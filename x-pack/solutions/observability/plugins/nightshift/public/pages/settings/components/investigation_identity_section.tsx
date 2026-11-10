@@ -32,7 +32,7 @@ export const InvestigationIdentitySection = () => {
   const status = useInvestigatorServiceAccount();
   const detection = useDetectionEngineServiceAccount();
   const { isDeveloperMode } = useDeveloperMode();
-  const isSetUp = isNightshiftSetUp(status.data);
+  const isSetUp = isNightshiftSetUp({ investigator: status.data, detection: detection.data });
 
   const renderStatus = () => {
     if (status.isLoading) return <EuiLoadingSpinner size="m" />;

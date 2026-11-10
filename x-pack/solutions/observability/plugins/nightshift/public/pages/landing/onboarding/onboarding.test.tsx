@@ -33,6 +33,9 @@ jest.mock('../../../data/service_accounts/use_investigator_service_account', () 
   useInvestigatorServiceAccount: () => ({ data: {} }),
   isNightshiftSetUp: () => true,
 }));
+jest.mock('../../../data/service_accounts/use_detection_engine_service_account', () => ({
+  useDetectionEngineServiceAccount: () => ({ data: {} }),
+}));
 jest.mock('../../../data/sandbox_connectors/use_connectors_by_type', () => ({
   useConnectorsByType: jest.fn(),
 }));

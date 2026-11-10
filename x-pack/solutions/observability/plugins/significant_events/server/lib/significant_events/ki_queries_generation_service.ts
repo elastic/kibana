@@ -6,7 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { EMPTY_TOKENS } from '@kbn/nightshift-ai';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { SignificantEventsQueriesGenerationResult } from '@kbn/significant-events-schema';
@@ -16,6 +15,7 @@ import {
   buildKIQueryGenerationMessage,
   readKIQueryGenerationResult,
 } from './identify_ki_queries_via_agent';
+import { chatTokenCountFromRounds } from './features/chat_token_count';
 
 export interface BuildKIQueryGenerationInputParams {
   source: NightshiftSource;
@@ -82,9 +82,15 @@ export function collectGeneratedKIQueries(
     source,
     logger,
   });
-  // The workflow runs the agent again when it never finalized, so this is not an error here.
+  // The workflow runs the agent again when it never finalized, so this is not an error here. The
+  // attempt still spent tokens, which the workflow adds to its total.
   if (!result) {
-    return { queries: [], tokensUsed: { ...EMPTY_TOKENS }, connectorId, finalized: false };
+    return {
+      queries: [],
+      tokensUsed: chatTokenCountFromRounds(agentConversation.rounds),
+      connectorId,
+      finalized: false,
+    };
   }
   const { queries, tokensUsed, durationMs } = result;
 

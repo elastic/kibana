@@ -45,6 +45,7 @@ const createHandlerParams = ({
   scheduledDiscovery,
   scheduledWorkflowError,
   maintenanceState = 'enabled',
+  canManageSecurity = true,
   spaceSettings = {
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: false,
     [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_DETECTION_INTERVAL_MINUTES]: 30,
@@ -59,6 +60,7 @@ const createHandlerParams = ({
   scheduledDiscovery: NonNullable<HandlerParams['params']>['body']['scheduledDiscovery'];
   scheduledWorkflowError?: Error;
   maintenanceState?: SignificantEventsMaintenanceState;
+  canManageSecurity?: boolean;
   spaceSettings?: Record<string, boolean | number>;
 }) => {
   const uiSettingsClient = {
@@ -76,6 +78,19 @@ const createHandlerParams = ({
     getState: jest.fn().mockResolvedValue(maintenanceState),
   };
   const agentBuilder = { agents: { ensure: jest.fn() } };
+  const core = {
+    elasticsearch: {
+      client: {
+        asScoped: () => ({
+          asCurrentUser: {
+            security: {
+              hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: canManageSecurity }),
+            },
+          },
+        }),
+      },
+    },
+  };
 
   const handlerParams = {
     params: { body: { scheduledDiscovery } },
@@ -84,7 +99,7 @@ const createHandlerParams = ({
       licensing: {},
       uiSettingsClient,
     }),
-    server: { agentBuilder },
+    server: { agentBuilder, core },
     significantEventsScheduledWorkflowsService: scheduledWorkflowService,
     maintenanceService,
     getSpaceId: jest.fn().mockResolvedValue('space-a'),
@@ -108,6 +123,37 @@ const createHandlerParams = ({
 describe('scheduled significant events discovery settings route', () => {
   beforeEach(() => {
     installDiscoveryAgentsMock.mockClear();
+  });
+
+  it('refuses to turn scheduled discovery on without manage_security, changing nothing', async () => {
+    const { handlerParams, uiSettingsClient, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: { enabled: true },
+      canManageSecurity: false,
+    });
+
+    // The route wrapper maps the StatusError to a Boom forbidden.
+    await expect(route.handler(handlerParams)).rejects.toMatchObject({
+      output: { statusCode: 403 },
+    });
+    expect(uiSettingsClient.setMany).not.toHaveBeenCalled();
+    expect(installDiscoveryAgentsMock).not.toHaveBeenCalled();
+    expect(scheduledWorkflowService.ensureWorkflow).not.toHaveBeenCalled();
+  });
+
+  it('lets a caller without manage_security turn scheduled discovery off', async () => {
+    const { handlerParams, scheduledWorkflowService } = createHandlerParams({
+      scheduledDiscovery: { enabled: false },
+      canManageSecurity: false,
+      spaceSettings: {
+        [OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED]: true,
+      },
+    });
+
+    await route.handler(handlerParams);
+
+    expect(scheduledWorkflowService.ensureWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
   });
 
   it('persists scheduled discovery settings and reconciles per-space workflows on enable', async () => {

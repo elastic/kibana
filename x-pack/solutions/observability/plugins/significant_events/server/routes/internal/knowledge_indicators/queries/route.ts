@@ -23,6 +23,7 @@ import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import { deriveQueryType } from '@kbn/streams-schema';
 import {
+  EMPTY_TOKENS,
   MAX_EXISTING_QUERIES_FOR_CONTEXT,
   resolveNightshiftModelForRequest,
 } from '@kbn/nightshift-ai';
@@ -652,11 +653,26 @@ const generateQueriesRoute = createServerRoute({
       sourcesClient.get(sourceId),
       server.agentBuilder.conversations.getScopedClient({ request }),
     ]);
-    const agentConversation = await conversationClient.get(conversationId);
+    const generationLogger = logger.get('significant_events_queries_generation');
+    // An unreadable conversation is an attempt that never finalized, so the workflow runs the
+    // agent again instead of failing the whole generation.
+    const agentConversation = await conversationClient
+      .get(conversationId)
+      .catch((error: unknown) => {
+        generationLogger.warn(
+          `Could not read conversation [${conversationId}] of the query generation agent: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return undefined;
+      });
+    if (!agentConversation) {
+      return { queries: [], tokensUsed: { ...EMPTY_TOKENS }, connectorId, finalized: false };
+    }
 
     return collectGeneratedKIQueries(
       { source, connectorId, agentConversation },
-      { logger: logger.get('significant_events_queries_generation'), telemetry }
+      { logger: generationLogger, telemetry }
     );
   },
 });

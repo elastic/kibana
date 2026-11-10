@@ -134,12 +134,20 @@ describe('collectGeneratedKIQueries', () => {
       {
         source,
         connectorId: 'test-connector',
-        agentConversation: { rounds: [{ steps: [] }] } as unknown as Pick<Conversation, 'rounds'>,
+        agentConversation: {
+          rounds: [{ steps: [], model_usage: { input_tokens: 30, output_tokens: 12 } }],
+        } as unknown as Pick<Conversation, 'rounds'>,
       },
       { logger: loggerMock.create(), telemetry }
     );
 
-    expect(result).toMatchObject({ finalized: false, queries: [], connectorId: 'test-connector' });
+    // The workflow sums every attempt, so a wasted one still reports what it spent.
+    expect(result).toEqual({
+      finalized: false,
+      queries: [],
+      connectorId: 'test-connector',
+      tokensUsed: { prompt: 30, completion: 12, total: 42, cached: 0 },
+    });
     expect(telemetry.trackSignificantEventsQueriesGenerated).not.toHaveBeenCalled();
   });
 });

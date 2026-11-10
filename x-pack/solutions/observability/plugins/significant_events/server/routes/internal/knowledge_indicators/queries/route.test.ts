@@ -735,7 +735,7 @@ describe('generateQueriesRoute', () => {
       }),
       server: { agentBuilder },
       maintenanceService: makeMaintenanceService(),
-      logger: { get: jest.fn().mockReturnValue({ debug: jest.fn() }) },
+      logger: { get: jest.fn().mockReturnValue({ debug: jest.fn(), warn: jest.fn() }) },
       telemetry: {},
     } as unknown as GenerateHandlerParams);
 
@@ -781,6 +781,23 @@ describe('generateQueriesRoute', () => {
       tokensUsed: { prompt: 0, completion: 0, total: 0 },
       connectorId: 'test-connector',
     });
+  });
+
+  it('reports an unreadable conversation as an attempt that never finalized, so the loop retries', async () => {
+    const conversationClient = { get: jest.fn().mockRejectedValue(new Error('not found')) };
+    const agentBuilder = {
+      conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
+    };
+
+    const result = await generateRoute.handler(makeHandlerParams({ agentBuilder }));
+
+    expect(result).toEqual({
+      queries: [],
+      tokensUsed: { prompt: 0, completion: 0, total: 0, cached: 0 },
+      connectorId: 'test-connector',
+      finalized: false,
+    });
+    expect(mockCollectGeneratedKIQueries).not.toHaveBeenCalled();
   });
 
   it('fails when agent builder is unavailable', async () => {

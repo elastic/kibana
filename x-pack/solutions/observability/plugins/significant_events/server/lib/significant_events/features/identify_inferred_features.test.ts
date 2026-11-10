@@ -184,7 +184,7 @@ describe('identifyInferredFeatures', () => {
     );
   });
 
-  it('keeps the stored agent round time in a failed iteration when the agent never finalized', async () => {
+  it('keeps the stored agent round time and tokens in a failed iteration when the agent never finalized', async () => {
     const kiClient = {
       getFeatures: jest.fn().mockResolvedValue({ hits: [] }),
       getExcludedFeatures: jest.fn().mockResolvedValue({ hits: [] }),
@@ -193,9 +193,17 @@ describe('identifyInferredFeatures', () => {
     };
     const trackFeaturesIdentified = jest.fn();
 
-    await identifyInferredFeatures({
+    const result = await identifyInferredFeatures({
       kiClient,
-      agentConversation: { rounds: [{ steps: [], time_to_last_token: 240_000 }] },
+      agentConversation: {
+        rounds: [
+          {
+            steps: [],
+            time_to_last_token: 240_000,
+            model_usage: { input_tokens: 900, output_tokens: 300 },
+          },
+        ],
+      },
       connectorId: 'connector-1',
       logger: loggerMock.create(),
       sourceId: 'logs.test',
@@ -211,5 +219,9 @@ describe('identifyInferredFeatures', () => {
       expect.objectContaining({ state: 'failure', duration_ms: expect.any(Number) })
     );
     expect(trackFeaturesIdentified.mock.calls[0][0].duration_ms).toBeGreaterThanOrEqual(240_000);
+    expect(result.iterationResult).toMatchObject({
+      state: 'failure',
+      tokensUsed: { prompt: 900, completion: 300, total: 1200, cached: 0 },
+    });
   });
 });

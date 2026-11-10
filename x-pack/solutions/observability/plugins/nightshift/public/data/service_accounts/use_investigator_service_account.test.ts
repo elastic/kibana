@@ -34,9 +34,16 @@ const status = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
+const detection = {
+  serviceAccountsEnabled: true,
+  canSetUp: true,
+  role: 'nightshift_detection',
+  serviceAccountId: 'kibana/nightshift_detection',
+};
+
 describe('isNightshiftSetUp', () => {
-  it('is set up once the bound investigation is installed and enabled', () => {
-    expect(isNightshiftSetUp(status())).toBe(true);
+  it('is set up once the bound investigation is installed and enabled and detection is bound', () => {
+    expect(isNightshiftSetUp({ investigator: status(), detection })).toBe(true);
   });
 
   it.each([
@@ -45,10 +52,21 @@ describe('isNightshiftSetUp', () => {
     ['the bound investigation is disabled', { enabled: false }],
     ['the entry point is bound to another account', { bound: false }],
   ])('is not set up when %s', (_, overrides) => {
-    expect(isNightshiftSetUp(status(overrides))).toBe(false);
+    expect(isNightshiftSetUp({ investigator: status(overrides), detection })).toBe(false);
+  });
+
+  // A space set up before the detection account existed has a bound investigator only, and its
+  // detection engine refuses every run until the prompt sets the account up.
+  it('is not set up when the detection engine has no account', () => {
+    expect(
+      isNightshiftSetUp({
+        investigator: status(),
+        detection: { ...detection, serviceAccountId: null },
+      })
+    ).toBe(false);
   });
 
   it('is not set up without a status', () => {
-    expect(isNightshiftSetUp(undefined)).toBe(false);
+    expect(isNightshiftSetUp({ investigator: undefined, detection: undefined })).toBe(false);
   });
 });

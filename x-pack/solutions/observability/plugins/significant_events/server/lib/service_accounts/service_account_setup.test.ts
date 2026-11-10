@@ -176,7 +176,7 @@ describe('createDetectionEngineSetupService.enable', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Could not verify'));
   });
 
-  it('fails when reading the account fails for another reason', async () => {
+  it('fails and unbinds the unchecked account when reading it fails for another reason', async () => {
     const { core } = createCore({ accountReadStatus: 500 });
 
     await expect(
@@ -187,6 +187,35 @@ describe('createDetectionEngineSetupService.enable', () => {
         isServerless: true,
       }).enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
     ).rejects.toMatchObject({ statusCode: 500 });
+    await expect(
+      core.security.serviceAccounts.getWorkloadBinding({
+        workloadType: 'detection_engine',
+        workloadId: 'detection_engine',
+        spaceId: 'default',
+      })
+    ).resolves.toBeNull();
+  });
+
+  it('still refuses another account when putting the previous binding back fails', async () => {
+    const { core, unbindWorkload } = createCore({
+      accountSummary: { name: 'nightshift_agent', enabled: true },
+    });
+    unbindWorkload.mockRejectedValueOnce(new Error('UIAM unavailable'));
+    const logger = { warn: jest.fn(), error: jest.fn() } as unknown as Logger;
+
+    await expect(
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        ...createWorkflowsExtensions(),
+        isServerless: true,
+        logger,
+      }).enable({ request, spaceId: 'default', serviceAccountId: 'agent-account' })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: expect.stringContaining('nightshift_agent'),
+    });
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('UIAM unavailable'));
   });
 
   it('refuses another account and puts the previous binding back', async () => {

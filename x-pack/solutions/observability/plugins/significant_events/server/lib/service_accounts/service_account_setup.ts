@@ -132,6 +132,39 @@ export function createDetectionEngineSetupService({
     }
   };
 
+  // Puts the space back on the account it had before `_enable`. A failure here is logged rather
+  // than thrown, so the caller still learns why `_enable` refused instead of a rollback error.
+  const restorePreviousBinding = async ({
+    request,
+    previousAccountId,
+  }: {
+    request: KibanaRequest;
+    previousAccountId: string | undefined;
+  }): Promise<void> => {
+    try {
+      if (previousAccountId) {
+        await core.security.serviceAccounts.bindWorkload(request, {
+          serviceAccountId: previousAccountId,
+          workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+          workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+        });
+      } else {
+        await core.security.serviceAccounts.unbindWorkload(request, {
+          workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+          workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+        });
+      }
+    } catch (error) {
+      logger?.error(
+        `Could not restore the detection engine binding of the space${
+          previousAccountId ? ` to [${previousAccountId}]` : ''
+        }; it may still be bound to the refused account. Call _enable again with the right account: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  };
+
   // Core cannot look an account up before binding it, so the binding is read back: its summary
   // is empty when the account does not exist. The account must be the one `nightshift_detection`
   // that holds the detection role, which is what the setup step finds or creates by name. Binding
@@ -163,6 +196,9 @@ export function createDetectionEngineSetupService({
       // UIAM of the functional tests. The account cannot be checked then, and refusing would make
       // the space impossible to set up. A missing, renamed or disabled account is still refused.
       if (getStatusCode(error) !== 403) {
+        // Any other failure leaves the account unchecked: keeping the binding would make the
+        // space read as set up and run as an account nobody verified.
+        await restorePreviousBinding({ request, previousAccountId });
         throw error;
       }
       logger?.warn(
@@ -175,18 +211,7 @@ export function createDetectionEngineSetupService({
     if (summary?.name === expectedName && summary.enabled) {
       return;
     }
-    if (previousAccountId) {
-      await core.security.serviceAccounts.bindWorkload(request, {
-        serviceAccountId: previousAccountId,
-        workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
-        workloadId: DETECTION_ENGINE_WORKLOAD_ID,
-      });
-    } else {
-      await core.security.serviceAccounts.unbindWorkload(request, {
-        workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
-        workloadId: DETECTION_ENGINE_WORKLOAD_ID,
-      });
-    }
+    await restorePreviousBinding({ request, previousAccountId });
     throw new StatusError(
       summary === null
         ? `Service account [${serviceAccountId}] does not exist. Use the id of the [${expectedName}] account.`

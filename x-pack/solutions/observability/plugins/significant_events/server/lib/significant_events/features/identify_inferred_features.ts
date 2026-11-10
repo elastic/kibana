@@ -16,12 +16,7 @@ import {
   isComputedFeature,
   normalizeFeatureSlug,
 } from '@kbn/significant-events-schema';
-import {
-  EMPTY_TOKENS,
-  type InferenceDocument,
-  type ExcludedFeatureSummary,
-  type IgnoredFeature,
-} from '@kbn/nightshift-ai';
+import type { InferenceDocument, ExcludedFeatureSummary, IgnoredFeature } from '@kbn/nightshift-ai';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import {
   reconcileInferredFeatures,
@@ -32,6 +27,7 @@ import {
   buildFeatureIdentificationMessage,
   readFeatureIdentificationResult,
 } from './identify_features_via_agent';
+import { chatTokenCountFromRounds } from './chat_token_count';
 
 export { findSimilarFeatures } from './feature_similarity_search';
 
@@ -489,7 +485,8 @@ export async function identifyInferredFeatures({
       iteration,
       durationMs,
       state: 'failure',
-      tokensUsed: { ...EMPTY_TOKENS },
+      // A run that never finalized still spent what its stored round records.
+      tokensUsed: chatTokenCountFromRounds(agentConversation?.rounds ?? []),
       newFeatures: [],
       updatedFeatures: [],
     };

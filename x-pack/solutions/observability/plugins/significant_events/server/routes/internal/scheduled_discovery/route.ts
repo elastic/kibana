@@ -13,6 +13,7 @@ import { assertSignificantEventsAccess } from '../../utils/assert_significant_ev
 import { assertNotPaused } from '../../utils/assert_not_paused';
 import { FeatureNotEnabledError } from '../../../lib/errors/feature_not_enabled_error';
 import { StatusError } from '../../../lib/errors/status_error';
+import { canManageSecurity } from '../../../lib/service_accounts/detection_engine_account';
 import { SCHEDULED_DISCOVERY_NUMERIC_SETTINGS } from '../../../lib/workflows/scheduled_discovery_settings';
 import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
 import {
@@ -191,6 +192,30 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
       );
     }
 
+    // Reconcile the per-space workflows on an enabled-state transition, and also
+    // on a config change while enabled so the rendered workflow templates pick up
+    // the new cadence and batch sizes.
+    const enabledChanged =
+      scheduledDiscovery.enabled !== undefined && scheduledDiscovery.enabled !== previousEnabled;
+    const configChanged = Object.keys(spaceUpdates).some(
+      (key) => key !== OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
+    );
+    const reconcilesWorkflows = enabledChanged || (nextEnabled && configChanged);
+
+    // Installing and enabling the scheduled workflows binds them to the space's account, which
+    // needs the caller's `manage_security`. Refuse before any setting or agent changes, instead of
+    // failing on the second install after the first one went through.
+    if (
+      reconcilesWorkflows &&
+      nextEnabled &&
+      !(await canManageSecurity({ core: server.core, request }))
+    ) {
+      throw new StatusError(
+        'Turning on scheduled discovery, or changing it while on, requires the manage_security cluster privilege.',
+        403
+      );
+    }
+
     const rollbackSettings = async () => {
       if (Object.keys(previousSpaceValues).length === 0) {
         return;
@@ -207,16 +232,7 @@ const putScheduledDiscoverySettingsRoute = createServerRoute({
         await uiSettingsClient.setMany(spaceUpdates);
       }
 
-      // Reconcile the per-space workflows on an enabled-state transition, and also
-      // on a config change while enabled so the rendered workflow templates pick up
-      // the new cadence and batch sizes.
-      const enabledChanged =
-        scheduledDiscovery.enabled !== undefined && scheduledDiscovery.enabled !== previousEnabled;
-      const configChanged = Object.keys(spaceUpdates).some(
-        (key) => key !== OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED
-      );
-
-      if (enabledChanged || (nextEnabled && configChanged)) {
+      if (reconcilesWorkflows) {
         const spaceId = await getSpaceId(request);
         if (nextEnabled) {
           if (!server.agentBuilder) {

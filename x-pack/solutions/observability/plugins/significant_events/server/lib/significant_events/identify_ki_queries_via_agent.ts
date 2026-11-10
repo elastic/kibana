@@ -10,14 +10,14 @@ import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
-import { EMPTY_TOKENS, buildKIQueryGenerationUserMessage } from '@kbn/nightshift-ai';
+import { buildKIQueryGenerationUserMessage } from '@kbn/nightshift-ai';
 import type { ExistingQuerySummary } from '@kbn/nightshift-ai';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import {
   SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
   type AcceptedQuery,
 } from '../../agent_builder/skills/ki_query_generation';
-import { chatTokenCountFromModelUsage } from './features/chat_token_count';
+import { chatTokenCountFromRounds } from './features/chat_token_count';
 
 interface FinalizedValidationData {
   slug: string;
@@ -101,9 +101,8 @@ export function readKIQueryGenerationResult({
     features: q.features,
   }));
 
-  const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromModelUsage(round?.model_usage) ?? {
-    ...EMPTY_TOKENS,
-  };
+  // Every round counts: the `ai.agent` step retries on the same conversation.
+  const tokensUsed: ChatCompletionTokenCount = chatTokenCountFromRounds(conversation.rounds);
 
   logger.debug(`KI query generation agent returned ${queries.length} queries for "${source.slug}"`);
 

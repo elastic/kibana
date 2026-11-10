@@ -115,6 +115,14 @@ jest.mock('../data/service_accounts/use_investigator_service_account', () => ({
   ...jest.requireActual('../data/service_accounts/use_investigator_service_account'),
   useInvestigatorServiceAccount: () => mockServiceAccount,
 }));
+let mockDetectionAccount: {
+  isLoading: boolean;
+  isSuccess: boolean;
+  data?: Record<string, unknown>;
+};
+jest.mock('../data/service_accounts/use_detection_engine_service_account', () => ({
+  useDetectionEngineServiceAccount: () => mockDetectionAccount,
+}));
 
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseSignificantEventsAvailability = useSignificantEventsAvailability as jest.Mock;
@@ -155,6 +163,11 @@ describe('NightshiftPage', () => {
       isLoading: false,
       isSuccess: true,
       data: { installed: true, enabled: true, bound: true, serviceAccountsEnabled: true },
+    };
+    mockDetectionAccount = {
+      isLoading: false,
+      isSuccess: true,
+      data: { serviceAccountId: 'kibana/nightshift_detection' },
     };
     mockUseSignificantEventsAvailability.mockReturnValue({ isAvailable: true, isLoading: false });
     mockUseOnboardingVisibility.mockReturnValue({

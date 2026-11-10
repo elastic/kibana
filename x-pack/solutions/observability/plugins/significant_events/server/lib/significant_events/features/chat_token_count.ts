@@ -26,3 +26,26 @@ export function chatTokenCountFromModelUsage(
     cached: usage.cached_input_tokens,
   };
 }
+
+/**
+ * The tokens every round of a conversation spent. A step retried on the same conversation adds a
+ * round per attempt, and a round that never finalized still spent what it records.
+ */
+export function chatTokenCountFromRounds(
+  rounds: ReadonlyArray<{ model_usage?: ModelTokenUsage }>
+): ChatCompletionTokenCount {
+  return rounds
+    .map(({ model_usage: usage }) => chatTokenCountFromModelUsage(usage))
+    .reduce<ChatCompletionTokenCount>(
+      (sum, tokens) =>
+        tokens
+          ? {
+              prompt: sum.prompt + tokens.prompt,
+              completion: sum.completion + tokens.completion,
+              total: sum.total + tokens.total,
+              cached: (sum.cached ?? 0) + (tokens.cached ?? 0),
+            }
+          : sum,
+      { prompt: 0, completion: 0, total: 0, cached: 0 }
+    );
+}

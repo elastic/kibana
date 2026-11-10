@@ -7,6 +7,7 @@
 
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
 import type { InvestigatorServiceAccountStatus } from '@kbn/nightshift-investigations-plugin/common';
+import type { DetectionEngineServiceAccountStatus } from '@kbn/significant-events-plugin/common';
 import { isHttpClientError } from '../../common/http_error';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -38,11 +39,19 @@ export const useInvestigatorServiceAccount = (): UseQueryResult<
 };
 
 /**
- * Nightshift is usable in a space once service accounts are on and its investigation entry point
- * is installed, enabled, and bound to the space's agent account.
+ * Nightshift is usable in a space once service accounts are on, its investigation entry point is
+ * installed, enabled, and bound to the space's agent account, and its detection engine is bound to
+ * the detection account. A space set up before the detection account existed has only the first.
  */
-export const isNightshiftSetUp = (status: InvestigatorServiceAccountStatus | undefined): boolean =>
-  status?.serviceAccountsEnabled === true &&
-  status.installed === true &&
-  status.enabled === true &&
-  status.bound === true;
+export const isNightshiftSetUp = ({
+  investigator,
+  detection,
+}: {
+  investigator: InvestigatorServiceAccountStatus | undefined;
+  detection: DetectionEngineServiceAccountStatus | undefined;
+}): boolean =>
+  investigator?.serviceAccountsEnabled === true &&
+  investigator.installed === true &&
+  investigator.enabled === true &&
+  investigator.bound === true &&
+  detection?.serviceAccountId != null;

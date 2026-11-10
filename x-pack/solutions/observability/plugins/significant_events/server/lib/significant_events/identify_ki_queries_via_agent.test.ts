@@ -80,6 +80,26 @@ describe('readKIQueryGenerationResult', () => {
     });
   });
 
+  it('counts the tokens of every round, since the step retries on the same conversation', () => {
+    const finalized = conversationOf([
+      validationStep('validate-1', {
+        slug: 'logs.test',
+        finalized: true,
+        finalized_queries: [validatedQuery],
+      }),
+    ]);
+    const conversation = {
+      rounds: [
+        { steps: [], model_usage: { input_tokens: 100, output_tokens: 40 } },
+        ...finalized.rounds,
+      ],
+    } as unknown as Pick<Conversation, 'rounds'>;
+
+    expect(
+      readKIQueryGenerationResult({ conversation, source, logger: loggerMock.create() })
+    ).toMatchObject({ tokensUsed: { prompt: 110, completion: 45, total: 155, cached: 2 } });
+  });
+
   it('rejects queries finalized for a different source', () => {
     const conversation = conversationOf([
       validationStep('validate-1', { slug: 'logs.other', finalized: true, finalized_queries: [] }),
