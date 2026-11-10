@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { ReactNode } from 'react';
+import { useHistory } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiLoadingLogo, EuiPageSection } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -20,11 +21,13 @@ import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { APPLICATIONS_LABEL, SESSIONS_LABEL } from '../../labels';
+import { ErrorsTab } from '../errors/errors_tab';
+import { NetworkTab } from '../network/network_tab';
 import { SessionsTab } from '../sessions/sessions_tab';
 import { OtelOverview } from './otel_overview/otel_overview';
 
 /** Tabs of the Application view, in display order. */
-const APPLICATION_TAB_IDS = ['overview', 'sessions'] as const;
+const APPLICATION_TAB_IDS = ['overview', 'errors', 'network', 'sessions'] as const;
 
 export type ApplicationTabId = (typeof APPLICATION_TAB_IDS)[number];
 
@@ -32,10 +35,19 @@ const APPLICATION_TAB_LABELS: Record<ApplicationTabId, string> = {
   overview: i18n.translate('xpack.digitalExperience.application.tabs.overview', {
     defaultMessage: 'Overview',
   }),
+  errors: i18n.translate('xpack.digitalExperience.application.tabs.errors', {
+    defaultMessage: 'Errors',
+  }),
+  network: i18n.translate('xpack.digitalExperience.application.tabs.network', {
+    defaultMessage: 'Network',
+  }),
   sessions: SESSIONS_LABEL,
 };
 
-/** Sessions are built from EDOT Browser data only, so Classic RUM applications have none. */
+/**
+ * Errors, network and sessions are read from EDOT Browser data only; Classic RUM applications have
+ * the ux plugin's dashboard as their Overview.
+ */
 const tabsOf = (source: ApplicationSource): readonly ApplicationTabId[] =>
   source === APPLICATION_SOURCE.otel ? APPLICATION_TAB_IDS : ['overview'];
 
@@ -139,9 +151,23 @@ export function ApplicationPage({
   selectedTab: ApplicationTabId;
 }) {
   const applicationsHref = useApplicationsHref();
-  const { overviewHref, sessionsHref } = useApplicationLinks(serviceName, source);
+  const history = useHistory();
+  const { overviewHref, overviewPath, errorsHref, networkHref, sessionsHref } = useApplicationLinks(
+    serviceName,
+    source
+  );
+  // Classic RUM has no Errors or Network tab, so their URLs are replaced by the Overview's.
+  const isUnsupportedTab =
+    source !== APPLICATION_SOURCE.otel && (selectedTab === 'errors' || selectedTab === 'network');
+  useEffect(() => {
+    if (isUnsupportedTab) {
+      history.replace(overviewPath);
+    }
+  }, [history, isUnsupportedTab, overviewPath]);
   const tabHrefs: Record<ApplicationTabId, string> = {
     overview: overviewHref,
+    errors: errorsHref,
+    network: networkHref,
     sessions: sessionsHref(),
   };
 
@@ -166,6 +192,22 @@ export function ApplicationPage({
       )
     );
 
+  const renderTab = () => {
+    if (isUnsupportedTab) {
+      return null;
+    }
+    switch (selectedTab) {
+      case 'errors':
+        return withPagePadding(<ErrorsTab serviceName={serviceName} />);
+      case 'network':
+        return withPagePadding(<NetworkTab serviceName={serviceName} />);
+      case 'sessions':
+        return renderSessions();
+      default:
+        return renderOverview();
+    }
+  };
+
   return (
     <>
       <AppHeader
@@ -179,7 +221,7 @@ export function ApplicationPage({
           'data-test-subj': `digitalExperienceTab-${id}`,
         }))}
       />
-      {selectedTab === 'sessions' ? renderSessions() : renderOverview()}
+      {renderTab()}
     </>
   );
 }

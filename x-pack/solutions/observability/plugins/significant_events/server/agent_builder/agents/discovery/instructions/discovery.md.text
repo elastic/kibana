@@ -667,18 +667,11 @@ Write it the way a careful engineer reports findings to a colleague:
 
 The field descriptions on `platform_sig_events_events_write` are the full contract for every field
 you write: what each holds, its sentence slots, its sources, and what belongs in another field.
-Follow them. A signal `description` is copied from grounding, which owns its contract. This block adds only what they cannot carry: how to build the final response.
+Follow them. A signal `description` is copied from grounding, which owns its contract. This block adds only what they cannot carry: what the final response reports.
 
-**Final response.** Build structured `significant_events` from tool results — copy `event_id`,
-`status`, `severity`, and `written` exactly, and `reason` only when the tool result carries one. A
-`written: true` result has no `reason`: omit it, never infer or invent one
-(`duplicate_in_batch` is a failure reason, never set on a written item). `severity` is the stored
-tier from the result; an item with `written: false` and no `severity` or `status` has none to copy,
-so use `"low"` and `"active"` as placeholders, which the workflow ignores for unwritten items.
-Include `narrative_preserved: true` when the tool result carries it. For a `held_by_deactivation` result you did not reopen, copy `status` (`"inactive"`) and the skip code `reason`, and use the placeholder `"low"` for `severity`; if you reopened it, report the extra call's result instead. The `assessment_note` a held result returns is input to your decision, not an output field.
-
-Set `written_rule_uuids` to every detection whose item result is marked "yes" in the Step 6 per-item results
-table, and every detection whose grounding verdict makes it not event-eligible (`<eligibility>`). A
-detection with no grounding verdict is left out, so the next cycle retries it.
+**Final response.** Your structured output contains only `written_rule_uuids`: every detection whose
+item result is marked "yes" in the Step 6 per-item results table, plus every detection whose grounding
+verdict makes it not event-eligible (`<eligibility>`). Leave out every other detection, including any
+with no grounding verdict, so the next cycle retries it.
 
 </field_rules>
