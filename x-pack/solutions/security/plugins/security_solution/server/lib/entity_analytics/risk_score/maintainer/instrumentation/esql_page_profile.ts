@@ -6,7 +6,9 @@
  */
 
 import type { EsqlEsqlResult } from '@elastic/elasticsearch/lib/api/types';
+import type { EsqlProfileResponse } from '@kbn/esql-language';
 import { countBy, groupBy, sumBy } from 'lodash';
+import { esqlProfileResponseValidator } from './esql_profile_response';
 
 /** Condenses response counters and driver profiles into one page's diagnostic summary. */
 export const summarizeEsqlPage = (
@@ -46,8 +48,8 @@ const summarizeDrivers = (driverProfiles: DriverProfile[]) => {
     cpuMs: nanosToMilliseconds(sumBy(driverProfiles, 'cpuNanos')),
     drivers: countBy(driverProfiles, 'description'),
     topOperators: summarizeBusiestOperators(operatorProfiles),
-    documentsFound: sumBy(operatorProfiles, 'documentsFound'),
-    valuesLoaded: sumBy(operatorProfiles, 'valuesLoaded'),
+    documentsFound: sumBy(driverProfiles, 'documentsFound'),
+    valuesLoaded: sumBy(driverProfiles, 'valuesLoaded'),
   };
 };
 
@@ -64,24 +66,53 @@ const summarizeBusiestOperators = (operatorProfiles: OperatorProfile[]) =>
       ms: nanosToMilliseconds(processingNanos),
     }));
 
-const readDriverProfiles = (profile: unknown): DriverProfile[] | undefined =>
-  isRecord(profile) && Array.isArray(profile.drivers)
+const readDriverProfiles = (profile: unknown): DriverProfile[] | undefined => {
+  const validatedProfile = esqlProfileResponseValidator?.safeParse(profile);
+  if (validatedProfile?.success) {
+    return validatedProfile.data.drivers.map(readValidatedDriverProfile);
+  }
+
+  return isRecord(profile) && Array.isArray(profile.drivers)
     ? profile.drivers.filter(isRecord).map(readDriverProfile)
     : undefined;
+};
 
-const readDriverProfile = (driver: Record<string, unknown>): DriverProfile => ({
-  description: typeof driver.description === 'string' ? driver.description : 'unknown',
-  cpuNanos: numberAt(driver, 'cpu_nanos') ?? 0,
-  operators: Array.isArray(driver.operators)
-    ? driver.operators.filter(isRecord).map(readOperatorProfile)
-    : [],
+const readValidatedDriverProfile = (
+  driver: EsqlProfileResponse['drivers'][number]
+): DriverProfile => ({
+  description: driver.description,
+  cpuNanos: driver.cpu_nanos,
+  documentsFound: driver.documents_found,
+  valuesLoaded: driver.values_loaded,
+  operators: driver.operators.map((operator) =>
+    readOperatorProfile(operator, 'status' in operator ? operator.status : undefined)
+  ),
 });
 
-const readOperatorProfile = (operator: Record<string, unknown>): OperatorProfile => ({
+const readDriverProfile = (driver: Record<string, unknown>): DriverProfile => {
+  const operators = Array.isArray(driver.operators)
+    ? driver.operators
+        .filter(isRecord)
+        .map((operator) => readOperatorProfile(operator, operator.status))
+    : [];
+
+  return {
+    description: typeof driver.description === 'string' ? driver.description : 'unknown',
+    cpuNanos: numberAt(driver, 'cpu_nanos') ?? 0,
+    documentsFound: numberAt(driver, 'documents_found') ?? sumBy(operators, 'documentsFound'),
+    valuesLoaded: numberAt(driver, 'values_loaded') ?? sumBy(operators, 'valuesLoaded'),
+    operators,
+  };
+};
+
+const readOperatorProfile = (
+  operator: { operator?: unknown },
+  status: unknown
+): OperatorProfile => ({
   name: typeof operator.operator === 'string' ? operator.operator.split('[', 1)[0] : 'unknown',
-  processingNanos: numberAt(operator.status, 'process_nanos') ?? 0,
-  documentsFound: numberAt(operator.status, 'documents_found') ?? 0,
-  valuesLoaded: numberAt(operator.status, 'values_loaded') ?? 0,
+  processingNanos: numberAt(status, 'process_nanos') ?? 0,
+  documentsFound: numberAt(status, 'documents_found') ?? 0,
+  valuesLoaded: numberAt(status, 'values_loaded') ?? 0,
 });
 
 const numberAt = (value: unknown, key: string): number | undefined => {
@@ -101,6 +132,8 @@ const TOP_OPERATORS = 3;
 interface DriverProfile {
   description: string;
   cpuNanos: number;
+  documentsFound: number;
+  valuesLoaded: number;
   operators: OperatorProfile[];
 }
 
