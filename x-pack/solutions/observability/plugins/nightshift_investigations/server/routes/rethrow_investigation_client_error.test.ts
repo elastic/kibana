@@ -11,11 +11,9 @@ import {
   NightshiftModelNotFoundError,
 } from '@kbn/significant-events-schema';
 import {
-  InvestigationConflictError,
   InvalidNotificationDestinationError,
   InvestigationNotFoundError,
   InvestigationQuotaDeniedError,
-  InvestigationMetadataMissingError,
   InvestigationUnavailableError,
 } from '../client/errors';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
@@ -35,10 +33,8 @@ describe('rethrowInvestigationClientError', () => {
   it.each([
     [new InvalidNotificationDestinationError('Unsupported notification type'), 400],
     [new InvestigationNotFoundError('investigation-1'), 404],
-    [new InvestigationMetadataMissingError('investigation-1'), 400],
-    [new InvestigationConflictError('Conflict'), 409],
     [new InvestigationUnavailableError('Unavailable'), 503],
-    [new InvestigationQuotaDeniedError(), 429],
+    [new InvestigationQuotaDeniedError('all'), 429],
     [new NightshiftModelNotFoundError('missing-model'), 400],
     [new NightshiftModelBlockedError('blocked-model', 'default-model'), 400],
     [

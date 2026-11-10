@@ -72,7 +72,7 @@ for CONFIG_PATH in "${CONFIGS[@]}"; do
   start=$(date +%s)
 
   set +e
-  node scripts/scout run-tests --location local --arch "$ARCH" --domain "$DOMAIN" --serverConfigSet edr_real_fleet --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
+  node scripts/scout run-tests --location local --arch "$ARCH" --domain "$DOMAIN" --config "$CONFIG_PATH" --kibanaInstallDir "$KIBANA_BUILD_LOCATION"
   EXIT_CODE=$?
   set -e
 

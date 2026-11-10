@@ -58,6 +58,12 @@ export interface ConversationTemplateFieldDefinition {
   max?: number;
   /** TEXT / SELECT — value must match this regex pattern. */
   regex?: { pattern: string; message?: string };
+  /**
+   * SELECT only — when true, Agent Builder telemetry reports changes of this field's value
+   * (`agent_builder_conversation_fields_changed`). Only allowed on SELECT fields, because the
+   * reported values are the template's `options`, never free text.
+   */
+  report_changes?: boolean;
 }
 
 /**

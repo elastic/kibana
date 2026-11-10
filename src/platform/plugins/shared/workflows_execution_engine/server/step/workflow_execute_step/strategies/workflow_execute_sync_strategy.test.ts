@@ -14,7 +14,10 @@ import { WorkflowExecuteSyncStrategy } from './workflow_execute_sync_strategy';
 import type { StepExecutionRepository } from '../../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
-import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
+import {
+  INPUT_RECORDED_STATE_KEY,
+  type StepExecutionRuntime,
+} from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
 
 const createMockWorkflow = (overrides: Partial<EsWorkflow> = {}): EsWorkflow =>
@@ -185,6 +188,26 @@ describe('WorkflowExecuteSyncStrategy', () => {
       );
     });
 
+    it('starts the child when step state only records that input was written', async () => {
+      mockStepRuntime.getCurrentStepState.mockReturnValue({
+        [INPUT_RECORDED_STATE_KEY]: true,
+      });
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        { param1: 'value1' },
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result.status).toBe('waiting');
+      expect(mockEngine.executeWorkflow).toHaveBeenCalled();
+      expect(mockExecRepo.getWorkflowExecutionById).toHaveBeenCalledWith('child-exec-1', 'default');
+    });
+
     it('should propagate isTestRun flag', async () => {
       (mockStepRuntime.workflowExecution as any).isTestRun = true;
 
@@ -205,6 +228,91 @@ describe('WorkflowExecuteSyncStrategy', () => {
       );
     });
 
+    it('fails the step instead of waiting when the child is already terminal after start', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.FAILED,
+        error: { type: 'MissingExecutionIdentityError', message: 'no execution identity attached' },
+      } as any);
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result.status).toBe('failed');
+      expect(result.error!.message).toBe('no execution identity attached');
+      expect(mockStepRuntime.setCurrentStepState).toHaveBeenCalledWith(
+        expect.objectContaining({ executionId: 'child-exec-1' })
+      );
+      expect(mockStepRuntime.tryEnterWaitUntil).not.toHaveBeenCalled();
+    });
+
+    it('still waits when the child is not yet terminal after start', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.RUNNING,
+      } as any);
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result.status).toBe('waiting');
+      expect(mockStepRuntime.tryEnterWaitUntil).toHaveBeenCalledWith(
+        undefined,
+        ExecutionStatus.WAITING_FOR_CHILD
+      );
+    });
+
+    it('returns cancelled without waiting when the step is aborted during the child read', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockImplementation(async () => {
+        mockStepRuntime.abortController.abort();
+        return { id: 'child-exec-1', status: ExecutionStatus.RUNNING } as any;
+      });
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result).toEqual({ status: 'cancelled' });
+      expect(mockStepRuntime.tryEnterWaitUntil).not.toHaveBeenCalled();
+    });
+
+    it('still waits when reading the child after start throws', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockRejectedValue(new Error('es down'));
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result.status).toBe('waiting');
+      expect(mockStepRuntime.tryEnterWaitUntil).toHaveBeenCalled();
+    });
+
     it('should return failed when engine throws', async () => {
       mockEngine.executeWorkflow.mockRejectedValue(new Error('Engine failed'));
 
@@ -222,6 +330,130 @@ describe('WorkflowExecuteSyncStrategy', () => {
         status: 'failed',
         error: expect.objectContaining({ message: 'Engine failed' }),
       });
+    });
+  });
+
+  describe('execution chain in the child context', () => {
+    const getChildContext = (): Record<string, unknown> =>
+      mockEngine.executeWorkflow.mock.calls[0][1] as Record<string, unknown>;
+
+    it("makes a top-level parent the only hop of its direct child's chain", async () => {
+      (mockStepRuntime.workflowExecution as any).context = {};
+
+      await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(getChildContext()).toEqual(
+        expect.objectContaining({
+          executionChain: [
+            { executionId: 'parent-exec-1', invocation: 'sync', workflowId: 'parent-workflow-id' },
+          ],
+        })
+      );
+    });
+
+    it("appends the parent to a grandchild's chain after the top-level hop", async () => {
+      (mockStepRuntime.workflowExecution as any).context = {
+        executionChain: [
+          { executionId: 'top-exec-1', invocation: 'sync', workflowId: 'top-workflow-id' },
+        ],
+        parentWorkflowExecutionId: 'top-exec-1',
+        parentWorkflowId: 'top-workflow-id',
+      };
+      (mockStepRuntime.workflowExecution as any).triggeredBy = 'workflow-step';
+
+      await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        1,
+        false,
+        'sync-step-1'
+      );
+
+      expect(getChildContext()).toEqual(
+        expect.objectContaining({
+          executionChain: [
+            { executionId: 'top-exec-1', invocation: 'sync', workflowId: 'top-workflow-id' },
+            { executionId: 'parent-exec-1', invocation: 'sync', workflowId: 'parent-workflow-id' },
+          ],
+          parentWorkflowExecutionId: 'parent-exec-1',
+          parentWorkflowId: 'parent-workflow-id',
+        })
+      );
+    });
+
+    it('keeps the execution chain next to an inherited service account', async () => {
+      (mockStepRuntime.workflowExecution as any).context = {};
+
+      await strategy.execute(createMockWorkflow(), {}, 'default', mockRequest, 0, true, 'child');
+
+      expect(getChildContext()).toEqual(
+        expect.objectContaining({
+          executionChain: [
+            { executionId: 'parent-exec-1', invocation: 'sync', workflowId: 'parent-workflow-id' },
+          ],
+          inheritParentIdentity: true,
+          parentStepName: 'child',
+        })
+      );
+    });
+
+    it('omits the chain when the parent is a child without a stored chain', async () => {
+      (mockStepRuntime.workflowExecution as any).context = {
+        parentWorkflowExecutionId: 'unknown-exec',
+        parentWorkflowId: 'unknown-workflow-id',
+      };
+      (mockStepRuntime.workflowExecution as any).triggeredBy = 'workflow-step';
+
+      await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        1,
+        false,
+        'sync-step-1'
+      );
+
+      expect(getChildContext()).not.toHaveProperty('executionChain');
+      expect(getChildContext()).toEqual(
+        expect.objectContaining({ parentWorkflowInvocation: 'sync' })
+      );
+    });
+
+    it("forwards the parent's event chain with the parent marked as visited", async () => {
+      Object.assign(mockStepRuntime.workflowExecution, {
+        eventChainDepth: 2,
+        eventChainVisitedWorkflowIds: ['emitter-workflow-id'],
+      });
+
+      await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(getChildContext()).toEqual(
+        expect.objectContaining({
+          parentEventChain: {
+            eventChainDepth: 2,
+            eventChainVisitedWorkflowIds: ['emitter-workflow-id', 'parent-workflow-id'],
+          },
+        })
+      );
     });
   });
 
@@ -308,6 +540,27 @@ describe('WorkflowExecuteSyncStrategy', () => {
 
       expect(result.status).toBe('failed');
       expect(result.error!.message).toBe('child failed');
+    });
+
+    it('should keep the error type of a failed child workflow', async () => {
+      mockExecRepo.getWorkflowExecutionById.mockResolvedValue({
+        id: 'child-exec-1',
+        status: ExecutionStatus.FAILED,
+        error: { type: 'NonRetryableError', message: 'process is gone' },
+      } as any);
+
+      const result = await strategy.execute(
+        createMockWorkflow(),
+        {},
+        'default',
+        mockRequest,
+        0,
+        false,
+        'sync-step-1'
+      );
+
+      expect(result.status).toBe('failed');
+      expect(result.error).toMatchObject({ type: 'NonRetryableError', message: 'process is gone' });
     });
 
     it('should return failed when child workflow is cancelled', async () => {

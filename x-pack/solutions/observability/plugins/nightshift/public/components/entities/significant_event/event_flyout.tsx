@@ -1,0 +1,525 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEuiTheme } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
+import {
+  FlyoutTemplate,
+  type FlyoutFooterMenuItem,
+  type FlyoutFooterMenuPanel,
+} from '@kbn/flyout-template';
+import { i18n } from '@kbn/i18n';
+import { useInvestigation } from '@kbn/investigation-output';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import type { SignificantEventResponse } from '@kbn/significant-events-schema';
+import { DetectionFlyout } from '../detection/detection_flyout';
+import { DetectionsList } from './detections_list';
+import { EventInvestigationCard } from './event_investigation_card';
+import { EventTimeline } from './event_timeline';
+import { TruncatableSummary } from '../../ui/truncatable_summary';
+import { SIGNIFICANT_EVENT_SEVERITY } from '../../ui/severity_badge';
+import { useFlyoutShareUrlCustomAction } from '../../ui/flyout_share_url_button';
+import {
+  buildNightshiftEventFlyoutShareUrl,
+  buildNightshiftEventsPageUrl,
+} from '../../../common/url_params';
+import {
+  buildInvestigationConversationChatOptions,
+  buildNewSignificantEventChatOptions,
+} from '../../../chat/open_significant_event_in_chat';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
+import { useFetchDetectionOccurrences } from '../../../data/detections/use_fetch_detection_occurrences';
+import { useFetchEventLifecycle } from '../../../data/significant_events/use_fetch_event_lifecycle';
+import { useFetchInvestigationAvailability } from '../../../data/investigations/use_fetch_investigation_availability';
+import { useFetchEventInvestigation } from '../../../data/significant_events/use_fetch_event_investigation';
+import { findDetectionSignal } from '../detection/resolve_detection_signal';
+import {
+  getStatusColor,
+  isNeedsActionStatus,
+  SIGNIFICANT_EVENT_STATUS_LABELS,
+} from './significant_event_status';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useBlocksNewActivity } from '../../../data/maintenance/use_significant_events_maintenance';
+import { useTriggerEventInvestigation } from '../../../data/significant_events/use_trigger_event_investigation';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../common/ebt_constants';
+import { setFlyoutMenuCloseButtonEbtProps } from '../../../common/flyout_close_ebt';
+import { MarkSignificantEventInactiveModal } from './mark_significant_event_inactive_modal';
+
+const EVENT_FLYOUT_HISTORY_KEY = Symbol('nightshiftEventFlyout');
+const OVERVIEW_TAB_ID = 'overview';
+const TIMELINE_TAB_ID = 'timeline';
+const TIMELINE_TITLE = i18n.translate('xpack.nightshift.flyout.timelineTabLabel', {
+  defaultMessage: 'Timeline',
+});
+const TABS = [
+  {
+    id: OVERVIEW_TAB_ID,
+    label: i18n.translate('xpack.nightshift.flyout.overviewTabLabel', {
+      defaultMessage: 'Overview',
+    }),
+  },
+  {
+    id: TIMELINE_TAB_ID,
+    label: TIMELINE_TITLE,
+  },
+];
+const SUMMARY_TITLE = i18n.translate('xpack.nightshift.flyout.whatHappenedTitle', {
+  defaultMessage: 'What happened?',
+});
+const DETECTIONS_TITLE = i18n.translate('xpack.nightshift.flyout.detectionsTitle', {
+  defaultMessage: 'Detections',
+});
+const INVESTIGATION_TITLE = i18n.translate('xpack.nightshift.flyout.investigationTitle', {
+  defaultMessage: 'Investigation',
+});
+const ACTIONS_LABEL = i18n.translate('xpack.nightshift.flyout.actionsButtonLabel', {
+  defaultMessage: 'Actions',
+});
+const OPEN_INVESTIGATION_CHAT_LABEL = i18n.translate(
+  'xpack.nightshift.flyout.openInvestigationChatButtonLabel',
+  {
+    defaultMessage: 'Open investigation in chat',
+  }
+);
+const NEW_CHAT_ITEM_LABEL = i18n.translate(
+  'xpack.nightshift.flyout.openInChatNewConversationItem',
+  {
+    defaultMessage: 'New chat about this event',
+  }
+);
+const INVESTIGATION_CHAT_UNAVAILABLE_LABEL = i18n.translate(
+  'xpack.nightshift.flyout.openInChatInvestigationUnavailable',
+  {
+    defaultMessage: 'Investigation chat is still loading',
+  }
+);
+const IN_PROGRESS_CHAT_TOOLTIP = i18n.translate(
+  'xpack.nightshift.flyout.openInChatInProgressTooltip',
+  {
+    defaultMessage:
+      'An investigation is still running. You can start a new chat about this significant event.',
+  }
+);
+const RUN_INVESTIGATION_LABEL = i18n.translate(
+  'xpack.nightshift.flyout.runInvestigationButtonLabel',
+  { defaultMessage: 'Run investigation' }
+);
+const FOLLOW_UP_INVESTIGATION_LABEL = i18n.translate(
+  'xpack.nightshift.flyout.followUpInvestigationButtonLabel',
+  { defaultMessage: 'Run follow-up' }
+);
+const NO_EPISODE_INVESTIGATION_TOOLTIP = i18n.translate(
+  'xpack.nightshift.flyout.noEpisodeInvestigationTooltip',
+  {
+    defaultMessage: 'This event has no alert to investigate yet.',
+  }
+);
+
+const INVESTIGATION_UNAVAILABLE_TOOLTIP = i18n.translate(
+  'xpack.nightshift.flyout.investigationUnavailableTooltip',
+  {
+    defaultMessage: 'Investigations are unavailable. You may need write access to Agent Builder.',
+  }
+);
+
+const FOLLOW_UP_INVESTIGATION_TOOLTIP = i18n.translate(
+  'xpack.nightshift.flyout.followUpInvestigationTooltip',
+  {
+    defaultMessage:
+      'An investigation is already running. This queues a follow-up that starts when it finishes.',
+  }
+);
+const MARK_INACTIVE_LABEL = i18n.translate('xpack.nightshift.flyout.markInactiveButtonLabel', {
+  defaultMessage: 'Mark inactive',
+});
+
+export interface EventFlyoutProps {
+  event: SignificantEventResponse;
+  onClose: () => void;
+  /**
+   * `push` shares the page with the app that opens it. `overlay` stacks over another flyout, such
+   * as an investigation, without a mask or replacing it.
+   */
+  type?: 'push' | 'overlay';
+  /** The flyout's width: an EUI size or pixels. */
+  size?: 's' | 'm' | number;
+}
+
+export function EventFlyout({
+  event,
+  onClose,
+  type = 'push',
+  size = 's',
+}: EventFlyoutProps): React.ReactElement {
+  const formatTimestamp = useFormatTimestamp();
+  const { euiTheme } = useEuiTheme();
+  const { agentBuilder, application, focusedSignificantEventService, http } = useKibana().services;
+  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
+  const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
+  const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
+  const [isMarkInactiveModalOpen, setIsMarkInactiveModalOpen] = useState(false);
+  const stagedOverlayEventId = useRef<string>();
+  const lifecycleQuery = useFetchEventLifecycle(event.event_id);
+  const [startedInvestigation, setStartedInvestigation] = useState<{
+    id: string;
+    startedAt: number;
+    episodeId: string | undefined;
+    listedUpdatedAt?: string;
+  }>();
+  /** The listed investigation when a start was clicked: a follow-up's run is recorded past it. */
+  const startBaselineRef = useRef<{ id: string; updated_at: string }>();
+  const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
+  // The investigation is found through its subject (the event's alert, by episode id), as for any
+  // alert. The event's own `investigations[]` is not read here.
+  const {
+    investigation: subjectInvestigation,
+    isAwaitingStart,
+    isListLoading,
+  } = useFetchEventInvestigation(event.episode_id, {
+    awaiting:
+      startedInvestigation?.episodeId === event.episode_id ? startedInvestigation : undefined,
+  });
+  const { isAvailable: canInvestigate, isLoading: isAvailabilityLoading } =
+    useFetchInvestigationAvailability();
+  const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation({
+    onTriggered: (investigationId, { episode_id: episodeId }) => {
+      const baseline = startBaselineRef.current;
+      setStartedInvestigation({
+        id: investigationId,
+        startedAt: Date.now(),
+        episodeId,
+        // Only a continued investigation has a listed state to be recorded past.
+        ...(baseline?.id === investigationId ? { listedUpdatedAt: baseline.updated_at } : {}),
+      });
+      void lifecycleQuery.refetch();
+    },
+  });
+  const hasInvestigation = subjectInvestigation != null || isAwaitingStart;
+
+  const { investigation: investigationDetails, status: investigationStatus } = useInvestigation({
+    http,
+    // While a start is pending, the listed investigation is an older run: show none of its details.
+    investigationId: isAwaitingStart ? undefined : subjectInvestigation?.id,
+  });
+  const conversationId = investigationDetails?.id;
+
+  useEffect(() => {
+    setSelectedDetectionId(undefined);
+    setSelectedTabId(OVERVIEW_TAB_ID);
+  }, [event.event_id]);
+
+  useEffect(() => {
+    // The focused event belongs to Nightshift's own chat; an overlay over another page, such as an
+    // investigation, must not take it over unless its New chat action explicitly stages the event.
+    if (type === 'overlay') {
+      return;
+    }
+    focusedSignificantEventService.setFocusedEvent(event);
+    return () => {
+      focusedSignificantEventService.clearFocusedEvent(event.event_id);
+    };
+  }, [event, focusedSignificantEventService, type]);
+
+  useEffect(() => {
+    return () => {
+      const stagedEventId = stagedOverlayEventId.current;
+      if (stagedEventId) {
+        focusedSignificantEventService.clearFocusedEvent(stagedEventId);
+        stagedOverlayEventId.current = undefined;
+      }
+    };
+  }, [focusedSignificantEventService]);
+
+  useEffect(() => {
+    if (
+      selectedDetectionId &&
+      lifecycleQuery.data?.detections.every(
+        (detection) => detection.detection_id !== selectedDetectionId
+      )
+    ) {
+      setSelectedDetectionId(undefined);
+    }
+  }, [lifecycleQuery.data?.detections, selectedDetectionId]);
+
+  const selectedDetection = useMemo(
+    () =>
+      lifecycleQuery.data?.detections.find(
+        (detection) => detection.detection_id === selectedDetectionId
+      ),
+    [lifecycleQuery.data?.detections, selectedDetectionId]
+  );
+
+  const selectedDetectionSignal = useMemo(() => {
+    if (!selectedDetection) {
+      return undefined;
+    }
+    return findDetectionSignal(selectedDetection, lifecycleQuery.data?.events);
+  }, [lifecycleQuery.data?.events, selectedDetection]);
+
+  const closeDetectionFlyout = useCallback(() => {
+    setSelectedDetectionId(undefined);
+  }, []);
+
+  const handleDetectionClick = useCallback((detectionId: string) => {
+    setSelectedDetectionId((current) => (current === detectionId ? undefined : detectionId));
+  }, []);
+
+  const getShareUrl = useCallback(
+    () =>
+      // Outside Nightshift the page behind the flyout cannot reopen the event, so the link goes to
+      // the events page, which can.
+      type === 'overlay'
+        ? buildNightshiftEventsPageUrl(application.getUrlForApp, event.event_id)
+        : buildNightshiftEventFlyoutShareUrl(event.event_id),
+    [application.getUrlForApp, event.event_id, type]
+  );
+  const shareUrlCustomAction = useFlyoutShareUrlCustomAction(getShareUrl);
+  const flyoutMenuProps = useMemo(
+    () => ({ trailingActions: [shareUrlCustomAction] }),
+    [shareUrlCustomAction]
+  );
+  const openNewChat = useCallback(() => {
+    agentBuilder?.openChat(buildNewSignificantEventChatOptions(event));
+    // An open sidebar replaces its draft on openChat without a new conversation id, so re-stage the event.
+    focusedSignificantEventService.setFocusedEvent(event);
+    stagedOverlayEventId.current = type === 'overlay' ? event.event_id : undefined;
+  }, [agentBuilder, event, focusedSignificantEventService, type]);
+  const openInvestigationChat = useCallback(() => {
+    if (conversationId) {
+      agentBuilder?.openChat(buildInvestigationConversationChatOptions(conversationId));
+    }
+  }, [agentBuilder, conversationId]);
+  const latestInvestigationInProgress =
+    isAwaitingStart || (subjectInvestigation?.in_progress ?? false);
+  const actionMenuPanels = useMemo<FlyoutFooterMenuPanel[]>(() => {
+    const items: FlyoutFooterMenuItem[] = [];
+    if (canManage) {
+      items.push({
+        name: latestInvestigationInProgress
+          ? FOLLOW_UP_INVESTIGATION_LABEL
+          : RUN_INVESTIGATION_LABEL,
+        icon: 'inspect',
+        toolTipContent:
+          activityBlockTooltip ??
+          (event.episode_id ? undefined : NO_EPISODE_INVESTIGATION_TOOLTIP) ??
+          (canInvestigate || isAvailabilityLoading
+            ? undefined
+            : INVESTIGATION_UNAVAILABLE_TOOLTIP) ??
+          (latestInvestigationInProgress ? FOLLOW_UP_INVESTIGATION_TOOLTIP : undefined),
+        onClick: () => {
+          startBaselineRef.current = subjectInvestigation
+            ? { id: subjectInvestigation.id, updated_at: subjectInvestigation.updated_at }
+            : undefined;
+          triggerInvestigation({ event_id: event.event_id, episode_id: event.episode_id });
+        },
+        // Until the list is read, a start cannot tell a new investigation from a continued one.
+        disabled:
+          blocksActivity ||
+          triggeringEventId != null ||
+          !event.episode_id ||
+          !canInvestigate ||
+          isListLoading,
+        hasAriaDisabled: true,
+        'data-test-subj': 'nightshiftEventFlyoutRunInvestigationButton',
+        ...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.START_INVESTIGATION,
+          element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
+          detail: isNeedsActionStatus(event.status)
+            ? NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION
+            : NIGHTSHIFT_EBT_DETAILS.RESOLVED,
+        }),
+      });
+    }
+    if (agentBuilder && hasInvestigation) {
+      if (!latestInvestigationInProgress) {
+        items.push({
+          name: OPEN_INVESTIGATION_CHAT_LABEL,
+          icon: 'comment',
+          disabled: !conversationId,
+          hasAriaDisabled: true,
+          toolTipContent: conversationId ? undefined : INVESTIGATION_CHAT_UNAVAILABLE_LABEL,
+          onClick: openInvestigationChat,
+          'data-test-subj': 'nightshiftEventFlyoutOpenInvestigationChatItem',
+          ...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
+            element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
+            detail: NIGHTSHIFT_EBT_DETAILS.EXISTING_CONVERSATION,
+          }),
+        });
+      }
+      items.push({
+        name: NEW_CHAT_ITEM_LABEL,
+        icon: 'productAgent',
+        onClick: openNewChat,
+        toolTipContent: latestInvestigationInProgress ? IN_PROGRESS_CHAT_TOOLTIP : undefined,
+        'data-test-subj': 'nightshiftEventFlyoutStartNewChatItem',
+        ...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
+          element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
+          detail: NIGHTSHIFT_EBT_DETAILS.NEW_CONVERSATION,
+        }),
+      });
+    }
+    if (canManage && isNeedsActionStatus(event.status)) {
+      items.push(
+        { isSeparator: true },
+        {
+          name: MARK_INACTIVE_LABEL,
+          icon: 'eyeSlash',
+          onClick: () => setIsMarkInactiveModalOpen(true),
+          ...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_SIGNIFICANT_EVENT,
+            element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
+            detail: NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION,
+          }),
+        }
+      );
+    }
+    return items.length ? [{ id: 0, items }] : [];
+  }, [
+    activityBlockTooltip,
+    agentBuilder,
+    blocksActivity,
+    canInvestigate,
+    isAvailabilityLoading,
+    canManage,
+    conversationId,
+    event.episode_id,
+    event.event_id,
+    event.status,
+    hasInvestigation,
+    isListLoading,
+    latestInvestigationInProgress,
+    openInvestigationChat,
+    openNewChat,
+    subjectInvestigation,
+    triggerInvestigation,
+    triggeringEventId,
+  ]);
+
+  return (
+    <>
+      <FlyoutTemplate
+        onClose={onClose}
+        size={size}
+        type={type}
+        ownFocus={type === 'overlay' ? false : undefined}
+        session="start"
+        historyKey={EVENT_FLYOUT_HISTORY_KEY}
+        resizable
+        flyoutMenuProps={flyoutMenuProps}
+        tabs={TABS}
+        selectedTabId={selectedTabId}
+        onTabChange={setSelectedTabId}
+        data-test-subj="nightshiftEventFlyout"
+        onClickCapture={(clickEvent: React.MouseEvent<HTMLElement>) =>
+          setFlyoutMenuCloseButtonEbtProps(clickEvent, NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT)
+        }
+      >
+        <FlyoutTemplate.Header
+          title={event.title}
+          description={formatTimestamp(event.created_at ?? event['@timestamp'])}
+        >
+          <FlyoutTemplate.Header.Badge
+            color={euiTheme.colors.severity[SIGNIFICANT_EVENT_SEVERITY[event.severity].color]}
+          >
+            {i18n.translate('xpack.nightshift.flyout.severityLabel', {
+              defaultMessage: '{severity} severity',
+              values: { severity: SIGNIFICANT_EVENT_SEVERITY[event.severity].label },
+            })}
+          </FlyoutTemplate.Header.Badge>
+          <FlyoutTemplate.Header.Badge
+            color="hollow"
+            toolTipContent={i18n.translate('xpack.nightshift.flyout.confidenceTooltip', {
+              defaultMessage:
+                'How confident Nightshift is that this is correct, based on evidence strength and consistency.',
+            })}
+          >
+            {i18n.translate('xpack.nightshift.flyout.confidenceLabel', {
+              defaultMessage: 'Confidence {percent}%',
+              values: { percent: Math.round(event.confidence * 100) },
+            })}
+          </FlyoutTemplate.Header.Badge>
+          <FlyoutTemplate.Header.Badge color={getStatusColor(event.status)}>
+            {SIGNIFICANT_EVENT_STATUS_LABELS[event.status]}
+          </FlyoutTemplate.Header.Badge>
+        </FlyoutTemplate.Header>
+        <FlyoutTemplate.Body>
+          <FlyoutTemplate.Body.TabPanel tabId={OVERVIEW_TAB_ID}>
+            <FlyoutTemplate.Body.Section title={SUMMARY_TITLE}>
+              <TruncatableSummary summary={event.summary} />
+            </FlyoutTemplate.Body.Section>
+            {hasInvestigation ? (
+              <FlyoutTemplate.Body.Section title={INVESTIGATION_TITLE}>
+                <EventInvestigationCard
+                  inProgress={latestInvestigationInProgress}
+                  investigation={investigationDetails}
+                  status={investigationStatus}
+                />
+              </FlyoutTemplate.Body.Section>
+            ) : null}
+            {lifecycleQuery.isLoading ||
+            lifecycleQuery.isError ||
+            lifecycleQuery.data?.detections.length ? (
+              <FlyoutTemplate.Body.Section title={DETECTIONS_TITLE}>
+                <DetectionsList
+                  event={event}
+                  eventId={event.event_id}
+                  lifecycleQuery={lifecycleQuery}
+                  occurrencesByRuleUuid={occurrencesQuery.data}
+                  isLoadingOccurrences={occurrencesQuery.isLoading}
+                  selectedDetectionId={selectedDetectionId}
+                  onDetectionClick={(detection) => handleDetectionClick(detection.detection_id)}
+                />
+              </FlyoutTemplate.Body.Section>
+            ) : null}
+          </FlyoutTemplate.Body.TabPanel>
+          <FlyoutTemplate.Body.TabPanel tabId={TIMELINE_TAB_ID}>
+            <FlyoutTemplate.Body.Section title={TIMELINE_TITLE}>
+              <EventTimeline
+                event={event}
+                lifecycleQuery={lifecycleQuery}
+                selectedDetectionId={selectedDetectionId}
+                onDetectionClick={handleDetectionClick}
+                onEventClick={() => setSelectedTabId(OVERVIEW_TAB_ID)}
+              />
+            </FlyoutTemplate.Body.Section>
+          </FlyoutTemplate.Body.TabPanel>
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.PrimaryActionMenu
+            label={ACTIONS_LABEL}
+            panels={actionMenuPanels}
+            data-test-subj="nightshiftEventFlyoutActionsButton"
+          />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
+      {isMarkInactiveModalOpen ? (
+        <MarkSignificantEventInactiveModal
+          eventId={event.event_id}
+          onClose={() => setIsMarkInactiveModalOpen(false)}
+          onSuccess={onClose}
+        />
+      ) : null}
+      {selectedDetection ? (
+        <DetectionFlyout
+          key={selectedDetection.detection_id}
+          detection={selectedDetection}
+          event={event}
+          signal={selectedDetectionSignal}
+          onClose={closeDetectionFlyout}
+        />
+      ) : null}
+    </>
+  );
+}

@@ -30,6 +30,8 @@ const mitreAttackEntityAttributesSchemaV1 = schema.object({
   technique_id: schema.maybe(schema.string()),
 });
 
+// The saved object id is `{framework}:{framework_version}:{id}` and `framework` is an
+// indexed attribute, so additional frameworks (e.g. ATLAS) need no mapping change.
 export const mitreAttackEntityType: SavedObjectsType = {
   name: MITRE_ATTACK_ENTITY_SO_TYPE,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,

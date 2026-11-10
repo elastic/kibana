@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
-import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
-import { SERVICE_NAME, TRANSACTION_NAME, TRANSACTION_TYPE } from '../../../common/es_fields/apm';
-import { environmentQuery } from '../../../common/utils/environment_query';
+import type { ProfilingDataAccessPluginStart } from '@kbn/profiling-data-access-plugin/server';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 
 interface Params {
   profilingDataAccessStart: ProfilingDataAccessPluginStart;
@@ -17,15 +16,13 @@ interface Params {
   esClient: ElasticsearchClient;
   startIndex: number;
   endIndex: number;
-  start: number;
-  end: number;
-  kuery: string;
-  serviceName?: string;
-  transactionName?: string;
-  environment?: string;
-  transactionType?: string;
+  totalSeconds: number;
+  query: QueryDslQueryContainer;
   indices?: string[];
   stacktraceIdsField?: string;
+  /** Universal Profiling (ECS) when undefined */
+  schema: ProfilingSchema | undefined;
+  abortSignal?: AbortSignal;
 }
 
 export function fetchFunctions({
@@ -34,43 +31,23 @@ export function fetchFunctions({
   esClient,
   startIndex,
   endIndex,
-  start,
-  end,
-  kuery,
-  serviceName,
-  transactionName,
-  environment,
-  transactionType,
+  totalSeconds,
+  query,
   indices,
   stacktraceIdsField,
+  schema,
+  abortSignal,
 }: Params) {
   return profilingDataAccessStart.services.fetchFunctions({
     core,
     esClient,
     startIndex,
     endIndex,
-    totalSeconds: end - start,
+    totalSeconds,
+    query,
     indices,
     stacktraceIdsField,
-    query: {
-      bool: {
-        filter: [
-          ...kqlQuery(kuery),
-          ...termQuery(SERVICE_NAME, serviceName),
-          ...termQuery(TRANSACTION_NAME, transactionName),
-          ...environmentQuery(environment),
-          ...termQuery(TRANSACTION_TYPE, transactionType),
-          {
-            range: {
-              ['@timestamp']: {
-                gte: String(start),
-                lt: String(end),
-                format: 'epoch_second',
-              },
-            },
-          },
-        ],
-      },
-    },
+    schema,
+    abortSignal,
   });
 }

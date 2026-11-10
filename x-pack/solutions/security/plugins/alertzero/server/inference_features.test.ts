@@ -8,14 +8,19 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-endpoints/server';
 import {
-  ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
-  ALERTZERO_FAST_INFERENCE_FEATURE_ID,
+  ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+  ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+  ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
-  ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
 } from '@kbn/alertzero-common';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 
 const OPUS_5 = '.anthropic-claude-5-opus-chat_completion';
+const SONNET_5 = '.anthropic-claude-5-sonnet-chat_completion';
+const SONNET_5_5 = '.anthropic-claude-5.5-sonnet-chat_completion';
+const GPT_6_SOL = '.openai-gpt-6-sol-chat_completion';
+const GPT_5_6_SOL = '.openai-gpt-5.6-sol-chat_completion';
 
 const createSetupMock = (result: { ok: boolean; error?: string } = { ok: true }) => {
   const register = jest.fn().mockReturnValue(result);
@@ -36,16 +41,17 @@ describe('registerAlertZeroInferenceFeatures', () => {
   });
 
   // Registration order is render order, so this also pins the rows to cheapest-first.
-  it('registers the parent ahead of the three tiers', () => {
+  it('registers the parent ahead of the three tiers and the template row', () => {
     const { setup, register } = createSetupMock();
 
     registerAlertZeroInferenceFeatures(setup, logger);
 
     expect(register.mock.calls.map(([arg]) => arg.featureId)).toEqual([
       ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
-      ALERTZERO_FAST_INFERENCE_FEATURE_ID,
-      ALERTZERO_REASONING_INFERENCE_FEATURE_ID,
-      ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID,
+      ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+      ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+      ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+      ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
     ]);
   });
 
@@ -67,56 +73,133 @@ describe('registerAlertZeroInferenceFeatures', () => {
     });
   });
 
-  it('registers the fast tier on the cost-saving rung', () => {
+  it('registers the efficient tier on the cost-saving rung', () => {
     const { setup, register } = createSetupMock();
 
     registerAlertZeroInferenceFeatures(setup, logger);
 
-    expect(registeredTier(register, ALERTZERO_FAST_INFERENCE_FEATURE_ID)).toEqual({
+    expect(registeredTier(register, ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID)).toEqual({
       parentFeatureId: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
       taskType: 'chat_completion',
       isTechPreview: true,
       ignoreGlobalDefault: true,
-      featureId: ALERTZERO_FAST_INFERENCE_FEATURE_ID,
-      featureName: 'Fast models',
+      featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+      featureName: 'Efficient models',
       featureDescription:
-        'Low latency, high volume, and lightweight judgment, such as triaging an alert or checking detection coverage.',
+        'Quick, lightweight judgment on calls that run often, such as checking detection coverage. Choose a small, low-cost model.',
       recommendedEndpoints: [
+        '.openai-gpt-6-luna-chat_completion',
         '.google-gemini-3.5-flash-lite-chat_completion',
         '.anthropic-claude-4.5-haiku-chat_completion',
-        '.anthropic-claude-5-sonnet-chat_completion',
       ],
     });
   });
 
-  it('registers the reasoning tier on the frontier rung', () => {
+  // Frequent or many-round calls multiply frontier latency and cost, so a mid-size model leads.
+  it('registers the balanced tier on the mid-size rung', () => {
     const { setup, register } = createSetupMock();
 
     registerAlertZeroInferenceFeatures(setup, logger);
 
-    expect(
-      registeredTier(register, ALERTZERO_REASONING_INFERENCE_FEATURE_ID).recommendedEndpoints
-    ).toEqual([
-      OPUS_5,
-      '.anthropic-claude-5-sonnet-chat_completion',
-      '.openai-gpt-5.6-sol-chat_completion',
-    ]);
+    expect(registeredTier(register, ALERTZERO_BALANCED_INFERENCE_FEATURE_ID)).toEqual({
+      parentFeatureId: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+      taskType: 'chat_completion',
+      isTechPreview: true,
+      ignoreGlobalDefault: true,
+      featureId: ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+      featureName: 'Balanced models',
+      featureDescription:
+        'Calls where accuracy matters but that run often or use tools over many steps, such as triaging alerts or diagnosing a noisy rule. Choose a strong mid-size model.',
+      recommendedEndpoints: [
+        SONNET_5_5,
+        '.openai-gpt-5.6-terra-chat_completion',
+        '.google-gemini-3.6-flash-chat_completion',
+      ],
+    });
   });
 
-  // Many tool rounds multiply frontier latency and cost, so the mid-tier model leads.
-  it('leads the agentic tier with the mid-tier model', () => {
+  it('registers the frontier tier on the most capable rung', () => {
     const { setup, register } = createSetupMock();
 
     registerAlertZeroInferenceFeatures(setup, logger);
 
-    expect(
-      registeredTier(register, ALERTZERO_AGENTIC_INFERENCE_FEATURE_ID).recommendedEndpoints[0]
-    ).toBe('.anthropic-claude-5-sonnet-chat_completion');
+    expect(registeredTier(register, ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID)).toEqual({
+      parentFeatureId: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+      taskType: 'chat_completion',
+      isTechPreview: true,
+      ignoreGlobalDefault: true,
+      featureId: ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+      featureName: 'Frontier models',
+      featureDescription:
+        'Complex, single-pass work where output quality matters most, such as generating attack discoveries or drafting a detection rule. Choose your most capable model.',
+      recommendedEndpoints: [GPT_6_SOL, GPT_5_6_SOL, OPUS_5],
+    });
+  });
+
+  // Every tier lists at least two vendors, so losing one vendor still leaves a model on the same
+  // rung instead of falling through to the parent.
+  it('spans at least two vendors in every tier', () => {
+    const { setup, register } = createSetupMock();
+
+    registerAlertZeroInferenceFeatures(setup, logger);
+
+    const tierIds = [
+      ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
+      ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
+      ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+    ];
+    for (const tierId of tierIds) {
+      const { recommendedEndpoints } = registeredTier(register, tierId);
+      const vendors = new Set(
+        recommendedEndpoints.map((endpoint: string) => endpoint.split('-')[0])
+      );
+      expect(vendors.size).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  // A mid-size model in the frontier chain would silently downgrade Attack Discovery and rule
+  // creation whenever the frontier models above it are unavailable.
+  it('keeps mid-size models out of the frontier tier', () => {
+    const { setup, register } = createSetupMock();
+
+    registerAlertZeroInferenceFeatures(setup, logger);
+
+    const { recommendedEndpoints } = registeredTier(
+      register,
+      ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID
+    );
+    const { recommendedEndpoints: balancedEndpoints } = registeredTier(
+      register,
+      ALERTZERO_BALANCED_INFERENCE_FEATURE_ID
+    );
+    expect(recommendedEndpoints).not.toContain(SONNET_5);
+    for (const endpoint of balancedEndpoints) {
+      expect(recommendedEndpoints).not.toContain(endpoint);
+    }
+  });
+
+  it('registers the prompt-template row with no recommended model', () => {
+    const { setup, register } = createSetupMock();
+
+    registerAlertZeroInferenceFeatures(setup, logger);
+
+    expect(registeredTier(register, ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID)).toEqual({
+      parentFeatureId: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+      taskType: 'chat_completion',
+      isTechPreview: true,
+      ignoreGlobalDefault: true,
+      allowTemplateRequiredModels: true,
+      featureId: ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
+      featureName: 'Cyber domain models',
+      featureDescription:
+        'OpenAI Daybreak models for Attack Discovery, alert triage, the false-positive judge, and Hunt Watch. A Daybreak endpoint requires a prompt template, so it is listed only here. A model saved here replaces the tier those calls use. Leave this empty to keep Attack Discovery and the judge on Frontier models, alert triage on Efficient models, and Hunt dataset matching and recommendations on Efficient models with technique extraction on Frontier models. Hunt ES|QL generation keeps the Frontier model when the saved endpoint requires a prompt template.',
+      recommendedEndpoints: [],
+    });
   });
 
   // The tiers sit on deliberately different rungs. If the cluster-wide default were allowed to
-  // win, all three would collapse onto one model, losing the cost saving on the fast tier and the
-  // quality on the reasoning one.
+  // win, all three would collapse onto one model, losing the cost saving on the efficient tier and
+  // the quality on the frontier one.
   it('opts every tier out of the global default', () => {
     const { setup, register } = createSetupMock();
 
@@ -129,16 +212,22 @@ describe('registerAlertZeroInferenceFeatures', () => {
     expect(tiers.every((tier) => tier.ignoreGlobalDefault === true)).toBe(true);
   });
 
-  // The fast tier runs once per alert, so a frontier recommendation here silently bills the
-  // highest-volume path in AlertZero at frontier rates.
-  it('keeps the frontier model out of the fast tier', () => {
+  // The efficient tier takes the highest-volume calls, so a mid-size or frontier recommendation
+  // here silently bills the busiest path in AlertZero at those rates.
+  it('keeps mid-size and frontier models out of the efficient tier', () => {
     const { setup, register } = createSetupMock();
 
     registerAlertZeroInferenceFeatures(setup, logger);
 
-    expect(
-      registeredTier(register, ALERTZERO_FAST_INFERENCE_FEATURE_ID).recommendedEndpoints
-    ).not.toContain(OPUS_5);
+    const { recommendedEndpoints } = registeredTier(
+      register,
+      ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID
+    );
+    expect(recommendedEndpoints).not.toContain(OPUS_5);
+    expect(recommendedEndpoints).not.toContain(SONNET_5);
+    expect(recommendedEndpoints).not.toContain(SONNET_5_5);
+    expect(recommendedEndpoints).not.toContain(GPT_6_SOL);
+    expect(recommendedEndpoints).not.toContain(GPT_5_6_SOL);
   });
 
   it('is a no-op when the optional plugin is unavailable', () => {
@@ -154,7 +243,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
 
     registerAlertZeroInferenceFeatures(setup, logger);
 
-    expect(logger.warn).toHaveBeenCalledTimes(4);
+    expect(logger.warn).toHaveBeenCalledTimes(5);
   });
 
   it('registers every tier even when the parent is rejected', () => {
@@ -168,6 +257,6 @@ describe('registerAlertZeroInferenceFeatures', () => {
       logger
     );
 
-    expect(register).toHaveBeenCalledTimes(4);
+    expect(register).toHaveBeenCalledTimes(5);
   });
 });

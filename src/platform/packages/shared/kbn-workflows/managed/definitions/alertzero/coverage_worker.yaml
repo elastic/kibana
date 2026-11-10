@@ -210,6 +210,47 @@ steps:
             ai_index_id: "{{ inputs.ai_index_id | default: consts.ai_index_id }}"
             autonomy_level: "{{ inputs.autonomy_level | default: 'manual' }}"
 
+  # Telemetry: the sweep's outcome, from the same values as `emit_result`.
+  - name: report_worker_run_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: worker_run_completed
+      candidates_found: "${{ steps.search_pending_indicators.output.hits.total.value | default: 0 }}"
+      items_dispatched: "${{ steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows | size }}"
+      items_in_flight: |-
+        {%- assign started = steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows | size -%}
+        {{ steps.collect_active_indicators.output.count | default: 0 | plus: started }}
+      source_read_failed: "${{ steps.search_pending_indicators.error != null }}"
+      lookup_failed: "${{ steps.list_active_reviews.error != null }}"
+      degraded_reason: |-
+        {%- assign pending = steps.search_pending_indicators.output.hits.total.value | default: 0 -%}
+        {%- assign started = steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows | size -%}
+        {%- if steps.search_pending_indicators.error != null or steps.list_active_reviews.error != null -%}
+        dependency_unavailable
+        {%- elsif pending > 0 and started == 0 -%}
+        capacity
+        {%- elsif started < pending and steps.resolve_free_slots.output.free < steps.resolve_batch_size.output.size -%}
+        capacity
+        {%- else -%}
+        none
+        {%- endif -%}
+      run_outcome: |-
+        {%- assign pending = steps.search_pending_indicators.output.hits.total.value | default: 0 -%}
+        {%- assign started = steps.resolve_dispatch_batch.output.indicators | default: consts.no_rows | size -%}
+        {%- if steps.search_pending_indicators.error != null -%}
+        failed_source_unavailable
+        {%- elsif pending == 0 -%}
+        empty_nothing_pending
+        {%- elsif started == 0 -%}
+        empty_at_capacity
+        {%- elsif started < pending and steps.resolve_free_slots.output.free < steps.resolve_batch_size.output.size -%}
+        degraded_partial
+        {%- else -%}
+        produced
+        {%- endif -%}
+
   - name: emit_result
     type: workflow.output
     status: completed

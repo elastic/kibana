@@ -202,6 +202,12 @@ const WEAKENED_SETTINGS: readonly WeakenedSettingDefinition[] = [
     text: (oses) => `Credential hardening on ${oses} is turned off.`,
   },
   {
+    setting: 'attack_surface_reduction.registry_credential_hardening.enabled',
+    osList: [PolicyOperatingSystem.windows],
+    weakens: weakenedBoolean,
+    text: (oses) => `Registry credential hardening on ${oses} is turned off.`,
+  },
+  {
     setting: 'antivirus_registration.mode',
     osList: [PolicyOperatingSystem.windows],
     weakens: (from, to) =>
@@ -309,7 +315,11 @@ export const buildPolicyChangeAssessment = (
       idOrName: policy.snapshot.identity.id,
       changes: [...operations],
     },
-    policy.storedConfig
+    policy.storedConfig,
+    {
+      linuxRansomwareProtection: capabilities.linuxRansomwareProtection,
+      licenseInformation: capabilities.licenseInformation,
+    }
   );
   const { endpointCustomNotification, ...eligibilityCapabilities } = capabilities;
   const eligibilityContext = buildEligibilityContext({

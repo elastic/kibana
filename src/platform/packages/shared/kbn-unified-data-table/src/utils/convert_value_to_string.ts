@@ -11,7 +11,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
-import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
+import {
+  convertSourceToString,
+  convertValueToString as commonConvertValueToString,
+} from '@kbn/discover-utils';
 import type { DataSource } from '@kbn/data-source';
 import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import type { DocumentsDisplayMode } from '../types';
@@ -72,6 +75,12 @@ export const convertValueToString = ({
 
   const value = row.flattened?.[columnId];
   const field = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName: columnId });
+
+  // The summary column represents the whole document, also when the data view, e.g. a temporary
+  // or ES|QL one, has no _source field.
+  if (columnId === SOURCE_COLUMN && !field) {
+    return convertSourceToString({ dataTableRecord: row, options });
+  }
 
   return commonConvertValueToString({
     dataView,

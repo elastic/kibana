@@ -176,6 +176,6 @@ node scripts/i18n_check --fix
 * `--namespace` Filter which namespaces to run the i18n checker on. All namespaces must be defined in the `.i18nrc.json` files. This is useful when ran locally against a subset of namespaces on a branch.
 * `--ignore-unused` Check against the translation files. Remove outdated message that are no longer inside codebase
 * `--ignore-incompatible` Check against the translation files. Remove messages insied the code base that are no longer compatible with the defaultMessage inside the codebase (variables changed)
-* `--ignore-untracked` Check against the codebase. Skip checking all files for namespace paths that are not defined inside `.i18nrc.json` files
+* `--ignore-untracked` Check against the codebase. Skip the check that fails on files containing i18n messages under a path that is neither registered under a namespace nor listed in `exclude` in the `.i18nrc.json` files. This check runs by default, including in CI, regardless of `--namespace`.
 * `--ignore-malformed` Check against the codebase. Ignore messages with malformed ICU syntax.
 * `--include-config` specifies additional paths to `.i18nrc.json` files (may be useful for 3rd-party plugins)

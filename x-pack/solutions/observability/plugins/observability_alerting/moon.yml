@@ -29,19 +29,23 @@ dependsOn:
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/rule-data-utils'
   - '@kbn/observability-plugin'
+  - '@kbn/observability-shared-plugin'
   - '@kbn/alerting-v2-episodes-ui'
+  - '@kbn/alerts-ui-shared'
+  - '@kbn/cases-plugin'
+  - '@kbn/security-plugin'
+  - '@kbn/kibana-utils-plugin'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - public/**/*.ts
     - public/**/*.tsx
     - test/scout*/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

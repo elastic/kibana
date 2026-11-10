@@ -104,6 +104,7 @@ export const GraphViewTab: FC<GraphViewTabProps> = memo(({ entityId, scopeId }) 
       mode="entity"
       entityId={entityId}
       scopeId={scopeId}
+      graphScopeId={scopeId}
       onShowDocument={onShowDocument}
       onShowEntity={onShowEntity}
       onShowGrouped={onShowGrouped}

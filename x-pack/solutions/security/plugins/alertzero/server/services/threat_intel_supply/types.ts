@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { HuntModelTierStatus } from '@kbn/alertzero-common';
+
 export type ThreatIntelSupplyScope = 'deployment' | 'space';
 
 export type ThreatIntelSupplyWorkflowKey = 'ingest' | 'enrich' | 'attribute';
@@ -33,4 +35,6 @@ export interface ThreatIntelSupplyStatus {
    */
   drift: boolean;
   huntEnabled: boolean;
+  /** One entry per Hunt model tier; informational, never part of the hard gate. */
+  modelTiers: HuntModelTierStatus[];
 }

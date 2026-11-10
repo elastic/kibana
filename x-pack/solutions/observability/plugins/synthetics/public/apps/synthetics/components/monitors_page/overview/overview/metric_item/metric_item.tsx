@@ -122,10 +122,12 @@ export const MetricItem = ({
   monitor,
   onClick,
   style,
+  isInteractive = true,
 }: {
   monitor: OverviewStatusMetaData;
   style?: React.CSSProperties;
   onClick: (params: FlyoutParamProps) => void;
+  isInteractive?: boolean;
 }) => {
   const status = monitor.overallStatus;
   const showLastRun = useSelector(selectOverviewShowLastRun);
@@ -227,24 +229,28 @@ export const MetricItem = ({
       >
         <Chart id={`${monitor.configId}-${locationId}-metric-chart`}>
           <Settings
-            onElementClick={() => {
-              if (testInProgress) {
-                dispatch(toggleTestNowFlyoutAction(monitor.configId));
-                dispatch(toggleErrorPopoverOpen(null));
-              } else {
-                dispatch(hideTestNowFlyoutAction());
-                dispatch(toggleErrorPopoverOpen(null));
-              }
-              if (!testInProgress && locationName) {
-                onClick({
-                  locationId,
-                  configId: monitor.configId,
-                  id: monitor.monitorQueryId,
-                  location: locationName,
-                  spaces: monitor.spaces,
-                });
-              }
-            }}
+            onElementClick={
+              isInteractive
+                ? () => {
+                    if (testInProgress) {
+                      dispatch(toggleTestNowFlyoutAction(monitor.configId));
+                      dispatch(toggleErrorPopoverOpen(null));
+                    } else {
+                      dispatch(hideTestNowFlyoutAction());
+                      dispatch(toggleErrorPopoverOpen(null));
+                    }
+                    if (!testInProgress && locationName) {
+                      onClick({
+                        locationId,
+                        configId: monitor.configId,
+                        id: monitor.monitorQueryId,
+                        location: locationName,
+                        spaces: monitor.spaces,
+                      });
+                    }
+                  }
+                : undefined
+            }
             baseTheme={chartBaseTheme}
             locale={i18n.getLocale()}
           />
@@ -257,41 +263,44 @@ export const MetricItem = ({
                   subtitle: metricSubtitle,
                   body: (
                     <div
-                      role="button"
                       tabIndex={0}
                       css={{ width: '100%', minWidth: 0 }}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      onMouseUp={(e) => e.stopPropagation()}
-                      onClick={(e) => {
-                        const target = e.target as HTMLElement;
-                        const closestInteractive = target.closest(
-                          'a, button, [role="button"], .euiBadge'
-                        );
-                        if (!closestInteractive || closestInteractive === e.currentTarget) {
-                          onClick({
-                            locationId,
-                            configId: monitor.configId,
-                            id: monitor.monitorQueryId,
-                            location: locationName ?? '',
-                            spaces: monitor.spaces,
-                          });
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          onClick({
-                            locationId,
-                            configId: monitor.configId,
-                            id: monitor.monitorQueryId,
-                            location: locationName ?? '',
-                            spaces: monitor.spaces,
-                          });
-                        }
-                      }}
+                      {...(isInteractive && {
+                        role: 'button',
+                        onMouseDown: (e) => e.stopPropagation(),
+                        onMouseUp: (e) => e.stopPropagation(),
+                        onClick: (e) => {
+                          const target = e.target as HTMLElement;
+                          const closestInteractive = target.closest(
+                            'a, button, [role="button"], .euiBadge'
+                          );
+                          if (!closestInteractive || closestInteractive === e.currentTarget) {
+                            onClick({
+                              locationId,
+                              configId: monitor.configId,
+                              id: monitor.monitorQueryId,
+                              location: locationName ?? '',
+                              spaces: monitor.spaces,
+                            });
+                          }
+                        },
+                        onKeyDown: (e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            onClick({
+                              locationId,
+                              configId: monitor.configId,
+                              id: monitor.monitorQueryId,
+                              location: locationName ?? '',
+                              spaces: monitor.spaces,
+                            });
+                          }
+                        },
+                      })}
                     >
                       <MetricItemBody
                         monitor={monitor}
+                        isInteractive={isInteractive}
                         onLocationClick={(locId, locLabel) => {
                           onClick({
                             locationId: locId,
@@ -313,21 +322,24 @@ export const MetricItem = ({
             ]}
           />
         </Chart>
-        <div className={isPopoverOpen ? '' : 'cardItemActions_hover'}>
-          <ActionsPopover
-            monitor={monitor}
-            isPopoverOpen={isPopoverOpen}
-            setIsPopoverOpen={setIsPopoverOpen}
-            position="relative"
-            locationId={locationId}
-          />
-        </div>
+        {isInteractive && (
+          <div className={isPopoverOpen ? '' : 'cardItemActions_hover'}>
+            <ActionsPopover
+              monitor={monitor}
+              isPopoverOpen={isPopoverOpen}
+              setIsPopoverOpen={setIsPopoverOpen}
+              position="relative"
+              locationId={locationId}
+            />
+          </div>
+        )}
         {configIdByLocation && (
           <MetricItemIcon
             monitor={monitor}
             status={status}
             timestamp={timestamp}
             configIdByLocation={configIdByLocation}
+            isInteractive={isInteractive}
           />
         )}
       </EuiPanel>

@@ -12,7 +12,7 @@ requestBody:
               fieldHistoryLength: 15
         clearLogExtractionOverrideExample:
           summary: "Clear log extraction overrides"
-          description: "Send null for any field to clear that override and revert it to the default value."
+          description: "Send null for any field to clear that override and revert it to the entity type default. For frequency, that is 1m for host and user, 10m for service and 30m for generic."
           value:
             logExtraction:
               frequency: null

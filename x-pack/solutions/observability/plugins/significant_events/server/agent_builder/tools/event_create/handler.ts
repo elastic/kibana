@@ -6,10 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
-import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import { eventsWriteHandler, type EventsWriteInput } from '../event_write/handler';
 import { createBulkWriteOutcomeUnknownError } from '../bulk_write';
 
@@ -29,25 +27,20 @@ export type EventCreateInput = Pick<
 export async function createEventToolHandler({
   eventSearchClient,
   eventInput,
-  alertEventsClient,
-  emitTrigger,
   logger,
 }: {
   eventSearchClient: RuleEventsClient;
   eventInput: EventCreateInput;
-  alertEventsClient: AlertEventsClientApi;
-  emitTrigger?: TriggerEmitter;
   logger?: Logger;
-}): Promise<{ event_id: string; acknowledged: true }> {
+}): Promise<{ event_id: string; group_hash: string; acknowledged: true }> {
+  const eventId = uuidv4();
   const result = await eventsWriteHandler({
     eventSearchClient,
     input: {
       ...eventInput,
-      event_id: uuidv4(),
+      event_id: eventId,
       status: eventInput.status ?? 'active',
     },
-    alertEventsClient,
-    emitTrigger,
     logger,
   });
   if (!result.written) {
@@ -55,5 +48,11 @@ export async function createEventToolHandler({
       `Event write skipped (${result.reason}): event_id=${result.event_id}`
     );
   }
-  return { event_id: result.event_id, acknowledged: true };
+  // A freshly generated event_id has no stored version, so the write can only have created one.
+  if (!result.created) {
+    throw createBulkWriteOutcomeUnknownError(
+      `Event write updated a stored event for a generated event_id: event_id=${eventId}`
+    );
+  }
+  return { event_id: result.event_id, group_hash: result.group_hash, acknowledged: true };
 }

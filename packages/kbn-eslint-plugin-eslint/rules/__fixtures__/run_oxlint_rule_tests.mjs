@@ -19,11 +19,12 @@ require.cache[legacyPluginPath] = { exports: oxlintPlugin };
 class RuleTester extends OxlintRuleTester {
   constructor(config = {}) {
     const isTypeScript = String(config.parser).includes('@typescript-eslint/parser');
+    const isJsx = Boolean(config.parserOptions?.ecmaFeatures?.jsx);
     super({
       eslintCompat: true,
       languageOptions: {
         sourceType: config.parserOptions?.sourceType ?? 'module',
-        parserOptions: { lang: isTypeScript ? 'ts' : 'js' },
+        parserOptions: { lang: (isTypeScript ? 'ts' : 'js') + (isJsx ? 'x' : '') },
       },
     });
   }
@@ -53,13 +54,18 @@ const parityTests = {
   module_migration: () => require('../module_migration.test.js'),
   no_async_foreach: () => require('../no_async_foreach.test.js'),
   no_async_promise_body: () => require('../no_async_promise_body.test.js'),
+  no_abort_signal_timeout: () => require('../no_abort_signal_timeout.test.js'),
+  no_uncleared_race_timeout: () => require('../no_uncleared_race_timeout.test.js'),
   no_conditional_saved_object_type_registration: () =>
     require('../no_conditional_saved_object_type_registration.test.js'),
   no_constructor_args_in_property_initializers: () =>
     require('../no_constructor_args_in_property_initializers.test.js'),
+  no_deprecated_imports: () => require('../no_deprecated_imports.test.js'),
   no_export_all: () => require('../no_export_all.test.js'),
+  no_feature_flag_snapshot: () => require('../no_feature_flag_snapshot.test.js'),
   no_npx_playwright: () => require('../no_npx_playwright.test.js'),
   no_sync_import_from_plugin: () => require('../no_sync_import_from_plugin.test.js'),
+  no_redundant_link_navigation: () => require('../no_redundant_link_navigation.test.js'),
   no_this_in_property_initializers: () => require('../no_this_in_property_initializers.test.js'),
   no_trailing_import_slash: () => require('../no_trailing_import_slash.test.js'),
   no_unsafe_console: () => require('../no_unsafe_console.test.js'),
@@ -69,6 +75,7 @@ const parityTests = {
   no_wrapped_error_in_logger: () => require('../no_wrapped_error_in_logger.test.js'),
   require_include_in_check_a11y: () => require('../require_include_in_check_a11y.test.js'),
   require_kbn_fs: () => require('../require_kbn_fs.test.js'),
+  require_lazy_zod_schema: () => require('../require_lazy_zod_schema.test.js'),
   require_kibana_feature_privileges_naming: () =>
     require('../require_kibana_feature_privileges_naming.test.js'),
   scout_expect_import: () => require('../scout_expect_import.test.js'),
@@ -85,6 +92,8 @@ const parityTests = {
   scout_no_promise_all_with_playwright_apis: () =>
     require('../scout_no_promise_all_with_playwright_apis.test.js'),
   scout_no_raw_eui_selectors: () => require('../scout_no_raw_eui_selectors.test.js'),
+  scout_no_raw_locators: () => require('../scout_no_raw_locators.test.js'),
+  scout_prefer_both_arch_tags: () => require('../scout_prefer_both_arch_tags.test.js'),
   scout_require_api_client_in_api_test: () =>
     require('../scout_require_api_client_in_api_test.test.js'),
   scout_require_global_setup_hook_in_parallel_tests: () =>
@@ -95,7 +104,7 @@ const parityTests = {
 
 // Rules that alias an existing ESLint `create` rule instead of being reimplemented with `createOnce`.
 // Oxlint runs them through its ESLint-compatible API, which re-runs `create` for every file.
-const CREATE_API_RULES = new Set(['security_imports_restriction']);
+const CREATE_API_RULES = new Set(['no_deprecated_imports', 'security_imports_restriction']);
 
 for (const [ruleName, rule] of Object.entries(oxlintPlugin.rules)) {
   const api = CREATE_API_RULES.has(ruleName) ? 'create' : 'createOnce';

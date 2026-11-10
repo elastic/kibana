@@ -8,14 +8,16 @@
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
-import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
   getInvestigationAgentType,
   registerInvestigationAgentType,
   NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
 } from '.';
+import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
+import { SLACK_READ_TOOL_ID } from '../../tools/slack_read/tool';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
@@ -28,18 +30,14 @@ const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ];
 
-const INVESTIGATION_TOOL_IDS = [
-  'agentic_investigations.set_impact',
-  'agentic_investigations.set_hypotheses',
-];
-
-const ALL_PLUGINS = { investigationToolsEnabled: true, proposalsEnabled: true } as const;
-
-const staticBase = (type: AgentTypeDefinition): AgentBaseConfiguration => {
-  if (typeof type.baseConfiguration === 'function') {
-    throw new Error('expected a static base configuration');
+const baseFor = async (
+  type: AgentTypeDefinition,
+  spaceId = 'default'
+): Promise<AgentBaseConfiguration> => {
+  if (typeof type.baseConfiguration !== 'function') {
+    throw new Error('expected a per-space base configuration');
   }
-  return type.baseConfiguration;
+  return type.baseConfiguration({ request: httpServerMock.createKibanaRequest(), spaceId });
 };
 
 describe('Nightshift investigation agent type', () => {
@@ -48,8 +46,7 @@ describe('Nightshift investigation agent type', () => {
 
     registerInvestigationAgentType(agentBuilder, {
       sandboxEnabled: false,
-      cortexEnabled: false,
-      ...ALL_PLUGINS,
+      wikiEnabled: false,
     });
 
     expect(agentBuilder.agents.registerType).toHaveBeenCalledWith(
@@ -57,140 +54,197 @@ describe('Nightshift investigation agent type', () => {
     );
   });
 
-  it('carries a standalone sandbox prompt and no Elastic tools', () => {
-    const base = staticBase(
-      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
+  it('carries a standalone sandbox prompt and no Elastic data tools beyond event search', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: true, wikiEnabled: true })
     );
 
     expect(base).toMatchObject({
       enable_elastic_capabilities: false,
       skill_ids: [],
-      workflow_ids: ['system-nightshift-sandbox-materialize-workspace'],
-      post_execution_workflow_ids: ['system-nightshift-agent-optimize'],
+      workflow_ids: ['system-nightshift-sandbox-materialize-workspace-bound-default'],
+      post_execution_workflow_ids: ['system-nightshift-agent-optimize-bound-default'],
     });
     expect(base.tools?.[0]?.tool_ids).toEqual([
-      ...INVESTIGATION_TOOL_IDS,
-      PROPOSALS_CREATE_TOOL_ID,
       ...SANDBOX_TOOL_IDS,
+      TIME_CONVERTER_TOOL_ID,
+      platformSignificantEventsTools.searchEvent,
+      SLACK_READ_TOOL_ID,
     ]);
-    expect(base.tools?.[0]?.tool_ids).not.toContain(
-      platformSignificantEventsTools.reportInvestigationProgress
-    );
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
+    expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeConnectorSubAction);
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
-    expect(base.instructions).toContain('/workspace/elastic.md');
+    expect(base.instructions).toContain('/workspace/.connector-docs/elastic.md');
     expect(base.instructions).not.toContain('platform_core_execute_esql');
     expect(base.instructions).not.toContain('/workspace/decision-trees/monitors.md');
-    expect(base.instructions).toContain('<alert_data>');
-    expect(base.instructions).toContain('Affected entity');
-    expect(base.instructions).not.toContain('inputs.context.alerts');
-    expect(base.instructions).toContain('`- <slug> (id <id>): FROM <view_name>`');
-    expect(base.instructions).toContain('FROM <view_name> | LIMIT 0');
+    expect(base.instructions).toContain('KNOWLEDGE WIKI');
+    expect(base.instructions).toContain('/workspace/wiki/README.md');
+    expect(base.instructions).not.toContain('{{knowledge_wiki_section}}');
   });
 
-  it('adds Semantic Memory context and workflows when memory is enabled', () => {
-    const base = staticBase(
+  it('adds Semantic Memory context and workflows when memory is enabled', async () => {
+    const base = await baseFor(
       getInvestigationAgentType({
         sandboxEnabled: true,
-        cortexEnabled: false,
+        wikiEnabled: false,
         memoryEnabled: true,
-        ...ALL_PLUGINS,
       })
     );
 
-    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-materialize-workspace']);
-    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-default',
+    ]);
     expect(base.instructions).toContain('/workspace/memories/.index.json');
-    expect(base.instructions).not.toContain('{{semantic_memory_load_step}}');
   });
 
-  it('hydrates and reinforces decision trees through the combined workflows', () => {
-    const base = staticBase(
+  it('hydrates and reinforces decision trees through the combined workflows', async () => {
+    const base = await baseFor(
       getInvestigationAgentType({
         sandboxEnabled: true,
-        cortexEnabled: true,
+        wikiEnabled: true,
         decisionTreesEnabled: true,
-        ...ALL_PLUGINS,
       })
     );
 
     // One pre-hook, not two: decision trees hydrate as a third parallel branch of the
     // combined materialize workflow, which already carries the sandbox_id they need.
-    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-materialize-workspace']);
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
     // One post-hook, not two: reinforcement is the tail phase of the combined optimize
     // workflow. Listing both would reinforce every round twice.
-    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-default',
+    ]);
     expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
-    expect(base.instructions).not.toContain('{{decision_trees_load_step}}');
     expect(base.instructions).not.toContain('{{decision_trees_section}}');
   });
 
-  it('drops both cortex workflows when cortex is disabled', () => {
-    const base = staticBase(
-      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false, ...ALL_PLUGINS })
+  it('keeps hydrating knowledge but drops the optimize hook when learning is disabled', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        wikiEnabled: true,
+        memoryEnabled: true,
+        decisionTreesEnabled: true,
+        learningEnabled: false,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
+    expect(base.post_execution_workflow_ids).toBeUndefined();
+    expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
+  });
+
+  it('forwards disabled learning through registration', async () => {
+    const agentBuilder = agentBuilderMocks.createSetup();
+
+    registerInvestigationAgentType(agentBuilder, {
+      sandboxEnabled: true,
+      wikiEnabled: true,
+      memoryEnabled: true,
+      learningEnabled: false,
+    });
+
+    const [[type]] = jest.mocked(agentBuilder.agents.registerType).mock.calls;
+    const base = await baseFor(type);
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
+    expect(base.post_execution_workflow_ids).toBeUndefined();
+  });
+
+  it('drops both wiki workflows when wiki is disabled', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: true, wikiEnabled: false })
     );
 
     expect(base.workflow_ids).toBeUndefined();
     expect(base.post_execution_workflow_ids).toBeUndefined();
+    expect(base.instructions).not.toContain('/workspace/wiki/');
+    expect(base.instructions).not.toContain('KNOWLEDGE WIKI');
+    expect(base.instructions).not.toContain('{{wiki_load_step}}');
+    expect(base.instructions).not.toContain('{{knowledge_wiki_section}}');
   });
 
-  it('drops the pre-execution workflow when cortex is on but the sandbox is not configured', () => {
-    const base = staticBase(
-      getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: true, ...ALL_PLUGINS })
+  it('drops the pre-execution workflow when wiki is on but the sandbox is not configured', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: false, wikiEnabled: true })
     );
 
     expect(base.workflow_ids).toBeUndefined();
-    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-default',
+    ]);
     expect(base.tools?.[0]?.tool_ids).toEqual([
-      ...INVESTIGATION_TOOL_IDS,
-      PROPOSALS_CREATE_TOOL_ID,
+      TIME_CONVERTER_TOOL_ID,
+      platformSignificantEventsTools.searchEvent,
+      SLACK_READ_TOOL_ID,
     ]);
   });
 
-  it('allow-lists the telemetry connector when one is configured', () => {
-    const base = staticBase(
+  it('adds inherited connectors to the allow-list when a resolver is given', async () => {
+    const base = await baseFor(
       getInvestigationAgentType({
         sandboxEnabled: true,
-        cortexEnabled: true,
-        telemetryConnectorId: 'elasticsearch-telemetry',
-        ...ALL_PLUGINS,
+        wikiEnabled: true,
+        getInheritedConnectorIds: async () => ['github', 'elasticsearch', 'github'],
       })
     );
 
-    expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
+    expect(base.connector_ids).toEqual(['github', 'elasticsearch']);
   });
 
-  it('offers the investigation and proposal tools only when their plugins are enabled', () => {
-    const base = staticBase(
-      getInvestigationAgentType({
-        sandboxEnabled: false,
-        cortexEnabled: false,
-        investigationToolsEnabled: false,
-        proposalsEnabled: false,
-      })
+  it('offers only the time converter and the Slack read tool when the sandbox is not configured', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: false, wikiEnabled: false })
     );
 
-    expect(base.tools?.[0]?.tool_ids).toEqual([]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([
+      TIME_CONVERTER_TOOL_ID,
+      platformSignificantEventsTools.searchEvent,
+      SLACK_READ_TOOL_ID,
+    ]);
   });
 
-  it('instructs the agent to record its findings with the investigation tools', () => {
-    const { instructions } = staticBase(
-      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
+  it('instructs the agent to answer in its final message and not to record findings', async () => {
+    const { instructions } = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: true, wikiEnabled: true })
     );
 
+    expect(instructions).not.toContain('reply_user');
+    expect(instructions).toContain('untrusted data');
+    expect(instructions).toContain('final message');
     for (const tool of [
       'set_conversation_metadata',
       'agentic_investigations.set_impact',
       'agentic_investigations.set_hypotheses',
       'proposals.create',
     ]) {
-      expect(instructions).toContain(`\`${tool}\``);
+      expect(instructions).not.toContain(tool);
     }
-    expect(instructions).toContain('"origin": "nightshift"');
-    expect(instructions).toContain('**Check before you finish.**');
-    expect(instructions).not.toContain('investigation_progress_report');
-    expect(instructions).not.toContain('blind_spots');
-    expect(instructions).not.toMatch(/\d0-(critical|high|medium|low)/);
+  });
+
+  it("runs its hooks through the space's bound hook entry points", async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        wikiEnabled: true,
+      }),
+      'sa-a'
+    );
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-sa-a',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-sa-a',
+    ]);
   });
 
   describe('custom context', () => {
@@ -204,8 +258,7 @@ describe('Nightshift investigation agent type', () => {
     ): Promise<AgentBaseConfiguration> => {
       const type = getInvestigationAgentType({
         sandboxEnabled: true,
-        cortexEnabled: true,
-        ...ALL_PLUGINS,
+        wikiEnabled: true,
         getCustomContextInstructions,
         logger,
       });
@@ -215,28 +268,24 @@ describe('Nightshift investigation agent type', () => {
       return type.baseConfiguration(ctx);
     };
 
-    const staticInstructions = staticBase(
-      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
-    ).instructions;
+    const baseWithoutCustomContext = async (): Promise<AgentBaseConfiguration> =>
+      baseFor(getInvestigationAgentType({ sandboxEnabled: true, wikiEnabled: true }), ctx.spaceId);
 
     it("appends the space's custom context to the instructions on every resolve", async () => {
       const getCustomContextInstructions = jest.fn().mockResolvedValue(CUSTOM_CONTEXT);
 
       const base = await resolveBase(getCustomContextInstructions);
 
+      const plain = await baseWithoutCustomContext();
       expect(getCustomContextInstructions).toHaveBeenCalledWith(ctx);
-      expect(base.instructions).toBe(`${staticInstructions?.trimEnd()}\n\n${CUSTOM_CONTEXT}\n`);
-      expect(base.tools).toEqual(
-        staticBase(
-          getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
-        ).tools
-      );
+      expect(base.instructions).toBe(`${plain.instructions?.trimEnd()}\n\n${CUSTOM_CONTEXT}\n`);
+      expect(base.tools).toEqual(plain.tools);
     });
 
     it('keeps the base instructions when the space has no custom context', async () => {
       const base = await resolveBase(jest.fn().mockResolvedValue(''));
 
-      expect(base.instructions).toBe(staticInstructions);
+      expect(base.instructions).toBe((await baseWithoutCustomContext()).instructions);
     });
 
     it('keeps the base instructions and logs a warning when custom context cannot be read', async () => {
@@ -244,10 +293,17 @@ describe('Nightshift investigation agent type', () => {
 
       const base = await resolveBase(jest.fn().mockRejectedValue(new Error('boom')), logger);
 
-      expect(base.instructions).toBe(staticInstructions);
+      expect(base.instructions).toBe((await baseWithoutCustomContext()).instructions);
       expect(logger.warn).toHaveBeenCalledWith(
         'Failed to load custom context for space "space-a": boom'
       );
     });
   });
+});
+
+it('starts with no connectors: they come from the connectors users assign', async () => {
+  const base = await baseFor(
+    getInvestigationAgentType({ sandboxEnabled: true, wikiEnabled: false })
+  );
+  expect(base.connector_ids).toEqual([]);
 });

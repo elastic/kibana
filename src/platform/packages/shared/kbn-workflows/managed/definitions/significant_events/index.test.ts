@@ -8,13 +8,8 @@
  */
 
 import { parse } from 'yaml';
-import {
-  SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
-  SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW,
-} from '.';
+import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW, SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW } from '.';
 import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
-import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface WorkflowJsonSchema {
   type?: string;
@@ -22,6 +17,7 @@ interface WorkflowJsonSchema {
   description?: string;
   properties?: Record<string, WorkflowJsonSchema>;
   items?: WorkflowJsonSchema;
+  required?: string[];
 }
 
 interface WorkflowStep {
@@ -37,11 +33,6 @@ interface WorkflowStep {
   with?: {
     path?: string;
     body?: Record<string, unknown> & { runId?: string };
-    subject_type?: string;
-    subject_id?: string;
-    trigger_type?: string;
-    message?: string;
-    source_ids?: string;
     written_rule_uuids?: string;
     inputs?: Record<string, string>;
     schema?: WorkflowJsonSchema;
@@ -77,30 +68,20 @@ const orchestrator = parse(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.yaml) as Par
 const queriesGeneration = parse(
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
 ) as ParsedWorkflow;
-const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml) as
-  | ParsedWorkflow & {
-      triggers: Array<{ type: string; on?: { condition?: string } }>;
-    };
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
-    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(24);
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.version).toBe(29);
     expect(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.version).toBe(4);
   });
 
-  it('accepts every non-written events_write result reason in the discovery output schema', () => {
+  it('reports only the written rule uuids in the discovery output schema', () => {
     const schema = requireStep(discovery, 'run_discovery_agent').with?.schema;
     const properties = schema?.properties;
-    const eventProperties = properties?.significant_events?.items?.properties;
-    const nonWrittenReasons = [
-      'bulk_error',
-      'duplicate_in_batch',
-      'existing_active_event',
-      'unchanged_outcome',
-      'unknown_event_id',
-    ];
 
-    expect(eventProperties?.reason?.enum).toEqual(nonWrittenReasons);
+    // Nothing reads per-event outcomes from the agent: discovery starts no investigation.
+    expect(Object.keys(properties ?? {})).toEqual(['written_rule_uuids']);
+    expect(schema?.required).toEqual(['written_rule_uuids']);
     expect(properties?.written_rule_uuids?.description).toContain('unknown_event_id');
     expect(properties?.written_rule_uuids?.description).toContain(
       'intentionally determined not event-eligible'
@@ -145,49 +126,16 @@ describe('significant events persistence workflow contracts', () => {
     });
   });
 
-  it('marks discovery-triggered investigations as automatic', () => {
-    const triggerStep = requireStep(discovery, 'trigger_investigation');
-    expect(triggerStep).toMatchObject({
-      type: 'nightshift.triggerInvestigation',
-      with: {
-        subject_type: 'significant_event',
-        subject_id: '{{ foreach.item.event_id }}',
-        trigger_type: 'automatic',
-      },
-      'on-failure': { continue: true },
-    });
-    expect(triggerStep.with?.message).toContain('Probable cause:');
-    expect(triggerStep.with?.source_ids).toContain('source_ids');
-    // Open investigations are matched by subject; the start step takes no concurrency key.
-    expect(triggerStep.with).not.toHaveProperty('concurrency_key');
-  });
-
-  it('bounds the discovery investigation message below the trigger input limit', () => {
-    const message = requireStep(discovery, 'trigger_investigation').with?.message;
-    if (!message) throw new Error('Expected trigger_investigation message');
-
-    const renderedMessage = createWorkflowLiquidEngine().parseAndRenderSync(message, {
-      steps: {
-        resolve_active_event: {
-          output: {
-            hits: [
-              {
-                title: 'T'.repeat(512),
-                summary: 'S'.repeat(10_000),
-                symptom_hypothesis: 'H'.repeat(10_000),
-              },
-            ],
-          },
-        },
-      },
-    });
-
-    expect(renderedMessage.length).toBeLessThanOrEqual(10_000);
-    expect(renderedMessage).toContain('T'.repeat(512));
-    expect(renderedMessage).toContain('S'.repeat(7000));
-    expect(renderedMessage).not.toContain('S'.repeat(7001));
-    expect(renderedMessage).toContain(`Probable cause: ${'H'.repeat(2000)}`);
-    expect(renderedMessage).not.toContain('...');
+  it('starts no investigation from discovery', () => {
+    // Significant events are investigated like any other alert: by an automation or by the
+    // `Investigate` action, never by discovery.
+    expect(findStep(discovery.steps, 'trigger_investigation')).toBeUndefined();
+    expect(findStep(discovery.steps, 'maybe_trigger_investigations')).toBeUndefined();
+    expect(findStep(discovery.steps, 'guard_missing_investigation')).toBeUndefined();
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml).not.toContain('INVESTIGATABLE_SEVERITIES');
+    expect(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml).not.toContain(
+      'nightshift.triggerInvestigation'
+    );
   });
 
   it('attributes discovery agent calls to Nightshift', () => {
@@ -212,49 +160,5 @@ describe('significant events persistence workflow contracts', () => {
     expect(requireStep(discovery, 'maybe_stamp_processed').condition).toContain(
       'steps.count_written_rules.output.writtenCount > 0'
     );
-  });
-
-  it('does not launch investigations without resolved event details', () => {
-    expect(requireStep(discovery, 'guard_resolved_event').condition).toContain(
-      'steps.resolve_active_event.output.hits[0] != null'
-    );
-  });
-
-  it('skips investigation when the event already has investigations', () => {
-    const guard = requireStep(discovery, 'guard_missing_investigation');
-    // Condition must gate on the absence of prior investigations.
-    expect(guard.condition).toContain('investigations');
-    expect(guard.condition).toContain('== 0');
-
-    // Evaluate the Liquid expression for both shapes of the Kibana response.
-    const engine = createWorkflowLiquidEngine();
-    // Strip the ${{ }} wrapper so the expression can be used inside a Liquid {% if %} tag.
-    const inner = (guard.condition as string).replace(/^\s*\$\{\{(.+)\}\}\s*$/, '$1').trim();
-    const template = `{% if ${inner} %}true{% else %}false{% endif %}`;
-
-    const makeContext = (investigations: unknown[]) => ({
-      steps: { resolve_active_event: { output: { hits: [{ investigations }] } } },
-    });
-
-    // Empty investigations → condition is true → investigation should be triggered.
-    expect(engine.parseAndRenderSync(template, makeContext([]))).toBe('true');
-    // Populated investigations → condition is false → investigation should be skipped.
-    expect(engine.parseAndRenderSync(template, makeContext([{ id: 'inv-1' }]))).toBe('false');
-  });
-
-  it('attaches completed investigations only to Significant Events', () => {
-    expect(investigationCompleted.triggers).toEqual([
-      {
-        type: 'nightshift-investigations.completed',
-        on: { condition: 'event.subject.type: "significant_event"' },
-      },
-    ]);
-    const attach = requireStep(investigationCompleted, 'attach_completed_investigation');
-    expect(attach.with?.path).toContain('/internal/significant_events/events/');
-    expect(attach.with?.body).toEqual({
-      workflow_execution_id: '{{ event.investigation_id }}',
-      started_at: '{{ event.started_at }}',
-      completed_at: '{{ event.completed_at }}',
-    });
   });
 });

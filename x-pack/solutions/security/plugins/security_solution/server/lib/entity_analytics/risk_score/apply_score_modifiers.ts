@@ -20,7 +20,6 @@ import type { AssetCriticalityService } from '../asset_criticality';
 import type { PrivmonUserCrudService } from '../privilege_monitoring/users/privileged_users_crud';
 
 import type { RiskScoreBucket } from '../types';
-import { RIEMANN_ZETA_VALUE } from './constants';
 import { getGlobalWeightForIdentifierType, max10DecimalPlaces } from './helpers';
 
 import {
@@ -108,7 +107,7 @@ export const riskScoreDocFactory =
     const risk = bucket.top_inputs.risk_details;
 
     const alertsRiskScoreFields = {
-      category_1_score: max10DecimalPlaces(risk.value.category_1_score / RIEMANN_ZETA_VALUE), // normalize value to be between 0-100
+      category_1_score: max10DecimalPlaces(risk.value.normalized_score), // already normalized by the sample size the query used
       category_1_count: risk.value.category_1_count,
     };
 

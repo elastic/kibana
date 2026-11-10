@@ -24,6 +24,7 @@ import {
   MAX_ROUTE_ID_LENGTH,
   MAX_ROUTE_STRING_LENGTH,
   maxArraySizeMessage,
+  safeNumber,
 } from '../zod_query';
 
 /**
@@ -39,18 +40,31 @@ type BoundedJson =
   | BoundedJson[]
   | { [key: string]: BoundedJson };
 
-const boundedJson: z.ZodType<BoundedJson> = z
-  .lazy(() =>
-    z.union([
-      z.string().max(MAX_PARAM_VALUE_LENGTH),
-      z.number().min(Number.MIN_SAFE_INTEGER).max(Number.MAX_SAFE_INTEGER),
-      z.boolean(),
-      z.null(),
-      z.array(boundedJson).max(MAX_MONITOR_FANOUT_SIZE),
-      z.record(z.string().max(MAX_ROUTE_STRING_LENGTH), boundedJson),
-    ])
-  )
-  .meta({ id: 'syntheticsJsonValue' });
+const boundedJsonRuntime: z.ZodType<BoundedJson> = z.lazy(() =>
+  z.union([
+    z.string().max(MAX_PARAM_VALUE_LENGTH),
+    safeNumber(z.number()),
+    z.boolean(),
+    z.null(),
+    z.array(boundedJsonRuntime).max(MAX_MONITOR_FANOUT_SIZE),
+    z.record(z.string().max(MAX_ROUTE_STRING_LENGTH), boundedJsonRuntime),
+  ])
+);
+
+// Validated by `boundedJsonRuntime`, but exposed as a free-form value so the
+// OpenAPI spec doesn't expand the recursive union at every use.
+const boundedJson = z
+  .custom<BoundedJson>()
+  .superRefine((value, ctx) => {
+    const result = boundedJsonRuntime.safeParse(value);
+    if (result.success) {
+      return;
+    }
+    for (const { message, path } of result.error.issues) {
+      ctx.addIssue({ code: 'custom', message, path });
+    }
+  })
+  .meta({ id: 'syntheticsJsonValue', description: 'Any JSON value.' });
 
 const MONITOR_OAS_IDS: Record<MonitorTypeEnum, string> = {
   [MonitorTypeEnum.HTTP]: 'httpMonitorFields',
@@ -61,10 +75,12 @@ const MONITOR_OAS_IDS: Record<MonitorTypeEnum, string> = {
 };
 
 const locationInput = z.union([
-  z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
-  z.looseObject({
-    id: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
-  }),
+  z.string().min(1).max(MAX_ROUTE_ID_LENGTH).meta({ title: 'Location ID' }),
+  z
+    .looseObject({
+      id: z.string().min(1).max(MAX_ROUTE_ID_LENGTH),
+    })
+    .meta({ title: 'Location object' }),
 ]);
 
 const locationsField = z
@@ -72,16 +88,21 @@ const locationsField = z
   .max(MAX_MONITOR_FANOUT_SIZE, { error: maxArraySizeMessage(MAX_MONITOR_FANOUT_SIZE) });
 
 const scheduleField = z.union([
-  z.number().min(Number.MIN_SAFE_INTEGER).max(Number.MAX_SAFE_INTEGER),
-  z.strictObject({
-    number: z.union([z.string().max(32), z.number()]),
-    unit: ScheduleUnitCodec,
-  }),
+  safeNumber(z.number()).meta({ title: 'Minutes' }),
+  z
+    .strictObject({
+      number: z.union([z.string().max(32), z.number()]),
+      unit: ScheduleUnitCodec,
+    })
+    .meta({ title: 'Number and unit' }),
 ]);
 
 const stringList = z.union([
-  z.string().max(MAX_ROUTE_STRING_LENGTH),
-  z.array(z.string().max(MAX_ROUTE_STRING_LENGTH)).max(MAX_MONITOR_FANOUT_SIZE),
+  z.string().max(MAX_ROUTE_STRING_LENGTH).meta({ title: 'Single value' }),
+  z
+    .array(z.string().max(MAX_ROUTE_STRING_LENGTH))
+    .max(MAX_MONITOR_FANOUT_SIZE)
+    .meta({ title: 'Multiple values' }),
 ]);
 
 const stringMap = z.record(
@@ -128,7 +149,12 @@ const typedOverlays: Record<string, z.ZodType> = {
   [ConfigKey.LOCATIONS]: locationsField.optional(),
   [ConfigKey.SCHEDULE]: scheduleField.optional(),
   [ConfigKey.TAGS]: stringList.optional(),
-  [ConfigKey.PARAMS]: z.union([z.string().max(MAX_PARAM_VALUE_LENGTH), stringMap]).optional(),
+  [ConfigKey.PARAMS]: z
+    .union([
+      z.string().max(MAX_PARAM_VALUE_LENGTH).meta({ title: 'JSON string' }),
+      stringMap.meta({ title: 'Key-value object' }),
+    ])
+    .optional(),
   [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec.optional(),
   [ConfigKey.LABELS]: stringMap.optional(),
   [ConfigKey.KIBANA_SPACES]: optionalIdList,
@@ -138,13 +164,20 @@ const typedOverlays: Record<string, z.ZodType> = {
   [ConfigKey.MODE]: ModeCodec.optional(),
   [ConfigKey.IPV4]: z.boolean().optional(),
   [ConfigKey.IPV6]: z.boolean().optional(),
-  [ConfigKey.TIMEOUT]: z.union([z.string().max(32), z.number(), z.null()]).optional(),
-  [ConfigKey.MAX_ATTEMPTS]: z
-    .number()
-    .min(Number.MIN_SAFE_INTEGER)
-    .max(Number.MAX_SAFE_INTEGER)
+  [ConfigKey.TIMEOUT]: z
+    .union([
+      z.string().max(32).meta({ title: 'Seconds as string' }),
+      z.number().meta({ title: 'Seconds' }),
+      z.null(),
+    ])
     .optional(),
-  [ConfigKey.MAX_REDIRECTS]: z.union([z.string().max(32), z.number()]).optional(),
+  [ConfigKey.MAX_ATTEMPTS]: safeNumber(z.number()).optional(),
+  [ConfigKey.MAX_REDIRECTS]: z
+    .union([
+      z.string().max(32).meta({ title: 'Count as string' }),
+      z.number().meta({ title: 'Count' }),
+    ])
+    .optional(),
   [ConfigKey.URLS]: z.union([z.string().max(MAX_ROUTE_STRING_LENGTH), z.null()]).optional(),
   [ConfigKey.HOSTS]: optionalString,
   url: optionalString,
@@ -186,6 +219,9 @@ To list available private locations, run the \`elastic-synthetics locations\` co
   [ConfigKey.SCHEDULE]:
     "The monitor's schedule in minutes. Supported values are `1`, `3`, `5`, `10`, `15`, `30`, `60`, `120`, and `240`. The default value is `3` minutes for HTTP, TCP, and ICMP monitors, and `10` minutes for browser monitors.",
   [ConfigKey.APM_SERVICE_NAME]: 'The APM service name.',
+  [ConfigKey.KIBANA_SPACES]:
+    'The IDs of additional spaces to make the monitor available in, besides the current space.',
+  [ConfigKey.MAINTENANCE_WINDOWS]: 'The IDs of the maintenance windows to apply to the monitor.',
   [ConfigKey.TAGS]: 'An array of tags.',
   [ConfigKey.LABELS]:
     'Key-value pairs of labels to associate with the monitor. Labels can be used for filtering and grouping monitors.',

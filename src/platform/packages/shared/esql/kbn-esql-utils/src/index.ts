@@ -51,6 +51,7 @@ export {
   getChangePointSeriesColumns,
   getChangePointByColumns,
   buildChangePointLineDataQuery,
+  narrowChangePointEsqlToEntity,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
   formatEsqlLiteral,
@@ -59,7 +60,6 @@ export {
 export {
   getIndexPatternFromESQLQuery,
   getIndexPatternsFromESQLQuery,
-  splitIndexPatternSources,
   getSourceCommandFromESQLQuery,
   getSourceCommandQueryFromESQLQuery,
   getAnySourceCommandFromESQLQuery,
@@ -78,6 +78,8 @@ export { appendWhereClauseToESQLQuery } from './utils/append_to_query/append_whe
 export { appendLimitToQuery } from './utils/append_to_query/append_limit';
 export { buildMetricsInfoQuery } from './utils/append_to_query/append_metrics_info';
 
+export { getESQLControlVariablesFromState } from './utils/get_esql_control_variables';
+export { castESQLValue } from './utils/cast_esql_value';
 export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
@@ -86,12 +88,14 @@ export {
   getStartEndParams,
   hasStartEndParams,
   getNamedParams,
+  getEsqlSearchParams,
 } from './utils/run_query';
 export {
   isESQLColumnSortable,
   isESQLColumnGroupable,
   isESQLFieldGroupable,
 } from './utils/esql_fields_utils';
+export { getEsqlInspectorStats } from './utils/get_esql_inspector_stats';
 export { sanitazeESQLInput } from './utils/sanitaze_input';
 export { escapeEsqlColumnName } from '@kbn/esql-language';
 export { replaceESQLQueryIndexPattern } from './utils/replace_index_pattern';
@@ -117,12 +121,10 @@ export {
   MAX_ESQL_VIEW_DESCRIPTION_LENGTH,
   MAX_ESQL_VIEW_NAME_LENGTH,
   MAX_ESQL_VIEW_QUERY_LENGTH,
-  resolveViewColumnToIndexField,
   validateEsqlViewName,
   type EsqlViewNameValidationError,
   type EsqlViewsClient,
 } from './utils/views';
-export { getEsqlControls, getAllEsqlControls, getVariableNamePrefix } from './utils/controls';
 export {
   getColumnsWithHighlights,
   type ESQLColumnsWithHighlights,

@@ -220,6 +220,14 @@ export class ScheduleRequestHandler extends RequestHandler<
       return checkErrorResponse;
     }
 
+    const disabledErrorResponse = await this.checkExportTypeEnabled(
+      exportTypeId,
+      ScheduleType.SCHEDULED
+    );
+    if (disabledErrorResponse) {
+      return disabledErrorResponse;
+    }
+
     // check that security requirements are met
     const reportingHealth = await reporting.getHealthInfo();
     if (!reportingHealth.hasPermanentEncryptionKey) {

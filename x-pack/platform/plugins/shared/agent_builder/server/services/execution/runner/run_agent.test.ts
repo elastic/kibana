@@ -83,6 +83,24 @@ describe('runAgent', () => {
     expect(agentClient.get).toHaveBeenCalledWith(params.agentId, { access: 'use' });
   });
 
+  it('resolves the agent for the service account a bound run executes as', async () => {
+    runnerDeps.runAs = { type: 'service_account', serviceAccountId: 'kibana/sa-1' };
+    runnerManager = new RunnerManager(runnerDeps);
+
+    await runAgent({
+      agentExecutionParams: {
+        agentId: 'test-agent',
+        agentParams: { nextInput: { message: 'bar' } },
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(agentClient.get).toHaveBeenCalledWith('test-agent', {
+      access: 'use',
+      runAs: 'kibana/sa-1',
+    });
+  });
+
   it('records the agent name on the run context stack', async () => {
     const createChild = jest.spyOn(runnerManager, 'createChild');
 
@@ -362,6 +380,44 @@ describe('runAgent', () => {
             enabled: false,
             auto_approved_apis: [callerGrant, { target: 'elasticsearch', api: 'indices.delete' }],
           },
+        })
+      );
+    });
+
+    it("passes the parent's workflow run on to the sub-agents of the rebuilt executor", async () => {
+      agent = createMockedInternalAgent({
+        configuration: { tools: [], approvals: storedApprovals },
+      });
+      agentClient.get.mockResolvedValue(agent);
+      const parentManager = new RunnerManager({
+        ...runnerDeps,
+        getExecutionService: () => executionService,
+        interactivity: { enabled: false, auto_approved_apis: [callerGrant] },
+        workflowExecutionId: 'workflow-run-1',
+      });
+      const createChild = jest.spyOn(parentManager, 'createChild');
+      await runAgent({
+        agentExecutionParams: {
+          agentId: 'test-agent',
+          agentParams: { nextInput: { message: 'hi' } },
+        },
+        parentManager,
+      });
+      const childManager = createChild.mock.results[0].value as RunnerManager;
+
+      await childManager.deps.subAgentExecutor.createSubAgent({
+        agentId: 'sub-agent',
+        conversationId: 'sub-conversation',
+        parentConversationId: 'parent-conversation',
+        parentExecutionId: 'parent-execution-id',
+        prompt: 'go',
+        subagentName: 'helper',
+        subagentPurpose: 'testing',
+      });
+
+      expect(executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ workflowExecutionId: 'workflow-run-1' }),
         })
       );
     });

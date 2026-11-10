@@ -45,7 +45,7 @@ import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
 import type { GetObservabilityAlertsTableProp } from '../types';
 import AlertActions from '../../alert_actions/alert_actions';
-import { ElapsedTimestampTooltip } from '../../../../common';
+import { ElapsedTimestampTooltip } from '../../../../common/components/elapsed_timestamp_tooltip';
 
 export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
@@ -84,6 +84,7 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     observabilityRuleTypeRegistry,
     services: { http },
     parentAlert,
+    allowLinks = true,
   } = props;
 
   const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
@@ -118,7 +119,7 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
     [ALERT_REASON]: (value) => {
       if (!observabilityRuleTypeRegistry) return <>{value}</>;
       const parsedAlert = parseAlert(observabilityRuleTypeRegistry)(alert);
-      return (
+      return allowLinks ? (
         <EuiLink
           data-test-subj="o11yGetRenderCellValueLink"
           css={{ ':hover': { textDecoration: 'none' } }}
@@ -126,6 +127,10 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
         >
           {parsedAlert.reason}
         </EuiLink>
+      ) : (
+        <EuiText size="s" data-test-subj="o11yGetRenderCellValueLink">
+          {parsedAlert.reason}
+        </EuiText>
       );
     },
     [ALERT_RULE_NAME]: (value) => {
@@ -143,7 +148,7 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
       return (
         <CellTooltip
           value={
-            canReadRule && ruleLink ? (
+            canReadRule && ruleLink && allowLinks ? (
               <EuiLink data-test-subj="o11yCellRenderersLink" href={ruleLink}>
                 {value}
               </EuiLink>

@@ -17,6 +17,7 @@ import {
   EuiTextTruncate,
 } from '@elastic/eui';
 import { type Investigation } from '../../types';
+import { toPlainSummary } from '../../utils/to_plain_summary';
 import type { BaseActionsProps } from '../actions';
 import { ConversationsActionsGroup } from './actions_group';
 import { ConversationMetaInfo } from './conversation_meta_info';
@@ -25,10 +26,11 @@ interface ConversationCardProps {
   investigation: Investigation;
   /** Marks the card whose details flyout is currently open. */
   isSelected?: boolean;
-  onClickRecommendedAction: BaseActionsProps['onClickRecommendedAction'];
   onClickAction: BaseActionsProps['onClickAction'];
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
+  /** When false the card is inert, its assignees are hidden, and its chat control and menu are disabled. Defaults to true. */
+  canOpenInvestigationDetails?: boolean;
   /** URL for this card's chat, so its control renders as a link. */
   chatHref?: string;
   /** When true escalation actions are shown. Requires the manage escalations capability. */
@@ -80,10 +82,10 @@ export const ConversationCard = memo<ConversationCardProps>(
   ({
     investigation,
     isSelected = false,
-    onClickRecommendedAction,
     onClickAction,
     onClickCard,
     onOpenChat,
+    canOpenInvestigationDetails = true,
     chatHref,
     canManageEscalations,
     canCloseInvestigation,
@@ -96,17 +98,17 @@ export const ConversationCard = memo<ConversationCardProps>(
     return (
       <StyledEuiPanel
         paddingSize="none"
-        role="button"
-        tabIndex={0}
+        role={canOpenInvestigationDetails ? 'button' : undefined}
+        tabIndex={canOpenInvestigationDetails ? 0 : undefined}
         aria-label={investigation.title}
         aria-current={isSelected || undefined}
         borderRadius="none"
         $isSelected={isSelected}
         hasBorder={false}
         hasShadow={false}
-        onClick={() => onClickCard(investigation.id)}
+        onClick={canOpenInvestigationDetails ? () => onClickCard(investigation.id) : undefined}
         onKeyDown={(event: React.KeyboardEvent) => {
-          if (event.key === 'Enter' || event.key === ' ') {
+          if (canOpenInvestigationDetails && (event.key === 'Enter' || event.key === ' ')) {
             event.preventDefault();
             onClickCard(investigation.id);
           }
@@ -127,7 +129,7 @@ export const ConversationCard = memo<ConversationCardProps>(
             >
               <EuiFlexItem grow={false}>
                 <ConversationMetaInfo
-                  createdAt={investigation.createdAt}
+                  timestamp={investigation.createdAt}
                   inFlightStatus={renderInFlightStatus?.(investigation)}
                 />
               </EuiFlexItem>
@@ -144,20 +146,22 @@ export const ConversationCard = memo<ConversationCardProps>(
                    * Stop propagation so interacting with the assignee picker
                    * (clicking the + button or selecting a user) does not trigger the card click.
                    */}
-                  <EuiFlexItem
-                    grow={false}
-                    onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                    onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
-                  >
-                    {renderAssignees(investigation)}
-                  </EuiFlexItem>
+                  {canOpenInvestigationDetails && (
+                    <EuiFlexItem
+                      grow={false}
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                      onKeyDown={(e: React.KeyboardEvent) => e.stopPropagation()}
+                    >
+                      {renderAssignees(investigation)}
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem grow={false}>
                     <ConversationsActionsGroup
                       investigation={investigation}
-                      onClickRecommendedAction={onClickRecommendedAction}
                       onClickAction={onClickAction}
                       onOpenChat={() => onOpenChat(investigation.id)}
                       chatHref={chatHref}
+                      canOpenInvestigationDetails={canOpenInvestigationDetails}
                       canManageEscalations={canManageEscalations}
                       canCloseInvestigation={canCloseInvestigation}
                       onCopyLink={onCopyLink}
@@ -180,7 +184,7 @@ export const ConversationCard = memo<ConversationCardProps>(
           {investigation.summary ? (
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                <EuiTextTruncate text={investigation.summary} />
+                <EuiTextTruncate text={toPlainSummary(investigation.summary)} />
               </EuiText>
             </EuiFlexItem>
           ) : null}

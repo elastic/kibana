@@ -59,6 +59,8 @@ interface ServiceProviderRecord {
   icon: string;
   name: string;
   solutions: ProviderSolution[];
+  /** Extra terms matched by the service search box but not shown in the list. */
+  searchAliases?: string[];
 }
 
 export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecord> = {
@@ -139,8 +141,9 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   },
   [ServiceProviderKeys.openai]: {
     icon: openAIIcon,
-    name: 'OpenAI',
+    name: 'OpenAI / OpenAI Compatible',
     solutions: ['Observability', 'Security', 'Search'],
+    searchAliases: ['local', 'self-managed', 'self-hosted', 'vllm', 'ollama', 'lm studio'],
   },
   [ServiceProviderKeys['alibabacloud-ai-search']]: {
     icon: alibabaCloudIcon,
@@ -182,6 +185,15 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
     name: 'Groq',
     solutions: ['Observability', 'Security', 'Search'],
   },
+};
+
+/** Builds the text the service search box matches against: service key, display name and aliases. */
+export const getServiceProviderSearchableLabel = (providerKey: string): string => {
+  const provider = SERVICE_PROVIDERS[providerKey as ServiceProviderKeys];
+  if (!provider) {
+    return providerKey;
+  }
+  return [providerKey, provider.name, ...(provider.searchAliases ?? [])].join(' ');
 };
 
 export const ServiceProviderIcon: React.FC<ServiceProviderProps> = ({ providerKey }) => {

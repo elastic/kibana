@@ -7,7 +7,12 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { ServiceProviderIcon, ServiceProviderName } from './service_provider';
+import {
+  SERVICE_PROVIDERS,
+  ServiceProviderIcon,
+  ServiceProviderName,
+  getServiceProviderSearchableLabel,
+} from './service_provider';
 import { ServiceProviderKeys } from '../../../constants';
 
 describe('ServiceProviderIcon component', () => {
@@ -53,13 +58,30 @@ describe('ServiceProviderName component', () => {
     expect(screen.getByText('Hugging Face')).toBeInTheDocument();
   });
 
-  it('renders Open AI icon and name when providerKey is openai', () => {
-    render(<ServiceProviderName providerKey={ServiceProviderKeys.openai} />);
-    expect(screen.getByText('OpenAI')).toBeInTheDocument();
-  });
-
   it('renders new provider name when providerKey is not present in SERVICE_PROVIDERS', () => {
     render(<ServiceProviderName providerKey={'brand-new-provider' as ServiceProviderKeys} />);
     expect(screen.getByText('brand-new-provider')).toBeInTheDocument();
+  });
+});
+
+describe('getServiceProviderSearchableLabel', () => {
+  it('includes the service key, display name and search aliases for openai', () => {
+    const { name, searchAliases = [] } = SERVICE_PROVIDERS[ServiceProviderKeys.openai];
+    const searchableLabel = getServiceProviderSearchableLabel(ServiceProviderKeys.openai);
+    expect(searchableLabel).toContain(ServiceProviderKeys.openai);
+    expect(searchableLabel).toContain(name);
+    expect(searchAliases.length).toBeGreaterThan(0);
+    searchAliases.forEach((alias) => expect(searchableLabel).toContain(alias));
+  });
+
+  it('includes the service key and display name for providers without aliases', () => {
+    const { name } = SERVICE_PROVIDERS[ServiceProviderKeys.hugging_face];
+    expect(getServiceProviderSearchableLabel(ServiceProviderKeys.hugging_face)).toBe(
+      `${ServiceProviderKeys.hugging_face} ${name}`
+    );
+  });
+
+  it('falls back to the provider key for unknown providers', () => {
+    expect(getServiceProviderSearchableLabel('brand-new-provider')).toBe('brand-new-provider');
   });
 });

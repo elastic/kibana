@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, screen } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import type { UseGetCase } from '../../containers/use_get_case';
@@ -98,19 +97,17 @@ describe('CaseViewTabs', () => {
     );
   });
 
-  it('navigates to the activity tab when the activity tab is clicked', async () => {
+  it('navigates to the activity tab when the activity tab is clicked', () => {
     const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
     renderWithTestingProviders(<CaseViewTabs {...caseProps} />, {
       wrapperProps: { license: basicLicense },
     });
 
-    await userEvent.click(await screen.findByTestId('case-view-tab-title-activity'));
+    fireEvent.click(screen.getByTestId('case-view-tab-title-activity'));
 
-    await waitFor(() => {
-      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-        detailName: caseData.id,
-        tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
-      });
+    expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+      detailName: caseData.id,
+      tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
     });
   });
 
@@ -130,19 +127,17 @@ describe('CaseViewTabs', () => {
       expect(await screen.findByTestId('case-view-tab-title-similar_cases')).toBeInTheDocument();
     });
 
-    it('navigates to the similar cases tab when the similar cases tab is clicked', async () => {
+    it('navigates to the similar cases tab when the similar cases tab is clicked', () => {
       const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
       renderWithTestingProviders(<CaseViewTabs {...caseProps} />, {
         wrapperProps: { license: platinumLicense },
       });
 
-      await userEvent.click(await screen.findByTestId('case-view-tab-title-similar_cases'));
+      fireEvent.click(screen.getByTestId('case-view-tab-title-similar_cases'));
 
-      await waitFor(() => {
-        expect(navigateToCaseViewMock).toHaveBeenCalledWith({
-          detailName: caseData.id,
-          tabId: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
-        });
+      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+        detailName: caseData.id,
+        tabId: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
       });
     });
   });

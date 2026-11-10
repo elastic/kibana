@@ -52,7 +52,7 @@ describe('config validation', () => {
             "maxInFlight": 50,
             "maxInFlightPerConnector": 10,
           },
-          "enabled": false,
+          "enabled": true,
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
@@ -127,7 +127,7 @@ describe('config validation', () => {
             "maxInFlight": 50,
             "maxInFlightPerConnector": 10,
           },
-          "enabled": false,
+          "enabled": true,
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
@@ -311,7 +311,7 @@ describe('config validation', () => {
             "maxInFlight": 50,
             "maxInFlightPerConnector": 10,
           },
-          "enabled": false,
+          "enabled": true,
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
@@ -522,7 +522,7 @@ describe('config validation', () => {
             "maxInFlight": 50,
             "maxInFlightPerConnector": 10,
           },
-          "enabled": false,
+          "enabled": true,
           "maxBodyBytes": ByteSizeValue {
             "valueInBytes": 1048576,
           },
@@ -587,7 +587,7 @@ describe('config validation', () => {
 
   test('validates xpack.actions.inboundEvents', () => {
     const empty = configSchema.validate({});
-    expect(empty.inboundEvents.enabled).toBe(false);
+    expect(empty.inboundEvents.enabled).toBe(true);
     expect(empty.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(1024 * 1024);
     expect(empty.inboundEvents.maxEmitted).toBe(25);
 
@@ -597,7 +597,10 @@ describe('config validation', () => {
     expect(enabled.inboundEvents.maxEmitted).toBe(25);
 
     const customSize = configSchema.validate({ inboundEvents: { maxBodyBytes: '512kb' } });
-    expect(customSize.inboundEvents.enabled).toBe(false);
+    expect(customSize.inboundEvents.enabled).toBe(true);
+
+    const disabled = configSchema.validate({ inboundEvents: { enabled: false } });
+    expect(disabled.inboundEvents.enabled).toBe(false);
     expect(customSize.inboundEvents.maxBodyBytes.getValueInBytes()).toBe(512 * 1024);
 
     const customMax = configSchema.validate({ inboundEvents: { maxEmitted: 100 } });

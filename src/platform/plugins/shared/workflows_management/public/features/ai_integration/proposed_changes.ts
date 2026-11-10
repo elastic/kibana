@@ -111,6 +111,8 @@ export class ProposalManager {
     this.options = options ?? {};
 
     this.mouseMoveDisposable = editor.onMouseMove((e) => {
+      // `mouseenter` does not fire if the pointer was already there when the editor mounted.
+      this.pointerInsideHotkeySurface = true;
       if (!this.hasPendingProposals()) return;
       const lineNumber = e.target.position?.lineNumber;
       if (lineNumber == null) return;

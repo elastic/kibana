@@ -103,7 +103,7 @@ test.describe(
     }) => {
       await browserAuth.loginWithCustomRole(metricsOnlyRole);
 
-      await pageObjects.datasetQuality.goto();
+      await pageObjects.datasetQuality.goto({}, { waitForStats: false });
 
       await test.step('does not fall back to the no-privileges empty state', async () => {
         await expect(pageObjects.datasetQuality.noPrivilegesEmptyState).toBeHidden();
@@ -125,7 +125,7 @@ test.describe(
     }) => {
       await browserAuth.loginWithCustomRole(logsAndMetricsRole);
 
-      await pageObjects.datasetQuality.goto();
+      await pageObjects.datasetQuality.goto({}, { waitForStats: false });
 
       await expect(pageObjects.datasetQuality.getTypesFilter()).toBeVisible();
     });

@@ -32,7 +32,7 @@ interface CreateTestConfigOptions {
 
 // Registers the unified `security.entity` and `security.attack` attachment types so the
 // cases attachment tests exercise them (both are gated behind these experimental flags).
-const DEFAULT_EXPERIMENTAL_FEATURES = ['entityAttachmentsEnabled', 'attackAttachmentsEnabled'];
+const DEFAULT_EXPERIMENTAL_FEATURES = ['entityAttachmentsEnabled', 'attackAttachments'];
 
 const enabledActionTypes = [
   '.cases',
@@ -98,12 +98,15 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
-          '--xpack.eventLog.logEntries=true',
+          '--xpack.eventLog.logEntries=false',
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
           ...findTestPluginPaths([
-            path.resolve(__dirname, 'plugins'),
+            path.resolve(
+              __dirname,
+              '../../../test_plugins/security_investigations/cases_api_integration'
+            ),
             path.resolve(__dirname, '../../alerting_api_integration/common/plugins'),
           ]),
           `--xpack.actions.preconfigured=${JSON.stringify({
