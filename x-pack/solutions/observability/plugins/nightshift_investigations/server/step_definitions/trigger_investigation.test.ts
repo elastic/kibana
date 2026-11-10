@@ -91,8 +91,16 @@ describe('triggerInvestigationStepDefinition', () => {
       );
     });
 
-    it('preserves producer workflow lineage when it resolves the alert snapshot', async () => {
-      (fetchInvestigationAlertSnapshots as jest.Mock).mockResolvedValue(snapshots);
+    it('reads the producer run from significant event alert data, ignoring the step context', async () => {
+      const significantEventAlerts = [
+        {
+          alert_version: 'v2',
+          id: 'episode-1',
+          source: 'elastic.significant_events',
+          data: { workflow_execution_id: 'discovery-run-1' },
+        },
+      ];
+      (fetchInvestigationAlertSnapshots as jest.Mock).mockResolvedValue(significantEventAlerts);
       const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
       const { definition } = createDefinition(start);
 
@@ -100,15 +108,15 @@ describe('triggerInvestigationStepDefinition', () => {
         createContext({
           subject_type: 'alert',
           subject_id: 'episode-1',
-          context: { source_workflow_execution_id: 'producer-workflow-1', unrelated: 'dropped' },
+          context: { source_workflow_execution_id: 'forged-run' },
         })
       );
 
       expect(start).toHaveBeenCalledWith(
         expect.objectContaining({
           context: {
-            alerts: snapshots,
-            source_workflow_execution_id: 'producer-workflow-1',
+            alerts: significantEventAlerts,
+            source_workflow_execution_id: 'discovery-run-1',
           },
         }),
         expect.anything()

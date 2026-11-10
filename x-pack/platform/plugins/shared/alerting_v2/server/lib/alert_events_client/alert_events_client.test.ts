@@ -295,20 +295,6 @@ describe('AlertEventsClient.createAlertEvent status changes', () => {
     ]);
   });
 
-  it('publishes workflow provenance carried by the alert event data', async () => {
-    const { client, publisher } = createClient([]);
-
-    await client.createAlertEvent({
-      source: 'elastic.significant_events',
-      fingerprint: 'event-1',
-      data: { workflow_execution_id: 'discovery-run-1' },
-    });
-
-    expect(publisher.publishAlertStatusChanges).toHaveBeenCalledWith([
-      expect.objectContaining({ producerWorkflowExecutionId: 'discovery-run-1' }),
-    ]);
-  });
-
   it.each([
     ALERT_EPISODE_STATUS.PENDING,
     ALERT_EPISODE_STATUS.ACTIVE,

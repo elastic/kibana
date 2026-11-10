@@ -179,6 +179,9 @@ const resolveAlerts = async ({
   }, ALERT_VISIBILITY_RETRY_OPTIONS);
 };
 
+const nonEmptyString = (value: unknown): string | undefined =>
+  typeof value === 'string' && value.length > 0 ? value : undefined;
+
 const toSubjectId = ({
   subject_type: subjectType,
   subject_id: subjectId,
@@ -271,15 +274,17 @@ export const triggerInvestigationStepDefinition = (
               getEpisodeLookup,
             })
           : undefined;
-      const alertTitle = alerts?.flatMap((snapshot) => {
-        const dataTitle =
-          snapshot.alert_version === 'v2' && snapshot.source === SIGNIFICANT_EVENTS_ALERT_SOURCE
-            ? snapshot.data?.title
-            : undefined;
-        return typeof dataTitle === 'string' && dataTitle.length > 0
-          ? dataTitle.slice(0, MAX_TITLE_LENGTH)
-          : [];
-      })[0];
+      const significantEventData = alerts?.flatMap((snapshot) =>
+        snapshot.alert_version === 'v2' &&
+        snapshot.source === SIGNIFICANT_EVENTS_ALERT_SOURCE &&
+        snapshot.data
+          ? [snapshot.data]
+          : []
+      )[0];
+      const alertTitle = nonEmptyString(significantEventData?.title)?.slice(0, MAX_TITLE_LENGTH);
+      const sourceWorkflowExecutionId = nonEmptyString(
+        significantEventData?.workflow_execution_id
+      )?.slice(0, MAX_ID_LENGTH);
       const title =
         input.title && input.title !== subjectId ? input.title : alertTitle ?? input.title;
       try {
@@ -300,7 +305,9 @@ export const triggerInvestigationStepDefinition = (
             context: alerts
               ? {
                   alerts,
-                  source_workflow_execution_id: input.context?.source_workflow_execution_id,
+                  ...(sourceWorkflowExecutionId
+                    ? { source_workflow_execution_id: sourceWorkflowExecutionId }
+                    : {}),
                 }
               : input.scope_query && input.subject_type === 'manual'
               ? { ...input.context, scope_query: input.scope_query }

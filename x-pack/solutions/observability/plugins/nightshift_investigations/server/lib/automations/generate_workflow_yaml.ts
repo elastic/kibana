@@ -216,9 +216,6 @@ function generateAlertV2Workflow(
           ...(automation.runtime.timeoutSeconds !== undefined
             ? { timeout_seconds: automation.runtime.timeoutSeconds }
             : {}),
-          context: {
-            source_workflow_execution_id: '${{ event.producerWorkflowExecutionId }}',
-          },
           ...(notificationDestinations ? { notificationDestinations } : {}),
         },
       },

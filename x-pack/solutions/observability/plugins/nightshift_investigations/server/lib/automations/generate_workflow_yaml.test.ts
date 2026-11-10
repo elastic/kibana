@@ -623,7 +623,7 @@ describe('generateWorkflowYaml', () => {
         });
       });
 
-      it('keys the investigation on the alert id and forwards producer workflow lineage', () => {
+      it('keys the investigation on the alert id and sends no context, so the alert is looked up', () => {
         const yaml = parse(
           generateWorkflowYaml({ automationId: 'auto-123', automation: baseAutomation() })
         );
@@ -632,10 +632,8 @@ describe('generateWorkflowYaml', () => {
           subject_type: 'alert',
           subject_id: '{{ event.alert.id }}',
           title: '{{ event.rule.name | default: event.alert.id }}',
-          context: {
-            source_workflow_execution_id: '${{ event.producerWorkflowExecutionId }}',
-          },
         });
+        expect(start.with).not.toHaveProperty('context');
         expect(start.if).toBe("${{ event.alert.status == 'active' }}");
         expect(recovered).toMatchObject({
           name: 'follow_up_recovered_alert_v2',

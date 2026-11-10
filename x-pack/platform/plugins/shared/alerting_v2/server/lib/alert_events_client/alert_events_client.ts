@@ -9,11 +9,10 @@ import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import Boom from '@hapi/boom';
 import { inject, injectable } from 'inversify';
-import {
-  ID_MAX_LENGTH,
-  type AlertEventSeverity,
-  type CreateAlertEventData,
-  type CreateAlertEventResponse,
+import type {
+  AlertEventSeverity,
+  CreateAlertEventData,
+  CreateAlertEventResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
@@ -88,13 +87,6 @@ export function getGroupHash(event: CreateAlertEventData, spaceId: string): stri
 
   // Schema requires fingerprint, fingerprint_fields, or rule_id.
   return sha256(`${spaceId}:${source}:${event.rule_id}`);
-}
-
-function getProducerWorkflowExecutionId(event: CreateAlertEventData): string | undefined {
-  const value = getValueByDottedPath(event.data, 'workflow_execution_id');
-  if (typeof value !== 'string') return undefined;
-  const trimmed = value.trim();
-  return trimmed && trimmed.length <= ID_MAX_LENGTH ? trimmed : undefined;
 }
 
 interface ResolvedEpisode {
@@ -191,7 +183,6 @@ export class AlertEventsClient {
         episodeId,
         status: episodeStatus,
         previousStatus,
-        producerWorkflowExecutionId: getProducerWorkflowExecutionId(event),
         // An inactive alert reports no severity, even when the writer sent one.
         severity: episodeStatus === alertEpisodeStatus.inactive ? null : event.severity ?? null,
       });
@@ -213,7 +204,6 @@ export class AlertEventsClient {
     episodeId,
     status,
     previousStatus,
-    producerWorkflowExecutionId,
     severity,
   }: {
     source: string;
@@ -221,7 +211,6 @@ export class AlertEventsClient {
     episodeId: string;
     status: AlertEpisodeStatus;
     previousStatus: AlertEpisodeStatus | null;
-    producerWorkflowExecutionId?: string;
     severity: AlertEventSeverity | null;
   }): Promise<void> {
     try {
@@ -229,7 +218,6 @@ export class AlertEventsClient {
         {
           spaceId: this.spaceId,
           source,
-          producerWorkflowExecutionId,
           alert: { id: episodeId, groupHash, status, previousStatus, severity },
           rule: null,
           execution: null,

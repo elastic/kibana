@@ -96,7 +96,7 @@ export const APPROVED_TRIGGER_DEFINITIONS: Array<{ id: string; schemaHash: strin
   },
   {
     id: 'alerting.alertStatusChanged',
-    schemaHash: '08bf3c5ef7342faa1a1fa8b694fa1b4b985e6efee5a0892c2cf15738d68d38c4',
+    schemaHash: '0840e1303c7b027c3a3830ca0f6ec4a1695eaf35eb7e4567855f51ad11c8ce29',
   },
   {
     id: 'alerting.ruleCreated',

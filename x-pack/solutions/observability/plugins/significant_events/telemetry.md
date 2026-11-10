@@ -60,11 +60,11 @@ runs. Reusing one execution ID would conflate distinct runs. Thread the pipeline
    `nightshift-investigation-started.investigation_id`. This identifies the investigation, not one
    of its Workflow Engine runs.
 
-Alert-event-client writes also copy their stored `data.workflow_execution_id` into the
-`alerting.alertStatusChanged` trigger. Alert automations forward it as
-`source_workflow_execution_id`, so an alert-triggered investigation retains the producer run when
-one exists. Rule-produced alerts omit it; other alert-event-client writers carry it only when they
-store the same provenance field.
+An alert automation resolves the alert it was triggered for, and when the alert is a significant
+event the Nightshift trigger step reads `workflow_execution_id` from the alert event `data` and
+forwards it as `source_workflow_execution_id`. The `alerting.alertStatusChanged` trigger payload
+carries no producer field: provenance stays in the data Significant Events stores, and alerts from
+rules or other writers send none.
 
 `event_id` is the durable business identity of a significant event; workflow execution IDs describe
 the processing runs that created or changed it. Do not substitute one for the other. Onboarding

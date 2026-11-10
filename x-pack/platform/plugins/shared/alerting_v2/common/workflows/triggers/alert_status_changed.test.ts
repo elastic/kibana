@@ -29,7 +29,6 @@ const rulePayload: AlertStatusChangedTriggerPayload = {
 const clientPayload: AlertStatusChangedTriggerPayload = {
   spaceId: 'default',
   source: 'datadog',
-  producerWorkflowExecutionId: 'producer-workflow-1',
   alert: {
     id: 'alert-2',
     groupHash: 'hash-2',

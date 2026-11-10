@@ -51,19 +51,6 @@ export const alertStatusChangedEventSchema = lazySchema(() =>
               'Where the alert came from: "internal" for alerts produced by rule runs, otherwise the source given by the writer, for example "elastic.significant_events" or the external system of an imported alert.',
           })
         ),
-      producerWorkflowExecutionId: z
-        .string()
-        .max(ID_MAX_LENGTH)
-        .optional()
-        .describe(
-          i18n.translate(
-            'xpack.alertingV2.triggers.alertStatusChanged.schema.producerWorkflowExecutionId',
-            {
-              defaultMessage:
-                'Workflow Engine execution ID supplied by the alert events client writer, when the alert was produced by a workflow.',
-            }
-          )
-        ),
       alert: z
         .object({
           id: z
