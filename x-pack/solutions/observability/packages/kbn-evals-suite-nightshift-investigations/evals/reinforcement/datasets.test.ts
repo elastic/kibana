@@ -6,7 +6,14 @@
  */
 
 import { confirmsCause, gradeSubmissions, parseTreeMarkdown } from './arguments';
-import { REINFORCEMENT_EXAMPLE_LIMIT, selectCustomer0Examples } from './datasets';
+import { mkdtempSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { join } from 'path';
+import {
+  REINFORCEMENT_EXAMPLE_LIMIT,
+  loadReinforcementExamples,
+  selectCustomer0Examples,
+} from './datasets';
 import { reinforcementExamples } from './traces';
 import type { ReinforcementExample, SubmitArguments } from './types';
 
@@ -56,6 +63,28 @@ describe('selectCustomer0Examples', () => {
 
   it('falls back to the default count when the limit is not a number', () => {
     expect(selectCustomer0Examples(examples, Number.NaN)).toHaveLength(REINFORCEMENT_EXAMPLE_LIMIT);
+  });
+});
+
+describe('loadReinforcementExamples', () => {
+  const writeExamples = (examples: unknown[]): string => {
+    const file = join(mkdtempSync(join(tmpdir(), 'reinforcement-traces-')), 'examples.json');
+    writeFileSync(file, JSON.stringify({ examples }));
+    return file;
+  };
+
+  it('loads full rounds in the committed format', () => {
+    expect(loadReinforcementExamples(writeExamples(reinforcementExamples))).toEqual(
+      reinforcementExamples
+    );
+  });
+
+  it('rejects a round without the prior tree the replay seeds', () => {
+    const [{ input, metadata }] = reinforcementExamples;
+    const { prior_tree: _priorTree, ...withoutPriorTree } = input;
+    expect(() =>
+      loadReinforcementExamples(writeExamples([{ input: withoutPriorTree, metadata }]))
+    ).toThrow('prior_tree');
   });
 });
 

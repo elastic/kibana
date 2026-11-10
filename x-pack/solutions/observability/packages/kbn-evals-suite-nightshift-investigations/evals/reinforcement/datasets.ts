@@ -11,9 +11,43 @@ import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
 import { investigationExampleSchema, type InvestigationExample } from '../investigation/types';
 import type { ReinforcementExample } from './types';
 
+/** The fields `runReinforcementExample` reads, so a malformed file fails at load, not mid-run. */
+const exampleSchema = lazySchema(() =>
+  z.object({
+    input: z.object({
+      question: z.string().min(1),
+      response: z.string(),
+      prior_tree: z.object({
+        tree_id: z.string().min(1),
+        version: z.number().int().min(1),
+        markdown: z.string().min(1),
+      }),
+      tool_calls: z.array(
+        z.object({
+          tool_id: z.string().min(1),
+          tool_call_id: z.string().min(1),
+          params: z.record(z.string(), z.unknown()),
+        })
+      ),
+      tool_results: z.array(
+        z.object({
+          tool_id: z.string().min(1),
+          tool_call_id: z.string().min(1),
+          results: z.array(z.unknown()),
+        })
+      ),
+    }),
+    metadata: z.object({
+      case_id: z.string().min(1),
+      source: z.string().default('traces-file'),
+      require_merge: z.boolean().optional(),
+    }),
+  })
+);
+
 const fileSchema = lazySchema(() =>
   z.object({
-    examples: z.array(z.custom<ReinforcementExample>()).min(1).max(20),
+    examples: z.array(exampleSchema).min(1).max(20),
   })
 );
 
