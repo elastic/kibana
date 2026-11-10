@@ -665,6 +665,68 @@ describe('assembly.parseChildren', () => {
     expect(warnSpy).not.toHaveBeenCalled();
     warnSpy.mockRestore();
   });
+
+  describe('parts belonging to another assembly', () => {
+    const ForeignPart = createDeclarativeComponent<{ label?: string }>({
+      assembly: 'OtherAssembly',
+      part: 'row',
+    });
+
+    it('should warn that a part from another assembly renders nothing.', () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      asm.parseChildren([
+        createElement(NameCol, { key: '1', label: 'Title' }),
+        createElement(ForeignPart, { key: '2' }),
+      ]);
+
+      expect(warnSpy).toHaveBeenCalledTimes(1);
+      expect(warnSpy).toHaveBeenCalledWith(
+        `[${assembly}] <OtherAssembly.row> is a "row" part of OtherAssembly and renders ` +
+          `nothing here. Move it inside a OtherAssembly parent.`
+      );
+      warnSpy.mockRestore();
+    });
+
+    it('should warn even when `supportsOtherChildren` is `true`.', () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      asm.parseChildren([createElement(ForeignPart, { key: '1' })], {
+        supportsOtherChildren: true,
+      });
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('is a "row" part of OtherAssembly and renders nothing here')
+      );
+      warnSpy.mockRestore();
+    });
+
+    it('should still parse the recognized parts around it.', () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const result = asm.parseChildren([
+        createElement(ForeignPart, { key: '1' }),
+        createElement(NameCol, { key: '2', label: 'Title' }),
+      ]);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual(expect.objectContaining({ type: 'child' }));
+      expect(result[1]).toEqual(expect.objectContaining({ type: 'part', part: 'column' }));
+      warnSpy.mockRestore();
+    });
+
+    it('should not report a part of the assembly being parsed as misplaced.', () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+      asm.parseChildren([
+        createElement(NameCol, { key: '1', label: 'Title' }),
+        createElement(SpacerPart, { key: '2', size: 'm' }),
+      ]);
+
+      expect(warnSpy).not.toHaveBeenCalled();
+      warnSpy.mockRestore();
+    });
+  });
 });
 
 describe('resolveSkeleton', () => {
