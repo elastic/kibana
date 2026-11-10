@@ -8,6 +8,7 @@
 import { createPrompt } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_JUDGE_TEXT_LENGTH } from '../alert_outcome_shared';
+import { withIdentifierRule } from '../with_identifier_rule';
 import systemPromptText from './system_prompt.text';
 
 export const ALERT_OUTCOME_BENIGN_CLASSIFICATION_TOOL_NAME = 'score_alert_outcome_benign';
@@ -40,7 +41,7 @@ export const alertOutcomeBenignClassificationPrompt = createPrompt({
   .version({
     system: {
       mustache: {
-        template: systemPromptText,
+        template: withIdentifierRule(systemPromptText),
       },
     },
     template: {
