@@ -47610,7 +47610,6 @@
     "xpack.nightshift.onboarding.automate.openButton": "Ouvrir",
     "xpack.nightshift.onboarding.automate.trialTitle": "Investigation d’essai",
     "xpack.nightshift.onboarding.automate.unavailableTitle": "Les automatisations ne sont pas disponibles dans ce déploiement",
-    "xpack.nightshift.onboarding.doItLaterButton": "Je le ferai plus tard",
     "xpack.nightshift.onboarding.getStartedTitle": "Démarrer",
     "xpack.nightshift.onboarding.heroTitleAutomate": "Créer une première automatisation",
     "xpack.nightshift.onboarding.heroTitleInvestigate": "Essayez la première investigation",
