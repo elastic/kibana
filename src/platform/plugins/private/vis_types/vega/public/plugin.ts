@@ -48,8 +48,6 @@ import { getVegaInspectorView } from './vega_inspector/vega_inspector';
 import { getServiceSettingsLazy } from './vega_view/vega_map_view/service_settings/get_service_settings_lazy';
 import { VEGA_AS_CODE_ENABLED_FLAG, VEGA_EMBEDDABLE_TYPE } from '../common/constants';
 import { ADD_VEGA_EMBEDDABLE_ACTION_ID, ADD_VEGA_PANEL_ACTION_ID } from './constants';
-import { registerVegaAddFromLibrary } from './embeddable/register_vega_add_from_library';
-import { getVegaLibraryVisTypeAlias } from './vega_library_vis_type_alias';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -88,7 +86,7 @@ export class VegaPlugin implements Plugin<void, void> {
   initializerContext: PluginInitializerContext<ConfigSchema>;
   private addActionsSubscription?: Subscription;
   private librarySubscription?: Subscription;
-  private registerLibrary?: () => void;
+  private registerLibrary?: () => Promise<void>;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.initializerContext = initializerContext;
@@ -145,9 +143,9 @@ export class VegaPlugin implements Plugin<void, void> {
     });
 
     // Registered in `start`, once the feature flag can be read.
-    this.registerLibrary = () => {
-      visualizations.registerAlias(getVegaLibraryVisTypeAlias(openLibraryEditor));
-      registerVegaAddFromLibrary(embeddable);
+    this.registerLibrary = async () => {
+      const { registerVegaLibrary } = await import('./library/register_vega_library');
+      registerVegaLibrary({ visualizations, embeddable, openLibraryEditor });
     };
   }
 

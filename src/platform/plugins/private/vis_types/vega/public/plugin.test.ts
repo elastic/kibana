@@ -65,6 +65,8 @@ jest.mock('./async_module', () => ({
   vegaVisType: {},
 }));
 
+const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+
 describe('VegaPlugin', () => {
   const setup = () => {
     const core = coreMock.createSetup();
@@ -163,26 +165,29 @@ describe('VegaPlugin', () => {
   });
 
   describe('vega.asCodeEnabled feature flag', () => {
-    it('lists and offers library items when the flag is enabled', () => {
+    it('lists and offers library items when the flag is enabled', async () => {
       const { embeddable, visualizations } = startPlugin(setup(), new BehaviorSubject(true));
+      await flushPromises();
 
       expect(visualizations.registerAlias).toHaveBeenCalledWith(mockVegaLibraryVisTypeAlias);
       expect(mockRegisterVegaAddFromLibrary).toHaveBeenCalledWith(embeddable);
     });
 
-    it('neither lists nor offers library items when the flag is disabled', () => {
+    it('neither lists nor offers library items when the flag is disabled', async () => {
       const { visualizations } = startPlugin(setup());
+      await flushPromises();
 
       expect(visualizations.registerAlias).not.toHaveBeenCalled();
       expect(mockRegisterVegaAddFromLibrary).not.toHaveBeenCalled();
     });
 
-    it('registers library items only once when the flag toggles', () => {
+    it('registers library items only once when the flag toggles', async () => {
       const asCodeEnabled$ = new BehaviorSubject(true);
       const { visualizations } = startPlugin(setup(), asCodeEnabled$);
 
       asCodeEnabled$.next(false);
       asCodeEnabled$.next(true);
+      await flushPromises();
 
       expect(visualizations.registerAlias).toHaveBeenCalledTimes(1);
       expect(mockRegisterVegaAddFromLibrary).toHaveBeenCalledTimes(1);
@@ -190,6 +195,7 @@ describe('VegaPlugin', () => {
 
     it('opens the library editor with the start services', async () => {
       const { startCore, startDeps } = startPlugin(setup(), new BehaviorSubject(true));
+      await flushPromises();
       const [openLibraryEditor] = mockGetVegaLibraryVisTypeAlias.mock.calls[0];
 
       await openLibraryEditor('item-1');
