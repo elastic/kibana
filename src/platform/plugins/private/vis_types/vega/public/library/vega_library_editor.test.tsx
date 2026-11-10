@@ -16,12 +16,12 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { VegaReadResponseBody } from '../../server/api/read/types';
 import type { VegaEditableState } from '../lib/editable_state';
 import { setData } from '../services';
-import type { VegaPluginStartDependencies } from '../plugin';
 import { saveVegaToLibrary } from './save_to_library';
-import type { VegaLibraryClient } from './vega_library_client';
+import { createVegaLibraryClientMock } from './vega_library_client.mock';
 import { VegaLibraryEditor } from './vega_library_editor';
 
 jest.mock('../components/vega_vis_editor', () => ({
@@ -89,13 +89,12 @@ const renderEditor = ({
   onPreview?: (state: VegaEditableState) => void;
 } = {}) => {
   const core = coreMock.createStart();
-  const client = {
-    update: jest.fn(async (id: string, data: VegaReadResponseBody['data']) => ({ id, data })),
-  } as unknown as VegaLibraryClient;
+  const client = createVegaLibraryClientMock();
+  client.update.mockImplementation(async (id, data) => ({ id, data, meta: {} }));
   const closeFlyout = jest.fn();
-  const SearchBar = jest.fn((_props: StatefulSearchBarProps): null => null);
+  const { SearchBar } = unifiedSearchPluginMock.createStartContract().ui;
   const getSearchBarProps = (): StatefulSearchBarProps => {
-    const props = SearchBar.mock.lastCall?.[0];
+    const props = jest.mocked(SearchBar).mock.lastCall?.[0];
     if (!props) throw new Error('SearchBar has not rendered');
     return props;
   };
@@ -104,7 +103,7 @@ const renderEditor = ({
     <VegaLibraryEditor
       core={core}
       client={client}
-      SearchBar={SearchBar as VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar']}
+      SearchBar={SearchBar}
       item={item}
       canSave={canSave}
       allowSaveAsNew={allowSaveAsNew}

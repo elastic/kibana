@@ -10,9 +10,9 @@
 import React from 'react';
 import type { ReactElement } from 'react';
 import { act, render, screen } from '@testing-library/react';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 import { saveVegaToLibrary } from './save_to_library';
-import type { VegaLibraryClient } from './vega_library_client';
+import { createVegaLibraryClientMock } from './vega_library_client.mock';
 
 let mockModalProps: {
   title: string;
@@ -41,31 +41,23 @@ jest.mock('@kbn/saved-objects-plugin/public', () => ({
 
 const state = { spec: { format: 'hjson' as const, value: '{ mark: bar }' } };
 
-const createClient = () =>
-  ({
-    create: jest.fn().mockResolvedValue({ id: 'new-id', data: { title: 'My chart' }, meta: {} }),
-    search: jest.fn().mockResolvedValue({ data: [] }),
-  } as unknown as jest.Mocked<VegaLibraryClient>);
+const createClient = () => {
+  const client = createVegaLibraryClientMock();
+  client.create.mockResolvedValue({ id: 'new-id', data: { title: 'My chart' }, meta: {} });
+  client.search.mockResolvedValue({ data: [], meta: { page: 1, per_page: 20, total: 0 } });
+  return client;
+};
 
-const tagging = {
-  ui: {
-    components: {
-      SavedObjectSaveModalTagSelector: ({
-        initialSelection,
-        onTagsSelected,
-      }: {
-        initialSelection: string[];
-        onTagsSelected: (tags: string[]) => void;
-      }) => (
-        <button
-          data-test-subj="mockTagSelector"
-          data-initial={initialSelection.join(',')}
-          onClick={() => onTagsSelected(['tag-2'])}
-        />
-      ),
-    },
-  },
-} as unknown as SavedObjectsTaggingApi;
+const tagging = taggingApiMock.create();
+tagging.ui.components.SavedObjectSaveModalTagSelector.mockImplementation(
+  ({ initialSelection, onTagsSelected }) => (
+    <button
+      data-test-subj="mockTagSelector"
+      data-initial={initialSelection.join(',')}
+      onClick={() => onTagsSelected(['tag-2'])}
+    />
+  )
+);
 
 const showModal = (params: Partial<Parameters<typeof saveVegaToLibrary>[0]> = {}) => {
   const client = params.client ?? createClient();
