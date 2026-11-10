@@ -92,7 +92,8 @@ export const findLiveQueryRoute = (
                 ),
                 sort: {
                   direction: (request.query.sortOrder ?? 'desc') as Direction,
-                  field: request.query.sort ?? 'created_at',
+                  // `created_at` is not mapped on the actions index, so sorting on it fails the search.
+                  field: request.query.sort ?? '@timestamp',
                 },
                 spaceId,
               },

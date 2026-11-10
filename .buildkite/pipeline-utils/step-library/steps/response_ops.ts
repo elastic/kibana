@@ -16,7 +16,7 @@ export const responseOpsSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/functional/response_ops.sh',
     label: 'Rules, Alerts and Exceptions ResponseOps Cypress Tests on Security Solution',
     key: 'response-ops',
-    agents: { ...spotAgent('n2-standard-4', spotZones.centralFCA), ...pdBalanced },
+    agents: { ...spotAgent('n2-standard-4', spotZones.n2), ...pdBalanced },
     depends_on: ['build'],
     timeout_in_minutes: 60,
     parallelism: 11,

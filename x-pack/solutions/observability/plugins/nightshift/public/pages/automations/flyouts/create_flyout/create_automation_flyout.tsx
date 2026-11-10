@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useCreateAutomation } from '../../../../data/automations/use_automations';
+import { useRuleCatalog } from '../../../../data/rules/use_rule_catalog';
 import {
   createAutomationFormValues,
   type AutomationFormValues,
@@ -87,17 +88,19 @@ export const CreateAutomationFlyout = ({
   const titleId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const createAutomation = useCreateAutomation();
+  const { data: catalog, isComplete } = useRuleCatalog();
+  const completeCatalog = isComplete ? catalog : undefined;
   const update = (changes: Partial<AutomationFormValues>) =>
     setValues((current) => ({ ...current, ...changes }));
   const isDirty = JSON.stringify(values) !== JSON.stringify(initialValues);
-  const saveBlocker = getSaveBlocker(values);
-  const canSave = isDirty && canSaveAutomation(values);
+  const saveBlocker = getSaveBlocker(values, completeCatalog);
+  const canSave = isDirty && canSaveAutomation(values, completeCatalog);
 
   const requestClose = () => (isDirty ? setIsDiscardOpen(true) : onClose());
 
   const save = (isEnabled: boolean) => {
     const { trigger } = values;
-    if (!isTriggerValid(trigger)) return;
+    if (!isTriggerValid(trigger) || saveBlocker) return;
     setShowValidationErrors(true);
     const isNameMissing = !values.name.trim();
     setIsNameInvalid(isNameMissing);
