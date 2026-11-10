@@ -295,15 +295,33 @@ export class StorageIndexAdapter<
       });
   }
 
+  /**
+   * Resolves the write index behind the storage alias from a single `indices.get` call, so the
+   * index name and its state always come from the same cluster state. Deriving them from separate
+   * `getAlias` + `get` calls let a concurrent index creation return an index name with no state.
+   */
   private async getCurrentWriteIndex(): Promise<
     { name: string; state: IndicesIndexState } | undefined
   > {
-    const [writeIndex, indices] = await Promise.all([
-      this.getCurrentWriteIndexName(),
-      this.getExistingIndices(),
-    ]);
+    const aliasName = getAliasName(this.storage.name);
 
-    return writeIndex ? { name: writeIndex, state: indices[writeIndex] } : undefined;
+    const indices = await wrapEsCall(
+      this.esClient.indices.get({
+        // An alias resolves to its indices, hidden or not, without any wildcard expansion.
+        index: aliasName,
+      })
+    ).catch((error) => {
+      if (isNotFoundError(error)) {
+        return {};
+      }
+      throw error;
+    });
+
+    const writeIndex = Object.entries(indices).find(
+      ([, state]) => state.aliases?.[aliasName]?.is_write_index === true
+    );
+
+    return writeIndex ? { name: writeIndex[0], state: writeIndex[1] } : undefined;
   }
 
   private async getExistingIndices() {
@@ -315,40 +333,12 @@ export class StorageIndexAdapter<
     );
   }
 
-  private async getCurrentWriteIndexName(): Promise<string | undefined> {
-    const aliasName = getAliasName(this.storage.name);
-
-    const aliases = await wrapEsCall(
-      this.esClient.indices.getAlias({
-        name: getAliasName(this.storage.name),
-      })
-    ).catch((error) => {
-      if (isResponseError(error) && error.statusCode === 404) {
-        return {};
-      }
-      throw error;
-    });
-
-    const writeIndex = Object.entries(aliases)
-      .map(([name, alias]) => {
-        return {
-          name,
-          isWriteIndex: alias.aliases[aliasName]?.is_write_index === true,
-        };
-      })
-      .find(({ isWriteIndex }) => {
-        return isWriteIndex;
-      });
-
-    return writeIndex?.name;
-  }
-
   private async createIndex(): Promise<void> {
-    const writeIndex = await this.getCurrentWriteIndexName();
+    const writeIndex = await this.getCurrentWriteIndex();
 
     const indexName = getIndexName(
       this.storage.name,
-      writeIndex ? parseInt(last(writeIndex.split('-'))!, 10) : 1
+      writeIndex ? parseInt(last(writeIndex.name.split('-'))!, 10) : 1
     );
 
     await wrapEsCall(

@@ -661,18 +661,18 @@ describe('StorageIndexAdapter - esql method', () => {
   });
 
   it('awaits ensureMappingsBeforeReading before issuing the ES|QL query', async () => {
-    // Defer the alias lookup that updateMappingsIfNeeded awaits so the
+    // Defer the write index lookup that updateMappingsIfNeeded awaits so the
     // ensureMappingsBeforeReading promise stays pending until we release it.
-    let releaseGetAlias!: () => void;
-    const getAliasPromise = new Promise<{
+    let releaseGetIndices!: () => void;
+    const getIndicesPromise = new Promise<{
       'test_index-000001': { aliases: { test_index: { is_write_index: true } } };
     }>((resolve) => {
-      releaseGetAlias = () =>
+      releaseGetIndices = () =>
         resolve({
           'test_index-000001': { aliases: { test_index: { is_write_index: true } } },
         });
     });
-    (esClient.indices.getAlias as jest.Mock).mockReturnValueOnce(getAliasPromise);
+    (esClient.indices.get as jest.Mock).mockReturnValueOnce(getIndicesPromise);
 
     const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
     const client = adapter.getClient();
@@ -685,9 +685,74 @@ describe('StorageIndexAdapter - esql method', () => {
     await Promise.resolve();
     expect(esqlQuery).not.toHaveBeenCalled();
 
-    releaseGetAlias();
+    releaseGetIndices();
     await esqlPromise;
 
     expect(esqlQuery).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('StorageIndexAdapter - write index resolution', () => {
+  let esClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    esClient = createMockEsClient();
+    loggerMock = createLoggerMock();
+  });
+
+  it('resolves the write index from a single indices.get on the alias', async () => {
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await adapter
+      .getClient()
+      .search({ track_total_hits: false, size: 1, query: { match_all: {} } });
+
+    expect(esClient.indices.get).toHaveBeenCalledWith({ index: 'test_index' });
+    expect(esClient.indices.getAlias).not.toHaveBeenCalled();
+  });
+
+  it('does not throw on read when the alias does not exist yet', async () => {
+    (esClient.indices.get as jest.Mock).mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: { error: { type: 'index_not_found_exception' } },
+      } as unknown as TransportResult<unknown, unknown>)
+    );
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(
+      adapter.getClient().search({ track_total_hits: false, size: 1, query: { match_all: {} } })
+    ).resolves.toBeDefined();
+
+    expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+  });
+
+  it('creates the index on write when the alias does not exist yet', async () => {
+    (esClient.indices.get as jest.Mock).mockResolvedValue({});
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(
+      adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } })
+    ).resolves.toBeDefined();
+
+    expect(esClient.indices.create).toHaveBeenCalledWith({ index: 'test_index-000001' });
+  });
+
+  it('ignores indices the alias does not point to as write index', async () => {
+    (esClient.indices.get as jest.Mock).mockResolvedValue({
+      'test_index-000001': {
+        mappings: { _meta: { version: 'current' } },
+        aliases: { test_index: { is_write_index: false } },
+      },
+    });
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } });
+
+    expect(esClient.indices.create).toHaveBeenCalledWith({ index: 'test_index-000001' });
   });
 });
