@@ -629,10 +629,12 @@ const ORCA_FLAGS_SYSTEM = `You extract root causes from an investigation report.
 ## Reference
 {{{reference}}}
 
+A flag counts as named when the report presents it as a cause or a contributing cause, including when it is one of several causes or stated with low confidence. A flag the report explicitly rules out, or calls unrelated, coincidental or not causal, does not count, and neither does one that appears only in a list of next checks or open questions. When the report blames a flag in one place and rules it out in another, follow its final conclusion.
+
 Call the \`score\` tool with:
+- reasoning: one sentence, naming any flag the report mentions but rules out.
 - named_flags: every plausible flag the report names as a cause. Use the key from the list. Append \`:variant\` only when the report states a variant. A key without a variant still counts. An empty list is valid.
-- named_causes: every root cause the report asserts, including flags that are not in the list. Use \`key\` or \`key:variant\` for a feature flag; otherwise use the report's wording.
-- reasoning: one sentence.`;
+- named_causes: every root cause the report asserts, including flags that are not in the list. Use \`key\` or \`key:variant\` for a feature flag; otherwise use the report's wording. Leave out anything it rules out.`;
 
 const ORCA_FLAGS_USER = `## Report
 {{{answer}}}

@@ -686,7 +686,11 @@ one custom context snippet (`ORCA_CUSTOM_CONTEXT` in
 `github.com/open-telemetry/opentelemetry-demo` at commit `fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733`,
 the commit the paper's environment is built on. The paper's agents find that checkout at
 `/app/opentelemetry-demo`; ours clone it in the sandbox, as the customer0 space points at Elastic's
-repositories. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
+repositories. The sandbox's egress proxy refuses any host the space has not allowed, so whenever the
+custom context names GitHub the eval adds `github.com`, `codeload.github.com`,
+`objects.githubusercontent.com` and `raw.githubusercontent.com` to the space's sandbox allowlist
+(`PUT /internal/nightshift/sandbox_allowlist`, [`sandbox_allowlist.ts`](evals/investigation/sandbox_allowlist.ts));
+without them every clone fails with `CONNECT tunnel failed, response 403`. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
 of 42 questions and is not this ORCA benchmark; CI does not run it. Quote that 42-question set
 as a benchmark result again only after its windows end at detection time.
 
@@ -764,8 +768,9 @@ judge that does not reason and are not directly comparable to the paper's. `goal
 does not fail accuracy. Hallucination is 1 when the report names at least one cause and none of
 them is in that set, and its direction is minimize. An empty incident report scores 0 on both.
 Only the control judge uses ORCA's prompt. Accuracy and hallucination use our own extraction
-prompt, `OrcaFlagsJudgePrompt`, which lists the flags a report names, and the set logic above is
-applied in code. They do not use the paper's incident judge prompt (`JUDGE_PROMPT_MULTI_HEADER`
+prompt, `OrcaFlagsJudgePrompt`, which lists the flags a report names as a cause, and the set logic
+above is applied in code. A flag the report explicitly rules out, calls unrelated, or lists only as a
+next check is not named, so mentioning every flag as ruled out cannot satisfy accuracy. They do not use the paper's incident judge prompt (`JUDGE_PROMPT_MULTI_HEADER`
 plus its scoring footer).
 Control passes an empty report and fails when a report places an incident inside
 `metadata.quiet_window`. Its judge prompt is ORCA's `JUDGE_PROMPT_CONTROL` from the Harbor tasks'

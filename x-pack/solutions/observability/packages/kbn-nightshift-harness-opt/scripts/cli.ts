@@ -20,6 +20,7 @@ import type { RunSummary, TelemetryVariant } from './runner';
 import { restartLane, treeHash } from './candidate_workspace';
 import { dryRound, runCampaign } from './campaign';
 import { serveReport, writeReport } from './report';
+import { rescoreTraces } from './rescore';
 
 const DEFAULT_AGENT = '.anthropic-claude-5.5-sonnet-chat_completion';
 /** ORCA's judges bind to GPT-5.4 in the suite; same model here. */
@@ -130,6 +131,25 @@ export const cli = () =>
           await dryRound({ summary: { ...summary, runs }, lanes, log });
           return;
         }
+        case 'rescore': {
+          // Re-judge stored investigations: `--traces a.json,b.json` or every trace under `--from`.
+          const from = str(flags.from);
+          const traces = str(flags.traces)?.split(',') ?? [];
+          const tracePaths = from
+            ? Fs.readdirSync(from, { recursive: true })
+                .map(String)
+                .filter((file) => file.includes('traces/') && file.endsWith('.json'))
+                .map((file) => Path.join(from, file))
+            : traces;
+          if (tracePaths.length === 0) throw createFlagError('--from <dir> or --traces <files>');
+          await rescoreTraces({
+            tracePaths,
+            lane: lanes[asLane(str(flags.lane) ?? 'incumbent')],
+            judgeConnectorId,
+            log,
+          });
+          return;
+        }
         case 'report': {
           const ledgerFile = str(flags.ledger);
           if (flags.serve) {
@@ -195,6 +215,7 @@ export const cli = () =>
           'gate-rollouts',
           'from',
           'ledger',
+          'traces',
           'host',
           'port',
         ],

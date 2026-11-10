@@ -20,6 +20,7 @@ import { evaluate } from '../../src/evaluate';
 import { restoreKnowledge } from '../../src/knowledge/restore_knowledge';
 import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
+import { ensureSandboxHosts, getDatasetSandboxHosts } from './sandbox_allowlist';
 import {
   ORCABENCH_ES_CONNECTOR_ID,
   saveConnectorSetOnInvestigator,
@@ -225,7 +226,11 @@ export const registerInvestigationEvaluation = ({
           method: 'PUT',
           body: JSON.stringify({ investigationLimitsEnabled: false }),
         });
-        await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
+        const customContext = getDatasetCustomContext(dataset);
+        await replaceCustomContext(fetch, customContext);
+        // The custom context points the agent at public source code; the sandbox's egress proxy
+        // refuses GitHub unless the space allows it.
+        await ensureSandboxHosts(fetch, getDatasetSandboxHosts(customContext));
         const knowledgeMetadata = await restoreKnowledge({ esClient, log });
         const runExperiment = ({
           runConcurrency,

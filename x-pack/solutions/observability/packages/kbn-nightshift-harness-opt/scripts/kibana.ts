@@ -20,6 +20,10 @@ import {
   ORCA_CUSTOM_CONTEXT,
   replaceCustomContext,
 } from '@kbn/evals-suite-nightshift-investigations/evals/investigation/custom_context';
+import {
+  ensureSandboxHosts,
+  getDatasetSandboxHosts,
+} from '@kbn/evals-suite-nightshift-investigations/evals/investigation/sandbox_allowlist';
 import type { LaneSettings } from './paths';
 
 export class KibanaHttpError extends Error {
@@ -197,5 +201,6 @@ export const prepareLane = async ({
     body: JSON.stringify({ investigationLimitsEnabled: false }),
   });
   await replaceCustomContext(fetch, ORCA_CUSTOM_CONTEXT);
+  await ensureSandboxHosts(fetch, getDatasetSandboxHosts(ORCA_CUSTOM_CONTEXT));
   log.info(`[${lane.lane}] lane prepared at ${lane.kibanaUrl}`);
 };
