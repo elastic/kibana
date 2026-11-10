@@ -39,6 +39,7 @@ import {
   BLAST_RADIUS_GRAPH_TEST_ID,
   BLAST_RADIUS_LOADING_TEST_ID,
   BLAST_RADIUS_RUN_BUTTON_TEST_ID,
+  BLAST_RADIUS_STORAGE_TEST_ID,
   BLAST_RADIUS_SUMMARY_TEST_ID,
   BLAST_RADIUS_TAB_TEST_ID,
 } from './test_ids';
@@ -89,6 +90,32 @@ const ENGINE_OPTIONS: Array<{ id: GraphTraversalEngine; label: string }> = [
 const isGraphTraversalEngine = (id: string): id is GraphTraversalEngine =>
   ENGINE_OPTIONS.some((option) => option.id === id);
 
+/** Where the walk reads relationships from: the entity documents' arrays, or edge documents. */
+type RelationshipStorage = 'arrays' | 'edges';
+
+const STORAGE_LEGEND = i18n.translate(
+  'xpack.securitySolution.flyout.entityDetails.blastRadius.storageLegend',
+  { defaultMessage: 'Relationships' }
+);
+
+const STORAGE_OPTIONS: Array<{ id: RelationshipStorage; label: string }> = [
+  {
+    id: 'arrays',
+    label: i18n.translate('xpack.securitySolution.flyout.entityDetails.blastRadius.storageArrays', {
+      defaultMessage: 'On entities',
+    }),
+  },
+  {
+    id: 'edges',
+    label: i18n.translate('xpack.securitySolution.flyout.entityDetails.blastRadius.storageEdges', {
+      defaultMessage: 'Edge documents',
+    }),
+  },
+];
+
+const isRelationshipStorage = (id: string): id is RelationshipStorage =>
+  STORAGE_OPTIONS.some((option) => option.id === id);
+
 /**
  * Runs the entity graph traversal for the entity on demand and renders the traversed nodes
  * and edges as a left-to-right graph. The traversal runs through the managed workflow or as
@@ -99,16 +126,20 @@ export const BlastRadiusSubTab: FC<BlastRadiusSubTabProps> = memo(({ entityId })
   const { mutate, data, error, isLoading, reset } = useRunBlastRadius({ entityId });
   const [exclusions, setExclusions] = useState<GraphTraversalExclusion[]>([]);
   const [engine, setEngine] = useState<GraphTraversalEngine>('hops');
+  const [storage, setStorage] = useState<RelationshipStorage>('arrays');
 
   const selectEngine = useCallback((id: string) => {
     if (isGraphTraversalEngine(id)) setEngine(id);
   }, []);
+  const selectStorage = useCallback((id: string) => {
+    if (isRelationshipStorage(id)) setStorage(id);
+  }, []);
   const runWith = useCallback(
     (next: GraphTraversalExclusion[]) => {
       setExclusions(next);
-      mutate({ exclusions: next, engine });
+      mutate({ exclusions: next, engine, edgeDocuments: storage === 'edges' });
     },
-    [mutate, engine]
+    [mutate, engine, storage]
   );
   const run = useCallback(() => runWith(exclusions), [runWith, exclusions]);
   const excludeNode = useCallback(
@@ -165,6 +196,21 @@ export const BlastRadiusSubTab: FC<BlastRadiusSubTabProps> = memo(({ entityId })
                 options={ENGINE_OPTIONS}
                 idSelected={engine}
                 onChange={selectEngine}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {STORAGE_LEGEND}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                data-test-subj={BLAST_RADIUS_STORAGE_TEST_ID}
+                legend={STORAGE_LEGEND}
+                buttonSize="compressed"
+                options={STORAGE_OPTIONS}
+                idSelected={storage}
+                onChange={selectStorage}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -263,7 +309,12 @@ export const BlastRadiusSubTab: FC<BlastRadiusSubTabProps> = memo(({ entityId })
 
       {!isLoading && output && graph && (
         <>
-          <BlastRadiusSummary output={output} engine={data?.engine} onRerun={run} />
+          <BlastRadiusSummary
+            output={output}
+            engine={data?.engine}
+            edgeDocuments={data?.edge_documents}
+            onRerun={run}
+          />
           <EuiSpacer size="s" />
           <div
             data-test-subj={BLAST_RADIUS_GRAPH_TEST_ID}
@@ -295,8 +346,9 @@ BlastRadiusSubTab.displayName = 'BlastRadiusSubTab';
 const BlastRadiusSummary: FC<{
   output: GraphTraversalOutput;
   engine?: GraphTraversalEngine;
+  edgeDocuments?: boolean;
   onRerun: () => void;
-}> = ({ output, engine, onRerun }) => (
+}> = ({ output, engine, edgeDocuments, onRerun }) => (
   <EuiFlexGroup
     data-test-subj={BLAST_RADIUS_SUMMARY_TEST_ID}
     alignItems="center"
@@ -334,6 +386,15 @@ const BlastRadiusSummary: FC<{
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.blastRadius.ranWithEsql"
               defaultMessage="Ran as one ES|QL GRAPH EXPAND statement."
+            />
+          </>
+        )}
+        {edgeDocuments && (
+          <>
+            {' '}
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.blastRadius.readEdgeDocuments"
+              defaultMessage="Relationships were read from edge documents."
             />
           </>
         )}

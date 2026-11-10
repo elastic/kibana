@@ -20,3 +20,4 @@ export const BLAST_RADIUS_CLEAR_EXCLUSIONS_TEST_ID =
   `${BLAST_RADIUS_TAB_TEST_ID}ClearExclusions` as const;
 export const BLAST_RADIUS_EXCLUDE_NODE_TEST_ID = `${BLAST_RADIUS_TAB_TEST_ID}ExcludeNode` as const;
 export const BLAST_RADIUS_ENGINE_TEST_ID = `${BLAST_RADIUS_TAB_TEST_ID}Engine` as const;
+export const BLAST_RADIUS_STORAGE_TEST_ID = `${BLAST_RADIUS_TAB_TEST_ID}Storage` as const;

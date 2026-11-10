@@ -29,6 +29,8 @@ export interface RunBlastRadiusVariables {
   exclusions: GraphTraversalExclusion[];
   /** Hop by hop unless `esql`, which runs the scenario as one ES|QL `GRAPH EXPAND` statement. */
   engine?: GraphTraversalEngine;
+  /** Read relationships from edge documents instead of the entity documents' arrays. */
+  edgeDocuments?: boolean;
 }
 
 /**
@@ -40,12 +42,13 @@ export const useRunBlastRadius = ({ entityId, scenarioId }: UseRunBlastRadiusPar
   const effectiveScenarioId = scenarioId ?? getDefaultGraphTraversalScenarioId(entityId);
 
   return useMutation<RunGraphTraversalResponse, Error, RunBlastRadiusVariables>({
-    mutationFn: ({ exclusions, engine }) => {
+    mutationFn: ({ exclusions, engine, edgeDocuments }) => {
       const body: RunGraphTraversalRequestBody = {
         entity_id: entityId,
         scenario_id: effectiveScenarioId,
         ...(exclusions.length > 0 && { exclusions }),
         ...(engine === 'esql' && { esql: true }),
+        ...(edgeDocuments && { edge_documents: true }),
       };
       return http.fetch<RunGraphTraversalResponse>(
         ENTITY_STORE_ROUTES.internal.GRAPH_TRAVERSAL_RUN,

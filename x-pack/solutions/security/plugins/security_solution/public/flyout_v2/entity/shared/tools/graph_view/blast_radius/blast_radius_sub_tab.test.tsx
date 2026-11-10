@@ -14,6 +14,7 @@ import { useRunBlastRadius } from './use_run_blast_radius';
 import {
   BLAST_RADIUS_CLEAR_EXCLUSIONS_TEST_ID,
   BLAST_RADIUS_ENGINE_TEST_ID,
+  BLAST_RADIUS_STORAGE_TEST_ID,
   BLAST_RADIUS_ERROR_TEST_ID,
   BLAST_RADIUS_EXCLUSION_BADGE_TEST_ID,
   BLAST_RADIUS_EXCLUSIONS_TEST_ID,
@@ -113,7 +114,11 @@ describe('BlastRadiusSubTab', () => {
     expect(mockUseRunBlastRadius).toHaveBeenCalledWith({ entityId: SEED });
     fireEvent.click(screen.getByTestId(BLAST_RADIUS_RUN_BUTTON_TEST_ID));
     expect(mutation.mutate).toHaveBeenCalledTimes(1);
-    expect(mutation.mutate).toHaveBeenCalledWith({ exclusions: [], engine: 'hops' });
+    expect(mutation.mutate).toHaveBeenCalledWith({
+      exclusions: [],
+      engine: 'hops',
+      edgeDocuments: false,
+    });
     expect(screen.queryByTestId(BLAST_RADIUS_EXCLUSIONS_TEST_ID)).not.toBeInTheDocument();
   });
 
@@ -128,6 +133,7 @@ describe('BlastRadiusSubTab', () => {
     expect(mutation.mutate).toHaveBeenLastCalledWith({
       exclusions: [{ field: 'entity.id', values: [role] }],
       engine: 'hops',
+      edgeDocuments: false,
     });
     const badge = screen.getByTestId(BLAST_RADIUS_EXCLUSION_BADGE_TEST_ID);
     expect(badge).toHaveTextContent('okta-prod-admin');
@@ -137,10 +143,15 @@ describe('BlastRadiusSubTab', () => {
     expect(mutation.mutate).toHaveBeenLastCalledWith({
       exclusions: [{ field: 'entity.id', values: [role] }],
       engine: 'hops',
+      edgeDocuments: false,
     });
 
     fireEvent.click(badge.querySelector('button') as Element);
-    expect(mutation.mutate).toHaveBeenLastCalledWith({ exclusions: [], engine: 'hops' });
+    expect(mutation.mutate).toHaveBeenLastCalledWith({
+      exclusions: [],
+      engine: 'hops',
+      edgeDocuments: false,
+    });
     expect(screen.queryByTestId(BLAST_RADIUS_EXCLUSIONS_TEST_ID)).not.toBeInTheDocument();
   });
 
@@ -152,7 +163,11 @@ describe('BlastRadiusSubTab', () => {
     fireEvent.click(screen.getByTestId('mockExclude-arn:aws:iam::1:role/okta-prod-admin'));
     fireEvent.click(screen.getByTestId(BLAST_RADIUS_CLEAR_EXCLUSIONS_TEST_ID));
 
-    expect(mutation.mutate).toHaveBeenLastCalledWith({ exclusions: [], engine: 'hops' });
+    expect(mutation.mutate).toHaveBeenLastCalledWith({
+      exclusions: [],
+      engine: 'hops',
+      edgeDocuments: false,
+    });
   });
 
   it('runs through ES|QL once that engine is selected', () => {
@@ -167,7 +182,42 @@ describe('BlastRadiusSubTab', () => {
       })
     );
     fireEvent.click(screen.getByTestId(BLAST_RADIUS_RUN_BUTTON_TEST_ID));
-    expect(mutation.mutate).toHaveBeenLastCalledWith({ exclusions: [], engine: 'esql' });
+    expect(mutation.mutate).toHaveBeenLastCalledWith({
+      exclusions: [],
+      engine: 'esql',
+      edgeDocuments: false,
+    });
+  });
+
+  it('reads edge documents once that storage is selected', () => {
+    const mutation = mockMutation({});
+    mockUseRunBlastRadius.mockReturnValue(mutation);
+
+    renderTab();
+
+    fireEvent.click(
+      within(screen.getByTestId(BLAST_RADIUS_STORAGE_TEST_ID)).getByRole('button', {
+        name: 'Edge documents',
+      })
+    );
+    fireEvent.click(screen.getByTestId(BLAST_RADIUS_RUN_BUTTON_TEST_ID));
+    expect(mutation.mutate).toHaveBeenLastCalledWith({
+      exclusions: [],
+      engine: 'hops',
+      edgeDocuments: true,
+    });
+  });
+
+  it('says in the summary when relationships came from edge documents', () => {
+    mockUseRunBlastRadius.mockReturnValue(
+      mockMutation({ data: { ...completed, edge_documents: true } })
+    );
+
+    renderTab();
+
+    expect(screen.getByTestId(BLAST_RADIUS_SUMMARY_TEST_ID)).toHaveTextContent(
+      'Relationships were read from edge documents.'
+    );
   });
 
   it('says in the summary when ES|QL produced the result', () => {

@@ -20,11 +20,13 @@ import { TRAVERSAL_NODE_ID_FIELD } from '../../../../common/graph_traversal/hop_
 import {
   buildHopQuery,
   HOP_COUNT_COLUMN,
+  HOP_READ_COLUMN,
   HOP_SOURCE_COLUMN,
   HOP_TARGET_COLUMN,
   hopPayloadColumn,
   type HopQuery,
 } from './build_hop_query';
+import { buildEdgeHopQuery, HOP_RELATION_COLUMN } from './build_edge_hop_query';
 
 export interface EsqlResult {
   columns: Array<{ name: string; type: string }>;
@@ -44,6 +46,12 @@ export interface RunHopInput {
    * payload fields describe the reached node. Without it, they describe the frontier node.
    */
   lookupIndex?: string;
+  /**
+   * The space's edges index. When set, relationships are read as edge documents (`src`,
+   * `kind`, `dst`), one query per leg covering every kind of the hop, instead of the
+   * relationship arrays on the entity documents.
+   */
+  edgesIndex?: string;
   direction: TraversalDirection;
   frontier: string[];
   visited: string[];
@@ -63,6 +71,12 @@ export interface RunHopStats {
   /** Always 0 since a hop's queries are issued together; kept so the stats shape is stable. */
   queries_skipped: number;
   rows_returned: number;
+  /**
+   * Relationships the hop's queries matched at the index, before the hub cap kept at most
+   * `hub_degree + 1` per node (and kind): a capped group's rows carry its count, counted once;
+   * every other row is one relationship.
+   */
+  relationships_read: number;
   edges_added: number;
   dropped_edges: number;
   /** Frontier ids removed by an `entity.id` exclusion. */
@@ -81,6 +95,8 @@ export interface RunHopStats {
   query_ms: number;
   /** Milliseconds Elasticsearch reports it spent on the hop's queries (`took`), summed. */
   es_took_ms: number;
+  /** Each query's `took` in issue order, since `es_took_ms` no longer tells them apart. */
+  es_took_per_query: number[];
 }
 
 export interface RunHopResult {
@@ -107,6 +123,8 @@ interface CollectedEdge {
   frontierNode: string;
   reached: string;
   inbound: boolean;
+  /** How many relationships the row's (frontier node, relation) group matched, when capped. */
+  read?: number;
 }
 
 const toId = (value: unknown): string | undefined => {
@@ -131,7 +149,8 @@ const parseRows = ({
 }: {
   result: EsqlResult;
   hop: TraversalHop;
-  relation: string;
+  /** The relation of every row; absent when each row carries its own in `__relation`. */
+  relation?: string;
   frontier: Set<string>;
   inbound: boolean;
 }): CollectedEdge[] => {
@@ -139,6 +158,8 @@ const parseRows = ({
   const sourceIdx = columnIndex(HOP_SOURCE_COLUMN);
   const targetIdx = columnIndex(HOP_TARGET_COLUMN);
   const countIdx = columnIndex(HOP_COUNT_COLUMN);
+  const relationIdx = columnIndex(HOP_RELATION_COLUMN);
+  const readIdx = columnIndex(HOP_READ_COLUMN);
   if (sourceIdx < 0 || targetIdx < 0) {
     throw new Error(
       `Hop "${hop.name}" query returned no ${HOP_SOURCE_COLUMN}/${HOP_TARGET_COLUMN} columns`
@@ -165,7 +186,7 @@ const parseRows = ({
       edges.push({
         edge: {
           hop: hop.hop_number,
-          relation,
+          relation: relation ?? toId(row[relationIdx]) ?? 'related_to',
           source,
           target,
           count: countIdx >= 0 ? toCount(row[countIdx]) : 1,
@@ -174,10 +195,32 @@ const parseRows = ({
         frontierNode: frontierNode as string,
         reached: inbound ? source : target,
         inbound,
+        ...(readIdx >= 0 && typeof row[readIdx] === 'number' && { read: row[readIdx] as number }),
       });
     }
   }
   return edges;
+};
+
+/**
+ * Relationships the queries matched before any cap: a capped (frontier node, relation) group
+ * reports its count on every row it kept, counted once; a row without one is one relationship.
+ */
+const relationshipsRead = (edges: CollectedEdge[]): number => {
+  const counted = new Set<string>();
+  let read = 0;
+  for (const { edge, frontierNode, read: groupRead } of edges) {
+    if (groupRead === undefined) {
+      read += 1;
+      continue;
+    }
+    const key = `${frontierNode}\u0000${edge.relation}`;
+    if (!counted.has(key)) {
+      counted.add(key);
+      read += groupRead;
+    }
+  }
+  return read;
 };
 
 /**
@@ -272,7 +315,16 @@ export const runHop = async (
   input: RunHopInput,
   execute: ExecuteHopQuery
 ): Promise<RunHopResult> => {
-  const { index, lookupIndex, direction, limits, lookback, exclusions = [], until = [] } = input;
+  const {
+    index,
+    lookupIndex,
+    edgesIndex,
+    direction,
+    limits,
+    lookback,
+    exclusions = [],
+    until = [],
+  } = input;
   const hop = withStopConditionFields(input.hop, until);
   const visitedSet = new Set(input.visited);
   const excludedIds = new Set(
@@ -290,6 +342,7 @@ export const runHop = async (
     queries: 0,
     queries_skipped: 0,
     rows_returned: 0,
+    relationships_read: 0,
     edges_added: 0,
     dropped_edges: 0,
     excluded_frontier: distinctFrontier.length - uniqueFrontier.length,
@@ -301,6 +354,7 @@ export const runHop = async (
     setup_ms: 0,
     query_ms: 0,
     es_took_ms: 0,
+    es_took_per_query: [],
   };
 
   const untilMatches: string[] = [];
@@ -348,39 +402,61 @@ export const runHop = async (
   //    and the whole unfilled edge budget: what a sibling returns is not known in advance, so
   //    the edge cap below trims any overshoot. Results are read back in field and leg order,
   //    so admission under the caps is the same as when they ran one after another.
+  //    Over edge documents a kind is a value, so one query per leg covers every kind of the
+  //    hop and each row names its own relation.
   const legs = direction === 'both' ? [false, true] : [false];
   const limit = Math.min(limits.max_edges_per_hop, edgeCapacity);
-  const requests = legs.flatMap((inbound) =>
-    hop.target_fields.map(({ field, relation }) => ({
-      inbound,
-      relation,
-      query: buildHopQuery({
-        hop,
-        index,
-        lookupIndex,
-        targetField: field,
-        frontier,
-        limit,
-        lookback,
-        exclusions,
-        visited: input.visited,
-        hubDegree: limits.hub_degree,
-        inbound,
-      }),
-    }))
-  );
+  const requests: Array<{ inbound: boolean; relation?: string; query: HopQuery }> =
+    edgesIndex !== undefined
+      ? legs.map((inbound) => ({
+          inbound,
+          query: buildEdgeHopQuery({
+            hop,
+            edgesIndex,
+            lookupIndex,
+            frontier,
+            limit,
+            lookback,
+            exclusions,
+            visited: input.visited,
+            hubDegree: limits.hub_degree,
+            inbound,
+          }),
+        }))
+      : legs.flatMap((inbound) =>
+          hop.target_fields.map(({ field, relation }) => ({
+            inbound,
+            relation,
+            query: buildHopQuery({
+              hop,
+              index,
+              lookupIndex,
+              targetField: field,
+              frontier,
+              limit,
+              lookback,
+              exclusions,
+              visited: input.visited,
+              hubDegree: limits.hub_degree,
+              inbound,
+            }),
+          }))
+        );
   const queriesStartedAt = performance.now();
   const results = await Promise.all(requests.map(({ query }) => execute(query)));
   stats.query_ms = roundMs(performance.now() - queriesStartedAt);
   const collected: CollectedEdge[] = [];
   requests.forEach(({ inbound, relation }, position) => {
     const result = results[position];
-    if (typeof result.took === 'number') stats.es_took_ms += result.took;
+    const took = typeof result.took === 'number' ? result.took : 0;
+    stats.es_took_ms += took;
+    stats.es_took_per_query.push(took);
     stats.queries += 1;
     stats.rows_returned += result.values.length;
     if (result.values.length >= limit) truncated = true;
     collected.push(...parseRows({ result, hop, relation, frontier: frontierSet, inbound }));
   });
+  stats.relationships_read = relationshipsRead(collected);
 
   // 4. Excluded nodes (the query already left out excluded documents and pointer values;
   //    this covers whichever end the query could not filter)

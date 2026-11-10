@@ -11,7 +11,10 @@ import {
   listEntityGraphTraversalScenarioIds,
   loadEntityGraphTraversalPlan,
 } from '../../../../common/graph_traversal/scenarios';
-import { getLatestEntityIndexPattern } from '../../../../common/domain/entity_index';
+import {
+  getEntityEdgesAlias,
+  getLatestEntityIndexPattern,
+} from '../../../../common/domain/entity_index';
 import type {
   GraphTraversalExclusion,
   GraphTraversalNode,
@@ -43,6 +46,8 @@ export interface RunEsqlGraphTraversalParams {
   maxHops?: number;
   exclusions?: GraphTraversalExclusion[];
   until?: GraphTraversalStopCondition[];
+  /** Read relationships from the space's edge documents instead of the entity arrays. */
+  edgeDocuments?: boolean;
 }
 
 /**
@@ -70,6 +75,7 @@ export class EsqlGraphTraversalClient {
     maxHops,
     exclusions,
     until,
+    edgeDocuments = false,
   }: RunEsqlGraphTraversalParams): Promise<RunGraphTraversalResponse> {
     const startedAt = Date.now();
     const plan = loadEntityGraphTraversalPlan(
@@ -92,6 +98,7 @@ export class EsqlGraphTraversalClient {
       plan,
       indexPattern,
       lookupIndex,
+      ...(edgeDocuments && { edgesIndex: getEntityEdgesAlias(this.namespace) }),
       seedId,
       lookback,
       exclusions,
@@ -140,6 +147,7 @@ export class EsqlGraphTraversalClient {
     return {
       execution_id: ESQL_GRAPH_TRAVERSAL_EXECUTION_ID,
       engine: 'esql',
+      ...(edgeDocuments && { edge_documents: true }),
       status: 'completed',
       output: {
         scenario_id: plan.id,

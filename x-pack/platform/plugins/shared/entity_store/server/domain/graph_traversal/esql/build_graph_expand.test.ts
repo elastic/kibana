@@ -150,4 +150,60 @@ describe('buildGraphExpandStatement', () => {
     expect(query).toContain('| KEEP entity.id, entity.name, entity.type');
     expect(query).toContain('| LIMIT 1');
   });
+  describe('edge documents', () => {
+    const statement = buildGraphExpandStatement({
+      plan: plan('okta-user-to-aws-resources'),
+      indexPattern: INDEX,
+      lookupIndex: LOOKUP,
+      edgesIndex: 'entities-edges-default',
+      seedId: 'user:john.doe@acmecrm.com@okta',
+    });
+
+    it('walks the edges index on src to dst, naming the kind field and the kinds per hop', () => {
+      expect(statement.edgeDocuments).toBe(true);
+      expect(statement.query).toContain(
+        ['| GRAPH EXPAND entities-edges-default ON node_id == src', '    TO dst'].join('\n')
+      );
+      expect(statement.query).toContain(
+        '"relation_field":"kind","hop_relations":["member_of","sso_to_role","can_assume,can_connect,runs_as,grants_access_to"'
+      );
+      expect(statement.query).not.toContain('hop_fields');
+      expect(statement.query).toContain('| KEEP node_from, node_to, hop, relation, dropped');
+    });
+
+    it('maps a relation value to itself', () => {
+      expect(statement.targets.map((t) => t.field)).toEqual([
+        'member_of',
+        'sso_to_role',
+        'can_assume',
+        'can_connect',
+        'runs_as',
+        'grants_access_to',
+      ]);
+      expect(relationForField(statement, 'can_assume')).toBe('can_assume');
+    });
+
+    it('applies the lookback to the edge documents', () => {
+      const withLookback = buildGraphExpandStatement({
+        plan: plan('okta-user-to-aws-resources'),
+        indexPattern: INDEX,
+        edgesIndex: 'entities-edges-default',
+        seedId: 'seed',
+        lookback: '30d',
+      });
+      expect(withLookback.query).toContain('    WHERE `last_seen` >= NOW() - 30 days');
+    });
+
+    it('refuses exclusions on entity fields, which edge documents cannot test', () => {
+      expect(() =>
+        buildGraphExpandStatement({
+          plan: plan('okta-user-to-aws-resources'),
+          indexPattern: INDEX,
+          edgesIndex: 'entities-edges-default',
+          seedId: 'seed',
+          exclusions: [{ field: 'entity.sub_type', values: ['AWS IAM Policy'] }],
+        })
+      ).toThrow(/cannot filter entity documents/);
+    });
+  });
 });

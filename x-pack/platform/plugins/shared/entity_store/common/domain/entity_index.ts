@@ -52,6 +52,13 @@ export const getLegacySecurityEntityIndexPattern = <TDataset extends Dataset>({
 // Returns the alias name for an entity dataset. Used for alias creation, privilege
 // checks, and external consumers. Internal read/write operations should use
 // getLatestEntitiesIndexName to target the concrete index directly.
+/**
+ * The alias of the space's edges index, one document per relationship (`src`, `kind`,
+ * `dst`), as the identity access graph generator writes it beside the latest index. The
+ * store does not create it yet.
+ */
+export const getEntityEdgesAlias = (namespace: string) => `entities-edges-${namespace}`;
+
 export const getEntitiesAlias = (dataset: Dataset, namespace: string) =>
   `${ENTITY_BASE_PREFIX}-${dataset}-${namespace}` as const;
 

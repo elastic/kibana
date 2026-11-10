@@ -237,6 +237,8 @@ describe('runHop', () => {
     // cap of four.
     expect(execute.queryLimits).toEqual([4, 4]);
     expect(out.edges.map((e) => e.target)).toEqual(['role-b', 'role-c', 'i-1']);
+    // Uncapped rows are one relationship each.
+    expect(out.stats.relationships_read).toBe(3);
     expect(out.stats).toMatchObject({ queries: 2, queries_skipped: 0, edges_added: 3 });
     expect(out.truncated).toBe(false);
     expect(out.stop_reason).toBe('');
@@ -307,6 +309,58 @@ describe('runHop', () => {
     );
     expect(arrived).toBe(hop.target_fields.length);
     expect(out.stats.queries).toBe(hop.target_fields.length);
+  });
+
+  it('reads edge documents with one query per leg, each row carrying its own relation', async () => {
+    // A capped group reports how many relationships it matched on every row it kept.
+    const edgeResult: EsqlResult = {
+      columns: [
+        { name: HOP_SOURCE_COLUMN, type: 'keyword' },
+        { name: '__relation', type: 'keyword' },
+        { name: HOP_TARGET_COLUMN, type: 'keyword' },
+        { name: HOP_COUNT_COLUMN, type: 'long' },
+        { name: '__read', type: 'long' },
+      ],
+      values: [
+        ['role-a', 'can_assume', 'role-b', 1, 5],
+        ['role-a', 'can_assume', 'role-c', 1, 5],
+        ['role-a', 'runs_as', 'i-1', 1, 1],
+      ],
+      took: 12,
+    };
+    const execute = executor([edgeResult]);
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        lookupIndex: LOOKUP,
+        edgesIndex: 'entities-edges-default',
+        direction: 'out',
+        frontier: ['role-a'],
+        visited: ['seed', 'role-a'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+      },
+      execute
+    );
+    expect(execute.queries).toHaveLength(1);
+    expect(execute.queries[0]).toContain('FROM entities-edges-default');
+    expect(execute.queries[0]).toContain('| WHERE src IN (?) AND kind IN (?, ?)');
+    expect(execute.calls[0]).toEqual(['role-a', 'can_assume', 'runs_as', 'seed', 'role-a']);
+    expect(out.edges.map((e) => [e.source, e.relation, e.target])).toEqual([
+      ['role-a', 'can_assume', 'role-b'],
+      ['role-a', 'can_assume', 'role-c'],
+      ['role-a', 'runs_as', 'i-1'],
+    ]);
+    expect(out.nodes.map((n) => [n.id, n.via])).toEqual([
+      ['role-b', 'can_assume'],
+      ['role-c', 'can_assume'],
+      ['i-1', 'runs_as'],
+    ]);
+    // 5 relationships matched for can_assume (2 kept), 1 for runs_as.
+    expect(out.stats.relationships_read).toBe(6);
+    expect(out.stats.es_took_per_query).toEqual([12]);
   });
 
   it('filters visited ids inside the hop query, after the pointer field is exploded', async () => {

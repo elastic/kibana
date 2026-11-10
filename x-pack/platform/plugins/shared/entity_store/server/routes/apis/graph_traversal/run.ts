@@ -52,6 +52,8 @@ export const runGraphTraversalBodySchema = lazySchema(() =>
     until: z.array(fieldValuesSchema()).max(50).optional(),
     /** Run as one ES|QL GRAPH EXPAND statement instead of hop by hop (snapshot builds only). */
     esql: z.boolean().optional(),
+    /** Read relationships from the space's edge documents instead of the entity arrays. */
+    edge_documents: z.boolean().optional(),
   })
 );
 
@@ -98,6 +100,7 @@ export function registerRunGraphTraversal(router: EntityStorePluginRouter) {
           exclusions,
           until,
           esql,
+          edge_documents: edgeDocuments,
         } = req.body;
         const effectiveScenarioId = scenarioId ?? getDefaultGraphTraversalScenarioId(entityId);
 
@@ -110,6 +113,7 @@ export function registerRunGraphTraversal(router: EntityStorePluginRouter) {
               maxHops,
               exclusions,
               until,
+              edgeDocuments,
             });
             return res.ok({ body });
           }
@@ -120,6 +124,7 @@ export function registerRunGraphTraversal(router: EntityStorePluginRouter) {
             maxHops,
             exclusions,
             until,
+            edgeDocuments,
           });
           return res.ok({ body });
         } catch (error) {

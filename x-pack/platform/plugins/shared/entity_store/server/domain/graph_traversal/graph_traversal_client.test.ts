@@ -124,8 +124,9 @@ describe('GraphTraversalClient', () => {
     expect(texts.filter((t) => t.includes('MV_EXPAND'))).toHaveLength(10);
     expect(texts.filter((t) => !t.includes('MV_EXPAND'))).toHaveLength(1);
     expect(query.mock.calls.at(-1)![0].params).toEqual([SEED, 'group-1', 'role-1', 'bucket-1']);
-    // Hop queries join the resolved lookup index so payloads describe the reached node.
-    expect(texts[0]).toContain(`LOOKUP JOIN ${LATEST_INDEX}`);
+    // Hop queries carry no payload unless a stop condition needs one, so they do not join;
+    // nodes are resolved once after the walk.
+    expect(texts[0]).not.toContain('LOOKUP JOIN');
   });
 
   it('stops at a node matching a stop condition and traces the route to it', async () => {

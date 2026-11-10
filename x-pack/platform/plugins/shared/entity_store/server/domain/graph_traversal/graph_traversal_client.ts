@@ -7,7 +7,10 @@
 
 import { performance } from 'perf_hooks';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { getLatestEntityIndexPattern } from '../../../common/domain/entity_index';
+import {
+  getEntityEdgesAlias,
+  getLatestEntityIndexPattern,
+} from '../../../common/domain/entity_index';
 import type {
   GraphTraversalExclusion,
   GraphTraversalHopStats,
@@ -53,6 +56,8 @@ export interface RunGraphTraversalParams {
   exclusions?: GraphTraversalExclusion[];
   /** Added to the scenario's own stop conditions. */
   until?: GraphTraversalStopCondition[];
+  /** Read relationships from the space's edge documents instead of the entity arrays. */
+  edgeDocuments?: boolean;
 }
 
 /**
@@ -79,6 +84,7 @@ export class GraphTraversalClient {
     maxHops,
     exclusions = [],
     until = [],
+    edgeDocuments = false,
   }: RunGraphTraversalParams): Promise<RunGraphTraversalResponse> {
     const startedAt = Date.now();
     const plan = loadEntityGraphTraversalPlan(
@@ -95,6 +101,7 @@ export class GraphTraversalClient {
     }
     const stopConditions = [...plan.until, ...until];
     const indexPattern = getLatestEntityIndexPattern(this.namespace);
+    const edgesIndex = edgeDocuments ? getEntityEdgesAlias(this.namespace) : undefined;
 
     // The concrete lookup-mode index is resolved once for every hop and the node lookup.
     const resolveStartedAt = performance.now();
@@ -121,11 +128,15 @@ export class GraphTraversalClient {
           : nodes.filter((node) => node.hop === hopsExecuted).map((node) => node.id);
       const visited = [seedId, ...nodes.map((node) => node.id)];
       const hopStartedAt = performance.now();
+      // Edge payloads only serve the stop conditions inside the hop, which add the fields they
+      // test; the scenario's own payload fields would be read and joined for nothing, since the
+      // nodes are resolved once after the walk.
       const result = await runHop(
         {
-          hop,
+          hop: { ...hop, payload_fields: [] },
           index: indexPattern,
           lookupIndex,
+          edgesIndex,
           direction: plan.direction,
           frontier,
           visited,
@@ -149,13 +160,22 @@ export class GraphTraversalClient {
         hop_number: hop.hop_number,
         name: hop.name,
         frontier_size: result.stats.frontier_size,
+        dropped_frontier: result.stats.dropped_frontier,
+        excluded_frontier: result.stats.excluded_frontier,
         queries: result.stats.queries,
         rows_returned: result.stats.rows_returned,
+        relationships_read: result.stats.relationships_read,
         edges_added: result.stats.edges_added,
+        dropped_edges: result.stats.dropped_edges,
+        excluded_edges: result.stats.excluded_edges,
+        closing_edges: result.stats.closing_edges,
+        until_matched: result.stats.until_matched,
+        hubs_skipped: result.stats.hubs_skipped,
         new_nodes: result.stats.new_nodes,
         hop_ms: elapsedMs(hopStartedAt),
         query_ms: result.stats.query_ms,
         es_took_ms: result.stats.es_took_ms,
+        es_took_per_query: result.stats.es_took_per_query,
       });
       this.logger.info(
         `entity graph traversal hop ${hop.hop_number} (${hop.name}): ${result.stats.edges_added} edges, ${result.stats.new_nodes} new nodes, stop_reason="${result.stop_reason}"`
@@ -204,6 +224,7 @@ export class GraphTraversalClient {
     return {
       execution_id: HOPS_GRAPH_TRAVERSAL_EXECUTION_ID,
       engine: 'hops',
+      ...(edgeDocuments && { edge_documents: true }),
       status: 'completed',
       output,
       duration_ms: Date.now() - startedAt,

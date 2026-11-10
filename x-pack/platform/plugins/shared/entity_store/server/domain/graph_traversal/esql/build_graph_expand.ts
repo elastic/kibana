@@ -27,6 +27,11 @@ export const graphExpandPayloadColumn = (index: number): string => `__payload_${
 
 /** A run's `lookback` only expands entities seen within the window. */
 export const GRAPH_EXPAND_LOOKBACK_FIELD = 'entity.lifecycle.last_seen';
+/** Edge document fields and the lookback field on them. */
+export const EDGE_SOURCE_FIELD = 'src';
+export const EDGE_KIND_FIELD = 'kind';
+export const EDGE_TARGET_FIELD = 'dst';
+export const EDGE_LAST_SEEN_FIELD = 'last_seen';
 
 /** The walk's reached-node column, and its name once `LOOKUP JOIN` has keyed on it. */
 export const NODE_REACHED_COLUMN = 'node_reached';
@@ -73,6 +78,8 @@ export interface GraphExpandStatement {
   reachedColumn: string;
   /** Whether the rows carry the reached node's entity document (`LOOKUP JOIN`). */
   enriched: boolean;
+  /** Whether the walk read edge documents; `relation` then holds the kind itself. */
+  edgeDocuments: boolean;
 }
 
 export interface BuildGraphExpandParams {
@@ -84,6 +91,12 @@ export interface BuildGraphExpandParams {
    * document from. Without it the rows carry ids only and nodes come back unresolved.
    */
   lookupIndex?: string;
+  /**
+   * The space's edges index or alias. When set the walk reads edge documents (`src`, `kind`,
+   * `dst`) instead of the relationship arrays on the entity documents: one TO field carries
+   * every relationship, `relation_field` names the kind and `hop_relations` the kinds per hop.
+   */
+  edgesIndex?: string;
   seedId: string;
   lookback?: string;
   exclusions?: GraphTraversalExclusion[];
@@ -107,6 +120,7 @@ export const buildGraphExpandStatement = ({
   plan,
   indexPattern,
   lookupIndex,
+  edgesIndex,
   seedId,
   lookback,
   exclusions = [],
@@ -115,6 +129,7 @@ export const buildGraphExpandStatement = ({
   if (plan.hops.length === 0) {
     throw new GraphTraversalError(`Scenario "${plan.id}" has no hops`, 400);
   }
+  const edgeDocuments = edgesIndex !== undefined;
   // Parameters are positional: the seed comes first in the statement, then the document
   // exclusion values in the WHERE, then the UNTIL ids.
   const params: string[] = [];
@@ -124,11 +139,13 @@ export const buildGraphExpandStatement = ({
   };
   const seedPlaceholder = placeholders([seedId]);
 
-  // The union of relationship fields across hops, in first-seen order.
+  // The union of relationship fields across hops, in first-seen order. Over edge documents
+  // the kinds play that part: `relation` carries a kind value, which maps to itself.
   const targets: GraphExpandStatement['targets'] = [];
   for (const hop of plan.hops) {
     for (const { field, relation } of hop.target_fields) {
-      if (!targets.some((t) => t.field === field)) targets.push({ field, relation });
+      const key = edgeDocuments ? relation : field;
+      if (!targets.some((t) => t.field === key)) targets.push({ field: key, relation });
     }
   }
 
@@ -144,15 +161,23 @@ export const buildGraphExpandStatement = ({
   const excludedIds = exclusions
     .filter((e) => e.field === NODE_ID_EXCLUSION_FIELD)
     .flatMap((e) => e.values);
+  const documentExclusions = exclusions.filter((e) => e.field !== NODE_ID_EXCLUSION_FIELD);
+  // The command's WHERE tests the documents it scans. Over edge documents those are edges,
+  // so a hop filter or an exclusion on an entity field has nothing to test.
+  if (edgeDocuments && (filter || documentExclusions.length > 0)) {
+    throw new GraphTraversalError(
+      `The edge-document walk of scenario "${plan.id}" cannot filter entity documents; drop the hop filter and the exclusions on fields other than ${NODE_ID_EXCLUSION_FIELD}`,
+      400
+    );
+  }
   const predicates: string[] = [];
   if (filter) predicates.push(`(${filter})`);
   if (lookback) {
-    predicates.push(
-      `${quoteField(GRAPH_EXPAND_LOOKBACK_FIELD)} >= NOW() - ${lookbackToEsqlSpan(lookback)}`
-    );
+    const lookbackField = edgeDocuments ? EDGE_LAST_SEEN_FIELD : GRAPH_EXPAND_LOOKBACK_FIELD;
+    predicates.push(`${quoteField(lookbackField)} >= NOW() - ${lookbackToEsqlSpan(lookback)}`);
   }
   // Document exclusions: null-safe and multi-value safe.
-  for (const { field, values } of exclusions.filter((e) => e.field !== NODE_ID_EXCLUSION_FIELD)) {
+  for (const { field, values } of documentExclusions) {
     const quoted = quoteField(field);
     const contains = values.map(() => `MV_CONTAINS(${quoted}, ?)`).join(' OR ');
     placeholders(values);
@@ -194,15 +219,29 @@ export const buildGraphExpandStatement = ({
     max_edges_per_hop: limits.max_edges_per_hop,
     direction: plan.direction,
     closing_edges: false,
-    hop_fields: plan.hops.map((hop) => hop.target_fields.map((t) => t.field).join(',')),
+    ...(edgeDocuments
+      ? {
+          relation_field: EDGE_KIND_FIELD,
+          hop_relations: plan.hops.map((hop) => hop.target_fields.map((t) => t.relation).join(',')),
+        }
+      : {
+          hop_fields: plan.hops.map((hop) => hop.target_fields.map((t) => t.field).join(',')),
+        }),
     ...(excludedIds.length > 0 && { exclude: excludedIds }),
   };
 
   const lines = [
     GRAPH_EXPAND_PREAMBLE,
     `ROW node_id = ${seedPlaceholder}`,
-    `| GRAPH EXPAND ${indexPattern} ON node_id == ${quoteField(NODE_ID_EXCLUSION_FIELD)}`,
-    `    TO (${targets.map((t) => quoteField(t.field)).join(', ')})`,
+    ...(edgeDocuments
+      ? [
+          `| GRAPH EXPAND ${edgesIndex} ON node_id == ${EDGE_SOURCE_FIELD}`,
+          `    TO ${EDGE_TARGET_FIELD}`,
+        ]
+      : [
+          `| GRAPH EXPAND ${indexPattern} ON node_id == ${quoteField(NODE_ID_EXCLUSION_FIELD)}`,
+          `    TO (${targets.map((t) => quoteField(t.field)).join(', ')})`,
+        ]),
   ];
   if (predicates.length > 0) {
     lines.push(`    WHERE ${predicates.join(' AND ')}`);
@@ -220,7 +259,7 @@ export const buildGraphExpandStatement = ({
       'node_from',
       'node_to',
       'hop',
-      ...(targets.length > 1 ? ['relation'] : []),
+      ...(targets.length > 1 || edgeDocuments ? ['relation'] : []),
       'dropped',
       GRAPH_EXPAND_COUNT_COLUMN,
       quoteField(NODE_ID_EXCLUSION_FIELD),
@@ -244,6 +283,7 @@ export const buildGraphExpandStatement = ({
     maxHops: limits.max_hops,
     reachedColumn: lookupIndex !== undefined ? NODE_ID_EXCLUSION_FIELD : NODE_REACHED_COLUMN,
     enriched: lookupIndex !== undefined,
+    edgeDocuments,
   };
 };
 
