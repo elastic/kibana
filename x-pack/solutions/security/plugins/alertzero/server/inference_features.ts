@@ -22,40 +22,47 @@ import {
  * anyway. GA dates track `AGENT_BUILDER_RECOMMENDED_ENDPOINTS`, the list kept closest
  * to what EIS actually serves; endpoints Agent Builder does not recommend carry no date.
  *
- * Each list is ordered by measured quality on the workers that tier runs, not by model size, so
- * the same model may lead more than one tier. Every list spans at least two vendors, so a tier
- * that loses a vendor degrades to a comparable model rather than collapsing onto the cluster
- * default.
+ * Each list is the product-recommended default for its tier and spans at least two vendors, so a
+ * tier that loses a vendor degrades to a comparable model from another one rather than collapsing
+ * onto the cluster default.
  *
  * The last entry of each tier is served by the Serverless trial EIS catalog, which provisions none
  * of the entries above it. Without it every tier resolves to the first connector in the catalog,
  * so all three collapse onto one arbitrary model.
  */
 
-// The efficient tier runs alert triage on every sweep, and a wrong verdict can become a close
-// proposal. GPT-6 Luna scored 38/48 on the triage evals; GPT-6 Sol scored 47/48 with a faster
-// median run. GLM 5.2 is the trial-served entry (47/48).
+// The efficient tier takes the highest-volume and lowest-stakes calls we make, so the paid
+// recommendations are small models: a mid-size fallback here would silently bill the high-volume
+// path at those rates. The trial-served entry is the deliberate exception — GLM 5.2 is mid-size,
+// but it is only reached when no paid small model has a connector (the Serverless trial catalog),
+// where volumes are demo-scale and it is the only catalog model that clears the floor-triage eval
+// bar (2026-11 refresh: 12/12 strict verdicts vs 6/12 for Nemotron 3.5 Super VL).
 const EFFICIENT_RECOMMENDED_ENDPOINTS = [
-  '.openai-gpt-6-sol-chat_completion', // GPT-6 Sol, GA 2026-09-28
-  '.anthropic-claude-5.5-sonnet-chat_completion', // Claude Sonnet 5.5, GA 2026-09-28
+  '.openai-gpt-6-luna-chat_completion', // GPT-6 Luna, GA 2026-09-28
+  '.google-gemini-3.5-flash-lite-chat_completion', // Gemini 3.5 Flash Lite, GA 2026-07-21
+  '.anthropic-claude-4.5-haiku-chat_completion', // Claude Haiku 4.5, GA 2025-10-01
   '.zai-glm-5-2-chat_completion', // GLM 5.2
 ];
 
-// The balanced tier loops over many tool rounds (diagnosing a noisy rule, endpoint forensics).
-// Claude Sonnet 5.5 scored highest on rule-tuning quality, with GPT-6 Sol close behind. Sonnet 5
-// is the trial-served entry and the strongest catalog model measured on rule tuning.
+// The balanced tier covers calls where accuracy matters but which either run often (triaging every
+// alert) or loop over many tool rounds (diagnosing a rule), so frontier latency and cost would
+// multiply by the call or round count. A strong mid-size model is the right rung.
 const BALANCED_RECOMMENDED_ENDPOINTS = [
   '.anthropic-claude-5.5-sonnet-chat_completion', // Claude Sonnet 5.5, GA 2026-09-28
-  '.openai-gpt-6-sol-chat_completion', // GPT-6 Sol, GA 2026-09-28
+  '.openai-gpt-5.6-terra-chat_completion', // GPT-5.6 Terra
+  '.google-gemini-3.6-flash-chat_completion', // Gemini 3.6 Flash
   '.anthropic-claude-5-sonnet-chat_completion', // Claude Sonnet 5, GA 2026-07-03
 ];
 
-// GPT-6 Sol and Claude Opus 5.5 tie on Attack Discovery Worker verdicts, where older frontier
-// models fell well behind; Sol also leads the FP/TP judge on accuracy and claim grounding. Kimi
-// K3 is the strongest trial-served entry.
+// Attack Discovery reads a whole batch of alerts and rule creation drafts an ES|QL rule from a gap
+// description, both single-pass and both judged on the quality of one output, so every model here
+// is frontier-class. GPT-6 Sol leads as the cheapest model with no significant loss to Opus on
+// this tier's workers in the 2026-11 eval refresh. Opus sits last so losing OpenAI still leaves a
+// frontier model, not a mid-size one.
 const FRONTIER_RECOMMENDED_ENDPOINTS = [
   '.openai-gpt-6-sol-chat_completion', // GPT-6 Sol, GA 2026-09-28
-  '.anthropic-claude-5.5-opus-chat_completion', // Claude Opus 5.5, GA 2026-09-22
+  '.openai-gpt-5.6-sol-chat_completion', // GPT-5.6 Sol, GA 2026-07-09
+  '.anthropic-claude-5-opus-chat_completion', // Claude Opus 5, GA 2026-07-24
   '.moonshot-kimi-k3-chat_completion', // Kimi K3
 ];
 
@@ -105,7 +112,7 @@ export const registerAlertZeroInferenceFeatures = (
   }
 
   // Registration order is render order: the registry is a Map and the UI lists what it returns, so
-  // the rows read from the highest-volume calls to the most demanding ones.
+  // the rows read cheapest to most expensive.
   const tiers = [
     {
       featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
@@ -114,7 +121,7 @@ export const registerAlertZeroInferenceFeatures = (
       }),
       featureDescription: i18n.translate('xpack.alertzero.inferenceFeature.efficientDescription', {
         defaultMessage:
-          'Calls that run on every alert sweep, such as triaging alerts and checking detection coverage. A triage verdict can lead to a close proposal, so choose a model that stays accurate at volume.',
+          'Quick, lightweight judgment on calls that run often, such as checking detection coverage. Choose a small, low-cost model.',
       }),
       recommendedEndpoints: EFFICIENT_RECOMMENDED_ENDPOINTS,
     },
@@ -125,7 +132,7 @@ export const registerAlertZeroInferenceFeatures = (
       }),
       featureDescription: i18n.translate('xpack.alertzero.inferenceFeature.balancedDescription', {
         defaultMessage:
-          'Calls that use tools over many steps, such as diagnosing a noisy rule or analyzing endpoint forensics. Choose a model that is strong at multi-step tool use.',
+          'Calls where accuracy matters but that run often or use tools over many steps, such as triaging alerts or diagnosing a noisy rule. Choose a strong mid-size model.',
       }),
       recommendedEndpoints: BALANCED_RECOMMENDED_ENDPOINTS,
     },
@@ -147,9 +154,9 @@ export const registerAlertZeroInferenceFeatures = (
       parentFeatureId: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
       taskType: 'chat_completion',
       isTechPreview: true,
-      // Each list is picked from evals of the workers on that tier, so letting the cluster-wide
-      // default win would put those workers on a model that may score far lower on them. The hard
-      // escape hatch survives: `defaultConnectorOnly`
+      // The tiers are deliberately on different rungs, so letting the cluster-wide default win
+      // would collapse them onto one model and lose both the cost saving on the efficient tier and
+      // the quality on the frontier one. The hard escape hatch survives: `defaultConnectorOnly`
       // short-circuits before feature resolution, so an operator who wants one model everywhere
       // still gets it.
       ignoreGlobalDefault: true,
