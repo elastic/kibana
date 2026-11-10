@@ -11,12 +11,14 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   SecurityRequestHandlerContext,
   AuthcRequestHandlerContext,
+  AuthzRequestHandlerContext,
   AuditRequestHandlerContext,
 } from '@kbn/core-security-server';
 import type { InternalSecurityServiceStart } from './internal_contracts';
 
 export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerContext {
   #authc?: AuthcRequestHandlerContext;
+  #authz?: AuthzRequestHandlerContext;
   #audit?: AuditRequestHandlerContext;
   constructor(
     private readonly securityStart: InternalSecurityServiceStart,
@@ -51,6 +53,17 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
       };
     }
     return this.#authc;
+  }
+
+  public get authz() {
+    if (this.#authz == null) {
+      const uiam = this.securityStart.authz.uiam;
+
+      this.#authz = {
+        uiam: uiam ? { hasBillingAccess: () => uiam.hasBillingAccess(this.request) } : null,
+      };
+    }
+    return this.#authz;
   }
 
   public get audit() {

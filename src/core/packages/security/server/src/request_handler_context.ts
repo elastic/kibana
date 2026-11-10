@@ -14,6 +14,7 @@ import type { APIKeysWithContextType } from './authentication/api_keys';
 
 export interface SecurityRequestHandlerContext {
   authc: AuthcRequestHandlerContext;
+  authz: AuthzRequestHandlerContext;
   audit: AuditRequestHandlerContext;
 }
 
@@ -22,6 +23,16 @@ export interface AuthcRequestHandlerContext {
   /** See `CoreAuthenticationService.getPrincipal`, bound to the context's request. */
   getPrincipal(): AuthenticatedPrincipal | null;
   apiKeys: APIKeysWithContextType;
+}
+
+export interface AuthzRequestHandlerContext {
+  /** See `CoreAuthorizationService.uiam`, bound to the context's request. */
+  uiam: UiamAuthzRequestHandlerContext | null;
+}
+
+export interface UiamAuthzRequestHandlerContext {
+  /** See `CoreUiamAuthorizationService.hasBillingAccess`, bound to the context's request. */
+  hasBillingAccess(): Promise<boolean>;
 }
 
 export interface AuditRequestHandlerContext {

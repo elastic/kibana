@@ -63,6 +63,8 @@ export type {
 export type {
   SecurityRequestHandlerContext,
   AuthcRequestHandlerContext,
+  AuthzRequestHandlerContext,
+  UiamAuthzRequestHandlerContext,
   AuditRequestHandlerContext,
 } from './src/request_handler_context';
 export type {

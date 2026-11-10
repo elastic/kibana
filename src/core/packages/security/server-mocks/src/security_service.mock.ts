@@ -166,6 +166,11 @@ const createRequestHandlerContextMock = () => {
         },
       }),
     }),
+    authz: lazyObject({
+      uiam: lazyObject({
+        hasBillingAccess: jest.fn().mockResolvedValue(false),
+      }),
+    }),
     audit: lazyObject({
       logger: lazyObject({
         log: jest.fn(),

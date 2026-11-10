@@ -30,4 +30,28 @@ describe('CoreSecurityRouteHandlerContext', () => {
     expect(context.authc.getPrincipal()).toBe(principal);
     expect(getPrincipal).toHaveBeenCalledWith(request);
   });
+
+  it('binds authz.uiam.hasBillingAccess to the context request', async () => {
+    const request = httpServerMock.createKibanaRequest();
+    const hasBillingAccess = jest.fn().mockResolvedValue(true);
+    const securityStart = {
+      authz: { uiam: { hasBillingAccess } },
+    } as unknown as InternalSecurityServiceStart;
+
+    const context = new CoreSecurityRouteHandlerContext(securityStart, request);
+
+    const { authz } = context;
+    await expect(authz.uiam?.hasBillingAccess()).resolves.toBe(true);
+    expect(hasBillingAccess).toHaveBeenCalledWith(request);
+    expect(context.authz).toBe(authz);
+  });
+
+  it('exposes authz.uiam as null when UIAM is not configured', () => {
+    const request = httpServerMock.createKibanaRequest();
+    const securityStart = { authz: { uiam: null } } as unknown as InternalSecurityServiceStart;
+
+    const context = new CoreSecurityRouteHandlerContext(securityStart, request);
+
+    expect(context.authz.uiam).toBeNull();
+  });
 });
