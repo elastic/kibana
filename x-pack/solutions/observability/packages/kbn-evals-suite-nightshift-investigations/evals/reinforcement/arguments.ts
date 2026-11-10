@@ -154,12 +154,13 @@ const formatArguments = (submission: SubmitArguments): string =>
 
 /**
  * Structural check of what a turn's submit calls left on the tree (see `effectiveSubmission`)
- * against the investigation response, the tree before the run, and the tree after it. A score of 1 means the agent passed a traversal for this tree,
- * the visit path is non-empty, the causal path is set only when the response confirms a cause,
- * and any declared merges agree with the two trees. With `requireMerge` the submit must declare a
- * merge, and with `requireCausalPath` a confirmed response must come with a causal path; both are
- * round-level rules the caller sets for the seeded tree only. Whether those merges and paths are
- * the right ones for the investigation is the LLM judge's job.
+ * against the investigation response, the tree before the run, and the tree after it. A score of 1
+ * means the agent passed a traversal for this tree, the visit path is non-empty, the causal path is
+ * set only when the response confirms a cause, and any declared merges agree with the two trees.
+ * With `requireMerge` the submit must declare a merge, and with `requireCausalPath` a confirmed
+ * response must come with a causal path; both are round-level rules the caller sets for the seeded
+ * tree only. Whether those merges and paths are the right ones for the investigation is the LLM
+ * judge's job.
  */
 export const gradeSubmissions = ({
   submissions,
