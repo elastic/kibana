@@ -164,7 +164,7 @@ export const evaluateTrace = async (
     return message;
   });
   const hasRetriableErrors = failedResults.some(
-    (result) => result.error?.code !== 'evidence_unmet'
+    ({ error }) => error?.code !== 'evidence_unmet' && error?.code !== 'not_applicable'
   );
 
   return { results, errors, hasRetriableErrors };

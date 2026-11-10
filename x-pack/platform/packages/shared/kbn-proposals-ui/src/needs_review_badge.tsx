@@ -6,7 +6,13 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiLoadingSpinner, type EuiBadgeProps, type IconType } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiLoadingSpinner,
+  type EuiBadgeProps,
+  type IconType,
+  useEuiTheme,
+} from '@elastic/eui';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 
 export interface ProposedActionStatusBadgeProps {
@@ -25,12 +31,18 @@ export const ProposedActionStatusBadge = ({
   label = APPROVAL_MODAL_TRANSLATIONS.needsReviewBadge,
   isLoading = false,
   isDisabled = false,
-}: ProposedActionStatusBadgeProps) => (
-  <EuiBadge
-    color={color}
-    iconType={isLoading ? EuiLoadingSpinner : iconType}
-    isDisabled={isDisabled}
-  >
-    {label}
-  </EuiBadge>
-);
+}: ProposedActionStatusBadgeProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiBadge color={color} iconType={isLoading ? undefined : iconType} isDisabled={isDisabled}>
+      {isLoading && (
+        <EuiLoadingSpinner
+          size="s"
+          style={{ position: 'relative', top: euiTheme.size.xxs, marginRight: euiTheme.size.xs }}
+        />
+      )}
+      {label}
+    </EuiBadge>
+  );
+};

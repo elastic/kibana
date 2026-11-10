@@ -24,7 +24,8 @@ const createScrollContainer = ({ scrollTop }: { scrollTop: number }) => {
 const renderScrollActions = (
   scrollContainer: HTMLDivElement,
   timelineContent: HTMLDivElement | null = null,
-  anchoredItemKey?: string
+  anchoredItemKey?: string,
+  anchoredItemGap?: number
 ) =>
   renderHook(() =>
     useConversationScrollActions({
@@ -32,6 +33,7 @@ const renderScrollActions = (
       scrollContainerHeight: 400,
       timelineContent,
       anchoredItemKey,
+      anchoredItemGap,
     })
   );
 
@@ -110,6 +112,15 @@ describe('useConversationScrollActions', () => {
     renderScrollActions(scrollContainer, content, 'round-1::user_message');
 
     expect(content.style.minHeight).toBe('500px');
+  });
+
+  it('leaves the gap above the anchored item by reserving that much less', () => {
+    const scrollContainer = atBottom();
+    const content = withAnchoredItemAt(scrollContainer, 100);
+
+    renderScrollActions(scrollContainer, content, 'round-1::user_message', 8);
+
+    expect(content.style.minHeight).toBe('492px');
   });
 
   it('reserves nothing when no item is anchored', () => {

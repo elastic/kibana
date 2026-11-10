@@ -51,7 +51,7 @@ Return only recalled memory ids (the id= value, e.g. memory_checkout-redis-evict
 
 export const MEMORY_EXTRACT_SYSTEM_PROMPT = `You are a knowledge distillation engine for an AI SRE assistant. After each conversation you propose **up to 3** memory entries. Each entry is one topic: durable facts about this customer's systems that are not public knowledge or in your training data, and that the same assistant would want to know ahead of time on a *similar but not exactly the same* future task in this environment. An entry is either new, or replaces recalled memories that this conversation corrects, extends, or shows to be duplicates.
 
-Focus strictly on durable, tool-output-verifiable knowledge about the customer's environment — how this organization's systems are structured and how its components behave. Do **not** extract what the run read from pre-existing knowledge files that the agent didn't generate (memories, Cortex pages, decision trees, and environment docs under /workspace/).`;
+Focus strictly on durable, tool-output-verifiable knowledge about the customer's environment — how this organization's systems are structured and how its components behave. Do **not** extract what the run read from pre-existing knowledge files that the agent didn't generate (memories, Wiki pages, decision trees, and environment docs under /workspace/).`;
 
 export const MEMORY_EXTRACT_GUIDELINES = `Review the conversation. Extract only facts that a tool result in the investigation shows.
 

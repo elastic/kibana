@@ -12,7 +12,7 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository'
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { NightshiftInvestigationsClient } from '../client/investigations_client';
-import type { CortexPageStore } from '../cortex/page_store';
+import type { WikiPageStore } from '../wiki/page_store';
 import type {
   ListSandboxConnectors,
   ListSandboxConnectorTypes,
@@ -49,7 +49,7 @@ export type GetAutomationsSoClient = (
 
 export type GetWorkflowsManagement = () => WorkflowsServerPluginSetup | undefined;
 
-export type GetCortexPageStore = (request: KibanaRequest) => CortexPageStore;
+export type GetWikiPageStore = (request: KibanaRequest) => WikiPageStore;
 
 export type GetDecisionTreeStore = (request: KibanaRequest) => DecisionTreeStore;
 
@@ -66,8 +66,9 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getEpisodeLookup: GetEpisodeLookup;
   getAutomationsSoClient: GetAutomationsSoClient;
   getWorkflowsManagement: GetWorkflowsManagement;
-  getCortexPageStore: GetCortexPageStore;
-  isCortexEnabled: () => boolean;
+  isUniversalAlertingAvailable: () => boolean;
+  getWikiPageStore: GetWikiPageStore;
+  isWikiEnabled: () => boolean;
   listSandboxConnectors: ListSandboxConnectors;
   listSandboxConnectorTypes: ListSandboxConnectorTypes;
   sandboxAllowlistClient: SandboxAllowlistClient;
