@@ -26,6 +26,7 @@ import {
 import deepMerge from 'deepmerge';
 import {
   filter,
+  switchMap,
   startWith,
   Subject,
   BehaviorSubject,
@@ -35,6 +36,7 @@ import {
   map,
   firstValueFrom,
   timeout,
+  timer,
   EMPTY,
   skip,
   concatMap,
@@ -44,12 +46,28 @@ import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
 import type { IRouter } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
+import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+} from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { schema } from '@kbn/config-schema';
 import { createOpenFeatureLogger } from './create_open_feature_logger';
 import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
 import { incrementCounter } from './increment_counter';
 import { registerOfrepRoutes } from './ofrep_routes';
+import { registerOverrideRoutes } from './overrides_routes';
+import {
+  FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_ID,
+  FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_TYPE,
+  featureFlagsOverridesSavedObjectType,
+  normalizeOverrides,
+  RUNTIME_OVERRIDES_POLL_INTERVAL_MS,
+  type FeatureFlagOverrideValue,
+  type FeatureFlagsOverridesAttributes,
+} from './overrides_saved_object';
 
 /**
  * Core-internal contract for the setup lifecycle step.
@@ -69,7 +87,15 @@ export interface InternalFeatureFlagsSetup extends FeatureFlagsSetup {
 
 export interface FeatureFlagsSetupDeps {
   http: InternalHttpServiceSetup;
+  savedObjects: SavedObjectsServiceSetup;
 }
+
+export interface FeatureFlagsStartDeps {
+  savedObjects: SavedObjectsServiceStart;
+}
+
+/** Enough for every flag Kibana evaluates, with room for experiments. */
+const MAX_TRACKED_EVALUATIONS = 1000;
 
 /**
  * Start contract used inside core. One-shot evaluation stays available for the HTTP
@@ -131,13 +157,26 @@ export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
   private readonly logger: Logger;
   private readonly stop$ = new Subject<void>();
+  /** Overrides from `feature_flags.overrides` in the Kibana config. */
+  private readonly configOverrides$ = new BehaviorSubject<Record<string, unknown>>({});
+  /** Overrides stored in the feature-flags-overrides saved object. */
+  private readonly runtimeOverrides$ = new BehaviorSubject<
+    Record<string, FeatureFlagOverrideValue>
+  >({});
+  /** Config overrides with runtime overrides winning. Evaluation reads this. */
   private readonly overrides$ = new BehaviorSubject<Record<string, unknown>>({});
   private readonly contextChanged$ = new Subject<void>();
+  private overridesRepository: ISavedObjectsRepository | undefined;
+  private runtimeOverrideWriteCount = 0;
+  private latestOverrideVersion: string | undefined;
+  private stopped = false;
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private initialFeatureFlagsGetter: InitialFeatureFlagsGetter = async () => ({});
   private waitForContextReadyPromise: Promise<void> | undefined;
   private readonly providerReady$ = new BehaviorSubject<boolean>(true); // true by default if no provider is set
   private waitForProviderReadyPromise: Promise<unknown> | undefined;
+  /** Last value returned for each flag this node has evaluated. */
+  private readonly evaluatedFlags = new Map<string, FeatureFlagOverrideValue>();
 
   /**
    * The core service's constructor
@@ -152,14 +191,17 @@ export class FeatureFlagsService {
   /**
    * Setup lifecycle method
    */
-  public setup({ http }: FeatureFlagsSetupDeps): InternalFeatureFlagsSetup {
+  public setup({ http, savedObjects }: FeatureFlagsSetupDeps): InternalFeatureFlagsSetup {
+    savedObjects.registerType(featureFlagsOverridesSavedObjectType);
+
     // Register "overrides" to be changed via the dynamic config endpoint (enabled in test environments only)
     this.core.configService.addDynamicConfigPaths(featureFlagsConfig.path, ['overrides']);
 
     this.core.configService
       .atPath<FeatureFlagsConfig>(featureFlagsConfig.path)
       .subscribe(({ overrides = {} }) => {
-        this.overrides$.next(getFlattenedObject(overrides));
+        this.configOverrides$.next(getFlattenedObject(overrides));
+        this.publishMergedOverrides();
       });
 
     this.registerRoutes(http);
@@ -186,14 +228,18 @@ export class FeatureFlagsService {
   /**
    * Start lifecycle method
    */
-  public start(): InternalFeatureFlagsStart {
+  public start({ savedObjects }: FeatureFlagsStartDeps): InternalFeatureFlagsStart {
+    this.overridesRepository = savedObjects.createInternalRepository([
+      FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_TYPE,
+    ]);
+
     const featureFlagsChanged$ = new Subject<string[]>();
     this.featureFlagsClient.addHandler(ServerProviderEvents.ConfigurationChanged, (event) => {
       if (event?.flagsChanged) {
         featureFlagsChanged$.next(event.flagsChanged);
       }
     });
-    this.overrides$.pipe(pairwise()).subscribe(([prev, next]) => {
+    this.overrides$.pipe(pairwise(), takeUntil(this.stop$)).subscribe(([prev, next]) => {
       const mergedObject = { ...prev, ...next };
       const keys = Object.keys(mergedObject).filter(
         // Keep only the keys that have been removed or changed
@@ -201,6 +247,8 @@ export class FeatureFlagsService {
       );
       featureFlagsChanged$.next(keys);
     });
+    // Subscribe before the first poll so that poll's emission is observed.
+    this.pollRuntimeOverrides(this.overridesRepository);
     const observeFeatureFlag$ = (flagName: string) =>
       merge(
         // Flag changes
@@ -272,14 +320,17 @@ export class FeatureFlagsService {
    * Stop lifecycle method
    */
   public async stop() {
+    this.stopped = true;
     try {
       await OpenFeature.close();
     } finally {
-      this.providerReady$.complete();
-      this.overrides$.complete();
-      this.contextChanged$.complete();
       this.stop$.next();
       this.stop$.complete();
+      this.providerReady$.complete();
+      this.overrides$.complete();
+      this.configOverrides$.complete();
+      this.runtimeOverrides$.complete();
+      this.contextChanged$.complete();
     }
   }
 
@@ -313,8 +364,17 @@ export class FeatureFlagsService {
 
     // Report the counter for the flag evaluation.
     incrementCounter(flagName, value);
+    this.rememberEvaluation(flagName, value);
 
     return value;
+  }
+
+  /** Keeps the helper's flag list populated when the provider has no snapshot. */
+  private rememberEvaluation(flagName: string, value: FeatureFlagOverrideValue): void {
+    if (!this.evaluatedFlags.has(flagName) && this.evaluatedFlags.size >= MAX_TRACKED_EVALUATIONS) {
+      return;
+    }
+    this.evaluatedFlags.set(flagName, value);
   }
 
   /**
@@ -338,8 +398,8 @@ export class FeatureFlagsService {
   }
 
   /**
-   * Flag values the browser should render. Config overrides win over the provider snapshot,
-   * matching server-side evaluation.
+   * Flag values the browser should render. Runtime overrides win over config overrides,
+   * and both win over the provider snapshot, matching server-side evaluation.
    */
   private async getBrowserSnapshot(): Promise<Record<string, unknown>> {
     const flags = await this.initialFeatureFlagsGetter();
@@ -350,6 +410,19 @@ export class FeatureFlagsService {
     const router = http.createRouter('');
     this.registerCounterRoute(router);
     registerOfrepRoutes(router, () => this.getBrowserSnapshot(), this.logger);
+    registerOverrideRoutes(router, {
+      getRepository: () => this.overridesRepository,
+      getOverridesResponse: () => ({
+        runtimeOverrides: this.runtimeOverrides$.value,
+        configOverrides: this.configOverrides$.value,
+        evaluatedFlags: [...this.evaluatedFlags.entries()].map(([key, flagValue]) => ({
+          key,
+          value: flagValue,
+        })),
+      }),
+      commitRuntimeOverrides: (overrides) => this.commitRuntimeOverrides(overrides),
+      logger: this.logger,
+    });
   }
 
   private registerCounterRoute(router: IRouter): void {
@@ -403,6 +476,76 @@ export class FeatureFlagsService {
       });
     }
     await this.waitForProviderReadyPromise;
+  }
+
+  /** Runtime overrides replace config overrides for the same key. */
+  private publishMergedOverrides(): void {
+    this.overrides$.next({
+      ...this.configOverrides$.value,
+      ...this.runtimeOverrides$.value,
+    });
+  }
+
+  /**
+   * Applies a local write immediately. The write counter moves after the saved object
+   * update so a poll that started earlier cannot put the stale document back.
+   */
+  private commitRuntimeOverrides(overrides: Record<string, FeatureFlagOverrideValue>): void {
+    this.runtimeOverrides$.next(overrides);
+    this.publishMergedOverrides();
+    this.runtimeOverrideWriteCount++;
+    // This write's saved-object version is not known here. A poll may already have
+    // recorded a newer version, and keeping that version would skip it forever.
+    this.latestOverrideVersion = undefined;
+  }
+
+  private pollRuntimeOverrides(repository: ISavedObjectsRepository): void {
+    timer(0, RUNTIME_OVERRIDES_POLL_INTERVAL_MS)
+      .pipe(
+        switchMap(async () => {
+          const writeCountAtRead = this.runtimeOverrideWriteCount;
+          try {
+            const persisted = await repository.get<FeatureFlagsOverridesAttributes>(
+              FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_TYPE,
+              FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_ID
+            );
+            if (this.stopped || writeCountAtRead !== this.runtimeOverrideWriteCount || !persisted) {
+              return;
+            }
+            if (this.latestOverrideVersion === persisted.version) {
+              return;
+            }
+            this.latestOverrideVersion = persisted.version;
+            this.runtimeOverrides$.next(normalizeOverrides(persisted.attributes?.overrides));
+            this.publishMergedOverrides();
+          } catch (error) {
+            if (error instanceof Error && SavedObjectsErrorHelpers.isNotFoundError(error)) {
+              // The document is the source of truth. Absence means no runtime overrides,
+              // including after one this node already applied. Skip when a local write
+              // landed during this read, and when there was nothing to clear: most
+              // deployments never create the document, and publishing every poll would
+              // wake every flag subscriber.
+              if (this.stopped || writeCountAtRead !== this.runtimeOverrideWriteCount) {
+                return;
+              }
+              if (
+                this.latestOverrideVersion === undefined &&
+                Object.keys(this.runtimeOverrides$.value).length === 0
+              ) {
+                return;
+              }
+              this.latestOverrideVersion = undefined;
+              this.runtimeOverrides$.next({});
+              this.publishMergedOverrides();
+              return;
+            }
+            const message = error instanceof Error ? error.message : String(error);
+            this.logger.warn(`Failed to read persisted feature flag overrides: ${message}`);
+          }
+        }),
+        takeUntil(this.stop$)
+      )
+      .subscribe();
   }
 
   /**
