@@ -13,6 +13,7 @@ import type {
   NewPackagePolicy,
   PackagePolicyInput,
   PackagePolicyInputStream,
+  PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
   PackageInfo,
   RegistryStream,
@@ -34,6 +35,8 @@ import {
 } from '.';
 import { packageHasNoPolicyTemplates } from './policy_template';
 import { isValidDataset, isValidDataStreamType } from './is_valid_namespace';
+import { getFirstVisibleVarGroupOption, inferVarGroupSelections } from './var_group_helpers';
+import type { VarGroupDeploymentMode } from './var_group_helpers';
 
 type Errors = string[] | null;
 
@@ -297,29 +300,45 @@ const isVarRequiredByVarGroup = (
 
 /**
  * Effective var_group selections for validation: a var_group with no stored
- * selection falls back to its first option — the same default the form
- * displays. Without this, a fresh policy whose stream section was never
- * expanded (so the form's default-selection effect never ran) validates as
- * if the required group had no selection at all, and its vars are never
- * treated as required.
+ * selection falls back to the option the form would display, in this order:
+ *
+ * 1. The option inferred from the policy's populated vars (same helper the
+ *    form uses for policies that predate var_groups). This keeps a valid
+ *    simplified-API request that carries e.g. `log_group_name` +
+ *    `region_name` but no stored selection from being rejected as if the
+ *    first option were selected.
+ * 2. The first *visible* option for the policy's deployment mode (shared
+ *    helper with the form's `getVisibleOptions`), so an `options[0]` hidden
+ *    via `hide_in_deployment_modes` is never treated as the default.
+ *
+ * Without this, a fresh policy whose stream section was never expanded (so
+ * the form's default-selection effect never ran) validates as if the
+ * required group had no selection at all, and its vars are never treated as
+ * required.
  */
 const getEffectiveVarGroupSelections = (
   varGroups: RegistryVarGroup[] | undefined,
-  varGroupSelections: Record<string, string> | undefined
+  varGroupSelections: Record<string, string> | undefined,
+  vars?: PackagePolicyConfigRecord,
+  deploymentMode?: VarGroupDeploymentMode
 ): Record<string, string> | undefined => {
   if (!varGroups || varGroups.length === 0) {
     return varGroupSelections;
   }
 
+  const inferredSelections = vars ? inferVarGroupSelections(varGroups, vars) : undefined;
+
   let effective: Record<string, string> | undefined;
   for (const group of varGroups) {
     if (varGroupSelections?.[group.name]) continue;
-    const firstOption = group.options[0];
-    if (!firstOption) continue;
+    const fallbackName =
+      inferredSelections?.[group.name] ??
+      getFirstVisibleVarGroupOption(group, deploymentMode)?.name;
+    if (!fallbackName) continue;
     if (!effective) {
       effective = { ...(varGroupSelections ?? {}) };
     }
-    effective[group.name] = firstOption.name;
+    effective[group.name] = fallbackName;
   }
   return effective ?? varGroupSelections;
 };
@@ -338,6 +357,12 @@ export const validatePackagePolicy = (
 ): PackagePolicyValidationResults => {
   const { safeLoadYaml, conditionValidator } = deps;
   const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
+  // The form hides var_group options per deployment mode, so validation must
+  // fall back to the first option visible in the same mode. The mode follows
+  // the policy itself, exactly like the form's agentless toggle does.
+  const deploymentMode: VarGroupDeploymentMode = packagePolicy.supports_agentless
+    ? 'agentless'
+    : 'default';
   const validationResults: PackagePolicyValidationResults = {
     name: null,
     description: null,
@@ -393,7 +418,9 @@ export const validatePackagePolicy = (
   const packageVarGroupSelections = packagePolicy.var_group_selections;
   const effectivePackageVarGroupSelections = getEffectiveVarGroupSelections(
     packageVarGroups,
-    packageVarGroupSelections
+    packageVarGroupSelections,
+    packagePolicy.vars,
+    deploymentMode
   );
 
   if (packageVars.length) {
@@ -556,7 +583,9 @@ export const validatePackagePolicy = (
         const streamVarGroupSelections = stream.var_group_selections;
         const effectiveStreamVarGroupSelections = getEffectiveVarGroupSelections(
           streamVarGroups,
-          streamVarGroupSelections
+          streamVarGroupSelections,
+          stream.vars,
+          deploymentMode
         );
 
         if (streamVarDefs && Object.keys(streamVarDefs).length) {

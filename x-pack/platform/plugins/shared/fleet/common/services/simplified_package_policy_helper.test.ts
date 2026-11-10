@@ -385,6 +385,133 @@ describe('toPackagePolicy', () => {
     });
   });
 
+  describe('With stream-level var_group_selections (aws_mq)', () => {
+    // Mirrors the aws_mq@2.3.0 log-group selector: stream-level var_group
+    // `log_group_source`, required, options Log Group ARN / Name / Name Prefix.
+    const awsMqPackageInfo: PackageInfo = {
+      name: 'aws_mq',
+      type: 'integration',
+      title: 'Amazon MQ',
+      version: '2.3.0',
+      description: 'Test package with stream-level var_groups',
+      format_version: '3.6.0',
+      owner: { github: 'elastic/integrations' },
+      assets: {} as any,
+      data_streams: [
+        {
+          dataset: 'aws_mq.activemq_general_logs',
+          type: 'logs',
+          streams: [
+            {
+              input: 'aws-cloudwatch',
+              title: 'ActiveMQ general logs',
+              enabled: true,
+              vars: [
+                { name: 'log_group_arn', type: 'text', title: 'Log Group ARN' },
+                { name: 'log_group_name', type: 'text', title: 'Log Group Name' },
+                {
+                  name: 'log_group_name_prefix',
+                  type: 'text',
+                  title: 'Log Group Name Prefix',
+                },
+                { name: 'region_name', type: 'text', title: 'Region Name' },
+              ],
+              var_groups: [
+                {
+                  name: 'log_group_source',
+                  required: true,
+                  title: 'Log group',
+                  selector_title: 'Identify the log group by',
+                  options: [
+                    { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+                    {
+                      name: 'log_group_name',
+                      title: 'Log Group Name',
+                      vars: ['log_group_name', 'region_name'],
+                    },
+                    {
+                      name: 'log_group_name_prefix',
+                      title: 'Log Group Name Prefix',
+                      vars: ['log_group_name_prefix', 'region_name'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      policy_templates: [
+        {
+          name: 'aws_mq',
+          title: 'Amazon MQ',
+          inputs: [{ type: 'aws-cloudwatch', title: 'AWS CloudWatch', vars: [] }],
+        },
+      ],
+    } as unknown as PackageInfo;
+
+    it('should preserve stream-level var_group_selections when creating package policy', () => {
+      const res = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'aws-mq-1',
+          namespace: 'default',
+          policy_ids: ['policy-1'],
+          description: 'Test description',
+          inputs: {
+            'aws_mq-aws-cloudwatch': {
+              enabled: true,
+              streams: {
+                'aws_mq.activemq_general_logs': {
+                  enabled: true,
+                  vars: { log_group_name: 'my-group', region_name: 'us-east-1' },
+                  var_group_selections: { log_group_source: 'log_group_name' },
+                },
+              },
+            },
+          },
+        },
+        awsMqPackageInfo
+      );
+
+      expect(res.inputs[0].streams[0].var_group_selections).toEqual({
+        log_group_source: 'log_group_name',
+      });
+      expect(res.inputs[0].streams[0].vars?.log_group_name?.value).toBe('my-group');
+      expect(res.inputs[0].streams[0].vars?.region_name?.value).toBe('us-east-1');
+    });
+
+    it('should include stream-level var_group_selections when converting back to simplified policy', () => {
+      const packagePolicy = simplifiedPackagePolicytoNewPackagePolicy(
+        {
+          name: 'aws-mq-1',
+          namespace: 'default',
+          policy_ids: ['policy-1'],
+          description: 'Test description',
+          inputs: {
+            'aws_mq-aws-cloudwatch': {
+              enabled: true,
+              streams: {
+                'aws_mq.activemq_general_logs': {
+                  enabled: true,
+                  vars: { log_group_name: 'my-group', region_name: 'us-east-1' },
+                  var_group_selections: { log_group_source: 'log_group_name' },
+                },
+              },
+            },
+          },
+        },
+        awsMqPackageInfo
+      );
+
+      const simplified = packagePolicyToSimplifiedPackagePolicy(packagePolicy as any);
+
+      expect(
+        (simplified as any).inputs['aws_mq-aws-cloudwatch'].streams['aws_mq.activemq_general_logs']
+          .var_group_selections
+      ).toEqual({ log_group_source: 'log_group_name' });
+    });
+  });
+
   describe('With input-only package', () => {
     const inputPkgInfo: PackageInfo = {
       name: 'log',

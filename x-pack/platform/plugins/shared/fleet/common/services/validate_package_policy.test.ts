@@ -2940,6 +2940,32 @@ describe('Fleet - validatePackagePolicy with var_groups', () => {
     expect(result.vars?.api_url).toBeNull();
     expect(validationHasErrors(result)).toBe(false);
   });
+
+  it('should infer the OAuth option from populated vars when no package selection is stored', () => {
+    // Same inference as the stream-level P2 case: a policy created before
+    // var_groups existed (or via the simplified API) carries values for one
+    // option but no stored selection — validation must follow the populated
+    // vars instead of the first option.
+    const policyWithoutSelections = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: '' },
+        api_url: { type: 'text', value: '' },
+        client_id: { type: 'text', value: 'my-client-id' },
+        client_secret: { type: 'password', value: 'my-client-secret' },
+      },
+      var_group_selections: undefined,
+    };
+
+    const result = validatePackagePolicy(policyWithoutSelections, packageInfoWithVarGroups, deps);
+
+    expect(result.vars?.api_key).toBeNull();
+    expect(result.vars?.api_url).toBeNull();
+    expect(result.vars?.client_id).toBeNull();
+    expect(result.vars?.client_secret).toBeNull();
+    expect(validationHasErrors(result)).toBe(false);
+  });
 });
 
 describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
@@ -3012,7 +3038,7 @@ describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
     vars: [],
   } as unknown as PackageInfo;
 
-  const emptyStreamVars = () => ({
+  const emptyStreamVars = (): Record<string, { type: string; value: unknown }> => ({
     log_group_arn: { type: 'text', value: undefined },
     log_group_name: { type: 'text', value: undefined },
     log_group_name_prefix: { type: 'text', value: undefined },
@@ -3021,7 +3047,8 @@ describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
 
   const makePolicy = (
     streamVars: Record<string, { type: string; value: unknown }>,
-    streamSelections?: Record<string, string>
+    streamSelections?: Record<string, string>,
+    supportsAgentless?: boolean
   ): NewPackagePolicy =>
     ({
       name: 'aws-mq-1',
@@ -3029,6 +3056,7 @@ describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
       description: '',
       policy_ids: ['policy-1'],
       enabled: true,
+      ...(supportsAgentless !== undefined ? { supports_agentless: supportsAgentless } : {}),
       inputs: [
         {
           type: 'aws-cloudwatch',
@@ -3144,6 +3172,147 @@ describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
     );
 
     expect(streamVarsOf(result)?.log_group_arn).toBeNull();
+    expect(validationHasErrors(result)).toBe(false);
+  });
+
+  it('should follow the first visible option when options[0] is hidden in default mode', () => {
+    // Follow-up from juliaElastic 2026-11-09: the form defaults to the first
+    // *visible* option after hide_in_deployment_modes filtering, so when
+    // options[0] (Log Group ARN) is hidden in default mode, validation must
+    // require the Name option's vars instead of the ARN.
+    const groupWithHiddenFirstOption = {
+      ...logGroupSourceGroup,
+      options: [
+        {
+          name: 'log_group_arn',
+          title: 'Log Group ARN',
+          vars: ['log_group_arn'],
+          hide_in_deployment_modes: ['default'],
+        },
+        {
+          name: 'log_group_name',
+          title: 'Log Group Name',
+          vars: ['log_group_name', 'region_name'],
+        },
+        {
+          name: 'log_group_name_prefix',
+          title: 'Log Group Name Prefix',
+          vars: ['log_group_name_prefix', 'region_name'],
+        },
+      ],
+    };
+    const packageInfoWithHiddenFirstOption: PackageInfo = {
+      ...packageInfoWithStreamVarGroups,
+      data_streams: [
+        {
+          dataset: 'aws_mq.activemq_general_logs',
+          type: 'logs',
+          streams: [
+            {
+              ...awsMqStream,
+              var_groups: [groupWithHiddenFirstOption],
+            },
+          ],
+        },
+      ],
+    } as unknown as PackageInfo;
+
+    const result = validatePackagePolicy(
+      makePolicy(emptyStreamVars()),
+      packageInfoWithHiddenFirstOption,
+      deps
+    );
+
+    const vars = streamVarsOf(result);
+    expect(vars?.log_group_arn).toBeNull();
+    expect(vars?.log_group_name).toEqual([expect.stringContaining('is required')]);
+    expect(vars?.region_name).toEqual([expect.stringContaining('is required')]);
+    expect(validationHasErrors(result)).toBe(true);
+  });
+
+  it('should keep options[0] as the default in agentless mode when it is only hidden in default mode', () => {
+    const groupWithHiddenFirstOption = {
+      ...logGroupSourceGroup,
+      options: [
+        {
+          name: 'log_group_arn',
+          title: 'Log Group ARN',
+          vars: ['log_group_arn'],
+          hide_in_deployment_modes: ['default'],
+        },
+        {
+          name: 'log_group_name',
+          title: 'Log Group Name',
+          vars: ['log_group_name', 'region_name'],
+        },
+      ],
+    };
+    const packageInfoWithHiddenFirstOption: PackageInfo = {
+      ...packageInfoWithStreamVarGroups,
+      data_streams: [
+        {
+          dataset: 'aws_mq.activemq_general_logs',
+          type: 'logs',
+          streams: [
+            {
+              ...awsMqStream,
+              var_groups: [groupWithHiddenFirstOption],
+            },
+          ],
+        },
+      ],
+    } as unknown as PackageInfo;
+
+    const result = validatePackagePolicy(
+      makePolicy(emptyStreamVars(), undefined, true),
+      packageInfoWithHiddenFirstOption,
+      deps
+    );
+
+    const vars = streamVarsOf(result);
+    expect(vars?.log_group_arn).toEqual([expect.stringContaining('is required')]);
+    expect(vars?.log_group_name).toBeNull();
+    expect(validationHasErrors(result)).toBe(true);
+  });
+
+  it('should infer the Name option from populated vars when no stream selection is stored', () => {
+    // P2 follow-up (Libra review on #303689): a valid simplified-API request
+    // carrying log_group_name + region_name but no var_group_selections must
+    // not be rejected with "Log Group ARN is required." — the populated vars
+    // identify the intended option.
+    const vars = emptyStreamVars();
+    vars.log_group_name = { type: 'text', value: 'my-group' };
+    vars.region_name = { type: 'text', value: 'us-east-1' };
+    const result = validatePackagePolicy(makePolicy(vars), packageInfoWithStreamVarGroups, deps);
+
+    const out = streamVarsOf(result);
+    expect(out?.log_group_arn).toBeNull();
+    expect(out?.log_group_name).toBeNull();
+    expect(out?.region_name).toBeNull();
+    expect(validationHasErrors(result)).toBe(false);
+  });
+
+  it('should infer the Name option and require its missing vars when only some are populated', () => {
+    const vars = emptyStreamVars();
+    vars.log_group_name = { type: 'text', value: 'my-group' };
+    const result = validatePackagePolicy(makePolicy(vars), packageInfoWithStreamVarGroups, deps);
+
+    const out = streamVarsOf(result);
+    expect(out?.log_group_arn).toBeNull();
+    expect(out?.log_group_name).toBeNull();
+    expect(out?.region_name).toEqual([expect.stringContaining('is required')]);
+    expect(validationHasErrors(result)).toBe(true);
+  });
+
+  it('should infer the ARN option from a populated ARN var when no stream selection is stored', () => {
+    const vars = emptyStreamVars();
+    vars.log_group_arn = { type: 'text', value: 'arn:aws:logs:us-east-1:123:log-group:g' };
+    const result = validatePackagePolicy(makePolicy(vars), packageInfoWithStreamVarGroups, deps);
+
+    const out = streamVarsOf(result);
+    expect(out?.log_group_arn).toBeNull();
+    expect(out?.log_group_name).toBeNull();
+    expect(out?.region_name).toBeNull();
     expect(validationHasErrors(result)).toBe(false);
   });
 });

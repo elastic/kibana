@@ -50,6 +50,7 @@ export type SimplifiedPackagePolicyStreams = Record<
   {
     enabled?: undefined | boolean;
     vars?: SimplifiedVars;
+    var_group_selections?: Record<string, string>;
     condition?: AgentConditionExpression | null;
   }
 >;
@@ -172,6 +173,10 @@ function formatStreams(
     acc[stream.data_stream.dataset] = {
       enabled: isInputAllowed === false ? false : stream.enabled,
       vars: formatVars(stream.vars),
+      // Stream-level selections round-trip like package-level ones do, so a
+      // simplified request that names its selection is not silently reset to
+      // the first option when it is converted back.
+      ...(stream.var_group_selections ? { var_group_selections: stream.var_group_selections } : {}),
       ...(stream.condition !== undefined ? { condition: stream.condition } : {}),
     };
 
@@ -317,6 +322,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       const {
         enabled: streamEnabled,
         vars: streamsLevelVars,
+        var_group_selections: streamVarGroupSelections,
         condition: streamCondition,
       } = streamVal;
       const packagePolicyStream = streamsMap.get(streamId);
@@ -331,6 +337,14 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
 
       if (streamsLevelVars) {
         assignVariables(streamsLevelVars, packagePolicyStream.vars, `${inputId} ${streamId}`);
+      }
+
+      // Keep a supplied stream-level selection: without it the request is
+      // validated against the first option even when the caller picked
+      // another one (e.g. an Amazon MQ simplified request carrying
+      // log_group_name + region_name with the Name option selected).
+      if (streamVarGroupSelections) {
+        packagePolicyStream.var_group_selections = streamVarGroupSelections;
       }
 
       if (streamCondition !== undefined) {

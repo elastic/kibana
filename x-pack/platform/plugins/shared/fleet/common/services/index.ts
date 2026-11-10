@@ -159,7 +159,7 @@ export {
 export { isAwsCloudConnectorVars, isAzureCloudConnectorVars } from './cloud_connector_helpers';
 
 // Generic var_group helpers
-export type { VarGroupSelection } from './var_group_helpers';
+export type { VarGroupSelection, VarGroupDeploymentMode } from './var_group_helpers';
 export {
   getSelectedOption,
   getVisibleVarsForOption,
@@ -168,6 +168,8 @@ export {
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
   inferVarGroupSelections,
+  isVarGroupOptionHiddenInDeploymentMode,
+  getFirstVisibleVarGroupOption,
 } from './var_group_helpers';
 
 // Cloud Connector accessor module

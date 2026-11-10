@@ -210,3 +210,44 @@ export const inferVarGroupSelections = (
 
   return Object.keys(inferred).length > 0 ? inferred : undefined;
 };
+
+/**
+ * Deployment modes a var_group option can be hidden in. Matches the
+ * `hide_in_deployment_modes` values on {@link RegistryVarGroupOption}.
+ */
+export type VarGroupDeploymentMode = 'agentless' | 'default';
+
+/**
+ * Whether a var_group option is hidden in the given deployment mode.
+ * The form and validation must agree on this: the form's default selection is
+ * the first option that is not hidden here, so validation's fallback must use
+ * the same rule instead of blindly taking `options[0]`.
+ */
+export const isVarGroupOptionHiddenInDeploymentMode = (
+  option: RegistryVarGroupOption,
+  deploymentMode: VarGroupDeploymentMode | undefined
+): boolean => {
+  if (!deploymentMode || !option.hide_in_deployment_modes) {
+    return false;
+  }
+  return option.hide_in_deployment_modes.includes(deploymentMode);
+};
+
+/**
+ * First option of a var_group that is visible in the given deployment mode
+ * (and not in `hiddenOptionNames`, e.g. hidden for the policy template or a
+ * disabled provider). This is the option the form defaults to, so it is also
+ * the option validation falls back to when no selection is stored.
+ * Returns undefined when every option is hidden.
+ */
+export const getFirstVisibleVarGroupOption = (
+  varGroup: RegistryVarGroup,
+  deploymentMode?: VarGroupDeploymentMode,
+  hiddenOptionNames?: string[]
+): RegistryVarGroupOption | undefined => {
+  return varGroup.options.find(
+    (option) =>
+      !hiddenOptionNames?.includes(option.name) &&
+      !isVarGroupOptionHiddenInDeploymentMode(option, deploymentMode)
+  );
+};

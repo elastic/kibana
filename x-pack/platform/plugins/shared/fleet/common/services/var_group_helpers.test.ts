@@ -15,6 +15,8 @@ import {
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
   inferVarGroupSelections,
+  isVarGroupOptionHiddenInDeploymentMode,
+  getFirstVisibleVarGroupOption,
   type VarGroupSelection,
 } from './var_group_helpers';
 
@@ -407,6 +409,76 @@ describe('var_group_helpers', () => {
         credential_type: 'direct_access_key',
         data_collection: 'streaming',
       });
+    });
+  });
+
+  describe('isVarGroupOptionHiddenInDeploymentMode', () => {
+    const hiddenInDefault = {
+      name: 'log_group_arn',
+      title: 'Log Group ARN',
+      vars: ['log_group_arn'],
+      hide_in_deployment_modes: ['default' as const],
+    };
+
+    it('should return false when no deployment mode is given', () => {
+      expect(isVarGroupOptionHiddenInDeploymentMode(hiddenInDefault, undefined)).toBe(false);
+    });
+
+    it('should return true when the option hides the given mode', () => {
+      expect(isVarGroupOptionHiddenInDeploymentMode(hiddenInDefault, 'default')).toBe(true);
+      expect(isVarGroupOptionHiddenInDeploymentMode(hiddenInDefault, 'agentless')).toBe(false);
+    });
+
+    it('should return false when the option has no hide_in_deployment_modes', () => {
+      expect(
+        isVarGroupOptionHiddenInDeploymentMode({ name: 'x', title: 'X', vars: ['x'] }, 'default')
+      ).toBe(false);
+    });
+  });
+
+  describe('getFirstVisibleVarGroupOption', () => {
+    const groupWithHiddenFirstOption: RegistryVarGroup = {
+      name: 'log_group_source',
+      title: 'Log group',
+      selector_title: 'Identify the log group by',
+      options: [
+        {
+          name: 'log_group_arn',
+          title: 'Log Group ARN',
+          vars: ['log_group_arn'],
+          hide_in_deployment_modes: ['default'],
+        },
+        {
+          name: 'log_group_name',
+          title: 'Log Group Name',
+          vars: ['log_group_name', 'region_name'],
+        },
+      ],
+    };
+
+    it('should return the first option when nothing is hidden', () => {
+      expect(getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'agentless')?.name).toBe(
+        'log_group_arn'
+      );
+    });
+
+    it('should skip options hidden in the given deployment mode', () => {
+      expect(getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'default')?.name).toBe(
+        'log_group_name'
+      );
+    });
+
+    it('should skip options listed in hiddenOptionNames', () => {
+      expect(
+        getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'agentless', ['log_group_arn'])
+          ?.name
+      ).toBe('log_group_name');
+    });
+
+    it('should return undefined when every option is hidden', () => {
+      expect(
+        getFirstVisibleVarGroupOption(groupWithHiddenFirstOption, 'default', ['log_group_name'])
+      ).toBeUndefined();
     });
   });
 });
