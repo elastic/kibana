@@ -153,14 +153,13 @@ const formatArguments = (submission: SubmitArguments): string =>
   );
 
 /**
- * Structural check of what a turn's submit calls left on the tree (see `effectiveSubmission`)
- * against the investigation response, the tree before the run, and the tree after it. A score of 1
- * means the agent passed a traversal for this tree, the visit path is non-empty, the causal path is
- * set only when the response confirms a cause, and any declared merges agree with the two trees.
- * With `requireMerge` the submit must declare a merge, and with `requireCausalPath` a confirmed
- * response must come with a causal path; both are round-level rules the caller sets for the seeded
- * tree only. Whether those merges and paths are the right ones for the investigation is the LLM
- * judge's job.
+ * Structural check of the last submit call against the investigation response, the tree before
+ * the run, and the tree after it. A score of 1 means the agent passed a traversal for this tree,
+ * the visit path is non-empty, the causal path is set only when the response confirms a cause,
+ * and any declared merges agree with the two trees. With `requireMerge` the submit must declare a
+ * merge, and with `requireCausalPath` a confirmed response must come with a causal path; both are
+ * round-level rules the caller sets for the seeded tree only. Whether those merges and paths are
+ * the right ones for the investigation is the LLM judge's job.
  */
 export const gradeSubmissions = ({
   submissions,
@@ -190,11 +189,10 @@ export const gradeSubmissions = ({
   if (!submitted || !treeId) {
     problems.push('The submitted tree could not be parsed.');
   } else {
-    const effective = effectiveSubmission(submissions, submitted);
-    problems.push(...traversalProblems(effective, treeId, response, requireCausalPath));
-    problems.push(...mergeProblems(effective, prior, submitted));
-    problems.push(...pathProblems(effective, submitted));
-    if (requireMerge && !declaresMerge(effective, treeId)) {
+    problems.push(...traversalProblems(last, treeId, response, requireCausalPath));
+    problems.push(...mergeProblems(last, prior, submitted));
+    problems.push(...pathProblems(last, submitted));
+    if (requireMerge && !declaresMerge(last, treeId)) {
       problems.push(`This round folds duplicate nodes in ${treeId}, but merged_nodes is empty.`);
     }
   }
@@ -206,48 +204,6 @@ export const gradeSubmissions = ({
   return {
     score: 1,
     explanation: `Submit arguments are consistent with the prior and submitted trees.\n\n${rendered}`,
-  };
-};
-
-/**
- * What the tree ended up with across a turn's submit calls. The submit tool keeps a traversal or
- * merge an earlier call saved when a retry leaves it out, so the grade uses the last traversal given
- * for the tree, and the last call's merges plus each earlier merge whose merged-away nodes are gone
- * from the submitted tree. A merge from a rejected attempt the agent then dropped does not count.
- */
-const effectiveSubmission = (
-  submissions: SubmitArguments[],
-  submitted: DecisionTreeView
-): SubmitArguments => {
-  const last = submissions[submissions.length - 1];
-  const remaining = new Set(submitted.nodes.map((node) => node.node_id));
-  const lastMerges = (last.symptom_trees ?? []).flatMap((tree) => tree.merged_nodes ?? []);
-  const applied = submissions
-    .slice(0, -1)
-    .flatMap((submission) => submission.symptom_trees ?? [])
-    .flatMap((tree) => tree.merged_nodes ?? [])
-    .filter(
-      (merge) =>
-        (merge.from ?? []).length > 0 && (merge.from ?? []).every((id) => !remaining.has(id))
-    );
-  const merges = [...lastMerges];
-  const absorbed = new Set(lastMerges.flatMap((merge) => merge.from ?? []));
-  for (const merge of applied) {
-    if ((merge.from ?? []).some((id) => absorbed.has(id))) continue;
-    merges.push(merge);
-    for (const id of merge.from ?? []) absorbed.add(id);
-  }
-  const traversal = submissions
-    .flatMap((submission) => submission.traversals ?? [])
-    .filter((entry) => namesTree(entry.tree_id, submitted.tree_id))
-    .at(-1);
-  const namedTrees = submissions.flatMap((submission) => submission.symptom_trees ?? []);
-  return {
-    ...last,
-    symptom_trees: namedTrees.length
-      ? [{ ...namedTrees[namedTrees.length - 1], merged_nodes: merges }]
-      : [],
-    traversals: traversal ? [traversal] : [],
   };
 };
 
