@@ -20,7 +20,6 @@ import {
   breadcrumbService,
   IndexManagementBreadcrumb,
 } from '../../../public/application/services/breadcrumbs';
-import type { DataStream } from '../../../common';
 import { API_BASE_PATH, MAX_DATA_RETENTION } from '../../../common/constants';
 import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers/setup_environment';
@@ -37,7 +36,6 @@ import {
   getTableCellsValues,
 } from '../helpers/actions/data_stream_actions';
 import { closeViewFilterPopoverIfOpen } from '../helpers/actions/popover_cleanup';
-import { SHOW_MANAGED_DATA_STREAMS } from '../../../public/application/sections/home/data_stream_list/data_stream_list';
 
 jest.mock('react-use/lib/useObservable', () => () => jest.fn());
 
@@ -68,7 +66,6 @@ describe('Data Streams tab', () => {
   beforeEach(() => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
-    localStorage.clear();
     const env = setupEnvironment();
     httpSetup = env.httpSetup;
     httpRequestsMockHelpers = env.httpRequestsMockHelpers;
@@ -1782,10 +1779,8 @@ describe('Data Streams tab', () => {
 
       const userDataStream = createDataStreamPayload({ name: 'my-logs' });
 
-      const renderDeepLinkToManagedDataStream = async (
-        dataStreams: DataStream[] = [managedDataStream, userDataStream]
-      ) => {
-        httpRequestsMockHelpers.setLoadDataStreamsResponse(dataStreams);
+      const renderDeepLinkToManagedDataStream = async () => {
+        httpRequestsMockHelpers.setLoadDataStreamsResponse([managedDataStream, userDataStream]);
         httpRequestsMockHelpers.setLoadDataStreamResponse(
           managedDataStream.name,
           managedDataStream
@@ -1833,7 +1828,7 @@ describe('Data Streams tab', () => {
         });
       });
 
-      test('remembers the "managed" filter choice across visits', async () => {
+      test('resets the "managed" filter to the default on the next visit', async () => {
         httpRequestsMockHelpers.setLoadDataStreamsResponse([
           managedDataStream,
           nonManagedDataStream,
@@ -1842,63 +1837,18 @@ describe('Data Streams tab', () => {
         const { unmount } = await renderWithManagedHiddenByDefault();
         await screen.findByTestId('dataStreamTable');
 
-        const actions = createDataStreamTabActions();
-        await actions.toggleViewFilterAt(0);
+        await createDataStreamTabActions().toggleViewFilterAt(0);
         await waitFor(() => {
           expect(getTableCellsValues('dataStreamTable')).toHaveLength(2);
         });
-        expect(localStorage.getItem(SHOW_MANAGED_DATA_STREAMS)).toBe('true');
 
         unmount();
         await renderWithManagedHiddenByDefault();
         await screen.findByTestId('dataStreamTable');
 
-        expect(getTableCellsValues('dataStreamTable')).toHaveLength(2);
-      });
-
-      test('a stored "managed" filter choice overrides the default', async () => {
-        localStorage.setItem(SHOW_MANAGED_DATA_STREAMS, 'true');
-        httpRequestsMockHelpers.setLoadDataStreamsResponse([
-          managedDataStream,
-          nonManagedDataStream,
+        expect(getTableCellsValues('dataStreamTable')).toEqual([
+          ['', 'non-managed-data-stream', 'green', '1', 'Standard', '7 days', 'Delete'],
         ]);
-
-        await renderWithManagedHiddenByDefault();
-        await screen.findByTestId('dataStreamTable');
-
-        expect(getTableCellsValues('dataStreamTable')).toHaveLength(2);
-      });
-
-      test('turning on the "managed" filter for a deep link does not persist it', async () => {
-        await renderDeepLinkToManagedDataStream();
-
-        await waitFor(() => {
-          expect(getTableCellsValues('dataStreamTable')).toHaveLength(1);
-        });
-        expect(localStorage.getItem(SHOW_MANAGED_DATA_STREAMS)).toBe('false');
-      });
-
-      test('toggling the "hidden" filter after a deep link does not persist the "managed" filter', async () => {
-        const hiddenDataStream = createDataStreamPayload({
-          name: 'managed-data-stream-hidden',
-          hidden: true,
-        });
-        await renderDeepLinkToManagedDataStream([
-          managedDataStream,
-          hiddenDataStream,
-          userDataStream,
-        ]);
-
-        await waitFor(() => {
-          expect(getTableCellsValues('dataStreamTable')).toHaveLength(1);
-        });
-
-        await createDataStreamTabActions().toggleViewFilterAt(1);
-
-        await waitFor(() => {
-          expect(getTableCellsValues('dataStreamTable')).toHaveLength(2);
-        });
-        expect(localStorage.getItem(SHOW_MANAGED_DATA_STREAMS)).toBe('false');
       });
 
       test('the "managed" filter can be turned off after a deep link and stays off on reload', async () => {
@@ -1954,7 +1904,6 @@ describe('Data Streams tab', () => {
         await waitFor(() => {
           expect(getTableCellsValues('dataStreamTable')).toHaveLength(2);
         });
-        expect(localStorage.getItem(SHOW_MANAGED_DATA_STREAMS)).toBe('true');
       });
 
       test('the empty state link only turns on the filters excluding the searched data streams', async () => {

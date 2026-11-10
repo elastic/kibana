@@ -44,7 +44,6 @@ import type { Filters } from '../components';
 import { useStateWithLocalStorage } from '../../../hooks/use_state_with_localstorage';
 
 const SHOW_PROJECT_LEVEL_RETENTION = 'showProjectLevelRetention';
-export const SHOW_MANAGED_DATA_STREAMS = 'IDX_MGMT_SHOW_MANAGED_DATA_STREAMS';
 export type DataStreamFilterName = 'managed' | 'hidden';
 interface MatchParams {
   dataStreamName?: string;
@@ -104,17 +103,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   const [projectLevelRetentionCallout, setprojectLevelRetentionCallout] =
     useStateWithLocalStorage<boolean>(SHOW_PROJECT_LEVEL_RETENTION, true);
 
-  const [showManagedDataStreams, setShowManagedDataStreams] = useStateWithLocalStorage<boolean>(
-    SHOW_MANAGED_DATA_STREAMS,
-    showManagedDataStreamsByDefault
-  );
-
   const [filters, setFilters] = useState<Filters<DataStreamFilterName>>({
     managed: {
       name: i18n.translate('xpack.idxMgmt.dataStreamList.viewManagedLabel', {
         defaultMessage: 'Managed data streams',
       }),
-      checked: showManagedDataStreams ? 'on' : 'off',
+      checked: showManagedDataStreamsByDefault ? 'on' : 'off',
     },
     hidden: {
       name: i18n.translate('xpack.idxMgmt.dataStreamList.viewHiddenLabel', {
@@ -123,14 +117,6 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       checked: includeHidden ? 'on' : 'off',
     },
   });
-
-  // Only explicit user changes to the managed filter are persisted; filters turned on for a deep link are not.
-  const handleViewFilterChange = (nextFilters: Filters<DataStreamFilterName>) => {
-    if (nextFilters.managed.checked !== filters.managed.checked) {
-      setShowManagedDataStreams(nextFilters.managed.checked === 'on');
-    }
-    setFilters(nextFilters);
-  };
 
   const selectedDataStream = dataStreams?.find(({ name }) => name === decodedDataStreamName);
   const selectedDataStreamName = selectedDataStream?.name;
@@ -366,7 +352,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           reload={reload}
           excludedDataStreams={excludedDataStreams}
           viewFilters={filters}
-          onViewFilterChange={handleViewFilterChange}
+          onViewFilterChange={setFilters}
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
           setIncludeStats={handleIncludeStatsChange}
