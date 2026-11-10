@@ -9,7 +9,6 @@
 
 import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { UNKNOWN_EXECUTION_IDENTITY } from './lib/execution_identity';
-import { ResumeAsIdentityLookupError } from './resume_as_identity_lookup_error';
 import {
   getResumeAsRecord,
   getWorkflowResponder,
@@ -111,19 +110,36 @@ describe('resume as responder', () => {
       );
     });
 
-    it.each([
-      ['an answer is pending', { ...requested, ...answer }],
-      ['the execution runs as a responder', active],
-    ])(
-      'should throw a lookup error instead of refusing when the run identity cannot be resolved and %s',
-      async (_, context) => {
-        core.security.authc.getCurrentUser.mockReturnValue(null);
+    it('should look the run identity up again when it cannot be resolved at first', async () => {
+      core.security.authc.getCurrentUser.mockReturnValueOnce(null).mockReturnValue(
+        securityServiceMock.createMockAuthenticatedUser({
+          profile_uid: 'u_analyst',
+          username: 'analyst',
+        })
+      );
 
-        await expect(resolveWorkflowResponder(core, { context }, request)).rejects.toThrow(
-          ResumeAsIdentityLookupError
-        );
-      }
-    );
+      await expect(
+        resolveWorkflowResponder(core, { context: { ...requested, ...answer } }, request)
+      ).resolves.toBe('u_analyst');
+      expect(core.security.authc.getCurrentUser).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return nothing when the run identity cannot be resolved, so the waiting step refuses the answer', async () => {
+      core.security.authc.getCurrentUser.mockReturnValue(null);
+
+      await expect(
+        resolveWorkflowResponder(core, { context: { ...requested, ...answer } }, request)
+      ).resolves.toBeUndefined();
+      expect(core.security.authc.getCurrentUser).toHaveBeenCalledTimes(3);
+    });
+
+    it('should throw when the execution runs as a responder and the run identity cannot be resolved', async () => {
+      core.security.authc.getCurrentUser.mockReturnValue(null);
+
+      await expect(resolveWorkflowResponder(core, { context: active }, request)).rejects.toThrow(
+        'the identity of this run could not be confirmed'
+      );
+    });
   });
 
   describe('getResumeAsRecord', () => {

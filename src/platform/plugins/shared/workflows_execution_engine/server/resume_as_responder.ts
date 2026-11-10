@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import pRetry from 'p-retry';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { UNKNOWN_EXECUTION_IDENTITY } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
-import { ResumeAsIdentityLookupError } from './resume_as_identity_lookup_error';
 
 /** Execution context key of the HITL wait whose answer continues the execution as its responder. */
 export const RESUME_AS_CONTEXT_KEY = 'resumeAs';
@@ -37,7 +37,25 @@ export class ResumeAsResponderError extends Error {
   }
 }
 
+/** Three identity lookups, 100-200ms and then 400-800ms apart. */
+const IDENTITY_LOOKUP_RETRY_OPTIONS = {
+  retries: 2,
+  minTimeout: 100,
+  factor: 4,
+  randomize: true,
+} as const;
+
 const responderRequests = new WeakMap<KibanaRequest, string>();
+
+/** The identity of a run, retried because the Elasticsearch fallback can fail for a moment. */
+const getRunIdentity = (core: CoreStart, request: KibanaRequest): Promise<string | undefined> =>
+  pRetry(async () => {
+    const identity = await getAuthenticatedUser(request, core.security, core.elasticsearch.client);
+    if (!identity) {
+      throw new Error('The identity of this run could not be resolved');
+    }
+    return identity.executedBy;
+  }, IDENTITY_LOOKUP_RETRY_OPTIONS).catch(() => undefined);
 
 const isResumeAsRecord = (value: unknown): value is ResumeAsRecord =>
   value != null &&
@@ -69,9 +87,8 @@ const getPendingResponder = (
 /**
  * The responder a resume run of `execution` acts as instead of its service account: the person who
  * answered a `resume-as: responder` wait, or the one the execution runs as since. Only returned when
- * the run's own identity is that person. Throws `ResumeAsResponderError` when the execution runs as
- * a responder and this run is someone else, and `ResumeAsIdentityLookupError` when this run's
- * identity cannot be resolved.
+ * the run's own identity is that person. Throws when the execution runs as a responder and this run
+ * is someone else, or its identity cannot be resolved.
  */
 export const resolveWorkflowResponder = async (
   core: CoreStart,
@@ -83,16 +100,15 @@ export const resolveWorkflowResponder = async (
   if (!record || !responder) {
     return undefined;
   }
-  const runIdentity = await getAuthenticatedUser(request, core.security, core.elasticsearch.client);
-  if (!runIdentity) {
-    throw new ResumeAsIdentityLookupError();
-  }
-  if (runIdentity.executedBy === responder) {
+  const runIdentity = await getRunIdentity(core, request);
+  if (runIdentity === responder) {
     return responder;
   }
   if (record.responder) {
     throw new ResumeAsResponderError(
-      `This execution runs as ${responder} since their answer (resume-as: responder), but this run does not hold their credentials.`
+      runIdentity === undefined
+        ? `This execution runs as ${responder} since their answer (resume-as: responder), but the identity of this run could not be confirmed.`
+        : `This execution runs as ${responder} since their answer (resume-as: responder), but this run does not hold their credentials.`
     );
   }
   // The waiting step refuses an answer that this run cannot apply as its responder.
