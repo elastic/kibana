@@ -427,8 +427,8 @@ importers:
         specifier: 2.0.2
         version: 2.0.2
       '@elastic/monaco-esql':
-        specifier: 4.35.0
-        version: 4.35.0(monaco-editor@0.56.0)
+        specifier: 4.37.0
+        version: 4.37.0(monaco-editor@0.56.0)
       '@elastic/node-crypto':
         specifier: 1.2.3
         version: 1.2.3
@@ -463,8 +463,8 @@ importers:
         specifier: 1.24.2
         version: 1.24.2(@elastic/elasticsearch@8.19.2(supports-color@10.2.2))(supports-color@10.2.2)
       '@elastic/statistics':
-        specifier: 0.0.3
-        version: 0.0.3
+        specifier: 0.0.4
+        version: 0.0.4
       '@emotion/cache':
         specifier: 11.14.0
         version: 11.14.0
@@ -881,7 +881,7 @@ importers:
         version: link:x-pack/platform/plugins/private/canvas
       '@kbn/cases-api-integration-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/cases
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases
       '@kbn/cases-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-cases-components
@@ -1077,6 +1077,9 @@ importers:
       '@kbn/content-packs-schema':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-content-packs-schema
+      '@kbn/content-sanitization':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-content-sanitization
       '@kbn/context-engine-agent-builder-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/context_engine_agent_builder
@@ -2339,7 +2342,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-ftr-llm-proxy
       '@kbn/functional-with-es-ssl-cases-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_with_es_ssl/plugins/cases
+        version: link:x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases
       '@kbn/gen-ai-settings-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/gen_ai_settings
@@ -2700,6 +2703,9 @@ importers:
       '@kbn/management-settings-field-definition':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-management/settings/field_definition
+      '@kbn/management-settings-hooks':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-management/settings/hooks
       '@kbn/management-settings-ids':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-management/settings/setting_ids
@@ -2933,7 +2939,7 @@ importers:
         version: link:x-pack/solutions/observability/packages/alerting-test-data
       '@kbn/observability-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/observability
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability
       '@kbn/observability-get-padded-alert-time-range-util':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/get-padded-alert-time-range-util
@@ -2970,6 +2976,9 @@ importers:
       '@kbn/oidc-provider-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/security_api_integration/plugins/oidc_provider
+      '@kbn/ols':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-ols
       '@kbn/open-telemetry-instrumented-plugin':
         specifier: workspace:*
         version: link:src/platform/test/common/plugins/otel_metrics
@@ -3170,7 +3179,7 @@ importers:
         version: link:examples/resizable_layout_examples
       '@kbn/resolver-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/plugin_functional/plugins/resolver_test
+        version: link:x-pack/solutions/security/test_plugins/resolver_test
       '@kbn/response-ops-alert-snooze':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/response-ops/alert-snooze
@@ -3455,7 +3464,7 @@ importers:
         version: link:x-pack/solutions/security/packages/features
       '@kbn/security-solution-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/security_solution
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution
       '@kbn/security-solution-navigation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/navigation
@@ -3543,6 +3552,9 @@ importers:
       '@kbn/securitysolution-timeline-common':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/timeline-common
+      '@kbn/securitysolution-timeline-components':
+        specifier: workspace:*
+        version: link:x-pack/solutions/security/packages/timeline-components
       '@kbn/securitysolution-utils':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/kbn-securitysolution-utils
@@ -4209,9 +4221,6 @@ importers:
       '@langchain/openai':
         specifier: 1.7.0
         version: 1.7.0(@aws-sdk/credential-provider-node@3.972.88)(@langchain/core@1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0))(@smithy/signature-v4@5.7.4)(google-auth-library@10.9.1(supports-color@10.2.2))(undici@7.30.1)(ws@8.22.0)
-      '@launchdarkly/js-client-sdk':
-        specifier: 4.11.2
-        version: 4.11.2
       '@launchdarkly/node-server-sdk':
         specifier: 9.14.3
         version: 9.14.3(supports-color@10.2.2)
@@ -4251,9 +4260,9 @@ importers:
       '@openfeature/core':
         specifier: 1.12.0
         version: 1.12.0
-      '@openfeature/launchdarkly-client-provider':
-        specifier: 0.4.0
-        version: 0.4.0(@launchdarkly/js-client-sdk@4.11.2)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))
+      '@openfeature/ofrep-web-provider':
+        specifier: 0.4.3
+        version: 0.4.3(@openfeature/core@1.12.0)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk':
         specifier: 1.23.0
         version: 1.23.0(@openfeature/core@1.12.0)
@@ -4354,8 +4363,8 @@ importers:
         specifier: 4.29.12
         version: 4.29.12(@tanstack/react-query@4.29.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@tanstack/react-table':
-        specifier: 8.21.3
-        version: 8.21.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: 9.3.1
+        version: 9.3.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@tanstack/react-virtual':
         specifier: 3.13.12
         version: 3.13.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -4612,8 +4621,8 @@ importers:
         specifier: 2.2.22
         version: 2.2.22(fp-ts@2.16.11)
       ipaddr.js:
-        specifier: 2.3.0
-        version: 2.3.0
+        specifier: 2.5.0
+        version: 2.5.0
       jest-diff:
         specifier: 29.7.0
         version: 29.7.0
@@ -4798,8 +4807,8 @@ importers:
         specifier: 4.0.1
         version: 4.0.1
       re2js:
-        specifier: 2.8.5
-        version: 2.8.5
+        specifier: 2.9.1
+        version: 2.9.1
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -8235,6 +8244,8 @@ importers:
 
   src/platform/packages/shared/kbn-management/settings/field_definition: {}
 
+  src/platform/packages/shared/kbn-management/settings/hooks: {}
+
   src/platform/packages/shared/kbn-management/settings/section_registry: {}
 
   src/platform/packages/shared/kbn-management/settings/setting_ids: {}
@@ -8254,6 +8265,8 @@ importers:
   src/platform/packages/shared/kbn-object-versioning-utils: {}
 
   src/platform/packages/shared/kbn-occ: {}
+
+  src/platform/packages/shared/kbn-ols: {}
 
   src/platform/packages/shared/kbn-openapi-bundler: {}
 
@@ -9113,6 +9126,8 @@ importers:
 
   x-pack/platform/packages/shared/kbn-content-packs-schema: {}
 
+  x-pack/platform/packages/shared/kbn-content-sanitization: {}
+
   x-pack/platform/packages/shared/kbn-data-forge: {}
 
   x-pack/platform/packages/shared/kbn-data-lifecycle-phases: {}
@@ -9581,11 +9596,11 @@ importers:
 
   x-pack/platform/test/alerting_api_integration/packages/helpers: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/cases: {}
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/observability: {}
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/security_solution: {}
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution: {}
 
   x-pack/platform/test/cloud_integration/plugins/saml_provider: {}
 
@@ -9599,7 +9614,7 @@ importers:
 
   x-pack/platform/test/functional_with_es_ssl/plugins/alerts: {}
 
-  x-pack/platform/test/functional_with_es_ssl/plugins/cases: {}
+  x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases: {}
 
   x-pack/platform/test/licensing_plugin/plugins/test_feature_usage: {}
 
@@ -9905,6 +9920,8 @@ importers:
 
   x-pack/solutions/security/packages/timeline-common: {}
 
+  x-pack/solutions/security/packages/timeline-components: {}
+
   x-pack/solutions/security/packages/upselling: {}
 
   x-pack/solutions/security/plugins/alertzero: {}
@@ -9939,7 +9956,7 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test/plugin_functional/plugins/resolver_test: {}
+  x-pack/solutions/security/test_plugins/resolver_test: {}
 
   x-pack/solutions/security/test/security_solution_api_integration: {}
 
@@ -11267,8 +11284,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  '@elastic/monaco-esql@4.35.0':
-    resolution: {integrity: sha512-glwGeIao5jaN94wke96pwJh2QSLvcmLRNfzD9OWaw16e4FLX9Pb8diMnx2K/LNP/w52/9Yn9k+o3bf3atQK8/Q==}
+  '@elastic/monaco-esql@4.37.0':
+    resolution: {integrity: sha512-eHmJU+SSqtAopMs2VPrBRyc381W/giNJEa6ZfAdjhg0Ye0hOmQnXDhqFTXDLn5v0ObWmtDUTzKptwodnGFVjIg==}
     peerDependencies:
       monaco-editor: '>=0.30.0'
 
@@ -11333,8 +11350,8 @@ packages:
   '@elastic/search-ui@1.24.2':
     resolution: {integrity: sha512-fQ/BGEbh4EvX+IWw89xiSUXD3p3iDvZPA46WCHwH+jfEtKiC9P+274UiR32POI3znaWfZElxm9kIyNioVGin0Q==}
 
-  '@elastic/statistics@0.0.3':
-    resolution: {integrity: sha512-UjND5cw1sykkutO3pAlF6rz1ayXKQr16SyaxiW/H6AAyi21zsfoy2GS+Z3FjLCcKCFuPKR5mkEwtVPcClzNWkQ==}
+  '@elastic/statistics@0.0.4':
+    resolution: {integrity: sha512-RTJKR5gXDnzvgU1VR+q/Nl648w2rRbmMuF6As8BA81DtOVHrlQZO1JzplyiPkJecParC3YjduK01wQhrpweYuA==}
     engines: {node: '>=22'}
 
   '@elastic/transport@8.11.0':
@@ -12341,12 +12358,6 @@ packages:
     peerDependencies:
       '@langchain/core': 1.3.0
 
-  '@launchdarkly/js-client-sdk-common@1.32.5':
-    resolution: {integrity: sha512-NrgHgztMHaxrw58/3QV+vFfCRy1K/yW8gikAClRQz4Y2+anpeURiKVmD4lBbkxet+IfBIZ7Fxcl42+xXJ01t2Q==}
-
-  '@launchdarkly/js-client-sdk@4.11.2':
-    resolution: {integrity: sha512-BDOb0U5xCT+cBcXLD97T9OlK7YgRfGFH4zDW0hXO6Zxkr3RjBs6OBd3NXM+RTb8jizEWIsvuU+b2dUSKNLFtaQ==}
-
   '@launchdarkly/js-sdk-common@2.29.0':
     resolution: {integrity: sha512-WBW4ajbfJO6RGEB4Ax44d7/6jl/HhZOi61dNnCJ3HdHS5znwGV1eh8dUnRFISiIfnodWbpDRaVv4fG8QdKeFWw==}
 
@@ -12847,11 +12858,15 @@ packages:
   '@openfeature/core@1.12.0':
     resolution: {integrity: sha512-7PCPzyd1OC19begz30+CRknFB0ChtyaZUhk7YWrk+Bov1fpVw0HYkTXtoxxsvPfDZB9P9WsT7uixN+Z8f9+bcA==}
 
-  '@openfeature/launchdarkly-client-provider@0.4.0':
-    resolution: {integrity: sha512-Mhn0rCS5t1DbcQEP+/Ub25RkuYBTD91vXowzm9isynU4GRZ6WQze1xblmhAYKIMzi+GAnbwfhgVibjkq5LGibw==}
+  '@openfeature/ofrep-core@2.3.0':
+    resolution: {integrity: sha512-PgUoEp0nGDYUeZ2fIU2IczEe/5B+gQVDpGXc5o05wpo3sj69pbcpq/a3p8MT/mhv9fqODiqqwu29g/YEq/huaw==}
     peerDependencies:
-      '@launchdarkly/js-client-sdk': ^4.7.0
-      '@openfeature/web-sdk': ^1.0.0
+      '@openfeature/core': ^1.6.0
+
+  '@openfeature/ofrep-web-provider@0.4.3':
+    resolution: {integrity: sha512-GwSQQP2ZjS9dICRFkey+zpW5eadDF4SIhNNV0VPpO6C5G3NyUEljmHAhqSykZTYilgNQR5c8APdRQnEgBvGxdg==}
+    peerDependencies:
+      '@openfeature/web-sdk': ^1.10.0
 
   '@openfeature/server-sdk@1.23.0':
     resolution: {integrity: sha512-JWeLvltJIV0AFgOfbw7hK9b9Rw/5wWq+RMhCIU9sJtAqarxr8hSPglG+JAGGhYdElAz3Qwe9W3ApWyPNkQEyqg==}
@@ -14670,12 +14685,17 @@ packages:
       react-native:
         optional: true
 
-  '@tanstack/react-table@8.21.3':
-    resolution: {integrity: sha512-5nNMTSETP4ykGegmVkhjcS8tTLW6Vl4axfEGQN3v0zdHYbK4UfoqfPChclTrJ4EoK9QynqAu9oUf8VEmrpZ5Ww==}
-    engines: {node: '>=12'}
+  '@tanstack/react-store@0.11.2':
+    resolution: {integrity: sha512-oj5O5DmiMWE+ih+SioX2ayC1kbK7d3fpLx0B75fPJr9nY3zU+hoW010yr64qXsY/9fyiLVE2bn5mGNV3owm8RQ==}
     peerDependencies:
-      react: '>=16.8'
-      react-dom: '>=16.8'
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  '@tanstack/react-table@9.3.1':
+    resolution: {integrity: sha512-E6Ya5TnY6EaGyZYIUqig/29Lr/gJSAubQkLJFqiWkUl5nRCr0Xr9hvJot+NiRTtG+TzGxHTiqUW3bnLtQxlHug==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      react: '>=18'
 
   '@tanstack/react-virtual@3.13.12':
     resolution: {integrity: sha512-Gd13QdxPSukP8ZrkbgS2RwoZseTTbQPLnQEn7HY/rqtM+8Zt95f7xKC7N0EsKs7aoz0WzZ+fditZux+F8EzYxA==}
@@ -14683,9 +14703,12 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  '@tanstack/table-core@8.21.3':
-    resolution: {integrity: sha512-ldZXEhOBb8Is7xLs01fR3YEc3DERiz5silj8tnGkFZytt1abEvl/GhUmCE0PMLaMPTa3Jk4HbKmRlHmu+gCftg==}
-    engines: {node: '>=12'}
+  '@tanstack/store@0.11.2':
+    resolution: {integrity: sha512-sJ4mjol8uQsHV0gOJzzjwXfh2Fwm+Sz0+8deqiTm4jGbMdjzNSW+xZCFm0kUa870uhd8yi+DpKnZb5Kc4apa0Q==}
+
+  '@tanstack/table-core@9.3.1':
+    resolution: {integrity: sha512-zQvlxSNi2qGM3L4jh85Z6hqMfdIR5qOfD9KHOU32nuKFJGN0RlJ7UvV1lsPb1fPVhpFYI0VP3jJGxLdLDpTKjQ==}
+    engines: {node: '>=20'}
 
   '@tanstack/virtual-core@3.13.12':
     resolution: {integrity: sha512-1YBOJfRHV4sXUmWsFSf5rQor4Ss82G8dQWLRbnk3GA4jeP8hQt1hxXh0tmflpC0dz3VgEv/1+qwPyLeWkQuPFA==}
@@ -19588,8 +19611,8 @@ packages:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
     engines: {node: '>= 0.10'}
 
-  ipaddr.js@2.3.0:
-    resolution: {integrity: sha512-Zv/pA+ciVFbCSBBjGfaKUya/CcGmUHzTydLMaTwrUUEM2DIEO3iZvueGxmacvmN50fGpGVKeTXpb2LcYQxeVdg==}
+  ipaddr.js@2.5.0:
+    resolution: {integrity: sha512-aq+t5NAc+cS6rZQQVWC2x98CPqGtKKTMDd4Gaodv0wShnItdKg/51djkGJ1hqH+Oy0ivDftCbSLCQob8zso01w==}
     engines: {node: '>= 10'}
 
   irregular-plurals@3.5.0:
@@ -22539,9 +22562,9 @@ packages:
     resolution: {integrity: sha512-KTOIcZTSOpOxbu3i0+T6mFQ6tkxXKlTxfcMFs1trQbsMnG84qNq+DjXr8Afu+FEFjvF1NNlldpC7roPyazFI8g==}
     deprecated: Accidental publish of breaking changes. Please downgrade to 1.3.3 or upgrade to the latest version.
 
-  re2js@2.8.5:
-    resolution: {integrity: sha512-L13fl3sRU6GgC/3fGrZ3DBZt2knDy/MVTw90oVBKhdlLr9uKwrxlxJUD+zkEMm8X/nq1XMi5GS4jq8O4FjmHoA==}
-    engines: {node: '>=18.0.0'}
+  re2js@2.9.1:
+    resolution: {integrity: sha512-JIT3bEEUZTOR2YS1walNEIfH4cF/cQeZcBUFq7ldqO6lR6g0X5CBq/S8rsa9omzZcsNf8qc36jCkWpKKtncrZg==}
+    engines: {node: '>=20.0.0'}
 
   react-clientside-effect@1.2.8:
     resolution: {integrity: sha512-ma2FePH0z3px2+WOu6h+YycZcEvFmmxIlAb62cF52bG86eMySciO/EQZeQMXd07kPCYB0a1dWDT5J+KE9mCDUw==}
@@ -27399,7 +27422,7 @@ snapshots:
 
   '@elastic/micro-jq@2.0.2': {}
 
-  '@elastic/monaco-esql@4.35.0(monaco-editor@0.56.0)':
+  '@elastic/monaco-esql@4.37.0(monaco-editor@0.56.0)':
     dependencies:
       '@elastic/esql-definitions': 4.36.0
       monaco-editor: 0.56.0
@@ -27558,7 +27581,7 @@ snapshots:
       history: 4.9.0
       qs: 6.17.0
 
-  '@elastic/statistics@0.0.3':
+  '@elastic/statistics@0.0.4':
     dependencies:
       simple-statistics: 7.12.1
 
@@ -28860,14 +28883,6 @@ snapshots:
       '@langchain/core': 1.3.0(@opentelemetry/api@1.9.1)(@opentelemetry/exporter-trace-otlp-proto@0.223.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.12.0(@opentelemetry/api@1.9.1))(openai@4.104.0(ws@8.22.0)(zod@4.6.5))(ws@8.22.0)
       js-tiktoken: 1.0.21
 
-  '@launchdarkly/js-client-sdk-common@1.32.5':
-    dependencies:
-      '@launchdarkly/js-sdk-common': 2.29.0
-
-  '@launchdarkly/js-client-sdk@4.11.2':
-    dependencies:
-      '@launchdarkly/js-client-sdk-common': 1.32.5
-
   '@launchdarkly/js-sdk-common@2.29.0': {}
 
   '@launchdarkly/js-server-sdk-common@2.24.0':
@@ -29394,11 +29409,16 @@ snapshots:
 
   '@openfeature/core@1.12.0': {}
 
-  '@openfeature/launchdarkly-client-provider@0.4.0(@launchdarkly/js-client-sdk@4.11.2)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))':
+  '@openfeature/ofrep-core@2.3.0(@openfeature/core@1.12.0)':
     dependencies:
-      '@launchdarkly/js-client-sdk': 4.11.2
+      '@openfeature/core': 1.12.0
+
+  '@openfeature/ofrep-web-provider@0.4.3(@openfeature/core@1.12.0)(@openfeature/web-sdk@1.10.0(@openfeature/core@1.12.0))':
+    dependencies:
+      '@openfeature/ofrep-core': 2.3.0(@openfeature/core@1.12.0)
       '@openfeature/web-sdk': 1.10.0(@openfeature/core@1.12.0)
-      lodash.isempty: 4.4.0
+    transitivePeerDependencies:
+      - '@openfeature/core'
 
   '@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0)':
     dependencies:
@@ -31270,11 +31290,20 @@ snapshots:
     optionalDependencies:
       react-dom: 18.2.0(react@18.2.0)
 
-  '@tanstack/react-table@8.21.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+  '@tanstack/react-store@0.11.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@tanstack/table-core': 8.21.3
+      '@tanstack/store': 0.11.2
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
+      use-sync-external-store: 1.7.0(react@18.2.0)
+
+  '@tanstack/react-table@9.3.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      '@tanstack/react-store': 0.11.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@tanstack/table-core': 9.3.1
+      react: 18.2.0
+    transitivePeerDependencies:
+      - react-dom
 
   '@tanstack/react-virtual@3.13.12(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
@@ -31282,7 +31311,11 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@tanstack/table-core@8.21.3': {}
+  '@tanstack/store@0.11.2': {}
+
+  '@tanstack/table-core@9.3.1':
+    dependencies:
+      '@tanstack/store': 0.11.2
 
   '@tanstack/virtual-core@3.13.12': {}
 
@@ -37152,7 +37185,7 @@ snapshots:
 
   ipaddr.js@1.9.1: {}
 
-  ipaddr.js@2.3.0: {}
+  ipaddr.js@2.5.0: {}
 
   irregular-plurals@3.5.0: {}
 
@@ -40686,7 +40719,7 @@ snapshots:
 
   re2js@1.4.0: {}
 
-  re2js@2.8.5: {}
+  re2js@2.9.1: {}
 
   react-clientside-effect@1.2.8(react@18.2.0):
     dependencies:

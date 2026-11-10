@@ -44,7 +44,7 @@ interface ProposedActionRowProps {
  */
 const ProposedActionRow = ({ proposal, onDecisionError, basePath }: ProposedActionRowProps) => {
   const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
-    useProposalDecision(proposal.id);
+    useProposalDecision(proposal.id, proposal);
 
   return (
     <ProposedActionButton

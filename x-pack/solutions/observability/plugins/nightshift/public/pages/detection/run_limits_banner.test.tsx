@@ -21,14 +21,19 @@ const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas
 
 const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
   enabled: true,
+  investigationLimitsEnabled: true,
   limits: {
     detection: 100,
     investigation: 30,
+    manual_investigation: 0,
+    total_investigation: 0,
     ki_extraction: 0,
   },
   counts: {
     detection: 100,
     investigation: 5,
+    manual_investigation: 0,
+    total_investigation: 0,
     ki_extraction: 500,
   },
   window: {
@@ -47,11 +52,15 @@ describe('RunLimitsBanner', () => {
         limits: {
           detection: 100,
           investigation: 5,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 500,
         },
         counts: {
           detection: 100,
           investigation: 5,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 500,
         },
       }),
@@ -80,6 +89,8 @@ describe('RunLimitsBanner', () => {
         limits: {
           detection: 101,
           investigation: 5,
+          manual_investigation: 0,
+          total_investigation: 0,
           ki_extraction: 500,
         },
       }),

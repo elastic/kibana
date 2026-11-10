@@ -23,6 +23,7 @@ import {
 } from '@kbn/proposals-common';
 import {
   useApproveProposal,
+  isDecisionShown,
   useDismissProposal,
   useIsApprovingProposal,
   useIsDecliningProposal,
@@ -97,8 +98,9 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const dismissMutation = useDismissProposal();
   const reopenMutation = useReopenProposal();
   const isReopening = useIsReopeningProposal(proposalId);
-  const isApproving = useIsApprovingProposal(proposalId);
-  const isDeclining = useIsDecliningProposal(proposalId);
+  const decisionShown = isDecisionShown(proposalQuery.data);
+  const isApproving = useIsApprovingProposal(proposalId, decisionShown);
+  const isDeclining = useIsDecliningProposal(proposalId, decisionShown);
   const isSubmitting = isApproving ? 'applying' : isDeclining ? 'declining' : undefined;
   const { data: currentUserProfile } = useCurrentUserProfile();
 

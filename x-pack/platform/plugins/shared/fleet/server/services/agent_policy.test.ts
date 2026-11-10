@@ -57,6 +57,7 @@ import { scheduleDeployAgentPoliciesTask } from './agent_policies/deploy_agent_p
 import { scheduleBumpAgentPoliciesByIdTask } from './agent_policies/bump_agent_policies_by_id_task';
 import { createAgentPolicyWithPackages } from './agent_policy_create';
 import { reassignAgentsFromVersionSpecificPolicies } from './utils/version_specific_policies';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { agentlessAgentService } from './agents/agentless_agent';
 import { unenrollForAgentPolicyId } from './agents';
 import { getPackageInfo } from './epm/packages';
@@ -1514,6 +1515,140 @@ describe('Agent policy', () => {
       expect(mockedPackagePolicyService.findAllForAgentPolicy).not.toHaveBeenCalled();
       expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
     });
+
+    it.each([
+      {
+        stored: 'no conditions',
+        storedFields: { has_agent_version_conditions: false, min_agent_version: null },
+      },
+      {
+        stored: 'conditions',
+        storedFields: {
+          has_agent_version_conditions: true,
+          min_agent_version: '9.3.0',
+          package_agent_version_conditions: [
+            { name: 'apache', title: 'Apache', version_condition: '>=9.3.0' },
+          ],
+        },
+      },
+    ])(
+      'should keep stored $stored without reading package policies when they are unchanged',
+      async ({ storedFields }) => {
+        const soClient = getSavedObjectMock({
+          revision: 1,
+          monitoring_enabled: [],
+          ...storedFields,
+        });
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // A recompute would find no conditions, clear the stored ones and reassign variant agents.
+        mockPackagePolicySOs(soClient, [
+          { name: 'nginx-1', package: { name: 'nginx', title: 'Nginx', version: '1.0.0' } },
+        ]);
+
+        // The updated package is not in the stored conditions, e.g. editing an unrelated integration.
+        await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+          asyncDeploy: true,
+          agentVersionConditionsUnchanged: true,
+          updatedPackageNames: ['nginx'],
+        });
+
+        expect(soClient.find).not.toHaveBeenCalledWith(
+          expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
+        );
+
+        const [, , attributes] = soClient.update.mock.calls[0];
+        expect(attributes).toMatchObject({ revision: 2 });
+        expect(Object.keys(attributes).filter((key) => key.includes('agent_version'))).toEqual([]);
+        expect(reassignAgentsFromVersionSpecificPolicies).not.toHaveBeenCalled();
+        expect(scheduleDeployAgentPoliciesTask).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('should recompute unchanged version conditions when they list an updated package', async () => {
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        enableVersionSpecificPolicies: true,
+      } as ExperimentalFeatures);
+      // An update cleared apache's condition and saved, but the bump that should have recomputed
+      // failed. The retry keeps the conditions, since the package policy no longer changes them.
+      const soClient = getSavedObjectMock({
+        revision: 1,
+        monitoring_enabled: [],
+        has_agent_version_conditions: true,
+        min_agent_version: '9.3.0',
+        package_agent_version_conditions: [
+          { name: 'apache', title: 'Apache', version_condition: '>=9.3.0' },
+        ],
+      });
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockPackagePolicySOs(soClient, [
+        {
+          name: 'apache-1',
+          package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+          package_agent_version_condition: '',
+        },
+      ]);
+
+      await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+        agentVersionConditionsUnchanged: true,
+        updatedPackageNames: ['apache'],
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        expect.anything(),
+        'agent-policy',
+        expect.objectContaining({
+          has_agent_version_conditions: false,
+          min_agent_version: null,
+          package_agent_version_conditions: null,
+        })
+      );
+      expect(reassignAgentsFromVersionSpecificPolicies).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        'agent-policy'
+      );
+    });
+
+    it.each([
+      { stored: 'never stored', storedFields: {} },
+      // Policies last updated before `min_agent_version` was introduced.
+      { stored: 'only the flag stored', storedFields: { has_agent_version_conditions: false } },
+    ])(
+      'should still compute version conditions when unchanged but $stored',
+      async ({ storedFields }) => {
+        const soClient = getSavedObjectMock({
+          revision: 1,
+          monitoring_enabled: [],
+          ...storedFields,
+        });
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        mockPackagePolicySOs(soClient, [
+          {
+            name: 'apache-1',
+            package: { name: 'apache', title: 'Apache', version: '1.3.2' },
+            package_agent_version_condition: '>=9.3.0',
+          },
+        ]);
+
+        await agentPolicyService.bumpRevision(soClient, esClient, 'agent-policy', {
+          agentVersionConditionsUnchanged: true,
+        });
+
+        expect(soClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({ type: PACKAGE_POLICY_SAVED_OBJECT_TYPE })
+        );
+        expect(soClient.update).toHaveBeenCalledWith(
+          expect.anything(),
+          'agent-policy',
+          expect.objectContaining({
+            has_agent_version_conditions: true,
+            min_agent_version: '9.3.0',
+          })
+        );
+      }
+    );
   });
 
   describe('bumpAllAgentPoliciesForOutput', () => {
@@ -2186,6 +2321,26 @@ describe('Agent policy', () => {
       // soClient.update is called with updated values
       calledWith = soClient.update.mock.calls[1];
       expect(calledWith[2]).toHaveProperty('is_managed', true);
+    });
+
+    it('should never persist an id in the saved object attributes', async () => {
+      jest.spyOn(agentPolicyService, 'requireUniqueName').mockResolvedValue(undefined);
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [{ attributes: {}, id: 'mocked', type: 'mocked', references: [] }],
+      });
+
+      await agentPolicyService.update(soClient, esClient, 'mocked', {
+        id: '../../../../\\@bad-account.co',
+        name: 'mocked',
+        namespace: 'default',
+      });
+
+      expect(soClient.update).toHaveBeenCalledTimes(1);
+      expect(soClient.update.mock.calls[0][1]).toBe('mocked');
+      expect(soClient.update.mock.calls[0][2]).not.toHaveProperty('id');
     });
 
     it('should throw a HostedAgentRestrictionRelated error if user enables "is_protected" for a managed policy', async () => {

@@ -28,7 +28,7 @@ describe('buildOnlineEvalsEvidence', () => {
   it("takes the round's input, tool calls and final response, skipping other steps", () => {
     expect(
       buildOnlineEvalsEvidence({
-        round: round([{ type: 'reasoning', reasoning: 'Checking pods' }, toolCall('call-1')]),
+        round: round([{ type: 'update_todos' }, toolCall('call-1')]),
       })
     ).toEqual({
       round: {
@@ -43,6 +43,48 @@ describe('buildOnlineEvalsEvidence', () => {
         ],
         response: { message: 'A bad deploy of the payments service.' },
       },
+    });
+  });
+
+  describe('reasoning notes', () => {
+    it('attaches an unbound note to the tool call that follows it', () => {
+      const { steps } = buildOnlineEvalsEvidence({
+        round: round([
+          { type: 'reasoning', reasoning: 'Checking pods' },
+          { type: 'reasoning', reasoning: '  Comparing error rates  ' },
+          toolCall('call-1'),
+          toolCall('call-2'),
+        ]),
+      }).round;
+
+      expect(steps[0].reasoning).toBe('Checking pods\nComparing error rates');
+      expect(steps[1]).not.toHaveProperty('reasoning');
+    });
+
+    it('attaches a note bound to a call id to that call, wherever it sits', () => {
+      const { steps } = buildOnlineEvalsEvidence({
+        round: round([
+          toolCall('call-1'),
+          { type: 'reasoning', reasoning: 'Reading the runbook', tool_call_id: 'call-1' },
+          toolCall('call-2'),
+        ]),
+      }).round;
+
+      expect(steps[0].reasoning).toBe('Reading the runbook');
+      expect(steps[1]).not.toHaveProperty('reasoning');
+    });
+
+    it('drops blank notes and a note with no call after it', () => {
+      const { steps } = buildOnlineEvalsEvidence({
+        round: round([
+          { type: 'reasoning', reasoning: '   ' },
+          toolCall('call-1'),
+          { type: 'reasoning', reasoning: 'Wrapping up' },
+        ]),
+      }).round;
+
+      expect(steps).toHaveLength(1);
+      expect(steps[0]).not.toHaveProperty('reasoning');
     });
   });
 

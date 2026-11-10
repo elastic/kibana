@@ -85,7 +85,7 @@ describe('ProcessingNode', () => {
       ref: PIPELINE_NODE_DATA.ref,
       processorIds: ['parse', 'enrich'],
     });
-    expect(screen.getByTestId('streamsCanvasProcessingNodeRate').textContent).toBe('3.7k eps');
+    expect(screen.getByTestId('streamsCanvasProcessingNodeRate').textContent).toBe('3.7k/s');
     expect(screen.getByTestId('streamsCanvasProcessingNodeDuration').textContent).toBe('8ms');
     expect(screen.getByTestId('streamsCanvasProcessingNode').getAttribute('title')).toBe(
       'Parse and enrich'

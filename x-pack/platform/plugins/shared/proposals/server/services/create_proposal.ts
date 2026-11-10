@@ -8,7 +8,17 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { CREATE_PROPOSAL_WORKFLOW_ID } from '@kbn/workflows/managed';
-import type { Proposal } from '@kbn/proposals-common';
+import {
+  PROPOSAL_CATEGORY_TODO,
+  proposalConfidenceSchema,
+  proposalImpactSchema,
+} from '@kbn/proposals-common';
+import type {
+  Proposal,
+  ProposalConfidence,
+  ProposalImpact,
+  ProposalOrigin,
+} from '@kbn/proposals-common';
 import type { ProposalPrivilegesChecker } from './check_proposal_privileges';
 import type { ProposalsService } from './proposals_service';
 
@@ -19,15 +29,22 @@ export interface NewProposal {
   title: string;
   comment: string;
   /** The feature the proposal is for. It routes the proposal to that feature's queue. */
-  origin: string;
+  origin: ProposalOrigin;
   impact?: string;
   confidence?: string;
   category?: string;
 }
 
 export interface CreatedProposal {
-  workflowExecutionId: string;
-  /** Absent when the gate workflow had not stored it by the end of the wait. */
+  /**
+   * The gate that will decide the proposal. Absent for a to-do, which the
+   * service writes and decides directly.
+   */
+  workflowExecutionId?: string;
+  /**
+   * Absent when the gate workflow had not stored it by the end of the wait.
+   * Always present for a to-do, which is created synchronously.
+   */
   proposal?: Proposal;
 }
 
@@ -41,8 +58,25 @@ export type ProposalCreator = (args: {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Creates a proposal in a conversation through the gate workflow, as the user behind the request.
- * Shared by the agent tool and by in-process callers that propose without an agent run.
+ * Callers reach us with free text — an LLM's `impact`, a workflow's Liquid
+ * blank — so an unrecognized value falls back to what the action's own
+ * metadata, and then `create()`, decide. The gated branch passes the string
+ * through to the workflow, which parses it the same way.
+ */
+const asImpact = (value: string | undefined): ProposalImpact | undefined =>
+  proposalImpactSchema.safeParse(value).data;
+
+const asConfidence = (value: string | undefined): ProposalConfidence | undefined =>
+  proposalConfidenceSchema.safeParse(value).data;
+
+/**
+ * Creates a proposal in a conversation as the user behind the request. Shared by the agent tool
+ * and by in-process callers that propose without an agent run.
+ *
+ * Two paths, picked by category and nothing else. A to-do is carried out by the analyst and runs
+ * nothing, so it is written directly and decided by the service: a gate behind it would only park
+ * an execution nobody resumes until the analyst gets to it. Everything else keeps the gate, which
+ * is what records a decision that executes an action.
  */
 export const createProposalCreator = ({
   getProposalsService,
@@ -79,8 +113,29 @@ export const createProposalCreator = ({
   };
 
   const create: ProposalCreator = async ({ request, spaceId, conversationId, proposal }) => {
-    await assertAvailable(request);
     const { title, comment, origin, impact, confidence, category } = proposal;
+
+    if (category === PROPOSAL_CATEGORY_TODO) {
+      // Workflows are not consulted at all here, so a to-do needs only
+      // `manage_proposals` — the privilege the gated branch checks as well.
+      await privileges.assertCanManage(request);
+      const created = await getProposalsService().create(
+        {
+          gate: 'none',
+          conversationId,
+          title,
+          comment,
+          origin,
+          category: PROPOSAL_CATEGORY_TODO,
+          ...(asImpact(impact) !== undefined && { impact: asImpact(impact) }),
+          confidence: asConfidence(confidence) ?? 'medium',
+        },
+        { spaceId, request }
+      );
+      return { proposal: created };
+    }
+
+    await assertAvailable(request);
     const { workflowExecutionId } = await getWorkflowsApi().executeWorkflow({
       workflowId: CREATE_PROPOSAL_WORKFLOW_ID,
       spaceId,

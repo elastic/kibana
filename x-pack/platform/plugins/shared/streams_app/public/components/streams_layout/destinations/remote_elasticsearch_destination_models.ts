@@ -6,10 +6,10 @@
  */
 
 import type { UnitDestination } from '@kbn/streams-schema';
-import { DESTINATION_SIGNALS, SIGNAL_INDEX_FIELDS } from './destination_models';
+import { PREFIXED_DESTINATION_SIGNALS, SIGNAL_INDEX_FIELDS } from './destination_models';
 import {
   REMOTE_ELASTICSEARCH_TYPE,
-  type DestinationSignal,
+  type PrefixedDestinationSignal,
   type RemoteElasticsearchDestinationFormData,
 } from './types';
 
@@ -23,12 +23,12 @@ export const remoteElasticsearchCredentialName = (id: string): string => `${id}-
 /** Trimmed index name for each filled signal in Fixed. Empty in Auto. */
 export const getRemoteIndexBySignal = (
   form: RemoteRoutingFormData
-): Partial<Record<DestinationSignal, string>> => {
-  const indexBySignal: Partial<Record<DestinationSignal, string>> = {};
+): Partial<Record<PrefixedDestinationSignal, string>> => {
+  const indexBySignal: Partial<Record<PrefixedDestinationSignal, string>> = {};
   if (form.auto) {
     return indexBySignal;
   }
-  for (const signal of DESTINATION_SIGNALS) {
+  for (const signal of PREFIXED_DESTINATION_SIGNALS) {
     const index = form[SIGNAL_INDEX_FIELDS[signal]].trim();
     if (index) {
       indexBySignal[signal] = index;
@@ -57,7 +57,7 @@ export const createRemoteElasticsearchUnitDestination = ({
   endpoint: string;
 } & RemoteRoutingFormData): UnitDestination => {
   const indexBySignal = getRemoteIndexBySignal({ auto, logsIndex, metricsIndex, tracesIndex });
-  const indexed = DESTINATION_SIGNALS.flatMap((signal) => {
+  const indexed = PREFIXED_DESTINATION_SIGNALS.flatMap((signal) => {
     const value = indexBySignal[signal];
     return value ? [{ signal, value }] : [];
   });
@@ -72,7 +72,9 @@ export const createRemoteElasticsearchUnitDestination = ({
     name,
     ...(trimmedDescription ? { description: trimmedDescription } : {}),
     type: REMOTE_ELASTICSEARCH_TYPE,
-    supported_telemetry: auto ? [...DESTINATION_SIGNALS] : indexed.map(({ signal }) => signal),
+    supported_telemetry: auto
+      ? [...PREFIXED_DESTINATION_SIGNALS]
+      : indexed.map(({ signal }) => signal),
     config: [
       { name: 'endpoint', value: endpoint.trim() },
       ...indexEntries,

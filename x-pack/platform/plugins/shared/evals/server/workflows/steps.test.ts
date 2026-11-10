@@ -119,6 +119,29 @@ describe('ai.evals.evaluateTrace step', () => {
       },
     });
   });
+
+  it('does not throw when an evaluator reports it does not apply, since a retry cannot help', async () => {
+    const notApplicableResult = {
+      ...errorResult,
+      error: { code: 'not_applicable', message: 'Evaluator not applicable: no confirmed cause' },
+    };
+    const callKibanaApi = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: {},
+      body: { results: [notApplicableResult] },
+    });
+
+    const result = await getHandler(EvaluateTraceStepId)(
+      buildContext(evaluateInput, callKibanaApi)
+    );
+
+    expect(result).toEqual({
+      output: {
+        results: [],
+        errors: ['Evaluator "groundedness" failed: Evaluator not applicable: no confirmed cause'],
+      },
+    });
+  });
 });
 
 describe('ai.evals.persistOnlineScores step', () => {
