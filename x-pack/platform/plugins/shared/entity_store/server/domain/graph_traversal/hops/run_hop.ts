@@ -368,6 +368,7 @@ export const runHop = async (
           lookback,
           exclusions,
           visited: input.visited,
+          hubDegree: limits.hub_degree,
           inbound,
         });
         const queryStartedAt = performance.now();

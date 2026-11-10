@@ -29,6 +29,7 @@ import {
 } from '../../../common/graph_traversal/scenarios';
 import { GraphTraversalError } from './graph_traversal_error';
 import { resolveLatestEntityIndex } from './resolve_latest_entity_index';
+import type { HopQueryParam } from './hops/build_hop_query';
 import { resolveNodes, type ExecuteResolveQuery } from './hops/resolve_nodes';
 import { runHop, type EsqlResult, type ExecuteHopQuery } from './hops/run_hop';
 
@@ -244,7 +245,7 @@ export class GraphTraversalClient {
     return this.query(query, params, 'Resolve');
   };
 
-  private async query(query: string, params: string[], what: string): Promise<EsqlResult> {
+  private async query(query: string, params: HopQueryParam[], what: string): Promise<EsqlResult> {
     const response = await this.esClient.esql.query({ query, params, drop_null_columns: false });
     const typed = response as unknown as Partial<EsqlResult>;
     if (!Array.isArray(typed.columns) || !Array.isArray(typed.values)) {

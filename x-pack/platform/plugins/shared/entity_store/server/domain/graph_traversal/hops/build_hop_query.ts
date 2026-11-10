@@ -41,10 +41,16 @@ export const lookbackToEsqlSpan = (lookback: string): string => {
   return `${match[1]} ${unit}`;
 };
 
+/** A positional parameter: one id, or a list of ids bound as one multi-valued constant. */
+export type HopQueryParam = string | string[];
+
 export interface HopQuery {
   query: string;
-  params: string[];
+  params: HopQueryParam[];
 }
+
+/** Column holding the ids an inbound hub cap kept for one frontier node, before they are exploded. */
+export const HOP_REACHED_COLUMN = '__reached';
 
 export interface BuildHopQueryParams {
   hop: TraversalHop;
@@ -68,6 +74,13 @@ export interface BuildHopQueryParams {
    * exploded pointer, inbound on the document's own id.
    */
   visited?: string[];
+  /**
+   * Inbound only: cap the holders read per frontier node at `hubDegree + 1`, enough for the
+   * hub check after the fetch to refuse the node, instead of every pointing document being
+   * grouped and shipped. Needs `lookupIndex` when the hop has payload fields, since the cap
+   * regroups the rows and the payload is then joined back for the kept ids.
+   */
+  hubDegree?: number;
   /**
    * Walk the edges backwards: read the entities whose target field points at a frontier id,
    * instead of the frontier entities' own target field. Rows keep the stored orientation
@@ -106,6 +119,7 @@ export const buildHopQuery = ({
   lookback,
   exclusions = [],
   visited = [],
+  hubDegree,
   inbound = false,
 }: BuildHopQueryParams): HopQuery => {
   if (frontier.length === 0) {
@@ -118,10 +132,15 @@ export const buildHopQuery = ({
   );
 
   // Parameters are positional, so every value is registered in the order its `?` appears.
-  const params: string[] = [];
+  const params: HopQueryParam[] = [];
   const placeholders = (values: string[]): string => {
     params.push(...values);
     return values.map(() => '?').join(', ');
+  };
+  // One `?` bound to the whole list, for functions that take a multi-valued constant.
+  const listPlaceholder = (values: string[]): string => {
+    params.push(values);
+    return '?';
   };
   // An exclusion on the pointer field is applied after MV_EXPAND so only the excluded value
   // is dropped, not every entity that lists it among others. One on the match field
@@ -134,7 +153,13 @@ export const buildHopQuery = ({
 
   const lines = [HOP_QUERY_PREAMBLE, `FROM ${index}`];
   if (inbound) {
-    lines.push(`| WHERE ${target} IS NOT NULL AND ${match} IS NOT NULL`);
+    // IN on the multi-valued pointer would miss a value inside the array; MV_INTERSECTS
+    // against the frontier list is pushed to Lucene as a terms query without that limit, so
+    // only the documents holding a frontier id are read. The IN after the explode still trims
+    // per value.
+    lines.push(
+      `| WHERE MV_INTERSECTS(${target}, ${listPlaceholder(frontier)}) AND ${match} IS NOT NULL`
+    );
   } else {
     lines.push(`| WHERE ${match} IN (${placeholders(frontier)}) AND ${target} IS NOT NULL`);
   }
@@ -169,10 +194,34 @@ export const buildHopQuery = ({
   }
 
   const stats = `| STATS ${[`${HOP_COUNT_COLUMN} = COUNT(*)`, ...payloadStats].join(', ')}`;
-  if (!inbound && lookupIndex !== undefined) {
+  const entityId = quoteField(HOP_ENTITY_ID_FIELD);
+  const capInbound =
+    inbound && hubDegree !== undefined && (payloadStats.length === 0 || lookupIndex !== undefined);
+  if (capInbound) {
+    // Inbound hub cap. Each pointing document is one row, so there is no array to slice;
+    // instead the rows are grouped by the frontier id they point at and at most hubDegree + 1
+    // holder ids are kept per node with TOP, the same shape GRAPH EXPAND uses. The hub check
+    // after the fetch still sees more than hubDegree distinct holders and refuses the node,
+    // while a hub no longer fills the LIMIT at its neighbours' expense. With payload fields the
+    // kept ids are joined back to their documents, as the outbound query does for pointed ids.
+    lines.push(
+      `| STATS ${HOP_REACHED_COLUMN} = TOP(${match}, ${
+        hubDegree + 1
+      }, "asc") BY ${HOP_TARGET_COLUMN} = ${target}`,
+      `| MV_EXPAND ${HOP_REACHED_COLUMN}`
+    );
+    if (payloadStats.length > 0) {
+      lines.push(
+        `| RENAME ${HOP_REACHED_COLUMN} AS ${entityId}`,
+        `| LOOKUP JOIN ${lookupIndex} ON ${entityId}`,
+        `${stats} BY ${HOP_SOURCE_COLUMN} = ${entityId}, ${HOP_TARGET_COLUMN}`
+      );
+    } else {
+      lines.push(`${stats} BY ${HOP_SOURCE_COLUMN} = ${HOP_REACHED_COLUMN}, ${HOP_TARGET_COLUMN}`);
+    }
+  } else if (!inbound && lookupIndex !== undefined) {
     // Keep the frontier id aside, make the pointed id the join key, and drop the frontier
     // document's own columns so the joined ones are unambiguously the reached entity's.
-    const entityId = quoteField(HOP_ENTITY_ID_FIELD);
     lines.push(
       `| EVAL ${HOP_SOURCE_COLUMN} = ${match}`,
       `| RENAME ${target} AS ${entityId}`,

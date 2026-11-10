@@ -11,6 +11,7 @@ import {
   HOP_SOURCE_COLUMN,
   HOP_TARGET_COLUMN,
   hopPayloadColumn,
+  type HopQueryParam,
 } from './build_hop_query';
 import { runHop, type EsqlResult, type ExecuteHopQuery } from './run_hop';
 
@@ -57,12 +58,12 @@ const result = (rows: Array<[string, string, number?, unknown?]>): EsqlResult =>
 /** One canned result per target field, in target_fields order; records each query's text, params and LIMIT. */
 const executor = (
   perField: EsqlResult[]
-): ExecuteHopQuery & { calls: string[][]; queries: string[]; queryLimits: number[] } => {
-  const calls: string[][] = [];
+): ExecuteHopQuery & { calls: HopQueryParam[][]; queries: string[]; queryLimits: number[] } => {
+  const calls: HopQueryParam[][] = [];
   const queries: string[] = [];
   const queryLimits: number[] = [];
   let i = 0;
-  const execute = async ({ query, params }: { query: string; params: string[] }) => {
+  const execute = async ({ query, params }: { query: string; params: HopQueryParam[] }) => {
     calls.push(params);
     queries.push(query);
     queryLimits.push(Number(query.match(/\| LIMIT (\d+)$/)?.[1]));
@@ -596,12 +597,13 @@ describe('runHop', () => {
       execute
     );
     // Outbound legs register the frontier then the visited ids (filtered after the explode);
-    // inbound legs register the visited ids first (filtered on the document) then the frontier.
+    // inbound legs bind the frontier as one list for MV_INTERSECTS, then the visited ids
+    // (filtered on the document), then the frontier again for the IN after the explode.
     expect(execute.calls).toEqual([
       ['hash-1', 'host:WKSTN-RECV01', 'hash-1'],
       ['hash-1', 'host:WKSTN-RECV01', 'hash-1'],
-      ['host:WKSTN-RECV01', 'hash-1', 'hash-1'],
-      ['host:WKSTN-RECV01', 'hash-1', 'hash-1'],
+      [['hash-1'], 'host:WKSTN-RECV01', 'hash-1', 'hash-1'],
+      [['hash-1'], 'host:WKSTN-RECV01', 'hash-1', 'hash-1'],
     ]);
     expect(out.stats.queries).toBe(4);
     // Edges keep the stored orientation: the host holds the relationship to the hash.

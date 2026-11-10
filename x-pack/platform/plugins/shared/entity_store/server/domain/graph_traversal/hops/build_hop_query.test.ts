@@ -125,12 +125,13 @@ describe('buildHopQuery', () => {
         limit: 500,
         inbound: true,
       });
-      expect(params).toEqual(['role:x', 'role:y']);
+      // The frontier is bound once as a list for MV_INTERSECTS, then per value for the IN.
+      expect(params).toEqual([['role:x', 'role:y'], 'role:x', 'role:y']);
       expect(query).toBe(
         [
           HOP_QUERY_PREAMBLE,
           `FROM ${INDEX}`,
-          '| WHERE `entity.relationships.can_assume.ids` IS NOT NULL AND `entity.id` IS NOT NULL',
+          '| WHERE MV_INTERSECTS(`entity.relationships.can_assume.ids`, ?) AND `entity.id` IS NOT NULL',
           '| WHERE (entity.source == "cloud_asset_inventory.asset_inventory")',
           '| MV_EXPAND `entity.relationships.can_assume.ids`',
           '| WHERE `entity.relationships.can_assume.ids` IN (?, ?)',
@@ -186,7 +187,7 @@ describe('buildHopQuery', () => {
       });
       expect(query).toContain('| WHERE NOT `entity.id` IN (?)');
       expect(query.indexOf('| WHERE NOT `entity.id`')).toBeLessThan(query.indexOf('| MV_EXPAND'));
-      expect(params).toEqual(['role:skip', 'x']);
+      expect(params).toEqual([['x'], 'role:skip', 'x']);
     });
   });
 
@@ -244,7 +245,7 @@ describe('lookbackToEsqlSpan', () => {
         limit: 500,
         inbound: true,
       });
-      expect(params).toEqual(['seed', 'role:x']);
+      expect(params).toEqual([['role:x'], 'seed', 'role:x']);
       expect(query).toContain(
         [
           '| WHERE NOT `entity.id` IN (?)',
@@ -263,6 +264,85 @@ describe('lookbackToEsqlSpan', () => {
         limit: 500,
       });
       expect(query).not.toContain('WHERE NOT');
+    });
+  });
+  describe('inbound hub cap', () => {
+    it('keeps hub_degree + 1 holders per frontier node and joins their payload back', () => {
+      const { query, params } = buildHopQuery({
+        hop: { ...hop, filter: undefined },
+        index: INDEX,
+        lookupIndex: LOOKUP,
+        targetField: hop.target_fields[0].field,
+        frontier: ['role:x'],
+        hubDegree: 200,
+        limit: 500,
+        inbound: true,
+      });
+      expect(params).toEqual([['role:x'], 'role:x']);
+      expect(query).toBe(
+        [
+          HOP_QUERY_PREAMBLE,
+          `FROM ${INDEX}`,
+          '| WHERE MV_INTERSECTS(`entity.relationships.can_assume.ids`, ?) AND `entity.id` IS NOT NULL',
+          '| MV_EXPAND `entity.relationships.can_assume.ids`',
+          '| WHERE `entity.relationships.can_assume.ids` IN (?)',
+          '| STATS __reached = TOP(`entity.id`, 201, "asc") BY __target = `entity.relationships.can_assume.ids`',
+          '| MV_EXPAND __reached',
+          '| RENAME __reached AS `entity.id`',
+          `| LOOKUP JOIN ${LOOKUP} ON \`entity.id\``,
+          `| STATS __count = COUNT(*), __payload_0 = VALUES(\`entity.name\`), __payload_1 = VALUES(\`entity.sub_type\`) BY __source = \`entity.id\`, __target`,
+          '| LIMIT 500',
+        ].join('\n')
+      );
+    });
+
+    it('needs no join when the hop has no payload fields', () => {
+      const { query } = buildHopQuery({
+        hop: { ...hop, filter: undefined, payload_fields: [] },
+        index: INDEX,
+        targetField: hop.target_fields[0].field,
+        frontier: ['role:x'],
+        hubDegree: 2,
+        limit: 500,
+        inbound: true,
+      });
+      expect(query).toContain(
+        [
+          '| STATS __reached = TOP(`entity.id`, 3, "asc") BY __target = `entity.relationships.can_assume.ids`',
+          '| MV_EXPAND __reached',
+          '| STATS __count = COUNT(*) BY __source = __reached, __target',
+        ].join('\n')
+      );
+      expect(query).not.toContain('LOOKUP JOIN');
+    });
+
+    it('falls back to per-edge rows when payload fields cannot be joined back', () => {
+      const { query } = buildHopQuery({
+        hop: { ...hop, filter: undefined },
+        index: INDEX,
+        targetField: hop.target_fields[0].field,
+        frontier: ['role:x'],
+        hubDegree: 2,
+        limit: 500,
+        inbound: true,
+      });
+      expect(query).not.toContain('TOP(');
+      expect(query).toContain(
+        'BY __source = `entity.id`, __target = `entity.relationships.can_assume.ids`'
+      );
+    });
+
+    it('does not apply outbound', () => {
+      const { query } = buildHopQuery({
+        hop,
+        index: INDEX,
+        lookupIndex: LOOKUP,
+        targetField: hop.target_fields[0].field,
+        frontier: ['x'],
+        hubDegree: 2,
+        limit: 500,
+      });
+      expect(query).not.toContain('TOP(');
     });
   });
 });
