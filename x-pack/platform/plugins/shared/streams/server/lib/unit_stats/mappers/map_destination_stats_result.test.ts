@@ -6,7 +6,11 @@
  */
 
 import { streamsUnitStatsDestinationResultSchema } from '@kbn/streams-schema';
-import { joinDestinationRows, mapDestinationStatsRows } from './map_destination_stats_result';
+import {
+  joinDestinationRows,
+  mapDestinationStatsRows,
+  type DestinationRow,
+} from './map_destination_stats_result';
 
 const bucketMs = 60_000;
 
@@ -34,7 +38,11 @@ describe('mapDestinationStatsRows', () => {
             ],
           },
         },
-        failed: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
+        failed: {
+          rate: { value: 0, unit: '{item}', time_unit: 's' },
+          authentication: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+          authorization: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+        },
       },
     });
     expect(streamsUnitStatsDestinationResultSchema.parse(result)).toEqual(result);
@@ -70,6 +78,94 @@ describe('mapDestinationStatsRows', () => {
     expect(result.events.incoming.rate.value).toBeNull();
     expect(result.latency.average.value).toBeNull();
     expect(result.events.incoming.series.points).toHaveLength(2);
+  });
+});
+
+describe('mapDestinationStatsRows failure rates', () => {
+  const series = [{ bucket: '2026-10-20T10:00:00.000Z', sum_items: 270 }];
+  const rate = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
+
+  /** Maps one destination, and checks that the result still parses with the response schema. */
+  const mapFailed = (row: Partial<DestinationRow>) => {
+    const result = mapDestinationStatsRows({
+      rows: { 'es-prod': { incoming_rate: 4.6, failed_rate: 0, series, ...row } },
+      bucketMs,
+    })['es-prod'];
+    expect(streamsUnitStatsDestinationResultSchema.parse(result)).toEqual(result);
+
+    return result.events.failed;
+  };
+
+  it('has no data for a destination whose rates are null', () => {
+    const failed = mapFailed({ authentication_rate: null, authorization_rate: null });
+
+    expect(failed.authentication).toEqual({ rate: rate(null) });
+    expect(failed.authorization).toEqual({ rate: rate(null) });
+  });
+
+  it('has a rate of 0 and no signals for a destination with items and no rejection', () => {
+    const failed = mapFailed({ authentication_rate: 0, authorization_rate: 0 });
+
+    expect(failed.authentication).toEqual({ rate: rate(0) });
+    expect(failed.authorization).toEqual({ rate: rate(0) });
+  });
+
+  it('reports 401 failures only, with their signals', () => {
+    const failed = mapFailed({
+      authentication_rate: 2,
+      authorization_rate: 0,
+      failureSignals: [{ signal: 'logs', authentication_rate: 2, authorization_rate: null }],
+    });
+
+    expect(failed.authentication).toEqual({ rate: rate(2), signals: { logs: { rate: rate(2) } } });
+    expect(failed.authorization).toEqual({ rate: rate(0) });
+  });
+
+  it('reports 403 failures only, with their signals', () => {
+    const failed = mapFailed({
+      authentication_rate: 0,
+      authorization_rate: 1.9,
+      failureSignals: [{ signal: 'logs', authentication_rate: null, authorization_rate: 1.9 }],
+    });
+
+    expect(failed.authentication).toEqual({ rate: rate(0) });
+    expect(failed.authorization).toEqual({
+      rate: rate(1.9),
+      signals: { logs: { rate: rate(1.9) } },
+    });
+  });
+
+  it('leaves out a signal with no failures of a type, and the signal rates add up to the total', () => {
+    const failed = mapFailed({
+      authentication_rate: 2,
+      authorization_rate: 1,
+      failureSignals: [
+        { signal: 'logs', authentication_rate: 1.5, authorization_rate: 1 },
+        { signal: 'metrics', authentication_rate: 0.5, authorization_rate: null },
+      ],
+    });
+
+    expect(Object.keys(failed.authentication.signals ?? {})).toEqual(['logs', 'metrics']);
+    expect(Object.keys(failed.authorization.signals ?? {})).toEqual(['logs']);
+    const signalRates = Object.values(failed.authentication.signals ?? {}).map(
+      ({ rate: { value } }) => value ?? 0
+    );
+    expect(signalRates.reduce((sum, value) => sum + value, 0)).toBeCloseTo(
+      failed.authentication.rate.value ?? NaN
+    );
+  });
+
+  it('leaves out a signal that the API does not know', () => {
+    const failed = mapFailed({
+      authentication_rate: 2,
+      authorization_rate: 0,
+      failureSignals: [
+        { signal: 'logs', authentication_rate: 1, authorization_rate: null },
+        { signal: 'unknown', authentication_rate: 1, authorization_rate: null },
+      ],
+    });
+
+    expect(failed.authentication).toEqual({ rate: rate(2), signals: { logs: { rate: rate(1) } } });
   });
 });
 
@@ -120,6 +216,19 @@ describe('joinDestinationRows', () => {
     expect(shaped['es-dev']).toEqual({
       series: [{ bucket: '2026-10-20T10:00:00.000Z', sum_items: 90 }],
     });
+  });
+
+  it('attaches the failure signal rows only to the destination that has them', () => {
+    const failureSignalsRows = [
+      { id: 'es-dev', signal: 'logs', authentication_rate: 0.5, authorization_rate: null },
+    ];
+
+    const shaped = joinDestinationRows({ rateRows, sumsRows, failureSignalsRows });
+
+    expect(shaped['es-dev'].failureSignals).toEqual([
+      { signal: 'logs', authentication_rate: 0.5, authorization_rate: null },
+    ]);
+    expect(shaped['es-prod']).not.toHaveProperty('failureSignals');
   });
 
   it('has no destinations for no rows', () => {

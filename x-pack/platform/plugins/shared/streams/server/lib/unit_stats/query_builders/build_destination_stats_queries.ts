@@ -14,7 +14,9 @@ import {
   DESTINATION_ITEMS_FIELD,
   ESQL_MAX_ROWS,
   FAILURE_STORE_OUTCOME,
+  HTTP_STATUS_CODE_FIELD,
   OUTCOME_FIELD,
+  SIGNAL_FIELD,
   STATS_COLUMN,
   UNIT_METRICS_STREAM,
 } from '../constants';
@@ -56,16 +58,21 @@ export const countsItemOnce = (): ESQLSingleAstItem => {
  * the window is not diluted and the first delta's own interval is counted. The time is taken in
  * milliseconds because `DATE_DIFF` in seconds truncates. The incoming rate leaves out `failure_store`
  * rows, see `countsItemOnce`. `failed_rate` counts every outcome except `success`: 0 when there are
- * items and no failures, null when there are no items. `AVG` of the duration histograms is the mean
- * of all observations. `items` is a counter, so it is cast first.
+ * items and no failures, null when there are no items. The authentication and authorization rates
+ * are the same sum for the status codes 401 and 403, with the same 0 and null rules. They filter on
+ * the status code, not the outcome, so other 4xx failures stay in the failed rate only. `AVG` of the
+ * duration histograms is the mean of all observations. `items` is a counter, so it is cast first.
  */
 export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): ComposerQuery => {
   const items = normalizeColumn(DESTINATION_ITEMS_FIELD);
   const duration = normalizeColumn(DESTINATION_DURATION_FIELD);
   const outcome = normalizeColumn(OUTCOME_FIELD);
+  const statusCode = normalizeColumn(HTTP_STATUS_CODE_FIELD);
   const destinationId = normalizeColumn(DESTINATION_ID_FIELD);
   const incomingRate = esql.col(STATS_COLUMN.incomingRate);
   const failedRate = esql.col(STATS_COLUMN.failedRate);
+  const authenticationRate = esql.col(STATS_COLUMN.authenticationRate);
+  const authorizationRate = esql.col(STATS_COLUMN.authorizationRate);
   const avgLatency = esql.col(STATS_COLUMN.avgLatency);
   const id = esql.col(STATS_COLUMN.id);
   const { end } = params.window;
@@ -74,13 +81,52 @@ export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): 
     .pipe`EVAL delta = TO_DOUBLE(${items})`
     .pipe`STATS sum_items = SUM(delta) WHERE ${countsItemOnce()},
         failed_items = SUM(delta) WHERE ${outcome} != "success",
+        authentication_items = SUM(delta) WHERE ${statusCode} == 401,
+        authorization_items = SUM(delta) WHERE ${statusCode} == 403,
         ${avgLatency} = AVG(${duration}),
         covered_from = MIN(start_timestamp)
       BY ${id} = ${destinationId}`
     .pipe`EVAL window_seconds = DATE_DIFF("milliseconds", covered_from, ${end}) / 1000.0`
     .pipe`EVAL ${incomingRate} = sum_items / window_seconds,
-        ${failedRate} = CASE(sum_items IS NOT NULL, COALESCE(failed_items, 0.0) / window_seconds)`
-    .pipe`KEEP ${id}, ${incomingRate}, ${failedRate}, ${avgLatency}`;
+        ${failedRate} = CASE(sum_items IS NOT NULL, COALESCE(failed_items, 0.0) / window_seconds),
+        ${authenticationRate} = CASE(sum_items IS NOT NULL, COALESCE(authentication_items, 0.0) / window_seconds),
+        ${authorizationRate} = CASE(sum_items IS NOT NULL, COALESCE(authorization_items, 0.0) / window_seconds)`
+    .pipe`KEEP ${id}, ${incomingRate}, ${failedRate}, ${authenticationRate}, ${authorizationRate}, ${avgLatency}`;
+};
+
+/**
+ * The authentication and authorization rates of each destination, split by signal, from a plain
+ * `FROM`. It is for destinations that the rate query showed have such failures, so one row per
+ * destination and signal that has any. The time is the destination's, not the signal's: `INLINE
+ * STATS` finds the first delta of the destination over all its documents, before the status filter,
+ * so the signal rates add up to the rates of `buildDestinationRateQuery`. A signal with failures of
+ * one status only has a null rate for the other.
+ */
+export const buildDestinationFailureSignalsQuery = (
+  params: DestinationStatsQueryParams
+): ComposerQuery => {
+  const items = normalizeColumn(DESTINATION_ITEMS_FIELD);
+  const statusCode = normalizeColumn(HTTP_STATUS_CODE_FIELD);
+  const destinationId = normalizeColumn(DESTINATION_ID_FIELD);
+  const signalField = normalizeColumn(SIGNAL_FIELD);
+  const authenticationRate = esql.col(STATS_COLUMN.authenticationRate);
+  const authorizationRate = esql.col(STATS_COLUMN.authorizationRate);
+  const id = esql.col(STATS_COLUMN.id);
+  const signal = esql.col(STATS_COLUMN.signal);
+  const { end } = params.window;
+
+  return filterDestinations(esql.from(UNIT_METRICS_STREAM), params)
+    .pipe`EVAL delta = TO_DOUBLE(${items})`
+    .pipe`INLINE STATS covered_from = MIN(start_timestamp) BY ${destinationId}`
+    .pipe`WHERE ${statusCode} IN (401, 403)`
+    .pipe`STATS authentication_items = SUM(delta) WHERE ${statusCode} == 401,
+        authorization_items = SUM(delta) WHERE ${statusCode} == 403,
+        covered_from = MIN(covered_from)
+      BY ${id} = ${destinationId}, ${signal} = ${signalField}`
+    .pipe`EVAL window_seconds = DATE_DIFF("milliseconds", covered_from, ${end}) / 1000.0`
+    .pipe`EVAL ${authenticationRate} = authentication_items / window_seconds,
+        ${authorizationRate} = authorization_items / window_seconds`
+    .pipe`KEEP ${id}, ${signal}, ${authenticationRate}, ${authorizationRate}`;
 };
 
 /**

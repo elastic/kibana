@@ -37,6 +37,9 @@ export const OUTCOME_FIELD = 'attributes.outcome';
 export const FAILURE_STORE_OUTCOME = 'failure_store';
 
 export const DESTINATION_ID_FIELD = 'scope.attributes.streams.destination.id';
+export const SIGNAL_FIELD = 'scope.attributes.streams.signal';
+/** Set on a rejected item only, so a stream with no failures yet has no such field. */
+export const HTTP_STATUS_CODE_FIELD = 'attributes.http.response.status_code';
 export const DESTINATION_ITEMS_FIELD = 'metrics.streams.destination.items';
 export const DESTINATION_DURATION_FIELD = 'metrics.streams.destination.duration';
 
@@ -65,6 +68,9 @@ export const STATS_COLUMN = {
   bucket: 'bucket',
   incomingRate: 'incoming_rate',
   failedRate: 'failed_rate',
+  authenticationRate: 'authentication_rate',
+  authorizationRate: 'authorization_rate',
+  signal: 'signal',
   acceptedRate: 'accepted_rate',
   avgLatency: 'avg_latency',
   sumItems: 'sum_items',
