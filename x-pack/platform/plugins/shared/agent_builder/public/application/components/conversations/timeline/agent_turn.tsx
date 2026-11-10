@@ -49,6 +49,7 @@ const renderContent = (
   conversationId: string | undefined,
   conversationAttachments?: VersionedAttachment[]
 ): React.ReactNode => {
+  const { executionId } = item;
   if (isFailedTurn(item) || isAbortedTurn(item)) {
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -81,7 +82,8 @@ const renderContent = (
   const steps = completed?.steps ?? item.steps;
   const response = completed?.response ?? { message: item.response?.message ?? '' };
   const isAwaiting = isAwaitingPromptTurn(item);
-  const hasContent = steps.length > 0 || response.message !== '';
+  const hasContent =
+    steps.length > 0 || response.message !== '' || Boolean(completed?.response?.structured_output);
 
   if (!isAwaiting && !hasContent) {
     return null;
@@ -100,6 +102,7 @@ const renderContent = (
           conversationAttachments={conversationAttachments}
           attachmentRefs={item.attachmentRefs}
           triggerAttachmentRefs={completed ? item.triggerAttachmentRefs : undefined}
+          executionId={executionId}
         />
       )}
       {isAwaiting && promptRequestedEventId && (
@@ -112,7 +115,7 @@ const renderContent = (
   );
 };
 
-export const AgentTurn: React.FC<AgentTurnProps> = ({
+const AgentTurnComponent: React.FC<AgentTurnProps> = ({
   item,
   agent,
   conversationAttachments,
@@ -125,6 +128,10 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
 
   const avatarColumnStyles = css`
     min-inline-size: ${euiTheme.size.l};
+  `;
+
+  const contentColumnStyles = css`
+    min-inline-size: 0;
   `;
 
   const content = renderContent(item, conversationId, conversationAttachments);
@@ -143,7 +150,7 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
           agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
         )}
       </EuiFlexItem>
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={true} css={contentColumnStyles}>
         <EuiFlexGroup direction="column" gutterSize="s">
           {agent && (
             <EuiFlexItem grow={false}>
@@ -161,3 +168,6 @@ export const AgentTurn: React.FC<AgentTurnProps> = ({
     </EuiFlexGroup>
   );
 };
+
+export const AgentTurn = React.memo(AgentTurnComponent);
+AgentTurn.displayName = 'AgentTurn';

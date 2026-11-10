@@ -38,8 +38,13 @@ const uuidV5Mock = uuidV5 as unknown as jest.Mock<string, [string]>;
 // The existing precondition-matrix tests default `last_lifecycle_action_type`
 // to `null` — no user has issued activate/deactivate on the group. Tests that
 // exercise the user-lock path override this explicitly.
-type LatestAlertEventStateInput = Omit<LatestAlertEventState, 'last_lifecycle_action_type'> &
-  Partial<Pick<LatestAlertEventState, 'last_lifecycle_action_type'>>;
+type LatestAlertEventStateInput = Omit<
+  LatestAlertEventState,
+  'last_lifecycle_action_type' | 'last_episode_phase_started_at'
+> &
+  Partial<
+    Pick<LatestAlertEventState, 'last_lifecycle_action_type' | 'last_episode_phase_started_at'>
+  >;
 
 function createLatestAlertEventStateResponse(records: Array<LatestAlertEventStateInput>) {
   return createEsqlResponse(
@@ -49,6 +54,7 @@ function createLatestAlertEventStateResponse(records: Array<LatestAlertEventStat
       { name: 'last_episode_status', type: 'keyword' },
       { name: 'last_episode_status_count', type: 'long' },
       { name: 'last_episode_timestamp', type: 'date' },
+      { name: 'last_episode_phase_started_at', type: 'date' },
       { name: 'last_lifecycle_action_type', type: 'keyword' },
       { name: 'group_hash', type: 'keyword' },
     ],
@@ -58,6 +64,7 @@ function createLatestAlertEventStateResponse(records: Array<LatestAlertEventStat
       r.last_episode_status,
       r.last_episode_status_count,
       r.last_episode_timestamp ?? null,
+      r.last_episode_phase_started_at ?? null,
       r.last_lifecycle_action_type ?? null,
       r.group_hash,
     ])
@@ -92,7 +99,11 @@ describe('DirectorService', () => {
         alertEvents: [],
       });
 
-      expect(result).toEqual({ alertEvents: [], stats: { newEpisodeIds: [] } });
+      expect(result).toEqual({
+        alertEvents: [],
+        stats: { newEpisodeIds: [], statusTransitions: [] },
+        previousAlertStateByGroupHash: new Map(),
+      });
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     });
 
@@ -600,7 +611,9 @@ describe('DirectorService', () => {
 
     it('evaluates timeframe thresholds against the director clock, not the event', async () => {
       // Incoming events carry no `@timestamp` (ES sets it at ingest), so the
-      // elapsed time must come from the director run time.
+      // elapsed time must come from the director run time (`evaluatedAt`) measured
+      // against the derived phase-entry timestamp — not the latest stored event
+      // (`last_episode_timestamp`, 00:09 here), which would never accumulate.
       jest.useFakeTimers().setSystemTime(new Date('2026-01-01T00:10:00.000Z'));
 
       try {
@@ -617,7 +630,8 @@ describe('DirectorService', () => {
         mockEsClient.esql.query.mockResolvedValue(
           createLatestAlertEventStateResponse([
             {
-              last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+              last_episode_timestamp: '2026-01-01T00:09:00.000Z',
+              last_episode_phase_started_at: '2026-01-01T00:00:00.000Z',
               last_status: 'breached',
               last_episode_id: 'episode-1',
               last_episode_status: 'pending',
@@ -680,6 +694,169 @@ describe('DirectorService', () => {
 
       expect(result.alertEvents).toHaveLength(3);
       expect(result.stats.newEpisodeIds).toHaveLength(2);
+    });
+
+    describe('status transitions', () => {
+      const existingState = (
+        overrides: Partial<LatestAlertEventStateInput> = {}
+      ): LatestAlertEventStateInput => ({
+        last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+        last_status: 'breached',
+        last_episode_id: 'existing-episode',
+        last_episode_status: 'active',
+        last_episode_status_count: null,
+        group_hash: 'hash-1',
+        ...overrides,
+      });
+
+      const runWith = async (
+        alertEvents: ReturnType<typeof createAlertEvent>[],
+        states: LatestAlertEventStateInput[]
+      ) => {
+        mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse(states));
+
+        return directorService.run({
+          spaceId: 'default',
+          rule,
+          executionContext: testExecutionContext,
+          alertEvents,
+        });
+      };
+
+      it('records a first firing with a null previous status', async () => {
+        const result = await runWith(
+          [createAlertEvent({ group_hash: 'hash-1', status: 'breached', alert: undefined })],
+          []
+        );
+
+        expect(result.stats.statusTransitions).toEqual([
+          {
+            groupHash: 'hash-1',
+            episodeId: MOCKED_UUID,
+            previousStatus: null,
+            status: alertEpisodeStatus.pending,
+          },
+        ]);
+      });
+
+      it('records a change on an existing episode', async () => {
+        const result = await runWith(
+          [createAlertEvent({ group_hash: 'hash-1', status: 'breached', alert: undefined })],
+          [existingState({ last_episode_status: 'pending' })]
+        );
+
+        expect(result.stats.statusTransitions).toEqual([
+          {
+            groupHash: 'hash-1',
+            episodeId: 'existing-episode',
+            previousStatus: alertEpisodeStatus.pending,
+            status: alertEpisodeStatus.active,
+          },
+        ]);
+      });
+
+      it('records a new episode opened after an inactive one with the inactive previous status', async () => {
+        const result = await runWith(
+          [createAlertEvent({ group_hash: 'hash-1', status: 'breached', alert: undefined })],
+          [existingState({ last_episode_id: 'old-episode', last_episode_status: 'inactive' })]
+        );
+
+        expect(result.stats.statusTransitions).toEqual([
+          {
+            groupHash: 'hash-1',
+            episodeId: MOCKED_UUID,
+            previousStatus: alertEpisodeStatus.inactive,
+            status: alertEpisodeStatus.pending,
+          },
+        ]);
+      });
+
+      it('records nothing when the status stays the same', async () => {
+        const result = await runWith(
+          [createAlertEvent({ group_hash: 'hash-1', status: 'breached', alert: undefined })],
+          [existingState({ last_episode_status: 'active' })]
+        );
+
+        expect(result.alertEvents[0].alert?.status).toBe(alertEpisodeStatus.active);
+        expect(result.stats.statusTransitions).toEqual([]);
+      });
+
+      it('records nothing for a user-locked episode', async () => {
+        const result = await runWith(
+          [createAlertEvent({ group_hash: 'hash-1', status: 'recovered', alert: undefined })],
+          [
+            existingState({
+              last_episode_status: 'pending',
+              last_lifecycle_action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+            }),
+          ]
+        );
+
+        expect(result.alertEvents[0].alert?.status).toBe(alertEpisodeStatus.active);
+        expect(result.stats.statusTransitions).toEqual([]);
+      });
+
+      it('records one transition for sibling rows of the same group', async () => {
+        const siblingRow = (host: string) =>
+          createAlertEvent({
+            group_hash: 'hash-1',
+            status: 'breached',
+            alert: undefined,
+            data: { 'host.name': host },
+          });
+
+        const result = await runWith(
+          [siblingRow('host-a'), siblingRow('host-b'), siblingRow('host-c')],
+          [existingState({ last_episode_status: 'pending' })]
+        );
+
+        expect(result.alertEvents).toHaveLength(3);
+        expect(result.stats.statusTransitions).toEqual([
+          {
+            groupHash: 'hash-1',
+            episodeId: 'existing-episode',
+            previousStatus: alertEpisodeStatus.pending,
+            status: alertEpisodeStatus.active,
+          },
+        ]);
+      });
+
+      it('records one transition per changed group in a mixed batch', async () => {
+        const result = await runWith(
+          [
+            createAlertEvent({ group_hash: 'hash-new', status: 'breached', alert: undefined }),
+            createAlertEvent({ group_hash: 'hash-pending', status: 'breached', alert: undefined }),
+            createAlertEvent({ group_hash: 'hash-active', status: 'breached', alert: undefined }),
+          ],
+          [
+            existingState({
+              group_hash: 'hash-pending',
+              last_episode_id: 'pending-episode',
+              last_episode_status: 'pending',
+            }),
+            existingState({
+              group_hash: 'hash-active',
+              last_episode_id: 'active-episode',
+              last_episode_status: 'active',
+            }),
+          ]
+        );
+
+        expect(result.stats.statusTransitions).toEqual([
+          {
+            groupHash: 'hash-new',
+            episodeId: MOCKED_UUID,
+            previousStatus: null,
+            status: alertEpisodeStatus.pending,
+          },
+          {
+            groupHash: 'hash-pending',
+            episodeId: 'pending-episode',
+            previousStatus: alertEpisodeStatus.pending,
+            status: alertEpisodeStatus.active,
+          },
+        ]);
+      });
     });
 
     // A group is "user-locked" when its most recent lifecycle action in
@@ -1116,6 +1293,35 @@ describe('DirectorService', () => {
         expect(c).toBe('existing-episode-c');
         expect(new Set(result.stats.newEpisodeIds)).toEqual(new Set([a, b]));
       });
+    });
+  });
+
+  describe('previous alert state', () => {
+    it('returns the persisted state it loaded, keyed by group_hash, alongside a 1:1 batch', async () => {
+      const alertEvent = createAlertEvent({
+        group_hash: 'hash-1',
+        status: 'no_data',
+        alert: undefined,
+      });
+      const previous = {
+        last_episode_timestamp: '2026-01-01T00:00:00.000Z',
+        last_status: 'no_data' as const,
+        last_episode_id: 'held-episode',
+        last_episode_status: alertEpisodeStatus.active,
+        last_episode_status_count: null,
+        group_hash: 'hash-1',
+      };
+      mockEsClient.esql.query.mockResolvedValue(createLatestAlertEventStateResponse([previous]));
+
+      const result = await directorService.run({
+        spaceId: 'default',
+        rule: createRuleResponse({ no_data: { strategy: 'keep_last' } }),
+        executionContext: testExecutionContext,
+        alertEvents: [alertEvent],
+      });
+
+      expect(result.alertEvents).toHaveLength(1);
+      expect(result.previousAlertStateByGroupHash.get('hash-1')).toMatchObject(previous);
     });
   });
 });

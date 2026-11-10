@@ -67,7 +67,9 @@ export async function _runBackportPackagePolicyInputId(
           prerelease: true,
         });
 
-        const inputs = getInputsWithIds(packagePolicy, packagePolicy.id, undefined, pkgInfo);
+        // Operates on already-stored package policies, so skip path-traversal
+        // validation to avoid throwing on a pre-existing id.
+        const inputs = getInputsWithIds(packagePolicy, packagePolicy.id, undefined, pkgInfo, false);
         updates.push({ id: packagePolicy.id, inputs });
       } catch (error) {
         logger.error(`Failed to backport package policy ${packagePolicy.id}: ${error.message}`, {

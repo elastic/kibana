@@ -89,12 +89,11 @@ const UpgradeStep = () => {
       );
     } else {
       const readyForUpgrade = upgradeStatus?.readyForUpgrade;
-      const upgradeOnCloudUrl = cloud!.deploymentUrl + '?show_upgrade=true';
       callToAction = (
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton
-              href={upgradeOnCloudUrl}
+              href={cloud!.deploymentUpgradeUrl}
               target="_blank"
               data-test-subj="upgradeSetupCloudLink"
               iconSide="right"

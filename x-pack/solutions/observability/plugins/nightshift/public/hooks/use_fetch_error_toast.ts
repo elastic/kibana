@@ -28,13 +28,19 @@ export function useFetchErrorToast() {
         requestUrl = error.request.url;
       }
 
-      return notifications.toasts.addError(getFormattedError(error), {
+      const formattedError = getFormattedError(error);
+      return notifications.toasts.addError(formattedError, {
         title: i18n.translate('xpack.nightshift.failedToFetchError', {
-          defaultMessage: 'Failed to fetch data{requestUrlSuffix}',
-          values: {
-            requestUrlSuffix: requestUrl ? ` (${requestUrl})` : '',
-          },
+          defaultMessage: 'Failed to fetch data',
         }),
+        ...(requestUrl !== undefined
+          ? {
+              toastMessage: i18n.translate('xpack.nightshift.failedToFetchErrorMessage', {
+                defaultMessage: '{message} ({requestUrl})',
+                values: { message: formattedError.message, requestUrl },
+              }),
+            }
+          : {}),
       });
     },
     [notifications]

@@ -17,15 +17,16 @@ import type { ExportGenerationOpts } from '@kbn/share-plugin/public/types';
 import type {
   ReportingSharingData,
   JobParamsProviderOptions,
-  ExportModalShareOpts,
+  ScreenCaptureExportShareOpts,
 } from '../../share_context_menu';
 import { getJobParams } from '../../shared/get_png_pdf_job_params';
+import { getExperimentalBadge } from '../../shared/experimental_badge';
 
 /**
  * @description Returns config for the PDF export integration
  */
 export const getShareMenuItems =
-  ({ apiClient, startServices$ }: ExportModalShareOpts) =>
+  ({ apiClient, startServices$, isExperimental = false }: ScreenCaptureExportShareOpts) =>
   ({
     objectType,
     objectId,
@@ -114,6 +115,7 @@ export const getShareMenuItems =
       icon: 'document',
       disabled: sharingData.reportingDisabled,
       label: 'PDF' as const,
+      badge: getExperimentalBadge(isExperimental),
       generateAssetExport: generateReportPDF,
       exportType: 'printablePdfV2',
       requiresSavedState,

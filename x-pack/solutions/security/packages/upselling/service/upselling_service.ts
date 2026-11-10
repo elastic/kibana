@@ -11,6 +11,7 @@ import type { SecurityPageName } from '@kbn/security-solution-navigation';
 import type {
   SectionUpsellings,
   PageUpsellings,
+  UpsellingPageComponent,
   UpsellingSectionId,
   UpsellingMessageId,
   MessageUpsellings,
@@ -18,15 +19,15 @@ import type {
 
 export class UpsellingService {
   private sections: Map<UpsellingSectionId, React.ComponentType>;
-  private pages: Map<SecurityPageName, React.ComponentType>;
+  private pages: Map<SecurityPageName, UpsellingPageComponent>;
   private messages: Map<UpsellingMessageId, string>;
 
   private messagesSubject$: BehaviorSubject<Map<UpsellingMessageId, string>>;
   private sectionsSubject$: BehaviorSubject<Map<UpsellingSectionId, React.ComponentType>>;
-  private pagesSubject$: BehaviorSubject<Map<SecurityPageName, React.ComponentType>>;
+  private pagesSubject$: BehaviorSubject<Map<SecurityPageName, UpsellingPageComponent>>;
 
   public sections$: Observable<Map<UpsellingSectionId, React.ComponentType>>;
-  public pages$: Observable<Map<SecurityPageName, React.ComponentType>>;
+  public pages$: Observable<Map<SecurityPageName, UpsellingPageComponent>>;
   public messages$: Observable<Map<UpsellingMessageId, string>>;
 
   constructor() {

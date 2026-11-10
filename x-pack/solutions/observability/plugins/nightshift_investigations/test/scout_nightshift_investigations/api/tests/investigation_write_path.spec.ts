@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
 import type { ApiServicesFixture, KibanaRole } from '@kbn/scout-oblt';
 import { NIGHTSHIFT_ENABLED_FLAG, NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
+import { toSlackThreadKey } from '../../../../common';
 import {
   apiTest,
   cancelRunsOf,
@@ -48,6 +49,14 @@ const NIGHTSHIFT_OPERATOR_ROLE: KibanaRole = {
       spaces: ['*'],
     },
   ],
+};
+
+const NIGHTSHIFT_V2_ALERT_OPERATOR_ROLE: KibanaRole = {
+  ...NIGHTSHIFT_OPERATOR_ROLE,
+  elasticsearch: {
+    cluster: [],
+    indices: [{ names: ['.rule-events'], privileges: ['read'] }],
+  },
 };
 
 const setNightshiftEnabled = (apiServices: ApiServicesFixture, enabled: boolean | null) =>
@@ -125,6 +134,56 @@ apiTest.describe(
             trigger_type: 'manual',
           }),
         ]);
+      }
+    );
+
+    apiTest(
+      'starts an investigation for a v2 alert without a rule',
+      async ({ apiClient, samlAuth, esClient }) => {
+        const episodeId = uniqueId('episode');
+        const ruleName = `Ad hoc ${episodeId}`;
+        await esClient.index({
+          index: '.rule-events',
+          op_type: 'create',
+          refresh: true,
+          document: {
+            '@timestamp': new Date().toISOString(),
+            scheduled_timestamp: new Date().toISOString(),
+            type: 'alert',
+            source: 'elastic.significant_events',
+            status: 'breached',
+            severity: 'medium',
+            alert: { id: episodeId, status: 'active' },
+            group_hash: episodeId,
+            space_id: 'default',
+            data: { rule_name: ruleName },
+          },
+        });
+        try {
+          const { cookieHeader: v2CookieHeader } = await samlAuth.asInteractiveUser(
+            NIGHTSHIFT_V2_ALERT_OPERATOR_ROLE
+          );
+          const response = await startInvestigation(apiClient, v2CookieHeader, {
+            subject: { type: 'alert', ids: [episodeId] },
+          });
+          expect(response).toHaveStatusCode(200);
+          const investigation = await waitForInvestigation(
+            apiClient,
+            v2CookieHeader,
+            response.body.investigation_id
+          );
+          expect(investigation.subjects[0].snapshot).toMatchObject({
+            alert_version: 'v2',
+            rule_name: ruleName,
+          });
+          expect(investigation.subjects[0].snapshot?.rule_id).toBeUndefined();
+        } finally {
+          await esClient.deleteByQuery({
+            index: '.rule-events',
+            query: { term: { 'alert.id': episodeId } },
+            refresh: true,
+          });
+        }
       }
     );
 
@@ -219,7 +278,11 @@ apiTest.describe(
           channel: 'CSCOUT',
           thread_ts: `${Date.now()}.000100`,
         };
-        const threadKey = `team:${thread.workspace}/channel:${thread.channel}/thread:${thread.thread_ts}`;
+        const threadKey = toSlackThreadKey({
+          workspace: thread.workspace,
+          channel: thread.channel,
+          threadTs: thread.thread_ts,
+        });
 
         const created = await findOrCreateSlackThread(apiClient, cookieHeader, {
           ...thread,

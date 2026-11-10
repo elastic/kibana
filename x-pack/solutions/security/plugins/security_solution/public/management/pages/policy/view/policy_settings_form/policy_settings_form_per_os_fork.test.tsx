@@ -19,6 +19,8 @@ import { useGetDeviceControlUpsellComponent as _useGetDeviceControlUpsellCompone
 jest.mock('../../../../../common/hooks/use_license');
 jest.mock('./hooks/use_get_device_control_component');
 
+jest.setTimeout(15_000); // Costly: the per-OS case renders the whole per-OS form
+
 const useLicenseMock = _useLicense as jest.Mock;
 const useGetDeviceControlUpsellComponentMock = _useGetDeviceControlUpsellComponent as jest.Mock;
 

@@ -13,7 +13,7 @@ import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
 import type { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
-import { Provider } from 'react-redux-v7';
+import { Provider } from 'react-redux';
 import {
   createKbnUrlStateStorage,
   Storage,
@@ -25,6 +25,7 @@ import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
@@ -330,7 +331,19 @@ export async function mountApp(
       }, [initCallback, initialInput, props.history, redirectCallback]);
 
       if (editorState === 'loading') {
-        return <EuiLoadingSpinner />;
+        return (
+          <div
+            css={css({
+              display: 'flex',
+              flexGrow: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              height: '100%',
+            })}
+          >
+            <EuiLoadingSpinner size="xl" />
+          </div>
+        );
       }
 
       if (editorState === 'no_data') {

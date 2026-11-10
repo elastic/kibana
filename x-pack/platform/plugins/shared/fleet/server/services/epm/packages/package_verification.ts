@@ -7,7 +7,7 @@
 
 import { readFile } from 'fs/promises';
 
-import * as openpgp from 'openpgp';
+import type { Key } from 'openpgp';
 import type { Logger } from '@kbn/logging';
 
 import type { PackageVerificationResult } from '../../../types';
@@ -22,7 +22,11 @@ interface VerificationResult {
   keyId: string;
 }
 
-let cachedKey: openpgp.Key | undefined | null = null;
+// Loaded lazily, as the openpgp v6 cjs build fails to load when `document` is defined (e.g. jsdom
+// test environments), which would break any module importing this one.
+const loadOpenpgp = () => import('openpgp');
+
+let cachedKey: Key | undefined | null = null;
 
 export async function getGpgKeyIdOrUndefined(): Promise<string | undefined> {
   const key = await getGpgKeyOrUndefined();
@@ -32,14 +36,14 @@ export async function getGpgKeyIdOrUndefined(): Promise<string | undefined> {
   return key.getKeyID().toHex();
 }
 
-export async function getGpgKeyOrUndefined(): Promise<openpgp.Key | undefined> {
+export async function getGpgKeyOrUndefined(): Promise<Key | undefined> {
   if (cachedKey !== null) return cachedKey;
 
   cachedKey = await _readGpgKey();
   return cachedKey;
 }
 
-export async function _readGpgKey(): Promise<openpgp.Key | undefined> {
+export async function _readGpgKey(): Promise<Key | undefined> {
   const config = appContextService.getConfig();
   const logger = appContextService.getLogger();
   const gpgKeyPath = config?.packageVerification?.gpgKeyPath;
@@ -57,11 +61,23 @@ export async function _readGpgKey(): Promise<openpgp.Key | undefined> {
   }
   let key;
   try {
+    const openpgp = await loadOpenpgp();
     key = await openpgp.readKey({
       armoredKey: buffer.toString(),
     });
   } catch (e) {
     logger.warn(`Unable to parse GPG key from '${gpgKeyPath}': ${e}`);
+    return undefined;
+  }
+
+  // openpgp checks key flags and primary key algorithm and strength when looking for a signing key.
+  // Warn early, as packages verified with an unusable key would be reported as unverified.
+  try {
+    await key.getSigningKey();
+  } catch (e) {
+    logger.warn(
+      `GPG key from '${gpgKeyPath}' cannot be used to verify package signatures, packages will be reported as unverified: ${e}`
+    );
   }
 
   return key;
@@ -120,9 +136,10 @@ async function _verifyPackageSignature({
 }: {
   pkgArchiveBuffer: Buffer;
   pkgArchiveSignature: string;
-  verificationKey: openpgp.Key;
+  verificationKey: Key;
   logger: Logger;
 }): Promise<VerificationResult> {
+  const openpgp = await loadOpenpgp();
   const signature = await openpgp.readSignature({
     armoredSignature: pkgArchiveSignature,
   });

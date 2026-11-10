@@ -22,9 +22,11 @@ import { AiButton } from '@kbn/shared-ux-ai-components';
 
 import { anthropicIcon, cursorIcon, visualStudioCodeIcon } from '@kbn/custom-icons';
 
+import { CliInstallModal } from '@kbn/shared-components';
+
 import { useKibana } from '../../hooks/use_kibana';
+import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 import { PromptModal } from './prompt_modal';
-import { CliInstallModal } from './cli_install_modal';
 import { buildPrompt } from './util';
 import { AgentBuilderPanelContainer, AgentInstallPanelContainer, brandIcon } from './styles';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
@@ -70,6 +72,7 @@ export const AgentInstallSection = () => {
   const [isCliModalOpen, setIsCliModalOpen] = useState(false);
   const [modalPrompt, setModalPrompt] = useState('');
   const usageTracker = useUsageTracker();
+  const elasticsearchUrl = useElasticsearchUrl();
 
   const closePromptModal = useCallback(() => setIsPromptModalOpen(false), []);
   const closeCliModal = useCallback(() => setIsCliModalOpen(false), []);
@@ -247,7 +250,13 @@ export const AgentInstallSection = () => {
         </EuiFlexGroup>
       </EuiPanel>
       {isPromptModalOpen && <PromptModal prompt={modalPrompt} onClose={closePromptModal} />}
-      {isCliModalOpen && <CliInstallModal onClose={closeCliModal} />}
+      {isCliModalOpen && (
+        <CliInstallModal
+          elasticsearchUrl={elasticsearchUrl}
+          onClose={closeCliModal}
+          telemetryIdPrefix="searchGettingStarted-agentInstall-cliModal"
+        />
+      )}
     </>
   );
 };

@@ -23,12 +23,20 @@ describe('Slack app route privileges', () => {
     });
   });
 
-  it.each([
-    'GET /internal/significant_events/apps/slack/status',
-    'GET /internal/significant_events/apps/slack/bindings',
-  ] as const)('%s requires read only', (endpoint) => {
-    expect(internalSlackAppRoutes[endpoint].security.authz).toEqual({
+  it('GET /internal/significant_events/apps/slack/bindings requires read only', () => {
+    expect(
+      internalSlackAppRoutes['GET /internal/significant_events/apps/slack/bindings'].security.authz
+    ).toEqual({
       requiredPrivileges: [read],
+    });
+  });
+
+  it('GET /internal/significant_events/apps/slack/status requires read and checks manage and configure', () => {
+    expect(
+      internalSlackAppRoutes['GET /internal/significant_events/apps/slack/status'].security.authz
+    ).toEqual({
+      requiredPrivileges: [read],
+      extendedPrivileges: [manage, configure],
     });
   });
 });

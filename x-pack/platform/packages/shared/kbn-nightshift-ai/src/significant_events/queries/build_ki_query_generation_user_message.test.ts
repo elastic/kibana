@@ -12,31 +12,48 @@ import {
 
 describe('buildKIQueryGenerationUserMessage', () => {
   const target = { slug: 'logs-test' };
+  const existingQueries = Array.from({ length: MAX_EXISTING_QUERIES_FOR_CONTEXT + 5 }, (_, i) => ({
+    id: `query-${i}`,
+    title: 'Error rate',
+    type: 'stats',
+    severity_score: i,
+    description: 'x'.repeat(250),
+    esql: 'FROM logs.test | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+  }));
+
+  const getSurfacedQueries = (maxExistingQueriesForContext?: number) => {
+    const message =
+      maxExistingQueriesForContext === undefined
+        ? buildKIQueryGenerationUserMessage(target, existingQueries)
+        : buildKIQueryGenerationUserMessage(target, existingQueries, maxExistingQueriesForContext);
+    const [, context] = message.split('`existing_queries`:\n');
+    return JSON.parse(context) as Array<{ severity_score: number; description: string }>;
+  };
 
   it('omits existing_queries when there are none', () => {
     expect(buildKIQueryGenerationUserMessage(target, [])).toBe('`slug`: logs-test');
   });
 
-  it('bounds existing queries by severity, count and description length', () => {
-    const existingQueries = Array.from(
-      { length: MAX_EXISTING_QUERIES_FOR_CONTEXT + 5 },
-      (_, i) => ({
-        id: `query-${i}`,
-        title: 'Error rate',
-        type: 'stats',
-        severity_score: i,
-        description: 'x'.repeat(250),
-        esql: 'FROM logs.test | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
-      })
-    );
+  it('omits existing_queries when the override is 0', () => {
+    expect(buildKIQueryGenerationUserMessage(target, existingQueries, 0)).toBe('`slug`: logs-test');
+  });
 
-    const [, context] = buildKIQueryGenerationUserMessage(target, existingQueries).split(
-      '`existing_queries`:\n'
-    );
-    const surfaced: Array<{ severity_score: number; description: string }> = JSON.parse(context);
+  it('uses an override of 10', () => {
+    const surfaced = getSurfacedQueries(10);
+
+    expect(surfaced).toHaveLength(10);
+    expect(surfaced[0].severity_score).toBe(MAX_EXISTING_QUERIES_FOR_CONTEXT + 4);
+    expect(surfaced.at(-1)?.severity_score).toBe(MAX_EXISTING_QUERIES_FOR_CONTEXT - 5);
+  });
+
+  it('uses an explicit override of 50', () => {
+    expect(getSurfacedQueries(50)).toHaveLength(50);
+  });
+
+  it('defaults to 50 and bounds descriptions when the override is omitted', () => {
+    const surfaced = getSurfacedQueries();
 
     expect(surfaced).toHaveLength(MAX_EXISTING_QUERIES_FOR_CONTEXT);
-    expect(surfaced[0].severity_score).toBe(MAX_EXISTING_QUERIES_FOR_CONTEXT + 4);
     expect(surfaced.at(-1)?.severity_score).toBe(5);
     expect(surfaced[0].description).toHaveLength(200);
   });

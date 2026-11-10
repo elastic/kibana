@@ -14,10 +14,27 @@ import type { PolicyExecutionHistoryItem } from '../../services/execution_histor
 import type { useFetchRuleExecutions } from '../../hooks/use_fetch_rule_executions';
 import { ExecutionHistoryPage } from './execution_history_page';
 
+const RULE_EXECUTION_HISTORY_DOC_LINK = 'https://docs.test/review-rule-execution-history';
+const ACTION_POLICY_EXECUTION_HISTORY_DOC_LINK =
+  'https://docs.test/review-action-policy-execution-history';
+
 const mockUseFetchExecutionHistory = jest.fn();
 const mockUseFetchRuleExecutions = jest.fn();
 const mockRefetch = jest.fn();
 const mockRuleRefetch = jest.fn();
+const mockAppHeader = jest.fn();
+
+jest.mock('@kbn/app-header', () => {
+  const ReactActual = jest.requireActual('react');
+  const actual = jest.requireActual('@kbn/app-header');
+  return {
+    ...actual,
+    AppHeader: (props: Record<string, unknown>) => {
+      mockAppHeader(props);
+      return ReactActual.createElement(actual.AppHeader, props);
+    },
+  };
+});
 
 jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
@@ -42,6 +59,17 @@ jest.mock('@kbn/core-di-browser', () => ({
     }
     if (token === 'http') {
       return { basePath: { prepend: (path: string) => path } };
+    }
+    if (token === 'docLinks') {
+      return {
+        links: {
+          alerting: {
+            reviewRuleExecutionHistory: 'https://docs.test/review-rule-execution-history',
+            reviewActionPolicyExecutionHistory:
+              'https://docs.test/review-action-policy-execution-history',
+          },
+        },
+      };
     }
     if (typeof token === 'function') {
       return {
@@ -263,6 +291,7 @@ const switchToPoliciesTab = async () => {
 describe('ExecutionHistoryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockAppHeader.mockClear();
     mockCanAccessClassicRules = true;
     mockNewEventsCount(0);
     mockRuleExecutionFetchResult();
@@ -279,6 +308,22 @@ describe('ExecutionHistoryPage', () => {
     expect(screen.getByRole('tab', { name: /action policies/i })).toBeInTheDocument();
   });
 
+  it('switches the Documentation link when changing tabs', async () => {
+    mockFetchResult();
+    mockRulesFetchResult();
+    renderPage();
+
+    expect(mockAppHeader).toHaveBeenLastCalledWith(
+      expect.objectContaining({ docLink: RULE_EXECUTION_HISTORY_DOC_LINK })
+    );
+
+    await switchToPoliciesTab();
+
+    expect(mockAppHeader).toHaveBeenLastCalledWith(
+      expect.objectContaining({ docLink: ACTION_POLICY_EXECUTION_HISTORY_DOC_LINK })
+    );
+  });
+
   describe('Rules tab (default)', () => {
     it('renders the rules execution history table by default', () => {
       // The grid (and its wrapper) only renders when there are rows — an empty result shows the
@@ -289,7 +334,6 @@ describe('ExecutionHistoryPage', () => {
             {
               id: 'exec-1',
               rule: { id: 'rule-1' },
-              space_id: 'default',
               started_at: '2026-05-05T10:00:00.000Z',
               ended_at: '2026-05-05T10:00:01.000Z',
               timings: { duration_ms: 1000, scheduled_delay_ms: 0 },

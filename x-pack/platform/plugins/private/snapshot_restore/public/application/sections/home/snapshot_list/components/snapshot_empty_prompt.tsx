@@ -21,7 +21,7 @@ export const SnapshotEmptyPrompt: React.FunctionComponent<{ policiesCount: numbe
   const history = useHistory();
   return (
     <EuiPageTemplate.EmptyPrompt
-      iconType="managementApp"
+      iconType="gear"
       title={
         <h1 data-test-subj="title">
           <FormattedMessage

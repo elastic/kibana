@@ -59,12 +59,10 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
   } as const;
 
   const dashboard = {
-    getDashboardPageHeader: () => testSubjects.find('cloud-posture-dashboard-page-header'),
-
     getDashboardTabs: async () => {
       await PageObjects.header.waitUntilLoadingHasFinished();
-      const dashboardPageHeader = await dashboard.getDashboardPageHeader();
-      return await dashboardPageHeader.findByClassName('euiTabs');
+      const dashboardTabs = await testSubjects.find('cloud-posture-dashboard-tabs');
+      return await dashboardTabs.findByClassName('euiTabs');
     },
 
     getCloudTab: async () => {

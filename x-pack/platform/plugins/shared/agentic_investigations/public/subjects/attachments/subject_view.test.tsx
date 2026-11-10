@@ -7,13 +7,36 @@
 
 import React from 'react';
 import moment from 'moment';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
-import { subjectAttachmentRenderer } from './subject_attachment_definition';
+import { createSubjectAttachmentRenderer } from './subject_attachment_definition';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SubjectServices } from './subject_services';
 import type { SubjectRowData } from './subject_title';
 import { SubjectList, SubjectView } from './subject_view';
+
+// The flyout itself is covered by `subject_details_flyout.test.tsx`; here only the row's choice
+// between opening it and following its link matters.
+jest.mock('./subject_details_flyout', () => ({
+  SubjectDetailsFlyout: ({
+    alertId,
+    detailsHref,
+    onClose,
+  }: {
+    alertId: string;
+    detailsHref?: string;
+    onClose: () => void;
+  }) => (
+    <div data-test-subj="subjectFlyoutStub" data-href={detailsHref}>
+      {alertId}
+      <button type="button" data-test-subj="subjectFlyoutStubClose" onClick={onClose}>
+        close
+      </button>
+    </div>
+  ),
+}));
 
 const base = {
   id: 'doc-1',
@@ -22,14 +45,34 @@ const base = {
   createdAt: '2026-07-28T14:00:00.000Z',
 };
 
-const renderView = (subject: InvestigationSubject) =>
+const renderView = (subject: InvestigationSubject, services: SubjectServices = {}) =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <SubjectView document={subject} variant="details" />
+        <KibanaContextProvider services={services}>
+          <SubjectView document={subject} variant="details" />
+        </KibanaContextProvider>
       </I18nProvider>
     </EuiProvider>
   );
+
+/** A `share` whose locators resolve to `/located/<id>?<params>`. */
+const createShare = () => {
+  const navigate = jest.fn().mockResolvedValue(undefined);
+  const services = {
+    share: {
+      url: {
+        locators: {
+          get: (locatorId: string) => ({
+            getUrl: async (params: object) => `/located/${locatorId}?${JSON.stringify(params)}`,
+            navigate,
+          }),
+        },
+      },
+    },
+  } as unknown as SubjectServices;
+  return { services, navigate };
+};
 
 describe('SubjectView', () => {
   it('renders an alert as one compact row that links to the alert URL', () => {
@@ -77,6 +120,49 @@ describe('SubjectView', () => {
     renderView({ ...base, subjectType: 'alert', subjectId: 'alert-1' });
 
     expect(screen.getByTestId('investigationSubjectTitle')).toHaveTextContent('alert-1');
+  });
+
+  it("links an alert to its details page through the alerts locator, over the alert's own URL", async () => {
+    const { services } = createShare();
+    renderView(
+      {
+        ...base,
+        subjectType: 'alert',
+        subjectId: 'alert-1',
+        snapshot: { rule_name: 'Latency', url: '/app/discover#/view/1' },
+      },
+      services
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute(
+        'href',
+        '/located/ALERTS_LOCATOR?{"alertId":"alert-1"}'
+      )
+    );
+    const row = screen.getByTestId('investigationSubject-alert');
+    expect(row).not.toHaveAttribute('target');
+  });
+
+  it('links an alerting v2 alert to its episode details page, by rule name', async () => {
+    const { services } = createShare();
+    renderView(
+      {
+        ...base,
+        subjectType: 'alert',
+        subjectId: 'episode-1',
+        snapshot: { source: 'universal', rule_name: 'CPU high', rule_id: 'rule-1' },
+      },
+      services
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute(
+        'href',
+        '/located/ALERTING_V2_EPISODES_LOCATOR?{"episodeId":"episode-1","host":{"app":"observabilityAlerting","pathPrefix":"/alerts"}}'
+      )
+    );
+    expect(screen.getByTestId('investigationSubjectTitle')).toHaveTextContent('CPU high');
   });
 
   it('renders a significant event and a question by their summary, without a link', () => {
@@ -157,6 +243,148 @@ describe('SubjectView', () => {
   });
 });
 
+describe('SubjectView presentation', () => {
+  it('is presented as a significant event when its source says so', () => {
+    renderView({
+      ...base,
+      subjectType: 'alert',
+      subjectId: 'episode-1',
+      snapshot: { source: 'elastic.significant_events', rule_name: 'Checkout errors' },
+    });
+
+    expect(screen.getByTestId('investigationSubject-alert')).toHaveTextContent(
+      'Trigger · Significant event'
+    );
+  });
+});
+
+describe('SubjectView alert flyout', () => {
+  const alert = {
+    ...base,
+    subjectType: 'alert' as const,
+    subjectId: 'alert-1',
+    snapshot: { rule_name: 'High latency', url: '/app/observability/alerts/alert-1' },
+  };
+
+  it('gives focus back to the row when the flyout closes', async () => {
+    renderView(alert, { http: {} as never });
+
+    const row = screen.getByTestId('investigationSubject-alert');
+    row.focus();
+    fireEvent.click(row);
+    fireEvent.click(await screen.findByTestId('subjectFlyoutStubClose'));
+    // The browser leaves focus on the page body when a flyout without its own focus trap unmounts.
+    (document.activeElement as HTMLElement | null)?.blur();
+
+    await waitFor(() => expect(row).toHaveFocus());
+    expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
+  });
+
+  it('opens the alert in a flyout instead of navigating, and keeps the href', async () => {
+    renderView(alert, { http: {} as never });
+
+    const row = screen.getByTestId('investigationSubject-alert');
+    expect(row).toHaveAttribute('href', '/app/observability/alerts/alert-1');
+
+    const click = createEvent.click(row, { bubbles: true, cancelable: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(true);
+    const flyout = await screen.findByTestId('subjectFlyoutStub');
+    expect(flyout).toHaveTextContent('alert-1');
+    expect(flyout).toHaveAttribute('data-href', '/app/observability/alerts/alert-1');
+  });
+
+  it('lets the browser handle a new-tab click', async () => {
+    renderView(alert, { http: {} as never });
+
+    const row = screen.getByTestId('investigationSubject-alert');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true, metaKey: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(false);
+    expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
+  });
+
+  it('navigates as before when the flyout has no services', async () => {
+    const { services, navigate } = createShare();
+    renderView(alert, services);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute(
+        'href',
+        '/located/ALERTS_LOCATOR?{"alertId":"alert-1"}'
+      )
+    );
+    fireEvent.click(screen.getByTestId('investigationSubject-alert'));
+
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith({ alertId: 'alert-1' }));
+    expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
+  });
+});
+
+describe('SubjectView alert with a registered flyout', () => {
+  const sourceAlert = {
+    ...base,
+    subjectType: 'alert' as const,
+    subjectId: 'episode-1',
+    snapshot: { source: 'elastic.example', rule_name: 'Checkout errors' },
+  };
+
+  it('opens the registered flyout in place instead of navigating', async () => {
+    const { services, navigate } = createShare();
+    const getAlertFlyout = jest.fn((source?: string) =>
+      source === 'elastic.example' ? () => null : undefined
+    );
+    renderView(sourceAlert, { ...services, getAlertFlyout });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute('href')
+    );
+    const row = screen.getByTestId('investigationSubject-alert');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(true);
+    expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('episode-1');
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('opens a flyout registered after the row rendered, since it decides when clicked', async () => {
+    const { services, navigate } = createShare();
+    const registry: { flyout?: () => null } = {};
+    renderView(sourceAlert, { ...services, getAlertFlyout: () => registry.flyout });
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute('href')
+    );
+
+    registry.flyout = () => null;
+    const row = screen.getByTestId('investigationSubject-alert');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(true);
+    expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('episode-1');
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('lets the browser handle a new-tab click', async () => {
+    const { services, navigate } = createShare();
+    renderView(sourceAlert, { ...services, getAlertFlyout: () => () => null });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute('href')
+    );
+    const row = screen.getByTestId('investigationSubject-alert');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true, metaKey: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(false);
+    expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
+    expect(navigate).not.toHaveBeenCalled();
+  });
+});
+
 const alertStart = (id: string): string => `2026-07-28T14:0${id.slice(-1)}:00.000Z`;
 
 const alertSubject = (id: string): SubjectRowData => ({
@@ -169,11 +397,13 @@ const alertSubject = (id: string): SubjectRowData => ({
   },
 });
 
-const renderList = (subjects: SubjectRowData[]) =>
+const renderList = (subjects: SubjectRowData[], services: SubjectServices = {}) =>
   render(
     <EuiProvider>
       <I18nProvider>
-        <SubjectList subjects={subjects} />
+        <KibanaContextProvider services={services}>
+          <SubjectList subjects={subjects} />
+        </KibanaContextProvider>
       </I18nProvider>
     </EuiProvider>
   );
@@ -190,7 +420,24 @@ describe('SubjectList', () => {
     expect(screen.queryByTestId('investigationSubject-alerts')).not.toBeInTheDocument();
   });
 
-  it('collapses several alerts into one "N alerts" row that shows them when clicked', () => {
+  it('hides a Slack thread that no trigger started and keeps one that did', () => {
+    renderList([
+      { type: 'manual', id: 'q-1', summary: 'Why is it slow?' },
+      { type: 'slack_thread', id: 'notification', slack: { channel: 'C1', thread_ts: '1.1' } },
+      {
+        type: 'slack_thread',
+        id: 'trigger',
+        trigger_type: 'automatic',
+        slack: { channel: 'C2', thread_ts: '2.2' },
+      },
+    ]);
+
+    const rows = screen.getAllByTestId('investigationSubject-slack_thread');
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toHaveTextContent('#C2');
+  });
+
+  it('lists several alerts inline when there is no alerts list to link to', () => {
     renderList([
       alertSubject('a-1'),
       { type: 'manual', id: 'q-1', summary: 'Why is it slow?' },
@@ -231,11 +478,49 @@ describe('SubjectList', () => {
 
     expect(screen.queryByTestId('investigationSubject-alert')).not.toBeInTheDocument();
   });
+
+  it('links several alerts to the alerts list, filtered to them', async () => {
+    const { services, navigate } = createShare();
+    renderList([alertSubject('a-1'), alertSubject('a-2'), alertSubject('a-3')], services);
+
+    // The row starts as a plain toggle and becomes the link once the locator resolves.
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alerts')).toHaveAttribute('href')
+    );
+    const summary = screen.getByTestId('investigationSubject-alerts');
+
+    expect(summary.tagName).toBe('A');
+    expect(summary).toHaveTextContent('3 alerts');
+    expect(JSON.parse(summary.getAttribute('href')!.split('?')[1])).toEqual({
+      host: { app: 'observabilityAlerting', pathPrefix: '/alerts' },
+      filters: {
+        queryString:
+          'alert.id: ("a-1" or "a-2" or "a-3") or kibana.alert.uuid: ("a-1" or "a-2" or "a-3")',
+        status: 'all',
+      },
+      // A minute before the earliest alert start.
+      timeRange: { from: '2026-07-28T14:00:00.000Z', to: 'now' },
+    });
+    // The alerts are on that page, not under the row.
+    expect(screen.queryByTestId('investigationSubject-alert')).not.toBeInTheDocument();
+
+    fireEvent.click(summary);
+
+    await waitFor(() =>
+      expect(navigate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filters: expect.objectContaining({
+            queryString: expect.stringContaining('kibana.alert.uuid: ("a-1" or "a-2" or "a-3")'),
+          }),
+        })
+      )
+    );
+  });
 });
 
-describe('subjectAttachmentRenderer', () => {
+describe('createSubjectAttachmentRenderer', () => {
   it('labels subjects by type', () => {
-    const { getLabel } = subjectAttachmentRenderer;
+    const { getLabel } = createSubjectAttachmentRenderer({});
 
     expect(
       getLabel({
@@ -254,5 +539,29 @@ describe('subjectAttachmentRenderer', () => {
       })
     ).toBe('Slack: #oncall');
     expect(getLabel({ ...base, subjectType: 'manual', subjectId: 'q' })).toBe('Question');
+  });
+
+  it("links the loaded content through the plugin's locators", async () => {
+    const SubjectContent = await createSubjectAttachmentRenderer(
+      createShare().services
+    ).loadContent();
+
+    render(
+      <EuiProvider>
+        <I18nProvider>
+          <SubjectContent
+            document={{ ...base, subjectType: 'alert', subjectId: 'alert-1' }}
+            variant="inline"
+          />
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute(
+        'href',
+        '/located/ALERTS_LOCATOR?{"alertId":"alert-1"}'
+      )
+    );
   });
 });

@@ -48,7 +48,7 @@ describe('parseInsightsFromSteps', () => {
     const insights = parseInsightsFromSteps([
       { type: 'tool_call', tool_id: 'security.attack-discovery.run', results: [] },
       { type: 'reasoning', reasoning: REASONING_WITH_INSIGHTS },
-      { type: 'update_todos' },
+      { type: 'compaction' },
     ]);
 
     expect(insights).toEqual([
@@ -66,7 +66,7 @@ describe('parseInsightsFromSteps', () => {
     expect(
       parseInsightsFromSteps([
         { type: 'reasoning', reasoning: 'Retrieved 2 alerts. Running the pipeline now.' },
-        { type: 'update_todos' },
+        { type: 'compaction' },
       ])
     ).toBeNull();
   });
@@ -186,7 +186,7 @@ describe('AttackDiscoveryAgentBuilderChatClient.converse', () => {
   it('falls back to the reasoning steps when the final message has no fence', async () => {
     const client = buildClient({
       response: { message: 'Pipeline status: completed — 1 validated discovery.' },
-      steps: [{ type: 'reasoning', reasoning: REASONING_WITH_INSIGHTS }, { type: 'update_todos' }],
+      steps: [{ type: 'reasoning', reasoning: REASONING_WITH_INSIGHTS }, { type: 'compaction' }],
     });
 
     const result = await client.converse('run attack discovery');

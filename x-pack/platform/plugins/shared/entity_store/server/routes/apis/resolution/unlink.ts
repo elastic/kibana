@@ -15,8 +15,6 @@ import type { EntityStorePluginRouter, EntityStoreRequestHandlerContext } from '
 import { wrapMiddlewares } from '../../middleware';
 import { enterpriseLicenseMiddleware } from '../../middleware/enterprise_license';
 import { EntitiesNotFoundError, MixedEntityTypesError } from '../../../domain/errors';
-import { ENTITY_STORE_RESOLUTION_UNLINK_EVENT } from '../../../telemetry/events';
-import { reportResolutionError } from './utils/resolution_telemetry';
 
 const bodySchema = lazySchema(() =>
   z.object({
@@ -37,7 +35,7 @@ export async function handleResolutionUnlink(
   req: KibanaRequest<unknown, unknown, UnlinkRequestBody>,
   res: KibanaResponseFactory
 ): Promise<IKibanaResponse> {
-  const { logger, resolutionClient, analytics, namespace } = await ctx.entityStore;
+  const { logger, resolutionClient } = await ctx.entityStore;
 
   logger.debug('Resolution Unlink API called');
 
@@ -46,17 +44,8 @@ export async function handleResolutionUnlink(
       awaitVisibility: true,
     });
 
-    analytics.reportEvent(ENTITY_STORE_RESOLUTION_UNLINK_EVENT, {
-      entityType: result.entity_type,
-      entitiesUnlinked: result.unlinked.length,
-      entitiesSkipped: result.skipped.length,
-      namespace,
-    });
-
     return res.ok({ body: result });
   } catch (error) {
-    reportResolutionError(analytics, 'unlink', namespace, error);
-
     if (error instanceof EntitiesNotFoundError || error instanceof MixedEntityTypesError) {
       return res.badRequest({ body: error });
     }

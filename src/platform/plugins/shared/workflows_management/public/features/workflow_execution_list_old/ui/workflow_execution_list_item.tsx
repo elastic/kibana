@@ -139,7 +139,7 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               {status === ExecutionStatus.WAITING_FOR_INPUT && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="warning" data-test-subj="actionRequiredBadge">
-                    {i18n.translate('workflowsManagement.executionListItem.actionRequiredBadge', {
+                    {i18n.translate('workflows.executionListItem.actionRequiredBadge', {
                       defaultMessage: 'Action is required',
                     })}
                   </EuiBadge>
@@ -150,9 +150,12 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                   <EuiIconTip
                     type="flask"
                     color={euiTheme.colors.backgroundFilledText}
-                    title={i18n.translate('workflows.workflowExecutionListItem.testRunIconTitle', {
-                      defaultMessage: 'Test Run',
-                    })}
+                    title={i18n.translate(
+                      'workflows.workflowExecutionListItemOld.testRunIconTitle',
+                      {
+                        defaultMessage: 'Test Run',
+                      }
+                    )}
                   />
                 </EuiFlexItem>
               )}

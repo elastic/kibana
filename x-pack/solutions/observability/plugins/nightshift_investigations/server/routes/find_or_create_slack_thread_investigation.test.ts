@@ -35,7 +35,7 @@ it('passes the status message and the delivered event to the client', async () =
 
   await expect(
     handler({
-      request: {},
+      request: { spaceId: 'default' },
       getInvestigationsClient,
       params: {
         body: {
@@ -65,7 +65,7 @@ it('passes a release of the event to the client', async () => {
   });
 
   await handler({
-    request: {},
+    request: { spaceId: 'default' },
     getInvestigationsClient,
     params: {
       body: { ...BODY, event_id: 'Ev1', execution_id: 'exec-1', release_event: true },
@@ -111,6 +111,10 @@ it('returns an empty body for a thread without an investigation', async () => {
   findOrCreateSlackThread.mockResolvedValue(undefined);
 
   await expect(
-    handler({ request: {}, getInvestigationsClient, params: { body: BODY } } as never)
+    handler({
+      request: { spaceId: 'default' },
+      getInvestigationsClient,
+      params: { body: BODY },
+    } as never)
   ).resolves.toEqual({});
 });

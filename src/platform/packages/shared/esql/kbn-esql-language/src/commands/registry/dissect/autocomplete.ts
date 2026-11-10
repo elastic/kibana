@@ -22,7 +22,7 @@ import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_
 import { endsWithWhitespace } from '../../definitions/utils/regex';
 
 const appendSeparatorCompletionItem: ISuggestionItem = withAutoSuggest({
-  detail: i18n.translate('kbn-esql-language.esql.definitions.appendSeparatorDoc', {
+  detail: i18n.translate('esqlLanguage.esql.definitions.appendSeparatorDoc', {
     defaultMessage:
       'The character(s) that separate the appended fields. Default to empty string ("").',
   }),
@@ -52,7 +52,7 @@ export async function autocomplete(
   if (commandArgs.length === 1 && endsWithWhitespace(innerText)) {
     return buildConstantsDefinitions(
       ['"%{firstWord}"'],
-      i18n.translate('kbn-esql-language.esql.autocomplete.aPatternString', {
+      i18n.translate('esqlLanguage.esql.autocomplete.aPatternString', {
         defaultMessage: 'A pattern string',
       }),
       {

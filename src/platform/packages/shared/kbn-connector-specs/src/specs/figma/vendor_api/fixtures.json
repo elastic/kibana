@@ -1,0 +1,7 @@
+{
+  "listTeamProjects": {
+    "input": {
+      "teamId": "1234567890"
+    }
+  }
+}

@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
+import { runEsqlQuery } from '../../queries/run_esql_query';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { REACHES_BACK_COLUMN } from '../queries/history_reaches_back';
-
-/** The previous period barely changes between renders, so it stays fresh longer than the count. */
-export const PREVIOUS_PERIOD_STALE_TIME_MS = 30 * 60_000;
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
+import type { TileDeltaFailure } from '../data';
 
 interface PreviousPeriodQueryOptions<T> {
   queryKey: string;
   query: string | null;
   enabled: boolean;
   parse: (raw: ESQLSearchResponse) => T;
-  localOnly?: boolean;
 }
 
 /**
@@ -32,7 +31,6 @@ const usePreviousPeriodQuery = <T>({
   query,
   enabled,
   parse,
-  localOnly = false,
 }: PreviousPeriodQueryOptions<T>): {
   data: T | undefined;
   isPending: boolean;
@@ -44,24 +42,17 @@ const usePreviousPeriodQuery = <T>({
     [queryKey, query],
     async ({ signal }) => {
       if (!query) return undefined;
-      const result = await lastValueFrom(
-        services.search.search(
-          { params: { query } },
-          {
-            abortSignal: signal,
-            strategy: 'esql_async',
-            ...(localOnly ? { projectRouting: '_alias:_origin' } : {}),
-          }
-        )
+      const result = await runWithTileTimeout(signal, (tileSignal) =>
+        runEsqlQuery(services.search, query, `needs_attention_tile_${queryKey}`, tileSignal)
       );
-      return parse(result.rawResponse as unknown as ESQLSearchResponse);
+      return parse(result);
     },
     {
       enabled: enabled && Boolean(query),
       keepPreviousData: true,
-      staleTime: PREVIOUS_PERIOD_STALE_TIME_MS,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: retryUnlessTimedOut,
     }
   );
 
@@ -83,6 +74,11 @@ export const parseReachesBack = (raw: ESQLSearchResponse): boolean => {
 interface PreviousPeriodOptions<T> {
   /** Identifies the tile in the query cache. */
   tileKey: string;
+  /**
+   * Identifies the history check in the query cache, when tiles read the same source with the same
+   * query and should share one request. Defaults to `tileKey`.
+   */
+  guardKey?: string;
   /** The history check of the tile's source, or null while its inputs load. */
   guardQuery: string | null;
   /** The tile's query for the previous period (count only), or null while its inputs load. */
@@ -90,8 +86,6 @@ interface PreviousPeriodOptions<T> {
   /** True once the page's counts have loaded, the tile is not skipped and its count is above 0. */
   enabled: boolean;
   parse: (raw: ESQLSearchResponse) => T;
-  /** Run only against the local cluster, like the tile's count. */
-  localOnly?: boolean;
 }
 
 /**
@@ -102,61 +96,69 @@ interface PreviousPeriodOptions<T> {
  */
 export const usePreviousPeriod = <T>({
   tileKey,
+  guardKey = tileKey,
   guardQuery,
   previousQuery,
   enabled,
   parse,
-  localOnly,
 }: PreviousPeriodOptions<T>): {
   previous: T | undefined;
+  /**
+   * True or false once the history check has settled without an error, otherwise undefined. It does
+   * not depend on the previous-period query, so a sparkline can follow it when only that query fails.
+   */
+  reachesBack: boolean | undefined;
   isHistoryMissing: boolean;
   isError: boolean;
+  /** Which part failed: the history check, or the previous-period query that follows it. */
+  failure: TileDeltaFailure | undefined;
 } => {
   const guard = usePreviousPeriodQuery({
-    queryKey: `${tileKey}HistoryReachesBack`,
+    queryKey: `${guardKey}HistoryReachesBack`,
     query: guardQuery,
     enabled,
     parse: parseReachesBack,
-    localOnly,
   });
   const guardSettled = guard.data !== undefined && !guard.isPending;
-  const reachesBack = guardSettled && guard.data === true;
+  const hasHistory = guardSettled && guard.data === true;
 
   const previousPeriod = usePreviousPeriodQuery({
     queryKey: `${tileKey}PrevPeriod`,
     query: previousQuery,
-    enabled: enabled && reachesBack,
+    enabled: enabled && hasHistory,
     parse,
-    localOnly,
   });
 
   const isError = guard.isError || previousPeriod.isError;
   const isPreviousSettled = previousPeriod.data !== undefined && !previousPeriod.isPending;
 
   return {
-    previous: !isError && reachesBack && isPreviousSettled ? previousPeriod.data : undefined,
+    previous: !isError && hasHistory && isPreviousSettled ? previousPeriod.data : undefined,
+    reachesBack: !guard.isError && guardSettled ? guard.data : undefined,
     isHistoryMissing: !isError && guardSettled && guard.data === false,
     isError,
+    failure: guard.isError ? 'history' : previousPeriod.isError ? 'delta' : undefined,
   };
 };
 
 /**
- * Whether a delta can still arrive, for the spinner: not for a skipped tile, a zero count (the pill
- * is hidden then), a query that can never run, a failed query, a history that is too short (the
- * tile says so instead) or a delta that is already known.
+ * Whether a delta can still arrive, for the skeleton: not for a skipped tile, a count that is not
+ * known (it failed, timed out or was skipped), a query that can never run, a failed query, a history
+ * that is too short (the tile says so instead) or a delta that is already known. A count of 0 is
+ * known: the tile still compares it with the previous period.
  */
 export const isDeltaStillComing = ({
   skip,
-  count,
+  hasCount,
   isUnavailable,
   isError,
   isHistoryMissing,
   hasDelta,
 }: {
   skip?: boolean;
-  count: number;
+  hasCount: boolean;
   isUnavailable: boolean;
   isError: boolean;
   isHistoryMissing: boolean;
   hasDelta: boolean;
-}): boolean => !skip && count > 0 && !isUnavailable && !isError && !isHistoryMissing && !hasDelta;
+}): boolean => !skip && hasCount && !isUnavailable && !isError && !isHistoryMissing && !hasDelta;

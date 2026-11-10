@@ -32,24 +32,29 @@ export class ServiceAccountsTestPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
 {
   setup(core: CoreSetup<StartDependencies>, { security, taskManager }: SetupDependencies): void {
-    // Resolves jobs by the prefix of their ID, so tests can pick what the management page gets
-    // back: no details, a path Core must refuse, a title alone, or a title and a path.
+    // Resolves jobs by the prefix of their ID, so tests can pick what Core gets back: a job that
+    // is gone, one that cannot be checked, a path Core must refuse, a title alone, or a title and
+    // a path.
     core.security.serviceAccounts.registerWorkloadType({
       type: 'job',
       name: 'Test job',
       resolveWorkloads: async (workloads) =>
         workloads.map(({ workloadId }) => {
+          if (workloadId.startsWith('missing-')) {
+            return { status: 'missing' };
+          }
           if (workloadId.startsWith('unresolved-')) {
-            return undefined;
+            return { status: 'unknown' };
           }
           const title = `Test job ${workloadId}`;
           if (workloadId.startsWith('bad-path-')) {
-            return { title, path: '/app/../api/status' };
+            return { status: 'present', title, path: '/app/../api/status' };
           }
           if (workloadId.startsWith('title-only-')) {
-            return { title };
+            return { status: 'present', title };
           }
           return {
+            status: 'present',
             title,
             path: `/app/service_accounts_test/jobs/${encodeURIComponent(workloadId)}`,
           };
@@ -127,6 +132,35 @@ export class ServiceAccountsTestPlugin
         return response.ok({ body: { principal: coreSecurity.authc.getPrincipal() } });
       }
     );
+    router.get(
+      {
+        path: '/internal/service_accounts_test/_hold',
+        options: { access: 'internal' },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Test endpoint authenticating the caller through scoped Elasticsearch calls',
+          },
+        },
+        validate: {
+          query: schema.object({ waitMs: schema.number({ min: 0, max: 30000 }) }),
+        },
+      },
+      async (context, request, response) => {
+        const { elasticsearch } = await context.core;
+        const client = elasticsearch.client.asCurrentUser;
+        const initial = await client.security.authenticate();
+        await setTimeout(request.query.waitMs);
+        const completed = await client.security.authenticate();
+        return response.ok({
+          body: {
+            username: initial.username,
+            completedUsername: completed.username,
+            isFakeRequest: request.isFakeRequest,
+          },
+        });
+      }
+    );
     router.post(
       {
         path: '/internal/service_accounts_test/{workloadId}',
@@ -151,14 +185,20 @@ export class ServiceAccountsTestPlugin
             // renewal. UIAM exchange tokens live at least one minute (PT1M, plus 2s of clock skew),
             // and the stateful config set expires Elasticsearch tokens after 15s.
             waitMs: schema.number({ min: 0, max: 70000, defaultValue: 0 }),
+            holdMs: schema.number({ min: 0, max: 30000, defaultValue: 0 }),
             action: schema.oneOf(
               [
                 schema.literal('authenticate'),
                 schema.literal('read_role'),
+                schema.literal('get_saved_object'),
                 schema.literal('create_rule'),
+                schema.literal('schedule_task'),
+                schema.literal('self_call'),
               ],
               { defaultValue: 'authenticate' }
             ),
+            // The dashboard `get_saved_object` reads as the service account.
+            savedObjectId: schema.maybe(schema.string({ minLength: 1, maxLength: 128 })),
             rule: schema.maybe(schema.object({}, { unknowns: 'allow' })),
             revoke: schema.oneOf(
               [
@@ -182,7 +222,8 @@ export class ServiceAccountsTestPlugin
         const [start] = await core.getStartServices();
         const api = start.security.serviceAccounts;
         const workload = { workloadType: 'job', workloadId: request.params.workloadId };
-        const { operation, serviceAccountId, waitMs, action, revoke, rule } = request.body;
+        const { operation, serviceAccountId, waitMs, holdMs, action, revoke, savedObjectId, rule } =
+          request.body;
         try {
           if (operation === 'bind') {
             if (!serviceAccountId) return response.badRequest();
@@ -196,21 +237,66 @@ export class ServiceAccountsTestPlugin
           const result = await api.withScopedRequestForWorkload(
             { ...workload, spaceId: request.spaceId ?? 'default' },
             async (fakeRequest) => {
+              if (action === 'self_call') {
+                const initialAuthorization = fakeRequest.headers.authorization;
+                await setTimeout(waitMs);
+                const { username } = await start.elasticsearch.client
+                  .asScoped(fakeRequest)
+                  .asCurrentUser.security.authenticate();
+                const tokenChangedBeforeCall =
+                  initialAuthorization !== fakeRequest.headers.authorization;
+                const handler = await start.http.selfClient
+                  .asScoped(fakeRequest)
+                  .fetch('/internal/service_accounts_test/_hold', {
+                    query: { waitMs: holdMs },
+                    access: 'internal',
+                    timeout: 60_000,
+                  });
+                return {
+                  username,
+                  tokenChangedBeforeCall,
+                  tokenChanged: initialAuthorization !== fakeRequest.headers.authorization,
+                  handler,
+                };
+              }
+              if (action === 'get_saved_object') {
+                if (!savedObjectId) throw Boom.badRequest();
+                try {
+                  await start.savedObjects
+                    .getScopedClient(fakeRequest)
+                    .get('dashboard', savedObjectId);
+                  return { savedObjectStatus: 200 };
+                } catch (error) {
+                  return {
+                    savedObjectStatus: Boom.isBoom(error) ? error.output.statusCode : 500,
+                  };
+                }
+              }
               // A nested caller: the workload calls a Kibana API as the account through the self
               // client, and that API mints the workload's own credential.
-              if (action === 'create_rule') {
+              if (action === 'create_rule' || action === 'schedule_task') {
                 try {
-                  const { response: ruleResponse, body } = await start.http.selfClient
+                  const { response: nestedResponse, body } = await start.http.selfClient
                     .asScoped(fakeRequest)
-                    .fetch('/api/alerting/rule', { method: 'POST', body: rule, asResponse: true });
-                  return { status: ruleResponse.status, body };
+                    .fetch(
+                      action === 'create_rule'
+                        ? '/api/alerting/rule'
+                        : '/internal/service_accounts_test/_tasks',
+                      {
+                        method: 'POST',
+                        body: action === 'create_rule' ? rule : undefined,
+                        access: action === 'create_rule' ? 'public' : 'internal',
+                        asResponse: true,
+                      }
+                    );
+                  return { status: nestedResponse.status, body };
                 } catch (error) {
                   if (error instanceof Error && 'response' in error && 'body' in error) {
-                    const { response: ruleResponse, body } = error as Error & {
+                    const { response: nestedResponse, body } = error as Error & {
                       response?: Response;
                       body?: unknown;
                     };
-                    if (ruleResponse) return { status: ruleResponse.status, body };
+                    if (nestedResponse) return { status: nestedResponse.status, body };
                   }
                   throw error;
                 }

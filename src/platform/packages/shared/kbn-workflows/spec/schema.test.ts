@@ -38,6 +38,7 @@ import {
   WaitStepSchema,
   WorkflowExecuteAsyncStepSchema,
   WorkflowExecuteStepSchema,
+  WorkflowFailStepSchema,
   WorkflowOutputStepSchema,
   WorkflowSchema,
   WorkflowSchemaForAutocomplete,
@@ -46,9 +47,37 @@ import {
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
 import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
-import { IF_CONDITION_MAX_LENGTH } from '../common/constants';
+import { IF_CONDITION_MAX_LENGTH, WORKFLOW_RUN_NAME_MAX_LENGTH } from '../common/constants';
 import { MAX_DURATION_LENGTH } from '../common/utils/duration/duration';
 import { getShape } from '../common/utils/zod';
+
+describe('run-name', () => {
+  const workflow = {
+    name: 'Deploy',
+    triggers: [{ type: 'manual' }],
+    steps: [{ name: 'log', type: 'console', with: { message: 'done' } }],
+  };
+
+  it.each(['Deploy staging', 'Deploy {{ inputs.target }}', '', '   '])(
+    'preserves the optional template %j',
+    (runName) => {
+      const definition = { ...workflow, 'run-name': runName };
+      expect(WorkflowSchema.parse(definition)['run-name']).toBe(runName);
+      expect(WorkflowSchemaForAutocomplete.parse(definition)['run-name']).toBe(runName);
+    }
+  );
+
+  it('allows workflows without a run name', () => {
+    expect(WorkflowSchema.parse(workflow)['run-name']).toBeUndefined();
+  });
+
+  it.each([123, {}, 'x'.repeat(WORKFLOW_RUN_NAME_MAX_LENGTH + 1)])(
+    'rejects an invalid run name',
+    (runName) => {
+      expect(WorkflowSchema.safeParse({ ...workflow, 'run-name': runName }).success).toBe(false);
+    }
+  );
+});
 
 describe('WorkflowSchemaForAutocomplete', () => {
   it('should allow empty "with" block', () => {
@@ -313,6 +342,18 @@ describe('WorkflowOutputStepSchema', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+});
+
+describe('WorkflowFailStepSchema', () => {
+  it('keeps the error type, which a parent reads as steps.<name>.error.type', () => {
+    const step = WorkflowFailStepSchema.parse({
+      name: 'fail',
+      type: 'workflow.fail',
+      with: { message: 'The process is no longer running', type: 'NonRetryableError' },
+    });
+
+    expect(step.with?.type).toBe('NonRetryableError');
   });
 });
 
@@ -1343,6 +1384,12 @@ describe('HITL external channel schemas', () => {
       channels: ['C0123'],
       message: 'slack2 note',
     },
+    teams: {
+      'connector-id': 'teams-1',
+      'team-id': 'team-1',
+      'channel-id': 'channel-1',
+      message: 'teams note',
+    },
     servicenow: {
       'connector-id': 'snow-1',
       table: 'incident',
@@ -1382,7 +1429,8 @@ describe('HITL external channel schemas', () => {
       slack: ['connector-id', 'message'],
       slack_api: ['connector-id', 'channels', 'message'],
       email: ['connector-id', 'to', 'cc', 'bcc', 'subject', 'message'],
-      slack2: ['connector-id', 'channels', 'message'],
+      slack2: ['connector-id', 'channels', 'interactive', 'message'],
+      teams: ['connector-id', 'team-id', 'channel-id', 'message'],
       servicenow: ['connector-id', 'table', 'sys-id', 'message'],
       http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
     });
@@ -1400,7 +1448,8 @@ describe('HITL external channel schemas', () => {
       slack: ['connector-id'],
       slack_api: ['connector-id', 'channels'],
       email: ['connector-id', 'to', 'cc', 'bcc', 'subject'],
-      slack2: ['connector-id', 'channels'],
+      slack2: ['connector-id', 'channels', 'interactive'],
+      teams: ['connector-id', 'team-id', 'channel-id'],
       servicenow: ['connector-id', 'table', 'sys-id'],
       http: ['connector-id', 'url', 'path', 'method', 'headers', 'body'],
     });
@@ -1615,5 +1664,39 @@ describe('dynamic timeout schema', () => {
     expect(encoded).toMatch(/"anyOf"|"oneOf"/);
     expect(encoded).toContain('\\d+w');
     expect(encoded).toContain('{{');
+  });
+});
+
+describe('workflow child identity allowlist', () => {
+  it.each([
+    [WorkflowExecuteStepSchema, 'allowed-workflow-ids'],
+    [WorkflowExecuteStepSchema, 'allowed-workflow-tags'],
+    [WorkflowExecuteAsyncStepSchema, 'allowed-workflow-ids'],
+    [WorkflowExecuteAsyncStepSchema, 'allowed-workflow-tags'],
+  ] as const)('requires bounded literal entries: %p %s', (schema, field) => {
+    const step = {
+      name: 'child',
+      type: schema.shape.type.value,
+      with: {
+        'workflow-id': '{{ variables.action_workflow_id }}',
+        'run-as-mode': 'inherit',
+        [field]: ['approved-child'],
+      },
+    };
+    expect(schema.safeParse(step).success).toBe(true);
+    for (const allowedIds of [
+      [],
+      [''],
+      ['a'.repeat(1025)],
+      Array.from({ length: 101 }, (_, index) => `child-${index}`),
+      ['{{ variables.child }}'],
+      ['${{ variables.child }}'],
+      ['{% if true %}child{% endif %}'],
+      ['child\n{{ variables.suffix }}'],
+    ]) {
+      expect(
+        schema.safeParse({ ...step, with: { ...step.with, [field]: allowedIds } }).success
+      ).toBe(false);
+    }
   });
 });

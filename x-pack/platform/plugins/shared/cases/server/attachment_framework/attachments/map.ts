@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MapAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/map/v2';
+import { MapAttachmentPayloadSchema } from '../../../common/types/domain/attachment/map/v2';
 import type { UnifiedAttachmentTypeSetup } from '../types';
 import { MAP_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 

@@ -7,7 +7,10 @@
 
 import { firstValueFrom } from 'rxjs';
 
-import { ENABLE_KAFKA_OAUTH2_AUTH_FLAG } from '../../../common/constants';
+import {
+  ENABLE_KAFKA_KERBEROS_AUTH_FLAG,
+  ENABLE_KAFKA_OAUTH2_AUTH_FLAG,
+} from '../../../common/constants';
 import { appContextService } from '../app_context';
 
 const isFlagEnabled = async (flag: string): Promise<boolean> => {
@@ -22,3 +25,7 @@ const isFlagEnabled = async (flag: string): Promise<boolean> => {
 /** Whether the OAuth2 authentication method of the Kafka output is enabled. */
 export const isKafkaOAuth2AuthEnabled = (): Promise<boolean> =>
   isFlagEnabled(ENABLE_KAFKA_OAUTH2_AUTH_FLAG);
+
+/** Whether the Kerberos authentication method of the Kafka output is enabled. */
+export const isKafkaKerberosAuthEnabled = (): Promise<boolean> =>
+  isFlagEnabled(ENABLE_KAFKA_KERBEROS_AUTH_FLAG);
