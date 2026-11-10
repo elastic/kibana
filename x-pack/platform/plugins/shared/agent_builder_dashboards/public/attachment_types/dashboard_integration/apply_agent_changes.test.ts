@@ -33,19 +33,18 @@ const buildDashboardApi = ({
 const apply = ({
   api = buildDashboardApi(),
   dashboardState = agentDashboardState,
-  canWriteDashboards = true,
+  hasLocator = true,
 }: {
   api?: ReturnType<typeof buildDashboardApi>;
   dashboardState?: DashboardState;
-  canWriteDashboards?: boolean;
+  hasLocator?: boolean;
 } = {}) => {
   const dashboardLocator = { navigate: jest.fn(), getRedirectUrl: jest.fn() };
   const toasts = { addWarning: jest.fn() };
   const result = applyAgentChangesToDashboard({
     api: api as unknown as DashboardApi,
     dashboardState,
-    canWriteDashboards,
-    dashboardLocator,
+    dashboardLocator: hasLocator ? dashboardLocator : undefined,
     toasts: toasts as unknown as NotificationsStart['toasts'],
   });
   return { api, dashboardLocator, toasts, result };
@@ -54,8 +53,8 @@ const apply = ({
 describe('applyAgentChangesToDashboard', () => {
   it('switches an editable dashboard to edit mode before applying the changes', async () => {
     const { api, result } = apply();
-    await result;
 
+    await expect(result).resolves.toBe('applied');
     expect(api.setState).toHaveBeenCalledWith(agentDashboardState, { changedBy: ['agent'] });
     expect(api.setViewMode.mock.invocationCallOrder[0]).toBeLessThan(
       api.setState.mock.invocationCallOrder[0]
@@ -86,8 +85,8 @@ describe('applyAgentChangesToDashboard', () => {
       const { api, dashboardLocator, toasts, result } = apply({
         api: buildDashboardApi(apiOptions),
       });
-      await result;
 
+      await expect(result).resolves.toBe('opened-new-dashboard');
       expect(api.setState).not.toHaveBeenCalled();
       expect(dashboardLocator.navigate).toHaveBeenCalledWith({
         title: 'Agent dashboard',
@@ -131,13 +130,14 @@ describe('applyAgentChangesToDashboard', () => {
     );
   });
 
-  it('leaves the dashboard untouched and warns when the user cannot write dashboards', async () => {
-    const { api, dashboardLocator, toasts, result } = apply({ canWriteDashboards: false });
-    await result;
+  it("fails without a warning when the Dashboard app isn't available to open a new dashboard", async () => {
+    const { api, toasts, result } = apply({
+      api: buildDashboardApi({ isManaged: true }),
+      hasLocator: false,
+    });
 
-    expect(api.setViewMode).not.toHaveBeenCalled();
+    await expect(result).rejects.toThrow("The Dashboard app isn't available");
     expect(api.setState).not.toHaveBeenCalled();
-    expect(dashboardLocator.navigate).not.toHaveBeenCalled();
-    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
+    expect(toasts.addWarning).not.toHaveBeenCalled();
   });
 });

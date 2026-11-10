@@ -9,11 +9,13 @@ import { debounceTime, Observable } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { UpdateOriginResponse } from '@kbn/agent-builder-common';
+import { i18n } from '@kbn/i18n';
 import type { NotificationsStart } from '@kbn/core/public';
-import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import {
   isDashboardAttachment,
+  attachmentDataToDashboardState,
   dashboardStateToAttachmentData,
   DASHBOARD_ATTACHMENT_TYPE,
 } from '@kbn/agent-builder-dashboards-common';
@@ -24,12 +26,14 @@ import {
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
 import {
   APPLY_AGENT_CHANGES_ERROR_TITLE,
+  applyAgentChangesToDashboard,
   canApplyAgentChangesInPlace,
 } from './apply_agent_changes';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
 import { createOtherDashboardUpdateNotifier } from './other_dashboard_update_notifier';
-import { previewAttachmentInDashboard } from './preview_attachment';
+import type { DashboardLocator } from './open_in_dashboard_app';
+import { handlePreview } from '../handle_preview';
 import type { IdGenerator } from '..';
 
 /**
@@ -44,7 +48,7 @@ export interface DashboardAppIntegrationParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
   canWriteDashboards: boolean;
-  dashboardLocator?: DashboardRendererProps['locator'];
+  dashboardLocator?: DashboardLocator;
   toasts: NotificationsStart['toasts'];
   draftAttachmentId: IdGenerator;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
@@ -81,11 +85,13 @@ export const registerDashboardAppIntegration = ({
   };
 
   let pendingAddAttachmentTimeout: ReturnType<typeof setTimeout> | undefined;
+  // Attachments staged from this dashboard without an origin, because agent changes to a dashboard
+  // the user can't edit open in a new dashboard, which the origin then follows on save. One per
+  // conversation started here, so switching back to an earlier conversation still finds its own.
   const unlinkedStagedAttachmentIds = new Set<string>();
 
   const addAttachmentFromDashboard = () => {
-    // agent changes to a dashboard the user can't edit open in a new dashboard, so don't link the attachment to it
-    const isLinkable = canApplyAgentChangesInPlace(api, canWriteDashboards);
+    const isLinkable = canWriteDashboards && canApplyAgentChangesInPlace(api);
     const dashboardId = isLinkable ? api.savedObjectId$.getValue() : undefined;
     const syncAttachment = isLinkable
       ? state.attachments?.find(({ origin }) => origin === dashboardId)
@@ -149,30 +155,64 @@ export const registerDashboardAppIntegration = ({
   const otherDashboardUpdateNotifier = createOtherDashboardUpdateNotifier({
     toasts,
     openAttachment: (attachment) =>
-      void previewAttachmentInDashboard({
+      void handlePreview({
         attachment,
         dashboardApi: api,
         canWriteDashboards,
+        isSidebar: true,
         dashboardLocator,
         toasts,
         checkSavedDashboardExist,
-      }).catch((error: Error) =>
-        toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE })
-      ),
+      }),
   });
+
+  let hasWarnedAboutWritePermission = false;
+  const warnAboutWritePermissionOnce = async () => {
+    if (hasWarnedAboutWritePermission) {
+      return undefined;
+    }
+    hasWarnedAboutWritePermission = true;
+    toasts.addWarning({
+      title: i18n.translate('xpack.agentBuilderDashboards.applyAgentChanges.notAppliedToastTitle', {
+        defaultMessage: "The agent's changes weren't applied",
+      }),
+      text: i18n.translate('xpack.agentBuilderDashboards.applyAgentChanges.noWritePermissionText', {
+        defaultMessage:
+          "You don't have permission to edit dashboards. Preview the dashboard attachment in the chat to see the changes.",
+      }),
+    });
+    return undefined;
+  };
+
+  const applyToOpenDashboard = (attachment: DashboardAttachment) =>
+    applyAgentChangesToDashboard({
+      api,
+      dashboardState: attachmentDataToDashboardState(attachment.data),
+      dashboardLocator,
+      toasts,
+    }).catch((error: Error) => {
+      toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE });
+      return undefined;
+    });
 
   const agentLiveUpdatesSubscription = createAgentLiveUpdatesSubscription({
     agentBuilder,
     api,
-    canWriteDashboards,
-    dashboardLocator,
-    toasts,
     isStagedFromDashboard: (attachmentId) => unlinkedStagedAttachmentIds.has(attachmentId),
-    onOtherDashboardUpdated: otherDashboardUpdateNotifier.notify,
     upsertAttachment: (attachment: DashboardAttachment) => {
       const otherAttachments = (state.attachments ?? []).filter(({ id }) => id !== attachment.id);
       state.attachments = [...otherAttachments, attachment];
     },
+    // without write access, opening another dashboard would show unsaved changes that look saved
+    ...(canWriteDashboards
+      ? {
+          onOpenDashboardUpdated: applyToOpenDashboard,
+          onOtherDashboardUpdated: otherDashboardUpdateNotifier.notify,
+        }
+      : {
+          onOpenDashboardUpdated: warnAboutWritePermissionOnce,
+          onOtherDashboardUpdated: () => {},
+        }),
   });
 
   const newAttachmentIdRegenerationSubscription = createNewAttachmentIdRegenerationSubscription({

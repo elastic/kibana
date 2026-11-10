@@ -176,7 +176,7 @@ describe('registerDashboardAppIntegration', () => {
     jest.useRealTimers();
   });
 
-  const register = () => {
+  const register = ({ canWriteDashboards = true }: { canWriteDashboards?: boolean } = {}) => {
     const activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     const agentBuilder = {
       addAttachment,
@@ -203,7 +203,7 @@ describe('registerDashboardAppIntegration', () => {
     cleanup = registerDashboardAppIntegration({
       agentBuilder,
       api: mockApi as unknown as DashboardApi,
-      canWriteDashboards: true,
+      canWriteDashboards,
       toasts,
       draftAttachmentId,
       checkSavedDashboardExist,
@@ -261,6 +261,60 @@ describe('registerDashboardAppIntegration', () => {
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
+  const emitDashboardUpdated = (attachment: DashboardAttachment) =>
+    chatEventsByConversationId.get('conversation-1')?.next({
+      type: ChatEventType.toolUi,
+      data: {
+        tool_id: 'tool',
+        tool_call_id: 'call',
+        custom_event: DASHBOARD_UPDATED_UI_EVENT,
+        data: { attachment },
+      },
+    } as unknown as ChatEvent);
+
+  const flushPromises = async () => {
+    for (let i = 0; i < 5; i++) {
+      await Promise.resolve();
+    }
+  };
+
+  it("warns only once that the agent's changes weren't applied when the user can't write dashboards", async () => {
+    register({ canWriteDashboards: false });
+    emitConversationChange({ id: 'conversation-1', attachments: [] });
+
+    emitDashboardUpdated(createDashboardAttachment());
+    emitDashboardUpdated(createDashboardAttachment());
+    await flushPromises();
+
+    expect(mockApi.setState).not.toHaveBeenCalled();
+    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
+  });
+
+  it("doesn't tell a user who can't write dashboards about a different dashboard", () => {
+    mockApi.savedObjectId$.next('dashboard-1');
+    register({ canWriteDashboards: false });
+    emitConversationChange({ id: 'conversation-1', attachments: [] });
+
+    emitDashboardUpdated(createDashboardAttachment({ origin: 'dashboard-2' }));
+
+    expect(toasts.addInfo).not.toHaveBeenCalled();
+    expect(toasts.addWarning).not.toHaveBeenCalled();
+  });
+
+  it('shows an error toast when the agent changes fail to apply', async () => {
+    const error = new Error('Panel failed to load');
+    mockApi.setState.mockRejectedValue(error);
+    register();
+    emitConversationChange({ id: 'conversation-1', attachments: [] });
+
+    emitDashboardUpdated(createDashboardAttachment());
+    await flushPromises();
+
+    expect(toasts.addError).toHaveBeenCalledWith(error, {
+      title: "Couldn't apply the agent's changes to the dashboard",
+    });
+  });
+
   it('tells the user when the agent updated a different dashboard, until they leave this one', () => {
     const toast = { id: 'toast-1' };
     toasts.addInfo.mockReturnValue(toast);
@@ -268,15 +322,7 @@ describe('registerDashboardAppIntegration', () => {
     register();
     emitConversationChange({ id: 'conversation-1', attachments: [] });
 
-    chatEventsByConversationId.get('conversation-1')?.next({
-      type: ChatEventType.toolUi,
-      data: {
-        tool_id: 'tool',
-        tool_call_id: 'call',
-        custom_event: DASHBOARD_UPDATED_UI_EVENT,
-        data: { attachment: createDashboardAttachment({ origin: 'dashboard-2' }) },
-      },
-    } as unknown as ChatEvent);
+    emitDashboardUpdated(createDashboardAttachment({ origin: 'dashboard-2' }));
 
     expect(mockApi.setState).not.toHaveBeenCalled();
     expect(toasts.addInfo).toHaveBeenCalledTimes(1);

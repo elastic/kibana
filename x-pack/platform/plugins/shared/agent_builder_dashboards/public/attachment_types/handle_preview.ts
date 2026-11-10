@@ -8,9 +8,12 @@
 import type { NotificationsStart } from '@kbn/core/public';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
-import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
-import { toDashboardLocatorParams } from './dashboard_integration/dashboard_locator_params';
+import {
+  toDashboardLocatorParams,
+  type DashboardLocator,
+} from './dashboard_integration/open_in_dashboard_app';
 import { APPLY_AGENT_CHANGES_ERROR_TITLE } from './dashboard_integration/apply_agent_changes';
 import { handleEditInDashboard } from './handle_edit_in_dashboard';
 
@@ -19,7 +22,7 @@ interface HandlePreviewParams {
   dashboardApi?: DashboardApi;
   canWriteDashboards: boolean;
   isSidebar: boolean;
-  dashboardLocator?: DashboardRendererProps['locator'];
+  dashboardLocator?: DashboardLocator;
   toasts: NotificationsStart['toasts'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   openCanvas?: () => void;
@@ -46,7 +49,6 @@ const openPreview = async ({
     return previewAttachmentInDashboard({
       attachment,
       dashboardApi,
-      canWriteDashboards,
       dashboardLocator,
       toasts,
       checkSavedDashboardExist,

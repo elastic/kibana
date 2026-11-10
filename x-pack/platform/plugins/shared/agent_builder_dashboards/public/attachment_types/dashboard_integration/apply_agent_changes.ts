@@ -9,17 +9,20 @@ import { i18n } from '@kbn/i18n';
 import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
-import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
-import { toDashboardLocatorParams } from './dashboard_locator_params';
+import type { DashboardApi } from '@kbn/dashboard-plugin/public';
+import {
+  openInDashboardApp,
+  toDashboardLocatorParams,
+  type DashboardLocator,
+} from './open_in_dashboard_app';
+
+export type ApplyAgentChangesOutcome = 'applied' | 'opened-new-dashboard';
 
 interface ApplyAgentChangesParams {
   api: DashboardApi;
   dashboardState: DashboardState;
-  canWriteDashboards: boolean;
-  dashboardLocator?: DashboardRendererProps['locator'];
+  dashboardLocator?: DashboardLocator;
   toasts: NotificationsStart['toasts'];
-  /** Called right before the changes open in a new dashboard. */
-  onOpenInNewDashboard?: () => void;
 }
 
 export const APPLY_AGENT_CHANGES_ERROR_TITLE = i18n.translate(
@@ -28,70 +31,45 @@ export const APPLY_AGENT_CHANGES_ERROR_TITLE = i18n.translate(
 );
 
 /**
- * Whether the agent's changes can be applied to the open dashboard itself.
+ * Whether the agent's changes can be applied to the open dashboard itself, for a user who can
+ * write dashboards.
  */
-export const canApplyAgentChangesInPlace = (
-  api: DashboardApi,
-  canWriteDashboards: boolean
-): boolean => canWriteDashboards && api.isEditableByUser && !api.isManaged;
+export const canApplyAgentChangesInPlace = (api: DashboardApi): boolean =>
+  api.isEditableByUser && !api.isManaged;
 
 /**
- * Applies agent changes to the open dashboard, or to a new dashboard when the open one can't be edited.
+ * Applies agent changes to the open dashboard, or opens them in a new dashboard when the open one
+ * can't be edited. Expects a user who can write dashboards.
  */
 export const applyAgentChangesToDashboard = async ({
   api,
   dashboardState,
-  canWriteDashboards,
   dashboardLocator,
   toasts,
-  onOpenInNewDashboard,
-}: ApplyAgentChangesParams): Promise<void> => {
-  if (!canWriteDashboards) {
-    toasts.addWarning({
-      title: i18n.translate('xpack.agentBuilderDashboards.applyAgentChanges.notAppliedToastTitle', {
-        defaultMessage: "The agent's changes weren't applied",
-      }),
-      text: i18n.translate('xpack.agentBuilderDashboards.applyAgentChanges.noWritePermissionText', {
-        defaultMessage:
-          "You don't have permission to edit dashboards. Preview the dashboard attachment in the chat to see the changes.",
-      }),
-    });
-    return;
-  }
-
-  if (!canApplyAgentChangesInPlace(api, canWriteDashboards)) {
-    if (!dashboardLocator) {
-      return;
+}: ApplyAgentChangesParams): Promise<ApplyAgentChangesOutcome> => {
+  if (canApplyAgentChangesInPlace(api)) {
+    // Hosts other than the Dashboard app (e.g. Security) render the dashboard without save controls
+    if (api.getAppContext().currentAppId === DASHBOARD_APP_ID) {
+      api.setViewMode('edit');
     }
-    onOpenInNewDashboard?.();
-    await dashboardLocator.navigate({
-      ...toDashboardLocatorParams(dashboardState),
-      viewMode: 'edit',
-      changedBy: ['agent'],
-    });
-    toasts.addWarning({
-      title: i18n.translate(
-        'xpack.agentBuilderDashboards.applyAgentChanges.newDashboardToastTitle',
-        {
-          defaultMessage: "The agent's changes were opened in a new dashboard",
-        }
-      ),
-      text: api.isManaged
-        ? i18n.translate('xpack.agentBuilderDashboards.applyAgentChanges.managedDashboardText', {
-            defaultMessage:
-              "The original dashboard is managed by Elastic and can't be edited. Save the new dashboard to keep the changes.",
-          })
-        : i18n.translate('xpack.agentBuilderDashboards.applyAgentChanges.notEditableByUserText', {
-            defaultMessage:
-              "You don't have permission to edit the original dashboard. Save the new dashboard to keep the changes.",
-          }),
-    });
-    return;
+    await api.setState(dashboardState, { changedBy: ['agent'] });
+    return 'applied';
   }
 
-  // Hosts other than the Dashboard app (e.g. Security) render the dashboard without save controls
-  if (api.getAppContext().currentAppId === DASHBOARD_APP_ID) {
-    api.setViewMode('edit');
-  }
-  await api.setState(dashboardState, { changedBy: ['agent'] });
+  await openInDashboardApp(dashboardLocator, toDashboardLocatorParams(dashboardState));
+  toasts.addWarning({
+    title: i18n.translate('xpack.agentBuilderDashboards.applyAgentChanges.newDashboardToastTitle', {
+      defaultMessage: "The agent's changes were opened in a new dashboard",
+    }),
+    text: api.isManaged
+      ? i18n.translate('xpack.agentBuilderDashboards.applyAgentChanges.managedDashboardText', {
+          defaultMessage:
+            "The original dashboard is managed by Elastic and can't be edited. Save the new dashboard to keep the changes.",
+        })
+      : i18n.translate('xpack.agentBuilderDashboards.applyAgentChanges.notEditableByUserText', {
+          defaultMessage:
+            "You don't have permission to edit the original dashboard. Save the new dashboard to keep the changes.",
+        }),
+  });
+  return 'opened-new-dashboard';
 };
