@@ -30,6 +30,14 @@ const EVENT_INVESTIGATIONS_PAGE_SIZE = 10;
  * `pickAlertInvestigation` in the alerts UI (`use_investigate_alert.tsx`), which nightshift cannot
  * import, so an alert and its event show the same investigation.
  */
+const isStartPending = (
+  awaiting: { id: string; startedAt: number } | undefined,
+  investigations: InvestigationSummary[] | undefined
+): boolean =>
+  awaiting !== undefined &&
+  Date.now() - awaiting.startedAt < PENDING_START_TIMEOUT_MS &&
+  !investigations?.some(({ id }) => id === awaiting.id);
+
 const pickEventInvestigation = (
   investigations: InvestigationSummary[] | undefined
 ): InvestigationSummary | undefined =>
@@ -43,10 +51,11 @@ const pickEventInvestigation = (
 export const useFetchEventInvestigation = (
   episodeId: string | undefined,
   { awaiting }: { awaiting?: { id: string; startedAt: number } } = {}
-): { investigation: InvestigationSummary | undefined } => {
+): { investigation: InvestigationSummary | undefined; isAwaitingStart: boolean } => {
   const { http, agenticInvestigations } = useKibana().services;
 
-  const { data } = useQuery<ListInvestigationsResponse, Error>({
+  // Reading `dataUpdatedAt` re-renders on every fetch, so the pending window ends on its own.
+  const { data, dataUpdatedAt } = useQuery<ListInvestigationsResponse, Error>({
     queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'event', episodeId],
     // The list API belongs to agenticInvestigations, an optional dependency.
     enabled: agenticInvestigations != null && Boolean(episodeId),
@@ -66,15 +75,17 @@ export const useFetchEventInvestigation = (
     // A start returns before the investigation exists, so keep asking, for a while, until the
     // new one is listed.
     refetchInterval: (response) => {
-      const isAwaitingStart =
-        awaiting !== undefined &&
-        Date.now() - awaiting.startedAt < PENDING_START_TIMEOUT_MS &&
-        !response?.results.some(({ id }) => id === awaiting.id);
-      return isAwaitingStart || response?.results.some(({ in_progress: inProgress }) => inProgress)
+      return isStartPending(awaiting, response?.results) ||
+        response?.results.some(({ in_progress: inProgress }) => inProgress)
         ? IN_PROGRESS_REFETCH_INTERVAL_MS
         : false;
     },
   });
 
-  return { investigation: pickEventInvestigation(data?.results) };
+  return {
+    investigation: pickEventInvestigation(data?.results),
+    // A start returns before the investigation is listed: until it is, the listed one (if any) is
+    // an older run and must not read as the current one.
+    isAwaitingStart: dataUpdatedAt >= 0 && isStartPending(awaiting, data?.results),
+  };
 };

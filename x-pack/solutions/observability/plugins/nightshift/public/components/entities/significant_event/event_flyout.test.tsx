@@ -27,9 +27,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 const mockUseInvestigation = jest.fn<UseInvestigationResult, [unknown]>();
 const mockSubjectInvestigation = jest.fn();
+const mockIsAwaitingStart = jest.fn(() => false);
 jest.mock('../../../data/significant_events/use_fetch_event_investigation', () => ({
   useFetchEventInvestigation: (episodeId: string | undefined) => ({
     investigation: mockSubjectInvestigation(episodeId),
+    isAwaitingStart: mockIsAwaitingStart(),
     isLoading: false,
   }),
 }));
@@ -196,6 +198,8 @@ describe('EventFlyout', () => {
     mockFocusedSignificantEventService.clearFocusedEvent.mockClear();
     mockAddSuccess.mockClear();
     mockSubjectInvestigation.mockReset();
+    mockIsAwaitingStart.mockReset();
+    mockIsAwaitingStart.mockReturnValue(false);
     mockOpenConversationDetails.mockClear();
     mockReportEvent.mockClear();
     mockCanManage = false;
@@ -299,6 +303,18 @@ describe('EventFlyout', () => {
       expect.objectContaining({ investigationId: 'conv-subject' })
     );
     expect(screen.getByText('Investigation')).toBeInTheDocument();
+  });
+
+  it('does not present an older run as the current one while a start is pending', async () => {
+    mockCanManage = true;
+    mockSubjectInvestigation.mockReturnValue({ id: 'conv-old', in_progress: false });
+    mockIsAwaitingStart.mockReturnValue(true);
+    renderFlyout();
+
+    expect(mockUseInvestigation).toHaveBeenCalledWith(
+      expect.objectContaining({ investigationId: undefined })
+    );
+    expect(screen.getByText('Investigation · In progress')).toBeInTheDocument();
   });
 
   it('disables the investigation action for an event without an alert to investigate', async () => {

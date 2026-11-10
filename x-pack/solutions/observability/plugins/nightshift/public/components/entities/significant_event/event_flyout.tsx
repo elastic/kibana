@@ -180,15 +180,19 @@ export function EventFlyout({
   const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
   // The investigation is found through its subject (the event's alert, by episode id), as for any
   // alert. The event's own `investigations[]` is not read here.
-  const { investigation: subjectInvestigation } = useFetchEventInvestigation(event.episode_id, {
-    awaiting:
-      startedInvestigation?.episodeId === event.episode_id ? startedInvestigation : undefined,
-  });
-  const hasInvestigation = subjectInvestigation != null;
+  const { investigation: subjectInvestigation, isAwaitingStart } = useFetchEventInvestigation(
+    event.episode_id,
+    {
+      awaiting:
+        startedInvestigation?.episodeId === event.episode_id ? startedInvestigation : undefined,
+    }
+  );
+  const hasInvestigation = subjectInvestigation != null || isAwaitingStart;
 
   const { investigation: investigationDetails, status: investigationStatus } = useInvestigation({
     http,
-    investigationId: subjectInvestigation?.id,
+    // While a start is pending, the listed investigation is an older run: show none of its details.
+    investigationId: isAwaitingStart ? undefined : subjectInvestigation?.id,
   });
   const conversationId = investigationDetails?.id;
 
@@ -278,7 +282,8 @@ export function EventFlyout({
       agentBuilder?.openChat(buildInvestigationConversationChatOptions(conversationId));
     }
   }, [agentBuilder, conversationId]);
-  const latestInvestigationInProgress = subjectInvestigation?.in_progress ?? false;
+  const latestInvestigationInProgress =
+    isAwaitingStart || (subjectInvestigation?.in_progress ?? false);
   const actionMenuPanels = useMemo<FlyoutFooterMenuPanel[]>(() => {
     const items: FlyoutFooterMenuItem[] = [];
     if (canManage) {
