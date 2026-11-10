@@ -12,12 +12,14 @@ export type ReadTextFileResult =
   | { status: 'done'; content: string }
   | { status: 'failed'; message: string };
 
+/** Shown for a text file that is too big, whether by its size or by its text length. */
+export const textTooLongMessage = i18n.translate('xpack.agentBuilder.readTextFile.textTooLong', {
+  defaultMessage: 'The text of the file is too long. Try a smaller file.',
+});
+
 const labels = {
   notUtf8: i18n.translate('xpack.agentBuilder.readTextFile.notUtf8', {
     defaultMessage: 'The file must be UTF-8 text.',
-  }),
-  textTooLong: i18n.translate('xpack.agentBuilder.readTextFile.textTooLong', {
-    defaultMessage: 'The text of the file is too long. Try a smaller file.',
   }),
 };
 
@@ -33,7 +35,7 @@ export const readTextFile = async (file: File): Promise<ReadTextFileResult> => {
   }
   if (content.includes(NUL_CHARACTER)) return { status: 'failed', message: labels.notUtf8 };
   if (content.length > MAX_TEXT_FILE_LENGTH) {
-    return { status: 'failed', message: labels.textTooLong };
+    return { status: 'failed', message: textTooLongMessage };
   }
   return { status: 'done', content };
 };

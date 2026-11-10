@@ -44,18 +44,28 @@ describe('rejectInvalidFile', () => {
     });
   });
 
-  it.each([
-    ['a PDF', 'invoice.pdf', 'application/pdf', 10 * MB, '10 MB'],
-    ['a Markdown file', 'notes.md', 'text/markdown', 256 * KB, '256 KB'],
-    ['a text file', 'notes.txt', 'text/plain', 256 * KB, '256 KB'],
-    ['a CSV file', 'data.csv', 'text/csv', 256 * KB, '256 KB'],
-  ])('rejects %s that is over its own limit', (_label, name, type, limit, limitLabel) => {
+  it('rejects a PDF over its size limit and names the limit', () => {
     const addErrorToast = jest.fn();
-    const file = createFile({ name, type, size: limit + 1 });
+    const file = createFile({ name: 'invoice.pdf', type: 'application/pdf', size: 10 * MB + 1 });
 
     expect(rejectInvalidFile({ file, addErrorToast })).toBe(true);
     expect(addErrorToast).toHaveBeenCalledWith({
-      title: `The file is too large. The maximum size is ${limitLabel}.`,
+      title: 'The file is too large. The maximum size is 10 MB.',
+      text: 'invoice.pdf',
+    });
+  });
+
+  it.each([
+    ['a Markdown file', 'notes.md', 'text/markdown'],
+    ['a text file', 'notes.txt', 'text/plain'],
+    ['a CSV file', 'data.csv', 'text/csv'],
+  ])('rejects %s over 256 KB with the same message as a too long text', (_label, name, type) => {
+    const addErrorToast = jest.fn();
+    const file = createFile({ name, type, size: 256 * KB + 1 });
+
+    expect(rejectInvalidFile({ file, addErrorToast })).toBe(true);
+    expect(addErrorToast).toHaveBeenCalledWith({
+      title: 'The text of the file is too long. Try a smaller file.',
       text: name,
     });
   });

@@ -8,6 +8,7 @@
 import {
   AttachmentType,
   isSupportedBinaryMimeType,
+  MAX_BINARY_TEXT_LENGTH,
   type SupportedBinaryMimeType,
   type TextAttachmentData,
 } from '@kbn/agent-builder-common/attachments';
@@ -16,9 +17,11 @@ export const TEXT_FILE_MIME_TYPES = ['text/markdown', 'text/plain', 'text/csv'] 
 export type TextFileMimeType = (typeof TEXT_FILE_MIME_TYPES)[number];
 export type FileMimeType = SupportedBinaryMimeType | TextFileMimeType;
 
+// Rejects big files before reading them. A character takes up to 4 bytes, so a file under the
+// text length limit always fits.
 export const MAX_TEXT_FILE_BYTES = 256 * 1024;
-// Same attachment_read budget as MAX_BINARY_TEXT_LENGTH on the server.
-export const MAX_TEXT_FILE_LENGTH = 60_000;
+// Text files and PDFs share the attachment_read budget.
+export const MAX_TEXT_FILE_LENGTH = MAX_BINARY_TEXT_LENGTH;
 
 const MIME_TYPE_BY_EXTENSION: ReadonlyMap<string, FileMimeType> = new Map([
   ['pdf', 'application/pdf'],

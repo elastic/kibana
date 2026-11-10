@@ -958,7 +958,7 @@ describe('ConversationInput', () => {
       mockMessageEditorProps.onPasteFile?.(bigFile);
 
       expect(addErrorToast).toHaveBeenCalledWith({
-        title: 'The file is too large. The maximum size is 256 KB.',
+        title: 'The text of the file is too long. Try a smaller file.',
         text: 'big.txt',
       });
       expect(handlePasteTextFile).not.toHaveBeenCalled();

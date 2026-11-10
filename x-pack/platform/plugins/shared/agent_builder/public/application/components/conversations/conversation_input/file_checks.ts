@@ -10,6 +10,7 @@ import numeral from '@elastic/numeral';
 import type { ToastInput } from '@kbn/core/public';
 import { MAX_BINARY_BYTES, isSupportedBinaryMimeType } from '@kbn/agent-builder-common/attachments';
 import { getFileMimeType, MAX_TEXT_FILE_BYTES } from './file_type';
+import { textTooLongMessage } from './read_text_file';
 
 export const MAX_FILES_PER_MESSAGE = 10;
 
@@ -44,9 +45,13 @@ export const rejectInvalidFile = ({
     showUnsupportedFileToast(addErrorToast, file);
     return true;
   }
-  const maxBytes = isSupportedBinaryMimeType(mimeType)
-    ? MAX_BINARY_BYTES[mimeType]
-    : MAX_TEXT_FILE_BYTES;
+  if (!isSupportedBinaryMimeType(mimeType)) {
+    // The byte limit of text files is only a pre-check, so the toast names the real limit: the text length.
+    if (file.size <= MAX_TEXT_FILE_BYTES) return false;
+    addErrorToast({ title: textTooLongMessage, text: file.name || undefined });
+    return true;
+  }
+  const maxBytes = MAX_BINARY_BYTES[mimeType];
   if (file.size > maxBytes) {
     addErrorToast({
       title: i18n.translate('xpack.agentBuilder.fileChecks.tooLarge', {
