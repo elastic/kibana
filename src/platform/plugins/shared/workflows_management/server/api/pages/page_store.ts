@@ -60,9 +60,40 @@ export class WorkflowPageStore {
     }
   }
 
-  /** Replaces the secret. The old URL stops working at once. */
+  /** Replaces the secret. The old URL stops working at once. The page switch keeps its value. */
   async rotate(ref: PageRef): Promise<string> {
-    return this.write(ref, { overwrite: true });
+    const enabled = (await this.isEnabled(ref)) ?? true;
+    return this.write(ref, { overwrite: true, enabled });
+  }
+
+  /** Returns the page switch, or `undefined` when the page does not exist yet. */
+  async isEnabled(ref: PageRef): Promise<boolean | undefined> {
+    try {
+      const { attributes } = await this.deps.client.get<WorkflowPageAttributes>(
+        WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+        getPageId(ref),
+        { namespace: SavedObjectsUtils.namespaceStringToId(ref.spaceId) }
+      );
+      return attributes.enabled;
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return undefined;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Sets the page switch. A disabled page is offline while its workflow keeps running.
+   * The update sends only `enabled`, which is neither encrypted nor part of the AAD.
+   */
+  async setEnabled(ref: PageRef, enabled: boolean): Promise<void> {
+    await this.deps.client.update<WorkflowPageAttributes>(
+      WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+      getPageId(ref),
+      { enabled },
+      { namespace: SavedObjectsUtils.namespaceStringToId(ref.spaceId) }
+    );
   }
 
   /** Deletes the page, so a page trigger added later gets a new secret. */
@@ -117,7 +148,10 @@ export class WorkflowPageStore {
     }
   }
 
-  private async write(ref: PageRef, { overwrite }: { overwrite: boolean }): Promise<string> {
+  private async write(
+    ref: PageRef,
+    { overwrite, enabled = true }: { overwrite: boolean; enabled?: boolean }
+  ): Promise<string> {
     const { spaceId, workflowId } = ref;
     const secret = generatePageSecret();
     await this.deps.client.create<WorkflowPageAttributes>(
@@ -126,7 +160,7 @@ export class WorkflowPageStore {
         workflowId,
         secret,
         secretHash: computePageSecretHash({ workflowId, spaceId, secret }),
-        enabled: true,
+        enabled,
         createdAt: new Date().toISOString(),
       },
       {

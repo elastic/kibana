@@ -21,6 +21,7 @@ import {
   EuiModalHeaderTitle,
   EuiSkeletonText,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -31,13 +32,18 @@ import { useQuery, useQueryClient } from '@kbn/react-query';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import {
   INTERNAL_API_VERSION,
+  PAGE_ENABLED_API_PATH,
   PAGE_LINK_API_PATH,
   PAGE_ROTATE_API_PATH,
 } from '../../../../common/lib/api_constants';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface PageLinkResponse {
+  /** The page switch. A disabled page is offline while its workflow keeps running. */
   enabled: boolean;
+  workflowEnabled: boolean;
+  /** True when the link works: the page is on, the workflow is on, and it has a `run_as`. */
+  online: boolean;
   /** The `run_as` service account submissions run as. The page is offline without one. */
   serviceAccountId?: string;
   path: string;
@@ -45,8 +51,8 @@ interface PageLinkResponse {
 
 interface WorkflowPageShareModalProps {
   workflowId: string;
-  /** Rotating changes the workflow, so it needs the Workflows Update privilege. */
-  canRotate: boolean;
+  /** The page switch and rotating change the page, so they need the Workflows Update privilege. */
+  canManage: boolean;
   onClose: () => void;
 }
 
@@ -60,10 +66,10 @@ const linkQueryKey = (workflowId: string) => ['workflowPageLink', workflowId];
 const toAbsoluteUrl = (path: string, publicBaseUrl: string | undefined): string =>
   `${publicBaseUrl ? new URL(publicBaseUrl).origin : window.location.origin}${path}`;
 
-/** Shows the shareable URL of a workflow page, with copy and rotate. */
+/** Shows the shareable URL of a workflow page, with the page switch, copy, and rotate. */
 export const WorkflowPageShareModal = ({
   workflowId,
-  canRotate,
+  canManage,
   onClose,
 }: WorkflowPageShareModalProps) => {
   const { http } = useKibana().services;
@@ -71,6 +77,8 @@ export const WorkflowPageShareModal = ({
   const [isConfirmingRotate, setIsConfirmingRotate] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   const [hasRotateError, setHasRotateError] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
+  const [hasToggleError, setHasToggleError] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: linkQueryKey(workflowId),
@@ -96,6 +104,22 @@ export const WorkflowPageShareModal = ({
       setHasRotateError(true);
     } finally {
       setIsRotating(false);
+    }
+  };
+
+  const setPageEnabled = async (enabled: boolean) => {
+    setIsToggling(true);
+    setHasToggleError(false);
+    try {
+      const updated = await http.post<PageLinkResponse>(
+        buildPath(PAGE_ENABLED_API_PATH, { workflowId }),
+        { version: INTERNAL_API_VERSION, body: JSON.stringify({ enabled }) }
+      );
+      queryClient.setQueryData(linkQueryKey(workflowId), updated);
+    } catch {
+      setHasToggleError(true);
+    } finally {
+      setIsToggling(false);
     }
   };
 
@@ -161,7 +185,45 @@ export const WorkflowPageShareModal = ({
                 <EuiSpacer size="m" />
               </>
             )}
+            <EuiSwitch
+              label={i18n.translate('workflows.pageShare.enabledLabel', {
+                defaultMessage: 'Page enabled',
+              })}
+              checked={data.enabled}
+              disabled={!canManage || isToggling}
+              onChange={(event) => setPageEnabled(event.target.checked)}
+              data-test-subj="workflowPageShareEnabled"
+            />
+            <EuiSpacer size="m" />
+            {hasToggleError && (
+              <>
+                <KbnDangerCallout
+                  announceOnMount
+                  size="s"
+                  title={i18n.translate('workflows.pageShare.enabledError', {
+                    defaultMessage: 'Could not change the page. Try again.',
+                  })}
+                />
+                <EuiSpacer size="m" />
+              </>
+            )}
             {!data.enabled && (
+              <>
+                <KbnWarningCallout
+                  size="s"
+                  title={i18n.translate('workflows.pageShare.disabledTitle', {
+                    defaultMessage: 'The page is off',
+                  })}
+                >
+                  {i18n.translate('workflows.pageShare.disabledBody', {
+                    defaultMessage:
+                      'The link does not work until you enable the page. The workflow keeps running for its other triggers.',
+                  })}
+                </KbnWarningCallout>
+                <EuiSpacer size="m" />
+              </>
+            )}
+            {data.enabled && !data.workflowEnabled && (
               <>
                 <KbnWarningCallout
                   size="s"
@@ -238,7 +300,7 @@ export const WorkflowPageShareModal = ({
       </EuiModalBody>
       <EuiModalFooter>
         {data &&
-          canRotate &&
+          canManage &&
           (isConfirmingRotate ? (
             <>
               <EuiButtonEmpty onClick={() => setIsConfirmingRotate(false)} disabled={isRotating}>

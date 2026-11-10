@@ -10,6 +10,7 @@
 import {
   registerPageAppRoute,
   registerPageDefinitionRoute,
+  registerPageEnabledRoute,
   registerPageLinkRoute,
   registerPageRotateRoute,
   registerPageSubmitRoute,
@@ -39,4 +40,5 @@ export function registerPageRoutes(deps: RouteDependencies) {
   registerPageSubmitRoute(deps);
   registerPageLinkRoute(deps);
   registerPageRotateRoute(deps);
+  registerPageEnabledRoute(deps);
 }

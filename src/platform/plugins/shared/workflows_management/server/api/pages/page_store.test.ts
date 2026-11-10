@@ -86,15 +86,36 @@ describe('WorkflowPageStore', () => {
     await expect(store.getOrCreateSecret(ref)).resolves.toBe('winner');
   });
 
-  it('overwrites the secret on rotate', async () => {
+  it('overwrites the secret on rotate and keeps the page switch', async () => {
     const { client, store } = setup();
+    client.get.mockResolvedValue(storedPage({ secret: 'old', enabled: false }));
 
     const secret = await store.rotate(ref);
 
     expect(client.create).toHaveBeenCalledWith(
       WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
-      expect.objectContaining({ secret }),
+      expect.objectContaining({ secret, enabled: false }),
       expect.objectContaining({ overwrite: true })
+    );
+  });
+
+  it('reports no page switch before the page exists', async () => {
+    const { client, store } = setup();
+    client.get.mockRejectedValue(notFound());
+
+    await expect(store.isEnabled(ref)).resolves.toBeUndefined();
+  });
+
+  it('updates only the page switch', async () => {
+    const { client, store } = setup();
+
+    await store.setEnabled(ref, false);
+
+    expect(client.update).toHaveBeenCalledWith(
+      WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+      getPageId(ref),
+      { enabled: false },
+      { namespace: 'marketing' }
     );
   });
 

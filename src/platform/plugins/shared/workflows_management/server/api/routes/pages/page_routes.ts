@@ -18,6 +18,7 @@ import {
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import {
   PAGE_API_PATH,
+  PAGE_ENABLED_API_PATH,
   PAGE_FORM_PATH,
   PAGE_LINK_API_PATH,
   PAGE_ROTATE_API_PATH,
@@ -77,20 +78,30 @@ const workflowParamsSchema = schema.object({
 const hasPageTrigger = (workflow: WorkflowDetailDto | null): workflow is WorkflowDetailDto =>
   Boolean(workflow?.definition?.triggers.some(isPageTrigger));
 
-/** Response body for the author-facing link and rotate routes. */
+/**
+ * Response body for the author-facing page routes. `enabled` is the page switch. The page
+ * is `online` only when the switch is on, the workflow is enabled, and it has a `run_as`.
+ */
 const toPageLinkBody = ({
   basePath,
-  workflowId,
+  workflow,
   secret,
   enabled,
-  serviceAccountId,
 }: {
   basePath: string;
-  workflowId: string;
+  workflow: WorkflowDetailDto;
   secret: string;
   enabled: boolean;
-  serviceAccountId: string | undefined;
-}) => ({ enabled, serviceAccountId, path: buildPageUrl({ basePath, workflowId, secret }) });
+}) => {
+  const serviceAccountId = workflow.definition?.settings?.run_as;
+  return {
+    enabled,
+    workflowEnabled: workflow.enabled,
+    online: enabled && workflow.enabled && Boolean(serviceAccountId),
+    serviceAccountId,
+    path: buildPageUrl({ basePath, workflowId: workflow.id, secret }),
+  };
+};
 
 /**
  * GET the page app. The secret is checked before Kibana renders anything, so a wrong URL
@@ -225,14 +236,9 @@ export function registerPageLinkRoute(deps: RouteDependencies) {
             return response.notFound({ body: { message: 'Workflow does not define a page.' } });
           }
           const secret = await api.getPageSecret(workflowId, spaceId, request);
+          const enabled = await api.isPageEnabled(workflowId, spaceId, request);
           return response.ok({
-            body: toPageLinkBody({
-              basePath: request.basePath,
-              workflowId,
-              secret,
-              enabled: workflow.enabled,
-              serviceAccountId: workflow.definition?.settings?.run_as,
-            }),
+            body: toPageLinkBody({ basePath: request.basePath, workflow, secret, enabled }),
           });
         } catch (error) {
           return handleRouteError(response, error, { logger });
@@ -264,14 +270,54 @@ export function registerPageRotateRoute(deps: RouteDependencies) {
           }
           const secret = await api.rotatePage(workflowId, spaceId, request);
           audit.logWorkflowUpdated(request, { id: workflowId });
+          const enabled = await api.isPageEnabled(workflowId, spaceId, request);
           return response.ok({
-            body: toPageLinkBody({
-              basePath: request.basePath,
-              workflowId,
-              secret,
-              enabled: workflow.enabled,
-              serviceAccountId: workflow.definition?.settings?.run_as,
-            }),
+            body: toPageLinkBody({ basePath: request.basePath, workflow, secret, enabled }),
+          });
+        } catch (error) {
+          audit.logWorkflowUpdated(request, { id: workflowId, error });
+          return handleRouteError(response, error, { logger });
+        }
+      })
+    );
+}
+
+/** Turns a page on or off. The workflow keeps running; only the public URL goes offline. */
+export function registerPageEnabledRoute(deps: RouteDependencies) {
+  const { router, api, spaces, audit, logger } = deps;
+
+  router.versioned
+    .post({
+      path: PAGE_ENABLED_API_PATH,
+      access: 'internal',
+      security: WORKFLOW_UPDATE_SECURITY,
+      summary: 'Turn a workflow page on or off',
+    })
+    .addVersion(
+      {
+        version: INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: workflowParamsSchema,
+            body: schema.object({ enabled: schema.boolean() }),
+          },
+        },
+      },
+      withAvailabilityCheck(async (context, request, response) => {
+        const { workflowId } = request.params;
+        const { enabled } = request.body;
+        try {
+          const spaceId = spaces.getSpaceId(request);
+          const workflow = await api.getWorkflow(workflowId, spaceId, request);
+          if (!hasPageTrigger(workflow)) {
+            return response.notFound({ body: { message: 'Workflow does not define a page.' } });
+          }
+          // The page exists once its URL exists, so read the secret before the switch.
+          const secret = await api.getPageSecret(workflowId, spaceId, request);
+          await api.setPageEnabled(workflowId, spaceId, enabled, request);
+          audit.logWorkflowUpdated(request, { id: workflowId });
+          return response.ok({
+            body: toPageLinkBody({ basePath: request.basePath, workflow, secret, enabled }),
           });
         } catch (error) {
           audit.logWorkflowUpdated(request, { id: workflowId, error });

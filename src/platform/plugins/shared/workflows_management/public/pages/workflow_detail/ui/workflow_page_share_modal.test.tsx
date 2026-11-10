@@ -25,21 +25,30 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { http: mockHttp } }),
 }));
 
-const renderModal = ({ canRotate = true }: { canRotate?: boolean } = {}) =>
+const renderModal = ({ canManage = true }: { canManage?: boolean } = {}) =>
   render(
     <TestWrapper store={createMockStore()}>
       <EuiProvider>
-        <WorkflowPageShareModal workflowId="wf 1" canRotate={canRotate} onClose={jest.fn()} />
+        <WorkflowPageShareModal workflowId="wf 1" canManage={canManage} onClose={jest.fn()} />
       </EuiProvider>
     </TestWrapper>
   );
+
+const link = (overrides: Record<string, unknown> = {}) => ({
+  enabled: true,
+  workflowEnabled: true,
+  online: true,
+  serviceAccountId: 'kibana/pages',
+  path: '/api/workflows/pages/wf/old',
+  ...overrides,
+});
 
 const urlField = () => screen.findByTestId('workflowPageShareUrl') as Promise<HTMLInputElement>;
 
 describe('WorkflowPageShareModal', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockHttp.get.mockResolvedValue({ enabled: true, path: '/api/workflows/pages/wf/old' });
+    mockHttp.get.mockResolvedValue(link());
   });
 
   it('shows the absolute page URL on the public origin', async () => {
@@ -52,21 +61,44 @@ describe('WorkflowPageShareModal', () => {
   });
 
   it('warns that the page is offline while the workflow is disabled', async () => {
-    mockHttp.get.mockResolvedValue({ enabled: false, path: '/api/workflows/pages/wf/old' });
+    mockHttp.get.mockResolvedValue(link({ workflowEnabled: false, online: false }));
     renderModal();
 
     expect(await screen.findByText('The page is offline')).toBeInTheDocument();
   });
 
-  it('shows the URL but no rotation to a user without update rights', async () => {
-    renderModal({ canRotate: false });
+  it('warns that the page is off while its switch is off', async () => {
+    mockHttp.get.mockResolvedValue(link({ enabled: false, online: false }));
+    renderModal();
+
+    expect(await screen.findByText('The page is off')).toBeInTheDocument();
+    expect(screen.queryByText('The page is offline')).not.toBeInTheDocument();
+  });
+
+  it('turns the page off with the switch', async () => {
+    mockHttp.post.mockResolvedValue(link({ enabled: false, online: false }));
+    renderModal();
+    await urlField();
+
+    await userEvent.click(screen.getByTestId('workflowPageShareEnabled'));
+
+    expect(mockHttp.post).toHaveBeenCalledWith('/internal/workflows/pages/wf%201/_enabled', {
+      version: '1',
+      body: JSON.stringify({ enabled: false }),
+    });
+    expect(await screen.findByText('The page is off')).toBeInTheDocument();
+  });
+
+  it('shows the URL but no rotation or switch to a user without update rights', async () => {
+    renderModal({ canManage: false });
 
     expect((await urlField()).value).toBe('https://kibana.example.com/api/workflows/pages/wf/old');
     expect(screen.queryByTestId('workflowPageShareRotate')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowPageShareEnabled')).toBeDisabled();
   });
 
   it('asks before rotating, then shows the new URL', async () => {
-    mockHttp.post.mockResolvedValue({ enabled: true, path: '/api/workflows/pages/wf/new' });
+    mockHttp.post.mockResolvedValue(link({ path: '/api/workflows/pages/wf/new' }));
     renderModal();
     await urlField();
 

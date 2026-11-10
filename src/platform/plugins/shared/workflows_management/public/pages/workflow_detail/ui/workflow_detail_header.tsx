@@ -493,7 +493,7 @@ export const WorkflowDetailHeader = React.memo(
         {isPageShareOpen && workflowId && (
           <WorkflowPageShareModal
             workflowId={workflowId}
-            canRotate={canUpdateWorkflow}
+            canManage={canUpdateWorkflow}
             onClose={() => setIsPageShareOpen(false)}
           />
         )}

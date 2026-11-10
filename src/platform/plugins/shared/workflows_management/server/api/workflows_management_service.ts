@@ -495,6 +495,20 @@ export class WorkflowsService {
     return (await this.getPageStore()).getOrCreateSecret({ workflowId, spaceId });
   }
 
+  /** Returns the page switch. A page that does not exist yet starts enabled. */
+  public async isPageEnabled(workflowId: string, spaceId: string): Promise<boolean> {
+    return (await (await this.getPageStore()).isEnabled({ workflowId, spaceId })) ?? true;
+  }
+
+  /** Sets the page switch. Callers authorize first. */
+  public async setPageEnabled(
+    workflowId: string,
+    spaceId: string,
+    enabled: boolean
+  ): Promise<void> {
+    await (await this.getPageStore()).setEnabled({ workflowId, spaceId }, enabled);
+  }
+
   /** Replaces the page URL secret. Callers authorize first. */
   public async rotatePage(workflowId: string, spaceId: string): Promise<string> {
     return (await this.getPageStore()).rotate({ workflowId, spaceId });

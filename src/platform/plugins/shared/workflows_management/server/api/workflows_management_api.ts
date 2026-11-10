@@ -627,6 +627,27 @@ export class WorkflowsManagementApi {
     return this.workflowsService.getPageSecret(id, spaceId);
   }
 
+  /** Returns the page switch. Reading it needs execute access, like the page URL. */
+  public async isPageEnabled(
+    id: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<boolean> {
+    await this.assertWorkflowAccess(id, spaceId, 'execute', request);
+    return this.workflowsService.isPageEnabled(id, spaceId);
+  }
+
+  /** Turns the page on or off. Needs edit access, like rotating the URL. */
+  public async setPageEnabled(
+    id: string,
+    spaceId: string,
+    enabled: boolean,
+    request: KibanaRequest
+  ): Promise<void> {
+    await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+    await this.workflowsService.setPageEnabled(id, spaceId, enabled);
+  }
+
   /** Retires the workflow page URL. Needs edit access, like any change to the workflow. */
   public async rotatePage(id: string, spaceId: string, request: KibanaRequest): Promise<string> {
     await this.assertWorkflowAccess(id, spaceId, 'edit', request);
