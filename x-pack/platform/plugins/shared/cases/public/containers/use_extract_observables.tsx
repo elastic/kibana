@@ -8,6 +8,7 @@
 import { useMutation } from '@kbn/react-query';
 import { MAX_OBSERVABLES_PER_CASE } from '../../common/constants';
 import type { ExtractObservablesResponseUI } from '../../common/ui/types';
+import { useObservablesExtractedEBT } from '../analytics/observables';
 import { extractObservables } from './api';
 import * as i18n from './translations';
 import type { ServerError } from '../types';
@@ -25,6 +26,7 @@ export const useExtractObservables = (
 ) => {
   const { showErrorToast, showSuccessToast, showInfoToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
+  const reportObservablesExtracted = useObservablesExtractedEBT();
 
   return useMutation(() => extractObservables(caseId), {
     mutationKey: casesMutationsKeys.extractObservables,
@@ -47,6 +49,10 @@ export const useExtractObservables = (
           showInfoToast(i18n.NO_NEW_OBSERVABLES_FOUND);
           break;
       }
+      reportObservablesExtracted({
+        status: result.status,
+        newObservablesCount: result.newObservablesCount,
+      });
       onSuccess?.(result);
     },
   });

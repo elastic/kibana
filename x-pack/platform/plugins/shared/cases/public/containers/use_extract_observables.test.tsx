@@ -11,6 +11,7 @@ import type { ExtractObservablesResponseUI } from '../../common/ui/types';
 import { useExtractObservables } from './use_extract_observables';
 import { extractObservables } from './api';
 import { useCasesToast } from '../common/use_cases_toast';
+import { useObservablesExtractedEBT } from '../analytics/observables';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 import { TestProviders } from '../common/mock';
 import { basicCase } from './mock';
@@ -19,6 +20,7 @@ import * as i18n from './translations';
 jest.mock('./api');
 jest.mock('../common/use_cases_toast');
 jest.mock('../components/case_view/use_on_refresh_case_view_page');
+jest.mock('../analytics/observables');
 
 const buildResult = (
   overrides: Partial<ExtractObservablesResponseUI>
@@ -37,6 +39,7 @@ describe('useExtractObservables', () => {
   const showSuccessToast = jest.fn();
   const showInfoToast = jest.fn();
   const refreshCaseViewPage = useRefreshCaseViewPage();
+  const reportObservablesExtracted = jest.fn();
 
   const run = async (onSuccess?: jest.Mock) => {
     const { result } = renderHook(() => useExtractObservables(caseId, { onSuccess }), {
@@ -57,6 +60,7 @@ describe('useExtractObservables', () => {
       showSuccessToast,
       showInfoToast,
     });
+    (useObservablesExtractedEBT as jest.Mock).mockReturnValue(reportObservablesExtracted);
   });
 
   it('shows the count of new observables and refreshes the case when observables were extracted', async () => {
@@ -133,5 +137,43 @@ describe('useExtractObservables', () => {
     );
     expect(onSuccess).not.toHaveBeenCalled();
     expect(refreshCaseViewPage).not.toHaveBeenCalled();
+  });
+
+  it('reports the event once with the status and the count on success', async () => {
+    (extractObservables as jest.Mock).mockResolvedValue(buildResult({}));
+
+    await run();
+
+    await waitFor(() =>
+      expect(reportObservablesExtracted).toHaveBeenCalledWith({
+        status: 'extracted',
+        newObservablesCount: 2,
+      })
+    );
+    expect(reportObservablesExtracted).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports the event for an outcome without new observables', async () => {
+    (extractObservables as jest.Mock).mockResolvedValue(
+      buildResult({ status: 'no_new_observables', newObservablesCount: 0 })
+    );
+
+    await run();
+
+    await waitFor(() =>
+      expect(reportObservablesExtracted).toHaveBeenCalledWith({
+        status: 'no_new_observables',
+        newObservablesCount: 0,
+      })
+    );
+  });
+
+  it('does not report the event on failure', async () => {
+    (extractObservables as jest.Mock).mockRejectedValue(new Error('Failed to extract'));
+
+    await run();
+
+    await waitFor(() => expect(showErrorToast).toHaveBeenCalled());
+    expect(reportObservablesExtracted).not.toHaveBeenCalled();
   });
 });
