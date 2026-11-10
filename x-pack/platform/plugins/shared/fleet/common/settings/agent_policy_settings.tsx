@@ -118,7 +118,7 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
           'Reserve disk space equal to the size of the new agent package before upgrading. Overrides the setting of the agent binary source.',
       }),
     schema: z.boolean().default(true),
-    example_value: false,
+    example_value: true,
     checkboxLabel: i18n.translate(
       'xpack.fleet.settings.agentPolicyAdvanced.reserveDiskspaceCheckboxLabel',
       { defaultMessage: 'Enable' }
