@@ -23,6 +23,8 @@ const CONTAINS_WHITESPACE_REGEX = /\s/;
 const ONLY_WHITESPACE_REGEX = /^\s+$/;
 // Checks whether text starts with a word character.
 const STARTS_WITH_WORD_CHAR_REGEX = /^\w/;
+// Matches a semicolon preceded only by optional leading whitespace.
+const LEADING_SEMICOLON_REGEX = /^\s*;/;
 // Finds the first non-whitespace character.
 const NON_WHITESPACE_REGEX = /\S/;
 // Matches an opening parenthesis followed only by optional trailing whitespace.
@@ -62,6 +64,10 @@ export function isOnlyWhitespace(text: string): boolean {
 
 export function startsWithWordChar(text: string): boolean {
   return STARTS_WITH_WORD_CHAR_REGEX.test(text);
+}
+
+export function startsWithSemicolon(text: string): boolean {
+  return LEADING_SEMICOLON_REGEX.test(text);
 }
 
 export function endsWithOpenParen(text: string): boolean {

@@ -9,6 +9,7 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
   getInvestigationAgentType,
@@ -53,7 +54,7 @@ describe('Nightshift investigation agent type', () => {
     );
   });
 
-  it('carries a standalone sandbox prompt and no Elastic tools', async () => {
+  it('carries a standalone sandbox prompt and no Elastic data tools beyond event search', async () => {
     const base = await baseFor(
       getInvestigationAgentType({ sandboxEnabled: true, wikiEnabled: true })
     );
@@ -67,6 +68,7 @@ describe('Nightshift investigation agent type', () => {
     expect(base.tools?.[0]?.tool_ids).toEqual([
       ...SANDBOX_TOOL_IDS,
       TIME_CONVERTER_TOOL_ID,
+      platformSignificantEventsTools.searchEvent,
       SLACK_READ_TOOL_ID,
     ]);
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
@@ -121,6 +123,42 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).not.toContain('{{decision_trees_section}}');
   });
 
+  it('keeps hydrating knowledge but drops the optimize hook when learning is disabled', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        wikiEnabled: true,
+        memoryEnabled: true,
+        decisionTreesEnabled: true,
+        learningEnabled: false,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
+    expect(base.post_execution_workflow_ids).toBeUndefined();
+    expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
+  });
+
+  it('forwards disabled learning through registration', async () => {
+    const agentBuilder = agentBuilderMocks.createSetup();
+
+    registerInvestigationAgentType(agentBuilder, {
+      sandboxEnabled: true,
+      wikiEnabled: true,
+      memoryEnabled: true,
+      learningEnabled: false,
+    });
+
+    const [[type]] = jest.mocked(agentBuilder.agents.registerType).mock.calls;
+    const base = await baseFor(type);
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
+    expect(base.post_execution_workflow_ids).toBeUndefined();
+  });
+
   it('drops both wiki workflows when wiki is disabled', async () => {
     const base = await baseFor(
       getInvestigationAgentType({ sandboxEnabled: true, wikiEnabled: false })
@@ -143,7 +181,11 @@ describe('Nightshift investigation agent type', () => {
     expect(base.post_execution_workflow_ids).toEqual([
       'system-nightshift-agent-optimize-bound-default',
     ]);
-    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID, SLACK_READ_TOOL_ID]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([
+      TIME_CONVERTER_TOOL_ID,
+      platformSignificantEventsTools.searchEvent,
+      SLACK_READ_TOOL_ID,
+    ]);
   });
 
   it('adds inherited connectors to the allow-list when a resolver is given', async () => {
@@ -163,7 +205,11 @@ describe('Nightshift investigation agent type', () => {
       getInvestigationAgentType({ sandboxEnabled: false, wikiEnabled: false })
     );
 
-    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID, SLACK_READ_TOOL_ID]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([
+      TIME_CONVERTER_TOOL_ID,
+      platformSignificantEventsTools.searchEvent,
+      SLACK_READ_TOOL_ID,
+    ]);
   });
 
   it('instructs the agent to answer in its final message and not to record findings', async () => {
