@@ -29,16 +29,21 @@ const mockDataView = {
   getFieldByName: (name: string) => ({ name, type: 'string' } as unknown as DataViewField),
 } as unknown as DataView;
 
+// Mutable so a test can change a search input between renders and assert the stale,
+// destroyed dashboard API no longer receives the resulting synchronization calls.
+const defaultMockQuery = {
+  environment: 'ENVIRONMENT_ALL',
+  kuery: '',
+  rangeFrom: 'now-15m',
+  rangeTo: 'now',
+  dashboardId: 'dashboard-1',
+};
+let mockQuery = { ...defaultMockQuery };
+
 jest.mock('../../../hooks/use_apm_params', () => ({
   useAnyOfApmParams: () => ({
     path: { serviceName: 'test-service' },
-    query: {
-      environment: 'ENVIRONMENT_ALL',
-      kuery: '',
-      rangeFrom: 'now-15m',
-      rangeTo: 'now',
-      dashboardId: 'dashboard-1',
-    },
+    query: mockQuery,
   }),
 }));
 
@@ -88,6 +93,7 @@ describe('ServiceDashboards', () => {
   beforeEach(() => {
     capturedOnApiAvailable = undefined;
     capturedOnApiCleanup = undefined;
+    mockQuery = { ...defaultMockQuery };
   });
 
   afterEach(() => {
@@ -102,7 +108,7 @@ describe('ServiceDashboards', () => {
         setTimeRange: jest.fn(),
       };
 
-      render(<ServiceDashboards />);
+      const { rerender } = render(<ServiceDashboards />);
 
       expect(capturedOnApiAvailable).toBeDefined();
       expect(capturedOnApiCleanup).toBeDefined();
@@ -121,6 +127,14 @@ describe('ServiceDashboards', () => {
       // the stale reference so later effects cannot operate on a destroyed dashboard.
       await act(async () => {
         capturedOnApiCleanup!();
+      });
+
+      // Change a search input and rerender so the synchronization effect re-runs. If the stale
+      // reference had not been cleared, the destroyed API would receive these calls; the `!dashboard`
+      // guard must short-circuit instead. This is what distinguishes the fix from a no-op cleanup.
+      await act(async () => {
+        mockQuery = { ...defaultMockQuery, kuery: 'transaction.name: "GET /api"' };
+        rerender(<ServiceDashboards />);
       });
 
       expect(dashboardApi.setFilters).not.toHaveBeenCalled();
