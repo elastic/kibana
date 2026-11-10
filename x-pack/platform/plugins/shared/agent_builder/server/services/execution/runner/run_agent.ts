@@ -27,7 +27,7 @@ import {
   createSubAgentExecutor,
 } from './utils';
 import { createPluginsService } from './utils/plugins';
-import { createConnectorSkillsService } from './utils/connector_skills';
+import { createConnectorSkillsService } from './utils/connector_skills_service';
 import type { RunnerManager } from './runner';
 
 export const createAgentHandlerContext = async <TParams = Record<string, unknown>>({

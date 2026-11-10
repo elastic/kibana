@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { createConnectorSkillsService } from './connector_skills';
+import { createConnectorSkillsService } from './connector_skills_service';
 
 describe('createConnectorSkillsService', () => {
   const request = httpServerMock.createKibanaRequest();
