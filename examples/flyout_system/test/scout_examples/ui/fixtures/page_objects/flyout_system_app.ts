@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { expect } from '@kbn/scout/ui';
 import type { Locator, ScoutPage } from '@kbn/scout';
 
 /** Which way the flyout was opened: as a component, or through `core.overlays.openFlyoutTemplate`. */
@@ -288,6 +289,25 @@ export class FlyoutSystemApp {
     const header = this.header(form, session);
     await header.hover();
     await this.page.mouse.wheel(0, deltaY);
+  }
+
+  /**
+   * Resolves once the body has scrolled past the collapse threshold and the header's scheduled
+   * collapse evaluation has run, so a "still expanded" assertion cannot pass ahead of it.
+   */
+  async waitForCollapseEvaluation(form: FlyoutForm, session: string) {
+    const scroller = this.scrollContainer(form, session);
+    await expect
+      .poll(async () => scroller.evaluate((node) => node.scrollTop), {
+        message: 'the body should have scrolled past the collapse threshold',
+      })
+      .toBeGreaterThanOrEqual(16);
+    await this.page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        )
+    );
   }
 
   // Push flyouts section.
