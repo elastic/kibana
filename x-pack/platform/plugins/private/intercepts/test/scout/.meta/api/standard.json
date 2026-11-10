@@ -1,0 +1,88 @@
+{
+  "sha1": "12022c0ad6dafcf573593041495e1975bab09391",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "4396a82073ee9b0-047ec91879a4c12",
+      "title": "Intercept User Interaction APIs returns an empty object when no interaction exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/intercepts/test/scout/api/tests/interaction_apis.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "4396a82073ee9b0-32cd5e568b1fcfc",
+      "title": "Intercept User Interaction APIs records and returns the last interaction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/intercepts/test/scout/api/tests/interaction_apis.spec.ts",
+        "line": 38,
+        "column": 74
+      }
+    },
+    {
+      "id": "5f0cc5bea9f776c-2df4fbb964ab8b9",
+      "title": "Intercept Trigger APIs returns 204 when no trigger info exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/intercepts/test/scout/api/tests/trigger_apis.spec.ts",
+        "line": 20,
+        "column": 6
+      }
+    },
+    {
+      "id": "5f0cc5bea9f776c-7ba29998e2367a6",
+      "title": "Intercept Trigger APIs returns trigger info when it exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/intercepts/test/scout/api/tests/trigger_apis.spec.ts",
+        "line": 31,
+        "column": 16
+      }
+    }
+  ]
+}

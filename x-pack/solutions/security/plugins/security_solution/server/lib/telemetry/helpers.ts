@@ -14,6 +14,7 @@ import { set } from '@kbn/safer-lodash-set';
 import type { Logger, LogMeta } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { copyAllowlistedFields, filterList } from './filterlists';
+import type { AllowlistFields } from './filterlists/types';
 import type { PolicyConfig, PolicyData, SafeEndpointEvent } from '../../../common/endpoint/types';
 import type { ITelemetryReceiver } from './receiver';
 import type {
@@ -28,6 +29,7 @@ import type {
   PrebuiltRuleCustomizations,
   ResponseActionRules,
   ResponseActionsRuleTelemetryTemplate,
+  SearchTypes,
   TelemetryEvent,
   TimeFrame,
   TimelineResult,
@@ -390,6 +392,36 @@ export const processK8sUsernames = (clusterId: string, event: TelemetryEvent): T
   }
 
   return event;
+};
+
+interface InfluencerEntry {
+  influencer_field_name: string;
+  influencer_field_values: SearchTypes[];
+}
+
+const isInfluencerEntry = (value: unknown): value is InfluencerEntry =>
+  isPlainObject(value) && typeof (value as InfluencerEntry).influencer_field_name === 'string';
+
+/**
+ * Builds a copy of an ML alert's `influencers` array, keeping only the entries whose
+ * `influencer_field_name` is in the allowlist. The remaining entries are dropped entirely; retained entries keep
+ * their `influencer_field_values` as-is. Returns undefined when there are no influencers to process.
+ */
+export const buildSanitizedInfluencers = (
+  influencers: SearchTypes,
+  allowlist: AllowlistFields
+): InfluencerEntry[] | undefined => {
+  if (!Array.isArray(influencers) || influencers.length === 0) {
+    return undefined;
+  }
+
+  return influencers
+    .filter(isInfluencerEntry)
+    .filter((entry) => allowlist[entry.influencer_field_name] === true)
+    .map((entry) => ({
+      influencer_field_name: entry.influencer_field_name,
+      influencer_field_values: entry.influencer_field_values,
+    }));
 };
 
 export const processDetectionRuleCustomizations = (

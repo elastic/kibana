@@ -61,10 +61,10 @@ describe('LinkContent', () => {
     }),
   };
 
+  // eslint-disable-next-line prefer-const
   let urlService: BrowserUrlService;
 
   // @ts-expect-error there is a type error because we override the shortUrls implementation
-  // eslint-disable-next-line prefer-const
   ({ service: urlService } = urlServiceTestSetup({
     shortUrls: ({ locators }) =>
       new BrowserShortUrlClientFactory({

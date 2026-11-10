@@ -126,7 +126,7 @@ steps:
           headers: readerHeaders,
           body: { name: '', size: 10 },
         })
-      ).toHaveStatusCode(403);
+      ).toHaveStatusCode(404);
       expect(
         await apiClient.post(suggestPath, {
           headers: ownerHeaders,
@@ -140,6 +140,58 @@ steps:
           body: { inputs: {} },
         })
       ).toHaveStatusCode(404);
+      const unknownId = 'does-not-exist';
+      const unknownPath = `s/${spaceId}/api/workflows/workflow/${unknownId}`;
+      const unknownAccessPath = `s/${spaceId}/internal/workflows/${unknownId}/access_control`;
+      const writes = [
+        {
+          hiddenPath: workflowPath,
+          unknownPath,
+          send: (path: string) => apiClient.put(path, { headers: readerHeaders, body: { yaml } }),
+        },
+        {
+          hiddenPath: workflowPath,
+          unknownPath,
+          send: (path: string) => apiClient.delete(path, { headers: readerHeaders }),
+        },
+        {
+          hiddenPath: accessPath,
+          unknownPath: unknownAccessPath,
+          send: (path: string) =>
+            apiClient.put(path, {
+              headers: readerHeaders,
+              body: { access_mode: 'public', entries: [] },
+            }),
+        },
+      ];
+      for (const { hiddenPath, unknownPath: missingPath, send } of writes) {
+        const hidden = await send(hiddenPath);
+        const unknown = await send(missingPath);
+        expect(hidden).toHaveStatusCode(404);
+        expect(unknown).toHaveStatusCode(404);
+        expect(hidden.body.message.replace(workflowId, '<id>')).toBe(
+          unknown.body.message.replace(unknownId, '<id>')
+        );
+      }
+      const bulkDelete = await apiClient.delete(`s/${spaceId}/api/workflows`, {
+        headers: readerHeaders,
+        body: { ids: [workflowId, unknownId] },
+      });
+      expect(bulkDelete).toHaveStatusCode(200);
+      expect(bulkDelete.body).toStrictEqual({ total: 2, deleted: 0, failures: [] });
+      expect(await apiClient.get(workflowPath, { headers: ownerHeaders })).toHaveStatusCode(200);
+      const bulkCreate = (query: string) =>
+        apiClient.post(`s/${spaceId}/api/workflows${query}`, {
+          headers: readerHeaders,
+          body: { workflows: [{ id: workflowId, yaml }] },
+        });
+      const overwritten = await bulkCreate('?overwrite=true');
+      const duplicated = await bulkCreate('');
+      expect(overwritten).toHaveStatusCode(200);
+      expect(duplicated).toHaveStatusCode(200);
+      expect(overwritten.body.created).toStrictEqual([]);
+      expect(overwritten.body.failed).toHaveLength(1);
+      expect(overwritten.body.failed[0].error).toBe(duplicated.body.failed[0].error);
       const hiddenList = await apiClient.get(`s/${spaceId}/api/workflows`, {
         headers: readerHeaders,
       });
@@ -691,7 +743,7 @@ steps:
               `s/${spaceId}/api/workflows/executions/${executionId}/steps`,
               { headers: callerHeaders }
             );
-            expect(steps).toHaveStatusCode(allowed ? 200 : 403);
+            expect(steps).toHaveStatusCode(allowed ? 200 : 404);
             expect(steps.body.results).toStrictEqual(
               allowed
                 ? [expect.objectContaining({ stepId: 'message', status: 'completed' })]
@@ -985,7 +1037,7 @@ steps:
           .toBeGreaterThan(0);
         expect(
           await apiClient.get(`${workflowPath}/executions/steps`, { headers: readerHeaders })
-        ).toHaveStatusCode(403);
+        ).toHaveStatusCode(404);
         const warning = await apiClient.delete(`${workflowPath}?force=true`, {
           headers: ownerHeaders,
         });
@@ -1008,7 +1060,7 @@ steps:
 
   for (const { mode, shared, readerStatus } of [
     { mode: 'public', shared: false, readerStatus: 200 },
-    { mode: 'private', shared: false, readerStatus: 403 },
+    { mode: 'private', shared: false, readerStatus: 404 },
     { mode: 'private', shared: true, readerStatus: 200 },
   ] as const) {
     apiTest(

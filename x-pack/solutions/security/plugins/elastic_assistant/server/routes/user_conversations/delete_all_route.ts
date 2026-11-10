@@ -49,8 +49,10 @@ export const deleteAllConversationsRoute = (router: ElasticAssistantPluginRouter
             return checkResponse.response;
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
+          const authenticatedUser = checkResponse.currentUser;
 
           const result = await dataClient?.deleteAllConversations({
+            authenticatedUser,
             excludedIds: request.body?.excludedIds,
           });
 

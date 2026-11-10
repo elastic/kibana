@@ -86,12 +86,12 @@ const ruleCreatedEvent: RuleCreationTelemetryEvent = {
       items: {
         type: 'keyword',
         _meta: {
-          description: 'MITRE ATT&CK technique ID',
+          description: 'MITRE technique ID',
           optional: false,
         },
       },
       _meta: {
-        description: 'MITRE ATT&CK technique IDs included in the rule',
+        description: 'MITRE technique IDs included in the rule',
         optional: false,
       },
     },

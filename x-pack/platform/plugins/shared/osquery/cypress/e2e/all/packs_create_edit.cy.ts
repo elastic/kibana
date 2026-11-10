@@ -20,7 +20,12 @@ import {
   formFieldInputSelector,
 } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
-import { checkResults, deleteAndConfirm, inputQuery } from '../../tasks/live_query';
+import {
+  checkResults,
+  deleteAndConfirm,
+  inputQuery,
+  openResultsViewInMenu,
+} from '../../tasks/live_query';
 import {
   changePackActiveStatus,
   preparePack,
@@ -394,7 +399,8 @@ describe.skip(
                   lensUrl = url;
                 });
             });
-            cy.get(`[aria-label="View in Lens"]`).eq(0).click();
+            openResultsViewInMenu();
+            cy.getBySel('query-details-view-in-lens').click();
             cy.window()
               .its('open')
               .then(() => {
@@ -448,8 +454,8 @@ describe.skip(
           .then((pathname) => {
             const scheduleId = pathname.split('/history/scheduled/')[1].split('/')[0];
 
-            cy.get(`[aria-label="View in Discover"]`)
-              .eq(0)
+            openResultsViewInMenu();
+            cy.getBySel('query-details-view-in-discover')
               .should('have.attr', 'href')
               .then(($href) => {
                 expect($href).to.include(encodeURIComponent(scheduleId));

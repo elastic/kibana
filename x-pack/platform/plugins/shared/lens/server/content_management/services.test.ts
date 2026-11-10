@@ -13,7 +13,7 @@ import {
 } from '@kbn/lens-common/content_management/constants';
 
 import { servicesDefinitions } from './services';
-import type { LensGetOut, LensSavedObject } from './latest';
+import type { LensGetOut as LensGetOutV2, LensSavedObject as LensSavedObjectV2 } from './v2';
 import type { LensGetOut as LensGetOutV3, LensSavedObject as LensSavedObjectV3 } from './v3';
 
 const getAttributes = <Version extends typeof LENS_ITEM_VERSION_V2 | typeof LENS_ITEM_VERSION_V3>({
@@ -66,7 +66,7 @@ describe('Lens content management services', () => {
 
   describe('when reading v3 items on v2', () => {
     it('get returns a valid v2 item with the v3 default fill pinned', () => {
-      const { value, error } = transforms.get.out.result.down<LensGetOutV3, LensGetOut>(
+      const { value, error } = transforms.get.out.result.down<LensGetOutV3, LensGetOutV2>(
         {
           item: getSavedObject(getAttributes({ version: LENS_ITEM_VERSION_V3 })),
           meta: { outcome: 'exactMatch' },
@@ -84,7 +84,7 @@ describe('Lens content management services', () => {
     it('search returns a valid v2 item with the v3 default fill pinned', () => {
       const { value, error } = transforms.search.out.result.down<
         LensSavedObjectV3,
-        LensSavedObject
+        LensSavedObjectV2
       >(getSavedObject(getAttributes({ version: LENS_ITEM_VERSION_V3 })), LENS_ITEM_VERSION_V3, {
         validate: false,
       });

@@ -8,7 +8,7 @@
 /**
  * `system-nightshift-agent-optimize` executed for real.
  *
- * This workflow carries two very different budgets: the Cortex and Memory optimizers, which
+ * This workflow carries two very different budgets: the Wiki and Memory optimizers, which
  * Agent Builder runs as a non-blocking post-round hook, and a decision-tree reinforcement agent
  * that runs for up to 900s in its own conversation. Merging them only works if the first two
  * really do run together and really do finish before the third starts, so the ordering, the skip
@@ -19,12 +19,13 @@
 import { ExecutionStatus } from '@kbn/workflows';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../server/agents/investigation';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../server/agents/decision_tree_reinforcement';
+import { SANDBOX_VIEW_FILE_TOOL_ID } from '../server/tools/sandbox_bash/view_file_tool';
 import {
   createNightshiftWorkflowFixture,
   memoryOptimizeSummary,
   prepareReinforcementTurn,
   resolveNightshiftModelForRequest,
-  runCortexOptimize,
+  runWikiOptimize,
   runMemoryOptimize,
   type NightshiftWorkflowFixture,
 } from './nightshift_workflow_fixture';
@@ -52,18 +53,18 @@ const ELIGIBLE_ROUND_INPUTS = {
 
 describe('agent optimize workflow, an eligible investigator round', () => {
   let fixture: NightshiftWorkflowFixture;
-  let memoryRanWhileCortexWasStillGoing: boolean;
+  let memoryRanWhileWikiWasStillGoing: boolean;
 
   beforeAll(async () => {
     fixture = createNightshiftWorkflowFixture();
-    memoryRanWhileCortexWasStillGoing = false;
-    let cortexFinished = false;
-    jest.mocked(runCortexOptimize).mockImplementation(async () => {
+    memoryRanWhileWikiWasStillGoing = false;
+    let wikiFinished = false;
+    jest.mocked(runWikiOptimize).mockImplementation(async () => {
       await new Promise((resolve) => setTimeout(resolve, 25));
-      cortexFinished = true;
+      wikiFinished = true;
     });
     jest.mocked(runMemoryOptimize).mockImplementation(async () => {
-      memoryRanWhileCortexWasStillGoing = cortexFinished === false;
+      memoryRanWhileWikiWasStillGoing = wikiFinished === false;
       return memoryOptimizeSummary;
     });
 
@@ -84,17 +85,17 @@ describe('agent optimize workflow, an eligible investigator round', () => {
   // `mode: settled` starts them together; running them one after the other would double the
   // latency of a hook the investigation is already waiting on.
   it('runs the two optimizers concurrently', () => {
-    expect(memoryRanWhileCortexWasStillGoing).toBe(true);
+    expect(memoryRanWhileWikiWasStillGoing).toBe(true);
   });
 
   // A third branch would inherit the 120s `branch-timeout` and kill every long reinforcement run,
   // so the tail has to come after the parallel has finished, not inside it.
   it('runs the reinforcement tail only after both optimizers finished', () => {
-    const cortexEnd = jest.mocked(runCortexOptimize).mock.invocationCallOrder.at(-1)!;
+    const wikiEnd = jest.mocked(runWikiOptimize).mock.invocationCallOrder.at(-1)!;
     const memoryEnd = jest.mocked(runMemoryOptimize).mock.invocationCallOrder.at(-1)!;
     const prepareStart = jest.mocked(prepareReinforcementTurn).mock.invocationCallOrder[0];
 
-    expect(Math.max(cortexEnd, memoryEnd)).toBeLessThan(prepareStart);
+    expect(Math.max(wikiEnd, memoryEnd)).toBeLessThan(prepareStart);
   });
 
   it('runs prepare, resolve, ensure and the agent in that order', () => {
@@ -114,7 +115,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
   it('installs the reinforcement agent before running it', () => {
     expect(fixture.agentBuilder.ensure).toHaveBeenCalledWith(
       expect.objectContaining({
-        spaceId: 'fake_space_id',
+        spaceId: 'default',
         agent: expect.objectContaining({
           id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
         }),
@@ -157,6 +158,15 @@ describe('agent optimize workflow, an eligible investigator round', () => {
     ]);
   });
 
+  // Nothing of the conversation is saved yet, so this round is the investigation's first.
+  it('prepares the round as a first round', () => {
+    expect(jest.mocked(prepareReinforcementTurn).mock.calls[0][0]).toMatchObject({
+      turnKind: 'initial_investigation',
+      investigationId: ELIGIBLE_ROUND_INPUTS.conversation_id,
+      earlierAccessedTreeIds: [],
+    });
+  });
+
   it('withholds the learning tools on an initial investigation', () => {
     expect(fixture.agentRuns[0].agentParams.configurationOverrides).toBeUndefined();
   });
@@ -181,7 +191,7 @@ describe('agent optimize workflow, an eligible investigator round', () => {
   // `${{ }}` keeps an array; Liquid `{{ }}` would stringify it to "[object Object]" and the
   // bounded Zod preprocess would fall back to [], so reinforcement would re-read every tree.
   it('passes the round tool calls through as an array', () => {
-    for (const call of [runCortexOptimize, runMemoryOptimize, prepareReinforcementTurn]) {
+    for (const call of [runWikiOptimize, runMemoryOptimize, prepareReinforcementTurn]) {
       expect(jest.mocked(call).mock.calls[0][0]).toMatchObject({ toolCalls: TOOL_CALLS });
     }
   });
@@ -200,9 +210,53 @@ describe('agent optimize workflow, an eligible investigator round', () => {
   });
 });
 
+describe('agent optimize workflow, a follow-up round', () => {
+  let fixture: NightshiftWorkflowFixture;
+
+  beforeAll(async () => {
+    fixture = createNightshiftWorkflowFixture();
+    fixture.setSavedRounds([
+      {
+        id: 'round-0',
+        steps: [
+          {
+            type: 'tool_call',
+            tool_call_id: 'read-tree',
+            tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
+            params: { file_path: '/workspace/decision-trees/decision_tree_checkout-latency.md' },
+            results: [],
+          },
+        ],
+      },
+    ]);
+    jest.mocked(prepareReinforcementTurn).mockResolvedValue({
+      skipped: false,
+      message: 'reinforcement turn prompt',
+      treeCount: 1,
+      turnKind: 'feedback_reinforcement',
+      openedTreeIds: [],
+    });
+
+    await fixture.runOptimize(ELIGIBLE_ROUND_INPUTS);
+  });
+
+  it('prepares it on the trees the earlier rounds opened', () => {
+    expect(jest.mocked(prepareReinforcementTurn).mock.calls[0][0]).toMatchObject({
+      turnKind: 'feedback_reinforcement',
+      investigationId: ELIGIBLE_ROUND_INPUTS.conversation_id,
+      earlierAccessedTreeIds: ['symptom:checkout-latency'],
+    });
+  });
+
+  it('offers the learning tools', () => {
+    expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
+    expect(fixture.agentRuns[0].agentParams.configurationOverrides).toBeDefined();
+  });
+});
+
 describe('agent optimize workflow, rounds that must not reinforce', () => {
   // `prepare_turn` is the eligibility gate: it answers `skipped`, and both agent steps read that
-  // answer. The workflow still installs with Cortex or Memory alone, so this runs on installs that
+  // answer. The workflow still installs with Wiki or Memory alone, so this runs on installs that
   // have no decision trees at all.
   it.each([
     ['the decision-tree feature is off', { decisionTreesEnabled: false }, ELIGIBLE_ROUND_INPUTS],
@@ -210,6 +264,11 @@ describe('agent optimize workflow, rounds that must not reinforce', () => {
       'the round came from another agent',
       { decisionTreesEnabled: true },
       { ...ELIGIBLE_ROUND_INPUTS, agent_id: 'significant-events.investigation' },
+    ],
+    [
+      'the round has no id to place it in its conversation',
+      { decisionTreesEnabled: true },
+      { ...ELIGIBLE_ROUND_INPUTS, round_id: undefined },
     ],
   ])('skips the whole reinforcement tail when %s', async (_case, options, inputs) => {
     const fixture = createNightshiftWorkflowFixture(options);
@@ -225,12 +284,12 @@ describe('agent optimize workflow, rounds that must not reinforce', () => {
   });
 
   // The optimizers are independent of reinforcement: a feature-off install still writes knowledge back.
-  it('still optimizes cortex and memory when reinforcement is skipped', async () => {
+  it('still optimizes wiki and memory when reinforcement is skipped', async () => {
     const fixture = createNightshiftWorkflowFixture({ decisionTreesEnabled: false });
 
     await fixture.runOptimize(ELIGIBLE_ROUND_INPUTS);
 
-    expect(runCortexOptimize).toHaveBeenCalled();
+    expect(runWikiOptimize).toHaveBeenCalled();
     expect(runMemoryOptimize).toHaveBeenCalled();
   });
 });
@@ -251,14 +310,14 @@ describe('agent optimize workflow, a reinforcement that fails', () => {
   });
 
   // The agent runs in its own conversation, so a failed reinforcement leaves the round's
-  // Cortex and Memory updates in place rather than rolling them back with it.
-  it('keeps the cortex and memory optimizer results', async () => {
+  // Wiki and Memory updates in place rather than rolling them back with it.
+  it('keeps the wiki and memory optimizer results', async () => {
     const fixture = createNightshiftWorkflowFixture();
     fixture.failAgentRun(new Error('reinforcement agent crashed'));
 
     await fixture.runOptimize(ELIGIBLE_ROUND_INPUTS);
 
-    expect(fixture.stepOutput<{ status: string }>('optimize_cortex')).toEqual({ status: 'ok' });
+    expect(fixture.stepOutput<{ status: string }>('optimize_wiki')).toEqual({ status: 'ok' });
     expect(fixture.stepOutput<{ status: string }>('optimize_memory')).toEqual({ status: 'ok' });
   });
 });
@@ -268,11 +327,11 @@ describe('agent optimize workflow, one optimizer failing', () => {
   // still runs, and the failure stays visible in the execution rather than being flattened away.
   it('still runs the other optimizer and records the failed one', async () => {
     const fixture = createNightshiftWorkflowFixture();
-    jest.mocked(runCortexOptimize).mockRejectedValue(new Error('cortex optimize failed'));
+    jest.mocked(runWikiOptimize).mockRejectedValue(new Error('wiki optimize failed'));
 
     await fixture.runOptimize(ELIGIBLE_ROUND_INPUTS);
 
-    expect(fixture.stepExecutions('optimize_cortex')[0]?.status).toBe(ExecutionStatus.FAILED);
+    expect(fixture.stepExecutions('optimize_wiki')[0]?.status).toBe(ExecutionStatus.FAILED);
     expect(fixture.stepExecutions('optimize_memory')[0]?.status).toBe(ExecutionStatus.COMPLETED);
     expect(fixture.stepOutput<{ status: string }>('optimize_memory')).toEqual({ status: 'ok' });
     expect(fixture.executionStatus()).toBe(ExecutionStatus.COMPLETED);
@@ -280,7 +339,7 @@ describe('agent optimize workflow, one optimizer failing', () => {
 
   it('reports the failed branch in the parallel aggregate', async () => {
     const fixture = createNightshiftWorkflowFixture();
-    jest.mocked(runCortexOptimize).mockRejectedValue(new Error('cortex optimize failed'));
+    jest.mocked(runWikiOptimize).mockRejectedValue(new Error('wiki optimize failed'));
 
     await fixture.runOptimize(ELIGIBLE_ROUND_INPUTS);
 
@@ -295,12 +354,12 @@ describe('agent optimize workflow, one optimizer failing', () => {
   // `branch-timeout` ends it — which must still leave the sibling optimizer's result readable.
   it('keeps the sibling optimizer result when branch-timeout kills the other', async () => {
     const fixture = createNightshiftWorkflowFixture();
-    fixture.stubNeverEndingWriter('nightshift.cortexOptimize');
+    fixture.stubNeverEndingWriter('nightshift.wikiOptimize');
 
     await fixture.runOptimize(ELIGIBLE_ROUND_INPUTS);
     await fixture.driveToTerminal();
 
-    expect(fixture.stepExecutions('optimize_cortex')[0]?.status).toBe(ExecutionStatus.TIMED_OUT);
+    expect(fixture.stepExecutions('optimize_wiki')[0]?.status).toBe(ExecutionStatus.TIMED_OUT);
     expect(fixture.stepOutput<{ status: string }>('optimize_memory')).toEqual({ status: 'ok' });
     // The reinforcement tail still runs: a timed-out optimizer must not cancel the round's
     // decision-tree work.

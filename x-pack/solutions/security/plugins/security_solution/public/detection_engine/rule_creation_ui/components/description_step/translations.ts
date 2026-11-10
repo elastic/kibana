@@ -207,12 +207,27 @@ export const ALERT_SUPPRESSION_LABEL = i18n.translate(
   }
 );
 
-export const UNSUPPORTED_MITRE_ID_WARNING = (id: string) =>
+export const UNSUPPORTED_MITRE_ID_WARNING = (id: string, framework: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.ruleDescription.unsupportedMitreIdWarning',
     {
-      values: { id },
+      values: { id, framework },
       defaultMessage:
-        '"{id}" is not in the currently supported MITRE ATT&CK\u00AE version. Edit the rule to update its mappings.',
+        '"{id}" is not in the currently supported {framework} version. Edit the rule to update its mappings.',
     }
   );
+
+export const UNKNOWN_FRAMEWORK_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.unknownThreatFrameworkLabel',
+  {
+    defaultMessage: 'Unknown framework',
+  }
+);
+
+export const UNKNOWN_FRAMEWORK_WARNING = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.unknownThreatFrameworkWarning',
+  {
+    defaultMessage:
+      'This threat framework is not recognized. Its mappings are shown as saved on the rule.',
+  }
+);

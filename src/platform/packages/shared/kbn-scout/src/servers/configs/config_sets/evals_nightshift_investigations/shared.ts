@@ -36,6 +36,29 @@ const withSafeTracing = (tracing: ScoutServerConfig): ScoutServerConfig => {
   };
 };
 
+/**
+ * The suite's knowledge switches, `NIGHTSHIFT_KNOWLEDGE` as validated by its scout hook. Unset keeps
+ * every knowledge system off. Otherwise each listed system is on, and learning is off so every
+ * example reads the knowledge the eval restored rather than what earlier examples wrote.
+ */
+const knowledgeArgs = (): string[] => {
+  const selected = new Set((process.env.NIGHTSHIFT_KNOWLEDGE ?? '').split(',').filter(Boolean));
+  if (selected.size === 0) {
+    return [
+      '--xpack.nightshift_investigations.wiki.enabled=false',
+      '--xpack.nightshift_investigations.memory.enabled=false',
+    ];
+  }
+  const decisionTrees = selected.has('decision-trees');
+  return [
+    // Decision trees read the Wiki investigator context, so they need the Wiki runtime.
+    `--xpack.nightshift_investigations.wiki.enabled=${selected.has('wiki') || decisionTrees}`,
+    `--xpack.nightshift_investigations.memory.enabled=${selected.has('memory')}`,
+    `--xpack.nightshift_investigations.decision_trees.enabled=${decisionTrees}`,
+    '--xpack.nightshift_investigations.learning.enabled=false',
+  ];
+};
+
 const createInvestigationConfig = (
   safeTracing: ScoutServerConfig,
   sandboxKibanaConfig: string
@@ -44,10 +67,11 @@ const createInvestigationConfig = (
     throw new Error(`SANDBOX_KIBANA_CONFIG references a missing file: ${sandboxKibanaConfig}`);
   }
 
-  const telemetryConfig = process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
-  if (telemetryConfig && !existsSync(telemetryConfig)) {
+  // The suite's connector set: preconfigured connectors the eval saves on the investigator.
+  const connectorsConfig = process.env.NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG;
+  if (connectorsConfig && !existsSync(connectorsConfig)) {
     throw new Error(
-      `NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG references a missing file: ${telemetryConfig}`
+      `NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG references a missing file: ${connectorsConfig}`
     );
   }
 
@@ -60,13 +84,19 @@ const createInvestigationConfig = (
         // Allow sixteen investigation workflows plus five background tasks.
         '--xpack.task_manager.capacity=21',
         '--xpack.nightshift_investigations.enabled=true',
+        // Investigations only run as the Nightshift agent service account.
+        '--xpack.security.serviceAccounts.enabled=true',
+        '--xpack.agenticInvestigations.enabled=true',
+        '--xpack.proposals.enabled=true',
         '--feature_flags.overrides.nightshift.enabled=true',
-        '--xpack.nightshift_investigations.cortex.enabled=false',
+        // The suite judges investigations offline; online evals would run its judges again on every one.
+        '--feature_flags.overrides.nightshift.onlineEvals.paused=true',
+        ...knowledgeArgs(),
+        '--xpack.nightshift_investigations.findings_recorder.enabled=false',
         `--config=${sandboxKibanaConfig}`,
-        ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),
+        ...(connectorsConfig ? [`--config=${connectorsConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',
         '--uiSettings.overrides.workflows:aiAgent:enabled=true',
-        '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
         // The tracing config set already lifts the content redaction settings.
         '--uiSettings.overrides.agentBuilder:tracing:enabled=true',
         '--uiSettings.overrides.agentBuilder:tracing:includeUserData=true',

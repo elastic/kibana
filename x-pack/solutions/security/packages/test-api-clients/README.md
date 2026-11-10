@@ -10,6 +10,7 @@ This package contains API clients generated from OpenAPI schemas for use in Secu
 ## FTR usage example
 
 Add a service to your test services configuration
+
 ```typescript
 import { SecuritySolutionApiProvider } from '@kbn/security-solution-test-api-clients/supertest/detections.gen';
 
@@ -20,6 +21,7 @@ export const services = {
 ```
 
 Then use the service in your test
+
 ```typescript
 export default ({ getService }: FtrProviderContext): void => {
   const detectionsApi = getService('detectionsApi');
@@ -55,4 +57,4 @@ apiTest('creates a rule', async ({ detectionsApi, requestAuth }) => {
 
 Use `options.kibanaSpace` to target a non-default space and `options.responseType` for non-JSON payloads such as NDJSON or CSV exports. The response `body` type follows it: the OpenAPI response type for `'json'` (the default), `string` for `'text'` and `Buffer` for `'buffer'`.
 
-Because this package depends on `@kbn/security-solution-plugin` for the request and response types, TypeScript project references stop the plugin itself (and `@kbn/scout-security`, which the plugin references) from depending on this package. Scout tests that live inside the plugin's `tsconfig.json` therefore cannot import these clients yet.
+This package depends on `@kbn/security-solution-plugin` for the request and response types, so the plugin's own `tsconfig.json` cannot reference it without a circular project reference. Security Solution Scout tests live in a separate TypeScript project (`security_solution/test/tsconfig.json`) that references both the plugin and this package, so add `@kbn/security-solution-test-api-clients` to that project's `kbn_references` when you start using the clients there (`node scripts/lint_ts_projects --fix` does it for you).
