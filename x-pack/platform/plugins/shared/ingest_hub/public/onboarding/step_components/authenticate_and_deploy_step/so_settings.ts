@@ -12,6 +12,7 @@ interface SOSettingsSource {
   integrationName?: string;
   description?: string;
   namespace?: string;
+  dedicatedNamespaceTemplates?: boolean;
   instances?: ServiceInstance[];
   policySettings?: PolicySettings;
 }
@@ -40,8 +41,9 @@ const toSOInstances = (
     : {};
 
 /**
- * The integration name, description, global namespace, service instances and package policy
- * settings for a saved-object write. Spread into every create and update that carries the service selection, so resume sees
+ * The integration name, description, global namespace (with its dedicated-templates switch),
+ * service instances and package policy settings for a saved-object write. Spread into every create
+ * and update that carries the service selection, so resume sees
  * what the last deploy used (the name can change between deploys while it still follows the
  * selection).
  */
@@ -51,6 +53,7 @@ export const toSOSettings = (
   integrationName?: string;
   description?: string;
   namespace?: string;
+  dedicatedNamespaceTemplates?: boolean;
   instances?: ServiceInstance[];
   policySettings?: Record<string, unknown>;
 } => {
@@ -58,10 +61,13 @@ export const toSOSettings = (
   const integrationName = serviceSettings?.integrationName?.trim();
   const description = serviceSettings?.description?.trim();
   const namespace = serviceSettings?.namespace?.trim();
+  // The switch needs a namespace, so a stale `true` is not saved once the namespace is cleared.
+  const dedicatedNamespaceTemplates = !!serviceSettings?.dedicatedNamespaceTemplates && !!namespace;
   return {
     ...(integrationName ? { integrationName } : {}),
     ...(description ? { description } : {}),
     ...(namespace ? { namespace } : {}),
+    ...(dedicatedNamespaceTemplates ? { dedicatedNamespaceTemplates } : {}),
     ...toSOInstances(serviceSettings?.instances),
     ...(Object.keys(policySettings).length ? { policySettings } : {}),
   };
@@ -78,30 +84,42 @@ export const toSOSettingsUpdate = (
   integrationName?: string;
   description: string | null;
   namespace: string | null;
+  dedicatedNamespaceTemplates: boolean;
   instances?: ServiceInstance[];
   policySettings: Record<string, unknown>;
 } => {
-  const { integrationName, description, namespace, instances, policySettings } =
-    toSOSettings(serviceSettings);
+  const {
+    integrationName,
+    description,
+    namespace,
+    dedicatedNamespaceTemplates,
+    instances,
+    policySettings,
+  } = toSOSettings(serviceSettings);
   return {
     ...(integrationName ? { integrationName } : {}),
     description: description ?? null,
     namespace: namespace ?? null,
+    // Always sent: an omitted field keeps the stored value, and the switch may just have been turned off.
+    dedicatedNamespaceTemplates: !!dedicatedNamespaceTemplates,
     ...(instances ? { instances } : {}),
     policySettings: policySettings ?? {},
   };
 };
 
 /**
- * The update for settings that need no deploy: the name and description. The namespace, the
- * instances and the package policy settings are left out on purpose. They describe what was last
- * deployed: the namespace and the package policy settings are the values drift detection compares
- * the current ones against, and a duplicate added in Step 2 but not deployed yet must not come back
- * on resume. All are saved only together with a deploy.
+ * The update for settings that need no deploy: the name and description. The namespace, its
+ * dedicated-templates switch, the instances and the package policy settings are left out on
+ * purpose. They describe what was last deployed: the namespace and the package policy settings are
+ * the values drift detection compares the current ones against, the switch must stay paired with
+ * that namespace, and a duplicate added in Step 2 but not deployed yet must not come back on
+ * resume. They are saved with a deploy, and the switch also once it has been applied to the
+ * package.
  */
 export const toSOMetadataUpdate = (
   serviceSettings: SOSettingsSource | null | undefined
 ): { integrationName?: string; description: string | null } => {
-  const { namespace, instances, policySettings, ...metadata } = toSOSettingsUpdate(serviceSettings);
+  const { namespace, dedicatedNamespaceTemplates, instances, policySettings, ...metadata } =
+    toSOSettingsUpdate(serviceSettings);
   return metadata;
 };

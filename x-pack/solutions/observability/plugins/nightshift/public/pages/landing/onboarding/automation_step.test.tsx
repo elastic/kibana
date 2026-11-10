@@ -144,7 +144,7 @@ describe('OnboardingAutomationStep', () => {
     renderStep([], onInvestigationClick);
 
     expect(screen.getByTestId('nightshiftOnboardingTrialInvestigationStatus')).toHaveTextContent(
-      'Results are ready'
+      'Investigation results are ready'
     );
     expect(
       screen.queryByTestId('nightshiftOnboardingTrialCreateAutomation')
