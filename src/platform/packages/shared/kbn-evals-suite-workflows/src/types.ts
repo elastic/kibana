@@ -104,7 +104,8 @@ export type WorkflowTaskOutput = TaskOutput & {
   }>;
   errors: unknown[];
   resultYaml?: string;
-  latencyMs?: number;
+  /** Server-side trace id from converse, preferred by trace-based evaluators (latency, tokens). */
+  traceId?: string;
   /** Set by self-correction spec: turn index (1-based) at which valid YAML was produced; null if never. */
   turnsToRecovery?: number | null;
 };

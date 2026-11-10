@@ -6,27 +6,17 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
-import type { BrushEndListener } from '@elastic/charts';
-import {
-  EuiFlexGroup,
-  EuiLoadingChart,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import type { TimeSeriesPoint } from '../../../../common/types/applications';
+import { ChartArea } from '../../../components/chart_area';
 import { useFormatters } from '../../../hooks/use_formatters';
+import type { TimeRangeSelect } from '../../../utils/brush_time_range';
+import { onBrushTimeRange } from '../../../utils/brush_time_range';
 
 const CHART_HEIGHT = 140;
-
-const chartAreaCss = css({ blockSize: CHART_HEIGHT });
-
-const fillCss = css({ blockSize: '100%' });
 
 const TITLE = i18n.translate('xpack.digitalExperience.pageLoadsChart.title', {
   defaultMessage: 'Page loads',
@@ -47,60 +37,11 @@ export function PageLoadsChart({
 }: {
   points: TimeSeriesPoint[];
   isLoading: boolean;
-  /** The range, in epoch milliseconds, dragged over the chart. */
-  onTimeRangeSelect: (range: { start: number; end: number }) => void;
+  onTimeRangeSelect: TimeRangeSelect;
 }) {
   const baseTheme = useElasticChartsTheme();
   const { formatDate, timeZone } = useFormatters();
   const hasPageLoads = points.some(({ count }) => count > 0);
-
-  const onBrushEnd: BrushEndListener = (brushArea) => {
-    const [start, end] = ('x' in brushArea && brushArea.x) || [];
-    // A time axis gives epoch milliseconds.
-    if (typeof start === 'number' && typeof end === 'number') {
-      onTimeRangeSelect({ start, end });
-    }
-  };
-
-  const renderChartArea = () => {
-    if (isLoading || !hasPageLoads) {
-      return (
-        <EuiFlexGroup css={fillCss} alignItems="center" justifyContent="center">
-          {isLoading ? (
-            <EuiLoadingChart size="l" />
-          ) : (
-            <EuiText size="s" color="subdued">
-              {NO_DATA}
-            </EuiText>
-          )}
-        </EuiFlexGroup>
-      );
-    }
-    return (
-      <Chart size={{ height: CHART_HEIGHT }}>
-        <Settings
-          baseTheme={baseTheme}
-          showLegend={false}
-          locale={i18n.getLocale()}
-          onBrushEnd={onBrushEnd}
-        />
-        <Tooltip headerFormatter={({ value }) => formatDate(value)} />
-        <Axis id="time" position={Position.Bottom} />
-        <Axis id="count" position={Position.Left} gridLine={{ visible: true }} ticks={4} />
-        <BarSeries
-          id="pageLoads"
-          name={TITLE}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="timestamp"
-          yAccessors={['count']}
-          data={points}
-          enableHistogramMode
-          timeZone={timeZone}
-        />
-      </Chart>
-    );
-  };
 
   return (
     <EuiPanel hasBorder data-test-subj="digitalExperiencePageLoadsChart">
@@ -108,7 +49,35 @@ export function PageLoadsChart({
         <h2>{TITLE}</h2>
       </EuiTitle>
       <EuiSpacer size="s" />
-      <div css={chartAreaCss}>{renderChartArea()}</div>
+      <ChartArea
+        height={CHART_HEIGHT}
+        isLoading={isLoading}
+        hasData={hasPageLoads}
+        emptyMessage={NO_DATA}
+      >
+        <Chart size={{ height: CHART_HEIGHT }}>
+          <Settings
+            baseTheme={baseTheme}
+            showLegend={false}
+            locale={i18n.getLocale()}
+            onBrushEnd={onBrushTimeRange(onTimeRangeSelect)}
+          />
+          <Tooltip headerFormatter={({ value }) => formatDate(value)} />
+          <Axis id="time" position={Position.Bottom} />
+          <Axis id="count" position={Position.Left} gridLine={{ visible: true }} ticks={4} />
+          <BarSeries
+            id="pageLoads"
+            name={TITLE}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="timestamp"
+            yAccessors={['count']}
+            data={points}
+            enableHistogramMode
+            timeZone={timeZone}
+          />
+        </Chart>
+      </ChartArea>
     </EuiPanel>
   );
 }

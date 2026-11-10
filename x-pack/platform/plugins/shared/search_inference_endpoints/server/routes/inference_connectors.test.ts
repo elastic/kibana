@@ -280,7 +280,7 @@ describe('GET /internal/search_inference_endpoints/connectors', () => {
   });
 
   it('includes declared parameters on recommended connectors in the response body', async () => {
-    const parameters = { reasoning: { effort: 'high' as const }, temperature: 0.2 };
+    const parameters = { reasoning: { effort: 'high' as const } };
     const recommended = { ...inferenceConnector('rec'), parameters };
     const other = inferenceConnector('other');
     getForFeature.mockResolvedValue({

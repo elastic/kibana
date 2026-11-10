@@ -1,5 +1,5 @@
 {
-  "sha1": "d10693da49ed5c32fe5499dc8ceba5243950e77e",
+  "sha1": "cecea30ed1c1f5bb15a464ae472cfaa862119ecd",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/dfa_cloning.spec.ts",
-        "line": 246,
+        "line": 250,
         "column": 8
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/dfa_cloning.spec.ts",
-        "line": 353,
+        "line": 357,
         "column": 17
       }
     },
@@ -52,7 +52,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/ui/tests/dfa_cloning.spec.ts",
-        "line": 437,
+        "line": 441,
         "column": 26
       }
     },

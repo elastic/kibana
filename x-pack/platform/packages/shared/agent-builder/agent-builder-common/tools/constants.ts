@@ -123,7 +123,6 @@ export const internalTools = {
   runSubagent: 'run_subagent',
   sendMessageToAgent: 'send_message_to_agent',
   sleep: 'sleep',
-  writeTodos: 'write_todos',
   loadSkill: 'load_skill',
   searchRelevantSkills: 'search_relevant_skills',
   askUserQuestion: 'ask_user_question',

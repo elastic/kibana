@@ -19,8 +19,10 @@ const ebtElement = {
   aiIndexListPageToolbar: 'contextEngine.aiIndexListPage.toolbar',
   aiIndexListPageDeleteModal: 'contextEngine.aiIndexListPage.deleteModal',
   aiIndexCreatePage: 'contextEngine.aiIndexCreatePage',
+  aiIndexCreateModal: 'contextEngine.aiIndexCreateModal',
   aiIndexCreatePageTraceSelector: 'contextEngine.aiIndexCreatePage.traceSelector',
   aiIndexDetailPage: 'contextEngine.aiIndexDetailPage',
+  aiIndexDetailPageOnboardingPanel: 'contextEngine.aiIndexDetailPage.onboardingPanel',
   aiIndexDetailPageDescriptionPanel: 'contextEngine.aiIndexDetailPage.descriptionPanel',
   aiIndexDetailPageTracesPanel: 'contextEngine.aiIndexDetailPage.tracesPanel',
   aiIndexDetailPageSourcesPanel: 'contextEngine.aiIndexDetailPage.sourcesPanel',
@@ -58,6 +60,9 @@ const ebtAction = {
     TAB_OVERVIEW: 'tab_overview',
     TAB_SOURCES: 'tab_sources',
     TAB_KNOWLEDGE_INDICATORS: 'tab_knowledge_indicators',
+  },
+  onboarding: {
+    COPY_PROMPT: 'copy_prompt',
   },
   description: {
     EDIT: 'edit_description',

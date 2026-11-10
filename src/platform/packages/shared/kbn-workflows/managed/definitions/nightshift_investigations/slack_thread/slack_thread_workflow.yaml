@@ -132,6 +132,9 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-nightshift-investigation
+          # Only the copy bound to the space's service account is installed; the investigation
+          # runs as that account.
+          run-as-mode: inherit
           inputs:
             # ai.agent has no input for the round's author, so the Slack author goes in the text.
             message: |
@@ -139,6 +142,8 @@ steps:
 
               {{ event.text }}
             investigation_id: '{{ steps.find_investigation.output.investigation_id }}'
+            context:
+              entry_point: slack
         on-failure:
           continue: true
 

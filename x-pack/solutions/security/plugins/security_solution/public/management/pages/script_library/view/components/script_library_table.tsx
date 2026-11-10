@@ -38,6 +38,7 @@ import type {
   SortDirection,
 } from '../../../../../../common/endpoint/types';
 import { SCRIPT_LIBRARY_LABELS as tableLabels } from '../../translations';
+import { SCRIPT_LIBRARY } from '../../../../../app/translations';
 import { ScriptNameNavLink } from './script_name_nav_link';
 import { ScriptTablePlatformBadges } from './platform_badges';
 import {
@@ -335,7 +336,7 @@ export const ScriptLibraryTable = memo<ScriptLibraryTableProps>(
           onChange={onChange}
           rowProps={setTableRowProps}
           sorting={sorting as EuiTableSortingType<EndpointScript>}
-          tableCaption={tableLabels.pageTitle}
+          tableCaption={SCRIPT_LIBRARY}
         />
       </>
     );

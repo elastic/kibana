@@ -9,14 +9,16 @@ import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ApplicationsListPage, EDOT_BROWSER_DOCS_URL } from './applications_list_page';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import { ApplicationsListPage } from './applications_list_page';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
+import { EDOT_BROWSER_DOCS_URL } from '../../utils/doc_links';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useDigitalExperienceRouter } from '../../hooks/use_digital_experience_router';
 import { digitalExperienceRouter } from '../../routes';
 import type { ApplicationSummary } from '../../../common/types/applications';
 import { TimeRangePicker } from '../../components/time_range_picker';
-import { EnvironmentFilter } from './components/environment_filter';
+import { EnvironmentFilter } from '../../components/environment_filter';
 import { SourceFilter } from './components/source_filter';
 import { useEnvironment } from '../../hooks/use_environment';
 import { useSourceFilter } from '../../hooks/use_source_filter';
@@ -28,7 +30,9 @@ jest.mock('../../hooks/use_environment');
 jest.mock('../../hooks/use_source_filter');
 jest.mock('../../hooks/use_digital_experience_router');
 jest.mock('../../components/time_range_picker', () => ({ TimeRangePicker: jest.fn(() => null) }));
-jest.mock('./components/environment_filter', () => ({ EnvironmentFilter: jest.fn(() => null) }));
+jest.mock('../../components/environment_filter', () => ({
+  EnvironmentFilter: jest.fn(() => null),
+}));
 jest.mock('./components/source_filter', () => ({ SourceFilter: jest.fn(() => null) }));
 
 const timeRange = { rangeFrom: 'now-15m', rangeTo: 'now' };
@@ -122,7 +126,9 @@ const renderPage = ({ isServerless = false } = {}) => {
   return render(<ApplicationsListPage />, {
     wrapper: ({ children }) => (
       <I18nProvider>
-        <EuiProvider>{children}</EuiProvider>
+        <EuiProvider>
+          <MockAppHeaderProvider>{children}</MockAppHeaderProvider>
+        </EuiProvider>
       </I18nProvider>
     ),
   });

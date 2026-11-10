@@ -35,7 +35,8 @@ The items are the selected threat reports: `candidates_found` is the reports sel
 
 | Workflow | Close | `close_reason` |
 |---|---|---|
-| Packaging | A clean run with no confirmed hits | `benign` |
+| Packaging | A settled run with no confirmed hits (`success`) | `benign` |
+| Packaging | A retired run with no confirmed hits (`retired_incomplete`), closed although part of the report was never searched | `other` |
 | Proposal gate | Every Proposal of the Investigation settled | `resolved` |
 
 Every gate of an Investigation runs `close_if_settled` once its own Proposal settles, so only the gate whose close changed `status` reports.

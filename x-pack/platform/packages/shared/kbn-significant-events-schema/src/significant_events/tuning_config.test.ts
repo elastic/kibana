@@ -51,14 +51,12 @@ describe('validateSignificantEventsTuningConfig', () => {
 
   it('reports NaN values', () => {
     const errors = validateSignificantEventsTuningConfig({
-      entity_filtered_ratio: NaN,
-      diverse_ratio: NaN,
       semantic_min_score: NaN,
+      rrf_rank_constant: NaN,
     });
     expect(errors).toEqual([
-      '"entity_filtered_ratio" must be a number, got NaN',
-      '"diverse_ratio" must be a number, got NaN',
       '"semantic_min_score" must be a number, got NaN',
+      '"rrf_rank_constant" must be a number, got NaN',
     ]);
   });
 
@@ -76,16 +74,6 @@ describe('validateSignificantEventsTuningConfig', () => {
     const errors = validateSignificantEventsTuningConfig({ [INTEGER_FIELD]: FIELD_MAX + 1 });
     expect(errors).toEqual([`"${INTEGER_FIELD}" must be between ${FIELD_MIN} and ${FIELD_MAX}`]);
   });
-
-  it('reports cross-field ratio violation', () => {
-    const errors = validateSignificantEventsTuningConfig({
-      entity_filtered_ratio: 0.7,
-      diverse_ratio: 0.5,
-    });
-    expect(errors).toContainEqual(
-      expect.stringContaining('entity_filtered_ratio (0.7) + diverse_ratio (0.5) must be <= 1.0')
-    );
-  });
 });
 
 describe('resolveSignificantEventsTuningConfig', () => {
@@ -99,8 +87,7 @@ describe('resolveSignificantEventsTuningConfig', () => {
   it('drops unknown keys without falling back to defaults', () => {
     const logger = { warn: jest.fn() };
     const result = resolveSignificantEventsTuningConfig(
-      // `sample_size` was a tuning key before it moved into the features identification workflow.
-      { [INTEGER_FIELD]: VALID_OVERRIDE, sample_size: 30, legacy_field: 99 },
+      { [INTEGER_FIELD]: VALID_OVERRIDE, legacy_field: 99 },
       logger
     );
     expect(result).toEqual({

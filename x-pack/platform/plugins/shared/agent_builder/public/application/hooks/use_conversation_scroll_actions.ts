@@ -18,11 +18,14 @@ export const useConversationScrollActions = ({
   scrollContainerHeight,
   timelineContent,
   anchoredItemKey,
+  anchoredItemGap = 0,
 }: {
   scrollContainer: HTMLDivElement | null;
   scrollContainerHeight: number;
   timelineContent: HTMLDivElement | null;
   anchoredItemKey?: string;
+  /** Space in pixels left between the top of the container and the anchored item. */
+  anchoredItemGap?: number;
 }) => {
   const stuckToBottomRef = useRef(true);
   const smoothScrollingRef = useRef(false);
@@ -109,7 +112,7 @@ export const useConversationScrollActions = ({
   }, [scrollContainer, hasContentBelow]);
 
   // The timeline is kept at least one viewport tall from the anchored item down, so "scrolled to
-  // the bottom" puts that item at the top of the container. The answer fills the reserved space
+  // the bottom" puts that item at the top of the container, `anchoredItemGap` below its edge. The answer fills the reserved space
   // without changing the timeline's size; once it outgrows it, the view follows as usual. The
   // reserve sits on an inner wrapper, not on the observed content item: an explicit min-height
   // would replace that item's automatic minimum size and it would stop growing with the answer.
@@ -124,8 +127,10 @@ export const useConversationScrollActions = ({
     }
     const anchoredTop =
       anchored.getBoundingClientRect().top - timelineContent.getBoundingClientRect().top;
-    timelineContent.style.minHeight = `${Math.ceil(anchoredTop + scrollContainer.clientHeight)}px`;
-  }, [scrollContainer, timelineContent, anchoredItemKey]);
+    timelineContent.style.minHeight = `${Math.ceil(
+      anchoredTop - anchoredItemGap + scrollContainer.clientHeight
+    )}px`;
+  }, [scrollContainer, timelineContent, anchoredItemKey, anchoredItemGap]);
 
   useLayoutEffect(() => {
     reserveAnchorSpace();
