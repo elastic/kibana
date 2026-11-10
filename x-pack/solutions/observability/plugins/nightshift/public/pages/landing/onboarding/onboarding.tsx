@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import type { OnboardingSuggestion } from '@kbn/nightshift-investigations-plugin/common';
 import { NightshiftHeader } from '../header';
 import { useFlyoutShareUrlCustomAction } from '../../../components/ui/flyout_share_url_button';
 import {
@@ -96,8 +97,48 @@ const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.
 });
 
 const AUTOMATE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.automate.trialTitle', {
-  defaultMessage: 'Your first investigation',
+  defaultMessage: 'Try first investigation',
 });
+
+/** Design-only sample rows for `?suggestions=1` when the space has none yet. */
+const DESIGN_ONBOARDING_SUGGESTIONS: OnboardingSuggestion[] = [
+  {
+    title: 'Investigate p99 latency on order-processing',
+    prompt: 'Why is p99 latency up on order-processing?',
+    rationale: 'Latency alert fired on order-processing after the last deploy.',
+    source: 'alert',
+  },
+  {
+    title: 'Checkout error spike after payment-gateway change',
+    prompt: 'What caused the checkout error spike?',
+    rationale: 'Error rate jumped on checkout-service correlated with payment-gateway.',
+    source: 'error_spike',
+  },
+  {
+    title: 'SLO burn on availability for checkout',
+    prompt: 'Why is the checkout availability SLO burning?',
+    rationale: 'Availability SLO is in a fast burn window for the last hour.',
+    source: 'slo',
+  },
+  {
+    title: 'Recent deploy may have broken auth-service',
+    prompt: 'Did the latest auth-service deploy cause this outage?',
+    rationale: 'A GitHub deploy landed minutes before the first alert.',
+    source: 'code_change',
+  },
+  {
+    title: 'Team discussing payment timeouts in Slack',
+    prompt: 'Summarize the payment timeout incident from Slack.',
+    rationale: '#incidents is actively discussing upstream 504s.',
+    source: 'discussion',
+  },
+  {
+    title: 'Open case: payment provider degradation',
+    prompt: 'Continue the payment provider degradation case.',
+    rationale: 'An open case already tracks EU-West provider issues.',
+    source: 'case',
+  },
+];
 
 /**
  * First-run Nightshift: enable the space, add telemetry data, connect other sources, try a first
@@ -112,7 +153,7 @@ export function NightshiftOnboarding({
 }: {
   latestInvestigation?: InvestigationSummary;
   automationsHref?: string;
-  /** "I'll do it later" on the last step. */
+  /** "Skip this step" / Done on the last step. */
   onFinish: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -128,8 +169,35 @@ export function NightshiftOnboarding({
   const [stepOverride, setStepOverride] = useState<StepOverride>();
   const automations = useFetchAutomations({ enabled: automationsHref != null });
   const hasAutomation = (automations.data?.automations.length ?? 0) > 0;
+  // Design/dev URL forces (keep while iterating onboarding UI):
+  //   ?analyzing=1 — gathering banner
+  //   ?suggestions=1 — filled suggestion list
+  //   ?suggestions=empty — empty suggestions state
+  //   ?investigating=1 — trial card in progress
+  //   (no force) — investigation ready / automate when a trial exists
+  const searchParams = new URLSearchParams(search);
+  const forceAnalyzing = searchParams.get('analyzing') === '1';
+  const suggestionsParam = searchParams.get('suggestions');
+  const forceSuggestionsFilled = suggestionsParam === '1';
+  const forceSuggestionsEmpty = suggestionsParam === 'empty';
+  const forceSuggestions = forceSuggestionsFilled || forceSuggestionsEmpty;
+  const forceInvestigating = searchParams.get('investigating') === '1';
 
   const execution = data?.execution;
+  const designExecution =
+    forceAnalyzing && execution
+      ? { ...execution, status: 'running' as const }
+      : forceSuggestions && execution
+      ? {
+          ...execution,
+          status: 'succeeded' as const,
+          suggestions: forceSuggestionsEmpty
+            ? []
+            : execution.suggestions && execution.suggestions.length > 0
+            ? execution.suggestions
+            : DESIGN_ONBOARDING_SUGGESTIONS,
+        }
+      : execution;
   // Step 1 is done once the space is bound to its service accounts and the agent is installed:
   // one click does both, and removing the binding brings the step back.
   const isEnabled = data?.agent_installed === true && isNightshiftSetUp(serviceAccount.data);
@@ -153,15 +221,23 @@ export function NightshiftOnboarding({
   }
 
   // Before an exploration run exists, Proceed on Add data moves to Connect other sources locally.
-  const step: OnboardingStepId = !isEnabled
-    ? 'enable'
-    : stepOverride === 'addData' || stepOverride === 'connectSources'
-    ? stepOverride
-    : !isConnected
-    ? 'addData'
-    : latestInvestigation && stepOverride !== 'investigate'
-    ? 'automate'
-    : 'investigate';
+  const step: OnboardingStepId =
+    forceAnalyzing || forceSuggestions
+      ? 'investigate'
+      : !isEnabled
+      ? 'enable'
+      : stepOverride === 'addData' || stepOverride === 'connectSources'
+      ? stepOverride
+      : !isConnected
+      ? 'addData'
+      : latestInvestigation && stepOverride !== 'investigate'
+      ? 'automate'
+      : 'investigate';
+
+  const trialInvestigation =
+    forceInvestigating && latestInvestigation
+      ? { ...latestInvestigation, in_progress: true }
+      : latestInvestigation;
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -251,7 +327,7 @@ export function NightshiftOnboarding({
       status: statusOf('investigate'),
       onClick: linkTo('investigate'),
       hint:
-        step === 'investigate' && execution?.status === 'running'
+        step === 'investigate' && designExecution?.status === 'running'
           ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {
               defaultMessage: 'Analyzing your data…',
             })
@@ -303,7 +379,7 @@ export function NightshiftOnboarding({
           onClick={() => setStepOverride(undefined)}
           data-test-subj="nightshiftOnboardingProceedToAutomationButton"
         >
-          {PROCEED_LABEL}
+          {SKIP_LABEL}
         </EuiButton>
       )
     ) : step === 'automate' ? (
@@ -322,9 +398,7 @@ export function NightshiftOnboarding({
           ? i18n.translate('xpack.nightshift.onboarding.doneButton', {
               defaultMessage: 'Done',
             })
-          : i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
-              defaultMessage: "I'll do it later",
-            })}
+          : SKIP_LABEL}
       </EuiButton>
     ) : undefined;
 
@@ -362,7 +436,7 @@ export function NightshiftOnboarding({
       )}
       {sectionTitle && (
         <>
-          <EuiTitle size={step === 'automate' ? 'xs' : 's'}>
+          <EuiTitle size="xs">
             <h3 data-test-subj="nightshiftOnboardingStepTitle">{sectionTitle}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
@@ -389,14 +463,15 @@ export function NightshiftOnboarding({
             <OnboardingConnectSourcesStep />
           ) : step === 'addData' || !execution ? (
             <OnboardingAddDataStep />
-          ) : step === 'investigate' || !latestInvestigation ? (
+          ) : step === 'investigate' || !trialInvestigation ? (
             <OnboardingFirstInvestigationStep
-              execution={execution}
+              execution={designExecution ?? execution}
               onInvestigationStarted={() => setStepOverride(undefined)}
             />
           ) : (
             <OnboardingAutomationStep
-              investigation={latestInvestigation}
+              investigation={trialInvestigation}
+              isInvestigationSelected={selectedInvestigationId === trialInvestigation.id}
               automations={automations.data?.automations ?? []}
               automationsAvailable={automationsHref != null}
               onInvestigationClick={openInvestigation}

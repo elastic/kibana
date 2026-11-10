@@ -61,14 +61,8 @@ export function OnboardingStepsCard({
 
   return (
     <EuiPanel hasBorder paddingSize="l" data-test-subj="nightshiftOnboardingSteps">
-      <EuiTitle size="xxs">
-        <h2
-          css={css`
-            font-size: 15px;
-            line-height: 20px;
-            font-weight: ${euiTheme.font.weight.bold};
-          `}
-        >
+      <EuiTitle size="xs">
+        <h2>
           {i18n.translate('xpack.nightshift.onboarding.getStartedTitle', {
             defaultMessage: 'Get started',
           })}
