@@ -31,7 +31,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import { evaluate as base } from '../src/evaluate';
 import { callConverse } from '../src/converse_task';
-import { attachmentReadCompliance } from '../src/evaluators';
+import { attachmentReadCompliance, createToolUsageEvaluators } from '../src/evaluators';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -92,6 +92,7 @@ function createEvaluateSingleAlertTriage({
     const selectedEvaluators = selectEvaluators([
       evaluators.criteria(criteria),
       attachmentReadCompliance,
+      ...createToolUsageEvaluators(log),
       createSkillInvocationEvaluator({ traceEsClient, log, skillName: 'alert-analysis' }),
       ...Object.values(evaluators.traceBasedEvaluators),
     ]);

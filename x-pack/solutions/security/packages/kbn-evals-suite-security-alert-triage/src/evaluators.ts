@@ -6,7 +6,8 @@
  */
 
 import { getToolCallSteps, type TaskOutput } from '@kbn/evals';
-import { attachmentTools } from '@kbn/agent-builder-common';
+import { attachmentTools, internalTools } from '@kbn/agent-builder-common';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
  * CODE evaluator: scores whether the LLM called attachment_read the expected
@@ -36,3 +37,35 @@ export const attachmentReadCompliance = {
     };
   },
 };
+
+const SECURITY_ALERTS_TOOL_ID = 'security.alerts';
+
+const createToolCallCountEvaluator = (name: string, toolId: string) => ({
+  name,
+  kind: 'CODE' as const,
+  direction: 'minimize' as const,
+  evaluate: async ({ output }: { output: unknown }) => {
+    const count = getToolCallSteps(output as TaskOutput).filter((t) => t.tool_id === toolId).length;
+    return { score: count };
+  },
+});
+
+/**
+ * CODE evaluators for security-team#20696: count the calls that the alert-analysis skill
+ * used to cause on literal-following models, and log the ordered tool sequence of each run.
+ */
+export const createToolUsageEvaluators = (log: ToolingLog) => [
+  createToolCallCountEvaluator('security.alerts calls', SECURITY_ALERTS_TOOL_ID),
+  createToolCallCountEvaluator('search_relevant_skills calls', internalTools.searchRelevantSkills),
+  createToolCallCountEvaluator('load_skill calls', internalTools.loadSkill),
+  {
+    name: 'Tool sequence (steps)',
+    kind: 'CODE' as const,
+    direction: 'minimize' as const,
+    evaluate: async ({ output }: { output: unknown }) => {
+      const sequence = getToolCallSteps(output as TaskOutput).map((t) => t.tool_id ?? 'unknown');
+      log.info(`Tool sequence (${sequence.length}): ${sequence.join(' > ')}`);
+      return { score: sequence.length, metadata: { sequence } };
+    },
+  },
+];
