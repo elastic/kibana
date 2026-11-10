@@ -106,9 +106,17 @@ export class AlertActionTelemetrySubscriber {
 
   #reportAlertAction(event: AlertActionEvent, { origin }: AlertingPublisherContext): void {
     const actionType = ACTION_TYPE_BY_DOMAIN_EVENT[event.type];
+    if (actionType === undefined) {
+      return;
+    }
+
+    const eventType = ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE[actionType];
+    if (eventType === undefined) {
+      return;
+    }
 
     this.ebtService.reportEvent(
-      ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE[actionType],
+      eventType,
       buildAlertActionAppliedEventData({
         spaceId: event.spaceId,
         ruleId: event.ruleId,

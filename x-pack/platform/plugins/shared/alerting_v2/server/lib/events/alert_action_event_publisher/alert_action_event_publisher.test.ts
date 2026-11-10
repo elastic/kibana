@@ -349,12 +349,12 @@ describe('AlertActionEventPublisher', () => {
       expect(publishedOrigin()).toEqual({ actor: 'user', channel: 'ui' });
     });
 
-    it('publishes a fake request as internal on the system channel', () => {
+    it('publishes a fake request as the user on the system channel', () => {
       publisher.emitEpisodeActions(createRequest({}, { isFakeRequest: true }), [
         createAction({ action_type: 'ack' }),
       ]);
 
-      expect(publishedOrigin()).toEqual({ actor: 'internal', channel: 'system' });
+      expect(publishedOrigin()).toEqual({ actor: 'user', channel: 'system' });
     });
   });
 });

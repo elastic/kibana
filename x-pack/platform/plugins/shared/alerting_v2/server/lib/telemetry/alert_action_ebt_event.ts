@@ -67,7 +67,7 @@ const alertActionAppliedEventSchema: EventTypeOpts<AlertActionAppliedEbtData>['s
         type: 'keyword',
         _meta: {
           description:
-            'Who applied the action: `user` for a request carrying credentials, or `internal` for the Kibana internal user acting on its own.',
+            'Who applied the action. Alert actions are published from the request that applied them, so this is `user`.',
           optional: false,
         },
       },

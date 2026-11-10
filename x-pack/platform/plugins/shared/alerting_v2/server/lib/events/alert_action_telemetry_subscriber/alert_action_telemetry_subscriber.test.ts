@@ -206,17 +206,31 @@ describe('AlertActionTelemetrySubscriber', () => {
       );
     });
 
+    it('does not report an event type that has no action mapping', async () => {
+      subscriber.start();
+
+      await handler()(
+        {
+          ...acked(),
+          type: 'alerting.episode.not-reported',
+        } as unknown as AlertingDomainEvent,
+        context
+      );
+
+      expect(ebtService.reportEvent).not.toHaveBeenCalled();
+    });
+
     it('forwards the publisher context origin', async () => {
       subscriber.start();
 
       await handler()(acked(), {
         ...context,
-        origin: { actor: 'internal', channel: 'system' },
+        origin: { actor: 'user', channel: 'ui', app: 'observability' },
       });
 
       expect(ebtService.reportEvent).toHaveBeenCalledWith(
         ALERT_ACTION_EBT_EVENT_TYPE_BY_ACTION_TYPE.ack,
-        expect.objectContaining({ origin: { actor: 'internal', channel: 'system' } })
+        expect.objectContaining({ origin: { actor: 'user', channel: 'ui', app: 'observability' } })
       );
     });
   });
