@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import chroma from 'chroma-js';
+import type { ColorMapping } from '@kbn/coloring';
+import { getColorFactory } from '@kbn/coloring';
+import type { SerializedValue } from '@kbn/data-plugin/common';
+import { deserializeField } from '@kbn/data-plugin/common';
 import type { ColorValue } from '@kbn/isomer';
 import { KbnPalette, getPalettes } from '@kbn/palettes';
 
@@ -33,4 +38,30 @@ export const paletteColors = (
     light: toHex(light.getColor(index, count)),
     dark: toHex(dark.getColor(index, count)),
   }));
+};
+
+/** A color as Kibana writes it (hex, `rgb()`, a CSS name), as a hex color. */
+export const toHexColor = (color: string): HexColor => {
+  if (!chroma.valid(color)) {
+    throw new Error(`"${color}" is not a color.`);
+  }
+  const parsed = chroma(color);
+  return (parsed.alpha() < 1 ? parsed.hex('rgba') : parsed.hex('rgb')) as HexColor;
+};
+
+/**
+ * The color a Kibana color mapping gives each category, concrete for both color schemes, as
+ * Kibana's charts pick them. `categories` are serialized values in the order the chart meets them.
+ */
+export const colorMappingColors = (
+  categories: SerializedValue[],
+  colorMapping: ColorMapping.Config
+): ConcreteColor[] => {
+  const data = { type: 'categories' as const, categories };
+  const light = getColorFactory(colorMapping, getPalettes(false), false, data);
+  const dark = getColorFactory(colorMapping, getPalettes(true), true, data);
+  return categories.map((category) => {
+    const value = deserializeField(category);
+    return { light: toHexColor(light(value)), dark: toHexColor(dark(value)) };
+  });
 };

@@ -6,8 +6,9 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
+import type { ColorMapping } from '@kbn/coloring';
 import { KbnPalette } from '@kbn/palettes';
-import { paletteColors } from './colors';
+import { colorMappingColors, paletteColors, toHexColor } from './colors';
 
 describe('paletteColors', () => {
   // Kibana's default categorical palette is EUI's color-blind palette in both color modes.
@@ -31,5 +32,34 @@ describe('paletteColors', () => {
       expect(light).toMatch(/^#[0-9a-f]{6}$/i);
       expect(dark).toMatch(/^#[0-9a-f]{6}$/i);
     }
+  });
+});
+
+describe('colorMappingColors', () => {
+  const loop: ColorMapping.Config = {
+    paletteId: KbnPalette.Default,
+    colorMode: { type: 'categorical' },
+    assignments: [
+      { rules: [{ type: 'raw', value: 'b' }], color: { type: 'colorCode', colorCode: 'red' } },
+    ],
+    specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+  };
+
+  it('gives assigned categories their color and loops the palette over the rest', () => {
+    // Unassigned categories take the palette's colors in the order they appear.
+    const [first, second] = paletteColors(2);
+    expect(colorMappingColors(['a', 'b', 'c'], loop)).toEqual([
+      { light: first.light.toLowerCase(), dark: first.dark.toLowerCase() },
+      { light: '#ff0000', dark: '#ff0000' },
+      { light: second.light.toLowerCase(), dark: second.dark.toLowerCase() },
+    ]);
+  });
+});
+
+describe('toHexColor', () => {
+  it('writes CSS colors as hex, keeping transparency', () => {
+    expect(toHexColor('rgb(252, 196, 0)')).toBe('#fcc400');
+    expect(toHexColor('#2B394F1A')).toBe('#2b394f1a');
+    expect(() => toHexColor('not a color')).toThrow();
   });
 });
