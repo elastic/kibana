@@ -11,21 +11,24 @@ import { escapeQuotes } from '@kbn/es-query';
 
 import { AGENTS_PREFIX } from '../../constants';
 
-import { getAgentsByKuery } from './crud';
+import { getAgentsByKuery, updateAgent } from './crud';
 import { unenrollAgent } from './unenroll';
 
 export async function unenrollForAgentPolicyId(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   policyId: string,
-  options?: { revoke?: boolean }
+  options?: { revoke?: boolean; unenrolledReason?: string }
 ) {
   const revoke = options?.revoke ?? false;
+  const unenrolledReason = options?.unenrolledReason;
+  const policyKuery = `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(policyId)}"`;
   let hasMore = true;
   let page = 1;
   while (hasMore) {
     const { agents } = await getAgentsByKuery(esClient, soClient, {
-      kuery: `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(policyId)}"`,
+      // Agents that are already unenrolled are excluded unless the kuery references their status
+      kuery: unenrolledReason ? `(${policyKuery}) AND status:*` : policyKuery,
       showInactive: revoke,
       page: page++,
       perPage: 1000,
@@ -35,9 +38,14 @@ export async function unenrollForAgentPolicyId(
       hasMore = false;
     }
     for (const agent of agents) {
+      if (unenrolledReason && agent.status === 'unenrolled') {
+        await updateAgent(esClient, agent.id, { unenrolled_reason: unenrolledReason });
+        continue;
+      }
       await unenrollAgent(soClient, esClient, agent.id, {
         force: revoke,
         revoke,
+        unenrolledReason,
         skipAgentlessValidation: true,
       });
     }
