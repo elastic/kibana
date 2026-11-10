@@ -8,7 +8,7 @@
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('@ess @serverless SecuritySolution Automatic Workflow Migrations', () => {
+  describe('@ess @serverless @skipInServerlessMKI SecuritySolution Automatic Workflow Migrations', () => {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./update'));
