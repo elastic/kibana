@@ -10,6 +10,7 @@ import React, { Suspense, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { StardustWrapper } from '@kbn/content-management-favorites-public';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useEsqlEditorActions } from '../editor_actions_context';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 import { searchPlaceholder } from '../editor_visor/visor_i18n';
@@ -75,6 +76,10 @@ export function ESQLMenu({
 
   const [showStardust, setShowStardust] = useState(false);
   const [queryToSave, setQueryToSave] = useState<string>();
+  const [hasSeenCreateView, setHasSeenCreateView] = useLocalStorage<boolean>(
+    'esqlEditor.hasSeenCreateView',
+    false
+  );
   const applySavedView = useApplySavedView();
   const canCreateView = useCanCreateView(enableCreateView);
   const currentQuery = editorActions?.currentQuery ?? '';
@@ -98,24 +103,29 @@ export function ESQLMenu({
                 iconType="tablePlus"
                 size="xs"
                 aria-label={createViewLabel}
-                onClick={() => setQueryToSave(currentQuery)}
+                onClick={() => {
+                  setHasSeenCreateView(true);
+                  setQueryToSave(currentQuery);
+                }}
                 isDisabled={currentQuery.trim().length === 0}
                 data-test-subj="ESQLEditor-create-view-icon"
                 color="text"
               />
             </EuiToolTip>
-            <EuiIcon
-              type="dot"
-              color="primary"
-              data-test-subj="ESQLEditor-create-view-dot"
-              aria-hidden={true}
-              css={{
-                position: 'absolute',
-                insetBlockStart: '-1px',
-                insetInlineEnd: '-1px',
-                pointerEvents: 'none',
-              }}
-            />
+            {!hasSeenCreateView && (
+              <EuiIcon
+                type="dot"
+                color="primary"
+                data-test-subj="ESQLEditor-create-view-dot"
+                aria-hidden={true}
+                css={{
+                  position: 'absolute',
+                  insetBlockStart: '-1px',
+                  insetInlineEnd: '-1px',
+                  pointerEvents: 'none',
+                }}
+              />
+            )}
           </span>
         </EuiFlexItem>
       )}

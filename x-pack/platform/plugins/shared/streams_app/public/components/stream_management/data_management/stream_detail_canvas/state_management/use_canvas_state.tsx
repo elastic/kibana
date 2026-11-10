@@ -8,13 +8,14 @@ import React, { useContext, useRef, useMemo } from 'react';
 import { createActorContext } from '@xstate/react';
 import type { XYPosition } from '@xyflow/react';
 import type { Unit } from '../../../../../services/unit_repository';
+import type { RoutingDiagnostic } from '../../../../../services/unit_diagnostics';
 import type { ProcessingNodeRef, UnitLine } from '../../../../../services/unit_graph';
+import type { RoutingFlyoutTarget } from '../../../../stream_routing_flyout/state_management/routing_flyout_machine';
 import type { ProcessingStepPosition } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
 import type {
   CanvasCreateHistoryHandlers,
   CanvasFlyoutKind,
   CanvasStateServiceDeps,
-  RouteEditModes,
 } from './types';
 import { canvasStateMachine, createCanvasMachineImplementations } from './canvas_state_machine';
 
@@ -106,8 +107,14 @@ export const useCanvasNodePositions = () => {
 };
 
 export const useCanvasRoutingFlyout = () => {
-  return useCanvasStateSelector((state) => state.context.editingRoute);
+  return useCanvasStateSelector((state) => state.context.routingFlyout);
 };
+
+const NO_ROUTING_DIAGNOSTICS: RoutingDiagnostic[] = [];
+
+/** Diagnostics of the last failed save that point at routing nodes. */
+export const useCanvasRoutingDiagnostics = (): RoutingDiagnostic[] =>
+  useCanvasStateSelector((state) => state.context.routingDiagnostics ?? NO_ROUTING_DIAGNOSTICS);
 
 export const useCanvasProcessingFlyout = () => {
   return useCanvasStateSelector((state) => state.context.processingFlyout);
@@ -140,11 +147,12 @@ export const useCanvasEvents = () => {
       changeUnitConnection: (unitDefinition: Unit) => {
         service.send({ type: 'unit.stage', unitDefinition });
       },
-      openRoutingFlyout: (edgeId: string, mode: RouteEditModes) => {
-        service.send({ type: 'routing.edit.open', edgeId, mode });
+      /** `readOnly` opens the rules without editing, for users who cannot manage the stream. */
+      openRoutingFlyout: (target: RoutingFlyoutTarget, readOnly = false) => {
+        service.send({ type: 'routing.open', target, readOnly });
       },
       closeRoutingFlyout: () => {
-        service.send({ type: 'routing.edit.close' });
+        service.send({ type: 'routing.close' });
       },
       openProcessingFlyout: (slot: ProcessingNodeRef, position?: ProcessingStepPosition) => {
         service.send({ type: 'processing.open', slot, position });

@@ -339,6 +339,7 @@ export const importPluginOverrides: OxlintOverride[] = [
         'kbn-evals-suite-hunt-watch',
         'kbn-evals-suite-lead-generation',
         'kbn-evals-suite-security-alert-triage',
+        'kbn-evals-suite-security-persona-matrix',
         'security-mitre-attack-server',
       ].map((pkg) => `x-pack/solutions/security/packages/${pkg}`)
     ),

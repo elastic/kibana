@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EUI_COMPONENT_PREFIX, IGNORED_COMPONENT_NAME_PARTS, LEGACY_ROOT_TAG } from './constants';
+import {
+  EUI_COMPONENT_PREFIX,
+  IGNORED_COMPONENT_NAMES,
+  IGNORED_COMPONENT_NAME_PARTS,
+  LEGACY_ROOT_TAG,
+} from './constants';
 import { getFiberName } from './get_fiber_name';
 import type { ReactFiberNode, ReactFiberRoot } from './types';
 
@@ -33,6 +38,7 @@ export const isComponentFiber = (fiber: ReactFiberNode): boolean => isComponentT
 export const isEuiComponentName = (name: string): boolean => name.startsWith(EUI_COMPONENT_PREFIX);
 
 export const isIgnoredComponentName = (name: string): boolean =>
+  IGNORED_COMPONENT_NAMES.includes(name) ||
   IGNORED_COMPONENT_NAME_PARTS.some((part) => name.includes(part));
 
 /**

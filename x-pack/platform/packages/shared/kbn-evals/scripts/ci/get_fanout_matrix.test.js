@@ -288,6 +288,37 @@ describe('buildFanoutMatrix - override / no-config parity', () => {
     ]);
   });
 
+  it("carries a shard's judge onto each of its steps, PR and weekly", () => {
+    const suiteInfo = {
+      shards: [
+        { id: 's1', specFiles: [DISCOVERY] },
+        { id: 's2', specFiles: [QUERY_GEN], judge: 'eis-c' },
+      ],
+      specModelGroups: [{ files: [QUERY_GEN], models: ['eis/a'] }],
+      weeklyEisModelGroups: ['eis/a', 'eis/b'],
+    };
+    const build = (perSpec) =>
+      buildFanoutMatrix({
+        connectors: CONNECTORS,
+        suiteInfo,
+        requestedModelGroups: ['eis/a', 'eis/b'],
+        perSpec,
+        grepOverride: false,
+      });
+
+    expect(build(false)).toEqual([
+      { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY] },
+      { connectorId: 'eis-b', shardId: 's1', specFiles: [DISCOVERY] },
+      { connectorId: 'eis-a', shardId: 's2', specFiles: [QUERY_GEN], judge: 'eis-c' },
+      { connectorId: 'eis-b', shardId: 's2', specFiles: [QUERY_GEN], judge: 'eis-c' },
+    ]);
+    expect(build(true)).toEqual([
+      { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY] },
+      { connectorId: 'eis-b', shardId: 's1', specFiles: [DISCOVERY] },
+      { connectorId: 'eis-a', shardId: 's2', specFiles: [QUERY_GEN], judge: 'eis-c' },
+    ]);
+  });
+
   it('selects every provisioned connector for an "all" request', () => {
     const rows = buildFanoutMatrix({
       connectors: CONNECTORS,
@@ -318,5 +349,18 @@ describe('formatFanoutMatrix', () => {
     expect(line).toBe('{"connectorId":"eis-a","shardId":"","specFiles":[]}');
     // The JSONL round-trips through the same fields run_suite.sh reads with jq.
     expect(JSON.parse(line)).toEqual({ connectorId: 'eis-a', shardId: '', specFiles: [] });
+  });
+
+  it('writes judge only for a row that has one', () => {
+    const rows = [
+      { connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY], judge: 'eis-c' },
+      { connectorId: 'eis-b', shardId: 's2', specFiles: [QUERY_GEN] },
+    ];
+
+    expect(
+      formatFanoutMatrix(rows)
+        .split('\n')
+        .map((line) => JSON.parse(line))
+    ).toEqual(rows);
   });
 });

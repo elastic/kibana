@@ -70,10 +70,30 @@ describe('TableActionsPopover', () => {
       />
     );
     fireEvent.click(result.getByTestId('table-actions-icon-button'));
-    expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
-    expect(result.getByTestId('table-actions-cancel')).toBeInTheDocument();
-    expect(result.getByTestId('table-actions-cancel-and-archive')).toBeInTheDocument();
-    expect(result.getByTestId('table-actions-delete')).toBeInTheDocument();
+
+    // management | lifecycle | delete — menu is portaled, so query the full document.
+    const menuOrder = Array.from(
+      result.baseElement.querySelectorAll(
+        [
+          '[data-test-subj="table-actions-edit"]',
+          '[data-test-subj="table-actions-copy-id"]',
+          '[data-test-subj="table-actions-cancel"]',
+          '[data-test-subj="table-actions-cancel-and-archive"]',
+          '[data-test-subj="table-actions-delete"]',
+          '[role="separator"]',
+        ].join(', ')
+      )
+    ).map((el) => el.getAttribute('data-test-subj') ?? '|');
+
+    expect(menuOrder).toEqual([
+      'table-actions-edit',
+      'table-actions-copy-id',
+      '|',
+      'table-actions-cancel',
+      'table-actions-cancel-and-archive',
+      '|',
+      'table-actions-delete',
+    ]);
   });
 
   test('it shows the correct actions when a maintenance window is upcoming', () => {
