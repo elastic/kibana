@@ -499,6 +499,62 @@ describe('useVarGroupSelections', () => {
         var_group_selections: { auth_method: 'api_key', log_group_source: 'log_group_name' },
       });
     });
+
+    it('should apply policy effects when a stale selection is normalized on mount', () => {
+      // Combination of the stale-selection normalization with the policy
+      // effects the mount write must apply (upstream #303565): the
+      // normalized selection is the agentless default, and its support-flag
+      // var starts undefined on the policy, so it must be set here.
+      const providerVarGroups: RegistryVarGroup[] = [
+        {
+          name: 'credential_type',
+          title: 'Setup Access',
+          selector_title: 'Preferred method',
+          required: true,
+          options: [
+            {
+              name: 'identity_federation',
+              title: 'Identity Federation',
+              vars: ['role_arn', 'supports_identity_federation'],
+              provider: 'aws',
+              hide_in_deployment_modes: ['default'],
+            },
+            {
+              name: 'direct_access_key',
+              title: 'Direct Access Keys',
+              vars: ['access_key_id', 'secret_access_key'],
+            },
+          ],
+        },
+      ];
+
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: providerVarGroups,
+          savedSelections: { credential_type: 'saml' },
+          isAgentlessEnabled: true,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              role_arn: { type: 'text', value: undefined },
+              supports_identity_federation: { type: 'bool', value: undefined },
+            },
+          } as any,
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ credential_type: 'identity_federation' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          var_group_selections: { credential_type: 'identity_federation' },
+          supports_cloud_connector: true,
+          vars: expect.objectContaining({
+            supports_identity_federation: { type: 'bool', value: true },
+          }),
+        })
+      );
+    });
   });
 
   describe('initialization effect', () => {

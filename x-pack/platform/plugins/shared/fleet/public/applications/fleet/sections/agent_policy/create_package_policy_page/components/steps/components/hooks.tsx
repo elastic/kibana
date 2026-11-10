@@ -224,20 +224,22 @@ export function useVarGroupSelections({
       : derived;
   }, [sanitizedSavedSelections, deriveSelections]);
 
-  // Initialize on mount if not already set, or when a stale saved selection
-  // was normalized away: persist the derived selections so the stored
-  // policy agrees with what the form shows and what validation checks.
-  // (sanitizeVarGroupSelections returns the input object unchanged when
-  // nothing was dropped, so reference equality tells us whether any
-  // selection was stale.)
+  // Initialize on mount if not already set. The default selection must apply the
+  // same policy effects as a user selection: a required var_group makes the selected
+  // option's vars required, and the support flag var (e.g. supports_identity_federation)
+  // is only ever populated by those effects. Without them a fresh agentless policy
+  // fails validation until the user toggles the selector away and back.
   useEffect(() => {
-    if (varGroups && varGroups.length > 0) {
-      const needsInit = !savedSelections || sanitizedSavedSelections !== savedSelections;
-      if (needsInit && Object.keys(selections).length > 0) {
-        onSelectionsChange({ var_group_selections: selections });
+    if (varGroups && varGroups.length > 0 && !savedSelections) {
+      const derived = deriveSelections();
+      if (Object.keys(derived).length > 0) {
+        const policyEffects = packagePolicy
+          ? buildVarGroupPolicyUpdates(packagePolicy, derived, varGroups)
+          : null;
+        onSelectionsChange({ var_group_selections: derived, ...(policyEffects || {}) });
       }
     }
-  }, [varGroups, savedSelections, sanitizedSavedSelections, selections, onSelectionsChange]);
+  }, [varGroups, savedSelections, onSelectionsChange, deriveSelections, packagePolicy]);
 
   // Handle selection change with policy effects computation
   const handleSelectionChange = useCallback(
@@ -278,6 +280,31 @@ export function useVarGroupSelections({
     },
     [sanitizedSavedSelections, selections, onSelectionsChange, packagePolicy, varGroups, streamVars]
   );
+
+  // Persist the normalized selections when a stale saved selection was
+  // dropped, so the stored policy agrees with what the form shows and what
+  // validation checks. This lives after handleSelectionChange (rather than
+  // next to the mount effect above) because that effect is also touched by
+  // upstream; keeping this write in its own block, separated by the
+  // selection-change handler, avoids an adjacent-change merge conflict.
+  // It only runs when something is saved but stale: the mount effect above
+  // handles the nothing-saved case. The same policy effects apply here as
+  // to a user selection. (sanitizeVarGroupSelections returns the input
+  // object unchanged when nothing was dropped, so reference equality tells
+  // us whether any selection was stale.)
+  useEffect(() => {
+    if (!varGroups || varGroups.length === 0) return;
+    if (!savedSelections || sanitizedSavedSelections === savedSelections) return;
+    if (Object.keys(selections).length === 0) return;
+    const policyEffects =
+      packagePolicy && varGroups
+        ? buildVarGroupPolicyUpdates(packagePolicy, selections, varGroups)
+        : null;
+    onSelectionsChange({
+      var_group_selections: selections,
+      ...(policyEffects || {}),
+    });
+  }, [varGroups, savedSelections, sanitizedSavedSelections, selections, onSelectionsChange, packagePolicy]);
 
   return { selections, handleSelectionChange };
 }
