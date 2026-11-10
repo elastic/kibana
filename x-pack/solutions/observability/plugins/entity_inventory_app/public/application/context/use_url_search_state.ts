@@ -55,7 +55,8 @@ const UrlSearchStateRT = rt.partial({
   ]),
 });
 
-const keepDefault = <T>(value: T, fallback: T): T => (isEqual(value, fallback) ? fallback : value);
+const reuseDefaultIfEqual = <T>(value: T, fallback: T): T =>
+  isEqual(value, fallback) ? fallback : value;
 
 const sanitize = (
   decoded: rt.TypeOf<typeof UrlSearchStateRT>,
@@ -69,13 +70,13 @@ const sanitize = (
     decoded.query && !validateQuery(decoded.query, uiSettings) ? decoded.query : DEFAULT_QUERY;
 
   return {
-    dateRange: keepDefault(dateRange, DEFAULT_URL_SEARCH_STATE.dateRange),
-    query: keepDefault(query, DEFAULT_URL_SEARCH_STATE.query),
-    filters: keepDefault(
+    dateRange: reuseDefaultIfEqual(dateRange, DEFAULT_URL_SEARCH_STATE.dateRange),
+    query: reuseDefaultIfEqual(query, DEFAULT_URL_SEARCH_STATE.query),
+    filters: reuseDefaultIfEqual(
       (decoded.filters ?? []).filter(isFilter),
       DEFAULT_URL_SEARCH_STATE.filters
     ),
-    filterControls: keepDefault(
+    filterControls: reuseDefaultIfEqual(
       decoded.filterControls ?? EMPTY_SELECTION,
       DEFAULT_URL_SEARCH_STATE.filterControls
     ),
@@ -94,7 +95,7 @@ const readUrlSearchState = (value: string | null | undefined, uiSettings: IUiSet
   try {
     const decoded = UrlSearchStateRT.decode(decode(value));
     return isRight(decoded) ? sanitize(decoded.right, uiSettings) : undefined;
-  } catch (error) {
+  } catch {
     return undefined;
   }
 };
@@ -126,21 +127,24 @@ export const useUrlSearchState = (): [UrlSearchState, (patch: Partial<UrlSearchS
     [history]
   );
 
-  const update = useCallback(
-    (patch: Partial<UrlSearchState>) =>
-      write({
-        ...(readUrlSearchState(getStateParam(history.location.search), uiSettings) ??
-          DEFAULT_URL_SEARCH_STATE),
-        ...patch,
-      }),
-    [history, uiSettings, write]
+  const readCurrent = useCallback(
+    () => readUrlSearchState(getStateParam(history.location.search), uiSettings),
+    [history, uiSettings]
   );
 
-  useEffect(() => {
+  const update = useCallback(
+    (patch: Partial<UrlSearchState>) =>
+      write({ ...(readCurrent() ?? DEFAULT_URL_SEARCH_STATE), ...patch }),
+    [readCurrent, write]
+  );
+
+  const writeDefaultsWhenMissing = useCallback(() => {
     if (!urlState) {
       write(DEFAULT_URL_SEARCH_STATE);
     }
   }, [urlState, write]);
+
+  useEffect(writeDefaultsWhenMissing, [writeDefaultsWhenMissing]);
 
   return [urlState ?? DEFAULT_URL_SEARCH_STATE, update];
 };

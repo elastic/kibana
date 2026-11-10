@@ -80,6 +80,21 @@ describe('useUrlSearchState', () => {
       });
     });
 
+    it('keeps the same state objects when an unrelated parameter changes', () => {
+      const { result, history } = renderUrlState();
+      const [before] = result.current;
+
+      act(() => {
+        history.replace({ ...history.location, search: `${history.location.search}&other=value` });
+      });
+
+      const [after] = result.current;
+      expect(after.dateRange).toBe(before.dateRange);
+      expect(after.query).toBe(before.query);
+      expect(after.filters).toBe(before.filters);
+      expect(after.filterControls).toBe(before.filterControls);
+    });
+
     it('replaces an invalid _a parameter with the default state', () => {
       const { result, history } = renderUrlState('/kubernetes?_a=(dateRange:foo)');
       const [state] = result.current;
