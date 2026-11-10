@@ -76,6 +76,8 @@ export const useTriggerEventInvestigation = ({
       });
     },
     onSuccess: ({ investigation_id: investigationId }, event) => {
+      // The events list polls for a minute after a start, until the new investigation is listed.
+      markInvestigationStarted(queryClient);
       toasts.addSuccess({
         title: TRIGGER_SUCCESS_TOAST_TITLE,
         text: TRIGGER_SUCCESS_TOAST_TEXT,
