@@ -91,16 +91,36 @@ export type ProvisioningCallbackReceiveResult =
   /** Fields are individually well-formed but disagree with each other. */
   | { outcome: 'invalid'; message: string };
 
-/** What the audit log says about each outcome of a report; `invalid` carries its own message. */
-const RECEIVE_OUTCOME_REASONS: Record<
+/** Audit log entry for each outcome of a report. The `invalid` message comes from the check that failed. */
+const REPORT_AUDIT: Record<
   Exclude<ProvisioningCallbackReceiveResult['outcome'], 'invalid'>,
-  string
+  { message: string; type: string; outcome: string }
 > = {
-  received: 'report accepted',
-  receiving: 'same report already being applied',
-  not_found: 'no such record, or the token is not the one bound to it',
-  conflict: 'different values already received for this record',
-  gone: 'record expired or cancelled',
+  received: {
+    message: 'Provisioning callback report accepted',
+    type: 'change',
+    outcome: 'success',
+  },
+  receiving: {
+    message: 'Provisioning callback report already being applied',
+    type: 'info',
+    outcome: 'success',
+  },
+  not_found: {
+    message: 'Provisioning callback report rejected: unknown record or token',
+    type: 'denied',
+    outcome: 'failure',
+  },
+  conflict: {
+    message: 'Provisioning callback report rejected: different values already received',
+    type: 'denied',
+    outcome: 'failure',
+  },
+  gone: {
+    message: 'Provisioning callback report rejected: record expired or cancelled',
+    type: 'denied',
+    outcome: 'failure',
+  },
 };
 
 const RECEIVED_FIELDS: Array<keyof CloudConnectorCallbackReceivedValues> = [
@@ -296,16 +316,61 @@ class ProvisioningCallbackService {
     id: string,
     input: ProvisioningCallbackReceiveInput
   ): Promise<ProvisioningCallbackReceiveResult> {
-    const result = await this.judgeReport(soClient, id, input);
-    // Every outcome is audited, not only the one that creates the identity: a rejected report,
-    // such as a second role for the same launch, is what an auditor looks for. The reported
-    // values are not secrets; the token is never written.
-    auditLoggingService.writeCustomAuditLog({
-      message: `Provisioning callback report [id=${id}] [outcome=${result.outcome}] [reason=${
-        result.outcome === 'invalid' ? result.message : RECEIVE_OUTCOME_REASONS[result.outcome]
-      }] [role_arn=${input.payload.role_arn}] [stack_arn=${input.payload.stack_arn}]`,
-    });
+    let result: ProvisioningCallbackReceiveResult;
+    try {
+      result = await this.judgeReport(soClient, id, input);
+    } catch (error) {
+      this.auditReport(id, input.payload, {
+        message: 'Provisioning callback report could not be applied',
+        type: 'error',
+        outcome: 'failure',
+        error,
+      });
+      throw error;
+    }
+    if (result.outcome === 'not_found') {
+      // The caller was not admitted, so nothing it sent is trusted enough to be recorded.
+      this.auditReport(undefined, undefined, REPORT_AUDIT.not_found);
+    } else if (result.outcome === 'invalid') {
+      this.auditReport(id, input.payload, {
+        message: `Provisioning callback report rejected: ${result.message}`,
+        type: 'denied',
+        outcome: 'failure',
+      });
+    } else {
+      this.auditReport(id, input.payload, REPORT_AUDIT[result.outcome]);
+    }
     return result;
+  }
+
+  /**
+   * The caller's values go in structured fields, never in the message, so a report cannot
+   * write its own text into the audit log. The token is never written.
+   */
+  private auditReport(
+    id: string | undefined,
+    payload: CloudConnectorCallbackReceivedValues | undefined,
+    {
+      message,
+      type,
+      outcome,
+      error,
+    }: { message: string; type: string; outcome: string; error?: Error }
+  ) {
+    auditLoggingService.writeCustomAuditLog({
+      message,
+      event: {
+        action: 'provisioning_callback_report',
+        category: ['web'],
+        type: [type],
+        outcome,
+      },
+      ...(id
+        ? { kibana: { saved_object: { type: PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE, id } } }
+        : {}),
+      ...(payload ? { labels: { role_arn: payload.role_arn, stack_arn: payload.stack_arn } } : {}),
+      ...(error ? { error: { message: error.message } } : {}),
+    });
   }
 
   private async judgeReport(

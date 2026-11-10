@@ -497,9 +497,19 @@ describe('provisioningCallbackService', () => {
       expect(soClient.update).not.toHaveBeenCalled();
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledTimes(1);
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `Provisioning callback report [id=cb-1] [outcome=not_found] [reason=no such record, or the token is not the one bound to it] [role_arn=${ROLE_ARN}] [stack_arn=${STACK_ARN}]`,
+        message: 'Provisioning callback report rejected: unknown record or token',
+        event: {
+          action: 'provisioning_callback_report',
+          category: ['web'],
+          type: ['denied'],
+          outcome: 'failure',
+        },
       });
-      expect(JSON.stringify(mockedAudit.writeCustomAuditLog.mock.calls)).not.toContain(OTHER_TOKEN);
+      // Nothing the caller sent is written: not the token, not the id, not the ARNs.
+      const written = JSON.stringify(mockedAudit.writeCustomAuditLog.mock.calls);
+      expect(written).not.toContain(OTHER_TOKEN);
+      expect(written).not.toContain('cb-1');
+      expect(written).not.toContain(ROLE_ARN);
     });
 
     it('is not_found when no token was presented', async () => {
@@ -545,7 +555,15 @@ describe('provisioningCallbackService', () => {
       expect(soClient.update).not.toHaveBeenCalled();
       expect(cloudConnectorService.create).not.toHaveBeenCalled();
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `Provisioning callback report [id=cb-1] [outcome=gone] [reason=record expired or cancelled] [role_arn=${ROLE_ARN}] [stack_arn=${STACK_ARN}]`,
+        message: 'Provisioning callback report rejected: record expired or cancelled',
+        event: {
+          action: 'provisioning_callback_report',
+          category: ['web'],
+          type: ['denied'],
+          outcome: 'failure',
+        },
+        kibana: { saved_object: { type: PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE, id: 'cb-1' } },
+        labels: { role_arn: ROLE_ARN, stack_arn: STACK_ARN },
       });
     });
 
@@ -608,7 +626,15 @@ describe('provisioningCallbackService', () => {
         message: `Provisioning callback received [id=cb-1] [cloud_connector_id=cc-1] [role_arn=${ROLE_ARN}]`,
       });
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `Provisioning callback report [id=cb-1] [outcome=received] [reason=report accepted] [role_arn=${ROLE_ARN}] [stack_arn=${STACK_ARN}]`,
+        message: 'Provisioning callback report accepted',
+        event: {
+          action: 'provisioning_callback_report',
+          category: ['web'],
+          type: ['change'],
+          outcome: 'success',
+        },
+        kibana: { saved_object: { type: PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE, id: 'cb-1' } },
+        labels: { role_arn: ROLE_ARN, stack_arn: STACK_ARN },
       });
       expect(logger.info).toHaveBeenCalledWith(
         'Provisioning callback received [id=cb-1] [cloud_connector_id=cc-1]'
@@ -900,6 +926,18 @@ describe('provisioningCallbackService', () => {
         { status: 'pending' },
         { version: 'v2' }
       );
+      expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
+        message: 'Provisioning callback report could not be applied',
+        event: {
+          action: 'provisioning_callback_report',
+          category: ['web'],
+          type: ['error'],
+          outcome: 'failure',
+        },
+        kibana: { saved_object: { type: PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE, id: 'cb-1' } },
+        labels: { role_arn: ROLE_ARN, stack_arn: STACK_ARN },
+        error: { message: 'Error creating cloud connector in Fleet, boom' },
+      });
     });
 
     it('leaves the record alone when a concurrent attempt finished it before the release', async () => {
@@ -969,7 +1007,15 @@ describe('provisioningCallbackService', () => {
       expect(result).toMatchObject({ outcome: 'conflict' });
       expect(soClient.update).not.toHaveBeenCalled();
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `Provisioning callback report [id=cb-1] [outcome=conflict] [reason=different values already received for this record] [role_arn=arn:aws:iam::123456789012:role/another] [stack_arn=${STACK_ARN}]`,
+        message: 'Provisioning callback report rejected: different values already received',
+        event: {
+          action: 'provisioning_callback_report',
+          category: ['web'],
+          type: ['denied'],
+          outcome: 'failure',
+        },
+        kibana: { saved_object: { type: PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE, id: 'cb-1' } },
+        labels: { role_arn: 'arn:aws:iam::123456789012:role/another', stack_arn: STACK_ARN },
       });
     });
   });
