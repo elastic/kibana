@@ -269,7 +269,7 @@ export const runWatchdogWorker = (
               profilerStartMs,
               sampledMs: sampled,
               coverage,
-              profilingActiveMs: nowMs - requestedAt,
+              captureDurationMs: nowMs - requestedAt,
               samples,
               nodes: profile.nodes.length,
               // Read while the profile is still held, so it includes the profile.

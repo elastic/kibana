@@ -490,7 +490,7 @@ describe('runWatchdogWorker', () => {
         profilerStartMs: expect.any(Number),
         sampledMs: 2_000,
         coverage: 1,
-        profilingActiveMs: 1_025,
+        captureDurationMs: 1_025,
         samples: 3,
         nodes: 3,
         heapUsed: 1234,
@@ -720,7 +720,7 @@ describe('runWatchdogWorker', () => {
       expect(lastStats().profiling.profilingActiveMs).toBe(1_000);
       resume();
       await settle();
-      expect(profileMeta().profilingActiveMs).toBe(2_025);
+      expect(profileMeta().captureDurationMs).toBe(2_025);
       idle(STATS_INTERVAL_MS);
       expect(lastStats().profiling.profilingActiveMs).toBe(1_025);
     });

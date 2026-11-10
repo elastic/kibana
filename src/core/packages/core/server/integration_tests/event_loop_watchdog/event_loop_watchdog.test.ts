@@ -48,7 +48,7 @@ interface WorkerLogLine {
         profilerStartMs: number;
         sampledMs: number;
         coverage: number;
-        profilingActiveMs: number;
+        captureDurationMs: number;
         samples: number;
         nodes: number;
         heapUsed: number;
@@ -332,7 +332,7 @@ describe('event loop watchdog in a child process', () => {
       expect(profile?.samples).toBeGreaterThan(50);
       expect(profile?.coverage).toBeGreaterThan(0);
       expect(profile?.coverage).toBeLessThanOrEqual(1);
-      expect(profile?.profilingActiveMs).toBeGreaterThan(0);
+      expect(profile?.captureDurationMs).toBeGreaterThan(0);
       expect(restarts(result)).toEqual([]);
     }, 120_000);
 

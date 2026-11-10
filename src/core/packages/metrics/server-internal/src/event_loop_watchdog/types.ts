@@ -63,7 +63,7 @@ export interface ProfileLogMeta extends LogMeta {
         /** Share of the block, as of the stop, covered by samples: `sampledMs / blockedMs`, at most 1. */
         coverage: number;
         /** Time from the request until the profile reached the worker. */
-        profilingActiveMs: number;
+        captureDurationMs: number;
         /** Number of CPU samples in the profile. */
         samples: number;
         /** Number of distinct call-stack frames in the profile. */
