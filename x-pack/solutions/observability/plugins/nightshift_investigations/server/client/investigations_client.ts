@@ -676,6 +676,7 @@ export class NightshiftInvestigationsClient {
           : {}),
         context: {
           ...prepared.context,
+          nightshift_automation_id: automationId,
           is_follow_up: isFollowUp,
           source: resolvedSubject.type,
           [`${resolvedSubject.type}_id`]: resolvedSubject.id,
@@ -717,7 +718,10 @@ export class NightshiftInvestigationsClient {
       }/${subject.id}, execution_id=${executionId}`
     );
 
-    return { investigation_id: investigationId };
+    return {
+      investigation_id: investigationId,
+      ...(automationId ? { execution_id: executionId } : {}),
+    };
   }
 
   /**

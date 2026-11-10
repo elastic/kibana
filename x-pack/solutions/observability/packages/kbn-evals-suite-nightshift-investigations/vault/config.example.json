@@ -11,8 +11,8 @@
   },
   "nightshiftOrcaEs": {
     "url": "https://REPLACE_ME:443",
-    "apiKey": "REPLACE_ME",
-    "noFlagsApiKey": "REPLACE_ME"
+    "username": "nightshift-orcabench-eval",
+    "password": "REPLACE_ME"
   },
   "nightshiftKnowledge": {
     "default": {

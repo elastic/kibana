@@ -309,6 +309,27 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(investigationQuotaCallback).toHaveBeenCalledWith('manual');
   });
 
+  it.each([undefined, 'a1'])(
+    'records the owning automation on its investigation execution and rejects a caller-supplied association: %s',
+    async (automationId) => {
+      mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockManagement.runWorkflow.mockResolvedValue('exec-123');
+      const result = await makeClient().start(
+        {
+          subject: { type: 'manual', id: 'manual' },
+          trigger_type: 'manual',
+          message: 'Review service health.',
+          context: { nightshift_automation_id: 'forged' },
+        },
+        { automationId, entryPoint: 'automation' }
+      );
+      expect(mockManagement.runWorkflow.mock.calls[0][2].context.nightshift_automation_id).toBe(
+        automationId
+      );
+      expect(result.execution_id).toBe(automationId ? 'exec-123' : undefined);
+    }
+  );
+
   it('keeps operator instructions outside the alert evidence and leaves default briefs unchanged', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
