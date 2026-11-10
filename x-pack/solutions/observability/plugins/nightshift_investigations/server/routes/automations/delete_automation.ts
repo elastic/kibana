@@ -33,6 +33,7 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
     getWorkflowsManagement,
     getInvestigatorServiceAccountService,
     context,
+    getAutomationWorkflowService,
   }) => {
     const workflowsManagement = getWorkflowsManagement();
 
@@ -40,47 +41,49 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
       (await context.core).savedObjects.client.getCurrentNamespace() ?? DEFAULT_SPACE_ID;
     const soClient = getAutomationsSoClient(request, spaceId);
 
-    const existing = await soClient.get<NightshiftAutomationAttributes>(
-      NIGHTSHIFT_AUTOMATION_SO_TYPE,
-      params.path.id
-    );
+    return getAutomationWorkflowService().withLock(spaceId, params.path.id, async () => {
+      const existing = await soClient.get<NightshiftAutomationAttributes>(
+        NIGHTSHIFT_AUTOMATION_SO_TYPE,
+        params.path.id
+      );
 
-    // Delete the backing workflow first so it cannot fire after the SO is gone.
-    if (workflowsManagement && existing.attributes.workflowId) {
-      const { workflowId } = existing.attributes;
-      const workflow = await workflowsManagement.management
-        .getWorkflow(workflowId, spaceId, request)
-        .catch(() => null);
-      // Only a workflow read as unbound may outlive its automation. A workflow bound to a service
-      // account keeps running as that account; so may one whose binding can't be read (lookup
-      // failed, or the caller can't read it). For those, a failed delete fails the request and
-      // keeps the automation. Deleting a workflow that no longer exists succeeds.
-      const isKnownUnbound =
-        Boolean(workflow?.definition) && !workflow?.definition?.settings?.run_as;
-      if (!isKnownUnbound) {
-        // Changing a bound workflow requires manage_security; refuse before deleting anything.
-        if (workflow?.definition?.settings?.run_as) {
-          await getInvestigatorServiceAccountService().assertCanModifyBoundAutomations(request);
-        }
-        await workflowsManagement.management.deleteWorkflows([workflowId], spaceId, request);
-      } else {
-        // Best-effort: if workflow deletion fails the SO is still removed; an orphaned unbound
-        // workflow is inert because the automation SO is the source of truth for routing.
-        try {
+      // Delete the backing workflow first so it cannot fire after the SO is gone.
+      if (workflowsManagement && existing.attributes.workflowId) {
+        const { workflowId } = existing.attributes;
+        const workflow = await workflowsManagement.management
+          .getWorkflow(workflowId, spaceId, request)
+          .catch(() => null);
+        // Only a workflow read as unbound may outlive its automation. A workflow bound to a service
+        // account keeps running as that account; so may one whose binding can't be read (lookup
+        // failed, or the caller can't read it). For those, a failed delete fails the request and
+        // keeps the automation. Deleting a workflow that no longer exists succeeds.
+        const isKnownUnbound =
+          Boolean(workflow?.definition) && !workflow?.definition?.settings?.run_as;
+        if (!isKnownUnbound) {
+          // Changing a bound workflow requires manage_security; refuse before deleting anything.
+          if (workflow?.definition?.settings?.run_as) {
+            await getInvestigatorServiceAccountService().assertCanModifyBoundAutomations(request);
+          }
           await workflowsManagement.management.deleteWorkflows([workflowId], spaceId, request);
-        } catch {
-          // Intentionally swallowed — the SO delete below is the authoritative cleanup.
+        } else {
+          // Best-effort: if workflow deletion fails the SO is still removed; an orphaned unbound
+          // workflow is inert because the automation SO is the source of truth for routing.
+          try {
+            await workflowsManagement.management.deleteWorkflows([workflowId], spaceId, request);
+          } catch {
+            // Intentionally swallowed — the SO delete below is the authoritative cleanup.
+          }
         }
       }
-    }
 
-    try {
-      await soClient.delete(NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE, params.path.id);
-    } catch (error) {
-      if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) throw error;
-    }
-    await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, params.path.id);
+      try {
+        await soClient.delete(NIGHTSHIFT_AUTOMATION_BUDGET_SO_TYPE, params.path.id);
+      } catch (error) {
+        if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) throw error;
+      }
+      await soClient.delete(NIGHTSHIFT_AUTOMATION_SO_TYPE, params.path.id);
 
-    return {};
+      return {};
+    });
   },
 });

@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { listAutomationsRoute } from './list_automations';
 import { getAutomationRoute } from './get_automation';
-import { createRouteContext } from './test_helpers';
+import { createWorkflowService, createRouteContext } from './test_helpers';
 
 const savedObject = (id: string, author?: string) => ({
   id,
@@ -28,6 +28,7 @@ describe('list automations', () => {
       request: httpServerMock.createKibanaRequest(),
       params: {},
       getAutomationsSoClient: jest.fn().mockReturnValue({ find }),
+      getAutomationWorkflowService: createWorkflowService,
       context: createRouteContext(),
     } as never);
 
@@ -51,6 +52,7 @@ describe('get automation', () => {
       getAutomationsSoClient: jest
         .fn()
         .mockReturnValue({ get: jest.fn().mockResolvedValue(savedObject('automation-1', 'bob')) }),
+      getAutomationWorkflowService: createWorkflowService,
       context: createRouteContext(),
     } as never);
 

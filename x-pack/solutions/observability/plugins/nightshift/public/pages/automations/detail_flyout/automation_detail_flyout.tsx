@@ -71,6 +71,7 @@ import type { RunRange } from '../hooks/use_automation_usage';
 import { useGlobalLimit } from '../hooks/use_global_limit';
 import { AutomationUsageCell } from '../list/cells/usage_cell';
 import { RunsSparkline } from '../list/cells/runs_sparkline';
+import { AutomationWorkflowBadge, AutomationWorkflowWarning } from '../workflow_recovery';
 import { InfoStrip } from './info_strip';
 import { RunHistory, STATUSES, type Run } from './run_history';
 import { RunDetail } from './run_detail';
@@ -461,12 +462,18 @@ export const AutomationDetailFlyout = ({
                   <EuiSpacer size="s" />
                   <EuiBadgeGroup gutterSize="xs">
                     <EuiBadge color="hollow">{labels.title}</EuiBadge>
+                    <AutomationWorkflowBadge automation={automation} />
                     <EuiBadge color={automation.isEnabled ? 'success' : 'hollow'}>
                       {automation.isEnabled ? labels.enabled : statusLabels.paused}
                     </EuiBadge>
                   </EuiBadgeGroup>
                 </header>
                 <div css={{ padding: `${euiTheme.size.s} ${euiTheme.size.base}` }}>
+                  <AutomationWorkflowWarning
+                    automation={automation}
+                    canManage={canManage}
+                    editDisabledReason={editDisabledReason}
+                  />
                   <InfoStrip
                     items={[
                       {

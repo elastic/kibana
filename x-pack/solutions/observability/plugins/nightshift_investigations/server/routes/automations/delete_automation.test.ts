@@ -8,7 +8,11 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { deleteAutomationRoute } from './delete_automation';
-import { createRouteContext, createServiceAccountService } from './test_helpers';
+import {
+  createWorkflowService,
+  createRouteContext,
+  createServiceAccountService,
+} from './test_helpers';
 
 const { handler } = deleteAutomationRoute['DELETE /internal/nightshift/automations/{id}'];
 const soClient = savedObjectsClientMock.create();
@@ -22,6 +26,7 @@ const call = () =>
     getAutomationsSoClient: () => soClient,
     getWorkflowsManagement: () => ({ management: { deleteWorkflows, getWorkflow } }),
     getInvestigatorServiceAccountService: () => serviceAccountService,
+    getAutomationWorkflowService: createWorkflowService,
     context: createRouteContext(),
   } as never);
 

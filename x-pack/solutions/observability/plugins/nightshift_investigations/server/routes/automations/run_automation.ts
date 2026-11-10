@@ -71,21 +71,28 @@ export const runAutomationRoute = createNightshiftInvestigationsServerRoute({
     );
     const { workflowId } = automation;
     if (!workflowId)
-      throw badRequest('The backing workflow is missing. Save the automation again to repair it.');
-    const workflow = await management.getWorkflow(workflowId, spaceId, request);
-    if (!workflow?.definition || !workflow.valid) {
       throw badRequest(
-        'The backing workflow is missing or invalid. Save the automation again to repair it.'
+        'The backing workflow is missing. Use Repair to regenerate the backing workflow.'
+      );
+    const workflow = await management.getWorkflow(workflowId, spaceId, request);
+    if (!workflow) {
+      throw badRequest(
+        'The backing workflow could not be found or read. If it was deleted, use Repair; otherwise check workflow permissions.'
+      );
+    }
+    if (!workflow.definition || !workflow.valid) {
+      throw badRequest(
+        'The backing workflow is invalid. Save the automation to regenerate it before running it.'
       );
     }
     if (!serviceAccountId || workflow.definition.settings?.run_as !== serviceAccountId) {
       throw badRequest(
-        'The backing workflow is not bound to the Nightshift automations service account. Set up Nightshift service accounts and save the automation again.'
+        'The backing workflow is not bound to the Nightshift automations service account. Set up Nightshift service accounts and save the automation.'
       );
     }
     if (!workflow.enabled) {
       throw badRequest(
-        'The backing workflow is disabled. Save the automation again before running it.'
+        'The backing workflow is disabled. Use Repair and enable before running it.'
       );
     }
     const workflowExecutionId = await management.runWorkflow(

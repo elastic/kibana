@@ -198,6 +198,9 @@ export class WorkflowExecutionQueryService {
   ): Promise<WorkflowExecutionListDto> {
     const must: estypes.QueryDslQueryContainer[] = [
       ...(params.workflowId ? [{ term: { workflowId: params.workflowId } }] : []),
+      ...(params.workflowIds !== undefined
+        ? [{ terms: { workflowId: [...new Set(params.workflowIds)] } }]
+        : []),
       buildWorkflowExecutionsSpaceFilter(spaceId),
       ...(params.accessControlFilter ? [params.accessControlFilter] : []),
     ];

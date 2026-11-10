@@ -42,6 +42,12 @@ const automationAttributesSchemaV3 = schema.object({
   completions: schema.arrayOf(opaqueObject, { maxSize: 10 }),
 });
 
+const automationAttributesSchemaV4 = automationAttributesSchemaV3.extends({
+  previousWorkflowIds: schema.maybe(
+    schema.arrayOf(schema.string({ maxLength: 500 }), { maxSize: 1000 })
+  ),
+});
+
 export const nightshiftAutomationSavedObjectType: SavedObjectsType<NightshiftAutomationAttributes> =
   {
     name: NIGHTSHIFT_AUTOMATION_SO_TYPE,
@@ -62,6 +68,13 @@ export const nightshiftAutomationSavedObjectType: SavedObjectsType<NightshiftAut
       importableAndExportable: false,
     },
     modelVersions: {
+      4: {
+        changes: [],
+        schemas: {
+          create: automationAttributesSchemaV4,
+          forwardCompatibility: automationAttributesSchemaV4.extends({}, { unknowns: 'ignore' }),
+        },
+      },
       1: {
         changes: [],
         schemas: {

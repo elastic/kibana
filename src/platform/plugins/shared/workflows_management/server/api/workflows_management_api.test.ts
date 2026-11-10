@@ -382,6 +382,39 @@ describe('WorkflowsManagementApi', () => {
     });
   });
 
+  it('filters combined history against tombstone access in the requested space', async () => {
+    const workflow = await mockWorkflowsService.getWorkflow('workflow-123', 'default');
+    if (!workflow) throw new Error('Missing workflow fixture');
+    mockWorkflowsService.getWorkflowsByIds.mockResolvedValue([
+      { ...workflow, id: 'old' },
+      { ...workflow, id: 'current' },
+      { ...workflow, id: 'private' },
+    ]);
+    const access = await mockWorkflowsService.getAccessControl();
+    jest.mocked(access.checkAccess).mockImplementation(async ({ id }) => id !== 'private');
+    await api.getWorkflowExecutions(
+      { workflowIds: ['old', 'current', 'private', 'other-space'], request: mockRequest },
+      'my-space'
+    );
+    expect(mockWorkflowsService.getWorkflowsByIds).toHaveBeenCalledWith(
+      ['old', 'current', 'private', 'other-space'],
+      'my-space',
+      { includeDeleted: true, includeGlobal: false }
+    );
+    expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        accessControlFilter: { terms: { workflowId: ['old', 'current'] } },
+      }),
+      'my-space'
+    );
+    await expect(
+      api.getWorkflowExecutions(
+        { workflowId: 'old', workflowIds: ['current'], request: mockRequest },
+        'my-space'
+      )
+    ).rejects.toThrow('not both');
+  });
+
   it('applies access control in the query that reads the requested workflow fields', async () => {
     const access = await mockWorkflowsService.getAccessControl();
     const filter = { term: { 'access_control.access_mode': 'public' } };

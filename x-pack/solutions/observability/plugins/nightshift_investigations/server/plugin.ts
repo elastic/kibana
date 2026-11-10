@@ -37,6 +37,7 @@ import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { createIsNightshiftEnabledSync } from './is_nightshift_enabled';
 import { createGatedSandboxStart } from './sandbox_gate';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
+import { createAutomationWorkflowService } from './lib/automations/automation_workflow_service';
 import { createEnsureFailureSweep } from './lib/managed_workflows/ensure_failure_sweep';
 import { sweepInvestigationFailuresStepDefinition } from './step_definitions/sweep_investigation_failures';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
@@ -714,6 +715,7 @@ export class NightshiftInvestigationsPlugin
           getAlertsClient: this.getAlertsClient,
           getEpisodeLookup: this.getEpisodeLookup,
           getAutomationsSoClient: this.getAutomationsSoClient,
+          getAutomationWorkflowService: this.getAutomationWorkflowService,
           getWorkflowsManagement: () => this.workflowsManagement,
           getUserProfileService: async () => {
             const [start] = await core.getStartServices();
@@ -986,6 +988,18 @@ export class NightshiftInvestigationsPlugin
 
   private isServiceAccountExecutionEnabled = (): boolean =>
     this.security?.serviceAccounts.isEnabled() ?? false;
+
+  private getAutomationWorkflowService = () => {
+    if (!this.lockManager) throw new Error('Automation lock manager is not available');
+    return createAutomationWorkflowService({
+      getAutomationsSoClient: this.getAutomationsSoClient,
+      getWorkflowsManagement: () => this.workflowsManagement,
+      getInvestigatorServiceAccountService: this.getInvestigatorServiceAccountService,
+      isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
+      lockManager: this.lockManager,
+      logger: this.logger,
+    });
+  };
 
   /** One instance, so setups of a space queue behind each other across requests. */
   private getInvestigatorServiceAccountService = (): InvestigatorServiceAccountService => {

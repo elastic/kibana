@@ -1,0 +1,129 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { getEbtProps } from '@kbn/ebt-click';
+import { EuiBadge, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
+import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
+import {
+  type Automation,
+  useRefreshAutomations,
+  useRepairAutomation,
+} from '../../data/automations/use_automations';
+
+export const workflowRecoveryLabels = {
+  needsRepair: i18n.translate('xpack.nightshift.automations.workflow.needsRepair', {
+    defaultMessage: 'Needs repair',
+  }),
+  unknown: i18n.translate('xpack.nightshift.automations.workflow.unknown', {
+    defaultMessage: 'Unable to verify backing workflow',
+  }),
+  explanation: i18n.translate('xpack.nightshift.automations.workflow.explanation', {
+    defaultMessage:
+      'The backing workflow is missing or its enabled state has changed. Automatic investigations cannot run reliably. Repair the workflow to restore the saved configuration.',
+  }),
+  retry: i18n.translate('xpack.nightshift.automations.workflow.retry', {
+    defaultMessage: 'Retry',
+  }),
+};
+
+export const needsWorkflowRepair = (automation: Automation): boolean =>
+  automation.backingWorkflow?.state === 'missing' ||
+  automation.backingWorkflow?.state === 'out_of_sync';
+
+export const getRepairLabel = (automation: Automation): string =>
+  automation.isEnabled
+    ? i18n.translate('xpack.nightshift.automations.workflow.repairAndEnable', {
+        defaultMessage: 'Repair and enable',
+      })
+    : i18n.translate('xpack.nightshift.automations.workflow.repair', {
+        defaultMessage: 'Repair',
+      });
+
+export const AutomationWorkflowBadge = ({ automation }: { automation: Automation }) => {
+  const refresh = useRefreshAutomations();
+  if (needsWorkflowRepair(automation)) {
+    return (
+      <EuiBadge color="warning" data-test-subj="automationNeedsRepair">
+        {workflowRecoveryLabels.needsRepair}
+      </EuiBadge>
+    );
+  }
+  if (automation.backingWorkflow?.state === 'unknown') {
+    return (
+      <>
+        <EuiBadge color="hollow" data-test-subj="automationWorkflowUnknown">
+          {workflowRecoveryLabels.unknown}
+        </EuiBadge>
+        <EuiButtonEmpty
+          data-test-subj="nightshiftAutomationWorkflowBadgeButton"
+          size="xs"
+          {...getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.RETRY_AUTOMATION_WORKFLOW,
+            element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_LIST,
+          })}
+          onClick={() => refresh()}
+        >
+          {workflowRecoveryLabels.retry}
+        </EuiButtonEmpty>
+      </>
+    );
+  }
+  return null;
+};
+
+export const AutomationWorkflowWarning = ({
+  automation,
+  canManage,
+  editDisabledReason,
+}: {
+  automation: Automation;
+  canManage: boolean;
+  editDisabledReason?: string;
+}) => {
+  const repair = useRepairAutomation();
+  const refresh = useRefreshAutomations();
+  const needsRepair = needsWorkflowRepair(automation);
+  if (!needsRepair && automation.backingWorkflow?.state !== 'unknown') return null;
+  return (
+    <>
+      <KbnWarningCallout
+        title={needsRepair ? workflowRecoveryLabels.needsRepair : workflowRecoveryLabels.unknown}
+        text={needsRepair ? workflowRecoveryLabels.explanation : undefined}
+        data-test-subj="automationWorkflowWarning"
+        actionProps={{
+          primary: needsRepair
+            ? {
+                children: getRepairLabel(automation),
+                iconType: 'wrench',
+                disabled: !canManage,
+                title: editDisabledReason,
+                isLoading: repair.isLoading,
+                onClick: () => repair.mutate(automation),
+                'data-test-subj': 'repairAutomation',
+                ...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.REPAIR_AUTOMATION,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+                }),
+              }
+            : {
+                children: workflowRecoveryLabels.retry,
+                iconType: 'refresh',
+                onClick: () => refresh(),
+                ...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.RETRY_AUTOMATION_WORKFLOW,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_DETAIL_FLYOUT,
+                }),
+              },
+        }}
+      />
+      <EuiSpacer size="s" />
+    </>
+  );
+};

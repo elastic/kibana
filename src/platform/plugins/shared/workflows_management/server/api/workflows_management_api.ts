@@ -540,6 +540,14 @@ export class WorkflowsManagementApi {
     );
   }
 
+  /** Availability only, for ids obtained from a trusted consumer's already-authorized records. */
+  public async getWorkflowStates(
+    ids: string[],
+    spaceId: string
+  ): Promise<Array<{ id: string; enabled: boolean }>> {
+    return this.workflowsService.getWorkflowStates(ids, spaceId);
+  }
+
   public async findExistingWorkflowIds(ids: string[]): Promise<string[]> {
     return this.workflowsService.findExistingWorkflowIds(ids);
   }
@@ -1233,9 +1241,25 @@ export class WorkflowsManagementApi {
     params: SearchWorkflowExecutionsParams & { request: KibanaRequest },
     spaceId: string
   ): Promise<WorkflowExecutionListDto> {
+    if (params.workflowId !== undefined && params.workflowIds !== undefined) {
+      throw new Error('Specify either workflowId or workflowIds, not both.');
+    }
     const access = await this.workflowsService.getAccessControl();
     let accessControlFilter: estypes.QueryDslQueryContainer | undefined;
-    if (params.workflowId) {
+    if (params.workflowIds !== undefined) {
+      const workflows = await this.workflowsService.getWorkflowsByIds(params.workflowIds, spaceId, {
+        includeDeleted: true,
+        includeGlobal: false,
+      });
+      const readable = await Promise.all(
+        workflows.map(async (workflow) =>
+          (await access.checkAccess(workflow, 'read', params.request)) ? workflow.id : undefined
+        )
+      );
+      accessControlFilter = {
+        terms: { workflowId: readable.filter((id): id is string => id !== undefined) },
+      };
+    } else if (params.workflowId) {
       const workflow = await this.workflowsService.getWorkflow(params.workflowId, spaceId, {
         includeDeleted: true,
       });

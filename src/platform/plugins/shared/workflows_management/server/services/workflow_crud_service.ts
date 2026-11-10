@@ -570,6 +570,36 @@ export class WorkflowCrudService {
     }
   }
 
+  /** Reads only availability metadata for workflow ids supplied by a trusted server consumer. */
+  async getWorkflowStates(
+    ids: string[],
+    spaceId: string
+  ): Promise<Array<{ id: string; enabled: boolean }>> {
+    const uniqueIds = [...new Set(ids)];
+    if (uniqueIds.length === 0) return [];
+    const { must, must_not } = buildWorkflowFilters({
+      ids: uniqueIds,
+      space: { id: spaceId, includeGlobal: false },
+      deleted: 'not_deleted',
+    });
+    const response = await this.deps.workflowStorage.getClient().search({
+      query: { bool: { must, must_not } },
+      _source: ['enabled'],
+      size: uniqueIds.length,
+      track_total_hits: false,
+      allow_partial_search_results: false,
+    });
+    if (response.timed_out || response._shards.failed > 0) {
+      throw new Error('Could not verify workflow availability from an incomplete search.');
+    }
+    return response.hits.hits.map(({ _id, _source }) => {
+      if (!_id || typeof _source.enabled !== 'boolean') {
+        throw new Error('Could not verify incomplete workflow state metadata.');
+      }
+      return { id: _id, enabled: _source.enabled };
+    });
+  }
+
   async getWorkflowsByIds(
     ids: string[],
     spaceId: string,

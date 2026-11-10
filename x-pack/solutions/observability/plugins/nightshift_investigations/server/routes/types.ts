@@ -11,6 +11,7 @@ import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AutomationWorkflowService } from '../lib/automations/automation_workflow_service';
 import type { NightshiftInvestigationsClient } from '../client/investigations_client';
 import type { WikiPageStore } from '../wiki/page_store';
 import type {
@@ -65,6 +66,7 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getAlertsClient: GetAlertsClient;
   getEpisodeLookup: GetEpisodeLookup;
   getAutomationsSoClient: GetAutomationsSoClient;
+  getAutomationWorkflowService: () => AutomationWorkflowService;
   getWorkflowsManagement: GetWorkflowsManagement;
   getUserProfileService: () => Promise<CoreStart['userProfile']>;
   isUniversalAlertingAvailable: () => boolean;

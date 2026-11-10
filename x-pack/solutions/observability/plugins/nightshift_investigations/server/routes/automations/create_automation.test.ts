@@ -9,7 +9,11 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { parse } from 'yaml';
 import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
 import { createAutomationRoute } from './create_automation';
-import { createRouteContext, createServiceAccountService } from './test_helpers';
+import {
+  createWorkflowService,
+  createRouteContext,
+  createServiceAccountService,
+} from './test_helpers';
 
 const { handler, params } = createAutomationRoute['POST /internal/nightshift/automations'];
 
@@ -36,6 +40,7 @@ const call = (overrides: Record<string, unknown> = {}, user?: Record<string, str
     getWorkflowsManagement,
     isUniversalAlertingAvailable: () => true,
     getInvestigatorServiceAccountService: () => serviceAccountService,
+    getAutomationWorkflowService: createWorkflowService,
     context: createRouteContext(user),
   } as never);
 

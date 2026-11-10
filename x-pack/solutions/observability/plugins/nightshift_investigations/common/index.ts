@@ -306,3 +306,5 @@ export {
   type KnowledgePurgeResult,
   type KnowledgePurgeScope,
 } from './purge';
+
+export type { AutomationBackingWorkflow } from './automation_workflow';

@@ -13,3 +13,4 @@ export { deleteAutomationRoute } from './delete_automation';
 export { listAutomationRunsRoute } from './list_automation_runs';
 export { runAutomationRoute } from './run_automation';
 export { getAutomationRunActivityRoute } from './get_automation_run_activity';
+export { repairAutomationRoute } from './repair_automation';

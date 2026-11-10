@@ -70,6 +70,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
     isUniversalAlertingAvailable,
     getInvestigatorServiceAccountService,
     context,
+    getAutomationWorkflowService,
   }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
@@ -144,6 +145,8 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
       throw badRequest(`Failed to link workflow to automation: ${err.message}`);
     }
 
-    return { id: created.id, ...attributes, workflowId };
+    const automation = { id: created.id, ...attributes, workflowId };
+    const states = await getAutomationWorkflowService().getStates([automation], spaceId);
+    return { ...automation, backingWorkflow: states.get(created.id) };
   },
 });

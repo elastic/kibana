@@ -90,3 +90,11 @@ describe('nightshift automation saved object', () => {
     });
   });
 });
+
+it('loads existing records without historical associations and preserves server-owned history in version 4', () => {
+  const record = { ...baseV3, completions: [] };
+  expect(getSchemas('4')?.create?.validate(record)).toEqual(record);
+  expect(
+    getSchemas('4')?.create?.validate({ ...record, previousWorkflowIds: ['old'] })
+  ).toMatchObject({ previousWorkflowIds: ['old'] });
+});

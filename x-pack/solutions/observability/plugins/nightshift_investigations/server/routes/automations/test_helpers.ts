@@ -22,3 +22,13 @@ export const createServiceAccountService = () => ({
   resolveAutomationRunAs: jest.fn().mockResolvedValue('kibana/nightshift_automations'),
   assertCanModifyBoundAutomations: jest.fn().mockResolvedValue(undefined),
 });
+
+export const createWorkflowService = () => ({
+  withLock: jest.fn().mockImplementation((_spaceId, _id, callback) => callback()),
+  getStates: jest
+    .fn()
+    .mockImplementation(
+      async (automations) =>
+        new Map(automations.map(({ id }: { id: string }) => [id, { state: 'available' }]))
+    ),
+});

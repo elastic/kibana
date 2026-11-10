@@ -6,6 +6,7 @@
  */
 
 import type { AlertSeverity } from '@kbn/rule-data-utils';
+import type { AutomationBackingWorkflow } from '../../../common/automation_workflow';
 import type { PresetSchedule } from '../../../common/automation_schedule';
 import type { AlertSourceMode } from '../../../common/automation_limits';
 
@@ -74,6 +75,7 @@ export interface NightshiftAutomationAttributes {
   automationType: AutomationType;
   isEnabled: boolean;
   workflowId?: string;
+  previousWorkflowIds?: string[];
   trigger: NightshiftAutomationTrigger;
   execution: NightshiftAutomationExecution;
   completions: NightshiftAutomationCompletion[];
@@ -84,6 +86,7 @@ export interface NightshiftAutomationAttributes {
 
 export interface NightshiftAutomationRecord extends NightshiftAutomationAttributes {
   id: string;
+  backingWorkflow?: AutomationBackingWorkflow;
 }
 
 export interface NightshiftAutomationBudgetAttributes {

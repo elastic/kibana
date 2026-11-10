@@ -562,3 +562,50 @@ it.each(['missing', 'failed'])(
     expect(result.total).toBe(1);
   }
 );
+
+it('keeps investigation links from current and historical workflows on a combined page', async () => {
+  mockGet.mockResolvedValue({
+    attributes: { workflowId: 'new', previousWorkflowIds: ['old'], runtime: {} },
+  });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [
+      { id: 'new-run', workflowId: 'new', status: 'completed' },
+      { id: 'old-run', workflowId: 'old', status: 'completed' },
+    ],
+    total: 5,
+    page: 2,
+    size: 2,
+  });
+  mockSearchStepExecutions.mockImplementation(
+    async ({ workflowId, stepId, workflowExecutionIds }) => ({
+      results:
+        stepId === 'trigger_investigation'
+          ? workflowExecutionIds.map((id: string) => ({
+              workflowRunId: id,
+              output: { investigation_id: `${workflowId}-investigation` },
+            }))
+          : [],
+    })
+  );
+  const result = await call('auto-1', { page: 2, size: 2, startedAfter: '2026-11-01T00:00:00Z' });
+  expect(result).toMatchObject({
+    total: 5,
+    page: 2,
+    size: 2,
+    usedToday: 0,
+    runs: [
+      { id: 'new-run', investigationId: 'new-investigation' },
+      { id: 'old-run', investigationId: 'old-investigation' },
+    ],
+  });
+  expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
+    expect.objectContaining({
+      workflowIds: ['old', 'new'],
+      page: 2,
+      size: 2,
+      startedAfter: '2026-11-01T00:00:00Z',
+      request: mockRequest,
+    }),
+    'default'
+  );
+});

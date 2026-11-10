@@ -26,6 +26,8 @@ jest.mock('../../../data/automations/use_automations', () => ({
   useAutomationRunActivity: jest.fn(),
   useToggleAutomation: jest.fn(),
   useUpdateAutomation: jest.fn(),
+  useRepairAutomation: () => ({ mutate: jest.fn(), isLoading: false }),
+  useRefreshAutomations: () => jest.fn(),
 }));
 jest.mock('../../../data/run_quotas/use_significant_events_run_quotas', () => ({
   useRunQuotas: jest.fn(),

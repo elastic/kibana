@@ -11,6 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import type { Automation } from '../../../../data/automations/use_automations';
 import { getTriggerDisplay } from '../../utils/trigger_display';
+import { AutomationWorkflowBadge } from '../../workflow_recovery';
 import { AutomationTags } from './tags_badge';
 
 export const AutomationNameCell = ({
@@ -43,6 +44,9 @@ export const AutomationNameCell = ({
         >
           {automation.name}
         </EuiLink>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <AutomationWorkflowBadge automation={automation} />
       </EuiFlexItem>
       {tags.length > 0 && (
         <EuiFlexItem grow={false}>

@@ -18,6 +18,14 @@ export const getRunAutomationDisabledReason = (
   automation: Automation,
   activity: { data?: { isRunning: boolean }; isInitialLoading?: boolean; isError?: boolean } = {}
 ): string | undefined => {
+  if (
+    automation.backingWorkflow?.state === 'missing' ||
+    automation.backingWorkflow?.state === 'out_of_sync'
+  ) {
+    return i18n.translate('xpack.nightshift.automations.runNeedsRepair', {
+      defaultMessage: 'Repair the backing workflow before running this automation.',
+    });
+  }
   if (!automation.isEnabled) {
     return i18n.translate('xpack.nightshift.automations.runDisabledAutomationTooltip', {
       defaultMessage: 'This automation is disabled. Enable it to run on a schedule or manually.',

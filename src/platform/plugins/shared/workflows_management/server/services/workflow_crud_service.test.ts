@@ -296,6 +296,40 @@ describe('WorkflowCrudService', () => {
     expect(client.search).not.toHaveBeenCalled();
   });
 
+  describe('trusted workflow state lookup', () => {
+    it('reads sanitized state in the requested space and excludes deleted and global records', async () => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({
+        _shards: { failed: 0 },
+        hits: { hits: [{ _id: 'wf-1', _source: { enabled: false, yaml: 'private definition' } }] },
+      });
+      const result = await new WorkflowCrudService(deps).getWorkflowStates(['wf-1'], 'my-space');
+      expect(result).toEqual([{ id: 'wf-1', enabled: false }]);
+      expect(client.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: ['enabled'],
+          allow_partial_search_results: false,
+          query: {
+            bool: {
+              must: expect.arrayContaining([{ term: { spaceId: 'my-space' } }]),
+              must_not: expect.any(Array),
+            },
+          },
+        })
+      );
+    });
+    it.each([
+      { timed_out: true, failed: 0 },
+      { timed_out: false, failed: 1 },
+    ])('rejects incomplete availability searches: %j', async ({ timed_out, failed }) => {
+      const { deps, client } = makeDeps();
+      client.search.mockResolvedValue({ timed_out, _shards: { failed }, hits: { hits: [] } });
+      await expect(
+        new WorkflowCrudService(deps).getWorkflowStates(['wf-1'], 'default')
+      ).rejects.toThrow('incomplete search');
+    });
+  });
+
   describe('getWorkflowsByIds', () => {
     it.each([
       { timed_out: true, failed: 0 },

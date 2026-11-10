@@ -97,17 +97,29 @@ it.each([[], [{ kind: 'alert' }], [{ kind: 'slack' }], [{ kind: 'schedule' }, { 
 );
 
 it.each([
-  null,
-  { ...workflow, valid: false },
-  { ...workflow, enabled: false },
-  { ...workflow, definition: null },
-  { ...workflow, definition: { ...workflow.definition, settings: { run_as: 'other-account' } } },
-])('rejects unusable workflows without silently repairing them: %j', async (savedWorkflow) => {
-  getWorkflow.mockResolvedValue(savedWorkflow);
-  await expect(call()).rejects.toMatchObject({ output: { statusCode: 400 } });
-  expect(runWorkflow).not.toHaveBeenCalled();
-  expect(updateWorkflow).not.toHaveBeenCalled();
-});
+  { savedWorkflow: null, message: 'If it was deleted, use Repair' },
+  { savedWorkflow: { ...workflow, valid: false }, message: 'Save the automation' },
+  { savedWorkflow: { ...workflow, enabled: false }, message: 'Repair and enable' },
+  { savedWorkflow: { ...workflow, definition: null }, message: 'Save the automation' },
+  {
+    savedWorkflow: {
+      ...workflow,
+      definition: { ...workflow.definition, settings: { run_as: 'other-account' } },
+    },
+    message: 'Set up Nightshift service accounts and save',
+  },
+])(
+  'rejects unusable workflows with actionable guidance without silently repairing them: %j',
+  async ({ savedWorkflow, message }) => {
+    getWorkflow.mockResolvedValue(savedWorkflow);
+    await expect(call()).rejects.toMatchObject({
+      output: { statusCode: 400 },
+      message: expect.stringContaining(message),
+    });
+    expect(runWorkflow).not.toHaveBeenCalled();
+    expect(updateWorkflow).not.toHaveBeenCalled();
+  }
+);
 
 it('preserves a missing automation error from the current space', async () => {
   soClient.get.mockRejectedValue(notFound('Automation not found'));

@@ -57,6 +57,8 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
   SAVE_AND_ENABLE_AUTOMATION: 'saveAndEnableAutomation',
   SAVE_AUTOMATION: 'saveAutomation',
   RUN_AUTOMATION: 'runAutomation',
+  REPAIR_AUTOMATION: 'repairAutomation',
+  RETRY_AUTOMATION_WORKFLOW: 'retryAutomationWorkflow',
   SAVE_TUNING_DOCUMENT: 'saveTuningDocument',
   SHOW_MORE_INVESTIGATIONS: 'showMoreInvestigations',
   TOGGLE_AUTOMATION: 'toggleAutomation',
