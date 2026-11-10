@@ -34,7 +34,8 @@ export type {
 } from './services/sml/types';
 
 export { kibanaPermissions } from './services/sml/permissions/kibana';
-export { getSmlOriginId } from './services/sml/sml_origin';
+export { decodeSmlLinkId, getSmlOriginId, parseSmlEntryId } from './services/sml/sml_origin';
+export { searchSavedObjectsByTitle } from './services/sml/search_saved_objects_by_title';
 
 export { smlAiIndexDescription, smlIndexName } from './services/sml/sml_storage';
 export { SmlSearchFilterType } from '../common/http_api/sml';

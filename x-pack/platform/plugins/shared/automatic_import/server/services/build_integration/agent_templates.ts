@@ -16,10 +16,6 @@ tags:
 {{#contains "forwarded" tags}}
 publisher_pipeline.disable_host: true
 {{/contains}}
-{{#if processors}}
-processors:
-{{processors}}
-{{/if}}
 `.trim();
 
 const FILESTREAM_TEMPLATE = `
@@ -481,12 +477,8 @@ listen_address: {{listen_address}}
 {{#if listen_port}}
 listen_port: {{listen_port}}
 {{/if}}
-{{#if prefix}}
-prefix: {{prefix}}
-{{/if}}
-{{#if preserve_original_event}}
-preserve_original_event: {{preserve_original_event}}
-{{/if}}
+prefix: json
+preserve_original_event: true
 {{#if basic_auth}}
 basic_auth: {{basic_auth}}
 {{/if}}
@@ -532,6 +524,15 @@ include_headers:
   - {{item}}
 {{/each}}
 {{/if}}
+`.trim();
+
+// The pipeline parses event.original, so the duplicate copy of the body under `json` is dropped.
+// It runs after the user's processors so they can still read `json.*`.
+const HTTP_ENDPOINT_REQUIRED_PROCESSORS = `
+- drop_fields:
+    fields:
+      - json
+    ignore_missing: true
 `.trim();
 
 const KAFKA_TEMPLATE = `
@@ -764,7 +765,33 @@ const INPUT_TEMPLATES: Record<string, string> = {
   journald: JOURNALD_TEMPLATE,
 };
 
+const REQUIRED_PROCESSORS: Record<string, string> = {
+  http_endpoint: HTTP_ENDPOINT_REQUIRED_PROCESSORS,
+};
+
+const OPTIONAL_PROCESSORS_SECTION = `
+{{#if processors}}
+processors:
+{{processors}}
+{{/if}}
+`.trim();
+
+// Fleet only splices the user's processors into a list when they start at column 0.
+const buildProcessorsSection = (requiredProcessors?: string): string => {
+  if (requiredProcessors) {
+    return `
+processors:
+{{#if processors}}
+{{processors}}
+{{/if}}
+${requiredProcessors}
+`.trim();
+  }
+  return OPTIONAL_PROCESSORS_SECTION;
+};
+
 export const buildAgentTemplate = (inputType: string): string => {
   const inputSection = INPUT_TEMPLATES[inputType] ?? '';
-  return `${inputSection}\n${COMMON_TEMPLATE}\n`;
+  const processorsSection = buildProcessorsSection(REQUIRED_PROCESSORS[inputType]);
+  return `${inputSection}\n${COMMON_TEMPLATE}\n${processorsSection}\n`;
 };

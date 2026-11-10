@@ -44,7 +44,7 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
 
     const result = await cleanupRoute.handler({
       params: { body: { candidateRuleIds: ['rule-1'] } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => eventClient,
@@ -92,7 +92,7 @@ describe('POST /internal/significant_events/events/{id}/investigate', () => {
 
       const result = await investigateRoute.handler({
         params: { path: { id: 'event-1' } },
-        request: {},
+        request: { spaceId: 'default' },
         getScopedClients: jest.fn().mockResolvedValue({
           licensing: {},
           getEventSearchClient: () => ({ findLatestByEventId: jest.fn().mockResolvedValue(event) }),
@@ -118,7 +118,7 @@ describe('POST /internal/significant_events/events/{id}/investigate', () => {
     const findLatestByEventId = jest.fn();
     const handlerParams = {
       params: { path: { id: 'event-1' } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByEventId }),
@@ -158,7 +158,7 @@ describe('GET /internal/significant_events/events', () => {
       });
       const resources = {
         params: { query: { unassigned_entities: true, topology_feature_id: selected } },
-        request: {},
+        request: { spaceId: 'default' },
         server: {},
         getScopedClients: jest.fn().mockResolvedValue({
           licensing: {},
@@ -187,7 +187,7 @@ describe('GET /internal/significant_events/events', () => {
     }
   );
 
-  it('counts active events per deduplicated slug without losing either nullable feature field', async () => {
+  it('counts active events per deduplicated slug without losing a nullable topology field', async () => {
     const query = jest.fn().mockImplementation(async ({ query: statement }: { query: string }) =>
       statement.includes('STATS n')
         ? {
@@ -213,9 +213,12 @@ describe('GET /internal/significant_events/events', () => {
       unassigned: 4,
     });
     const statements = query.mock.calls.map(([request]) => request.query);
-    expect(statements.find((statement) => statement.includes('STATS n'))).toContain(
-      'MV_DEDUPE(CASE(a IS NULL, b, b IS NULL, a, MV_APPEND(a, b)))'
+    const countStatement = statements.find((statement) => statement.includes('STATS n'));
+    expect(countStatement).toContain(
+      'MV_DEDUPE(CASE(ab IS NULL, st, st IS NULL, ab, MV_APPEND(ab, st)))'
     );
+    expect(countStatement).toContain('FIELD_EXTRACT(data, "blast_radius.source")');
+    expect(countStatement).toContain('FIELD_EXTRACT(data, "blast_radius.target")');
     expect(statements.find((statement) => statement.includes('STATS n'))).toContain(
       'MV_EXPAND fid'
     );
@@ -247,7 +250,7 @@ describe('GET /internal/significant_events/events', () => {
 
     const response = await eventsSearchRoute.handler({
       params: { query: {} },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
@@ -289,7 +292,7 @@ describe('GET /internal/significant_events/events', () => {
           perPage: 10,
         },
       },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
@@ -336,7 +339,7 @@ describe('GET /internal/significant_events/events', () => {
 
     const response = await eventsSearchRoute.handler({
       params: { query: {} },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({ findLatestByCurrentStatePaginated }),
@@ -379,7 +382,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle', () => {
 
     const response = await lifecycleRoute.handler({
       params: { path: { id: latestVersion.event_id } },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({
@@ -436,7 +439,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, deactivations'
         path: { id: 'event-1' },
         ...(includeSkipped ? { query: { include_skipped: 'true' as const } } : {}),
       },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({
@@ -622,7 +625,7 @@ describe('GET /internal/significant_events/events/{id}/lifecycle, skipped detect
         path: { id: event.event_id },
         ...(includeSkipped ? { query: { include_skipped: 'true' as const } } : {}),
       },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () => ({
@@ -712,7 +715,7 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
   }) =>
     eventsUpdateRoute.handler({
       params: { path: { id: 'event-1' }, body },
-      request: {},
+      request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () =>

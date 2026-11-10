@@ -84,11 +84,16 @@ triggers:
         description: "Max excluded features sent in LLM prompt during features identification."
       - name: featuresMaxEntityFilters
         type: number
+        default: 10
         description: "Max entity filters applied during features identification sampling."
       - name: featuresSamplingTimeoutMs
         type: number
         default: 60000
         description: "Deadline (ms) per ES|QL sampling query during features identification sampling."
+      - name: featuresComputedTimeoutMs
+        type: number
+        default: 60000
+        description: "Deadline (ms) for the whole computed-feature generation pass during features identification."
       - name: featuresMaxPreviouslyIdentified
         type: number
         description: "Max previously identified features sent in LLM prompt during features identification."
@@ -208,6 +213,7 @@ steps:
             maxExcludedFeaturesInPrompt: "${{ inputs.featuresMaxExcludedInPrompt }}"
             maxEntityFilters: "${{ inputs.featuresMaxEntityFilters }}"
             samplingTimeoutMs: "${{ inputs.featuresSamplingTimeoutMs }}"
+            computedFeaturesTimeoutMs: "${{ inputs.featuresComputedTimeoutMs }}"
             maxPreviouslyIdentifiedFeatures: "${{ inputs.featuresMaxPreviouslyIdentified }}"
       - name: save_features_output
         type: data.set

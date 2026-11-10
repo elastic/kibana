@@ -60,7 +60,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
     return names;
   }, [selectedServiceIds, awsServicesMap, serviceSettings]);
 
-  const { statusByInstanceId, agentInfoByServiceId, receivingCount, totalCount } =
+  const { statusByInstanceId, agentInfoByServiceId, receivingCount, unverifiedCount, totalCount } =
     useServiceDataDetection();
 
   // Installed content — read from AWS package installation.
@@ -134,6 +134,7 @@ export function DetectAndReviewStep({ onContinue, onBack }: DetectAndReviewStepP
             agentInfoByServiceId={agentInfoByServiceId}
             deploymentMethod={deploymentMethod}
             receivingCount={receivingCount}
+            unverifiedCount={unverifiedCount}
             totalCount={totalCount}
           />
           <EuiHorizontalRule />

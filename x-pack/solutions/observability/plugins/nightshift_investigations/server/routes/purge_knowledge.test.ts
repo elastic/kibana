@@ -17,7 +17,7 @@ const resources = () => {
     preview: jest.fn().mockResolvedValue({ since: SINCE }),
     purge: jest.fn().mockResolvedValue({ since: SINCE }),
   };
-  return { client, getKnowledgePurgeClient: () => client, request: {} };
+  return { client, getKnowledgePurgeClient: () => client, request: { spaceId: 'default' } };
 };
 
 describe('knowledge purge routes', () => {
