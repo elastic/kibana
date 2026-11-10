@@ -27,7 +27,7 @@ import {
 import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
-import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
+import { DEFAULT_PINNED_CONTROL_STATE, ESQL_CONTROL } from '@kbn/controls-constants';
 import type {
   PinnedControlLayoutState,
   PinnedControlLayoutState as PinnedPanelLayoutState,
@@ -80,6 +80,7 @@ import { serializeLayout } from './serialize_layout';
 import {
   isDashboardLayoutPanel,
   type DashboardChildren,
+  type DashboardChildState,
   type DashboardLayout,
   type DashboardLayoutPanel,
   type DashboardPinnablePanel,
@@ -248,11 +249,53 @@ export function initializeLayoutManager(
     if (!embeddables?.length) return;
     const first = embeddables[0];
     if (!first.embeddableId) first.embeddableId = v4(); // give first panel an ID so we can place others around it
+    // Read from layout and child state because child APIs aren't registered yet on load.
+    const existingEsqlVariableNames = getExistingEsqlVariableNames(
+      layout$.value,
+      currentChildState
+    );
+    let anchorId: string | undefined;
 
     for (const incomingEmbeddable of embeddables) {
       const { serializedState, size, type } = incomingEmbeddable;
       const uuid = incomingEmbeddable.embeddableId ?? v4();
       const existingPanel: DashboardLayoutPanel | undefined = layout$.value.panels[uuid];
+      const existingPinnedPanel = layout$.value.pinnedPanels[uuid];
+      const incomingVariableName =
+        type === ESQL_CONTROL ? getEsqlVariableName(serializedState) : undefined;
+
+      // Discover sends the pinned control's own id to update its selection. Update it in place
+      // so it isn't skipped or added to the grid as a second copy.
+      if (
+        !existingPanel &&
+        existingPinnedPanel?.type === ESQL_CONTROL &&
+        incomingVariableName !== undefined &&
+        getEsqlVariableName(currentChildState[uuid]) === incomingVariableName
+      ) {
+        currentChildState[uuid] = {
+          ...(currentChildState[uuid] ?? {}),
+          ...serializedState,
+        };
+        anchorId ??= uuid;
+        continue;
+      }
+
+      // Skip a control whose variable is already on the dashboard. Two controls for one variable
+      // both get sent with the query, and the existing one keeps the user's selection.
+      if (
+        !existingPanel &&
+        incomingVariableName &&
+        existingEsqlVariableNames.has(incomingVariableName)
+      ) {
+        continue;
+      }
+
+      // Catches a second control for the same variable in this batch.
+      if (incomingVariableName) {
+        existingEsqlVariableNames.add(incomingVariableName);
+      }
+      // Anchor on the first panel that lands, so nothing is placed beside or scrolled to a skipped control.
+      anchorId ??= uuid;
       const sameType = existingPanel?.type === type;
 
       const updatedLayout = existingPanel
@@ -275,9 +318,9 @@ export function initializeLayoutManager(
             },
             /**
              * We can assume that all panels being sent as a single package are related; so,
-             * place them close together by grouping them around the first embeddable.
+             * place them close together by grouping them around the first accepted embeddable.
              */
-            beside: uuid === first.embeddableId ? undefined : first.embeddableId,
+            beside: uuid === anchorId ? undefined : anchorId,
           });
       currentChildState[uuid] = {
         ...(sameType && currentChildState[uuid] ? currentChildState[uuid] : {}),
@@ -286,8 +329,10 @@ export function initializeLayoutManager(
 
       layout$.next(updatedLayout);
     }
-    trackPanel.setScrollToPanelId(first.embeddableId);
-    trackPanel.setHighlightPanelId(first.embeddableId);
+    if (anchorId) {
+      trackPanel.setScrollToPanelId(anchorId);
+      trackPanel.setHighlightPanelId(anchorId);
+    }
   };
 
   // --------------------------------------------------------------------------------------
@@ -792,4 +837,36 @@ const transformDashboardLayoutToGridLayout = (
     }
   });
   return newLayout;
+};
+
+/** Returns the control's ES|QL variable name, or undefined when it's missing or empty. */
+const getEsqlVariableName = (state: object | undefined): string | undefined => {
+  if (
+    state &&
+    'variable_name' in state &&
+    typeof state.variable_name === 'string' &&
+    state.variable_name.length > 0
+  ) {
+    return state.variable_name;
+  }
+  return undefined;
+};
+
+/** Variable names used by ES|QL controls on the dashboard, in the grid or pinned. */
+const getExistingEsqlVariableNames = (
+  layout: DashboardLayout,
+  childState: DashboardChildState
+): Set<string> => {
+  const variableNames = new Set<string>();
+  const allPanels = [...Object.entries(layout.panels), ...Object.entries(layout.pinnedPanels)];
+
+  for (const [uuid, panel] of allPanels) {
+    if (panel.type !== ESQL_CONTROL) continue;
+    const variableName = getEsqlVariableName(childState[uuid]);
+    if (variableName) {
+      variableNames.add(variableName);
+    }
+  }
+
+  return variableNames;
 };
