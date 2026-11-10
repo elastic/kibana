@@ -134,10 +134,12 @@ export const prepareConversation = async ({
     }
     if (isTimelineRound(round) && !includedRounds.has(round.id)) continue;
     const input = round.userMessage.data;
-    if (input.attachments && input.attachments.length > 0) {
+    // Only a user's message carries inline attachments; an agent's message is text.
+    const attachmentsInMessage = 'attachments' in input ? input.attachments : undefined;
+    if (attachmentsInMessage && attachmentsInMessage.length > 0) {
       await mergeAttachmentInputs({
         stateManager: attachmentStateManager,
-        inputs: input.attachments,
+        inputs: attachmentsInMessage,
         actor: ATTACHMENT_REF_ACTOR.user,
         resolveContext,
         validateContext,

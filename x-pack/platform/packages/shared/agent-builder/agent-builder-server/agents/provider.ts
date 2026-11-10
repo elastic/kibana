@@ -474,6 +474,8 @@ export interface AgentParams {
    * public conversations). Stamped onto the completed round.
    */
   author?: ConversationRoundAuthor;
+  /** The actor that posted the input, when it is an agent (a sub-agent's report) rather than the requesting user. */
+  actor?: EventActor;
   browserApiTools?: BrowserApiToolMetadata[];
   /**
    * Whether to use structured output mode. When true, the agent will return structured data instead of plain text.
