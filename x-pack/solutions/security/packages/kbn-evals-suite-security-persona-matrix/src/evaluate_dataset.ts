@@ -6,6 +6,7 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import type { HttpHandler } from '@kbn/core/public';
 import { isValidTraceId } from '@opentelemetry/api';
 import {
   createQuantitativeCorrectnessEvaluators,
@@ -30,6 +31,13 @@ import {
   collectDeliveredArtifact,
   createConnectorInvokedEvaluator,
 } from './evaluators/connector_invoked_evaluator';
+import { createEicarTrapEvaluator } from './evaluators/eicar_trap_evaluator';
+import { createRubricCapNoToolCallEvaluator } from './evaluators/rubric_cap_no_tool_call_evaluator';
+import { createSimulationAwarenessEvaluator } from './evaluators/simulation_awareness_evaluator';
+import { createStalledAfterLoadSkillEvaluator } from './evaluators/stalled_after_load_skill_evaluator';
+import { createUnrequestedSideEffectsEvaluator } from './evaluators/unrequested_side_effects_evaluator';
+import { createWorkflowValidityEvaluator } from './evaluators/workflow_validity_evaluator';
+import { isStubConnectorVerified } from './fixtures/persona_matrix_tools_seed';
 import { TRACE_INDEX_PATTERN } from './evaluators/trace_index_pattern';
 import {
   createPersonaMatrixInputTokensEvaluator,
@@ -38,6 +46,12 @@ import {
   createPersonaMatrixToolCallsEvaluator,
 } from './evaluators/trace_evaluators';
 import type { PersonaMatrixChatClient } from './chat_client';
+import {
+  agentProfile as envAgentProfile,
+  withProfileExpectedTools,
+  type AgentProfile,
+} from './agent_profile';
+import { capJudgePayload, getJudgePayloadCapOptionsFromEnv } from './judge_payload_cap';
 
 /**
  * Dataset-level expected output the framework evaluators read via `expected`.
@@ -619,19 +633,43 @@ export const createPersonaMatrixSkillInvokedEvaluator = ({
   },
 });
 
+const SUITE_NAME = 'security-persona-matrix';
+
+/**
+ * Reporting identity for a profile. A non-default agent is a different system
+ * under test, so its dataset and experiment suite name carry the profile and a
+ * run cannot be mistaken for the default agent's result when archived scores are
+ * grouped by dataset or experiment suite. The default profile keeps the
+ * established names.
+ */
+export const reportingIdentity = (
+  datasetName: string,
+  profile: AgentProfile
+): { datasetName: string; suite: string } =>
+  profile === 'default'
+    ? { datasetName, suite: SUITE_NAME }
+    : { datasetName: `${datasetName} (${profile})`, suite: `${SUITE_NAME}-${profile}` };
+
 export function createEvaluatePersonaMatrixDataset({
   chatClient,
   evaluators,
   executorClient,
   traceEsClient,
   log,
+  fetch,
+  agentProfile = envAgentProfile,
 }: {
   chatClient: PersonaMatrixChatClient;
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
   traceEsClient: EsClient;
   log: ToolingLog;
+  /** Kibana HTTP handler, used by `WorkflowValidity` to create and run authored workflows. */
+  fetch: HttpHandler;
+  /** Agent the chat client converses with; defaults to the `AGENT_PROFILE` env. */
+  agentProfile?: AgentProfile;
 }) {
+  const identity = (datasetName: string) => reportingIdentity(datasetName, agentProfile);
   return async function evaluateDataset({
     dataset,
   }: {
@@ -640,8 +678,21 @@ export function createEvaluatePersonaMatrixDataset({
     // Shard before wrapping so a sharded run seeds and grades only its slice.
     // Slow models need hours for all 21 examples on one stack; shards can be
     // fanned out across separate stacks.
-    const shardedExamples = selectShard(dataset.examples, process.env.PERSONA_MATRIX_SHARD);
-    const wrappedExamples = shardedExamples.map(toDatasetExample);
+    const shardedExamples = withProfileExpectedTools(
+      selectShard(dataset.examples, process.env.PERSONA_MATRIX_SHARD),
+      agentProfile
+    );
+    // The ingest keeps per-example metadata and the dataset name but not the
+    // experiment metadata, so a non-default profile is stamped on each example
+    // too. The default profile is left untouched: example metadata is hashed into
+    // the dataset example id, so stamping it would re-add every example of the
+    // established dataset and split its score history.
+    const wrappedExamples = shardedExamples.map((example) => {
+      const wrapped = toDatasetExample(example);
+      return agentProfile === 'default'
+        ? wrapped
+        : { ...wrapped, metadata: { ...wrapped.metadata, agentProfile } };
+    });
 
     if (process.env.PERSONA_MATRIX_SHARD) {
       log.info(
@@ -649,6 +700,7 @@ export function createEvaluatePersonaMatrixDataset({
           `${shardedExamples.length}/${dataset.examples.length} examples`
       );
     }
+    const judgeCapOptions = getJudgePayloadCapOptionsFromEnv();
 
     const skillInvokedEvaluator = createPersonaMatrixSkillInvokedEvaluator({
       traceEsClient,
@@ -704,6 +756,14 @@ export function createEvaluatePersonaMatrixDataset({
       finalAnswerPresentEvaluator,
       minExpectedStepsEvaluator,
       connectorInvokedEvaluator,
+      // Deterministic behaviour checks. Recorded per cell, excluded from cell
+      // means via `excludeEvaluators` in the matrix config.
+      createWorkflowValidityEvaluator({ fetch, stubVerified: isStubConnectorVerified }),
+      createEicarTrapEvaluator(),
+      createSimulationAwarenessEvaluator(),
+      createUnrequestedSideEffectsEvaluator(),
+      createStalledAfterLoadSkillEvaluator(),
+      createRubricCapNoToolCallEvaluator(),
       ...createQuantitativeCorrectnessEvaluators(),
       createQuantitativeGroundednessEvaluator(),
       precomputedCriteriaEvaluator,
@@ -723,12 +783,16 @@ export function createEvaluatePersonaMatrixDataset({
         concurrency: Number(process.env.PERSONA_MATRIX_CONCURRENCY) || undefined,
         datasets: [
           {
-            name: dataset.name,
+            name: identity(dataset.name).datasetName,
             description: dataset.description,
             examples: wrappedExamples,
           },
         ],
-        metadata: { suite: 'security-persona-matrix', source: 'persona-matrix-eval' },
+        metadata: {
+          suite: identity(dataset.name).suite,
+          ...(agentProfile === 'default' ? {} : { agent_profile: agentProfile }),
+          source: 'persona-matrix-eval',
+        },
         task: async (example) => {
           const input = example.input as PersonaMatrixExampleInput;
           const question = input?.question;
@@ -789,6 +853,26 @@ export function createEvaluatePersonaMatrixDataset({
                 }
               : taskOutput;
 
+          // The judges read a size-capped copy; `taskOutput` itself (the golden transcript) stays
+          // verbatim, and anything trimmed is reported on the returned output.
+          const { output: judgeOutput, report: judgePayloadTrim } = capJudgePayload(
+            judgedOutput,
+            judgeCapOptions
+          );
+          if (judgePayloadTrim.trimmed.length || judgePayloadTrim.overBudget) {
+            log.info(
+              `[persona-matrix][judge-cap] ${example.id ?? question}: judge payload ${
+                judgePayloadTrim.charsBefore
+              } -> ${judgePayloadTrim.charsAfter} chars, trimmed ${
+                judgePayloadTrim.trimmed.length
+              } tool result(s)${
+                judgePayloadTrim.overBudget
+                  ? ' (STILL OVER BUDGET: non-result fields alone exceed it)'
+                  : ''
+              }`
+            );
+          }
+
           // The judges already retry internally; if they still fail, degrade this
           // example's qualitative scores to "unavailable" (the quantitative
           // evaluators handle a missing analysis) rather than discarding the
@@ -799,7 +883,7 @@ export function createEvaluatePersonaMatrixDataset({
                 evaluators.correctnessAnalysis().evaluate({
                   input,
                   expected,
-                  output: judgedOutput,
+                  output: judgeOutput,
                   metadata: example.metadata,
                 })
               ),
@@ -807,7 +891,7 @@ export function createEvaluatePersonaMatrixDataset({
                 evaluators.groundednessAnalysis().evaluate({
                   input,
                   expected,
-                  output: judgedOutput,
+                  output: judgeOutput,
                   metadata: example.metadata,
                 })
               ),
@@ -815,7 +899,7 @@ export function createEvaluatePersonaMatrixDataset({
                 criteriaJudge.evaluate({
                   input,
                   expected,
-                  output: judgedOutput,
+                  output: judgeOutput,
                   metadata: example.metadata,
                 })
               ),
@@ -847,6 +931,11 @@ export function createEvaluatePersonaMatrixDataset({
             groundednessAnalysis: groundednessResult?.metadata,
             criteriaAnalysis:
               criteriaSettled.status === 'fulfilled' ? criteriaSettled.value : undefined,
+            ...(judgePayloadTrim.trimmed.length || judgePayloadTrim.overBudget
+              ? { judgePayloadTrim }
+              : {}),
+            // Added after the judge payload is built so no judge ever reads it.
+            rawResponse: response.rawResponse,
           } as TaskOutput;
         },
       },
