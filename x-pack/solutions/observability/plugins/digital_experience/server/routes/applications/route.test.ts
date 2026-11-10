@@ -8,17 +8,18 @@
 import { NEVER } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { getClassicApplications } from './classic/get_classic_applications';
-import { getOtelApplications } from './otel/get_otel_applications';
+import { getOtelApplicationsFromBestSource } from './otel/get_otel_applications_source';
 import { APPLICATIONS_ENDPOINT, applicationsRouteRepository } from './route';
 
 jest.mock('./classic/get_classic_applications');
-jest.mock('./otel/get_otel_applications');
+jest.mock('./otel/get_otel_applications_source');
 
 const mockedClassic = jest.mocked(getClassicApplications);
 
 const START = '2021-01-18T12:00:00.000Z';
 const END = '2021-01-18T13:00:00.000Z';
-const mockedOtel = jest.mocked(getOtelApplications);
+const SESSIONS_SETTINGS = { frequency: '1m', partitions: 1 };
+const mockedOtel = jest.mocked(getOtelApplicationsFromBestSource);
 
 const runHandler = ({
   isServerless,
@@ -33,7 +34,7 @@ const runHandler = ({
 }) => {
   const context = {
     core: Promise.resolve({
-      elasticsearch: { client: { asCurrentUser: {} } },
+      elasticsearch: { client: { asCurrentUser: {}, asInternalUser: {} } },
       savedObjects: { client: {} },
       uiSettings: { client: { get: jest.fn().mockResolvedValue(false) } },
     }),
@@ -52,6 +53,7 @@ const runHandler = ({
     plugins: { apmDataAccess: withApmDataAccess ? { getApmIndices } : undefined },
     isServerless,
     isUxEnabled,
+    sessionsSettings: SESSIONS_SETTINGS,
     logger: loggingSystemMock.createLogger(),
   });
   return { result, getApmIndices };
@@ -104,6 +106,18 @@ describe('GET /internal/digital_experience/applications', () => {
     );
     expect(mockedClassic).toHaveBeenCalledWith(
       expect.objectContaining({ start: Date.parse(START), end: Date.parse(END) })
+    );
+  });
+
+  it('lets the OTel source check the sessions with the internal user and the configured settings', async () => {
+    await runHandler({ isServerless: false }).result;
+
+    expect(mockedOtel).toHaveBeenCalledWith(
+      expect.objectContaining({
+        esClient: {},
+        internalEsClient: {},
+        sessionsSettings: SESSIONS_SETTINGS,
+      })
     );
   });
 
