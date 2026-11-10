@@ -89,6 +89,11 @@ export const useCanvasIsSavingProcessing = () => {
   return useCanvasStateSelector((state) => state.context.savingComponentIntent === 'processing');
 };
 
+/** The unit a routing flyout save last staged, if any. */
+export const useCanvasRoutingStagedUnit = () => {
+  return useCanvasStateSelector((state) => state.context.routingStagedUnit);
+};
+
 export const useCanvasIsInitializing = () => {
   return useCanvasStateSelector(
     (state) => state.matches('initializingFromUrl') || state.matches({ ready: { unit: 'loading' } })

@@ -349,6 +349,8 @@ describe('canvas routing flyout', () => {
     const { context } = canvas.getSnapshot();
     expect(context.routingFlyout).toBeUndefined();
     expect(context.unit).toBe(persisted);
+    // The canvas tidies the flow of a routing node it sees staged here.
+    expect(context.routingStagedUnit).toBe(context.nextUnit);
     expect(context.nextUnit.unit.pipelines[0].config).toEqual([
       { name: 'sources', value: ['src'] },
       {

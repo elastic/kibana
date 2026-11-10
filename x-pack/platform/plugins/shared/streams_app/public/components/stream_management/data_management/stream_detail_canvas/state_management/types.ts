@@ -97,6 +97,8 @@ export interface CanvasState {
   savingComponentIntent?: 'create' | 'delete' | 'connect' | 'processing';
   savingSecrets?: StreamsUnit.Secrets;
   routingFlyout?: CanvasRoutingFlyout;
+  /** The unit a routing flyout save last staged, so the canvas can tell it placed a routing node. */
+  routingStagedUnit?: Unit;
   processingFlyout?: CanvasProcessingFlyout;
   /** Staged unit to return to when a processing flyout save fails. */
   processingRollbackUnit?: Unit;

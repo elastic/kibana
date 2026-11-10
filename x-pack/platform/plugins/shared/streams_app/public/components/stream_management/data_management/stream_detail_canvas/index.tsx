@@ -85,6 +85,7 @@ import {
   useCanvasIsInitializing,
   useCanvasIsSaving,
   useCanvasIsSavingProcessing,
+  useCanvasRoutingStagedUnit,
   useCanvasIsUnitUnavailable,
   useCanvasNodePositions,
   useCanvasUnitDefinition,
@@ -229,6 +230,7 @@ function StreamsCanvasInner() {
   const hasUnsavedChanges = useCanvasHasUnsavedChanges();
   const isSaving = useCanvasIsSaving();
   const isSavingProcessing = useCanvasIsSavingProcessing();
+  const routingStagedUnit = useCanvasRoutingStagedUnit();
   const isInitializing = useCanvasIsInitializing();
   const isUnitUnavailable = useCanvasIsUnitUnavailable();
   const nodePositions = useCanvasNodePositions();
@@ -381,13 +383,23 @@ function StreamsCanvasInner() {
     [changeUnitConnection, record]
   );
 
+  // The routing flyout stages its rules in the machine, not through stageUserEdit.
+  // Each staged unit counts as an edit once, so undo or redo back to it does not.
+  const seenRoutingStagedUnitRef = useRef<Unit>();
+
   const graphNodeIdsRef = useRef('');
   const graphEdgeIdsRef = useRef('');
   const knownNodeIdsRef = useRef<ReadonlySet<string>>(new Set());
 
   useEffect(() => {
-    const isUserEdit = userEditUnitRef.current === unitDefinition;
-    if (isUserEdit) {
+    const isRoutingStage =
+      routingStagedUnit === unitDefinition &&
+      seenRoutingStagedUnitRef.current !== routingStagedUnit;
+    if (isRoutingStage) {
+      seenRoutingStagedUnitRef.current = routingStagedUnit;
+    }
+    const isUserEdit = userEditUnitRef.current === unitDefinition || isRoutingStage;
+    if (userEditUnitRef.current === unitDefinition) {
       userEditUnitRef.current = undefined;
     }
     const nextNodeIds = getGraphNodeIds(graph.nodes);
@@ -417,7 +429,7 @@ function StreamsCanvasInner() {
     // A routing or processing node placed on a line makes that flow one column
     // longer, so tidy the flow it joined as "Tidy up selection" would with that
     // flow selected. Other flows keep their positions. Only an edit on this canvas
-    // or a processing flyout save places a node: one that the initial load, undo,
+    // or a routing or processing flyout save places a node: one that the initial load, undo,
     // redo or a reload brings in keeps its stored position.
     const placedNodeIds = new Set(
       isUserEdit || isSavingProcessing
@@ -458,7 +470,15 @@ function StreamsCanvasInner() {
           .map(({ id, position }) => [id, position])
       )
     );
-  }, [graph, unitDefinition, isSavingProcessing, setNodes, setEdges, updateNodePositions]);
+  }, [
+    graph,
+    unitDefinition,
+    isSavingProcessing,
+    routingStagedUnit,
+    setNodes,
+    setEdges,
+    updateNodePositions,
+  ]);
 
   // Tracks whether a pointer drag is in progress so we snapshot each gesture
   // exactly once.
