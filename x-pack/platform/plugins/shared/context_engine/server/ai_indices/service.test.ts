@@ -831,6 +831,26 @@ describe('AiIndexService', () => {
       );
     });
 
+    it('drops the relationship types configs carried before relationships left dreaming', async () => {
+      const entities = { nodes: [{ type: 'customer' }, { type: 'product' }] };
+      mockSearchHits(
+        storedHit({
+          ...aiIndexDocument,
+          dreaming: {
+            ...dreaming,
+            entities: {
+              ...entities,
+              edges: [{ type: 'buys', source: 'customer', target: 'product' }],
+            },
+          },
+        })
+      );
+
+      await expect(service.get('customer_support', DEFAULT_SPACE)).resolves.toEqual(
+        expect.objectContaining({ dreaming: { ...dreaming, entities } })
+      );
+    });
+
     describe('setDreaming', () => {
       it('writes the config and leaves the rest of the entry untouched', async () => {
         mockSearchHits(storedHit(aiIndexDocument));
