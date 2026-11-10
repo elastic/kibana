@@ -459,10 +459,10 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 | **Field** | **Description** |
 | --- | --- |
 | `event.action` | The action captured by the event.<br>Refer to [Audit events](./kibana-audit-events.md#xpack-security-ecs-audit-logging) for a table of possible actions. |
-| `event.category` | High level category associated with the event.<br>This field is closely related to `event.type`, which is used as a subcategory.<br>Possible values:`database`,`web`,`authentication`,`iam`,`process`,`file`.<br>{applies_to}`stack: unavailable, serverless: preview` `process` and `file` are only used by `sandbox_rpc` events. |
+| `event.category` | High level category associated with the event.<br>This field is closely related to `event.type`, which is used as a subcategory.<br>Possible values:`database`,`web`,`authentication`,`iam`,`process`,`file`.<br>{applies_to}`stack: unavailable` {applies_to}`serverless: preview` `process` and `file` are only used by `sandbox_rpc` events. |
 | `event.type` | Subcategory associated with the event.<br>This field can be used along with the `event.category` field to enable filtering events down to a level appropriate for single visualization.<br>Possible values:`creation`,`access`,`change`,`deletion`,`start`,`user` |
 | `event.outcome` | Denotes whether the event represents a success or failure:<br><br>* Any actions that the user is not authorized to perform are logged with outcome:  `failure`<br>* Authorized read operations are only logged after successfully fetching the data from {{es}} with outcome: `success`<br>* Authorized create, update, or delete operations are logged before attempting the operation in {{es}} with outcome: `unknown`, unless the event's own description says otherwise (for example `service_account_create` is logged after the operation)<br><br>Possible values: `success`, `failure`, `unknown`<br> |
-| `event.duration` {applies_to}`stack: unavailable, serverless: preview` | Duration of the operation the event describes, in nanoseconds. Recorded on `sandbox_rpc` events, where {{kib}} measures it from issuing the call to its result. |
+| `event.duration` {applies_to}`stack: unavailable` {applies_to}`serverless: preview` | Duration of the operation the event describes, in nanoseconds. Recorded on `sandbox_rpc` events, where {{kib}} measures it from issuing the call to its result. |
 
 ### User fields
 
@@ -489,10 +489,10 @@ Audit logs are written in JSON using the [Elastic Common Schema (ECS)](ecs://ref
 | `kibana.workload.type` | Type of the workload.<br>Example: `workflow` |
 | `kibana.workload.id` | ID of the workload. |
 | `kibana.workload.execution_id` | ID of the run of the workload, when the plugin executing it supplied one. Recorded on `service_account_assume` events and in their message as `[executionId=…]`. |
-| `kibana.sandbox_caller.plugin_id` {applies_to}`stack: unavailable, serverless: preview` | ID of the plugin that issued the sandbox RPC.<br>Example: `nightshiftInvestigations` |
-| `kibana.sandbox_caller.type` {applies_to}`stack: unavailable, serverless: preview` | Type of the caller that issued the sandbox RPC.<br>Example: `tool`, `workflow_step` or `findings_recorder` |
-| `kibana.sandbox_caller.id` {applies_to}`stack: unavailable, serverless: preview` | ID of the caller: the tool ID for a `tool`, the step type for a `workflow_step`. |
-| `kibana.sandbox_caller.execution_id` {applies_to}`stack: unavailable, serverless: preview` | ID of the run of the caller, when it has one: the tool call ID for a `tool`, the workflow run ID for a `workflow_step`. |
+| `kibana.sandbox_caller.plugin_id` {applies_to}`stack: unavailable` {applies_to}`serverless: preview` | ID of the plugin that issued the sandbox RPC.<br>Example: `nightshiftInvestigations` |
+| `kibana.sandbox_caller.type` {applies_to}`stack: unavailable` {applies_to}`serverless: preview` | Type of the caller that issued the sandbox RPC.<br>Example: `tool`, `workflow_step` or `findings_recorder` |
+| `kibana.sandbox_caller.id` {applies_to}`stack: unavailable` {applies_to}`serverless: preview` | ID of the caller: the tool ID for a `tool`, the step type for a `workflow_step`. |
+| `kibana.sandbox_caller.execution_id` {applies_to}`stack: unavailable` {applies_to}`serverless: preview` | ID of the run of the caller, when it has one: the tool call ID for a `tool`, the workflow run ID for a `workflow_step`. |
 | `kibana.authentication_provider` | Name of the authentication provider associated with the event.<br>Example: `my-saml-provider` |
 | `kibana.authentication_type` | Type of the authentication provider associated with the event.<br>Example: `saml` |
 | `kibana.authentication_realm` | Name of the Elasticsearch realm that has authenticated the user.<br>Example: `native` |
