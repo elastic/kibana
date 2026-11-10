@@ -21,7 +21,10 @@ import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import {
+  getErrorSource as getTaskManagerErrorSource,
+  isRetryableError,
+} from '@kbn/task-manager-plugin/server/task_running';
 import { isConnectorAuthorizationError } from '@kbn/connector-specs';
 import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
@@ -674,7 +677,7 @@ export class ActionExecutor {
               message: 'an error occurred while running the action',
               serviceMessage: err.message,
               error: err,
-              retry: true,
+              retry: isRetryableError(err) ?? true,
               errorSource,
             };
           }
