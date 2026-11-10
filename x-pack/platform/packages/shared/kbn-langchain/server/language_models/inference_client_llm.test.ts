@@ -6,9 +6,10 @@
  */
 
 import { InferenceClientLlm } from './inference_client_llm';
-import type { InferenceClient } from '@kbn/inference-common';
+import type { ChatCompleteResponse, InferenceClient } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { Logger } from '@kbn/core/server';
+import { ModelRefusalError } from './model_refusal_error';
 
 describe('InferenceClientLlm', () => {
   let mockInferenceClient: jest.Mocked<InferenceClient>;
@@ -115,6 +116,27 @@ describe('InferenceClientLlm', () => {
     await expect(llm._call('test prompt')).rejects.toThrow('test error');
     expect(mockLogger.error).toHaveBeenCalledWith(
       'InferenceClientLlm: chatComplete failed for connector test-connector: TEST_ERROR - test error'
+    );
+  });
+
+  it('_call() throws a ModelRefusalError when the response carries a content filter refusal', async () => {
+    const refusedResponse: ChatCompleteResponse = {
+      content: '',
+      refusal:
+        'The response was stopped by the provider content filter (finish_reason: content_filter).',
+      toolCalls: [],
+    };
+    mockInferenceClient.chatComplete.mockResolvedValueOnce(refusedResponse);
+
+    const llm = new InferenceClientLlm({
+      connectorId: 'test-connector',
+      inferenceClient: mockInferenceClient,
+      logger: mockLogger,
+    });
+
+    await expect(llm._call('test prompt')).rejects.toThrow(ModelRefusalError);
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      expect.stringContaining('finish_reason: content_filter')
     );
   });
 });

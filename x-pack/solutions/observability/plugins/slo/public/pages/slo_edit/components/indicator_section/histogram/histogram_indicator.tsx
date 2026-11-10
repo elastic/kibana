@@ -18,7 +18,7 @@ import {
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useEffect, useState } from 'react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import type { Option } from '../../../helpers/create_options';
 import { createOptionsFromFields } from '../../../helpers/create_options';
 import type { CreateSLOForm } from '../../../types';
@@ -98,15 +98,16 @@ export function HistogramIndicator({
   isLoadingIndex,
   dataView,
 }: HistogramIndicatorProps) {
-  const { control, watch, getFieldState } = useFormContext<CreateSLOForm>();
+  const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const formState = useFormState({ control, name: `indicator.params.${type}.field` });
   const [options, setOptions] = useState<Option[]>(createOptionsFromFields(histogramFields));
 
   useEffect(() => {
     setOptions(createOptionsFromFields(histogramFields));
   }, [histogramFields]);
 
-  const indexPattern = watch('indicator.params.index');
-  const aggregation = watch(`indicator.params.${type}.aggregation`);
+  const indexPattern = useWatch({ control, name: 'indicator.params.index' });
+  const aggregation = useWatch({ control, name: `indicator.params.${type}.aggregation` });
 
   return (
     <Fragment>
@@ -157,7 +158,7 @@ export function HistogramIndicator({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            isInvalid={getFieldState(`indicator.params.${type}.field`).invalid}
+            isInvalid={getFieldState(`indicator.params.${type}.field`, formState).invalid}
             label={<span>{metricLabel}</span>}
           >
             <Controller

@@ -439,6 +439,37 @@ describe('useUserProfileForm', () => {
   });
 
   describe('Display Language Form', () => {
+    const profileUpdateBody = () => {
+      const calls = coreStart.http.post.mock.calls as unknown as Array<[string, { body: string }]>;
+      const profileCall = calls.find(([path]) => path === '/internal/security/user_profile/_data');
+      if (!profileCall) {
+        throw new Error('Profile update was not posted');
+      }
+      return JSON.parse(profileCall[1].body);
+    };
+
+    const renderWithLoadedProfile = async (data: UserProfileData) => {
+      coreStart.http.get.mockResolvedValue({ data });
+      const userProfiles = new UserProfileAPIClient(coreStart.http);
+      await userProfiles.getCurrent({ dataPath: 'userSettings' });
+
+      const loadedWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
+        <Providers
+          services={coreStart}
+          history={history}
+          authc={authc}
+          securityApiClients={{
+            userProfiles,
+            users: new UserAPIClient(coreStart.http),
+          }}
+        >
+          {children}
+        </Providers>
+      );
+
+      return renderHook(() => useUserProfileForm({ user, data }), { wrapper: loadedWrapper });
+    };
+
     it('should report display_language_changed event when locale is changed on submit', async () => {
       const data: UserProfileData = {
         userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'en' },
@@ -472,6 +503,60 @@ describe('useUserProfileForm', () => {
       });
 
       expect(coreStart.analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('should not send the fallback locale when no locale is stored', async () => {
+      const data: UserProfileData = {
+        userSettings: { darkMode: 'light', contrastMode: 'standard' },
+      };
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+      expect(result.current.values.data?.userSettings.locale).toBe('en');
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.darkMode', 'dark');
+      });
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      const { userSettings } = profileUpdateBody();
+      expect(userSettings.darkMode).toBe('dark');
+      expect(userSettings).not.toHaveProperty('locale');
+    });
+
+    it('should not send a stored locale when another setting changes', async () => {
+      const data: UserProfileData = {
+        userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'de-DE' },
+      };
+      const { result } = await renderWithLoadedProfile(data);
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.darkMode', 'dark');
+      });
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      const { userSettings } = profileUpdateBody();
+      expect(userSettings.darkMode).toBe('dark');
+      expect(userSettings).not.toHaveProperty('locale');
+    });
+
+    it('should send the locale when it is changed on submit', async () => {
+      const data: UserProfileData = {
+        userSettings: { darkMode: 'light', contrastMode: 'standard', locale: 'de-DE' },
+      };
+      const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
+
+      await act(async () => {
+        await result.current.setFieldValue('data.userSettings.locale', 'fr-FR');
+      });
+      await act(async () => {
+        await result.current.submitForm();
+      });
+
+      expect(profileUpdateBody().userSettings.locale).toBe('fr-FR');
     });
   });
 

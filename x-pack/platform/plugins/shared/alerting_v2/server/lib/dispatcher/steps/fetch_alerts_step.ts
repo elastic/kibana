@@ -6,8 +6,6 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { PluginInitializerContext } from '@kbn/core/server';
-import { PluginInitializer } from '@kbn/core-di-server';
 import type { AlertEventSeverity } from '@kbn/alerting-v2-schemas';
 import type {
   Alert,
@@ -24,7 +22,7 @@ import type { LoggerServiceContract } from '../../services/logger_service/logger
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { isEsqlSubPlanTooLargeError } from '../../errors/esql_sub_plan_too_large_error';
 import { PRE_FETCH_STUCK_ADVANCE_LAG_MS } from '../constants';
-import type { PluginConfig } from '../../../config';
+import { ConfigService } from '../../services/config_service/config_service';
 import { buildAlertDetailsUrl } from '../alert_details_url';
 import { KibanaBaseUrlToken } from '../tokens';
 
@@ -47,10 +45,9 @@ export class FetchAlertsStep implements DispatcherStep {
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(KibanaBaseUrlToken) private readonly kibanaBaseUrl: string,
-    @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    @inject(ConfigService) configService: ConfigService
   ) {
-    this.alertsPerTick = pluginConfigAccessor.get<PluginConfig>().dispatcher.run.alerts.max;
+    this.alertsPerTick = configService.get('dispatcher.run.alerts.max');
   }
 
   public async execute(
@@ -63,7 +60,7 @@ export class FetchAlertsStep implements DispatcherStep {
 
     let result: RawAlert[];
     try {
-      result = await this.queryService.executeQueryRows<RawAlert>({
+      result = await this.queryService.executeQuery<RawAlert>({
         query: getDispatchableAlertEventsQuery({ gte, lte, limit: this.alertsPerTick }).query,
         // Lucene push-down is lower-bounded only. An `lte: windowEnd` here would
         // drop action docs stamped with `now` (after the settle buffer) and

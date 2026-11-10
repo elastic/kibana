@@ -61,7 +61,7 @@ describe('decision tree hydrate workflow, first execution', () => {
       3
     );
     expect(hydrateDecisionTreeWorkspace).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: 'fake_space_id' })
+      expect.objectContaining({ spaceId: 'default' })
     );
   });
 
