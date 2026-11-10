@@ -12,11 +12,17 @@ export type EsqlRow = Readonly<Record<string, EsqlCell>>;
 
 export interface EntityKeyRow {
   id: string;
+  family: string;
   datasets: readonly string[];
   subtype: 'k8s_workload' | 'k8s_node';
   buildQuery: (tsPrefix: string) => string;
   toEntity: (row: EsqlRow) => FeatureUpsert | undefined;
 }
+
+export const getDataStreamFamily = (dataStream: string): string | undefined => {
+  const match = /^(?:[^:]+:)?[^-]+-([^-]+)-/.exec(dataStream);
+  return match?.[1].split('.')[0];
+};
 
 type WorkloadKind = 'deployment' | 'statefulset' | 'daemonset' | 'replicaset';
 
@@ -129,6 +135,7 @@ const toNodeEntity = (row: EsqlRow): FeatureUpsert | undefined => {
 export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
   {
     id: 'ecs.k8s_workload',
+    family: 'kubernetes',
     datasets: ['kubernetes.pod'],
     subtype: 'k8s_workload',
     buildQuery: buildWorkloadQuery,
@@ -136,6 +143,7 @@ export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
   },
   {
     id: 'ecs.k8s_node',
+    family: 'kubernetes',
     datasets: ['kubernetes.node'],
     subtype: 'k8s_node',
     buildQuery: buildNodeQuery,

@@ -150,6 +150,7 @@ steps:
           persistedQueries: []
           queriesTokensUsed: { prompt: 0, completion: 0, total: 0 }
           metricsEntitiesCount: 0
+          metricsEntitiesUncoveredDataStreamsCount: 0
           metricsEntitiesHandled: false
           metricsEntitiesSkipReason: ''
           keepAliveRefreshed: 0
@@ -170,6 +171,7 @@ steps:
       featuresConnectorUsed: ""
       queriesConnectorUsed: ""
       metricsEntitiesCount: 0
+      metricsEntitiesUncoveredDataStreamsCount: 0
       metricsEntitiesHandled: false
       metricsEntitiesSkipReason: ""
       cycleStartedAt: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000Z" }}'
@@ -192,6 +194,7 @@ steps:
         type: data.set
         with:
           metricsEntitiesCount: "${{ steps.run_metrics_entities.output.metricsEntitiesCount | default: 0 }}"
+          metricsEntitiesUncoveredDataStreamsCount: "${{ steps.run_metrics_entities.output.uncoveredDataStreamsCount | default: 0 }}"
           metricsEntitiesHandled: >-
             ${{ steps.run_metrics_entities.error != null
               or steps.run_metrics_entities.output.handled != false }}
@@ -330,6 +333,7 @@ steps:
       persistedQueries: "${{ variables.persistedQueries }}"
       queriesTokensUsed: "${{ variables.queriesTokensUsed }}"
       metricsEntitiesCount: "${{ variables.metricsEntitiesCount }}"
+      metricsEntitiesUncoveredDataStreamsCount: "${{ variables.metricsEntitiesUncoveredDataStreamsCount }}"
       metricsEntitiesHandled: "${{ variables.metricsEntitiesHandled }}"
       metricsEntitiesSkipReason: "${{ variables.metricsEntitiesSkipReason }}"
       keepAliveRefreshed: "${{ steps.keep_alive_persistent.output.refreshed }}"

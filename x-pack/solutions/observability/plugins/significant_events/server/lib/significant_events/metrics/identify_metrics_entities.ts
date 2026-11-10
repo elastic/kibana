@@ -12,9 +12,15 @@ import type { FeatureUpsert } from '@kbn/significant-events-schema';
 import { toTimeSeriesSourceQuery } from '@kbn/nightshift-shared';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { getMetricsCatalogue } from './catalogue';
-import { ENTITY_KEY_TABLE, type EsqlCell, type EsqlRow } from './entity_key_table';
+import {
+  ENTITY_KEY_TABLE,
+  getDataStreamFamily,
+  type EsqlCell,
+  type EsqlRow,
+} from './entity_key_table';
 
 const MAX_ENTITIES = 500;
+const COVERED_DATA_STREAM_FAMILIES = new Set(ENTITY_KEY_TABLE.map(({ family }) => family));
 
 export interface IdentifyMetricsEntitiesOptions {
   esClient: ElasticsearchClient;
@@ -31,7 +37,8 @@ export interface IdentifyMetricsEntitiesResult {
   metricsEntitiesCount: number;
   metricsCatalogueRowsCount: number;
   matchedEntityKeyRowsCount: number;
-  unmatchedDataStreamsCount: number;
+  /** Catalogue data streams from families the entity-key table does not cover. */
+  uncoveredDataStreamsCount: number;
   metricsEntityRowsCount: number;
   droppedIncompleteRowsCount: number;
   droppedOverflowRowsCount: number;
@@ -97,7 +104,7 @@ export const identifyMetricsEntities = async ({
       metricsEntitiesCount: 0,
       metricsCatalogueRowsCount: 0,
       matchedEntityKeyRowsCount: 0,
-      unmatchedDataStreamsCount: 0,
+      uncoveredDataStreamsCount: 0,
       metricsEntityRowsCount: 0,
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
@@ -119,7 +126,7 @@ export const identifyMetricsEntities = async ({
       metricsEntitiesCount: 0,
       metricsCatalogueRowsCount,
       matchedEntityKeyRowsCount: 0,
-      unmatchedDataStreamsCount: 0,
+      uncoveredDataStreamsCount: 0,
       metricsEntityRowsCount: 0,
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
@@ -134,12 +141,10 @@ export const identifyMetricsEntities = async ({
       dataStreams.some((dataStream) => dataStreamMatchesDataset(dataStream, dataset))
     )
   );
-  const unmatchedDataStreamsCount = dataStreams.filter(
-    (dataStream) =>
-      !matchedKeyRows.some(({ datasets }) =>
-        datasets.some((dataset) => dataStreamMatchesDataset(dataStream, dataset))
-      )
-  ).length;
+  const uncoveredDataStreams = dataStreams.filter(
+    (dataStream) => !COVERED_DATA_STREAM_FAMILIES.has(getDataStreamFamily(dataStream) ?? '')
+  );
+  const uncoveredDataStreamsCount = uncoveredDataStreams.length;
   if (matchedKeyRows.length === 0) {
     logger.info(
       `No metrics entity key row matched source [${sourceId}] data streams [${dataStreams
@@ -152,13 +157,20 @@ export const identifyMetricsEntities = async ({
       metricsEntitiesCount: 0,
       metricsCatalogueRowsCount,
       matchedEntityKeyRowsCount: 0,
-      unmatchedDataStreamsCount,
+      uncoveredDataStreamsCount,
       metricsEntityRowsCount: 0,
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: Date.now() - startedAt },
       errors: [],
     };
+  }
+  if (uncoveredDataStreamsCount > 0) {
+    logger.info(
+      `Metrics entity-key table does not cover source [${sourceId}] data streams [${uncoveredDataStreams
+        .slice(0, 20)
+        .join(', ')}].`
+    );
   }
   const inventoryStartedAt = Date.now();
   const sourceQuery = toTimeSeriesSourceQuery(esql);
@@ -211,7 +223,7 @@ export const identifyMetricsEntities = async ({
     metricsEntitiesCount: selectedFeatures.length,
     metricsCatalogueRowsCount,
     matchedEntityKeyRowsCount: matchedKeyRows.length,
-    unmatchedDataStreamsCount,
+    uncoveredDataStreamsCount,
     metricsEntityRowsCount,
     droppedIncompleteRowsCount,
     droppedOverflowRowsCount,

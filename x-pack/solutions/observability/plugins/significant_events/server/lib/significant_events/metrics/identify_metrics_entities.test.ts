@@ -6,6 +6,7 @@
  */
 
 import { identifyMetricsEntities } from './identify_metrics_entities';
+import { getDataStreamFamily } from './entity_key_table';
 
 const catalogueColumns = [
   { name: 'metric_name', type: 'keyword' },
@@ -36,6 +37,32 @@ const sourceEsql =
 
 type TestCell = string | number | null | readonly string[];
 
+const kubernetesDataStreams = [
+  'metrics-gcp-us-central1:metrics-kubernetes.pod-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.node-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.container-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.state_container-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.state_deployment-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.state_daemonset-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.state_statefulset-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.state_replicaset-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.state_job-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.state_node-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.state_namespace-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.state_resourcequota-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.system-default',
+  'metrics-gcp-us-central1:metrics-kubernetes.volume-default',
+] as const;
+
+const catalogueRow = (index: number, dataStream: string): TestCell[] => [
+  `kubernetes.metric.${String(index).padStart(3, '0')}`,
+  [dataStream],
+  'percent',
+  'gauge',
+  'double',
+  ['orchestrator.cluster.name'],
+];
+
 const createHarness = (responses: Array<{ columns: object[]; values: TestCell[][] }>) => {
   const query = jest.fn();
   responses.forEach((response) => query.mockResolvedValueOnce(response));
@@ -53,29 +80,34 @@ const createHarness = (responses: Array<{ columns: object[]; values: TestCell[][
   };
 };
 
+describe('getDataStreamFamily', () => {
+  it('reads the family from CCS, local, and OTel data stream names', () => {
+    expect(getDataStreamFamily('metrics-gcp-us-central1:metrics-kubernetes.pod-default')).toBe(
+      'kubernetes'
+    );
+    expect(getDataStreamFamily('metrics-kubernetes.node-default')).toBe('kubernetes');
+    expect(getDataStreamFamily('metrics-us-east-1:metrics-hostmetricsreceiver.otel-default')).toBe(
+      'hostmetricsreceiver'
+    );
+  });
+});
+
 describe('identifyMetricsEntities', () => {
   it('writes complete workload and node rows and drops an incomplete workload', async () => {
     const firstCataloguePage = {
       columns: catalogueColumns,
-      values: Array.from({ length: 100 }, (_, index) => [
-        `kubernetes.pod.metric.${String(index).padStart(3, '0')}`,
-        ['metrics-kubernetes.pod-default'],
-        'percent',
-        'gauge',
-        'double',
-        ['orchestrator.cluster.name', 'kubernetes.namespace'],
-      ]),
+      values: Array.from({ length: 100 }, (_, index) =>
+        catalogueRow(index, kubernetesDataStreams[index % kubernetesDataStreams.length])
+      ),
     };
     const secondCataloguePage = {
       columns: catalogueColumns,
-      values: Array.from({ length: 16 }, (_, index) => [
-        `kubernetes.node.metric.${String(index).padStart(3, '0')}`,
-        ['metrics-kubernetes.node-default'],
-        'percent',
-        'gauge',
-        'double',
-        ['orchestrator.cluster.name', 'kubernetes.node.name'],
-      ]),
+      values: Array.from({ length: 16 }, (_, index) =>
+        catalogueRow(
+          index + 100,
+          kubernetesDataStreams[(index + 100) % kubernetesDataStreams.length]
+        )
+      ),
     };
     const workloads = {
       columns: workloadColumns,
@@ -103,7 +135,7 @@ describe('identifyMetricsEntities', () => {
         metricsEntitiesCount: 2,
         metricsCatalogueRowsCount: 116,
         matchedEntityKeyRowsCount: 2,
-        unmatchedDataStreamsCount: 0,
+        uncoveredDataStreamsCount: 0,
         metricsEntityRowsCount: 3,
         droppedIncompleteRowsCount: 1,
         droppedOverflowRowsCount: 0,
@@ -167,7 +199,7 @@ describe('identifyMetricsEntities', () => {
         handled: false,
         skipReason: 'no_tsds',
         metricsEntitiesCount: 0,
-        unmatchedDataStreamsCount: 0,
+        uncoveredDataStreamsCount: 0,
       })
     );
     expect(harness.query).toHaveBeenCalledTimes(1);
@@ -181,7 +213,7 @@ describe('identifyMetricsEntities', () => {
         values: [
           [
             'system.cpu.time',
-            ['metrics-hostmetricsreceiver.otel-default'],
+            ['metrics-us-east-1:metrics-hostmetricsreceiver.otel-default'],
             'seconds',
             'counter',
             'double',
@@ -204,7 +236,7 @@ describe('identifyMetricsEntities', () => {
         handled: false,
         skipReason: 'no_entity_key_row',
         metricsEntitiesCount: 0,
-        unmatchedDataStreamsCount: 1,
+        uncoveredDataStreamsCount: 1,
       })
     );
     expect(harness.query).toHaveBeenCalledTimes(1);
@@ -212,18 +244,21 @@ describe('identifyMetricsEntities', () => {
     expect(harness.info).toHaveBeenCalledTimes(1);
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('[otel-hostmetrics]'));
     expect(harness.info).toHaveBeenCalledWith(
-      expect.stringContaining('metrics-hostmetricsreceiver.otel-default')
+      expect.stringContaining('metrics-us-east-1:metrics-hostmetricsreceiver.otel-default')
     );
   });
 
-  it('handles a matching catalogue and counts unmatched data streams', async () => {
+  it('handles a matching catalogue and counts uncovered data streams', async () => {
     const harness = createHarness([
       {
         columns: catalogueColumns,
         values: [
           [
             'kubernetes.pod.cpu.usage.limit.pct',
-            ['metrics-kubernetes.pod-default', 'metrics-hostmetricsreceiver.otel-default'],
+            [
+              'metrics-kubernetes.pod-default',
+              'metrics-us-east-1:metrics-hostmetricsreceiver.otel-default',
+            ],
             'percent',
             'gauge',
             'double',
@@ -251,10 +286,15 @@ describe('identifyMetricsEntities', () => {
       expect.objectContaining({
         handled: true,
         matchedEntityKeyRowsCount: 1,
-        unmatchedDataStreamsCount: 1,
+        uncoveredDataStreamsCount: 1,
       })
     );
     expect(harness.bulk).toHaveBeenCalledTimes(1);
+    expect(harness.info).toHaveBeenCalledTimes(1);
+    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('[mixed-metrics]'));
+    expect(harness.info).toHaveBeenCalledWith(
+      expect.stringContaining('metrics-us-east-1:metrics-hostmetricsreceiver.otel-default')
+    );
   });
 
   it('keeps the 500 workload rows with the most replicas and logs overflow', async () => {
