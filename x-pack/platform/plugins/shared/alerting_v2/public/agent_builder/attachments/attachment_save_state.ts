@@ -18,6 +18,7 @@ export const UNSAVED_CHANGES_BADGE: HeaderBadge = {
     defaultMessage: 'Unsaved changes',
   }),
   color: 'warning',
+  iconType: 'pencil',
 };
 
 // Agent builder does not pass the new origin_snapshot_at back into rendered attachments after

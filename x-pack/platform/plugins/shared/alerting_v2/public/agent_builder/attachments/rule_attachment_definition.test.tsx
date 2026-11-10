@@ -117,7 +117,7 @@ describe('createRuleAttachmentDefinition', () => {
       };
 
       expect(definition.getHeader!({ attachment }).badges).toEqual([
-        { label: 'Unsaved changes', color: 'warning' },
+        { label: 'Unsaved changes', color: 'warning', iconType: 'pencil' },
       ]);
     });
 
