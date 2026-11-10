@@ -49,6 +49,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/observables'));
     // observables stored as cases-observables objects, up to 10,000 per case
     loadTestFile(require.resolve('./internal/observables_at_scale'));
+    // metadata shared by every case of a space and owner that holds an observable value
+    loadTestFile(require.resolve('./internal/observables_shared_data'));
     // end-to-end observable extraction via the attachment bulkCreate side effect
     loadTestFile(require.resolve('./internal/extract_observables'));
 

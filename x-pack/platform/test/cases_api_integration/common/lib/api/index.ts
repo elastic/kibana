@@ -169,7 +169,7 @@ export const deleteAllCaseItems = async (es: Client) => {
 export const deleteCaseObservables = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
     index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-    q: 'type:cases-observables',
+    q: 'type:cases-observables OR type:cases-observable-shared',
     wait_for_completion: true,
     refresh: true,
     body: {},
