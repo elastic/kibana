@@ -8,13 +8,14 @@
  */
 
 import type { ProjectRouting } from '@kbn/es-query';
-import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
 import type { Subscription } from 'rxjs';
 import { BehaviorSubject, combineLatestWith, debounceTime, map, skip, startWith } from 'rxjs';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { cpsService } from '../services/kibana_services';
+import { getProjectRoutingComparators } from '../../common/dashboard_state/project_routing';
 
 export const COMPARE_DEBOUNCE = 100;
 
@@ -52,13 +53,9 @@ export function initializeProjectRoutingManager(
       setProjectRouting(cpsProjectRouting);
     });
 
-  const comparators = {
-    project_routing: (_a, _b, lastSavedState, _latestState) => {
-      if (!projectRoutingRestore$.value) return true;
-      const savedValue = lastSavedState?.project_routing;
-      return savedValue === projectRouting$.value;
-    },
-  } as StateComparators<Pick<DashboardState, 'project_routing'>>;
+  const comparators = getProjectRoutingComparators({
+    isRestored: () => projectRoutingRestore$.value,
+  });
 
   const getState = (): Pick<DashboardState, 'project_routing'> => {
     if (!projectRoutingRestore$.value) {

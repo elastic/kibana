@@ -14,6 +14,7 @@ export {
   DEFAULT_APPROXIMATION_STATE,
   type ApproximationState,
 } from './approximation';
+export { getProjectRoutingComparators, type ProjectRoutingState } from './project_routing';
 export {
   DEFAULT_SETTINGS,
   deserializeSettings,
