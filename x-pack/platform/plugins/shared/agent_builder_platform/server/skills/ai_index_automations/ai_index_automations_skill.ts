@@ -22,23 +22,17 @@ export const aiIndexAutomationsSkill = defineSkillType({
   basePath: 'skills/platform/context-engine',
   availability: contextEngineSkillAvailability,
   description:
-    'Read, draft and change the workflow automations that generate Knowledge Indicators for a Context Engine AI Index. Load when authoring a KI generation workflow, when inspecting what an existing automation does, when a proposed fix names a workflow step, or when validating or piloting an automation.',
+    'Read, install and run the workflow automations that generate Knowledge Indicators for a Context Engine AI Index. Load when installing a template automation, when inspecting what an existing automation does, when a proposed fix names a workflow step, or when running or piloting an automation.',
   content,
   // The KI shape and strategy catalog are the shared references the analysis skill also reads,
-  // so the brief and the templates speak the same vocabulary.
+  // so its proposal and the templates speak the same vocabulary.
   referencedContent: [kiShapesReference, strategyCatalogReference],
   getRegistryTools: () => [
     platformCoreTools.executeWorkflow,
     platformCoreTools.getWorkflowExecutionStatus,
-    platformCoreTools.generateEsql,
-    platformCoreTools.executeEsql,
     contextEngineAiIndexTools.queryAiIndices,
-    `${internalNamespaces.workflows}.validate_workflow`,
     `${internalNamespaces.workflows}.get_workflow`,
     `${internalNamespaces.workflows}.get_step_definitions`,
-    `${internalNamespaces.workflows}.get_trigger_definitions`,
-    `${internalNamespaces.workflows}.get_examples`,
-    `${internalNamespaces.workflows}.workflow_execute_step`,
     contextEngineAutomationTools.installAutomationTemplate,
     contextEngineAutomationTools.saveAutomation,
     contextEngineAutomationTools.runAutomation,

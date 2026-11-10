@@ -1,5 +1,5 @@
 {
-  "sha1": "962c59b7d7984172c2316b8c3992ba720e4744bb",
+  "sha1": "bac424bcbd91baa3ba0b374464724e0959f02a96",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -150,6 +150,90 @@
       }
     },
     {
+      "id": "f70ca8205fdee5a-ac29dee84c6caa3",
+      "title": "Digital Experience EDOT Browser application shows the pages, browsers and clicks of the EDOT Browser application",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 20,
+        "column": 7
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-af2f0e14f2bc0dc",
+      "title": "Digital Experience EDOT Browser application shows the top errors on the Overview, linked to the Errors tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 31,
+        "column": 13
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-7aad8087fe750f1",
+      "title": "Digital Experience EDOT Browser application shows the error groups on the Errors tab, with the stack trace in a flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 40,
+        "column": 11
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-26e1b9fb8ddd7d4",
+      "title": "Digital Experience EDOT Browser application shows the requests and the render-blocking resources on the Network tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 54,
+        "column": 22
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-de88655e0af2823",
+      "title": "Digital Experience EDOT Browser application keeps the EDOT Browser Overview headings in order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 63,
+        "column": 93
+      }
+    },
+    {
+      "id": "f70ca8205fdee5a-6fb90f4d99eb78b",
+      "title": "Digital Experience EDOT Browser application narrows the EDOT Browser Overview by its filters, and keeps them across the tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/otel_application_overview.spec.ts",
+        "line": 82,
+        "column": 7
+      }
+    },
+    {
       "id": "b97a75be98dc303-6b41f0d47752318",
       "title": "Digital Experience on serverless lists only EDOT Browser applications without requesting Classic RUM data",
       "expectedStatus": "passed",
@@ -191,8 +275,8 @@
       }
     },
     {
-      "id": "ad8ceb6a0ebceff-708e74e148734ab",
-      "title": "Digital Experience sessions opens a session with its waterfall, then goes back to the same list",
+      "id": "ad8ceb6a0ebceff-155b7df5e6f48b6",
+      "title": "Digital Experience sessions opens a session with its waterfall and journey, then goes back to the same list",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

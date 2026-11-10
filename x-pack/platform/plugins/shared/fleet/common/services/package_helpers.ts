@@ -137,6 +137,10 @@ type PackageClassificationFields = Partial<
   Pick<PackageInfo | PackageListItem, 'name' | 'type' | 'data_streams' | 'policy_templates'>
 >;
 
+// `assets` is only available on the package info, not on the catalog list items
+type AssetOnlyClassificationFields = PackageClassificationFields &
+  Partial<Pick<PackageInfo, 'assets'>>;
+
 /**
  * Return true if a package declares at least one data stream or policy template.
  * Integration packages without either (documentation-only, or assets-only) have nothing to configure.
@@ -163,4 +167,52 @@ export function shouldAddIntegrationFromCatalog(pkg: PackageClassificationFields
     return true;
   }
   return hasDataStreamsOrPolicyTemplates(pkg);
+}
+
+/**
+ * Return true if the package ships at least one Kibana or Elasticsearch asset that can be installed.
+ * Knowledge base assets are ignored: they are built from the docs folder, which every package has.
+ */
+export function hasInstallableAssets(pkg: Pick<AssetOnlyClassificationFields, 'assets'>): boolean {
+  return Object.values(pkg.assets ?? {}).some((assetsByType) =>
+    Object.entries(assetsByType ?? {}).some(
+      ([assetType, assets]) => assetType !== 'knowledge_base' && (assets?.length ?? 0) > 0
+    )
+  );
+}
+
+/**
+ * Return true if the Integration Details page should offer "Install assets" instead of "Add integration":
+ * integration packages that have nothing to configure on an agent (no data streams and no policy templates,
+ * or on the ADD_INTEGRATION_EXCLUDED_PACKAGES list) but ship installable assets.
+ * Temporary: remove once packages are re-typed and behavior is inferred from `type`.
+ */
+export function isAssetOnlyIntegrationPackage(pkg: AssetOnlyClassificationFields): boolean {
+  return (
+    pkg.type === 'integration' && !shouldAddIntegrationFromCatalog(pkg) && hasInstallableAssets(pkg)
+  );
+}
+
+/**
+ * Packages on ADD_INTEGRATION_EXCLUDED_PACKAGES that still configure something on an agent (a custom
+ * policy UI, or a real input), so they stay available when adding an integration to an agent policy
+ * and keep "Add integration" on their details page.
+ * Temporary: remove once packages are re-typed and behavior is inferred from `type`.
+ */
+export const ADD_INTEGRATION_CONFIGURABLE_PACKAGES: readonly string[] = ['cribl', 'supabase'];
+
+/**
+ * Return true if the package should be offered when adding an integration to an agent policy:
+ * packages with nothing to configure on an agent (assets-only, documentation-only) are hidden.
+ * Takes the fields of a catalog card, which carries the classification but not the package contents.
+ */
+export function canAddToAgentPolicy(pkg: {
+  name?: string;
+  addIntegrationFromCatalog?: boolean;
+}): boolean {
+  if (pkg.name && ADD_INTEGRATION_CONFIGURABLE_PACKAGES.includes(pkg.name)) {
+    return true;
+  }
+  // Cards without a classification (e.g. custom integrations) keep being offered
+  return pkg.addIntegrationFromCatalog !== false;
 }

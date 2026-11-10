@@ -15,6 +15,7 @@ export type {
   GetActionButtonsParams,
   GetHeaderParams,
   HeaderData,
+  HeaderColor,
   HeaderBadge,
   ActionButton,
   AttachmentPreviewState,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { telemetryTargetNameSchema } from '@kbn/nightshift-investigations-plugin/common';
 import { lazySchema, z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type {
@@ -17,12 +16,7 @@ import type {
 
 export const investigationExampleSchema = lazySchema(() =>
   z.object({
-    input: z
-      .object({
-        question: z.string().trim().min(1).max(MAX_TEXT_LENGTH),
-        telemetry_target: telemetryTargetNameSchema.optional(),
-      })
-      .catchall(z.json()),
+    input: z.object({ question: z.string().trim().min(1).max(MAX_TEXT_LENGTH) }).catchall(z.json()),
     output: z.record(z.string(), z.json()).optional(),
     metadata: z.object({ case_id: z.string().trim().min(1).max(500) }).catchall(z.json()),
   })

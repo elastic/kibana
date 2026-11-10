@@ -22,6 +22,23 @@ is_pr_with_label "ci:build-docker-cross-compile" && BUILD_ARGS+=("--docker-cross
 is_pr_with_label "ci:build-os-packages" || BUILD_ARGS+=("--skip-os-packages")
 is_pr_with_label "ci:build-docker-contexts" || BUILD_ARGS+=("--skip-docker-contexts")
 is_pr_with_label "ci:build-cdn-assets" || BUILD_ARGS+=("--skip-cdn-assets")
+
+# Succeeds when the PR changes how the OpenSSL FIPS provider is built, or when that can't be determined.
+fips_provider_changed() {
+  local status=0
+  [[ "${GITHUB_PR_MERGE_BASE:-}" ]] || return 0
+  git diff --quiet "$GITHUB_PR_MERGE_BASE" HEAD -- src/dev/build/tasks/fips src/dev/build/lib/fips_config.ts || status=$?
+  # 1 = changed; anything higher is a git error, so build the provider to be safe
+  [[ "$status" != 0 ]]
+}
+
+# Compiling the FIPS provider takes about a minute, and it's only used when Kibana runs with
+# --enable-fips. PR builds skip it unless they build packages, change how it's built, or ask for it.
+if is_pr && ! is_pr_with_label "ci:build-fips-provider" && ! is_pr_with_label "ci:build-os-packages" &&
+  ! is_pr_with_label "ci:build-all-platforms" && ! fips_provider_changed; then
+  BUILD_ARGS+=("--skip-fips-provider")
+fi
+
 if [[ "${BUILDKITE_PIPELINE_SLUG:-}" == "kibana-pointer-compression" ]]; then
   BUILD_ARGS+=("--force-node-pointer-compression")
 fi

@@ -52,6 +52,10 @@ jest.mock('./pre_build.ts', () => ({
   runPreBuild: mockRunPreBuild,
 }));
 
+jest.mock('./frequent_cancellations_tip.ts', () => ({
+  postFrequentCancellationsTip: jest.fn().mockResolvedValue(undefined),
+}));
+
 jest.mock('../../../pipelines/evals/eval_pipeline.ts', () => ({
   getEvalTriggerStep: mockGetEvalTriggerStep,
 }));
@@ -115,6 +119,10 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'response ops path',
     changedFiles: ['x-pack/platform/plugins/shared/alerting/server/index.ts'],
+  },
+  {
+    name: 'alerting_v2 path',
+    changedFiles: ['x-pack/platform/plugins/shared/alerting_v2/server/index.ts'],
   },
   {
     name: 'response ops step definition path',
@@ -278,6 +286,14 @@ const SCENARIOS: Scenario[] = [
   {
     name: 'storybooks definition path',
     changedFiles: ['.buildkite/pipeline-utils/step-library/steps/storybooks.ts'],
+  },
+  {
+    name: 'kbn handlebars definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/kbn_handlebars.ts'],
+  },
+  {
+    name: 'prompt changes definition path',
+    changedFiles: ['.buildkite/pipeline-utils/step-library/steps/prompt_changes.ts'],
   },
   { name: 'storybook toolchain package affected', affectedPackages: ['@kbn/storybook'] },
   {

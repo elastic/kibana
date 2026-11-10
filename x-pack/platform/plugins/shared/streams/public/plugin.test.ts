@@ -7,6 +7,7 @@
 
 import { Plugin } from './plugin';
 import { coreMock } from '@kbn/core/public/mocks';
+import { firstValueFrom } from 'rxjs';
 import type { StreamsRepositoryClient } from './api';
 
 describe('Streams Plugin', () => {
@@ -71,6 +72,65 @@ describe('Streams Plugin', () => {
       expect(typeof start.getClassicStatus).toBe('function');
       expect(typeof start.enableWiredMode).toBe('function');
       expect(typeof start.disableWiredMode).toBe('function');
+    });
+  });
+
+  describe('navigationStatus$', () => {
+    const getNavigationStatus = async (
+      capabilities: Record<string, Record<string, boolean>>,
+      { canvasEnabled = true }: { canvasEnabled?: boolean } = {}
+    ) => {
+      let IsolatedPlugin: typeof Plugin = Plugin;
+      // The status observable is memoized per module, so each case needs a fresh module.
+      jest.isolateModules(() => {
+        ({ Plugin: IsolatedPlugin } = jest.requireActual<typeof import('./plugin')>('./plugin'));
+      });
+      const isolatedPlugin = new IsolatedPlugin({
+        env: { packageInfo: { buildFlavor: 'traditional' } },
+        config: { get: () => ({}) },
+        logger: { get: () => ({ error: jest.fn() }) },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+      const coreStart = coreMock.createStart();
+      coreStart.application.capabilities = {
+        ...coreStart.application.capabilities,
+        ...capabilities,
+      };
+      coreStart.uiSettings.get.mockImplementation((key: string) =>
+        key === 'observability:streamsEnableCanvas' ? canvasEnabled : undefined
+      );
+      const { navigationStatus$ } = isolatedPlugin.start(coreStart, {});
+      return firstValueFrom(navigationStatus$);
+    };
+
+    it('is enabled for a user with only the V2 show capability', async () => {
+      await expect(getNavigationStatus({ streamsV2: { show: true } })).resolves.toEqual({
+        status: 'enabled',
+      });
+    });
+
+    it('is disabled for a V2-only user when the canvas is disabled in the space', async () => {
+      await expect(
+        getNavigationStatus({ streamsV2: { show: true } }, { canvasEnabled: false })
+      ).resolves.toEqual({ status: 'disabled' });
+    });
+
+    it('is enabled for a legacy user when the canvas is disabled in the space', async () => {
+      await expect(
+        getNavigationStatus({ streams: { show: true } }, { canvasEnabled: false })
+      ).resolves.toEqual({ status: 'enabled' });
+    });
+
+    it('is enabled for a user with only the legacy show capability', async () => {
+      await expect(getNavigationStatus({ streams: { show: true } })).resolves.toEqual({
+        status: 'enabled',
+      });
+    });
+
+    it('is disabled without either show capability', async () => {
+      await expect(
+        getNavigationStatus({ streams: { show: false }, streamsV2: { show: false } })
+      ).resolves.toEqual({ status: 'disabled' });
     });
   });
 

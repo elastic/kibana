@@ -32,6 +32,8 @@ import { KibanaSavedObjectType } from '../../../../../../../common/types/models'
 import { appendReturnParams } from '../../components/return_params';
 
 import {
+  ADD_INTEGRATION_CONFIGURABLE_PACKAGES,
+  isAssetOnlyIntegrationPackage,
   isPackagePrerelease,
   splitPkgKey,
   packageToPackagePolicyInputs,
@@ -661,6 +663,16 @@ export function Detail() {
     [getPath, history]
   );
 
+  // Temporary: integration packages with nothing to configure on an agent only install assets
+  const isAssetOnlyPackage = useMemo(
+    () =>
+      packageInfo
+        ? !ADD_INTEGRATION_CONFIGURABLE_PACKAGES.includes(packageInfo.name) &&
+          isAssetOnlyIntegrationPackage(packageInfo)
+        : false,
+    [packageInfo]
+  );
+
   const headerRightContent = useMemo(
     () =>
       packageInfo ? (
@@ -708,10 +720,37 @@ export function Detail() {
                     },
                   ]
                 : []),
-              ...(packageInfo.type === 'content'
-                ? !isInstalled
-                  ? [{ isDivider: true }, { content: <InstallButton {...packageInfo} /> }]
-                  : [] // if content package is already installed, don't show install button in header
+              ...(packageInfo.type === 'content' || isAssetOnlyPackage
+                ? // Nothing to show when the package is installed or the user can't install it, so no divider either.
+                  // Uploaded asset-only packages keep their edit action.
+                  (!isInstalled && canInstallPackages) || (isAssetOnlyPackage && isCustomPackage)
+                  ? [
+                      { isDivider: true },
+                      {
+                        content: (
+                          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+                            {isAssetOnlyPackage && isCustomPackage && (
+                              <EuiFlexItem grow={false}>
+                                <EditIntegrationButton
+                                  handleEditIntegrationClick={handleEditIntegrationClick}
+                                />
+                              </EuiFlexItem>
+                            )}
+                            {!isInstalled && canInstallPackages && (
+                              <EuiFlexItem grow={false}>
+                                <InstallButton
+                                  {...packageInfo}
+                                  variant={isAssetOnlyPackage ? 'assets' : 'package'}
+                                  // distinct from the one in the Settings tab, which shares the page
+                                  data-test-subj="installAssetsHeaderButton"
+                                />
+                              </EuiFlexItem>
+                            )}
+                          </EuiFlexGroup>
+                        ),
+                      },
+                    ]
+                  : []
                 : [
                     { isDivider: true },
                     {
@@ -752,7 +791,7 @@ export function Detail() {
             ].map((item, index) => (
               <EuiFlexItem grow={false} key={index} data-test-subj={item['data-test-subj']}>
                 {item.isDivider ?? false ? (
-                  <Divider />
+                  <Divider data-test-subj="headerDivider" />
                 ) : item.label ? (
                   <EuiDescriptionList className="eui-textRight" compressed textStyle="reverse">
                     <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
@@ -773,6 +812,8 @@ export function Detail() {
       versionOptions,
       updateAvailable,
       isInstalled,
+      isAssetOnlyPackage,
+      canInstallPackages,
       isCustomPackage,
       handleEditIntegrationClick,
       addIntegrationDisabledReason,
