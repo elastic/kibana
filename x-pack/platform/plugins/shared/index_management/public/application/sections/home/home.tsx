@@ -9,7 +9,8 @@ import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { AppHeader, type AppHeaderTab } from '@kbn/app-header';
 
@@ -45,6 +46,43 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     plugins: { console: consolePlugin },
     privs,
   } = useAppContext();
+  const { euiTheme } = useEuiTheme();
+
+  // POC: card outline on list tables across Index Management tabs
+  // Plain tables: .euiTable__wrapper. Panelled: wrapper + sibling pagination bar share one card.
+  const tableCardBorder = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
+  const tableCardRadius = euiTheme.border.radius.control;
+
+  const indexMgmtTableCardCss = css`
+    .euiTable__wrapper {
+      border: ${tableCardBorder};
+      border-radius: ${tableCardRadius};
+    }
+
+    [data-test-subj='euiBasicTablePanelledWrapper'] {
+      border: ${tableCardBorder};
+      border-radius: ${tableCardRadius};
+
+      /* Keep EUI's join with the panelled pagination bar (no double bottom edge) */
+      &:not(:last-child) {
+        border-block-end-width: 0;
+        border-end-start-radius: 0;
+        border-end-end-radius: 0;
+      }
+
+      .euiTable__wrapper {
+        border: none;
+        border-radius: 0;
+      }
+    }
+
+    /* POC: panelled footer uses border.thin by default — match card color + radius */
+    [data-test-subj='euiBasicTablePanelledWrapper'] + div {
+      border: ${tableCardBorder};
+      border-block-start-width: 0;
+      border-radius: 0 0 ${tableCardRadius} ${tableCardRadius};
+    }
+  `;
 
   const onSectionChange = (newSection: Section) => {
     history.push(`/${newSection}`);
@@ -100,7 +138,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
   }
 
   const indexManagementTabs = (
-    <>
+    <div css={indexMgmtTableCardCss}>
       <AppHeader
         title={i18n.translate('xpack.idxMgmt.home.appTitle', {
           defaultMessage: 'Index Management',
@@ -136,7 +174,7 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
         )}
       </Routes>
       {consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null}
-    </>
+    </div>
   );
   return (
     <Routes>
