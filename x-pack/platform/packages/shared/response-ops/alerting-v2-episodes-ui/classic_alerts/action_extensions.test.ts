@@ -234,6 +234,22 @@ describe('classicActionExtensions', () => {
         errors: ['untrack failed'],
       });
     });
+
+    it('execute preserves the API response message when bulkUntrackAlerts rejects', async () => {
+      mockedBulkUntrack.mockRejectedValueOnce(
+        Object.assign(new Error('Bad Request'), {
+          body: { message: 'The alert cannot be resolved' },
+        })
+      );
+
+      const result = await resolveExtension.execute([makeClassicEpisode('c1', 'open')], http);
+
+      expect(result).toEqual({
+        succeeded: 0,
+        failed: 1,
+        errors: ['The alert cannot be resolved'],
+      });
+    });
   });
 
   describe('snooze extension', () => {
@@ -444,7 +460,7 @@ describe('classicActionExtensions', () => {
       const result = await editTagsExtension.execute(episodes, http, { tags: [] });
 
       expect(mockedBulkUpdateTags).not.toHaveBeenCalled();
-      expect(result).toEqual({ succeeded: 1, failed: 0 });
+      expect(result).toEqual({ succeeded: 0, failed: 0, unchanged: 1 });
     });
 
     it('execute groups by index for multi-index episodes', async () => {

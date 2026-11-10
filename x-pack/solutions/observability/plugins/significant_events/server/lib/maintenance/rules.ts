@@ -5,71 +5,63 @@
  * 2.0.
  */
 
-import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { BulkResponse } from '@kbn/alerting-v2-schemas';
+import type { RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { SignificantEventsMaintenanceFailure } from '../../../common/maintenance/types';
-import { toMessage } from './to_message';
+import {
+  deleteRules,
+  runBulkRuleOperation,
+  toBulkRuleResult,
+  type BulkRuleResult,
+} from '../significant_events/rules/bulk_rule_operations';
 
-/**
- * Toggle `enabled` on a set of alerting v2 signal rules. Returns the
- * ids that were actually toggled (no error), the ids that failed for a non-not-found
- * reason, and one failure entry per fatal id. A missing rule is treated as
- * "already gone" and reported as neither toggled nor failed.
- */
+export interface RulesToggleResult {
+  toggledIds: string[];
+  failedIds: string[];
+  failures: SignificantEventsMaintenanceFailure[];
+}
+
+const toMaintenanceResult = ({ succeededIds, failures }: BulkRuleResult): RulesToggleResult => ({
+  toggledIds: succeededIds,
+  failedIds: failures.map(({ id }) => id),
+  failures: failures.map(({ id, message }) => ({ target: `rule:${id}`, error: message })),
+});
+
+/** Report successful toggles and fatal failures, ignoring rules that are already gone. */
+export const toRulesToggleResult = (ids: string[], response: BulkResponse): RulesToggleResult =>
+  toMaintenanceResult(toBulkRuleResult(ids, response));
+
+/** Run a batched rule operation and adapt its results to maintenance's recovery inventory. */
+export const runRulesInBatches = async (
+  ids: string[],
+  run: (chunk: string[]) => Promise<BulkResponse>
+): Promise<RulesToggleResult & { affectedCount: number }> => {
+  const result = await runBulkRuleOperation(ids, run);
+  return { affectedCount: result.affectedCount, ...toMaintenanceResult(result) };
+};
+
+/** Toggle `enabled` on a set of alerting v2 signal rules as the caller. */
 export const setV2RulesEnabled = async (
   rulesClient: RulesClientApi,
   ids: string[],
   enabled: boolean
-): Promise<{
-  toggledIds: string[];
-  failedIds: string[];
-  failures: SignificantEventsMaintenanceFailure[];
-}> => {
-  const { errors } = enabled
-    ? await rulesClient.bulkEnableRules({ ids })
-    : await rulesClient.bulkDisableRules({ ids });
-  const fatalErrors = errors.filter(
-    (error) => error.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND
+): Promise<RulesToggleResult> =>
+  toRulesToggleResult(
+    ids,
+    enabled
+      ? await rulesClient.bulkEnableRules({ ids })
+      : await rulesClient.bulkDisableRules({ ids })
   );
-  const erroredIds = new Set(errors.map((error) => error.id));
-  return {
-    toggledIds: ids.filter((id) => !erroredIds.has(id)),
-    failedIds: fatalErrors.map((error) => error.id),
-    failures: fatalErrors.map((error) => ({
-      target: `rule:${error.id}`,
-      error: error.error.message,
-    })),
-  };
-};
-
-const RULE_BULK_SIZE = 100;
 
 export const deleteV2Rules = async (
-  rulesClient: RulesClientApi,
+  rulesClient: Pick<RulesClientApi, 'bulkDeleteRules'>,
   ids: string[]
 ): Promise<{
   deleted: number;
   failedIds: string[];
   failures: SignificantEventsMaintenanceFailure[];
 }> => {
-  let deleted = 0;
-  const failedIds: string[] = [];
-  const failures: SignificantEventsMaintenanceFailure[] = [];
-  for (let offset = 0; offset < ids.length; offset += RULE_BULK_SIZE) {
-    const chunk = ids.slice(offset, offset + RULE_BULK_SIZE);
-    try {
-      const result = await rulesClient.bulkDeleteRules({ ids: chunk });
-      deleted += result.affected_count;
-      for (const error of result.errors) {
-        if (error.error.code !== ALERTING_ERROR_CODES.RULE_NOT_FOUND) {
-          failedIds.push(error.id);
-          failures.push({ target: `rule:${error.id}`, error: error.error.message });
-        }
-      }
-    } catch (error) {
-      const message = toMessage(error);
-      failedIds.push(...chunk);
-      failures.push(...chunk.map((id) => ({ target: `rule:${id}`, error: message })));
-    }
-  }
-  return { deleted, failedIds, failures };
+  const result = await deleteRules(rulesClient, ids);
+  const { failedIds, failures } = toMaintenanceResult(result);
+  return { deleted: result.affectedCount, failedIds, failures };
 };

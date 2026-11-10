@@ -6,6 +6,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 import { Asset, EntityField } from '@kbn/entity-store/common/domain/definitions/entity.gen';
 import type { LeadEntity, Observation } from '../types';
 
@@ -54,7 +55,7 @@ const HIGH_CRITICALITY_LEVELS: ReadonlySet<string> = new Set(['high_impact', 'ex
  * Reads `asset.criticality` from the entity record root (it lives at the record
  * top level, not under the `entity` namespace). Returns `undefined` when absent.
  */
-const AssetCriticalitySchema = Asset.pick({ criticality: true }).strip();
+const AssetCriticalitySchema = lazySchema(() => Asset.pick({ criticality: true }).strip());
 export const getAssetCriticality = (entity: LeadEntity): string | undefined => {
   const parsed = AssetCriticalitySchema.safeParse((entity.record as Record<string, unknown>).asset);
   if (!parsed.success) return;

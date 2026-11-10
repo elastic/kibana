@@ -41,6 +41,17 @@ describe('describeSegmentSpan', () => {
       }).isOngoing
     ).toBe(false);
   });
+
+  it('uses an explicit closed state for a non-inactive span ending at the window edge', () => {
+    expect(
+      describeSegmentSpan({
+        x1Ms: WINDOW_END,
+        status: ALERT_EPISODE_STATUS.ACTIVE,
+        windowEndMs: WINDOW_END,
+        isOngoing: false,
+      }).isOngoing
+    ).toBe(false);
+  });
 });
 
 describe('formatDuration', () => {

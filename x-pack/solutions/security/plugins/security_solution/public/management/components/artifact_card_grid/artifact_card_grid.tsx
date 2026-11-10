@@ -49,6 +49,12 @@ export type ArtifactCardGridProps = Omit<
    * Callback to provide additional props for the `ArtifactEntryCollapsibleCard`
    */
   cardComponentProps?: (item: MaybeImmutable<AnyArtifact>) => ArtifactCardGridCardComponentProps;
+
+  /**
+   * When true, the grid shows a read-only Enabled column.
+   * Only artifact types that support the `disabled` tag should set this.
+   */
+  showEnabledColumn?: boolean;
 };
 
 export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
@@ -57,6 +63,7 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
     cardComponentProps,
     onPageChange,
     onExpandCollapse,
+    showEnabledColumn = false,
     'data-test-subj': dataTestSubj,
     ...paginatedContentProps
   }) => {
@@ -131,13 +138,14 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
         newFullCardProps.set(artifact, {
           ...cardProps,
           item: artifact,
+          showEnabledColumn,
           onExpandCollapse: () => handleCardExpandCollapse(artifact),
           'data-test-subj': cardProps['data-test-subj'] ?? getTestId('card'),
         });
       }
 
       return newFullCardProps;
-    }, [callerDefinedCardProps, getTestId, handleCardExpandCollapse]);
+    }, [callerDefinedCardProps, getTestId, handleCardExpandCollapse, showEnabledColumn]);
 
     const handleItemComponentProps = useCallback(
       (item: AnyArtifact): ArtifactEntryCollapsibleCardProps => {
@@ -152,6 +160,7 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
         <GridHeader
           expandAllIconType={isEverythingExpanded ? 'fold' : 'unfold'}
           onExpandCollapseAll={handleCardExpandCollapseAll}
+          showEnabledColumn={showEnabledColumn}
           data-test-subj={getTestId('header')}
         />
 

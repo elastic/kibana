@@ -7,11 +7,13 @@
 import qs from 'query-string';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 
 export interface TopNFunctionsLocatorParams extends SerializableRecord {
   kuery?: string;
   rangeFrom?: string;
   rangeTo?: string;
+  schema?: ProfilingSchema;
 }
 
 export type TopNFunctionsLocator = LocatorPublic<TopNFunctionsLocatorParams>;
@@ -25,8 +27,9 @@ export class TopNFunctionsLocatorDefinition
     rangeFrom,
     rangeTo,
     kuery,
+    schema,
   }: TopNFunctionsLocatorParams) => {
-    const params = { rangeFrom, rangeTo, kuery };
+    const params = { rangeFrom, rangeTo, kuery, schema };
     return {
       app: 'profiling',
       path: `/functions/topn?${qs.stringify(params)}`,

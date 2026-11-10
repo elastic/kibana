@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { DetectedMatch } from '../chat_complete/anonymization/types';
-import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
+import type { DetectedMatch, RegexWorkerService } from '@kbn/ai-anonymization-server';
 
 export const createRegexWorkerServiceMock = () => {
   const mock = {

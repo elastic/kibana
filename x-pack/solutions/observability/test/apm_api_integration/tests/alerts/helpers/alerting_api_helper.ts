@@ -76,7 +76,6 @@ export async function runRuleSoon({
         throw new Error(`[Rule] Running a rule ${ruleId} failed: ${error}`);
       }
     },
-    retryCount: 10,
   });
 }
 

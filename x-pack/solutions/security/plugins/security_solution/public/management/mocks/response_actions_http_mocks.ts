@@ -107,7 +107,10 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     path: ISOLATE_HOST_ROUTE_V2,
     method: 'post',
     handler: (): ResponseActionApiResponse => {
-      return { action: '1-2-3', data: { id: '1-2-3' } as ResponseActionApiResponse['data'] };
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails({ id: '1-2-3', command: 'isolate' });
+
+      return { action: '1-2-3', data: response };
     },
   },
   {
@@ -115,7 +118,10 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
     path: UNISOLATE_HOST_ROUTE_V2,
     method: 'post',
     handler: (): ResponseActionApiResponse => {
-      return { action: '3-2-1', data: { id: '3-2-1' } as ResponseActionApiResponse['data'] };
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails({ id: '3-2-1', command: 'unisolate' });
+
+      return { action: '3-2-1', data: response };
     },
   },
   {

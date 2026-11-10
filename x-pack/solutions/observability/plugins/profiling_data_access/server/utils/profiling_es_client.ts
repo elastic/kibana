@@ -12,6 +12,7 @@ import type {
   AggregationField,
   BaseFlameGraph,
   ESTopNFunctions,
+  ProfilingSchema,
   ProfilingStatusResponse,
   StackTraceResponse,
 } from '@kbn/profiling-utils';
@@ -34,7 +35,19 @@ export interface ProfilingESClient {
     azureCostDiscountRate?: number;
     indices?: string[];
     stacktraceIdsField?: string;
+    schema?: ProfilingSchema;
   }): Promise<StackTraceResponse>;
+  /** Collects the stacktrace IDs held by a random sample of the documents matching `query` */
+  sampleStacktraceIds(params: {
+    query: QueryDslQueryContainer;
+    indices: string[];
+    stacktraceIdsField: string;
+    /** Either 1 or at most 0.5, as the random sampler doesn't support values in between */
+    probability: number;
+    seed: number;
+    preference: string;
+    size: number;
+  }): Promise<string[]>;
   getEsClient(): ElasticsearchClient;
   profilingFlamegraph(params: {
     query: QueryDslQueryContainer;
@@ -49,6 +62,7 @@ export interface ProfilingESClient {
     costPervCPUPerHour?: number;
     indices?: string[];
     stacktraceIdsField?: string;
+    schema?: ProfilingSchema;
   }): Promise<BaseFlameGraph>;
   topNFunctions(params: {
     query: QueryDslQueryContainer;
@@ -65,6 +79,7 @@ export interface ProfilingESClient {
     azureCostDiscountRate?: number;
     costPervCPUPerHour?: number;
     durationSeconds: number;
+    schema?: ProfilingSchema;
   }): Promise<ESTopNFunctions>;
   universalProfiling: {
     status(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;

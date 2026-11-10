@@ -22,11 +22,9 @@ const createPolicy = (overrides?: Partial<ActionPolicyResponse>): ActionPolicyRe
     enabled: true,
     destinations: [{ type: 'workflow', id: 'workflow-1' }],
     matcher: { expression: 'data.severity : "critical"' },
-    group_by: ['host.name'],
+    grouping: { mode: 'per_field', fields: ['host.name'] },
     tags: ['production'],
-    grouping_mode: 'per_field',
     throttle: { strategy: 'time_interval', interval: '5m' },
-    snoozed_until: null,
     created_by: { profile_uid: 'alice' },
     created_at: '2026-01-01T00:00:00.000Z',
     updated_by: { profile_uid: 'alice' },
@@ -98,9 +96,8 @@ describe('registerActionPolicyAutoAttach', () => {
 
   it('attaches the focused action policy with a deterministic id', () => {
     const policy = createPolicy({
-      matcher: null,
-      group_by: null,
-      snoozed_until: null,
+      matcher: undefined,
+      snoozed_until: undefined,
     });
 
     focusedActionPolicy$.next(policy);
@@ -116,7 +113,6 @@ describe('registerActionPolicyAutoAttach', () => {
         id: 'policy-1',
         name: 'Critical production alerts',
         matcher: undefined,
-        group_by: undefined,
         snoozed_until: undefined,
       }),
     });

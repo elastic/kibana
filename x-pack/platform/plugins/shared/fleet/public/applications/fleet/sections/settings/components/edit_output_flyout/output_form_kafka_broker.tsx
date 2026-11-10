@@ -9,7 +9,10 @@ import { EuiFormRow, EuiPanel, EuiSelect, EuiSpacer, EuiTitle } from '@elastic/e
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import { kafkaAcknowledgeReliabilityLevel } from '../../../../../../../common/constants';
+import {
+  kafkaAcknowledgeReliabilityLevel,
+  kafkaAuthType,
+} from '../../../../../../../common/constants';
 
 import type { OutputFormInputsType } from './use_output_form';
 
@@ -71,28 +74,31 @@ export const OutputFormKafkaBroker: React.FunctionComponent<{ inputs: OutputForm
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
-        label={
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaBrokerTimeoutInputLabel"
-            defaultMessage="Broker timeout"
-          />
-        }
-        helpText={
-          <FormattedMessage
-            id="xpack.fleet.settings.editOutputFlyout.kafkaBrokerTimeoutInputHelpText"
-            defaultMessage="Define how long a Kafka server waits for data in the same cluster."
-          />
-        }
-      >
-        <EuiSelect
+      {/* This setting is not supported with OAuth2 authentication, it is not sent then */}
+      {inputs.kafkaAuthMethodInput.value !== kafkaAuthType.OAuth2 && (
+        <EuiFormRow
           fullWidth
-          data-test-subj="settingsOutputsFlyout.kafkaBrokerTimeoutInput"
-          {...inputs.kafkaBrokerTimeoutInput.props}
-          options={kafkaBrokerTimeoutOptions}
-        />
-      </EuiFormRow>
+          label={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.kafkaBrokerTimeoutInputLabel"
+              defaultMessage="Broker timeout"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.kafkaBrokerTimeoutInputHelpText"
+              defaultMessage="Define how long a Kafka server waits for data in the same cluster."
+            />
+          }
+        >
+          <EuiSelect
+            fullWidth
+            data-test-subj="settingsOutputsFlyout.kafkaBrokerTimeoutInput"
+            {...inputs.kafkaBrokerTimeoutInput.props}
+            options={kafkaBrokerTimeoutOptions}
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow
         fullWidth
         label={

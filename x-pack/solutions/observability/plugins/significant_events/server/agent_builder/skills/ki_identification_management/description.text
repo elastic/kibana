@@ -1,1 +1,1 @@
-Start, monitor, and cancel stream KI identification background tasks: trigger KI identification, surface a clickable tracking URL to the Significant Events page, check task status/results, and cancel in-progress runs.
+Start, monitor, and cancel source KI identification background tasks: trigger KI identification, surface a clickable tracking URL to the Significant Events page, check task status/results, and cancel in-progress runs. Pass the source slug. Tell the user the source title.

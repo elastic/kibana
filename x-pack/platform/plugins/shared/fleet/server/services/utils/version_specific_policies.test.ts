@@ -371,10 +371,27 @@ describe('deleteVersionSpecificFleetServerPolicies', () => {
         query: {
           bool: {
             filter: [{ term: { policy_base_id: 'policy1' } }],
-            must_not: [{ term: { policy_id: 'policy1' } }],
+            must_not: [{ terms: { policy_id: ['policy1'] } }],
           },
         },
         refresh: false,
+      })
+    );
+  });
+
+  it('keeps the given policy ids, e.g. the sentinel policy', async () => {
+    await deleteVersionSpecificFleetServerPolicies(esClient, 'policy1', {
+      keepPolicyIds: ['policy1#sentinel'],
+    });
+
+    expect(esClient.deleteByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            filter: [{ term: { policy_base_id: 'policy1' } }],
+            must_not: [{ terms: { policy_id: ['policy1', 'policy1#sentinel'] } }],
+          },
+        },
       })
     );
   });

@@ -6,6 +6,7 @@
  */
 
 import { Subject, startWith, distinctUntilChanged, BehaviorSubject, withLatestFrom } from 'rxjs';
+import { errors } from '@elastic/elasticsearch';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   ADJUST_THROUGHPUT_INTERVAL,
@@ -16,7 +17,7 @@ import {
   createPollIntervalScan,
   isBackpressureActive,
 } from './create_managed_configuration';
-import { mockLogger } from '../test_utils';
+import { createEsResponseError, mockLogger } from '../test_utils';
 import type { TaskManagerConfig } from '../config';
 import {
   CLAIM_STRATEGY_MGET,
@@ -240,6 +241,38 @@ describe('createManagedConfiguration()', () => {
         expect(subscription).toHaveBeenCalledTimes(1);
       });
 
+      test.each([
+        ['a raw 429 response error', createEsResponseError(429, 'es_rejected_execution_exception')],
+        ['a raw 503 response error', createEsResponseError(503)],
+        ['a raw transport timeout', new errors.TimeoutError('Request timed out')],
+      ])(
+        'should decrease configuration at the next interval when %s is emitted',
+        async (_name, error) => {
+          const { subscription, errors$ } = setupScenario(10);
+          errors$.next(error);
+          jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+          expect(subscription).toHaveBeenCalledTimes(1);
+          expect(subscription).toHaveBeenNthCalledWith(1, 10);
+          jest.advanceTimersByTime(1);
+          expect(subscription).toHaveBeenCalledTimes(2);
+          expect(subscription).toHaveBeenNthCalledWith(2, 8);
+        }
+      );
+
+      test.each([
+        ['a raw 404 response error', createEsResponseError(404)],
+        ['an aborted request', new errors.RequestAbortedError('Request aborted')],
+      ])(
+        'should not change configuration at the next interval when %s is emitted',
+        async (_name, error) => {
+          const { subscription, errors$ } = setupScenario(10);
+          errors$.next(error);
+          jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
+          expect(subscription).toHaveBeenCalledTimes(1);
+          expect(subscription).toHaveBeenNthCalledWith(1, 10);
+        }
+      );
+
       test('should log a warning when the configuration changes from the starting value', async () => {
         const { errors$ } = setupScenario(10, CLAIM_STRATEGY_MGET);
         errors$.next(new MsearchError(429));
@@ -307,6 +340,37 @@ describe('createManagedConfiguration()', () => {
         expect(subscription).toHaveBeenCalledTimes(2);
         expect(subscription).toHaveBeenNthCalledWith(2, 120);
       });
+
+      test.each([
+        ['a raw 429 response error', createEsResponseError(429, 'es_rejected_execution_exception')],
+        ['a raw 503 response error', createEsResponseError(503)],
+        ['a raw transport timeout', new errors.TimeoutError('Request timed out')],
+      ])(
+        'should increase configuration at the next interval when %s is emitted',
+        async (_name, error) => {
+          const { subscription, errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
+          errors$.next(error);
+          jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL - 1);
+          expect(subscription).toHaveBeenCalledTimes(1);
+          jest.advanceTimersByTime(1);
+          expect(subscription).toHaveBeenCalledTimes(2);
+          expect(subscription).toHaveBeenNthCalledWith(2, 120);
+        }
+      );
+
+      test.each([
+        ['a raw 404 response error', createEsResponseError(404)],
+        ['an aborted request', new errors.RequestAbortedError('Request aborted')],
+      ])(
+        'should not change configuration at the next interval when %s is emitted',
+        async (_name, error) => {
+          const { subscription, errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
+          errors$.next(error);
+          jest.advanceTimersByTime(ADJUST_THROUGHPUT_INTERVAL);
+          expect(subscription).toHaveBeenCalledTimes(1);
+          expect(subscription).toHaveBeenNthCalledWith(1, 100);
+        }
+      );
 
       test('should log a warning when the configuration changes from the starting value', async () => {
         const { errors$ } = setupScenario(100, CLAIM_STRATEGY_MGET);

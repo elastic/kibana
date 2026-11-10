@@ -55,8 +55,8 @@ export const bulkMarkApiKeysForInvalidation = async (
       await savedObjectsClient.bulkCreate(apiKeysToInvalidate);
     } catch (e) {
       logger.error(
-        `Failed to bulk mark list of API keys [${decodableApiKeys
-          .map((key) => `"${key}"`)
+        `Failed to bulk mark list of API keys [${apiKeysToInvalidate
+          .map(({ attributes }) => `"${attributes.apiKeyId}"`)
           .join(', ')}] for invalidation: ${e.message}`,
         {
           error: { stack_trace: e.stack },

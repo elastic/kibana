@@ -16,6 +16,7 @@ import {
   ADD_TO_CASE_TEST_ID,
   ADD_TO_BLOCK_LIST_TEST_ID,
 } from './take_action';
+import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { generateMockIndicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { TestProviders } from '../../../../common/mock';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
@@ -90,5 +91,25 @@ describe('TakeAction', () => {
     expect(
       screen.getByTestId(ADD_TO_BLOCK_LIST_TEST_ID).querySelector('[data-euiicon-type="stopSlash"]')
     ).toBeInTheDocument();
+  });
+
+  it('disables the add-to-case menu item for an indicator missing its name', async () => {
+    const indicator: Indicator = generateMockIndicator();
+    const fields = { ...indicator.fields };
+    delete fields['threat.indicator.name'];
+    const indicatorMissingName: Indicator = { _id: indicator._id, fields };
+
+    render(
+      <MemoryRouter>
+        <TestProviders>
+          <TakeAction indicator={indicatorMissingName} />
+        </TestProviders>
+      </MemoryRouter>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Take action' }));
+    await screen.findByTestId('alertsTableActionsMenu');
+
+    expect(screen.getByTestId(ADD_TO_CASE_TEST_ID)).toBeDisabled();
   });
 });

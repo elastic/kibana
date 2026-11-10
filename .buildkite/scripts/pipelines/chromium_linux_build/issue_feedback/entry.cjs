@@ -91,9 +91,9 @@ const getSha256Hash = async (filePath) => {
       'pr',
       'list',
       '--search',
-      String(`is:open is:pr head:${branchName} base:main`),
-      '--author',
-      process.env.KIBANA_MACHINE_USERNAME,
+      String(
+        `is:open is:pr head:${branchName} base:main (author:${process.env.KIBANA_MACHINE_USERNAME} OR author:app/elastic-vault-github-plugin-prod)`
+      ),
       '--limit',
       '1',
       '--json',

@@ -12,17 +12,18 @@ import type { CSSObject } from '@emotion/react';
 import { css } from '@emotion/react';
 import { EuiIconTip, useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
+import { FieldIcon, getFieldIconProps, getFieldIconType } from '@kbn/field-utils';
+import { columnToFieldBase } from '@kbn/data-source';
 import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import type { DataTableColumnsMeta } from '../types';
+import type { DataSource } from '@kbn/data-source';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 
 interface DataTableColumnHeaderProps {
   dataView: DataView;
   columnName: string | null;
   columnDisplayName: string;
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
   headerRowHeight?: number;
   showColumnTokens?: boolean;
 }
@@ -31,18 +32,14 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
   columnDisplayName,
   showColumnTokens,
   columnName,
-  columnsMeta,
+  dataSource,
   dataView,
   headerRowHeight,
 }) => {
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {showColumnTokens && (
-        <DataTableColumnToken
-          columnName={columnName}
-          columnsMeta={columnsMeta}
-          dataView={dataView}
-        />
+        <DataTableColumnToken columnName={columnName} dataSource={dataSource} dataView={dataView} />
       )}
       <DataTableColumnTitle columnDisplayName={columnDisplayName} />
     </ColumnHeaderTruncateContainer>
@@ -50,13 +47,13 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
 };
 
 const DataTableColumnToken: React.FC<
-  Pick<DataTableColumnHeaderProps, 'columnName' | 'columnsMeta' | 'dataView'>
+  Pick<DataTableColumnHeaderProps, 'columnName' | 'dataSource' | 'dataView'>
 > = (props) => {
   const { euiTheme } = useEuiTheme();
-  const { columnName, columnsMeta, dataView } = props;
+  const { columnName, dataSource, dataView } = props;
   const columnToken = useMemo(
-    () => getRenderedToken({ columnName, columnsMeta, dataView }),
-    [columnName, columnsMeta, dataView]
+    () => getRenderedToken({ columnName, dataSource, dataView }),
+    [columnName, dataSource, dataView]
   );
 
   return columnToken ? <span css={{ paddingRight: euiTheme.size.xs }}>{columnToken}</span> : null;
@@ -73,16 +70,16 @@ const fieldIconCss: CSSObject = { verticalAlign: 'bottom' };
 function getRenderedToken({
   dataView,
   columnName,
-  columnsMeta,
-}: Pick<DataTableColumnHeaderProps, 'dataView' | 'columnName' | 'columnsMeta'>) {
+  dataSource,
+}: Pick<DataTableColumnHeaderProps, 'dataView' | 'columnName' | 'dataSource'>) {
   if (!columnName || columnName === '_source') {
     return null;
   }
 
   // for text-based searches
-  if (columnsMeta) {
-    const columnMeta = columnsMeta[columnName];
-    const columnIconType = getTextBasedColumnIconType(columnMeta);
+  if (dataSource?.kind === 'esql') {
+    const column = dataSource.getColumn(columnName);
+    const columnIconType = column && getFieldIconType(columnToFieldBase(column));
     return columnIconType && columnIconType !== 'unknown' ? ( // renders an icon or nothing
       <FieldIcon type={columnIconType} css={fieldIconCss} />
     ) : null;
@@ -142,7 +139,7 @@ export const DataTableScoreColumnHeader = ({
   isSorted,
   showColumnTokens,
   columnName,
-  columnsMeta,
+  dataSource,
   dataView,
   headerRowHeight,
   columnDisplayName,
@@ -155,11 +152,7 @@ export const DataTableScoreColumnHeader = ({
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {showColumnTokens && isSorted && (
-        <DataTableColumnToken
-          columnName={columnName}
-          columnsMeta={columnsMeta}
-          dataView={dataView}
-        />
+        <DataTableColumnToken columnName={columnName} dataSource={dataSource} dataView={dataView} />
       )}
       {!isSorted && (
         <span css={{ paddingRight: euiTheme.size.xs }}>

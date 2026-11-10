@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { SignificantEventsKIsOnboardingClient } from './onboarding_workflow_client';
 import { SignificantEventsDiscoveryClient } from './significant_events_discovery_client';
@@ -16,7 +18,8 @@ export interface WorkflowClients {
 }
 export const createWorkflowClients = (
   managementApi: WorkflowsServerPluginSetup['management'] | undefined,
-  telemetry: EbtTelemetryClient
+  telemetry: EbtTelemetryClient,
+  getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>
 ): WorkflowClients => {
   if (!managementApi) {
     return { streamsKIsOnboardingClient: undefined, significantEventsDiscoveryClient: undefined };
@@ -26,6 +29,7 @@ export const createWorkflowClients = (
     streamsKIsOnboardingClient: new SignificantEventsKIsOnboardingClient({
       managementApi,
       telemetry,
+      getSourcesClient,
     }),
     significantEventsDiscoveryClient: new SignificantEventsDiscoveryClient({ managementApi }),
   };

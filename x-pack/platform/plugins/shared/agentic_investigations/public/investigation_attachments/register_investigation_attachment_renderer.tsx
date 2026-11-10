@@ -22,7 +22,8 @@ export interface InvestigationAttachmentContentProps<TDocument> {
 
 export interface InvestigationAttachmentRenderer<TDocument> {
   type: string;
-  getLabel: () => string;
+  /** Pill and header label; may read the attachment's document. */
+  getLabel: (document: TDocument) => string;
   icon: IconType;
   /** Imported on first render, so the content stays out of the page load bundle. */
   loadContent: () => Promise<React.ComponentType<InvestigationAttachmentContentProps<TDocument>>>;
@@ -47,7 +48,7 @@ const createInvestigationAttachmentUIDefinition = <TType extends string, TDocume
   );
 
   return {
-    getLabel,
+    getLabel: (attachment) => getLabel(attachment.data),
     getIcon: () => icon,
     renderInlineContent: ({ attachment }) => render(attachment.data, 'inline'),
     renderConversationDetailsContent: ({ attachment }) => render(attachment.data, 'details'),

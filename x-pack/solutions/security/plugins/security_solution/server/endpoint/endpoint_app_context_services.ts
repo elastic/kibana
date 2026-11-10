@@ -27,7 +27,12 @@ import type {
   FleetStartContract,
   MessageSigningServiceInterface,
 } from '@kbn/fleet-plugin/server';
-import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type {
+  AlertingAuthorization,
+  AlertingServerStart,
+  RulesClient as RulesClientApi,
+} from '@kbn/alerting-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { RulesClient } from '@kbn/alerting-plugin/server/rules_client';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
@@ -482,6 +487,14 @@ export class EndpointAppContextService {
     return this.startDependencies.agentBuilder;
   }
 
+  public getFleetAgentService(): FleetStartContract['agentService'] {
+    if (!this.startDependencies?.fleetStartServices) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.fleetStartServices.agentService;
+  }
+
   private getFleetAuthzService(): FleetStartContract['authz'] {
     if (!this.startDependencies?.fleetStartServices) {
       throw new EndpointAppContentServicesNotStartedError();
@@ -587,6 +600,22 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
     return this.startDependencies.cases.getCasesClientWithRequest(req);
+  }
+
+  public async getRulesClient(req: KibanaRequest): Promise<RulesClientApi> {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.alerting.getRulesClientWithRequest(req);
+  }
+
+  public async getAlertingAuthorization(
+    req: KibanaRequest
+  ): Promise<PublicMethodsOf<AlertingAuthorization>> {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.alerting.getAlertingAuthorizationWithRequest(req);
   }
 
   public getFeatureUsageService(): FeatureUsageService {

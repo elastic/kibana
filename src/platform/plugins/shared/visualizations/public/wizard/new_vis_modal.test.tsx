@@ -175,7 +175,7 @@ describe('NewVisModal', () => {
         editorParams: ['foo=true', 'bar=42'],
         onClose,
         application: { navigateToApp } as unknown as ApplicationStart,
-        originatingApp: 'coolJestTestApp',
+        embeddableState: { originatingApp: 'coolJestTestApp' },
         stateTransfer,
       });
       waitFor(async () => {

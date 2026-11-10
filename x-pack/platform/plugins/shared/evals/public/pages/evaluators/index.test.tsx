@@ -189,7 +189,20 @@ describe('EvaluatorsPage', () => {
     setFilter('Origin', 'user_defined');
 
     expect(screen.getByText('No custom evaluators yet')).toBeInTheDocument();
+    expect(screen.getByText(/Create an LLM judge/)).toBeInTheDocument();
     expect(screen.getByTestId('evalsEvaluatorEmptyCreate')).toBeInTheDocument();
+  });
+
+  it('does not invite a read-only user to create one', () => {
+    mockedUsePermissions.mockReturnValue({ canRead: true, canManage: false });
+    renderPage([BUILT_IN, CODE_BUILT_IN]);
+
+    setFilter('Origin', 'user_defined');
+
+    expect(screen.getByText('No custom evaluators yet')).toBeInTheDocument();
+    expect(screen.queryByText(/Create an LLM judge/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Ask someone who can manage evaluations/)).toBeInTheDocument();
+    expect(screen.queryByTestId('evalsEvaluatorEmptyCreate')).not.toBeInTheDocument();
   });
 
   it('calls a filtered-away set a no-match rather than claiming none exist', () => {

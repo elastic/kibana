@@ -16,6 +16,8 @@ import {
   REBALANCE_SHARDS_TASK_ID,
   DEFAULT_REBALANCE_SCHEDULE,
   MAX_PIN_CLEAR_ATTEMPTS,
+  PIN_NUDGE_MAX_WAIT_MS,
+  PIN_NUDGE_POLL_MS,
   runRebalanceShardsTaskSoon,
 } from './rebalance_private_location_shards_task';
 import {
@@ -24,6 +26,15 @@ import {
   REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY,
 } from './rebalance_shards_enabled';
 import type { SyntheticsServerSetup } from '../types';
+import {
+  EMPTY_REBALANCE_RESULT,
+  type RebalanceShardsResult,
+} from '../synthetics_service/private_location/rebalance_stats';
+import {
+  PL_REBALANCE_EVENT_TYPE,
+  PL_SHARDING_SNAPSHOT_EVENT_TYPE,
+  PL_SHARDING_STATE_EVENT_TYPE,
+} from '../telemetry/constants';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import * as getPrivateLocationsModule from '../synthetics_service/get_private_locations';
 import * as getAgentInfoModule from '../synthetics_service/private_location/get_agent_info';
@@ -41,13 +52,22 @@ const NOW = 1_700_000_000_000;
 const mockTaskManagerStart = taskManagerMock.createStart();
 const mockSoRepo = savedObjectsRepositoryMock.create();
 const mockLogger = loggerMock.create();
-const mockRebalanceShards = jest.fn().mockResolvedValue({ total: 0, moved: 0 });
+const rebalanceResult = (over: Partial<RebalanceShardsResult> = {}): RebalanceShardsResult => ({
+  ...EMPTY_REBALANCE_RESULT,
+  ...over,
+});
+const mockRebalanceShards = jest.fn().mockResolvedValue(rebalanceResult());
+const mockReportEvent = jest.fn();
 const mockClearShardConditions = jest.fn().mockResolvedValue({ cleared: 0, failed: 0 });
+const mockBumpAgentPolicyRevision = jest.fn().mockResolvedValue(undefined);
+const mockGetAgentPolicyRevision = jest.fn().mockResolvedValue(1);
 
 const mockSyntheticsMonitorClient = {
   privateLocationAPI: {
     rebalanceShards: mockRebalanceShards,
     clearShardConditions: mockClearShardConditions,
+    bumpAgentPolicyRevision: mockBumpAgentPolicyRevision,
+    getAgentPolicyRevision: mockGetAgentPolicyRevision,
   },
 } as unknown as SyntheticsMonitorClient;
 
@@ -61,6 +81,8 @@ const mockServerSetup = {
   coreStart,
   logger: mockLogger,
   config: { enabled: true },
+  stackVersion: '9.6.0',
+  telemetry: { reportEvent: mockReportEvent },
   pluginsStart: { taskManager: mockTaskManagerStart, licensing: { getLicense: mockGetLicense } },
 } as unknown as SyntheticsServerSetup;
 
@@ -74,9 +96,16 @@ const location = (over: Partial<Record<string, unknown>> = {}) =>
     ReturnType<typeof getPrivateLocationsModule.getPrivateLocations>
   >[number]);
 
-const agentInfo = (lastCheckin: number, memoryMib: number | null = null): AgentInfo => ({
+const agentInfo = (
+  lastCheckin: number,
+  memoryMib: number | null = null,
+  complete = false,
+  policyRevision: number | null = 1
+): AgentInfo => ({
   lastCheckin,
   memoryMib,
+  complete,
+  policyRevision,
 });
 
 const taskInstance = (
@@ -102,8 +131,10 @@ describe('RebalancePrivateLocationShardsTask', () => {
     jest.useFakeTimers().setSystemTime(NOW);
     mockTaskManagerStart.get.mockReset();
     mockGetLicense.mockResolvedValue(enterpriseLicense());
-    mockRebalanceShards.mockResolvedValue({ total: 0, moved: 0 });
+    mockRebalanceShards.mockResolvedValue(rebalanceResult());
     mockClearShardConditions.mockResolvedValue({ cleared: 0, failed: 0 });
+    mockBumpAgentPolicyRevision.mockResolvedValue(undefined);
+    mockGetAgentPolicyRevision.mockResolvedValue(1);
   });
 
   afterEach(() => jest.useRealTimers());
@@ -151,6 +182,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(getAgentInfo).not.toHaveBeenCalled();
       expect(mockRebalanceShards).not.toHaveBeenCalled();
       expect(result.state).toEqual({
+        shardingMode: 'switch_off',
         keep: 1,
         [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true,
@@ -171,6 +203,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(mockClearShardConditions).not.toHaveBeenCalled();
       expect(mockRebalanceShards).not.toHaveBeenCalled();
       expect(result.state).toEqual({
+        shardingMode: 'switch_off',
         keep: 1,
         [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: true,
@@ -184,6 +217,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
       expect(mockClearShardConditions).toHaveBeenCalledTimes(1);
       expect(result.state).toEqual({
+        shardingMode: 'switch_off',
         [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 1,
       });
@@ -199,6 +233,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
       expect(mockClearShardConditions).toHaveBeenCalledTimes(1);
       expect(lastRetry.state).toEqual({
+        shardingMode: 'switch_off',
         [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: MAX_PIN_CLEAR_ATTEMPTS,
       });
@@ -212,6 +247,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
       expect(mockClearShardConditions).not.toHaveBeenCalled();
       expect(exhausted.state).toEqual({
+        shardingMode: 'switch_off',
         [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: MAX_PIN_CLEAR_ATTEMPTS,
       });
@@ -223,6 +259,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       const result = await run({ [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false });
 
       expect(result.state).toEqual({
+        shardingMode: 'switch_off',
         [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 1,
       });
@@ -239,6 +276,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
       expect(mockClearShardConditions).toHaveBeenCalledTimes(1);
       expect(result.state).toEqual({
+        shardingMode: 'switch_off',
         [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true,
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
@@ -254,6 +292,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       const result = await run({ keep: 1 });
 
       expect(result.state).toEqual({
+        shardingMode: 'active',
         [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false,
         extra: 1,
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
@@ -270,6 +309,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(getAgentInfo).not.toHaveBeenCalled();
       expect(mockRebalanceShards).not.toHaveBeenCalled();
       expect(result.state).toEqual({
+        shardingMode: 'active',
         foo: 1,
         [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
         [REBALANCE_SHARDS_PIN_CLEAR_ATTEMPTS_STATE_KEY]: 0,
@@ -331,11 +371,11 @@ describe('RebalancePrivateLocationShardsTask', () => {
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
       jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(
         new Map([
-          ['agent-1', agentInfo(NOW, 2048)],
+          ['agent-1', agentInfo(NOW, 2048, true)],
           ['agent-2', agentInfo(NOW, null)],
         ])
       );
-      mockRebalanceShards.mockResolvedValue({ total: 5, moved: 2 });
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ total: 5, moved: 2 }));
 
       // agent-1 has a long-standing healthy streak → recovery-eligible; agent-2
       // is freshly healthy this run → healthy but not yet recovery-eligible.
@@ -346,6 +386,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         location: { id: 'loc-1', label: 'Location 1', agentPolicyId: 'ap-1' },
         healthyAgentIds: ['agent-1', 'agent-2'],
         recoveryAgentIds: ['agent-1'],
+        browserAgentIds: ['agent-1'],
         capacities: new Map([['agent-1', 2048]]),
         signal: expect.any(AbortSignal),
       });
@@ -464,7 +505,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       const result = await run({ keep: 1 });
 
       expect(mockLogger.error).toHaveBeenCalled();
-      expect(result.state).toEqual({ keep: 1 });
+      expect(result.state).toEqual({ keep: 1, shardingMode: 'active' });
     });
 
     it('throws without work when the task signal is already aborted', async () => {
@@ -524,6 +565,298 @@ describe('RebalancePrivateLocationShardsTask', () => {
       expect(mockRebalanceShards).toHaveBeenCalledWith(
         expect.objectContaining({ signal: abortController.signal })
       );
+    });
+  });
+
+  describe('pin nudge', () => {
+    beforeEach(() => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
+    });
+
+    const agentsAt = (revision: number | null) =>
+      new Map([['agent-1', agentInfo(NOW, null, false, revision)]]);
+
+    it('bumps once the agents report the revision with the first pins', async () => {
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ newlyPinned: 2 }));
+      mockGetAgentPolicyRevision.mockResolvedValue(5);
+      const getAgentInfo = jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(agentsAt(4));
+
+      const running = run();
+      await jest.advanceTimersByTimeAsync(PIN_NUDGE_POLL_MS);
+      expect(mockBumpAgentPolicyRevision).not.toHaveBeenCalled();
+      getAgentInfo.mockResolvedValue(agentsAt(5));
+      await jest.advanceTimersByTimeAsync(PIN_NUDGE_POLL_MS);
+      await running;
+
+      expect(mockGetAgentPolicyRevision).toHaveBeenCalledWith('ap-1');
+      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
+      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledWith('ap-1');
+    });
+
+    it('bumps anyway once the wait runs out', async () => {
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ newlyPinned: 1 }));
+      mockGetAgentPolicyRevision.mockResolvedValue(5);
+      jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(agentsAt(4));
+
+      const running = run();
+      await jest.advanceTimersByTimeAsync(PIN_NUDGE_MAX_WAIT_MS - PIN_NUDGE_POLL_MS);
+      expect(mockBumpAgentPolicyRevision).not.toHaveBeenCalled();
+      await jest.advanceTimersByTimeAsync(PIN_NUDGE_POLL_MS);
+      await running;
+
+      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not wait for an agent that left the location', async () => {
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ newlyPinned: 1 }));
+      mockGetAgentPolicyRevision.mockResolvedValue(5);
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValueOnce(agentsAt(4))
+        .mockResolvedValue(new Map());
+
+      const running = run();
+      await jest.advanceTimersByTimeAsync(PIN_NUDGE_POLL_MS);
+      await running;
+
+      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
+    });
+
+    it('logs a failed bump and does not retry it', async () => {
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ newlyPinned: 1 }));
+      mockBumpAgentPolicyRevision.mockRejectedValue(new Error('conflict'));
+
+      const running = run();
+      await jest.advanceTimersByTimeAsync(PIN_NUDGE_POLL_MS);
+      await running;
+      mockRebalanceShards.mockResolvedValue(rebalanceResult());
+      await run();
+
+      expect(mockBumpAgentPolicyRevision).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to nudge agent policy ap-1: conflict')
+      );
+    });
+
+    it('does not bump for moves between agents', async () => {
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ moved: 3, failedOver: 3 }));
+
+      await run();
+
+      expect(mockGetAgentPolicyRevision).not.toHaveBeenCalled();
+      expect(mockBumpAgentPolicyRevision).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('sharding telemetry', () => {
+    const SNAPSHOT_STATE = { snapshotAt: { 'loc-1': NOW } };
+    const eventsOf = (eventType: string) =>
+      mockReportEvent.mock.calls.filter(([type]) => type === eventType).map(([, event]) => event);
+
+    const givenHealthyLocation = () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(
+        new Map([
+          ['agent-1', agentInfo(NOW)],
+          ['agent-2', agentInfo(NOW)],
+        ])
+      );
+    };
+
+    it('reports nothing in steady state', async () => {
+      givenHealthyLocation();
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ total: 4 }));
+
+      await run({
+        ...SNAPSHOT_STATE,
+        healthySince: {
+          [healthySinceKey('ap-1', 'agent-1')]: NOW - 1,
+          [healthySinceKey('ap-1', 'agent-2')]: NOW - 1,
+        },
+      });
+
+      expect(mockReportEvent).not.toHaveBeenCalled();
+    });
+
+    it('reports a failover with hashed location id and agent/monitor counts', async () => {
+      givenHealthyLocation();
+      mockRebalanceShards.mockResolvedValue(
+        rebalanceResult({ total: 4, moved: 2, failedOver: 2, failed: 1 })
+      );
+
+      await run({
+        ...SNAPSHOT_STATE,
+        healthySince: {
+          [healthySinceKey('ap-1', 'agent-1')]: NOW - 1,
+          [healthySinceKey('ap-1', 'agent-2')]: NOW - 1,
+          [healthySinceKey('ap-1', 'agent-3')]: NOW - 1,
+        },
+      });
+
+      const [event] = eventsOf(PL_REBALANCE_EVENT_TYPE);
+      expect(event).toEqual(
+        expect.objectContaining({
+          reason: 'failover',
+          agentsTotal: 2,
+          agentsHealthy: 2,
+          agentsEvicted: 1,
+          monitorsTotal: 4,
+          monitorsMoved: 2,
+          monitorsFailedOver: 2,
+          moveFailures: 1,
+          stackVersion: '9.6.0',
+        })
+      );
+      expect(event.locationHash).toMatch(/^[0-9a-f]{64}$/);
+      expect(JSON.stringify(event)).not.toContain('loc-1');
+    });
+
+    it('reports a location without healthy agents once, not every run', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
+      jest.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds').mockResolvedValue(new Set());
+
+      const first = await run(SNAPSHOT_STATE);
+      await run({ ...SNAPSHOT_STATE, ...first.state });
+
+      expect(eventsOf(PL_REBALANCE_EVENT_TYPE)).toEqual([
+        expect.objectContaining({ reason: 'no_healthy_agents', agentsTotal: 1, agentsStale: 1 }),
+      ]);
+    });
+
+    it('reports recovery when a location returns from having no healthy agents', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValueOnce(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
+      jest.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds').mockResolvedValue(new Set());
+      const first = await run(SNAPSHOT_STATE);
+
+      givenHealthyLocation();
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ total: 4 }));
+      await run({ ...SNAPSHOT_STATE, ...first.state });
+
+      expect(eventsOf(PL_REBALANCE_EVENT_TYPE)).toEqual([
+        expect.objectContaining({ reason: 'no_healthy_agents' }),
+        expect.objectContaining({ reason: 'recovery', agentsRecovered: 2 }),
+      ]);
+    });
+
+    it('retries a failed location snapshot instead of waiting 24h', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockRejectedValueOnce(new Error('boom'));
+
+      const first = await run();
+      expect(first.state.snapshotAt).toEqual({});
+
+      givenHealthyLocation();
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ total: 4 }));
+      await run({ ...first.state });
+
+      expect(eventsOf(PL_SHARDING_SNAPSHOT_EVENT_TYPE)).toHaveLength(1);
+    });
+
+    it('persists the mode when listing locations fails so the change is not re-reported', async () => {
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockRejectedValue(new Error('so down'));
+      mockGetLicense.mockResolvedValue(licenseMock.createLicense({ license: { type: 'basic' } }));
+      mockClearShardConditions.mockResolvedValue({ cleared: 0, failed: 0 });
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockRejectedValue(new Error('x'));
+
+      const first = await run({ shardingMode: 'active' });
+
+      expect(first.state.shardingMode).toBe('unlicensed');
+    });
+
+    it('reports a location error once, then again after it recovers and fails anew', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      jest.spyOn(getAgentInfoModule, 'getAgentInfo').mockRejectedValue(new Error('fleet boom'));
+
+      const first = await run(SNAPSHOT_STATE);
+      await run({ ...SNAPSHOT_STATE, ...first.state });
+
+      expect(eventsOf(PL_REBALANCE_EVENT_TYPE)).toEqual([
+        expect.objectContaining({ reason: 'error' }),
+      ]);
+    });
+
+    it('emits the daily snapshot when due and not again within 24h', async () => {
+      givenHealthyLocation();
+      mockRebalanceShards.mockResolvedValue(
+        rebalanceResult({
+          total: 10,
+          browserMonitors: 4,
+          monitorsPerAgent: { 'agent-1': 8, 'agent-2': 2 },
+        })
+      );
+
+      const first = await run();
+      await run({ ...first.state });
+
+      expect(eventsOf(PL_SHARDING_SNAPSHOT_EVENT_TYPE)).toEqual([
+        expect.objectContaining({
+          agentsTotal: 2,
+          agentsHealthy: 2,
+          monitorsTotal: 10,
+          browserMonitors: 4,
+          monitorsPerAgentMin: 2,
+          monitorsPerAgentMax: 8,
+          skewRatio: 1.6,
+        }),
+      ]);
+      expect(first.state.snapshotAt).toEqual({ 'loc-1': NOW });
+    });
+
+    it('reports mode changes and the pin drain when the license is lost', async () => {
+      mockGetLicense.mockResolvedValue(licenseMock.createLicense({ license: { type: 'basic' } }));
+      mockClearShardConditions.mockResolvedValue({ cleared: 3, failed: 1 });
+
+      await run({ shardingMode: 'active' });
+
+      expect(eventsOf(PL_SHARDING_STATE_EVENT_TYPE)).toEqual([
+        expect.objectContaining({
+          event: 'mode_changed',
+          mode: 'unlicensed',
+          previousMode: 'active',
+        }),
+        expect.objectContaining({
+          event: 'pin_drain',
+          mode: 'unlicensed',
+          pinsCleared: 3,
+          pinsFailed: 1,
+          drainAttempt: 1,
+        }),
+      ]);
+    });
+
+    it('does not report a mode change on the first observed run', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([]);
+
+      await run();
+
+      expect(eventsOf(PL_SHARDING_STATE_EVENT_TYPE)).toEqual([]);
+    });
+
+    it('keeps rebalancing when reporting throws', async () => {
+      givenHealthyLocation();
+      mockRebalanceShards.mockResolvedValue(rebalanceResult({ total: 2, moved: 1 }));
+      mockReportEvent.mockImplementation(() => {
+        throw new Error('ebt down');
+      });
+
+      await expect(run()).resolves.toBeDefined();
+      expect(mockRebalanceShards).toHaveBeenCalledTimes(1);
+      mockReportEvent.mockReset();
     });
   });
 

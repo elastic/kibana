@@ -69,9 +69,11 @@ describe('BaseAlertingRoute', () => {
   let mockLogger: jest.Mocked<Logger>;
   let mockUiSettingsClient: MockUiSettingsClient;
   let route: TestRoute;
+  let serverTiming: KibanaRequest['serverTiming'];
 
   beforeEach(() => {
     const deps = createRouteDependencies();
+    serverTiming = deps.ctx.request.serverTiming;
     response = deps.response;
     mockLogger = deps.mockLogger;
     mockUiSettingsClient = deps.mockUiSettingsClient;
@@ -86,6 +88,35 @@ describe('BaseAlertingRoute', () => {
 
     expect(result).toBe(expectedResponse);
     expect(route.executeFn).toHaveBeenCalledTimes(1);
+  });
+
+  describe('server timing', () => {
+    it('records a timing event named after the route when execute() succeeds', async () => {
+      route.executeFn.mockResolvedValue(response.ok({ body: {} }));
+
+      await route.handle();
+
+      expect(serverTiming.getEvents()).toEqual([
+        { name: 'alerting-v2-route', description: 'test route', duration: expect.any(Number) },
+      ]);
+    });
+
+    it('records a timing event when execute() throws', async () => {
+      route.executeFn.mockRejectedValue(Boom.notFound('rule not found'));
+
+      await route.handle();
+
+      expect(serverTiming.getEvents()).toHaveLength(1);
+    });
+
+    it('records a timing event when the kill switch short-circuits the request', async () => {
+      mockUiSettingsClient.get.mockResolvedValue(false);
+
+      await route.handle();
+
+      expect(route.executeFn).not.toHaveBeenCalled();
+      expect(serverTiming.getEvents()).toHaveLength(1);
+    });
   });
 
   describe('alerting kill switch', () => {
@@ -294,7 +325,6 @@ describe('BaseAlertingRoute', () => {
         expect.objectContaining({
           access: 'internal',
           tags: ['oas-tag:alerting-v2'],
-          availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
         })
       );
@@ -307,7 +337,6 @@ describe('BaseAlertingRoute', () => {
         expect.objectContaining({
           access: 'internal',
           tags: ['oas-tag:alerting-v2'],
-          availability: { stability: 'experimental', since: '9.5.0' },
           summary: 'Get a rule',
           oasOperationObject: expect.any(Function),
         })
@@ -321,7 +350,6 @@ describe('BaseAlertingRoute', () => {
         expect.objectContaining({
           access: 'public',
           tags: ['oas-tag:alerting-v2'],
-          availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
         })
       );
@@ -334,20 +362,19 @@ describe('BaseAlertingRoute', () => {
         expect.objectContaining({
           access: 'internal',
           tags: ['oas-tag:alerting-v2', 'extra-tag'],
-          availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
         })
       );
     });
 
-    it('deep merges nested objects', () => {
-      TestRoute.routeOptions = { availability: { since: '1.0' } };
+    it('passes a route-declared availability through untouched', () => {
+      TestRoute.routeOptions = { availability: { stability: 'stable', since: '9.6.0' } };
 
       expect(TestRoute.options).toEqual(
         expect.objectContaining({
           access: 'internal',
           tags: ['oas-tag:alerting-v2'],
-          availability: { stability: 'experimental', since: '1.0' },
+          availability: { stability: 'stable', since: '9.6.0' },
           oasOperationObject: expect.any(Function),
         })
       );

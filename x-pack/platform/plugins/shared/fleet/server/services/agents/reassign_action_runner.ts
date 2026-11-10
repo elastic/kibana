@@ -9,7 +9,12 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
 
-import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentAlreadyAssignedError,
+  AgentReassignmentError,
+  AgentlessAgentRestrictionError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 
 import { appContextService } from '../app_context';
 
@@ -20,7 +25,7 @@ import { ActionRunner } from './action_runner';
 
 import { bulkUpdateAgents } from './crud';
 import { createErrorActionResults, createAgentAction } from './actions';
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
 
 export class ReassignActionRunner extends ActionRunner {
@@ -52,18 +57,33 @@ export async function reassignBatch(
   const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
   const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
 
-  const hostedPolicies = await getHostedPolicies(soClient, givenAgents, {
+  const restrictions = await getAgentPolicyRestrictions(soClient, givenAgents, {
     spaceId: options.spaceId,
   });
 
+  const newAgentPolicy = await agentPolicyService.get(soClient, options.newAgentPolicyId, true, {
+    ...(spaceId === '*' ? { spaceId } : {}),
+  });
+  const newAgentPolicyBaseId = removeVersionSuffixFromPolicyId(options.newAgentPolicyId);
+
   const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
     if (agent.policy_id === options.newAgentPolicyId) {
-      errors[agent.id] = new AgentReassignmentError(
+      errors[agent.id] = new AgentAlreadyAssignedError(
         `Agent ${agent.id} is already assigned to agent policy ${options.newAgentPolicyId}`
       );
-    } else if (isHostedAgent(hostedPolicies, agent)) {
+    } else if (isHostedAgent(restrictions, agent)) {
       errors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
         `Cannot reassign an agent from hosted agent policy ${agent.policy_id}`
+      );
+    } else if (
+      (isAgentlessAgent(restrictions, agent) || newAgentPolicy?.supports_agentless) &&
+      agent.policy_base_id !== newAgentPolicyBaseId
+    ) {
+      // agentless agents can only move between variants of their own policy (version-specific policies)
+      errors[agent.id] = new AgentlessAgentRestrictionError(
+        `Cannot reassign agent ${agent.id} ${
+          isAgentlessAgent(restrictions, agent) ? 'from' : 'to'
+        } managed agent policy`
       );
     } else {
       agents.push(agent);
@@ -76,12 +96,12 @@ export async function reassignBatch(
     appContextService
       .getLogger()
       .debug('No agents to update, skipping agent update and action creation');
-    throw new AgentReassignmentError('No agents to reassign, already assigned or hosted agents');
+    const errorList = Object.values(errors);
+    if (errorList.length > 0 && errorList.every((e) => e instanceof AgentAlreadyAssignedError)) {
+      throw new AgentAlreadyAssignedError('No agents to reassign, all agents are already assigned');
+    }
+    throw new AgentReassignmentError('No agents to reassign, already assigned or managed agents');
   }
-
-  const newAgentPolicy = await agentPolicyService.get(soClient, options.newAgentPolicyId, true, {
-    ...(spaceId === '*' ? { spaceId } : {}),
-  });
 
   await bulkUpdateAgents(
     esClient,

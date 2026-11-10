@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
@@ -24,6 +25,9 @@ import {
 import { EsServiceAccounts } from './es_service_accounts';
 import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from './uiam_role_limits';
 import { licenseMock } from '../../common/licensing/index.mock';
+import { SERVICE_ACCOUNT_NAME_MAX_LENGTH } from '../../common/service_accounts';
+import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
+import { securityMock } from '../mocks';
 import { securityTelemetry } from '../otel/instrumentation';
 
 jest.mock('../otel/instrumentation', () => ({
@@ -36,6 +40,11 @@ jest.mock('../otel/instrumentation', () => ({
 const ACCOUNT_PATH = '/_security/service/kibana/nightshift-relay';
 /** Kibana only ever manages user-managed accounts, so the GET asks for that type explicitly. */
 const READ_ACCOUNT = { method: 'GET', path: ACCOUNT_PATH, querystring: { type: 'user_managed' } };
+/** A read that reports the account's creator also asks for the creator's user profile. */
+const READ_ACCOUNT_WITH_CREATOR = {
+  ...READ_ACCOUNT,
+  querystring: { type: 'user_managed', with_profile_uid: true },
+};
 const CREDENTIALS_PATH = `${ACCOUNT_PATH}/credential`;
 const TOKEN_PATH = `${CREDENTIALS_PATH}/token/kibana-managed`;
 /** The shape Elasticsearch returns for a GET of an account's credentials. */
@@ -59,6 +68,12 @@ const staleCredential = () => ({
   createdBy: { type: 'user' as const, username: 'user' },
   token: 'AAEAAWtpYmFuYS9...',
 });
+
+/** An Elasticsearch error response with the given status. */
+const esError = (statusCode: number) =>
+  new errors.ResponseError(
+    securityMock.createApiResponse({ statusCode, body: { error: 'failed' } })
+  );
 
 /** The shape Elasticsearch returns for a scoped GET of a user-managed account. */
 const accountEntry = (overrides = {}) => ({
@@ -88,7 +103,10 @@ describe('EsServiceAccounts', () => {
   let request: KibanaRequest;
   let getCurrentUser: jest.Mock;
   let getCurrentUserProfileId: jest.Mock;
+  let getUserProfiles: jest.Mock;
   let mockCheckPrivileges: jest.Mocked<CheckPrivileges>;
+  let audit: ReturnType<typeof auditServiceMock.create>;
+  let auditLogger: ReturnType<typeof auditLoggerMock.create>;
 
   /** Queues the transport responses for the happy path: pre-flight miss, PUT, token. */
   const mockHappyPath = () => {
@@ -121,6 +139,10 @@ describe('EsServiceAccounts', () => {
     request = httpServerMock.createKibanaRequest();
     getCurrentUser = jest.fn().mockReturnValue(mockAuthenticatedUser({ roles: ['superuser'] }));
     getCurrentUserProfileId = jest.fn().mockResolvedValue(null);
+    getUserProfiles = jest.fn().mockResolvedValue([]);
+    auditLogger = auditLoggerMock.create();
+    audit = auditServiceMock.create();
+    audit.asScoped.mockReturnValue(auditLogger);
 
     serviceAccounts = new EsServiceAccounts({
       requestLifetimeMs: 600_000,
@@ -128,10 +150,12 @@ describe('EsServiceAccounts', () => {
       license,
       clusterClient,
       checkPrivilegesWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+      audit,
       credentialStore,
       canEncrypt: true,
       getCurrentUser,
       getCurrentUserProfileId,
+      getUserProfiles,
     });
   });
 
@@ -148,6 +172,20 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(
         expect.objectContaining({ method: 'PUT', body: { roles: createParams.roles, description } })
       );
+    });
+
+    it('rejects platform assumers, which only UIAM supports', async () => {
+      await expect(
+        serviceAccounts.create(request, { ...createParams, platformAssumers: ['relay'] })
+      ).rejects.toMatchObject({ output: { statusCode: 400 } });
+      expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('creates the account when the list of platform assumers is empty', async () => {
+      mockHappyPath();
+      await expect(
+        serviceAccounts.create(request, { ...createParams, platformAssumers: [] })
+      ).resolves.toEqual(createdAccount);
     });
 
     it('rejects an oversized description before creating an account', async () => {
@@ -398,10 +436,12 @@ describe('EsServiceAccounts', () => {
         license,
         clusterClient,
         checkPrivilegesWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+        audit,
         credentialStore,
         canEncrypt: false,
         getCurrentUser,
         getCurrentUserProfileId: jest.fn().mockResolvedValue(null),
+        getUserProfiles: jest.fn().mockResolvedValue([]),
       });
 
       await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
@@ -478,6 +518,24 @@ describe('EsServiceAccounts', () => {
       expect(securityTelemetry.recordServiceAccountRollbackFailure).toHaveBeenCalledWith({
         serviceAccountRollbackResource: 'credential',
       });
+    });
+
+    it('leaves the account in place when a concurrent create already minted its token', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce({}) // pre-flight GET: no such account
+        .mockResolvedValueOnce({ created: true }) // PUT
+        .mockRejectedValueOnce(
+          Object.assign(new Error('version_conflict_engine_exception'), { statusCode: 409 })
+        );
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+        output: { statusCode: 409 },
+      });
+
+      // Only the pre-flight, the PUT and the token attempt: nothing the winner made is deleted.
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(3);
+      expect(credentialStore.set).not.toHaveBeenCalled();
+      expect(credentialStore.delete).not.toHaveBeenCalled();
     });
 
     // The forced account delete exists for exactly this case: Elasticsearch refuses an unforced
@@ -757,6 +815,221 @@ describe('EsServiceAccounts', () => {
       });
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
     });
+
+    describe('audit', () => {
+      const createEvent = (outcome: 'success' | 'failure') =>
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'service_account_create',
+            category: ['iam'],
+            type: ['user', 'creation'],
+            outcome,
+          }),
+        });
+
+      it('logs a `success` event naming the created account, scoped to the request', async () => {
+        mockHappyPath();
+
+        await serviceAccounts.create(request, createParams);
+
+        expect(audit.asScoped).toHaveBeenCalledWith(request);
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(createEvent('success'));
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: { target: { id: 'kibana/nightshift-relay', name: 'nightshift-relay' } },
+            message:
+              'User has created service account [id=kibana/nightshift-relay, name=nightshift-relay]',
+          })
+        );
+      });
+
+      it('logs a `failure` event with the name when the caller is not authorized', async () => {
+        mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow();
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(createEvent('failure'));
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            user: { target: { name: 'nightshift-relay' } },
+            error: {
+              code: 'Error',
+              message:
+                'Cannot create a service account: missing `manage_security` cluster privilege',
+            },
+          })
+        );
+      });
+
+      it('logs a `failure` event without a target when the refused name did not validate', async () => {
+        mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
+
+        await expect(
+          serviceAccounts.create(request, { ...createParams, name: '../_cluster/settings' })
+        ).rejects.toMatchObject({ output: { statusCode: 403 } });
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(createEvent('failure'));
+        expect(auditLogger.log.mock.calls[0][0]).not.toHaveProperty('user');
+      });
+
+      it('logs nothing when security features are disabled', async () => {
+        license.isEnabled.mockReturnValue(false);
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow();
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when the name is taken', async () => {
+        esClient.asCurrentUser.transport.request.mockResolvedValueOnce(accountEntry());
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+          output: { statusCode: 409 },
+        });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when the name did not validate', async () => {
+        await expect(
+          serviceAccounts.create(request, { ...createParams, name: '../_cluster/settings' })
+        ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when the credential cannot be stored and the account is rolled back', async () => {
+        mockHappyPath();
+        credentialStore.set.mockRejectedValueOnce(new Error('encryption failed'));
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+          'encryption failed'
+        );
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      const leftBehindEvent = expect.objectContaining({
+        event: expect.objectContaining({ action: 'service_account_create', outcome: 'unknown' }),
+        user: { target: { id: 'kibana/nightshift-relay', name: 'nightshift-relay' } },
+        error: { code: 'Error', message: 'encryption failed' },
+        message:
+          'Failed attempt to create service account [id=kibana/nightshift-relay, name=nightshift-relay], which might have been left behind',
+      });
+
+      it('logs `unknown` naming the account when the rollback cannot delete it', async () => {
+        mockHappyPath();
+        credentialStore.set.mockRejectedValueOnce(new Error('encryption failed'));
+        esClient.asCurrentUser.transport.request
+          .mockResolvedValueOnce({}) // token delete
+          .mockRejectedValueOnce(new Error('account delete failed'));
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+          'encryption failed'
+        );
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(leftBehindEvent);
+      });
+
+      it('logs nothing when only the token delete of the rollback fails', async () => {
+        mockHappyPath();
+        credentialStore.set.mockRejectedValueOnce(new Error('encryption failed'));
+        esClient.asCurrentUser.transport.request
+          .mockRejectedValueOnce(new Error('token delete failed'))
+          .mockResolvedValueOnce({}); // forced account delete
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+          'encryption failed'
+        );
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when only the credential delete of the rollback fails', async () => {
+        mockHappyPath();
+        credentialStore.set.mockRejectedValueOnce(new Error('encryption failed'));
+        credentialStore.delete.mockRejectedValueOnce(new Error('credential delete failed'));
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+          'encryption failed'
+        );
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs `unknown` when a failed account write cannot be reconciled', async () => {
+        esClient.asCurrentUser.transport.request
+          .mockResolvedValueOnce({}) // pre-flight GET: no such account
+          .mockRejectedValueOnce(new Error('encryption failed')) // PUT
+          .mockRejectedValueOnce(new Error('read failed')); // reconciliation GET
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+          'encryption failed'
+        );
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(leftBehindEvent);
+      });
+
+      it('logs nothing when a failed account write is confirmed never to have committed', async () => {
+        esClient.asCurrentUser.transport.request
+          .mockResolvedValueOnce({}) // pre-flight GET
+          .mockRejectedValueOnce(new Error('write failed')) // PUT
+          .mockResolvedValueOnce({}); // reconciliation GET: still absent
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('write failed');
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+      });
+
+      it('logs nothing when the account left after a failed write is removed', async () => {
+        esClient.asCurrentUser.transport.request
+          .mockResolvedValueOnce({}) // pre-flight GET
+          .mockRejectedValueOnce(new Error('write failed')) // PUT
+          .mockResolvedValueOnce(accountEntry()) // reconciliation GET: present
+          .mockResolvedValueOnce(accountCredentials()) // no token: ours
+          .mockResolvedValueOnce({}) // token delete
+          .mockResolvedValueOnce({}); // forced account delete
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('write failed');
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+        expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(6);
+      });
+
+      it('logs `unknown` when the account left after a failed write cannot be removed', async () => {
+        esClient.asCurrentUser.transport.request
+          .mockResolvedValueOnce({}) // pre-flight GET
+          .mockRejectedValueOnce(new Error('encryption failed')) // PUT
+          .mockResolvedValueOnce(accountEntry()) // reconciliation GET: present
+          .mockResolvedValueOnce(accountCredentials()) // no token: ours
+          .mockResolvedValueOnce({}) // token delete
+          .mockRejectedValueOnce(new Error('account delete failed'));
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow(
+          'encryption failed'
+        );
+
+        expect(auditLogger.log).toHaveBeenCalledWith(leftBehindEvent);
+      });
+
+      it("logs nothing when the account left after a failed write is a concurrent create's", async () => {
+        esClient.asCurrentUser.transport.request
+          .mockResolvedValueOnce({}) // pre-flight GET
+          .mockRejectedValueOnce(new Error('write failed')) // PUT
+          .mockResolvedValueOnce(accountEntry()) // reconciliation GET: present
+          .mockResolvedValueOnce(accountCredentials(['kibana-managed'])); // holds a token: not ours
+
+        await expect(serviceAccounts.create(request, createParams)).rejects.toThrow('write failed');
+
+        expect(auditLogger.log).not.toHaveBeenCalled();
+        expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(4);
+      });
+    });
   });
 
   describe('#list', () => {
@@ -784,12 +1057,13 @@ describe('EsServiceAccounts', () => {
       const result = await serviceAccounts.list(request);
 
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
-        elasticsearch: { cluster: ['read_security'], index: {} },
+        elasticsearch: { cluster: ['manage_security'], index: {} },
       });
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: QUERY_PATH,
+        querystring: { with_profile_uid: true },
         body: { size: 101, sort: ['username'] },
       });
       expect(credentialStore.findExisting).toHaveBeenCalledWith([
@@ -818,19 +1092,220 @@ describe('EsServiceAccounts', () => {
       expect(result).not.toHaveProperty('nextPage');
     });
 
-    it('reports no creator, which Elasticsearch does not record yet', async () => {
-      esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
-        service_accounts: [queried('kibana/nightshift-relay')],
+    describe('creator', () => {
+      const user = { username: 'ada', realm: 'saml1', realm_type: 'saml' };
+
+      it('names a user by the full name on their profile', async () => {
+        esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+          service_accounts: [
+            queried('kibana/a', { created_by: user, created_by_profile_uid: 'u_ada' }),
+            queried('kibana/b', { created_by: user, created_by_profile_uid: 'u_ada' }),
+          ],
+        });
+        getUserProfiles.mockResolvedValueOnce([
+          { uid: 'u_ada', user: { username: 'ada', full_name: 'Ada Lovelace' } },
+        ]);
+
+        const { serviceAccounts: entries } = await serviceAccounts.list(request);
+
+        // One lookup per page, and one uid per person however many accounts they created.
+        expect(getUserProfiles).toHaveBeenCalledTimes(1);
+        expect(getUserProfiles).toHaveBeenCalledWith(new Set(['u_ada']));
+        expect(entries.map(({ createdBy }) => createdBy)).toEqual([
+          { type: 'user', username: 'ada', userProfileId: 'u_ada', displayName: 'Ada Lovelace' },
+          { type: 'user', username: 'ada', userProfileId: 'u_ada', displayName: 'Ada Lovelace' },
+        ]);
       });
-      // The credential names whoever asked Kibana to create the account. That is not the
-      // account's creator, so it stays out of the entry until Elasticsearch reports one.
-      credentialStore.findExisting.mockResolvedValue(new Set(['kibana/nightshift-relay']));
 
-      const [entry] = (await serviceAccounts.list(request)).serviceAccounts;
+      it('names a user by username when they have no profile or no full name', async () => {
+        esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+          service_accounts: [
+            queried('kibana/a', { created_by: user }),
+            queried('kibana/b', {
+              created_by: { ...user, username: 'bob' },
+              created_by_profile_uid: 'u_bob',
+            }),
+          ],
+        });
+        getUserProfiles.mockResolvedValueOnce([{ uid: 'u_bob', user: { username: 'bob' } }]);
 
-      expect(entry).not.toHaveProperty('createdBy');
-      expect(entry).not.toHaveProperty('createdAt');
-      expect(entry.assumable).toBe(true);
+        const { serviceAccounts: entries } = await serviceAccounts.list(request);
+
+        expect(entries.map(({ createdBy }) => createdBy)).toEqual([
+          { type: 'user', username: 'ada' },
+          { type: 'user', username: 'bob', userProfileId: 'u_bob' },
+        ]);
+      });
+
+      it('names an API key and the person who owns it', async () => {
+        esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+          service_accounts: [
+            queried('kibana/a', {
+              created_by: { ...user, api_key: { id: 'key-1', name: 'deploy' } },
+              created_by_profile_uid: 'u_ada',
+            }),
+            // No profile and no key name: the owner's username still names the person.
+            queried('kibana/b', { created_by: { ...user, api_key: { id: 'key-2' } } }),
+          ],
+        });
+        getUserProfiles.mockResolvedValueOnce([
+          { uid: 'u_ada', user: { username: 'ada', full_name: 'Ada Lovelace' } },
+        ]);
+
+        const { serviceAccounts: entries } = await serviceAccounts.list(request);
+
+        expect(entries.map(({ createdBy }) => createdBy)).toEqual([
+          {
+            type: 'api_key',
+            variant: 'stack',
+            apiKeyId: 'key-1',
+            apiKeyName: 'deploy',
+            userProfileId: 'u_ada',
+            displayName: 'Ada Lovelace',
+          },
+          { type: 'api_key', variant: 'stack', apiKeyId: 'key-2', displayName: 'ada' },
+        ]);
+      });
+
+      it('reports an API key that a service account owns as the key, named by the account', async () => {
+        esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+          service_accounts: [
+            queried('kibana/a', {
+              created_by: {
+                username: 'kibana/automation',
+                realm: '_service_account',
+                realm_type: '_service_account',
+                api_key: { id: 'key-1', name: 'automation-key' },
+              },
+            }),
+          ],
+        });
+
+        const [entry] = (await serviceAccounts.list(request)).serviceAccounts;
+
+        // A write made with an API key is that key, as a workload binder records it, so the key
+        // is kept rather than collapsed into the service account behind it.
+        expect(entry.createdBy).toEqual({
+          type: 'api_key',
+          variant: 'stack',
+          apiKeyId: 'key-1',
+          apiKeyName: 'automation-key',
+          displayName: 'kibana/automation',
+        });
+      });
+
+      it('names a service account by its principal', async () => {
+        esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+          service_accounts: [
+            queried('kibana/a', {
+              created_by: {
+                username: 'kibana/automation',
+                realm: '_service_account',
+                realm_type: '_service_account',
+              },
+            }),
+          ],
+        });
+
+        const [entry] = (await serviceAccounts.list(request)).serviceAccounts;
+
+        expect(entry.createdBy).toEqual({
+          type: 'service_account',
+          serviceAccountId: 'kibana/automation',
+        });
+        expect(getUserProfiles).not.toHaveBeenCalled();
+      });
+
+      it('falls back to usernames when the profiles cannot be read', async () => {
+        esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+          service_accounts: [
+            queried('kibana/a', { created_by: user, created_by_profile_uid: 'u_ada' }),
+          ],
+        });
+        getUserProfiles.mockRejectedValueOnce(new Error('profile index unavailable'));
+
+        const [entry] = (await serviceAccounts.list(request)).serviceAccounts;
+
+        expect(entry.createdBy).toEqual({ type: 'user', username: 'ada', userProfileId: 'u_ada' });
+        // The profile service logs the failure itself, so the fallback adds no second warning.
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(logger.debug).toHaveBeenCalledWith(
+          expect.stringContaining('Naming 1 service account creator(s) by username')
+        );
+      });
+
+      it('lists again without profile uids when Elasticsearch cannot look up the profiles', async () => {
+        esClient.asCurrentUser.transport.request
+          .mockRejectedValueOnce(esError(500))
+          .mockResolvedValueOnce({ service_accounts: [queried('kibana/a', { created_by: user })] });
+
+        const [entry] = (await serviceAccounts.list(request)).serviceAccounts;
+
+        expect(esClient.asCurrentUser.transport.request).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ querystring: { with_profile_uid: true } })
+        );
+        expect(esClient.asCurrentUser.transport.request).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({ querystring: { with_profile_uid: false } })
+        );
+        expect(entry.createdBy).toEqual({ type: 'user', username: 'ada' });
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'Failed to list service accounts with creator profiles, so retrying without them'
+          )
+        );
+      });
+
+      it.each([403, 400])('does not list again after a %d', async (statusCode) => {
+        esClient.asCurrentUser.transport.request.mockRejectedValueOnce(esError(statusCode));
+
+        await expect(serviceAccounts.list(request)).rejects.toMatchObject({ statusCode });
+        expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
+      });
+
+      it('omits a creator Elasticsearch did not record, or reported in an unrecognized shape', async () => {
+        esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+          service_accounts: [
+            queried('kibana/a'),
+            queried('kibana/b', { created_by: { realm: 'x' } }),
+          ],
+        });
+        // The credential names whoever asked Kibana to create the account. That is not what
+        // Elasticsearch recorded, so it never stands in for a missing creator.
+        credentialStore.findExisting.mockResolvedValue(new Set(['kibana/a', 'kibana/b']));
+
+        const { serviceAccounts: entries } = await serviceAccounts.list(request);
+
+        // An unreadable creator costs the creator, not the account.
+        expect(entries.map(({ id }) => id)).toEqual(['kibana/a', 'kibana/b']);
+        expect(entries[0]).not.toHaveProperty('createdBy');
+        expect(entries[1]).not.toHaveProperty('createdBy');
+        expect(getUserProfiles).not.toHaveBeenCalled();
+        // Only the unreadable one is worth a warning. A missing creator is expected.
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'Elasticsearch reported the creator of 1 service account(s) in an unrecognized shape, so they are reported without one: [kibana/b]. First error:'
+          )
+        );
+      });
+
+      it('warns once per page about unreadable creators, naming only the first ten', async () => {
+        esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+          service_accounts: Array.from({ length: 12 }, (_, i) =>
+            queried(`kibana/a${String(i).padStart(2, '0')}`, { created_by: 'not an object' })
+          ),
+        });
+
+        await serviceAccounts.list(request);
+
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        const [[message]] = logger.warn.mock.calls;
+        expect(message).toContain('creator of 12 service account(s)');
+        expect(message).toContain('kibana/a09] and 2 more.');
+        expect(message).not.toContain('kibana/a10');
+      });
     });
 
     it('asks for one more than the page and reports the last principal as the cursor when it arrives', async () => {
@@ -845,6 +1320,7 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: QUERY_PATH,
+        querystring: { with_profile_uid: true },
         body: { size: 3, sort: ['username'] },
       });
       expect(result.serviceAccounts.map(({ id }) => id)).toEqual(['kibana/a', 'kibana/b']);
@@ -865,6 +1341,7 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith({
         method: 'POST',
         path: QUERY_PATH,
+        querystring: { with_profile_uid: true },
         body: { size: 3, sort: ['username'], search_after: ['kibana/b'] },
       });
     });
@@ -922,7 +1399,7 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
-    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
       mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
       await expect(serviceAccounts.list(request)).rejects.toMatchObject({
@@ -980,8 +1457,6 @@ describe('EsServiceAccounts', () => {
         .mockResolvedValueOnce(accountCredentials(['kibana-managed']));
       credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
 
-      // The credential records who asked Kibana to create the account, and none of it is
-      // reported: Elasticsearch does not store a creator yet, and Kibana will not invent one.
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toEqual({
         id: ACCOUNT_ID,
         name: 'nightshift-relay',
@@ -992,12 +1467,83 @@ describe('EsServiceAccounts', () => {
       });
 
       expect(mockCheckPrivileges.globally).toHaveBeenCalledWith({
-        elasticsearch: { cluster: ['read_security'], index: {} },
+        elasticsearch: { cluster: ['manage_security'], index: {} },
       });
-      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(READ_ACCOUNT, {
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledWith(
+        READ_ACCOUNT_WITH_CREATOR,
+        { ignore: [404] }
+      );
+      expect(credentialStore.findExisting).toHaveBeenCalledWith([ACCOUNT_ID]);
+    });
+
+    it('reports the creator Elasticsearch recorded, named by their profile', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({
+          created_by: { username: 'ada', realm: 'saml1', realm_type: 'saml' },
+          created_by_profile_uid: 'u_ada',
+        })
+      );
+      getUserProfiles.mockResolvedValueOnce([
+        { uid: 'u_ada', user: { username: 'ada', full_name: 'Ada Lovelace' } },
+      ]);
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
+        createdBy: {
+          type: 'user',
+          username: 'ada',
+          userProfileId: 'u_ada',
+          displayName: 'Ada Lovelace',
+        },
+      });
+      expect(getUserProfiles).toHaveBeenCalledWith(new Set(['u_ada']));
+    });
+
+    it('reads the account again without a profile uid when Elasticsearch cannot look up the profile', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockRejectedValueOnce(esError(500))
+        .mockResolvedValueOnce(
+          accountEntry({ created_by: { username: 'ada', realm: 'saml1', realm_type: 'saml' } })
+        );
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
+        createdBy: { type: 'user', username: 'ada' },
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenNthCalledWith(
+        1,
+        READ_ACCOUNT_WITH_CREATOR,
+        { ignore: [404] }
+      );
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenNthCalledWith(2, READ_ACCOUNT, {
         ignore: [404],
       });
-      expect(credentialStore.findExisting).toHaveBeenCalledWith([ACCOUNT_ID]);
+      expect(getUserProfiles).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Failed to read service account [kibana/nightshift-relay] with creator profiles, so retrying without them'
+        )
+      );
+    });
+
+    it('does not read the account again after a 403', async () => {
+      esClient.asCurrentUser.transport.request.mockRejectedValueOnce(esError(403));
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
+        statusCode: 403,
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
+    });
+
+    it('reads an account whose creator it cannot read, and warns about the creator', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ created_by: { username: 42 } })
+      );
+
+      const entry = await serviceAccounts.get(request, ACCOUNT_ID);
+
+      expect(entry).not.toHaveProperty('createdBy');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('so they are reported without one: [kibana/nightshift-relay]')
+      );
     });
 
     it('reports an account Kibana cannot assume without asking for its tokens', async () => {
@@ -1115,7 +1661,7 @@ describe('EsServiceAccounts', () => {
       expect(esClient.asCurrentUser.transport.request).not.toHaveBeenCalled();
     });
 
-    it('rejects with a 403 when the caller lacks the `read_security` cluster privilege', async () => {
+    it('rejects with a 403 when the caller lacks the `manage_security` cluster privilege', async () => {
       mockCheckPrivileges.globally.mockResolvedValue(clusterPrivilegesResponse(false));
 
       await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
@@ -1167,6 +1713,108 @@ describe('EsServiceAccounts', () => {
       );
 
       expect(await serviceAccounts.get(request, ACCOUNT_ID)).not.toHaveProperty('description');
+    });
+  });
+
+  describe('#getSummary', () => {
+    const ACCOUNT_ID = 'kibana/nightshift-relay';
+
+    it('reads the account as Kibana and reports only its name and status', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ roles: ['viewer'], description: 'Runs investigation workflows.' })
+      );
+      credentialStore.findExisting.mockResolvedValue(new Set([ACCOUNT_ID]));
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toEqual({
+        id: ACCOUNT_ID,
+        name: 'nightshift-relay',
+        enabled: true,
+        assumable: true,
+      });
+      expect(clusterClient.asInternalUser.transport.request).toHaveBeenCalledTimes(1);
+      expect(clusterClient.asInternalUser.transport.request).toHaveBeenCalledWith(READ_ACCOUNT, {
+        ignore: [404],
+      });
+      expect(credentialStore.findExisting).toHaveBeenCalledWith([ACCOUNT_ID]);
+    });
+
+    // kibana_system can read service accounts but not their tokens, so the token check that #get
+    // makes as the user is not made here.
+    it('takes `assumable` from the stored credential without reading the account tokens', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ enabled: false })
+      );
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toEqual({
+        id: ACCOUNT_ID,
+        name: 'nightshift-relay',
+        enabled: false,
+        assumable: false,
+      });
+      expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalledWith(
+        expect.objectContaining({ path: CREDENTIALS_PATH }),
+        expect.anything()
+      );
+    });
+
+    it('authorizes no user and makes no call as one', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(accountEntry());
+
+      await serviceAccounts.getSummary(ACCOUNT_ID);
+
+      expect(mockCheckPrivileges.globally).not.toHaveBeenCalled();
+      expect(clusterClient.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('resolves `null` when there is no such account', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce({});
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toBeNull();
+      expect(credentialStore.findExisting).not.toHaveBeenCalled();
+    });
+
+    it('resolves `null` for an account Elasticsearch reports as not user-managed', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce({
+        [ACCOUNT_ID]: { type: 'built_in', role_descriptor: {} },
+      });
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).resolves.toBeNull();
+    });
+
+    it('resolves `null` for an id Kibana could never run as, without reaching Elasticsearch', async () => {
+      for (const id of [
+        'nightshift-relay',
+        'kibana/../_cluster',
+        'a/b/c',
+        '',
+        'kibana/',
+        '/nightshift-relay',
+        'elastic/kibana',
+        'other/nightshift-relay',
+        `kibana/${'a'.repeat(SERVICE_ACCOUNT_NAME_MAX_LENGTH + 1)}`,
+      ]) {
+        await expect(serviceAccounts.getSummary(id)).resolves.toBeNull();
+      }
+      expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
+    });
+
+    it('rejects with a 502 when the account is reported in an unrecognized shape', async () => {
+      clusterClient.asInternalUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ roles: 'viewer' })
+      );
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 502 },
+      });
+    });
+
+    it('rejects with a 403 when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(serviceAccounts.getSummary(ACCOUNT_ID)).rejects.toMatchObject({
+        output: { statusCode: 403 },
+      });
+      expect(clusterClient.asInternalUser.transport.request).not.toHaveBeenCalled();
     });
   });
 

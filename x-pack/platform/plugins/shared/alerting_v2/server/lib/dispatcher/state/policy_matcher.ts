@@ -22,11 +22,11 @@ export class PolicyMatcher {
     return !!(this.data?.tags && this.data.tags.length > 0);
   }
 
-  public matchesTags(ruleTags?: readonly string[]): boolean {
+  public matchesRoutingTags(routingTags?: readonly string[]): boolean {
     if (!this.hasTags()) return true;
-    if (!ruleTags || ruleTags.length === 0) return false;
-    const ruleTagSet = new Set(ruleTags);
-    return this.data?.tags?.some((tag) => ruleTagSet.has(tag)) ?? false;
+    if (!routingTags || routingTags.length === 0) return false;
+    const routingTagSet = new Set(routingTags);
+    return this.data?.tags?.some((tag) => routingTagSet.has(tag)) ?? false;
   }
 
   public expressionKql(): string | null {

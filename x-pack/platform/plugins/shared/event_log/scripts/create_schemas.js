@@ -194,6 +194,9 @@ function generateSchemaLines(lineWriter, prop, mappings) {
     lineWriter.addLine(`${propKey}: schema.maybe(`);
     lineWriter.indent();
     if (mappings.type === 'nested') {
+      lineWriter.addLine(
+        '// codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input'
+      );
       lineWriter.addLine(`schema.arrayOf(`);
       lineWriter.indent();
     }
@@ -328,6 +331,7 @@ export type IEvent = DeepPartial<DeepWriteable<IValidatedEvent>>;
 export const EventSchema = %%SCHEMA%%;
 
 function ecsStringMulti() {
+  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
   return schema.maybe(schema.arrayOf(schema.string()));
 }
 
@@ -360,6 +364,7 @@ function ecsDateRange() {
 }
 
 function ecsDateRangeMulti() {
+  // codeql[js/kibana/unbounded-array-in-schema] internal validation — not route input
   return schema.maybe(schema.arrayOf(ecsDateRangeBase()));
 }
 

@@ -84,7 +84,7 @@ export async function autocomplete(
         regex_file: {
           type: 'string',
           description: i18n.translate(
-            'kbn-esql-language.commands.userAgent.autocomplete.regexFileDescription',
+            'esqlLanguage.commands.userAgent.autocomplete.regexFileDescription',
             { defaultMessage: 'Parser configuration file name' }
           ),
           suggestions: [buildMapValueCompleteItem('_default_')],
@@ -92,7 +92,7 @@ export async function autocomplete(
         extract_device_type: {
           type: 'boolean',
           description: i18n.translate(
-            'kbn-esql-language.commands.userAgent.autocomplete.extractDeviceTypeDescription',
+            'esqlLanguage.commands.userAgent.autocomplete.extractDeviceTypeDescription',
             { defaultMessage: 'Extract device type (Desktop, Phone, Tablet)' }
           ),
           suggestions: [buildMapValueCompleteItem('true'), buildMapValueCompleteItem('false')],
@@ -100,7 +100,7 @@ export async function autocomplete(
         properties: {
           type: 'array',
           description: i18n.translate(
-            'kbn-esql-language.commands.userAgent.autocomplete.propertiesDescription',
+            'esqlLanguage.commands.userAgent.autocomplete.propertiesDescription',
             { defaultMessage: 'List of properties to extract' }
           ),
           suggestions: [buildMapValueCompleteItem('[ $0 ]', '[]')],

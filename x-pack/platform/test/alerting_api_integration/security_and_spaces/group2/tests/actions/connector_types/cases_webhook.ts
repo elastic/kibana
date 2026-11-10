@@ -433,8 +433,20 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
 
       describe('Execution', () => {
         it('should handle creating an incident without comments', async () => {
+          const { body: createdAction } = await supertest
+            .post('/api/actions/connector')
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'A casesWebhook simulator',
+              connector_type_id: '.cases-webhook',
+              config: simulatorConfig,
+              secrets,
+            })
+            .expect(200);
+          const executionActionId = createdAction.id;
+
           const { body } = await supertest
-            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .post(`/api/actions/connector/${executionActionId}/_execute`)
             .set('kbn-xsrf', 'foo')
             .send({
               params: {
@@ -456,21 +468,21 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
               getService,
               spaceId: 'default',
               type: 'action',
-              id: simulatedActionId,
+              id: executionActionId,
               provider: 'actions',
               actions: new Map([
-                ['execute-start', { equal: 7 }],
-                ['execute', { equal: 7 }],
+                ['execute-start', { gte: 1 }],
+                ['execute', { gte: 1 }],
               ]),
             });
           });
 
-          const executeEvent = events[events.length - 1];
+          const executeEvent = events.find((e) => e?.event?.action === 'execute');
           expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(125);
 
           expect(body).to.eql({
             status: 'ok',
-            connector_id: simulatedActionId,
+            connector_id: executionActionId,
             data: {
               id: '123',
               title: 'CK-1',

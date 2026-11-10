@@ -21,5 +21,6 @@ const mockConfig = {
 
 module.exports = {
   ...defaultConfig,
-  webpackFinal: (config) => webpackMerge(config, mockConfig),
+  webpackFinal: (config, options) =>
+    webpackMerge(defaultConfig.webpackFinal(config, options), mockConfig),
 };

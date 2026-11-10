@@ -17,6 +17,10 @@ export class SearchProfilerPage {
   readonly jsonParseErrorToast: Locator;
   readonly noShardsNotification: Locator;
   readonly consolePanel: Locator;
+  readonly viewShardDetailsLink: Locator;
+  readonly shardDetailsFlyoutCloseButton: Locator;
+  readonly openCloseShardDetailsLink: Locator;
+  readonly aggregationProfileTab: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.container = this.page.testSubj.locator('searchprofiler');
@@ -27,6 +31,10 @@ export class SearchProfilerPage {
     this.jsonParseErrorToast = this.page.testSubj.locator('jsonParseErrorToast');
     this.noShardsNotification = this.page.testSubj.locator('noShardsNotification');
     this.consolePanel = this.page.testSubj.locator('consolePanel');
+    this.viewShardDetailsLink = this.page.getByTestId('viewShardDetails');
+    this.shardDetailsFlyoutCloseButton = this.page.getByTestId('euiFlyoutCloseButton');
+    this.openCloseShardDetailsLink = this.page.getByTestId('openCloseShardDetails');
+    this.aggregationProfileTab = this.page.getByTestId('aggregationProfileTab');
   }
 
   async goto(options: { index?: string; loadFrom?: string } = {}) {

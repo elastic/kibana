@@ -43,6 +43,41 @@ describe('alertActionSchema', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('keeps the alert id and status of an alert-level action', () => {
+    const result = alertActionSchema.safeParse({
+      ...baseAction,
+      actor: { type: 'internal' },
+      alert_id: 'alert-1',
+      alert_status: 'active',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).toMatchObject({ alert_id: 'alert-1', alert_status: 'active' });
+  });
+
+  it('keeps the maintenance window id of a suppress action', () => {
+    const result = alertActionSchema.safeParse({
+      ...baseAction,
+      action_type: 'suppress',
+      actor: { type: 'internal' },
+      maintenance_window_id: 'mw-1',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).toMatchObject({ maintenance_window_id: 'mw-1' });
+  });
+
+  it('accepts a null alert id for a series-level action', () => {
+    const result = alertActionSchema.safeParse({
+      ...baseAction,
+      action_type: 'snooze',
+      actor: { type: 'user' },
+      alert_id: null,
+    });
+
+    expect(result.success).toBe(true);
+  });
 });
 
 describe('getAlertActionsResourceDefinition', () => {
@@ -58,10 +93,27 @@ describe('getAlertActionsResourceDefinition', () => {
     });
   });
 
-  it('resets data streams created with the keyword actor mapping', () => {
+  it('maps alert_id and alert_status as keywords without the episode_* fields', () => {
+    const { mappings } = getAlertActionsResourceDefinition();
+
+    expect(mappings.properties).toMatchObject({
+      alert_id: { type: 'keyword' },
+      alert_status: { type: 'keyword' },
+    });
+    expect(mappings.properties).not.toHaveProperty('episode_id');
+    expect(mappings.properties).not.toHaveProperty('episode_status');
+  });
+
+  it('maps maintenance_window_id as a keyword', () => {
+    const { mappings } = getAlertActionsResourceDefinition();
+
+    expect(mappings.properties).toMatchObject({ maintenance_window_id: { type: 'keyword' } });
+  });
+
+  it('resets data streams created with the episode_* fields or the keyword actor mapping', () => {
     const { version, forceReset } = getAlertActionsResourceDefinition();
 
-    expect(version).toBe(7);
-    expect(forceReset).toEqual({ version: 6 });
+    expect(version).toBe(9);
+    expect(forceReset).toEqual({ version: 7 });
   });
 });

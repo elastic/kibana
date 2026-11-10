@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { memo, useMemo } from 'react';
 import { useSendGetFileRequest } from '../../../hooks/response_actions/use_send_get_file_request';
 import type { ResponseActionGetFileRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type { ActionRequestComponentProps } from '../types';
-import { ResponseActionFileDownloadLink } from '../../response_action_file_download_link';
 
 export const GetFileActionResult = memo<
   ActionRequestComponentProps<{
     path: string[];
   }>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
-  const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
   const actionCreator = useSendGetFileRequest();
 
   const actionRequestBody = useMemo<undefined | ResponseActionGetFileRequestBody>(() => {
     const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
     const { path, comment } = command.args.args;
+    // `force` is a bare boolean flag; it is only ever defined for the `endpoint` agent type
+    const force = command.args.hasArg('force');
 
     return endpointId
       ? {
@@ -33,12 +31,13 @@ export const GetFileActionResult = memo<
           comment: comment?.[0],
           parameters: {
             path: path[0],
+            ...(force ? { force: true } : {}),
           },
         }
       : undefined;
-  }, [command.args.args, command.commandDefinition?.meta]);
+  }, [command.args, command.commandDefinition?.meta]);
 
-  const { result, actionDetails } = useConsoleActionSubmitter<ResponseActionGetFileRequestBody>({
+  return useConsoleActionSubmitter<ResponseActionGetFileRequestBody>({
     ResultComponent,
     setStore,
     store,
@@ -47,29 +46,6 @@ export const GetFileActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'getFile',
-    pendingMessage: i18n.translate('xpack.securitySolution.getFileAction.pendingMessage', {
-      defaultMessage: 'Retrieving the file from host.',
-    }),
-  });
-
-  if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
-    return (
-      <ResultComponent
-        showAs="success"
-        data-test-subj="getFileSuccess"
-        title={i18n.translate(
-          'xpack.securitySolution.endpointResponseActions.getFileAction.successTitle',
-          { defaultMessage: 'File retrieved from the host.' }
-        )}
-      >
-        <ResponseActionFileDownloadLink
-          action={actionDetails}
-          canAccessFileDownloadLink={canWriteFileOperations}
-        />
-      </ResultComponent>
-    );
-  }
-
-  return result;
+  }).result;
 });
 GetFileActionResult.displayName = 'GetFileActionResult';

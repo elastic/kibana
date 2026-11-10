@@ -11,20 +11,28 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
-import type { CommonAttachmentListViewProps } from '../../../client/attachment_framework/types';
+import type {
+  AttachmentRemovalOptions,
+  CommonAttachmentListViewProps,
+} from '../../../client/attachment_framework/types';
 import type { CaseFilesFilteringOptions } from '../../../containers/use_get_case_files';
 
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
 import { FilesTable } from './files_table';
 import { FilesUtilityBar } from './files_utility_bar';
-import { getFileIdsFromComments, getFilesFromComments } from './utils';
+import { getFileAttachmentIds, getFileIdsFromComments, getFilesFromComments } from './utils';
 
 export const DEFAULT_CASE_FILES_FILTERING_OPTIONS = {
   page: 0,
   perPage: 10,
 };
 
-export const CaseViewFiles = ({ caseData, searchTerm }: CommonAttachmentListViewProps) => {
+export const CaseViewFiles = ({
+  caseData,
+  searchTerm,
+  onRemove,
+  isRemoving,
+}: CommonAttachmentListViewProps) => {
   const searchTermRef = useRef<string | undefined>(searchTerm);
   const [filteringOptions, setFilteringOptions] = useState<CaseFilesFilteringOptions>({
     ...DEFAULT_CASE_FILES_FILTERING_OPTIONS,
@@ -73,6 +81,18 @@ export const CaseViewFiles = ({ caseData, searchTerm }: CommonAttachmentListView
     [caseFiles?.files, allowedFileIds]
   );
 
+  const onRemoveFiles = useMemo(
+    () =>
+      onRemove != null
+        ? (fileIds: string[], options?: AttachmentRemovalOptions) =>
+            onRemove(
+              { savedObjectIds: getFileAttachmentIds(caseData.comments, caseData.owner, fileIds) },
+              options
+            )
+        : undefined,
+    [onRemove, caseData.comments, caseData.owner]
+  );
+
   const onTableChange = useCallback(
     ({ page }: Criteria<FileJSON>) => {
       if (page && !isPreviousData) {
@@ -107,6 +127,8 @@ export const CaseViewFiles = ({ caseData, searchTerm }: CommonAttachmentListView
           items={visibleFiles}
           onChange={onTableChange}
           pagination={pagination}
+          onRemove={onRemoveFiles}
+          isRemoving={isRemoving}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

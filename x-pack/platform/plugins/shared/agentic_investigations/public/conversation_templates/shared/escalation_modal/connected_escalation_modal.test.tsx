@@ -86,9 +86,7 @@ const investigation: Investigation = {
   template_id: 'investigation',
   title: 'Suspicious login',
   createdAt: '2026-01-01T00:00:00Z',
-  updatedAt: '2026-01-01T00:00:00Z',
-  watch_id: 'watch-1',
-  watch_execution_id: 'exec-1',
+  worker_execution_ids: ['exec-1'],
   pendingProposalCount: 0,
   assignees: [],
   events: [],
@@ -251,6 +249,8 @@ describe('ConnectedEscalationModal', () => {
           {
             id: 'esc-1',
             title: 'Existing escalation',
+            user: { id: 'user-1', username: 'alice' },
+            can_link: true,
             metadata: { linked_investigations: ['conv-1'] },
             permissions: { rename: true, delete: true, update_access_control: true },
           },
@@ -264,22 +264,34 @@ describe('ConnectedEscalationModal', () => {
 
     renderModal({ mode: 'addToExisting' });
 
-    const radio = document.getElementById('incident-esc-1') as HTMLInputElement;
+    const radio = document.getElementById('escalation-esc-1') as HTMLInputElement;
     expect(radio).toBeDisabled();
   });
 
-  it('disables non-owner escalations (canManage: false)', () => {
+  it('shows a participant escalation as selectable and hides one the user does not participate in', () => {
     mockUseListEscalations.mockReturnValue({
       data: {
         results: [
           {
-            id: 'esc-2',
+            id: 'esc-member',
             title: 'Participant escalation',
+            user: { id: 'someone-else', username: 'owner' },
+            can_link: true,
+            access_control: { entries: [{ type: 'user', id: 'user-1' }] },
+            metadata: { linked_investigations: [] },
+            permissions: { rename: false, delete: false, update_access_control: false },
+          },
+          {
+            id: 'esc-public',
+            title: 'Public escalation',
+            user: { id: 'someone-else', username: 'owner' },
+            can_link: false,
+            access_control: { entries: [] },
             metadata: { linked_investigations: [] },
             permissions: { rename: false, delete: false, update_access_control: false },
           },
         ],
-        pagination: { total: 1, page: 1, per_page: 20 },
+        pagination: { total: 2, page: 1, per_page: 20 },
       },
       isLoading: false,
       isError: false,
@@ -288,8 +300,9 @@ describe('ConnectedEscalationModal', () => {
 
     renderModal({ mode: 'addToExisting' });
 
-    const radio = document.getElementById('incident-esc-2') as HTMLInputElement;
-    expect(radio).toBeDisabled();
+    const radio = document.getElementById('escalation-esc-member') as HTMLInputElement;
+    expect(radio).toBeEnabled();
+    expect(screen.queryByText('Public escalation')).not.toBeInTheDocument();
   });
 
   it('shows a loading spinner in create mode while the user profile is loading', () => {
@@ -336,7 +349,7 @@ describe('ConnectedEscalationModal', () => {
 
     expect(screen.queryByTestId('escalationModalCreateEscalation')).not.toBeInTheDocument();
     expect(
-      screen.getByText('Your user profile is unavailable. Private escalations cannot be created.')
+      screen.getByText('Your user profile is unavailable. Escalations cannot be created.')
     ).toBeInTheDocument();
   });
 
@@ -381,6 +394,8 @@ describe('ConnectedEscalationModal', () => {
           {
             id: 'esc-3',
             title: 'Open escalation',
+            user: { id: 'user-1', username: 'alice' },
+            can_link: true,
             metadata: { linked_investigations: [] },
             permissions: { rename: true, delete: true, update_access_control: true },
           },
@@ -393,7 +408,7 @@ describe('ConnectedEscalationModal', () => {
     } as unknown as ReturnType<typeof useListEscalations>);
 
     renderModal({ mode: 'addToExisting' });
-    fireEvent.click(screen.getByTestId('escalationModalIncident-esc-3'));
+    fireEvent.click(screen.getByTestId('escalationModalEscalation-esc-3'));
     fireEvent.click(screen.getByTestId('escalationModalattachToEscalation'));
 
     const [, callbacks] = addMutate.mock.calls[0];

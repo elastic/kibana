@@ -25,6 +25,8 @@ interface RenderAppParams {
   startDeps: AlertZeroStartDependencies;
   params: AppMountParameters;
   availability$: Observable<SubscriptionAvailability>;
+  spaceSupported$: Observable<boolean>;
+  isServerless: boolean;
 }
 
 const rootStyle: React.CSSProperties = {
@@ -39,6 +41,8 @@ export const renderApp = async ({
   startDeps,
   params,
   availability$,
+  spaceSupported$,
+  isServerless,
 }: RenderAppParams): Promise<AppUnmount> => {
   coreStart.chrome.docTitle.change(ALERTZERO_PLUGIN_NAME);
 
@@ -52,12 +56,23 @@ export const renderApp = async ({
    * for `services.http` and `services.notifications`.
    */
   const App = () => (
-    <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
+    <KibanaContextProvider
+      services={{
+        ...coreStart,
+        ...startDeps,
+        // `security` above is the Security plugin's contract, which shadows Core's. Core's
+        // service-account API is exposed under its own key.
+        serviceAccounts: coreStart.security.serviceAccounts,
+        isServerless,
+        appParams: { history: params.history },
+      }}
+    >
       <QueryClientProvider client={queryClient}>
         <Router history={params.history}>
           <div style={rootStyle}>
             <AccessBoundary
               availability$={availability$}
+              spaceSupported$={spaceSupported$}
               serviceAccountsEnabled={coreStart.security.serviceAccounts.isEnabled()}
             >
               <AppChromeLayout>

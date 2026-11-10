@@ -21,6 +21,7 @@ import {
   testIndexName,
   uniqueSuffix,
   updateSource,
+  validateSourceQuery,
 } from '../fixtures';
 
 const TITLE_PREFIX = 'scout-sources-validation';
@@ -52,12 +53,6 @@ apiTest.describe(
       ['EVAL', `FROM ${index} | EVAL x = 1`, 'Command "EVAL" is not allowed'],
       ['STATS', `FROM ${index} | STATS c = COUNT(*)`, 'Command "STATS" is not allowed'],
       ['LIMIT', `FROM ${index} | LIMIT 10`, 'Command "LIMIT" is not allowed'],
-      ['METADATA', `FROM ${index} METADATA _id`, 'METADATA is not allowed'],
-      [
-        'a remote cluster prefix',
-        `FROM remote:${index}`,
-        'Remote cluster references are not allowed',
-      ],
       [
         'a $ wildcard that matches a hyphenated source view',
         'FROM $.*.sources.*-*',
@@ -76,6 +71,24 @@ apiTest.describe(
       });
     }
 
+    apiTest('rejects a query that mixes types', async ({ apiClient }) => {
+      const response = await createSource(apiClient, manager.cookieHeader, {
+        title: `${TITLE_PREFIX}-${suffix}-mixed`,
+        esql: `FROM logs-*, ${index}`,
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toContain('mixes');
+    });
+
+    apiTest('rejects an index that matches more than one type', async ({ apiClient }) => {
+      const response = await createSource(apiClient, manager.cookieHeader, {
+        title: `${TITLE_PREFIX}-${suffix}-ambiguous`,
+        esql: 'FROM logs-traces-*',
+      });
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toContain('more than one kind');
+    });
+
     apiTest('rejects a field ES cannot resolve on an existing index', async ({ apiClient }) => {
       const response = await createSource(apiClient, manager.cookieHeader, {
         title: `${TITLE_PREFIX}-${suffix}`,
@@ -92,6 +105,22 @@ apiTest.describe(
       expect(response).toHaveStatusCode(400);
     });
 
+    apiTest(
+      'accepts METADATA on the source command and keeps it in the view',
+      async ({ apiClient, esClient }) => {
+        const response = await createSource(apiClient, manager.cookieHeader, {
+          title: `${TITLE_PREFIX}-${suffix}-metadata`,
+          esql: `FROM ${index} METADATA _id | WHERE status >= 500`,
+        });
+        expect(response).toHaveStatusCode(200);
+
+        const view = await readView(esClient, response.body.source.view_name);
+        expect(view?.query).toContain('METADATA _id');
+
+        await deleteSource(apiClient, manager.cookieHeader, response.body.source.id);
+      }
+    );
+
     apiTest('accepts FROM with WHERE filters', async ({ apiClient }) => {
       const response = await createSource(apiClient, manager.cookieHeader, {
         title: `${TITLE_PREFIX}-${suffix}-from`,
@@ -103,12 +132,36 @@ apiTest.describe(
 
     // TS on a plain index fails at LIMIT 0, so use a pattern that matches nothing yet: a source
     // whose indices do not exist is accepted by design.
-    apiTest('accepts TS over a pattern with no indices yet', async ({ apiClient }) => {
+    // Skipped: ES now rejects a view that starts with TS and has no STATS after it
+    // (elastic/elasticsearch#162011), and a source query cannot contain STATS,
+    // see https://github.com/elastic/kibana/issues/299153
+    apiTest.fixme('accepts TS over a pattern with no indices yet', async ({ apiClient }) => {
       const response = await createSource(apiClient, manager.cookieHeader, {
         title: `${TITLE_PREFIX}-${suffix}-ts`,
         esql: `TS ${index}-none-*`,
       });
       expect(response).toHaveStatusCode(200);
+      expect(response.body.source.type).toBe('metrics');
+      await deleteSource(apiClient, manager.cookieHeader, response.body.source.id);
+    });
+
+    apiTest('accepts a logs pattern that matches no indices yet', async ({ apiClient }) => {
+      const response = await createSource(apiClient, manager.cookieHeader, {
+        title: `${TITLE_PREFIX}-${suffix}-logs`,
+        esql: `FROM ${index}-logs-none-*`,
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.source.type).toBe('logs');
+      await deleteSource(apiClient, manager.cookieHeader, response.body.source.id);
+    });
+
+    apiTest('accepts a traces pattern that matches no indices yet', async ({ apiClient }) => {
+      const response = await createSource(apiClient, manager.cookieHeader, {
+        title: `${TITLE_PREFIX}-${suffix}-traces`,
+        esql: `FROM ${index}-traces-none-*`,
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.source.type).toBe('traces');
       await deleteSource(apiClient, manager.cookieHeader, response.body.source.id);
     });
 
@@ -126,6 +179,29 @@ apiTest.describe(
       expect(fetched.body.health).toBe('ok');
 
       await deleteSource(apiClient, manager.cookieHeader, response.body.source.id);
+    });
+
+    apiTest('answers validate with what create would do', async ({ apiClient }) => {
+      const accepted = await validateSourceQuery(apiClient, manager.cookieHeader, {
+        esql: `FROM ${index}-logs-none-* | WHERE status >= 500`,
+      });
+      expect(accepted).toHaveStatusCode(200);
+      expect(accepted.body).toStrictEqual({ valid: true, type: 'logs', index_exists: false });
+
+      const existing = await validateSourceQuery(apiClient, manager.cookieHeader, {
+        esql: `FROM ${index} | WHERE status >= 500`,
+      });
+      expect(existing).toHaveStatusCode(200);
+      expect(existing.body).toStrictEqual({ valid: true, type: 'unknown', index_exists: true });
+
+      const disallowed = await validateSourceQuery(apiClient, manager.cookieHeader, {
+        esql: `FROM ${index} | STATS c = COUNT(*)`,
+      });
+      expect(disallowed).toHaveStatusCode(200);
+      expect(disallowed.body).toStrictEqual({
+        valid: false,
+        error: expect.stringContaining('Command "STATS" is not allowed'),
+      });
     });
 
     apiTest(
@@ -160,6 +236,20 @@ apiTest.describe(
         expect(overlappingView.body.message).toContain(
           'Nightshift source views cannot be used as a source'
         );
+
+        const mixed = await updateSource(apiClient, manager.cookieHeader, source.id, {
+          ...body,
+          esql: `FROM logs-*, ${index}`,
+        });
+        expect(mixed).toHaveStatusCode(400);
+        expect(mixed.body.message).toContain('mixes');
+
+        const ambiguous = await updateSource(apiClient, manager.cookieHeader, source.id, {
+          ...body,
+          esql: 'FROM logs-traces-*',
+        });
+        expect(ambiguous).toHaveStatusCode(400);
+        expect(ambiguous.body.message).toContain('more than one kind');
 
         const fetched = await getSource(apiClient, manager.cookieHeader, source.id);
         expect(fetched).toHaveStatusCode(200);

@@ -17,12 +17,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 import { useKibana } from '../services';
+import { PATH_SELECTION_TELEMETRY_PREFIX } from './telemetry_prefix';
 
 interface OnboardingApiKeysProps {
   apiKey: string | null | undefined;
   isLoading: boolean;
   fill?: boolean;
-  telemetryPage: string;
 }
 
 interface ApiKeySplitButtonProps {
@@ -33,7 +33,6 @@ interface ApiKeySplitButtonProps {
   onSecondaryClick: () => void;
   primaryTestSubj: string;
   primaryTelemetryId: string;
-  telemetryPrefix: string;
 }
 
 const ApiKeySplitButton = ({
@@ -44,13 +43,12 @@ const ApiKeySplitButton = ({
   onSecondaryClick,
   primaryTestSubj,
   primaryTelemetryId,
-  telemetryPrefix,
 }: ApiKeySplitButtonProps) => (
   <EuiSplitButton fill={fill} color={fill ? 'primary' : 'text'} isLoading={isLoading}>
     <EuiSplitButton.ActionPrimary
       onClick={onPrimaryClick}
       data-test-subj={primaryTestSubj}
-      data-telemetry-id={`${telemetryPrefix}-${primaryTelemetryId}`}
+      data-telemetry-id={`${PATH_SELECTION_TELEMETRY_PREFIX}-${primaryTelemetryId}`}
     >
       <EuiIcon type="key" css={{ marginRight: 8 }} aria-hidden />
       {label}
@@ -62,22 +60,16 @@ const ApiKeySplitButton = ({
       })}
       onClick={onSecondaryClick}
       data-test-subj="vectordbPathSelectionApiKeyDropdown"
-      data-telemetry-id={`${telemetryPrefix}-apiKeys-openPopover`}
+      data-telemetry-id={`${PATH_SELECTION_TELEMETRY_PREFIX}-apiKeys-openPopover`}
     />
   </EuiSplitButton>
 );
 
-export const OnboardingApiKeys = ({
-  apiKey,
-  isLoading,
-  fill = true,
-  telemetryPage,
-}: OnboardingApiKeysProps) => {
+export const OnboardingApiKeys = ({ apiKey, isLoading, fill = true }: OnboardingApiKeysProps) => {
   const {
     services: { notifications, application },
   } = useKibana();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const telemetryPrefix = `vectordbOnboarding-${telemetryPage}`;
 
   const togglePopover = () => setIsPopoverOpen((open) => !open);
 
@@ -105,7 +97,7 @@ export const OnboardingApiKeys = ({
         application.navigateToApp('management', { path: 'security/api_keys' });
       }}
       data-test-subj="vectordbPathSelectionManageApiKeys"
-      data-telemetry-id={`${telemetryPrefix}-manageApiKeys-popoverItem`}
+      data-telemetry-id={`${PATH_SELECTION_TELEMETRY_PREFIX}-manageApiKeys-popoverItem`}
     >
       {i18n.translate('vectordbOnboarding.pathSelection.manageApiKeys', {
         defaultMessage: 'Manage API keys',
@@ -116,7 +108,7 @@ export const OnboardingApiKeys = ({
       icon="plugs"
       onClick={() => handleOpenConnectionDetails('endpoints')}
       data-test-subj="vectordbPathSelectionConnectionDetails"
-      data-telemetry-id={`${telemetryPrefix}-connectionDetails-popoverItem`}
+      data-telemetry-id={`${PATH_SELECTION_TELEMETRY_PREFIX}-connectionDetails-popoverItem`}
     >
       {i18n.translate('vectordbOnboarding.pathSelection.connectionDetails', {
         defaultMessage: 'Connection details',
@@ -137,7 +129,6 @@ export const OnboardingApiKeys = ({
           onSecondaryClick={togglePopover}
           primaryTestSubj="vectordbPathSelectionCopyApiKey"
           primaryTelemetryId="copyApiKey"
-          telemetryPrefix={telemetryPrefix}
         />
       )}
     </EuiCopy>
@@ -152,7 +143,6 @@ export const OnboardingApiKeys = ({
       onSecondaryClick={togglePopover}
       primaryTestSubj="vectordbPathSelectionGenerateApiKey"
       primaryTelemetryId="generateApiKey"
-      telemetryPrefix={telemetryPrefix}
     />
   );
 

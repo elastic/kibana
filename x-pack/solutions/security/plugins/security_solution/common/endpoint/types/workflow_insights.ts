@@ -6,7 +6,7 @@
  */
 
 import type { Moment } from 'moment';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -34,19 +34,25 @@ export const WORKFLOW_INSIGHT_ACTION_TYPE_VALUES = [
   'dismissed',
 ] as const;
 
-export const WorkflowInsightType = z.enum(WORKFLOW_INSIGHT_TYPE_VALUES);
+export const WorkflowInsightType = lazySchema(() => z.enum(WORKFLOW_INSIGHT_TYPE_VALUES));
 export type WorkflowInsightType = z.infer<typeof WorkflowInsightType>;
 
-export const WorkflowInsightCategory = z.enum(WORKFLOW_INSIGHT_CATEGORY_VALUES);
+export const WorkflowInsightCategory = lazySchema(() => z.enum(WORKFLOW_INSIGHT_CATEGORY_VALUES));
 export type WorkflowInsightCategory = z.infer<typeof WorkflowInsightCategory>;
 
-export const WorkflowInsightSourceType = z.enum(WORKFLOW_INSIGHT_SOURCE_TYPE_VALUES);
+export const WorkflowInsightSourceType = lazySchema(() =>
+  z.enum(WORKFLOW_INSIGHT_SOURCE_TYPE_VALUES)
+);
 export type WorkflowInsightSourceType = z.infer<typeof WorkflowInsightSourceType>;
 
-export const WorkflowInsightTargetType = z.enum(WORKFLOW_INSIGHT_TARGET_TYPE_VALUES);
+export const WorkflowInsightTargetType = lazySchema(() =>
+  z.enum(WORKFLOW_INSIGHT_TARGET_TYPE_VALUES)
+);
 export type WorkflowInsightTargetType = z.infer<typeof WorkflowInsightTargetType>;
 
-export const WorkflowInsightActionType = z.enum(WORKFLOW_INSIGHT_ACTION_TYPE_VALUES);
+export const WorkflowInsightActionType = lazySchema(() =>
+  z.enum(WORKFLOW_INSIGHT_ACTION_TYPE_VALUES)
+);
 export type WorkflowInsightActionType = z.infer<typeof WorkflowInsightActionType>;
 
 /**

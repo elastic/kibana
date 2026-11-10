@@ -148,7 +148,7 @@ describe('createRuleChangeHistoryAdapter', () => {
   });
 
   describe('getChange', () => {
-    it('maps objectId/changeId to id/eventId and forwards the signal', async () => {
+    it('maps changeId to eventId and forwards the signal', async () => {
       const api = createApiMock();
       const adapter = createRuleChangeHistoryAdapter(api);
       const signal = new AbortController().signal;
@@ -156,7 +156,6 @@ describe('createRuleChangeHistoryAdapter', () => {
       await adapter.getChange({ objectId: 'rule-1', changeId: 'evt-1', signal });
 
       expect(api.getRuleChangeEvent).toHaveBeenCalledWith({
-        id: 'rule-1',
         eventId: 'evt-1',
         signal,
       });

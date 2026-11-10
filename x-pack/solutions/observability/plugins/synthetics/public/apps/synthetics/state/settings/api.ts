@@ -13,7 +13,13 @@ import { apiService } from '../../../../utils/api_service';
 import type {
   DynamicSettings,
   DynamicSettingsSaveResponse,
+  HashiCorpVaultConfig,
+  HashiCorpVaultSecrets,
   LocationMonitorsResponse,
+  AffectedMonitorsResult,
+  SecretConnectionAffectedMonitors,
+  SecretConnectionTestResult,
+  SecretProviderType,
 } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import type { LocationMonitor } from '.';
@@ -36,7 +42,6 @@ export const setDynamicSettings = async ({
     defaultEmail: settings.defaultEmail,
     defaultTLSRuleEnabled: settings.defaultTLSRuleEnabled,
     defaultStatusRuleEnabled: settings.defaultStatusRuleEnabled,
-    privateLocationsSyncInterval: settings.privateLocationsSyncInterval,
     rebalancePrivateLocationShardsEnabled: settings.rebalancePrivateLocationShardsEnabled,
   };
   return await apiService.put(SYNTHETICS_API_URLS.DYNAMIC_SETTINGS, newSettings, {
@@ -55,6 +60,43 @@ export const triggerMwSync = async (): Promise<void> => {
 export const fetchLocationMonitors = async (): Promise<LocationMonitor[]> => {
   return await apiService.get<LocationMonitorsResponse>(
     SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_MONITORS
+  );
+};
+
+interface TestSecretConnectionRequest {
+  // Set when editing, so the server can fall back to the stored secret.
+  name?: string;
+  type: SecretProviderType;
+  config: HashiCorpVaultConfig;
+  secrets: HashiCorpVaultSecrets;
+}
+
+export const testSecretConnection = async (
+  request: TestSecretConnectionRequest
+): Promise<SecretConnectionTestResult> => {
+  return await apiService.post<SecretConnectionTestResult>(
+    `${SYNTHETICS_API_URLS.SECRET_CONNECTION}/_test`,
+    request
+  );
+};
+
+export const getAffectedMonitors = async (): Promise<SecretConnectionAffectedMonitors> => {
+  return await apiService.get<SecretConnectionAffectedMonitors>(
+    `${SYNTHETICS_API_URLS.SECRET_CONNECTION}/_affected_monitors`
+  );
+};
+
+export interface PreviewAffectedMonitorsRequest {
+  name: string;
+  allowedMonitorHosts: string[];
+}
+
+export const previewAffectedMonitors = async (
+  request: PreviewAffectedMonitorsRequest
+): Promise<AffectedMonitorsResult> => {
+  return await apiService.post<AffectedMonitorsResult>(
+    `${SYNTHETICS_API_URLS.SECRET_CONNECTION}/_affected_monitors`,
+    request
   );
 };
 

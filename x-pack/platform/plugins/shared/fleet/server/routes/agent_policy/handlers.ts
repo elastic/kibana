@@ -56,6 +56,7 @@ import type {
   CreateAgentAndPackagePolicyRequestSchema,
   RunAgentPolicyRevisionsCleanupTaskRequestSchema,
   RunAgentPolicyRevisionsCleanupTaskResponseSchema,
+  GetAgentPoliciesPackagePoliciesSummaryRequestSchema,
 } from '../../types';
 
 import type {
@@ -71,6 +72,7 @@ import type {
   GetFullAgentConfigMapResponse,
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPoliciesPackagePoliciesSummaryResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
   CreatePackagePolicyRequest,
@@ -83,6 +85,7 @@ import {
   defaultFleetErrorHandler,
 } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
+import { assertOnboardingAccess } from '../../services/package_policies/onboarding_access';
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -175,6 +178,7 @@ function sanitizeItemForReadAgentOnly(item: AgentPolicy): AgentPolicy {
     namespace: item.namespace,
     is_managed: item.is_managed,
     is_protected: item.is_protected,
+    supports_agentless: item.supports_agentless,
     status: item.status,
     updated_at: item.updated_at,
     updated_by: item.updated_by,
@@ -608,7 +612,17 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const { force, bumpRevision, ...data } = request.body;
+  const { force, bumpRevision, id: bodyId, ...data } = request.body;
+
+  // The agent policy id is immutable: reject a body id that differs from the path id and never
+  // persist it, so it cannot end up in the saved object attributes.
+  if (bodyId !== undefined && bodyId !== request.params.agentPolicyId) {
+    return response.badRequest({
+      body: {
+        message: `Cannot change agent policy ID: body id does not match path agentPolicyId "${request.params.agentPolicyId}"`,
+      },
+    });
+  }
 
   const spaceIds = data.space_ids;
   let spaceId = fleetContext.spaceId;
@@ -619,6 +633,17 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
     const authzFleetAgentsAll = fleetContext.authz.fleet.allAgents;
 
     const requestSpaceId = spaceId;
+
+    // Validate before any side effect: the space update below is applied immediately, so rejecting
+    // after it would report an error while the space change has already been persisted.
+    const existingAgentPolicy = await agentPolicyService.get(
+      appContextService.getInternalUserSOClientForSpaceId(requestSpaceId),
+      request.params.agentPolicyId,
+      false
+    );
+    if (existingAgentPolicy?.supports_agentless || data.supports_agentless) {
+      throw new FleetError('To update managed integrations, use the managed integrations API.');
+    }
 
     if (spaceIds?.length) {
       const authorizedSpaces = await getAuthorizedSpacesWithAgentPoliciesAllPrivileges(
@@ -637,15 +662,6 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       logger.debug(
         `spaceId now set to [${spaceId}] for updating agent policy [${request.params.agentPolicyId}]`
       );
-    }
-    const soClient = appContextService.getInternalUserSOClientForSpaceId(spaceId);
-    const existingAgentPolicy = await agentPolicyService.get(
-      soClient,
-      request.params.agentPolicyId,
-      false
-    );
-    if (existingAgentPolicy?.supports_agentless || data.supports_agentless) {
-      throw new FleetError('To update managed integrations, use the managed integrations API.');
     }
 
     const agentPolicy = await agentPolicyService.update(
@@ -754,6 +770,22 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
+
+  // agentless policies are managed by Elastic; `force` is the escape hatch
+  if (!request.body.force) {
+    const agentPolicy = await agentPolicyService.get(soClient, request.body.agentPolicyId, false);
+    if (agentPolicy?.supports_agentless) {
+      throw new FleetError('To delete managed integrations, use the managed integrations API.');
+    }
+  }
+
+  // Deleting the agent policy deletes or detaches its package policies, which those managed by a
+  // cloud onboarding instance only allow from the onboarding flow. `force` does not bypass this.
+  const packagePolicies = await packagePolicyService.findAllForAgentPolicy(
+    soClient,
+    request.body.agentPolicyId
+  );
+  assertOnboardingAccess(packagePolicies, undefined);
 
   const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
     soClient,
@@ -1086,6 +1118,26 @@ export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
   return response.ok({
     body,
   });
+};
+
+export const getAgentPoliciesPackagePoliciesSummaryHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof GetAgentPoliciesPackagePoliciesSummaryRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const ids = deduplicateIds(request.body.ids);
+
+  const summaries = await packagePolicyService.getSummaryForAgentPolicies(
+    coreContext.savedObjects.client,
+    ids
+  );
+
+  const body: GetAgentPoliciesPackagePoliciesSummaryResponse = {
+    items: Object.fromEntries(summaries),
+  };
+
+  return response.ok({ body });
 };
 
 export const RunAgentPolicyRevisionsCleanupTaskHandler: FleetRequestHandler<

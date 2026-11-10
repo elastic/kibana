@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/apm-sources-access-plugin'
   - '@kbn/metrics-data-access-plugin'
   - '@kbn/safer-lodash-set'
+  - '@kbn/genai-common'
 tags:
   - plugin
   - prod
@@ -48,6 +49,4 @@ fileGroups:
     - server/**/*
     - jest.config.js
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

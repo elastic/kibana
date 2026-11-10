@@ -8,7 +8,7 @@
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { MAX_EMBEDDED_RULES_PER_ITEM } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { ACTION_POLICY_EVENT_ACTIONS } from '../dispatcher/steps/constants';
+import { ACTION_POLICY_EVENT_ACTIONS } from '../services/event_log_service/constants';
 import {
   collectIdsFromEvents,
   buildExecutionHistoryItem,
@@ -237,7 +237,7 @@ describe('buildExecutionHistoryItem', () => {
     expect(historyItem?.workflows).toEqual([{ id: 'wf-1', name: 'My Workflow' }]);
   });
 
-  it('falls back to null name when id missing from maps', () => {
+  it('omits the name when the id is missing from the maps', () => {
     const event = buildEvent({
       kibana: {
         saved_objects: [
@@ -249,9 +249,11 @@ describe('buildExecutionHistoryItem', () => {
     });
 
     const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
-    expect(historyItem?.policy.name).toBeNull();
-    expect(historyItem?.rules[0]?.name).toBeNull();
-    expect(historyItem?.workflows[0]?.name).toBeNull();
+
+    expect(historyItem).not.toBeNull();
+    expect(historyItem?.policy).toEqual({ id: 'policy-1' });
+    expect(historyItem?.rules).toEqual([{ id: 'rule-a' }]);
+    expect(historyItem?.workflows).toEqual([{ id: 'wf-1' }]);
   });
 
   it('projects the stored event action onto the API outcome', () => {
@@ -300,6 +302,22 @@ describe('buildExecutionHistoryItem', () => {
     expect(historyItem?.alert_count).toBe(0);
     expect(historyItem?.action_group_count).toBe(0);
     expect(historyItem?.workflows).toEqual([]);
+  });
+
+  it('reads the alerts from alert_ids and alert_count', () => {
+    const event = buildEvent({
+      kibana: {
+        saved_objects: [{ type: ACTION_POLICY_SAVED_OBJECT_TYPE, id: 'policy-1' }],
+        alerting_v2: { dispatcher: { alert_ids: ['alert-1', 'alert-2'], alert_count: 2 } },
+      },
+    });
+
+    const historyItem = buildExecutionHistoryItem(event, EMPTY_NAME_MAPS);
+
+    expect(historyItem).toMatchObject({
+      alert_count: 2,
+      alerts: [{ id: 'alert-1' }, { id: 'alert-2' }],
+    });
   });
 
   describe('when search is not active', () => {

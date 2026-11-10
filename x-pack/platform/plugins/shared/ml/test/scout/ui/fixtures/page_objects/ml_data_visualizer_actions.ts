@@ -16,14 +16,8 @@ export class MlDataVisualizerActions {
   readonly timeRangeSelectorSection: Locator;
   readonly totalDocCount: Locator;
 
-  private readonly dataVisualizerTab: Locator;
-  private readonly dataVisualizerSelectIndexButton: Locator;
-  private readonly dataSourceSelectorButton: Locator;
-  private readonly openDiscoverSessionButton: Locator;
   private readonly useFullDataButton: Locator;
   private readonly applyTimeButton: Locator;
-  private readonly loadSearchForm: Locator;
-  private readonly savedObjectFinderSearchInput: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.actionsPanel = this.page.testSubj.locator('dataVisualizerActionsPanel');
@@ -37,82 +31,18 @@ export class MlDataVisualizerActions {
     );
     this.totalDocCount = this.page.testSubj.locator('dataVisualizerTotalDocCount');
 
-    this.dataVisualizerTab = this.page.locator(
-      '[data-test-subj~="mlMainTab"][data-test-subj~="dataVisualizer"]'
-    );
-    this.dataVisualizerSelectIndexButton = this.page.testSubj.locator(
-      'mlDataVisualizerSelectIndexButton'
-    );
-    this.dataSourceSelectorButton = this.page.testSubj.locator('mlDataSourceSelectorButton');
-    this.openDiscoverSessionButton = this.page.testSubj.locator('mlOpenDiscoverSessionButton');
     this.useFullDataButton = this.page.testSubj.locator('mlDatePickerButtonUseFullData');
     this.applyTimeButton = this.page.testSubj.locator('superDatePickerApplyTimeButton');
-    this.loadSearchForm = this.page.testSubj.locator('loadSearchForm');
-    this.savedObjectFinderSearchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
   }
 
-  async navigateToMl(): Promise<void> {
-    await this.page.gotoApp('ml');
-    await this.page.testSubj.waitForSelector('mlApp', { state: 'visible' });
-  }
-
-  async navigateToDataVisualizer(): Promise<void> {
-    await this.navigateToMl();
-    await this.dataVisualizerTab.click();
-    await this.page.testSubj.waitForSelector('mlPageDataVisualizerSelector', { state: 'visible' });
-  }
-
-  async navigateToDataViewSelection(): Promise<void> {
-    await this.dataVisualizerSelectIndexButton.click();
-    await this.dataSourceSelectorButton.waitFor({ state: 'visible' });
-  }
-
-  async selectDataView(name: string): Promise<void> {
-    await this.dataSourceSelectorButton.click();
-
-    const switcher = this.page.testSubj.locator('indexPattern-switcher');
-    await switcher.waitFor({ state: 'visible' });
-
-    const searchInput = this.page.testSubj.locator('indexPattern-switcher--input');
-    if (await searchInput.isVisible()) {
-      await searchInput.fill(name);
-    }
-
-    const option = switcher.locator(`li[role="option"][data-test-subj="dataView-${name}"]`);
-    await option.waitFor({ state: 'visible', timeout: 40_000 });
-    await option.click();
-
-    await switcher.waitFor({ state: 'hidden' });
-    await this.page.waitForURL(/index=/, { timeout: 10_000 });
-    await this.page.testSubj.waitForSelector('dataVisualizerIndexPage', { state: 'visible' });
-  }
-
-  async selectSavedSearch(name: string): Promise<void> {
-    if (await this.loadSearchForm.isVisible()) {
-      await this.page.keyboard.press('Escape');
-      await this.loadSearchForm.waitFor({ state: 'hidden' });
-    }
-
-    await this.openDiscoverSessionButton.click();
-    await this.loadSearchForm.waitFor({ state: 'visible' });
-    await this.savedObjectFinderSearchInput.waitFor({ state: 'visible' });
-
-    // SavedObjectFinder fires an async fetch on mount; wait for the initial load to settle.
-    await this.page.testSubj
-      .locator('savedObjectsFinderTable')
-      .locator('table:not([aria-busy="true"])')
-      .waitFor({ state: 'visible', timeout: 40_000 });
-
-    if (await this.savedObjectFinderSearchInput.isVisible()) {
-      await this.savedObjectFinderSearchInput.fill(name);
-    }
-
-    const resultItem = this.page.locator(`button[data-test-subj="savedObjectTitle${name}"]`);
-    await resultItem.waitFor({ state: 'visible', timeout: 40_000 });
-    await resultItem.click();
-    await this.loadSearchForm.waitFor({ state: 'hidden' });
-
-    await this.page.waitForURL(/savedSearchId/, { timeout: 10_000 });
+  /**
+   * Opens the index data visualizer on the given data source, deep linking the same
+   * `index` / `savedSearchId` query param the in-app data source picker writes.
+   */
+  async navigateToIndexDataVisualizer(
+    source: { index: string } | { savedSearchId: string }
+  ): Promise<void> {
+    await this.page.gotoApp('ml/jobs/new_job/datavisualizer', { params: source });
     await this.page.testSubj.waitForSelector('dataVisualizerIndexPage', { state: 'visible' });
   }
 

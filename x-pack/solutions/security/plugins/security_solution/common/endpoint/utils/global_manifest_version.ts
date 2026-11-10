@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment, { type Moment } from 'moment';
 import { getControlledArtifactCutoffDate } from './controlled_artifact_rollout';
 
 export type GlobalManifestVersionStatus =
@@ -44,4 +44,14 @@ export const classifyGlobalManifestVersion = (value: string): GlobalManifestVers
   }
 
   return 'valid';
+};
+
+export const GLOBAL_MANIFEST_VERSION_OUTDATED_DAYS = 30;
+
+export const getGlobalManifestVersionAgeDays = (
+  value: string,
+  now: Moment = moment.utc()
+): number => {
+  const versionDate = moment.utc(value, 'YYYY-MM-DD', true);
+  return moment.utc(now).startOf('day').diff(versionDate, 'days');
 };

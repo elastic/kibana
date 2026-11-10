@@ -7,8 +7,15 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { createMemoryHistory } from 'history';
 import { useLocation } from 'react-router-dom';
-import { NotFoundRouteException } from '@kbn/typed-react-router-config';
+import {
+  InvalidRouteParamsException,
+  NotFoundRouteException,
+  RouterProvider,
+} from '@kbn/typed-react-router-config';
+import { useProfilingParams } from '../hooks/use_profiling_params';
+import { profilingRouter } from '.';
 import { RouterErrorBoundary } from './router_error_boundary';
 
 jest.mock('react-router-dom', () => ({
@@ -76,6 +83,20 @@ function ThrowError({ error }: { error: Error }): React.ReactElement {
   throw error;
 }
 
+// Throws like the router does for a URL it can repair, until the URL has the repaired query
+function ThrowWhileUnrepaired(): React.ReactElement {
+  const { search } = useLocation();
+  if (search !== '?kuery=') {
+    throw new InvalidRouteParamsException('Invalid params', { path: {}, query: { kuery: '' } });
+  }
+  return <div data-test-subj="child">Hello</div>;
+}
+
+function SettingsPage() {
+  useProfilingParams('/settings');
+  return <div data-test-subj="settings">Settings</div>;
+}
+
 describe('RouterErrorBoundary', () => {
   beforeEach(() => {
     mockUseLocation.mockReturnValue({
@@ -122,6 +143,44 @@ describe('RouterErrorBoundary', () => {
 
     expect(screen.getByTestId('kibana-error-boundary')).toBeInTheDocument();
     expect(screen.queryByTestId('not-found-prompt')).not.toBeInTheDocument();
+  });
+
+  describe('under the router', () => {
+    beforeEach(() => {
+      mockUseLocation.mockImplementation(jest.requireActual('react-router-dom').useLocation);
+    });
+
+    it('leaves InvalidRouteParamsException to the router, which repairs the URL', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/settings?kuery'] });
+
+      render(
+        <RouterProvider router={profilingRouter as any} history={history}>
+          <RouterErrorBoundary>
+            <ThrowWhileUnrepaired />
+          </RouterErrorBoundary>
+        </RouterProvider>
+      );
+
+      expect(await screen.findByTestId('child')).toBeInTheDocument();
+      expect(history.location.search).toBe('?kuery=');
+      expect(screen.queryByTestId('kibana-error-boundary')).not.toBeInTheDocument();
+    });
+
+    it('lets the router repair a URL with an invalid schema', async () => {
+      const history = createMemoryHistory({ initialEntries: ['/settings?schema=invalid'] });
+
+      render(
+        <RouterProvider router={profilingRouter as any} history={history}>
+          <RouterErrorBoundary>
+            <SettingsPage />
+          </RouterErrorBoundary>
+        </RouterProvider>
+      );
+
+      expect(await screen.findByTestId('settings')).toBeInTheDocument();
+      expect(history.location.search).toBe('');
+      expect(screen.queryByTestId('kibana-error-boundary')).not.toBeInTheDocument();
+    });
   });
 
   it('resets error state and renders children when resetKey changes', () => {

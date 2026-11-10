@@ -6,7 +6,7 @@
  */
 
 import path from 'node:path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -16,14 +16,16 @@ import { wrapMiddlewares } from '../middleware';
 import { EntityStoreNotInstalledError } from '../../domain/errors';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 
-const bodySchema = z.object({
-  clearHistorySnapshots: z
-    .boolean()
-    .default(false)
-    .describe(
-      'When `true`, deletes existing history snapshot indices for this space in the background after the task is disabled. The response returns immediately and does not wait for deletion to finish. Deletion failures are logged and are not returned to the caller. If the task is already disabled, the request succeeds and does not delete indices. Defaults to `false`.'
-    ),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    clearHistorySnapshots: z
+      .boolean()
+      .default(false)
+      .describe(
+        'When `true`, deletes existing history snapshot indices for this space in the background after the task is disabled. The response returns immediately and does not wait for deletion to finish. Deletion failures are logged and are not returned to the caller. If the task is already disabled, the request succeeds and does not delete indices. Defaults to `false`.'
+      ),
+  })
+);
 
 export function registerDisableHistorySnapshot(router: EntityStorePluginRouter) {
   router.versioned

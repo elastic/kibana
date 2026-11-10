@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { IBasePath } from '@kbn/core-http-browser';
 import type { ApprovalProposal } from '@kbn/proposals-ui';
 import { ProposedActionButton, type ProposedActionButtonProps } from './proposed_action_button';
 
@@ -24,7 +25,11 @@ const mockProposal: ApprovalProposal = {
   impact: 'critical',
   status: 'pending',
   category: 'Response action',
-  action: { name: 'Isolate cfo-mbp-14 — host isolation', reversible: false },
+  action: {
+    name: 'Isolate cfo-mbp-14 — host isolation',
+    reversible: false,
+    approvalPolicy: 'always-gate',
+  },
 };
 
 const baseProps: ProposedActionButtonProps = {
@@ -46,7 +51,20 @@ describe('ProposedActionButton', () => {
     renderButton();
     expect(screen.getByText('Isolate cfo-mbp-14 — host isolation')).toBeInTheDocument();
     expect(screen.getByText('Needs review')).toBeInTheDocument();
-    expect(screen.getByText('Response action • Irreversible')).toBeInTheDocument();
+    expect(screen.getByTestId('proposedAction')).toHaveTextContent(
+      'Response action • Irreversible'
+    );
+  });
+
+  it('says "No action type" when the proposal has neither a category nor a reversibility', () => {
+    renderButton({ proposal: { ...mockProposal, category: undefined, action: undefined } });
+
+    expect(screen.getByText('No action type')).toBeInTheDocument();
+  });
+
+  it('shows "Irreversible" in the danger color', () => {
+    renderButton();
+    expect(screen.getByText('Irreversible').className).toMatch(/danger/i);
   });
 
   it('names the row with its own title and status, not a fixed string every row shares', () => {
@@ -56,6 +74,72 @@ describe('ProposedActionButton', () => {
         name: 'Review proposed action: Isolate cfo-mbp-14 — host isolation, Needs review',
       })
     ).toBeInTheDocument();
+  });
+
+  it('renders as a list item holding a native button, for a ProposedActionsList', () => {
+    renderButton();
+
+    const row = screen.getByTestId('proposedAction');
+    expect(row.tagName).toBe('BUTTON');
+    expect(row.closest('li')).not.toBeNull();
+  });
+
+  it('shows no tooltip while the title fits on one line', () => {
+    renderButton();
+
+    fireEvent.mouseOver(screen.getByTestId('proposedAction'));
+
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  describe('a title too long for the row', () => {
+    const scrollWidth = jest.spyOn(HTMLElement.prototype, 'scrollWidth', 'get');
+    const clientWidth = jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get');
+
+    beforeEach(() => {
+      // jsdom lays nothing out, so stand in for a title wider than the space it has.
+      scrollWidth.mockReturnValue(400);
+      clientWidth.mockReturnValue(200);
+    });
+
+    afterAll(() => {
+      scrollWidth.mockRestore();
+      clientWidth.mockRestore();
+    });
+
+    it('offers the full title in a tooltip', async () => {
+      renderButton();
+
+      fireEvent.mouseOver(screen.getByTestId('proposedAction'));
+
+      await waitFor(() =>
+        expect(screen.getByRole('tooltip')).toHaveTextContent('Isolate cfo-mbp-14 — host isolation')
+      );
+    });
+
+    it('adds a reason that is cut off too under the title in the same tooltip', async () => {
+      renderButton({
+        proposal: { ...mockProposal, status: 'expired', rationale: 'The rule was deleted.' },
+      });
+
+      fireEvent.mouseOver(screen.getByTestId('proposedAction'));
+
+      await waitFor(() =>
+        expect(screen.getByRole('tooltip')).toHaveTextContent(
+          'Isolate cfo-mbp-14 — host isolationThe rule was deleted.'
+        )
+      );
+    });
+
+    it('anchors that tooltip on the focusable button, so keyboard focus reveals it too', () => {
+      renderButton();
+
+      // EuiToolTip opens on its anchor's focus (jsdom cannot satisfy its :focus-visible check, so
+      // the hover case above proves it opens; this proves the anchor is the button, not a span
+      // inside it that focus never reaches).
+      const row = screen.getByTestId('proposedAction');
+      expect(row.parentElement).toHaveClass('euiToolTipAnchor');
+    });
   });
 
   it('opens the approval modal on click, matching the one the card recommended-action opens', () => {
@@ -69,6 +153,25 @@ describe('ProposedActionButton', () => {
     expect(
       screen.getAllByText('Isolate cfo-mbp-14 — host isolation').length
     ).toBeGreaterThanOrEqual(2);
+  });
+
+  it('hands the base path to the modal, so in-app links in the comment survive server.basePath', () => {
+    const basePath = {
+      serverBasePath: '/kbn',
+      prepend: (path: string) => `/kbn${path}`,
+    } as unknown as IBasePath;
+    renderButton({
+      basePath,
+      proposal: {
+        ...mockProposal,
+        comment: '**Rule:** [Noisy rule](/s/default/app/security/rules/id/abc)',
+      },
+    });
+    fireEvent.click(screen.getByTestId('proposedAction'));
+
+    expect(
+      within(screen.getByRole('dialog')).getByRole('link', { name: /Noisy rule/ })
+    ).toHaveAttribute('href', '/kbn/app/security/rules/id/abc');
   });
 
   it('commits the approval by calling onConfirm from the modal', () => {
@@ -146,7 +249,13 @@ describe('ProposedActionButton', () => {
       expect(screen.getByText('Applied')).toBeInTheDocument();
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
       expect(screen.getByText(/Bonnie Fishel/)).toBeInTheDocument();
-      expect(screen.queryByText('Response action • Irreversible')).not.toBeInTheDocument();
+      expect(screen.queryByText('Irreversible')).not.toBeInTheDocument();
+    });
+
+    it('shows the full date and time of the decision', () => {
+      renderButton({ proposal: decidedProposal });
+
+      expect(screen.getByText(/1 Jan 2024, \d{2}:\d{2}$/)).toBeInTheDocument();
     });
 
     it('shows a Declined badge for a dismissed proposal', () => {
@@ -155,13 +264,27 @@ describe('ProposedActionButton', () => {
       expect(screen.getByText('Declined')).toBeInTheDocument();
     });
 
+    it.each<[string, Partial<ApprovalProposal>, string]>([
+      ['approved', {}, 'Applied'],
+      ['declined', { decision: 'dismissed' }, 'Declined'],
+      ['failed', { status: 'failed' }, 'Failed'],
+      ['approved, with nothing to run,', { status: 'no_action' }, 'Approved'],
+      ['to-do, marked as applied,', { category: 'todo', status: 'no_action' }, 'Applied'],
+    ])('captions a %s proposal with who acted and when', (_, overrides, badge) => {
+      renderButton({ proposal: { ...decidedProposal, ...overrides } });
+
+      expect(screen.getByText(badge)).toBeInTheDocument();
+      expect(screen.getByText(/^Bonnie Fishel • 1 Jan 2024, \d{2}:\d{2}$/)).toBeInTheDocument();
+    });
+
     it('is still clickable, opening a read-only modal for the closed record', () => {
       renderButton({ proposal: decidedProposal });
 
       fireEvent.click(screen.getByTestId('proposedAction'));
 
       const dialog = screen.getByRole('dialog');
-      expect(within(dialog).getByText('Applied')).toBeInTheDocument();
+      // The badge's own label and the outcome banner's own title.
+      expect(within(dialog).getAllByText('Applied')).toHaveLength(2);
       expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
     });
 
@@ -181,6 +304,14 @@ describe('ProposedActionButton', () => {
       expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     });
 
+    it('says it can no longer be applied, not who acted, for an expired proposal that has an actor', () => {
+      renderButton({ proposal: { ...decidedProposal, status: 'expired' } });
+
+      expect(screen.getByText('Expired')).toBeInTheDocument();
+      expect(screen.getByText('Can no longer be applied')).toBeInTheDocument();
+      expect(screen.queryByText(/Bonnie Fishel/)).not.toBeInTheDocument();
+    });
+
     it('names the decider without a time when the record carries no decidedAt', () => {
       renderButton({ proposal: { ...decidedProposal, decidedAt: undefined } });
 
@@ -196,10 +327,18 @@ describe('ProposedActionButton', () => {
     it('shows an Expired badge instead of Needs review, though nobody ever decided it', () => {
       renderButton({ proposal: expiredProposal });
 
-      // The badge and the caption below it both read "Expired": nobody names a decider, so the
-      // caption falls back to the same label rather than a fabricated "by Unknown".
-      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
+      // The badge says "Expired"; nobody names a decider, so the caption says it can no longer be
+      // applied rather than a fabricated "by Unknown".
+      expect(screen.getByText('Expired')).toBeInTheDocument();
+      expect(screen.getByText('Can no longer be applied')).toBeInTheDocument();
       expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    });
+
+    it('captions the reason the workflow saved for it', () => {
+      renderButton({ proposal: { ...expiredProposal, rationale: 'The rule was deleted.' } });
+
+      expect(screen.getByText('The rule was deleted.')).toBeInTheDocument();
+      expect(screen.queryByText('Can no longer be applied')).not.toBeInTheDocument();
     });
 
     it('is still clickable, opening a read-only modal with no actions to take', () => {

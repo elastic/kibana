@@ -5,17 +5,13 @@
  * 2.0.
  */
 
-import {
-  DATE_PICKER_APPLY_BUTTON_TIMELINE,
-  GLOBAL_FILTERS_CONTAINER,
-} from '../../../screens/date_picker';
+import { DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../../../screens/date_picker';
 import { HOSTS_NAMES } from '../../../screens/hosts/all_hosts';
 import { ANOMALIES_TAB } from '../../../screens/hosts/main';
 import {
   BREADCRUMBS,
   EXPLORE,
   HOSTS,
-  KQL_INPUT,
   LOADING_INDICATOR,
   NETWORK,
   openNavigationPanel as toggleNavigationPanel,
@@ -36,8 +32,8 @@ import { openAllHosts } from '../../../tasks/hosts/main';
 
 import { waitForIpsTableToBeLoaded } from '../../../tasks/network/flows';
 import {
-  clearSearchBar,
-  kqlSearch,
+  clearGlobalSearchBar,
+  kqlSearchGlobalBar,
   navigateFromHeaderTo,
   saveQuery,
 } from '../../../tasks/security_header';
@@ -49,8 +45,10 @@ import { ABSOLUTE_DATE_RANGE } from '../../../urls/state';
 
 import { getTimeline } from '../../../objects/timeline';
 import {
+  GLOBAL_SEARCH_BAR,
   GLOBAL_SEARCH_BAR_FILTER_ITEM_AT,
   GLOBAL_SEARCH_BAR_PINNED_FILTER,
+  GLOBAL_SEARCH_BAR_QUERY_INPUT,
 } from '../../../screens/search_bar';
 
 const ABSOLUTE_DATE = {
@@ -113,7 +111,7 @@ describe(
 
     it('sets the global start and end dates from the url', () => {
       visit(ABSOLUTE_DATE_RANGE.url);
-      expectDateRangeToBe(GLOBAL_FILTERS_CONTAINER, {
+      expectDateRangeToBe(GLOBAL_SEARCH_BAR, {
         start: ABSOLUTE_DATE.startTime,
         end: ABSOLUTE_DATE.endTime,
       });
@@ -121,11 +119,11 @@ describe(
 
     it('sets the url state when start and end date are set', () => {
       visit(ABSOLUTE_DATE_RANGE.url);
-      setStartDate(ABSOLUTE_DATE.newStartTimeTyped);
-      updateDates();
+      setStartDate(ABSOLUTE_DATE.newStartTimeTyped, GLOBAL_SEARCH_BAR);
+      updateDates(GLOBAL_SEARCH_BAR);
       waitForIpsTableToBeLoaded();
-      setEndDate(ABSOLUTE_DATE.newEndTimeTyped);
-      updateDates();
+      setEndDate(ABSOLUTE_DATE.newEndTimeTyped, GLOBAL_SEARCH_BAR);
+      updateDates(GLOBAL_SEARCH_BAR);
 
       let startDate: string;
       let endDate: string;
@@ -158,7 +156,7 @@ describe(
 
     it('sets the timeline start and end dates independently of the global start and end dates when times are unlocked', () => {
       visit(ABSOLUTE_DATE_RANGE.urlUnlinked);
-      expectDateRangeToBe(GLOBAL_FILTERS_CONTAINER, {
+      expectDateRangeToBe(GLOBAL_SEARCH_BAR, {
         start: ABSOLUTE_DATE.startTime,
         end: ABSOLUTE_DATE.endTime,
       });
@@ -200,17 +198,17 @@ describe(
 
     it('sets kql on network page', () => {
       visit(ABSOLUTE_DATE_RANGE.urlKqlNetworkNetwork);
-      cy.get(KQL_INPUT()).should('have.text', 'source.ip: "10.142.0.9"');
+      cy.get(GLOBAL_SEARCH_BAR_QUERY_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
     });
 
     it('sets kql on hosts page', () => {
       visit(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
-      cy.get(KQL_INPUT()).should('have.text', 'source.ip: "10.142.0.9"');
+      cy.get(GLOBAL_SEARCH_BAR_QUERY_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
     });
 
     it('sets the url state when kql is set', () => {
       visit(ABSOLUTE_DATE_RANGE.url);
-      kqlSearch('source.ip: "10.142.0.9" {enter}');
+      kqlSearchGlobalBar('source.ip: "10.142.0.9" {enter}');
 
       cy.url().should(
         'include',
@@ -220,7 +218,7 @@ describe(
 
     it('sets the url state when kql is set and check if href reflect this change', () => {
       visit(ABSOLUTE_DATE_RANGE.url);
-      kqlSearch('source.ip: "10.142.0.9" {enter}');
+      kqlSearchGlobalBar('source.ip: "10.142.0.9" {enter}');
       navigateFromHeaderTo(HOSTS);
 
       toggleNavigationPanel(EXPLORE);
@@ -235,7 +233,7 @@ describe(
     });
     it('sets KQL in host page and detail page and check if href match on breadcrumb, tabs and subTabs', () => {
       visit(ABSOLUTE_DATE_RANGE.urlHostNew);
-      kqlSearch('host.name: "siem-kibana" {enter}');
+      kqlSearchGlobalBar('host.name: "siem-kibana" {enter}');
       openAllHosts();
       waitForAllHostsToBeLoaded();
 
@@ -260,8 +258,8 @@ describe(
       cy.get(HOSTS_NAMES).first().should('have.text', 'siem-kibana');
 
       openFirstHostDetails();
-      clearSearchBar();
-      kqlSearch('agent.type: "auditbeat" {enter}');
+      clearGlobalSearchBar();
+      kqlSearchGlobalBar('agent.type: "auditbeat" {enter}');
 
       cy.get(ANOMALIES_TAB)
         .should('have.attr', 'href')
@@ -294,7 +292,7 @@ describe(
     it('Do not clears kql when navigating to a new page', () => {
       visit(ABSOLUTE_DATE_RANGE.urlKqlHostsHosts);
       navigateFromHeaderTo(NETWORK);
-      cy.get(KQL_INPUT()).should('have.text', 'source.ip: "10.142.0.9"');
+      cy.get(GLOBAL_SEARCH_BAR_QUERY_INPUT).should('have.text', 'source.ip: "10.142.0.9"');
     });
 
     it('sets and reads the url state for timeline by id', () => {
