@@ -221,8 +221,9 @@ export const useProvisioningCallback = ({
           if (outcome === 'cancelled') {
             setStatus('expired');
           } else if (outcome === 'created' && activeIdRef.current === id) {
-            // The report is being applied. The server either finishes it or hands the record
-            // back to pending, and the next pass settles either way, so keep watching.
+            // The report is being applied. The server finishes it, hands the record back to
+            // pending, or retires it once the record has expired with nobody applying the report
+            // any more, and the next pass settles whichever it is, so keep watching.
             deadline = Date.now() + PROVISIONING_CALLBACK_RECEIVING_GRACE_MS;
           } else if (outcome === 'failed') {
             // The record is still live; the id is kept so a manual Create retries the cancel.

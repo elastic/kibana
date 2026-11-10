@@ -334,6 +334,32 @@ describe('useProvisioningCallback', () => {
       expect(result.current.created).toEqual({ id: 'cc-1', name: 'cc-1', ...RECEIVED_VALUES });
     });
 
+    it('gives up as expired once the server retires a report nobody is applying any more', async () => {
+      mockedDelete
+        .mockResolvedValueOnce({
+          data: { item: pendingItem('cb-1', { status: 'receiving', ...RECEIVED_VALUES }) },
+          error: null,
+        } as any)
+        .mockResolvedValueOnce({
+          data: { item: pendingItem('cb-1', { status: 'cancelled', ...RECEIVED_VALUES }) },
+          error: null,
+        } as any);
+
+      const result = await startAndPassDeadline();
+      expect(result.current.status).toBe('receiving');
+
+      jest.setSystemTime(Date.now() + PROVISIONING_CALLBACK_RECEIVING_GRACE_MS + 1);
+      await poll();
+      expect(mockedDelete).toHaveBeenCalledTimes(2);
+      expect(result.current.status).toBe('expired');
+      expect(result.current.created).toBeUndefined();
+
+      // Nothing is polled or retired any more.
+      await poll();
+      expect(mockedGet).not.toHaveBeenCalled();
+      expect(mockedDelete).toHaveBeenCalledTimes(2);
+    });
+
     it('leaves a newer launch alone when its cancel settles after that launch', async () => {
       let resolveDelete: (value: unknown) => void = () => {};
       mockedDelete.mockReturnValue(new Promise((resolve) => (resolveDelete = resolve)) as any);
