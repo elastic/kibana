@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { CreateAlertEventsStep } from './create_alert_events_step';
+import { createConfigServiceMock } from '../../services/config_service/config_service.mock';
 import {
   collectStreamResults,
   createPipelineStream,
@@ -47,13 +47,10 @@ describe('CreateAlertEventsStep', () => {
       },
     };
 
-    const pluginConfigAccessor =
-      coreMock.createPluginInitializerContext<PluginConfig>(config).config;
-
     const logger = createLoggerService();
     mockLogger = logger.mockLogger;
 
-    return new CreateAlertEventsStep(logger.loggerService, pluginConfigAccessor);
+    return new CreateAlertEventsStep(logger.loggerService, createConfigServiceMock(config));
   }
 
   beforeEach(() => {

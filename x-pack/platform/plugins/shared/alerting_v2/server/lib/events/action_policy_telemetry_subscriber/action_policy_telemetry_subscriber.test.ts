@@ -24,7 +24,7 @@ import {
 } from '../action_policy_event_publisher/events';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createEventBusMock } from '../event_bus/event_bus.mock';
-import type { EventBus, Subscription } from '../event_bus';
+import type { EventBus } from '../event_bus';
 import { ActionPolicyTelemetrySubscriber } from './action_policy_telemetry_subscriber';
 
 type CapturedHandler = (
@@ -72,24 +72,6 @@ describe('ActionPolicyTelemetrySubscriber', () => {
       request: httpServerMock.createKibanaRequest() as KibanaRequest,
       origin: { actor: 'user', channel: 'api' },
     };
-  });
-
-  describe('start()', () => {
-    it('subscribes a handler to each reported action policy event type', () => {
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(ACTION_POLICY_OPERATIONS.length);
-      for (const type of ACTION_POLICY_OPERATIONS) {
-        expect(bus.subscribe).toHaveBeenCalledWith(type, expect.any(Function));
-      }
-    });
-
-    it('is idempotent: a second call does not double-subscribe', () => {
-      subscriber.start();
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(ACTION_POLICY_OPERATIONS.length);
-    });
   });
 
   describe('event dispatch', () => {
@@ -154,29 +136,5 @@ describe('ActionPolicyTelemetrySubscriber', () => {
         );
       }
     );
-  });
-
-  describe('stop()', () => {
-    it('unsubscribes active subscriptions', () => {
-      const unsubscribe = jest.fn();
-      bus.subscribe.mockReturnValue({ unsubscribe } satisfies Subscription);
-
-      subscriber.start();
-      subscriber.stop();
-
-      expect(unsubscribe).toHaveBeenCalledTimes(ACTION_POLICY_OPERATIONS.length);
-    });
-
-    it('allows a subsequent start() to re-subscribe', () => {
-      subscriber.start();
-      subscriber.stop();
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(ACTION_POLICY_OPERATIONS.length * 2);
-    });
-
-    it('is safe to call when no subscriptions are active', () => {
-      expect(() => subscriber.stop()).not.toThrow();
-    });
   });
 });

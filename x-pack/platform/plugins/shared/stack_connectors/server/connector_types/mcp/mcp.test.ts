@@ -5,18 +5,29 @@
  * 2.0.
  */
 
-import { McpConnector, listToolsCache } from './mcp';
+import {
+  CONNECTION_FAILURE_RETRY_LIMIT,
+  McpConnector,
+  connectionFailures,
+  listToolsCache,
+} from './mcp';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import type { ServiceParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { LeasePool } from '@kbn/actions-plugin/server/lib';
+import { LeasePool, buildClientLeaseKey } from '@kbn/actions-plugin/server/lib';
 import type { MCPConnectorConfig, MCPConnectorSecrets } from '@kbn/connector-schemas/mcp';
 import { CONNECTOR_ID, SUB_ACTION } from '@kbn/connector-schemas/mcp/constants';
 import { clientTypes } from '@kbn/connector-specs/server';
-import { getErrorSource, TaskErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import {
+  getErrorSource,
+  isRetryableError,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server/task_running';
 import { buildHeadersFromSecrets } from './auth_helpers';
+import { McpError, McpErrorCode } from '@kbn/mcp-client';
+import { BREAKER_FAILURE_THRESHOLD, mcpCircuitBreaker } from './circuit_breaker';
 
 jest.mock('@kbn/connector-specs/server', () => ({
   clientTypes: {
@@ -91,6 +102,7 @@ describe('McpConnector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     listToolsCache.clear();
+    connectionFailures.clear();
 
     pool = new LeasePool<unknown>();
     services = actionsMock.createServices();
@@ -111,6 +123,7 @@ describe('McpConnector', () => {
 
   afterEach(() => {
     pool.stop();
+    mcpCircuitBreaker.clear();
   });
 
   describe('sub-action registration', () => {
@@ -561,6 +574,422 @@ describe('McpConnector', () => {
       expect(mcpClientType.build).not.toHaveBeenCalled();
     });
 
+    describe('consecutive connection failures', () => {
+      const leaseKey = buildClientLeaseKey({
+        connectorId: 'test-connector-1',
+        clientTypeId: 'mcp',
+        connectorVersion,
+      });
+
+      const expectCallToolError = async (connector: McpConnector) => {
+        try {
+          await connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+        } catch (err) {
+          return err;
+        }
+        throw new Error('expected callTool to throw');
+      };
+
+      it('stops retrying after N consecutive connection failures', async () => {
+        fakeClient.callTool.mockImplementation(() => Promise.reject(new Error('socket closed')));
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+
+        const errors = [];
+        for (let i = 0; i < CONNECTION_FAILURE_RETRY_LIMIT; i++) {
+          errors.push(await expectCallToolError(connector));
+        }
+
+        expect(isRetryableError(errors[0] as Error)).toBeNull();
+        expect(isRetryableError(errors[1] as Error)).toBeNull();
+        expect(isRetryableError(errors[CONNECTION_FAILURE_RETRY_LIMIT - 1] as Error)).toBe(false);
+        expect(logger.error).toHaveBeenLastCalledWith(expect.stringContaining('retries disabled'));
+      });
+
+      it('counts concurrent failures on one pooled client once', async () => {
+        const rejectOperations: Array<(error: Error) => void> = [];
+        fakeClient.callTool.mockImplementation(
+          () =>
+            new Promise((_, reject) => {
+              rejectOperations.push(reject);
+            })
+        );
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+        const calls = [
+          expectCallToolError(connector),
+          expectCallToolError(connector),
+          expectCallToolError(connector),
+        ];
+
+        for (let turn = 0; turn < 10 && rejectOperations.length < 3; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(fakeClient.callTool).toHaveBeenCalledTimes(3);
+        expect(rejectOperations).toHaveLength(3);
+        rejectOperations.forEach((rejectOperation, index) =>
+          rejectOperation(new Error(`socket closed ${index}`))
+        );
+        const errors = await Promise.all(calls);
+
+        expect(connectionFailures.get(leaseKey)).toBe(1);
+        expect(errors.every((err) => isRetryableError(err as Error) === null)).toBe(true);
+      });
+
+      it('resets a lease generation after a mixed concurrent success and failure', async () => {
+        fakeClient.callTool
+          .mockRejectedValueOnce(new Error('socket closed'))
+          .mockRejectedValueOnce(new Error('socket closed'));
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+
+        await expectCallToolError(connector);
+        await expectCallToolError(connector);
+
+        const rejectOperations: Array<(error: Error) => void> = [];
+        const resolveOperations: Array<(value: { content: [] }) => void> = [];
+        fakeClient.callTool.mockImplementation(
+          () =>
+            new Promise((resolve, reject) => {
+              resolveOperations.push(resolve);
+              rejectOperations.push(reject);
+            })
+        );
+        const failedCall = expectCallToolError(connector);
+        const successfulCall = connector.callTool(
+          { name: 'test-tool', arguments: {} },
+          connectorUsageCollector
+        );
+        const laterFailedCall = expectCallToolError(connector);
+
+        for (let turn = 0; turn < 10 && rejectOperations.length < 3; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(fakeClient.callTool).toHaveBeenCalledTimes(5);
+        rejectOperations[0](new Error('socket closed'));
+        for (let turn = 0; turn < 10 && connectionFailures.get(leaseKey) !== 3; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(connectionFailures.get(leaseKey)).toBe(3);
+        resolveOperations[1]({ content: [] });
+        await successfulCall;
+        expect(connectionFailures.get(leaseKey)).toBeUndefined();
+
+        rejectOperations[2](new Error('socket closed'));
+        const [firstError, laterError] = await Promise.all([failedCall, laterFailedCall]);
+
+        expect(connectionFailures.get(leaseKey)).toBe(1);
+        expect(isRetryableError(firstError as Error)).toBe(false);
+        expect(isRetryableError(laterError as Error)).toBeNull();
+      });
+
+      it('resets the counter after a success so the next failure is retryable', async () => {
+        fakeClient.callTool
+          .mockRejectedValueOnce(new Error('socket closed'))
+          .mockRejectedValueOnce(new Error('socket closed'))
+          .mockResolvedValueOnce({ content: [] })
+          .mockRejectedValueOnce(new Error('socket closed'));
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+
+        await expectCallToolError(connector);
+        await expectCallToolError(connector);
+        await connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+
+        expect(connectionFailures.get(leaseKey)).toBeUndefined();
+
+        const last = await expectCallToolError(connector);
+        expect(isRetryableError(last as Error)).toBeNull();
+      });
+
+      it('keeps a late failure from an old lease retryable after a new lease succeeds', async () => {
+        fakeClient.callTool.mockRejectedValueOnce(new Error('socket closed'));
+        fakeClient.callTool.mockRejectedValueOnce(new Error('socket closed'));
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+
+        await expectCallToolError(connector);
+        await expectCallToolError(connector);
+        expect(connectionFailures.get(leaseKey)).toBe(2);
+
+        const resolveOperations: Array<(value: { content: [] }) => void> = [];
+        const rejectOperations: Array<(error: Error) => void> = [];
+        fakeClient.callTool.mockImplementation(
+          () =>
+            new Promise((resolve, reject) => {
+              resolveOperations.push(resolve);
+              rejectOperations.push(reject);
+            })
+        );
+        const thresholdFailure = expectCallToolError(connector);
+        const lateFailure = expectCallToolError(connector);
+        for (let turn = 0; turn < 10 && rejectOperations.length < 2; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(rejectOperations).toHaveLength(2);
+
+        rejectOperations[0](new Error('socket closed'));
+        const thresholdError = await thresholdFailure;
+        expect(isRetryableError(thresholdError as Error)).toBe(false);
+        expect(connectionFailures.get(leaseKey)).toBe(CONNECTION_FAILURE_RETRY_LIMIT);
+
+        const successfulCall = connector.callTool(
+          { name: 'test-tool', arguments: {} },
+          connectorUsageCollector
+        );
+        for (let turn = 0; turn < 10 && resolveOperations.length < 3; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(resolveOperations).toHaveLength(3);
+        expect(mcpClientType.build).toHaveBeenCalledTimes(4);
+        resolveOperations[2]({ content: [] });
+        await successfulCall;
+        expect(connectionFailures.get(leaseKey)).toBeUndefined();
+
+        rejectOperations[1](new Error('socket closed'));
+        const lateError = await lateFailure;
+        expect(isRetryableError(lateError as Error)).toBeNull();
+        expect(connectionFailures.get(leaseKey)).toBeUndefined();
+      });
+
+      it('counts a failure on the current lease after an old lease succeeds late', async () => {
+        const resolveOperations: Array<(value: { content: [] }) => void> = [];
+        const rejectOperations: Array<(error: Error) => void> = [];
+        fakeClient.callTool.mockImplementation(
+          () =>
+            new Promise((resolve, reject) => {
+              resolveOperations.push(resolve);
+              rejectOperations.push(reject);
+            })
+        );
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+
+        const invalidatingCall = expectCallToolError(connector);
+        const lateOldSuccess = connector.callTool(
+          { name: 'test-tool', arguments: {} },
+          connectorUsageCollector
+        );
+        for (let turn = 0; turn < 10 && rejectOperations.length < 2; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        rejectOperations[0](new Error('socket closed'));
+        await invalidatingCall;
+
+        const currentLeaseSuccess = connector.callTool(
+          { name: 'test-tool', arguments: {} },
+          connectorUsageCollector
+        );
+        for (let turn = 0; turn < 10 && resolveOperations.length < 3; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(resolveOperations).toHaveLength(3);
+        expect(mcpClientType.build).toHaveBeenCalledTimes(2);
+        resolveOperations[2]({ content: [] });
+        await currentLeaseSuccess;
+
+        resolveOperations[1]({ content: [] });
+        await lateOldSuccess;
+
+        const currentLeaseFailure = expectCallToolError(connector);
+        for (let turn = 0; turn < 10 && rejectOperations.length < 4; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(rejectOperations).toHaveLength(4);
+        rejectOperations[3](new Error('socket closed'));
+        const error = await currentLeaseFailure;
+
+        expect(connectionFailures.get(leaseKey)).toBe(1);
+        expect(isRetryableError(error as Error)).toBeNull();
+      });
+
+      it('does not reuse a lease failure decision after another lease succeeds', async () => {
+        const resolveOperations: Array<(value: { content: [] }) => void> = [];
+        const rejectOperations: Array<(error: Error) => void> = [];
+        fakeClient.callTool.mockImplementation(
+          () =>
+            new Promise((resolve, reject) => {
+              resolveOperations.push(resolve);
+              rejectOperations.push(reject);
+            })
+        );
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+
+        const invalidatingCall = expectCallToolError(connector);
+        const lateOldSuccess = connector.callTool(
+          { name: 'test-tool', arguments: {} },
+          connectorUsageCollector
+        );
+        for (let turn = 0; turn < 10 && rejectOperations.length < 2; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        rejectOperations[0](new Error('socket closed'));
+        await invalidatingCall;
+
+        const secondFailure = expectCallToolError(connector);
+        for (let turn = 0; turn < 10 && rejectOperations.length < 3; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        rejectOperations[2](new Error('socket closed'));
+        await secondFailure;
+
+        const thresholdFailure = expectCallToolError(connector);
+        const lateCurrentFailure = expectCallToolError(connector);
+        for (let turn = 0; turn < 10 && rejectOperations.length < 5; turn++) {
+          await new Promise((resolve) => setImmediate(resolve));
+        }
+        expect(rejectOperations).toHaveLength(5);
+        rejectOperations[3](new Error('socket closed'));
+        const thresholdError = await thresholdFailure;
+        expect(isRetryableError(thresholdError as Error)).toBe(false);
+        expect(connectionFailures.get(leaseKey)).toBe(CONNECTION_FAILURE_RETRY_LIMIT);
+
+        resolveOperations[1]({ content: [] });
+        await lateOldSuccess;
+        expect(connectionFailures.get(leaseKey)).toBeUndefined();
+
+        rejectOperations[4](new Error('socket closed'));
+        const lateError = await lateCurrentFailure;
+        expect(isRetryableError(lateError as Error)).toBeNull();
+        expect(connectionFailures.get(leaseKey)).toBeUndefined();
+      });
+
+      it('does not count tool failures that are not connection errors', async () => {
+        fakeClient.callTool.mockRejectedValue(new Error('tool failed'));
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(false);
+        const connector = createConnector();
+
+        for (let i = 0; i < CONNECTION_FAILURE_RETRY_LIMIT; i++) {
+          const err = await expectCallToolError(connector);
+          expect(isRetryableError(err as Error)).toBeNull();
+        }
+
+        expect(connectionFailures.size).toBe(0);
+      });
+
+      it('does not mark user errors as not retryable', async () => {
+        fakeClient.callTool.mockRejectedValue(new Error('unauthorized'));
+        mcpClientType.isUserError.mockReturnValue(true);
+        const connector = createConnector();
+
+        for (let i = 0; i < CONNECTION_FAILURE_RETRY_LIMIT; i++) {
+          const err = await expectCallToolError(connector);
+          expect(getErrorSource(err as Error)).toBe(TaskErrorSource.USER);
+          expect(isRetryableError(err as Error)).not.toBe(false);
+        }
+      });
+
+      it('does not let failures on one connector change retryability for another', async () => {
+        fakeClient.callTool.mockImplementation(() => Promise.reject(new Error('socket closed')));
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connectorA = createConnector({
+          connector: { id: 'connector-a', type: CONNECTOR_ID },
+        });
+        const connectorB = createConnector({
+          connector: { id: 'connector-b', type: CONNECTOR_ID },
+        });
+
+        const errorsA = [];
+        for (let i = 0; i < CONNECTION_FAILURE_RETRY_LIMIT; i++) {
+          errorsA.push(await expectCallToolError(connectorA));
+        }
+        const firstB = await expectCallToolError(connectorB);
+
+        expect(isRetryableError(errorsA[CONNECTION_FAILURE_RETRY_LIMIT - 1] as Error)).toBe(false);
+        expect(isRetryableError(firstB as Error)).toBeNull();
+      });
+
+      it('counts a rejected build as a connection failure', async () => {
+        mcpClientType.build.mockImplementation(() => Promise.reject(new Error('connect failed')));
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+
+        const errors = [];
+        for (let i = 0; i < CONNECTION_FAILURE_RETRY_LIMIT; i++) {
+          errors.push(await expectCallToolError(connector));
+        }
+
+        expect(isRetryableError(errors[0] as Error)).toBeNull();
+        expect(isRetryableError(errors[1] as Error)).toBeNull();
+        expect(isRetryableError(errors[CONNECTION_FAILURE_RETRY_LIMIT - 1] as Error)).toBe(false);
+      });
+
+      it('applies the retry limit to fetch deadline failures', async () => {
+        const timeoutError = new Error('Request timed out after 1ms');
+        timeoutError.name = 'McpFetchTimeoutError';
+        mcpClientType.build.mockImplementation(() => Promise.reject(timeoutError));
+        mcpClientType.shouldInvalidateOnError.mockImplementation(
+          (err: unknown) => err instanceof Error && err.name === 'McpFetchTimeoutError'
+        );
+        const connector = createConnector();
+
+        const errors = [];
+        for (let i = 0; i < CONNECTION_FAILURE_RETRY_LIMIT; i++) {
+          errors.push(await expectCallToolError(connector));
+        }
+
+        expect(connectionFailures.get(leaseKey)).toBe(CONNECTION_FAILURE_RETRY_LIMIT);
+        expect(isRetryableError(errors[0] as Error)).toBeNull();
+        expect(isRetryableError(errors[1] as Error)).toBeNull();
+        expect(isRetryableError(errors[2] as Error)).toBe(false);
+        expect((errors[2] as Error).cause).toBe(timeoutError);
+      });
+
+      it('counts a shared rejected build once and does not mutate its error', async () => {
+        const buildError = new Error('connect failed');
+        mcpClientType.build.mockRejectedValueOnce(new Error('connect failed'));
+        mcpClientType.build.mockRejectedValueOnce(new Error('connect failed'));
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+
+        await expectCallToolError(connector);
+        await expectCallToolError(connector);
+
+        let rejectBuild!: (error: Error) => void;
+        mcpClientType.build.mockReturnValue(
+          new Promise((_, reject) => {
+            rejectBuild = reject;
+          })
+        );
+        const firstCall = expectCallToolError(connector);
+        const secondCall = expectCallToolError(connector);
+        rejectBuild(buildError);
+        const errors = await Promise.all([firstCall, secondCall]);
+
+        expect(connectionFailures.get(leaseKey)).toBe(CONNECTION_FAILURE_RETRY_LIMIT);
+        expect(errors[0]).not.toBe(errors[1]);
+        expect(isRetryableError(errors[0] as Error)).toBe(false);
+        expect(isRetryableError(errors[1] as Error)).toBe(false);
+        expect((errors[0] as Error).cause).toBe(buildError);
+        expect((errors[1] as Error).cause).toBe(buildError);
+        expect(isRetryableError(buildError)).toBeNull();
+        expect(buildError.message).toBe('connect failed');
+      });
+
+      it('counts a first shared rejected build once across three callers', async () => {
+        let rejectBuild!: (error: Error) => void;
+        mcpClientType.build.mockReturnValue(
+          new Promise((_, reject) => {
+            rejectBuild = reject;
+          })
+        );
+        mcpClientType.shouldInvalidateOnError.mockReturnValue(true);
+        const connector = createConnector();
+        const calls = [
+          expectCallToolError(connector),
+          expectCallToolError(connector),
+          expectCallToolError(connector),
+        ];
+
+        rejectBuild(new Error('connect failed'));
+        const errors = await Promise.all(calls);
+
+        expect(connectionFailures.get(leaseKey)).toBe(1);
+        expect(errors.every((err) => isRetryableError(err as Error) === null)).toBe(true);
+      });
+    });
+
     it('surfaces a build rejection and does not cache the failed lease', async () => {
       mcpClientType.build
         .mockRejectedValueOnce(new Error('connect failed'))
@@ -678,6 +1107,81 @@ describe('McpConnector', () => {
 
       expect(addRequestBodyBytes).toHaveBeenCalledWith(undefined, listParams);
       expect(addRequestBodyBytes).toHaveBeenCalledWith(undefined, callParams);
+    });
+  });
+
+  describe('circuit breaker', () => {
+    it('opens the breaker after connect failures and fails fast for that connector', async () => {
+      mcpClientType.build.mockImplementation(() => Promise.reject(new Error('connect failed')));
+      const connector = createConnector();
+
+      for (let i = 0; i < BREAKER_FAILURE_THRESHOLD; i++) {
+        await expect(
+          connector.listTools({ forceRefresh: true }, connectorUsageCollector)
+        ).rejects.toThrow('connect failed');
+      }
+
+      expect(mcpClientType.build).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD);
+
+      await expect(
+        connector.listTools({ forceRefresh: true }, connectorUsageCollector)
+      ).rejects.toThrow('is unavailable');
+      await expect(
+        connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
+      ).rejects.toThrow('is unavailable');
+      await expect(connector.testConnector({}, connectorUsageCollector)).rejects.toThrow(
+        'is unavailable'
+      );
+      expect(mcpClientType.build).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD);
+
+      const other = createConnector({
+        connector: { id: 'other-connector', type: CONNECTOR_ID },
+      });
+      await expect(
+        other.listTools({ forceRefresh: true }, connectorUsageCollector)
+      ).rejects.toThrow('connect failed');
+      expect(mcpClientType.build).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD + 1);
+    });
+
+    it('does not open the breaker on request timeouts from a connected client', async () => {
+      fakeClient.callTool.mockRejectedValue(
+        new McpError(McpErrorCode.RequestTimeout, 'Request timed out')
+      );
+      const connector = createConnector();
+
+      for (let i = 0; i < BREAKER_FAILURE_THRESHOLD; i++) {
+        await expect(
+          connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector)
+        ).rejects.toThrow('Request timed out');
+      }
+      expect(fakeClient.callTool).toHaveBeenCalledTimes(BREAKER_FAILURE_THRESHOLD);
+
+      await expect(
+        connector.listTools({ forceRefresh: true }, connectorUsageCollector)
+      ).resolves.toEqual({ tools: [] });
+      expect(fakeClient.listTools).toHaveBeenCalledTimes(1);
+      expect(mcpClientType.build).toHaveBeenCalledTimes(1);
+    });
+
+    it('opens the breaker when a pooled client dies and every rebuild fails', async () => {
+      const connectionLost = new McpError(McpErrorCode.ConnectionClosed, 'connection closed');
+      fakeClient.callTool.mockRejectedValue(connectionLost);
+      mcpClientType.shouldInvalidateOnError.mockImplementation((err) => err === connectionLost);
+      const connector = createConnector();
+      const callTool = () =>
+        connector.callTool({ name: 'test-tool', arguments: {} }, connectorUsageCollector);
+
+      await expect(callTool()).rejects.toThrow('connection closed');
+      expect(mcpClientType.build).toHaveBeenCalledTimes(1);
+
+      mcpClientType.build.mockImplementation(() => Promise.reject(new Error('connect failed')));
+      for (let i = 0; i < BREAKER_FAILURE_THRESHOLD; i++) {
+        await expect(callTool()).rejects.toThrow('connect failed');
+      }
+      expect(mcpClientType.build).toHaveBeenCalledTimes(1 + BREAKER_FAILURE_THRESHOLD);
+
+      await expect(callTool()).rejects.toThrow('is unavailable');
+      expect(mcpClientType.build).toHaveBeenCalledTimes(1 + BREAKER_FAILURE_THRESHOLD);
     });
   });
 });

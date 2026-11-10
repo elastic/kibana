@@ -7,23 +7,13 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
-import { getEbtProps } from '@kbn/ebt-click';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 
 export interface NightshiftHeaderProps {
   isLoading?: boolean;
   hasActiveInvestigations?: boolean;
-  showAllEventsHref?: string;
   /** Replaces the status-derived hero title. */
   title?: string;
   /** Puts the greeting in front of the title on one line ("Good morning! Meet Nightshift"). */
@@ -94,7 +84,6 @@ const getHeroTitle = ({
 export function NightshiftHeader({
   isLoading = false,
   hasActiveInvestigations = false,
-  showAllEventsHref,
   title: titleOverride,
   isGreetingInline = false,
   greetingName,
@@ -102,9 +91,6 @@ export function NightshiftHeader({
   const { euiTheme } = useEuiTheme();
 
   const title = titleOverride ?? getHeroTitle({ isLoading, hasActiveInvestigations });
-  const buttonCss = css`
-    color: ${euiTheme.colors.textSubdued};
-  `;
 
   return (
     <EuiFlexItem
@@ -178,31 +164,6 @@ export function NightshiftHeader({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        {showAllEventsHref && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              {showAllEventsHref && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    color="text"
-                    data-test-subj="o11yNightshiftAppShowAllLink"
-                    href={showAllEventsHref}
-                    size="s"
-                    {...getEbtProps({
-                      action: NIGHTSHIFT_EBT_ACTIONS.VIEW_ALL_SIGNIFICANT_EVENTS,
-                      element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
-                    })}
-                    css={buttonCss}
-                  >
-                    {i18n.translate('xpack.nightshift.summary.showAllEventsLinkText', {
-                      defaultMessage: 'Show all events',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiFlexItem>
   );
