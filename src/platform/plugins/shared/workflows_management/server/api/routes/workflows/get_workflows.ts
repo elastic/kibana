@@ -20,6 +20,7 @@ import {
   MAX_FILTER_VALUE_LENGTH,
   MAX_PAGE_SIZE,
   MAX_SEARCH_QUERY_LENGTH,
+  MAX_VISIBILITY_CONTEXT_LENGTH,
   OAS_TAG,
 } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
@@ -30,8 +31,6 @@ import {
 } from '../utils/route_security';
 import { validatePaginationWindow } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
-
-const MAX_VISIBILITY_CONTEXT_LENGTH = 128;
 
 const querySchema = schema.object(
   {

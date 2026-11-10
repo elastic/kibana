@@ -44,3 +44,5 @@ export const MAX_DATEMATH_LENGTH = 64;
 export const MAX_FILTER_VALUE_LENGTH = 1024;
 
 export const MAX_SEARCH_QUERY_LENGTH = 4096;
+
+export const MAX_VISIBILITY_CONTEXT_LENGTH = 128;

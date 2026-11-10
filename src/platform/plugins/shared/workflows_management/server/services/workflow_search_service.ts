@@ -326,12 +326,19 @@ export class WorkflowSearchService {
       };
     });
 
+    const resolvedManagedFilter = options?.managedFilter ?? 'unmanaged';
+
     try {
       const aggsFilter = buildWorkflowFilters({
         space: { id: spaceId, includeGlobal: true },
         deleted: 'not_deleted',
-        managed: options?.managedFilter ?? 'unmanaged',
+        managed: resolvedManagedFilter,
       });
+      const visibilityContextFilter = buildVisibilityContextFilter(
+        resolvedManagedFilter,
+        options?.visibilityContext
+      );
+      if (visibilityContextFilter) aggsFilter.must.push(visibilityContextFilter);
       if (options?.accessControlFilter) aggsFilter.must.push(options.accessControlFilter);
       const aggsResponse = await this.deps.workflowStorage.getClient().search({
         size: 0,

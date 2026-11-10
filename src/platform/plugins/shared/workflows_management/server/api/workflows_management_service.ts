@@ -779,6 +779,15 @@ export class WorkflowsService {
     );
   }
 
+  /**
+   * Marks the plugin install pass incomplete when an install is skipped before reaching
+   * {@link installManagedWorkflow} (e.g. Workflows unavailable), so ready() will not orphan-delete.
+   */
+  public async markManagedInstallIncomplete(registeredPluginId: string): Promise<void> {
+    await this.ensureInitialized();
+    this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
+  }
+
   public async uninstallManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowOperationOptions,

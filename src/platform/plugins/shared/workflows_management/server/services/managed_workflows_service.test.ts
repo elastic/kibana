@@ -15,6 +15,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { isOccConflictError, OccWriter } from '@kbn/occ';
 import type { WorkflowExecutionEngineModel, WorkflowYaml } from '@kbn/workflows';
 import {
+  getManagedWorkflowListVisibilityContext,
   getManagedWorkflowSelectorVisibilityContext,
   getManagedWorkflowSolutionVisibilityContext,
 } from '@kbn/workflows/managed';
@@ -44,13 +45,16 @@ jest.mock('@kbn/workflows/managed', () => ({
   getManagedWorkflowDefinition: (id: string) =>
     mockManagedWorkflowDefinitions.find((definition) => definition.id === id),
   getManagedWorkflowDefinitions: () => [...mockManagedWorkflowDefinitions],
+  getManagedWorkflowListVisibilityContext: (list: string) => `list:${list}`,
   getManagedWorkflowSelectorVisibilityContext: (selector: string) => `selector:${selector}`,
   getManagedWorkflowSolutionVisibilityContext: (solution: string) => `solution:${solution}`,
   getManagedWorkflowVisibilityContexts: (visibility?: {
     selectors?: string[];
     solutions?: string[];
+    lists?: string[];
   }) => [
     ...(visibility?.selectors ?? []).map((selector) => `selector:${selector}`),
+    ...(visibility?.lists ?? []).map((list) => `list:${list}`),
     ...(visibility?.solutions ?? []).map((solution) => `solution:${solution}`),
   ],
 }));
@@ -717,7 +721,7 @@ describe('ManagedWorkflowsService', () => {
 
     it('persists managed workflow visibility metadata', async () => {
       const definition = createDefinition({
-        visibility: { selectors: ['rule_action'], solutions: ['security'] },
+        visibility: { selectors: ['rule_action'], solutions: ['security'], lists: ['workflows'] },
       });
       mockManagedWorkflowDefinitions = [definition];
       const { crudService, service } = createService();
@@ -728,6 +732,7 @@ describe('ManagedWorkflowsService', () => {
       const indexedDocument = getIndexedDocument(crudService);
       expect(indexedDocument.managedVisibilityContexts).toEqual([
         getManagedWorkflowSelectorVisibilityContext('rule_action'),
+        getManagedWorkflowListVisibilityContext('workflows'),
         getManagedWorkflowSolutionVisibilityContext('security'),
       ]);
     });

@@ -12,6 +12,7 @@ import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import {
+  getManagedWorkflowListVisibilityContext,
   getManagedWorkflowSelectorVisibilityContext,
   getManagedWorkflowSolutionVisibilityContext,
 } from '@kbn/workflows/managed';
@@ -1269,6 +1270,33 @@ describe('Workflow routes', () => {
 
       expect(mockApi.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default-space', {
         managedFilter: 'all',
+        request,
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: aggs });
+    });
+
+    it('should normalize the visibility context to an array for api.getWorkflowAggs', async () => {
+      const aggs = { tags: {} };
+      mockApi.getWorkflowAggs.mockResolvedValue(aggs);
+      const request = httpServerMock.createKibanaRequest({
+        query: {
+          fields: ['tags'],
+          managed: 'all',
+          visibilityContext: getManagedWorkflowListVisibilityContext('workflows'),
+        },
+      });
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.read]: true,
+        [WorkflowsManagementApiActions.readManaged]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default-space', {
+        managedFilter: 'all',
+        visibilityContext: [getManagedWorkflowListVisibilityContext('workflows')],
         request,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: aggs });
