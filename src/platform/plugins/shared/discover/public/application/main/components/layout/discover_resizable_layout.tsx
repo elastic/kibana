@@ -141,11 +141,8 @@ const dscPageBodyContentsStyles = {
       gap: 0;
     }
 
-    [data-test-subj='unifiedHistogram'].euiFlexGroup {
-      gap: ${euiTheme.size.s};
-    }
-
-    [data-test-subj='unifiedHistogram'].euiResizableContainer {
+    /* PanelsResizable sets data-test-subj to id+ResizableContainer, not the bare id */
+    [data-test-subj='unifiedHistogramResizableContainer'] {
       gap: 0;
     }
 
@@ -167,13 +164,19 @@ const dscPageBodyContentsStyles = {
     }
 
     /* POC: sidebar ↔ main gutter = size.s (matches top padding) */
-    > .euiResizableButton {
+    > .euiResizableButton,
+    [data-test-subj='discoverLayoutResizableButton'] {
       inline-size: ${euiTheme.size.s} !important; /* stylelint-disable-line declaration-no-important */
+      width: ${euiTheme.size.s} !important; /* stylelint-disable-line declaration-no-important */
     }
 
-    /* POC: chart ↔ documents gutter = size.s */
-    [data-test-subj='unifiedHistogram'] > .euiResizableButton {
-      inline-size: auto !important; /* stylelint-disable-line declaration-no-important */
+    /*
+     * POC: chart to documents gutter = size.s (same as sidebar gutter).
+     * Target unifiedHistogramResizableButton — nested unifiedHistogram selector never matched
+     * (actual attr is unifiedHistogramResizableContainer), so the handle stayed at size.base (16).
+     */
+    [data-test-subj='unifiedHistogramResizableButton'] {
+      height: ${euiTheme.size.s} !important; /* stylelint-disable-line declaration-no-important */
       block-size: ${euiTheme.size.s} !important; /* stylelint-disable-line declaration-no-important */
     }
 
@@ -211,10 +214,23 @@ const dscPageBodyContentsStyles = {
 
     /* POC: documents-only / static histogram cards — nested only, not the outer sidebar layout */
     > .euiResizablePanel [data-test-subj='resizableLayoutSingleContainer'] > .euiFlexItem,
-    > .euiResizablePanel [data-test-subj='resizableLayoutStaticContainer'] > .euiFlexItem,
+    > .euiResizablePanel
+      [data-test-subj='resizableLayoutStaticContainer']
+      > .euiFlexItem:not(:has([data-test-subj='unifiedHistogramChartPanelHidden'])),
     > .euiFlexItem:last-child [data-test-subj='resizableLayoutSingleContainer'] > .euiFlexItem,
-    > .euiFlexItem:last-child [data-test-subj='resizableLayoutStaticContainer'] > .euiFlexItem {
+    > .euiFlexItem:last-child
+      [data-test-subj='resizableLayoutStaticContainer']
+      > .euiFlexItem:not(:has([data-test-subj='unifiedHistogramChartPanelHidden'])) {
       ${panelCardCss(euiTheme)}
+    }
+
+    /*
+     * POC: when the chart is hidden/unavailable, UnifiedHistogram still mounts an empty
+     * placeholder in a Static fixed slot — our card border turned that into a 2px line.
+     */
+    [data-test-subj='resizableLayoutStaticContainer']
+      > .euiFlexItem:has([data-test-subj='unifiedHistogramChartPanelHidden']) {
+      display: none;
     }
   `,
 };
