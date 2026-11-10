@@ -64,7 +64,6 @@ export const AGENT_BUILDER_CONVERSATIONS_ROUTE = '/api/agent_builder/conversatio
  */
 export const HARNESS_TOOL_IDS: readonly string[] = [
   ...Object.values(attachmentTools),
-  internalTools.writeTodos,
   internalTools.loadSkill,
   internalTools.searchRelevantSkills,
   internalTools.setConversationMetadata,

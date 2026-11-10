@@ -300,7 +300,7 @@ describe('runAlertAnalysisWorkflow trajectory join', () => {
 
   it.each([
     [['attachments.add']],
-    [['attachments.read', 'write_todos']],
+    [['attachments.read']],
     [['load_skill', 'search_relevant_skills', 'set_conversation_metadata']],
     [['sleep']],
     [['describe_api', 'describe_api_type']],
