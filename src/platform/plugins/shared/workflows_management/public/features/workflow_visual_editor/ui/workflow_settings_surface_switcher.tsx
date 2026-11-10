@@ -136,7 +136,7 @@ const SettingsSurfacePrototypeNavControl = () => {
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="workflows.settingsSurface.switcher.flyoutDescription"
-                defaultMessage="Choose which settings-surface pattern to preview on this workflow."
+                defaultMessage="Preview the three workflow-settings chrome patterns: A side panel, B canvas info nodes, or C collapsible launcher."
               />
             </EuiText>
             <EuiSpacer size="m" />
