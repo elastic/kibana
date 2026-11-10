@@ -7,6 +7,7 @@
 
 import { groupBy } from 'lodash';
 import { HUNT_CASE_INSENSITIVE_IOC_TYPES } from '@kbn/alertzero-common';
+import { isIpAddress } from '../../../../common/sse_view';
 
 export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
 export const THREAT_REPORTS_INDEX_PATTERN = '.kibana-threat-reports*' as const;
@@ -146,10 +147,13 @@ export const buildEntityLookupEsql = ({
  * The predicate is `MV_CONTAINS`, not `==`: Tier 1 matches with term queries, which hit
  * any element of a multivalued field (`host.ip`, `related.ip`, `kubernetes.audit.sourceIPs`),
  * while ES|QL scalar `==` is null on a multivalued cell and would open Discover empty for
- * a confirmed match. `MV_CONTAINS` is typed, so the field is coerced to the literal's type:
- * `ip` IOCs compare as `ip` (which also canonicalizes IPv6 spellings and accepts keyword
- * fields that hold addresses); hash and domain IOCs compare case-folded, matching Tier 1's
- * case-insensitive clauses; everything else compares the string as is. Absent when
+ * a confirmed match. `MV_CONTAINS` is typed and the field's mapping is unknown here, so
+ * the field is always coerced to the literal's type: a well-formed IP value (an `ip` IOC,
+ * or an untyped one that parses as an address) compares as `ip`, which canonicalizes IPv6
+ * spellings and accepts keyword fields that hold addresses; hash and domain IOCs compare
+ * case-folded, matching Tier 1's case-insensitive clauses; everything else compares as a
+ * string via `TO_STRING`. An `ip` IOC whose value does not parse takes the string branch,
+ * because `"bad"::ip` is null and `MV_CONTAINS(field, null)` matches every row. Absent when
  * field/value/indices are empty.
  */
 export const buildIocMatchEsql = ({
@@ -169,11 +173,11 @@ export const buildIocMatchEsql = ({
     return undefined;
   }
 
-  const predicate =
-    iocType === 'ip'
-      ? `MV_CONTAINS(TO_IP(${field}), "${escapeEsqlString(value)}"::ip)`
-      : iocType && HUNT_CASE_INSENSITIVE_IOC_TYPES.has(iocType)
-      ? `MV_CONTAINS(TO_LOWER(${field}), "${escapeEsqlString(value.toLowerCase())}")`
-      : `MV_CONTAINS(${field}, "${escapeEsqlString(value)}")`;
+  const compareAsIp = (iocType === 'ip' || iocType === undefined) && isIpAddress(value);
+  const predicate = compareAsIp
+    ? `MV_CONTAINS(TO_IP(${field}), "${escapeEsqlString(value)}"::ip)`
+    : iocType && HUNT_CASE_INSENSITIVE_IOC_TYPES.has(iocType)
+    ? `MV_CONTAINS(TO_LOWER(${field}), "${escapeEsqlString(value.toLowerCase())}")`
+    : `MV_CONTAINS(TO_STRING(${field}), "${escapeEsqlString(value)}")`;
   return `FROM ${cleanedIndices.map(quoteEsqlIdentifier).join(', ')} | WHERE ${predicate}`;
 };

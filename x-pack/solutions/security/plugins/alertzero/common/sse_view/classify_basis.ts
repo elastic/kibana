@@ -29,24 +29,27 @@ const IPV6_HEXTET_COUNT = 8;
 /**
  * Expands an IPv6 literal to its eight 16-bit hextets, so equivalent spellings
  * (`::1` and `0:0:0:0:0:0:0:1`, `::ffff:10.0.0.1` and `::ffff:a00:1`, upper and
- * lower case, bracketed or not) grade the same. Returns undefined for anything
- * that is not a well-formed IPv6 address.
+ * lower case, bracketed or not, with or without a `%zone` id) grade the same.
+ * Returns undefined for anything that is not a well-formed IPv6 address.
  */
 const parseIpv6Hextets = (value: string): number[] | undefined => {
   const normalized = value
     .trim()
     .toLowerCase()
-    .replace(/^\[|\]$/g, '');
+    .replace(/^\[|\]$/g, '')
+    // A scoped literal (`fe80::1%eth0`) names the same address; the zone is not part of it.
+    .replace(/%[^%]*$/, '');
   if (!normalized.includes(':')) return undefined;
 
-  // An embedded IPv4 tail (`::ffff:10.0.0.1`) is two hextets.
+  // An embedded IPv4 tail (`::ffff:10.0.0.1`) is two hextets. The separator before it
+  // is consumed here, except when it is the `::` gap itself (`::10.0.0.1`).
   let body = normalized;
   const tail: number[] = [];
   const embedded = /^(.*:)(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/.exec(normalized);
   if (embedded) {
     const octets = parseIpv4Octets(embedded[2]);
     if (!octets) return undefined;
-    body = embedded[1];
+    body = embedded[1].endsWith('::') ? embedded[1] : embedded[1].slice(0, -1);
     tail.push(octets[0] * 256 + octets[1], octets[2] * 256 + octets[3]);
   }
 
@@ -62,14 +65,14 @@ const parseIpv6Hextets = (value: string): number[] | undefined => {
 
   const gap = body.indexOf('::');
   if (gap === -1) {
-    const groups = parseGroups(body.replace(/:$/, ''));
+    const groups = parseGroups(body);
     if (!groups) return undefined;
     const hextets = [...groups, ...tail];
     return hextets.length === IPV6_HEXTET_COUNT ? hextets : undefined;
   }
   if (body.indexOf('::', gap + 1) !== -1) return undefined;
   const head = parseGroups(body.slice(0, gap));
-  const rest = parseGroups(body.slice(gap + 2).replace(/:$/, ''));
+  const rest = parseGroups(body.slice(gap + 2));
   if (!head || !rest) return undefined;
   const fill = IPV6_HEXTET_COUNT - head.length - rest.length - tail.length;
   if (fill < 1) return undefined;
@@ -124,6 +127,10 @@ const isWeakIpv4 = (value: string): boolean => {
 };
 
 const isWeakIp = (value: string): boolean => isWeakIpv4(value) || isWeakIpv6(value);
+
+/** Whether `value` is a well-formed IPv4 or IPv6 literal, in any spelling this module grades. */
+export const isIpAddress = (value: string): boolean =>
+  parseIpv4Octets(value) !== undefined || parseIpv6Hextets(value) !== undefined;
 
 /** Hash, public IP, domain, URL and email all grade strong; only a non-public `ip` grades weak. */
 const isStrongIoc = (ioc: ClassifyBasisIoc): boolean =>

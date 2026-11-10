@@ -16,7 +16,7 @@
 
 export { buildSummary, type BuildSummaryOptions } from './build_summary';
 
-export { classifyBasis, type SseBasis, type ClassifyBasisIoc } from './classify_basis';
+export { classifyBasis, isIpAddress, type SseBasis, type ClassifyBasisIoc } from './classify_basis';
 
 export { isExecutableHuntQuery } from './is_executable_hunt_query';
 

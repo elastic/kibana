@@ -124,7 +124,7 @@ describe('esql_queries', () => {
         value: 'https://Evil.Example/A',
         iocType: 'url',
       })
-    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(url.full, "https://Evil.Example/A")');
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_STRING(url.full), "https://Evil.Example/A")');
     expect(buildIocMatchEsql({ indices: [], field: 'url.full', value: 'x' })).toBeUndefined();
   });
 
@@ -139,9 +139,22 @@ describe('esql_queries', () => {
         iocType: 'ip',
       })
     ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(related.ip), "203.0.113.77"::ip)');
+    // An untyped value that parses as an address still compares as ip: `MV_CONTAINS` needs
+    // matching types, and an `ip` column against a keyword literal fails verification.
     expect(
       buildIocMatchEsql({ indices: ['logs-*'], field: 'source.ip', value: '2001:DB8::1' })
-    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(source.ip, "2001:DB8::1")');
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(source.ip), "2001:DB8::1"::ip)');
+  });
+
+  it('never casts an unparseable ip value, since a null literal would match every row', () => {
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-*'],
+        field: 'source.ip',
+        value: 'not-an-ip',
+        iocType: 'ip',
+      })
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_STRING(source.ip), "not-an-ip")');
   });
 
   it('builds entity lookup ES|QL on the exact ECS field', () => {

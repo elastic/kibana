@@ -204,6 +204,24 @@ describe('deriveDetections', () => {
     });
   });
 
+  it('counts every host and user in a sampled IOC group even when the name lists are capped at 50', () => {
+    const huntResult: DeriveDetectionsHuntResult = { tier1: {} };
+    const events: SseEventRef[] = Array.from({ length: 60 }, (_, index) =>
+      buildEvent({
+        event_id: `evt-${index}`,
+        host: `host-${index}`,
+        user: `user-${index}`,
+        matched: { ioc: { type: 'ip', value: '203.0.113.5' }, field: 'source.ip' },
+      })
+    );
+
+    const [detection] = deriveDetections(huntResult, events);
+
+    expect(detection.hosts).toHaveLength(50);
+    expect(detection.users).toHaveLength(50);
+    expect(detection).toMatchObject({ host_count: 60, user_count: 60, total: 60 });
+  });
+
   it('falls back to matched.ioc/matched.field for hits with no matched.iocs array', () => {
     const hits: HuntForThreatHit[] = [
       {
