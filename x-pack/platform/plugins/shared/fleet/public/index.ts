@@ -161,7 +161,11 @@ export type {
   CreateCloudOnboardingDeploymentRequest,
   UpdateCloudOnboardingDeploymentRequest,
 } from '../common/types/rest_spec/cloud_onboarding_deployment';
-export { sendGetPackageInfoByKey, sendGetPackageInfoByKeyForRq } from './hooks/use_request/epm';
+export {
+  sendGetPackageInfoByKey,
+  sendGetPackageInfoByKeyForRq,
+  sendUpdatePackage,
+} from './hooks/use_request/epm';
 export {
   sendUpdatePackagePolicy,
   sendDeletePackagePolicy,

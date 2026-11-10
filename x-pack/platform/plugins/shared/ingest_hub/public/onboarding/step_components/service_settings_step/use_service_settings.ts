@@ -109,6 +109,11 @@ export interface ServiceSettingsPersistedState {
    */
   namespace?: string;
   /**
+   * Whether the global namespace uses dedicated index templates. Applied to the installed
+   * packages after a deploy; never applies to a duplicate's own namespace.
+   */
+  dedicatedNamespaceTemplates?: boolean;
+  /**
    * Package policy fields every policy of the onboarding gets (e.g. the output), keyed by Fleet
    * field name. Each deployment method applies only the ones it supports. An empty value is the
    * Fleet default; an absent one was never chosen.
@@ -270,6 +275,27 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       });
     },
     [persisted, setPersisted]
+  );
+
+  // The switch means nothing without a namespace, so it reads as off while there is none.
+  const dedicatedNamespaceTemplates =
+    !!persisted?.dedicatedNamespaceTemplates && !!namespace.trim();
+
+  const setDedicatedNamespaceTemplates = useCallback(
+    (value: boolean) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        dedicatedNamespaceTemplates: value,
+      });
+      // Turning it off changes nothing on the package, so nothing else would save it, and a saved
+      // "on" would come back when the deployment is reopened. Turning it on is saved once it was
+      // applied, so that it stays paired with the namespace it was applied for.
+      const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
+      if (!value && deploymentId) {
+        updateDeployment(deploymentId, { dedicatedNamespaceTemplates: false });
+      }
+    },
+    [persisted, setPersisted, detectAndReviewStep?.onboardingDeploymentId, updateDeployment]
   );
 
   const policySettings = useMemo(
@@ -666,6 +692,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     namespace,
     setNamespace,
     namespaceError,
+    dedicatedNamespaceTemplates,
+    setDedicatedNamespaceTemplates,
     policySettings,
     setPolicySetting,
     isProxyUrlSupported,

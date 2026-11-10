@@ -6,9 +6,19 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { ActionButtonType, type ActionButton } from '@kbn/agent-builder-browser/attachments';
 import { AttachmentActions } from './attachment_actions';
+
+function makeDeferred<T = void>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+}
 
 const createButton = (overrides: Partial<ActionButton> & Pick<ActionButton, 'label'>) => ({
   type: ActionButtonType.SECONDARY,
@@ -218,5 +228,105 @@ describe('AttachmentActions', () => {
     render(<AttachmentActions buttons={[run]} iconOnly />);
 
     expect(screen.getByText('Run')).toBeInTheDocument();
+  });
+
+  describe('async loading lifecycle', () => {
+    it('disables the main button while its handler promise is pending, re-enables on resolve', async () => {
+      const { promise, resolve } = makeDeferred();
+      const handler = jest.fn(() => promise);
+      const copy = createButton({ label: 'Create', type: ActionButtonType.PRIMARY, handler });
+      render(<AttachmentActions buttons={[copy]} />);
+
+      const btn = screen.getByRole('button', { name: 'Create' });
+      expect(btn).not.toBeDisabled();
+
+      fireEvent.click(btn);
+
+      expect(btn).toBeDisabled();
+      expect(handler).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        resolve();
+        await promise;
+      });
+
+      expect(btn).not.toBeDisabled();
+    });
+
+    it('re-enables the main button when the handler rejects', async () => {
+      const { promise, reject } = makeDeferred();
+      const handler = jest.fn(() => promise);
+      const save = createButton({ label: 'Save', type: ActionButtonType.PRIMARY, handler });
+      render(<AttachmentActions buttons={[save]} />);
+
+      const btn = screen.getByRole('button', { name: 'Save' });
+      fireEvent.click(btn);
+
+      expect(btn).toBeDisabled();
+
+      await act(async () => {
+        reject(new Error('network error'));
+        await promise.catch(() => {});
+      });
+
+      expect(btn).not.toBeDisabled();
+    });
+
+    it('prevents double submission by disabling the button after the first click', async () => {
+      const { promise, resolve } = makeDeferred();
+      const handler = jest.fn(() => promise);
+      const save = createButton({ label: 'Submit', type: ActionButtonType.PRIMARY, handler });
+      render(<AttachmentActions buttons={[save]} />);
+
+      const btn = screen.getByRole('button', { name: 'Submit' });
+      fireEvent.click(btn);
+
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(btn).toBeDisabled();
+
+      await act(async () => {
+        resolve();
+        await promise;
+      });
+    });
+
+    it('disables the split-button dropdown trigger while the main handler is pending', async () => {
+      const { promise, resolve } = makeDeferred();
+      const handler = jest.fn(() => promise);
+      const primary = createButton({ label: 'Create', type: ActionButtonType.PRIMARY, handler });
+      const secondary = createButton({ label: 'Copy' });
+      render(<AttachmentActions buttons={[primary, secondary]} />);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+
+      expect(screen.getByTestId('agentBuilderAttachmentMoreActions')).toBeDisabled();
+
+      await act(async () => {
+        resolve();
+        await promise;
+      });
+
+      expect(screen.getByTestId('agentBuilderAttachmentMoreActions')).not.toBeDisabled();
+    });
+
+    it('disables menu items while the main handler is pending', async () => {
+      const { promise, resolve } = makeDeferred();
+      const handler = jest.fn(() => promise);
+      const primary = createButton({ label: 'Create', type: ActionButtonType.PRIMARY, handler });
+      const secondary = createButton({ label: 'Copy' });
+      render(<AttachmentActions buttons={[primary, secondary]} />);
+
+      // Open the menu while idle, then start loading — the popover stays open
+      openMenu();
+      fireEvent.click(screen.getByRole('button', { name: 'Create' }));
+
+      const menuItem = await screen.findByText('Copy');
+      expect(menuItem.closest('button, [role="menuitem"]')).toBeDisabled();
+
+      await act(async () => {
+        resolve();
+        await promise;
+      });
+    });
   });
 });

@@ -53,6 +53,9 @@ interface SharedSettingsSectionProps {
   onNamespaceChange: (namespace: string) => void;
   /** Validation error of the namespace; the advanced section stays open while there is one. */
   namespaceError?: string;
+  dedicatedNamespaceTemplates: boolean;
+  onDedicatedNamespaceTemplatesChange: (enabled: boolean) => void;
+  isDedicatedTemplatesUnavailable?: boolean;
   /** Whether services are already deployed, which changes what a new namespace means. */
   hasDeployedServices?: boolean;
   /** Whether an ECF stack is already launched. */
@@ -90,6 +93,9 @@ export function SharedSettingsSection({
   namespace,
   onNamespaceChange,
   namespaceError,
+  dedicatedNamespaceTemplates,
+  onDedicatedNamespaceTemplatesChange,
+  isDedicatedTemplatesUnavailable = false,
   hasDeployedServices = false,
   hasLaunchedEcfStack = false,
   hasServicesIgnoringNamespace = false,
@@ -275,6 +281,9 @@ export function SharedSettingsSection({
           <SharedAdvancedSettings
             namespace={namespace}
             onNamespaceChange={onNamespaceChange}
+            dedicatedNamespaceTemplates={dedicatedNamespaceTemplates}
+            onDedicatedNamespaceTemplatesChange={onDedicatedNamespaceTemplatesChange}
+            isDedicatedTemplatesUnavailable={isDedicatedTemplatesUnavailable}
             hasDeployedServices={hasDeployedServices}
             hasLaunchedEcfStack={hasLaunchedEcfStack}
             hasServicesIgnoringNamespace={hasServicesIgnoringNamespace}

@@ -68,6 +68,7 @@ import {
   CloudOnboardingDeploymentSchemaV6,
   CloudOnboardingDeploymentSchemaV7,
   CloudOnboardingDeploymentSchemaV8,
+  CloudOnboardingDeploymentSchemaV9,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -2289,7 +2290,7 @@ export const getSavedObjectTypes = (
           },
         },
         8: {
-          // Raised the policySettings value limit so a condition fits. No mapping change.
+          // Added dedicatedNamespaceTemplates. No mappings_addition — it is not indexed (dynamic: false).
           changes: [],
           schemas: {
             forwardCompatibility: CloudOnboardingDeploymentSchemaV8.extends(
@@ -2297,6 +2298,17 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV8,
+          },
+        },
+        9: {
+          // Raised the policySettings value limit so a condition fits. No mapping change.
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV9.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV9,
           },
         },
       },

@@ -86,6 +86,54 @@ describe('toSOSettings', () => {
   });
 });
 
+describe('dedicatedNamespaceTemplates', () => {
+  it('is saved when it is on and there is a namespace', () => {
+    expect(
+      toSOSettings({ namespace: 'prod', dedicatedNamespaceTemplates: true }, 'agent_based')
+    ).toEqual({
+      namespace: 'prod',
+      dedicatedNamespaceTemplates: true,
+    });
+  });
+
+  it('is left out when it is off', () => {
+    expect(
+      toSOSettings({ namespace: 'prod', dedicatedNamespaceTemplates: false }, 'agent_based')
+    ).toEqual({
+      namespace: 'prod',
+    });
+  });
+
+  it('is not saved without a namespace, so a stale value is dropped', () => {
+    expect(
+      toSOSettings({ namespace: ' ', dedicatedNamespaceTemplates: true }, 'agent_based')
+    ).toEqual({});
+    expect(toSOSettings({ dedicatedNamespaceTemplates: true }, 'agent_based')).toEqual({});
+  });
+
+  it('is always sent on an update, so turning it off clears the stored value', () => {
+    expect(
+      toSOSettingsUpdate({ namespace: 'prod', dedicatedNamespaceTemplates: true }, 'agent_based')
+    ).toMatchObject({ dedicatedNamespaceTemplates: true });
+    expect(
+      toSOSettingsUpdate({ namespace: 'prod', dedicatedNamespaceTemplates: false }, 'agent_based')
+    ).toMatchObject({ dedicatedNamespaceTemplates: false });
+    expect(toSOSettingsUpdate({ namespace: 'prod' }, 'agent_based')).toMatchObject({
+      dedicatedNamespaceTemplates: false,
+    });
+  });
+
+  it('is left out of the metadata update, so it stays paired with the namespace', () => {
+    expect(
+      toSOMetadataUpdate({
+        integrationName: 'my-aws',
+        namespace: 'prod',
+        dedicatedNamespaceTemplates: true,
+      })
+    ).toEqual({ integrationName: 'my-aws', description: null });
+  });
+});
+
 describe('toSOSettingsUpdate', () => {
   it('returns the trimmed name and description', () => {
     expect(
@@ -97,6 +145,7 @@ describe('toSOSettingsUpdate', () => {
       integrationName: 'my-aws',
       description: 'Production',
       namespace: null,
+      dedicatedNamespaceTemplates: false,
       policySettings: {},
     });
   });
@@ -105,6 +154,7 @@ describe('toSOSettingsUpdate', () => {
     expect(toSOSettingsUpdate({ namespace: ' prod ' }, 'agent_based')).toEqual({
       description: null,
       namespace: 'prod',
+      dedicatedNamespaceTemplates: false,
       policySettings: {},
     });
   });
@@ -119,12 +169,14 @@ describe('toSOSettingsUpdate', () => {
       integrationName: 'my-aws',
       description: null,
       namespace: null,
+      dedicatedNamespaceTemplates: false,
       policySettings: {},
     });
     expect(toSOSettingsUpdate({ integrationName: 'my-aws' }, 'agent_based')).toEqual({
       integrationName: 'my-aws',
       description: null,
       namespace: null,
+      dedicatedNamespaceTemplates: false,
       policySettings: {},
     });
   });
@@ -133,6 +185,7 @@ describe('toSOSettingsUpdate', () => {
     expect(toSOSettingsUpdate({ integrationName: ' ', description: 'x' }, 'agent_based')).toEqual({
       description: 'x',
       namespace: null,
+      dedicatedNamespaceTemplates: false,
       policySettings: {},
     });
   });
@@ -147,6 +200,7 @@ describe('toSOSettingsUpdate', () => {
       integrationName: 'my-aws',
       description: null,
       namespace: null,
+      dedicatedNamespaceTemplates: false,
       policySettings: {},
       instances: [original, duplicate],
     });
@@ -158,6 +212,7 @@ describe('toSOSettingsUpdate', () => {
         integrationName: 'my-aws',
         description: null,
         namespace: null,
+        dedicatedNamespaceTemplates: false,
         policySettings: {},
       }
     );
@@ -206,7 +261,10 @@ describe('toSOMetadataUpdate', () => {
         description: 'Production',
         instances: [original, duplicate],
       })
-    ).toEqual({ integrationName: 'my-aws', description: 'Production' });
+    ).toEqual({
+      integrationName: 'my-aws',
+      description: 'Production',
+    });
   });
 
   it('leaves out the package policy settings, which are saved only with a deploy', () => {
