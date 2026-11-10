@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useEffect, useState } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type {
   InvestigationSummary,
@@ -25,11 +26,7 @@ const PENDING_START_TIMEOUT_MS = 60_000;
 /** More than a handful of investigations of one episode is not read: the most recently updated open one wins. */
 const EVENT_INVESTIGATIONS_PAGE_SIZE = 10;
 
-/**
- * The investigation an event refers to: the open one, else the most recently updated. Mirrors
- * `pickAlertInvestigation` in the alerts UI (`use_investigate_alert.tsx`), which nightshift cannot
- * import, so an alert and its event show the same investigation.
- */
+/** A just-started investigation that is not listed yet, within the wait. */
 const isStartPending = (
   awaiting: { id: string; startedAt: number } | undefined,
   investigations: InvestigationSummary[] | undefined
@@ -38,6 +35,11 @@ const isStartPending = (
   Date.now() - awaiting.startedAt < PENDING_START_TIMEOUT_MS &&
   !investigations?.some(({ id }) => id === awaiting.id);
 
+/**
+ * The investigation an event refers to: the open one, else the most recently updated. Mirrors
+ * `pickAlertInvestigation` in the alerts UI (`use_investigate_alert.tsx`), which nightshift cannot
+ * import, so an alert and its event show the same investigation.
+ */
 const pickEventInvestigation = (
   investigations: InvestigationSummary[] | undefined
 ): InvestigationSummary | undefined =>
@@ -54,8 +56,22 @@ export const useFetchEventInvestigation = (
 ): { investigation: InvestigationSummary | undefined; isAwaitingStart: boolean } => {
   const { http, agenticInvestigations } = useKibana().services;
 
-  // Reading `dataUpdatedAt` re-renders on every fetch, so the pending window ends on its own.
-  const { data, dataUpdatedAt } = useQuery<ListInvestigationsResponse, Error>({
+  // The wait ends on a timer, not on a fetch: if every list request fails, nothing else re-renders.
+  const [expiredStartId, setExpiredStartId] = useState<string>();
+  const awaitingId = awaiting?.id;
+  const awaitingStartedAt = awaiting?.startedAt;
+  useEffect(() => {
+    if (awaitingId === undefined || awaitingStartedAt === undefined) {
+      return;
+    }
+    const timer = setTimeout(
+      () => setExpiredStartId(awaitingId),
+      Math.max(0, PENDING_START_TIMEOUT_MS - (Date.now() - awaitingStartedAt))
+    );
+    return () => clearTimeout(timer);
+  }, [awaitingId, awaitingStartedAt]);
+
+  const { data } = useQuery<ListInvestigationsResponse, Error>({
     queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'event', episodeId],
     // The list API belongs to agenticInvestigations, an optional dependency.
     enabled: agenticInvestigations != null && Boolean(episodeId),
@@ -86,6 +102,6 @@ export const useFetchEventInvestigation = (
     investigation: pickEventInvestigation(data?.results),
     // A start returns before the investigation is listed: until it is, the listed one (if any) is
     // an older run and must not read as the current one.
-    isAwaitingStart: dataUpdatedAt >= 0 && isStartPending(awaiting, data?.results),
+    isAwaitingStart: awaitingId !== expiredStartId && isStartPending(awaiting, data?.results),
   };
 };

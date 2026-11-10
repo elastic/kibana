@@ -105,6 +105,24 @@ describe('useFetchEventInvestigation', () => {
     }
   });
 
+  it('stops reading a start as pending once the wait ends, even when every list request fails', async () => {
+    jest.useFakeTimers();
+    try {
+      httpGet.mockRejectedValue(new Error('list failed'));
+      const { result } = renderFetch('episode-1', {
+        awaiting: { id: 'started', startedAt: Date.now() },
+      });
+
+      expect(result.current.isAwaitingStart).toBe(true);
+      await act(async () => {
+        jest.advanceTimersByTime(60_000);
+      });
+      expect(result.current.isAwaitingStart).toBe(false);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('reads nothing when the agentic investigations plugin is unavailable', () => {
     mockUseKibana.mockReturnValue({ services: { http: { get: httpGet } } });
     const { result } = renderFetch('episode-1');
