@@ -146,38 +146,83 @@ describe('splitSeriesAtNullGaps', () => {
 
 describe('trimPartialTrailingBucket', () => {
   it('returns an empty array for null or undefined input', () => {
-    expect(trimPartialTrailingBucket(null)).toEqual([]);
-    expect(trimPartialTrailingBucket(undefined)).toEqual([]);
+    expect(trimPartialTrailingBucket(null, 100)).toEqual([]);
+    expect(trimPartialTrailingBucket(undefined, 100)).toEqual([]);
   });
 
-  it('returns an empty array for empty input', () => {
-    expect(trimPartialTrailingBucket([])).toEqual([]);
+  it('returns the same reference unchanged for an empty series', () => {
+    const data: Array<{ x: number; y: number | null }> = [];
+    expect(trimPartialTrailingBucket(data, 100)).toBe(data);
   });
 
-  it('leaves a single point unchanged so there is still something to render', () => {
-    expect(trimPartialTrailingBucket([{ x: 1, y: 5 }])).toEqual([{ x: 1, y: 5 }]);
+  it('returns the same reference for a series with fewer than three points', () => {
+    const data = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+    ];
+    expect(trimPartialTrailingBucket(data, 25)).toBe(data);
   });
 
-  it('drops the final (partial) bucket from a multi-point series', () => {
-    expect(
-      trimPartialTrailingBucket([
-        { x: 1, y: 5 },
-        { x: 2, y: 8 },
-        { x: 3, y: 0 },
-      ])
-    ).toEqual([
-      { x: 1, y: 5 },
-      { x: 2, y: 8 },
+  it('returns the same reference when end is undefined (trimming disabled)', () => {
+    const data = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: 2 },
+    ];
+    expect(trimPartialTrailingBucket(data, undefined)).toBe(data);
+  });
+
+  it('returns the same reference when end is not finite', () => {
+    const data = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: 2 },
+    ];
+    expect(trimPartialTrailingBucket(data, NaN)).toBe(data);
+  });
+
+  it('drops the final bucket when it extends past the range end', () => {
+    // bucket size is 10 (30 - 20), last bucket covers [30, 40) which extends
+    // past end = 35, so it is only partially covered and gets dropped.
+    const data = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: 2 },
+    ];
+    expect(trimPartialTrailingBucket(data, 35)).toEqual([
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
     ]);
   });
 
-  it('does not mutate the input array', () => {
+  it('keeps the final bucket when the range is bucket-aligned', () => {
+    // bucket size is 10, last bucket covers [30, 40) and end = 40 aligns to its
+    // boundary, so the bucket is complete and the real data point is kept.
     const data = [
-      { x: 1, y: 5 },
-      { x: 2, y: 8 },
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: 2 },
     ];
-    trimPartialTrailingBucket(data);
-    expect(data).toHaveLength(2);
+    expect(trimPartialTrailingBucket(data, 40)).toBe(data);
+  });
+
+  it('keeps a trailing bucket that has no value (carries the dotted-edge signal)', () => {
+    const data = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: null },
+    ];
+    expect(trimPartialTrailingBucket(data, 35)).toBe(data);
+  });
+
+  it('does not mutate the input array when trimming', () => {
+    const data = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: 2 },
+    ];
+    trimPartialTrailingBucket(data, 35);
+    expect(data).toHaveLength(3);
   });
 });
 

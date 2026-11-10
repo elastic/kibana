@@ -117,15 +117,38 @@ export function splitSeriesAtNullGaps(
   return { mainSegments, leadingEdge, trailingEdge, interiorEdges };
 }
 
+const EMPTY_SERIES: Coordinate[] = [];
+
 /**
- * Drops the final, partially-covered bucket of a coordinate series (returning a
- * series of one point or fewer unchanged so there is still something to render).
+ * Drops the final bucket when it is still in progress, i.e. when the bucket
+ * (inferred from the spacing of the last two points) extends past `end`.
+ *
+ * Returns the same reference when nothing is trimmed, so a bucket-aligned range
+ * keeps its real last bucket untouched. Series with fewer than three points are
+ * never trimmed, and a trailing bucket without a value is kept since it carries
+ * the "no data since" signal of the dotted edge. When `end` is undefined (or not
+ * finite) nothing is trimmed, which is how callers opt out of trimming entirely.
+ *
+ * Assumes evenly spaced buckets where `x` is the bucket start: the interval is
+ * inferred from the last two points. Pass the range `end` (epoch ms) that the
+ * series was requested with.
  */
-export function trimPartialTrailingBucket(data?: ReadonlyArray<Coordinate> | null): Coordinate[] {
-  if (!data || data.length <= 1) {
-    return data ? [...data] : [];
+export function trimPartialTrailingBucket(
+  data: Coordinate[] | null | undefined,
+  end?: number
+): Coordinate[] {
+  if (!data) {
+    return EMPTY_SERIES;
   }
-  return data.slice(0, -1);
+  if (data.length < 3 || end === undefined || !Number.isFinite(end)) {
+    return data;
+  }
+  const last = data[data.length - 1];
+  const bucketSize = last.x - data[data.length - 2].x;
+  if (bucketSize > 0 && isValidY(last.y) && last.x + bucketSize > end) {
+    return data.slice(0, -1);
+  }
+  return data;
 }
 
 const EDGE_SERIES_TYPE = 'line' as const;
