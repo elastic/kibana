@@ -23,7 +23,8 @@ jest.mock('../../lib/mcp/with_mcp_client', () => ({
   }),
 }));
 
-// Mock HTTP client methods for write actions that call ctx.client directly.
+// Mock HTTP client methods for REST actions that call ctx.client directly.
+const mockGet = jest.fn();
 const mockPost = jest.fn();
 const mockPatch = jest.fn();
 const mockPut = jest.fn();
@@ -38,6 +39,7 @@ const parse = <K extends keyof typeof GithubConnector.actions>(
 describe('GithubConnector', () => {
   const mockContext = {
     client: {
+      get: mockGet,
       post: mockPost,
       patch: mockPatch,
       put: mockPut,
@@ -59,6 +61,7 @@ describe('GithubConnector', () => {
     jest.clearAllMocks();
     mockCallTool.mockResolvedValue({ content: mockContent });
     mockListTools.mockResolvedValue({ tools: [{ name: 'get_me' }, { name: 'search_code' }] });
+    mockGet.mockResolvedValue({ data: [], headers: {} });
     mockPost.mockResolvedValue({ data: mockWriteResponse });
     mockPatch.mockResolvedValue({ data: mockWriteResponse });
     mockPut.mockResolvedValue({ data: mockWriteResponse });
@@ -452,6 +455,181 @@ describe('GithubConnector', () => {
         name: 'issue_read',
         arguments: { owner: 'elastic', repo: 'kibana', issue_number: 123, method: 'get_comments' },
       });
+    });
+  });
+
+  describe('getIssueTimeline action', () => {
+    const timelineEvents = [
+      { id: 1, event: 'subscribed', created_at: '2026-08-18T12:00:00Z', actor: { login: 'dev' } },
+      {
+        id: 2,
+        event: 'labeled',
+        created_at: '2026-08-18T12:01:00Z',
+        actor: { login: 'chetnarajput-qasource' },
+        label: { name: 'impact:medium' },
+      },
+    ];
+
+    it('is a read tool', () => {
+      expect(GithubConnector.actions.getIssueTimeline).toEqual(
+        expect.objectContaining({ isTool: true, scope: 'read' })
+      );
+    });
+
+    it('GETs the timeline of the issue with the default paging', async () => {
+      await GithubConnector.actions.getIssueTimeline.handler(
+        mockContext,
+        parse('getIssueTimeline', { owner: 'elastic', repo: 'kibana', issueNumber: 10 })
+      );
+
+      expect(mockGet).toHaveBeenCalledWith(
+        'https://api.github.com/repos/elastic/kibana/issues/10/timeline',
+        {
+          params: { page: 1, per_page: 100 },
+          headers: { 'X-GitHub-Api-Version': '2022-11-28' },
+        }
+      );
+    });
+
+    it('passes a custom page and page size', async () => {
+      await GithubConnector.actions.getIssueTimeline.handler(
+        mockContext,
+        parse('getIssueTimeline', {
+          owner: 'elastic',
+          repo: 'kibana',
+          issueNumber: 10,
+          page: 3,
+          perPage: 50,
+        })
+      );
+
+      expect(mockGet).toHaveBeenCalledWith(expect.any(String), {
+        params: { page: 3, per_page: 50 },
+        headers: { 'X-GitHub-Api-Version': '2022-11-28' },
+      });
+    });
+
+    it('URL-encodes the owner and the repository', async () => {
+      await GithubConnector.actions.getIssueTimeline.handler(
+        mockContext,
+        parse('getIssueTimeline', { owner: 'el/astic', repo: 'ki bana', issueNumber: 10 })
+      );
+
+      expect(mockGet).toHaveBeenCalledWith(
+        'https://api.github.com/repos/el%2Fastic/ki%20bana/issues/10/timeline',
+        expect.any(Object)
+      );
+    });
+
+    it('returns the normalized events with the paging of the response', async () => {
+      mockGet.mockResolvedValue({
+        data: timelineEvents,
+        headers: {
+          link: '<https://api.github.com/repositories/1/issues/10/timeline?page=2>; rel="next"',
+        },
+      });
+
+      const result = await GithubConnector.actions.getIssueTimeline.handler(
+        mockContext,
+        parse('getIssueTimeline', { owner: 'elastic', repo: 'kibana', issueNumber: 10 })
+      );
+
+      expect(result).toEqual({
+        events: [
+          { id: 1, event: 'subscribed', createdAt: '2026-08-18T12:00:00Z', actor: 'dev' },
+          {
+            id: 2,
+            event: 'labeled',
+            createdAt: '2026-08-18T12:01:00Z',
+            actor: 'chetnarajput-qasource',
+            label: 'impact:medium',
+          },
+        ],
+        page: 1,
+        nextPage: 2,
+        hasMore: true,
+      });
+    });
+
+    it('keeps only the requested event types', async () => {
+      mockGet.mockResolvedValue({ data: timelineEvents, headers: {} });
+
+      const result = await GithubConnector.actions.getIssueTimeline.handler(
+        mockContext,
+        parse('getIssueTimeline', {
+          owner: 'elastic',
+          repo: 'kibana',
+          issueNumber: 10,
+          eventTypes: ['labeled'],
+        })
+      );
+
+      expect(result).toEqual({
+        events: [expect.objectContaining({ id: 2, event: 'labeled' })],
+        page: 1,
+        nextPage: null,
+        hasMore: false,
+      });
+    });
+
+    it('asks GitHub to leave out the excluded event types', async () => {
+      await GithubConnector.actions.getIssueTimeline.handler(
+        mockContext,
+        parse('getIssueTimeline', {
+          owner: 'elastic',
+          repo: 'kibana',
+          issueNumber: 10,
+          excludeEventTypes: ['subscribed', 'mentioned'],
+        })
+      );
+
+      expect(mockGet).toHaveBeenCalledWith(expect.any(String), {
+        params: { page: 1, per_page: 100, exclude: 'subscribed,mentioned' },
+        headers: { 'X-GitHub-Api-Version': '2022-11-28' },
+      });
+    });
+
+    it('does not send exclude when no event type is excluded', async () => {
+      await GithubConnector.actions.getIssueTimeline.handler(
+        mockContext,
+        parse('getIssueTimeline', { owner: 'elastic', repo: 'kibana', issueNumber: 10 })
+      );
+
+      const [, { params }] = mockGet.mock.calls[0];
+      expect(params).not.toHaveProperty('exclude');
+    });
+
+    it('does not swallow request failures', async () => {
+      mockGet.mockRejectedValue(new Error('Request failed with status code 404'));
+
+      await expect(
+        GithubConnector.actions.getIssueTimeline.handler(
+          mockContext,
+          parse('getIssueTimeline', { owner: 'elastic', repo: 'kibana', issueNumber: 10 })
+        )
+      ).rejects.toThrow('Request failed with status code 404');
+    });
+
+    it('rejects an unbounded list of event types', () => {
+      expect(() =>
+        parse('getIssueTimeline', {
+          owner: 'elastic',
+          repo: 'kibana',
+          issueNumber: 10,
+          eventTypes: Array.from({ length: 51 }, () => 'labeled'),
+        })
+      ).toThrow(/eventTypes/);
+    });
+
+    it('rejects an unbounded list of excluded event types', () => {
+      expect(() =>
+        parse('getIssueTimeline', {
+          owner: 'elastic',
+          repo: 'kibana',
+          issueNumber: 10,
+          excludeEventTypes: Array.from({ length: 51 }, () => 'subscribed'),
+        })
+      ).toThrow(/excludeEventTypes/);
     });
   });
 

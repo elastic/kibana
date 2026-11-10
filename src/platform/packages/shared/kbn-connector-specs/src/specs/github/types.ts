@@ -248,6 +248,55 @@ export const GetIssueCommentsInputSchema = lazySchema(() =>
 );
 export type GetIssueCommentsInput = z.infer<typeof GetIssueCommentsInputSchema>;
 
+const KNOWN_TIMELINE_EVENT_TYPES = [
+  'labeled',
+  'unlabeled',
+  'commented',
+  'cross-referenced',
+  'referenced',
+  'connected',
+  'disconnected',
+  'closed',
+  'reopened',
+  'assigned',
+  'unassigned',
+  'review_requested',
+  'review_request_removed',
+  'reviewed',
+  'ready_for_review',
+  'merged',
+  'renamed',
+  'committed',
+  'project_v2_item_status_changed',
+];
+
+export const GetIssueTimelineInputSchema = lazySchema(() =>
+  z.object({
+    owner: z.string().min(1).max(200).describe('Repository owner (user or org)'),
+    repo: z.string().min(1).max(200).describe('Repository name'),
+    issueNumber: z.number().describe('Issue or pull request number'),
+    eventTypes: z
+      .array(z.string().max(100))
+      .max(50)
+      .optional()
+      .describe(
+        `Only return these event types, for example ["labeled","unlabeled"]. Known types: ${KNOWN_TIMELINE_EVENT_TYPES.join(
+          ', '
+        )}. Omit for all types. Filtering happens after the page is fetched, so a page can be empty while hasMore is true.`
+      ),
+    excludeEventTypes: z
+      .array(z.string().max(100))
+      .max(50)
+      .optional()
+      .describe(
+        'Event types GitHub should leave out, for example ["subscribed","mentioned"], which are most of a typical timeline. Applied by GitHub before paging, so it reduces the number of pages.'
+      ),
+    page: z.number().optional().default(1).describe('Page number (1-based)'),
+    perPage: z.number().optional().default(100).describe('Events per page (max 100)'),
+  })
+);
+export type GetIssueTimelineInput = z.infer<typeof GetIssueTimelineInputSchema>;
+
 export const CallToolInputSchema = lazySchema(() =>
   z.object({
     name: z.string().min(1).max(200).describe('Name of the MCP tool to call'),
