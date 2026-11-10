@@ -5,15 +5,5 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
-import type { AnnotationTooltipProps } from './annotation_tooltip';
-
-const AnnotationTooltipLazy = lazy(() => import('./annotation_tooltip'));
-
-export function AnnotationTooltip(props: AnnotationTooltipProps) {
-  return (
-    <Suspense fallback={null}>
-      <AnnotationTooltipLazy {...props} />
-    </Suspense>
-  );
-}
+export { AnnotationTooltip } from './annotation_tooltip';
+export type { AnnotationTooltipProps } from './annotation_tooltip';
