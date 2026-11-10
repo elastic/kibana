@@ -192,3 +192,84 @@ describe('deployGroup — proxy URL', () => {
     expect(mockCreatePolicy.mock.calls[0][0]).not.toHaveProperty('output_id');
   });
 });
+
+describe('deployGroup — dedicated index template for a custom dataset', () => {
+  const otel = {
+    id: 'ec2',
+    name: 'Amazon EC2',
+    packageName: 'aws_cloudwatch_input_otel',
+    dataStreams: ['ec2'],
+    inputs: ['otelcol'],
+    showInUI: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    varDefsByInput: {},
+    varDefsByDataStream: {
+      ec2: {
+        inputs: ['otelcol'],
+        defaultEnabledInputs: ['otelcol'],
+        varDefsByInput: {
+          otelcol: { 'data_stream.dataset': { name: 'data_stream.dataset', default: 'aws.ec2' } },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+
+  const otelGroup: DeployGroup = {
+    groupId: 'aws_cloudwatch_input_otel',
+    instanceIds: ['ec2'],
+    members: [
+      {
+        instance: { instanceId: 'ec2', serviceId: 'ec2', name: 'Amazon EC2', isDuplicate: false },
+        service: otel,
+      },
+    ],
+    isDuplicateGroup: false,
+    namespace: '',
+  };
+
+  const deploy = async (dataset: string, createDatasetTemplates?: boolean) => {
+    await deployGroup(otelGroup, {
+      namespace: 'default',
+      globalRegion: 'us-east-1',
+      storedServiceVars: {
+        ec2: {
+          enabledDataStreams: ['ec2'],
+          varsByDataStream: {
+            ec2: {
+              enabledInputs: ['otelcol'],
+              varsByInput: { otelcol: { 'data_stream.dataset': dataset } },
+              ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
+            },
+          },
+        },
+      },
+      authenticateAndDeployStep: {} as never,
+    });
+    return mockCreatePolicy.mock.calls[0][0];
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '1.0.0', policy_templates: [] } },
+    });
+    mockCreatePolicy.mockResolvedValue({ item: { id: 'policy-1' } });
+  });
+
+  it('asks Fleet not to create the template when the user opted out', async () => {
+    expect(await deploy('aws.prod', false)).toHaveProperty('create_dataset_templates', false);
+  });
+
+  it('leaves the flag out by default so Fleet keeps its own', async () => {
+    expect(await deploy('aws.prod')).not.toHaveProperty('create_dataset_templates');
+  });
+
+  it('ignores an opt-out once the dataset is back to the default', async () => {
+    expect(await deploy('aws.ec2', false)).not.toHaveProperty('create_dataset_templates');
+  });
+
+  it('never sends the choice as a package var', async () => {
+    const body = await deploy('aws.prod', false);
+    expect(JSON.stringify(body.inputs)).not.toContain('createDatasetTemplates');
+  });
+});
