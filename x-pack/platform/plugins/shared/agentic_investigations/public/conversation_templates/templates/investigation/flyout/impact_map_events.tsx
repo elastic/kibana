@@ -47,7 +47,7 @@ import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import {
   BUILT_IN_ENTITY_TYPES,
   canonicalEntityTypeId,
-  KNOWN_EUI_ICONS,
+  resolveEntityIcon,
   resolveEntityMetadata,
   type EntityMetadataRow,
   type ImpactMapEntityType,
@@ -456,11 +456,19 @@ interface KeyFact {
   label: string;
   value: React.ReactNode;
   testSubj?: string;
+  /** Too wide for the row (badges that wrap): shown on its own line under the short facts. */
+  block?: boolean;
 }
 
-/** The facts to read first, in a row like the investigation flyout's status panel. */
+/**
+ * The facts to read first. Short facts share a row with dividers between them; a block fact (one
+ * that can wrap, like the entities an event affects) gets its own line under a rule, so nothing
+ * wraps into a stray column.
+ */
 const KeyFacts: React.FC<{ facts: KeyFact[]; testSubj: string }> = ({ facts, testSubj }) => {
   const { euiTheme } = useEuiTheme();
+  const rowFacts = facts.filter(({ block }) => !block);
+  const blockFacts = facts.filter(({ block }) => block);
   return (
     <EuiPanel
       hasBorder
@@ -469,33 +477,46 @@ const KeyFacts: React.FC<{ facts: KeyFact[]; testSubj: string }> = ({ facts, tes
       borderRadius="m"
       data-test-subj={testSubj}
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        responsive={false}
-        wrap
-        css={css`
-          row-gap: ${euiTheme.size.m};
-        `}
-      >
-        {facts.map(({ label, value, testSubj: factTestSubj }, index) => (
-          <EuiFlexItem
-            key={label}
-            grow={false}
-            css={css`
-              padding: ${euiTheme.size.xs} ${euiTheme.size.l};
-              ${index === 0 ? 'padding-left: 0;' : `border-left: ${euiTheme.border.thin};`}
-            `}
-          >
-            <EuiText size="s" color="subdued">
-              {label}
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" data-test-subj={factTestSubj}>
-              {value}
-            </EuiText>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
+      {rowFacts.length > 0 && (
+        <EuiFlexGroup gutterSize="none" responsive={false} wrap>
+          {rowFacts.map(({ label, value, testSubj: factTestSubj }, index) => (
+            <EuiFlexItem
+              key={label}
+              grow={false}
+              css={css`
+                padding: ${euiTheme.size.xs} ${euiTheme.size.l};
+                ${index === 0 ? 'padding-left: 0;' : `border-left: ${euiTheme.border.thin};`}
+              `}
+            >
+              <EuiText size="s" color="subdued">
+                {label}
+              </EuiText>
+              <EuiSpacer size="xs" />
+              <EuiText size="s" data-test-subj={factTestSubj}>
+                {value}
+              </EuiText>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      )}
+      {blockFacts.map(({ label, value, testSubj: factTestSubj }) => (
+        <div
+          key={label}
+          css={css`
+            ${rowFacts.length > 0
+              ? `margin-top: ${euiTheme.size.m}; padding-top: ${euiTheme.size.m}; border-top: ${euiTheme.border.thin};`
+              : ''}
+          `}
+        >
+          <EuiText size="s" color="subdued">
+            {label}
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiText size="s" data-test-subj={factTestSubj}>
+            {value}
+          </EuiText>
+        </div>
+      ))}
     </EuiPanel>
   );
 };
@@ -610,6 +631,7 @@ const EventKeyFacts: React.FC<{
           : [
               {
                 label: FACT_AFFECTS,
+                block: true,
                 value: (
                   <EventAffects event={event} impactMap={impactMap} onOpenEntity={onOpenEntity} />
                 ),
@@ -1113,15 +1135,6 @@ const ChildEventsFlyout: React.FC<{
   );
 };
 
-const DEPENDENCY_ICONS: Record<string, string> = {
-  db: 'database',
-  messaging: 'package',
-  cache: 'database',
-  external: 'globe',
-};
-
-const KNOWN_ICONS = new Set<string>(KNOWN_EUI_ICONS);
-
 /**
  * What an entity type is, as the map draws it. A type stored before `infrastructure` existed says
  * `service` even for a Kubernetes deployment; it has a named icon and no APM agent, which is how
@@ -1137,19 +1150,10 @@ export const getEntityKind = (
     : type?.kind;
 
 /** An icon for an entity from its type: a named EUI icon, else one for its kind, else a generic one. */
-export const getEntityIcon = (type?: ImpactMapEntityType): string => {
-  const named = type?.icon?.eui_icon;
-  if (named && KNOWN_ICONS.has(named)) {
-    return named;
-  }
-  if (/kubernetes|k8s/i.test(`${type?.id} ${type?.label}`)) {
-    return 'logoKubernetes';
-  }
-  if (type?.kind === 'dependency') {
-    return DEPENDENCY_ICONS[type.icon?.span_type ?? ''] ?? 'globe';
-  }
-  return type?.kind === 'infrastructure' ? 'compute' : 'apps';
-};
+export const getEntityIcon = (
+  type?: ImpactMapEntityType,
+  entityLabel?: string
+): string => resolveEntityIcon(type, entityLabel);
 
 /** The kind and the type under it: `Infrastructure › Kubernetes deployment`. */
 export const getEntityTypeLabel = (
@@ -1217,6 +1221,8 @@ export interface ImpactMapEventsFlyoutProps {
   /** An EUI icon for what the events happened to, and what kind of thing it is. */
   icon?: string;
   typeLabel?: string;
+  /** What the entity is, in a sentence, shown under its title. */
+  description?: string;
   /** The entity, for a link to where a solution shows it. */
   entityTarget?: ImpactEntityLinkTarget;
   /** Oldest first. */
@@ -1313,6 +1319,7 @@ const EventsFlyoutContent: React.FC<
   title,
   icon,
   typeLabel,
+  description,
   entityTarget,
   renderEvents,
   events,
@@ -1446,6 +1453,18 @@ const EventsFlyoutContent: React.FC<
               <TypeBadges typeLabel={typeLabel} icon={icon} />
               <OpenInSolutionButton entity={entityTarget} />
             </EuiFlexGroup>
+            {description && (
+              <>
+                <EuiSpacer size="s" />
+                <EuiText
+                  size="s"
+                  color="subdued"
+                  data-test-subj="agenticInvestigationsImpactMapEntityDescription"
+                >
+                  <p>{description}</p>
+                </EuiText>
+              </>
+            )}
             <EuiSpacer size="m" />
             {metadata?.some(({ featured }) => featured) && (
               <>
@@ -1596,7 +1615,14 @@ export const resolveEventsSelection = (
     Partial<Pick<InvestigationImpactMapResponse, 'relationship_types'>>
 ): Pick<
   ImpactMapEventsFlyoutProps,
-  'title' | 'events' | 'initialEventId' | 'icon' | 'typeLabel' | 'metadata' | 'entityTarget'
+  | 'title'
+  | 'events'
+  | 'initialEventId'
+  | 'icon'
+  | 'typeLabel'
+  | 'description'
+  | 'metadata'
+  | 'entityTarget'
 > => {
   const { events, entities, relationships } = impactMap;
   if (selection.kind === 'entity') {
@@ -1606,6 +1632,7 @@ export const resolveEventsSelection = (
       title: entity?.label ?? selection.id,
       icon: getEntityIcon(type),
       typeLabel: getEntityTypeLabel(type, entity?.label),
+      description: entity?.description ?? type?.description,
       metadata: resolveEntityMetadata(entity, type),
       entityTarget: entity &&
         type && {

@@ -94,7 +94,7 @@ export type ImpactMapRenderer = ComponentType<ImpactMapRendererProps>;
 export interface ImpactEntityLinkTarget {
   id: string;
   label: string;
-  /** The kind of its type: a service, a dependency or infrastructure. */
+  /** The kind of its type: a service or infrastructure (older maps may say dependency). */
   kind: string;
   metadata?: Array<{ key: string; value: string }>;
 }

@@ -70,8 +70,8 @@ const checkoutMap: SetImpactMapToolParams = {
     {
       id: 'payments_postgres',
       label: 'PostgreSQL',
-      kind: 'dependency',
-      icon: { span_type: 'db', span_subtype: 'postgresql' },
+      kind: 'infrastructure',
+      icon: { eui_icon: 'logoPostgres' },
     },
   ],
   relationship_types: [{ id: 'calls', label: 'CALLS' }],

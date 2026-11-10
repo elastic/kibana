@@ -13,6 +13,7 @@ import {
   EVIDENCE_CHART_Y_AXIS_UNITS,
   HYPOTHESIS_STATUSES,
   IMPACT_MAP_ENTITY_KINDS,
+  IMPACT_MAP_STORED_ENTITY_KINDS,
   IMPACT_MAP_EVENT_KINDS,
   IMPACT_MAP_HEALTH_STATES,
   IMPACT_MAP_ROLES,
@@ -45,6 +46,10 @@ import {
   sanitizeDataSource,
   clockTimeToIso,
   type InvestigationEvidence,
+  getLegacyDependencyIcon,
+  IMPACT_MAP_CONFIDENCES,
+  IMPACT_MAP_SOURCES,
+  KNOWN_EUI_ICONS,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
   MAX_COMMENT_LENGTH,
@@ -140,8 +145,13 @@ export const findingsOutputSchema = lazySchema(() => {
           z.object({
             id: z.string().min(1),
             label: z.string().optional(),
+            description: z.string().optional(),
             type: z.string().min(1),
-            kind: z.enum(IMPACT_MAP_ENTITY_KINDS).optional(),
+            // `dependency` is still read, as infrastructure: a model that follows older text may send it.
+            kind: z.enum(IMPACT_MAP_STORED_ENTITY_KINDS).optional(),
+            parent: z.string().optional(),
+            found_in: z.enum(IMPACT_MAP_SOURCES).optional(),
+            confidence: z.enum(IMPACT_MAP_CONFIDENCES).optional(),
             agent_name: z.string().optional(),
             eui_icon: z.string().optional(),
             span_type: z.string().optional(),
@@ -168,6 +178,9 @@ export const findingsOutputSchema = lazySchema(() => {
             target: z.string().min(1),
             type: z.string().min(1),
             on_critical_path: z.boolean().optional(),
+            label: z.string().optional(),
+            found_in: z.enum(IMPACT_MAP_SOURCES).optional(),
+            confidence: z.enum(IMPACT_MAP_CONFIDENCES).optional(),
           })
         ),
       })
@@ -338,6 +351,7 @@ export interface FindingsImpactMap {
 
 const MAX_MAP_ID_LENGTH = 256;
 const MAX_MAP_LABEL_LENGTH = 256;
+const MAX_MAP_ENTITY_DESCRIPTION_LENGTH = 400;
 const MAX_MAP_TYPE_ID_LENGTH = 64;
 const MAX_MAP_ICON_KEY_LENGTH = 64;
 const MAX_MAP_ALERT_COUNT = 9_999;
@@ -416,20 +430,44 @@ const INFRASTRUCTURE_THING =
   /(^|[^a-z])(k8s|kubernetes|deployment|statefulset|daemonset|replicaset|pod|node|host|vm|container|cluster|namespace|load[ _-]?balancer|ec2|lambda)([^a-z]|$)/i;
 const KUBERNETES_OBJECT =
   /(^|[^a-z])(k8s|kubernetes|deployment|statefulset|daemonset|replicaset|pod)([^a-z]|$)/i;
+/** The logo for a technology a type id names, so a database or a queue reads at a glance. */
+const TECHNOLOGY_ICONS: Array<[RegExp, string]> = [
+  [/elasticsearch/i, 'logoElasticsearch'],
+  [/postgres/i, 'logoPostgres'],
+  [/mysql|mariadb/i, 'logoMySQL'],
+  [/mongo/i, 'logoMongodb'],
+  [/redis/i, 'logoRedis'],
+  [/memcache/i, 'logoMemcached'],
+  [/kafka/i, 'logoKafka'],
+  [/rabbit/i, 'logoRabbitmq'],
+  [/nginx/i, 'logoNginx'],
+  [/haproxy/i, 'logoHAproxy'],
+  [/(sqs|sns|pubsub|queue|topic)/i, 'package'],
+  [/(bucket|s3|storage)/i, 'storage'],
+  [/(external|third[ _-]?party|api[ _-]?endpoint|endpoint|http|gateway|proxy)/i, 'globe'],
+];
 const DEPENDENCY_THING =
   /(database|(^|[^a-z])db([^a-z]|$)|sql|mongo|redis|memcache|cache|elasticsearch|kafka|queue|topic|rabbit|sqs|sns|pubsub|bucket|s3|storage|load[ _-]?balancer|gateway|proxy|external|third[ _-]?party|api[ _-]?endpoint|endpoint|http)/i;
 
 /**
- * A first classification for a new entity type the model left unclassified: the shape (a dependency
- * diamond for what services rely on, a service circle for what runs code) and, for a Kubernetes
- * object, its logo. The catalog keeps it, so it is decided once for every later investigation.
+ * A first classification for a new entity type the model left unclassified: the shape (a service
+ * circle for what runs code, a rounded square for everything else) and the icon that suits it, such
+ * as a technology's logo for a database or a queue. The catalog keeps it, so it is decided once
+ * for every later investigation.
  */
 export const classifyEntityType = (
   typeId: string
-): { kind: 'service' | 'dependency' | 'infrastructure'; euiIcon?: string } => {
+): { kind: 'service' | 'infrastructure'; euiIcon?: string } => {
   if (KUBERNETES_OBJECT.test(typeId)) return { kind: 'infrastructure', euiIcon: 'logoKubernetes' };
+  // A named technology wins over a generic word: an `elasticsearch_cluster` is Elasticsearch.
+  const logo = TECHNOLOGY_ICONS.slice(0, 10).find(([pattern]) => pattern.test(typeId));
+  if (logo) return { kind: 'infrastructure', euiIcon: logo[1] };
   if (INFRASTRUCTURE_THING.test(typeId)) return { kind: 'infrastructure' };
-  return { kind: DEPENDENCY_THING.test(typeId) ? 'dependency' : 'service' };
+  if (DEPENDENCY_THING.test(typeId)) {
+    const technology = TECHNOLOGY_ICONS.find(([pattern]) => pattern.test(typeId));
+    return { kind: 'infrastructure', euiIcon: technology?.[1] ?? 'database' };
+  }
+  return { kind: 'service' };
 };
 
 /**
@@ -510,18 +548,22 @@ export const limitImpactMap = (
     }
     if (!entityTypes.has(typeId) && !knownTypeIds.has(typeId)) {
       const guess = classifyEntityType(typeId);
-      const euiName = euiIcon ?? (agentName || spanType || spanSubtype ? undefined : guess.euiIcon);
+      // A span type or subtype is the old way to name a dependency's icon: it picks the icon now.
+      const spanIcon =
+        spanType || spanSubtype
+          ? getLegacyDependencyIcon({ span_type: spanType, span_subtype: spanSubtype })
+          : undefined;
+      const euiName = euiIcon ?? (agentName ? undefined : spanIcon ?? guess.euiIcon);
+      const modelKind = entity.kind === 'dependency' ? 'infrastructure' : entity.kind;
       entityTypes.set(typeId, {
         id: typeId,
         label: humanizeTypeId(typeId),
-        kind: entity.kind ?? (spanType || spanSubtype ? 'dependency' : guess.kind),
-        ...(agentName || euiName || spanType || spanSubtype
+        kind: modelKind ?? (spanIcon ? 'infrastructure' : guess.kind),
+        ...(agentName || euiName
           ? {
               icon: {
                 ...(agentName ? { agent_name: agentName } : {}),
                 ...(euiName ? { eui_icon: euiName } : {}),
-                ...(spanType ? { span_type: spanType } : {}),
-                ...(spanSubtype ? { span_subtype: spanSubtype } : {}),
               },
             }
           : {}),
@@ -554,7 +596,15 @@ export const limitImpactMap = (
       id,
       type_id: typeId,
       label: truncate(toEntityName(entity.label?.trim() || id), MAX_MAP_LABEL_LENGTH),
+      ...(entity.description?.trim()
+        ? { description: truncate(entity.description.trim(), MAX_MAP_ENTITY_DESCRIPTION_LENGTH) }
+        : {}),
       ...(Object.keys(annotations).length ? { annotations } : {}),
+      ...(entity.parent?.trim() && entity.parent.trim() !== id
+        ? { parent_id: truncate(entity.parent.trim(), MAX_MAP_ID_LENGTH) }
+        : {}),
+      ...(entity.found_in ? { source: entity.found_in } : {}),
+      ...(entity.confidence ? { confidence: entity.confidence } : {}),
       ...(metadata.length ? { metadata } : {}),
     });
   }
@@ -592,6 +642,11 @@ export const limitImpactMap = (
       source_id: source,
       target_id: target,
       ...(relationship.on_critical_path ? { on_critical_path: true } : {}),
+      ...(relationship.label?.trim()
+        ? { label: truncate(relationship.label.trim(), MAX_MAP_LABEL_LENGTH) }
+        : {}),
+      ...(relationship.found_in ? { source: relationship.found_in } : {}),
+      ...(relationship.confidence ? { confidence: relationship.confidence } : {}),
     });
   }
 
@@ -1047,11 +1102,32 @@ export const FINDINGS_JSON_SCHEMA = {
                 description:
                   'One lowercase id per kind of entity, reused across investigations. Use the OpenTelemetry entity name when there is one (k8s.deployment, k8s.pod, k8s.node, k8s.namespace, host, container, process), nodejs_service, java_service and so on for services, db.postgresql, db.redis and messaging.kafka for dependencies, and make up a lowercase dotted id only for a kind of thing that is not in the catalog.',
               },
+              description: {
+                type: 'string',
+                description:
+                  'Two short sentences, at most 40 words: first what this entity is and does in the system, then why it matters in this investigation (its part in the cause or the impact, for example "Receives every order from checkout, so its failure stopped all purchases."). Taken from tool results only, never guessed. Say how it relates to the problem, not how it is doing now: current status belongs in events. Sent again each time because the map replaces the stored one, and updated when new evidence changes its part.',
+              },
               kind: {
                 type: 'string',
                 enum: IMPACT_MAP_ENTITY_KINDS,
                 description:
-                  'Classify by what the thing fundamentally is. service draws a circle, for application code you run; dependency draws a diamond, for a database, queue, cache or external API that services call; infrastructure draws a rounded square, for what runs and hosts them: a Kubernetes deployment, pod or node, a host, VM, container, cloud resource or load balancer.',
+                  'service draws a circle, only for application code you run (a service with an APM agent logo). Everything else is infrastructure and draws a rounded square with the icon you choose in eui_icon: a database, cache, queue, search cluster, external API, load balancer, Kubernetes object, host, container or cloud resource. Do not use a separate kind for what services call; give it an icon that says what it is.',
+              },
+              parent: {
+                type: 'string',
+                description:
+                  'The id of the entity this one sits inside, so the map draws a box around its members: a pod inside its node, a node inside its availability zone, a zone inside its region, a service inside the business service it belongs to. Use it for what is shared (zone, region, network, cluster, environment), so a reader sees at once that the affected entities have something in common. Must be another entity in this map.',
+              },
+              found_in: {
+                type: 'string',
+                enum: IMPACT_MAP_SOURCES,
+                description:
+                  'Where you learned the entity exists: log, trace, metric, config (Helm, manifests, Terraform), code, catalog (a service catalog or CMDB), diagram, doc, chat, or inferred when you are guessing from patterns such as shared IP ranges. Things people wrote down can be stale, so prefer what telemetry shows.',
+              },
+              confidence: {
+                type: 'string',
+                enum: IMPACT_MAP_CONFIDENCES,
+                description: 'How sure you are that it is real and where you placed it.',
               },
               agent_name: {
                 type: 'string',
@@ -1060,18 +1136,9 @@ export const FINDINGS_JSON_SCHEMA = {
               },
               eui_icon: {
                 type: 'string',
-                description:
-                  'For something with no APM agent, an EUI icon name. Always logoKubernetes for a Kubernetes deployment, pod, node, statefulset, daemonset or namespace; logoDocker for a container; logoAWS, logoGCP or logoAzure for cloud resources.',
-              },
-              span_type: {
-                type: 'string',
-                description:
-                  'For a dependency, its span type for the icon: db, messaging, cache or external.',
-              },
-              span_subtype: {
-                type: 'string',
-                description:
-                  'For a dependency, its span subtype for the icon: postgresql, mysql, elasticsearch, redis, kafka, http and so on.',
+                description: `The icon for anything that is not a service, chosen to say what it is. Prefer a technology logo when there is one: logoElasticsearch, logoPostgres, logoMySQL, logoMongodb, logoRedis, logoKafka, logoRabbitmq, logoNginx, logoKubernetes (always for a Kubernetes deployment, pod, node, statefulset, daemonset or namespace), logoDocker (a container), logoAWS, logoGCP or logoAzure (cloud resources). Otherwise a generic one: database, storage, package (a queue), globe (an external API), cluster, compute (a host or VM), lock, link. One of: ${KNOWN_EUI_ICONS.join(
+                  ', '
+                )}.`,
               },
               role: {
                 type: 'string',
@@ -1126,6 +1193,22 @@ export const FINDINGS_JSON_SCHEMA = {
               on_critical_path: {
                 type: 'boolean',
                 description: 'True for each hop on the path from the symptom to the root cause.',
+              },
+              label: {
+                type: 'string',
+                description:
+                  'Only when the type alone does not say it: the protocol, port or action, for example "HTTPS :443" or "replicates every 5s".',
+              },
+              found_in: {
+                type: 'string',
+                enum: IMPACT_MAP_SOURCES,
+                description:
+                  'Where you learned of the link: trace, log, metric, config, code, catalog, diagram, doc, chat, or inferred for a hypothesis. Inferred links draw dashed.',
+              },
+              confidence: {
+                type: 'string',
+                enum: IMPACT_MAP_CONFIDENCES,
+                description: 'How sure you are the link is real.',
               },
             },
             required: ['source', 'target', 'type'],

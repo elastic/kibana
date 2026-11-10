@@ -31,7 +31,7 @@ const entityTypeSchema = impactMapEntityTypeSchema.extend({
     'Human name of the type, e.g. "Kubernetes pod".'
   ),
   kind: impactMapEntityTypeSchema.shape.kind.describe(
-    'The shape, by what the thing fundamentally is. "service" draws a circle, for application code you run (services, functions, front ends). "dependency" draws a diamond, for what services call (databases, queues, caches, external APIs). "infrastructure" draws a rounded square, for what runs and hosts them (Kubernetes deployments, pods and nodes, hosts, VMs, containers, cloud resources, load balancers).'
+    'The shape. "service" draws a circle, only for application code you run (services, functions, front ends), with its APM agent logo. "infrastructure" draws a rounded square with the icon you choose, for everything else: databases, caches, queues, search clusters, external APIs, load balancers, Kubernetes objects, hosts, VMs, containers and cloud resources. Do not use "dependency"; it is read as "infrastructure".'
   ),
   metadata_fields: impactMapEntityTypeSchema.shape.metadata_fields.describe(
     'The metadata fields entities of this type usually carry, for example a Kubernetes deployment: k8s.cluster.name, k8s.namespace.name (both featured). Add fields beyond `standard_metadata_fields`; they are reused by later investigations.'
@@ -39,19 +39,22 @@ const entityTypeSchema = impactMapEntityTypeSchema.extend({
   icon: impactMapIconSchema
     .extend({
       agent_name: impactMapIconSchema.shape.agent_name.describe(
-        'For a "service" type: the APM agent whose logo to draw, e.g. "nodejs", "java", "go", "python", "dotnet", "ruby", "php", "rum-js", "opentelemetry".'
+        'For a "service" type: the APM agent whose logo to draw, e.g. "nodejs", "java", "go", "python", "dotnet", "ruby", "php", "rum-js", "opentelemetry". Prefer this when the runtime is known.'
       ),
       eui_icon: impactMapIconSchema.shape.eui_icon.describe(
-        'For a type with no APM agent: an EUI icon name. Always "logoKubernetes" for Kubernetes objects (deployment, pod, node, statefulset, daemonset, namespace), "logoDocker" for containers, "logoAWS", "logoGCP" or "logoAzure" for cloud resources.'
+        'Required whenever there is no APM agent_name — every entity type must have a glyph, like a cloud architecture diagram. Prefer a technology or product logo: "logoElasticsearch", "logoElastic", "logoKibana", "logoPostgres", "logoMySQL", "logoMongodb", "logoRedis", "logoKafka", "logoRabbitmq", "logoNginx", "logoKubernetes" (always for Kubernetes objects), "logoDocker", "logoAWS", "logoGCP", "logoAzure", "logoGithub". Otherwise pick the closest shape: "database", "storage", "package" (queue/topic), "globe" (DNS or external API), "cluster" (deployments), "compute" (host, VM, allocator), "gear" (constructor, controller, operator), "merge" (proxy, load balancer, gateway), "mapMarker" (region or AZ), "shield" (firewall), "users" (team), "bolt" (disruption or fault), "sparkles" (investigation), "apps" (generic service with unknown runtime), "nested" (group).'
       ),
       span_type: impactMapIconSchema.shape.span_type.describe(
-        'For a "dependency" type: the span type whose icon to draw, e.g. "db", "messaging", "cache", "external", "storage".'
+        'Older way to pick an icon; use eui_icon.'
       ),
       span_subtype: impactMapIconSchema.shape.span_subtype.describe(
-        'For a "dependency" type: the technology, e.g. "postgresql", "mysql", "elasticsearch", "redis", "kafka", "rabbitmq", "s3", "http", "grpc".'
+        'Older way to pick an icon; use eui_icon.'
       ),
     })
-    .optional(),
+    .optional()
+    .describe(
+      'How the type draws. Always set this: agent_name for a known APM runtime, or eui_icon for everything else. Never leave a type without an icon.'
+    ),
 });
 
 const relationshipTypeSchema = impactMapRelationshipTypeSchema.extend({
@@ -79,6 +82,7 @@ export const upsertImpactMapCatalogToolSchema = lazySchema(() =>
 const DESCRIPTION =
   "Read the space's impact map catalog, and add types to it. The catalog holds the entity types (with how they draw and their icon) and relationship types every impact map in this space reuses, so investigations look consistent. " +
   'Call it with no arguments to read the catalog before `agentic_investigations.set_impact_map`, and reuse existing ids rather than inventing near-duplicates. ' +
+  'Every entity type must carry an icon: APM `agent_name` for a known runtime, otherwise a specific `eui_icon` (product logo or the closest shape — never leave a type without one). ' +
   'Types sent here are added, or replace the stored type with the same id (metadata fields add up by key). Returns the whole catalog, and `standard_metadata_fields`: the common metadata keys (cloud, Kubernetes, host) to reuse on entities before inventing your own.';
 
 /** `agentic_investigations.upsert_impact_map_catalog`: reads and extends the space catalog. */

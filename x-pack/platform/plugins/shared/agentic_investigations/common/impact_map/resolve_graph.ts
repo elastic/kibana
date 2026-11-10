@@ -111,6 +111,37 @@ export const resolveImpactMapGraph = ({
     keptEntities.push(entity);
   }
 
+  // A parent that is not in the map, or that leads back to the entity, would draw a box around
+  // nothing; drop the link and keep the entity.
+  const parentOf = new Map(
+    keptEntities.flatMap(({ id, parent_id: parentId }) => (parentId ? [[id, parentId]] : []))
+  );
+  const isInside = (start: string, ancestorId: string): boolean => {
+    const seen = new Set<string>();
+    for (let id: string | undefined = start; id && !seen.has(id); id = parentOf.get(id)) {
+      if (id === ancestorId) return true;
+      seen.add(id);
+    }
+    return false;
+  };
+  keptEntities.forEach((entity, index) => {
+    const { parent_id: parentId } = entity;
+    if (!parentId) return;
+    const reason = !entityIds.has(parentId)
+      ? 'is not an entity'
+      : parentId === entity.id || isInside(parentId, entity.id)
+      ? 'would put the entity inside itself'
+      : undefined;
+    if (reason) {
+      warnings.push(
+        `Entity "${entity.id}" has parent_id "${parentId}", which ${reason}; it was dropped.`
+      );
+      const { parent_id: _dropped, ...rest } = entity;
+      keptEntities[index] = rest;
+      parentOf.delete(entity.id);
+    }
+  });
+
   const relationshipIds = new Set<string>();
   const keptRelationships: Array<ImpactMapRelationship & { id: string }> = [];
   for (const relationship of relationships) {

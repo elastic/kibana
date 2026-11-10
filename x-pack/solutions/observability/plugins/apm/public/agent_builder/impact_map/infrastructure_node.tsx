@@ -59,7 +59,7 @@ export const InfrastructureNode = memo(
               visibility: hidden;
             `}
           />
-          {data.euiIcon && <EuiIcon type={data.euiIcon} size="xl" aria-hidden="true" />}
+          <EuiIcon type={data.euiIcon ?? 'compute'} size="xl" aria-hidden="true" />
           <Handle
             type="source"
             position={sourcePosition ?? Position.Right}

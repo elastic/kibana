@@ -16,6 +16,7 @@ import {
   useStore,
   useUpdateNodeInternals,
   type ColorMode,
+  type EdgeTypes,
   type Node,
   type NodeProps,
   type NodeTypes,
@@ -39,8 +40,12 @@ import { getSeverityColor } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getApmInternalServices } from '../../plugin';
 import { InfrastructureNode } from './infrastructure_node';
+import { GroupNode } from './group_node';
+import { ImpactMapEdge } from './impact_edge';
+import { ServiceGlyphNode } from './service_glyph_node';
+import { applyEdgeHoverHighlight, EDGE_HOVERED_CLASS } from './edge_hover';
+import { applyGroupedLayout, hasGroups } from './group_layout';
 import { ServiceNode } from '../../components/shared/service_map/service_node';
-import { DiamondNode } from '../../components/shared/service_map/diamond_node';
 import { applyDagreLayout } from '../../components/shared/service_map/layout';
 import {
   IMPACT_SEVERITY_SCORES,
@@ -156,35 +161,16 @@ function EventCountBadge({ count }: { count?: number }) {
 
 const ImpactServiceNode = memo((props: NodeProps<Node<ImpactServiceNodeData>>) => (
   <>
-    <ServiceNode {...(props as unknown as ComponentProps<typeof ServiceNode>)} />
+    {props.data.agentName ? (
+      <ServiceNode {...(props as unknown as ComponentProps<typeof ServiceNode>)} />
+    ) : (
+      <ServiceGlyphNode {...props} />
+    )}
     {props.data.impactState === 'root_cause' && <StateBadge state="root_cause" floating />}
     <EventCountBadge count={props.data.eventCount} />
   </>
 ));
 ImpactServiceNode.displayName = 'ImpactServiceNode';
-
-const ImpactDependencyNode = memo(
-  ({ data, sourcePosition, targetPosition }: NodeProps<Node<ImpactDependencyNodeData>>) => (
-    <>
-      <DiamondNode
-        id={data.id}
-        label={data.label}
-        spanType={data.spanType}
-        spanSubtype={data.spanSubtype}
-        sourcePosition={sourcePosition}
-        targetPosition={targetPosition}
-        testSubjPrefix="impactDependency"
-        iconAltFallback="dependency"
-        borderColor={
-          data.severityScore !== undefined ? getSeverityColor(data.severityScore) : undefined
-        }
-      />
-      {data.impactState === 'root_cause' && <StateBadge state="root_cause" floating />}
-      <EventCountBadge count={data.eventCount} />
-    </>
-  )
-);
-ImpactDependencyNode.displayName = 'ImpactDependencyNode';
 
 const ImpactInfrastructureNode = memo((props: NodeProps<Node<ImpactDependencyNodeData>>) => (
   <>
@@ -196,9 +182,13 @@ const ImpactInfrastructureNode = memo((props: NodeProps<Node<ImpactDependencyNod
 ImpactInfrastructureNode.displayName = 'ImpactInfrastructureNode';
 
 const nodeTypes: NodeTypes = {
+  impactGroup: GroupNode,
   impactInfrastructure: ImpactInfrastructureNode,
   service: ImpactServiceNode,
-  impactDependency: ImpactDependencyNode,
+};
+
+const edgeTypes: EdgeTypes = {
+  impact: ImpactMapEdge,
 };
 
 const LEGEND = {
@@ -211,9 +201,18 @@ const LEGEND = {
   criticalPath: i18n.translate('xpack.apm.impactMap.legend.criticalPath', {
     defaultMessage: 'Critical path',
   }),
+  inferred: i18n.translate('xpack.apm.impactMap.legend.inferred', {
+    defaultMessage: 'Inferred',
+  }),
 };
 
-function ImpactMapLegend({ criticalPathColor }: { criticalPathColor: string }) {
+function ImpactMapLegend({
+  criticalPathColor,
+  showInferred,
+}: {
+  criticalPathColor: string;
+  showInferred: boolean;
+}) {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiPanel paddingSize="xs" hasShadow={false} hasBorder data-test-subj="impactServiceMapLegend">
@@ -254,6 +253,25 @@ function ImpactMapLegend({ criticalPathColor }: { criticalPathColor: string }) {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+        {showInferred && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <span
+                  data-test-subj="impactServiceMapLegendInferred"
+                  css={css`
+                    display: block;
+                    width: ${euiTheme.size.l};
+                    border-top: 2px dashed ${euiTheme.colors.darkShade};
+                  `}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">{LEGEND.inferred}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );
@@ -334,14 +352,17 @@ function MapControls({
   );
 }
 
-/** More room on top, so the nodes sit centred in the space the controls and legend leave free. */
+/** Room for the controls and legend without zooming the graph into a sparse postage stamp. */
 const FIT_VIEW_OPTIONS = {
-  padding: { top: '96px', right: '10%', bottom: '8%', left: '10%' },
-  maxZoom: 1.5,
+  padding: { top: '72px', right: '6%', bottom: '6%', left: '6%' },
+  maxZoom: 1.75,
 };
 
-/** The service map's spacing assumes wide service cards; these nodes are small icons. */
-const TIGHT_LAYOUT = { nodeWidth: 120, ranksep: 90, nodesep: 50 };
+/**
+ * Compact enough to read as one diagram; rank gap still fits a short relationship pill between
+ * icons without the empty-field look of a 300px separation.
+ */
+const IMPACT_LAYOUT = { nodeWidth: 160, nodeHeight: 96, ranksep: 140, nodesep: 56 };
 
 const CLICKABLE_CLASS = 'impactMapClickable';
 
@@ -464,34 +485,48 @@ export function ImpactServiceMap({
 }: ImpactMapRendererProps) {
   const { euiTheme, colorMode } = useEuiTheme();
   const criticalPathColor = euiTheme.colors.danger;
+  const edgeColors = useMemo(
+    () => ({ criticalPath: criticalPathColor }),
+    [criticalPathColor]
+  );
 
   const agentNames = useServiceAgentNames(impactMap);
 
   const { laidOutNodes, edges } = useMemo(() => {
-    const graph = transformImpactMap(impactMap, { criticalPath: criticalPathColor }, agentNames);
-    // Only a target with events, or an entity with metadata, opens anything, so only it looks
-    // clickable.
-    const withMetadata = new Set(
-      impactMap.entities.filter(({ metadata }) => metadata?.length).map(({ id }) => id)
-    );
-    return {
-      laidOutNodes: applyDagreLayout<ImpactServiceMapNode>(
-        graph.nodes,
-        graph.edges,
-        TIGHT_LAYOUT
-      ).map((node) =>
-        node.data.eventCount || withMetadata.has(node.id)
-          ? { ...node, className: CLICKABLE_CLASS }
-          : node
-      ),
-      edges: graph.edges.map((edge) =>
-        edge.data?.eventCount ? { ...edge, className: CLICKABLE_CLASS } : edge
-      ),
+    const graph = transformImpactMap(impactMap, edgeColors, agentNames);
+    const layOut = (): ImpactServiceMapNode[] => {
+      if (hasGroups(graph.nodes)) {
+        try {
+          return applyGroupedLayout<ImpactServiceMapNode>(graph.nodes, graph.edges, IMPACT_LAYOUT);
+        } catch {
+          // Draw the entities flat rather than nothing; a group box needs the layout that failed.
+        }
+      }
+      const flat = graph.nodes.filter(({ type }) => type !== 'impactGroup');
+      return applyDagreLayout<ImpactServiceMapNode>(
+        flat,
+        graph.edges.filter(
+          ({ source, target }) =>
+            flat.some(({ id }) => id === source) && flat.some(({ id }) => id === target)
+        ),
+        {
+          nodeWidth: IMPACT_LAYOUT.nodeWidth,
+          nodeHeight: IMPACT_LAYOUT.nodeHeight,
+          ranksep: IMPACT_LAYOUT.ranksep,
+          nodesep: IMPACT_LAYOUT.nodesep,
+        }
+      );
     };
-  }, [impactMap, criticalPathColor, agentNames]);
+    // Every entity and link can open its details, so every one looks clickable.
+    return {
+      laidOutNodes: layOut().map((node) => ({ ...node, className: CLICKABLE_CLASS })),
+      edges: graph.edges.map((edge) => ({ ...edge, className: CLICKABLE_CLASS })),
+    };
+  }, [impactMap, edgeColors, agentNames]);
 
   // Local state so a dragged node stays put; a revised map from the agent lays out afresh.
   const [nodes, setNodes, onNodesChange] = useNodesState<ImpactServiceMapNode>(laidOutNodes);
+  const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
   // A revised map or a late agent lookup replaces the nodes. Each keeps the size already measured:
   // the nodes do not remount, so nothing would measure them again, and without a size a node has
   // no handles and its edges are not drawn.
@@ -499,11 +534,42 @@ export function ImpactServiceMap({
     () =>
       setNodes((current) =>
         laidOutNodes.map((node) => {
+          // Group boxes own their size from layout; keeping an old measured height collapses the
+          // cluster to the title row and members look ungrouped.
+          if (node.type === 'impactGroup') {
+            return node;
+          }
           const { measured } = current.find(({ id }) => id === node.id) ?? {};
           return measured ? { ...node, measured } : node;
         })
       ),
     [laidOutNodes, setNodes]
+  );
+
+  const { edges: displayEdges, endpointIds } = useMemo(
+    () => applyEdgeHoverHighlight(nodes, edges, hoveredEdgeId),
+    [nodes, edges, hoveredEdgeId]
+  );
+
+  const onEdgeMouseEnter = useCallback((_: React.MouseEvent, edge: { id: string }) => {
+    setHoveredEdgeId(edge.id);
+  }, []);
+  const onEdgeMouseLeave = useCallback(() => {
+    setHoveredEdgeId(null);
+  }, []);
+
+  const endpointSelectors = useMemo(
+    () =>
+      [...endpointIds]
+        .map((id) => {
+          const escaped =
+            typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
+              ? CSS.escape(id)
+              : id.replace(/"/g, '\\"');
+          return `.react-flow__node[data-id="${escaped}"]`;
+        })
+        .join(',\n'),
+    [endpointIds]
   );
 
   return (
@@ -529,21 +595,60 @@ export function ImpactServiceMap({
               center,
             ${euiTheme.colors.lightShade};
           background-size: ${euiTheme.size.l} ${euiTheme.size.l};
-          .react-flow__node,
-          .react-flow__edge {
+          .react-flow__node {
             cursor: default;
           }
-          ${onEntityClick ? `.react-flow__node.${CLICKABLE_CLASS} { cursor: pointer; }` : ''}
-          ${onRelationshipClick ? `.react-flow__edge.${CLICKABLE_CLASS} { cursor: pointer; }` : ''}
+          .react-flow__edge {
+            cursor: pointer;
+          }
+          /* Group boxes sit under their members; the wrapper must not steal their clicks. */
+          .react-flow__node-impactGroup {
+            pointer-events: none;
+          }
+          .react-flow__node-impactGroup .impactMapGroupHeader {
+            pointer-events: auto;
+          }
+          .react-flow__edge.${EDGE_HOVERED_CLASS} path {
+            filter: drop-shadow(0 0 3px ${euiTheme.colors.primary});
+          }
+          /* Endpoints via data-id so hover never rewrites the node list (that remount jumped
+             nested groups and made the pointer land on a different edge). */
+          ${endpointSelectors
+            ? `
+            .react-flow__node:not(.react-flow__node-impactGroup) {
+              opacity: 0.3;
+            }
+            ${endpointSelectors} {
+              opacity: 1;
+              filter: drop-shadow(0 0 0.5px ${euiTheme.colors.primary})
+                drop-shadow(0 0 4px ${euiTheme.colors.primary});
+            }
+          `
+            : ''}
+          ${onEntityClick
+            ? `
+            .react-flow__node.${CLICKABLE_CLASS},
+            .react-flow__node.${CLICKABLE_CLASS} * {
+              cursor: pointer;
+            }
+            .react-flow__node.${CLICKABLE_CLASS}:hover {
+              filter: drop-shadow(0 0 0.5px ${euiTheme.colors.primary})
+                drop-shadow(0 0 3px ${euiTheme.colors.primary});
+            }
+          `
+            : ''}
         `}
       >
         <ReactFlow
           nodes={nodes}
-          edges={edges}
+          edges={displayEdges}
           onNodesChange={onNodesChange}
           onNodeClick={onEntityClick ? (_, { id }) => onEntityClick(id) : undefined}
           onEdgeClick={onRelationshipClick ? (_, { id }) => onRelationshipClick(id) : undefined}
+          onEdgeMouseEnter={onEdgeMouseEnter}
+          onEdgeMouseLeave={onEdgeMouseLeave}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           fitView
           fitViewOptions={FIT_VIEW_OPTIONS}
           minZoom={0.1}
@@ -561,7 +666,10 @@ export function ImpactServiceMap({
                 <MapControls onToggleFullScreen={onToggleFullScreen} isFullScreen={isFullScreen} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <ImpactMapLegend criticalPathColor={criticalPathColor} />
+                <ImpactMapLegend
+                  criticalPathColor={criticalPathColor}
+                  showInferred={edges.some(({ data }) => data?.inferred)}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </Panel>

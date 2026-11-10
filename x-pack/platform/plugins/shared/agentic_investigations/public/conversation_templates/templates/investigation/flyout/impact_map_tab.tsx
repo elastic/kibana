@@ -211,13 +211,16 @@ const ImpactMapPanel: React.FC<{
         openTimeline();
       }
     : undefined;
-  // Nothing to show for a target with no events, so a click on it does nothing.
+  // Open for any entity or relationship on the map. Type, description and metadata are useful
+  // even when nothing has been recorded as an event yet — a silent click feels broken.
   const open = (next: EventsSelection) => {
-    const { events, metadata } = resolveEventsSelection(next, impactMap);
-    // Facts alone are worth opening: they tell a person where to look.
-    if (events.length > 0 || (metadata?.length ?? 0) > 0) {
-      setSelection(next);
+    if (next.kind === 'entity' && !impactMap.entities.some(({ id }) => id === next.id)) {
+      return;
     }
+    if (next.kind === 'relationship' && !impactMap.relationships.some(({ id }) => id === next.id)) {
+      return;
+    }
+    setSelection(next);
   };
   const openEntity = (id: string) => open({ kind: 'entity', id });
   const openRelationship = (id: string) => open({ kind: 'relationship', id });

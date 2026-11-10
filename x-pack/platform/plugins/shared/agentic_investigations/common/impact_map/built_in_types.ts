@@ -26,7 +26,86 @@ export const KNOWN_EUI_ICONS = [
   'compute',
   'apps',
   'package',
+  'storage',
+  'cluster',
+  'link',
+  'lock',
+  'logoElastic',
+  'logoElasticsearch',
+  'logoKibana',
+  'logoLogstash',
+  'logoBeats',
+  'logoKafka',
+  'logoRedis',
+  'logoMemcached',
+  'logoPostgres',
+  'logoMySQL',
+  'logoMongodb',
+  'logoCouchbase',
+  'logoRabbitmq',
+  'logoNginx',
+  'logoHAproxy',
+  'logoApache',
+  'logoEtcd',
+  'logoCeph',
+  'logoPrometheus',
+  'logoGithub',
+  'logoSlack',
+  'logoWebhook',
+  'users',
+  'user',
+  'tag',
+  'mapMarker',
+  'shield',
+  'layers',
+  'gear',
+  'merge',
+  'branch',
+  'home',
+  'plugs',
+  'rocket',
+  'productCloudInfra',
+  'bolt',
+  'bell',
+  'clock',
+  'wrench',
+  'nested',
+  'symlink',
+  'inspect',
+  'sparkles',
+  'search',
+  'tokenEvent',
 ] as const;
+
+/** An icon for what a stored `dependency` type drew as a diamond: its technology, else its span type. */
+export const getLegacyDependencyIcon = (icon?: {
+  span_type?: string;
+  span_subtype?: string;
+}): string => {
+  const bySubtype: Record<string, string> = {
+    elasticsearch: 'logoElasticsearch',
+    postgresql: 'logoPostgres',
+    postgres: 'logoPostgres',
+    mysql: 'logoMySQL',
+    mongodb: 'logoMongodb',
+    redis: 'logoRedis',
+    memcached: 'logoMemcached',
+    kafka: 'logoKafka',
+    rabbitmq: 'logoRabbitmq',
+  };
+  const byType: Record<string, string> = {
+    db: 'database',
+    cache: 'database',
+    messaging: 'package',
+    storage: 'storage',
+    external: 'globe',
+  };
+  return (
+    bySubtype[(icon?.span_subtype ?? '').toLowerCase()] ??
+    byType[(icon?.span_type ?? '').toLowerCase()] ??
+    'globe'
+  );
+};
 
 const KNOWN_ICON_BY_LOWERCASE = new Map<string, string>(
   KNOWN_EUI_ICONS.map((icon) => [icon.toLowerCase(), icon])
@@ -48,6 +127,13 @@ export const normalizeEntityType = (type: ImpactMapEntityType): ImpactMapEntityT
     const { eui_icon: named, ...rest } = icon;
     const known = KNOWN_ICON_BY_LOWERCASE.get(named.toLowerCase());
     next = { ...next, icon: known ? { ...rest, eui_icon: known } : rest };
+  }
+  if (next.kind === 'dependency') {
+    next = {
+      ...next,
+      kind: 'infrastructure',
+      icon: { ...next.icon, eui_icon: next.icon?.eui_icon ?? getLegacyDependencyIcon(next.icon) },
+    };
   }
   if (
     next.kind === 'service' &&
@@ -108,6 +194,22 @@ const kubernetesType = (
   };
 };
 
+/** Real infrastructure that is not a database or a Kubernetes object: a place, a network, a team. */
+const infraType = (
+  id: string,
+  label: string,
+  euiIcon: string,
+  description: string,
+  fields: ImpactMapMetadataField[] = []
+): ImpactMapEntityType => ({
+  id,
+  label,
+  kind: 'infrastructure',
+  icon: { eui_icon: euiIcon },
+  description,
+  ...(fields.length > 0 ? { metadata_fields: uniqueFields(fields) } : {}),
+});
+
 const serviceType = (id: string, label: string, agentName?: string): ImpactMapEntityType => ({
   id,
   label,
@@ -148,13 +250,13 @@ const serviceType = (id: string, label: string, agentName?: string): ImpactMapEn
 const dependencyType = (
   id: string,
   label: string,
-  icon: { span_type: string; span_subtype: string },
+  euiIcon: string,
   fields: ImpactMapMetadataField[]
 ): ImpactMapEntityType => ({
   id,
   label,
-  kind: 'dependency',
-  icon,
+  kind: 'infrastructure',
+  icon: { eui_icon: euiIcon },
   description: 'Something services call.',
   metadata_fields: [...fields, field('server.address', true), field('server.port')],
 });
@@ -246,44 +348,138 @@ export const BUILT_IN_ENTITY_TYPES: readonly ImpactMapEntityType[] = [
       field('host.name'),
     ],
   },
+  infraType('database', 'Database', 'database', 'A database whose engine is not known.', [
+    field('db.namespace', true),
+    field('db.system.name'),
+  ]),
+  infraType(
+    'group',
+    'Group',
+    'nested',
+    'A set of entities drawn together because they share something: a business service, a tier, a failure domain.',
+    []
+  ),
+  // Where things are and how they connect: a map of any system needs these before any service.
+  infraType(
+    'cloud.region',
+    'Cloud region',
+    'mapMarker',
+    'A cloud provider region, or a data centre site.',
+    [field('cloud.provider', true), field('cloud.region', true)]
+  ),
+  infraType(
+    'cloud.availability_zone',
+    'Availability zone',
+    'mapMarker',
+    'One failure domain in a region: a zone, a rack, a power or network domain.',
+    [
+      field('cloud.provider', true),
+      field('cloud.region', true),
+      field('cloud.availability_zone', true),
+    ]
+  ),
+  infraType('data_center', 'Data center', 'home', 'A physical site or room that hosts machines.', [
+    field('data_center.name', true, 'Data center'),
+  ]),
+  infraType('network', 'Network', 'link', 'A network, VPC, VLAN or subnet that entities share.', [
+    field('network.name', true, 'Network'),
+    field('network.cidr', true, 'Address range'),
+  ]),
+  infraType(
+    'network.firewall_rule',
+    'Firewall rule',
+    'shield',
+    'A security group, network policy or firewall rule that allows or blocks traffic.',
+    [field('network.rule.name', true, 'Rule'), field('network.rule.action', false, 'Action')]
+  ),
+  infraType(
+    'network.load_balancer',
+    'Load balancer',
+    'merge',
+    'A load balancer, ingress, proxy or API gateway that spreads or routes traffic.',
+    [field('network.name'), field('url.domain', true, 'Address')]
+  ),
+  infraType(
+    'cloud.service',
+    'Managed cloud service',
+    'logoCloud',
+    'A service the cloud provider runs for you, such as a managed database, queue or identity service, with limits you can hit.',
+    [field('cloud.provider', true), field('cloud.platform', true), field('cloud.region')]
+  ),
+  infraType('storage.bucket', 'Object storage', 'storage', 'A bucket or blob container.', [
+    field('cloud.provider', true),
+    field('cloud.region'),
+  ]),
+  infraType('messaging.queue', 'Queue or topic', 'package', 'A queue, topic or event stream.', [
+    field('messaging.system', true),
+    field('messaging.destination.name', true),
+  ]),
+  infraType(
+    'controller',
+    'Controller',
+    'gear',
+    'Software that keeps a system in its desired state: a Kubernetes operator, scheduler, autoscaler or control-plane component. Draw it when it acts on, or fails to act on, what broke.',
+    [field('k8s.cluster.name', true), field('service.version')]
+  ),
+  infraType(
+    'environment',
+    'Environment',
+    'layers',
+    'A deployment environment, slice or tenant: production, staging, a customer cell.',
+    [field('deployment.environment.name', true)]
+  ),
+  infraType(
+    'release',
+    'Release or version',
+    'tag',
+    'A software version or build that many entities run. Group by it to find a bad release.',
+    [field('service.version', true, 'Version'), field('vcs.revision', false, 'Revision')]
+  ),
+  infraType(
+    'pipeline',
+    'Pipeline',
+    'branch',
+    'A CI/CD or GitOps pipeline that builds, renders or deploys other entities.',
+    [field('cicd.pipeline.name', true, 'Pipeline')]
+  ),
+  infraType('repository', 'Repository', 'logoGithub', 'A source or configuration repository.', [
+    field('vcs.repository.url.full', true, 'URL'),
+  ]),
+  infraType(
+    'team',
+    'Team',
+    'users',
+    'The team that owns, runs or can be paged for other entities. Link it with owned_by.',
+    [field('team.name', true, 'Team'), field('team.oncall', false, 'On call')]
+  ),
   serviceType('service', 'Service'),
   serviceType('nodejs_service', 'Node.js service', 'nodejs'),
   serviceType('java_service', 'Java service', 'java'),
   serviceType('go_service', 'Go service', 'go'),
   serviceType('python_service', 'Python service', 'python'),
   serviceType('dotnet_service', '.NET service', 'dotnet'),
-  dependencyType('db.postgresql', 'PostgreSQL', { span_type: 'db', span_subtype: 'postgresql' }, [
+  dependencyType('db.postgresql', 'PostgreSQL', 'logoPostgres', [
     field('db.namespace', true),
     field('db.system.name'),
   ]),
-  dependencyType('db.mysql', 'MySQL', { span_type: 'db', span_subtype: 'mysql' }, [
+  dependencyType('db.mysql', 'MySQL', 'logoMySQL', [
     field('db.namespace', true),
     field('db.system.name'),
   ]),
-  dependencyType(
-    'db.elasticsearch',
-    'Elasticsearch',
-    { span_type: 'db', span_subtype: 'elasticsearch' },
-    [field('db.namespace'), field('db.system.name')]
-  ),
-  dependencyType('db.redis', 'Redis', { span_type: 'cache', span_subtype: 'redis' }, [
+  dependencyType('db.elasticsearch', 'Elasticsearch', 'logoElasticsearch', [
+    field('db.namespace'),
     field('db.system.name'),
   ]),
-  dependencyType(
-    'messaging.kafka',
-    'Kafka topic',
-    { span_type: 'messaging', span_subtype: 'kafka' },
-    [field('messaging.destination.name', true), field('messaging.system')]
-  ),
-  dependencyType(
-    'gen_ai.provider',
-    'Generative AI provider',
-    { span_type: 'external', span_subtype: 'http' },
-    [field('gen_ai.provider.name', true), field('gen_ai.request.model')]
-  ),
-  dependencyType('external_api', 'External API', { span_type: 'external', span_subtype: 'http' }, [
-    field('url.full'),
+  dependencyType('db.redis', 'Redis', 'logoRedis', [field('db.system.name')]),
+  dependencyType('messaging.kafka', 'Kafka topic', 'logoKafka', [
+    field('messaging.destination.name', true),
+    field('messaging.system'),
   ]),
+  dependencyType('gen_ai.provider', 'Generative AI provider', 'globe', [
+    field('gen_ai.provider.name', true),
+    field('gen_ai.request.model'),
+  ]),
+  dependencyType('external_api', 'External API', 'globe', [field('url.full')]),
 ];
 
 /**
@@ -326,6 +522,13 @@ export const BUILT_IN_RELATIONSHIP_TYPES: readonly ImpactMapRelationshipType[] =
   relationshipType('publishes_to', 'PUBLISHES_TO'),
   relationshipType('subscribes_to', 'SUBSCRIBES_TO'),
   relationshipType('depends_on', 'DEPENDS_ON'),
+  relationshipType('owned_by', 'OWNED_BY'),
+  relationshipType('routes_to', 'ROUTES_TO'),
+  relationshipType('replicates_to', 'REPLICATES_TO'),
+  relationshipType('managed_by', 'MANAGED_BY'),
+  relationshipType('deployed_by', 'DEPLOYED_BY'),
+  relationshipType('connects_to', 'CONNECTS_TO'),
+  relationshipType('blocked_by', 'BLOCKED_BY'),
 ];
 
 /** The types in code, as a catalog. */

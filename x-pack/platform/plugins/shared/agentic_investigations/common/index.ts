@@ -126,15 +126,19 @@ export {
   IMPACT_MAP_CATALOG_INDEX_NAME,
   IMPACT_MAP_EVENTS_INDEX_NAME,
   IMPACT_MAP_ENTITY_KINDS,
+  IMPACT_MAP_STORED_ENTITY_KINDS,
   IMPACT_MAP_EVENT_KINDS,
   IMPACT_MAP_HEALTH_STATES,
   IMPACT_MAP_INDEX_NAME,
   IMPACT_MAP_ROLES,
+  IMPACT_MAP_SOURCES,
+  IMPACT_MAP_CONFIDENCES,
   MAX_IMPACT_MAP_CATALOG_TYPES,
   MAX_IMPACT_MAP_ENTITIES,
   MAX_IMPACT_MAP_ENTITY_METADATA,
   MAX_IMPACT_MAP_EVENTS,
   MAX_IMPACT_MAP_RELATIONSHIPS,
+  PARSE_MERMAID_TOOL_ID,
   SET_IMPACT_MAP_TOOL_ID,
   SHOW_TIMELINE_TOOL_ID,
   TIMELINE_ATTACHMENT_TYPE,
@@ -157,6 +161,8 @@ export type {
   ImpactMapRelationship,
   ImpactMapRelationshipType,
   ImpactMapRole,
+  ImpactMapSource,
+  ImpactMapConfidence,
   InvestigationImpactMap,
 } from './impact_map/impact_map';
 
@@ -166,8 +172,17 @@ export {
   BUILT_IN_RELATIONSHIP_TYPES,
   canonicalEntityTypeId,
   KNOWN_EUI_ICONS,
+  getLegacyDependencyIcon,
   normalizeEntityType,
 } from './impact_map/built_in_types';
+export {
+  DEFAULT_INFRASTRUCTURE_ICON,
+  DEFAULT_SERVICE_ICON,
+  isKnownEuiIcon,
+  resolveEntityIcon,
+} from './impact_map/entity_icons';
+export { impactMapToMermaid, parseMermaid } from './impact_map/mermaid';
+export type { ParsedMermaid } from './impact_map/mermaid';
 export { resolveEntityMetadata, STANDARD_METADATA_FIELDS } from './impact_map/metadata';
 export type { EntityMetadataRow } from './impact_map/metadata';
 

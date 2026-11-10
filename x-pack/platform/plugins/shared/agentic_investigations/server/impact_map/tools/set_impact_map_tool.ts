@@ -40,6 +40,15 @@ const entitySchema = impactMapEntitySchema.extend({
   metadata: impactMapEntitySchema.shape.metadata.describe(
     "Facts that help a person understand and find this entity, from tool results only: cloud.provider, cloud.availability_zone, k8s.cluster.name, k8s.namespace.name, host.name, service.version and so on. Reuse the keys the catalog lists (`standard_metadata_fields` and each type's `metadata_fields`); add your own lowercase dotted key, with a `label`, for anything else that helps. Set `featured: true` on the few that matter most (for example cluster and namespace), which show on the first page of the entity's flyout."
   ),
+  parent_id: impactMapEntitySchema.shape.parent_id.describe(
+    'The id of the entity this one sits inside; the map draws a box around its members, like a Mermaid subgraph. A pod inside its node, a node inside its zone, a zone inside its region, a service inside its business service. Use it for whatever the affected entities share. Must be another entity in this call.'
+  ),
+  source: impactMapEntitySchema.shape.source.describe(
+    'Where you learned the entity exists: log, trace, metric, config, code, catalog, diagram, doc, chat, or inferred. Written-down sources can be stale; prefer telemetry.'
+  ),
+  confidence: impactMapEntitySchema.shape.confidence.describe(
+    'How sure you are that it is real and where you placed it.'
+  ),
   annotations: impactMapAnnotationsSchema
     .extend({
       role: impactMapAnnotationsSchema.shape.role.describe(
@@ -68,6 +77,15 @@ const relationshipSchema = impactMapRelationshipSchema.extend({
   target_id: impactMapRelationshipSchema.shape.target_id.describe('The entity the edge ends at.'),
   on_critical_path: impactMapRelationshipSchema.shape.on_critical_path.describe(
     'True for every edge on the chain from the impacted entry point to the root cause. Drawn red.'
+  ),
+  label: impactMapRelationshipSchema.shape.label.describe(
+    'Only when the type alone does not say it: the protocol, port or action, such as "HTTPS :443". Replaces the type label on this edge.'
+  ),
+  source: impactMapRelationshipSchema.shape.source.describe(
+    'Where you learned of the link: trace, log, metric, config, code, catalog, diagram, doc, chat, or inferred for a hypothesis (drawn dashed, so say why in the description of the entities it joins).'
+  ),
+  confidence: impactMapRelationshipSchema.shape.confidence.describe(
+    'How sure you are the link is real.'
   ),
 });
 
@@ -138,6 +156,8 @@ const DESCRIPTION =
   'The graph is a snapshot, not a diff: send the whole map every time; it replaces the stored one. Events are merged by id. ' +
   'Entities are physical things only (services, hosts, pods, databases, queues, cloud APIs). A change, an outage, a vendor or customer impact is an event on the entity it happened to, never an entity. ' +
   'Types come from the space catalog so every investigation draws things the same way: read it first with `agentic_investigations.upsert_impact_map_catalog` (no arguments) and reuse its type ids; send any new type in `entity_types` / `relationship_types`. ' +
+  'Every entity type needs an icon before you draw it: APM `agent_name` when the runtime is known, otherwise pick a specific `eui_icon` (Elasticsearch, Kubernetes, GCP, gear for a controller, compute for an allocator, merge for a proxy — never an empty circle). ' +
+  'Draw the architecture of the problem for an on-call engineer who does not know the system: put entities inside what they belong to with `parent_id` (pod in node, node in zone, zone in region, hosts in a network), show owners as team entities with `owned_by` links, and say where each entity and link came from with `source` and `confidence`; a suspected link is `inferred`. Anything a Mermaid diagram can show, this can show; read a diagram with `agentic_investigations.parse_mermaid` first. ' +
   'Mark the confirmed cause `role: "root_cause"`, what the problem touched, where it shows included, `impacted: true`, and every edge of the causal chain `on_critical_path: true`. ' +
   'It does not end the investigation; keep working after calling it.';
 
