@@ -194,8 +194,8 @@ export async function drainConcurrencyQueueSlots(params: {
   }
 }
 
-/** Pre-enqueue drain when a new execution joins a queue concurrency group. */
-export async function maybeDrainConcurrencyQueueBeforeEnqueue({
+/** Best-effort drain of the queue concurrency group an execution belongs to. */
+export async function maybeDrainConcurrencyQueue({
   workflowExecution,
   workflowExecutionRepository,
   workflowTaskManager,

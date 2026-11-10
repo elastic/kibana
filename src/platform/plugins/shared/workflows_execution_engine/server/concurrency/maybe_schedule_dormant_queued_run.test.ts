@@ -22,6 +22,7 @@ describe('handleConcurrencyBlockedExecution', () => {
   const logger = {
     warn: jest.fn(),
     info: jest.fn(),
+    debug: jest.fn(),
   } as unknown as Logger;
 
   const createExecution = (overrides: Partial<EsWorkflowExecution> = {}): EsWorkflowExecution =>
@@ -47,10 +48,14 @@ describe('handleConcurrencyBlockedExecution', () => {
   const createDependencies = (execution: EsWorkflowExecution | null) => {
     const workflowExecutionRepository = {
       getWorkflowExecutionById: jest.fn().mockResolvedValue(execution),
+      countExecutionsByConcurrencyGroupAndStatuses: jest.fn().mockResolvedValue(1),
+      getOldestQueuedExecutionIdByConcurrencyGroup: jest.fn().mockResolvedValue(null),
+      tryCasPromoteQueuedWorkflowExecutionToPending: jest.fn().mockResolvedValue(true),
     } as unknown as jest.Mocked<WorkflowExecutionRepository>;
     const workflowTaskManager = {
       scheduleDormantQueuedRunTask: jest.fn().mockResolvedValue(undefined),
       scheduleAndRunImmediateResume: jest.fn().mockResolvedValue(undefined),
+      promoteQueuedRunTask: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<WorkflowTaskManager>;
     const internalResumeWorkflowExecution = jest.fn().mockResolvedValue(undefined);
 
@@ -110,6 +115,71 @@ describe('handleConcurrencyBlockedExecution', () => {
       request,
     });
     expect(internalResumeWorkflowExecution).not.toHaveBeenCalled();
+  });
+
+  it('promotes the queued execution when its slot holder terminated before the enqueue landed', async () => {
+    const execution = createExecution({
+      status: ExecutionStatus.QUEUED,
+      concurrencyGroupKey: 'group-1',
+      triggeredBy: 'manual',
+    });
+    const { workflowExecutionRepository, workflowTaskManager, internalResumeWorkflowExecution } =
+      createDependencies(execution);
+    // The group is empty because the holder reached a terminal status while this
+    // execution was still writing its `queued` document.
+    workflowExecutionRepository.countExecutionsByConcurrencyGroupAndStatuses
+      .mockResolvedValueOnce(0)
+      .mockResolvedValue(1);
+    workflowExecutionRepository.getOldestQueuedExecutionIdByConcurrencyGroup.mockResolvedValueOnce(
+      workflowExecutionId
+    );
+    workflowExecutionRepository.getWorkflowExecutionById
+      .mockResolvedValueOnce(execution)
+      .mockResolvedValueOnce(execution)
+      .mockResolvedValueOnce({ ...execution, status: ExecutionStatus.PENDING });
+
+    await handleConcurrencyBlockedExecution({
+      workflowExecutionId,
+      spaceId,
+      request,
+      workflowExecutionRepository,
+      workflowTaskManager,
+      internalResumeWorkflowExecution,
+      logger,
+    });
+
+    expect(workflowTaskManager.scheduleDormantQueuedRunTask).toHaveBeenCalled();
+    expect(
+      workflowExecutionRepository.tryCasPromoteQueuedWorkflowExecutionToPending
+    ).toHaveBeenCalledWith({ workflowExecutionId, spaceId });
+    expect(workflowTaskManager.promoteQueuedRunTask).toHaveBeenCalledWith({
+      executionId: workflowExecutionId,
+      triggeredBy: 'manual',
+    });
+  });
+
+  it('leaves the queued execution alone while its slot holder is still running', async () => {
+    const execution = createExecution({
+      status: ExecutionStatus.QUEUED,
+      concurrencyGroupKey: 'group-1',
+    });
+    const { workflowExecutionRepository, workflowTaskManager, internalResumeWorkflowExecution } =
+      createDependencies(execution);
+
+    await handleConcurrencyBlockedExecution({
+      workflowExecutionId,
+      spaceId,
+      request,
+      workflowExecutionRepository,
+      workflowTaskManager,
+      internalResumeWorkflowExecution,
+      logger,
+    });
+
+    expect(
+      workflowExecutionRepository.tryCasPromoteQueuedWorkflowExecutionToPending
+    ).not.toHaveBeenCalled();
+    expect(workflowTaskManager.promoteQueuedRunTask).not.toHaveBeenCalled();
   });
 
   it('does not resume when the terminal execution has no sync parent context', async () => {
