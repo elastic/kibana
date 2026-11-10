@@ -16,8 +16,6 @@ export type DreamedKiAttributes = Record<string, string | number | boolean | str
 export interface DreamedKiReference {
   uri: string;
   relation?: KiReferenceRelation;
-  /** The relationship type on an entity's `relates_to` reference; `about` on a fact's. */
-  description?: string;
 }
 
 /** A fact or entity as dreaming reads and writes it. */
@@ -32,10 +30,9 @@ export interface DreamedKi extends StoredKi {
   permissions?: KiPermissions;
 }
 
-/** The `description` of a fact's `relates_to` reference to an entity it is about. */
-export const ABOUT_RELATION = 'about';
+export type DreamedKiKind = 'entity' | 'fact';
 
-export const kindOf = (ki: Pick<DreamedKi, 'type'>): 'entity' | 'fact' | undefined => {
+export const kindOf = (ki: Pick<DreamedKi, 'type'>): DreamedKiKind | undefined => {
   if (ki.type.startsWith(ENTITY_TYPE_PREFIX)) {
     return 'entity';
   }

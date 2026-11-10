@@ -55,7 +55,7 @@ const accessPatternsSchema = lazySchema(() =>
   z.array(accessPatternSchema).max(MAX_DREAMING_ACCESS_PATTERNS)
 );
 
-/** Entities, facts and relationships the dreaming model creates, updates or deletes. */
+/** Entities and facts the dreaming model creates, updates or deletes. */
 export const dreamChangeSetSchema = lazySchema(() =>
   z.object({
     entities: z
@@ -64,7 +64,7 @@ export const dreamChangeSetSchema = lazySchema(() =>
           ref: refSchema,
           delete: z.boolean().optional(),
           type: typeSchema.optional(),
-          name: z.string().max(MAX_KI_TITLE_LENGTH).optional(),
+          title: z.string().max(MAX_KI_TITLE_LENGTH).optional(),
           description: z.string().max(MAX_KI_DESCRIPTION_LENGTH).optional(),
           content: z.string().max(MAX_KI_CONTENT_LENGTH).optional(),
           attributes: z
@@ -90,20 +90,7 @@ export const dreamChangeSetSchema = lazySchema(() =>
           type: typeSchema.optional(),
           title: z.string().max(MAX_KI_TITLE_LENGTH).optional(),
           content: z.string().max(MAX_KI_CONTENT_LENGTH).optional(),
-          about: z.array(refSchema).max(MAX_SOURCE_IDS).optional(),
           access_patterns: accessPatternsSchema.optional(),
-          source_memory_ids: sourceMemoryIdsSchema.optional(),
-        })
-      )
-      .max(MAX_DREAMING_CHANGE_SET_ITEMS)
-      .default([]),
-    relationships: z
-      .array(
-        z.object({
-          type: typeSchema.min(1),
-          source: refSchema,
-          target: refSchema,
-          remove: z.boolean().optional(),
           source_memory_ids: sourceMemoryIdsSchema.optional(),
         })
       )
@@ -189,7 +176,7 @@ const plannedDocumentSchema = lazySchema(() =>
 export const applyDreamChangesOutputSchema = lazySchema(() =>
   z.object({
     created: z.number().describe('Facts and entities created'),
-    updated: z.number().describe('Facts and entities updated, relationships included'),
+    updated: z.number().describe('Facts and entities updated'),
     deleted: z.number().describe('Facts and entities deleted'),
     rejected: z
       .array(rejectedItemSchema)
@@ -219,8 +206,7 @@ export const applyDreamChangesStepCommonDefinition: CommonStepDefinition<
     defaultMessage: 'Apply dreamed memory changes',
   }),
   description: i18n.translate('xpack.contextEngine.workflows.steps.applyDreamChanges.description', {
-    defaultMessage:
-      'Write the facts, entities and relationships a dreaming model proposed into an AI index.',
+    defaultMessage: 'Write the facts and entities a dreaming model proposed into an AI index.',
   }),
   category: StepCategory.Kibana,
   stability: 'tech_preview',

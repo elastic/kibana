@@ -27,7 +27,6 @@ const steps: Step[] = parse(
     instructions: '',
     factTypes: [],
     entityTypes: [],
-    relationshipTypes: [],
   }).replaceAll('{{ workflow.spaceId }}', SPACE)
 ).steps;
 

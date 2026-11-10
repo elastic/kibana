@@ -1,6 +1,6 @@
 version: '1'
 name: __NAME__
-description: 'Turns the memories agents save in a Context Engine AI index into long-term facts, entities and relationships, as the AI index dreaming config describes.'
+description: 'Turns the memories agents save in a Context Engine AI index into long-term facts and entities, as the AI index dreaming config describes.'
 enabled: false
 tags:
   - context-engine
@@ -20,7 +20,6 @@ consts:
   instructions: __INSTRUCTIONS__
   fact_types: __FACT_TYPES__
   entity_types: __ENTITY_TYPES__
-  relationship_types: __RELATIONSHIP_TYPES__
 outputs:
   - name: memories
     type: number
@@ -183,6 +182,7 @@ steps:
                 - id
                 - type
                 - title
+                - description
                 - content
                 - attributes
                 - references
@@ -228,9 +228,15 @@ steps:
                 delay: '30s'
             with:
               prompt: |
-                You consolidate short-term memories into long-term memory: entities, facts about them, and relationships between entities.
+                You consolidate short-term memories into long-term memory, of the kinds configured below:
+                {%- if consts.fact_types.size > 0 %}
+                - facts: separate pieces of knowledge, each readable on its own.
+                {%- endif %}
+                {%- if consts.entity_types.size > 0 %}
+                - entities: the things the memories are about, each with a summary of what is known about it.
+                {%- endif %}
 
-                You are given MEMORIES (new notes agents saved while working) and EXISTING long-term entities and facts.
+                You are given MEMORIES (new notes agents saved while working) and EXISTING long-term items.
 
                 A memory is a note an agent chose to remember: its title and content. Take from it only what it states.
 
@@ -239,14 +245,16 @@ steps:
                 Merge rather than duplicate: if a memory restates or refines an existing item, update that item.
 
                 When a memory restates or confirms an existing item, return its ref with that memory in source_memory_ids even if nothing else changes: that records that it was seen again. Each EXISTING item shows attributes["memory.number_of_occurrences"], how many memories it was seen in, and attributes["memory.last_seen_at"], when it was last seen.
+                {%- if consts.fact_types.size > 0 %}
 
-                Facts are read without their entities, so write each one to stand alone: name the entities it is about in its title and content, and keep every number exactly as stated.
+                Facts are read on their own, so write each one to stand alone: name what it is about in its title and content, and keep every name, number, code and date exactly as stated.
 
-                Add a relationship of a configured type whenever the memories support it, so related entities are linked.
+                State the knowledge itself rather than copying the memory, and leave out how it was found and where it came from. When a memory holds several separate pieces of knowledge, write a fact for each.
+                {%- endif %}
+                {%- if consts.entity_types.size > 0 %}
 
-                List every entity a fact is about in its about field, creating an entity of a configured type if none exists yet.
-
-                Give every entity a content summary of what is known about it: its attribute values and the main facts about it. When you create, update or delete a fact about an entity, update that entity and rewrite its content to match.
+                Give every entity a content summary of what is known about it: its attribute values and the main facts about it.
+                {%- endif %}
 
                 Give an entity or fact access_patterns when the MEMORIES show how to query the raw data about it: up to 5 distinct questions a later agent could answer from that data. Build them only from indices, fields, values and queries that appear in the MEMORIES; return none rather than invent an index or field. Each has:
                 - question_type: a short label for the kind of question.
@@ -264,7 +272,7 @@ steps:
 
                 Ignore memories that hold nothing worth remembering. An empty change set is a valid answer.
 
-                How to read EXISTING: an item's type is its kind and its configured type, so entity.customer is an entity of type customer and fact.preference is a fact of type preference. On an entity, each references entry with relation relates_to is a relationship: its description is the relationship type and its uri, ki://<id>, names the target entity. On a fact, the relates_to entries with description about name the entities it is about.
+                How to read EXISTING: an item's type is its kind followed by its configured type: fact.<fact type> or entity.<entity type>.
 
                 FACT TYPES:
                 {%- for fact_type in consts.fact_types %}
@@ -277,12 +285,6 @@ steps:
                 - {{ entity_type.type }}{% if entity_type.description %}: {{ entity_type.description }}{% endif %}{% if entity_type.attributes.size > 0 %} (attributes: {{ entity_type.attributes | join: ', ' }}){% endif %}
                 {%- else %}
                 none: do not create entities.
-                {%- endfor %}
-                RELATIONSHIP TYPES:
-                {%- for relationship_type in consts.relationship_types %}
-                - {{ relationship_type.type }}: {{ relationship_type.source }} -> {{ relationship_type.target }}{% if relationship_type.description %} ({{ relationship_type.description }}){% endif %}
-                {%- else %}
-                none: do not create relationships.
                 {%- endfor %}
 
                 INSTRUCTIONS:
@@ -311,14 +313,14 @@ steps:
                       properties:
                         ref:
                           type: string
-                          description: An id from EXISTING, or a new key like "new:1" to create something. Reuse the same new key to refer to a new entity elsewhere in this change set.
+                          description: An id from EXISTING, or a new key like "new:1" to create something.
                         delete:
                           type: boolean
                           description: True deletes an existing entity.
                         type:
                           type: string
                           description: One of the configured entity types.
-                        name:
+                        title:
                           type: string
                           description: The canonical name of the entity.
                         description:
@@ -383,15 +385,10 @@ steps:
                           description: One of the configured fact types.
                         title:
                           type: string
-                          description: A short label for the fact that names the entities it is about.
+                          description: A short label for the fact that names what it is about.
                         content:
                           type: string
-                          description: The fact, stated so it can be used on its own, naming the entities it is about and keeping exact values.
-                        about:
-                          type: array
-                          description: Refs of the entities the fact is about.
-                          items:
-                            type: string
+                          description: The fact, stated so it can be used on its own, naming what it is about and keeping exact values.
                         access_patterns:
                           type: array
                           description: Replaces the existing access patterns; leave out to keep them.
@@ -418,37 +415,9 @@ steps:
                             type: string
                       required:
                         - ref
-                  relationships:
-                    type: array
-                    description: Relationships between entities to add or remove.
-                    items:
-                      type: object
-                      properties:
-                        type:
-                          type: string
-                          description: One of the configured relationship types.
-                        source:
-                          type: string
-                          description: Ref of the source entity.
-                        target:
-                          type: string
-                          description: Ref of the target entity.
-                        remove:
-                          type: boolean
-                          description: True removes an existing relationship.
-                        source_memory_ids:
-                          type: array
-                          description: Ids of the MEMORIES this is based on. Required unless removing.
-                          items:
-                            type: string
-                      required:
-                        - type
-                        - source
-                        - target
                 required:
                   - entities
                   - facts
-                  - relationships
 
           - name: apply_changes
             type: context-engine.applyDreamChanges

@@ -66,7 +66,7 @@ describe('applyOperations', () => {
         op: 'upsert_entity',
         id: 'entity-customer-825464',
         type: 'customer',
-        name: 'Customer 825464',
+        title: 'Customer 825464',
         content: 'Nova member in Montreal.',
         attributes: { tier: 'Nova' },
         sourceMemoryIds: ['m-1', 'm-2'],
@@ -126,7 +126,7 @@ describe('applyOperations', () => {
         op: 'upsert_entity',
         id: 'entity-person-bob',
         type: 'person',
-        name: 'Bob',
+        title: 'Bob',
         attributes: {},
         sourceMemoryIds: ['m-1', 'm-2'],
         lastSeenAt: '2026-11-01T00:00:00.000Z',
@@ -150,16 +150,13 @@ describe('applyOperations', () => {
     );
   });
 
-  it('replaces the entities a fact is about, and renders its access patterns', async () => {
+  it('updates a fact, adding the new memory and rendering its access patterns', async () => {
     stored.set('fact-1', {
       id: 'fact-1',
       type: 'fact.preference',
       title: 'Old',
       content: 'Old.',
-      references: [
-        { uri: 'ki://entity-person-old', relation: 'relates_to', description: 'about' },
-        { uri: 'ki://m-1', relation: 'derived_from' },
-      ],
+      references: [{ uri: 'ki://m-1', relation: 'derived_from' }],
     });
     const pattern = {
       question_type: 'member profile',
@@ -175,7 +172,6 @@ describe('applyOperations', () => {
         type: 'preference',
         title: 'Customer 825464 prefers early departures',
         content: 'Customer 825464 prefers early morning departures.',
-        about: ['entity-customer-825464'],
         accessPatterns: [pattern],
         sourceMemoryIds: ['m-2'],
       },
@@ -184,7 +180,6 @@ describe('applyOperations', () => {
     const [document] = written();
     expect(document.references).toEqual([
       { uri: 'ki://m-1', relation: 'derived_from' },
-      { uri: 'ki://entity-customer-825464', relation: 'relates_to', description: 'about' },
       { uri: 'ki://m-2', relation: 'derived_from' },
     ]);
     expect(document.content).toBe(
@@ -206,49 +201,6 @@ describe('applyOperations', () => {
     );
   });
 
-  it('adds a relationship to its source entity, and removes it again', async () => {
-    stored.set('entity-person-bob', {
-      id: 'entity-person-bob',
-      type: 'entity.person',
-      title: 'Bob',
-      references: [{ uri: 'ki://m-1', relation: 'derived_from' }],
-    });
-    const relationship = {
-      op: 'relationship' as const,
-      sourceId: 'entity-person-bob',
-      targetId: 'entity-team-ops',
-      type: 'member_of',
-      sourceMemoryIds: ['m-1'],
-    };
-
-    await applyOperations(context(), [{ ...relationship, remove: false }]);
-    const added = written()[0];
-    expect(added.references).toEqual([
-      { uri: 'ki://m-1', relation: 'derived_from' },
-      { uri: 'ki://entity-team-ops', relation: 'relates_to', description: 'member_of' },
-    ]);
-
-    stored.set('entity-person-bob', added);
-    await applyOperations(context(), [{ ...relationship, remove: true, sourceMemoryIds: [] }]);
-    expect(written()[1].references).toEqual([{ uri: 'ki://m-1', relation: 'derived_from' }]);
-  });
-
-  it('skips a relationship whose source entity does not exist', async () => {
-    const counts = await applyOperations(context(), [
-      {
-        op: 'relationship',
-        sourceId: 'entity-person-missing',
-        targetId: 'entity-team-ops',
-        type: 'member_of',
-        remove: false,
-        sourceMemoryIds: ['m-1'],
-      },
-    ]);
-
-    expect(counts).toEqual({ created: 0, updated: 0, deleted: 0 });
-    expect(putKiRevision).not.toHaveBeenCalled();
-  });
-
   it('appends a new revision to a data stream instead of overwriting', async () => {
     stored.set('entity-person-bob', {
       id: 'entity-person-bob',
@@ -261,7 +213,7 @@ describe('applyOperations', () => {
         op: 'upsert_entity',
         id: 'entity-person-bob',
         type: 'person',
-        name: 'Bob',
+        title: 'Bob',
         attributes: {},
         sourceMemoryIds: ['m-1'],
       },
@@ -281,7 +233,7 @@ describe('applyOperations', () => {
         op: 'upsert_entity',
         id: 'entity-team-ops',
         type: 'team',
-        name: 'Ops',
+        title: 'Ops',
         attributes: {},
         sourceMemoryIds: ['m-1'],
       },
@@ -386,7 +338,7 @@ describe('applyOperations', () => {
           op: 'upsert_entity',
           id: 'entity-team--ops',
           type: 'team',
-          name: 'Ops',
+          title: 'Ops',
           attributes: {},
           sourceMemoryIds: ['m-1'],
         },
@@ -406,23 +358,23 @@ describe('applyOperations', () => {
         op: 'upsert_entity' as const,
         id: 'entity-team-ops',
         type: 'team',
-        name: 'Ops',
+        title: 'Ops',
         attributes: {},
         sourceMemoryIds: ['m-2'],
       },
       {
-        op: 'relationship' as const,
-        sourceId: 'entity-team-ops',
-        targetId: 'entity-person-bob',
-        type: 'includes',
-        remove: false,
+        op: 'upsert_fact' as const,
+        id: 'fact-2',
+        type: 'note',
+        title: 'Ops is on call',
+        content: 'Ops is on call this week.',
         sourceMemoryIds: ['m-2'],
       },
       {
         op: 'upsert_entity' as const,
         id: 'entity-person-bob',
         type: 'person',
-        name: 'Bob',
+        title: 'Bob',
         content: 'Bob is on the Ops team.',
         attributes: {},
         sourceMemoryIds: ['m-2'],
@@ -456,33 +408,39 @@ describe('applyOperations', () => {
       const counts = await applyOperations({ ...context(), dryRun }, operations);
 
       expect(counts).toEqual(await applyOperations(context(), operations));
-      expect(counts).toEqual({ created: 1, updated: 2, deleted: 1 });
+      expect(counts).toEqual({ created: 2, updated: 1, deleted: 1 });
       expect(jest.mocked(putKiRevision).mock.calls).toHaveLength(3);
       expect(jest.mocked(softDeleteKi).mock.calls).toHaveLength(1);
     });
 
-    it('reports each KI as it would be stored, including a relationship on a new entity', async () => {
+    it('reports each KI as it would be stored', async () => {
       const dryRun = new Map();
 
       await applyOperations({ ...context(), dryRun }, operations);
 
       expect(putKiRevision).not.toHaveBeenCalled();
       expect(softDeleteKi).not.toHaveBeenCalled();
-      expect([...dryRun.keys()]).toEqual(['entity-team-ops', 'entity-person-bob', 'fact-1']);
+      expect([...dryRun.keys()]).toEqual([
+        'entity-team-ops',
+        'fact-2',
+        'entity-person-bob',
+        'fact-1',
+      ]);
       expect(dryRun.get('entity-team-ops')).toEqual({
         change: 'created',
         ki: expect.objectContaining({
           type: 'entity.team',
           title: 'Ops',
-          references: [
-            { uri: 'ki://m-2', relation: 'derived_from' },
-            { uri: 'ki://entity-person-bob', relation: 'relates_to', description: 'includes' },
-          ],
+          references: [{ uri: 'ki://m-2', relation: 'derived_from' }],
           governance: {
             provenance: { created_by: writer, updated_by: writer },
             lifecycle: { status: 'active' },
           },
         }),
+      });
+      expect(dryRun.get('fact-2')).toEqual({
+        change: 'created',
+        ki: expect.objectContaining({ type: 'fact.note', content: 'Ops is on call this week.' }),
       });
       expect(dryRun.get('entity-person-bob')).toEqual({
         change: 'updated',
@@ -516,39 +474,15 @@ describe('addReferences', () => {
       uri: `ki://m-${from + index}`,
       relation: 'derived_from' as const,
     }));
-  const relationships = [
-    { uri: 'ki://entity-a', relation: 'relates_to' as const, description: 'knows' },
-    { uri: 'ki://entity-b', relation: 'relates_to' as const, description: 'knows' },
-  ];
-
-  it('drops the oldest memory citations before any relationship when over the cap', () => {
-    const newRelationship = {
-      uri: 'ki://entity-c',
-      relation: 'relates_to' as const,
-      description: 'knows',
-    };
-
-    const references = addReferences(
-      [...relationships, ...citations(100)],
-      [newRelationship, ...citations(1, 100)]
-    );
-
-    expect(references).toHaveLength(100);
-    expect(references).toEqual(expect.arrayContaining([...relationships, newRelationship]));
-    expect(references).not.toContainEqual({ uri: 'ki://m-0', relation: 'derived_from' });
-    expect(references).toContainEqual({ uri: 'ki://m-100', relation: 'derived_from' });
+  it('adds each memory citation once', () => {
+    expect(addReferences(citations(2), citations(2, 1))).toEqual(citations(3));
   });
 
-  it('drops the oldest relationships only once no citation is left', () => {
-    const many = Array.from({ length: 101 }, (_, index) => ({
-      uri: `ki://entity-${index}`,
-      relation: 'relates_to' as const,
-      description: 'knows',
-    }));
-
-    const references = addReferences(many, []);
+  it('drops the oldest memory citations when over the cap', () => {
+    const references = addReferences(citations(100), citations(1, 100));
 
     expect(references).toHaveLength(100);
-    expect(references).not.toContainEqual(many[0]);
+    expect(references).not.toContainEqual({ uri: 'ki://m-0', relation: 'derived_from' });
+    expect(references).toContainEqual({ uri: 'ki://m-100', relation: 'derived_from' });
   });
 });

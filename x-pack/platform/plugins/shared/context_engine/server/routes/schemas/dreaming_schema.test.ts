@@ -18,7 +18,6 @@ const config = {
       { type: 'customer', description: 'A loyalty member.', attributes: ['loyalty_number'] },
       { type: 'city' },
     ],
-    edges: [{ type: 'lives_in', source: 'customer', target: 'city' }],
   },
 };
 
@@ -60,13 +59,16 @@ describe('dreamingConfigSchema', () => {
     ).toThrow('Must be at least 15 minutes.');
   });
 
-  it('rejects a relationship to an entity type that is not configured', () => {
+  it('rejects relationship types, which dreaming no longer builds', () => {
     expect(() =>
       dreamingConfigSchema.validate({
         ...config,
-        entities: { ...config.entities, nodes: [config.entities.nodes[0]] },
+        entities: {
+          ...config.entities,
+          edges: [{ type: 'lives_in', source: 'customer', target: 'city' }],
+        },
       })
-    ).toThrow("Relationship type 'lives_in' links entity type 'city', which is not configured.");
+    ).toThrow();
   });
 
   it('bounds the instructions', () => {

@@ -47,7 +47,6 @@ const values: ContextEngineDreamingWorkflowTemplateValues = {
     { type: 'customer', description: 'A loyalty member.', attributes: ['loyalty_number', 'tier'] },
     { type: 'city' },
   ],
-  relationshipTypes: [{ type: 'lives_in', source: 'customer', target: 'city' }],
 };
 
 const render = (overrides: Partial<ContextEngineDreamingWorkflowTemplateValues> = {}) =>
@@ -62,7 +61,6 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       instructions: values.instructions,
       fact_types: values.factTypes,
       entity_types: values.entityTypes,
-      relationship_types: values.relationshipTypes,
     });
   });
 
@@ -223,9 +221,122 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     );
   });
 
+  describe('the consolidate prompt', () => {
+    const memory = { id: 'm-1', type: 'memory.session_fact', title: 'Seat', content: 'Aisle.' };
+    const existing = { id: 'fact-1', type: 'fact.preference', title: 'Bob likes aisles' };
+    const deleted = {
+      id: 'fact-2',
+      type: 'fact.preference',
+      title: 'Gone',
+      governance: { lifecycle: { status: 'deleted' } },
+    };
+
+    const prompt = (overrides: Partial<ContextEngineDreamingWorkflowTemplateValues> = {}) => {
+      const workflow = render(overrides);
+      const batches = findStep(findStep(workflow.steps, 'dream').steps ?? [], 'batches');
+      const consolidate = findStep(batches.steps ?? [], 'consolidate');
+      return createWorkflowLiquidEngine().parseAndRenderSync(String(consolidate.with?.prompt), {
+        consts: workflow.consts,
+        foreach: { item: [memory] },
+        steps: {
+          read_existing: {
+            output: { hits: { hits: [{ _source: existing }, { _source: deleted }] } },
+          },
+        },
+      });
+    };
+
+    it('lists the configured types and instructions, then the memories and existing items', () => {
+      const rendered = prompt();
+
+      expect(rendered).toContain(
+        'FACT TYPES:\n- preference: Something a customer likes.\nENTITY TYPES:\n'
+      );
+      expect(rendered).toContain(
+        '- customer: A loyalty member. (attributes: loyalty_number, tier)\n- city\n'
+      );
+      expect(rendered).toContain(`INSTRUCTIONS:\n\n${values.instructions}\n`);
+      expect(rendered).toContain(`MEMORIES (one per line):\n${JSON.stringify(memory)}\n`);
+      expect(rendered).toContain(JSON.stringify(existing));
+      expect(rendered).not.toContain('"Gone"');
+    });
+
+    it('tells the model not to create a kind with no types configured', () => {
+      expect(prompt({ entityTypes: [] })).toContain(
+        'ENTITY TYPES:\nnone: do not create entities.\n\nINSTRUCTIONS:'
+      );
+      expect(prompt({ factTypes: [] })).toContain(
+        'FACT TYPES:\nnone: do not create facts.\nENTITY TYPES:'
+      );
+    });
+
+    it('describes only the kinds that are configured', () => {
+      const all = prompt();
+      const factsOnly = prompt({ entityTypes: [] });
+      const entitiesOnly = prompt({ factTypes: [] });
+
+      expect(all).toContain(
+        'of the kinds configured below:\n- facts: separate pieces of knowledge, each readable on its own.\n- entities: the things the memories are about, each with a summary of what is known about it.\n\nYou are given'
+      );
+      expect(factsOnly).toContain(
+        'of the kinds configured below:\n- facts: separate pieces of knowledge, each readable on its own.\n\nYou are given'
+      );
+      expect(factsOnly).toContain('keep every name, number, code and date exactly as stated');
+      expect(factsOnly).toContain('write a fact for each');
+      expect(factsOnly).not.toContain('Give every entity a content summary');
+      expect(entitiesOnly).toContain(
+        'of the kinds configured below:\n- entities: the things the memories are about, each with a summary of what is known about it.\n\nYou are given'
+      );
+      expect(entitiesOnly).toContain('Give every entity a content summary');
+      expect(entitiesOnly).not.toContain('Facts are read on their own');
+    });
+
+    it('never asks for relationships or links between items', () => {
+      const rendered = prompt();
+
+      expect(rendered).not.toMatch(/relationship|relates_to|about field/i);
+    });
+  });
+
+  it('reads existing facts and entities with what each is for', () => {
+    const batches = findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
+    const readExisting = findStep(batches.steps ?? [], 'read_existing').with;
+
+    expect(readExisting?._source).toEqual(expect.arrayContaining(['description', 'content']));
+    expect(readExisting?.query?.bool?.should).toEqual([
+      { prefix: { type: 'fact.' } },
+      { prefix: { type: 'entity.' } },
+    ]);
+  });
+
+  it('asks the model for entities and facts, and nothing else', () => {
+    const batches = findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
+    const { schema } = findStep(batches.steps ?? [], 'consolidate').with as {
+      schema: {
+        properties: Record<string, { items: { properties: Record<string, unknown> } }>;
+        required: string[];
+      };
+    };
+
+    expect(Object.keys(schema.properties)).toEqual(['entities', 'facts']);
+    expect(schema.required).toEqual(['entities', 'facts']);
+  });
+
+  it('names every item by its title, as EXISTING shows it', () => {
+    const batches = findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
+    const { schema } = findStep(batches.steps ?? [], 'consolidate').with as {
+      schema: { properties: Record<string, { items: { properties: Record<string, unknown> } }> };
+    };
+
+    for (const { items } of Object.values(schema.properties)) {
+      expect(items.properties).toHaveProperty('title');
+      expect(items.properties).not.toHaveProperty('name');
+    }
+  });
+
   it('keeps empty type lists as lists', () => {
-    expect(render({ entityTypes: [], relationshipTypes: [] }).consts).toEqual(
-      expect.objectContaining({ entity_types: [], relationship_types: [] })
+    expect(render({ factTypes: [], entityTypes: [] }).consts).toEqual(
+      expect.objectContaining({ fact_types: [], entity_types: [] })
     );
   });
 
