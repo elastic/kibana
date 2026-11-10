@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/resolver-test-plugin
   channel: ''
   owner: '@elastic/security-solution'
-  sourceRoot: x-pack/solutions/security/test/plugin_functional/plugins/resolver_test
+  sourceRoot: x-pack/solutions/security/test_plugins/resolver_test
 dependsOn:
   - '@kbn/core'
   - '@kbn/kibana-react-plugin'
