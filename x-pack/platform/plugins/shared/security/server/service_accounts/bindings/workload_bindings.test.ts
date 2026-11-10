@@ -72,8 +72,16 @@ describe('ServiceAccountWorkloadBindings', () => {
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     store = {
-      set: jest.fn().mockImplementation(async (attributes) => binding(attributes)),
-      delete: jest.fn().mockResolvedValue(true),
+      bulkSet: jest
+        .fn()
+        .mockImplementation(async (written: ServiceAccountWorkloadBinding[]) =>
+          written.map((attributes) => ({ ok: true, value: binding(attributes) }))
+        ),
+      bulkDelete: jest
+        .fn()
+        .mockImplementation(async (removed: unknown[]) =>
+          removed.map(() => ({ ok: true, value: true }))
+        ),
       getVerified: jest.fn().mockResolvedValue(binding()),
       findByServiceAccountId: jest.fn().mockResolvedValue([]),
     } as unknown as jest.Mocked<WorkloadBindingStore>;
@@ -124,9 +132,9 @@ describe('ServiceAccountWorkloadBindings', () => {
       } as never);
 
       expect(getSpaceId).toHaveBeenCalledWith(request);
-      expect(store.set).toHaveBeenCalledWith(
-        expect.objectContaining({ ...COORDINATES, spaceId: 'marketing' })
-      );
+      expect(store.bulkSet).toHaveBeenCalledWith([
+        expect.objectContaining({ ...COORDINATES, spaceId: 'marketing' }),
+      ]);
     });
 
     it('records the binding for the acting user', async () => {
@@ -137,13 +145,13 @@ describe('ServiceAccountWorkloadBindings', () => {
         ...WORKLOAD,
       });
 
-      expect(store.set).toHaveBeenCalledWith(
+      expect(store.bulkSet).toHaveBeenCalledWith([
         expect.objectContaining({
           ...COORDINATES,
           serviceAccountId: 'service-account-id',
           boundBy: { type: 'user', userProfileId: 'profile-uid', username: 'elastic' },
-        })
-      );
+        }),
+      ]);
       expect(result.serviceAccountId).toBe('service-account-id');
     });
 
@@ -154,7 +162,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       await bindings.bindWorkload(PLUGIN_ID, request, params);
       await bindings.bindWorkload(PLUGIN_ID, request, params);
 
-      const [[first], [second]] = store.set.mock.calls;
+      const [[[first]], [[second]]] = store.bulkSet.mock.calls;
       expect(first.canary).not.toBe(second.canary);
     });
 
@@ -175,7 +183,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       expect(checkPrivileges).toHaveBeenCalledWith({
         elasticsearch: { cluster: ['manage_security'], index: {} },
       });
-      expect(store.set).not.toHaveBeenCalled();
+      expect(store.bulkSet).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(
         'Refused to bind a service account to a workload: missing `manage_security` cluster privilege'
       );
@@ -190,7 +198,30 @@ describe('ServiceAccountWorkloadBindings', () => {
           ...WORKLOAD,
         })
       ).rejects.toMatchObject({ output: { statusCode: 401 } });
-      expect(store.set).not.toHaveBeenCalled();
+      expect(store.bulkSet).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [
+        'the write fails as a whole',
+        (error: Error) => store.bulkSet.mockRejectedValue(error),
+        new Error('cluster unavailable'),
+      ],
+      [
+        'the binding could not be written',
+        (error: Error) => store.bulkSet.mockResolvedValue([{ ok: false, error } as never]),
+        Boom.conflict('The binding was changed concurrently.'),
+      ],
+    ])('throws the error it failed with when %s', async (_name, fail, error) => {
+      fail(error);
+
+      await expect(
+        bindings.bindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), {
+          serviceAccountId: 'service-account-id',
+          ...WORKLOAD,
+        })
+      ).rejects.toBe(error);
+      expect(logger.debug).not.toHaveBeenCalledWith(expect.stringMatching(/^Bound /));
     });
 
     describe('audit', () => {
@@ -208,9 +239,9 @@ describe('ServiceAccountWorkloadBindings', () => {
 
       it('logs the intent, scoped to the request, before the binding is written', async () => {
         const request = httpServerMock.createKibanaRequest();
-        store.set.mockImplementation(async (attributes) => {
+        store.bulkSet.mockImplementation(async (written) => {
           expect(auditLogger.log).toHaveBeenCalledWith(bindEvent('unknown'));
-          return binding(attributes);
+          return written.map((attributes) => ({ ok: true, value: binding(attributes) }));
         });
 
         await bindings.bindWorkload(PLUGIN_ID, request, {
@@ -249,7 +280,7 @@ describe('ServiceAccountWorkloadBindings', () => {
             },
           })
         );
-        expect(store.set).not.toHaveBeenCalled();
+        expect(store.bulkSet).not.toHaveBeenCalled();
       });
 
       it('logs an unbind of the previous account first when the workload is rebound', async () => {
@@ -312,7 +343,7 @@ describe('ServiceAccountWorkloadBindings', () => {
           ...WORKLOAD,
         });
 
-        expect(store.set).toHaveBeenCalled();
+        expect(store.bulkSet).toHaveBeenCalled();
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(bindEvent('unknown'));
       });
@@ -327,7 +358,7 @@ describe('ServiceAccountWorkloadBindings', () => {
           })
         ).rejects.toThrow('store unavailable');
 
-        expect(store.set).not.toHaveBeenCalled();
+        expect(store.bulkSet).not.toHaveBeenCalled();
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
@@ -381,7 +412,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       expect(checkPrivileges).toHaveBeenCalledWith({
         elasticsearch: { cluster: ['manage_security'], index: {} },
       });
-      expect(store.delete).toHaveBeenCalledWith(COORDINATES);
+      expect(store.bulkDelete).toHaveBeenCalledWith([COORDINATES]);
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
@@ -395,7 +426,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       } as never);
 
       expect(getSpaceId).toHaveBeenCalledWith(request);
-      expect(store.delete).toHaveBeenCalledWith({ ...COORDINATES, spaceId: 'marketing' });
+      expect(store.bulkDelete).toHaveBeenCalledWith([{ ...COORDINATES, spaceId: 'marketing' }]);
     });
 
     it('requires the `manage_security` cluster privilege', async () => {
@@ -404,11 +435,32 @@ describe('ServiceAccountWorkloadBindings', () => {
       await expect(
         bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
       ).rejects.toMatchObject({ output: { statusCode: 403 } });
-      expect(store.delete).not.toHaveBeenCalled();
+      expect(store.bulkDelete).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [
+        'the delete fails as a whole',
+        (error: Error) => store.bulkDelete.mockRejectedValue(error),
+        new Error('cluster unavailable'),
+      ],
+      [
+        'the binding could not be removed',
+        (error: Error) => store.bulkDelete.mockResolvedValue([{ ok: false, error } as never]),
+        Boom.serverUnavailable('unavailable'),
+      ],
+    ])('throws the error it failed with when %s', async (_name, fail, error) => {
+      fail(error);
+
+      await expect(
+        bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
+      ).rejects.toBe(error);
+      expect(logger.debug).not.toHaveBeenCalledWith(expect.stringMatching(/^Unbound /));
+      expect(logger.warn).not.toHaveBeenCalled();
     });
 
     it('reports, rather than fails, when there was no binding to remove', async () => {
-      store.delete.mockResolvedValue(false);
+      store.bulkDelete.mockResolvedValue([{ ok: true, value: false }]);
       getSpaceId.mockReturnValue('marketing');
 
       await expect(
@@ -434,9 +486,9 @@ describe('ServiceAccountWorkloadBindings', () => {
 
       it('logs the intent, naming the verified bound account, before the binding is removed', async () => {
         const request = httpServerMock.createKibanaRequest();
-        store.delete.mockImplementation(async () => {
+        store.bulkDelete.mockImplementation(async () => {
           expect(auditLogger.log).toHaveBeenCalledWith(unbindEvent('unknown'));
-          return true;
+          return [{ ok: true, value: true }];
         });
 
         await bindings.unbindWorkload(PLUGIN_ID, request, WORKLOAD);
@@ -455,7 +507,7 @@ describe('ServiceAccountWorkloadBindings', () => {
 
       it('logs the intent without a target when there was no binding to remove', async () => {
         store.getVerified.mockResolvedValue(null);
-        store.delete.mockResolvedValue(false);
+        store.bulkDelete.mockResolvedValue([{ ok: true, value: false }]);
 
         await expect(
           bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
@@ -477,7 +529,7 @@ describe('ServiceAccountWorkloadBindings', () => {
           bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
         ).resolves.toBe(true);
 
-        expect(store.delete).toHaveBeenCalledWith(COORDINATES);
+        expect(store.bulkDelete).toHaveBeenCalledWith([COORDINATES]);
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log.mock.calls[0][0]).not.toHaveProperty('user');
       });
@@ -489,7 +541,7 @@ describe('ServiceAccountWorkloadBindings', () => {
           bindings.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD)
         ).rejects.toThrow('store unavailable');
 
-        expect(store.delete).not.toHaveBeenCalled();
+        expect(store.bulkDelete).not.toHaveBeenCalled();
         expect(auditLogger.log).not.toHaveBeenCalled();
       });
 
@@ -503,8 +555,363 @@ describe('ServiceAccountWorkloadBindings', () => {
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(unbindEvent('failure'));
         expect(auditLogger.log.mock.calls[0][0]).not.toHaveProperty('user');
-        expect(store.delete).not.toHaveBeenCalled();
+        expect(store.bulkDelete).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('#bulkUpdateWorkloadBindings', () => {
+    const OTHER = { workloadType: 'rule', workloadId: 'other-rule-id' };
+    const OTHER_COORDINATES = { ...COORDINATES, ...OTHER };
+    const AUDIT_OTHER = { plugin_id: PLUGIN_ID, type: 'rule', id: 'other-rule-id' };
+
+    const bindChange = (overrides: Record<string, string> = {}) => ({
+      op: 'bind' as const,
+      serviceAccountId: 'service-account-id',
+      ...WORKLOAD,
+      ...overrides,
+    });
+    const unbindChange = (overrides: Record<string, string> = {}) => ({
+      op: 'unbind' as const,
+      ...OTHER,
+      ...overrides,
+    });
+
+    const update = (changes: Parameters<typeof bindings.bulkUpdateWorkloadBindings>[2]) =>
+      bindings.bulkUpdateWorkloadBindings(PLUGIN_ID, httpServerMock.createKibanaRequest(), changes);
+
+    it('applies binds and unbinds with one write each, and reports every change in order', async () => {
+      store.getVerified.mockImplementation(async ({ workloadId }) =>
+        workloadId === 'rule-id' ? null : binding({ ...OTHER, serviceAccountId: 'old-account-id' })
+      );
+
+      const results = await update([bindChange(), unbindChange()]);
+
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
+      expect(store.bulkSet).toHaveBeenCalledTimes(1);
+      expect(store.bulkSet).toHaveBeenCalledWith([
+        expect.objectContaining({ ...COORDINATES, serviceAccountId: 'service-account-id' }),
+      ]);
+      expect(store.bulkDelete).toHaveBeenCalledTimes(1);
+      expect(store.bulkDelete).toHaveBeenCalledWith([OTHER_COORDINATES]);
+
+      expect(results).toEqual([
+        {
+          ...WORKLOAD,
+          op: 'bind',
+          ok: true,
+          binding: expect.objectContaining({
+            ...COORDINATES,
+            serviceAccountId: 'service-account-id',
+          }),
+        },
+        {
+          ...OTHER,
+          op: 'unbind',
+          ok: true,
+          removed: true,
+          previousServiceAccountId: 'old-account-id',
+        },
+      ]);
+      // An unbound workload has no previous account to report, not an undefined one.
+      expect(results[0]).not.toHaveProperty('previousServiceAccountId');
+    });
+
+    it('reports the account a bind replaced', async () => {
+      store.getVerified.mockResolvedValue(binding({ serviceAccountId: 'old-account-id' }));
+
+      const [result] = await update([bindChange()]);
+
+      expect(result).toMatchObject({ ok: true, previousServiceAccountId: 'old-account-id' });
+    });
+
+    it('records one binder and one time for every bind in the call', async () => {
+      await update([bindChange(), bindChange(OTHER)]);
+
+      const [[[first, second]]] = store.bulkSet.mock.calls;
+      expect(first.boundBy).toEqual(second.boundBy);
+      expect(first.boundAt).toBe(second.boundAt);
+      // Each binding still gets its own canary.
+      expect(first.canary).not.toBe(second.canary);
+    });
+
+    it('changes bindings in the space of the request, whatever a change names', async () => {
+      getSpaceId.mockReturnValue('marketing');
+
+      await update([
+        { ...bindChange(), spaceId: 'another-space' } as never,
+        { ...unbindChange(), spaceId: 'another-space' } as never,
+      ]);
+
+      expect(store.bulkSet).toHaveBeenCalledWith([
+        expect.objectContaining({ ...COORDINATES, spaceId: 'marketing' }),
+      ]);
+      expect(store.bulkDelete).toHaveBeenCalledWith([
+        { ...OTHER_COORDINATES, spaceId: 'marketing' },
+      ]);
+    });
+
+    it('audits each change as the same change alone would be', async () => {
+      store.getVerified.mockResolvedValue(binding({ serviceAccountId: 'old-account-id' }));
+
+      await update([bindChange(), unbindChange()]);
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(3);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'service_account_workload_unbind' }),
+          user: { target: { id: 'old-account-id' } },
+          kibana: { workload: AUDIT_WORKLOAD },
+        })
+      );
+      expect(auditLogger.log).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'service_account_workload_bind' }),
+          user: { target: { id: 'service-account-id' } },
+          kibana: { workload: AUDIT_WORKLOAD },
+        })
+      );
+      expect(auditLogger.log).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'service_account_workload_unbind' }),
+          user: { target: { id: 'old-account-id' } },
+          kibana: { workload: AUDIT_OTHER },
+        })
+      );
+    });
+
+    it('does nothing for an empty update', async () => {
+      await expect(update([])).resolves.toEqual([]);
+
+      expect(checkPrivileges).not.toHaveBeenCalled();
+      expect(store.getVerified).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    describe('when the caller may not change bindings', () => {
+      beforeEach(() => {
+        checkPrivileges.mockResolvedValue({ hasAllRequested: false });
+      });
+
+      it('refuses every change on its own, without throwing', async () => {
+        await expect(update([bindChange(), unbindChange()])).resolves.toEqual([
+          {
+            ...WORKLOAD,
+            op: 'bind',
+            ok: false,
+            error: {
+              statusCode: 403,
+              message:
+                'Cannot bind a service account to a workload: missing `manage_security` cluster privilege',
+            },
+          },
+          {
+            ...OTHER,
+            op: 'unbind',
+            ok: false,
+            error: {
+              statusCode: 403,
+              message:
+                'Cannot unbind a service account from a workload: missing `manage_security` cluster privilege',
+            },
+          },
+        ]);
+
+        expect(store.getVerified).not.toHaveBeenCalled();
+        expect(store.bulkSet).not.toHaveBeenCalled();
+        expect(store.bulkDelete).not.toHaveBeenCalled();
+      });
+
+      it('audits a refusal for every change', async () => {
+        await update([bindChange(), bindChange(OTHER), unbindChange({ workloadId: 'third' })]);
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(3);
+        expect(auditLogger.log).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            event: expect.objectContaining({
+              action: 'service_account_workload_bind',
+              outcome: 'failure',
+            }),
+            user: { target: { id: 'service-account-id' } },
+            kibana: { workload: AUDIT_WORKLOAD },
+          })
+        );
+        expect(auditLogger.log).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            event: expect.objectContaining({ outcome: 'failure' }),
+            kibana: { workload: AUDIT_OTHER },
+          })
+        );
+        expect(auditLogger.log).toHaveBeenNthCalledWith(
+          3,
+          expect.objectContaining({
+            event: expect.objectContaining({
+              action: 'service_account_workload_unbind',
+              outcome: 'failure',
+            }),
+            kibana: { workload: { ...AUDIT_WORKLOAD, id: 'third' } },
+          })
+        );
+        expect(auditLogger.log.mock.calls[2][0]).not.toHaveProperty('user');
+      });
+
+      it('logs the refusal once per operation, not once per change', async () => {
+        await update([bindChange(), bindChange(OTHER), unbindChange({ workloadId: 'third' })]);
+
+        expect(logger.warn).toHaveBeenCalledTimes(2);
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Refused to bind a service account to a workload: missing `manage_security` cluster privilege'
+        );
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Refused to unbind a service account from a workload: missing `manage_security` cluster privilege'
+        );
+      });
+    });
+
+    it('rejects the whole call when the privilege check itself fails', async () => {
+      checkPrivileges.mockRejectedValue(new Error('cluster unavailable'));
+
+      await expect(update([bindChange(), unbindChange()])).rejects.toThrow('cluster unavailable');
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    it('rejects the whole call when it binds and the request is not authenticated', async () => {
+      getCurrentUser.mockReturnValue(null);
+
+      await expect(update([unbindChange(), bindChange()])).rejects.toMatchObject({
+        output: { statusCode: 401 },
+      });
+      expect(checkPrivileges).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    it('unbinds on a request with no user behind it, as a single unbind does', async () => {
+      getCurrentUser.mockReturnValue(null);
+
+      await expect(update([unbindChange()])).resolves.toEqual([
+        expect.objectContaining({ ok: true, removed: true }),
+      ]);
+    });
+
+    it('fails only the change whose prior binding cannot be read', async () => {
+      store.getVerified.mockImplementation(async ({ workloadId }) => {
+        if (workloadId === 'rule-id') {
+          throw new Error('store unavailable');
+        }
+        return null;
+      });
+
+      const results = await update([bindChange(), bindChange(OTHER)]);
+
+      expect(results[0]).toEqual({
+        ...WORKLOAD,
+        op: 'bind',
+        ok: false,
+        // The detail is logged, not returned: it can carry what the caller's client must not see.
+        error: { statusCode: 500, message: 'An internal server error occurred' },
+      });
+      expect(results[1]).toMatchObject({ ...OTHER, op: 'bind', ok: true });
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to bind workload [rule/rule-id] of plugin [alerting]: store unavailable'
+      );
+
+      // The change that failed is neither written nor audited.
+      expect(store.bulkSet).toHaveBeenCalledWith([expect.objectContaining(OTHER_COORDINATES)]);
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({ kibana: { workload: AUDIT_OTHER } })
+      );
+    });
+
+    it('applies a change whose prior binding failed integrity verification, without naming it', async () => {
+      store.getVerified.mockRejectedValue(
+        Boom.forbidden(
+          'The service account binding for this workload failed integrity verification.'
+        )
+      );
+
+      const [result] = await update([bindChange()]);
+
+      expect(result).toMatchObject({ ok: true });
+      expect(result).not.toHaveProperty('previousServiceAccountId');
+    });
+
+    it('reads prior bindings at most ten at a time', async () => {
+      let inFlight = 0;
+      let mostInFlight = 0;
+      store.getVerified.mockImplementation(async () => {
+        inFlight++;
+        mostInFlight = Math.max(mostInFlight, inFlight);
+        await new Promise((resolve) => setImmediate(resolve));
+        inFlight--;
+        return null;
+      });
+
+      await update(
+        Array.from({ length: 25 }, (_, index) => unbindChange({ workloadId: `rule-${index}` }))
+      );
+
+      expect(store.getVerified).toHaveBeenCalledTimes(25);
+      expect(mostInFlight).toBe(10);
+    });
+
+    it('reports a change that could not be written with the reason it failed', async () => {
+      store.bulkSet.mockImplementation(async (written) =>
+        written.map((attributes) =>
+          attributes.workloadId === 'rule-id'
+            ? { ok: false, error: Boom.conflict('The binding was changed concurrently.') }
+            : { ok: true, value: binding(attributes) }
+        )
+      );
+
+      const results = await update([bindChange(), bindChange(OTHER)]);
+
+      expect(results[0]).toEqual({
+        ...WORKLOAD,
+        op: 'bind',
+        ok: false,
+        error: { statusCode: 409, message: 'The binding was changed concurrently.' },
+      });
+      expect(results[1]).toMatchObject({ ok: true });
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('fails every change of a write that fails as a whole, and no others', async () => {
+      store.bulkSet.mockRejectedValue(new Error('cluster unavailable'));
+
+      const results = await update([
+        bindChange(),
+        bindChange(OTHER),
+        unbindChange({ workloadId: 'third' }),
+      ]);
+
+      expect(results.map(({ ok }) => ok)).toEqual([false, false, true]);
+      expect(results[0]).toMatchObject({
+        error: { statusCode: 500, message: 'An internal server error occurred' },
+      });
+      // One line for the one error, however many changes it failed.
+      expect(logger.error).toHaveBeenCalledTimes(1);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to change the bindings of 2 workloads of plugin [alerting], including [rule/rule-id]: cluster unavailable'
+      );
+    });
+
+    it('reports an unbind that matched no binding', async () => {
+      store.getVerified.mockResolvedValue(null);
+      store.bulkDelete.mockResolvedValue([{ ok: true, value: false }]);
+      getSpaceId.mockReturnValue('marketing');
+
+      await expect(update([unbindChange()])).resolves.toEqual([
+        { ...OTHER, op: 'unbind', ok: true, removed: false },
+      ]);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Unbinding matched no binding for workload [rule/other-rule-id] of plugin [alerting] in space [marketing]'
+      );
     });
   });
 
@@ -1111,6 +1518,13 @@ describe('ServiceAccountWorkloadBindings', () => {
           api.unbindWorkload(PLUGIN_ID, httpServerMock.createKibanaRequest(), WORKLOAD),
       ],
       [
+        'bulkUpdateWorkloadBindings',
+        (api: ServiceAccountWorkloadBindings) =>
+          api.bulkUpdateWorkloadBindings(PLUGIN_ID, httpServerMock.createKibanaRequest(), [
+            { op: 'unbind', ...WORKLOAD },
+          ]),
+      ],
+      [
         'getBinding',
         (api: ServiceAccountWorkloadBindings) => api.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE),
       ],
@@ -1127,8 +1541,8 @@ describe('ServiceAccountWorkloadBindings', () => {
           'Cannot use service account workload bindings: saved object encryption is not available. Set `xpack.encryptedSavedObjects.encryptionKey`.',
         output: { statusCode: 403 },
       });
-      expect(store.set).not.toHaveBeenCalled();
-      expect(store.delete).not.toHaveBeenCalled();
+      expect(store.bulkSet).not.toHaveBeenCalled();
+      expect(store.bulkDelete).not.toHaveBeenCalled();
       expect(store.getVerified).not.toHaveBeenCalled();
     });
 

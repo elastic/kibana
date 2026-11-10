@@ -33,10 +33,43 @@ export interface EnsureClusterPrivilegeParams {
   onRefused?: (error: Boom.Boom) => void;
 }
 
+export type CheckClusterPrivilegeParams = Pick<
+  EnsureClusterPrivilegeParams,
+  'request' | 'checkPrivilegesWithRequest' | 'privilege'
+>;
+
 /**
- * Rejects with a 403 unless the request holds the given cluster privilege. Elasticsearch answers
- * the check from the caller's effective permissions, so a privilege that implies it, such as `all`,
- * passes too.
+ * Whether the request holds the given cluster privilege. Elasticsearch answers the check from the
+ * caller's effective permissions, so a privilege that implies it, such as `all`, passes too. A
+ * failed check propagates: it says nothing about what the caller may do.
+ */
+export const hasClusterPrivilege = async ({
+  request,
+  checkPrivilegesWithRequest,
+  privilege,
+}: CheckClusterPrivilegeParams): Promise<boolean> => {
+  const { hasAllRequested } = await checkPrivilegesWithRequest(request).globally({
+    elasticsearch: { cluster: [privilege], index: {} },
+  });
+  return hasAllRequested;
+};
+
+/**
+ * Logs the refusal of an action for a missing cluster privilege, and returns the 403 to refuse it
+ * with. For a caller that refuses without throwing; {@link ensureClusterPrivilege} throws it.
+ */
+export const clusterPrivilegeRefusal = ({
+  logger,
+  privilege,
+  action,
+}: Pick<EnsureClusterPrivilegeParams, 'logger' | 'privilege' | 'action'>): Boom.Boom => {
+  logger.warn(`Refused to ${action}: missing \`${privilege}\` cluster privilege`);
+  return Boom.forbidden(`Cannot ${action}: missing \`${privilege}\` cluster privilege`);
+};
+
+/**
+ * Rejects with a 403 unless the request holds the given cluster privilege. See
+ * {@link hasClusterPrivilege} for how the check is answered.
  */
 export const ensureClusterPrivilege = async ({
   request,
@@ -46,13 +79,8 @@ export const ensureClusterPrivilege = async ({
   action,
   onRefused,
 }: EnsureClusterPrivilegeParams): Promise<void> => {
-  const { hasAllRequested } = await checkPrivilegesWithRequest(request).globally({
-    elasticsearch: { cluster: [privilege], index: {} },
-  });
-
-  if (!hasAllRequested) {
-    logger.warn(`Refused to ${action}: missing \`${privilege}\` cluster privilege`);
-    const error = Boom.forbidden(`Cannot ${action}: missing \`${privilege}\` cluster privilege`);
+  if (!(await hasClusterPrivilege({ request, checkPrivilegesWithRequest, privilege }))) {
+    const error = clusterPrivilegeRefusal({ logger, privilege, action });
     onRefused?.(error);
     throw error;
   }

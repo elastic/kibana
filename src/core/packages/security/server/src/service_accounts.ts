@@ -14,6 +14,8 @@ import type {
   ServiceAccount,
   ServiceAccountBoundWorkload,
   ServiceAccountWorkloadBinding,
+  ServiceAccountWorkloadBindingChange,
+  ServiceAccountWorkloadBindingChangeResult,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountWorkloadRef,
@@ -108,7 +110,8 @@ export interface CoreServiceAccountsService {
    * caller that has to name it again at execution time. Re-binding is the same call: it replaces
    * the existing binding for the workload.
    *
-   * Rejects when the workload type was not registered by the calling plugin.
+   * Rejects when the workload type was not registered by the calling plugin, or when
+   * `serviceAccountId` is empty or longer than {@link SERVICE_ACCOUNT_ID_MAX_LENGTH}.
    */
   bindWorkload(
     request: KibanaRequest,
@@ -124,6 +127,34 @@ export interface CoreServiceAccountsService {
    * Plugins must call this from their own workload-delete path; nothing else removes a binding.
    */
   unbindWorkload(request: KibanaRequest, params: ServiceAccountWorkloadRef): Promise<boolean>;
+
+  /**
+   * Binds and unbinds many workloads in the space of the request, in one call. Each change is
+   * authorized and audited exactly as the same {@link bindWorkload} or {@link unbindWorkload} call
+   * would be, and the result reports on every change, in the order given.
+   *
+   * One change that fails does not stop the others: when the caller may not change bindings, or a
+   * change cannot be read or written, its result has `ok: false` and the reason, and nothing is
+   * thrown. A workload-delete path must therefore treat an unbind with `ok: false` as a failed
+   * delete, or it leaves a binding behind for a later workload with the same ID to inherit.
+   *
+   * The call itself rejects, before changing anything, when bindings are unavailable, the
+   * privilege check cannot be made, a change binds an account and the request is not
+   * authenticated, there are more than {@link SERVICE_ACCOUNT_WORKLOAD_BINDING_CHANGES_MAX}
+   * changes, a change names a workload type the calling plugin did not register, a malformed
+   * workload ID, or a bind names no service account, or two changes name the same workload.
+   * Two changes to one workload always come down to the last of them, so send only that one.
+   *
+   * Every change applies in the space of the request, as with the single-workload methods. A flow
+   * that copies workloads into another space has to make the call from a request in that space.
+   *
+   * Changes are not applied atomically. A caller that needs its own records to agree with the
+   * bindings reconciles them by the results.
+   */
+  bulkUpdateWorkloadBindings(
+    request: KibanaRequest,
+    changes: readonly ServiceAccountWorkloadBindingChange[]
+  ): Promise<ServiceAccountWorkloadBindingChangeResult[]>;
 
   /**
    * Returns the workload's binding, or `null` when it has none. Throws if the stored binding fails

@@ -45,6 +45,14 @@ export const SERVICE_ACCOUNT_WORKLOAD_TYPE_DESCRIPTION_MAX_LENGTH = 1024;
 export const SERVICE_ACCOUNT_WORKLOAD_ID_MAX_LENGTH = 512;
 
 /**
+ * Upper bound on the changes in one bulk update of workload bindings. A caller with more splits
+ * them across calls.
+ *
+ * @public
+ */
+export const SERVICE_ACCOUNT_WORKLOAD_BINDING_CHANGES_MAX = 1000;
+
+/**
  * Declares a kind of workload that a plugin runs as service accounts.
  *
  * Workload types are scoped to the plugin that registers them: two plugins may each register a
