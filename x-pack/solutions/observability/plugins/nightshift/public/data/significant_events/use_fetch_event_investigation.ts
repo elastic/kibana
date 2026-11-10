@@ -26,18 +26,38 @@ const PENDING_START_TIMEOUT_MS = 60_000;
 /** More than a handful of investigations of one episode is not read: the most recently updated open one wins. */
 const EVENT_INVESTIGATIONS_PAGE_SIZE = 10;
 
-/** A started run that the list does not show yet, within the wait. */
+/** What a start waits for: the listed investigation to carry the run it launched. */
+interface AwaitedStart {
+  id: string;
+  startedAt: number;
+  /**
+   * The awaited investigation's `updated_at` before the start, when it already existed. A new
+   * investigation's creating write records the run, so being listed is enough there.
+   */
+  listedUpdatedAt?: string;
+}
+
+/**
+ * Whether the started run is still missing from the list. It shows as `in_progress` or as a moved
+ * `updated_at`, since a run can finish before the first refresh.
+ */
 const isStartPending = (
-  awaiting: { id: string; startedAt: number } | undefined,
+  awaiting: AwaitedStart | undefined,
   investigations: InvestigationSummary[] | undefined
 ): boolean => {
   if (awaiting === undefined || Date.now() - awaiting.startedAt >= PENDING_START_TIMEOUT_MS) {
     return false;
   }
   const listed = investigations?.find(({ id }) => id === awaiting.id);
-  // A follow-up continues an open investigation, so its id is listed before its run is: the id
-  // alone would report the previous run's state, hence the `in_progress` check.
-  return listed === undefined || !listed.in_progress;
+  if (listed === undefined) {
+    return true;
+  }
+  // A follow-up reuses the id, which is listed before its run is.
+  return (
+    !listed.in_progress &&
+    awaiting.listedUpdatedAt !== undefined &&
+    listed.updated_at === awaiting.listedUpdatedAt
+  );
 };
 
 /**
@@ -57,15 +77,13 @@ const pickEventInvestigation = (
  */
 export const useFetchEventInvestigation = (
   episodeId: string | undefined,
-  { awaiting }: { awaiting?: { id: string; startedAt: number } } = {}
+  { awaiting }: { awaiting?: AwaitedStart } = {}
 ): { investigation: InvestigationSummary | undefined; isAwaitingStart: boolean } => {
   const { http, agenticInvestigations } = useKibana().services;
 
-  // The wait ends on a timer or when the run shows, not on a fetch: if every list request fails,
-  // nothing else re-renders. Keyed by `startedAt`, not by the id, since a follow-up reuses the open
-  // investigation's id and must start its own wait.
+  // Ends on a timer, not on a fetch: if every list request fails, nothing else re-renders. Keyed by
+  // `startedAt`, since a follow-up reuses the id and must start its own wait.
   const [settledStartAt, setSettledStartAt] = useState<number>();
-  const awaitingId = awaiting?.id;
   const awaitingStartedAt = awaiting?.startedAt;
   useEffect(() => {
     if (awaitingStartedAt === undefined) {
@@ -103,16 +121,13 @@ export const useFetchEventInvestigation = (
         : false,
   });
 
-  // Once the awaited investigation reports a run, the wait is over for good: the run finishing must
-  // not make the start look unobserved again.
+  // Once the awaited investigation carries the run, the wait is over for good: the run finishing
+  // must not make the start look unobserved again.
   useEffect(() => {
-    if (
-      awaitingStartedAt !== undefined &&
-      data?.results.some(({ id, in_progress: inProgress }) => id === awaitingId && inProgress)
-    ) {
+    if (awaitingStartedAt !== undefined && !isStartPending(awaiting, data?.results)) {
       setSettledStartAt(awaitingStartedAt);
     }
-  }, [awaitingId, awaitingStartedAt, data]);
+  }, [awaiting, awaitingStartedAt, data]);
 
   return {
     investigation: pickEventInvestigation(data?.results),

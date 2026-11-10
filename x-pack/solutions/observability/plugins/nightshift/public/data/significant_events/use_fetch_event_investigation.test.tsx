@@ -18,8 +18,12 @@ const httpGet = jest.fn();
 
 const investigation = (
   id: string,
-  { status = 'open', inProgress = false }: { status?: string; inProgress?: boolean } = {}
-) => ({ id, metadata: { status }, in_progress: inProgress });
+  {
+    status = 'open',
+    inProgress = false,
+    updatedAt = '2026-07-10T12:00:00Z',
+  }: { status?: string; inProgress?: boolean; updatedAt?: string } = {}
+) => ({ id, metadata: { status }, in_progress: inProgress, updated_at: updatedAt });
 
 const renderFetch = (
   episodeId: string | undefined,
@@ -82,12 +86,12 @@ describe('useFetchEventInvestigation', () => {
     expect(httpGet).not.toHaveBeenCalled();
   });
 
-  it('keeps asking until the just-started run of the investigation is observed', async () => {
+  it('settles a new investigation as soon as it is listed, even with no run in progress', async () => {
     jest.useFakeTimers();
     try {
       httpGet
         .mockResolvedValueOnce({ results: [] })
-        .mockResolvedValue({ results: [investigation('started', { inProgress: true })] });
+        .mockResolvedValue({ results: [investigation('started', { inProgress: false })] });
       const { result } = renderFetch('episode-1', {
         awaiting: { id: 'started', startedAt: Date.now() },
       });
@@ -111,10 +115,18 @@ describe('useFetchEventInvestigation', () => {
     jest.useFakeTimers();
     try {
       httpGet
-        .mockResolvedValueOnce({ results: [investigation('open-run', { inProgress: false })] })
-        .mockResolvedValue({ results: [investigation('open-run', { inProgress: true })] });
+        .mockResolvedValueOnce({
+          results: [investigation('open-run', { updatedAt: '2026-07-10T12:00:00Z' })],
+        })
+        .mockResolvedValue({
+          results: [investigation('open-run', { updatedAt: '2026-07-10T12:00:05Z' })],
+        });
       const { result } = renderFetch('episode-1', {
-        awaiting: { id: 'open-run', startedAt: Date.now() },
+        awaiting: {
+          id: 'open-run',
+          startedAt: Date.now(),
+          listedUpdatedAt: '2026-07-10T12:00:00Z',
+        },
       });
 
       await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
@@ -128,6 +140,22 @@ describe('useFetchEventInvestigation', () => {
     } finally {
       jest.useRealTimers();
     }
+  });
+
+  it('settles a start whose run finished before the first refresh', async () => {
+    httpGet.mockResolvedValue({
+      results: [investigation('open-run', { updatedAt: '2026-07-10T12:00:03Z' })],
+    });
+    const { result } = renderFetch('episode-1', {
+      awaiting: {
+        id: 'open-run',
+        startedAt: Date.now(),
+        listedUpdatedAt: '2026-07-10T12:00:00Z',
+      },
+    });
+
+    await waitFor(() => expect(result.current.investigation?.id).toBe('open-run'));
+    expect(result.current.isAwaitingStart).toBe(false);
   });
 
   it('stops reading a start as pending once the wait ends, even when every list request fails', async () => {
