@@ -17,6 +17,7 @@ import {
   extractEventChainVisitedWorkflowIdsFromExecution,
   extractExecutionMetadata,
   extractQueueDelayMs,
+  extractRunAs,
   extractTimeToFirstStep,
   mergeEmitterWorkflowIntoEventChainVisited,
 } from './extract_execution_metadata';
@@ -423,6 +424,64 @@ describe('extractQueueDelayMs', () => {
         })
       )
     ).toBeUndefined();
+  });
+});
+
+describe('extractRunAs', () => {
+  const definitionWithRunAs = (runAs?: string): WorkflowYaml =>
+    ({
+      steps: [],
+      ...(runAs && { settings: { run_as: runAs } }),
+    } as Partial<WorkflowYaml> as WorkflowYaml);
+
+  it('reports user for an execution with no service account', () => {
+    expect(extractRunAs(createMockWorkflowExecution())).toEqual({ runAs: 'user' });
+  });
+
+  it("reports a service account set by the workflow's own settings.run_as", () => {
+    expect(
+      extractRunAs(
+        createMockWorkflowExecution({
+          workflowDefinition: definitionWithRunAs('sa-1'),
+          effectiveIdentity: { type: 'service_account', id: 'sa-1' },
+        })
+      )
+    ).toEqual({ runAs: 'service_account', runAsInherited: false });
+  });
+
+  it('reports a service account inherited from the parent workflow', () => {
+    expect(
+      extractRunAs(
+        createMockWorkflowExecution({
+          workflowDefinition: definitionWithRunAs(),
+          effectiveIdentity: {
+            type: 'service_account',
+            id: 'sa-parent',
+            inheritedFrom: { workloadId: 'parent-wf' },
+          },
+        })
+      )
+    ).toEqual({ runAs: 'service_account', runAsInherited: true });
+  });
+
+  it('reports user when a non-inherited identity has no settings.run_as, as the runner does', () => {
+    expect(
+      extractRunAs(
+        createMockWorkflowExecution({
+          workflowDefinition: definitionWithRunAs(),
+          effectiveIdentity: { type: 'service_account', id: 'sa-1' },
+        })
+      )
+    ).toEqual({ runAs: 'user' });
+  });
+
+  it('is included in the execution metadata', () => {
+    expect(
+      extractExecutionMetadata(
+        createMockWorkflowExecution({ workflowDefinition: definitionWithRunAs('sa-1') }),
+        []
+      )
+    ).toMatchObject({ runAs: 'service_account', runAsInherited: false });
   });
 });
 
