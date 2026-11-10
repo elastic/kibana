@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getBuiltInStepDefinition } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { structuralStepOutputSchemas } from './structural_step_output_schemas';
 
@@ -105,6 +106,15 @@ describe('structuralStepOutputSchemas', () => {
       expect(schema).toBeInstanceOf(z.ZodObject);
     }
   });
+
+  it.each(['if', 'parallel'])(
+    'uses the same "%s" output schema as the built-in step definition',
+    (stepType) => {
+      expect(structuralStepOutputSchemas[stepType]).toBe(
+        getBuiltInStepDefinition(stepType)?.outputSchema
+      );
+    }
+  );
 
   it('does not include non-structural step types like foreach, retry, or wait', () => {
     expect(structuralStepOutputSchemas).not.toHaveProperty('foreach');

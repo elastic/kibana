@@ -49,16 +49,22 @@ const makeDefinition = (
   configuration: { tools: [] },
   access_control: undefined,
   created_by: undefined,
-  permissions: { update_agent: true, update_access_control: true, update_approvals: false },
+  permissions: {
+    update_agent: true,
+    update_access_control: true,
+    update_approvals: false,
+  },
   ...overrides,
 });
 
 const toInternal = (
-  overrides: Partial<Parameters<typeof toInternalDefinition>[0]['definition']> = {}
+  overrides: Partial<Parameters<typeof toInternalDefinition>[0]['definition']> = {},
+  hiddenByAgentId: Map<string, boolean> = new Map()
 ) =>
   toInternalDefinition({
     definition: makeDefinition(overrides),
     availabilityByAgentId: new Map(),
+    hiddenByAgentId,
     availabilityCache: { getOrCompute: jest.fn() } as never,
   });
 
@@ -103,6 +109,28 @@ describe('toInternalDefinition hidden derivation', () => {
     });
     expect(agent.hidden).toBe(true);
   });
+
+  it('an ensure-registered hidden:false makes a system-created non-chat agent visible', () => {
+    const agent = toInternal(
+      {
+        type: 'platform.nightshift.investigation-type',
+        created_by: { id: undefined, username: SYSTEM_USER_ID },
+      },
+      new Map([['agent-id', false]])
+    );
+    expect(agent.hidden).toBe(false);
+  });
+
+  it('an ensure-registered override for another agent id does not apply', () => {
+    const agent = toInternal(
+      {
+        type: 'platform.nightshift.investigation-type',
+        created_by: { id: undefined, username: SYSTEM_USER_ID },
+      },
+      new Map([['other-agent', false]])
+    );
+    expect(agent.hidden).toBe(true);
+  });
 });
 
 describe('persisted agent provider', () => {
@@ -123,6 +151,7 @@ describe('persisted agent provider', () => {
       toolsService: {} as never,
       logger: {} as never,
       availabilityByAgentId: new Map(),
+      hiddenByAgentId: new Map(),
     });
     const provider = await providerFactory({ request: {} as never, space: 'default' });
 
@@ -145,6 +174,7 @@ describe('persisted agent provider', () => {
         toolsService: {} as never,
         logger: {} as never,
         availabilityByAgentId: new Map(),
+        hiddenByAgentId: new Map(),
       })({ request: {} as never, space: 'default' });
 
       const agent = await provider.get(gatedAgent.id);
@@ -174,6 +204,7 @@ describe('persisted agent provider', () => {
         toolsService: {} as never,
         logger: {} as never,
         availabilityByAgentId,
+        hiddenByAgentId: new Map(),
       })({ request: {} as never, space: 'default' });
 
       const agent = await provider.get(gatedAgent.id);
@@ -204,6 +235,7 @@ describe('persisted agent provider', () => {
         toolsService: {} as never,
         logger: {} as never,
         availabilityByAgentId,
+        hiddenByAgentId: new Map(),
       })({ request: {} as never, space: 'default' });
 
       const agent = await provider.get(gatedAgent.id);

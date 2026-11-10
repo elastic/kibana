@@ -9,7 +9,7 @@
 
 import { RuleTester } from 'eslint';
 import dedent from 'dedent';
-import { NoGroupCrossingImportsRule } from './no_group_crossing_imports';
+import { rules } from '../..';
 import { formatSuggestions } from '../helpers/report';
 import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 import type { KibanaPackageManifest } from '@kbn/repo-packages';
@@ -100,7 +100,7 @@ const babelTester = [
 
 for (const [name, tester] of [tsTester, babelTester]) {
   describe(name, () => {
-    tester.run('@kbn/imports/no_group_crossing_imports', NoGroupCrossingImportsRule, {
+    tester.run('@kbn/imports/no_group_crossing_imports', rules.no_group_crossing_imports, {
       valid: [
         make(
           { group: 'observability', visibility: 'private' },

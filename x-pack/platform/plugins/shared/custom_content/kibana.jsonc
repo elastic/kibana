@@ -13,6 +13,7 @@
       "embeddable",
       "data",
       "esql",
+      "inspector",
       "uiActions"
     ],
     "optionalPlugins": [

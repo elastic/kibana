@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useState } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import { type EuiButtonColor, useGeneratedHtmlId } from '@elastic/eui';
-import type { DismissReason } from '@kbn/proposals-common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isTodoProposal, type DismissReason } from '@kbn/proposals-common';
+import type { IBasePath } from '@kbn/core-http-browser';
 import { ApprovalContentHeader } from './approval_content_header';
 import { ApprovalActorTime } from './approval_actor_time';
 import { AlwaysAllowCheckbox } from './always_allow_checkbox';
@@ -22,11 +24,13 @@ import {
 } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import {
+  formatDateTime,
   getProposalCaption,
   getProposalDecision,
   getProposalTone,
   isProposalExpired,
 } from './proposal_helpers';
+import { ProposalCaption } from './proposal_caption';
 import type { ApprovalAction, AlwaysAllowOption, DeclineParams, ApprovalProposal } from './types';
 
 export interface ApprovalContentProps {
@@ -47,9 +51,9 @@ export interface ApprovalContentProps {
    */
   isSubmitting?: 'applying' | 'declining';
   /**
-   * Who is submitting right now, for the "Applying"/"Declining" phase's live caption. Falls back
-   * to a generic "You" when omitted, so a host that has not wired a profile lookup still gets a
-   * coherent transient state.
+   * Who is submitting right now, for the "Applying"/"Declining" banner. Falls back to a generic
+   * "You" when omitted, so a host that has not wired a profile lookup still gets a coherent
+   * transient state.
    */
   currentActorName?: string;
   alwaysAllow?: AlwaysAllowOption;
@@ -60,22 +64,30 @@ export interface ApprovalContentProps {
    */
   readOnly?: boolean;
   /**
-   * Approves the proposal. Rendered as a filled `EuiButton` labeled "Approve", disabled once the
-   * proposal has expired — both derived here rather than supplied by the caller, so every host's
-   * Approve button behaves and reads identically. Omit for a host that cannot record an approval,
-   * which hides the button entirely rather than leaving it inert.
+   * Approves the proposal. Label is "Approve", or "Mark as applied" for a to-do
+   * (`isTodoProposal`). Disabled when expired. Omit to hide the button.
    */
   onApprove?: () => void | Promise<void>;
-  /** Each entry rendered as an `EuiButtonEmpty`, alongside Approve/Decline. */
+  /** Extra empty buttons beside Approve/Decline. */
   secondaryActions?: ApprovalAction[];
   /**
-   * Enables the built-in decline flow. When set, a "Decline" trigger appears next to the Approve
-   * button; clicking it swaps the body for `DeclineReasonForm` and the footer for Cancel/Decline,
-   * entirely within this component — so a host never renders `DeclineReasonForm` itself or tracks
-   * its own declining mode. The same flow renders identically whether this is placed inside a
-   * modal or an Agent Builder chat card. Disabled whenever the Approve button is.
+   * Built-in Decline flow: shows Decline next to the primary, then swaps in
+   * `DeclineReasonForm` with Cancel/Decline. Disabled with the primary.
    */
   onDismiss?: (params: DeclineParams) => Promise<void>;
+  /**
+   * Re-offers a marked-applied to-do ("Mark as not applied").
+   * Disabled when `readOnly`.
+   */
+  onReopen?: () => Promise<void>;
+  /** Whether this proposal's `onReopen` is in flight. */
+  isReopening?: boolean;
+  /**
+   * `core.http.basePath`, so the comment's in-app links (`/app/security/...`) resolve with the
+   * server base path and the current space. Without it they render as authored, which breaks
+   * under `server.basePath`.
+   */
+  basePath?: IBasePath;
   'data-test-subj'?: string;
 }
 
@@ -93,8 +105,8 @@ export interface ApprovalContentProps {
  * the form itself.
  *
  * The decision's async lifecycle is the host's, not this component's: `isSubmitting` and the
- * proposal's own decision together are the whole phase this renders — the badge, the header's
- * actor/time caption, and the outcome banner. This only wraps `onApprove` to surface a rejection
+ * proposal's own decision together are the whole phase this renders — the badge, and the outcome
+ * banner with who decided and when. This only wraps `onApprove` to surface a rejection
  * as its own banner; it holds no phase of its own, so it renders identically whether it just
  * mounted or has been open the whole time.
  *
@@ -112,6 +124,9 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     onApprove,
     secondaryActions,
     onDismiss,
+    onReopen,
+    isReopening = false,
+    basePath,
     'data-test-subj': dataTestSubj,
   }) => {
     const generatedTitleId = useGeneratedHtmlId({ prefix: 'ApprovalContent' });
@@ -119,26 +134,20 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const [mode, setMode] = useState<'view' | 'declining'>('view');
     const [dismissReason, setDismissReason] = useState<DismissReason>('no_reason');
     const [rationale, setRationale] = useState('');
-    // Only for the live "Xs ago" caption below — not for the phase itself, which reads `isSubmitting`
-    // directly. Resets whenever this component (re)mounts while already submitting, so a modal
-    // reopened mid-submission restarts the counter rather than reading the true elapsed time; the
-    // phase it is captioning is still correct either way.
-    const [since, setSince] = useState<string | undefined>(undefined);
 
-    useEffect(() => {
-      setSince(isSubmitting ? new Date().toISOString() : undefined);
-    }, [isSubmitting]);
-
-    const actorName = currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback;
     const isExpired = isProposalExpired(proposal);
     const isReplaced = proposal.supersededBy !== undefined || proposal.status === 'superseded';
     const displayMode = isReplaced ? 'view' : mode;
     const decision = getProposalDecision(proposal);
     const tone = getProposalTone(proposal);
+    const isTodo = isTodoProposal(proposal);
 
     const primaryAction: ApprovalAction | undefined = onApprove
       ? {
-          label: APPROVAL_MODAL_TRANSLATIONS.approve,
+          label: isTodo
+            ? APPROVAL_MODAL_TRANSLATIONS.markApplied
+            : APPROVAL_MODAL_TRANSLATIONS.approve,
+          ...(isTodo && { iconType: 'check' as const }),
           onClick: onApprove,
           color: 'primary',
           isDisabled: isReplaced || isExpired || readOnly,
@@ -201,7 +210,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
               ? [
                   {
                     label: APPROVAL_MODAL_TRANSLATIONS.dismiss,
-                    color: 'text' as const,
+                    color: 'primary' as const,
                     iconType: 'cross' as const,
                     onClick: startDeclining,
                     isDisabled: isReplaced || primaryAction?.isDisabled,
@@ -234,24 +243,66 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     const isReplacedFailure = isReplaced && decision?.status === 'failed';
     const badge = getApprovalOutcomeBadge(isReplacedFailure ? 'failed' : approvalPhase);
     const banner = isReplaced ? undefined : getApprovalOutcomeBanner(approvalPhase);
-    const bannerSuffix = decision?.reason;
+    // Who decided and when, or who asked while it is in flight, then the reason if there is one.
+    const bannerWhoAndWhen = APPROVAL_MODAL_TRANSLATIONS.whoAndWhenBannerDescription(
+      decision?.actorName ?? currentActorName ?? APPROVAL_MODAL_TRANSLATIONS.currentActorFallback,
+      decision?.decidedAt ? formatDateTime(decision.decidedAt) : undefined
+    );
+    const bannerSuffix =
+      banner &&
+      (decision?.reason ? (
+        <FormattedMessage
+          id="xpack.proposals.approvalModal.outcome.descriptionWithReason"
+          defaultMessage="{whoAndWhen}. {reason}"
+          values={{ whoAndWhen: bannerWhoAndWhen, reason: decision.reason }}
+        />
+      ) : (
+        bannerWhoAndWhen
+      ));
     const isSettledOrTransient = approvalPhase !== 'pending';
 
-    const replacedCaption = isReplaced ? getProposalCaption(proposal) : undefined;
-    const headerCaption = decision?.actorName ? (
-      <>
-        {replacedCaption && `${replacedCaption} • `}
-        <ApprovalActorTime
-          actorName={decision.actorName}
-          at={decision.decidedAt}
-          executed={decision.status === 'failed'}
-        />
-      </>
-    ) : !isReplaced && isSubmitting && since ? (
-      <ApprovalActorTime actorName={actorName} at={since} live />
-    ) : (
-      getProposalCaption(proposal, { includeRiskDetails: !isReplaced })
-    );
+    // Only a marked-applied to-do can reopen: nothing automated ran, so undoing is safe.
+    const canReopen =
+      Boolean(onReopen) && isTodo && !isReplaced && approvalPhase === 'marked_applied';
+    const reopenAction: ApprovalAction | undefined =
+      canReopen && onReopen
+        ? {
+            label: APPROVAL_MODAL_TRANSLATIONS.markNotApplied,
+            color: 'primary',
+            iconType: 'undo',
+            isDisabled: readOnly,
+            isLoading: isReopening,
+            onClick: async () => {
+              setActionError(undefined);
+              try {
+                await onReopen();
+              } catch (err) {
+                setActionError(
+                  err instanceof Error ? err.message : APPROVAL_MODAL_TRANSLATIONS.actionErrorTitle
+                );
+              }
+            },
+            'data-test-subj': dataTestSubj ? `${dataTestSubj}-reopen` : undefined,
+          }
+        : undefined;
+
+    // The outcome banner says who decided and when. A decided proposal with no banner (a replaced
+    // or expired one) keeps that in the header instead.
+    const headerCaption =
+      !banner && decision?.actorName ? (
+        <>
+          {getProposalCaption(proposal) !== undefined && (
+            <>
+              <ProposalCaption proposal={proposal} /> •{' '}
+            </>
+          )}
+          <ApprovalActorTime actorName={decision.actorName} at={decision.decidedAt} />
+        </>
+      ) : (
+        getProposalCaption(proposal, { includeRiskDetails: !isReplaced }) && (
+          <ProposalCaption proposal={proposal} includeRiskDetails={!isReplaced} />
+        )
+      );
 
     const defaultButtonColor: EuiButtonColor = tone === 'danger' ? 'danger' : 'primary';
 
@@ -264,6 +315,7 @@ export const ApprovalContent = memo<ApprovalContentProps>(
     // showing the form alongside a banner that says the decision is already in flight would be
     // confusing.
     const showDeclineForm = displayMode === 'declining' && isSubmitting !== 'declining';
+    const contentMode = showDeclineForm ? 'declining' : 'view';
 
     return (
       <>
@@ -276,30 +328,32 @@ export const ApprovalContent = memo<ApprovalContentProps>(
         />
 
         <ApprovalContentBody
-          mode={displayMode}
+          mode={contentMode}
           comment={proposal.comment}
           banner={banner}
           bannerSuffix={bannerSuffix}
           actionError={actionError}
+          basePath={basePath}
           data-test-subj={dataTestSubj}
         />
 
-        {displayMode === 'view' && alwaysAllow && (
+        {contentMode === 'view' && alwaysAllow && (
           <AlwaysAllowCheckbox
             option={alwaysAllow}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-always-allow` : undefined}
           />
         )}
 
-        {!isReplaced && (
-          <ApprovalStatusCallouts
-            isPending={approvalPhase === 'pending'}
-            previousExecutionError={proposal.previousExecutionError}
-            isExpired={isExpired}
-            expiredReason={proposal.rationale}
-            data-test-subj={dataTestSubj}
-          />
-        )}
+        {/* A replaced card's only callout is why its own attempt failed; the rest belong to the
+            live successor. */}
+        <ApprovalStatusCallouts
+          isPending={!isReplaced && approvalPhase === 'pending'}
+          previousExecutionError={proposal.previousExecutionError}
+          failedAttemptError={isReplacedFailure ? proposal.executionError : undefined}
+          isExpired={!isReplaced && isExpired}
+          expiredReason={proposal.rationale}
+          data-test-subj={dataTestSubj}
+        />
 
         {showDeclineForm && (
           <DeclineReasonForm
@@ -311,12 +365,20 @@ export const ApprovalContent = memo<ApprovalContentProps>(
           />
         )}
 
-        {/* Decided/transient states name their actor in the header caption already — no need
+        {/* Decided/transient states name their actor in the outcome banner already — no need
             to repeat it here, so there is nothing left in the footer to show. */}
         {!isSettledOrTransient && hasFooter && (
           <ApprovalContentFooter
             secondaryActions={resolvedSecondaryActions}
             primaryAction={resolvedPrimaryAction}
+            defaultButtonColor={defaultButtonColor}
+            onPrimaryClick={handlePrimaryClick}
+          />
+        )}
+
+        {reopenAction && (
+          <ApprovalContentFooter
+            secondaryActions={[reopenAction]}
             defaultButtonColor={defaultButtonColor}
             onPrimaryClick={handlePrimaryClick}
           />

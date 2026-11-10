@@ -63,12 +63,13 @@ import { i18n } from '@kbn/i18n';
 import { SearchSessionState, getQueryLog } from '@kbn/data-plugin/public';
 import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
+import type { FirstDayOfWeek } from '@kbn/date-range-picker';
 import {
   DATE_RANGE_PICKER_FEATURE_FLAG,
   DateRangePicker,
@@ -77,6 +78,7 @@ import {
   type AutoRefreshSettings,
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
+import moment from 'moment';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
@@ -192,7 +194,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   disableAutoFocus?: boolean;
   fillSubmitButton: boolean;
   iconType?: EuiIconProps['type'];
-  indexPatterns?: Array<DataView | string>;
+  indexPatterns?: Array<FilterableSource | string>;
   indicateNoData?: boolean;
   isClearable?: boolean;
   isDirty: boolean;
@@ -328,6 +330,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
     isApproximate: boolean;
     onChange: (isApproximate: boolean) => void;
     additionalText?: string;
+    additionalDisabledText?: string;
     disabled?: boolean;
     disabledReason?: string;
   };
@@ -586,6 +589,11 @@ export const QueryBarTopRow = React.memo(
       );
     });
 
+    // A submit (e.g. a manual Refresh) refetches the data without changing the date range props,
+    // so tell the DateRangePicker to re-resolve relative bounds (e.g. `now-15m`) against the new
+    // "now" and keep the dates it displays in step with the data.
+    const [submitEpoch, setSubmitEpoch] = useState(0);
+
     const onSubmit = useCallback(
       (
         { query, dateRange }: { query?: Query | QT; dateRange: TimeRange },
@@ -595,6 +603,7 @@ export const QueryBarTopRow = React.memo(
           timeHistory.add(dateRange);
         }
 
+        setSubmitEpoch((epoch) => epoch + 1);
         propsOnSubmit({ query, dateRange }, trigger);
       },
       [timeHistory, propsOnSubmit]
@@ -755,6 +764,15 @@ export const QueryBarTopRow = React.memo(
 
       return () => subscription.unsubscribe();
     }, [shouldUseLegacyTimePicker, propsOnRefreshChange, data.query.timefilter.timefilter]);
+
+    const dayOfWeekSetting: string = uiSettings.get('dateFormat:dow');
+
+    const calendarOptions = useMemo(
+      () => ({
+        firstDayOfWeek: moment.weekdays().indexOf(dayOfWeekSetting) as FirstDayOfWeek,
+      }),
+      [dayOfWeekSetting]
+    );
 
     // Visualize-style consumers request auto-refresh-only mode via
     // `showAutoRefreshOnly` + `!showDatePicker`: the picker renders readOnly with
@@ -1047,8 +1065,10 @@ export const QueryBarTopRow = React.memo(
               onSettingsChange={onDateRangePickerSettingsChange}
               onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
               refreshEpoch={autoRefreshEpoch}
+              resolveEpoch={submitEpoch}
               inputDateFormats={inputDateFormats}
               timeZone={uiSettings.get('dateFormat:tz')}
+              calendarOptions={calendarOptions}
               prependBasePath={http?.basePath.prepend}
               canAccessAdvancedSettings={
                 (application?.capabilities.advancedSettings?.save as boolean | undefined) ?? false
@@ -1272,6 +1292,7 @@ export const QueryBarTopRow = React.memo(
                   isApproximate={props.esqlApproximation.isApproximate}
                   onChange={props.esqlApproximation.onChange}
                   additionalText={props.esqlApproximation.additionalText}
+                  additionalDisabledText={props.esqlApproximation.additionalDisabledText}
                   disabled={props.esqlApproximation.disabled}
                   disabledReason={props.esqlApproximation.disabledReason}
                 />
@@ -1535,6 +1556,7 @@ export const QueryBarTopRow = React.memo(
                     isApproximate={props.esqlApproximation.isApproximate}
                     onChange={props.esqlApproximation.onChange}
                     additionalText={props.esqlApproximation.additionalText}
+                    additionalDisabledText={props.esqlApproximation.additionalDisabledText}
                     disabled={props.esqlApproximation.disabled}
                     disabledReason={props.esqlApproximation.disabledReason}
                   />

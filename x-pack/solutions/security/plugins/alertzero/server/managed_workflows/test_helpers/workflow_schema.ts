@@ -12,8 +12,8 @@ import { validateWorkflowYaml } from '@kbn/workflows-management-plugin/common/li
  * Errors from validating rendered YAML against the generic `WorkflowSchema`, or undefined. Install
  * also checks connectors and trigger definitions, so passing here does not prove `valid: true`.
  */
-export const workflowSchemaFailure = (yaml: string): string | undefined => {
-  const result = validateWorkflowYaml(yaml, WorkflowSchema);
+export const workflowSchemaFailure = async (yaml: string): Promise<string | undefined> => {
+  const result = await validateWorkflowYaml(yaml, WorkflowSchema);
   if (result.valid) {
     return undefined;
   }

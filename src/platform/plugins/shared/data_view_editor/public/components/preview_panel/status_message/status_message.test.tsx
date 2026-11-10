@@ -129,6 +129,29 @@ describe('StatusMessage', () => {
     ).toBeVisible();
   });
 
+  it('should show that the user lacks the privileges to view the matching indices', () => {
+    renderWithI18n(
+      <StatusMessage
+        isIncludingSystemIndices={false}
+        matchedIndices={matchedIndices}
+        query={'k*'}
+        showSystemIndices={false}
+        error={new Error('action [indices:admin/resolve/index] is unauthorized for user [test]')}
+      />
+    );
+
+    const statusMessage = screen.getByTestId('createIndexPatternStatusMessage');
+    expect(statusMessage).toHaveTextContent(
+      "You don't have permission to view the data streams, indices, or index aliases that match your index pattern."
+    );
+    expect(statusMessage).toHaveTextContent(
+      'Ask an administrator to grant you the read and view_index_metadata index privileges.'
+    );
+    expect(
+      screen.queryByText('action [indices:admin/resolve/index] is unauthorized for user [test]')
+    ).not.toBeInTheDocument();
+  });
+
   it('should show that no indices exist', () => {
     renderWithI18n(
       <StatusMessage

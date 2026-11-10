@@ -9,8 +9,10 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { ServiceAccountBoundWorkload } from '@kbn/core-security-common';
 import type {
   CoreSecurityDelegateServiceAccounts,
+  DeleteServiceAccountResult,
   ResolvedServiceAccountWorkload,
   ServiceAccountWorkloadBinding,
 } from '@kbn/core-security-server';
@@ -24,20 +26,13 @@ import type { EnsureClusterPrivilegeParams } from './cluster_privilege';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import type { ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
-import type { ServiceAccountBoundWorkload } from '../../common/service_accounts';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage } from '../errors';
 
 /** How many bindings are re-read at once when checking whether an account can be deleted. */
 const VERIFY_CONCURRENCY = 10;
 
-/**
- * What came of a delete. An account that is still bound to workloads is not deleted unless the
- * caller forces it, and the workloads that stopped it are reported back.
- */
-export type DeleteServiceAccountResult =
-  | { deleted: true; warnings: string[] }
-  | { deleted: false; workloads: [ServiceAccountBoundWorkload, ...ServiceAccountBoundWorkload[]] };
+export type { DeleteServiceAccountResult } from '@kbn/core-security-server';
 
 const isNonEmpty = <T>(items: T[]): items is [T, ...T[]] => items.length > 0;
 
@@ -104,15 +99,19 @@ interface BlockingBinding {
 const toBoundWorkload = (
   { pluginId, workloadType, workloadId }: ServiceAccountWorkloadBinding,
   typeName: string | undefined,
-  { title, href }: ResolvedServiceAccountWorkload
-): ServiceAccountBoundWorkload => ({
-  pluginId,
-  workloadType,
-  workloadId,
-  displayName: title ?? workloadId,
-  ...(typeName !== undefined && { typeName }),
-  ...(href !== undefined && { href }),
-});
+  resolved: ResolvedServiceAccountWorkload | undefined
+): ServiceAccountBoundWorkload => {
+  const { title, href } =
+    resolved?.status === 'present' ? resolved : { title: undefined, href: undefined };
+  return {
+    pluginId,
+    workloadType,
+    workloadId,
+    displayName: title ?? workloadId,
+    ...(typeName !== undefined && { typeName }),
+    ...(href !== undefined && { href }),
+  };
+};
 
 export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
   private readonly logger: Logger;
@@ -243,7 +242,7 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
       toBoundWorkload(
         binding,
         this.workloadTypes.getWorkloadTypeName(binding.pluginId, binding.workloadType),
-        (verified && resolved.get(binding)) || {}
+        verified ? resolved.get(binding) : undefined
       )
     );
   }
@@ -258,7 +257,9 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
 
     try {
       const resolved = await this.workloadTypes.resolveBoundWorkloads(bindings);
-      return new Map(bindings.map((binding, index) => [binding, resolved[index] ?? {}]));
+      return new Map(
+        bindings.map((binding, index) => [binding, resolved[index] ?? { status: 'unknown' }])
+      );
     } catch (e) {
       this.logger.warn(
         `Unable to resolve ${bindings.length} bound workload(s): ${getDetailedErrorMessage(e)}`

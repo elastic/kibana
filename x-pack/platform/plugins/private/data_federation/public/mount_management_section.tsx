@@ -20,6 +20,7 @@ import type { DataFederationKibanaServices, FederatedDataFeatureFlags } from './
 import { DataSourcesClient } from './data_sources_client';
 import { DatasetsClient } from './datasets_client';
 import { getDiscoverLocator } from './get_discover_locator';
+import { createServiceRegistry } from './service_registry';
 import { createReportUiCounter } from './ui_counters';
 
 export const mountManagementSection = (
@@ -40,6 +41,11 @@ export const mountManagementSection = (
     featureFlags?: FederatedDataFeatureFlags;
   }
 ) => {
+  const serviceRegistry = createServiceRegistry({
+    enableGoogleCloudStorageDataSourceType,
+    enableAzureDataSourceType,
+  });
+
   const services: DataFederationKibanaServices = {
     dataSourcesClient: new DataSourcesClient(coreStart.http),
     datasetsClient: new DatasetsClient(coreStart.http),
@@ -51,6 +57,7 @@ export const mountManagementSection = (
       enableGoogleCloudStorageDataSourceType,
       enableAzureDataSourceType,
     },
+    serviceRegistry,
     reportUiCounter: createReportUiCounter(usageCollection),
   };
 

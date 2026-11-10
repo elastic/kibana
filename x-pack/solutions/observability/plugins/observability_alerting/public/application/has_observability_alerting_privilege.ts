@@ -37,6 +37,14 @@ export const hasObservabilityAlertingCapabilities = (
   return { v1, v2 };
 };
 
+/** Rules page tabs the user can open; with both, the page renders the Universal and Classic tabs. */
+export const getObservabilityRulesTabVisibility = (
+  capabilities: Capabilities
+): { showV1: boolean; showV2: boolean } => {
+  const { v1, v2 } = hasObservabilityAlertingCapabilities(capabilities, 'rules');
+  return { showV1: v1, showV2: v2 };
+};
+
 /** Capability-based check: does the user have any observability alerting access? */
 export const hasObservabilityAlertsV1Capability = (capabilities: Capabilities): boolean =>
   hasObservabilityRulesV1Capability(capabilities) ||

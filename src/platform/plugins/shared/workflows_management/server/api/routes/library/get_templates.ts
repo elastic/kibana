@@ -32,7 +32,7 @@ export function registerGetTemplatesRoute(
       path: '/internal/workflows/library/templates',
       access: 'internal',
       security: WORKFLOW_READ_SECURITY,
-      summary: 'List Workflow Template Library templates',
+      summary: 'List Workflow Template library templates',
       description: 'Returns the catalog rows the running Kibana version was published with.',
     })
     .addVersion(

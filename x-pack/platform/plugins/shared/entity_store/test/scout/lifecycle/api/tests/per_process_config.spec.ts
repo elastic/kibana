@@ -18,6 +18,7 @@ import {
   forceLogExtraction,
   getStatus,
   installAllEntityTypes,
+  taskExists,
   uninstallAllEntityTypes,
   waitForDualProcessFlag,
   waitForStoreNotInstalled,
@@ -50,22 +51,6 @@ apiTest.describe(
         responseType: 'json',
         body,
       });
-
-    // Only a verified 404 counts as absence. Treating any read failure as "task gone" would let
-    // the stop assertions pass on a transient error.
-    const taskExists = async (
-      kbnClient: { savedObjects: { get: (o: { type: string; id: string }) => Promise<unknown> } },
-      id: string
-    ) => {
-      try {
-        await kbnClient.savedObjects.get({ type: 'task', id });
-        return true;
-      } catch (error) {
-        const { response, status } = error as { response?: { status?: number }; status?: number };
-        if ((response?.status ?? status) === 404) return false;
-        throw error;
-      }
-    };
 
     /**
      * Puts the non-priority process back in the started state. The stop cases below remove its
@@ -139,9 +124,10 @@ apiTest.describe(
       // Top level is the priority process: it defers on the cap and takes the global volume field.
       expect(engine.maxLogsPerWindowCapBehavior).toBe('defer');
       expect(engine.maxLogsPerWindow).toBe(500000);
-      // Non-priority drops on the cap, ignores the global volume field and has its own frequency.
+      // Non-priority drops on the cap (the one field that still diverges by design), but shares
+      // the global volume field like any other field, and has its own frequency.
       expect(engine.nonPriority?.maxLogsPerWindowCapBehavior).toBe('drop');
-      expect(engine.nonPriority?.maxLogsPerWindow).toBe(100000);
+      expect(engine.nonPriority?.maxLogsPerWindow).toBe(500000);
       expect(engine.nonPriority?.frequency).toBe('5m');
 
       // The store is installed once for the file, so clear both layers for later cases.

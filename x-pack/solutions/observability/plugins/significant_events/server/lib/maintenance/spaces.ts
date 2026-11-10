@@ -33,8 +33,8 @@ const findAllSpaceIdsInternally = async (server: SignificantEventsServer): Promi
 };
 
 /**
- * Every space that exists, always including the default space. Pause, flag-off pause,
- * reassert and reset all act on every space, and a partial list would leave the missed
+ * Every space that exists, always including the default space. Flag-off pause and
+ * reassert act on every space, and a partial list would leave the missed
  * spaces running, so an enumeration error is thrown instead of falling back to the default
  * space. Without the spaces plugin only the default space exists.
  */

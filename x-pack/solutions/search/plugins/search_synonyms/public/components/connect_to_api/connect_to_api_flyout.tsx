@@ -76,7 +76,7 @@ export const ConnectToApiFlyout: React.FC<ConnectToApiFlyoutProps> = ({ onClose,
       <EuiFlyoutBody>
         <EuiText size="s">
           <p>
-            {i18n.translate('xpack.searchSynonyms.ConnectToApiFlyout.description', {
+            {i18n.translate('xpack.searchSynonyms.ConnectToApiFlyout.bodyDescription', {
               defaultMessage: `You can specify the analyzer that contains your synonyms set as a search time analyzer.`,
             })}
             <EuiSpacer size="s" />

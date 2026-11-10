@@ -68,14 +68,6 @@ actions:
         * [Short URLs](../group/endpoint-short-url)
 
         Warning: Do not write documents directly to the `.kibana` index. When you write directly to the `.kibana` index, the data becomes corrupted and permanently breaks future Kibana versions.
-  - target: '$.tags[?(@.name=="synthetics")]'
-    description: Add tag info
-    update:
-        x-displayName: Synthetics
-        description: Synthetics APIs enable you to check the status of your services and applications.
-        externalDocs:
-          description: Synthetic monitoring
-          url: https://www.elastic.co/docs/solutions/observability/synthetics
   - target: '$.tags[?(@.name=="user session")]'
     description: Change tag description
     update:

@@ -14,6 +14,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { NotificationCoordinator } from '@kbn/core-notifications-browser';
+import type { InternalScreenReaderStart } from '../screen_reader';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi } from './toasts_api';
 import { ToastsTelemetry } from './telemetry';
@@ -29,6 +30,7 @@ interface StartDeps {
   analytics: AnalyticsServiceStart;
   targetDomElement: HTMLElement;
   notificationCoordinator: NotificationCoordinator;
+  screenReader: InternalScreenReaderStart;
 }
 
 export class ToastsService {
@@ -48,6 +50,7 @@ export class ToastsService {
     rendering,
     analytics,
     notificationCoordinator,
+    screenReader,
   }: StartDeps) {
     this.api!.start({ overlays, rendering });
     this.targetDomElement = targetDomElement;
@@ -67,6 +70,7 @@ export class ToastsService {
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={toasts$}
           reportEvent={reportEvent}
+          notifyScreenReader={screenReader.notify}
         />
       ),
       targetDomElement

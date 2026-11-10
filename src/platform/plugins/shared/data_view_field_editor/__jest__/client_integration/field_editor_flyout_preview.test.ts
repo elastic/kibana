@@ -387,6 +387,76 @@ describe('Field editor Preview panel', () => {
     });
   });
 
+  describe('custom label', () => {
+    it('should display the custom label in the preview row when set', async () => {
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, getRenderedFieldsPreview, toggleFormRow },
+      } = await setup();
+
+      await toggleFormRow('value');
+      await fields.updateName('myRuntimeField');
+      await fields.updateScript('echo("hello")');
+      await flushPreviewAndSearchTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'myRuntimeField', value: 'mockedScriptValue' },
+      ]);
+
+      await toggleFormRow('customLabel');
+      await fields.updateCustomLabel('My custom label');
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'My custom label', value: 'mockedScriptValue' },
+      ]);
+
+      // Toggling the custom label off falls back to the field name
+      await toggleFormRow('customLabel', 'off');
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'myRuntimeField', value: 'mockedScriptValue' },
+      ]);
+    });
+
+    it('should display the custom label of the field being edited', async () => {
+      const field = {
+        name: 'foo',
+        type: 'keyword' as const,
+        customLabel: 'Foo label',
+        script: {
+          source: 'emit("hello")',
+        },
+      };
+
+      const {
+        actions: { flushPreviewAndSearchTimers, getRenderedFieldsPreview },
+      } = await setup({ fieldToEdit: field });
+
+      await flushPreviewAndSearchTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'Foo label', value: 'mockedScriptValue' },
+      ]);
+    });
+
+    it('should not apply the custom label to composite subfield rows', async () => {
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: { 'composite_field.a': [1] } });
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, getRenderedFieldsPreview, toggleFormRow },
+      } = await setup();
+
+      await fields.updateName('myComposite');
+      await toggleFormRow('customLabel');
+      await fields.updateCustomLabel('My custom label');
+
+      await fields.updateType('Composite');
+      await fields.updateScript("emit('a',1)");
+      await flushPreviewAndSearchTimers();
+
+      // Composite subfields are identified by "<parent>.<subfield>", the label does not apply
+      expect(getRenderedFieldsPreview()).toEqual([{ key: 'myComposite.a', value: '1' }]);
+    });
+  });
+
   describe('updating indicator', () => {
     beforeEach(() => {
       // Add some latency to be able to test the "updatingIndicator" state
@@ -813,6 +883,8 @@ describe('Field editor Preview panel', () => {
       expect(screen.queryByTestId('documentsNav')).not.toBeInTheDocument();
       // There should be a link to load back the cluster data
       expect(screen.queryByTestId('loadDocsFromClusterButton')).toBeVisible();
+      // The header indicates that the preview is based on a custom document
+      expect(screen.getByTestId('subTitle')).toHaveTextContent('From: Custom data');
     });
 
     it('should load back the cluster data after providing a custom ID', async () => {
@@ -848,6 +920,132 @@ describe('Field editor Preview panel', () => {
       expect(getRenderedFieldsPreview()).toEqual([
         { key: 'myRuntimeField', value: 'clusterDataDocPreview' },
       ]);
+      // ...and the header points back to the cluster data
+      expect(screen.getByTestId('subTitle')).toHaveTextContent(`From: ${indexPatternNameForTest}`);
+    });
+
+    it('should keep the preview row visible while the cluster documents are being fetched', async () => {
+      const {
+        actions: {
+          fields,
+          flushDocumentsAndPreviewTimers,
+          flushPreviewAndSearchTimers,
+          getRenderedFieldsPreview,
+          setDocumentId,
+          toggleFormRow,
+        },
+      } = await setup();
+
+      await toggleFormRow('value');
+      await fields.updateName('myRuntimeField');
+      await fields.updateScript('echo("hello world")');
+      await flushPreviewAndSearchTimers(); // fetch preview
+
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['loadedDocPreview'] });
+      setSearchResponse([customLoadedDoc]);
+
+      // Load a custom document ID
+      await setDocumentId('123456');
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'myRuntimeField', value: 'loadedDocPreview' },
+      ]);
+
+      // Load back the cluster data, with some latency to observe the state while loading
+      httpRequestsMockHelpers.setFieldPreviewResponse({ values: ['clusterDataDocPreview'] });
+      setSearchResponse(mockDocuments);
+      setSearchResponseLatency(2000);
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('loadDocsFromClusterButton'));
+      });
+
+      // While the documents are being fetched the preview row must stay visible,
+      // with the updating indicator in place of the value
+      expect(screen.queryAllByTestId('fieldPreviewItem').length).toBe(1);
+      expect(getRenderedFieldsPreview()[0].key).toBe('myRuntimeField');
+      expect(screen.queryAllByTestId('isUpdatingIndicator').length).toBeGreaterThan(0);
+
+      await flushDocumentsAndPreviewTimers();
+
+      expect(getRenderedFieldsPreview()).toEqual([
+        { key: 'myRuntimeField', value: 'clusterDataDocPreview' },
+      ]);
+    });
+
+    it('should clear the error state when the document ID is cleared', async () => {
+      const {
+        actions: {
+          fields,
+          getRenderedIndexPatternFields,
+          loadDocumentsFromCluster,
+          setDocumentId,
+          toggleFormRow,
+        },
+      } = await setup();
+
+      await fields.updateName('myRuntimeField');
+      await toggleFormRow('value');
+
+      // We will return no document from the search
+      setSearchResponse([]);
+
+      await setDocumentId('wrongID');
+
+      expect(screen.queryByTestId('fetchDocError')).toBeVisible();
+      expect(screen.queryByText('Document ID not found')).toBeVisible();
+
+      // Clear the document ID
+      setSearchResponse(mockDocuments);
+      await setDocumentId('');
+
+      // The error is gone and the field list (of the last loaded documents) is visible again
+      expect(screen.queryByTestId('fetchDocError')).not.toBeInTheDocument();
+      expect(screen.queryByText('Document ID not found')).not.toBeInTheDocument();
+      expect(screen.getByTestId('documentIdField')).toHaveValue('');
+      expect(getRenderedIndexPatternFields()[0]).toEqual({
+        key: 'description',
+        value: 'First doc - description',
+      });
+
+      // We are still in "custom document" mode: no nav buttons, but a link
+      // back to the cluster documents
+      expect(screen.queryByTestId('documentsNav')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('loadDocsFromClusterButton')).toBeVisible();
+
+      await loadDocumentsFromCluster();
+
+      expect(screen.queryByTestId('documentsNav')).toBeVisible();
+      expect(screen.queryByTestId('loadDocsFromClusterButton')).not.toBeInTheDocument();
+    });
+
+    it('should discard a pending document lookup when the ID is cleared', async () => {
+      const {
+        actions: { fields, flushDocumentsAndPreviewTimers, toggleFormRow },
+      } = await setup();
+
+      await fields.updateName('myRuntimeField');
+      await toggleFormRow('value');
+
+      // The next lookup will not find any document and would set an error...
+      setSearchResponse([]);
+      setSearchResponseLatency(2000);
+
+      const input = screen.getByTestId('documentIdField');
+      await act(async () => {
+        fireEvent.change(input, { target: { value: 'unknownId' } });
+      });
+
+      // ...but the ID is cleared while the request is in flight
+      await act(async () => {
+        fireEvent.change(input, { target: { value: '' } });
+      });
+
+      await flushDocumentsAndPreviewTimers();
+
+      // The stale "not found" response must not put the preview in an error state
+      expect(screen.queryByTestId('fetchDocError')).not.toBeInTheDocument();
+      expect(screen.queryByText('Document ID not found')).not.toBeInTheDocument();
+      expect(input).toHaveValue('');
     });
 
     it('should not lose the state of single document vs cluster data after toggling on/off the empty prompt', async () => {
@@ -966,6 +1164,32 @@ describe('Field editor Preview panel', () => {
       await fields.updateType('Composite');
       await flushPreviewAndSearchTimers();
       expect(screen.queryByTestId('compositeEditor')).toBeVisible();
+    });
+
+    it('should preserve the script when switching to and from the composite type', async () => {
+      const script = 'emit("bar", 1)';
+      const {
+        actions: { fields, flushPreviewAndSearchTimers, toggleFormRow },
+      } = await setup();
+
+      await toggleFormRow('value');
+      await fields.updateScript(script);
+
+      await fields.updateType('Composite');
+      await flushPreviewAndSearchTimers();
+      expect(screen.getByTestId('compositeEditor')).toBeVisible();
+      expect(screen.getByTestId('scriptField')).toHaveValue(script);
+
+      await fields.updateType('Keyword');
+      await flushPreviewAndSearchTimers();
+      expect(screen.getByRole('switch', { name: 'Set value' })).toBeChecked();
+      expect(screen.getByTestId('scriptField')).toHaveValue(script);
+
+      // a cleared script must not be restored from a previous type switch
+      await fields.updateScript('');
+      await fields.updateType('Composite');
+      await flushPreviewAndSearchTimers();
+      expect(screen.getByTestId('scriptField')).toHaveValue('');
     });
 
     it('should show composite field types and update appropriately', async () => {

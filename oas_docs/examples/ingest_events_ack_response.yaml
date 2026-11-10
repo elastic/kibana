@@ -1,0 +1,3 @@
+summary: Connector HTTP 200 ack. No event is emitted.
+value:
+  challenge: abc

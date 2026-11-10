@@ -42,10 +42,10 @@ describe('registerAlertingAdvancedSettings', () => {
     );
   });
 
-  it('disables the global setting by default and does not mark it experimental', () => {
+  it('enables the global setting by default and does not mark it experimental', () => {
     const setting = alertingGlobalAdvancedSettings[ALERTING_V2_ENABLED_SETTING_ID];
 
-    expect(setting.value).toBe(false);
+    expect(setting.value).toBe(true);
     expect(setting).not.toHaveProperty('experimental');
   });
 

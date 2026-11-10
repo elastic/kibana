@@ -14,7 +14,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { setupGetFieldSuggestions } from './field';
 import type { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 
@@ -44,6 +44,25 @@ describe('Kuery field suggestions', () => {
     const filterableFields = (indexPatternResponse.fields as DataViewField[]).filter(isFilterable);
 
     expect(suggestions.length).toBe(filterableFields.length);
+  });
+
+  test('should keep the field of the data view in the suggestion, with its spec', async () => {
+    const field = new DataViewField({
+      name: 'bytes',
+      type: 'number',
+      searchable: true,
+      aggregatable: true,
+    });
+
+    const suggestions = await getSuggestions(
+      {
+        indexPatterns: [{ title: 'logs-*', fields: [field] }],
+      } as unknown as QuerySuggestionGetFnArgs,
+      mockKueryNode({ prefix: '', suffix: '' })
+    );
+
+    // consumers read the data view field from the suggestion, for example `field.spec.name`
+    expect(suggestions.map(({ field: suggested }) => suggested.spec.name)).toEqual(['bytes']);
   });
 
   test('should filter suggestions based on the query', async () => {
@@ -116,7 +135,7 @@ describe('Kuery field suggestions', () => {
     expect(keywordIndex).toBeLessThan(analyzedIndex);
   });
 
-  test('should not have descriptions', async () => {
+  test('should not have descriptions for fields without a custom label', async () => {
     const prefix = '';
     const suffix = '';
     const suggestions = await getSuggestions(
@@ -126,6 +145,46 @@ describe('Kuery field suggestions', () => {
     expect(suggestions.length).toBeGreaterThan(0);
     suggestions.forEach((suggestion) => {
       expect(suggestion).not.toHaveProperty('description');
+    });
+  });
+
+  describe('custom labels', () => {
+    beforeEach(() => {
+      querySuggestionsArgs = {
+        indexPatterns: [
+          {
+            ...indexPatternResponse,
+            fields: indexPatternResponse.fields.map((field) =>
+              field.name === 'machine.os' ? { ...field, customLabel: 'Operating system' } : field
+            ),
+          },
+        ],
+      } as unknown as QuerySuggestionGetFnArgs;
+    });
+
+    test('should use the custom label as description and keep the field name as text', async () => {
+      const suggestions = await getSuggestions(
+        querySuggestionsArgs,
+        mockKueryNode({ prefix: 'machine.os', suffix: '' })
+      );
+
+      expect(suggestions.find(({ text }) => text === 'machine.os ')).toHaveProperty(
+        'description',
+        'Operating system'
+      );
+      expect(suggestions.find(({ text }) => text === 'machine.os.raw ')).not.toHaveProperty(
+        'description'
+      );
+    });
+
+    test('should match the custom label', async () => {
+      const suggestions = await getSuggestions(
+        querySuggestionsArgs,
+        mockKueryNode({ prefix: 'operating', suffix: '' })
+      );
+
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions[0].text).toBe('machine.os ');
     });
   });
 

@@ -50,12 +50,12 @@ export const LandingLinkCard: FC<LandingLinkIconProps> = React.memo(function Lan
   urlState,
   onLinkClick,
 }) {
-  const { title, description, landingIcon, isBeta, betaOptions } = item;
+  const { id, title, description, landingIcon, isBeta, betaOptions } = item;
 
   return (
     <LinkCard
       {...getKibanaLinkProps({ item, urlState, onLinkClick })}
-      data-test-subj="LandingItem"
+      data-test-subj={`LandingItem LandingItem-${id}`}
       layout="vertical"
       textAlign="left"
       titleSize="xs"
@@ -71,7 +71,7 @@ export const LandingLinkCard: FC<LandingLinkIconProps> = React.memo(function Lan
 export const LandingLinkIcon: FC<PropsWithChildren<LandingLinkIconProps>> = React.memo(
   function LandingLinkIcon({ item, urlState, onLinkClick, children }) {
     const styles = useLinkIconStyles();
-    const { title, description, landingIcon, isBeta, betaOptions } = item;
+    const { id, title, description, landingIcon, isBeta, betaOptions } = item;
 
     return (
       <EuiFlexGroup
@@ -79,7 +79,7 @@ export const LandingLinkIcon: FC<PropsWithChildren<LandingLinkIconProps>> = Reac
         alignItems="flexStart"
         gutterSize="none"
         responsive={false}
-        data-test-subj="LandingItem"
+        data-test-subj={`LandingItem LandingItem-${id}`}
       >
         <EuiFlexItem grow={false}>
           <EuiIcon aria-hidden="true" size="xl" type={landingIcon ?? ''} role="presentation" />

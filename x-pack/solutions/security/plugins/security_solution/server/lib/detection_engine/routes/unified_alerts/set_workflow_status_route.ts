@@ -17,7 +17,6 @@ import { SetUnifiedAlertsWorkflowStatusRequestBody } from '../../../../../common
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL } from '../../../../../common/constants';
 import { updateAlertsWorkflowStatus } from '../common/operations/update_alerts_workflow_status';
-import { auditAlertUpdatePreOperationFailure } from '../common/operations/audit_alert_updates';
 import { validateClosingReason } from '../common/validators/validate_closing_reason';
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
 import { withSiemErrorHandling } from '../with_siem_error_handling';
@@ -68,10 +67,6 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
 
         const closingReason = await validateClosingReason({ core, status, reason });
         if (!closingReason.valid) {
-          auditAlertUpdatePreOperationFailure(
-            (await context.securitySolution)?.getAuditLogger(),
-            'Invalid alert update request'
-          );
           return buildSiemResponse(response).error({
             statusCode: 400,
             body: closingReason.message,

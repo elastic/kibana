@@ -11,6 +11,7 @@ import {
   INFERENCE_SETTINGS_NAMESPACE_TYPE,
 } from '../../common/constants';
 import { inferenceSettingsSchemaV1 } from './schema/v1';
+import { inferenceSettingsSchemaV2 } from './schema/v2';
 
 export const createInferenceSettingsSavedObjectType = (): SavedObjectsType => ({
   name: INFERENCE_SETTINGS_SO_TYPE,
@@ -27,6 +28,13 @@ export const createInferenceSettingsSavedObjectType = (): SavedObjectsType => ({
       schemas: {
         forwardCompatibility: inferenceSettingsSchemaV1.extends({}, { unknowns: 'ignore' }),
         create: inferenceSettingsSchemaV1,
+      },
+    },
+    2: {
+      changes: [],
+      schemas: {
+        forwardCompatibility: inferenceSettingsSchemaV2.extends({}, { unknowns: 'ignore' }),
+        create: inferenceSettingsSchemaV2,
       },
     },
   },

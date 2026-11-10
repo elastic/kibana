@@ -44,7 +44,6 @@ describe('createGetStatusService', () => {
         data: { available: true },
         resource_management: { enabled: true },
         resources: { created: true, pre_8_9_1_data: false },
-        settings: { configured: true },
         policies: {
           collector: { installed: true },
           symbolizer: { installed: true },
@@ -73,7 +72,6 @@ describe('createGetStatusService', () => {
         data: { available: true },
         resource_management: { enabled: true },
         resources: { created: true, pre_8_9_1_data: true },
-        settings: { configured: true },
       },
     ]);
 

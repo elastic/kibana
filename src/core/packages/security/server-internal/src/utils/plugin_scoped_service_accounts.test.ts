@@ -18,9 +18,11 @@ const WORKLOAD_IN_SPACE = { ...WORKLOAD, spaceId: 'default' };
 const createDelegate = (): jest.Mocked<ServiceAccountsServiceContract> => ({
   isEnabled: jest.fn().mockReturnValue(true),
   create: jest.fn(),
+  delete: jest.fn(),
   bindWorkload: jest.fn(),
   unbindWorkload: jest.fn(),
   getWorkloadBinding: jest.fn(),
+  getWorkloadServiceAccountSummary: jest.fn(),
   withScopedRequestForWorkload: jest.fn(),
 });
 
@@ -37,18 +39,21 @@ describe('createPluginScopedServiceAccounts', () => {
   const scopedTo = (pluginId: string) =>
     createPluginScopedServiceAccounts({ pluginId, delegate, workloadTypes });
 
-  it('passes `isEnabled` and `create` straight through', () => {
+  it('passes `isEnabled`, `create`, and `delete` straight through', () => {
     const scoped = scopedTo('alerting');
 
     expect(scoped.isEnabled).toBe(delegate.isEnabled);
     expect(scoped.create).toBe(delegate.create);
+    expect(scoped.delete).toBe(delegate.delete);
   });
 
   it('exposes exactly the public service accounts contract', () => {
     expect(Object.keys(scopedTo('alerting')).sort()).toEqual([
       'bindWorkload',
       'create',
+      'delete',
       'getWorkloadBinding',
+      'getWorkloadServiceAccountSummary',
       'isEnabled',
       'unbindWorkload',
       'withScopedRequestForWorkload',
@@ -78,6 +83,19 @@ describe('createPluginScopedServiceAccounts', () => {
 
       await expect(scopedTo('alerting').getWorkloadBinding(WORKLOAD_IN_SPACE)).resolves.toBeNull();
       expect(delegate.getWorkloadBinding).toHaveBeenCalledWith('alerting', WORKLOAD_IN_SPACE);
+    });
+
+    it('names the bound account with the plugin id first', async () => {
+      const summary = { id: 'sa-1', name: 'Nightshift', enabled: true, assumable: true };
+      delegate.getWorkloadServiceAccountSummary.mockResolvedValue(summary);
+
+      await expect(
+        scopedTo('alerting').getWorkloadServiceAccountSummary(WORKLOAD_IN_SPACE)
+      ).resolves.toBe(summary);
+      expect(delegate.getWorkloadServiceAccountSummary).toHaveBeenCalledWith(
+        'alerting',
+        WORKLOAD_IN_SPACE
+      );
     });
 
     it('runs a scoped request with the plugin id first', async () => {
@@ -149,6 +167,11 @@ describe('createPluginScopedServiceAccounts', () => {
           scoped.getWorkloadBinding({ ...unregistered, spaceId: 'default' }),
       ],
       [
+        'getWorkloadServiceAccountSummary',
+        (scoped: ReturnType<typeof scopedTo>) =>
+          scoped.getWorkloadServiceAccountSummary({ ...unregistered, spaceId: 'default' }),
+      ],
+      [
         'withScopedRequestForWorkload',
         (scoped: ReturnType<typeof scopedTo>) =>
           scoped.withScopedRequestForWorkload({ ...unregistered, spaceId: 'default' }, jest.fn()),
@@ -159,6 +182,7 @@ describe('createPluginScopedServiceAccounts', () => {
       expect(delegate.bindWorkload).not.toHaveBeenCalled();
       expect(delegate.unbindWorkload).not.toHaveBeenCalled();
       expect(delegate.getWorkloadBinding).not.toHaveBeenCalled();
+      expect(delegate.getWorkloadServiceAccountSummary).not.toHaveBeenCalled();
       expect(delegate.withScopedRequestForWorkload).not.toHaveBeenCalled();
     });
   });
@@ -189,6 +213,11 @@ describe('createPluginScopedServiceAccounts', () => {
             scoped.getWorkloadBinding({ ...WORKLOAD_IN_SPACE, workloadId }),
         ],
         [
+          'getWorkloadServiceAccountSummary',
+          (scoped: ReturnType<typeof scopedTo>) =>
+            scoped.getWorkloadServiceAccountSummary({ ...WORKLOAD_IN_SPACE, workloadId }),
+        ],
+        [
           'withScopedRequestForWorkload',
           (scoped: ReturnType<typeof scopedTo>) =>
             scoped.withScopedRequestForWorkload({ ...WORKLOAD_IN_SPACE, workloadId }, jest.fn()),
@@ -199,6 +228,7 @@ describe('createPluginScopedServiceAccounts', () => {
       expect(delegate.bindWorkload).not.toHaveBeenCalled();
       expect(delegate.unbindWorkload).not.toHaveBeenCalled();
       expect(delegate.getWorkloadBinding).not.toHaveBeenCalled();
+      expect(delegate.getWorkloadServiceAccountSummary).not.toHaveBeenCalled();
       expect(delegate.withScopedRequestForWorkload).not.toHaveBeenCalled();
     };
 

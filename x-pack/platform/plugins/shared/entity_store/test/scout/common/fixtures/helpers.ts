@@ -355,6 +355,22 @@ export const uninstallEntityStoreSuiteWithKbnClient = async ({
   }
 };
 
+/**
+ * Reports whether a Task Manager task is still scheduled, via the FTR task route that answers
+ * 404 once the task is gone. `ignoreErrors` settles on that 404 from the first reply instead of
+ * letting KbnClient retry it five times and report only the last attempt's status, so a transient
+ * network error can neither be read as a missing task nor overwrite an answer already given.
+ */
+export const taskExists = async (kbnClient: KbnClientFixture, taskId: string): Promise<boolean> => {
+  const { status } = await kbnClient.request({
+    method: 'GET',
+    path: `/internal/ftr/task_manager/${encodeURIComponent(taskId)}`,
+    ignoreErrors: [404],
+  });
+
+  return status === 200;
+};
+
 export const searchDocById = async (esClient: EsClient, id: string) => {
   await esClient.indices.refresh({ index: LATEST_ALIAS });
   return await esClient.search({
@@ -810,10 +826,10 @@ export const waitForStoreNotInstalled = async (
  * A 200 from the config overrides API only means the instance that served it applied the value
  * in memory; the others pick it up from the persisted override on core's 10s poll. The status
  * API reports the `user` engine's `nonPriority` block only when the flag evaluates true on the
- * instance that served the read, so this polls that read and requires the expected shape to hold
- * continuously for longer than one poll period: by then every instance has polled at least once
- * since the write, whichever ones happened to serve the reads. A response without the `user`
- * engine (a non-200, or a store that is not installed) resets the window.
+ * instance that served the read, and `null` when it does not, so this polls that read and requires
+ * the expected shape to hold continuously for longer than one poll period: by then every instance
+ * has polled at least once since the write, whichever ones happened to serve the reads. A response
+ * without the `user` engine (a non-200, or a store that is not installed) resets the window.
  */
 export const waitForDualProcessFlag = async (
   apiClient: ApiClientFixture,
@@ -834,7 +850,7 @@ export const waitForDualProcessFlag = async (
     const engine =
       statusCode === 200 ? body.engines.find(({ type }) => type === 'user') : undefined;
 
-    if (engine && (engine.nonPriority !== undefined) === enabled) {
+    if (engine && (engine.nonPriority !== null) === enabled) {
       stableSince ??= Date.now();
       if (Date.now() - stableSince >= stableForMs) return;
     } else {
