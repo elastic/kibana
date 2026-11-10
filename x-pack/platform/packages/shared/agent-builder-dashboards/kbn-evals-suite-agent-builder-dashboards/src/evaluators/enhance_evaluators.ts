@@ -8,14 +8,14 @@
 import { isEqual } from 'lodash';
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { EvaluationResult } from '@kbn/evals';
-import { getLeafPanels, getPanelQueries, normalizeQuery } from '../dashboard_panels';
+import { getLeafPanels, getPanelDataSources, normalizeQuery } from '../dashboard_panels';
 import type { DashboardAgentEvaluator, DashboardAgentTaskOutput, EnhanceGold } from '../types';
 import { skippedResult } from '../evaluator_utils';
 import {
   GENERATE_DASHBOARD_TOOL_ID,
   findAskUserQuestionPrompt,
   findModeOptionIndex,
-  getLastWrittenDashboardId,
+  hasWrittenDashboard,
   type AskUserQuestionPrompt,
 } from '../extract_dashboard';
 import {
@@ -123,7 +123,7 @@ const missingDashboardResult = (before?: DashboardAttachmentData): EvaluationRes
  * reward a run that did no enhancing; Defect Resolution scores that run 0.
  */
 const noWriteResult = (output: DashboardAgentTaskOutput): EvaluationResult | undefined =>
-  getLastWrittenDashboardId(output.steps ?? []) === undefined
+  !hasWrittenDashboard(output)
     ? {
         score: null,
         label: 'no-write',
@@ -136,7 +136,10 @@ const getPanelIds = (dashboard: DashboardAttachmentData): Set<string> =>
 
 const queriesById = (dashboard: DashboardAttachmentData): Map<string, string[]> =>
   new Map(
-    getLeafPanels(dashboard).map((panel) => [panel.id, getPanelQueries(panel).map(normalizeQuery)])
+    getLeafPanels(dashboard).map((panel) => {
+      const { queries, indices } = getPanelDataSources(panel);
+      return [panel.id, [...queries.map(normalizeQuery), ...indices]];
+    })
   );
 
 const sameList = (a: readonly string[], b: readonly string[]): boolean =>

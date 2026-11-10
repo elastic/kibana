@@ -668,6 +668,7 @@ src/platform/packages/shared/kbn-management/settings/components/field_input @ela
 src/platform/packages/shared/kbn-management/settings/components/field_row @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/components/form @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/field_definition @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/hooks @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/section_registry @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
@@ -1107,6 +1108,7 @@ x-pack/platform/packages/shared/kbn-change-history @elastic/kibana-core
 x-pack/platform/packages/shared/kbn-change-history-ui @elastic/workflows-eng
 x-pack/platform/packages/shared/kbn-classic-stream-flyout @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-ui
+x-pack/platform/packages/shared/kbn-content-sanitization @elastic/kibana-security
 x-pack/platform/packages/shared/kbn-data-forge @elastic/nightshift-sre-agent-team @elastic/obs-signals-logs-team
 x-pack/platform/packages/shared/kbn-data-lifecycle-phases @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-dissect-heuristics @elastic/streams-ui
@@ -1334,6 +1336,10 @@ x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/plugins/shared/usage_api @elastic/kibana-core
 x-pack/platform/test
+x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases @elastic/security-investigations
+x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability @elastic/security-investigations
+x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution @elastic/security-investigations
+x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases @elastic/security-investigations
 x-pack/platform/test/agent_builder_sml/plugins/sml_test_types @elastic/workchat-eng
 x-pack/platform/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
@@ -1341,16 +1347,12 @@ x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/res
 x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
-x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/security-investigations
-x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/security-investigations
-x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/security-investigations
 x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/platform/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 x-pack/platform/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/platform/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
-x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/security-investigations
 x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
@@ -1521,7 +1523,7 @@ x-pack/solutions/security/plugins/security_solution_serverless @elastic/security
 x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting
 x-pack/solutions/security/test
-x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
+x-pack/solutions/security/test_plugins/resolver_test @elastic/security-solution
 x-pack/solutions/security/test/security_solution_api_integration @elastic/security-detection-engineering
 x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response @elastic/security-detection-engineering
 x-pack/solutions/security/test/security_solution_endpoint @elastic/security-defend-workflows
@@ -2699,6 +2701,7 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/abuseipdb/** @elastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/alienvault_otx/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/amazon_s3/** @elastic/workchat-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/atlassian/** @elastic/workchat-eng
+src/platform/packages/shared/kbn-connector-specs/src/specs/aws/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_cloudwatch/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_eks/** @elastic/workflows-eng
 src/platform/packages/shared/kbn-connector-specs/src/specs/aws_lambda/** @elastic/workflows-eng
@@ -2866,7 +2869,7 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /x-pack/platform/test/functional/fixtures/kbn_archives/rules_scheduled_task_id @elastic/security-investigations
 /x-pack/platform/test/functional/services/cases/ @elastic/security-investigations
 /x-pack/platform/test/functional_with_es_ssl/apps/cases/ @elastic/security-investigations
-/x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/security-investigations
+/x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases @elastic/security-investigations
 
 /x-pack/solutions/search/test/serverless/functional/test_suites/cases/ @elastic/security-investigations
 
@@ -3663,6 +3666,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/ent
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/explore @elastic/security-entity-analytics
 
 /x-pack/solutions/security/packages/test-api-clients/supertest/entity_analytics.gen.ts @elastic/security-entity-analytics
+/x-pack/solutions/security/packages/test-api-clients/scout/entity_analytics.gen.ts @elastic/security-entity-analytics
 
 ## Security Solution sub teams - Entity Store / Maintainers / Entity Details
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
@@ -4024,6 +4028,12 @@ pnpm-workspace.yaml @elastic/kibana-operations
 /**/scout/*/.meta/**
 /**/scout_*/.meta/**
 /**/scout_*/*/.meta/**
+
+# Checks to ensure ML models are not deployed
+/x-pack/platform/test/serverless/api_integration/test_suites/ml/ @elastic/search-ml-ux
+/x-pack/solutions/*/test/serverless/api_integration/test_suites/ml/ @elastic/search-ml-ux
+/x-pack/solutions/search/test/serverless/functional/test_suites/ml/trained_models_list.ts @elastic/search-ml-ux
+/x-pack/solutions/security/test/serverless/functional/test_suites/ml/trained_models_list.ts @elastic/search-ml-ux @elastic/security-solution
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
