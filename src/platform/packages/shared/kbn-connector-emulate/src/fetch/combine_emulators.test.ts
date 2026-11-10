@@ -237,6 +237,64 @@ describe('combineEmulators', () => {
       expect(namesHost('GET', new URL('https://eu.region.example/x/y'))).toBe(true);
       expect(namesHost('GET', new URL('https://other.example/x/y'))).toBe(false);
     });
+
+    it('names the host when only the scheme is a variable', async () => {
+      const { fetch, calls } = combineEmulators({
+        self_hosted: createEmulatorFetch({ specs: [selfHostedSpec] }),
+        scheme: createEmulatorFetch({
+          specs: [
+            {
+              ...selfHostedSpec,
+              servers: [
+                {
+                  url: '{scheme}://api.scheme.example',
+                  variables: { scheme: { default: 'https', enum: ['http', 'https'] } },
+                },
+              ],
+            },
+          ],
+        }),
+      });
+
+      await fetch('https://api.scheme.example/x/y');
+
+      expect(calls).toEqual([expect.objectContaining({ connector: 'scheme' })]);
+    });
+
+    it('names the host of an absolute token URL', async () => {
+      const { fetch, calls } = combineEmulators({
+        self_hosted: createEmulatorFetch({ specs: [selfHostedSpec] }),
+        any_host: createEmulatorFetch({
+          specs: [
+            {
+              ...anyHostSpec,
+              components: {
+                securitySchemes: {
+                  oauth: {
+                    type: 'oauth2',
+                    flows: {
+                      clientCredentials: {
+                        tokenUrl: 'https://login.any.example/oauth/token',
+                        scopes: {},
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        }),
+      });
+
+      const response = await fetch('https://login.any.example/oauth/token', {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: 'grant_type=client_credentials&client_id=id',
+      });
+
+      expect(response.status).toBe(200);
+      expect(calls).toEqual([expect.objectContaining({ connector: 'any_host', token: true })]);
+    });
   });
 
   it('finds the credential in Basic auth, the query, the body and JWT assertions', async () => {
