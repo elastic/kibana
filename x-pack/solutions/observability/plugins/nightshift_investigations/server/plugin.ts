@@ -26,6 +26,7 @@ import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/ma
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { NightshiftInvestigationsConfig } from './config';
 import {
   InvestigationLocatorDefinition,
@@ -68,20 +69,20 @@ import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/class
 import { scoreOnlineEvalsRoundStepDefinition } from './step_definitions/score_online_evals_round';
 import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
 import { createShouldIncludeExplanations } from './online_evals/should_include_explanations';
-import { alertOutcomeJudges, cortexJudges, referenceFreeJudges } from './online_evals/judges';
+import { alertOutcomeJudges, wikiJudges, referenceFreeJudges } from './online_evals/judges';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
-import { cortexHydrateStepDefinition } from './step_definitions/cortex_hydrate';
+import { wikiHydrateStepDefinition } from './step_definitions/wiki_hydrate';
 import { memoryMaterializeToSandboxStepDefinition } from './step_definitions/memory_materialize_to_sandbox';
-import { cortexOptimizeStepDefinition } from './step_definitions/cortex_optimize';
+import { wikiOptimizeStepDefinition } from './step_definitions/wiki_optimize';
 import { decisionTreeHydrateStepDefinition } from './step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from './step_definitions/decision_tree_prepare';
 import { decisionTreeReinforceStepDefinition } from './step_definitions/decision_tree_reinforce';
 import { memoryOptimizeStepDefinition } from './step_definitions/memory_optimize';
-import { createCortexStore, registerCortexAiIndex } from './cortex/register_cortex';
+import { createWikiStore, registerWikiAiIndex } from './wiki/register_wiki';
 import { registerMemoryAiIndex } from './memory/register_memory';
-import { registerCortexTelemetryEvents } from './telemetry';
+import { registerWikiTelemetryEvents } from './telemetry';
 import { createMemoryPageStore } from './memory/page_store';
 import { createDecisionTreeStore } from './decision_trees/store';
 import { createKnowledgePurgeClient } from './purge/purge_client';
@@ -123,12 +124,15 @@ import {
   NIGHTSHIFT_AUTOMATION_SO_TYPE,
 } from './saved_objects';
 import { createOnboardingClient } from './onboarding/onboarding_client';
+import { createLocalElasticsearchConnectorLifecycleListener } from './onboarding/local_elasticsearch_connector';
 import {
   createListSandboxConnectors,
   createListSandboxConnectorTypes,
 } from './lib/list_sandbox_connectors';
 import { createCustomContextClient } from './custom_context';
 import { createSandboxAllowlistClient } from './sandbox_allowlist';
+import { createSlackTurnAdmissionCheck } from './lib/slack_turn_admission';
+import { getNightshiftSettingsUrl } from './lib/notifications/notify_investigation_quota_reached';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -167,15 +171,19 @@ export class NightshiftInvestigationsPlugin
   private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
+  private nightshiftSources?: NightshiftInvestigationsStartDeps['nightshiftSources'];
+  private cloudSetup?: NightshiftInvestigationsSetupDeps['cloud'];
+  private esHosts: string[] = [];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
   private coreStart?: CoreStart;
   private investigatorServiceAccountService?: InvestigatorServiceAccountService;
+  private lockManager?: LockManagerService;
   /** The managed workflows client of this plugin, shared by startup installs and setup. */
   private managedWorkflowsClient?: Promise<ManagedWorkflowsClient>;
   private notificationRoutingService?: InvestigationAttachmentDocService<StoredNotificationRouting>;
   private investigationAvailability?: AvailabilityConfig;
-  private cortexEnabled = false;
+  private wikiEnabled = false;
   private memoryEnabled = false;
   private investigationQuotaCallback?: InvestigationQuotaCallback;
   private telemetry?: NightshiftTelemetryClient;
@@ -191,6 +199,7 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
     this.workflowsManagement = plugins.workflowsManagement;
+    this.lockManager = new LockManagerService(core, this.logger);
     const investigationLocator = plugins.share.url.locators.create(
       new InvestigationLocatorDefinition()
     );
@@ -198,6 +207,15 @@ export class NightshiftInvestigationsPlugin
       new NightshiftSettingsLocatorDefinition()
     );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
+    plugins.actions?.registerConnectorLifecycleListener(
+      createLocalElasticsearchConnectorLifecycleListener({
+        getInternalEsClient: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.elasticsearch.client.asInternalUser;
+        },
+        logger: this.logger.get('local-elasticsearch-connector'),
+      })
+    );
     const isNightshiftEnabledSync = createIsNightshiftEnabledSync(core.getStartServices);
     plugins.alerting?.enableAlertStatusChanged({
       isEnabled: async () => isNightshiftEnabledSync(),
@@ -216,15 +234,15 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger.get('telemetry'),
     });
     this.telemetry = telemetry;
-    for (const judge of [...referenceFreeJudges, ...alertOutcomeJudges, ...cortexJudges]) {
+    for (const judge of [...referenceFreeJudges, ...alertOutcomeJudges, ...wikiJudges]) {
       plugins.evals?.registerEvaluator(judge);
     }
 
-    this.cortexEnabled = this.ctx.config.get().cortex.enabled;
+    this.wikiEnabled = this.ctx.config.get().wiki.enabled;
     this.memoryEnabled = this.ctx.config.get().memory.enabled;
-    if (this.cortexEnabled) {
-      registerCortexAiIndex(plugins.contextEngine, this.logger.get('cortex'));
-      registerCortexTelemetryEvents(core.analytics);
+    if (this.wikiEnabled) {
+      registerWikiAiIndex(plugins.contextEngine, this.logger.get('wiki'));
+      registerWikiTelemetryEvents(core.analytics);
     }
     if (this.memoryEnabled) {
       registerMemoryAiIndex(plugins.contextEngine, this.logger.get('memory'));
@@ -232,7 +250,7 @@ export class NightshiftInvestigationsPlugin
 
     this.decisionTreesEnabled =
       this.ctx.config.get().decision_trees.enabled &&
-      this.cortexEnabled &&
+      this.wikiEnabled &&
       Boolean(plugins.sandbox?.isAvailable);
     if (this.decisionTreesEnabled) {
       registerDecisionTreeAiIndex(plugins.contextEngine, this.logger.get('decision_trees'));
@@ -257,6 +275,10 @@ export class NightshiftInvestigationsPlugin
       }),
     });
 
+    this.cloudSetup = plugins.cloud;
+    core.elasticsearch.legacy.config$.subscribe((config) => {
+      this.esHosts = config.hosts;
+    });
     const onboardingClient = createOnboardingClient({
       getDeps: () => ({
         workflowsManagement: this.workflowsManagement,
@@ -264,6 +286,10 @@ export class NightshiftInvestigationsPlugin
         agentBuilder: this.agentBuilder,
         agentAvailability: this.getInvestigationAvailability(),
         assistantEnabled: this.assistantEnabled,
+        actions: this.actionsStart,
+        elasticsearch: this.elasticsearch,
+        cloud: this.cloudSetup,
+        esHosts: this.esHosts,
       }),
       logger: this.logger.get('onboarding'),
       ensureFailureSweep: this.ensureFailureSweep,
@@ -300,11 +326,24 @@ export class NightshiftInvestigationsPlugin
         },
         logger: this.logger,
       });
+      plugins.agentBuilder.callbacks.registerOnBeforeNewConversation(
+        createSlackTurnAdmissionCheck({
+          getQuotaCallback: () => this.investigationQuotaCallback,
+          getSettingsUrl: (spaceId) =>
+            getNightshiftSettingsUrl({
+              locator: settingsLocator,
+              spaceId,
+              kibanaUrl: core.http.basePath.publicBaseUrl,
+            }),
+          logger: this.logger,
+        })
+      );
       const config = this.ctx.config.get();
       const nightshiftAgentOptions: NightshiftAgentTypeOptions = {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
-        cortexEnabled: this.cortexEnabled,
+        wikiEnabled: this.wikiEnabled,
         memoryEnabled: this.memoryEnabled,
+        learningEnabled: config.learning.enabled,
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         getCustomContextInstructions: ({ request, spaceId }) =>
@@ -349,13 +388,14 @@ export class NightshiftInvestigationsPlugin
               if (!sandboxStart) return undefined;
               // The same per-request check the investigator's sandbox tools pass: a user who may
               // not use the sandbox must not have its files read on their behalf either.
+              const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
               const access = await checkSandboxAccess({
                 request,
+                spaceId,
                 featureFlags: this.featureFlags,
                 security: this.securityStart,
               });
               if (access.status !== 'available') return undefined;
-              const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
               const redactor = await getRecorderOutputRedactor({
                 request,
                 allowedConnectorIds,
@@ -574,13 +614,13 @@ export class NightshiftInvestigationsPlugin
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
-          cortexHydrateStepDefinition({
+          wikiHydrateStepDefinition({
             getSandboxStart: getGatedSandboxStart,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             analytics: core.analytics,
-            logger: this.logger.get('cortex'),
-            isEnabled: () => this.cortexEnabled,
+            logger: this.logger.get('wiki'),
+            isEnabled: () => this.wikiEnabled,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -599,9 +639,9 @@ export class NightshiftInvestigationsPlugin
             getUiSettings: () => this.uiSettings,
           })
         );
-        // Registered unconditionally: the combined materialize workflow installs with Cortex
+        // Registered unconditionally: the combined materialize workflow installs with Wiki
         // or Memory, so a trees-off install would otherwise reference an unknown step type.
-        // The handler no-ops on the flag instead, matching cortex/memory above.
+        // The handler no-ops on the flag instead, matching wiki/memory above.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreeHydrateStepDefinition({
             getSandboxStart: getGatedSandboxStart,
@@ -612,14 +652,14 @@ export class NightshiftInvestigationsPlugin
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
-          cortexOptimizeStepDefinition({
+          wikiOptimizeStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
             getInference: () => this.inference,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             analytics: core.analytics,
-            logger: this.logger.get('cortex'),
-            isEnabled: () => this.cortexEnabled,
+            logger: this.logger.get('wiki'),
+            isEnabled: () => this.wikiEnabled,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -634,11 +674,12 @@ export class NightshiftInvestigationsPlugin
           })
         );
         // Registered unconditionally for the same reason as the tree hydrate above: the
-        // combined optimize workflow installs with Cortex or Memory and now runs the
+        // combined optimize workflow installs with Wiki or Memory and now runs the
         // reinforcement phase too. The handler no-ops on the flag.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
+            getInference: () => this.inference,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
             logger: this.logger.get('decision_trees'),
@@ -665,21 +706,21 @@ export class NightshiftInvestigationsPlugin
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
           isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
-          isCortexEnabled: () => this.cortexEnabled,
+          isWikiEnabled: () => this.wikiEnabled,
           listSandboxConnectors,
           listSandboxConnectorTypes,
           sandboxAllowlistClient,
           customContextClient,
           onboardingClient,
-          getCortexPageStore: (request: KibanaRequest) => {
+          getWikiPageStore: (request: KibanaRequest) => {
             if (!this.elasticsearch) {
               throw new Error(
                 'elasticsearch is not available — plugin start() has not been called'
               );
             }
-            return createCortexStore({
+            return createWikiStore({
               esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
-              logger: this.logger.get('cortex'),
+              logger: this.logger.get('wiki'),
               spaceId: this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
             });
           },
@@ -766,6 +807,7 @@ export class NightshiftInvestigationsPlugin
     this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
+    this.nightshiftSources = plugins.nightshiftSources;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
     this.coreStart = coreStart;
@@ -827,6 +869,13 @@ export class NightshiftInvestigationsPlugin
       isAssistantEnabled: () => this.assistantEnabled,
     };
   }
+
+  private getNightshiftSources = () => {
+    if (!this.nightshiftSources) {
+      throw new Error('nightshiftSources is not available — plugin start() has not been called');
+    }
+    return this.nightshiftSources;
+  };
 
   /** Created once so every `agents.ensure` call registers the same gate; deps read lazily. */
   private getInvestigationAvailability = (): AvailabilityConfig => {
@@ -928,8 +977,10 @@ export class NightshiftInvestigationsPlugin
     if (this.investigatorServiceAccountService) {
       return this.investigatorServiceAccountService;
     }
-    if (!this.coreStart || !this.workflowsExtensionsStart) {
-      throw new Error('workflowsExtensions is not available — plugin start() has not been called');
+    if (!this.coreStart || !this.workflowsExtensionsStart || !this.lockManager) {
+      throw new Error(
+        'Required start services are unavailable — plugin start() has not been called'
+      );
     }
     this.investigatorServiceAccountService = createInvestigatorServiceAccountService({
       core: this.coreStart,
@@ -942,7 +993,16 @@ export class NightshiftInvestigationsPlugin
       spaces: this.spaces,
       getAgentBuilder: () => this.agentBuilder,
       getAgentAvailability: () => this.getInvestigationAvailability(),
+      isAssistantEnabled: () => this.assistantEnabled,
       getAutomationsSoClient: this.getAutomationsSoClient,
+      lockManager: this.lockManager,
+      listInstalledWorkflowStates: async () => {
+        const client = await this.managedWorkflowsClient;
+        return client ? client.listInstalledWorkflowStates() : [];
+      },
+      scheduleSourceVolumeTask: (request) =>
+        this.getNightshiftSources().scheduleSourceVolumeTask(request),
+      removeSourceVolumeTask: () => this.getNightshiftSources().removeSourceVolumeTask(),
       isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),
@@ -1032,7 +1092,7 @@ export class NightshiftInvestigationsPlugin
     await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
     });
-    if (this.cortexEnabled || this.memoryEnabled) {
+    if (this.wikiEnabled || this.memoryEnabled) {
       await installSandboxMaterializeWorkspaceWorkflow({ client });
       await installAgentOptimizationsWorkflow({ client });
     }

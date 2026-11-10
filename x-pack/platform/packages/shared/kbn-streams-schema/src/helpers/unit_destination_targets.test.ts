@@ -194,6 +194,15 @@ describe('getUnitDestinationWritePatterns', () => {
       'traces-*-*',
     ]);
   });
+
+  it('falls back to every docs prefix for docs without index or write_patterns', () => {
+    expect(getUnitDestinationWritePatterns(elasticsearch([], ['logs', 'docs']))).toEqual([
+      'logs-*-*',
+      'logs-*',
+      'metrics-*',
+      'traces-*',
+    ]);
+  });
 });
 
 describe('getUnitDestinationSignalTargets', () => {
@@ -217,16 +226,18 @@ describe('getUnitDestinationSignalTargets', () => {
 });
 
 describe('readUnitDestinationSignals', () => {
-  it('keeps supported OTLP signals only', () => {
-    expect(readUnitDestinationSignals(elasticsearch([], ['logs', 'profiles', 'traces']))).toEqual([
+  it('keeps logs, metrics, traces and docs', () => {
+    expect(readUnitDestinationSignals(elasticsearch([], ['logs', 'docs', 'profiles']))).toEqual([
       'logs',
-      'traces',
+      'docs',
     ]);
   });
 
-  it('does not treat non-OTLP signals as logs', () => {
+  it('applies an unscoped index to docs', () => {
     const docsOnly = elasticsearch([{ name: 'index', value: 'logs-app-default' }], ['docs']);
-    expect(readUnitDestinationSignals(docsOnly)).toEqual([]);
-    expect(getUnitDestinationWritePatterns(docsOnly)).toEqual([]);
+    expect(getUnitDestinationSignalTargets(docsOnly).indexBySignal).toEqual({
+      docs: 'logs-app-default',
+    });
+    expect(getUnitDestinationWritePatterns(docsOnly)).toEqual(['logs-app-default']);
   });
 });

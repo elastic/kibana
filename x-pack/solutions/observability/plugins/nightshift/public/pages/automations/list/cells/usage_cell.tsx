@@ -15,8 +15,8 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { getDailyUsageTone } from '../../utils/daily_usage';
+import { getAutomationUsageTooltip } from '../../utils/usage_tooltip';
 import { triggerLabels } from '../../flyouts/form/triggers/translations';
 import { listLabels } from '../translations';
 
@@ -24,41 +24,33 @@ export const AutomationUsageCell = ({
   used,
   limit,
   isRateLimited,
+  isGlobalLimitReached = false,
+  align = 'end',
 }: {
   used?: number;
   limit?: number;
   isRateLimited: boolean;
+  /** When the shared investigation quota is exhausted, all usage meters use a disabled look. */
+  isGlobalLimitReached?: boolean;
+  align?: 'start' | 'end';
 }) => {
   const { euiTheme } = useEuiTheme();
   if (used === undefined) return <>—</>;
 
-  const isLimitReached = limit !== undefined && used >= limit;
   const isLimitHigh = limit !== undefined && getDailyUsageTone(used, limit) !== 'healthy';
   const warningText = euiTheme.colors.textWarning;
+  const disabledText = euiTheme.colors.textDisabled;
   const limitColor = euiTheme.colors.vis.euiColorVisWarning0;
+  const emphasisColor = isGlobalLimitReached ? disabledText : isLimitHigh ? warningText : undefined;
+  const progressColor = isGlobalLimitReached ? disabledText : isLimitHigh ? limitColor : 'success';
+  const tooltip = getAutomationUsageTooltip({ used, limit, isGlobalLimitReached });
+
   return (
     <div css={{ width: '100%' }}>
-      <EuiToolTip
-        display="block"
-        content={
-          limit === undefined
-            ? i18n.translate('xpack.nightshift.automations.usageCellNoLimitTooltip', {
-                defaultMessage: 'No daily limit. {used} runs today.',
-                values: { used },
-              })
-            : isLimitReached
-            ? i18n.translate('xpack.nightshift.automations.usageCellLimitReachedTooltip', {
-                defaultMessage: 'Daily limit reached · no more runs until midnight (UTC)',
-              })
-            : i18n.translate('xpack.nightshift.automations.usageCellTooltip', {
-                defaultMessage: '{used} of {limit} triggers used today · resets at midnight (UTC)',
-                values: { used, limit },
-              })
-        }
-      >
+      <EuiToolTip display="block" title={tooltip.title} content={tooltip.content}>
         <div data-test-subj="automationUsage" tabIndex={0}>
           <EuiFlexGroup
-            justifyContent="flexEnd"
+            justifyContent={align === 'end' ? 'flexEnd' : 'flexStart'}
             alignItems="center"
             gutterSize="xs"
             responsive={false}
@@ -69,7 +61,7 @@ export const AutomationUsageCell = ({
                 <EuiIcon
                   type="hourglass"
                   size="s"
-                  color={warningText}
+                  color={emphasisColor ?? warningText}
                   aria-label={listLabels.limitReached}
                   data-test-subj="automationLimitReached"
                 />
@@ -78,7 +70,7 @@ export const AutomationUsageCell = ({
             <EuiFlexItem grow={false}>
               <EuiText
                 size="xs"
-                color={isLimitHigh ? warningText : undefined}
+                color={emphasisColor}
                 css={{
                   fontWeight: euiTheme.font.weight.semiBold,
                   fontVariantNumeric: 'tabular-nums',
@@ -89,12 +81,7 @@ export const AutomationUsageCell = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           {limit !== undefined && (
-            <EuiProgress
-              value={Math.min(used, limit)}
-              max={limit}
-              size="s"
-              color={isLimitHigh ? limitColor : 'success'}
-            />
+            <EuiProgress value={Math.min(used, limit)} max={limit} size="s" color={progressColor} />
           )}
         </div>
       </EuiToolTip>
