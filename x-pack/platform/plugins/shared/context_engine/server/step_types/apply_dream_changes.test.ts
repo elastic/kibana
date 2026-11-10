@@ -8,6 +8,8 @@
 import { ExecutionError } from '@kbn/workflows/server';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import { entityId } from '../dreaming/ids';
+import { audienceKeyOf } from '../dreaming/permissions';
 import { getApplyDreamChangesStepDefinition } from './apply_dream_changes';
 import { createMockStepContext, mockKiStepTelemetry, mockKiWriter } from './test_utils';
 
@@ -164,7 +166,9 @@ describe('getApplyDreamChangesStepDefinition', () => {
     const { output } = await definition(aiIndexService()).handler(context);
 
     expect(output).toEqual(expect.objectContaining({ created: 2, updated: 0 }));
-    expect(stored['entity-city--montreal']).toEqual(expect.objectContaining({ permissions }));
+    expect(stored[entityId('city', 'Montreal', audienceKeyOf([permissions]))]).toEqual(
+      expect.objectContaining({ permissions })
+    );
     expect(stored[existingCustomer.id]).not.toEqual(
       expect.objectContaining({ content: changes.entities[0].content })
     );

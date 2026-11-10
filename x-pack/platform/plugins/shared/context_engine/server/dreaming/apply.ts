@@ -41,7 +41,12 @@ import {
   type DreamedKiReference,
 } from './dreamed_ki';
 import { kiUri } from './ids';
-import { derivedPermissions, isVisibleInSpace, type KiPermissions } from './permissions';
+import {
+  derivedPermissions,
+  isVisibleInSpace,
+  samePermissions,
+  type KiPermissions,
+} from './permissions';
 import type {
   DeleteOperation,
   DreamingOperation,
@@ -77,8 +82,8 @@ export interface ApplyContext {
   dryRun?: Map<string, PlannedWrite>;
 }
 
-const referenceKey = ({ uri, relation }: DreamedKiReference): string =>
-  `${relation ?? ''}\u0000${uri}`;
+const referenceKey = ({ uri, relation, description }: DreamedKiReference): string =>
+  `${relation ?? ''}\u0000${relation === 'relates_to' ? description ?? '' : ''}\u0000${uri}`;
 
 /** Adds references without duplicates, dropping the oldest `derived_from` ones over the cap. */
 export const addReferences = (
@@ -144,14 +149,17 @@ const withDerivedPermissions =
     build: BuildDocument
   ): BuildDocument =>
   (current) => {
+    const permissions = derivedPermissions(
+      sourceMemoryIds.map((id) => memoryPermissions.get(id)),
+      spaceId
+    );
+    if (current && !samePermissions(current.permissions, permissions)) {
+      return undefined;
+    }
     const document = build(current);
     if (!document) {
       return undefined;
     }
-    const permissions = derivedPermissions(
-      [current?.permissions, ...sourceMemoryIds.map((id) => memoryPermissions.get(id))],
-      spaceId
-    );
     return permissions ? { ...document, permissions } : document;
   };
 

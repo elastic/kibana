@@ -160,6 +160,18 @@ describe('resolveChangeSet', () => {
     });
   });
 
+  it('keeps a new entity from restricted memories apart from the same name for others', () => {
+    const entities = changeSet({
+      entities: [{ ref: 'new:1', type: 'person', title: 'Bob', source_memory_ids: ['m-1'] }],
+    });
+
+    const [open] = resolveChangeSet(entities, context()).operations;
+    const [restricted] = resolveChangeSet(entities, context({ audience: 'a1b2' })).operations;
+
+    expect(open).toMatchObject({ id: 'entity-person--bob' });
+    expect(restricted).toMatchObject({ id: 'entity-person--bob--a1b2' });
+  });
+
   it('accepts types written with their kind prefix, as EXISTING shows them', () => {
     const { operations, rejected } = resolveChangeSet(
       changeSet({

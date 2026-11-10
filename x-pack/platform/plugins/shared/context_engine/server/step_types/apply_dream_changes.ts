@@ -18,7 +18,7 @@ import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { createVerifyEsql, keepVerifiedPatterns } from '../dreaming/access_patterns';
 import { applyOperations, type PlannedWrite } from '../dreaming/apply';
 import { kindOf, type DreamedKi } from '../dreaming/dreamed_ki';
-import { isVisibleInSpace } from '../dreaming/permissions';
+import { audienceKeyOf, isVisibleInSpace } from '../dreaming/permissions';
 import { referencedIds, resolveChangeSet, vocabularyOf } from '../dreaming/resolve_change_set';
 import type { KiStepDependencies } from './helpers';
 import {
@@ -109,6 +109,7 @@ export const getApplyDreamChangesStepDefinition = ({
             .map(({ id, updated_at: updatedAt }) => [id, updatedAt])
         ),
         existing,
+        audience: audienceKeyOf(memories.map(({ permissions }) => permissions)),
       });
       const { operations, dropped } = await keepVerifiedPatterns(
         resolved.operations,

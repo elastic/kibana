@@ -41,6 +41,8 @@ export interface ResolveContext {
   memories: ReadonlyMap<string, string | undefined>;
   /** The current facts and entities the change set refers to, by id. */
   existing: ReadonlyMap<string, DreamedKi>;
+  /** Who can see the memories, when they are restricted; new entities are kept apart by it. */
+  audience?: string;
 }
 
 export interface UpsertEntityOperation {
@@ -100,7 +102,7 @@ const reject: (reason: string) => never = (reason) => {
 /** Validates a change set and resolves its refs to KI ids, rejecting invalid items. */
 export const resolveChangeSet = (
   changeSet: DreamChangeSet,
-  { executionId, vocabulary, memories, existing }: ResolveContext
+  { executionId, vocabulary, memories, existing, audience }: ResolveContext
 ): ResolvedChangeSet => {
   const operations: DreamingOperation[] = [];
   const rejected: ResolvedChangeSet['rejected'] = [];
@@ -184,7 +186,7 @@ export const resolveChangeSet = (
       const sourceMemoryIds = resolveSources(entity.source_memory_ids, current);
       operations.push({
         op: 'upsert_entity',
-        id: current?.id ?? entityId(type, title),
+        id: current?.id ?? entityId(type, title, audience),
         type,
         title,
         ...(entity.description !== undefined && { description: entity.description }),

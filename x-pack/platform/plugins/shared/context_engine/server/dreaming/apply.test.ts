@@ -298,28 +298,73 @@ describe('applyOperations', () => {
     expect(open).not.toHaveProperty('permissions');
   });
 
-  it('never widens who can see an existing KI', async () => {
-    stored.set('fact-1', {
-      id: 'fact-1',
-      type: 'fact.note',
-      title: 'A',
-      permissions: restrictedTo({ space: 'team-a', name: ['ai_index:a/read'] }),
-    });
+  it('gives a KI built from memories with the same permissions exactly those permissions', async () => {
+    const shared = restrictedTo({ space: '*', name: ['ai_index:a/read'] });
+    const memoryPermissions = new Map([
+      ['m-1', shared],
+      ['m-2', shared],
+    ]);
 
-    await applyOperations(context(), [
+    await applyOperations(context(undefined, memoryPermissions), [
       {
         op: 'upsert_fact',
         id: 'fact-1',
         type: 'note',
-        title: 'A2',
-        content: 'A2.',
-        sourceMemoryIds: ['m-1'],
+        title: 'A',
+        content: 'A.',
+        sourceMemoryIds: ['m-1', 'm-2'],
       },
     ]);
 
-    expect(written()[0].permissions).toEqual(
-      restrictedTo({ space: 'team-a', name: ['ai_index:a/read'] })
-    );
+    expect(written()[0].permissions).toEqual(shared);
+  });
+
+  it('updates an existing KI only from memories with the same permissions', async () => {
+    const teamA = restrictedTo({ space: 'team-a', name: ['ai_index:a/read'] });
+    const teamB = restrictedTo({ space: 'team-a', name: ['ai_index:b/read'] });
+    stored.set('fact-1', { id: 'fact-1', type: 'fact.note', title: 'A', permissions: teamA });
+    stored.set('entity-person--bob', {
+      id: 'entity-person--bob',
+      type: 'entity.person',
+      title: 'Bob',
+    });
+    const memoryPermissions = new Map([
+      ['m-a', teamA],
+      ['m-b', teamB],
+    ]);
+    const update = (id: string, sourceMemoryIds: string[]) =>
+      id.startsWith('fact')
+        ? {
+            op: 'upsert_fact' as const,
+            id,
+            type: 'note',
+            title: 'A2',
+            content: 'A2.',
+            sourceMemoryIds,
+          }
+        : {
+            op: 'upsert_entity' as const,
+            id,
+            type: 'person',
+            title: 'Bob',
+            attributes: {},
+            sourceMemoryIds,
+          };
+
+    for (const dryRun of [undefined, new Map()]) {
+      const counts = await applyOperations({ ...context(undefined, memoryPermissions), dryRun }, [
+        update('fact-1', ['m-1']),
+        update('fact-1', ['m-b']),
+        update('entity-person--bob', ['m-a']),
+      ]);
+
+      expect(counts).toEqual({ created: 0, updated: 0, deleted: 0 });
+    }
+    expect(putKiRevision).not.toHaveBeenCalled();
+
+    await applyOperations(context(undefined, memoryPermissions), [update('fact-1', ['m-a'])]);
+
+    expect(written()[0]).toMatchObject({ title: 'A2', permissions: teamA });
   });
 
   it('leaves alone a KI this space cannot see', async () => {
@@ -484,5 +529,14 @@ describe('addReferences', () => {
     expect(references).toHaveLength(100);
     expect(references).not.toContainEqual({ uri: 'ki://m-0', relation: 'derived_from' });
     expect(references).toContainEqual({ uri: 'ki://m-100', relation: 'derived_from' });
+  });
+
+  it('keeps stored relates_to references to one target under different descriptions', () => {
+    const relationships = [
+      { uri: 'ki://entity-team--ops', relation: 'relates_to' as const, description: 'member_of' },
+      { uri: 'ki://entity-team--ops', relation: 'relates_to' as const, description: 'manages' },
+    ];
+
+    expect(addReferences(relationships, citations(1))).toEqual([...relationships, ...citations(1)]);
   });
 });
