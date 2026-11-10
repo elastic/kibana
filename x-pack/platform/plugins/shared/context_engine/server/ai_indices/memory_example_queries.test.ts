@@ -55,15 +55,17 @@ describe('buildMemoryExampleQueries', () => {
         '  AND (expires_at IS NULL OR expires_at > NOW())',
         '| WHERE title:"<name>"',
         '| SORT _score DESC, _id ASC',
-        '| KEEP id, title, description, content, type, tags, updated_at, references.uri, references.relation, references.description',
+        '| KEEP id, title, description, content, attributes, type, tags, updated_at, references.uri, references.relation, references.description',
         '| LIMIT 5',
       ].join('\n')
     );
   });
 
-  it('lists entities of one type, newest first', () => {
+  it('lists entities of one type, newest first, with their attributes', () => {
     expect(queries.entitiesOfType).toContain('\n| WHERE type == "entity.<entity type>"\n');
     expect(queries.entitiesOfType).toContain('\n| WHERE @timestamp == latest_at\n');
     expect(queries.entitiesOfType).toContain('\n| SORT updated_at DESC, _id ASC\n');
+    expect(queries.entitiesOfType).toContain('| KEEP id, title, description, content, attributes,');
+    expect(queries.factsOfType).not.toContain('attributes');
   });
 });

@@ -26,13 +26,16 @@ const latestActiveRevision = [
 const KEEP_WITH_REFERENCES =
   '| KEEP id, title, description, content, type, tags, updated_at, references.uri, references.relation, references.description';
 
-const newestOfType = (target: string, typeFilter: string): string =>
+const KEEP_ENTITY_WITH_REFERENCES =
+  '| KEEP id, title, description, content, attributes, type, tags, updated_at, references.uri, references.relation, references.description';
+
+const newestOfType = (target: string, typeFilter: string, keep = KEEP_WITH_REFERENCES): string =>
   [
     `FROM ${target} METADATA _id`,
     `| WHERE ${typeFilter}`,
     ...latestActiveRevision,
     '| SORT updated_at DESC, _id ASC',
-    KEEP_WITH_REFERENCES,
+    keep,
     '| LIMIT 20',
   ].join('\n');
 
@@ -63,8 +66,12 @@ export const buildMemoryExampleQueries = (
     ...latestActiveRevision,
     '| WHERE title:"<name>"',
     '| SORT _score DESC, _id ASC',
-    KEEP_WITH_REFERENCES,
+    KEEP_ENTITY_WITH_REFERENCES,
     '| LIMIT 5',
   ].join('\n'),
-  entitiesOfType: newestOfType(target, `type == "${ENTITY_TYPE_PREFIX}<entity type>"`),
+  entitiesOfType: newestOfType(
+    target,
+    `type == "${ENTITY_TYPE_PREFIX}<entity type>"`,
+    KEEP_ENTITY_WITH_REFERENCES
+  ),
 });

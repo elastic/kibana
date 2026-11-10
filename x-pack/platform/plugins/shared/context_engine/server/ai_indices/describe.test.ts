@@ -373,7 +373,7 @@ describe('describeAiIndex', () => {
     );
     expect(response).toContain(
       [
-        'Dreaming keeps the things memories are about as entities, each typed entity.<entity type>: title holds its name, and content a summary of what is known about it, including its attribute values. Entity types, with how many entities each has:',
+        'Dreaming keeps the things memories are about as entities, each typed entity.<entity type>: title holds its name, attributes its attribute values, and content a summary of what is known about it. Entity types, with how many entities each has:',
         '"entity.customer": 2 - A paying account (attributes: plan, region)',
         '"entity.service": 0',
         'An entity by name, across entity types:',

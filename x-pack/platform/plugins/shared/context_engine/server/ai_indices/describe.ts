@@ -135,7 +135,7 @@ const dreamedLines = (
       : []),
     ...(entities.length > 0
       ? [
-          `Dreaming keeps the things memories are about as entities, each typed ${ENTITY_TYPE_PREFIX}<entity type>: title holds its name, and content a summary of what is known about it, including its attribute values. Entity types, with how many entities each has:`,
+          `Dreaming keeps the things memories are about as entities, each typed ${ENTITY_TYPE_PREFIX}<entity type>: title holds its name, attributes its attribute values, and content a summary of what is known about it. Entity types, with how many entities each has:`,
           ...entities.map(({ type, description, attributes }) =>
             dreamedTypeLine(`${ENTITY_TYPE_PREFIX}${type}`, counts, { description, attributes })
           ),
