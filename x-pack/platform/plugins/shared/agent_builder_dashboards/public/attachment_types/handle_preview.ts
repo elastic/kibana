@@ -10,18 +10,11 @@ import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-co
 import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/types';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { previewAttachmentInDashboard } from './dashboard_integration/preview_attachment';
+import { toDashboardLocatorParams } from './dashboard_integration/dashboard_locator_params';
+import { APPLY_AGENT_CHANGES_ERROR_TITLE } from './dashboard_integration/apply_agent_changes';
 import { handleEditInDashboard } from './handle_edit_in_dashboard';
 
-export const handlePreview = async ({
-  attachment,
-  dashboardApi,
-  canWriteDashboards,
-  isSidebar,
-  dashboardLocator,
-  toasts,
-  checkSavedDashboardExist,
-  openCanvas,
-}: {
+interface HandlePreviewParams {
   attachment: DashboardAttachment;
   dashboardApi?: DashboardApi;
   canWriteDashboards: boolean;
@@ -30,7 +23,26 @@ export const handlePreview = async ({
   toasts: NotificationsStart['toasts'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   openCanvas?: () => void;
-}) => {
+  linkNextDashboard?: (attachmentId: string) => void;
+}
+
+/** Previews the attachment, showing an error toast when it can't be opened. */
+export const handlePreview = (params: HandlePreviewParams): Promise<void> =>
+  openPreview(params).catch((error: Error) => {
+    params.toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE });
+  });
+
+const openPreview = async ({
+  attachment,
+  dashboardApi,
+  canWriteDashboards,
+  isSidebar,
+  dashboardLocator,
+  toasts,
+  checkSavedDashboardExist,
+  openCanvas,
+  linkNextDashboard,
+}: HandlePreviewParams): Promise<void> => {
   // sidebar in dashboard experience - synchronize dashboard app to attachment
   if (dashboardApi && canWriteDashboards) {
     return previewAttachmentInDashboard({
@@ -40,6 +52,7 @@ export const handlePreview = async ({
       dashboardLocator,
       toasts,
       checkSavedDashboardExist,
+      linkNextDashboard,
     });
   }
 
@@ -56,10 +69,7 @@ export const handlePreview = async ({
         const exists = await checkSavedDashboardExist(attachment.origin);
         return exists ? attachment.origin : undefined;
       },
-      dashboardLocatorParams: {
-        ...dashboardState,
-        viewMode: 'edit',
-      },
+      dashboardLocatorParams: toDashboardLocatorParams(dashboardState),
     });
   }
 

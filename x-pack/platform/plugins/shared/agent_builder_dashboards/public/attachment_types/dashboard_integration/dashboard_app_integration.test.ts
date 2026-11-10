@@ -7,7 +7,7 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, skip, Subject } from 'rxjs';
-import type { ChatEvent, Conversation } from '@kbn/agent-builder-common';
+import { ChatEventType, type ChatEvent, type Conversation } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
@@ -20,6 +20,7 @@ import {
   registerDashboardAppIntegration,
 } from './dashboard_app_integration';
 import type { IdGenerator } from '..';
+import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 
 const createDashboardSaveState = (): DashboardSaveEvent['dashboardState'] => ({
   title: 'Saved Dashboard',
@@ -140,8 +141,10 @@ describe('registerDashboardAppIntegration', () => {
   }) => void;
   let cleanup: () => void;
   let simulateDashboardStateChange: () => void;
+  let toasts: ReturnType<typeof notificationServiceMock.createStartContract>['toasts'];
 
   beforeEach(() => {
+    toasts = notificationServiceMock.createStartContract().toasts;
     const mockAnyStateChange$ = new BehaviorSubject(undefined);
     simulateDashboardStateChange = () => {
       mockAnyStateChange$.next(undefined);
@@ -173,7 +176,7 @@ describe('registerDashboardAppIntegration', () => {
     jest.useRealTimers();
   });
 
-  const register = () => {
+  const register = ({ linkedAttachmentId }: { linkedAttachmentId?: string } = {}) => {
     const activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     const agentBuilder = {
       addAttachment,
@@ -201,10 +204,12 @@ describe('registerDashboardAppIntegration', () => {
       agentBuilder,
       api: mockApi as unknown as DashboardApi,
       canWriteDashboards: true,
-      toasts: notificationServiceMock.createStartContract().toasts,
+      toasts,
       draftAttachmentId,
       checkSavedDashboardExist,
       getUpdateOrigin,
+      linkedAttachmentId,
+      linkNextDashboard: jest.fn(),
     });
   };
 
@@ -277,6 +282,68 @@ describe('registerDashboardAppIntegration', () => {
       'dashboard-attachment-id',
       'new-dashboard'
     );
+  });
+
+  it('moves the origin of the attachment a new dashboard was opened from to it once saved', async () => {
+    const attachment = createDashboardAttachment({ origin: 'managed-dashboard' });
+    register({ linkedAttachmentId: attachment.id });
+    emitConversationChange({
+      id: 'conversation-1',
+      attachments: [createVersionedAttachment(attachment)],
+    });
+
+    mockApi.onSave$.next({
+      previousDashboardId: undefined,
+      dashboardId: 'new-dashboard',
+      dashboardState: createDashboardSaveState(),
+    });
+    await Promise.resolve();
+
+    expect(updateAttachmentOrigin).toHaveBeenCalledWith(
+      'conversation-1',
+      'dashboard-attachment-id',
+      'new-dashboard'
+    );
+  });
+
+  it('syncs manual changes of a new dashboard into the attachment it was opened from', () => {
+    const attachment = createDashboardAttachment({ origin: 'managed-dashboard' });
+    register({ linkedAttachmentId: attachment.id });
+    emitConversationChange({
+      id: 'conversation-1',
+      attachments: [createVersionedAttachment(attachment)],
+    });
+
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'dashboard-attachment-id' })
+    );
+  });
+
+  it('tells the user when the agent updated a different dashboard, until they leave this one', () => {
+    const toast = { id: 'toast-1' };
+    toasts.addInfo.mockReturnValue(toast);
+    mockApi.savedObjectId$.next('dashboard-1');
+    register();
+    emitConversationChange({ id: 'conversation-1', attachments: [] });
+
+    chatEventsByConversationId.get('conversation-1')?.next({
+      type: ChatEventType.toolUi,
+      data: {
+        tool_id: 'tool',
+        tool_call_id: 'call',
+        custom_event: DASHBOARD_UPDATED_UI_EVENT,
+        data: { attachment: createDashboardAttachment({ origin: 'dashboard-2' }) },
+      },
+    } as unknown as ChatEvent);
+
+    expect(mockApi.setState).not.toHaveBeenCalled();
+    expect(toasts.addInfo).toHaveBeenCalledTimes(1);
+
+    cleanup();
+
+    expect(toasts.remove).toHaveBeenCalledWith(toast);
   });
 
   it('selects the matching existing dashboard attachment for manual sync', () => {

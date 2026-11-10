@@ -19,9 +19,12 @@ export const createOriginSyncSubscription = ({
   api,
   getAttachments,
   checkSavedDashboardExist,
+  linkedAttachmentId,
   updateOrigin,
 }: {
   api: DashboardApi;
+  /** The attachment whose changes opened this dashboard as a new one, which follows it on save. */
+  linkedAttachmentId?: string;
   getAttachments: () => undefined | DashboardAttachment[];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   updateOrigin: (
@@ -37,12 +40,14 @@ export const createOriginSyncSubscription = ({
     if (!attachments) {
       return;
     }
-    const attachmentToSync = attachments.find(({ origin }) => {
-      if (origin === previousDashboardId || origin === dashboardId) {
-        return true;
-      }
-      return false;
-    });
+    const attachmentToSync =
+      attachments.find(({ id }) => id === linkedAttachmentId) ??
+      attachments.find(({ origin }) => {
+        if (origin === previousDashboardId || origin === dashboardId) {
+          return true;
+        }
+        return false;
+      });
     if (attachmentToSync) {
       return updateOrigin(attachmentToSync.id, dashboardId);
     }

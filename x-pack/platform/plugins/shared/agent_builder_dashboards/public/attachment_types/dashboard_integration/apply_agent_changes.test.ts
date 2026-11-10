@@ -85,12 +85,81 @@ describe('applyAgentChangesToDashboard', () => {
         description: 'Built by the agent',
         panels: [],
         time_range: { from: 'now-7d', to: 'now' },
+        preserveSavedFilters: false,
         viewMode: 'edit',
         changedBy: ['agent'],
       });
       expect(toasts.addWarning).toHaveBeenCalledTimes(1);
     }
   );
+
+  it('opens the full dashboard state in a new dashboard, with filters and query in their stored form', async () => {
+    const dashboardLocator = buildLocator();
+
+    await applyAgentChangesToDashboard({
+      api: buildDashboardApi({ isManaged: true }) as unknown as DashboardApi,
+      dashboardState: {
+        ...dashboardState,
+        query: { expression: 'host.name: a', language: 'kql' },
+        filters: [
+          { type: 'condition', condition: { field: 'host.name', operator: 'is', value: 'a' } },
+        ],
+        pinned_panels: [{ type: 'options_list_control', id: 'control-1', config: {} }],
+        refresh_interval: { pause: false, value: 60000 },
+      } as unknown as DashboardState,
+      canWriteDashboards: true,
+      dashboardLocator,
+      toasts: buildToasts() as unknown as NotificationsStart['toasts'],
+    });
+
+    expect(dashboardLocator.navigate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: { query: 'host.name: a', language: 'kuery' },
+        filters: [
+          expect.objectContaining({
+            meta: expect.objectContaining({ key: 'host.name', params: { query: 'a' } }),
+          }),
+        ],
+        pinned_panels: [expect.objectContaining({ id: 'control-1' })],
+        refresh_interval: { pause: false, value: 60000 },
+        preserveSavedFilters: false,
+      })
+    );
+  });
+
+  it('links the new dashboard to the attachment before opening the changes in it', async () => {
+    const dashboardLocator = buildLocator();
+    const onOpenInNewDashboard = jest.fn();
+
+    await applyAgentChangesToDashboard({
+      api: buildDashboardApi({ isManaged: true }) as unknown as DashboardApi,
+      dashboardState,
+      canWriteDashboards: true,
+      dashboardLocator,
+      toasts: buildToasts() as unknown as NotificationsStart['toasts'],
+      onOpenInNewDashboard,
+    });
+
+    expect(onOpenInNewDashboard).toHaveBeenCalledTimes(1);
+    expect(onOpenInNewDashboard.mock.invocationCallOrder[0]).toBeLessThan(
+      dashboardLocator.navigate.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('does not link a new dashboard when applying the changes in place', async () => {
+    const onOpenInNewDashboard = jest.fn();
+
+    await applyAgentChangesToDashboard({
+      api: buildDashboardApi() as unknown as DashboardApi,
+      dashboardState,
+      canWriteDashboards: true,
+      dashboardLocator: buildLocator(),
+      toasts: buildToasts() as unknown as NotificationsStart['toasts'],
+      onOpenInNewDashboard,
+    });
+
+    expect(onOpenInNewDashboard).not.toHaveBeenCalled();
+  });
 
   it('leaves the dashboard untouched and warns when the user cannot write dashboards', async () => {
     const api = buildDashboardApi();

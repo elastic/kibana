@@ -10,6 +10,7 @@ import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common/t
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { applyAgentChangesToDashboard } from './apply_agent_changes';
+import { toDashboardLocatorParams } from './dashboard_locator_params';
 
 interface PreviewAttachmentInDashboardParams {
   attachment: DashboardAttachment;
@@ -18,6 +19,8 @@ interface PreviewAttachmentInDashboardParams {
   dashboardLocator?: DashboardRendererProps['locator'];
   toasts: NotificationsStart['toasts'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  /** Links the next dashboard that opens to the attachment whose changes it shows. */
+  linkNextDashboard?: (attachmentId: string) => void;
 }
 
 export const previewAttachmentInDashboard = async ({
@@ -27,6 +30,7 @@ export const previewAttachmentInDashboard = async ({
   dashboardLocator,
   toasts,
   checkSavedDashboardExist,
+  linkNextDashboard,
 }: PreviewAttachmentInDashboardParams) => {
   const dashboardState = attachmentDataToDashboardState(attachment.data);
   const currentSavedObjectId = dashboardApi.savedObjectId$.getValue();
@@ -37,6 +41,7 @@ export const previewAttachmentInDashboard = async ({
       canWriteDashboards,
       dashboardLocator,
       toasts,
+      onOpenInNewDashboard: () => linkNextDashboard?.(attachment.id),
     });
 
   // a) Viewing saved dashboard + attachment linked to same dashboard -> apply state
@@ -59,10 +64,7 @@ export const previewAttachmentInDashboard = async ({
   // A host app's own `dashboardApi.locator` (e.g. Security's) may keep only `dashboardId` and drop
   // the attachment's panels, so navigate through the Dashboard app locator instead.
   await dashboardLocator?.navigate({
-    title: dashboardState.title,
-    description: dashboardState.description,
-    panels: dashboardState.panels,
-    time_range: dashboardState.time_range,
+    ...toDashboardLocatorParams(dashboardState),
     dashboardId: linkedDashboardExists ? attachment.origin : undefined,
     viewMode: 'edit',
     changedBy: ['agent'],

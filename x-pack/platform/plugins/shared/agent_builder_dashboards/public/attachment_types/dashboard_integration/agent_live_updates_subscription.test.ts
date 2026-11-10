@@ -34,7 +34,11 @@ const buildToolUiEvent = (
 
 const createHarness = (
   savedObjectId: string | undefined,
-  { isNewConversation = false, isManaged = false } = {}
+  {
+    isNewConversation = false,
+    isManaged = false,
+    linkedAttachmentId,
+  }: { isNewConversation?: boolean; isManaged?: boolean; linkedAttachmentId?: string } = {}
 ) => {
   const chatEvents$ = new Subject();
   const activeConversation$ = new BehaviorSubject<{ id?: string }>({
@@ -45,7 +49,9 @@ const createHarness = (
   const setViewMode = jest.fn();
   const upsertAttachment = jest.fn();
   const dashboardLocator = { navigate: jest.fn(), getRedirectUrl: jest.fn() };
-  const toasts = { addWarning: jest.fn() };
+  const toasts = { addWarning: jest.fn(), addError: jest.fn() };
+  const linkNextDashboard = jest.fn();
+  const onOtherDashboardUpdated = jest.fn();
 
   const subscription = createAgentLiveUpdatesSubscription({
     agentBuilder: {
@@ -62,10 +68,15 @@ const createHarness = (
     canWriteDashboards: true,
     dashboardLocator,
     toasts: toasts as unknown as NotificationsStart['toasts'],
+    linkedAttachmentId,
+    linkNextDashboard,
+    onOtherDashboardUpdated,
     upsertAttachment,
   });
 
   return {
+    linkNextDashboard,
+    onOtherDashboardUpdated,
     chatEvents$,
     activeConversation$,
     getChatEvents$,
@@ -97,6 +108,18 @@ describe('createAgentLiveUpdatesSubscription', () => {
       subscription.unsubscribe();
     }
   );
+
+  it('tells the user instead of applying the changes when the agent updated a different saved dashboard', () => {
+    const { chatEvents$, setState, onOtherDashboardUpdated, subscription } =
+      createHarness('dashboard-1');
+    const attachment = buildAttachment('other-dashboard');
+
+    chatEvents$.next(buildToolUiEvent(attachment));
+
+    expect(setState).not.toHaveBeenCalled();
+    expect(onOtherDashboardUpdated).toHaveBeenCalledWith(attachment);
+    subscription.unsubscribe();
+  });
 
   it('switches the dashboard to edit mode when applying the changes', () => {
     const { chatEvents$, setViewMode, subscription } = createHarness('dashboard-1');
@@ -138,6 +161,29 @@ describe('createAgentLiveUpdatesSubscription', () => {
     subscription.unsubscribe();
   });
 
+  it('links the new dashboard to the attachment when opening the changes in it', async () => {
+    const { chatEvents$, linkNextDashboard, subscription } = createHarness('managed-dashboard', {
+      isManaged: true,
+    });
+
+    chatEvents$.next(buildToolUiEvent(buildAttachment('managed-dashboard')));
+    await new Promise(process.nextTick);
+
+    expect(linkNextDashboard).toHaveBeenCalledWith('attachment-1');
+    subscription.unsubscribe();
+  });
+
+  it('applies the updates of the attachment the saved dashboard was opened from', () => {
+    const { chatEvents$, setState, subscription } = createHarness('new-dashboard', {
+      linkedAttachmentId: 'attachment-1',
+    });
+
+    chatEvents$.next(buildToolUiEvent(buildAttachment('managed-dashboard')));
+
+    expect(setState).toHaveBeenCalledTimes(1);
+    subscription.unsubscribe();
+  });
+
   it('applies the dashboard state from the first run of a new conversation', () => {
     const { chatEvents$, activeConversation$, getChatEvents$, setState, subscription } =
       createHarness(undefined, { isNewConversation: true });
@@ -151,6 +197,20 @@ describe('createAgentLiveUpdatesSubscription', () => {
     expect(setState).toHaveBeenCalledTimes(1);
     expect(setViewMode).toHaveBeenCalledWith('edit');
     expect(setState).toHaveBeenCalledWith(expect.anything(), { changedBy: ['agent'] });
+    subscription.unsubscribe();
+  });
+
+  it('shows an error toast when the changes fail to apply', async () => {
+    const { chatEvents$, setState, toasts, subscription } = createHarness('dashboard-1');
+    const error = new Error('Panel failed to load');
+    setState.mockRejectedValue(error);
+
+    chatEvents$.next(buildToolUiEvent(buildAttachment('dashboard-1')));
+    await new Promise(process.nextTick);
+
+    expect(toasts.addError).toHaveBeenCalledWith(error, {
+      title: "Couldn't apply the agent's changes to the dashboard",
+    });
     subscription.unsubscribe();
   });
 

@@ -13,7 +13,11 @@ import type { DashboardAttachment } from '@kbn/agent-builder-dashboards-common';
 import { attachmentDataToDashboardState } from '@kbn/agent-builder-dashboards-common';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
 import { DASHBOARD_UPDATED_UI_EVENT, type DashboardUpdatedUiEventData } from '../../../common';
-import { applyAgentChangesToDashboard, canApplyAgentChangesInPlace } from './apply_agent_changes';
+import {
+  APPLY_AGENT_CHANGES_ERROR_TITLE,
+  applyAgentChangesToDashboard,
+  canApplyAgentChangesInPlace,
+} from './apply_agent_changes';
 
 export interface AgentLiveUpdatesSubscriptionParams {
   agentBuilder: AgentBuilderPluginStart;
@@ -21,6 +25,11 @@ export interface AgentLiveUpdatesSubscriptionParams {
   canWriteDashboards: boolean;
   dashboardLocator?: DashboardRendererProps['locator'];
   toasts: NotificationsStart['toasts'];
+  /** The attachment whose changes opened this dashboard as a new one. */
+  linkedAttachmentId?: string;
+  linkNextDashboard: (attachmentId: string) => void;
+  /** Called instead of applying an update that belongs to another saved dashboard. */
+  onOtherDashboardUpdated: (attachment: DashboardAttachment) => void;
   upsertAttachment: (attachment: DashboardAttachment) => void;
 }
 
@@ -39,6 +48,9 @@ export const createAgentLiveUpdatesSubscription = ({
   canWriteDashboards,
   dashboardLocator,
   toasts,
+  linkedAttachmentId,
+  linkNextDashboard,
+  onOtherDashboardUpdated,
   upsertAttachment,
 }: AgentLiveUpdatesSubscriptionParams): Subscription =>
   agentBuilder.events.ui.activeConversation$
@@ -58,11 +70,13 @@ export const createAgentLiveUpdatesSubscription = ({
       const currentSavedObjectId = api.savedObjectId$.getValue();
       // Attachments staged from a dashboard the user can't edit are left unlinked
       const isOwnAttachment =
+        attachment.id === linkedAttachmentId ||
         attachment.origin === currentSavedObjectId ||
         (!attachment.origin && !canApplyAgentChangesInPlace(api, canWriteDashboards));
 
       // Skip if viewing a saved dashboard that differs from the attachment's linked dashboard
       if (currentSavedObjectId && !isOwnAttachment) {
+        onOtherDashboardUpdated(attachment);
         return;
       }
 
@@ -72,5 +86,8 @@ export const createAgentLiveUpdatesSubscription = ({
         canWriteDashboards,
         dashboardLocator,
         toasts,
-      });
+        onOpenInNewDashboard: () => linkNextDashboard(attachment.id),
+      }).catch((error: Error) =>
+        toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE })
+      );
     });

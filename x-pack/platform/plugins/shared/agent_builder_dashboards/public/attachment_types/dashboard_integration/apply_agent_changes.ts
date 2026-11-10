@@ -10,6 +10,7 @@ import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
 import type { NotificationsStart } from '@kbn/core/public';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardApi, DashboardRendererProps } from '@kbn/dashboard-plugin/public';
+import { toDashboardLocatorParams } from './dashboard_locator_params';
 
 interface ApplyAgentChangesParams {
   api: DashboardApi;
@@ -17,7 +18,14 @@ interface ApplyAgentChangesParams {
   canWriteDashboards: boolean;
   dashboardLocator?: DashboardRendererProps['locator'];
   toasts: NotificationsStart['toasts'];
+  /** Called right before the changes open in a new dashboard, so it can be linked to them. */
+  onOpenInNewDashboard?: () => void;
 }
+
+export const APPLY_AGENT_CHANGES_ERROR_TITLE = i18n.translate(
+  'xpack.agentBuilderDashboards.applyAgentChanges.errorToastTitle',
+  { defaultMessage: "Couldn't apply the agent's changes to the dashboard" }
+);
 
 /**
  * Whether the agent's changes can be applied to the open dashboard itself.
@@ -36,6 +44,7 @@ export const applyAgentChangesToDashboard = async ({
   canWriteDashboards,
   dashboardLocator,
   toasts,
+  onOpenInNewDashboard,
 }: ApplyAgentChangesParams): Promise<void> => {
   if (!canWriteDashboards) {
     toasts.addWarning({
@@ -54,11 +63,9 @@ export const applyAgentChangesToDashboard = async ({
     if (!dashboardLocator) {
       return;
     }
+    onOpenInNewDashboard?.();
     await dashboardLocator.navigate({
-      title: dashboardState.title,
-      description: dashboardState.description,
-      panels: dashboardState.panels,
-      time_range: dashboardState.time_range,
+      ...toDashboardLocatorParams(dashboardState),
       viewMode: 'edit',
       changedBy: ['agent'],
     });

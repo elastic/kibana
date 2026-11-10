@@ -22,9 +22,14 @@ import {
   UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
-import { canApplyAgentChangesInPlace } from './apply_agent_changes';
+import {
+  APPLY_AGENT_CHANGES_ERROR_TITLE,
+  canApplyAgentChangesInPlace,
+} from './apply_agent_changes';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
+import { createOtherDashboardUpdateNotifier } from './other_dashboard_update_notifier';
+import { previewAttachmentInDashboard } from './preview_attachment';
 import type { IdGenerator } from '..';
 
 /**
@@ -53,6 +58,10 @@ export interface DashboardAppIntegrationParams {
   getUpdateOrigin: (
     attachmentId: string
   ) => ((origin: string) => Promise<UpdateOriginResponse | undefined>) | undefined;
+  /** The attachment whose changes opened this dashboard as a new one. */
+  linkedAttachmentId?: string;
+  /** Links the next dashboard that opens to the attachment whose changes it shows. */
+  linkNextDashboard: (attachmentId: string) => void;
 }
 
 interface State {
@@ -69,6 +78,8 @@ export const registerDashboardAppIntegration = ({
   draftAttachmentId,
   checkSavedDashboardExist,
   getUpdateOrigin,
+  linkedAttachmentId,
+  linkNextDashboard,
 }: DashboardAppIntegrationParams): (() => void) => {
   const state: State = {
     attachments: undefined,
@@ -82,7 +93,8 @@ export const registerDashboardAppIntegration = ({
     const isLinkable = canApplyAgentChangesInPlace(api, canWriteDashboards);
     const dashboardId = isLinkable ? api.savedObjectId$.getValue() : undefined;
     const syncAttachment = isLinkable
-      ? state.attachments?.find(({ origin }) => origin === dashboardId)
+      ? state.attachments?.find(({ id }) => id === linkedAttachmentId) ??
+        state.attachments?.find(({ origin }) => origin === dashboardId)
       : undefined;
     const dashboardData = dashboardStateToAttachmentData(api.getSerializedState().attributes);
 
@@ -136,12 +148,31 @@ export const registerDashboardAppIntegration = ({
     }
   );
 
+  const otherDashboardUpdateNotifier = createOtherDashboardUpdateNotifier({
+    toasts,
+    openAttachment: (attachment) =>
+      void previewAttachmentInDashboard({
+        attachment,
+        dashboardApi: api,
+        canWriteDashboards,
+        dashboardLocator,
+        toasts,
+        checkSavedDashboardExist,
+        linkNextDashboard,
+      }).catch((error: Error) =>
+        toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE })
+      ),
+  });
+
   const agentLiveUpdatesSubscription = createAgentLiveUpdatesSubscription({
     agentBuilder,
     api,
     canWriteDashboards,
     dashboardLocator,
     toasts,
+    linkedAttachmentId,
+    linkNextDashboard,
+    onOtherDashboardUpdated: otherDashboardUpdateNotifier.notify,
     upsertAttachment: (attachment: DashboardAttachment) => {
       const otherAttachments = (state.attachments ?? []).filter(({ id }) => id !== attachment.id);
       state.attachments = [...otherAttachments, attachment];
@@ -156,6 +187,7 @@ export const registerDashboardAppIntegration = ({
   const originSyncSubscription = createOriginSyncSubscription({
     api,
     checkSavedDashboardExist,
+    linkedAttachmentId,
     getAttachments: () => state.attachments,
     updateOrigin: (id: string, origin: string) => getUpdateOrigin(id)?.(origin),
   });
@@ -170,6 +202,7 @@ export const registerDashboardAppIntegration = ({
     originSyncSubscription.unsubscribe();
     manualChangesSubscription.unsubscribe();
     conversationChangesSubscription.unsubscribe();
+    otherDashboardUpdateNotifier.removeAll();
     if (pendingAddAttachmentTimeout !== undefined) {
       clearTimeout(pendingAddAttachmentTimeout);
       pendingAddAttachmentTimeout = undefined;
