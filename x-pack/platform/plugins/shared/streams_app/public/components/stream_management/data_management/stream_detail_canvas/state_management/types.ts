@@ -11,6 +11,7 @@ import type { XYPosition } from '@xyflow/react';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import type { Unit, UnitRepository } from '../../../../../services/unit_repository';
 import type { ProcessingNodeRef, UnitLine } from '../../../../../services/unit_graph';
+import type { RoutingDiagnostic } from '../../../../../services/unit_diagnostics';
 import type {
   ProcessingFlyoutActorRef,
   ProcessingSaveRequest,
@@ -102,6 +103,8 @@ export interface CanvasState {
   /** Processor ids written for the flyout's steps, in step order, while they save. */
   processingSaveIds?: string[];
   nodePositions: Record<string, XYPosition>;
+  /** Diagnostics of the last failed save that point at routing nodes of `nextUnit`. */
+  routingDiagnostics?: RoutingDiagnostic[];
   sourcesRef: SourcesActorRef;
   destinationsRef: DestinationsActorRef;
   error?: Error;

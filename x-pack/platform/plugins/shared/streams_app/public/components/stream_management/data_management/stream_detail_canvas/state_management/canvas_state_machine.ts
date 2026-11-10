@@ -80,6 +80,7 @@ import {
   ROUTING_FLYOUT_ID,
   canApplyRoutingDraft,
   getRoutingFlyoutInput,
+  getRoutingDiagnosticsUpdate,
   getRoutingStageUpdate,
   notifyRoutingStaged,
   rejectBusyRoutingSave,
@@ -98,7 +99,12 @@ const SAVE_FAILURE_TRANSITIONS = [
   {
     guard: 'isSavingProcessing',
     target: 'saveFailed',
-    actions: ['storeUnitFailure', 'notifyProcessingSaveFailed', 'restoreProcessingRollback'],
+    actions: [
+      'storeUnitFailure',
+      'storeRoutingDiagnostics',
+      'notifyProcessingSaveFailed',
+      'restoreProcessingRollback',
+    ],
   },
   {
     guard: 'isSavingComponentChange',
@@ -118,7 +124,7 @@ const SAVE_FAILURE_TRANSITIONS = [
   },
   {
     target: 'saveFailed',
-    actions: ['storeUnitFailure', 'notifyUnitFailure'],
+    actions: ['storeUnitFailure', 'storeRoutingDiagnostics', 'notifyUnitFailure'],
   },
 ] as const;
 
@@ -207,6 +213,7 @@ export const canvasStateMachine = setup({
             savingComponentKind: undefined,
             savingComponentIntent: undefined,
             savingSecrets: undefined,
+            routingDiagnostics: [],
             error: undefined,
           }
         : context
@@ -226,9 +233,11 @@ export const canvasStateMachine = setup({
         savingSecrets: undefined,
         processingRollbackUnit: undefined,
         processingSaveIds: undefined,
+        routingDiagnostics: [],
         error: undefined,
       };
     }),
+    storeRoutingDiagnostics: assign((args) => getRoutingDiagnosticsUpdate(args)),
     storeUnitFailure: assign({
       error: ({ event }) =>
         event.type === 'xstate.error.actor.loadUnitDefinition' ||
@@ -237,6 +246,7 @@ export const canvasStateMachine = setup({
           ? getFormattedError(event.error)
           : undefined,
       savingSecrets: undefined,
+      routingDiagnostics: [],
     }),
     rollbackToPersistedUnit: assign({
       nextUnit: ({ context }) => context.unit,
@@ -400,7 +410,13 @@ export const canvasStateMachine = setup({
         return {};
       }
       const { target, readOnly = false } = event;
-      const input = getRoutingFlyoutInput(context.nextUnit, target, self, readOnly);
+      const input = getRoutingFlyoutInput(
+        context.nextUnit,
+        target,
+        self,
+        readOnly,
+        context.routingDiagnostics
+      );
       if (!input) {
         return { routingFlyout: { target } };
       }

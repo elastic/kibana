@@ -11,6 +11,7 @@ import {
   readLineOrigin,
   readLineTarget,
   readRoutingRuleIndex,
+  withRoutingDiagnostics,
 } from './build_unit_connection_edges';
 import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE, type ClassicCanvasNode } from './types';
 
@@ -577,5 +578,24 @@ describe('reading line ends from canvas nodes', () => {
     expect(readRoutingRuleIndex('rule-x')).toBeUndefined();
     expect(readRoutingRuleIndex('src')).toBeUndefined();
     expect(readRoutingRuleIndex(null)).toBeUndefined();
+  });
+});
+
+describe('withRoutingDiagnostics', () => {
+  it('marks the routing node and the rules the last save rejected', () => {
+    const { routingNodes } = buildRouted();
+    const marked = withRoutingDiagnostics(routingNodes, [
+      { code: 'E050', message: 'bad condition', pipelineId: 'p-routed', ruleIndex: 1 },
+      { code: 'E017', message: 'no way out', pipelineId: 'p-routed' },
+    ]);
+    const routed = marked.find(({ data }) => data.pipelineId === 'p-routed');
+    expect(routed?.data.diagnostics).toEqual(['bad condition', 'no way out']);
+    expect(routed?.data.rules.map(({ diagnostics }) => diagnostics)).toEqual([
+      undefined,
+      ['bad condition'],
+      undefined,
+    ]);
+    const others = marked.filter(({ data }) => data.pipelineId !== 'p-routed');
+    expect(others).toEqual(routingNodes.filter(({ data }) => data.pipelineId !== 'p-routed'));
   });
 });

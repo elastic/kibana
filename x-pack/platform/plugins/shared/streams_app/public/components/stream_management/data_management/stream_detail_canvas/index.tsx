@@ -36,6 +36,7 @@ import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useUnitId } from '../../../../hooks/use_unit_id';
 import {
   buildUnitCanvasGraph,
+  withRoutingDiagnostics,
   configuredDestinationNodeId,
   configuredSourceNodeId,
   readConfiguredDestinationId,
@@ -88,6 +89,7 @@ import {
   useCanvasDestinationsRef,
   useCanvasSourcesRef,
   useCanvasUrlRef,
+  useCanvasRoutingDiagnostics,
   useCanvasRoutingFlyout,
   useCanvasProcessingFlyout,
 } from './state_management';
@@ -227,6 +229,7 @@ function StreamsCanvasInner() {
   const isUnitUnavailable = useCanvasIsUnitUnavailable();
   const nodePositions = useCanvasNodePositions();
   const routingFlyout = useCanvasRoutingFlyout();
+  const routingDiagnostics = useCanvasRoutingDiagnostics();
   const processingFlyout = useCanvasProcessingFlyout();
   const nodePositionsRef = useRef(nodePositions);
   useEffect(() => {
@@ -300,14 +303,14 @@ function StreamsCanvasInner() {
     const graphNodes = [
       ...configuredSourceNodes,
       ...processingNodes,
-      ...routingNodes,
+      ...withRoutingDiagnostics(routingNodes, routingDiagnostics),
       ...configuredDestinationNodes,
     ];
     return {
       nodes: applyLayout(graphNodes, edges),
       edges,
     };
-  }, [destinations, resolvedIndicesByDestination, sources, unitDefinition]);
+  }, [destinations, resolvedIndicesByDestination, routingDiagnostics, sources, unitDefinition]);
 
   // Local (non-persisted) node state so nodes can be dragged around the canvas.
   // Metadata-only updates (e.g. index count after resolved indices reload) are

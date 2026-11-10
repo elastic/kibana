@@ -493,6 +493,26 @@ describe('routingFlyoutMachine', () => {
     ]);
   });
 
+  it('shows the last save diagnostics on their rules until the condition changes', () => {
+    const { flyout } = startFlyout({
+      target: { kind: 'pipeline', pipelineId: 'main' },
+      rules: [{ when: 'body ==', destinations: ['es-logs'] }, { destinations: ['es-logs'] }],
+      diagnostics: [
+        { code: 'E050', message: 'bad condition', pipelineId: 'main', ruleIndex: 0 },
+        { code: 'E017', message: 'no way out', pipelineId: 'main' },
+      ],
+    });
+    const diagnostics = () => flyout.getSnapshot().context.rules.map((rule) => rule.diagnostics);
+    expect(diagnostics()).toEqual([['bad condition'], undefined]);
+    expect(flyout.getSnapshot().context.nodeDiagnostics).toEqual(['no way out']);
+
+    flyout.send({ type: 'rule.update', key: 'rule-0', changes: { telemetry: ['logs'] } });
+    expect(diagnostics()).toEqual([['bad condition'], undefined]);
+
+    flyout.send({ type: 'rule.update', key: 'rule-0', changes: { when: 'body == "x"' } });
+    expect(diagnostics()).toEqual([undefined, undefined]);
+  });
+
   it('cannot save without rules, or when read-only', () => {
     const { flyout } = startFlyout();
     flyout.send({ type: 'rule.delete', key: 'rule-0' });

@@ -28,6 +28,7 @@ import type { UnitSignal } from '../../../../services/unit_pipeline';
 import type { Unit } from '../../../../services/unit_repository';
 import { DESTINATION_SIGNAL_LABELS } from '../../../streams_layout/destinations/destination_type_config';
 import type { DestinationSignal } from '../../../streams_layout/destinations/types';
+import type { RoutingDiagnostic } from '../../../../services/unit_diagnostics';
 import {
   ANIMATED_EDGE_TYPE,
   DESTINATION_NODE_TYPE,
@@ -241,6 +242,35 @@ const buildRoutingNode = (routing: UnitGraphRoutingNode): RoutingNode => {
     },
   };
 };
+
+/**
+ * Marks the routing nodes, and their rules, that the last failed save rejected.
+ * Other nodes are returned as they are.
+ */
+export const withRoutingDiagnostics = (
+  routingNodes: readonly RoutingNode[],
+  diagnostics: readonly RoutingDiagnostic[]
+): RoutingNode[] =>
+  routingNodes.map((node) => {
+    const own = diagnostics.filter(({ pipelineId }) => pipelineId === node.data.pipelineId);
+    if (own.length === 0) {
+      return node;
+    }
+    return {
+      ...node,
+      data: {
+        ...node.data,
+        diagnostics: own.map(({ message }) => message),
+        rules: node.data.rules.map((rule) => {
+          const ruleIndex = readRoutingRuleIndex(rule.handleId);
+          const messages = own
+            .filter((diagnostic) => diagnostic.ruleIndex === ruleIndex)
+            .map(({ message }) => message);
+          return messages.length > 0 ? { ...rule, diagnostics: messages } : rule;
+        }),
+      },
+    };
+  });
 
 const processingOutput = (
   graph: UnitGraph,

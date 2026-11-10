@@ -375,6 +375,14 @@ export const withPublishedTelemetry = (unit: Unit): Unit => {
   );
 };
 
+/**
+ * The unit as it is sent on save: wiring the schema and the distributor reject is
+ * left out, and routing pipelines are narrowed to the signals their routes export.
+ * Save diagnostics point into this unit, not the staged one.
+ */
+export const toPublishedUnit = (stagedUnit: Unit): Unit =>
+  withPublishedTelemetry(withoutUnconnectedWiring(stagedUnit));
+
 /** Like `writePipeline`, but keeps a pipeline that forwards nowhere, as a staged, unconnected node. */
 const replacePipelineConfig = (
   unit: Unit,

@@ -75,8 +75,54 @@ type RoutingRuleEdit = Pick<RoutingRuleDraft, 'when' | 'action' | 'telemetry'>;
 /** A rule added in the flyout has an empty condition until it is applied, so it opens ready to edit. */
 const isUnsetCondition = ({ when }: RoutingRuleDraft): boolean => when === '';
 
-function RoutingRuleView({ rule: { when, action, telemetry } }: { rule: RoutingRuleDraft }) {
+const diagnosticsLabel = i18n.translate('xpack.streams.routingFlyout.rule.diagnosticsLabel', {
+  defaultMessage: 'The last save rejected this rule',
+});
+
+function RoutingRuleDiagnostics({ diagnostics }: { diagnostics: string[] }) {
+  return (
+    <EuiText size="s" color="danger" data-test-subj="streamsRoutingRuleDiagnostics">
+      <p>
+        <strong>{diagnosticsLabel}</strong>
+      </p>
+      <ul>
+        {diagnostics.map((message, index) => (
+          <li key={index}>{message}</li>
+        ))}
+      </ul>
+    </EuiText>
+  );
+}
+
+function RoutingRuleView({
+  rule: { when, action, telemetry, diagnostics },
+}: {
+  rule: RoutingRuleDraft;
+}) {
   const condition = normalizeWhen(when);
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem>
+        <RoutingRuleSummary when={condition} action={action} telemetry={telemetry} />
+      </EuiFlexItem>
+      {diagnostics ? (
+        <EuiFlexItem>
+          <RoutingRuleDiagnostics diagnostics={diagnostics} />
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
+  );
+}
+
+function RoutingRuleSummary({
+  when: condition,
+  action,
+  telemetry,
+}: {
+  when: string | undefined;
+  action: RoutingAction;
+  telemetry: UnitSignal[];
+}) {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
       <EuiFlexItem>
@@ -109,11 +155,15 @@ function RoutingRuleView({ rule: { when, action, telemetry } }: { rule: RoutingR
 
 function RoutingConditionForm({
   when,
+  diagnostics,
   onChange,
 }: {
   when: string | undefined;
+  /** Why the last save rejected the condition, while it is unchanged. */
+  diagnostics?: string[];
   onChange: (when: string) => void;
 }) {
+  const isInvalid = diagnostics !== undefined && diagnostics.length > 0;
   return (
     <EuiFormRow
       fullWidth
@@ -123,10 +173,13 @@ function RoutingConditionForm({
       helpText={i18n.translate('xpack.streams.routingFlyout.rule.conditionHelp', {
         defaultMessage: 'An OTTL condition. Leave it empty to match all remaining data.',
       })}
+      isInvalid={isInvalid}
+      error={diagnostics}
     >
       <EuiFieldText
         fullWidth
         compressed
+        isInvalid={isInvalid}
         value={when ?? ''}
         placeholder='resource.attributes["env"] == "prod"'
         onChange={(event) => onChange(event.target.value)}
@@ -138,6 +191,7 @@ function RoutingConditionForm({
 
 function RoutingRuleEditForm({
   draft,
+  diagnostics,
   availableSignals,
   isCreated,
   onChange,
@@ -145,6 +199,8 @@ function RoutingRuleEditForm({
   onSubmit,
 }: {
   draft: RoutingRuleEdit;
+  /** Why the last save rejected the rule's condition as it was before this edit. */
+  diagnostics?: { when: string | undefined; messages: string[] };
   availableSignals: UnitSignal[];
   isCreated: boolean;
   onChange: (draft: RoutingRuleEdit) => void;
@@ -156,7 +212,15 @@ function RoutingRuleEditForm({
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        <RoutingConditionForm when={draft.when} onChange={(when) => onChange({ ...draft, when })} />
+        <RoutingConditionForm
+          when={draft.when}
+          diagnostics={
+            diagnostics && normalizeWhen(draft.when) === normalizeWhen(diagnostics.when)
+              ? diagnostics.messages
+              : undefined
+          }
+          onChange={(when) => onChange({ ...draft, when })}
+        />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFormRow
@@ -263,7 +327,7 @@ export function RoutingRuleRow({
   dragHandleProps,
 }: RoutingRuleRowProps) {
   const { euiTheme } = useEuiTheme();
-  const { key, when, action, telemetry } = rule;
+  const { key, when, action, telemetry, diagnostics } = rule;
   // A new rule is only created once its form is submitted; cancelling it removes the rule.
   const [isCreated, setIsCreated] = useState(() => !isUnsetCondition(rule));
   // Edits stay in the row until they are applied, so cancelling leaves the rule unchanged.
@@ -315,7 +379,7 @@ export function RoutingRuleRow({
       data-test-subj={`streamsRoutingRule-${key}`}
       hasShadow={isDragging}
       css={css`
-        border: 1px solid ${euiTheme.border.color};
+        border: 1px solid ${diagnostics ? euiTheme.colors.danger : euiTheme.border.color};
       `}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -384,6 +448,7 @@ export function RoutingRuleRow({
           {isEditing && edit ? (
             <RoutingRuleEditForm
               draft={edit}
+              diagnostics={diagnostics ? { when, messages: diagnostics } : undefined}
               availableSignals={availableSignals}
               isCreated={isCreated}
               onChange={setEdit}

@@ -166,6 +166,7 @@ function RoutingFlyoutForm({
   const isUnsupported = !editable && !isReadOnly;
   const hasChanges = useSelector(flyoutRef, (state) => state.context.hasChanges);
   const saveError = useSelector(flyoutRef, (state) => state.context.saveError);
+  const nodeDiagnostics = useSelector(flyoutRef, (state) => state.context.nodeDiagnostics);
   const isSaving = useSelector(flyoutRef, (state) => state.matches('saving'));
   const canSave =
     useSelector(flyoutRef, (state) => state.can({ type: 'flyout.save' })) && !isReadOnly;
@@ -223,6 +224,25 @@ function RoutingFlyoutForm({
                   defaultMessage:
                     'This routing uses telemetry-specific rule lists. Edit it in the YAML configuration.',
                 })}
+              />
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
+          {nodeDiagnostics.length > 0 ? (
+            <>
+              <KbnDangerCallout
+                announceOnMount
+                title={i18n.translate('xpack.streams.routingFlyout.diagnosticsTitle', {
+                  defaultMessage: 'The last save rejected this routing',
+                })}
+                text={
+                  <ul>
+                    {nodeDiagnostics.map((message, index) => (
+                      <li key={index}>{message}</li>
+                    ))}
+                  </ul>
+                }
+                data-test-subj="streamsRoutingFlyoutDiagnostics"
               />
               <EuiSpacer size="m" />
             </>

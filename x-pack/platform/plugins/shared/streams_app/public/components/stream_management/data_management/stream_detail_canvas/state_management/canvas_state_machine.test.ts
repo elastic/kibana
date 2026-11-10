@@ -753,3 +753,73 @@ describe('canvasStateMachine', () => {
     expect(core.notifications.toasts.addError).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('canvas routing save diagnostics', () => {
+  const routedUnit = (): Unit => {
+    const routed = loadedUnit();
+    routed.unit.pipelines[0].config = [
+      { name: 'sources', value: ['src'] },
+      {
+        name: 'routes',
+        value: [{ when: 'attributes["a"] ==', destinations: ['es'] }, { destinations: ['es'] }],
+      },
+    ];
+    return routed;
+  };
+
+  const rejected = (diagnostics: object[]) =>
+    Object.assign(new Error('Bad Request'), {
+      name: 'HttpFetchError',
+      request: {},
+      body: { statusCode: 400, attributes: { data: { valid: false, diagnostics } } },
+    });
+
+  const failSave = async () => {
+    const persist = jest.fn(async (unit: Unit) => unit);
+    persist.mockRejectedValueOnce(
+      rejected([
+        {
+          severity: 'error',
+          code: 'E050',
+          message: 'unexpected end of condition',
+          path: '/pipelines/0/config/1/value/0/when',
+        },
+      ])
+    );
+    const { canvas } = startCanvas(persist, routedUnit());
+    await waitForUnitReady(canvas);
+    const staged = routedUnit();
+    staged.unit.pipelines[0].name = 'Routing';
+    canvas.send({ type: 'unit.stage', unitDefinition: staged });
+    canvas.send({ type: 'unit.save' });
+    await waitFor(canvas, (snapshot) => snapshot.matches({ ready: { unit: 'saveFailed' } }));
+    return canvas;
+  };
+
+  it('traces a rejected save back to the routing rule and hands it to the flyout', async () => {
+    const canvas = await failSave();
+    expect(canvas.getSnapshot().context.routingDiagnostics).toEqual([
+      { code: 'E050', message: 'unexpected end of condition', pipelineId: 'p-src', ruleIndex: 0 },
+    ]);
+
+    canvas.send({ type: 'routing.open', target: { kind: 'pipeline', pipelineId: 'p-src' } });
+    const rules = canvas.getSnapshot().context.routingFlyout?.ref?.getSnapshot().context.rules;
+    expect(rules?.map(({ diagnostics }) => diagnostics)).toEqual([
+      ['unexpected end of condition'],
+      undefined,
+    ]);
+  });
+
+  it('drops the routing node diagnostics once its rules are staged again', async () => {
+    const canvas = await failSave();
+    canvas.send({ type: 'routing.open', target: { kind: 'pipeline', pipelineId: 'p-src' } });
+    const ref = canvas.getSnapshot().context.routingFlyout?.ref;
+    ref?.send({
+      type: 'rule.update',
+      key: 'rule-0',
+      changes: { when: 'attributes["a"] == "b"' },
+    });
+    ref?.send({ type: 'flyout.save' });
+    expect(canvas.getSnapshot().context.routingDiagnostics).toEqual([]);
+  });
+});

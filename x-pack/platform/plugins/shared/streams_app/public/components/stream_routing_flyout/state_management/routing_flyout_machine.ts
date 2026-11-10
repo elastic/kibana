@@ -13,6 +13,7 @@ import {
   type UnitSignal,
 } from '../../../services/unit_pipeline';
 import type { UnitRoutableLine } from '../../../services/unit_connections';
+import type { RoutingDiagnostic } from '../../../services/unit_diagnostics';
 import { normalizeWhen } from '../routing_rule_condition';
 
 /** What a rule does with matching data: `move` it to the targets, or `copy` it and keep evaluating. */
@@ -38,6 +39,8 @@ export interface RoutingRuleDraft {
   telemetry: UnitSignal[];
   /** The rule as saved: its targets, processors and other fields are written back unchanged. */
   base: RouteRule;
+  /** Why the last canvas save rejected the rule; cleared once its condition or action changes. */
+  diagnostics?: string[];
 }
 
 export interface RoutingFlyoutInput {
@@ -51,6 +54,8 @@ export interface RoutingFlyoutInput {
   editable: boolean;
   /** Whether the user cannot manage the stream, so nothing can be edited or saved. */
   readOnly?: boolean;
+  /** Diagnostics of the last failed canvas save for this routing node. */
+  diagnostics?: readonly RoutingDiagnostic[];
   parentRef: AnyActorRef;
 }
 
@@ -62,6 +67,8 @@ export interface RoutingFlyoutContext {
   /** False when the rules cannot be edited here, or the user cannot manage the stream. */
   editable: boolean;
   readOnly: boolean;
+  /** Diagnostics of the last failed canvas save that point at no particular rule. */
+  nodeDiagnostics: string[];
   hasChanges: boolean;
   saveError?: string;
   nextKey: number;
@@ -89,14 +96,20 @@ export interface RoutingSaveRequest {
 }
 
 const toDraft =
-  (signals: readonly UnitSignal[]) =>
-  (rule: RouteRule, index: number): RoutingRuleDraft => ({
-    key: `rule-${index}`,
-    when: rule.when,
-    action: rule.action ?? DEFAULT_ROUTING_ACTION,
-    telemetry: [...(rule.telemetry ?? signals)],
-    base: rule,
-  });
+  (signals: readonly UnitSignal[], diagnostics: readonly RoutingDiagnostic[]) =>
+  (rule: RouteRule, index: number): RoutingRuleDraft => {
+    const messages = diagnostics
+      .filter(({ ruleIndex }) => ruleIndex === index)
+      .map(({ message }) => message);
+    return {
+      key: `rule-${index}`,
+      when: rule.when,
+      action: rule.action ?? DEFAULT_ROUTING_ACTION,
+      telemetry: [...(rule.telemetry ?? signals)],
+      base: rule,
+      ...(messages.length > 0 ? { diagnostics: messages } : {}),
+    };
+  };
 
 /** Every signal the rules handle, in the order they are offered. */
 export const getRulesTelemetry = (
@@ -306,6 +319,13 @@ export const routingFlyoutMachine = setup({
         return {};
       }
       const next: RoutingRuleDraft = { ...updated, ...event.changes };
+      // A save diagnostic is about the condition the rule had; a new one is checked on the next save.
+      if (
+        normalizeWhen(next.when) !== normalizeWhen(updated.when) ||
+        next.action !== updated.action
+      ) {
+        delete next.diagnostics;
+      }
       const others = context.rules.filter(({ key }) => key !== event.key);
       const when = normalizeWhen(next.when);
       if (when === undefined) {
@@ -387,11 +407,14 @@ export const routingFlyoutMachine = setup({
   id: 'routingFlyout',
   context: ({ input }) => ({
     target: input.target,
-    rules: input.rules.map(toDraft(input.signals)),
+    rules: input.rules.map(toDraft(input.signals, input.diagnostics ?? [])),
     signals: input.signals,
     availableSignals: input.availableSignals,
     editable: input.editable && !input.readOnly,
     readOnly: input.readOnly ?? false,
+    nodeDiagnostics: (input.diagnostics ?? [])
+      .filter(({ ruleIndex }) => ruleIndex === undefined || ruleIndex >= input.rules.length)
+      .map(({ message }) => message),
     hasChanges: false,
     saveError: undefined,
     nextKey: input.rules.length,

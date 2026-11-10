@@ -23,6 +23,10 @@ import {
   writePipelineRoutes,
 } from '../../../../../services/unit_connections';
 import type { Unit } from '../../../../../services/unit_repository';
+import {
+  getRoutingDiagnostics,
+  type RoutingDiagnostic,
+} from '../../../../../services/unit_diagnostics';
 import type { CanvasState, CanvasUrlEvent } from './types';
 
 /**
@@ -46,7 +50,8 @@ export const getRoutingFlyoutInput = (
   unit: Unit,
   target: RoutingFlyoutTarget,
   parentRef: AnyActorRef,
-  readOnly = false
+  readOnly = false,
+  diagnostics: readonly RoutingDiagnostic[] = []
 ): RoutingFlyoutInput | undefined => {
   if (target.kind === 'pipeline') {
     const rules = getPipelineRoutes(unit, target.pipelineId);
@@ -59,6 +64,7 @@ export const getRoutingFlyoutInput = (
           availableSignals: available,
           editable: canEditPipelineRoutes(unit, target.pipelineId),
           readOnly,
+          diagnostics: diagnostics.filter(({ pipelineId }) => pipelineId === target.pipelineId),
           parentRef,
         }
       : undefined;
@@ -102,10 +108,41 @@ const getRoutingDraft = (context: CanvasState, event: RoutingSaveRequest): Unit 
 export const canApplyRoutingDraft = ({ context, event }: CanvasActionArgs): boolean =>
   event.type === 'routing.save' && getRoutingDraft(context, event) !== context.nextUnit;
 
-/** Stages the drafted unit; it is persisted with the rest of the canvas on save. */
-export const getRoutingStageUpdate = ({ context, event }: CanvasActionArgs): Partial<CanvasState> =>
-  event.type === 'routing.save'
-    ? { nextUnit: getRoutingDraft(context, event), error: undefined }
+/**
+ * Stages the drafted unit; it is persisted with the rest of the canvas on save. The
+ * routing node's diagnostics from the last failed save no longer apply to its new rules.
+ */
+export const getRoutingStageUpdate = ({
+  context,
+  event,
+}: CanvasActionArgs): Partial<CanvasState> => {
+  if (event.type !== 'routing.save') {
+    return {};
+  }
+  const { target } = event;
+  return {
+    nextUnit: getRoutingDraft(context, event),
+    error: undefined,
+    routingDiagnostics:
+      target.kind === 'pipeline'
+        ? context.routingDiagnostics?.filter(({ pipelineId }) => pipelineId !== target.pipelineId)
+        : context.routingDiagnostics,
+  };
+};
+
+/** Traces the diagnostics of a failed save back to the routing nodes of the unit that was saving. */
+export const getRoutingDiagnosticsUpdate = ({
+  context,
+  event,
+}: CanvasActionArgs): Partial<CanvasState> =>
+  event.type === 'xstate.error.actor.validateUnitDefinition' ||
+  event.type === 'xstate.error.actor.persistUnitDefinition'
+    ? {
+        routingDiagnostics: getRoutingDiagnostics(
+          event.error,
+          context.savingUnit ?? context.nextUnit
+        ),
+      }
     : {};
 
 export const notifyRoutingStaged = ({ context }: CanvasActionArgs): void => {

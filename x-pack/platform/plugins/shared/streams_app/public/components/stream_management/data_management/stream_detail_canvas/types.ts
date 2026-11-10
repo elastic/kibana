@@ -61,11 +61,15 @@ export interface RoutingNodeRule {
   connected: boolean;
   action?: 'copy' | 'move';
   signals?: DestinationSignal[];
+  /** Why the last save rejected the rule. */
+  diagnostics?: string[];
 }
 
 export interface RoutingNodeData extends Record<string, unknown> {
   pipelineId: string;
   rules: RoutingNodeRule[];
+  /** Why the last save rejected the routing, for every rule and the node itself. */
+  diagnostics?: string[];
 }
 
 export interface ProcessingNodeData extends Record<string, unknown> {

@@ -8,6 +8,7 @@ import React, { useContext, useRef, useMemo } from 'react';
 import { createActorContext } from '@xstate/react';
 import type { XYPosition } from '@xyflow/react';
 import type { Unit } from '../../../../../services/unit_repository';
+import type { RoutingDiagnostic } from '../../../../../services/unit_diagnostics';
 import type { ProcessingNodeRef, UnitLine } from '../../../../../services/unit_graph';
 import type { RoutingFlyoutTarget } from '../../../../stream_routing_flyout/state_management/routing_flyout_machine';
 import type { ProcessingStepPosition } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
@@ -108,6 +109,12 @@ export const useCanvasNodePositions = () => {
 export const useCanvasRoutingFlyout = () => {
   return useCanvasStateSelector((state) => state.context.routingFlyout);
 };
+
+const NO_ROUTING_DIAGNOSTICS: RoutingDiagnostic[] = [];
+
+/** Diagnostics of the last failed save that point at routing nodes. */
+export const useCanvasRoutingDiagnostics = (): RoutingDiagnostic[] =>
+  useCanvasStateSelector((state) => state.context.routingDiagnostics ?? NO_ROUTING_DIAGNOSTICS);
 
 export const useCanvasProcessingFlyout = () => {
   return useCanvasStateSelector((state) => state.context.processingFlyout);
