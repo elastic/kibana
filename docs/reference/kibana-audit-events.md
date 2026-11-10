@@ -426,11 +426,11 @@ stack: unavailable
 serverless: preview
 ```
 
-#### Type: access
+#### Types: start, access, creation and change
 
 | **Action** | **Outcome** | **Description** |
 | --- | --- | --- |
-| `sandbox_rpc` | `success` | Sandbox RPC [method] finished with gRPC status OK. Logged once for each call a plugin makes to the sandbox, after it finishes. `event.category` is `process` for `RunCommand` and `file` for the file calls. Refer to [Trace a sandbox call](#sandbox-rpc-details). |
+| `sandbox_rpc` | `success` | Sandbox RPC [method] finished with gRPC status OK. Logged once for each call a plugin makes to the sandbox, after it finishes. `event.category` is `process` for `RunCommand` and `file` for the file calls. `event.type` is `start` for `RunCommand`, `access` for `ReadFiles` and `StatFiles`, `creation` for `Mkdirs`, and both `creation` and `change` for `WriteFiles`, which creates a file or overwrites one. Refer to [Trace a sandbox call](#sandbox-rpc-details). |
 | | `failure` | Sandbox RPC [method] finished with gRPC status [status], for example `UNAVAILABLE`. A call that fails without reaching the sandbox, such as a refused connection, is also logged. |
 
 #### Trace a sandbox call [sandbox-rpc-details]

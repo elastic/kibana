@@ -94,6 +94,18 @@ const category = (method: string): 'process' | 'file' =>
   method.endsWith('/RunCommand') ? 'process' : 'file';
 
 /**
+ * The ECS types of the operation, so a query for file writes (`creation` or `change`) finds the
+ * sandbox writes. `WriteFiles` carries both: it creates the file or overwrites one, and only the
+ * sandbox knows which.
+ */
+const types = (method: string): Array<'start' | 'access' | 'creation' | 'change'> => {
+  if (method.endsWith('/RunCommand')) return ['start'];
+  if (method.endsWith('/WriteFiles')) return ['creation', 'change'];
+  if (method.endsWith('/Mkdirs')) return ['creation'];
+  return ['access'];
+};
+
+/**
  * The audit event of one RPC.
  *
  * The proxy's request id is `sandbox.proxy_request_id`, not `http.request.id`. On Serverless the
@@ -107,7 +119,7 @@ const auditEvent = (rpc: SandboxRpcInfo, caller: SandboxCaller, spaceId?: string
     event: {
       action: 'sandbox_rpc',
       category: [category(rpc.method)],
-      type: ['access' as const],
+      type: types(rpc.method),
       outcome,
       duration: rpc.durationNs,
     },

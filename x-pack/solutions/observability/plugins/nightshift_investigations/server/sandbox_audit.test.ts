@@ -121,7 +121,11 @@ describe('auditedSandboxSession', () => {
     await expect(audited().runCommand({ command: 'true' })).rejects.toBe(failure);
 
     expect(audit.log).toHaveBeenCalledTimes(1);
-    expect(logged().event).toMatchObject({ outcome: 'failure', category: ['process'] });
+    expect(logged().event).toMatchObject({
+      outcome: 'failure',
+      category: ['process'],
+      type: ['start'],
+    });
     expect(logged().rpc.status_code).toBe('UNAVAILABLE');
   });
 
@@ -134,27 +138,40 @@ describe('auditedSandboxSession', () => {
   });
 
   it.each([
-    ['runCommand', 'RunCommand', 'process', (s: any) => s.runCommand({ command: 'true' })],
-    ['readFiles', 'ReadFiles', 'file', (s: any) => s.readFiles([{ path: '/a' }])],
+    [
+      'runCommand',
+      'RunCommand',
+      'process',
+      ['start'],
+      (s: any) => s.runCommand({ command: 'true' }),
+    ],
+    ['readFiles', 'ReadFiles', 'file', ['access'], (s: any) => s.readFiles([{ path: '/a' }])],
     [
       'writeFiles',
       'WriteFiles',
       'file',
+      // A write creates the file or overwrites one, and only the sandbox knows which, so the
+      // event carries both: a query for either finds it.
+      ['creation', 'change'],
       (s: any) => s.writeFiles([{ path: '/a', content: Buffer.from('') }]),
     ],
-    ['mkdirs', 'Mkdirs', 'file', (s: any) => s.mkdirs(['/a'])],
-    ['statFiles', 'StatFiles', 'file', (s: any) => s.statFiles(['/a'])],
-  ])('audits %s as a %s call in the %s category', async (property, rpcName, expected, call) => {
-    (session as any)[property].mockResolvedValue({
-      value: [],
-      rpc: rpc({ method: `sandbox.SandboxService/${rpcName}` }),
-    });
+    ['mkdirs', 'Mkdirs', 'file', ['creation'], (s: any) => s.mkdirs(['/a'])],
+    ['statFiles', 'StatFiles', 'file', ['access'], (s: any) => s.statFiles(['/a'])],
+  ])(
+    'audits %s as a %s call in the %s category',
+    async (property, rpcName, expected, type, call) => {
+      (session as any)[property].mockResolvedValue({
+        value: [],
+        rpc: rpc({ method: `sandbox.SandboxService/${rpcName}` }),
+      });
 
-    await call(audited());
+      await call(audited());
 
-    expect(logged().event.category).toEqual([expected]);
-    expect(logged().rpc.method).toBe(`sandbox.SandboxService/${rpcName}`);
-  });
+      expect(logged().event.category).toEqual([expected]);
+      expect(logged().event.type).toEqual(type);
+      expect(logged().rpc.method).toBe(`sandbox.SandboxService/${rpcName}`);
+    }
+  );
 
   it('describes a workflow step by its type, its run and its id', async () => {
     session.statFiles.mockResolvedValue({ value: [], rpc: rpc() });
