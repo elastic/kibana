@@ -12,10 +12,12 @@ jest.mock('../../onboarding_flow_context', () => ({ useOnboardingFlow: jest.fn()
 jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('./use_agent_detection', () => ({ useAgentDetection: jest.fn() }));
+jest.mock('@kbn/fleet-plugin/public', () => ({ useGetOutputs: jest.fn() }));
 
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';
+import { useGetOutputs } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceSettingsPersistedState } from '../service_settings_step/use_service_settings';
@@ -25,6 +27,7 @@ import { useServiceDataDetection } from './use_service_data_detection';
 const mockUseSessionStorage = useSessionStorage as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUseQuery = useQuery as jest.Mock;
+const mockUseGetOutputs = useGetOutputs as jest.Mock;
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 const mockUseAgentDetection = useAgentDetection as jest.Mock;
 
@@ -64,6 +67,8 @@ function setup({
   queryData,
   entry = CLOUDTRAIL,
   deploymentMethod = 'agent_based',
+  ecfStacks,
+  outputs = [],
 }: {
   serviceSettings: ServiceSettingsPersistedState;
   serviceStatuses?: Record<string, string>;
@@ -73,16 +78,24 @@ function setup({
   queryData?: { results: Record<string, boolean> };
   entry?: AwsServiceMatrixEntry;
   deploymentMethod?: 'managed_integration' | 'agent_based';
+  ecfStacks?: Array<{
+    family: string;
+    stackName: string;
+    templateVersion: string;
+    namespace?: string;
+  }>;
+  outputs?: Array<{ id: string; type: string }>;
 }) {
   const httpGet = jest.fn().mockResolvedValue({ results: {} });
   mockUseKibana.mockReturnValue({ services: { http: { get: httpGet } } });
   mockUseSessionStorage.mockReturnValue([serviceSettings, jest.fn()]);
   mockUseQuery.mockReturnValue({ data: queryData });
   mockUseAgentDetection.mockReturnValue(agentDetection);
+  mockUseGetOutputs.mockReturnValue({ data: { items: outputs } });
   const updateDetectAndReviewStep = jest.fn();
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds: ['cloudtrail'] },
-    detectAndReviewStep: { serviceStatuses, deployErrors, policyIdsByInstance },
+    detectAndReviewStep: { serviceStatuses, deployErrors, policyIdsByInstance, ecfStacks },
     awsServicesMap: new Map([['cloudtrail', entry]]),
     deploymentMethod,
     updateDetectAndReviewStep,
@@ -153,28 +166,58 @@ describe('useServiceDataDetection', () => {
     );
   });
 
-  it('polls every pattern of an ECF service in any namespace, ignoring the global one', async () => {
-    const ecfEntry = {
-      ...CLOUDTRAIL,
-      deploymentMethods: [{ method: 'ecf' }],
-    } as unknown as AwsServiceMatrixEntry;
-    const { httpGet } = setup({
-      entry: ecfEntry,
-      deploymentMethod: 'managed_integration',
-      serviceSettings: {
-        globalRegion: 'us-east-1',
-        namespace: 'prod',
-        instances: [
-          { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'CT', isDuplicate: false },
-        ],
-        serviceVars: {},
-      },
+  describe('ECF services', () => {
+    const ecfSetup = (
+      ecfFields: Record<string, unknown>,
+      ecfStacks?: Parameters<typeof setup>[0]['ecfStacks']
+    ) =>
+      setup({
+        entry: {
+          ...CLOUDTRAIL,
+          deploymentMethods: [{ method: 'ecf' }],
+          ecfLogType: 'cloudtrail',
+          ...ecfFields,
+        } as unknown as AwsServiceMatrixEntry,
+        deploymentMethod: 'managed_integration',
+        ecfStacks,
+        serviceSettings: {
+          globalRegion: 'us-east-1',
+          namespace: 'staging',
+          instances: [
+            { instanceId: 'cloudtrail', serviceId: 'cloudtrail', name: 'CT', isDuplicate: false },
+          ],
+          serviceVars: {},
+        },
+      });
+    const polledPattern = async (httpGet: jest.Mock) => {
+      renderHook(() => useServiceDataDetection());
+      await mockUseQuery.mock.calls[0][0].queryFn();
+      return httpGet.mock.calls[0][1].query.dataStreams;
+    };
+
+    it('polls the namespace of the launched stack, not the global one that is not applied yet', async () => {
+      const { httpGet } = ecfSetup({}, [
+        { family: 'unified', stackName: 'stack', templateVersion: '1.0.0', namespace: 'prod' },
+      ]);
+
+      expect(await polledPattern(httpGet)).toBe('logs-aws.cloudtrail-prod');
     });
-    renderHook(() => useServiceDataDetection());
 
-    await mockUseQuery.mock.calls[0][0].queryFn();
+    it('polls the default namespace for a stack saved without one', async () => {
+      const { httpGet } = ecfSetup({}, [
+        { family: 'unified', stackName: 'stack', templateVersion: '1.0.0' },
+      ]);
 
-    expect(httpGet.mock.calls[0][1].query.dataStreams).toBe('logs-aws.cloudtrail-*');
+      expect(await polledPattern(httpGet)).toBe('logs-aws.cloudtrail-default');
+    });
+
+    it('polls every namespace for a service whose template takes none', async () => {
+      const { httpGet } = ecfSetup({ ecfDedicatedTemplate: 'otel' }, [
+        { family: 'otel', stackName: 'stack', templateVersion: '1.0.0' },
+      ]);
+
+      expect(await polledPattern(httpGet)).toBe('logs-aws.cloudtrail-*');
+    });
   });
 
   it('polls the global namespace for a managed integration service that deploys as a policy', async () => {
@@ -938,6 +981,140 @@ describe('useServiceDataDetection', () => {
       const { result } = renderHook(() => useServiceDataDetection());
 
       expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+    });
+  });
+  describe('a remote Elasticsearch output', () => {
+    const withOutput = (outputId?: string): ServiceSettingsPersistedState => ({
+      globalRegion: 'us-east-1',
+      serviceVars: {},
+      policySettings: outputId ? { output_id: outputId } : undefined,
+    });
+    const liveAgent = {
+      ...NO_AGENTS,
+      summaryByInstanceId: {
+        cloudtrail: {
+          health: 'healthy',
+          agent: { id: 'a1' },
+          agentIds: ['a1'],
+          liveAgentIds: ['a1'],
+        },
+      },
+    };
+
+    it('reports a running agent as unverified for a remote Elasticsearch output', () => {
+      setup({
+        serviceSettings: withOutput('out-1'),
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: liveAgent,
+        outputs: [{ id: 'out-1', type: 'remote_elasticsearch' }],
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('unverified');
+      expect(result.current.unverifiedCount).toBe(1);
+      expect(result.current.receivingCount).toBe(0);
+    });
+
+    it.each(['logstash', 'kafka', 'otlp'])(
+      'keeps checking the data for a %s output, which may forward into this cluster',
+      (type) => {
+        setup({
+          serviceSettings: withOutput('out-1'),
+          serviceStatuses: { cloudtrail: 'detecting' },
+          policyIdsByInstance: { cloudtrail: 'policy-1' },
+          agentDetection: liveAgent,
+          outputs: [{ id: 'out-1', type }],
+        });
+        const { result } = renderHook(() => useServiceDataDetection());
+
+        expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+        expect(result.current.unverifiedCount).toBe(0);
+      }
+    );
+
+    it('keeps checking the data for an Elasticsearch output', () => {
+      setup({
+        serviceSettings: withOutput('out-1'),
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: liveAgent,
+        outputs: [{ id: 'out-1', type: 'elasticsearch' }],
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+      expect(result.current.unverifiedCount).toBe(0);
+    });
+
+    it('keeps checking the data while the outputs are not known', () => {
+      setup({
+        serviceSettings: withOutput('out-1'),
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: liveAgent,
+        outputs: [],
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+    });
+
+    it('keeps checking the data when no output was chosen', () => {
+      setup({
+        serviceSettings: withOutput(),
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: liveAgent,
+        outputs: [{ id: 'out-1', type: 'remote_elasticsearch' }],
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+    });
+
+    it('ignores the output of another deployment method', () => {
+      setup({
+        serviceSettings: withOutput('out-1'),
+        deploymentMethod: 'managed_integration',
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: liveAgent,
+        outputs: [{ id: 'out-1', type: 'remote_elasticsearch' }],
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+    });
+
+    it('still waits for the agent before leaving the detecting state', () => {
+      setup({
+        serviceSettings: withOutput('out-1'),
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        outputs: [{ id: 'out-1', type: 'remote_elasticsearch' }],
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+    });
+
+    it('still shows an unhealthy agent as an error', () => {
+      setup({
+        serviceSettings: withOutput('out-1'),
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: {
+          ...NO_AGENTS,
+          summaryByInstanceId: {
+            cloudtrail: { health: 'unhealthy', agentIds: ['a1'], liveAgentIds: ['a1'] },
+          },
+        },
+        outputs: [{ id: 'out-1', type: 'remote_elasticsearch' }],
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('error');
     });
   });
 });

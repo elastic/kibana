@@ -12,6 +12,7 @@ import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
   WorkflowExecutionDurationCell,
+  WorkflowExecutionRunNameCell,
   WorkflowExecutionStartedAtCell,
   WorkflowExecutionTagsCell,
   WorkflowExecutionWorkflowCell,
@@ -38,6 +39,27 @@ const createExecution = (
   duration: 3000,
   error: null,
   ...overrides,
+});
+
+describe('WorkflowExecutionRunNameCell', () => {
+  it('renders the execution name', () => {
+    render(
+      <WorkflowExecutionRunNameCell execution={createExecution({ runName: 'Deploy staging' })} />,
+      {
+        wrapper: getTestProvider({}),
+      }
+    );
+
+    expect(screen.getByTestId('executionsTableRunName')).toHaveTextContent('Deploy staging');
+  });
+
+  it('renders nothing for unnamed runs, like the other empty cells', () => {
+    render(<WorkflowExecutionRunNameCell execution={createExecution({ runName: undefined })} />, {
+      wrapper: getTestProvider({}),
+    });
+
+    expect(screen.queryByTestId('executionsTableRunName')).not.toBeInTheDocument();
+  });
 });
 
 describe('WorkflowExecutionWorkflowCell', () => {
@@ -77,6 +99,19 @@ describe('WorkflowExecutionWorkflowCell', () => {
 
     fireEvent.click(screen.getByTestId('workflowExecutionWorkflowLink'));
     expect(onOpen).toHaveBeenCalledWith(execution);
+  });
+
+  it('shows only the workflow name in the workflow column', () => {
+    render(
+      <WorkflowExecutionWorkflowCell
+        execution={createExecution({ workflowName: 'Deploy', runName: 'Deploy staging' })}
+        onOpen={onOpen}
+      />,
+      { wrapper: getTestProvider({}) }
+    );
+
+    expect(screen.getByTestId('workflowExecutionWorkflowLink')).toHaveTextContent('Deploy');
+    expect(screen.queryByText('Deploy staging')).not.toBeInTheDocument();
   });
 
   it('renders action required badge when status is WAITING_FOR_INPUT', () => {

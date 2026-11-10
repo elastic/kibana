@@ -126,6 +126,26 @@ describe('useSendMessageMutation', () => {
     expect(messageOf(conversationStreamService.getSnapshot(conversationId))).toBe('Hi there');
   });
 
+  it('skips the release when the connection is closed locally: no refetch, composer and pending message untouched', async () => {
+    const { bindings, source, result } = setup();
+    const resetAttachments = jest.fn();
+
+    act(() => result.current.mutate({ ...vars, resetAttachments }));
+    await waitFor(() => expect(mockChat).toHaveBeenCalled());
+    act(() => source.next(started as ChatEvent));
+    act(() => {
+      result.current.detachAll();
+      // The aborted fetch rejects, as core http does once the signal fires.
+      source.error(Object.assign(new Error('The operation was aborted.'), { name: 'AbortError' }));
+    });
+
+    await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
+    expect(mockGet).not.toHaveBeenCalled();
+    expect(resetAttachments).not.toHaveBeenCalled();
+    expect(bindings.clearPendingMessage).not.toHaveBeenCalled();
+    expect(mockAbort).not.toHaveBeenCalled();
+  });
+
   it('records the staged attachments with the pending message, not the screen context', async () => {
     const { bindings, result } = setup();
     const attachment = { id: 'a-1', type: 'text', data: { content: 'hello' } };

@@ -29,6 +29,7 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   useIsDecliningProposal: jest.fn(),
   useReopenProposal: jest.fn(() => ({ mutateAsync: jest.fn() })),
   useIsReopeningProposal: jest.fn(() => false),
+  isDecisionShown: jest.fn(() => false),
 }));
 
 jest.mock('../../../user_profiles', () => ({

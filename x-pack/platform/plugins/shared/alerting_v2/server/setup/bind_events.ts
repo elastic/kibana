@@ -35,37 +35,37 @@ import { ActionPolicyTelemetrySubscriber } from '../lib/events/action_policy_tel
  * against partially-initialised dependencies during the setup phase.
  */
 export const bindEvents = ({ bind }: ContainerModuleLoadOptions) => {
-  bind(AsyncDomainEventBus).toSelf().inSingletonScope();
+  bind(AsyncDomainEventBus).toSelf();
   bind(AlertingDomainEventBusToken).toService(AsyncDomainEventBus);
 
   /**
    * Alert actions event publishers and subscribers.
    */
-  bind(AlertActionEventPublisher).toSelf().inSingletonScope();
-  bind(AlertActionWorkflowSubscriber).toSelf().inSingletonScope();
-  bind(AlertActionTelemetrySubscriber).toSelf().inSingletonScope();
+  bind(AlertActionEventPublisher).toSelf();
+  bind(AlertActionWorkflowSubscriber).toSelf();
+  bind(AlertActionTelemetrySubscriber).toSelf();
 
   /**
    * Rule event publishers and subscribers.
    */
-  bind(RuleEventPublisher).toSelf().inSingletonScope();
-  bind(RuleWorkflowSubscriber).toSelf().inSingletonScope();
+  bind(RuleEventPublisher).toSelf();
+  bind(RuleWorkflowSubscriber).toSelf();
   bind(RuleExecutorEventPublisher).toSelf().inRequestScope();
-  bind(RuleChangesHistorySubscriber).toSelf().inSingletonScope();
-  bind(RuleTelemetrySubscriber).toSelf().inSingletonScope();
-  bind(RuleExecutorWorkflowSubscriber).toSelf().inSingletonScope();
+  bind(RuleChangesHistorySubscriber).toSelf();
+  bind(RuleTelemetrySubscriber).toSelf();
+  bind(RuleExecutorWorkflowSubscriber).toSelf();
 
   /**
    * Alert status changed publisher, subscriber and the opt-ins that gate
    * publishing, filled through the setup contract.
    */
   bind(AlertStatusChangedEventPublisher).toSelf().inRequestScope();
-  bind(AlertStatusChangedWorkflowSubscriber).toSelf().inSingletonScope();
-  bind(AlertStatusChangedOptIns).toSelf().inSingletonScope();
+  bind(AlertStatusChangedWorkflowSubscriber).toSelf();
+  bind(AlertStatusChangedOptIns).toSelf();
 
   /**
    * Action policy event publishers and subscribers.
    */
-  bind(ActionPolicyEventPublisher).toSelf().inSingletonScope();
-  bind(ActionPolicyTelemetrySubscriber).toSelf().inSingletonScope();
+  bind(ActionPolicyEventPublisher).toSelf();
+  bind(ActionPolicyTelemetrySubscriber).toSelf();
 };

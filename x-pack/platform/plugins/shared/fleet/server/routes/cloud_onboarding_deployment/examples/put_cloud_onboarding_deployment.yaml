@@ -3,7 +3,7 @@ requestBody:
     application/json:
       examples:
         putCloudOnboardingDeploymentRequestExample:
-          description: 'Update a cloud onboarding deployment after the CFN stack has been submitted'
+          description: 'Update a cloud onboarding instance after the CFN stack has been submitted'
           value:
             status: 'deploying'
             deploymentId: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc'
@@ -15,7 +15,7 @@ responses:
       application/json:
         examples:
           putCloudOnboardingDeploymentExample:
-            description: 'The updated cloud onboarding deployment'
+            description: 'The updated cloud onboarding instance'
             value:
               item:
                 id: 'onboarding-deployment-id-1'
@@ -51,7 +51,7 @@ responses:
       application/json:
         examples:
           notFoundResponseExample:
-            description: 'The requested cloud onboarding deployment does not exist'
+            description: 'The requested cloud onboarding instance does not exist'
             value:
               statusCode: 404
               error: 'Not Found'

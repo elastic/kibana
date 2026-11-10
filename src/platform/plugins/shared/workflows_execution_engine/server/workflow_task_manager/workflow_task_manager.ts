@@ -447,7 +447,18 @@ export class WorkflowTaskManager {
   }): Promise<void> {
     const runAs = await this.getHandoffRunAs(params.executionId, params.fakeRequest);
     if (await this.tryRunImmediateResume({ ...params, runAs })) return;
-    await this.ensureWakeTask({ ...params, runAs });
+    await this.handOffToWakeTask({ ...params, runAs });
+  }
+
+  /** Wakes the retained wake task, which keeps retrying while the immediate runner is claimed. */
+  async handOffToWakeTask(params: {
+    executionId: string;
+    spaceId: string;
+    fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
+    runAs?: WorkflowTaskRunAs;
+  }): Promise<void> {
+    await this.ensureWakeTask(params);
     try {
       await this.runSoonWithConflictRetry(
         getWorkflowWakeTaskId(params.executionId),

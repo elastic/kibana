@@ -10,18 +10,25 @@ import { notFound } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
-import { STREAMS_API_PRIVILEGES, STREAMS_DEFAULT_UNIT_ID } from '../../../../../common/constants';
+import {
+  STREAMS_DEFAULT_UNIT_ID,
+  STREAMS_V2_API_PRIVILEGES,
+} from '../../../../../common/constants';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
+import type { UnitApiKey } from '../../../../lib/unit_config/unit_api_keys';
 import { createServerRoute } from '../../../create_server_route';
+import { assertStreamsCanvasEnabled } from '../../../streams/unit/assert_streams_canvas_enabled';
+import { createUnitApiKeyService, recordComponentApiKey } from '../create_unit_api_key_service';
 import {
   createSourceApiKeyPrivilegeCheck,
   createSourceApiKeyRoleDescriptors,
   createSourceResource,
   DIRECT_SOURCE_TYPE_SLUGS,
   interpretSourceApiKeyPrivileges,
-  isOwnedBySource,
+  isSourceApiKey,
   MANAGED_SOURCE_TYPE_SLUGS,
   SOURCE_API_KEY_CLUSTER_PRIVILEGE,
+  sourceApiKeyName,
   STREAMS_SOURCES_MANAGED_BY,
   type SourceApiKeyPrivilegeResult,
   type SourceTypeSlug,
@@ -49,7 +56,7 @@ const listSourceApiKeysRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -58,34 +65,22 @@ const listSourceApiKeysRoute = createServerRoute({
       unitId: streamsUnitIdentifierSchema.optional(),
     }),
   }),
-  handler: async ({ getScopedClients, request, params }) => {
-    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
+  handler: async ({ getScopedClients, request, params, logger }) => {
+    const clients = await getScopedClients({ request });
     const {
       query: { sourceId, unitId = STREAMS_DEFAULT_UNIT_ID },
     } = params;
-    const canList = await canListSourceApiKeys({ scopedClusterClient, isSecurityEnabled });
-    if (!canList) {
-      return { apiKeys: [] };
-    }
-    const sourceResource = createSourceResource(sourceId);
-    const response = await scopedClusterClient.asCurrentUser.security.queryApiKeys({
-      query: {
-        bool: {
-          filter: [
-            { term: { 'metadata.managed_by': STREAMS_SOURCES_MANAGED_BY } },
-            { term: { 'metadata.source_resource': sourceResource } },
-            { term: { 'metadata.streams_unit_id': unitId } },
-            { term: { invalidated: false } },
-          ],
-        },
-      },
-    });
+
+    await assertStreamsCanvasEnabled(clients.uiSettingsClient);
+
+    // Listed from the unit's key registry, so every user with V2 manage sees every user's keys.
+    const apiKeys = await createUnitApiKeyService({ clients, logger }).listApiKeys(unitId);
 
     return {
-      apiKeys: response.api_keys.map((apiKey) => ({
-        id: apiKey.id,
-        name: apiKey.name,
-        createdAt: new Date(apiKey.creation).toISOString(),
+      apiKeys: apiKeys.filter(isSourceApiKey(sourceId)).map((apiKey) => ({
+        id: apiKey.key_id,
+        name: sourceApiKeyName(sourceId),
+        createdAt: apiKey.created_at,
       })),
     };
   },
@@ -103,7 +98,7 @@ const getSourceApiKeyPrivilegesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -137,7 +132,7 @@ const createSourceApiKeyRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -147,11 +142,15 @@ const createSourceApiKeyRoute = createServerRoute({
       unitId: streamsUnitIdentifierSchema.optional(),
     }),
   }),
-  handler: async ({ getScopedClients, request, params }) => {
-    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
+  handler: async ({ getScopedClients, request, params, logger }) => {
+    const clients = await getScopedClients({ request });
+    const { scopedClusterClient, isSecurityEnabled } = clients;
     const {
       body: { sourceId, sourceTypeSlug, unitId = STREAMS_DEFAULT_UNIT_ID },
     } = params;
+
+    await assertStreamsCanvasEnabled(clients.uiSettingsClient);
+
     const sourceResource = createSourceResource(sourceId);
     const privileges = await getSourceApiKeyPrivileges({
       scopedClusterClient,
@@ -161,10 +160,13 @@ const createSourceApiKeyRoute = createServerRoute({
     });
 
     if (!privileges.canCreate) {
-      throw new StatusError(getSourceApiKeyPrivilegeErrorMessage(privileges.failure), 403);
+      throw new StatusError(
+        getSourceApiKeyPrivilegeErrorMessage(privileges.failure, sourceId),
+        403
+      );
     }
 
-    const name = `stream-source-${sourceId}`;
+    const name = sourceApiKeyName(sourceId);
     const createdAt = new Date().toISOString();
     const roleDescriptors = createSourceApiKeyRoleDescriptors({
       sourceTypeSlug,
@@ -180,6 +182,19 @@ const createSourceApiKeyRoute = createServerRoute({
         source_resource: sourceResource,
         streams_unit_id: unitId,
       },
+    });
+
+    await recordComponentApiKey({
+      unitApiKeyService: createUnitApiKeyService({ clients, logger }),
+      unitId,
+      apiKey: {
+        key_id: id,
+        component_type: 'source',
+        component_id: sourceId,
+        created_at: createdAt,
+      },
+      invalidate: clients.invalidateApiKeysAsInternalUser,
+      logger,
     });
 
     return {
@@ -201,7 +216,7 @@ const deleteSourceApiKeyRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -211,34 +226,28 @@ const deleteSourceApiKeyRoute = createServerRoute({
       unitId: streamsUnitIdentifierSchema.optional(),
     }),
   }),
-  handler: async ({ getScopedClients, request, params }) => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+  handler: async ({ getScopedClients, request, params, logger }) => {
+    const clients = await getScopedClients({ request });
     const {
       body: { apiKeyId, sourceId, unitId = STREAMS_DEFAULT_UNIT_ID },
     } = params;
-    const sourceResource = createSourceResource(sourceId);
-    const { api_keys: apiKeys } = await scopedClusterClient.asCurrentUser.security.getApiKey({
-      id: apiKeyId,
-    });
-    const apiKey = apiKeys[0];
 
-    if (
-      !apiKey ||
-      !isOwnedBySource({
-        metadata: apiKey.metadata,
-        sourceResource,
-        unitId,
-      })
-    ) {
+    await assertStreamsCanvasEnabled(clients.uiSettingsClient);
+
+    const unitApiKeyService = createUnitApiKeyService({ clients, logger });
+    const isRequestedKey = (apiKey: UnitApiKey) =>
+      apiKey.key_id === apiKeyId && isSourceApiKey(sourceId)(apiKey);
+
+    if (!(await unitApiKeyService.listApiKeys(unitId)).some(isRequestedKey)) {
       throw notFound(`API key ${apiKeyId} was not found for source ${sourceId}`);
     }
 
-    const { invalidated_api_keys: invalidatedApiKeys } =
-      await scopedClusterClient.asCurrentUser.security.invalidateApiKey({
-        ids: [apiKeyId],
-      });
+    const { revoked } = await unitApiKeyService.revokeApiKeys(unitId, isRequestedKey);
+    if (revoked.length === 0) {
+      throw new StatusError(`Failed to revoke API key ${apiKeyId} for source ${sourceId}`, 500);
+    }
 
-    return { invalidatedApiKeys };
+    return { invalidatedApiKeys: revoked.map(({ key_id: keyId }) => keyId) };
   },
 });
 
@@ -261,7 +270,7 @@ const getSourceApiKeyPrivileges = async ({
   sourceTypeSlug: SourceTypeSlug;
 }): Promise<SourceApiKeyPrivilegeResult> => {
   if (!isSecurityEnabled) {
-    return { canCreate: true, canList: true, failure: 'none' };
+    return { canCreate: true, failure: 'none' };
   }
 
   const sourceResource = createSourceResource(sourceId);
@@ -269,40 +278,33 @@ const getSourceApiKeyPrivileges = async ({
   const response = await scopedClusterClient.asCurrentUser.security.hasPrivileges(privilegeCheck);
 
   return interpretSourceApiKeyPrivileges({
+    sourceTypeSlug,
     hasAllRequested: response.has_all_requested,
     canManageApiKeys: response.cluster[SOURCE_API_KEY_CLUSTER_PRIVILEGE] === true,
   });
 };
 
-const canListSourceApiKeys = async ({
-  scopedClusterClient,
-  isSecurityEnabled,
-}: {
-  scopedClusterClient: IScopedClusterClient;
-  isSecurityEnabled: boolean;
-}): Promise<boolean> => {
-  if (!isSecurityEnabled) {
-    return true;
-  }
-
-  const response = await scopedClusterClient.asCurrentUser.security.hasPrivileges({
-    cluster: [SOURCE_API_KEY_CLUSTER_PRIVILEGE],
-  });
-
-  return response.cluster[SOURCE_API_KEY_CLUSTER_PRIVILEGE] === true;
-};
-
 const getSourceApiKeyPrivilegeErrorMessage = (
-  failure: SourceApiKeyPrivilegeResult['failure']
+  failure: SourceApiKeyPrivilegeResult['failure'],
+  sourceId: string
 ): string => {
   if (failure === 'cluster') {
     return i18n.translate('xpack.streams.sources.missingApiKeyClusterPrivilegeErrorMessage', {
-      defaultMessage: "Your account can't create API keys.",
+      defaultMessage:
+        "Your account can't create API keys. It needs the manage_own_api_key privilege.",
     });
   }
 
-  return i18n.translate('xpack.streams.sources.missingIngestSourcePrivilegeErrorMessage', {
+  if (failure === 'index') {
+    return i18n.translate('xpack.streams.sources.missingSourceIndexPrivilegeErrorMessage', {
+      defaultMessage:
+        "Your account can't create keys for this source. It needs the write and auto_configure index privileges on all indices.",
+    });
+  }
+
+  return i18n.translate('xpack.streams.sources.missingSourceWritePrivilegeErrorMessage', {
     defaultMessage:
-      "Your account can't create ingest keys. An admin should assign the ingest_source_manager role.",
+      "Your account can't create keys for this source. It needs the write privilege of the streams application on source:{sourceId}, or on source:* for every source.",
+    values: { sourceId },
   });
 };

@@ -1252,9 +1252,9 @@ steps:
       continue: true
 
   # The gate's own output already says WHAT was decided. This recovers the prose
-  # that goes with it — `decidedBy`, `dismissReason`, `rationale` — which the gate
-  # does not carry and `proposals.getProposal` does not return either: that step
-  # is limited to the fields a gating workflow branches on.
+  # that goes with it — `dismissReason`, `rationale` — which the gate does not
+  # carry and `proposals.getProposal` does not return either: that step is
+  # limited to the fields a gating workflow branches on.
   - name: read_proposal_decision
     type: kibana.request
     if: "${{ steps.resolve_escalation.output.escalate == true and steps.escalation_gate.error == blank }}"
@@ -1329,8 +1329,10 @@ steps:
   # Investigation, so closing it would delete the thing the handoff exists to
   # produce, and closing the attack would contradict a run that is about to start.
   #
-  # `decidedBy` is absent when the gate auto-approved under `supervised` autonomy,
-  # which is what the `| default:` covers.
+  # Neither this verdict nor the decline's below names who decided. The proposal card
+  # already shows it by display name, while `decidedBy.username` is an id: the Worker's
+  # service-account id on an auto-approval under `supervised` autonomy, and on
+  # serverless an opaque user id even when a person decided.
   - name: record_forensics_handoff
     type: ai.conversation.metadata.patch
     if: "${{ steps.record_decision.output.approved == true }}"
@@ -1339,8 +1341,7 @@ steps:
       updates:
         status: open
         verdict: >-
-          Handed off to Forensics Watch, approved by
-          {{ steps.read_proposal_decision.output.decidedBy.username | default: 'the worker' }}.
+          Handed off to Forensics Watch.
           Knowledge indicator analyze-endpoint-{{ inputs.attack_discovery_id }}.
           This Investigation stays open for the forensics report.
     on-failure:
@@ -1363,8 +1364,7 @@ steps:
         status: closed
         close_reason: other
         verdict: >-
-          Escalation declined by
-          {{ steps.read_proposal_decision.output.decidedBy.username | default: 'an analyst' }}
+          Escalation declined
           as "{{ steps.read_proposal_decision.output.dismissReason | default: 'unspecified' }}".
           {{ steps.read_proposal_decision.output.rationale }}
     on-failure:
