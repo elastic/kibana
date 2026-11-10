@@ -9,7 +9,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createIsomerRuntime } from '@elastic/isomer-runtime';
 import { buildJsxShim } from '@elastic/isomer-sdk/author';
-import type { SlackRichTextBlock, SlackRichTextPreformatted } from '@elastic/isomer-sdk/slack';
+import type { SlackRichTextBlock, SlackRichTextPreformatted } from '../../lib';
 import { componentsPack, componentsPrimitives } from '../../pack';
 import type { CodeNode } from '.';
 

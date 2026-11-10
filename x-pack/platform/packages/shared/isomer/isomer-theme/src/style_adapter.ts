@@ -14,7 +14,7 @@ import { collectRootStyles } from './root_styles';
 /** The `styleCollector` tag of packs whose styles are collected by {@link isomerStyleAdapter}. */
 export const ISOMER_STYLE_COLLECTOR = 'distillate';
 
-const { artifactCollector, registry, renderStyles } = isomerDistillery;
+const { artifactCollector, renderStyles } = isomerDistillery;
 
 /** HTML style adapter that records the Distillate handles a render uses and emits their stylesheet. */
 export const isomerStyleAdapter: HTMLStyleAdapter<PrimitiveNode, StylesCollector> = {
@@ -34,8 +34,4 @@ export const isomerStyleAdapter: HTMLStyleAdapter<PrimitiveNode, StylesCollector
   }),
   renderStyles: (collector, { scheme }) =>
     renderStyles(collector, undefined, isomerRenderOptions(scheme)),
-  ownsHandle: (handle) => {
-    const { moduleName } = handle as Partial<StyleHandle>;
-    return registry.module(moduleName ?? '') !== undefined;
-  },
 };

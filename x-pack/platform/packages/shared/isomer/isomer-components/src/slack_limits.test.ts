@@ -16,11 +16,10 @@ import type {
   SlackBlock,
   SlackRichTextBlockElement,
   SlackRichTextInline,
-  SlackSectionBlock,
-  SlackTableBlock,
 } from '@elastic/isomer-sdk/slack';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
+import type { SlackSectionBlock, SlackTableBlock } from './lib';
 import { componentsPack } from './pack';
 import type { CodeNode, FieldsNode, LinkNode, TableNode } from './primitives';
 

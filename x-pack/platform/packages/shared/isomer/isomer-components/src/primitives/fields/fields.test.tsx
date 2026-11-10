@@ -9,7 +9,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { createIsomerRuntime } from '@elastic/isomer-runtime';
 import { buildJsxShim } from '@elastic/isomer-sdk/author';
-import type { SlackSectionBlock } from '@elastic/isomer-sdk/slack';
+import type { SlackSectionBlock } from '../../lib';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { componentsPack, componentsPrimitives } from '../../pack';
 import type { FieldsNode } from '.';

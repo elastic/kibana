@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { SlackActionsBlock, SlackBlock, SlackButtonElement } from '@elastic/isomer-sdk/slack';
+import type { SlackBlock } from '@elastic/isomer-sdk/slack';
 import { SLACK_LIMITS, clampSlackText, slackLinkUrl } from '@elastic/isomer-sdk/slack';
+import type { SlackActionsBlock, SlackButtonElement } from '../../lib';
 import type { ActionsNode } from './actions';
 import { oneLine } from '../../lib';
 

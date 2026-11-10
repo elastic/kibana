@@ -9,3 +9,13 @@ export { clampEscapedMrkdwn } from './clamp_escaped_mrkdwn';
 export { definePrimitive, type ComponentsPackTypes, type ComponentsRenderContext } from './define';
 export { componentIcon, type IconPaint } from './icon';
 export { oneLine, plainText } from './plain_text';
+export { STRUCTURED_VALUE_FORMATS, structuredValueSchema } from './structured_value';
+export type {
+  SlackActionsBlock,
+  SlackButtonElement,
+  SlackContextBlock,
+  SlackRichTextBlock,
+  SlackRichTextPreformatted,
+  SlackSectionBlock,
+  SlackTableBlock,
+} from './slack_blocks';

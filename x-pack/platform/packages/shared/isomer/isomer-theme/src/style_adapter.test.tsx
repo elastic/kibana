@@ -79,17 +79,6 @@ describe('isomerStyleAdapter', () => {
     expect(renderStyles('light').css).toMatch(/--isomer-shadow-m:0px 0px 2px/);
   });
 
-  it('owns only handles authored in the Isomer distillery', () => {
-    expect(isomerStyleAdapter.ownsHandle?.(root)).toBe(true);
-    expect(
-      isomerStyleAdapter.ownsHandle?.({
-        key: 'chart.root',
-        readableName: 'chart-root',
-        moduleName: 'chart',
-      } as SdkStyleHandle)
-    ).toBe(false);
-  });
-
   it('styles a pack rendered through the HTML surface', () => {
     const noteSchema = z.object({ type: z.literal('note'), text: z.string() });
     type NoteNode = z.infer<typeof noteSchema>;

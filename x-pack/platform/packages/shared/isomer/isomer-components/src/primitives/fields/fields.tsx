@@ -7,13 +7,13 @@
 
 import React, { Fragment } from 'react';
 import type { PrimitiveNode } from '@elastic/isomer-sdk';
-import { nodeAnchor, structuredValueSchema, z } from '@elastic/isomer-sdk';
+import { nodeAnchor, z } from '@elastic/isomer-sdk';
 import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 
-import { componentIcon, definePrimitive, plainText } from '../../lib';
+import { componentIcon, definePrimitive, plainText, structuredValueSchema } from '../../lib';
 import { fieldEntries } from './field_entries';
 import { fieldsSlackRenderer } from './fields_slack';
 

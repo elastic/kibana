@@ -69,6 +69,8 @@ overrides:
   '@babel/runtime': '7.29.7'
   '@babel/traverse': '7.29.8'
   '@babel/types': '7.29.8'
+  '@elastic/isomer-runtime': 'file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz'
+  '@elastic/isomer-sdk': 'file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c8.05c3442.tgz'
   '@emotion/sheet': 'npm:@elastic/emotion-sheet@1.4.1'
   '@hapi/mimos>mime-db': '1.53.0'
   '@hello-pangea/dnd': '18.0.1'

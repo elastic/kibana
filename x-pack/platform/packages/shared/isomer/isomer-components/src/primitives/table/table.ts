@@ -7,12 +7,12 @@
 
 import type { ReactNode } from 'react';
 import type { PrimitiveNode } from '@elastic/isomer-sdk';
-import { STRUCTURED_VALUE_FORMATS, z } from '@elastic/isomer-sdk';
+import { z } from '@elastic/isomer-sdk';
 import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
-import { componentIcon, definePrimitive, plainText } from '../../lib';
+import { STRUCTURED_VALUE_FORMATS, componentIcon, definePrimitive, plainText } from '../../lib';
 import { tableReactRenderer } from './table_react';
 import { tableSlackRenderer } from './table_slack';
 import { noRowsNote, tableView, textTable } from './table_model';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SlackContextBlock } from '@elastic/isomer-sdk/slack';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
+import type { SlackContextBlock } from '../../lib';
 
 import { clampEscapedMrkdwn, oneLine } from '../../lib';
 import type { ContextNode } from './context';

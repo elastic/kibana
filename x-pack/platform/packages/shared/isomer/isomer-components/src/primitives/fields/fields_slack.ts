@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SlackSectionBlock } from '@elastic/isomer-sdk/slack';
 import { SLACK_LIMITS, bold } from '@elastic/isomer-sdk/slack';
+import type { SlackSectionBlock } from '../../lib';
 
 import { clampEscapedMrkdwn } from '../../lib';
 import { fieldEntries } from './field_entries';

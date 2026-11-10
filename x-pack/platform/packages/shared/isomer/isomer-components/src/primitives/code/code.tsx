@@ -9,7 +9,7 @@ import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import { z } from '@elastic/isomer-sdk';
 import { fromTextChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
-import type { SlackRichTextBlock } from '@elastic/isomer-sdk/slack';
+import type { SlackRichTextBlock } from '../../lib';
 
 import { componentIcon, definePrimitive, plainText } from '../../lib';
 import { codeReactRenderer } from './code_react';
