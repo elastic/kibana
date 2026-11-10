@@ -10,7 +10,7 @@ import {
   ALERT_EVENTS_DATA_STREAM,
   ALERTING_V2_RULE_API_PATH,
 } from '@kbn/alerting-v2-constants';
-import type { EsClient, KbnClient } from '@kbn/scout-oblt';
+import type { ApiServicesFixture, EsClient, KbnClient, KibanaRole } from '@kbn/scout-oblt';
 
 export const V1_EPISODE_TAG = 'scout-obs-priv-v1';
 export const V2_EPISODE_TAG = 'scout-obs-priv-v2';
@@ -25,6 +25,12 @@ export const THRESHOLD_DATA_VIEW_ID = 'scout-obs-priv-threshold-dv';
 
 /** AAD alias/pattern used by observability custom threshold alerts. */
 export const OBS_THRESHOLD_ALERTS_INDEX_PATTERN = '.alerts-observability.threshold.alerts-*';
+
+/** Read on every index, so Elasticsearch privileges never limit what a test role sees. */
+export const READER_ES_PRIVILEGES: KibanaRole['elasticsearch'] = {
+  cluster: [],
+  indices: [{ names: ['*'], privileges: ['read', 'view_index_metadata'] }],
+};
 
 const RULE_API_HEADERS = {
   'kbn-xsrf': 'true',
@@ -56,69 +62,49 @@ export const deleteV1ThresholdSourceIndex = async (esClient: EsClient): Promise<
   await esClient.indices.delete({ index: THRESHOLD_TEST_INDEX }, { ignore: [404] });
 };
 
+const ALERT_POLL_TIMEOUT_MS = 90_000;
+
 /**
- * Polls observability threshold AAD until the rule engine writes an alert for
- * `ruleId`. `execution_status: ok` is not sufficient — that can mean a
- * successful run with no alerts.
- *
- * Once the alert document exists, sets `kibana.alert.workflow_tags` to
- * `[V1_EPISODE_TAG]` so the classic-source tag aggregation (which reads
- * workflow tags, not rule tags) includes it in the "Alert tags" filter.
+ * Polls `index` until the rule engine writes an alert for `ruleId` and returns the alert ids.
+ * `execution_status: ok` is not sufficient, since that can mean a successful run with no alerts.
  */
-export const waitForV1RuleAlert = async (
+const waitForRuleAlertIds = async (
   esClient: EsClient,
-  kbnClient: KbnClient,
+  index: string,
   ruleId: string
-): Promise<void> => {
-  const timeoutMs = 90_000;
-  const deadline = Date.now() + timeoutMs;
+): Promise<string[]> => {
+  const deadline = Date.now() + ALERT_POLL_TIMEOUT_MS;
   while (Date.now() < deadline) {
     const result = await esClient.search<{ 'kibana.alert.uuid': string }>(
       {
-        index: OBS_THRESHOLD_ALERTS_INDEX_PATTERN,
+        index,
         query: { term: { 'kibana.alert.rule.uuid': ruleId } },
         _source: ['kibana.alert.uuid'],
       },
       { ignore: [404] }
     );
     const hits = 'hits' in result ? result.hits?.hits ?? [] : [];
-    if (hits.length > 0) {
-      const alertIds = hits
-        .map((h) => h._source?.['kibana.alert.uuid'])
-        .filter((id): id is string => typeof id === 'string');
-
-      await kbnClient.request({
-        description: 'seed workflow tags on v1 threshold alert',
-        method: 'POST',
-        path: '/internal/rac/alerts/tags',
-        headers: RULE_API_HEADERS,
-        body: {
-          index: OBS_THRESHOLD_ALERTS_INDEX_PATTERN,
-          alertIds,
-          add: [V1_EPISODE_TAG],
-        },
-      });
-
-      await esClient.indices.refresh(
-        { index: OBS_THRESHOLD_ALERTS_INDEX_PATTERN },
-        { ignore: [404] }
-      );
-      return;
+    const alertIds = hits
+      .map((hit) => hit._source?.['kibana.alert.uuid'])
+      .filter((id): id is string => typeof id === 'string');
+    if (alertIds.length > 0) {
+      return alertIds;
     }
     await sleep(1_000);
   }
   throw new Error(
-    `v1 alert for rule ${ruleId} did not appear in ${OBS_THRESHOLD_ALERTS_INDEX_PATTERN} within ${timeoutMs}ms`
+    `alert for rule ${ruleId} did not appear in ${index} within ${ALERT_POLL_TIMEOUT_MS}ms`
   );
 };
 
-export const deleteV1PrivilegeAlerts = async (
+const deleteRuleAlerts = async (
   esClient: EsClient,
+  index: string,
   ruleId: string
 ): Promise<void> => {
   await esClient.deleteByQuery(
     {
-      index: OBS_THRESHOLD_ALERTS_INDEX_PATTERN,
+      index,
       refresh: true,
       conflicts: 'proceed',
       query: { term: { 'kibana.alert.rule.uuid': ruleId } },
@@ -126,6 +112,34 @@ export const deleteV1PrivilegeAlerts = async (
     { ignore: [404] }
   );
 };
+
+/**
+ * Waits for the custom threshold alert of `ruleId`, then sets its `kibana.alert.workflow_tags` to
+ * `[V1_EPISODE_TAG]` so the classic-source tag aggregation (which reads workflow tags, not rule
+ * tags) includes it in the "Alert tags" filter.
+ */
+export const waitForV1RuleAlert = async (
+  esClient: EsClient,
+  kbnClient: KbnClient,
+  ruleId: string
+): Promise<void> => {
+  const alertIds = await waitForRuleAlertIds(esClient, OBS_THRESHOLD_ALERTS_INDEX_PATTERN, ruleId);
+  await kbnClient.request({
+    description: 'seed workflow tags on v1 threshold alert',
+    method: 'POST',
+    path: '/internal/rac/alerts/tags',
+    headers: RULE_API_HEADERS,
+    body: {
+      index: OBS_THRESHOLD_ALERTS_INDEX_PATTERN,
+      alertIds,
+      add: [V1_EPISODE_TAG],
+    },
+  });
+  await esClient.indices.refresh({ index: OBS_THRESHOLD_ALERTS_INDEX_PATTERN }, { ignore: [404] });
+};
+
+export const deleteV1PrivilegeAlerts = async (esClient: EsClient, ruleId: string): Promise<void> =>
+  deleteRuleAlerts(esClient, OBS_THRESHOLD_ALERTS_INDEX_PATTERN, ruleId);
 
 export const ES_QUERY_RULE_TYPE_ID = '.es-query';
 
@@ -133,43 +147,13 @@ export const ES_QUERY_RULE_TYPE_ID = '.es-query';
 export const STACK_ALERTS_INDEX_PATTERN = '.alerts-stack.alerts-default';
 
 export const waitForStackRuleAlert = async (esClient: EsClient, ruleId: string): Promise<void> => {
-  const timeoutMs = 90_000;
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    const result = await esClient.search(
-      {
-        index: STACK_ALERTS_INDEX_PATTERN,
-        query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-        _source: false,
-      },
-      { ignore: [404] }
-    );
-    const hits = 'hits' in result ? result.hits?.hits ?? [] : [];
-    if (hits.length > 0) {
-      await esClient.indices.refresh({ index: STACK_ALERTS_INDEX_PATTERN }, { ignore: [404] });
-      return;
-    }
-    await sleep(1_000);
-  }
-  throw new Error(
-    `stack alert for rule ${ruleId} did not appear in ${STACK_ALERTS_INDEX_PATTERN} within ${timeoutMs}ms`
-  );
+  await waitForRuleAlertIds(esClient, STACK_ALERTS_INDEX_PATTERN, ruleId);
 };
 
 export const deleteStackPrivilegeAlerts = async (
   esClient: EsClient,
   ruleId: string
-): Promise<void> => {
-  await esClient.deleteByQuery(
-    {
-      index: STACK_ALERTS_INDEX_PATTERN,
-      refresh: true,
-      conflicts: 'proceed',
-      query: { term: { 'kibana.alert.rule.uuid': ruleId } },
-    },
-    { ignore: [404] }
-  );
-};
+): Promise<void> => deleteRuleAlerts(esClient, STACK_ALERTS_INDEX_PATTERN, ruleId);
 
 export const deleteV1PrivilegeRule = async (
   kbnClient: KbnClient,
@@ -181,6 +165,130 @@ export const deleteV1PrivilegeRule = async (
     method: 'DELETE',
     ignoreErrors: [404],
   });
+};
+
+interface RuleSeedServices {
+  apiServices: ApiServicesFixture;
+  esClient: EsClient;
+  kbnClient: KbnClient;
+}
+
+/** Creates a custom threshold rule over a seeded index and waits for its alert. */
+export const createV1PrivilegeRule = async ({
+  apiServices,
+  esClient,
+  kbnClient,
+  name,
+}: RuleSeedServices & { name: string }): Promise<string> => {
+  await createV1ThresholdSourceIndex(esClient);
+  await apiServices.dataViews.create({
+    id: THRESHOLD_DATA_VIEW_ID,
+    name: THRESHOLD_DATA_VIEW_ID,
+    title: THRESHOLD_TEST_INDEX,
+    timeFieldName: '@timestamp',
+    override: true,
+  });
+  const created = await apiServices.alerting.rules.create({
+    name,
+    ruleTypeId: CUSTOM_THRESHOLD_RULE_TYPE_ID,
+    consumer: 'logs',
+    enabled: true,
+    schedule: { interval: '1m' },
+    actions: [],
+    params: {
+      criteria: [
+        {
+          comparator: '>',
+          threshold: [0],
+          timeSize: 5,
+          timeUnit: 'm',
+          metrics: [{ name: 'A', aggType: 'count' }],
+        },
+      ],
+      alertOnNoData: false,
+      alertOnGroupDisappear: false,
+      searchConfiguration: {
+        query: { query: '', language: 'kuery' },
+        index: THRESHOLD_DATA_VIEW_ID,
+      },
+    },
+  });
+  const ruleId = created.data.id as string;
+  try {
+    await apiServices.alerting.rules.runSoon(ruleId);
+    await waitForV1RuleAlert(esClient, kbnClient, ruleId);
+    return ruleId;
+  } catch (error) {
+    await deleteV1PrivilegeAlerts(esClient, ruleId);
+    await deleteV1PrivilegeRule(kbnClient, ruleId);
+    throw error;
+  }
+};
+
+/** Removes the custom threshold rule, its alerts, and the seeded index and data view. */
+export const deleteV1PrivilegeRuleData = async ({
+  apiServices,
+  esClient,
+  kbnClient,
+  ruleId,
+}: RuleSeedServices & { ruleId?: string }): Promise<void> => {
+  if (ruleId) {
+    await deleteV1PrivilegeAlerts(esClient, ruleId);
+    await deleteV1PrivilegeRule(kbnClient, ruleId);
+  }
+  await apiServices.dataViews.delete(THRESHOLD_DATA_VIEW_ID).catch(() => undefined);
+  await deleteV1ThresholdSourceIndex(esClient);
+};
+
+/** Creates an Elasticsearch query rule over the seeded index and waits for its alert. */
+export const createStackPrivilegeRule = async ({
+  apiServices,
+  esClient,
+  kbnClient,
+  name,
+}: RuleSeedServices & { name: string }): Promise<string> => {
+  const created = await apiServices.alerting.rules.create({
+    name,
+    ruleTypeId: ES_QUERY_RULE_TYPE_ID,
+    consumer: 'stackAlerts',
+    enabled: true,
+    schedule: { interval: '1m' },
+    actions: [],
+    params: {
+      size: 100,
+      thresholdComparator: '>',
+      threshold: [0],
+      index: [THRESHOLD_TEST_INDEX],
+      timeField: '@timestamp',
+      esQuery: JSON.stringify({ query: { match_all: {} } }),
+      timeWindowSize: 1,
+      timeWindowUnit: 'd',
+      excludeHitsFromPreviousRun: false,
+    },
+  });
+  const ruleId = created.data.id as string;
+  try {
+    await apiServices.alerting.rules.runSoon(ruleId);
+    await waitForStackRuleAlert(esClient, ruleId);
+    return ruleId;
+  } catch (error) {
+    await deleteStackPrivilegeAlerts(esClient, ruleId);
+    await deleteV1PrivilegeRule(kbnClient, ruleId);
+    throw error;
+  }
+};
+
+/** Removes the Elasticsearch query rule and its alerts. */
+export const deleteStackPrivilegeRuleData = async ({
+  esClient,
+  kbnClient,
+  ruleId,
+}: Omit<RuleSeedServices, 'apiServices'> & { ruleId?: string }): Promise<void> => {
+  if (!ruleId) {
+    return;
+  }
+  await deleteStackPrivilegeAlerts(esClient, ruleId);
+  await deleteV1PrivilegeRule(kbnClient, ruleId);
 };
 
 /**

@@ -125,12 +125,8 @@ export class ObservabilityAlertingPage {
     );
     this.ruleDetailLayout = this.page.testSubj.locator('ruleDetailLayout');
     this.toasts = this.page.components.toast().toasts;
-    this.addToCaseRowControl = this.page.testSubj.locator(
-      `unifiedDataTable_rowControl_${ADD_TO_CASE_EPISODE_ACTION_ID}`
-    );
-    this.addToCaseRowMenuItem = this.page.testSubj.locator(
-      `unifiedDataTable_rowMenu_${ADD_TO_CASE_EPISODE_ACTION_ID}`
-    );
+    this.addToCaseRowControl = this.rowControl(ADD_TO_CASE_EPISODE_ACTION_ID);
+    this.addToCaseRowMenuItem = this.rowMenuItem(ADD_TO_CASE_EPISODE_ACTION_ID);
     this.rowActionsMenuButton = this.page.testSubj.locator(
       'unifiedDataTable_additionalRowControl_actionsMenu'
     );
@@ -173,22 +169,21 @@ export class ObservabilityAlertingPage {
       .waitFor({ state: 'visible' });
   }
 
-  async gotoInboxFilteredByRule(ruleId: string): Promise<void> {
-    const search = new URLSearchParams({
-      _a: `(alertsList:(ruleId:'${ruleId}'))`,
-    });
+  /** Opens the inbox with `listState`, the rison body of its `alertsList` URL state. */
+  private async gotoInboxWithListState(listState: string): Promise<void> {
+    const search = new URLSearchParams({ _a: `(alertsList:(${listState}))` });
     await this.goto(`${OBSERVABILITY_ALERTING_ALERTS_PATH}?${search.toString()}`);
     await this.inboxPage.waitFor({ state: 'visible' });
+  }
+
+  async gotoInboxFilteredByRule(ruleId: string): Promise<void> {
+    await this.gotoInboxWithListState(`ruleId:'${ruleId}'`);
   }
 
   /** Opens the inbox filtered to episodes carrying any of `tags`, across all episode sources. */
   async gotoInboxFilteredByTags(tags: readonly string[]): Promise<void> {
     const tagList = tags.map((tag) => `'${tag}'`).join(',');
-    const search = new URLSearchParams({
-      _a: `(alertsList:(tags:!(${tagList})))`,
-    });
-    await this.goto(`${OBSERVABILITY_ALERTING_ALERTS_PATH}?${search.toString()}`);
-    await this.inboxPage.waitFor({ state: 'visible' });
+    await this.gotoInboxWithListState(`tags:!(${tagList})`);
   }
 
   async openEpisodeFlyout(): Promise<void> {
@@ -268,8 +263,18 @@ export class ObservabilityAlertingPage {
    */
   episodeRowAction(actionId: string, ruleName: string): Locator {
     return this.episodeRows(ruleName)
-      .locator(this.page.testSubj.locator(`unifiedDataTable_rowControl_${actionId}`))
-      .or(this.page.testSubj.locator(`unifiedDataTable_rowMenu_${actionId}`));
+      .locator(this.rowControl(actionId))
+      .or(this.rowMenuItem(actionId));
+  }
+
+  /** Inline row control of an episode action. */
+  private rowControl(actionId: string): Locator {
+    return this.page.testSubj.locator(`unifiedDataTable_rowControl_${actionId}`);
+  }
+
+  /** Overflow menu item of an episode action. */
+  private rowMenuItem(actionId: string): Locator {
+    return this.page.testSubj.locator(`unifiedDataTable_rowMenu_${actionId}`);
   }
 
   /** Overflow actions menu button of the row of `ruleName`. */

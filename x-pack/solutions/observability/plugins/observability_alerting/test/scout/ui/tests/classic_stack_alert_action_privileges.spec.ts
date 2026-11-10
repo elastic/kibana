@@ -12,17 +12,19 @@ import {
   unsetAlertingV2EnabledSetting,
 } from '../fixtures/alerting_v2_setting';
 import {
-  createStackPrivilegeRule,
-  createV1PrivilegeRule,
-  deleteStackPrivilegeRuleData,
-  deleteV1PrivilegeRuleData,
   expectEpisodeWriteActions,
   gotoSeededClassicAlert,
   OBSERVABILITY_READ_STACK_WRITE_ROLE,
   STACK_ALERTS_ALL_ROLE,
   STACK_RULE_NAME,
   V1_RULE_NAME,
-} from '../fixtures/classic_alert_action_privileges_test_data';
+} from '../fixtures/alert_action_privileges_test_data';
+import {
+  createStackPrivilegeRule,
+  createV1PrivilegeRule,
+  deleteStackPrivilegeRuleData,
+  deleteV1PrivilegeRuleData,
+} from '../fixtures/privilege_test_data';
 
 /* Stateful only: serverless Observability hides `stackAlertsOnly`, so the feature grants no privileges there. */
 test.describe(
@@ -35,8 +37,18 @@ test.describe(
     test.beforeAll(async ({ apiServices, esClient, kbnClient }) => {
       test.setTimeout(180_000);
       await setAlertingV2EnabledSetting(kbnClient, true);
-      v1RuleId = await createV1PrivilegeRule({ apiServices, esClient, kbnClient });
-      stackRuleId = await createStackPrivilegeRule({ apiServices, esClient, kbnClient });
+      v1RuleId = await createV1PrivilegeRule({
+        apiServices,
+        esClient,
+        kbnClient,
+        name: V1_RULE_NAME,
+      });
+      stackRuleId = await createStackPrivilegeRule({
+        apiServices,
+        esClient,
+        kbnClient,
+        name: STACK_RULE_NAME,
+      });
     });
 
     test.afterAll(async ({ apiServices, esClient, kbnClient }) => {

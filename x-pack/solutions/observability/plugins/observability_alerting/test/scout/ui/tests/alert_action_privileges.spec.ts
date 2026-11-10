@@ -16,8 +16,6 @@ import {
 import {
   APM_ALL_OBSERVABILITY_ALERTS_READ_ROLE,
   CLASSIC_WRITE_UNIVERSAL_READ_ROLE,
-  createV1PrivilegeRule,
-  deleteV1PrivilegeRuleData,
   expectEpisodeWriteActions,
   expectNoEpisodeWriteActions,
   gotoSeededClassicAlert,
@@ -28,15 +26,17 @@ import {
   OPEN_IN_DISCOVER_ACTION_ID,
   UNIVERSAL_WRITE_CLASSIC_READ_ROLE,
   V1_RULE_NAME,
-} from '../fixtures/classic_alert_action_privileges_test_data';
+} from '../fixtures/alert_action_privileges_test_data';
 import {
+  createV1PrivilegeRule,
+  deleteV1PrivilegeRuleData,
   deleteV2PrivilegeRule,
   seedV2PrivilegeRule,
   V2_PRIVILEGE_RULE_NAME,
 } from '../fixtures/privilege_test_data';
 
 test.describe(
-  'Observability Alerting - classic alert action privileges',
+  'Observability Alerting - alert action privileges',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let v1RuleId: string;
@@ -45,7 +45,12 @@ test.describe(
     test.beforeAll(async ({ apiServices, esClient, kbnClient }) => {
       test.setTimeout(180_000);
       await setAlertingV2EnabledSetting(kbnClient, true);
-      v1RuleId = await createV1PrivilegeRule({ apiServices, esClient, kbnClient });
+      v1RuleId = await createV1PrivilegeRule({
+        apiServices,
+        esClient,
+        kbnClient,
+        name: V1_RULE_NAME,
+      });
       v2RuleId = await seedV2PrivilegeRule(esClient, kbnClient);
     });
 
