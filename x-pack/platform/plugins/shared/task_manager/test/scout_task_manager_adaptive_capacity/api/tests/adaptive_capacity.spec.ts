@@ -78,7 +78,7 @@ apiTest.describe('Task Manager adaptive capacity', { tag: ['@local-stateful-clas
       expect(capacity.config).toBeLessThanOrEqual(MAX_CAPACITY);
       expect(capacity.as_cost).toBe(capacity.config * 2);
 
-      expect(adaptive).not.toBe(null);
+      expect(adaptive).not.toBeNull();
       const state = adaptive as AdaptiveCapacityState;
       expect(state.capacity).toBe(capacity.config);
       expect(state.heap_limit_bytes).toBeGreaterThan(0);

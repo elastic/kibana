@@ -16,7 +16,7 @@ With a locally managed Elasticsearch that uses its own credentials, point `confi
 
 Pass the heap limit as a `node` flag, not via `NODE_OPTIONS`: the dev CLI forwards `process.execArgv` to the server child only, while `NODE_OPTIONS` also reaches the rspack optimizer worker, which needs several GB and dies at 1 GB.
 
-`config/kibana.dev.yml` in this worktree enables alerting v2 and workflows and pins `xpack.task_manager.capacity: 10`. Override per experiment, for example append `--xpack.task_manager.capacity=20`, or `--xpack.task_manager.capacity=auto` to let the heap controller size capacity between `adaptive_capacity.min_capacity` and `adaptive_capacity.max_capacity` (defaults 5..50, heap target 75 % of the limit). The controller's latest decision is visible under `stats.configuration.value.adaptive_capacity` in `/api/task_manager/_health` and in the sampler output.
+Enable alerting v2 and workflows in `config/kibana.dev.yml` and pin `xpack.task_manager.capacity: 10` as the baseline. Override per experiment, for example append `--xpack.task_manager.capacity=20`, or `--xpack.task_manager.capacity=auto` to let the heap controller size capacity between `adaptive_capacity.min_capacity` and `adaptive_capacity.max_capacity` (defaults 5..50, heap target 75 % of the limit). The controller's latest decision is visible under `stats.configuration.value.adaptive_capacity` in `/api/task_manager/_health` and in the sampler output.
 
 ## 2. Seed the wide index
 
