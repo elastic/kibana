@@ -1188,3 +1188,60 @@ describe('secrets', () => {
     expect(serialized).not.toContain('session_token');
   });
 });
+
+describe('dedicated index template for a custom dataset', () => {
+  const makeDatasetService = (): AwsServiceMatrixEntry => {
+    const datasetVar = makeVarDef('data_stream.dataset', { default: 'aws.vpcflow' });
+    return {
+      ...makeSimpleService(),
+      varDefsByInput: { 'aws-s3': { bucket_arn: makeVarDef('bucket_arn') } },
+      varDefsByDataStream: {
+        vpcflow: {
+          inputs: ['aws-s3'],
+          varDefsByInput: {
+            'aws-s3': { bucket_arn: makeVarDef('bucket_arn'), 'data_stream.dataset': datasetVar },
+          },
+        },
+      },
+    } as unknown as AwsServiceMatrixEntry;
+  };
+  const optedOut = {
+    vpcflow: {
+      enabledDataStreams: ['vpcflow'],
+      varsByDataStream: {
+        vpcflow: {
+          enabledInputs: ['aws-s3'],
+          varsByInput: { 'aws-s3': { 'data_stream.dataset': 'aws.prod' } },
+          createDatasetTemplates: false,
+        },
+      },
+    },
+  };
+  const targets = () =>
+    buildAgentBasedTargets(
+      [makeInstance()],
+      ['vpcflow'],
+      new Map([['vpcflow', makeDatasetService()]])
+    );
+
+  it('passes the opt-out to a new agent policy, where Fleet creates each package policy', async () => {
+    await deployNewAgentPolicy(targets(), {
+      ...BASE_OPTS,
+      storedServiceVars: optedOut,
+      agentPolicyName: 'AWS Agent Policy 1',
+    });
+
+    const [body] = mockSendCreateAgentPolicy.mock.calls[0];
+    expect(body.package_policies[0].create_dataset_templates).toBe(false);
+  });
+
+  it('passes the opt-out to existing agent policies', async () => {
+    await deployToExistingAgentPolicies(targets(), {
+      ...BASE_OPTS,
+      storedServiceVars: optedOut,
+      selectedAgentPolicyIds: ['policy-a'],
+    });
+
+    expect(mockSendCreatePackagePolicy.mock.calls[0][0].create_dataset_templates).toBe(false);
+  });
+});
