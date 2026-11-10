@@ -1,0 +1,14 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts", "fixtures/*.json"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/data-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/isomer"
+  ]
+}

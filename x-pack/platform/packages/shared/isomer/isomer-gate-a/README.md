@@ -1,0 +1,13 @@
+# @kbn/isomer-gate-a
+
+Gate A for saved object materialization: does a materialized chart match what Kibana draws? Dev-only. It compares against Kibana's own output for the corpus's Lens ES|QL `metric` and `xy` panels, captured from a real Kibana by lane C's corpus suite.
+
+- **Fixtures** (`fixtures/`, one file per panel) keep only what the gate reads from a capture: the as-code config, the render context (`now`, absolute time range, `dateFormat:tz`), Kibana's inspector tables, the chart's size, and, in light and dark, Elastic Charts' `DebugState` (legend, axes, series values and paths) or the metric's DOM readings (background, texts and their colors). To add a case, copy those fields from a corpus capture.
+- **Seed data** (`buildEdgeCaseDocuments`, `EDGE_CASE_MAPPINGS`, `SAMPLE_DATA_SETS`): the data the panels were captured over, which the A-data suite installs on demand.
+
+- **Cases** (`listGateCases`): every fixture, in light and dark. `kibanaTables` gives Kibana's own inspector tables, with columns keyed by their ES|QL names as the ES|QL search returns them. `kibanaChart` gives what Kibana drew. `kibanaChartSize` gives the size it drew at.
+- **A-data** (`compareTables`): our pipeline's `Datatable` against Kibana's. Columns match by id and type, and rows must match value for value in the same order. ISO and epoch dates compare as the same instant, and reordered rows are reported as such. `datatableFromChartData` rebuilds a materialized chart's table from its columns' Kibana `source`. The on-demand FTR suite in `x-pack/platform/test/isomer_gate_a` seeds the data and runs it.
+- **A-visual** (`compareCharts`): one normalized shape for Elastic Charts' `DebugState` (`normalizeDebugState`), the DOM Kibana renders a metric into (`normalizeMetricReadings`), and an Isomer Scene (`normalizeScene`). Spec ids and keys are dropped, colors become lowercase hex, and series are grouped by mark. Labels, names, colors, values and order must match exactly. Geometry (gridlines, paths) is compared only where both sides report it, within a pixel tolerance. Each difference reads like a review comment, such as `legend item 1 color "#16c5c0" vs "#54b399"`.
+- **Engines** (`runGateAVisual`): compares a case's Scene, and then what a `GateAEngine` (such as headless Elastic Charts, `createElasticChartsHeadlessEngine`) draws from it at Kibana's size, with what Kibana drew.
+
+The Lens materializer's Scene-level run is `x-pack/platform/plugins/shared/isomer/server/materialize/lens/gate_a_visual.test.ts`. It pins each case's differences in `gate_a_visual.differences.json`, so any change fails until the file is regenerated with `UPDATE_GATE_A=true node scripts/jest <that test>`.

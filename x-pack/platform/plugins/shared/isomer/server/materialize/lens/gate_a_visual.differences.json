@@ -1,0 +1,196 @@
+{
+  "isomer-corpus-buckets/buckets-xy-multivalue-esql/dark": {
+    "scene": [],
+    "engine": [
+      "axis 1 values [\"blue\",\"green\",\"red\",\"cyan\",\"magenta\",\"(null)\"] vs [\"\\\"blue\\\"\",\"\\\"green\\\"\",\"\\\"red\\\"\",\"\\\"cyan\\\"\",\"\\\"magenta\\\"\",\"null\"]",
+      "axis 2 gridline 3 moves by 1.17px",
+      "axis 2 gridline 4 moves by 1.75px",
+      "axis 2 gridline 5 moves by 2.33px",
+      "axis 2 gridline 6 moves by 2.92px",
+      "axis 2 gridline 7 moves by 3.50px",
+      "series 1 value 1 {\"x\":\"blue\",\"y\":51} vs {\"x\":\"\\\"blue\\\"\",\"y\":51}",
+      "series 1 value 2 {\"x\":\"green\",\"y\":51} vs {\"x\":\"\\\"green\\\"\",\"y\":51}",
+      "series 1 value 3 {\"x\":\"red\",\"y\":50} vs {\"x\":\"\\\"red\\\"\",\"y\":50}",
+      "series 1 value 4 {\"x\":\"cyan\",\"y\":50} vs {\"x\":\"\\\"cyan\\\"\",\"y\":50}",
+      "series 1 value 5 {\"x\":\"magenta\",\"y\":50} vs {\"x\":\"\\\"magenta\\\"\",\"y\":50}",
+      "series 1 value 6 {\"x\":\"(null)\",\"y\":42} vs {\"x\":\"null\",\"y\":42}"
+    ]
+  },
+  "isomer-corpus-buckets/buckets-xy-multivalue-esql/light": {
+    "scene": [],
+    "engine": [
+      "axis 1 values [\"blue\",\"green\",\"red\",\"cyan\",\"magenta\",\"(null)\"] vs [\"\\\"blue\\\"\",\"\\\"green\\\"\",\"\\\"red\\\"\",\"\\\"cyan\\\"\",\"\\\"magenta\\\"\",\"null\"]",
+      "axis 2 gridline 3 moves by 1.17px",
+      "axis 2 gridline 4 moves by 1.75px",
+      "axis 2 gridline 5 moves by 2.33px",
+      "axis 2 gridline 6 moves by 2.92px",
+      "axis 2 gridline 7 moves by 3.50px",
+      "series 1 value 1 {\"x\":\"blue\",\"y\":51} vs {\"x\":\"\\\"blue\\\"\",\"y\":51}",
+      "series 1 value 2 {\"x\":\"green\",\"y\":51} vs {\"x\":\"\\\"green\\\"\",\"y\":51}",
+      "series 1 value 3 {\"x\":\"red\",\"y\":50} vs {\"x\":\"\\\"red\\\"\",\"y\":50}",
+      "series 1 value 4 {\"x\":\"cyan\",\"y\":50} vs {\"x\":\"\\\"cyan\\\"\",\"y\":50}",
+      "series 1 value 5 {\"x\":\"magenta\",\"y\":50} vs {\"x\":\"\\\"magenta\\\"\",\"y\":50}",
+      "series 1 value 6 {\"x\":\"(null)\",\"y\":42} vs {\"x\":\"null\",\"y\":42}"
+    ]
+  },
+  "isomer-corpus-values/values-metric-esql/dark": {
+    "scene": [
+      "tile 1 text 1 color \"#e3e8f2\" vs \"#b4c1d5\"",
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ]
+  },
+  "isomer-corpus-values/values-metric-esql/light": {
+    "scene": [
+      "tile 1 text 1 color \"#111c2c\" vs \"#384861\"",
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ]
+  },
+  "isomer-corpus-values/values-xy-huge-esql/dark": {
+    "scene": [],
+    "engine": [
+      "axis 1 label count 8 vs 4",
+      "axis 1 label 1 \"1st\" vs \"Jan 1, 2024, 00:00:00.000\"",
+      "axis 1 label 2 \"January 2024\" vs \"Jan 3, 2024, 00:00:00.000\"",
+      "axis 1 label 3 \"2nd\" vs \"Jan 5, 2024, 00:00:00.000\"",
+      "axis 1 label 4 \"3rd\" vs \"Jan 7, 2024, 00:00:00.000\"",
+      "axis 1 values [1704067200000,1704067200000,1704153600000,1704240000000,1704326400000,1704412800000,1704499200000,1704585600000] vs [1704067200000,1704240000000,1704412800000,1704585600000]",
+      "axis 1 gridline count 8 vs 4",
+      "axis 1 gridline 2 moves by 93.23px",
+      "axis 1 gridline 3 moves by 186.45px",
+      "axis 1 gridline 4 moves by 279.68px",
+      "axis 2 gridline 3 moves by 1.14px",
+      "axis 2 gridline 4 moves by 1.71px",
+      "axis 2 gridline 5 moves by 2.29px",
+      "axis 2 gridline 6 moves by 2.86px",
+      "axis 2 gridline 7 moves by 3.43px",
+      "axis 2 gridline 8 moves by 4.00px",
+      "series 1 path 1 moves by 39.54px",
+      "series 1 path 2 moves by 39.54px"
+    ]
+  },
+  "isomer-corpus-values/values-xy-huge-esql/light": {
+    "scene": [],
+    "engine": [
+      "axis 1 label count 8 vs 4",
+      "axis 1 label 1 \"1st\" vs \"Jan 1, 2024, 00:00:00.000\"",
+      "axis 1 label 2 \"January 2024\" vs \"Jan 3, 2024, 00:00:00.000\"",
+      "axis 1 label 3 \"2nd\" vs \"Jan 5, 2024, 00:00:00.000\"",
+      "axis 1 label 4 \"3rd\" vs \"Jan 7, 2024, 00:00:00.000\"",
+      "axis 1 values [1704067200000,1704067200000,1704153600000,1704240000000,1704326400000,1704412800000,1704499200000,1704585600000] vs [1704067200000,1704240000000,1704412800000,1704585600000]",
+      "axis 1 gridline count 8 vs 4",
+      "axis 1 gridline 2 moves by 93.23px",
+      "axis 1 gridline 3 moves by 186.45px",
+      "axis 1 gridline 4 moves by 279.68px",
+      "axis 2 gridline 3 moves by 1.14px",
+      "axis 2 gridline 4 moves by 1.71px",
+      "axis 2 gridline 5 moves by 2.29px",
+      "axis 2 gridline 6 moves by 2.86px",
+      "axis 2 gridline 7 moves by 3.43px",
+      "axis 2 gridline 8 moves by 4.00px",
+      "series 1 path 1 moves by 39.54px",
+      "series 1 path 2 moves by 39.54px"
+    ]
+  },
+  "sample-logs/01d8e435-91c0-484f-a11e-856747050b0a/dark": {
+    "scene": [
+      "tile 1 text 1 color \"#e3e8f2\" vs \"#b4c1d5\"",
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ]
+  },
+  "sample-logs/01d8e435-91c0-484f-a11e-856747050b0a/light": {
+    "scene": [
+      "tile 1 text 1 color \"#111c2c\" vs \"#384861\"",
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ]
+  },
+  "sample-logs/11/dark": {
+    "scene": [
+      "tile 1 text 1 color \"#111c2c\" vs \"#b4c1d5\"",
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ]
+  },
+  "sample-logs/11/light": {
+    "scene": [
+      "tile 1 text 1 color \"#111c2c\" vs \"#384861\"",
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ]
+  },
+  "sample-logs/8c1456d4-1993-4ba2-b701-04aca02c9fef/dark": {
+    "scene": [
+      "tile 1 text 1 color \"#e3e8f2\" vs \"#b4c1d5\"",
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ]
+  },
+  "sample-logs/8c1456d4-1993-4ba2-b701-04aca02c9fef/light": {
+    "scene": [
+      "tile 1 text 1 color \"#111c2c\" vs \"#384861\"",
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ]
+  },
+  "sample-logs/bb94016e-f4a6-49ca-87a9-296a2869d570/dark": {
+    "scene": [
+      "tile 1 text 1 color \"#e3e8f2\" vs \"#b4c1d5\"",
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ]
+  },
+  "sample-logs/bb94016e-f4a6-49ca-87a9-296a2869d570/light": {
+    "scene": [
+      "tile 1 text 1 color \"#111c2c\" vs \"#384861\"",
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ]
+  },
+  "sample-logs/cbca842c-b9fa-4523-9ce0-14e350866e33/dark": {
+    "scene": [],
+    "engine": [
+      "axis 1 gridline 1 moves by 1.67px",
+      "axis 1 gridline 2 moves by 1.12px",
+      "axis 1 gridline 6 moves by 1.11px",
+      "axis 1 gridline 7 moves by 1.66px",
+      "axis 1 gridline 8 moves by 2.22px",
+      "axis 1 gridline 9 moves by 2.77px",
+      "axis 1 gridline 10 moves by 3.33px"
+    ]
+  },
+  "sample-logs/cbca842c-b9fa-4523-9ce0-14e350866e33/light": {
+    "scene": [],
+    "engine": [
+      "axis 1 gridline 1 moves by 1.67px",
+      "axis 1 gridline 2 moves by 1.12px",
+      "axis 1 gridline 6 moves by 1.11px",
+      "axis 1 gridline 7 moves by 1.66px",
+      "axis 1 gridline 8 moves by 2.22px",
+      "axis 1 gridline 9 moves by 2.77px",
+      "axis 1 gridline 10 moves by 3.33px"
+    ]
+  }
+}

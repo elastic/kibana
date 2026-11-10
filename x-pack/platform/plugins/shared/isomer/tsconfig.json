@@ -29,6 +29,7 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/as-code-filters-transforms",
     "@kbn/ui-theme",
-    "@kbn/rison"
+    "@kbn/rison",
+    "@kbn/isomer-gate-a"
   ]
 }

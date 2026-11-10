@@ -40,6 +40,7 @@ dependsOn:
   - '@kbn/as-code-filters-transforms'
   - '@kbn/ui-theme'
   - '@kbn/rison'
+  - '@kbn/isomer-gate-a'
 tags:
   - plugin
   - prod

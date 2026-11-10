@@ -1715,6 +1715,8 @@
       "@kbn/isomer-components/*": ["./x-pack/platform/packages/shared/isomer/isomer-components/*"],
       "@kbn/isomer-corpus": ["./x-pack/platform/packages/shared/isomer/isomer-corpus"],
       "@kbn/isomer-corpus/*": ["./x-pack/platform/packages/shared/isomer/isomer-corpus/*"],
+      "@kbn/isomer-gate-a": ["./x-pack/platform/packages/shared/isomer/isomer-gate-a"],
+      "@kbn/isomer-gate-a/*": ["./x-pack/platform/packages/shared/isomer/isomer-gate-a/*"],
       "@kbn/isomer-plugin": ["./x-pack/platform/plugins/shared/isomer"],
       "@kbn/isomer-plugin/*": ["./x-pack/platform/plugins/shared/isomer/*"],
       "@kbn/isomer-theme": ["./x-pack/platform/packages/shared/isomer/isomer-theme"],
