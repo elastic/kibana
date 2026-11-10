@@ -53,50 +53,6 @@
             "kind"
           ]
         }
-      ],
-      "edges": [
-        {
-          "type": "manages",
-          "source": "person",
-          "target": "user",
-          "description": "The person is the user's manager, as in \"Sarah is their manager\"."
-        },
-        {
-          "type": "lives_with",
-          "source": "user",
-          "target": "person",
-          "description": "The user lives with the person, as in \"lives with roommate Jake\"."
-        },
-        {
-          "type": "family_of",
-          "source": "person",
-          "target": "user",
-          "description": "The person is family of the user, with the relation in the fact."
-        },
-        {
-          "type": "friend_of",
-          "source": "person",
-          "target": "user",
-          "description": "The person is a friend of the user."
-        },
-        {
-          "type": "lives_in",
-          "source": "user",
-          "target": "place",
-          "description": "Where the user lives now."
-        },
-        {
-          "type": "visits",
-          "source": "user",
-          "target": "place",
-          "description": "Somewhere the user has visited or plans to visit."
-        },
-        {
-          "type": "member_of",
-          "source": "user",
-          "target": "organization",
-          "description": "The user works at, studies at or belongs to the organization."
-        }
       ]
     }
   }

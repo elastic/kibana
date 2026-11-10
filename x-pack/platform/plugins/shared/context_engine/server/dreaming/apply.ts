@@ -12,6 +12,7 @@ import {
   FACT_TYPE_PREFIX,
   LAST_SEEN_AT_ATTRIBUTE,
   OCCURRENCES_ATTRIBUTE,
+  PROCEDURE_TYPE_PREFIX,
 } from '../../common/dreaming';
 import type { AccessPattern } from '../../common/step_types/apply_dream_changes';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
@@ -34,7 +35,6 @@ import {
   withoutAccessPatternAttributes,
 } from './access_patterns';
 import {
-  ABOUT_RELATION,
   citedMemoryIds,
   occurrencesOf,
   type DreamedKi,
@@ -44,10 +44,11 @@ import {
 import { kiUri } from './ids';
 import { derivedPermissions, isVisibleInSpace, type KiPermissions } from './permissions';
 import type {
+  DeleteOperation,
   DreamingOperation,
-  RelationshipOperation,
   UpsertEntityOperation,
   UpsertFactOperation,
+  UpsertProcedureOperation,
 } from './resolve_change_set';
 
 const WRITE_CONFLICT_RETRIES = 3;
@@ -78,8 +79,8 @@ export interface ApplyContext {
   dryRun?: Map<string, PlannedWrite>;
 }
 
-const referenceKey = ({ uri, relation, description }: DreamedKiReference): string =>
-  `${relation ?? ''}\u0000${relation === 'relates_to' ? description ?? '' : ''}\u0000${uri}`;
+const referenceKey = ({ uri, relation }: DreamedKiReference): string =>
+  `${relation ?? ''}\u0000${uri}`;
 
 /** Adds references without duplicates, dropping the oldest `derived_from` ones over the cap. */
 export const addReferences = (
@@ -91,14 +92,12 @@ export const addReferences = (
     byKey.set(referenceKey(reference), byKey.get(referenceKey(reference)) ?? reference);
   }
   const references = [...byKey.values()];
-  for (const relation of ['derived_from', 'relates_to'] as const) {
-    while (references.length > MAX_KI_REFERENCES) {
-      const index = references.findIndex((reference) => reference.relation === relation);
-      if (index === -1) {
-        break;
-      }
-      references.splice(index, 1);
+  while (references.length > MAX_KI_REFERENCES) {
+    const index = references.findIndex(({ relation }) => relation === 'derived_from');
+    if (index === -1) {
+      break;
     }
+    references.splice(index, 1);
   }
   return references.slice(-MAX_KI_REFERENCES);
 };
@@ -295,7 +294,7 @@ const upsertEntity = (context: ApplyContext, operation: UpsertEntityOperation) =
           ...current,
           id: operation.id,
           type: `${ENTITY_TYPE_PREFIX}${operation.type}`,
-          title: operation.name,
+          title: operation.title,
           ...(operation.description !== undefined && { description: operation.description }),
           ...withAccessPatterns(current, operation.content, operation.accessPatterns, {
             ...current?.attributes,
@@ -310,77 +309,60 @@ const upsertEntity = (context: ApplyContext, operation: UpsertEntityOperation) =
   );
 
 const upsertFact = (context: ApplyContext, operation: UpsertFactOperation) =>
-  writeDocument(context, operation.id, operation.sourceMemoryIds, (current) => {
-    if (citesAll(current, operation.sourceMemoryIds)) {
-      return undefined;
-    }
-    const { about } = operation;
-    const kept =
-      about === undefined
-        ? current?.references
-        : current?.references?.filter(
-            ({ relation, description }) =>
-              relation !== 'relates_to' || description !== ABOUT_RELATION
-          );
-    return {
-      ...current,
-      id: operation.id,
-      type: `${FACT_TYPE_PREFIX}${operation.type}`,
-      title: operation.title,
-      ...withAccessPatterns(current, operation.content, operation.accessPatterns, {
-        ...current?.attributes,
-        ...sightingAttributes(current, operation.sourceMemoryIds, operation.lastSeenAt),
-      }),
-      references: addReferences(kept, [
-        ...(about ?? []).map((id) => ({
-          uri: kiUri(id),
-          relation: 'relates_to' as const,
-          description: ABOUT_RELATION,
-        })),
-        ...sourceReferences(operation.sourceMemoryIds),
-      ]),
-    };
-  });
+  writeDocument(context, operation.id, operation.sourceMemoryIds, (current) =>
+    citesAll(current, operation.sourceMemoryIds)
+      ? undefined
+      : {
+          ...current,
+          id: operation.id,
+          type: `${FACT_TYPE_PREFIX}${operation.type}`,
+          title: operation.title,
+          ...withAccessPatterns(current, operation.content, operation.accessPatterns, {
+            ...current?.attributes,
+            ...sightingAttributes(current, operation.sourceMemoryIds, operation.lastSeenAt),
+          }),
+          references: addReferences(
+            current?.references,
+            sourceReferences(operation.sourceMemoryIds)
+          ),
+        }
+  );
 
-const applyRelationship = (context: ApplyContext, operation: RelationshipOperation) =>
-  writeDocument(context, operation.sourceId, operation.sourceMemoryIds, (current) => {
-    if (!current) {
-      return undefined;
-    }
-    const relationship: DreamedKiReference = {
-      uri: kiUri(operation.targetId),
-      relation: 'relates_to',
-      description: operation.type,
-    };
-    const linked = current.references?.some(
-      (reference) => referenceKey(reference) === referenceKey(relationship)
-    );
-    if (operation.remove) {
-      if (!linked) {
-        return undefined;
-      }
-      return {
-        ...current,
-        references: current.references?.filter(
-          (reference) => referenceKey(reference) !== referenceKey(relationship)
-        ),
-      };
-    }
-    if (linked && citesAll(current, operation.sourceMemoryIds)) {
-      return undefined;
-    }
-    return {
-      ...current,
-      attributes: {
-        ...current.attributes,
-        ...sightingAttributes(current, operation.sourceMemoryIds, operation.lastSeenAt),
-      },
-      references: addReferences(current.references, [
-        relationship,
-        ...sourceReferences(operation.sourceMemoryIds),
-      ]),
-    };
-  });
+const upsertProcedure = (context: ApplyContext, operation: UpsertProcedureOperation) =>
+  writeDocument(context, operation.id, operation.sourceMemoryIds, (current) =>
+    citesAll(current, operation.sourceMemoryIds)
+      ? undefined
+      : {
+          ...current,
+          id: operation.id,
+          type: `${PROCEDURE_TYPE_PREFIX}${operation.type}`,
+          title: operation.title,
+          ...(operation.description !== undefined && { description: operation.description }),
+          content: operation.content,
+          attributes: {
+            ...current?.attributes,
+            ...sightingAttributes(current, operation.sourceMemoryIds, operation.lastSeenAt),
+          },
+          references: addReferences(
+            current?.references,
+            sourceReferences(operation.sourceMemoryIds)
+          ),
+        }
+  );
+
+const upsert = (
+  context: ApplyContext,
+  operation: Exclude<DreamingOperation, DeleteOperation>
+): Promise<'created' | 'updated' | 'skipped'> => {
+  switch (operation.op) {
+    case 'upsert_entity':
+      return upsertEntity(context, operation);
+    case 'upsert_fact':
+      return upsertFact(context, operation);
+    case 'upsert_procedure':
+      return upsertProcedure(context, operation);
+  }
+};
 
 const deletable = async (context: ApplyContext, kiId: string): Promise<boolean> => {
   const { esClient, aiIndexId, dest, abortSignal } = context;
@@ -433,28 +415,15 @@ export const applyOperations = async (
 ): Promise<ApplyCounts> => {
   const counts: ApplyCounts = { created: 0, updated: 0, deleted: 0 };
   for (const operation of operations) {
-    switch (operation.op) {
-      case 'upsert_entity':
-      case 'upsert_fact': {
-        const result =
-          operation.op === 'upsert_entity'
-            ? await upsertEntity(context, operation)
-            : await upsertFact(context, operation);
-        if (result !== 'skipped') {
-          counts[result] += 1;
-        }
-        break;
+    if (operation.op === 'delete') {
+      if (await deleteKi(context, operation.id)) {
+        counts.deleted += 1;
       }
-      case 'relationship':
-        if ((await applyRelationship(context, operation)) === 'updated') {
-          counts.updated += 1;
-        }
-        break;
-      case 'delete':
-        if (await deleteKi(context, operation.id)) {
-          counts.deleted += 1;
-        }
-        break;
+      continue;
+    }
+    const result = await upsert(context, operation);
+    if (result !== 'skipped') {
+      counts[result] += 1;
     }
   }
   return counts;

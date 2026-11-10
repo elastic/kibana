@@ -58,26 +58,6 @@
             "unit"
           ]
         }
-      ],
-      "edges": [
-        {
-          "type": "reported_in",
-          "source": "financial_metric",
-          "target": "report",
-          "description": "The report gives a value for the metric."
-        },
-        {
-          "type": "owned_by",
-          "source": "financial_metric",
-          "target": "department",
-          "description": "The department is accountable for the metric."
-        },
-        {
-          "type": "covers",
-          "source": "audit",
-          "target": "department",
-          "description": "The audit reviewed the department."
-        }
       ]
     }
   }

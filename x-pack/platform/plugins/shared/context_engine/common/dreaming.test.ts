@@ -8,52 +8,61 @@
 import {
   dreamingBuildsAnything,
   dreamingTypesOf,
+  isDreamedKiType,
   isDreamingConfigured,
   validateDreamingTypes,
 } from './dreaming';
 
 const customer = { type: 'customer', attributes: ['tier'] };
 const city = { type: 'city' };
-const livesIn = { type: 'lives_in', source: 'customer', target: 'city' };
+const troubleshooting = { type: 'troubleshooting' };
 
 describe('dreamingTypesOf', () => {
-  it('returns the facts, entities and relationships a config builds', () => {
+  it('returns the facts, entities and procedures a config builds', () => {
     expect(
       dreamingTypesOf({
         facts: [{ type: 'preference' }],
-        entities: { nodes: [customer, city], edges: [livesIn] },
+        entities: { nodes: [customer, city] },
+        procedures: [troubleshooting],
       })
     ).toEqual({
       facts: [{ type: 'preference' }],
       entities: [customer, city],
-      relationships: [livesIn],
+      procedures: [troubleshooting],
     });
   });
 
-  it('builds no relationships without entities', () => {
-    expect(dreamingTypesOf({ entities: { nodes: [], edges: [livesIn] } }).relationships).toEqual(
-      []
-    );
-  });
-
   it('treats missing and null kinds as empty', () => {
-    expect(dreamingTypesOf({ facts: null, entities: null })).toEqual({
+    expect(dreamingTypesOf({ facts: null, entities: null, procedures: null })).toEqual({
       facts: [],
       entities: [],
-      relationships: [],
+      procedures: [],
     });
   });
 });
 
 describe('dreamingBuildsAnything', () => {
-  it('is true with a fact type or an entity type', () => {
+  it('is true with a fact, entity or procedure type', () => {
     expect(dreamingBuildsAnything({ facts: [{ type: 'preference' }] })).toBe(true);
     expect(dreamingBuildsAnything({ entities: { nodes: [city] } })).toBe(true);
+    expect(dreamingBuildsAnything({ procedures: [troubleshooting] })).toBe(true);
   });
 
-  it('is false with neither', () => {
+  it('is false with none', () => {
     expect(dreamingBuildsAnything({})).toBe(false);
-    expect(dreamingBuildsAnything({ facts: [], entities: { nodes: [] } })).toBe(false);
+    expect(dreamingBuildsAnything({ facts: [], entities: { nodes: [] }, procedures: [] })).toBe(
+      false
+    );
+  });
+});
+
+describe('isDreamedKiType', () => {
+  it('matches the fact, entity and procedure types dreaming writes', () => {
+    expect(isDreamedKiType('fact.preference')).toBe(true);
+    expect(isDreamedKiType('entity.customer')).toBe(true);
+    expect(isDreamedKiType('procedure.troubleshooting')).toBe(true);
+    expect(isDreamedKiType('memory.session_fact')).toBe(false);
+    expect(isDreamedKiType('runbook')).toBe(false);
   });
 });
 
@@ -74,7 +83,8 @@ describe('validateDreamingTypes', () => {
     expect(
       validateDreamingTypes({
         facts: [{ type: 'preference' }],
-        entities: { nodes: [customer, city], edges: [livesIn] },
+        entities: { nodes: [customer, city] },
+        procedures: [troubleshooting],
       })
     ).toBeUndefined();
   });
@@ -86,9 +96,9 @@ describe('validateDreamingTypes', () => {
     expect(validateDreamingTypes({ entities: { nodes: [city, city] } })).toBe(
       "Entity type 'city' is listed twice."
     );
-    expect(
-      validateDreamingTypes({ entities: { nodes: [customer, city], edges: [livesIn, livesIn] } })
-    ).toBe("Relationship type 'lives_in' is listed twice.");
+    expect(validateDreamingTypes({ procedures: [troubleshooting, troubleshooting] })).toBe(
+      "Procedure type 'troubleshooting' is listed twice."
+    );
   });
 
   it('rejects an attribute listed twice', () => {
@@ -97,11 +107,5 @@ describe('validateDreamingTypes', () => {
         entities: { nodes: [{ type: 'customer', attributes: ['tier', 'tier'] }] },
       })
     ).toBe("Entity type 'customer' lists attribute 'tier' twice.");
-  });
-
-  it('rejects a relationship between entity types that are not configured', () => {
-    expect(validateDreamingTypes({ entities: { nodes: [customer], edges: [livesIn] } })).toBe(
-      "Relationship type 'lives_in' links entity type 'city', which is not configured."
-    );
   });
 });

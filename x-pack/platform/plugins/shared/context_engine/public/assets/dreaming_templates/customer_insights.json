@@ -84,44 +84,6 @@
             "member_count"
           ]
         }
-      ],
-      "edges": [
-        {
-          "type": "holds",
-          "source": "customer",
-          "target": "loyalty_tier",
-          "description": "The customer's card is in this tier."
-        },
-        {
-          "type": "lives_in",
-          "source": "customer",
-          "target": "region",
-          "description": "The customer lives in this province or city."
-        },
-        {
-          "type": "reported",
-          "source": "customer",
-          "target": "problem",
-          "description": "The customer ran into this problem."
-        },
-        {
-          "type": "affects",
-          "source": "problem",
-          "target": "loyalty_tier",
-          "description": "The problem hits members of this tier."
-        },
-        {
-          "type": "occurs_on",
-          "source": "problem",
-          "target": "route",
-          "description": "The problem happened on this route or flight."
-        },
-        {
-          "type": "duplicate_of",
-          "source": "problem",
-          "target": "problem",
-          "description": "The problem is the same as another, earlier one."
-        }
       ]
     }
   }

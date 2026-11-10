@@ -35,7 +35,7 @@ const LIFECYCLE =
 const MEMORY_EXCLUSION =
   '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact")';
 const DREAMING_EXCLUSION =
-  '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")';
+  '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*" AND NOT type LIKE "procedure.*")';
 
 const emptyResponse = { columns: [], values: [] };
 

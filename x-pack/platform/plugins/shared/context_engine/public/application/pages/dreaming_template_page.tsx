@@ -130,7 +130,7 @@ const Pill = ({
 /**
  * The step after creating an AI index with memory, on one screen: pick the example closest to
  * what's being built, or start from scratch, describe it, and shape what dreaming learns: fact
- * types, then entity and relationship types if wanted. Applying turns dreaming on; skipping saves
+ * and procedure types, then entity types if wanted. Applying turns dreaming on; skipping saves
  * nothing. Either way it continues to the AI index's own onboarding.
  */
 export const DreamingTemplatePage = () => {
@@ -236,7 +236,7 @@ export const DreamingTemplatePage = () => {
                 <p>
                   {i18n.translate('xpack.contextEngine.dreamingTemplate.lead', {
                     defaultMessage:
-                      'Start from the example closest to your agent, or from scratch. Dreaming turns this AI index’s memories and conversations into the facts below, and, once you turn them on, entities and relationships.',
+                      'Start from the example closest to your agent, or from scratch. Dreaming turns this AI index’s memories and conversations into the facts and procedures below, and, once you turn them on, entities.',
                   })}
                 </p>
               </EuiText>
@@ -342,7 +342,7 @@ export const DreamingTemplatePage = () => {
                         ? undefined
                         : i18n.translate('xpack.contextEngine.dreamingTemplate.applyDisabled', {
                             defaultMessage:
-                              'Add a fact type, or turn on entities, for dreaming to learn something.',
+                              'Add a fact or procedure type, or turn on entities, for dreaming to learn something.',
                           })
                     }
                     data-test-subj="contextDreamingTemplateSave"

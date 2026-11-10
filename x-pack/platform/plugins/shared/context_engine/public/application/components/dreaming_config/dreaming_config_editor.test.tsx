@@ -18,10 +18,8 @@ import {
 
 const SUPPORT = draftOf({
   facts: [{ type: 'solution', description: 'A confirmed fix.' }],
-  entities: {
-    nodes: [{ type: 'issue', attributes: ['severity'] }, { type: 'product_area' }],
-    edges: [{ type: 'affects', source: 'issue', target: 'product_area' }],
-  },
+  procedures: [{ type: 'troubleshooting', description: 'How a problem is fixed.' }],
+  entities: { nodes: [{ type: 'issue', attributes: ['severity'] }, { type: 'product_area' }] },
 });
 
 let latest: DreamingConfigDraft;
@@ -48,7 +46,11 @@ describe('DreamingConfigEditor', () => {
   it('keeps entities on a draft while they are off, and leaves them out of the config', () => {
     const off = { ...SUPPORT, entitiesEnabled: false };
 
-    expect(typesOfDraft(off)).toEqual({ facts: SUPPORT.facts, entities: null });
+    expect(typesOfDraft(off)).toEqual({
+      facts: SUPPORT.facts,
+      procedures: SUPPORT.procedures,
+      entities: null,
+    });
     expect(typesOfDraft(SUPPORT).entities).toEqual(SUPPORT.entities);
   });
 
@@ -75,43 +77,43 @@ describe('DreamingConfigEditor', () => {
     expect(latest.entities.nodes).toHaveLength(2);
   });
 
-  it('renames an entity type in its relationships, and deletes them with it', () => {
+  it('adds, edits and deletes a procedure type in a modal', () => {
+    renderEditor(<Editable initial={SUPPORT} />);
+
+    fireEvent.click(screen.getByTestId('contextDreamingConfigProcedures-add'));
+    fillName('Setup');
+    fireEvent.change(screen.getByTestId('contextDreamingTypeModalDescription'), {
+      target: { value: '  How to set something up.  ' },
+    });
+    save();
+    expect(latest.procedures).toEqual([
+      ...SUPPORT.procedures,
+      { type: 'setup', description: 'How to set something up.' },
+    ]);
+
+    fireEvent.click(screen.getByTestId('contextDreamingConfigProcedure-troubleshooting-edit'));
+    fillName('fix');
+    save();
+    fireEvent.click(screen.getByTestId('contextDreamingConfigProcedure-setup-delete'));
+
+    expect(latest.procedures).toEqual([{ type: 'fix', description: 'How a problem is fixed.' }]);
+  });
+
+  it('renames and deletes entity types', () => {
     renderEditor(<Editable initial={SUPPORT} />);
 
     fireEvent.click(screen.getByTestId('contextDreamingConfigEntity-issue-edit'));
     fillName('problem');
     save();
-    expect(latest.entities.edges).toEqual([
-      { type: 'affects', source: 'problem', target: 'product_area' },
-    ]);
-
     fireEvent.click(screen.getByTestId('contextDreamingConfigEntity-product_area-delete'));
-    expect(latest.entities).toEqual({
-      nodes: [{ type: 'problem', attributes: ['severity'] }],
-      edges: [],
-    });
-  });
 
-  it('adds a relationship between entity types, and only once there are some', () => {
-    renderEditor(<Editable initial={{ ...SUPPORT, entities: { nodes: [], edges: [] } }} />);
-    expect(screen.getByTestId('contextDreamingConfigRelationships-add')).toBeDisabled();
-
-    fireEvent.click(screen.getByTestId('contextDreamingConfigEntities-add'));
-    fillName('customer');
-    save();
-    fireEvent.click(screen.getByTestId('contextDreamingConfigRelationships-add'));
-    fillName('reported');
-    save();
-
-    expect(latest.entities.edges).toEqual([
-      { type: 'reported', source: 'customer', target: 'customer' },
-    ]);
+    expect(latest.entities).toEqual({ nodes: [{ type: 'problem', attributes: ['severity'] }] });
   });
 
   it('suggests entities when they are turned on with none', () => {
     renderEditor(
       <DreamingConfigEditor
-        draft={draftOf({ facts: SUPPORT.facts })}
+        draft={draftOf({ facts: SUPPORT.facts, procedures: SUPPORT.procedures })}
         onChange={(next) => {
           latest = next;
         }}

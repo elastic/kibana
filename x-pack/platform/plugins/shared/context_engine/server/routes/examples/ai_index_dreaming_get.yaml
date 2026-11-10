@@ -17,6 +17,9 @@ responses:
                     description: A problem confirmed to affect customers, with where it happens.
                   - type: workaround
                     description: A confirmed way around a problem until it is fixed.
+                procedures:
+                  - type: troubleshooting
+                    description: How to diagnose and fix a problem customers report, step by step.
                 entities:
                   nodes:
                     - type: issue
@@ -26,11 +29,6 @@ responses:
                         - fixed_in
                     - type: platform
                       description: A browser, operating system or device, with its version.
-                  edges:
-                    - type: occurs_on
-                      source: issue
-                      target: platform
-                      description: The issue happens only on this platform or version.
           getAiIndexDreamingNeverConfiguredExample:
             summary: "Dreaming never configured"
             description: "An AI Index that never configured dreaming"

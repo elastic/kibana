@@ -18,8 +18,8 @@ const config = {
       { type: 'customer', description: 'A loyalty member.', attributes: ['loyalty_number'] },
       { type: 'city' },
     ],
-    edges: [{ type: 'lives_in', source: 'customer', target: 'city' }],
   },
+  procedures: [{ type: 'rebooking', description: 'How a missed connection is rebooked.' }],
 };
 
 describe('dreamingConfigSchema', () => {
@@ -31,12 +31,15 @@ describe('dreamingConfigSchema', () => {
     expect(dreamingConfigSchema.validate({ enabled: false })).toEqual({ enabled: false });
   });
 
-  it('accepts null facts and entities', () => {
-    expect(dreamingConfigSchema.validate({ enabled: false, facts: null, entities: null })).toEqual({
-      enabled: false,
-      facts: null,
-      entities: null,
-    });
+  it('accepts null facts, entities and procedures', () => {
+    expect(
+      dreamingConfigSchema.validate({
+        enabled: false,
+        facts: null,
+        entities: null,
+        procedures: null,
+      })
+    ).toEqual({ enabled: false, facts: null, entities: null, procedures: null });
   });
 
   it('rejects a type name that is not lowercase letters, digits and underscores', () => {
@@ -60,13 +63,25 @@ describe('dreamingConfigSchema', () => {
     ).toThrow('Must be at least 15 minutes.');
   });
 
-  it('rejects a relationship to an entity type that is not configured', () => {
+  it('rejects a procedure type listed twice', () => {
     expect(() =>
       dreamingConfigSchema.validate({
         ...config,
-        entities: { ...config.entities, nodes: [config.entities.nodes[0]] },
+        procedures: [...config.procedures, { type: 'rebooking' }],
       })
-    ).toThrow("Relationship type 'lives_in' links entity type 'city', which is not configured.");
+    ).toThrow("Procedure type 'rebooking' is listed twice.");
+  });
+
+  it('rejects relationship types, which dreaming no longer builds', () => {
+    expect(() =>
+      dreamingConfigSchema.validate({
+        ...config,
+        entities: {
+          ...config.entities,
+          edges: [{ type: 'lives_in', source: 'customer', target: 'city' }],
+        },
+      })
+    ).toThrow();
   });
 
   it('bounds the instructions', () => {

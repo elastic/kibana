@@ -1,6 +1,6 @@
 version: '1'
 name: __NAME__
-description: 'Turns the memories agents save in a Context Engine AI index into long-term facts, entities and relationships, as the AI index dreaming config describes.'
+description: 'Turns the memories agents save in a Context Engine AI index into long-term facts, entities and procedures, as the AI index dreaming config describes.'
 enabled: false
 tags:
   - context-engine
@@ -20,7 +20,7 @@ consts:
   instructions: __INSTRUCTIONS__
   fact_types: __FACT_TYPES__
   entity_types: __ENTITY_TYPES__
-  relationship_types: __RELATIONSHIP_TYPES__
+  procedure_types: __PROCEDURE_TYPES__
 outputs:
   - name: memories
     type: number
@@ -183,6 +183,7 @@ steps:
                 - id
                 - type
                 - title
+                - description
                 - content
                 - attributes
                 - references
@@ -194,6 +195,8 @@ steps:
                         type: 'fact.'
                     - prefix:
                         type: 'entity.'
+                    - prefix:
+                        type: 'procedure.'
                   minimum_should_match: 1
                   filter:
                     - bool:
@@ -228,9 +231,18 @@ steps:
                 delay: '30s'
             with:
               prompt: |
-                You consolidate short-term memories into long-term memory: entities, facts about them, and relationships between entities.
+                You consolidate short-term memories into long-term memory, of the kinds configured below:
+                {%- if consts.fact_types.size > 0 %}
+                - facts: separate pieces of knowledge, each readable on its own.
+                {%- endif %}
+                {%- if consts.entity_types.size > 0 %}
+                - entities: the things the memories are about, each with a summary of what is known about it.
+                {%- endif %}
+                {%- if consts.procedure_types.size > 0 %}
+                - procedures: reusable, step-by-step ways of doing a task.
+                {%- endif %}
 
-                You are given MEMORIES (new notes agents saved while working) and EXISTING long-term entities and facts.
+                You are given MEMORIES (new notes agents saved while working) and EXISTING long-term items.
 
                 A memory is a note an agent chose to remember: its title and content. Take from it only what it states.
 
@@ -241,14 +253,26 @@ steps:
                 When a memory restates or confirms an existing item, return its ref with that memory in source_memory_ids even if nothing else changes: that records that it was seen again. Each EXISTING item shows attributes["memory.number_of_occurrences"], how many memories it was seen in, and attributes["memory.last_seen_at"], when it was last seen. These are set for you: never return memory.* attributes.
 
                 An EXISTING item lists the memories it was built from as references with relation derived_from and uri ki://<memory id>. Do not return an item only for memories it already lists: they are already recorded.
+                {%- if consts.fact_types.size > 0 %}
 
-                Facts are read without their entities, so write each one to stand alone: name the entities it is about in its title and content, and keep every number exactly as stated.
+                Facts are read on their own, so write each one to stand alone: name what it is about in its title and content, and keep every name, number, code and date exactly as stated.
 
-                Add a relationship of a configured type whenever the memories support it, so related entities are linked.
+                State the knowledge itself rather than copying the memory, and leave out how it was found and where it came from. When a memory holds several separate pieces of knowledge, write a fact for each.
+                {%- endif %}
+                {%- if consts.entity_types.size > 0 %}
 
-                List every entity a fact is about in its about field, creating an entity of a configured type if none exists yet.
+                Give every entity a content summary of what is known about it: its attribute values and the main facts about it.
+                {%- endif %}
+                {%- if consts.procedure_types.size > 0 %}
 
-                Give every entity a content summary of what is known about it: its attribute values and the main facts about it. When you create, update or delete a fact about an entity, update that entity and rewrite its content to match.
+                A procedure is a way of doing a task that a later agent can follow again. Write one only when a memory states the steps themselves: steps that were followed and worked, or that a runbook or guide gives, and that would work again. A description of how something behaves, such as a convention, a limit or the parameters of an endpoint, is not a procedure, even when it could be written as steps. Do not add steps the memories do not state. Give it:
+                - title: the task, such as "Rotate an expired API key".
+                - description: when to use it, in one sentence.
+                - content: only the steps, numbered 1., 2., 3., one action each, keeping every command, setting, name and value exactly as stated. Write a condition into its step, such as "If the request returns 429, wait for Retry-After seconds". Leave out who owns the task, where to report it and where the steps came from.
+                Do not write a procedure for steps that only fit one case, such as a fix for a single record, or for steps that were suggested but not confirmed to work.
+                When a memory refines, corrects or extends an EXISTING procedure for the same task, update that procedure and rewrite its steps in full, rather than writing a second one.
+                {%- endif %}
+                {%- if consts.fact_types.size > 0 or consts.entity_types.size > 0 %}
 
                 Give an entity or fact access_patterns when the MEMORIES show how to query the raw data about it: up to 5 distinct questions a later agent could answer from that data. Build them only from indices, fields, values and queries that appear in the MEMORIES; return none rather than invent an index or field. Each has:
                 - question_type: a short label for the kind of question.
@@ -261,12 +285,13 @@ steps:
                 - Boolean fields take COUNT(*) WHERE field == true, never SUM()/AVG()/MIN()/MAX(). Only use AVG()/SUM() on numeric fields.
                 - Keep it cheap: end it with a small | LIMIT n (n <= 20).
                 An item's existing access_patterns are shown with it. Return access_patterns only to change them; the list you return replaces them.
+                {%- endif %}
 
                 Every created or updated item must list the MEMORIES it is based on in source_memory_ids.
 
                 Ignore memories that hold nothing worth remembering. An empty change set is a valid answer.
 
-                How to read EXISTING: an item's type is its kind and its configured type, so entity.customer is an entity of type customer and fact.preference is a fact of type preference. On an entity, each references entry with relation relates_to is a relationship: its description is the relationship type and its uri, ki://<id>, names the target entity. On a fact, the relates_to entries with description about name the entities it is about.
+                How to read EXISTING: an item's type is its kind followed by its configured type: fact.<fact type>, entity.<entity type> or procedure.<procedure type>.
 
                 FACT TYPES:
                 {%- for fact_type in consts.fact_types %}
@@ -280,11 +305,11 @@ steps:
                 {%- else %}
                 none: do not create entities.
                 {%- endfor %}
-                RELATIONSHIP TYPES:
-                {%- for relationship_type in consts.relationship_types %}
-                - {{ relationship_type.type }}: {{ relationship_type.source }} -> {{ relationship_type.target }}{% if relationship_type.description %} ({{ relationship_type.description }}){% endif %}
+                PROCEDURE TYPES:
+                {%- for procedure_type in consts.procedure_types %}
+                - {{ procedure_type.type }}{% if procedure_type.description %}: {{ procedure_type.description }}{% endif %}
                 {%- else %}
-                none: do not create relationships.
+                none: do not create procedures.
                 {%- endfor %}
 
                 INSTRUCTIONS:
@@ -313,14 +338,14 @@ steps:
                       properties:
                         ref:
                           type: string
-                          description: An id from EXISTING, or a new key like "new:1" to create something. Reuse the same new key to refer to a new entity elsewhere in this change set.
+                          description: An id from EXISTING, or a new key like "new:1" to create something.
                         delete:
                           type: boolean
                           description: True deletes an existing entity.
                         type:
                           type: string
                           description: One of the configured entity types.
-                        name:
+                        title:
                           type: string
                           description: The canonical name of the entity.
                         description:
@@ -385,15 +410,10 @@ steps:
                           description: One of the configured fact types.
                         title:
                           type: string
-                          description: A short label for the fact that names the entities it is about.
+                          description: A short label for the fact that names what it is about.
                         content:
                           type: string
-                          description: The fact, stated so it can be used on its own, naming the entities it is about and keeping exact values.
-                        about:
-                          type: array
-                          description: Refs of the entities the fact is about.
-                          items:
-                            type: string
+                          description: The fact, stated so it can be used on its own, naming what it is about and keeping exact values.
                         access_patterns:
                           type: array
                           description: Replaces the existing access patterns; leave out to keep them.
@@ -420,37 +440,41 @@ steps:
                             type: string
                       required:
                         - ref
-                  relationships:
+                  procedures:
                     type: array
-                    description: Relationships between entities to add or remove.
+                    description: Procedures to create, update, or delete. Leave out procedures that do not change.
                     items:
                       type: object
                       properties:
+                        ref:
+                          type: string
+                          description: An id from EXISTING, or a new key like "new:1" to create something.
+                        delete:
+                          type: boolean
+                          description: True deletes an existing procedure.
                         type:
                           type: string
-                          description: One of the configured relationship types.
-                        source:
+                          description: One of the configured procedure types.
+                        title:
                           type: string
-                          description: Ref of the source entity.
-                        target:
+                          description: The task the procedure does.
+                        description:
                           type: string
-                          description: Ref of the target entity.
-                        remove:
-                          type: boolean
-                          description: True removes an existing relationship.
+                          description: When to use the procedure, in one sentence.
+                        content:
+                          type: string
+                          description: The numbered steps, keeping exact commands, settings and values.
                         source_memory_ids:
                           type: array
-                          description: Ids of the MEMORIES this is based on. Required unless removing.
+                          description: Ids of the MEMORIES this is based on. Required unless deleting.
                           items:
                             type: string
                       required:
-                        - type
-                        - source
-                        - target
+                        - ref
                 required:
                   - entities
                   - facts
-                  - relationships
+                  - procedures
 
           - name: apply_changes
             type: context-engine.applyDreamChanges

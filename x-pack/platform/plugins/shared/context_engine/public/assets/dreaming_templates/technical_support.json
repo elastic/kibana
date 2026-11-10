@@ -2,7 +2,7 @@
   "summary": "Technical support. Content includes API docs, error guides, and integration help. The agent uses it to resolve errors, check compatibility and walk developers through migrations.",
   "rationale": "Technical support turns on errors and the software around them. Tracking which SDK versions need which runtimes, which integrations raise which errors and which plan limits apply lets the agent diagnose a problem from the versions a developer is on.",
   "dreaming": {
-    "instructions": "Record what users need to make an integration work: how each error is resolved, required configuration, which versions work together, how to migrate between versions, and the limits that apply. Keep exact error codes, header names, version numbers and limits.\n\nSkip:\n- Marketing language about product features.\n- Roadmap items or unreleased feature descriptions.\n- Internal implementation details not relevant to users.",
+    "instructions": "Record what users need to make an integration work: how each error is resolved, required configuration, which versions work together, how to migrate between versions, the limits that apply, and the steps that fix a problem or set an integration up. Keep exact error codes, header names, version numbers and limits.\n\nSkip:\n- Marketing language about product features.\n- Roadmap items or unreleased feature descriptions.\n- Internal implementation details not relevant to users.",
     "facts": [
       {
         "type": "error_resolution",
@@ -23,6 +23,16 @@
       {
         "type": "rate_limit",
         "description": "A limit on usage, such as \"free tier allows 100 requests per minute per API key\"."
+      }
+    ],
+    "procedures": [
+      {
+        "type": "troubleshooting",
+        "description": "How to diagnose and fix a problem, step by step, such as \"resolve 401 errors after rotating an API key\"."
+      },
+      {
+        "type": "setup",
+        "description": "How to set up an integration, step by step, such as \"configure webhook delivery with signature verification\"."
       }
     ],
     "entities": {
@@ -57,38 +67,6 @@
         {
           "type": "plan",
           "description": "A pricing tier with its own limits."
-        }
-      ],
-      "edges": [
-        {
-          "type": "raised_by",
-          "source": "error",
-          "target": "integration",
-          "description": "The integration returns this error."
-        },
-        {
-          "type": "requires",
-          "source": "sdk",
-          "target": "runtime",
-          "description": "The SDK needs this runtime or a later one."
-        },
-        {
-          "type": "incompatible_with",
-          "source": "sdk",
-          "target": "runtime",
-          "description": "The SDK breaks on this runtime."
-        },
-        {
-          "type": "supersedes",
-          "source": "sdk",
-          "target": "sdk",
-          "description": "The SDK version replaces an older one."
-        },
-        {
-          "type": "limited_by",
-          "source": "integration",
-          "target": "plan",
-          "description": "The plan sets the integration's limits."
         }
       ]
     }

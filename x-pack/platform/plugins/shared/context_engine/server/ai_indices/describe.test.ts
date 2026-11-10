@@ -206,8 +206,8 @@ describe('describeAiIndex', () => {
     expect(response).not.toContain('"entity.customer"');
     expect(response).toContain(
       [
-        'Unless the task specifically calls for memory, exclude memory types, and the facts and entities dreaming writes, from ordinary KI retrieval:',
-        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")',
+        'Unless the task specifically calls for memory, exclude memory types, and the facts, entities and procedures dreaming writes, from ordinary KI retrieval:',
+        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*" AND NOT type LIKE "procedure.*")',
       ].join('\n')
     );
     expect(response).toContain(

@@ -14,10 +14,8 @@ import { createMockStepContext, mockKiStepTelemetry, mockKiWriter } from './test
 const dreaming = {
   enabled: true,
   facts: [{ type: 'preference' }],
-  entities: {
-    nodes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
-    edges: [{ type: 'lives_in', source: 'customer', target: 'city' }],
-  },
+  entities: { nodes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }] },
+  procedures: [{ type: 'rebooking' }],
 };
 
 const dest = { type: 'index' as const, value: 'ai-index-idx-support' };
@@ -38,7 +36,7 @@ const changes = {
       content: 'Nova member in Montreal. Prefers early morning departures.',
       source_memory_ids: ['mem-2'],
     },
-    { ref: 'new:1', type: 'city', name: 'Montreal', source_memory_ids: ['mem-2'] },
+    { ref: 'new:1', type: 'city', title: 'Montreal', source_memory_ids: ['mem-2'] },
   ],
   facts: [
     {
@@ -46,16 +44,17 @@ const changes = {
       type: 'preference',
       title: 'Customer 825464 prefers early morning departures',
       content: 'Customer 825464 (Nova, Montreal) prefers early morning departures.',
-      about: [existingCustomer.id],
       source_memory_ids: ['mem-2'],
     },
     { ref: 'new:3', type: 'complaint', title: 'X', content: 'Y', source_memory_ids: ['mem-2'] },
   ],
-  relationships: [
+  procedures: [
     {
-      type: 'lives_in',
-      source: existingCustomer.id,
-      target: 'new:1',
+      ref: 'new:4',
+      type: 'rebooking',
+      title: 'Rebook a missed connection',
+      description: 'When a member misses a connecting flight.',
+      content: '1. Find the next flight.\n2. Rebook the member on it.',
       source_memory_ids: ['mem-2'],
     },
   ],
@@ -114,8 +113,8 @@ describe('getApplyDreamChangesStepDefinition', () => {
     const { output } = await definition(aiIndexService()).handler(context);
 
     expect(output).toEqual({
-      created: 2,
-      updated: 2,
+      created: 3,
+      updated: 1,
       deleted: 0,
       rejected: [{ item: 'fact new:3', reason: "fact type 'complaint' is not configured" }],
       dropped_access_patterns: 0,
@@ -134,7 +133,6 @@ describe('getApplyDreamChangesStepDefinition', () => {
         references: [
           { uri: 'ki://mem-1', relation: 'derived_from' },
           { uri: 'ki://mem-2', relation: 'derived_from' },
-          { uri: 'ki://entity-city--montreal', relation: 'relates_to', description: 'lives_in' },
         ],
         governance: expect.objectContaining({
           provenance: { created_by: mockKiWriter, updated_by: mockKiWriter },
@@ -143,11 +141,16 @@ describe('getApplyDreamChangesStepDefinition', () => {
     );
     const fact = Object.values(stored).find(({ type }) => type === 'fact.preference');
     expect(fact).toEqual(
+      expect.objectContaining({ references: [{ uri: 'ki://mem-2', relation: 'derived_from' }] })
+    );
+    const procedure = Object.values(stored).find(({ type }) => type === 'procedure.rebooking');
+    expect(procedure).toEqual(
       expect.objectContaining({
-        references: [
-          { uri: `ki://${existingCustomer.id}`, relation: 'relates_to', description: 'about' },
-          { uri: 'ki://mem-2', relation: 'derived_from' },
-        ],
+        id: expect.stringMatching(/^procedure-/),
+        title: 'Rebook a missed connection',
+        description: 'When a member misses a connecting flight.',
+        content: '1. Find the next flight.\n2. Rebook the member on it.',
+        references: [{ uri: 'ki://mem-2', relation: 'derived_from' }],
       })
     );
   });
@@ -181,8 +184,11 @@ describe('getApplyDreamChangesStepDefinition', () => {
 
     const { output } = await definition(aiIndexService()).handler(context);
 
-    expect(output).toEqual(expect.objectContaining({ created: 1, updated: 0 }));
+    expect(output).toEqual(expect.objectContaining({ created: 3, updated: 0 }));
     expect(stored['entity-city--montreal']).toEqual(expect.objectContaining({ permissions }));
+    expect(Object.values(stored).find(({ type }) => type === 'procedure.rebooking')).toEqual(
+      expect.objectContaining({ permissions })
+    );
     expect(stored[existingCustomer.id]).not.toEqual(
       expect.objectContaining({ content: changes.entities[0].content })
     );
@@ -211,8 +217,8 @@ describe('getApplyDreamChangesStepDefinition', () => {
     expect(stored).toEqual({ [existingCustomer.id]: existingCustomer });
     expect(output).toEqual(
       expect.objectContaining({
-        created: 2,
-        updated: 2,
+        created: 3,
+        updated: 1,
         deleted: 0,
         rejected: [{ item: 'fact new:3', reason: "fact type 'complaint' is not configured" }],
       })
@@ -231,15 +237,22 @@ describe('getApplyDreamChangesStepDefinition', () => {
         type: expect.stringMatching(/^fact\./),
         title: expect.any(String),
       },
+      {
+        id: expect.stringMatching(/^procedure-/),
+        change: 'created',
+        type: 'procedure.rebooking',
+        title: 'Rebook a missed connection',
+      },
     ]);
     expect(output?.documents?.map(({ id }) => id)).toEqual(
       output?.would_write?.map(({ id }) => id)
     );
     expect(output?.documents?.[0]).toEqual(
       expect.objectContaining({
-        references: expect.arrayContaining([
-          { uri: 'ki://entity-city--montreal', relation: 'relates_to', description: 'lives_in' },
-        ]),
+        references: [
+          { uri: 'ki://mem-1', relation: 'derived_from' },
+          { uri: 'ki://mem-2', relation: 'derived_from' },
+        ],
       })
     );
   });
@@ -257,7 +270,7 @@ describe('getApplyDreamChangesStepDefinition', () => {
           },
         ],
         changes: {
-          entities: [{ ref: 'new:1', type: 'city', name: 'Lyon', source_memory_ids: ['mem-9'] }],
+          entities: [{ ref: 'new:1', type: 'city', title: 'Lyon', source_memory_ids: ['mem-9'] }],
         },
       },
       esClient: createEsClient(stored),

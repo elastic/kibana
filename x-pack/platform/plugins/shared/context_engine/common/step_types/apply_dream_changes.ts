@@ -55,7 +55,7 @@ const accessPatternsSchema = lazySchema(() =>
   z.array(accessPatternSchema).max(MAX_DREAMING_ACCESS_PATTERNS)
 );
 
-/** Entities, facts and relationships the dreaming model creates, updates or deletes. */
+/** Entities, facts and procedures the dreaming model creates, updates or deletes. */
 export const dreamChangeSetSchema = lazySchema(() =>
   z.object({
     entities: z
@@ -64,7 +64,7 @@ export const dreamChangeSetSchema = lazySchema(() =>
           ref: refSchema,
           delete: z.boolean().optional(),
           type: typeSchema.optional(),
-          name: z.string().max(MAX_KI_TITLE_LENGTH).optional(),
+          title: z.string().max(MAX_KI_TITLE_LENGTH).optional(),
           description: z.string().max(MAX_KI_DESCRIPTION_LENGTH).optional(),
           content: z.string().max(MAX_KI_CONTENT_LENGTH).optional(),
           attributes: z
@@ -90,20 +90,21 @@ export const dreamChangeSetSchema = lazySchema(() =>
           type: typeSchema.optional(),
           title: z.string().max(MAX_KI_TITLE_LENGTH).optional(),
           content: z.string().max(MAX_KI_CONTENT_LENGTH).optional(),
-          about: z.array(refSchema).max(MAX_SOURCE_IDS).optional(),
           access_patterns: accessPatternsSchema.optional(),
           source_memory_ids: sourceMemoryIdsSchema.optional(),
         })
       )
       .max(MAX_DREAMING_CHANGE_SET_ITEMS)
       .default([]),
-    relationships: z
+    procedures: z
       .array(
         z.object({
-          type: typeSchema.min(1),
-          source: refSchema,
-          target: refSchema,
-          remove: z.boolean().optional(),
+          ref: refSchema,
+          delete: z.boolean().optional(),
+          type: typeSchema.optional(),
+          title: z.string().max(MAX_KI_TITLE_LENGTH).optional(),
+          description: z.string().max(MAX_KI_DESCRIPTION_LENGTH).optional(),
+          content: z.string().max(MAX_KI_CONTENT_LENGTH).optional(),
           source_memory_ids: sourceMemoryIdsSchema.optional(),
         })
       )
@@ -188,9 +189,9 @@ const plannedDocumentSchema = lazySchema(() =>
 
 export const applyDreamChangesOutputSchema = lazySchema(() =>
   z.object({
-    created: z.number().describe('Facts and entities created'),
-    updated: z.number().describe('Facts and entities updated, relationships included'),
-    deleted: z.number().describe('Facts and entities deleted'),
+    created: z.number().describe('Facts, entities and procedures created'),
+    updated: z.number().describe('Facts, entities and procedures updated'),
+    deleted: z.number().describe('Facts, entities and procedures deleted'),
     rejected: z
       .array(rejectedItemSchema)
       .describe('Items of the change set that were not applied, each with why'),
@@ -220,7 +221,7 @@ export const applyDreamChangesStepCommonDefinition: CommonStepDefinition<
   }),
   description: i18n.translate('xpack.contextEngine.workflows.steps.applyDreamChanges.description', {
     defaultMessage:
-      'Write the facts, entities and relationships a dreaming model proposed into an AI index.',
+      'Write the facts, entities and procedures a dreaming model proposed into an AI index.',
   }),
   category: StepCategory.Kibana,
   stability: 'tech_preview',
@@ -232,8 +233,9 @@ export const applyDreamChangesStepCommonDefinition: CommonStepDefinition<
       {
         defaultMessage:
           'Checks the change set against the dreaming config of the AI index, resolves new keys ' +
-          'like "new:1" to stable ids, and writes each fact and entity as a KI typed by its ' +
-          'configured type, such as fact.preference or entity.customer. Every item must cite ' +
+          'like "new:1" to stable ids, and writes each fact, entity and procedure as a KI typed ' +
+          'by its configured type, such as fact.preference, entity.customer or ' +
+          'procedure.troubleshooting. Every item must cite ' +
           'the memories it is based on. ' +
           'An item that breaks a rule is rejected and the rest still apply. Access patterns ' +
           'whose example query does not run are dropped. A dry run reports what it would ' +

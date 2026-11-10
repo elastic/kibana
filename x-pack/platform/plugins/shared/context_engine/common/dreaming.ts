@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/** What fact, entity, relationship and attribute names may be made of. */
+/** What fact, entity, procedure and attribute names may be made of. */
 export const DREAMING_TYPE_PATTERN = /^[a-z0-9_]+$/;
 
 export const DEFAULT_DREAMING_INTERVAL = '24h';
@@ -18,15 +18,21 @@ export const MAX_DREAMING_TYPE_DESCRIPTION_LENGTH = 2048;
 export const MAX_DREAMING_FACT_TYPES = 50;
 export const MAX_DREAMING_ENTITY_TYPES = 50;
 export const MAX_DREAMING_ENTITY_ATTRIBUTES = 50;
-export const MAX_DREAMING_RELATIONSHIP_TYPES = 50;
+export const MAX_DREAMING_PROCEDURE_TYPES = 50;
 export const MAX_DREAMING_CONNECTOR_ID_LENGTH = 256;
 
-/** Type prefixes of the KIs dreaming writes: `fact.<fact type>` and `entity.<entity type>`. */
+/**
+ * Type prefixes of the KIs dreaming writes: `fact.<fact type>`, `entity.<entity type>` and
+ * `procedure.<procedure type>`.
+ */
 export const FACT_TYPE_PREFIX = 'fact.';
 export const ENTITY_TYPE_PREFIX = 'entity.';
+export const PROCEDURE_TYPE_PREFIX = 'procedure.';
 
 export const isDreamedKiType = (type: string): boolean =>
-  type.startsWith(FACT_TYPE_PREFIX) || type.startsWith(ENTITY_TYPE_PREFIX);
+  type.startsWith(FACT_TYPE_PREFIX) ||
+  type.startsWith(ENTITY_TYPE_PREFIX) ||
+  type.startsWith(PROCEDURE_TYPE_PREFIX);
 
 /** The KI types of the memories dreaming reads. */
 export const DREAMING_MEMORY_KI_TYPES: readonly string[] = [
@@ -70,27 +76,20 @@ export interface DreamingEntityType {
   attributes?: string[];
 }
 
-export interface DreamingRelationshipType {
+/** A kind of reusable, step-by-step way of doing something, such as `troubleshooting`. */
+export interface DreamingProcedureType {
   type: string;
-  /** The entity type the relationship starts at. */
-  source: string;
-  /** The entity type the relationship points to. */
-  target: string;
   description?: string;
 }
 
-/**
- * Entity types (nodes) and the relationship types between them (edges). Entities are built only
- * when `nodes` names at least one type, and relationships only when `edges` does too.
- */
+/** Entity types. Entities are built only when `nodes` names at least one type. */
 export interface DreamingEntities {
   nodes: DreamingEntityType[];
-  edges?: DreamingRelationshipType[] | null;
 }
 
 /**
- * What an AI index learns from its memories: facts, and entities with the relationships between
- * them. A kind with no types configured is not built.
+ * What an AI index learns from its memories: facts, entities and procedures. A kind with no types
+ * configured is not built.
  */
 export interface AiIndexDreamingConfig {
   /** Whether dreaming runs on its schedule. */
@@ -103,9 +102,14 @@ export interface AiIndexDreamingConfig {
   connector_id?: string;
   /** Fact types to build. Missing or empty: no facts. */
   facts?: DreamingFactType[] | null;
-  /** Entity types and the relationships between them. Missing: no entities. */
+  /** Entity types. Missing: no entities. */
   entities?: DreamingEntities | null;
+  /** Procedure types to build. Missing or empty: no procedures. */
+  procedures?: DreamingProcedureType[] | null;
 }
+
+/** The parts of a dreaming config that say what it builds. */
+export type DreamingTypesConfig = Pick<AiIndexDreamingConfig, 'facts' | 'entities' | 'procedures'>;
 
 /** Response of `GET` and `PUT /api/context_engine/ai_index/{aiIndexId}/_dreaming`. */
 export interface GetAiIndexDreamingResponse {
@@ -115,24 +119,22 @@ export interface GetAiIndexDreamingResponse {
 /** The dreaming config of an AI index that never configured it. */
 export const DREAMING_DISABLED: AiIndexDreamingConfig = { enabled: false };
 
-/** The fact, entity and relationship types a config builds. */
+/** The fact, entity and procedure types a config builds. */
 export interface DreamingTypes {
   facts: DreamingFactType[];
   entities: DreamingEntityType[];
-  relationships: DreamingRelationshipType[];
+  procedures: DreamingProcedureType[];
 }
 
 export const dreamingTypesOf = ({
   facts,
   entities,
-}: Pick<AiIndexDreamingConfig, 'facts' | 'entities'>): DreamingTypes => {
-  const nodes = entities?.nodes ?? [];
-  return {
-    facts: facts ?? [],
-    entities: nodes,
-    relationships: nodes.length > 0 ? entities?.edges ?? [] : [],
-  };
-};
+  procedures,
+}: DreamingTypesConfig): DreamingTypes => ({
+  facts: facts ?? [],
+  entities: entities?.nodes ?? [],
+  procedures: procedures ?? [],
+});
 
 /**
  * Whether an AI index takes memories: its dreaming config is set up, on or off. `enabled` only
@@ -141,12 +143,10 @@ export const dreamingTypesOf = ({
 export const isDreamingConfigured = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
   dreaming !== undefined && (dreaming.enabled || dreamingBuildsAnything(dreaming));
 
-/** Whether a config builds anything at all: at least one fact or entity type. */
-export const dreamingBuildsAnything = (
-  config: Pick<AiIndexDreamingConfig, 'facts' | 'entities'>
-): boolean => {
-  const { facts, entities } = dreamingTypesOf(config);
-  return facts.length > 0 || entities.length > 0;
+/** Whether a config builds anything at all: at least one fact, entity or procedure type. */
+export const dreamingBuildsAnything = (config: DreamingTypesConfig): boolean => {
+  const { facts, entities, procedures } = dreamingTypesOf(config);
+  return facts.length > 0 || entities.length > 0 || procedures.length > 0;
 };
 
 const findDuplicate = (values: readonly string[]): string | undefined =>
@@ -154,16 +154,20 @@ const findDuplicate = (values: readonly string[]): string | undefined =>
 
 /**
  * What is wrong with a config beyond the shape of its fields, or `undefined` when nothing is: a
- * type named twice, an attribute listed twice, or a relationship between entity types that are not
- * configured.
+ * type named twice, or an attribute listed twice.
  */
 export const validateDreamingTypes = ({
   facts,
   entities,
-}: Pick<AiIndexDreamingConfig, 'facts' | 'entities'>): string | undefined => {
+  procedures,
+}: DreamingTypesConfig): string | undefined => {
   const duplicateFact = findDuplicate((facts ?? []).map(({ type }) => type));
   if (duplicateFact !== undefined) {
     return `Fact type '${duplicateFact}' is listed twice.`;
+  }
+  const duplicateProcedure = findDuplicate((procedures ?? []).map(({ type }) => type));
+  if (duplicateProcedure !== undefined) {
+    return `Procedure type '${duplicateProcedure}' is listed twice.`;
   }
   const nodes = entities?.nodes ?? [];
   const duplicateEntity = findDuplicate(nodes.map(({ type }) => type));
@@ -174,18 +178,6 @@ export const validateDreamingTypes = ({
     const duplicateAttribute = findDuplicate(attributes ?? []);
     if (duplicateAttribute !== undefined) {
       return `Entity type '${type}' lists attribute '${duplicateAttribute}' twice.`;
-    }
-  }
-  const edges = entities?.edges ?? [];
-  const duplicateEdge = findDuplicate(edges.map(({ type }) => type));
-  if (duplicateEdge !== undefined) {
-    return `Relationship type '${duplicateEdge}' is listed twice.`;
-  }
-  const nodeTypes = new Set(nodes.map(({ type }) => type));
-  for (const { type, source, target } of edges) {
-    const unknown = [source, target].find((end) => !nodeTypes.has(end));
-    if (unknown !== undefined) {
-      return `Relationship type '${type}' links entity type '${unknown}', which is not configured.`;
     }
   }
   return undefined;

@@ -47,7 +47,7 @@ const values: ContextEngineDreamingWorkflowTemplateValues = {
     { type: 'customer', description: 'A loyalty member.', attributes: ['loyalty_number', 'tier'] },
     { type: 'city' },
   ],
-  relationshipTypes: [{ type: 'lives_in', source: 'customer', target: 'city' }],
+  procedureTypes: [{ type: 'troubleshooting', description: 'How a customer problem is fixed.' }],
 };
 
 const render = (overrides: Partial<ContextEngineDreamingWorkflowTemplateValues> = {}) =>
@@ -62,7 +62,7 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       instructions: values.instructions,
       fact_types: values.factTypes,
       entity_types: values.entityTypes,
-      relationship_types: values.relationshipTypes,
+      procedure_types: values.procedureTypes,
     });
   });
 
@@ -257,7 +257,9 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       expect(rendered).toContain(
         '- customer: A loyalty member. (attributes: loyalty_number, tier)\n- city\n'
       );
-      expect(rendered).toContain('RELATIONSHIP TYPES:\n- lives_in: customer -> city\n');
+      expect(rendered).toContain(
+        'PROCEDURE TYPES:\n- troubleshooting: How a customer problem is fixed.\n'
+      );
       expect(rendered).toContain(`INSTRUCTIONS:\n\n${values.instructions}\n`);
       expect(rendered).toContain(`MEMORIES (one per line):\n${JSON.stringify(memory)}\n`);
       expect(rendered).toContain(JSON.stringify(existing));
@@ -273,22 +275,83 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       );
     });
 
-    it('tells the model not to create entities or relationships when none are configured', () => {
-      expect(prompt({ entityTypes: [], relationshipTypes: [] })).toContain(
-        'ENTITY TYPES:\nnone: do not create entities.\nRELATIONSHIP TYPES:\nnone: do not create relationships.\n'
+    it('tells the model not to create a kind with no types configured', () => {
+      expect(prompt({ entityTypes: [], procedureTypes: [] })).toContain(
+        'ENTITY TYPES:\nnone: do not create entities.\nPROCEDURE TYPES:\nnone: do not create procedures.\n'
       );
-    });
-
-    it('tells the model not to create facts when no fact types are configured', () => {
       expect(prompt({ factTypes: [] })).toContain(
         'FACT TYPES:\nnone: do not create facts.\nENTITY TYPES:'
       );
     });
+
+    it('describes only the kinds that are configured', () => {
+      const all = prompt();
+      const factsOnly = prompt({ entityTypes: [], procedureTypes: [] });
+      const proceduresOnly = prompt({ factTypes: [], entityTypes: [] });
+
+      expect(all).toContain(
+        'of the kinds configured below:\n- facts: separate pieces of knowledge, each readable on its own.\n- entities: the things the memories are about, each with a summary of what is known about it.\n- procedures: reusable, step-by-step ways of doing a task.\n\nYou are given'
+      );
+      expect(factsOnly).toContain(
+        'of the kinds configured below:\n- facts: separate pieces of knowledge, each readable on its own.\n\nYou are given'
+      );
+      expect(factsOnly).toContain('keep every name, number, code and date exactly as stated');
+      expect(factsOnly).toContain('write a fact for each');
+      expect(factsOnly).not.toContain('Give every entity a content summary');
+      expect(factsOnly).not.toContain('A procedure is');
+      expect(proceduresOnly).toContain('A procedure is a way of doing a task');
+      expect(proceduresOnly).toContain('update that procedure and rewrite its steps in full');
+      expect(proceduresOnly).not.toContain('Facts are read on their own');
+      expect(proceduresOnly).not.toContain('access_patterns');
+    });
+
+    it('never asks for relationships or links between items', () => {
+      const rendered = prompt();
+
+      expect(rendered).not.toMatch(/relationship|relates_to|about field/i);
+    });
+  });
+
+  it('reads existing facts, entities and procedures with what each is for', () => {
+    const batches = findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
+    const readExisting = findStep(batches.steps ?? [], 'read_existing').with;
+
+    expect(readExisting?._source).toEqual(expect.arrayContaining(['description', 'content']));
+    expect(readExisting?.query?.bool?.should).toEqual([
+      { prefix: { type: 'fact.' } },
+      { prefix: { type: 'entity.' } },
+      { prefix: { type: 'procedure.' } },
+    ]);
+  });
+
+  it('asks the model for entities, facts and procedures, and nothing else', () => {
+    const batches = findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
+    const { schema } = findStep(batches.steps ?? [], 'consolidate').with as {
+      schema: {
+        properties: Record<string, { items: { properties: Record<string, unknown> } }>;
+        required: string[];
+      };
+    };
+
+    expect(Object.keys(schema.properties)).toEqual(['entities', 'facts', 'procedures']);
+    expect(schema.required).toEqual(['entities', 'facts', 'procedures']);
+  });
+
+  it('names every item by its title, as EXISTING shows it', () => {
+    const batches = findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
+    const { schema } = findStep(batches.steps ?? [], 'consolidate').with as {
+      schema: { properties: Record<string, { items: { properties: Record<string, unknown> } }> };
+    };
+
+    for (const { items } of Object.values(schema.properties)) {
+      expect(items.properties).toHaveProperty('title');
+      expect(items.properties).not.toHaveProperty('name');
+    }
   });
 
   it('keeps empty type lists as lists', () => {
-    expect(render({ entityTypes: [], relationshipTypes: [] }).consts).toEqual(
-      expect.objectContaining({ entity_types: [], relationship_types: [] })
+    expect(render({ entityTypes: [], procedureTypes: [] }).consts).toEqual(
+      expect.objectContaining({ entity_types: [], procedure_types: [] })
     );
   });
 

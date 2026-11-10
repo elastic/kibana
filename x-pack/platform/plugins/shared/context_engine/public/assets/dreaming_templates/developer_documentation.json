@@ -2,7 +2,7 @@
   "summary": "Developer platform. Content includes API docs, guides, and architecture decisions. The assistant uses it to help developers find endpoints, follow patterns and understand how the system fits together.",
   "rationale": "Developer docs describe an API and the system behind it. Connecting endpoints to the resources they operate on, the credentials they need and the components that serve them, and components to what they depend on, lets the assistant explain both how to call something and what happens behind it.",
   "dreaming": {
-    "instructions": "Record what developers need to build on the platform: what each endpoint does, the conventions every request follows, how the system is built, how authentication works, and the limits that apply. Keep exact methods, paths, status codes, header names and limits.\n\nSkip:\n- Deprecated endpoints or removed features.\n- Internal implementation details not exposed in the API.\n- Draft specifications not yet released to developers.",
+    "instructions": "Record what developers need to build on the platform: what each endpoint does, the conventions every request follows, how the system is built, how authentication works, the limits that apply, and the steps for common tasks. Keep exact methods, paths, status codes, header names and limits.\n\nSkip:\n- Deprecated endpoints or removed features.\n- Internal implementation details not exposed in the API.\n- Draft specifications not yet released to developers.",
     "facts": [
       {
         "type": "endpoint",
@@ -23,6 +23,16 @@
       {
         "type": "limit",
         "description": "A size, rate or count limit, such as \"max payload size is 10MB, max batch size is 100 items\"."
+      }
+    ],
+    "procedures": [
+      {
+        "type": "how_to",
+        "description": "How to do a common task with the API, step by step, such as \"upload a large file with a multipart upload\"."
+      },
+      {
+        "type": "setup",
+        "description": "How to get set up to build on the platform, such as \"create an API key and make a first authenticated request\"."
       }
     ],
     "entities": {
@@ -54,32 +64,6 @@
             "scope",
             "header"
           ]
-        }
-      ],
-      "edges": [
-        {
-          "type": "operates_on",
-          "source": "api_endpoint",
-          "target": "resource",
-          "description": "The endpoint creates, reads, updates or deletes the resource."
-        },
-        {
-          "type": "authenticated_by",
-          "source": "api_endpoint",
-          "target": "credential",
-          "description": "The endpoint accepts this credential."
-        },
-        {
-          "type": "handled_by",
-          "source": "api_endpoint",
-          "target": "component",
-          "description": "The component processes the endpoint's requests."
-        },
-        {
-          "type": "depends_on",
-          "source": "component",
-          "target": "component",
-          "description": "The component needs another one to work."
         }
       ]
     }

@@ -1102,7 +1102,7 @@ export const registerAiIndexRoutes = ({
       access: 'public',
       summary: 'Get the dreaming configuration of an AI Index',
       description: [
-        'Returns what the AI Index learns from its memories: the fact types, entity types and relationship types dreaming builds, its instructions, and how often it runs. An AI Index that never configured dreaming returns `{ "enabled": false }`.',
+        'Returns what the AI Index learns from its memories: the fact, entity and procedure types dreaming builds, its instructions, and how often it runs. An AI Index that never configured dreaming returns `{ "enabled": false }`.',
         CONTEXT_ENGINE_DISABLED_NOTE,
       ].join('\n\n'),
       options: {

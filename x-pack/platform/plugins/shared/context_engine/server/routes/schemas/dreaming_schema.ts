@@ -14,7 +14,7 @@ import {
   MAX_DREAMING_FACT_TYPES,
   MAX_DREAMING_INSTRUCTIONS_LENGTH,
   MAX_DREAMING_INTERVAL_LENGTH,
-  MAX_DREAMING_RELATIONSHIP_TYPES,
+  MAX_DREAMING_PROCEDURE_TYPES,
   MAX_DREAMING_TYPE_DESCRIPTION_LENGTH,
   MAX_DREAMING_TYPE_LENGTH,
   MIN_DREAMING_INTERVAL_MINUTES,
@@ -125,30 +125,27 @@ export const dreamingConfigSchema = schema.object(
                 meta: { description: 'Entity types to build. Empty: no entities.' },
               }
             ),
-            edges: schema.maybe(
-              schema.nullable(
-                schema.arrayOf(
-                  schema.object({
-                    type: typeSchema('The relationship type.'),
-                    source: typeSchema('The entity type the relationship starts at.'),
-                    target: typeSchema('The entity type the relationship points to.'),
-                    description: typeDescriptionSchema,
-                  }),
-                  {
-                    maxSize: MAX_DREAMING_RELATIONSHIP_TYPES,
-                    meta: {
-                      description:
-                        'Relationship types between entity types. Omitted or empty: no relationships.',
-                    },
-                  }
-                )
-              )
-            ),
           },
           {
             meta: {
+              description: 'Entity types (nodes). Omitted or null: no entities.',
+            },
+          }
+        )
+      )
+    ),
+    procedures: schema.maybe(
+      schema.nullable(
+        schema.arrayOf(
+          schema.object({
+            type: typeSchema('The procedure type, stored as the KI type `procedure.<type>`.'),
+            description: typeDescriptionSchema,
+          }),
+          {
+            maxSize: MAX_DREAMING_PROCEDURE_TYPES,
+            meta: {
               description:
-                'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.',
+                'Procedure types to build: reusable, step-by-step ways of doing something. Omitted or empty: no procedures.',
             },
           }
         )
@@ -158,8 +155,7 @@ export const dreamingConfigSchema = schema.object(
   {
     validate: validateDreamingTypes,
     meta: {
-      description:
-        'What the AI Index learns from its memories: facts, and entities with the relationships between them.',
+      description: 'What the AI Index learns from its memories: facts, entities and procedures.',
     },
   }
 );

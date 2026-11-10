@@ -126,7 +126,7 @@ const memorySection = (
     'memory.session_fact',
     'Use platform.context_engine.remember to write memory.',
     'Use platform.context_engine.forget with a memory id to tombstone memory.',
-    'Unless the task specifically calls for memory, exclude memory types, and the facts and entities dreaming writes, from ordinary KI retrieval:',
+    'Unless the task specifically calls for memory, exclude memory types, and the facts, entities and procedures dreaming writes, from ordinary KI retrieval:',
     excludeMemoryKiTypesFilter(true),
     ...(includeFacts ? factsLines(factTypes, factTypeCounts, factQueries) : []),
     includeFacts

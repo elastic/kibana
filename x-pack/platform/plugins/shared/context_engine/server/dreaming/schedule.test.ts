@@ -24,10 +24,8 @@ const dreaming = {
   schedule: { interval: '6h' },
   instructions: 'Remember what customers prefer.',
   facts: [{ type: 'preference', description: 'Something a customer wants.' }],
-  entities: {
-    nodes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }],
-    edges: [{ type: 'lives_in', source: 'customer', target: 'city' }],
-  },
+  entities: { nodes: [{ type: 'customer', attributes: ['tier'] }, { type: 'city' }] },
+  procedures: [{ type: 'troubleshooting', description: 'How a customer problem is fixed.' }],
 };
 
 const aiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem => ({
@@ -112,7 +110,7 @@ describe('createDreamingScheduleService', () => {
         instructions: 'Remember what customers prefer.',
         factTypes: dreaming.facts,
         entityTypes: dreaming.entities.nodes,
-        relationshipTypes: dreaming.entities.edges,
+        procedureTypes: dreaming.procedures,
       },
     });
   });
@@ -132,7 +130,7 @@ describe('createDreamingScheduleService', () => {
         connectorId: 'my-connector',
         instructions: '',
         entityTypes: [],
-        relationshipTypes: [],
+        procedureTypes: [],
       })
     );
   });

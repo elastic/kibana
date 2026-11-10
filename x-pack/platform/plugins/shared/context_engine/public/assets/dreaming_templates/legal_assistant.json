@@ -69,44 +69,6 @@
             "kind"
           ]
         }
-      ],
-      "edges": [
-        {
-          "type": "governed_by",
-          "source": "contract",
-          "target": "regulation",
-          "description": "The contract must comply with the regulation."
-        },
-        {
-          "type": "party_to",
-          "source": "organization",
-          "target": "contract",
-          "description": "The organization signed the contract."
-        },
-        {
-          "type": "enforces",
-          "source": "organization",
-          "target": "regulation",
-          "description": "The regulator enforces the regulation."
-        },
-        {
-          "type": "interprets",
-          "source": "ruling",
-          "target": "regulation",
-          "description": "The ruling interprets or applies the regulation."
-        },
-        {
-          "type": "implements",
-          "source": "policy",
-          "target": "regulation",
-          "description": "The policy exists to comply with the regulation."
-        },
-        {
-          "type": "supersedes",
-          "source": "policy",
-          "target": "policy",
-          "description": "The policy version replaces an earlier one."
-        }
       ]
     }
   }

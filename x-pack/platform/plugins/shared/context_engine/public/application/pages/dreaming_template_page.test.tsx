@@ -33,9 +33,9 @@ const SUPPORT = {
   dreaming: {
     instructions: 'Record confirmed fixes.',
     facts: [{ type: 'solution', description: 'A confirmed fix.' }],
+    procedures: [{ type: 'troubleshooting', description: 'How a problem is fixed.' }],
     entities: {
       nodes: [{ type: 'issue', description: 'A known problem.', attributes: ['severity'] }],
-      edges: [{ type: 'duplicate_of', source: 'issue', target: 'issue' }],
     },
   },
 };
@@ -46,10 +46,7 @@ const LEGAL = {
   dreaming: {
     instructions: 'Record obligations.',
     facts: [{ type: 'obligation' }],
-    entities: {
-      nodes: [{ type: 'contract' }],
-      edges: [{ type: 'supersedes', source: 'contract', target: 'contract' }],
-    },
+    entities: { nodes: [{ type: 'contract' }] },
   },
 };
 
@@ -147,7 +144,7 @@ describe('DreamingTemplatePage', () => {
     expect(screen.getByTestId('contextDreamingConfigFact-obligation')).toBeInTheDocument();
   });
 
-  it('turns dreaming on with the facts only while entities are off', async () => {
+  it('turns dreaming on with the facts and procedures only while entities are off', async () => {
     const services = renderPage();
     await pickedExample();
 
@@ -170,19 +167,17 @@ describe('DreamingTemplatePage', () => {
       enabled: true,
       instructions: 'Acme customer support knowledge base.\n\nRecord confirmed fixes.',
       facts: SUPPORT.dreaming.facts,
+      procedures: SUPPORT.dreaming.procedures,
       entities: null,
     });
   });
 
-  it('suggests the example’s entities and relationships when they are turned on, and saves them', async () => {
+  it('suggests the example’s entities when they are turned on, and saves them', async () => {
     const services = renderPage();
     await pickedExample();
 
     fireEvent.click(screen.getByTestId('contextDreamingConfigEntitiesSwitch'));
     expect(screen.getByTestId('contextDreamingConfigEntity-issue')).toHaveTextContent('severity');
-    expect(screen.getByTestId('contextDreamingConfigRelationship-duplicate_of')).toHaveTextContent(
-      'issue → issue'
-    );
     fireEvent.click(screen.getByTestId('contextDreamingTemplateSave'));
 
     await waitFor(() => expect(services.http.put).toHaveBeenCalled());
@@ -213,6 +208,7 @@ describe('DreamingTemplatePage', () => {
     expect(putBody(services)).toEqual({
       enabled: true,
       facts: [{ type: 'incident_cause' }],
+      procedures: [],
       entities: null,
       instructions: 'Incident reviews.',
     });

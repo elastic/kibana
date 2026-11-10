@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ENTITY_TYPE_PREFIX, FACT_TYPE_PREFIX, OCCURRENCES_ATTRIBUTE } from '../../common/dreaming';
+import {
+  ENTITY_TYPE_PREFIX,
+  FACT_TYPE_PREFIX,
+  OCCURRENCES_ATTRIBUTE,
+  PROCEDURE_TYPE_PREFIX,
+} from '../../common/dreaming';
 import type { KiReferenceRelation } from '../../common/step_types/ki';
 import type { StoredKi } from '../ai_indices/ki_revision';
 import { kiIdFromUri } from './ids';
@@ -16,11 +21,9 @@ export type DreamedKiAttributes = Record<string, string | number | boolean | str
 export interface DreamedKiReference {
   uri: string;
   relation?: KiReferenceRelation;
-  /** The relationship type on an entity's `relates_to` reference; `about` on a fact's. */
-  description?: string;
 }
 
-/** A fact or entity as dreaming reads and writes it. */
+/** A fact, entity or procedure as dreaming reads and writes it. */
 export interface DreamedKi extends StoredKi {
   id: string;
   type: string;
@@ -32,27 +35,29 @@ export interface DreamedKi extends StoredKi {
   permissions?: KiPermissions;
 }
 
-/** The `description` of a fact's `relates_to` reference to an entity it is about. */
-export const ABOUT_RELATION = 'about';
+export type DreamedKiKind = 'entity' | 'fact' | 'procedure';
 
-export const kindOf = (ki: Pick<DreamedKi, 'type'>): 'entity' | 'fact' | undefined => {
+export const kindOf = (ki: Pick<DreamedKi, 'type'>): DreamedKiKind | undefined => {
   if (ki.type.startsWith(ENTITY_TYPE_PREFIX)) {
     return 'entity';
   }
   if (ki.type.startsWith(FACT_TYPE_PREFIX)) {
     return 'fact';
   }
+  if (ki.type.startsWith(PROCEDURE_TYPE_PREFIX)) {
+    return 'procedure';
+  }
   return undefined;
 };
 
-/** The memories a fact or entity was derived from. */
+/** The memories a fact, entity or procedure was derived from. */
 export const citedMemoryIds = (ki: DreamedKi): string[] =>
   (ki.references ?? []).flatMap(({ uri, relation }) => {
     const memoryId = relation === 'derived_from' ? kiIdFromUri(uri) : undefined;
     return memoryId !== undefined ? [memoryId] : [];
   });
 
-/** How many memories a fact or entity was seen in. */
+/** How many memories a fact, entity or procedure was seen in. */
 export const occurrencesOf = (ki: DreamedKi | undefined): number => {
   const stored = ki?.attributes?.[OCCURRENCES_ATTRIBUTE];
   return typeof stored === 'number' ? stored : ki ? citedMemoryIds(ki).length : 0;

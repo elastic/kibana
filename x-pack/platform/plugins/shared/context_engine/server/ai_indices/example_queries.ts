@@ -8,7 +8,7 @@
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { kiLifecyclePipeline } from './ki_lifecycle';
 import { MEMORY_KI_TYPES } from '../../common/memory';
-import { ENTITY_TYPE_PREFIX, FACT_TYPE_PREFIX } from '../../common/dreaming';
+import { ENTITY_TYPE_PREFIX, FACT_TYPE_PREFIX, PROCEDURE_TYPE_PREFIX } from '../../common/dreaming';
 
 export interface AiIndexExampleQuery {
   title: string;
@@ -19,12 +19,13 @@ export interface AiIndexExampleQuery {
 const KEEP = '| KEEP title, description, content, type, tags';
 export const FACT_TYPE_PATTERN = `${FACT_TYPE_PREFIX}*`;
 export const ENTITY_TYPE_PATTERN = `${ENTITY_TYPE_PREFIX}*`;
+export const PROCEDURE_TYPE_PATTERN = `${PROCEDURE_TYPE_PREFIX}*`;
 
-/** Leaves out memory types and, when the AI index dreams, the fact and entity types dreaming writes. */
+/** Leaves out memory types and, when the AI index dreams, the KI types dreaming writes. */
 export const excludeMemoryKiTypesCondition = (dreams: boolean): string =>
   `type IS NULL OR (${[
     ...MEMORY_KI_TYPES.map((type) => `type != "${type}"`),
-    ...(dreams ? [FACT_TYPE_PATTERN, ENTITY_TYPE_PATTERN] : []).map(
+    ...(dreams ? [FACT_TYPE_PATTERN, ENTITY_TYPE_PATTERN, PROCEDURE_TYPE_PATTERN] : []).map(
       (pattern) => `NOT type LIKE "${pattern}"`
     ),
   ].join(' AND ')})`;

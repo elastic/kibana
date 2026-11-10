@@ -10,33 +10,31 @@ import {
   ENTITY_TYPE_PREFIX,
   FACT_TYPE_PREFIX,
   MEMORY_ATTRIBUTE_PREFIX,
+  PROCEDURE_TYPE_PREFIX,
   dreamingTypesOf,
   type AiIndexDreamingConfig,
-  type DreamingRelationshipType,
 } from '../../common/dreaming';
 import type { AccessPattern, DreamChangeSet } from '../../common/step_types/apply_dream_changes';
 import { baseContent } from './access_patterns';
-import { citedMemoryIds, kindOf, type DreamedKi } from './dreamed_ki';
-import { batchKeyOf, entityId, factId } from './ids';
+import { citedMemoryIds, kindOf, type DreamedKi, type DreamedKiKind } from './dreamed_ki';
+import { batchKeyOf, entityId, factId, procedureId } from './ids';
 
 const NEW_REF_PREFIX = 'new:';
 
-/** The fact, entity and relationship types the model may write. */
+/** The fact, entity and procedure types the model may write. */
 export interface DreamingVocabulary {
   factTypes: ReadonlySet<string>;
   /** Each entity type with its attribute keys. */
   entityTypes: ReadonlyMap<string, ReadonlySet<string>>;
-  relationshipTypes: ReadonlyMap<string, DreamingRelationshipType>;
+  procedureTypes: ReadonlySet<string>;
 }
 
 export const vocabularyOf = (config: AiIndexDreamingConfig): DreamingVocabulary => {
-  const { facts, entities, relationships } = dreamingTypesOf(config);
+  const { facts, entities, procedures } = dreamingTypesOf(config);
   return {
     factTypes: new Set(facts.map(({ type }) => type)),
     entityTypes: new Map(entities.map(({ type, attributes }) => [type, new Set(attributes ?? [])])),
-    relationshipTypes: new Map(
-      relationships.map((relationship) => [relationship.type, relationship])
-    ),
+    procedureTypes: new Set(procedures.map(({ type }) => type)),
   };
 };
 
@@ -45,7 +43,7 @@ export interface ResolveContext {
   vocabulary: DreamingVocabulary;
   /** When each memory the model was shown was recorded, by id. */
   memories: ReadonlyMap<string, string | undefined>;
-  /** The current facts and entities the change set refers to, by id. */
+  /** The current facts, entities and procedures the change set refers to, by id. */
   existing: ReadonlyMap<string, DreamedKi>;
 }
 
@@ -53,7 +51,7 @@ export interface UpsertEntityOperation {
   op: 'upsert_entity';
   id: string;
   type: string;
-  name: string;
+  title: string;
   description?: string;
   content?: string;
   attributes: Record<string, string>;
@@ -70,10 +68,22 @@ export interface UpsertFactOperation {
   type: string;
   title: string;
   content: string;
-  /** Replaces the entities the fact is about. `undefined` keeps them. */
-  about?: string[];
   /** Replaces the fact's access patterns. `undefined` keeps them. */
   accessPatterns?: AccessPattern[];
+  sourceMemoryIds: string[];
+  lastSeenAt?: string;
+}
+
+export interface UpsertProcedureOperation {
+  op: 'upsert_procedure';
+  id: string;
+  type: string;
+  /** The task the procedure does. */
+  title: string;
+  /** When to use it. */
+  description?: string;
+  /** The numbered steps. */
+  content: string;
   sourceMemoryIds: string[];
   lastSeenAt?: string;
 }
@@ -83,21 +93,11 @@ export interface DeleteOperation {
   id: string;
 }
 
-export interface RelationshipOperation {
-  op: 'relationship';
-  sourceId: string;
-  targetId: string;
-  type: string;
-  remove: boolean;
-  sourceMemoryIds: string[];
-  lastSeenAt?: string;
-}
-
 export type DreamingOperation =
   | UpsertEntityOperation
   | UpsertFactOperation
-  | DeleteOperation
-  | RelationshipOperation;
+  | UpsertProcedureOperation
+  | DeleteOperation;
 
 export interface ResolvedChangeSet {
   operations: DreamingOperation[];
@@ -105,12 +105,8 @@ export interface ResolvedChangeSet {
 }
 
 /** The ids of the existing KIs a change set refers to. */
-export const referencedIds = ({ entities, facts, relationships }: DreamChangeSet): string[] => {
-  const refs = [
-    ...entities.map(({ ref }) => ref),
-    ...facts.flatMap(({ ref, about }) => [ref, ...(about ?? [])]),
-    ...relationships.flatMap(({ source, target }) => [source, target]),
-  ];
+export const referencedIds = ({ entities, facts, procedures }: DreamChangeSet): string[] => {
+  const refs = [...entities, ...facts, ...procedures].map(({ ref }) => ref);
   return [...new Set(refs.filter((ref) => !ref.startsWith(NEW_REF_PREFIX)))];
 };
 
@@ -131,12 +127,6 @@ export const resolveChangeSet = (
   const operations: DreamingOperation[] = [];
   const rejected: ResolvedChangeSet['rejected'] = [];
   const batchKey = batchKeyOf(memories.keys());
-  const entityRefs = new Map<string, string>();
-  for (const [id, ki] of existing) {
-    if (kindOf(ki) === 'entity') {
-      entityRefs.set(id, id);
-    }
-  }
 
   const attempt = (item: string, run: () => void) => {
     try {
@@ -171,7 +161,7 @@ export const resolveChangeSet = (
     return lastSeenAt !== undefined ? { lastSeenAt } : {};
   };
 
-  const existingOfKind = (ref: string, kind: 'entity' | 'fact'): DreamedKi | undefined => {
+  const existingOfKind = (ref: string, kind: DreamedKiKind): DreamedKi | undefined => {
     const ki = existing.get(ref);
     if (ki && kindOf(ki) !== kind) {
       reject(`'${ref}' is not an existing ${kind}`);
@@ -195,9 +185,9 @@ export const resolveChangeSet = (
       const type =
         withoutPrefix(entity.type, ENTITY_TYPE_PREFIX) ??
         current?.type.slice(ENTITY_TYPE_PREFIX.length);
-      const name = entity.name ?? current?.title;
-      if (!type || !name) {
-        reject('a new entity needs a type and a name');
+      const title = entity.title ?? current?.title;
+      if (!type || !title) {
+        reject('a new entity needs a type and a title');
       }
       if (!DREAMING_TYPE_PATTERN.test(type)) {
         reject(`type '${type}' must be lowercase letters, digits, and underscores`);
@@ -217,13 +207,11 @@ export const resolveChangeSet = (
         attributes[key] = value;
       }
       const sourceMemoryIds = resolveSources(entity.source_memory_ids, current);
-      const id = current?.id ?? entityId(type, name);
-      entityRefs.set(entity.ref, id);
       operations.push({
         op: 'upsert_entity',
-        id,
+        id: current?.id ?? entityId(type, title),
         type,
-        name,
+        title,
         ...(entity.description !== undefined && { description: entity.description }),
         ...(entity.content !== undefined && { content: entity.content }),
         attributes,
@@ -233,14 +221,6 @@ export const resolveChangeSet = (
       });
     });
   }
-
-  const resolveEntityRef = (ref: string): string => {
-    const id = entityRefs.get(ref);
-    if (id === undefined) {
-      reject(`'${ref}' does not refer to an entity`);
-    }
-    return id;
-  };
 
   for (const fact of changeSet.facts) {
     attempt(`fact ${fact.ref}`, () => {
@@ -268,7 +248,6 @@ export const resolveChangeSet = (
       if (!vocabulary.factTypes.has(type)) {
         reject(`fact type '${type}' is not configured`);
       }
-      const about = vocabulary.entityTypes.size > 0 ? fact.about?.map(resolveEntityRef) : undefined;
       const sourceMemoryIds = resolveSources(fact.source_memory_ids, current);
       operations.push({
         op: 'upsert_fact',
@@ -276,7 +255,6 @@ export const resolveChangeSet = (
         type,
         title,
         content,
-        ...(about && { about: [...new Set(about)] }),
         ...(fact.access_patterns && { accessPatterns: fact.access_patterns }),
         sourceMemoryIds,
         ...lastSeenAtOf(sourceMemoryIds),
@@ -284,51 +262,45 @@ export const resolveChangeSet = (
     });
   }
 
-  const entityTypeOf = (id: string): string | undefined => {
-    const upserted = operations.find(
-      (operation): operation is UpsertEntityOperation =>
-        operation.op === 'upsert_entity' && operation.id === id
-    );
-    return upserted?.type ?? existing.get(id)?.type.slice(ENTITY_TYPE_PREFIX.length);
-  };
-
-  for (const relationship of changeSet.relationships) {
-    attempt(
-      `relationship ${relationship.source} ${relationship.type} ${relationship.target}`,
-      () => {
-        const configured = vocabulary.relationshipTypes.get(relationship.type);
-        if (!configured) {
-          reject(
-            vocabulary.relationshipTypes.size === 0
-              ? 'this AI index does not build relationships'
-              : `relationship type '${relationship.type}' is not configured`
-          );
-        }
-        const sourceId = resolveEntityRef(relationship.source);
-        const targetId = resolveEntityRef(relationship.target);
-        if (
-          entityTypeOf(sourceId) !== configured.source ||
-          entityTypeOf(targetId) !== configured.target
-        ) {
-          reject(
-            `'${relationship.type}' connects a '${configured.source}' to a '${configured.target}'`
-          );
-        }
-        const remove = relationship.remove === true;
-        const sourceMemoryIds = remove
-          ? []
-          : resolveSources(relationship.source_memory_ids, existing.get(sourceId));
-        operations.push({
-          op: 'relationship',
-          sourceId,
-          targetId,
-          type: relationship.type,
-          remove,
-          sourceMemoryIds,
-          ...lastSeenAtOf(sourceMemoryIds),
-        });
+  for (const procedure of changeSet.procedures) {
+    attempt(`procedure ${procedure.ref}`, () => {
+      if (vocabulary.procedureTypes.size === 0) {
+        reject('this AI index does not build procedures');
       }
-    );
+      const current = existingOfKind(procedure.ref, 'procedure');
+      if (procedure.delete) {
+        if (!current) {
+          reject('only an existing procedure can be deleted');
+        }
+        operations.push({ op: 'delete', id: procedure.ref });
+        return;
+      }
+      if (!current && !procedure.ref.startsWith(NEW_REF_PREFIX)) {
+        reject(`'${procedure.ref}' is neither an existing procedure nor a new key`);
+      }
+      const type =
+        withoutPrefix(procedure.type, PROCEDURE_TYPE_PREFIX) ??
+        current?.type.slice(PROCEDURE_TYPE_PREFIX.length);
+      const title = procedure.title ?? current?.title;
+      const content = procedure.content ?? current?.content;
+      if (!type || !title || !content) {
+        reject('a procedure needs a type, a title, and content');
+      }
+      if (!vocabulary.procedureTypes.has(type)) {
+        reject(`procedure type '${type}' is not configured`);
+      }
+      const sourceMemoryIds = resolveSources(procedure.source_memory_ids, current);
+      operations.push({
+        op: 'upsert_procedure',
+        id: current?.id ?? procedureId(executionId, batchKey, procedure.ref),
+        type,
+        title,
+        ...(procedure.description !== undefined && { description: procedure.description }),
+        content,
+        sourceMemoryIds,
+        ...lastSeenAtOf(sourceMemoryIds),
+      });
+    });
   }
 
   return { operations, rejected };

@@ -76,7 +76,7 @@ describe('buildExampleQueries', () => {
 
     for (const { esql } of dreaming) {
       expect(esql).toContain(
-        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")'
+        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*" AND NOT type LIKE "procedure.*")'
       );
       expect(Parser.parse(esql).errors).toEqual([]);
     }

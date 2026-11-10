@@ -67,7 +67,7 @@ export interface ContextEngineDreamingWorkflowTemplateValues extends ManagedWork
   instructions: string;
   factTypes: Array<{ type: string; description?: string }>;
   entityTypes: Array<{ type: string; description?: string; attributes?: string[] }>;
-  relationshipTypes: Array<{ type: string; source: string; target: string; description?: string }>;
+  procedureTypes: Array<{ type: string; description?: string }>;
 }
 
 const TEMPLATE_TOKEN = /__[A-Z_]+__/g;
@@ -81,11 +81,11 @@ const renderJsonTemplate = (template: string, values: Record<string, unknown>): 
       : token
   );
 
-/** Consolidates the memories of one AI index into long-term facts, entities and relationships. */
+/** Consolidates the memories of one AI index into long-term facts, entities and procedures. */
 export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 3,
+  version: 4,
   billable: false,
   yamlTemplate: (values) =>
     renderJsonTemplate(DREAMING_YAML, {
@@ -98,7 +98,7 @@ export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
       __INSTRUCTIONS__: values.instructions,
       __FACT_TYPES__: values.factTypes,
       __ENTITY_TYPES__: values.entityTypes,
-      __RELATIONSHIP_TYPES__: values.relationshipTypes,
+      __PROCEDURE_TYPES__: values.procedureTypes,
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineDreamingWorkflowTemplateValues>;

@@ -42,6 +42,10 @@ export const entityId = (type: string, name: string): string =>
 export const factId = (executionId: string, batchKey: string, ref: string): string =>
   `fact-${shortHash(executionId, batchKey, ref)}`;
 
+/** The KI id of a new procedure, built as a fact's is. */
+export const procedureId = (executionId: string, batchKey: string, ref: string): string =>
+  `procedure-${shortHash(executionId, batchKey, ref)}`;
+
 /** The key of a batch of memories. */
 export const batchKeyOf = (memoryIds: Iterable<string>): string =>
   shortHash(...[...memoryIds].sort());
