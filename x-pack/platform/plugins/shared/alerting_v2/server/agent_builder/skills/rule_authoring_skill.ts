@@ -218,7 +218,9 @@ When the user wants alerts to recover only when a condition is met, to never rec
 When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status", "alert me when the data stops"), use \`set_no_data\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
 
 ### Notifications
-When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md). To make an existing action policy attachment notify on this rule, call \`${ALERTING_TOOL_IDS.linkRuleAndActionPolicy}\`; never set \`routing_tags\` by hand for that.`,
+When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md). To make an existing action policy attachment notify on this rule, call \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\`; never set \`routing_tags\` by hand for that.`,
     getInlineTools: () => [
       manageRuleTool(deps),
       attachRuleTool(deps),

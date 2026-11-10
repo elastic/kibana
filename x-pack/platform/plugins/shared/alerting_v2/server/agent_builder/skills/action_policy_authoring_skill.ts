@@ -152,7 +152,9 @@ For a new policy, start with \`set_metadata\` (name required), then \`set_destin
 
 For an existing policy, pass the \`actionPolicyAttachmentId\` and only include the operations for the requested changes.
 
-See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, call \`${ALERTING_TOOL_IDS.linkRuleAndActionPolicy}\` instead of setting tags by hand — the \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
+See the [action-policy-matchers reference](./references/action-policy-matchers.md) when choosing matcher fields. To scope a policy to one rule, call \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\` instead of setting tags by hand — the \`matcher\` field in the operations table below shows the shape but does not expand its \`tags\`/\`expression\` sub-fields; consult the matchers reference for the full API. For whether to scope to one rule or many, consult [single-rule action policies](./references/action-policy-single-rule.md) or [multi-rule action policies](./references/action-policy-multi-rule.md).
 
 ${generateActionPolicyOperationsDoc()}
 
@@ -225,7 +227,9 @@ An action policy only requires its destination **workflows** to be saved first. 
 After rendering the attachments, remind the user to save the workflow before the action policy.
 
 Policies are linked to rules only by \`matcher.tags\`, matched against the rule's \`metadata.routing_tags\`. If a tag in the policy's \`matcher.tags\` is carried by a rule attachment in the conversation that is still unsaved, remind the user that the rule has not been saved yet. Explain that unless another saved rule already carries that routing tag, the policy will not match any alerts until the rule is saved. Do not search for or fetch other rules to check this.
-Before calling \`${ALERTING_TOOL_IDS.linkRuleAndActionPolicy}\` on a policy that is already saved and has no \`matcher.tags\` (it applies to every rule), explain to the user that linking narrows the policy to that rule and other rules will stop notifying through it once saved. If the tool result has \`warnings\`, relay them.
+Before calling \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\` on a policy that is already saved and has no \`matcher.tags\` (it applies to every rule), explain to the user that linking narrows the policy to that rule and other rules will stop notifying through it once saved. If the tool result has \`warnings\`, relay them.
 
 Do not add this reminder for catch-all policies, for policies that route only by \`matcher.expression\`, or when the policy's tags are not on the unsaved rule.
 
@@ -241,7 +245,9 @@ After creating the defaults, briefly mention:
 ## When to Load References
 
 ### Single-rule Action Policies
-When notifying on one specific rule (link it with \`${ALERTING_TOOL_IDS.linkRuleAndActionPolicy}\`, never by setting tags by hand), consult the [action-policy-single-rule reference](./references/action-policy-single-rule.md).
+When notifying on one specific rule (link it with \`${
+      ALERTING_TOOL_IDS.linkRuleAndActionPolicy
+    }\`, never by setting tags by hand), consult the [action-policy-single-rule reference](./references/action-policy-single-rule.md).
 
 ### Multi-rule Action Policies
 When the user wants one policy across several rules, a catch-all, or routing by tag/severity, consult the [action-policy-multi-rule reference](./references/action-policy-multi-rule.md).
