@@ -101,18 +101,18 @@ interface PendingFocus {
 export function EuiDataGridAdapter<TRow>({ model }: EuiDataGridAdapterProps<TRow>) {
   const styles = useMemoCss(componentStyles);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
+  const modelRef = useRef(model);
   const pendingFocusRef = useRef<PendingFocus | null>(null);
   const { columns, getRowId, leadingControlColumns: modelLeadingControlColumns, rows } = model;
+  modelRef.current = model;
 
-  const requestFocus = useCallback(
-    (address: TableGridCellAddress) => {
-      pendingFocusRef.current = {
-        address,
-        fallbackRowIndex: rows.findIndex((row) => getRowId(row) === address.rowId),
-      };
-    },
-    [getRowId, rows]
-  );
+  const requestFocus = useCallback((address: TableGridCellAddress) => {
+    const { getRowId: getCurrentRowId, rows: currentRows } = modelRef.current;
+    pendingFocusRef.current = {
+      address,
+      fallbackRowIndex: currentRows.findIndex((row) => getCurrentRowId(row) === address.rowId),
+    };
+  }, []);
 
   useEffect(() => {
     const pendingFocus = pendingFocusRef.current;
@@ -190,18 +190,18 @@ export function EuiDataGridAdapter<TRow>({ model }: EuiDataGridAdapterProps<TRow
 
   const leadingControlColumns = useMemo<EuiDataGridProps['leadingControlColumns']>(
     () =>
-      model.leadingControlColumns.map((column) => ({
+      modelLeadingControlColumns.map((column) => ({
         id: column.id,
         width: column.width,
         headerCellRender: () => (
           <EuiIconTip aria-label={column.label} type="info" content={column.label} />
         ),
         rowCellRender: ({ rowIndex }) => {
-          const context = getCellContext(model, rowIndex, column.id);
+          const context = getCellContext(modelRef.current, rowIndex, column.id);
           return context ? column.renderCell({ ...context, requestFocus }) : null;
         },
       })),
-    [model, requestFocus]
+    [modelLeadingControlColumns, requestFocus]
   );
 
   const isScrollRestored = useRef(false);
