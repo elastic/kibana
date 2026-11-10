@@ -2061,6 +2061,17 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should not set agent.download.reserve_diskspace when the advanced setting is cleared', async () => {
+    mockAgentPolicy({
+      advanced_settings: {
+        agent_download_reserve_diskspace_enabled: null,
+      },
+    });
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy?.agent?.download.reserve_diskspace).toBeUndefined();
+  });
+
   describe('fleet server host ssl', () => {
     const baseFleetServerHost = {
       name: 'default Fleet Server',

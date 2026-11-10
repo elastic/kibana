@@ -92,6 +92,16 @@ describe('form_settings', () => {
       expect(res).toEqual({ 'test.foo.default_value': 'test' });
     });
 
+    it('do not render null values for agent policy (full agent policy)', () => {
+      const res = _getSettingsValuesForAgentPolicy(TEST_SETTINGS, {
+        advanced_settings: {
+          test_foo: null,
+          test_foo_default_value: 'test',
+        },
+      } as any);
+      expect(res).toEqual({ 'test.foo.default_value': 'test' });
+    });
+
     it('render yaml values for agent policy (full agent policy)', () => {
       const res = _getSettingsValuesForAgentPolicy(TEST_SETTINGS, {
         advanced_settings: {

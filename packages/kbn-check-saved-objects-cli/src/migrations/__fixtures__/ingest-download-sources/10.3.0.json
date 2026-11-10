@@ -12,8 +12,7 @@
       "source_id": "elastic-artifacts",
       "name": "Elastic Artifacts",
       "is_default": true,
-      "host": "https://artifacts.elastic.co/downloads/",
-      "reserve_diskspace": false
+      "host": "https://artifacts.elastic.co/downloads/"
     }
   ]
 }
