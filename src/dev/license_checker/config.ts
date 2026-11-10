@@ -122,6 +122,11 @@ export const LICENSE_OVERRIDES = {
   '@elastic/pretty-printer': ['Elastic License 2.0'],
   '@elastic/statistics': ['Elastic License 2.0'],
   '@elastic/distillate': ['Elastic License 2.0'],
+  // Temporary, with the vendored build of elastic/elastic-charts#2939 (see
+  // x-pack/platform/packages/shared/isomer/vendor): its tarball ships no LICENSE.txt, which the
+  // published 73.3.2 has (dual SSPL v1 and Elastic License 2.0). Remove with the vendored build.
+  '@elastic/charts@73.3.2': ['Elastic License 2.0'],
+  '@elastic/isomer-charts-elastic': ['Elastic License 2.0'],
   '@elastic/isomer-primitives-charts': ['Elastic License 2.0'],
   '@elastic/isomer-runtime': ['Elastic License 2.0'],
   '@elastic/isomer-sdk': ['Elastic License 2.0'],
