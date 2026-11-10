@@ -33,6 +33,8 @@ outputs:
     type: number
   - name: resume_from
     type: string
+  - name: resume_after_id
+    type: string
 triggers:
   - type: scheduled
     with:
@@ -93,6 +95,7 @@ steps:
       size: 500
       sort:
         - updated_at: asc
+        - id: asc
       collapse:
         field: id
         inner_hits:
@@ -114,6 +117,7 @@ steps:
               format: strict_date_time
       _source:
         - updated_at
+        - id
       query:
         bool:
           filter:
@@ -121,9 +125,19 @@ steps:
                 type:
                   - memory.session_fact
                   - memory.session
-            - range:
-                updated_at:
-                  gte: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+            - bool:
+                should:
+                  - range:
+                      updated_at:
+                        gt: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+                  - bool:
+                      filter:
+                        - term:
+                            updated_at: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+                        - range:
+                            id:
+                              gt: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after_id }}{% endif %}'
+                minimum_should_match: 1
             - bool:
                 should:
                   - bool:
@@ -154,6 +168,7 @@ steps:
         | reject_exp: "memory", "memory._source.governance.lifecycle.status == 'deleted' or memory._source.governance.lifecycle.status == 'verification_failed' or memory.fields.expires_at.first <= execution.startedAt"
         | map: "_source" }}
       resume_from: '{% if steps.read_memories.output.hits.hits.size == 500 %}{{ steps.read_memories.output.hits.hits.last._source.updated_at }}{% endif %}'
+      resume_after_id: '{% if steps.read_memories.output.hits.hits.size == 500 %}{{ steps.read_memories.output.hits.hits.last._source.id }}{% endif %}'
       created: 0
       updated: 0
       deleted: 0
@@ -166,7 +181,14 @@ steps:
     steps:
       - name: batches
         type: foreach
-        foreach: '{{ variables.memories | chunk: 50 | json }}'
+        foreach: >-
+          {%- assign batches = "" | split: "" -%}
+          {%- assign audiences = variables.memories | group_by_exp: "memory", "memory.permissions | json" -%}
+          {%- for audience in audiences -%}
+          {%- assign chunks = audience.items | chunk: 50 -%}
+          {%- assign batches = batches | concat: chunks -%}
+          {%- endfor -%}
+          {{ batches | json }}
         steps:
           - name: read_existing
             type: elasticsearch.search
@@ -186,6 +208,7 @@ steps:
                 - content
                 - attributes
                 - references
+                - permissions
                 - governance.lifecycle.status
               query:
                 bool:
@@ -297,8 +320,10 @@ steps:
                 {%- endfor %}
 
                 EXISTING (one item per line, none when empty):
+                {%- assign audience = foreach.item.first.permissions | json %}
                 {%- for hit in steps.read_existing.output.hits.hits %}
-                {%- unless hit._source.governance.lifecycle.status == 'deleted' or hit._source.governance.lifecycle.status == 'verification_failed' %}
+                {%- assign item_audience = hit._source.permissions | json %}
+                {%- unless hit._source.governance.lifecycle.status == 'deleted' or hit._source.governance.lifecycle.status == 'verification_failed' or item_audience != audience %}
                 {{ hit._source | json }}
                 {%- endunless %}
                 {%- endfor %}
@@ -461,3 +486,4 @@ steps:
       deleted: '${{ variables.deleted | default: 0 }}'
       rejected: '${{ variables.rejected | default: 0 }}'
       resume_from: '{{ variables.resume_from }}'
+      resume_after_id: '{{ variables.resume_after_id }}'
