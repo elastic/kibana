@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/significant-events-schema'
   - '@kbn/nightshift-ai'
   - '@kbn/nightshift-shared'
+  - '@kbn/nightshift-sources-plugin'
   - '@kbn/agent-builder-server'
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/evals-plugin'
@@ -79,8 +80,13 @@ dependsOn:
   - '@kbn/eval-kql'
   - '@kbn/rrule'
   - '@kbn/inference-tracing'
-  - '@kbn/server-route-repository-utils'
+  - '@kbn/lock-manager'
   - '@kbn/cloud-plugin'
+  - '@kbn/connector-specs'
+  - '@kbn/server-route-repository-utils'
+  - '@kbn/isomer'
+  - '@kbn/isomer-plugin'
+  - '@kbn/isomer-components'
 tags:
   - plugin
   - prod
