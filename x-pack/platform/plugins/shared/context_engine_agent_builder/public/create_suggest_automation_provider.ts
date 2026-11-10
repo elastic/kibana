@@ -7,7 +7,14 @@
 
 import { isToolResultEvent, ToolResultType, type ToolResult } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import { buildPath } from '@kbn/core-http-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { ApplicationStart } from '@kbn/core/public';
+import {
+  AI_INDEX_SUGGEST_AUTOMATION_CONTEXT_PATH,
+  SUGGEST_AUTOMATION_CONTEXT_INTERNAL_API_VERSION,
+} from '@kbn/context-engine-plugin/common/constants';
+import type { SuggestAutomationContextResponse } from '@kbn/context-engine-plugin/common/http_api/automation_suggestion_context';
 import type { SuggestAutomationProvider } from '@kbn/context-engine-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import { EMPTY, switchMap } from 'rxjs';
@@ -53,12 +60,35 @@ const getAutomationToolAiIndexId = (result: ToolResult): string | undefined => {
 export const buildSuggestAutomationSessionTag = (spaceId: string, aiIndexId: string): string =>
   `context-engine-ai-index:${spaceId}:${aiIndexId}`;
 
+/**
+ * Explores the index the way a reviewer setting it up would — field summaries and a document
+ * sample per source, each existing automation's definition, how many signals and trace rows
+ * already exist — so the attachment hands the agent conclusions instead of a reason to look.
+ * Failure here is not fatal: the chat still opens with the plain index snapshot, just without the
+ * shortcut, and the agent falls back to exploring the sources itself.
+ */
+const fetchSuggestionContext = async (
+  http: HttpStart,
+  aiIndexId: string
+): Promise<SuggestAutomationContextResponse | undefined> => {
+  try {
+    return await http.get<SuggestAutomationContextResponse>(
+      buildPath(AI_INDEX_SUGGEST_AUTOMATION_CONTEXT_PATH, { aiIndexId }),
+      { version: SUGGEST_AUTOMATION_CONTEXT_INTERNAL_API_VERSION }
+    );
+  } catch {
+    return undefined;
+  }
+};
+
 export const createSuggestAutomationProvider = ({
   agentBuilder,
   application,
+  http,
 }: {
   agentBuilder: AgentBuilderPluginStart | undefined;
   application: ApplicationStart;
+  http: HttpStart;
 }): SuggestAutomationProvider => ({
   canSuggest: ({ aiIndex, isManaged }) =>
     aiIndex !== undefined &&
@@ -70,17 +100,19 @@ export const createSuggestAutomationProvider = ({
     application.capabilities[WORKFLOWS_MANAGEMENT_CAPABILITY]?.executeWorkflow === true &&
     agentBuilder?.openChat !== undefined,
 
-  suggestAutomation: ({ aiIndex, spaceId }) => {
+  suggestAutomation: async ({ aiIndex, spaceId }) => {
     if (!agentBuilder?.openChat) {
       return;
     }
+    const context = await fetchSuggestionContext(http, aiIndex.id);
     const attachmentData: AiIndexAttachmentData = {
       id: aiIndex.id,
       description: aiIndex.description,
       dest: aiIndex.dest,
-      sources: aiIndex.sources,
-      automations: aiIndex.automations,
-      traces: aiIndex.traces,
+      sources: context?.sources ?? aiIndex.sources,
+      automations: context?.automations ?? aiIndex.automations,
+      traces: context?.traces ?? aiIndex.traces,
+      ...(context ? { signals_summary: context.signals_summary } : {}),
     };
     agentBuilder.openChat({
       autoSendInitialMessage: true,

@@ -46,13 +46,15 @@ const patternBucket = (
 
 const mainResponse = ({
   patterns = [],
+  tags = [],
   total = 0,
 }: {
   patterns?: ReturnType<typeof patternBucket>[];
+  tags?: Array<{ key: string; doc_count: number }>;
   total?: number;
 } = {}) => ({
   hits: { total: { value: total, relation: 'eq' }, hits: [] },
-  aggregations: { patterns: { buckets: patterns } },
+  aggregations: { patterns: { buckets: patterns }, tags: { buckets: tags } },
 });
 
 const conversationsResponse = (ids: string[]) => ({
@@ -307,6 +309,29 @@ describe('selectSignals', () => {
       },
     ]);
     expect(result.signalCount).toBe(4200);
+  });
+
+  it('counts each tag over every attributed signal, not only the patterns the aggregation kept', async () => {
+    esClient.search.mockResolvedValueOnce(conversationsResponse([]) as never).mockResolvedValueOnce(
+      mainResponse({
+        patterns: [patternBucket('coverage_gap', 'logs-app-1', 'execute_esql', 1)],
+        tags: [
+          { key: 'coverage_gap', doc_count: 301 },
+          { key: 'query_error', doc_count: 7 },
+        ],
+        total: 301,
+      }) as never
+    );
+
+    const result = await run();
+
+    expect(result.tagCounts).toEqual([
+      { tag: 'coverage_gap', count: 301 },
+      { tag: 'query_error', count: 7 },
+    ]);
+    expect(requestFor(MAIN).aggs).toMatchObject({
+      tags: { terms: { field: 'tags', size: 100 } },
+    });
   });
 
   it('gives a rare pattern the same evidence as a common one, since each bucket carries its own', async () => {
