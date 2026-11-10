@@ -45,7 +45,7 @@ Subclasses customize behaviour by overriding two **protected** hooks:
 ### React Rendering (Recommended)
 
 ```tsx
-import { formatFieldValueReact } from '@kbn/discover-utils';
+import { formatFieldValueReact } from '@kbn/discover-utils/components';
 
 // Using the utility function
 const reactNode = formatFieldValueReact({ value, hit, fieldFormats, dataView, field });

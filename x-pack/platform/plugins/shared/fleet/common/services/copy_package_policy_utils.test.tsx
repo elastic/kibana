@@ -86,6 +86,15 @@ describe('copyPackagePolicy', () => {
     expect(result).not.toHaveProperty('id');
   });
 
+  it('should not carry over the onboarding deployment that manages the original', () => {
+    const result = copyPackagePolicy({
+      ...nginxPackagePolicy,
+      onboarding_deployment_id: 'deploy-1',
+    });
+
+    expect(result).not.toHaveProperty('onboarding_deployment_id');
+  });
+
   it('should prefix the name with "copy-"', () => {
     const result = copyPackagePolicy(nginxPackagePolicy);
 

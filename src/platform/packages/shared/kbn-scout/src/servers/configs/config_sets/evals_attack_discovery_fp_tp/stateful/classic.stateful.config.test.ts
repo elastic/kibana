@@ -15,4 +15,11 @@ describe('evals_attack_discovery_fp_tp config set', () => {
       '--xpack.security.serviceAccounts.enabled=true'
     );
   });
+
+  it('leaves Agent Builder experimental features at their default', () => {
+    const experimentalArg = servers.kbnTestServer.serverArgs.find((arg) =>
+      arg.startsWith('--uiSettings.overrides.agentBuilder:experimentalFeatures=true')
+    );
+    expect(experimentalArg).toBeUndefined();
+  });
 });

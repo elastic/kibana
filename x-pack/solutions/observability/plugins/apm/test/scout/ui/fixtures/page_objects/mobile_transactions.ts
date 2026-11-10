@@ -34,14 +34,18 @@ export class MobileTransactionsPage {
     transactionName: string,
     overrides: { rangeFrom?: string; rangeTo?: string } = {}
   ) {
-    await this.page.goto(
-      `${this.kbnUrl.app('apm')}/mobile-services/${encodeURIComponent(
-        serviceName
-      )}/transactions/view?${new URLSearchParams({
-        rangeFrom: overrides.rangeFrom ?? testData.START_DATE,
-        rangeTo: overrides.rangeTo ?? testData.END_DATE,
-        transactionName,
-      })}`
+    // APM's bundle is slow to boot on a cold Cloud deployment, hence the raised `readyTimeout`.
+    await this.page.gotoApp(
+      `apm/mobile-services/${encodeURIComponent(serviceName)}/transactions/view`,
+      {
+        params: {
+          rangeFrom: overrides.rangeFrom ?? testData.START_DATE,
+          rangeTo: overrides.rangeTo ?? testData.END_DATE,
+          transactionName,
+        },
+        readyWhen: this.page.testSubj.locator('apmMainContainer'),
+        readyTimeout: EXTENDED_TIMEOUT,
+      }
     );
   }
 

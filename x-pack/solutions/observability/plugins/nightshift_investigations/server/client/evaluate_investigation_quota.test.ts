@@ -21,18 +21,22 @@ describe('evaluateInvestigationQuota', () => {
   });
 
   it('fails closed when no callback is registered', async () => {
-    await expect(evaluateInvestigationQuota({ logger: createLogger() })).rejects.toBeInstanceOf(
-      InvestigationUnavailableError
-    );
+    await expect(
+      evaluateInvestigationQuota({ trigger: 'automatic', logger: createLogger() })
+    ).rejects.toBeInstanceOf(InvestigationUnavailableError);
   });
 
-  it('returns an explicit denial without warning', async () => {
+  it('returns an explicit denial for the trigger without warning', async () => {
     const logger = createLogger();
-    const callback = jest.fn().mockResolvedValue({ allowed: false });
+    const callback = jest.fn().mockResolvedValue({ allowed: false, deniedBy: 'manual' });
 
-    await expect(evaluateInvestigationQuota({ callback, logger })).resolves.toEqual({
+    await expect(
+      evaluateInvestigationQuota({ callback, trigger: 'manual', logger })
+    ).resolves.toEqual({
       allowed: false,
+      deniedBy: 'manual',
     });
+    expect(callback).toHaveBeenCalledWith('manual');
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -40,9 +44,9 @@ describe('evaluateInvestigationQuota', () => {
     const logger = createLogger();
     const callback = jest.fn().mockRejectedValue(new Error('Storage unavailable'));
 
-    await expect(evaluateInvestigationQuota({ callback, logger })).rejects.toBeInstanceOf(
-      InvestigationUnavailableError
-    );
+    await expect(
+      evaluateInvestigationQuota({ callback, trigger: 'automatic', logger })
+    ).rejects.toBeInstanceOf(InvestigationUnavailableError);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Storage unavailable'));
   });
 
@@ -57,7 +61,11 @@ describe('evaluateInvestigationQuota', () => {
         })
     );
 
-    const result = evaluateInvestigationQuota({ callback, logger: createLogger() });
+    const result = evaluateInvestigationQuota({
+      callback,
+      trigger: 'automatic',
+      logger: createLogger(),
+    });
     const assertion = expect(result).rejects.toBeInstanceOf(InvestigationUnavailableError);
     await jest.advanceTimersByTimeAsync(10_000);
     await assertion;
@@ -82,7 +90,7 @@ describe('evaluateInvestigationQuota', () => {
         })
     );
 
-    const result = evaluateInvestigationQuota({ callback, logger });
+    const result = evaluateInvestigationQuota({ callback, trigger: 'automatic', logger });
     const assertion = expect(result).rejects.toBeInstanceOf(InvestigationUnavailableError);
     await jest.advanceTimersByTimeAsync(10_000);
     await assertion;
@@ -104,7 +112,11 @@ describe('evaluateInvestigationQuota', () => {
         })
     );
 
-    const result = evaluateInvestigationQuota({ callback, logger: createLogger() });
+    const result = evaluateInvestigationQuota({
+      callback,
+      trigger: 'automatic',
+      logger: createLogger(),
+    });
     const assertion = expect(result).rejects.toBeInstanceOf(InvestigationUnavailableError);
     await jest.advanceTimersByTimeAsync(10_000);
     await assertion;
@@ -126,7 +138,7 @@ describe('evaluateInvestigationQuota', () => {
         })
     );
 
-    const result = evaluateInvestigationQuota({ callback, logger });
+    const result = evaluateInvestigationQuota({ callback, trigger: 'automatic', logger });
     const assertion = expect(result).rejects.toBeInstanceOf(InvestigationUnavailableError);
     await jest.advanceTimersByTimeAsync(10_000);
     await assertion;
