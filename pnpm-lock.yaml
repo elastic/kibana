@@ -14251,11 +14251,11 @@ packages:
   blurhash@2.0.5:
     resolution: {integrity: sha512-cRygWd7kGBQO3VEhPiTgq4Wc43ctsM+o46urrmPOiuAe+07fzlSB9OJVdpgDL0jPqXUVQ9ht7aq7kxOeJHRK+w==}
 
-  bn.js@4.11.9:
-    resolution: {integrity: sha512-E6QoYqCKZfgatHTdHzs1RRKP7ip4vvm+EyRUeE2RF0NblwVvb0p6jSVeNTOFxPn26QXN2o6SMfNxKp6kU8zQaw==}
+  bn.js@4.12.5:
+    resolution: {integrity: sha512-3aRg6/JxfffFD+OlOjOFR3Vo79l39ooBTFucxx+MT3dhCtzn3EmiUPQo+6/OZuI2jbXi3YKgmiTFBgChQMwIRQ==}
 
-  bn.js@5.2.3:
-    resolution: {integrity: sha512-EAcmnPkxpntVL+DS7bO1zhcZNvCkxqtkd0ZY53h06GNQ3DEkkGZ/gKgmDv6DdZQGj9BgfSPKtJJ7Dp1GPP8f7w==}
+  bn.js@5.2.5:
+    resolution: {integrity: sha512-Vq886eXykuP5E6HcKSSStP3bJgrE6In5WKxVUvJ8XGpWWYs2xZHWqUwzCtGgEtBcxyd57KBFDPFoUfNzdaHCNg==}
 
   body-parser@1.20.9:
     resolution: {integrity: sha512-FISIQxV5u91Y9gvuFq3q/tA/qTqLJn3AhRcEvyozyhJTh5OBFFtv827AdHU7Rbyct4r+Ba1/99oFa1Y3yuFsdw==}
@@ -30500,13 +30500,13 @@ snapshots:
 
   asn1.js@4.10.1:
     dependencies:
-      bn.js: 4.11.9
+      bn.js: 4.12.5
       inherits: 2.0.4
       minimalistic-assert: 1.0.1
 
   asn1.js@5.4.1:
     dependencies:
-      bn.js: 4.11.9
+      bn.js: 4.12.5
       inherits: 2.0.4
       minimalistic-assert: 1.0.1
       safer-buffer: 2.1.2
@@ -30879,9 +30879,9 @@ snapshots:
 
   blurhash@2.0.5: {}
 
-  bn.js@4.11.9: {}
+  bn.js@4.12.5: {}
 
-  bn.js@5.2.3: {}
+  bn.js@5.2.5: {}
 
   body-parser@1.20.9(supports-color@8.1.1):
     dependencies:
@@ -30987,12 +30987,12 @@ snapshots:
 
   browserify-rsa@4.1.0:
     dependencies:
-      bn.js: 5.2.3
+      bn.js: 5.2.5
       randombytes: 2.1.0
 
   browserify-sign@4.2.3:
     dependencies:
-      bn.js: 5.2.3
+      bn.js: 5.2.5
       browserify-rsa: 4.1.0
       create-hash: 1.2.0
       create-hmac: 1.1.7
@@ -31690,7 +31690,7 @@ snapshots:
 
   create-ecdh@4.0.4:
     dependencies:
-      bn.js: 4.11.9
+      bn.js: 4.12.5
       elliptic: 6.6.1
 
   create-hash@1.2.0:
@@ -32498,7 +32498,7 @@ snapshots:
 
   diffie-hellman@5.0.3:
     dependencies:
-      bn.js: 4.11.9
+      bn.js: 4.12.5
       miller-rabin: 4.0.1
       randombytes: 2.1.0
 
@@ -32689,7 +32689,7 @@ snapshots:
 
   elliptic@6.6.1:
     dependencies:
-      bn.js: 4.11.9
+      bn.js: 4.12.5
       brorand: 1.1.0
       hash.js: 1.1.3
       hmac-drbg: 1.0.1
@@ -36471,7 +36471,7 @@ snapshots:
 
   miller-rabin@4.0.1:
     dependencies:
-      bn.js: 4.11.9
+      bn.js: 4.12.5
       brorand: 1.1.0
 
   mime-db@1.52.0: {}
@@ -37853,7 +37853,7 @@ snapshots:
 
   public-encrypt@4.0.3:
     dependencies:
-      bn.js: 4.11.9
+      bn.js: 4.12.5
       browserify-rsa: 4.1.0
       create-hash: 1.2.0
       parse-asn1: 5.1.7
