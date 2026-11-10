@@ -176,12 +176,37 @@ describe('FlyoutTemplate header collapse on scroll', () => {
     expect(closeButton).toHaveFocus();
   });
 
+  it('collapses while an expanded control only controls content inside the region', () => {
+    render(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Long title" description="A timestamp">
+          <FlyoutTemplate.Header.InfoBlock title="Status">
+            <button type="button" aria-expanded="true" aria-controls="inner-panel">
+              Open
+            </button>
+            <div id="inner-panel">details</div>
+          </FlyoutTemplate.Header.InfoBlock>
+        </FlyoutTemplate.Header>
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+    const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
+
+    collapseByScroll(overflowEl);
+    expect(screen.getByTestId('flyoutHeaderCollapsibleRegion')).toHaveAttribute(
+      'aria-hidden',
+      'true'
+    );
+  });
+
   it('stays expanded while a control in the collapsible region is expanded', () => {
     render(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Header title="Long title" description="A timestamp">
           <FlyoutTemplate.Header.InfoBlock title="Status">
-            <button type="button" aria-expanded="true">
+            <button type="button" aria-expanded="true" aria-controls="outer-panel">
               Open
             </button>
           </FlyoutTemplate.Header.InfoBlock>
@@ -191,6 +216,9 @@ describe('FlyoutTemplate header collapse on scroll', () => {
         </FlyoutTemplate.Body>
       </FlyoutTemplate>
     );
+    const panel = document.createElement('div');
+    panel.id = 'outer-panel';
+    document.body.appendChild(panel);
     const overflowEl = screen.getByTestId('euiFlyoutBodyOverflow');
     const region = screen.getByTestId('flyoutHeaderCollapsibleRegion');
 
@@ -202,6 +230,7 @@ describe('FlyoutTemplate header collapse on scroll', () => {
       fireEvent.scroll(overflowEl);
     });
     expect(region).toHaveAttribute('aria-hidden', 'true');
+    panel.remove();
   });
 
   it('keeps the title heading visible with its id in collapsed state', () => {
