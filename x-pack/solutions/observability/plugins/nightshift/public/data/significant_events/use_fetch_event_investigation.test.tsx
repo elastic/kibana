@@ -82,23 +82,48 @@ describe('useFetchEventInvestigation', () => {
     expect(httpGet).not.toHaveBeenCalled();
   });
 
-  it('keeps asking until a just-started investigation is listed', async () => {
+  it('keeps asking until the just-started run of the investigation is observed', async () => {
     jest.useFakeTimers();
     try {
       httpGet
         .mockResolvedValueOnce({ results: [] })
-        .mockResolvedValue({ results: [investigation('started')] });
+        .mockResolvedValue({ results: [investigation('started', { inProgress: true })] });
       const { result } = renderFetch('episode-1', {
         awaiting: { id: 'started', startedAt: Date.now() },
       });
 
       await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
       expect(result.current.investigation).toBeUndefined();
+      expect(result.current.isAwaitingStart).toBe(true);
 
       await act(async () => {
         jest.advanceTimersByTime(5_000);
       });
       await waitFor(() => expect(result.current.investigation?.id).toBe('started'));
+      expect(httpGet).toHaveBeenCalledTimes(2);
+      expect(result.current.isAwaitingStart).toBe(false);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('stays pending while a follow-up reuses an investigation listed before its run is recorded', async () => {
+    jest.useFakeTimers();
+    try {
+      httpGet
+        .mockResolvedValueOnce({ results: [investigation('open-run', { inProgress: false })] })
+        .mockResolvedValue({ results: [investigation('open-run', { inProgress: true })] });
+      const { result } = renderFetch('episode-1', {
+        awaiting: { id: 'open-run', startedAt: Date.now() },
+      });
+
+      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
+      expect(result.current.isAwaitingStart).toBe(true);
+
+      await act(async () => {
+        jest.advanceTimersByTime(5_000);
+      });
+      await waitFor(() => expect(result.current.isAwaitingStart).toBe(false));
       expect(httpGet).toHaveBeenCalledTimes(2);
     } finally {
       jest.useRealTimers();
