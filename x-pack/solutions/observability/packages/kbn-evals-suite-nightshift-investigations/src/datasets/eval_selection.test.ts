@@ -282,6 +282,15 @@ describe('CI shard selection', () => {
     );
   });
 
+  it.each([{ NIGHTSHIFT_DATASETS: 'reinforcement' }, { EVAL_SHARD_ID: 'reinforcement' }])(
+    'rejects knowledge switches alongside reinforcement (%o)',
+    (selection) => {
+      expect(() =>
+        resolveEvalSelection({ ...selection, SANDBOX_API_KEY: 'key', NIGHTSHIFT_KNOWLEDGE: 'wiki' })
+      ).toThrow('Run reinforcement without NIGHTSHIFT_KNOWLEDGE');
+    }
+  );
+
   it('keeps the customer0 shard on smoke and trace-only, without reinforcement', () => {
     expect(resolveEvalSelection({ ...WITH_SANDBOX, EVAL_SHARD_ID: 'customer0' })).toEqual(
       resolveEvalSelection(WITH_SANDBOX)

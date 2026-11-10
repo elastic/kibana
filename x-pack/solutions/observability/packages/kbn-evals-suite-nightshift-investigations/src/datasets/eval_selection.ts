@@ -58,6 +58,16 @@ export interface EvalSelection {
 export const resolveEvalSelection = (
   env: Record<string, string | undefined> = process.env
 ): EvalSelection => {
+  // The reinforcement eval seeds its own trees and keeps learning on, so it never restores
+  // knowledge: the switch would only load credentials and turn systems on for nothing.
+  const reinforcementSelected =
+    env.EVAL_SHARD_ID === REINFORCEMENT_DATASET_ID ||
+    (env.NIGHTSHIFT_DATASETS ?? '').split(',').some((id) => id.trim() === REINFORCEMENT_DATASET_ID);
+  if (reinforcementSelected && env.NIGHTSHIFT_KNOWLEDGE?.trim()) {
+    throw new Error(
+      'Run reinforcement without NIGHTSHIFT_KNOWLEDGE; it seeds its own decision trees and never restores knowledge'
+    );
+  }
   // The CI reinforcement shard runs on its own Scout server, which its scout hook starts with
   // decision trees on.
   if (env.EVAL_SHARD_ID === REINFORCEMENT_DATASET_ID) {
