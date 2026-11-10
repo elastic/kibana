@@ -2439,6 +2439,9 @@ importers:
       '@kbn/index-editor':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-index-editor
+      '@kbn/index-explorer-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/index_explorer
       '@kbn/index-lifecycle-management-common-shared':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared
@@ -9361,6 +9364,8 @@ importers:
   x-pack/platform/plugins/private/graph: {}
 
   x-pack/platform/plugins/private/grokdebugger: {}
+
+  x-pack/platform/plugins/private/index_explorer: {}
 
   x-pack/platform/plugins/private/index_lifecycle_management: {}
 

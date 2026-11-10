@@ -90,6 +90,7 @@
     "xpack.graph": ["platform/plugins/private/graph"],
     "xpack.grokDebugger": "platform/plugins/private/grokdebugger",
     "xpack.idxMgmt": "platform/plugins/shared/index_management",
+    "xpack.indexExplorer": "platform/plugins/private/index_explorer",
     "xpack.indexLifecycleMgmt": "platform/plugins/private/index_lifecycle_management",
     "xpack.inferenceEndpointUICommon": "platform/packages/shared/kbn-inference-endpoint-ui-common",
     "xpack.infra": "solutions/observability/plugins/infra",

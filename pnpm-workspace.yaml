@@ -1431,6 +1431,7 @@ packages:
   - 'x-pack/platform/plugins/private/global_search_providers'
   - 'x-pack/platform/plugins/private/graph'
   - 'x-pack/platform/plugins/private/grokdebugger'
+  - 'x-pack/platform/plugins/private/index_explorer'
   - 'x-pack/platform/plugins/private/index_lifecycle_management'
   - 'x-pack/platform/plugins/private/indices_metadata'
   - 'x-pack/platform/plugins/private/intercepts'

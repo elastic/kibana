@@ -837,6 +837,7 @@
     "@kbn/inbox-plugin": "workspace:*",
     "@kbn/index-adapter": "workspace:*",
     "@kbn/index-editor": "workspace:*",
+    "@kbn/index-explorer-plugin": "workspace:*",
     "@kbn/index-lifecycle-management-common-shared": "workspace:*",
     "@kbn/index-lifecycle-management-plugin": "workspace:*",
     "@kbn/index-management-plugin": "workspace:*",
