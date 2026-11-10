@@ -56,7 +56,11 @@ const submission = (seededMerges: Array<{ from: string[]; into: string }>): Subm
   ],
 });
 
-const grade = (submitted: SubmitArguments, seededSubmittedMermaid: string) => {
+const grade = (
+  submitted: SubmitArguments,
+  seededSubmittedMermaid: string,
+  { live = false }: { live?: boolean } = {}
+) => {
   const output: ReinforcementTaskOutput = {
     case_id: 'case-1',
     tree_id: SEEDED_ID,
@@ -76,11 +80,11 @@ const grade = (submitted: SubmitArguments, seededSubmittedMermaid: string) => {
     input: {
       question: 'Why is the EQL SLO burning?',
       response: CONFIRMED,
-      prior_tree: { tree_id: SEEDED_ID },
+      ...(live ? {} : { prior_tree: { tree_id: SEEDED_ID } }),
     },
     output,
     expected: undefined,
-    metadata: { case_id: 'case-1', require_merge: true },
+    metadata: { case_id: 'case-1', require_merge: !live },
   });
 };
 
@@ -97,6 +101,33 @@ describe('submitArgumentsEvaluator', () => {
     const graded = await grade(submission([]), SEEDED_MERGED);
 
     expect(graded.explanation).toContain(`${SEEDED_ID}, but merged_nodes is empty`);
+    expect(graded.score).toBe(0);
+  });
+
+  // A live run seeds no tree: a confirmed cause needs a causal path on one tree, not on each.
+  it('accepts a live run whose causal path is on only one of the trees it named', async () => {
+    const graded = await grade(submission([{ from: ['E3'], into: 'E2' }]), SEEDED_MERGED, {
+      live: true,
+    });
+
+    expect(graded.score).toBe(1);
+  });
+
+  it('fails a live run that confirms a cause without a causal path on any tree', async () => {
+    const withoutCausal = submission([{ from: ['E3'], into: 'E2' }]);
+    const graded = await grade(
+      {
+        ...withoutCausal,
+        traversals: withoutCausal.traversals?.map((traversal) => ({
+          ...traversal,
+          causal_path: [],
+        })),
+      },
+      SEEDED_MERGED,
+      { live: true }
+    );
+
+    expect(graded.explanation).toContain('no tree has a causal_path');
     expect(graded.score).toBe(0);
   });
 });

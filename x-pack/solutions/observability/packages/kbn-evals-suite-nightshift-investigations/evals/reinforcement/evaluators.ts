@@ -13,7 +13,13 @@ import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-
 import pRetry from 'p-retry';
 import type { EvalConnector, Evaluator } from '@kbn/evals';
 import { buildModelFromConnector } from '@kbn/evals';
-import { gradeSubmissions, isSeededTree, parseTreeMarkdown, submissionsForTree } from './arguments';
+import {
+  confirmsCause,
+  gradeSubmissions,
+  isSeededTree,
+  parseTreeMarkdown,
+  submissionsForTree,
+} from './arguments';
 import type { ReinforcementTaskOutput } from './types';
 
 export const SUBMIT_ARGUMENTS_EVALUATOR = 'submit_arguments_consistent';
@@ -127,6 +133,20 @@ export const submitArgumentsEvaluator: ReinforcementEvaluator = {
         requireCausalPath: seeded,
       });
     });
+    // A live run seeds no tree, so a confirmed cause needs a causal path on any tree it named.
+    if (!input.prior_tree?.tree_id && confirmsCause(response)) {
+      const causal = trees.some((tree) =>
+        (submissionsForTree(output.submissions, tree.tree_id).at(-1)?.traversals ?? []).some(
+          (traversal) => (traversal.causal_path ?? []).length > 0
+        )
+      );
+      if (!causal) {
+        graded.push({
+          score: 0,
+          explanation: 'The response confirms a cause, but no tree has a causal_path.',
+        });
+      }
+    }
     const failed = graded.filter((result) => result.score !== 1);
     return {
       score: failed.length === 0 ? 1 : 0,

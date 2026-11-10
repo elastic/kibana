@@ -31,6 +31,7 @@ import {
   type WorkflowExecutionListDto,
 } from '@kbn/workflows';
 import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '@kbn/workflows/managed';
+import type { Hypothesis } from '@kbn/agentic-investigations-plugin/common';
 import { runInvestigation } from '../investigation/task';
 import type { InvestigationExample } from '../investigation/types';
 import { parseSubmissions, treeIdsInSubmission } from './arguments';
@@ -770,6 +771,13 @@ const investigatorResponse = async (
 };
 
 /**
+ * The investigator records hypotheses through `set_hypotheses`, not in its prose, so their statuses
+ * are appended for the grader to tell whether the round confirmed a cause.
+ */
+const withHypotheses = (response: string, hypotheses: Hypothesis[] | undefined): string =>
+  hypotheses?.length ? `${response}\n\n${JSON.stringify({ hypotheses })}` : response;
+
+/**
  * Runs one Customer-0 investigation and grades the reinforcement submit its post-execution
  * hook already produced.
  */
@@ -803,10 +811,9 @@ export const runCustomer0Reinforcement = async ({
     };
   }
 
-  const response = await investigatorResponse(
-    fetch,
-    conversationId,
-    investigation.structured_report?.conclusion
+  const response = withHypotheses(
+    await investigatorResponse(fetch, conversationId, investigation.structured_report?.conclusion),
+    investigation.structured_report?.hypotheses
   );
   let execution: WorkflowExecutionDto | undefined;
   try {

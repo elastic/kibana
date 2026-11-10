@@ -30,9 +30,9 @@ export const confirmsCause = (response: string): boolean => CONFIRMED_CAUSE_RE.t
 const namesTree = (named: string | undefined, treeId: string): boolean =>
   !named || symptomSlugFromTreeId(named) === symptomSlugFromTreeId(treeId);
 
-/** True when `treeId` is the round's seeded tree, or the round seeded none. */
+/** True when `treeId` is the round's seeded tree. A live run seeds none. */
 export const isSeededTree = (seededId: string | undefined, treeId: string): boolean =>
-  namesTree(seededId, treeId);
+  Boolean(seededId) && namesTree(seededId, treeId);
 
 /**
  * A submit naming no tree applies to every tree. One that names only other trees, like a retry of
