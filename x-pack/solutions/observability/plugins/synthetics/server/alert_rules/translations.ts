@@ -154,6 +154,31 @@ export const commonMonitorStateI18: Array<{
   },
 ];
 
+// Monitor status `checkedAt` is pre-formatted, so FormatDate reparses it in the Node timezone.
+// `timestamp` is the raw ISO instant. The TLS rule keeps the shared `checkedAt` text because
+// that rule already exposes the raw `@timestamp`.
+export const statusRuleCheckedAtVariable = {
+  name: 'checkedAt' as const,
+  description: i18n.translate(
+    'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.checkedAtPreformatted',
+    {
+      defaultMessage:
+        'The time of the check, preformatted using the Kibana dateFormat and dateFormat:tz settings. Do not pass it to FormatDate; use the timestamp variable instead.',
+    }
+  ),
+};
+
+export const statusRuleTimestampVariable = {
+  name: 'timestamp' as const,
+  description: i18n.translate(
+    'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.timestamp',
+    {
+      defaultMessage:
+        'The ISO 8601 time of the check included with this alert. Empty for a pending monitor with no ping. On recovery, this can be the previous alert time rather than the up check. Use FormatDate to render it in a timezone.',
+    }
+  ),
+};
+
 export const commonStateTranslations = [
   {
     name: 'firstCheckedAt',
