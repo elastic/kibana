@@ -1929,6 +1929,7 @@
     "@kbn/inference-cli": "workspace:*",
     "@kbn/ink": "workspace:*",
     "@kbn/inspect-component-plugin": "workspace:*",
+    "@kbn/isomer-corpus": "workspace:*",
     "@kbn/jest": "workspace:*",
     "@kbn/jest-benchmarks": "workspace:*",
     "@kbn/jest-serializers": "workspace:*",

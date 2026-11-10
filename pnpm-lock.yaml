@@ -5706,6 +5706,9 @@ importers:
       '@kbn/inspect-component-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/inspect_component
+      '@kbn/isomer-corpus':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-corpus
       '@kbn/jest':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-jest
@@ -9101,6 +9104,8 @@ importers:
   x-pack/platform/packages/shared/isomer/isomer: {}
 
   x-pack/platform/packages/shared/isomer/isomer-components: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-corpus: {}
 
   x-pack/platform/packages/shared/isomer/isomer-theme: {}
 
