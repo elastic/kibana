@@ -28,7 +28,6 @@ import type {
   DatasourceDimensionEditorProps,
   DatasourceLayerPanelProps,
   PublicAPIProps,
-  DataType,
   TableChangeType,
   DatasourceDimensionTriggerProps,
   DataSourceInfo,
@@ -51,12 +50,10 @@ import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
 import {
   canColumnBeUsedBeInMetricDimension,
-  hasNumericColumn,
-  isNotNumeric,
-  isNumeric,
+  hasNumericMetricColumn,
+  isNumericMetric,
   MAX_NUM_OF_COLUMNS,
   operationFromColumn,
-  resolveTextBasedColumnType,
 } from './utils';
 import {
   getColumnsFromCache,
@@ -81,11 +78,13 @@ const getSelectedFieldsFromColumns = memoizeOne(
   isEqual
 );
 
+type ResolveOperation = (column: TextBasedLayerColumn) => ReturnType<typeof operationFromColumn>;
+
 const getUnchangedSuggestionTable = (
   state: TextBasedPrivateState,
   allColumns: TextBasedLayerColumn[],
   id: string,
-  resolveType: (column: TextBasedLayerColumn) => DataType,
+  resolveOperation: ResolveOperation,
   hasNumberColumn: boolean
 ) => {
   return {
@@ -98,18 +97,17 @@ const getUnchangedSuggestionTable = (
       layerId: id,
       columns:
         state.layers[id].columns?.map((f) => {
-          const dataType = resolveType(f);
+          const operation = resolveOperation(f);
           const inMetricDimension = canColumnBeUsedBeInMetricDimension(
             hasNumberColumn,
             allColumns.length,
-            dataType
+            operation
           );
           return {
             columnId: f.columnId,
             operation: {
-              dataType,
+              ...operation,
               label: f.fieldName,
-              isBucketed: dataType !== 'number',
               ...(inMetricDimension && {
                 inMetricDimension,
               }),
@@ -126,12 +124,14 @@ const getSuggestionsByRules = (
   allColumns: TextBasedLayerColumn[],
   id: string,
   rules: Array<{ isBucketed: boolean; allowAll?: boolean }>,
-  resolveType: (column: TextBasedLayerColumn) => DataType,
+  resolveOperation: ResolveOperation,
   hasNumberColumn: boolean
 ) => {
   const columnsToKeep = rules.reduce<TextBasedLayerColumn[]>((acc, rule) => {
-    const matchesRule = (col: TextBasedLayerColumn) =>
-      rule.isBucketed ? resolveType(col) !== 'number' : resolveType(col) === 'number';
+    const matchesRule = (col: TextBasedLayerColumn) => {
+      const { dataType, isBucketed } = resolveOperation(col);
+      return rule.isBucketed ? isBucketed : dataType === 'number' && !isBucketed;
+    };
     let column = state.layers[id].columns?.find(
       (col) => matchesRule(col) && !acc.some((c) => c.columnId === col.columnId)
     );
@@ -162,16 +162,17 @@ const getSuggestionsByRules = (
       layerId: id,
       columns:
         columnsToKeep?.map((f, i) => {
-          const dataType = resolveType(f);
+          const operation = resolveOperation(f);
           const inMetricDimension = canColumnBeUsedBeInMetricDimension(
             hasNumberColumn,
             allColumns.length,
-            dataType
+            operation
           );
           return {
             columnId: f.columnId,
             operation: {
-              dataType,
+              dataType: operation.dataType,
+              ...(operation.isBucketed === rules[i].isBucketed && { scale: operation.scale }),
               label: f.fieldName,
               isBucketed: !!rules[i].isBucketed,
               // makes non-number fields to act as metrics, used for datatable suggestions
@@ -218,20 +219,20 @@ export function getTextBasedDatasource({
       }
 
       const activeColumns = activeData?.[id]?.columns;
-      // Resolve column types against the Query Result Type overlay (activeData) once per layer,
-      // falling back to the persisted meta.type when the layer has no inspector table yet.
-      const resolveType = (column: TextBasedLayerColumn) =>
-        resolveTextBasedColumnType(
+      // Resolve column operations against the Query Result Type overlay (activeData) once per layer,
+      // falling back to the persisted meta when the layer has no inspector table yet.
+      const resolveOperation: ResolveOperation = (column) =>
+        operationFromColumn(
           column,
           activeColumns?.find((col) => col.id === column.columnId)
         );
-      const hasNumberColumn = hasNumericColumn(allColumns, activeColumns);
+      const hasNumberColumn = hasNumericMetricColumn(allColumns, activeColumns);
 
       const unchangedSuggestionTable = getUnchangedSuggestionTable(
         state,
         allColumns,
         id,
-        resolveType,
+        resolveOperation,
         hasNumberColumn
       );
 
@@ -241,7 +242,7 @@ export function getTextBasedDatasource({
         allColumns,
         id,
         [{ isBucketed: false }],
-        resolveType,
+        resolveOperation,
         hasNumberColumn
       );
       const metricBucketTable = getSuggestionsByRules(
@@ -249,7 +250,7 @@ export function getTextBasedDatasource({
         allColumns,
         id,
         [{ isBucketed: false }, { isBucketed: true, allowAll: true }],
-        resolveType,
+        resolveOperation,
         hasNumberColumn
       );
       const metricBucketBucketTable = getSuggestionsByRules(
@@ -261,7 +262,7 @@ export function getTextBasedDatasource({
           { isBucketed: true, allowAll: true },
           { isBucketed: true, allowAll: true },
         ],
-        resolveType,
+        resolveOperation,
         hasNumberColumn
       );
 
@@ -289,12 +290,14 @@ export function getTextBasedDatasource({
       // Number fields are assigned automatically as metrics (!isBucketed). There are cases where the query
       // will not return number fields. In these cases we want to suggest a datatable
       // Datatable works differently in this case. On the metrics dimension can be all type of fields
-      const hasNumberTypeColumns = textBasedQueryColumns?.some(isNumeric);
+      const hasNumberTypeColumns = textBasedQueryColumns.some((c) =>
+        isNumericMetric(operationFromColumn(c))
+      );
       const newColumns = textBasedQueryColumns.map((c) => {
         const inMetricDimension = canColumnBeUsedBeInMetricDimension(
-          Boolean(hasNumberTypeColumns),
+          hasNumberTypeColumns,
           textBasedQueryColumns.length,
-          c?.meta?.type
+          operationFromColumn(c)
         );
         return {
           columnId: c.variable ?? c.id,
@@ -354,9 +357,8 @@ export function getTextBasedDatasource({
                 return {
                   columnId: f.columnId,
                   operation: {
-                    dataType: f?.meta?.type as DataType,
+                    ...operationFromColumn(f),
                     label: f.fieldName,
-                    isBucketed: Boolean(isNotNumeric(f)),
                   },
                 };
               }) ?? [],
@@ -888,18 +890,16 @@ export function getTextBasedDatasource({
                 return {
                   columnId: f.columnId,
                   operation: {
-                    dataType: f?.meta?.type as DataType,
+                    ...operationFromColumn(f),
                     label: f.fieldName,
-                    isBucketed: Boolean(isNotNumeric(f)),
                   },
                 };
               }),
               {
                 columnId: newId,
                 operation: {
-                  dataType: field?.meta?.type as DataType,
+                  ...operationFromColumn(field),
                   label: field?.name ?? '',
-                  isBucketed: Boolean(isNotNumeric(field)),
                 },
               },
             ],
@@ -931,13 +931,14 @@ export function getTextBasedDatasource({
     getDatasourceInfo: async (state) => {
       return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {
         const columns = layer.columns.map((col) => {
+          const { dataType, isBucketed } = operationFromColumn(col);
           return {
             id: col.columnId,
-            role: isNotNumeric(col) ? ('split' as const) : ('metric' as const),
+            role: isBucketed ? ('split' as const) : ('metric' as const),
             operation: {
-              dataType: col?.meta?.type as DataType,
+              dataType,
               label: col.fieldName,
-              isBucketed: Boolean(isNotNumeric(col)),
+              isBucketed,
               hasTimeShift: false,
               hasReducedTimeRange: false,
               fields: [col.fieldName],

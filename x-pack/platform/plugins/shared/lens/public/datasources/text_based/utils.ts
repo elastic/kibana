@@ -181,17 +181,22 @@ export const isNumeric = (column: TextBasedLayerColumn | DatatableColumn) =>
 export const isNotNumeric = (column: TextBasedLayerColumn | DatatableColumn) => !isNumeric(column);
 
 export function resolveTextBasedColumnType(
-  column: TextBasedLayerColumn,
+  column: Pick<TextBasedLayerColumn, 'meta'>,
   activeColumn?: DatatableColumn
 ): DataType {
   return (activeColumn?.meta?.type ?? column.meta?.type) as DataType;
 }
 
+export const isNumericMetric = ({
+  dataType,
+  isBucketed,
+}: Pick<OperationMetadata, 'dataType' | 'isBucketed'>) => dataType === 'number' && !isBucketed;
+
 /**
- * Whether the layer has at least one numeric column, resolved against the Query Result Type
- * overlay when `activeColumns` is available, and falling back to the persisted column type otherwise.
+ * Whether the layer has at least one numeric metric column, resolved against the Query Result Type
+ * overlay when `activeColumns` is available, and falling back to the persisted column otherwise.
  */
-export function hasNumericColumn(
+export function hasNumericMetricColumn(
   columns: TextBasedLayerColumn[],
   activeColumns?: DatatableColumn[]
 ): boolean {
@@ -199,9 +204,8 @@ export function hasNumericColumn(
     ? new Map(activeColumns.map((activeColumn) => [activeColumn.id, activeColumn]))
     : undefined;
 
-  return columns.some(
-    (column) =>
-      resolveTextBasedColumnType(column, activeColumnById?.get(column.columnId)) === 'number'
+  return columns.some((column) =>
+    isNumericMetric(operationFromColumn(column, activeColumnById?.get(column.columnId)))
   );
 }
 
@@ -210,7 +214,7 @@ export function hasNumericColumn(
  * resolved against activeData when available, so these fields never disagree with each other.
  */
 export function operationFromColumn(
-  column: TextBasedLayerColumn,
+  column: Pick<TextBasedLayerColumn, 'meta'>,
   activeColumn?: DatatableColumn
 ): Pick<OperationMetadata, 'dataType' | 'isBucketed' | 'scale'> {
   const dataType = resolveTextBasedColumnType(column, activeColumn);
@@ -240,9 +244,11 @@ export function canColumnBeDroppedInMetricDimension(
 export function canColumnBeUsedBeInMetricDimension(
   hasNumberColumn: boolean,
   columnCount: number,
-  selectedColumnType?: string
+  selectedOperation: Pick<OperationMetadata, 'dataType' | 'isBucketed'>
 ): boolean {
-  return !hasNumberColumn || columnCount >= MAX_NUM_OF_COLUMNS || selectedColumnType === 'number';
+  return (
+    !hasNumberColumn || columnCount >= MAX_NUM_OF_COLUMNS || isNumericMetric(selectedOperation)
+  );
 }
 
 export function mergeLayer({
