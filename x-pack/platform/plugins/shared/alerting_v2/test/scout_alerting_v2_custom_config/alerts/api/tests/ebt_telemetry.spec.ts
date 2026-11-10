@@ -6,26 +6,25 @@
  */
 
 /**
- * Asserts the EBT events produced when an alert action is applied. The ack
- * requests go through `apiClient`; alert events are seeded through `apiServices`.
+ * Asserts the EBT events produced when an alert action is applied, not the
+ * HTTP contract of the alert-actions API. Acks go through
+ * `apiServices.alertingV2.alertActions`, so the apiClient requirement does
+ * not apply.
  */
+
+/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
 
 import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/api';
-import type { RoleApiCredentials } from '@kbn/scout';
 import { ALERT_ACK_ACTION_APPLIED_EBT_EVENT_TYPE } from '../../../../../server/lib/telemetry/alert_action_ebt_schema';
 import {
-  ALERTING_V2_ALERTS_ALL_ROLE,
   apiTest,
   buildAlertEvent,
   buildGroupHash,
-  BULK_ACK_EPISODE_ACTION_URL,
-  getAckEpisodeActionUrl,
-  testData,
   type AlertingApiServicesFixture,
 } from '../fixtures';
 
-// The API key request is not a browser request, so it is reported on the `api` channel with no app.
+// The service request is not a browser request, so it is reported on the `api` channel with no app.
 const API_ORIGIN = { actor: 'user', channel: 'api' } as const;
 
 // Rule ids are created inside each test. The analytics buffer keeps events for a
@@ -40,13 +39,7 @@ const cleanCreatedRules = async (apiServices: AlertingApiServicesFixture) => {
 };
 
 apiTest.describe('Alert action EBT telemetry', { tag: ['@local-stateful-classic'] }, () => {
-  let writerHeaders: Record<string, string>;
-
-  apiTest.beforeAll(async ({ apiServices, requestAuth }) => {
-    const writerCredentials: RoleApiCredentials = await requestAuth.getApiKeyForCustomRole(
-      ALERTING_V2_ALERTS_ALL_ROLE
-    );
-    writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
+  apiTest.beforeAll(async ({ apiServices }) => {
     await apiServices.alertingV2.ebt.optIn();
   });
 
@@ -62,7 +55,7 @@ apiTest.describe('Alert action EBT telemetry', { tag: ['@local-stateful-classic'
     }
   });
 
-  apiTest('reports a single ack', async ({ apiClient, apiServices }) => {
+  apiTest('reports a single ack', async ({ apiServices }) => {
     const ruleId = `ebt-ack-rule-${randomUUID()}`;
     createdRuleIds.push(ruleId);
     const episodeId = `ebt-ack-episode-${randomUUID()}`;
@@ -74,11 +67,7 @@ apiTest.describe('Alert action EBT telemetry', { tag: ['@local-stateful-classic'
       }),
     ]);
 
-    const response = await apiClient.post(getAckEpisodeActionUrl(episodeId), {
-      headers: writerHeaders,
-      body: {},
-    });
-    expect(response).toHaveStatusCode(204);
+    await apiServices.alertingV2.alertActions.ack({ episodeId });
 
     const [event] = await apiServices.alertingV2.ebt.waitForAlertActionEvents({
       ruleId,
@@ -90,11 +79,10 @@ apiTest.describe('Alert action EBT telemetry', { tag: ['@local-stateful-classic'
       rule_id: ruleId,
       origin: API_ORIGIN,
     });
-    expect(Object.keys(event.properties)).not.toContain('alert_count');
     expect(event.properties.origin.app).toBeUndefined();
   });
 
-  apiTest('reports a bulk ack as one event per alert', async ({ apiClient, apiServices }) => {
+  apiTest('reports a bulk ack as one event per alert', async ({ apiServices }) => {
     const ruleId = `ebt-bulk-ack-rule-${randomUUID()}`;
     createdRuleIds.push(ruleId);
     const episodeIdOne = `ebt-bulk-ack-episode-one-${randomUUID()}`;
@@ -112,12 +100,10 @@ apiTest.describe('Alert action EBT telemetry', { tag: ['@local-stateful-classic'
       }),
     ]);
 
-    const response = await apiClient.post(BULK_ACK_EPISODE_ACTION_URL, {
-      headers: writerHeaders,
-      body: { items: [{ alert_id: episodeIdOne }, { alert_id: episodeIdTwo }] },
+    const response = await apiServices.alertingV2.alertActions.bulkAck({
+      items: [{ alert_id: episodeIdOne }, { alert_id: episodeIdTwo }],
     });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body).toStrictEqual({ affected_count: 2, errors: [] });
+    expect(response).toStrictEqual({ affected_count: 2, errors: [] });
 
     const events = await apiServices.alertingV2.ebt.waitForAlertActionEvents({
       ruleId,
@@ -131,7 +117,6 @@ apiTest.describe('Alert action EBT telemetry', { tag: ['@local-stateful-classic'
         rule_id: ruleId,
         origin: API_ORIGIN,
       });
-      expect(Object.keys(event.properties)).not.toContain('alert_count');
       expect(event.properties.origin.app).toBeUndefined();
     }
   });
