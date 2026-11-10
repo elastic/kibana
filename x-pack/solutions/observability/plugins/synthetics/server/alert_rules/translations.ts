@@ -174,7 +174,7 @@ export const statusRuleTimestampVariable = {
     'xpack.synthetics.alertRules.monitorStatus.actionVariables.state.timestamp',
     {
       defaultMessage:
-        'The ISO 8601 time of the check included with this alert. Empty for a pending monitor with no ping. On recovery without an up check, this is the previous alert time. Use FormatDate to render it in a timezone.',
+        'The ISO 8601 time of the check included with this alert. Empty for a pending monitor with no ping. On recovery, this can be the previous alert time rather than the up check. Use FormatDate to render it in a timezone.',
     }
   ),
 };
