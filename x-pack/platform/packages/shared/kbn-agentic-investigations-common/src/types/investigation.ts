@@ -31,6 +31,8 @@ export interface Investigation {
   proposalDecidedAt?: string;
   /** True when the proposal is approved and its action has not finished. Set only for a proposal. */
   isProposalSettling?: boolean;
+  /** True when this read of the proposal shows its decision, or no decision can follow. Set only for a proposal. */
+  isDecisionShown?: boolean;
   worker_execution_ids: string[];
   watch_tier?: string;
   severity?: string;

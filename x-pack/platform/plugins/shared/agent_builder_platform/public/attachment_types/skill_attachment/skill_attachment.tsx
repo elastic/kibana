@@ -35,10 +35,9 @@ import {
   SKILLS_API_PATH,
   type CreateSkillResponse,
 } from '@kbn/agent-builder-plugin/public';
+import { AGENT_BUILDER_MANAGE_PATHS } from '@kbn/deeplinks-agent-builder';
 import { SKILL_ATTACHMENT_TYPE, type SkillAttachment } from '../../../common/attachments';
 import { SkillDiffViewer } from './skill_diff_viewer';
-
-const SKILLS_MANAGE_PATH = '/manage/skills';
 
 const INSTRUCTIONS_PREVIEW_MAX_HEIGHT_PX = 240;
 
@@ -515,7 +514,7 @@ export const createSkillAttachmentDefinition = ({
           icon: 'pencil',
           type: ActionButtonType.PRIMARY,
           href: application.getUrlForApp(AGENTBUILDER_APP_ID, {
-            path: `${SKILLS_MANAGE_PATH}/${skillId}`,
+            path: `${AGENT_BUILDER_MANAGE_PATHS.skills}/${skillId}`,
           }),
           openInNewTab: true,
           handler: () => {

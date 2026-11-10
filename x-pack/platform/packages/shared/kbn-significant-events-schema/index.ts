@@ -51,7 +51,6 @@ export {
   type FeatureUpsert,
   type FeatureWithFilter,
   type IgnoredFeature,
-  CODE_ANALYSIS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
   DATASET_ANALYSIS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
@@ -78,6 +77,24 @@ export {
 export { type AggregatedFeature, groupFeaturesAcrossSources } from './src/feature_aggregation';
 
 export { FeatureAccumulator } from './src/feature_accumulator';
+
+export {
+  type TopologyEdge,
+  type TopologyEdgeVariant,
+  type TopologyEdgeResolution,
+  type TopologyNode,
+  type TopologyNodeType,
+  type TopologyProvenance,
+  type TopologySnapshotProperties,
+  MAX_TOPOLOGY_PROVENANCE,
+  TOPOLOGY_EDGE_RESOLUTIONS,
+  TOPOLOGY_NODE_TYPES,
+  topologyEdgeSchema,
+  topologyEdgeVariantSchema,
+  topologyNodeSchema,
+  topologyProvenanceSchema,
+  topologySnapshotPropertiesSchema,
+} from './src/topology';
 
 export type { IterationResult } from './src/api/features';
 

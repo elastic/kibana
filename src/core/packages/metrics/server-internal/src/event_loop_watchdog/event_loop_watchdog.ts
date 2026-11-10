@@ -11,7 +11,7 @@ import type { ManagedWorker, WorkerLoggingConfig } from '@kbn/core-threads-serve
 import { createManagedWorker } from '@kbn/core-threads-server-internal';
 import type { Logger } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
-import type { Phase, WatchdogWorkerData } from './types';
+import type { Phase, WatchdogProfilingData, WatchdogWorkerData } from './types';
 import {
   HEARTBEAT_INTERVAL_MS,
   SLOT_COUNT,
@@ -29,6 +29,7 @@ export interface EventLoopWatchdogParams {
   thresholdsMs: Readonly<Record<Phase, number>>;
   statsIntervalMs: number;
   logging: WorkerLoggingConfig;
+  profiling: WatchdogProfilingData;
   /** Overrides the worker entry, for tests. */
   workerEntry?: string;
 }
@@ -50,7 +51,7 @@ export class EventLoopWatchdog {
     if (this.stopping) {
       throw new Error('Cannot start the event loop watchdog while it is stopping');
     }
-    const { logger, thresholdsMs, statsIntervalMs, logging, workerEntry } = this.params;
+    const { logger, thresholdsMs, statsIntervalMs, logging, profiling, workerEntry } = this.params;
     // Resolve first: if it throws, no heartbeat timer is left behind.
     const entry = workerEntry ?? require.resolve('./worker');
     const shared = new BigInt64Array(
@@ -71,6 +72,7 @@ export class EventLoopWatchdog {
       thresholdsMs,
       statsIntervalMs,
       logging,
+      profiling,
     };
     this.worker = createManagedWorker<WatchdogWorkerData>({
       name: WATCHDOG_WORKER_NAME,
@@ -82,12 +84,13 @@ export class EventLoopWatchdog {
       },
       logger,
       unref: true,
+      // Never stays off while the flag is on: restarts back off to ManagedWorker's 1 minute cap.
+      restart: { maxAttempts: Infinity },
+      // Can't fire with unlimited restarts; keeps the heartbeat from outliving a future limit.
       onExhausted: () => this.clearHeartbeat(),
     });
     this.worker.start();
-    logger.info(
-      `Event loop watchdog started (block threshold ${thresholdsMs.running}ms, ${thresholdsMs.starting}ms while starting)`
-    );
+    logger.info('Event loop watchdog started');
     this.warnIfSilent();
   }
 

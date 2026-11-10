@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiTextBlockTruncate,
   useEuiTheme,
+  useResizeObserver,
 } from '@elastic/eui';
 import { ConversationMetaInfo, toPlainSummary } from '@kbn/agentic-investigations-common';
 import { useAiButtonGradientStyles } from '@kbn/shared-ux-ai-components';
@@ -35,6 +36,11 @@ export interface InvestigationCardProps {
    * the card button so actions are not nested interactive controls.
    */
   actions?: React.ReactNode;
+  /**
+   * Drop the card's own border and shadow so a host can wrap it in a custom frame (for example an
+   * AI gradient ring) without reaching into the card's DOM.
+   */
+  borderless?: boolean;
 }
 
 const EntityChips = ({ investigation }: { investigation: InvestigationSummary }) => {
@@ -78,6 +84,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   onClick,
   isSelected = false,
   actions,
+  borderless = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { labelCss: aiLabelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
@@ -128,10 +135,16 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   ) : undefined;
 
   const hasActions = actions != null;
+  const [actionsElement, setActionsElement] = useState<HTMLDivElement | null>(null);
+  const { width: actionsWidth } = useResizeObserver(actionsElement, 'width');
 
-  // Spacer matching ConversationsActionsGroup / Nightshift card actions: divider margins +
-  // two size="s" (32px) icon buttons + gutters — keeps age text from running under the icons.
-  const actionsSpacerWidth = `calc(${euiTheme.size.xl} * 2 + ${euiTheme.size.l} + ${euiTheme.size.s})`;
+  // The actions are positioned over the top row, so the row reserves their measured width to keep
+  // the age text from running under them. Until measured, fall back to the width of
+  // ConversationsActionsGroup: divider margins + two size="s" (32px) icon buttons + gutters.
+  const actionsSpacerWidth =
+    actionsWidth > 0
+      ? `${actionsWidth}px`
+      : `calc(${euiTheme.size.xl} * 2 + ${euiTheme.size.l} + ${euiTheme.size.s})`;
 
   return (
     <div
@@ -144,6 +157,12 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
         background: ${isSelected
           ? euiTheme.colors.backgroundBaseInteractiveSelect
           : euiTheme.colors.backgroundBasePlain};
+        ${borderless
+          ? css`
+              border: none;
+              box-shadow: none;
+            `
+          : ''}
         ${isInteractive && !isSelected
           ? `&:has([data-test-subj='investigationCardButton']:hover) {
               background: ${euiTheme.colors.backgroundBaseInteractiveHover};
@@ -188,6 +207,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
                 <EuiFlexItem
                   grow={false}
                   aria-hidden
+                  data-test-subj="investigationCardActionsSpacer"
                   css={{
                     marginBlock: `-${euiTheme.size.s}`,
                     inlineSize: actionsSpacerWidth,
@@ -247,6 +267,8 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
       </div>
       {hasActions && (
         <div
+          ref={setActionsElement}
+          data-test-subj="investigationCardActions"
           css={css`
             position: absolute;
             inset-block-start: ${euiTheme.size.l};
