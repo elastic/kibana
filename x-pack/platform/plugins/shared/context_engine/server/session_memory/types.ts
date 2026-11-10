@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-/** A session memory document as stored in Elasticsearch, one per revision. */
+/** One revision of a memory. */
 export interface StoredSessionMemory {
   '@timestamp': string;
   id: string;
   space: string;
   session_id: string;
   user_id: string;
-  ai_index_id: string[];
+  ai_index_id: readonly string[];
   /** Absent on tombstones. */
   content?: string;
-  attributes?: Record<string, string>;
+  attributes?: Readonly<Record<string, string>>;
   /** Present only on tombstones. */
   deleted_at?: string;
 }
 
-/** A session event document as stored in Elasticsearch, one per turn. */
 export interface StoredSessionEvent {
   '@timestamp': string;
   id: string;
@@ -28,17 +27,15 @@ export interface StoredSessionEvent {
   session_id: string;
   turn_id?: string;
   user_id: string;
-  ai_index_id: string[];
+  ai_index_id: readonly string[];
   transcript: string;
 }
 
-/** Every session memory operation runs for one user in one space. */
 export interface SessionMemoryScope {
   space: string;
   userId: string;
 }
 
-/** The latest live revision of a memory. */
 export interface SessionMemory {
   id: string;
   sessionId: string;
@@ -46,7 +43,6 @@ export interface SessionMemory {
   aiIndexIds: readonly string[];
   content: string;
   attributes: Readonly<Record<string, string>>;
-  /** When this revision was written. */
   revisedAt: string;
 }
 
@@ -60,10 +56,9 @@ export interface RememberInput {
 }
 
 export interface SaveEventInput {
-  /** Defaults to a generated id. A caller that answers before the write finishes passes its own. */
+  /** Defaults to a generated id. */
   id?: string;
   sessionId: string;
-  /** The harness's id for the turn, when it has one. */
   turnId?: string;
   transcript: string;
   aiIndexIds?: readonly string[];
@@ -83,6 +78,5 @@ export interface SessionMemoryService {
     scope: SessionMemoryScope,
     ids: readonly string[]
   ): Promise<{ deletedDocuments: number }>;
-  /** Writes one turn's transcript and returns the event's id. */
   saveEvent(scope: SessionMemoryScope, input: SaveEventInput): Promise<{ id: string }>;
 }

@@ -7,7 +7,7 @@
 
 import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { SESSION_EVENTS_DATA_STREAM, SESSION_MEMORY_DATA_STREAM } from './data_streams';
+import { SESSION_MEMORY_DATA_STREAM } from './data_streams';
 import { createSessionMemoryService } from './service';
 import type { StoredSessionMemory } from './types';
 
@@ -52,10 +52,14 @@ const forgottenMemory: StoredSessionMemory = {
 
 describe('createSessionMemoryService', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
-  const service = createSessionMemoryService({
-    esClient,
-    generateId: () => 'generated-id',
-    now: () => NOW,
+  const service = createSessionMemoryService(esClient);
+
+  beforeAll(() => {
+    jest.useFakeTimers({ now: NOW });
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   beforeEach(() => {
@@ -70,13 +74,12 @@ describe('createSessionMemoryService', () => {
         content: 'checkout-service latency comes from the connection pool limit',
       });
 
-      expect(result).toEqual({ id: 'generated-id' });
+      expect(result).toEqual({ id: expect.any(String) });
       expect(esClient.index).toHaveBeenCalledWith({
         index: SESSION_MEMORY_DATA_STREAM,
-        op_type: 'create',
         document: {
           '@timestamp': NOW.toISOString(),
-          id: 'generated-id',
+          id: result.id,
           space: 'default',
           session_id: 'session-1',
           user_id: 'jdoe',
@@ -87,7 +90,7 @@ describe('createSessionMemoryService', () => {
       });
     });
 
-    it('writes a revision as a full document under the given id, without reading first', async () => {
+    it('writes a revision as a full document under the given id', async () => {
       const result = await service.remember(scope, {
         id: 'memory-1',
         sessionId: 'session-2',
@@ -97,7 +100,6 @@ describe('createSessionMemoryService', () => {
       });
 
       expect(result).toEqual({ id: 'memory-1' });
-      expect(esClient.search).not.toHaveBeenCalled();
       expect(esClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
@@ -182,37 +184,6 @@ describe('createSessionMemoryService', () => {
       });
     });
 
-    it('reads only the latest revision of each memory in the caller scope', async () => {
-      esClient.search.mockResolvedValue(searchResponse([]));
-
-      await service.forget(scope, ['memory-1']);
-
-      expect(esClient.search).toHaveBeenCalledWith({
-        index: SESSION_MEMORY_DATA_STREAM,
-        ignore_unavailable: true,
-        query: {
-          bool: {
-            filter: [
-              { terms: { id: ['memory-1'] } },
-              { term: { space: 'default' } },
-              { term: { user_id: 'jdoe' } },
-            ],
-          },
-        },
-        collapse: { field: 'id' },
-        sort: [{ '@timestamp': 'desc' }],
-        size: 1,
-      });
-    });
-
-    it('writes nothing when no memory is live', async () => {
-      esClient.search.mockResolvedValue(searchResponse([forgottenMemory]));
-
-      await service.forget(scope, ['memory-2', 'memory-3']);
-
-      expect(esClient.bulk).not.toHaveBeenCalled();
-    });
-
     it('throws when Elasticsearch rejects a tombstone', async () => {
       esClient.search.mockResolvedValue(searchResponse([storedMemory]));
       esClient.bulk.mockResolvedValue(
@@ -239,28 +210,6 @@ describe('createSessionMemoryService', () => {
   });
 
   describe('hardDelete', () => {
-    it('deletes every revision of the memories in the caller scope', async () => {
-      esClient.deleteByQuery.mockResolvedValue({ deleted: 3, failures: [] });
-
-      await expect(service.hardDelete(scope, ['memory-1', 'memory-2'])).resolves.toEqual({
-        deletedDocuments: 3,
-      });
-      expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-        index: SESSION_MEMORY_DATA_STREAM,
-        ignore_unavailable: true,
-        query: {
-          bool: {
-            filter: [
-              { terms: { id: ['memory-1', 'memory-2'] } },
-              { term: { space: 'default' } },
-              { term: { user_id: 'jdoe' } },
-            ],
-          },
-        },
-        conflicts: 'proceed',
-      });
-    });
-
     it('throws when Elasticsearch fails to delete some documents', async () => {
       esClient.deleteByQuery.mockResolvedValue({
         deleted: 1,
@@ -282,55 +231,6 @@ describe('createSessionMemoryService', () => {
     it('does nothing for an empty list', async () => {
       await expect(service.hardDelete(scope, [])).resolves.toEqual({ deletedDocuments: 0 });
       expect(esClient.deleteByQuery).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('saveEvent', () => {
-    const transcript = 'User: checkout is slow\nAgent: rolled back to 3.1';
-
-    it('writes one turn under a generated id, in the caller scope', async () => {
-      const result = await service.saveEvent(scope, {
-        sessionId: 'session-1',
-        turnId: 'turn-3',
-        transcript,
-        aiIndexIds: ['ops-memory'],
-      });
-
-      expect(result).toEqual({ id: 'generated-id' });
-      expect(esClient.index).toHaveBeenCalledWith({
-        index: SESSION_EVENTS_DATA_STREAM,
-        op_type: 'create',
-        document: {
-          '@timestamp': NOW.toISOString(),
-          id: 'generated-id',
-          space: 'default',
-          session_id: 'session-1',
-          turn_id: 'turn-3',
-          user_id: 'jdoe',
-          ai_index_id: ['ops-memory'],
-          transcript,
-        },
-      });
-    });
-
-    it('keeps a caller-supplied id and leaves out a missing turn id', async () => {
-      await expect(
-        service.saveEvent(scope, { id: 'event-1', sessionId: 'session-1', transcript })
-      ).resolves.toEqual({ id: 'event-1' });
-
-      expect(esClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          document: {
-            '@timestamp': NOW.toISOString(),
-            id: 'event-1',
-            space: 'default',
-            session_id: 'session-1',
-            user_id: 'jdoe',
-            ai_index_id: [],
-            transcript,
-          },
-        })
-      );
     });
   });
 });

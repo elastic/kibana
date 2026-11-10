@@ -53,8 +53,7 @@ export interface ContextEnginePluginStart {
     spaceId: string
   ) => ImprovementsServiceApi;
   /**
-   * The session memory store: memories and session events.
-   * It reads and writes as the internal user, so callers check privileges before using it. The
+   * Reads and writes as the internal user, so callers check privileges before using it. The
    * user in each call is the end user the memory is about, and is never checked against the
    * authenticated user.
    */

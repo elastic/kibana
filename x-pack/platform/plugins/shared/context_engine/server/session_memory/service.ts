@@ -7,23 +7,15 @@
 
 import { randomUUID } from 'crypto';
 import type { BulkResponse, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { CoreStart, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { SESSION_EVENTS_DATA_STREAM, SESSION_MEMORY_DATA_STREAM } from './data_streams';
 import type {
   ForgetOutcome,
-  SessionMemory,
   SessionMemoryScope,
   SessionMemoryService,
   StoredSessionEvent,
   StoredSessionMemory,
 } from './types';
-
-interface SessionMemoryServiceDeps {
-  /** Internal user client. Core's client sends the product origin system data streams require. */
-  esClient: ElasticsearchClient;
-  generateId?: () => string;
-  now?: () => Date;
-}
 
 // Every read and delete goes through this filter, so a memory in another space or of another user
 // behaves exactly like one that does not exist.
@@ -32,8 +24,6 @@ const scopeFilter = ({ space, userId }: SessionMemoryScope): QueryDslQueryContai
   { term: { user_id: userId } },
 ];
 
-// Elasticsearch creates each stream on its first write, so reads and deletes before that find nothing
-// instead of failing.
 const ignoreMissingStream = { ignore_unavailable: true };
 
 // The bulk API reports rejected documents in the response instead of throwing.
@@ -43,16 +33,6 @@ const throwOnBulkErrors = (response: BulkResponse): void => {
     throw new Error(`Failed to write to session memory: ${error.reason ?? error.type}`);
   }
 };
-
-const toSessionMemory = (stored: StoredSessionMemory, content: string): SessionMemory => ({
-  id: stored.id,
-  sessionId: stored.session_id,
-  userId: stored.user_id,
-  aiIndexIds: stored.ai_index_id,
-  content,
-  attributes: stored.attributes ?? {},
-  revisedAt: stored['@timestamp'],
-});
 
 const toTombstone = (latest: StoredSessionMemory, timestamp: string): StoredSessionMemory => ({
   '@timestamp': timestamp,
@@ -71,27 +51,26 @@ const getForgetOutcome = (latest: StoredSessionMemory | undefined): ForgetOutcom
   return latest.deleted_at === undefined ? 'forgotten' : 'already_forgotten';
 };
 
-/** Creates the service that reads and writes the session memory data streams. */
-export const createSessionMemoryService = ({
-  esClient,
-  generateId = randomUUID,
-  now = () => new Date(),
-}: SessionMemoryServiceDeps): SessionMemoryService => ({
+/**
+ * Creates the service that reads and writes the session memory data streams.
+ * `esClient` must send the product origin that system data streams require, as core's clients do.
+ */
+export const createSessionMemoryService = (
+  esClient: ElasticsearchClient
+): SessionMemoryService => ({
   remember: async ({ space, userId }, input) => {
-    const { id = generateId(), sessionId, content, aiIndexIds = [], attributes = {} } = input;
+    const { id = randomUUID(), sessionId, content, aiIndexIds = [], attributes = {} } = input;
     await esClient.index<StoredSessionMemory>({
       index: SESSION_MEMORY_DATA_STREAM,
-      // A data stream accepts only `create`.
-      op_type: 'create',
       document: {
-        '@timestamp': now().toISOString(),
+        '@timestamp': new Date().toISOString(),
         id,
         space,
         session_id: sessionId,
         user_id: userId,
-        ai_index_id: [...aiIndexIds],
+        ai_index_id: aiIndexIds,
         content,
-        attributes: { ...attributes },
+        attributes,
       },
     });
     return { id };
@@ -106,10 +85,18 @@ export const createSessionMemoryService = ({
       size: 1,
     });
     const latest = response.hits.hits[0]?._source;
-    if (!latest || latest.deleted_at !== undefined || latest.content === undefined) {
+    if (latest?.content === undefined) {
       return undefined;
     }
-    return toSessionMemory(latest, latest.content);
+    return {
+      id: latest.id,
+      sessionId: latest.session_id,
+      userId: latest.user_id,
+      aiIndexIds: latest.ai_index_id,
+      content: latest.content,
+      attributes: latest.attributes ?? {},
+      revisedAt: latest['@timestamp'],
+    };
   },
 
   forget: async (scope, ids) => {
@@ -128,13 +115,12 @@ export const createSessionMemoryService = ({
       sort: [{ '@timestamp': 'desc' }],
       size: uniqueIds.length,
     });
-    const latestById = new Map(
-      response.hits.hits.flatMap(({ _source }) => (_source ? [[_source.id, _source] as const] : []))
-    );
+    const latestRevisions = response.hits.hits.flatMap(({ _source }) => _source ?? []);
+    const latestById = new Map(latestRevisions.map((latest) => [latest.id, latest]));
 
-    const timestamp = now().toISOString();
-    const tombstones = [...latestById.values()]
-      .filter(({ deleted_at: deletedAt }) => deletedAt === undefined)
+    const timestamp = new Date().toISOString();
+    const tombstones = latestRevisions
+      .filter((latest) => latest.deleted_at === undefined)
       .map((latest) => toTombstone(latest, timestamp));
     if (tombstones.length > 0) {
       throwOnBulkErrors(
@@ -170,27 +156,20 @@ export const createSessionMemoryService = ({
   },
 
   saveEvent: async ({ space, userId }, input) => {
-    const { id = generateId(), sessionId, turnId, transcript, aiIndexIds = [] } = input;
+    const { id = randomUUID(), sessionId, turnId, transcript, aiIndexIds = [] } = input;
     await esClient.index<StoredSessionEvent>({
       index: SESSION_EVENTS_DATA_STREAM,
-      op_type: 'create',
       document: {
-        '@timestamp': now().toISOString(),
+        '@timestamp': new Date().toISOString(),
         id,
         space,
         session_id: sessionId,
-        ...(turnId === undefined ? {} : { turn_id: turnId }),
+        turn_id: turnId,
         user_id: userId,
-        ai_index_id: [...aiIndexIds],
+        ai_index_id: aiIndexIds,
         transcript,
       },
     });
     return { id };
   },
 });
-
-/** Builds the session memory service on core's internal user client. */
-export const getSessionMemoryService = ({
-  elasticsearch,
-}: Pick<CoreStart, 'elasticsearch'>): SessionMemoryService =>
-  createSessionMemoryService({ esClient: elasticsearch.client.asInternalUser });
