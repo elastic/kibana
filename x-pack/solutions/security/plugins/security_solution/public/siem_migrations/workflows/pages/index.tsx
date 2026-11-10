@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiBadge,
@@ -22,6 +22,9 @@ import { SecuritySolutionPageWrapper } from '../../../common/components/page_wra
 import { HeaderPage } from '../../../common/components/header_page';
 import { PageTitle } from '../../common/components/page_title';
 import { WorkflowsTable } from '../components/workflows_table';
+import { useKibana } from '../../../common/lib/kibana';
+import { setPrototypeSelectorVisible } from '../common/flyout_variant';
+import { PrototypeVariantSelect } from '../components/prototype_variant_select';
 import { TINES_VENDOR_COLOR } from '../../common/utils/migration_vendor_color_config';
 import {
   ADD_ANOTHER_MIGRATION,
@@ -37,8 +40,22 @@ const MIGRATION_OPTIONS: Array<EuiComboBoxOptionOption<string>> = [
   { label: MIGRATION_OPTION_LABEL, value: 'admin-migration' },
 ];
 
+let isSelectorRegistered = false;
+
 export const MigrationWorkflowsPage: React.FC = React.memo(() => {
   const [selectedMigration, setSelectedMigration] = useState(MIGRATION_OPTIONS);
+  const { chrome } = useKibana().services;
+
+  // Prototype variant switcher lives on the right of the Kibana top bar. Nav controls can't be
+  // unregistered, so it is registered once and only renders while this page is mounted.
+  useEffect(() => {
+    if (!isSelectorRegistered) {
+      isSelectorRegistered = true;
+      chrome.navControls.registerRight({ content: <PrototypeVariantSelect />, order: 1 });
+    }
+    setPrototypeSelectorVisible(true);
+    return () => setPrototypeSelectorVisible(false);
+  }, [chrome]);
 
   return (
     <SecuritySolutionPageWrapper>

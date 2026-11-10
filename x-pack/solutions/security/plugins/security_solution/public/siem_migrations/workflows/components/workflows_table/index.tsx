@@ -38,6 +38,8 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { TableHeader } from '../../../common/components';
 import { WorkflowDetailsFlyout } from '../workflow_details_flyout';
+import { WorkflowDetailsFlyoutExpanding } from '../workflow_details_flyout/expanding_flyout';
+import { useFlyoutVariant } from '../../common/flyout_variant';
 import * as i18n from './translations';
 
 const STATUS_BADGE: Record<WorkflowMigrationStatus, { color: string; label: string }> = {
@@ -47,7 +49,8 @@ const STATUS_BADGE: Record<WorkflowMigrationStatus, { color: string; label: stri
   error: { color: 'danger', label: i18n.STATUS_ERROR },
 };
 
-export const WorkflowsTable: React.FC = React.memo(() => {
+const WorkflowsTableComponent: React.FC = () => {
+  const flyoutVariant = useFlyoutVariant();
   const { euiTheme } = useEuiTheme();
   const { navigateToApp } = useKibana().services.application;
   const openWorkflowsApp = useCallback(() => navigateToApp('workflows'), [navigateToApp]);
@@ -266,10 +269,15 @@ export const WorkflowsTable: React.FC = React.memo(() => {
         sorting={sorting}
         onChange={onTableChange}
       />
-      {openRowId === 'phishing-email-response' && (
-        <WorkflowDetailsFlyout onClose={() => setOpenRowId(null)} />
-      )}
+      {openRowId === 'phishing-email-response' &&
+        (flyoutVariant === 'expanding' ? (
+          <WorkflowDetailsFlyoutExpanding onClose={() => setOpenRowId(null)} />
+        ) : (
+          <WorkflowDetailsFlyout onClose={() => setOpenRowId(null)} />
+        ))}
     </>
   );
-});
+};
+
+export const WorkflowsTable = React.memo(WorkflowsTableComponent);
 WorkflowsTable.displayName = 'WorkflowsTable';

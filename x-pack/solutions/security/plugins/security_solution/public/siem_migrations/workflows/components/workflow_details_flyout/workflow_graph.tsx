@@ -195,7 +195,7 @@ export const GraphMinimap: React.FC = () => {
   );
 };
 
-export const WorkflowGraph: React.FC = React.memo(() => {
+export const WorkflowGraph: React.FC<{ maxHeight?: number }> = React.memo(({ maxHeight = 640 }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -217,7 +217,7 @@ export const WorkflowGraph: React.FC = React.memo(() => {
             transparent 1px
           );
           background-size: 16px 16px;
-          max-height: 640px;
+          max-height: ${maxHeight}px;
           overflow-y: auto;
         `}
         data-test-subj="workflowMigrationGraph"

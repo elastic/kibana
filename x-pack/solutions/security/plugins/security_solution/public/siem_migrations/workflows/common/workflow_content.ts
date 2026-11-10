@@ -331,3 +331,8 @@ The Tines Story was partially translated into an Elastic workflow. 6 of 8 steps 
     created_by: SIEM_MIGRATIONS_ASSISTANT_USER,
   },
 ];
+
+/** First lines of the workflow YAML, for compact previews. */
+export const PHISHING_EMAIL_YAML_SHORT = `${PHISHING_EMAIL_YAML.split('\n')
+  .slice(0, 16)
+  .join('\n')}\n# …`;

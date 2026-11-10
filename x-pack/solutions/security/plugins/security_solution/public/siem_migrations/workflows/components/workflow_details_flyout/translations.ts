@@ -139,3 +139,24 @@ export const SUMMARY_TAB = i18n.translate(
     defaultMessage: 'Summary',
   }
 );
+
+export const SHORT_YAML_VIEW = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.detailsFlyout.shortYamlView',
+  {
+    defaultMessage: 'YAML (short)',
+  }
+);
+
+export const BACK = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.detailsFlyout.back',
+  {
+    defaultMessage: 'Back',
+  }
+);
+
+export const OPEN_ELASTIC_WORKFLOW = i18n.translate(
+  'xpack.securitySolution.siemMigrations.workflows.detailsFlyout.openElasticWorkflow',
+  {
+    defaultMessage: 'Elastic Workflow',
+  }
+);
