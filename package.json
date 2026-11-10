@@ -124,6 +124,7 @@
     "@aws-sdk/client-kendra": "3.1156.0",
     "@aws-sdk/credential-provider-node": "3.972.88",
     "@elastic/elasticsearch/@elastic/transport": "9.4.0",
+    "@hey-api/json-schema-ref-parser/js-yaml": "4.3.2",
     "@storybook/react-docgen-typescript-plugin": "1.0.6--canary.9.cd77847.0",
     "@types/react": "18.2.79",
     "@types/react-dom": "18.2.25",
