@@ -1398,7 +1398,10 @@ describe('RuleEventsClient', () => {
       const emitTrigger = jest.fn();
       const client = clientWith({ writer, emitTrigger });
 
-      const result = await client.createEvent({ event: version(), origin: { actor: 'agent_tool' } });
+      const result = await client.createEvent({
+        event: version(),
+        origin: { actor: 'agent_tool' },
+      });
 
       expect(result).toEqual({ groupHash: 'hash-1', alertId: 'alert-1' });
       expect(writer.createAlertEvent).toHaveBeenCalledWith(
@@ -1495,7 +1498,9 @@ describe('RuleEventsClient', () => {
     it('refuses to write when the client was created without a writer', async () => {
       const client = asRuleEventsClient({ findLatestByEventId: jest.fn() });
 
-      await expect(client.createEvent({ event: version(), origin: { actor: 'agent_tool' } })).rejects.toThrow('without a writer');
+      await expect(
+        client.createEvent({ event: version(), origin: { actor: 'agent_tool' } })
+      ).rejects.toThrow('without a writer');
     });
   });
 });

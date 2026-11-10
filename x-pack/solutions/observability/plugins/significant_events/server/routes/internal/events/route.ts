@@ -20,7 +20,7 @@ import {
   type EventLifecycleResponse,
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
-import { z, isoDateTime } from '@kbn/zod/v4';
+import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
@@ -458,16 +458,18 @@ const eventsUpdateRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-    body: z.object({
-      status: significantEventManualStatusSchema,
-      close_reason: significantEventCloseReasonSchema.optional(),
-      assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
-    }),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({
+        id: z.string().max(255),
+      }),
+      body: z.object({
+        status: significantEventManualStatusSchema,
+        close_reason: significantEventCloseReasonSchema.optional(),
+        assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { getEventSearchClient, licensing } = await getScopedClients({ request });
 

@@ -69,11 +69,13 @@ export const significantEventManualStatusSchema = z
     `"${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure is confirmed or remains plausibly unverified; "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active (record the rationale in "assessment_note").`
   );
 
-export const significantEventCloseReasonSchema = z
-  .enum(['resolved', 'dismissed'])
-  .describe(
-    `Why the event is set to "${ALERT_EPISODE_STATUS.INACTIVE}": "resolved" = it was a real problem that is over; "dismissed" = it was noise or not worth surfacing. Ignored for "${ALERT_EPISODE_STATUS.ACTIVE}".`
-  );
+export const significantEventCloseReasonSchema = lazySchema(() =>
+  z
+    .enum(['resolved', 'dismissed'])
+    .describe(
+      `Why the event is set to "${ALERT_EPISODE_STATUS.INACTIVE}": "resolved" = it was a real problem that is over; "dismissed" = it was noise or not worth surfacing. Ignored for "${ALERT_EPISODE_STATUS.ACTIVE}".`
+    )
+);
 
 export type SignificantEventCloseReason = z.infer<typeof significantEventCloseReasonSchema>;
 
