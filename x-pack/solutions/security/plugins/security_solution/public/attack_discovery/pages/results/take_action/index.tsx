@@ -211,9 +211,9 @@ const TakeActionComponent: React.FC<Props> = ({
   const attackCaseAttachments = useAttackCaseAttachments(attacksToAttach);
 
   const onAddToCaseSuccess = useCallback(
-    (theCase: CaseUI, _isNewCase: boolean, updatedCase?: CaseUI) => {
+    (theCase: CaseUI, _isNewCase: boolean, createdAttachments?: CaseUI['comments']) => {
       // Not raised while building the payload, which the case selector does on every render.
-      attackCaseAttachments?.onAttached(theCase, updatedCase);
+      attackCaseAttachments?.onAttached(theCase, createdAttachments);
       refetchFindAttackDiscoveries?.();
     },
     [attackCaseAttachments, refetchFindAttackDiscoveries]

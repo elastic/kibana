@@ -218,6 +218,13 @@ export const NO_ATTACHMENTS_ADDED = i18n.translate(
   }
 );
 
+export const ALREADY_ATTACHED_TO_CASE = i18n.translate(
+  'xpack.cases.modal.attachments.alreadyAttachedContent',
+  {
+    defaultMessage: 'Everything you selected is already attached to the case.',
+  }
+);
+
 export const COLUMNS = i18n.translate('xpack.cases.allCasesView.columnSelection', {
   defaultMessage: 'Columns',
 });

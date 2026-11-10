@@ -46,7 +46,12 @@ export const hasDocReferences = <T>(arg: T): arg is T & DocumentReference => {
 export const useCheckDocumentAttachments = ({
   cases,
   getAttachments,
-}: UseCheckAlertAttachmentsProps): { disabledCases: Set<string>; isLoading: boolean } => {
+}: UseCheckAlertAttachmentsProps): {
+  disabledCases: Set<string>;
+  isLoading: boolean;
+  /** True only until the first result for these cases loads, not on background refetches. */
+  isInitialLoading: boolean;
+} => {
   const { owner } = useCasesContext();
   // getAttachments is called here without a real case to collect the document IDs it
   // would attach, so we can flag cases that already contain them. Callers that branch on
@@ -67,14 +72,14 @@ export const useCheckDocumentAttachments = ({
       (reference): reference is string => typeof reference === 'string' && reference.length > 0
     );
 
-  const { data, isFetching } = useFindCasesContainingAllSelectedDocuments(
+  const { data, isFetching, isInitialLoading } = useFindCasesContainingAllSelectedDocuments(
     selectedDocumentIds,
     cases.map(({ id }) => id)
   );
 
   const disabledCases = useMemo(() => new Set(data?.casesWithAllAttachments ?? []), [data]);
 
-  return { disabledCases, isLoading: isFetching };
+  return { disabledCases, isLoading: isFetching, isInitialLoading };
 };
 
 export type UseCheckDocumentAttachments = ReturnType<typeof useCheckDocumentAttachments>;

@@ -81,7 +81,11 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       queryParams,
     });
 
-    const { disabledCases, isLoading: isLoadingCaseAttachments } = useCheckDocumentAttachments({
+    const {
+      disabledCases,
+      isLoading: isLoadingCaseAttachments,
+      isInitialLoading: isInitialLoadingCaseAttachments,
+    } = useCheckDocumentAttachments({
       cases: data.cases,
       getAttachments,
     });
@@ -250,7 +254,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       disableActions: selectedCases.length > 0,
       selectedColumns,
       disabledCases,
-      isLoadingDisabledCases: isLoadingCaseAttachments,
+      isLoadingDisabledCases: isInitialLoadingCaseAttachments,
     });
 
     const activeFilterDimensions = useMemo(

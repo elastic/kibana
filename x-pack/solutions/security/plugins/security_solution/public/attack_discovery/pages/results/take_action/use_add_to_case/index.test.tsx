@@ -226,8 +226,7 @@ describe('useAddToCase', () => {
         },
         noAttachmentsToaster: {
           title: 'Already attached to the case',
-          content:
-            'The attacks and alerts that fit in this case are already attached to it, so nothing was added.',
+          content: 'Everything that fits in this case is already attached, so nothing was added.',
         },
       })
     );

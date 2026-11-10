@@ -16,6 +16,7 @@ import { buildAttacksAttachments, MAX_ATTACKS_PER_ATTACH } from '..';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { CaseAttachment } from '../utils';
 import { isAttackAttachment } from '../utils';
 import {
   ATTACK_ALERTS_TRUNCATED,
@@ -28,45 +29,28 @@ export interface AttackCaseAttachments {
   getAttachments: (theCase?: CaseUI) => CaseAttachmentsWithoutOwner;
   /**
    * Warns about anything that did not fit, or was already on the case, once the attachments have
-   * been posted to `theCase`. `updatedCase` is the case the server returned; without it, as when
-   * the server added nothing, only what did not fit is reported.
+   * been posted to `theCase`. `createdAttachments` are the attachments the server created; without
+   * them, as for a new case or when the server added nothing, only what did not fit is reported.
    */
-  onAttached: (theCase: CaseUI, updatedCase?: CaseUI) => void;
+  onAttached: (theCase: CaseUI, createdAttachments?: readonly CaseAttachment[]) => void;
 }
 
-/**
- * Counts the posted attacks that were already on the case, which the server drops as duplicates.
- * Adding an attachment always moves the case's `updatedAt` past the attachment's `createdAt`, so
- * an attack created no later than the case's pre-attach `updatedAt` was there before this attach.
- * The pre-attach case is the picker's snapshot, so attacks attached concurrently since it loaded
- * are missed, and clock skew between Kibana nodes larger than the gap since the case's last update
- * can make a newly added attack read as already attached.
- */
+/** Counts the posted attacks the server did not create, as it drops those already on the case. */
 const countAlreadyAttachedAttacks = (
   { attachments }: AttackAttachmentsResult,
-  { updatedAt }: CaseUI,
-  { comments }: CaseUI
+  createdAttachments: readonly CaseAttachment[]
 ): number => {
-  if (updatedAt == null) {
-    return 0;
-  }
-
-  const postedAttackIds = new Set(
-    attachments.flatMap(({ type, attachmentId }) =>
-      type === SECURITY_ATTACK_ATTACHMENT_TYPE ? [attachmentId] : []
-    )
+  const createdAttackIds = new Set(
+    createdAttachments.filter(isAttackAttachment).map(({ attachmentId }) => attachmentId)
   );
-  const caseUpdatedAt = Date.parse(updatedAt);
 
-  // Cases from before attack deduplication can hold the same attack more than once.
   return new Set(
-    comments
-      .filter(isAttackAttachment)
-      .filter(
-        ({ attachmentId, createdAt }) =>
-          postedAttackIds.has(attachmentId) && Date.parse(createdAt) <= caseUpdatedAt
-      )
-      .map(({ attachmentId }) => attachmentId)
+    attachments.flatMap((attachment) =>
+      attachment.type === SECURITY_ATTACK_ATTACHMENT_TYPE &&
+      !createdAttackIds.has(attachment.attachmentId)
+        ? [attachment.attachmentId]
+        : []
+    )
   ).size;
 };
 
@@ -107,11 +91,11 @@ export const useAttackCaseAttachments = (
 
   // Rebuilding is pure, so it reports the same truncation the posted payload had.
   const onAttached = useCallback(
-    (theCase: CaseUI, updatedCase?: CaseUI) => {
+    (theCase: CaseUI, createdAttachments?: readonly CaseAttachment[]) => {
       const result = build(theCase);
 
       const alreadyAttachedCount =
-        updatedCase != null ? countAlreadyAttachedAttacks(result, theCase, updatedCase) : 0;
+        createdAttachments != null ? countAlreadyAttachedAttacks(result, createdAttachments) : 0;
       if (alreadyAttachedCount > 0) {
         addWarning({ title: ATTACKS_ALREADY_ATTACHED(alreadyAttachedCount) });
       }

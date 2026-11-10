@@ -717,11 +717,11 @@ describe('TakeAction', () => {
       const { useAddToCase } = jest.requireMock('./use_add_to_case');
       const { onSuccess } = useAddToCase.mock.lastCall[0];
       const theCase = { id: 'case-1', totalAlerts: 3 } as CaseUI;
-      const updatedCase = { id: 'case-1', totalAlerts: 5 } as CaseUI;
-      onSuccess(theCase, false, updatedCase);
+      const createdAttachments = [{ id: 'attachment-1' }] as CaseUI['comments'];
+      onSuccess(theCase, false, createdAttachments);
 
       expect(onAttached).toHaveBeenCalledTimes(1);
-      expect(onAttached).toHaveBeenCalledWith(theCase, updatedCase);
+      expect(onAttached).toHaveBeenCalledWith(theCase, createdAttachments);
     });
 
     it('reports what did not fit when the server added nothing to the case', async () => {

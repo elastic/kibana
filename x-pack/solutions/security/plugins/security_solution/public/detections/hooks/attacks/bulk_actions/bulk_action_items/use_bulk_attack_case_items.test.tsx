@@ -249,11 +249,11 @@ describe('useBulkAttackCaseItems', () => {
     const attachTo = (
       theCase: Partial<CaseUI>,
       isNewCase = false,
-      updatedCase?: Partial<CaseUI>
+      createdAttachments?: CaseUI['comments']
     ) => {
       const attachments = resolveAttachments(theCase);
       const { onSuccess } = useAddToCase.mock.lastCall[0];
-      onSuccess(theCase as CaseUI, isNewCase, updatedCase as CaseUI | undefined);
+      onSuccess(theCase as CaseUI, isNewCase, createdAttachments);
       return attachments;
     };
 
@@ -372,19 +372,15 @@ describe('useBulkAttackCaseItems', () => {
 
       await clickAddToCase();
 
-      const caseUpdatedAt = '2026-10-29T10:00:00.000Z';
-      attachTo({ id: 'case-1', totalAlerts: 1, updatedAt: caseUpdatedAt }, false, {
-        id: 'case-1',
-        comments: [
-          {
-            id: 'comment-1',
-            type: SECURITY_ATTACK_ATTACHMENT_TYPE,
-            attachmentId: 'attack-1',
-            metadata: { index: ATTACK_INDEX, title: 'A multi-stage attack', alertCount: 2 },
-            createdAt: '2026-10-29T09:00:00.000Z',
-          },
-        ] as unknown as CaseUI['comments'],
-      });
+      // The server dropped the attack and created only its alerts.
+      attachTo({ id: 'case-1', totalAlerts: 0 }, false, [
+        {
+          id: 'comment-1',
+          type: SECURITY_ALERT_ATTACHMENT_TYPE,
+          attachmentId: ['alert-1', 'alert-2'],
+          metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-1'] },
+        },
+      ] as unknown as CaseUI['comments']);
 
       expect(appToastsMock.addWarning).toHaveBeenCalledWith({
         title: '1 attack was already attached to this case and was not added again.',

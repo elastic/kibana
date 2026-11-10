@@ -23,9 +23,13 @@ interface Props {
   onClick?: () => void;
   /**
    * Called once the attachments have been posted, with the case they were posted to and, for an
-   * existing case, the case the server returned.
+   * existing case, the attachments the server created.
    */
-  onSuccess?: (theCase: CaseUI, isNewCase: boolean, updatedCase?: CaseUI) => void;
+  onSuccess?: (
+    theCase: CaseUI,
+    isNewCase: boolean,
+    createdAttachments?: CaseUI['comments']
+  ) => void;
   /** Called instead of `onSuccess` when the server added nothing to the chosen case. */
   onNoAttachmentsAdded?: (theCase: CaseUI) => void;
   title: string;
@@ -80,7 +84,7 @@ export const useAddToCase = ({
     successToaster: {
       content: i18n.ADD_TO_CASE_SUCCESS,
     },
-    // The payload is never empty, so this only shows when the server dropped it all as duplicates.
+    // Shown when the server drops every attachment as already attached.
     noAttachmentsToaster: {
       title: i18n.ALREADY_ATTACHED_TO_CASE_TITLE,
       content: i18n.ALREADY_ATTACHED_TO_CASE_CONTENT,

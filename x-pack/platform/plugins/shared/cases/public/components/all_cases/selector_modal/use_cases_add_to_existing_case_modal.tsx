@@ -11,7 +11,7 @@ import { useApplication } from '../../../common/lib/kibana/use_application';
 import { CaseStatuses } from '../../../../common/types/domain';
 import type { AllCasesSelectorModalProps } from '.';
 import { useCasesToast } from '../../../common/use_cases_toast';
-import type { CaseUI } from '../../../containers/types';
+import type { AttachmentUIV2, CaseUI } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/state/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
@@ -19,7 +19,7 @@ import type { CreateCaseFlyoutProps } from '../../create/flyout/create_case_flyo
 import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
 import { useAddAttachmentToExistingCaseTransaction } from '../../../common/apm/use_cases_transactions';
-import { NO_ATTACHMENTS_ADDED } from '../translations';
+import { ALREADY_ATTACHED_TO_CASE, NO_ATTACHMENTS_ADDED } from '../translations';
 
 export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRowClick'> & {
   createCaseFlyout?: Pick<CreateCaseFlyoutProps, 'headerContent' | 'initialValue'>;
@@ -32,10 +32,10 @@ export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRo
     content?: string;
   };
   /**
-   * `updatedCase` is the case returned after attaching to an existing case. It is not
-   * passed when a new case is created.
+   * `createdAttachments` are the attachments the server created on an existing case, without
+   * those it dropped as already attached. They are not passed when a new case is created.
    */
-  onSuccess?: (theCase: CaseUI, isNewCase: boolean, updatedCase?: CaseUI) => void;
+  onSuccess?: (theCase: CaseUI, isNewCase: boolean, createdAttachments?: AttachmentUIV2[]) => void;
   /**
    * Called instead of `onSuccess` when attaching to an existing case added nothing, either
    * because there was nothing to attach or because everything was already on the case.
@@ -109,10 +109,10 @@ export const useCasesAddToExistingCaseModal = ({
       }
 
       const attachments = getAttachments?.({ theCase }) ?? [];
-      const handleNoAttachmentsAdded = () => {
+      const handleNoAttachmentsAdded = (defaultContent?: string) => {
         casesToasts.showInfoToast(
           noAttachmentsToaster?.title ?? NO_ATTACHMENTS_ADDED,
-          noAttachmentsToaster?.content
+          noAttachmentsToaster?.content ?? defaultContent
         );
         onNoAttachmentsAdded?.(theCase);
       };
@@ -127,24 +127,23 @@ export const useCasesAddToExistingCaseModal = ({
 
         startTransaction({ appId, attachments });
 
-        const updatedCase = await createAttachments({
+        const createdAttachments = await createAttachments({
           caseId: theCase.id,
           caseOwner: theCase.owner,
           attachments,
         });
 
-        // The server drops attachments that are already on the case. If it dropped all of
-        // them, the case is not updated, so its version does not change. `theCase` is the
-        // picker's snapshot, so a concurrent update to the case makes this read as a success.
-        if (updatedCase.version === theCase.version) {
-          handleNoAttachmentsAdded();
+        // The server only drops attachments that are already on the case, so creating none of a
+        // non-empty payload means all of it was already attached.
+        if (createdAttachments.length === 0) {
+          handleNoAttachmentsAdded(ALREADY_ATTACHED_TO_CASE);
 
           return;
         }
 
         trackAttachEvents(window.location.pathname, attachments);
 
-        onSuccess?.(theCase, false, updatedCase);
+        onSuccess?.(theCase, false, createdAttachments);
 
         casesToasts.showSuccessAttach({
           theCase,
