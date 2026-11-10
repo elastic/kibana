@@ -366,6 +366,7 @@ describe('EventFlyout', () => {
     expect(screen.queryByRole('menuitem', { name: 'Mark inactive' })).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
     await userEvent.click(screen.getByRole('menuitem', { name: 'Mark inactive' }));
+    await userEvent.click(screen.getByRole('radio', { name: /^Dismissed/ }));
     fireEvent.change(screen.getByTestId('nightshiftMarkSignificantEventInactiveReason'), {
       target: { value: 'Known maintenance' },
     });
@@ -377,7 +378,11 @@ describe('EventFlyout', () => {
         {
           params: {
             path: { id: mockEvent.event_id },
-            body: { status: 'inactive', assessment_note: 'Known maintenance' },
+            body: {
+              status: 'inactive',
+              close_reason: 'dismissed',
+              assessment_note: 'Known maintenance',
+            },
           },
           signal: null,
         }
