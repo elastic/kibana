@@ -26,7 +26,6 @@ import {
 import deepMerge from 'deepmerge';
 import {
   filter,
-  switchMap,
   startWith,
   Subject,
   BehaviorSubject,
@@ -37,6 +36,9 @@ import {
   firstValueFrom,
   timeout,
   EMPTY,
+  distinctUntilChanged,
+  skip,
+  exhaustMap,
 } from 'rxjs';
 import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
@@ -173,7 +175,7 @@ export class FeatureFlagsService {
           throw new Error('A provider has already been set. This API cannot be called twice.');
         }
         this.providerReady$.next(false); // Set the provider as not ready.
-        setProviderWithRetries(provider, this.logger);
+        setProviderWithRetries(provider, this.logger).finally(() => this.providerReady$.next(true));
         // Unblock in-flight evaluations and reevaluate subscribed flags once the provider is ready.
         OpenFeature.addHandler(ServerProviderEvents.Ready, () => this.providerReady$.next(true));
       },
@@ -207,6 +209,8 @@ export class FeatureFlagsService {
         this.contextChanged$.pipe(map(() => [flagName])),
         // Provider ready changes to true (we need to reevaluate)
         this.providerReady$.pipe(
+          skip(1), // skip the first value because it is the initial value (it's a BehaviorSubject)
+          distinctUntilChanged(),
           filter((ready) => ready),
           map(() => [flagName])
         )
@@ -234,14 +238,14 @@ export class FeatureFlagsService {
         ),
       getBooleanValue$: (flagName, fallbackValue) => {
         return observeFeatureFlag$(flagName).pipe(
-          switchMap(() =>
+          exhaustMap(() =>
             this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue)
           )
         );
       },
       getStringValue$: <Value extends string>(flagName: string, fallbackValue: Value) => {
         return observeFeatureFlag$(flagName).pipe(
-          switchMap(() =>
+          exhaustMap(() =>
             this.evaluateFlag<Value>(
               this.featureFlagsClient.getStringValue,
               flagName,
@@ -252,7 +256,7 @@ export class FeatureFlagsService {
       },
       getNumberValue$: <Value extends number>(flagName: string, fallbackValue: Value) => {
         return observeFeatureFlag$(flagName).pipe(
-          switchMap(() =>
+          exhaustMap(() =>
             this.evaluateFlag<Value>(
               this.featureFlagsClient.getNumberValue,
               flagName,
