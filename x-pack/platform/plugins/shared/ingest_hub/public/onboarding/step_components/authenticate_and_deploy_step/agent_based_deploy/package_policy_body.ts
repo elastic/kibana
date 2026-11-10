@@ -273,6 +273,7 @@ export async function buildGroupPackagePolicy(
   package: { name: string; version: string };
   namespace?: string;
   output_id?: string;
+  condition?: string;
   vars?: Record<string, string | SecretRefValue | null>;
   create_dataset_templates?: boolean;
   inputs: Record<string, unknown>;
