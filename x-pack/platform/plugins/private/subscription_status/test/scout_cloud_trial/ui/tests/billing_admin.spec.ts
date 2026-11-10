@@ -8,8 +8,7 @@
 import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
-// Admins are treated as billing admins until Kibana can check billing access:
-// https://github.com/elastic/kibana-team/issues/4343
+// Admins are treated as billing admins until Kibana can check billing access.
 test.describe(
   'Subscription status badge for billing admins',
   { tag: ['@local-serverless-search'] },
