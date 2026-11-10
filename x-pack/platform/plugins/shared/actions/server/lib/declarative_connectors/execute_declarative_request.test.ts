@@ -89,6 +89,33 @@ describe('executeDeclarativeRequest', () => {
     );
   });
 
+  it('keeps number and boolean types in a JSON body', async () => {
+    const { client } = createRecordingAxiosClient({});
+    const requestSpy = jest.spyOn(client, 'request');
+
+    await executeDeclarativeRequest({
+      client,
+      request: {
+        method: 'POST',
+        url: 'https://api.example/items',
+        body: {
+          page: '{{ input.page }}',
+          perPage: '{{ input.perPage }}',
+          includeArchived: '{{ input.includeArchived }}',
+          label: 'page {{ input.page }}',
+        },
+      },
+      input: { page: 2, perPage: 50, includeArchived: false },
+      config: {},
+    });
+
+    const sent = requestSpy.mock.calls[0][0];
+    expect(sent?.data).toEqual({ page: 2, perPage: 50, includeArchived: false, label: 'page 2' });
+    expect(sent?.headers).not.toEqual(
+      expect.objectContaining({ 'Content-Type': 'application/x-www-form-urlencoded' })
+    );
+  });
+
   it('sends a text body as a string', async () => {
     const { client } = createRecordingAxiosClient({});
     const requestSpy = jest.spyOn(client, 'request');
