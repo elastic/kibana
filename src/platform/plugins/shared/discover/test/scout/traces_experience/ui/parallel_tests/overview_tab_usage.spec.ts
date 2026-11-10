@@ -21,17 +21,26 @@ import {
 } from '../fixtures';
 
 type DiscoverPage = PageObjects['discover'];
+type DataGridPage = PageObjects['dataGrid'];
+
+const FILTERED_ROW_TIMEOUT_MS = 30_000;
 
 const openOverviewTab = async (
   pageObjects: {
     discover: DiscoverPage;
+    dataGrid: DataGridPage;
     tracesExperience: { openOverviewTab: () => Promise<void> };
   },
-  esqlWhereClause: string
+  field: string,
+  value: string
 ) => {
   await pageObjects.discover.writeAndSubmitEsqlQuery(
-    `${TRACES.ESQL_QUERY} | WHERE ${esqlWhereClause}`
+    `${TRACES.ESQL_QUERY} | WHERE ${field} == "${value}"`
   );
+  // ES|QL results carry no sort, so row 0 of a not-yet-filtered result set is an arbitrary document.
+  await expect(pageObjects.dataGrid.getCellValue(0, field)).toHaveText(value, {
+    timeout: FILTERED_ROW_TIMEOUT_MS,
+  });
   await pageObjects.tracesExperience.openOverviewTab();
 };
 
@@ -63,7 +72,7 @@ spaceTest.describe(
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for span and open overview tab', async () => {
-          await openOverviewTab(pageObjects, `span.name == "${RICH_TRACE.INTERNAL_SPAN_NAME}"`);
+          await openOverviewTab(pageObjects, 'span.name', RICH_TRACE.INTERNAL_SPAN_NAME);
         });
 
         await spaceTest.step('open service flyout via service name link', async () => {
@@ -83,10 +92,7 @@ spaceTest.describe(
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for transaction and open overview tab', async () => {
-          await openOverviewTab(
-            pageObjects,
-            `transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`
-          );
+          await openOverviewTab(pageObjects, 'transaction.name', RICH_TRACE.TRANSACTION_NAME);
         });
 
         await spaceTest.step('click transaction name link and verify APM page', async () => {
@@ -107,7 +113,7 @@ spaceTest.describe(
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for span with dependency and open overview tab', async () => {
-          await openOverviewTab(pageObjects, `span.name == "${RICH_TRACE.DB_SPAN_NAME}"`);
+          await openOverviewTab(pageObjects, 'span.name', RICH_TRACE.DB_SPAN_NAME);
         });
 
         await spaceTest.step('click dependency name link and verify APM page', async () => {
@@ -129,7 +135,7 @@ spaceTest.describe(
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for span and open overview tab', async () => {
-          await openOverviewTab(pageObjects, `span.name == "${RICH_TRACE.INTERNAL_SPAN_NAME}"`);
+          await openOverviewTab(pageObjects, 'span.name', RICH_TRACE.INTERNAL_SPAN_NAME);
         });
 
         await spaceTest.step('verify chart renders without error', async () => {
@@ -158,7 +164,7 @@ spaceTest.describe(
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for span and open overview tab', async () => {
-          await openOverviewTab(pageObjects, `span.name == "${RICH_TRACE.INTERNAL_SPAN_NAME}"`);
+          await openOverviewTab(pageObjects, 'span.name', RICH_TRACE.INTERNAL_SPAN_NAME);
         });
 
         await spaceTest.step(
@@ -198,10 +204,7 @@ spaceTest.describe(
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for transaction and open overview tab', async () => {
-          await openOverviewTab(
-            pageObjects,
-            `transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`
-          );
+          await openOverviewTab(pageObjects, 'transaction.name', RICH_TRACE.TRANSACTION_NAME);
         });
 
         await spaceTest.step('click service badge in the focused waterfall', async () => {
@@ -228,10 +231,7 @@ spaceTest.describe(
         await spaceTest.step(
           'filter for transaction with errors and open overview tab',
           async () => {
-            await openOverviewTab(
-              pageObjects,
-              `transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`
-            );
+            await openOverviewTab(pageObjects, 'transaction.name', RICH_TRACE.TRANSACTION_NAME);
           }
         );
 
@@ -278,10 +278,7 @@ spaceTest.describe(
         await spaceTest.step(
           'filter for transaction with correlated logs and open overview tab',
           async () => {
-            await openOverviewTab(
-              pageObjects,
-              `transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`
-            );
+            await openOverviewTab(pageObjects, 'transaction.name', RICH_TRACE.TRANSACTION_NAME);
           }
         );
 
@@ -319,7 +316,7 @@ spaceTest.describe(
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for span with span links and open overview tab', async () => {
-          await openOverviewTab(pageObjects, `span.name == "${RICH_TRACE.INTERNAL_SPAN_NAME}"`);
+          await openOverviewTab(pageObjects, 'span.name', RICH_TRACE.INTERNAL_SPAN_NAME);
         });
 
         await spaceTest.step(
