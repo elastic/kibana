@@ -15,7 +15,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/global.setup.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/global.setup.ts",
         "line": 14,
         "column": 27
       }
@@ -31,7 +31,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 144,
         "column": 78
       }
@@ -47,7 +47,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 154,
         "column": 49
       }
@@ -63,7 +63,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 165,
         "column": 34
       }
@@ -79,7 +79,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 193,
         "column": 12
       }
@@ -95,7 +95,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 224,
         "column": 15
       }
@@ -111,7 +111,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 247,
         "column": 11
       }
@@ -127,7 +127,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 286,
         "column": 39
       }
@@ -143,7 +143,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 304,
         "column": 21
       }
@@ -159,7 +159,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 132,
         "column": 9
       }
@@ -175,7 +175,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 165,
         "column": 34
       }
@@ -191,7 +191,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 193,
         "column": 12
       }
@@ -207,7 +207,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 224,
         "column": 15
       }
@@ -223,7 +223,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 247,
         "column": 11
       }
@@ -239,7 +239,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 286,
         "column": 39
       }
@@ -255,7 +255,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 304,
         "column": 21
       }
@@ -271,7 +271,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 323,
         "column": 77
       }
@@ -287,7 +287,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 387,
         "column": 16
       }
@@ -303,7 +303,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 144,
         "column": 78
       }
@@ -319,7 +319,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 154,
         "column": 49
       }
@@ -335,7 +335,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 165,
         "column": 34
       }
@@ -351,7 +351,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 193,
         "column": 12
       }
@@ -367,7 +367,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 224,
         "column": 15
       }
@@ -383,7 +383,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 247,
         "column": 11
       }
@@ -399,7 +399,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 286,
         "column": 39
       }
@@ -415,7 +415,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/manage_role_access.spec.ts",
         "line": 304,
         "column": 21
       }
@@ -431,7 +431,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/rule_events_read.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/rule_events_read.spec.ts",
         "line": 67,
         "column": 42
       }
@@ -447,7 +447,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/settings_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/settings_role_access.spec.ts",
         "line": 38,
         "column": 7
       }
@@ -463,7 +463,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/settings_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/settings_role_access.spec.ts",
         "line": 38,
         "column": 7
       }
@@ -479,7 +479,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/settings_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/settings_role_access.spec.ts",
         "line": 45,
         "column": 40
       }
@@ -495,7 +495,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/viewer_role_access.spec.ts",
         "line": 72,
         "column": 57
       }
@@ -511,7 +511,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/viewer_role_access.spec.ts",
         "line": 83,
         "column": 48
       }
@@ -527,7 +527,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/viewer_role_access.spec.ts",
         "line": 99,
         "column": 27
       }
@@ -543,7 +543,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/viewer_role_access.spec.ts",
         "line": 111,
         "column": 41
       }
@@ -559,7 +559,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/viewer_role_access.spec.ts",
         "line": 123,
         "column": 7
       }
@@ -575,7 +575,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/viewer_role_access.spec.ts",
         "line": 142,
         "column": 16
       }
@@ -591,7 +591,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/viewer_role_access.spec.ts",
         "line": 151,
         "column": 23
       }
@@ -607,7 +607,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/viewer_role_access.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/authorization/viewer_role_access.spec.ts",
         "line": 195,
         "column": 17
       }
@@ -623,7 +623,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/maintenance/pause_on_flag_off.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/maintenance/pause_on_flag_off.spec.ts",
         "line": 263,
         "column": 46
       }
@@ -639,7 +639,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/maintenance/reset_current_space.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/maintenance/reset_current_space.spec.ts",
         "line": 120,
         "column": 52
       }
@@ -655,7 +655,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/maintenance/reset_current_space.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/maintenance/reset_current_space.spec.ts",
         "line": 137,
         "column": 10
       }
@@ -671,7 +671,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/maintenance/reset_current_space.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/maintenance/reset_current_space.spec.ts",
         "line": 153,
         "column": 43
       }
@@ -687,7 +687,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/run_quotas/authorization.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/run_quotas/authorization.spec.ts",
         "line": 40,
         "column": 7
       }
@@ -703,7 +703,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/run_quotas/authorization.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/run_quotas/authorization.spec.ts",
         "line": 58,
         "column": 38
       }
@@ -719,7 +719,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/run_quotas/authorization.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/run_quotas/authorization.spec.ts",
         "line": 82,
         "column": 48
       }
@@ -735,7 +735,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/run_quotas/gates.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/run_quotas/gates.spec.ts",
         "line": 115,
         "column": 36
       }
@@ -751,7 +751,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/run_quotas/gates.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/run_quotas/gates.spec.ts",
         "line": 132,
         "column": 69
       }
@@ -767,7 +767,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/run_quotas/gates.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/run_quotas/gates.spec.ts",
         "line": 156,
         "column": 76
       }
@@ -783,7 +783,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/significant_events/onboarding_bulk_status.spec.ts",
         "line": 21,
         "column": 44
       }
@@ -799,7 +799,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/significant_events/onboarding_bulk_status.spec.ts",
         "line": 46,
         "column": 6
       }
@@ -815,7 +815,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/significant_events/onboarding_bulk_status.spec.ts",
         "line": 53,
         "column": 28
       }
@@ -829,7 +829,7 @@
         "@cloud-serverless-observability_logs_essentials"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/plugin_hard_disabled.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/significant_events/plugin_hard_disabled.spec.ts",
         "line": 20,
         "column": 17
       }
@@ -845,7 +845,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/plugin_loaded.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/significant_events/plugin_loaded.spec.ts",
         "line": 22,
         "column": 35
       }
@@ -861,7 +861,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/workflows/managed_workflows.spec.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/workflows/managed_workflows.spec.ts",
         "line": 30,
         "column": 50
       }
@@ -877,7 +877,7 @@
         "@cloud-serverless-observability_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/global.teardown.ts",
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/tests/global.teardown.ts",
         "line": 5,
         "column": 1
       }

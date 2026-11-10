@@ -27,7 +27,7 @@ api/
 
 ```bash
 node scripts/scout run-tests --arch stateful --domain classic \
-  --config x-pack/solutions/observability/plugins/significant_events/test/scout/api/playwright.config.ts
+  --config x-pack/solutions/observability/plugins/significant_events/test/scout_significant_events/api/playwright.config.ts
 ```
 
 Significant events is gated behind the `nightshift.enabled` feature flag, which
