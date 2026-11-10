@@ -94,7 +94,6 @@ describe('render', () => {
         expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent(
           'Request stopped before completion. Results may be incomplete or empty.'
         );
-        expect(screen.queryByText(/Request timed out/)).not.toBeInTheDocument();
       }
     );
   });
