@@ -7,7 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SyntheticsPluginsSetupDependencies } from '../types';
-import { commonMonitorStateI18, commonStateTranslations } from './translations';
+import {
+  commonMonitorStateI18,
+  commonStateTranslations,
+  statusRuleCheckedAtVariable,
+  statusRuleTimestampVariable,
+} from './translations';
+
+export type SyntheticsAlertRuleType = 'monitorStatus' | 'tls';
 
 export const MESSAGE = 'message';
 export const ALERT_REASON_MSG = 'reason';
@@ -19,10 +26,24 @@ export const FAILED_STEP_NAME = 'failedStepName';
 export const FAILED_STEP_NUMBER = 'failedStepNumber';
 const GROUPING = 'grouping';
 
+const getMonitorContextVariables = (ruleType: SyntheticsAlertRuleType) => {
+  if (ruleType !== 'monitorStatus') {
+    return commonMonitorStateI18;
+  }
+
+  return commonMonitorStateI18.flatMap((variable) =>
+    variable.name === 'checkedAt'
+      ? [statusRuleCheckedAtVariable, statusRuleTimestampVariable]
+      : [variable]
+  );
+};
+
 export const getActionVariables = ({
   plugins,
+  ruleType,
 }: {
   plugins: SyntheticsPluginsSetupDependencies;
+  ruleType: SyntheticsAlertRuleType;
 }) => {
   return {
     context: [
@@ -37,7 +58,7 @@ export const getActionVariables = ({
       ACTION_VARIABLES[FAILED_STEP_NAME],
       ACTION_VARIABLES[FAILED_STEP_NUMBER],
       ACTION_VARIABLES[GROUPING],
-      ...commonMonitorStateI18,
+      ...getMonitorContextVariables(ruleType),
     ],
     state: [...commonStateTranslations],
   };
