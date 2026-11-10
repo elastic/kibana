@@ -23,8 +23,6 @@ import type {
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardCanvasAttachmentProps } from './async_services';
-import { createNewDashboardLink } from './dashboard_integration/new_dashboard_link';
-
 export interface IdGenerator {
   readonly current: string;
   next: () => string;
@@ -73,7 +71,6 @@ export const registerDashboardAttachmentUiDefinition = ({
   toasts: NotificationsStart['toasts'];
 }): (() => void) => {
   let dashboardApi: DashboardApi | undefined;
-  const newDashboardLink = createNewDashboardLink();
   const findDashboardsServicePromise = dashboardPlugin.findDashboardsService();
   const checkSavedDashboardExist = async (dashboardId: string) => {
     const findDashboardsService = await findDashboardsServicePromise;
@@ -100,9 +97,6 @@ export const registerDashboardAttachmentUiDefinition = ({
       switchMap(([api, appId]) => {
         // maintains a dashboardApi reference for access in getActionButtons
         dashboardApi = api;
-        if (api) {
-          newDashboardLink.claim(api);
-        }
         // integrates dashboard app with agent only when both dashboard and chat are active
         const isAgentOpen = appId === 'agentBuilder';
         return api && isAgentOpen
@@ -117,9 +111,6 @@ export const registerDashboardAttachmentUiDefinition = ({
                   draftAttachmentId,
                   checkSavedDashboardExist,
                   getUpdateOrigin: (attachmentId) => updateOriginByAttachmentId.get(attachmentId),
-                  linkedAttachmentId: newDashboardLink.getLinkedAttachmentId(api),
-                  linkNextDashboard: (attachmentId) =>
-                    newDashboardLink.linkNextDashboard(api, attachmentId),
                 })
               )
             )
@@ -169,23 +160,16 @@ export const registerDashboardAttachmentUiDefinition = ({
           type: ActionButtonType.SECONDARY,
           handler: async () => {
             const { handlePreview } = await import('./async_services');
-            const previewDashboardApi = dashboardApi;
 
             return handlePreview({
               attachment,
-              dashboardApi: previewDashboardApi,
+              dashboardApi,
               canWriteDashboards,
               isSidebar,
               dashboardLocator,
               toasts,
               checkSavedDashboardExist,
               openCanvas,
-              linkedAttachmentId:
-                previewDashboardApi && newDashboardLink.getLinkedAttachmentId(previewDashboardApi),
-              linkNextDashboard: previewDashboardApi
-                ? (attachmentId) =>
-                    newDashboardLink.linkNextDashboard(previewDashboardApi, attachmentId)
-                : undefined,
             });
           },
         },

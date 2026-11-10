@@ -23,8 +23,6 @@ interface HandlePreviewParams {
   toasts: NotificationsStart['toasts'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   openCanvas?: () => void;
-  linkedAttachmentId?: string;
-  linkNextDashboard?: (attachmentId: string) => () => void;
 }
 
 /** Previews the attachment, showing an error toast when it can't be opened. */
@@ -42,8 +40,6 @@ const openPreview = async ({
   toasts,
   checkSavedDashboardExist,
   openCanvas,
-  linkedAttachmentId,
-  linkNextDashboard,
 }: HandlePreviewParams): Promise<void> => {
   // sidebar in dashboard experience - synchronize dashboard app to attachment
   if (dashboardApi && canWriteDashboards) {
@@ -54,8 +50,6 @@ const openPreview = async ({
       dashboardLocator,
       toasts,
       checkSavedDashboardExist,
-      linkedAttachmentId,
-      linkNextDashboard,
     });
   }
 

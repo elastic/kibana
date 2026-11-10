@@ -24,11 +24,8 @@ export interface AgentLiveUpdatesSubscriptionParams {
   canWriteDashboards: boolean;
   dashboardLocator?: DashboardRendererProps['locator'];
   toasts: NotificationsStart['toasts'];
-  /** The attachment whose changes opened this dashboard as a new one. */
-  linkedAttachmentId?: string;
   /** Whether the open dashboard staged the attachment, which is left unlinked when the user can't edit it. */
   isStagedFromDashboard: (attachmentId: string) => boolean;
-  linkNextDashboard: (attachmentId: string) => () => void;
   /** Called instead of applying an update that belongs to another saved dashboard. */
   onOtherDashboardUpdated: (attachment: DashboardAttachment) => void;
   upsertAttachment: (attachment: DashboardAttachment) => void;
@@ -49,9 +46,7 @@ export const createAgentLiveUpdatesSubscription = ({
   canWriteDashboards,
   dashboardLocator,
   toasts,
-  linkedAttachmentId,
   isStagedFromDashboard,
-  linkNextDashboard,
   onOtherDashboardUpdated,
   upsertAttachment,
 }: AgentLiveUpdatesSubscriptionParams): Subscription => {
@@ -75,7 +70,6 @@ export const createAgentLiveUpdatesSubscription = ({
 
       const currentSavedObjectId = api.savedObjectId$.getValue();
       const isOwnAttachment =
-        attachment.id === linkedAttachmentId ||
         attachment.origin === currentSavedObjectId ||
         (!attachment.origin && isStagedFromDashboard(attachment.id));
 
@@ -101,7 +95,6 @@ export const createAgentLiveUpdatesSubscription = ({
         toasts,
         onOpenInNewDashboard: () => {
           isOpeningNewDashboard = true;
-          return linkNextDashboard(attachment.id);
         },
       }).catch((error: Error) => {
         isOpeningNewDashboard = false;

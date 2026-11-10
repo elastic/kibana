@@ -35,15 +35,13 @@ const apply = ({
   dashboardState = agentDashboardState,
   canWriteDashboards = true,
   onOpenInNewDashboard,
-  navigate = jest.fn(),
 }: {
   api?: ReturnType<typeof buildDashboardApi>;
   dashboardState?: DashboardState;
   canWriteDashboards?: boolean;
-  onOpenInNewDashboard?: () => (() => void) | void;
-  navigate?: jest.Mock;
+  onOpenInNewDashboard?: () => void;
 } = {}) => {
-  const dashboardLocator = { navigate, getRedirectUrl: jest.fn() };
+  const dashboardLocator = { navigate: jest.fn(), getRedirectUrl: jest.fn() };
   const toasts = { addWarning: jest.fn() };
   const result = applyAgentChangesToDashboard({
     api: api as unknown as DashboardApi,
@@ -149,18 +147,6 @@ describe('applyAgentChangesToDashboard', () => {
     await apply({ onOpenInNewDashboard }).result;
 
     expect(onOpenInNewDashboard).not.toHaveBeenCalled();
-  });
-
-  it('removes the link to the new dashboard when it fails to open', async () => {
-    const unlink = jest.fn();
-    const { result } = apply({
-      api: buildDashboardApi({ isManaged: true }),
-      onOpenInNewDashboard: () => unlink,
-      navigate: jest.fn().mockRejectedValue(new Error('Navigation failed')),
-    });
-
-    await expect(result).rejects.toThrow('Navigation failed');
-    expect(unlink).toHaveBeenCalledTimes(1);
   });
 
   it('leaves the dashboard untouched and warns when the user cannot write dashboards', async () => {

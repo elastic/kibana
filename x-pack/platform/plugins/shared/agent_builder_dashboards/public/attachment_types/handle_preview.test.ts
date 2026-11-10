@@ -39,16 +39,13 @@ const preview = async ({
   attachment,
   dashboardApi,
   linkedDashboardExists = true,
-  linkedAttachmentId,
 }: {
   attachment: DashboardAttachment;
   dashboardApi?: ReturnType<typeof buildDashboardApi>;
   linkedDashboardExists?: boolean;
-  linkedAttachmentId?: string;
 }) => {
   const dashboardLocator = { navigate: jest.fn(), getRedirectUrl: jest.fn() };
   const toasts = { addWarning: jest.fn(), addError: jest.fn() };
-  const linkNextDashboard = jest.fn();
   await handlePreview({
     attachment,
     dashboardApi: dashboardApi as unknown as DashboardApi | undefined,
@@ -57,10 +54,8 @@ const preview = async ({
     dashboardLocator,
     toasts: toasts as unknown as NotificationsStart['toasts'],
     checkSavedDashboardExist: async () => linkedDashboardExists,
-    linkedAttachmentId,
-    linkNextDashboard,
   });
-  return { dashboardLocator, toasts, linkNextDashboard };
+  return { dashboardLocator, toasts };
 };
 
 describe('handlePreview with a published dashboard', () => {
@@ -131,25 +126,17 @@ describe('handlePreview with a published dashboard', () => {
   );
 
   it.each([
-    ['it is linked to the viewed dashboard', 'dashboard-1', 'dashboard-1', true, undefined],
-    ['its linked dashboard was deleted', undefined, 'deleted-dashboard', false, undefined],
-    [
-      'the agent opened the viewed new dashboard for it',
-      undefined,
-      'managed-dashboard',
-      true,
-      'attachment-1',
-    ],
+    ['it is linked to the viewed dashboard', 'dashboard-1', 'dashboard-1', true],
+    ['its linked dashboard was deleted', undefined, 'deleted-dashboard', false],
   ])(
     'applies the attachment in place in edit mode when %s',
-    async (_, savedObjectId, origin, linkedDashboardExists, linkedAttachmentId) => {
+    async (_, savedObjectId, origin, linkedDashboardExists) => {
       const dashboardApi = buildDashboardApi(savedObjectId);
 
       const { dashboardLocator } = await preview({
         attachment: buildAttachment(origin),
         dashboardApi,
         linkedDashboardExists,
-        linkedAttachmentId,
       });
 
       expect(dashboardApi.setState).toHaveBeenCalledWith(
@@ -165,11 +152,11 @@ describe('handlePreview with a published dashboard', () => {
     ['linked to it', 'dashboard-1'],
     ['not linked to a dashboard', undefined],
   ])(
-    'opens the attachment in a new dashboard linked to it and warns when the viewed dashboard is managed and the attachment is %s',
+    'opens the attachment in a new dashboard and warns when the viewed dashboard is managed and the attachment is %s',
     async (_, origin) => {
       const dashboardApi = buildDashboardApi('dashboard-1', true);
 
-      const { dashboardLocator, toasts, linkNextDashboard } = await preview({
+      const { dashboardLocator, toasts } = await preview({
         attachment: buildAttachment(origin),
         dashboardApi,
       });
@@ -179,7 +166,6 @@ describe('handlePreview with a published dashboard', () => {
         expect.not.objectContaining({ dashboardId: expect.anything() })
       );
       expect(toasts.addWarning).toHaveBeenCalledTimes(1);
-      expect(linkNextDashboard).toHaveBeenCalledWith('attachment-1');
     }
   );
 

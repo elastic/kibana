@@ -176,7 +176,7 @@ describe('registerDashboardAppIntegration', () => {
     jest.useRealTimers();
   });
 
-  const register = ({ linkedAttachmentId }: { linkedAttachmentId?: string } = {}) => {
+  const register = () => {
     const activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     const agentBuilder = {
       addAttachment,
@@ -208,8 +208,6 @@ describe('registerDashboardAppIntegration', () => {
       draftAttachmentId,
       checkSavedDashboardExist,
       getUpdateOrigin,
-      linkedAttachmentId,
-      linkNextDashboard: jest.fn(),
     });
   };
 
@@ -261,43 +259,6 @@ describe('registerDashboardAppIntegration', () => {
     jest.advanceTimersByTime(MANUAL_CHANGES_DEBOUNCE_MS);
 
     expect(addAttachment).not.toHaveBeenCalled();
-  });
-
-  it('moves the origin of the attachment a new dashboard was opened from to it once saved', async () => {
-    const attachment = createDashboardAttachment({ origin: 'managed-dashboard' });
-    register({ linkedAttachmentId: attachment.id });
-    emitConversationChange({
-      id: 'conversation-1',
-      attachments: [createVersionedAttachment(attachment)],
-    });
-
-    mockApi.onSave$.next({
-      previousDashboardId: undefined,
-      dashboardId: 'new-dashboard',
-      dashboardState: createDashboardSaveState(),
-    });
-    await Promise.resolve();
-
-    expect(updateAttachmentOrigin).toHaveBeenCalledWith(
-      'conversation-1',
-      'dashboard-attachment-id',
-      'new-dashboard'
-    );
-  });
-
-  it('syncs manual changes of a new dashboard into the attachment it was opened from', () => {
-    const attachment = createDashboardAttachment({ origin: 'managed-dashboard' });
-    register({ linkedAttachmentId: attachment.id });
-    emitConversationChange({
-      id: 'conversation-1',
-      attachments: [createVersionedAttachment(attachment)],
-    });
-
-    jest.runOnlyPendingTimers();
-
-    expect(addAttachment).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'dashboard-attachment-id' })
-    );
   });
 
   it('tells the user when the agent updated a different dashboard, until they leave this one', () => {

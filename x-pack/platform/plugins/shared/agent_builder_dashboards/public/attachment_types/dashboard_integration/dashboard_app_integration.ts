@@ -58,10 +58,6 @@ export interface DashboardAppIntegrationParams {
   getUpdateOrigin: (
     attachmentId: string
   ) => ((origin: string) => Promise<UpdateOriginResponse | undefined>) | undefined;
-  /** The attachment whose changes opened this dashboard as a new one. */
-  linkedAttachmentId?: string;
-  /** Links the next dashboard that opens to the attachment whose changes it shows. */
-  linkNextDashboard: (attachmentId: string) => () => void;
 }
 
 interface State {
@@ -78,8 +74,6 @@ export const registerDashboardAppIntegration = ({
   draftAttachmentId,
   checkSavedDashboardExist,
   getUpdateOrigin,
-  linkedAttachmentId,
-  linkNextDashboard,
 }: DashboardAppIntegrationParams): (() => void) => {
   const state: State = {
     attachments: undefined,
@@ -94,8 +88,7 @@ export const registerDashboardAppIntegration = ({
     const isLinkable = canApplyAgentChangesInPlace(api, canWriteDashboards);
     const dashboardId = isLinkable ? api.savedObjectId$.getValue() : undefined;
     const syncAttachment = isLinkable
-      ? state.attachments?.find(({ id }) => id === linkedAttachmentId) ??
-        state.attachments?.find(({ origin }) => origin === dashboardId)
+      ? state.attachments?.find(({ origin }) => origin === dashboardId)
       : undefined;
     const dashboardData = dashboardStateToAttachmentData(api.getSerializedState().attributes);
 
@@ -163,8 +156,6 @@ export const registerDashboardAppIntegration = ({
         dashboardLocator,
         toasts,
         checkSavedDashboardExist,
-        linkedAttachmentId,
-        linkNextDashboard,
       }).catch((error: Error) =>
         toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE })
       ),
@@ -176,9 +167,7 @@ export const registerDashboardAppIntegration = ({
     canWriteDashboards,
     dashboardLocator,
     toasts,
-    linkedAttachmentId,
     isStagedFromDashboard: (attachmentId) => unlinkedStagedAttachmentIds.has(attachmentId),
-    linkNextDashboard,
     onOtherDashboardUpdated: otherDashboardUpdateNotifier.notify,
     upsertAttachment: (attachment: DashboardAttachment) => {
       const otherAttachments = (state.attachments ?? []).filter(({ id }) => id !== attachment.id);
@@ -194,7 +183,6 @@ export const registerDashboardAppIntegration = ({
   const originSyncSubscription = createOriginSyncSubscription({
     api,
     checkSavedDashboardExist,
-    linkedAttachmentId,
     getAttachments: () => state.attachments,
     updateOrigin: (id: string, origin: string) => getUpdateOrigin(id)?.(origin),
   });
