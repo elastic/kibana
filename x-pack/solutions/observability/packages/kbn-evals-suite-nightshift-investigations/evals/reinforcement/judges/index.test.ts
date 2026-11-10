@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { submitArgumentsEvaluator } from './evaluators';
-import type { ReinforcementTaskOutput, SubmitArguments } from './types';
+import { submitArgumentsEvaluator } from '.';
+import type { ReinforcementTaskOutput, SubmitArguments } from '../types';
 
 const SEEDED_ID = 'symptom:eql-slo-burn-rate';
 const OTHER_ID = 'symptom:checkout-high-latency';

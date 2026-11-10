@@ -30,7 +30,7 @@ import {
   SUBMIT_ARGUMENTS_EVALUATOR,
   createMergedNodesEvaluator,
   submitArgumentsEvaluator,
-} from './evaluators';
+} from './judges';
 import {
   CUSTOMER0_REINFORCEMENT_TIMEOUT_MS,
   runCustomer0Reinforcement,

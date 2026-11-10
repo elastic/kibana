@@ -19,8 +19,8 @@ import {
   isSeededTree,
   parseTreeMarkdown,
   submissionsForTree,
-} from './arguments';
-import type { ReinforcementTaskOutput } from './types';
+} from '../arguments';
+import type { ReinforcementTaskOutput } from '../types';
 
 export const SUBMIT_ARGUMENTS_EVALUATOR = 'submit_arguments_consistent';
 export const MERGED_NODES_EVALUATOR = 'merged_nodes_and_paths';
