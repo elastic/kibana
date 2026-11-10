@@ -36,6 +36,11 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         border-radius: unset !important;
         background-color: transparent !important;
         height: unset !important;
+
+        // the floating border that euiShadow draws in dark mode
+        &::after {
+          display: none;
+        }
       }
     `;
 
@@ -96,6 +101,10 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
             background-color: ${euiTheme.colors.backgroundBasePlain} !important;
             height: ${euiTheme.size.xl} !important;
             box-shadow: ${euiTheme.shadows.xs.down} !important;
+
+            &::after {
+              display: block;
+            }
           }
         }
       }
