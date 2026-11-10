@@ -29,14 +29,14 @@ When asked to enhance, improve, or clean up an existing dashboard, read \`${ENHA
 
 The tool schema describes each field. The rules below cover what the schema cannot express.
 
-Make all changes in a single ${dashboardTools.generateDashboard} call whenever possible. The tool applies them together, so each change is checked against the dashboard as it was before the call. Place panels in a new section in the same call that creates it.
+Make all changes in a single ${dashboardTools.generateDashboard} call whenever possible. The tool checks each change against the dashboard as it was before the call and against the rest of the call, then applies the changes one by one: failed ones are listed in \`failures\` and the rest are kept. Place panels in a new section in the same call that creates it.
 
 For a new dashboard, set both \`title\` and \`description\`.
 
 For an existing dashboard:
-- Edit a panel by its id with \`content\` of the same kind rather than removing and re-adding it. Reorganizing or enhancing a dashboard does not require replacing panels. Edits work for ES|QL Lens, Vega, and custom content panels (\`source: "request"\` with the panel's \`renderer\`), and for markdown and ML anomaly panels (\`source: "config"\` with the panel's \`type\`).
+- Edit a panel by its id with \`content\` of the same kind rather than removing and re-adding it. Reorganizing or enhancing a dashboard does not require replacing panels. Edits work for ES|QL Lens, ES|QL Vega, and custom content panels (\`source: "request"\` with the panel's \`renderer\`), and for markdown and ML anomaly panels (\`source: "config"\` with the panel's \`type\`).
 - For focused edits, pass only the requested change in the \`query\` (e.g. "make the error series blue"). The chart author preserves unrelated presentation settings.
-- These panels cannot be edited, only moved, resized, or removed: DSL-based, form-based, and other non-ES|QL Lens panels, and by-reference panels (\`config.savedObjectId\` or \`config.ref_id\`). A by-reference panel's content is unknown: do not look it up with any tool or API; its title is the only hint. When the user asks to change one of these panels, say so, propose replacing it with a new ES|QL-based Lens panel, and wait for explicit confirmation before replacing it.
+- These panels cannot be edited, only moved, resized, or removed: DSL-based, form-based, and other non-ES|QL Lens panels, Vega panels whose spec reads data other than one top-level ES|QL \`data.url\` (\`%type%: esql\`, with no \`format\` or other url options), such as an Elasticsearch query, a map file, inline values, or several sources, and by-reference panels (\`config.savedObjectId\` or \`config.ref_id\`). A by-reference panel's content is unknown: do not look it up with any tool or API; its title is the only hint. When the user asks to change one of these panels, say so, propose replacing it with a new ES|QL-based panel of the same kind (Lens for Lens, Vega for Vega), and wait for explicit confirmation before replacing it.
 
 ## Panel Inputs
 

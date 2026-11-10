@@ -16,6 +16,8 @@ import type {
   HashiCorpVaultConfig,
   HashiCorpVaultSecrets,
   LocationMonitorsResponse,
+  AffectedMonitorsResult,
+  SecretConnectionAffectedMonitors,
   SecretConnectionTestResult,
   SecretProviderType,
 } from '../../../../../common/runtime_types';
@@ -74,6 +76,26 @@ export const testSecretConnection = async (
 ): Promise<SecretConnectionTestResult> => {
   return await apiService.post<SecretConnectionTestResult>(
     `${SYNTHETICS_API_URLS.SECRET_CONNECTION}/_test`,
+    request
+  );
+};
+
+export const getAffectedMonitors = async (): Promise<SecretConnectionAffectedMonitors> => {
+  return await apiService.get<SecretConnectionAffectedMonitors>(
+    `${SYNTHETICS_API_URLS.SECRET_CONNECTION}/_affected_monitors`
+  );
+};
+
+export interface PreviewAffectedMonitorsRequest {
+  name: string;
+  allowedMonitorHosts: string[];
+}
+
+export const previewAffectedMonitors = async (
+  request: PreviewAffectedMonitorsRequest
+): Promise<AffectedMonitorsResult> => {
+  return await apiService.post<AffectedMonitorsResult>(
+    `${SYNTHETICS_API_URLS.SECRET_CONNECTION}/_affected_monitors`,
     request
   );
 };

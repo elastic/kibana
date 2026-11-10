@@ -21,6 +21,7 @@ All routes require: `kbn-xsrf: true`, `x-elastic-internal-origin: kibana`.
 | POST | `/api/security/entity_store/install` | Install entity store |
 | PUT | `/api/security/entity_store/start` | Start/reschedule extraction tasks (both processes for user when the dual-process flag is on) |
 | PUT | `/api/security/entity_store/stop` | Stop extraction tasks (both processes for user when the dual-process flag is on) |
+| POST | `/api/security/entity_store/update_api_key` | Re-grant the API key of every Entity Store task (extract, history snapshot, status report, resilience, maintainers) as the caller. Needs install privileges. Body `{}`, returns `{ ok, updated, failed }` |
 | POST | `/api/security/entity_store/uninstall` | Uninstall entity store |
 | GET | `/api/security/entity_store/status` | Status (`?include_components=true`). With the dual-process flag on, the user engine also has a `nonPriority` block for the non-priority process (shape in `server/routes/apis/status.ts`) |
 | PUT | `/api/security/entity_store` | Update `logExtraction` (store-wide, all types), `excludedUserNames` and/or `historySnapshot` (`frequency`, `retentionDays`) config without reinstall. Per-type config goes through internal `PUT /{entityType}` |

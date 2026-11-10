@@ -33,7 +33,7 @@ export const registerHuntForThreatRoute = ({ router, logger, getSpaceId }: Route
           requiredPrivileges: [ALERTZERO_API_PRIVILEGE_READ],
         },
       },
-      summary: 'Run Tier 1 deterministic hunt',
+      summary: 'Run IOC Hunt',
     })
     .addVersion(
       {

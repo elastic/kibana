@@ -572,10 +572,14 @@ describe('ActionPolicyDetailsFlyout', () => {
   });
 
   describe('when the user only has read privilege', () => {
-    it('hides the Take action button', () => {
+    it('offers only the test notification in the Take action menu', async () => {
+      const user = userEvent.setup({ pointerEventsCheck: 0 });
       renderFlyout({ canWrite: false });
 
-      expect(screen.queryByTestId(TEST_SUBJ.takeActionButton)).not.toBeInTheDocument();
+      await user.click(screen.getByTestId(TEST_SUBJ.takeActionButton));
+
+      expect(screen.getByTestId('sendTestNotificationActionPolicy-policy-1')).toBeInTheDocument();
+      expect(screen.queryByTestId('editActionPolicy-policy-1')).not.toBeInTheDocument();
     });
 
     it('still renders the policy details', () => {

@@ -42,6 +42,7 @@ import {
 } from '../../../common/constants';
 import type { Owner } from '../../../common/constants/types';
 import { Operations } from '../../authorization';
+import { assertCanStoreExtractObservables } from '../../common/assert_can_store_extract_observables';
 import { createCaseError, isSOError } from '../../common/error';
 import {
   createAlertUpdateStatusRequest,
@@ -76,7 +77,7 @@ import type {
   AttachmentAttributes,
   CustomFieldsConfiguration,
 } from '../../../common/types/domain';
-import { CaseStatuses, AttachmentType } from '../../../common/types/domain';
+import { CaseStatuses, AttachmentType, UserActionTypes } from '../../../common/types/domain';
 import {
   validateCustomFields,
   validateCaseExtendedFields,
@@ -120,9 +121,33 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
   }
 }
 
+const isCloseCaseUserAction = ({ parameters: { attributes } }: UserActionEvent): boolean =>
+  attributes.type === UserActionTypes.status && attributes.payload.status === CaseStatuses.closed;
+
+/**
+ * Throws an error if any of the requests change `extractObservables` to true for an owner that
+ * cannot auto-extract observables. A request that keeps an already stored true is accepted, so
+ * routine edits of old cases still work.
+ */
+function throwIfExtractObservablesChangedToTrue(requests: UpdateRequestWithOriginalCase[]) {
+  requests.forEach(({ updateReq, originalCase }) => {
+    const requestedValue = updateReq.settings?.extractObservables;
+    const storedValue = originalCase.attributes.settings.extractObservables;
+
+    // `settings` is an object, so a change to another setting (for example `syncAlerts`) keeps the
+    // whole object in the request, including an unchanged `extractObservables: true`.
+    if (requestedValue === true && storedValue !== true) {
+      assertCanStoreExtractObservables({
+        owner: originalCase.attributes.owner,
+        extractObservables: requestedValue,
+      });
+    }
+  });
+}
+
 /**
  * Throws an error if any of the requests attempt to create a number of user actions that would put
- * it's case over the limit.
+ * it's case over the limit. Closing a case is exempt so a case at the limit can always be closed.
  */
 async function throwIfMaxUserActionsReached({
   userActionsDict,
@@ -140,9 +165,11 @@ async function throwIfMaxUserActionsReached({
   });
 
   Object.keys(currentTotals).forEach((caseId) => {
-    const totalToAdd = userActionsDict?.[caseId]?.length ?? 0;
+    const totalToAdd = (userActionsDict?.[caseId] ?? []).filter(
+      (userAction) => !isCloseCaseUserAction(userAction)
+    ).length;
 
-    if (currentTotals[caseId] + totalToAdd > MAX_USER_ACTIONS_PER_CASE) {
+    if (totalToAdd > 0 && currentTotals[caseId] + totalToAdd > MAX_USER_ACTIONS_PER_CASE) {
       throw Boom.badRequest(
         `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
       );
@@ -678,6 +705,7 @@ export const bulkUpdate = async (
     const hasPlatinumLicense = await licensingService.isAtLeastPlatinum();
 
     throwIfUpdateOwner(casesToUpdate);
+    throwIfExtractObservablesChangedToTrue(casesToUpdate);
     throwIfUpdateAssigneesWithoutValidLicense(casesToUpdate, hasPlatinumLicense);
 
     // Validate close reasons

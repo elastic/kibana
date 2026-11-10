@@ -184,6 +184,11 @@ const getWrapperWithTooltip = (
 // @internal
 export type ShowDatePicker = boolean | { disabled: boolean; disabledReason?: string };
 
+export type LegacyDatePickerProps = Pick<
+  React.ComponentProps<typeof EuiSuperDatePicker>,
+  'minDate' | 'commonlyUsedRanges'
+>;
+
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
   customSubmitButton?: any;
@@ -239,6 +244,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    * Defaults to true.
    */
   showTimeWindowButtons?: boolean;
+  legacyDatePickerProps?: LegacyDatePickerProps;
   /**
    * Style of the submit button
    * `iconOnly` - use IconButton
@@ -330,6 +336,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
     isApproximate: boolean;
     onChange: (isApproximate: boolean) => void;
     additionalText?: string;
+    additionalDisabledText?: string;
     disabled?: boolean;
     disabledReason?: string;
   };
@@ -574,7 +581,7 @@ export const QueryBarTopRow = React.memo(
       timeHistory$,
       toRecentlyUsedRanges(timeHistory?.get() ?? [])
     );
-    const [commonlyUsedRanges] = useState(() => {
+    const [uiSettingsCommonlyUsedRanges] = useState(() => {
       return (
         uiSettings
           ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
@@ -587,6 +594,13 @@ export const QueryBarTopRow = React.memo(
           }) ?? []
       );
     });
+    const commonlyUsedRanges =
+      props.legacyDatePickerProps?.commonlyUsedRanges ?? uiSettingsCommonlyUsedRanges;
+
+    // A submit (e.g. a manual Refresh) refetches the data without changing the date range props,
+    // so tell the DateRangePicker to re-resolve relative bounds (e.g. `now-15m`) against the new
+    // "now" and keep the dates it displays in step with the data.
+    const [submitEpoch, setSubmitEpoch] = useState(0);
 
     const onSubmit = useCallback(
       (
@@ -597,6 +611,7 @@ export const QueryBarTopRow = React.memo(
           timeHistory.add(dateRange);
         }
 
+        setSubmitEpoch((epoch) => epoch + 1);
         propsOnSubmit({ query, dateRange }, trigger);
       },
       [timeHistory, propsOnSubmit]
@@ -1006,6 +1021,7 @@ export const QueryBarTopRow = React.memo(
             recentlyUsedRanges={recentlyUsedRanges}
             locale={i18n.getLocale()}
             commonlyUsedRanges={commonlyUsedRanges}
+            minDate={props.legacyDatePickerProps?.minDate}
             dateFormat={uiSettings.get('dateFormat')}
             isAutoRefreshOnly={showAutoRefreshOnly}
             className="kbnQueryBar__datePicker"
@@ -1058,6 +1074,7 @@ export const QueryBarTopRow = React.memo(
               onSettingsChange={onDateRangePickerSettingsChange}
               onRefresh={propsOnRefreshChange ? onDateRangePickerRefresh : undefined}
               refreshEpoch={autoRefreshEpoch}
+              resolveEpoch={submitEpoch}
               inputDateFormats={inputDateFormats}
               timeZone={uiSettings.get('dateFormat:tz')}
               calendarOptions={calendarOptions}
@@ -1284,6 +1301,7 @@ export const QueryBarTopRow = React.memo(
                   isApproximate={props.esqlApproximation.isApproximate}
                   onChange={props.esqlApproximation.onChange}
                   additionalText={props.esqlApproximation.additionalText}
+                  additionalDisabledText={props.esqlApproximation.additionalDisabledText}
                   disabled={props.esqlApproximation.disabled}
                   disabledReason={props.esqlApproximation.disabledReason}
                 />
@@ -1547,6 +1565,7 @@ export const QueryBarTopRow = React.memo(
                     isApproximate={props.esqlApproximation.isApproximate}
                     onChange={props.esqlApproximation.onChange}
                     additionalText={props.esqlApproximation.additionalText}
+                    additionalDisabledText={props.esqlApproximation.additionalDisabledText}
                     disabled={props.esqlApproximation.disabled}
                     disabledReason={props.esqlApproximation.disabledReason}
                   />

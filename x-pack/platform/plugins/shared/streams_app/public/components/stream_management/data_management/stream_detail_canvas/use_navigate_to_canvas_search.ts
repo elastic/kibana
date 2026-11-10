@@ -10,24 +10,26 @@ import { useHistory } from 'react-router-dom';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { CANVAS_URL_STATE_KEY } from '../../../../../common/url_schema';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useUnitId } from '../../../../hooks/use_unit_id';
 import { streamsAppRouter } from '../../../../routes/config';
 import { defaultCanvasUrlState } from './state_management';
 
 interface CanvasSearchPathParams {
+  unitId: string;
   rangeFrom: string;
   rangeTo: string;
 }
 
 export const getCanvasSearchPath = (
   query: string,
-  { rangeFrom, rangeTo }: CanvasSearchPathParams
+  { unitId, rangeFrom, rangeTo }: CanvasSearchPathParams
 ): string =>
   setStateToKbnUrl(
     CANVAS_URL_STATE_KEY,
     { ...defaultCanvasUrlState, query },
     { useHash: false, storeInHashQuery: false },
-    streamsAppRouter.link('/new-experience/{tab}', {
-      path: { tab: 'map' },
+    streamsAppRouter.link('/v2/unit/{unitId}/{tab}', {
+      path: { unitId, tab: 'map' },
       query: { rangeFrom, rangeTo },
     })
   );
@@ -35,11 +37,12 @@ export const getCanvasSearchPath = (
 export const useNavigateToCanvasSearch = (): ((query: string) => void) => {
   const history = useHistory();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const unitId = useUnitId();
 
   return useCallback(
     (query: string) => {
-      history.push(getCanvasSearchPath(query, { rangeFrom, rangeTo }));
+      history.push(getCanvasSearchPath(query, { unitId, rangeFrom, rangeTo }));
     },
-    [history, rangeFrom, rangeTo]
+    [history, unitId, rangeFrom, rangeTo]
   );
 };

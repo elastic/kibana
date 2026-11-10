@@ -1,6 +1,6 @@
 {
   "schema_version": "v1",
-  "component_revision": "sha256:184deeb99068734eb569bd2352fb89e4ff487136c4e1631acc923d61ee915a1c",
+  "component_revision": "sha256:faaf9454970e4eb4b7eb64f3f9164b25d2b9f0ef98ff4ad1f4424a046647c1e8",
   "components": [
     {
       "type": "otlp",
@@ -16,6 +16,17 @@
       ],
       "telemetry_selection": "configurable",
       "status": "beta"
+    },
+    {
+      "type": "prometheus_remote_write",
+      "kind": "source",
+      "display_name": "Prometheus remote write",
+      "description": "Receives Prometheus remote write metrics from the managed ingestion path.",
+      "supported_telemetry": [
+        "metrics"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental"
     },
     {
       "type": "add_fields",
@@ -1611,6 +1622,22 @@
       }
     },
     {
+      "kind": "source",
+      "type": "prometheus_remote_write",
+      "schema_version": "v1",
+      "display_name": "Prometheus remote write",
+      "description": "Receives Prometheus remote write metrics from the managed ingestion path.",
+      "supported_telemetry": [
+        "metrics"
+      ],
+      "telemetry_selection": "configurable",
+      "status": "experimental",
+      "fields": [],
+      "help": {
+        "summary": "Receives Prometheus remote write metrics from the managed ingestion path."
+      }
+    },
+    {
       "kind": "processor",
       "type": "add_fields",
       "schema_version": "v1",
@@ -1631,6 +1658,7 @@
           "type": "array",
           "label": "Fields",
           "required": true,
+          "telemetry_selection": "configurable",
           "items": {
             "type": "object",
             "telemetry_selection": "configurable",

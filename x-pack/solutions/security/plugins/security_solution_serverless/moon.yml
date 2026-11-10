@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/plugins/security_solution_serverless
 dependsOn:
   - '@kbn/core'
+  - '@kbn/app-header'
   - '@kbn/config-schema'
   - '@kbn/management-plugin'
   - '@kbn/security-plugin'

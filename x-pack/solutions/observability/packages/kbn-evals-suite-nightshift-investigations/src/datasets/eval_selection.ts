@@ -10,18 +10,29 @@ import { parseRequestedIds } from './select_datasets';
 /** `NIGHTSHIFT_DATASETS` id for the file-driven investigation eval; every other id is a smoke dataset. */
 export const INVESTIGATION_DATASET_ID = 'trace-only';
 /**
- * `NIGHTSHIFT_DATASETS` id for the Nightshift assistant connector probes. Opt-in only: it needs a
- * remote telemetry connector, so unset and `all` never select it.
+ * `NIGHTSHIFT_DATASETS` id for the Nightshift assistant connector probes. Opt-in only: it needs an
+ * Elasticsearch connector, so unset and `all` never select it.
  */
 export const CONNECTOR_PROBE_DATASET_ID = 'connector-probe';
+/**
+ * `NIGHTSHIFT_DATASETS` id for the Wiki optimizer replay. Opt-in only, like the connector probes,
+ * but it needs no sandbox credentials: it replays saved rounds through the optimizer and runs no
+ * investigation.
+ */
+export const WIKI_OPTIMIZE_DATASET_ID = 'wiki-optimize';
 
-const EVAL_IDS: readonly string[] = [INVESTIGATION_DATASET_ID, CONNECTOR_PROBE_DATASET_ID];
+const EVAL_IDS: readonly string[] = [
+  INVESTIGATION_DATASET_ID,
+  CONNECTOR_PROBE_DATASET_ID,
+  WIKI_OPTIMIZE_DATASET_ID,
+];
 
 export interface EvalSelection {
   runSmoke: boolean;
   runInvestigations: boolean;
   runOrca: boolean;
   runConnectorProbes: boolean;
+  runWikiOptimize: boolean;
   /** Smoke dataset ids for `selectDatasets`; `undefined` runs them all. Unused when `runSmoke` is false. */
   smokeDatasetsRequest: string | undefined;
   /** True when an unset selection fell back to smoke because no sandbox credentials were found. */
@@ -35,9 +46,9 @@ export const resolveEvalSelection = (
   const orca = env.EVAL_SHARD_ID === 'orcabench' || env.NIGHTSHIFT_DATASETS?.trim() === 'orcabench';
   if (orca) {
     if (!env.SANDBOX_API_KEY) throw new Error('ORCA investigations require SANDBOX_API_KEY');
-    if (!env.NIGHTSHIFT_ORCA_TELEMETRY) {
+    if (env.NIGHTSHIFT_CONNECTOR_SET !== 'orcabench') {
       throw new Error(
-        'ORCA investigations require a Scout server started with the ORCA telemetry hook'
+        'ORCA investigations require a Scout server started with the orcabench connector set'
       );
     }
     return {
@@ -45,14 +56,13 @@ export const resolveEvalSelection = (
       runInvestigations: false,
       runOrca: true,
       runConnectorProbes: false,
+      runWikiOptimize: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     };
   }
   if (env.NIGHTSHIFT_DATASETS?.split(',').some((id) => id.trim() === 'orcabench')) {
-    throw new Error(
-      'Run orcabench on its own Scout server; it cannot share the current telemetry target'
-    );
+    throw new Error('Run orcabench on its own Scout server; it needs the orcabench connector set');
   }
   const requested =
     env.NIGHTSHIFT_DATASETS?.trim() ||
@@ -77,6 +87,7 @@ export const resolveEvalSelection = (
       runSmoke: true,
       runInvestigations: hasSandbox,
       runConnectorProbes: false,
+      runWikiOptimize: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: !hasSandbox,
     };
@@ -93,6 +104,7 @@ export const resolveEvalSelection = (
     runSmoke: smokeIds.length > 0,
     runInvestigations,
     runConnectorProbes,
+    runWikiOptimize: ids.includes(WIKI_OPTIMIZE_DATASET_ID),
     smokeDatasetsRequest: smokeIds.length > 0 ? smokeIds.join(',') : undefined,
     fellBackToSmoke: false,
   };

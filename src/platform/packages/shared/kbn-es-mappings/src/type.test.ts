@@ -25,48 +25,56 @@ describe('Type checking with TypeScript compiler', () => {
 
     // The expected errors inside the tests are in the following lines
     const errorLines = errorsByLine.map((error) => error.lineNumber);
-    expect(errorLines).toStrictEqual([46, 54, 61, 69, 91]);
+    expect(errorLines).toStrictEqual([48, 56, 63, 70, 78, 100]);
 
     expect(errorsByLine).toMatchInlineSnapshot(`
       Array [
         Object {
           "errorMessage": "Type 'number' is not assignable to type 'string | string[] | undefined'.",
-          "lineNumber": 46,
+          "lineNumber": 48,
           "tsErrorLine": Array [
             "Type Error Explanation: name must be a string",
-            "Error Line [46]: name: 123,",
+            "Error Line [48]: name: 123,",
           ],
         },
         Object {
           "errorMessage": "Type 'string' is not assignable to type 'number | number[] | undefined'.",
-          "lineNumber": 54,
+          "lineNumber": 56,
           "tsErrorLine": Array [
             "Type Error Explanation: age must be a number",
-            "Error Line [54]: age: 'thirty',",
+            "Error Line [56]: age: 'thirty',",
           ],
         },
         Object {
           "errorMessage": "Type 'string' is not assignable to type 'Partial<boolean> | Partial<boolean>[] | undefined'.",
-          "lineNumber": 61,
+          "lineNumber": 63,
           "tsErrorLine": Array [
             "Type Error Explanation: isActive must be a boolean",
-            "Error Line [61]: isActive: 'yes',",
+            "Error Line [63]: isActive: 'yes',",
           ],
         },
         Object {
-          "errorMessage": "Type '\\"invalid_type\\"' is not assignable to type '\\"boolean\\" | \\"object\\" | \\"keyword\\" | \\"match_only_text\\" | \\"text\\" | \\"date_nanos\\" | \\"date\\" | \\"flattened\\" | \\"semantic_text\\" | \\"alias\\" | \\"byte\\" | \\"double\\" | \\"float\\" | \\"integer\\" | \\"long\\" | \\"short\\"'.",
-          "lineNumber": 69,
+          "errorMessage": "Type 'number' is not assignable to type 'string | string[] | undefined'.",
+          "lineNumber": 70,
+          "tsErrorLine": Array [
+            "Type Error Explanation: nickname must be a string",
+            "Error Line [70]: nickname: 123,",
+          ],
+        },
+        Object {
+          "errorMessage": "Type '\\"invalid_type\\"' is not assignable to type '\\"boolean\\" | \\"object\\" | \\"keyword\\" | \\"match_only_text\\" | \\"text\\" | \\"wildcard\\" | \\"date_nanos\\" | \\"date\\" | \\"flattened\\" | \\"semantic_text\\" | \\"alias\\" | \\"byte\\" | \\"double\\" | \\"float\\" | \\"integer\\" | \\"long\\" | \\"short\\"'.",
+          "lineNumber": 78,
           "tsErrorLine": Array [
             "Type Error Explanation: not_mapped is not defined in the mapping",
-            "Error Line [69]: not_mapped: { type: 'invalid_type' },",
+            "Error Line [78]: not_mapped: { type: 'invalid_type' },",
           ],
         },
         Object {
           "errorMessage": "Property 'unknown' does not exist on type '{ name: Omit<MappingTextProperty, \\"properties\\"> & { dynamic?: StrictDynamic | undefined; }; age: Omit<MappingIntegerNumberProperty, \\"properties\\"> & { ...; }; }'.",
-          "lineNumber": 91,
+          "lineNumber": 100,
           "tsErrorLine": Array [
             "Type Error Explanation: Unknown object nested mapping properties are not allowed",
-            "Error Line [91]: export const unknownMappingErrors = objectMapping.properties.nestedObj.properties.unknown;",
+            "Error Line [100]: export const unknownMappingErrors = objectMapping.properties.nestedObj.properties.unknown;",
           ],
         },
       ]

@@ -135,6 +135,20 @@ TS metrics-a
   | STATS min_value = MIN(latency.exp), max_value = MAX(latency.exp)`);
   });
 
+  it('declares the metadata fields that the WHERE clauses use in the TS source', () => {
+    const boundsQuery = createHistogramBoundsQuery({
+      metricItem: createMetric({}),
+      whereStatements: ['_ignored IS NULL'],
+      metadataFields: ['_ignored'],
+      originalSource: 'metrics-*',
+    });
+
+    expect(boundsQuery?.esqlQuery).toBe(`SET unmapped_fields = "NULLIFY";
+TS metrics-a METADATA _ignored
+  | WHERE _ignored IS NULL
+  | STATS min_value = MIN(latency.exp), max_value = MAX(latency.exp)`);
+  });
+
   it('escapes metric names that need backticks', () => {
     const boundsQuery = createHistogramBoundsQuery({
       metricItem: createMetric({ metricName: 'latency.p-99' }),

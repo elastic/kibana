@@ -89,7 +89,7 @@ export const ConversationDetailsFlyoutHeader = ({
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
                 <FormattedMessage
-                  id="xpack.alertzero.detailsFlyout.header.since"
+                  id="xpack.agenticInvestigations.detailsFlyout.header.since"
                   defaultMessage="Since {time} ({relative})"
                   values={{
                     time: <FormattedTime value={createdAt} />,

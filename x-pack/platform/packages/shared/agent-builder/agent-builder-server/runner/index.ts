@@ -71,8 +71,6 @@ export type {
   AuthorizationInfo,
 } from './prompt_manager';
 export type { ConversationStateManager, ToolStateManager } from './state_manager';
-export type { TodoStateManager } from './todo_state_manager';
-export { createTodoStateManager } from './todo_state_manager';
 export { FileEntryType } from './filestore';
 export type {
   FsEntry,

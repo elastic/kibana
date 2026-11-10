@@ -8,7 +8,12 @@
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import { fetchInvestigationAlertSnapshots, parseAlertSnapshot } from './alert_snapshot';
+import { MAX_V2_ALERT_DATA_LENGTH } from '../../common';
+import {
+  fetchInvestigationAlertSnapshots,
+  parseAlertSnapshot,
+  truncateV2AlertData,
+} from './alert_snapshot';
 
 const alert = {
   'kibana.alert.uuid': 'alert-1',
@@ -197,7 +202,61 @@ describe('fetchInvestigationAlertSnapshots', () => {
     expect(snapshot).not.toHaveProperty('rule_name', expect.any(String));
   });
 
-  it('omits the data of a v2 episode that is too large to store in a subject snapshot', async () => {
+  const v2Columns = [
+    'episode.id',
+    'first_timestamp',
+    'last_timestamp',
+    'episode.status',
+    'rule.id',
+    'group_hash',
+  ];
+  const v2Row = (ruleId: string | null, groupHash: string | null = 'hash') => [
+    'episode-1',
+    '2026-09-02T10:00:00.000Z',
+    '2026-09-02T10:05:00.000Z',
+    'active',
+    ruleId,
+    groupHash,
+  ];
+
+  it('names a v2 episode without a rule from its data', async () => {
+    const lookup = makeLookup({
+      columns: v2Columns,
+      rows: [v2Row(null)],
+      episodeData: { 'episode-1': '{"rule_name":"Ad hoc"}' },
+    });
+
+    const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1']);
+
+    expect(snapshot).toEqual(
+      expect.objectContaining({ alert_version: 'v2', id: 'episode-1', rule_name: 'Ad hoc' })
+    );
+    expect(snapshot).not.toHaveProperty('rule_id', expect.any(String));
+    expect(lookup.getRulesClient).not.toHaveBeenCalled();
+  });
+
+  it('keeps a v2 episode whose data rule name is empty', async () => {
+    const lookup = makeLookup({
+      columns: v2Columns,
+      rows: [v2Row(null)],
+      episodeData: { 'episode-1': '{"rule_name":""}' },
+    });
+
+    const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1']);
+
+    expect(snapshot).toEqual(expect.objectContaining({ id: 'episode-1' }));
+    expect(snapshot).not.toHaveProperty('rule_name', expect.any(String));
+  });
+
+  it('treats a malformed v2 episode as not found', async () => {
+    const lookup = makeLookup({ columns: v2Columns, rows: [v2Row('v2-rule', null)] });
+
+    await expect(run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1'])).rejects.toThrow(
+      'Alert with id episode-1 not found'
+    );
+  });
+
+  it('drops the oversize field of a v2 episode that is too large to store in a subject snapshot', async () => {
     const lookup = makeLookup({
       columns: [
         'episode.id',
@@ -216,8 +275,47 @@ describe('fetchInvestigationAlertSnapshots', () => {
     const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['ep-1']);
 
     expect(snapshot).toEqual(
-      expect.objectContaining({ id: 'ep-1', rule_name: 'V2 rule', data: undefined })
+      expect.objectContaining({ id: 'ep-1', rule_name: 'V2 rule', data: {} })
     );
+  });
+
+  it('truncates large arrays of a v2 episode instead of dropping its data', async () => {
+    const lookup = makeLookup({
+      columns: v2Columns,
+      rows: [v2Row('v2-rule')],
+      episodeData: {
+        'episode-1': JSON.stringify({
+          event_id: 'evt-1',
+          rule_ids: ['rule-1'],
+          signals: Array.from({ length: 400 }, (_, i) => `signal-${i}-${'x'.repeat(100)}`),
+        }),
+      },
+    });
+
+    const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1']);
+
+    expect(snapshot).toMatchObject({
+      data: { event_id: 'evt-1', rule_ids: ['rule-1'], signals_truncated: 400 },
+    });
+    expect(JSON.stringify(snapshot).length).toBeLessThan(33_000 + 1_000);
+  });
+
+  it('keeps the identifying fields of a v2 episode whose data is large without arrays', async () => {
+    const lookup = makeLookup({
+      columns: v2Columns,
+      rows: [v2Row('v2-rule')],
+      episodeData: {
+        'episode-1': JSON.stringify({
+          event_id: 'evt-1',
+          title: 'Checkout errors',
+          summary: 'x'.repeat(40_000),
+        }),
+      },
+    });
+
+    const [snapshot] = await run(makeAlertsClient({ alerts: [] }), lookup, ['episode-1']);
+
+    expect(snapshot).toMatchObject({ data: { event_id: 'evt-1', title: 'Checkout errors' } });
   });
 
   it('keeps the names of readable rules when another rule is inaccessible', async () => {
@@ -310,5 +408,59 @@ describe('fetchInvestigationAlertSnapshots', () => {
     alertsClient.find.mockRejectedValue(lookupError);
 
     await expect(run(alertsClient, makeLookup(), ['alert-1'])).rejects.toBe(lookupError);
+  });
+});
+
+describe('truncateV2AlertData', () => {
+  const lines = (count: number, width: number) =>
+    Array.from({ length: count }, (_, i) => `line-${i}-${'x'.repeat(width)}`);
+  const jsonLength = (value: unknown) => JSON.stringify(value).length;
+
+  it('returns data within the limit untouched', () => {
+    const data = { event_id: 'evt-1', signals: lines(3, 10) };
+
+    expect(truncateV2AlertData(data)).toEqual(data);
+  });
+
+  it('halves the largest array until the data fits and records its original length', () => {
+    const data = { event_id: 'evt-1', signals: lines(400, 100), tags: lines(5, 10) };
+
+    const result = truncateV2AlertData(data);
+
+    expect(jsonLength(result)).toBeLessThanOrEqual(MAX_V2_ALERT_DATA_LENGTH);
+    expect(result).toMatchObject({ event_id: 'evt-1', signals_truncated: 400, tags: data.tags });
+    expect(result).not.toHaveProperty('tags_truncated');
+    expect((result.signals as string[]).length).toBeLessThan(400);
+  });
+
+  it('keeps the serialized length within the limit when several arrays are large', () => {
+    const data = {
+      event_id: 'evt-1',
+      signals: lines(300, 90),
+      blast_radius: lines(300, 70),
+      causal_features: lines(300, 50),
+    };
+
+    expect(jsonLength(truncateV2AlertData(data))).toBeLessThanOrEqual(MAX_V2_ALERT_DATA_LENGTH);
+  });
+
+  it('drops the largest field, keeping the small ones, when no array is left to halve', () => {
+    const data = { event_id: 'evt-1', title: 'Checkout errors', summary: 'x'.repeat(40_000) };
+
+    expect(truncateV2AlertData(data)).toEqual({ event_id: 'evt-1', title: 'Checkout errors' });
+  });
+
+  it('drops an oversize non-array field once halving the arrays is not enough', () => {
+    const data = {
+      event_id: 'evt-1',
+      signals: lines(50, 10),
+      summary: 'x'.repeat(40_000),
+    };
+
+    const result = truncateV2AlertData(data);
+
+    expect(jsonLength(result)).toBeLessThanOrEqual(MAX_V2_ALERT_DATA_LENGTH);
+    expect(result).toMatchObject({ event_id: 'evt-1', signals_truncated: 50 });
+    expect(result).not.toHaveProperty('summary');
   });
 });

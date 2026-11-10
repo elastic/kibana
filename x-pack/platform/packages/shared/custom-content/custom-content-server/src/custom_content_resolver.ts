@@ -10,7 +10,8 @@ import { MessageRole, type Message } from '@kbn/inference-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { appendLimitToQuery, getStartEndParams } from '@kbn/esql-utils';
+import { appendLimitToQuery, getNamedParams } from '@kbn/esql-utils';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
@@ -61,6 +62,8 @@ Second example — a row of 4 KPI cards, then a 4-row bar list inside a card, th
 Size for the data you were actually given. If the schema description or prompt says there are four items, size for four rows — do NOT pad for rows that might exist later. When a LIMIT in the query caps the rows, size for that limit. Between ${CUSTOM_CONTENT_MIN_HEIGHT} and ${CUSTOM_CONTENT_MAX_HEIGHT}.
 
 Emit nothing before this comment — no markdown fence, no blank line.`;
+
+const FRAME_FILL_GUIDANCE = `FRAME FILL — the dashboard layout decides the final size of the panel, so the frame can be taller than the height you declared. Wrap the whole template in one root container with \`min-height: 100%\`, \`display: flex\` and \`flex-direction: column\`, and let the main surface (the card, or the group of cards, that holds the content) grow with \`flex: 1\`. A card background then reaches the bottom of the frame instead of ending partway down it. Never give the root or the main surface a fixed height.`;
 
 const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
 - Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
@@ -148,6 +151,8 @@ ${SANDBOX_GUIDANCE}
 
 ${HEIGHT_DECLARATION_GUIDANCE}
 
+${FRAME_FILL_GUIDANCE}
+
 ${colorSection()}
 
 CONTENT RULES:
@@ -172,6 +177,8 @@ ${SANDBOX_GUIDANCE}
 ${HEIGHT_DECLARATION_GUIDANCE}
 - Aggregation/grouping/sorting cannot happen in the template — it only receives \`rows\` and \`max\` as given. If the data needs grouping that isn't already reflected in \`rows\`, that has to happen upstream in the ES|QL query (STATS ... BY ...).
 - For charts use pure CSS or inline SVG.
+
+${FRAME_FILL_GUIDANCE}
 
 ${colorSection()}
 
@@ -204,6 +211,8 @@ export type CustomContentTemplateResolver = (params: {
   existingTemplate?: string;
   /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
   hasExistingQuery?: boolean;
+  /** The values of the dashboard controls a query may refer to (`?name`), bound when it is sampled. */
+  esqlVariables?: ESQLControlVariable[];
 }) => Promise<ResolvedCustomContentTemplate>;
 
 export const createCustomContentTemplateResolver = ({
@@ -211,14 +220,14 @@ export const createCustomContentTemplateResolver = ({
   esClient,
   logger,
 }: CustomContentTemplateResolverDeps): CustomContentTemplateResolver => {
-  return async ({ prompt, esqlQuery, existingTemplate, hasExistingQuery }) => {
+  return async ({ prompt, esqlQuery, existingTemplate, hasExistingQuery, esqlVariables }) => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
 
     if (esqlQuery) {
       try {
         const sampledQuery = appendLimitToQuery(esqlQuery, SAMPLE_ROW_COUNT);
-        const params = getStartEndParams(sampledQuery, SAMPLE_TIME_RANGE);
+        const params = getNamedParams(sampledQuery, SAMPLE_TIME_RANGE, esqlVariables);
         const result = await esClient.asCurrentUser.esql.query({
           query: sampledQuery,
           ...(params.length ? { params } : {}),
