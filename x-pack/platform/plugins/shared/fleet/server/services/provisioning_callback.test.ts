@@ -87,7 +87,7 @@ const CONNECTOR_NOT_FOUND = SavedObjectsErrorHelpers.createGenericNotFoundError(
   'cb-1'
 );
 
-const CLAIM = { status: 'receiving', ...PAYLOAD };
+const CLAIM = { status: 'receiving' as const, ...PAYLOAD };
 const CLAIMED = pendingAttrs({ status: 'receiving', ...PAYLOAD });
 
 describe('provisioningCallbackService', () => {
