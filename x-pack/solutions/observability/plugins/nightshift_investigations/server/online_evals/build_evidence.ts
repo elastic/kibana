@@ -6,7 +6,7 @@
  */
 
 import { ConversationRoundStepType, type ConversationRound } from '@kbn/agent-builder-common';
-import type { EvaluateEvidence } from '@kbn/evals-plugin/server';
+import type { EvaluateEvidence, ToolCallEvidence } from '@kbn/evals-plugin/server';
 
 /** The most tool calls `evaluate()` accepts for one round. */
 export const MAX_EVIDENCE_TOOL_CALLS = 200;
@@ -24,18 +24,36 @@ export const buildOnlineEvalsEvidence = ({
   round: ConversationRound;
   alertOutcome?: string;
 }): EvaluateEvidence => {
-  const toolCalls = round.steps.flatMap((step) =>
-    step.type === ConversationRoundStepType.toolCall
-      ? [
-          {
-            tool_call_id: step.tool_call_id,
-            tool_id: step.tool_id,
-            arguments: step.params,
-            result: step.results,
-          },
-        ]
-      : []
-  );
+  const boundNotes = new Map<string, string[]>();
+  for (const step of round.steps) {
+    const note = step.type === ConversationRoundStepType.reasoning ? step.reasoning.trim() : '';
+    if (note && step.type === ConversationRoundStepType.reasoning && step.tool_call_id) {
+      boundNotes.set(step.tool_call_id, [...(boundNotes.get(step.tool_call_id) ?? []), note]);
+    }
+  }
+
+  // A note not bound to a call belongs to the call that follows it; one with no call after it is
+  // left out, since the final response carries what the agent concluded.
+  let pendingNotes: string[] = [];
+  const toolCalls: ToolCallEvidence[] = [];
+  for (const step of round.steps) {
+    if (step.type === ConversationRoundStepType.reasoning) {
+      const note = step.reasoning.trim();
+      if (note && !step.tool_call_id) {
+        pendingNotes.push(note);
+      }
+    } else if (step.type === ConversationRoundStepType.toolCall) {
+      const reasoning = [...(boundNotes.get(step.tool_call_id) ?? []), ...pendingNotes].join('\n');
+      pendingNotes = [];
+      toolCalls.push({
+        tool_call_id: step.tool_call_id,
+        tool_id: step.tool_id,
+        ...(reasoning ? { reasoning } : {}),
+        arguments: step.params,
+        result: step.results,
+      });
+    }
+  }
 
   return {
     round: {

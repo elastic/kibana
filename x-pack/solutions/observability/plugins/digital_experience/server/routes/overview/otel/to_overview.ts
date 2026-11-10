@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { OverviewPercentile } from '../../../../common/overview_filters';
 import type { ApplicationOverview, OverviewTrendPoint } from '../../../../common/types/overview';
-import { getP75 } from '../../../lib/helpers/aggregations';
+import { getPercentile } from '../../../lib/helpers/aggregations';
 import { toHttpRequests } from '../../../lib/helpers/http_requests';
 import { NO_WEB_VITALS } from '../../../../common/core_web_vitals';
 import { toWebVitals } from '../../../lib/helpers/web_vitals';
@@ -18,7 +19,7 @@ const toTrend = (logs?: OverviewLogsAggregations): OverviewTrendPoint[] =>
     ({ key, doc_count: pageLoads, loadTime }) => ({
       timestamp: key,
       pageLoads,
-      loadTimeP75Ms: getP75(loadTime),
+      loadTimePercentileMs: getPercentile(loadTime),
     })
   );
 
@@ -28,15 +29,17 @@ const toTrend = (logs?: OverviewLogsAggregations): OverviewTrendPoint[] =>
  */
 export const toOverview = (
   serviceName: string,
+  percentile: OverviewPercentile,
   logs?: OverviewLogsAggregations,
   spans?: OverviewSpansAggregations
 ): ApplicationOverview => {
   const metrics = logs?.inEnvironment;
   return {
     serviceName,
+    percentile,
     pageLoads: { count: metrics?.pageLoads.doc_count ?? 0 },
     loadTime: {
-      p75Ms: metrics ? getP75(metrics.pageLoads.loadTime) : null,
+      percentileMs: metrics ? getPercentile(metrics.pageLoads.loadTime) : null,
       sampleCount: metrics?.pageLoads.loadTimeSamples.value ?? 0,
     },
     jsErrors: { count: metrics?.jsErrors.doc_count ?? 0 },

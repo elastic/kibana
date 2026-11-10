@@ -45,7 +45,10 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
       expectedPassedAlertCount == null || output.workflow.passedAlertCount !== null;
     const hasCompleteWorkflowEvidence = retrievedCountAvailable && passedCountAvailable;
 
-    const stagesMatch = expectedStages.every((stage) => stages.includes(stage));
+    const forbiddenStages = expected?.forbiddenWorkflowStages ?? [];
+    const stagesMatch =
+      expectedStages.every((stage) => stages.includes(stage)) &&
+      !forbiddenStages.some((stage) => stages.includes(stage));
     const retrievedCountMatches =
       expectedRetrievedAlertCount == null ||
       output.workflow.retrievedAlertCount === expectedRetrievedAlertCount;
@@ -89,6 +92,7 @@ export const createWorkflowEvidenceEvaluator = (): Evaluator<
         unscopedPipelineAlertRetrievalCounts:
           output.workflow.retrievalEvidence?.unscopedPipelineAlertRetrievalCounts ?? [],
         stages,
+        forbiddenWorkflowStages: forbiddenStages,
         expectedRetrievedAlertCount,
         expectedPassedAlertCount,
         retrievedAlertCount: output.workflow.retrievedAlertCount,

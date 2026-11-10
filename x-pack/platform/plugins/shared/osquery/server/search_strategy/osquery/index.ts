@@ -217,6 +217,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               ...('startDate' in request ? { startDate: request.startDate } : {}),
               ...('agentId' in request ? { agentId: request.agentId } : {}),
               ...('agentIds' in request ? { agentIds: request.agentIds } : {}),
+              ...('agentsCount' in request ? { agentsCount: request.agentsCount } : {}),
               ...('policyIds' in request ? { policyIds: request.policyIds } : {}),
               ...('integrationNamespaces' in request
                 ? { integrationNamespaces: request.integrationNamespaces }

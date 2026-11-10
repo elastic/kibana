@@ -45,8 +45,7 @@ export interface ExecuteQueryParams {
 }
 
 export interface QueryServiceContract {
-  executeQuery(params: ExecuteQueryParams): Promise<EsqlQueryResponse>;
-  executeQueryRows<T = Record<string, unknown>>(params: ExecuteQueryParams): Promise<T[]>;
+  executeQuery<T = Record<string, unknown>>(params: ExecuteQueryParams): Promise<T[]>;
   executeQueryStream<T = Record<string, unknown>>(params: ExecuteQueryParams): AsyncIterable<T[]>;
 }
 
@@ -61,7 +60,7 @@ export class QueryService implements QueryServiceContract {
     private readonly esqlResponseFormatService: EsqlResponseFormatServiceContract
   ) {}
 
-  async executeQuery({
+  private async runEsqlQuery({
     query,
     filter,
     params,
@@ -98,8 +97,8 @@ export class QueryService implements QueryServiceContract {
     }
   }
 
-  async executeQueryRows<T = Record<string, unknown>>(params: ExecuteQueryParams): Promise<T[]> {
-    const response = await this.executeQuery(params);
+  async executeQuery<T = Record<string, unknown>>(params: ExecuteQueryParams): Promise<T[]> {
+    const response = await this.runEsqlQuery(params);
     return toRows<T>(response);
   }
 

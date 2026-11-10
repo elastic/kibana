@@ -230,6 +230,7 @@ export class IacProvisionerUnavailableError extends FleetError {
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
 export class AgentAlreadyAssignedError extends AgentReassignmentError {}
+export class AgentRestartPendingError extends FleetError {}
 export class AgentRollbackError extends FleetError {
   constructor(message: string) {
     super(`Error rolling back agent in Fleet: ${message}`);

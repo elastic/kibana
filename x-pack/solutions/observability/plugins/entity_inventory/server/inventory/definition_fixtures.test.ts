@@ -6,10 +6,15 @@
  */
 
 import { entitySchema } from '@kbn/entity-store/common';
-import { INVENTORY_DEFINITION_FIXTURES, k8sNodeFixture } from './__fixtures__/definitions';
+import {
+  INVENTORY_DEFINITION_FIXTURES,
+  entityIdFixture,
+  k8sNodeFixture,
+  rankedEntityIdFixture,
+} from './__fixtures__/definitions';
 
 describe('inventory definition fixtures', () => {
-  const cases = INVENTORY_DEFINITION_FIXTURES.map(
+  const cases = [...INVENTORY_DEFINITION_FIXTURES, entityIdFixture, rankedEntityIdFixture].map(
     (definition) => [definition.type, definition] as const
   );
 
