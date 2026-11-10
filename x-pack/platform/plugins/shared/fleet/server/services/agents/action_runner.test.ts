@@ -689,13 +689,20 @@ describe('ActionRunner', () => {
     });
 
     it('stops the heartbeat when opening a point in time fails', async () => {
-      mockAgentPages(1, 2);
-      mockedOpenPointInTime.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+      jest.useFakeTimers();
+      try {
+        mockAgentPages(1, 2);
+        mockedOpenPointInTime.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
 
-      await createRunner({ total: 2 }, { pitId: undefined }).runActionAsyncWithRetry();
+        await createRunner({ total: 2 }, { pitId: undefined }).runActionAsyncWithRetry();
+        const writesWhenTheRunEnded = resolver.updateCheckTaskState.mock.calls.length;
+        await jest.advanceTimersByTimeAsync(RUNNER_HEARTBEAT_INTERVAL_MINUTES * 60 * 1000 * 3);
 
-      // the timer must not outlive the run, whichever way the run ends
-      expect(jest.getTimerCount()).toBe(0);
+        // the timer must not outlive the run, whichever way the run ends
+        expect(resolver.updateCheckTaskState).toHaveBeenCalledTimes(writesWhenTheRunEnded);
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('does not open a point in time when it already has one', async () => {

@@ -306,11 +306,32 @@ export async function bulkCreateAgentActionResults(
     });
   }
 
-  await esClient.bulk({
+  const res = await esClient.bulk({
     index: AGENT_ACTIONS_RESULTS_INDEX,
     operations: bulkBody,
     refresh: 'wait_for',
   });
+
+  // A bulk reports per item failures in its response rather than throwing, so a write that only
+  // partly landed would otherwise read as complete. This is surfaced rather than thrown: callers
+  // write these results for a whole batch at once, and failing the batch would have it rewrite the
+  // results that did land, counting those agents twice. The callers that depend on a result being
+  // present read it back before acting on it instead.
+  if (res.errors) {
+    const failures = res.items
+      .map((item) => item.create ?? item.index)
+      .filter((item) => item?.error)
+      .map((item) => `${item!._id}: ${item!.error?.reason}`);
+    if (failures.length > 0) {
+      appContextService
+        .getLogger()
+        .error(
+          `Failed to write ${failures.length} of ${
+            results.length
+          } agent action results: ${failures.join(', ')}`
+        );
+    }
+  }
 }
 
 export async function getAgentActions(esClient: ElasticsearchClient, actionId: string) {

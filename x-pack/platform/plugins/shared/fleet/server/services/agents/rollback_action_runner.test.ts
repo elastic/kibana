@@ -29,6 +29,14 @@ const mockedCreateErrorActionResults = createErrorActionResults as jest.MockedFu
 
 const logger = loggerMock.create();
 
+const responseError = (statusCode: number, type: string) =>
+  new EsErrors.ResponseError({
+    statusCode,
+    body: { error: { type } },
+    warnings: [],
+    meta: {} as any,
+  });
+
 /** An agent with a rollback that has not expired, so it is eligible for the given version. */
 const createAgent = (id: string, version: string): Agent =>
   ({
@@ -119,16 +127,14 @@ describe('rollbackBatch', () => {
     // the agents are marked as rolling back but nothing was dispatched; a bulk action retries both
     // writes, but sendRollbackAgentsActions also calls this directly with no retry, and the agents
     // would be left looking like they are upgrading until that times out
-    mockedCreateAgentAction.mockRejectedValue(new Error('rejected by Elasticsearch'));
+    mockedCreateAgentAction.mockRejectedValue(responseError(400, 'mapper_parsing_exception'));
     const agent = {
       ...createAgent('agent-0', '8.18.0'),
       upgraded_at: '2026-11-01T00:00:00.000Z',
       upgrade_started_at: '2026-10-31T00:00:00.000Z',
     } as Agent;
 
-    await expect(rollbackBatch(esClient, [agent], {}, {})).rejects.toThrow(
-      'rejected by Elasticsearch'
-    );
+    await expect(rollbackBatch(esClient, [agent], {}, {})).rejects.toThrow();
 
     expect(mockedBulkUpdateAgents).toHaveBeenLastCalledWith(
       esClient,
@@ -145,16 +151,23 @@ describe('rollbackBatch', () => {
     );
   });
 
-  it('leaves the upgrade state alone when the write may still have landed', async () => {
-    // createAgentAction writes with refresh: 'wait_for', so a timeout is a realistic way in here
-    // with the document already indexed and about to be dispatched, and no read settles it;
-    // unmarking those agents would show them as idle while they roll back and let someone start a
-    // second rollback on them
-    mockedCreateAgentAction.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+  it.each([
+    ['a timeout', new EsErrors.TimeoutError('Request timed out')],
+    ['a dropped connection', new EsErrors.ConnectionError('socket hang up')],
+    ['a gateway error from a proxy', responseError(502, 'bad_gateway')],
+    [
+      'a conflict, which means the document is already there',
+      responseError(409, 'version_conflict'),
+    ],
+  ])('leaves the upgrade state alone after %s', async (_label, error) => {
+    // createAgentAction writes with refresh: 'wait_for', so plenty of failures reach here with the
+    // document already indexed and about to be dispatched, and no read settles it; unmarking those
+    // agents would show them as idle while they roll back and let someone start a second rollback
+    mockedCreateAgentAction.mockRejectedValue(error);
 
     await expect(
       rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, {})
-    ).rejects.toThrow('Request timed out');
+    ).rejects.toThrow();
 
     // only the forward write, no restore
     expect(mockedBulkUpdateAgents).toHaveBeenCalledTimes(1);
@@ -163,16 +176,11 @@ describe('rollbackBatch', () => {
     );
   });
 
-  it('restores the upgrade state when Elasticsearch rejected the write outright', async () => {
-    // a response, even a rejection, means Elasticsearch processed the request and indexed nothing
-    mockedCreateAgentAction.mockRejectedValue(
-      new EsErrors.ResponseError({
-        statusCode: 400,
-        body: { error: { type: 'mapper_parsing_exception' } },
-        warnings: [],
-        meta: {} as any,
-      })
-    );
+  it.each([
+    ['a mapping failure', responseError(400, 'mapper_parsing_exception')],
+    ['a rejected write', responseError(429, 'es_rejected_execution_exception')],
+  ])('restores the upgrade state after %s, which can only be a refusal', async (_label, error) => {
+    mockedCreateAgentAction.mockRejectedValue(error);
 
     await expect(
       rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, {})
@@ -183,7 +191,7 @@ describe('rollbackBatch', () => {
 
   it('warns when the restore only partly lands', async () => {
     // bulkUpdateAgents reports per agent failures in the map it is given rather than throwing
-    mockedCreateAgentAction.mockRejectedValue(new Error('rejected by Elasticsearch'));
+    mockedCreateAgentAction.mockRejectedValue(responseError(400, 'mapper_parsing_exception'));
     mockedBulkUpdateAgents.mockImplementation(async (_esClient, _updates, errors) => {
       if (mockedBulkUpdateAgents.mock.calls.length > 1) {
         errors['agent-0'] = new Error('version conflict');
@@ -192,7 +200,7 @@ describe('rollbackBatch', () => {
 
     await expect(
       rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, {})
-    ).rejects.toThrow('rejected by Elasticsearch');
+    ).rejects.toThrow();
 
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Could not restore the upgrade state of 1 agents')
@@ -200,23 +208,43 @@ describe('rollbackBatch', () => {
   });
 
   it('still raises the original failure when the upgrade state cannot be put back', async () => {
-    mockedCreateAgentAction.mockRejectedValue(new Error('rejected by Elasticsearch'));
+    mockedCreateAgentAction.mockRejectedValue(responseError(400, 'mapper_parsing_exception'));
     mockedBulkUpdateAgents
       .mockResolvedValueOnce(undefined as never)
       .mockRejectedValue(new Error('restore failed'));
 
     await expect(
       rollbackBatch(esClient, [createAgent('agent-0', '8.18.0')], {}, {})
-    ).rejects.toThrow('rejected by Elasticsearch');
+    ).rejects.toThrow();
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Could not restore the upgrade state')
     );
   });
 
-  it('writes the error results of a version group before the action that dedupe keys on', async () => {
-    // the action lists every agent of the group, including any whose bookkeeping update failed, so
-    // a replay filters all of them out and never returns — leaving an action that can never
-    // complete if the results it owed were still unwritten
+  it('names only the agents whose bookkeeping landed in the action document', async () => {
+    // listing an agent whose update failed would make a replay filter it out on the strength of a
+    // document saying it was handled, leaving it with neither a rollback nor a result
+    mockedBulkUpdateAgents.mockImplementation(async (_esClient, _updates, errors) => {
+      errors['agent-1'] = new Error('version conflict');
+    });
+
+    await rollbackBatch(
+      esClient,
+      [createAgent('agent-0', '8.18.0'), createAgent('agent-1', '8.18.0')],
+      {},
+      {}
+    );
+
+    expect(mockedCreateAgentAction).toHaveBeenCalledWith(
+      esClient,
+      expect.anything(),
+      expect.objectContaining({ agents: ['agent-0'], total: 2 })
+    );
+  });
+
+  it('writes the error results after the action document, not before', async () => {
+    // results written first would be orphaned under an action id that never got a document if the
+    // action write then failed, and dedupe reads a result as "this agent was handled"
     const order: string[] = [];
     mockedCreateErrorActionResults.mockImplementation(async () => {
       order.push('createErrorActionResults');
@@ -236,31 +264,7 @@ describe('rollbackBatch', () => {
       {}
     );
 
-    expect(order).toEqual(['createErrorActionResults', 'createAgentAction']);
-  });
-
-  it('does not write an error result twice for one agent', async () => {
-    // pre-action errors are assigned to the first action after its own results were written
-    mockedBulkUpdateAgents.mockImplementation(async (_esClient, _updates, errors) => {
-      errors['agent-1'] = new Error('version conflict');
-    });
-
-    await rollbackBatch(
-      esClient,
-      [
-        createAgent('agent-0', '8.18.0'),
-        createAgent('agent-1', '8.18.0'),
-        { id: 'agent-2', upgrade: { rollbacks: [] } } as unknown as Agent,
-      ],
-      {},
-      {}
-    );
-
-    const writtenAgentIds = mockedCreateErrorActionResults.mock.calls.flatMap(([, , errors]) =>
-      Object.keys(errors)
-    );
-    expect(writtenAgentIds).toEqual([...new Set(writtenAgentIds)]);
-    expect(writtenAgentIds).toEqual(expect.arrayContaining(['agent-1', 'agent-2']));
+    expect(order).toEqual(['createAgentAction', 'createErrorActionResults']);
   });
 
   it('does not create the action when the agent bookkeeping fails', async () => {
