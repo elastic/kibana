@@ -86,8 +86,9 @@ export const NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES: Readonly<Record<string, 
         // Source data. A source is any ES|QL query, read through the source's view, and the
         // caller needs read on the indices behind it: an explicit index it cannot read fails the
         // query with a 403, while a wildcard silently skips what it cannot read. Saving a source
-        // checks that its author can read the indices, but the query can name any of them, so the
-        // account reads every index except system ones, the pattern the `viewer` role uses.
+        // checks that its author has read on every local index the query names (remote targets
+        // are not checked), but the query can name any of them, so the account reads every index
+        // except system ones, the pattern the `viewer` role uses.
         // `.rule-events`, `.alert-actions` and the `.significant_events-*` data streams need no
         // grant: the `nightshift` feature privilege below carries implicit read on them, and
         // Kibana writes them as the internal user.

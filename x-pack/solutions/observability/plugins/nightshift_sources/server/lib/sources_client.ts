@@ -48,6 +48,15 @@ const FULL_UPDATE = { mergeAttributes: false } as const;
 
 export type SourceViewsClient = Pick<EsqlViewsClient, 'putView' | 'getView' | 'deleteView'>;
 
+/** Why a user's read access to the data behind a query could not be confirmed. */
+type TReadFailure = 'unparsable' | 'unverifiable' | 'denied';
+
+const READ_FAILURE_REASONS: Record<TReadFailure, string> = {
+  unparsable: ': its query cannot be checked',
+  unverifiable: ': its data cannot be checked for this user',
+  denied: '',
+};
+
 const MAX_SLUG_ALLOCATION_ATTEMPTS = 100;
 const VIEW_NAME_CATALOG_PAGE_SIZE = 1000;
 
@@ -104,8 +113,8 @@ export class SourcesClient {
    * The checks create and update run on a new query, without writing. Returns the type to store,
    * and whether any index exists yet behind the query.
    *
-   * Nothing here checks which indices the author can read. The routes that call this are gated
-   * behind manage and configure, and the service account's role decides what engines read.
+   * The author must be able to read every local index the query targets, because the engines
+   * read it as the service account, whose role covers far more than the author's.
    */
   async validateQuery({
     esql,
@@ -113,6 +122,7 @@ export class SourcesClient {
     esql: string;
   }): Promise<{ type: SourceType; indexExists: boolean }> {
     const type = validateSourceQuery({ esql });
+    await this.assertAuthorCanRead(esql);
     const { indexExists } = await assertSourceQueryExecutes({
       esClient: this.deps.dataEsClient,
       esql,
@@ -244,25 +254,51 @@ export class SourcesClient {
    */
   async assertReadable(id: string): Promise<void> {
     const { attributes } = await this.getSavedObject(id);
+    const failure = await this.findReadFailure(attributes.esql);
+    if (failure !== undefined) {
+      throw forbidden(`Cannot read source ${id}${READ_FAILURE_REASONS[failure]}`);
+    }
+  }
+
+  /**
+   * Rejects with 403 when the current user cannot read every local index a new query targets.
+   * Onboarding, detection and discovery run as the detection service account, which reads far
+   * more than most authors, so a source must not name data its author cannot read. The `LIMIT 0`
+   * probe cannot tell: a wildcard passes when the author reads only some of the matches.
+   */
+  private async assertAuthorCanRead(esql: string): Promise<void> {
+    const failure = await this.findReadFailure(esql);
+    if (failure === undefined) {
+      return;
+    }
+    throw forbidden(
+      failure === 'denied'
+        ? 'Cannot save this source: you cannot read all the indices its query targets'
+        : `Cannot save this source${READ_FAILURE_REASONS[failure]}`
+    );
+  }
+
+  /**
+   * Asks Elasticsearch whether the current user has `read` on the local index patterns of a
+   * query. Remote targets are skipped, see `assertReadable`. Returns why the answer is no, or
+   * `undefined` when the user can read. A failing privilege request throws, so the check fails
+   * closed.
+   */
+  private async findReadFailure(esql: string): Promise<TReadFailure | undefined> {
     let targets: ISourceReadTargets;
     try {
-      targets = getSourceReadTargets(attributes.esql);
+      targets = getSourceReadTargets(esql);
     } catch {
-      throw forbidden(`Cannot read source ${id}: its query cannot be checked`);
+      return 'unparsable';
     }
     if (targets.indexPatterns.length === 0) {
-      if (targets.hasRemote) {
-        return;
-      }
-      throw forbidden(`Cannot read source ${id}: its data cannot be checked for this user`);
+      return targets.hasRemote ? undefined : 'unverifiable';
     }
 
     const response = await this.deps.dataEsClient.security.hasPrivileges({
       index: [{ names: targets.indexPatterns, privileges: ['read'] }],
     });
-    if (!response.has_all_requested) {
-      throw forbidden(`Cannot read source ${id}`);
-    }
+    return response.has_all_requested ? undefined : 'denied';
   }
 
   /**
