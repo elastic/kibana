@@ -42,6 +42,16 @@ describe('resolveInboundEventsEnabled', () => {
     expect(resolveInboundEventsEnabled({ actionTypeId: '.dual', hasIdentity: true })).toBe(true);
   });
 
+  it('is true for dual types that have events enabled without last-saver identity', () => {
+    expect(
+      resolveInboundEventsEnabled({
+        actionTypeId: '.dual',
+        hasIdentity: false,
+        eventsEnabled: true,
+      })
+    ).toBe(true);
+  });
+
   it('is false for outbound-only types', () => {
     expect(resolveInboundEventsEnabled({ actionTypeId: '.slack', hasIdentity: true })).toBe(false);
   });

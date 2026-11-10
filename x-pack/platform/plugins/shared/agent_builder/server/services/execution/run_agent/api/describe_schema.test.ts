@@ -14,6 +14,14 @@ const mockWideDefinition = () => ({
   properties: Object.fromEntries(mockWidePropertyNames.map((name) => [name, { type: 'string' }])),
 });
 
+const repeatedSubtree = { type: 'object', description: 'y'.repeat(1_000) };
+const fieldNames = (count: number) => Array.from({ length: count }, (_, index) => `field_${index}`);
+const oversizedRepeatedSubtree = { type: 'string', enum: ['w'.repeat(1_500)] };
+const oversizedRepeatSchema = {
+  type: 'object',
+  properties: Object.fromEntries(fieldNames(30).map((name) => [name, oversizedRepeatedSubtree])),
+};
+
 jest.mock('@elastic/schemas/es/json/_types.json', () => ({
   $defs: {
     Duration: {
@@ -346,6 +354,58 @@ describe('toDescribedSchema', () => {
     expect(second).toBe(first);
     expect(await toDescribedSchema('elasticsearch', schema)).toBe(first);
   });
+
+  it('leaves repeated inline subtrees in place while the schema fits its character limit', async () => {
+    const schema = {
+      type: 'object',
+      properties: { first: repeatedSubtree, second: repeatedSubtree },
+    };
+
+    await expect(toDescribedSchema('kibana', schema)).resolves.toEqual({
+      schema,
+      expandableTypes: [],
+    });
+  });
+
+  it('shares an inline subtree repeated across a schema too large to describe', async () => {
+    const schema = {
+      type: 'object',
+      properties: Object.fromEntries(fieldNames(50).map((name) => [name, repeatedSubtree])),
+    };
+
+    const { schema: described, expandableTypes } = await toDescribedSchema('kibana', schema);
+
+    const [name] = Object.keys(described.$defs as Record<string, unknown>);
+    expect(name).toMatch(/^field_0\.[0-9a-f]{8}$/);
+    expect(described).toEqual({
+      type: 'object',
+      properties: Object.fromEntries(
+        fieldNames(50).map((field) => [field, { $ref: `#/$defs/${name}` }])
+      ),
+      $defs: { [name]: repeatedSubtree },
+    });
+    expect(expandableTypes).toEqual([]);
+  });
+
+  it('stubs a hoisted subtree too large to inline into the definitions block', async () => {
+    const { schema: described, expandableTypes } = await toDescribedSchema(
+      'kibana',
+      oversizedRepeatSchema
+    );
+
+    const [name] = expandableTypes;
+    expect(name).toMatch(/^field_0\.[0-9a-f]{8}$/);
+    expect(expandableTypes).toEqual([name]);
+    expect(described).toEqual({
+      type: 'object',
+      properties: Object.fromEntries(
+        fieldNames(30).map((field) => [
+          field,
+          { type: 'string', title: name, 'x-expandable': name },
+        ])
+      ),
+    });
+  });
 });
 
 describe('toDescribedDefinition', () => {
@@ -409,6 +469,16 @@ describe('toDescribedDefinition', () => {
       },
       expandableTypes: ['Oversized'],
     });
+  });
+
+  it('expands a stub left for a hoisted inline subtree', async () => {
+    const {
+      expandableTypes: [typeName],
+    } = await toDescribedSchema('kibana', oversizedRepeatSchema);
+
+    await expect(toDescribedDefinition('kibana', oversizedRepeatSchema, typeName)).resolves.toEqual(
+      { schema: oversizedRepeatedSubtree, expandableTypes: [] }
+    );
   });
 
   it('returns nothing for a name the schema closure does not define', async () => {

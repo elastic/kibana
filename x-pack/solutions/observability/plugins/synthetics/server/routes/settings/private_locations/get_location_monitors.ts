@@ -9,6 +9,7 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { getPrivateLocationsAndAgentPolicies } from './get_private_locations';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { MonitorTypeEnum } from '../../../../common/runtime_types';
 import {
   legacyMonitorAttributes,
   syntheticsMonitorAttributes,
@@ -18,6 +19,7 @@ import {
 type Payload = Array<{
   id: string;
   count: number;
+  browserCount: number;
 }>;
 
 interface Bucket {
@@ -25,19 +27,23 @@ interface Bucket {
   doc_count: number;
 }
 
+const locationTerms = (attributes: string) => ({
+  terms: {
+    field: `${attributes}.locations.id`,
+    size: 20000,
+  },
+});
+
+const browserLocationAgg = (attributes: string) => ({
+  filter: { term: { [`${attributes}.type`]: MonitorTypeEnum.BROWSER } },
+  aggs: { locations: locationTerms(attributes) },
+});
+
 const aggs = {
-  locations_legacy: {
-    terms: {
-      field: `${legacyMonitorAttributes}.locations.id`,
-      size: 20000,
-    },
-  },
-  locations: {
-    terms: {
-      field: `${syntheticsMonitorAttributes}.locations.id`,
-      size: 20000,
-    },
-  },
+  locations_legacy: locationTerms(legacyMonitorAttributes),
+  locations: locationTerms(syntheticsMonitorAttributes),
+  browser_locations_legacy: browserLocationAgg(legacyMonitorAttributes),
+  browser_locations: browserLocationAgg(syntheticsMonitorAttributes),
 };
 
 export const getLocationMonitors: SyntheticsRestApiRouteFactory<Payload> = () => ({
@@ -52,6 +58,9 @@ export const getLocationMonitors: SyntheticsRestApiRouteFactory<Payload> = () =>
       syntheticsMonitorClient
     );
 
+    // Intentional. A private location's monitor total is all-spaces, then limited
+    // to locations this caller can already see. browserCount is a split of that
+    // existing count, not a new read of monitors in other spaces.
     const locationMonitors = await soClient.find({
       type: syntheticsMonitorSOTypes,
       perPage: 0,
@@ -63,23 +72,31 @@ export const getLocationMonitors: SyntheticsRestApiRouteFactory<Payload> = () =>
       | {
           locations_legacy?: { buckets: Bucket[] };
           locations?: { buckets: Bucket[] };
+          browser_locations_legacy?: { locations?: { buckets: Bucket[] } };
+          browser_locations?: { locations?: { buckets: Bucket[] } };
         }
       | undefined;
 
     // Merge counts from both buckets
     const counts: Record<string, number> = {};
+    const browserCounts: Record<string, number> = {};
 
-    aggsResp?.locations_legacy?.buckets.forEach(({ key, doc_count: docCount }) => {
-      counts[key] = (counts[key] || 0) + docCount;
-    });
-    aggsResp?.locations?.buckets.forEach(({ key, doc_count: docCount }) => {
-      counts[key] = (counts[key] || 0) + docCount;
-    });
+    const addCounts = (buckets: Bucket[] | undefined, target: Record<string, number>) => {
+      buckets?.forEach(({ key, doc_count: docCount }) => {
+        target[key] = (target[key] || 0) + docCount;
+      });
+    };
+
+    addCounts(aggsResp?.locations_legacy?.buckets, counts);
+    addCounts(aggsResp?.locations?.buckets, counts);
+    addCounts(aggsResp?.browser_locations_legacy?.locations?.buckets, browserCounts);
+    addCounts(aggsResp?.browser_locations?.locations?.buckets, browserCounts);
 
     return Object.entries(counts)
       .map(([id, count]) => ({
         id,
         count,
+        browserCount: browserCounts[id] ?? 0,
       }))
       .filter(({ id }) =>
         locations.some((location) => location.id === id || location.label === id)

@@ -110,7 +110,14 @@ export const AssistantBody: FunctionComponent<Props> = ({
   }
 
   return (
-    <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+    <EuiFlexGroup
+      direction="column"
+      justifyContent="spaceBetween"
+      // Wide content (e.g. markdown tables) must scroll within itself instead of widening the flyout body.
+      css={css`
+        min-width: 0;
+      `}
+    >
       <EuiFlexItem>
         {isLoading ? (
           <EuiEmptyPrompt

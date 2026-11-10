@@ -18,7 +18,10 @@ project:
   sourceRoot: x-pack/platform/test/agent_builder_sml/plugins/sml_test_types
 dependsOn:
   - '@kbn/core'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-sml-plugin'
+  - '@kbn/config-schema'
   - '@kbn/features-plugin'
 tags:
   - plugin

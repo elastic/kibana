@@ -528,5 +528,7 @@ describe('getWorkflowContextSchema - HITL template context', () => {
 
     expect(getSchemaAtPath(contextSchema, 'context.hitl.externalFormLink').schema).toBeDefined();
     expect(getSchemaAtPath(contextSchema, 'context.hitl.externalQueryLink').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'context.hitl.externalApproveLink').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'context.hitl.externalRejectLink').schema).toBeDefined();
   });
 });

@@ -39,9 +39,11 @@ export function getRuleTypeChange(fieldsDiff: RuleFieldsDiffWithType): RuleTypeC
 
 /**
  * Tells whether the rule's `type` diff outcome means the type changes on upgrade.
- * Only the three outcomes `determineIfValueCanUpdate` treats as a real update count.
- * `CustomizedValueSameUpdate` is deliberately excluded because current already equals
- * target for that outcome, so nothing changes on upgrade.
+ * `ruleTypeDiffAlgorithm` always merges the target type, so the type changes whenever
+ * the current version differs from the target one. That covers the three outcomes
+ * `determineIfValueCanUpdate` treats as a real update plus `CustomizedValueNoUpdate`
+ * (BASE=A, CURRENT=B, TARGET=A), where the upgrade resets a diverged type back to the
+ * target. `CustomizedValueSameUpdate` is excluded because current already equals target.
  */
 export function hasRuleTypeChanged(typeDiff: RuleTypeDiffOutcome | undefined): boolean {
   const diffOutcome = typeDiff?.diff_outcome;
@@ -49,6 +51,7 @@ export function hasRuleTypeChanged(typeDiff: RuleTypeDiffOutcome | undefined): b
   return (
     diffOutcome === ThreeWayDiffOutcome.StockValueCanUpdate ||
     diffOutcome === ThreeWayDiffOutcome.CustomizedValueCanUpdate ||
+    diffOutcome === ThreeWayDiffOutcome.CustomizedValueNoUpdate ||
     diffOutcome === ThreeWayDiffOutcome.MissingBaseCanUpdate
   );
 }

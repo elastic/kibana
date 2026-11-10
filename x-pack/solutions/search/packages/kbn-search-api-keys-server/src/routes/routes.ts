@@ -28,7 +28,7 @@ export function registerSearchApiKeysRoutes(router: IRouter, logger: Logger) {
       },
       validate: {
         body: schema.object({
-          id: schema.string(),
+          id: schema.string({ maxLength: 512 }),
         }),
       },
       options: {

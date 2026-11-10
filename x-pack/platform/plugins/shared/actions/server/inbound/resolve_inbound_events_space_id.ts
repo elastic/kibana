@@ -9,5 +9,6 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { ActionsClientContext } from '../actions_client';
 
-export const resolveInboundEventsSpaceId = (context: ActionsClientContext): string =>
-  context.spaceId ?? context.spaces?.getSpaceId(context.request) ?? DEFAULT_SPACE_ID;
+export const resolveInboundEventsSpaceId = (
+  context: Pick<ActionsClientContext, 'spaceId' | 'spaces' | 'request'>
+): string => context.spaceId ?? context.spaces?.getSpaceId(context.request) ?? DEFAULT_SPACE_ID;

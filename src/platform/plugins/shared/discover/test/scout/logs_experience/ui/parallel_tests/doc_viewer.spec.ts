@@ -213,6 +213,38 @@ spaceTest.describe(
     );
 
     spaceTest(
+      'should open on the Table tab and hide Log overview when the log has no message',
+      async ({ page, pageObjects }) => {
+        const { docViewer, logsExperience } = pageObjects;
+
+        await logsExperience.gotoDataView(LOGS.SYNTH_NO_MESSAGE_DATA_VIEW);
+        await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
+
+        await expect(page.testSubj.locator(`docViewerTab-${LOGS.TABLE_TAB}`)).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+        await expect(page.testSubj.locator(`docViewerTab-${LOGS.LOGS_OVERVIEW_TAB}`)).toBeHidden();
+      }
+    );
+
+    // The positive control for the test above: without it, that test would also pass if the logs
+    // profile never resolved for the space.
+    spaceTest(
+      'should open on the Log overview tab when the log has a message',
+      async ({ page, pageObjects }) => {
+        const { docViewer, logsExperience } = pageObjects;
+
+        await logsExperience.gotoDocViewerLogs();
+        await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
+
+        await expect(
+          page.testSubj.locator(`docViewerTab-${LOGS.LOGS_OVERVIEW_TAB}`)
+        ).toHaveAttribute('aria-selected', 'true');
+      }
+    );
+
+    spaceTest(
       'should open a section from a leading control inside a dashboard panel',
       async ({ apiServices, scoutSpace, pageObjects }) => {
         const { dashboard, dataGrid, logsExperience } = pageObjects;

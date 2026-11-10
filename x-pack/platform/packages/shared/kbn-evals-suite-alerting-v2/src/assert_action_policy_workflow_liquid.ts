@@ -56,9 +56,21 @@ const resolveSegment = (schema: JsonSchema, segment: string): JsonSchema | null 
     return null;
   }
 
-  // Open maps (groupKey, rules, episode data) accept any key but don't describe their
-  // values, so everything below them is unconstrained.
-  return schema.properties?.[segment] ?? (schema.additionalProperties ? ANY_KEY_OBJECT : null);
+  const named = schema.properties?.[segment];
+  if (named) {
+    return named;
+  }
+
+  // Boolean `true` is an open map: any key, unconstrained values.
+  // A schema describes the value of every other key (typed maps such as `rules`).
+  const additional = schema.additionalProperties;
+  if (additional === true) {
+    return ANY_KEY_OBJECT;
+  }
+  if (additional && typeof additional === 'object') {
+    return additional;
+  }
+  return null;
 };
 
 const toPayloadRelativePath = (path: string): string => {
@@ -196,4 +208,35 @@ export const assertActionPolicyWorkflowLiquid = (
   throwUnknownPayloadLiquidFields(payloadVariables, getPayloadSchema());
 
   return { variables, workflow, yaml: workflowYaml };
+};
+
+// Loop aliases (`{% for alert in ... %}`, `foreach.item`) are local Liquid variables that
+// `scanForTemplateVariables` does not report, so match the output tags directly.
+const ALERT_URL_OUTPUT_PATTERN = /\{\{-?[^}]*\balert_url\b[^}]*-?\}\}/;
+
+const collectStrings = (value: unknown): string[] => {
+  if (typeof value === 'string') {
+    return [value];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap(collectStrings);
+  }
+  if (typeof value === 'object' && value !== null) {
+    return Object.values(value).flatMap(collectStrings);
+  }
+  return [];
+};
+
+/** Asserts that the notification workflow renders each alert's `alert_url` details link. */
+export const assertActionPolicyWorkflowLinksAlertDetails = (workflow: ParsedWorkflow): void => {
+  const linksAlertDetails = collectStrings(workflow.steps).some((value) =>
+    ALERT_URL_OUTPUT_PATTERN.test(value)
+  );
+  if (!linksAlertDetails) {
+    throw new Error(
+      'Generated workflow does not render an alert details link. ' +
+        'Each dispatched alert carries an absolute `alert_url`; notification steps should ' +
+        'render it (e.g. `{{ alert.alert_url }}` inside `{% for alert in inputs.payload.alerts %}`).'
+    );
+  }
 };

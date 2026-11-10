@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import Fs from 'fs';
 import Path from 'path';
 import { Readable, Writable } from 'stream';
 import { pipeline } from 'stream/promises';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import { x as tarExtract, t as tarList } from 'tar';
+import { t as tarList } from 'tar';
 import { cleanTypeCheckArtifacts } from './utils';
+import { createArchiveExtractor } from './file_system/utils';
 import {
   createDownloadProgressBar,
   createExtractionProgressBar,
@@ -43,8 +45,15 @@ export async function isCacheServerAvailable(): Promise<boolean> {
   const baseUrl = getCacheServerUrl();
   if (!baseUrl) return false;
   try {
-    await fetch(baseUrl.replace(/\/$/, ''), { signal: AbortSignal.timeout(1000) });
-    return true;
+    const deadline = timeoutSignal(1000);
+    try {
+      const response = await fetch(baseUrl.replace(/\/$/, ''), { signal: deadline });
+      // Any HTTP response counts. Cancel the unread body before dispose(), which does not abort the download.
+      await response.body?.cancel().catch(() => undefined);
+      return true;
+    } finally {
+      deadline.dispose();
+    }
   } catch {
     return false;
   }
@@ -115,7 +124,7 @@ async function restoreFromArtifactStream(
       // Each blob is a complete .tar.gz for one project. tar auto-detects gzip.
       // Extracting immediately here pipelines disk writes with downloading
       // of the next blob that is already buffered in the TCP receive window.
-      await pipeline(Readable.from(blob), tarExtract({ cwd: REPO_ROOT }));
+      await pipeline(Readable.from(blob), createArchiveExtractor(log));
 
       projectsRestored++;
       incBar();
@@ -253,8 +262,7 @@ export async function tryRestoreFromCacheServer(
       try {
         await pipeline(
           Readable.from(extractBuffer),
-          tarExtract({
-            cwd: REPO_ROOT,
+          createArchiveExtractor(log, {
             onentry: () => {
               updateBar(++entriesExtracted);
             },

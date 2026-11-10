@@ -137,6 +137,7 @@ export const indexEndpointHostDocs = usageTracker.track(
     withResponseActions = true,
     numResponseActions = 1,
     alertIds,
+    responseState,
   }: {
     numDocs: number;
     client: Client;
@@ -150,6 +151,7 @@ export const indexEndpointHostDocs = usageTracker.track(
     withResponseActions?: boolean;
     numResponseActions?: IndexEndpointAndFleetActionsForHostOptions['numResponseActions'];
     alertIds?: string[];
+    responseState?: IndexEndpointAndFleetActionsForHostOptions['responseState'];
   }): Promise<IndexedHostsResponse> => {
     const timeBetweenDocs = 6 * 3600 * 1000; // 6 hours between metadata documents
     const timestamp = new Date().getTime();
@@ -190,7 +192,7 @@ export const indexEndpointHostDocs = usageTracker.track(
 
           mergeAndAppendArrays(response, createdPolicies);
 
-          // eslint-disable-next-line require-atomic-updates
+          // eslint-disable-next-line @kbn/compat/eslint-require-atomic-updates
           realPolicies[appliedPolicyId] = createdPolicies.integrationPolicies[0];
         }
 
@@ -265,6 +267,7 @@ export const indexEndpointHostDocs = usageTracker.track(
             endpoints: [hostMetadata],
             count,
             alertIds,
+            responseState,
           });
 
           bulkOperations.push(...operations);

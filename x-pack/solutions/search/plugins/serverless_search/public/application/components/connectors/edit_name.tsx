@@ -43,9 +43,12 @@ export const EditName: React.FC<EditNameProps> = ({ connector, isDisabled }) => 
   const { isLoading, mutate } = useMutation({
     mutationFn: async (inputName: string) => {
       const body = { name: inputName };
-      await http.post(`/internal/serverless_search/connectors/${connector.id}/name`, {
-        body: JSON.stringify(body),
-      });
+      await http.post(
+        `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/name`,
+        {
+          body: JSON.stringify(body),
+        }
+      );
       return inputName;
     },
     onSuccess: (successData) => {

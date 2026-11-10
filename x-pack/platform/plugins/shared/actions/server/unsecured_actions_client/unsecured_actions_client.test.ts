@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -91,7 +92,7 @@ describe('getAll()', () => {
       }),
     ];
     mockGetAllUnsecured.mockResolvedValueOnce(expectedResult);
-    const result = await unsecuredActionsClient.getAll('default');
+    const result = await unsecuredActionsClient.getAll(DEFAULT_SPACE_ID);
     expect(result).toEqual(expectedResult);
     expect(mockGetAllUnsecured).toHaveBeenCalledWith({
       esClient: clusterClient.asInternalUser,
@@ -99,7 +100,7 @@ describe('getAll()', () => {
       kibanaIndices: ['.kibana'],
       logger,
       internalSavedObjectsRepository,
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       connectorTypeRegistry,
     });
   });
@@ -109,7 +110,7 @@ describe('getAll()', () => {
       throw new Error('failfail');
     });
     await expect(
-      unsecuredActionsClient.getAll('customSpace')
+      unsecuredActionsClient.getAll(asSpaceId('custom-space'))
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"failfail"`);
     expect(mockGetAllUnsecured).toHaveBeenCalledWith({
       esClient: clusterClient.asInternalUser,
@@ -117,7 +118,7 @@ describe('getAll()', () => {
       kibanaIndices: ['.kibana'],
       logger,
       internalSavedObjectsRepository,
-      spaceId: 'customSpace',
+      spaceId: asSpaceId('custom-space'),
       connectorTypeRegistry,
     });
   });
@@ -129,7 +130,7 @@ describe('execute()', () => {
       unsecuredActionsClient.execute({
         requesterId: 'badId',
         id: '1',
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         params: {
           name: 'my name',
         },
@@ -146,7 +147,7 @@ describe('execute()', () => {
       unsecuredActionsClient.execute({
         requesterId: 'background_task',
         id: actionId,
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         params: {
           name: 'my name',
         },
@@ -158,7 +159,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
-      spaceId: 'default',
+      spaceId: DEFAULT_SPACE_ID,
       actionExecutionId: expect.any(String),
     });
     expect(logger.warn).toHaveBeenCalledWith(
@@ -177,7 +178,7 @@ describe('execute()', () => {
         params: {
           name: 'my name',
         },
-        spaceId: 'custom',
+        spaceId: asSpaceId('custom'),
         relatedSavedObjects: [
           {
             id: 'some-id',
@@ -193,7 +194,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
-      spaceId: 'custom',
+      spaceId: asSpaceId('custom'),
       source: {
         source: {
           taskId: 'some-id',
@@ -224,7 +225,7 @@ describe('execute()', () => {
         params: {
           name: 'my name',
         },
-        spaceId: 'custom',
+        spaceId: asSpaceId('custom'),
         relatedSavedObjects: [
           {
             id: 'some-id',
@@ -239,7 +240,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
-      spaceId: 'custom',
+      spaceId: asSpaceId('custom'),
       source: {
         source: {
           taskId: 'some-id',

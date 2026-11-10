@@ -14,11 +14,13 @@ import {
 import {
   ASSESS_RELEVANCE_API_PATH,
   CLASSIFY_SEVERITY_API_PATH,
+  ENRICH_REPORT_CORE_API_PATH,
   ENRICH_TAXONOMY_API_PATH,
   EXTRACT_DIAMOND_API_PATH,
 } from '../../../common/threat_intel';
 import { registerAssessRelevanceRoute } from './assess_relevance';
 import { registerClassifySeverityRoute } from './classify_severity';
+import { registerEnrichReportCoreRoute } from './enrich_report_core';
 import { registerEnrichTaxonomyRoute } from './enrich_taxonomy';
 import { registerExtractDiamondRoute } from './extract_diamond';
 import { resolveScopedModel } from './lib/scoped_model';
@@ -26,10 +28,11 @@ import { resolveScopedModel } from './lib/scoped_model';
 jest.mock('./lib/scoped_model');
 
 const routes = [
-  [registerAssessRelevanceRoute, ASSESS_RELEVANCE_API_PATH, 'alertzero_fast'],
-  [registerClassifySeverityRoute, CLASSIFY_SEVERITY_API_PATH, 'alertzero_fast'],
-  [registerEnrichTaxonomyRoute, ENRICH_TAXONOMY_API_PATH, 'alertzero_fast'],
-  [registerExtractDiamondRoute, EXTRACT_DIAMOND_API_PATH, 'alertzero_reasoning'],
+  [registerAssessRelevanceRoute, ASSESS_RELEVANCE_API_PATH, 'alertzero_efficient'],
+  [registerClassifySeverityRoute, CLASSIFY_SEVERITY_API_PATH, 'alertzero_efficient'],
+  [registerEnrichTaxonomyRoute, ENRICH_TAXONOMY_API_PATH, 'alertzero_efficient'],
+  [registerEnrichReportCoreRoute, ENRICH_REPORT_CORE_API_PATH, 'alertzero_frontier'],
+  [registerExtractDiamondRoute, EXTRACT_DIAMOND_API_PATH, 'alertzero_frontier'],
 ] as const;
 
 describe('threat intel model tiers', () => {

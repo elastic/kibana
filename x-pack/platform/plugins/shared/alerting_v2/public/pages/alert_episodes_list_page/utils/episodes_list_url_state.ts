@@ -5,16 +5,17 @@
  * 2.0.
  */
 
+import { ALERTING_V2_EPISODES_STATUS_ALL } from '@kbn/alerting-v2-constants';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import type { TimeRange } from '@kbn/es-query';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { isArray, isEqual, isNil, isPlainObject, isString, sortBy } from 'lodash';
 
-/** Namespace for episodes list state inside the `_a` app-state blob */
-export const EPISODES_LIST_APP_STATE_KEY = 'episodesList' as const;
+/** Namespace for alerts list state inside the `_a` app-state blob */
+export const ALERTS_LIST_APP_STATE_KEY = 'alertsList' as const;
 
 /** Serialized in `_a` so “all statuses” survives reload (distinct from default Active) */
-export const EPISODES_LIST_STATUS_URL_ALL = 'all' as const;
+export const EPISODES_LIST_STATUS_URL_ALL = ALERTING_V2_EPISODES_STATUS_ALL;
 
 /** Default list filters (Active episodes, no rule/tags/search/assignee). */
 export const DEFAULT_EPISODES_LIST_FILTER: EpisodesFilterState = { status: ['active'] };
@@ -26,7 +27,7 @@ export const DEFAULT_EPISODES_LIST_TIME_RANGE: TimeRange = {
 };
 
 type AppStateRecord = Record<string, unknown> & {
-  [EPISODES_LIST_APP_STATE_KEY]?: unknown;
+  [ALERTS_LIST_APP_STATE_KEY]?: unknown;
 };
 
 const isNonEmptyString = (v: unknown): v is string => isString(v) && v.trim().length > 0;
@@ -152,7 +153,7 @@ export function readEpisodesListAppStateFromUrlStorage(storage: IKbnUrlStateStor
   timeRange?: TimeRange;
   histogramBreakdownField?: string;
 } {
-  const raw = storage.get<AppStateRecord>('_a')?.[EPISODES_LIST_APP_STATE_KEY];
+  const raw = storage.get<AppStateRecord>('_a')?.[ALERTS_LIST_APP_STATE_KEY];
   const { filter, timeRange, histogramBreakdownField } = splitEpisodesListRaw(raw);
   return {
     filterState: { ...DEFAULT_EPISODES_LIST_FILTER, ...filter },
@@ -169,15 +170,13 @@ export async function writeEpisodesListAppStateToUrlStorage(
 ): Promise<void> {
   const serialized = encodeEpisodesListRecord(filter, timeRange, histogramBreakdownField);
   const appState = storage.get<AppStateRecord>('_a') ?? {};
-  const {
-    [EPISODES_LIST_APP_STATE_KEY]: _ignoredEpisodesListState,
-    ...appStateWithoutEpisodesList
-  } = appState;
+  const { [ALERTS_LIST_APP_STATE_KEY]: _ignoredAlertsListState, ...appStateWithoutAlertsList } =
+    appState;
 
   const nextAppState: AppStateRecord =
     Object.keys(serialized).length === 0
-      ? appStateWithoutEpisodesList
-      : { ...appStateWithoutEpisodesList, [EPISODES_LIST_APP_STATE_KEY]: serialized };
+      ? appStateWithoutAlertsList
+      : { ...appStateWithoutAlertsList, [ALERTS_LIST_APP_STATE_KEY]: serialized };
 
   await storage.set('_a', nextAppState, { replace: false });
 }

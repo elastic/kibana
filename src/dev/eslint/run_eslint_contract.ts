@@ -19,9 +19,9 @@ import {
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { resolveLintTargets } from '../lint_targets';
-import { LINT_LABEL } from './constants';
 import { lintFiles } from './lint_files';
 import { pickFilesToLint } from './pick_files_to_lint';
+import { executeOxlintValidation } from '../oxlint/run_oxlint_contract';
 
 export interface ExecuteEslintValidationOptions {
   baseContext: ValidationBaseContext;
@@ -82,19 +82,27 @@ export const runEslintContract = () => {
         onWarning: (message) => log.warning(message),
       });
 
-      const result = await executeEslintValidation({
+      const oxlintResult = await executeOxlintValidation({
+        baseContext,
+        log,
+        fix: flagsReader.boolean('fix'),
+      });
+      const eslintResult = await executeEslintValidation({
         baseContext,
         log,
         fix: flagsReader.boolean('fix'),
       });
 
-      if (result && result.failedFiles.length > 0) {
-        throw createFailError(`${LINT_LABEL} errors`);
+      if (
+        (eslintResult && eslintResult.failedFiles.length > 0) ||
+        (oxlintResult && oxlintResult.failedFiles.length > 0)
+      ) {
+        throw createFailError('Lint errors');
       }
     },
     {
       description: `
-      Run ESLint using the shared validation contract to select scoped files.
+      Run ESLint and Oxlint using the shared validation contract to select scoped files.
 
       Examples:
         # quick local profile

@@ -4,6 +4,8 @@ Use `ml.query_anomalies` and pass the ES|QL below in the `query` parameter for `
 
 For **`ad_ts_ingest_latency_estimate`** (source data indices) use `platform.core.execute_esql` instead.
 
+`category_definition` and `model_size_stats` are **not** on the `.ml-anomalies` materialized view — those queries must use `FROM .ml-anomalies-*`. Record / bucket / influencer results (including `event_count`) use `FROM .ml-anomalies` — see `esql-read-queries` for the allowed field list (`causes` is not supported). Use `score` / `initial_score` (not `record_score` / `anomaly_score`) on the view.
+
 ---
 
 ## ad_get_available_metadata
@@ -85,6 +87,8 @@ FROM .ml-config
 
 Get log categories for categorization jobs: category definitions, regex patterns, and examples.
 
+Not on the `.ml-anomalies` materialized view — query `FROM .ml-anomalies-*`.
+
 **Parameters:** `job_id` (string)
 
 ```esql
@@ -117,6 +121,8 @@ FROM .ml-notifications-*
 ## ad_ts_model_memory_health
 
 Get memory health and growth trend for a job. Use `limit=1` for a fast current-state snapshot; `limit=500` for full growth trend analysis.
+
+Not on the `.ml-anomalies` materialized view — query `FROM .ml-anomalies-*`.
 
 **Parameters:** `job_id` (string), `limit` (number: 1 for snapshot, 500 for trend)
 
@@ -165,13 +171,13 @@ Find buckets with zero or suspiciously low event counts. Compare `event_count` a
 **Parameters:** `job_id` (string), `start_time` (ISO 8601), `end_time` (ISO 8601)
 
 ```esql
-FROM .ml-anomalies-*
+FROM .ml-anomalies
 | WHERE result_type == "bucket"
   AND job_id == ?job_id
   AND timestamp >= ?start_time
   AND timestamp <= ?end_time
 | SORT timestamp ASC
-| KEEP timestamp, event_count, anomaly_score, bucket_span, is_interim
+| KEEP timestamp, event_count, score, bucket_span, is_interim
 | LIMIT 500
 ```
 

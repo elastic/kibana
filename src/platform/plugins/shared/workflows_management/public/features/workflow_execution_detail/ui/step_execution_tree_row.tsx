@@ -27,6 +27,7 @@ import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
 import { getStepIconType } from '@kbn/workflows-ui';
 import { FailedStepErrorPanel } from './failed_step_error_panel';
 import { TreeStateTag, type TreeStateTagKind } from './tree_state_tag';
+import { type WaitingStepAction, WaitingStepActionPanel } from './waiting_step_action_panel';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
@@ -140,10 +141,12 @@ export interface StepExecutionTreeRowProps {
   statusPlacement?: StatusPlacement;
   /** Show danger status when an ancestor aggregates a failed descendant. */
   showAggregateDanger?: boolean;
+  /** Inline Provide action panel for the active waitForInput step. */
+  waitingAction?: WaitingStepAction;
   'data-test-subj'?: string;
 }
 
-const notRunLabel = i18n.translate('workflowsManagement.stepExecutionTreeRow.notRun', {
+const notRunLabel = i18n.translate('workflows.stepExecutionTreeRow.notRun', {
   defaultMessage: 'Not run',
 });
 
@@ -216,6 +219,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
     arrivalPulse = false,
     statusPlacement = 'right',
     showAggregateDanger = false,
+    waitingAction,
     'data-test-subj': dataTestSubj = 'workflowStepExecutionTreeRow',
   }) => {
     const { euiTheme, colorMode } = useEuiTheme();
@@ -250,14 +254,17 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
     const dangerSelectionBorder =
       colorMode === 'LIGHT' ? euiTheme.colors.borderStrongDanger : euiTheme.colors.borderBaseDanger;
 
-    const expandLabel = i18n.translate('workflowsManagement.stepExecutionTreeRow.expandAriaLabel', {
+    const expandLabel = i18n.translate('workflows.stepExecutionTreeRow.expandAriaLabel', {
       defaultMessage: '{expanded, select, true{Collapse} other{Expand}} {stepName}',
       values: { expanded: isExpanded, stepName: stepId },
     });
 
     // Dedupe while preserving order: pin kinds, waiting annotation, then extra tags.
+    // The inline action panel replaces the "waiting for input" annotation.
+    const showWarningFill = status === ExecutionStatus.WAITING_FOR_INPUT && !isBranchLabel;
+    const showWaitingPanel = showWarningFill && waitingAction != null;
     const waitingTags: TreeStateTagKind[] =
-      status === ExecutionStatus.WAITING_FOR_INPUT ? ['waitingForInput'] : [];
+      showWarningFill && !showWaitingPanel ? ['waitingForInput'] : [];
     const resolvedStateTags = [...iterationPinKinds, ...waitingTags, ...stateTags].filter(
       (kind, index, all): kind is TreeStateTagKind => all.indexOf(kind) === index
     );
@@ -284,11 +291,11 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
         return (
           <EuiText size="xs" color="subdued" data-test-subj="workflowStepTreeDuration">
             {durationLabel != null
-              ? i18n.translate('workflowsManagement.stepExecutionTreeRow.iterationRangeMeta', {
+              ? i18n.translate('workflows.stepExecutionTreeRow.iterationRangeMeta', {
                   defaultMessage: '{count} iterations · {duration}',
                   values: { count: iterationCount, duration: durationLabel },
                 })
-              : i18n.translate('workflowsManagement.stepExecutionTreeRow.iterationRangeCountOnly', {
+              : i18n.translate('workflows.stepExecutionTreeRow.iterationRangeCountOnly', {
                   defaultMessage: '{count} iterations',
                   values: { count: iterationCount },
                 })}
@@ -325,11 +332,11 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
       isRetryParent && retryAttemptCount != null ? (
         <EuiBadge color="hollow" iconType="refresh" data-test-subj="workflowStepTreeAttemptsBadge">
           {retryMaxAttempts != null
-            ? i18n.translate('workflowsManagement.stepExecutionTreeRow.attemptsOfMaxBadge', {
+            ? i18n.translate('workflows.stepExecutionTreeRow.attemptsOfMaxBadge', {
                 defaultMessage: '{used} of {max} attempts',
                 values: { used: retryAttemptCount, max: retryMaxAttempts },
               })
-            : i18n.translate('workflowsManagement.stepExecutionTreeRow.attemptsBadge', {
+            : i18n.translate('workflows.stepExecutionTreeRow.attemptsBadge', {
                 defaultMessage: '{n} attempts',
                 values: { n: retryAttemptCount },
               })}
@@ -355,8 +362,14 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
       </EuiFlexGroup>
     );
 
+    const warningSelectionBorder =
+      colorMode === 'LIGHT'
+        ? euiTheme.colors.borderStrongWarning
+        : euiTheme.colors.borderBaseWarning;
+
     const rowBg = (() => {
       if (showDangerFill) return euiTheme.colors.backgroundBaseDanger;
+      if (showWarningFill) return euiTheme.colors.backgroundBaseWarning;
       if (isTrigger) return euiTheme.colors.backgroundBaseSubdued;
       if (selected) return selectBg;
       return 'transparent';
@@ -369,6 +382,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
         data-status-placement={statusPlacement}
         data-danger-fill={showDangerFill ? 'true' : 'false'}
         data-danger-selected={showDangerSelectionBorder ? 'true' : 'false'}
+        data-warning-fill={showWarningFill ? 'true' : 'false'}
         data-arrival-pulse={arrivalPulse ? 'true' : 'false'}
         css={css`
           width: 100%;
@@ -383,6 +397,8 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
               background-color: ${
                 showDangerFill
                   ? euiTheme.colors.backgroundBaseDanger
+                  : showWarningFill
+                  ? euiTheme.colors.backgroundBaseWarning
                   : selected
                   ? selectBg
                   : hoverBg
@@ -393,22 +409,28 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
             ? `cursor: pointer;`
             : ''}
           ${showDangerSelectionBorder ? `outline: 1px solid ${dangerSelectionBorder};` : ''}
+          ${showWarningFill && selected && !showDangerSelectionBorder
+            ? `outline: 1px solid ${warningSelectionBorder};`
+            : ''}
           ${arrivalPulse
             ? `
-            @keyframes workflowDangerArrivalPulse {
+            @keyframes workflowStepArrivalPulse {
               0%,
               100% {
-                box-shadow: 0 0 0 0 ${transparentize(euiTheme.colors.danger, 0)};
+                box-shadow: 0 0 0 0 ${transparentize(
+                  showWarningFill ? euiTheme.colors.warning : euiTheme.colors.danger,
+                  0
+                )};
               }
               50% {
                 box-shadow: 0 0 0 ${euiTheme.size.xs} ${transparentize(
-                euiTheme.colors.danger,
+                showWarningFill ? euiTheme.colors.warning : euiTheme.colors.danger,
                 0.35
               )};
               }
             }
             @media (prefers-reduced-motion: no-preference) {
-              animation: workflowDangerArrivalPulse 0.6s ease-out 2;
+              animation: workflowStepArrivalPulse 0.6s ease-out 2;
             }
           `
             : ''}
@@ -552,6 +574,8 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
                       ? euiTheme.colors.textPrimary
                       : tintDanger
                       ? euiTheme.colors.danger
+                      : showWarningFill
+                      ? euiTheme.colors.textWarning
                       : isInactive
                       ? euiTheme.colors.textDisabled
                       : 'inherit'};
@@ -648,6 +672,15 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
               })
             }
             messageOverride={errorPanelMessageOverride}
+          />
+        )}
+        {showWaitingPanel && waitingAction && (
+          <WaitingStepActionPanel
+            action={waitingAction}
+            ariaLabel={i18n.translate('workflows.executionFlyout.waitingStep.regionAriaLabel', {
+              defaultMessage: 'Action required for {stepName}',
+              values: { stepName: stepId },
+            })}
           />
         )}
       </div>

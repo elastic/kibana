@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { AiIndexDetailPanelDescription } from './ai_index_detail_panel_description';
 
 interface LockedSectionPanelProps {
   title: React.ReactNode;
@@ -45,10 +38,7 @@ export const LockedSectionPanel = ({
         <EuiTitle size="xs">
           <h3>{title}</h3>
         </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText size="s" color="subdued">
-          <p>{description}</p>
-        </EuiText>
+        <AiIndexDetailPanelDescription>{description}</AiIndexDetailPanelDescription>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiPanel>

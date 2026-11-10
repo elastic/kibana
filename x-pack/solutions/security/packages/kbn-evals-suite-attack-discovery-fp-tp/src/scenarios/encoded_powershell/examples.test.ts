@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FpTpWorld } from '../../world';
+import { FP_TP_RAW_EVENT_PAGE_SIZE, type FpTpWorld } from '../../world';
 import { buildFpTpExampleWorld } from '..';
 import { ENCODED_POWERSHELL_EXAMPLES } from './examples';
 
@@ -22,8 +22,8 @@ const situationOf = (id: string): string | undefined =>
   ENCODED_POWERSHELL_EXAMPLES.find((example) => example.id === id)?.situation;
 
 describe('encoded-powershell examples', () => {
-  it('returns eight examples', () => {
-    expect(ENCODED_POWERSHELL_EXAMPLES).toHaveLength(8);
+  it('returns nine examples', () => {
+    expect(ENCODED_POWERSHELL_EXAMPLES).toHaveLength(9);
   });
 
   it('returns U1 for the lookalike fp', () => {
@@ -74,6 +74,41 @@ describe('encoded-powershell examples', () => {
     expect(
       processParents(buildFpTpExampleWorld('encoded-powershell.mixed-world', 'run1'))
     ).toContain('WINWORD.EXE');
+  });
+
+  describe('fp with truncated events', () => {
+    const fp = buildFpTpExampleWorld('encoded-powershell.fp', 'run1');
+    const truncated = buildFpTpExampleWorld('encoded-powershell.fp-events-truncated', 'run1');
+    const timestamps = (world: FpTpWorld): number[] =>
+      world.events.map((event) => Date.parse(String(event.source['@timestamp'])));
+    const added = truncated.events.slice(fp.events.length);
+
+    it('returns more raw events than the analysis reads in one page', () => {
+      expect(added.length).toBeGreaterThan(FP_TP_RAW_EVENT_PAGE_SIZE);
+    });
+
+    it('returns the fp world unchanged around the added events', () => {
+      expect({ ...truncated, events: truncated.events.slice(0, fp.events.length) }).toEqual(fp);
+    });
+
+    it('returns the added events after every fp raw event', () => {
+      expect(Math.min(...timestamps({ ...truncated, events: added }))).toBeGreaterThan(
+        Math.max(...timestamps(fp))
+      );
+    });
+
+    it('returns the added events on the cited host', () => {
+      const hostIds = new Set(fp.alerts.map((alert) => (alert.source.host as { id: string }).id));
+      expect(
+        added.filter((event) => !hostIds.has((event.source.host as { id: string }).id))
+      ).toEqual([]);
+    });
+
+    it('returns benign service starts', () => {
+      expect(new Set(processParents({ ...truncated, events: added }))).toEqual(
+        new Set(['services.exe'])
+      );
+    });
   });
 
   it('returns no attack document when the attack discovery is missing', () => {

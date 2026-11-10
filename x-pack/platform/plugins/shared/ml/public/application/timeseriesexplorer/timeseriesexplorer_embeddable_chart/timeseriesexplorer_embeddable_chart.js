@@ -516,6 +516,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       chartHeight,
       lastRefresh,
       onForecastComplete,
+      isInteractive,
       selectedEntities,
       selectedDetectorIndex,
       selectedJob,
@@ -570,6 +571,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
       autoZoomDuration,
+      isInteractive,
     };
 
     const entityControls = this.getControlsForDetector();
@@ -592,7 +594,6 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     this.previousChartProps = chartProps;
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
-
     return (
       <SingleMetricViewerChartSurface
         fieldNamesWithEmptyValues={fieldNamesWithEmptyValues}
@@ -628,9 +629,10 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
               <EntityFieldNamesAndFilterButtons
                 api={this.props.api}
                 entityData={chartDetails.entityData}
+                isInteractive={isInteractive}
               />
               <EuiFlexGroup style={{ float: 'right' }} alignItems="center">
-                {showModelBoundsCheckbox && (
+                {isInteractive && showModelBoundsCheckbox && (
                   <TimeseriesExplorerCheckbox
                     id="toggleModelBoundsCheckbox"
                     label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
@@ -641,7 +643,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   />
                 )}
 
-                {showAnnotationsCheckbox && (
+                {isInteractive && showAnnotationsCheckbox && (
                   <TimeseriesExplorerCheckbox
                     id="toggleAnnotationsCheckbox"
                     label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
@@ -652,7 +654,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   />
                 )}
 
-                {showForecastCheckbox && (
+                {isInteractive && showForecastCheckbox && (
                   <EuiFlexItem grow={false}>
                     <TimeseriesExplorerCheckbox
                       id="toggleShowForecastCheckbox"
@@ -669,7 +671,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                   </EuiFlexItem>
                 )}
 
-                {arePartitioningFieldsProvided &&
+                {isInteractive &&
+                  arePartitioningFieldsProvided &&
                   selectedJob &&
                   shouldShowForecastButton === true && (
                     <EuiFlexItem grow={false} style={{ textAlign: 'right' }}>

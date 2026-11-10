@@ -63,7 +63,9 @@ describe('createTimestampPipeline', () => {
     const maxTimestamp = '2024-01-15T12:00:00.000Z';
     const pipelineName = 'test-pipeline';
 
-    await createTimestampPipeline({ esClient, log, pipelineName, maxTimestamp });
+    const nowMs = Date.parse('2024-01-15T13:00:00.000Z');
+
+    await createTimestampPipeline({ esClient, log, pipelineName, maxTimestamp, nowMs });
 
     expect(esClient.ingest.putPipeline).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -71,7 +73,7 @@ describe('createTimestampPipeline', () => {
         processors: expect.arrayContaining([
           expect.objectContaining({
             script: expect.objectContaining({
-              params: { max_timestamp: maxTimestamp },
+              params: { max_timestamp: maxTimestamp, now_ms: nowMs },
             }),
           }),
         ]),
@@ -233,6 +235,9 @@ describe('replaySnapshot', () => {
         getDataStream: jest
           .fn()
           .mockResolvedValue({ data_streams: [{ name: 'logs-app-default' }] }),
+        createDataStream: jest.fn().mockResolvedValue({ acknowledged: true }),
+        getMapping: jest.fn().mockResolvedValue({}),
+        putMapping: jest.fn().mockResolvedValue({ acknowledged: true }),
       },
     } as unknown as Client);
 
@@ -289,6 +294,49 @@ describe('replaySnapshot', () => {
     expect(nginxCall[0].script).toBeUndefined();
   });
 
+  it('reads the clock once and shares it between the pipeline and inline-script reindexes', async () => {
+    const esClient = createFullMockEsClient();
+    (esClient.snapshot.get as unknown as jest.Mock).mockResolvedValue({
+      snapshots: [
+        {
+          snapshot: 'test-snap',
+          indices: ['logs.otel', 'logs-nginx-default'],
+          start_time: '2024-01-01T00:00:00.000Z',
+          end_time: '2024-01-01T01:00:00.000Z',
+          state: 'SUCCESS',
+        },
+      ],
+    });
+    (esClient.snapshot.restore as unknown as jest.Mock).mockResolvedValue({
+      snapshot: {
+        indices: ['snapshot-loader-temp-logs.otel', 'snapshot-loader-temp-logs-nginx-default'],
+      },
+    });
+    let clock = Date.parse('2024-01-15T13:00:00.000Z');
+    const dateNow = jest.spyOn(Date, 'now').mockImplementation(() => (clock += 1000));
+
+    try {
+      await replaySnapshot({
+        esClient,
+        log,
+        repository: mockRepo,
+        snapshotName: 'test-snap',
+        patterns: ['logs*'],
+        shouldUseInlineScript: (destIndex) => destIndex === 'logs.otel',
+      });
+    } finally {
+      dateNow.mockRestore();
+    }
+
+    const pipelineNow = (esClient.ingest.putPipeline as jest.Mock).mock.calls[0][0].processors[0]
+      .script.params.now_ms;
+    const inlineCall = (esClient.reindex as unknown as jest.Mock).mock.calls.find(
+      ([req]: [{ dest: { index: string } }]) => req.dest.index === 'logs.otel'
+    );
+    expect(typeof pipelineNow).toBe('number');
+    expect(inlineCall[0].script.params.now_ms).toBe(pipelineNow);
+  });
+
   it('uses explicit pipeline when shouldUseInlineScript is not provided', async () => {
     const esClient = createFullMockEsClient();
 
@@ -308,6 +356,72 @@ describe('replaySnapshot', () => {
       { requestTimeout: 5 * 60 * 1000 }
     );
     expect(esClient.cluster.health).not.toHaveBeenCalled();
+  });
+
+  it('copies metric mappings after beforeReindex and before reindexing', async () => {
+    const esClient = createFullMockEsClient();
+    (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
+      'snapshot-loader-temp-.ds-logs-app-default-2024.01.01-000001': {
+        mappings: {
+          properties: {
+            metrics: {
+              properties: { requests_total: { type: 'double', time_series_metric: 'counter' } },
+            },
+          },
+        },
+      },
+    });
+    const beforeReindex = jest.fn().mockResolvedValue(undefined);
+
+    const result = await replaySnapshot({
+      esClient,
+      log,
+      repository: mockRepo,
+      snapshotName: 'test-snap',
+      patterns: ['logs-*'],
+      beforeReindex,
+    });
+
+    const order = (fn: unknown) => (fn as jest.Mock).mock.invocationCallOrder[0];
+    expect(order(beforeReindex)).toBeLessThan(order(esClient.indices.putMapping));
+    expect(order(esClient.indices.putMapping)).toBeLessThan(order(esClient.reindex));
+    expect(esClient.indices.putMapping).toHaveBeenCalledWith({
+      index: 'logs-app-default',
+      properties: {
+        metrics: {
+          properties: { requests_total: { type: 'double', time_series_metric: 'counter' } },
+        },
+      },
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('still reindexes when metric mappings cannot be copied', async () => {
+    const esClient = createFullMockEsClient();
+    (esClient.indices.getMapping as jest.Mock).mockResolvedValue({
+      'snapshot-loader-temp-.ds-logs-app-default-2024.01.01-000001': {
+        mappings: {
+          properties: {
+            metrics: { properties: { x: { type: 'double', time_series_metric: 'gauge' } } },
+          },
+        },
+      },
+    });
+    (esClient.indices.putMapping as jest.Mock).mockRejectedValue(
+      new Error('illegal_argument_exception: mapper [metrics.x] cannot be changed')
+    );
+
+    const result = await replaySnapshot({
+      esClient,
+      log,
+      repository: mockRepo,
+      snapshotName: 'test-snap',
+      patterns: ['logs-*'],
+    });
+
+    expect(esClient.reindex).toHaveBeenCalledTimes(1);
+    expect(result.success).toBe(true);
+    expect(result.errors).toEqual([]);
   });
 
   it('invokes beforeReindex with correct params after restore and before reindex', async () => {

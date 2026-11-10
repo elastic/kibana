@@ -52,7 +52,7 @@ export function validateTriggerConditionsForWorkflow(
               triggerIndex: i,
               message:
                 result.error ??
-                i18n.translate('workflowsManagement.validateTriggerConditions.fallbackError', {
+                i18n.translate('workflows.validateTriggerConditions.fallbackError', {
                   defaultMessage:
                     'Condition must be valid KQL and only reference event schema properties.',
                 }),

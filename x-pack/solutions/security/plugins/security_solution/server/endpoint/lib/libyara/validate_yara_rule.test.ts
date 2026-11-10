@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
+  clearYaraValidateCache,
   getYaraEngineVersion,
   loadYaraValidateModule,
   setYaraLogger,
   validateYaraRule,
 } from './validate_yara_rule';
+import { YaraEngineUnavailableError } from './errors';
 
 /**
  * Smoke test against the real libyara WASM artifact.
@@ -22,6 +25,10 @@ describe('validateYaraRule (libyara WASM)', () => {
   beforeAll(async () => {
     await loadYaraValidateModule();
   }, 30_000);
+
+  beforeEach(() => {
+    clearYaraValidateCache();
+  });
 
   afterEach(() => {
     setYaraLogger(undefined);
@@ -55,7 +62,10 @@ describe('validateYaraRule (libyara WASM)', () => {
     }) as typeof mod.ccall;
 
     try {
-      await expect(validateYaraRule('rule X { condition: true }')).rejects.toThrow(
+      const error = await validateYaraRule('rule X { condition: true }').catch((err) => err);
+      expect(error).toBeInstanceOf(YaraEngineUnavailableError);
+      expect(error).toHaveProperty(
+        'message',
         'libyara WASM validate_yara returned null (allocation failed)'
       );
       expect(utf8ToString).not.toHaveBeenCalled();
@@ -203,6 +213,69 @@ rule Broken {
       expect(debugMessage).toContain('outcome=compile_error');
       expect(debugMessage).toContain('ruleCount=0');
       expect(debugMessage).not.toContain(uniqueMarker);
+    });
+
+    describe('slow validate warning', () => {
+      const ruleText = 'rule Slow { strings: $a = "UNIQUE_YARA_LOG_MARKER_slow" condition: $a }';
+      let compileDurationMs: number;
+      let restoreMocks: () => void;
+
+      beforeEach(async () => {
+        let now = 0;
+        const nowSpy = jest.spyOn(performance, 'now').mockImplementation(() => now);
+
+        const mod = await loadYaraValidateModule();
+        const originalCcall = mod.ccall;
+        mod.ccall = ((
+          ident: string,
+          returnType: string | null,
+          argTypes: string[],
+          args: unknown[]
+        ) => {
+          if (ident === 'validate_yara') {
+            now += compileDurationMs;
+          }
+          return originalCcall(ident, returnType, argTypes, args);
+        }) as typeof mod.ccall;
+
+        restoreMocks = () => {
+          mod.ccall = originalCcall;
+          nowSpy.mockRestore();
+        };
+      });
+
+      afterEach(() => {
+        restoreMocks();
+      });
+
+      it('warns with metadata but without rule source when validate takes more than 1s', async () => {
+        const mockLogger = loggingSystemMock.createLogger();
+        setYaraLogger(mockLogger);
+        compileDurationMs = 1500;
+
+        await validateYaraRule(ruleText);
+
+        expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+        const warnMessage = String(mockLogger.warn.mock.calls[0][0]);
+        expect(warnMessage).toContain('blocked the event loop for 1500ms');
+        expect(warnMessage).toContain('outcome=success');
+        expect(warnMessage).toContain('ruleCount=1');
+        expect(warnMessage).toContain(`sourceByteLength=${Buffer.byteLength(ruleText, 'utf8')}`);
+        expect(warnMessage).toContain(
+          `sourceSha256=${createHash('sha256').update(ruleText, 'utf8').digest('hex')}`
+        );
+        expect(warnMessage).not.toContain('UNIQUE_YARA_LOG_MARKER_slow');
+      });
+
+      it('does not warn when validate takes 1s or less', async () => {
+        const mockLogger = loggingSystemMock.createLogger();
+        setYaraLogger(mockLogger);
+        compileDurationMs = 1000;
+
+        await validateYaraRule(ruleText);
+
+        expect(mockLogger.warn).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -379,6 +452,162 @@ rule ${module}Check {
           message: `unknown module "${module}"`,
         }),
       ]);
+    });
+  });
+
+  describe('source hash cache', () => {
+    const countValidateYaraCcalls = async (run: () => Promise<void>): Promise<number> => {
+      const mod = await loadYaraValidateModule();
+      const originalCcall = mod.ccall;
+      let validateCalls = 0;
+
+      mod.ccall = ((
+        ident: string,
+        returnType: string | null,
+        argTypes: string[],
+        args: unknown[]
+      ) => {
+        if (ident === 'validate_yara') {
+          validateCalls += 1;
+        }
+        return originalCcall(ident, returnType, argTypes, args);
+      }) as typeof mod.ccall;
+
+      try {
+        await run();
+        return validateCalls;
+      } finally {
+        mod.ccall = originalCcall;
+      }
+    };
+
+    it('compiles the same source only once', async () => {
+      const source = 'rule CacheHit { condition: true }';
+
+      const validateCalls = await countValidateYaraCcalls(async () => {
+        const first = await validateYaraRule(source);
+        const second = await validateYaraRule(source);
+        expect(second).toEqual(first);
+        expect(second).not.toBe(first);
+        expect(first.rules).toEqual([{ identifier: 'CacheHit', meta: {}, duplicateMeta: [] }]);
+      });
+
+      expect(validateCalls).toBe(1);
+    });
+
+    it('returns a fresh copy so caller mutations do not leak into later validations', async () => {
+      const source = 'rule CacheIsolation { meta: os = "Windows" condition: true }';
+
+      const first = await validateYaraRule(source);
+      first.errorCount++;
+      first.errors.push({
+        severity: 'error',
+        message: 'meta.os "Windows" does not match Linux',
+        line: 1,
+      });
+      first.rules[0].meta.os = 'Linux';
+
+      const second = await validateYaraRule(source);
+
+      expect(second).not.toBe(first);
+      expect(second.errors).not.toBe(first.errors);
+      expect(second.rules).not.toBe(first.rules);
+      expect(second.errors).toEqual([]);
+      expect(second.errorCount).toBe(0);
+      expect(second.rules).toEqual([
+        { identifier: 'CacheIsolation', meta: { os: 'Windows' }, duplicateMeta: [] },
+      ]);
+      expect(first.errorCount).toBe(1);
+      expect(first.rules[0].meta.os).toBe('Linux');
+    });
+
+    it('compiles distinct sources separately', async () => {
+      const validateCalls = await countValidateYaraCcalls(async () => {
+        await validateYaraRule('rule CacheA { condition: true }');
+        await validateYaraRule('rule CacheB { condition: true }');
+      });
+
+      expect(validateCalls).toBe(2);
+    });
+
+    it('caches compile errors so a known-bad source is not recompiled', async () => {
+      const source = 'rule CacheBroken { condition: not_a_thing }';
+
+      const validateCalls = await countValidateYaraCcalls(async () => {
+        const first = await validateYaraRule(source);
+        const second = await validateYaraRule(source);
+        expect(first.errorCount).toBeGreaterThan(0);
+        expect(second).toEqual(first);
+      });
+
+      expect(validateCalls).toBe(1);
+    });
+
+    it('does not cache allocation failures', async () => {
+      const mod = await loadYaraValidateModule();
+      const originalCcall = mod.ccall;
+      let validateCalls = 0;
+
+      mod.ccall = ((
+        ident: string,
+        returnType: string | null,
+        argTypes: string[],
+        args: unknown[]
+      ) => {
+        if (ident === 'validate_yara') {
+          validateCalls += 1;
+          return 0;
+        }
+        if (ident === 'validate_yara_free') {
+          throw new Error('validate_yara_free should not be called for a null pointer');
+        }
+        return originalCcall(ident, returnType, argTypes, args);
+      }) as typeof mod.ccall;
+
+      try {
+        const source = 'rule CacheMissOnThrow { condition: true }';
+        await expect(validateYaraRule(source)).rejects.toBeInstanceOf(YaraEngineUnavailableError);
+        await expect(validateYaraRule(source)).rejects.toBeInstanceOf(YaraEngineUnavailableError);
+        expect(validateCalls).toBe(2);
+      } finally {
+        mod.ccall = originalCcall;
+      }
+    });
+
+    it('logs cache hits at trace level without rule source', async () => {
+      const mockLogger = loggingSystemMock.createLogger();
+      setYaraLogger(mockLogger);
+
+      const uniqueMarker = 'UNIQUE_YARA_CACHE_HIT_MARKER_xyzzy';
+      const source = `rule CacheHitLog { strings: $a = "${uniqueMarker}" condition: $a }`;
+
+      await validateYaraRule(source);
+      mockLogger.debug.mockClear();
+      await validateYaraRule(source);
+
+      expect(mockLogger.debug).not.toHaveBeenCalled();
+      expect(mockLogger.trace).toHaveBeenCalled();
+      const traceArg = mockLogger.trace.mock.calls[0][0];
+      const traceMessage = typeof traceArg === 'function' ? traceArg() : String(traceArg);
+
+      expect(traceMessage).toContain('YARA validate cache hit');
+      expect(traceMessage).toContain('sourceSha256=');
+      expect(traceMessage).not.toContain(uniqueMarker);
+    });
+
+    it('evicts the least recently used source when the cache is full', async () => {
+      clearYaraValidateCache(2);
+
+      await validateYaraRule('rule CacheLruA { condition: true }');
+      await validateYaraRule('rule CacheLruB { condition: true }');
+      await validateYaraRule('rule CacheLruC { condition: true }');
+
+      const validateCalls = await countValidateYaraCcalls(async () => {
+        await validateYaraRule('rule CacheLruA { condition: true }');
+        await validateYaraRule('rule CacheLruC { condition: true }');
+      });
+
+      expect(validateCalls).toBe(1);
     });
   });
 });

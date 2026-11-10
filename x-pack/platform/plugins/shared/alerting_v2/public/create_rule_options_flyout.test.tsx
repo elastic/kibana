@@ -75,6 +75,30 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   },
 }));
 
+const mockCreateActionPolicyFormFlyout = () => null;
+jest.mock('./components/action_policy/form_flyout/create_action_policy_form_flyout', () => ({
+  CreateActionPolicyFormFlyout: mockCreateActionPolicyFormFlyout,
+}));
+
+let mockCreateActionPolicyDisabledReason: string | undefined;
+jest.mock('./hooks/use_create_action_policy_disabled_reason', () => ({
+  useCreateActionPolicyDisabledReason: () => mockCreateActionPolicyDisabledReason,
+}));
+
+jest.mock('@kbn/core-di-browser', () => ({
+  ...jest.requireActual('@kbn/core-di-browser'),
+  useService: () => ({}),
+}));
+
+jest.mock('./application/bind_locators_to_host', () => ({
+  getAlertingV2Locators: () => ({
+    actionPolicyLocators: {
+      getRedirectUrl: ({ actionPolicyId }: { actionPolicyId: string }) =>
+        `/app/observability/alerting/action-policies/edit/${actionPolicyId}`,
+    },
+  }),
+}));
+
 // Collects all pending resolvers from untilPluginStartServicesReady calls so the test
 // can resolve both the useAsync call and the currentAppId$ effect in one go.
 const pendingResolvers: Array<(services: AlertingV2KibanaServices) => void> = [];
@@ -114,6 +138,7 @@ describe('CreateRuleOptionsFlyout', () => {
     capturedComposeProps = {};
     pendingResolvers.length = 0;
     mockServices = createMockServices();
+    mockCreateActionPolicyDisabledReason = undefined;
   });
 
   describe('loading state', () => {
@@ -138,6 +163,8 @@ describe('CreateRuleOptionsFlyout', () => {
   describe('selector → esql transition', () => {
     it('renders ComposeDiscoverFlyout when the ES|QL option is clicked', async () => {
       const onClose = jest.fn();
+      const disabledReason = 'Action policy creation is disabled';
+      mockCreateActionPolicyDisabledReason = disabledReason;
       renderFlyout({ onClose, initialQuery: 'FROM logs-*' });
       resolveServices(mockServices);
 
@@ -153,7 +180,18 @@ describe('CreateRuleOptionsFlyout', () => {
       expect(capturedComposeProps.initialQuery).toBe('FROM logs-*');
       expect(capturedComposeProps.mode).toBe('create');
       expect(capturedComposeProps.onClose).toBe(onClose);
+      expect(capturedComposeProps.onHistoryBack).toEqual(expect.any(Function));
+      expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
       expect(capturedComposeProps.onCreateRule).toBeDefined();
+      expect(
+        (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyFormFlyout
+      ).toBe(mockCreateActionPolicyFormFlyout);
+      expect(
+        (capturedComposeProps.services as AlertingV2KibanaServices).createActionPolicyDisabledReason
+      ).toBe(disabledReason);
+      expect(
+        (capturedComposeProps.services as AlertingV2KibanaServices).getActionPolicyEditHref!('ap-1')
+      ).toBe('/app/observability/alerting/action-policies/edit/ap-1');
     });
 
     it('passes esqlVariables through to ComposeDiscoverFlyout', async () => {
@@ -189,6 +227,28 @@ describe('CreateRuleOptionsFlyout', () => {
         expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
       });
       expect(capturedComposeProps.initialQuery).toBeUndefined();
+    });
+
+    it('returns to the selector when the form navigates back', async () => {
+      renderFlyout();
+      resolveServices(mockServices);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('esqlBtn'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+      });
+
+      act(() => {
+        (capturedComposeProps.onHistoryBack as () => void)();
+      });
+
+      expect(screen.queryByTestId('mockComposeDiscoverFlyout')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mockRuleCreateOptionsFlyout')).toBeInTheDocument();
     });
   });
 

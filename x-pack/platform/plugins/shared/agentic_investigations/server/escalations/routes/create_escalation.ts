@@ -32,8 +32,28 @@ export const registerCreateEscalationRoute = ({
       },
       async (_context, request, response) => {
         try {
-          const escalation = await getEscalationsService().create(request, request.body);
-          return response.ok({ body: escalation });
+          const service = getEscalationsService();
+          const escalation = await service.create(request, request.body);
+
+          let attachmentsCopy: { copied: number; failed: number } | undefined;
+          try {
+            attachmentsCopy = await service.addAttachments(request, escalation.id, [
+              request.body.linked_investigation_id,
+            ]);
+          } catch (attachErr) {
+            logger.warn(
+              `[escalations] Attachment copy failed after escalation creation; escalation was still created. escalationId=${
+                escalation.id
+              } error=${(attachErr as Error).message}`
+            );
+          }
+
+          return response.ok({
+            body: {
+              ...escalation,
+              ...(attachmentsCopy !== undefined && { attachments_copy: attachmentsCopy }),
+            },
+          });
         } catch (error) {
           return handleEscalationRouteError(error, response, logger);
         }

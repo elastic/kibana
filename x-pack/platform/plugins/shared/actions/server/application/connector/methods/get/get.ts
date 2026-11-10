@@ -55,6 +55,7 @@ export async function get({
 
   let connector: Connector;
   let hasIdentity = false;
+  const eventsEnabled = foundInMemoryConnector?.isInboundEventsEnabled === true;
 
   if (foundInMemoryConnector !== undefined) {
     context.auditLogger?.log(
@@ -108,6 +109,7 @@ export async function get({
   const isInboundEventsEnabled = readInboundEventsEnabled({
     actionTypeId: connector.actionTypeId,
     hasIdentity,
+    eventsEnabled,
   });
   if (isInboundEventsEnabled !== undefined) {
     connector.isInboundEventsEnabled = isInboundEventsEnabled;

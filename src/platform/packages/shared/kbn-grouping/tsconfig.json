@@ -17,7 +17,7 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/data-views-plugin",
+    "@kbn/data-views-types",
     "@kbn/es-query",
     "@kbn/i18n",
     "@kbn/i18n-react",

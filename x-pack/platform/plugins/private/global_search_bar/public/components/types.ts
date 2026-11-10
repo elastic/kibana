@@ -21,10 +21,11 @@ export interface SearchProps {
   navigateToUrl: ApplicationStart['navigateToUrl'];
   reportEvent: EventReporter;
   taggingApi?: SavedObjectTaggingPluginStart;
-  basePathUrl: string;
 }
 
 /* @internal */
 export interface SearchModalProps extends SearchProps {
   onClose: () => void | Promise<void>;
 }
+
+export type SearchErrorType = 'license' | 'generic';

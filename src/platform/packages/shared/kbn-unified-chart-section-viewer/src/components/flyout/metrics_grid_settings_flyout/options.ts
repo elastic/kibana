@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiSuperSelectOption } from '@elastic/eui';
+import type { EuiSuperSelectOption, IconType } from '@elastic/eui';
+import { IconChartHeatmap, IconChartLine } from '@kbn/chart-icons';
 import { i18n } from '@kbn/i18n';
-import type { HistogramPercentile, SimpleAggregation } from '@kbn/discover-utils';
+import type {
+  HistogramPercentile,
+  HistogramVisualization,
+  SimpleAggregation,
+} from '@kbn/discover-utils';
 import { SIMPLE_AGGREGATION_OPTIONS, HISTOGRAM_PERCENTILE_OPTIONS } from './constants';
 
 /**
@@ -81,3 +86,30 @@ export const GAUGE_OPTIONS = buildSimpleAggregationOptions(
 );
 
 export const HISTOGRAM_OPTIONS = buildHistogramPercentileOptions();
+
+export interface HistogramVisualizationChoice {
+  id: HistogramVisualization;
+  label: string;
+  iconType: IconType;
+  'data-test-subj': string;
+}
+
+/** Histogram choices shown in the flyout. */
+export const HISTOGRAM_VISUALIZATION_OPTIONS: HistogramVisualizationChoice[] = [
+  {
+    id: 'lnsHeatmap',
+    label: i18n.translate('metricsExperience.gridSettingsFlyout.heatmapChoiceLabel', {
+      defaultMessage: 'Distribution',
+    }),
+    iconType: IconChartHeatmap as IconType,
+    'data-test-subj': 'metricsExperienceGridSettingsDistributionChoice',
+  },
+  {
+    id: 'lnsXY',
+    label: i18n.translate('metricsExperience.gridSettingsFlyout.lineChoiceLabel', {
+      defaultMessage: 'Percentile',
+    }),
+    iconType: IconChartLine as IconType,
+    'data-test-subj': 'metricsExperienceGridSettingsPercentileChoice',
+  },
+];

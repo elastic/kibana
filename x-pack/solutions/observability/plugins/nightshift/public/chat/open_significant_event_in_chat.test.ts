@@ -14,34 +14,25 @@ import {
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_id: 'evt-1',
-  event_uuid: 'evt-uuid-1',
-  status: 'open',
-  stream_names: ['logs.app'],
+  status: 'active',
+  source_ids: ['logs.app'],
   title: 'Latency spike',
   summary: 'Summary',
-  severity: '80-critical',
+  severity: 'critical',
   confidence: 0.9,
   ...overrides,
 });
 
 describe('open_significant_event_in_chat', () => {
-  it('buildNewSignificantEventChatOptions attaches the event and prefills the prompt', () => {
+  it('prefills the prompt without an explicit attachment', () => {
     const event = mockEvent();
     const options = buildNewSignificantEventChatOptions(event);
 
-    expect(options).toEqual(
-      expect.objectContaining({
-        newConversation: true,
-        autoSendInitialMessage: false,
-        initialMessage: 'Explain this significant event: Latency spike',
-        attachments: [
-          expect.objectContaining({
-            id: 'evt-uuid-1',
-            origin: 'evt-1',
-          }),
-        ],
-      })
-    );
+    expect(options).toEqual({
+      newConversation: true,
+      autoSendInitialMessage: false,
+      initialMessage: 'Explain this significant event: Latency spike',
+    });
   });
 
   it('buildInvestigationConversationChatOptions passes conversationId only', () => {

@@ -10,6 +10,8 @@ import type { InstrumentationProfile as GeneratedInstrumentationProfile } from '
 export interface ToolCallEvidence {
   tool_call_id?: string;
   tool_id?: string;
+  /** The agent's own note immediately before this call, when the source records one. */
+  reasoning?: string;
   arguments?: unknown;
   result?: unknown;
 }

@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import {
   PackName,
@@ -22,13 +22,14 @@ import {
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
   Shards,
-  ObjectQueries,
+  ObjectQueriesInput,
   ScheduleTypeOrUndefined,
   PackIntervalOrUndefined,
   RRuleScheduleConfigOrUndefined,
-  MinOsqueryVersionOrUndefined,
+  MinOsqueryVersionInputOrUndefined,
   ResultTypeOrUndefined,
   PackPlatformOrUndefined,
+  ObjectQueries,
   MinOsqueryVersion,
   ResultType,
   PackPlatform,
@@ -41,11 +42,11 @@ export const UpdatePacksRequestBody = lazySchema(() =>
     enabled: EnabledOrUndefined.optional(),
     policy_ids: PolicyIdsOrUndefined.optional(),
     shards: Shards.optional(),
-    queries: ObjectQueries.optional(),
+    queries: ObjectQueriesInput.optional(),
     schedule_type: ScheduleTypeOrUndefined.optional(),
     interval: PackIntervalOrUndefined.optional(),
     rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
-    min_osquery_version: MinOsqueryVersionOrUndefined.optional(),
+    min_osquery_version: MinOsqueryVersionInputOrUndefined.optional(),
     result_type: ResultTypeOrUndefined.optional(),
     platform: PackPlatformOrUndefined.optional(),
   })
@@ -71,10 +72,10 @@ export const UpdatePacksResponse = lazySchema(() =>
          */
         version: z.number().int().optional().describe('The pack version number.'),
         enabled: EnabledOrUndefined.optional(),
-        created_at: z.string().datetime().optional(),
+        created_at: isoDateTime().optional(),
         created_by: z.string().nullable().optional(),
         created_by_profile_uid: z.string().optional(),
-        updated_at: z.string().datetime().optional(),
+        updated_at: isoDateTime().optional(),
         updated_by: z.string().nullable().optional(),
         updated_by_profile_uid: z.string().optional(),
         policy_ids: PolicyIdsOrUndefined.optional(),

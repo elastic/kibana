@@ -40,7 +40,7 @@ const MonitoringAppLoading = () => (
     data-test-subj="monitoringAppContainer"
   >
     <EuiPageTemplate.Section>
-      <AppHeaderLoading spacing="bleed" menu={{ buttonCount: 1, hasPrimary: true }} />
+      <AppHeaderLoading spacing="largeBleed" menu={{ buttonCount: 1, hasPrimary: true }} />
       <PageLoading />
     </EuiPageTemplate.Section>
   </EuiPageTemplate>

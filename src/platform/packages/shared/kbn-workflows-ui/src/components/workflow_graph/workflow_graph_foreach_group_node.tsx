@@ -109,6 +109,14 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
         </div>
       </div>
       <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
+      {/* Fallback handle — mirrors workflow_graph_node.tsx. Required so failure edges
+          sourced from a foreach/while container can resolve the 'fallback' sourceHandle. */}
+      <Handle
+        type="source"
+        id="fallback"
+        position={Position.Bottom}
+        style={{ opacity: 0, right: 24, left: 'auto', transform: 'none' }}
+      />
     </>
   );
 }

@@ -81,7 +81,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'plugins/alerts')}`,
-        `--plugin-path=${join(__dirname, 'plugins/cases')}`,
+        `--plugin-path=${join(
+          __dirname,
+          '../../test_plugins/security_investigations/functional_with_es_ssl/cases'
+        )}`,
         `--plugin-path=${join(
           __dirname,
           '../alerting_api_integration/common/plugins/actions_simulators'
@@ -92,6 +95,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'ruleStatusFilter',
         ])}`,
         `--uiSettings.overrides.workflows:ui:enabled=true`,
+        // Keeps the classic Rules and Logs heading tabs, which hide when Alerting V2 is on.
+        `--uiSettings.globalOverrides.alerting:v2:enabled=false`,
         `--workflowsManagement.enabled=true`,
         `--workflowsExecutionEngine.enabled=true`,
         `--xpack.stack_connectors.enableExperimental=${JSON.stringify(['connectorsFromSpecs'])}`,

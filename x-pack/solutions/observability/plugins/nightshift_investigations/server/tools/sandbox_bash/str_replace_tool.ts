@@ -10,8 +10,13 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
-import { getConversationId, getSandboxCallContext, resolveAbsolutePath } from './tool_utils';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
+import {
+  getConversationId,
+  getSandboxCallContext,
+  getSandboxCaller,
+  resolveAbsolutePath,
+} from './tool_utils';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
 export const SANDBOX_STR_REPLACE_TOOL_ID = 'nightshift_sandbox_str_replace';
@@ -43,14 +48,14 @@ export const createSandboxStrReplaceTool = ({
   sandboxWorkspaceManager,
   logger,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   logger: Logger;
 }): BuiltinToolDefinition<typeof strReplaceSchema> => ({
   id: SANDBOX_STR_REPLACE_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Replace an exact string in a sandbox file. old_str must appear exactly once; include enough surrounding context to make it unique. Use sandbox_view_file first to confirm line numbers and exact content.',
+    'Replace an exact string in a sandbox file. old_str must appear exactly once; include enough surrounding context to make it unique. Use nightshift_sandbox_view_file first to confirm line numbers and exact content.',
   tags: ['sandbox', 'file'],
   schema: strReplaceSchema,
   annotations: {
@@ -60,6 +65,7 @@ export const createSandboxStrReplaceTool = ({
     idempotentHint: false,
     openWorldHint: false,
   },
+  excludeFromMcp: true,
   handler: async (params, context) => {
     const rawConversationId = getConversationId(context);
     if (!rawConversationId) {
@@ -77,9 +83,13 @@ export const createSandboxStrReplaceTool = ({
       };
     }
 
-    let session: SandboxSession;
+    let session: AuditedSandboxSession;
     try {
-      session = sandboxStart.getSession(context.request, rawConversationId);
+      session = sandboxStart.getSession(
+        context.request,
+        rawConversationId,
+        getSandboxCaller(context)
+      );
     } catch (err) {
       return {
         results: [
@@ -119,7 +129,7 @@ export const createSandboxStrReplaceTool = ({
               data: {
                 message: `File too large (${Math.floor(
                   stat.size / 1024 / 1024
-                )} MB) to edit with str_replace.`,
+                )} MB) to edit with nightshift_sandbox_str_replace.`,
               },
             },
           ],

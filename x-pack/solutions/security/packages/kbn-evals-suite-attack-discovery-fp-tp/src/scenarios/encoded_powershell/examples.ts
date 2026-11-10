@@ -12,6 +12,7 @@ import {
   withoutAttackDiscovery,
   withoutEntities,
   withoutEvents,
+  withTruncatingBenignEvents,
   type FpTpWorld,
 } from '../../world';
 import type { FpTpExample } from '../types';
@@ -34,6 +35,12 @@ export const ENCODED_POWERSHELL_EXAMPLES: readonly FpTpExample[] = [
     situation: 'U1',
     evidenceState: 'complete',
     expectedOutcome: 'false_positive',
+    provenance: 'authored',
+    checks: {
+      entityRole: 'contradicts',
+      processParent: 'contradicts',
+      networkDestination: 'contradicts',
+    },
     buildWorld: fp,
   },
   {
@@ -41,6 +48,8 @@ export const ENCODED_POWERSHELL_EXAMPLES: readonly FpTpExample[] = [
     situation: 'U6',
     evidenceState: 'complete',
     expectedOutcome: 'true_positive',
+    provenance: 'authored',
+    checks: { entityRole: 'supports', processParent: 'supports', networkDestination: 'supports' },
     buildWorld: tp,
   },
   {
@@ -48,6 +57,8 @@ export const ENCODED_POWERSHELL_EXAMPLES: readonly FpTpExample[] = [
     situation: 'U6',
     evidenceState: 'entities_missing',
     expectedOutcome: 'true_positive',
+    provenance: 'authored',
+    checks: { entityRole: 'skipped', processParent: 'supports', networkDestination: 'supports' },
     buildWorld: (runMarker) => withoutEntities(tp(runMarker)),
   },
   {
@@ -55,6 +66,12 @@ export const ENCODED_POWERSHELL_EXAMPLES: readonly FpTpExample[] = [
     situation: 'U1',
     evidenceState: 'entities_missing',
     expectedOutcome: 'inconclusive',
+    provenance: 'authored',
+    checks: {
+      entityRole: 'skipped',
+      processParent: 'contradicts',
+      networkDestination: 'contradicts',
+    },
     buildWorld: (runMarker) => withoutEntities(fp(runMarker)),
   },
   {
@@ -62,6 +79,8 @@ export const ENCODED_POWERSHELL_EXAMPLES: readonly FpTpExample[] = [
     situation: 'U6',
     evidenceState: 'events_missing',
     expectedOutcome: 'inconclusive',
+    provenance: 'authored',
+    checks: { entityRole: 'supports', processParent: 'skipped', networkDestination: 'skipped' },
     buildWorld: (runMarker) => withoutEvents(tp(runMarker)),
   },
   {
@@ -69,13 +88,32 @@ export const ENCODED_POWERSHELL_EXAMPLES: readonly FpTpExample[] = [
     situation: 'U1',
     evidenceState: 'mixed',
     expectedOutcome: 'inconclusive',
+    provenance: 'authored',
+    checks: {
+      entityRole: 'contradicts',
+      processParent: 'supports',
+      networkDestination: 'supports',
+    },
     buildWorld: (runMarker) => withEntitiesFrom(tp(runMarker), fp(runMarker)),
+  },
+  // The fp world plus more benign raw events than the analysis reads in one page. The
+  // checks still contradict, so the model's verdict is `false_positive`, but the
+  // truncated page makes `block_truncated_clear` emit `inconclusive`. No `checks`:
+  // the verdict rules do not model truncation, so the gold would not follow from them.
+  {
+    id: 'encoded-powershell.fp-events-truncated',
+    situation: 'U1',
+    evidenceState: 'events_truncated',
+    expectedOutcome: 'inconclusive',
+    provenance: 'authored',
+    buildWorld: (runMarker) => withTruncatingBenignEvents(fp(runMarker), runMarker),
   },
   {
     id: 'encoded-powershell.failed-missing-ad',
     situation: 'U6',
     evidenceState: 'attack_discovery_missing',
     expectedOutcome: 'failed',
+    provenance: 'authored',
     buildWorld: (runMarker) => withoutAttackDiscovery(tp(runMarker)),
   },
   {
@@ -83,6 +121,7 @@ export const ENCODED_POWERSHELL_EXAMPLES: readonly FpTpExample[] = [
     situation: 'U6',
     evidenceState: 'cited_alert_missing',
     expectedOutcome: 'failed',
+    provenance: 'authored',
     buildWorld: (runMarker) => withMissingCitedAlert(tp(runMarker)),
   },
 ];

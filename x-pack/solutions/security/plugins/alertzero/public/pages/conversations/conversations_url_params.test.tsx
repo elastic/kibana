@@ -52,6 +52,25 @@ describe('useConversationsUrlParams', () => {
     expect(history.length).toBe(initialLength + 1);
   });
 
+  it('keeps the clicked proposal next to the conversation', () => {
+    const { result, history } = renderUrlParams('/');
+
+    act(() => result.current.selectConversation('inv-1', 'prop-1'));
+
+    expect(history.location.search).toBe('?selectedConversationId=inv-1&selectedProposalId=prop-1');
+    expect(result.current.selectedProposalId).toBe('prop-1');
+  });
+
+  it('drops a stale proposal when a conversation is opened without one', () => {
+    const { result, history } = renderUrlParams(
+      '/?selectedConversationId=inv-1&selectedProposalId=prop-1'
+    );
+
+    act(() => result.current.selectConversation('inv-2'));
+
+    expect(history.location.search).toBe('?selectedConversationId=inv-2');
+  });
+
   it('replaces the id when a different conversation is opened', () => {
     const { result, history } = renderUrlParams('/?selectedConversationId=inv-1');
 
@@ -62,6 +81,16 @@ describe('useConversationsUrlParams', () => {
 
   it('drops the id when the flyout closes', () => {
     const { result, history } = renderUrlParams('/?selectedConversationId=inv-1');
+
+    act(() => result.current.clearSelectedConversation());
+
+    expect(history.location.search).toBe('');
+  });
+
+  it('drops the proposal too when the flyout closes', () => {
+    const { result, history } = renderUrlParams(
+      '/?selectedConversationId=inv-1&selectedProposalId=prop-1'
+    );
 
     act(() => result.current.clearSelectedConversation());
 

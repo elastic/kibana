@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { zodToolInputToJsonSchema } from '@kbn/agent-builder-genai-utils/tools/utils/json_schema';
 import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
 import { renderElement } from '@kbn/agent-builder-common/tools/custom_rendering';
 import { MOUNT_POINTS } from '../../../filesystem/mount_points';
 
 const describePayloadSchema = (renderer: RendererTypeDefinition): string => {
   try {
-    const { $schema, ...jsonSchema } = z.toJSONSchema(renderer.payloadSchema, {
-      unrepresentable: 'any',
-      io: 'input',
-    }) as Record<string, unknown>;
-    return JSON.stringify(jsonSchema);
+    return JSON.stringify(zodToolInputToJsonSchema(renderer.payloadSchema));
   } catch {
     return '{}';
   }

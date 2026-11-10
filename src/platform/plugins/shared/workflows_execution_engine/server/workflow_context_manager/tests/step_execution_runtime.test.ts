@@ -364,6 +364,7 @@ describe('StepExecutionRuntime', () => {
           startedAt: originalStartedAt,
         })
       );
+      expect(workflowLogger.logInfo).not.toHaveBeenCalled();
     });
   });
 
@@ -567,18 +568,34 @@ describe('StepExecutionRuntime', () => {
         );
       });
 
-      it('should exit wait state and clear resumeAt when step already has resumeAt in state', () => {
+      it('exits the wait and clears resumeAt once the stored resumeAt has passed', () => {
+        const now = new Date();
+        const resumeAt = new Date(now.getTime() - 1_000).toISOString();
         (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
           status: ExecutionStatus.WAITING,
-          state: { resumeAt: '2025-12-31T00:00:00.000Z' },
+          state: { resumeAt },
         } as Partial<EsWorkflowStepExecution>);
 
-        const entered = underTest.tryEnterWaitUntil(new Date('2025-12-31T00:00:00.000Z'));
+        const entered = underTest.tryEnterWaitUntil(new Date(now.getTime()));
 
         expect(entered).toBe(false);
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({ state: undefined })
         );
+      });
+
+      it('stays parked when re-entered before the stored resumeAt', () => {
+        const now = new Date();
+        const resumeAt = new Date(now.getTime() + 60_000).toISOString();
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt, resolvedDuration: '60s' },
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(new Date(now.getTime() + 60_000));
+
+        expect(entered).toBe(true);
+        expect(workflowExecutionState.upsertStep).not.toHaveBeenCalled();
       });
 
       it('should enter wait state even when status is WAITING but resumeAt is absent', () => {
@@ -843,6 +860,37 @@ describe('StepExecutionRuntime', () => {
         stepName: 'Display name',
         stepExecutionId: fakeStepExecutionId,
       });
+    });
+  });
+
+  describe('getStepTimeoutMs', () => {
+    const createRuntime = (configuration?: Record<string, unknown>) =>
+      new StepExecutionRuntime({
+        node: { ...fakeNode, configuration } as GraphNodeUnion,
+        stackFrames: fakeStackFrames,
+        stepExecutionId: fakeStepExecutionId,
+        contextManager: {
+          renderValueAccordingToContext: jest.fn((value: string) =>
+            value === '{{ inputs.timeout }}' ? '2m' : value
+          ),
+        } as unknown as WorkflowContextManager,
+        workflowExecutionGraph,
+        stepLogger: workflowLogger,
+        workflowExecutionState,
+        stepIoService,
+      });
+
+    it('returns the step timeout in milliseconds', () => {
+      expect(createRuntime({ timeout: '10m' }).getStepTimeoutMs()).toBe(600_000);
+    });
+
+    it('renders a templated step timeout', () => {
+      expect(createRuntime({ timeout: '{{ inputs.timeout }}' }).getStepTimeoutMs()).toBe(120_000);
+    });
+
+    it('returns undefined when the node has no timeout', () => {
+      expect(createRuntime({ name: 'step' }).getStepTimeoutMs()).toBeUndefined();
+      expect(createRuntime().getStepTimeoutMs()).toBeUndefined();
     });
   });
 

@@ -6,6 +6,13 @@
  */
 
 import {
+  getMissingSourceGroup,
+  getStreamVarGroups,
+  isFieldVisible,
+  isInSelectedVarGroupOption,
+  isRequiredBySelectedOption,
+  resolveVarGroupSelections,
+  shouldDefaultCollectS3Logs,
   getRegionFieldName,
   getRequiredTextFields,
   getFlyoutFields,
@@ -14,7 +21,7 @@ import {
   toDraft,
 } from './field_config';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+import type { RegistryVarGroup, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 function makeVarDef(
   name: string,
@@ -28,7 +35,6 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
   return {
     id: 'test',
     name: 'Test Service',
-    category: 'compute',
     signalTypes: ['logs'],
     dataStreams: [],
     inputs: [],
@@ -137,6 +143,19 @@ describe('resolveFieldMeta', () => {
     const meta = resolveFieldMeta(service, 'aws-s3', 'tags');
     expect(meta?.multi).toBe(true);
   });
+
+  it('forces multi for ECF trigger vars only in the ECF view', () => {
+    const service = makeService({
+      varDefsByInput: {
+        'aws-cloudwatch': { log_group_arn: makeVarDef('log_group_arn', 'text') },
+      },
+    });
+    expect(resolveFieldMeta(service, 'aws-cloudwatch', 'log_group_arn')?.multi).toBe(false);
+    expect(
+      resolveFieldMeta({ ...service, settingsScope: 'ecf' }, 'aws-cloudwatch', 'log_group_arn')
+        ?.multi
+    ).toBe(true);
+  });
 });
 
 describe('toTyped / toDraft', () => {
@@ -158,6 +177,14 @@ describe('toTyped / toDraft', () => {
 
   it('toTyped: bool string "true" → true', () => {
     expect(toTyped('true', boolMeta)).toBe(true);
+  });
+
+  it('toTyped: bool typed true → true (SO resume path: stored boolean passes through)', () => {
+    expect(toTyped(true, boolMeta)).toBe(true);
+  });
+
+  it('toTyped: bool typed false → false (SO resume path: stored boolean passes through)', () => {
+    expect(toTyped(false, boolMeta)).toBe(false);
   });
 
   it('toTyped: bool string "false" → false', () => {
@@ -279,5 +306,216 @@ describe('getFlyoutFields', () => {
       },
     });
     expect(getFlyoutFields(service, 'aws-s3')).toContain('queue_url');
+  });
+});
+
+describe('getMissingSourceGroup', () => {
+  const opt = (name: string) => makeVarDef(name, 'text', { required: false });
+  const agentView = makeService({
+    ecfSettings: { requiredConfig: [], dataStreams: [], inputs: [], defaultEnabledInputs: [] },
+    varDefsByInput: {
+      'aws-s3': {
+        bucket_arn: opt('bucket_arn'),
+        access_point_arn: opt('access_point_arn'),
+        queue_url: opt('queue_url'),
+      },
+      'aws-cloudwatch': {
+        log_group_arn: opt('log_group_arn'),
+        log_group_name: opt('log_group_name'),
+        log_group_name_prefix: opt('log_group_name_prefix'),
+      },
+    },
+  });
+
+  it.each([
+    ['aws-s3', ['bucket_arn', 'access_point_arn', 'queue_url'], 'queue_url'],
+    [
+      'aws-cloudwatch',
+      ['log_group_arn', 'log_group_name', 'log_group_name_prefix'],
+      'log_group_name',
+    ],
+  ])('%s: reports the group while none is filled, and nothing once one is', (input, group, alt) => {
+    expect(getMissingSourceGroup(agentView, input, {})).toEqual(group);
+    expect(getMissingSourceGroup(agentView, input, { [group[0]]: '' })).toEqual(group);
+    expect(getMissingSourceGroup(agentView, input, { [group[0]]: [] })).toEqual(group);
+    expect(getMissingSourceGroup(agentView, input, { [group[0]]: ['arn:x'] })).toBeUndefined();
+    expect(getMissingSourceGroup(agentView, input, { [alt]: 'value' })).toBeUndefined();
+  });
+
+  it('does not apply to the ECF view or to other inputs', () => {
+    expect(
+      getMissingSourceGroup({ ...agentView, settingsScope: 'ecf' }, 'aws-s3', {})
+    ).toBeUndefined();
+    expect(getMissingSourceGroup(agentView, 'httpjson', {})).toBeUndefined();
+  });
+
+  it('applies to services without an ECF route (e.g. Amazon MQ, EC2 logs)', () => {
+    const agentOnly = { ...agentView, ecfSettings: undefined };
+    expect(getMissingSourceGroup(agentOnly, 'aws-cloudwatch', {})).toEqual([
+      'log_group_arn',
+      'log_group_name',
+      'log_group_name_prefix',
+    ]);
+    expect(
+      getMissingSourceGroup(agentOnly, 'aws-cloudwatch', { log_group_name_prefix: '/aws/x' })
+    ).toBeUndefined();
+  });
+});
+
+describe('stream-level var_groups', () => {
+  const opt = (name: string, extra: Partial<RegistryVarsEntry> = {}) =>
+    makeVarDef(name, 'text', { required: false, ...extra });
+  const LOG_GROUP_SOURCE: RegistryVarGroup = {
+    name: 'log_group_source',
+    title: 'Log group',
+    selector_title: 'Identify the log group by',
+    required: true,
+    options: [
+      { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+      { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name', 'region_name'] },
+      {
+        name: 'log_group_name_prefix',
+        title: 'Log Group Name Prefix',
+        vars: ['log_group_name_prefix', 'region_name'],
+      },
+    ],
+  };
+  const service = makeService({
+    optionalConfig: [
+      'log_group_arn',
+      'log_group_name',
+      'log_group_name_prefix',
+      'region_name',
+      'scan_frequency',
+    ],
+    varDefsByInput: {
+      'aws-cloudwatch': {
+        log_group_arn: opt('log_group_arn'),
+        log_group_name: opt('log_group_name', { show_user: false }),
+        log_group_name_prefix: opt('log_group_name_prefix', { show_user: false }),
+        region_name: opt('region_name', { show_user: false }),
+        scan_frequency: opt('scan_frequency', { show_user: false }),
+      },
+    },
+    varGroupsByInput: { 'aws-cloudwatch': [LOG_GROUP_SOURCE] },
+  });
+
+  it('defaults to the first option and honours a stored choice that names an option', () => {
+    expect(resolveVarGroupSelections(service, 'aws-cloudwatch', undefined)).toEqual({
+      log_group_source: 'log_group_arn',
+    });
+    expect(
+      resolveVarGroupSelections(service, 'aws-cloudwatch', { log_group_source: 'log_group_name' })
+    ).toEqual({ log_group_source: 'log_group_name' });
+    expect(
+      resolveVarGroupSelections(service, 'aws-cloudwatch', { log_group_source: 'nope' })
+    ).toEqual({ log_group_source: 'log_group_arn' });
+    expect(resolveVarGroupSelections(service, 'aws-s3', undefined)).toEqual({});
+    expect(getStreamVarGroups(service, null)).toEqual([]);
+  });
+
+  it("shows only the selected option's vars and keeps vars no group controls", () => {
+    expect(getFlyoutFields(service, 'aws-cloudwatch')).toEqual(['log_group_arn', 'scan_frequency']);
+    expect(
+      getFlyoutFields(service, 'aws-cloudwatch', { log_group_source: 'log_group_name' })
+    ).toEqual(['log_group_name', 'region_name', 'scan_frequency']);
+    expect(isFieldVisible(service, 'aws-cloudwatch', 'log_group_name')).toBe(false);
+    expect(isFieldVisible(service, 'aws-cloudwatch', 'scan_frequency')).toBe(true);
+    expect(isInSelectedVarGroupOption(service, 'aws-cloudwatch', 'log_group_arn')).toBe(true);
+    expect(isInSelectedVarGroupOption(service, 'aws-cloudwatch', 'scan_frequency')).toBe(false);
+  });
+
+  it("makes the selected option's vars required text fields, show_user or not", () => {
+    expect(getRequiredTextFields(service, 'aws-cloudwatch')).toEqual(['log_group_arn']);
+    // Region vars are filled from the global region at deploy time, never asked for.
+    expect(
+      getRequiredTextFields(service, 'aws-cloudwatch', {
+        log_group_source: 'log_group_name_prefix',
+      })
+    ).toEqual(['log_group_name_prefix']);
+    expect(isRequiredBySelectedOption(service, 'aws-cloudwatch', 'log_group_arn')).toBe(true);
+    expect(isRequiredBySelectedOption(service, 'aws-cloudwatch', 'scan_frequency')).toBe(false);
+  });
+
+  it('does not require the vars of a group that is not required', () => {
+    const optionalGroup = makeService({
+      ...service,
+      varGroupsByInput: { 'aws-cloudwatch': [{ ...LOG_GROUP_SOURCE, required: false }] },
+    });
+    expect(getRequiredTextFields(optionalGroup, 'aws-cloudwatch')).toEqual([]);
+    expect(getFlyoutFields(optionalGroup, 'aws-cloudwatch')).toEqual([
+      'log_group_arn',
+      'scan_frequency',
+    ]);
+  });
+
+  it('replaces the hard-coded "at least one source" rule', () => {
+    expect(getMissingSourceGroup(service, 'aws-cloudwatch', {})).toBeUndefined();
+  });
+});
+
+describe('S3 collection mode (collect_s3_logs)', () => {
+  const opt = (name: string) => makeVarDef(name, 'text', { required: false });
+  const s3Defs = {
+    collect_s3_logs: makeVarDef('collect_s3_logs', 'bool', { default: false }),
+    bucket_arn: opt('bucket_arn'),
+    access_point_arn: opt('access_point_arn'),
+    queue_url: opt('queue_url'),
+  };
+  const agentView = makeService({
+    ecfSettings: { requiredConfig: [], dataStreams: [], inputs: [], defaultEnabledInputs: [] },
+    varDefsByInput: { 'aws-s3': s3Defs },
+  });
+
+  describe('shouldDefaultCollectS3Logs', () => {
+    it.each(['bucket_arn', 'access_point_arn'])('turns the toggle on for a %s alone', (name) => {
+      expect(shouldDefaultCollectS3Logs(agentView, 'aws-s3', { [name]: 'arn:x' })).toBe(true);
+      expect(shouldDefaultCollectS3Logs(agentView, 'aws-s3', { [name]: ['arn:x'] })).toBe(true);
+    });
+
+    it('leaves the toggle alone without an ARN, with only a queue URL, or once the user chose', () => {
+      expect(shouldDefaultCollectS3Logs(agentView, 'aws-s3', {})).toBe(false);
+      expect(shouldDefaultCollectS3Logs(agentView, 'aws-s3', { queue_url: 'https://q' })).toBe(
+        false
+      );
+      expect(
+        shouldDefaultCollectS3Logs(agentView, 'aws-s3', {
+          bucket_arn: 'arn:x',
+          collect_s3_logs: 'false',
+        })
+      ).toBe(false);
+    });
+  });
+
+  describe('getMissingSourceGroup follows the collection mode', () => {
+    it('with the toggle on, needs a bucket or access-point ARN, not a queue URL', () => {
+      const vars = { collect_s3_logs: 'true', queue_url: 'https://q' };
+      expect(getMissingSourceGroup(agentView, 'aws-s3', vars)).toEqual([
+        'bucket_arn',
+        'access_point_arn',
+      ]);
+      expect(
+        getMissingSourceGroup(agentView, 'aws-s3', { collect_s3_logs: true, access_point_arn: 'x' })
+      ).toBeUndefined();
+    });
+
+    it('with the toggle off, needs a queue URL, not an ARN', () => {
+      expect(
+        getMissingSourceGroup(agentView, 'aws-s3', { collect_s3_logs: 'false', bucket_arn: 'x' })
+      ).toEqual(['queue_url']);
+      expect(
+        getMissingSourceGroup(agentView, 'aws-s3', { collect_s3_logs: 'false', queue_url: 'q' })
+      ).toBeUndefined();
+    });
+
+    it('with the toggle unset, accepts either kind of source and reports the whole group otherwise', () => {
+      expect(getMissingSourceGroup(agentView, 'aws-s3', { queue_url: 'q' })).toBeUndefined();
+      expect(getMissingSourceGroup(agentView, 'aws-s3', { access_point_arn: 'x' })).toBeUndefined();
+      expect(getMissingSourceGroup(agentView, 'aws-s3', {})).toEqual([
+        'bucket_arn',
+        'access_point_arn',
+        'queue_url',
+      ]);
+    });
   });
 });

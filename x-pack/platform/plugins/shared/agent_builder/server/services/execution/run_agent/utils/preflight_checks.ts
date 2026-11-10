@@ -6,18 +6,22 @@
  */
 
 import { createBadRequestError } from '@kbn/agent-builder-common/base/errors';
-import type { ConverseInput, TimelineEvent } from '@kbn/agent-builder-common';
+import type { ConverseInput } from '@kbn/agent-builder-common';
 import { pendingPromptRequest } from '@kbn/agent-builder-common';
+import type { ContextTimelineEvent } from './context_timeline';
 
 export const ensureValidInput = ({
   input,
   timeline,
+  allowResume = true,
 }: {
   input: ConverseInput;
-  timeline: TimelineEvent[];
+  timeline: ContextTimelineEvent[];
+  /** When false, a paused conversation takes standard input: the run does not resume it. */
+  allowResume?: boolean;
 }) => {
   // The single definition of "paused": an unanswered prompt_requested as the last terminal.
-  const pending = pendingPromptRequest(timeline);
+  const pending = allowResume ? pendingPromptRequest(timeline) : undefined;
   const pendingPrompts =
     pending?.data.outcome.type === 'prompt_requested' ? pending.data.outcome.prompts : [];
 

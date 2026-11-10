@@ -11,7 +11,11 @@ import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { registerCreateThreatReportRoute } from './create_threat_report';
+import { registerAttributeAlertsEvidenceRoute } from './attribute_alerts_evidence';
+import { registerPersistReportFieldsRoute } from './persist_report_fields';
+import { registerIngestThreatReportRoute } from './ingest_threat_report';
 import { registerExtractIocsRoute } from './extract_iocs';
+import { registerEnrichReportCoreRoute } from './enrich_report_core';
 import { registerExtractDiamondRoute } from './extract_diamond';
 import { registerEnrichTaxonomyRoute } from './enrich_taxonomy';
 import { registerClassifySeverityRoute } from './classify_severity';
@@ -59,7 +63,11 @@ export interface RouteRegistrationDeps {
 
 export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerCreateThreatReportRoute(deps);
+  registerAttributeAlertsEvidenceRoute(deps);
+  registerPersistReportFieldsRoute(deps);
+  registerIngestThreatReportRoute(deps);
   registerExtractIocsRoute(deps);
+  registerEnrichReportCoreRoute(deps);
   registerExtractDiamondRoute(deps);
   registerEnrichTaxonomyRoute(deps);
   registerClassifySeverityRoute(deps);

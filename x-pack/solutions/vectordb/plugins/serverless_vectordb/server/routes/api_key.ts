@@ -31,6 +31,7 @@ export const registerCreateApiKeyRoute = (router: IRouter, logger: Logger) => {
 
         const existing = await client.security.getApiKey({
           name: `${ONBOARDING_KEY_NAME_PREFIX}*`,
+          owner: true,
         });
 
         const now = Date.now();

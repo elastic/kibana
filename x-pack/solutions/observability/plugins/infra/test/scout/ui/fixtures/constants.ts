@@ -124,11 +124,13 @@ export interface SemconvPodFixture {
   name: string;
   nodeName: string;
   withoutLimits?: boolean;
+  /** Pod has kubeletstats cpu and network docs, and no memory fields. */
+  omitMemory?: boolean;
   interfaces?: string[];
 }
 
 export const SEMCONV_PODS: SemconvPodFixture[] = [
-  { uid: 'semconv-pod-0', name: 'semconv-pod-0', nodeName: SEMCONV_HOST1_NAME },
+  { uid: 'semconv-pod-0-uid', name: 'semconv-pod-0', nodeName: SEMCONV_HOST1_NAME },
   {
     uid: 'semconv-pod-1-uid',
     name: 'semconv-pod-1',
@@ -231,3 +233,11 @@ export const BASE_DEFAULT_INVENTORY_VIEW_ATTRIBUTES: Omit<
   },
   preferredSchema: 'ecs',
 };
+
+// Logs ML pages (Anomalies and Categories). Each spec points the `observability:logSources`
+// setting of its worker's space at this empty index, so the pages' default log view finds an
+// existing index and renders the setup screen / privilege prompts instead of the no-data page.
+// (Serverless has no log view saved objects, only the built-in default log view, which reads that
+// setting.) The index name must not start with `.` (the built-in viewer/editor roles can't read
+// dot indices) or `logs` (it would match the default log sources, `logs*`, used by other specs).
+export const LOGS_ML_INDEX = 'scout-infra-logs-ml';

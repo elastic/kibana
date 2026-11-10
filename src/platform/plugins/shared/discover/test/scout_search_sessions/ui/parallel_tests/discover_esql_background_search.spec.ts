@@ -54,7 +54,7 @@ spaceTest.describe(
       async ({ pageObjects }) => {
         await pageObjects.discover.goto({ queryMode: 'esql' });
         await pageObjects.discover.waitUntilTabIsLoaded();
-        await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+        await pageObjects.esqlEditor.setQuery(SLOW_ESQL_QUERY);
 
         await pageObjects.backgroundSearch.sendToBackground();
 

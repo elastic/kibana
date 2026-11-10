@@ -18,6 +18,43 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import { Model, BuildkiteMetadata, EvaluatorStats } from '../common_attributes.gen';
 
+/**
+ * An evaluator as the experiment's score documents recorded it.
+ */
+export const ExperimentEvaluatorSummary = lazySchema(() =>
+  z.object({
+    name: z.string().max(256),
+    /**
+     * Absent on experiments recorded before evaluator versions were persisted.
+     */
+    version: z
+      .string()
+      .max(64)
+      .optional()
+      .describe('Absent on experiments recorded before evaluator versions were persisted.'),
+    /**
+     * Whether the evaluator invoked a model. Absent on experiments recorded before per-evaluator attribution was introduced.
+     */
+    kind: z
+      .enum(['llm', 'code'])
+      .optional()
+      .describe(
+        'Whether the evaluator invoked a model. Absent on experiments recorded before per-evaluator attribution was introduced.'
+      ),
+    /**
+     * Model this evaluator judged with. Never present for code evaluators, which invoke no model.
+     */
+    model: Model.optional().describe(
+      'Model this evaluator judged with. Never present for code evaluators, which invoke no model.'
+    ),
+    /**
+     * How many score documents this evaluator produced.
+     */
+    score_count: z.number().int().describe('How many score documents this evaluator produced.'),
+  })
+);
+export type ExperimentEvaluatorSummary = z.infer<typeof ExperimentEvaluatorSummary>;
+
 export const GetEvaluationExperimentRequestQuery = lazySchema(() =>
   z.object({
     /**
@@ -90,6 +127,36 @@ export const GetEvaluationExperimentResponse = lazySchema(() =>
     git_branch: z.string().max(256).nullable().optional(),
     git_commit_sha: z.string().max(256).nullable().optional(),
     ci: BuildkiteMetadata.optional(),
+    /**
+     * Host the experiment ran on, when recorded.
+     */
+    hostname: z.string().max(256).optional().describe('Host the experiment ran on, when recorded.'),
+    /**
+     * Timestamp of the experiment's earliest score document.
+     */
+    first_score_at: z
+      .string()
+      .max(64)
+      .optional()
+      .describe("Timestamp of the experiment's earliest score document."),
+    /**
+     * Timestamp of the experiment's latest score document.
+     */
+    last_score_at: z
+      .string()
+      .max(64)
+      .optional()
+      .describe("Timestamp of the experiment's latest score document."),
+    /**
+     * Every evaluator that scored the experiment, with the version and kind it ran as and, for evaluators that invoked a judge, that judge's model.
+     */
+    evaluators: z
+      .array(ExperimentEvaluatorSummary)
+      .max(1000)
+      .optional()
+      .describe(
+        "Every evaluator that scored the experiment, with the version and kind it ran as and, for evaluators that invoked a judge, that judge's model."
+      ),
     stats: z.array(EvaluatorStats),
   })
 );

@@ -52,7 +52,7 @@ export function registerGetWorkflowRoute(deps: RouteDependencies) {
           }
           const { id } = request.params;
           const spaceId = spaces.getSpaceId(request);
-          const workflow = await api.getWorkflow(id, spaceId);
+          const workflow = await api.getWorkflow(id, spaceId, request);
           if (!workflow) {
             audit.logWorkflowAccessed(request, {
               id,

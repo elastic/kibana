@@ -44,8 +44,8 @@ export const toFindActionPoliciesRequest = ({
   return {
     page,
     per_page: perPage,
+    filter: enabled === undefined ? undefined : `enabled: ${enabled}`,
     search,
-    enabled,
     sort_field: sortField,
     sort_order: sortOrder,
   };

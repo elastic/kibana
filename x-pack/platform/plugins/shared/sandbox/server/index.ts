@@ -19,13 +19,18 @@
  *   host: <sandbox-api-host>
  *   port: 9090          # gRPC port (default)
  *   api_key: <key>
- *   ssl:
- *     certificate_authorities: <PEM>   # optional CA for server cert verification
- *     certificate: <PEM>               # client cert (mTLS)
- *     key: <PEM>                       # client key  (mTLS)
+ *   ssl:                               # PEM file paths
+ *     certificate_authorities: <path>  # optional CA for server cert verification
+ *     certificate: <path>              # optional client cert (mTLS), requires key
+ *     key: <path>                      # optional client key  (mTLS), requires certificate
  * ```
  *
- * When `enabled` is `false` (the default), or when `api_key`/`ssl` are absent,
+ * `certificate` and `key` must be set together. Without them, Kibana connects
+ * without a client certificate and relies on `api_key` alone.
+ * When `enabled` is `true`, Kibana fails to start if a configured file cannot
+ * be read.
+ *
+ * When `enabled` is `false` (the default), or when `api_key` is absent,
  * `SandboxPluginStart.getSession` throws a descriptive error for every call.
  */
 
@@ -40,10 +45,14 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { SandboxSession } from './sandbox_session';
+export type { SandboxRpcInfo, SandboxRpcResult } from './rpc';
+// Light on purpose: rpc.ts does not load gRPC, which the plugin entry point defers.
+export { SandboxRpcError, sandboxRpcLogMeta } from './rpc';
 export type { SandboxPluginSetup, SandboxPluginStart } from './plugin';
 export type {
   RunCommandParams,
   RunCommandResult,
+  SecretEnvKey,
   FileMetadata,
   ReadFileResult,
   WriteFileResult,

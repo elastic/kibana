@@ -20,8 +20,7 @@ import {
 } from '@openfeature/server-sdk';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
-import { FeatureFlagsService } from '..';
+import { FeatureFlagsService, type InternalFeatureFlagsStart } from '..';
 import type { FeatureFlagsConfig } from './feature_flags_config';
 
 describe('FeatureFlagsService Server', () => {
@@ -187,7 +186,7 @@ describe('FeatureFlagsService Server', () => {
   });
 
   describe('flag evaluation', () => {
-    let startContract: FeatureFlagsStart;
+    let startContract: InternalFeatureFlagsStart;
     let apmSpy: jest.SpyInstance;
     let addHandlerSpy: jest.SpyInstance;
 
@@ -375,6 +374,26 @@ describe('FeatureFlagsService Server', () => {
       await expect(firstValueFrom(flag$)).resolves.toEqual(false);
       expect(observedValues).toHaveLength(3);
       expect(observedValues).toStrictEqual([true, false, false]);
+    });
+
+    test('treats string boolean overrides as booleans', async () => {
+      config$.next({
+        overrides: {
+          'securitySolution.attackDiscoveryWorkflowsEnabled': 'false',
+          'ingestHub.onboardingEnabled': 'true',
+          'my-string-flag': 'false',
+        },
+      });
+
+      await expect(
+        startContract.getBooleanValue('securitySolution.attackDiscoveryWorkflowsEnabled', true)
+      ).resolves.toBe(false);
+      await expect(
+        startContract.getBooleanValue('ingestHub.onboardingEnabled', false)
+      ).resolves.toBe(true);
+      await expect(startContract.getStringValue('my-string-flag', 'fallback')).resolves.toBe(
+        'false'
+      );
     });
 
     test('overrides with dotted names', async () => {

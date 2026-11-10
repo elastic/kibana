@@ -34,6 +34,7 @@ import {
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
 import { formatSecrets, normalizeSecrets } from '../synthetics_service/utils';
+import { withScheduleInterval } from '../../common/lib/schedule_to_time';
 import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
@@ -185,13 +186,15 @@ export class MonitorConfigRepository {
 
     return await this.soClient.create<EncryptedSyntheticsMonitorAttributes>(
       savedObjectType ?? syntheticsMonitorSavedObjectType,
-      formatSecrets({
-        ...normalizedMonitor,
-        [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
-        [ConfigKey.CONFIG_ID]: id,
-        revision: 1,
-        [ConfigKey.KIBANA_SPACES]: spaces,
-      }),
+      formatSecrets(
+        withScheduleInterval({
+          ...normalizedMonitor,
+          [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+          [ConfigKey.CONFIG_ID]: id,
+          revision: 1,
+          [ConfigKey.KIBANA_SPACES]: spaces,
+        })
+      ),
       opts
     );
   }
@@ -210,12 +213,14 @@ export class MonitorConfigRepository {
         return {
           id,
           type: savedObjectType ?? syntheticsMonitorSavedObjectType,
-          attributes: formatSecrets({
-            ...monitor,
-            [ConfigKey.MONITOR_QUERY_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
-            [ConfigKey.CONFIG_ID]: id,
-            revision: 1,
-          }),
+          attributes: formatSecrets(
+            withScheduleInterval({
+              ...monitor,
+              [ConfigKey.MONITOR_QUERY_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+              [ConfigKey.CONFIG_ID]: id,
+              revision: 1,
+            })
+          ),
           ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
           references,
         };
@@ -234,6 +239,7 @@ export class MonitorConfigRepository {
   ) {
     const soType = decryptedPreviousMonitor.type;
     const prevSpaces = (decryptedPreviousMonitor.namespaces || []).sort();
+    const next = withScheduleInterval(data);
 
     const spaces = (data.spaces || []).sort();
     // If the spaces have changed, we need to delete the saved object and recreate it
@@ -241,13 +247,13 @@ export class MonitorConfigRepository {
       // `mergeAttributes: false` fully replaces the attributes. The default deep-merge
       // keeps stale keys in top-level map fields that aren't mapped as `flattened`
       // (notably `labels`), making it impossible to delete individual entries. See #274387.
-      return this.soClient.update<MonitorFields>(soType, id, data, {
+      return this.soClient.update<MonitorFields>(soType, id, next, {
         references,
         mergeAttributes: false,
       });
     } else {
       await this.soClient.delete(soType, id, { force: true });
-      return await this.soClient.create(syntheticsMonitorSavedObjectType, data, {
+      return await this.soClient.create(syntheticsMonitorSavedObjectType, next, {
         id,
         ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
         references,
@@ -284,7 +290,8 @@ export class MonitorConfigRepository {
     }> = [];
 
     for (const monitor of monitors) {
-      const { attributes, id, previousMonitor, references } = monitor;
+      const { id, previousMonitor, references } = monitor;
+      const attributes = withScheduleInterval(monitor.attributes);
       const prevSpaces = (previousMonitor.namespaces || []).sort();
       const spaces = (attributes.spaces || []).sort();
       if (!isEqual(prevSpaces, spaces) && !isEmpty(spaces)) {
@@ -361,6 +368,38 @@ export class MonitorConfigRepository {
 
     // Use util to combine, sort, and slice
     return combineAndSortSavedObjects<T>(results, options, page, perPage);
+  }
+
+  /** Finds a monitor name across the current and legacy Saved Object types. */
+  async findExistingMonitorName(names: string[], namespace: string): Promise<string | undefined> {
+    if (names.length === 0) {
+      return undefined;
+    }
+
+    const nameFields = [
+      `${syntheticsMonitorSavedObjectType}.${ConfigKey.NAME}.keyword`,
+      `${legacySyntheticsMonitorTypeSingle}.${ConfigKey.NAME}.keyword`,
+    ];
+    const { hits } = await this.soClient.search({
+      type: syntheticsMonitorSOTypes,
+      namespaces: [namespace],
+      _source: false,
+      fields: nameFields,
+      size: 1,
+      terminate_after: 1,
+      track_total_hits: false,
+      query: {
+        bool: {
+          should: [{ terms: { [nameFields[0]]: names } }, { terms: { [nameFields[1]]: names } }],
+          minimum_should_match: 1,
+        },
+      },
+    });
+
+    const existingName = nameFields
+      .map((field) => hits.hits[0]?.fields?.[field]?.[0])
+      .find((value): value is string => typeof value === 'string');
+    return existingName;
   }
 
   async findDecryptedMonitors({ spaceId, filter }: { spaceId: string; filter?: string }) {

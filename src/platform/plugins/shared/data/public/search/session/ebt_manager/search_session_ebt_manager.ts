@@ -18,7 +18,7 @@ import {
   BG_SEARCH_OPEN,
   BG_SEARCH_START,
 } from './constants';
-import type { UISession } from '../sessions_mgmt/types';
+import type { UISession } from '../types';
 import {
   getQueryLanguage,
   getQueryString,

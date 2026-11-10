@@ -7,68 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getClipboardMenuActions, monaco, setClipboardContextMenuLabels } from './monaco_imports';
+import { monaco } from './monaco_imports';
 
-describe('WHEN the Monaco clipboard contribution is loaded', () => {
-  it('SHOULD register localized context menu actions with writable guards', () => {
-    setClipboardContextMenuLabels({
-      cut: 'Translated Cut',
-      copy: 'Translated Copy',
-      paste: 'Translated Paste',
+describe('monaco imports', () => {
+  describe('kibana augmentation verification', () => {
+    describe('getLanguageThemeResolver', () => {
+      it('has the property getLanguageThemeResolver defined', () => {
+        expect(monaco.editor).toHaveProperty('getLanguageThemeResolver', expect.any(Function));
+      });
     });
 
-    const clipboardActions = getClipboardMenuActions().map((menuItem) => ({
-      id: menuItem.command?.id,
-      title: menuItem.command?.title,
-      when: menuItem.when?.serialize(),
-    }));
+    describe('registerLanguageThemeResolver', () => {
+      it('has the property registerLanguageThemeResolver defined', () => {
+        expect(monaco.editor).toHaveProperty('registerLanguageThemeResolver', expect.any(Function));
+      });
 
-    expect(clipboardActions).toEqual([
-      {
-        id: 'editor.action.clipboardCutAction',
-        title: 'Translated Cut',
-        when: '!editorReadonly',
-      },
-      {
-        id: 'editor.action.clipboardCopyAction',
-        title: 'Translated Copy',
-        when: undefined,
-      },
-      {
-        id: 'editor.action.clipboardPasteAction',
-        title: 'Translated Paste',
-        when: '!editorReadonly',
-      },
-    ]);
-  });
-});
+      it('registers a theme resolver to a specific ID and returns the same registered theme resolver using the same ID', () => {
+        const themeResolver = jest.fn();
+        monaco.editor.registerLanguageThemeResolver('test', themeResolver);
+        expect(monaco.editor.getLanguageThemeResolver('test')).toBe(themeResolver);
+      });
 
-describe('monaco augmentation', () => {
-  describe('getLanguageThemeResolver', () => {
-    it('has the property getLanguageThemeResolver defined', () => {
-      expect(monaco.editor).toHaveProperty('getLanguageThemeResolver', expect.any(Function));
-    });
-  });
+      it('throws an error when attempting to register a different theme resolver if one exists for the specified theme ID', () => {
+        expect(() => monaco.editor.registerLanguageThemeResolver('test', jest.fn())).toThrow();
+      });
 
-  describe('registerLanguageThemeResolver', () => {
-    it('has the property registerLanguageThemeResolver defined', () => {
-      expect(monaco.editor).toHaveProperty('registerLanguageThemeResolver', expect.any(Function));
-    });
-
-    it('registers a theme resolver to a specific ID and returns the same registered theme resolver using the same ID', () => {
-      const themeResolver = jest.fn();
-      monaco.editor.registerLanguageThemeResolver('test', themeResolver);
-      expect(monaco.editor.getLanguageThemeResolver('test')).toBe(themeResolver);
-    });
-
-    it('throws an error when attempting to register a different theme resolver if one exists for the specified theme ID', () => {
-      expect(() => monaco.editor.registerLanguageThemeResolver('test', jest.fn())).toThrow();
-    });
-
-    it('allows registering a different theme resolver for a theme ID with existing resolver definition by specifying the override flag', () => {
-      const alternateThemeResolver = jest.fn();
-      monaco.editor.registerLanguageThemeResolver('test', alternateThemeResolver, true);
-      expect(monaco.editor.getLanguageThemeResolver('test')).toBe(alternateThemeResolver);
+      it('allows registering a different theme resolver for a theme ID with existing resolver definition by specifying the override flag', () => {
+        const alternateThemeResolver = jest.fn();
+        monaco.editor.registerLanguageThemeResolver('test', alternateThemeResolver, true);
+        expect(monaco.editor.getLanguageThemeResolver('test')).toBe(alternateThemeResolver);
+      });
     });
   });
 });

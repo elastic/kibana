@@ -19,7 +19,9 @@ const {
 const toolCall = (
   toolId: string,
   params: Record<string, unknown> | undefined = toolId === TOOL_ID_EVENTS_WRITE
-    ? { items: [{ status: 'open' }] }
+    ? { items: [{ status: 'active' }] }
+    : toolId === TOOL_ID_EXECUTE_ESQL
+    ? { timeout_seconds: 60 }
     : undefined,
   results?: unknown[]
 ): ConverseStep => ({
@@ -51,7 +53,7 @@ const allExpectedTools: ConverseStep[] = [
   toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
   toolCall(TOOL_ID_EXECUTE_ESQL),
   toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }),
-  toolCall(TOOL_ID_EVENTS_WRITE, { items: [{ status: 'open' }] }),
+  toolCall(TOOL_ID_EVENTS_WRITE, { items: [{ status: 'active' }] }),
 ];
 
 describe('scoreToolUsage', () => {
@@ -61,6 +63,51 @@ describe('scoreToolUsage', () => {
       label: 'correct',
       explanation: 'Empty batch: no tool calls made as expected',
     });
+  });
+
+  it('scores the share of execute_esql calls that pass the 60 s deadline', () => {
+    const result = scoreToolUsage({
+      steps: [
+        toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+        toolCall(TOOL_ID_EXECUTE_ESQL),
+        toolCall(TOOL_ID_EXECUTE_ESQL, { query: 'FROM logs-*' }),
+        toolCall(TOOL_ID_EXECUTE_ESQL, { query: 'FROM logs-*', timeout_seconds: 30 }),
+        toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }),
+        toolCall(TOOL_ID_EVENTS_WRITE, { items: [{ status: 'active' }] }),
+      ],
+      detectionCount: 1,
+    });
+    expect(result.label).toBe('missing-esql-deadline');
+    expect(result.score).toBeCloseTo(1 / 3);
+    expect(result.explanation).toContain('2 of 3');
+  });
+
+  it('keeps the missing-tool penalty and multiplies it by the deadline share', () => {
+    const esqlCalls = [
+      ...Array.from({ length: 9 }, () => toolCall(TOOL_ID_EXECUTE_ESQL)),
+      toolCall(TOOL_ID_EXECUTE_ESQL, { query: 'FROM logs-*' }),
+    ];
+    const result = scoreToolUsage({
+      steps: [
+        toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+        ...esqlCalls,
+        toolCall(TOOL_ID_EVENTS_WRITE, { items: [{ status: 'active' }] }),
+      ],
+      detectionCount: 1,
+    });
+    expect(result.label).toBe(`missing-${TOOL_ID_EVENT_SEARCH}`);
+    expect(result.score).toBeCloseTo((2 / 3) * 0.9);
+    expect(result.explanation).toContain('1 of 10');
+
+    const fixed = scoreToolUsage({
+      steps: [
+        toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+        ...Array.from({ length: 10 }, () => toolCall(TOOL_ID_EXECUTE_ESQL)),
+        toolCall(TOOL_ID_EVENTS_WRITE, { items: [{ status: 'active' }] }),
+      ],
+      detectionCount: 1,
+    });
+    expect(fixed.score).toBeGreaterThan(result.score);
   });
 
   it('scores 0 when an empty batch makes unexpected tool calls', () => {
@@ -77,11 +124,41 @@ describe('scoreToolUsage', () => {
     });
   });
 
-  it('scores 0 and labels missing-events_write when events_write is never called', () => {
-    const steps = allExpectedTools.filter((s) => s.tool_id !== TOOL_ID_EVENTS_WRITE);
+  it('scores 0 and labels missing-events_write when no event decision is not grounded', () => {
+    const steps = [
+      toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+    ];
     const result = scoreToolUsage({ steps, detectionCount: 1 });
     expect(result.score).toBe(0);
     expect(result.label).toBe(`missing-${TOOL_ID_EVENTS_WRITE}`);
+  });
+
+  it('accepts a grounded no-event decision without an events_write call', () => {
+    const steps = allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE);
+
+    expect(scoreToolUsage({ steps, detectionCount: 1 })).toEqual({
+      score: 1,
+      label: 'correct',
+      explanation: 'Correctly called all tools',
+    });
+  });
+
+  it('rejects a no-event run that grounded fewer detections than the batch size', () => {
+    const steps = allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE);
+
+    const result = scoreToolUsage({ steps, detectionCount: 5 });
+    expect(result.score).toBe(0);
+    expect(result.label).toBe(`missing-${TOOL_ID_EVENTS_WRITE}`);
+  });
+
+  it('accepts a no-event run with one execute_esql call per detection', () => {
+    const steps = [
+      ...allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+    ];
+
+    expect(scoreToolUsage({ steps, detectionCount: 2 }).score).toBe(1);
   });
 
   it.each([undefined, {}, { items: [] }] as const)(
@@ -107,7 +184,7 @@ describe('scoreToolUsage', () => {
         },
       },
     ]);
-    const completedWrite = toolCall(TOOL_ID_EVENTS_WRITE, { items: [{ status: 'open' }] });
+    const completedWrite = toolCall(TOOL_ID_EVENTS_WRITE, { items: [{ status: 'active' }] });
     const steps = [
       ...allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE),
       missingItemsWrite,
@@ -179,9 +256,9 @@ describe('scoreToolUsage', () => {
   it('scores live Agent Builder underscore tool ids as the dotted equivalents', () => {
     const steps: ConverseStep[] = [
       toolCall('platform_sig_events_ki_search', { kind: ['query'] }),
-      toolCall('platform_core_execute_esql'),
+      toolCall('platform_core_execute_esql', { timeout_seconds: 60 }),
       toolCall('platform_sig_events_event_search', { rule_uuids: ['rule-uuid-1'] }),
-      toolCall('platform_sig_events_events_write', { items: [{ status: 'open' }] }),
+      toolCall('platform_sig_events_events_write', { items: [{ status: 'active' }] }),
     ];
 
     expect(scoreToolUsage({ steps, detectionCount: 1 }).label).toBe('correct');
@@ -255,6 +332,120 @@ describe('scoreToolUsage', () => {
       detectionCount: 1,
     });
     expect(result).toMatchObject({ score: 1, label: 'correct' });
+  });
+
+  it('rejects a retry after an unknown event id failure', () => {
+    const failedItem = { event_id: 'unknown-id', status: 'active', title: 'Event X' };
+    const firstWrite = toolCall(TOOL_ID_EVENTS_WRITE, { items: [failedItem] }, [
+      {
+        data: {
+          results: [{ index: 0, written: false, reason: 'unknown_event_id' }],
+        },
+      },
+    ]);
+    const retry = toolCall(TOOL_ID_EVENTS_WRITE, {
+      items: [{ status: 'active', title: 'Event X' }],
+    });
+    const steps = [
+      ...allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE),
+      firstWrite,
+      retry,
+    ];
+
+    expect(scoreToolUsage({ steps, detectionCount: 1 })).toMatchObject({
+      score: 0.75,
+      label: `multiple-${TOOL_ID_EVENTS_WRITE}-calls`,
+    });
+  });
+
+  it('labels a retry of a successful item as an unjustified second write', () => {
+    const failedItem = { event_id: 'failed-event', status: 'active', title: 'Failed' };
+    const successfulItem = {
+      event_id: 'successful-event',
+      status: 'active',
+      title: 'Successful',
+    };
+    const firstWrite = toolCall(TOOL_ID_EVENTS_WRITE, { items: [failedItem, successfulItem] }, [
+      {
+        data: {
+          results: [
+            { index: 0, written: false, reason: 'bulk_error' },
+            { index: 1, written: true },
+          ],
+        },
+      },
+    ]);
+    const steps = [
+      ...allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE),
+      firstWrite,
+      toolCall(TOOL_ID_EVENTS_WRITE, { items: [successfulItem] }),
+    ];
+
+    expect(scoreToolUsage({ steps, detectionCount: 1 })).toMatchObject({
+      score: 0.75,
+      label: `multiple-${TOOL_ID_EVENTS_WRITE}-calls`,
+    });
+  });
+
+  it('retries only the bulk error item when another item has an unknown event id', () => {
+    const detectionSignal = (ruleUuid: string) => ({
+      type: 'detection',
+      metadata: { rule_uuid: ruleUuid },
+    });
+    const bulkErrorItem = {
+      event_id: 'bulk-event',
+      status: 'active',
+      title: 'Bulk failure',
+      signals: [detectionSignal('bulk-rule')],
+    };
+    const unknownIdItem = {
+      event_id: 'unknown-event',
+      status: 'active',
+      title: 'Unknown id',
+      signals: [detectionSignal('unknown-rule')],
+    };
+    const firstWrite = toolCall(TOOL_ID_EVENTS_WRITE, { items: [bulkErrorItem, unknownIdItem] }, [
+      {
+        data: {
+          results: [
+            { index: 0, written: false, reason: 'bulk_error' },
+            { index: 1, written: false, reason: 'unknown_event_id' },
+          ],
+        },
+      },
+    ]);
+    const retry = toolCall(TOOL_ID_EVENTS_WRITE, {
+      items: [bulkErrorItem],
+    });
+    const steps = [
+      ...allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE),
+      firstWrite,
+      retry,
+    ];
+
+    expect(scoreToolUsage({ steps, detectionCount: 1 })).toEqual({
+      score: 1,
+      label: 'correct',
+      explanation: 'Correctly called all tools and retried only failed event items',
+    });
+  });
+
+  it('still rejects duplicate rule ownership within one write call', () => {
+    const duplicateRule = {
+      type: 'detection',
+      metadata: { rule_uuid: 'same-rule' },
+    };
+    const steps = [
+      ...allExpectedTools.filter((step) => step.tool_id !== TOOL_ID_EVENTS_WRITE),
+      toolCall(TOOL_ID_EVENTS_WRITE, {
+        items: [{ signals: [duplicateRule] }, { signals: [duplicateRule] }],
+      }),
+    ];
+
+    expect(scoreToolUsage({ steps, detectionCount: 1 })).toMatchObject({
+      score: 0,
+      label: 'duplicate-rule-across-items',
+    });
   });
 });
 

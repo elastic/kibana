@@ -30,12 +30,11 @@ export const CompactionStep: React.FC<CompactionStepProps> = ({ step }) => {
               />
             ) : (
               <FormattedMessage
-                id="xpack.agentBuilder.eventSteps.steps.compaction.complete"
-                defaultMessage="Context condensed: {before} → {after} tokens, {count, plural, one {# round} other {# rounds}}"
+                id="xpack.agentBuilder.eventSteps.steps.compaction.completeTokens"
+                defaultMessage="Context condensed: {before} → {after} tokens"
                 values={{
                   before: step.token_count_before.toLocaleString(),
                   after: step.token_count_after.toLocaleString(),
-                  count: step.summarized_round_count,
                 }}
               />
             )}

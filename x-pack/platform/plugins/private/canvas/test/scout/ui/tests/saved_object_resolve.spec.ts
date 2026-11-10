@@ -111,7 +111,7 @@ test.describe('Canvas saved object resolve', { tag: ['@local-stateful-classic'] 
 
     await test.step('redirect toast is shown with the new-location message', async () => {
       const toast = page.locator(
-        `${euiSelectors.toast.ROOT_SELECTOR} ${euiSelectors.toast.TOAST_SELECTOR} .euiText`
+        `${euiSelectors.globalToastList.ROOT_SELECTOR} ${euiSelectors.globalToastList.TOAST_SELECTOR} .euiText`
       );
       await expect(toast).toContainText("The Workpad you're looking for has a new location.", {
         timeout: 20_000,

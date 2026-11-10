@@ -8,7 +8,7 @@
 import type { MonoTypeOperatorFunction } from 'rxjs';
 import { filter } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatEvent } from '@kbn/agent-builder-common';
+import type { ChatEvent, InteractivityConfigInput } from '@kbn/agent-builder-common';
 import {
   createBadRequestError,
   AgentExecutionMode,
@@ -18,6 +18,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type {
   AgentExecutionService,
+  ExecuteAgentParams,
   ExecutionConversationOrigin,
 } from '@kbn/agent-builder-server/execution';
 import {
@@ -109,17 +110,19 @@ export const getConverseHelpers = ({
     };
   };
 
-  const executeAgent = async ({
+  const toExecuteParams = ({
     payload,
     request,
-    executionService,
     executionOptions,
+    interactive,
+    autoCreateConversationWithId = true,
   }: {
     payload: ChatRequestBodyPayload;
     request: KibanaRequest;
-    executionService: AgentExecutionService;
     executionOptions?: ResolvedExecutionOptions;
-  }) => {
+    interactive?: InteractivityConfigInput;
+    autoCreateConversationWithId?: boolean;
+  }): ExecuteAgentParams => {
     const {
       agent_id: agentId,
       conversation_id: conversationId,
@@ -132,23 +135,27 @@ export const getConverseHelpers = ({
       configuration_overrides: configurationOverrides,
       project_routing: projectRouting,
       reasoning_level: reasoningLevel,
+      trigger_mode: triggerMode,
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
     const { useTaskManager, origin, callback, executionId, metadata } =
       executionOptions ?? defaultExecutionOptions(payload);
 
-    return executionService.executeAgent({
+    return {
       mode: AgentExecutionMode.conversation,
       request,
       executionId,
       metadata,
       useTaskManager,
+      // Only browser requests from the Kibana UI, where a user is waiting on the first token.
+      requestImmediateClaim: request.isInternalApiRequest,
+      ...(interactive ? { interactive } : {}),
       params: {
         agentId,
         connectorId,
         conversationId,
-        autoCreateConversationWithId: true,
+        autoCreateConversationWithId,
         accessControl,
         readOnly,
         origin,
@@ -162,9 +169,28 @@ export const getConverseHelpers = ({
           prompts,
           attachments,
         },
+        ...(triggerMode ? { triggerMode } : {}),
       },
-    });
+    };
   };
 
-  return { validateConfigurationOverrides, executeAgent };
+  /** Runs the agent. For the chat API, which honours `trigger_mode`, use `maybeExecuteAgent`. */
+  const executeAgent = async (options: {
+    payload: ChatRequestBodyPayload;
+    request: KibanaRequest;
+    executionService: AgentExecutionService;
+    executionOptions?: ResolvedExecutionOptions;
+    interactive?: InteractivityConfigInput;
+    autoCreateConversationWithId?: boolean;
+  }) => options.executionService.executeAgent(toExecuteParams(options));
+
+  /** Persists the request's user message, and runs the agent unless the trigger mode says not to. */
+  const maybeExecuteAgent = async (options: {
+    payload: ChatRequestBodyPayload;
+    request: KibanaRequest;
+    executionService: AgentExecutionService;
+    executionOptions?: ResolvedExecutionOptions;
+  }) => options.executionService.maybeExecuteAgent(toExecuteParams(options));
+
+  return { validateConfigurationOverrides, executeAgent, maybeExecuteAgent };
 };

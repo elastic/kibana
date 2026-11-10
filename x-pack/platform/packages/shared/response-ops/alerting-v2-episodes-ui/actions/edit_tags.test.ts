@@ -79,8 +79,8 @@ describe('createEditTagsAction', () => {
       queryClient: deps.queryClient,
     });
     expect(bulk.bulkTagEpisodeActions).toHaveBeenCalledWith(deps.http, [
-      { episode_id: 'e1', tags: ['alpha', 'beta'] },
-      { episode_id: 'e2', tags: ['alpha', 'beta'] },
+      { alert_id: 'e1', tags: ['alpha', 'beta'] },
+      { alert_id: 'e2', tags: ['alpha', 'beta'] },
     ]);
     expect(deps.notifications.toasts.add).toHaveBeenCalled();
     expect(onSuccess).toHaveBeenCalled();
@@ -123,7 +123,7 @@ describe('createEditTagsAction', () => {
     expect(passedTags).toHaveLength(0);
   });
 
-  it('execute: error path calls notifications.toasts.addDanger', async () => {
+  it('execute: error path calls notifications.toasts.addError', async () => {
     const deps = makeDeps();
     jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
     jest.spyOn(bulk, 'bulkTagEpisodeActions').mockRejectedValue(new Error('network error'));
@@ -131,7 +131,7 @@ describe('createEditTagsAction', () => {
 
     await createEditTagsAction(deps).execute({ episodes: [makeEpisode()], onSuccess });
 
-    expect(deps.notifications.toasts.addDanger).toHaveBeenCalled();
+    expect(deps.notifications.toasts.addError).toHaveBeenCalled();
     expect(onSuccess).not.toHaveBeenCalled();
   });
 });

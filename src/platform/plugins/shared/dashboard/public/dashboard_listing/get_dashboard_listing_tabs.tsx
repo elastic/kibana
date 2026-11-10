@@ -9,6 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { KibanaContentListPageTab } from '@kbn/content-list-page';
 import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import {
   TableListViewTable,
@@ -26,15 +27,13 @@ import {
 } from '../services/kibana_services';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import { confirmCreateWithUnsaved } from './confirm_overlays';
-import { getDashboardBackupService } from '../services/dashboard_api_services';
 import type {
   DashboardListingProps,
   DashboardListingTab,
   DashboardSavedObjectUserContent,
 } from './types';
 
-type GetDashboardListingTabsParams = Pick<
+export type GetDashboardListingTabsParams = Pick<
   DashboardListingProps,
   'goToDashboard' | 'getDashboardUrl' | 'useSessionStorageIntegration' | 'initialFilter' | 'getTabs'
 > & {
@@ -123,24 +122,27 @@ export const getDashboardListingTabs = ({
     title: i18n.translate('dashboard.listing.tabs.dashboards.title', {
       defaultMessage: 'Dashboards',
     }),
-    id: 'dashboards',
+    id: DASHBOARD_APP_ID,
     getTableList: (parentProps) => (
       <DashboardsTabContent {...commonProps} parentProps={parentProps} />
     ),
-    createAction: () => {
-      if (useSessionStorageIntegration && getDashboardBackupService().dashboardHasUnsavedEdits()) {
-        confirmCreateWithUnsaved(() => {
-          getDashboardBackupService().clearState();
-          goToDashboard();
-        }, goToDashboard);
-        return;
-      }
-      goToDashboard();
-    },
   };
 
-  // Additional tabs (e.g., visualizations and annotation groups)
   const additionalTabs = getTabs ? getTabs() : [];
 
   return [dashboardsTab, ...additionalTabs];
 };
+
+/**
+ * Adapts the listing tabs to `KibanaContentListPage.ActiveTab`. The Dashboards tab renders
+ * synchronously; registered tabs resolve their legacy `getTableList` content asynchronously.
+ */
+export const toContentListPageTabs = (
+  tabs: DashboardListingTab[],
+  { parentProps, ...commonProps }: TabContentProps
+): KibanaContentListPageTab[] =>
+  tabs.map(({ id, getTableList }) =>
+    id === DASHBOARD_APP_ID
+      ? { id, render: () => <DashboardsTabContent {...commonProps} parentProps={parentProps} /> }
+      : { id, load: async () => getTableList(parentProps) }
+  );

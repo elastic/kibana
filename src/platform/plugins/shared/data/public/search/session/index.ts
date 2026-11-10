@@ -17,3 +17,10 @@ export { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 export type { WaitUntilNextSessionCompletesOptions } from './session_helpers';
 export { waitUntilNextSessionCompletes$ } from './session_helpers';
 export * from './ebt_manager';
+export { getInProgressSessionIds, setInProgressSessionIds } from './in_progress_session';
+export { ACTION } from './types';
+export type {
+  PersistedSearchSessionSavedObjectAttributes,
+  UISearchSessionState,
+  UISession,
+} from './types';

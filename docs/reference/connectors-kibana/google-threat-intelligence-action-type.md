@@ -11,6 +11,8 @@ applies_to:
 
 The Google threat intelligence connector communicates with the [Google Threat Intelligence (GTI) API](https://gtidocs.virustotal.com/reference/api-overview) to investigate threat actors, campaigns, malware, vulnerabilities, reports, and related indicators, to enrich IP addresses, domain names, URLs, and file hashes, and to submit URLs for public or private scanning. It can be used with Agent Builder and Workflows.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 Use the [VirusTotal connector](/reference/connectors-kibana/virustotal-action-type.md) if you only need community file, URL, domain, and IP address scanning. Use this connector for GTI Enterprise data: threat-landscape collections, ATT&CK mappings, the IOC stream, and private URL scanning.
 
 ## Create connectors in {{kib}} [define-google-threat-intelligence-ui]

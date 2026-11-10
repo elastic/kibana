@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { buildClassicAlertsQuery, buildClassicAlertsSort } from './query';
+import {
+  buildClassicAlertsQuery,
+  buildClassicAlertsSort,
+  buildClassicAlertsHistogramAggs,
+  resolveClassicHistogramBreakdown,
+} from './query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 
 /** Extracts `bool.filter` from a query container, throwing if the shape is unexpected. */
@@ -135,11 +140,18 @@ describe('buildClassicAlertsQuery', () => {
     );
   });
 
-  it('adds a query_string filter for search text', () => {
-    const query = buildClassicAlertsQuery({ queryString: 'host:web-01' });
+  it('translates KQL search text to Elasticsearch DSL', () => {
+    const query = buildClassicAlertsQuery({ queryString: 'kibana.alert.rule.name: test' });
 
     expect(getFilters(query)).toEqual(
-      expect.arrayContaining([{ query_string: { query: 'host:web-01' } }])
+      expect.arrayContaining([
+        {
+          bool: {
+            minimum_should_match: 1,
+            should: [{ match: { 'kibana.alert.rule.name': 'test' } }],
+          },
+        },
+      ])
     );
   });
 
@@ -176,12 +188,71 @@ describe('buildClassicAlertsSort', () => {
 
   it('generates a Painless script sort that includes severity extensions', () => {
     const sort = buildClassicAlertsSort({ sortField: 'severity', sortDirection: 'desc' }, [
-      { value: 'warning', label: 'Warning', color: 'warning', sortRank: 1 },
+      { value: 'warning', label: 'Warning', color: 'warning', sortRank: 4 },
     ]);
     expect(sort).toHaveLength(2);
     const scriptSort = sort[0] as { _script: { script: { source: string } } };
-    expect(scriptSort._script.script.source).toContain("if (v == 'warning') { return 1; }");
-    expect(scriptSort._script.script.source).toContain("if (v == 'critical') { return 4; }");
+    expect(scriptSort._script.script.source).toContain("if (v == 'warning') { return 4; }");
+    expect(scriptSort._script.script.source).toContain("if (v == 'critical') { return 7; }");
     expect(sort[1]).toEqual({ '@timestamp': { order: 'desc', unmapped_type: 'keyword' } });
+  });
+});
+
+describe('buildClassicAlertsHistogramAggs', () => {
+  const HOUR = 3_600_000;
+  const T0 = new Date('2024-01-01T00:00:00.000Z').getTime();
+  const buckets = [
+    { start: T0, end: T0 + HOUR },
+    { start: T0 + HOUR, end: T0 + 2 * HOUR },
+  ];
+
+  it('builds started/ended range aggregations with one contiguous slot per bucket', () => {
+    const nowMs = T0 + 2 * HOUR;
+    const aggs = buildClassicAlertsHistogramAggs({ buckets, nowMs });
+
+    expect(aggs).toEqual({
+      started: {
+        range: {
+          field: 'kibana.alert.start',
+          ranges: [{ to: T0 + HOUR }, { from: T0 + HOUR, to: T0 + 2 * HOUR }],
+        },
+      },
+      ended: {
+        range: {
+          field: 'kibana.alert.end',
+          missing: nowMs,
+          ranges: [{ to: T0 + 1 }, { from: T0 + 1, to: T0 + HOUR + 1 }],
+        },
+      },
+    });
+  });
+
+  it('adds the range aggregations per top breakdown term next to the overall ones', () => {
+    const aggs = buildClassicAlertsHistogramAggs({
+      buckets,
+      nowMs: T0,
+      breakdown: resolveClassicHistogramBreakdown('rule.id'),
+    });
+
+    expect(Object.keys(aggs)).toEqual(['started', 'ended', 'breakdown']);
+    expect(aggs.breakdown.terms).toEqual({
+      field: 'kibana.alert.rule.uuid',
+      missing: 'unknown',
+      size: 9,
+    });
+    expect(Object.keys(aggs.breakdown.aggs ?? {})).toEqual(['started', 'ended']);
+  });
+});
+
+describe('resolveClassicHistogramBreakdown', () => {
+  it('returns undefined for breakdowns without a classic equivalent', () => {
+    expect(resolveClassicHistogramBreakdown('last_assignee_uid')).toBeUndefined();
+  });
+
+  it('normalises classic status values onto episode statuses', () => {
+    const breakdown = resolveClassicHistogramBreakdown('episode.status');
+    expect(breakdown?.normalize('active')).toBe('active');
+    expect(breakdown?.normalize('recovered')).toBe('inactive');
+    expect(breakdown?.normalize('untracked')).toBe('inactive');
   });
 });

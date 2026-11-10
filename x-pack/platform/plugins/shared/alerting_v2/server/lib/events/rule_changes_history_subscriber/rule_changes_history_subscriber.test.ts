@@ -26,9 +26,8 @@ import {
 } from '../rule_event_publisher/events';
 import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_events';
 import { createEventBusMock } from '../event_bus/event_bus.mock';
-import type { EventBus, Subscription } from '../event_bus';
+import type { EventBus } from '../event_bus';
 import { RuleChangesHistorySubscriber } from './rule_changes_history_subscriber';
-import { RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP } from './mappings';
 
 type CapturedHandler = (
   event: AlertingDomainEvent,
@@ -41,8 +40,7 @@ const profile = {
   user: { username: author.username },
 } as UserProfileWithSecurity;
 
-const rule = createRuleResponse({ id: 'rule-1', metadata: { version: 3 } });
-const { version: _occVersion, ...ruleSnapshot } = rule;
+const rule = createRuleResponse({ id: 'rule-1', version: 3 });
 
 const payload: RuleEvent['payload'] = {
   ruleId: 'rule-1',
@@ -73,26 +71,6 @@ describe('RuleChangesHistorySubscriber', () => {
     request = httpServerMock.createKibanaRequest();
   });
 
-  describe('start()', () => {
-    it('subscribes one handler per mapping, using each mapping event type', () => {
-      subscriber.start();
-
-      const mappingEventTypes = Object.keys(RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP);
-      expect(bus.subscribe).toHaveBeenCalledTimes(mappingEventTypes.length);
-
-      const subscribedEventTypes = bus.subscribe.mock.calls.map(([eventType]) => eventType);
-      expect(subscribedEventTypes.sort()).toEqual(mappingEventTypes.sort());
-    });
-
-    it('is idempotent: a second call does not double-subscribe', () => {
-      subscriber.start();
-      const firstCallCount = bus.subscribe.mock.calls.length;
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(firstCallCount);
-    });
-  });
-
   describe('event dispatch', () => {
     const handlerFor = (eventType: AlertingDomainEvent['type']): CapturedHandler => {
       const call = bus.subscribe.mock.calls.find(([type]) => type === eventType);
@@ -114,14 +92,17 @@ describe('RuleChangesHistorySubscriber', () => {
       async ({ eventType, action, ecsEventType }) => {
         subscriber.start();
 
-        await handlerFor(eventType)(eventOf(eventType), { request });
+        await handlerFor(eventType)(eventOf(eventType), {
+          request,
+          origin: { actor: 'user', channel: 'api' },
+        });
 
         expect(userProfile.getCurrent).toHaveBeenCalledWith({ request });
         expect(changeHistory.logRuleChanges).toHaveBeenCalledTimes(1);
         expect(changeHistory.logRuleChanges).toHaveBeenCalledWith({
           spaceId: 'my-space',
           author,
-          entries: [{ id: 'rule-1', snapshot: ruleSnapshot, sequence: 3 }],
+          entries: [{ id: 'rule-1', snapshot: rule, sequence: 3 }],
           action,
           eventType: ecsEventType,
           correlationId: 'corr-1',
@@ -133,7 +114,10 @@ describe('RuleChangesHistorySubscriber', () => {
       userProfile.getCurrent.mockResolvedValue(null);
       subscriber.start();
 
-      await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), { request });
+      await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), {
+        request,
+        origin: { actor: 'user', channel: 'api' },
+      });
 
       expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
         expect.objectContaining({ author: { uid: null, username: null } })
@@ -149,25 +133,7 @@ describe('RuleChangesHistorySubscriber', () => {
           spaceId: 'my-space',
           correlationId: 'corr-1',
         }),
-        { request }
-      );
-
-      expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
-    });
-
-    it('skips events whose rule has no version sequence', async () => {
-      subscriber.start();
-      // The API always populates `metadata.version`; drop it to exercise the
-      // subscriber's defensive guard against a malformed runtime event.
-      const { version: _version, ...metadataWithoutVersion } = rule.metadata;
-      const ruleWithoutSequence = {
-        ...rule,
-        metadata: metadataWithoutVersion,
-      } as typeof rule;
-
-      await handlerFor(RULE_UPDATED_EVENT_TYPE)(
-        eventOf(RULE_UPDATED_EVENT_TYPE, { ...payload, rule: ruleWithoutSequence }),
-        { request }
+        { request, origin: { actor: 'user', channel: 'api' } }
       );
 
       expect(changeHistory.logRuleChanges).not.toHaveBeenCalled();
@@ -176,7 +142,10 @@ describe('RuleChangesHistorySubscriber', () => {
     it('omits timestamp so logRuleChanges defaults to now', async () => {
       subscriber.start();
 
-      await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), { request });
+      await handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), {
+        request,
+        origin: { actor: 'user', channel: 'api' },
+      });
 
       expect(changeHistory.logRuleChanges).toHaveBeenCalledWith(
         expect.not.objectContaining({ timestamp: expect.anything() })
@@ -188,7 +157,10 @@ describe('RuleChangesHistorySubscriber', () => {
       subscriber.start();
 
       await expect(
-        handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), { request })
+        handlerFor(RULE_CREATED_EVENT_TYPE)(eventOf(RULE_CREATED_EVENT_TYPE), {
+          request,
+          origin: { actor: 'user', channel: 'api' },
+        })
       ).resolves.toBeUndefined();
 
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
@@ -201,40 +173,6 @@ describe('RuleChangesHistorySubscriber', () => {
         },
         error: expect.objectContaining({ message: 'es unreachable' }),
       });
-    });
-  });
-
-  describe('stop()', () => {
-    it('unsubscribes every active subscription and clears internal state', () => {
-      const unsubscribers: jest.Mock[] = [];
-      bus.subscribe.mockImplementation(() => {
-        const unsubscribe = jest.fn();
-        unsubscribers.push(unsubscribe);
-        return { unsubscribe } satisfies Subscription;
-      });
-
-      subscriber.start();
-      expect(unsubscribers.length).toBe(Object.keys(RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP).length);
-
-      subscriber.stop();
-
-      for (const unsubscribe of unsubscribers) {
-        expect(unsubscribe).toHaveBeenCalledTimes(1);
-      }
-    });
-
-    it('makes a subsequent start() re-subscribe (state cleared)', () => {
-      subscriber.start();
-      const firstCount = bus.subscribe.mock.calls.length;
-
-      subscriber.stop();
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(firstCount * 2);
-    });
-
-    it('is safe to call when no subscriptions are active', () => {
-      expect(() => subscriber.stop()).not.toThrow();
     });
   });
 });

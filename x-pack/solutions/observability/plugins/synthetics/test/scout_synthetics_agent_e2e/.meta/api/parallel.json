@@ -1,9 +1,22 @@
 {
-  "sha1": "2e831dcf0a6b9480bc764f88c7d471f28f2e0b57",
+  "sha1": "965d04c2fd9a74fd8b78520370c864cd454755c1",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "dca7f090d71d4f8-35095d1ae2bdc35",
+      "title": "Synthetics real-agent pinning of running monitors keeps running monitors running when the rebalance switch turns back on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel_tests/pin_running_monitors.spec.ts",
+        "line": 63,
+        "column": 7
+      }
+    },
     {
       "id": "631f7bf9bf7ee97-322fddc6892c2d3",
       "title": "Synthetics real-agent shard rebalance does not fail over a stopped agent that still has recent Heartbeat data",
@@ -13,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel_tests/rebalance.spec.ts",
-        "line": 93,
-        "column": 5
+        "line": 73,
+        "column": 60
       }
     },
     {
@@ -26,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout_synthetics_agent_e2e/api/parallel_tests/rebalance.spec.ts",
-        "line": 145,
-        "column": 5
+        "line": 91,
+        "column": 35
       }
     }
   ]

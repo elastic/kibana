@@ -10,14 +10,21 @@ import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
 import { buildPath } from '@kbn/core-http-browser';
 import type {
+  ActionPolicyTestPreviewResponse,
+  ActionPolicyTestSendBody,
+  ActionPolicyTestSendResponse,
   BulkResponse,
   CreateActionPolicyData,
   ActionPolicyResponse,
   FindActionPoliciesRequest,
   FindActionPoliciesResponse,
-  UpdateActionPolicyBody,
+  UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '@kbn/alerting-v2-constants';
+import {
+  ALERTING_V2_INTERNAL_ACTION_POLICY_TEST_API_PATH,
+  ALERTING_V2_INTERNAL_ACTION_POLICY_TEST_PREVIEW_API_PATH,
+  ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
+} from '@kbn/alerting-v2-constants';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 
 /** Re-exported from the shared schemas package. */
@@ -49,8 +56,8 @@ export class ActionPoliciesApi {
       query: {
         page: params.page,
         per_page: params.per_page,
+        filter: params.filter || undefined,
         search: params.search || undefined,
-        enabled: params.enabled,
         sort_field: params.sort_field,
         sort_order: params.sort_order,
       },
@@ -69,7 +76,7 @@ export class ActionPoliciesApi {
     });
   }
 
-  public async updateActionPolicy(id: string, data: UpdateActionPolicyBody) {
+  public async updateActionPolicy(id: string, data: UpdateActionPolicyData) {
     return this.http.patch<ActionPolicyResponse>(buildActionPolicyPath(id), {
       body: JSON.stringify(data),
     });
@@ -98,7 +105,7 @@ export class ActionPoliciesApi {
   }
 
   public async updateActionPolicyApiKey(id: string) {
-    await this.http.post(buildActionPolicyPath(id, '_update_api_key'));
+    return this.http.post<ActionPolicyResponse>(buildActionPolicyPath(id, '_update_api_key'));
   }
 
   public async bulkDeleteActionPolicies(ids: string[]) {
@@ -135,6 +142,20 @@ export class ActionPoliciesApi {
     return this.http.post<BulkResponse>(
       `${ALERTING_V2_ACTION_POLICY_API_PATH}/_bulk_update_api_key`,
       { body: JSON.stringify({ ids }) }
+    );
+  }
+
+  public async previewTestNotification(id: string) {
+    return this.http.post<ActionPolicyTestPreviewResponse>(
+      buildPath(ALERTING_V2_INTERNAL_ACTION_POLICY_TEST_PREVIEW_API_PATH, { id }),
+      { body: JSON.stringify({}) }
+    );
+  }
+
+  public async sendTestNotification(id: string, body: ActionPolicyTestSendBody) {
+    return this.http.post<ActionPolicyTestSendResponse>(
+      buildPath(ALERTING_V2_INTERNAL_ACTION_POLICY_TEST_API_PATH, { id }),
+      { body: JSON.stringify(body) }
     );
   }
 

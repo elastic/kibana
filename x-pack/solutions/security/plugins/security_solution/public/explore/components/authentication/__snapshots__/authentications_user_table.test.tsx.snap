@@ -154,7 +154,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
     data-test-subj="paginated-basic-table"
   >
     <div
-      class="emotion-euiContainerCSS"
+      class="euiTable__wrapper emotion-euiContainerCSS"
     >
       <table
         class="euiTable emotion-euiTable-fixed-uncompressed-hasBackground-desktop"

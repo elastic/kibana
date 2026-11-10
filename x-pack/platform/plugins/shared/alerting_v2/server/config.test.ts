@@ -136,22 +136,24 @@ describe('alerting_v2 config schema', () => {
   describe('getQueryRowLimit', () => {
     it('uses min(alerts.max, NON_STREAMING_MAX_ROWS) for the json response format', () => {
       const config = configSchema.validate({});
-      expect(getQueryRowLimit(config, formatByName('json'))).toBe(NON_STREAMING_MAX_ROWS);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('json'))).toBe(
+        NON_STREAMING_MAX_ROWS
+      );
     });
 
     it('uses alerts.max for the arrow response format', () => {
       const config = configSchema.validate({});
-      expect(getQueryRowLimit(config, formatByName('arrow'))).toBe(10000);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('arrow'))).toBe(10000);
     });
 
     it('honors a lower alerts.max on the json response format', () => {
       const config = configSchema.validate({ rules: { run: { alerts: { max: 500 } } } });
-      expect(getQueryRowLimit(config, formatByName('json'))).toBe(500);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('json'))).toBe(500);
     });
 
     it('honors a lower alerts.max on the arrow response format', () => {
       const config = configSchema.validate({ rules: { run: { alerts: { max: 500 } } } });
-      expect(getQueryRowLimit(config, formatByName('arrow'))).toBe(500);
+      expect(getQueryRowLimit(config.rules.run.alerts.max, formatByName('arrow'))).toBe(500);
     });
   });
 
@@ -188,6 +190,14 @@ describe('alerting_v2 config schema', () => {
         configSchema.validate({ rules: { run: { query: { maxResponseSize: 'ten megs' } } } })
       ).toThrow();
     });
+
+    it('rejects values above 200mb', () => {
+      expect(() =>
+        configSchema.validate({
+          rules: { run: { query: { maxResponseSize: '201mb' } } },
+        })
+      ).toThrow();
+    });
   });
 
   describe('rules.run.timeout', () => {
@@ -206,6 +216,145 @@ describe('alerting_v2 config schema', () => {
       expect(() => configSchema.validate({ rules: { run: { timeout: 'nonsense' } } })).toThrow(
         /Invalid duration/
       );
+    });
+  });
+
+  describe('retention.ruleEvents', () => {
+    it('is disabled with a 90d retention by default', () => {
+      const config = configSchema.validate({});
+      expect(config.retention.ruleEvents).toEqual({ enabled: false, dataRetention: '90d' });
+    });
+
+    it('accepts a custom retention', () => {
+      expect(
+        configSchema.validate({
+          retention: { ruleEvents: { enabled: true, dataRetention: '45d' } },
+        }).retention.ruleEvents
+      ).toEqual({ enabled: true, dataRetention: '45d' });
+    });
+
+    it.each(['30d', '720h'])('accepts the 30d floor expressed as %s', (dataRetention) => {
+      expect(
+        configSchema.validate({ retention: { ruleEvents: { dataRetention } } }).retention.ruleEvents
+          .dataRetention
+      ).toBe(dataRetention);
+    });
+
+    it.each(['29d', '1h', '500ms'])('rejects %s, below the 30d floor', (dataRetention) => {
+      expect(() => configSchema.validate({ retention: { ruleEvents: { dataRetention } } })).toThrow(
+        /cannot be less than 30d/
+      );
+    });
+
+    it('rejects weeks, which Elasticsearch does not accept', () => {
+      expect(() =>
+        configSchema.validate({ retention: { ruleEvents: { dataRetention: '13w' } } })
+      ).toThrow(/weeks are not supported/);
+    });
+
+    it('rejects a malformed duration', () => {
+      expect(() =>
+        configSchema.validate({ retention: { ruleEvents: { dataRetention: 'abc' } } })
+      ).toThrow(/Invalid duration/);
+    });
+  });
+
+  describe('retention.alertActions.dispatcher', () => {
+    it('is disabled with a 90d retention by default', () => {
+      const config = configSchema.validate({});
+      expect(config.retention.alertActions.dispatcher).toEqual({
+        enabled: false,
+        dataRetention: '90d',
+      });
+    });
+
+    it('accepts a custom retention', () => {
+      expect(
+        configSchema.validate({
+          retention: { alertActions: { dispatcher: { enabled: true, dataRetention: '7d' } } },
+        }).retention.alertActions.dispatcher
+      ).toEqual({ enabled: true, dataRetention: '7d' });
+    });
+
+    it.each(['1d', '24h', '2w'])('accepts %s', (dataRetention) => {
+      expect(
+        configSchema.validate({ retention: { alertActions: { dispatcher: { dataRetention } } } })
+          .retention.alertActions.dispatcher.dataRetention
+      ).toBe(dataRetention);
+    });
+
+    it.each(['23h', '1h', '500ms'])('rejects %s, below the 1d floor', (dataRetention) => {
+      expect(() =>
+        configSchema.validate({ retention: { alertActions: { dispatcher: { dataRetention } } } })
+      ).toThrow(/cannot be less than 1d/);
+    });
+
+    it('rejects a malformed duration', () => {
+      expect(() =>
+        configSchema.validate({
+          retention: { alertActions: { dispatcher: { dataRetention: 'abc' } } },
+        })
+      ).toThrow(/Invalid duration/);
+    });
+  });
+
+  describe('dispatcher.paused', () => {
+    it('defaults to false', () => {
+      expect(configSchema.validate({}).dispatcher.paused).toBe(false);
+    });
+  });
+
+  describe('dispatcher.run.timeout', () => {
+    it('defaults to 1m', () => {
+      expect(configSchema.validate({}).dispatcher.run.timeout).toBe('1m');
+    });
+
+    it('accepts the 5m ceiling', () => {
+      expect(
+        configSchema.validate({ dispatcher: { run: { timeout: '5m' } } }).dispatcher.run.timeout
+      ).toBe('5m');
+    });
+
+    it('rejects a value below the 1m floor', () => {
+      expect(() => configSchema.validate({ dispatcher: { run: { timeout: '30s' } } })).toThrow(
+        /cannot be less than 1m/
+      );
+    });
+
+    it('rejects a value above the 5m ceiling', () => {
+      expect(() => configSchema.validate({ dispatcher: { run: { timeout: '6m' } } })).toThrow(
+        /cannot exceed 5m/
+      );
+    });
+
+    it('rejects a malformed duration', () => {
+      expect(() => configSchema.validate({ dispatcher: { run: { timeout: 'abc' } } })).toThrow(
+        /Invalid duration/
+      );
+    });
+  });
+
+  describe('dispatcher.run.alerts.max', () => {
+    it('defaults to 10000', () => {
+      expect(configSchema.validate({}).dispatcher.run.alerts.max).toBe(10000);
+    });
+
+    it('rejects values below the 1000 floor', () => {
+      expect(() =>
+        configSchema.validate({ dispatcher: { run: { alerts: { max: 999 } } } })
+      ).toThrow();
+    });
+
+    it('rejects values above the 10000 ceiling', () => {
+      expect(() =>
+        configSchema.validate({ dispatcher: { run: { alerts: { max: 10001 } } } })
+      ).toThrow();
+    });
+
+    it('rejects non-integer values', () => {
+      expect(() =>
+        configSchema.validate({ dispatcher: { run: { alerts: { max: 1000.5 } } } })
+      ).toThrow(/must be an integer/);
     });
   });
 

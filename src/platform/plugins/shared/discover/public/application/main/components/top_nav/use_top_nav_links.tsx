@@ -19,14 +19,16 @@ import {
   dismissFlyouts,
   DiscoverFlyouts,
 } from '@kbn/discover-utils';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { RuleTypeWithDescription } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import useObservable from 'react-use/lib/useObservable';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import { useI18n } from '@kbn/i18n-react';
-import { shouldShowAlertingV2CreateRuleFlyout } from '@kbn/alerting-v2-utils';
+import {
+  isAlertingV2AvailableInSolution,
+  shouldShowAlertingV2CreateRuleFlyout,
+} from '@kbn/alerting-v2-utils';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
@@ -163,7 +165,14 @@ export const useTopNavLinks = ({
     hasUnsavedChanges,
   });
 
-  const showCreateRuleV2 = isEsqlMode && shouldShowAlertingV2CreateRuleFlyout(services.core);
+  const solutionNavId = useObservable(
+    services.core.chrome.getActiveSolutionNavId$(),
+    services.core.chrome.getActiveSolutionNavId()
+  );
+  const showCreateRuleV2 =
+    isEsqlMode &&
+    isAlertingV2AvailableInSolution(solutionNavId) &&
+    shouldShowAlertingV2CreateRuleFlyout(services.core);
 
   const appMenuItems: DiscoverAppMenuItemType[] = useMemo(() => {
     const items: DiscoverAppMenuItemType[] = [];
@@ -182,14 +191,16 @@ export const useTopNavLinks = ({
       items.push(alertsAppMenuItem);
     }
 
+    const { searchSessionsManagement } = services;
     if (
       !!appId &&
+      searchSessionsManagement &&
       services.data.search.isBackgroundSearchEnabled &&
       services.capabilities.discover_v2.storeSearchSession
     ) {
       const backgroundSearchFlyoutMenuItem = getBackgroundSearchFlyout({
         onClick: ({ context: { onFinishAction } }) => {
-          services.data.search.showSearchSessionsFlyout({
+          searchSessionsManagement.openFlyout({
             appId,
             trackingProps: { openedFrom: 'background search button' },
             onBackgroundSearchOpened: ({ session, event }) => {
@@ -206,10 +217,9 @@ export const useTopNavLinks = ({
     }
 
     if (!services.embeddableEditor.isEmbeddedEditor()) {
-      const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined =
-        isEsqlMode && currentDataView.type === ESQL_TYPE
-          ? { query: { esql: getInitialESQLQuery(currentDataView) } }
-          : undefined;
+      const defaultEsqlState: Pick<DiscoverAppState, 'query'> | undefined = isEsqlMode
+        ? { query: { esql: getInitialESQLQuery(currentDataView) } }
+        : undefined;
       const locatorParams: DiscoverAppLocatorParams = defaultEsqlState
         ? defaultEsqlState
         : currentDataView.isPersisted()

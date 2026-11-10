@@ -8,6 +8,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import { TraceWaterfallFlyoutFooter } from './flyout_footer';
 
 const mockGetRedirectUrl = jest.fn();
@@ -20,8 +21,14 @@ const mockShare = {
 };
 const mockHttp = {} as any;
 
-jest.mock('../../../../shared/service_flyout/hooks/use_apm_indices', () => ({
-  useApmIndices: () => ({ indices: { transaction: 'traces-*' }, loading: false }),
+const FETCHED_INDICES = { transaction: 'traces-*' } as APMIndices;
+
+const mockUseResolvedApmIndices = jest.fn(
+  (_args: unknown): APMIndices | null | undefined => FETCHED_INDICES
+);
+
+jest.mock('../../../../../hooks/use_apm_indices', () => ({
+  useResolvedApmIndices: (args: unknown) => mockUseResolvedApmIndices(args),
 }));
 
 jest.mock('../../../../shared/service_flyout/utils/get_flyout_discover_navigation', () => ({
@@ -40,6 +47,7 @@ const defaultProps = {
 
 describe('TraceWaterfallFlyoutFooter', () => {
   beforeEach(() => {
+    mockUseResolvedApmIndices.mockReturnValue(FETCHED_INDICES);
     (getFlyoutDiscoverNavigation as jest.Mock).mockReturnValue({
       href: 'https://discover-url',
       esqlQuery: 'FROM traces',
@@ -130,5 +138,34 @@ describe('TraceWaterfallFlyoutFooter', () => {
       rangeFrom: 'now-15m',
       rangeTo: 'now',
     });
+  });
+
+  it('fetches indices when no parent source is provided', () => {
+    render(<TraceWaterfallFlyoutFooter {...defaultProps} />);
+
+    expect(mockUseResolvedApmIndices).toHaveBeenCalledWith({
+      http: mockHttp,
+      indicesSource: undefined,
+    });
+    expect(getFlyoutDiscoverNavigation).toHaveBeenCalledWith(
+      expect.objectContaining({ indices: FETCHED_INDICES })
+    );
+  });
+
+  it('uses parent indices for the Discover link', () => {
+    const parentIndices = { transaction: 'traces-parent*' } as APMIndices;
+    mockUseResolvedApmIndices.mockReturnValue(parentIndices);
+
+    render(
+      <TraceWaterfallFlyoutFooter {...defaultProps} indicesSource={{ indices: parentIndices }} />
+    );
+
+    expect(mockUseResolvedApmIndices).toHaveBeenCalledWith({
+      http: mockHttp,
+      indicesSource: { indices: parentIndices },
+    });
+    expect(getFlyoutDiscoverNavigation).toHaveBeenCalledWith(
+      expect.objectContaining({ indices: parentIndices })
+    );
   });
 });

@@ -38,18 +38,36 @@ export interface ReadStreamResult {
  *
  * @param response - The fetch Response whose body to read.
  * @param maxBytes - Maximum number of bytes to read. 0 or negative disables the limit.
+ * @param signal - Cancels a pending body read when aborted.
  */
 export const readResponseStream = async (
   response: Response,
-  maxBytes: number
+  maxBytes: number,
+  signal?: AbortSignal
 ): Promise<ReadStreamResult> => {
   if (!response.body) return { buffer: Buffer.alloc(0), truncated: false };
   const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
+  let aborted = signal?.aborted ?? false;
+  const abort = () => {
+    aborted = true;
+    void Promise.resolve(reader.cancel()).catch(() => undefined);
+  };
+  if (aborted) {
+    abort();
+  } else {
+    signal?.addEventListener('abort', abort, { once: true });
+  }
   try {
     while (true) {
+      if (aborted) {
+        throw new DOMException('Response body read aborted.', 'AbortError');
+      }
       const { done, value } = await reader.read();
+      if (aborted) {
+        throw new DOMException('Response body read aborted.', 'AbortError');
+      }
       if (done) break;
       totalBytes += value.byteLength;
       if (maxBytes > 0 && totalBytes > maxBytes) {
@@ -59,6 +77,7 @@ export const readResponseStream = async (
       chunks.push(value);
     }
   } finally {
+    signal?.removeEventListener('abort', abort);
     reader.releaseLock();
   }
   return { buffer: Buffer.concat(chunks), truncated: false };

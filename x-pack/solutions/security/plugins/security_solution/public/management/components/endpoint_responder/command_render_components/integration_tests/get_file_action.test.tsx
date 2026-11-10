@@ -31,8 +31,8 @@ import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
   UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../../common/translations';
-import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 jest.mock('../../../../../common/components/user_privileges');
 
@@ -153,6 +153,83 @@ describe('When using get-file action from response actions console', () => {
     });
   });
 
+  describe('and the `--force` argument is used', () => {
+    it('should include `force` in the request body', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledWith({
+          body: '{"agent_type":"endpoint","endpoint_ids":["a.b.c"],"parameters":{"path":"one/two","force":true}}',
+          path: GET_FILE_ROUTE,
+          version: '2023-10-31',
+        });
+      });
+    });
+
+    it('should not include `force` in the request body when `--force` is not used', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledTimes(1);
+      });
+
+      expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.stringContaining('force') })
+      );
+    });
+
+    it('should display the `--force` argument in the command help', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-helpOutput')).toHaveTextContent('--force');
+      });
+    });
+
+    it('should not display the `--force` argument in the command help if the Endpoint does not support the `get_file_force` capability', async () => {
+      await render(ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_force'));
+      await enterConsoleCommand(renderResult, user, 'get-file --help');
+
+      await waitFor(() => {
+        expect(renderResult.getByTestId('test-helpOutput')).toBeInTheDocument();
+      });
+
+      expect(renderResult.getByTestId('test-helpOutput')).not.toHaveTextContent('--force');
+    });
+
+    it('should error if `--force` is used and the Endpoint does not support the `get_file_force` capability', async () => {
+      await render(ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_force'));
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
+        'The following get-file argument is not supported by this command: --force'
+      );
+      expect(apiMocks.responseProvider.getFile).not.toHaveBeenCalled();
+    });
+
+    it('should still allow `get-file` without `--force` when the capability is not supported', async () => {
+      await render(ENDPOINT_CAPABILITIES.filter((capability) => capability !== 'get_file_force'));
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.getFile).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it('should error if `--force` is used with a non-endpoint agent type', async () => {
+      getConsoleCommandsOptions.agentType = 'sentinel_one';
+      await render();
+      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two" --force');
+
+      expect(renderResult.getByTestId('test-badArgument-message')).toHaveTextContent(
+        'The following get-file argument is not supported by this command: --force'
+      );
+    });
+  });
+
   it('should only accept one `--comment`', async () => {
     await render();
     await enterConsoleCommand(
@@ -166,21 +243,20 @@ describe('When using get-file action from response actions console', () => {
     );
   });
 
-  it('should display download link once action completes', async () => {
-    const actionDetailsApiResponseMock: ReturnType<typeof apiMocks.responseProvider.actionDetails> =
-      {
-        data: {
-          ...apiMocks.responseProvider.actionDetails({
-            path: '/1',
-          } as HttpFetchOptionsWithPath).data,
-
-          completedAt: new Date().toISOString(),
-          command: 'get-file',
+  it('should display pending status while action is not yet complete', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'get-file',
+        agents: ['a.b.c'],
+        isCompleted: false,
+        wasSuccessful: false,
+        agentState: {
+          'a.b.c': { isCompleted: false, wasSuccessful: false },
         },
-      };
-    apiMocks.responseProvider.actionDetails.mockReturnValue(actionDetailsApiResponseMock);
+      }),
+    });
 
-    await render();
+    const { getByTestId } = await render();
     await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
 
     await waitFor(() => {
@@ -188,8 +264,40 @@ describe('When using get-file action from response actions console', () => {
     });
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('getFileSuccess').textContent).toEqual(
-        'File retrieved from the host.Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+      expect(getByTestId('getFile-pending')).toBeTruthy();
+    });
+
+    expect(getByTestId('getFile-actionResult-hostStatus')).toHaveTextContent('get-file is pending');
+  });
+
+  it('should display download link once action completes', async () => {
+    apiMocks.responseProvider.actionDetails.mockReturnValue({
+      data: new EndpointActionGenerator('seed').generateActionDetails({
+        command: 'get-file',
+        agents: ['a.b.c'],
+      }),
+    });
+
+    const { getByTestId } = await render();
+    await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
+
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(getByTestId('getFile-success')).toBeTruthy();
+    });
+
+    expect(getByTestId('getFile-actionResult-hostStatus')).toHaveTextContent(
+      'get-file completed successfully'
+    );
+
+    await waitFor(() => {
+      expect(
+        getByTestId('getFile-actionResult-getFileResults-getFileDownloadLink').textContent
+      ).toEqual(
+        'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
       );
     });
   });
@@ -207,6 +315,7 @@ describe('When using get-file action from response actions console', () => {
     'ra_get-file_error_upload-timeout',
     'ra_get-file_error_queue-timeout',
     'ra_get-file_error_not-enough-free-space',
+    'ra_get-file_error_file-locked',
   ])('should show detailed error if get-file failure returned code: %s', async (outputCode) => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',
@@ -242,6 +351,15 @@ describe('When using get-file action from response actions console', () => {
         new RegExp(endpointActionResponseCodes[outputCode].replace(/[|\\{}()[\]^$+*?.]/g, '\\$&'))
       );
     });
+
+    expect(renderResult.getByTestId('getFile-actionResult-hostStatus')).toHaveTextContent(
+      'get-file failed'
+    );
+    expect(
+      renderResult.getByTestId(
+        'getFile-actionResult-getFileResults-failure-response-action-failure-info'
+      )
+    ).toHaveTextContent(endpointActionResponseCodes[outputCode]);
   });
 
   describe('And agent type is SentinelOne', () => {

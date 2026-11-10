@@ -15,8 +15,9 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ENTITY_ANALYTICS_MANAGEMENT_PATH } from '../../../common/constants';
 import { ENGINE_DESCRIPTOR_CREATE_PRIVILEGE } from '@kbn/entity-store/common';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import {
-  ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID,
+  ENTITY_ANALYTICS_SWITCH_TEST_ID,
   RISK_SCORE_TAB_TEST_ID,
   ASSET_CRITICALITY_TAB_TEST_ID,
   WATCHLISTS_TAB_TEST_ID,
@@ -62,12 +63,6 @@ jest.mock('../api/hooks/use_risk_engine_status', () => ({
   }),
 }));
 
-jest.mock('../api/hooks/use_schedule_now_risk_engine_mutation', () => ({
-  useScheduleNowRiskEngineMutation: () => ({
-    mutate: () => {},
-  }),
-}));
-
 jest.mock('../../common/lib/kibana', () => ({
   useKibana: () => ({
     services: {
@@ -76,6 +71,7 @@ jest.mock('../../common/lib/kibana', () => ({
           securitySolution: {
             entityAnalytics: {
               assetCriticality: 'https://example.com',
+              entityRiskScoring: 'https://example.com/entity-risk-scoring',
             },
           },
         },
@@ -165,10 +161,75 @@ jest.mock(
   })
 );
 
-jest.mock('../components/entity_store/components/clear_entity_data_button', () => ({
-  ClearEntityDataButton: () => (
-    <span data-test-subj="clear-entity-data-button">{'Clear Entity Data'}</span>
+jest.mock('../components/entity_store/components/clear_entity_data_modal', () => ({
+  ClearEntityDataModal: () => null,
+}));
+
+jest.mock('../../common/components/app_header', () => ({
+  SecurityAppHeader: ({
+    title,
+    tabs,
+    menu,
+  }: {
+    title: string;
+    tabs?: Array<{
+      id: string;
+      label: string;
+      onClick?: () => void;
+      'data-test-subj'?: string;
+    }>;
+    menu?: {
+      switch?: {
+        label: string;
+        checked: boolean;
+        disabled?: boolean;
+        'data-test-subj'?: string;
+      };
+      items?: Array<{ id: string; label: string; testId?: string }>;
+    };
+  }) => (
+    <div>
+      <h1 data-test-subj="appHeaderTitle">{title}</h1>
+      {tabs?.map((tab) => (
+        <button
+          key={tab.id}
+          type="button"
+          data-test-subj={tab['data-test-subj']}
+          onClick={tab.onClick}
+        >
+          {tab.label}
+        </button>
+      ))}
+      {menu?.switch && (
+        <button
+          type="button"
+          role="switch"
+          aria-checked={menu.switch.checked}
+          data-test-subj={menu.switch['data-test-subj']}
+          disabled={menu.switch.disabled}
+        >
+          {menu.switch.label}
+        </button>
+      )}
+      {menu?.items?.map((item) => (
+        <button key={item.id} type="button" data-test-subj={item.testId}>
+          {item.label}
+        </button>
+      ))}
+    </div>
   ),
+}));
+
+const mockUseToggleEntityAnalytics = jest.fn().mockReturnValue({
+  status: 'not_installed',
+  isLoading: false,
+  isStatusLoading: false,
+  pendingAction: null,
+  toggle: jest.fn(),
+  errors: { entityStore: [] },
+});
+jest.mock('../hooks/use_toggle_entity_analytics', () => ({
+  useToggleEntityAnalytics: () => mockUseToggleEntityAnalytics(),
 }));
 
 const mockToggleSelectedClosedAlertsSetting = jest.fn();
@@ -183,19 +244,8 @@ jest.mock(
   })
 );
 
-jest.mock('../components/entity_analytics_toggle', () => ({
-  EntityAnalyticsToggle: (props: {
-    hasEnablementPrivileges: boolean;
-    hasStopPrivileges: boolean;
-  }) => (
-    <span
-      data-test-subj="mock-entity-analytics-toggle"
-      data-has-enablement-privileges={String(props.hasEnablementPrivileges)}
-      data-has-stop-privileges={String(props.hasStopPrivileges)}
-    >
-      {'Entity analytics toggle'}
-    </span>
-  ),
+jest.mock('../components/entity_analytics_error_panel', () => ({
+  EntityAnalyticsErrorPanel: () => null,
 }));
 
 jest.mock('../components/entity_resolution', () => ({
@@ -295,6 +345,14 @@ describe('EntityAnalyticsManagementPage', () => {
       error: null,
       mutateAsync: jest.fn(),
     });
+    mockUseToggleEntityAnalytics.mockReturnValue({
+      status: 'not_installed',
+      isLoading: false,
+      isStatusLoading: false,
+      pendingAction: null,
+      toggle: jest.fn(),
+      errors: { entityStore: [] },
+    });
   });
 
   const pageComponent = (initialTab?: string) => {
@@ -317,7 +375,9 @@ describe('EntityAnalyticsManagementPage', () => {
 
   it('renders page title and tabs', () => {
     render(pageComponent());
-    expect(screen.getByTestId(ENTITY_ANALYTICS_MANAGEMENT_PAGE_TITLE_TEST_ID)).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+      'Entity analytics'
+    );
     expect(screen.getByTestId(RISK_SCORE_TAB_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId(ASSET_CRITICALITY_TAB_TEST_ID)).toBeInTheDocument();
   });
@@ -336,7 +396,7 @@ describe('EntityAnalyticsManagementPage', () => {
 
   it('has the risk score tab selected by default with content visible', () => {
     render(pageComponent());
-    expect(screen.getByTestId('mock-entity-analytics-toggle')).toBeInTheDocument();
+    expect(screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID)).toBeInTheDocument();
     expect(screen.getByTestId('mock-risk-score-preview')).toBeInTheDocument();
   });
 
@@ -526,6 +586,63 @@ describe('EntityAnalyticsManagementPage', () => {
     expect(screen.getByTestId('mock-watchlists-tab')).toBeInTheDocument();
   });
 
+  describe('Entity Analytics toggle progress', () => {
+    it('hides the progress bar while the toggle is idle', () => {
+      render(pageComponent());
+      expect(
+        screen.queryByRole('progressbar', { name: /entity analytics/i })
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows the progress bar while the Entity Analytics status is loading', () => {
+      mockUseToggleEntityAnalytics.mockReturnValue({
+        status: 'not_installed',
+        isLoading: false,
+        isStatusLoading: true,
+        pendingAction: null,
+        toggle: jest.fn(),
+        errors: { entityStore: [] },
+      });
+      render(pageComponent());
+      expect(
+        screen.getByRole('progressbar', { name: 'Loading Entity Analytics status' })
+      ).toBeInTheDocument();
+    });
+
+    it('shows the progress bar while Entity Analytics is being enabled', () => {
+      mockUseToggleEntityAnalytics.mockReturnValue({
+        status: 'enabling',
+        isLoading: true,
+        isStatusLoading: false,
+        pendingAction: 'enable',
+        toggle: jest.fn(),
+        errors: { entityStore: [] },
+      });
+      render(pageComponent());
+      expect(
+        screen.getByRole('progressbar', { name: 'Enabling Entity Analytics' })
+      ).toBeInTheDocument();
+    });
+
+    it('shows the progress bar while Entity Analytics is being disabled', () => {
+      mockUseEntityStoreStatus.mockReturnValue({
+        data: { status: 'running', engines: [{ type: 'host' }] },
+      });
+      mockUseToggleEntityAnalytics.mockReturnValue({
+        status: 'enabling',
+        isLoading: true,
+        isStatusLoading: false,
+        pendingAction: 'disable',
+        toggle: jest.fn(),
+        errors: { entityStore: [] },
+      });
+      render(pageComponent());
+      expect(
+        screen.getByRole('progressbar', { name: 'Disabling Entity Analytics' })
+      ).toBeInTheDocument();
+    });
+  });
+
   // The toggle enables both the risk score maintainer and the Entity Store in one action, so
   // enablement requires BOTH privilege sets (an OR would let an install-only user flip it and then
   // hit a risk engine 500). OFF derives stop privileges from install_privileges.kibana (SO write), not full install.
@@ -552,14 +669,7 @@ describe('EntityAnalyticsManagementPage', () => {
         },
       });
       render(pageComponent());
-      expect(screen.getByTestId('mock-entity-analytics-toggle')).toHaveAttribute(
-        'data-has-enablement-privileges',
-        'true'
-      );
-      expect(screen.getByTestId('mock-entity-analytics-toggle')).toHaveAttribute(
-        'data-has-stop-privileges',
-        'true'
-      );
+      expect(screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID)).toBeEnabled();
     });
 
     it('denies enablement when the user has entity store install privileges but is missing risk engine privileges', () => {
@@ -572,14 +682,7 @@ describe('EntityAnalyticsManagementPage', () => {
         },
       });
       render(pageComponent());
-      expect(screen.getByTestId('mock-entity-analytics-toggle')).toHaveAttribute(
-        'data-has-enablement-privileges',
-        'false'
-      );
-      expect(screen.getByTestId('mock-entity-analytics-toggle')).toHaveAttribute(
-        'data-has-stop-privileges',
-        'true'
-      );
+      expect(screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID)).toBeDisabled();
     });
 
     it('denies enablement when the user has risk engine privileges but is missing entity store install privileges', () => {
@@ -595,29 +698,27 @@ describe('EntityAnalyticsManagementPage', () => {
         },
       });
       render(pageComponent());
-      expect(screen.getByTestId('mock-entity-analytics-toggle')).toHaveAttribute(
-        'data-has-enablement-privileges',
-        'false'
-      );
-      expect(screen.getByTestId('mock-entity-analytics-toggle')).toHaveAttribute(
-        'data-has-stop-privileges',
-        'true'
-      );
+      expect(screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID)).toBeDisabled();
     });
 
     it('denies stop privileges when engine descriptor write is missing', () => {
+      mockUseToggleEntityAnalytics.mockReturnValue({
+        status: 'enabled',
+        isLoading: false,
+        isStatusLoading: false,
+        pendingAction: null,
+        toggle: jest.fn(),
+        errors: { entityStore: [] },
+      });
       mockUseEntityEnginePrivileges.mockReturnValue({
         data: {
           has_all_required: false,
-          has_install_permissions: false,
+          has_install_permissions: true,
           ...withoutStopPrivileges,
         },
       });
       render(pageComponent());
-      expect(screen.getByTestId('mock-entity-analytics-toggle')).toHaveAttribute(
-        'data-has-stop-privileges',
-        'false'
-      );
+      expect(screen.getByTestId(ENTITY_ANALYTICS_SWITCH_TEST_ID)).toBeDisabled();
     });
   });
 });

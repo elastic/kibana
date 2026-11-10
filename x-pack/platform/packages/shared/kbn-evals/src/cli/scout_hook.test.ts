@@ -34,12 +34,36 @@ describe('runScoutHook', () => {
     });
   });
 
+  it('runs the hook with only the given env, hiding the caller environment', () => {
+    const hook = writeHook(`printf '{"env":{"SEEN":"%s"}}' "\${AMBIENT_SECRET:-unset}"`);
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, AMBIENT_SECRET: 'leaked' };
+    try {
+      expect(runScoutHook(repoRoot, hook, {})).toEqual({ SEEN: 'leaked' });
+      expect(runScoutHook(repoRoot, hook, {}, { env: { PATH: originalEnv.PATH } })).toEqual({
+        SEEN: 'unset',
+      });
+    } finally {
+      process.env = originalEnv;
+    }
+  });
+
   it('returns nothing when the hook adds nothing', () => {
     expect(runScoutHook(repoRoot, writeHook(`echo '{}'`), {})).toEqual({});
   });
 
   it('fails when the hook exits non-zero', () => {
     expect(() => runScoutHook(repoRoot, writeHook('exit 3'), {})).toThrow('exited with code 3');
+  });
+
+  it('uses the hook exit code and output when it exits without reading the config', () => {
+    const configLargerThanPipeBuffer = { value: 'x'.repeat(256 * 1024) };
+    expect(
+      runScoutHook(repoRoot, writeHook(`echo '{"env":{"A":"1"}}'`), configLargerThanPipeBuffer)
+    ).toEqual({ A: '1' });
+    expect(() => runScoutHook(repoRoot, writeHook('exit 3'), configLargerThanPipeBuffer)).toThrow(
+      'exited with code 3'
+    );
   });
 
   it('fails when the hook prints something other than the expected shape', () => {

@@ -9,7 +9,7 @@ import { buildTurnScripts } from '@kbn/nightshift-decision-trees';
 import type { LearningRecord } from '@kbn/nightshift-decision-trees';
 import { DECISION_TREE_PROMPT_TOOLS } from '../tools/decision_tree/prompt_tools';
 import type { DecisionTreeSummary } from './store';
-import { buildReinforcementPrompt, deriveCausalConfirmed, deriveTurnKind } from './turn';
+import { buildReinforcementPrompt } from './turn';
 
 const scripts = buildTurnScripts(DECISION_TREE_PROMPT_TOOLS);
 
@@ -26,55 +26,22 @@ const tree = (overrides: Partial<DecisionTreeSummary> = {}): DecisionTreeSummary
   ...overrides,
 });
 
-describe('deriveCausalConfirmed', () => {
-  it('detects a confirmed hypothesis in the structured output', () => {
-    expect(
-      deriveCausalConfirmed('{"hypotheses":[{"candidate":"leak","status":"confirmed"}]}')
-    ).toBe(true);
-  });
-
-  it('detects the unquoted form', () => {
-    expect(deriveCausalConfirmed('- candidate: leak\n  status: confirmed')).toBe(true);
-  });
-
-  it('is false when every hypothesis is still open or dismissed', () => {
-    expect(
-      deriveCausalConfirmed('{"hypotheses":[{"status":"investigating"},{"status":"dismissed"}]}')
-    ).toBe(false);
-  });
-});
-
-describe('deriveTurnKind', () => {
-  it('treats a tree still on its first version as an initial investigation', () => {
-    expect(deriveTurnKind([tree({ version: 1 })])).toBe('initial_investigation');
-  });
-
-  it('treats a revised tree as a follow-up', () => {
-    expect(deriveTurnKind([tree({ version: 2 })])).toBe('feedback_reinforcement');
-  });
-
-  it('treats no trees at all as an initial investigation', () => {
-    expect(deriveTurnKind([])).toBe('initial_investigation');
-  });
-});
-
 describe('buildReinforcementPrompt', () => {
   const base = {
     learnings: [] as LearningRecord[],
     connectorNames: ['elastic-telemetry'],
-    prompt: 'Why is checkout slow?',
-    response: 'Connection pool exhausted.',
+    turnKind: 'initial_investigation' as const,
   };
 
-  it('asks for a new tree when the investigator did not open one', () => {
+  it('asks for a new tree when the first round opened none', () => {
     const message = buildReinforcementPrompt({ ...base, trees: [] });
 
     expect(message).toContain(scripts.initialCreate);
     expect(message).toContain('Decision-tree files available for edit:\n- None');
   });
 
-  it('asks for a merge when the investigator opened a first-version tree', () => {
-    const message = buildReinforcementPrompt({ ...base, trees: [tree()] });
+  it('asks for a merge when the first round opened a tree', () => {
+    const message = buildReinforcementPrompt({ ...base, trees: [tree({ version: 4 })] });
 
     expect(message).toContain(scripts.initialMerge);
     expect(message).toContain(
@@ -82,23 +49,40 @@ describe('buildReinforcementPrompt', () => {
     );
   });
 
-  it('asks for reinforcement once a revised tree has a confirmed root cause', () => {
+  it('asks a follow-up to extend the tree, even one still on its first version', () => {
     const message = buildReinforcementPrompt({
       ...base,
-      trees: [tree({ version: 3 })],
-      response: '{"hypotheses":[{"status":"confirmed"}]}',
+      turnKind: 'feedback_reinforcement',
+      trees: [tree({ version: 1 })],
     });
-
-    expect(message).toContain(scripts.reinforce);
-  });
-
-  it('asks for an extension on a follow-up with no confirmed root cause', () => {
-    const message = buildReinforcementPrompt({ ...base, trees: [tree({ version: 3 })] });
 
     expect(message).toContain(scripts.followupExtend);
   });
 
-  it('carries the transcript and the active learnings', () => {
+  it('does not ask a follow-up to reinforce a path as causal unless its cause was confirmed', () => {
+    const message = buildReinforcementPrompt({
+      ...base,
+      turnKind: 'feedback_reinforcement',
+      trees: [tree({ version: 3 })],
+    });
+
+    expect(message).not.toContain(scripts.reinforce);
+  });
+
+  it('asks a follow-up whose causal check confirmed the cause to reinforce the causal path', () => {
+    const message = buildReinforcementPrompt({
+      ...base,
+      turnKind: 'feedback_reinforcement',
+      trees: [tree({ version: 3 })],
+      causalConfirmed: true,
+    });
+
+    expect(message).toContain(scripts.reinforce);
+    expect(message).not.toContain(scripts.followupExtend);
+  });
+
+  // The investigation reaches the agent as conversation history, not inside this message.
+  it('leaves the transcript out and carries the active learnings', () => {
     const message = buildReinforcementPrompt({
       ...base,
       trees: [tree()],
@@ -147,8 +131,7 @@ describe('buildReinforcementPrompt', () => {
       ],
     });
 
-    expect(message).toContain('Why is checkout slow?');
-    expect(message).toContain('Connection pool exhausted.');
+    expect(message).not.toContain('## Investigation transcript');
     expect(message).toContain('- Checkout depends on Redis.');
     expect(message).toContain('- Checkout shares a connection pool.');
     expect(message).not.toContain('Payments use a different cluster.');

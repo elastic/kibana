@@ -18,16 +18,17 @@ Registered from `register.ts`. Tool ids live in `tools/tool_ids.ts` under the
 | -------------------- | ---------------------------------------------------------------------------- |
 | Knowledge indicators | `search_knowledge_indicators`, `create_feature_knowledge_indicator`, `create_query_knowledge_indicator` |
 | KI identification    | `ki_identification_start`, `ki_identification_cancel`, `ki_identification_status` |
+| Nightshift sources   | `source_list`, `source_get`, `source_create`, `source_update`, `source_delete`          |
 | Events               | `event_search`, `event_create`, `event_write`, `event_status_update`         |
 | Discovery            | `discovery_write`                                                            |
 
 `search_knowledge_indicators` is also consumed outside this plugin, by the
-`observability_agent_builder` RCA skill.
+`observability_agent_builder` investigation skill.
 
 ### Skills (`skills/`)
 
-`knowledge_indicators_management`, `ki_identification_management`, `ki_query_generation`,
-`significant_events_management`, `significant_events_ki_grounding`, `investigation_management`.
+`knowledge_indicators_management`, `nightshift_sources_management`, `ki_identification_management`,
+`ki_query_generation`, `significant_events_management`, `significant_events_ki_grounding`.
 The `ki_query_generation` skill provides its feature retrieval and query validation tools inline
 rather than registering them globally.
 

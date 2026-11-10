@@ -33,7 +33,6 @@ const createParams = () => {
         logError: jest.fn(),
         logDebug: jest.fn(),
         logWarn: jest.fn(),
-        flushEvents: jest.fn(),
       })),
     },
     esClient: {},

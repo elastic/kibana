@@ -43,6 +43,30 @@ steps:
       });
     });
 
+    it('should persist the error type so a parent workflow can read it', async () => {
+      await workflowRunFixture.runWorkflow({
+        workflowYaml: `
+steps:
+  - name: fail_step
+    type: workflow.fail
+    with:
+      message: "The process is no longer running"
+      type: NonRetryableError
+        `,
+      });
+
+      const workflowExecution =
+        workflowRunFixture.workflowExecutionRepositoryMock.workflowExecutions.get(
+          'fake_workflow_execution_id'
+        );
+
+      expect(workflowExecution?.status).toBe(ExecutionStatus.FAILED);
+      expect(workflowExecution?.error).toEqual({
+        type: 'NonRetryableError',
+        message: 'The process is no longer running',
+      });
+    });
+
     it('should store message in context.output for external access', async () => {
       await workflowRunFixture.runWorkflow({
         workflowYaml: `

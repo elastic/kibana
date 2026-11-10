@@ -42,6 +42,7 @@ export const getCloudLinks = (cloud: CloudURLs): CloudLinks => {
     projectsUrl,
     performanceUrl,
     usersAndRolesUrl,
+    searchPowerUrl,
   } = cloud;
 
   const links: CloudLinks = {};
@@ -97,6 +98,15 @@ export const getCloudLinks = (cloud: CloudURLs): CloudLinks => {
         defaultMessage: 'View all projects',
       }),
       href: projectsUrl,
+    };
+  }
+
+  if (searchPowerUrl) {
+    links.searchPower = {
+      title: i18n.translate('core.ui.chrome.sideNavigation.cloudLinks.searchPowerLinkText', {
+        defaultMessage: 'Configure Search Power',
+      }),
+      href: searchPowerUrl,
     };
   }
 

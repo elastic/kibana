@@ -41,9 +41,12 @@ If you are unsure, please reach out to the Kibana Security team for guidance.
 
 ### Skipping failing tests due to FIPS overrides
 
-If you have determined that the test in question is failing due to the FIPS overrides, you can skip the test by adding the `this.tags('skipFIPS')` tag to the nearest possible `describe` block in the suite.
+If you have determined that the test in question is failing due to the FIPS overrides, skip it in FIPS runs only. How depends on the test framework:
 
-It is imperative to skip only the tests that are affected by FIPS overrides. If necessary, create a new `describe` block to isolate the affected tests. Ensure the `describe` block is not using an arrow function.
+- **Scout**: add `tags.limit.except.fips` next to the suite's deployment tags. See [Limit tags](../../testing/deployment-tags.md#scout-deployment-tags-limit).
+- **FTR**: add `this.tags('skipFIPS')` to the nearest possible `describe` block in the suite. Ensure the `describe` block is not using an arrow function.
+
+It is imperative to skip only the tests that are affected by FIPS overrides. If necessary, create a new `describe` block to isolate the affected tests.
 
 This will still allow the test to run as part of regular CI, but will skip the test in the FIPS pipeline.
 

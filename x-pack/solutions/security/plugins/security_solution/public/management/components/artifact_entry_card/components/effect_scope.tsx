@@ -11,10 +11,10 @@ import type { CommonProps } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import styled from 'styled-components';
-import { i18n } from '@kbn/i18n';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   GLOBAL_EFFECT_SCOPE,
+  POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE,
   POLICY_EFFECT_SCOPE,
   POLICY_EFFECT_SCOPE_TITLE,
 } from './translations';
@@ -28,11 +28,6 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 //          by policy (>0), but **NOT** show the menu.
 //          So something like: `<EffectScope perPolicyCount={3} />`
 //          This should display it as "Applied to 3 policies", but NOT as a menu with links
-
-const POLICY_DETAILS_NOT_ACCESSIBLE_IN_ACTIVE_SPACE = i18n.translate(
-  'xpack.securitySolution.effectScope.policyDetailsNotAccessibleInActiveSpace',
-  { defaultMessage: 'Policy is not accessible from the current space' }
-);
 
 const StyledWithContextMenuShiftedWrapper = styled('div')`
   margin-left: -10px;

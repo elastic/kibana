@@ -9,8 +9,13 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 import type { EuiIconProps } from '@elastic/eui';
+
+/** Test subject shared by both title icon forms, so collapsed and expanded headers locate alike. */
+export const TITLE_ICON_TEST_SUBJ = 'flyoutHeaderTitleIcon';
+
+export const TITLE_LOADING_TEST_SUBJ = 'flyoutHeaderTitleLoading';
 
 /** Renders an optional title icon or accessible tooltip anchor. */
 export const renderTitleIcon = (
@@ -18,15 +23,28 @@ export const renderTitleIcon = (
   tooltip: ReactNode
 ): ReactNode =>
   tooltip ? (
-    <EuiIconTip type={icon ?? 'info'} content={tooltip} />
+    <EuiIconTip
+      type={icon ?? 'info'}
+      content={tooltip}
+      anchorProps={{ 'data-test-subj': TITLE_ICON_TEST_SUBJ }}
+    />
   ) : icon ? (
-    <EuiIcon type={icon} aria-hidden />
+    <EuiIcon type={icon} aria-hidden data-test-subj={TITLE_ICON_TEST_SUBJ} />
   ) : null;
 
-/** Renders a title node with an optional trailing icon. */
-export const renderTitleWithIcon = (titleNode: ReactNode, iconNode: ReactNode): ReactNode => (
+/** Renders the title loading spinner when `isLoading` is set. */
+export const renderTitleLoading = (isLoading: boolean): ReactNode =>
+  isLoading ? <EuiLoadingSpinner size="m" data-test-subj={TITLE_LOADING_TEST_SUBJ} /> : null;
+
+/** Renders a title node with an optional trailing icon and loading spinner. */
+export const renderTitleWithAdornments = (
+  titleNode: ReactNode,
+  iconNode: ReactNode,
+  loadingNode: ReactNode
+): ReactNode => (
   <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
     <EuiFlexItem grow={false}>{titleNode}</EuiFlexItem>
     {iconNode && <EuiFlexItem grow={false}>{iconNode}</EuiFlexItem>}
+    {loadingNode && <EuiFlexItem grow={false}>{loadingNode}</EuiFlexItem>}
   </EuiFlexGroup>
 );

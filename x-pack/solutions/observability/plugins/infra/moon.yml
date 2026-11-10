@@ -99,7 +99,6 @@ dependsOn:
   - '@kbn/serverless'
   - '@kbn/elastic-agent-utils'
   - '@kbn/dashboard-plugin'
-  - '@kbn/shared-svg'
   - '@kbn/aiops-log-rate-analysis'
   - '@kbn/search-types'
   - '@kbn/alerting-comparators'
@@ -167,6 +166,8 @@ tags:
   - group-observability
   - private
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -176,6 +177,4 @@ fileGroups:
     - test/scenarios/**/*
     - test/scout/api/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

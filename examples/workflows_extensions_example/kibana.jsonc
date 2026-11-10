@@ -11,7 +11,8 @@
       "browser": true,
       "requiredPlugins": [
         "developerExamples",
-        "workflowsExtensions"
+        "workflowsExtensions",
+        "spaces"
       ]
     }
 }

@@ -27,6 +27,7 @@ tags:
   - prod
   - group-platform
   - shared
+  - jest-integration-tests
 fileGroups:
   src:
     - '**/*.ts'

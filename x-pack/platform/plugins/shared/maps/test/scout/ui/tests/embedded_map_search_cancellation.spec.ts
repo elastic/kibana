@@ -57,10 +57,11 @@ test.describe(
     test('cancels search when navigating away from the dashboard', async ({
       page,
       pageObjects,
+      network,
     }) => {
-      // Set up listeners before opening the dashboard to avoid race conditions
-      const esqlRequestPromise = page.waitForRequest(
-        (req) => req.url().includes('/internal/search/esql') && req.method() === 'POST'
+      // Set up listener before opening the dashboard to avoid race conditions
+      const esqlRequestPromise = page.waitForResponse(
+        (res) => res.url().endsWith('/esql_async') && res.ok()
       );
 
       // Open dashboard WITHOUT waiting for render
@@ -69,23 +70,24 @@ test.describe(
       // Wait for the map to initiate the ES|QL search (stalled by error_query)
       await esqlRequestPromise;
 
-      const esqlAbortedPromise = page.waitForEvent(
-        'requestfailed',
-        (req) => req.url().includes('/internal/search/esql') && req.method() === 'POST'
-      );
-
-      // Navigate away - this should abort the pending request
-      await pageObjects.collapsibleNav.clickItem('Discover');
-
-      // Verify the in-flight request was aborted
-      const failedRequest = await esqlAbortedPromise;
-      expect(failedRequest.failure()).not.toBeNull();
+      expect(
+        await network.countMatchingRequests(
+          { endpoint: '/esql_async', method: 'DELETE' },
+          async () => {
+            await pageObjects.collapsibleNav.clickItem('Discover');
+          }
+        )
+      ).toBe(1);
     });
 
-    test('cancels search when clicking the cancel button', async ({ page, pageObjects }) => {
-      // Set up listeners before opening the dashboard to avoid race conditions
-      const esqlRequestPromise = page.waitForRequest(
-        (req) => req.url().includes('/internal/search/esql') && req.method() === 'POST'
+    test('cancels search when clicking the cancel button', async ({
+      page,
+      pageObjects,
+      network,
+    }) => {
+      // Set up listener before opening the dashboard to avoid race conditions
+      const esqlRequestPromise = page.waitForResponse(
+        (res) => res.url().endsWith('/esql_async') && res.ok()
       );
 
       // Open dashboard WITHOUT waiting for render
@@ -94,19 +96,17 @@ test.describe(
       // Wait for the map to initiate the ES|QL search (stalled by error_query)
       await esqlRequestPromise;
 
-      const esqlAbortedPromise = page.waitForEvent(
-        'requestfailed',
-        (req) => req.url().includes('/internal/search/esql') && req.method() === 'POST'
-      );
-
-      // Click cancel button - this should abort the pending request
       const cancelButton = page.testSubj.locator('queryCancelButton');
       await cancelButton.waitFor({ state: 'visible' });
-      await cancelButton.click();
 
-      // Verify the in-flight request was aborted
-      const failedRequest = await esqlAbortedPromise;
-      expect(failedRequest.failure()).not.toBeNull();
+      expect(
+        await network.countMatchingRequests(
+          { endpoint: '/esql_async', method: 'DELETE' },
+          async () => {
+            await cancelButton.click();
+          }
+        )
+      ).toBe(1);
 
       // Verify cancel button disappears (no more in-flight requests)
       await cancelButton.waitFor({ state: 'hidden' });

@@ -67,6 +67,29 @@ describe('CoreApp', () => {
   });
 
   describe('Dynamic Config feature', () => {
+    const persistedAttributes = (flagValue: boolean) => ({
+      'feature_flags.overrides': { 'my-feature-flag': flagValue },
+    });
+
+    const startWithDynamicConfig = async () => {
+      const routerMock = mockRouter.create();
+      internalCoreSetup.http.createRouter.mockReturnValue(routerMock);
+
+      coreContext.configService.atPath.mockReturnValue(of({ allowDynamicConfigOverrides: true }));
+      const localCoreApp = new CoreAppsService(coreContext);
+      await localCoreApp.setup(internalCoreSetup, emptyPlugins());
+
+      const internalCoreStart = coreInternalLifecycleMock.createInternalStart();
+      localCoreApp.start(internalCoreStart);
+
+      return {
+        repository: internalCoreStart.savedObjects.createInternalRepository.mock.results[0].value,
+        settingsHandler: routerMock.versioned.getRoute('put', '/internal/core/_settings').versions[
+          '1'
+        ].handler,
+      };
+    };
+
     describe('`/internal/core/_settings` route', () => {
       it('is not registered by default', async () => {
         const routerMock = mockRouter.create();
@@ -127,6 +150,46 @@ describe('CoreApp', () => {
         expect(repository.get).toHaveBeenCalledWith(
           'dynamic-config-overrides',
           'dynamic-config-overrides'
+        );
+      });
+
+      it('applies the persisted document when no local write raced the read', async () => {
+        const { repository } = await startWithDynamicConfig();
+        repository.get.mockResolvedValue({
+          version: 'WzEsMV0=',
+          attributes: persistedAttributes(true),
+        });
+
+        await jest.advanceTimersByTimeAsync(0);
+
+        expect(coreContext.configService.setDynamicConfigOverrides).toHaveBeenCalledWith(
+          persistedAttributes(true)
+        );
+      });
+
+      it('discards a persisted document that a local `_settings` write raced', async () => {
+        const { repository, settingsHandler } = await startWithDynamicConfig();
+        let resolveRead: (doc: unknown) => void = () => {};
+        repository.get.mockReturnValue(
+          new Promise((resolve) => {
+            resolveRead = resolve;
+          })
+        );
+
+        // The poller's read is now in flight, holding the document the write below replaces.
+        await jest.advanceTimersByTimeAsync(0);
+
+        const newOverrides = persistedAttributes(false);
+        await settingsHandler(
+          {} as unknown as RequestHandlerContext,
+          httpServerMock.createKibanaRequest({ body: newOverrides }),
+          httpServerMock.createResponseFactory()
+        );
+        resolveRead({ version: 'WzEsMV0=', attributes: persistedAttributes(true) });
+        await jest.advanceTimersByTimeAsync(0);
+
+        expect(coreContext.configService.setDynamicConfigOverrides).toHaveBeenLastCalledWith(
+          newOverrides
         );
       });
     });

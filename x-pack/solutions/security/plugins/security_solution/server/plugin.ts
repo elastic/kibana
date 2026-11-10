@@ -40,6 +40,7 @@ import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_str
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
+import { registerAlertUpdateAuthorizationAudit } from './lib/detection_engine/routes/common/operations/audit_alert_update_authz';
 import {
   createEqlAlertType,
   createEsqlAlertType,
@@ -94,7 +95,7 @@ import type { SecuritySolutionRequestHandlerContext } from './types';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import type { ITelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
-import { type IAsyncTelemetryEventsSender } from './lib/telemetry/async_sender.types';
+import type { IAsyncTelemetryEventsSender } from './lib/telemetry/async_sender.types';
 import {
   AsyncTelemetryEventsSender,
   DEFAULT_QUEUE_CONFIG,
@@ -136,6 +137,9 @@ import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService, type CdnConfig } from './lib/telemetry/artifact';
 import { events } from './lib/telemetry/event_based/events';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
+import { indexFieldsProvider } from './lib/timelines_server/search_strategy/index_fields';
+import { timelineSearchStrategyProvider } from './lib/timelines_server/search_strategy/timeline';
+import { timelineEqlSearchStrategyProvider } from './lib/timelines_server/search_strategy/timeline/eql';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   ENDPOINT_PACKAGE_POLICIES_STATS_STRATEGY,
@@ -182,8 +186,14 @@ import type { TrialCompanionRoutesDeps } from './lib/trial_companion/types';
 import { setupAlertsCapabilitiesSwitcher } from './lib/capabilities/alerts_capabilities_switcher';
 import { securityAlertsProfileInitializer } from './lib/anonymization';
 import { registerWorkflowSteps } from './workflows/step_types';
-import { registerSecurityManagedWorkflowOwner } from './workflows/managed_workflows';
+import { registerEndpointWorkflowSteps } from './workflows/step_types/endpoint/register_workflow_steps';
+import { setFingerprintCreateAllowed } from './workflows/step_types/match_attack_fingerprints/match_attack_fingerprints';
+import {
+  registerSecurityManagedWorkflowOwner,
+  initSecurityManagedWorkflowsClient,
+} from './workflows/managed_workflows';
 import { installSecurityManagedWorkflowsAndMarkReady } from './workflows/security_managed_workflows';
+import { ensureThreatIntelSupplyWorkflowsForSpace } from './workflows/threat_intel_workflow/install';
 import { SecuritySolutionEventBus } from './events/event_bus';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerSecurityWorkflowEventBridge } from './workflows/triggers/event_bridge';
@@ -228,6 +238,8 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private isServerless: boolean;
   private securityEventBus?: SecuritySolutionEventBus;
+
+  /** Captured in `setup()`: rule lifecycle telemetry needs the setup contract, not the start one. */
 
   /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
   private platformCpsEnabled = false;
@@ -324,9 +336,20 @@ export class Plugin implements ISecuritySolutionPlugin {
       },
       this.isServerless,
       this.pluginContext.env.packageInfo.version,
+      {
+        profile: this.config.entityAnalytics.riskEngine.esqlProfiling,
+        profileInterval: this.config.entityAnalytics.riskEngine.esqlProfilingInterval,
+      },
       plugins.encryptedSavedObjects?.canEncrypt === true
     );
-    registerAttachments(agentBuilder, core, logger, experimentalFeatures).catch((error) => {
+    registerAttachments(
+      agentBuilder,
+      core,
+      logger,
+      experimentalFeatures,
+      this.pluginContext.env.packageInfo.version,
+      plugins.ml
+    ).catch((error) => {
       this.logger.error(`Error registering security attachments: ${error}`);
     });
 
@@ -348,6 +371,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins: SecuritySolutionPluginSetupDependencies
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
+
+    registerAlertUpdateAuthorizationAudit({
+      http: core.http,
+      getAuditLogger: (request) => plugins.security?.audit.asScoped(request),
+    });
 
     if (plugins.share) {
       plugins.share.url.locators.create(new AIValueReportLocatorDefinition());
@@ -417,6 +445,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       auditLogger: plugins.security?.audit.withoutRequest,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
+      entityAnalyticsConfig: config.entityAnalytics,
       hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
@@ -561,7 +590,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
     this.usageCollection = plugins.usageCollection;
-    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures);
+    registerCaseAttachments(plugins.cases.attachmentFramework, experimentalFeatures, {
+      getStartServices: core.getStartServices,
+      logger: this.logger,
+    });
     plugins.cases.attachmentFramework.registerAttachment(securityAlertAttachmentType);
 
     plugins.cases.registerCloseReasonValidator(APP_ID, async (closeReason, request) => {
@@ -809,6 +841,20 @@ export class Plugin implements ISecuritySolutionPlugin {
           threatIntelligenceSearchStrategy
         );
 
+        // Timeline search strategies (previously registered by the timelines plugin)
+        plugins.data.search.registerSearchStrategy(
+          'indexFields',
+          indexFieldsProvider(core.getStartServices)
+        );
+        plugins.data.search.registerSearchStrategy(
+          'timelineSearchStrategy',
+          timelineSearchStrategyProvider(depsStart.data, this.logger)
+        );
+        plugins.data.search.registerSearchStrategy(
+          'timelineEqlSearchStrategy',
+          timelineEqlSearchStrategyProvider(depsStart.data)
+        );
+
         this.siemMigrationsService.setup({ esClusterClient: coreStart.elasticsearch.client });
       })
       .catch(() => {}); // it shouldn't reject, but just in case
@@ -851,6 +897,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
         isServerless: this.isServerless,
+        stackVersion: this.pluginContext.env.packageInfo.version,
       });
 
       this.trialCompanionMilestoneService.setup({
@@ -872,6 +919,15 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (plugins.workflowsExtensions) {
       registerWorkflowSteps(plugins.workflowsExtensions);
+      registerEndpointWorkflowSteps(plugins.workflowsExtensions, {
+        experimentalFeatures: config.experimentalFeatures,
+        analytics: core.analytics,
+        getInternalEsClient: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.elasticsearch.client.asInternalUser;
+        },
+        endpointAppContextService: this.endpointAppContextService,
+      });
       registerSecurityWorkflowTriggers(plugins.workflowsExtensions);
       registerSecurityManagedWorkflowOwner(plugins.workflowsExtensions);
     }
@@ -905,6 +961,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
+    if (plugins.alertzero) {
+      const alertzero = plugins.alertzero;
+      setFingerprintCreateAllowed(() => alertzero.attackFingerprintWritesAllowed);
+    }
+
     const { config, logger, productFeaturesService } = this;
 
     initializeEndpointExceptionsPerPolicyOptInStatus(
@@ -946,6 +1007,8 @@ export class Plugin implements ISecuritySolutionPlugin {
         workflowsExtensions: plugins.workflowsExtensions,
         logger,
         threatIntelSupplyEnabled: this.threatIntelSupplyEnabled,
+        automaticTroubleshootingUniversalSkillEnabled:
+          config.experimentalFeatures.automaticTroubleshootingUniversalSkill,
         bootstrapReady: this.threatIntelRuntime.bootstrapReady,
         core,
       });
@@ -1257,6 +1320,28 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not started.');
     }
 
+    // Push, not pull: alertzero cannot declare a dependency on this plugin's start contract, since
+    // this plugin already depends on alertzero (the `alertzero` setup dependency above) and the
+    // reverse edge would fail Kibana's plugin boot with a circular-dependency error. AlertZero Hunt
+    // ensure calls this when a required TI supply workflow document is missing (e.g. per-space
+    // attribute lag after space create).
+    if (plugins.alertzero && plugins.workflowsExtensions && this.threatIntelSupplyEnabled) {
+      const workflowsExtensions = plugins.workflowsExtensions;
+      const tiLogger = this.logger.get('threatIntel');
+      plugins.alertzero.registerThreatIntelSupplyWorkflowInstaller(async ({ spaceId }) => {
+        const managedWorkflowsClient = await initSecurityManagedWorkflowsClient(
+          workflowsExtensions
+        );
+        await ensureThreatIntelSupplyWorkflowsForSpace({
+          managedWorkflowsClient,
+          spaceId,
+        });
+        tiLogger.info(
+          `Installed threat intel supply workflows for space '${spaceId}' on Hunt ensure request`
+        );
+      });
+    }
+
     return {};
   }
 
@@ -1264,9 +1349,10 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.logger.debug('Stopping plugin');
     this.asyncTelemetryEventsSender.stop().catch(() => {});
     this.telemetryEventsSender.stop();
-    this.endpointAppContextService.stop();
+    // Watchers use endpoint services, so they must stop before those services drop their dependencies
     this.policyWatcher?.stop();
     this.telemetryWatcher?.stop();
+    this.endpointAppContextService.stop();
     this.completeExternalResponseActionsTask.stop().catch(() => {});
     this.siemMigrationsService.stop();
     securityWorkflowInsightsService.stop();

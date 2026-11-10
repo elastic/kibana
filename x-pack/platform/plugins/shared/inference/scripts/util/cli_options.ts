@@ -29,7 +29,33 @@ export const elasticsearchOption = {
   }),
 };
 
+export const inferenceIdOption = {
+  describe: 'Elasticsearch chat_completion inference endpoint id used for the LLM',
+  string: true as const,
+};
+
 export const connectorIdOption = {
   describe: 'The ID of the connector',
   string: true as const,
 };
+
+export function resolveInferenceId({
+  inferenceId,
+  connectorId,
+  log,
+}: {
+  inferenceId?: string;
+  connectorId?: string;
+  log: { warning: (message: string) => void };
+}): string | undefined {
+  if (inferenceId) {
+    return inferenceId;
+  }
+  if (connectorId) {
+    log.warning(
+      '--connectorId is deprecated. Pass the Elasticsearch inference endpoint id with --inferenceId.'
+    );
+    return connectorId;
+  }
+  return undefined;
+}

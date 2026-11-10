@@ -2,7 +2,7 @@
 
 exports[`OverwrittenSessionPage renders as expected 1`] = `
 <div
-  class="css-kdghhb-fullScreenGraphicsFadeIn"
+  class="css-e5l8dj-fullScreenGraphicsFadeIn"
   data-test-subj="secAuthenticationStatePage"
 >
   <header
@@ -39,7 +39,7 @@ exports[`OverwrittenSessionPage renders as expected 1`] = `
       class="euiSpacer euiSpacer--xl emotion-euiSpacer-xl"
     />
     <a
-      class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+      class="euiButton emotion-euiButtonDisplay-m-base-primary"
       href="/mock-base-path/"
       rel="noreferrer"
     >

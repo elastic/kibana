@@ -90,6 +90,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     return;
   }
 
+  // apm.startSpan also makes the span current in the caller's async context, and ending it
+  // never removes it from there, so every node would grow the APM span stack of the run.
+  // Starting it after a microtask keeps it out of the caller's context.
+  await Promise.resolve();
   // Create a span for the entire node execution lifecycle
   const nodeSpan = apm.startSpan(`node: ${node.stepId || node.id}`, 'workflow', 'node');
   if (nodeSpan) {
@@ -112,10 +116,8 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
 
     if (params.workflowExecutionState.getWorkflowExecution().cancelRequested) {
       await cancelWorkflowIfRequested(
-        params.workflowExecutionRepository,
         params.workflowExecutionState,
         stepExecutionRuntime,
-        params.workflowLogger,
         workflowExecutionCursor,
         stepExecutionRuntime.abortController
       );
@@ -130,6 +132,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     if (params.workflowRuntime.getWorkflowExecution().status !== ExecutionStatus.RUNNING) {
       // onCancel cleanup runs in the `finally` block (which covers both this
       // short-circuit and the monitor-threw path), so it is not invoked here.
+      // Stop the cursor too: a non-RUNNING status with an executing cursor would
+      // otherwise spin executionFlowLoop on already-resolved promises and starve the event loop.
+      workflowExecutionCursor.stop();
       nodeSpan?.setOutcome('unknown');
       nodeSpan?.end();
       return;
@@ -160,17 +165,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       !stepExecutionRuntime.abortController.signal.aborted
     ) {
       runStepPromise = (async () => {
-        try {
-          await Promise.resolve(nodeImplementation.run());
-          if (stepExecutionRuntime) {
-            await handleExecutionDelay(params, stepExecutionRuntime);
-          }
-        } finally {
-          if (stepExecutionRuntime) {
-            await stepExecutionRuntime.flushEventLogs({
-              signal: params.signal,
-            });
-          }
+        await Promise.resolve(nodeImplementation.run());
+        if (stepExecutionRuntime) {
+          await handleExecutionDelay(params, stepExecutionRuntime);
         }
       })();
     }

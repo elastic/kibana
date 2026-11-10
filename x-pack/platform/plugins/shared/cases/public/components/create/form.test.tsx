@@ -150,6 +150,44 @@ describe('CreateCaseForm', () => {
     expect(await screen.findByTestId('caseObservablesToggle')).toBeInTheDocument();
   });
 
+  it('seeds the extract observables toggle when the space configuration finishes loading', async () => {
+    const loadedConfiguration = {
+      ...useGetAllCaseConfigurationsResponse.data[0],
+      id: 'config-1',
+      owner: 'securitySolution',
+      extractObservables: false,
+    };
+
+    useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+      ...useGetAllCaseConfigurationsResponse,
+      isLoading: true,
+      data: [],
+    }));
+    const license = licensingMock.createLicense({ license: { type: 'platinum' } });
+
+    const { rerender } = renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+      wrapperProps: { owner: ['securitySolution'], license },
+    });
+
+    const toggle = await screen.findByTestId('caseObservablesToggle');
+    expect(within(toggle).getByTestId('input')).toBeChecked();
+
+    useGetAllCaseConfigurationsMock.mockImplementation(() => ({
+      ...useGetAllCaseConfigurationsResponse,
+      isLoading: false,
+      data: [loadedConfiguration],
+    }));
+
+    // CreateCaseForm is React.memo — change a prop so the mock update is read.
+    rerender(<CreateCaseForm {...casesFormProps} onCancel={jest.fn()} />);
+
+    await waitFor(() => {
+      expect(
+        within(screen.getByTestId('caseObservablesToggle')).getByTestId('input')
+      ).not.toBeChecked();
+    });
+  });
+
   describe('case settings for a host with no pinned owner (e.g. ML)', () => {
     const observabilityConfiguration = {
       ...useGetAllCaseConfigurationsResponse.data[0],

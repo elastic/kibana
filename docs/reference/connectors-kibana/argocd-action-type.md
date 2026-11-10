@@ -13,6 +13,10 @@ The Argo CD connector calls the [Argo CD API](https://argo-cd.readthedocs.io/en/
 
 This connector is complementary to the [Kubernetes connector](/reference/connectors-kibana/kubernetes-action-type.md): use Argo CD for desired-versus-live GitOps lifecycle, and Kubernetes for direct cluster API operations.
 
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
+
 ::::{warning}
 This connector can perform any operation the configured token is authorized for, including syncing applications (and pruning resources when `prune` is enabled). There are no additional restrictions in {{kib}}: access is governed entirely by the token's Argo CD [RBAC](https://argo-cd.readthedocs.io/en/stable/operator-manual/rbac/). Prefer a project-scoped token with least-privilege permissions.
 ::::

@@ -9,7 +9,6 @@
 
 import { firstValueFrom } from 'rxjs';
 import { act, renderHook } from '@testing-library/react';
-import type { Transaction } from '@elastic/apm-rum';
 import { apm } from '@elastic/apm-rum';
 import {
   type Client,
@@ -17,13 +16,18 @@ import {
   OpenFeature,
   type Provider,
 } from '@openfeature/web-sdk';
+import { OFREPWebProvider } from '@openfeature/ofrep-web-provider';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
-import type { FeatureFlagsSetup, FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import { FeatureFlagsService } from '..';
+
+jest.mock('@openfeature/ofrep-web-provider', () => ({
+  OFREPWebProvider: jest.fn(),
+}));
 
 async function isSettledPromise(p: Promise<unknown>) {
   const immediateValue = {};
@@ -46,6 +50,7 @@ describe('FeatureFlagsService Browser', () => {
     injectedMetadata = injectedMetadataServiceMock.createSetupContract();
     http = httpServiceMock.createSetupContract();
     http.post.mockResolvedValue(undefined);
+    jest.spyOn(OpenFeature, 'setProviderAndWait').mockResolvedValue(undefined);
   });
 
   afterEach(async () => {
@@ -56,44 +61,57 @@ describe('FeatureFlagsService Browser', () => {
   });
 
   describe('provider handling', () => {
-    test('appends a provider (without awaiting)', () => {
-      expect.assertions(1);
-      const { setProvider } = featureFlagsService.setup(createSetupDeps());
-      const spy = jest.spyOn(OpenFeature, 'setProviderAndWait');
-      const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
-      setProvider(fakeProvider);
-      expect(spy).toHaveBeenCalledWith(fakeProvider);
-    });
+    const openFeatureLogger = { error() {}, warn() {}, info() {}, debug() {} };
 
-    test('throws an error if called twice', () => {
-      const { setProvider } = featureFlagsService.setup(createSetupDeps());
-      const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
-      setProvider(fakeProvider);
-      expect(() => setProvider(fakeProvider)).toThrowErrorMatchingInlineSnapshot(
-        `"A provider has already been set. This API cannot be called twice."`
-      );
-    });
-
-    test('registers a handler to reevaluate flags when the provider is ready', () => {
-      const { setProvider } = featureFlagsService.setup(createSetupDeps());
+    test('installs the Kibana OFREP provider during setup', () => {
+      http = httpServiceMock.createSetupContract({ basePath: '/kbn' });
+      injectedMetadata.getFeatureFlags.mockReturnValue({
+        overrides: {
+          'my-overridden-flag': true,
+          myDestructuredObjPlugin: { myOverriddenFlag: true },
+        },
+        initialFeatureFlags: { 'my-initial-flag': false, 'my-overridden-flag': false },
+      });
       const addHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
-      const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
-      setProvider(fakeProvider);
+
+      featureFlagsService.setup(createSetupDeps());
+
+      expect(OFREPWebProvider).toHaveBeenCalledWith(
+        expect.objectContaining({
+          baseUrl: `${window.location.origin}/kbn/internal/feature-flags`,
+          pollInterval: 10_000,
+          changeDetection: 'polling',
+          fetchImplementation: expect.any(Function),
+        })
+      );
+      const provider = jest.mocked(OpenFeature.setProviderAndWait).mock
+        .calls[0][0] as unknown as Provider;
+      expect(provider.metadata).toEqual({ name: 'Kibana OFREP provider' });
+      expect(
+        provider.resolveBooleanEvaluation('my-initial-flag', true, {}, openFeatureLogger)
+      ).toEqual({ value: false, reason: 'CACHED' });
+      expect(
+        provider.resolveBooleanEvaluation('my-overridden-flag', false, {}, openFeatureLogger)
+      ).toEqual({ value: true, reason: 'CACHED' });
+      expect(
+        provider.resolveBooleanEvaluation(
+          'myDestructuredObjPlugin.myOverriddenFlag',
+          false,
+          {},
+          openFeatureLogger
+        )
+      ).toEqual({ value: true, reason: 'CACHED' });
       expect(addHandlerSpy).toHaveBeenCalledWith(ClientProviderEvents.Ready, expect.any(Function));
-      addHandlerSpy.mockRestore();
     });
 
     test('awaits initialization in the start context', async () => {
-      const { setProvider } = featureFlagsService.setup(createSetupDeps());
       let externalResolve: Function = () => void 0;
-      const spy = jest.spyOn(OpenFeature, 'setProviderAndWait').mockImplementationOnce(async () => {
+      jest.spyOn(OpenFeature, 'setProviderAndWait').mockImplementationOnce(async () => {
         await new Promise((resolve) => {
           externalResolve = resolve;
         });
       });
-      const fakeProvider = {} as Provider;
-      setProvider(fakeProvider);
-      expect(spy).toHaveBeenCalledWith(fakeProvider);
+      featureFlagsService.setup(createSetupDeps());
       const startPromise = featureFlagsService.start();
       await expect(isSettledPromise(startPromise)).resolves.toBe(false);
       externalResolve();
@@ -101,9 +119,24 @@ describe('FeatureFlagsService Browser', () => {
       await expect(isSettledPromise(startPromise)).resolves.toBe(true);
     });
 
+    test('continues startup when the provider fails to initialize', async () => {
+      const coreContext = coreContextMock.create();
+      const service = new FeatureFlagsService(coreContext);
+      jest
+        .spyOn(OpenFeature, 'setProviderAndWait')
+        .mockRejectedValueOnce(new Error('provider down'));
+      service.setup(createSetupDeps());
+
+      await expect(service.start()).resolves.toEqual(expect.any(Object));
+      expect(coreContext.logger.error).toHaveBeenCalledWith(
+        expect.stringContaining('provider down')
+      );
+
+      await service.stop();
+    });
+
     test('do not hold for too long during initialization', async () => {
-      const { setProvider } = featureFlagsService.setup(createSetupDeps());
-      const spy = jest.spyOn(OpenFeature, 'setProviderAndWait').mockImplementationOnce(async () => {
+      jest.spyOn(OpenFeature, 'setProviderAndWait').mockImplementationOnce(async () => {
         await new Promise(() => {}); // never resolves
       });
       const addLabelsMock = jest.fn();
@@ -111,9 +144,7 @@ describe('FeatureFlagsService Browser', () => {
         .spyOn(apm, 'getCurrentTransaction')
         // @ts-expect-error incomplete signature, but we don't care at this point
         .mockImplementationOnce(() => ({ addLabels: addLabelsMock }));
-      const fakeProvider = {} as Provider;
-      setProvider(fakeProvider);
-      expect(spy).toHaveBeenCalledWith(fakeProvider);
+      featureFlagsService.setup(createSetupDeps());
       const startPromise = featureFlagsService.start();
       await expect(isSettledPromise(startPromise)).resolves.toBe(false);
       await new Promise((resolve) => setTimeout(resolve, 2100)); // A bit longer than 2 seconds
@@ -122,53 +153,34 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     describe('APM instrumentation', () => {
-      const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
-
-      let setProvider: FeatureFlagsSetup['setProvider'];
-      let apmSpy: jest.SpyInstance<Transaction | undefined>;
-      let setProviderSpy: jest.SpyInstance<Promise<void>>;
-
-      beforeEach(() => {
-        const setup = featureFlagsService.setup(createSetupDeps());
-        setProvider = setup.setProvider;
-        setProviderSpy = jest.spyOn(OpenFeature, 'setProviderAndWait');
-        apmSpy = jest.spyOn(apm, 'startTransaction');
-      });
-
-      test('starts an APM transaction to track the time it takes to set a provider', () => {
-        expect.assertions(1);
-        setProvider(fakeProvider);
+      test('starts an APM transaction to track provider initialization', () => {
+        const apmSpy = jest.spyOn(apm, 'startTransaction');
+        featureFlagsService.setup(createSetupDeps());
         expect(apmSpy).toHaveBeenCalledWith('set-provider', 'feature-flags');
       });
 
       test('APM transaction tracks success', async () => {
-        expect.assertions(4);
-
-        setProviderSpy.mockResolvedValueOnce();
-        setProvider(fakeProvider);
+        const apmSpy = jest.spyOn(apm, 'startTransaction');
+        featureFlagsService.setup(createSetupDeps());
 
         const transaction = apmSpy.mock.results[0].value;
         const endTransactionSpy = jest.spyOn(transaction, 'end');
-        expect(transaction.outcome).toBeUndefined();
-        expect(endTransactionSpy).toHaveBeenCalledTimes(0);
-        await setProviderSpy.mock.results[0].value.catch(() => {});
+        await jest.mocked(OpenFeature.setProviderAndWait).mock.results[0].value;
+        await new Promise((resolve) => process.nextTick(resolve));
         expect(transaction.outcome).toBe('success');
         expect(endTransactionSpy).toHaveBeenCalledTimes(1);
       });
 
       test('APM transaction tracks failures', async () => {
-        expect.assertions(5);
-
+        const apmSpy = jest.spyOn(apm, 'startTransaction');
         const apmCaptureErrorSpy = jest.spyOn(apm, 'captureError');
         const error = new Error('Something went terribly wrong');
-        setProviderSpy.mockRejectedValueOnce(error);
-        setProvider(fakeProvider);
+        jest.spyOn(OpenFeature, 'setProviderAndWait').mockRejectedValueOnce(error);
+        featureFlagsService.setup(createSetupDeps());
 
         const transaction = apmSpy.mock.results[0].value;
         const endTransactionSpy = jest.spyOn(transaction, 'end');
-        expect(transaction.outcome).toBeUndefined();
-        expect(endTransactionSpy).toHaveBeenCalledTimes(0);
-        await setProviderSpy.mock.results[0].value.catch(() => {});
+        await jest.mocked(OpenFeature.setProviderAndWait).mock.results[0].value.catch(() => {});
         expect(apmCaptureErrorSpy).toHaveBeenCalledWith(error);
         expect(transaction.outcome).toBe('failure');
         expect(endTransactionSpy).toHaveBeenCalledTimes(1);
@@ -266,45 +278,9 @@ describe('FeatureFlagsService Browser', () => {
 
     beforeEach(async () => {
       addHandlerSpy = jest.spyOn(featureFlagsClient, 'addHandler');
-      injectedMetadata.getFeatureFlags.mockReturnValue({
-        overrides: {
-          'my-overridden-flag': true,
-          'myPlugin.myOverriddenFlag': true,
-          myDestructuredObjPlugin: { myOverriddenFlag: true },
-        },
-        initialFeatureFlags: {},
-      });
       featureFlagsService.setup(createSetupDeps());
       startContract = await featureFlagsService.start();
       apmSpy = jest.spyOn(apm, 'addLabels');
-    });
-
-    // We don't need to test the client, just our APIs, so testing that it returns the fallback value should be enough.
-    test('get boolean flag', () => {
-      const value = false;
-      expect(startContract.getBooleanValue('my-flag', value)).toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
-      expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
-        body: JSON.stringify({ value }),
-      });
-    });
-
-    test('get string flag', () => {
-      const value = 'my-default';
-      expect(startContract.getStringValue('my-flag', value)).toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
-      expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
-        body: JSON.stringify({ value }),
-      });
-    });
-
-    test('get number flag', () => {
-      const value = 42;
-      expect(startContract.getNumberValue('my-flag', value)).toEqual(value);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-flag': value });
-      expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
-        body: JSON.stringify({ value }),
-      });
     });
 
     test('getBooleanValue$ delivers the current evaluation before subscribe returns', () => {
@@ -401,14 +377,6 @@ describe('FeatureFlagsService Browser', () => {
       expect(seen).toEqual([false, true, false]);
     });
 
-    test('useBooleanValue honors config overrides on the first render', () => {
-      const { result } = renderHook(() =>
-        startContract.useBooleanValue('my-overridden-flag', false)
-      );
-
-      expect(result.current).toBe(true);
-    });
-
     test('useStringValue seeds from the synchronous evaluation and updates when the flag changes', () => {
       jest.spyOn(featureFlagsClient, 'getStringValue').mockReturnValue('live');
 
@@ -491,38 +459,11 @@ describe('FeatureFlagsService Browser', () => {
       expect(observedValues).toHaveLength(3);
     });
 
-    test('with overrides', async () => {
-      const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
-      expect(startContract.getBooleanValue('my-overridden-flag', false)).toEqual(true);
-      expect(apmSpy).toHaveBeenCalledWith({ 'flag_my-overridden-flag': true });
-      expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-overridden-flag/counter', {
-        body: JSON.stringify({ value: true }),
-      });
-      expect(getBooleanValueSpy).not.toHaveBeenCalled();
-
-      // Only to prove the spy works
-      expect(startContract.getBooleanValue('another-flag', false)).toEqual(false);
-      expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
-      expect(getBooleanValueSpy).toHaveBeenCalledWith('another-flag', false);
-      expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/another-flag/counter', {
-        body: JSON.stringify({ value: false }),
-      });
-    });
-
-    test('overrides with dotted names', async () => {
-      const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
-      expect(startContract.getBooleanValue('myPlugin.myOverriddenFlag', false)).toEqual(true);
-      expect(
-        startContract.getBooleanValue('myDestructuredObjPlugin.myOverriddenFlag', false)
-      ).toEqual(true);
-      expect(getBooleanValueSpy).not.toHaveBeenCalled();
-    });
-
     describe('usage counter reporting', () => {
-      test('does not report repeated evaluations of the same value', () => {
-        startContract.getBooleanValue('my-flag', false);
-        startContract.getBooleanValue('my-flag', false);
-        startContract.getBooleanValue('my-flag', false);
+      test('does not report repeated evaluations of the same value', async () => {
+        await firstValueFrom(startContract.getBooleanValue$('my-flag', false));
+        await firstValueFrom(startContract.getBooleanValue$('my-flag', false));
+        await firstValueFrom(startContract.getBooleanValue$('my-flag', false));
 
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
@@ -530,11 +471,11 @@ describe('FeatureFlagsService Browser', () => {
         });
       });
 
-      test('does not retry the same value after a failed best-effort report', () => {
+      test('does not retry the same value after a failed best-effort report', async () => {
         http.post.mockRejectedValueOnce(new Error('Counter request failed'));
 
-        startContract.getBooleanValue('my-flag', false);
-        startContract.getBooleanValue('my-flag', false);
+        await firstValueFrom(startContract.getBooleanValue$('my-flag', false));
+        await firstValueFrom(startContract.getBooleanValue$('my-flag', false));
 
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
@@ -542,9 +483,9 @@ describe('FeatureFlagsService Browser', () => {
         });
       });
 
-      test('does not report repeated NaN evaluations', () => {
-        startContract.getNumberValue('my-flag', NaN);
-        startContract.getNumberValue('my-flag', NaN);
+      test('does not report repeated NaN evaluations', async () => {
+        await firstValueFrom(startContract.getNumberValue$('my-flag', NaN));
+        await firstValueFrom(startContract.getNumberValue$('my-flag', NaN));
 
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenCalledWith('/internal/feature-flags/my-flag/counter', {
@@ -552,39 +493,30 @@ describe('FeatureFlagsService Browser', () => {
         });
       });
 
-      test('reports again when the evaluated value changes', () => {
+      test('reports again when the evaluated value changes', async () => {
         const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
         getBooleanValueSpy.mockReturnValueOnce(true).mockReturnValueOnce(false);
 
-        expect(startContract.getBooleanValue('my-flag', false)).toEqual(true);
+        await expect(
+          firstValueFrom(startContract.getBooleanValue$('my-flag', false))
+        ).resolves.toEqual(true);
         expect(http.post).toHaveBeenCalledTimes(1);
         expect(http.post).toHaveBeenLastCalledWith('/internal/feature-flags/my-flag/counter', {
           body: JSON.stringify({ value: true }),
         });
 
-        expect(startContract.getBooleanValue('my-flag', false)).toEqual(false);
+        await expect(
+          firstValueFrom(startContract.getBooleanValue$('my-flag', false))
+        ).resolves.toEqual(false);
         expect(http.post).toHaveBeenCalledTimes(2);
         expect(http.post).toHaveBeenLastCalledWith('/internal/feature-flags/my-flag/counter', {
           body: JSON.stringify({ value: false }),
         });
       });
 
-      test('does not report repeated evaluations of the same override value', () => {
-        startContract.getBooleanValue('my-overridden-flag', false);
-        startContract.getBooleanValue('my-overridden-flag', false);
-
-        expect(http.post).toHaveBeenCalledTimes(1);
-        expect(http.post).toHaveBeenCalledWith(
-          '/internal/feature-flags/my-overridden-flag/counter',
-          {
-            body: JSON.stringify({ value: true }),
-          }
-        );
-      });
-
-      test('treats values of different types as distinct for the same flag name', () => {
-        startContract.getStringValue('my-flag', '1');
-        startContract.getNumberValue('my-flag', 1);
+      test('treats values of different types as distinct for the same flag name', async () => {
+        await firstValueFrom(startContract.getStringValue$('my-flag', '1'));
+        await firstValueFrom(startContract.getNumberValue$('my-flag', 1));
 
         expect(http.post).toHaveBeenCalledTimes(2);
         expect(http.post).toHaveBeenNthCalledWith(1, '/internal/feature-flags/my-flag/counter', {
@@ -626,11 +558,8 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('reevaluates subscribed flags when the provider becomes ready', async () => {
-      // setProvider is not called in this suite's beforeEach, so register it here.
       const openFeatureAddHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
-      const { setProvider } = featureFlagsService.setup(createSetupDeps());
-      jest.spyOn(OpenFeature, 'setProviderAndWait').mockResolvedValue();
-      setProvider({ metadata: { name: 'fake provider' } } as Provider);
+      featureFlagsService.setup(createSetupDeps());
 
       const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
       getBooleanValueSpy.mockReturnValue(false);

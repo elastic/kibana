@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { spaceTest as test, tags } from '@kbn/scout-oblt';
+import { spaceTest as test, tags, type ObservabilityNavigation } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
+
+/** Asserts the active marker on a body nav item wherever it rendered — primary nav or "More". */
+const expectActiveBodyNavItem = async (nav: ObservabilityNavigation, deepLinkId: string) => {
+  const item = await nav.revealBodyNavItemByDeepLinkId(deepLinkId);
+  await expect(item).toHaveAttribute('data-test-subj', /nav-item-isActive/);
+};
 
 test.describe(
   'Stateful Observability Navigation - Sidebar',
@@ -26,14 +32,18 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('primary body items are visible and linked', async () => {
-        const primaryDeepLinks = [
-          'discover',
-          'dashboards',
-          'workflows',
-          'observability-overview:alerts',
-        ];
+        const primaryDeepLinks = ['discover', 'dashboards'];
         for (const deepLinkId of primaryDeepLinks) {
           const item = nav.navItemInPrimaryByDeepLinkId(deepLinkId);
+          await expect(item).toBeVisible();
+          await expect(item).toHaveAttribute('href', /.+/);
+        }
+      });
+
+      await test.step('overflow-boundary body items are visible and linked', async () => {
+        const boundaryDeepLinks = ['workflows', 'observability-overview:alerts'];
+        for (const deepLinkId of boundaryDeepLinks) {
+          const item = await nav.revealBodyNavItemByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
           await expect(item).toHaveAttribute('href', /.+/);
         }
@@ -85,15 +95,15 @@ test.describe(
       });
 
       await test.step('Workflows', async () => {
-        await nav.navItemInPrimaryByDeepLinkId('workflows').click();
+        await nav.clickBodyNavItemByDeepLinkId('workflows');
         await expect(page.testSubj.locator('workflowsPage')).toBeVisible();
-        await expect(nav.activeNavItemByDeepLinkId('workflows')).toBeVisible();
+        await expectActiveBodyNavItem(nav, 'workflows');
       });
 
       await test.step('Alerts', async () => {
-        await nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts').click();
+        await nav.clickBodyNavItemByDeepLinkId('observability-overview:alerts');
         await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible();
-        await expect(nav.activeNavItemByDeepLinkId('observability-overview:alerts')).toBeVisible();
+        await expectActiveBodyNavItem(nav, 'observability-overview:alerts');
       });
 
       await test.step('SLOs (via More menu)', async () => {
@@ -178,9 +188,7 @@ test.describe(
       await test.step('Open Cases list', async () => {
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
-        await expect(
-          page.testSubj.locator('cases-all-title').or(page.testSubj.locator('appHeaderTitle'))
-        ).toHaveText('Cases');
+        await expect(page.testSubj.locator('appHeaderTitle')).toHaveText('Cases');
       });
 
       await test.step('Create case', async () => {
@@ -192,11 +200,7 @@ test.describe(
         await nav.openMoreMenu();
         await nav.navItemInMoreByDeepLinkId('observability-overview:cases').click();
         await page.testSubj.click('configure-case-button');
-        await expect(
-          page.testSubj
-            .locator('case-configure-title')
-            .or(page.testSubj.locator('cases-redesign-settings-panel'))
-        ).toBeVisible();
+        await expect(page.testSubj.locator('cases-settings-panel')).toBeVisible();
       });
     });
 

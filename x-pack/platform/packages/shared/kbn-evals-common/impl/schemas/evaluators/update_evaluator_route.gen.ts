@@ -30,6 +30,17 @@ export const UpdateEvaluatorRequestBody = lazySchema(() =>
   z.object({
     description: z.string().min(1).max(2048).optional(),
     judge: LlmJudgeConfig.optional(),
+    /**
+     * The version this edit was made from. When set and the evaluator has since moved to another version, the update is rejected with `409` instead of being written over the newer version. Omit it to layer the update onto whatever the latest version is.
+     */
+    base_version: z
+      .string()
+      .min(1)
+      .max(64)
+      .optional()
+      .describe(
+        'The version this edit was made from. When set and the evaluator has since moved to another version, the update is rejected with `409` instead of being written over the newer version. Omit it to layer the update onto whatever the latest version is.'
+      ),
   })
 );
 export type UpdateEvaluatorRequestBody = z.infer<typeof UpdateEvaluatorRequestBody>;

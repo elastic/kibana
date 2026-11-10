@@ -258,7 +258,7 @@ export async function runDiscovery(
   await runManagedWorkflow(DISCOVERY_WORKFLOW_ID, 'discovery', {}, ctx, config, log);
 
   const params = new URLSearchParams({
-    stream: ctx.streamName,
+    source_id: ctx.sourceId,
     from: ctx.generatedAt,
     perPage: '100',
   });
@@ -289,11 +289,11 @@ export async function runDiscovery(
       )})`
     );
   }
-  if (event.status !== 'open') {
+  if (event.status !== 'active') {
     throw new Error(
       `runDiscovery: created event "${event.title ?? 'untitled'}" with status ${
         event.status ?? 'unknown'
-      }, expected open`
+      }, expected active`
     );
   }
 

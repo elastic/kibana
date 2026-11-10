@@ -7,27 +7,43 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import { EuiFlyoutHeader, EuiPanel } from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 interface FlyoutHeaderProps extends React.ComponentProps<typeof EuiFlyoutHeader> {
   children: React.ReactNode;
   /**
-   * Overrides for the inner `EuiPanel` that provides the recommended `16px` padding. Callers can
-   * e.g. pass `{ paddingSize: 'none' }` to render a more compact header.
+   * Overrides for the inner padding wrapper. Callers can e.g. pass `{ paddingSize: 'none' }`
+   * to render a more compact header.
    */
-  panelProps?: React.ComponentProps<typeof EuiPanel>;
+  panelProps?: Pick<EuiPanelProps, 'paddingSize' | 'css'>;
 }
 
 /**
- * Wrapper of `EuiFlyoutHeader`, setting the recommended `16px` padding using a EuiPanel.
+ * Wrapper of `EuiFlyoutHeader`, setting the recommended `16px` padding.
  */
 export const FlyoutHeader: FC<FlyoutHeaderProps> = memo(
   ({ children, panelProps, ...flyoutHeaderProps }) => {
+    const { euiTheme } = useEuiTheme();
+    const paddingSize = panelProps?.paddingSize ?? 'm';
+
     return (
       <EuiFlyoutHeader hasBorder {...flyoutHeaderProps}>
-        <EuiPanel hasShadow={false} color="transparent" {...panelProps}>
-          {children}
-        </EuiPanel>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          responsive={false}
+          css={[
+            paddingSize !== 'none' &&
+              css`
+                padding: ${euiTheme.size[paddingSize]};
+              `,
+            panelProps?.css,
+          ]}
+        >
+          <EuiFlexItem>{children}</EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutHeader>
     );
   }

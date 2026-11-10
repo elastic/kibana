@@ -77,6 +77,21 @@ export const MANAGED_CONFIG_KEYS: ManagedConfigKey[] = [
   },
 ];
 
+/**
+ * Defines the keys which we overwrite in the user's `.vscode/extensions.json` for the workspace.
+ */
+export const MANAGED_EXTENSIONS_KEYS: ManagedConfigKey[] = [
+  {
+    key: 'recommendations',
+    value: [
+      'oxc.oxc-vscode',
+      'dbaeumer.vscode-eslint',
+      'stylelint.vscode-stylelint',
+      'orta.vscode-jest',
+    ],
+  },
+];
+
 export const MANAGED_CONFIG_FILES = [
   {
     name: 'kibana-json-schema.json',

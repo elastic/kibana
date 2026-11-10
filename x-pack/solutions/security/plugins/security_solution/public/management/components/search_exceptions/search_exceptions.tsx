@@ -7,11 +7,19 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import type { EuiFieldSearchProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFieldSearch,
+  EuiButton,
+  EuiFilterButton,
+  EuiFilterGroup,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PolicySelectorMenuButtonProps } from '../policy_selector';
 import { PolicySelectorMenuButton } from '../policy_selector';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
+import type { ArtifactEnabledStatus } from '../../common/utils';
 
 const GLOBAL_ENTRIES = i18n.translate(
   'xpack.securitySolution.management.policiesSelector.globalEntries',
@@ -25,6 +33,18 @@ const UNASSIGNED_ENTRIES = i18n.translate(
     defaultMessage: 'Unassigned entries',
   }
 );
+const ENABLED_ENTRIES = i18n.translate(
+  'xpack.securitySolution.searchExceptions.enabledStatusFilter.enabled',
+  {
+    defaultMessage: 'Enabled',
+  }
+);
+const DISABLED_ENTRIES = i18n.translate(
+  'xpack.securitySolution.searchExceptions.enabledStatusFilter.disabled',
+  {
+    defaultMessage: 'Disabled',
+  }
+);
 
 export interface SearchExceptionsProps {
   defaultValue?: string;
@@ -32,6 +52,10 @@ export interface SearchExceptionsProps {
   hasPolicyFilter?: boolean;
   defaultIncludedPolicies?: string;
   hideRefreshButton?: boolean;
+  /** The active Enabled / Disabled filter. `undefined` shows all entries. */
+  enabledStatus?: ArtifactEnabledStatus;
+  /** When set, an Enabled / Disabled filter is shown between the policy filter and the Refresh button */
+  onEnabledStatusChange?(enabledStatus: ArtifactEnabledStatus | undefined): void;
   onSearch(
     /** The query string the user entered into the text field */
     query: string,
@@ -50,6 +74,8 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     hasPolicyFilter,
     defaultIncludedPolicies = '',
     hideRefreshButton = false,
+    enabledStatus,
+    onEnabledStatusChange,
   }) => {
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const initiallySelectedPolicies = useMemo(() => {
@@ -123,6 +149,14 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
       [onSearch, includedPolicies]
     );
 
+    const handleOnEnabledClick = useCallback(() => {
+      onEnabledStatusChange?.(enabledStatus === 'enabled' ? undefined : 'enabled');
+    }, [enabledStatus, onEnabledStatusChange]);
+
+    const handleOnDisabledClick = useCallback(() => {
+      onEnabledStatusChange?.(enabledStatus === 'disabled' ? undefined : 'disabled');
+    }, [enabledStatus, onEnabledStatusChange]);
+
     return (
       <EuiFlexGroup
         data-test-subj="searchExceptions"
@@ -149,6 +183,32 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
               onChange={policySelectionOnChangeHandler}
               data-test-subj="policiesSelectorButton"
             />
+          </EuiFlexItem>
+        ) : null}
+
+        {onEnabledStatusChange ? (
+          <EuiFlexItem grow={false}>
+            <EuiFilterGroup data-test-subj="enabledStatusFilter">
+              <EuiFilterButton
+                isToggle
+                isSelected={enabledStatus === 'enabled'}
+                hasActiveFilters={enabledStatus === 'enabled'}
+                onClick={handleOnEnabledClick}
+                withNext
+                data-test-subj="enabledStatusFilter-enabled"
+              >
+                {ENABLED_ENTRIES}
+              </EuiFilterButton>
+              <EuiFilterButton
+                isToggle
+                isSelected={enabledStatus === 'disabled'}
+                hasActiveFilters={enabledStatus === 'disabled'}
+                onClick={handleOnDisabledClick}
+                data-test-subj="enabledStatusFilter-disabled"
+              >
+                {DISABLED_ENTRIES}
+              </EuiFilterButton>
+            </EuiFilterGroup>
           </EuiFlexItem>
         ) : null}
 

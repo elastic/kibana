@@ -98,11 +98,11 @@ const getOutcomeDisplay = (
   outcome: PolicyExecutionOutcome
 ): { color: EuiBadgeProps['color']; label: string } => {
   switch (outcome) {
-    case 'dispatched':
+    case 'success':
       return { color: 'hollow', label: i18n.OUTCOME_DISPATCHED };
     case 'throttled':
       return { color: 'hollow', label: i18n.OUTCOME_THROTTLED };
-    case 'dispatch_failed':
+    case 'failure':
       return { color: 'danger', label: i18n.OUTCOME_FAILED };
   }
 };
@@ -136,7 +136,7 @@ const PolicyNameCell = ({
 const PolicyOutcomeCell = ({ row }: DataGridCellValueElementProps) => {
   const outcome = row.flattened[POLICY_EXECUTION_FIELDS.outcome] as PolicyExecutionOutcome;
   const { color, label } = getOutcomeDisplay(outcome);
-  if (outcome !== 'dispatch_failed') {
+  if (outcome !== 'failure') {
     return <EuiBadge color={color}>{label}</EuiBadge>;
   }
   const errorMessage = row.flattened[POLICY_RECORD_EXTRA_FIELDS.errorMessage] as string | null;
@@ -170,7 +170,7 @@ const PolicyRulesCell = ({
   <RulesCell
     rules={row.flattened[POLICY_EXECUTION_FIELDS.rules] as PolicyRules}
     maxVisibleRules={MAX_VISIBLE_RULES}
-    totalRuleCount={row.flattened[POLICY_RECORD_EXTRA_FIELDS.totalRuleCount] as number}
+    totalRuleCount={row.flattened[POLICY_RECORD_EXTRA_FIELDS.ruleCount] as number}
     activeRuleId={activeRuleId}
     onRuleClick={onRuleClick}
     canReadRules={canReadRules}

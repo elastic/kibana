@@ -6,19 +6,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ESCALATIONS_SUGGEST_USERS_URL } from '../../../common/escalations/constants';
+import { SUGGEST_USER_PROFILES_URL } from '../../../common/constants';
 import { ESCALATIONS_API_PRIVILEGE_MANAGE } from '../constants';
+import { INVESTIGATIONS_API_PRIVILEGE_MANAGE } from '../../investigations/constants';
 import type { EscalationRouteDependencies } from '../types';
 
 /**
- * Suggests user profiles for the escalation collaborator picker.
+ * Suggests user profiles for both the escalation collaborator picker and the investigation
+ * assignee picker. Requires either manage privilege: users who can manage investigations
+ * need this to suggest assignees even when they cannot manage escalations.
  *
  * Deliberately an unversioned `router.post` (not `router.versioned`), consistent with every
  * other internal user-profile suggest route in Kibana — the core suggest client sends no
  * `elastic-api-version` header, and adding one would break the route.
- *
- * Requires ESCALATIONS_API_PRIVILEGE_MANAGE rather than READ: only the private-escalation
- * create form calls this, and create already requires the manage privilege.
  */
 export const registerSuggestUsersRoute = ({
   router,
@@ -27,8 +27,16 @@ export const registerSuggestUsersRoute = ({
 }: EscalationRouteDependencies) => {
   router.post(
     {
-      path: ESCALATIONS_SUGGEST_USERS_URL,
-      security: { authz: { requiredPrivileges: [ESCALATIONS_API_PRIVILEGE_MANAGE] } },
+      path: SUGGEST_USER_PROFILES_URL,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [ESCALATIONS_API_PRIVILEGE_MANAGE, INVESTIGATIONS_API_PRIVILEGE_MANAGE],
+            },
+          ],
+        },
+      },
       validate: {
         body: schema.object({
           name: schema.string({ minLength: 0, maxLength: 256 }),

@@ -6,9 +6,13 @@
  */
 
 import type { SavedObjectsFindResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { AggregationsStringTermsBucketKeys } from '@elastic/elasticsearch/lib/api/types';
 import type { ApiKeyToInvalidate } from '../../saved_objects/schemas/api_key_to_invalidate';
+import { TASK_SO_NAME } from '../../saved_objects';
+import type { SerializedConcreteTaskInstance } from '../../task';
+import { TaskStatus } from '../../task';
 import type { SavedObjectTypesToQuery } from './run_invalidate';
 import { queryForApiKeysInUse } from './query_for_api_keys_in_use';
 
@@ -21,6 +25,11 @@ export interface UiamApiKeyAndSOId {
   id: string;
   apiKeyId: string;
   uiamApiKey: string;
+}
+
+interface RunningTask {
+  taskId: string;
+  taskStartedAt: string;
 }
 
 interface GetApiKeyIdsToInvalidateOpts {
@@ -46,6 +55,13 @@ export async function getApiKeyIdsToInvalidate({
 }: GetApiKeyIdsToInvalidateOpts): Promise<GetApiKeysToInvalidateResult> {
   const apiKeyIds: ApiKeyIdAndSOId[] = [];
   const uiamApiKeys: UiamApiKeyAndSOId[] = [];
+  const runningTasks = new Map<string, RunningTask>();
+
+  const trackRunningTask = (soId: string, { taskId, taskStartedAt }: ApiKeyToInvalidate) => {
+    if (taskId && taskStartedAt) {
+      runningTasks.set(soId, { taskId, taskStartedAt });
+    }
+  };
 
   if (encryptedSavedObjectsClient) {
     // Decrypt the apiKeyId for each pending invalidation SO
@@ -56,6 +72,11 @@ export async function getApiKeyIdsToInvalidate({
             savedObjectType,
             apiKeyPendingInvalidationSO.id
           );
+
+        trackRunningTask(
+          decryptedApiKeyPendingInvalidationObject.id,
+          decryptedApiKeyPendingInvalidationObject.attributes
+        );
 
         const { uiamApiKey, apiKeyId } = decryptedApiKeyPendingInvalidationObject.attributes;
         if (uiamApiKey) {
@@ -75,6 +96,8 @@ export async function getApiKeyIdsToInvalidate({
   } else {
     // No decryption needed, return the apiKeyId as-is
     apiKeySOsPendingInvalidation.saved_objects.forEach((apiKeyPendingInvalidationSO) => {
+      trackRunningTask(apiKeyPendingInvalidationSO.id, apiKeyPendingInvalidationSO.attributes);
+
       const { uiamApiKey, apiKeyId } = apiKeyPendingInvalidationSO.attributes;
       if (uiamApiKey) {
         uiamApiKeys.push({
@@ -108,12 +131,26 @@ export async function getApiKeyIdsToInvalidate({
     );
   }
 
+  const soIdsUsedByRunningTasks = await getSOIdsUsedByRunningTasks(
+    runningTasks,
+    savedObjectsClient
+  );
+  // Keys are shared across tasks of the same type, so protect every pending SO with the same key.
+  const apiKeyIdsUsedByRunningTasks = new Set(
+    [...apiKeyIds, ...uiamApiKeys]
+      .filter(({ id }) => soIdsUsedByRunningTasks.has(id))
+      .map(({ apiKeyId }) => apiKeyId)
+  );
+  const isInUse = (apiKeyId: string) =>
+    apiKeyIdsUsedByRunningTasks.has(apiKeyId) ||
+    apiKeyIdsInUseBuckets.some((bucket) => bucket.key === apiKeyId);
+
   const apiKeyIdsToInvalidate: ApiKeyIdAndSOId[] = [];
   const uiamApiKeysToInvalidate: UiamApiKeyAndSOId[] = [];
   const apiKeyIdsToExclude: ApiKeyIdAndSOId[] = [];
 
   apiKeyIds.forEach(({ id, apiKeyId }) => {
-    if (apiKeyIdsInUseBuckets.find((bucket) => bucket.key === apiKeyId)) {
+    if (isInUse(apiKeyId)) {
       apiKeyIdsToExclude.push({ id, apiKeyId });
     } else {
       apiKeyIdsToInvalidate.push({ id, apiKeyId });
@@ -121,7 +158,7 @@ export async function getApiKeyIdsToInvalidate({
   });
 
   uiamApiKeys.forEach(({ id, apiKeyId, uiamApiKey }) => {
-    if (apiKeyIdsInUseBuckets.find((bucket) => bucket.key === apiKeyId)) {
+    if (isInUse(apiKeyId)) {
       apiKeyIdsToExclude.push({ id, apiKeyId });
     } else {
       uiamApiKeysToInvalidate.push({ id, apiKeyId, uiamApiKey });
@@ -133,4 +170,47 @@ export async function getApiKeyIdsToInvalidate({
     apiKeyIdsToExclude,
     ...(uiamApiKeysToInvalidate.length > 0 ? { uiamApiKeysToInvalidate } : {}),
   };
+}
+
+// Returns the ids of the pending invalidation SOs whose key was replaced during a task run that is
+// still in progress. That run keeps using the replaced key until it finishes.
+async function getSOIdsUsedByRunningTasks(
+  runningTasksBySOId: Map<string, RunningTask>,
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<Set<string>> {
+  const soIds = new Set<string>();
+  if (runningTasksBySOId.size === 0) {
+    return soIds;
+  }
+
+  const allTaskIds = Array.from(runningTasksBySOId.values(), (runningTask) => runningTask.taskId);
+  const taskIds = [...new Set(allTaskIds)];
+  const { saved_objects: tasks } = await savedObjectsClient.bulkGet<
+    Pick<SerializedConcreteTaskInstance, 'status' | 'startedAt' | 'retryAt'>
+  >(taskIds.map((id) => ({ type: TASK_SO_NAME, id })));
+
+  const now = Date.now();
+  const runningTasks = new Map<string, string>();
+  for (const task of tasks) {
+    if (isSavedObjectErrorResult(task)) {
+      continue;
+    }
+    const { id, attributes } = task;
+    if (attributes.status !== TaskStatus.Running || !attributes.startedAt) {
+      continue;
+    }
+    // A run that outlived its retryAt is presumed dead (e.g. its Kibana node crashed).
+    if (!attributes.retryAt || Date.parse(attributes.retryAt) <= now) {
+      continue;
+    }
+    runningTasks.set(id, attributes.startedAt);
+  }
+
+  for (const [soId, { taskId, taskStartedAt }] of runningTasksBySOId) {
+    const startedAt = runningTasks.get(taskId);
+    if (startedAt && Date.parse(startedAt) === Date.parse(taskStartedAt)) {
+      soIds.add(soId);
+    }
+  }
+  return soIds;
 }

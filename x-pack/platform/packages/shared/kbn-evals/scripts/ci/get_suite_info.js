@@ -36,5 +36,17 @@ process.stdout.write(
     shards: Array.isArray(suite.shards) ? suite.shards : [],
     stepTimeoutInMinutes: suite.stepTimeoutInMinutes,
     scoutHook: suite.scoutHook,
+    vaultSecret: suite.vaultSecret,
+    scoutArch: suite.scoutArch,
+    scoutDomain: suite.scoutDomain,
+    // The Scout server config set (plugin flags the suite's stack needs). run_suite.sh
+    // falls back to it when EVAL_SERVER_CONFIG_SET is unset (on-demand path).
+    serverConfigSet: suite.serverConfigSet,
+    // Per-spec model config and the suite-level fallback, so `get_fanout_matrix.js` can resolve each
+    // spec's models without re-reading the suites config.
+    specModelGroups: Array.isArray(suite.specModelGroups) ? suite.specModelGroups : [],
+    weeklyEisModelGroups: Array.isArray(suite.weeklyEisModelGroups)
+      ? suite.weeklyEisModelGroups
+      : [],
   })
 );

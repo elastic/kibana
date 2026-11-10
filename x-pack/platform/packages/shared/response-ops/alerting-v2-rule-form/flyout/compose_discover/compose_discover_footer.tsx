@@ -99,7 +99,7 @@ export const ComposeDiscoverFooter = ({
     isConditionStep &&
     !isBuilderStep &&
     isAlert &&
-    !isCommittedQueryValid(watchedQuery, 'alert', uiState.queryCommitted);
+    !isCommittedQueryValid(watchedQuery, uiState.queryCommitted);
 
   const nextDisabled =
     (!isBuilderMode && uiState.childOpen) ||
@@ -118,15 +118,14 @@ export const ComposeDiscoverFooter = ({
   };
 
   const submitDisabled =
-    hasValidationErrors ||
-    !isCommittedQueryValid(watchedQuery, isAlert ? 'alert' : 'signal', uiState.queryCommitted);
+    hasValidationErrors || !isCommittedQueryValid(watchedQuery, uiState.queryCommitted);
   const submitLabel = isCreate ? CREATE_RULE_BUTTON_LABEL : SAVE_RULE_BUTTON_LABEL;
 
   if (uiState.yamlMode) {
     /*
      * Gate YAML Save on validity only, not the form-shape `submitDisabled`, so
-     * non-representable rules (e.g. alert + standalone) stay savable — they never
-     * produce a 'success' summary state.
+     * non-representable rules stay savable — they never produce a 'success'
+     * summary state.
      */
     const yamlSaveDisabled = hasValidationErrors || yamlHasErrors;
     const yamlSaveDisabledTooltip = yamlHasErrors

@@ -6,12 +6,118 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ToolHandlerContext } from '@kbn/agent-builder-server';
+import { i18n } from '@kbn/i18n';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import { getExecutionState } from '@kbn/agent-builder-tools-base/workflows';
+import {
+  getExecutionState,
+  hasWorkflowExecutePrivilege,
+  hasWorkflowExecutionReadPrivilege,
+} from '@kbn/agent-builder-tools-base/workflows';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
+import { confirmToolCall } from './utils/confirm_tool_call';
+import { formatCodeBlock } from './utils/code_block';
+
+/** `execute_api` selector for the same operation, so one auto-approval covers both tools. */
+const RESUME_EXECUTION_API = 'workflows.post-workflows-executions-executionid-resume';
+const MAX_INPUT_PREVIEW_CHARS = 2000;
+
+const buildConfirmationMessage = (input: Record<string, unknown>, waitingMessage?: string) => {
+  const lines: string[] = [];
+  if (waitingMessage) {
+    lines.push(
+      i18n.translate('workflows.agentBuilder.resumeExecution.confirmation.waitingMessage', {
+        defaultMessage: '**The workflow asks:** {waitingMessage}',
+        values: { waitingMessage },
+      }),
+      ''
+    );
+  }
+  lines.push(
+    i18n.translate('workflows.agentBuilder.resumeExecution.confirmation.input', {
+      defaultMessage: '**The agent will send:**',
+    }),
+    formatCodeBlock('json', JSON.stringify(input, null, 2), MAX_INPUT_PREVIEW_CHARS)
+  );
+  return lines.join('\n');
+};
+
+type WaitingInput = NonNullable<Awaited<ReturnType<typeof getExecutionState>>>['waiting_input'];
+
+/** Loads the paused step once, so the prompt and the resume name the same step. */
+const createWaitingInputLoader = ({
+  request,
+  spaceId,
+  executionId,
+  workflowApi,
+  getSecurity,
+}: {
+  request: KibanaRequest;
+  spaceId: string;
+  executionId: string;
+  workflowApi: WorkflowsServerPluginSetup['management'];
+  getSecurity: () => SecurityPluginStart | undefined;
+}): (() => Promise<WaitingInput>) => {
+  let waitingInput: Promise<WaitingInput> | undefined;
+  return () => {
+    waitingInput ??= (async () => {
+      try {
+        if (
+          !(await hasWorkflowExecutionReadPrivilege({ security: getSecurity(), request, spaceId }))
+        ) {
+          return undefined;
+        }
+        const execution = await getExecutionState({ executionId, spaceId, workflowApi, request });
+        return execution?.waiting_input;
+      } catch {
+        // The dialog still shows the input, and the resume finds the paused step itself.
+        return undefined;
+      }
+    })();
+    return waitingInput;
+  };
+};
+
+/**
+ * Asks the user to confirm the input before the workflow resumes. A paused step
+ * waits for a human, so an agent must not answer it alone.
+ */
+const confirmResume = ({
+  toolContext,
+  input,
+  loadWaitingInput,
+}: {
+  toolContext: ToolHandlerContext;
+  input: Record<string, unknown>;
+  loadWaitingInput: () => Promise<WaitingInput>;
+}) =>
+  confirmToolCall({
+    context: toolContext,
+    toolId: platformCoreTools.resumeWorkflowExecution,
+    api: RESUME_EXECUTION_API,
+    declinedMessage: 'The user declined to resume this workflow execution. Do not retry it.',
+    // An answer confirms one paused step; a new pause asks again.
+    getPromptKey: async () => (await loadWaitingInput())?.step_execution_id,
+    getPrompt: async () => ({
+      title: i18n.translate('workflows.agentBuilder.resumeExecution.confirmation.title', {
+        defaultMessage: 'Resume the paused workflow?',
+      }),
+      message: buildConfirmationMessage(input, (await loadWaitingInput())?.message),
+      confirm_text: i18n.translate(
+        'workflows.agentBuilder.resumeExecution.confirmation.confirmText',
+        { defaultMessage: 'Resume' }
+      ),
+      cancel_text: i18n.translate(
+        'workflows.agentBuilder.resumeExecution.confirmation.cancelText',
+        { defaultMessage: 'Cancel' }
+      ),
+      color: 'warning',
+    }),
+  });
 
 const resumeWorkflowExecutionSchema = z.object({
   executionId: z
@@ -28,8 +134,10 @@ const resumeWorkflowExecutionSchema = z.object({
 
 export const resumeWorkflowExecutionTool = ({
   workflowsManagement,
+  getSecurity,
 }: {
   workflowsManagement: WorkflowsServerPluginSetup;
+  getSecurity: () => SecurityPluginStart | undefined;
 }): BuiltinToolDefinition<typeof resumeWorkflowExecutionSchema> => {
   const { management: workflowApi } = workflowsManagement;
 
@@ -42,6 +150,7 @@ export const resumeWorkflowExecutionTool = ({
     Use this tool when a workflow execution returned with status "waiting_for_input".
     The execution's "waiting_input" field describes what input is expected (message and optional schema).
     Provide the executionId and the required input object to resume the workflow.
+    In a conversation, the user confirms the input before the workflow resumes; if they decline, do not retry. With no user to confirm (for example in an \`ai.agent\` workflow step), resuming is refused unless the run pre-approved the workflows API.
 
     **Important - read after resume:** a successful call means resume was **accepted and scheduled** in the engine.
     The execution record can **lag**: you may still briefly see the same "waiting_for_input" and the same form right after this tool returns. **Do not** tell the user there is another HITL step, a loop or a second approval round unless you have **confirmed** a genuinely new pause (clear evidence such as a new step, changed context, or repeated status checks that rule out a stale snapshot).
@@ -58,10 +167,34 @@ export const resumeWorkflowExecutionTool = ({
       idempotentHint: false,
       openWorldHint: false,
     },
-    handler: async ({ executionId, input }, { spaceId, request }) => {
+    handler: async ({ executionId, input }, toolContext) => {
+      const { spaceId, request } = toolContext;
       try {
+        if (!(await hasWorkflowExecutePrivilege({ security: getSecurity(), request, spaceId }))) {
+          return {
+            results: [
+              errorResult(
+                "Unauthorized to resume workflow execution. The 'workflowsManagement' execute privilege is required."
+              ),
+            ],
+          };
+        }
+
+        const loadWaitingInput = createWaitingInputLoader({
+          request,
+          spaceId,
+          executionId,
+          workflowApi,
+          getSecurity,
+        });
+        const confirmation = await confirmResume({ toolContext, input, loadWaitingInput });
+        if (confirmation) {
+          return confirmation;
+        }
+
         await workflowApi.resumeWorkflowExecution(executionId, spaceId, input, request, {
           channel: 'agent_builder',
+          stepExecutionId: (await loadWaitingInput())?.step_execution_id,
         });
       } catch (e) {
         const message = e instanceof Error ? e.message : String(e);
@@ -71,9 +204,13 @@ export const resumeWorkflowExecutionTool = ({
       }
 
       // Failure here is non-fatal & the resume already happened so the LLM must not retry it
-      let execution: Awaited<ReturnType<typeof getExecutionState>>;
+      let execution: Awaited<ReturnType<typeof getExecutionState>> = null;
       try {
-        execution = await getExecutionState({ executionId, spaceId, workflowApi });
+        if (
+          await hasWorkflowExecutionReadPrivilege({ security: getSecurity(), request, spaceId })
+        ) {
+          execution = await getExecutionState({ executionId, spaceId, workflowApi, request });
+        }
       } catch {
         execution = null;
       }

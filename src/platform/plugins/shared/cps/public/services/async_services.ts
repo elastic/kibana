@@ -21,6 +21,7 @@ export const fetchDefaultProjectRouting = async (http: HttpSetup): Promise<strin
   const projectRoutingName = getSpaceDefaultNpreName(http.spaceId);
 
   try {
+    // codeql[js/kibana/unsafe-dynamic-http-path] segment is kibana_space_${spaceId}_default; spaceId is parsed by getSpaceIdFromPath and matches /^[a-z0-9_-]+$/
     return await http.get<string>(`/internal/cps/project_routing/${projectRoutingName}`);
   } catch (error) {
     if (error?.response?.status === 404) {

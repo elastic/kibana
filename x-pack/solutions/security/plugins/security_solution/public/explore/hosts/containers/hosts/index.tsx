@@ -20,8 +20,17 @@ import type { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../../../common/utils/execution_context';
 import type { HostsArgs } from './hosts_table_query_types';
 import { HOSTS_ALL_TABLE_QUERY_ID } from './hosts_table_query_types';
+
+const HOSTS_ALL_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
+  'hosts_all'
+);
 
 export const ID = HOSTS_ALL_TABLE_QUERY_ID;
 
@@ -86,6 +95,7 @@ export const useAllHost = ({
     },
     errorMessage: i18n.FAIL_ALL_HOST,
     abort: skip,
+    executionContext: HOSTS_ALL_CONTEXT,
   });
 
   const hostsResponse = useMemo(

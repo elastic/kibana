@@ -35,6 +35,7 @@ import {
   createNewAPIKeySet,
   updateMetaAttributes,
   bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
   migrateLegacyLastRunOutcomeMsg,
 } from '../../../../rules_client/lib';
 import type { RuleParams } from '../../types';
@@ -295,7 +296,10 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
   changeTracking?: RuleChangeTracking;
   // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 }): Promise<SanitizedRule<Params>> {
-  await bulkMigrateLegacyActions({ context, rules: [originalRuleSavedObject] });
+  const migratedRuleIds = await bulkMigrateLegacyActions({
+    context,
+    rules: [originalRuleSavedObject],
+  });
   const originalRule = originalRuleSavedObject.attributes;
 
   const allActions = [...updateRuleData.actions, ...(updateRuleData.systemActions ?? [])];
@@ -326,11 +330,12 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     : originalRule.revision;
 
   const username = await context.getUserName();
-
+  const profileUid = await context.getProfileUid();
   const apiKeyAttributes = await createNewAPIKeySet(context, {
     id: ruleType.id,
     ruleName: updateRuleData.name,
     username,
+    profileUid,
     shouldUpdateApiKey: originalRule.enabled,
     errorMessage: 'Error updating rule: could not create API key',
     apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
@@ -350,6 +355,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     notifyWhen,
     revision,
     updatedBy: username,
+    updatedByProfileUid: profileUid,
     updatedAt: new Date().toISOString(),
     artifacts: artifactsWithRefs,
     ...(originalRule.lastRun
@@ -378,6 +384,9 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
         references: extractedReferences,
       },
     });
+
+    // Legacy actions are deleted only once the rule carrying them is saved, so a conflict can be retried
+    await deleteLegacyActionsForRules(context, migratedRuleIds);
 
     await logRuleChanges({
       ruleSOs: [updatedRuleSavedObject],

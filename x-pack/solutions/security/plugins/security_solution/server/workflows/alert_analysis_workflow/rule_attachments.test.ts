@@ -49,6 +49,13 @@ const createRulesClient = (rules: RuleAlertType[]): jest.Mocked<RulesClient> =>
       const { filter = '', page = 1, perPage = 0, sortField, sortOrder } = options ?? {};
 
       let matched = rules;
+      // The service narrows ML rules out (or counts only them) through the rule-type KQL clause.
+      const mlClause = 'alert.attributes.params.type: "machine_learning"';
+      if (typeof filter === 'string' && filter.includes(`not ${mlClause}`)) {
+        matched = matched.filter((rule) => rule.params.type !== 'machine_learning');
+      } else if (typeof filter === 'string' && filter.includes(mlClause)) {
+        matched = matched.filter((rule) => rule.params.type === 'machine_learning');
+      }
       if (typeof filter === 'string' && filter.includes('actionRef')) {
         const negatedGroups = (filter.match(/not \(/g) ?? []).length;
         const totalGroups = (filter.match(/actionRef/g) ?? []).length;
@@ -244,6 +251,7 @@ describe('alert analysis workflow rule attachments', () => {
       total: 3,
       attached: 1,
       selectable: 2,
+      skippedRuleCount: 0,
       attachedRuleIds: ['rule-1'],
       ruleIds: ['rule-2', 'rule-3'],
     });
@@ -288,6 +296,7 @@ describe('alert analysis workflow rule attachments', () => {
       total: 2,
       attached: 2,
       selectable: 0,
+      skippedRuleCount: 0,
       attachedRuleIds: ['rule-1', 'rule-3'],
       ruleIds: [],
     });
@@ -314,8 +323,60 @@ describe('alert analysis workflow rule attachments', () => {
       total: 2,
       attached: 0,
       selectable: 2,
+      skippedRuleCount: 0,
       attachedRuleIds: [],
       ruleIds: ['rule-2', 'rule-3'],
+    });
+  });
+
+  describe('selection when the caller lacks machine learning authorization', () => {
+    const buildService = ({ mlValid }: { mlValid: boolean }) =>
+      createAlertAnalysisWorkflowRuleAttachmentService({
+        rulesClient: createRulesClient([
+          createRule({ id: 'rule-1' }),
+          createRule({ id: 'rule-2', type: 'machine_learning' }),
+          createRule({ id: 'rule-3', type: 'machine_learning' }),
+          createRule({ id: 'rule-4', actions: [createWorkflowAction()] }),
+        ]),
+        workflowId: WORKFLOW_ID,
+        bulkEditDependencies: {
+          ...createBulkEditDependencies(),
+          mlAuthz: {
+            validateRuleType: jest.fn().mockResolvedValue({ valid: mlValid, message: undefined }),
+          },
+        },
+      });
+
+    it('leaves ML rules out of the selection and reports how many were skipped', async () => {
+      await expect(
+        buildService({ mlValid: false }).getRuleAttachmentSelection({
+          search: '',
+          attachmentFilter: 'not_attached',
+        })
+      ).resolves.toEqual({
+        total: 1,
+        attached: 0,
+        selectable: 1,
+        skippedRuleCount: 2,
+        attachedRuleIds: [],
+        ruleIds: ['rule-1'],
+      });
+    });
+
+    it('selects ML rules when the caller is authorized to edit them', async () => {
+      await expect(
+        buildService({ mlValid: true }).getRuleAttachmentSelection({
+          search: '',
+          attachmentFilter: 'not_attached',
+        })
+      ).resolves.toEqual({
+        total: 3,
+        attached: 0,
+        selectable: 3,
+        skippedRuleCount: 0,
+        attachedRuleIds: [],
+        ruleIds: ['rule-1', 'rule-2', 'rule-3'],
+      });
     });
   });
 

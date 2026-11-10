@@ -78,6 +78,41 @@ describe('compileUserDefinedEvaluator', () => {
     );
   });
 
+  describe('evaluator direction', () => {
+    const withScores = (scores: LlmJudgeConfig['output']['scores']) =>
+      compileUserDefinedEvaluator(document({ ...NUMERIC_JUDGE, output: { scores } })).direction;
+
+    it('takes the direction its scores share', () => {
+      expect(withScores([{ name: 'hallucination', type: 'number', direction: 'minimize' }])).toBe(
+        'minimize'
+      );
+      expect(
+        withScores([
+          { name: 'length', type: 'number', direction: 'neutral' },
+          { name: 'turns', type: 'number', direction: 'neutral' },
+        ])
+      ).toBe('neutral');
+    });
+
+    it('reads scores without a direction as maximize', () => {
+      expect(
+        withScores([
+          { name: 'tone', type: 'number' },
+          { name: 'grounded', type: 'number', direction: 'maximize' },
+        ])
+      ).toBe('maximize');
+    });
+
+    it('keeps maximize for a judge whose scores point different ways', () => {
+      expect(
+        withScores([
+          { name: 'grounded', type: 'number' },
+          { name: 'hallucination', type: 'number', direction: 'minimize' },
+        ])
+      ).toBe('maximize');
+    });
+  });
+
   describe('evidence schema', () => {
     it('requires the evidence the judge declared', () => {
       const { evidenceSchema } = compileUserDefinedEvaluator(document(NUMERIC_JUDGE));
@@ -217,6 +252,38 @@ describe('compileUserDefinedEvaluator', () => {
       );
     });
 
+    it("tells the judge which end of a numeric score's range is best", async () => {
+      const { prompt } = await runJudge({
+        judge: {
+          ...NUMERIC_JUDGE,
+          output: {
+            scores: [
+              { name: 'grounded', type: 'number' },
+              { name: 'hallucination', type: 'number', direction: 'minimize' },
+              { name: 'length', type: 'number', direction: 'neutral' },
+            ],
+          },
+        },
+        output: {
+          grounded: { score: 1, explanation: 'Cites the tool output.' },
+          hallucination: { score: 0, explanation: 'Nothing invented.' },
+          length: { score: 0.4, explanation: 'Medium length.' },
+        },
+      });
+
+      const { properties } = prompt.mock.calls[0][0].prompt.versions[0].tools.evaluate.schema;
+
+      // Unchanged from before scores declared a direction, so existing judges are prompted
+      // exactly as they were.
+      expect(properties.grounded.properties.score.description).toBe(
+        'A score between 0 and 1, where 1 is the best possible outcome.'
+      );
+      expect(properties.hallucination.properties.score.description).toBe(
+        'A score between 0 and 1, where 0 is the best possible outcome.'
+      );
+      expect(properties.length.properties.score.description).toBe('A score between 0 and 1.');
+    });
+
     it('uses the system prompt the definition set', async () => {
       const { prompt } = await runJudge({
         judge: { ...NUMERIC_JUDGE, system_prompt: 'You grade tone and nothing else.' },
@@ -242,6 +309,40 @@ describe('compileUserDefinedEvaluator', () => {
           score: 0.8,
           explanation: 'Mostly professional.',
         }),
+      ]);
+    });
+
+    it('stamps each score with its own direction, reading an absent one as maximize', async () => {
+      const { result } = await runJudge({
+        judge: {
+          ...NUMERIC_JUDGE,
+          output: {
+            scores: [
+              { name: 'grounded', type: 'number' },
+              { name: 'hallucination', type: 'number', direction: 'minimize' },
+              {
+                name: 'verdict',
+                type: 'categorical',
+                direction: 'neutral',
+                labels: [
+                  { value: 'pass', score: 1 },
+                  { value: 'fail', score: 0 },
+                ],
+              },
+            ],
+          },
+        },
+        output: {
+          grounded: { score: 0.9, explanation: 'Cites the tool output.' },
+          hallucination: { score: 0.1, explanation: 'One unsupported claim.' },
+          verdict: { label: 'pass', explanation: 'Answers the question.' },
+        },
+      });
+
+      expect(result.scores.map(({ name, direction }) => ({ name, direction }))).toEqual([
+        { name: 'grounded', direction: 'maximize' },
+        { name: 'hallucination', direction: 'minimize' },
+        { name: 'verdict', direction: 'neutral' },
       ]);
     });
 

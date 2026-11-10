@@ -35,6 +35,8 @@ import { EvalsClient } from './utils/evals_client';
 import { EvaluatorApiClient } from './utils/evaluator_api_client';
 import { getBuildkiteCiMetadataFromEnv } from './utils/ci_metadata';
 import { getSpaceIdsFromEnv } from './utils/space_ids';
+import { reportExperimentLinks, resolveEvalsUiKibanaUrl } from './utils/report_experiment_links';
+import { DEFAULT_EXPERIMENT_CONCURRENCY, getConcurrencyFromEnv } from './utils/concurrency';
 import { buildIngestRequest, toScoreModel } from './utils/build_ingest_request';
 import { buildModelFromConnector } from './utils/build_model_from_connector';
 import type {
@@ -282,10 +284,12 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
     async (
       {
         log,
+        config,
         evalsClient,
         connector,
         evaluationConnector,
         repetitions,
+        concurrency,
         reportModelScore,
         workerExecutionId,
         workerExperimentId,
@@ -314,6 +318,8 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         model,
         executionId,
         repetitions,
+        concurrency,
+        requestedConcurrency: getConcurrencyFromEnv(),
         upsertDataset: async (dataset: EvaluationDataset) =>
           evalsClient.upsertDataset({
             name: dataset.name,
@@ -377,6 +383,20 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           });
         }
       }
+
+      reportExperimentLinks({
+        log,
+        kibanaUrl: resolveEvalsUiKibanaUrl({
+          evaluationsKbnUrl: process.env.EVAL_KBN_URL,
+          scoutKibanaUrl: config.hosts.kibana,
+        }),
+        experimentIds: datasetRunResults.map(({ id }) => id),
+        executionId,
+        suiteId,
+        modelId: model.id,
+        shardId: process.env.EVAL_SHARD_ID,
+        spaceId: spaceIds?.[0],
+      });
 
       // Publish the full composite execution ID to Buildkite metadata so the
       // post-comparison step can retrieve it without querying the experiments API.
@@ -497,4 +517,5 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   connectorParam: [undefined, { option: true, scope: 'worker' }],
   evaluationConnectorParam: [undefined, { option: true, scope: 'worker' }],
   repetitions: [1, { option: true, scope: 'worker' }],
+  concurrency: [DEFAULT_EXPERIMENT_CONCURRENCY, { option: true, scope: 'worker' }],
 });

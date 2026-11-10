@@ -65,11 +65,13 @@ export const suggestUsersRoute = (router: ElasticAssistantPluginRouter, logger: 
             name: searchTerm,
             size,
             dataPath: 'avatar',
-            // ensure that the user has the required assistant privileges
+            // Kibana registers this as an application privilege. The feature id
+            // `securitySolutionAssistant` is not a privilege name, so only roles
+            // with `*` matched the previous check.
             requiredPrivileges: {
               spaceId,
               privileges: {
-                kibana: ['securitySolutionAssistant'],
+                kibana: ['feature_securitySolutionAssistant.all'],
               },
             },
           });

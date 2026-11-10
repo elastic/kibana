@@ -54,13 +54,18 @@ export const registerResolveInstrumentationRoute = ({ router }: RouteDependencie
         const coreContext = await context.core;
         const traceAccessor = createTraceAccessor({
           traceId,
-          esClient: coreContext.elasticsearch.client.asInternalUser,
+          // The probed evidence carries samples of the query, response and tool calls, so
+          // reading as the internal user would hand trace content to a caller who holds
+          // `manage_evals` but no Elasticsearch access to the trace.
+          esClient: coreContext.elasticsearch.client.asCurrentUser,
         });
 
         if (!(await hasTraceDocuments(traceAccessor))) {
           return response.notFound({
             body: {
-              message: `Error: ${getNoTraceDocumentsMessage(traceId)}`,
+              // Main's shared wording, without its `Error:` prefix: the body is already an
+              // error, so the prefix only shows up doubled in the UI.
+              message: getNoTraceDocumentsMessage(traceId),
             },
           });
         }

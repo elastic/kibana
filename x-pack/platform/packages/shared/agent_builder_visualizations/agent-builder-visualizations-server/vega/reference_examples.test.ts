@@ -223,7 +223,7 @@ describe('reference example specs (loaded on demand)', () => {
     }
   });
 
-  it('escapes dotted field references and filters time on the raw source field', async () => {
+  it('escapes dotted field references and leaves @timestamp filtering to Kibana', async () => {
     for (const example of VEGA_REFERENCE_EXAMPLES) {
       const spec = await example.load();
       const serialized = JSON.stringify(spec);
@@ -231,11 +231,9 @@ describe('reference example specs (loaded on demand)', () => {
       expect(serialized).not.toMatch(/"field":\s*"[a-z_]+\.[a-z_]+"/i);
 
       const url = (spec.data as { url?: Record<string, unknown> }).url ?? {};
-      const query = String(url.query ?? '');
-      if (query.includes('?_tstart')) {
-        expect(query).toMatch(/WHERE @timestamp >= \?_tstart AND @timestamp < \?_tend/);
-        expect(url['%timefield%']).toBe('@timestamp');
-      }
+      // Kibana applies the time range to @timestamp on its own, as the ES|QL guidance says.
+      expect(String(url.query ?? '')).not.toMatch(/@timestamp\s*[<>]=?\s*\?_t(start|end)/);
+      expect(url).not.toHaveProperty('%timefield%');
     }
   });
 });

@@ -130,7 +130,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
                 maxLength: 4096,
                 meta: {
                   description:
-                    'A comma-separated list of data stream index patterns to check. Each pattern must be of the form `logs-<dataset>-*` or `metrics-<dataset>-*`.',
+                    'A comma-separated list of data stream index patterns to check. Each pattern must be of the form `logs-<dataset>-<namespace>` or `metrics-<dataset>-<namespace>`, where `<namespace>` is `*` or a concrete namespace.',
                 },
               }),
               start: schema.string({
