@@ -104,6 +104,27 @@ export const getAgentPolicyAdvancedSettings = (docLinks?: DocLinks['fleet']): Se
     example_value: '/tmp/test',
   },
   {
+    name: 'agent.download.reserve_diskspace.enabled',
+    hidden: true,
+    api_field: {
+      name: 'agent_download_reserve_diskspace_enabled',
+    },
+    title: i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.reserveDiskspaceTitle', {
+      defaultMessage: 'Reserve disk space before upgrade',
+    }),
+    description: () =>
+      i18n.translate('xpack.fleet.settings.agentPolicyAdvanced.reserveDiskspaceDescription', {
+        defaultMessage:
+          'Reserve disk space equal to the size of the new agent package before upgrading. Overrides the setting of the agent binary source.',
+      }),
+    schema: z.boolean().default(true),
+    example_value: false,
+    checkboxLabel: i18n.translate(
+      'xpack.fleet.settings.agentPolicyAdvanced.reserveDiskspaceCheckboxLabel',
+      { defaultMessage: 'Enable' }
+    ),
+  },
+  {
     name: 'agent.logging.metrics.period',
     hidden: true,
     api_field: {

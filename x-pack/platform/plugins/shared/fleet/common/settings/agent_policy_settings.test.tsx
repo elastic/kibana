@@ -85,4 +85,24 @@ describe('agent_policy_settings', () => {
       expect(setting.schema.parse(undefined)).toBe(false);
     });
   });
+
+  describe('reserve_diskspace setting', () => {
+    it('should include agent.download.reserve_diskspace.enabled in AGENT_POLICY_ADVANCED_SETTINGS', () => {
+      const setting = AGENT_POLICY_ADVANCED_SETTINGS.find(
+        (s) => s.name === 'agent.download.reserve_diskspace.enabled'
+      );
+      expect(setting).toBeDefined();
+      expect(setting?.api_field.name).toBe('agent_download_reserve_diskspace_enabled');
+    });
+
+    it('should accept boolean values and default to true', () => {
+      const setting = AGENT_POLICY_ADVANCED_SETTINGS.find(
+        (s) => s.name === 'agent.download.reserve_diskspace.enabled'
+      )!;
+      expect(setting.schema.safeParse(true).success).toBe(true);
+      expect(setting.schema.safeParse(false).success).toBe(true);
+      expect(setting.schema.safeParse('false').success).toBe(false);
+      expect(setting.schema.parse(undefined)).toBe(true);
+    });
+  });
 });

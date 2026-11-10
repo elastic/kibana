@@ -1627,6 +1627,112 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('reserve_diskspace', () => {
+      it('should add reserve_diskspace to the agent policy and allow updating it', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'download source with reserve_diskspace disabled',
+            host: 'http://test.fr:443',
+            is_default: false,
+            reserve_diskspace: false,
+          })
+          .expect(200);
+
+        const { id: downloadSourceId, ...itemWithoutId } = postResponse.item;
+        expect(itemWithoutId.reserve_diskspace).to.eql(false);
+
+        const { body: postAgentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'agent policy with download source reserve_diskspace disabled',
+            namespace: 'default',
+            description: '',
+            is_default: false,
+            download_source_id: downloadSourceId,
+          })
+          .expect(200);
+
+        const { id: agentPolicyId } = postAgentPolicyResponse.item;
+
+        const { body: getAgentPolicyResponse } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
+          .expect(200);
+
+        expect(getAgentPolicyResponse.item.agent.download.reserve_diskspace).to.eql({
+          enabled: false,
+        });
+
+        await supertest
+          .put(`/api/fleet/agent_download_sources/${downloadSourceId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            ...itemWithoutId,
+            reserve_diskspace: true,
+          })
+          .expect(200);
+
+        const { body: getAgentPolicyUpdatedResponse } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
+          .expect(200);
+
+        expect(getAgentPolicyUpdatedResponse.item.agent.download.reserve_diskspace).to.eql({
+          enabled: true,
+        });
+      });
+
+      it('should let the agent policy advanced setting override reserve_diskspace', async function () {
+        const { body: postResponse } = await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'download source with reserve_diskspace enabled',
+            host: 'http://test.fr:443',
+            is_default: false,
+            reserve_diskspace: true,
+          })
+          .expect(200);
+
+        const { body: postAgentPolicyResponse } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'agent policy overriding reserve_diskspace',
+            namespace: 'default',
+            description: '',
+            is_default: false,
+            download_source_id: postResponse.item.id,
+            advanced_settings: {
+              agent_download_reserve_diskspace_enabled: false,
+            },
+          })
+          .expect(200);
+
+        const { body: getAgentPolicyResponse } = await supertest
+          .get(`/api/fleet/agent_policies/${postAgentPolicyResponse.item.id}/full`)
+          .expect(200);
+
+        expect(getAgentPolicyResponse.item.agent.download.reserve_diskspace).to.eql({
+          enabled: false,
+        });
+      });
+
+      it('should return a 400 when reserve_diskspace is not a boolean', async function () {
+        await supertest
+          .post(`/api/fleet/agent_download_sources`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'download source with invalid reserve_diskspace',
+            host: 'http://test.fr:443',
+            is_default: false,
+            reserve_diskspace: 'nope',
+          })
+          .expect(400);
+      });
+    });
+
     describe('download_source_ids behaviour', () => {
       // One case promotes a new default, so hand the flag back to the original source
       after(async () => {

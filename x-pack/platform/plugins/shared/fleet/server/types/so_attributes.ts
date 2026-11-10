@@ -356,6 +356,7 @@ export interface DownloadSourceSOAttributes {
   is_preconfigured?: boolean;
   source_id?: string;
   proxy_id?: string | null;
+  reserve_diskspace?: boolean;
   ssl?: string | null; // encrypted ssl field
   auth?: string | null; // encrypted auth field
   secrets?: {

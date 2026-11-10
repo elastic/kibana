@@ -23,3 +23,10 @@ export const downloadSourceSchemaV2 = schema.object(
   },
   { unknowns: 'ignore' }
 );
+
+export const downloadSourceSchemaV3 = downloadSourceSchemaV2.extends(
+  {
+    reserve_diskspace: schema.maybe(schema.boolean()),
+  },
+  { unknowns: 'ignore' }
+);

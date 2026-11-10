@@ -303,6 +303,28 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
+          <EuiFormRow
+            fullWidth
+            {...inputs.reserveDiskspaceInput.formRowProps}
+            helpText={
+              <FormattedMessage
+                id="xpack.fleet.settings.editDownloadSourcesFlyout.reserveDiskspaceHelpText"
+                defaultMessage="Before upgrading, agents reserve disk space equal to the size of the new agent package to fail early when there is not enough space. Applies to agent policies using this host as their primary agent binary source. Turn off if this causes upgrade issues."
+              />
+            }
+          >
+            <EuiSwitch
+              data-test-subj="editDownloadSourcesFlyout.reserveDiskspaceSwitch"
+              {...inputs.reserveDiskspaceInput.props}
+              label={
+                <FormattedMessage
+                  id="xpack.fleet.settings.editDownloadSourcesFlyout.reserveDiskspaceSwitchLabel"
+                  defaultMessage="Reserve disk space before upgrading agents"
+                />
+              }
+            />
+          </EuiFormRow>
+          <EuiSpacer size="m" />
           <SSLFormSection
             inputs={inputs}
             useSecretsStorage={enableSSLSecrets && useSecretsStorage}

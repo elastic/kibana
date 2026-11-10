@@ -30,6 +30,14 @@ const DownloadSourceBaseSchema = {
       }),
     ])
   ),
+  reserve_diskspace: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'When enabled, Elastic Agent reserves disk space equal to the size of the new agent package before upgrading. Defaults to true on the agent side when not set.',
+      },
+    })
+  ),
   ssl: schema.maybe(
     schema.object({
       certificate_authorities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),

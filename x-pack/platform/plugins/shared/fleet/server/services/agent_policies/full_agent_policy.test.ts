@@ -2041,6 +2041,26 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
+  it('should set agent.download.reserve_diskspace.enabled from advanced_settings', async () => {
+    mockAgentPolicy({
+      advanced_settings: {
+        agent_download_reserve_diskspace_enabled: false,
+      },
+    });
+    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
+
+    expect(agentPolicy).toMatchObject({
+      agent: {
+        download: {
+          sourceURI: 'http://default-registry.co',
+          reserve_diskspace: {
+            enabled: false,
+          },
+        },
+      },
+    });
+  });
+
   describe('fleet server host ssl', () => {
     const baseFleetServerHost = {
       name: 'default Fleet Server',
@@ -4403,6 +4423,37 @@ describe('getBinarySourceSettings', () => {
     expect(getBinarySourceSettings([downloadSource], undefined)).toEqual({
       sourceURI: 'http://custom-registry-test',
       sources: ['http://custom-registry-test'],
+    });
+  });
+
+  it.each([true, false])(
+    'should return agent download config with reserve_diskspace.enabled %s if set',
+    (reserveDiskspace) => {
+      expect(
+        getBinarySourceSettings(
+          [{ ...downloadSource, reserve_diskspace: reserveDiskspace }],
+          undefined
+        )
+      ).toEqual({
+        sourceURI: 'http://custom-registry-test',
+        sources: ['http://custom-registry-test'],
+        reserve_diskspace: { enabled: reserveDiskspace },
+      });
+    }
+  );
+
+  it('should use reserve_diskspace of the primary download source only', () => {
+    expect(
+      getBinarySourceSettings(
+        [
+          downloadSource,
+          { ...downloadSource, id: 'test-ds-2', host: 'http://other', reserve_diskspace: false },
+        ],
+        undefined
+      )
+    ).toEqual({
+      sourceURI: 'http://custom-registry-test',
+      sources: ['http://custom-registry-test', 'http://other'],
     });
   });
 

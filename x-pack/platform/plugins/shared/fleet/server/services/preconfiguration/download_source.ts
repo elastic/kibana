@@ -30,6 +30,8 @@ function hasChanged(existing: DownloadSource, preconfigured: PreconfiguredDownlo
     existing.host !== preconfigured.host ||
     existing.is_default !== preconfigured.is_default ||
     !isEqual(existing.proxy_id ?? null, preconfigured.proxy_id ?? null) ||
+    // unset is equivalent to the agent default (enabled)
+    (existing.reserve_diskspace ?? true) !== (preconfigured.reserve_diskspace ?? true) ||
     !isEqual(existing.ssl ?? null, preconfigured.ssl ?? null)
   );
 }
@@ -52,6 +54,9 @@ async function createOrUpdatePreconfiguredDownloadSources(
       if (!existing.is_preconfigured || dataChanged) {
         await downloadSourceService.update(soClient, esClient, preconfigured.id, {
           ...preconfigured,
+          // reset a previously stored value when it was removed from the config
+          ...(existing.reserve_diskspace !== undefined &&
+            preconfigured.reserve_diskspace === undefined && { reserve_diskspace: true }),
           is_preconfigured: true,
         });
         if (dataChanged) {
