@@ -440,6 +440,34 @@ export const casesSchema: CasesTelemetrySchema = {
         type: 'long',
         _meta: { description: 'Automatically extract observables setting disabled' },
       },
+      extractObservablesSourceExplicit: {
+        type: 'long',
+        _meta: {
+          description:
+            'Cases where the caller set extractObservables to a value that differs from the template or space default. A value from a legacy (configuration-level) template that differs from the space default is counted here, because only a template that the request references is known as a template. Cases created before this attribute existed are not counted in any source bucket',
+        },
+      },
+      extractObservablesSourceTemplate: {
+        type: 'long',
+        _meta: {
+          description:
+            'Cases where extractObservables comes from the case template, unless a caller or a rule changed the value. Legacy (configuration-level) templates count here only for cases that a rule creates',
+        },
+      },
+      extractObservablesSourceSpaceDefault: {
+        type: 'long',
+        _meta: {
+          description:
+            'Cases where extractObservables comes from the space or owner default, unless a caller or a rule changed the value',
+        },
+      },
+      extractObservablesSourceRule: {
+        type: 'long',
+        _meta: {
+          description:
+            'Cases where a detection rule set extractObservables to a value that differs from the template or space default',
+        },
+      },
       observables: observablesSchema,
       totalWithMaxObservables: {
         type: 'long',
@@ -530,6 +558,20 @@ export const casesSchema: CasesTelemetrySchema = {
       closure: {
         manually: long,
         automatic: long,
+      },
+      extractObservablesDefaultOn: {
+        type: 'long',
+        _meta: {
+          description:
+            'Number of configuration saved objects with the extractObservables default enabled',
+        },
+      },
+      extractObservablesDefaultOff: {
+        type: 'long',
+        _meta: {
+          description:
+            'Number of configuration saved objects with the extractObservables default disabled',
+        },
       },
       ...customFieldsSolutionTelemetrySchema,
     },

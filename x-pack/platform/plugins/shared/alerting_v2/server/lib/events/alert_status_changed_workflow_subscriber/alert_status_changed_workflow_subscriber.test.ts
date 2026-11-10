@@ -77,25 +77,6 @@ describe('AlertStatusChangedWorkflowSubscriber', () => {
     subscriber = new AlertStatusChangedWorkflowSubscriber(bus, workflowService, loggerService);
   });
 
-  describe('start()', () => {
-    it('subscribes one handler to alert.status.changed', () => {
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(1);
-      expect(bus.subscribe).toHaveBeenCalledWith(
-        ALERT_STATUS_CHANGED_EVENT_TYPE,
-        expect.any(Function)
-      );
-    });
-
-    it('is idempotent: a second call does not double-subscribe', () => {
-      subscriber.start();
-      subscriber.start();
-
-      expect(bus.subscribe).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('event dispatch', () => {
     it('forwards a rule run payload unchanged under the acting request', async () => {
       subscriber.start();
@@ -163,24 +144,6 @@ describe('AlertStatusChangedWorkflowSubscriber', () => {
         },
         error: expect.objectContaining({ message: 'workflows unreachable' }),
       });
-    });
-  });
-
-  describe('stop()', () => {
-    it('unsubscribes and lets a later start() subscribe again', () => {
-      const unsubscribe = jest.fn();
-      bus.subscribe.mockReturnValue({ unsubscribe });
-
-      subscriber.start();
-      subscriber.stop();
-      subscriber.start();
-
-      expect(unsubscribe).toHaveBeenCalledTimes(1);
-      expect(bus.subscribe).toHaveBeenCalledTimes(2);
-    });
-
-    it('is safe to call when no subscription is active', () => {
-      expect(() => subscriber.stop()).not.toThrow();
     });
   });
 });

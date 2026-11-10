@@ -29,7 +29,16 @@ import type { WorkflowExecutionRepository } from '../server/repositories/workflo
 jest.mock('../server/repositories/workflow_execution_repository');
 jest.mock('../server/repositories/step_execution_repository');
 
+/** The space every execution this fixture drives belongs to; override it per suite. */
+const DEFAULT_FIXTURE_SPACE_ID = 'fake_space_id';
+
+export interface WorkflowRunFixtureOptions {
+  /** The space the fixture's executions run in. Defaults to `fake_space_id`. */
+  spaceId?: string;
+}
+
 export class WorkflowRunFixture {
+  public readonly spaceId: string;
   public readonly taskAbortController = new AbortController();
   public readonly dependencies = mockContextDependencies();
   public readonly loggerMock = {
@@ -63,7 +72,8 @@ export class WorkflowRunFixture {
   public readonly workflowsExecutionEngineMock = workflowsExecutionEngineMock.createStart();
   public readonly internalResumeWorkflowExecutionMock = jest.fn().mockResolvedValue(undefined);
 
-  constructor() {
+  constructor({ spaceId = DEFAULT_FIXTURE_SPACE_ID }: WorkflowRunFixtureOptions = {}) {
+    this.spaceId = spaceId;
     jest
       .mocked(this.dependencies.coreStart.elasticsearch.client.asInternalUser.search)
       .mockResolvedValue({
@@ -120,7 +130,7 @@ export class WorkflowRunFixture {
     const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
     const workflowExecution: Partial<EsWorkflowExecution> = {
       id: 'fake_workflow_execution_id',
-      spaceId: 'fake_space_id',
+      spaceId: this.spaceId,
       workflowId: 'fake_foreach_id',
       isTestRun: false,
       workflowDefinition,
@@ -139,7 +149,7 @@ export class WorkflowRunFixture {
     );
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
-      spaceId: 'fake_space_id',
+      spaceId: this.spaceId,
       signal: this.taskAbortController.signal,
       dependencies: this.dependencies,
       logger: this.loggerMock,
@@ -163,11 +173,32 @@ export class WorkflowRunFixture {
     }
   }
 
+  /**
+   * Re-ticks a parked workflow until it leaves WAITING. One resume can leave a
+   * later parallel branch parked.
+   */
+  public async driveToTerminal(maxGuard = 10): Promise<void> {
+    let guard = 0;
+    while (
+      this.workflowExecutionRepositoryMock.workflowExecutions.get('fake_workflow_execution_id')
+        ?.status === ExecutionStatus.WAITING &&
+      guard < maxGuard
+    ) {
+      const resumeTask = this.taskManagerMock.schedule.mock.calls.at(-1)?.[0];
+      if (resumeTask?.runAt instanceof Date) {
+        await this.resumeWorkflowAtScheduledTime();
+      } else {
+        await this.resumeWorkflow();
+      }
+      guard += 1;
+    }
+  }
+
   public resumeWorkflow() {
     this.bindIoClient();
     return resumeWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
-      spaceId: 'fake_space_id',
+      spaceId: this.spaceId,
       signal: this.taskAbortController.signal,
       logger: this.loggerMock,
       config: this.configMock,
@@ -195,7 +226,7 @@ export class WorkflowRunFixture {
     const workflowDefinition = YAML.parseDocument(workflowYaml).toJSON() as WorkflowYaml;
     const workflowExecution: Partial<EsWorkflowExecution> = {
       id: 'fake_workflow_execution_id',
-      spaceId: 'fake_space_id',
+      spaceId: this.spaceId,
       stepId,
       workflowId: 'fake_foreach_id',
       isTestRun: false,
@@ -214,7 +245,7 @@ export class WorkflowRunFixture {
     );
     return runWorkflow({
       workflowRunId: 'fake_workflow_execution_id',
-      spaceId: 'fake_space_id',
+      spaceId: this.spaceId,
       signal: this.taskAbortController.signal,
       dependencies: this.dependencies,
       logger: this.loggerMock,

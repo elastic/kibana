@@ -44,7 +44,7 @@ const createMockInit = (
   };
 
   const mockContextManager = {
-    renderValueAccordingToContext: jest.fn((value: unknown) => value),
+    renderObjectAccordingToContextAsync: jest.fn(async (value: Record<string, unknown>) => value),
   };
 
   const stepExecutionRuntime = {
@@ -189,7 +189,7 @@ describe('WorkflowExecuteStepImpl', () => {
     it('should render inputs via context manager', async () => {
       const init = createMockInit();
       const ctx = (init.stepExecutionRuntime as any).contextManager;
-      ctx.renderValueAccordingToContext.mockReturnValue({
+      ctx.renderObjectAccordingToContextAsync.mockResolvedValue({
         'workflow-id': 'rendered-id',
         inputs: { rendered: true },
       });
@@ -199,7 +199,7 @@ describe('WorkflowExecuteStepImpl', () => {
       const step = new WorkflowExecuteStepImpl(init);
       await step.run();
 
-      expect(ctx.renderValueAccordingToContext).toHaveBeenCalled();
+      expect(ctx.renderObjectAccordingToContextAsync).toHaveBeenCalled();
       expect((init.stepExecutionRuntime as any).setInput).toHaveBeenCalledWith({
         'workflow-id': 'rendered-id',
         inputs: { rendered: true },
@@ -214,7 +214,7 @@ describe('WorkflowExecuteStepImpl', () => {
       async ({ renderedWorkflowId }) => {
         const init = createMockInit();
         const ctx = (init.stepExecutionRuntime as any).contextManager;
-        ctx.renderValueAccordingToContext.mockReturnValue({
+        ctx.renderObjectAccordingToContextAsync.mockResolvedValue({
           'workflow-id': renderedWorkflowId,
           inputs: { rendered: true },
         });
@@ -544,7 +544,7 @@ describe('WorkflowExecuteStepImpl', () => {
       expect(repo.getWorkflow).not.toHaveBeenCalled();
       expect(init.stepExecutionRuntime.setInput).not.toHaveBeenCalled();
       expect(
-        init.stepExecutionRuntime.contextManager.renderValueAccordingToContext
+        init.stepExecutionRuntime.contextManager.renderObjectAccordingToContextAsync
       ).not.toHaveBeenCalled();
       expect(stepRuntime.finishStep).toHaveBeenCalledWith({ result: 'success' });
     });

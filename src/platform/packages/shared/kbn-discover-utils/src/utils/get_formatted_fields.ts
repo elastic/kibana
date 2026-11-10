@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '../types';
-import { formatFieldValueReact } from './format_value';
+import { formatFieldValueReact } from './format_value_react';
 
 export function getFormattedFields<T>(
   doc: DataTableRecord,

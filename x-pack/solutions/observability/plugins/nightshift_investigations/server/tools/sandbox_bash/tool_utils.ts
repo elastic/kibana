@@ -8,15 +8,28 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { RunContextStackEntry, ToolHandlerContext } from '@kbn/agent-builder-server';
+import type { SandboxCaller } from '../../sandbox_audit';
 import type { ResolvedSandboxCredentials } from './connector_credentials';
 
 export const getConversationId = (context: {
-  runContext: { stack: readonly unknown[] };
+  runContext: { stack: unknown[] };
 }): string | undefined =>
-  (context.runContext.stack as readonly RunContextStackEntry[])
+  (context.runContext.stack as RunContextStackEntry[])
     .filter((e) => e.type === 'agent')
     .map((e) => (e as Extract<RunContextStackEntry, { type: 'agent' }>).conversationId)
     .find(Boolean);
+
+/**
+ * What the sandbox audit events of a tool call say issued them: the tool and this call of it.
+ * Every tool that obtains a session passes this, since a session cannot be had without it.
+ */
+export const getSandboxCaller = (
+  context: Pick<ToolHandlerContext, 'callContext'>
+): SandboxCaller => ({
+  type: 'tool',
+  toolId: context.callContext.toolId,
+  toolCallId: context.callContext.toolCallId,
+});
 
 /**
  * Sandbox workspaces are namespaced per space, so the same conversation id in two spaces
@@ -57,8 +70,6 @@ export const resolveAbsolutePath = (filePath: string): string => {
 };
 
 export interface SandboxCallContext {
-  agentId?: string;
-  conversationId?: string;
   request: KibanaRequest;
   /** Per-agent connector allow-list; credentials are never injected for connectors outside it. */
   allowedConnectorIds: readonly string[];
@@ -79,15 +90,10 @@ export type SandboxToolHandlerContext = ToolHandlerContext & {
 export const getSandboxCallContext = (
   context: Pick<SandboxToolHandlerContext, 'request' | 'sandboxCallContext'> & {
     agentConfiguration?: AgentConfiguration;
-    runContext?: { stack: readonly RunContextStackEntry[] };
   }
 ): SandboxCallContext =>
   context.sandboxCallContext ?? {
     request: context.request,
-    agentId: context.runContext?.stack.findLast((entry) => entry.type === 'agent')?.agentId,
-    conversationId: context.runContext
-      ? getConversationId({ runContext: context.runContext })
-      : undefined,
     allowedConnectorIds: context.agentConfiguration?.connector_ids ?? [],
     resolvedCredentials: new Map(),
   };

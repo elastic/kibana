@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ComponentCatalogue } from '@kbn/streams-schema';
-import { getDefinition } from '../../services/component_catalogue';
+import { getDefinition, type ComponentChecker } from '../../services/component_catalogue';
 import { SLOT_POSITION } from '../../services/unit_graph';
 import type { UnitSignal } from '../../services/unit_pipeline';
 import type { DraftProcessor } from '../../services/unit_processing';
@@ -80,12 +80,16 @@ interface ProcessorListProps {
   /** Ids of processors that other processing slots also apply. */
   sharedProcessorIds: ReadonlySet<string>;
   componentRefs: readonly ComponentReferenceOption[];
+  /** Checks a processor the editor submits before it commits. */
+  checkComponent: ComponentChecker;
+  /** Ids used in the unit, for checking a new processor under the id it would get. */
+  componentIds: ReadonlySet<string>;
   onCreate: () => void;
   onEdit: (key: string) => void;
   onDelete: (key: string) => void;
   onDuplicate: (key: string) => void;
   onMove: (from: number, to: number) => void;
-  onCommit: (processor: DraftProcessor) => void;
+  onCommit: (processor: DraftProcessor, options?: { unchecked?: boolean }) => void;
   onCancel: () => void;
 }
 
@@ -101,6 +105,8 @@ export function ProcessorList({
   diagnostics,
   sharedProcessorIds,
   componentRefs,
+  checkComponent,
+  componentIds,
   onCreate,
   onEdit,
   onDelete,
@@ -121,6 +127,8 @@ export function ProcessorList({
           catalogue={catalogue}
           telemetry={telemetry}
           componentRefs={componentRefs}
+          checkComponent={checkComponent}
+          componentIds={componentIds}
           onCommit={onCommit}
           onCancel={onCancel}
         />
@@ -133,9 +141,8 @@ export function ProcessorList({
       {newStepPosition === SLOT_POSITION.start ? newStepEditor : null}
       {steps.map((step, index) => {
         const isUnderEdit = isEditing && step.key === editingKey;
-        const displayName =
-          getDefinition(catalogue, 'processor', step.processor.type)?.display_name ??
-          step.processor.type;
+        const definition = getDefinition(catalogue, 'processor', step.processor.type);
+        const displayName = definition?.display_name ?? step.processor.type;
         return (
           <EuiFlexItem key={step.key} grow={false}>
             <DraggableStepWrapper
@@ -159,6 +166,8 @@ export function ProcessorList({
                     }
                     telemetry={telemetry}
                     componentRefs={componentRefs}
+                    checkComponent={checkComponent}
+                    componentIds={componentIds}
                     onCommit={onCommit}
                     onCancel={onCancel}
                     onDelete={() => onDelete(step.key)}
@@ -169,6 +178,7 @@ export function ProcessorList({
                     displayName={displayName}
                     diagnostics={diagnostics.filter(({ stepIndex }) => stepIndex === index)}
                     editable={editable && !isEditing}
+                    hasEditableDefinition={definition !== undefined}
                     isFirst={index === 0}
                     isLast={index === steps.length - 1}
                     onEdit={() => onEdit(step.key)}

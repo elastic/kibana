@@ -925,7 +925,8 @@ async function handleTransformInstall({
           // add '{ headers: { es-secondary-authorization: 'ApiKey {encodedApiKey}' } }'
           { ignore: [409], ...(secondaryAuth ? { ...secondaryAuth } : {}) }
         ),
-      { logger }
+      // Re-PUTting a just-deleted transform id conflicts until ES reaps its state-and-stats doc.
+      { logger, additionalRetryMessages: ['version_conflict_engine_exception'] }
     );
     logger.debug(`Created transform: ${transform.installationName}`);
   } catch (err) {

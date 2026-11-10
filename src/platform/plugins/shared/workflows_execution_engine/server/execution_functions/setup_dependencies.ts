@@ -233,7 +233,8 @@ export async function setupDependencies(
     workflowExecutionGraph,
     stepExecutionRuntimeFactory,
     enhancedDependencies,
-    stepIoService
+    stepIoService,
+    workflowExecutionState
   );
 
   return {

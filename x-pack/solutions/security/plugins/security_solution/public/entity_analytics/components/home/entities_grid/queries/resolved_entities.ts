@@ -7,7 +7,11 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { escapeStringValue } from '@kbn/esql-utils';
-import { CriticalityLevels } from '../../../../../../common/entity_analytics/asset_criticality/constants';
+import { CriticalityLevelsForBulkUpload } from '../../../../../../common/entity_analytics/asset_criticality/constants';
+import {
+  CRITICALITY_LEVELS,
+  getCriticalityRank,
+} from '../../../../../../common/entity_analytics/entity_store/resolution_group_values';
 import {
   CRITICALITY_FIELD,
   ENTITY_ID_FIELD,
@@ -44,26 +48,15 @@ const GROUP_VALUE_FIELDS = [
   LAST_SEEN_FIELD,
 ];
 
-/** Criticality levels from the highest: a resolved entity shows the highest of its aliases. */
-export const CRITICALITY_LEVELS = Object.values(CriticalityLevels);
-
-const getCriticalityRank = (index: number): number => CRITICALITY_LEVELS.length - index;
-
 const buildCriticalityRankExpression = (field: string): string =>
   `CASE(${CRITICALITY_LEVELS.map(
-    (level, index) => `${field} == ${escapeStringValue(level)}, ${getCriticalityRank(index)}`
+    (level) => `${field} == ${escapeStringValue(level)}, ${getCriticalityRank(level)}`
   ).join(', ')})`;
 
 const buildCriticalityLevelExpression = (rankField: string): string =>
   `CASE(${CRITICALITY_LEVELS.map(
-    (level, index) => `${rankField} == ${getCriticalityRank(index)}, ${escapeStringValue(level)}`
+    (level) => `${rankField} == ${getCriticalityRank(level)}, ${escapeStringValue(level)}`
   ).join(', ')})`;
-
-/** The sort rank of a criticality: extreme the highest, unassigned the lowest (0). */
-export const getCriticalitySortRank = (level: unknown): number => {
-  const index = CRITICALITY_LEVELS.findIndex((criticality) => criticality === level);
-  return index === -1 ? 0 : getCriticalityRank(index);
-};
 
 /** `GREATEST` or `LEAST` of two values, either of which may be missing. */
 const buildExtreme = (fn: 'GREATEST' | 'LEAST', a: string, b: string): string =>
@@ -311,7 +304,7 @@ const buildResolvedEntityCountsChangesQuery = (
 
 /** The resolved entities whose main entity the search matches: KQL can't run after their join. */
 const fetchSearchedResolvedEntityIds = async (
-  args: Pick<QueryArgs, 'namespace' | 'searchExpression'>,
+  args: Pick<QueryArgs, 'namespace' | 'searchExpression' | 'entityExpression'>,
   runQuery: EsqlRunner
 ): Promise<string[]> => {
   const resolvedEntityIds = getEntityIds(
@@ -332,16 +325,25 @@ const fetchSearchedResolvedEntityIds = async (
   );
 };
 
-/** Entity docs hold own values, so counts by a group-valued field change for the resolved entities. */
+/**
+ * Entity docs hold own values, so counts by a group-valued field change for the resolved entities.
+ * With a search or entity filters, only the resolved entities they keep in view count.
+ */
 export const fetchResolvedEntityValueChanges = async (
-  args: Pick<QueryArgs, 'namespace' | 'concreteEntityIndexName' | 'searchExpression'>,
+  args: Pick<
+    QueryArgs,
+    'namespace' | 'concreteEntityIndexName' | 'searchExpression' | 'entityExpression'
+  >,
   runQuery: EsqlRunner
 ): Promise<ResolvedEntityValueChange[]> => {
-  const rows = args.searchExpression
-    ? await fetchPerIdChunk(runQuery, await fetchSearchedResolvedEntityIds(args, runQuery), (ids) =>
-        buildResolvedEntityCountsChangesQuery(args, ids)
-      )
-    : await runQuery(buildResolvedEntityCountsChangesQuery(args));
+  const rows =
+    args.searchExpression || args.entityExpression
+      ? await fetchPerIdChunk(
+          runQuery,
+          await fetchSearchedResolvedEntityIds(args, runQuery),
+          (ids) => buildResolvedEntityCountsChangesQuery(args, ids)
+        )
+      : await runQuery(buildResolvedEntityCountsChangesQuery(args));
   return rows.map((row) => ({
     field: String(row.change_field),
     value: typeof row.change_value === 'string' ? row.change_value : null,
@@ -414,4 +416,48 @@ export const getMergedRowsByEntity = (
     }
   }
   return [...byId.values()];
+};
+
+/** One Group by bucket of resolved rows: a value of a group-valued field, or none (`null`). */
+export interface ResolvedValueBucket {
+  value: string | null;
+  count: number;
+}
+
+/**
+ * Buckets by the group's values: the main entities' own counts, moved by the resolved entities'
+ * changes. Like the filter bar, an entity without a criticality counts as unassigned.
+ */
+export const buildResolvedValueBuckets = ({
+  field,
+  ownCounts,
+  changes,
+}: {
+  field: string;
+  ownCounts: readonly ResolvedValueBucket[];
+  changes: readonly ResolvedEntityValueChange[];
+}): ResolvedValueBucket[] => {
+  const toKey = (value: string | null) =>
+    value ?? (field === CRITICALITY_FIELD ? CriticalityLevelsForBulkUpload.UNASSIGNED : null);
+  const counts = new Map<string | null, number>();
+  const add = (value: string | null, count: number) => {
+    const key = toKey(value);
+    counts.set(key, (counts.get(key) ?? 0) + count);
+  };
+  ownCounts.forEach(({ value, count }) => add(value, count));
+  changes
+    .filter((change) => change.field === field)
+    .forEach(({ value, change }) => add(value, change));
+  return (
+    [...counts]
+      // The counts and the changes are two reads, so data changed between them can't go below 0.
+      .map(([value, count]) => ({ value, count: Math.max(0, count) }))
+      .filter(({ count }) => count > 0)
+      .sort(
+        (a, b) =>
+          b.count - a.count ||
+          // The "no value" bucket goes last among equal counts.
+          (a.value == null ? 1 : b.value == null ? -1 : a.value.localeCompare(b.value))
+      )
+  );
 };

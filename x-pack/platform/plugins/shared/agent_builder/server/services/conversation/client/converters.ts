@@ -32,8 +32,11 @@ import {
   ToolOrigin,
   ToolResultType,
   isEventsNativeVersion,
+  isLegacyTodosStep,
+  isTimelineEvent,
   normalizeConversationAccessControl,
 } from '@kbn/agent-builder-common';
+import { TimelineEventType } from '@kbn/agent-builder-common/chat/timeline_events';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { ExecutionPeek } from '../../execution/persistence';
@@ -162,6 +165,29 @@ const migrateToolResultType = (result: ToolResult): ToolResult => {
   return result;
 };
 
+const withoutLegacySteps = <T extends { type: string }>(steps: T[]): T[] =>
+  steps.filter((step) => !isLegacyTodosStep(step));
+
+/**
+ * Drops the steps written by the removed todo tool from stored events, both as `execution_step`
+ * events and inside `execution_terminated` snapshots. Together with the same filter on `rounds`,
+ * this is the only place that knows the step type existed: readers above the converter never see
+ * it, and the document is rewritten without it on its next write.
+ */
+const dropLegacySteps = (events: ConversationEvent[]): ConversationEvent[] =>
+  events.flatMap((event) => {
+    if (!isTimelineEvent(event)) {
+      return [event];
+    }
+    if (event.type === TimelineEventType.executionStep) {
+      return isLegacyTodosStep(event.data.step) ? [] : [event];
+    }
+    if (event.type === TimelineEventType.executionTerminated && event.data.steps) {
+      return [{ ...event, data: { ...event.data, steps: withoutLegacySteps(event.data.steps) } }];
+    }
+    return [event];
+  });
+
 function deserializeStepResults(rounds: PersistentConversationRound[]): ConversationRound[] {
   return rounds.map<ConversationRound>((round) => {
     // Migration: pending_prompt (singular) -> pending_prompts (array)
@@ -182,7 +208,7 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
         input_tokens: 0,
         output_tokens: 0,
       },
-      steps: round.steps.map<ConversationRoundStep>((step) => {
+      steps: withoutLegacySteps(round.steps).map<ConversationRoundStep>((step) => {
         if (step.type === ConversationRoundStepType.toolCall) {
           return {
             ...step,
@@ -289,7 +315,7 @@ export const fromEs = (
 
   const events =
     isEventsNative && storedEvents != null && storedEvents.length > 0
-      ? storedEvents
+      ? dropLegacySteps(storedEvents)
       : roundsToEvents(conversation);
 
   return { ...conversation, events };

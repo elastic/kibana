@@ -86,6 +86,7 @@ describe('SecurityService', function () {
           name: 'Workflow',
           resolveWorkloads: async (workloads) =>
             workloads.map(({ workloadId }) => ({
+              status: 'present',
               title: `Workflow ${workloadId}`,
               path: `/app/workflows/${workloadId}`,
             })),
@@ -100,7 +101,9 @@ describe('SecurityService', function () {
               spaceId: 'marketing',
             },
           ])
-        ).resolves.toEqual([{ title: 'Workflow w-1', href: '/s/marketing/app/workflows/w-1' }]);
+        ).resolves.toEqual([
+          { status: 'present', title: 'Workflow w-1', href: '/s/marketing/app/workflows/w-1' },
+        ]);
       });
 
       it('builds links under the configured base path', async () => {
@@ -117,7 +120,10 @@ describe('SecurityService', function () {
           type: 'workflow',
           name: 'Workflow',
           resolveWorkloads: async (workloads) =>
-            workloads.map(({ workloadId }) => ({ path: `/app/workflows/${workloadId}` })),
+            workloads.map(({ workloadId }) => ({
+              status: 'present',
+              path: `/app/workflows/${workloadId}`,
+            })),
         });
 
         await expect(
@@ -129,7 +135,7 @@ describe('SecurityService', function () {
               spaceId: 'default',
             },
           ])
-        ).resolves.toEqual([{ href: '/kbn/app/workflows/w-1' }]);
+        ).resolves.toEqual([{ status: 'present', href: '/kbn/app/workflows/w-1' }]);
       });
     });
 

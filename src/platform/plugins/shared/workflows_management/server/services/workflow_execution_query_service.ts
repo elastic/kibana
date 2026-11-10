@@ -17,7 +17,10 @@ import type {
 } from '@kbn/workflows';
 import { executionIoId } from '@kbn/workflows/server';
 import type { ChildWorkflowExecutionItem } from '@kbn/workflows/types/v1';
-import type { LogSearchResult } from '@kbn/workflows-execution-engine/server';
+import type {
+  GetStepExecutionsByIdsOptions,
+  LogSearchResult,
+} from '@kbn/workflows-execution-engine/server';
 import { bulkUpdaterItem, getBulkUpdaterWriteResult } from '@kbn/workflows-execution-engine/server';
 import type {
   ExecutionLogsParams,
@@ -65,7 +68,10 @@ import type {
 const DEFAULT_PAGE_SIZE = 100;
 
 /** Step payloads live on the IO stream, never on the step document. */
-const STEP_PAYLOAD_SOURCE_EXCLUDES = ['input', 'output'];
+const STEP_PAYLOAD_SOURCE_EXCLUDES: NonNullable<GetStepExecutionsByIdsOptions['sourceExcludes']> = [
+  'input',
+  'output',
+];
 
 /** Max completed steps fetched when resolving predecessor reasoning from output documents. */
 const PREDECESSOR_REASONING_MAX_HITS = 1000;
@@ -230,6 +236,15 @@ export class WorkflowExecutionQueryService {
     }
     if (params.executedBy && params.executedBy.length > 0) {
       must.push({ terms: { executedBy: params.executedBy } });
+    }
+
+    const runName = params.runName?.trim();
+    if (runName) {
+      must.push({
+        wildcard: {
+          runName: { value: `*${runName.replace(/[\\*?]/g, '\\$&')}*`, case_insensitive: true },
+        },
+      });
     }
 
     if (params.concurrencyGroupKey !== undefined) {
@@ -925,23 +940,27 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
     const { executionId, id } = params;
-    const response = (await this.deps.stepExecutionsDataClient.search({
-      query: {
-        bool: {
-          must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],
-        },
-      },
-      size: 1,
-      track_total_hits: false,
-      _source: { excludes: STEP_PAYLOAD_SOURCE_EXCLUDES },
-    })) as estypes.SearchResponse<EsWorkflowStepExecution>;
-
-    if (response.hits.hits.length === 0) {
-      return null;
+    // Step writes use refresh:false. Search misses the doc until the next refresh, so an
+    // external resume link used immediately after the wait starts is rejected. getByIds
+    // reads the translog.
+    let stepExecution: EsWorkflowStepExecution | undefined;
+    try {
+      const { items } = await this.deps.stepExecutionsDataClient.getByIds([id], {
+        sourceExcludes: STEP_PAYLOAD_SOURCE_EXCLUDES,
+      });
+      stepExecution = items[0]?.document;
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return null;
+      }
+      throw error;
     }
 
-    const stepExecution = response.hits.hits[0]._source ?? null;
-    if (!stepExecution) {
+    if (
+      !stepExecution ||
+      stepExecution.workflowRunId !== executionId ||
+      stepExecution.spaceId !== spaceId
+    ) {
       return null;
     }
 

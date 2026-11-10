@@ -17,6 +17,7 @@ import { isWorkflowGraphSetupError } from './workflow_graph_setup_error';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { emitWorkflowExecutionFailedEventIfFailed } from '../lib/emit_workflow_execution_failed_event';
 import { emitWorkflowIdentityFailureEvent } from '../lib/emit_workflow_identity_failure_event';
+import { toWorkflowIdentityTaskError } from '../lib/workflow_identity_task_error';
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
@@ -251,7 +252,7 @@ export const resumeWorkflow = async (
         ...params,
         error: executionError,
       });
-      if (!failedExecution) throw error;
+      if (!failedExecution) throw toWorkflowIdentityTaskError(error);
       if (failedExecution.status === ExecutionStatus.FAILED) {
         await emitWorkflowIdentityFailureEvent({
           execution: failedExecution,
@@ -266,6 +267,7 @@ export const resumeWorkflow = async (
         workflowTaskManager: new WorkflowTaskManager(params.dependencies.taskManager),
         cloudSetup: params.dependencies.cloudSetup,
       });
+      throw toWorkflowIdentityTaskError(error);
     }
     throw error;
   }
