@@ -392,6 +392,7 @@ export class LensPlugin {
         eventAnnotationService,
         theme: core.theme,
         uiSettings: core.uiSettings,
+        extensionRegistry: this.extensionRegistry,
       };
     };
 

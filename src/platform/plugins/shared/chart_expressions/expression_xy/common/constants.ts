@@ -25,6 +25,8 @@ export const EXTENDED_ANNOTATION_LAYER = 'extendedAnnotationLayer';
 export const AXIS_EXTENT_CONFIG = 'axisExtentConfig';
 export const REFERENCE_LINE = 'referenceLine';
 export const REFERENCE_LINE_LAYER = 'referenceLineLayer';
+/** Expression variable carrying an `Observable<XYOverlay[]>` pushed to the chart after it renders. */
+export const XY_OVERLAYS_VARIABLE = 'xyOverlays$';
 
 export const LayerTypes = {
   DATA: 'data',

@@ -12,6 +12,7 @@ import type {
   AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
+import type { OverlayPointClickEvent } from '@kbn/expression-xy-plugin/public';
 import type {
   DragDropOperation,
   LensEditSupportedActions,
@@ -38,6 +39,12 @@ export function isLensAnnotationClickEvent(
   event: ExpressionRendererEvent
 ): event is AnnotationClickTriggerEvent {
   return event.name === 'annotationClick';
+}
+
+export function isLensOverlayPointClickEvent(
+  event: ExpressionRendererEvent
+): event is OverlayPointClickEvent {
+  return event.name === 'overlayPointClick';
 }
 
 export function isLensEditEvent<T extends LensEditSupportedActions>(

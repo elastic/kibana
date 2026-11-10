@@ -11,3 +11,5 @@ export { getExtensionMatchContext, resolveActiveExtensions } from './resolve_act
 export type { ActiveLensExtension } from './resolve_active_extensions';
 export { runActiveExtensions, dispatchOverlayPointClick } from './run_active_extensions';
 export type { LensExtensionFailure, LensExtensionsRunResult } from './run_active_extensions';
+export { loadExtensionOverlays } from './load_extension_overlays';
+export { getExtensionFailureMessage } from './extension_failure_message';

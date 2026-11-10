@@ -38,6 +38,7 @@ import type { LensApi } from '@kbn/lens-common-2';
 import { createEmptyLensState } from '../helper';
 import { createMockDatasource, createMockVisualization, makeDefaultServices } from '../../mocks';
 import { initializeInternalApi } from '../initializers/initialize_internal_api';
+import { createLensExtensionRegistry } from '../../extensions';
 import type { LensEmbeddableStartServices } from '../types';
 
 function getDefaultLensApiMock() {
@@ -221,6 +222,7 @@ export function makeEmbeddableServices(
     capabilities: services.application.capabilities,
     expressionRenderer: jest.fn().mockReturnValue(null),
     documentToExpression: jest.fn(),
+    extensionRegistry: createLensExtensionRegistry(),
     injectFilterReferences: services.data.query.filterManager.inject as jest.Mock,
     visualizationMap: mockVisualizationMap(visOverrides?.id, visOverrides),
     datasourceMap: mockDatasourceMap(dataOverrides?.id, dataOverrides),

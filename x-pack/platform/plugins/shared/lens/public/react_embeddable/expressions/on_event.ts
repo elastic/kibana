@@ -17,8 +17,10 @@ import {
   isLensMultiFilterEvent,
   isLensTableRowContextMenuClickEvent,
   isLensAnnotationClickEvent,
+  isLensOverlayPointClickEvent,
 } from '../../types_guards';
 import { inferTimeField } from '../../utils';
+import { dispatchOverlayPointClick } from '../../extensions';
 
 import { addLog } from '../logger';
 import type { LensEmbeddableStartServices } from '../types';
@@ -28,7 +30,7 @@ export const prepareEventHandler =
     api: LensApi,
     getState: GetStateType,
     callbacks: LensPublicCallbacks,
-    { data, uiActions, visualizationMap }: LensEmbeddableStartServices,
+    { data, uiActions, visualizationMap, extensionRegistry }: LensEmbeddableStartServices,
     disableTriggers: boolean | undefined
   ) =>
   async (event: ExpressionRendererEvent) => {
@@ -36,6 +38,12 @@ export const prepareEventHandler =
       return;
     }
     addLog(`onEvent$`);
+
+    if (isLensOverlayPointClickEvent(event)) {
+      const { overlayId, layerId, pointId } = event.data;
+      dispatchOverlayPointClick(extensionRegistry, { extensionId: overlayId, layerId, pointId });
+      return;
+    }
 
     let eventHandler:
       | LensPublicCallbacks['onBrushEnd']

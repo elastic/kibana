@@ -77,6 +77,7 @@ import type {
   LayerCellValueActions,
   MultiFilterEvent,
   AnnotationClickEvent,
+  OverlayPointClickEvent,
 } from '../types';
 import { isTimeChart } from '../../common/helpers';
 import type {
@@ -124,6 +125,7 @@ import {
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
 } from './annotations';
+import { getClickedOverlayPoint, OverlayPoints, useOverlays } from './overlay_points';
 import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
 import { Tooltip as CustomTooltip } from './tooltip';
@@ -161,6 +163,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   layerCellValueActions: LayerCellValueActions;
   onSelectRange: (data: BrushEvent['data']) => void;
   onAnnotationClick: (data: AnnotationClickEvent['data']) => void;
+  onOverlayPointClick?: (data: OverlayPointClickEvent['data']) => void;
   renderMode: RenderMode;
   syncColors: boolean;
   syncTooltips: boolean;
@@ -226,6 +229,7 @@ export function XYChart({
   layerCellValueActions,
   onSelectRange,
   onAnnotationClick,
+  onOverlayPointClick,
   setChartSize,
   interactive = true,
   syncColors,
@@ -235,6 +239,7 @@ export function XYChart({
   uiState,
   timeFormat,
   overrides,
+  overlays$,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -253,6 +258,7 @@ export function XYChart({
     pointVisibility,
   } = args;
   const chartRef = useRef<Chart>(null);
+  const overlays = useOverlays(overlays$);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = useKibanaIsDarkMode();
   const palettes = useKbnPalettes();
@@ -646,6 +652,12 @@ export function XYChart({
   const clickHandler: ElementClickListener = ([elementEvent]) => {
     // this cast is safe because we are rendering a cartesian chart
     const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
+
+    const overlayPoint = getClickedOverlayPoint(overlays, xySeries.specId, xyGeometry.datum);
+    if (overlayPoint) {
+      onOverlayPointClick?.(overlayPoint);
+      return;
+    }
 
     const layer = dataLayers.find((l) =>
       xySeries.seriesKeys.some((key: string | number) =>
@@ -1136,6 +1148,13 @@ export function XYChart({
                 pointVisibility={pointVisibility}
               />
             )}
+            {overlays.length ? (
+              <OverlayPoints
+                overlays={overlays}
+                yAxesConfiguration={yAxesConfiguration}
+                isTimeVis={isTimeVis}
+              />
+            ) : null}
             {referenceLineLayers.length ? (
               <ReferenceLines
                 layers={referenceLineLayers}

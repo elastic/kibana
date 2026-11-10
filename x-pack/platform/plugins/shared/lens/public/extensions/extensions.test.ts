@@ -10,6 +10,8 @@ import {
   queryHasStatsCommand,
   queryHasTsSourceCommand,
   type LensExtension,
+  type LensExtensionFetchContext,
+  type LensExtensionLayer,
   type LensExtensionMatchContext,
 } from '@kbn/lens-common';
 import {
@@ -156,12 +158,24 @@ describe('Lens extensions', () => {
   describe('runActiveExtensions', () => {
     const layer = { layerId: 'metrics', esql: TS_QUERY };
 
+    const createRunContext = (
+      executeEsql: LensExtensionFetchContext['executeEsql'],
+      abortSignal = new AbortController().signal
+    ) => ({
+      abortSignal,
+      getFetchContext: (fetchLayer: LensExtensionLayer): LensExtensionFetchContext => ({
+        layer: fetchLayer,
+        abortSignal,
+        executeEsql,
+      }),
+    });
+
     it('runs the derived query and stamps the owning ids on the overlay', async () => {
       const executeEsql = jest.fn().mockResolvedValue(exemplarsTable);
 
       const { overlays, failures } = await runActiveExtensions({
         activeExtensions: [{ extension: createExemplarsExtension(), layer }],
-        fetchContext: { executeEsql, abortSignal: new AbortController().signal },
+        ...createRunContext(executeEsql),
       });
 
       expect(executeEsql).toHaveBeenCalledWith(`SET exemplars={"limit": 500};\n${TS_QUERY}`);
@@ -188,10 +202,7 @@ describe('Lens extensions', () => {
           { extension: failing, layer },
           { extension: createExemplarsExtension(), layer },
         ],
-        fetchContext: {
-          executeEsql: jest.fn().mockResolvedValue(exemplarsTable),
-          abortSignal: new AbortController().signal,
-        },
+        ...createRunContext(jest.fn().mockResolvedValue(exemplarsTable)),
       });
 
       expect(overlays.map(({ extensionId }) => extensionId)).toEqual(['observability.exemplars']);
@@ -210,10 +221,7 @@ describe('Lens extensions', () => {
 
       const result = await runActiveExtensions({
         activeExtensions: [{ extension: createExemplarsExtension(), layer }],
-        fetchContext: {
-          executeEsql: jest.fn().mockResolvedValue(exemplarsTable),
-          abortSignal: abortController.signal,
-        },
+        ...createRunContext(jest.fn().mockResolvedValue(exemplarsTable), abortController.signal),
       });
 
       expect(result).toEqual({ overlays: [], failures: [] });

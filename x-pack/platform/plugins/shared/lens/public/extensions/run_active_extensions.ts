@@ -7,6 +7,7 @@
 
 import type {
   LensExtensionFetchContext,
+  LensExtensionLayer,
   LensExtensionOverlay,
   LensOverlayPointClickEvent,
 } from '@kbn/lens-common';
@@ -26,7 +27,8 @@ export interface LensExtensionsRunResult {
 
 interface RunActiveExtensionsParams {
   readonly activeExtensions: readonly ActiveLensExtension[];
-  readonly fetchContext: Omit<LensExtensionFetchContext, 'layer'>;
+  readonly abortSignal: AbortSignal;
+  readonly getFetchContext: (layer: LensExtensionLayer) => LensExtensionFetchContext;
 }
 
 const toError = (reason: unknown): Error =>
@@ -38,15 +40,14 @@ const toError = (reason: unknown): Error =>
  */
 export const runActiveExtensions = async ({
   activeExtensions,
-  fetchContext,
+  abortSignal,
+  getFetchContext,
 }: RunActiveExtensionsParams): Promise<LensExtensionsRunResult> => {
   const settled = await Promise.allSettled(
-    activeExtensions.map(({ extension, layer }) =>
-      extension.fetchOverlay({ ...fetchContext, layer })
-    )
+    activeExtensions.map(({ extension, layer }) => extension.fetchOverlay(getFetchContext(layer)))
   );
 
-  if (fetchContext.abortSignal.aborted) {
+  if (abortSignal.aborted) {
     return { overlays: [], failures: [] };
   }
 

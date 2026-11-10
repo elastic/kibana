@@ -78,6 +78,7 @@ export function LensRenderer({
   parentApi,
   onApiAvailable,
   projectRouting,
+  extensions,
   ...props
 }: LensRendererProps) {
   // Use the settings interface to store panel settings
@@ -96,6 +97,7 @@ export function LensRenderer({
   const isApproximate$ = useObservableVariable(props.isApproximate);
   const disableTriggers$ = useObservableVariable(props.disableTriggers ?? false);
   const projectRouting$ = useObservableVariable(projectRouting);
+  const extensions$ = useObservableVariable(extensions);
 
   // Lens API will be set once, but when set trigger a reflow to adopt the latest attributes
   const [lensApi, setLensApi] = useState<LensApi | undefined>(undefined);
@@ -207,6 +209,7 @@ export function LensRenderer({
           esqlVariables$,
           isApproximate$,
           hideTitle$,
+          extensions$,
           reload$, // trigger a reload (replacement for deprecated searchSessionId)
         } satisfies LensParentApi)
       }

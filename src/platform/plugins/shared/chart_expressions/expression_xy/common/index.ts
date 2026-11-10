@@ -17,6 +17,7 @@ export {
   FittingFunctions,
   PointVisibilityOptions,
   AreaFillOptions,
+  XY_OVERLAYS_VARIABLE,
 } from './constants';
 
 export type {
@@ -37,6 +38,9 @@ export type {
   XYLayerArgs,
   XYCurveType,
   XYChartProps,
+  XYOverlay,
+  XYOverlayPoint,
+  XYPointsOverlay,
   LegendConfig,
   IconPosition,
   DataLayerArgs,
