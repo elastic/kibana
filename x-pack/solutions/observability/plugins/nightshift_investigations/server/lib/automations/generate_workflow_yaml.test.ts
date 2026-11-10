@@ -10,6 +10,7 @@ import { evaluateKql } from '@kbn/eval-kql';
 import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { WorkflowSchemaBase } from '@kbn/workflows';
 import { generateWorkflowYaml, SLACK_MESSAGE_TEXT_LIMIT } from './generate_workflow_yaml';
+import { MAX_ALERT_SOURCE_LENGTH, MAX_ALERT_SOURCES } from '../../../common/automation_limits';
 import { MAX_PROMPT_TEMPLATE_LENGTH } from './schemas';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow } from './types';
 
@@ -248,6 +249,84 @@ describe('generateWorkflowYaml', () => {
       });
     });
 
+    describe.each([
+      ['alerting.v1.alertStatusChanged', 'recovered'],
+      ['alerting.alertStatusChanged', 'inactive'],
+    ])('%s severity filtering', (triggerType, recoveredStatus) => {
+      const matches = (
+        rows: AlertRow[],
+        alert: Record<string, unknown>,
+        rule: Record<string, unknown> | null = { name: 'CPU usage', tags: ['prod'] }
+      ): boolean => {
+        const automation = baseAutomation();
+        automation.trigger.rows = rows;
+        const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+        const trigger = yaml.triggers.find(({ type }: { type: string }) => type === triggerType);
+        return evaluateKql(trigger.on.condition, { event: { alert, rule } });
+      };
+
+      it('matches selected activation severities and allows recoveries with no severity', () => {
+        const rows: AlertRow[] = [{ kind: 'alert', severities: ['high', 'critical', 'warning'] }];
+        expect(matches(rows, { status: 'active', severity: 'high', previousStatus: null })).toBe(
+          true
+        );
+        expect(
+          matches(rows, { status: 'active', severity: 'critical', previousStatus: null })
+        ).toBe(true);
+        expect(matches(rows, { status: 'active', severity: 'warning', previousStatus: null })).toBe(
+          true
+        );
+        expect(matches(rows, { status: 'active', severity: 'medium', previousStatus: null })).toBe(
+          false
+        );
+        expect(matches(rows, { status: 'active', severity: null, previousStatus: null })).toBe(
+          false
+        );
+        expect(matches(rows, { status: 'active', previousStatus: null })).toBe(false);
+        expect(matches(rows, { status: recoveredStatus, severity: null })).toBe(true);
+        for (const severities of [undefined, []]) {
+          expect(
+            matches([{ kind: 'alert', severities }], {
+              status: 'active',
+              severity: null,
+              previousStatus: null,
+            })
+          ).toBe(true);
+        }
+      });
+
+      it('combines severity with rule filters and preserves alternatives between rows', () => {
+        const rows: AlertRow[] = [
+          { kind: 'alert', severities: ['high'], tags: ['prod'] },
+          { kind: 'alert', severities: ['major'], ruleNames: ['Disk full'] },
+        ];
+        expect(matches(rows, { status: 'active', severity: 'high', previousStatus: null })).toBe(
+          true
+        );
+        expect(
+          matches(
+            rows,
+            { status: 'active', severity: 'major', previousStatus: null },
+            { name: 'Disk full' }
+          )
+        ).toBe(true);
+        expect(matches(rows, { status: 'active', severity: 'major', previousStatus: null })).toBe(
+          false
+        );
+        expect(
+          matches(rows, { status: 'active', severity: 'high', previousStatus: null }, null)
+        ).toBe(false);
+        expect(matches(rows, { status: recoveredStatus, severity: null }, null)).toBe(false);
+        expect(
+          matches(
+            [{ kind: 'alert', severities: ['high'] }],
+            { status: 'active', severity: 'high', previousStatus: null },
+            null
+          )
+        ).toBe(true);
+      });
+    });
+
     it('keeps the steps of each alert trigger inside its own guard in a mixed automation', () => {
       const automation = baseAutomation();
       automation.trigger.rows = [{ kind: 'alert' }, { kind: 'slack', event: 'message' }];
@@ -334,8 +413,12 @@ describe('generateWorkflowYaml', () => {
     });
 
     describe('universal alert trigger', () => {
-      const v2Event = (alert: Record<string, unknown>, rule: Record<string, unknown> | null) => ({
-        event: { alert: { id: 'ep-1', ...alert }, rule },
+      const v2Event = (
+        alert: Record<string, unknown>,
+        rule: Record<string, unknown> | null,
+        source?: string
+      ) => ({
+        event: { alert: { id: 'ep-1', ...alert }, rule, source },
       });
       const v2Matches = (row: AlertRow, event: ReturnType<typeof v2Event>): boolean => {
         const automation = baseAutomation();
@@ -349,18 +432,27 @@ describe('generateWorkflowYaml', () => {
       const rule = { id: 'rule-1', name: 'High CPU usage', tags: ['k8s'] };
 
       it('matches new activations and recoveries, but not a flap back to active or in-between states', () => {
-        const row: AlertRow = { kind: 'alert' };
-        expect(v2Matches(row, v2Event({ status: 'active', previousStatus: null }, rule))).toBe(
-          true
-        );
-        expect(v2Matches(row, v2Event({ status: 'active', previousStatus: 'pending' }, rule))).toBe(
-          true
-        );
+        const row: AlertRow = { kind: 'alert', severities: ['high'] };
+        expect(
+          v2Matches(
+            row,
+            v2Event({ status: 'active', severity: 'high', previousStatus: null }, rule)
+          )
+        ).toBe(true);
+        expect(
+          v2Matches(
+            row,
+            v2Event({ status: 'active', severity: 'high', previousStatus: 'pending' }, rule)
+          )
+        ).toBe(true);
         expect(
           v2Matches(row, v2Event({ status: 'inactive', previousStatus: 'recovering' }, rule))
         ).toBe(true);
         expect(
-          v2Matches(row, v2Event({ status: 'active', previousStatus: 'recovering' }, rule))
+          v2Matches(
+            row,
+            v2Event({ status: 'active', severity: 'high', previousStatus: 'recovering' }, rule)
+          )
         ).toBe(false);
         expect(
           v2Matches(row, v2Event({ status: 'recovering', previousStatus: 'active' }, rule))
@@ -382,6 +474,153 @@ describe('generateWorkflowYaml', () => {
         const event = v2Event({ status: 'active', previousStatus: null }, rule);
         expect(v2Matches({ kind: 'alert', tags: ['k8s'] }, event)).toBe(true);
         expect(v2Matches({ kind: 'alert', tags: ['prod'] }, event)).toBe(false);
+      });
+
+      describe('alert source filter', () => {
+        it.each([
+          ['internal', 'active', 'high', true],
+          ['pagerduty', 'active', 'high', false],
+          ['internal', 'active', 'medium', false],
+          ['internal', 'inactive', null, true],
+          ['pagerduty', 'inactive', null, false],
+        ])('combines source and severity for %s %s %s', (source, status, severity, expected) => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['internal'],
+            severities: ['high'],
+          };
+          const event = v2Event({ status, severity, previousStatus: null }, rule, source);
+          expect(v2Matches(row, event)).toBe(expected);
+        });
+
+        const sourceEvent = (source: string) =>
+          v2Event({ status: 'active', previousStatus: null }, rule, source);
+
+        it('keeps only the included sources', () => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['elastic.significant_events'],
+            alertSourceMode: 'include',
+          };
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(false);
+        });
+
+        it('drops the excluded sources and keeps the rest', () => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['internal', 'elastic.significant_events'],
+            alertSourceMode: 'exclude',
+          };
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(true);
+        });
+
+        it('matches every source outside the first-party ones for external', () => {
+          const row: AlertRow = { kind: 'alert', alertSources: ['external'] };
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(false);
+          expect(v2Matches(row, sourceEvent('elastic.future_producer'))).toBe(false);
+        });
+
+        it('keeps only the first-party sources when external is excluded', () => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['external'],
+            alertSourceMode: 'exclude',
+          };
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('elastic.significant_events'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(false);
+        });
+
+        it('combines external with a first-party source, and excludes both together', () => {
+          const include: AlertRow = { kind: 'alert', alertSources: ['external', 'internal'] };
+          expect(v2Matches(include, sourceEvent('pagerduty'))).toBe(true);
+          expect(v2Matches(include, sourceEvent('internal'))).toBe(true);
+          expect(v2Matches(include, sourceEvent('elastic.significant_events'))).toBe(false);
+          const exclude: AlertRow = { ...include, alertSourceMode: 'exclude' };
+          expect(v2Matches(exclude, sourceEvent('pagerduty'))).toBe(false);
+          expect(v2Matches(exclude, sourceEvent('elastic.significant_events'))).toBe(true);
+        });
+
+        it('combines the source filter with the rule filters', () => {
+          const row: AlertRow = { kind: 'alert', tags: ['k8s'], alertSources: ['internal'] };
+          expect(v2Matches(row, sourceEvent('internal'))).toBe(true);
+          expect(v2Matches(row, sourceEvent('pagerduty'))).toBe(false);
+        });
+
+        const triggerTypes = (row: AlertRow) => {
+          const automation = baseAutomation();
+          automation.trigger.rows = [row];
+          return parse(generateWorkflowYaml({ automationId: 'auto-123', automation })).triggers.map(
+            (t: { type: string }) => t.type
+          );
+        };
+
+        it('emits the classic trigger only when classic passes the filter', () => {
+          const both = ['alerting.v1.alertStatusChanged', 'alerting.alertStatusChanged'];
+          expect(triggerTypes({ kind: 'alert' })).toEqual(both);
+          expect(triggerTypes({ kind: 'alert', alertSources: ['classic', 'internal'] })).toEqual(
+            both
+          );
+          expect(
+            triggerTypes({ kind: 'alert', alertSources: ['internal'], alertSourceMode: 'include' })
+          ).toEqual(['alerting.alertStatusChanged']);
+          expect(
+            triggerTypes({ kind: 'alert', alertSources: ['classic'], alertSourceMode: 'exclude' })
+          ).toEqual(['alerting.alertStatusChanged']);
+        });
+
+        it('rejects a source filter that leaves no trigger when universal alerting is off', () => {
+          const automation = baseAutomation();
+          automation.trigger.rows = [{ kind: 'alert', alertSources: ['internal'] }];
+          expect(() =>
+            generateWorkflowYaml({ automationId: 'auto-123', automation, universalAlerts: false })
+          ).toThrow('no available trigger');
+        });
+
+        it('accepts the largest source filter the request schema allows', () => {
+          const alertSources = Array.from({ length: MAX_ALERT_SOURCES }, (_, i) =>
+            `${i}`.padEnd(MAX_ALERT_SOURCE_LENGTH, 'x')
+          );
+          const automation = baseAutomation();
+          automation.trigger.rows = [{ kind: 'alert', alertSources }];
+          expect(() =>
+            generateWorkflowYaml({ automationId: 'auto-123', automation })
+          ).not.toThrow();
+        });
+
+        it('rejects source filters longer than a trigger condition allows', () => {
+          const alertSources = Array.from(
+            { length: 30 },
+            (_, i) => `source-${i}-${'x'.repeat(90)}`
+          );
+          const automation = baseAutomation();
+          automation.trigger.rows = [{ kind: 'alert', alertSources }];
+          expect(() => generateWorkflowYaml({ automationId: 'auto-123', automation })).toThrow(
+            'too long'
+          );
+        });
+
+        it('emits the universal trigger only when a universal source passes the filter', () => {
+          expect(triggerTypes({ kind: 'alert', alertSources: ['classic'] })).toEqual([
+            'alerting.v1.alertStatusChanged',
+          ]);
+        });
+
+        it('ignores blank and padded sources instead of dropping every alert trigger', () => {
+          expect(triggerTypes({ kind: 'alert', alertSources: [' classic '] })).toEqual([
+            'alerting.v1.alertStatusChanged',
+          ]);
+          expect(triggerTypes({ kind: 'alert', alertSources: [''] })).toEqual([
+            'alerting.v1.alertStatusChanged',
+            'alerting.alertStatusChanged',
+          ]);
+        });
       });
 
       it('keys the investigation on the alert id and sends no context, so the alert is looked up', () => {
@@ -481,7 +720,7 @@ describe('generateWorkflowYaml', () => {
         with: {
           automation_id: 'auto-123',
           subject_type: 'manual',
-          subject_id: 'manual',
+          subject_id: 'scheduled-auto-123-{{ event.scheduledFor | default: execution.id }}',
           title: 'Test automation',
           summary: 'Test automation',
           trigger_type: 'automatic',
@@ -562,7 +801,7 @@ describe('generateWorkflowYaml', () => {
       expect(new Set([scheduled.name, alert.name, slack.name]).size).toBe(3);
       expect(scheduled.with).toMatchObject({
         subject_type: 'manual',
-        subject_id: 'manual',
+        subject_id: 'scheduled-auto-123-{{ event.scheduledFor | default: execution.id }}',
         timeout_seconds: 120,
       });
       expect(alert.with).toMatchObject({

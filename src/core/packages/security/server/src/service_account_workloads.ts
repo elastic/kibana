@@ -70,10 +70,14 @@ export interface ServiceAccountWorkloadTypeRegistration {
    */
   description?: string;
   /**
-   * Optional lookup that turns bound workloads into a title and a link, so the service account
-   * management page can show what each binding points at. Core calls it with internal access, not
-   * on behalf of a user, bounds each call with a timeout and aborts `signal` when that runs out.
-   * Without it, the page shows the workload ID.
+   * Optional lookup that tells Core whether each bound workload still exists, and turns the ones
+   * that do into a title and a link. The service account management page uses the title and link.
+   * The stale binding cleanup task uses the status, and deletes the binding of a workload reported
+   * `missing`. Core calls it with internal access, not on behalf of a user, bounds each call with a
+   * timeout and aborts `signal` when that runs out.
+   *
+   * Without it, the page shows the workload ID, and bindings of this type are only cleaned up once
+   * their service account is gone.
    */
   resolveWorkloads?: ServiceAccountWorkloadResolver;
 }
@@ -91,30 +95,44 @@ export interface ServiceAccountWorkloadLocator {
 /**
  * What a workload type knows about one of its workloads.
  *
+ * - `present`: the workload exists. A title and a path are optional.
+ * - `missing`: the workload definitely no longer exists. Core deletes the binding of a missing
+ *   workload, so only report it on evidence about this workload, such as a read that found no
+ *   document.
+ * - `unknown`: the workload could not be checked. The binding is kept.
+ *
  * @public
  */
-export interface ServiceAccountWorkloadDetails {
-  /** Human-readable title of the workload, e.g. the workflow name. */
-  title?: string;
-  /**
-   * Path of the workload's page, relative to the Kibana base path and without a space prefix,
-   * e.g. `/app/workflows/{id}`. It must start with `/app/`. Core adds the base path and the space
-   * of the binding. Core ignores the whole entry, title included, when the path is not one it can
-   * link to safely.
-   */
-  path?: string;
-}
+export type ServiceAccountWorkloadDetails =
+  | {
+      status: 'present';
+      /** Human-readable title of the workload, e.g. the workflow name. */
+      title?: string;
+      /**
+       * Path of the workload's page, relative to the Kibana base path and without a space prefix,
+       * e.g. `/app/workflows/{id}`. It must start with `/app/`. Core adds the base path and the
+       * space of the binding. Core drops the title and the path, but keeps the status, when the
+       * path is not one it can link to safely.
+       */
+      path?: string;
+    }
+  | { status: 'missing' }
+  | { status: 'unknown' };
 
 /**
- * Resolves a batch of workloads of one type to their details. Returns one entry per workload, in
- * the same order, with `undefined` for a workload that no longer exists or cannot be resolved.
+ * Resolves a batch of workloads of one type. Returns one entry per workload, in the same order.
+ *
+ * Answer for each workload on its own: a document that could not be read is `unknown`, and the
+ * others keep their answer. A failure that puts the whole batch in doubt, such as a missing index
+ * or a failed request, must make every entry `unknown`, or throw. Never report such a failure as
+ * `missing`, because that deletes every binding in the batch.
  *
  * @public
  */
 export type ServiceAccountWorkloadResolver = (
   workloads: ReadonlyArray<ServiceAccountWorkloadLocator>,
   options: { signal: AbortSignal }
-) => Promise<Array<ServiceAccountWorkloadDetails | undefined>>;
+) => Promise<ServiceAccountWorkloadDetails[]>;
 
 /**
  * Setup contract of Core's service accounts service.

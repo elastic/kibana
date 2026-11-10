@@ -165,7 +165,6 @@ export const createOnboardingClient = ({
       }
 
       const spaceId = getSpaceId(request);
-
       await installInvestigationAgent({
         agentBuilder,
         spaceId,
