@@ -23,6 +23,7 @@ import {
   APP_UI_ID,
   CASES_FEATURE_ID,
   CASES_PATH,
+  COVERAGE_OVERVIEW_PATH,
   CONFIGURATIONS_PATH,
   DASHBOARDS_PATH,
   EXCEPTIONS_PATH,
@@ -217,6 +218,16 @@ export const isRuleChangesHistoryPath = (pathname: string): boolean =>
 export const isRulesManagementPath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: `${RULES_PATH}/:tabName(${Object.values(AllRulesTabs).join('|')})`,
+    exact: true,
+    strict: false,
+  });
+
+/**
+ * Matches the MITRE coverage page, whose app header owns the page actions.
+ */
+export const isCoverageOverviewPath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: COVERAGE_OVERVIEW_PATH,
     exact: true,
     strict: false,
   });
