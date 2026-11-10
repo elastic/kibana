@@ -36,6 +36,29 @@ const withSafeTracing = (tracing: ScoutServerConfig): ScoutServerConfig => {
   };
 };
 
+/**
+ * The suite's knowledge switches, `NIGHTSHIFT_KNOWLEDGE` as validated by its scout hook. Unset keeps
+ * every knowledge system off. Otherwise each listed system is on, and learning is off so every
+ * example reads the knowledge the eval restored rather than what earlier examples wrote.
+ */
+const knowledgeArgs = (): string[] => {
+  const selected = new Set((process.env.NIGHTSHIFT_KNOWLEDGE ?? '').split(',').filter(Boolean));
+  if (selected.size === 0) {
+    return [
+      '--xpack.nightshift_investigations.wiki.enabled=false',
+      '--xpack.nightshift_investigations.memory.enabled=false',
+    ];
+  }
+  const decisionTrees = selected.has('decision-trees');
+  return [
+    // Decision trees read the Wiki investigator context, so they need the Wiki runtime.
+    `--xpack.nightshift_investigations.wiki.enabled=${selected.has('wiki') || decisionTrees}`,
+    `--xpack.nightshift_investigations.memory.enabled=${selected.has('memory')}`,
+    `--xpack.nightshift_investigations.decision_trees.enabled=${decisionTrees}`,
+    '--xpack.nightshift_investigations.learning.enabled=false',
+  ];
+};
+
 const createInvestigationConfig = (
   safeTracing: ScoutServerConfig,
   sandboxKibanaConfig: string
@@ -68,8 +91,7 @@ const createInvestigationConfig = (
         '--feature_flags.overrides.nightshift.enabled=true',
         // The suite judges investigations offline; online evals would run its judges again on every one.
         '--feature_flags.overrides.nightshift.onlineEvals.paused=true',
-        '--xpack.nightshift_investigations.wiki.enabled=false',
-        '--xpack.nightshift_investigations.memory.enabled=false',
+        ...knowledgeArgs(),
         '--xpack.nightshift_investigations.findings_recorder.enabled=false',
         `--config=${sandboxKibanaConfig}`,
         ...(connectorsConfig ? [`--config=${connectorsConfig}`] : []),
