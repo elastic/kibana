@@ -35,6 +35,7 @@ import { registerSkill } from './agent_builder/register_skill';
 import type { ConfigSchema } from './config';
 import { appLocatorGetLocationCommon } from '../common/app_locator_get_location';
 import {
+  ESQL_CATEGORIZE_PRODUCT_FEATURE_ID,
   METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   TRACES_PRODUCT_FEATURE_ID,
 } from '../common/constants';
@@ -125,6 +126,12 @@ export class DiscoverServerPlugin
           { name: 'observability', tier: 'complete' },
           { name: 'security', tier: 'complete' },
         ],
+      },
+      {
+        // ES|QL CATEGORIZE is not available on the Observability logs essentials tier
+        id: ESQL_CATEGORIZE_PRODUCT_FEATURE_ID,
+        description: 'Grouping similar messages with ES|QL CATEGORIZE in Discover',
+        products: [{ name: 'observability', tier: 'complete' }],
       },
     ]);
 

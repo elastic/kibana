@@ -68,6 +68,7 @@ export const TAB_STATE_URL_KEY = '_tab'; // `_t` is already used by Kibana for t
  */
 export const TRACES_PRODUCT_FEATURE_ID = 'discover:traces';
 export const METRICS_EXPERIENCE_PRODUCT_FEATURE_ID = 'discover:metrics-experience';
+export const ESQL_CATEGORIZE_PRODUCT_FEATURE_ID = 'discover:esql-categorize';
 
 /**
  * Discover session HTTP API
