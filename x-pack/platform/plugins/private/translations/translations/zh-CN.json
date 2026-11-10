@@ -47470,7 +47470,6 @@
     "xpack.nightshift.flyout.detectionsTitle": "检测",
     "xpack.nightshift.flyout.followUpInvestigationButtonLabel": "运行后续操作",
     "xpack.nightshift.flyout.followUpInvestigationTooltip": "调查已在运行。这会将后续任务加入队列，并在其完成后启动。",
-    "xpack.nightshift.flyout.investigationCardFailedLabel": "失败",
     "xpack.nightshift.flyout.investigationCardStatusLabel": "调查 · {status}",
     "xpack.nightshift.flyout.investigationCardTitle": "调查",
     "xpack.nightshift.flyout.investigationTitle": "调查",

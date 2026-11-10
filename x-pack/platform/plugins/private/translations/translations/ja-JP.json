@@ -47486,7 +47486,6 @@
     "xpack.nightshift.flyout.detectionsTitle": "検出",
     "xpack.nightshift.flyout.followUpInvestigationButtonLabel": "フォローアップを実行",
     "xpack.nightshift.flyout.followUpInvestigationTooltip": "調査はすでに実行中です。これにより、終了時に開始するフォローアップがキューに登録されます。",
-    "xpack.nightshift.flyout.investigationCardFailedLabel": "失敗",
     "xpack.nightshift.flyout.investigationCardStatusLabel": "調査・{status}",
     "xpack.nightshift.flyout.investigationCardTitle": "調査",
     "xpack.nightshift.flyout.investigationTitle": "調査",

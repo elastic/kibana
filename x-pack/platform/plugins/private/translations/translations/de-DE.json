@@ -47371,7 +47371,6 @@
     "xpack.nightshift.flyout.detectionsTitle": "Erkennungen",
     "xpack.nightshift.flyout.followUpInvestigationButtonLabel": "Follow-up ausführen",
     "xpack.nightshift.flyout.followUpInvestigationTooltip": "Eine Untersuchung läuft bereits. Dadurch wird eine Folgeaktion in die Warteschlange gestellt, die startet, sobald dieser Vorgang abgeschlossen ist.",
-    "xpack.nightshift.flyout.investigationCardFailedLabel": "Fehlgeschlagen",
     "xpack.nightshift.flyout.investigationCardStatusLabel": "Untersuchung · {status}",
     "xpack.nightshift.flyout.investigationCardTitle": "Untersuchung",
     "xpack.nightshift.flyout.investigationTitle": "Untersuchung",
