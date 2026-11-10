@@ -6,6 +6,7 @@
  */
 
 import type { CohortRouting } from '../cohort_routing';
+import { MODEL_REFUSAL_PATTERN } from '../constants';
 import type {
   GenerationFault,
   ReviewArtifact,
@@ -100,7 +101,13 @@ const foldReviews = (
       )
       .join('; ');
   const failures = applicable.filter(({ result }) => result.score === 0);
-  if (failures.length > 0) return fail(describe(failures));
+  if (failures.length > 0) {
+    // Any pipeline failure among the reviews wins: the label survives only when every failure is
+    // the model's.
+    return failures.every(({ result }) => result.label === MODEL_FAULT_LABEL)
+      ? { score: 0, label: MODEL_FAULT_LABEL, explanation: describe(failures) }
+      : fail(describe(failures));
+  }
   const gaps = applicable.filter(({ result }) => result.label === 'MISSING');
   if (gaps.length > 0) return missing(describe(gaps));
   return pass(describe(applicable));
@@ -133,7 +140,9 @@ export const scoreRunnerCompleted: CodeScorer = (_expected, artifacts) => {
 
 /**
  * Every review completed or parked at the gate within the wait; one that ran out of time, failed
- * or was cancelled fails. The review snapshot is read before teardown cancels a parked review.
+ * or was cancelled fails. A review that failed because the model refused (see
+ * `MODEL_REFUSAL_PATTERN`) is a `MODEL_FAULT`, reported but not gating. The review snapshot is
+ * read before teardown cancels a parked review.
  */
 export const scoreReviewsSettled: CodeScorer = (_expected, artifacts) =>
   foldReviews(
@@ -146,11 +155,18 @@ export const scoreReviewsSettled: CodeScorer = (_expected, artifacts) =>
           })`
         );
       }
-      // The error is a plain string, so a model refusal cannot be told from a pipeline break
-      // here and every failed review gates.
-      return review.status === 'failed' || review.status === 'cancelled'
-        ? fail(`review ${review.status}${review.error ? `: ${review.error}` : ''}`)
-        : pass(`review ${review.status}`);
+      if (review.status !== 'failed' && review.status !== 'cancelled') {
+        return pass(`review ${review.status}`);
+      }
+      const explanation = `review ${review.status}${review.error ? `: ${review.error}` : ''}`;
+      return review.status === 'failed' && review.error && MODEL_REFUSAL_PATTERN.test(review.error)
+        ? {
+            score: 0,
+            label: MODEL_FAULT_LABEL,
+            explanation,
+            metadata: { reviewFault: 'refused' },
+          }
+        : fail(explanation);
     },
     'no review ran'
   );

@@ -124,6 +124,77 @@ describe('scoreReviewsSettled', () => {
     expect(result.explanation).toContain('analysis step errored: boom');
   });
 
+  it.each([
+    'The model (claude-opus-5-5) refused to complete the response, so generation stopped',
+    'The response was stopped by the provider content filter (finish_reason: content_filter).',
+  ])('labels a review that failed on a model refusal MODEL_FAULT: %s', (error) => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({ reviews: [review({ parked: false, status: 'failed', error })] })
+    );
+    expect(result).toMatchObject({ score: 0, label: MODEL_FAULT_LABEL });
+    expect(result.explanation).toContain('review failed');
+    expect(result.explanation).toContain(error);
+  });
+
+  it('still fails a failed review whose error is not a refusal', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({ reviews: [review({ parked: false, status: 'failed', error: 'boom' })] })
+    );
+    expect(result.score).toBe(0);
+    expect(result.label).toBeUndefined();
+  });
+
+  it('still fails a cancelled review whose error reads like a refusal', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({
+        reviews: [
+          review({
+            parked: false,
+            status: 'cancelled',
+            error: 'refused to complete the response',
+          }),
+        ],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.label).toBeUndefined();
+  });
+
+  it('does not label the row MODEL_FAULT when a refused review sits beside a pipeline failure', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({
+        reviews: [
+          review({ status: 'failed', parked: false, error: 'refused to complete the response' }),
+          review({ executionId: 'review-2', status: 'failed', parked: false, error: 'boom' }),
+        ],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.label).toBeUndefined();
+  });
+
+  it('keeps a timed-out review a plain failure even when its error is a refusal', () => {
+    const result = scoreReviewsSettled(
+      expected,
+      artifacts({
+        reviews: [
+          review({
+            parked: false,
+            status: 'failed',
+            timedOutAfterMs: 300_000,
+            error: 'refused to complete the response',
+          }),
+        ],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.label).toBeUndefined();
+  });
+
   it('fails a failed review that has no error message', () => {
     const result = scoreReviewsSettled(
       expected,

@@ -24,6 +24,14 @@ export const FP_TP_WORKFLOW_ID = 'system-security-attack-discovery-fp-tp-analysi
 /** The runner's generation child: a refused batch leaves its error on this child's steps. */
 export const BATCHED_GENERATION_WORKFLOW_ID = 'system-security-attack-discovery-batched-generation';
 
+/**
+ * A model declining to answer, not the pipeline failing: the run step's refusal error
+ * (`handle_model_refusal`) and the inference plugin's content-filter refusal. Matched against
+ * generation batch errors and failed review execution errors.
+ */
+export const MODEL_REFUSAL_PATTERN =
+  /refused to complete the response|finish_reason: content_filter/i;
+
 /** A dedicated space keeps the runner's per-space concurrency key and the seeded alerts apart. */
 export const EVAL_SPACE_ID = 'ad-worker-eval';
 

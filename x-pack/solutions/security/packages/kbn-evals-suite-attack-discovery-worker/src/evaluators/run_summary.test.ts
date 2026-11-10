@@ -135,6 +135,14 @@ describe('CODE gate', () => {
         expect(() => assertCodeScoresPass('dataset', failures)).not.toThrow();
       });
 
+      it('ReviewsSettled: a refused review is reported, not gated', async () => {
+        const failures = await gate(
+          evaluatorScoring({ name: 'ReviewsSettled', score: 0, label: MODEL_FAULT_LABEL })
+        );
+        expect(failures).toHaveLength(1);
+        expect(() => assertCodeScoresPass('dataset', failures)).not.toThrow();
+      });
+
       it.each(['RunnerCompleted', 'FingerprintsDispatched', 'OutcomeReported', 'BrandNewCheck'])(
         '%s: still gates when it carries the label',
         async (name) => {

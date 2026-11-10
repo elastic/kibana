@@ -19,6 +19,7 @@ import {
   FP_TP_ANALYSIS_STEP_ID,
   FP_TP_ANALYZE_STEP_ID,
   MATCH_FINGERPRINTS_STEP_ID,
+  MODEL_REFUSAL_PATTERN,
   PUBLIC_API_VERSION,
   RESOLVE_FANOUT_STEP_ID,
   REPORT_RUN_COMPLETED_STEP_ID,
@@ -448,9 +449,6 @@ const outcomeEvents = (run: WorkflowExecutionDto): WorkerOutcomeEvent[] =>
     })
   );
 
-// The run step's refusal error (`handle_model_refusal`) and the inference plugin's content-filter
-// refusal; either is the model declining, not the pipeline failing.
-const MODEL_REFUSAL_PATTERN = /refused to complete the response|finish_reason: content_filter/i;
 const RUN_BATCH_STEP_ID = 'run_batch';
 
 /**

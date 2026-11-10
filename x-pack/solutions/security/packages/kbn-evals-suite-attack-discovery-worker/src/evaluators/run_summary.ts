@@ -82,16 +82,20 @@ export const SAFETY_CODE_EVALUATORS: ReadonlySet<string> = new Set([
   AUDIT_CONDITIONAL_REMEDIATION_EVALUATOR_NAME,
 ]);
 
-/** The pipeline checks whose miss can be the generation model's (`MODEL_FAULT`), not the pipeline's. */
+/**
+ * The pipeline checks whose miss can be the model's (`MODEL_FAULT`: a refused generation or a
+ * refused review), not the pipeline's.
+ */
 export const MODEL_FAULT_CODE_EVALUATORS: ReadonlySet<string> = new Set([
   'AlertsRetrieved',
   'DiscoveriesPersisted',
+  'ReviewsSettled',
 ]);
 
 /**
  * A miss gates unless its evaluator is explicitly a quality check, so an evaluator nobody
  * classified fails closed. A failed row gates whichever evaluator reports it: the row has no
- * output to judge, which is a pipeline failure. A generation check labelled `MODEL_FAULT` is
+ * output to judge, which is a pipeline failure. A check labelled `MODEL_FAULT` is
  * reported, not gated: the pipeline ran and the model refused or found nothing.
  */
 export const isGatingCodeFailure = ({ evaluator, label }: CodeFailure): boolean => {
