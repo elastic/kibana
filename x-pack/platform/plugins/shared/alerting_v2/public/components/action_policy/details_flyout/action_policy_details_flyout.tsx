@@ -23,7 +23,6 @@ import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from '../labels';
 import { AffectedRulesFlyout } from './affected_rules_flyout';
 import { ACTION_POLICY_MENU_ARIA_LABEL, useActionPolicyMenu } from '../use_action_policy_menu';
 import {
-  ActionPolicySummaryBody,
   ActionPolicySummaryDefinitionSection,
   ActionPolicySummaryDestinationsSection,
   ActionPolicySummaryNotificationSection,
@@ -82,7 +81,14 @@ export const ActionPolicyDetailsFlyout = ({
 
   const { data: profileByUid } = useBulkGetUserProfiles({ uids: metadataUids });
 
-  const { snoozed_until: snoozedUntil } = policy;
+  const {
+    snoozed_until: snoozedUntil,
+    description,
+    matcher,
+    grouping,
+    throttle,
+    destinations,
+  } = policy;
   const snoozedActive = isSnoozed(snoozedUntil);
   const isLicenseValid = useIsActionPoliciesLicenseValid();
   const isEnableBlockedByLicense = !policy.enabled && !isLicenseValid;
@@ -225,25 +231,25 @@ export const ActionPolicyDetailsFlyout = ({
         </Header>
 
         <Body>
-          <ActionPolicySummaryBody policy={policy}>
-            <ActionPolicySummaryDefinitionSection
-              policyScopeAction={
-                showAffectedRulesLink ? (
-                  <EuiLink
-                    onClick={() => setIsAffectedRulesOpen(true)}
-                    data-test-subj="actionPolicyDetailsFlyoutSeeAffectedRulesLink"
-                  >
-                    {i18n.translate(
-                      'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.seeAffectedRules',
-                      { defaultMessage: 'See all affected rules' }
-                    )}
-                  </EuiLink>
-                ) : undefined
-              }
-            />
-            <ActionPolicySummaryNotificationSection />
-            <ActionPolicySummaryDestinationsSection />
-          </ActionPolicySummaryBody>
+          <ActionPolicySummaryDefinitionSection
+            description={description}
+            matcher={matcher}
+            policyScopeAction={
+              showAffectedRulesLink ? (
+                <EuiLink
+                  onClick={() => setIsAffectedRulesOpen(true)}
+                  data-test-subj="actionPolicyDetailsFlyoutSeeAffectedRulesLink"
+                >
+                  {i18n.translate(
+                    'xpack.alertingV2.actionPolicy.detailsFlyout.policyScope.seeAffectedRules',
+                    { defaultMessage: 'See all affected rules' }
+                  )}
+                </EuiLink>
+              ) : undefined
+            }
+          />
+          <ActionPolicySummaryNotificationSection grouping={grouping} throttle={throttle} />
+          <ActionPolicySummaryDestinationsSection destinations={destinations} />
         </Body>
 
         <Footer>

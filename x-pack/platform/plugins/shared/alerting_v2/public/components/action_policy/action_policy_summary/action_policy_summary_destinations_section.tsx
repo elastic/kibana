@@ -7,14 +7,18 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { FlyoutSection } from '@kbn/flyout-sections';
 import { i18n } from '@kbn/i18n';
 import { DestinationCard } from '../details_flyout/destination_card';
-import { useActionPolicySummary } from './action_policy_summary_context';
 
-export const ActionPolicySummaryDestinationsSection = () => {
-  const { destinations = [] } = useActionPolicySummary();
+export interface ActionPolicySummaryDestinationsSectionProps {
+  destinations?: ActionPolicyResponse['destinations'];
+}
 
+export const ActionPolicySummaryDestinationsSection = ({
+  destinations = [],
+}: ActionPolicySummaryDestinationsSectionProps) => {
   return (
     <FlyoutSection
       id="destinations"

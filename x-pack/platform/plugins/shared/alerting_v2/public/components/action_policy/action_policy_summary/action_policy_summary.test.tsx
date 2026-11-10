@@ -9,14 +9,16 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { getFrequencyLabel, getGroupingModeLabel } from '../labels';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import {
-  ActionPolicySummaryBody,
   ActionPolicySummaryDefinitionSection,
   ActionPolicySummaryDestinationsSection,
   ActionPolicySummaryNotificationSection,
-  useActionPolicySummary,
-  type ActionPolicySummaryData,
 } from '.';
+
+type ActionPolicySummaryData = Partial<
+  Pick<ActionPolicyResponse, 'description' | 'matcher' | 'grouping' | 'throttle' | 'destinations'>
+>;
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -37,34 +39,23 @@ jest.mock('../../../hooks/use_fetch_workflow', () => ({
   }),
 }));
 
-const renderSummary = (policy: ActionPolicySummaryData, policyScopeAction?: React.ReactNode) =>
+const renderSummary = (
+  { description, matcher, grouping, throttle, destinations }: ActionPolicySummaryData,
+  policyScopeAction?: React.ReactNode
+) =>
   render(
     <I18nProvider>
-      <ActionPolicySummaryBody policy={policy}>
-        <ActionPolicySummaryDefinitionSection policyScopeAction={policyScopeAction} />
-        <ActionPolicySummaryNotificationSection />
-        <ActionPolicySummaryDestinationsSection />
-      </ActionPolicySummaryBody>
+      <ActionPolicySummaryDefinitionSection
+        description={description}
+        matcher={matcher}
+        policyScopeAction={policyScopeAction}
+      />
+      <ActionPolicySummaryNotificationSection grouping={grouping} throttle={throttle} />
+      <ActionPolicySummaryDestinationsSection destinations={destinations} />
     </I18nProvider>
   );
 
 describe('ActionPolicySummary', () => {
-  describe('useActionPolicySummary', () => {
-    it('throws when used outside ActionPolicySummaryBody', () => {
-      const Consumer = () => {
-        useActionPolicySummary();
-        return null;
-      };
-      const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-      expect(() => render(<Consumer />)).toThrow(
-        'useActionPolicySummary must be used within ActionPolicySummaryBody'
-      );
-
-      consoleError.mockRestore();
-    });
-  });
-
   describe('with a fully-populated policy', () => {
     const policy: ActionPolicySummaryData = {
       description: 'Notify the on-call team',
@@ -77,10 +68,9 @@ describe('ActionPolicySummary', () => {
       ],
     };
 
-    it('renders the summary body with the three sections', () => {
+    it('renders the three sections', () => {
       renderSummary(policy);
 
-      expect(screen.getByTestId('actionPolicySummaryBody')).toBeInTheDocument();
       expect(screen.getByTestId('actionPolicyDetailsFlyoutDefinition')).toBeInTheDocument();
       expect(screen.getByTestId('actionPolicyDetailsFlyoutNotification')).toBeInTheDocument();
       expect(screen.getByTestId('actionPolicyDetailsFlyoutDestinations')).toBeInTheDocument();

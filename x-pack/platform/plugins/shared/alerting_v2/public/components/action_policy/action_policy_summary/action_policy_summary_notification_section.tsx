@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { FlyoutSection } from '@kbn/flyout-sections';
 import { i18n } from '@kbn/i18n';
 import { BadgeList } from '../badge_list';
@@ -17,11 +18,16 @@ import {
   getGroupingModeLabel,
 } from '../labels';
 import { Column, SubsectionColumns } from '../details_flyout/subsection_columns';
-import { useActionPolicySummary } from './action_policy_summary_context';
 
-export const ActionPolicySummaryNotificationSection = () => {
-  const { grouping, throttle } = useActionPolicySummary();
+export interface ActionPolicySummaryNotificationSectionProps {
+  grouping?: ActionPolicyResponse['grouping'];
+  throttle?: ActionPolicyResponse['throttle'];
+}
 
+export const ActionPolicySummaryNotificationSection = ({
+  grouping,
+  throttle,
+}: ActionPolicySummaryNotificationSectionProps) => {
   return (
     <FlyoutSection
       id="notification"

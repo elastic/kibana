@@ -9,22 +9,24 @@ import React from 'react';
 import type { ReactNode } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FlyoutSection, FlyoutSubsection } from '@kbn/flyout-sections';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
 import { PolicyScopeSummary, POLICY_SCOPE_LABEL } from '../details_flyout/policy_scope_summary';
-import { useActionPolicySummary } from './action_policy_summary_context';
 
 const EMPTY_VALUE = '-';
 
 export interface ActionPolicySummaryDefinitionSectionProps {
+  description?: ActionPolicyResponse['description'];
+  matcher?: ActionPolicyResponse['matcher'];
   /** Rendered beside the "Policy scope" title, e.g. a link that only makes sense in the flyout. */
   policyScopeAction?: ReactNode;
 }
 
 export const ActionPolicySummaryDefinitionSection = ({
+  description,
+  matcher,
   policyScopeAction,
 }: ActionPolicySummaryDefinitionSectionProps) => {
-  const { description, matcher } = useActionPolicySummary();
-
   return (
     <FlyoutSection
       id="definition"

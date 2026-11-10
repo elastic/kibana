@@ -21,7 +21,6 @@ import { WorkflowApi } from '@kbn/workflows-ui';
 import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
 import {
-  ActionPolicySummaryBody,
   ActionPolicySummaryDefinitionSection,
   ActionPolicySummaryDestinationsSection,
   ActionPolicySummaryNotificationSection,
@@ -49,6 +48,7 @@ export const ActionPolicyCanvasContent = ({
 
   const { data: rawData, origin } = attachment;
   const data = rawData as ActionPolicyCanvasData;
+  const { description, matcher, grouping, throttle, destinations } = data;
   // Origin is only set if the action policy has been persisted
   const isPersisted = Boolean(origin);
 
@@ -205,11 +205,9 @@ export const ActionPolicyCanvasContent = ({
   return (
     <QueryClientProvider client={queryClient}>
       <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
-        <ActionPolicySummaryBody policy={data}>
-          <ActionPolicySummaryDefinitionSection />
-          <ActionPolicySummaryNotificationSection />
-          <ActionPolicySummaryDestinationsSection />
-        </ActionPolicySummaryBody>
+        <ActionPolicySummaryDefinitionSection description={description} matcher={matcher} />
+        <ActionPolicySummaryNotificationSection grouping={grouping} throttle={throttle} />
+        <ActionPolicySummaryDestinationsSection destinations={destinations} />
       </EuiPanel>
     </QueryClientProvider>
   );
