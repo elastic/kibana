@@ -7,23 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing';
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map, startWith } from 'rxjs';
-import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import type { DashboardState, DashboardOptions } from '@kbn/as-code-dashboard-schema';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 import {
-  DEFAULT_SETTINGS,
-  deserializeSettings,
-  settingsComparators,
-  type DashboardSettings,
-} from '../../common/dashboard_state/settings';
+  DASHBOARD_COMPARATOR_DEFAULTS,
+  metadataComparators,
+  optionsComparators,
+} from '../../common/dashboard_state/comparators';
 import { coreServices, screenshotModeService } from '../services/kibana_services';
 
-export type { DashboardSettings };
+export type DashboardSettings = Required<DashboardOptions> & {
+  description?: DashboardState['description'];
+  tags: DashboardState['tags'];
+  time_restore: boolean;
+  project_routing_restore: boolean;
+  title: DashboardState['title'];
+};
+
+const DEFAULT_SETTINGS: WithAllKeys<DashboardSettings> = {
+  ...DEFAULT_DASHBOARD_OPTIONS,
+  description: undefined,
+  tags: DASHBOARD_COMPARATOR_DEFAULTS.tags,
+  time_restore: false,
+  project_routing_restore: false,
+  title: DASHBOARD_COMPARATOR_DEFAULTS.title,
+};
+
+const settingsComparators: StateComparators<DashboardSettings> = {
+  ...optionsComparators,
+  ...metadataComparators,
+  time_restore: 'referenceEquality',
+  project_routing_restore: 'referenceEquality',
+};
+
+function deserializeState(state: DashboardState) {
+  return {
+    ...state.options,
+    description: state.description,
+    tags: state.tags,
+    time_restore: Boolean(state.time_range),
+    project_routing_restore: Boolean(state.project_routing),
+    title: state.title,
+  };
+}
 
 export function initializeSettingsManager(initialState: DashboardState) {
   const stateManager = initializeStateManager(
-    deserializeSettings(initialState),
+    deserializeState(initialState),
     DEFAULT_SETTINGS,
     settingsComparators
   );
@@ -81,9 +115,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
           startWith(undefined),
           debounceTime(100),
           map(() => stateManager.getLatestState()),
-          combineLatestWith(
-            lastSavedState$.pipe(map((lastSaved) => deserializeSettings(lastSaved)))
-          ),
+          combineLatestWith(lastSavedState$.pipe(map((lastSaved) => deserializeState(lastSaved)))),
           map(([latestState, lastSavedState]) => {
             const {
               description,
@@ -111,7 +143,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
         );
       },
       reset: (lastSavedState: DashboardState) => {
-        stateManager.reinitializeState(deserializeSettings(lastSavedState));
+        stateManager.reinitializeState(deserializeState(lastSavedState));
       },
     },
   };

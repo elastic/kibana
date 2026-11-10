@@ -16,8 +16,8 @@ export {
 } from './approximation';
 export { getProjectRoutingComparators, type ProjectRoutingState } from './project_routing';
 export {
-  DEFAULT_SETTINGS,
-  deserializeSettings,
-  settingsComparators,
-  type DashboardSettings,
-} from './settings';
+  DASHBOARD_COMPARATOR_DEFAULTS,
+  metadataComparators,
+  getDashboardComparators,
+  optionsComparators,
+} from './comparators';
