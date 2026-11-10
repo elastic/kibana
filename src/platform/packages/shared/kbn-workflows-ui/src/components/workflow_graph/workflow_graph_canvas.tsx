@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiButtonGroup,
   EuiButtonIcon,
   EuiCallOut,
   euiCanAnimate,
@@ -60,7 +61,7 @@ import {
 import { computeInsertionPoints } from './compute_insertion_points';
 import { computePendingErrorBranchPlacement, type PendingInsertVisual } from './pending_insert';
 import { resolveAppendInsertTarget } from './resolve_append_insert_target';
-import { WORKFLOWS_CANVAS_CHROME_INSET, WORKFLOWS_SURFACE_RADIUS } from './surface_radius';
+import { WORKFLOWS_CANVAS_CHROME_INSET } from './surface_radius';
 import { useInsertLayoutAnimation } from './use_insert_layout_animation';
 import { useWorkflowLayout } from './use_workflow_layout';
 import {
@@ -227,9 +228,14 @@ function CanvasZoomControls({
   onFitView: () => void;
 }) {
   const { euiTheme } = useEuiTheme();
-  const floatingShadow = useEuiShadow('m');
+  // Elevate via a transparent wrapper so the segmented group's own fill is the
+  // only surface color.
+  const floatingShadow = useEuiShadow('m', { border: 'none' });
   const { zoomIn, zoomOut } = useReactFlow();
 
+  const legend = i18n.translate('workflowsUi.graph.zoomControlsLegend', {
+    defaultMessage: 'Zoom controls',
+  });
   const zoomOutLabel = i18n.translate('workflowsUi.graph.zoomOut', {
     defaultMessage: 'Zoom out',
   });
@@ -250,57 +256,61 @@ function CanvasZoomControls({
     <div
       css={[
         {
-          background: euiTheme.colors.backgroundBasePlain,
-          borderRadius: WORKFLOWS_SURFACE_RADIUS,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: euiTheme.size.s,
-          gap: 2,
           position: 'relative',
+          display: 'inline-flex',
+          borderRadius: euiTheme.border.radius.control,
         },
         floatingShadow,
       ]}
     >
-      <EuiToolTip content={zoomInLabel} position="right" disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="plus"
-          aria-label={zoomInLabel}
-          color="text"
-          size="s"
-          onClick={handleZoomIn}
-          data-test-subj="workflowCanvas-zoom-in"
-        />
-      </EuiToolTip>
-      <EuiToolTip content={zoomOutLabel} position="right" disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="minus"
-          aria-label={zoomOutLabel}
-          color="text"
-          size="s"
-          onClick={handleZoomOut}
-          data-test-subj="workflowCanvas-zoom-out"
-        />
-      </EuiToolTip>
-      <EuiToolTip content={resetZoomLabel} position="right" disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="bullseye"
-          aria-label={resetZoomLabel}
-          color="text"
-          size="s"
-          onClick={onResetView}
-          data-test-subj="workflowCanvas-reset-zoom"
-        />
-      </EuiToolTip>
-      <EuiToolTip content={fitViewLabel} position="right" disableScreenReaderOutput>
-        <EuiButtonIcon
-          iconType="fullScreen"
-          aria-label={fitViewLabel}
-          color="text"
-          size="s"
-          onClick={onFitView}
-          data-test-subj="workflowCanvas-fit-view"
-        />
-      </EuiToolTip>
+      <EuiButtonGroup
+        legend={legend}
+        variant="segmented"
+        layout="vertical"
+        buttonSize="s"
+        wrap={false}
+      >
+        <EuiToolTip content={zoomInLabel} position="right" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="plus"
+            aria-label={zoomInLabel}
+            color="text"
+            onClick={handleZoomIn}
+            data-test-subj="workflowCanvas-zoom-in"
+            title=""
+          />
+        </EuiToolTip>
+        <EuiToolTip content={zoomOutLabel} position="right" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="minus"
+            aria-label={zoomOutLabel}
+            color="text"
+            onClick={handleZoomOut}
+            data-test-subj="workflowCanvas-zoom-out"
+            title=""
+          />
+        </EuiToolTip>
+        <EuiToolTip content={resetZoomLabel} position="right" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="bullseye"
+            aria-label={resetZoomLabel}
+            color="text"
+            onClick={onResetView}
+            data-test-subj="workflowCanvas-reset-zoom"
+            title=""
+          />
+        </EuiToolTip>
+        <EuiToolTip content={fitViewLabel} position="right" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="fullScreen"
+            aria-label={fitViewLabel}
+            color="text"
+            onClick={onFitView}
+            data-test-subj="workflowCanvas-fit-view"
+            title=""
+          />
+        </EuiToolTip>
+      </EuiButtonGroup>
     </div>
   );
 }
@@ -311,9 +321,6 @@ function CanvasMinimap({
   nodeColor: (n: { type?: string; data?: unknown }) => string;
 }) {
   const { euiTheme } = useEuiTheme();
-  // Keep the shadow mixin's dark-mode ::after ring off this wrapper; that
-  // overlay sits at z-index 0 and the MiniMap paints over it, so the border
-  // would only show around the collapse header.
   const floatingShadow = useEuiShadow('m', { border: 'none' });
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -324,64 +331,56 @@ function CanvasMinimap({
     defaultMessage: 'Expand minimap',
   });
 
+  // Mirror segmented EuiButtonGroup chrome (control radius, xs/2 padding, plain fill).
+  const groupChromeCss = {
+    position: 'relative' as const,
+    borderRadius: euiTheme.border.radius.control,
+    background: euiTheme.colors.backgroundBasePlain,
+    border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+    padding: `calc(${euiTheme.size.xs} / 2)`,
+    overflow: 'hidden' as const,
+  };
+
   if (!isExpanded) {
     return (
       <div
         css={[
           {
-            background: euiTheme.colors.backgroundBasePlain,
-            borderRadius: WORKFLOWS_SURFACE_RADIUS,
-            border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-            padding: euiTheme.size.s,
             position: 'relative',
+            display: 'inline-flex',
+            borderRadius: euiTheme.border.radius.control,
           },
           floatingShadow,
         ]}
       >
-        <EuiToolTip content={expandLabel} position="left" disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="map"
-            aria-label={expandLabel}
-            color="text"
-            size="s"
-            onClick={() => setIsExpanded(true)}
-            data-test-subj="workflowCanvas-expand-minimap"
-          />
-        </EuiToolTip>
+        <EuiButtonGroup
+          legend={expandLabel}
+          variant="segmented"
+          buttonSize="s"
+          wrap={false}
+        >
+          <EuiToolTip content={expandLabel} position="left" disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="map"
+              aria-label={expandLabel}
+              color="text"
+              onClick={() => setIsExpanded(true)}
+              data-test-subj="workflowCanvas-expand-minimap"
+              title=""
+            />
+          </EuiToolTip>
+        </EuiButtonGroup>
       </div>
     );
   }
 
   return (
-    <div
-      css={[
-        {
-          position: 'relative',
-          borderRadius: WORKFLOWS_SURFACE_RADIUS,
-          background: euiTheme.colors.emptyShade,
-          border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
-          overflow: 'hidden',
-          '& .react-flow__minimap.react-flow__panel': {
-            position: 'relative',
-            inset: 'auto',
-            margin: 0,
-            transform: 'none',
-          },
-          '& .react-flow__minimap-svg': {
-            margin: 4,
-            width: 'calc(100% - 8px)',
-            height: 'calc(100% - 8px)',
-          },
-        },
-        floatingShadow,
-      ]}
-    >
+    <div css={[groupChromeCss, floatingShadow]}>
       <div
         css={{
           display: 'flex',
           justifyContent: 'flex-end',
           alignItems: 'center',
-          padding: euiTheme.size.s,
         }}
       >
         <EuiToolTip content={collapseLabel} position="left" disableScreenReaderOutput>
@@ -392,6 +391,7 @@ function CanvasMinimap({
             size="xs"
             onClick={() => setIsExpanded(false)}
             data-test-subj="workflowCanvas-collapse-minimap"
+            title=""
           />
         </EuiToolTip>
       </div>
@@ -405,10 +405,15 @@ function CanvasMinimap({
         nodeStrokeWidth={0}
         nodeBorderRadius={2}
         style={{
+          position: 'relative',
+          inset: 'auto',
+          margin: 0,
+          transform: 'none',
           width: 160,
           height: 126,
           boxSizing: 'border-box',
-          background: euiTheme.colors.emptyShade,
+          background: euiTheme.colors.backgroundBaseSubdued,
+          borderRadius: euiTheme.border.radius.control,
         }}
       />
     </div>

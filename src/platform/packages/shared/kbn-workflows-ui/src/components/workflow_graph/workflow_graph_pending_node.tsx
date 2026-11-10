@@ -107,8 +107,8 @@ export function WorkflowGraphPendingNode({
   const isConfiguring = pending.phase === 'configuring';
   const isTriggerDraft = pending.context.mode === 'trigger';
   const isHorizontal = direction === 'LR';
-  const borderRadius = 8;
-  const chipBorderRadius = 4;
+  const borderRadius = euiTheme.border.radius.panel;
+  const chipBorderRadius = euiTheme.border.radius.control;
   const ariaLabel = isConfiguring
     ? isTriggerDraft
       ? i18n.translate('workflowsUi.graph.pendingConfiguringTriggerAria', {

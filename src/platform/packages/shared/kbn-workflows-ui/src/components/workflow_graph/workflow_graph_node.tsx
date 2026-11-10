@@ -124,10 +124,6 @@ function getStepHasFallback(step: WorkflowGraphNodeData['step']): boolean {
 }
 
 const CHIP_SIZE = 32;
-/** Outer step/trigger card corner radius. */
-const NODE_BORDER_RADIUS = 8;
-/** Icon tile corner radius inside the card. */
-const CHIP_BORDER_RADIUS = 4;
 
 type EuiTheme = ReturnType<typeof useEuiTheme>['euiTheme'];
 
@@ -850,8 +846,8 @@ function WorkflowGraphNodeInner(node: NodeProps<Node<WorkflowGraphNodeData>>) {
 
   const execState = resolveExecutionState(stepExecution?.status);
   const colors = resolveNodeColors(euiTheme, stepType, isTriggerNode, execState);
-  const borderRadius = NODE_BORDER_RADIUS;
-  const chipBorderRadius = CHIP_BORDER_RADIUS;
+  const borderRadius = euiTheme.border.radius.panel;
+  const chipBorderRadius = euiTheme.border.radius.control;
 
   const canShowRun =
     Boolean(canRunSteps && onStepRun) && !isTrigger && !colors.hasStatusIcon;

@@ -47,7 +47,8 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
     : isFailed
     ? colors.danger
     : colors.borderBasePlain;
-  const borderRadius = euiTheme.border.radius.small;
+  const borderRadius = euiTheme.border.radius.panel;
+  const chipBorderRadius = euiTheme.border.radius.control;
   const iconType = getStepIconType(stepType);
 
   return (
@@ -89,7 +90,7 @@ function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNod
               height: 28,
               background: chip.background,
               border: `1px solid ${chip.border}`,
-              borderRadius,
+              borderRadius: chipBorderRadius,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
