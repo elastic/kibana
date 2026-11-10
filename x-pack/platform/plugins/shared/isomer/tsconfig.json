@@ -37,6 +37,7 @@
     "@kbn/as-code-shared-schemas",
     "@kbn/as-code-shared-transforms",
     "@kbn/controls-constants",
-    "@kbn/controls-schemas"
+    "@kbn/controls-schemas",
+    "@kbn/lens-common"
   ]
 }

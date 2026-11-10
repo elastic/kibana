@@ -23,6 +23,17 @@ Every `materialize` call runs one pipeline, as the requesting user:
 3. **Mapping and provenance.** The context's time range is resolved to absolute times once, before planning, so the queries and the provenance agree. Date math such as `now-7d/d` resolves and rounds in the context's time zone, then the user's `dateFormat:tz` (`Browser` as UTC), as Kibana's browser resolves it. The materializer maps the results. Chart nodes (`metric`, `xyChart`) and `unsupported` nodes get `source` provenance: `host: 'kibana'`, the Kibana version as `hostVersion`, the time range and capture time, and in `meta` the materializer and its version, space, and saved object type and ID. Chart nodes also get the pipeline's losses.
 4. **Validation.** Every result is validated the way the runtime validates a composition, against the Isomer input budget and the charts and components packs' primitives, nodes inside a `grid` included. A failing plan, query, mapping or validation returns `unsupported` with a reason, titled from the materializer's `describe` when it has one.
 
+### Lens data-view queries
+
+`server/materialize/lens_aggs` turns a Lens chart that queries a data view into the `aggs` requests Lens runs for it. `compileLensDataViewChart(chart)` takes the chart in Lens's API format, turns it into the Lens attributes Lens itself would save (`LensConfigBuilder.fromAPIFormat`, so columns, IDs and defaults are Lens's), and compiles each form-based layer the way Lens's `toExpression` builds its `esaggs` call:
+
+- one agg per column, in column order, as each operation's `toEsAggsFn` builds it;
+- duplicate aggs merged as Lens's `dedupeAggs` merges them, and single percentiles of one field merged into one `percentiles` agg as the percentile operation's `optimizeEsAggs` merges them;
+- the layer's sampling (off when a min or max column is in it) and `ignoreGlobalFilters`;
+- the layer's data view: a saved data view's ID, or the ad hoc data view spec Lens keeps for it.
+
+Each layer comes with Lens's `esaggs` ID map, from each table column (`col-1-0.95`) to the Lens columns it fills, as Lens's `lens_map_to_columns` takes it. The metric operations compile: count, unique count, sum, average, minimum, maximum, median, standard deviation, percentile, percentile rank and last value. A layer with any other column, or with a filter, time shift, reduced time range or time scale on a column, comes back with the reason it can't be compiled yet.
+
 ### `MaterializeKit`
 
 `map` gets a kit built for the user and the context its plan ran in, so every materializer formats and colors as Kibana does:
