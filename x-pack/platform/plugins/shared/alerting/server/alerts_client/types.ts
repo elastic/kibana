@@ -244,6 +244,7 @@ export interface SearchResult<AlertData, Aggregation = unknown> {
   hits: SearchResponseBody<Alert & AlertData>['hits']['hits'];
   total: SearchResponseBody<Alert & AlertData>['hits']['total'];
   aggregations: SearchResponseBody<Alert & AlertData, Aggregation>['aggregations'];
+  _shards: SearchResponseBody<Alert & AlertData>['_shards'];
 }
 
 export type GetSummarizedAlertsParams = {

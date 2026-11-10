@@ -22,9 +22,9 @@ import {
   ALERT_STATE_NAMESPACE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import { get, isPlainObject } from 'lodash';
+import { get, isPlainObject, uniq } from 'lodash';
 import type { RawAlertInstance, RuleAlertData } from '../../types';
-import type { TrackedAADAlerts } from '../types';
+import type { SearchResult, TrackedAADAlerts } from '../types';
 import { retryTransientEsErrors } from '../../lib/retry_transient_es_errors';
 import type { TrackedAlertsSearch } from './get_tracked_alerts';
 import {
@@ -75,21 +75,25 @@ export async function reconcileTrackedAlertsWithState<AlertData extends RuleAler
   ReconcileTrackedAlertsWithStateResult<AlertData>
 > {
   const logContext = { logger, ruleInfoMessage, logTags };
-  const searchWithRetry: TrackedAlertsSearch<AlertData> = (queryBody) =>
-    retryTransientEsErrors(() => search(queryBody), { logger });
+  const searchTrackedAlerts: TrackedAlertsSearch<AlertData> = async (queryBody) => {
+    const result = await retryTransientEsErrors(() => search(queryBody), { logger });
+    throwIfShardsFailed(result._shards);
+    return result;
+  };
 
   // 1. Load every document the rule still tracks. A failure here fails the run.
   const trackedAlerts = createEmptyTrackedAlerts<AlertData>();
-  const hits = await fetchTrackedAlerts({ ruleId, search: searchWithRetry });
+  const hits = await fetchTrackedAlerts({ ruleId, search: searchTrackedAlerts });
   populateTrackedAlerts(trackedAlerts, hits);
 
-  // 2. State knows an alert the query missed: fetch its document by id.
+  // 2. State knows an alert the query missed: fetch its document by id. A failure here fails
+  //    the run too.
   await fetchTrackedAlertsMissingFromIndex({
     ruleId,
     trackedAlerts,
     activeAlertsFromState,
     recoveredAlertsFromState,
-    search: searchWithRetry,
+    search: searchTrackedAlerts,
     ...logContext,
   });
 
@@ -106,7 +110,7 @@ export async function reconcileTrackedAlertsWithState<AlertData extends RuleAler
 }
 
 // Documents written before `kibana.alert.tracked` existed are not returned by the tracked
-// query, so fetch them by the uuids in task state. Best effort: errors are logged, not thrown.
+// query, so fetch them by the uuids in task state.
 async function fetchTrackedAlertsMissingFromIndex<AlertData extends RuleAlertData>({
   ruleId,
   trackedAlerts,
@@ -136,16 +140,22 @@ async function fetchTrackedAlertsMissingFromIndex<AlertData extends RuleAlertDat
     `Found ${missingUuids.length} alerts in task state not returned by tracked alerts query ${ruleInfoMessage}. Fetching them directly to restore tracking info.`,
     logTags
   );
-  try {
-    const missingHits = await fetchAlertsByIds({ ruleId, alertUuids: missingUuids, search });
-    populateTrackedAlerts(trackedAlerts, missingHits);
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    logger.error(`Error fetching missing tracked alerts ${ruleInfoMessage} - ${errorMessage}`, {
-      tags: logTags.tags,
-      error: { stack_trace: err.stack },
-    });
+  const missingHits = await fetchAlertsByIds({ ruleId, alertUuids: missingUuids, search });
+  populateTrackedAlerts(trackedAlerts, missingHits);
+}
+
+// A failed shard leaves its documents out of the response without an error. Executors answer
+// isTrackedAlert from these documents, so a partial load must fail the run, not look complete.
+function throwIfShardsFailed(shards: SearchResult<RuleAlertData>['_shards']): void {
+  if (shards.failed === 0) {
+    return;
   }
+  const reasons = uniq((shards.failures ?? []).map(({ reason }) => reason.type));
+  throw new Error(
+    `Failed to load tracked alerts from ${shards.failed} of ${shards.total} shards${
+      reasons.length > 0 ? `: ${reasons.join(', ')}` : ''
+    }`
+  );
 }
 
 export interface RestoreStateFromTrackedAlertsParams<AlertData extends RuleAlertData>

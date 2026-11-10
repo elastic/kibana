@@ -1040,6 +1040,85 @@ describe('Task Runner', () => {
           })
         );
       });
+
+      test.each([
+        {
+          partialLoad: 'fetching the alerts missing from the tracked alerts query fails',
+          mockSearch: () =>
+            clusterClient.search
+              .mockResolvedValueOnce({
+                took: 10,
+                timed_out: false,
+                _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+                hits: { total: { relation: 'eq', value: 0 }, hits: [] },
+              })
+              .mockRejectedValueOnce(new Error('search failed!')),
+          error: 'search failed!',
+        },
+        {
+          partialLoad: 'the tracked alerts query fails on some shards',
+          mockSearch: () =>
+            clusterClient.search.mockResolvedValueOnce({
+              took: 10,
+              timed_out: false,
+              _shards: {
+                failed: 1,
+                successful: 1,
+                total: 2,
+                skipped: 0,
+                failures: [{ reason: { type: 'circuit_breaking_exception' } }],
+              },
+              hits: { total: { relation: 'eq', value: 0 }, hits: [] },
+            }),
+          error: 'Failed to load tracked alerts from 1 of 2 shards: circuit_breaking_exception',
+        },
+      ])(
+        'should fail the run and keep the task state when $partialLoad',
+        async ({ mockSearch, error }) => {
+          const alertsService = new AlertsService({
+            logger,
+            pluginStop$: new ReplaySubject(1),
+            kibanaVersion: '8.8.0',
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            dataStreamAdapter: getDataStreamAdapter({ useDataStreamForAlerts }),
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+          elasticsearchAndSOAvailability$.next(true);
+
+          const spy = jest
+            .spyOn(alertsService, 'getContextInitializationPromise')
+            .mockResolvedValue({ result: true });
+
+          mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+          encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+          mockSearch();
+
+          const taskInstance = {
+            ...mockedTaskInstance,
+            state: {
+              ...mockedTaskInstance.state,
+              alertInstances: {
+                '1': {
+                  meta: { uuid: 'abc', flappingHistory: [true] },
+                  state: { start: DATE_1970, duration: '0' },
+                },
+              },
+            },
+          };
+
+          const result = await createTaskRunner({
+            taskInstance,
+            context: { ...taskRunnerFactoryInitializerParams, alertsService },
+          }).run();
+
+          expect(ruleTypeWithAlerts.executor).not.toHaveBeenCalled();
+          expect(clusterClient.bulk).not.toHaveBeenCalled();
+          expect(result.state).toEqual(taskInstance.state);
+          expect(result.taskRunError?.message).toBe(error);
+          spy.mockRestore();
+        }
+      );
     });
 
     function testCorrectAlertsClientUsed<
