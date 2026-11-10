@@ -17,21 +17,21 @@ export const getPluginStatus$ = (
   return license$.pipe(
     takeUntil(stop$),
     map((license) => {
-      if (license) {
-        if (license.error) {
-          return {
-            level: ServiceStatusLevels.unavailable,
-            summary: 'Error fetching license',
-          };
-        }
+      if (license.error) {
         return {
-          level: ServiceStatusLevels.available,
-          summary: 'License fetched',
+          level: ServiceStatusLevels.unavailable,
+          summary: 'Error fetching license',
+        };
+      }
+      if (!license.isAvailable) {
+        return {
+          level: ServiceStatusLevels.degraded,
+          summary: 'License not available',
         };
       }
       return {
-        level: ServiceStatusLevels.degraded,
-        summary: 'License not fetched yet',
+        level: ServiceStatusLevels.available,
+        summary: 'License fetched',
       };
     })
   );
