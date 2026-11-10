@@ -299,6 +299,48 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     });
   });
 
+  describe('proxy URL', () => {
+    const updateWithProxy = async (proxyUrl: string | undefined) => {
+      mockGetPackageInfo.mockResolvedValue({
+        data: {
+          item: { version: '2.5.0', vars: [{ name: 'proxy_url' }], policy_templates: [] },
+        },
+      });
+      mockGetOnePackagePolicy.mockResolvedValue({
+        data: {
+          item: {
+            name: 'existing-policy-name',
+            namespace: 'existing-ns',
+            package: { version: '2.5.0' },
+            vars: { proxy_url: { value: 'http://old:3128' } },
+          },
+        },
+      });
+      await cleanupAgentBasedPolicies({
+        ...BASE_OPTS,
+        policySettings: proxyUrl === undefined ? {} : { proxy_url: proxyUrl },
+        instances: [instance],
+        servicesMap: new Map([['vpcflow', vpcflow]]),
+        pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+        currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+        selectedAgentPolicyIds: ['agent-policy-1'],
+      });
+      return mockUpdatePackagePolicy.mock.calls[0][1];
+    };
+
+    it('sends the new proxy over the one the policy has', async () => {
+      expect((await updateWithProxy('http://new:3128')).vars.proxy_url).toBe('http://new:3128');
+    });
+
+    it('clears the proxy with null, over the existing var that is merged in', async () => {
+      expect((await updateWithProxy('')).vars.proxy_url).toBeNull();
+    });
+
+    it('keeps the proxy of the policy when none was ever set', async () => {
+      expect((await updateWithProxy(undefined)).vars.proxy_url).toBe('http://old:3128');
+    });
+  });
+
   it('prefers a duplicate’s own namespace over the global one', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },

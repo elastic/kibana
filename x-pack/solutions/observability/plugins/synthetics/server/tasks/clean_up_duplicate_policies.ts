@@ -6,15 +6,23 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { syntheticsMonitorSOTypes } from '../../common/types/saved_objects';
 import type { EncryptedSyntheticsMonitorAttributes } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
 import { bumpAgentPolicyRevision } from '../synthetics_service/private_location/package_policy_service';
+import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import { getFilterForTestNowRun } from './test_now_run_filter';
 import type { SyntheticsServerSetup } from '../types';
 
-/** Fleet SO bulk-delete allows 10k; keep well under that and getByIDs payload size. */
-export const DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE = 500;
+/**
+ * Fleet's delete reads every policy of a batch in full, so this bounds memory
+ * rather than an ES limit. Past 1000, larger batches barely shorten the run.
+ */
+export const DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE = 1000;
+
+/** Scans read ids and a few small fields only; ES caps a page at 10k hits. */
+export const PACKAGE_POLICY_SCAN_PAGE_SIZE = 5000;
 
 export interface LeftoverPackagePolicies {
   /** Private-location policies that no monitor expects, including old-format ids. */
@@ -39,7 +47,7 @@ export const findLeftoverPackagePolicies = async (
   const policyIdPages = await fleet.packagePolicyService.fetchAllItemIds(soClient, {
     kuery: getFilterForTestNowRun(true),
     spaceIds: ['*'],
-    perPage: DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE,
+    perPage: PACKAGE_POLICY_SCAN_PAGE_SIZE,
   });
   for await (const ids of policyIdPages) {
     ids.forEach((id) => existingIds.add(id));
@@ -49,8 +57,9 @@ export const findLeftoverPackagePolicies = async (
   const expectedLocationById = new Map<string, string>();
   const finder = soClient.createPointInTimeFinder<EncryptedSyntheticsMonitorAttributes>({
     type: syntheticsMonitorSOTypes,
-    fields: ['id', 'name', 'locations', 'origin'],
+    fields: ['id', 'locations', 'origin'],
     namespaces: ['*'],
+    perPage: PACKAGE_POLICY_SCAN_PAGE_SIZE,
   });
   try {
     for await (const { saved_objects: monitors } of finder.find()) {
@@ -113,12 +122,21 @@ export const deletePackagePolicies = async (
       // Fleet's default bumps the agent policy for every deleted package policy,
       // recompiling and redeploying it each time (thousands of units on a Windows
       // private location).
-      const results = await fleet.packagePolicyService.delete(soClient, esClient, batch, {
-        force: true,
-        spaceIds: ['*'],
-        ignoreMissing: true,
-        bumpRevision: false,
-      });
+      let results: Awaited<ReturnType<typeof fleet.packagePolicyService.delete>>;
+      try {
+        results = await fleet.packagePolicyService.delete(soClient, esClient, batch, {
+          force: true,
+          spaceIds: ['*'],
+          ignoreMissing: true,
+          bumpRevision: false,
+        });
+      } catch (error) {
+        // Fleet's delete is not atomic: it can reject after part of the batch is gone, and
+        // which agent policies those sat on is lost with the response.
+        const fallbackIds = await getAllPrivateLocationAgentPolicyIds(soClient, server);
+        fallbackIds.forEach((policyId) => agentPolicyIds.add(policyId));
+        throw error;
+      }
       for (const result of results ?? []) {
         if (result.success) {
           result.policy_ids?.forEach((policyId) => agentPolicyIds.add(policyId));
@@ -131,6 +149,23 @@ export const deletePackagePolicies = async (
   } finally {
     // Deletes that already landed must not be left undeployed by an abort or a failed batch.
     await bumpAgentPolicyRevisions([...agentPolicyIds], server);
+  }
+};
+
+/** Every synthetics package policy sits on one of these. */
+const getAllPrivateLocationAgentPolicyIds = async (
+  soClient: SavedObjectsClientContract,
+  server: SyntheticsServerSetup
+): Promise<string[]> => {
+  try {
+    const privateLocations = await getPrivateLocations(soClient, ALL_SPACES_ID);
+    return privateLocations.map(({ agentPolicyId }) => agentPolicyId);
+  } catch (error) {
+    server.logger.error(
+      '[PrivateLocationCleanUpTask] Failed to read private locations to bump their agent policies after a failed delete',
+      { error }
+    );
+    return [];
   }
 };
 

@@ -46,47 +46,32 @@ export const createSignificantSecurityEventAttachmentDefinition = ({
 }: {
   navigation: AttachmentNavigationDeps;
 }): AttachmentUIDefinition<SignificantSecurityEventAttachment> => ({
-  // The attachment title lags one write behind the finding shown, so it cannot yet say
-  // which finding it is. Lead with what confirmed the finding when something did.
   getLabel: (attachment) => {
     const data = attachment?.data;
     const parsed = parseSignificantSecurityEventData(data);
+    if (parsed) {
+      const { title } = buildSignificantSecurityEventHeadline(parsed, data);
+      if (title) {
+        return title;
+      }
+    }
     // Narrowed for the same reason the threat attachment narrows them: a persisted payload
     // can carry captured fields this build no longer accepts, and the platform requires a
     // string here. An object would reach Agent Builder's own chrome, outside this
     // renderer's control. The captured fields are read unparsed on purpose, so a payload
     // this build rejects still labels itself.
-    const title = asString(data?.attachmentLabel) ?? asString(data?.title) ?? DEFAULT_LABEL;
-    const huntResult = parsed?.hunt_result;
-
-    if (!huntResult?.has_confirmed_hit) {
-      return title;
-    }
-    // Only Tier 1 hits are counted, and `hit_sources` is the only field that says whether
-    // Tier 1 is what confirmed *this* finding: an entry corroborated by Tier 2 alone carries
-    // its report's Tier 1 counts, which for a clean Tier 1 is zero. Reading the count
-    // regardless labels such a finding "0 hits confirm".
-    if (huntResult.hit_sources.includes('tier1')) {
-      return i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.labelWithHits', {
-        defaultMessage: '{count, plural, one {# hit confirms} other {# hits confirm}}: {title}',
-        values: { count: huntResult.tier1.counts.total_hits, title },
-      });
-    }
-    return i18n.translate('xpack.alertzero.agentBuilder.attachments.sse.labelWithBehaviorHit', {
-      defaultMessage: 'Behavior match confirms: {title}',
-      values: { title },
-    });
+    return asString(data?.attachmentLabel) ?? asString(data?.title) ?? DEFAULT_LABEL;
   },
   getIcon: () => 'securitySignalDetected',
-  // Severity / status / confidence live in the card body; the header stays title + subtitle.
   getHeader: ({ attachment }) => {
     const data = attachment?.data;
     const parsed = parseSignificantSecurityEventData(data);
-    const { subtitle } = buildSignificantSecurityEventHeadline(parsed, data);
+    const { subtitle, basisBadge } = buildSignificantSecurityEventHeadline(parsed, data);
 
     return {
       icon: 'securitySignalDetected',
       ...(subtitle ? { subtitle } : {}),
+      ...(basisBadge ? { badges: [basisBadge] } : {}),
     };
   },
   renderInlineContent: (props) => (

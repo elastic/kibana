@@ -146,7 +146,10 @@ Investigations only run as the Nightshift agent service account, so the eval fir
 account's roles on stateful (`ensureNightshiftServiceAccountRoles`), finds or creates the accounts
 (`ensureNightshiftServiceAccounts`, as the app's setup step does), and sets up the space with `POST /internal/nightshift/investigations/service_account/_enable` (idempotent; the eval
 user holds `manage_security`). The `evals_nightshift_investigations` config set turns on
-`xpack.security.serviceAccounts.enabled`.
+`xpack.security.serviceAccounts.enabled`. Nightshift allows five manual investigations a day by
+default and the eval starts one per example, so it turns the daily investigation limits off with
+`PUT /internal/significant_events/run_quotas` (`investigationLimitsEnabled: false`), as an admin
+would on the Nightshift settings page. The setting stays on that stack.
 
 The native framework still requires an evaluation endpoint in its configuration; the command
 reuses the target endpoint for that metadata. This suite never invokes an LLM evaluator or judge.
@@ -182,7 +185,8 @@ The `evals_nightshift_investigations` server config extends `evals_tracing` when
 exports sandbox credentials. Otherwise it is plain `evals_tracing`, so the smoke eval needs no
 sandbox credentials. It enables the investigation engine, its `nightshift.enabled` feature flag
 and sandbox, pauses online evals (`nightshift.onlineEvals.paused`) so investigations are judged
-only by the suite, disables Wiki, and exports full Agent Builder payloads (user messages, system
+only by the suite, disables Wiki and Semantic Memory unless [knowledge switches](#knowledge-switches)
+turn them on, and exports full Agent Builder payloads (user messages, system
 instructions, responses, tool arguments/results and conversation IDs) to the profile's configured
 destination. Trace-exporter headers and connector credentials reach Kibana through
 environment references in committed YAML, without generated secret files or credential arguments.
@@ -277,10 +281,10 @@ the agent in `connectors.md`. There is no eval-only telemetry setting, start par
 hint; the agent finds the data through the connectors, as it must for a customer. A connector set
 is the group of preconfigured connectors one Scout stack starts with:
 
-| Set         | Kibana config                                                              | Connectors                         | Credentials (Vault / profile JSON)  |
-| ----------- | -------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------- |
-| `default`   | [`scout/connector_sets/default.yml`](scout/connector_sets/default.yml)     | `elasticsearch` (`.elasticsearch`) | `nightshift.telemetry.{url,apiKey}` |
-| `orcabench` | [`scout/connector_sets/orcabench.yml`](scout/connector_sets/orcabench.yml) | `orcabench-es` (`.elasticsearch`)  | `nightshiftOrcaEs.{url,apiKey}`     |
+| Set         | Kibana config                                                          | Connectors                                     | Credentials (Vault / profile JSON)         |
+| ----------- | ---------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------ |
+| `default`   | [`scout/connector_sets/default.yml`](scout/connector_sets/default.yml) | `elasticsearch` (`.elasticsearch`)             | `nightshift.telemetry.{url,apiKey}`        |
+| `orcabench` | none                                                                   | `orcabench-es` (`.elasticsearch`), by the eval | `nightshiftOrcaEs.{url,username,password}` |
 
 To add a connector to a set, declare it in the set's YAML and add its id to `CONNECTOR_SETS`. The
 hook selects `orcabench` on the ORCA shard (or `NIGHTSHIFT_DATASETS=orcabench`), and `default`
@@ -289,7 +293,8 @@ Scout config set at the set's YAML; the eval then saves every connector in the s
 investigator through the Agent Builder agents API (`saveConnectorSetOnInvestigator` in
 [`connector_sets.ts`](evals/investigation/connector_sets.ts)), as a user would in the agent's
 settings. Without a connector set, nothing is saved. One stack runs one set; the eval does not
-switch connectors per example.
+switch connectors per example. `orcabench` preconfigures nothing: the eval creates its one
+connector and puts each cutoff's key on it in turn (see [telemetry cutoff](#telemetry-cutoff)).
 
 The `default` set's credentials keep the Vault field name `nightshift.telemetry`:
 
@@ -331,6 +336,81 @@ completed investigation or placeholder score alone does not prove connectivity.
 Leave the Elasticsearch settings unset for the bundled synthetic examples; they need no connector. The
 former `remote` selection and `NIGHTSHIFT_REMOTE_EXAMPLES_FILE` are replaced by this shared file
 workflow.
+
+## Knowledge switches
+
+Investigations run without learned knowledge by default. `NIGHTSHIFT_KNOWLEDGE` turns on any of
+`memory`, `wiki` and `decision-trees` (comma-separated), and the eval then copies that system's
+knowledge from the endpoint under test into the run's space before the first example:
+
+```bash
+NIGHTSHIFT_KNOWLEDGE=memory,decision-trees NIGHTSHIFT_DATASETS=trace-only \
+  NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.json \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
+```
+
+- The knowledge comes from the endpoint the [connector set](#connector-sets) investigates:
+  `nightshiftKnowledge.default` for customer0 and `nightshiftKnowledge.orcabench` for ORCA, each
+  with the `url` and `apiKey` of the Elasticsearch cluster behind that endpoint's Kibana, and the
+  `spaceId` that holds its knowledge (default `default`). For the default set only, without a
+  profile block, the hook reads `NIGHTSHIFT_KNOWLEDGE_ES_URL`, `NIGHTSHIFT_KNOWLEDGE_ES_API_KEY`
+  and `NIGHTSHIFT_KNOWLEDGE_SPACE_ID` from the shell; an ORCA run needs its own block, so stale
+  customer0 values in the shell can't load customer0 knowledge into it. See
+  [Knowledge source key](#knowledge-source-key).
+- Before the first example, the eval clears all three knowledge indices in its space, then copies
+  every selected system's documents from the source space, moving their ids and `space_id` into its
+  own space. Embeddings are recomputed by the eval cluster on write. A source space with no
+  documents for a selected system fails the run.
+- The Scout config set turns on each selected system and turns learning off
+  (`xpack.nightshift_investigations.learning.enabled=false`), so the post-run optimize hook doesn't
+  change the knowledge while examples run. Decision trees need the Wiki runtime, so
+  `decision-trees` alone also runs Wiki, with an empty Wiki index.
+- Every score records `knowledge` (the selection, or `none`), `knowledge_source`, and per system the
+  number of documents loaded and the newest one's `@timestamp`.
+- Changing `NIGHTSHIFT_KNOWLEDGE` restarts Scout, since it changes the server's flags.
+
+### Knowledge source key
+
+The knowledge indices live on the Elasticsearch cluster behind the endpoint's deployed Kibana, and
+the connector keys don't grant access to them, so the copy needs its own key. The `dev-vault` profile
+has no `nightshiftKnowledge` block yet, so for now each developer mints a short-lived read-only key
+with credentials for that cluster (any user with `manage_own_api_key`):
+
+```bash
+curl -s -u "$ES_USER:$ES_PASSWORD" -H 'Content-Type: application/json' \
+  -X POST "$KNOWLEDGE_ES_URL/_security/api_key" -d '{
+    "name": "nightshift-evals-knowledge-read-<you>",
+    "expiration": "7d",
+    "role_descriptors": { "knowledge_read": { "indices": [
+      { "names": ["ai-index-idx-nightshift-*"], "privileges": ["read"] }
+    ] } }
+  }'
+```
+
+Use the response's `encoded` value as the key, and keep it out of the repo, for example in a
+`chmod 600` file loaded before the run:
+
+```bash
+# ~/.nightshift-knowledge-c0.env
+NIGHTSHIFT_KNOWLEDGE_ES_URL=https://<cluster>.es.<region>.elastic.cloud
+NIGHTSHIFT_KNOWLEDGE_ES_API_KEY=<encoded>
+NIGHTSHIFT_KNOWLEDGE_SPACE_ID=default
+```
+
+```bash
+set -a; source ~/.nightshift-knowledge-c0.env; set +a
+NIGHTSHIFT_KNOWLEDGE=memory,wiki node scripts/evals start --suite nightshift-investigations ...
+```
+
+The URL must not embed credentials, and the hook fails the run before Scout starts when the key or
+URL is missing. A key past its expiration fails the copy with a 401; mint a new one. CI and the
+`orcabench` connector set need the key in the profile's `nightshiftKnowledge.<set>` block instead.
+
+Known limitation: the copy is the source space's knowledge as it is at run time. It is not
+filtered against the cases under test, so it can hold knowledge that an earlier investigation of
+the same case derived, which can give away the reference cause. Read knowledge-on scores with that
+in mind until the copy excludes each case's own investigations.
 
 ## Connector probes
 
@@ -577,6 +657,7 @@ against.
 | Variable                         | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `NIGHTSHIFT_DATASETS`            | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all` or `trace-only` fails before any test runs, even when Scout is reused. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `wiki-optimize` selects the [Wiki optimizer replay](#wiki-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
+| `NIGHTSHIFT_KNOWLEDGE`           | Comma-separated knowledge systems (`memory`, `wiki`, `decision-trees`) to turn on and restore before the first example. Unset turns them all off. See [knowledge switches](#knowledge-switches).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `NIGHTSHIFT_PROBE_EXAMPLES_FILE` | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `NIGHTSHIFT_WIKI_REPLAY_FILE` | Replay file for `wiki-optimize`; the bundled synthetic examples when unset. Same `nightshift/` dataset-file format as the investigation examples, with the round and expectation fields in [Wiki optimizer replay](#wiki-optimizer-replay). |
 | `NIGHTSHIFT_PROBE_TIME_BUDGET_S` | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
@@ -591,25 +672,85 @@ NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-in
 
 ## ORCA benchmark
 
-`orcabench` runs ORCA's 50 sampled tasks from the Golden dataset `nightshift/orca-sampled50-v3`
+`orcabench` runs ORCA's 50 sampled tasks from the Golden dataset `nightshift/orca-sampled50-v4`
 against the ORCA telemetry cluster: 40 incident tasks over 28 incidents and 10 no-incident
 controls. Each question uses ORCA's own wording: a stated current time, a vague or offset report
 time and the user-facing symptom, without the incident onset or an analysis window. CI runs it as
 its own shard under the `evals:nightshift-investigations` label, next to the `customer0` shard that
 runs the smoke and trace-only evals, so each Scout server runs one [connector set](#connector-sets).
-The ORCA shard runs the `orcabench` set: one Elasticsearch connector, `orcabench-es`, and no index
-hint, so the agent discovers the ORCA indices the way it would on any cluster. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
+The ORCA shard runs the `orcabench` set: the investigator has one Elasticsearch connector, named
+`orcabench_es`. The question names that connector, as ORCA's names its Grafana API, but no
+index, so the agent discovers the ORCA indices the way it would on any cluster. The space carries
+one custom context snippet (`ORCA_CUSTOM_CONTEXT` in
+[`custom_context.ts`](evals/investigation/custom_context.ts)) pointing at the demo's public source,
+`github.com/open-telemetry/opentelemetry-demo` at commit `fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733`,
+the commit the paper's environment is built on. The paper's agents find that checkout at
+`/app/opentelemetry-demo`; ours clone it in the sandbox, as the customer0 space points at Elastic's
+repositories. The Golden release `nightshift/orca-ech-full-20261019` is an alert-triggered eval
 of 42 questions and is not this ORCA benchmark; CI does not run it. Quote that 42-question set
 as a benchmark result again only after its windows end at detection time.
 
-Each example records `metadata.current_time`, and the public 755 also record
-`metadata.telemetry_snapshot_time`. ORCA serves each task the first telemetry snapshot taken after
-`current_time` plus five minutes, so that snapshot time is the latest data the paper's agents can
-see. This suite does not bound reads yet: the ORCA cluster holds all six days, so an agent can read
-telemetry after its task's snapshot, and a rate here can be higher than a bounded run would give.
-The bound is planned in Elasticsearch, not in the investigation: one read key per snapshot time
-whose role filters `@timestamp` with document-level security, set on the `orcabench-es` connector,
-so the agent investigates unchanged and cannot see past its snapshot.
+Each example records `metadata.current_time` and `metadata.telemetry_snapshot_time`. ORCA serves
+each task the first telemetry snapshot taken after `current_time` plus five minutes, or its last
+snapshot when none is later, so that snapshot time is the latest data the paper's agents can see.
+Public tasks also carry ORCA's ground truth, the task's `tests/expected.json`, as
+`metadata.orca_expected`: each plausible event's `event_id`, `root_cause` and `event_time`, or a
+control's quiet window. Every read here stops there too; see [telemetry cutoff](#telemetry-cutoff).
+
+### Telemetry cutoff
+
+The ORCA cluster holds all six days, so Elasticsearch, not the investigation, bounds what a task can
+read. The agent investigates unchanged and no query it writes can see past its task's cutoff.
+
+- **Cutoff.** A task's cutoff is its `telemetry_snapshot_time`; a release without one on every task
+  fails before any investigation. The bound is inclusive, `@timestamp <= cutoff`, and
+  is always written with milliseconds: Elasticsearch rounds a `lte` date without them up to the end
+  of that second. The 755 has 125 distinct cutoffs, the sampled 50 has 41.
+- **Keys.** The eval signs in to the ORCA cluster as the user `nightshift-orcabench-eval`, whose
+  role reads the three ORCA index patterns and holds `manage_own_api_key`. Elasticsearch only lets a
+  user, not an API key, create a key that carries privileges. At run start the eval mints one key
+  per cutoff in the run, with `read` and `view_index_metadata` on those patterns and the
+  document-level security query `{"range": {"@timestamp": {"lte": "<cutoff>"}}}`. A key expires
+  when the test's own timeout would, so it outlives every investigation that reads with it, and is
+  invalidated as soon as the experiment ends. A key can read its own record, so the agent could see
+  its name, metadata and role. The name is `nightshift-orcabench-eval-<hash>`, a hash of the cutoff
+  and the variant, and the metadata holds only the purpose and a run id. The role's query still shows the
+  cutoff and, for `no-flags`, the demo's flag keys, but neither is new to the agent: it can find
+  the cutoff with a `max` on `@timestamp`, and the flag keys are in the demo source it is pointed
+  at (`src/flagd/demo.flagd.json`). No key is logged, stored in a start input
+  or written to experiment metadata; each lives only in the connector's secrets while its cutoff
+  runs, and the eval writes the connector without letting `kbnClient` log a failed response.
+- **One cutoff at a time.** Nightshift runs only in the default space, and connectors are saved on
+  its one investigator as a whole, so the eval runs one cutoff's tasks at a time
+  ([`orca_cutoff_gate.ts`](evals/investigation/orca_cutoff_gate.ts)). Before a cutoff's tasks start,
+  the `orcabench-es` connector gets that cutoff's key; up to eight of them run together, and the
+  next cutoff waits until all have ended. An investigation that outlives its poll gets two more
+  minutes to end; if it hasn't ended, or can't be found, the run stops before any other key goes
+  on, so no key is swapped under a running investigation. Cutoffs
+  take turns in dataset order, and the test's timeout counts one batch per cutoff. A run is
+  therefore close to serial: the sampled 50 has 41 cutoffs. Run one ORCA eval on a stack at a time,
+  since both would write the one connector.
+- **Preflight.** Before any investigation, a reference key bounded at ORCA's last snapshot must
+  return the document counts pinned in [`orca_dataset.ts`](evals/investigation/orca_dataset.ts) for
+  the run's variant. Then every cutoff key must count no document after its cutoff and some document
+  up to it, on each signal, and a `no-flags` key no flag document.
+- **Records.** Every ORCA experiment records `telemetry_cutoff: dls`, its `telemetry_variant` and
+  `telemetry_cutoffs`, so bounded runs never mix with the earlier unbounded runs.
+
+The ORCA cluster's admin creates the eval user and its role once:
+
+```json
+PUT /_security/role/nightshift-orcabench-eval
+{
+  "cluster": ["manage_own_api_key"],
+  "indices": [
+    {
+      "names": ["logs-orcabench.otel-*", "traces-orcabench.otel-*", "metrics-orcabench.otel-*"],
+      "privileges": ["read", "view_index_metadata"]
+    }
+  ]
+}
+```
 
 ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector; Customer-0's bind to
 `eis-openai-gpt-6-sol`. ORCA's model is the paper's judge model, but not its settings: the paper runs
@@ -646,7 +787,7 @@ array on write, so the ten controls keep those markers and do not store `plausib
 `rca_anti_leakage` judges trajectory leakage of incident records and post-resolution writeups. It
 does not see prompt leakage, and a feature-flag key in telemetry is a legitimate signal.
 
-`nightshift/orca-sampled50-v3` copies `plausible_flags` from the public Harbor dataset
+`nightshift/orca-sampled50-v4` copies `plausible_flags` from the public Harbor dataset
 `orca-bench/orca-bench` (`sha256:2add497ac2f93468dba1b83977c295a784c89031754e6a35520195345ad62ada`).
 A task matches when `sha256(case_id)` truncated to 16 hex characters is that task's package name
 and the task's `user_facing_issue` appears in the question. The copied value is the set of
@@ -666,7 +807,13 @@ any quoted ORCA accuracy or hallucination number:
 `d1-c1-admanualgc-on-02-medium_ttd15m_at_off+10m`,
 `d1-i1-imageslowload-on-02-medium_ttd480m_period_previous-period`,
 `d2-cc1-adfailure-on-02-medium_ttd1440m_day_same-day`.
-`nightshift/orca-sampled50-v2` is unchanged.
+v4 differs from v3 in three ways. Its questions no longer name the ORCA indices. Every task records
+`telemetry_snapshot_time`: the 40 public tasks copy their Harbor task's, and the 10 medium tasks
+take the first snapshot strictly after `current_time` plus five minutes among the 125 snapshots the
+public tasks name. That choice is exact, because each lands under 5 minutes before the next known
+snapshot and ORCA's snapshots are at least 300 s apart; the same rule reproduces all 664 public
+snapshots outside ORCA's last-snapshot fallback. The 40 public tasks carry `orca_expected`.
+`nightshift/orca-sampled50-v3` and `-v2` are unchanged.
 
 The previous run of this pinned 50 is the 28 October 2026 Sonnet 4.6 investigation
 `bk-01a184b7-e436-462e-9b4b-015d32c3ae77` on `nightshift/orca-sampled50-v2`. Its mean `goal_pass`
@@ -677,17 +824,18 @@ stored run, 21 October 2026 `bk-01a1606b-fecd-479e-b2ae-eb4eedb78385` on
 where 39 of 42 investigations touched `feature_flag.key` and mean `goal_pass` was about 0.89, is
 a correlation and is not ORCA accuracy.
 
-Do not compare these scores with the paper's published rates. This agent has ES|QL and does not
-have the Astronomy Shop source. The paper's agents have that repository and Grafana (Prometheus,
-Jaeger, OpenSearch). The closer paper baseline is the telemetry-only Sonnet 4.6 result, 21.4%,
+Do not compare these scores with the paper's published rates yet. This agent reads telemetry with
+ES|QL and reaches the Astronomy Shop source by cloning it; the paper's agents have a checkout and
+Grafana (Prometheus, Jaeger, OpenSearch), an hour per task, and a `report.md` graded by ORCA's own
+judge. The closer paper baseline is the telemetry-only Sonnet 4.6 result, 21.4%,
 against 30.9% for the same model with code. The 40 matched tasks above are the Verified view, so
 a later writeup may quote Verified only for those 40, still with this tool-surface caveat. The
 paper's 25.3% and 10.0% are not like-for-like.
 
 ### Public 755
 
-`nightshift/orca-bench-public755-v1` (`342ac04a-b9f7-59a1-9462-3503b3bd52a6`, 755 examples, sha256
-`5b09b95d3f192f43086a5653572e3d8480c97412e14a79c0e48411d519555ecb`) holds every task of the public
+`nightshift/orca-bench-public755-v2` (`7e7dd22d-83fb-54a5-9e51-dd2b67def0ef`, 755 examples, sha256
+`f6a6f74aba362adb3dfe2882422f1ea23c1fb0db4169116579b42c38d45777a1`) holds every task of the public
 Harbor dataset above: 617 incident tasks and 138 controls, with tiers easy 245, hard 264 and
 universal 246. The tiers are the question's granularity, not the paper's difficulty: the paper's
 Easy, Medium and Hard (`orca_difficulty`) are our `easy`, `hard` and `universal`, one to one. Each
@@ -696,8 +844,8 @@ example is built from its Harbor task:
 - `case_id` is the name whose `sha256` prefix is the task's package name, and `harbor_task` is
   the package. Every one of the 755 resolves to exactly one name.
 - The question uses the task's stated current time, `reported_styled` and `user_facing_issue`,
-  in the same wording as `nightshift/orca-sampled50-v3`. On the 40 tasks both releases hold, the
-  questions, flag sets and current times are identical.
+  in the same wording as `nightshift/orca-sampled50-v4`. On the 40 tasks both releases hold, the
+  questions, flag sets, current times and snapshot times are identical.
 - `plausible_flags` is the set of `events[].root_cause` keys. On 77 incident tasks it does not
   contain the flag the `qid` names, for example `d1-n1-loadGeneratorFloodHomepage-on-00-hard`,
   whose answer is `imageSlowLoad`. That set is ORCA's answer.
@@ -708,6 +856,9 @@ example is built from its Harbor task:
   task's own difficulty label. Controls carry `quiet_window` from the task. Ten of them have no
   start.
 - `telemetry_snapshot_time` is the snapshot named in the task's environment.
+- `orca_expected` is the task's `tests/expected.json`.
+- v2 differs from v1 only in that its questions no longer name the ORCA indices, and in
+  `orca_expected`. `nightshift/orca-bench-public755-v1` is unchanged.
 
 Every root-cause event of the 755 falls inside the ORCA cluster's data. Its logs, traces and
 metrics each cover every hour from 2026-04-19T03:00Z through the 2026-04-24T19:00Z hour, which
@@ -720,7 +871,7 @@ returns at most 10,000 scores per experiment, so a run that would write more (th
 writes about 13,600) fails before any investigation starts.
 `NIGHTSHIFT_ORCA_RELEASE=public755` selects the release, and `NIGHTSHIFT_ORCA_SLICE=<index>/<count>`
 runs one contiguous part of it in `case_id` order. Each run validates the whole release before
-slicing. A slice runs as its own dataset, `nightshift/orca-bench-public755-v1/slice-<index>-of-<count>`,
+slicing. A slice runs as its own dataset, `nightshift/orca-bench-public755-v2/slice-<index>-of-<count>`,
 because the eval client upserts the dataset it runs, and under the release name a slice would
 remove the other tasks. The eval stores the slice first and runs it with the example ids the
 server gave it, so its scores show up in each example's history in the Evals UI. Keep one `<count>` for a baseline and join the slices on `case_id`.
@@ -733,19 +884,13 @@ flag telemetry visible.
 
 The flag ablation runs the same agent, tasks and judge with every flag document hidden:
 flagd's own logs, spans and metrics, any document with a `feature_flag` field, flag-evaluation
-spans, and log lines that name a flag. Elasticsearch hides them through document-level security on
-a separate read key, so no query the agent writes can bring them back. To run it:
-
-1. Have an ORCA cluster admin create an API key whose role reads the three ORCA index patterns
-   with a `query` of `{"bool": {"must_not": [<the flag documents>]}}`. The key cannot be derived
-   from the read-only key above.
-2. Store that key as `nightshiftOrcaEs.noFlagsApiKey`, next to the full key's `apiKey`, in the
-   config the run uses. With the variant set, the Scout hook fills the `orcabench-es` connector
-   from `noFlagsApiKey` and refuses to start without it; every other ORCA run keeps `apiKey`.
-3. Set `NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags`. The preflight then expects the flag-free
-   document counts pinned in [`orca_dataset.ts`](evals/investigation/orca_dataset.ts), so a run on
-   the full key fails before any investigation, and every score records
-   `telemetry_variant: no-flags`.
+spans, and log lines that name a flag (`ORCA_FLAG_DOCUMENTS_QUERY` in
+[`orca_cutoff.ts`](evals/investigation/orca_cutoff.ts)). Set
+`NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags` and each cutoff key's document-level security becomes
+`{"bool": {"filter": [<the cutoff range>], "must_not": [<the flag documents>]}}`, so no query the
+agent writes can bring them back. It needs no other credential. The preflight then expects the
+flag-free counts and no flag document through any key, and every score records
+`telemetry_variant: no-flags`.
 
 ```bash
 NIGHTSHIFT_DATASETS=orcabench NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags \
@@ -754,20 +899,20 @@ NIGHTSHIFT_DATASETS=orcabench NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags \
 ```
 
 The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
-[`vault/config.example.json`](vault/config.example.json)) whose key can only `read` and
-`view_index_metadata` on `logs-orcabench.otel-*`, `traces-orcabench.otel-*` and
-`metrics-orcabench.otel-*`.
+[`vault/config.example.json`](vault/config.example.json)) with the ORCA cluster's `url` and the
+`username` and `password` of the eval user above. The Scout hook refuses an ORCA run without them,
+and exports them only to the ORCA shard.
 
 - The dataset's ID, case count and content digest are pinned in
   [`orca_dataset.ts`](evals/investigation/orca_dataset.ts). A changed release fails before any
-  investigation starts, as does a source whose document counts differ from the snapshot.
+  investigation starts, as does a source or key that fails the [preflight](#telemetry-cutoff).
 - Each task runs once, at most eight at a time, and Playwright doesn't retry the test.
 - The eval fails when fewer than 80% of investigations complete, or when none returned ORCA
   telemetry. Judge scores are advisory.
 - Both shards draw on one sandbox pool. When it runs out, investigations end without a
   conclusion and the eval fails, so leave room for overlapping builds.
 
-Locally, start a fresh Scout server for ORCA; a reused server keeps its connector credentials:
+Locally, start a fresh Scout server for ORCA:
 
 ```bash
 NIGHTSHIFT_DATASETS=orcabench node scripts/evals start \
