@@ -7,6 +7,7 @@
 
 import type { ScoutPage } from '@kbn/scout-oblt';
 import type { InvestigatorServiceAccountStatus } from '@kbn/nightshift-investigations-plugin/common';
+import type { DetectionEngineServiceAccountStatus } from '@kbn/significant-events-plugin/common';
 
 export { test } from '@kbn/scout-oblt';
 
@@ -38,6 +39,14 @@ const SET_UP_SERVICE_ACCOUNT_STATUS: InvestigatorServiceAccountStatus = {
   boundWorkflows: [],
 };
 
+/** The detection engine's account, which the app also requires before it renders. */
+const SET_UP_DETECTION_ACCOUNT_STATUS: DetectionEngineServiceAccountStatus = {
+  serviceAccountsEnabled: true,
+  canSetUp: true,
+  role: 'nightshift_detection',
+  serviceAccountId: 'kibana/nightshift_detection',
+};
+
 /**
  * Reports the space as set up, so the app renders instead of its "Enable Elastic nightshift" step.
  * Setting it up for real needs service accounts, which these navigation tests do not exercise.
@@ -45,5 +54,8 @@ const SET_UP_SERVICE_ACCOUNT_STATUS: InvestigatorServiceAccountStatus = {
 export const mockNightshiftSetUp = async (page: ScoutPage): Promise<void> => {
   await page.route('**/internal/nightshift/investigations/service_account', async (route) => {
     await route.fulfill({ status: 200, json: SET_UP_SERVICE_ACCOUNT_STATUS });
+  });
+  await page.route('**/internal/significant_events/service_account', async (route) => {
+    await route.fulfill({ status: 200, json: SET_UP_DETECTION_ACCOUNT_STATUS });
   });
 };
