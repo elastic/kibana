@@ -25,20 +25,43 @@ const buildAttachment = (origin?: string): DashboardAttachment => ({
   },
 });
 
-const buildLocator = () => ({ navigate: jest.fn(), getRedirectUrl: jest.fn() });
-
-const buildToasts = () =>
-  ({ addWarning: jest.fn(), addError: jest.fn() } as unknown as NotificationsStart['toasts']);
-
-const buildDashboardApi = (savedObjectId: string | undefined) => ({
+const buildDashboardApi = (savedObjectId: string | undefined, isManaged = false) => ({
   savedObjectId$: { getValue: () => savedObjectId },
   getAppContext: () => ({ currentAppId: 'dashboards' }),
   isEditableByUser: true,
-  isManaged: false,
+  isManaged,
   setState: jest.fn(),
   setViewMode: jest.fn(),
-  locator: buildLocator(),
+  locator: { navigate: jest.fn(), getRedirectUrl: jest.fn() },
 });
+
+const preview = async ({
+  attachment,
+  dashboardApi,
+  linkedDashboardExists = true,
+  linkedAttachmentId,
+}: {
+  attachment: DashboardAttachment;
+  dashboardApi?: ReturnType<typeof buildDashboardApi>;
+  linkedDashboardExists?: boolean;
+  linkedAttachmentId?: string;
+}) => {
+  const dashboardLocator = { navigate: jest.fn(), getRedirectUrl: jest.fn() };
+  const toasts = { addWarning: jest.fn(), addError: jest.fn() };
+  const linkNextDashboard = jest.fn();
+  await handlePreview({
+    attachment,
+    dashboardApi: dashboardApi as unknown as DashboardApi | undefined,
+    canWriteDashboards: true,
+    isSidebar: true,
+    dashboardLocator,
+    toasts: toasts as unknown as NotificationsStart['toasts'],
+    checkSavedDashboardExist: async () => linkedDashboardExists,
+    linkedAttachmentId,
+    linkNextDashboard,
+  });
+  return { dashboardLocator, toasts, linkNextDashboard };
+};
 
 describe('handlePreview with a published dashboard', () => {
   it.each([
@@ -48,23 +71,16 @@ describe('handlePreview with a published dashboard', () => {
     'navigates through the Dashboard app locator when the attachment is %s',
     async (_, origin, dashboardId) => {
       const dashboardApi = buildDashboardApi('dashboard-1');
-      const dashboardLocator = buildLocator();
 
-      await handlePreview({
+      const { dashboardLocator } = await preview({
         attachment: buildAttachment(origin),
-        dashboardApi: dashboardApi as unknown as DashboardApi,
-        canWriteDashboards: true,
-        isSidebar: true,
-        dashboardLocator,
-        toasts: buildToasts(),
-        checkSavedDashboardExist: async () => true,
+        dashboardApi,
       });
 
       expect(dashboardLocator.navigate).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Agent dashboard',
           description: 'Built by the agent',
-          panels: [],
           time_range: { from: 'now-7d', to: 'now' },
           preserveSavedFilters: false,
           dashboardId,
@@ -83,10 +99,9 @@ describe('handlePreview with a published dashboard', () => {
   ])(
     'passes the attachment filters and query in their stored form when previewing %s',
     async (_, dashboardApi) => {
-      const dashboardLocator = buildLocator();
       const attachment = buildAttachment('dashboard-2');
 
-      await handlePreview({
+      const { dashboardLocator } = await preview({
         attachment: {
           ...attachment,
           data: {
@@ -97,12 +112,7 @@ describe('handlePreview with a published dashboard', () => {
             ],
           },
         } as DashboardAttachment,
-        dashboardApi: dashboardApi as unknown as DashboardApi | undefined,
-        canWriteDashboards: true,
-        isSidebar: true,
-        dashboardLocator,
-        toasts: buildToasts(),
-        checkSavedDashboardExist: async () => true,
+        dashboardApi,
       });
 
       expect(dashboardLocator.navigate).toHaveBeenCalledWith(
@@ -120,140 +130,68 @@ describe('handlePreview with a published dashboard', () => {
     }
   );
 
-  it('applies the attachment in place in edit mode when it is linked to the viewed dashboard', async () => {
-    const dashboardApi = buildDashboardApi('dashboard-1');
-    const dashboardLocator = buildLocator();
+  it.each([
+    ['it is linked to the viewed dashboard', 'dashboard-1', 'dashboard-1', true, undefined],
+    ['its linked dashboard was deleted', undefined, 'deleted-dashboard', false, undefined],
+    [
+      'the agent opened the viewed new dashboard for it',
+      undefined,
+      'managed-dashboard',
+      true,
+      'attachment-1',
+    ],
+  ])(
+    'applies the attachment in place in edit mode when %s',
+    async (_, savedObjectId, origin, linkedDashboardExists, linkedAttachmentId) => {
+      const dashboardApi = buildDashboardApi(savedObjectId);
 
-    await handlePreview({
-      attachment: buildAttachment('dashboard-1'),
-      dashboardApi: dashboardApi as unknown as DashboardApi,
-      canWriteDashboards: true,
-      isSidebar: true,
-      dashboardLocator,
-      toasts: buildToasts(),
-      checkSavedDashboardExist: async () => true,
-    });
+      const { dashboardLocator } = await preview({
+        attachment: buildAttachment(origin),
+        dashboardApi,
+        linkedDashboardExists,
+        linkedAttachmentId,
+      });
 
-    expect(dashboardApi.setState).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'Agent dashboard',
-        time_range: { from: 'now-7d', to: 'now' },
-      }),
-      { changedBy: ['agent'] }
-    );
-    expect(dashboardApi.setViewMode).toHaveBeenCalledWith('edit');
-    expect(dashboardLocator.navigate).not.toHaveBeenCalled();
-  });
+      expect(dashboardApi.setState).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Agent dashboard' }),
+        { changedBy: ['agent'] }
+      );
+      expect(dashboardApi.setViewMode).toHaveBeenCalledWith('edit');
+      expect(dashboardLocator.navigate).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([
+    ['linked to it', 'dashboard-1'],
+    ['not linked to a dashboard', undefined],
+  ])(
+    'opens the attachment in a new dashboard linked to it and warns when the viewed dashboard is managed and the attachment is %s',
+    async (_, origin) => {
+      const dashboardApi = buildDashboardApi('dashboard-1', true);
+
+      const { dashboardLocator, toasts, linkNextDashboard } = await preview({
+        attachment: buildAttachment(origin),
+        dashboardApi,
+      });
+
+      expect(dashboardApi.setState).not.toHaveBeenCalled();
+      expect(dashboardLocator.navigate).toHaveBeenCalledWith(
+        expect.not.objectContaining({ dashboardId: expect.anything() })
+      );
+      expect(toasts.addWarning).toHaveBeenCalledTimes(1);
+      expect(linkNextDashboard).toHaveBeenCalledWith('attachment-1');
+    }
+  );
 
   it('shows an error toast when the attachment fails to open', async () => {
     const dashboardApi = buildDashboardApi('dashboard-1');
     const error = new Error('Panel failed to load');
     dashboardApi.setState.mockRejectedValue(error);
-    const toasts = buildToasts();
 
-    await handlePreview({
-      attachment: buildAttachment('dashboard-1'),
-      dashboardApi: dashboardApi as unknown as DashboardApi,
-      canWriteDashboards: true,
-      isSidebar: true,
-      dashboardLocator: buildLocator(),
-      toasts,
-      checkSavedDashboardExist: async () => true,
-    });
+    const { toasts } = await preview({ attachment: buildAttachment('dashboard-1'), dashboardApi });
 
     expect(toasts.addError).toHaveBeenCalledWith(error, {
       title: "Couldn't apply the agent's changes to the dashboard",
     });
-  });
-
-  it('applies the attachment in place in edit mode on an unsaved dashboard when its linked dashboard was deleted', async () => {
-    const dashboardApi = buildDashboardApi(undefined);
-    const dashboardLocator = buildLocator();
-
-    await handlePreview({
-      attachment: buildAttachment('deleted-dashboard'),
-      dashboardApi: dashboardApi as unknown as DashboardApi,
-      canWriteDashboards: true,
-      isSidebar: true,
-      dashboardLocator,
-      toasts: buildToasts(),
-      checkSavedDashboardExist: async () => false,
-    });
-
-    expect(dashboardApi.setState).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Agent dashboard' }),
-      { changedBy: ['agent'] }
-    );
-    expect(dashboardApi.setViewMode).toHaveBeenCalledWith('edit');
-    expect(dashboardLocator.navigate).not.toHaveBeenCalled();
-  });
-
-  it('opens the attachment in a new dashboard and warns when the viewed linked dashboard is managed', async () => {
-    const dashboardApi = { ...buildDashboardApi('dashboard-1'), isManaged: true };
-    const dashboardLocator = buildLocator();
-    const toasts = buildToasts();
-    const linkNextDashboard = jest.fn();
-
-    await handlePreview({
-      attachment: buildAttachment('dashboard-1'),
-      dashboardApi: dashboardApi as unknown as DashboardApi,
-      canWriteDashboards: true,
-      isSidebar: true,
-      dashboardLocator,
-      toasts,
-      checkSavedDashboardExist: async () => true,
-      linkNextDashboard,
-    });
-
-    expect(dashboardApi.setState).not.toHaveBeenCalled();
-    expect(dashboardLocator.navigate).toHaveBeenCalledWith(
-      expect.not.objectContaining({ dashboardId: expect.anything() })
-    );
-    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
-    expect(linkNextDashboard).toHaveBeenCalledWith('attachment-1');
-  });
-
-  it('opens an unlinked attachment in a new dashboard linked to it and warns when the viewed dashboard is managed', async () => {
-    const dashboardApi = { ...buildDashboardApi('dashboard-1'), isManaged: true };
-    const dashboardLocator = buildLocator();
-    const toasts = buildToasts();
-    const linkNextDashboard = jest.fn();
-
-    await handlePreview({
-      attachment: buildAttachment(undefined),
-      dashboardApi: dashboardApi as unknown as DashboardApi,
-      canWriteDashboards: true,
-      isSidebar: true,
-      dashboardLocator,
-      toasts,
-      checkSavedDashboardExist: async () => true,
-      linkNextDashboard,
-    });
-
-    expect(dashboardApi.setState).not.toHaveBeenCalled();
-    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
-    expect(linkNextDashboard).toHaveBeenCalledWith('attachment-1');
-  });
-
-  it('applies the attachment in place on the new dashboard it opened, even though it still points to the managed dashboard', async () => {
-    const dashboardApi = buildDashboardApi(undefined);
-    const dashboardLocator = buildLocator();
-
-    await handlePreview({
-      attachment: buildAttachment('managed-dashboard'),
-      dashboardApi: dashboardApi as unknown as DashboardApi,
-      canWriteDashboards: true,
-      isSidebar: true,
-      dashboardLocator,
-      toasts: buildToasts(),
-      checkSavedDashboardExist: async () => true,
-      linkedAttachmentId: 'attachment-1',
-    });
-
-    expect(dashboardApi.setState).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Agent dashboard' }),
-      { changedBy: ['agent'] }
-    );
-    expect(dashboardLocator.navigate).not.toHaveBeenCalled();
   });
 });

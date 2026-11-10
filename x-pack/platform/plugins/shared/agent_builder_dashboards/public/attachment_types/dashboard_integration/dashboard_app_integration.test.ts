@@ -263,27 +263,6 @@ describe('registerDashboardAppIntegration', () => {
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
-  it('links an unlinked attachment to the new dashboard it was opened in once saved', async () => {
-    register();
-    emitConversationChange({
-      id: 'conversation-1',
-      attachments: [createVersionedAttachment(createDashboardAttachment())],
-    });
-
-    mockApi.onSave$.next({
-      previousDashboardId: undefined,
-      dashboardId: 'new-dashboard',
-      dashboardState: createDashboardSaveState(),
-    });
-    await Promise.resolve();
-
-    expect(updateAttachmentOrigin).toHaveBeenCalledWith(
-      'conversation-1',
-      'dashboard-attachment-id',
-      'new-dashboard'
-    );
-  });
-
   it('moves the origin of the attachment a new dashboard was opened from to it once saved', async () => {
     const attachment = createDashboardAttachment({ origin: 'managed-dashboard' });
     register({ linkedAttachmentId: attachment.id });

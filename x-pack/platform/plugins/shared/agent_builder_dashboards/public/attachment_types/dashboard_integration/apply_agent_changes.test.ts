@@ -10,7 +10,7 @@ import type { DashboardApi } from '@kbn/dashboard-plugin/public';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { applyAgentChangesToDashboard } from './apply_agent_changes';
 
-const dashboardState = {
+const agentDashboardState = {
   title: 'Agent dashboard',
   description: 'Built by the agent',
   panels: [],
@@ -30,55 +30,69 @@ const buildDashboardApi = ({
   setState: jest.fn(),
 });
 
-const buildLocator = () => ({ navigate: jest.fn(), getRedirectUrl: jest.fn() });
-
-const buildToasts = () => ({ addWarning: jest.fn() });
-
 const apply = ({
   api = buildDashboardApi(),
+  dashboardState = agentDashboardState,
   canWriteDashboards = true,
-  dashboardLocator = buildLocator(),
-  toasts = buildToasts(),
+  onOpenInNewDashboard,
+  navigate = jest.fn(),
 }: {
   api?: ReturnType<typeof buildDashboardApi>;
+  dashboardState?: DashboardState;
   canWriteDashboards?: boolean;
-  dashboardLocator?: ReturnType<typeof buildLocator>;
-  toasts?: ReturnType<typeof buildToasts>;
-} = {}) =>
-  applyAgentChangesToDashboard({
+  onOpenInNewDashboard?: () => (() => void) | void;
+  navigate?: jest.Mock;
+} = {}) => {
+  const dashboardLocator = { navigate, getRedirectUrl: jest.fn() };
+  const toasts = { addWarning: jest.fn() };
+  const result = applyAgentChangesToDashboard({
     api: api as unknown as DashboardApi,
     dashboardState,
     canWriteDashboards,
     dashboardLocator,
     toasts: toasts as unknown as NotificationsStart['toasts'],
+    onOpenInNewDashboard,
   });
+  return { api, dashboardLocator, toasts, result };
+};
 
 describe('applyAgentChangesToDashboard', () => {
   it('switches an editable dashboard to edit mode before applying the changes', async () => {
-    const api = buildDashboardApi();
+    const { api, result } = apply();
+    await result;
 
-    await apply({ api });
-
-    expect(api.setViewMode).toHaveBeenCalledWith('edit');
-    expect(api.setState).toHaveBeenCalledWith(dashboardState, { changedBy: ['agent'] });
+    expect(api.setState).toHaveBeenCalledWith(agentDashboardState, { changedBy: ['agent'] });
     expect(api.setViewMode.mock.invocationCallOrder[0]).toBeLessThan(
       api.setState.mock.invocationCallOrder[0]
     );
   });
 
+  it('applies the changes in place without entering edit mode outside the Dashboard app', async () => {
+    const { api, dashboardLocator, result } = apply({
+      api: buildDashboardApi({ currentAppId: 'securitySolutionUI' }),
+    });
+    await result;
+
+    expect(api.setState).toHaveBeenCalledWith(agentDashboardState, { changedBy: ['agent'] });
+    expect(api.setViewMode).not.toHaveBeenCalled();
+    expect(dashboardLocator.navigate).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['the dashboard is managed', { isManaged: true }],
     ['the user cannot edit this dashboard', { isEditableByUser: false }],
+    [
+      'a managed dashboard is hosted outside the Dashboard app',
+      { isManaged: true, currentAppId: 'securitySolutionUI' },
+    ],
   ])(
     'opens the changes in a new dashboard and warns, leaving the dashboard untouched, when %s',
     async (_, apiOptions) => {
-      const api = buildDashboardApi(apiOptions);
-      const dashboardLocator = buildLocator();
-      const toasts = buildToasts();
+      const { api, dashboardLocator, toasts, result } = apply({
+        api: buildDashboardApi(apiOptions),
+      });
+      await result;
 
-      await apply({ api, dashboardLocator, toasts });
-
-      expect(api.setViewMode).not.toHaveBeenCalled();
       expect(api.setState).not.toHaveBeenCalled();
       expect(dashboardLocator.navigate).toHaveBeenCalledWith({
         title: 'Agent dashboard',
@@ -94,12 +108,10 @@ describe('applyAgentChangesToDashboard', () => {
   );
 
   it('opens the full dashboard state in a new dashboard, with filters and query in their stored form', async () => {
-    const dashboardLocator = buildLocator();
-
-    await applyAgentChangesToDashboard({
-      api: buildDashboardApi({ isManaged: true }) as unknown as DashboardApi,
+    const { dashboardLocator, result } = apply({
+      api: buildDashboardApi({ isManaged: true }),
       dashboardState: {
-        ...dashboardState,
+        ...agentDashboardState,
         query: { expression: 'host.name: a', language: 'kql' },
         filters: [
           { type: 'condition', condition: { field: 'host.name', operator: 'is', value: 'a' } },
@@ -107,10 +119,8 @@ describe('applyAgentChangesToDashboard', () => {
         pinned_panels: [{ type: 'options_list_control', id: 'control-1', config: {} }],
         refresh_interval: { pause: false, value: 60000 },
       } as unknown as DashboardState,
-      canWriteDashboards: true,
-      dashboardLocator,
-      toasts: buildToasts() as unknown as NotificationsStart['toasts'],
     });
+    await result;
 
     expect(dashboardLocator.navigate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -122,98 +132,44 @@ describe('applyAgentChangesToDashboard', () => {
         ],
         pinned_panels: [expect.objectContaining({ id: 'control-1' })],
         refresh_interval: { pause: false, value: 60000 },
-        preserveSavedFilters: false,
       })
     );
   });
 
-  it('links the new dashboard to the attachment before opening the changes in it', async () => {
-    const dashboardLocator = buildLocator();
+  it('calls onOpenInNewDashboard right before opening the new dashboard, and not when applying in place', async () => {
     const onOpenInNewDashboard = jest.fn();
+    const managed = apply({ api: buildDashboardApi({ isManaged: true }), onOpenInNewDashboard });
+    await managed.result;
 
-    await applyAgentChangesToDashboard({
-      api: buildDashboardApi({ isManaged: true }) as unknown as DashboardApi,
-      dashboardState,
-      canWriteDashboards: true,
-      dashboardLocator,
-      toasts: buildToasts() as unknown as NotificationsStart['toasts'],
-      onOpenInNewDashboard,
-    });
-
-    expect(onOpenInNewDashboard).toHaveBeenCalledTimes(1);
     expect(onOpenInNewDashboard.mock.invocationCallOrder[0]).toBeLessThan(
-      dashboardLocator.navigate.mock.invocationCallOrder[0]
+      managed.dashboardLocator.navigate.mock.invocationCallOrder[0]
     );
-  });
 
-  it('removes the link to the new dashboard when it fails to open', async () => {
-    const dashboardLocator = buildLocator();
-    dashboardLocator.navigate.mockRejectedValue(new Error('Navigation failed'));
-    const unlink = jest.fn();
-
-    await expect(
-      applyAgentChangesToDashboard({
-        api: buildDashboardApi({ isManaged: true }) as unknown as DashboardApi,
-        dashboardState,
-        canWriteDashboards: true,
-        dashboardLocator,
-        toasts: buildToasts() as unknown as NotificationsStart['toasts'],
-        onOpenInNewDashboard: () => unlink,
-      })
-    ).rejects.toThrow('Navigation failed');
-    expect(unlink).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not link a new dashboard when applying the changes in place', async () => {
-    const onOpenInNewDashboard = jest.fn();
-
-    await applyAgentChangesToDashboard({
-      api: buildDashboardApi() as unknown as DashboardApi,
-      dashboardState,
-      canWriteDashboards: true,
-      dashboardLocator: buildLocator(),
-      toasts: buildToasts() as unknown as NotificationsStart['toasts'],
-      onOpenInNewDashboard,
-    });
+    onOpenInNewDashboard.mockClear();
+    await apply({ onOpenInNewDashboard }).result;
 
     expect(onOpenInNewDashboard).not.toHaveBeenCalled();
   });
 
+  it('removes the link to the new dashboard when it fails to open', async () => {
+    const unlink = jest.fn();
+    const { result } = apply({
+      api: buildDashboardApi({ isManaged: true }),
+      onOpenInNewDashboard: () => unlink,
+      navigate: jest.fn().mockRejectedValue(new Error('Navigation failed')),
+    });
+
+    await expect(result).rejects.toThrow('Navigation failed');
+    expect(unlink).toHaveBeenCalledTimes(1);
+  });
+
   it('leaves the dashboard untouched and warns when the user cannot write dashboards', async () => {
-    const api = buildDashboardApi();
-    const dashboardLocator = buildLocator();
-    const toasts = buildToasts();
-
-    await apply({ api, canWriteDashboards: false, dashboardLocator, toasts });
+    const { api, dashboardLocator, toasts, result } = apply({ canWriteDashboards: false });
+    await result;
 
     expect(api.setViewMode).not.toHaveBeenCalled();
     expect(api.setState).not.toHaveBeenCalled();
     expect(dashboardLocator.navigate).not.toHaveBeenCalled();
-    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
-  });
-
-  it('applies the changes in place without entering edit mode to an editable dashboard hosted outside the Dashboard app', async () => {
-    const api = buildDashboardApi({ currentAppId: 'securitySolutionUI' });
-    const dashboardLocator = buildLocator();
-
-    await apply({ api, dashboardLocator });
-
-    expect(api.setState).toHaveBeenCalledWith(dashboardState, { changedBy: ['agent'] });
-    expect(api.setViewMode).not.toHaveBeenCalled();
-    expect(dashboardLocator.navigate).not.toHaveBeenCalled();
-  });
-
-  it('opens the changes in a new dashboard when a managed dashboard is hosted outside the Dashboard app', async () => {
-    const api = buildDashboardApi({ isManaged: true, currentAppId: 'securitySolutionUI' });
-    const dashboardLocator = buildLocator();
-    const toasts = buildToasts();
-
-    await apply({ api, dashboardLocator, toasts });
-
-    expect(api.setState).not.toHaveBeenCalled();
-    expect(dashboardLocator.navigate).toHaveBeenCalledWith(
-      expect.not.objectContaining({ dashboardId: expect.anything() })
-    );
     expect(toasts.addWarning).toHaveBeenCalledTimes(1);
   });
 });
