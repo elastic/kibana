@@ -14,9 +14,14 @@ import { statusSignal } from './status_signal';
 const mockSettleDeclinedProposals = jest.fn();
 const mockSetInvestigationStatus = jest.fn();
 const mockAddSuccess = jest.fn();
+const mockAddDanger = jest.fn();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({ services: { notifications: { toasts: { addSuccess: mockAddSuccess } } } }),
+  useKibana: () => ({
+    services: {
+      notifications: { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } },
+    },
+  }),
 }));
 
 jest.mock('@kbn/agentic-investigations-common', () => ({
@@ -138,5 +143,34 @@ describe('ConnectedStatusToggle closing an investigation', () => {
       }),
       expect.anything()
     );
+  });
+
+  it('reports a skipped close that the server rejected, and lets the user try again', async () => {
+    previewData.requires_discard_reason = false;
+    mockSetInvestigationStatus.mockImplementation((_vars, { onError }) =>
+      onError(
+        Object.assign(new Error('Conflict'), {
+          request: {},
+          response: { status: 409 },
+          body: { attributes: { code: 'close_targets_changed' } },
+        })
+      )
+    );
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ConnectedStatusToggle
+          conversationId="conv-1"
+          templateId="investigation"
+          status="open"
+          refetchConversation={jest.fn()}
+        />
+      </QueryClientProvider>
+    );
+    fireEvent.click(screen.getByText('toggle'));
+
+    await waitFor(() => expect(mockAddDanger).toHaveBeenCalledTimes(1));
+    // The attempt ended: nothing is left mounted that would swallow the next click.
+    expect(screen.queryByText('confirm close')).not.toBeInTheDocument();
   });
 });

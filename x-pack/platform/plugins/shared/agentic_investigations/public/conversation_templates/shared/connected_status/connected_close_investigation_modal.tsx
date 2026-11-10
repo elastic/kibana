@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -82,6 +82,9 @@ export const ConnectedCloseInvestigationModal: React.FC<
 
   const settleDeclinedProposals = useSettleDeclinedProposals(dropDecidedProposal);
 
+  // Set by `confirmWithoutReason` so the catch below knows no modal is on screen to report into.
+  const wasSkipped = useRef(false);
+
   const handleConfirm = useCallback(
     async ({ dismissReason, rationale }: { dismissReason?: DismissReason; rationale?: string }) => {
       try {
@@ -104,6 +107,15 @@ export const ConnectedCloseInvestigationModal: React.FC<
         onClose();
         await settled;
       } catch (err) {
+        if (wasSkipped.current) {
+          // A close that asked nothing has no modal to show the callouts in, so the failure is
+          // reported as a toast and the attempt ends rather than stalling out of sight.
+          invalidateAll();
+          statusSignal.bump();
+          services.notifications?.toasts.addDanger(i18n.STATUS_CHANGE_ERROR);
+          onClose();
+          return;
+        }
         const code = getCloseErrorCode(err);
         if (code === 'close_targets_changed') {
           // Keep the modal open, show the changed-callout and refresh the list.
@@ -137,7 +149,10 @@ export const ConnectedCloseInvestigationModal: React.FC<
     ]
   );
 
-  const confirmWithoutReason = useCallback(() => void handleConfirm({}), [handleConfirm]);
+  const confirmWithoutReason = useCallback(() => {
+    wasSkipped.current = true;
+    void handleConfirm({});
+  }, [handleConfirm]);
   const { isSkipped } = useSkipCloseConfirmation({
     preview: previewData,
     loadError: isError && !previewData,

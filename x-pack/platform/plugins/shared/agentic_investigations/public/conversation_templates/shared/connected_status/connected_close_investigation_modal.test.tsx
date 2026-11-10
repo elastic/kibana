@@ -15,10 +15,15 @@ const mockSettleDeclinedProposals = jest.fn();
 const mockUseSettleDeclinedProposals = jest.fn(() => mockSettleDeclinedProposals);
 const mockMutateAsync = jest.fn();
 const mockAddSuccess = jest.fn();
+const mockAddDanger = jest.fn();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
-    services: { notifications: { toasts: { addSuccess: mockAddSuccess, addWarning: jest.fn() } } },
+    services: {
+      notifications: {
+        toasts: { addSuccess: mockAddSuccess, addWarning: jest.fn(), addDanger: mockAddDanger },
+      },
+    },
   }),
 }));
 
@@ -134,5 +139,27 @@ describe('ConnectedCloseInvestigationModal', () => {
         body: expect.objectContaining({ status: 'closed', dismiss_reason: undefined }),
       })
     );
+  });
+
+  it('reports a skipped close that failed, instead of leaving it silent', async () => {
+    previewData.requires_discard_reason = false;
+    mockMutateAsync.mockRejectedValue(
+      Object.assign(new Error('Conflict'), {
+        request: {},
+        response: { status: 409 },
+        body: { attributes: { code: 'close_targets_changed' } },
+      })
+    );
+    const onClose = jest.fn();
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ConnectedCloseInvestigationModal investigation={investigation} onClose={onClose} />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => expect(mockAddDanger).toHaveBeenCalledTimes(1));
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('confirm close')).not.toBeInTheDocument();
   });
 });
