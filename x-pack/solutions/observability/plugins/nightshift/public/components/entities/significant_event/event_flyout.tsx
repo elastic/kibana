@@ -334,6 +334,7 @@ export function EventFlyout({
           name: MARK_INACTIVE_LABEL,
           icon: 'eyeSlash',
           onClick: () => setIsMarkInactiveModalOpen(true),
+          'data-test-subj': 'nightshiftEventFlyoutMarkInactiveItem',
           ...getEbtProps({
             action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_SIGNIFICANT_EVENT,
             element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT,
