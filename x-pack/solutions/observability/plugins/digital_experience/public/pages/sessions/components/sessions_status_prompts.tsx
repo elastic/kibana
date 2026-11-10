@@ -9,9 +9,10 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { SessionsStatus } from '../../../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
+import { httpErrorMessage } from '../../../utils/http_error_message';
 
 const ASK_ADMIN_TEXT = i18n.translate('xpack.digitalExperience.sessions.status.askAdminText', {
   defaultMessage:
@@ -28,7 +29,7 @@ const EnableError = ({ error }: { error: Error }) => (
       title={i18n.translate('xpack.digitalExperience.sessions.status.enableErrorTitle', {
         defaultMessage: 'Could not set up sessions',
       })}
-      text={error.message}
+      text={httpErrorMessage(error)}
     />
   </>
 );
@@ -120,7 +121,7 @@ export function SessionsStatusCallout({
       </>
     );
   }
-  if (status.needsUpdate) {
+  if (status.needsUpdate && !status.autoUpdate) {
     return (
       <>
         <KbnWarningCallout
@@ -185,6 +186,26 @@ export function SessionsStatusCallout({
       </>
     );
   }
+  // Applied by a background task with the API key granted at setup; nothing to do but wait. After
+  // a failing transform, as that one needs attention.
+  if (status.needsUpdate && status.autoUpdate) {
+    return (
+      <>
+        <KbnInfoCallout
+          data-test-subj="digitalExperienceSessionsUpdating"
+          size="s"
+          title={i18n.translate('xpack.digitalExperience.sessions.status.updatingTitle', {
+            defaultMessage: 'Sessions are being updated',
+          })}
+          text={i18n.translate('xpack.digitalExperience.sessions.status.updatingDescription', {
+            defaultMessage:
+              'Sessions were set up by an earlier version or with other settings. They update automatically within a few minutes, with the access granted when they were set up.',
+          })}
+        />
+        <EuiSpacer size="m" />
+      </>
+    );
+  }
   if (status.health === 'lagging') {
     return (
       <>
@@ -204,5 +225,11 @@ export function SessionsStatusCallout({
       </>
     );
   }
-  return null;
+  // A failed setup with nothing else to show, such as granting a new API key on a visit.
+  return enableError ? (
+    <>
+      <EnableError error={enableError} />
+      <EuiSpacer size="m" />
+    </>
+  ) : null;
 }

@@ -67,6 +67,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       transactionSampling: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
       indexLifecycleManagement: `${ELASTIC_DOCS}solutions/observability/apm/index-lifecycle-management`,
       metricsUi: `${ELASTIC_DOCS}solutions/observability/apm/metrics-ui`,
+      troubleshootingTooManyServices: `${ELASTIC_DOCS}troubleshoot/observability/apm/common-problems#troubleshooting-too-many-services`,
       troubleshootingTooManyTransactions: `${ELASTIC_DOCS}troubleshoot/observability/apm/common-problems#troubleshooting-too-many-transactions`,
     },
     canvas: {
@@ -568,7 +569,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       siemMigrations: `${ELASTIC_DOCS}solutions/security/get-started/automatic-migration`,
       llmPerformanceMatrix: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
       alertZero: {
-        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/configure-worker-settings#configure-worker-settings-continuous-threat-hunt`,
+        overview: `${ELASTIC_DOCS}solutions/security/alertzero`,
+        setUp: `${ELASTIC_DOCS}solutions/security/alertzero/set-up-alertzero`,
+        proposedActions: `${ELASTIC_DOCS}solutions/security/alertzero/work-in-alertzero`,
+        escalations: `${ELASTIC_DOCS}solutions/security/alertzero/manage-escalations`,
+        watches: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers`,
+        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers#alertzero-hunt-watch`,
       },
     },
     query: {
