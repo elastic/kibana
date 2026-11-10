@@ -56,39 +56,49 @@ export const EventInvestigationCard = ({
   const statusLabel =
     SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS[inProgress ? 'in_progress' : 'completed'];
 
+  const content = (
+    <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiAvatar type="space" iconType="inspect" name={title} aria-hidden />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText size="s">
+          <p>
+            <strong>{title}</strong>
+          </p>
+        </EuiText>
+        <EuiText size="xs" color="subdued">
+          {i18n.translate('xpack.nightshift.flyout.investigationCardStatusLabel', {
+            defaultMessage: 'Investigation · {status}',
+            values: {
+              status: statusLabel,
+            },
+          })}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  if (!canOpen) {
+    return (
+      <EuiPanel hasBorder data-test-subj="nightshiftEventInvestigationCard">
+        {content}
+      </EuiPanel>
+    );
+  }
+
   return (
     <EuiPanel
       hasBorder
-      onClick={canOpen ? handleOpen : undefined}
+      onClick={handleOpen}
       data-test-subj="nightshiftEventInvestigationCard"
-      {...(canOpen
-        ? getEbtProps({
-            action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
-            element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT_INVESTIGATION,
-            detail: status,
-          })
-        : {})}
+      {...getEbtProps({
+        action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
+        element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT_INVESTIGATION,
+        detail: status,
+      })}
     >
-      <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiAvatar type="space" iconType="inspect" name={title} aria-hidden />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s">
-            <p>
-              <strong>{title}</strong>
-            </p>
-          </EuiText>
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.nightshift.flyout.investigationCardStatusLabel', {
-              defaultMessage: 'Investigation · {status}',
-              values: {
-                status: statusLabel,
-              },
-            })}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {content}
     </EuiPanel>
   );
 };
