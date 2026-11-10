@@ -67,6 +67,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       transactionSampling: `${ELASTIC_DOCS}solutions/observability/apm/transaction-sampling`,
       indexLifecycleManagement: `${ELASTIC_DOCS}solutions/observability/apm/index-lifecycle-management`,
       metricsUi: `${ELASTIC_DOCS}solutions/observability/apm/metrics-ui`,
+      troubleshootingTooManyServices: `${ELASTIC_DOCS}troubleshoot/observability/apm/common-problems#troubleshooting-too-many-services`,
       troubleshootingTooManyTransactions: `${ELASTIC_DOCS}troubleshoot/observability/apm/common-problems#troubleshooting-too-many-transactions`,
     },
     canvas: {
@@ -219,13 +220,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
       upgrade9x: `${ENTERPRISE_SEARCH_DOCS}upgrading-to-9-x.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
-    },
-    searchHomepage: {
-      visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,
-      notebooksExamples: `${ELASTIC_WEBSITE_URL}search-labs/tutorials/examples`,
-      customerEngineerRequestForm: `${ELASTIC_WEBSITE_URL}contact/ce-help`,
-      elasticCommunity: `${ELASTIC_WEBSITE_URL}community/`,
-      elasticCloud: `${ELASTIC_WEBSITE_URL}cloud/`,
     },
     searchGettingStarted: {
       visitSearchLabs: `${ELASTIC_WEBSITE_URL}search-labs`,
@@ -476,6 +470,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       attacksPage: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery/manage-discoveries-from-attacks-page`,
       dashboardsPage: `${ELASTIC_DOCS}solutions/security/dashboards`,
       detectionResponsePage: `${ELASTIC_DOCS}solutions/security/dashboards/detection-response-dashboard`,
+      dataQualityPage: `${ELASTIC_DOCS}solutions/security/dashboards/data-quality-dashboard`,
+      indicatorsPage: `${ELASTIC_DOCS}solutions/security/investigate/indicators-of-compromise`,
+      alertSummaryPage: `${ELASTIC_DOCS}solutions/security/ai/ease/ease-alerts`,
       notesPage: `${ELASTIC_DOCS}solutions/security/investigate/notes`,
       timelinesPage: `${ELASTIC_DOCS}solutions/security/investigate/timeline`,
       runAttackDiscoveryInWorkflow: `${ELASTIC_DOCS}solutions/security/ai/attack-discovery/run-attack-discovery-in-a-workflow`,
@@ -499,12 +496,15 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       installElasticDefend: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/install-elastic-defend`,
       avcResults: `https://www.elastic.co/blog/elastic-security-av-comparatives-business-test`,
       bidirectionalIntegrations: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions/third-party-response-actions`,
+      endpoints: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/endpoints`,
       endpointExceptions: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/elastic-endpoint-exceptions`,
       trustedApps: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/trusted-applications`,
       trustedDevices: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/trusted-devices`,
       elasticAiFeatures: `${ELASTIC_DOCS}solutions/security/ai`,
       eventFilters: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/event-filters`,
+      kubernetesDashboard: `${ELASTIC_DOCS}solutions/security/dashboards/kubernetes-dashboard`,
       blocklist: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/blocklist`,
+      hostIsolationExceptions: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/host-isolation-exceptions`,
       threatIntelInt: `${ELASTIC_DOCS}solutions/security/get-started/enable-threat-intelligence-integrations`,
       endpointArtifacts: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/optimize-elastic-defend`,
       endpointArtifactsNoEscaping: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/exception-types-and-syntax#endpoint-no-escaping`,
@@ -517,7 +517,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       packageActionTroubleshooting: {
         es_connection: `${ELASTIC_DOCS}troubleshoot/security/elastic-defend`,
       },
+      policies: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/policies`,
       responseActions: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions`,
+      responseActionsHistory: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions/response-actions-history`,
       scriptLibrary: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions/script-library`,
       configureEndpointIntegrationPolicy: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-an-integration-policy-for-elastic-defend`,
       exceptions: {
@@ -559,6 +561,14 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
       siemMigrations: `${ELASTIC_DOCS}solutions/security/get-started/automatic-migration`,
       llmPerformanceMatrix: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
+      alertZero: {
+        overview: `${ELASTIC_DOCS}solutions/security/alertzero`,
+        setUp: `${ELASTIC_DOCS}solutions/security/alertzero/set-up-alertzero`,
+        proposedActions: `${ELASTIC_DOCS}solutions/security/alertzero/work-in-alertzero`,
+        escalations: `${ELASTIC_DOCS}solutions/security/alertzero/manage-escalations`,
+        watches: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers`,
+        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/watches-and-workers#alertzero-hunt-watch`,
+      },
     },
     query: {
       eql: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/eql`,
@@ -1075,6 +1085,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     endpoints: {
       troubleshooting: `${ELASTIC_DOCS}troubleshoot/security/elastic-defend#ts-transform-failed`,
+    },
+    osquery: {
+      guide: `${ELASTIC_DOCS}solutions/security/investigate/osquery`,
     },
     legal: {
       privacyStatement: `${ELASTIC_WEBSITE_URL}legal/product-privacy-statement`,

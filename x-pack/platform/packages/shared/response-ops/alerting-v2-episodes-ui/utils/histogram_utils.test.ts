@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { HISTOGRAM_OTHER_BREAKDOWN } from '../constants';
 import {
+  clampBucketInterval,
   computeBucketInterval,
+  countEpisodesByBreakdown,
+  limitBreakdownSeries,
+  mergeBucketCounts,
+  sumBreakdownTotals,
   generateTimeBuckets,
   computeOverlapCounts,
   formatHistogramDatatable,
@@ -202,5 +208,142 @@ describe('formatHistogramDatatable', () => {
       'episode.status'
     );
     expect(table.rows[0]['episode.status']).toBeNull();
+  });
+});
+
+describe('clampBucketInterval', () => {
+  it('returns the interval unchanged when the bucket count fits', () => {
+    expect(clampBucketInterval(0, 16 * HOUR, '1m')).toBe('1m');
+    expect(clampBucketInterval(0, DAY, '1m')).toBe('2m');
+    expect(clampBucketInterval(0, 1000 * MIN, 'm')).toBe('m');
+  });
+
+  it('scales the interval by the smallest factor that fits within the cap', () => {
+    expect(clampBucketInterval(0, 1001 * MIN, 'm')).toBe('2m');
+    expect(clampBucketInterval(0, 30 * DAY, '1m')).toBe('44m');
+    expect(clampBucketInterval(0, 30 * DAY, '1m', 100)).toBe('432m');
+  });
+
+  it('keeps multi-unit prefixes when scaling', () => {
+    expect(clampBucketInterval(0, 3000 * 5 * MIN, '5m')).toBe('15m');
+  });
+
+  it('counts the extra bucket created by aligning an unaligned start', () => {
+    const startMs = 30_000;
+    const endMs = startMs + 1000 * MIN;
+
+    expect(generateTimeBuckets(startMs, endMs, '1m')).toHaveLength(1001);
+    const interval = clampBucketInterval(startMs, endMs, '1m');
+    expect(interval).toBe('2m');
+    expect(generateTimeBuckets(startMs, endMs, interval).length).toBeLessThanOrEqual(1000);
+  });
+
+  it('returns unknown formats unchanged', () => {
+    expect(clampBucketInterval(0, 365 * DAY, 'auto')).toBe('auto');
+  });
+});
+
+describe('mergeBucketCounts', () => {
+  it('sums counts for the same bucket and breakdown across sources in first-seen order', () => {
+    expect(
+      mergeBucketCounts(
+        [
+          { bucketStart: 0, count: 2, breakdown: 'active' },
+          { bucketStart: HOUR, count: 1, breakdown: 'active' },
+        ],
+        [
+          { bucketStart: 0, count: 3, breakdown: 'active' },
+          { bucketStart: 0, count: 4, breakdown: 'inactive' },
+        ]
+      )
+    ).toEqual([
+      { bucketStart: 0, count: 5, breakdown: 'active' },
+      { bucketStart: HOUR, count: 1, breakdown: 'active' },
+      { bucketStart: 0, count: 4, breakdown: 'inactive' },
+    ]);
+  });
+
+  it('sums counts without a breakdown', () => {
+    expect(
+      mergeBucketCounts([{ bucketStart: 0, count: 1 }], [{ bucketStart: 0, count: 2 }])
+    ).toEqual([{ bucketStart: 0, count: 3 }]);
+  });
+});
+
+describe('countEpisodesByBreakdown', () => {
+  it('counts episodes per breakdown value, using unknown for missing values', () => {
+    const row = (ruleId: string | null): HistogramEpisodeRow => ({
+      first_timestamp: '2024-01-01T00:00:00.000Z',
+      last_timestamp: '2024-01-01T01:00:00.000Z',
+      'episode.status': 'inactive',
+      'rule.id': ruleId,
+    });
+
+    expect(countEpisodesByBreakdown([row('a'), row('a'), row('b'), row(null)], 'rule.id')).toEqual({
+      a: 2,
+      b: 1,
+      unknown: 1,
+    });
+  });
+});
+
+describe('sumBreakdownTotals', () => {
+  it('sums totals for the same breakdown value across sources', () => {
+    expect(sumBreakdownTotals({ a: 1, b: 2 }, { b: 3, c: 4 })).toEqual({ a: 1, b: 5, c: 4 });
+  });
+});
+
+describe('limitBreakdownSeries', () => {
+  const OTHER = HISTOGRAM_OTHER_BREAKDOWN;
+
+  it('keeps the top values and folds the rest, including pre-folded counts, into one series', () => {
+    const counts = [
+      { bucketStart: 0, count: 5, breakdown: 'a' },
+      { bucketStart: 0, count: 3, breakdown: 'b' },
+      { bucketStart: 0, count: 2, breakdown: 'c' },
+      { bucketStart: HOUR, count: 1, breakdown: 'c' },
+      { bucketStart: 0, count: 4, breakdown: OTHER },
+    ];
+
+    expect(limitBreakdownSeries(counts, { a: 9, b: 6, c: 2, [OTHER]: 100 }, 2)).toEqual([
+      { bucketStart: 0, count: 5, breakdown: 'a' },
+      { bucketStart: 0, count: 3, breakdown: 'b' },
+      { bucketStart: 0, count: 6, breakdown: OTHER },
+      { bucketStart: HOUR, count: 1, breakdown: OTHER },
+    ]);
+  });
+
+  it('breaks total ties by value in ascending order', () => {
+    const counts = [
+      { bucketStart: 0, count: 1, breakdown: 'b' },
+      { bucketStart: 0, count: 1, breakdown: 'a' },
+    ];
+
+    expect(limitBreakdownSeries(counts, { b: 1, a: 1 }, 1)).toEqual([
+      { bucketStart: 0, count: 1, breakdown: 'a' },
+      { bucketStart: 0, count: 1, breakdown: OTHER },
+    ]);
+  });
+
+  it('orders series by rank with Other last', () => {
+    const counts = [
+      { bucketStart: 0, count: 1, breakdown: 'low' },
+      { bucketStart: 0, count: 2, breakdown: OTHER },
+      { bucketStart: 0, count: 3, breakdown: 'high' },
+      { bucketStart: HOUR, count: 4, breakdown: 'high' },
+    ];
+
+    expect(
+      limitBreakdownSeries(counts, { low: 1, high: 7 }).map(({ breakdown }) => breakdown)
+    ).toEqual(['high', 'high', 'low', OTHER]);
+  });
+
+  it('leaves counts unchanged when there are no more values than the limit', () => {
+    const counts = [
+      { bucketStart: 0, count: 2, breakdown: 'active' },
+      { bucketStart: 0, count: 1, breakdown: 'inactive' },
+    ];
+
+    expect(limitBreakdownSeries(counts, { active: 2, inactive: 1 })).toEqual(counts);
   });
 });

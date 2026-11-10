@@ -38,6 +38,11 @@ import {
   ThreatIntelSupplyNotInstalledError,
   type ThreatIntelSupplyService,
 } from '../threat_intel_supply';
+import { getHuntAccountLabel } from '../watches/hunt/common/resolve_worker_index_coverage';
+import {
+  readLatestFinishedSweepIndexScope,
+  sweepEvaluatedUniverse,
+} from '../watches/hunt/common/read_last_sweep_index_scope';
 import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
 
 /**
@@ -46,6 +51,17 @@ import type { GetWorkerBlockingReasons } from './worker_blocking_reasons';
  */
 const WORKER_IDS_BY_REQUIRED_SKILL: Readonly<Record<string, readonly string[]>> = {
   'endpoint-forensic-analysis': [SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID],
+};
+
+/** Reads the patterns of the space's default data view, so a stale sweep can be told apart. */
+export type GetHuntUniverse = () => Promise<string[]>;
+
+/** `2026-10-28T14:03:11.000Z` as `2026-10-28 14:03 UTC`, which is what the band tooltip shows. */
+const formatSweepTime = (iso: string): string => {
+  const time = new Date(iso);
+  return Number.isNaN(time.getTime())
+    ? iso
+    : `${time.toISOString().slice(0, 16).replace('T', ' ')} UTC`;
 };
 
 const getDefinitionFromTemplate = (registration: WorkerRegistration): WorkflowYaml | null => {
@@ -200,7 +216,11 @@ export class WorkersService {
     }
   }
 
-  async list(request: KibanaRequest, spaceId: string): Promise<ListWorkersResponse> {
+  async list(
+    request: KibanaRequest,
+    spaceId: string,
+    getHuntUniverse?: GetHuntUniverse
+  ): Promise<ListWorkersResponse> {
     await this.ensureAgent(spaceId);
 
     const [agentLookup, hiddenWorkerIds, blockingReasons] = await Promise.all([
@@ -213,7 +233,14 @@ export class WorkersService {
         .list()
         .filter((registration) => !hiddenWorkerIds.has(registration.id))
         .map((registration) =>
-          this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup)
+          this.projectWorker(
+            registration,
+            spaceId,
+            request,
+            blockingReasons,
+            agentLookup,
+            getHuntUniverse
+          )
         )
     );
     return ListWorkersResponse.parse({ workers });
@@ -222,7 +249,8 @@ export class WorkersService {
   async get(
     workerId: string,
     request: KibanaRequest,
-    spaceId: string
+    spaceId: string,
+    getHuntUniverse?: GetHuntUniverse
   ): Promise<Worker | undefined> {
     await this.ensureAgent(spaceId);
     const registration = workerRegistry.get(workerId);
@@ -237,14 +265,70 @@ export class WorkersService {
       this.buildAgentLookup(request),
       this.getBlockingReasons(request),
     ]);
-    return this.projectWorker(registration, spaceId, request, blockingReasons, agentLookup);
+    return this.projectWorker(
+      registration,
+      spaceId,
+      request,
+      blockingReasons,
+      agentLookup,
+      getHuntUniverse
+    );
+  }
+
+  /**
+   * The Hunt worker's installed workflow id and stored service account id, for the index
+   * coverage route. Reads only the install status and settings: it never writes through
+   * `ensureAgent` and never reads an execution.
+   */
+  async getHuntCoverageInputs(
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<{ workflowId: string | null; serviceAccountId: string | null }> {
+    const none = { workflowId: null, serviceAccountId: null };
+    const registration = workerRegistry.get(SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID);
+    if (!registration) return none;
+
+    let workflowId: string;
+    try {
+      if ((await this.hiddenWorkerIds(request)).has(registration.id)) return none;
+      const managedWorkflows = await this.requireManagedWorkflows();
+      const status = await managedWorkflows.getWorkflowStatus(registration.id, {
+        spaceId,
+        workflowIdSuffix: spaceId,
+      });
+      if (!status.installed || status.status === 'not_managed') return none;
+      workflowId = status.workflowId;
+    } catch (error) {
+      this.logger.debug(
+        `Failed to read the hunt worker status: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return none;
+    }
+
+    try {
+      const managedWorkflows = await this.requireManagedWorkflows();
+      const state = await managedWorkflows.getInstalledWorkflowState(workflowId, spaceId);
+      if (!state?.templateValues) return { workflowId, serviceAccountId: null };
+      const { serviceAccountId } = registration.settings.toSettings(state.templateValues);
+      return { workflowId, serviceAccountId: serviceAccountId ?? null };
+    } catch (error) {
+      this.logger.debug(
+        `Failed to read the hunt worker settings: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return { workflowId, serviceAccountId: null };
+    }
   }
 
   async update(
     workerId: string,
     patch: UpdateWorkerRequestBody,
     spaceId: string,
-    request: KibanaRequest
+    request: KibanaRequest,
+    getHuntUniverse?: GetHuntUniverse
   ): Promise<WorkerUpdateResult> {
     const registration = workerRegistry.get(workerId);
     if (!registration) {
@@ -450,9 +534,58 @@ export class WorkersService {
       spaceId,
       request,
       blockingReasons,
-      agentLookup
+      agentLookup,
+      getHuntUniverse
     );
     return { outcome: 'updated', response: { worker } };
+  }
+
+  /**
+   * Why the Hunt worker's last finished sweep was blocked at its index scope gate, or undefined
+   * when it was not (or the sweep cannot be read). A blocked sweep is a worker state, not a
+   * hidden telemetry value.
+   */
+  private async readHuntBlockedReason({
+    workflowId,
+    spaceId,
+    request,
+    serviceAccountId,
+    getHuntUniverse,
+  }: {
+    workflowId: string;
+    spaceId: string;
+    request: KibanaRequest;
+    serviceAccountId: string | undefined;
+    getHuntUniverse: GetHuntUniverse | undefined;
+  }): Promise<string | undefined> {
+    try {
+      const sweep = await readLatestFinishedSweepIndexScope({
+        management: this.requireManagement(),
+        workflowId,
+        spaceId,
+        request,
+        logger: this.logger,
+      });
+      const scope = sweep?.scope;
+      if (!sweep || scope?.status !== 'blocked') return undefined;
+      // A sweep that evaluated an older default data view says nothing about the current one:
+      // the coverage callout already stops using it, so the state must too.
+      if (getHuntUniverse && !sweepEvaluatedUniverse(scope, await getHuntUniverse())) {
+        return undefined;
+      }
+      const account = getHuntAccountLabel({ serviceAccountId });
+      const sweptAt = formatSweepTime(sweep.checkedAt);
+      return scope.resolution === 'blocked:discovery_failed'
+        ? `The sweep at ${sweptAt} running as ${account} could not resolve this space's default data view`
+        : `The sweep at ${sweptAt} running as ${account} could not see any index in this space's default data view`;
+    } catch (error) {
+      this.logger.debug(
+        `Failed to read the last hunt sweep: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
   }
 
   private async projectWorker(
@@ -460,7 +593,8 @@ export class WorkersService {
     spaceId: string,
     request: KibanaRequest,
     blockingReasons: WorkerBlockingReason[],
-    agentLookupCallback?: AgentLookup
+    agentLookupCallback?: AgentLookup,
+    getHuntUniverse?: GetHuntUniverse
   ): Promise<Worker> {
     const managedWorkflows = await this.requireManagedWorkflows();
     const status = await managedWorkflows.getWorkflowStatus(registration.id, {
@@ -475,6 +609,7 @@ export class WorkersService {
     let settings = registration.settings.toSettings(registration.settings.createDefaultValues());
     let settingsUnavailable = false;
     let definition: WorkflowYaml | null = null;
+    let degradedReason: string | undefined;
 
     if (status.installed) {
       enabled = Boolean(status.enabled);
@@ -515,6 +650,20 @@ export class WorkersService {
           }`
         );
       }
+
+      if (
+        registration.id === SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID &&
+        enabled &&
+        !settingsUnavailable
+      ) {
+        degradedReason = await this.readHuntBlockedReason({
+          workflowId: status.workflowId,
+          spaceId,
+          request,
+          serviceAccountId: settings.serviceAccountId,
+          getHuntUniverse,
+        });
+      }
     } else {
       definition = getDefinitionFromTemplate(registration);
     }
@@ -525,9 +674,17 @@ export class WorkersService {
       watchIds: [registration.catalog.watchId],
       enabled,
       lastRun,
-      state: settingsUnavailable ? 'unavailable' : enabled ? 'ok' : 'paused',
+      state: settingsUnavailable
+        ? 'unavailable'
+        : degradedReason
+        ? 'degraded'
+        : enabled
+        ? 'ok'
+        : 'paused',
       ...(settingsUnavailable
         ? { stateReason: 'Worker settings could not be read from durable storage' }
+        : degradedReason
+        ? { stateReason: degradedReason }
         : {}),
       settings,
       settingsRevision,

@@ -7,38 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTelemetryOptIn } from './get_telemetry_opt_in';
 import type { TelemetrySavedObject } from '../saved_objects';
+import { getTelemetryOptIn } from './get_telemetry_opt_in';
 
 describe('getTelemetryOptIn', () => {
-  it('returns null when saved object not found', () => {
+  it('returns null when saved object not found', async () => {
     const params = getCallGetTelemetryOptInParams({
       savedObjectNotFound: true,
     });
 
-    const result = callGetTelemetryOptIn(params);
+    const result = await callGetTelemetryOptIn(params);
 
     expect(result).toBe(null);
   });
 
-  it('returns null if enabled is null or undefined', () => {
+  it('returns null if enabled is null or undefined', async () => {
     for (const enabled of [null, undefined]) {
       const params = getCallGetTelemetryOptInParams({
         enabled,
       });
 
-      const result = callGetTelemetryOptIn(params);
+      const result = await callGetTelemetryOptIn(params);
 
       expect(result).toBe(null);
     }
   });
 
-  it('returns true when enabled is true', () => {
+  it('returns true when enabled is true', async () => {
     const params = getCallGetTelemetryOptInParams({
       enabled: true,
     });
 
-    const result = callGetTelemetryOptIn(params);
+    const result = await callGetTelemetryOptIn(params);
 
     expect(result).toBe(true);
   });
@@ -99,6 +99,96 @@ describe('getTelemetryOptIn', () => {
       expect(result).toBe(params.result);
     }
   );
+
+  describe('feature flag', () => {
+    it('honors an explicit opt-out when the feature flag is enabled', async () => {
+      const result = await callGetTelemetryOptIn(
+        getCallGetTelemetryOptInParams({ enabled: false, isOptedInFromFeatureFlag: true })
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('honors an explicit opt-in when the feature flag is disabled', async () => {
+      const result = await callGetTelemetryOptIn(
+        getCallGetTelemetryOptInParams({ enabled: true, isOptedInFromFeatureFlag: false })
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('honors a locked kibana.yml opt-out when the feature flag is enabled', async () => {
+      const result = await callGetTelemetryOptIn(
+        getCallGetTelemetryOptInParams({
+          allowChangingOptInStatus: false,
+          configTelemetryOptIn: false,
+          enabled: true,
+          isOptedInFromFeatureFlag: true,
+        })
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('turns a locked opt-in off when the feature flag is disabled', async () => {
+      const result = await callGetTelemetryOptIn(
+        getCallGetTelemetryOptInParams({
+          allowChangingOptInStatus: false,
+          configTelemetryOptIn: true,
+          enabled: false,
+          isOptedInFromFeatureFlag: false,
+        })
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('keeps a locked opt-in when the feature flag is enabled', async () => {
+      const result = await callGetTelemetryOptIn(
+        getCallGetTelemetryOptInParams({
+          allowChangingOptInStatus: false,
+          configTelemetryOptIn: true,
+          isOptedInFromFeatureFlag: true,
+        })
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('stays undecided when opt-in is locked on and the feature flag is not known yet', async () => {
+      const result = await callGetTelemetryOptIn(
+        getCallGetTelemetryOptInParams({
+          allowChangingOptInStatus: false,
+          configTelemetryOptIn: true,
+          isOptedInFromFeatureFlag: undefined,
+        })
+      );
+
+      expect(result).toBe(null);
+    });
+
+    it('keeps an undecided opt-in as null when the feature flag is enabled', async () => {
+      const result = await callGetTelemetryOptIn(
+        getCallGetTelemetryOptInParams({
+          savedObjectNotFound: true,
+          isOptedInFromFeatureFlag: true,
+        })
+      );
+
+      expect(result).toBe(null);
+    });
+
+    it('returns false when opt-in is undecided and the feature flag is disabled', async () => {
+      const result = await callGetTelemetryOptIn(
+        getCallGetTelemetryOptInParams({
+          savedObjectNotFound: true,
+          isOptedInFromFeatureFlag: false,
+        })
+      );
+
+      expect(result).toBe(false);
+    });
+  });
 });
 
 interface CallGetTelemetryOptInParams {
@@ -109,6 +199,7 @@ interface CallGetTelemetryOptInParams {
   enabled: boolean | null | undefined;
   configTelemetryOptIn: boolean | null;
   allowChangingOptInStatus: boolean;
+  isOptedInFromFeatureFlag?: boolean | undefined;
 }
 
 const DefaultParams = {
@@ -129,12 +220,16 @@ function getCallGetTelemetryOptInParams(
 
 function callGetTelemetryOptIn(params: CallGetTelemetryOptInParams) {
   const { currentKibanaVersion, configTelemetryOptIn, allowChangingOptInStatus } = params;
+  const isOptedInFromFeatureFlag = Object.hasOwn(params, 'isOptedInFromFeatureFlag')
+    ? params.isOptedInFromFeatureFlag
+    : true;
   const telemetrySavedObject = getMockTelemetrySavedObject(params);
   return getTelemetryOptIn({
     currentKibanaVersion,
     telemetrySavedObject,
     allowChangingOptInStatus,
     configTelemetryOptIn,
+    isOptedInFromFeatureFlag,
   });
 }
 

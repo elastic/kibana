@@ -124,19 +124,22 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
           alertIds: body.subject.ids,
           ...lookup,
         });
-        return await client.start({
-          subject: { type: 'alert', id: primaryId, summary: body.subject.summary },
-          title: body.title,
-          context: { alerts },
-          trigger_type: 'manual',
-          message: body.message,
-          ...(body.connector_id ? { connector_id: body.connector_id } : {}),
-          ...(body.notificationDestinations
-            ? { notificationDestinations: body.notificationDestinations }
-            : {}),
-        });
+        return await client.start(
+          {
+            subject: { type: 'alert', id: primaryId, summary: body.subject.summary },
+            title: body.title,
+            context: { alerts },
+            trigger_type: 'manual',
+            message: body.message,
+            ...(body.connector_id ? { connector_id: body.connector_id } : {}),
+            ...(body.notificationDestinations
+              ? { notificationDestinations: body.notificationDestinations }
+              : {}),
+          },
+          { entryPoint: 'start_api' }
+        );
       }
-      return await client.start({ ...body, trigger_type: 'manual' });
+      return await client.start({ ...body, trigger_type: 'manual' }, { entryPoint: 'start_api' });
     } catch (error) {
       rethrowInvestigationClientError(error);
     }

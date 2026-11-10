@@ -95,7 +95,7 @@ const createPersistedProvider = async ({
     get: async (agentId: string, opts?: GetAgentOptions) => {
       const access = opts?.access ?? 'read';
       try {
-        const definition = await client.getWithAccess(agentId, access);
+        const definition = await client.getWithAccess(agentId, { access, runAs: opts?.runAs });
         return toInternalDefinition({
           definition,
           availabilityByAgentId,
@@ -103,7 +103,11 @@ const createPersistedProvider = async ({
           availabilityCache,
         });
       } catch (e) {
-        if (agentId === agentBuilderDefaultAgentId && isAgentNotFoundError(e)) {
+        if (
+          agentId === agentBuilderDefaultAgentId &&
+          opts?.runAs === undefined &&
+          isAgentNotFoundError(e)
+        ) {
           const definition = await ensureDefaultAgent(client);
           return toInternalDefinition({
             definition,
@@ -157,6 +161,15 @@ const createPersistedProvider = async ({
     },
     update: async (agentId, update) => {
       const definition = await client.update(agentId, update);
+      return toInternalDefinition({
+        definition,
+        availabilityByAgentId,
+        hiddenByAgentId,
+        availabilityCache,
+      });
+    },
+    setServiceAccount: async (agentId, serviceAccountId) => {
+      const definition = await client.setServiceAccount(agentId, serviceAccountId);
       return toInternalDefinition({
         definition,
         availabilityByAgentId,

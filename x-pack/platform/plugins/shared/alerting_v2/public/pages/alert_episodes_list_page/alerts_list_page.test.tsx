@@ -65,6 +65,7 @@ jest.mock('@kbn/unified-data-table', () => ({
       () =>
         leftSide
   ),
+  getRowHeight: jest.fn(() => 3),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
@@ -108,7 +109,7 @@ jest.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_contai
 
 jest.mock('../../hooks/use_breadcrumbs', () => ({ useBreadcrumbs: jest.fn() }));
 
-jest.mock('./components/episodes_kpis', () => ({
+jest.mock('@kbn/alerting-v2-episodes-ui/components/episodes_kpis', () => ({
   EpisodesKpis: () => null,
 }));
 
@@ -132,7 +133,7 @@ jest.mock('./components/episodes_filter_bar', () => ({
   ),
 }));
 
-jest.mock('./components/episodes_histogram', () => ({
+jest.mock('@kbn/alerting-v2-episodes-ui/components/episodes_histogram', () => ({
   EpisodesHistogram: () => null,
 }));
 
@@ -229,6 +230,16 @@ jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
 jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
 mockHttp.post.mockResolvedValue({ rules: [] });
 
+// Classic write access loads rule types, so that request is routed apart from the rule responses.
+const mockHttpGet = (response: unknown = { items: [], total: 0, page: 1, per_page: 3 }) => {
+  mockHttp.get.mockImplementation((pathOrOptions) => {
+    const path = typeof pathOrOptions === 'string' ? pathOrOptions : pathOrOptions.path;
+    return Promise.resolve(path === '/api/alerting/rule_types' ? [] : response);
+  });
+};
+
+mockHttpGet();
+
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
 let unmountPage: () => void;
 
@@ -256,7 +267,7 @@ describe('AlertsListPage', () => {
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
     jest.mocked(fetchClassicAlertsAsEpisodes).mockResolvedValue([]);
-    mockHttp.get.mockResolvedValue({ items: [], total: 0, page: 1, per_page: 3 });
+    mockHttpGet();
     mockHttp.post.mockResolvedValue({ rules: [] });
     ({ unmount: unmountPage } = renderPage());
     // Wait for episodes to load so bulk action handlers have access to episode data
@@ -279,6 +290,7 @@ describe('AlertsListPage', () => {
       order: 1,
       displayName: 'Test Action',
       iconType: 'star',
+      enforcesOwnPrivileges: false,
       isCompatible: jest.fn(() => true),
       execute: jest.fn(async () => {}),
     };
@@ -305,6 +317,7 @@ describe('AlertsListPage', () => {
       'severity',
       '@timestamp',
       'rule.id',
+      'reason',
       'duration',
       'tags',
       'rule_tags',
@@ -319,6 +332,7 @@ describe('AlertsListPage', () => {
     ['tags', 'Alert tags'],
     ['rule_tags', 'Rule tags'],
     ['suppressed', 'Suppressed'],
+    ['reason', 'Reason'],
   ])('labels the %s column %p and takes its sort control away', (columnId, label) => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
@@ -337,6 +351,7 @@ describe('AlertsListPage', () => {
     'severity',
     '@timestamp',
     'rule.id',
+    'reason',
     'duration',
     'tags',
     'rule_tags',
@@ -392,7 +407,7 @@ describe('AlertsListPage', () => {
     expect(initialIsRuleAvailable?.('rule1')).toBe(false);
 
     unmountPage();
-    mockHttp.get.mockResolvedValue({
+    mockHttpGet({
       items: [{ id: 'rule1', metadata: { name: 'Rule 1' } }],
       total: 1,
       page: 1,
@@ -512,6 +527,7 @@ describe('query invalidation', () => {
       order: 1,
       displayName: 'Test Action',
       iconType: 'star',
+      enforcesOwnPrivileges: false,
       isCompatible: jest.fn(() => true),
       execute: jest.fn(async ({ onSuccess }: EpisodeActionContext) => {
         capturedOnSuccess = onSuccess;
@@ -658,6 +674,7 @@ describe('privilege gating', () => {
     order: 10,
     displayName: 'Acknowledge',
     iconType: 'checkCircle',
+    enforcesOwnPrivileges: false,
     isCompatible: () => true,
     execute: jest.fn(async () => {}),
   };
@@ -714,6 +731,9 @@ describe('privilege gating', () => {
     renderPage();
     await waitForRows();
 
+    expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
+      expect.objectContaining({ canWriteNativeEpisodes: true })
+    );
     expect(getRowControlIds()).toEqual([
       'ALERTING_V2_ACK_EPISODE',
       OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
@@ -725,17 +745,26 @@ describe('privilege gating', () => {
     expect(getFlyoutActionIds()).toContain('ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER');
   });
 
-  it('hides mutating episode actions when the user only has read privilege', async () => {
+  it('builds the episode actions without write privilege when the user only has read privilege', async () => {
     mockCapabilities = READ_ONLY_CAPABILITIES;
 
     renderPage();
     await waitForRows();
 
-    expect(getRowControlIds()).toEqual([OPEN_IN_DISCOVER_EPISODE_ACTION_ID]);
-    expect(getCapturedBulkActions().map((action) => action.key)).toEqual([
-      OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
-    ]);
-    expect(getFlyoutActionIds()).toContain('ALERTING_V2_OPEN_ALERT_EVENTS_HISTORY_IN_DISCOVER');
+    expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
+      expect.objectContaining({ canWriteNativeEpisodes: false })
+    );
+  });
+
+  it('resolves classic rows through the write access of the classic source', async () => {
+    mockCapabilities = READ_ONLY_CAPABILITIES;
+
+    renderPage();
+    await waitForRows();
+
+    expect(mockCreateEpisodeActions).toHaveBeenCalledWith(
+      expect.objectContaining({ canWriteSourceEpisode: expect.any(Function) })
+    );
   });
 });
 

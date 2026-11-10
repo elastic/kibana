@@ -24,6 +24,15 @@ jest.mock('./foreach_iterations_section', () => ({
   ForeachIterationsSection: () => <div data-test-subj="workflowExecutionIterationsSection" />,
 }));
 
+const mockResumeProps: { current: Record<string, unknown> } = { current: {} };
+
+jest.mock('./resume_execution_button', () => ({
+  ResumeExecutionButton: (props: Record<string, unknown>) => {
+    mockResumeProps.current = props;
+    return <div data-test-subj="resume-execution-button" />;
+  },
+}));
+
 const mockOverviewProps: { current: Record<string, unknown> } = { current: {} };
 
 jest.mock('./workflow_execution_overview', () => ({
@@ -76,6 +85,7 @@ const createRegularStep = (
 describe('WorkflowStepExecutionDetails', () => {
   beforeEach(() => {
     mockOverviewProps.current = {};
+    mockResumeProps.current = {};
   });
 
   it('renders Input and Output sections for a trigger with both payloads', () => {
@@ -204,26 +214,14 @@ describe('WorkflowStepExecutionDetails', () => {
     ).toBeInTheDocument();
   });
 
-  it('does not show resume UI on overview until waitingStepExecutionId is ready', () => {
+  it('does not show resume UI on overview — waiting actions live on the step row', () => {
     const overviewStep = createRegularStep({
       id: '__overview',
       stepId: 'Overview',
       stepType: '__overview',
     });
 
-    const { rerender } = render(
-      <TestWrapper>
-        <WorkflowStepExecutionDetails
-          workflowExecutionId="exec-1"
-          stepExecution={overviewStep}
-          workflowExecutionStatus={ExecutionStatus.WAITING_FOR_INPUT}
-        />
-      </TestWrapper>
-    );
-
-    expect(mockOverviewProps.current.showResumeUI).toBe(false);
-
-    rerender(
+    render(
       <TestWrapper>
         <WorkflowStepExecutionDetails
           workflowExecutionId="exec-1"
@@ -234,6 +232,34 @@ describe('WorkflowStepExecutionDetails', () => {
       </TestWrapper>
     );
 
-    expect(mockOverviewProps.current.showResumeUI).toBe(true);
+    expect(mockOverviewProps.current.showResumeUI).toBe(false);
+  });
+
+  it('shares submit state with the tree row and does not auto-open', () => {
+    const submitState = {
+      isSubmitting: false,
+      isSubmitted: false,
+      setSubmitting: jest.fn(),
+      setSubmitted: jest.fn(),
+    };
+    const stepExecution = createRegularStep({
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      input: { message: 'Need approval' },
+      output: undefined,
+    });
+
+    render(
+      <TestWrapper>
+        <WorkflowStepExecutionDetails
+          workflowExecutionId="exec-1"
+          stepExecution={stepExecution}
+          shouldAutoResume={true}
+          submitState={submitState}
+        />
+      </TestWrapper>
+    );
+
+    expect(mockResumeProps.current.submitState).toBe(submitState);
+    expect(mockResumeProps.current.autoOpen ?? false).toBe(false);
   });
 });

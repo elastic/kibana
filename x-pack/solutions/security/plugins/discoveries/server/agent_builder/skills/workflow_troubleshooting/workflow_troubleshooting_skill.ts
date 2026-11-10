@@ -81,7 +81,10 @@ the gate plus generate plus validate comfortably fit on every run. The gate deli
 **no \`on-failure: retry\`**: it is conversation-stateful and long-running, so a retry would
 restart from scratch and burn the remaining budget. A \`timed_out\` status on the gate or
 generate step means a slow LLM call exceeded the step timeout or the remaining pipeline
-budget — never a permission problem.
+budget — never a permission problem. On connectors that don't report a refusal to Kibana (for
+example the \`.gen-ai\`, \`.bedrock\`, and \`.gemini\` stack connectors), a provider content filter
+can still look like repeated parse errors that end in a generate-step timeout; see the
+\`content_filter\` category.
 
 A failure_reason of \`Pipeline budget exceeded (…ms) before starting <phase> phase\` means the
 30-minute total budget ran out before that phase could start (usually because an earlier phase
@@ -238,7 +241,7 @@ Summarize your findings using this structure:
 - ❌ Validation: [status summary with error]
 
 ### Error Category
-[If available from the diagnostic report attachment or determinable from the error details, include the structured error category: \`rate_limit\`, \`network_error\`, \`permission_error\`, \`cluster_health\`, \`concurrent_conflict\`, \`anonymization_error\`, \`step_registration_error\`, \`connector_error\`, \`timeout\`, \`interrupted\`, \`validation_error\`, or \`unknown\`]
+[If available from the diagnostic report attachment or determinable from the error details, include the structured error category: \`rate_limit\`, \`network_error\`, \`permission_error\`, \`cluster_health\`, \`concurrent_conflict\`, \`anonymization_error\`, \`step_registration_error\`, \`connector_error\`, \`content_filter\`, \`timeout\`, \`interrupted\`, \`validation_error\`, or \`unknown\`]
 
 ### Root Cause
 [Clear explanation of what went wrong and why]
@@ -591,11 +594,32 @@ determine the category.
 - Test the connector using the "Test" tab in connector settings
 - Verify the connector's model configuration matches the provider's requirements
 
+### content_filter
+
+**Pattern:** Error messages containing "content filter", "content_filter", "refused to complete
+the response", or "finish_reason: content_filter".
+
+The model's provider stopped the response with its safety filter, usually while the model was
+describing the attack (malware, Office macro chains, credential theft). It happens on specific
+models, for example Claude Opus 5.5 and Claude Fable 5.1 through the Elastic Inference Service,
+and it is probabilistic: the same alerts can pass on one run and be refused on the next.
+
+⚠️ **Not a prompt-size, timeout, or permission issue:** Do NOT suggest reducing the number of
+alerts, narrowing the time range, raising timeouts, or RBAC changes; none of them stop the filter.
+
+**Remediation:**
+- Select a different model for Attack Discovery in the Attack Discovery settings or, for the
+  AlertZero Attack Discovery Worker, in Model Settings for the AlertZero model rows
+
 ### timeout
 
 **Pattern:** Execution status is \`timed_out\`, or error messages containing "timeout", "timed out", or "deadline exceeded".
 
 ⚠️ **Not a permission issue:** Timeouts are caused by LLM latency or excessive alert volume — never by missing RBAC privileges. Do NOT suggest RBAC fixes for timeouts.
+
+⚠️ **Check the connector first:** a content filter on a connector that doesn't report refusals
+(for example \`.gen-ai\`, \`.bedrock\`, or \`.gemini\`) can be retried until the generate step times
+out. Fewer alerts will not fix that; switch models instead.
 
 **Remediation:**
 - For LLM generation timeouts: reduce the number of alerts (try 20–30) or switch to a faster connector/model

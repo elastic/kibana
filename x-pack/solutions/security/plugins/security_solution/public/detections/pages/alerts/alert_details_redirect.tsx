@@ -16,10 +16,9 @@ import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import { formatPageFilterSearchParam } from '@kbn/securitysolution-alerts-page-url';
 import { ALERTS_PATH, DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { inputsSelectors } from '../../../common/store';
 import { FLYOUT_V2_URL_PARAM } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { resolveFlyoutParams, resolveFlyoutV2Params } from './utils';
+import { resolveFlyoutV2Params } from './utils';
 
 export const AlertDetailsRedirect = () => {
   const { alertId } = useParams<{ alertId: string }>();
@@ -68,21 +67,13 @@ export const AlertDetailsRedirect = () => {
 
   const pageFiltersQuery = encode(formatPageFilterSearchParam([statusPageFilter]));
 
-  const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
-
-  const currentFlyoutParams = searchParams.get(URL_PARAM_KEY.flyout);
   const currentFlyoutV2Params = searchParams.get(FLYOUT_V2_URL_PARAM);
-
-  const flyoutParamKey = isNewFlyoutEnabled ? FLYOUT_V2_URL_PARAM : URL_PARAM_KEY.flyout;
-  const flyoutParamValue = isNewFlyoutEnabled
-    ? resolveFlyoutV2Params({ index, alertId }, currentFlyoutV2Params)
-    : resolveFlyoutParams({ index, alertId }, currentFlyoutParams);
 
   const urlParams = new URLSearchParams({
     [URL_PARAM_KEY.appQuery]: kqlAppQuery,
     [URL_PARAM_KEY.timerange]: timerange,
     [URL_PARAM_KEY.pageFilter]: pageFiltersQuery,
-    [flyoutParamKey]: flyoutParamValue,
+    [FLYOUT_V2_URL_PARAM]: resolveFlyoutV2Params({ index, alertId }, currentFlyoutV2Params),
   });
 
   const url = `${ALERTS_PATH}?${urlParams.toString()}`;

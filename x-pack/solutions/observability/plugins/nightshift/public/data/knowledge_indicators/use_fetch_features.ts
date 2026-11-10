@@ -6,13 +6,13 @@
  */
 
 import { type QueryFunctionContext, useQuery } from '@kbn/react-query';
-import type { Feature } from '@kbn/significant-events-schema';
+import type { AggregatedFeature } from '@kbn/significant-events-schema';
 import { FEATURES_QUERY_KEY } from '../query_keys';
 import { useKibana } from '../../hooks/use_kibana';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
 
 interface FetchFeaturesResult {
-  features: Feature[];
+  features: AggregatedFeature[];
 }
 
 export const useFetchFeatures = () => {
