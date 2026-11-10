@@ -40036,6 +40036,9 @@ paths:
                           description: The ID of the proxy to use for this download source. See the proxies API for more information.
                           nullable: true
                           type: string
+                        reserve_diskspace:
+                          description: When enabled, Elastic Agent reserves disk space equal to the size of the new agent package before upgrading. Defaults to true on the agent side when not set.
+                          type: boolean
                         secrets:
                           additionalProperties: false
                           type: object
@@ -40215,6 +40218,9 @@ paths:
                   description: The ID of the proxy to use for this download source. See the proxies API for more information.
                   nullable: true
                   type: string
+                reserve_diskspace:
+                  description: When enabled, Elastic Agent reserves disk space equal to the size of the new agent package before upgrading. Defaults to true on the agent side when not set.
+                  type: boolean
                 secrets:
                   additionalProperties: false
                   type: object
@@ -40335,6 +40341,9 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      reserve_diskspace:
+                        description: When enabled, Elastic Agent reserves disk space equal to the size of the new agent package before upgrading. Defaults to true on the agent side when not set.
+                        type: boolean
                       secrets:
                         additionalProperties: false
                         type: object
@@ -40602,6 +40611,9 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      reserve_diskspace:
+                        description: When enabled, Elastic Agent reserves disk space equal to the size of the new agent package before upgrading. Defaults to true on the agent side when not set.
+                        type: boolean
                       secrets:
                         additionalProperties: false
                         type: object
@@ -40788,6 +40800,9 @@ paths:
                   description: The ID of the proxy to use for this download source. See the proxies API for more information.
                   nullable: true
                   type: string
+                reserve_diskspace:
+                  description: When enabled, Elastic Agent reserves disk space equal to the size of the new agent package before upgrading. Defaults to true on the agent side when not set.
+                  type: boolean
                 secrets:
                   additionalProperties: false
                   type: object
@@ -40908,6 +40923,9 @@ paths:
                         description: The ID of the proxy to use for this download source. See the proxies API for more information.
                         nullable: true
                         type: string
+                      reserve_diskspace:
+                        description: When enabled, Elastic Agent reserves disk space equal to the size of the new agent package before upgrading. Defaults to true on the agent side when not set.
+                        type: boolean
                       secrets:
                         additionalProperties: false
                         type: object
@@ -153886,6 +153904,8 @@ components:
           additionalProperties: false
           type: object
           properties:
+            agent_download_reserve_diskspace_enabled:
+              nullable: true
             agent_download_target_directory:
               nullable: true
             agent_download_timeout:
@@ -173406,6 +173426,8 @@ components:
           additionalProperties: false
           type: object
           properties:
+            agent_download_reserve_diskspace_enabled:
+              nullable: true
             agent_download_target_directory:
               nullable: true
             agent_download_timeout:
@@ -183750,6 +183772,8 @@ components:
           additionalProperties: false
           type: object
           properties:
+            agent_download_reserve_diskspace_enabled:
+              nullable: true
             agent_download_target_directory:
               nullable: true
             agent_download_timeout:
