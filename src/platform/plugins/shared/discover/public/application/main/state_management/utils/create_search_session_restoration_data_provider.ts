@@ -12,7 +12,7 @@ import type { DataPublicPluginStart, SearchSessionInfoProvider } from '@kbn/data
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { ReactiveTabRuntimeState, TabState } from '../redux';
 import type { RuntimeStateManager } from '../redux/runtime_state';
-import { selectCurrentProfileLocatorState } from '../redux/runtime_state';
+import { getTabDataView, selectCurrentProfileLocatorState } from '../redux/runtime_state';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '../../../../../common';
 import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
 
@@ -74,7 +74,7 @@ function createUrlGeneratorState({
     profileStateMap: currentTab.profileState,
     profileStateRegistry,
   });
-  const dataView = getCurrentTabRuntimeState().currentDataView$.getValue();
+  const dataView = getTabDataView(getCurrentTabRuntimeState());
   return {
     filters: data.query.filterManager.getFilters(),
     dataViewId: dataView?.id,

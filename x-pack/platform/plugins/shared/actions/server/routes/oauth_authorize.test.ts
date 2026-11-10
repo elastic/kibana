@@ -16,6 +16,7 @@ import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/se
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 import { oauthAuthorizeRoute } from './oauth_authorize';
+import { connectorAuthCounter } from '../lib/connector_metrics';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import { actionsConfigMock } from '../actions_config.mock';
@@ -106,6 +107,7 @@ describe('oauthAuthorizeRoute', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
     router = httpServiceMock.createRouter();
     (verifyAccessAndContext as jest.Mock).mockImplementation((_license, handler) => handler);
 
@@ -226,6 +228,12 @@ describe('oauthAuthorizeRoute', () => {
     await handler(context, req, res);
 
     expect(mockRateLimiter.log).toHaveBeenCalledWith('test-profile-uid', 'authorize');
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'initiate',
+      'connector.auth_type': 'unknown',
+      success: false,
+      'error.type': 'rate_limited',
+    });
     expect(res.customError).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 429,
@@ -358,6 +366,7 @@ describe('oauthAuthorizeRoute', () => {
   });
 
   it('returns authorization URL on success', async () => {
+    mockActionsClient.get.mockResolvedValue({ actionTypeId: '.github' });
     mockOAuthServiceInstance.getOAuthConfig.mockResolvedValue({
       authTypeId: 'oauth_authorization_code',
       authorizationUrl: 'https://provider.example.com/authorize',
@@ -396,6 +405,14 @@ describe('oauthAuthorizeRoute', () => {
       },
     });
 
+    expect(connectorAuthCounter.add).toHaveBeenCalledTimes(1);
+    expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+      'auth.phase': 'initiate',
+      'connector.auth_type': 'oauth_authorization_code',
+      'connector.type': '.github',
+      success: true,
+    });
+
     // Verify OAuth state was created with the correct params
     expect(mockOAuthStateClientInstance.create).toHaveBeenCalledWith({
       connectorId: 'connector-1',
@@ -413,6 +430,13 @@ describe('oauthAuthorizeRoute', () => {
       state: 'random-state',
       codeChallenge: 'code-challenge-value',
     });
+
+    // EARS-specific log lines are only emitted for EARS connectors
+    expect(
+      (mockLogger.info as jest.Mock).mock.calls.filter(
+        ([, meta]: [unknown, { tags?: string[] } | undefined]) => meta?.tags?.includes('ears')
+      )
+    ).toEqual([]);
   });
 
   it('returns EARS authorization URL and checks resolved EARS host against allowedHosts', async () => {
@@ -461,6 +485,11 @@ describe('oauthAuthorizeRoute', () => {
         state: 'ears-state',
       },
     });
+
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      'EARS authorize success: connectorId=connector-ears provider=google profileUid=test-profile-uid spaceId=default state=ears-state',
+      { tags: ['ears', 'authorize', 'success'] }
+    );
   });
 
   it('returns error when resolved EARS authorize URL host is not in allowedHosts', async () => {

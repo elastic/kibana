@@ -136,7 +136,10 @@ describe('ObservabilityActions component', () => {
 
   const setup = async (
     pageId: string,
-    { alert = { ...inventoryThresholdAlertEs, [ALERT_FLAPPING]: [false] } }: { alert?: Alert } = {}
+    {
+      alert = { ...inventoryThresholdAlertEs, [ALERT_FLAPPING]: [false] },
+      onRemoveFromCase,
+    }: { alert?: Alert; onRemoveFromCase?: (alertId: string) => void } = {}
   ) => {
     const queryClient = new QueryClient({
       defaultOptions: {
@@ -169,6 +172,7 @@ describe('ObservabilityActions component', () => {
       | 'observabilityRuleTypeRegistry'
       | 'refresh'
       | 'alertDetailsNavigation'
+      | 'onRemoveFromCase'
     > = {
       tableId: pageId,
       config,
@@ -181,6 +185,7 @@ describe('ObservabilityActions component', () => {
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       refresh,
       alertDetailsNavigation,
+      onRemoveFromCase,
     };
 
     const services = {
@@ -332,6 +337,25 @@ describe('ObservabilityActions component', () => {
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
 
     expect(wrapper.find('[data-test-subj="add-to-case-action"]').hostNodes().length).toBe(0);
+  });
+
+  it('should hide "Remove from case" without onRemoveFromCase', async () => {
+    const wrapper = await setup('nothing');
+    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
+
+    expect(wrapper.find('[data-test-subj="removeAlertFromCase"]').hostNodes().length).toBe(0);
+  });
+
+  it('should remove the row alert from the case', async () => {
+    const onRemoveFromCase = jest.fn();
+    const wrapper = await setup('nothing', { onRemoveFromCase });
+    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="removeAlertFromCase"]').hostNodes().length).toBe(1);
+    });
+    wrapper.find('[data-test-subj="removeAlertFromCase"]').hostNodes().simulate('click');
+
+    expect(onRemoveFromCase).toHaveBeenCalledWith('6d4c6d74-d51a-495c-897d-88ced3b95e30');
   });
 
   it('should show a valid url when clicking  "View in app"', async () => {

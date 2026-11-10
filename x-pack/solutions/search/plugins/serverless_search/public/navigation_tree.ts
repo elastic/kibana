@@ -27,8 +27,8 @@ function isEditingFromDashboard(
   return isVizApp && hasOriginatingApp;
 }
 
-const PERFORMANCE_TITLE = i18n.translate('xpack.serverlessSearch.nav.performance', {
-  defaultMessage: 'Performance',
+const MONITOR_PERFORMANCE_TITLE = i18n.translate('xpack.serverlessSearch.nav.monitorPerformance', {
+  defaultMessage: 'Monitor performance',
 });
 const ALERTS_AND_INSIGHTS_TITLE = i18n.translate(
   'xpack.serverlessSearch.nav.mngt.alertsAndInsights',
@@ -164,11 +164,11 @@ export function createNavigationTree({
           {
             children: [
               { link: 'management:index_management', breadcrumbStatus: 'hidden' },
+              { link: 'management:data_federation', breadcrumbStatus: 'hidden' },
               { link: 'management:index_lifecycle_management', breadcrumbStatus: 'hidden' },
               { link: 'management:snapshot_restore', breadcrumbStatus: 'hidden' },
               { link: 'management:transform', breadcrumbStatus: 'hidden' },
               { link: 'management:rollup_jobs', breadcrumbStatus: 'hidden' },
-              { link: 'management:data_federation', breadcrumbStatus: 'hidden' },
               { link: 'management:esql_views', breadcrumbStatus: 'hidden' },
               { link: 'management:data_quality', breadcrumbStatus: 'hidden' },
               { link: 'management:data_usage', breadcrumbStatus: 'hidden' },
@@ -248,15 +248,6 @@ export function createNavigationTree({
                 id: 'cloudLinkBilling',
                 cloudLink: 'billingAndSub',
               },
-              ...(showPerformanceLink
-                ? [
-                    {
-                      id: 'cloudLinkDeployment',
-                      cloudLink: 'deployment' as const,
-                      title: PERFORMANCE_TITLE,
-                    },
-                  ]
-                : []),
               {
                 cloudLink: 'userAndRoles',
               },
@@ -277,6 +268,15 @@ export function createNavigationTree({
             title: PROJECT_PERFORMANCE_TITLE,
             breadcrumbStatus: 'hidden',
             children: [
+              ...(showPerformanceLink
+                ? [
+                    {
+                      id: 'cloudLinkDeployment',
+                      cloudLink: 'deployment' as const,
+                      title: MONITOR_PERFORMANCE_TITLE,
+                    },
+                  ]
+                : []),
               {
                 link: 'management:queryActivity',
                 breadcrumbStatus: 'hidden',
@@ -319,6 +319,7 @@ export function createNavigationTree({
             title: AI_TITLE,
             children: [
               { link: 'management:genAiSettings', breadcrumbStatus: 'hidden' },
+              { link: 'management:aiAnonymizationSettings', breadcrumbStatus: 'hidden' },
               { link: 'management:evals', breadcrumbStatus: 'hidden' },
               ...(showAiAssistant
                 ? [

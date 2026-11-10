@@ -20,7 +20,7 @@ import type { HuntThreatIntelSupplyStatus } from '@kbn/alertzero-common';
 import {
   useHuntThreatIntelSupplyStatus,
   useRestoreHuntThreatIntelSupply,
-} from '../../../hooks/use_hunt_threat_intel_supply';
+} from '../../../hooks/hunt/use_hunt_threat_intel_supply';
 import { SettingRow } from './setting_row';
 import * as settingsI18n from '../settings_translations';
 
@@ -48,6 +48,9 @@ const rowLabel = (key: HuntThreatIntelSupplyStatus['workflows'][number]['key']):
 };
 
 const hardGateMessage = (reasonCodes: string[]): string => {
+  if (reasonCodes.includes('reports_index_unmanaged')) {
+    return settingsI18n.THREAT_INTEL_SUPPLY_HARD_GATE_UNMANAGED;
+  }
   if (reasonCodes.includes('embedding_endpoint_unavailable')) {
     return settingsI18n.THREAT_INTEL_SUPPLY_HARD_GATE_EMBEDDING;
   }

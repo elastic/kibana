@@ -86,8 +86,8 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
   const eventIds = originalEventId ? getFieldArray(originalEventId) : getFieldArray(eventId);
 
   // `useEntityStoreEuidApi` is async-hydrated (see `entity_store/public/euid_api_context.tsx`);
-  // it returns `null` until the lazy chunk loads. The `useMemo` recomputes once `euid` is available.
-  const euid = useEntityStoreEuidApi()?.euid;
+  // it returns `null` until the lazy chunk loads. The `useMemo` recomputes once `euidApi` is available.
+  const euidApi = useEntityStoreEuidApi();
 
   // Actor and target detection covers both entity-store v1 (`*.entity.id` and `*.target.entity.id`,
   // still emitted in v2 backfill) and v2 raw identity fields (`host.id`, `host.name`, …) — the same
@@ -97,8 +97,8 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
     (field) => getFieldArray(hit.flattened[field]).length > 0
   );
   const hasV2Actor = useMemo(
-    () => euid != null && hasEuidIdentity(getGraphActorEuidSourceFields(euid), hit.flattened),
-    [euid, hit.flattened]
+    () => euidApi != null && hasEuidIdentity(getGraphActorEuidSourceFields(euidApi), hit.flattened),
+    [euidApi, hit.flattened]
   );
   const hasActor = hasV1Actor || hasV2Actor;
 
@@ -106,8 +106,9 @@ export const useGraphPreview = ({ hit }: UseGraphPreviewParams): UseGraphPreview
     (field) => getFieldArray(hit.flattened[field]).length > 0
   );
   const hasV2Target = useMemo(
-    () => euid != null && hasEuidIdentity(getGraphTargetEuidSourceFields(euid), hit.flattened),
-    [euid, hit.flattened]
+    () =>
+      euidApi != null && hasEuidIdentity(getGraphTargetEuidSourceFields(euidApi), hit.flattened),
+    [euidApi, hit.flattened]
   );
   const hasTarget = hasV1Target || hasV2Target;
 

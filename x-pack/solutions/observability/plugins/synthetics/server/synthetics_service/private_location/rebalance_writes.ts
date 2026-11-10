@@ -89,6 +89,7 @@ export const toMonitorPlacements = (
       type,
       cost: getMonitorCostMib(type),
       currentAgentId: agentIdFromCondition(pkgPolicy.condition),
+      browser: type === 'browser',
     });
   }
   return [...byId.values()];

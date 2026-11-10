@@ -13,7 +13,7 @@ import { TaskPollingLifecycle, claimAvailableTasks } from './polling_lifecycle';
 import { createInitialMiddleware } from './lib/middleware';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskStoreMock } from './task_store.mock';
-import { mockLogger } from './test_utils';
+import { createEsResponseError, mockLogger } from './test_utils';
 import { taskClaimingMock } from './queries/task_claiming.mock';
 import { TaskClaiming } from './queries/task_claiming';
 import type {
@@ -1108,6 +1108,50 @@ describe('TaskPollingLifecycle', () => {
         active: true,
         reason: 'too_many_requests',
       });
+    });
+
+    test('emits an active backpressure event when a raw Elasticsearch request fails with 503', () => {
+      const errors$ = new Subject<Error>();
+      const store = taskStoreMock.create({});
+      (store as unknown as { errors$: Subject<Error> }).errors$ = errors$;
+
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        taskStore: store,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+      });
+      const events = collectBackpressureEvents(lifecycle);
+
+      errors$.next(createEsResponseError(503));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+      const active = events
+        .map((event) => (isOk(event.event) ? event.event.value : undefined))
+        .filter((snapshot) => snapshot?.active);
+      expect(active.length).toBeGreaterThan(0);
+      expect(active[active.length - 1]).toMatchObject({
+        active: true,
+        reason: 'es_unavailable',
+      });
+    });
+
+    test('stays inactive when a raw Elasticsearch request fails without ES pressure', () => {
+      const errors$ = new Subject<Error>();
+      const store = taskStoreMock.create({});
+      (store as unknown as { errors$: Subject<Error> }).errors$ = errors$;
+
+      const lifecycle = new TaskPollingLifecycle({
+        ...taskManagerOpts,
+        taskStore: store,
+        elasticsearchAndSOAvailability$: new Subject<boolean>(),
+      });
+      const events = collectBackpressureEvents(lifecycle);
+
+      errors$.next(createEsResponseError(404));
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+      const anyActive = events.some((event) => isOk(event.event) && event.event.value.active);
+      expect(anyActive).toBe(false);
     });
 
     test('stays inactive under the low-utilization poll-interval change (capacity-driven, not ES)', () => {

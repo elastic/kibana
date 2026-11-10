@@ -1,0 +1,964 @@
+{
+  "components": {
+    "schemas": {
+      "AlertsManagementErrorResponse": {
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/errorResponseBody"
+          }
+        }
+      },
+      "ProxyResource": {
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "name": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "type": {
+            "readOnly": true,
+            "type": "string"
+          }
+        }
+      },
+      "actionStatus": {
+        "properties": {
+          "isSuppressed": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "alert": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProxyResource"
+          }
+        ],
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/alertProperties"
+          }
+        }
+      },
+      "alertContext": {
+        "readOnly": true,
+        "type": "object"
+      },
+      "alertModification": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProxyResource"
+          }
+        ],
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/alertModificationProperties"
+          }
+        }
+      },
+      "alertModificationItem": {
+        "properties": {
+          "comments": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "modificationEvent": {
+            "enum": [
+              "AlertCreated",
+              "StateChange",
+              "MonitorConditionChange"
+            ],
+            "type": "string"
+          },
+          "modifiedAt": {
+            "type": "string"
+          },
+          "modifiedBy": {
+            "type": "string"
+          },
+          "newValue": {
+            "type": "string"
+          },
+          "oldValue": {
+            "type": "string"
+          }
+        }
+      },
+      "alertModificationProperties": {
+        "properties": {
+          "alertId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "modifications": {
+            "items": {
+              "$ref": "#/components/schemas/alertModificationItem"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "alertProperties": {
+        "properties": {
+          "context": {
+            "$ref": "#/components/schemas/alertContext"
+          },
+          "egressConfig": {
+            "$ref": "#/components/schemas/egressConfig"
+          },
+          "essentials": {
+            "$ref": "#/components/schemas/essentials"
+          }
+        },
+        "type": "object"
+      },
+      "alertsList": {
+        "properties": {
+          "nextLink": {
+            "type": "string"
+          },
+          "value": {
+            "items": {
+              "$ref": "#/components/schemas/alert"
+            },
+            "type": "array"
+          }
+        }
+      },
+      "alertsSummary": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ProxyResource"
+          }
+        ],
+        "properties": {
+          "properties": {
+            "$ref": "#/components/schemas/alertsSummaryGroup"
+          }
+        }
+      },
+      "alertsSummaryGroup": {
+        "properties": {
+          "groupedby": {
+            "type": "string"
+          },
+          "smartGroupsCount": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/alertsSummaryGroupItem"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "alertsSummaryGroupItem": {
+        "properties": {
+          "count": {
+            "type": "integer"
+          },
+          "groupedby": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "values": {
+            "items": {
+              "$ref": "#/components/schemas/alertsSummaryGroupItem"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "comments": {
+        "properties": {
+          "comments": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "egressConfig": {
+        "readOnly": true,
+        "type": "object"
+      },
+      "errorResponseBody": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "details": {
+            "items": {
+              "$ref": "#/components/schemas/errorResponseBody"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          },
+          "target": {
+            "type": "string"
+          }
+        }
+      },
+      "essentials": {
+        "properties": {
+          "actionStatus": {
+            "$ref": "#/components/schemas/actionStatus"
+          },
+          "alertRule": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "alertState": {
+            "enum": [
+              "New",
+              "Acknowledged",
+              "Closed"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "lastModifiedDateTime": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "lastModifiedUserName": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "monitorCondition": {
+            "enum": [
+              "Fired",
+              "Resolved"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "monitorConditionResolvedDateTime": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "monitorService": {
+            "enum": [
+              "Application Insights",
+              "ActivityLog Administrative",
+              "ActivityLog Security",
+              "ActivityLog Recommendation",
+              "ActivityLog Policy",
+              "ActivityLog Autoscale",
+              "Log Analytics",
+              "Nagios",
+              "Platform",
+              "SCOM",
+              "ServiceHealth",
+              "SmartDetector",
+              "VM Insights",
+              "Zabbix",
+              "Resource Health"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "severity": {
+            "enum": [
+              "Sev0",
+              "Sev1",
+              "Sev2",
+              "Sev3",
+              "Sev4"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "signalType": {
+            "enum": [
+              "Metric",
+              "Log",
+              "Unknown"
+            ],
+            "readOnly": true,
+            "type": "string"
+          },
+          "smartGroupId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "smartGroupingReason": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "sourceCreatedId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "startDateTime": {
+            "format": "date-time",
+            "readOnly": true,
+            "type": "string"
+          },
+          "targetResource": {
+            "type": "string"
+          },
+          "targetResourceGroup": {
+            "type": "string"
+          },
+          "targetResourceName": {
+            "type": "string"
+          },
+          "targetResourceType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Azure Alerts Management Service Resource Provider"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/{scope}/providers/Microsoft.AlertsManagement/alerts": {
+      "get": {
+        "operationId": "Alerts_GetAll",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scope",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-skip-url-encoding": true
+          },
+          {
+            "in": "query",
+            "name": "targetResource",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetResourceType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetResourceGroup",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "monitorService",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Application Insights",
+                "ActivityLog Administrative",
+                "ActivityLog Security",
+                "ActivityLog Recommendation",
+                "ActivityLog Policy",
+                "ActivityLog Autoscale",
+                "Log Analytics",
+                "Nagios",
+                "Platform",
+                "SCOM",
+                "ServiceHealth",
+                "SmartDetector",
+                "VM Insights",
+                "Zabbix",
+                "Resource Health"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "monitorCondition",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Fired",
+                "Resolved"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Sev0",
+                "Sev1",
+                "Sev2",
+                "Sev3",
+                "Sev4"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alertState",
+            "required": false,
+            "schema": {
+              "enum": [
+                "New",
+                "Acknowledged",
+                "Closed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alertRule",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "smartGroupId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeContext",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeEgressConfig",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageCount",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "required": false,
+            "schema": {
+              "enum": [
+                "name",
+                "severity",
+                "alertState",
+                "monitorCondition",
+                "targetResource",
+                "targetResourceName",
+                "targetResourceGroup",
+                "targetResourceType",
+                "startDateTime",
+                "lastModifiedDateTime"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "select",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeRange",
+            "required": false,
+            "schema": {
+              "enum": [
+                "1h",
+                "1d",
+                "7d",
+                "30d"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customTimeRange",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "enum": [
+                "2019-03-01"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alertsList"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertsManagementErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "x-ms-pageable": {
+          "nextLinkName": "nextLink"
+        }
+      }
+    },
+    "/{scope}/providers/Microsoft.AlertsManagement/alerts/{alertId}": {
+      "get": {
+        "operationId": "Alerts_GetById",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scope",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-skip-url-encoding": true
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "enum": [
+                "2019-03-01"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alert"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertsManagementErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{scope}/providers/Microsoft.AlertsManagement/alerts/{alertId}/changestate": {
+      "post": {
+        "operationId": "Alerts_ChangeState",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scope",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-skip-url-encoding": true
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "enum": [
+                "2019-03-01"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "newState",
+            "required": true,
+            "schema": {
+              "enum": [
+                "New",
+                "Acknowledged",
+                "Closed"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/comments"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alert"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertsManagementErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{scope}/providers/Microsoft.AlertsManagement/alerts/{alertId}/history": {
+      "get": {
+        "operationId": "Alerts_GetHistory",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scope",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-skip-url-encoding": true
+          },
+          {
+            "in": "path",
+            "name": "alertId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alertModification"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertsManagementErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{scope}/providers/Microsoft.AlertsManagement/alertsSummary": {
+      "get": {
+        "operationId": "Alerts_GetSummary",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scope",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "x-ms-skip-url-encoding": true
+          },
+          {
+            "in": "query",
+            "name": "groupby",
+            "required": true,
+            "schema": {
+              "enum": [
+                "severity",
+                "alertState",
+                "monitorCondition",
+                "monitorService",
+                "signalType",
+                "alertRule"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeSmartGroupsCount",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetResource",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetResourceType",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "targetResourceGroup",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "monitorService",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Application Insights",
+                "ActivityLog Administrative",
+                "ActivityLog Security",
+                "ActivityLog Recommendation",
+                "ActivityLog Policy",
+                "ActivityLog Autoscale",
+                "Log Analytics",
+                "Nagios",
+                "Platform",
+                "SCOM",
+                "ServiceHealth",
+                "SmartDetector",
+                "VM Insights",
+                "Zabbix",
+                "Resource Health"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "monitorCondition",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Fired",
+                "Resolved"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "enum": [
+                "Sev0",
+                "Sev1",
+                "Sev2",
+                "Sev3",
+                "Sev4"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alertState",
+            "required": false,
+            "schema": {
+              "enum": [
+                "New",
+                "Acknowledged",
+                "Closed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alertRule",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "timeRange",
+            "required": false,
+            "schema": {
+              "enum": [
+                "1h",
+                "1d",
+                "7d",
+                "30d"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "customTimeRange",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "api-version",
+            "required": true,
+            "schema": {
+              "enum": [
+                "2019-03-01"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/alertsSummary"
+                }
+              }
+            }
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertsManagementErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://management.azure.com"
+    }
+  ]
+}

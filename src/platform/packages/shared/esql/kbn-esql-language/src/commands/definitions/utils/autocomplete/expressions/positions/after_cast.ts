@@ -10,12 +10,12 @@
 import { i18n } from '@kbn/i18n';
 import type { ESQLInlineCast } from '@elastic/esql/types';
 import { Walker, within } from '@elastic/esql';
+import { inlineCasts as inlineCastsMapping } from '@elastic/esql-definitions/inline-cast';
 import type { SupportedDataType } from '../../../../..';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import { getFunctionDefinition } from '../../../functions';
 import type { ExpressionContext } from '../types';
 import { getExpressionType } from '../../..';
-import { inlineCastsMapping } from '../../../../generated/inline_casts_mapping';
 import { getMatchingSignatures } from '../../../signatures';
 
 /**
@@ -44,7 +44,8 @@ export async function suggestAfterCast(ctx: ExpressionContext): Promise<ISuggest
     ? getExpressionType(
         inlineCastNode.value,
         ctx.context?.columns,
-        ctx.context?.unmappedFieldsStrategy
+        ctx.context?.unmappedFieldsStrategy,
+        ctx.context?.isTimeseriesSource === true
       )
     : undefined;
 
@@ -90,8 +91,8 @@ export function getCastingTypesSuggestions(typeBeingCasted?: SupportedDataType):
       label: castingType,
       text: castingType,
       kind: 'Keyword',
-      detail: i18n.translate('kbn-esql-language.esql.autocomplete.inlineCastingTypeDescription', {
-        defaultMessage: `Cast value to ${castingType}`,
+      detail: i18n.translate('esqlLanguage.esql.autocomplete.inlineCastingTypeDescription', {
+        defaultMessage: 'Cast value to {castingType}',
         values: { castingType },
       }),
     };

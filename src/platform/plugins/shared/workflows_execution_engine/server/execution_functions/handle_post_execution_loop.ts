@@ -16,7 +16,10 @@ import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { InternalResumeWorkflowExecution } from '../types';
-import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import {
+  getWorkflowWakeTaskId,
+  type WorkflowTaskManager,
+} from '../workflow_task_manager/workflow_task_manager';
 
 export async function handlePostExecutionLoop({
   workflowRunId,
@@ -113,12 +116,17 @@ export async function handlePostExecutionLoop({
 
   if (isTerminalStatus(finalExecution.status) && workflowTaskManager) {
     // Best-effort: the retained wake task removes anything left behind once the execution is terminal.
-    await workflowTaskManager.removeTasksForExecution(workflowRunId).catch((err) => {
-      logger.warn(
-        `Failed to remove Task Manager tasks for terminal execution ${workflowRunId}: ${
-          err instanceof Error ? err.message : String(err)
-        }`
-      );
-    });
+    // It is left for its own run to delete, since removing it here races its Task Manager claim.
+    await workflowTaskManager
+      .removeTasksForExecution(workflowRunId, {
+        exceptTaskId: getWorkflowWakeTaskId(workflowRunId),
+      })
+      .catch((err) => {
+        logger.warn(
+          `Failed to remove Task Manager tasks for terminal execution ${workflowRunId}: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      });
   }
 }

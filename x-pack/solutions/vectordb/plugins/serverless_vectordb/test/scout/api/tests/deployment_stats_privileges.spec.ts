@@ -6,6 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, COMMON_HEADERS, DEPLOYMENT_STATS_API_PATH } from '../fixtures';
 
@@ -28,10 +29,9 @@ const READ_ONE_INDEX_ROLE = {
   },
 };
 
-// Suite fails on MKI: https://github.com/elastic/kibana/issues/296477
 apiTest.describe(
   'Vector DB deployment stats API privileges',
-  { tag: ['@local-serverless-vectordb'] },
+  { tag: [...tags.serverless.vectordb] },
   () => {
     apiTest.beforeAll(async ({ esClient, apiClient, samlAuth }) => {
       await esClient.indices.create({ index: READABLE_INDEX });

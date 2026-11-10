@@ -17,8 +17,6 @@ import {
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 
-import type { UiCounterMetricType } from '@kbn/analytics';
-import { METRIC_TYPE } from '@kbn/analytics';
 import type { ApplicationStart, DocLinksStart, IUiSettingsClient } from '@kbn/core/public';
 import type { EmbeddableStateTransfer, EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
@@ -96,10 +94,6 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   public static defaultProps = {
     editorParams: [],
   };
-
-  private readonly trackUiMetric:
-    | ((type: UiCounterMetricType, eventNames: string | string[], count?: number) => void)
-    | undefined;
 
   constructor(props: TypeSelectionProps) {
     super(props);
@@ -189,10 +183,6 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     searchType?: string,
     searchId?: string
   ) {
-    if (this.trackUiMetric) {
-      this.trackUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
-    }
-
     let params;
     if ('alias' in visType) {
       if (visType.alias && 'path' in visType.alias) {

@@ -22,8 +22,8 @@ export const CREATE_ASSIGN_EPISODE_ACTION_REQUEST: CreateAssignEpisodeActionBody
 export const createAssignEpisodeActionOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
-      name: 'createAssignEpisodeActionRequest',
-      summary: `Assign the alert episode to user ${SAMPLE_ASSIGNEE_UID}`,
+      name: 'createAssignAlertActionRequest',
+      summary: `Assign the alert to user ${SAMPLE_ASSIGNEE_UID}`,
       value: CREATE_ASSIGN_EPISODE_ACTION_REQUEST,
     },
     responses: {

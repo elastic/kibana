@@ -36,9 +36,9 @@ export const resolveModelStepDefinition = ({
 }) =>
   createServerStepDefinition({
     id: 'significantEvents.resolveModel',
-    label: 'Resolve Significant Events model',
+    label: 'Resolve significant events model',
     category: StepCategory.Ai,
-    description: 'Validates and resolves the model used by a Significant Events step.',
+    description: 'Validates and resolves the model used by a significant events step.',
     inputSchema: z.object({
       step: z.enum(significantEventsModelSteps),
       connector_id: z.string().max(MAX_ID_LENGTH).optional(),
@@ -51,7 +51,7 @@ export const resolveModelStepDefinition = ({
       const savedObjects = getSavedObjects();
       const uiSettings = getUiSettings();
       if (!inference || !savedObjects || !uiSettings) {
-        throw new Error('Significant Events model resolution is unavailable');
+        throw new Error('Significant events model resolution is unavailable');
       }
 
       try {

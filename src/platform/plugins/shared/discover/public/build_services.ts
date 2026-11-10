@@ -34,7 +34,6 @@ import type {
 } from '@kbn/data-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataSourceService } from '@kbn/data-source';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -157,7 +156,6 @@ export interface DiscoverServices {
   locator: DiscoverAppLocator;
   contextLocator: DiscoverContextAppLocator;
   singleDocLocator: DiscoverSingleDocLocator;
-  expressions: ExpressionsStart;
   charts: ChartsPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTagging?: SavedObjectsTaggingApi;
@@ -228,7 +226,7 @@ export const buildServices = ({
   const discoverSessionService = createDiscoverSessionService({
     apiClient: createDiscoverSessionClient(core.http),
     legacyClient: plugins.savedSearch,
-    useHttpApi: readBooleanFlag(core, SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY, false),
+    useHttpApi: readBooleanFlag(core, SESSION_HTTP_API_ENABLED_FEATURE_FLAG_KEY, true),
   });
 
   return {
@@ -249,7 +247,7 @@ export const buildServices = ({
     discoverFeatureFlags: {
       getCascadeLayoutEnabled: () =>
         readBooleanFlag(core, CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY, true),
-      getIsEsqlDefault: () => readBooleanFlag(core, IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false),
+      getIsEsqlDefault: () => readBooleanFlag(core, IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, true),
     },
     docLinks: core.docLinks,
     embeddable: plugins.embeddable,
@@ -288,7 +286,6 @@ export const buildServices = ({
     locator,
     contextLocator,
     singleDocLocator,
-    expressions: plugins.expressions,
     charts: plugins.charts,
     savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
     savedObjectsManagement: plugins.savedObjectsManagement,

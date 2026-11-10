@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import { ALL_ENTITY_TYPES } from '@kbn/entity-store/common';
 import type { EntityType } from '@kbn/entity-store/common';
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import {
   getGraphActorEuidSourceFields,
   getGraphTargetEuidSourceFields,
@@ -62,7 +62,7 @@ const readNamespace = (source: Source, fields: string[]): Source =>
  * are expanded here and resolved one value at a time.
  */
 const resolveEuidsForType = (
-  euid: EntityStoreEuid,
+  euidApi: EntityStoreEuidApi,
   type: EntityType,
   source: Source,
   namespace: Source,
@@ -74,7 +74,10 @@ const resolveEuidsForType = (
       toValues(get(source, sourceField)),
     ])
   ).flatMap((combination) => {
-    const id = euid.getEuidFromObjectForSearch(type, { ...namespace, ...combination });
+    const id = euidApi.euid.getEuidFromObjectForSearch(euidApi.getBuiltInEntityDefinition(type), {
+      ...namespace,
+      ...combination,
+    });
     return id ? [id] : [];
   });
 
@@ -86,16 +89,16 @@ const resolveEuidsForType = (
  */
 export const resolveActorAndTargets = (
   source: Source,
-  euid: EntityStoreEuid
+  euidApi: EntityStoreEuidApi
 ): ResolvedActorAndTargets => {
-  const actorFields = getGraphActorEuidSourceFields(euid);
-  const targetFields = getGraphTargetEuidSourceFields(euid);
+  const actorFields = getGraphActorEuidSourceFields(euidApi);
+  const targetFields = getGraphTargetEuidSourceFields(euidApi);
   const namespace = readNamespace(source, actorFields.all);
 
   let actorId: string | undefined;
   for (const type of ALL_ENTITY_TYPES) {
     [actorId] = resolveEuidsForType(
-      euid,
+      euidApi,
       type,
       source,
       namespace,
@@ -106,7 +109,7 @@ export const resolveActorAndTargets = (
 
   const targetIds = ALL_ENTITY_TYPES.flatMap((type) =>
     resolveEuidsForType(
-      euid,
+      euidApi,
       type,
       source,
       namespace,

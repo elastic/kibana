@@ -10,6 +10,7 @@ import {
   buildCleanInvestigationSummary,
   buildInvestigationSummary,
 } from './build_investigation_summary';
+import { dedupeCoverageGaps } from './dedupe_coverage_gaps';
 import type { CurrentRunState } from './types';
 
 const state = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
@@ -32,7 +33,15 @@ const state = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
   allEventsActionable: false,
   hasProcessBearingEvent: false,
   manualRemediation: [],
-  hosts: [{ name: 'WIN-ANALYST01', enrolled: true, agentId: 'a1', capabilities: [] }],
+  hosts: [
+    {
+      name: 'WIN-ANALYST01',
+      enrolled: true,
+      agentId: 'a1',
+      capabilities: [],
+      capabilitiesSource: 'reported',
+    },
+  ],
   processSelectors: [],
   evidence: { tier1HitCount: 0, tier2Confirmed: [{ techniqueId: 'T1078.004', rowCount: 2 }] },
   ...overrides,
@@ -67,6 +76,29 @@ describe('buildInvestigationSummary', () => {
   it('lists the full user names', () => {
     expect(buildInvestigationSummary({ state: state(), decided })).toContain(
       'Users: escalated-role, dev-user'
+    );
+  });
+
+  it('names the implicated identities and says criticality is left to the analyst', () => {
+    const summary = buildInvestigationSummary({
+      state: state({ services: ['svc-role'] }),
+      decided,
+    });
+    expect(summary).toContain('Services: svc-role');
+    expect(summary).toContain(
+      'Asset criticality: the identities above are involved in this attack. AlertZero does not change asset criticality. Review their ratings in Entity Analytics if they are out of date.'
+    );
+  });
+
+  it('adds no criticality note when nothing was confirmed', () => {
+    expect(
+      buildInvestigationSummary({ state: state({ hasConfirmedHit: false }), decided })
+    ).not.toContain('Asset criticality');
+  });
+
+  it('adds no criticality note when no user or service is implicated', () => {
+    expect(buildInvestigationSummary({ state: state({ users: [] }), decided })).not.toContain(
+      'Asset criticality'
     );
   });
 
@@ -118,12 +150,12 @@ describe('buildInvestigationSummary', () => {
 describe('buildInvestigationSummary packaging outcome', () => {
   it.each([
     [
-      'the existing-Proposal guard suppressed the mint',
-      { mintSuppression: 'existing_proposals' as const },
-      'Packaging: no new proposals, the Investigation already has proposals from an earlier run',
+      'every finding was already raised by another Investigation',
+      { converged: [{ title: 'Isolate host A' }] },
+      'Packaging: no new proposals, 1 already raised by another Investigation (Isolate host A)',
     ],
     [
-      'the existing-Proposal check failed',
+      'the Proposals look-up failed',
       { mintSuppression: 'check_failed' as const },
       'Packaging: no new proposals, existing proposals could not be checked',
     ],
@@ -137,14 +169,97 @@ describe('buildInvestigationSummary packaging outcome', () => {
     ).toContain(expected);
   });
 
-  it('does not claim actions were proposed when the mint was suppressed', () => {
+  it('does not claim actions were proposed when the look-up failed', () => {
     expect(
       buildInvestigationSummary({
         state: state(),
         decided: { dismiss: false, proposals: [] },
-        mintSuppression: 'existing_proposals',
+        mintSuppression: 'check_failed',
       })
     ).not.toContain('proposed');
+  });
+
+  it('does not claim actions were proposed when every finding converged onto an existing proposal', () => {
+    expect(
+      buildInvestigationSummary({
+        state: state(),
+        decided: { dismiss: false, proposals: [] },
+        converged: [{ title: 'Isolate host A' }, { title: 'Kill process x' }],
+      })
+    ).not.toContain('proposed');
+  });
+
+  it('counts the findings that converged beside the ones it proposed', () => {
+    const summary = buildInvestigationSummary({
+      state: state(),
+      decided: {
+        dismiss: false,
+        proposals: [{ title: 'Isolate host B' }] as never,
+      },
+      converged: [{ title: 'Isolate host A' }],
+    });
+
+    expect(summary).toContain('proposed 1 action: Isolate host B');
+    expect(summary).toContain('1 already raised by another Investigation (Isolate host A)');
+  });
+
+  describe('a rerun that finds its own live proposals', () => {
+    // The Investigation stays open with a pending or executing proposal, so the summary must not
+    // say it was dismissed: this run created nothing, but nothing was closed either.
+    it('says the findings are already open here, and not that the run was dismissed', () => {
+      const summary = buildInvestigationSummary({
+        state: state(),
+        decided: { dismiss: false, proposals: [] },
+        alreadyOpen: 2,
+      });
+
+      expect(summary).toContain(
+        'Packaging: no new proposals, 2 already open on this Investigation'
+      );
+      expect(summary).not.toContain('dismissed');
+    });
+
+    it('still says dismissed for a run that really had nothing to propose', () => {
+      expect(
+        buildInvestigationSummary({
+          state: state(),
+          decided: { dismiss: false, proposals: [] },
+        })
+      ).toContain('Packaging: dismissed, no proposals');
+    });
+
+    it('lists what converged elsewhere and what is already open here, together', () => {
+      expect(
+        buildInvestigationSummary({
+          state: state(),
+          decided: { dismiss: false, proposals: [] },
+          converged: [{ title: 'Isolate host A' }],
+          alreadyOpen: 1,
+        })
+      ).toContain(
+        'Packaging: no new proposals, 1 already raised by another Investigation (Isolate host A); 1 already open on this Investigation'
+      );
+    });
+
+    it('counts them beside the ones it proposed', () => {
+      expect(
+        buildInvestigationSummary({
+          state: state(),
+          decided: { dismiss: false, proposals: [{ title: 'Isolate host B' }] as never },
+          alreadyOpen: 1,
+        })
+      ).toContain('proposed 1 action: Isolate host B; 1 already open on this Investigation');
+    });
+  });
+
+  it('names no titles when the converged proposals have none', () => {
+    expect(
+      buildInvestigationSummary({
+        state: state(),
+        decided: { dismiss: false, proposals: [] },
+        converged: [{}, {}],
+      })
+    ).toContain('Packaging: no new proposals, 2 already raised by another Investigation');
   });
 
   it('says the Investigation was left open when a dismissal was held for a pending proposal', () => {
@@ -224,5 +339,41 @@ describe('buildCleanInvestigationSummary', () => {
     expect(buildCleanInvestigationSummary({ inputs: {} })).toContain(
       'Packaging: dismissed, no proposals'
     );
+  });
+});
+
+describe('buildCleanInvestigationSummary for a retired run', () => {
+  const unsearched = dedupeCoverageGaps([
+    { reason: 'unknown_technique_id', detail: 'T9999', technique_id: 'T9999' },
+  ]);
+
+  it('says the report retired without a full search instead of that nothing matched', () => {
+    const summary = buildCleanInvestigationSummary({ inputs: {}, retired: true, unsearched });
+    expect(summary).toContain(
+      'Outcome: no confirmed hits, but 1 gap left part of the report unsearched; the report is retired without a full search.'
+    );
+    expect(summary).toContain('Not searched: T9999 (unknown technique id)');
+    expect(summary).not.toContain('Nothing in this environment matched');
+  });
+
+  it('drops the count and the section when no gaps arrived', () => {
+    const summary = buildCleanInvestigationSummary({ inputs: {}, retired: true });
+    expect(summary).toContain(
+      'Outcome: no confirmed hits, but part of the report could not be searched; the report is retired without a full search.'
+    );
+    expect(summary).not.toContain('Not searched:');
+  });
+
+  it('keeps the whole summary inside the CE cap with 100 gaps', () => {
+    const many = dedupeCoverageGaps(
+      Array.from({ length: 100 }, (_, index) => ({
+        reason: 'unknown_technique_id',
+        detail: `T${9000 + index}`,
+        technique_id: `T${9000 + index}`,
+      }))
+    );
+    const summary = buildCleanInvestigationSummary({ inputs: {}, retired: true, unsearched: many });
+    expect(summary.length).toBeLessThanOrEqual(10_000);
+    expect(summary).toContain('at least 100 gaps');
   });
 });

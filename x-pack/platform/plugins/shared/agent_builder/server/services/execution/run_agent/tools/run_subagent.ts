@@ -14,6 +14,7 @@ import { capitalize, uniqBy } from 'lodash';
 import {
   ToolType,
   apiTargets,
+  applyAgentApprovals,
   isApiAutoApproved,
   isRoundCompleteEvent,
   internalTools,
@@ -26,6 +27,7 @@ import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_
 import { findUnknownApis, formatUnknownApis } from '@kbn/agent-builder-common/apis/known_apis';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type {
+  AgentApprovals,
   ApiTarget,
   AssistantResponse,
   AutoApprovedApi,
@@ -198,15 +200,19 @@ const formatGrantedApis = (apis: readonly AutoApprovedApi[]): string =>
 const resolveSubagentApiGrant = async ({
   requested,
   interactivity,
+  subagentApprovals,
   prompts,
   promptId,
   agentId,
+  discoveryEnabled,
 }: {
   requested: AutoApprovedApi[];
   interactivity: InteractivityConfig;
+  subagentApprovals?: AgentApprovals;
   prompts: ToolPromptManager;
   promptId: string;
   agentId: string;
+  discoveryEnabled: boolean;
 }): Promise<SubagentApiGrant> => {
   const unknownApis = findUnknownApis(requested);
   if (unknownApis.length > 0) {
@@ -214,7 +220,11 @@ const resolveSubagentApiGrant = async ({
       status: 'unknown_apis',
       message:
         `Unknown auto_approved_apis: ${formatUnknownApis(unknownApis)}. Each entry must name an ` +
-        `API that exists on its target. Use the ${internalTools.discoverApis} tool to find the identifier.`,
+        `API that exists on its target. ` +
+        (discoveryEnabled
+          ? `Use the ${internalTools.discoverApis} tool to find the identifier.`
+          : `Do not retry with another identifier unless a skill or the user gave it to you. ` +
+            `Otherwise, leave it out of auto_approved_apis.`),
     };
   }
 
@@ -232,8 +242,9 @@ const resolveSubagentApiGrant = async ({
     return settled('not_required');
   }
 
+  const coveredGrant = applyAgentApprovals({ interactivity, approvals: subagentApprovals });
   const pending = destructive.filter(
-    ({ target, api }) => !isApiAutoApproved({ interactivity, target, api })
+    ({ target, api }) => !isApiAutoApproved({ interactivity: coveredGrant, target, api })
   );
   if (pending.length === 0) {
     return settled('granted');
@@ -305,6 +316,7 @@ export const createSubagentTool = ({
   subagentTracker,
   conversationExists,
   transientOnly = false,
+  discoveryEnabled = false,
 }: {
   /** Id of the agent currently executing (the "owner") */
   ownerAgentId: string;
@@ -326,12 +338,17 @@ export const createSubagentTool = ({
    * background one reports through conversation state, neither of which that run keeps.
    */
   transientOnly?: boolean;
+  /** Whether the `discover_apis` tool is available, so errors can point the model at it. */
+  discoveryEnabled?: boolean;
 }) => {
   const orderedAllowed = orderAllowedWithSelfFirst(allowedSubagents);
   const allowedIds = orderedAllowed.map((a) => a.id) as [string, ...string[]];
   const allowedIdsSet = new Set(allowedIds);
   const inferenceFeatureIdBySubagent = new Map(
     orderedAllowed.map(({ id, inferenceFeatureId }) => [id, inferenceFeatureId])
+  );
+  const approvalsBySubagentId = new Map(
+    orderedAllowed.map((subagent) => [subagent.id, subagent.approvals])
   );
 
   const schema = z.object({
@@ -441,9 +458,11 @@ export const createSubagentTool = ({
         const grant = await resolveSubagentApiGrant({
           requested: requestedApis,
           interactivity,
+          subagentApprovals: approvalsBySubagentId.get(agent_id),
           prompts,
           promptId: `${SubAgentToolName}.${callContext.toolCallId}.auto_approved_apis`,
           agentId: subagentLabel,
+          discoveryEnabled,
         });
 
         if (grant.status === 'unknown_apis') {

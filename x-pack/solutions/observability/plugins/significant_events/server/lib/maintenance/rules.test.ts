@@ -7,7 +7,7 @@
 
 import { MAX_BULK_ITEMS, type BulkResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_ERROR_CODES } from '@kbn/alerting-v2-plugin/server';
-import { runRulesInBatches } from './rules';
+import { deleteV2Rules, runRulesInBatches } from './rules';
 
 const makeRuleIds = (count: number, prefix = 'rule'): string[] =>
   Array.from({ length: count }, (_, index) => `${prefix}-${index}`);
@@ -59,5 +59,37 @@ describe('runRulesInBatches', () => {
       failedIds: ['rule-conflict'],
       failures: [{ target: 'rule:rule-conflict', error: 'Conflict' }],
     });
+  });
+});
+
+describe('deleteV2Rules', () => {
+  it('retains deletion counts and per-rule maintenance failures across batches', async () => {
+    const ids = makeRuleIds(MAX_BULK_ITEMS + 2);
+    const rulesClient = {
+      bulkDeleteRules: jest
+        .fn()
+        .mockRejectedValueOnce(new Error('Request failed'))
+        .mockResolvedValueOnce({
+          affected_count: 1,
+          errors: [
+            {
+              id: ids[MAX_BULK_ITEMS + 1],
+              error: { code: ALERTING_ERROR_CODES.RULE_NOT_FOUND, message: 'Gone' },
+            },
+          ],
+        }),
+    };
+
+    await expect(deleteV2Rules(rulesClient, ids)).resolves.toEqual({
+      deleted: 1,
+      failedIds: ids.slice(0, MAX_BULK_ITEMS),
+      failures: ids
+        .slice(0, MAX_BULK_ITEMS)
+        .map((id) => ({ target: `rule:${id}`, error: 'Request failed' })),
+    });
+    expect(rulesClient.bulkDeleteRules.mock.calls).toEqual([
+      [{ ids: ids.slice(0, MAX_BULK_ITEMS) }],
+      [{ ids: ids.slice(MAX_BULK_ITEMS) }],
+    ]);
   });
 });

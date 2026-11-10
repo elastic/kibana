@@ -17,6 +17,7 @@ import type {
   AgentExecutionMode,
   AutoApprovedApi,
   ChatEvent,
+  EventActor,
   ConversationWriteSource,
   ExecutionStatus,
   InteractivityConfig,
@@ -40,7 +41,6 @@ import type {
   RenderersService,
   ConversationEventTypesService,
   ToolManager,
-  TodoStateManager,
   IFilesystemService,
   IBashService,
   ConversationTemplatesService,
@@ -59,11 +59,17 @@ import type { AgentRegistry } from './registry';
 export interface ConversationClient {
   /** True if a conversation with the given id exists in the current scope. */
   exists(conversationId: string): Promise<boolean>;
-  /** Validates, serializes, and merges `updates` into the conversation metadata. */
+  /**
+   * Validates, serializes, and merges `updates` into the conversation metadata. Recorded as a
+   * `metadata_updated` activity event attributed via `options.activity` (default: current user).
+   */
   patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>,
-    options: { source: ConversationWriteSource }
+    options: {
+      source: ConversationWriteSource;
+      activity?: { actor?: EventActor; execution_id?: string };
+    }
   ): Promise<{ changedFields: string[] }>;
 }
 
@@ -160,16 +166,21 @@ export interface SubAgentExecution {
 export interface ExperimentalFeatures {
   /** Whether the skills feature is enabled */
   skills: boolean;
-  /** Whether AI index instructions are enabled by Context Engine and Agent Builder settings */
+  /** Whether AI index instructions are enabled by the Context Engine setting */
   aiIndices: boolean;
+  /** Whether SML is available, which follows the Agent Builder experimental setting */
+  sml: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
-  /** Whether the todo list tool and task-management prompt are enabled */
-  todos: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
   /** Whether the `discover_apis` tool is enabled. */
   apiDiscovery: boolean;
+  /**
+   * Whether dynamically loaded tools (skill and attachment-bound tools) are exposed through the
+   * `execute_dynamic_tool` meta-tool instead of being added to the native tool list.
+   */
+  dynamicTools: boolean;
 }
 
 /**
@@ -229,6 +240,10 @@ export interface AgentHandlerContext {
    * Id of the space associated with the request
    */
   spaceId: string;
+  /**
+   * Service account the execution runs as; see `GetAgentOptions.runAs`.
+   */
+  runAs?: string;
   /**
    * Information about the deployment (environment, version, license...) the agent runs in.
    */
@@ -315,10 +330,6 @@ export interface AgentHandlerContext {
    * Attachment state manager to manage conversation attachments during execution.
    */
   attachmentStateManager: AttachmentStateManager;
-  /**
-   * Manages the active todo list for this conversation execution.
-   */
-  todoStateManager: TodoStateManager;
   /**
    * Used to manage interruptions.
    */

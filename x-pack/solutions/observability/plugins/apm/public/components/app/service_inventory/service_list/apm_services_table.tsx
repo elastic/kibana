@@ -146,6 +146,9 @@ export function getServiceColumns({
                       path: { serviceName },
                       query: {
                         ...query,
+                        // Badge counts ignore page kuery; clear it so click-through matches.
+                        kuery: '',
+                        rangeTo: 'now',
                         alertStatus: ALERT_STATUS_ACTIVE,
                       },
                     })}

@@ -6,7 +6,15 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { investigationNotificationDestinationSchema } from '../../../common';
+import {
+  investigationNotificationDestinationSchema,
+  MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
+} from '../../../common';
+
+// Keep operator guidance bounded independently of trigger evidence in the final agent message.
+export const MAX_PROMPT_TEMPLATE_LENGTH = MAX_AUTOMATION_INSTRUCTIONS_LENGTH;
+
+export const promptTemplateSchema = z.string().max(MAX_PROMPT_TEMPLATE_LENGTH);
 
 export const automationCompletionInputSchema = z.object({
   action: z.enum(['create_investigation', 'post_to_slack', 'silent']).optional(),

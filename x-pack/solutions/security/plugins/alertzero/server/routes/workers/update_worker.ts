@@ -19,6 +19,7 @@ import {
 } from '@kbn/alertzero-common';
 import { ALERTZERO_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import { workerName } from '../../../common/worker_names';
+import { resolveHuntUniverse } from '../hunt/resolve_hunt_universe';
 import type { RouteDependencies } from '../register_routes';
 import type { WorkerEnableBlockedReason } from '../../services/workers/workers_service';
 import { withAlertZeroEnabled } from '../with_alertzero_enabled';
@@ -28,25 +29,15 @@ const WORKER_ENABLE_BLOCKED_MESSAGES: Record<
   WorkerEnableBlockedReason,
   (displayName: string) => string
 > = {
-  alertAnalysisWorkflowDisabled: () =>
-    i18n.translate('xpack.alertzero.alertTriageAlertAnalysisWorkflowDisabledErrorMessage', {
-      defaultMessage:
-        'Alert Triage requires the Alert Analysis workflow, which is disabled in this deployment. Enable it before turning on the Alert Triage Worker.',
-    }),
-  alertAnalysisRuntimeDisabled: () =>
-    i18n.translate('xpack.alertzero.alertTriageAlertAnalysisRuntimeDisabledErrorMessage', {
-      defaultMessage:
-        'Alert Triage requires alert analysis to be turned on for this space. Go to Alert analysis settings, then turn on the Alert Triage Worker.',
-    }),
-  ruleAttachmentUnavailable: () =>
-    i18n.translate('xpack.alertzero.alertTriageRuleAttachmentUnavailableErrorMessage', {
-      defaultMessage:
-        'Alert Triage cannot be turned on because detection rules cannot be connected to it right now. Make sure Security is available in this space and try again.',
-    }),
   huntSupplyPrerequisitesUnmet: () =>
     i18n.translate('xpack.alertzero.huntSupplyPrerequisitesUnmetErrorMessage', {
       defaultMessage:
         'Hunt Watch needs Machine Learning embedding support for threat intel report supply. Finish ML and threat intel setup, then try again.',
+    }),
+  huntSupplyReportsIndexUnmanaged: () =>
+    i18n.translate('xpack.alertzero.huntSupplyReportsIndexUnmanagedErrorMessage', {
+      defaultMessage:
+        'The threat reports index (.kibana-threat-reports) exists without its template. Back up any reports you want to keep (see the Elasticsearch reindex API at https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-reindex), then delete the index and restart Kibana to recreate it, then try turning on Hunt Watch again.',
     }),
   huntSupplyNotInstalled: () =>
     i18n.translate('xpack.alertzero.huntSupplyNotInstalledErrorMessage', {
@@ -132,7 +123,8 @@ export const registerUpdateWorkerRoute = ({
             workerId,
             request.body,
             getSpaceId(request),
-            request
+            request,
+            () => resolveHuntUniverse(context, logger)
           );
 
           switch (result.outcome) {

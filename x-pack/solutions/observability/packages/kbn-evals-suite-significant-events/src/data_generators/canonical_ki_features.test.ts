@@ -14,7 +14,7 @@ const getFeatureById = (features: Feature[], id: string) =>
 describe('canonical_ki_features', () => {
   it('creates deterministic entity/dependency/infra KI features from expected_ground_truth', () => {
     const features = canonicalKIFeaturesFromExpectedGroundTruth({
-      streamName: 'logs',
+      sourceId: 'logs',
       scenarioId: 'payment-unreachable',
       expectedGroundTruth:
         'entities=[frontend, checkout, payment], deps=[frontend->checkout (gRPC), checkout->payment (gRPC)], infra=[kubernetes]',
@@ -38,7 +38,7 @@ describe('canonical_ki_features', () => {
 
   it('filters ellipsis and "multiple services" items', () => {
     const features = canonicalKIFeaturesFromExpectedGroundTruth({
-      streamName: 'logs',
+      sourceId: 'logs',
       scenarioId: 'healthy-baseline',
       expectedGroundTruth:
         'entities=[frontend, ..., multiple services], deps=[frontend->checkout], infra=[kubernetes]',
@@ -50,7 +50,7 @@ describe('canonical_ki_features', () => {
 
   it('skips malformed deps without ->', () => {
     const features = canonicalKIFeaturesFromExpectedGroundTruth({
-      streamName: 'logs',
+      sourceId: 'logs',
       scenarioId: 'healthy-baseline',
       expectedGroundTruth: 'deps=[frontend checkout, checkout->payment]',
     });
@@ -63,7 +63,7 @@ describe('canonical_ki_features', () => {
 
   it('drops text within parentheses from ids', () => {
     const features = canonicalKIFeaturesFromExpectedGroundTruth({
-      streamName: 'logs',
+      sourceId: 'logs',
       scenarioId: 'scenario',
       expectedGroundTruth: 'entities=[payment (nodejs)], deps=[frontend->checkout (gRPC)]',
     });

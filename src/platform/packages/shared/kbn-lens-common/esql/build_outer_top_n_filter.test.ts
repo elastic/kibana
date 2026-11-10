@@ -21,7 +21,7 @@ describe('buildOuterTopNFilter', () => {
         size: 5,
       })
     ).toBe(
-      'WHERE geo.src IN (FROM kibana_sample_data_logs | WHERE timestamp >= ?_tstart AND timestamp <= ?_tend | STATS AVG(bytes) BY geo.src | SORT `AVG(bytes)` DESC | LIMIT 5 | KEEP geo.src)'
+      'WHERE geo.src IN (FROM kibana_sample_data_logs | WHERE timestamp >= ?_tstart AND timestamp <= ?_tend | WHERE geo.src IS NOT NULL | STATS AVG(bytes) BY geo.src | SORT `AVG(bytes)` DESC | LIMIT 5 | KEEP geo.src)'
     );
   });
 
@@ -35,7 +35,7 @@ describe('buildOuterTopNFilter', () => {
         size: 3,
       })
     ).toBe(
-      'WHERE category.keyword IN (FROM ft_ecommerce | STATS COUNT(*) BY category.keyword | SORT category.keyword ASC | LIMIT 3 | KEEP category.keyword)'
+      'WHERE category.keyword IN (FROM ft_ecommerce | WHERE category.keyword IS NOT NULL | STATS COUNT(*) BY category.keyword | SORT category.keyword ASC | LIMIT 3 | KEEP category.keyword)'
     );
   });
 
@@ -49,7 +49,7 @@ describe('buildOuterTopNFilter', () => {
         size: 4,
       })
     ).toBe(
-      'WHERE agent.keyword IN (FROM kibana_sample_data_logs | STATS rank_agent_keyword = AVG(bytes) BY agent.keyword | SORT rank_agent_keyword ASC | LIMIT 4 | KEEP agent.keyword)'
+      'WHERE agent.keyword IN (FROM kibana_sample_data_logs | WHERE agent.keyword IS NOT NULL | STATS rank_agent_keyword = AVG(bytes) BY agent.keyword | SORT rank_agent_keyword ASC | LIMIT 4 | KEEP agent.keyword)'
     );
   });
 });

@@ -126,6 +126,30 @@ describe('entity_resolution', () => {
       }
     });
 
+    it('includes the identity namespace when the row projects it', async () => {
+      mockExecuteEsql.mockResolvedValueOnce({
+        columns: [
+          { name: 'entity.id', type: 'keyword' },
+          { name: 'entity.name', type: 'keyword' },
+          { name: 'entity.EngineMetadata.Type', type: 'keyword' },
+          { name: 'entity.namespace', type: 'keyword' },
+        ],
+        values: [['user:jsmith@okta', 'jsmith@okta', 'user', 'okta']],
+      });
+
+      const result = await resolveSingleEntity({
+        esClient,
+        spaceId: 'default',
+        entityId: 'user:jsmith@okta',
+        entityType: 'user',
+      });
+
+      expect(result.status).toBe('resolved');
+      if (result.status === 'resolved') {
+        expect(result.identity.namespace).toBe('okta');
+      }
+    });
+
     it('returns ambiguous with candidate ids when more than one row matches', async () => {
       mockExecuteEsql
         .mockResolvedValueOnce(empty)

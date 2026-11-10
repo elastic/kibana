@@ -6,9 +6,8 @@
  */
 
 import {
-  MAX_ASSESSMENT_NOTE_LENGTH,
-  MAX_SUMMARY_LENGTH,
-  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  MAX_TEXT_LENGTH,
+  significantEventInvestigationSchema,
   type SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import { attachInvestigationToEvent } from './attach_investigation';
@@ -18,7 +17,7 @@ const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEven
   '@timestamp': '2026-01-01T00:00:00.000Z',
   event_id: 'agent-event-1',
   status: 'active',
-  stream_names: ['logs.test'],
+  source_ids: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
   severity: 'medium',
@@ -69,9 +68,9 @@ describe('attachInvestigationToEvent', () => {
 
   it('attaches an investigation to a legacy event with longer narratives', async () => {
     const existing = createEvent({
-      symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1),
-      summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1),
-      assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1),
+      symptom_hypothesis: 'x'.repeat(MAX_TEXT_LENGTH + 1),
+      summary: 'x'.repeat(MAX_TEXT_LENGTH + 1),
+      assessment_note: 'x'.repeat(MAX_TEXT_LENGTH + 1),
     });
     const { client, alertEventsClient } = createClients(existing);
 
@@ -87,30 +86,33 @@ describe('attachInvestigationToEvent', () => {
     expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
   });
 
-  it('replaces an existing entry with a completed one, preserving started_at', async () => {
-    const pending = createInvestigation();
-    const existing = createEvent({ investigations: [pending] });
-    const { client, alertEventsClient } = createClients(existing);
+  it.each(['completed', 'failed'] as const)(
+    'preserves the %s outcome when replacing a running entry',
+    async (outcome) => {
+      const pending = createInvestigation();
+      const existing = createEvent({ investigations: [pending] });
+      const { client, alertEventsClient } = createClients(existing);
 
-    const terminal = createInvestigation({
-      completed_at: '2026-01-01T02:00:00.000Z',
-    });
-    const result = await attachInvestigationToEvent({
-      eventSearchClient: client as never,
-      alertEventsClient: alertEventsClient as never,
-      eventId: 'agent-event-1',
-      investigation: terminal,
-    });
+      const terminal = significantEventInvestigationSchema.parse({
+        ...createInvestigation({ completed_at: '2026-01-01T02:00:00.000Z' }),
+        outcome,
+      });
+      const result = await attachInvestigationToEvent({
+        eventSearchClient: client as never,
+        alertEventsClient: alertEventsClient as never,
+        eventId: 'agent-event-1',
+        investigation: terminal,
+      });
 
-    expect(result.updated).toBe(1);
+      expect(result.updated).toBe(1);
 
-    const written = getWritten(alertEventsClient);
+      const written = getWritten(alertEventsClient);
 
-    // Only one entry — replaced, not duplicated
-    expect(written.investigations).toHaveLength(1);
-    expect(written.investigations![0].started_at).toBe(pending.started_at);
-    expect(written.investigations![0].completed_at).toBe('2026-01-01T02:00:00.000Z');
-  });
+      expect(written.investigations).toEqual([
+        { ...pending, completed_at: '2026-01-01T02:00:00.000Z', outcome },
+      ]);
+    }
+  );
 
   it('replaces by workflow_execution_id: different executions produce two entries', async () => {
     const first = createInvestigation({

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import React, { useState } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -41,6 +42,7 @@ export const LocationAgentDetails = ({
   agentPolicyId,
   locationLabel,
   locationMonitorCount,
+  missingCompleteAgent = false,
 }: {
   stats?: LocationAgentStats;
   loading: boolean;
@@ -48,6 +50,8 @@ export const LocationAgentDetails = ({
   locationLabel: string;
   /** Authoritative monitor count for the location (matches the table's "Monitors" column). */
   locationMonitorCount: number;
+  /** Browser monitors here cannot run: no enrolled agent is elastic-agent-complete. */
+  missingCompleteAgent?: boolean;
 }) => {
   const { basePath } = useSyntheticsSettingsContext();
   const { canReadAgentPolicies, canReadAgents } = useFleetPermissions();
@@ -84,6 +88,9 @@ export const LocationAgentDetails = ({
   const clusterUsedMib = agents.reduce((sum, a) => sum + (a.usedMemoryMib ?? 0), 0);
 
   const warnings: React.ReactNode[] = [];
+  if (missingCompleteAgent) {
+    warnings.push(BROWSER_NEEDS_COMPLETE_AGENT);
+  }
   if (unhealthyAgents.length > 0) {
     warnings.push(UNHEALTHY_AGENTS_WARNING(unhealthyAgents.length));
   }
@@ -288,7 +295,7 @@ export const LocationAgentDetails = ({
             <EuiFlexItem grow={false}>
               <EuiLink
                 data-test-subj="syntheticsManageAgentsInFleetLink"
-                href={fleetAgentsHref(`policy_id:"${agentPolicyId}"`)}
+                href={fleetAgentsHref(buildPolicyBaseIdWithFallbackKuery(agentPolicyId))}
                 target="_blank"
                 external
               >
@@ -624,6 +631,14 @@ const DISTRIBUTION_HELP_SHARDED = i18n.translate(
 const NO_AGENTS_LABEL = i18n.translate('xpack.synthetics.privateLocation.agentDetails.noAgents', {
   defaultMessage: 'No agents enrolled for this location yet.',
 });
+
+const BROWSER_NEEDS_COMPLETE_AGENT = i18n.translate(
+  'xpack.synthetics.privateLocation.agentDetails.browserNeedsCompleteAgent',
+  {
+    defaultMessage:
+      'Browser monitors on this location are not running. They only run on the elastic-agent-complete image, and no enrolled agent is on that image.',
+  }
+);
 
 const AGENTS_TABLE_CAPTION = i18n.translate(
   'xpack.synthetics.privateLocation.agentDetails.tableCaption',

@@ -52,9 +52,7 @@ interface BulkSummary {
  * - alias (has resolved_to): alias row pointing at the target.
  * - plain: self-row.
  *
- * Resolution targets that are not themselves in the entity store have no row;
- * Phase 2 ES|QL recovers their `resolution_target_id` via
- * `COALESCE(resolution_target_id, entity_id)` after the LOOKUP JOIN.
+ * Resolution targets get their own self-row from `buildTargetRows`.
  */
 const buildLookupRowsForEntity = (
   source: EntityStoreLookupSource,
@@ -89,6 +87,37 @@ const buildLookupRowsForEntity = (
       '@timestamp': now,
     },
   ];
+};
+
+/**
+ * One self-row per resolution target referenced by `aliasRows`.
+ *
+ * Phase 2 pages through targets by ID range and keeps joined alerts that have a lookup row, so
+ * every target needs one: without it, the target's own alerts would drop out of its group, and
+ * entities in no group whose ID falls inside the range would be indistinguishable from targets.
+ * Targets come before aliases in each bulk request, so within a page an alias row replaces a
+ * target row for the same entity. Across pages either can land last, which only matters for an
+ * entity that is both an alias and a target, i.e. a resolution chain.
+ */
+const buildTargetRows = (
+  aliasRows: LookupDocument[],
+  { calculationRunId, now }: { calculationRunId: string; now: string }
+): LookupDocument[] => {
+  const targetIds = new Set<string>();
+  for (const row of aliasRows) {
+    if (row.relationship_type === RESOLUTION_RELATIONSHIP_TYPE && row.resolution_target_id) {
+      targetIds.add(row.resolution_target_id);
+    }
+  }
+
+  return [...targetIds].map((targetId) => ({
+    entity_id: targetId,
+    resolution_target_id: targetId,
+    propagation_target_id: null,
+    relationship_type: SELF_RELATIONSHIP_TYPE,
+    calculation_run_id: calculationRunId,
+    '@timestamp': now,
+  }));
 };
 
 /** Emits ES bulk action/document pairs keyed by `entity_id`. */
@@ -237,9 +266,10 @@ export const buildLookupIndex = async ({
     previousSearchAfter = searchAfter;
     pagesProcessed += 1;
 
-    const docs = entities.flatMap((entity: EntityStoreLookupSource) =>
+    const aliasDocs = entities.flatMap((entity: EntityStoreLookupSource) =>
       buildLookupRowsForEntity(entity, { calculationRunId, now })
     );
+    const docs = [...buildTargetRows(aliasDocs, { calculationRunId, now }), ...aliasDocs];
     const operations = toBulkIndexOperations(docs, lookupIndex);
     if (operations.length > 0) {
       bulkBatches += 1;

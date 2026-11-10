@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers, type StartServicesAccessor } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, type PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -72,14 +72,10 @@ const createReadAccess = async () => {
     })
   );
 
-  const getStartServices = jest.fn(async () => [
-    { savedObjects: { getScopedClient: jest.fn().mockReturnValue({}) } },
-  ]) as unknown as StartServicesAccessor;
   const access = await createPolicyAccessContext(
     endpointAppContextService,
     { request, spaceId: SPACE_ID },
-    ENDPOINT_POLICY_READ_REQUIRED_AUTHZ,
-    getStartServices
+    ENDPOINT_POLICY_READ_REQUIRED_AUTHZ
   );
   const soClient = access.fleet.getSoClient();
   const getById = jest.spyOn(access.fleet.packagePolicy, 'get');

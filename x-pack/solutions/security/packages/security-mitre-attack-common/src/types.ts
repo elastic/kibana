@@ -48,7 +48,12 @@ export interface MitreEntityBuckets {
   subtechniques: MitreSubtechnique[];
 }
 
-/** Full result of a list operation: buckets plus the resolved framework / version. */
+/**
+ * Full result of a list operation: buckets plus the resolved framework / version.
+ * A collection always holds exactly one framework. Consumers that need several
+ * frameworks (for example ATT&CK Enterprise and ATLAS) call list() once per framework
+ * rather than receiving a merged collection, so each framework keeps its own version.
+ */
 export interface MitreEntityCollection extends MitreEntityBuckets {
   framework: MitreFramework;
   /**

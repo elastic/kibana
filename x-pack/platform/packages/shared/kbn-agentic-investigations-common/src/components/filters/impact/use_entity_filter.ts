@@ -5,29 +5,34 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import type { ImpactFilterable } from './entity_ids';
-import { impactPills } from './impact_pills';
+import { useCallback, useState } from 'react';
+import type { ImpactPill, PagedImpactPills } from './impact_pills';
 
-/**
- * Selected Impact pill for a queue page. `items` are every loaded row that feeds the pills.
- * A poll or a collapsed section can drop the selected entity from them, so the selection
- * clears itself once its pill is gone.
- */
-export const useEntityFilter = (items: readonly ImpactFilterable[]) => {
-  const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
-  const availableEntityIds = useMemo(
-    () => new Set(impactPills(items).map((pill) => pill.entityId)),
-    [items]
+/** Selected Impact pill; kept as `selectedPill` while its entity sits past the loaded pages. */
+export const useEntityFilter = ({ pills, total }: Pick<PagedImpactPills, 'pills' | 'total'>) => {
+  const [selected, setSelected] = useState<ImpactPill | null>(null);
+
+  const setEntityFilter = useCallback(
+    (entityId: string | null) =>
+      setSelected((current) => {
+        if (entityId === null) return null;
+        return pills.find((pill) => pill.entityId === entityId) ?? current;
+      }),
+    [pills]
   );
-  const entityFilter =
-    selectedEntityId !== null && availableEntityIds.has(selectedEntityId) ? selectedEntityId : null;
 
-  useEffect(() => {
-    if (selectedEntityId !== entityFilter) {
-      setSelectedEntityId(entityFilter);
-    }
-  }, [selectedEntityId, entityFilter]);
+  const isQueueEmpty = pills.length === 0 && total === 0;
+  if (isQueueEmpty && selected !== null) {
+    setSelected(null);
+  }
+  const selectedPill =
+    isQueueEmpty || selected === null
+      ? null
+      : pills.find((pill) => pill.entityId === selected.entityId) ?? selected;
 
-  return { entityFilter, setEntityFilter: setSelectedEntityId };
+  return {
+    entityFilter: selectedPill?.entityId ?? null,
+    selectedPill,
+    setEntityFilter,
+  };
 };

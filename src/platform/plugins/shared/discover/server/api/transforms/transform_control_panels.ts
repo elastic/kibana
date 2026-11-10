@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ZodError } from '@kbn/zod';
+import { prettifyError, ZodError } from '@kbn/zod';
 import { transformType } from '@kbn/embeddable-plugin/server';
-import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { discoverSessionApiControlPanelSchema } from '@kbn/as-code-discover-schema';
 import {
   getControlOrder,
@@ -20,30 +19,45 @@ import type { DiscoverSessionApiControlPanels, DiscoverSessionWarning } from '..
 
 const createDroppedControlPanelsWarning = (
   tabId: string,
+  controlGroupJson: string,
   reason: string
 ): DiscoverSessionWarning => ({
   type: 'dropped_property',
   tab_id: tabId,
   key: 'control_panels',
-  message: `Unable to transform control panels. Error: ${reason}`,
+  value: controlGroupJson,
+  message: reason,
 });
+
+const getDroppedPanelDetails = (panel: unknown) => {
+  if (!isRecord(panel)) {
+    return {};
+  }
+
+  const { type: panelType, ...panelConfig } = panel;
+
+  if (typeof panelType !== 'string') {
+    return { item_config: panel };
+  }
+
+  return { item_type: panelType, item_config: panelConfig };
+};
 
 const createDroppedPanelWarning = (
   tabId: string,
   panelId: string,
+  panel: unknown,
   error: unknown
 ): DiscoverSessionWarning => {
-  let message = error instanceof Error ? error.message : 'Unknown error';
-
-  if (error instanceof ZodError) {
-    message = stringifyZodError(error);
-  }
+  const reason = error instanceof Error ? error.message : 'Unknown error';
 
   return {
-    type: 'dropped_panel',
+    type: 'dropped_item',
     tab_id: tabId,
-    panel_id: panelId,
-    message: `Unable to transform control panel [${panelId}]. Error: ${message}`,
+    key: 'control_panels',
+    item_id: panelId,
+    ...getDroppedPanelDetails(panel),
+    message: error instanceof ZodError ? prettifyError(error) : reason,
   };
 };
 
@@ -81,7 +95,7 @@ export const transformControlPanelsOut = (
   } catch {
     return {
       panels: undefined,
-      warnings: [createDroppedControlPanelsWarning(tabId, 'controlGroupJson is not valid JSON')],
+      warnings: [createDroppedControlPanelsWarning(tabId, controlGroupJson, 'Invalid JSON.')],
     };
   }
 
@@ -89,7 +103,7 @@ export const transformControlPanelsOut = (
     return {
       panels: undefined,
       warnings: [
-        createDroppedControlPanelsWarning(tabId, 'controlGroupJson must be a JSON object'),
+        createDroppedControlPanelsWarning(tabId, controlGroupJson, 'Expected a JSON object.'),
       ],
     };
   }
@@ -105,7 +119,7 @@ export const transformControlPanelsOut = (
     try {
       panels.push(parseControlPanelEntry(id, panel));
     } catch (error) {
-      warnings.push(createDroppedPanelWarning(tabId, id, error));
+      warnings.push(createDroppedPanelWarning(tabId, id, panel, error));
     }
   }
 

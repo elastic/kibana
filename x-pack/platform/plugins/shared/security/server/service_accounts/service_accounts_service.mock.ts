@@ -26,18 +26,26 @@ export const serviceAccountsServiceMock = {
         assumable: true,
         createdBy: { type: 'user' as const, username: 'mock-user-id' },
       }),
+      getSummary: jest.fn().mockResolvedValue({
+        id: 'mock-service-account-id',
+        name: 'mock-service-account-name',
+        enabled: true,
+        assumable: true,
+      }),
       createFakeRequest: jest.fn().mockImplementation(async () =>
         httpServerMock.createFakeKibanaRequest({
           headers: { authorization: 'Bearer essu_mock-service-account-token' },
         })
       ),
       reauthenticateFakeRequest: jest.fn().mockResolvedValue(null),
+      refreshFakeRequestBeforeUse: jest.fn().mockResolvedValue(null),
       releaseFakeRequest: jest.fn(),
       getFakeRequestPrincipal: jest.fn().mockReturnValue(null),
       delete: jest.fn().mockResolvedValue({ warnings: [] }),
     },
     management: {
       listWorkloads: jest.fn().mockResolvedValue([]),
+      countBoundWorkloads: jest.fn().mockResolvedValue(new Map()),
       delete: jest.fn().mockResolvedValue({ deleted: true, warnings: [] }),
     },
     workloads: {
@@ -56,6 +64,7 @@ export const serviceAccountsServiceMock = {
       }),
       unbindWorkload: jest.fn().mockResolvedValue(true),
       getBinding: jest.fn().mockResolvedValue(null),
+      getServiceAccountSummary: jest.fn().mockResolvedValue(null),
       withScopedRequest: jest.fn().mockImplementation(async (_pluginId, _params, fn) =>
         fn(
           httpServerMock.createFakeKibanaRequest({

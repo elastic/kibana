@@ -30,7 +30,6 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../task
 import { toggleRuleOffAndOn, visitRuleAlerts } from '../../tasks/isolate';
 
 import { login } from '../../tasks/login';
-import { disableNewFlyout } from '../../tasks/kibana_advanced_settings';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
@@ -46,7 +45,6 @@ describe(
     let ruleId: string;
     let ruleName: string;
     beforeEach(() => {
-      disableNewFlyout();
       login();
     });
 

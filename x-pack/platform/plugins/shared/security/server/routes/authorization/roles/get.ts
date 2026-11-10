@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { AuthzDisabled } from '@kbn/core-security-server';
 
+import { queryRoleByName } from './lib';
 import { roleResponseSchema } from './model';
 import type { RouteDefinitionParams } from '../..';
 import { API_VERSIONS } from '../../../../common/constants';
@@ -21,6 +22,7 @@ export function defineGetRolesRoutes({
   getFeatures,
   subFeaturePrivilegeIterator,
   logger,
+  buildFlavor,
 }: RouteDefinitionParams) {
   router.versioned
     .get({
@@ -102,9 +104,9 @@ export function defineGetRolesRoutes({
 
           const [features, elasticsearchRoles] = await Promise.all([
             getFeatures(),
-            await esClient.asCurrentUser.security.getRole({
-              name: request.params.name,
-            }),
+            buildFlavor === 'serverless'
+              ? queryRoleByName(esClient.asCurrentUser, request.params.name)
+              : esClient.asCurrentUser.security.getRole({ name: request.params.name }),
           ]);
 
           const elasticsearchRole = elasticsearchRoles[request.params.name];

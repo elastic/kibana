@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import {
   groupingModeSchema,
   MATCHER_CONTEXT_FIELDS,
@@ -65,6 +67,7 @@ const alertKeyGuard: Record<keyof ActionPolicyWorkflowPayloadAlert, true> = {
   space_id: true,
   group_hash: true,
   alert_id: true,
+  alert_url: true,
   alert_status: true,
   severity: true,
   data: true,
@@ -422,17 +425,23 @@ describe('schema_to_skill_docs', () => {
    * real types rather than rendered as `unknown`.
    */
   describe('schemas extracted into `definitions` / `$defs`', () => {
-    const allDocs = () => [
+    const schemaDocs = () => [
       generateRuleSchemaDoc(),
       generateRuleOperationsDoc(),
       generateActionPolicySchemaDoc(),
       generateActionPolicyOperationsDoc(),
-      generateActionPolicyWorkflowPayloadDoc(),
     ];
 
+    const allDocs = () => [...schemaDocs(), generateActionPolicyWorkflowPayloadDoc()];
+
     it('never leaves an unresolved pointer or type in any doc', () => {
-      for (const doc of allDocs()) {
+      // The payload doc intentionally embeds the raw JSON Schema and a YAML
+      // example that contain `$ref`, so only check schema-derived docs for
+      // unresolved pointers.
+      for (const doc of schemaDocs()) {
         expect(doc).not.toContain('$ref');
+      }
+      for (const doc of allDocs()) {
         expect(doc).not.toContain('| unknown');
         expect(doc).not.toContain('unknown[]');
       }
@@ -489,7 +498,7 @@ describe('schema_to_skill_docs', () => {
         '| `artifacts` | object[] | optional | Optional objects attached to the rule, such as a runbook or a dashboard. Each item has `id`, `type`, and `data`. The shape of `data` depends on `type`. For example, a `runbook` uses `content` and a `dashboard` uses `dashboard_id`. Known types are validated against that shape. Unknown types are stored when `id`, `type`, and `data` are present. An empty array is rejected: omit `artifacts` on create, or send `null` on PATCH to clear. (min items: 1, max items: 100) |'
       );
       expect(generateActionPolicySchemaDoc()).toContain(
-        '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
+        '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. Each one can appear at most once. (min items: 1, max items: 10) |'
       );
     });
 
@@ -505,7 +514,7 @@ describe('schema_to_skill_docs', () => {
     it('keeps the referencing field description when the definition also has one', () => {
       const doc = generateActionPolicySchemaDoc();
       expect(doc).toContain(
-        '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
+        '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. Each one can appear at most once. (min items: 1, max items: 10) |'
       );
       expect(doc).not.toContain('An action policy destination configuration.');
     });
@@ -839,20 +848,21 @@ describe('schema_to_skill_docs', () => {
     it('documents every ActionPolicyWorkflowPayload top-level field', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       for (const field of Object.keys(payloadKeyGuard)) {
-        expect(doc).toContain(`\`${field}\``);
+        expect(doc).toContain(`"${field}"`);
       }
     });
 
     it('documents every ActionPolicyWorkflowPayloadAlert field', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       for (const field of Object.keys(alertKeyGuard)) {
-        expect(doc).toContain(`\`${field}\``);
+        expect(doc).toContain(`"${field}"`);
       }
     });
 
-    it('documents rule_id as nullable, since external-alert episodes have no rule', () => {
+    it('documents rule_id as nullable, since external alerts have no rule', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
-      expect(doc).toContain('| `rule_id` | string \\| null | required |');
+      expect(doc).toContain('"rule_id"');
+      expect(doc).toMatch(/"type":\s*\[\s*"string",\s*"null"\s*\]/);
     });
 
     it('documents the inputs.payload Liquid access pattern', () => {
@@ -871,9 +881,59 @@ describe('schema_to_skill_docs', () => {
       expect(doc).not.toContain('## Liquid Templates');
       expect(doc).not.toContain('./references/');
     });
+
+    it('renders the example message in the standard alert layout', () => {
+      const doc = generateActionPolicyWorkflowPayloadDoc();
+      const [, exampleYaml = ''] = doc.match(/## Example[\s\S]*?```yaml\n([\s\S]*?)\n```/) ?? [];
+      const { steps } = parse(exampleYaml) as { steps: Array<{ with: { message: string } }> };
+
+      // Same options as the templating engine of the workflows execution engine.
+      const engine = createWorkflowLiquidEngine({ strictFilters: true, strictVariables: false });
+      const lastEventTimestamp = '2026-10-30T13:42:00.000Z';
+      const alertUrl = (alertId: string): string =>
+        `https://kibana.example.com/app/observability/alerting/alerts/${alertId}`;
+      const payload = {
+        alerts: [
+          {
+            alert_id: 'alert-1',
+            alert_url: alertUrl('alert-1'),
+            alert_status: 'active',
+            severity: 'high',
+            rule_id: 'rule-1',
+            last_event_timestamp: lastEventTimestamp,
+            data: { host: { name: 'prod-1' }, error_count: 12 },
+          },
+          {
+            alert_id: 'alert-2',
+            alert_url: alertUrl('alert-2'),
+            alert_status: 'recovering',
+            rule_id: null,
+            last_event_timestamp: lastEventTimestamp,
+          },
+        ],
+        rules: { 'rule-1': { name: 'High error count' } },
+      };
+
+      expect(engine.parseAndRenderSync(steps[0].with.message, { inputs: { payload } })).toBe(
+        [
+          '**2 alerts**',
+          '',
+          '**High error count** — Active · High\\',
+          `Last event 2026-10-30 13:42 UTC · [View in app](${alertUrl('alert-1')})\\`,
+          'Alert id: alert-1\\',
+          'Host: prod-1 · Errors: 12',
+          '',
+          '**Unnamed rule** — Recovering\\',
+          `Last event 2026-10-30 13:42 UTC · [View in app](${alertUrl('alert-2')})\\`,
+          'Alert id: alert-2\\',
+          'Host: unknown · Errors: n/a',
+          '',
+        ].join('\n')
+      );
+    });
   });
 
-  describe('Alerting v2 agent builder start contract', () => {
+  describe('Universal alerting agent builder start contract', () => {
     it.each([
       ['zodToJsonSchema via generateRuleSchemaDoc', generateRuleSchemaDoc],
       ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],

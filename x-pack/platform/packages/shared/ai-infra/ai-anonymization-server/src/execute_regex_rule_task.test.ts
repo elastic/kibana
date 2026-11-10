@@ -6,7 +6,8 @@
  */
 
 import type { RegexAnonymizationRule } from '@kbn/ai-anonymization-common';
-import { executeRegexRulesTask } from './execute_regex_rule_task';
+import { DEFAULT_BUILTIN_REGEX_RULES } from '@kbn/ai-anonymization-common';
+import { executeRegexRulesTask, usesNativeFallback } from './execute_regex_rule_task';
 
 describe('executeRegexRulesTask', () => {
   const emailRule: RegexAnonymizationRule = {
@@ -151,6 +152,147 @@ describe('executeRegexRulesTask', () => {
     result.forEach((match) => {
       expect(match.matchValue.length).toBeGreaterThan(0);
       expect(match.matchValue).toMatch(/a+/); // Should be sequences of 'a's
+    });
+  });
+
+  it('throws, naming the rule, when a pattern does not compile instead of silently skipping it', () => {
+    const brokenRule: RegexAnonymizationRule = {
+      type: 'RegExp',
+      enabled: true,
+      id: 'custom-1',
+      name: 'Broken pattern',
+      entityClass: 'MISC',
+      pattern: '(unclosed',
+    };
+
+    expect(() =>
+      executeRegexRulesTask({ rules: [emailRule, brokenRule], records: [{ content: 'a@b.com' }] })
+    ).toThrow(/"Broken pattern" has an invalid regular expression/);
+  });
+
+  describe('custom rules run on RE2', () => {
+    const custom = (pattern: string): RegexAnonymizationRule => ({
+      type: 'RegExp',
+      enabled: true,
+      id: 'custom-1',
+      name: 'Custom',
+      entityClass: 'MISC',
+      pattern,
+    });
+    const matchesOf = (pattern: string, content: string) =>
+      executeRegexRulesTask({ rules: [custom(pattern)], records: [{ content }] }).map(
+        ({ matchValue }) => matchValue
+      );
+
+    // The QA M6 input: with native RegExp this pattern backtracks for far longer than the worker timeout.
+    it('finishes in linear time on a catastrophic pattern and input', () => {
+      const start = performance.now();
+      const result = matchesOf('(a+)+$', `${'a'.repeat(5000)}!`);
+
+      expect(performance.now() - start).toBeLessThan(1000);
+      expect(result).toEqual([]);
+    });
+
+    it.each([
+      ['a Unicode property class', '\\p{L}+@x', 'héllo@x', ['héllo@x']],
+      ['an inline flag', '(?i)secret', 'a SeCrEt b', ['SeCrEt']],
+      ['an emoji as one character', '.', '😀', ['😀']],
+      ['a character code', '\\x{00e9}', 'café', ['é']],
+    ])('supports %s', (_, pattern, content, expected) => {
+      expect(matchesOf(pattern, content)).toEqual(expected);
+    });
+
+    // Rules saved before custom patterns moved to RE2 must keep masking: RE2 cannot compile these,
+    // so they fall back to the engine they always ran on instead of failing or being skipped.
+    it.each([
+      ['lookahead', 'foo(?=bar)', 'foobar foobaz', ['foo']],
+      ['lookbehind', '(?<=@)\\w+', 'a@bob c', ['bob']],
+      ['a backreference', '(a)\\1', 'aa ab', ['aa']],
+      ['a \\u escape', '\\u00e9', 'café', ['é']],
+    ])(
+      'keeps a rule that only the previous engine supports working: %s',
+      (_, pattern, content, expected) => {
+        expect(matchesOf(pattern, content)).toEqual(expected);
+      }
+    );
+
+    it('still rejects a pattern that is invalid on both engines, naming the rule', () => {
+      expect(() => matchesOf('(unclosed', 'x')).toThrow(
+        /"Custom" has an invalid regular expression/
+      );
+    });
+
+    // The `builtIn` flag lives in a stored setting that the API can write: only a rule identical to a
+    // shipped one may use the native engine, or a flagged `(a+)+$` would stall the worker again.
+    it('runs a rule that merely claims to be built in on RE2 as well', () => {
+      const claimsBuiltIn = { ...custom('(a+)+$'), id: 'builtin-made-up', builtIn: true };
+      const start = performance.now();
+
+      const result = executeRegexRulesTask({
+        rules: [claimsBuiltIn],
+        records: [{ content: `${'a'.repeat(5000)}!` }],
+      });
+
+      expect(performance.now() - start).toBeLessThan(1000);
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('built-in account rule', () => {
+    const accountRule: RegexAnonymizationRule = {
+      ...(DEFAULT_BUILTIN_REGEX_RULES.find(
+        ({ id }) => id === 'builtin-account-login'
+      ) as RegexAnonymizationRule),
+      enabled: true,
+    };
+    const content =
+      'user="QACORP\\\\jdoe" SORT count DESC\\n| LIMIT 20 in C:\\WINDOWS\\System32 as CORP\\a.mehta';
+
+    // Only the name is masked, never `DOMAIN\\` or the backslashes: the restored value must be exact
+    // in any escaping layer (structured model output, tool arguments, JSON in JSON).
+    it('masks the account name only, not the domain, escape sequences or path segments', () => {
+      const matches = executeRegexRulesTask({ rules: [accountRule], records: [{ content }] });
+
+      expect(matches.map(({ matchValue }) => matchValue)).toEqual(['jdoe', 'a.mehta']);
+      expect(matches.some(({ matchValue }) => matchValue.includes('\\'))).toBe(false);
+    });
+
+    it('does not filter a custom rule that reuses the same pattern', () => {
+      const { id, builtIn, ...custom } = accountRule;
+      const matches = executeRegexRulesTask({ rules: [custom], records: [{ content }] });
+
+      expect(matches.map(({ matchValue }) => matchValue)).toContain('WINDOWS\\System32');
+    });
+  });
+
+  describe('usesNativeFallback', () => {
+    const custom = (pattern: string, overrides: Partial<RegexAnonymizationRule> = {}) =>
+      ({
+        type: 'RegExp',
+        enabled: true,
+        id: 'custom-1',
+        entityClass: 'MISC',
+        pattern,
+        ...overrides,
+      } as RegexAnonymizationRule);
+
+    it('is false for every shipped built-in rule and for a pattern RE2 can compile', () => {
+      DEFAULT_BUILTIN_REGEX_RULES.forEach((rule) => expect(usesNativeFallback(rule)).toBe(false));
+      expect(usesNativeFallback(custom('EMP-\\d+'))).toBe(false);
+    });
+
+    it.each([
+      ['lookahead', 'foo(?=bar)'],
+      ['a backreference', '(a)\\1'],
+      ['a \\u escape', '\\u00e9'],
+    ])('is true for a custom rule using %s', (_, pattern) => {
+      expect(usesNativeFallback(custom(pattern))).toBe(true);
+    });
+
+    it('is true for a rule that only claims to be built in', () => {
+      expect(
+        usesNativeFallback(custom('foo(?=bar)', { id: 'builtin-made-up', builtIn: true }))
+      ).toBe(true);
     });
   });
 });
