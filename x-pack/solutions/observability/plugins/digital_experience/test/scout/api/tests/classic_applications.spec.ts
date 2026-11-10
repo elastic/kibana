@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout-oblt/api';
 import type { ApplicationsResponse } from '../../../../common/types/applications';
 import { findApplication, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
+import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 const { APPLICATIONS_IN_TIME_RANGE_PATH, COMMON_HEADERS, SERVICE_NAME } = testData;
 
@@ -17,6 +18,14 @@ apiTest.describe(
   'Digital Experience applications API with Classic RUM data',
   { tag: DIGITAL_EXPERIENCE_WITH_UX_TAGS },
   () => {
+    apiTest.beforeAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_ON_OVERRIDE);
+    });
+
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_RESET_OVERRIDE);
+    });
+
     apiTest('returns the metrics of a Classic RUM application', async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 

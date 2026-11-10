@@ -7,7 +7,7 @@
 
 import { test } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { FLAG_OFF_OVERRIDE, getGlobalFlagOverride } from '../../feature_flag';
+import { FLAG_OFF_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { DIGITAL_EXPERIENCE_DISABLED_WITH_UX_TAGS } from '../../tags';
 
 test.describe(
@@ -22,8 +22,8 @@ test.describe(
       await browserAuth.loginAsViewer();
     });
 
-    test.afterAll(async ({ apiServices, config }) => {
-      await apiServices.core.settings(getGlobalFlagOverride(config));
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 
     test('keeps the legacy User Experience navigation', async ({ page, kbnUrl }) => {

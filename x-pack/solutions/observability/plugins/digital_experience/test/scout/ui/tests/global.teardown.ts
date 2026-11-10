@@ -22,6 +22,7 @@ globalTeardownHook(
   }
 );
 
+// Each spec resets the flag it set; this covers a spec that stopped before its `afterAll`.
 globalTeardownHook(
   'Restore the Digital Experience feature flag',
   { tag: DIGITAL_EXPERIENCE_DISABLED_TAGS },

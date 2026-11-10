@@ -19,11 +19,3 @@ export const FLAG_OFF_OVERRIDE = {
 export const FLAG_RESET_OVERRIDE = {
   'feature_flags.overrides': { 'digitalExperience.enabled': null },
 } as const;
-
-/**
- * The override the global setup leaves in place, for a flag-off spec to restore: on locally,
- * where the flag-on specs run, and none on Cloud, where they don't.
- */
-export const getGlobalFlagOverride = ({ isCloud }: { isCloud: boolean }) => {
-  return isCloud ? FLAG_RESET_OVERRIDE : FLAG_ON_OVERRIDE;
-};

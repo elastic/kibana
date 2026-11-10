@@ -8,16 +8,7 @@
 import { globalSetupHook } from '@kbn/scout-oblt';
 import { ES_ARCHIVES } from '../../common/fixtures/constants';
 import { ingestOtelRumData } from '../../common/fixtures/otel_rum_data';
-import { FLAG_ON_OVERRIDE } from '../../feature_flag';
 import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
-
-globalSetupHook(
-  'Turn the Digital Experience feature flag on',
-  { tag: DIGITAL_EXPERIENCE_TAGS },
-  async ({ apiServices }) => {
-    await apiServices.core.settings(FLAG_ON_OVERRIDE);
-  }
-);
 
 globalSetupHook(
   'Ingest RUM test data',

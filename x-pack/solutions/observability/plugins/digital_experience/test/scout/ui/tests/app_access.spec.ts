@@ -8,10 +8,19 @@
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
+import { FLAG_ON_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 
 test.describe('Digital Experience access', { tag: DIGITAL_EXPERIENCE_WITH_UX_TAGS }, () => {
+  test.beforeAll(async ({ apiServices }) => {
+    await apiServices.core.settings(FLAG_ON_OVERRIDE);
+  });
+
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole(testData.DIGITAL_EXPERIENCE_READ_ROLE);
+  });
+
+  test.afterAll(async ({ apiServices }) => {
+    await apiServices.core.settings(FLAG_RESET_OVERRIDE);
   });
 
   test('opens the app for a user with the read privilege', async ({

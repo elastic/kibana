@@ -7,7 +7,7 @@
 
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
-import { FLAG_OFF_OVERRIDE, getGlobalFlagOverride } from '../../feature_flag';
+import { FLAG_OFF_OVERRIDE, FLAG_RESET_OVERRIDE } from '../../feature_flag';
 import { DIGITAL_EXPERIENCE_DISABLED_TAGS } from '../../tags';
 
 const TIME_RANGE = 'start=2026-01-01T00:00:00.000Z&end=2026-01-02T00:00:00.000Z';
@@ -29,8 +29,8 @@ apiTest.describe(
       await apiServices.core.settings(FLAG_OFF_OVERRIDE);
     });
 
-    apiTest.afterAll(async ({ apiServices, config }) => {
-      await apiServices.core.settings(getGlobalFlagOverride(config));
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_RESET_OVERRIDE);
     });
 
     for (const { method, path } of ROUTES) {

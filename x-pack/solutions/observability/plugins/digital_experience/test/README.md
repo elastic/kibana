@@ -2,12 +2,14 @@
 
 The plugin is behind the `digitalExperience.enabled` feature flag (default `false`). All specs run on the default Scout server, and switch the flag at runtime with `apiServices.core.settings` (`feature_flags.overrides`):
 
-| Specs | Flag | How | Deployments (`tags.ts`) |
-| --- | --- | --- | --- |
-| Flag-on (most specs) | on | each `global.setup.ts` turns it on | local stateful and serverless Observability Complete |
-| Flag-off (`feature_disabled`, `app_access_disabled`, `navigation_disabled`) | off | the spec turns it off in `beforeAll`, and back to the global setup's value in `afterAll` | every Observability deployment, Cloud included |
+Each spec sets the flag it needs in `beforeAll` and removes the override in `afterAll`, so it doesn't depend on the order specs run in:
 
-Specs in a config run one at a time, so a flag-off spec doesn't affect the flag-on specs. Each `global.teardown.ts` removes the override.
+| Specs | Flag | Deployments (`tags.ts`) |
+| --- | --- | --- |
+| Flag-on (most specs) | `FLAG_ON_OVERRIDE` | local stateful and serverless Observability Complete |
+| Flag-off (`feature_disabled`, `app_access_disabled`, `navigation_disabled`) | `FLAG_OFF_OVERRIDE` | every Observability deployment, Cloud included |
+
+Specs in a config run one at a time, so one spec's flag doesn't leak into another. Each `global.teardown.ts` also removes the override, in case a spec stopped before its `afterAll`.
 
 Specs that need the ux plugin (Classic RUM dashboard, legacy navigation) run on stateful only, because serverless disables it.
 
