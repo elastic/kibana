@@ -293,7 +293,42 @@ const collectTemplateRoots = (request: DeclarativeRequest): string[] =>
     (templatePath) => templatePath.split('.')[0]
   );
 
+const assertTemplateMarkersAreValid = (actionName: string, value: unknown): void => {
+  if (typeof value === 'string') {
+    let malformedPlaceholder = false;
+    const remaining = value.replace(TEMPLATE_PATTERN, (match, _path: string, offset: number) => {
+      if (value[offset - 1] === '{' || value[offset + match.length] === '}') {
+        malformedPlaceholder = true;
+      }
+      return '';
+    });
+    if (malformedPlaceholder || remaining.includes('{{') || remaining.includes('}}')) {
+      throw new DeclarativeConnectorSpecError(
+        `Action "${actionName}" contains a malformed template placeholder.`
+      );
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      assertTemplateMarkersAreValid(actionName, item);
+    }
+    return;
+  }
+  if (value !== null && typeof value === 'object') {
+    for (const [key, nested] of Object.entries(value)) {
+      if (key.includes('{{') || key.includes('}}')) {
+        throw new DeclarativeConnectorSpecError(
+          `Action "${actionName}" request keys cannot contain template markers.`
+        );
+      }
+      assertTemplateMarkersAreValid(actionName, nested);
+    }
+  }
+};
+
 const assertTemplateRoots = (actionName: string, request: DeclarativeRequest): void => {
+  assertTemplateMarkersAreValid(actionName, requestTemplateValue(request));
   const templatePaths = collectTemplatePaths(requestTemplateValue(request));
   const roots = collectTemplateRoots(request);
   for (const [index, templatePath] of templatePaths.entries()) {

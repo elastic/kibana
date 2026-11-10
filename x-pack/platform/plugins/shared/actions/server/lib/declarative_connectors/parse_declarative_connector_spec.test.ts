@@ -362,4 +362,39 @@ describe('parseDeclarativeConnectorSpec', () => {
     expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/foo\.bar/);
     expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/Action "ping"/);
   });
+
+  it.each([
+    '{{ input.name',
+    'input.name }}',
+    '{{ input.name }',
+    '{{ secrets.api-key }}',
+    '{{{ input.name }}}',
+  ])('rejects malformed template markers in request values: %s', (value) => {
+    const raw = minimalSpec(`      method: GET
+      url: "https://example.com/${value}"`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/malformed template placeholder/);
+  });
+
+  it('rejects template markers in nested request object keys', () => {
+    const raw = minimalSpec(`      method: POST
+      url: https://example.com
+      body:
+        "{{ input.name }}": value`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(
+      /request keys cannot contain template markers/
+    );
+  });
+
+  it('rejects template markers in query keys', () => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com
+      query:
+        "{{ secrets.apiKey }}": value`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(
+      /request keys cannot contain template markers/
+    );
+  });
 });
