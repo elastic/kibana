@@ -72,7 +72,7 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
       align-items: center;
       box-sizing: border-box;
       inline-size: 100%;
-      padding: 12px ${euiTheme.size.base};
+      padding: ${euiTheme.size.base};
       border: 0;
       background: transparent;
       color: inherit;
@@ -92,7 +92,7 @@ export const GroupedAttachmentRow = memo<GroupedAttachmentRowProps>(
 
       &:hover,
       &:focus-visible {
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
         text-decoration: none;
 
         .groupedAttachmentRowAffordance {

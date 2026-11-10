@@ -128,8 +128,9 @@ const CompactRow = ({
     box-sizing: border-box;
     inline-size: 100%;
     margin: 0;
-    padding: ${euiTheme.size.s} ${euiTheme.size.m};
-    ${isNested && `padding-inline-start: calc(${euiTheme.size.m} * 2 + ${euiTheme.size.l});`}
+    padding: ${euiTheme.size.base};
+    ${isNested &&
+    `padding-inline-start: calc(${euiTheme.size.base} + ${euiTheme.size.m} + ${euiTheme.size.l});`}
     border: none;
     background: transparent;
     color: inherit;
@@ -140,7 +141,7 @@ const CompactRow = ({
     css`
       cursor: pointer;
       &:hover {
-        background: ${euiTheme.colors.backgroundBaseSubdued};
+        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
         text-decoration: none;
       }
       &:focus-visible {

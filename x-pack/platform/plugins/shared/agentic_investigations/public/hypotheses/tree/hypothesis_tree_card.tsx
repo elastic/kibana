@@ -92,6 +92,12 @@ export const HypothesisTreeCard = ({
         hasBorder
         hasShadow={false}
         paddingSize="m"
+        css={css`
+          &:hover,
+          &:focus-visible {
+            background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+          }
+        `}
         onClick={() => setIsOpen(true)}
         aria-label={openHypothesisTreeAriaLabel(description)}
         data-test-subj="investigationHypothesisTreeButton"
