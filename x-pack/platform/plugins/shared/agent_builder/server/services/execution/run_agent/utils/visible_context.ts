@@ -115,7 +115,8 @@ export const renderVisibleContext = async (
   const view = buildContextView({ conversation, run, conversationTimestamp }, deps);
   const notices = noticeRendererFor(conversation);
   // the answer agent has no tools, so it should not get dynamic tool definitions
-  const dynamicToolDefinitions = phase === 'research' ? run.compactionSummary?.dynamic_tools : undefined;
+  const dynamicToolDefinitions =
+    phase === 'research' ? run.compactionSummary?.dynamic_tools : undefined;
   const history = await prepareMessages({
     conversation,
     roundResultTransformer: view.historyTransformer,
