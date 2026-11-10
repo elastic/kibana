@@ -77,8 +77,14 @@ const enhanceQueryForAlerts = (nlQuery: string, isCount?: boolean): string => {
 const isEsqlResult = (result: ToolHandlerResult): result is ToolHandlerResult<EsqlResults> =>
   result.type === ToolResultType.esqlResults;
 
+// Quoted values, quoted identifiers and comments, so that a word inside them is not read as a command.
+const QUOTED_OR_COMMENT =
+  /"""[\s\S]*?"""|"(?:\\.|[^"\\])*"|`(?:[^`]|``)*`|\/\*[\s\S]*?\*\/|\/\/[^\n]*/g;
+
 // Aggregated results (STATS) have small rows and the user may have asked for a number of them, so they are not cut.
-const isAggregation = (query: string): boolean => /\bSTATS\b/i.test(query);
+// Only a `| STATS` command counts: the word can also appear in a value, a name or a comment.
+const isAggregation = (query: string): boolean =>
+  /\|\s*STATS\b/i.test(query.replace(QUOTED_OR_COMMENT, ' '));
 
 const buildNote = (message: string): ToolHandlerResult => ({
   tool_result_id: getToolResultId(),

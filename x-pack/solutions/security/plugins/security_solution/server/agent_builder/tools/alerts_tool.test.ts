@@ -275,6 +275,44 @@ describe('alertsTool', () => {
         expect(results).toEqual([grouped]);
       });
 
+      // Why: the word STATS can appear in a value, a comment or a quoted name. Only a `| STATS` command
+      // makes a result aggregated. Treating a raw query as aggregated would skip the cap.
+      it.each([
+        ['a quoted value', 'FROM alerts | WHERE host.name == "stats-prod" | LIMIT 100'],
+        ['a triple-quoted value', 'FROM alerts | WHERE message == """a STATS b""" | LIMIT 100'],
+        ['a comment', 'FROM alerts // STATS later\n| LIMIT 100'],
+        ['a quoted identifier', 'FROM alerts | KEEP `STATS` | LIMIT 100'],
+      ])('still caps a raw result when STATS only appears in %s', async (_label, query) => {
+        const total = MAX_ALERT_ROWS + 35;
+        (runSearchTool as jest.Mock).mockResolvedValue([buildEsqlResult(total, query)]);
+
+        const { results } = await callHandler();
+
+        expect((results[0].data as { values: unknown[][] }).values).toHaveLength(MAX_ALERT_ROWS);
+        expect(results[1]).toMatchObject({
+          data: { message: expect.stringContaining(`${MAX_ALERT_ROWS} of at least ${total}`) },
+        });
+      });
+
+      it.each([
+        [
+          'after a quoted pipe',
+          'FROM alerts | WHERE message == "a | b" | STATS count = COUNT(*) BY host.name | LIMIT 40',
+        ],
+        ['on its own line', 'FROM alerts\n| STATS count = COUNT(*) BY host.name\n| LIMIT 40'],
+        ['in lower case', 'from alerts | stats count = count(*) by host.name | limit 40'],
+      ])(
+        'treats a real STATS command %s as aggregated and does not cut it',
+        async (_label, query) => {
+          const grouped = buildEsqlResult(MAX_ALERT_ROWS + 15, query, 'host.name');
+          (runSearchTool as jest.Mock).mockResolvedValue([grouped]);
+
+          const { results } = await callHandler();
+
+          expect(results).toEqual([grouped]);
+        }
+      );
+
       it('cuts the probe row and says that more rows exist when the generator hit its default limit', async () => {
         (runSearchTool as jest.Mock).mockResolvedValue([buildEsqlResult(MAX_ALERT_ROWS + 1)]);
 
