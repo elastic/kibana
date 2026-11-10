@@ -89,7 +89,7 @@ flowchart TD
 
 1. **An entry with an inclusive operator on a column that the query does not output.** The column has no values, or has the ES|QL type `null` (`EVAL x = NULL`). An entry with an inclusive operator on it (`is`, `is one of`, `matches`, `exists`) can never match. Therefore an item with such entry would exclude nothing, so we drop it and record the reason (see [The rule execution log message](#the-rule-execution-log-message)).
 
-2. **An entry with an exclusive operator on a column that the query does not output.** An entry with an exclusive operator on it (`is not`, `is not one of`, `does not match`, `does not exist`) is true for every row, as it is in the DSL filter. We exclude these entries. If no entry is left after this, then the item is true for every row and excludes every row of the rule. In this case the rule execution stops here, returns no alerts and succeeds with a warning that says so (see [Fields that exist nowhere](#fields-that-exist-nowhere)).
+2. **An entry with an exclusive operator on a column that the query does not output.** An entry with an exclusive operator on it (`is not`, `is not one of`, `does not match`, `does not exist`) is true for every row, as it is in the DSL filter. We exclude these entries. If no entry is left after this, then the item is true for every row and excludes every row of the rule. In this case the item is written as `| WHERE false`, the rule creates no alerts, and the rule shows a warning that says so (see [Fields that exist nowhere](#fields-that-exist-nowhere)).
 
 3. **A value that cannot be written** for the declared type, or an entry with no declared type, fails the rule (see [Value rules](#value-rules)). We check the entries that are left after the previous step. The API rejects both when the item is written. This only happens for an item that was stored without those checks.
 
@@ -271,7 +271,18 @@ The exception flyouts (add and edit) let the user choose what an item applies to
   - **Value.** An "is one of" entry takes several values, and "exists" takes none.
 
 - **Checking the values.** The form runs the same checks as the API, which live in the exceptions package that the browser and the server share. A value that does not fit the column type is shown under the Value field while the user types, with the value in the message, and the save button stays disabled until the user fixes it. An entry that is not complete yet, without a field or a column type, shows no error and is not saved.
-- **Closing alerts.** The options to close alerts work as for any other item. "Close this alert" closes the alert by its id. "Close all alerts that match this exception" finds the alerts by the entries, which an alert stores in its `_source` even though the alerts index does not map a computed column. The close request gives each computed column as a runtime field that reads the value from `_source`, and the runtime type follows the `column_type` of the entry, because neither the alerts index nor the source indices know the column. A `date` or `date_nanos` column is a `date` runtime field, and the entry is tested as a range from its value to itself. A value that names a unit (`2026-09-30`) then covers the unit, as it does at the end of the query. Two cases cannot be matched exactly: a `date_nanos` value with nanoseconds, because the runtime field keeps milliseconds, and an `unsigned_long` above 2^53, because the alert stores the rounded number. The flyout shows its warning that the exception uses runtime or non-ECS fields.
+- **Closing alerts.** The options to close alerts work as for any other item. "Close this alert" closes the alert by its id. "Close all alerts that match this exception" finds the alerts by the entries, which an alert stores in its `_source` even though the alerts index does not map a computed column. The close request gives each computed column as a runtime field that reads the value from `_source`, and the runtime type follows the `column_type` of the entry, because neither the alerts index nor the source indices know the column.
+
+  Dates need one more step. A date in an exception can name a unit, such as `2026-09-30` for the whole day, but a runtime field matches a date only at the exact instant. A `date` or `date_nanos` column is therefore read as a `date` runtime field. The entry is tested as a range from its value to itself. The range covers the whole unit, as the stage does at the end of the query.
+
+  Bulk close has these limits:
+
+  - A `date_nanos` value with a fraction of a second also matches the alerts with other nanoseconds in the same millisecond, because the runtime field keeps milliseconds.
+  - An integer above 2^53 on a `long` or `unsigned_long` column is compared with the rounded number that the alert stores.
+  - It does not compare the declared type with the type that the query outputs.
+  - An item whose entries all have an exclusive operator on columns that the query does not output closes every open alert of the rule, as the stage excludes every row.
+
+  The flyout shows its warning that the exception uses runtime or non-ECS fields.
 - **In the list of exceptions.** The card of an item that applies to computed columns has a "Computed columns" badge, with a tooltip that says that the item excludes rows by the columns that an ES|QL rule query computes and only applies to ES|QL rules.
 
 ## Types supported at the end of the query

@@ -40,6 +40,7 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
+import { isEsqlOutputColumnsItem } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
 import type {
@@ -140,13 +141,17 @@ export const prepareExceptionItemsForBulkClose = (
 ): ExceptionListItemSchema[] => {
   return exceptionItems.map((item: ExceptionListItemSchema) => {
     if (item.entries !== undefined) {
+      // The `event.*` fields of the source are copied to `kibana.alert.original_event.*` in an alert. A computed column of an
+      // ES|QL rule is stored in the alert under its own name, even when that name starts with `event.`.
+      const isComputedItem = isEsqlOutputColumnsItem(item);
       const newEntries = item.entries.map((itemEntry: Entry | EntryNested) => {
         const entry = omit(itemEntry, 'id') as Entry | EntryNested;
         return {
           ...entry,
-          field: entry.field.startsWith('event.')
-            ? entry.field.replace(/^event./, `${ALERT_ORIGINAL_EVENT}.`)
-            : entry.field,
+          field:
+            !isComputedItem && entry.field.startsWith('event.')
+              ? entry.field.replace(/^event./, `${ALERT_ORIGINAL_EVENT}.`)
+              : entry.field,
         };
       });
       return {
