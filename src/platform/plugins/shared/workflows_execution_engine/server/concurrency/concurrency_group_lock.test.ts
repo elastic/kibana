@@ -92,4 +92,59 @@ describe('withConcurrencyGroupLock', () => {
 
     expect(withLock).toHaveBeenCalledTimes(1);
   });
+
+  describe('when acquisition fails', () => {
+    const failingLock = (failures: number): ConcurrencyGroupLock => {
+      let attempts = 0;
+      return {
+        async withLock(_lockId, callback) {
+          attempts += 1;
+          if (attempts <= failures) {
+            throw new LockAcquisitionError('held');
+          }
+          return callback();
+        },
+      };
+    };
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('runs the callback when a later attempt acquires the lock', async () => {
+      jest.useFakeTimers();
+      const lock = failingLock(1);
+
+      const pending = withConcurrencyGroupLock(lock, 'default', 'group-a', async () => 'admitted');
+      await jest.advanceTimersByTimeAsync(25);
+
+      await expect(pending).resolves.toBe('admitted');
+    });
+
+    it('stops waiting at the end of the lock wait budget', async () => {
+      jest.useFakeTimers();
+      const lock = failingLock(Number.POSITIVE_INFINITY);
+
+      const pending = withConcurrencyGroupLock(lock, 'default', 'group-a', async () => 'admitted');
+      const assertion = expect(pending).rejects.toBeInstanceOf(LockAcquisitionError);
+      await jest.advanceTimersByTimeAsync(91_000);
+
+      await assertion;
+    });
+
+    it('does not retry an error that is not a lock acquisition failure', async () => {
+      let attempts = 0;
+      const lock: ConcurrencyGroupLock = {
+        async withLock() {
+          attempts += 1;
+          throw new Error('elasticsearch unavailable');
+        },
+      };
+
+      await expect(
+        withConcurrencyGroupLock(lock, 'default', 'group-a', async () => 'admitted')
+      ).rejects.toThrow('elasticsearch unavailable');
+      expect(attempts).toBe(1);
+    });
+  });
 });
