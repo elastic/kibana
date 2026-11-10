@@ -25,6 +25,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./synthetics_api_security'));
+    loadTestFile(require.resolve('./run_test_manually_managed_locations'));
     loadTestFile(require.resolve('./synthetics_enablement'));
     loadTestFile(require.resolve('./add_monitor'));
     loadTestFile(require.resolve('./add_monitor_project'));
