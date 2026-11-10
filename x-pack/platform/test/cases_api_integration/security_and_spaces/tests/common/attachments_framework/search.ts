@@ -27,7 +27,10 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
 
   const searchCaseIds = async (search: string, searchFields: string[]): Promise<string[]> => {
-    const { cases } = await searchCases({ supertest, body: { search, searchFields } });
+    const { cases } = await searchCases({
+      supertest,
+      body: { search, searchFields, owner: ['securitySolutionFixture', 'securitySolution'] },
+    });
     return cases.map(({ id }) => id);
   };
 
