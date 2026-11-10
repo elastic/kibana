@@ -49,8 +49,24 @@ test.describe(
       await serviceMapPage.closeOptionsPanelIfOpen();
     });
 
-    test.afterAll(async ({ apiServices }) => {
+    test.afterAll(async ({ apiServices, esClient }) => {
       await removeServiceMapGroupingOverride(apiServices);
+      // Targeted cleanup so suite-owned docs do not linger for later sequential suites.
+      // Do not call apmSynthtraceEsClient.clean() — that would wipe shared opbeans fixtures.
+      try {
+        await esClient.deleteByQuery({
+          index: 'traces-apm*,metrics-apm*,logs-apm*',
+          query: {
+            terms: {
+              'service.name': [SERVICE_MAP_A11Y_BUSY, SERVICE_MAP_A11Y_QUIET],
+            },
+          },
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      } catch {
+        // Continue teardown even if cleanup fails
+      }
     });
 
     test('axe stays clean and metrics are named for screen readers', async ({

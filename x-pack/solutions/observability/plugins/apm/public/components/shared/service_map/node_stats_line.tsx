@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { ServiceMapServiceStats } from '@kbn/apm-types';
 import type { AggregatedServiceMapStats } from '../../../../common/service_map';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
-import { formatCompactRate, getFailureLevel, useFailureColor } from './failure_ring';
+import { formatCompactRate, getFailureLevel } from './failure_ring';
 import { textHaloStyles } from './text_halo';
 
 type NodeStatsLineStats = AggregatedServiceMapStats | ServiceMapServiceStats;
@@ -30,7 +30,13 @@ export function NodeStatsLine({
 }) {
   const { euiTheme } = useEuiTheme();
   const level = getFailureLevel(stats?.failedTransactionRate, stats?.requestCount);
-  const failureColor = useFailureColor(level);
+  // Text-safe tokens (not ring fill colours) so xs failure labels keep readable contrast.
+  let failureTextColor: string | undefined;
+  if (level === 'danger') {
+    failureTextColor = euiTheme.colors.textDanger;
+  } else if (level === 'warning') {
+    failureTextColor = euiTheme.colors.textWarning;
+  }
   if (!stats) {
     return null;
   }
@@ -52,9 +58,9 @@ export function NodeStatsLine({
         key="failed"
         data-test-subj="serviceMapNodeFailedShare"
         css={
-          level === 'danger' || level === 'warning'
+          failureTextColor
             ? css`
-                color: ${failureColor};
+                color: ${failureTextColor};
                 font-weight: ${euiTheme.font.weight.bold};
               `
             : undefined
