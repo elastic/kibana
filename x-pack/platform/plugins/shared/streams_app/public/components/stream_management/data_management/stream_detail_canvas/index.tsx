@@ -56,7 +56,7 @@ import { ConnectionTargetsProvider } from './nodes/connection_handle';
 import { CanvasToolbar } from './canvas_toolbar';
 import { CanvasReadOnlyProvider } from './canvas_read_only_context';
 import { UnitReadOnlyCallout } from '../../../streams_layout/unit_read_only_callout';
-import { applyLayout } from './layout';
+import { applyLayout, getConnectedNodeIds } from './layout';
 import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
@@ -66,6 +66,7 @@ import type { IndexInspectTabId } from '../../../index_inspect/types';
 import {
   DESTINATION_NODE_TYPE,
   PROCESSING_NODE_TYPE,
+  ROUTING_NODE_TYPE,
   SOURCE_NODE_TYPE,
   type ClassicCanvasEdge,
   type ClassicCanvasGraph,
@@ -316,6 +317,8 @@ function StreamsCanvasInner() {
   // not wiped.
   const [nodes, setNodes, applyNodesChange] = useNodesState(graph.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(graph.edges);
+  const liveNodesRef = useRef(nodes);
+  liveNodesRef.current = nodes;
   const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
 
   const searchedFlow = useMemo(() => resolveCanvasSearch(graph, query), [graph, query]);
@@ -353,8 +356,16 @@ function StreamsCanvasInner() {
   // The machine holds this canvas when a create save starts, then resets the
   // stack on persist success so undo cannot restore a destination / source whose key was revoked.
   useBindCanvasCreateHistory({ hold, reset, discard });
+  // Hold the spinner until the unit, the source environment, and the first
+  // unit.loaded sync have settled. Resolved indices refresh in the background.
+  const isCanvasLoading =
+    isInitializing ||
+    isSourceEnvironmentLoading ||
+    ((!hasReceivedUnit || !hasReceivedDestinationsUnit) && !isUnitUnavailable);
+
   const graphNodeIdsRef = useRef('');
   const graphEdgeIdsRef = useRef('');
+  const knownNodeIdsRef = useRef<ReadonlySet<string>>(new Set());
 
   useEffect(() => {
     const nextNodeIds = getGraphNodeIds(graph.nodes);
@@ -370,14 +381,54 @@ function StreamsCanvasInner() {
     graphNodeIdsRef.current = nextNodeIds;
     graphEdgeIdsRef.current = nextEdgeIds;
 
-    setNodes(
-      graph.nodes.map((node) => {
-        const storedPosition = nodePositionsRef.current[node.id];
-        return storedPosition ? { ...node, position: storedPosition } : node;
-      })
-    );
+    const knownNodeIds = knownNodeIdsRef.current;
+    knownNodeIdsRef.current = new Set(graph.nodes.map((node) => node.id));
+
+    const positionedNodes = graph.nodes.map((node) => {
+      const storedPosition = nodePositionsRef.current[node.id];
+      return storedPosition ? { ...node, position: storedPosition } : node;
+    });
     setEdges(graph.edges);
-  }, [graph, setNodes, setEdges]);
+
+    // A routing or processing node placed on a line makes that flow one column
+    // longer, so tidy the flow it joined exactly as "Tidy up selection" would with
+    // that flow selected. Other flows keep their positions, and the initial load
+    // is left to the full layout.
+    const placedNodeIds =
+      isCanvasLoading || knownNodeIds.size === 0
+        ? []
+        : graph.nodes
+            .filter(
+              ({ id, type }) =>
+                (type === ROUTING_NODE_TYPE || type === PROCESSING_NODE_TYPE) &&
+                !knownNodeIds.has(id)
+            )
+            .map(({ id }) => id);
+    if (placedNodeIds.length === 0) {
+      setNodes(positionedNodes);
+      return;
+    }
+
+    // Tidy from where the nodes are on screen right now, as the menu action does.
+    const liveNodesById = new Map(liveNodesRef.current.map((node) => [node.id, node]));
+    const liveNodes = positionedNodes.map((node) => {
+      const liveNode = liveNodesById.get(node.id);
+      return liveNode
+        ? { ...node, position: liveNode.position, measured: liveNode.measured }
+        : node;
+    });
+    const flowNodeIds = getConnectedNodeIds(placedNodeIds, graph.edges);
+    const tidiedNodes = applyLayout(liveNodes, graph.edges, { onlyIds: flowNodeIds });
+    setNodes(tidiedNodes);
+    // Store the tidied positions so the next graph change does not undo them.
+    updateNodePositions(
+      Object.fromEntries(
+        tidiedNodes
+          .filter(({ id }) => flowNodeIds.has(id))
+          .map(({ id, position }) => [id, position])
+      )
+    );
+  }, [graph, isCanvasLoading, setNodes, setEdges, updateNodePositions]);
 
   // Tracks whether a pointer drag is in progress so we snapshot each gesture
   // exactly once.
@@ -767,13 +818,6 @@ function StreamsCanvasInner() {
     onEnter,
   });
 
-  // Hold the spinner until the unit, the source environment, and the first
-  // unit.loaded sync have settled. Resolved indices refresh in the background.
-  const isCanvasLoading =
-    isInitializing ||
-    isSourceEnvironmentLoading ||
-    ((!hasReceivedUnit || !hasReceivedDestinationsUnit) && !isUnitUnavailable);
-
   const searchBar = <CanvasSearchBar query={query ?? ''} onQueryChange={changeSearchQuery} />;
 
   if (isCanvasLoading) {
@@ -866,6 +910,7 @@ function StreamsCanvasInner() {
             nodesConnectable={canEditConnections}
             edgesReconnectable={canEditConnections}
             nodesDraggable={!readOnly}
+            zoomControlsDisabled={isSaving}
             connectionLineStyle={{ stroke: euiTheme.colors.primary, strokeWidth: 1 }}
             onNodeClick={onNodeClick}
             onNodeContextMenu={readOnly ? undefined : onNodeContextMenu}

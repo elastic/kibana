@@ -14,6 +14,7 @@ import {
   NODE_WIDTH_ESTIMATE,
   ROW_GAP,
 } from './canvas_constants';
+import { DESTINATION_NODE_TYPE } from './types';
 
 interface LayoutNode {
   id: string;
@@ -36,6 +37,10 @@ const NODE_SEPARATION = Math.max(ROW_GAP - NODE_HEIGHT_ESTIMATE, 0);
 const getNodeHeight = ({ type, measured }: LayoutNode): number =>
   measured?.height ?? (type ? NODE_HEIGHT_BY_TYPE[type] : undefined) ?? NODE_HEIGHT_ESTIMATE;
 
+// Center-to-center distances between successive dagre ranks and rows.
+const COLUMN_PITCH = NODE_WIDTH_ESTIMATE + RANK_SEPARATION;
+const ROW_PITCH = NODE_HEIGHT_ESTIMATE + NODE_SEPARATION;
+
 /**
  * Dagre assigns each node to a rank by its depth in the flow and minimizes edge
  * crossings within each rank, so richer topologies (pipelines, routing, fan-out)
@@ -45,12 +50,27 @@ const getNodeHeight = ({ type, measured }: LayoutNode): number =>
  *
  * For the current unit topology (sources feeding destinations) this still yields
  * sources in column 0 and destinations in column 1.
+ *
+ * Dagre ranks any unconnected node in the first column, which is where sources
+ * live. Destinations that nothing feeds yet are therefore kept out of dagre and
+ * stacked in the destination column instead, so a new destination shows up on
+ * the right, ready to be wired to a source on the left.
  */
 export const layoutGraph = (nodes: LayoutNode[], edges: LayoutEdge[]): Map<string, XYPosition> => {
   const positions = new Map<string, XYPosition>();
   if (nodes.length === 0) {
     return positions;
   }
+
+  const nodeIds = new Set(nodes.map((node) => node.id));
+  const layoutEdges = edges.filter(
+    ({ source, target }) => nodeIds.has(source) && nodeIds.has(target)
+  );
+  const connectedIds = new Set(layoutEdges.flatMap(({ source, target }) => [source, target]));
+  const isUnconnectedDestination = (node: LayoutNode): boolean =>
+    node.type === DESTINATION_NODE_TYPE && !connectedIds.has(node.id);
+  const flowNodes = nodes.filter((node) => !isUnconnectedDestination(node));
+  const unconnectedDestinations = nodes.filter(isUnconnectedDestination);
 
   const graph = new Dagre.graphlib.Graph({ directed: true, compound: false })
     .setGraph({
@@ -62,30 +82,59 @@ export const layoutGraph = (nodes: LayoutNode[], edges: LayoutEdge[]): Map<strin
     })
     .setDefaultEdgeLabel(() => ({}));
 
-  const nodeIds = new Set(nodes.map((node) => node.id));
-  nodes.forEach((node) => {
+  flowNodes.forEach((node) => {
     graph.setNode(node.id, { width: NODE_WIDTH_ESTIMATE, height: NODE_HEIGHT_ESTIMATE });
   });
-  edges.forEach(({ source, target }) => {
-    if (nodeIds.has(source) && nodeIds.has(target)) {
-      graph.setEdge(source, target);
-    }
+  layoutEdges.forEach(({ source, target }) => {
+    graph.setEdge(source, target);
   });
 
   Dagre.layout(graph);
 
-  // Dagre reports node centers; convert to top-left and normalize so the whole
-  // graph starts at the origin (keeps callers and tests independent of dagre's
-  // internal offsets).
+  // Node centers, as dagre reports them.
+  const centers = new Map<string, XYPosition>();
+  flowNodes.forEach((node) => {
+    const laidOut = graph.node(node.id);
+    if (laidOut) {
+      centers.set(node.id, { x: laidOut.x, y: laidOut.y });
+    }
+  });
+
+  if (unconnectedDestinations.length > 0) {
+    const flowCenters = [...centers.values()];
+    const connectedDestinationCenters = flowNodes.flatMap((node) => {
+      const center = centers.get(node.id);
+      return node.type === DESTINATION_NODE_TYPE && center ? [center] : [];
+    });
+    // Join the column the connected destinations already occupy, or open a new
+    // one to the right of the flow when there is none yet.
+    let columnX = 0;
+    if (connectedDestinationCenters.length > 0) {
+      columnX = Math.max(...connectedDestinationCenters.map(({ x }) => x));
+    } else if (flowCenters.length > 0) {
+      columnX = Math.max(...flowCenters.map(({ x }) => x)) + COLUMN_PITCH;
+    }
+    const columnCenters = flowCenters.filter(({ x }) => x === columnX);
+    const firstY =
+      columnCenters.length > 0
+        ? Math.max(...columnCenters.map(({ y }) => y)) + ROW_PITCH
+        : Math.min(...flowCenters.map(({ y }) => y), NODE_HEIGHT_ESTIMATE / 2);
+    unconnectedDestinations.forEach((node, index) => {
+      centers.set(node.id, { x: columnX, y: firstY + index * ROW_PITCH });
+    });
+  }
+
+  // Convert centers to top-left and normalize so the whole graph starts at the
+  // origin (keeps callers and tests independent of dagre's internal offsets).
   let minX = Infinity;
   let minY = Infinity;
   nodes.forEach((node) => {
-    const laidOut = graph.node(node.id);
-    if (!laidOut) {
+    const center = centers.get(node.id);
+    if (!center) {
       return;
     }
-    minX = Math.min(minX, laidOut.x - NODE_WIDTH_ESTIMATE / 2);
-    minY = Math.min(minY, laidOut.y - getNodeHeight(node) / 2);
+    minX = Math.min(minX, center.x - NODE_WIDTH_ESTIMATE / 2);
+    minY = Math.min(minY, center.y - getNodeHeight(node) / 2);
   });
   if (!Number.isFinite(minX)) {
     minX = 0;
@@ -93,14 +142,14 @@ export const layoutGraph = (nodes: LayoutNode[], edges: LayoutEdge[]): Map<strin
   }
 
   nodes.forEach((node) => {
-    const laidOut = graph.node(node.id);
-    if (!laidOut) {
+    const center = centers.get(node.id);
+    if (!center) {
       positions.set(node.id, { x: 0, y: 0 });
       return;
     }
     positions.set(node.id, {
-      x: Math.round(laidOut.x - NODE_WIDTH_ESTIMATE / 2 - minX),
-      y: Math.round(laidOut.y - getNodeHeight(node) / 2 - minY),
+      x: Math.round(center.x - NODE_WIDTH_ESTIMATE / 2 - minX),
+      y: Math.round(center.y - getNodeHeight(node) / 2 - minY),
     });
   });
 
@@ -120,6 +169,34 @@ interface ApplyLayoutOptions {
    */
   onlyIds?: Set<string>;
 }
+
+/**
+ * Returns the ids of every node reachable from the given nodes, in either edge
+ * direction: the whole flow those nodes belong to.
+ */
+export const getConnectedNodeIds = (
+  seedIds: Iterable<string>,
+  edges: LayoutEdge[]
+): Set<string> => {
+  const neighbors = new Map<string, string[]>();
+  edges.forEach(({ source, target }) => {
+    neighbors.set(source, [...(neighbors.get(source) ?? []), target]);
+    neighbors.set(target, [...(neighbors.get(target) ?? []), source]);
+  });
+
+  const connected = new Set(seedIds);
+  const pending = [...connected];
+  while (pending.length > 0) {
+    const id = pending.pop();
+    (id === undefined ? [] : neighbors.get(id) ?? []).forEach((neighborId) => {
+      if (!connected.has(neighborId)) {
+        connected.add(neighborId);
+        pending.push(neighborId);
+      }
+    });
+  }
+  return connected;
+};
 
 /**
  * Re-runs {@link layoutGraph} against live nodes and returns a new array with the
