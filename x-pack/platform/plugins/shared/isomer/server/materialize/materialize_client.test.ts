@@ -63,6 +63,9 @@ const setup = ({
     search,
     validate,
     getKitServices: createTestKitServices,
+    getSelectionServices: jest.fn(async () => {
+      throw new Error('No data views in this test.');
+    }),
     kibanaVersion: '9.5.0',
     limits: { maxDepth: 1 },
   });
@@ -326,7 +329,7 @@ describe('createScopedMaterializeClient', () => {
   });
 
   describe('filtersForSelection', () => {
-    it('rejects a selection it cannot turn into filters', async () => {
+    it('rejects a selection on a node without data', async () => {
       const { client } = setup();
       await expect(
         client.filtersForSelection(
@@ -341,7 +344,7 @@ describe('createScopedMaterializeClient', () => {
           },
           { type: 'markdown', text: 'There are **3** open alerts.' }
         )
-      ).rejects.toThrow('Kibana cannot turn a selection on node "panel-1" into filters.');
+      ).rejects.toThrow('No data views in this test.');
     });
   });
 });

@@ -159,6 +159,18 @@ export class IsomerPlugin
       hasField: createHasField(elasticsearch.client.asScoped(scope.request).asCurrentUser),
       getKitServices: () =>
         createKitServices(uiSettings.asScopedToClient(scope.savedObjectsClient), fieldFormats),
+      getSelectionServices: async () => {
+        const esClient = elasticsearch.client.asScoped(scope.request).asCurrentUser;
+        const [dataViews, aggs] = await Promise.all([
+          data.indexPatterns.dataViewsServiceFactory(
+            scope.savedObjectsClient,
+            esClient,
+            scope.request
+          ),
+          data.search.aggs.asScopedToClient(scope.savedObjectsClient, esClient),
+        ]);
+        return { dataViews, aggs };
+      },
       validate: this.validateNode,
       kibanaVersion: this.kibanaVersion,
     });

@@ -173,11 +173,11 @@ export interface ScopedMaterializeClient {
    */
   materialize(input: MaterializeInput, context?: MaterializeContext): Promise<MaterializedNode>;
   /**
-   * Resolves the Kibana filters represented by a chart selection.
+   * Resolves the Kibana filters represented by a chart selection, for a host to keep and pass back
+   * in `context.filters`.
    *
    * @param event Selection event referring to a chart node.
    * @param node Materialized node that produced the event.
-   * @throws Until selection conversion is implemented.
    */
   filtersForSelection(event: ChartEvent, node: MaterializedNode): Promise<Filter[]>;
 }

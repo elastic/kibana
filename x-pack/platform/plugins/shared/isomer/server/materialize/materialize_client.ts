@@ -13,6 +13,8 @@ import type { MaterializeContext, MaterializeInput } from '../../common';
 import { executeEsql } from './executors/esql';
 import type { KitServices } from './kit/create_kit';
 import { createMaterializeKit } from './kit/create_kit';
+import type { SelectionServices } from './selection/filters_for_selection';
+import { filtersForSelection } from './selection/filters_for_selection';
 import { DATA_REQUEST_TIMEOUT_MS, MAX_MATERIALIZE_DEPTH, MAX_ROWS_PER_REQUEST } from './limits';
 import type { MaterializedNode, MaterializedNodeSource } from './nodes';
 import { isUnsupportedNode } from './nodes';
@@ -45,6 +47,8 @@ export interface ScopedMaterializeClientDeps {
   validate: (node: MaterializedNode) => Promise<ValidationError[]>;
   /** The user's field formats and settings, read on first use. */
   getKitServices: () => Promise<KitServices>;
+  /** The user's data views and aggs, which selections resolve against. */
+  getSelectionServices: () => Promise<SelectionServices>;
   kibanaVersion: string;
   now?: () => Date;
   limits?: Partial<MaterializeLimits>;
@@ -89,6 +93,7 @@ export const createScopedMaterializeClient = ({
   hasField,
   validate,
   getKitServices,
+  getSelectionServices,
   kibanaVersion,
   now = () => new Date(),
   limits: {
@@ -247,14 +252,8 @@ export const createScopedMaterializeClient = ({
       return materializeAt(input, context, 0);
     },
 
-    /** Rejects until the materialization pipeline implements selection conversion. */
-    filtersForSelection: async ({ node }) => {
-      throw new Error(
-        i18n.translate('xpack.isomer.materialize.selectionUnsupported', {
-          defaultMessage: 'Kibana cannot turn a selection on node "{node}" into filters.',
-          values: { node },
-        })
-      );
-    },
+    /** Turns a selection on a materialized chart node into Kibana filters. */
+    filtersForSelection: async (event, node) =>
+      filtersForSelection(event, node, await getSelectionServices()),
   };
 };

@@ -30,6 +30,7 @@
     "@kbn/as-code-filters-transforms",
     "@kbn/ui-theme",
     "@kbn/rison",
+    "@kbn/data-views-plugin",
     "@kbn/isomer-gate-a"
   ]
 }
