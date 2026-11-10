@@ -27,6 +27,12 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "event_loop_watchdog": Object {
+          "enabled": true,
+          "flag_threshold_ms": 5000,
+          "live_report_interval_ms": 3000,
+          "min_cpu_ratio": 0.5,
+        },
         "execution_control": Object {
           "poll_interval": 5000,
         },
@@ -97,6 +103,12 @@ describe('config validation', () => {
           "monitor": true,
           "warn_threshold": 5000,
         },
+        "event_loop_watchdog": Object {
+          "enabled": true,
+          "flag_threshold_ms": 5000,
+          "live_report_interval_ms": 3000,
+          "min_cpu_ratio": 0.5,
+        },
         "execution_control": Object {
           "poll_interval": 5000,
         },
@@ -164,6 +176,12 @@ describe('config validation', () => {
         "event_loop_delay": Object {
           "monitor": true,
           "warn_threshold": 5000,
+        },
+        "event_loop_watchdog": Object {
+          "enabled": true,
+          "flag_threshold_ms": 5000,
+          "live_report_interval_ms": 3000,
+          "min_cpu_ratio": 0.5,
         },
         "execution_control": Object {
           "poll_interval": 5000,

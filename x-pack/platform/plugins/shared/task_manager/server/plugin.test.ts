@@ -86,6 +86,12 @@ const pluginInitializerContextParams = {
     monitor: true,
     warn_threshold: 5000,
   },
+  event_loop_watchdog: {
+    enabled: false,
+    flag_threshold_ms: 5000,
+    min_cpu_ratio: 0.5,
+    live_report_interval_ms: 3000,
+  },
   worker_utilization_running_average_window: 5,
   metrics_reset_interval: 3000,
   claim_strategy: 'update_by_query',
@@ -214,6 +220,24 @@ describe('TaskManagerPlugin', () => {
       expect(coreSetup.security.acquireFakeRequestEnricher).toHaveBeenCalledTimes(1);
       const pollingLifecycleOpts = (TaskPollingLifecycle as jest.Mock).mock.calls[0][0];
       expect(pollingLifecycleOpts.enrichFakeRequest).toBe(enricher);
+    });
+
+    test('passes the event loop watchdog to TaskPollingLifecycle as a per-run observer', async () => {
+      const pluginInitializerContext = coreMock.createPluginInitializerContext<TaskManagerConfig>(
+        pluginInitializerContextParams
+      );
+      pluginInitializerContext.node.roles.backgroundTasks = true;
+
+      const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
+      taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
+      taskManagerPlugin.start(coreStart, {
+        cloud: cloudMock.createStart(),
+        licensing: licensingMock.createStart(),
+      });
+
+      const pollingLifecycleOpts = (TaskPollingLifecycle as jest.Mock).mock.calls[0][0];
+      expect(typeof pollingLifecycleOpts.eventLoopWatchdog.beginRun).toBe('function');
+      expect(pollingLifecycleOpts.eventLoopBlocks$).toBeDefined();
     });
 
     test('should start the claim nudge service if node.roles.backgroundTasks is true and claim_nudge.enabled is true', async () => {
