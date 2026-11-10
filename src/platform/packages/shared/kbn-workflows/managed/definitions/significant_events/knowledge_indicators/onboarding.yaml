@@ -150,6 +150,8 @@ steps:
           persistedQueries: []
           queriesTokensUsed: { prompt: 0, completion: 0, total: 0 }
           metricsEntitiesCount: 0
+          metricsEntitiesHandled: false
+          metricsEntitiesSkipReason: ''
           keepAliveRefreshed: 0
 
   # -----------------------------------------------------------------------
@@ -168,18 +170,14 @@ steps:
       featuresConnectorUsed: ""
       queriesConnectorUsed: ""
       metricsEntitiesCount: 0
+      metricsEntitiesHandled: false
+      metricsEntitiesSkipReason: ""
       cycleStartedAt: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000Z" }}'
 
-  # Metrics sources take the deterministic path; all other sources keep the existing path.
-  - name: run_source_onboarding
+  - name: run_metrics_source_onboarding
     type: if
     condition: '${{ inputs.sourceType == "metrics" and inputs.metricsEntitiesEnabled == true }}'
     steps:
-      - name: set_metrics_skips
-        type: data.set
-        with:
-          skipFeatures: true
-          skipQueries: true
       - name: run_metrics_entities
         type: kibana.request
         with:
@@ -188,11 +186,33 @@ steps:
           headers:
             x-elastic-internal-origin: "kibana"
             x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
+        on-failure:
+          continue: true
       - name: save_metrics_entities_output
         type: data.set
         with:
-          metricsEntitiesCount: "${{ steps.run_metrics_entities.output.metricsEntitiesCount }}"
-    else:
+          metricsEntitiesCount: "${{ steps.run_metrics_entities.output.metricsEntitiesCount | default: 0 }}"
+          metricsEntitiesHandled: >-
+            ${{ steps.run_metrics_entities.error != null
+              or steps.run_metrics_entities.output.handled != false }}
+          metricsEntitiesSkipReason: "${{ steps.run_metrics_entities.output.skipReason | default: '' }}"
+      - name: set_metrics_skips
+        type: if
+        condition: "${{ variables.metricsEntitiesHandled == true }}"
+        steps:
+          - name: skip_metrics_features_and_queries
+            type: data.set
+            with:
+              skipFeatures: true
+              skipQueries: true
+
+  - name: run_source_onboarding
+    type: if
+    condition: >-
+      ${{ inputs.sourceType != "metrics"
+        or inputs.metricsEntitiesEnabled != true
+        or variables.metricsEntitiesHandled == false }}
+    steps:
       - name: check_should_identify
         type: if
         condition: "${{ variables.skipFeatures == false and inputs.skipQueries == false }}"
@@ -310,4 +330,6 @@ steps:
       persistedQueries: "${{ variables.persistedQueries }}"
       queriesTokensUsed: "${{ variables.queriesTokensUsed }}"
       metricsEntitiesCount: "${{ variables.metricsEntitiesCount }}"
+      metricsEntitiesHandled: "${{ variables.metricsEntitiesHandled }}"
+      metricsEntitiesSkipReason: "${{ variables.metricsEntitiesSkipReason }}"
       keepAliveRefreshed: "${{ steps.keep_alive_persistent.output.refreshed }}"

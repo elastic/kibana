@@ -26,9 +26,12 @@ export interface IdentifyMetricsEntitiesOptions {
 }
 
 export interface IdentifyMetricsEntitiesResult {
+  handled: boolean;
+  skipReason?: 'no_tsds' | 'no_entity_key_row';
   metricsEntitiesCount: number;
   metricsCatalogueRowsCount: number;
   matchedEntityKeyRowsCount: number;
+  unmatchedDataStreamsCount: number;
   metricsEntityRowsCount: number;
   droppedIncompleteRowsCount: number;
   droppedOverflowRowsCount: number;
@@ -90,9 +93,11 @@ export const identifyMetricsEntities = async ({
     const catalogueMs = Date.now() - startedAt;
     const message = errorMessage(error instanceof Error ? error : new Error(String(error)));
     return {
+      handled: true,
       metricsEntitiesCount: 0,
       metricsCatalogueRowsCount: 0,
       matchedEntityKeyRowsCount: 0,
+      unmatchedDataStreamsCount: 0,
       metricsEntityRowsCount: 0,
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
@@ -109,9 +114,12 @@ export const identifyMetricsEntities = async ({
   if (metricsCatalogueRowsCount === 0) {
     logger.info(`Metrics catalogue is empty for source [${sourceId}]; no entities were written.`);
     return {
+      handled: false,
+      skipReason: 'no_tsds',
       metricsEntitiesCount: 0,
       metricsCatalogueRowsCount,
       matchedEntityKeyRowsCount: 0,
+      unmatchedDataStreamsCount: 0,
       metricsEntityRowsCount: 0,
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
@@ -126,6 +134,32 @@ export const identifyMetricsEntities = async ({
       dataStreams.some((dataStream) => dataStreamMatchesDataset(dataStream, dataset))
     )
   );
+  const unmatchedDataStreamsCount = dataStreams.filter(
+    (dataStream) =>
+      !matchedKeyRows.some(({ datasets }) =>
+        datasets.some((dataset) => dataStreamMatchesDataset(dataStream, dataset))
+      )
+  ).length;
+  if (matchedKeyRows.length === 0) {
+    logger.info(
+      `No metrics entity key row matched source [${sourceId}] data streams [${dataStreams
+        .slice(0, 20)
+        .join(', ')}]; no entities were written.`
+    );
+    return {
+      handled: false,
+      skipReason: 'no_entity_key_row',
+      metricsEntitiesCount: 0,
+      metricsCatalogueRowsCount,
+      matchedEntityKeyRowsCount: 0,
+      unmatchedDataStreamsCount,
+      metricsEntityRowsCount: 0,
+      droppedIncompleteRowsCount: 0,
+      droppedOverflowRowsCount: 0,
+      timings: { catalogueMs, inventoryMs: 0, totalMs: Date.now() - startedAt },
+      errors: [],
+    };
+  }
   const inventoryStartedAt = Date.now();
   const sourceQuery = toTimeSeriesSourceQuery(esql);
   const features: FeatureUpsert[] = [];
@@ -173,9 +207,11 @@ export const identifyMetricsEntities = async ({
 
   const inventoryMs = Date.now() - inventoryStartedAt;
   return {
+    handled: true,
     metricsEntitiesCount: selectedFeatures.length,
     metricsCatalogueRowsCount,
     matchedEntityKeyRowsCount: matchedKeyRows.length,
+    unmatchedDataStreamsCount,
     metricsEntityRowsCount,
     droppedIncompleteRowsCount,
     droppedOverflowRowsCount,

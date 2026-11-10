@@ -103,9 +103,11 @@ describe('identifyMetricsEntities', () => {
         metricsEntitiesCount: 2,
         metricsCatalogueRowsCount: 116,
         matchedEntityKeyRowsCount: 2,
+        unmatchedDataStreamsCount: 0,
         metricsEntityRowsCount: 3,
         droppedIncompleteRowsCount: 1,
         droppedOverflowRowsCount: 0,
+        handled: true,
         errors: [],
       })
     );
@@ -160,9 +162,99 @@ describe('identifyMetricsEntities', () => {
       logger: harness.logger,
     });
 
-    expect(result.metricsEntitiesCount).toBe(0);
+    expect(result).toEqual(
+      expect.objectContaining({
+        handled: false,
+        skipReason: 'no_tsds',
+        metricsEntitiesCount: 0,
+        unmatchedDataStreamsCount: 0,
+      })
+    );
     expect(harness.query).toHaveBeenCalledTimes(1);
     expect(harness.bulk).not.toHaveBeenCalled();
+  });
+
+  it('falls back without writing when no entity key row matches the catalogue', async () => {
+    const harness = createHarness([
+      {
+        columns: catalogueColumns,
+        values: [
+          [
+            'system.cpu.time',
+            ['metrics-hostmetricsreceiver.otel-default'],
+            'seconds',
+            'counter',
+            'double',
+            ['host.name'],
+          ],
+        ],
+      },
+    ]);
+
+    const result = await identifyMetricsEntities({
+      esClient: harness.esClient,
+      esql: sourceEsql,
+      sourceId: 'otel-hostmetrics',
+      kiClient: harness.kiClient,
+      logger: harness.logger,
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        handled: false,
+        skipReason: 'no_entity_key_row',
+        metricsEntitiesCount: 0,
+        unmatchedDataStreamsCount: 1,
+      })
+    );
+    expect(harness.query).toHaveBeenCalledTimes(1);
+    expect(harness.bulk).not.toHaveBeenCalled();
+    expect(harness.info).toHaveBeenCalledTimes(1);
+    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('[otel-hostmetrics]'));
+    expect(harness.info).toHaveBeenCalledWith(
+      expect.stringContaining('metrics-hostmetricsreceiver.otel-default')
+    );
+  });
+
+  it('handles a matching catalogue and counts unmatched data streams', async () => {
+    const harness = createHarness([
+      {
+        columns: catalogueColumns,
+        values: [
+          [
+            'kubernetes.pod.cpu.usage.limit.pct',
+            ['metrics-kubernetes.pod-default', 'metrics-hostmetricsreceiver.otel-default'],
+            'percent',
+            'gauge',
+            'double',
+            ['orchestrator.cluster.name', 'kubernetes.namespace'],
+          ],
+        ],
+      },
+      {
+        columns: workloadColumns,
+        values: [
+          ['cluster-a', 'payments', 'deployment', 'checkout', 3, '2026-11-10T12:00:00.000Z'],
+        ],
+      },
+    ]);
+
+    const result = await identifyMetricsEntities({
+      esClient: harness.esClient,
+      esql: sourceEsql,
+      sourceId: 'mixed-metrics',
+      kiClient: harness.kiClient,
+      logger: harness.logger,
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        handled: true,
+        matchedEntityKeyRowsCount: 1,
+        unmatchedDataStreamsCount: 1,
+      })
+    );
+    expect(harness.bulk).toHaveBeenCalledTimes(1);
   });
 
   it('keeps the 500 workload rows with the most replicas and logs overflow', async () => {
