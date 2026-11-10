@@ -76,6 +76,7 @@ import type {
 import type { AgentPolicyAgentVersionCondition } from '../../common/types/models/agent_policy';
 import {
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
+  AGENTLESS_UNENROLLED_REASON,
   AGENT_POLICY_INDEX,
   agentPolicyStatuses,
   FLEET_ELASTIC_AGENT_PACKAGE,
@@ -1700,7 +1701,12 @@ class AgentPolicyService {
 
     if (agentPolicy?.supports_agentless) {
       logger.debug(`Starting  unenrolling agent from agentless policy ${id}`);
-      await unenrollForAgentPolicyId(soClient, esClient, id, { revoke: true });
+      // The unenrolled agent documents are kept, since in-flight Fleet Server checkins must still
+      // find them inactive. The reason hides them from the agents list once the policy is gone.
+      await unenrollForAgentPolicyId(soClient, esClient, id, {
+        revoke: true,
+        unenrolledReason: AGENTLESS_UNENROLLED_REASON,
+      });
       // unenroll  offline agents for agentless policies first to avoid 404 Save Object error
       await this.triggerAgentPolicyUpdatedEvent(esClient, 'deleted', id, {
         spaceId: soClient.getCurrentNamespace(),
