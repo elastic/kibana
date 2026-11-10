@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, displayName, description, searchFilter } from '@kbn/zod';
+import { z, displayName, description, searchFilter, lazySchema } from '@kbn/zod';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { asCodeQuerySchema, getAsCodeTagsSchema } from '@kbn/as-code-shared-schemas';
 import { VEGA_MAX_FILTERS } from '../../common/constants';
@@ -48,7 +48,9 @@ export const vegaQuerySchema = asCodeQuerySchema
   })
   .optional();
 
-export const vegaFiltersSchema = z.array(asCodeFilterSchema).max(VEGA_MAX_FILTERS).optional();
+export const vegaFiltersSchema = lazySchema(() =>
+  z.array(asCodeFilterSchema).max(VEGA_MAX_FILTERS).optional()
+);
 
 export const vegaLibraryItemSchema = z
   .object({
