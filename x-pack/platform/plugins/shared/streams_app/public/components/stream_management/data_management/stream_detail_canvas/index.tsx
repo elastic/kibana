@@ -923,7 +923,7 @@ function StreamsCanvasInner() {
             isValidConnection={isValidConnection}
             nodesConnectable={canEditConnections}
             edgesReconnectable={canEditConnections}
-            nodesDraggable={!readOnly}
+            nodesDraggable={!readOnly && !isSaving}
             zoomControlsDisabled={isSaving}
             connectionLineStyle={{ stroke: euiTheme.colors.primary, strokeWidth: 1 }}
             onNodeClick={onNodeClick}
