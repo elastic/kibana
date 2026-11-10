@@ -28,6 +28,7 @@ import type {
   UpdateObservableRequest,
   BulkAddObservablesRequest,
   BulkDeleteObservablesRequest,
+  ExtractObservablesResponse,
   CasesPatchResponse,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
@@ -68,6 +69,7 @@ import {
   deleteObservable,
   updateObservable,
 } from './observables';
+import { extractCaseObservables } from './extract_case_observables';
 import type { GetApplicableFieldsParams } from './applicable_fields';
 import { getApplicableFields } from './applicable_fields';
 import type { ApplicableFieldsResponse } from '../../../common/types/domain/template/applicable_field';
@@ -183,6 +185,10 @@ export interface CasesSubClient {
    */
   bulkDeleteObservables(params: BulkDeleteObservablesRequest): Promise<Case>;
   /**
+   * Extracts observables from the alerts and events attached to the case, and reports the outcome
+   */
+  extractObservables(caseId: string): Promise<ExtractObservablesResponse>;
+  /**
    * Returns the fully-formed `extended_fields` a caller may apply — the owner's global field-library
    * fields plus, when a template is in scope, that template's fields. Pass `caseId` to derive owner +
    * applied template from an existing case, or `owner` (+ optional `templateId`) for a prospective case.
@@ -214,6 +220,7 @@ const usageCounterByMethod = {
   deleteObservable: 'delete_observable',
   bulkAddObservables: 'bulk_add_observables',
   bulkDeleteObservables: 'bulk_delete_observables',
+  extractObservables: 'extract_observables',
   getApplicableFields: null,
 } as const satisfies Record<keyof CasesSubClient, string | null>;
 
@@ -293,6 +300,11 @@ export const createCasesSubClient = (
       usageCounterByMethod.bulkDeleteObservables,
       clientArgs,
       (params: BulkDeleteObservablesRequest) => bulkDeleteObservables(params, clientArgs)
+    ),
+    extractObservables: withUsageCounter(
+      usageCounterByMethod.extractObservables,
+      clientArgs,
+      (caseId: string) => extractCaseObservables(caseId, clientArgs, casesClient)
     ),
     getApplicableFields: (params: GetApplicableFieldsParams) =>
       getApplicableFields(params, clientArgs),
