@@ -8,13 +8,10 @@
 import { randomUUID } from 'crypto';
 import type { BulkResponse, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreStart, ElasticsearchClient } from '@kbn/core/server';
-import type { sessionEventsMappings, sessionMemoryMappings } from './data_streams';
 import { SESSION_EVENTS_DATA_STREAM, SESSION_MEMORY_DATA_STREAM } from './data_streams';
 import type {
   ForgetOutcome,
-  SessionEventsClient,
   SessionMemory,
-  SessionMemoryClient,
   SessionMemoryScope,
   SessionMemoryService,
   StoredSessionEvent,
@@ -22,9 +19,7 @@ import type {
 } from './types';
 
 interface SessionMemoryServiceDeps {
-  memoryClient: SessionMemoryClient;
-  eventsClient: SessionEventsClient;
-  /** Internal user client, for the delete_by_query call the data streams client lacks. */
+  /** Internal user client. Core's client sends the product origin system data streams require. */
   esClient: ElasticsearchClient;
   generateId?: () => string;
   now?: () => Date;
@@ -37,8 +32,11 @@ const scopeFilter = ({ space, userId }: SessionMemoryScope): QueryDslQueryContai
   { term: { user_id: userId } },
 ];
 
-// The data streams client sends writes through the bulk API, which reports rejected documents in the
-// response instead of throwing.
+// Elasticsearch creates each stream on its first write, so reads and deletes before that find nothing
+// instead of failing.
+const ignoreMissingStream = { ignore_unavailable: true };
+
+// The bulk API reports rejected documents in the response instead of throwing.
 const throwOnBulkErrors = (response: BulkResponse): void => {
   const error = response.items.find((item) => item.create?.error)?.create?.error;
   if (error) {
@@ -73,36 +71,36 @@ const getForgetOutcome = (latest: StoredSessionMemory | undefined): ForgetOutcom
   return latest.deleted_at === undefined ? 'forgotten' : 'already_forgotten';
 };
 
-/** Creates the service that reads and writes the session memory data stream. */
+/** Creates the service that reads and writes the session memory data streams. */
 export const createSessionMemoryService = ({
-  memoryClient,
-  eventsClient,
   esClient,
   generateId = randomUUID,
   now = () => new Date(),
 }: SessionMemoryServiceDeps): SessionMemoryService => ({
   remember: async ({ space, userId }, input) => {
     const { id = generateId(), sessionId, content, aiIndexIds = [], attributes = {} } = input;
-    const response = await memoryClient.create({
-      documents: [
-        {
-          '@timestamp': now().toISOString(),
-          id,
-          space,
-          session_id: sessionId,
-          user_id: userId,
-          ai_index_id: [...aiIndexIds],
-          content,
-          attributes: { ...attributes },
-        },
-      ],
+    await esClient.index<StoredSessionMemory>({
+      index: SESSION_MEMORY_DATA_STREAM,
+      // A data stream accepts only `create`.
+      op_type: 'create',
+      document: {
+        '@timestamp': now().toISOString(),
+        id,
+        space,
+        session_id: sessionId,
+        user_id: userId,
+        ai_index_id: [...aiIndexIds],
+        content,
+        attributes: { ...attributes },
+      },
     });
-    throwOnBulkErrors(response);
     return { id };
   },
 
   get: async (scope, id) => {
-    const response = await memoryClient.search({
+    const response = await esClient.search<StoredSessionMemory>({
+      index: SESSION_MEMORY_DATA_STREAM,
+      ...ignoreMissingStream,
       query: { bool: { filter: [{ term: { id } }, ...scopeFilter(scope)] } },
       sort: [{ '@timestamp': 'desc' }],
       size: 1,
@@ -122,7 +120,9 @@ export const createSessionMemoryService = ({
 
     // Collapse to the latest revision of each memory before looking at tombstones. Filtering out
     // tombstones in the query instead would surface an older revision of a forgotten memory.
-    const response = await memoryClient.search({
+    const response = await esClient.search<StoredSessionMemory>({
+      index: SESSION_MEMORY_DATA_STREAM,
+      ...ignoreMissingStream,
       query: { bool: { filter: [{ terms: { id: uniqueIds } }, ...scopeFilter(scope)] } },
       collapse: { field: 'id' },
       sort: [{ '@timestamp': 'desc' }],
@@ -137,7 +137,14 @@ export const createSessionMemoryService = ({
       .filter(({ deleted_at: deletedAt }) => deletedAt === undefined)
       .map((latest) => toTombstone(latest, timestamp));
     if (tombstones.length > 0) {
-      throwOnBulkErrors(await memoryClient.create({ documents: tombstones }));
+      throwOnBulkErrors(
+        await esClient.bulk<StoredSessionMemory>({
+          operations: tombstones.flatMap((tombstone) => [
+            { create: { _index: SESSION_MEMORY_DATA_STREAM } },
+            tombstone,
+          ]),
+        })
+      );
     }
 
     return Object.fromEntries(uniqueIds.map((id) => [id, getForgetOutcome(latestById.get(id))]));
@@ -150,6 +157,7 @@ export const createSessionMemoryService = ({
 
     const { deleted = 0, failures = [] } = await esClient.deleteByQuery({
       index: SESSION_MEMORY_DATA_STREAM,
+      ...ignoreMissingStream,
       query: { bool: { filter: [{ terms: { id: [...ids] } }, ...scopeFilter(scope)] } },
       conflicts: 'proceed',
     });
@@ -163,41 +171,26 @@ export const createSessionMemoryService = ({
 
   saveEvent: async ({ space, userId }, input) => {
     const { id = generateId(), sessionId, turnId, transcript, aiIndexIds = [] } = input;
-    const response = await eventsClient.create({
-      documents: [
-        {
-          '@timestamp': now().toISOString(),
-          id,
-          space,
-          session_id: sessionId,
-          ...(turnId === undefined ? {} : { turn_id: turnId }),
-          user_id: userId,
-          ai_index_id: [...aiIndexIds],
-          transcript,
-        },
-      ],
+    await esClient.index<StoredSessionEvent>({
+      index: SESSION_EVENTS_DATA_STREAM,
+      op_type: 'create',
+      document: {
+        '@timestamp': now().toISOString(),
+        id,
+        space,
+        session_id: sessionId,
+        ...(turnId === undefined ? {} : { turn_id: turnId }),
+        user_id: userId,
+        ai_index_id: [...aiIndexIds],
+        transcript,
+      },
     });
-    throwOnBulkErrors(response);
     return { id };
   },
 });
 
-/** Builds the session memory service from core's data stream clients, which core caches after start. */
-export const getSessionMemoryService = async ({
-  dataStreams,
+/** Builds the session memory service on core's internal user client. */
+export const getSessionMemoryService = ({
   elasticsearch,
-}: Pick<CoreStart, 'dataStreams' | 'elasticsearch'>): Promise<SessionMemoryService> => {
-  const [memoryClient, eventsClient] = await Promise.all([
-    dataStreams.initializeClient<typeof sessionMemoryMappings, StoredSessionMemory>(
-      SESSION_MEMORY_DATA_STREAM
-    ),
-    dataStreams.initializeClient<typeof sessionEventsMappings, StoredSessionEvent>(
-      SESSION_EVENTS_DATA_STREAM
-    ),
-  ]);
-  return createSessionMemoryService({
-    memoryClient,
-    eventsClient,
-    esClient: elasticsearch.client.asInternalUser,
-  });
-};
+}: Pick<CoreStart, 'elasticsearch'>): SessionMemoryService =>
+  createSessionMemoryService({ esClient: elasticsearch.client.asInternalUser });

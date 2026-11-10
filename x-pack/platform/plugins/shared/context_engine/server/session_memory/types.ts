@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import type { IDataStreamClient } from '@kbn/data-streams';
-import type { sessionEventsMappings, sessionMemoryMappings } from './data_streams';
-
 /** A session memory document as stored in Elasticsearch, one per revision. */
 export interface StoredSessionMemory {
   '@timestamp': string;
@@ -23,11 +20,6 @@ export interface StoredSessionMemory {
   deleted_at?: string;
 }
 
-export type SessionMemoryClient = IDataStreamClient<
-  typeof sessionMemoryMappings,
-  StoredSessionMemory
->;
-
 /** A session event document as stored in Elasticsearch, one per turn. */
 export interface StoredSessionEvent {
   '@timestamp': string;
@@ -39,11 +31,6 @@ export interface StoredSessionEvent {
   ai_index_id: string[];
   transcript: string;
 }
-
-export type SessionEventsClient = IDataStreamClient<
-  typeof sessionEventsMappings,
-  StoredSessionEvent
->;
 
 /** Every session memory operation runs for one user in one space. */
 export interface SessionMemoryScope {

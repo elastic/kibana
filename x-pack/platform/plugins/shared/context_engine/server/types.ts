@@ -58,7 +58,7 @@ export interface ContextEnginePluginStart {
    * user in each call is the end user the memory is about, and is never checked against the
    * authenticated user.
    */
-  getSessionMemoryService: () => Promise<SessionMemoryService>;
+  getSessionMemoryService: () => SessionMemoryService;
 }
 
 /** Duck-typed so Context Engine does not depend on `@kbn/workflows-management-plugin` (Moon cycle). */

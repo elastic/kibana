@@ -7,17 +7,17 @@
 
 import type { BulkResponse, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { SESSION_MEMORY_DATA_STREAM } from './data_streams';
+import { SESSION_EVENTS_DATA_STREAM, SESSION_MEMORY_DATA_STREAM } from './data_streams';
 import { createSessionMemoryService } from './service';
-import type { SessionEventsClient, SessionMemoryClient, StoredSessionMemory } from './types';
+import type { StoredSessionMemory } from './types';
 
 const NOW = new Date('2026-11-09T10:00:00.000Z');
 const scope = { space: 'default', userId: 'jdoe' };
 
-const createdResponse = (): BulkResponse => ({
-  errors: false,
+const bulkResponse = (items: BulkResponse['items'] = []): BulkResponse => ({
+  errors: items.some((item) => item.create?.error),
   took: 1,
-  items: [{ create: { _index: '.ds-memory', _id: 'doc', status: 201 } }],
+  items,
 });
 
 const searchResponse = (sources: StoredSessionMemory[]): SearchResponse<StoredSessionMemory> => ({
@@ -51,22 +51,8 @@ const forgottenMemory: StoredSessionMemory = {
 };
 
 describe('createSessionMemoryService', () => {
-  const memoryClient: jest.Mocked<SessionMemoryClient> = {
-    create: jest.fn(),
-    search: jest.fn(),
-    exists: jest.fn(),
-    helpers: { getFieldsFromHit: jest.fn() },
-  };
-  const eventsClient: jest.Mocked<SessionEventsClient> = {
-    create: jest.fn(),
-    search: jest.fn(),
-    exists: jest.fn(),
-    helpers: { getFieldsFromHit: jest.fn() },
-  };
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const service = createSessionMemoryService({
-    memoryClient,
-    eventsClient,
     esClient,
     generateId: () => 'generated-id',
     now: () => NOW,
@@ -74,8 +60,7 @@ describe('createSessionMemoryService', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    memoryClient.create.mockResolvedValue(createdResponse());
-    eventsClient.create.mockResolvedValue(createdResponse());
+    esClient.bulk.mockResolvedValue(bulkResponse());
   });
 
   describe('remember', () => {
@@ -86,19 +71,19 @@ describe('createSessionMemoryService', () => {
       });
 
       expect(result).toEqual({ id: 'generated-id' });
-      expect(memoryClient.create).toHaveBeenCalledWith({
-        documents: [
-          {
-            '@timestamp': NOW.toISOString(),
-            id: 'generated-id',
-            space: 'default',
-            session_id: 'session-1',
-            user_id: 'jdoe',
-            ai_index_id: [],
-            content: 'checkout-service latency comes from the connection pool limit',
-            attributes: {},
-          },
-        ],
+      expect(esClient.index).toHaveBeenCalledWith({
+        index: SESSION_MEMORY_DATA_STREAM,
+        op_type: 'create',
+        document: {
+          '@timestamp': NOW.toISOString(),
+          id: 'generated-id',
+          space: 'default',
+          session_id: 'session-1',
+          user_id: 'jdoe',
+          ai_index_id: [],
+          content: 'checkout-service latency comes from the connection pool limit',
+          attributes: {},
+        },
       });
     });
 
@@ -112,44 +97,24 @@ describe('createSessionMemoryService', () => {
       });
 
       expect(result).toEqual({ id: 'memory-1' });
-      expect(memoryClient.search).not.toHaveBeenCalled();
-      expect(memoryClient.create).toHaveBeenCalledWith({
-        documents: [
-          expect.objectContaining({
+      expect(esClient.search).not.toHaveBeenCalled();
+      expect(esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
             id: 'memory-1',
             session_id: 'session-2',
             ai_index_id: ['ops-memory'],
             content: 'the pool limit was raised in 3.2.1',
             attributes: { incident: 'INC-4211' },
           }),
-        ],
-      });
-    });
-
-    it('throws when Elasticsearch rejects the document', async () => {
-      memoryClient.create.mockResolvedValue({
-        errors: true,
-        took: 1,
-        items: [
-          {
-            create: {
-              _index: '.ds-memory',
-              status: 400,
-              error: { type: 'document_parsing_exception', reason: 'failed to parse' },
-            },
-          },
-        ],
-      });
-
-      await expect(
-        service.remember(scope, { sessionId: 'session-1', content: 'anything' })
-      ).rejects.toThrow('Failed to write to session memory: failed to parse');
+        })
+      );
     });
   });
 
   describe('get', () => {
     it('returns the latest revision of the memory in the caller scope', async () => {
-      memoryClient.search.mockResolvedValue(searchResponse([storedMemory]));
+      esClient.search.mockResolvedValue(searchResponse([storedMemory]));
 
       await expect(service.get(scope, 'memory-1')).resolves.toEqual({
         id: 'memory-1',
@@ -160,7 +125,9 @@ describe('createSessionMemoryService', () => {
         attributes: { incident: 'INC-4211' },
         revisedAt: '2026-11-09T09:00:00.000Z',
       });
-      expect(memoryClient.search).toHaveBeenCalledWith({
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: SESSION_MEMORY_DATA_STREAM,
+        ignore_unavailable: true,
         query: {
           bool: {
             filter: [
@@ -176,13 +143,13 @@ describe('createSessionMemoryService', () => {
     });
 
     it('returns undefined when no memory matches', async () => {
-      memoryClient.search.mockResolvedValue(searchResponse([]));
+      esClient.search.mockResolvedValue(searchResponse([]));
 
       await expect(service.get(scope, 'memory-1')).resolves.toBeUndefined();
     });
 
     it('returns undefined when the latest revision is a tombstone', async () => {
-      memoryClient.search.mockResolvedValue(searchResponse([forgottenMemory]));
+      esClient.search.mockResolvedValue(searchResponse([forgottenMemory]));
 
       await expect(service.get(scope, 'memory-2')).resolves.toBeUndefined();
     });
@@ -190,7 +157,7 @@ describe('createSessionMemoryService', () => {
 
   describe('forget', () => {
     it('tombstones each live memory and reports what happened to every id', async () => {
-      memoryClient.search.mockResolvedValue(searchResponse([storedMemory, forgottenMemory]));
+      esClient.search.mockResolvedValue(searchResponse([storedMemory, forgottenMemory]));
 
       await expect(
         service.forget(scope, ['memory-1', 'memory-2', 'memory-3', 'memory-1'])
@@ -199,8 +166,9 @@ describe('createSessionMemoryService', () => {
         'memory-2': 'already_forgotten',
         'memory-3': 'not_found',
       });
-      expect(memoryClient.create).toHaveBeenCalledWith({
-        documents: [
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        operations: [
+          { create: { _index: SESSION_MEMORY_DATA_STREAM } },
           {
             '@timestamp': NOW.toISOString(),
             id: 'memory-1',
@@ -215,11 +183,13 @@ describe('createSessionMemoryService', () => {
     });
 
     it('reads only the latest revision of each memory in the caller scope', async () => {
-      memoryClient.search.mockResolvedValue(searchResponse([]));
+      esClient.search.mockResolvedValue(searchResponse([]));
 
       await service.forget(scope, ['memory-1']);
 
-      expect(memoryClient.search).toHaveBeenCalledWith({
+      expect(esClient.search).toHaveBeenCalledWith({
+        index: SESSION_MEMORY_DATA_STREAM,
+        ignore_unavailable: true,
         query: {
           bool: {
             filter: [
@@ -236,16 +206,35 @@ describe('createSessionMemoryService', () => {
     });
 
     it('writes nothing when no memory is live', async () => {
-      memoryClient.search.mockResolvedValue(searchResponse([forgottenMemory]));
+      esClient.search.mockResolvedValue(searchResponse([forgottenMemory]));
 
       await service.forget(scope, ['memory-2', 'memory-3']);
 
-      expect(memoryClient.create).not.toHaveBeenCalled();
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('throws when Elasticsearch rejects a tombstone', async () => {
+      esClient.search.mockResolvedValue(searchResponse([storedMemory]));
+      esClient.bulk.mockResolvedValue(
+        bulkResponse([
+          {
+            create: {
+              _index: '.ds-memory',
+              status: 400,
+              error: { type: 'document_parsing_exception', reason: 'failed to parse' },
+            },
+          },
+        ])
+      );
+
+      await expect(service.forget(scope, ['memory-1'])).rejects.toThrow(
+        'Failed to write to session memory: failed to parse'
+      );
     });
 
     it('does nothing for an empty list', async () => {
       await expect(service.forget(scope, [])).resolves.toEqual({});
-      expect(memoryClient.search).not.toHaveBeenCalled();
+      expect(esClient.search).not.toHaveBeenCalled();
     });
   });
 
@@ -258,6 +247,7 @@ describe('createSessionMemoryService', () => {
       });
       expect(esClient.deleteByQuery).toHaveBeenCalledWith({
         index: SESSION_MEMORY_DATA_STREAM,
+        ignore_unavailable: true,
         query: {
           bool: {
             filter: [
@@ -307,21 +297,20 @@ describe('createSessionMemoryService', () => {
       });
 
       expect(result).toEqual({ id: 'generated-id' });
-      expect(eventsClient.create).toHaveBeenCalledWith({
-        documents: [
-          {
-            '@timestamp': NOW.toISOString(),
-            id: 'generated-id',
-            space: 'default',
-            session_id: 'session-1',
-            turn_id: 'turn-3',
-            user_id: 'jdoe',
-            ai_index_id: ['ops-memory'],
-            transcript,
-          },
-        ],
+      expect(esClient.index).toHaveBeenCalledWith({
+        index: SESSION_EVENTS_DATA_STREAM,
+        op_type: 'create',
+        document: {
+          '@timestamp': NOW.toISOString(),
+          id: 'generated-id',
+          space: 'default',
+          session_id: 'session-1',
+          turn_id: 'turn-3',
+          user_id: 'jdoe',
+          ai_index_id: ['ops-memory'],
+          transcript,
+        },
       });
-      expect(memoryClient.create).not.toHaveBeenCalled();
     });
 
     it('keeps a caller-supplied id and leaves out a missing turn id', async () => {
@@ -329,38 +318,19 @@ describe('createSessionMemoryService', () => {
         service.saveEvent(scope, { id: 'event-1', sessionId: 'session-1', transcript })
       ).resolves.toEqual({ id: 'event-1' });
 
-      const [{ documents }] = eventsClient.create.mock.calls[0];
-      expect(documents).toEqual([
-        {
-          '@timestamp': NOW.toISOString(),
-          id: 'event-1',
-          space: 'default',
-          session_id: 'session-1',
-          user_id: 'jdoe',
-          ai_index_id: [],
-          transcript,
-        },
-      ]);
-    });
-
-    it('throws when Elasticsearch rejects the event', async () => {
-      eventsClient.create.mockResolvedValue({
-        errors: true,
-        took: 1,
-        items: [
-          {
-            create: {
-              _index: '.ds-events',
-              status: 400,
-              error: { type: 'strict_dynamic_mapping_exception', reason: 'unknown field' },
-            },
+      expect(esClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: {
+            '@timestamp': NOW.toISOString(),
+            id: 'event-1',
+            space: 'default',
+            session_id: 'session-1',
+            user_id: 'jdoe',
+            ai_index_id: [],
+            transcript,
           },
-        ],
-      });
-
-      await expect(
-        service.saveEvent(scope, { sessionId: 'session-1', transcript })
-      ).rejects.toThrow('Failed to write to session memory: unknown field');
+        })
+      );
     });
   });
 });
