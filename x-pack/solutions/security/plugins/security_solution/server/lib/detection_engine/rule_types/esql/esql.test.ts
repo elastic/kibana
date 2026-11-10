@@ -327,7 +327,7 @@ describe('esqlExecutor', () => {
 
       // only the suppression branch of the executor logs the number of suppressed alerts
       expect(mockedArguments.sharedParams.ruleExecutionLogger.debug).toHaveBeenCalledWith(
-        expect.stringContaining('Alerts suppressed')
+        expect.stringContaining('alerts. Suppressed')
       );
       const [alertDocument] = ruleServices.alertWithPersistence.mock.calls[0][0];
       expect(alertDocument._source).not.toHaveProperty('_source');
