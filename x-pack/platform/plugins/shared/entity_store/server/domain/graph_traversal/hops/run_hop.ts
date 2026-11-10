@@ -71,6 +71,7 @@ export interface RunHopStats {
   excluded_edges: number;
   /** Nodes admitted this hop that matched a stop condition. */
   until_matched: number;
+  /** Edges onto visited nodes that arrived despite the query filtering them; they admit no node. */
   closing_edges: number;
   new_nodes: number;
   hubs_skipped: string[];
@@ -366,6 +367,7 @@ export const runHop = async (
           limit,
           lookback,
           exclusions,
+          visited: input.visited,
           inbound,
         });
         const queryStartedAt = performance.now();
@@ -398,9 +400,9 @@ export const runHop = async (
     stats.hubs_skipped = Array.from(hubs);
   }
 
-  // 6. Dedupe and edge cap. In a `both` walk an edge onto a node already visited was
-  //    recorded from that node's side when it was expanded, so it is a repeat, not a closing
-  //    edge; outbound walks keep closing edges, which are new paths.
+  // 6. Dedupe and edge cap. Edges onto visited nodes are filtered inside the hop query; any
+  //    that still arrive are counted below as closing edges. In a `both` walk such an edge was
+  //    recorded from the other node's side when it was expanded, so it is dropped as a repeat.
   const deduped = dedupeEdges(kept, hubs).filter(
     ({ reached }) => direction !== 'both' || !visitedSet.has(reached)
   );

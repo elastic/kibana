@@ -97,10 +97,11 @@ describe('runHop', () => {
       },
       execute
     );
-    // role-x is not expanded; both exclusions also travel as document filter parameters.
+    // role-x is not expanded; both exclusions also travel as document filter parameters, and
+    // the visited ids follow them as the filter on the exploded pointer.
     expect(execute.calls).toEqual([
-      ['role-a', 'role-x', '1'],
-      ['role-a', 'role-x', '1'],
+      ['role-a', 'role-x', '1', 'seed', 'role-a', 'role-x'],
+      ['role-a', 'role-x', '1', 'seed', 'role-a', 'role-x'],
     ]);
     expect(out.edges.map((edge) => edge.target)).toEqual(['role-b']);
     expect(out.nodes.map((node) => node.id)).toEqual(['role-b']);
@@ -134,7 +135,11 @@ describe('runHop', () => {
       },
       execute
     );
-    expect(execute.calls).toEqual([['role-a'], ['role-a']]);
+    // Frontier first, then the visited ids the query filters out after the explode.
+    expect(execute.calls).toEqual([
+      ['role-a', 'seed', 'role-a'],
+      ['role-a', 'seed', 'role-a'],
+    ]);
     expect(out.edges).toEqual([
       {
         hop: 1,
@@ -266,7 +271,28 @@ describe('runHop', () => {
     expect(out.stop_reason).toBe('max_edges_total');
   });
 
-  it('keeps closing edges onto visited nodes without re-admitting them', async () => {
+  it('filters visited ids inside the hop query, after the pointer field is exploded', async () => {
+    const execute = executor([result([['role-a', 'role-b']]), result([])]);
+    await runHop(
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: ['role-a'],
+        visited: ['seed', 'role-a'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+      },
+      execute
+    );
+    expect(execute.calls[0]).toEqual(['role-a', 'seed', 'role-a']);
+    expect(execute.queries[0]).toContain(
+      `| MV_EXPAND \`${hop.target_fields[0].field}\`\n| WHERE NOT \`${hop.target_fields[0].field}\` IN (?, ?)`
+    );
+  });
+
+  it('counts closing edges that still arrive without re-admitting their node', async () => {
     const execute = executor([
       result([
         ['role-a', 'seed'],
@@ -370,7 +396,9 @@ describe('runHop', () => {
       },
       execute
     );
-    expect(execute.calls[0]).toHaveLength(10);
+    // 10 frontier ids, then the 15 visited ids.
+    expect(execute.calls[0]).toHaveLength(10 + frontier.length);
+    expect(execute.calls[0].slice(0, 10)).toEqual(frontier.slice(0, 10));
     expect(out.truncated).toBe(true);
     expect(out.stats).toMatchObject({
       frontier_size: 15,
@@ -567,7 +595,14 @@ describe('runHop', () => {
       },
       execute
     );
-    expect(execute.calls).toEqual([['hash-1'], ['hash-1'], ['hash-1'], ['hash-1']]);
+    // Outbound legs register the frontier then the visited ids (filtered after the explode);
+    // inbound legs register the visited ids first (filtered on the document) then the frontier.
+    expect(execute.calls).toEqual([
+      ['hash-1', 'host:WKSTN-RECV01', 'hash-1'],
+      ['hash-1', 'host:WKSTN-RECV01', 'hash-1'],
+      ['host:WKSTN-RECV01', 'hash-1', 'hash-1'],
+      ['host:WKSTN-RECV01', 'hash-1', 'hash-1'],
+    ]);
     expect(out.stats.queries).toBe(4);
     // Edges keep the stored orientation: the host holds the relationship to the hash.
     expect(out.edges.map((e) => [e.source, e.target, e.relation])).toEqual([

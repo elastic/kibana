@@ -183,7 +183,9 @@ export const buildGraphExpandStatement = ({
   // it is admitted, so nothing beyond it is visited and no budget is spent on it.
   // hop_fields gives the walk the scenario's fields per hop, so a hop only issues subplans
   // for its own fields rather than for the whole TO union; max_edges_per_hop caps each
-  // subplan's rows at the index.
+  // subplan's rows at the index. closing_edges false keeps edges back onto nodes already
+  // reached out of the hop subplans, as the hop engine does, so they are never grouped or
+  // shipped.
   const options = {
     max_hops: limits.max_hops,
     max_nodes: limits.max_nodes,
@@ -191,6 +193,7 @@ export const buildGraphExpandStatement = ({
     hub_degree: limits.hub_degree,
     max_edges_per_hop: limits.max_edges_per_hop,
     direction: plan.direction,
+    closing_edges: false,
     hop_fields: plan.hops.map((hop) => hop.target_fields.map((t) => t.field).join(',')),
     ...(excludedIds.length > 0 && { exclude: excludedIds }),
   };

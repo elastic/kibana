@@ -63,6 +63,12 @@ export interface BuildHopQueryParams {
   lookback?: string;
   exclusions?: TraversalExclusion[];
   /**
+   * Ids of nodes the walk has already admitted. An edge onto one adds no node and is not
+   * reported, so it is filtered inside the query instead of after the fetch: outbound on the
+   * exploded pointer, inbound on the document's own id.
+   */
+  visited?: string[];
+  /**
    * Walk the edges backwards: read the entities whose target field points at a frontier id,
    * instead of the frontier entities' own target field. Rows keep the stored orientation
    * (`__source` is the entity holding the field, `__target` the id it points at), so on an
@@ -99,6 +105,7 @@ export const buildHopQuery = ({
   limit,
   lookback,
   exclusions = [],
+  visited = [],
   inbound = false,
 }: BuildHopQueryParams): HopQuery => {
   if (frontier.length === 0) {
@@ -142,6 +149,9 @@ export const buildHopQuery = ({
   for (const { values } of matchExclusions) {
     lines.push(`| WHERE NOT ${match} IN (${placeholders(values)})`);
   }
+  if (inbound && visited.length > 0) {
+    lines.push(`| WHERE NOT ${match} IN (${placeholders(visited)})`);
+  }
   for (const { field, values } of documentExclusions) {
     const quoted = quoteField(field);
     const contains = values.map(() => `MV_CONTAINS(${quoted}, ?)`).join(' OR ');
@@ -151,6 +161,8 @@ export const buildHopQuery = ({
   lines.push(`| MV_EXPAND ${target}`);
   if (inbound) {
     lines.push(`| WHERE ${target} IN (${placeholders(frontier)})`);
+  } else if (visited.length > 0) {
+    lines.push(`| WHERE NOT ${target} IN (${placeholders(visited)})`);
   }
   for (const { values } of targetExclusions) {
     lines.push(`| WHERE NOT ${target} IN (${placeholders(values)})`);

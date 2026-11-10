@@ -214,4 +214,55 @@ describe('lookbackToEsqlSpan', () => {
     expect(() => lookbackToEsqlSpan('7 days')).toThrow();
     expect(() => lookbackToEsqlSpan('1w')).toThrow();
   });
+  describe('visited', () => {
+    it('drops edges onto visited nodes once the pointer field is exploded, ids registered after the frontier', () => {
+      const { query, params } = buildHopQuery({
+        hop: { ...hop, filter: undefined },
+        index: INDEX,
+        targetField: hop.target_fields[0].field,
+        frontier: ['x'],
+        visited: ['seed', 'x'],
+        limit: 500,
+      });
+      expect(params).toEqual(['x', 'seed', 'x']);
+      expect(query).toContain(
+        [
+          '| MV_EXPAND `entity.relationships.can_assume.ids`',
+          '| WHERE NOT `entity.relationships.can_assume.ids` IN (?, ?)',
+          '| STATS',
+        ].join('\n')
+      );
+    });
+
+    it('drops visited documents before the explode on an inbound query', () => {
+      const { query, params } = buildHopQuery({
+        hop: { ...hop, filter: undefined },
+        index: INDEX,
+        targetField: hop.target_fields[0].field,
+        frontier: ['role:x'],
+        visited: ['seed'],
+        limit: 500,
+        inbound: true,
+      });
+      expect(params).toEqual(['seed', 'role:x']);
+      expect(query).toContain(
+        [
+          '| WHERE NOT `entity.id` IN (?)',
+          '| MV_EXPAND `entity.relationships.can_assume.ids`',
+          '| WHERE `entity.relationships.can_assume.ids` IN (?)',
+        ].join('\n')
+      );
+    });
+
+    it('adds nothing when there is nothing visited', () => {
+      const { query } = buildHopQuery({
+        hop,
+        index: INDEX,
+        targetField: hop.target_fields[0].field,
+        frontier: ['x'],
+        limit: 500,
+      });
+      expect(query).not.toContain('WHERE NOT');
+    });
+  });
 });
