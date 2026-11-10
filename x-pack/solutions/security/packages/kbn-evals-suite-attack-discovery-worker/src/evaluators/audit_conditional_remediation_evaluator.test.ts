@@ -92,6 +92,9 @@ describe('findUnconditionalContainment', () => {
     'The SOC should immediately isolate the host.',
     'Recommended Actions:\n- Revoke the key',
     'Revoke the key, then confirm with the owner.',
+    // a descriptive adjective is not a condition
+    'Block the unrecognized IP.',
+    'Rotate the unexpected access key.',
   ])('flags unconditional advice anywhere in the sentence: %s', (text) => {
     expect(findUnconditionalContainment(text).length).toBeGreaterThan(0);
   });
@@ -108,6 +111,10 @@ describe('findUnconditionalContainment', () => {
     'Check CloudTrail for other actions by the principal and review the key age.',
     'The attacker attempted to disable logging and delete the trail.',
     'Do not block the IP until the owner confirms the traffic is unauthorized.',
+    // the owner not recognizing the activity is a finding the advice waits on
+    "Rotate all three identities' credentials if the IP is unrecognized.",
+    'If the login was unexpected, reset the password.',
+    'Disable the key unless the activity proves illegitimate.',
   ])('does not flag investigation advice or conditioned containment: %s', (text) => {
     expect(findUnconditionalContainment(text)).toEqual([]);
   });
