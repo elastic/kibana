@@ -171,6 +171,49 @@ describe('renderInvestigationSlackMessage', () => {
     expect(message.blocks.length).toBeLessThanOrEqual(50);
   });
 
+  it('keeps the fallback text under the Slack text limit with maximum-length findings', () => {
+    const long = 'w'.repeat(1500);
+    const { text } = render({
+      investigation: completed({
+        summary: long,
+        verdict: long,
+        impact: { summary: long, entities: [{ name: 'checkout' }] },
+        hypotheses: [0, 1].map((index) => ({
+          candidate: `candidate ${index}`,
+          confidence: 0.9,
+          status: 'confirmed' as const,
+          reason: 'r'.repeat(600),
+        })),
+      }),
+    });
+
+    expect(text.length).toBeLessThanOrEqual(4000);
+  });
+
+  it('does not let agent text broadcast or link through Slack control sequences', () => {
+    const hostile = '<!channel> <!here> <https://evil.example|click> &amp;';
+    const { blocks, text } = render({
+      automationName: hostile,
+      investigation: completed({
+        title: hostile,
+        summary: hostile,
+        verdict: hostile,
+        impact: { summary: hostile, entities: [{ name: hostile }] },
+        hypotheses: [{ candidate: hostile, confidence: 0.9, status: 'confirmed', reason: hostile }],
+      }),
+    });
+    // Only mrkdwn parses control sequences; plain_text and rich_text elements are literal.
+    const mrkdwn = JSON.stringify(blocks).match(/"type":"mrkdwn","text":"[^"]*"/g) ?? [];
+
+    expect(mrkdwn.length).toBeGreaterThan(0);
+    for (const rendered of [...mrkdwn, text]) {
+      expect(rendered).not.toContain('<!channel>');
+      expect(rendered).not.toContain('<!here>');
+      expect(rendered).not.toContain('<https://evil.example|click>');
+    }
+    expect(text).toContain('&lt;!channel&gt;');
+  });
+
   it('clamps a long automation name instead of failing the render', () => {
     const { blocks } = render({ automationName: 'a'.repeat(1000), phase: 'started' });
 
