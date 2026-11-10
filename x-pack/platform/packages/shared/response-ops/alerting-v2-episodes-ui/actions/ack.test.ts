@@ -35,7 +35,6 @@ const makeClassicEpisode = (id: string, status = 'open'): AlertEpisode =>
       instanceId: 'inst-1',
       ruleId: 'r1',
       ruleTypeId: undefined,
-      consumer: undefined,
       workflowStatus: status,
       workflowTags: [],
       caseIds: [],

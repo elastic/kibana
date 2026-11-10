@@ -28,7 +28,6 @@ const makeClassicEpisode = (
       instanceId: undefined,
       ruleId,
       ruleTypeId: undefined,
-      consumer: undefined,
       workflowStatus: 'open',
       workflowTags: [],
       caseIds,
