@@ -2,6 +2,8 @@
 
 `FlyoutTemplate.Footer` renders a primary and a secondary action, right-aligned inside `EuiFlyoutFooter`, with the secondary action first. With no actions, the footer is not rendered at all. The template does not add a default Cancel button.
 
+The footer has the flyout's plain background, not `EuiFlyoutFooter`'s subdued one, and a thin top border like the one under the header.
+
 ```tsx
 <FlyoutTemplate.Footer>
   <FlyoutTemplate.Footer.SecondaryAction label="Discard" onClick={onDiscard} />

@@ -113,6 +113,21 @@ describe('FlyoutTemplate footer', () => {
     expect(screen.getByTestId('paddedFooter')).toHaveStyle({ padding: '16px' });
   });
 
+  it('gives the footer the plain background of the flyout', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" data-test-subj="plain">
+        <FlyoutTemplate.Body>
+          <span>content</span>
+        </FlyoutTemplate.Body>
+        <FlyoutTemplate.Footer>
+          <FlyoutTemplate.Footer.PrimaryAction label="Save" onClick={noop} />
+        </FlyoutTemplate.Footer>
+      </FlyoutTemplate>
+    );
+
+    expect(screen.getByTestId('plainFooter')).toHaveStyle({ backgroundColor: '#FFFFFF' });
+  });
+
   it('shows an action tooltip on hover', async () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
