@@ -20,6 +20,7 @@ import type {
   LensHeatmapConfig,
   LensMetricConfig,
   LensPartitionConfig,
+  LensTagcloudConfig,
   LensXyConfig,
   LensXyDataLayer,
   LensXyEsqlReferenceLinesLayer,
@@ -35,7 +36,8 @@ export type LensSingleQueryConfig =
   | LensDatatableConfig
   | LensPartitionConfig
   | LensHeatmapConfig
-  | LensGaugeConfig;
+  | LensGaugeConfig
+  | LensTagcloudConfig;
 
 /** The chart types that run one query, which the Lens materializer maps. */
 const SINGLE_QUERY_TYPES: ReadonlySet<string> = new Set<LensSingleQueryConfig['type']>([
@@ -47,6 +49,7 @@ const SINGLE_QUERY_TYPES: ReadonlySet<string> = new Set<LensSingleQueryConfig['t
   'waffle',
   'heatmap',
   'gauge',
+  'tag_cloud',
 ]);
 
 interface EsqlSource {

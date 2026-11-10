@@ -15,6 +15,7 @@ import { mapLensGauge } from './gauge';
 import { mapLensHeatmap } from './heatmap';
 import { mapLensMetric } from './metric';
 import { mapLensPartition } from './partition';
+import { mapLensTagcloud } from './tagcloud';
 import { asMappedChart, planLensChart } from './plan';
 import type { LensApiConfig, LensMaterializeConfig, LensSavedObjectReference } from './types';
 import { mapLensXy } from './xy';
@@ -145,6 +146,8 @@ export const createLensMaterializer = ({
         return mapLensHeatmap(single, tables, kit, savedObject);
       case 'gauge':
         return mapLensGauge(single, tables, kit, savedObject);
+      case 'tag_cloud':
+        return mapLensTagcloud(single, tables, kit, savedObject);
     }
   },
 });
