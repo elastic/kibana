@@ -37,7 +37,7 @@ const actionIcons: Record<TableGridCellActionIcon, IconType> = {
 };
 
 const getCellContext = <TRow,>(
-  model: TableGridModel<TRow>,
+  model: Pick<TableGridModel<TRow>, 'getRowId' | 'rows'>,
   rowIndex: number,
   columnId: string
 ): TableGridCellContext<TRow> | undefined => {
@@ -197,11 +197,11 @@ export function EuiDataGridAdapter<TRow>({ model }: EuiDataGridAdapterProps<TRow
           <EuiIconTip aria-label={column.label} type="info" content={column.label} />
         ),
         rowCellRender: ({ rowIndex }) => {
-          const context = getCellContext(modelRef.current, rowIndex, column.id);
+          const context = getCellContext({ getRowId, rows }, rowIndex, column.id);
           return context ? column.renderCell({ ...context, requestFocus }) : null;
         },
       })),
-    [modelLeadingControlColumns, requestFocus]
+    [getRowId, modelLeadingControlColumns, requestFocus, rows]
   );
 
   const isScrollRestored = useRef(false);
