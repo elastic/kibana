@@ -32,7 +32,11 @@ export function EntityTypeTooltip({
         values: { type: typeKindLabel },
       })
     : undefined;
-  const subtypeLine = subtypeLabel
+  // Same string twice (e.g. Type: Service / Sub-type: Service) is noise — drop the sub-type.
+  const showSubtype =
+    Boolean(subtypeLabel) &&
+    subtypeLabel!.trim().toLowerCase() !== (typeKindLabel ?? '').trim().toLowerCase();
+  const subtypeLine = showSubtype
     ? i18n.translate('xpack.apm.impactMap.entityTooltip.subtype', {
         defaultMessage: 'Sub-type: {subtype}',
         values: { subtype: subtypeLabel },
