@@ -15,7 +15,7 @@ import {
 } from '@kbn/as-code-filters-transforms';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { VEGA_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { isVegaByReferenceState } from '../../common/embeddable/type_guards';
+import { isVegaByReferenceState } from '../../common/utils';
 import type { VegaByReferenceState, VegaByValueState, VegaEmbeddableState } from './schema';
 
 const VEGA_SAVED_OBJECT_REF_NAME = 'savedObjectRef';

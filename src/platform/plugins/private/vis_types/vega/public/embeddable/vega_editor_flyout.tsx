@@ -22,7 +22,7 @@ import {
   vegaEditorFlyoutBodyCss,
 } from '../components/vega_editor_body';
 import { specFromEditor, specToEditorValue } from '../lib/editor_spec';
-import { isSameSearch } from '../lib/library_draft';
+import { isSameSearch } from '../lib/editable_state';
 import { vegaTitleInWizard } from '../vega_icon';
 import type { VegaEmbeddableApi } from './vega_embeddable';
 

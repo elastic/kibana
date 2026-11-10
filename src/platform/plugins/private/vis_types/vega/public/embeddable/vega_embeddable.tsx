@@ -78,8 +78,8 @@ import type { VegaRenderDescriptor } from '../data_model/types';
 import { parseSpec } from '../lib/editor_spec';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { getDefaultDataView } from '../lib/get_default_data_view';
-import { isVegaByReferenceState } from '../../common/embeddable/type_guards';
-import { toPanelFilters, type VegaEditableState } from '../lib/library_draft';
+import { isVegaByReferenceState } from '../../common/utils';
+import { toPanelFilters, type VegaEditableState } from '../lib/editable_state';
 import {
   createVegaLibraryClient,
   hasVegaLibraryItemWithTitle,

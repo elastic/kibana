@@ -41,8 +41,8 @@ import {
 } from '../components/vega_editor_body';
 import { parseSpec } from '../lib/editor_spec';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
-import { fromDraft, isSameDraft, toDraft } from '../lib/library_draft';
-import type { VegaDraft, VegaEditableState } from '../lib/library_draft';
+import { fromDraft, isSameDraft, toDraft } from '../lib/editable_state';
+import type { VegaDraft, VegaEditableState } from '../lib/editable_state';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { getData } from '../services';
 import { PreviewTimePicker } from './preview_time_picker';

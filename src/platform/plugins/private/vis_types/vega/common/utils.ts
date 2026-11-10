@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VegaByReferenceState, VegaEmbeddableState } from '../../server/embeddable/schema';
+import type { VegaByReferenceState, VegaEmbeddableState } from '../server/embeddable/schema';
 
 /** Whether a Vega panel references a library item instead of storing its spec. */
 export const isVegaByReferenceState = (state: VegaEmbeddableState): state is VegaByReferenceState =>

@@ -11,7 +11,7 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { openLazyFlyout, openLazySystemFlyout } from '@kbn/presentation-util';
 import { getDefaultDataView } from '../lib/get_default_data_view';
-import type { VegaEditableState } from '../lib/library_draft';
+import type { VegaEditableState } from '../lib/editable_state';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { vegaTitleInWizard } from '../vega_icon';
 import { createVegaLibraryClient } from './vega_library_client';

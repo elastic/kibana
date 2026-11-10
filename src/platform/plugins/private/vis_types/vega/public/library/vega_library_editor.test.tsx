@@ -17,7 +17,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import type { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { VegaReadResponseBody } from '../../server/api/read/types';
-import type { VegaEditableState } from '../lib/library_draft';
+import type { VegaEditableState } from '../lib/editable_state';
 import { setData } from '../services';
 import type { VegaPluginStartDependencies } from '../plugin';
 import { saveVegaToLibrary } from './save_to_library';
