@@ -186,6 +186,13 @@ export interface Agent extends AgentBase {
   sort?: any[];
   metrics?: AgentMetrics;
   last_known_status?: AgentStatus;
+  pending_restart?: AgentPendingRestart;
+}
+
+export interface AgentPendingRestart {
+  action_id: string;
+  created_at: string;
+  expiration?: string;
 }
 
 export interface CurrentUpgrade {

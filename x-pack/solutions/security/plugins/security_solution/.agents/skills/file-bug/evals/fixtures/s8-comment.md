@@ -1,0 +1,1 @@
+Still reproducible on 9.3.0 (ECH, default space, superuser): open Security > Alerts, set the date picker to Last 24 hours. The table shows "0 results" although 12 alerts exist in that range. Expected: 12 rows.

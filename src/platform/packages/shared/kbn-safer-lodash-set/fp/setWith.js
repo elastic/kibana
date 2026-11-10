@@ -5,7 +5,7 @@
  * See `src/platform/packages/shared/kbn-safer-lodash-set/LICENSE` for more information.
  */
 
-/*eslint no-var:0 */
+/* eslint-disable no-var */
 var convert = require('lodash/fp/convert');
 var func = convert('setWith', require('../setWith'));
 

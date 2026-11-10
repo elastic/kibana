@@ -11,15 +11,15 @@ import { omit } from 'lodash';
 import { type Filter, isOfAggregateQueryType } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { DataViewField, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
+import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
-import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { getOrRegisterEsqlDataView } from '@kbn/data-source';
 import type {
   UnifiedHistogramFetchParams,
   UnifiedHistogramFetchParamsExternal,
   UnifiedHistogramServices,
 } from '../types';
+import { resolveBreakdownField } from './resolve_breakdown_field';
 
 const EMPTY_FILTERS: Filter[] = [];
 const EMPTY_ESQL_VARIABLES: ESQLControlVariable[] = [];
@@ -113,18 +113,7 @@ function getProcessedBreakdownField({
     return undefined;
   }
 
-  if (dataSource.kind === 'esql') {
-    const breakdownColumn = columns?.find((column) => column.name === breakdownField);
-    const field = breakdownColumn
-      ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(breakdownColumn))
-      : undefined;
-    return {
-      field,
-    };
-  }
-
-  const dvs = dataSource.kind === 'index-pattern' ? dataSource.getDataView() : undefined;
   return {
-    field: breakdownField ? dvs?.getFieldByName(breakdownField) : undefined,
+    field: resolveBreakdownField({ breakdownField, dataSource, columns }),
   };
 }

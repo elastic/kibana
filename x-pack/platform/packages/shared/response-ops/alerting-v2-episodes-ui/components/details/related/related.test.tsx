@@ -84,4 +84,36 @@ describe('AlertEpisodesRelated', () => {
     // EuiTitle puts the test subj on its child, so this is the heading itself.
     expect(heading.tagName).toBe('H2');
   });
+
+  it('renders the subsections for an episode without a rule when it has an external source', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodesRelated
+          currentEpisodeId="ep-1"
+          groupHash="gh-1"
+          ruleState={{ status: RuleStateStatus.idle }}
+          source="zabbix"
+          getEpisodeDetailsHref={(id) => `/base/${id}`}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('mockGroupSubsection')).toBeInTheDocument();
+    expect(screen.getByTestId('mockRuleSubsection')).toBeInTheDocument();
+  });
+
+  it('renders nothing without a rule or a source', () => {
+    const { container } = render(
+      <I18nProvider>
+        <AlertEpisodesRelated
+          currentEpisodeId="ep-1"
+          groupHash="gh-1"
+          ruleState={{ status: RuleStateStatus.idle }}
+          getEpisodeDetailsHref={(id) => `/base/${id}`}
+        />
+      </I18nProvider>
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
 });

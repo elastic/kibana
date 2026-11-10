@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import {
+  ALERT_STATUS,
+  ALERT_STATUS_ACTIVE,
+  ALERT_TIME_RANGE,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
+import { TRANSACTION_NAME } from '../../../common/es_fields/apm';
 import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getServiceTransactionGroupsAlerts } from './get_service_transaction_groups_alerts';
 
@@ -30,24 +35,37 @@ function getFilters(client: ReturnType<typeof createMockAlertsClient>): QueryFil
 }
 
 describe('getServiceTransactionGroupsAlerts', () => {
-  it('filters by active status and time range', async () => {
+  it('filters by active status and alert lifetime time range', async () => {
     const client = createMockAlertsClient();
-    const start = Date.now() - 3600000;
-    const end = Date.now();
+    const nowMs = Date.parse('2026-05-12T13:00:00.000Z');
+    const start = nowMs - 3600000;
+    const end = nowMs;
+    const realDateNow = Date.now;
+    Date.now = jest.fn(() => nowMs);
 
-    await getServiceTransactionGroupsAlerts({
-      apmAlertsClient: client as unknown as ApmAlertsClient,
-      latencyAggregationType: LatencyAggregationType.avg,
-      start,
-      end,
-    });
+    try {
+      await getServiceTransactionGroupsAlerts({
+        apmAlertsClient: client as unknown as ApmAlertsClient,
+        start,
+        end,
+      });
+    } finally {
+      Date.now = realDateNow;
+    }
 
     const filters = getFilters(client);
 
     expect(filters).toEqual(
       expect.arrayContaining([{ term: { [ALERT_STATUS]: ALERT_STATUS_ACTIVE } }])
     );
-    expect(filters.find((f) => f.range)).toBeDefined();
+    expect(filters.find((f) => f.range?.[ALERT_TIME_RANGE])).toEqual({
+      range: {
+        [ALERT_TIME_RANGE]: expect.objectContaining({
+          gte: start,
+          lte: end,
+        }),
+      },
+    });
   });
 
   it('extends a past end to now so currently-active alerts are not missed', async () => {
@@ -61,7 +79,6 @@ describe('getServiceTransactionGroupsAlerts', () => {
     try {
       await getServiceTransactionGroupsAlerts({
         apmAlertsClient: client as unknown as ApmAlertsClient,
-        latencyAggregationType: LatencyAggregationType.avg,
         start,
         end: pastEnd,
       });
@@ -70,12 +87,28 @@ describe('getServiceTransactionGroupsAlerts', () => {
     }
 
     const rangeFilter = getFilters(client).find((f) => f.range);
-    expect(rangeFilter?.range?.['@timestamp']).toEqual(
+    expect(rangeFilter?.range?.[ALERT_TIME_RANGE]).toEqual(
       expect.objectContaining({
         gte: start,
         lte: nowMs,
       })
     );
+  });
+
+  it('aggregates unique alerts per transaction group via cardinality', async () => {
+    const client = createMockAlertsClient();
+
+    await getServiceTransactionGroupsAlerts({
+      apmAlertsClient: client as unknown as ApmAlertsClient,
+      start: Date.now() - 3600000,
+      end: Date.now(),
+    });
+
+    const aggs = client.search.mock.calls[0][0].aggs;
+    expect(aggs.transaction_groups.terms.field).toBe(TRANSACTION_NAME);
+    expect(aggs.transaction_groups.terms.order).toEqual({ alerts_count: 'desc' });
+    expect(aggs.transaction_groups.aggs.alerts_count.cardinality.field).toBe(ALERT_UUID);
+    expect(client.search.mock.calls[0][0].query.bool.must).toBeUndefined();
   });
 
   it('returns aggregated alert counts per transaction group', async () => {
@@ -84,8 +117,8 @@ describe('getServiceTransactionGroupsAlerts', () => {
       aggregations: {
         transaction_groups: {
           buckets: [
-            { key: 'GET /api', doc_count: 3 },
-            { key: 'POST /api', doc_count: 1 },
+            { key: 'GET /api', doc_count: 5, alerts_count: { value: 3 } },
+            { key: 'POST /api', doc_count: 2, alerts_count: { value: 1 } },
           ],
         },
       },
@@ -93,7 +126,6 @@ describe('getServiceTransactionGroupsAlerts', () => {
 
     const result = await getServiceTransactionGroupsAlerts({
       apmAlertsClient: client as unknown as ApmAlertsClient,
-      latencyAggregationType: LatencyAggregationType.avg,
       start: Date.now() - 3600000,
       end: Date.now(),
     });

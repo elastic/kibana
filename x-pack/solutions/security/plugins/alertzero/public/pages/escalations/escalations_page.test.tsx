@@ -25,6 +25,7 @@ import {
 import { useAlertZeroInvestigationsCapabilities } from '../../hooks/use_alertzero_investigations_capabilities';
 import { useConversationsUrlParams } from '../conversations/conversations_url_params';
 import { useInvestigationDetails } from '../conversations/use_investigation_details';
+import { ESCALATIONS_READ_MORE_URL } from './constants';
 import { EscalationsPage } from './escalations_page';
 
 jest.mock('../../hooks/use_alertzero_investigations_capabilities');
@@ -89,6 +90,18 @@ jest.mock('../../hooks/use_alertzero_doc_title', () => ({
 const mockUseAssignEscalation = useAssignEscalation as jest.Mock;
 const mockUseListEscalations = useListEscalations as jest.Mock;
 const mockUseEscalationImpactPills = useEscalationImpactPills as jest.Mock;
+
+/** What the pills hook returns once the server has sent every pill. */
+const pagedPills = (pills: Array<{ entityId: string; count: number }>) => ({
+  pills,
+  total: pills.length,
+  remaining: 0,
+  canShowMore: true,
+  reachLimit: 10_000,
+  loadFailed: false,
+  isLoadingMore: false,
+  showMore: jest.fn(),
+});
 const mockUseUserProfiles = useUserProfiles as jest.Mock;
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.Mock;
 const mockUseOpenInChat = useOpenInChat as jest.Mock;
@@ -120,12 +133,20 @@ const closedEscalation = {
 const assignMutate = jest.fn().mockResolvedValue({});
 
 const renderPage = (
-  overrides: { capabilities?: { showEscalations?: boolean; manageEscalations?: boolean } } = {}
+  overrides: {
+    capabilities?: {
+      showEscalations?: boolean;
+      manageEscalations?: boolean;
+      canAccessAgentBuilder?: boolean;
+    };
+  } = {}
 ) => {
   mockUseCapabilities.mockReturnValue({
     showEscalations: true,
     manageEscalations: true,
+    readInvestigations: true,
     manageInvestigations: true,
+    canAccessAgentBuilder: true,
     ...overrides.capabilities,
   });
   const core = coreMock.createStart();
@@ -166,6 +187,7 @@ beforeEach(() => {
   mockUseCapabilities.mockReturnValue({
     showEscalations: true,
     manageEscalations: true,
+    readInvestigations: true,
     manageInvestigations: true,
   });
   mockUseConversationsUrlParams.mockReturnValue({
@@ -175,7 +197,7 @@ beforeEach(() => {
   });
   mockUseInvestigationDetails.mockImplementation(() => undefined);
   mockUseAssignEscalation.mockReturnValue({ mutateAsync: assignMutate });
-  mockUseEscalationImpactPills.mockReturnValue({ data: [] });
+  mockUseEscalationImpactPills.mockReturnValue(pagedPills([]));
   mockUseUserProfiles.mockReturnValue({ data: [], isLoading: false });
   mockUseSuggestUserProfiles.mockReturnValue({ data: [], isLoading: false });
 });
@@ -229,13 +251,11 @@ describe('EscalationsPage', () => {
     expect(screen.getByTestId('escalationQueue-closed')).toBeInTheDocument();
   });
 
-  it('explains in the Open section that escalations are created from the Alert Zero page', () => {
+  it('does not show the empty-state note in the Open section when there are open escalations', () => {
     mockBothQueues([openEscalation], [closedEscalation]);
     renderPage();
 
-    expect(screen.getByTestId('escalationQueueNote-open')).toHaveTextContent(
-      'Escalations start in Alert Zero'
-    );
+    expect(screen.queryByTestId('alertZeroEscalationsOpenNote')).not.toBeInTheDocument();
   });
 
   it('says there are no open escalations when the Open list is empty', () => {
@@ -247,12 +267,12 @@ describe('EscalationsPage', () => {
     );
   });
 
-  it('links to the Alert Zero page from the Open section note', () => {
+  it('explains how escalations reach the Open section without naming where to escalate from', () => {
     mockBothQueues([], [closedEscalation]);
     renderPage();
 
-    expect(screen.getByTestId('alertZeroEscalationsOpenNoteLink')).toHaveTextContent(
-      'Alert Zero page'
+    expect(screen.getByTestId('alertZeroEscalationsOpenNote')).toHaveTextContent(
+      "When you escalate an investigation, the escalation appears here until it's closed."
     );
   });
 
@@ -275,9 +295,19 @@ describe('EscalationsPage', () => {
     renderPage();
 
     expect(screen.getByTestId('alertZeroEscalationsEmptyBanner')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'No escalations yet' })).toBeInTheDocument();
     expect(screen.queryByTestId('escalationsPageHeader')).not.toBeInTheDocument();
     expect(screen.queryByTestId('escalationQueue-open')).not.toBeInTheDocument();
     expect(screen.queryByTestId('escalationQueue-closed')).not.toBeInTheDocument();
+  });
+
+  it('links the explainer banner to the escalations docs page', () => {
+    mockBothQueues([], []);
+    renderPage();
+
+    const link = screen.getByTestId('alertZeroEscalationsEmptyBannerDocsLink');
+    expect(link).toHaveTextContent('Read more about escalations');
+    expect(link).toHaveAttribute('href', ESCALATIONS_READ_MORE_URL);
   });
 
   it('hides the explainer banner when any escalation exists', () => {
@@ -294,6 +324,15 @@ describe('EscalationsPage', () => {
     expect(screen.getByTestId('escalationsPageHeader')).toBeInTheDocument();
     // "1 open escalation" from the header count
     expect(screen.getByText(/1 open escalation/)).toBeInTheDocument();
+  });
+
+  it('says "No open escalations" in the hero header when only closed escalations exist', () => {
+    mockBothQueues([], [closedEscalation]);
+    renderPage();
+
+    expect(screen.getByTestId('escalationsPageHeader')).toHaveTextContent(
+      'On the board: No open escalations'
+    );
   });
 
   it('shows a loading spinner while queries are in flight', () => {
@@ -369,6 +408,36 @@ describe('EscalationsPage', () => {
     // Read-only stub is rendered; interactive stub is not.
     expect(screen.getByTestId('mock-assignees-readonly-esc-open-1')).toBeInTheDocument();
     expect(screen.queryByTestId('mock-assign-esc-open-1')).not.toBeInTheDocument();
+  });
+
+  describe('without the Agent Builder privilege', () => {
+    it('explains which features are unavailable in a callout', () => {
+      mockBothQueues([openEscalation], []);
+      renderPage({ capabilities: { canAccessAgentBuilder: false } });
+
+      expect(screen.getByTestId('alertZeroAgentBuilderPrivilegeCallout')).toHaveTextContent(
+        'You need the Agent Builder Kibana privilege to open investigations and chats'
+      );
+    });
+
+    it('leaves the cards inert and hides the assignees', () => {
+      mockBothQueues([openEscalation], []);
+      renderPage({ capabilities: { canAccessAgentBuilder: false } });
+
+      fireEvent.click(screen.getByTestId('escalationCard-esc-open-1'));
+
+      expect(openChat).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('escalationCardLink-esc-open-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-assign-esc-open-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-assignees-readonly-esc-open-1')).not.toBeInTheDocument();
+    });
+  });
+
+  it('shows no privilege callout when Agent Builder is accessible', () => {
+    mockBothQueues([openEscalation], []);
+    renderPage();
+
+    expect(screen.queryByTestId('alertZeroAgentBuilderPrivilegeCallout')).not.toBeInTheDocument();
   });
 
   it('shows the server total in the bucket badge even when the page holds fewer items', () => {
@@ -537,7 +606,7 @@ describe('EscalationsPage', () => {
     };
 
     beforeEach(() => {
-      mockUseEscalationImpactPills.mockReturnValue({ data: pills });
+      mockUseEscalationImpactPills.mockReturnValue(pagedPills(pills));
     });
 
     it('renders one pill per entity the pills query returns', () => {
@@ -549,11 +618,11 @@ describe('EscalationsPage', () => {
     });
 
     it('renders no pills when no escalation has an impact', () => {
-      mockUseEscalationImpactPills.mockReturnValue({ data: [] });
+      mockUseEscalationImpactPills.mockReturnValue(pagedPills([]));
       mockBothQueues([openEscalation], [closedEscalation]);
       renderPage();
 
-      expect(screen.queryByText('Impact')).not.toBeInTheDocument();
+      expect(screen.queryByText('Impacted entities')).not.toBeInTheDocument();
     });
 
     it('asks both queues for the selected entity and restores them on a second click', () => {
@@ -585,6 +654,21 @@ describe('EscalationsPage', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Sales-NAS' }));
 
       expect(screen.getByText(/7 open escalations/)).toBeInTheDocument();
+    });
+
+    it('loads the next page of pills from the +n pill', () => {
+      const showMore = jest.fn();
+      mockUseEscalationImpactPills.mockReturnValue({
+        ...pagedPills(pills),
+        remaining: 40,
+        showMore,
+      });
+      mockBothQueues([impactOpen], [impactClosed]);
+      renderPage();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Show 40 more' }));
+
+      expect(showMore).toHaveBeenCalledTimes(1);
     });
 
     it('starts both queues over at page 1 when the filter changes', () => {

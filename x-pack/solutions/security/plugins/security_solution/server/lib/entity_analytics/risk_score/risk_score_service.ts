@@ -28,6 +28,7 @@ import type { ResetToZeroDependencies } from './reset_to_zero';
 import { resetToZero } from './reset_to_zero';
 import { createPrivilegedUsersCrudService } from '../privilege_monitoring/users/privileged_users_crud';
 import { getIsIdBasedRiskScoringEnabled } from './is_id_based_risk_scoring_enabled';
+import { DEFAULT_ALERT_SAMPLE_SIZE } from './constants';
 
 export type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;
@@ -110,7 +111,7 @@ export const riskScoreServiceFactory = ({
       const alertSampleSizePerShard =
         savedObjectConfig.alertSampleSizePerShard ??
         entityAnalyticsConfig?.riskEngine?.alertSampleSizePerShard ??
-        10000;
+        DEFAULT_ALERT_SAMPLE_SIZE;
 
       return {
         ...savedObjectConfig,

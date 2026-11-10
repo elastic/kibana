@@ -23,7 +23,7 @@ import {
 } from './data_table_document_selection';
 import { getDocId } from '@kbn/discover-utils';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { servicesMock } from '../../__mocks__/services';
 import { UnifiedDataTableContext } from '../table_context';
 
@@ -283,6 +283,46 @@ describe('document selection', () => {
       expect(screen.getByText('Always')).toBeInTheDocument();
       expect(screen.queryByText('Never')).not.toBeInTheDocument();
       expect(screen.getByText('When two')).toBeInTheDocument();
+    });
+
+    it('renders a custom bulk action disabled, with its reason as the tooltip', async () => {
+      const props = {
+        columns: ['test'],
+        customBulkActions: [
+          {
+            key: 'unsupported',
+            label: 'Unsupported',
+            'data-test-subj': 'bulkActionUnsupported',
+            onClick: jest.fn(),
+            getDisabledReason: () => 'Not available for part of the selection',
+          },
+        ],
+        enableComparisonMode: false,
+        fieldFormats: servicesMock.fieldFormats,
+        isFilterActive: false,
+        pageIndex: 0,
+        pageSize: 2,
+        rows: dataTableContextRowsMock,
+        selectedDocsState: buildSelectedDocsState(['i::1::', 'i::2::']),
+        setIsCompareActive: jest.fn(),
+        setIsFilterActive: jest.fn(),
+        toastNotifications: servicesMock.toastNotifications,
+      };
+      const contextMock = {
+        ...dataTableContextMock,
+        selectedDocsState: props.selectedDocsState,
+      };
+
+      renderWithTableContext(<DataTableDocumentToolbarBtn {...props} />, contextMock);
+      await userEvent.click(getSelectionToolbarButton(2));
+
+      const item = screen.getByTestId('bulkActionUnsupported');
+      expect(item).toBeDisabled();
+
+      fireEvent.mouseOver(item.parentElement!);
+      expect(
+        await screen.findByText('Not available for part of the selection')
+      ).toBeInTheDocument();
     });
 
     it('hides default bulk actions when hideDefaultBulkActions is true', async () => {

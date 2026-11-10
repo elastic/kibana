@@ -8,6 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
+import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../../../flyout/entity_details/shared/components/right/test_ids';
 import {
   mockServiceEntityRiskScores,
   mockServiceEntityRiskScoresWithResolution,
@@ -226,6 +227,32 @@ describe('<Service />', () => {
       expect(queryByTestId('asset-criticality-edit-chevron')).not.toBeInTheDocument();
     });
 
+    it('shows the Table tab when there are no aliases', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord);
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <Service {...mockProps} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(getByTestId(ENTITY_PANEL_TABLE_TAB_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('hides the Table tab in the group view', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord, [aliasRecord]);
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <Service {...mockProps} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(ENTITY_PANEL_TABLE_TAB_TEST_ID)).not.toBeInTheDocument();
+    });
+
     it('shows the "Resolved from N records" badge counting the target and its aliases', () => {
       mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
       withStoreRecords(targetRecord, [aliasRecord]);
@@ -344,9 +371,7 @@ describe('<Service />', () => {
 
         expect(getByTestId('risk-summary-table')).toBeInTheDocument();
         expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
-        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent(
-          'Entity risk contributions'
-        );
+        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
       });
 
       it('keeps showing the resolution group score next to the individual score when the feature flag is off', () => {

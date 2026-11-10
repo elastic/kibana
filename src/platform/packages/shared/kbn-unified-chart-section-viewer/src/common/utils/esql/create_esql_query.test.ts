@@ -106,6 +106,24 @@ TS metrics-*
     ).toBe(false);
   });
 
+  describe('metadata fields', () => {
+    it('declares the metadata fields that the WHERE statements use in the TS source', () => {
+      const query = createESQLQuery({
+        metricItem: mockMetric,
+        whereStatements: ['_ignored IS NULL'],
+        metadataFields: ['_ignored'],
+      });
+
+      expect(query).toBe(
+        `
+TS metrics-* METADATA _ignored
+  | WHERE _ignored IS NULL
+  | STATS AVG(AVG_OVER_TIME(cpu.usage)) BY TBUCKET(100)
+`.trim()
+      );
+    });
+  });
+
   it('should generate a basic AVG query for a metric field', () => {
     const query = createESQLQuery({ metricItem: mockMetric });
     expect(query).toBe(
@@ -689,6 +707,7 @@ TS edge-case-gauge-to-counter
           counterAggregation: 'max',
           gaugeAggregation: 'avg',
           histogramPercentile: 'p95',
+          histogramVisualization: 'lnsXY',
           dimensions: [],
           searchTerm: '',
         },
@@ -708,6 +727,7 @@ TS metrics-*
           counterAggregation: 'sum',
           gaugeAggregation: 'sum',
           histogramPercentile: 'p95',
+          histogramVisualization: 'lnsXY',
           dimensions: [],
           searchTerm: '',
         },
@@ -727,6 +747,7 @@ TS metrics-*
           counterAggregation: 'sum',
           gaugeAggregation: 'avg',
           histogramPercentile: 'p90',
+          histogramVisualization: 'lnsXY',
           dimensions: [],
           searchTerm: '',
         },
@@ -746,6 +767,7 @@ TS metrics-*
           counterAggregation: 'sum',
           gaugeAggregation: 'avg',
           histogramPercentile: 'p50',
+          histogramVisualization: 'lnsXY',
           dimensions: [],
           searchTerm: '',
         },

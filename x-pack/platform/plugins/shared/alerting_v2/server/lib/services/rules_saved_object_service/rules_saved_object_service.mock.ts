@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { createSpacesServiceMock } from '../spaces_service/spaces_service.mock';
 import { RulesSavedObjectService } from './rules_saved_object_service';
 import type { RulesSavedObjectServiceContract } from './rules_saved_object_service';
 
@@ -17,9 +17,12 @@ export function createRulesSavedObjectService(): {
   mockFindByIds: jest.SpyInstance;
 } {
   const mockSavedObjectsClient = savedObjectsClientMock.create();
-  const mockSpaces = spacesMock.createStart();
+  const { spacesService } = createSpacesServiceMock();
 
-  const rulesSavedObjectService = new RulesSavedObjectService(mockSavedObjectsClient, mockSpaces);
+  const rulesSavedObjectService = new RulesSavedObjectService(
+    mockSavedObjectsClient,
+    spacesService
+  );
 
   const mockFindByIds = jest.spyOn(rulesSavedObjectService, 'findByIds').mockResolvedValue([]);
 
@@ -43,6 +46,7 @@ export function createRulesSavedObjectServiceMock(): RulesSavedObjectServiceMock
     getRuleIdsByQuery: jest.fn().mockResolvedValue([]),
     countByQuery: jest.fn().mockResolvedValue(0),
     findTags: jest.fn().mockResolvedValue([]),
+    countByTemplateIds: jest.fn().mockResolvedValue({}),
     getTotalScheduledPerMinute: jest.fn().mockResolvedValue(0),
   };
 }

@@ -36,6 +36,7 @@ export const AiIndexManagedRow = ({ aiIndex }: AiIndexManagedRowProps) => {
   const { summary, isLoading: isKiLoading } = useListKi({
     aiIndexId: aiIndex.id,
     size: KI_SUMMARY_PAGE_SIZE,
+    lifecycleStatus: ['active'],
   });
 
   const viewDetailsLabel = i18n.translate('xpack.contextEngine.landing.managedRow.viewDetails', {

@@ -50,6 +50,8 @@ xpack.apm.serverlessOnboarding: true
 # Synthetics mTLS cert locations
 xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
 xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
+# Synthetics Vault secret references need Elastic Agent 9.6+ on private locations
+xpack.uptime.secretConnections.enabled: false
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']

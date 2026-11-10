@@ -63,6 +63,19 @@ describe('createInvestigationTimelineAttachmentType', () => {
       expect(result.valid).toBe(true);
     });
 
+    it('accepts the searched window alongside events, and rejects a half-open one', async () => {
+      const window = { start: '2026-09-10T10:00:00.000Z', end: '2026-09-10T14:00:00.000Z' };
+      expect((await attachmentType.validate({ ...validData, window })).valid).toBe(true);
+      expect((await attachmentType.validate({ events: [], window })).valid).toBe(true);
+      expect(
+        (await attachmentType.validate({ ...validData, window: { start: window.start } })).valid
+      ).toBe(false);
+      expect(
+        (await attachmentType.validate({ ...validData, window: { start: '', end: window.end } }))
+          .valid
+      ).toBe(false);
+    });
+
     it('rejects a bare event array; the payload must be { events }', async () => {
       const result = await attachmentType.validate(validEvents);
       expect(result.valid).toBe(false);
@@ -127,13 +140,35 @@ describe('createInvestigationTimelineAttachmentType', () => {
         expect(representation.value).toContain('No events were reconstructed');
       }
     });
+
+    // "Nothing in the window" and "nothing at all" are different findings; the header
+    // says which range the answer covers.
+    it('names the searched window in the header, including on an empty timeline', async () => {
+      const window = { start: '2026-09-10T10:00:00.000Z', end: '2026-09-10T14:00:00.000Z' };
+      const render = async (events: typeof validEvents) => {
+        const formatted = await attachmentType.format(
+          makeAttachment({ events, window }),
+          formatContext
+        );
+        const representation = await formatted.getRepresentation?.();
+        return representation?.type === 'text' ? representation.value : '';
+      };
+
+      expect(await render(validEvents)).toContain(
+        'searched 2026-09-10T10:00:00.000Z to 2026-09-10T14:00:00.000Z'
+      );
+      expect(await render([])).toContain(
+        'searched 2026-09-10T10:00:00.000Z to 2026-09-10T14:00:00.000Z'
+      );
+    });
   });
 
   describe('getAgentDescription', () => {
-    it('documents the { events } payload and that the events are already ordered', () => {
+    it('documents the { events, window } payload and that the events are already ordered', () => {
       const description = attachmentType.getAgentDescription?.();
-      expect(description).toContain('{ events }');
+      expect(description).toContain('{ events, window? }');
       expect(description).toContain('{ timestamp, host, description }');
+      expect(description).toContain('{ start, end }');
       expect(description).toContain('do not reorder');
     });
   });

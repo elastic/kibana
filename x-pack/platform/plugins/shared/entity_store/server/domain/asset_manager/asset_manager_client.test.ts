@@ -566,7 +566,7 @@ describe('AssetManagerClient', () => {
         });
         expect(nonPriorityLogsExtractionConfigByType.user).toMatchObject({
           maxLogsPerWindowCapBehavior: 'drop',
-          maxLogsPerWindow: LATEST_LOG_EXTRACTION_DEFAULTS.maxLogsPerWindow,
+          maxLogsPerWindow: 500000,
           frequency: '5m',
         });
         expect(logsExtractionConfigByType.host).toMatchObject({
@@ -891,32 +891,35 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
   const namespace = 'default';
 
-  const buildClient = ({
-    latestTemplateExists,
-    legacyLatestTemplateExists,
-    updatesTemplateExists,
-    legacyUpdatesTemplateExists,
-    latestComponentTemplateExists,
-    legacyLatestComponentTemplateExists,
-    updatesComponentTemplateExists,
-    legacyUpdatesComponentTemplateExists,
-  }: {
-    latestTemplateExists: boolean;
-    legacyLatestTemplateExists: boolean;
-    updatesTemplateExists: boolean;
-    legacyUpdatesTemplateExists: boolean;
-    latestComponentTemplateExists: boolean;
-    legacyLatestComponentTemplateExists: boolean;
-    updatesComponentTemplateExists: boolean;
-    legacyUpdatesComponentTemplateExists: boolean;
-  }) => {
+  const buildClient = (
+    {
+      latestTemplateExists,
+      legacyLatestTemplateExists,
+      updatesTemplateExists,
+      legacyUpdatesTemplateExists,
+      latestComponentTemplateExists,
+      legacyLatestComponentTemplateExists,
+      updatesComponentTemplateExists,
+      legacyUpdatesComponentTemplateExists,
+    }: {
+      latestTemplateExists: boolean;
+      legacyLatestTemplateExists: boolean;
+      updatesTemplateExists: boolean;
+      legacyUpdatesTemplateExists: boolean;
+      latestComponentTemplateExists: boolean;
+      legacyLatestComponentTemplateExists: boolean;
+      updatesComponentTemplateExists: boolean;
+      legacyUpdatesComponentTemplateExists: boolean;
+    },
+    overrides: { userEsClient?: ElasticsearchClient; internalEsClient?: ElasticsearchClient } = {}
+  ) => {
     const getIndexTemplate = jest.fn().mockImplementation(async ({ name }: { name: string }) => {
       const exists =
         (name.includes('security_') && name.includes('latest') && legacyLatestTemplateExists) ||
         (!name.includes('security_') && name.includes('latest') && latestTemplateExists) ||
         (name.includes('security_') && name.includes('updates') && legacyUpdatesTemplateExists) ||
         (!name.includes('security_') && name.includes('updates') && updatesTemplateExists);
-      if (!exists) throw new Error('index_template not found [404]');
+      if (!exists) throw Object.assign(new Error('index_template not found'), { statusCode: 404 });
       return {};
     });
 
@@ -936,7 +939,8 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
           (!name.includes('security_') &&
             name.includes('updates') &&
             updatesComponentTemplateExists);
-        if (!exists) throw new Error('component_template not found [404]');
+        if (!exists)
+          throw Object.assign(new Error('component_template not found'), { statusCode: 404 });
         return {};
       });
 
@@ -977,8 +981,8 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
     return new AssetManagerClient({
       logger: loggerMock.create(),
-      esClient,
-      internalEsClient: esClient,
+      esClient: overrides.userEsClient ?? esClient,
+      internalEsClient: overrides.internalEsClient ?? esClient,
       taskManager,
       engineDescriptorClient:
         engineDescriptorClient as unknown as import('../saved_objects').EngineDescriptorClient,
@@ -1101,6 +1105,51 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
 
       expect(templates.every((t) => !t.installed)).toBe(true);
       expect(componentTemplates.every((t) => !t.installed)).toBe(true);
+    });
+  });
+  describe('privilege-independent probes', () => {
+    const allExist = {
+      latestTemplateExists: true,
+      legacyLatestTemplateExists: false,
+      updatesTemplateExists: true,
+      legacyUpdatesTemplateExists: false,
+      latestComponentTemplateExists: true,
+      legacyLatestComponentTemplateExists: false,
+      updatesComponentTemplateExists: true,
+      legacyUpdatesComponentTemplateExists: false,
+    };
+    const forbidden = () => Object.assign(new Error('security_exception'), { statusCode: 403 });
+    const forbiddenUserEsClient = {
+      indices: {
+        exists: jest.fn().mockRejectedValue(forbidden()),
+        getIndexTemplate: jest.fn().mockRejectedValue(forbidden()),
+      },
+      cluster: { getComponentTemplate: jest.fn().mockRejectedValue(forbidden()) },
+    } as unknown as ElasticsearchClient;
+
+    it('reports templates as installed even when the requesting user is forbidden from reading them', async () => {
+      const client = buildClient(allExist, { userEsClient: forbiddenUserEsClient });
+
+      const templates = await getComponentsByResource(client, 'index_template');
+      const componentTemplates = await getComponentsByResource(client, 'component_template');
+      const indices = await getComponentsByResource(client, 'index');
+
+      expect(templates[0].installed).toBe(true);
+      expect(componentTemplates[0].installed).toBe(true);
+      expect(indices[0].installed).toBe(true);
+    });
+
+    it('propagates non-404 probe errors instead of reporting the component as missing', async () => {
+      const failingInternalEsClient = {
+        indices: {
+          exists: jest.fn().mockResolvedValue(true),
+          getIndexTemplate: jest.fn().mockRejectedValue({ statusCode: 503 }),
+        },
+        cluster: { getComponentTemplate: jest.fn().mockResolvedValue({}) },
+      } as unknown as ElasticsearchClient;
+      const client = buildClient(allExist, { internalEsClient: failingInternalEsClient });
+
+      await expect(client.getStatus(true)).rejects.toMatchObject({ statusCode: 503 });
     });
   });
 });

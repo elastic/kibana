@@ -27,5 +27,6 @@ export type { ServicesFunctionsResponse } from './functions';
 export type { ProfilingStatusResponse } from './status';
 export type { ProfilingHostsFlamegraphResponse } from './hosts_flamegraph';
 export type { ProfilingHostsFunctionsResponse } from './hosts_functions';
+export type { ProfilingHostsScope, ProfilingHostsCorrelation } from './hosts_scope';
 export type { ServicesProfilingSchemasResponse } from './schemas';
 export type { ProfilingHostsSchemasResponse } from './hosts_schemas';

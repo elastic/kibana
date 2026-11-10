@@ -1,0 +1,29 @@
+{
+  "sandbox": {
+    "apiKey": "REPLACE_ME",
+    "url": "https://REPLACE_ME:443"
+  },
+  "nightshift": {
+    "telemetry": {
+      "url": "https://REPLACE_ME",
+      "apiKey": "REPLACE_ME"
+    }
+  },
+  "nightshiftOrcaEs": {
+    "url": "https://REPLACE_ME:443",
+    "apiKey": "REPLACE_ME",
+    "noFlagsApiKey": "REPLACE_ME"
+  },
+  "nightshiftKnowledge": {
+    "default": {
+      "url": "https://REPLACE_ME:443",
+      "apiKey": "REPLACE_ME",
+      "spaceId": "default"
+    },
+    "orcabench": {
+      "url": "https://REPLACE_ME:443",
+      "apiKey": "REPLACE_ME",
+      "spaceId": "default"
+    }
+  }
+}

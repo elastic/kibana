@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 import { waitFor, within } from '@testing-library/react';
-// eslint-disable-next-line import/no-extraneous-dependencies
+// eslint-disable-next-line @kbn/compat/import-no-extraneous-dependencies
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import type { ArtifactFormComponentProps, ArtifactViewModeComponentProps } from './types';
 import type { ArtifactListPageProps } from './artifact_list_page';
@@ -114,8 +114,15 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
   let renderResult: ReturnType<AppContextTestRender['render']>;
 
   const renderArtifactListPage = (props: Partial<ArtifactListPageProps> = {}) => {
-    const { showAsSimpleTable, showEnabledColumn, ViewModeComponent, CardDecorator, ...baseProps } =
-      props;
+    const {
+      showAsSimpleTable,
+      showEnabledColumn,
+      ViewModeComponent,
+      policyAssignmentInfoTooltip,
+      CardDecorator,
+      showCommentsInViewFlyout,
+      ...baseProps
+    } = props;
 
     const sharedProps = {
       apiClient,
@@ -133,12 +140,14 @@ export const getArtifactListPageRenderingSetup = (): ArtifactListPageRenderingSe
           {...sharedProps}
           showAsSimpleTable
           showEnabledColumn={showEnabledColumn}
+          showCommentsInViewFlyout={showCommentsInViewFlyout}
           ViewModeComponent={
             ViewModeComponent ??
             (({ item }: ArtifactViewModeComponentProps) => (
               <div data-test-subj="viewModeComponent">{item.name}</div>
             ))
           }
+          policyAssignmentInfoTooltip={policyAssignmentInfoTooltip}
         />
       ) : (
         <ArtifactListPage {...sharedProps} CardDecorator={CardDecorator} />

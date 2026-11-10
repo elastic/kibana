@@ -23,7 +23,7 @@ const ConsoleStateContext = createContext<null | ConsoleStore>(null);
 
 type ConsoleStateProviderProps = PropsWithChildren<{}> &
   InitialStateInterface &
-  Pick<ConsoleProps, 'apiRef'>;
+  Pick<ConsoleProps, 'apiRef' | 'onApiAvailable'>;
 
 /**
  * A Console wide data store for internal state management between inner components
@@ -38,6 +38,7 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
     storagePrefix,
     managedKey,
     apiRef,
+    onApiAvailable,
     children,
   }) => {
     const [getConsoleState, storeConsoleState] = useWithManagedConsoleState(managedKey);
@@ -88,12 +89,16 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
         Object.assign((apiRef.current = apiRef.current ?? ({} as ConsoleApi)), state.consoleApi);
       }
 
+      if (onApiAvailable) {
+        onApiAvailable(state.consoleApi);
+      }
+
       return () => {
         if (!isMounted() && apiRef) {
           apiRef.current = undefined;
         }
       };
-    }, [isMounted, apiRef, state.consoleApi]);
+    }, [isMounted, apiRef, onApiAvailable, state.consoleApi]);
 
     // Anytime `state` changes AND the console is under ConsoleManager's control, then
     // store the console's state to ConsoleManager. This is what enables a console to be

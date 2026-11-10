@@ -1,0 +1,35 @@
+{
+  "getCrmObject": {
+    "queries": [
+      {
+        "source": "associations_v4",
+        "method": "POST",
+        "path": "/crm/v4/associations/{fromObjectType}/{toObjectType}/batch/read"
+      },
+      { "source": "notes_v3", "method": "POST", "path": "/crm/v3/objects/notes/batch/read" }
+    ]
+  },
+  "searchBroad": {
+    "queries": [
+      { "source": "contacts_v3", "method": "POST", "path": "/crm/v3/objects/contacts/search" },
+      { "source": "objects_v3", "method": "POST", "path": "/crm/v3/objects/{objectType}/search" }
+    ]
+  },
+  "searchCrmObjects": {
+    "queries": [
+      {
+        "source": "associations_v3",
+        "method": "POST",
+        "path": "/crm/v3/associations/{fromObjectType}/{toObjectType}/batch/read"
+      },
+      { "source": "contacts_v3", "method": "POST", "path": "/crm/v3/objects/contacts/search" },
+      { "source": "notes_v3", "method": "POST", "path": "/crm/v3/objects/notes/search" },
+      { "source": "objects_v3", "method": "POST", "path": "/crm/v3/objects/{objectType}/search" }
+    ]
+  },
+  "searchDeals": {
+    "queries": [
+      { "source": "objects_v3", "method": "POST", "path": "/crm/v3/objects/{objectType}/search" }
+    ]
+  }
+}

@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
   - '@kbn/entity-store'
+  - '@kbn/es-types'
 tags:
   - plugin
   - prod
@@ -30,6 +31,4 @@ fileGroups:
   src:
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
