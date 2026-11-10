@@ -150036,6 +150036,7 @@ paths:
                 getWorkflowExecutionsResponseExample:
                   description: Example response returning a paginated list of executions for a workflow
                   value:
+                    hasNamedExecution: false
                     page: 1
                     results:
                       - duration: 3000
