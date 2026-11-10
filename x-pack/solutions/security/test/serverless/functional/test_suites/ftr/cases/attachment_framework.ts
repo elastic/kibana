@@ -51,10 +51,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
 
-        await retry.waitFor('createDashboardButton', async () => {
-          return await testSubjects.exists('createDashboardButton');
-        });
-
+        // The button stays disabled until the Security Solution tag loads.
+        await testSubjects.waitForEnabled('createDashboardButton');
         await testSubjects.click('createDashboardButton');
         await header.waitUntilLoadingHasFinished();
 
