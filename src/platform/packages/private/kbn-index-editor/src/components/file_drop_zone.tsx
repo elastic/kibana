@@ -148,7 +148,9 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     multiple: true,
     noClick: true, // we'll trigger open manually
     noKeyboard: true,
-    disabled: dropzoneDisabled,
+    noPaste: true,
+    // `disabled` would set aria-disabled on the root, which wraps the upload flow buttons
+    noDrag: dropzoneDisabled,
   });
 
   const onFileSelectorClick = useCallback(() => {

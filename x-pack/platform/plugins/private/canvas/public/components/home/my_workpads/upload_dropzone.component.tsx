@@ -39,7 +39,8 @@ export const UploadDropzone: FC<PropsWithChildren<Props>> = ({
     onDrop(fileList);
   };
   return (
-    <Dropzone {...{ onDrop: dropFn, disabled }} noClick>
+    // `disabled` would set aria-disabled on the root, which wraps the workpad list
+    <Dropzone onDrop={dropFn} noDrag={disabled} noClick noPaste>
       {({ getRootProps, isDragActive }) => (
         <div
           {...getRootProps({
