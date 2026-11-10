@@ -47,11 +47,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           installIntegrationsKnowledge: false,
         })}`,
         `--feature_flags.overrides.fleet.enableSentinelPolicyVersion=true`,
-        // The assignment task moves the agent docs these specs seed to `<id>#sentinel` policies,
-        // which resets their status to updating; its own coverage lives in x-pack/platform/test/fleet_tasks
-        `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
-          'fleet:version-specific-policy-assignment-task',
-        ])}`,
 
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs')),
