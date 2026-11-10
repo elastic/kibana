@@ -22,7 +22,6 @@ import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import type {
   CategoryColorStop,
   OrdinalColorStop,
-  ColorStop,
 } from '../../../../../../common/descriptor_types';
 import type { DynamicColorProperty } from '../../properties/dynamic_color_property';
 import { ColorStopsCategorical } from './color_stops_categorical';
@@ -50,7 +49,7 @@ interface Props {
 }
 
 interface State {
-  customColorMap?: ColorStop[];
+  customColorMap?: OrdinalColorStop[] | CategoryColorStop[];
   prevPropsCustomColorMap?: OrdinalColorStop[] | CategoryColorStop[];
 }
 
@@ -118,7 +117,7 @@ export class ColorMapSelect extends Component<Props, State> {
     colorStops,
     isInvalid,
   }: {
-    colorStops: ColorStop[];
+    colorStops: OrdinalColorStop[] | CategoryColorStop[];
     isInvalid: boolean;
   }) => {
     // Manage invalid custom color map in local state
@@ -144,7 +143,7 @@ export class ColorMapSelect extends Component<Props, State> {
     if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
       colorStopEditor = (
         <ColorStopsOrdinal
-          colorStops={this.state.customColorMap}
+          colorStops={this.state.customColorMap as OrdinalColorStop[] | undefined}
           onChange={this._onCustomColorMapChange}
           swatches={this.props.swatches}
         />
@@ -152,7 +151,7 @@ export class ColorMapSelect extends Component<Props, State> {
     } else if (field) {
       colorStopEditor = (
         <ColorStopsCategorical
-          colorStops={this.state.customColorMap}
+          colorStops={this.state.customColorMap as CategoryColorStop[] | undefined}
           field={field}
           getValueSuggestions={this.props.styleProperty.getValueSuggestions}
           onChange={this._onCustomColorMapChange}

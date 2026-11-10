@@ -18,26 +18,29 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { ColorStop, StopValue } from '../../../../../../common/descriptor_types';
+import type {
+  CategoryColorStop,
+  OrdinalColorStop,
+} from '../../../../../../common/descriptor_types';
 import { removeRow, isColorInvalid } from './color_stops_utils';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
 import { mapColorStopsStyles } from '../map_color_stops.styles';
 
-interface Props {
-  onChange: (params: { colorStops: ColorStop[]; isInvalid: boolean }) => void;
-  colorStops: ColorStop[];
-  isStopsInvalid: (colorStops: ColorStop[]) => boolean;
-  getStopError: (stop: StopValue, index: number) => string | null | undefined;
+interface Props<T extends OrdinalColorStop | CategoryColorStop> {
+  onChange: (params: { colorStops: T[]; isInvalid: boolean }) => void;
+  colorStops: T[];
+  isStopsInvalid: (colorStops: T[]) => boolean;
+  getStopError: (stop: T['stop'], index: number) => string | null | undefined;
   renderStopInput: (
-    stop: StopValue,
-    onStopChange: (newStopValue: StopValue) => void,
+    stop: T['stop'],
+    onStopChange: (newStopValue: T['stop']) => void,
     index: number
   ) => ReactNode;
-  addNewRow: (colorStops: ColorStop[], index: number) => ColorStop[];
+  addNewRow: (colorStops: T[], index: number) => T[];
   swatches?: string[];
 }
 
-export const ColorStops = ({
+export const ColorStops = <T extends OrdinalColorStop | CategoryColorStop>({
   onChange,
   colorStops,
   isStopsInvalid,
@@ -45,10 +48,10 @@ export const ColorStops = ({
   renderStopInput,
   addNewRow,
   swatches,
-}: Props) => {
+}: Props<T>) => {
   const styles = useMemoCss(mapColorStopsStyles);
-  function getStopInput(stop: StopValue, index: number) {
-    const onStopChange = (newStopValue: StopValue) => {
+  function getStopInput(stop: T['stop'], index: number) {
+    const onStopChange = (newStopValue: T['stop']) => {
       const newColorStops = _.cloneDeep(colorStops);
       newColorStops[index].stop = newStopValue;
       onChange({

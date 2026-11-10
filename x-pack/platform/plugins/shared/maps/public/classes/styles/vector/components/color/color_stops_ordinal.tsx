@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ColorStops } from './color_stops';
-import type { ColorStop, StopValue } from '../../../../../../common/descriptor_types';
+import type { OrdinalColorStop } from '../../../../../../common/descriptor_types';
 import {
   addOrdinalRow,
   isOrdinalStopInvalid,
@@ -25,11 +25,11 @@ interface Props {
    * The range is from the given stop number (inclusive) to the next stop number (exclusive).
    * Colors are color hex strings (3 or 6 character).
    */
-  colorStops?: ColorStop[];
+  colorStops?: OrdinalColorStop[];
   /**
    * Callback for when the color stops changes. Called with { colorStops, isInvalid }
    */
-  onChange: (params: { colorStops: ColorStop[]; isInvalid: boolean }) => void;
+  onChange: (params: { colorStops: OrdinalColorStop[]; isInvalid: boolean }) => void;
   swatches?: string[];
 }
 
@@ -38,13 +38,13 @@ export const ColorStopsOrdinal = ({
   onChange,
   swatches,
 }: Props) => {
-  const getStopError = (stop: StopValue, index: number) => {
+  const getStopError = (stop: OrdinalColorStop['stop'], index: number) => {
     let error: string | undefined;
     if (isOrdinalStopInvalid(stop)) {
       error = i18n.translate('xpack.maps.styles.colorStops.ordinalStop.numberWarningLabel', {
         defaultMessage: 'Stop must be a number',
       });
-    } else if (index !== 0 && (colorStops[index - 1].stop as number) >= (stop as number)) {
+    } else if (index !== 0 && colorStops[index - 1].stop >= stop) {
       error = i18n.translate(
         'xpack.maps.styles.colorStops.ordinalStop.numberOrderingWarningLabel',
         {
@@ -56,14 +56,14 @@ export const ColorStopsOrdinal = ({
   };
 
   const renderStopInput = (
-    stop: StopValue,
-    onStopChange: (newStopValue: StopValue) => void,
+    stop: OrdinalColorStop['stop'],
+    onStopChange: (newStopValue: OrdinalColorStop['stop']) => void,
     index: number
   ) => {
     function handleOnChangeEvent(event: ChangeEvent<HTMLInputElement>) {
       const sanitizedValue = parseFloat(event.target.value);
-      const newStopValue = isNaN(sanitizedValue) ? '' : sanitizedValue;
-      onStopChange(newStopValue);
+      // Empty or non-numeric input is stored as '' so the input stays blank and the stop is flagged invalid
+      onStopChange((isNaN(sanitizedValue) ? '' : sanitizedValue) as number);
     }
     return (
       <EuiFieldNumber
@@ -79,7 +79,7 @@ export const ColorStopsOrdinal = ({
   };
 
   return (
-    <ColorStops
+    <ColorStops<OrdinalColorStop>
       onChange={onChange}
       colorStops={colorStops}
       isStopsInvalid={isOrdinalStopsInvalid}

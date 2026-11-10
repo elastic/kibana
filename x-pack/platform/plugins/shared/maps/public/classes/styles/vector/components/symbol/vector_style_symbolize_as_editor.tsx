@@ -62,7 +62,6 @@ export function VectorStyleSymbolizeAsEditor({
   const symbolizeAsForm = (
     <EuiFormRow label={symbolLabel} display="columnCompressed">
       <EuiButtonGroup
-        type="single"
         isDisabled={disabled}
         buttonSize="compressed"
         options={SYMBOLIZE_AS_OPTIONS}

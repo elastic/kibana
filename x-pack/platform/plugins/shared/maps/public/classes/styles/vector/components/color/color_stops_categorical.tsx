@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { ColorStop, StopValue } from '../../../../../../common/descriptor_types';
+import type { CategoryColorStop } from '../../../../../../common/descriptor_types';
 import {
   addCategoricalRow,
   isCategoricalStopsInvalid,
@@ -25,12 +25,12 @@ interface Props {
    * Stops cannot include duplicates
    * Colors are color hex strings (3 or 6 character).
    */
-  colorStops?: ColorStop[];
+  colorStops?: CategoryColorStop[];
   field: IField;
   /**
    * Callback for when the color stops changes. Called with { colorStops, isInvalid }
    */
-  onChange: (params: { colorStops: ColorStop[]; isInvalid: boolean }) => void;
+  onChange: (params: { colorStops: CategoryColorStop[]; isInvalid: boolean }) => void;
   /**
    * Callback for fetching stop value suggestions. Called with query.
    */
@@ -45,7 +45,7 @@ export const ColorStopsCategorical = ({
   getValueSuggestions,
   swatches,
 }: Props) => {
-  const getStopError = (stop: StopValue, index: number) => {
+  const getStopError = (stop: CategoryColorStop['stop'], index: number) => {
     let count = 0;
     for (let i = 1; i < colorStops.length; i++) {
       if (colorStops[i].stop === stop && i !== index) {
@@ -61,8 +61,8 @@ export const ColorStopsCategorical = ({
   };
 
   const renderStopInput = (
-    stop: StopValue,
-    onStopChange: (newStopValue: StopValue) => void,
+    stop: CategoryColorStop['stop'],
+    onStopChange: (newStopValue: CategoryColorStop['stop']) => void,
     index: number
   ) => {
     const stopValue = typeof stop === 'string' ? stop : '';
@@ -79,7 +79,7 @@ export const ColorStopsCategorical = ({
   };
 
   return (
-    <ColorStops
+    <ColorStops<CategoryColorStop>
       onChange={onChange}
       colorStops={colorStops}
       isStopsInvalid={isCategoricalStopsInvalid}

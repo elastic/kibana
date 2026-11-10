@@ -61,7 +61,6 @@ export type {
   //
   Category,
   CategoryColorStop,
-  ColorStop,
   ColorDynamicOptions,
   ColorStaticOptions,
   ColorDynamicStylePropertyDescriptor,
