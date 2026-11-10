@@ -116,7 +116,7 @@ export const AppMenuComponent = ({
     const responsiveOverflowItems = [...displayedItems.slice(inlineItemLimit), ...overflowItems];
     const shouldShowOverflow = responsiveOverflowItems.length > 0 || hasStaticItems;
     const hasSecondaryActions =
-      Boolean(switchConfig) || inlineItems.length > 0 || shouldShowOverflow;
+      Boolean(historyConfig) || Boolean(switchConfig) || inlineItems.length > 0;
 
     return (
       <>
@@ -133,18 +133,18 @@ export const AppMenuComponent = ({
                 onPopoverClose={handleOnPopoverClose}
               />
             ))}
-            {shouldShowOverflow && (
-              <AppMenuOverflowButton
-                items={responsiveOverflowItems}
-                staticItems={processedStaticItems}
-                isPopoverOpen={openPopoverId === showMoreButtonId}
-                onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
-                onPopoverClose={handleOnPopoverClose}
-              />
-            )}
           </div>
         )}
         {primaryActionComponent}
+        {shouldShowOverflow && (
+          <AppMenuOverflowButton
+            items={responsiveOverflowItems}
+            staticItems={processedStaticItems}
+            isPopoverOpen={openPopoverId === showMoreButtonId}
+            onPopoverToggle={() => handlePopoverToggle(showMoreButtonId)}
+            onPopoverClose={handleOnPopoverClose}
+          />
+        )}
       </>
     );
   };
