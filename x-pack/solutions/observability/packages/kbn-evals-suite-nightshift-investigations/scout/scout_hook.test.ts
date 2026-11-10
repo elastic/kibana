@@ -510,4 +510,84 @@ describe('ORCA CI shard', () => {
       expect(stderr).not.toContain(orca.password);
     }
   );
+
+  describe('knowledge switches', () => {
+    const c0 = { url: 'https://c0-kibana-es.example', apiKey: 'c0-knowledge-key', spaceId: 'ops' };
+    const orcaKnowledge = { url: 'https://orca-kibana-es.example', apiKey: 'orca-knowledge-key' };
+    const withKnowledge = {
+      ...existing,
+      nightshiftOrcaEs: orca,
+      nightshiftKnowledge: { default: c0, orcabench: orcaKnowledge },
+    };
+
+    it('exports nothing for knowledge when NIGHTSHIFT_KNOWLEDGE is unset', () => {
+      expect(runHook(withKnowledge).output).toEqual(runHook(existing).output);
+    });
+
+    it("normalizes the selection and reads the connector set's own knowledge source", () => {
+      expect(
+        runHook(withKnowledge, { NIGHTSHIFT_KNOWLEDGE: ' wiki,memory,wiki ' }).output.env
+      ).toMatchObject({
+        NIGHTSHIFT_KNOWLEDGE: 'memory,wiki',
+        NIGHTSHIFT_KNOWLEDGE_ES_URL: c0.url,
+        NIGHTSHIFT_KNOWLEDGE_ES_API_KEY: c0.apiKey,
+        NIGHTSHIFT_KNOWLEDGE_SPACE_ID: 'ops',
+      });
+      expect(
+        runHook(withKnowledge, {
+          EVAL_SHARD_ID: 'orcabench',
+          NIGHTSHIFT_KNOWLEDGE: 'decision-trees',
+        }).output.env
+      ).toMatchObject({
+        NIGHTSHIFT_KNOWLEDGE: 'decision-trees',
+        NIGHTSHIFT_KNOWLEDGE_ES_URL: orcaKnowledge.url,
+        NIGHTSHIFT_KNOWLEDGE_ES_API_KEY: orcaKnowledge.apiKey,
+        NIGHTSHIFT_KNOWLEDGE_SPACE_ID: 'default',
+      });
+    });
+
+    it('falls back to the shell knowledge source', () => {
+      expect(
+        runHook(existing, {
+          NIGHTSHIFT_KNOWLEDGE: 'memory',
+          NIGHTSHIFT_KNOWLEDGE_ES_URL: 'https://shell.example',
+          NIGHTSHIFT_KNOWLEDGE_ES_API_KEY: 'shell-knowledge-key',
+        }).output.env
+      ).toMatchObject({
+        NIGHTSHIFT_KNOWLEDGE_ES_URL: 'https://shell.example',
+        NIGHTSHIFT_KNOWLEDGE_ES_API_KEY: 'shell-knowledge-key',
+        NIGHTSHIFT_KNOWLEDGE_SPACE_ID: 'default',
+      });
+    });
+
+    it.each([
+      [
+        withKnowledge,
+        { NIGHTSHIFT_KNOWLEDGE: 'cortex' },
+        "unknown NIGHTSHIFT_KNOWLEDGE system 'cortex'",
+      ],
+      [existing, { NIGHTSHIFT_KNOWLEDGE: 'memory' }, 'nightshiftKnowledge.default.url and apiKey'],
+      [
+        { ...existing, nightshiftOrcaEs: orca, nightshiftKnowledge: { default: c0 } },
+        {
+          EVAL_SHARD_ID: 'orcabench',
+          NIGHTSHIFT_KNOWLEDGE: 'memory',
+          NIGHTSHIFT_KNOWLEDGE_ES_URL: c0.url,
+          NIGHTSHIFT_KNOWLEDGE_ES_API_KEY: c0.apiKey,
+        },
+        'nightshiftKnowledge.orcabench.url and apiKey',
+      ],
+      [{ sandbox: SANDBOX }, { NIGHTSHIFT_KNOWLEDGE: 'memory' }, 'requires a connector set'],
+      [
+        { ...existing, nightshiftKnowledge: { default: { ...c0, url: 'https://u:p@c0.example' } } },
+        { NIGHTSHIFT_KNOWLEDGE: 'memory' },
+        'no credentials in the URL',
+      ],
+    ])('fails early on an unusable selection or source (%#)', (config, env, message) => {
+      const { status, stderr } = runHook(config, env);
+      expect(status).toBe(1);
+      expect(stderr).toContain(message);
+      expect(stderr).not.toContain(c0.apiKey);
+    });
+  });
 });

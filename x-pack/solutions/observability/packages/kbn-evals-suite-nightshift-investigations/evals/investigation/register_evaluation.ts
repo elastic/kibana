@@ -17,6 +17,7 @@ import {
 } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
+import { restoreKnowledge } from '../../src/knowledge/restore_knowledge';
 import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
 import { saveConnectorSetOnInvestigator, saveConnectorsOnInvestigator } from './connector_sets';
@@ -230,6 +231,8 @@ export const registerInvestigationEvaluation = ({
             .toBe(true);
           await replaceCustomContext(fetch, getDatasetCustomContext(dataset), basePath);
         };
+        // What knowledge the investigations read; set by the restore before the experiment runs.
+        let knowledgeMetadata: Record<string, string | number> = {};
         const runExperiment = () =>
           executorClient.runExperiment(
             {
@@ -241,6 +244,7 @@ export const registerInvestigationEvaluation = ({
               concurrency,
               metadata: {
                 ...experimentMetadata,
+                ...knowledgeMetadata,
                 concurrency,
                 ...(orca ? { telemetry_cutoffs: cutoffGroups.length } : {}),
               },
@@ -277,6 +281,12 @@ export const registerInvestigationEvaluation = ({
                 await setUpNightshiftSpace(basePath);
                 await saveOrcaConnector(kbnClient, { basePath, connectorId, url, apiKey });
                 await saveConnectorsOnInvestigator(fetch, [connectorId], basePath);
+                // Each cutoff space reads the same knowledge, so any restore's metadata describes them all.
+                knowledgeMetadata = await restoreKnowledge({
+                  esClient,
+                  log,
+                  targetSpaceId: spaceId,
+                });
               },
               { concurrency: 4 }
             );
@@ -285,6 +295,7 @@ export const registerInvestigationEvaluation = ({
         } else {
           await setUpNightshiftSpace('');
           await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
+          knowledgeMetadata = await restoreKnowledge({ esClient, log });
           experimentResults = await runExperiment();
         }
         const [experiment] = experimentResults;

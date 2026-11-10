@@ -11,5 +11,6 @@
     "@kbn/zod",
     "@kbn/streamlang",
     "@kbn/utility-types",
+    "@kbn/core-spaces-common",
   ]
 }
