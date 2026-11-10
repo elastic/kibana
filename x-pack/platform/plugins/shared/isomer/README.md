@@ -40,6 +40,8 @@ Every `materialize` call runs one pipeline, as the requesting user:
 - **ES|QL tables**: date histogram and histogram columns filter to their bucket, other aggregated columns to field existence, and raw columns to their value when the index pattern's field can be filtered.
 - **Brushes** filter the brushed column's field to the brushed range.
 
+Hosts outside Kibana's server call it over HTTP: `POST /api/isomer/filters_for_selection` (version `2023-10-31`) takes `{ event, node }`, with the node as `POST /api/isomer/materialize` returned it, and returns `{ filters }`. It has the same authentication and feature flag as the materialize route, and returns `400` for a node that doesn't validate or a selection that doesn't fit it.
+
 A `negate` selection negates every filter, and duplicates are dropped. Filters carry no display mapping (`meta.key`, `meta.value`), which Kibana's filter manager adds when a Kibana host adds them; ES|QL filters name the query's index pattern as their `meta.index`.
 
 ### Lens

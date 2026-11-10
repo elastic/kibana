@@ -165,3 +165,74 @@ export const materializeResponseBodySchema = lazySchema(() =>
         'An Isomer composition holding the materialized node, or an `unsupported` node that says why there is none.',
     })
 );
+
+const columnIdSchema = lazySchema(() => z.string().min(1).max(1024));
+
+const cellSchema = lazySchema(() =>
+  z.union([
+    z.string().max(10_000),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    z.array(z.union([z.string().max(10_000), z.number(), z.boolean(), z.null()])).max(1_000),
+  ])
+);
+
+const eventSharedShape = {
+  node: lazySchema(() => z.string().min(1).max(1024)),
+  description: lazySchema(() => z.string().max(10_000)),
+  values: lazySchema(() => z.record(columnIdSchema, cellSchema)),
+};
+
+export const chartEventBodySchema = lazySchema(() =>
+  z.discriminatedUnion('kind', [
+    z
+      .object({
+        kind: z.literal('select'),
+        target: z.enum(['datum', 'series', 'category', 'legend', 'cell', 'tile', 'slice', 'tag']),
+        // An xy `datum`, `series` or `legend` event names its series (elastic/isomer charts).
+        seriesKey: z.string().max(10_000).optional(),
+        series: z
+          .object({ layer: z.number().int().min(0), y: z.number().int().min(0) })
+          .strict()
+          .optional(),
+        rows: z.array(z.number().int().min(0)).min(1).max(10_000),
+        columns: z.array(columnIdSchema).max(100),
+        negate: z.boolean().optional(),
+        ...eventSharedShape,
+      })
+      .strict(),
+    z
+      .object({
+        kind: z.literal('brush'),
+        column: columnIdSchema,
+        range: z.tuple([z.number(), z.number()]),
+        ...eventSharedShape,
+      })
+      .strict(),
+  ])
+);
+
+export const filtersForSelectionRequestBodySchema = lazySchema(() =>
+  z
+    .object({
+      event: chartEventBodySchema.meta({
+        description: 'The `chart.select` or `chart.brush` event a renderer raised on the node.',
+      }),
+      node: z.looseObject({ type: z.string().min(1).max(256) }).meta({
+        description:
+          'The materialized node the event refers to, as `POST /api/isomer/materialize` returned it.',
+      }),
+    })
+    .strict()
+);
+
+export const filtersForSelectionResponseBodySchema = lazySchema(() =>
+  z
+    .object({ filters: z.array(storedFilterSchema) })
+    .strict()
+    .meta({
+      description:
+        'The Kibana filters the selection stands for. Keep them and pass them back in `context.filters` to materialize again.',
+    })
+);

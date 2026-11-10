@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Composition, ValidationError } from '@kbn/isomer';
+import type { Composition, PrimitiveNode, ValidationError } from '@kbn/isomer';
 import type { MaterializedNode } from './nodes';
 
 type NodeValidator = (composition: Composition) => { errors: ValidationError[] };
@@ -38,7 +38,7 @@ const createValidator = async (): Promise<NodeValidator> => {
  */
 export const createNodeValidator = () => {
   let validator: Promise<NodeValidator> | undefined;
-  return async (node: MaterializedNode): Promise<ValidationError[]> => {
+  return async (node: MaterializedNode | PrimitiveNode): Promise<ValidationError[]> => {
     validator ??= createValidator().catch((error) => {
       validator = undefined;
       throw error;
@@ -50,3 +50,9 @@ export const createNodeValidator = () => {
     }));
   };
 };
+
+/** Whether `node` is a materialized node, given its validation errors. */
+export const isValidNode = (
+  node: PrimitiveNode,
+  errors: ValidationError[]
+): node is MaterializedNode => errors.length === 0;

@@ -28,6 +28,7 @@ import { MaterializerRegistry } from './materialize/registry';
 import { createNodeValidator } from './materialize/validate_node';
 import type { MaterializeScope, Materializer, ScopedMaterializeClient } from './materialize/types';
 import { abortSignalFor } from './materialize/abort_signal';
+import { registerFiltersForSelectionRoute } from './routes/filters_for_selection_route';
 import { registerMaterializeRoute } from './routes/materialize_route';
 
 /** Setup contract for registering materializers before the plugin starts. */
@@ -98,9 +99,12 @@ export class IsomerPlugin
   }
 
   setup(core: CoreSetup): IsomerPluginSetup {
-    registerMaterializeRoute({
-      router: core.http.createRouter(),
+    const router = core.http.createRouter();
+    registerMaterializeRoute({ router, createClient: this.createClient });
+    registerFiltersForSelectionRoute({
+      router,
       createClient: this.createClient,
+      validateNode: this.validateNode,
     });
     this.registry.register(
       LENS_TYPE,

@@ -38,7 +38,13 @@ export interface SelectionServices {
 
 const OTHER_BUCKET = '__other__';
 
-class SelectionError extends Error {}
+/** Raised for a selection that doesn't fit its node. */
+export class SelectionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'SelectionError';
+  }
+}
 
 const selectionError = (message: string) => new SelectionError(message);
 

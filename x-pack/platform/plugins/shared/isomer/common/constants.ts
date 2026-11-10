@@ -11,5 +11,11 @@ export const MATERIALIZE_API_PATH = '/api/isomer/materialize';
 /** The materialize route's only version. */
 export const MATERIALIZE_API_VERSION = '2023-10-31';
 
+/** The public route that turns a selection on a materialized node into Kibana filters. */
+export const FILTERS_FOR_SELECTION_API_PATH = '/api/isomer/filters_for_selection';
+
+/** The filters for selection route's only version. */
+export const FILTERS_FOR_SELECTION_API_VERSION = '2023-10-31';
+
 /** Turns materialization on, in process and over HTTP. Off unless a provider or an override sets it. */
 export const MATERIALIZE_FEATURE_FLAG = 'isomer.materializeEnabled';
