@@ -18,10 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import type {
-  OnboardingSuggestion,
-  OnboardingSuggestionsExecution,
-} from '@kbn/nightshift-investigations-plugin/common';
+import type { OnboardingSuggestionsExecution } from '@kbn/nightshift-investigations-plugin/common';
 import { NightshiftHeader } from '../header';
 import { useFlyoutShareUrlCustomAction } from '../../../components/ui/flyout_share_url_button';
 import {
@@ -103,46 +100,6 @@ const AUTOMATE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.autom
   defaultMessage: 'Try first investigation',
 });
 
-/** Design-only sample rows for `?suggestions=1` when the space has none yet. */
-const DESIGN_ONBOARDING_SUGGESTIONS: OnboardingSuggestion[] = [
-  {
-    title: 'Investigate p99 latency on order-processing',
-    prompt: 'Why is p99 latency up on order-processing?',
-    rationale: 'Latency alert fired on order-processing after the last deploy.',
-    source: 'alert',
-  },
-  {
-    title: 'Checkout error spike after payment-gateway change',
-    prompt: 'What caused the checkout error spike?',
-    rationale: 'Error rate jumped on checkout-service correlated with payment-gateway.',
-    source: 'error_spike',
-  },
-  {
-    title: 'SLO burn on availability for checkout',
-    prompt: 'Why is the checkout availability SLO burning?',
-    rationale: 'Availability SLO is in a fast burn window for the last hour.',
-    source: 'slo',
-  },
-  {
-    title: 'Recent deploy may have broken auth-service',
-    prompt: 'Did the latest auth-service deploy cause this outage?',
-    rationale: 'A GitHub deploy landed minutes before the first alert.',
-    source: 'code_change',
-  },
-  {
-    title: 'Team discussing payment timeouts in Slack',
-    prompt: 'Summarize the payment timeout incident from Slack.',
-    rationale: '#incidents is actively discussing upstream 504s.',
-    source: 'discussion',
-  },
-  {
-    title: 'Open case: payment provider degradation',
-    prompt: 'Continue the payment provider degradation case.',
-    rationale: 'An open case already tracks EU-West provider issues.',
-    source: 'case',
-  },
-];
-
 /** Stub execution so analyze/suggestions URL forces work before a real workflow run exists. */
 const DESIGN_PREVIEW_EXECUTION: OnboardingSuggestionsExecution = {
   execution_id: 'design-preview',
@@ -180,7 +137,7 @@ export function NightshiftOnboarding({
   const hasAutomation = (automations.data?.automations.length ?? 0) > 0;
   // Design/dev URL forces (keep while iterating onboarding UI):
   //   ?analyzing=1 — gathering banner
-  //   ?suggestions=1 — filled suggestion list
+  //   ?suggestions=1 — live suggestion list when the space has any (else empty)
   //   ?suggestions=empty — empty suggestions state
   //   ?investigating=1 — trial card in progress
   //   (no force) — investigation ready / automate when a trial exists
@@ -194,21 +151,16 @@ export function NightshiftOnboarding({
 
   const execution = data?.execution;
   const liveSuggestions = execution?.suggestions;
-  const hasLiveSuggestions = (liveSuggestions?.length ?? 0) > 0;
-  // Fabricated sample rows (or a forced empty list) must not start real investigations.
-  const isDesignPreviewReadOnly =
-    forceAnalyzing || forceSuggestionsEmpty || (forceSuggestionsFilled && !hasLiveSuggestions);
+  // Forced empty / analyzing must not start real investigations or retries.
+  const isDesignPreviewReadOnly = forceAnalyzing || forceSuggestionsEmpty;
   const designExecution: OnboardingSuggestionsExecution | undefined = forceAnalyzing
     ? { ...(execution ?? DESIGN_PREVIEW_EXECUTION), status: 'running', suggestions: undefined }
     : forceSuggestions
     ? {
         ...(execution ?? DESIGN_PREVIEW_EXECUTION),
         status: 'succeeded',
-        suggestions: forceSuggestionsEmpty
-          ? []
-          : hasLiveSuggestions
-          ? liveSuggestions
-          : DESIGN_ONBOARDING_SUGGESTIONS,
+        // No hardcoded fallbacks — same stance as #304159 (empty when nothing real).
+        suggestions: forceSuggestionsEmpty ? [] : liveSuggestions ?? [],
       }
     : execution;
   // Step 1 is done once the space is bound to its service accounts and the agent is installed:
