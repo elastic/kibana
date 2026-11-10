@@ -13,7 +13,6 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { MAX_ID_LENGTH, upsertStreamQueryRequestSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
-import { v4 as uuidv4 } from 'uuid';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
@@ -105,7 +104,6 @@ export function createQueryKnowledgeIndicatorTool({
     handler: async ({ slug, ...queryInput }, context) => {
       const { request } = context;
       let sourceId = '';
-      const queryId = queryInput.id ?? uuidv4();
 
       try {
         const scopedClients = await getScopedClients({
@@ -127,7 +125,7 @@ export function createQueryKnowledgeIndicatorTool({
         const { id } = await createQueryKnowledgeIndicatorToolHandler({
           kiClient,
           source,
-          queryInput: { ...queryInput, id: queryId },
+          queryInput,
           logger,
         });
 

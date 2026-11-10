@@ -187,6 +187,34 @@ describe('ki_query_create tool', () => {
     );
   });
 
+  it.each([
+    [
+      'acknowledges a write',
+      { upsertQuery: jest.fn().mockResolvedValue(undefined) },
+      { acknowledged: true },
+    ],
+    [
+      'keeps the write error',
+      { upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')) },
+      { message: 'Failed to create query knowledge indicator: upsert failed' },
+    ],
+  ])('%s when telemetry throws', async (_name, kiClient, expected) => {
+    jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
+    jest.mocked(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).mockImplementationOnce(() => {
+      throw new Error('telemetry down');
+    });
+    const tool = createQueryKnowledgeIndicatorTool({
+      getScopedClients: createScopedClients(kiClient),
+      server,
+      logger,
+      telemetry,
+    });
+
+    const { results } = await invokeHandler(tool as never, queryParams, createMockToolContext());
+
+    expect(results[0].data).toEqual(expect.objectContaining(expected));
+  });
+
   it('omits the caller-named id when the write fails', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
     const tool = createQueryKnowledgeIndicatorTool({

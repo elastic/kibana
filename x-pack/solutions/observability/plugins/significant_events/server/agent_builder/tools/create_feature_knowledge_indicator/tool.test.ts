@@ -178,6 +178,54 @@ describe('ki_feature_create tool', () => {
     );
   });
 
+  it('reports the normalized feature slug', async () => {
+    jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
+    const tool = createFeatureKnowledgeIndicatorTool({
+      getScopedClients: createScopedClients({ bulk: jest.fn().mockResolvedValue(undefined) }),
+      server,
+      logger,
+      telemetry,
+    });
+
+    await invokeHandler(
+      tool as never,
+      { ...featureParams, id: ' Svc-Checkout ' },
+      createMockToolContext()
+    );
+
+    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+      expect.objectContaining({ knowledge_indicator_id: 'svc-checkout' })
+    );
+  });
+
+  it.each([
+    [
+      'acknowledges a write',
+      { bulk: jest.fn().mockResolvedValue(undefined) },
+      { acknowledged: true },
+    ],
+    [
+      'keeps the write error',
+      { bulk: jest.fn().mockRejectedValue(new Error('write failed')) },
+      { message: 'Failed to create feature knowledge indicator: write failed' },
+    ],
+  ])('%s when telemetry throws', async (_name, kiClient, expected) => {
+    jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
+    jest.mocked(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).mockImplementationOnce(() => {
+      throw new Error('telemetry down');
+    });
+    const tool = createFeatureKnowledgeIndicatorTool({
+      getScopedClients: createScopedClients(kiClient),
+      server,
+      logger,
+      telemetry,
+    });
+
+    const { results } = await invokeHandler(tool as never, featureParams, createMockToolContext());
+
+    expect(results[0].data).toEqual(expect.objectContaining(expected));
+  });
+
   it('stores the feature against the source id when the slug differs', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
 

@@ -10,6 +10,10 @@ import { sourceWithSlug } from '../../utils/test_helpers';
 import { validateEsqlQueryForSourceOrThrow } from '../../../lib/significant_events/validate_esql_query';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 
+jest.mock('uuid', () => ({
+  v4: jest.fn(() => 'generated-query-id'),
+}));
+
 jest.mock('../../../lib/significant_events/validate_esql_query', () => ({
   ...jest.requireActual('../../../lib/significant_events/validate_esql_query'),
   validateEsqlQueryForSourceOrThrow: jest.fn(),
@@ -59,6 +63,31 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
     );
   });
 
+  it('generates id when missing', async () => {
+    const kiClient = {
+      upsertQuery: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const result = await createQueryKnowledgeIndicatorToolHandler({
+      kiClient: kiClient as never,
+      source,
+      queryInput: {
+        title: 'Suspicious query',
+        description: 'Find suspicious events',
+        esql: { query: 'FROM logs.test, logs.test.*' },
+      },
+      logger,
+    });
+
+    expect(result).toEqual({ id: 'generated-query-id' });
+    expect(kiClient.upsertQuery).toHaveBeenCalledWith(
+      source.id,
+      expect.objectContaining({
+        id: 'generated-query-id',
+      })
+    );
+  });
+
   it('rejects an over-broad multi-word full-text predicate', async () => {
     const kiClient = {
       upsertQuery: jest.fn().mockResolvedValue(undefined),
@@ -69,7 +98,6 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
         kiClient: kiClient as never,
         source,
         queryInput: {
-          id: 'query-1',
           title: 'Over-broad',
           description: 'ORed terms',
           esql: { query: 'FROM logs.test, logs.test.* | WHERE message : "request failed"' },
@@ -91,7 +119,6 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
         kiClient: kiClient as never,
         source,
         queryInput: {
-          id: 'query-1',
           title: 'Cast in MATCH_PHRASE',
           description: 'Union-typed field',
           esql: {
@@ -116,7 +143,6 @@ describe('createQueryKnowledgeIndicatorToolHandler', () => {
         kiClient: kiClient as never,
         source,
         queryInput: {
-          id: 'query-1',
           title: 'Suspicious query',
           description: 'Find suspicious events',
           esql: { query: 'FROM logs.test, logs.test.*' },
