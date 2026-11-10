@@ -9,7 +9,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { QuerySchema } from '@kbn/slo-schema';
 import { is, querySchema } from '@kbn/slo-schema';
 import type { FieldPath } from 'react-hook-form';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import type { CreateSLOForm } from '../types';
 const isFieldBeingUsed = (fieldName: string, query?: QuerySchema) => {
   if (!query) {
@@ -37,8 +37,8 @@ export const useRunTimeFieldBeingUsed = (
   name: FieldPath<CreateSLOForm>,
   dataView?: DataView
 ): string[] => {
-  const { watch } = useFormContext<CreateSLOForm>();
-  const value = watch(name);
+  const { control } = useFormContext<CreateSLOForm>();
+  const value = useWatch({ control, name });
 
   if (!dataView || !value) {
     return [];

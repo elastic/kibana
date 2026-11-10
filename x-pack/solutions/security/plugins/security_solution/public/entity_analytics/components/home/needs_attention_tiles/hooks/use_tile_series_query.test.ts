@@ -104,7 +104,7 @@ describe('useTileSeriesQuery', () => {
     );
   });
 
-  it('searches with the ES|QL strategy and parses the response', async () => {
+  it('searches with the ES|QL strategy, in the local project only, and parses the response', async () => {
     mockSearch.mockReturnValue(of({ rawResponse: { columns: [{ name: 'a' }], values: [[1, 2]] } }));
     renderHook(() =>
       useTileSeriesQuery({ tileKey: 'tile', query: 'FROM x', enabled: true, parse })
@@ -112,24 +112,8 @@ describe('useTileSeriesQuery', () => {
     expect(await lastCall()[1]({ signal: undefined })).toBe(2);
     expect(mockSearch).toHaveBeenCalledWith(
       { params: { query: 'FROM x' } },
-      expect.objectContaining({ strategy: 'esql_async' })
+      expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
     );
-    expect(mockSearch.mock.calls[0][1].projectRouting).toBeUndefined();
-  });
-
-  it('can run on the local cluster only, like the count', async () => {
-    mockSearch.mockReturnValue(of({ rawResponse: { columns: [], values: [] } }));
-    renderHook(() =>
-      useTileSeriesQuery({
-        tileKey: 'tile',
-        query: 'FROM x',
-        enabled: true,
-        parse,
-        localOnly: true,
-      })
-    );
-    await lastCall()[1]({ signal: undefined });
-    expect(mockSearch.mock.calls[0][1].projectRouting).toBe('_alias:_origin');
   });
 
   it('fails when the parser throws, so the line is left out', async () => {
@@ -190,17 +174,20 @@ describe('getTileTrend', () => {
 });
 
 describe('getSeriesGate', () => {
-  const ready = { isReady: true, reachesBack: true, count: 5 };
+  const ready = { isReady: true, reachesBack: true, hasCount: true };
 
-  it('runs when everything has settled, the history reaches back and the count is above 0', () => {
+  it('runs when everything has settled and the history reaches back, whatever the count', () => {
     expect(getSeriesGate(ready)).toEqual({ canRun: true, isHidden: false });
   });
 
-  it('hides the line once settled when the history is too short, unknown or the count is 0', () => {
+  it('hides the line once settled when the history is too short or unknown', () => {
     const hidden = { canRun: false, isHidden: true };
     expect(getSeriesGate({ ...ready, reachesBack: false })).toEqual(hidden);
     expect(getSeriesGate({ ...ready, reachesBack: undefined })).toEqual(hidden);
-    expect(getSeriesGate({ ...ready, count: 0 })).toEqual(hidden);
+  });
+
+  it('hides the line when the count did not come back, even if a cached history reaches back', () => {
+    expect(getSeriesGate({ ...ready, hasCount: false })).toEqual({ canRun: false, isHidden: true });
   });
 
   it('neither runs nor hides while the counts and the delta are still loading', () => {

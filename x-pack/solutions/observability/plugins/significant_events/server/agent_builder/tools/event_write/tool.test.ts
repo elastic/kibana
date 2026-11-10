@@ -13,6 +13,7 @@ import {
   SEVERITY_CONTRACT_RULE,
 } from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -113,6 +114,12 @@ describe('events_write tool', () => {
         items: Array.from({ length: MAX_BULK_WRITE_ITEMS + 1 }, () => input),
       }).success
     ).toBe(false);
+  });
+
+  it('exposes reopen_deactivated to the agent', () => {
+    expect(
+      eventsWriteSchema.safeParse({ items: [{ ...input, reopen_deactivated: true }] }).success
+    ).toBe(true);
   });
 
   it('rejects input without an items array', () => {
@@ -826,6 +833,60 @@ describe('events_write tool', () => {
     expect(result).toEqual(
       expect.objectContaining({ results: [expect.objectContaining({ type: 'other' })] })
     );
+  });
+
+  it('reports only persisted alert identities and the creation group_hash', async () => {
+    const { event_id: _eventId, ...newItem } = input;
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      {
+        index: 0,
+        event_id: 'event-1',
+        status: 'active',
+        written: true,
+        created: true,
+        group_hash: 'hash-1',
+      },
+      { index: 1, event_id: 'event-2', status: 'active', written: true, created: false },
+      {
+        index: 2,
+        event_id: 'generated-2',
+        written: false,
+        reason: 'bulk_error',
+        error: { type: 'rule_events_write_error', reason: 'busy' },
+      },
+      {
+        index: 3,
+        event_id: 'closed-event',
+        existing_event_id: 'closed-event',
+        written: false,
+        reason: 'bulk_error',
+        error: { type: 'rule_events_write_error', reason: 'busy' },
+      },
+    ]);
+    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+    const context = createMockToolContext();
+    context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
+
+    await invokeHandler(
+      createTool(telemetry) as never,
+      { items: [input, { ...input, event_id: 'event-2' }, newItem, newItem] },
+      context
+    );
+
+    const identity = { alert_source: 'elastic.significant_events', space_id: 'space-a' };
+    const payloads = telemetry.trackAgentToolEventsWrite.mock.calls.map(([payload]) => payload);
+    expect(payloads[0]).toMatchObject({
+      ...identity,
+      fingerprint: 'event-1',
+      group_hash: 'hash-1',
+    });
+    expect(payloads[1]).toMatchObject({ ...identity, fingerprint: 'event-2' });
+    expect(payloads[1]).not.toHaveProperty('group_hash');
+    expect(payloads[2]).toMatchObject(identity);
+    expect(payloads[2]).not.toHaveProperty('fingerprint');
+    expect(payloads[2]).not.toHaveProperty('group_hash');
+    expect(payloads[3]).toMatchObject({ ...identity, fingerprint: 'closed-event' });
+    expect(payloads[3]).not.toHaveProperty('group_hash');
   });
 
   it('returns a classified validation error', async () => {

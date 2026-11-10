@@ -7,6 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
+import { of } from 'rxjs';
 import type { AlertZeroConfig } from './config';
 import { AlertZeroPlugin } from './plugin';
 
@@ -58,6 +59,7 @@ const createCoreStart = (indices: { putIndexTemplate: jest.Mock; exists?: jest.M
         },
       },
     },
+    featureFlags: { getBooleanValue$: () => of(true) },
     security: { serviceAccounts: { isEnabled: () => false } },
   } as unknown as CoreStart);
 

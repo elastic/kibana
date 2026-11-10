@@ -8,6 +8,19 @@
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceInstance } from './use_service_settings';
 
+/** Duplicate instance ids are `<serviceId>__dup-<n>`. */
+export const DUPLICATE_INSTANCE_ID_SEPARATOR = '__dup-';
+
+/**
+ * The service an instance belongs to: the id itself for an original, the part before the
+ * duplicate suffix for a duplicate. The services map is keyed by service id, so looking up an
+ * instance id (e.g. `elb__dup-1`) there misses.
+ */
+export function getBaseServiceId(instanceId: string): string {
+  const separatorIndex = instanceId.indexOf(DUPLICATE_INSTANCE_ID_SEPARATOR);
+  return separatorIndex >= 0 ? instanceId.slice(0, separatorIndex) : instanceId;
+}
+
 /**
  * Reconcile persisted instances against the current selectedServiceIds.
  *

@@ -45,6 +45,7 @@ if ! pgrep -f 'Xvfb :99' >/dev/null 2>&1; then
 fi
 
 echo "=== Starting Elasticsearch ==="
+mkdir -p target
 pnpm es snapshot >target/river-elasticsearch-warmup.log 2>&1 &
 ELASTICSEARCH_PID=$!
 

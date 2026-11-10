@@ -7,13 +7,16 @@
 
 import { cloneDeep } from 'lodash';
 import type { AgentConfiguration, ExecutionTerminalEvent } from '@kbn/agent-builder-common';
-import { TimelineEventType, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
+import {
+  TimelineEventType,
+  isExecutionTerminalEvent,
+  isUserMessageEvent,
+} from '@kbn/agent-builder-common';
 import type {
   AgentHandlerContext,
   CycleHookExecutionContext,
   ExecutionSummary,
   ProcessedTimelineEvent,
-  ProcessedUserMessageEvent,
 } from '@kbn/agent-builder-server';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import { historyView } from '../utils/context_coverage';
@@ -68,6 +71,7 @@ export const buildCycleHookExecutionContext = ({
     input: cloneDeep(processedConversation.nextInput),
     conversation: {
       id: conversationId,
+      access: context.conversationAccess,
       get events() {
         return getHistory().events;
       },
@@ -113,9 +117,7 @@ const summarizeExecution = (
   if (!terminal) {
     return undefined;
   }
-  const userMessage = execution.triggers.find(
-    (event): event is ProcessedUserMessageEvent => event.type === TimelineEventType.userMessage
-  );
+  const userMessage = execution.triggers.find(isUserMessageEvent);
   return {
     id: execution.id,
     input: userMessage?.data,

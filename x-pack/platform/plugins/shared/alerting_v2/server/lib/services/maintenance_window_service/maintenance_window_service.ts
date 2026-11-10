@@ -12,7 +12,7 @@ import { inject, injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
-import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
+import { savedObjectNamespacesToSpaceId } from '../../saved_object_namespaces_to_space_id';
 import { MaintenanceWindowSavedObjectsClientToken } from './tokens';
 import type { ActiveMaintenanceWindow } from './types';
 

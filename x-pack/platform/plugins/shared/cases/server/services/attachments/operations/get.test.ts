@@ -1468,6 +1468,28 @@ describe('AttachmentService getter', () => {
         events: 1,
       });
     });
+
+    it('runs the legacy and unified aggregations in parallel', async () => {
+      const attachmentGetterWithFlagOn = createAttachmentGetter(true);
+      const emptyPage = { saved_objects: [], page: 1, per_page: 0, total: 0 };
+      let resolveLegacy: (value: typeof emptyPage) => void = () => {};
+      unsecuredSavedObjectsClient.find
+        .mockReturnValueOnce(
+          new Promise((resolve) => {
+            resolveLegacy = resolve;
+          })
+        )
+        .mockResolvedValueOnce(emptyPage);
+
+      const stats = attachmentGetterWithFlagOn.getCaseAttatchmentStats({ caseIds: ['case-1'] });
+
+      // The unified find starts while the legacy find is still pending.
+      await new Promise(setImmediate);
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+
+      resolveLegacy(emptyPage);
+      await stats;
+    });
   });
 
   describe('getCaseIdsByAttachmentIds', () => {

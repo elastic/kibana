@@ -217,6 +217,14 @@ When the labels match, PR CI triggers the dedicated
 surface on the PR as a separate `kibana-evals` commit status — open its build for per-suite/per-model
 results and triage.
 
+Every run logs a link to its experiments in the evals UI
+(`/app/management/ai/evals/experiments/<experiment-id>?execution_id=<execution-id>`) after the
+score table. The link points at the Kibana that received the scores: `EVAL_KBN_URL` when set
+(by CI, `--evaluations-kbn-url`, or the datasets profile's `evaluationsKbn.url`; `dev-vault` and a
+synced `config.json` point it at the golden cluster), otherwise the Kibana Scout ran against. On Buildkite (PR, weekly and on-demand builds) the same
+links are added to a `kbn-evals-experiments-<suite>` build annotation, one row per model and
+shard, so they show at the top of the build. Logged URLs never include credentials.
+
 #### Per-spec model groups
 
 The weekly run normally runs every model in a suite against every spec. To run a spec against
@@ -239,7 +247,9 @@ fewer models, list it under `specModelGroups` in
 - Every model in `specModelGroups` must be in `weeklyEisModelGroups`, and every model there must
   be in the weekly step's `EVAL_MODEL_GROUPS` in `llm_evals.yml`. Both are checked in PR CI. The
   weekly run requests `EVAL_MODEL_GROUPS`; EIS provisions every model it discovers.
-- `shards` are unrelated. They decide which specs share a CI step, not which models run.
+- `shards` are unrelated. They decide which specs share a CI step, not which models run. A shard
+  can also set `judge` to an evaluation connector id (for example `"judge": "eis-openai-gpt-5-4"`)
+  to pin the judge for its steps only; shards without one keep the suite-wide judge.
 - Only the weekly run (`KBN_EVALS_WEEKLY=1`) applies this. PR and on-demand runs still run every
   model against every spec.
 
@@ -247,7 +257,7 @@ fewer models, list it under `specModelGroups` in
 names a model outside the weekly list, or leaves a spec on disk unlisted.
 
 **Preview the fanout locally.** `get_fanout_matrix.js` prints one `{ connectorId, shardId,
-specFiles }` line per CI step. It needs an endpoint for every weekly model, so fake them from the
+specFiles, judge? }` line per CI step. It needs an endpoint for every weekly model, so fake them from the
 suite config. Drop `KBN_EVALS_WEEKLY=1` to see the PR / on-demand fanout.
 
 ```bash
@@ -519,11 +529,15 @@ You can use these as-is or build your own directly in the suite.
 
 #### LLM-as-a-judge
 
-Set `--judge` to select which model judges results. Judge evaluators receive the judge connector automatically.
+Judge evaluators receive the judge connector automatically. Without `--judge`, the [default judge](#default-judge) is used; set `--judge` to pick another model.
 
 ```bash
 node scripts/evals start --suite agent-builder --judge eis-claude-4-5-sonnet
 ```
+
+#### Default judge
+
+Without `--judge` / `EVAL_CONNECTOR_ID`, the judge comes from `evaluationConnectorId` in the profile config (`dev-vault`, or a `config.<profile>.json` synced from Vault). Profiles without it, such as `local`, still prompt (or fail without a TTY).
 
 #### Selecting evaluators at runtime
 

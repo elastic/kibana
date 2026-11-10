@@ -7,9 +7,14 @@
 
 import type { CoreWebVital } from '../../../common/core_web_vitals';
 import { CORE_WEB_VITAL_THRESHOLDS } from '../../../common/core_web_vitals';
-import type { DurationVital, ScoreVital, VitalRatings } from '../../../common/types/applications';
+import type {
+  DurationVital,
+  ScoreVital,
+  VitalRatings,
+  WebVitals,
+} from '../../../common/types/applications';
 import type { PercentilesAggregation } from './aggregations';
-import { getP75, p75Of } from './aggregations';
+import { getPercentile, p75Of } from './aggregations';
 
 // Elasticsearch parses the bound as the field's type, so a float 0.1 is still up to 0.1.
 const upTo = (field: string, threshold: number) => ({
@@ -52,13 +57,30 @@ const toRatings = ({
 };
 
 export const toDurationVital = (aggregation: VitalAggregation): DurationVital => ({
-  p75Ms: getP75(aggregation.p75),
+  p75Ms: getPercentile(aggregation.p75),
   sampleCount: aggregation.doc_count,
   ratings: toRatings(aggregation),
 });
 
 export const toScoreVital = (aggregation: VitalAggregation): ScoreVital => ({
-  p75: getP75(aggregation.p75),
+  p75: getPercentile(aggregation.p75),
   sampleCount: aggregation.doc_count,
   ratings: toRatings(aggregation),
+});
+
+/** The vital aggregations of a bucket, one per Core Web Vital. */
+export interface WebVitalAggregations {
+  lcp: VitalAggregation;
+  inp: VitalAggregation;
+  cls: VitalAggregation;
+  fcp: VitalAggregation;
+  ttfb: VitalAggregation;
+}
+
+export const toWebVitals = ({ lcp, inp, cls, fcp, ttfb }: WebVitalAggregations): WebVitals => ({
+  lcp: toDurationVital(lcp),
+  inp: toDurationVital(inp),
+  cls: toScoreVital(cls),
+  fcp: toDurationVital(fcp),
+  ttfb: toDurationVital(ttfb),
 });

@@ -67,7 +67,8 @@ describe('getSigEventsLogPatternsEsql', () => {
     expect(esql.mock.calls[0]).toEqual([
       'count_docs_for_sigevents_log_patterns',
       expect.objectContaining({
-        query: 'FROM logs-* | WHERE KQL("service.name:\\"checkout\\"") | STATS total = COUNT(*)',
+        query:
+          'FROM logs-* | WHERE @timestamp >= "1970-01-01T00:00:00.100Z" AND @timestamp <= "1970-01-01T00:00:00.200Z" | WHERE KQL("service.name:\\"checkout\\"") | STATS total = COUNT(*)',
       }),
     ]);
     expect(esql.mock.calls[1]).toEqual([

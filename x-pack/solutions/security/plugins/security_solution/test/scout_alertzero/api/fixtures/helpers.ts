@@ -482,3 +482,102 @@ export const withHuntHeaders = (cookieHeader: Record<string, string>): Record<st
   ...TI_HEADERS,
   ...cookieHeader,
 });
+
+const SECURITY_SOLUTION_DEFAULT_INDEX_SETTING_ID = 'securitySolution:defaultIndex';
+
+/** Sets (or, with `undefined`, clears) the space's default data view patterns. */
+export const setDefaultIndexInSpace = async ({
+  apiClient,
+  headers,
+  spaceId,
+  patterns,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+  patterns: string[] | undefined;
+}): Promise<void> => {
+  const response = await apiClient.post(spaceUrl(KIBANA_SETTINGS_PATH, spaceId), {
+    headers: { ...headers, 'kbn-xsrf': 'true' },
+    responseType: 'json',
+    body: { changes: { [SECURITY_SOLUTION_DEFAULT_INDEX_SETTING_ID]: patterns ?? null } },
+  });
+  if (response.statusCode !== 200) {
+    throw new Error(
+      `Setup: failed to set the default index in ${spaceId} (status ${
+        response.statusCode
+      }): ${JSON.stringify(response.body)}`
+    );
+  }
+};
+
+const WORKFLOWS_API_HEADERS = { 'elastic-api-version': '2023-10-31' };
+const FINISHED_EXECUTION_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out'];
+
+export interface FinishedSweepGate {
+  executionId: string;
+  stepStartedAt: string;
+  stepFinishedAt: string | undefined;
+  output: unknown;
+}
+
+/**
+ * Waits for the newest finished execution of the Hunt workflow in a space (the same status set
+ * as `getLatestFinishedWorkflowExecution`) and returns its `check_index_scope` step. Enabling
+ * the worker starts a sweep at once and a run started while one is in flight is dropped, so this
+ * waits instead of posting a run. Returns `undefined` when nothing finishes within the budget.
+ */
+export const waitForFinishedSweepGate = async ({
+  apiClient,
+  headers,
+  spaceId,
+  workflowId,
+  budgetMs = 60_000,
+  intervalMs = 1_000,
+}: {
+  apiClient: ApiClientFixture;
+  headers: Record<string, string>;
+  spaceId: string;
+  workflowId: string;
+  budgetMs?: number;
+  intervalMs?: number;
+}): Promise<FinishedSweepGate | undefined> => {
+  const statuses = FINISHED_EXECUTION_STATUSES.map((status) => `statuses=${status}`).join('&');
+  const deadline = Date.now() + budgetMs;
+  while (Date.now() < deadline) {
+    const list = await apiClient.get(
+      spaceUrl(
+        `api/workflows/workflow/${workflowId}/executions?${statuses}&sortField=createdAt&sortOrder=desc&size=1`,
+        spaceId
+      ),
+      { headers: { ...headers, ...WORKFLOWS_API_HEADERS }, responseType: 'json' }
+    );
+    const executionId = (list.body as { results?: Array<{ id: string }> }).results?.[0]?.id;
+    if (executionId) {
+      const execution = await apiClient.get(
+        spaceUrl(`api/workflows/executions/${executionId}?includeOutput=true`, spaceId),
+        { headers: { ...headers, ...WORKFLOWS_API_HEADERS }, responseType: 'json' }
+      );
+      const step = (
+        execution.body as {
+          stepExecutions?: Array<{
+            stepId: string;
+            startedAt: string;
+            finishedAt?: string;
+            output?: unknown;
+          }>;
+        }
+      ).stepExecutions?.find(({ stepId }) => stepId === 'check_index_scope');
+      return step
+        ? {
+            executionId,
+            stepStartedAt: step.startedAt,
+            stepFinishedAt: step.finishedAt,
+            output: step.output,
+          }
+        : undefined;
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  return undefined;
+};

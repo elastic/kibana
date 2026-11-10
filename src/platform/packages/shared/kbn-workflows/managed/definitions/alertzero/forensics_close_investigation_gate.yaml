@@ -57,6 +57,13 @@ triggers:
           type: integer
           minimum: 0
           description: How many detection alerts the attack lists, so the card can say how many an approval reaches at most.
+        caveat:
+          type: string
+          maxLength: 2000
+          description: >
+            Markdown the analyst should read before deciding, such as containment that
+            never reached the approval queue. Shown first on the card. Optional: a
+            containment gate that settled normally has nothing to add.
       required:
         - investigationConversationId
         - attackDiscoveryId
@@ -126,7 +133,13 @@ steps:
         close_reason: "{{ inputs.closeReason }}"
         attack_reason: "{{ inputs.attackReason }}"
         summary: "{{ inputs.assessment | default: '' }}"
+      # A caveat comes first: whatever went wrong before this question changes what
+      # Approve means, so it is read before the close itself.
       comment: |-
+        {%- if inputs.caveat != blank -%}
+        **Before you close:** {{ inputs.caveat }}
+
+        {% endif -%}
         {%- assign alerts = 'its detection alerts' -%}
         {%- if inputs.attackAlertCount > 0 %}{% assign alerts = 'up to ' | append: inputs.attackAlertCount | append: ' detection alert(s)' %}{% endif -%}
         {%- if inputs.closeReason == 'false_positive' -%}
@@ -231,10 +244,12 @@ steps:
     on-failure:
       continue: true
 
-  # Reads who decided and why, which the bridge's output doesn't carry. Uses the
-  # bridge's `proposalId`; after a failed action that is the clone the analyst
-  # last decided on. Skipped when the wrap didn't settle: a lost race has no
-  # decision of its own.
+  # Reads why a proposal was dismissed (reason and rationale), which the bridge's
+  # output doesn't carry. The journal note below does not name the decider: the
+  # proposal card already shows that by display name, while `decidedBy.username`
+  # is an id. Uses the bridge's `proposalId`; after a failed action that is the
+  # clone the analyst last decided on. Skipped when the wrap didn't settle: a
+  # lost race has no decision of its own.
   - name: read_proposal_decision
     type: kibana.request
     if: "${{ steps.create_and_gate_proposal.output.status != blank }}"
@@ -275,8 +290,8 @@ steps:
       investigation_id: "{{ inputs.investigationConversationId }}"
       close_reason: "{{ inputs.closeReason }}"
 
-  # The action already journaled what it closed. This note says what was decided
-  # and by whom. Best-effort.
+  # The action already journaled what it closed. This note says what was decided.
+  # It does not name who decided. Best-effort.
   - name: journal_outcome
     type: workflow.execute
     if: "${{ steps.create_and_gate_proposal.output.status != blank }}"
@@ -286,15 +301,14 @@ steps:
       inputs:
         conversation_id: "{{ inputs.investigationConversationId }}"
         message: >-
-          {%- assign who = steps.read_proposal_decision.output.decidedBy.username | default: 'An analyst' -%}
           {%- if steps.resolve_decision.output.approved == true and inputs.closeReason == 'false_positive' -%}
-          {{ who }} approved closing this Investigation, the attack and its alerts as a false positive. Endpoint analysis found no real incident
+          Approved closing this Investigation, the attack and its alerts as a false positive. Endpoint analysis found no real incident
           {%- if inputs.assessment != blank %}: {{ inputs.assessment }}{% else %}.{% endif %}
           {%- elsif steps.resolve_decision.output.approved == true -%}
-          {{ who }} approved closing this Investigation. Endpoint analysis assessed it as `{{ inputs.closeReason }}`
+          Approved closing this Investigation. Endpoint analysis assessed it as `{{ inputs.closeReason }}`
           {%- if inputs.assessment != blank %}: {{ inputs.assessment }}{% else %}.{% endif %}
           {%- elsif steps.resolve_decision.output.dismissed == true -%}
-          {{ who }} chose to keep this Investigation open ({{ steps.read_proposal_decision.output.dismissReason | default: 'no reason given' }})
+          Chose to keep this Investigation open ({{ steps.read_proposal_decision.output.dismissReason | default: 'no reason given' }})
           {%- if steps.read_proposal_decision.output.rationale != blank %}: {{ steps.read_proposal_decision.output.rationale }}{% else %}.{% endif %}
           Nothing was changed. The question is asked again after the next proposal on this Investigation is decided.
           {%- elsif steps.resolve_decision.output.expired == true -%}

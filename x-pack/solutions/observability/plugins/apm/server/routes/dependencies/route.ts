@@ -295,6 +295,7 @@ const topDependencySpansRoute = createApmServerRoute({
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TopDependencySpansResponse> => {
     const apmEventClient = await getApmEventClient(resources);
+    const { logger } = resources;
 
     const {
       query: {
@@ -311,6 +312,7 @@ const topDependencySpansRoute = createApmServerRoute({
 
     const spans = await getTopDependencySpans({
       apmEventClient,
+      logger,
       dependencyName,
       spanName,
       start,

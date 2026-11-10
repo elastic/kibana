@@ -26,6 +26,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import { CLOUD_CONNECTOR_DEFAULT_ACCOUNT_TYPE } from '../../common/constants/cloud_connector';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 import { PackagePolicyMocks } from '../mocks/package_policy.mocks';
 
 import type {
@@ -180,6 +181,25 @@ paths:
 {{#each paths}}
   - {{this}}
 {{/each}}
+`),
+  ],
+  // Templates with a root-level custom yaml var ("Custom configurations")
+  [
+    '/ymlvarpkg-1.0.0/data_stream/ymlds/agent/stream/stream_custom.yml',
+    Buffer.from(`
+type: log
+paths:
+{{#each paths}}
+  - {{this}}
+{{/each}}
+{{custom}}
+`),
+  ],
+  [
+    '/ymlvarpkg-1.0.0/agent/input/input_custom.yml',
+    Buffer.from(`
+type: log
+{{custom}}
 `),
   ],
 ]) as PackagePolicyAssetsMap;
@@ -797,9 +817,55 @@ describe('Package policy service', () => {
         expect.anything(),
         expect.anything(),
         'test',
-        expect.not.objectContaining({ hasAgentVersionConditions: expect.anything() })
+        expect.objectContaining({ agentVersionConditionsUnchanged: false })
       );
     });
+
+    it.each([
+      { when: 'the package has none', overwrite: false, expected: true },
+      { when: 'the package has none but the create overwrites', overwrite: true, expected: false },
+    ])(
+      'should set agentVersionConditionsUnchanged to $expected on bumpRevision when $when',
+      async ({ overwrite, expected }) => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = createSavedObjectClientMock();
+
+        soClient.create.mockResolvedValueOnce({
+          id: 'test-package-policy',
+          attributes: {},
+          references: [],
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        });
+
+        mockAgentPolicyGet();
+
+        await packagePolicyService.create(
+          soClient,
+          esClient,
+          {
+            name: 'Test Package Policy',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test',
+            policy_ids: ['test'],
+            inputs: [],
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Endpoint',
+              version: '0.9.0',
+            },
+          },
+          { id: 'test-package-policy', skipUniqueNameVerification: true, overwrite }
+        );
+
+        expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          'test',
+          expect.objectContaining({ agentVersionConditionsUnchanged: expected })
+        );
+      }
+    );
 
     it('should store package_agent_version_condition on saved object when package manifest has agent version condition', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -886,7 +952,7 @@ describe('Package policy service', () => {
         expect.anything(),
         expect.anything(),
         'test',
-        expect.not.objectContaining({ hasAgentVersionConditions: expect.anything() })
+        expect.objectContaining({ agentVersionConditionsUnchanged: false })
       );
     });
 
@@ -2372,6 +2438,60 @@ describe('Package policy service', () => {
       });
     });
 
+    it.each([
+      {
+        when: 'a created package has an agent version condition',
+        pkg: { name: 'apache', title: 'Apache', version: '1.3.2' },
+        expected: false,
+      },
+      {
+        when: 'no created package has an agent version condition',
+        pkg: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.9.0' },
+        expected: true,
+      },
+    ])(
+      'sets agentVersionConditionsUnchanged to $expected when $when',
+      async ({ pkg, expected }) => {
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const soClient = createSavedObjectClientMock();
+        jest
+          .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
+          .mockResolvedValueOnce(undefined);
+        soClient.bulkCreate.mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'test-package-policy-1',
+              attributes: { package: pkg, inputs: [] },
+              references: [],
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            },
+          ],
+        });
+        mockAgentPolicyGet();
+
+        const result = await packagePolicyService.bulkCreate(soClient, esClient, [
+          {
+            id: 'test-package-policy-1',
+            name: 'Test Package Policy 1',
+            namespace: 'test',
+            enabled: true,
+            policy_id: 'test_agent_policy',
+            policy_ids: ['test_agent_policy'],
+            inputs: [],
+            package: pkg,
+          },
+        ]);
+
+        expect(result.agentVersionConditionsUnchanged).toBe(expected);
+        expect(agentPolicyService.bumpRevision).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          'test_agent_policy',
+          expect.objectContaining({ agentVersionConditionsUnchanged: expected })
+        );
+      }
+    );
+
     describe('secret storage', () => {
       const buildTestPolicy = () => ({
         id: 'test-package-policy-1',
@@ -3453,6 +3573,143 @@ describe('Package policy service', () => {
           ],
         },
       ]);
+    });
+
+    describe('root-level custom yaml var', () => {
+      const streamPkgInfo = {
+        name: 'ymlvarpkg',
+        version: '1.0.0',
+        type: 'integration',
+        data_streams: [
+          {
+            type: 'logs',
+            dataset: 'ymlvarpkg.ymlds',
+            path: 'ymlds',
+            streams: [{ input: 'log', template_path: 'stream_custom.yml' }],
+          },
+        ],
+        policy_templates: [{ inputs: [{ type: 'log' }] }],
+      } as unknown as PackageInfo;
+
+      const streamInputWithCustom = (custom: string) => [
+        {
+          type: 'log',
+          enabled: true,
+          streams: [
+            {
+              id: 'stream-ymlds',
+              data_stream: { dataset: 'ymlvarpkg.ymlds', type: 'logs' },
+              enabled: true,
+              vars: {
+                paths: { value: ['/var/log/app.log'], type: 'text' },
+                custom: { value: custom, type: 'yaml' },
+              },
+            },
+          ],
+        },
+      ];
+
+      it('should reject a traversal stream id injected through the custom yaml var', () => {
+        expect(() =>
+          _compilePackagePolicyInputs(
+            streamPkgInfo,
+            {},
+            streamInputWithCustom('id: ../../../../tmp/evil') as any,
+            ASSETS_MAP_FIXTURES
+          )
+        ).toThrow('path traversal');
+      });
+
+      it('should keep a safe id coming from the custom yaml var', () => {
+        const inputs = _compilePackagePolicyInputs(
+          streamPkgInfo,
+          {},
+          streamInputWithCustom('id: logfile-custom-id\ntags: [a]') as any,
+          ASSETS_MAP_FIXTURES
+        );
+
+        expect(inputs[0].streams[0].compiled_stream).toEqual({
+          type: 'log',
+          paths: ['/var/log/app.log'],
+          id: 'logfile-custom-id',
+          tags: ['a'],
+        });
+      });
+
+      it('should reject a traversal input id injected through the custom yaml var', () => {
+        expect(() =>
+          _compilePackagePolicyInputs(
+            {
+              name: 'ymlvarpkg',
+              version: '1.0.0',
+              data_streams: [],
+              policy_templates: [{ inputs: [{ type: 'log', template_path: 'input_custom.yml' }] }],
+            } as unknown as PackageInfo,
+            {},
+            [
+              {
+                type: 'log',
+                enabled: true,
+                vars: { custom: { value: 'id: ../../tmp/evil', type: 'yaml' } },
+                streams: [],
+              },
+            ] as any,
+            ASSETS_MAP_FIXTURES
+          )
+        ).toThrow('path traversal');
+      });
+
+      describe('when recompiling for an agent version (agent policy generation)', () => {
+        // An `.hbs` asset with an agent version condition makes the recompile run instead of
+        // returning the stored input unchanged.
+        const assetsMapWithVersionCondition = new Map([
+          ...Array.from(ASSETS_MAP_FIXTURES.entries()),
+          [
+            '/ymlvarpkg-1.0.0/data_stream/ymlds/agent/stream/versioned.yml.hbs',
+            Buffer.from(
+              '{{#semverSatisfies _meta.agent.version "^9.0.0"}}a: 1{{/semverSatisfies}}'
+            ),
+          ],
+        ]) as PackagePolicyAssetsMap;
+
+        // Generation recompiles stored policies, so it must not throw on an ID that was already
+        // stored; the write paths are the ones that validate.
+        it('should not validate a traversal stream id in the template output', () => {
+          const inputs = _compilePackagePolicyInputs(
+            streamPkgInfo,
+            {},
+            streamInputWithCustom('id: ../../../../tmp/evil') as any,
+            assetsMapWithVersionCondition,
+            '9.3.0'
+          );
+
+          expect(inputs[0].streams[0].compiled_stream?.id).toBe('../../../../tmp/evil');
+        });
+
+        it('should not validate a traversal input id in the template output', () => {
+          const inputs = _compilePackagePolicyInputs(
+            {
+              name: 'ymlvarpkg',
+              version: '1.0.0',
+              data_streams: [],
+              policy_templates: [{ inputs: [{ type: 'log', template_path: 'input_custom.yml' }] }],
+            } as unknown as PackageInfo,
+            {},
+            [
+              {
+                type: 'log',
+                enabled: true,
+                vars: { custom: { value: 'id: ../../tmp/evil', type: 'yaml' } },
+                streams: [],
+              },
+            ] as any,
+            assetsMapWithVersionCondition,
+            '9.3.0'
+          );
+
+          expect(inputs[0].compiled_input?.id).toBe('../../tmp/evil');
+        });
+      });
     });
 
     it('should work with an input with a template and no streams', async () => {
@@ -5460,6 +5717,27 @@ describe('Package policy service', () => {
           expect.anything()
         );
       });
+
+      it('passes the agent version condition flag to bumpRevision', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        setupSOClientMocks(savedObjectsClient);
+
+        await callUpdate(savedObjectsClient, elasticsearchClient);
+
+        // The mocked package has template version conditions.
+        policyIds.forEach((policyId) => {
+          expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
+            savedObjectsClient,
+            elasticsearchClient,
+            policyId,
+            expect.objectContaining({
+              agentVersionConditionsUnchanged: false,
+              updatedPackageNames: ['test'],
+            })
+          );
+        });
+      });
     });
 
     it('should not persist spaceIds in SO attributes', async () => {
@@ -5961,6 +6239,40 @@ describe('Package policy service', () => {
         new PackagePolicyValidationError(
           'Cannot change the package of an existing integration policy. Create a new policy with the desired package.'
         )
+      );
+    });
+
+    it('should put item in failedPolicies when preparing the update rejects with a non-Error value', async () => {
+      const savedObjectsClient = createSavedObjectClientMock();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: mockPackagePolicy,
+          },
+        ],
+      });
+      savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+      mockedSecretsModule.isSecretStorageEnabled.mockResolvedValueOnce(true);
+      mockedSecretsModule.extractAndUpdateSecrets.mockRejectedValueOnce(undefined);
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const res = await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
+        mockPackagePolicy,
+      ]);
+
+      expect(res.failedPolicies).toHaveLength(1);
+      expect(res.updatedPolicies).toHaveLength(0);
+      expect(res.failedPolicies[0].packagePolicy).toEqual(mockPackagePolicy);
+      expect(res.failedPolicies[0].error).toEqual(new Error('undefined'));
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        `Preparing update to package policy [${mockPackagePolicy.id}] failed: [Error] undefined`
       );
     });
 
@@ -7091,6 +7403,179 @@ describe('Package policy service', () => {
         expect(endpointCall?.[3]).toMatchObject({ removeProtection: true });
         expect(nonEndpointCall?.[3]).toMatchObject({ removeProtection: false });
       });
+    });
+
+    describe('agent version conditions on revision bump', () => {
+      beforeEach(() => {
+        mockAgentPolicyService.bumpRevision.mockReset();
+      });
+
+      afterEach(() => {
+        (getPackageInfo as jest.Mock).mockImplementation(mockedGetPackageInfo);
+      });
+
+      const generateAttributes = (overrides: Record<string, unknown> = {}) => ({
+        name: 'endpoint-policy',
+        description: '',
+        namespace: 'default',
+        enabled: true,
+        policy_ids: ['test-agent-policy-1', 'test-agent-policy-2'],
+        package: { name: 'endpoint', title: 'Elastic Endpoint', version: '0.9.0' },
+        inputs: [],
+        ...overrides,
+      });
+
+      interface BatchPolicy {
+        old?: Record<string, unknown>;
+        next?: Record<string, unknown>;
+        notFound?: boolean;
+        saveFails?: boolean;
+      }
+
+      const bulkUpdateAndGetUnchangedFlags = async (batch: BatchPolicy[]) => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        const policies = batch.map((policy, index) => ({
+          ...policy,
+          id: `package-policy-${index}`,
+        }));
+        savedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: policies
+            .filter(({ notFound }) => !notFound)
+            .map(({ id, old }) => ({
+              id,
+              type: 'ingest-package-policies',
+              references: [],
+              version: '1.0.0',
+              attributes: generateAttributes(old),
+            })),
+        });
+        savedObjectsClient.bulkUpdate.mockImplementation(async (objs) => ({
+          saved_objects: objs.map((obj) =>
+            policies.find(({ id }) => id === obj.id)?.saveFails
+              ? {
+                  id: obj.id,
+                  type: obj.type,
+                  error: { statusCode: 409, error: 'Conflict', message: 'Conflict' },
+                }
+              : { ...obj, references: [], version: 'test' }
+          ),
+        }));
+
+        const { failedPolicies } = await packagePolicyService.bulkUpdate(
+          savedObjectsClient,
+          elasticsearchClient,
+          policies.map(({ id, next }) => ({ ...generateAttributes(next), id })),
+          { force: true }
+        );
+
+        return {
+          flags: [
+            ...new Set(
+              mockAgentPolicyService.bumpRevision.mock.calls.map(
+                ([, , , options]) => options?.agentVersionConditionsUnchanged
+              )
+            ),
+          ],
+          failedIds: failedPolicies.map(({ packagePolicy }) => packagePolicy.id),
+        };
+      };
+
+      const mockPackageWithAgentVersionCondition = () => {
+        jest
+          .spyOn(packagePolicyService, 'compilePackagePolicyForVersions')
+          .mockResolvedValueOnce(undefined);
+        (getPackageInfo as jest.Mock).mockImplementation(async ({ pkgName, pkgVersion }) => ({
+          name: pkgName,
+          version: pkgVersion,
+          conditions: { agent: { version: '>=9.3.0' } },
+        }));
+      };
+
+      it.each([
+        { when: 'the package has no condition and assignments are unchanged', expected: true },
+        {
+          when: 'assignments change',
+          next: { policy_ids: ['test-agent-policy-2', 'test-agent-policy-3'] },
+          expected: false,
+        },
+        {
+          when: 'the package version changes',
+          next: { package: { name: 'endpoint', title: 'Elastic Endpoint', version: '1.0.0' } },
+          expected: false,
+        },
+        {
+          when: 'the package declares an agent version condition',
+          setup: mockPackageWithAgentVersionCondition,
+          expected: false,
+        },
+        {
+          when: 'a stale stored condition is cleared on the same package version',
+          old: { package_agent_version_condition: '>=9.3.0' },
+          expected: false,
+        },
+        {
+          when: 'version specific policies are disabled and the package version is unchanged',
+          old: { package_agent_version_condition: '>=9.3.0' },
+          setup: () => {
+            jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+              enableVersionSpecificPolicies: false,
+            } as ExperimentalFeatures);
+            mockPackageWithAgentVersionCondition();
+          },
+          expected: true,
+        },
+      ])(
+        'sets agentVersionConditionsUnchanged to $expected when $when',
+        async ({ old = {}, next = {}, setup, expected }) => {
+          setup?.();
+          const { flags } = await bulkUpdateAndGetUnchangedFlags([{ old, next }]);
+          expect(flags).toEqual([expected]);
+        }
+      );
+
+      it('passes the updated package names to bumpRevision', async () => {
+        await bulkUpdateAndGetUnchangedFlags([{}]);
+
+        expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.any(String),
+          expect.objectContaining({ updatedPackageNames: ['endpoint'] })
+        );
+      });
+
+      const versionChange = {
+        package: { name: 'endpoint', title: 'Elastic Endpoint', version: '1.0.0' },
+      };
+
+      it.each([
+        {
+          when: 'one package policy needs a recompute',
+          batch: [{}, { next: versionChange }],
+          expected: false,
+          failedIds: [],
+        },
+        {
+          // It writes nothing, so it cannot change any agent policy's conditions.
+          when: 'the one that needs a recompute fails before it is written',
+          batch: [{}, { next: versionChange, notFound: true }],
+          expected: true,
+          failedIds: ['package-policy-1'],
+        },
+        {
+          when: 'the one that needs a recompute fails to save',
+          batch: [{}, { next: versionChange, saveFails: true }],
+          expected: false,
+          failedIds: ['package-policy-1'],
+        },
+      ])(
+        'sets agentVersionConditionsUnchanged to $expected in a mixed batch when $when',
+        async ({ batch, expected, failedIds }) => {
+          const result = await bulkUpdateAndGetUnchangedFlags(batch);
+          expect(result).toEqual({ flags: [expected], failedIds });
+        }
+      );
     });
 
     it('should store package_agent_version_condition from the target package version', async () => {
@@ -8422,6 +8907,34 @@ describe('Package policy service', () => {
       expect((callbackTwo as jest.Mock).mock.calls[0][0].inputs).toHaveLength(1);
       expect((callbackTwo as jest.Mock).mock.calls[0][0].inputs[0].config.one.value).toEqual(
         'inserted by callbackOne'
+      );
+    });
+
+    it('should keep the onboarding_deployment_id of a package policy update', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const callback: CombinedExternalCallback = jest.fn(async (ds) => ds);
+
+      appContextService.addExternalCallback('packagePolicyUpdate', callback);
+
+      // Package upgrades pass the stored package policy, which the update schema alone rejects.
+      const storedPackagePolicy = {
+        ...newPackagePolicy,
+        id: 'pp-1',
+        onboarding_deployment_id: 'deployment-1',
+      };
+      const result = await packagePolicyService.runExternalCallbacks(
+        'packagePolicyUpdate',
+        storedPackagePolicy,
+        soClient,
+        esClient,
+        coreMock.createCustomRequestHandlerContext(context),
+        request
+      );
+
+      expect(callback).toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({ id: 'pp-1', onboarding_deployment_id: 'deployment-1' })
       );
     });
 
@@ -15165,6 +15678,78 @@ describe('Package policy service', () => {
     describe('rollback', () => {
       beforeEach(() => {
         jest.clearAllMocks();
+      });
+
+      describe('onboarding_deployment_id', () => {
+        const makePolicies = (
+          current: string | null | undefined,
+          previous: string | null | undefined
+        ): Array<SavedObjectsFindResult<PackagePolicySOAttributes>> =>
+          [
+            { id: 'onboarding-policy', version: '2.3.2', onboarding_deployment_id: current },
+            { id: 'onboarding-policy:prev', version: '2.2.0', onboarding_deployment_id: previous },
+          ].map(({ id: policyId, version, onboarding_deployment_id: deploymentId }) => ({
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: policyId,
+            namespaces: ['default'],
+            attributes: {
+              name: 'aws-1',
+              policy_ids: ['12345'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'aws', title: 'AWS', version },
+              revision: 1,
+              latest_revision: !policyId.endsWith(':prev'),
+              created_at: '2024-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2024-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+              ...(deploymentId !== undefined ? { onboarding_deployment_id: deploymentId } : {}),
+            },
+            references: [],
+            score: 0,
+          }));
+        const restoredAttributes = () => mockSoClient.bulkUpdate.mock.calls[0][0][0].attributes;
+
+        it('keeps the current value instead of the one in the previous revision', async () => {
+          await packagePolicyService.rollback(
+            mockSoClient,
+            makePolicies('deploy-2', 'deploy-1'),
+            '2.2.0'
+          );
+
+          expect(restoredAttributes()).toHaveProperty('onboarding_deployment_id', 'deploy-2');
+        });
+
+        it('keeps the current value when the previous revision has it cleared', async () => {
+          await packagePolicyService.rollback(
+            mockSoClient,
+            makePolicies('deploy-2', null),
+            '2.2.0'
+          );
+
+          expect(restoredAttributes()).toHaveProperty('onboarding_deployment_id', 'deploy-2');
+        });
+
+        it('clears a value the policy no longer has', async () => {
+          await packagePolicyService.rollback(
+            mockSoClient,
+            makePolicies(undefined, 'deploy-1'),
+            '2.2.0'
+          );
+
+          expect(restoredAttributes()).toHaveProperty('onboarding_deployment_id', null);
+        });
+
+        it('leaves the field out when the previous revision has none', async () => {
+          await packagePolicyService.rollback(
+            mockSoClient,
+            makePolicies('deploy-1', undefined),
+            '2.2.0'
+          );
+
+          expect(restoredAttributes()).not.toHaveProperty('onboarding_deployment_id');
+        });
       });
 
       it('should create temporary saved objects to back up package policies before updating them', async () => {
