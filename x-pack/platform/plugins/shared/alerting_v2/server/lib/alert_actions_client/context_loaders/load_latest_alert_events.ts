@@ -7,16 +7,14 @@
 
 import Boom from '@hapi/boom';
 import { esql } from '@elastic/esql';
-import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { EVENTS_SERIES_ID_EVAL } from '@kbn/alerting-v2-common-queries';
 import { encodeSeriesId, type DecodedSeriesId } from '@kbn/alerting-v2-utils';
 import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { getAlertEpisodeNotFoundMessage } from '../../errors/alert_error_messages';
-import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import type { AlertEventRecord, RawAlertEventRow } from '../types';
-import { parseDataJson } from '../utils/parse_data_json';
+import { parseDataJson } from '../../parse_data_json';
 import { getSeriesNotFoundError } from '../utils/series_id';
 
 /**
@@ -27,8 +25,8 @@ import { getSeriesNotFoundError } from '../utils/series_id';
  * code never has to second-guess whether the field is a JS object or a
  * raw string.
  */
-export const toAlertEventRecords = (response: EsqlQueryResponse): AlertEventRecord[] =>
-  queryResponseToRecords<RawAlertEventRow>(response).map((row) => ({
+export const toAlertEventRecords = (rows: RawAlertEventRow[]): AlertEventRecord[] =>
+  rows.map((row) => ({
     ...row,
     data_json: parseDataJson(row.data_json),
   }));
@@ -109,9 +107,7 @@ export const loadLatestAlertEventsBySeries = async ({
     )
     .toRequest();
 
-  const rows = queryResponseToRecords<RawSeriesEventRow>(
-    await queryService.executeQuery({ query: query.query })
-  );
+  const rows = await queryService.executeQuery<RawSeriesEventRow>({ query: query.query });
 
   return new Map(
     rows.map(({ series_id: seriesId, ...row }) => [
@@ -172,7 +168,9 @@ export const loadLatestAlertEventsByEpisodeId = async ({
     | KEEP @timestamp, group_hash, episode_id, episode_status, episode_status_count, rule_id, rule_version, space_id, status, source, data_json, severity
   `.toRequest();
 
-  return toAlertEventRecords(await queryService.executeQuery({ query: query.query }));
+  return toAlertEventRecords(
+    await queryService.executeQuery<RawAlertEventRow>({ query: query.query })
+  );
 };
 
 interface LoadLastSeriesAlertEventParams {

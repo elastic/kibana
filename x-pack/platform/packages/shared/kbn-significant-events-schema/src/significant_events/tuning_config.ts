@@ -42,7 +42,7 @@ export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningCo
   feature_ttl_days: 30,
   semantic_min_score: 0.15,
   rrf_rank_constant: 20,
-  query_validation_timeout_ms: 10_000,
+  query_validation_timeout_ms: 15_000,
 };
 
 /**

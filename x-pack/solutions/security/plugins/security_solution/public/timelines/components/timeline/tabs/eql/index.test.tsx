@@ -32,7 +32,6 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expandable_flyout';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const SPECIAL_TEST_TIMEOUT = 30000;
@@ -60,7 +59,6 @@ jest.mock('../../../../../common/components/user_privileges');
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/use_flyout_api');
-jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
 jest.mock('../../body/unified_timeline_body', () => ({
   UnifiedTimelineBody: ({ header }: { header: React.ReactNode }) => header,
@@ -134,7 +132,6 @@ describe('EQL partial results callout', () => {
 
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(createExpandableFlyoutApiMock());
     jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
     HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
       return {
@@ -246,7 +243,6 @@ describe('EQL partial results callout', () => {
 // Failing: See https://github.com/elastic/kibana/issues/277361
 describe.skip('EQL Tab', () => {
   const props = {} as EqlTabContentComponentProps;
-  const mockOpenFlyout = jest.fn();
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeAll(() => {
@@ -259,9 +255,6 @@ describe.skip('EQL Tab', () => {
   });
 
   beforeEach(() => {
-    // Clear call history between tests. `mockOpenFlyout` is declared once at describe scope, so
-    // without this a legacy `openFlyout` call from one test leaks into the next and trips the
-    // `expect(mockOpenFlyout).not.toHaveBeenCalled()` assertions.
     jest.clearAllMocks();
     useTimelineEventsMock = jest.fn(() => [
       false,
@@ -292,12 +285,8 @@ describe.skip('EQL Tab', () => {
     });
 
     flyoutApi = createFlyoutApiMock();
-    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
-      ...createExpandableFlyoutApiMock(),
-      openFlyout: mockOpenFlyout,
-    });
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(createExpandableFlyoutApiMock());
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
-    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
 
     HTMLElement.prototype.getBoundingClientRect = jest.fn(() => {
       return {
@@ -565,40 +554,8 @@ describe.skip('EQL Tab', () => {
     });
 
     it(
-      'should open the legacy notes flyout when the new flyout is disabled',
+      'should open the notes flyout',
       async () => {
-        render(
-          <TestProviders store={createMockStore(mockState)}>
-            <TestComponent />
-          </TestProviders>
-        );
-
-        expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
-
-        await waitFor(() => {
-          expect(screen.getByTestId('timeline-notes-button-small')).not.toBeDisabled();
-        });
-
-        fireEvent.click(screen.getByTestId('timeline-notes-button-small'));
-
-        await waitFor(() => {
-          expect(mockOpenFlyout).toHaveBeenCalledWith(
-            expect.objectContaining({
-              right: expect.objectContaining({ id: 'document-details-right' }),
-              left: expect.objectContaining({ id: 'document-details-left' }),
-            })
-          );
-        });
-        expect(flyoutApi.openNotes).not.toHaveBeenCalled();
-      },
-      SPECIAL_TEST_TIMEOUT
-    );
-
-    it(
-      'should open the new notes flyout when the new flyout is enabled',
-      async () => {
-        jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
-
         render(
           <TestProviders store={createMockStore(mockState)}>
             <TestComponent />
@@ -619,7 +576,6 @@ describe.skip('EQL Tab', () => {
             origin: FLYOUT_ORIGIN.TIMELINE,
           });
         });
-        expect(mockOpenFlyout).not.toHaveBeenCalled();
       },
       SPECIAL_TEST_TIMEOUT
     );
