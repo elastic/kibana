@@ -11,9 +11,11 @@ import type { JsonObject, JsonValue } from '@kbn/utility-types';
 import {
   type EsWorkflowStepExecution,
   ExecutionStatus,
+  hasHitlExternalResumeToken,
   HITL_TOKEN_EXPIRES_AT_INPUT_FIELD,
   HITL_TOKEN_HASH_INPUT_FIELD,
   isHitlWaitStepType,
+  readHitlExternalResumeToken,
   TerminalExecutionStatuses,
 } from '@kbn/workflows';
 
@@ -27,6 +29,7 @@ export const MARK_STEP_AS_RESPONDED_SOURCE_FIELDS = [
   'status',
   'hitl',
   'input',
+  'state',
 ] as const satisfies ReadonlyArray<keyof EsWorkflowStepExecution & string>;
 
 export interface MarkStepAsRespondedAudit {
@@ -37,8 +40,17 @@ export interface MarkStepAsRespondedAudit {
 
 /** A claim won by `markStepAsResponded`, kept so a resume that was not applied can release it. */
 export interface HitlStepClaim extends MarkStepAsRespondedAudit {
-  /** External-resume token that the claim removed from the step `input`. */
-  strippedToken?: { hash: string; expiresAt: string };
+  /**
+   * External-resume token the claim removed. Lives only for this request.
+   * `state` is the current location. `input` is the copy a 9.6 node reads.
+   * `mirroredOnInput` means both copies were live.
+   */
+  strippedToken?: {
+    hash: string;
+    expiresAt: string;
+    source: 'state' | 'input';
+    mirroredOnInput: boolean;
+  };
 }
 
 export type MarkStepAsRespondedCurrent = Pick<
@@ -46,19 +58,25 @@ export type MarkStepAsRespondedCurrent = Pick<
   (typeof MARK_STEP_AS_RESPONDED_SOURCE_FIELDS)[number]
 >;
 
-const stripHitlTokenFieldsFromInput = (input: JsonValue | undefined): JsonValue | undefined => {
-  if (input == null || typeof input !== 'object' || Array.isArray(input)) {
-    return input;
-  }
-
-  // ES `_update` `doc` merges nested objects: omitted keys stay. `null` removes the field
-  // (same as Painless `ctx._source.input.remove(...)`).
-  return {
-    ...(input as Record<string, unknown>),
-    [HITL_TOKEN_HASH_INPUT_FIELD]: null,
-    [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
-  } as JsonValue;
+const nullHitlTokenFields = {
+  [HITL_TOKEN_HASH_INPUT_FIELD]: null,
+  [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: null,
 };
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  value != null && typeof value === 'object' && !Array.isArray(value);
+
+/** ES `_update` `doc` merges nested objects: omitted keys stay. `null` removes the field. */
+function stripHitlTokenFields(value: JsonValue | undefined): JsonValue | undefined;
+function stripHitlTokenFields(
+  value: Record<string, unknown> | undefined
+): Record<string, unknown> | undefined;
+function stripHitlTokenFields(value: unknown): JsonValue | Record<string, unknown> | undefined {
+  if (!isRecord(value) || !hasHitlExternalResumeToken(value)) {
+    return undefined;
+  }
+  return { ...value, ...nullHitlTokenFields };
+}
 
 export const createMarkStepAsRespondedUpdater = (
   audit: MarkStepAsRespondedAudit,
@@ -94,10 +112,14 @@ export const createMarkStepAsRespondedUpdater = (
       ...(audit.channel != null ? { channel: audit.channel } : {}),
     };
 
-    const input = stripHitlTokenFieldsFromInput(current.input);
     const patch: Partial<EsWorkflowStepExecution> = { hitl };
-    if (input !== current.input) {
+    const input = stripHitlTokenFields(current.input);
+    if (input) {
       patch.input = input;
+    }
+    const state = stripHitlTokenFields(current.state);
+    if (state) {
+      patch.state = state;
     }
 
     return patch;
@@ -107,20 +129,23 @@ export const createMarkStepAsRespondedUpdater = (
 const isJsonObject = (value: JsonValue | undefined): value is JsonObject =>
   value != null && typeof value === 'object' && !Array.isArray(value);
 
-/** Returns the external-resume token held in a step `input`, which claiming that step strips. */
+/** Returns the external-resume token a claim removes. Step `state` wins when both copies are live. */
 export const getStrippedHitlToken = (
-  current: Pick<EsWorkflowStepExecution, 'input'>
+  current: Pick<EsWorkflowStepExecution, 'input' | 'state'>
 ): HitlStepClaim['strippedToken'] => {
-  const { input } = current;
-  if (!isJsonObject(input)) {
-    return undefined;
+  const stateToken = readHitlExternalResumeToken({ state: current.state });
+  const inputToken = readHitlExternalResumeToken({ input: current.input });
+  if (stateToken) {
+    return {
+      ...stateToken,
+      source: 'state',
+      mirroredOnInput: inputToken != null,
+    };
   }
-  const hash = input[HITL_TOKEN_HASH_INPUT_FIELD];
-  const expiresAt = input[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD];
-  if (typeof hash !== 'string' || typeof expiresAt !== 'string') {
-    return undefined;
+  if (inputToken) {
+    return { ...inputToken, source: 'input', mirroredOnInput: false };
   }
-  return { hash, expiresAt };
+  return undefined;
 };
 
 /** Creates an updater that undoes `claim` only while the step still waits for input under it. */
@@ -149,9 +174,37 @@ export const createReleaseHitlStepClaimUpdater = (
     // also puts the step back in the pending list.
     const patch: Partial<EsWorkflowStepExecution> = { hitl: null };
     const { strippedToken } = claim;
+    if (strippedToken?.source === 'state') {
+      const state = current.state ?? {};
+      if (
+        state[HITL_TOKEN_HASH_INPUT_FIELD] == null &&
+        state[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD] == null
+      ) {
+        patch.state = {
+          ...state,
+          [HITL_TOKEN_HASH_INPUT_FIELD]: strippedToken.hash,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: strippedToken.expiresAt,
+        };
+      }
+      const { input } = current;
+      if (
+        strippedToken.mirroredOnInput &&
+        isJsonObject(input) &&
+        input[HITL_TOKEN_HASH_INPUT_FIELD] == null &&
+        input[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD] == null
+      ) {
+        patch.input = {
+          ...input,
+          [HITL_TOKEN_HASH_INPUT_FIELD]: strippedToken.hash,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: strippedToken.expiresAt,
+        };
+      }
+      return patch;
+    }
+
     const { input } = current;
     if (
-      strippedToken &&
+      strippedToken?.source === 'input' &&
       isJsonObject(input) &&
       input[HITL_TOKEN_HASH_INPUT_FIELD] == null &&
       input[HITL_TOKEN_EXPIRES_AT_INPUT_FIELD] == null
