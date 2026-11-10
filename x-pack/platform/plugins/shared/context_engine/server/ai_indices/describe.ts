@@ -10,15 +10,17 @@ import type { AiIndexHttpItem, KiTypeCount } from '../../common/http_api/ai_indi
 import { MEMORY_KI_TYPES } from '../../common/memory';
 import {
   dreamingTypesOf,
+  ENTITY_TYPE_PREFIX,
   FACT_TYPE_PREFIX,
   isDreamedKiType,
   isDreamingConfigured,
-  type DreamingFactType,
+  PROCEDURE_TYPE_PREFIX,
+  type DreamingTypes,
 } from '../../common/dreaming';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
 import { buildExampleQueries, excludeMemoryKiTypesFilter } from './example_queries';
-import { buildMemoryExampleQueries } from './memory_example_queries';
+import { buildMemoryExampleQueries, type MemoryExampleQueries } from './memory_example_queries';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
 const MEMORY_KI_TYPE_SET: ReadonlySet<string> = new Set(MEMORY_KI_TYPES);
@@ -74,49 +76,84 @@ const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
     counts.map(({ tag, count }) => [tag, count])
   );
 
-const factKiType = (type: string): string => `${FACT_TYPE_PREFIX}${type}`;
+const NO_DREAMED_TYPES: DreamingTypes = { facts: [], entities: [], procedures: [] };
 
-const factTypeLine = (
-  { type, description }: DreamingFactType,
-  counts: ReadonlyMap<string, number>
-): string => {
-  const kiType = factKiType(type);
-  return `${JSON.stringify(kiType)}: ${counts.get(kiType) ?? 0}${
-    description ? ` - ${description}` : ''
+const configuredDreamedTypes = ({ dreaming }: AiIndexHttpItem): DreamingTypes =>
+  dreaming && isDreamingConfigured(dreaming) ? dreamingTypesOf(dreaming) : NO_DREAMED_TYPES;
+
+const dreamedKiTypes = ({ facts, entities, procedures }: DreamingTypes): string[] => [
+  ...facts.map(({ type }) => `${FACT_TYPE_PREFIX}${type}`),
+  ...entities.map(({ type }) => `${ENTITY_TYPE_PREFIX}${type}`),
+  ...procedures.map(({ type }) => `${PROCEDURE_TYPE_PREFIX}${type}`),
+];
+
+const dreamedTypeLine = (
+  kiType: string,
+  counts: ReadonlyMap<string, number>,
+  { description, attributes = [] }: { description?: string; attributes?: string[] }
+): string =>
+  `${JSON.stringify(kiType)}: ${counts.get(kiType) ?? 0}${description ? ` - ${description}` : ''}${
+    attributes.length > 0 ? ` (attributes: ${attributes.join(', ')})` : ''
   }`;
-};
 
-const factsLines = (
-  factTypes: DreamingFactType[],
-  factTypeCounts: KiTypeCount[],
-  { factsOfType, recentFacts }: { factsOfType: string; recentFacts: string }
+const dreamedLines = (
+  { facts, entities, procedures }: DreamingTypes,
+  dreamedTypeCounts: KiTypeCount[],
+  queries: MemoryExampleQueries
 ): string[] => {
-  const counts = new Map(factTypeCounts.map(({ type, count }) => [type, count]));
+  const counts = new Map(dreamedTypeCounts.map(({ type, count }) => [type, count]));
   return [
-    `Dreaming turns memories into long-term facts, each typed ${FACT_TYPE_PREFIX}<fact type> and written to stand on its own. Fact types, with how many facts each has:`,
-    ...factTypes.map((factType) => factTypeLine(factType, counts)),
-    'Facts of one type, newest first:',
-    factsOfType,
-    'The most recent facts:',
-    recentFacts,
+    ...(facts.length > 0
+      ? [
+          `Dreaming turns memories into long-term facts, each typed ${FACT_TYPE_PREFIX}<fact type> and written to stand on its own. Fact types, with how many facts each has:`,
+          ...facts.map(({ type, description }) =>
+            dreamedTypeLine(`${FACT_TYPE_PREFIX}${type}`, counts, { description })
+          ),
+          'Facts of one type, newest first:',
+          queries.factsOfType,
+          'The most recent facts:',
+          queries.recentFacts,
+        ]
+      : []),
+    ...(entities.length > 0
+      ? [
+          `Dreaming keeps the things memories are about as entities, each typed ${ENTITY_TYPE_PREFIX}<entity type>: title holds its name, and content a summary of what is known about it, including its attribute values. Entity types, with how many entities each has:`,
+          ...entities.map(({ type, description, attributes }) =>
+            dreamedTypeLine(`${ENTITY_TYPE_PREFIX}${type}`, counts, { description, attributes })
+          ),
+          'An entity by name, across entity types:',
+          queries.entityByName,
+          'Entities of one type, newest first:',
+          queries.entitiesOfType,
+        ]
+      : []),
+    ...(procedures.length > 0
+      ? [
+          `Dreaming keeps reusable step-by-step procedures, each typed ${PROCEDURE_TYPE_PREFIX}<procedure type>: title names the task, description says when to use it, and content holds the numbered steps. Procedure types, with how many procedures each has:`,
+          ...procedures.map(({ type, description }) =>
+            dreamedTypeLine(`${PROCEDURE_TYPE_PREFIX}${type}`, counts, { description })
+          ),
+          'A procedure for a task, with hybrid retrieval:',
+          queries.procedureForTask,
+          'Procedures of one type, newest first:',
+          queries.proceduresOfType,
+        ]
+      : []),
   ];
 };
-
-const configuredFactTypes = ({ dreaming }: AiIndexHttpItem): DreamingFactType[] =>
-  dreaming && isDreamingConfigured(dreaming) ? dreamingTypesOf(dreaming).facts : [];
 
 const memorySection = (
   aiIndex: AiIndexHttpItem,
   target: string,
-  factTypeCounts: KiTypeCount[]
+  dreamedTypeCounts: KiTypeCount[]
 ): string[] => {
   if (!isDreamingConfigured(aiIndex.dreaming)) {
     return [];
   }
 
-  const factTypes = configuredFactTypes(aiIndex);
-  const includeFacts = factTypes.length > 0;
-  const { crossSession, ...factQueries } = buildMemoryExampleQueries(target, { includeFacts });
+  const types = configuredDreamedTypes(aiIndex);
+  const includeFacts = types.facts.length > 0;
+  const queries = buildMemoryExampleQueries(target, { includeFacts });
 
   return [
     'Memory',
@@ -128,11 +165,11 @@ const memorySection = (
     'Use platform.context_engine.forget with a memory id to tombstone memory.',
     'Unless the task specifically calls for memory, exclude memory types, and the facts, entities and procedures dreaming writes, from ordinary KI retrieval:',
     excludeMemoryKiTypesFilter(true),
-    ...(includeFacts ? factsLines(factTypes, factTypeCounts, factQueries) : []),
+    ...dreamedLines(types, dreamedTypeCounts, queries),
     includeFacts
       ? 'For cross-session recall, search session facts and long-term facts together with hybrid retrieval, so memories dreaming has not reached yet are found too:'
       : 'For cross-session recall, search granular facts with hybrid retrieval:',
-    crossSession,
+    queries.crossSession,
     'Select the latest revision before filtering deleted or expired memories, or an older active data-stream revision can reappear.',
     'References identify the source conversations.',
   ];
@@ -174,13 +211,13 @@ export const describeAiIndex = async ({
     target,
   });
   const dreams = includeMemory && isDreamingConfigured(aiIndex.dreaming);
-  const { kiTypeCounts, tagCounts, factTypeCounts } = await describeAiIndexAggregations({
+  const { kiTypeCounts, tagCounts, dreamedTypeCounts } = await describeAiIndexAggregations({
     esClient,
     dest: aiIndex.dest,
     spaceId,
     fields: allFields,
     dreams,
-    factTypes: dreams ? configuredFactTypes(aiIndex).map(({ type }) => factKiType(type)) : [],
+    dreamedTypes: dreams ? dreamedKiTypes(configuredDreamedTypes(aiIndex)) : [],
   });
 
   return renderSections([
@@ -189,7 +226,7 @@ export const describeAiIndex = async ({
     semanticFieldsSection(semanticFields),
     kiTypeCountsSection(kiTypeCounts, dreams),
     tagCountsSection(tagCounts),
-    includeMemory ? memorySection(aiIndex, target, factTypeCounts) : [],
+    includeMemory ? memorySection(aiIndex, target, dreamedTypeCounts) : [],
     exampleQueriesSection(aiIndex.dest, includeMemory, dreams),
   ]);
 };

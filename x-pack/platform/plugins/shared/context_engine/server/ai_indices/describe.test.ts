@@ -68,7 +68,7 @@ describe('describeAiIndex', () => {
         { type: 'detection rule', count: 2 },
       ],
       tagCounts: [{ tag: 'billing, invoices', count: 3 }],
-      factTypeCounts: [],
+      dreamedTypeCounts: [],
     });
   });
 
@@ -85,7 +85,7 @@ describe('describeAiIndex', () => {
       spaceId: 'marketing',
       fields,
       dreams: false,
-      factTypes: [],
+      dreamedTypes: [],
     });
     expect(response).toBe(
       [
@@ -167,7 +167,7 @@ describe('describeAiIndex', () => {
     describeAiIndexAggregationsMock.mockResolvedValue({
       kiTypeCounts: [],
       tagCounts: [],
-      factTypeCounts: [],
+      dreamedTypeCounts: [],
     });
 
     const response = await describeAiIndex(params);
@@ -188,7 +188,7 @@ describe('describeAiIndex', () => {
         { type: 'document', count: 3 },
       ],
       tagCounts: [],
-      factTypeCounts: [],
+      dreamedTypeCounts: [],
     });
 
     const response = await describeAiIndex({
@@ -235,7 +235,7 @@ describe('describeAiIndex', () => {
     describeAiIndexAggregationsMock.mockResolvedValue({
       kiTypeCounts: [],
       tagCounts: [],
-      factTypeCounts: [{ type: 'fact.known_issue', count: 3 }],
+      dreamedTypeCounts: [{ type: 'fact.known_issue', count: 3 }],
     });
 
     const response = await describeAiIndex({
@@ -254,7 +254,7 @@ describe('describeAiIndex', () => {
     });
 
     expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ dreams: true, factTypes: ['fact.known_issue', 'fact.policy'] })
+      expect.objectContaining({ dreams: true, dreamedTypes: ['fact.known_issue', 'fact.policy'] })
     );
     expect(response).toContain(
       [
@@ -286,13 +286,99 @@ describe('describeAiIndex', () => {
     });
 
     expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ dreams: true, factTypes: [] })
+      expect.objectContaining({ dreams: true, dreamedTypes: ['entity.customer'] })
     );
     expect(response).toContain('\nMemory\n');
     expect(response).not.toContain('Fact types');
     expect(response).not.toContain('type LIKE "fact.*"\n');
     expect(response).toContain(
       'For cross-session recall, search granular facts with hybrid retrieval:\nFROM ai-index-idx-support* METADATA _id, _index, _score\n| WHERE type == "memory.session_fact"\n'
+    );
+  });
+
+  it('lists the configured entity types with their counts and attributes, and how to find an entity', async () => {
+    describeAiIndexAggregationsMock.mockResolvedValue({
+      kiTypeCounts: [],
+      tagCounts: [],
+      dreamedTypeCounts: [{ type: 'entity.customer', count: 2 }],
+    });
+
+    const response = await describeAiIndex({
+      ...params,
+      aiIndex: {
+        ...aiIndex,
+        dreaming: {
+          enabled: true,
+          entities: {
+            nodes: [
+              { type: 'customer', description: 'A paying account', attributes: ['plan', 'region'] },
+              { type: 'service' },
+            ],
+          },
+        },
+      },
+      includeMemory: true,
+    });
+
+    expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ dreamedTypes: ['entity.customer', 'entity.service'] })
+    );
+    expect(response).toContain(
+      [
+        'Dreaming keeps the things memories are about as entities, each typed entity.<entity type>: title holds its name, and content a summary of what is known about it, including its attribute values. Entity types, with how many entities each has:',
+        '"entity.customer": 2 - A paying account (attributes: plan, region)',
+        '"entity.service": 0',
+        'An entity by name, across entity types:',
+        'FROM ai-index-idx-support* METADATA _id, _score',
+        '| WHERE type LIKE "entity.*"',
+      ].join('\n')
+    );
+    expect(response).toContain('| WHERE title:"<name>"\n| SORT _score DESC, _id ASC\n');
+    expect(response).toContain(
+      'Entities of one type, newest first:\nFROM ai-index-idx-support* METADATA _id\n| WHERE type == "entity.<entity type>"\n'
+    );
+    expect(response).not.toContain('Procedure types');
+  });
+
+  it('lists the configured procedure types with their counts, and how to find a procedure for a task', async () => {
+    describeAiIndexAggregationsMock.mockResolvedValue({
+      kiTypeCounts: [],
+      tagCounts: [],
+      dreamedTypeCounts: [{ type: 'procedure.runbook', count: 5 }],
+    });
+
+    const response = await describeAiIndex({
+      ...params,
+      aiIndex: {
+        ...aiIndex,
+        dreaming: {
+          enabled: true,
+          facts: [{ type: 'policy' }],
+          procedures: [{ type: 'runbook', description: 'How to resolve an incident' }],
+        },
+      },
+      includeMemory: true,
+    });
+
+    expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
+      expect.objectContaining({ dreamedTypes: ['fact.policy', 'procedure.runbook'] })
+    );
+    expect(response).toContain(['"fact.policy": 0', 'Facts of one type, newest first:'].join('\n'));
+    expect(response).toContain(
+      [
+        'Dreaming keeps reusable step-by-step procedures, each typed procedure.<procedure type>: title names the task, description says when to use it, and content holds the numbered steps. Procedure types, with how many procedures each has:',
+        '"procedure.runbook": 5 - How to resolve an incident',
+        'A procedure for a task, with hybrid retrieval:',
+        'FROM ai-index-idx-support* METADATA _id, _index, _score',
+        '| WHERE type LIKE "procedure.*"',
+      ].join('\n')
+    );
+    expect(response).toContain(
+      'Procedures of one type, newest first:\nFROM ai-index-idx-support* METADATA _id\n| WHERE type == "procedure.<procedure type>"\n'
+    );
+    expect(response).not.toContain('Entity types');
+    expect(response).toContain(
+      'For cross-session recall, search session facts and long-term facts together with hybrid retrieval, so memories dreaming has not reached yet are found too:\nFROM ai-index-idx-support* METADATA _id, _index, _score\n| WHERE type == "memory.session_fact" OR type LIKE "fact.*"\n'
     );
   });
 
@@ -310,13 +396,13 @@ describe('describeAiIndex', () => {
         { type: 'document', count: 3 },
       ],
       tagCounts: [],
-      factTypeCounts: [],
+      dreamedTypeCounts: [],
     });
 
     const response = await describeAiIndex({ ...params, includeMemory: true });
 
     expect(describeAiIndexAggregationsMock).toHaveBeenCalledWith(
-      expect.objectContaining({ dreams: false, factTypes: [] })
+      expect.objectContaining({ dreams: false, dreamedTypes: [] })
     );
     expect(response).toContain('\nKnowledge item types\n"entity.host": 5\n"document": 3\n');
     expect(response).not.toContain('NOT type LIKE');
