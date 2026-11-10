@@ -6,6 +6,7 @@
  */
 
 import type { SpaceId } from '@kbn/core-spaces-common';
+import type { TaskMemoryReporter } from '@kbn/task-manager-plugin/server/task';
 
 import type { QueryPayload } from './get_query_payload';
 import type { RuleResponse } from '../rules_client';
@@ -29,6 +30,8 @@ export interface RuleExecutionInput {
   readonly executionId: string;
   readonly scheduledAt: string;
   readonly executionContext: ExecutionContext;
+  /** Task Manager's memory reporter for this run; absent when the run was not started by Task Manager. */
+  readonly memory?: TaskMemoryReporter;
 }
 
 export interface RulePipelineState {

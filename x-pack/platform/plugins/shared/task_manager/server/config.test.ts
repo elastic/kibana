@@ -12,6 +12,19 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "adaptive_capacity": Object {
+          "decision_interval": 1000,
+          "default_bytes_per_task": 134217728,
+          "heap_target_ratio": 0.75,
+          "light_task_bytes": 8388608,
+          "light_task_slots": 10,
+          "max_capacity": 50,
+          "max_increase_per_decision": 5,
+          "memory_target_ratio": 0.85,
+          "min_capacity": 5,
+          "persist_estimates": true,
+          "task_reports": true,
+        },
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
@@ -82,6 +95,19 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "adaptive_capacity": Object {
+          "decision_interval": 1000,
+          "default_bytes_per_task": 134217728,
+          "heap_target_ratio": 0.75,
+          "light_task_bytes": 8388608,
+          "light_task_slots": 10,
+          "max_capacity": 50,
+          "max_increase_per_decision": 5,
+          "memory_target_ratio": 0.85,
+          "min_capacity": 5,
+          "persist_estimates": true,
+          "task_reports": true,
+        },
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
@@ -150,6 +176,19 @@ describe('config validation', () => {
     };
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "adaptive_capacity": Object {
+          "decision_interval": 1000,
+          "default_bytes_per_task": 134217728,
+          "heap_target_ratio": 0.75,
+          "light_task_bytes": 8388608,
+          "light_task_slots": 10,
+          "max_capacity": 50,
+          "max_increase_per_decision": 5,
+          "memory_target_ratio": 0.85,
+          "min_capacity": 5,
+          "persist_estimates": true,
+          "task_reports": true,
+        },
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
         "auto_calculate_default_ech_capacity": false,
@@ -333,5 +372,31 @@ describe('config validation', () => {
     };
 
     expect(() => configSchema.validate(config)).not.toThrow();
+  });
+
+  test('accepts capacity auto and validates the adaptive bounds', () => {
+    expect(configSchema.validate({ capacity: 'auto' }).capacity).toBe('auto');
+    expect(
+      configSchema.validate({ capacity: 'auto', adaptive_capacity: { max_capacity: 20 } })
+        .adaptive_capacity
+    ).toEqual({
+      min_capacity: 5,
+      max_capacity: 20,
+      heap_target_ratio: 0.75,
+      default_bytes_per_task: 134217728,
+      max_increase_per_decision: 5,
+      decision_interval: 1000,
+      light_task_bytes: 8388608,
+      light_task_slots: 10,
+      persist_estimates: true,
+      task_reports: true,
+      memory_target_ratio: 0.85,
+    });
+    expect(() =>
+      configSchema.validate({ adaptive_capacity: { min_capacity: 30, max_capacity: 20 } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"adaptive_capacity.min_capacity (30) cannot exceed adaptive_capacity.max_capacity (20)"`
+    );
+    expect(() => configSchema.validate({ capacity: 'other' })).toThrow();
   });
 });

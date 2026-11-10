@@ -953,6 +953,7 @@ function mockStats(
       timestamp: new Date().toISOString(),
       value: {
         capacity: { config: 10, as_cost: 20, as_workers: 10 },
+        adaptive_capacity: null,
         claim_strategy: 'mget',
         poll_interval: 0,
         request_capacity: 1000,

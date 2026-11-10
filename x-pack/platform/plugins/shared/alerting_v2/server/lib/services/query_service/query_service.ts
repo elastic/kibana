@@ -34,6 +34,8 @@ export interface ExecuteQueryParams {
   abortSignal?: AbortSignal;
   /** Maximum allowed response body size in bytes. Passed to the ES transport. */
   maxResponseSize?: number;
+  /** Receives the size of each decoded batch, for formats that can tell; see {@link EsqlFormatRequestOptions}. */
+  onBytes?: (bytes: number) => void;
   /**
    * Response format to use for this stream. When provided, overrides the
    * feature-flag lookup so the caller can pin the format for the lifetime of
@@ -209,8 +211,9 @@ const buildFormatRequest = ({ query, filter, params }: ExecuteQueryParams): Esql
 
 const buildFormatRequestOptions = (
   context: ExecutionContext,
-  { maxResponseSize }: ExecuteQueryParams
+  { maxResponseSize, onBytes }: ExecuteQueryParams
 ): EsqlFormatRequestOptions => ({
   signal: context.signal,
   ...(maxResponseSize !== undefined ? { maxResponseSize } : {}),
+  ...(onBytes !== undefined ? { onBytes } : {}),
 });

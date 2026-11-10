@@ -3428,6 +3428,9 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/webhook @elastic/response-ops
 /src/platform/packages/shared/kbn-connector-schemas/webhook @elastic/response-ops
 
+# Task Manager Scout server config sets
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/task_manager_adaptive_capacity @elastic/response-ops
+
 ## Security Solution shared OAS schemas
 /x-pack/solutions/security/plugins/security_solution/common/api/model @elastic/security-detection-engineering
 

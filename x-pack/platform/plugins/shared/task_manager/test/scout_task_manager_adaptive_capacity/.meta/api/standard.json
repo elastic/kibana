@@ -1,0 +1,35 @@
+{
+  "sha1": "c21e8cfeaa1215fe3080a069f40b74e481d8d937",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "5a79218e5b12e62-c34deeae9523578",
+      "title": "Task Manager adaptive capacity health reports auto mode with a heap budget inside the configured range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_adaptive_capacity/api/tests/adaptive_capacity.spec.ts",
+        "line": 63,
+        "column": 25
+      }
+    },
+    {
+      "id": "5a79218e5b12e62-20e2cfcb885590e",
+      "title": "Task Manager adaptive capacity a recurring task gets a memory estimate on its document after its first run",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_adaptive_capacity/api/tests/adaptive_capacity.spec.ts",
+        "line": 77,
+        "column": 14
+      }
+    }
+  ]
+}

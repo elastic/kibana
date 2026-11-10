@@ -17,7 +17,22 @@ export type EsqlFormatRequest = Pick<
 export interface EsqlFormatRequestOptions {
   signal: AbortSignal;
   maxResponseSize?: number;
+  /**
+   * Called with the size in bytes of each batch as it is decoded, when the
+   * format can tell. Streaming formats hold those bytes outside the V8 heap,
+   * where Task Manager's memory accounting cannot attribute them to the run.
+   */
+  onBytes?: (bytes: number) => void;
 }
+
+/** The subset of the options that goes to the Elasticsearch transport. */
+export const toTransportOptions = ({
+  signal,
+  maxResponseSize,
+}: EsqlFormatRequestOptions): Pick<EsqlFormatRequestOptions, 'signal' | 'maxResponseSize'> => ({
+  signal,
+  ...(maxResponseSize !== undefined ? { maxResponseSize } : {}),
+});
 
 export interface EsqlRowBatchSource {
   readonly batches: AsyncIterable<EsqlRow[]>;

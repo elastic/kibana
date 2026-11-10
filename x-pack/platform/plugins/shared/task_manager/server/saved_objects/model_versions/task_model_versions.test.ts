@@ -18,6 +18,8 @@ const forwardCompatibilityV13 = taskModelVersions['13']!.schemas!
   .forwardCompatibility as ObjectType;
 const forwardCompatibilityV14 = taskModelVersions['14']!.schemas!
   .forwardCompatibility as ObjectType;
+const forwardCompatibilityV15 = taskModelVersions['15']!.schemas!
+  .forwardCompatibility as ObjectType;
 
 const getTaskAttributes = (overrides: Attributes = {}): Attributes => ({
   taskType: 'task-type',
@@ -80,6 +82,20 @@ describe('taskModelVersions v14 forwardCompatibility', () => {
   it('drops top-level fields added in a later version', () => {
     const result = forwardCompatibilityV14.validate(getTaskAttributes({ futureField: 'value' }));
     expect(result).not.toHaveProperty('futureField');
+  });
+});
+
+describe('taskModelVersions v15 forwardCompatibility', () => {
+  it('keeps the memory estimate written by adaptive capacity', () => {
+    const attributes = getTaskAttributes({
+      memoryEstimate: { bytes: 48_000_000, samples: 4, updatedAt: '2026-11-05T00:00:00.000Z' },
+    });
+    expect(forwardCompatibilityV15.validate(attributes)).toEqual(attributes);
+  });
+
+  it('accepts a document without the estimate and drops unknown attributes', () => {
+    const attributes = getTaskAttributes();
+    expect(forwardCompatibilityV15.validate({ ...attributes, later: true })).toEqual(attributes);
   });
 });
 

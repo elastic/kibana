@@ -88,6 +88,20 @@ describe('arrowFormat', () => {
     ]);
   });
 
+  it('reports the byte length of each batch and keeps the callback off the transport options', async () => {
+    mockHelpersEsqlArrowBatches(mockEsClient, [
+      { numRows: 1, rows: [{ host: 'host-a' }], byteLength: 1000 },
+      { numRows: 1, rows: [{ host: 'host-b' }], byteLength: 500 },
+    ]);
+    const onBytes = jest.fn();
+
+    const source = await arrowFormat.open(mockEsClient, request, { ...options, onBytes });
+    await collectBatches(source.batches);
+
+    expect(onBytes.mock.calls).toEqual([[1000], [500]]);
+    expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(request, options);
+  });
+
   it('yields one empty batch when the result set is empty, matching jsonFormat', async () => {
     mockHelpersEsqlArrowBatches(mockEsClient, [{ numRows: 0, rows: [] }]);
 

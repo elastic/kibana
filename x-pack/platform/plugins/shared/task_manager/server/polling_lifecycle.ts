@@ -6,7 +6,7 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { Subject, withLatestFrom, BehaviorSubject, combineLatest } from 'rxjs';
+import { Subject, withLatestFrom, BehaviorSubject, combineLatest, interval } from 'rxjs';
 import {
   distinctUntilChanged,
   startWith,
@@ -66,7 +66,12 @@ import { TaskClaiming } from './queries/task_claiming';
 import type { ClaimOwnershipResult } from './task_claimers';
 import type { TaskPartitioner } from './lib/task_partitioner';
 import type { TaskPoller } from './polling/task_poller';
+import { AdaptiveCapacityController } from './lib/adaptive_capacity';
+import { registerAdaptiveCapacityTelemetry } from './otel/adaptive_capacity_telemetry';
+import type { AdaptiveCapacityState } from './lib/adaptive_capacity';
 import {
+  getMinCapacity,
+  isAdaptiveCapacity,
   createCapacityScan,
   createPollIntervalScan,
   countErrors,
@@ -138,6 +143,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   public capacityConfiguration$: Observable<number>;
   public pollIntervalConfiguration$: Observable<number>;
+  /** Present only with `capacity: auto`; emits every controller decision. */
+  public adaptiveCapacityState$?: Observable<AdaptiveCapacityState>;
+  private adaptiveCapacity?: AdaptiveCapacityController;
+  private adaptiveCapacitySubscription?: Subscription;
 
   // all task related events (task claimed, task marked as running, etc.) are emitted through events$
   private events$ = new Subject<TaskLifecycleEvent>();
@@ -195,11 +204,58 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL).pipe(share());
     const window = WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / this.currentPollInterval;
     const tmUtilizationQueue = createRunningAveragedStat<number>(window);
-    this.capacityConfiguration$ = errorCheck$.pipe(
+    // Elasticsearch pressure only ever lowers capacity from `startingCapacity`;
+    // with `capacity: auto` the heap controller supplies a second ceiling and the
+    // pool follows the lower of the two.
+    const pressureCapacity$ = errorCheck$.pipe(
       createCapacityScan(config, logger, startingCapacity),
       startWith(startingCapacity),
       distinctUntilChanged()
     );
+    if (isAdaptiveCapacity(config)) {
+      const { adaptive_capacity: adaptive } = config;
+      this.adaptiveCapacity = new AdaptiveCapacityController({
+        logger,
+        settings: {
+          minCapacity: adaptive.min_capacity,
+          maxCapacity: adaptive.max_capacity,
+          heapTargetRatio: adaptive.heap_target_ratio,
+          defaultBytesPerTask: adaptive.default_bytes_per_task,
+          maxIncreasePerDecision: adaptive.max_increase_per_decision,
+          lightTaskBytes: adaptive.light_task_bytes,
+          lightTaskSlots: adaptive.light_task_slots,
+          persistEstimates: adaptive.persist_estimates,
+          memoryLimitBytes: adaptive.memory_limit_bytes,
+          memoryTargetRatio: adaptive.memory_target_ratio,
+        },
+        // The first decision runs in the controller's constructor, before the pool exists.
+        getRunningTasks: () => (this.pool ? this.pool.getRunningTasks() : []),
+      });
+      this.adaptiveCapacityState$ = this.adaptiveCapacity.state$;
+      registerAdaptiveCapacityTelemetry(() => this.adaptiveCapacity?.state);
+      // The pressure scan starts from the ceiling, so apply it as a ratio of the
+      // heap capacity: a 20% Elasticsearch backoff lowers whatever is in effect
+      // right away instead of having to decay down from the ceiling first.
+      this.capacityConfiguration$ = combineLatest([
+        pressureCapacity$,
+        this.adaptiveCapacity.capacity$,
+      ]).pipe(
+        rxMap(([pressureCapacity, heapCapacity]) =>
+          Math.max(
+            getMinCapacity(config),
+            Math.floor((heapCapacity * pressureCapacity) / startingCapacity)
+          )
+        ),
+        distinctUntilChanged()
+      );
+      logger.info(
+        `Task Manager capacity is adaptive: ${adaptive.min_capacity}..${
+          adaptive.max_capacity
+        } normal tasks, heap target ${Math.round(adaptive.heap_target_ratio * 100)}% of the limit`
+      );
+    } else {
+      this.capacityConfiguration$ = pressureCapacity$;
+    }
     this.pollIntervalConfiguration$ = errorCheck$.pipe(
       withLatestFrom(this.currentTmUtilization$),
       createPollIntervalScan(logger, this.currentPollInterval, claimStrategy, tmUtilizationQueue),
@@ -244,7 +300,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     // `active` is the current managed-config state OR a recent ES-pressure error,
     // so a sustained block reads as one period; distinctUntilChanged emits on change.
     const backpressureState$ = combineLatest([
-      this.capacityConfiguration$,
+      pressureCapacity$,
       this.pollIntervalConfiguration$,
       recentBackpressure$,
     ]).pipe(
@@ -286,6 +342,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       strategy: config.claim_strategy,
       capacity$: this.capacityConfiguration$,
       definitions: this.definitions,
+      onTaskEnded: (task) => this.adaptiveCapacity?.taskEnded(task),
     });
     this.pool.load.subscribe(emitEvent);
 
@@ -297,6 +354,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       definitions,
       logger: this.logger,
       getAvailableCapacity: (taskType?: string) => this.pool.availableCapacity(taskType),
+      getMemoryGate: () => this.adaptiveCapacity?.memoryGate(),
       taskPartitioner,
       // Until the initial control-document read settles, the pause state is
       // unknown, so treat execution as paused. This ensures a node that
@@ -325,6 +383,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       claimNudge$: claimNudgeService?.claimNudge$,
       backpressure$: claimNudgeSuppressed$,
       getCapacity: () => {
+        // Decide against the heap as it is right now, before tasks are admitted.
+        this.adaptiveCapacity?.refresh('claim');
         const capacity = this.pool.availableCapacity();
         if (!capacity) {
           const usedCapacityPercentage = this.pool.usedCapacityPercentage;
@@ -348,6 +408,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         // set synchronously so repeat availability emissions (e.g. ES
         // reconnects) can never trigger a second reconciliation or poller start
         this.started = true;
+        this.startAdaptiveCapacity();
         // fire-and-forget: reconcileAndStartPolling never rejects (it handles
         // its own errors) and starts the poller when it settles
         void this.reconcileAndStartPolling();
@@ -409,8 +470,26 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     return this.events$;
   }
 
+  private startAdaptiveCapacity() {
+    if (!this.adaptiveCapacity || this.adaptiveCapacitySubscription || this.stopped) {
+      return;
+    }
+    const controller = this.adaptiveCapacity;
+    this.adaptiveCapacitySubscription = interval(
+      this.config.adaptive_capacity.decision_interval
+    ).subscribe(() => {
+      try {
+        controller.tick();
+      } catch (error) {
+        this.logger.error(`Adaptive capacity decision failed: ${error.message}`);
+      }
+    });
+  }
+
   public stop() {
     this.stopped = true;
+    this.adaptiveCapacitySubscription?.unsubscribe();
+    this.adaptiveCapacity?.stop();
     this.executionControlSubscription?.unsubscribe();
     this.backpressureSubscription?.unsubscribe();
     this.poller.stop();
@@ -425,6 +504,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
   };
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
+    const { adaptiveCapacity } = this;
     return new TaskManagerRunner({
       logger: this.logger,
       instance,
@@ -441,6 +521,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
       enrichFakeRequest: this.enrichFakeRequest,
+      observeRunEnd: adaptiveCapacity
+        ? (task, reportedBytes) => adaptiveCapacity.observeRunEnd(task, reportedBytes)
+        : undefined,
     });
   };
 

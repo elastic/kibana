@@ -49,6 +49,10 @@ import type {
   TaskRunAsContext,
   TaskTypeGroup,
 } from '../task';
+import type { RunningTaskSnapshot } from '../task_pool';
+import type { RunMemoryObservation } from '../lib/adaptive_capacity';
+import type { RunMemoryReporter } from './task_memory_reporter';
+import { createRunMemoryReporter, NOOP_RUN_MEMORY_REPORTER } from './task_memory_reporter';
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import {
@@ -106,6 +110,8 @@ export interface TaskRunner {
   isSameTask: (executionId: string) => boolean;
   isAdHocTaskAndOutOfAttempts: boolean;
   removeTask: () => Promise<void>;
+  /** Bytes the run reserved through its memory reporter; 0 when none. */
+  memoryReservationBytes: number;
 }
 
 export enum TaskRunningStage {
@@ -145,6 +151,14 @@ type Opts = {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  /**
+   * With adaptive capacity: closes out this run's memory attribution, folding in
+   * the peak the task reported, and returns the estimate to persist.
+   */
+  observeRunEnd?: (
+    task: RunningTaskSnapshot,
+    reportedBytes?: number
+  ) => RunMemoryObservation | undefined;
 } & Pick<Middleware, 'beforeRun'>;
 
 export enum TaskRunResult {
@@ -206,7 +220,14 @@ export class TaskManagerRunner implements TaskRunner {
   private isCancelled = false;
   private scheduleAtRunStart?: IntervalSchedule | RruleSchedule;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
+  private readonly observeRunEnd?: (
+    task: RunningTaskSnapshot,
+    reportedBytes?: number
+  ) => RunMemoryObservation | undefined;
+  private memoryReporter: RunMemoryReporter = NOOP_RUN_MEMORY_REPORTER;
+  private reportedMemoryBytes?: number;
   private taskRunEventCustomFields?: Record<string, unknown>;
+  private runMemory?: RunMemoryObservation;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -234,6 +255,7 @@ export class TaskManagerRunner implements TaskRunner {
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    observeRunEnd,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -255,6 +277,7 @@ export class TaskManagerRunner implements TaskRunner {
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.observeRunEnd = observeRunEnd;
   }
 
   /**
@@ -304,6 +327,11 @@ export class TaskManagerRunner implements TaskRunner {
   /**
    *  Effective cost for this task (instance override, then definition, then Normal).
    */
+  /** Bytes the run reserved through its memory reporter; 0 when none. */
+  public get memoryReservationBytes(): number {
+    return this.memoryReporter.reservedBytes();
+  }
+
   public get cost(): number {
     const instanceCost = getTaskCostFromInstance(this.instance.task.cost);
     return instanceCost ?? this.definition?.cost ?? TaskCost.Normal;
@@ -533,10 +561,17 @@ export class TaskManagerRunner implements TaskRunner {
 
           const abortController = new AbortController();
 
+          // Records only with adaptive capacity and task reports on; otherwise every call is a no-op.
+          this.memoryReporter =
+            this.observeRunEnd && this.config.adaptive_capacity.task_reports
+              ? createRunMemoryReporter()
+              : NOOP_RUN_MEMORY_REPORTER;
+
           this.task = definition.createTaskRunner({
             taskInstance: sanitizedTaskInstance,
             ...(runAs ? { runAs } : { fakeRequest, enrichRequest }),
             signal: abortController.signal,
+            memory: this.memoryReporter.reporter,
             executionUuid: this.uuid,
             setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
           });
@@ -1010,6 +1045,7 @@ export class TaskManagerRunner implements TaskRunner {
           retryAt: null,
           ownerId: null,
           ...(shouldTaskBeDisabled ? { enabled: false } : {}),
+          ...this.memoryEstimateUpdate(),
         };
       }
 
@@ -1062,11 +1098,39 @@ export class TaskManagerRunner implements TaskRunner {
     return TaskRunResult.Success;
   }
 
+  /**
+   * The `memoryEstimate` attribute for the run-end update: the instance's average
+   * after this run, when adaptive capacity observed it and persistence is on.
+   */
+  private memoryEstimateUpdate(): Pick<PartialConcreteTaskInstance, 'memoryEstimate'> {
+    if (!this.runMemory || !this.config.adaptive_capacity.persist_estimates) return {};
+    return {
+      memoryEstimate: {
+        bytes: this.runMemory.instanceBytes,
+        samples: this.runMemory.samples,
+        updatedAt: new Date().toISOString(),
+      },
+    };
+  }
+
   private async processResult(
     result: Result<SuccessfulRunResult, FailedRunResult>,
     taskTiming: TaskTiming
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
+    // Close out the memory attribution now, while the run still counts as running,
+    // so the estimate can go into the same update that reschedules the task.
+    this.memoryReporter.close();
+    this.reportedMemoryBytes = this.memoryReporter.peakReportedBytes();
+    this.runMemory = this.observeRunEnd?.(
+      {
+        executionId: this.taskExecutionId,
+        taskId: this.id,
+        taskType: this.taskType,
+        cost: this.cost,
+      },
+      this.reportedMemoryBytes
+    );
 
     const debugLogger = createWrappedLogger({ logger: this.logger, tags: [`metrics-debugger`] });
 
@@ -1343,6 +1407,10 @@ export class TaskManagerRunner implements TaskRunner {
           scheduled: task.scheduledAt.toISOString(),
           schedule_delay: scheduleDelayNs,
           execution: { uuid: this.uuid },
+          ...(this.runMemory ? { memory_bytes: this.runMemory.bytes } : {}),
+          ...(this.reportedMemoryBytes !== undefined
+            ? { memory_reported_bytes: this.reportedMemoryBytes }
+            : {}),
           ...(this.taskRunEventCustomFields ? { data: this.taskRunEventCustomFields } : {}),
         },
       },

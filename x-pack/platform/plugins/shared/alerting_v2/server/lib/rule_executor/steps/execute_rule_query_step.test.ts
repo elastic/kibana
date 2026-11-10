@@ -440,6 +440,42 @@ describe('ExecuteRuleQueryStep', () => {
       expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     });
 
+    it('reports the bytes received and reserves from the first batch what the row limit could bring', async () => {
+      step = createStep(3, 'arrow');
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        {
+          numRows: 2,
+          rows: [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }],
+          byteLength: 1000,
+        },
+        { numRows: 1, rows: [{ 'host.name': 'host-c' }], byteLength: 500 },
+      ]);
+      const memory = { reserve: jest.fn(), release: jest.fn(), report: jest.fn() };
+
+      const state = createRulePipelineState({
+        input: createRuleExecutionInput({ memory }),
+        rule: createRuleResponse(),
+      });
+      await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      expect(memory.report.mock.calls).toEqual([[1000], [1500]]);
+      // 1000 bytes for 2 rows, so up to 3 rows (the LIMIT) could hold 1500 bytes.
+      expect(memory.reserve).toHaveBeenCalledTimes(1);
+      expect(memory.reserve).toHaveBeenCalledWith(1500);
+      expect(memory.release).not.toHaveBeenCalled();
+    });
+
+    it('does nothing with memory when the run has no reporter', async () => {
+      mockHelpersEsqlArrowBatches(mockEsClient, [
+        { numRows: 1, rows: [{ 'host.name': 'host-a' }], byteLength: 1000 },
+      ]);
+
+      const state = createRulePipelineState({ rule: createRuleResponse() });
+      const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+      expect(results[0].state.esqlRowBatch).toEqual([{ 'host.name': 'host-a' }]);
+    });
+
     it('appends alerts.max as LIMIT and does not apply the JSON row cap', async () => {
       step = createStep(undefined, 'arrow');
       mockHelpersEsqlArrowBatches(mockEsClient, [

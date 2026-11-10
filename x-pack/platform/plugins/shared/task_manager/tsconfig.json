@@ -8,10 +8,12 @@
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "server/**/*.json",
     "common/**/*",
+    "scripts/**/*",
     "test/scout/**/*",
     "test/scout_service_accounts/**/*",
     "test/scout_uiam_local/**/*",
-    "test/scout_task_manager_claim_nudge/**/*"
+    "test/scout_task_manager_claim_nudge/**/*",
+    "test/scout_task_manager_adaptive_capacity/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

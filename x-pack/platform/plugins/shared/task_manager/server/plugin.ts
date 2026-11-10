@@ -460,7 +460,7 @@ export class TaskManagerPlugin
         this.heapSizeLimit
       } defaultCapacity=${defaultCapacity} autoCalculateDefaultEchCapacity=${
         this.config.auto_calculate_default_ech_capacity
-      }`
+      } capacity=${this.config.capacity ?? 'default'}`
     );
 
     const startingCapacity = calculateStartingCapacity(this.config!, this.logger, defaultCapacity);
