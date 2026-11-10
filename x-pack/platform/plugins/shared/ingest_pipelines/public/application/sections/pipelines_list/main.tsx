@@ -166,7 +166,7 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({ hi
       },
     };
 
-    if (canManage && enableManageProcessors && hasManageProcessorsPrivileges) {
+    if (enableManageProcessors && hasManageProcessorsPrivileges) {
       menu.items = [
         {
           id: 'manageProcessors',
