@@ -1524,8 +1524,8 @@ x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting
 x-pack/solutions/security/test
 x-pack/solutions/security/test_helpers/detections-response-ftr-services @elastic/security-detection-engineering
-x-pack/solutions/security/test_suites/test-suites-security-solution-apis @elastic/security-detection-engineering
 x-pack/solutions/security/test_plugins/resolver_test @elastic/security-solution
+x-pack/solutions/security/test_suites/test-suites-security-solution-apis @elastic/security-detection-engineering
 x-pack/solutions/security/test/security_solution_endpoint @elastic/security-defend-workflows
 x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding @elastic/search-ml-ux
 x-pack/solutions/vectordb/plugins/serverless_vectordb @elastic/search-ml-ux
