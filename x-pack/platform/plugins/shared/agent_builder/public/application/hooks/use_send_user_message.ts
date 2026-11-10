@@ -6,9 +6,11 @@
  */
 
 import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { Conversation } from '@kbn/agent-builder-common';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { flattenAttachments } from '../context/conversation/flatten_attachments';
+import { withoutPreAddedAttachments } from '../context/conversation/without_pre_added_attachments';
 import { queryKeys } from '../query_keys';
 import { mutationKeys } from '../mutation_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
@@ -32,10 +34,16 @@ export const useSendUserMessage = () => {
       if (!conversationId) {
         return Promise.reject(new Error('Cannot send a user message without a conversation id'));
       }
+      const conversation = queryClient.getQueryData<Conversation>(
+        queryKeys.conversations.byId(conversationId)
+      );
       return chatService.sendUserMessage({
         conversationId,
         input: message,
-        attachments: flattenAttachments(attachments ?? []),
+        attachments: withoutPreAddedAttachments(
+          flattenAttachments(attachments ?? []),
+          conversation?.attachments
+        ),
         triggerMode: ChatTriggerMode.Never,
       });
     },

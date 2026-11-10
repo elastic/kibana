@@ -270,6 +270,7 @@ const editorController = {
   isEmpty: false,
   getPlaceholderNames: jest.fn(() => []),
   removePlaceholderByName: jest.fn(),
+  setPlaceholderAttachmentId: jest.fn(),
   insertText: jest.fn(),
 };
 

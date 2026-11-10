@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { ConversationRoundAuthor, ConversationRoundOrigin } from '@kbn/agent-builder-common';
 import type {
   Attachment,
@@ -32,6 +32,7 @@ import { AuthorHeader } from '../author_header';
 import { UserMessageAttachmentTiles } from './user_message_attachment_tiles';
 import { isTileAttachment, useUserMessageFiles } from './use_user_message_files';
 import { useUserMessageThumbnails } from './use_user_message_thumbnails';
+import { withLinkedAttachmentRefs } from './with_linked_attachment_refs';
 
 const labels = {
   userMessage: i18n.translate('xpack.agentBuilder.userMessage.userInput', {
@@ -58,7 +59,7 @@ export const UserMessage = ({
   isPendingCurrentRound,
   origin,
   startedAt,
-  attachmentRefs,
+  attachmentRefs: eventAttachmentRefs,
   conversationAttachments,
   fallbackAttachments,
 }: UserMessageProps) => {
@@ -70,6 +71,15 @@ export const UserMessage = ({
     name: authorName,
     isCurrentUser,
   } = useUserMessageAuthor({ author, origin, isPendingCurrentRound });
+  const attachmentRefs = useMemo(
+    () =>
+      withLinkedAttachmentRefs({
+        text: input,
+        attachmentRefs: eventAttachmentRefs,
+        conversationAttachments,
+      }),
+    [input, eventAttachmentRefs, conversationAttachments]
+  );
   const thumbnails = useUserMessageThumbnails({
     attachmentRefs,
     conversationAttachments,

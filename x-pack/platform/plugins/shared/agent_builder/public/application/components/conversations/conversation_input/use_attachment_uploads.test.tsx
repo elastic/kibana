@@ -44,6 +44,7 @@ const chips: Record<PlaceholderKind, string[]> = { image: [], binary: [], text: 
 const messageEditorController = {
   getPlaceholderNames: (kind: PlaceholderKind = 'image') => chips[kind],
   removePlaceholderByName: jest.fn(),
+  setPlaceholderAttachmentId: jest.fn(),
 };
 
 const createFile = (name: string, type = '') => new File(['x'], name, { type });

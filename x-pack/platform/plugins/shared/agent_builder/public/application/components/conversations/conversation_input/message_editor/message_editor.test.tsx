@@ -103,6 +103,7 @@ const createMockMessageEditor = (): {
       isEmpty: false,
       getPlaceholderNames: jest.fn(() => []),
       removePlaceholderByName: jest.fn(),
+      setPlaceholderAttachmentId: jest.fn(),
     },
   };
 };

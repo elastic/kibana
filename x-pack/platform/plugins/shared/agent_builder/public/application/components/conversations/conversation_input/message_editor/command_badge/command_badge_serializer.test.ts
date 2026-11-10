@@ -191,6 +191,13 @@ describe('serializeEditorContent', () => {
     );
   });
 
+  it('adds the attachment id of a binary placeholder as a query', () => {
+    const div = document.createElement('div');
+    div.appendChild(createAttachmentPlaceholderElement('invoice.pdf', 'binary', 'att 1'));
+
+    expect(serializeEditorContent(div)).toBe('[invoice.pdf](binary://invoice.pdf?id=att%201)');
+  });
+
   it('strips brackets from image display name', () => {
     const div = document.createElement('div');
     div.appendChild(createAttachmentPlaceholderElement('file[1].png'));
@@ -368,6 +375,12 @@ describe('deserializeInputSegments', () => {
     const segments = deserializeInputSegments('[My invoice.pdf](binary://My%20invoice.pdf)');
 
     expect(segments).toEqual([{ type: 'binary', name: 'My invoice.pdf' }]);
+  });
+
+  it('parses the attachment id of a binary segment', () => {
+    const segments = deserializeInputSegments('[invoice.pdf](binary://invoice.pdf?id=att%201)');
+
+    expect(segments).toEqual([{ type: 'binary', name: 'invoice.pdf', attachmentId: 'att 1' }]);
   });
 
   it('preserves a binary link with malformed percent-encoding as text', () => {

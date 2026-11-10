@@ -7,6 +7,7 @@
 
 import { isElementCommandBadge, serializeCommandBadge } from './command_badge';
 import {
+  ATTACHMENT_ID_PARAM,
   getPlaceholderKind,
   IMAGE_ATTACHMENT_SCHEME,
   isElementAttachmentPlaceholder,
@@ -34,6 +35,7 @@ export const encodeAttachmentName = (name: string): string =>
  * Walks child nodes of the editor element and serializes to text.
  * Badge spans are converted to `[/label](scheme://metadataValue)`.
  * Image, binary and text file placeholders are converted to `[name](image://encodedName)`, `[name](binary://encodedName)` and `[name](text://encodedName)`.
+ * A placeholder that knows its attachment id adds it as `?id=<encodedId>`, so the sent message links to the attachment.
  * Text nodes are appended as-is, with caret-target ZWS characters stripped.
  * A trailing <br> is skipped: the browser adds it to keep the last line visible, it is not content.
  */
@@ -65,7 +67,11 @@ export const serializeEditorContent = (editorElement: HTMLElement): string => {
       const name = element.getAttribute('aria-label') ?? '';
       const displayName = name.replace(/[\[\]]/g, '');
       const scheme = SCHEME_BY_KIND[getPlaceholderKind(element)];
-      result += `[${displayName}](${scheme}://${encodeAttachmentName(name)})`;
+      const { attachmentId } = element.dataset;
+      const query = attachmentId
+        ? `?${ATTACHMENT_ID_PARAM}=${encodeAttachmentName(attachmentId)}`
+        : '';
+      result += `[${displayName}](${scheme}://${encodeAttachmentName(name)}${query})`;
     } else if (isElementCommandBadge(element)) {
       result += serializeCommandBadge(element);
     } else if (element.tagName === 'BR') {

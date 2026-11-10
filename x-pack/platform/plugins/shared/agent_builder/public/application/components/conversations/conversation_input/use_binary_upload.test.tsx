@@ -52,6 +52,7 @@ const createConversation = jest.fn();
 const messageEditorController = {
   getPlaceholderNames: jest.fn(),
   removePlaceholderByName: jest.fn(),
+  setPlaceholderAttachmentId: jest.fn(),
 };
 
 const setContext = ({
@@ -134,6 +135,20 @@ describe('useBinaryUpload', () => {
       expect(upsertAttachments).toHaveBeenCalledWith([binaryAttachmentInput]);
       expect(result.current.loadingBinaryNames.size).toBe(0);
       expect(createConversation).not.toHaveBeenCalled();
+    });
+
+    it('links the chip to the attachment, so the sent message points to it', async () => {
+      const { result } = renderBinaryUpload();
+
+      paste(result);
+
+      await waitFor(() =>
+        expect(messageEditorController.setPlaceholderAttachmentId).toHaveBeenCalledWith(
+          'invoice.pdf',
+          'binary',
+          'att-1'
+        )
+      );
     });
 
     it('puts the attachment into the conversation cache, for Send', async () => {

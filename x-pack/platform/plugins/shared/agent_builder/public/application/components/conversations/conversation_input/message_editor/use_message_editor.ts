@@ -19,6 +19,7 @@ import {
   createAttachmentPlaceholderElement,
   getPlaceholderNamesFromElement,
   removePlaceholderByName as removePlaceholderByNameFromDom,
+  setPlaceholderAttachmentIdByName,
   type PlaceholderKind,
 } from './attachment_placeholder';
 import { getTextBeforeCursor } from './command_menu/utils/get_text_before_cursor';
@@ -59,6 +60,8 @@ export interface MessageEditorController {
   /** Names of the chips of `kind` (images by default). */
   getPlaceholderNames: (kind?: PlaceholderKind) => string[];
   removePlaceholderByName: (name: string, kind?: PlaceholderKind) => void;
+  /** Links the chip named `name` to its attachment, so the sent message points to it. */
+  setPlaceholderAttachmentId: (name: string, kind: PlaceholderKind, attachmentId: string) => void;
 }
 
 // The limit applies to what is sent, and attachment placeholders and command badges serialize to
@@ -243,7 +246,9 @@ const useMessageEditorController = ({
           } else if (segment.type === 'image') {
             ref.current.appendChild(createAttachmentPlaceholderElement(segment.name));
           } else if (segment.type === 'binary') {
-            ref.current.appendChild(createAttachmentPlaceholderElement(segment.name, 'binary'));
+            ref.current.appendChild(
+              createAttachmentPlaceholderElement(segment.name, 'binary', segment.attachmentId)
+            );
           } else if (segment.type === 'text_file') {
             ref.current.appendChild(createAttachmentPlaceholderElement(segment.name, 'text'));
           }
@@ -281,6 +286,11 @@ const useMessageEditorController = ({
         if (ref.current) {
           removePlaceholderByNameFromDom(ref.current, name, kind);
           syncIsEmpty();
+        }
+      },
+      setPlaceholderAttachmentId: (name: string, kind: PlaceholderKind, attachmentId: string) => {
+        if (ref.current) {
+          setPlaceholderAttachmentIdByName(ref.current, name, kind, attachmentId);
         }
       },
       isEmpty,

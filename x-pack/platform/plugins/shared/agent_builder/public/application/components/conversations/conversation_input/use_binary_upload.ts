@@ -207,6 +207,8 @@ export const useBinaryUpload = ({
       upsertAttachments([
         { id: attachment.id, type: AttachmentType.binary, origin: fileId, description: name },
       ]);
+      // The attachment is already in the conversation, so the message links to it by id.
+      messageEditorController.setPlaceholderAttachmentId(name, 'binary', attachment.id);
     },
     [
       upsertAttachments,

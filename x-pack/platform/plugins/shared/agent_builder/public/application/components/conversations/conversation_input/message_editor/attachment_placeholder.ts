@@ -24,6 +24,9 @@ export const BINARY_ATTACHMENT_SCHEME = 'binary';
 /** Scheme used in serialized text file attachment markdown links. */
 export const TEXT_ATTACHMENT_SCHEME = 'text';
 
+/** Query parameter of a serialized attachment link that holds the attachment id, e.g. `binary://a.pdf?id=<id>`. */
+export const ATTACHMENT_ID_PARAM = 'id';
+
 // Mirrors the EUI `image` icon (packages/eui/src/components/icon/assets/image.tsx).
 // Inlined because the placeholder is imperative DOM inside contentEditable — React can't own it.
 const IMAGE_ICON_PATHS = [
@@ -79,7 +82,8 @@ const createCrossIconSvg = (): SVGSVGElement => {
 
 export const createAttachmentPlaceholderElement = (
   label: string,
-  kind: PlaceholderKind = 'image'
+  kind: PlaceholderKind = 'image',
+  attachmentId?: string
 ): HTMLSpanElement => {
   const span = document.createElement('span');
   span.contentEditable = 'false';
@@ -89,6 +93,9 @@ export const createAttachmentPlaceholderElement = (
   span.setAttribute('aria-label', label);
   span.title = label;
   span.dataset.placeholderName = label;
+  if (attachmentId) {
+    span.dataset.attachmentId = attachmentId;
+  }
 
   span.appendChild(createKindIconSvg(kind));
   span.appendChild(createCrossIconSvg());
@@ -155,6 +162,19 @@ export const removePlaceholderByName = (
       span.remove();
       return;
     }
+  }
+};
+
+/** Stores the attachment id on the chip named `name`, so the message text links to the attachment. */
+export const setPlaceholderAttachmentIdByName = (
+  el: HTMLElement,
+  name: string,
+  kind: PlaceholderKind,
+  attachmentId: string
+): void => {
+  const chip = getChipsOfKind(el, kind).find((span) => span.dataset.placeholderName === name);
+  if (chip) {
+    chip.dataset.attachmentId = attachmentId;
   }
 };
 

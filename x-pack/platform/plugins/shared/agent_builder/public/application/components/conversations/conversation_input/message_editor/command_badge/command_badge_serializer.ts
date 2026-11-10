@@ -10,6 +10,7 @@ import { getCommandDefinition } from '../command_menu';
 import { COMMAND_ID_ATTRIBUTE, COMMAND_METADATA_ATTRIBUTE } from './attributes';
 import { getCommandDefinitionByScheme } from '../command_menu/command_definitions';
 import {
+  ATTACHMENT_ID_PARAM,
   IMAGE_ATTACHMENT_SCHEME,
   BINARY_ATTACHMENT_SCHEME,
   TEXT_ATTACHMENT_SCHEME,
@@ -30,6 +31,7 @@ interface ImageSegment {
 interface BinarySegment {
   type: 'binary';
   name: string;
+  attachmentId?: string;
 }
 interface TextFileSegment {
   type: 'text_file';
@@ -145,7 +147,15 @@ export const deserializeInputSegments = (text: string): ContentSegment[] => {
     const attachmentSegmentType = ATTACHMENT_SEGMENT_TYPE_BY_SCHEME.get(scheme);
     if (attachmentSegmentType) {
       try {
-        segments.push({ type: attachmentSegmentType, name: decodeURIComponent(path) });
+        const name = decodeURIComponent(path);
+        const attachmentId = queryString
+          ? new URLSearchParams(queryString).get(ATTACHMENT_ID_PARAM) ?? undefined
+          : undefined;
+        segments.push(
+          attachmentSegmentType === 'binary' && attachmentId
+            ? { type: attachmentSegmentType, name, attachmentId }
+            : { type: attachmentSegmentType, name }
+        );
       } catch {
         // Malformed percent-encoding, preserve as text
         segments.push({ type: 'text', value: match[0] });

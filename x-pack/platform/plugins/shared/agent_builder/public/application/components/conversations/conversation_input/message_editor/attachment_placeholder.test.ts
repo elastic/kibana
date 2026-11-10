@@ -6,6 +6,7 @@
  */
 
 import {
+  setPlaceholderAttachmentIdByName,
   createAttachmentPlaceholderElement,
   isElementAttachmentPlaceholder,
   getPlaceholderNamesFromElement,
@@ -118,6 +119,29 @@ describe('removePlaceholderByName', () => {
     container.appendChild(createAttachmentPlaceholderElement('dup.png'));
     removePlaceholderByName(container, 'dup.png');
     expect(getPlaceholderNamesFromElement(container)).toHaveLength(1);
+  });
+});
+
+describe('setPlaceholderAttachmentIdByName', () => {
+  it('stores the id on the chip with the given name and kind', () => {
+    const container = document.createElement('div');
+    container.appendChild(createAttachmentPlaceholderElement('a.pdf', 'text'));
+    container.appendChild(createAttachmentPlaceholderElement('a.pdf', 'binary'));
+
+    setPlaceholderAttachmentIdByName(container, 'a.pdf', 'binary', 'att-1');
+
+    const [textChip, binaryChip] = Array.from(container.children) as HTMLElement[];
+    expect(binaryChip.dataset.attachmentId).toBe('att-1');
+    expect(textChip.dataset.attachmentId).toBeUndefined();
+  });
+
+  it('does nothing when no chip has the name', () => {
+    const container = document.createElement('div');
+    container.appendChild(createAttachmentPlaceholderElement('a.pdf', 'binary'));
+
+    setPlaceholderAttachmentIdByName(container, 'b.pdf', 'binary', 'att-1');
+
+    expect((container.firstChild as HTMLElement).dataset.attachmentId).toBeUndefined();
   });
 });
 

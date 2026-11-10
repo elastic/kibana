@@ -23,6 +23,7 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import { flattenAttachments } from '../conversation/flatten_attachments';
+import { withoutPreAddedAttachments } from '../conversation/without_pre_added_attachments';
 import {
   buildOptimisticAttachments,
   type OptimisticAttachments,
@@ -202,7 +203,10 @@ export const useSendMessageMutation = ({
           agentId: vars.agentId,
           connectorId: vars.connectorId,
           attachments: [
-            ...flattenAttachments(vars.attachments ?? []),
+            ...withoutPreAddedAttachments(
+              flattenAttachments(vars.attachments ?? []),
+              vars.conversationAttachments
+            ),
             ...(await withScreenContextAttachment({
               services,
               conversationAttachments: vars.conversationAttachments,

@@ -28,6 +28,7 @@ const addErrorToast = jest.fn();
 const messageEditorController = {
   getPlaceholderNames: jest.fn(),
   removePlaceholderByName: jest.fn(),
+  setPlaceholderAttachmentId: jest.fn(),
 };
 
 const setContext = ({
