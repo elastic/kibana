@@ -10,9 +10,11 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { I18nProvider } from '@kbn/i18n-react';
 import { createDefaultUnit } from '../../../services/unit_repository';
 import { CreateDestinationModal } from './create_destination_modal';
+import { getDestinationCreateSpec } from './destination_models';
+import { EMPTY_ELASTICSEARCH_DESTINATION_FORM } from './types';
 
 const NAME_REQUIRED = 'Enter a destination name.';
-const LOGS_PATTERN_REQUIRED = 'Enter a write pattern for logs.';
+const SIGNAL_NAME_REQUIRED = 'Name at least one signal.';
 
 const renderModal = () => {
   const createDestination = jest.fn();
@@ -35,13 +37,10 @@ const renderModal = () => {
 
 const click = (testSubject: string) => fireEvent.click(screen.getByTestId(testSubject));
 
-const docsPatternsInput = () => {
-  click('streamsCreateDestinationCustomWritePatterns');
-  click('streamsCreateDestinationCustomSignal-docs');
-  return within(screen.getByTestId('streamsCreateDestination-docs-writePatterns')).getByTestId(
+const docsPatternsInput = () =>
+  within(screen.getByTestId('streamsCreateDestination-docs-writePatterns')).getByTestId(
     'comboBoxSearchInput'
   );
-};
 
 const docsPills = () =>
   within(screen.getByTestId('streamsCreateDestination-docs-writePatterns'))
@@ -56,20 +55,76 @@ const addDocsPattern = (input: HTMLElement, value: string) => {
   fireEvent.keyDown(input, { key: 'Enter' });
 };
 
+const useCustomIndexNames = () => click('streamsCreateDestinationCustomWritePatterns');
+const chooseFixed = () => fireEvent.click(screen.getByLabelText('Fixed index per signal'));
+const chooseAutomatic = () => fireEvent.click(screen.getByLabelText('Automatic'));
+const fieldValue = (testSubject: string) =>
+  (screen.getByTestId(testSubject) as HTMLInputElement).value;
+
+const submittedElasticsearch = async (createDestination: jest.Mock) => {
+  await waitFor(() => expect(createDestination).toHaveBeenCalled());
+  return createDestination.mock.calls[0][0].elasticsearch;
+};
+
+const heading = (name: string) => screen.getByRole('heading', { name });
+
 describe('CreateDestinationModal', () => {
+  it('shows the storage step, the type steps and the details step for each storage kind', () => {
+    renderModal();
+    expect(heading("Where will this destination's data live?")).toBeInTheDocument();
+    expect(heading('How should its documents be written?')).toBeInTheDocument();
+    expect(heading('Destination details')).toBeInTheDocument();
+
+    click('streamsCreateDestinationRemoteElasticsearch');
+    const connect = heading('Connect your remote cluster');
+    const writing = heading('How should its documents be written?');
+    expect(connect.compareDocumentPosition(writing)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+
+    click('streamsCreateDestinationExternalStorage');
+    expect(heading('Configure external storage')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'How should its documents be written?' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('names each storage card by its title, describes it and badges local only', () => {
+    renderModal();
+    const local = screen.getByRole('radio', { name: 'Local Elasticsearch Most common' });
+    const cardDetails = (radio: HTMLElement) => document.getElementById(`${radio.id}-details`);
+    expect(cardDetails(local)).toHaveTextContent('Write to indexes in this deployment.');
+    expect(screen.getByRole('radio', { name: 'Remote Elasticsearch' })).toBeInTheDocument();
+    expect(cardDetails(screen.getByRole('radio', { name: 'External storage' }))).toHaveTextContent(
+      'Send data outside Elasticsearch to Amazon S3.'
+    );
+    const badges = screen.getAllByText('Most common');
+    expect(badges).toHaveLength(1);
+    expect(cardDetails(local)).not.toContainElement(badges[0]);
+  });
+
   it('only shows the errors of fields the user has left', () => {
     renderModal();
 
-    click('streamsCreateDestinationCustomWritePatterns');
-    click('streamsCreateDestinationCustomSignal-logs');
+    useCustomIndexNames();
 
-    expect(screen.queryByText(LOGS_PATTERN_REQUIRED)).not.toBeInTheDocument();
+    expect(screen.queryByText(SIGNAL_NAME_REQUIRED)).not.toBeInTheDocument();
     expect(screen.queryByText(NAME_REQUIRED)).not.toBeInTheDocument();
 
     fireEvent.blur(screen.getByTestId('streamsCreateDestination-logs-index'));
 
-    expect(screen.getByText(LOGS_PATTERN_REQUIRED)).toBeInTheDocument();
+    expect(screen.getByText(SIGNAL_NAME_REQUIRED)).toBeInTheDocument();
     expect(screen.queryByText(NAME_REQUIRED)).not.toBeInTheDocument();
+  });
+
+  it('names the details fields by their labels and describes Name by its help text', () => {
+    renderModal();
+    const name = screen.getByRole('textbox', { name: 'Name' });
+    expect(name).toBe(screen.getByTestId('streamsCreateDestinationName'));
+    expect(name).toHaveAccessibleDescription(
+      "Permanent once created. Destinations can't be renamed."
+    );
+    expect(screen.getByRole('textbox', { name: /^Description/ })).toBe(
+      screen.getByTestId('streamsCreateDestinationDescription')
+    );
   });
 
   it('submits the form values', async () => {
@@ -90,9 +145,242 @@ describe('CreateDestinationModal', () => {
     );
   });
 
+  describe('local writing mode', () => {
+    it('submits Automatic custom with signals derived from filled fields', async () => {
+      const { createDestination } = renderModal();
+      useCustomIndexNames();
+      setFieldValue('streamsCreateDestination-logs-index', 'logs-billing-*');
+      addDocsPattern(docsPatternsInput(), 'logs-orders-*');
+      setFieldValue('streamsCreateDestinationName', 'Billing');
+      click('streamsCreateDestinationSubmit');
+
+      const elasticsearch = await submittedElasticsearch(createDestination);
+      expect(elasticsearch).toEqual({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        auto: true,
+        useCustomWritePatterns: true,
+        customSignals: ['logs', 'docs'],
+        logsIndex: 'logs-billing-*',
+        docsWritePatterns: ['logs-orders-*'],
+      });
+      expect(getDestinationCreateSpec(elasticsearch)).toEqual({
+        signals: ['logs', 'docs'],
+        indexBySignal: {},
+        writePatternsBySignal: { logs: ['logs-billing-*'], docs: ['logs-orders-*'] },
+      });
+    });
+
+    it('submits Fixed shared as three composed indices and shows them in the help line', async () => {
+      const { createDestination } = renderModal();
+      chooseFixed();
+      setFieldValue('streamsCreateDestinationIndex', 'billing-default');
+      expect(
+        screen.getByText(
+          'Saved as logs-billing-default, metrics-billing-default and traces-billing-default.'
+        )
+      ).toBeInTheDocument();
+      setFieldValue('streamsCreateDestinationName', 'Billing');
+      click('streamsCreateDestinationSubmit');
+
+      const elasticsearch = await submittedElasticsearch(createDestination);
+      expect(elasticsearch).toEqual({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        auto: false,
+        staticNaming: 'shared',
+        logsIndex: 'logs-billing-default',
+        metricsIndex: 'metrics-billing-default',
+        tracesIndex: 'traces-billing-default',
+      });
+      expect(getDestinationCreateSpec(elasticsearch)).toEqual({
+        signals: ['logs', 'metrics', 'traces'],
+        indexBySignal: {
+          logs: 'logs-billing-default',
+          metrics: 'metrics-billing-default',
+          traces: 'traces-billing-default',
+        },
+        writePatternsBySignal: {},
+      });
+    });
+
+    it('shows the generic help line when the shared field is empty and only the error when invalid', () => {
+      renderModal();
+      chooseFixed();
+      expect(
+        screen.getByText('Saved as logs-<name>, metrics-<name> and traces-<name>.')
+      ).toBeInTheDocument();
+
+      setFieldValue('streamsCreateDestinationIndex', 'Billing');
+      fireEvent.blur(screen.getByTestId('streamsCreateDestinationIndex'));
+
+      expect(screen.getByText('Index names must be lowercase.')).toBeInTheDocument();
+      expect(screen.queryByText('Saved as', { exact: false })).not.toBeInTheDocument();
+    });
+
+    it('keeps a shared name typed with a signal prefix as typed and asks to drop the prefix', () => {
+      renderModal();
+      chooseFixed();
+      setFieldValue('streamsCreateDestinationIndex', 'logs-');
+      expect(fieldValue('streamsCreateDestinationIndex')).toBe('logs-');
+
+      setFieldValue('streamsCreateDestinationIndex', 'logs-billing-default');
+      fireEvent.blur(screen.getByTestId('streamsCreateDestinationIndex'));
+      setFieldValue('streamsCreateDestinationName', 'Billing');
+
+      expect(fieldValue('streamsCreateDestinationIndex')).toBe('logs-billing-default');
+      expect(
+        screen.getByText('Enter the name without the logs-, metrics- or traces- prefix.')
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('streamsCreateDestinationSubmit')).toBeDisabled();
+    });
+
+    it('keeps a shared name typed with a signal prefix after switching storage away and back', () => {
+      renderModal();
+      chooseFixed();
+      setFieldValue('streamsCreateDestinationIndex', 'logs-billing-default');
+
+      click('streamsCreateDestinationRemoteElasticsearch');
+      click('streamsCreateDestinationLocalElasticsearch');
+
+      expect(fieldValue('streamsCreateDestinationIndex')).toBe('logs-billing-default');
+    });
+
+    it('submits Fixed per signal with full names as typed', async () => {
+      const { createDestination } = renderModal();
+      chooseFixed();
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      setFieldValue('streamsCreateDestination-logs-index', 'logs-billing-default');
+      setFieldValue('streamsCreateDestination-traces-index', 'traces-billing-default');
+      setFieldValue('streamsCreateDestinationName', 'Billing');
+      click('streamsCreateDestinationSubmit');
+
+      const elasticsearch = await submittedElasticsearch(createDestination);
+      expect(elasticsearch).toEqual({
+        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+        auto: false,
+        staticNaming: 'perSignal',
+        logsIndex: 'logs-billing-default',
+        tracesIndex: 'traces-billing-default',
+      });
+      expect(getDestinationCreateSpec(elasticsearch)).toEqual({
+        signals: ['logs', 'traces'],
+        indexBySignal: { logs: 'logs-billing-default', traces: 'traces-billing-default' },
+        writePatternsBySignal: {},
+      });
+    });
+
+    it('does not prefix a per-signal name typed without its signal', () => {
+      renderModal();
+      chooseFixed();
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      setFieldValue('streamsCreateDestination-logs-index', 'billing-default');
+      fireEvent.blur(screen.getByTestId('streamsCreateDestination-logs-index'));
+
+      expect(fieldValue('streamsCreateDestination-logs-index')).toBe('billing-default');
+      expect(
+        screen.getByText(
+          'Must follow logs-<dataset>-<namespace>. The dataset and namespace cannot contain "-".'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('resets the signal fields when per-signal names disagree', () => {
+      renderModal();
+      chooseFixed();
+      setFieldValue('streamsCreateDestinationIndex', 'a-b');
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      setFieldValue('streamsCreateDestination-metrics-index', 'metrics-c-d');
+      click('streamsCreateDestinationIndexNaming-shared');
+
+      expect(fieldValue('streamsCreateDestinationIndex')).toBe('');
+
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      expect(fieldValue('streamsCreateDestination-logs-index')).toBe('');
+      expect(fieldValue('streamsCreateDestination-metrics-index')).toBe('');
+      expect(fieldValue('streamsCreateDestination-traces-index')).toBe('');
+    });
+
+    it('keeps the shared name when per-signal names agree', () => {
+      renderModal();
+      chooseFixed();
+      setFieldValue('streamsCreateDestinationIndex', 'a-b');
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      click('streamsCreateDestinationIndexNaming-shared');
+
+      expect(fieldValue('streamsCreateDestinationIndex')).toBe('a-b');
+    });
+
+    it('composes all three indices when one per-signal name moves to shared', () => {
+      renderModal();
+      chooseFixed();
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      setFieldValue('streamsCreateDestination-logs-index', 'logs-a-b');
+      click('streamsCreateDestinationIndexNaming-shared');
+
+      expect(fieldValue('streamsCreateDestinationIndex')).toBe('a-b');
+      expect(
+        screen.getByText('Saved as logs-a-b, metrics-a-b and traces-a-b.')
+      ).toBeInTheDocument();
+
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      expect(fieldValue('streamsCreateDestination-metrics-index')).toBe('metrics-a-b');
+      expect(fieldValue('streamsCreateDestination-traces-index')).toBe('traces-a-b');
+    });
+
+    it('resets the custom switch and naming when the mode changes', () => {
+      renderModal();
+      useCustomIndexNames();
+      setFieldValue('streamsCreateDestination-logs-index', 'logs-a-*');
+      chooseFixed();
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      chooseAutomatic();
+
+      expect(screen.getByTestId('streamsCreateDestinationCustomWritePatterns')).toHaveAttribute(
+        'aria-checked',
+        'false'
+      );
+
+      useCustomIndexNames();
+      expect(fieldValue('streamsCreateDestination-logs-index')).toBe('');
+
+      chooseFixed();
+      expect(screen.getByTestId('streamsCreateDestinationIndex')).toBeInTheDocument();
+    });
+
+    it('asks for a signal name when only spaces were typed', () => {
+      renderModal();
+      useCustomIndexNames();
+      setFieldValue('streamsCreateDestination-logs-index', '   ');
+      setFieldValue('streamsCreateDestinationName', 'x');
+
+      expect(screen.getByTestId('streamsCreateDestinationSubmit')).toBeDisabled();
+      fireEvent.blur(screen.getByTestId('streamsCreateDestination-logs-index'));
+      expect(screen.getByText(SIGNAL_NAME_REQUIRED)).toBeInTheDocument();
+    });
+
+    it('drops docs from the signals when its last write pattern is removed', async () => {
+      const { createDestination } = renderModal();
+      useCustomIndexNames();
+      addDocsPattern(docsPatternsInput(), 'logs-o-*');
+      setFieldValue('streamsCreateDestination-logs-index', 'logs-a-*');
+      fireEvent.click(
+        within(screen.getByTestId('streamsCreateDestination-docs-writePatterns')).getByRole(
+          'button',
+          { name: 'Remove logs-o-* from selection in this group' }
+        )
+      );
+      setFieldValue('streamsCreateDestinationName', 'x');
+      click('streamsCreateDestinationSubmit');
+
+      const elasticsearch = await submittedElasticsearch(createDestination);
+      expect(elasticsearch.customSignals).toEqual(['logs']);
+      expect(elasticsearch.docsWritePatterns).toEqual([]);
+    });
+  });
+
   describe('Documents', () => {
     it('splits a pasted list into one entry per pattern and marks only the invalid one', () => {
       renderModal();
+      useCustomIndexNames();
 
       addDocsPattern(docsPatternsInput(), 'logs-a-*, Metrics-b-*');
 
@@ -105,6 +393,7 @@ describe('CreateDestinationModal', () => {
 
     it('says how many write patterns a destination can have', () => {
       renderModal();
+      useCustomIndexNames();
 
       addDocsPattern(
         docsPatternsInput(),
@@ -118,6 +407,7 @@ describe('CreateDestinationModal', () => {
 
     it('adds each docs write pattern once, keeping the lowercase fix of an uppercase one', () => {
       renderModal();
+      useCustomIndexNames();
       const input = docsPatternsInput();
 
       addDocsPattern(input, 'Logs-a-*');
@@ -131,7 +421,7 @@ describe('CreateDestinationModal', () => {
       const { createDestination } = renderModal();
 
       fireEvent.click(screen.getByLabelText('Fixed index per signal'));
-      expect(screen.getByText('Name all OTel signals')).toBeInTheDocument();
+      expect(screen.getByText('One name for all signals')).toBeInTheDocument();
       setFieldValue('streamsCreateDestination-docs-index', 'accounting-2026');
       setFieldValue('streamsCreateDestinationIndex', 'billing-default');
       click('streamsCreateDestinationIndexNaming-perSignal');
@@ -152,24 +442,14 @@ describe('CreateDestinationModal', () => {
       );
     });
 
-    it('clears the docs write patterns when the docs badge is turned off', () => {
+    it('clears the docs write patterns when the custom switch is turned off', () => {
       renderModal();
+      useCustomIndexNames();
       addDocsPattern(docsPatternsInput(), 'logs-a-*');
       expect(docsPills()).toEqual(['logs-a-*']);
 
-      click('streamsCreateDestinationCustomSignal-docs');
-      click('streamsCreateDestinationCustomSignal-docs');
-
-      expect(docsPills()).toEqual([]);
-    });
-
-    it('clears the docs write patterns when the custom switch is turned off', () => {
-      renderModal();
-      addDocsPattern(docsPatternsInput(), 'logs-a-*');
-
-      click('streamsCreateDestinationCustomWritePatterns');
-      click('streamsCreateDestinationCustomWritePatterns');
-      click('streamsCreateDestinationCustomSignal-docs');
+      useCustomIndexNames();
+      useCustomIndexNames();
 
       expect(docsPills()).toEqual([]);
     });
@@ -179,10 +459,49 @@ describe('CreateDestinationModal', () => {
       fireEvent.click(screen.getByLabelText('Fixed index per signal'));
       setFieldValue('streamsCreateDestination-docs-index', 'accounting-2026');
 
-      fireEvent.click(screen.getByLabelText('Auto (default)'));
+      fireEvent.click(screen.getByLabelText('Automatic'));
       fireEvent.click(screen.getByLabelText('Fixed index per signal'));
 
       expect(screen.getByTestId('streamsCreateDestination-docs-index')).toHaveValue('');
+    });
+  });
+
+  describe('external storage', () => {
+    it('submits the S3 form values with S3 preselected and no visible provider label', async () => {
+      const { createDestination } = renderModal();
+      click('streamsCreateDestinationExternalStorage');
+
+      const provider = screen.getByTestId('streamsCreateDestinationS3Provider');
+      expect(within(provider).getByText('Amazon S3')).toBeInTheDocument();
+      expect(screen.getByText('Provider').closest('label')).toBeNull();
+
+      setFieldValue('streamsCreateDestinationS3Region', 'us-east-1');
+      setFieldValue('streamsCreateDestinationS3Bucket', 'my-bucket');
+      setFieldValue('streamsCreateDestinationS3AccessKeyId', 'AKIA');
+      setFieldValue('streamsCreateDestinationS3SecretAccessKey', 'shh');
+      expect(screen.getByTestId('streamsCreateDestinationS3SecretAccessKey')).toHaveAttribute(
+        'type',
+        'password'
+      );
+      setFieldValue('streamsCreateDestinationName', 'Archive');
+      click('streamsCreateDestinationSubmit');
+
+      await waitFor(() =>
+        expect(createDestination).toHaveBeenCalledWith(
+          expect.objectContaining({
+            storageKind: 'external_storage',
+            destinationName: 'Archive',
+            s3: {
+              region: 'us-east-1',
+              bucket: 'my-bucket',
+              prefix: '',
+              accessKeyId: 'AKIA',
+              secretAccessKey: 'shh',
+            },
+          }),
+          expect.anything()
+        )
+      );
     });
   });
 
@@ -214,6 +533,9 @@ describe('CreateDestinationModal', () => {
         'https://es.example.com:443'
       );
       setFieldValue('streamsCreateDestinationRemoteElasticsearchApiKey', 'remote-key');
+      expect(
+        screen.getByTestId('streamsCreateDestinationRemoteElasticsearchApiKey')
+      ).toHaveAttribute('type', 'password');
       setFieldValue('streamsCreateDestinationName', 'Central');
       click('streamsCreateDestinationSubmit');
 
@@ -234,6 +556,53 @@ describe('CreateDestinationModal', () => {
           expect.anything()
         )
       );
+    });
+  });
+
+  describe('step dots', () => {
+    const incomplete = (step: number) => screen.queryByText(`Step ${step} is incomplete`);
+
+    it('fills the local steps once their fields are valid', () => {
+      renderModal();
+      expect(incomplete(1)).not.toBeInTheDocument();
+      expect(incomplete(2)).not.toBeInTheDocument();
+      expect(incomplete(3)).toBeInTheDocument();
+
+      chooseFixed();
+      expect(incomplete(2)).toBeInTheDocument();
+      setFieldValue('streamsCreateDestinationIndex', 'billing-default');
+      expect(incomplete(2)).not.toBeInTheDocument();
+
+      setFieldValue('streamsCreateDestinationName', 'Billing');
+      expect(incomplete(3)).not.toBeInTheDocument();
+    });
+
+    it('fills the remote connection step once endpoint and API key are set', () => {
+      renderModal();
+      click('streamsCreateDestinationRemoteElasticsearch');
+      expect(incomplete(2)).toBeInTheDocument();
+      expect(incomplete(3)).not.toBeInTheDocument();
+
+      setFieldValue(
+        'streamsCreateDestinationRemoteElasticsearchEndpoint',
+        'https://es.example.com:443'
+      );
+      expect(incomplete(2)).toBeInTheDocument();
+      setFieldValue('streamsCreateDestinationRemoteElasticsearchApiKey', 'remote-key');
+      expect(incomplete(2)).not.toBeInTheDocument();
+    });
+
+    it('fills the external storage step once the required S3 fields are set', () => {
+      renderModal();
+      click('streamsCreateDestinationExternalStorage');
+      expect(incomplete(2)).toBeInTheDocument();
+
+      setFieldValue('streamsCreateDestinationS3Region', 'us-east-1');
+      setFieldValue('streamsCreateDestinationS3Bucket', 'billing-archive');
+      setFieldValue('streamsCreateDestinationS3AccessKeyId', 'access-key-id');
+      expect(incomplete(2)).toBeInTheDocument();
+      setFieldValue('streamsCreateDestinationS3SecretAccessKey', 'secret-access-key');
+      expect(incomplete(2)).not.toBeInTheDocument();
     });
   });
 });

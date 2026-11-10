@@ -12,26 +12,10 @@ import {
   useWatch,
   type ControllerRenderProps,
 } from 'react-hook-form';
-import {
-  EuiButtonGroup,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiHorizontalRule,
-  EuiRadio,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PREFIXED_DESTINATION_SIGNALS, SIGNAL_INDEX_FIELDS } from './destination_models';
-import {
-  DESTINATION_AUTO_MODE_LABEL,
-  DESTINATION_FIXED_INDEX_MODE_LABEL,
-  DESTINATION_SIGNAL_LABELS,
-} from './destination_type_config';
+import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
 import {
   EMPTY_REMOTE_ELASTICSEARCH_DESTINATION_FORM,
   type DestinationCreationFormData,
@@ -39,6 +23,15 @@ import {
   type PrefixedDestinationSignal,
   type StaticIndexNaming,
 } from './types';
+import { getSharedRemoteIndexOnSwitch } from './writing_mode_form';
+import {
+  INDEX_NAME_PREPEND,
+  NamingButtonGroup,
+  SignalFieldsBox,
+  SignalPrepend,
+  UNNAMED_SIGNALS_HELP,
+  WritingModePanel,
+} from './writing_mode_panel';
 
 type IndexFieldPath =
   `remoteElasticsearch.${(typeof SIGNAL_INDEX_FIELDS)[PrefixedDestinationSignal]}`;
@@ -57,11 +50,6 @@ interface RemoteElasticsearchRoutingFieldsProps {
 
 const getIndexFieldPath = (signal: PrefixedDestinationSignal): IndexFieldPath =>
   `remoteElasticsearch.${SIGNAL_INDEX_FIELDS[signal]}`;
-
-const INDEX_PLACEHOLDER = i18n.translate(
-  'xpack.streams.destinations.remoteElasticsearch.indexPlaceholder',
-  { defaultMessage: 'my-index' }
-);
 
 const indexErrorText = (error: IndexError): string | undefined => {
   switch (error) {
@@ -98,7 +86,7 @@ const StaticFields = ({
   disabled,
   indexFields,
 }: RemoteElasticsearchRoutingFieldsProps & { indexFields: IndexFields }) => {
-  const { control, setValue } = useFormContext<DestinationCreationFormData>();
+  const { control, setValue, resetField } = useFormContext<DestinationCreationFormData>();
   const staticNaming = useWatch({ control, name: 'remoteElasticsearch.staticNaming' });
   const requiredError =
     errors.staticIndexes === 'required'
@@ -107,36 +95,28 @@ const StaticFields = ({
         })
       : undefined;
 
-  const namingOptions = [
-    {
-      id: 'shared',
-      label: i18n.translate('xpack.streams.destinations.remoteElasticsearch.sharedNamingLabel', {
-        defaultMessage: 'One index for all signals',
-      }),
-      'data-test-subj': 'streamsCreateDestinationIndexNaming-shared',
-    },
-    {
-      id: 'perSignal',
-      label: i18n.translate('xpack.streams.destinations.remoteElasticsearch.perSignalNamingLabel', {
-        defaultMessage: 'Name signals individually',
-      }),
-      'data-test-subj': 'streamsCreateDestinationIndexNaming-perSignal',
-    },
-  ];
-
   const setSharedIndex = (index: string) => {
     for (const signal of PREFIXED_DESTINATION_SIGNALS) {
       indexFields[signal].onChange(index);
     }
   };
 
-  const onNamingChange = (nextNaming: string) => {
-    const naming = nextNaming as StaticIndexNaming;
+  const onNamingChange = (naming: StaticIndexNaming) => {
     setValue('remoteElasticsearch.staticNaming', naming, { shouldDirty: true });
-    if (naming === 'shared') {
-      setSharedIndex(
-        PREFIXED_DESTINATION_SIGNALS.map((signal) => indexFields[signal].value).find(Boolean) ?? ''
-      );
+    if (naming !== 'shared') {
+      return;
+    }
+    const index = getSharedRemoteIndexOnSwitch({
+      logsIndex: indexFields.logs.value,
+      metricsIndex: indexFields.metrics.value,
+      tracesIndex: indexFields.traces.value,
+    });
+    if (index) {
+      setSharedIndex(index);
+      return;
+    }
+    for (const signal of PREFIXED_DESTINATION_SIGNALS) {
+      resetField(getIndexFieldPath(signal));
     }
   };
 
@@ -148,84 +128,80 @@ const StaticFields = ({
 
   return (
     <>
-      <EuiButtonGroup
-        legend={i18n.translate('xpack.streams.destinations.remoteElasticsearch.namingLegend', {
-          defaultMessage: 'Fixed index naming',
-        })}
-        buttonSize="compressed"
-        isFullWidth
-        isDisabled={disabled}
-        options={namingOptions}
-        idSelected={staticNaming}
-        onChange={onNamingChange}
-        data-test-subj="streamsCreateDestinationIndexNaming"
-      />
-      <EuiSpacer size="s" />
+      <NamingButtonGroup naming={staticNaming} disabled={disabled} onChange={onNamingChange} />
+      <EuiSpacer size="m" />
       {staticNaming === 'shared' ? (
-        <EuiFormRow
-          fullWidth
-          helpText={i18n.translate(
-            'xpack.streams.destinations.remoteElasticsearch.allSignalsIndexHelpDescription',
-            { defaultMessage: 'The same index name is used for logs, metrics, and traces.' }
-          )}
-          isInvalid={Boolean(sharedError)}
-          error={sharedError}
-        >
-          <EuiFieldText
+        <SignalFieldsBox>
+          <EuiFormRow
             fullWidth
-            value={indexFields.logs.value}
-            disabled={disabled}
-            isInvalid={Boolean(sharedError)}
-            onChange={(event) => setSharedIndex(event.target.value)}
-            onBlur={() => {
-              for (const signal of PREFIXED_DESTINATION_SIGNALS) {
-                indexFields[signal].onBlur();
-              }
-            }}
-            placeholder={INDEX_PLACEHOLDER}
-            aria-label={i18n.translate(
-              'xpack.streams.destinations.remoteElasticsearch.sharedIndexAriaLabel',
-              { defaultMessage: 'Index name for all signals' }
+            helpText={i18n.translate(
+              'xpack.streams.destinations.remoteElasticsearch.allSignalsIndexHelpDescription',
+              { defaultMessage: 'The same index name is used for logs, metrics, and traces.' }
             )}
-            data-test-subj="streamsCreateDestinationIndex"
-          />
-        </EuiFormRow>
+            isInvalid={Boolean(sharedError)}
+            error={sharedError}
+          >
+            <EuiFieldText
+              fullWidth
+              value={indexFields.logs.value}
+              disabled={disabled}
+              isInvalid={Boolean(sharedError)}
+              prepend={<SignalPrepend label={INDEX_NAME_PREPEND} />}
+              onChange={(event) => setSharedIndex(event.target.value)}
+              onBlur={() => {
+                for (const signal of PREFIXED_DESTINATION_SIGNALS) {
+                  indexFields[signal].onBlur();
+                }
+              }}
+              placeholder={i18n.translate(
+                'xpack.streams.destinations.remoteElasticsearch.sharedIndexPlaceholder',
+                { defaultMessage: 'e.g. billing-all-signals' }
+              )}
+              aria-label={i18n.translate(
+                'xpack.streams.destinations.remoteElasticsearch.sharedIndexAriaLabel',
+                { defaultMessage: 'Index name for all signals' }
+              )}
+              data-test-subj="streamsCreateDestinationIndex"
+            />
+          </EuiFormRow>
+        </SignalFieldsBox>
       ) : (
-        <>
-          {PREFIXED_DESTINATION_SIGNALS.map((signal) => {
+        <SignalFieldsBox
+          help={requiredError ?? UNNAMED_SIGNALS_HELP}
+          isHelpError={Boolean(requiredError)}
+        >
+          {PREFIXED_DESTINATION_SIGNALS.map((signal, position) => {
             const errorText = indexErrorText(errors[SIGNAL_INDEX_FIELDS[signal]]);
             return (
-              <EuiFormRow
-                key={signal}
-                fullWidth
-                label={DESTINATION_SIGNAL_LABELS[signal]}
-                isInvalid={Boolean(errorText)}
-                error={errorText}
-              >
-                <EuiFieldText
-                  fullWidth
-                  value={indexFields[signal].value}
-                  disabled={disabled}
-                  isInvalid={Boolean(errorText)}
-                  onChange={(event) => indexFields[signal].onChange(event.target.value)}
-                  onBlur={indexFields[signal].onBlur}
-                  placeholder={INDEX_PLACEHOLDER}
-                  data-test-subj={`streamsCreateDestination-${signal}-index`}
-                />
-              </EuiFormRow>
+              <React.Fragment key={signal}>
+                {position > 0 && <EuiSpacer size="s" />}
+                <EuiFormRow fullWidth isInvalid={Boolean(errorText)} error={errorText}>
+                  <EuiFieldText
+                    fullWidth
+                    value={indexFields[signal].value}
+                    disabled={disabled}
+                    isInvalid={Boolean(errorText)}
+                    prepend={<SignalPrepend label={DESTINATION_SIGNAL_LABELS[signal]} />}
+                    onChange={(event) => indexFields[signal].onChange(event.target.value)}
+                    onBlur={indexFields[signal].onBlur}
+                    placeholder={i18n.translate(
+                      'xpack.streams.destinations.remoteElasticsearch.perSignalIndexPlaceholder',
+                      { defaultMessage: 'e.g. {signal}-billing', values: { signal } }
+                    )}
+                    aria-label={i18n.translate(
+                      'xpack.streams.destinations.remoteElasticsearch.signalIndexAriaLabel',
+                      {
+                        defaultMessage: '{signal} index name',
+                        values: { signal: DESTINATION_SIGNAL_LABELS[signal] },
+                      }
+                    )}
+                    data-test-subj={`streamsCreateDestination-${signal}-index`}
+                  />
+                </EuiFormRow>
+              </React.Fragment>
             );
           })}
-          <EuiSpacer size="xs" />
-          <EuiText size="xs" color={requiredError ? 'danger' : 'subdued'}>
-            <p>
-              {requiredError ??
-                i18n.translate(
-                  'xpack.streams.destinations.remoteElasticsearch.perSignalIndexHelpDescription',
-                  { defaultMessage: 'Leave a signal blank to not send it to this destination.' }
-                )}
-            </p>
-          </EuiText>
-        </>
+        </SignalFieldsBox>
       )}
     </>
   );
@@ -242,11 +218,6 @@ export const RemoteElasticsearchRoutingFields = (props: RemoteElasticsearchRouti
     metrics: useController({ control, name: getIndexFieldPath('metrics') }).field,
     traces: useController({ control, name: getIndexFieldPath('traces') }).field,
   };
-  const autoRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRemoteRoutingAuto' });
-  const staticRadioId = useGeneratedHtmlId({
-    prefix: 'streamsCreateDestinationRemoteRoutingStatic',
-  });
-
   const onModeChange = (nextAuto: boolean) => {
     if (nextAuto === auto) {
       return;
@@ -263,53 +234,13 @@ export const RemoteElasticsearchRoutingFields = (props: RemoteElasticsearchRouti
   };
 
   return (
-    <>
-      <EuiTitle size="xxs">
-        <h3>
-          {i18n.translate('xpack.streams.destinations.remoteElasticsearch.indexModeTitle', {
-            defaultMessage: 'Index mode',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiText size="xs" color="subdued">
-        <p>
-          {i18n.translate('xpack.streams.destinations.remoteElasticsearch.indexModeDescription', {
-            defaultMessage:
-              'Route each document by its target index or its data stream fields, or set a fixed index.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="l" responsive={false} alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiRadio
-            id={autoRadioId}
-            name="streamsCreateDestinationRemoteRouting"
-            label={DESTINATION_AUTO_MODE_LABEL}
-            checked={auto}
-            disabled={disabled}
-            onChange={() => onModeChange(true)}
-            data-test-subj="streamsCreateDestinationAuto"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiRadio
-            id={staticRadioId}
-            name="streamsCreateDestinationRemoteRouting"
-            label={DESTINATION_FIXED_INDEX_MODE_LABEL}
-            checked={!auto}
-            disabled={disabled}
-            onChange={() => onModeChange(false)}
-            data-test-subj="streamsCreateDestinationFixedIndex"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {!auto && (
-        <>
-          <EuiHorizontalRule margin="s" />
-          <StaticFields {...props} indexFields={indexFields} />
-        </>
-      )}
-    </>
+    <WritingModePanel
+      auto={auto}
+      disabled={disabled}
+      radioName="streamsCreateDestinationRemoteRouting"
+      onModeChange={onModeChange}
+    >
+      {!auto && <StaticFields {...props} indexFields={indexFields} />}
+    </WritingModePanel>
   );
 };

@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { FormProvider, useForm, type UseFormReturn } from 'react-hook-form';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RemoteElasticsearchRoutingFields } from './remote_elasticsearch_routing_fields';
 import {
@@ -52,20 +51,24 @@ const renderRouting = ({
   return { getValues };
 };
 
+const click = (element: HTMLElement) => fireEvent.click(element);
+const setFieldValue = (testSubject: string, value: string) =>
+  fireEvent.change(screen.getByTestId(testSubject), { target: { value } });
+
 describe('RemoteElasticsearchRoutingFields', () => {
   it('starts in auto without write patterns or index fields', () => {
     renderRouting();
 
-    expect(screen.getByRole('radio', { name: 'Auto (default)' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Automatic' })).toBeChecked();
     expect(screen.queryByTestId('streamsCreateDestinationCustomWritePatterns')).toBeNull();
     expect(screen.queryByTestId('streamsCreateDestinationIndex')).toBeNull();
   });
 
-  it('writes one full index name to every signal, without a signal prefix', async () => {
+  it('writes one full index name to every signal, without a signal prefix', () => {
     const { getValues } = renderRouting();
 
-    await userEvent.click(screen.getByRole('radio', { name: 'Fixed index per signal' }));
-    await userEvent.type(screen.getByTestId('streamsCreateDestinationIndex'), 'shared-idx');
+    click(screen.getByRole('radio', { name: 'Fixed index per signal' }));
+    setFieldValue('streamsCreateDestinationIndex', 'shared-idx');
 
     expect(getValues().remoteElasticsearch).toMatchObject({
       auto: false,
@@ -76,11 +79,11 @@ describe('RemoteElasticsearchRoutingFields', () => {
     expect(getValues().elasticsearch).toEqual(EMPTY_DESTINATION_CREATION_FORM.elasticsearch);
   });
 
-  it('names signals individually and copies the first filled name back to shared', async () => {
+  it('names signals individually and copies a single filled name back to shared', () => {
     const { getValues } = renderRouting({ initial: { auto: false } });
 
-    await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
-    await userEvent.type(screen.getByTestId('streamsCreateDestination-traces-index'), 'my-traces');
+    click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
+    setFieldValue('streamsCreateDestination-traces-index', 'my-traces');
 
     expect(getValues().remoteElasticsearch).toMatchObject({
       logsIndex: '',
@@ -88,7 +91,7 @@ describe('RemoteElasticsearchRoutingFields', () => {
       tracesIndex: 'my-traces',
     });
 
-    await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-shared'));
+    click(screen.getByTestId('streamsCreateDestinationIndexNaming-shared'));
 
     expect(screen.getByTestId('streamsCreateDestinationIndex')).toHaveValue('my-traces');
     expect(getValues().remoteElasticsearch).toMatchObject({
@@ -98,13 +101,13 @@ describe('RemoteElasticsearchRoutingFields', () => {
     });
   });
 
-  it('clears the indices and naming when switching back to auto', async () => {
+  it('clears the indices and naming when switching back to auto', () => {
     const { getValues } = renderRouting();
 
-    await userEvent.click(screen.getByRole('radio', { name: 'Fixed index per signal' }));
-    await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
-    await userEvent.type(screen.getByTestId('streamsCreateDestination-logs-index'), 'a');
-    await userEvent.click(screen.getByRole('radio', { name: 'Auto (default)' }));
+    click(screen.getByRole('radio', { name: 'Fixed index per signal' }));
+    click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
+    setFieldValue('streamsCreateDestination-logs-index', 'a');
+    click(screen.getByRole('radio', { name: 'Automatic' }));
 
     expect(getValues().remoteElasticsearch).toMatchObject({
       auto: true,
@@ -137,8 +140,29 @@ describe('RemoteElasticsearchRoutingFields', () => {
     });
 
     expect(screen.getByText('Enter at least one index.')).toBeInTheDocument();
-    expect(
-      screen.queryByText('Leave a signal blank to not send it to this destination.')
-    ).toBeNull();
+    expect(screen.queryByText('Unnamed signals will be ignored and skipped.')).toBeNull();
+  });
+
+  it('says unnamed signals are skipped when naming each signal', () => {
+    renderRouting({ initial: { auto: false, staticNaming: 'perSignal' } });
+
+    expect(screen.getByText('Unnamed signals will be ignored and skipped.')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('e.g. logs-billing')).toBeInTheDocument();
+  });
+
+  it('resets the signal fields when per-signal names disagree', () => {
+    const { getValues } = renderRouting({ initial: { auto: false } });
+
+    click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
+    setFieldValue('streamsCreateDestination-logs-index', 'a');
+    setFieldValue('streamsCreateDestination-metrics-index', 'b');
+    click(screen.getByTestId('streamsCreateDestinationIndexNaming-shared'));
+
+    expect(screen.getByTestId('streamsCreateDestinationIndex')).toHaveValue('');
+    expect(getValues().remoteElasticsearch).toMatchObject({
+      logsIndex: '',
+      metricsIndex: '',
+      tracesIndex: '',
+    });
   });
 });

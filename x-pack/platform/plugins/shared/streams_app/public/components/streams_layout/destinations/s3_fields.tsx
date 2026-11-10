@@ -16,6 +16,8 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiIconTip,
+  EuiPanel,
+  EuiSpacer,
   EuiSuperSelect,
   EuiText,
 } from '@elastic/eui';
@@ -196,23 +198,25 @@ const S3FieldRow = ({
 /** Fields for an Amazon S3 destination (`s3.schema.yaml`). */
 export const S3Fields = ({ errors, disabled }: S3FieldsProps) => (
   <>
-    <EuiFormRow fullWidth label={PROVIDER_LABEL}>
-      <EuiSuperSelect
-        fullWidth
-        options={PROVIDER_OPTIONS}
-        valueOfSelected="s3"
-        onChange={() => undefined}
-        disabled={disabled}
-        data-test-subj="streamsCreateDestinationS3Provider"
-      />
-    </EuiFormRow>
-    {FIELDS.map((definition) => (
-      <S3FieldRow
-        key={definition.field}
-        definition={definition}
-        errors={errors}
-        disabled={disabled}
-      />
-    ))}
+    <EuiSuperSelect
+      fullWidth
+      options={PROVIDER_OPTIONS}
+      valueOfSelected="s3"
+      onChange={() => undefined}
+      disabled={disabled}
+      aria-label={PROVIDER_LABEL}
+      data-test-subj="streamsCreateDestinationS3Provider"
+    />
+    <EuiSpacer size="s" />
+    <EuiPanel color="subdued" hasShadow={false} paddingSize="m">
+      {FIELDS.map((definition) => (
+        <S3FieldRow
+          key={definition.field}
+          definition={definition}
+          errors={errors}
+          disabled={disabled}
+        />
+      ))}
+    </EuiPanel>
   </>
 );

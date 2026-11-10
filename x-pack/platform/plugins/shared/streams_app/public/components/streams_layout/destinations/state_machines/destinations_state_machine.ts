@@ -928,8 +928,8 @@ type Toasts = CoreStart['notifications']['toasts'];
 function createNotifyDestinationCreatedAction({ toasts }: { toasts: Toasts }) {
   return () => {
     toasts.addSuccess({
-      title: i18n.translate('xpack.streams.destinations.destinationCreatedSuccessTitle', {
-        defaultMessage: 'New destination configured',
+      title: i18n.translate('xpack.streams.destinations.destinationCreatedToastTitle', {
+        defaultMessage: 'New destination created',
       }),
     });
   };

@@ -52,6 +52,12 @@ const renderConnectionFields = ({
 };
 
 describe('RemoteElasticsearchConnectionFields', () => {
+  it('leaves the section title to the modal step', () => {
+    renderConnectionFields();
+
+    expect(screen.queryByText('Connection')).toBeNull();
+  });
+
   it('renders API key as a password field and never echoes it in text', () => {
     const { container } = renderConnectionFields({ apiKey: API_KEY_VALUE });
 

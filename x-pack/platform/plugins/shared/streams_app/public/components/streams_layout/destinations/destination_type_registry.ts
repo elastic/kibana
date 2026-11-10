@@ -24,6 +24,8 @@ export interface DestinationTypeDefinition {
   unitType?: DestinationType;
   available: boolean;
   label: string;
+  description: string;
+  badge?: string;
   testSubject: string;
 }
 
@@ -33,6 +35,12 @@ export const DESTINATION_TYPE_DEFINITIONS: readonly DestinationTypeDefinition[] 
     unitType: 'elasticsearch',
     available: true,
     label: LOCAL_ELASTICSEARCH_LABEL,
+    description: i18n.translate('xpack.streams.destinations.localElasticsearchDescription', {
+      defaultMessage: 'Write to indexes in this deployment.',
+    }),
+    badge: i18n.translate('xpack.streams.destinations.localElasticsearchBadge', {
+      defaultMessage: 'Most common',
+    }),
     testSubject: 'streamsCreateDestinationLocalElasticsearch',
   },
   {
@@ -40,6 +48,9 @@ export const DESTINATION_TYPE_DEFINITIONS: readonly DestinationTypeDefinition[] 
     unitType: REMOTE_ELASTICSEARCH_TYPE,
     available: true,
     label: REMOTE_ELASTICSEARCH_LABEL,
+    description: i18n.translate('xpack.streams.destinations.remoteElasticsearchDescription', {
+      defaultMessage: 'Write to another Elasticsearch cluster using its endpoint and an API key.',
+    }),
     testSubject: 'streamsCreateDestinationRemoteElasticsearch',
   },
   {
@@ -48,6 +59,9 @@ export const DESTINATION_TYPE_DEFINITIONS: readonly DestinationTypeDefinition[] 
     available: true,
     label: i18n.translate('xpack.streams.destinations.externalStorageLabel', {
       defaultMessage: 'External storage',
+    }),
+    description: i18n.translate('xpack.streams.destinations.externalStorageDescription', {
+      defaultMessage: 'Send data outside Elasticsearch to Amazon S3.',
     }),
     testSubject: 'streamsCreateDestinationExternalStorage',
   },

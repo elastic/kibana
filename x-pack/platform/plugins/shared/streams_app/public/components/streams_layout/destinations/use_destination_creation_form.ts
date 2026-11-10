@@ -23,6 +23,8 @@ export interface DestinationCreationForm {
   formData: DestinationCreationFormData;
   /** Errors to show, see `getVisibleDestinationFormErrors`. */
   formErrors: DestinationCreationFormErrors;
+  /** Every current error, shown or not, so the step dots can track progress. */
+  stepErrors: DestinationCreationFormErrors;
   canSubmit: boolean;
 }
 
@@ -44,6 +46,7 @@ export const useDestinationCreationForm = ({
     methods,
     formData,
     formErrors: getVisibleDestinationFormErrors({ errors, touchedFields, isSubmitted }),
+    stepErrors: errors,
     canSubmit: canSubmitDestinationForm({ formData, unitDefinition }),
   };
 };

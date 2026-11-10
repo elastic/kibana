@@ -379,6 +379,46 @@ describe('destinationsStateMachine', () => {
     deleteActor.stop();
   });
 
+  it('says the destination was created once its create is persisted', () => {
+    const toasts = coreMock.createStart().notifications.toasts;
+    const createParentSend = jest.fn();
+    const createActorRef = createActor(
+      destinationsStateMachine.provide(
+        createDestinationsMachineImplementations({
+          toasts,
+          apiKeyGenerationDeps: {
+            streamsRepositoryClient: { fetch },
+            unitId: STREAMS_DEFAULT_UNIT_ID,
+          } as unknown as DestinationApiKeyGenerationDeps,
+          timeState,
+          timeState$,
+        })
+      ),
+      {
+        input: {
+          unitDefinition,
+          parentRef: {
+            send: jest.fn(),
+            _send: createParentSend,
+            getSnapshot: () => ({ context: {} }),
+          } as unknown as AnyActorRef,
+        },
+      }
+    ).start();
+    createActorRef.send({ type: 'modal.openCreate' });
+    createActorRef.send({ type: 'destination.create', formData: s3FormData });
+    const [[{ unitDefinition: persisted }]] = createParentSend.mock.calls;
+
+    createActorRef.send({
+      type: 'unit.persisted',
+      destinationIds: ['s3-archive'],
+      unitDefinition: persisted,
+    });
+
+    expect(toasts.addSuccess).toHaveBeenCalledWith({ title: 'New destination created' });
+    createActorRef.stop();
+  });
+
   it('spawns details for a destination whose id is an Object.prototype key', () => {
     actor.send({
       type: 'destinationDetail.show',
