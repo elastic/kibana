@@ -13,6 +13,7 @@ import { errors } from '@elastic/elasticsearch';
 import { esql } from '@elastic/esql';
 import type { StorageClientBulkRequest, StorageTransportOptions } from '../..';
 import { StorageIndexAdapter, type StorageSettings } from '../..';
+import { MAX_RETRIES } from './retry_transient_es_errors';
 
 const createLoggerMock = (): jest.Mocked<Logger> => {
   const logger = {
@@ -754,5 +755,109 @@ describe('StorageIndexAdapter - write index resolution', () => {
     await adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } });
 
     expect(esClient.indices.create).toHaveBeenCalledWith({ index: 'test_index-000001' });
+  });
+});
+
+describe('StorageIndexAdapter - transient error retries', () => {
+  let esClient: jest.Mocked<ElasticsearchClient>;
+  let loggerMock: jest.Mocked<Logger>;
+
+  const retryableError = () =>
+    new errors.ResponseError({
+      statusCode: 503,
+      body: { error: { type: 'no_shard_available_action_exception' } },
+    } as unknown as TransportResult<unknown, unknown>);
+
+  const writeIndexState = {
+    'test_index-000001': {
+      mappings: { _meta: { version: 'current' } },
+      aliases: { test_index: { is_write_index: true } },
+    },
+  };
+
+  beforeEach(() => {
+    esClient = createMockEsClient();
+    loggerMock = createLoggerMock();
+  });
+
+  it('retries the write index lookup when Elasticsearch is not ready yet', async () => {
+    (esClient.indices.get as jest.Mock)
+      .mockRejectedValueOnce(retryableError())
+      .mockResolvedValue(writeIndexState);
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(
+      adapter.getClient().search({ track_total_hits: false, size: 1, query: { match_all: {} } })
+    ).resolves.toBeDefined();
+
+    expect(esClient.indices.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries index creation when the cluster is busy', async () => {
+    (esClient.indices.get as jest.Mock).mockResolvedValue({});
+    (esClient.indices.create as jest.Mock)
+      .mockRejectedValueOnce(
+        new errors.ResponseError({
+          statusCode: 503,
+          body: { error: { type: 'process_cluster_event_timeout_exception' } },
+        } as unknown as TransportResult<unknown, unknown>)
+      )
+      .mockResolvedValue({});
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(
+      adapter.getClient().index({ id: 'doc1', document: { foo: 'bar' } })
+    ).resolves.toBeDefined();
+
+    expect(esClient.indices.create).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives up after the retry budget and rethrows the Elasticsearch error', async () => {
+    jest.useFakeTimers();
+    (esClient.indices.get as jest.Mock).mockRejectedValue(retryableError());
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    const search = adapter
+      .getClient()
+      .search({ track_total_hits: false, size: 1, query: { match_all: {} } });
+    // Attach the rejection handler before the backoff runs out, so the rejection is never floating.
+    const assertion = expect(search).rejects.toThrow('no_shard_available_action_exception');
+    await jest.advanceTimersByTimeAsync(60_000);
+    await assertion;
+
+    expect(esClient.indices.get).toHaveBeenCalledTimes(MAX_RETRIES + 1);
+    jest.useRealTimers();
+  });
+
+  it('does not retry a non-transient error', async () => {
+    (esClient.indices.get as jest.Mock).mockRejectedValue(
+      new errors.ResponseError({
+        statusCode: 400,
+        body: { error: { type: 'illegal_argument_exception' } },
+      } as unknown as TransportResult<unknown, unknown>)
+    );
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(
+      adapter.getClient().search({ track_total_hits: false, size: 1, query: { match_all: {} } })
+    ).rejects.toThrow('illegal_argument_exception');
+
+    expect(esClient.indices.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry document reads and writes', async () => {
+    (esClient.search as jest.Mock).mockRejectedValue(retryableError());
+
+    const adapter = new StorageIndexAdapter(esClient, loggerMock, storageSettings);
+
+    await expect(
+      adapter.getClient().search({ track_total_hits: false, size: 1, query: { match_all: {} } })
+    ).rejects.toThrow('no_shard_available_action_exception');
+
+    expect(esClient.search).toHaveBeenCalledTimes(1);
   });
 });
