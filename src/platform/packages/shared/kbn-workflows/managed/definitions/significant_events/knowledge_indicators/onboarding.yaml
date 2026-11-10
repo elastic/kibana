@@ -35,6 +35,14 @@ triggers:
         type: string
         required: true
         description: "Slug of the target source. Together with the source id it keys concurrency."
+      - name: sourceType
+        type: string
+        required: true
+        description: "Type of the target source."
+      - name: metricsEntitiesEnabled
+        type: boolean
+        default: false
+        description: "Run deterministic entity extraction for a metrics source."
       - name: skipFeatures
         type: boolean
         default: false
@@ -141,6 +149,7 @@ steps:
           queriesConnectorUsed: ''
           persistedQueries: []
           queriesTokensUsed: { prompt: 0, completion: 0, total: 0 }
+          metricsEntitiesCount: 0
           keepAliveRefreshed: 0
 
   # -----------------------------------------------------------------------
@@ -158,107 +167,116 @@ steps:
       queriesTokensUsed: {}
       featuresConnectorUsed: ""
       queriesConnectorUsed: ""
+      metricsEntitiesCount: 0
       cycleStartedAt: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000Z" }}'
 
-  # -----------------------------------------------------------------------
-  # Step 1: Recency check — auto-skip features if recently identified.
-  #         When skipQueries=true we always want to identify features,
-  #         so the recency optimization is skipped in that case.
-  # -----------------------------------------------------------------------
-  - name: check_should_identify
+  # Metrics sources take the deterministic path; all other sources keep the existing path.
+  - name: run_source_onboarding
     type: if
-    condition: "${{ variables.skipFeatures == false and inputs.skipQueries == false }}"
+    condition: '${{ inputs.sourceType == "metrics" and inputs.metricsEntitiesEnabled == true }}'
     steps:
-      - name: should_identify
+      - name: set_metrics_skips
+        type: data.set
+        with:
+          skipFeatures: true
+          skipQueries: true
+      - name: run_metrics_entities
         type: kibana.request
         with:
-          method: GET
-          path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_should_identify?thresholdHours={{ inputs.featuresRecencyThresholdHours }}"
+          method: POST
+          path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_identify/metrics_entities"
           headers:
             x-elastic-internal-origin: "kibana"
             x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
-      - name: skip_if_recent
+      - name: save_metrics_entities_output
+        type: data.set
+        with:
+          metricsEntitiesCount: "${{ steps.run_metrics_entities.output.metricsEntitiesCount }}"
+    else:
+      - name: check_should_identify
         type: if
-        condition: "${{ steps.should_identify.output.shouldIdentify == false }}"
+        condition: "${{ variables.skipFeatures == false and inputs.skipQueries == false }}"
         steps:
-          - name: set_skip_features
+          - name: should_identify
+            type: kibana.request
+            with:
+              method: GET
+              path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/features/_should_identify?thresholdHours={{ inputs.featuresRecencyThresholdHours }}"
+              headers:
+                x-elastic-internal-origin: "kibana"
+                x-nightshift-source-revision: "{{ inputs.sourceRevision }}"
+          - name: skip_if_recent
+            type: if
+            condition: "${{ steps.should_identify.output.shouldIdentify == false }}"
+            steps:
+              - name: set_skip_features
+                type: data.set
+                with:
+                  skipFeatures: true
+
+      - name: run_features
+        type: if
+        condition: "${{ variables.skipFeatures == false }}"
+        steps:
+          - name: identify_features
+            type: workflow.execute
+            with:
+              workflow-id: "system-streams-ki-features-identification"
+              inputs:
+                sourceId: "${{ inputs.sourceId }}"
+                sourceSlug: "${{ inputs.sourceSlug }}"
+                sourceRevision: "${{ inputs.sourceRevision }}"
+                connectorId: "${{ inputs.featuresConnectorId }}"
+                start: "${{ inputs.featuresStart }}"
+                end: "${{ inputs.featuresEnd }}"
+                maxIterations: "${{ inputs.featuresMaxIterations }}"
+                convergencePatience: "${{ inputs.featuresConvergencePatience }}"
+                sampleSize: "${{ inputs.featuresSampleSize }}"
+                featureTtlDays: "${{ inputs.featuresTtlDays }}"
+                entityFilteredRatio: "${{ inputs.featuresEntityFilteredRatio }}"
+                diverseRatio: "${{ inputs.featuresDiverseRatio }}"
+                maxExcludedFeaturesInPrompt: "${{ inputs.featuresMaxExcludedInPrompt }}"
+                maxEntityFilters: "${{ inputs.featuresMaxEntityFilters }}"
+                samplingTimeoutMs: "${{ inputs.featuresSamplingTimeoutMs }}"
+                computedFeaturesTimeoutMs: "${{ inputs.featuresComputedTimeoutMs }}"
+                maxPreviouslyIdentifiedFeatures: "${{ inputs.featuresMaxPreviouslyIdentified }}"
+          - name: save_features_output
             type: data.set
             with:
-              skipFeatures: true
+              discoveredFeatures: "${{ steps.identify_features.output.discoveredFeatures }}"
+              featuresTokensUsed: "${{ steps.identify_features.output.tokensUsed }}"
+              featuresConnectorUsed: "${{ steps.identify_features.output.connectorId }}"
 
-  # -----------------------------------------------------------------------
-  # Step 2: Features identification (unless skipped or recent)
-  # -----------------------------------------------------------------------
-  - name: run_features
-    type: if
-    condition: "${{ variables.skipFeatures == false }}"
-    steps:
-      - name: identify_features
-        type: workflow.execute
-        with:
-          workflow-id: "system-streams-ki-features-identification"
-          inputs:
-            sourceId: "${{ inputs.sourceId }}"
-            sourceSlug: "${{ inputs.sourceSlug }}"
-            sourceRevision: "${{ inputs.sourceRevision }}"
-            connectorId: "${{ inputs.featuresConnectorId }}"
-            start: "${{ inputs.featuresStart }}"
-            end: "${{ inputs.featuresEnd }}"
-            maxIterations: "${{ inputs.featuresMaxIterations }}"
-            convergencePatience: "${{ inputs.featuresConvergencePatience }}"
-            sampleSize: "${{ inputs.featuresSampleSize }}"
-            featureTtlDays: "${{ inputs.featuresTtlDays }}"
-            entityFilteredRatio: "${{ inputs.featuresEntityFilteredRatio }}"
-            diverseRatio: "${{ inputs.featuresDiverseRatio }}"
-            maxExcludedFeaturesInPrompt: "${{ inputs.featuresMaxExcludedInPrompt }}"
-            maxEntityFilters: "${{ inputs.featuresMaxEntityFilters }}"
-            samplingTimeoutMs: "${{ inputs.featuresSamplingTimeoutMs }}"
-            computedFeaturesTimeoutMs: "${{ inputs.featuresComputedTimeoutMs }}"
-            maxPreviouslyIdentifiedFeatures: "${{ inputs.featuresMaxPreviouslyIdentified }}"
-      - name: save_features_output
-        type: data.set
-        with:
-          discoveredFeatures: "${{ steps.identify_features.output.discoveredFeatures }}"
-          featuresTokensUsed: "${{ steps.identify_features.output.tokensUsed }}"
-          featuresConnectorUsed: "${{ steps.identify_features.output.connectorId }}"
+      - name: check_should_generate_queries
+        type: if
+        condition: "${{ inputs.skipFeatures == false and variables.discoveredFeatures.size == 0 }}"
+        steps:
+          - name: set_skip_queries
+            type: data.set
+            with:
+              skipQueries: true
 
-  # -----------------------------------------------------------------------
-  # Step 3: Skip queries when no features were discovered this cycle.
-  #         inputs.skipFeatures == true (queries-only run) bypasses this gate.
-  # -----------------------------------------------------------------------
-  - name: check_should_generate_queries
-    type: if
-    condition: "${{ inputs.skipFeatures == false and variables.discoveredFeatures.size == 0 }}"
-    steps:
-      - name: set_skip_queries
-        type: data.set
-        with:
-          skipQueries: true
-
-  # -----------------------------------------------------------------------
-  # Step 4: Queries generation (unless skipped)
-  # -----------------------------------------------------------------------
-  - name: run_queries
-    type: if
-    condition: "${{ variables.skipQueries == false }}"
-    steps:
-      - name: generate_queries
-        type: workflow.execute
-        with:
-          workflow-id: "system-streams-ki-queries-generation"
-          inputs:
-            sourceId: "${{ inputs.sourceId }}"
-            sourceSlug: "${{ inputs.sourceSlug }}"
-            sourceRevision: "${{ inputs.sourceRevision }}"
-            connectorId: "${{ inputs.queriesConnectorId }}"
-            maxExistingQueriesForContext: "${{ inputs.queriesMaxExistingForContext }}"
-      - name: save_queries_output
-        type: data.set
-        with:
-          generatedQueries: "${{ steps.generate_queries.output.queries }}"
-          persistedQueries: "${{ steps.generate_queries.output.persistedQueries }}"
-          queriesTokensUsed: "${{ steps.generate_queries.output.tokensUsed }}"
-          queriesConnectorUsed: "${{ steps.generate_queries.output.connectorId }}"
+      - name: run_queries
+        type: if
+        condition: "${{ variables.skipQueries == false }}"
+        steps:
+          - name: generate_queries
+            type: workflow.execute
+            with:
+              workflow-id: "system-streams-ki-queries-generation"
+              inputs:
+                sourceId: "${{ inputs.sourceId }}"
+                sourceSlug: "${{ inputs.sourceSlug }}"
+                sourceRevision: "${{ inputs.sourceRevision }}"
+                connectorId: "${{ inputs.queriesConnectorId }}"
+                maxExistingQueriesForContext: "${{ inputs.queriesMaxExistingForContext }}"
+          - name: save_queries_output
+            type: data.set
+            with:
+              generatedQueries: "${{ steps.generate_queries.output.queries }}"
+              persistedQueries: "${{ steps.generate_queries.output.persistedQueries }}"
+              queriesTokensUsed: "${{ steps.generate_queries.output.tokensUsed }}"
+              queriesConnectorUsed: "${{ steps.generate_queries.output.connectorId }}"
 
   # -----------------------------------------------------------------------
   # Step 5: Keep-alive — re-stamp persistent KIs (durable ones, plus excluded
@@ -291,4 +309,5 @@ steps:
       queriesConnectorUsed: "${{ variables.queriesConnectorUsed }}"
       persistedQueries: "${{ variables.persistedQueries }}"
       queriesTokensUsed: "${{ variables.queriesTokensUsed }}"
+      metricsEntitiesCount: "${{ variables.metricsEntitiesCount }}"
       keepAliveRefreshed: "${{ steps.keep_alive_persistent.output.refreshed }}"

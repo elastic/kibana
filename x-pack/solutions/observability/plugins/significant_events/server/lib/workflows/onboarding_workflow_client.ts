@@ -6,7 +6,7 @@
  */
 
 import { setTimeout as delay } from 'timers/promises';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { FeatureFlagsStart, KibanaRequest } from '@kbn/core/server';
 import { NonTerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
@@ -26,6 +26,7 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
+import { NIGHTSHIFT_METRICS_ENTITIES_FLAG, type SourceType } from '@kbn/nightshift-shared';
 import { StatusError } from '../errors/status_error';
 import { isStartedBefore, WorkflowExecutionService } from './workflow_execution_service';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
@@ -76,6 +77,8 @@ interface OnboardingWorkflowInputPayload {
   sourceId: string;
   sourceSlug: string;
   sourceRevision: string;
+  sourceType: SourceType;
+  metricsEntitiesEnabled: boolean;
   rootTriggeredBy?: 'scheduled';
   skipFeatures: boolean;
   skipQueries: boolean;
@@ -125,16 +128,22 @@ const toWorkflowInputPayload = ({
   inputs,
   sourceSlug,
   sourceRevision,
+  sourceType,
+  metricsEntitiesEnabled,
 }: {
   inputs: SignificantEventsKIsOnboardingInputs;
   sourceSlug: string;
   sourceRevision: string;
+  sourceType: SourceType;
+  metricsEntitiesEnabled: boolean;
 }): OnboardingWorkflowInputPayload => {
   const { sourceId, features, queries } = inputs;
   return {
     sourceId,
     sourceSlug,
     sourceRevision,
+    sourceType,
+    metricsEntitiesEnabled,
     rootTriggeredBy: inputs.rootTriggeredBy,
     skipFeatures: features.skip,
     skipQueries: queries.skip,
@@ -273,15 +282,19 @@ export class SignificantEventsKIsOnboardingClient {
   }>;
   private readonly telemetry: EbtTelemetryClient;
   private readonly getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>;
+  private readonly featureFlagsReady: Promise<void>;
+  private metricsEntitiesEnabled = false;
 
   constructor({
     managementApi,
     telemetry,
     getSourcesClient,
+    featureFlags,
   }: {
     managementApi: WorkflowsServerPluginSetup['management'];
     telemetry: EbtTelemetryClient;
     getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>;
+    featureFlags?: FeatureFlagsStart | Promise<FeatureFlagsStart>;
   }) {
     this.workflowExecutionService = new WorkflowExecutionService({
       managementApi,
@@ -307,6 +320,13 @@ export class SignificantEventsKIsOnboardingClient {
     }));
     this.telemetry = telemetry;
     this.getSourcesClient = getSourcesClient;
+    this.featureFlagsReady = featureFlags
+      ? Promise.resolve(featureFlags).then((service) => {
+          service.getBooleanValue$(NIGHTSHIFT_METRICS_ENTITIES_FLAG, false).subscribe((enabled) => {
+            this.metricsEntitiesEnabled = enabled;
+          });
+        })
+      : Promise.resolve();
   }
 
   /**
@@ -328,12 +348,15 @@ export class SignificantEventsKIsOnboardingClient {
       throw new StatusError('Source query changed before onboarding could be scheduled', 409);
     }
     const sourceSlug = source.slug;
+    await this.featureFlagsReady;
     const executionId = await this.workflowExecutionService.execute({
       executionSpaceId: request.spaceId,
       inputs: toWorkflowInputPayload({
         inputs,
         sourceSlug,
         sourceRevision: source.esql_updated_at,
+        sourceType: source.type,
+        metricsEntitiesEnabled: this.metricsEntitiesEnabled,
       }),
       request,
     });

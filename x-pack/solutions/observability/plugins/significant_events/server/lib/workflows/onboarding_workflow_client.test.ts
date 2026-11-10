@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import { of } from 'rxjs';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -45,17 +46,33 @@ const slugOf = (sourceId: string): string => `${sourceId}-slug`;
 const onboardingKeyOf = (sourceId: string): string =>
   `nightshift-source-onboarding-${slugOf(sourceId)}:${sourceId}`;
 
-const createClient = (overrides: Record<string, jest.Mock> = {}) => {
+const createClient = (
+  overrides: Record<string, jest.Mock> = {},
+  {
+    metricsEntitiesEnabled = false,
+    sourceType = 'logs',
+  }: { metricsEntitiesEnabled?: boolean; sourceType?: 'logs' | 'metrics' } = {}
+) => {
   const managementApi = createMockManagementApi(overrides);
   const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
   const sourcesClientGet = jest.fn(async (sourceId: string) => ({
-    source: { id: sourceId, slug: slugOf(sourceId), enabled: true, esql_updated_at: 'revision-2' },
+    source: {
+      id: sourceId,
+      slug: slugOf(sourceId),
+      enabled: true,
+      esql_updated_at: 'revision-2',
+      type: sourceType,
+    },
   }));
   const getSourcesClient = jest.fn().mockResolvedValue({ get: sourcesClientGet });
+  const featureFlags = {
+    getBooleanValue$: jest.fn().mockReturnValue(of(metricsEntitiesEnabled)),
+  } as never;
   const client = new SignificantEventsKIsOnboardingClient({
     managementApi: managementApi as never,
     telemetry,
     getSourcesClient,
+    featureFlags,
   });
   return { client, managementApi, telemetry };
 };
@@ -188,6 +205,35 @@ describe('SignificantEventsKIsOnboardingClient', () => {
           sourceId: 'logs.nginx',
           sourceSlug: slugOf('logs.nginx'),
           sourceRevision: 'revision-2',
+          sourceType: 'logs',
+          metricsEntitiesEnabled: false,
+        }),
+        request
+      );
+    });
+
+    it('passes the source type and metrics entity flag to the workflow', async () => {
+      const { client, managementApi } = createClient(
+        {},
+        { metricsEntitiesEnabled: true, sourceType: 'metrics' }
+      );
+      const request = httpServerMock.createKibanaRequest();
+
+      await client.run({
+        inputs: {
+          sourceId: 'metrics.kubernetes',
+          features: { skip: false, start: 1000, end: 2000 },
+          queries: { skip: false },
+        },
+        request,
+      });
+
+      expect(managementApi.runWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID }),
+        'default',
+        expect.objectContaining({
+          sourceType: 'metrics',
+          metricsEntitiesEnabled: true,
         }),
         request
       );
