@@ -10,7 +10,7 @@ import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 
 const CANVAS_ARIA_LABEL = 'Attachment preview';
 const RENDER_ERROR_TITLE = "Couldn't render this attachment";
-const UNSAVED_CHANGES_BADGE = 'Unsaved changes';
+const UNSAVED_CHANGES_BADGE = 'Unsaved';
 
 /** Drives the Agent Builder chat and the attachment canvas that alerting attachments render into. */
 export class AgentChatPage {
@@ -21,9 +21,9 @@ export class AgentChatPage {
   public readonly responseMessage: Locator;
   /** The Preview button on the inline attachment card in the agent's response. */
   public readonly previewButton: Locator;
-  /** The icon-only Unsaved changes badge in the inline attachment card's header. */
+  /** The icon-only Unsaved badge in the inline attachment card's header. */
   public readonly inlineUnsavedChangesBadge: Locator;
-  /** The Unsaved changes badge in the canvas header, next to the Update action. */
+  /** The Unsaved badge in the canvas header, next to the Update action. */
   public readonly canvasUnsavedChangesBadge: Locator;
 
   constructor(private readonly page: ScoutPage) {

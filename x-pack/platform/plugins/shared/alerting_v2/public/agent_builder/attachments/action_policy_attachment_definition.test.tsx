@@ -78,7 +78,7 @@ describe('createActionPolicyAttachmentDefinition', () => {
       };
 
       expect(definition.getHeader!({ attachment }).badges).toEqual([
-        { label: 'Unsaved changes', color: 'warning', iconType: 'pencil' },
+        { label: 'Unsaved', color: 'primary', iconType: 'save' },
       ]);
     });
   });

@@ -15,10 +15,10 @@ import { i18n } from '@kbn/i18n';
 
 export const UNSAVED_CHANGES_BADGE: HeaderBadge = {
   label: i18n.translate('xpack.alertingV2.attachments.unsavedChangesBadge', {
-    defaultMessage: 'Unsaved changes',
+    defaultMessage: 'Unsaved',
   }),
-  color: 'warning',
-  iconType: 'pencil',
+  color: 'primary',
+  iconType: 'save',
 };
 
 // Agent builder does not pass the new origin_snapshot_at back into rendered attachments after
