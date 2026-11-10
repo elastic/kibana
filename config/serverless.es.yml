@@ -113,9 +113,6 @@ xpack.searchQueryRules.enabled: true
 ## ES|QL Data Federation in stack management
 xpack.dataFederation.enabled: true
 
-## Search Connectors in stack management
-xpack.contentConnectors.ui.enabled: false
-
 # Elastic Managed LLMs
 xpack.actions.preconfigured:
   Anthropic-Claude-Sonnet-3-7:
