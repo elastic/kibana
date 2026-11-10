@@ -122,6 +122,37 @@ describe('SparkPlotItem', () => {
     ]);
   });
 
+  it('trims the comparison partial tail even when the current tail is null', () => {
+    // The current period is idle in its final bucket (null tail, kept so the
+    // dotted edge still reads "no data since"), but the comparison period has a
+    // non-null, partially covered last bucket. Each series is evaluated on its
+    // own, so the comparison tail is trimmed and no longer drops to the edge.
+    const series = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: null },
+    ];
+    renderSparkPlotItem({
+      type: 'bar',
+      series,
+      comparisonSeries: [
+        { x: 10, y: 1 },
+        { x: 20, y: 2 },
+        { x: 30, y: 3 },
+      ],
+      comparisonSeriesColor: '#111',
+      end: 35,
+    });
+
+    // Current series keeps its null tail (reference preserved); comparison loses
+    // its partial last bucket.
+    expect(seriesData.get('barSeries')).toBe(series);
+    expect(seriesData.get('comparisonBarSeries')).toEqual([
+      { x: 10, y: 1 },
+      { x: 20, y: 2 },
+    ]);
+  });
+
   it('keeps the untrimmed series when only the last bucket has data', () => {
     const series = [
       { x: 10, y: null },

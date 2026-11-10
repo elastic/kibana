@@ -113,27 +113,29 @@ export function SparkPlotItem({
   const defaultChartThemes = useChartThemes();
   const comparisonChartTheme = getComparisonChartTheme();
 
-  // Decide the cut once from the main series and apply it to both series, so the
-  // main and comparison lines always end on the same bucket. If trimming would
-  // leave no valid points (a service reporting only in its latest, partial
-  // bucket) keep the untrimmed series so the row still shows a chart. This must
-  // sit above the isLoading early return to satisfy the rules of hooks.
+  // Trim the partial trailing bucket from each series independently, using the
+  // same range end for both (the comparison x values are already shifted onto
+  // the current period by the detailed-statistics route). Evaluating them apart
+  // matters when only one series has a non-null partial last bucket: an idle
+  // current period with a null tail must not stop the comparison tail from being
+  // trimmed, and vice versa. If trimming a series would leave no valid points (a
+  // service reporting only in its latest, partial bucket) keep it untrimmed so
+  // the row still shows a chart. This must sit above the isLoading early return
+  // to satisfy the rules of hooks.
   const { trimmedSeries, trimmedComparisonSeries } = useMemo(() => {
-    const untrimmed = { trimmedSeries: series, trimmedComparisonSeries: comparisonSeries };
-    if (end === undefined || !series) {
-      return untrimmed;
-    }
-    const trimmed = trimPartialTrailingBucket(series, end);
-    const didTrim = trimmed.length < series.length;
-    if (!didTrim || !hasValidTimeseries(trimmed)) {
-      return untrimmed;
-    }
-    // comparisonSeries x values are already shifted onto the current period
-    // (detailed-statistics route), so dropping its last point applies the same
-    // cut as the main series.
+    const trimOne = (input?: Coordinate[] | null) => {
+      if (end === undefined || !input) {
+        return input;
+      }
+      const trimmed = trimPartialTrailingBucket(input, end);
+      if (trimmed.length === input.length || !hasValidTimeseries(trimmed)) {
+        return input;
+      }
+      return trimmed;
+    };
     return {
-      trimmedSeries: trimmed,
-      trimmedComparisonSeries: comparisonSeries?.slice(0, -1),
+      trimmedSeries: trimOne(series),
+      trimmedComparisonSeries: trimOne(comparisonSeries),
     };
   }, [series, comparisonSeries, end]);
 
