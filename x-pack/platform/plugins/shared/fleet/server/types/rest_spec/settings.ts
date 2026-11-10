@@ -217,8 +217,12 @@ export const SettingsSchemaV9 = SettingsSchemaV8.extends({
   otlp_output_requirements_met: schema.maybe(schema.boolean()),
 });
 
+export const SettingsSchemaV10 = SettingsSchemaV9.extends({
+  response_actions_export_secret_storage_requirements_met: schema.maybe(schema.boolean()),
+});
+
 export const SettingsResponseSchema = schema.object({
-  item: SettingsSchemaV9,
+  item: SettingsSchemaV10,
 });
 
 export const PutSpaceSettingsRequestSchema = {

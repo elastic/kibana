@@ -102,3 +102,11 @@ For integration secrets, when performing CRUD on a package policy, we first chec
 If secret storage is not enabled, we check all fleet server versions, if they meet the minimum spec, then we enable secret storage on the global settings saved object and the check is never performed again. 
 
 For output secrets, we do not perform this check as outputs offer a plain text alternative for all secret fields. Instead we warn the user about the version requirements and let them decide. 
+
+### Using Fleet secrets from other plugins
+
+Other plugins use `FleetStartContract.secretsService`. Fleet supplies its internal Elasticsearch and saved objects clients, so callers pass none:
+
+- `createSecrets(values)` creates one secret per value and returns `{ id }` in input order.
+- `deleteSecrets(ids)` deletes secrets by id; unknown ids are ignored.
+- `isSecretStorageEnabledForFeature({ featureName, minimumFleetServerVersion, settingKey })` runs the Fleet Server version check described above and latches `settingKey` in the global settings once it passes. A plugin that needs its own minimum version adds its own key to `FleetServerRequirementSettingsKey`, `BaseSettings`, the settings saved object mappings (with a new model version) and `mapSettingsSO`.

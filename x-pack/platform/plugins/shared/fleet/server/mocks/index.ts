@@ -49,6 +49,7 @@ import type { FleetRequestHandlerContext } from '../types';
 import { packageServiceMock } from '../services/epm/package_service.mock';
 import type { UninstallTokenServiceInterface } from '../services/security/uninstall_token_service';
 import type { MessageSigningServiceInterface } from '../services/security';
+import type { SecretsServiceInterface } from '../services/secrets/secrets_service';
 
 import { getPackageSpecTagId } from '../services/epm/kibana/assets/tag_assets';
 
@@ -401,6 +402,16 @@ export function createUninstallTokenServiceMock(): DeeplyMockedKeys<UninstallTok
   };
 }
 
+export function createSecretsServiceMock(): jest.Mocked<SecretsServiceInterface> {
+  return {
+    createSecrets: jest.fn(async (values: string[]) =>
+      values.map((_value, index) => ({ id: `secret-${index}` }))
+    ),
+    deleteSecrets: jest.fn().mockResolvedValue(undefined),
+    isSecretStorageEnabledForFeature: jest.fn().mockResolvedValue(true),
+  };
+}
+
 export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContract> => {
   const fleetAuthzMock = createFleetAuthzMock();
   const fleetArtifactsClient = createArtifactsClientMock();
@@ -428,6 +439,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     messageSigningService: createMessageSigningServiceMock(),
     uninstallTokenService: createUninstallTokenServiceMock(),
     createFleetActionsClient: jest.fn((_) => fleetActionsClient),
+    secretsService: createSecretsServiceMock(),
     getPackageSpecTagId: jest.fn(getPackageSpecTagId),
     createOutputClient: jest.fn(async (_) => createOutputClientMock()),
     runWithCache: (async (cb: any) => await cb()) as any,
