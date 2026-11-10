@@ -61,16 +61,18 @@ const evaluate = (
     transcript = TRANSCRIPT,
     report = REPORT,
     extraSteps = [],
+    closingReasoning,
   }: {
     cause?: string;
     transcript?: string | null;
     report?: string;
     extraSteps?: EvidenceRound['steps'];
+    closingReasoning?: string;
   } = {}
 ) =>
   alertOutcomeRcaReportingGapJudge.evaluate({
     round: roundFor(report, transcript, extraSteps),
-    referenceData: { alert_outcome: cause },
+    referenceData: { alert_outcome: cause, closing_reasoning: closingReasoning },
     inferenceClient,
     log: loggingSystemMock.createLogger(),
   });
@@ -103,6 +105,19 @@ describe('nightshift_alert_outcome_rca_reporting_gap', () => {
     const scoringRequest = messages[3].content;
     expect(scoringRequest).toContain(CAUSE);
     expect(scoringRequest).toContain(REPORT);
+  });
+
+  it("ends the transcript with the agent's closing notes, before the scoring request", async () => {
+    const { chatComplete, inferenceClient } = createInferenceClient(judgeOutput());
+
+    await evaluate(inferenceClient, {
+      closingReasoning: 'The leaked connections exhaust the pool.',
+    });
+
+    const { messages } = chatComplete.mock.calls[0][0];
+    expect(messages.slice(-2, -1)).toEqual([
+      { role: 'assistant', content: 'The leaked connections exhaust the pool.' },
+    ]);
   });
 
   describe.each(

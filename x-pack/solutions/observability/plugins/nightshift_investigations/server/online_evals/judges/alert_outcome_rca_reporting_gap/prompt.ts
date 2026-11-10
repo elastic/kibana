@@ -91,7 +91,7 @@ export const buildScoringRequest = ({
   [
     'The conversation above is the investigation transcript to evaluate. It does not include the final report.',
     omittedToolCalls > 0
-      ? `${omittedToolCalls} later tool calls were left out to fit your context.`
+      ? `${omittedToolCalls} tool calls from the middle of the investigation were left out to fit your context.`
       : undefined,
     `Confirmed root cause (ground truth):\n${confirmedRootCause}`,
     `Final RCA report:\n${investigationReport}`,

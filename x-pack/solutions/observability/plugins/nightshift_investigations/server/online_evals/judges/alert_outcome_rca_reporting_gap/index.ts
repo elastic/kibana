@@ -7,10 +7,15 @@
 
 import { MessageRole } from '@kbn/inference-common';
 import type { EvaluatorResult, RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
-import type { AlertOutcomeReferenceData } from '../alert_outcome_shared';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_JUDGE_INPUT_CHARS, alertOutcomeReferenceDataSchema } from '../alert_outcome_shared';
 import { isEvidenceToolCall } from '../../../investigation_round';
-import { renderTraceMessages, roundEvidenceSchema, truncate } from '../render_round';
+import {
+  MAX_TOOL_FIELD_CHARS,
+  renderTraceMessages,
+  roundEvidenceSchema,
+  truncate,
+} from '../render_round';
 import { capExplanation, gradeToScore, runConversationJudge } from '../run_judge';
 import type { AlertOutcomeRcaReportingGapOutput } from './prompt';
 import {
@@ -19,6 +24,16 @@ import {
   alertOutcomeRcaReportingGapTool,
   buildScoringRequest,
 } from './prompt';
+
+// Unbounded like `alert_outcome`; `evaluate` truncates it.
+const referenceDataSchema = lazySchema(() =>
+  alertOutcomeReferenceDataSchema.extend({
+    /** The agent's notes after its last tool call, where it concludes before writing the report. */
+    closing_reasoning: z.string().optional(),
+  })
+);
+
+type ReferenceData = z.infer<typeof referenceDataSchema>;
 
 /** The transcript grade from which the cause counts as found during the investigation. */
 export const TRANSCRIPT_PRESENT_FLOOR = 2;
@@ -60,7 +75,7 @@ const toScores = (output: AlertOutcomeRcaReportingGapOutput): EvaluatorResult['s
   ];
 };
 
-const definition: RegisteredEvaluatorDefinition<AlertOutcomeReferenceData> = {
+const definition: RegisteredEvaluatorDefinition<ReferenceData> = {
   name: 'nightshift_alert_outcome_rca_reporting_gap',
   version: '1.0.0',
   kind: 'llm',
@@ -68,7 +83,7 @@ const definition: RegisteredEvaluatorDefinition<AlertOutcomeReferenceData> = {
   description:
     "Reference-based: whether an investigation's first-round report stated the confirmed cause as strongly as its tool calls showed it. alert_outcome_rca_no_reporting_gap is 0 when the transcript points at the confirmed cause (2+ of 3) and the report shows only the symptom or nothing (1 or less).",
   evidenceSchema: roundEvidenceSchema,
-  referenceDataSchema: alertOutcomeReferenceDataSchema,
+  referenceDataSchema,
   async evaluate({ round, referenceData, inferenceClient }) {
     if (!inferenceClient) {
       throw new Error(
@@ -97,6 +112,13 @@ const definition: RegisteredEvaluatorDefinition<AlertOutcomeReferenceData> = {
       { ...round, steps: evidenceSteps },
       { includeFinalAnswer: false }
     );
+    const closingReasoning = referenceData?.closing_reasoning?.trim();
+    if (closingReasoning) {
+      messages.push({
+        role: MessageRole.Assistant,
+        content: truncate(closingReasoning, MAX_TOOL_FIELD_CHARS),
+      });
+    }
     const output = await runConversationJudge({
       inferenceClient,
       system: ALERT_OUTCOME_RCA_REPORTING_GAP_SYSTEM_PROMPT,
