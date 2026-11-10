@@ -137,7 +137,9 @@ describe('by-value panel type registry', () => {
         existingPanel: {
           id: 'panel-1',
           type: 'vega',
-          config: {},
+          config: {
+            spec: JSON.stringify({ data: { url: { '%type%': 'esql', query: 'FROM logs' } } }),
+          },
           grid: { x: 0, y: 0, w: 24, h: 15 },
         },
       })

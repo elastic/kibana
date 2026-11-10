@@ -9,6 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
+import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import {
   createTrajectoryEvaluator,
   getStringMeta,
@@ -44,6 +45,10 @@ import {
   enhanceNoRegressionEvaluator,
 } from './evaluators/enhance_evaluators';
 import { dashboardLayoutEditEvaluator } from './evaluators/layout_edit';
+import { dashboardPanelEditsEvaluator } from './evaluators/panel_edits';
+import { dashboardReplaceConfirmationEvaluator } from './evaluators/replace_confirmation';
+import { createReplyEvaluator } from './evaluators/reply_judge';
+import { createUnavailableRequestsEvaluator } from './evaluators/unavailable_requests';
 import {
   combineTurnSteps,
   findAskUserQuestionPrompt,
@@ -115,8 +120,10 @@ const answerModeQuestion = (
   },
 });
 
+/** Whether the turn must write a dashboard: not when nothing can be built, nor before the user confirms a replacement. */
 const expectsDashboard = (expected: DashboardDatasetExample['output']): boolean =>
-  expected?.route === 'dashboard' || expected?.enhance !== undefined;
+  (expected?.route === 'dashboard' && !expected.noDashboard && !expected.replaceConfirmation) ||
+  expected?.enhance !== undefined;
 
 export function createEvaluateDataset({
   agentBuilderClient,
@@ -163,7 +170,13 @@ export function createEvaluateDataset({
     const seededDashboard = input?.dashboard;
     const seededResults = input?.esqlResults;
     const screenContext = input?.screenContext;
+    const visualizations = input?.visualizations ?? [];
     const attachments = [
+      ...visualizations.map(({ id, data }) => ({
+        id,
+        type: VISUALIZATION_ATTACHMENT_TYPE,
+        data: { ...data },
+      })),
       ...(seededDashboard
         ? [{ id: SEEDED_DASHBOARD_ID, type: DASHBOARD_ATTACHMENT_TYPE, data: seededDashboard }]
         : []),
@@ -256,6 +269,10 @@ export function createEvaluateDataset({
     enhanceDefectResolutionEvaluator,
     enhanceNoRegressionEvaluator,
     dashboardLayoutEditEvaluator,
+    dashboardPanelEditsEvaluator,
+    dashboardReplaceConfirmationEvaluator,
+    createUnavailableRequestsEvaluator(esClient),
+    createReplyEvaluator(evaluators),
     positiveOnly(trajectoryEvaluator),
   ].map((evaluator) => withLowScoreLogging(evaluator, log));
 

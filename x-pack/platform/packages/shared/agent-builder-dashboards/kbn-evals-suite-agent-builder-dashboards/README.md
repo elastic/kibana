@@ -13,7 +13,7 @@ Chart presentation is checked on each panel's Lens Config API config, against th
 ## What it evaluates
 
 - **Dashboard Skill Routing** (`CODE`): the request reaches the skill its gold `route` names. `dashboard` loads the dashboards skill, `visualization` loads visualization creation without generating a dashboard, and `none` uses neither. Enhance examples also have to read `dashboards/enhance.md`; that path is taken from the same `read_file` / `filestore.read` steps.
-- **Dashboard Structure** (`CODE`): what the prompt pins down. That is a panel count range, an exact number of panels per kind (`{ metric: 6 }`), a section count, and sections matched by title terms and minimum size. Scored as the fraction of gold assertions that hold.
+- **Dashboard Structure** (`CODE`): what the prompt pins down. That is a panel count range, an exact number of panels per kind (`{ metric: 6 }`), a section count, and sections matched by title terms, minimum size, and the ES|QL their panels must run, and rows read top to bottom: each row's panels share a top and height directly below the previous row, optionally full width, and a row marked `atTop` is the top row of the dashboard (inside a section, the section must be at the top too). Scored as the fraction of gold assertions that hold.
 - **Dashboard Time Range** (`CODE`): the dashboard ends up with the gold `timeRange`. Creation prompts name no time window, so the gold is the data-aware default for the sample logs, `now-24h` to `now`. The open-ended creation example also sends a home page screen context with a deliberately improbable `now-37m` to `now-3m`, which must be ignored; a copy is labelled `copied-screen-time-range`. Scores 1 or 0.
 - **Dashboard Layout Rules** (`CODE`): panels stay inside the 48-column grid, no two panels overlap in a section, and no metric or gauge spans the full width.
 - **Dashboard Composition Order** (`CODE`): metric and gauge panels come before other charts, in the top level and in every section. Panels are read top to bottom, then left to right, so a metric to the right of a chart in the same row counts as after it.
@@ -29,7 +29,7 @@ Chart presentation is checked on each panel's Lens Config API config, against th
   - metrics color the value, never the background, and set a primary metric's `apply_color_to` only together with its `color`
 - **Dashboard Color & Format** (`CODE`), checks:
   - no legacy palettes (`eui_amsterdam`, `kibana_v7_legacy`, `elastic_brand_2023`)
-  - no static series or slice colors on charts that should use the default palette (reference lines and annotations may keep theirs)
+  - no static series or slice colors on charts that should use the default palette (reference lines and annotations may keep theirs, and so may a panel whose `panelEdits` gold asks for a color)
   - no percent format on a column the query already scales to 0–100 (`100 * …`), which Lens would show as `8.8k%`
 - **Dashboard Controls** (`CODE`): at most 5 filter controls and one time slider, none on id-like fields. Skipped when the dashboard has no controls.
 - **Dashboard Control Queries** (`CODE`): every stored control's values query (`FROM <index> | STATS BY <field>`) executes against the cluster. A control on a column the index does not have, such as a `DISSECT` output, fails with "Unknown column" and renders as a broken dropdown. Scored as the fraction of controls whose query executes, with the number of values each would offer in the metadata. Skipped when the dashboard has no controls.
@@ -37,10 +37,11 @@ Chart presentation is checked on each panel's Lens Config API config, against th
   - every stored control is on a mapped field, by exact name; the field list names the real `.keyword` siblings
   - every control the agent asked `generate_dashboard` for is on a mapped field, read from the `controls` in the tool params, since the server drops unmapped controls before they are stored
   - at least one control carries `user_requested` when the prompt asked for controls, and none does otherwise; the agent may add controls of its own next to the requested ones, but asking `generate_dashboard` for no control at all when the prompt asked for some fails
-  - a control exists on each field the prompt names (`mustInclude`)
-  - each filter the prompt asks for by name (`requestedFilters`) has a stored control on one of its mapped substitutes, or a reply sentence that names it alongside a control or filter (the stored controls already show it was not added), so a requested filter the agent never tried still counts
+  - a control exists on each field the prompt names (`mustInclude`), and none on a field it removes the control of (`mustExclude`)
+  - a range slider, not another control type, is on each field the prompt asks one for (`rangeSliders`)
+  - when the gold sets `timeSlider`, the dashboard keeps exactly one time slider (`true`) or none (`false`)
   - the reply repeats no raw control error text
-  - when more requested fields failed (each field counted once, however often it was retried) than were stored on a mapped substitute, the reply names at least that many of the failed fields alongside a control or filter (`status code` names `status_code`); a generic "some filters could not be added" does not count, and a failed control the agent replaced with a mapped one needs no mention
+  Whether the reply accounts for requested controls it could not add is judged by Dashboard Reply. On a seeded example the agent never wrote, it scores 0, since the seed has none of the requested controls. Here and in the other evaluators, a `generate_dashboard` call that left the dashboard as it was counts as no write.
 - **Dashboard Panel Config Reference** (`CODE`): for the ML panel types the prompt asks for (`panelConfigTypes`), the agent reads the type's config reference (`panel_configs/<type>.md`) with `read_file` before its first `generate_dashboard` call that writes a panel of that type, since those config schemas are not in the tool schema. A write that came first counts as a failure even if it later succeeds. Scored as the fraction of gold types that hold. Skipped on examples without `panelConfigTypes`.
 - **Enhance Mode Question** (`CODE`): a bare "enhance" request ends the opening turn with one `ask_user_question` offering an appearance option and a content option, before anything is written. A request that names the mode does not ask.
 - **Enhance Mode Compliance** (`CODE`), binary:
@@ -55,8 +56,16 @@ Chart presentation is checked on each panel's Lens Config API config, against th
   - in every container (the top level or a section) the gold does not list under `changes`, the seed panels keep their grids. At the top level only `x`, `w` and `h` are compared, because adding or removing a section shifts the outer `y`;
   - the top-level panels and sections that survive keep their relative order;
   - collapsed sections stay collapsed;
+  - the seed controls come back unchanged, unless the example also carries `controls` gold, which Control Sourcing scores instead;
   - each gold placement holds: the container, first in it, beside a panel (same row and height), below one, a width, or after and before another item in reading order. A placement names a seed id, or the first added panel of a kind or the first added section.
-- **Trajectory**: `load_skill` → `generate_dashboard`. Content-mode enhance also expects `get_index_mapping` before the write, because it may change queries. Appearance mode changes no query, so reading the attachment is enough and the mapping call is not expected. Discover results examples read the attachment instead of the mapping, in every run on both models, so the mapping call is not expected there. Skipped on routing examples.
+- **Dashboard Panel Edits** (`CODE`): a panel the prompt edits in place keeps its id and gets what was asked. It's gated on a gold `panelEdits` list, where each entry names a seed panel (or `{ added: kind }` for the first panel of that kind, in reading order, that the seed lacks) and describes it in the attachment's own shape: an embeddable `type` and a partial `config` (a Vega `spec` written as an object). These are subset-matched with the same rules as the visualization suite's Visualization Config vs Intent: only listed keys are checked, values compare strictly, arrays match in any order, and a `type` may list alternatives. Named checks cover what no exact value can: `color` (a static series color in a Lens data layer, or a Vega mark color: `color`, `fill` or `stroke` on a mark (unless its encoding sets the same channel, which wins), its encoding, or the `config` entry of a drawn mark type that sets no color of its own (`config.bar`, else `config.mark`), or a scale `scheme` or `range`, read from the HJSON spec. One within 20° of red or 25° of blue that is saturated and bright enough matches, so `#BD271E` counts as red while `#ffcccc` and `#330000` do not; CSS names of the hue and the Vega `reds` and `blues` schemes count too. Titles, gridlines, reference lines, annotations and other non-series colors do not), `bulletList` (two or more markdown items), `contentIncludes` (terms the markdown mentions, ignoring case) and `vegaMark` (a mark type the Vega spec draws in any view, such as `rect` for a heatmap). Scored as the fraction of edited panels that match, or 0 when the agent never wrote the dashboard. Dashboard Layout Edit still scores the rest of the layout on the same runs.
+- **Dashboard Replace Confirmation** (`CODE`): the agent cannot edit a panel that reads a data view or an Elasticsearch query rather than ES|QL, such as a data-view Lens chart or a Vega chart over Query DSL. Gated on a gold `replaceConfirmation` naming that panel. Scored as the fraction of these checks that hold: the panel keeps its type and every seed config value, and the dashboard was not written before the user answered. Whether the agent asked to replace the panel is judged by Dashboard Reply. Dashboard evaluators skip these examples, since the seed comes back unchanged.
+- **Dashboard Unavailable Requests** (`CODE`): a prompt that asks for something the data cannot back, such as an index that does not exist, next to a request it can. Gated on a gold `unavailableRequests` list. It checks that nothing was built for the request: every source the dashboard reads resolves to an index, alias or data stream on the cluster, and no section is left empty. Sources are the local index sources parsed from `FROM` and `TS` in Lens and Vega ES|QL and control queries (ENRICH policies and remote `cluster:index` sources are not checked), plus a Vega `url.index`; an Elasticsearch error other than index-not-found skips the example instead of failing it. It reads the dashboard, not its wording, so a built panel on the missing index fails whatever it is titled. On a seeded example the agent never wrote, it scores 0 rather than passing the seed. Whether the reply says it could not be added is judged by Dashboard Reply. With `noDashboard` gold, for a request nothing of which can be built, it scores only whether no dashboard was written (1 or 0); dashboard evaluators skip those examples.
+- **Dashboard Reply** (`LLM`): whether the agent told the user what it could not do. The criteria are built per example from the gold and the stored dashboard, so the judge reads only the prompt, the agent's last reply and any `ask_user_question` questions, not the dashboard. It runs the kbn-evals criteria judge and scores the fraction of criteria met. Skipped when an example yields no criteria. The criteria are:
+  - for each `unavailableRequests` entry, the reply says it could not be added because the data does not exist;
+  - for `replaceConfirmation`, the reply or a question explains the panel cannot be edited in place and offers to replace it, leaving the replacement to the user's go-ahead (an explicit question is not required);
+  - for `controls` gold that asks for controls, each `requestedFilters` entry with no stored control on a substitute is named as a filter that could not be added, and when more requested fields failed (each counted once) than a later call replaced with a stored control, the reply names the failed filters in plain words.
+- **Trajectory**: `load_skill` → `generate_dashboard`. Content-mode enhance also expects `get_index_mapping` before the write, because it may change queries. Appearance mode changes no query, so reading the attachment is enough and the mapping call is not expected. Discover results examples read the attachment instead of the mapping, in every run on both models, so the mapping call is not expected there. Skipped on routing and replace confirmation examples.
 - **Trace-based**: tokens, latency, and tool-call counts from OTel spans.
 
 ### Rules
@@ -73,14 +82,14 @@ Each rule declares three properties:
 
 Adding a rule costs nothing per run: it is a code check over the attachment the task already reads. To cover a new rule in enhance, give the seeded dashboard the defect and declare it.
 
-No LLM judge runs in this suite; every check is deterministic.
+Every check is deterministic except Dashboard Reply, which judges reply wording with an LLM so that no regex has to guess how the agent phrases it. What the reply must cover still comes from code.
 
 ## Dataset
 
-Thirty-two examples, because each dashboard example costs 150k–300k input tokens:
+Forty-four examples, because each dashboard example costs 150k–300k input tokens:
 
 - **Creation** (`datasets/creation.ts`, 4): a rich logs dashboard, two requested sections, six compact KPIs, and four KPIs above a time series.
-- **Routing** (`datasets/routing.ts`, 3): a standalone chart, ES|QL help, and field discovery. Nothing is generated, so these are cheap.
+- **Routing** (`datasets/routing.ts`, 4): a standalone chart, ES|QL help, and field discovery, which must stay out of the dashboard skill, and a dashboard over a `nonexistent-*` index, which loads the skill but must end without a dashboard (`noDashboard`). Nothing is generated, so these are cheap.
 - **ML panels** (`datasets/ml_panels.ts`, 2): a swim lane with anomaly charts, and a single metric viewer, each for a job named in the prompt. They check that the agent reads the panel config references.
 - **Enhance** (`datasets/enhance.ts`, 3), all over the same seeded dashboard:
   - `[/dashboards](skill://dashboards) Enhance this dashboard`, the prompt the dashboard's "Enhance this dashboard" action sends. The agent should ask for the mode, and the task answers the `ask_user_question` prompt by picking "Appearance only".
@@ -90,14 +99,25 @@ Thirty-two examples, because each dashboard example costs 150k–300k input toke
   - KPIs, trends and breakdowns, with no controls asked for. Any controls the agent adds on its own must be on mapped fields, and nothing about dropped filters belongs in the reply.
   - The prompt from [#294133](https://github.com/elastic/kibana/issues/294133): the same dashboard plus controls for HTTP method, status code, path and HTTP version, which only exist as `DISSECT` output. The agent either substitutes mapped fields or says in plain words which filters it could not add.
   - Four KPIs and a status code breakdown plus a control on machine OS, a mapped field the results do not show, to prove requested controls still get added.
+- **Layout edit** (`datasets/layout_edit.ts`, 17), over the seeded sectioned dashboard: remove panels from one or two sections, remove a section, add a KPI, a chart in a section, or a section before or between others, move panels between sections and the top level, restyle or edit panels, set widths, add to a collapsed section, and empty a section. The two in-place edits (recolor and rename a chart; turn the pie into a table and the intro into a bullet list) also carry `panelEdits` gold.
+- **Edit scenarios** (`datasets/edit_scenarios.ts`, 11), over the same seeded sectioned dashboard. Each example combines asks, so one run covers several gaps:
+  - recolor the ES|QL Vega bars and raise the ML swim lane's severity threshold (`panelEdits`);
+  - rename the data-view chart, which the agent must not edit silently (`replaceConfirmation`);
+  - recolor the Vega bars on a variant whose Vega chart reads an Elasticsearch query; the agent must not edit it and should offer an ES|QL replacement (`replaceConfirmation`);
+  - replace the OS filter with a destination country filter and remove the bytes slider (`controls`);
+  - add a Payments section from a `payments-*` index that does not exist, next to a KPI it can add (`unavailableRequests`);
+  - add two Lens ES|QL charts the agent made earlier in the conversation, sent as visualization attachments (`src/fixtures/logs_visualizations.ts`), in a new section whose panels must run their ES|QL (`structure.sections[].queries`);
+  - add a range slider on `machine.ram` and remove the time slider (`controls.rangeSliders`, `controls.timeSlider: false`);
+  - rename the Visitors section and move a panel out of it (`structure.sections` and a placement);
+  - move the Vega chart to the top level, delete the ML swim lane, and swap the bytes slider for `machine.ram` (`removed`, a placement and `controls`);
+  - add a markdown note, a second ML swim lane and a Vega heatmap to a section (`structure.panelKinds`, placements of the added kinds, and `panelEdits` on the note's terms, the swim lane's job and view, and the heatmap's `rect` mark);
+  - delete the Errors section but keep its errors by host table, and recolor the 4xx chart while moving it into Traffic (`removed`, placements and `panelEdits`).
 
-Every example carries `metadata.behaviour` (`creation` | `routing` | `enhance` | `discover_results` | `layout_edit` | `ml_panels`) and `metadata.dataSource` (`logs`, or `logs_dissect` for the Discover results). Enhance examples also carry `metadata.enhanceMode`, so golden-cluster results can be sliced.
-
-- **Layout edit** (`datasets/layout_edit.ts`, 17), over the seeded sectioned dashboard: remove panels from one or two sections, remove a section, add a KPI, a chart in a section, or a section before or between others, move panels between sections and the top level, restyle or edit panels, set widths, add to a collapsed section, and empty a section.
+Every example carries `metadata.behaviour` (`creation` | `routing` | `enhance` | `discover_results` | `layout_edit` | `edit_scenario` | `ml_panels`) and `metadata.dataSource` (`logs`, or `logs_dissect` for the Discover results). Enhance examples also carry `metadata.enhanceMode`, so golden-cluster results can be sliced. `datasets/gold_ids.test.ts` fails when gold names a panel or section id its seeded dashboard does not have, so seed edits cannot silently zero an assertion.
 
 ### Seeded dashboard
 
-`src/fixtures/messy_logs_dashboard.ts` is a working dashboard over `kibana_sample_data_logs`. Its panels are minimal ES|QL Lens configs, the kind that parse against the Lens ES|QL schemas, so appearance mode can enhance each of them in place. It is sent as a by-value attachment with the opening turn, the same way the enhance action attaches the open dashboard. It declares its defects as rule ids.
+`src/fixtures/messy_logs_dashboard.ts` is a working dashboard over `kibana_sample_data_logs`. Its defects sit on minimal ES|QL Lens configs, the kind that parse against the Lens ES|QL schemas, so appearance mode can enhance each of them in place. It also holds a data-view Lens bar chart, a Vega chart and an ML anomaly swim lane (`src/fixtures/non_esql_panels.ts`) with no defect. The agent cannot edit the data-view chart and has no reason to touch the others, so Mode Compliance and No Regression catch an enhance that drops or breaks them. It is sent as a by-value attachment with the opening turn, the same way the enhance action attaches the open dashboard. It declares its defects as rule ids.
 
 Layout and composition defects:
 - a placeholder title, which must be rewritten (`title_not_rewritten`; Dashboard Titles & Labels still flags a placeholder result)
@@ -126,7 +146,9 @@ Content defects, which only content mode should fix:
 - a Traffic section (six panels);
 - a note between Traffic and Errors;
 - an Errors section (five panels);
-- a Visitors section (three panels).
+- a Visitors section (three panels);
+- an Other sources section with the same data-view Lens, Vega and ML panels as the messy seed, which no layout edit touches, so `stable.other-sources` shows they survive; the edit scenarios edit them;
+- an options list, a range slider and a time slider, which only the edit scenarios change.
 
 It breaks no `must` rule, so any gap, overlap or styling miss in a result comes from the edit. Its ids are readable, so the gold can name what a prompt moves. A variant with Visitors collapsed covers edits of a collapsed section.
 
@@ -194,10 +216,11 @@ node scripts/evals start \
 Test titles, one per spec:
 
 - `creates dashboards that follow the layout and composition rules` (`dashboard_creation.spec.ts`)
-- `keeps non-dashboard requests out of the dashboard skill` (`dashboard_routing.spec.ts`)
+- `writes no dashboard for requests that must not become one` (`dashboard_routing.spec.ts`)
 - `enhances a seeded dashboard in the requested mode` (`dashboard_enhance.spec.ts`)
 - `builds dashboards from DISSECT results with controls on mapped fields only` (`dashboard_discover_results.spec.ts`)
 - `edits a sectioned dashboard and keeps the rest of the layout` (`dashboard_layout_edit.spec.ts`)
+- `edits non-ES|QL panels, controls and sections of a sectioned dashboard` (`dashboard_edit_scenarios.spec.ts`)
 - `reads the ML panel config references before writing ML panels` (`dashboard_ml_panels.spec.ts`)
 
 After the eval stack is already running, use `run` for faster iteration:
@@ -205,7 +228,7 @@ After the eval stack is already running, use `run` for faster iteration:
 ```bash
 node scripts/evals run \
   --suite agent-builder-dashboards \
-  --grep "keeps non-dashboard requests" \
+  --grep "writes no dashboard" \
   --project eis-anthropic-claude-4-5-sonnet \
   --evaluation-connector-id eis-anthropic-claude-4-5-sonnet
 ```
@@ -243,7 +266,7 @@ node scripts/playwright test \
   --config x-pack/platform/packages/shared/agent-builder-dashboards/kbn-evals-suite-agent-builder-dashboards/playwright.config.ts \
   evals/dashboards/dashboard_routing.spec.ts \
   --project eis-anthropic-claude-4-5-sonnet \
-  --grep "keeps non-dashboard requests"
+  --grep "writes no dashboard"
 ```
 
 Use `--list` to check what Playwright can discover:
