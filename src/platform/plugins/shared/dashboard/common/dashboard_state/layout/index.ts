@@ -8,5 +8,10 @@
  */
 
 export { deserializeLayout } from './deserialize_layout';
+export {
+  areLayoutsEqual,
+  arePanelLayoutsEqual,
+  arePinnedPanelLayoutsEqual,
+} from './are_layouts_equal';
 export { areEqual, type GetComparators } from './are_equal';
 export type { DashboardChildState, DashboardLayout, DashboardLayoutPanel } from './layout_types';

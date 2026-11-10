@@ -8,11 +8,11 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { xor } from 'lodash';
 import { asyncForEach } from '@kbn/std';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { areComparatorsEqual, type StateComparators } from '@kbn/presentation-publishing';
 import { deserializeLayout } from './deserialize_layout';
+import { arePanelLayoutsEqual, arePinnedPanelLayoutsEqual } from './are_layouts_equal';
 
 export type GetComparators = (
   type: string,
@@ -37,8 +37,6 @@ const withComparisonIds = <Item extends LayoutItem>(
     id: item.id ?? `${prefix}${index}`,
     ...(item.panels && { panels: withComparisonIds(item.panels, `${prefix}${index}:`) }),
   }));
-
-const haveSameKeys = (a: object, b: object) => xor(Object.keys(a), Object.keys(b)).length === 0;
 
 async function areConfigsEqual(
   getComparators: GetComparators,
@@ -89,55 +87,43 @@ export async function areEqual(
     withComparisonIds(current.pinned_panels, `${prefix}pinned:`)
   );
 
+  if (
+    !arePanelLayoutsEqual(baselineLayout.layout, currentLayout.layout) ||
+    !arePinnedPanelLayoutsEqual(baselineLayout.layout, currentLayout.layout)
+  ) {
+    return false;
+  }
+
   const arePanelsEqual = async () => {
-    const { layout: baselineLayoutState, childState: baselineChildState } = baselineLayout;
-    const { layout: currentLayoutState, childState: currentChildState } = currentLayout;
-    if (
-      !haveSameKeys(baselineLayoutState.sections, currentLayoutState.sections) ||
-      !haveSameKeys(baselineLayoutState.panels, currentLayoutState.panels)
-    ) {
-      return false;
-    }
-    for (const [id, section] of Object.entries(currentLayoutState.sections)) {
-      if (!deepEqual(baselineLayoutState.sections[id], section)) return false;
-    }
     let isEqual = true;
-    await asyncForEach(Object.entries(currentLayoutState.panels), async ([id, panel]) => {
+    await asyncForEach(Object.entries(currentLayout.layout.panels), async ([id, { type }]) => {
       if (!isEqual) return;
-      const { type, ...restOfPanel } = panel;
-      const { type: baselineType, ...restOfBaselinePanel } = baselineLayoutState.panels[id];
       isEqual =
-        baselineType === type &&
-        deepEqual(restOfBaselinePanel, restOfPanel) &&
+        baselineLayout.layout.panels[id].type === type &&
         (await areConfigsEqual(
           getComparators,
           type,
-          baselineChildState[id],
-          currentChildState[id]
+          baselineLayout.childState[id],
+          currentLayout.childState[id]
         ));
     });
     return isEqual;
   };
 
   const arePinnedPanelsEqual = async () => {
-    const { layout: baselineLayoutState, childState: baselineChildState } = baselineLayout;
-    const { layout: currentLayoutState, childState: currentChildState } = currentLayout;
-    if (!haveSameKeys(baselineLayoutState.pinnedPanels, currentLayoutState.pinnedPanels)) {
-      return false;
-    }
-    // layout state includes pinned panel order, which is meaningful
     let isEqual = true;
-    await asyncForEach(Object.entries(currentLayoutState.pinnedPanels), async ([id, pinned]) => {
-      if (!isEqual) return;
-      isEqual =
-        deepEqual(baselineLayoutState.pinnedPanels[id], pinned) &&
-        (await areConfigsEqual(
+    await asyncForEach(
+      Object.entries(currentLayout.layout.pinnedPanels),
+      async ([id, { type }]) => {
+        if (!isEqual) return;
+        isEqual = await areConfigsEqual(
           getComparators,
-          pinned.type,
-          baselineChildState[id],
-          currentChildState[id]
-        ));
-    });
+          type,
+          baselineLayout.childState[id],
+          currentLayout.childState[id]
+        );
+      }
+    );
     return isEqual;
   };
 
