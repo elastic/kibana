@@ -34,6 +34,7 @@ import type { WorkflowsMeteringService } from '../metering';
 import { workflowsExecutionEngineMock } from '../mocks';
 import { createMockWorkflowDataClient } from '../repositories/data_access_layer/mocks';
 import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { ResumeAsIdentityLookupError } from '../resume_as_identity_lookup_error';
 import { getWorkflowResponder, RESUME_AS_CONTEXT_KEY } from '../resume_as_responder';
 import { DYNAMIC_TIMEOUT_STATE_KEY } from '../step/wait_for_input_step/hitl_timeout_helpers';
 import type { WorkflowsExecutionEnginePluginStart } from '../types';
@@ -154,7 +155,7 @@ describe('resumeWorkflow', () => {
       [RESUME_AS_CONTEXT_KEY]: { stepExecutionId: 'approval-step', responder },
     });
 
-    const resumeAs = async (context: Record<string, unknown>, runIdentity: string) => {
+    const resumeAs = async (context: Record<string, unknown>, runIdentity: string | null) => {
       jest.clearAllMocks();
       const dependencies = mockContextDependencies();
       const fakeRequest = createFakeKibanaRequest();
@@ -168,7 +169,9 @@ describe('resumeWorkflow', () => {
       jest
         .spyOn(dependencies.coreStart.security.authc, 'getCurrentUser')
         .mockReturnValue(
-          securityServiceMock.createMockAuthenticatedUser({ profile_uid: runIdentity })
+          runIdentity === null
+            ? null
+            : securityServiceMock.createMockAuthenticatedUser({ profile_uid: runIdentity })
         );
       const workflowExecutionRepository = new WorkflowExecutionRepository(
         createMockWorkflowDataClient()
@@ -239,6 +242,7 @@ describe('resumeWorkflow', () => {
         fakeRequest,
         scopedRequest,
         withScopedRequestForWorkload,
+        workflowExecutionRepository,
         stepExecutionRepository,
       };
     };
@@ -284,6 +288,24 @@ describe('resumeWorkflow', () => {
       expect(runs).toEqual([]);
       expect(withScopedRequestForWorkload).not.toHaveBeenCalled();
     });
+
+    it.each([
+      ['an answer is pending', { ...record(null), ...answer }],
+      ['the execution runs as a responder', record('u_analyst')],
+    ])(
+      'should leave the execution for Task Manager to retry when the run identity cannot be resolved and %s',
+      async (_, context) => {
+        const { result, runs, workflowExecutionRepository, stepExecutionRepository } =
+          await resumeAs(context, null);
+
+        await expect(result).rejects.toThrow(ResumeAsIdentityLookupError);
+        expect(runs).toEqual([]);
+        expect(stepExecutionRepository.markNonTerminalStepsFailed).not.toHaveBeenCalled();
+        expect(
+          workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion
+        ).not.toHaveBeenCalled();
+      }
+    );
   });
 
   describe('terminal state and resume gating', () => {

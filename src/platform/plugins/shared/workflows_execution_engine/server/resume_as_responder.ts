@@ -11,6 +11,7 @@ import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import { UNKNOWN_EXECUTION_IDENTITY } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';
+import { ResumeAsIdentityLookupError } from './resume_as_identity_lookup_error';
 
 /** Execution context key of the HITL wait whose answer continues the execution as its responder. */
 export const RESUME_AS_CONTEXT_KEY = 'resumeAs';
@@ -68,8 +69,9 @@ const getPendingResponder = (
 /**
  * The responder a resume run of `execution` acts as instead of its service account: the person who
  * answered a `resume-as: responder` wait, or the one the execution runs as since. Only returned when
- * the run's own identity is that person. Throws when the execution runs as a responder and this run
- * is someone else.
+ * the run's own identity is that person. Throws `ResumeAsResponderError` when the execution runs as
+ * a responder and this run is someone else, and `ResumeAsIdentityLookupError` when this run's
+ * identity cannot be resolved.
  */
 export const resolveWorkflowResponder = async (
   core: CoreStart,
@@ -82,7 +84,10 @@ export const resolveWorkflowResponder = async (
     return undefined;
   }
   const runIdentity = await getAuthenticatedUser(request, core.security, core.elasticsearch.client);
-  if (runIdentity?.executedBy === responder) {
+  if (!runIdentity) {
+    throw new ResumeAsIdentityLookupError();
+  }
+  if (runIdentity.executedBy === responder) {
     return responder;
   }
   if (record.responder) {

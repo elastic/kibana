@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApiClientFixture } from '@kbn/scout';
+import type { ApiClientFixture, SamlAuth } from '@kbn/scout';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
@@ -50,8 +50,32 @@ const waitForAnswer = async (
   return stepExecutionId;
 };
 
-const authenticatedAs = (execution: WorkflowExecutionDto, stepId: string): string =>
-  JSON.stringify(execution.stepExecutions?.find((step) => step.stepId === stepId)?.output);
+/** Logs in a user other than the one who starts the executions, to answer their waits. */
+const loginAsResponder = async (
+  apiClient: ApiClientFixture,
+  samlAuth: SamlAuth,
+  headers: Record<string, string>
+): Promise<{ headers: Record<string, string>; username: string }> => {
+  const { cookieHeader } = await samlAuth.asInteractiveUser({
+    elasticsearch: { cluster: [], indices: [] },
+    kibana: [{ base: ['all'], feature: {}, spaces: ['*'] }],
+  });
+  const responderHeaders = { ...headers, ...cookieHeader };
+  const me = await apiClient.get('internal/security/me', {
+    headers: responderHeaders,
+    responseType: 'json',
+  });
+  expect(me).toHaveStatusCode(200);
+  return { headers: responderHeaders, username: me.body.username };
+};
+
+/** The user Elasticsearch authenticated in an `authenticationStep` named `stepId`. */
+const authenticatedUsername = (execution: WorkflowExecutionDto, stepId: string): unknown =>
+  (
+    execution.stepExecutions?.find((step) => step.stepId === stepId)?.output as
+      | { username?: unknown }
+      | undefined
+  )?.username;
 
 apiTest.describe(
   '[NON-MKI] Workflow service accounts: resume',
@@ -227,10 +251,12 @@ apiTest.describe(
 
     apiTest(
       'resume-as: responder runs the steps after the answer as the responder, also after a timer',
-      async ({ apiClient }) => {
+      async ({ apiClient, samlAuth }) => {
         const { headers, accountId, initiatingUser, create, run, wait, resume } = getContext();
 
         apiTest.setTimeout(120_000);
+        const responder = await loginAsResponder(apiClient, samlAuth, headers);
+        expect(responder.username).not.toBe(initiatingUser.username);
         const yaml = workflowYaml(
           accountId,
           `${responderWaitStep}  - name: delay
@@ -242,11 +268,10 @@ ${authenticationStep}`
         const id = await create(apiClient, yaml);
         const executionId = await run(apiClient, id);
         const stepExecutionId = await waitForAnswer(apiClient, headers, executionId, 'approval');
-        await resume(apiClient, { id, yaml, executionId, stepExecutionId });
+        await resume(apiClient, { id, yaml, executionId, stepExecutionId }, responder.headers);
 
         const completed = await wait(apiClient, executionId);
-        expect(authenticatedAs(completed, 'authenticate')).not.toContain(accountId);
-        expect(authenticatedAs(completed, 'authenticate')).toContain(initiatingUser.username);
+        expect(authenticatedUsername(completed, 'authenticate')).toBe(responder.username);
         expect(completed.effectiveIdentity).toStrictEqual({
           type: 'service_account',
           id: accountId,
@@ -256,11 +281,13 @@ ${authenticationStep}`
 
     apiTest(
       'resume-as: responder ends at the next wait that does not set it',
-      async ({ apiClient }) => {
+      async ({ apiClient, samlAuth }) => {
         const { headers, accountId, initiatingUser, create, run, wait, resume, expectAccount } =
           getContext();
 
         apiTest.setTimeout(120_000);
+        const responder = await loginAsResponder(apiClient, samlAuth, headers);
+        expect(responder.username).not.toBe(initiatingUser.username);
         const yaml = workflowYaml(
           accountId,
           responderWaitStep +
@@ -270,12 +297,16 @@ ${authenticationStep}`
         );
         const id = await create(apiClient, yaml);
         const executionId = await run(apiClient, id);
-        await resume(apiClient, {
-          id,
-          yaml,
-          executionId,
-          stepExecutionId: await waitForAnswer(apiClient, headers, executionId, 'approval'),
-        });
+        await resume(
+          apiClient,
+          {
+            id,
+            yaml,
+            executionId,
+            stepExecutionId: await waitForAnswer(apiClient, headers, executionId, 'approval'),
+          },
+          responder.headers
+        );
         await resume(apiClient, {
           id,
           yaml,
@@ -284,8 +315,7 @@ ${authenticationStep}`
         });
 
         const completed = await wait(apiClient, executionId);
-        expect(authenticatedAs(completed, 'as_responder')).not.toContain(accountId);
-        expect(authenticatedAs(completed, 'as_responder')).toContain(initiatingUser.username);
+        expect(authenticatedUsername(completed, 'as_responder')).toBe(responder.username);
         expectAccount(completed, accountId);
       }
     );

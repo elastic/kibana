@@ -9,6 +9,7 @@
 
 import { coreMock, httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { UNKNOWN_EXECUTION_IDENTITY } from './lib/execution_identity';
+import { ResumeAsIdentityLookupError } from './resume_as_identity_lookup_error';
 import {
   getResumeAsRecord,
   getWorkflowResponder,
@@ -109,6 +110,20 @@ describe('resume as responder', () => {
         ResumeAsResponderError
       );
     });
+
+    it.each([
+      ['an answer is pending', { ...requested, ...answer }],
+      ['the execution runs as a responder', active],
+    ])(
+      'should throw a lookup error instead of refusing when the run identity cannot be resolved and %s',
+      async (_, context) => {
+        core.security.authc.getCurrentUser.mockReturnValue(null);
+
+        await expect(resolveWorkflowResponder(core, { context }, request)).rejects.toThrow(
+          ResumeAsIdentityLookupError
+        );
+      }
+    );
   });
 
   describe('getResumeAsRecord', () => {

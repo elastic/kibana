@@ -21,6 +21,7 @@ import { toWorkflowIdentityTaskError } from '../lib/workflow_identity_task_error
 import type { WorkflowsMeteringService } from '../metering';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import { ResumeAsIdentityLookupError } from '../resume_as_identity_lookup_error';
 import {
   resolveWorkflowResponder,
   RESUME_AS_RESPONDER_ERROR,
@@ -260,6 +261,10 @@ export const resumeWorkflow = async (
       resumeWithRequest
     );
   } catch (error) {
+    // Not an identity failure: Task Manager retries the run, which keeps the answer or the scope.
+    if (error instanceof ResumeAsIdentityLookupError) {
+      throw error;
+    }
     const isResponderError = error instanceof ResumeAsResponderError;
     if (!enteredExecution && (isResponderError || getExecutionServiceAccountId(execution))) {
       const executionError = {
