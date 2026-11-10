@@ -41,6 +41,23 @@ describe('riskEngineCleanupRoute', () => {
     context = requestContextMock.convertContext(tools.context);
     clients.riskScoreDataClient.tearDown.mockResolvedValue([]);
     (deleteSavedObjects as jest.Mock).mockResolvedValue(undefined);
+    clients.core.elasticsearch.client.asInternalUser.updateByQuery.mockResolvedValue({
+      version_conflicts: 0,
+    });
+    clients.core.elasticsearch.client.asCurrentUser.indices.delete.mockImplementation(
+      async ({ index }: { index: string }) => {
+        if (index !== 'risk-score.risk-score-default') {
+          return;
+        }
+        const dataStreamDeleted =
+          clients.core.elasticsearch.client.asCurrentUser.indices.deleteDataStream.mock.calls.some(
+            (call: [{ name?: string }]) => call[0]?.name === index
+          );
+        if (!dataStreamDeleted) {
+          throw Object.assign(new Error('matches a data stream'), { meta: { statusCode: 400 } });
+        }
+      }
+    );
     removeIfExists = jest.fn().mockResolvedValue(undefined);
     getStartServicesMock = jest.fn().mockResolvedValue([
       {},
@@ -72,6 +89,9 @@ describe('riskEngineCleanupRoute', () => {
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual({ cleanup_successful: true });
+    expect(
+      clients.core.elasticsearch.client.asCurrentUser.indices.deleteDataStream
+    ).toHaveBeenCalledWith({ name: 'risk-score.risk-score-default' }, { ignore: [404] });
     expect(clients.core.elasticsearch.client.asCurrentUser.indices.delete).toHaveBeenCalledWith(
       { index: 'risk-score.risk-score-default' },
       { ignore: [404] }
@@ -117,6 +137,21 @@ describe('riskEngineCleanupRoute', () => {
     const response = await server.inject(buildRequest(), context);
 
     expect(response.status).toEqual(500);
+    expect(removeIfExists).not.toHaveBeenCalled();
+    expect(deleteSavedObjects).not.toHaveBeenCalled();
+  });
+
+  it('does not stop scoring when entity risk fields stay conflicted', async () => {
+    clients.core.elasticsearch.client.asInternalUser.updateByQuery.mockResolvedValue({
+      version_conflicts: 2,
+    });
+
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(500);
+    expect(clients.core.elasticsearch.client.asInternalUser.updateByQuery).toHaveBeenCalledTimes(
+      2
+    );
     expect(removeIfExists).not.toHaveBeenCalled();
     expect(deleteSavedObjects).not.toHaveBeenCalled();
   });

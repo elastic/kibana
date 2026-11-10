@@ -110,8 +110,13 @@ export const riskEngineCleanupRoute = (
           try {
             const alias = `risk-score.risk-score-${namespace}`;
             // The privilege check grants read/write, not delete_index. Delete the caller's
-            // risk-score index and lookup index as that user so a missing delete privilege
+            // risk-score data and lookup index as that user so a missing delete privilege
             // fails before the saved object or the maintainer task is removed.
+            // The risk-score name is a data stream until tearDown runs, and the index
+            // delete API rejects a data stream name.
+            await currentUserEsClient.indices
+              .deleteDataStream({ name: alias }, { ignore: [404] })
+              .catch(addError);
             await currentUserEsClient.indices
               .delete({ index: alias }, { ignore: [404] })
               .catch(addError);
@@ -125,8 +130,8 @@ export const riskEngineCleanupRoute = (
               return failureResponse();
             }
 
-            await core.elasticsearch.client.asInternalUser
-              .updateByQuery({
+            const clearEntityRisk = () =>
+              core.elasticsearch.client.asInternalUser.updateByQuery({
                 index: getEntitiesAlias(ENTITY_LATEST, namespace),
                 ignore_unavailable: true,
                 conflicts: 'proceed',
@@ -141,8 +146,24 @@ export const riskEngineCleanupRoute = (
                   },
                 },
                 script: { lang: 'painless', source: CLEAR_ENTITY_RISK_SCRIPT },
-              })
-              .catch(addError);
+              });
+            let clearResult = await clearEntityRisk().catch((error: unknown) => {
+              addError(error);
+              return undefined;
+            });
+            if ((clearResult?.version_conflicts ?? 0) > 0) {
+              clearResult = await clearEntityRisk().catch((error: unknown) => {
+                addError(error);
+                return undefined;
+              });
+            }
+            if ((clearResult?.version_conflicts ?? 0) > 0) {
+              addError(
+                new Error(
+                  `${clearResult?.version_conflicts} entity documents still have risk fields after a retry`
+                )
+              );
+            }
             if (errors.length > 0) {
               return failureResponse();
             }
