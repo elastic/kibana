@@ -373,6 +373,10 @@ export interface DiscoverCellActionMetadata extends Record<string, unknown> {
    * The current time range
    */
   timeRange?: TimeRange;
+  /**
+   * The current ES|QL control variables
+   */
+  esqlVariables?: ESQLControlVariable[];
 }
 
 export interface DiscoverCellActionExecutionContext extends CellActionExecutionContext {
