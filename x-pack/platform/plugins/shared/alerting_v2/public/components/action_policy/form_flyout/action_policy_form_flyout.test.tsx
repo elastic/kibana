@@ -127,8 +127,13 @@ jest.mock('../../../hooks/use_fetch_workflows', () => ({
       size: 100,
     },
     isLoading: false,
+    isError: false,
     refetch: jest.fn(),
   }),
+}));
+
+jest.mock('../../../hooks/use_fetch_workflows_by_ids', () => ({
+  useFetchWorkflowsByIds: () => [],
 }));
 
 const TEST_SUBJ = {

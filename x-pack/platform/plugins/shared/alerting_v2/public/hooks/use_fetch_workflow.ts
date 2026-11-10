@@ -13,6 +13,13 @@ import { WorkflowApi } from '@kbn/workflows-ui';
 import { retryUnlessNotFound } from '../utils/is_not_found_error';
 import { workflowKeys } from './query_key_factory';
 
+export const getWorkflowDetailQueryOptions = (workflowsApi: WorkflowApi, id: string) => ({
+  queryKey: workflowKeys.detail(id),
+  queryFn: () => workflowsApi.getWorkflow(id),
+  refetchOnWindowFocus: false,
+  retry: retryUnlessNotFound,
+});
+
 export const useFetchWorkflow = (
   id: string | undefined,
   isEnabled = true,
@@ -22,11 +29,8 @@ export const useFetchWorkflow = (
   const { toasts } = useService(CoreStart('notifications'));
 
   return useQuery<WorkflowDetailDto, Error>({
-    queryKey: workflowKeys.detail(id!),
-    queryFn: () => workflowsApi.getWorkflow(id!),
+    ...getWorkflowDetailQueryOptions(workflowsApi, id ?? ''),
     enabled: !!id && isEnabled,
-    refetchOnWindowFocus: false,
-    retry: retryUnlessNotFound,
     onError: (error: Error) => {
       if (!notifyOnError) {
         return;

@@ -194,13 +194,19 @@ jest.mock('../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
     data: {
       results: [
-        { id: 'workflow-1', name: 'Workflow 1' },
-        { id: 'workflow-2', name: 'Workflow 2' },
+        { id: 'workflow-1', name: 'Workflow 1', enabled: true },
+        { id: 'workflow-2', name: 'Workflow 2', enabled: true },
       ],
+      total: 2,
     },
     isLoading: false,
+    isError: false,
     refetch: jest.fn(),
   }),
+}));
+
+jest.mock('../../hooks/use_fetch_workflows_by_ids', () => ({
+  useFetchWorkflowsByIds: () => [],
 }));
 
 const mockUseParams = jest.fn();
