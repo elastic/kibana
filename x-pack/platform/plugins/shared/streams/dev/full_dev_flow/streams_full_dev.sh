@@ -372,24 +372,6 @@ if "telemetry.newPipelineTelemetry" not in text:
         changed = True
         print("patched feature_gates telemetry.newPipelineTelemetry")
 
-if "user_facing:" not in text:
-    old_header = "    telemetry:\n      log_level: debug\n      internal:\n"
-    new_header = "    telemetry:\n      log_level: debug\n      metrics_level: detailed\n      internal:\n"
-    if old_header in text:
-        text = text.replace(old_header, new_header, 1)
-    old_servers = "        servers: []\n"
-    new_servers = """        servers: []
-      user_facing:
-        enabled: true
-        interval: 10000
-        loopback_endpoint: localhost:4318
-"""
-    if old_servers not in text:
-        sys.exit("could not find telemetry.internal.servers in dev/values.yaml")
-    text = text.replace(old_servers, new_servers, 1)
-    changed = True
-    print("patched user_facing telemetry")
-
 if "user: motel-index-collector" not in text:
     marker = (
         "            name: motel.events.metrics.{targetID}\n"
