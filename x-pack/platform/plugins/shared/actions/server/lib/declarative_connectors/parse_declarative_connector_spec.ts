@@ -11,21 +11,7 @@ import { z, ZodError, lazySchema } from '@kbn/zod/v4';
 import type { DeclarativeConnectorSpec, DeclarativeJsonSchema } from './types';
 import { DeclarativeConnectorSpecError } from './types';
 
-const featureIdSchema = lazySchema(() =>
-  z.enum([
-    'alerting',
-    'cases',
-    'uptime',
-    'siem',
-    'generativeAIForSecurity',
-    'generativeAIForObservability',
-    'generativeAIForSearchPlayground',
-    'endpointSecurity',
-    'workflows',
-    'agentBuilder',
-    'contextEngine',
-  ])
-);
+const featureIdSchema = lazySchema(() => z.enum(['workflows', 'agentBuilder']));
 
 const matchesSchemaType = (value: unknown, type: DeclarativeJsonSchema['type']): boolean => {
   switch (type) {
@@ -141,7 +127,7 @@ const jsonSchema: z.ZodType<DeclarativeJsonSchema> = z.lazy(() =>
     })
 );
 
-const requestSchema = lazySchema(() =>
+const httpRequestSchema = lazySchema(() =>
   z
     .object({
       method: z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']),
@@ -235,7 +221,7 @@ const connectorSpecSchema = lazySchema(() =>
               isTool: z.boolean().optional(),
               scope: z.enum(['read', 'write', 'destroy']).optional(),
               input: jsonSchema,
-              request: requestSchema,
+              request: httpRequestSchema,
             })
             .strict()
         )
@@ -243,7 +229,7 @@ const connectorSpecSchema = lazySchema(() =>
       test: z
         .object({
           description: z.string().optional(),
-          request: requestSchema,
+          request: httpRequestSchema,
         })
         .strict(),
     })
@@ -271,11 +257,6 @@ export const parseDeclarativeConnectorSpec = (raw: string): DeclarativeConnector
     const connector = connectorSpecSchema.parse(parsed);
     return {
       ...connector,
-      metadata: {
-        ...connector.metadata,
-        supportedFeatureIds: connector.metadata
-          .supportedFeatureIds as DeclarativeConnectorSpec['metadata']['supportedFeatureIds'],
-      },
       auth: {
         types: connector.auth.types.map(normalizeAuthType),
       },

@@ -17,7 +17,7 @@ metadata:
   description: Test connector
   minimumLicense: basic
   supportedFeatureIds:
-    - alerting
+    - workflows
 config:
   type: object
   additionalProperties: false
@@ -73,6 +73,14 @@ describe('parseDeclarativeConnectorSpec', () => {
     const raw = loadFixture('abuseipdb-1.1.0.yaml').replace('schemaVersion: 1', 'schemaVersion: 2');
 
     expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
+  });
+
+  it('rejects unsupported feature IDs', () => {
+    const raw = minimalSpec(`      method: GET
+      url: https://example.com/ping`).replace('- workflows', '- alerting');
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/supportedFeatureIds/);
   });
 
   it('throws when a request sets both url and baseUrl', () => {
