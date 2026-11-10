@@ -14,11 +14,15 @@ import {
   ALERT_MUTED,
 } from '@kbn/rule-data-utils';
 import { nodeBuilder } from '@kbn/es-query';
-import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import type { TaskManagerDoc } from '../../../../common/lib';
-import { AlertUtils, getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import {
+  AlertUtils,
+  TaskManagerUtils,
+  getUrlPrefix,
+  getTestRuleData,
+  ObjectRemover,
+} from '../../../../common/lib';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 
@@ -35,6 +39,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       space: Spaces.space1,
       supertestWithoutAuth: supertest,
     });
+    const taskManagerUtils = new TaskManagerUtils(es, retry);
 
     const createRule = async () => {
       const { body: createdRule } = await supertest
@@ -82,24 +87,6 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       return alerts;
-    };
-
-    // Task Manager returns the task to `idle` only after the rule's run completes, so `_run_soon`
-    // soft-fails with a 200 body and queues nothing if it lands while the task is still running.
-    const runRuleSoon = async (ruleId: string) => {
-      await retry.try(async () => {
-        const task = await es.get<TaskManagerDoc>({
-          id: `task:${ruleId}`,
-          index: '.kibana_task_manager',
-        });
-        const status = task._source!.task.status;
-        if (status !== TaskStatus.Idle) {
-          throw new Error(`Expected task:${ruleId} to be idle but was ${status}`);
-        }
-
-        const response = await alertUtils.runSoon(ruleId);
-        expect(response.status).to.eql(204);
-      });
     };
 
     before(async () => {
@@ -211,7 +198,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
-      await runRuleSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
 
       // Wait for alert document to be updated
       await retry.try(async () => {
@@ -240,7 +227,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
-      await runRuleSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
 
       // Wait for alert to be muted
       await retry.try(async () => {
@@ -255,7 +242,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getUnmuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
-      await runRuleSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
 
       // Wait for alert document to be updated
       await retry.try(async () => {
@@ -281,7 +268,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
-      await runRuleSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
 
       // Wait for all alert documents to be updated
       await retry.try(async () => {
@@ -306,7 +293,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
-      await runRuleSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
 
       // Wait for alerts to be muted
       await retry.try(async () => {
@@ -321,7 +308,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.unmuteAll(ruleId);
 
       // Run the rule to trigger reconciliation
-      await runRuleSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
 
       // Wait for all alert documents to be updated
       await retry.try(async () => {
@@ -387,7 +374,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // Run the rule to trigger reconciliation
-      await runRuleSoon(ruleId);
+      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
 
       // Wait for reconciliation to fix the muted state
       await retry.try(async () => {

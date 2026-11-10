@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import type { AlertsFilter } from '@kbn/alerting-plugin/common/rule';
 import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
@@ -12,6 +13,7 @@ import type { SnoozeBody } from '@kbn/alerting-plugin/common/routes/rule/apis/sn
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { Space, User } from '../types';
 import type { ObjectRemover } from './object_remover';
+import type { TaskManagerUtils } from './task_manager_utils';
 import { getUrlPrefix } from './space_test_utils';
 import { getTestRuleData } from './get_test_rule_data';
 
@@ -576,6 +578,16 @@ export class AlertUtils {
       request = request.query({ force: true });
     }
     return await request.send();
+  }
+
+  // `_run_soon` soft-fails with a 200 ("Rule is already running") and queues nothing if it lands
+  // before the rule's previous run releases its task, so wait for idle first and require a 204.
+  public async runSoonWhenIdle(ruleId: string, taskManagerUtils: TaskManagerUtils) {
+    await taskManagerUtils.waitForIdle(ruleId);
+
+    const response = await this.runSoon(ruleId);
+    expect(response.status).to.eql(204);
+    return response;
   }
 
   public async createInternallyManagedRule(objectRemover?: ObjectRemover) {
