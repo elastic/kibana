@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { ZodObject } from '@kbn/zod/v4';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
@@ -172,6 +173,7 @@ export class NightshiftInvestigationsPlugin
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
   private nightshiftSources?: NightshiftInvestigationsStartDeps['nightshiftSources'];
+  private isomerStart?: IsomerPluginStart;
   private cloudSetup?: NightshiftInvestigationsSetupDeps['cloud'];
   private esHosts: string[] = [];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
@@ -577,6 +579,7 @@ export class NightshiftInvestigationsPlugin
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
+            getIsomerRuntime: this.getIsomerRuntime,
             getRoutingClient: this.getNotificationRoutingClient,
           })
         );
@@ -585,6 +588,7 @@ export class NightshiftInvestigationsPlugin
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
+            getIsomerRuntime: this.getIsomerRuntime,
             getRoutingClient: this.getNotificationRoutingClient,
             getTriggerEmitter,
             getWorkflowsManagement: () => this.workflowsManagement,
@@ -595,6 +599,7 @@ export class NightshiftInvestigationsPlugin
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
+            getIsomerRuntime: this.getIsomerRuntime,
             getRoutingClient: this.getNotificationRoutingClient,
             getTriggerEmitter,
           })
@@ -603,6 +608,7 @@ export class NightshiftInvestigationsPlugin
           renderSlackMessageStepDefinition({
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
+            getIsomerRuntime: this.getIsomerRuntime,
           })
         );
         // Registered even when disabled: the combined workflow no-ops a writer branch instead
@@ -808,6 +814,7 @@ export class NightshiftInvestigationsPlugin
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
     this.nightshiftSources = plugins.nightshiftSources;
+    this.isomerStart = plugins.isomer;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
     this.coreStart = coreStart;
@@ -1017,6 +1024,13 @@ export class NightshiftInvestigationsPlugin
       }
       return this.notificationRoutingService;
     };
+
+  private getIsomerRuntime: IsomerPluginStart['getRuntime'] = () => {
+    if (!this.isomerStart) {
+      throw new Error('isomer is not available');
+    }
+    return this.isomerStart.getRuntime();
+  };
 
   private getNotificationRoutingClient = async (
     request: KibanaRequest,
