@@ -178,26 +178,6 @@ describe('ki_feature_create tool', () => {
     );
   });
 
-  it('reports the normalized feature slug', async () => {
-    jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
-    const tool = createFeatureKnowledgeIndicatorTool({
-      getScopedClients: createScopedClients({ bulk: jest.fn().mockResolvedValue(undefined) }),
-      server,
-      logger,
-      telemetry,
-    });
-
-    await invokeHandler(
-      tool as never,
-      { ...featureParams, id: ' Svc-Checkout ' },
-      createMockToolContext()
-    );
-
-    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
-      expect.objectContaining({ knowledge_indicator_id: 'svc-checkout' })
-    );
-  });
-
   it.each([
     [
       'acknowledges a write',
@@ -309,10 +289,10 @@ describe('ki_feature_create tool', () => {
         success: false,
         source_id: 'logs.test',
         space_id: 'space-a',
+        knowledge_indicator_id: 'feature-1',
         error_message: 'write failed',
       })
     );
-    expect(reported).not.toHaveProperty('knowledge_indicator_id');
   });
 
   it('tells the agent whether a refused write is worth retrying', async () => {

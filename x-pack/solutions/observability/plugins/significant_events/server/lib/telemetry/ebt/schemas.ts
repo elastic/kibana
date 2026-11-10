@@ -290,7 +290,7 @@ const agentBuilderKnowledgeIndicatorCreatedSchema: RootSchema<AgentBuilderKnowle
       type: 'keyword',
       _meta: {
         description:
-          'The created `feature.id` or `query.id`, unique within `source_id`; absent when creation fails',
+          'The `feature.id` or `query.id` the write addressed, unique within `source_id`; absent only when a failed query write had no caller-supplied id',
         optional: true,
       },
     },

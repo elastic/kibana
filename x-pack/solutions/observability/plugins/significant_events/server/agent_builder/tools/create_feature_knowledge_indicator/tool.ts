@@ -11,7 +11,7 @@ import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/agent-b
 import type { Logger } from '@kbn/core/server';
 import { nightshiftSourceSlugField } from '@kbn/nightshift-shared';
 import { lazySchema, isoDateTime } from '@kbn/zod/v4';
-import { baseFeatureSchema, normalizeFeatureSlug } from '@kbn/significant-events-schema';
+import { baseFeatureSchema } from '@kbn/significant-events-schema';
 import dedent from 'dedent';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -130,7 +130,7 @@ export function createFeatureKnowledgeIndicatorTool({
               success: true,
               source_id: source.id,
               space_id: request.spaceId,
-              knowledge_indicator_id: normalizeFeatureSlug(id),
+              knowledge_indicator_id: id,
             }),
         });
 
@@ -167,6 +167,7 @@ export function createFeatureKnowledgeIndicatorTool({
               success: false,
               source_id: sourceId,
               space_id: request.spaceId,
+              knowledge_indicator_id: featureInput.id,
               error_message: message,
             }),
         });

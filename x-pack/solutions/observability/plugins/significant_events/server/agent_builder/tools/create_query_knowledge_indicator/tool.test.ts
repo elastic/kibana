@@ -254,6 +254,24 @@ describe('ki_query_create tool', () => {
     expect(reported).not.toHaveProperty('knowledge_indicator_id');
   });
 
+  it('keeps a caller-supplied id in failure telemetry', async () => {
+    jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
+    const tool = createQueryKnowledgeIndicatorTool({
+      getScopedClients: createScopedClients({
+        upsertQuery: jest.fn().mockRejectedValue(new Error('upsert failed')),
+      }),
+      server,
+      logger,
+      telemetry,
+    });
+
+    await invokeHandler(tool as never, { ...queryParams, id: 'query-1' }, createMockToolContext());
+
+    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, knowledge_indicator_id: 'query-1' })
+    );
+  });
+
   it('does not let a Nightshift reader create a query KI', async () => {
     (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
 
