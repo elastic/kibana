@@ -64,9 +64,9 @@ describe('Rootly', () => {
     expect(types).toContain('bearer');
   });
 
-  it('marks the bearer auth type as sandbox capable', () => {
+  it('does not mark the bearer auth type as sandbox capable', () => {
     const types = Rootly.auth?.types ?? [];
-    expect(types).toEqual([expect.objectContaining({ type: 'bearer', supportsSandbox: true })]);
+    expect(types).toEqual([expect.objectContaining({ type: 'bearer', supportsSandbox: false })]);
   });
 
   it('declares the Rootly API host as its only sandbox host', () => {

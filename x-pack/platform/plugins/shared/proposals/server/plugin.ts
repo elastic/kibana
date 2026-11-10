@@ -156,6 +156,9 @@ export class ProposalsPlugin
       getWorkflowsApi: () => this.requireWorkflowsApi(),
       getAttachmentsClient: (request) =>
         plugins.agentBuilder.attachments.getScopedClient({ request }),
+      // A gateless proposal is created and decided by the service itself, so
+      // the attribution the gate workflow used to resolve is resolved here.
+      resolveUser: (request) => this.requireUserResolver()(request),
     });
 
     void initializeManagedWorkflows({

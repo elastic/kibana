@@ -12,7 +12,7 @@ import seedrandom from 'seedrandom';
 import { buildAlertDetailsUrl } from '../dispatcher/alert_details_url';
 import type { ActionPolicy, Alert, Rule } from '../dispatcher/types';
 
-/** Prefix of every synthetic id, so a test payload can never be mistaken for a real alert or rule. */
+/** Prefix of every generated synthetic id, so a generated test payload is not mistaken for a real alert or rule. */
 export const TEST_ID_PREFIX = 'test-';
 
 /** Alerts in the group of an aggregated (`all` / `per_field`) policy. */
@@ -22,6 +22,10 @@ export const DEFAULT_AGGREGATED_ALERT_COUNT = 3;
 const MAX_PLACEHOLDER_RULES = 3;
 
 const DATA_FIELD_PREFIX = 'data.';
+
+/** Path of a `data.*` policy grouping field under `alert.data`, or `''` for any other field. */
+const toDataPath = (field: string): string =>
+  field.startsWith(DATA_FIELD_PREFIX) ? field.slice(DATA_FIELD_PREFIX.length) : '';
 
 export interface SyntheticScenarioParams {
   policy: ActionPolicy;
@@ -52,9 +56,7 @@ const shareGroupingValues = (alerts: Alert[], policy: ActionPolicy, suffix: stri
 
   const [firstAlert] = alerts;
   for (const field of policy.grouping.fields) {
-    const dataPath = field.startsWith(DATA_FIELD_PREFIX)
-      ? field.slice(DATA_FIELD_PREFIX.length)
-      : '';
+    const dataPath = toDataPath(field);
     const value =
       get(firstAlert, field) ?? (dataPath ? `${TEST_ID_PREFIX}${dataPath}-${suffix}` : undefined);
     if (value !== undefined) {
@@ -64,9 +66,19 @@ const shareGroupingValues = (alerts: Alert[], policy: ActionPolicy, suffix: stri
 };
 
 /**
+ * Rule grouping fields name columns under `alert.data`, so a `per_field` policy's `data.*` fields
+ * map to placeholder rule grouping fields without the `data.` prefix.
+ */
+const toRuleGroupingFields = (policy: ActionPolicy): string[] =>
+  policy.grouping.mode === 'per_field'
+    ? policy.grouping.fields.map(toDataPath).filter((dataPath) => dataPath !== '')
+    : [];
+
+/**
  * Builds placeholder rules and alerts for a policy, from its configuration alone. The rules carry
- * the policy routing tags, so the alerts pass the dispatcher routing-tag check. Deterministic for
- * a seed, apart from `last_event_timestamp`, which is `now`.
+ * the policy routing tags, so the alerts pass the dispatcher routing-tag check, and the `data.*`
+ * fields of a `per_field` policy as grouping fields. Deterministic for a seed, apart from
+ * `last_event_timestamp`, which is `now`.
  */
 export const createSyntheticScenario = ({
   policy,
@@ -79,12 +91,14 @@ export const createSyntheticScenario = ({
   const alertCount = policy.grouping.mode === 'per_alert' ? 1 : DEFAULT_AGGREGATED_ALERT_COUNT;
   const ruleCount = Math.min(alertCount, MAX_PLACEHOLDER_RULES);
   const routingTags = [...(policy.matcher?.tags ?? [])];
+  const groupingFields = toRuleGroupingFields(policy);
 
   const rules: Rule[] = Array.from({ length: ruleCount }, (_, index) => ({
     id: `${TEST_ID_PREFIX}rule-${index + 1}-${randomHex(random)}`,
     spaceId,
     name: `Test rule ${index + 1}`,
     routingTags,
+    groupingFields,
   }));
 
   const severity = SEVERITY_LEVELS[Math.floor(random() * SEVERITY_LEVELS.length)];
