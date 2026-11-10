@@ -11,6 +11,7 @@ import {
   readLineOrigin,
   readLineTarget,
   readRoutingRuleIndex,
+  withRoutingDiagnostics,
 } from './build_unit_connection_edges';
 import { DESTINATION_NODE_TYPE, SOURCE_NODE_TYPE, type ClassicCanvasNode } from './types';
 
@@ -164,6 +165,103 @@ describe('buildUnitCanvasGraph with routing nodes', () => {
     edges.forEach((edge) => {
       expect(edge).toMatchObject({ deletable: false, selectable: false, type: 'animated' });
     });
+  });
+
+  it('lets "Add routing" put a routing node on lines leaving processing', () => {
+    const processed = {
+      unit: {
+        sources: [],
+        destinations: [],
+        processors: [{ id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] }],
+        pipelines: [
+          {
+            id: 'fan',
+            supported_telemetry: ['logs'],
+            config: [
+              { name: 'sources', value: ['s1'] },
+              { name: 'processors', value: ['tag'] },
+              { name: 'destinations', value: ['es-a', 'es-b'] },
+            ],
+          },
+          {
+            id: 'ruled',
+            supported_telemetry: ['logs'],
+            config: [
+              { name: 'sources', value: ['s2'] },
+              { name: 'routes', value: [{ processors: ['tag'], destinations: ['es-c'] }] },
+            ],
+          },
+        ],
+      },
+      ui_metadata: {},
+    } as Unit;
+    const { edges } = buildUnitCanvasGraph(processed, ['s1', 's2'], ['es-a', 'es-b', 'es-c']);
+    expect(
+      edges
+        .filter(({ source }) => source.startsWith('processing-'))
+        .map(({ source, target, data }) => [source, target, data?.routingLine])
+    ).toEqual([
+      [
+        'processing-pipeline-fan',
+        'configured-destination-es-a',
+        {
+          origin: { kind: 'processing', ref: { kind: 'pipeline', pipelineId: 'fan' } },
+          destinationId: 'es-a',
+        },
+      ],
+      [
+        'processing-pipeline-fan',
+        'configured-destination-es-b',
+        {
+          origin: { kind: 'processing', ref: { kind: 'pipeline', pipelineId: 'fan' } },
+          destinationId: 'es-b',
+        },
+      ],
+      [
+        'processing-route-ruled-0',
+        'configured-destination-es-c',
+        {
+          origin: {
+            kind: 'processing',
+            ref: { kind: 'route', pipelineId: 'ruled', routeIndex: 0 },
+          },
+          destinationId: 'es-c',
+        },
+      ],
+    ]);
+  });
+
+  it('lets "Add routing" put a routing node on lines into a destination it can route', () => {
+    expect(
+      buildRouted().edges.map(({ source, sourceHandle, target, data }) => [
+        source,
+        sourceHandle,
+        target,
+        data?.routingLine,
+      ])
+    ).toEqual([
+      [
+        'configured-source-direct-source',
+        undefined,
+        'configured-destination-es-a',
+        { origin: { kind: 'source', id: 'direct-source' }, destinationId: 'es-a' },
+      ],
+      ['configured-source-routed-source', undefined, 'configured-routing-p-routed', undefined],
+      // A rule with several targets cannot delegate one of them to a child pipeline.
+      ['configured-routing-p-routed', 'rule-0', 'configured-destination-es-a', undefined],
+      ['configured-routing-p-routed', 'rule-1', 'configured-routing-child', undefined],
+      [
+        'configured-routing-p-routed',
+        'rule-2',
+        'configured-destination-es-b',
+        {
+          origin: { kind: 'rule', rule: { pipelineId: 'p-routed', ruleIndex: 2 } },
+          destinationId: 'es-b',
+        },
+      ],
+      // A routed child with a plain destinations list is edited as a routing node instead.
+      ['configured-routing-child', 'rule-0', 'configured-destination-es-c', undefined],
+    ]);
   });
 
   it('skips sources that are not on the canvas', () => {
@@ -480,5 +578,24 @@ describe('reading line ends from canvas nodes', () => {
     expect(readRoutingRuleIndex('rule-x')).toBeUndefined();
     expect(readRoutingRuleIndex('src')).toBeUndefined();
     expect(readRoutingRuleIndex(null)).toBeUndefined();
+  });
+});
+
+describe('withRoutingDiagnostics', () => {
+  it('marks the routing node and the rules the last save rejected', () => {
+    const { routingNodes } = buildRouted();
+    const marked = withRoutingDiagnostics(routingNodes, [
+      { code: 'E050', message: 'bad condition', pipelineId: 'p-routed', ruleIndex: 1 },
+      { code: 'E017', message: 'no way out', pipelineId: 'p-routed' },
+    ]);
+    const routed = marked.find(({ data }) => data.pipelineId === 'p-routed');
+    expect(routed?.data.diagnostics).toEqual(['bad condition', 'no way out']);
+    expect(routed?.data.rules.map(({ diagnostics }) => diagnostics)).toEqual([
+      undefined,
+      ['bad condition'],
+      undefined,
+    ]);
+    const others = marked.filter(({ data }) => data.pipelineId !== 'p-routed');
+    expect(others).toEqual(routingNodes.filter(({ data }) => data.pipelineId !== 'p-routed'));
   });
 });

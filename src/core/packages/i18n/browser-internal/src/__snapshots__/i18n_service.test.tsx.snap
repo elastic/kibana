@@ -312,7 +312,9 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiFlyoutMenu.pagination.last\\": \\"Last\\",
     \\"euiKeyboardShortcuts.cmd\\": \\"Cmd\\",
     \\"euiKeyboardShortcuts.copyDescription\\": \\"Copy the focused cell value\\",
-    \\"euiKeyboardShortcuts.copyTitle\\": \\"C\\"
+    \\"euiKeyboardShortcuts.copyTitle\\": \\"C\\",
+    \\"euiFlyoutMenu.maximize\\": \\"Maximize\\",
+    \\"euiFlyoutMenu.restore\\": \\"Restore\\"
   }
 }"
 `;

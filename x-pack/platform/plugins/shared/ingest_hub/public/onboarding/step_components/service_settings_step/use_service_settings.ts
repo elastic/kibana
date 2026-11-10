@@ -40,6 +40,7 @@ import {
 import { getNamespaceError } from './instance_namespace_field';
 import { supportsPolicySetting, type PolicySettings } from '../../common/policy_settings';
 import {
+  getConditionErrors,
   getDescriptionError,
   getIntegrationNameError,
   getProxyUrlError,
@@ -604,6 +605,16 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const integrationNameError = getIntegrationNameError(integrationName);
   const descriptionError = getDescriptionError(description);
   const namespaceError = getNamespaceError(namespace);
+  // Only where the condition is offered: one kept from another deployment method is never sent,
+  // and could not be fixed from a hidden field.
+  const condition = policySettings.condition ?? '';
+  const conditionErrors = useMemo(
+    () =>
+      supportsPolicySetting('condition', deploymentMethod)
+        ? getConditionErrors(condition)
+        : undefined,
+    [condition, deploymentMethod]
+  );
 
   // The proxy URL reaches only the policies of services whose package declares the var, and only
   // for the deployment methods that send it. Elsewhere the field is hidden, so a value left over
@@ -631,7 +642,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       !integrationNameError &&
       !descriptionError &&
       !namespaceError &&
-      !proxyUrlError,
+      !proxyUrlError &&
+      !conditionErrors,
     [
       globalRegion,
       incompleteInstances,
@@ -639,6 +651,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       descriptionError,
       namespaceError,
       proxyUrlError,
+      conditionErrors,
     ]
   );
 
@@ -685,6 +698,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     setPolicySetting,
     isProxyUrlSupported,
     proxyUrlError,
+    conditionErrors,
     bareNamePackage,
     instances,
     filteredInstances,

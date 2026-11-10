@@ -281,6 +281,21 @@ export class WorkflowExecutionQueryService {
       sort,
       searchAfter: params.searchAfter,
       collapse: params.collapse ? { field: params.collapse } : undefined,
+      // First page only. Later pages reuse this flag. List filters stay off this query.
+      namedExecutionQuery:
+        params.workflowId && !params.searchAfter?.length
+          ? {
+              bool: {
+                must: [
+                  { term: { workflowId: params.workflowId } },
+                  buildWorkflowExecutionsSpaceFilter(spaceId),
+                  ...(params.accessControlFilter ? [params.accessControlFilter] : []),
+                  { wildcard: { runName: { value: '?*' } } },
+                ],
+                must_not: [{ term: { deleted: true } }],
+              },
+            }
+          : undefined,
     });
   }
 
