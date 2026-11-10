@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/shared-ux-error-boundary'
   - '@kbn/test-jest-helpers'
+  - '@kbn/ui-ai-components'
   - '@kbn/ui-callout'
   - '@kbn/ui-react-assembly'
 tags:
@@ -37,6 +38,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

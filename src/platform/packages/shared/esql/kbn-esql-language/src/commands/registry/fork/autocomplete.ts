@@ -70,10 +70,10 @@ export async function autocomplete(
 
 const newBranchSuggestion: ISuggestionItem = withAutoSuggest({
   kind: 'Issue',
-  label: i18n.translate('kbn-esql-language.esql.suggestions.newBranchLabel', {
+  label: i18n.translate('esqlLanguage.esql.suggestions.newBranchLabel', {
     defaultMessage: 'New branch',
   }),
-  detail: i18n.translate('kbn-esql-language.esql.suggestions.newBranchDetail', {
+  detail: i18n.translate('esqlLanguage.esql.suggestions.newBranchDetail', {
     defaultMessage: 'Add a new branch to the fork',
   }),
   text: '($0)',

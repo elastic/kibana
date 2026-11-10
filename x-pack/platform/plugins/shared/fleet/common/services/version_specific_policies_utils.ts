@@ -8,6 +8,7 @@
 import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 
 import { AGENT_POLICY_SENTINEL_VERSION, AGENT_POLICY_VERSION_SEPARATOR } from '../constants';
+import type { AgentPolicy } from '../types';
 
 const DEFAULT_POLICY_ID_FIELD = 'policy_id';
 
@@ -67,6 +68,16 @@ export function hasAgentVersionSuffix(policyId: string): boolean {
 
 export function getSentinelVersionPolicyId(baseId: string): string {
   return `${baseId}${AGENT_POLICY_VERSION_SEPARATOR}${AGENT_POLICY_SENTINEL_VERSION}`;
+}
+
+/**
+ * Whether the policy gets a `#sentinel` document and its agents are assigned to it. Managed and
+ * agentless policies are left on the plain id.
+ */
+export function hasSentinelVersionPolicy(
+  policy: Pick<AgentPolicy, 'is_managed' | 'supports_agentless'>
+): boolean {
+  return !policy.is_managed && !policy.supports_agentless;
 }
 
 export function splitVersionSuffixFromPolicyId(policyId: string): {
@@ -217,7 +228,7 @@ export function buildPolicyIdsOrVariantsEsFilter(
 // policy_id exact-term path. No prefix is used so that the query remains compatible with
 // search.allow_expensive_queries:false; versioned policy_id values (e.g. policy-id#9.3)
 // without a policy_base_id can only arise in the narrow window of a mixed-version rollout,
-// and the startup backfill covers all pre-existing documents.
+// and the setup backfill covers all pre-existing documents.
 
 /**
  * KQL equivalent of {@link buildPolicyBaseIdWithFallbackEsFilter}: matches migrated documents via

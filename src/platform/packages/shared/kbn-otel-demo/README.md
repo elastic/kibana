@@ -31,7 +31,7 @@ node scripts/otel_demo.js --teardown
 ## What This Does
 
 1. **Ensures minikube is running** - Starts it if needed
-2. **Enables Streams in Kibana** - Calls `POST /api/streams/_enable` to set up the logs.otel index
+2. **Enables Streams in Kibana** - Only with `--logs-index` (e.g. `logs.otel`): calls `POST /api/streams/_enable` so the wired stream exists. By default container logs go to the `logs-generic.otel-default` data stream
 3. **Resolves host.minikube.internal** - Injects `hostAliases` so pods can reach host Elasticsearch
 4. **Deploys demo to Kubernetes** - Creates namespace, deployments, services, RBAC
 5. **Configures OTel Collector**:
@@ -53,7 +53,7 @@ node scripts/otel_demo.js --teardown
 
 The collector reads container logs directly from the Kubernetes node filesystem:
 - Mounts `/var/log/pods`, `/var/log/containers`, and `/var/lib/docker/containers`
-- Parses Docker JSON log format
+- Parses Docker JSON and CRI (containerd, CRI-O; minikube's default) formats with the `container` operator
 - Groups multiline logs (stack traces with indented lines)
 - Enriches with Kubernetes metadata via `k8sattributes` processor
 
@@ -92,7 +92,7 @@ node scripts/otel_demo.js [options]
 Options:
   --config, -c         Path to Kibana config file (default: config/kibana.dev.yml)
   --vanilla            Use vanilla otel-collector-contrib instead of EDOT Collector
-  --logs-index         Index name for logs (default: "logs.otel", vanilla only)
+  --logs-index         Index for container logs and K8s events, e.g. "logs.otel" (default: logs-generic.otel-default)
   --teardown           Stop and remove the OTel Demo from Kubernetes
   --scenario, -s       Apply a failure scenario (can be repeated)
   --patch, -p          Patch scenarios onto running cluster (no redeploy)

@@ -9,8 +9,9 @@
 
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, LogDocumentOverview } from '../..';
-import { fieldConstants, formatFieldValueText } from '../..';
+import type { DataTableRecord, LogDocumentOverview } from '../types';
+import * as fieldConstants from '../field_constants';
+import { formatFieldValueText } from './format_value';
 import { getFieldValueWithFallback } from './get_field_value_with_fallback';
 
 export function getLogDocumentOverview(
@@ -36,9 +37,15 @@ export function getLogDocumentOverview(
     ) as LogDocumentOverview[T];
   };
 
-  const levelArray = doc.flattened[fieldConstants.LOG_LEVEL_FIELD];
-  const level = Array.isArray(levelArray) && levelArray.length > 0 ? levelArray[0] : levelArray;
+  const getFirstValue = (field: string) => {
+    const value = doc.flattened[field];
+    return Array.isArray(value) && value.length > 0 ? value[0] : value;
+  };
+
+  const level = getFirstValue(fieldConstants.LOG_LEVEL_FIELD);
+  const severityText = getFirstValue(fieldConstants.OTEL_SEVERITY_TEXT_FIELD);
   const message = formatField(fieldConstants.MESSAGE_FIELD);
+  const otelMessage = formatField(fieldConstants.OTEL_MESSAGE_FIELD);
   const errorMessage = formatField(fieldConstants.ERROR_MESSAGE_FIELD);
   const eventOriginal = formatField(fieldConstants.EVENT_ORIGINAL_FIELD);
   const timestamp = formatField(fieldConstants.TIMESTAMP_FIELD);
@@ -68,11 +75,7 @@ export function getLogDocumentOverview(
   const agentName = formatField(fieldConstants.AGENT_NAME_FIELD);
 
   // apm  log fields
-  const errorLogLevelArray = doc.flattened[fieldConstants.ERROR_LOG_LEVEL_FIELD];
-  const errorLogLevel =
-    Array.isArray(errorLogLevelArray) && errorLogLevelArray.length > 0
-      ? errorLogLevelArray[0]
-      : errorLogLevelArray;
+  const errorLogLevel = getFirstValue(fieldConstants.ERROR_LOG_LEVEL_FIELD);
   const errorExceptionMessage = formatField(fieldConstants.ERROR_EXCEPTION_MESSAGE);
   const processorEvent = formatField(fieldConstants.PROCESSOR_EVENT_FIELD);
 
@@ -91,9 +94,11 @@ export function getLogDocumentOverview(
 
   return {
     [fieldConstants.LOG_LEVEL_FIELD]: level,
+    [fieldConstants.OTEL_SEVERITY_TEXT_FIELD]: severityText,
     [fieldConstants.ERROR_LOG_LEVEL_FIELD]: errorLogLevel,
     [fieldConstants.TIMESTAMP_FIELD]: timestamp,
     [fieldConstants.MESSAGE_FIELD]: message,
+    [fieldConstants.OTEL_MESSAGE_FIELD]: otelMessage,
     [fieldConstants.ERROR_MESSAGE_FIELD]: errorMessage,
     [fieldConstants.EVENT_ORIGINAL_FIELD]: eventOriginal,
     [fieldConstants.SERVICE_NAME_FIELD]: serviceName,

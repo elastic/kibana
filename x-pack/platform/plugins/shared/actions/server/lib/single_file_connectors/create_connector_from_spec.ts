@@ -9,6 +9,7 @@ import type { ConnectorSpec } from '@kbn/connector-specs';
 import {
   TEST_CONNECTOR_SUB_ACTION,
   connectorSpecHasEvents,
+  getSandboxHosts,
   getSandboxSupportedAuthTypeIds,
 } from '@kbn/connector-specs';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
@@ -83,6 +84,7 @@ export const createConnectorTypeFromSpec = (
 
   const executor = hasExecutableActions
     ? generateExecutorFunction({
+        connectorTypeId: spec.metadata.id,
         actions: executableActions,
         getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
         getCredential: actions.getCredential,
@@ -124,5 +126,6 @@ export const createConnectorTypeFromSpec = (
     isExperimental: spec.metadata.isTechnicalPreview,
     isTestable: Boolean(spec.test.enabled),
     sandboxSupportedAuthTypes: getSandboxSupportedAuthTypeIds(spec.auth),
+    getSandboxHosts: ({ config }) => getSandboxHosts(spec.sandbox, config),
   };
 };

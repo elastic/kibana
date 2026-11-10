@@ -1,5 +1,5 @@
 {
-  "sha1": "be9252d9986059c739ae5027c825d01ea638aec4",
+  "sha1": "1ba4473102ab65c0a6820eba0815fc321ccae3a2",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/custom_content/test/scout/api/tests/custom_content_tool_ui_events.spec.ts",
-        "line": 127,
+        "line": 132,
         "column": 74
       }
     }

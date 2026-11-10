@@ -14,7 +14,6 @@ import * as i18n from './translations';
 
 export {
   ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
-  ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 
@@ -289,9 +288,6 @@ export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadine
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
 
-/** This Kibana Advanced Setting allows users to enable/disable the new EUI-based flyout system */
-export const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable the rule changes history feature */
 export const ENABLE_RULE_CHANGES_HISTORY_SETTING =
   'securitySolution:enableRuleChangesHistory' as const;
@@ -523,6 +519,8 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   ATTACKS_PAGE_CALLOUT: 'securitySolution.attacksPage.tourCalloutDismissed.v9.5',
   ATTACKS_PAGE_WORKFLOWS_PROMOTION_CALLOUT:
     'securitySolution.attacksPage.workflowsPromotionCalloutDismissed.v9.5',
+  ENTITY_ANALYTICS_HOME_PAGE_BANNER:
+    'securitySolution.entityAnalyticsHomePage.productTourBannerDismissed.v9.6',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -752,6 +750,7 @@ export enum SecurityAgentBuilderAttachments {
   entity = 'security.entity',
   entityAnalyticsDashboard = 'security.entity_analytics_dashboard',
   entityGraph = 'security.entity_graph',
+  entityAnalyticsAiBrief = 'security.entity_analytics_ai_brief',
   entityRiskScoreHistory = 'security.entity_risk_score_history',
   exception = 'security.exception',
   investigationIocs = 'security.investigation.iocs',

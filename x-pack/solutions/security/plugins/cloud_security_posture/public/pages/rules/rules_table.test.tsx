@@ -150,13 +150,151 @@ describe('RulesTable', () => {
       </Wrapper>
     );
 
-    // Check that the "select all" checkbox has an aria-label
-    const selectAllCheckbox = screen.getByLabelText('Select all rules on current page');
-    expect(selectAllCheckbox).toBeInTheDocument();
+    // The table provides the "select all" checkbox
+    expect(screen.getAllByTestId('checkboxSelectAll')).toHaveLength(1);
 
-    // Check that individual rule checkboxes have aria-labels with rule names
+    // Individual rule checkboxes are named after their rule
     const mockRuleName = selectRulesMock[0].metadata.name;
-    const ruleCheckbox = screen.getByLabelText(`Select rule: ${mockRuleName}`);
-    expect(ruleCheckbox).toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: `Select rule: ${mockRuleName}` })
+    ).toBeInTheDocument();
+  });
+
+  describe('row selection', () => {
+    const [firstRule, secondRule] = selectRulesMock as CspBenchmarkRulesWithStates[];
+    // a rule that is selected but is not part of the rules shown in the current page
+    const ruleOnAnotherPage = {
+      ...firstRule,
+      metadata: { ...firstRule.metadata, id: 'rule-on-another-page', name: 'Rule on another page' },
+    } as CspBenchmarkRulesWithStates;
+
+    const originalInnerWidth = window.innerWidth;
+    const setViewportWidth = (width: number) => {
+      window.innerWidth = width;
+      window.dispatchEvent(new Event('resize'));
+    };
+
+    afterEach(() => {
+      setViewportWidth(originalInnerWidth);
+    });
+
+    it('selects a rule and keeps the rules selected on other pages', async () => {
+      const setSelectedRules = jest.fn();
+      render(
+        <Wrapper>
+          <RulesTable
+            {...mockProps}
+            selectedRules={[ruleOnAnotherPage]}
+            setSelectedRules={setSelectedRules}
+          />
+        </Wrapper>
+      );
+
+      await userEvent.click(
+        screen.getByRole('checkbox', { name: `Select rule: ${firstRule.metadata.name}` })
+      );
+
+      expect(setSelectedRules).toHaveBeenCalledWith([ruleOnAnotherPage, firstRule]);
+    });
+
+    it('deselects a rule and keeps the rules selected on other pages', async () => {
+      const setSelectedRules = jest.fn();
+      render(
+        <Wrapper>
+          <RulesTable
+            {...mockProps}
+            selectedRules={[ruleOnAnotherPage, firstRule]}
+            setSelectedRules={setSelectedRules}
+          />
+        </Wrapper>
+      );
+
+      const checkbox = screen.getByRole('checkbox', {
+        name: `Select rule: ${firstRule.metadata.name}`,
+      });
+      expect(checkbox).toBeChecked();
+
+      await userEvent.click(checkbox);
+
+      expect(setSelectedRules).toHaveBeenCalledWith([ruleOnAnotherPage]);
+    });
+
+    it('"select all" selects every rule of the current page and keeps the other pages', async () => {
+      const setSelectedRules = jest.fn();
+      render(
+        <Wrapper>
+          <RulesTable
+            {...mockProps}
+            selectedRules={[ruleOnAnotherPage]}
+            setSelectedRules={setSelectedRules}
+          />
+        </Wrapper>
+      );
+
+      await userEvent.click(screen.getByTestId('checkboxSelectAll'));
+
+      expect(setSelectedRules).toHaveBeenCalledWith([ruleOnAnotherPage, firstRule, secondRule]);
+    });
+
+    it('"select all" deselects only the rules of the current page', async () => {
+      const setSelectedRules = jest.fn();
+      render(
+        <Wrapper>
+          <RulesTable
+            {...mockProps}
+            selectedRules={[ruleOnAnotherPage, firstRule, secondRule]}
+            setSelectedRules={setSelectedRules}
+          />
+        </Wrapper>
+      );
+
+      const selectAll = screen.getByTestId('checkboxSelectAll');
+      expect(selectAll).toBeChecked();
+
+      await userEvent.click(selectAll);
+
+      expect(setSelectedRules).toHaveBeenCalledWith([ruleOnAnotherPage]);
+    });
+
+    it('does not alter a selection that spans multiple pages when it renders', () => {
+      const setSelectedRules = jest.fn();
+      render(
+        <Wrapper>
+          <RulesTable
+            {...mockProps}
+            selectedRules={[ruleOnAnotherPage, firstRule, secondRule]}
+            setSelectedRules={setSelectedRules}
+          />
+        </Wrapper>
+      );
+
+      expect(setSelectedRules).not.toHaveBeenCalled();
+    });
+
+    it('shows the "select all" checkbox as indeterminate when only some rules are selected', () => {
+      render(
+        <Wrapper>
+          <RulesTable {...mockProps} selectedRules={[firstRule]} />
+        </Wrapper>
+      );
+
+      expect((screen.getByTestId('checkboxSelectAll') as HTMLInputElement).indeterminate).toBe(
+        true
+      );
+    });
+
+    // WCAG 2.2 SC 1.4.10 Reflow: at 400% zoom the table is rendered in its stacked (mobile) layout
+    it('renders a single "select all" checkbox and a single checkbox per rule at 400% zoom', () => {
+      setViewportWidth(320);
+      render(
+        <Wrapper>
+          <RulesTable {...mockProps} />
+        </Wrapper>
+      );
+
+      // 1 "select all" + 1 per rule; `getAllByRole` ignores the table's hidden header copy
+      expect(screen.getAllByRole('checkbox')).toHaveLength(1 + selectRulesMock.length);
+      expect(screen.getAllByRole('checkbox', { name: /select all rows/i })).toHaveLength(1);
+    });
   });
 });

@@ -104,6 +104,6 @@ export function createVegaRequestHandler(
       theme.getTheme(),
       esqlVariables
     );
-    return await vp.parseAsync();
+    return (await vp.parseAsync()).toRenderDescriptor();
   };
 }

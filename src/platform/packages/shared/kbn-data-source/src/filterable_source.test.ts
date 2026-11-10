@@ -14,6 +14,7 @@ import { buildEsQuery, buildPhraseFilter } from '@kbn/es-query';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import { registerEsqlSourceInDataViewsCache } from './cache_adapter';
 import type { FilterableSource } from './filterable_source';
+import { isEsqlFilterableSource } from './filterable_source';
 import { DataViewSource } from './sources/data_view_source';
 import { EsqlSource } from './sources/esql_source';
 import { createMockDataViewsService } from './__mocks__/data_views_service.mock';
@@ -74,6 +75,49 @@ describe('toFilterableSource', () => {
       expect(filterable.isTimeBased()).toBe(true);
     });
 
+    describe('sharing between queries on the same dataset', () => {
+      const onDataset = (title: string, esql: string, timeFieldName = '@timestamp') =>
+        EsqlSource.create({
+          query: esql,
+          timeFieldName,
+          resultColumns: [makeColumn('avg_bytes', 'number', 'double', true)],
+        }).then((source) => ({ source, title, timeFieldName }));
+
+      it('returns the same object for queries on the same dataset, like the shared DataView', async () => {
+        await seedDataset('shared-*', '@timestamp');
+        const first = await onDataset('shared-*', 'FROM shared-* | STATS avg_bytes = AVG(bytes)');
+        const second = await onDataset('shared-*', 'FROM shared-* | WHERE bytes > 10 | LIMIT 5');
+
+        expect(first.source.id).not.toBe(second.source.id);
+        expect(await second.source.toFilterableSource()).toBe(
+          await first.source.toFilterableSource()
+        );
+      });
+
+      it('returns another object for another dataset or time field', async () => {
+        await seedDataset('one-*', '@timestamp');
+        await seedDataset('two-*', '@timestamp');
+        await seedDataset('one-*', 'event.ingested');
+        const base = await onDataset('one-*', 'FROM one-* | LIMIT 1');
+        const otherTarget = await onDataset('two-*', 'FROM two-* | LIMIT 1');
+        const otherTime = await onDataset('one-*', 'FROM one-* | LIMIT 1', 'event.ingested');
+
+        const filterable = await base.source.toFilterableSource();
+
+        expect(await otherTarget.source.toFilterableSource()).not.toBe(filterable);
+        expect(await otherTime.source.toFilterableSource()).not.toBe(filterable);
+      });
+    });
+
+    it('has the name of the source, and no getName, which is an optional capability', async () => {
+      const source = await statsOnDataset('named-*');
+
+      const filterable = await source.toFilterableSource();
+
+      expect(filterable.name).toBe(source.name);
+      expect('getName' in filterable).toBe(false);
+    });
+
     it('is not time based without a time field', async () => {
       const source = await statsOnDataset('no-time-*');
 
@@ -110,6 +154,15 @@ describe('toFilterableSource', () => {
       );
     });
 
+    it('is marked as an ES|QL source, which has no data view to load by its id', async () => {
+      const source = await statsOnDataset('kind-*');
+
+      const filterable = await source.toFilterableSource();
+
+      expect(filterable.kind).toBe('esql');
+      expect(isEsqlFilterableSource(filterable)).toBe(true);
+    });
+
     it('has no fields while the schema of the dataset is unknown', async () => {
       const source = await EsqlSource.create({ query: 'FROM unknown-*' });
 
@@ -136,6 +189,21 @@ describe('toFilterableSource', () => {
         expect(filterable.title).toBe(dataView.title);
         expect(filterable.timeFieldName).toBe(dataView.timeFieldName);
         expect(summarize(filterable.fields)).toEqual(summarize(dataView.fields.getAll()));
+      });
+
+      it('sets filterable on each field, as the DataView field reports it', async () => {
+        const source = await statsOnDataset('filterable-flag-*', '@timestamp');
+        const dataView = await registerEsqlSourceInDataViewsCache(
+          createMockDataViewsService(),
+          source
+        );
+
+        const { fields } = await source.toFilterableSource();
+
+        expect(fields.length).toBeGreaterThan(0);
+        fields.forEach(({ name, filterable }) => {
+          expect(filterable).toBe(dataView.fields.getByName(name)?.filterable);
+        });
       });
 
       it('has the same fields that unified search offers to filter on', async () => {
@@ -181,6 +249,18 @@ describe('toFilterableSource', () => {
       const filterable = await new DataViewSource(dataView).toFilterableSource();
 
       expect(filterable).toBe(dataView);
+    });
+
+    it('is not marked as an ES|QL source', async () => {
+      const dataView = new DataView({
+        spec: { id: 'dsl-id', title: 'logs-*', timeFieldName: '@timestamp', fields: {} },
+        fieldFormats: {} as DataView['fieldFormats'],
+      });
+
+      const filterable = await new DataViewSource(dataView).toFilterableSource();
+
+      expect(filterable.kind).toBeUndefined();
+      expect(isEsqlFilterableSource(filterable)).toBe(false);
     });
   });
 });

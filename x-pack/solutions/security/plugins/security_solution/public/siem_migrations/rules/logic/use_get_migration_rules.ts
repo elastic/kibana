@@ -9,20 +9,29 @@ import { useQuery, useQueryClient } from '@kbn/react-query';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { useCallback } from 'react';
 import type { RuleMigrationFilters } from '../../../../common/siem_migrations/rules/types';
+import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../common/siem_migrations/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 import { getMigrationRules } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
-export const useGetMigrationRules = (params: {
-  migrationId: string;
-  page?: number;
-  perPage?: number;
-  sortField?: string;
-  sortDirection?: 'asc' | 'desc';
-  filters?: RuleMigrationFilters;
-}) => {
+interface GetMigrationRulesData {
+  migrationRules: RuleMigrationRule[];
+  total: number;
+}
+
+export const useGetMigrationRules = (
+  params: {
+    migrationId: string;
+    page?: number;
+    perPage?: number;
+    sortField?: string;
+    sortDirection?: 'asc' | 'desc';
+    filters?: RuleMigrationFilters;
+  },
+  options?: { enabled?: boolean; initialData?: GetMigrationRulesData }
+) => {
   const { addError } = useAppToasts();
 
   const { migrationId } = params;
@@ -30,7 +39,7 @@ export const useGetMigrationRules = (params: {
     migration_id: migrationId,
   });
 
-  return useQuery(
+  return useQuery<GetMigrationRulesData>(
     ['GET', SPECIFIC_MIGRATION_PATH, params],
     async ({ signal }) => {
       const response = await getMigrationRules({ signal, ...params });
@@ -39,6 +48,7 @@ export const useGetMigrationRules = (params: {
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
+      ...options,
       onError: (error) => {
         addError(error, { title: i18n.GET_MIGRATION_RULES_FAILURE });
       },

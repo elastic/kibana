@@ -8,7 +8,7 @@
 import { z, isoDateTime } from '@kbn/zod';
 import { notificationIdSchema } from '../../common/notification_schema';
 import type { NotificationUnreadStatus } from '../../common/types';
-import { getNotificationDataStreamClient } from '../storage/notification_data_stream';
+import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import type { NotificationQueryDeps } from './query_notifications';
 import { isReadAt, type NotificationReadState } from './read_state';
 
@@ -16,6 +16,8 @@ const unreadStatusSourceSchema = z.object({
   notification_id: notificationIdSchema,
   '@timestamp': isoDateTime(),
 });
+
+type UnreadStatusSource = z.infer<typeof unreadStatusSourceSchema>;
 
 /**
  * Whether the caller has anything unread, for the bell badge dot.
@@ -25,12 +27,14 @@ const unreadStatusSourceSchema = z.object({
  * `capped` flag lets the badge render "10+" without ever paying to count past the cap.
  */
 export const queryUnreadStatus = async (
-  { dataStreams, logger }: NotificationQueryDeps,
+  { esClient, logger }: NotificationQueryDeps,
   readState: NotificationReadState
 ): Promise<NotificationUnreadStatus> => {
   const { overrides, readAllBefore } = readState;
-  const client = await getNotificationDataStreamClient(dataStreams);
-  const response = await client.search({
+  const response = await esClient.search<UnreadStatusSource>({
+    index: NOTIFICATION_DATA_STREAM_NAME,
+    // No stream until a producer submits the first notification, same as `queryNotifications`.
+    ignore_unavailable: true,
     // Encodes the read-state invariant that nothing at or before the marker can be unread, which
     // `isReadAt` still enforces per hit. An override can only postdate the marker, never precede
     // it. Pruning here is what makes polling cheap: `can_match` skips whole backing indices.

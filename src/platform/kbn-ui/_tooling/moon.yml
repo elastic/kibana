@@ -1,0 +1,16 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: kbn-ui-tooling
+language: typescript
+toolchains:
+  default: node
+project:
+  title: kbn-ui tooling
+  sourceRoot: src/platform/kbn-ui/_tooling
+dependsOn:
+  - '@kbn/moon'
+tags:
+  - jest-unit-tests
+tasks:
+  jest:
+    inputs:
+      - '/src/platform/kbn-ui/*/moon.yml'

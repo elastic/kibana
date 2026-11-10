@@ -145,7 +145,7 @@ apiTest.describe('GET /api/data_views/v2 - as code', { tag: tags.deploymentAgnos
     });
     expect(response.body.data[0].meta.managed).toBe(false);
     expect(response.body.data[0].meta.version).toBeDefined();
-    expect(response.body.data[0].meta.namespaces).toBeDefined();
+    expect(response.body.data[0].meta.spaces).toBeDefined();
   });
 
   apiTest('narrows results by query', async ({ apiClient }) => {

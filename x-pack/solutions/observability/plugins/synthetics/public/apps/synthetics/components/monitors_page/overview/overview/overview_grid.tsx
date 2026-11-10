@@ -62,10 +62,10 @@ export const OverviewGrid = memo(
       dispatch(refreshOverviewTrends.get());
     }, [dispatch, lastRefresh, view, isInitialized]);
 
-    // Display no monitors found when down, up, or disabled filter produces no results
-    if (status && !monitorsSortedByStatus.length && isInitialized) {
-      return <NoMonitorsFound isInteractive={isInteractive} />;
-    }
+    // Keep the list toolbar on an empty result. "Show autodiscovered monitors"
+    // lives there; returning only the empty prompt hid it when those were the
+    // only monitors.
+    const isEmpty = Boolean(status && !monitorsSortedByStatus.length && isInitialized);
 
     return (
       <>
@@ -137,7 +137,9 @@ export const OverviewGrid = memo(
         ) : (
           <EuiSpacer size="m" />
         )}
-        {view === 'cardView' ? (
+        {isEmpty ? (
+          <NoMonitorsFound isInteractive={isInteractive} />
+        ) : view === 'cardView' ? (
           <OverviewCardView
             monitorsSortedByStatus={monitorsSortedByStatus}
             setFlyoutConfigCallback={setFlyoutConfigCallback}

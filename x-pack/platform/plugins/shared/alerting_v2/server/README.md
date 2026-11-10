@@ -77,6 +77,16 @@ Each event has:
 
 A series is the per-rule stream of events sharing the same `group_hash`. It is the stable identity used to compare runs, detect recoveries, scope suppressions, and correlate lifecycle state over time.
 
+`group_hash` only hashes the grouping fields and their values, so it is not unique on its own: two rules in a space that group the same values share it, and every rule without grouping fields shares one constant hash. A series is therefore identified by its space, its owner and its hash: `(space_id, rule_id, group_hash)` for a rule-backed series and `(space_id, source, group_hash)` for an external one. Every `.rule-events` and `.alert-actions` document carries all of those fields, so nothing extra is stored.
+
+#### Series id
+
+The API addresses a series by a `series_id`: base64url of `1::rule::{space_id}::{rule_id}::{group_hash}` or `1::source::{space_id}::{source}::{group_hash}`. The leading `1` is the format version.
+
+- The episodes query derives `series_id` for every row with a shared ES|QL expression (`SERIES_ID_EVAL` in `@kbn/alerting-v2-common-queries`) and the same expression keys the per-series aggregations, so one rule's snooze never shows on another rule's episodes. Clients echo the id and never construct it.
+- The server decodes it with `decodeSeriesId` (`@kbn/alerting-v2-utils`), which `encodeSeriesId` mirrors byte for byte, and resolves the latest event by the owner and `group_hash` inside the request's space. A malformed id is a `400 INVALID_SERIES_ID`; an id minted for another space, or one with no events, is a `404`.
+- The series routes (`/internal/alerting/v2/series/{series_id}/_snooze`, `_unsnooze` and the bulk variants) take it, and the `activate` / `deactivate` latest-episode guard compares within the alert's own series.
+
 ### Episode
 
 An episode is the lifecycle container for an alert series. Episodes exist only for `type: alert` events.
@@ -278,5 +288,6 @@ If your change is about...
 - Prefer changing the smallest owning subsystem instead of threading behavior through multiple layers.
 - If you add fields to stored documents, update the resources definitions and any readers/writers that depend on them.
 - If you add pipeline state, add it to the relevant `types.ts`, update the step bindings, and add tests at the step and pipeline level.
+- If you add or change a log line, follow the logging rules in [`lib/services/logger_service/README.md`](lib/services/logger_service/README.md): log through `LoggerService` from a subsystem logger, keep IDs in `labels`, attach a `code` to every `warn` / `error`, and never log user-authored text or credentials.
 - If you are tempted to make the dispatcher understand rule execution internals, that logic probably belongs earlier in the rule executor.
 - If you are tempted to make the director send notifications, that logic probably belongs later in the dispatcher.

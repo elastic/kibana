@@ -16,6 +16,8 @@ import {
   extractRetrievalEvidence,
   extractUnscopedAlertRetrievalRowCounts,
   findAdToolResult,
+  getValidationUnreachableReason,
+  hasScopedAgentAlertRetrievalWithoutIdentity,
   insightsForResponse,
   insightsFromValidatedDiscoveries,
   trackedStageKeys,
@@ -42,12 +44,17 @@ const recordedEsqlStep = ({
   ids,
   includeResultQuery = true,
   includeIdColumn = true,
+  identityColumn = '_id',
 }: {
   query: string;
   rows?: number;
   ids?: string[];
   includeResultQuery?: boolean;
   includeIdColumn?: boolean;
+  /** The column the rows carry their alert identity in. `kibana.alert.uuid`
+   *  models a retrieval that kept no `_id` metadata but still returned the
+   *  alert's own identity. */
+  identityColumn?: '_id' | 'kibana.alert.uuid';
 }): AttackDiscoveryAgentBuilderTaskOutput['steps'][number] => {
   const alertIds =
     ids ?? Array.from({ length: rows ?? 0 }, (_, index) => `ad-scenario-alert-${index}`);
@@ -61,7 +68,7 @@ const recordedEsqlStep = ({
         type: 'esql_results',
         data: {
           columns: includeIdColumn
-            ? [{ name: '_id', type: 'keyword' }]
+            ? [{ name: identityColumn, type: 'keyword' }]
             : [{ name: 'message', type: 'text' }],
           ...(includeResultQuery ? { query } : {}),
           source: 'esql',
@@ -897,9 +904,10 @@ describe("the AD tool call's own ES|QL query", () => {
 describe('supplied alerts can never be read as retrieved', () => {
   // `get_pipeline_data` Step 2.5 writes the SUPPLIED alert set into the
   // retrieval block (`extraction_strategy: 'provided'`,
-  // `alerts_context_count: providedAlerts.length`). That branch is unreachable
-  // at this revision; making it reachable without this exclusion would score the
-  // 7 provided-mode dense reps 16-vs-95 — a 0 that says nothing about retrieval.
+  // `alerts_context_count: providedAlerts.length`). That branch is the reading
+  // for a supplied-alerts run — no alert-retrieval workflow executes, so
+  // `alertRetrievalData` stays null, and counting it would score the supplied
+  // set as a retrieval.
   it('reads a provided-mode reconstruction as supplied, and scores the agent retrieval', () => {
     const result = computeWorkflowAlertCounts({
       pipeline: {
@@ -1125,6 +1133,104 @@ describe('an unscoped retrieval scores 0 rather than going unscored', () => {
 
     expect(result.retrievedAlertCount).toBeNull();
     expect(result.retrievedAlertCountSource).toBe('none');
+  });
+});
+
+describe('an alert identity carried without the _id metadata', () => {
+  it('counts the alert population from kibana.alert.uuid', () => {
+    const steps = [
+      recordedEsqlStep({
+        query: denseRetrievalQuery,
+        ids: denseAlertIds(95),
+        identityColumn: 'kibana.alert.uuid',
+      }),
+    ];
+
+    expect(extractAgentAlertRetrievalPopulation(steps)).toBe(95);
+  });
+
+  it('unions the _id and kibana.alert.uuid results of a split retrieval', () => {
+    const steps = [
+      recordedEsqlStep({ query: denseRetrievalQuery, ids: denseAlertIds(50) }),
+      recordedEsqlStep({
+        query: `${denseRetrievalQuery}\n  | WHERE host.name == "wks-karen-06"`,
+        ids: denseAlertIds(45, 50),
+        identityColumn: 'kibana.alert.uuid',
+      }),
+    ];
+
+    expect(extractAgentAlertRetrievalPopulation(steps)).toBe(95);
+  });
+});
+
+describe('a scoped retrieval whose rows carry no identity is attributed', () => {
+  const scopedQuery = `FROM .alerts-security.alerts-default | WHERE tags == "${AD2_SCENARIO_SEED_LABEL}"`;
+
+  const workflowFor = (steps: AttackDiscoveryAgentBuilderTaskOutput['steps']) =>
+    buildWorkflow({
+      pipeline: null,
+      agentEsqlRowCounts: extractAgentEsqlRowCounts(steps),
+      agentAlertRetrievalPopulation: extractAgentAlertRetrievalPopulation(
+        steps,
+        AD2_SCENARIO_SEED_LABEL
+      ),
+      scopedAgentRetrievalWithoutIdentity: hasScopedAgentAlertRetrievalWithoutIdentity(
+        steps,
+        AD2_SCENARIO_SEED_LABEL
+      ),
+      retrievalScope: AD2_SCENARIO_SEED_LABEL,
+      unscopedAgentAlertRetrievalRowCounts: extractUnscopedAlertRetrievalRowCounts(
+        steps,
+        AD2_SCENARIO_SEED_LABEL
+      ),
+    });
+
+  it('reports the retrieval as unidentified rather than as no retrieval', () => {
+    const steps = [recordedEsqlStep({ query: scopedQuery, rows: 2, includeIdColumn: false })];
+    const workflow = workflowFor(steps);
+
+    expect(workflow.retrievedAlertCount).toBe(0);
+    expect(workflow.retrievedAlertCountSource).toBe('agent_esql_retrieval_unidentified');
+    expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([2]);
+  });
+
+  it('does not call an empty scoped retrieval unidentified, whatever its projection', () => {
+    const steps = [recordedEsqlStep({ query: scopedQuery, rows: 0, includeIdColumn: false })];
+    const workflow = workflowFor(steps);
+
+    expect(hasScopedAgentAlertRetrievalWithoutIdentity(steps, AD2_SCENARIO_SEED_LABEL)).toBe(false);
+    expect(workflow.retrievedAlertCount).toBe(0);
+    expect(workflow.retrievedAlertCountSource).toBe('none');
+    expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([0]);
+  });
+
+  it('attributes a scoped retrieval that returned the expected population', () => {
+    const steps = [
+      recordedEsqlStep({
+        query: scopedQuery,
+        ids: ['fixture-alert-1', 'fixture-alert-2'],
+        identityColumn: 'kibana.alert.uuid',
+      }),
+    ];
+    const workflow = workflowFor(steps);
+
+    expect(workflow.retrievedAlertCount).toBe(2);
+    expect(workflow.retrievedAlertCountSource).toBe('agent_esql_retrieval');
+  });
+
+  it('leaves an unscoped-only retrieval reporting unscoped_retrieval', () => {
+    const workflow = workflowFor([
+      recordedEsqlStep({ query: denseRetrievalQuery, rows: 97, includeIdColumn: false }),
+    ]);
+
+    expect(workflow.retrievedAlertCountSource).toBe('unscoped_retrieval');
+  });
+
+  it('leaves a run with no alerts retrieval reporting none', () => {
+    const workflow = workflowFor([]);
+
+    expect(workflow.retrievedAlertCount).toBe(0);
+    expect(workflow.retrievedAlertCountSource).toBe('none');
   });
 });
 
@@ -1441,6 +1547,20 @@ describe('slow-path handoff (#293046): insights from pipeline validated discover
   });
 });
 
+describe('getValidationUnreachableReason', () => {
+  it.each([
+    [{ status: 'error', alertsContextCount: null }, 'execution_failed'],
+    [{ status: 'completed', alertsContextCount: 0 }, 'zero_alerts'],
+    [{ status: 'completed', alertsContextCount: 2 }, undefined],
+    [{ status: 'completed', alertsContextCount: null }, undefined],
+    [{ status: 'pending', alertsContextCount: 0 }, undefined],
+    [{ status: null, alertsContextCount: 0 }, undefined],
+    [undefined, undefined],
+  ] as const)('maps %j to %s', (adToolResult, reason) => {
+    expect(getValidationUnreachableReason(adToolResult)).toBe(reason);
+  });
+});
+
 describe('slow-path handoff (#293046): waitForValidationPhase', () => {
   const trackingWith = (validation: unknown) => ({
     generation: { workflow_id: 'wf-gen' },
@@ -1464,7 +1584,7 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
       const settled = await waitForValidationPhase({
         fetch,
         executionId: 'exec-1',
-        executionFailed: true,
+        validationUnreachableReason: 'execution_failed',
       });
 
       expect(fetch).toHaveBeenCalledTimes(1);
@@ -1494,12 +1614,134 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
       const pending = waitForValidationPhase({
         fetch,
         executionId: 'exec-1',
-        executionFailed: true,
+        validationUnreachableReason: 'execution_failed',
       });
       const settled = await jest.advanceTimersByTimeAsync(10_000).then(() => pending);
 
       expect(settled.validation?.workflow_run_id).toBe('run-failed-exec');
       expect(fetch).toHaveBeenCalledTimes(3);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // The product short-circuits a zero-alert run (`handleNoAlerts`): `completed`
+  // with `alerts_context_count: 0`, no generation/validation workflow. Without
+  // this exit the poller burned the full 10-minute budget on every such run.
+  it('stops polling once the AD tool reported a zero-alert short-circuit', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce({ generation: null, validation: null })
+        .mockImplementation(async () => {
+          throw new Error('polled again after a zero-alert short-circuit');
+        });
+
+      const settled = await waitForValidationPhase({
+        fetch,
+        executionId: 'exec-1',
+        validationUnreachableReason: 'zero_alerts',
+      });
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(settled).toEqual({ generation: null, validation: null });
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  // A correct zero-alert run has nothing to read from tracking, so a tracking
+  // GET that is not indexed yet must not turn it into a harness error (unlike a
+  // failed run, which throws when no snapshot exists).
+  it('returns an empty snapshot for a zero-alert run whose tracking is not indexed yet', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockRejectedValue(Object.assign(new Error('404'), { response: { status: 404 } }));
+
+      const settled = await waitForValidationPhase({
+        fetch,
+        executionId: 'exec-1',
+        validationUnreachableReason: 'zero_alerts',
+      });
+
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(settled).toEqual({ generation: null, validation: null });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it.each([
+    ['500', Object.assign(new Error('500'), { response: { status: 500 } })],
+    ['429', Object.assign(new Error('429'), { response: { status: 429 } })],
+    ['network error', new Error('connection refused')],
+  ])(
+    'throws instead of returning an empty snapshot for a zero-alert run on a %s tracking error',
+    async (_name, trackingError) => {
+      const fetch = jest.fn().mockRejectedValue(trackingError);
+
+      await expect(
+        waitForValidationPhase({
+          fetch,
+          executionId: 'exec-1',
+          validationUnreachableReason: 'zero_alerts',
+        })
+      ).rejects.toThrow(/failed before reaching the validation phase/);
+      expect(fetch).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it('still throws for a failed execution that never produced a tracking snapshot', async () => {
+    const fetch = jest
+      .fn()
+      .mockRejectedValue(Object.assign(new Error('404'), { response: { status: 404 } }));
+
+    await expect(
+      waitForValidationPhase({
+        fetch,
+        executionId: 'exec-1',
+        validationUnreachableReason: 'execution_failed',
+      })
+    ).rejects.toThrow(/failed before reaching the validation phase/);
+  });
+
+  it('does not short-circuit a zero-alert run that did reach validation', async () => {
+    const fetch = jest.fn().mockResolvedValue(trackingWith({ workflow_id: 'wf-val' }));
+
+    const settled = await waitForValidationPhase({
+      fetch,
+      executionId: 'exec-1',
+      validationUnreachableReason: 'zero_alerts',
+    });
+
+    expect(settled.validation).toEqual({ workflow_id: 'wf-val' });
+  });
+
+  // A pending run may still legitimately reach validation, so it keeps polling.
+  it('keeps polling for a pending AD tool result', async () => {
+    jest.useFakeTimers();
+    try {
+      const fetch = jest
+        .fn()
+        .mockResolvedValueOnce(trackingWith(null))
+        .mockResolvedValueOnce(trackingWith(null))
+        .mockResolvedValueOnce(trackingWith({ workflow_id: 'wf-val' }));
+      const pending = waitForValidationPhase({
+        fetch,
+        executionId: 'exec-1',
+        validationUnreachableReason: getValidationUnreachableReason({
+          status: 'pending',
+          alertsContextCount: 0,
+        }),
+      });
+      const settled = await jest.advanceTimersByTimeAsync(10_000).then(() => pending);
+
+      expect(fetch).toHaveBeenCalledTimes(3);
+      expect(settled.validation).toEqual({ workflow_id: 'wf-val' });
     } finally {
       jest.useRealTimers();
     }
@@ -1781,6 +2023,100 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
 
   it('honors a positive AD2_VALIDATION_WAIT_TIMEOUT_MS override', () => {
     expect(resolveValidationWaitTimeoutMs('30000')).toBe(30_000);
+  });
+});
+
+describe('zero-alert short-circuit: task-level wait', () => {
+  // Reverting the `inspectWorkflow` wiring leaves the unit tests of
+  // `waitForValidationPhase` green while every zero-alert run waits out the
+  // full budget. The real task runs here; only the executor and HTTP are faked.
+  it('does not poll past the first tracking read when the AD tool completed with zero alerts', async () => {
+    jest.useFakeTimers();
+    try {
+      const chatClient = {
+        converse: jest.fn().mockResolvedValue({
+          steps: [
+            {
+              type: 'tool_call',
+              tool_id: 'security.attack-discovery.run',
+              results: [
+                {
+                  data: {
+                    execution_uuid: 'exec-zero',
+                    status: 'completed',
+                    alerts_context_count: 0,
+                    discovery_count: 0,
+                  },
+                  tool_result_id: 'zero',
+                  type: 'other',
+                },
+              ],
+            },
+          ],
+        }),
+      };
+      const fetch = jest.fn(async (url: string) => {
+        if (url.endsWith('/tracking')) return { generation: null, validation: null };
+        throw new Error(`unexpected request ${url}`);
+      });
+
+      let taskOutput: unknown;
+      const executorClient = {
+        runExperiment: jest.fn(
+          async ({
+            datasets,
+            task,
+          }: {
+            datasets: Array<{ examples: Array<{ question: string }> }>;
+            task: (args: { input: { question: string } }) => Promise<unknown>;
+          }) => {
+            for (const example of datasets[0].examples) {
+              taskOutput = await task({ input: example });
+            }
+          }
+        ),
+      };
+
+      const run = createEvaluateAttackDiscoveryAgentBuilderDataset({
+        chatClient: chatClient as never,
+        fetch: fetch as never,
+        evaluators: { traceBasedEvaluators: {} } as never,
+        executorClient: executorClient as never,
+        traceEsClient: {} as never,
+      });
+
+      const pending = run({
+        dataset: {
+          name: 'zero-alert-task',
+          description: '',
+          examples: [
+            {
+              input: {
+                question: 'q',
+                triageType: 'live-retrieval',
+                expectedSkills: [],
+                expectedToolPath: [],
+              },
+            },
+          ],
+        },
+      });
+      // Attach the catch immediately and advance the whole wait budget: if the
+      // `inspectWorkflow` wiring is reverted the loop would otherwise run the
+      // full budget under frozen fake timers and hang instead of failing.
+      const settledRun = pending.catch((error: Error) => error);
+      await jest.advanceTimersByTimeAsync(WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS);
+      const runResult = await settledRun;
+      expect(runResult).not.toBeInstanceOf(Error);
+
+      const trackingCalls = fetch.mock.calls.filter(([url]) => url.endsWith('/tracking'));
+      expect(trackingCalls).toHaveLength(1);
+      expect(
+        (taskOutput as { workflow: { passedAlertCount: number | null } }).workflow.passedAlertCount
+      ).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });
 

@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const NO_CONFIGURATION_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.workflows.noConfigurationRequired',
+  'workflows.components.workflows.noConfigurationRequired',
   {
     defaultMessage:
       'No configuration required. This connector uses the internal Kibana workflows API.',
@@ -18,14 +18,14 @@ export const NO_CONFIGURATION_REQUIRED = i18n.translate(
 );
 
 export const WORKFLOW_ID_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.workflows.workflowIdTextFieldLabel',
+  'workflows.components.workflows.workflowIdTextFieldLabel',
   {
     defaultMessage: 'Select Workflow',
   }
 );
 
 export const WORKFLOW_ID_REQUIRED = i18n.translate(
-  'xpack.stackConnectors.components.workflows.error.requiredWorkflowIdText',
+  'workflows.components.workflows.error.requiredWorkflowIdText',
   {
     defaultMessage: 'Workflow ID is required.',
   }

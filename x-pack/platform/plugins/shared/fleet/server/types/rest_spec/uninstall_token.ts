@@ -49,7 +49,11 @@ export const GetUninstallTokensMetadataResponseSchema = ListResponseSchema(
 
 export const GetUninstallTokenRequestSchema = {
   params: schema.object({
-    uninstallTokenId: schema.string({ meta: { description: 'The ID of the uninstall token' } }),
+    uninstallTokenId: schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.uninstall_tokens.get.uninstallTokenId',
+      meta: { description: 'The ID of the uninstall token' },
+    }),
   }),
 };
 

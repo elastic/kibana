@@ -797,14 +797,14 @@ describe('utils', () => {
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 
-    it('returns metadata.template in a response that satisfies the schema', () => {
+    it('omits metadata.template from the response even when it is stored', () => {
       const attrs = createRuleSoAttributes({
         metadata: { name: 'test-rule', template: { id: 'template-1' } },
       });
 
       const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
 
-      expect(result.metadata.template).toEqual({ id: 'template-1' });
+      expect(result.metadata).not.toHaveProperty('template');
       expect(() => ruleResponseSchema.parse(result)).not.toThrow();
     });
 

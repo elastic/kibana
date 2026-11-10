@@ -27,6 +27,7 @@ import {
 import { RULE_EVENTS_DATA_STREAM } from '../../src/data_generators/snapshot_indices';
 import { replayKnowledgeIndicatorsSnapshot } from '../../src/data_generators/replay_knowledge_indicators_snapshot';
 import { seedChronicBackground } from '../../src/data_generators/seed_chronic_background';
+import { seedDetections } from '../../src/data_generators/seed_detections';
 import { evaluate } from '../../src/evaluate';
 import {
   getActiveDatasets,
@@ -355,6 +356,12 @@ evaluate.describe(
                     ...detection,
                     source_id: sourceForEvaluation.id,
                   }));
+                  await seedDetections({
+                    esClient,
+                    detections: stampedDetections,
+                    spaceId: 'default',
+                    log,
+                  });
                   // Same message shape as the production batch.
                   const agentInput = buildDiscoveryInput({ detections: stampedDetections });
 
@@ -462,7 +469,10 @@ evaluate.describe(
                     ),
                 ];
                 const plans = allPlans.filter(
-                  (plan) => plan.sequence.length >= 2 && continuationSuite.includesPath(plan.path)
+                  (plan) =>
+                    plan.sequence.length >= 2 &&
+                    continuationSuite.includesPath(plan.path) &&
+                    (scenario.continuationPaths?.includes(plan.path) ?? true)
                 );
 
                 return plans.map((plan) => ({
@@ -614,6 +624,12 @@ evaluate.describe(
                             : {}),
                           detection_id: `${base.detection_id ?? base.rule_uuid}-fire-${i}`,
                         };
+                        await seedDetections({
+                          esClient,
+                          detections: [detection],
+                          spaceId: 'default',
+                          log,
+                        });
                         const agentInput = buildDiscoveryInput({ detections: [detection] });
 
                         const converseResult = await agentBuilderClient.converse({
