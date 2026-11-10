@@ -23481,7 +23481,7 @@ paths:
                             - value
                         dreaming:
                           additionalProperties: false
-                          description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+                          description: 'What the AI Index learns from its memories: facts, entities and procedures.'
                           type: object
                           properties:
                             connector_id:
@@ -23494,42 +23494,10 @@ paths:
                               type: boolean
                             entities:
                               additionalProperties: false
-                              description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                              description: 'Entity types (nodes). Omitted or null: no entities.'
                               nullable: true
                               type: object
                               properties:
-                                edges:
-                                  description: 'Relationship types between entity types. Omitted or empty: no relationships.'
-                                  items:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      description:
-                                        description: What the type means, as the dreaming model reads it.
-                                        maxLength: 2048
-                                        type: string
-                                      source:
-                                        description: The entity type the relationship starts at.
-                                        maxLength: 128
-                                        minLength: 1
-                                        type: string
-                                      target:
-                                        description: The entity type the relationship points to.
-                                        maxLength: 128
-                                        minLength: 1
-                                        type: string
-                                      type:
-                                        description: The relationship type.
-                                        maxLength: 128
-                                        minLength: 1
-                                        type: string
-                                    required:
-                                      - type
-                                      - source
-                                      - target
-                                  maxItems: 50
-                                  nullable: true
-                                  type: array
                                 nodes:
                                   description: 'Entity types to build. Empty: no entities.'
                                   items:
@@ -23583,6 +23551,26 @@ paths:
                               description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                               maxLength: 8192
                               type: string
+                            procedures:
+                              description: 'Procedure types to build: reusable, step-by-step ways of doing something. Omitted or empty: no procedures.'
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  description:
+                                    description: What the type means, as the dreaming model reads it.
+                                    maxLength: 2048
+                                    type: string
+                                  type:
+                                    description: The procedure type, stored as the KI type `procedure.<type>`.
+                                    maxLength: 128
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - type
+                              maxItems: 50
+                              nullable: true
+                              type: array
                             schedule:
                               additionalProperties: false
                               type: object
@@ -23898,7 +23886,7 @@ paths:
                     - value
                 dreaming:
                   additionalProperties: false
-                  description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+                  description: 'What the AI Index learns from its memories: facts, entities and procedures.'
                   type: object
                   properties:
                     connector_id:
@@ -23911,42 +23899,10 @@ paths:
                       type: boolean
                     entities:
                       additionalProperties: false
-                      description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                      description: 'Entity types (nodes). Omitted or null: no entities.'
                       nullable: true
                       type: object
                       properties:
-                        edges:
-                          description: 'Relationship types between entity types. Omitted or empty: no relationships.'
-                          items:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              description:
-                                description: What the type means, as the dreaming model reads it.
-                                maxLength: 2048
-                                type: string
-                              source:
-                                description: The entity type the relationship starts at.
-                                maxLength: 128
-                                minLength: 1
-                                type: string
-                              target:
-                                description: The entity type the relationship points to.
-                                maxLength: 128
-                                minLength: 1
-                                type: string
-                              type:
-                                description: The relationship type.
-                                maxLength: 128
-                                minLength: 1
-                                type: string
-                            required:
-                              - type
-                              - source
-                              - target
-                          maxItems: 50
-                          nullable: true
-                          type: array
                         nodes:
                           description: 'Entity types to build. Empty: no entities.'
                           items:
@@ -24000,6 +23956,26 @@ paths:
                       description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                       maxLength: 8192
                       type: string
+                    procedures:
+                      description: 'Procedure types to build: reusable, step-by-step ways of doing something. Omitted or empty: no procedures.'
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          description:
+                            description: What the type means, as the dreaming model reads it.
+                            maxLength: 2048
+                            type: string
+                          type:
+                            description: The procedure type, stored as the KI type `procedure.<type>`.
+                            maxLength: 128
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                      maxItems: 50
+                      nullable: true
+                      type: array
                     schedule:
                       additionalProperties: false
                       type: object
@@ -24880,7 +24856,7 @@ paths:
                       - value
                   dreaming:
                     additionalProperties: false
-                    description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+                    description: 'What the AI Index learns from its memories: facts, entities and procedures.'
                     type: object
                     properties:
                       connector_id:
@@ -24893,42 +24869,10 @@ paths:
                         type: boolean
                       entities:
                         additionalProperties: false
-                        description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                        description: 'Entity types (nodes). Omitted or null: no entities.'
                         nullable: true
                         type: object
                         properties:
-                          edges:
-                            description: 'Relationship types between entity types. Omitted or empty: no relationships.'
-                            items:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                description:
-                                  description: What the type means, as the dreaming model reads it.
-                                  maxLength: 2048
-                                  type: string
-                                source:
-                                  description: The entity type the relationship starts at.
-                                  maxLength: 128
-                                  minLength: 1
-                                  type: string
-                                target:
-                                  description: The entity type the relationship points to.
-                                  maxLength: 128
-                                  minLength: 1
-                                  type: string
-                                type:
-                                  description: The relationship type.
-                                  maxLength: 128
-                                  minLength: 1
-                                  type: string
-                              required:
-                                - type
-                                - source
-                                - target
-                            maxItems: 50
-                            nullable: true
-                            type: array
                           nodes:
                             description: 'Entity types to build. Empty: no entities.'
                             items:
@@ -24982,6 +24926,26 @@ paths:
                         description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                         maxLength: 8192
                         type: string
+                      procedures:
+                        description: 'Procedure types to build: reusable, step-by-step ways of doing something. Omitted or empty: no procedures.'
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: What the type means, as the dreaming model reads it.
+                              maxLength: 2048
+                              type: string
+                            type:
+                              description: The procedure type, stored as the KI type `procedure.<type>`.
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                          required:
+                            - type
+                        maxItems: 50
+                        nullable: true
+                        type: array
                       schedule:
                         additionalProperties: false
                         type: object
@@ -25275,7 +25239,7 @@ paths:
                     - value
                 dreaming:
                   additionalProperties: false
-                  description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+                  description: 'What the AI Index learns from its memories: facts, entities and procedures.'
                   type: object
                   properties:
                     connector_id:
@@ -25288,42 +25252,10 @@ paths:
                       type: boolean
                     entities:
                       additionalProperties: false
-                      description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                      description: 'Entity types (nodes). Omitted or null: no entities.'
                       nullable: true
                       type: object
                       properties:
-                        edges:
-                          description: 'Relationship types between entity types. Omitted or empty: no relationships.'
-                          items:
-                            additionalProperties: false
-                            type: object
-                            properties:
-                              description:
-                                description: What the type means, as the dreaming model reads it.
-                                maxLength: 2048
-                                type: string
-                              source:
-                                description: The entity type the relationship starts at.
-                                maxLength: 128
-                                minLength: 1
-                                type: string
-                              target:
-                                description: The entity type the relationship points to.
-                                maxLength: 128
-                                minLength: 1
-                                type: string
-                              type:
-                                description: The relationship type.
-                                maxLength: 128
-                                minLength: 1
-                                type: string
-                            required:
-                              - type
-                              - source
-                              - target
-                          maxItems: 50
-                          nullable: true
-                          type: array
                         nodes:
                           description: 'Entity types to build. Empty: no entities.'
                           items:
@@ -25377,6 +25309,26 @@ paths:
                       description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                       maxLength: 8192
                       type: string
+                    procedures:
+                      description: 'Procedure types to build: reusable, step-by-step ways of doing something. Omitted or empty: no procedures.'
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          description:
+                            description: What the type means, as the dreaming model reads it.
+                            maxLength: 2048
+                            type: string
+                          type:
+                            description: The procedure type, stored as the KI type `procedure.<type>`.
+                            maxLength: 128
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                      maxItems: 50
+                      nullable: true
+                      type: array
                     schedule:
                       additionalProperties: false
                       type: object
@@ -25988,7 +25940,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns what the AI Index learns from its memories: the fact types, entity types and relationship types dreaming builds, its instructions, and how often it runs. An AI Index that never configured dreaming returns `{ "enabled": false }`.
+        Returns what the AI Index learns from its memories: the fact, entity and procedure types dreaming builds, its instructions, and how often it runs. An AI Index that never configured dreaming returns `{ "enabled": false }`.
 
         Returns a 404 response when Context Engine is turned off in this space (`contextEngine:enabled`).<br/><br/>[Required authorization] Route required privileges: contextEngine:read.
       operationId: get-context-engine-ai-index-aiindexid-dreaming
@@ -26019,11 +25971,6 @@ paths:
                     dreaming:
                       enabled: true
                       entities:
-                        edges:
-                          - description: The issue happens only on this platform or version.
-                            source: issue
-                            target: platform
-                            type: occurs_on
                         nodes:
                           - attributes:
                               - status
@@ -26038,6 +25985,9 @@ paths:
                         - description: A confirmed way around a problem until it is fixed.
                           type: workaround
                       instructions: Record confirmed fixes, known issues and policies from support tickets.
+                      procedures:
+                        - description: How to diagnose and fix a problem customers report, step by step.
+                          type: troubleshooting
                       schedule:
                         interval: 24h
               schema:
@@ -26046,7 +25996,7 @@ paths:
                 properties:
                   dreaming:
                     additionalProperties: false
-                    description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+                    description: 'What the AI Index learns from its memories: facts, entities and procedures.'
                     type: object
                     properties:
                       connector_id:
@@ -26059,42 +26009,10 @@ paths:
                         type: boolean
                       entities:
                         additionalProperties: false
-                        description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                        description: 'Entity types (nodes). Omitted or null: no entities.'
                         nullable: true
                         type: object
                         properties:
-                          edges:
-                            description: 'Relationship types between entity types. Omitted or empty: no relationships.'
-                            items:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                description:
-                                  description: What the type means, as the dreaming model reads it.
-                                  maxLength: 2048
-                                  type: string
-                                source:
-                                  description: The entity type the relationship starts at.
-                                  maxLength: 128
-                                  minLength: 1
-                                  type: string
-                                target:
-                                  description: The entity type the relationship points to.
-                                  maxLength: 128
-                                  minLength: 1
-                                  type: string
-                                type:
-                                  description: The relationship type.
-                                  maxLength: 128
-                                  minLength: 1
-                                  type: string
-                              required:
-                                - type
-                                - source
-                                - target
-                            maxItems: 50
-                            nullable: true
-                            type: array
                           nodes:
                             description: 'Entity types to build. Empty: no entities.'
                             items:
@@ -26148,6 +26066,26 @@ paths:
                         description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                         maxLength: 8192
                         type: string
+                      procedures:
+                        description: 'Procedure types to build: reusable, step-by-step ways of doing something. Omitted or empty: no procedures.'
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: What the type means, as the dreaming model reads it.
+                              maxLength: 2048
+                              type: string
+                            type:
+                              description: The procedure type, stored as the KI type `procedure.<type>`.
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                          required:
+                            - type
+                        maxItems: 50
+                        nullable: true
+                        type: array
                       schedule:
                         additionalProperties: false
                         type: object
@@ -26254,16 +26192,11 @@ paths:
                   facts:
                     - type: known_issue
               putAiIndexDreamingRequestExample:
-                description: Example request that turns dreaming on with fact, entity and relationship types
+                description: Example request that turns dreaming on with fact, procedure and entity types
                 summary: Configure dreaming
                 value:
                   enabled: true
                   entities:
-                    edges:
-                      - description: The issue happens only on this platform or version.
-                        source: issue
-                        target: platform
-                        type: occurs_on
                     nodes:
                       - attributes:
                           - status
@@ -26278,11 +26211,14 @@ paths:
                     - description: A confirmed way around a problem until it is fixed.
                       type: workaround
                   instructions: Record confirmed fixes, known issues and policies from support tickets.
+                  procedures:
+                    - description: How to diagnose and fix a problem customers report, step by step.
+                      type: troubleshooting
                   schedule:
                     interval: 24h
             schema:
               additionalProperties: false
-              description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+              description: 'What the AI Index learns from its memories: facts, entities and procedures.'
               type: object
               properties:
                 connector_id:
@@ -26295,42 +26231,10 @@ paths:
                   type: boolean
                 entities:
                   additionalProperties: false
-                  description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                  description: 'Entity types (nodes). Omitted or null: no entities.'
                   nullable: true
                   type: object
                   properties:
-                    edges:
-                      description: 'Relationship types between entity types. Omitted or empty: no relationships.'
-                      items:
-                        additionalProperties: false
-                        type: object
-                        properties:
-                          description:
-                            description: What the type means, as the dreaming model reads it.
-                            maxLength: 2048
-                            type: string
-                          source:
-                            description: The entity type the relationship starts at.
-                            maxLength: 128
-                            minLength: 1
-                            type: string
-                          target:
-                            description: The entity type the relationship points to.
-                            maxLength: 128
-                            minLength: 1
-                            type: string
-                          type:
-                            description: The relationship type.
-                            maxLength: 128
-                            minLength: 1
-                            type: string
-                        required:
-                          - type
-                          - source
-                          - target
-                      maxItems: 50
-                      nullable: true
-                      type: array
                     nodes:
                       description: 'Entity types to build. Empty: no entities.'
                       items:
@@ -26384,6 +26288,26 @@ paths:
                   description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                   maxLength: 8192
                   type: string
+                procedures:
+                  description: 'Procedure types to build: reusable, step-by-step ways of doing something. Omitted or empty: no procedures.'
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        description: What the type means, as the dreaming model reads it.
+                        maxLength: 2048
+                        type: string
+                      type:
+                        description: The procedure type, stored as the KI type `procedure.<type>`.
+                        maxLength: 128
+                        minLength: 1
+                        type: string
+                    required:
+                      - type
+                  maxItems: 50
+                  nullable: true
+                  type: array
                 schedule:
                   additionalProperties: false
                   type: object
@@ -26408,11 +26332,6 @@ paths:
                     dreaming:
                       enabled: true
                       entities:
-                        edges:
-                          - description: The issue happens only on this platform or version.
-                            source: issue
-                            target: platform
-                            type: occurs_on
                         nodes:
                           - attributes:
                               - status
@@ -26427,6 +26346,9 @@ paths:
                         - description: A confirmed way around a problem until it is fixed.
                           type: workaround
                       instructions: Record confirmed fixes, known issues and policies from support tickets.
+                      procedures:
+                        - description: How to diagnose and fix a problem customers report, step by step.
+                          type: troubleshooting
                       schedule:
                         interval: 24h
               schema:
@@ -26435,7 +26357,7 @@ paths:
                 properties:
                   dreaming:
                     additionalProperties: false
-                    description: 'What the AI Index learns from its memories: facts, and entities with the relationships between them.'
+                    description: 'What the AI Index learns from its memories: facts, entities and procedures.'
                     type: object
                     properties:
                       connector_id:
@@ -26448,42 +26370,10 @@ paths:
                         type: boolean
                       entities:
                         additionalProperties: false
-                        description: 'Entity types (nodes) and the relationships between them (edges). Omitted or null: no entities.'
+                        description: 'Entity types (nodes). Omitted or null: no entities.'
                         nullable: true
                         type: object
                         properties:
-                          edges:
-                            description: 'Relationship types between entity types. Omitted or empty: no relationships.'
-                            items:
-                              additionalProperties: false
-                              type: object
-                              properties:
-                                description:
-                                  description: What the type means, as the dreaming model reads it.
-                                  maxLength: 2048
-                                  type: string
-                                source:
-                                  description: The entity type the relationship starts at.
-                                  maxLength: 128
-                                  minLength: 1
-                                  type: string
-                                target:
-                                  description: The entity type the relationship points to.
-                                  maxLength: 128
-                                  minLength: 1
-                                  type: string
-                                type:
-                                  description: The relationship type.
-                                  maxLength: 128
-                                  minLength: 1
-                                  type: string
-                              required:
-                                - type
-                                - source
-                                - target
-                            maxItems: 50
-                            nullable: true
-                            type: array
                           nodes:
                             description: 'Entity types to build. Empty: no entities.'
                             items:
@@ -26537,6 +26427,26 @@ paths:
                         description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                         maxLength: 8192
                         type: string
+                      procedures:
+                        description: 'Procedure types to build: reusable, step-by-step ways of doing something. Omitted or empty: no procedures.'
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: What the type means, as the dreaming model reads it.
+                              maxLength: 2048
+                              type: string
+                            type:
+                              description: The procedure type, stored as the KI type `procedure.<type>`.
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                          required:
+                            - type
+                        maxItems: 50
+                        nullable: true
+                        type: array
                       schedule:
                         additionalProperties: false
                         type: object
@@ -26556,19 +26466,19 @@ paths:
           content:
             application/json:
               examples:
+                duplicateTypeExample:
+                  description: The same fact type is listed twice
+                  summary: Type listed twice
+                  value:
+                    error: Bad Request
+                    message: Fact type 'known_issue' is listed twice.
+                    statusCode: 400
                 memoryDisabledExample:
                   description: The request sets up dreaming while the global Context Engine memory setting is off
                   summary: Memory turned off
                   value:
                     error: Bad Request
                     message: Context Engine memory is disabled. Enable the global memory setting before setting up dreaming.
-                    statusCode: 400
-                unknownEntityTypeExample:
-                  description: A relationship type links an entity type that is not configured
-                  summary: Relationship to an unknown entity type
-                  value:
-                    error: Bad Request
-                    message: Relationship type 'occurs_on' links entity type 'device', which is not configured.
                     statusCode: 400
               schema:
                 additionalProperties: false
@@ -26669,13 +26579,13 @@ paths:
                   { "type": "known_issue", "description": "A problem confirmed to affect customers, with where it happens." },
                   { "type": "workaround", "description": "A confirmed way around a problem until it is fixed." }
                 ],
+                "procedures": [
+                  { "type": "troubleshooting", "description": "How to diagnose and fix a problem customers report, step by step." }
+                ],
                 "entities": {
                   "nodes": [
                     { "type": "issue", "description": "A known problem customers run into.", "attributes": ["status", "fixed_in"] },
                     { "type": "platform", "description": "A browser, operating system or device, with its version." }
-                  ],
-                  "edges": [
-                    { "type": "occurs_on", "source": "issue", "target": "platform", "description": "The issue happens only on this platform or version." }
                   ]
                 }
               }'
@@ -26690,13 +26600,13 @@ paths:
                 { "type": "known_issue", "description": "A problem confirmed to affect customers, with where it happens." },
                 { "type": "workaround", "description": "A confirmed way around a problem until it is fixed." }
               ],
+              "procedures": [
+                { "type": "troubleshooting", "description": "How to diagnose and fix a problem customers report, step by step." }
+              ],
               "entities": {
                 "nodes": [
                   { "type": "issue", "description": "A known problem customers run into.", "attributes": ["status", "fixed_in"] },
                   { "type": "platform", "description": "A browser, operating system or device, with its version." }
-                ],
-                "edges": [
-                  { "type": "occurs_on", "source": "issue", "target": "platform", "description": "The issue happens only on this platform or version." }
                 ]
               }
             }
