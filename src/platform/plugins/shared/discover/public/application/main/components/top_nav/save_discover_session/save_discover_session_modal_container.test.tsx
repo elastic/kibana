@@ -833,7 +833,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
         app: 'dashboards',
         path: '#/view/dashboard-123',
         newPanel: false,
-        state: { savedObjectId: 'the-saved-search-id' },
+        state: { savedObjectId: 'the-saved-search-id', selectedTabId: expect.any(String) },
       });
     });
 
@@ -853,7 +853,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
         app: 'dashboards',
         path: '#/create',
         newPanel: false,
-        state: { savedObjectId: 'the-saved-search-id' },
+        state: { savedObjectId: 'the-saved-search-id', selectedTabId: expect.any(String) },
       });
     });
 
@@ -876,7 +876,7 @@ describe('DiscoverSessionSaveModalContainer', () => {
         app: 'dashboards',
         path: '#/view/dashboard-123',
         newPanel: true,
-        state: { savedObjectId: 'the-saved-search-id' },
+        state: { savedObjectId: 'the-saved-search-id', selectedTabId: expect.any(String) },
       });
     });
 
@@ -897,8 +897,30 @@ describe('DiscoverSessionSaveModalContainer', () => {
         app: 'dashboards',
         path: '#/create',
         newPanel: true,
-        state: { savedObjectId: 'the-saved-search-id' },
+        state: { savedObjectId: 'the-saved-search-id', selectedTabId: expect.any(String) },
       });
+    });
+
+    it('should pin the first tab of the saved session when adding it to a dashboard', async () => {
+      const services = createDiscoverServicesMock();
+      const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
+      const saveSpy = jest.fn<ReturnType<DiscoverSessionService['save']>, Parameters<DiscoverSessionService['save']>>(
+        (discoverSession) =>
+          Promise.resolve({ ...discoverSession, id: discoverSession.id ?? 'new-session', managed: false })
+      );
+      const { modalProps } = await setup({ mockSaveDiscoverSession: saveSpy, services });
+
+      await act(async () => {
+        await modalProps?.onSave(getOnSaveProps({ dashboardId: 'dashboard-123' }));
+      });
+
+      const [[savedSession]] = saveSpy.mock.calls;
+      expect(transferSpy).toHaveBeenCalledWith(
+        TransferAction.SaveByReference,
+        expect.objectContaining({
+          state: expect.objectContaining({ selectedTabId: savedSession.tabs[0].id }),
+        })
+      );
     });
 
     it('should show a success toast on save', async () => {

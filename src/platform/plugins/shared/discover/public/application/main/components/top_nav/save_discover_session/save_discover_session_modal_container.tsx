@@ -158,6 +158,7 @@ export const DiscoverSessionSaveModalContainer = ({
           newPanel: isEmbeddedEditor && userWantsCopy,
           state: {
             savedObjectId: response.discoverSession.id,
+            selectedTabId: response.discoverSession.tabs[0]?.id,
             controlGroupState,
           },
         });
