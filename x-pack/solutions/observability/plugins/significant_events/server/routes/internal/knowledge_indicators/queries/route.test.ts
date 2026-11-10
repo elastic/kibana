@@ -15,6 +15,7 @@ import { DeepStrict } from '@kbn/zod-helpers';
 import type { SignificantEventsMaintenanceState } from '../../../../../common/maintenance/state_machine';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../../../agent_builder/agents/ki_query_generation';
 import { internalKIQueriesRoutes } from './route';
+import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 
 jest.mock('../../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
@@ -783,8 +784,12 @@ describe('generateQueriesRoute', () => {
     });
   });
 
-  it('reports an unreadable conversation as an attempt that never finalized, so the loop retries', async () => {
-    const conversationClient = { get: jest.fn().mockRejectedValue(new Error('not found')) };
+  it('reports a missing conversation as an attempt that never finalized, so the loop retries', async () => {
+    const conversationClient = {
+      get: jest
+        .fn()
+        .mockRejectedValue(createConversationNotFoundError({ conversationId: 'conversation-1' })),
+    };
     const agentBuilder = {
       conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
     };
@@ -797,6 +802,21 @@ describe('generateQueriesRoute', () => {
       connectorId: 'test-connector',
       finalized: false,
     });
+    expect(mockCollectGeneratedKIQueries).not.toHaveBeenCalled();
+  });
+
+  // The step's own retry re-reads the same conversation, which is far cheaper than a new agent run.
+  it('throws any other conversation read error for the step to retry', async () => {
+    const conversationClient = {
+      get: jest.fn().mockRejectedValue(new Error('search_phase_execution_exception')),
+    };
+    const agentBuilder = {
+      conversations: { getScopedClient: jest.fn().mockResolvedValue(conversationClient) },
+    };
+
+    await expect(generateRoute.handler(makeHandlerParams({ agentBuilder }))).rejects.toThrow(
+      'search_phase_execution_exception'
+    );
     expect(mockCollectGeneratedKIQueries).not.toHaveBeenCalled();
   });
 

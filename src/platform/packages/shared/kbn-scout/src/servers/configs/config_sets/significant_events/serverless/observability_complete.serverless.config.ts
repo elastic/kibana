@@ -9,9 +9,11 @@
 
 import { servers as defaultConfig } from '../../default/serverless/observability_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
+import { serviceAccountsUiamServerArgs } from '../../service_accounts/shared';
 
 // Significant events sets each space's detection engine up as a service account, which its API
-// tests do in global setup. Serverless keeps service accounts off by default.
+// tests do in global setup. Serverless keeps service accounts off by default, and the account is a
+// UIAM one here, so Task Manager must grant UIAM API keys for the rules it schedules.
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
@@ -19,6 +21,7 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.security.serviceAccounts.enabled=true',
+      ...serviceAccountsUiamServerArgs,
     ],
   },
 };

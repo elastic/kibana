@@ -34,9 +34,21 @@ export const InvestigationIdentitySection = () => {
   const { isDeveloperMode } = useDeveloperMode();
   const isSetUp = isNightshiftSetUp({ investigator: status.data, detection: detection.data });
 
-  const renderStatus = () => {
-    if (status.isLoading) return <EuiLoadingSpinner size="m" />;
+  // The badge needs both statuses: without the detection one it would read "Not set up" while
+  // loading, and for good when that read fails.
+  const readError = status.error ?? detection.error;
+  const retryFailedReads = () => {
     if (!status.data) {
+      status.refetch();
+    }
+    if (detection.isError) {
+      detection.refetch();
+    }
+  };
+
+  const renderStatus = () => {
+    if (status.isLoading || detection.isLoading) return <EuiLoadingSpinner size="m" />;
+    if (!status.data || detection.isError) {
       return (
         <EuiCallOut
           announceOnMount
@@ -48,12 +60,12 @@ export const InvestigationIdentitySection = () => {
           })}
           data-test-subj="nightshiftServiceAccountError"
         >
-          {status.error?.message && <p>{status.error.message}</p>}
+          {readError?.message && <p>{readError.message}</p>}
           <EuiButtonEmpty
             size="xs"
             flush="left"
             iconType="refresh"
-            onClick={() => status.refetch()}
+            onClick={retryFailedReads}
             data-test-subj="nightshiftServiceAccountRetry"
           >
             {i18n.translate('xpack.nightshift.settings.serviceAccount.retry', {

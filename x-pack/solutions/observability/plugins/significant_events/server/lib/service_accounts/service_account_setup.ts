@@ -132,16 +132,27 @@ export function createDetectionEngineSetupService({
     }
   };
 
-  // Puts the space back on the account it had before `_enable`. A failure here is logged rather
-  // than thrown, so the caller still learns why `_enable` refused instead of a rollback error.
+  // Puts the space back on the account it had before `_enable`, so a failed call never leaves it
+  // reading as set up. A failure here is logged rather than thrown, so the caller still learns why
+  // `_enable` failed instead of a rollback error.
   const restorePreviousBinding = async ({
     request,
+    spaceId,
+    serviceAccountId,
     previousAccountId,
   }: {
     request: KibanaRequest;
+    spaceId: string;
+    serviceAccountId: string;
     previousAccountId: string | undefined;
   }): Promise<void> => {
     try {
+      // A concurrent `_enable` may have bound the space since: its binding is not this call's to
+      // undo. Bindings have no compare-and-set, so this narrows the race rather than closing it.
+      const currentAccountId = await getDetectionEngineAccountId({ core, spaceId });
+      if (currentAccountId !== serviceAccountId) {
+        return;
+      }
       if (previousAccountId) {
         await core.security.serviceAccounts.bindWorkload(request, {
           serviceAccountId: previousAccountId,
@@ -169,17 +180,13 @@ export function createDetectionEngineSetupService({
   // is empty when the account does not exist. The account must be the one `nightshift_detection`
   // that holds the detection role, which is what the setup step finds or creates by name. Binding
   // any other account would leave every later run failing with an opaque token exchange error, so
-  // the space is put back as it was and the call is refused.
+  // the call is refused and `enable` puts the space back as it was.
   const assertBoundAccountIsDetectionAccount = async ({
     spaceId,
     serviceAccountId,
-    previousAccountId,
-    request,
   }: {
     spaceId: string;
     serviceAccountId: string;
-    previousAccountId: string | undefined;
-    request: KibanaRequest;
   }): Promise<void> => {
     const expectedName = getNightshiftServiceAccountName('detection');
     let summary: Awaited<
@@ -195,10 +202,8 @@ export function createDetectionEngineSetupService({
       // UIAM answers 403 when Kibana's own identity may not read the account, as in the local
       // UIAM of the functional tests. The account cannot be checked then, and refusing would make
       // the space impossible to set up. A missing, renamed or disabled account is still refused.
+      // Any other failure leaves the account unchecked, so the call fails and the binding goes.
       if (getStatusCode(error) !== 403) {
-        // Any other failure leaves the account unchecked: keeping the binding would make the
-        // space read as set up and run as an account nobody verified.
-        await restorePreviousBinding({ request, previousAccountId });
         throw error;
       }
       logger?.warn(
@@ -211,7 +216,6 @@ export function createDetectionEngineSetupService({
     if (summary?.name === expectedName && summary.enabled) {
       return;
     }
-    await restorePreviousBinding({ request, previousAccountId });
     throw new StatusError(
       summary === null
         ? `Service account [${serviceAccountId}] does not exist. Use the id of the [${expectedName}] account.`
@@ -284,65 +288,67 @@ export function createDetectionEngineSetupService({
       workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
       workloadId: DETECTION_ENGINE_WORKLOAD_ID,
     });
-    await assertBoundAccountIsDetectionAccount({
-      spaceId,
-      serviceAccountId,
-      previousAccountId,
-      request,
-    });
-    // Installed with the caller's request: binding a workflow to an account needs the caller's
-    // `manage_security`, which the workflows plugin enforces. Installing again with another
-    // account rebinds an installed workflow and keeps its enabled state.
-    const client = await workflowsExtensions.getClient(request);
-    for (const workflowId of SETUP_WORKFLOW_IDS) {
-      try {
-        await client.managedWorkflows.install(
-          SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
-          workflowId,
-          { spaceId, workflowIdSuffix: spaceId, values: { serviceAccountId } }
+    // Everything after the bind either completes the setup or puts the space back, so the
+    // binding alone means the space is set up: the UI reads it to decide whether to offer setup.
+    try {
+      await assertBoundAccountIsDetectionAccount({ spaceId, serviceAccountId });
+      // Installed with the caller's request: binding a workflow to an account needs the caller's
+      // `manage_security`, which the workflows plugin enforces. Installing again with another
+      // account rebinds an installed workflow and keeps its enabled state.
+      const client = await workflowsExtensions.getClient(request);
+      for (const workflowId of SETUP_WORKFLOW_IDS) {
+        try {
+          await client.managedWorkflows.install(
+            SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER,
+            workflowId,
+            { spaceId, workflowIdSuffix: spaceId, values: { serviceAccountId } }
+          );
+        } catch (error) {
+          // Keep the status of the workflows plugin: a 403 or 400 is not fixed by calling again.
+          const statusCode = getStatusCode(error) ?? 500;
+          const retry = statusCode >= 500 ? ' Call _enable again to retry.' : '';
+          throw new StatusError(
+            `Installing workflow [${workflowId}] failed: ${
+              error instanceof Error ? error.message : String(error)
+            }.${retry}`,
+            statusCode
+          );
+        }
+      }
+      // Installing is best-effort in the workflows plugin, so check that every workflow ended up
+      // bound to the account instead of answering with ids that were never installed.
+      const unbound: string[] = [];
+      for (const workflowId of SETUP_WORKFLOW_IDS) {
+        const document = await workflowsManagement.management.getWorkflow(
+          `${workflowId}-${spaceId}`,
+          spaceId,
+          request
         );
-      } catch (error) {
-        // Keep the status of the workflows plugin: a 403 or 400 is not fixed by calling again.
-        const statusCode = getStatusCode(error) ?? 500;
-        const retry = statusCode >= 500 ? ' The space is bound; call _enable again to retry.' : '';
+        if (document?.definition?.settings?.run_as !== serviceAccountId) {
+          unbound.push(workflowId);
+        }
+      }
+      // A concurrent call for another account may have rebound the space after this one bound it.
+      const currentAccountId = await getDetectionEngineAccountId({ core, spaceId });
+      if (currentAccountId !== serviceAccountId) {
         throw new StatusError(
-          `Installing workflow [${workflowId}] failed: ${
-            error instanceof Error ? error.message : String(error)
-          }.${retry}`,
-          statusCode
+          `The detection engine of space [${spaceId}] is now bound to [${currentAccountId}] instead of [${serviceAccountId}], so a concurrent _enable replaced this one. Call _enable again with the account you want.`,
+          409
         );
       }
-    }
-    // Installing is best-effort in the workflows plugin, so check that every workflow ended up
-    // bound to the account instead of answering with ids that were never installed.
-    const unbound: string[] = [];
-    for (const workflowId of SETUP_WORKFLOW_IDS) {
-      const document = await workflowsManagement.management.getWorkflow(
-        `${workflowId}-${spaceId}`,
-        spaceId,
-        request
-      );
-      if (document?.definition?.settings?.run_as !== serviceAccountId) {
-        unbound.push(workflowId);
+      if (unbound.length > 0) {
+        throw new StatusError(
+          `Setting up space [${spaceId}] did not bind ${unbound
+            .map((id) => `[${id}]`)
+            .join(', ')} to [${serviceAccountId}]. Call _enable again to retry.`,
+          500
+        );
       }
+      await enableScheduledWorkflows({ request, spaceId, workflowsManagement });
+    } catch (error) {
+      await restorePreviousBinding({ request, spaceId, serviceAccountId, previousAccountId });
+      throw error;
     }
-    // A concurrent call for another account may have rebound the space after this one bound it.
-    const currentAccountId = await getDetectionEngineAccountId({ core, spaceId });
-    if (currentAccountId !== serviceAccountId) {
-      throw new StatusError(
-        `The detection engine of space [${spaceId}] is now bound to [${currentAccountId}] instead of [${serviceAccountId}], so a concurrent _enable replaced this one. Call _enable again with the account you want.`,
-        409
-      );
-    }
-    if (unbound.length > 0) {
-      throw new StatusError(
-        `Setting up space [${spaceId}] did not bind ${unbound
-          .map((id) => `[${id}]`)
-          .join(', ')} to [${serviceAccountId}]. The space is bound; call _enable again to retry.`,
-        500
-      );
-    }
-    await enableScheduledWorkflows({ request, spaceId, workflowsManagement });
     return { spaceId, serviceAccountId };
   };
 

@@ -27,6 +27,7 @@ import {
   MAX_EXISTING_QUERIES_FOR_CONTEXT,
   resolveNightshiftModelForRequest,
 } from '@kbn/nightshift-ai';
+import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import { sortQueryLinksForTable } from '../../../../lib/significant_events/utils';
 import {
   buildKIQueryGenerationInput,
@@ -654,15 +655,18 @@ const generateQueriesRoute = createServerRoute({
       server.agentBuilder.conversations.getScopedClient({ request }),
     ]);
     const generationLogger = logger.get('significant_events_queries_generation');
-    // An unreadable conversation is an attempt that never finalized, so the workflow runs the
-    // agent again instead of failing the whole generation.
+    // A missing conversation (agent builder also answers not-found for one the caller may not
+    // read) is an attempt that never finalized, so the loop runs the agent again. Any other
+    // error is thrown for the step's own retry, which re-reads the same conversation instead
+    // of paying for a new agent run.
     const agentConversation = await conversationClient
       .get(conversationId)
       .catch((error: unknown) => {
+        if (!isConversationNotFoundError(error)) {
+          throw error;
+        }
         generationLogger.warn(
-          `Could not read conversation [${conversationId}] of the query generation agent: ${
-            error instanceof Error ? error.message : String(error)
-          }`
+          `Conversation [${conversationId}] of the query generation agent was not found: ${error.message}`
         );
         return undefined;
       });

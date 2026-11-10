@@ -406,7 +406,9 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
     expect(install).not.toHaveBeenCalled();
   });
 
-  it('names the workflow that failed to install and says the space is bound', async () => {
+  // The UI reads the binding alone to decide whether to offer setup, so a failed setup must not
+  // leave one behind.
+  it('names the workflow that failed to install and unbinds the space', async () => {
     const { core } = createCore();
     const { install, ...workflows } = createWorkflowsExtensions();
     install.mockRejectedValueOnce(new Error('index not ready'));
@@ -422,6 +424,13 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
       statusCode: 500,
       message: expect.stringContaining('[system-sources-ki-onboarding-bound]'),
     });
+    await expect(
+      core.security.serviceAccounts.getWorkloadBinding({
+        workloadType: 'detection_engine',
+        workloadId: 'detection_engine',
+        spaceId: 'default',
+      })
+    ).resolves.toBeNull();
   });
 
   it('keeps the status of an install error and only suggests a retry for server errors', async () => {
@@ -458,6 +467,14 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
       statusCode: 409,
       message: expect.stringContaining('[account-2]'),
     });
+    // The newer binding belongs to the concurrent call: the failed one leaves it alone.
+    await expect(
+      core.security.serviceAccounts.getWorkloadBinding({
+        workloadType: 'detection_engine',
+        workloadId: 'detection_engine',
+        spaceId: 'default',
+      })
+    ).resolves.toEqual({ serviceAccountId: 'account-2' });
   });
 
   it('fails when an installed workflow is not bound to the account, naming it', async () => {
