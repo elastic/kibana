@@ -74,6 +74,7 @@ const runHandler = (
     request: { authzResult },
     logger,
     sessionsSettings: settings,
+    isServerless: true,
   });
   return { result, coreContext, logger };
 };
@@ -204,6 +205,7 @@ describe('sessions routes', () => {
           esClient: coreContext.elasticsearch.client,
           settings,
           enabledBy: 'ana',
+          isServerless: true,
         })
       );
       expect(coreContext.security.audit.logger.log).toHaveBeenCalledWith(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-export { AlertingRetryService } from './alerting_retry_service';
+export { EsTransientRetryService } from './es_transient_retry_service';
 export { EsConcurrentModificationError } from './es_concurrent_modification_error';
 export { EsUnacknowledgedError } from './es_unacknowledged_error';
+export type { IRetryService, RetryOptions } from './types';

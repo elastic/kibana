@@ -244,6 +244,18 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
         );
       }
     );
+
+    it('never grades a recovery that is the first round against itself', async () => {
+      const { run, evaluate, reportOnlineEvalsStepFailed } = setup({ rounds: [RECOVERY] });
+
+      await expect(run({ ...RECOVERY_INPUT, graded_report: 'first_round' })).resolves.toEqual({
+        output: { scored: false, skip_reason: 'scoring_failed' },
+      });
+      expect(evaluate).not.toHaveBeenCalled();
+      expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'score', code: 'invalid_input' })
+      );
+    });
   });
 
   it('passes no ground truth for an initial round', async () => {

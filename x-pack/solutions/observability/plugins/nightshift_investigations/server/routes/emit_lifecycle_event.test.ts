@@ -11,7 +11,7 @@ import { InvestigationNotFoundError } from '../client/errors';
 
 const endpoint = 'POST /internal/nightshift/investigations/{id}/lifecycle_events' as const;
 const { handler } = nightshiftInvestigationsRouteRepository[endpoint];
-const mockRequest = {} as KibanaRequest;
+const mockRequest = { spaceId: 'default' } as KibanaRequest;
 
 const makeClient = (overrides: Record<string, unknown> = {}) => ({
   getLifecycleSubject: jest.fn().mockResolvedValue({

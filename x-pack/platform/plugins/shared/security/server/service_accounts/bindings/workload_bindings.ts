@@ -11,6 +11,7 @@ import { randomBytes } from 'crypto';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   BindServiceAccountWorkloadParams,
+  ServiceAccountSummary,
   ServiceAccountWorkloadBinding,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRef,
@@ -63,6 +64,11 @@ export interface ServiceAccountWorkloadBindingsApi {
     pluginId: string,
     params: ServiceAccountWorkloadCoordinates
   ): Promise<ServiceAccountWorkloadBinding | null>;
+
+  getServiceAccountSummary(
+    pluginId: string,
+    params: ServiceAccountWorkloadCoordinates
+  ): Promise<ServiceAccountSummary | null>;
 
   withScopedRequest<T>(
     pluginId: string,
@@ -255,6 +261,18 @@ export class ServiceAccountWorkloadBindings implements ServiceAccountWorkloadBin
   ): Promise<ServiceAccountWorkloadBinding | null> {
     this.ensureAvailable();
     return await this.store.getVerified(this.toCoordinates(pluginId, params));
+  }
+
+  /**
+   * Names the account of the workload's verified binding, never an account the caller names, so
+   * that it can only describe an account the workload runs as.
+   */
+  async getServiceAccountSummary(
+    pluginId: string,
+    params: ServiceAccountWorkloadCoordinates
+  ): Promise<ServiceAccountSummary | null> {
+    const binding = await this.getBinding(pluginId, params);
+    return binding ? await this.backend.getSummary(binding.serviceAccountId) : null;
   }
 
   async withScopedRequest<T>(

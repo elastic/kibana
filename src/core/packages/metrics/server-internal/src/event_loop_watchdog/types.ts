@@ -29,6 +29,8 @@ export interface BlockLogMeta extends LogMeta {
       startedAt: string;
       phase: Phase;
       suppressedBlocks: number;
+      /** True when the block was still ongoing at log time; `blockedMs` is its length so far. */
+      ongoing: boolean;
     };
   };
 }

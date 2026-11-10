@@ -27,7 +27,7 @@ import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
 import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
 import { SLACK_READ_TOOL_ID } from '../../tools/slack_read/tool';
-import knowledgeCortexSection from './instructions/knowledge_cortex.text';
+import knowledgeWikiSection from './instructions/knowledge_wiki.text';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
@@ -49,7 +49,7 @@ export const INVESTIGATION_TOOL_IDS = [SET_IMPACT_TOOL_ID, SET_HYPOTHESES_TOOL_I
 export const INVESTIGATION_AGENT_NAME = 'Nightshift Investigator';
 export const INVESTIGATION_AGENT_DESCRIPTION =
   'Answers an arbitrary investigation question by reasoning from cluster telemetry it queries ' +
-  'inside a sandbox and, when Cortex is enabled, records what it learns in the Nightshift Cortex wiki.';
+  'inside a sandbox and, when Wiki is enabled, records what it learns in the Nightshift Wiki.';
 
 const SEMANTIC_MEMORY_SECTION = `
 **USING MEMORIES**
@@ -62,18 +62,18 @@ Memories are observations from past tasks — they help steer your investigation
 `;
 
 const fillContextInstructions = ({
-  includeCortex,
+  includeWiki,
   includeDecisionTrees,
   includeMemory,
 }: {
-  includeCortex: boolean;
+  includeWiki: boolean;
   includeDecisionTrees: boolean;
   includeMemory: boolean;
 }): string =>
   instructions
     .replace(
-      '{{knowledge_cortex_section}}',
-      includeCortex ? `\n${knowledgeCortexSection.trimEnd()}\n` : ''
+      '{{knowledge_wiki_section}}',
+      includeWiki ? `\n${knowledgeWikiSection.trimEnd()}\n` : ''
     )
     .replace('{{semantic_memory_section}}', includeMemory ? SEMANTIC_MEMORY_SECTION : '')
     .replace(
@@ -83,7 +83,7 @@ const fillContextInstructions = ({
 
 export interface InvestigationAgentTypeOptions {
   sandboxEnabled: boolean;
-  cortexEnabled: boolean;
+  wikiEnabled: boolean;
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
   /** The agentic investigations plugin is enabled, so its tools are registered. */
@@ -167,7 +167,7 @@ export type NightshiftAgentTypeOptions = Omit<
 >;
 
 /**
- * Builds the configuration every Nightshift agent type shares: tools, connectors, the Cortex and
+ * Builds the configuration every Nightshift agent type shares: tools, connectors, the Wiki and
  * Memory hooks and the space's custom context. Only the instructions differ between types.
  * With `standalone`, the agent lists only its own tools and the Slack read tool.
  * Agent Builder's own prompt and internal tools still apply to it.
@@ -175,7 +175,7 @@ export type NightshiftAgentTypeOptions = Omit<
 export const buildNightshiftAgentConfiguration = ({
   instructions: agentInstructions,
   sandboxEnabled,
-  cortexEnabled,
+  wikiEnabled,
   memoryEnabled = false,
   investigationToolsEnabled,
   proposalsEnabled,
@@ -216,16 +216,16 @@ export const buildNightshiftAgentConfiguration = ({
         // Decision trees are no longer a separate before-agent hook: they hydrate as a third
         // parallel branch of the combined materialize workflow, which already carries the
         // sandbox_id they need. The reinforcement agent keeps its own hydrate workflow because
-        // it runs in a different conversation. `decisionTreesEnabled` implies `cortexEnabled`,
+        // it runs in a different conversation. `decisionTreesEnabled` implies `wikiEnabled`,
         // so it adds nothing to either gate below.
         const beforeAgentWorkflowIds =
-          sandboxEnabled && (cortexEnabled || memoryEnabled) ? [materializeWorkflowId] : [];
+          sandboxEnabled && (wikiEnabled || memoryEnabled) ? [materializeWorkflowId] : [];
         return beforeAgentWorkflowIds.length ? { workflow_ids: beforeAgentWorkflowIds } : {};
       })(),
       // One post-hook. Decision-tree reinforcement is the tail phase of the combined optimize
       // workflow, so listing the reinforce workflow here as well would reinforce every round
       // twice — two ai.agent runs, up to 900s each, writing the same trees.
-      ...(cortexEnabled || memoryEnabled
+      ...(wikiEnabled || memoryEnabled
         ? { post_execution_workflow_ids: [optimizeWorkflowId] }
         : {}),
     } satisfies AgentBaseConfiguration);
@@ -276,7 +276,7 @@ export const getInvestigationAgentType = ({
     ...options,
     standalone: true,
     instructions: fillContextInstructions({
-      includeCortex: options.sandboxEnabled && options.cortexEnabled,
+      includeWiki: options.sandboxEnabled && options.wikiEnabled,
       includeDecisionTrees: options.sandboxEnabled && decisionTreesEnabled,
       includeMemory: options.sandboxEnabled && (options.memoryEnabled ?? false),
     }),
@@ -287,7 +287,7 @@ export const registerInvestigationAgentType = (
   agentBuilder: AgentBuilderPluginSetup,
   {
     sandboxEnabled,
-    cortexEnabled,
+    wikiEnabled,
     memoryEnabled = false,
     decisionTreesEnabled = false,
     investigationToolsEnabled,
@@ -300,7 +300,7 @@ export const registerInvestigationAgentType = (
   agentBuilder.agents.registerType(
     getInvestigationAgentType({
       sandboxEnabled,
-      cortexEnabled,
+      wikiEnabled,
       memoryEnabled,
       decisionTreesEnabled,
       investigationToolsEnabled,
