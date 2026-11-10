@@ -129,6 +129,9 @@ spaceTest.describe(
         // Created directly (not via createUiOnboardingSpace) so the gate stays off.
         const spaceId = `scout-onb-off-${Date.now().toString(36)}`;
         await apiServices.spaces.create({ id: spaceId, name: `Onboarding off ${spaceId}` });
+        // Security-solution space: the hidden app must come from the per-space
+        // setting being off, not from the solution gate.
+        await apiServices.spaces.setSolutionView({ id: spaceId, solution: 'security' });
         try {
           await browserAuth.loginAsAdmin();
           await page.goto(kbnUrl.app('alertzero', { space: spaceId }));

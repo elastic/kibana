@@ -32,6 +32,8 @@ apiTest.describe(
         const spaceId = `scout-onb-api-nomodel-${Date.now().toString(36)}`;
         await apiServices.spaces.create({ id: spaceId, name: spaceId });
         try {
+          // AlertZero routes 404 outside a Security-solution space.
+          await apiServices.spaces.setSolutionView({ id: spaceId, solution: 'security' });
           await enableAlertZeroInSpace({ apiClient, headers, spaceId });
 
           const res = await apiClient.get(`/s/${spaceId}${ALERTZERO_WORKERS_URL}`, {

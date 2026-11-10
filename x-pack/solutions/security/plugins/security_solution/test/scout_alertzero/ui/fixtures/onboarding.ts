@@ -29,6 +29,8 @@ const randomSuffix = (): string =>
 /** Minimal spaces surface the specs rely on (satisfied by scout's apiServices.spaces). */
 export interface SpacesService {
   create: (args: { id: string; name: string }) => Promise<unknown>;
+  /** AlertZero only runs in Security-solution spaces (`isSpaceSupported`). */
+  setSolutionView: (args: { id: string; solution: 'security' }) => Promise<unknown>;
   delete: (id: string) => Promise<unknown>;
 }
 
@@ -59,6 +61,8 @@ const buildOnboardingSpace = async (
 ): Promise<OnboardingSpace> => {
   const spaceId = `${namespace}-${randomSuffix()}`;
   await spaces.create({ id: spaceId, name: `Onboarding ${spaceId}` });
+  // The app is unsupported (404s, hidden) outside a Security-solution space.
+  await spaces.setSolutionView({ id: spaceId, solution: 'security' });
 
   // Worker routes 404 until the per-space gate is on; seeding and every later
   // spec depend on it.
