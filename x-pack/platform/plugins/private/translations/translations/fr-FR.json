@@ -51976,7 +51976,6 @@
     "xpack.searchInferenceEndpoints.eisModelsPage.entity": "Modèle",
     "xpack.searchInferenceEndpoints.eisModelsPage.entityPlural": "Modèles",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.embedding": "Plongement",
-    "xpack.searchInferenceEndpoints.eisModelspage.filter.llm": "LLM",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.rerank": "Reclasser",
     "xpack.searchInferenceEndpoints.eisModelsPage.header": "Elastic Inference Service",
     "xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton": "Préférences régionales",

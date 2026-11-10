@@ -52200,7 +52200,6 @@
     "xpack.searchInferenceEndpoints.eisModelsPage.entity": "モデル",
     "xpack.searchInferenceEndpoints.eisModelsPage.entityPlural": "モデル",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.embedding": "埋め込み",
-    "xpack.searchInferenceEndpoints.eisModelspage.filter.llm": "LLM",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.rerank": "再ランク付け",
     "xpack.searchInferenceEndpoints.eisModelsPage.header": "Elastic Inference Service",
     "xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton": "リージョン設定",

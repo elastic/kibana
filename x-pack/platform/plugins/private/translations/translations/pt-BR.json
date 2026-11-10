@@ -52217,7 +52217,6 @@
     "xpack.searchInferenceEndpoints.eisModelsPage.entity": "modelo",
     "xpack.searchInferenceEndpoints.eisModelsPage.entityPlural": "modelos",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.embedding": "Embedding",
-    "xpack.searchInferenceEndpoints.eisModelspage.filter.llm": "LLM",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.rerank": "Reclassificar",
     "xpack.searchInferenceEndpoints.eisModelsPage.header": "Serviço de Inferência da Elastic",
     "xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton": "Preferências de região",

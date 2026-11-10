@@ -52186,7 +52186,6 @@
     "xpack.searchInferenceEndpoints.eisModelsPage.entity": "模型",
     "xpack.searchInferenceEndpoints.eisModelsPage.entityPlural": "模型",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.embedding": "嵌入",
-    "xpack.searchInferenceEndpoints.eisModelspage.filter.llm": "LLM",
     "xpack.searchInferenceEndpoints.eisModelspage.filter.rerank": "重排序",
     "xpack.searchInferenceEndpoints.eisModelsPage.header": "Elastic 推理服务",
     "xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton": "地区偏好",
