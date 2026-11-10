@@ -2966,6 +2966,83 @@ describe('Fleet - validatePackagePolicy with var_groups', () => {
     expect(result.vars?.client_secret).toBeNull();
     expect(validationHasErrors(result)).toBe(false);
   });
+
+  it('should not invent a default option for a package-level var_group with no selection and no evidence', () => {
+    // Follow-up from jillguyonnet 2026-11-10: before this PR a policy with
+    // var_groups and no stored var_group_selections had all group-controlled
+    // vars skipped. The first-visible fallback must not change that for
+    // package-level groups — API-created policies (e.g. Cloud Security
+    // Posture) and upgrades of pre-var_group policies saved fine with empty
+    // vars, and updatePackageInputs validates during upgrade before doUpgrade
+    // infers and persists selections, so an invented default could 400 them.
+    // With no populated vars there is nothing to infer from, so nothing is
+    // treated as required. The vars are undefined (not empty strings, which
+    // pass required validation by design) so the invented default in the
+    // previous round would have failed this policy.
+    const policyWithoutSelections = {
+      ...basePackagePolicy,
+      vars: {
+        api_key: { type: 'password', value: undefined },
+        api_url: { type: 'text', value: undefined },
+        client_id: { type: 'text', value: undefined },
+        client_secret: { type: 'password', value: undefined },
+        proxy_url: { type: 'text', value: '' },
+      },
+      var_group_selections: undefined,
+    };
+
+    const result = validatePackagePolicy(policyWithoutSelections, packageInfoWithVarGroups, deps);
+
+    expect(result.vars?.api_key).toBeNull();
+    expect(result.vars?.api_url).toBeNull();
+    expect(result.vars?.client_id).toBeNull();
+    expect(result.vars?.client_secret).toBeNull();
+    expect(validationHasErrors(result)).toBe(false);
+  });
+
+  it('should treat a stored package-level selection naming no existing option as missing', () => {
+    // Follow-up from juliaElastic 2026-11-10 15:54: a stored selection that
+    // names a removed/renamed option must not be authoritative — otherwise
+    // controlled vars are skipped and requiredness is bypassed. With no
+    // evidence to infer from, the group is left unselected (same as no
+    // stored selection for package-level groups).
+    const policyWithStaleSelection = {
+      ...basePackagePolicy,
+      var_group_selections: { auth_method: 'saml' },
+    };
+
+    const result = validatePackagePolicy(policyWithStaleSelection, packageInfoWithVarGroups, deps);
+
+    expect(result.vars?.api_key).toBeNull();
+    expect(result.vars?.api_url).toBeNull();
+    expect(result.vars?.client_id).toBeNull();
+    expect(result.vars?.client_secret).toBeNull();
+    expect(validationHasErrors(result)).toBe(false);
+  });
+
+  it('should infer the option from populated vars instead of trusting a stale stored selection', () => {
+    // Same stale selection, but the populated vars identify the OAuth option:
+    // the missing client_secret must then be required, not skipped.
+    const policyWithStaleSelection = {
+      ...basePackagePolicy,
+      vars: {
+        ...basePackagePolicy.vars,
+        api_key: { type: 'password', value: '' },
+        api_url: { type: 'text', value: '' },
+        client_id: { type: 'text', value: 'my-client-id' },
+        client_secret: { type: 'password', value: undefined },
+      },
+      var_group_selections: { auth_method: 'saml' },
+    };
+
+    const result = validatePackagePolicy(policyWithStaleSelection, packageInfoWithVarGroups, deps);
+
+    expect(result.vars?.api_key).toBeNull();
+    expect(result.vars?.api_url).toBeNull();
+    expect(result.vars?.client_id).toBeNull();
+    expect(result.vars?.client_secret).toEqual([expect.stringContaining('is required')]);
+    expect(validationHasErrors(result)).toBe(true);
+  });
 });
 
 describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
@@ -3314,5 +3391,92 @@ describe('Fleet - validatePackagePolicy with stream-level var_groups', () => {
     expect(out?.log_group_name).toBeNull();
     expect(out?.region_name).toBeNull();
     expect(validationHasErrors(result)).toBe(false);
+  });
+
+  it('should treat a stored stream selection naming no existing option as missing', () => {
+    // Follow-up from juliaElastic 2026-11-10 15:54: a stored selection that
+    // names a removed/renamed option must not be authoritative — otherwise
+    // controlled vars are skipped and requiredness is bypassed. With empty
+    // vars there is nothing to infer from, so the stream-level first-visible
+    // fallback applies and the ARN (the default option) is required.
+    const result = validatePackagePolicy(
+      makePolicy(emptyStreamVars(), { log_group_source: 'not_a_real_option' }),
+      packageInfoWithStreamVarGroups,
+      deps
+    );
+
+    const out = streamVarsOf(result);
+    expect(out?.log_group_arn).toEqual([expect.stringContaining('is required')]);
+    expect(out?.log_group_name).toBeNull();
+    expect(validationHasErrors(result)).toBe(true);
+  });
+
+  it('should infer the Name option from populated vars instead of trusting a stale stored selection', () => {
+    const vars = emptyStreamVars();
+    vars.log_group_name = { type: 'text', value: 'my-group' };
+    vars.region_name = { type: 'text', value: 'us-east-1' };
+    const result = validatePackagePolicy(
+      makePolicy(vars, { log_group_source: 'not_a_real_option' }),
+      packageInfoWithStreamVarGroups,
+      deps
+    );
+
+    const out = streamVarsOf(result);
+    expect(out?.log_group_arn).toBeNull();
+    expect(out?.log_group_name).toBeNull();
+    expect(out?.region_name).toBeNull();
+    expect(validationHasErrors(result)).toBe(false);
+  });
+
+  it('should not infer an option hidden in the policy deployment mode', () => {
+    // P3 follow-up (Libra review on #303689): inference must only consider
+    // options visible in the deployment mode, like the form does. Here the
+    // Name option is hidden in default mode, so its populated vars must not
+    // make validation check it — the stream-level first-visible fallback
+    // (Log Group ARN) applies instead.
+    const groupWithHiddenNameOption = {
+      ...logGroupSourceGroup,
+      options: [
+        { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+        {
+          name: 'log_group_name',
+          title: 'Log Group Name',
+          vars: ['log_group_name', 'region_name'],
+          hide_in_deployment_modes: ['default'],
+        },
+        {
+          name: 'log_group_name_prefix',
+          title: 'Log Group Name Prefix',
+          vars: ['log_group_name_prefix', 'region_name'],
+        },
+      ],
+    };
+    const packageInfoWithHiddenNameOption: PackageInfo = {
+      ...packageInfoWithStreamVarGroups,
+      data_streams: [
+        {
+          dataset: 'aws_mq.activemq_general_logs',
+          type: 'logs',
+          streams: [
+            {
+              ...awsMqStream,
+              var_groups: [groupWithHiddenNameOption],
+            },
+          ],
+        },
+      ],
+    } as unknown as PackageInfo;
+
+    // Only log_group_name is populated (region_name is shared with the Prefix
+    // option, so populating it would evidence Prefix too and mask the check).
+    const vars = emptyStreamVars();
+    vars.log_group_name = { type: 'text', value: 'my-group' };
+    const result = validatePackagePolicy(makePolicy(vars), packageInfoWithHiddenNameOption, deps);
+
+    const out = streamVarsOf(result);
+    expect(out?.log_group_arn).toEqual([expect.stringContaining('is required')]);
+    expect(out?.log_group_name).toBeNull();
+    expect(out?.region_name).toBeNull();
+    expect(validationHasErrors(result)).toBe(true);
   });
 });

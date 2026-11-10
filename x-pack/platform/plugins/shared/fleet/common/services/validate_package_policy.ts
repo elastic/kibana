@@ -299,48 +299,80 @@ const isVarRequiredByVarGroup = (
 };
 
 /**
- * Effective var_group selections for validation: a var_group with no stored
- * selection falls back to the option the form would display, in this order:
+ * Effective var_group selections for validation.
+ *
+ * A stored selection is only kept when it names an option that still exists in the
+ * group. A stale selection (the option was renamed or removed by a package upgrade)
+ * must not be treated as authoritative: with it, `shouldValidateVar` and
+ * `isVarRequiredByVarGroup` match no option, so controlled vars are skipped and
+ * requiredness is silently bypassed. A stale selection is treated as missing and
+ * goes through the same fallback as a group with no stored selection.
+ *
+ * For a group with no (valid) stored selection, in this order:
  *
  * 1. The option inferred from the policy's populated vars (same helper the
- *    form uses for policies that predate var_groups). This keeps a valid
+ *    form uses for policies that predate var_groups), restricted to options
+ *    visible in the policy's deployment mode. This keeps a valid
  *    simplified-API request that carries e.g. `log_group_name` +
  *    `region_name` but no stored selection from being rejected as if the
  *    first option were selected.
  * 2. The first *visible* option for the policy's deployment mode (shared
  *    helper with the form's `getVisibleOptions`), so an `options[0]` hidden
- *    via `hide_in_deployment_modes` is never treated as the default.
- *
- * Without this, a fresh policy whose stream section was never expanded (so
- * the form's default-selection effect never ran) validates as if the
- * required group had no selection at all, and its vars are never treated as
- * required.
+ *    via `hide_in_deployment_modes` is never treated as the default — but
+ *    only when `allowFirstVisibleFallback` is set. That fallback is a
+ *    behaviour change for package-level var_groups: before this PR a policy
+ *    with no stored selection had all group-controlled vars skipped, and
+ *    API-created policies (e.g. Cloud Security Posture) and upgrades of
+ *    pre-var_group policies relied on that. `updatePackageInputs` validates
+ *    during upgrade *before* `doUpgrade` infers and persists selections, so
+ *    inventing a default there can 400 a policy that previously saved and
+ *    upgraded fine. Package-level groups therefore get inference only, and
+ *    no selection when inference finds nothing — exactly the pre-PR
+ *    behaviour. Stream-level var_groups are new (package-spec ≥ 3.6.0), so
+ *    the first-visible fallback stays there, where the form also defaults to
+ *    it and the mount effect stores it before save.
  */
 const getEffectiveVarGroupSelections = (
   varGroups: RegistryVarGroup[] | undefined,
   varGroupSelections: Record<string, string> | undefined,
   vars?: PackagePolicyConfigRecord,
-  deploymentMode?: VarGroupDeploymentMode
+  deploymentMode?: VarGroupDeploymentMode,
+  allowFirstVisibleFallback = false
 ): Record<string, string> | undefined => {
   if (!varGroups || varGroups.length === 0) {
     return varGroupSelections;
   }
 
-  const inferredSelections = vars ? inferVarGroupSelections(varGroups, vars) : undefined;
+  // Drop stored selections that name no existing option in their group.
+  const validSelections = varGroupSelections
+    ? Object.fromEntries(
+        Object.entries(varGroupSelections).filter(([groupName, optionName]) =>
+          varGroups
+            .find((group) => group.name === groupName)
+            ?.options.some((option) => option.name === optionName)
+        )
+      )
+    : undefined;
+
+  const inferredSelections = vars
+    ? inferVarGroupSelections(varGroups, vars, deploymentMode)
+    : undefined;
 
   let effective: Record<string, string> | undefined;
   for (const group of varGroups) {
-    if (varGroupSelections?.[group.name]) continue;
+    if (validSelections?.[group.name]) continue;
     const fallbackName =
       inferredSelections?.[group.name] ??
-      getFirstVisibleVarGroupOption(group, deploymentMode)?.name;
+      (allowFirstVisibleFallback
+        ? getFirstVisibleVarGroupOption(group, deploymentMode)?.name
+        : undefined);
     if (!fallbackName) continue;
     if (!effective) {
-      effective = { ...(varGroupSelections ?? {}) };
+      effective = { ...(validSelections ?? {}) };
     }
     effective[group.name] = fallbackName;
   }
-  return effective ?? varGroupSelections;
+  return effective ?? validSelections;
 };
 
 const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;
@@ -585,7 +617,11 @@ export const validatePackagePolicy = (
           streamVarGroups,
           streamVarGroupSelections,
           stream.vars,
-          deploymentMode
+          deploymentMode,
+          // Stream-level var_groups are new (package-spec >= 3.6.0): the
+          // first-visible fallback matches the form default here. Package-level
+          // groups deliberately get no invented default (see above).
+          true
         );
 
         if (streamVarDefs && Object.keys(streamVarDefs).length) {

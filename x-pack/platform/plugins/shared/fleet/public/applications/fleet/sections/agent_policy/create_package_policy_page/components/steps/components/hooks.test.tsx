@@ -313,6 +313,37 @@ describe('useVarGroupSelections', () => {
       });
     });
 
+    it('should infer stream selections from stream vars, not package vars, on the edit page', () => {
+      // Follow-up from jillguyonnet 2026-11-10 (and the P3 review): the
+      // stream-level call site has no packagePolicy, so without varsForInference
+      // it could never infer — validation infers from the stream's vars while
+      // the form defaulted to the first visible option. Stream vars must be
+      // the evidence; package-level vars for a different group must not leak in.
+      const { result } = renderHook(() =>
+        useVarGroupSelections({
+          varGroups: mockStreamVarGroups,
+          savedSelections: undefined,
+          isAgentlessEnabled: false,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              client_id: { type: 'text', value: 'my-client' },
+              client_secret: { type: 'password', value: 'shhh' },
+            },
+          } as any,
+          varsForInference: {
+            log_group_name: { type: 'text', value: 'my-group' },
+          },
+          isEditPage: true,
+        })
+      );
+
+      expect(result.current.selections).toEqual({ log_group_source: 'log_group_name' });
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith({
+        var_group_selections: { log_group_source: 'log_group_name' },
+      });
+    });
+
     it('should not infer from vars on the create page', () => {
       const { result } = renderHook(() =>
         useVarGroupSelections({

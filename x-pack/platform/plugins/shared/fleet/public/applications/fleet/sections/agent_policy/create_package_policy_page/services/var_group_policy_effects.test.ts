@@ -605,7 +605,11 @@ describe('var_group_policy_effects', () => {
       });
     });
 
-    it('should leave non-string values of deselected options untouched', () => {
+    it('should clear populated non-string values of deselected options', () => {
+      // Follow-up from jillguyonnet 2026-11-10: the leak this PR fixes is
+      // value-type-agnostic — a multi:true array (a list of log group names),
+      // a number, or a true boolean belonging to a deselected option still
+      // reaches the compiled agent template. Any populated value is cleared.
       const varGroup: RegistryVarGroup = {
         name: 'log_group_source',
         title: 'Log Group Source',
@@ -614,7 +618,7 @@ describe('var_group_policy_effects', () => {
           {
             name: 'log_group_arn',
             title: 'Log Group ARN',
-            vars: ['log_group_arn', 'use_tls'],
+            vars: ['log_group_arn', 'ports', 'use_tls', 'log_group_names'],
           },
           { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
         ],
@@ -622,7 +626,9 @@ describe('var_group_policy_effects', () => {
       const streamVars = {
         log_group_arn: { value: 'arn:aws:logs:us-east-1:123456789012:log-group:my-group' },
         log_group_name: { value: '' },
+        ports: { value: [443, 8443], type: 'integer' },
         use_tls: { value: true, type: 'bool' },
+        log_group_names: { value: ['group-a', 'group-b'], type: 'text' },
       };
 
       const result = buildStreamVarGroupVarsUpdate(
@@ -635,8 +641,45 @@ describe('var_group_policy_effects', () => {
       expect(result).toEqual({
         log_group_arn: { value: undefined },
         log_group_name: { value: '' },
-        use_tls: { value: true, type: 'bool' },
+        ports: { value: undefined, type: 'integer' },
+        use_tls: { value: undefined, type: 'bool' },
+        log_group_names: { value: undefined, type: 'text' },
       });
+    });
+
+    it('should leave unpopulated values of deselected options untouched', () => {
+      // '' / [] / false / undefined are indistinguishable from an unset var
+      // (false is a migration default, not evidence of configuration), so
+      // there is nothing to leak and nothing to clear.
+      const varGroup: RegistryVarGroup = {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          {
+            name: 'log_group_arn',
+            title: 'Log Group ARN',
+            vars: ['log_group_arn', 'ports', 'use_tls', 'log_group_names'],
+          },
+          { name: 'log_group_name', title: 'Log Group Name', vars: ['log_group_name'] },
+        ],
+      };
+      const streamVars = {
+        log_group_arn: { value: '' },
+        log_group_name: { value: '' },
+        ports: { value: [], type: 'integer' },
+        use_tls: { value: false, type: 'bool' },
+        log_group_names: { value: undefined, type: 'text' },
+      };
+
+      const result = buildStreamVarGroupVarsUpdate(
+        streamVars,
+        varGroup,
+        'log_group_arn',
+        'log_group_name'
+      );
+
+      expect(result).toBeUndefined();
     });
 
     it('should return undefined when streamVars is undefined', () => {

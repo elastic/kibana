@@ -127,6 +127,16 @@ interface UseVarGroupSelectionsParams {
    */
   hideInVarGroupOptions?: Record<string, string[]>;
   /**
+   * Optional: vars to infer selections from on the edit page, when the
+   * var_groups' vars live somewhere other than the package policy's own
+   * `vars` — e.g. a stream's vars for stream-level var_groups, or an input's
+   * vars for input-level var_groups. Defaults to `packagePolicy?.vars`.
+   * Without this, the stream-level call site could never infer (it has no
+   * packagePolicy), so validation — which infers from the stream's vars —
+   * and the form disagreed about the default.
+   */
+  varsForInference?: PackagePolicyConfigRecord;
+  /**
    * Optional: whether the form is editing an existing policy. When true and the
    * policy has no stored var_group_selections (it predates the package's
    * var_groups), selections are inferred from the policy's populated vars instead
@@ -149,12 +159,17 @@ export function useVarGroupSelections({
   packagePolicy,
   streamVars,
   hideInVarGroupOptions,
+  varsForInference,
   isEditPage = false,
 }: UseVarGroupSelectionsParams) {
   // Derive selections when none are saved: defaults for new policies; on the edit
   // page, prefer inference from the policy's populated vars (policies created before
   // the package introduced var_groups have no stored selections, and the first
-  // visible option may not match their actual configuration).
+  // visible option may not match their actual configuration). Inference reads
+  // the vars the groups actually control (`varsForInference` for stream/input
+  // groups, else the package policy's vars) and never picks an option hidden
+  // in the current deployment mode, so it agrees with validation, which
+  // infers the same way from the same vars.
   const deriveSelections = useCallback((): VarGroupSelection => {
     const defaults = computeDefaultVarGroupSelections(
       varGroups,
@@ -164,9 +179,20 @@ export function useVarGroupSelections({
     if (!isEditPage) {
       return defaults;
     }
-    const inferred = inferVarGroupSelections(varGroups, packagePolicy?.vars);
+    const inferred = inferVarGroupSelections(
+      varGroups,
+      varsForInference ?? packagePolicy?.vars,
+      isAgentlessEnabled ? 'agentless' : 'default'
+    );
     return inferred ? { ...defaults, ...inferred } : defaults;
-  }, [varGroups, isAgentlessEnabled, hideInVarGroupOptions, isEditPage, packagePolicy?.vars]);
+  }, [
+    varGroups,
+    isAgentlessEnabled,
+    hideInVarGroupOptions,
+    isEditPage,
+    varsForInference,
+    packagePolicy?.vars,
+  ]);
 
   // Derive current selections from saved or compute them
   const selections = useMemo((): VarGroupSelection => {

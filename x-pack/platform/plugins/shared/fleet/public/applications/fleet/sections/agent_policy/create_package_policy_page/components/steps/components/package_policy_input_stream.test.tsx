@@ -211,7 +211,8 @@ describe('PackagePolicyInputStreamConfig', () => {
     packageInputStream: RegistryStreamWithDataStream = mockPackageInputStreamWithVarGroups,
     packagePolicyInputStream: NewPackagePolicyInputStream = mockPackagePolicyInputStream,
     packageInfo: PackageInfo = mockPackageInfo,
-    inputPolicyTemplate?: string
+    inputPolicyTemplate?: string,
+    options?: { isAgentless?: boolean; isEditPage?: boolean }
   ) => {
     renderResult = testRenderer.render(
       <PackagePolicyInputStreamConfig
@@ -223,6 +224,8 @@ describe('PackagePolicyInputStreamConfig', () => {
         forceShowErrors={false}
         hasStreamToggle={true}
         inputPolicyTemplate={inputPolicyTemplate}
+        isAgentless={options?.isAgentless}
+        isEditPage={options?.isEditPage}
       />
     );
   };
@@ -345,18 +348,17 @@ describe('PackagePolicyInputStreamConfig', () => {
     });
 
     it('should filter options based on deployment mode (agentless)', async () => {
-      useAgentlessMock.mockReturnValue({
-        isAgentlessEnabled: true,
-        isAgentlessDefault: false,
-        isAgentlessAgentPolicy: jest.fn(),
-        getAgentlessStatusForPackage: jest
-          .fn()
-          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
-        isServerless: false,
-        isCloud: true,
-      });
-
-      render();
+      // The policy's own deployment mode is threaded in via the isAgentless
+      // prop — not "agentless is available in this deployment" from
+      // useAgentless(), which also returns true for an agent-based policy on
+      // Cloud with agentless enabled.
+      render(
+        mockPackageInputStreamWithVarGroups,
+        mockPackagePolicyInputStream,
+        mockPackageInfo,
+        undefined,
+        { isAgentless: true }
+      );
 
       await waitFor(() => {
         const select = renderResult.getByTestId('varGroupSelector-auth_method');
@@ -368,18 +370,13 @@ describe('PackagePolicyInputStreamConfig', () => {
     });
 
     it('should filter options based on deployment mode (default)', async () => {
-      useAgentlessMock.mockReturnValue({
-        isAgentlessEnabled: false,
-        isAgentlessDefault: false,
-        isAgentlessAgentPolicy: jest.fn(),
-        getAgentlessStatusForPackage: jest
-          .fn()
-          .mockReturnValue({ isAgentless: false, isDefaultDeploymentMode: false }),
-        isServerless: false,
-        isCloud: false,
-      });
-
-      render();
+      render(
+        mockPackageInputStreamWithVarGroups,
+        mockPackagePolicyInputStream,
+        mockPackageInfo,
+        undefined,
+        { isAgentless: false }
+      );
 
       await waitFor(() => {
         const select = renderResult.getByTestId('varGroupSelector-auth_method');
@@ -387,6 +384,39 @@ describe('PackagePolicyInputStreamConfig', () => {
 
         // cloud_connector should be filtered out in default mode
         expect(options.find((o) => o.value === 'cloud_connector')).toBeUndefined();
+      });
+    });
+
+    it('should infer the selection from populated stream vars on the edit page', async () => {
+      // Follow-up from jillguyonnet 2026-11-10: without varsForInference the
+      // stream form could never infer — validation infers from the stream's
+      // vars while the form defaulted to the first visible option. A policy
+      // predating var_groups with OAuth vars populated must be presented as
+      // OAuth, not as the first option (API Key).
+      const policyWithOauthVars: NewPackagePolicyInputStream = {
+        ...mockPackagePolicyInputStream,
+        vars: {
+          ...mockPackagePolicyInputStream.vars,
+          client_id: { type: 'text', value: 'my-client' },
+          client_secret: { type: 'password', value: 'shhh' },
+        },
+      };
+
+      render(mockPackageInputStreamWithVarGroups, policyWithOauthVars, mockPackageInfo, undefined, {
+        isEditPage: true,
+      });
+
+      await waitFor(() => {
+        // OAuth vars should be visible (inferred selection)
+        expect(renderResult.getByTestId('textInput-client-id')).toBeInTheDocument();
+        expect(renderResult.getByTestId('passwordInput-client-secret')).toBeInTheDocument();
+
+        // API Key should be hidden
+        expect(renderResult.queryByTestId('passwordInput-api-key')).not.toBeInTheDocument();
+      });
+
+      expect(mockUpdatePackagePolicyInputStream).toHaveBeenCalledWith({
+        var_group_selections: { auth_method: 'oauth' },
       });
     });
 

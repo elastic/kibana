@@ -167,6 +167,7 @@ export {
   shouldShowVar,
   isVarRequiredByVarGroup,
   isVarInSelectedVarGroupOption,
+  hasConfiguredVarValue,
   inferVarGroupSelections,
   isVarGroupOptionHiddenInDeploymentMode,
   getFirstVisibleVarGroupOption,

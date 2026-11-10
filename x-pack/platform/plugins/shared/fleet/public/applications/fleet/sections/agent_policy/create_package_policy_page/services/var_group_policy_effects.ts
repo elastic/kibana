@@ -19,6 +19,7 @@ import {
   getAllCloudConnectorVarNames,
   type VarGroupSelection,
 } from '../../../../../../../common/services/cloud_connectors';
+import { hasConfiguredVarValue } from '../../../../../../../common/services/var_group_helpers';
 import type { RegistryVarGroup } from '../../../../types';
 
 /**
@@ -248,20 +249,26 @@ export function registerPolicyUpdateHandler(handler: PolicyUpdateHandler): void 
 }
 
 /**
- * Builds a stream-vars update that clears the plain-text values of a stream-level
+ * Builds a stream-vars update that clears the populated values of a stream-level
  * var_group's deselected options.
  *
  * Stream-level var_groups are new, so clearing on a selection change cannot disturb
  * existing behaviour; package-level credential groups keep today's secret-ref-only
  * clearing in `updateCloudConnectorPolicy`.
  *
- * Vars shared with the newly selected option are kept. Vars holding secret references
- * are cleared too — they must never leak into the agent template. Non-string values
- * (booleans, numbers, arrays) are left untouched. Cleared vars are unset (value
- * `undefined`, the same state a fresh var has) rather than emptied to `''`, so a
- * required var in the newly selected option is still treated as missing by
- * validation when the user switches back without filling it in. Returns undefined
- * when nothing needs clearing.
+ * Vars shared with the newly selected option are kept. Any populated value is
+ * cleared, whatever its type — a `multi: true` array (e.g. a list of log group
+ * names) or a number/boolean belonging to a deselected option would otherwise
+ * still reach the compiled agent template, the same leak this PR fixes for
+ * strings. Values that count as unpopulated (`''`, `[]`, `false`, `undefined`,
+ * `null`) are left alone: they are indistinguishable from an unset var, and
+ * `false` in particular is a migration default, not evidence of configuration
+ * (same rule as `hasConfiguredVarValue`, which inference uses). Secret-ref
+ * values are objects, so they count as populated and are cleared too. Cleared
+ * vars are unset (value `undefined`, the same state a fresh var has) rather
+ * than emptied to `''`, so a required var in the newly selected option is
+ * still treated as missing by validation when the user switches back without
+ * filling it in. Returns undefined when nothing needs clearing.
  */
 export function buildStreamVarGroupVarsUpdate(
   streamVars: PackagePolicyConfigRecord | undefined,
@@ -291,7 +298,7 @@ export function buildStreamVarGroupVarsUpdate(
   for (const name of deselectedVarNames) {
     const entry = updated[name];
     if (!entry) continue;
-    if ((typeof entry.value === 'string' && entry.value !== '') || isSecretRef(entry.value)) {
+    if (hasConfiguredVarValue(entry)) {
       updated[name] = { ...entry, value: undefined };
       changed = true;
     }

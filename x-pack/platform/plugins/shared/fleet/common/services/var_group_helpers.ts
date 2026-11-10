@@ -133,13 +133,39 @@ export const isVarInSelectedVarGroupOption = (
 };
 
 /**
+ * Deployment modes a var_group option can be hidden in. Matches the
+ * `hide_in_deployment_modes` values on {@link RegistryVarGroupOption}.
+ */
+export type VarGroupDeploymentMode = 'agentless' | 'default';
+
+/**
+ * Whether a var_group option is hidden in the given deployment mode.
+ * The form and validation must agree on this: the form's default selection is
+ * the first option that is not hidden here, so validation's fallback must use
+ * the same rule instead of blindly taking `options[0]`.
+ */
+export const isVarGroupOptionHiddenInDeploymentMode = (
+  option: RegistryVarGroupOption,
+  deploymentMode: VarGroupDeploymentMode | undefined
+): boolean => {
+  if (!deploymentMode || !option.hide_in_deployment_modes) {
+    return false;
+  }
+  return option.hide_in_deployment_modes.includes(deploymentMode);
+};
+
+/**
  * Whether a var entry holds a value that counts as evidence of user configuration.
  *
  * `false` is excluded on purpose: boolean vars migrated from a package version that did
  * not declare them are sanitized from null to false, so a `false` value is
  * indistinguishable from a migration default and must not vote for an option.
+ * Exported so the stream-var clearing in `var_group_policy_effects` uses the same
+ * definition of "populated" as inference does.
  */
-const hasConfiguredVarValue = (entry: PackagePolicyConfigRecordEntry | undefined): boolean => {
+export const hasConfiguredVarValue = (
+  entry: PackagePolicyConfigRecordEntry | undefined
+): boolean => {
   const value = entry?.value;
   if (value === undefined || value === null || value === '' || value === false) {
     return false;
@@ -164,13 +190,20 @@ const hasConfiguredVarValue = (entry: PackagePolicyConfigRecordEntry | undefined
  * when one option's vars are a subset of another's (e.g. direct access keys vs temporary
  * access keys). A group with no evidence, or with an unresolvable tie, is left unselected.
  *
+ * When `deploymentMode` is given, options hidden in that mode are never inferred:
+ * validation and the form must agree on the default, and an option the form hides
+ * cannot be the one validation checks. Callers that do not know the mode (e.g. the
+ * server-side upgrade path) omit it and keep the previous unfiltered behaviour.
+ *
  * @param varGroups - The var_groups from package info
  * @param vars - The policy's package-level vars to read evidence from
+ * @param deploymentMode - Deployment mode to filter hidden options by, if known
  * @returns Inferred selections, or undefined when nothing could be inferred
  */
 export const inferVarGroupSelections = (
   varGroups: RegistryVarGroup[] | undefined,
-  vars: PackagePolicyConfigRecord | undefined
+  vars: PackagePolicyConfigRecord | undefined,
+  deploymentMode?: VarGroupDeploymentMode
 ): VarGroupSelection | undefined => {
   if (!varGroups || varGroups.length === 0 || !vars) {
     return undefined;
@@ -186,6 +219,9 @@ export const inferVarGroupSelections = (
 
     for (const option of varGroup.options) {
       if (option.vars.length === 0) {
+        continue;
+      }
+      if (isVarGroupOptionHiddenInDeploymentMode(option, deploymentMode)) {
         continue;
       }
       const score = option.vars.filter((name) => hasConfiguredVarValue(vars[name])).length;
@@ -209,28 +245,6 @@ export const inferVarGroupSelections = (
   }
 
   return Object.keys(inferred).length > 0 ? inferred : undefined;
-};
-
-/**
- * Deployment modes a var_group option can be hidden in. Matches the
- * `hide_in_deployment_modes` values on {@link RegistryVarGroupOption}.
- */
-export type VarGroupDeploymentMode = 'agentless' | 'default';
-
-/**
- * Whether a var_group option is hidden in the given deployment mode.
- * The form and validation must agree on this: the form's default selection is
- * the first option that is not hidden here, so validation's fallback must use
- * the same rule instead of blindly taking `options[0]`.
- */
-export const isVarGroupOptionHiddenInDeploymentMode = (
-  option: RegistryVarGroupOption,
-  deploymentMode: VarGroupDeploymentMode | undefined
-): boolean => {
-  if (!deploymentMode || !option.hide_in_deployment_modes) {
-    return false;
-  }
-  return option.hide_in_deployment_modes.includes(deploymentMode);
 };
 
 /**

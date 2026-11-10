@@ -410,6 +410,87 @@ describe('var_group_helpers', () => {
         data_collection: 'streaming',
       });
     });
+
+    it('should never infer an option hidden in the given deployment mode', () => {
+      // P3 follow-up (Libra review on #303689): validation and the form must
+      // agree on the default, and an option the form hides in this mode
+      // cannot be the one validation checks — even when its vars are the
+      // only populated ones.
+      const group: RegistryVarGroup = {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+          {
+            name: 'log_group_name',
+            title: 'Log Group Name',
+            vars: ['log_group_name', 'region_name'],
+            hide_in_deployment_modes: ['default'],
+          },
+        ],
+      };
+
+      expect(
+        inferVarGroupSelections(
+          [group],
+          {
+            log_group_name: { type: 'text', value: 'my-group' },
+            region_name: { type: 'text', value: 'us-east-1' },
+          },
+          'default'
+        )
+      ).toBeUndefined();
+      expect(
+        inferVarGroupSelections(
+          [group],
+          {
+            log_group_name: { type: 'text', value: 'my-group' },
+            region_name: { type: 'text', value: 'us-east-1' },
+          },
+          'agentless'
+        )
+      ).toEqual({ log_group_source: 'log_group_name' });
+    });
+
+    it('should infer the visible option when both a hidden and a visible option have populated vars', () => {
+      // Without the mode filter, the hidden Name option would win outright
+      // (2/2 vs the ARN option's 1/1). With it, the hidden option is skipped
+      // and the ARN option — the best visible one — is inferred.
+      const group: RegistryVarGroup = {
+        name: 'log_group_source',
+        title: 'Log Group Source',
+        selector_title: 'Select log group source',
+        options: [
+          { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+          {
+            name: 'log_group_name',
+            title: 'Log Group Name',
+            vars: ['log_group_name', 'region_name'],
+            hide_in_deployment_modes: ['default'],
+          },
+        ],
+      };
+
+      expect(
+        inferVarGroupSelections(
+          [group],
+          {
+            log_group_arn: { type: 'text', value: 'arn:aws:logs:us-east-1:123:log-group:g' },
+            log_group_name: { type: 'text', value: 'my-group' },
+            region_name: { type: 'text', value: 'us-east-1' },
+          },
+          'default'
+        )
+      ).toEqual({ log_group_source: 'log_group_arn' });
+      expect(
+        inferVarGroupSelections([group], {
+          log_group_arn: { type: 'text', value: 'arn:aws:logs:us-east-1:123:log-group:g' },
+          log_group_name: { type: 'text', value: 'my-group' },
+          region_name: { type: 'text', value: 'us-east-1' },
+        })
+      ).toEqual({ log_group_source: 'log_group_name' });
+    });
   });
 
   describe('isVarGroupOptionHiddenInDeploymentMode', () => {
