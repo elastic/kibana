@@ -1466,6 +1466,20 @@ groups:
           self: ga
           observability: ga
 
+      - setting: "observability:apmMaxNumberOfServices"
+        id: observability-apm-max-number-of-services
+        description: |
+          Sets the maximum number of services shown in the {{product.apm}} Service inventory. Values must be between 1 and 5000. Higher values slow down queries and use more memory on {{es}}. Above 2000 the query can exceed the [`search.max_buckets`](elasticsearch://reference/elasticsearch/configuration-reference/search-settings.md#search-settings-max-buckets) cluster setting, which defaults to 65536.
+        datatype: int
+        default: 1000
+        applies_to:
+          stack: ga 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          observability: ga
+
       - setting: "observability:apmTraceExplorerTab"
         id: observability-apm-trace-explorer-tab
         description: |
@@ -2016,6 +2030,23 @@ groups:
   - group: Security solution
     id: kibana-siem-settings
     settings:
+
+      - setting: "securitySolution:enableAlertZero"
+        id: securitysolution-enablealertzero
+        description: |
+          Turns on [AlertZero](docs-content://solutions/security/alertzero/index.md) in the space. AlertZero Workers triage alerts, hunt for threats, tune detection rules, and investigate attacks in the background, then bring you the proposed actions that need a person to decide.
+
+          AlertZero works only in spaces that use the Security solution view. After you turn on this setting, open **AlertZero** to select which Workers to run. Turning the setting off hides AlertZero in the space but doesn't turn off its Workers. For the requirements and steps, refer to [Set up AlertZero](docs-content://solutions/security/alertzero/set-up-alertzero.md).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview 9.6+
+          ech: ga
+          ece: ga
+          eck: ga
+          self: ga
+          serverless:
+            security: preview
 
       - setting: "securitySolution:refreshIntervalDefaults"
         id: securitysolution-refreshintervaldefaults

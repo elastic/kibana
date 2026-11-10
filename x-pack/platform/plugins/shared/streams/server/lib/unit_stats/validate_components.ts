@@ -8,6 +8,7 @@
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { noDestinationStats } from './mappers/map_destination_stats_result';
 import { noProcessorStats } from './mappers/map_processor_stats_result';
+import { noSourceStats } from './mappers/map_source_stats_result';
 import { UnitStatsError } from './errors/unit_stats_error';
 
 /**
@@ -47,6 +48,22 @@ export const validateProcessor = ({
         result: {
           ...noProcessorStats(),
           error: UnitStatsError.notFound('processor').toStatsError(),
+        },
+        queryable: false,
+      };
+
+/** Checks a requested source against the unit config alone. */
+export const validateSource = ({
+  config,
+}: {
+  config: object | undefined;
+}): { result: StreamsUnit.StatsSourceResult; queryable: boolean } =>
+  config
+    ? { result: noSourceStats(), queryable: true }
+    : {
+        result: {
+          ...noSourceStats(),
+          error: UnitStatsError.notFound('source').toStatsError(),
         },
         queryable: false,
       };

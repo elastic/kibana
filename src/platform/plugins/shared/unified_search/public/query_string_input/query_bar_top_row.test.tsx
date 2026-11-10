@@ -1371,6 +1371,82 @@ describe('QueryBarTopRowTopRow', () => {
       expect(hoverPickerTooltipText()).toContain('12:05:00.000');
     });
   });
+
+  describe('legacy date picker props', () => {
+    beforeEach(() => {
+      useNewDateRangePickerFlag = false;
+    });
+
+    const renderLegacyPicker = (props: Record<string, unknown> = {}) =>
+      render(
+        wrapQueryBarTopRowInContext({
+          enableDateRangePicker: false,
+          isDirty: false,
+          timeHistory: mockTimeHistory,
+          ...props,
+        })
+      );
+
+    const openQuickSelect = async () => {
+      await userEvent.click(await screen.findByTestId('superDatePickerToggleQuickMenuButton'));
+    };
+
+    it('uses the quick ranges from the advanced setting by default', async () => {
+      renderLegacyPicker();
+      await openQuickSelect();
+
+      expect(await screen.findByText('Today')).toBeInTheDocument();
+    });
+
+    it('replaces the quick ranges from the advanced setting with commonlyUsedRanges', async () => {
+      renderLegacyPicker({
+        legacyDatePickerProps: {
+          commonlyUsedRanges: [{ start: 'now-3d', end: 'now', label: 'Last 3 days' }],
+        },
+      });
+      await openQuickSelect();
+
+      expect(await screen.findByText('Last 3 days')).toBeInTheDocument();
+      expect(screen.queryByText('Today')).not.toBeInTheDocument();
+    });
+
+    describe('minDate', () => {
+      beforeEach(() => {
+        Element.prototype.scrollIntoView = jest.fn();
+      });
+
+      const openStartDateCalendar = async () => {
+        await userEvent.click(await screen.findByTestId('superDatePickerstartDatePopoverButton'));
+        await waitFor(() => {
+          expect(document.querySelector('.react-datepicker')).toBeInTheDocument();
+        });
+      };
+
+      const getDisabledDays = () =>
+        document.querySelectorAll('.react-datepicker__day--disabled').length;
+
+      it('does not disable calendar days when minDate is not provided', async () => {
+        renderLegacyPicker({
+          dateRangeFrom: '2026-01-20T00:00:00.000Z',
+          dateRangeTo: 'now',
+        });
+        await openStartDateCalendar();
+
+        expect(getDisabledDays()).toBe(0);
+      });
+
+      it('disables the calendar days before minDate', async () => {
+        renderLegacyPicker({
+          dateRangeFrom: '2026-01-20T00:00:00.000Z',
+          dateRangeTo: 'now',
+          legacyDatePickerProps: { minDate: moment('2026-01-15T00:00:00.000Z') },
+        });
+        await openStartDateCalendar();
+
+        expect(getDisabledDays()).toBeGreaterThan(0);
+      });
+    });
+  });
 });
 
 describe('SharingMetaFields', () => {

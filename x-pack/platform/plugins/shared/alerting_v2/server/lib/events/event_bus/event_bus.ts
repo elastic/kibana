@@ -134,9 +134,11 @@ export class AsyncDomainEventBus<TEvent extends DomainEvent = DomainEvent, TCont
     });
   }
 
-  public subscribe<E extends TEvent>(
-    type: E['type'],
-    handler: (...args: EventBusHandlerArgs<E, TContext>) => Promise<void> | void
+  public subscribe<K extends TEvent['type']>(
+    type: K,
+    handler: (
+      ...args: EventBusHandlerArgs<Extract<TEvent, { type: K }>, TContext>
+    ) => Promise<void> | void
   ): Subscription {
     const wrapped: AnyHandler = (event, ...extra) => {
       setImmediate(async () => {

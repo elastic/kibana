@@ -8,6 +8,7 @@
 import {
   analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceLocalIndexExpressions,
   getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,
@@ -307,5 +308,17 @@ describe('getSourceReadTargets', () => {
 
   it('throws on a query that does not parse', () => {
     expect(() => getSourceReadTargets('FROM')).toThrow('Invalid ES|QL query');
+  });
+});
+
+describe('getSourceLocalIndexExpressions', () => {
+  it('preserves exact local expressions', () => {
+    expect(
+      getSourceLocalIndexExpressions('FROM logs-*,-logs-archive-*,remote:logs-*,<logs-{now/d}>')
+    ).toEqual(['logs-*', '-logs-archive-*', '<logs-{now/d}>']);
+  });
+
+  it('returns no target for exclusions only', () => {
+    expect(getSourceLocalIndexExpressions('FROM remote:logs-*,-logs-local-*')).toEqual([]);
   });
 });

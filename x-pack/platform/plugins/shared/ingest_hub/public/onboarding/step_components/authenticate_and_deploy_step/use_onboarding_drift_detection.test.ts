@@ -310,6 +310,30 @@ describe('useOnboardingDriftDetection — package policy settings', () => {
     await expectDirty(result, false);
   });
 
+  it('is dirty when the condition changed since the last deploy', async () => {
+    const { result } = renderDrift({
+      policySettings: { condition: '${host.platform} == "linux"' },
+      savedPolicySettings: { condition: '${host.platform} == "windows"' },
+    });
+    await expectDirty(result, true);
+  });
+
+  it('is dirty when the condition was cleared', async () => {
+    const { result } = renderDrift({
+      policySettings: { condition: '' },
+      savedPolicySettings: { condition: '${host.platform} == "linux"' },
+    });
+    await expectDirty(result, true);
+  });
+
+  it('ignores a condition under managed integration, which does not apply it', async () => {
+    const { result } = renderDrift({
+      deploymentMethod: 'managed_integration',
+      policySettings: { condition: '${host.platform} == "linux"' },
+    });
+    await expectDirty(result, false);
+  });
+
   it('ignores an output under managed integration, which does not apply it', async () => {
     const { result } = renderDrift({
       deploymentMethod: 'managed_integration',

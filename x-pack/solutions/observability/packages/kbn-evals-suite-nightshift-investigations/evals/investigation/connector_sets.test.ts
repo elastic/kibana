@@ -6,7 +6,13 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import { CONNECTOR_SETS, getConnectorSet, saveConnectorSetOnInvestigator } from './connector_sets';
+import {
+  CONNECTOR_SETS,
+  getConnectorSet,
+  isOrcaConnectorId,
+  saveConnectorSetOnInvestigator,
+  saveConnectorsOnInvestigator,
+} from './connector_sets';
 
 const savedAgent = {
   configuration: {
@@ -47,14 +53,14 @@ describe('saveConnectorSetOnInvestigator', () => {
     });
   });
 
-  it('saves only the ORCA Elasticsearch connector for the orcabench set', async () => {
+  // The ORCA connector is saved by the eval once it holds a cutoff's key, never before.
+  it('saves no connector for the orcabench set', async () => {
     const fetch = fetchAgent();
 
     await saveConnectorSetOnInvestigator(fetch, { env: { NIGHTSHIFT_CONNECTOR_SET: 'orcabench' } });
 
-    expect(putBody(fetch as unknown as jest.Mock).configuration.connector_ids).toEqual([
-      ...CONNECTOR_SETS.orcabench,
-    ]);
+    expect(CONNECTOR_SETS.orcabench).toEqual([]);
+    expect(putBody(fetch as unknown as jest.Mock).configuration.connector_ids).toEqual([]);
   });
 
   // A later dataset on the same stack must not inherit an earlier one's connectors.
@@ -77,6 +83,27 @@ describe('saveConnectorSetOnInvestigator', () => {
     await saveConnectorSetOnInvestigator(fetch as unknown as HttpHandler, { env: {} });
 
     expect(fetch).not.toHaveBeenCalled();
+  });
+});
+
+describe('saveConnectorsOnInvestigator', () => {
+  it('saves exactly these connectors on the investigator', async () => {
+    const fetch = fetchAgent();
+
+    await saveConnectorsOnInvestigator(fetch, ['orcabench-es']);
+
+    expect(putBody(fetch as unknown as jest.Mock)).toEqual({
+      configuration: { ...savedAgent.configuration, connector_ids: ['orcabench-es'] },
+    });
+  });
+});
+
+describe('isOrcaConnectorId', () => {
+  it('matches only the ORCA connector', () => {
+    expect(isOrcaConnectorId('orcabench-es')).toBe(true);
+    expect(isOrcaConnectorId('orcabench-es-0123456789ab')).toBe(false);
+    expect(isOrcaConnectorId('elasticsearch')).toBe(false);
+    expect(isOrcaConnectorId(undefined)).toBe(false);
   });
 });
 
