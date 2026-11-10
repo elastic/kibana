@@ -5,13 +5,26 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
+import { tags, type ScoutPage } from '@kbn/scout';
 import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
-import { mockStreamsList } from '../fixtures/mock_streams_list';
 
 const TAB_NAMES = ['map', 'sources', 'destinations', 'classic'];
+
+// Keeps the Classic tab independent of the stack's data streams.
+const mockStreamsList = async (page: ScoutPage) => {
+  await page.route(
+    (url) => url.pathname.endsWith('/api/streams'),
+    async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ streams: [{ name: 'logs-test-default', type: 'classic' }] }),
+      });
+    }
+  );
+};
 
 test.describe('Streams layout', { tag: tags.serverless.observability.complete }, () => {
   test.beforeAll(async ({ kbnClient }) => {
@@ -21,7 +34,7 @@ test.describe('Streams layout', { tag: tags.serverless.observability.complete },
   });
 
   test.beforeEach(async ({ browserAuth, page }) => {
-    await mockStreamsList(page, [{ name: 'logs-test-default', type: 'classic' }]);
+    await mockStreamsList(page);
     await browserAuth.loginAsAdmin();
   });
 

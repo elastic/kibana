@@ -26,7 +26,7 @@ export function useShowClassicTab(): { loading: boolean; showClassic: boolean } 
   } = useStreamsPrivileges();
   const enabled = legacy && v2;
 
-  const { data, isLoading } = useQuery({
+  const { data, isInitialLoading } = useQuery({
     queryKey: CLASSIC_TAB_QUERY_KEY,
     queryFn: ({ signal }) =>
       streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', { signal: signal ?? null }),
@@ -42,9 +42,5 @@ export function useShowClassicTab(): { loading: boolean; showClassic: boolean } 
     refetchOnReconnect: false,
   });
 
-  return {
-    // A disabled query also reports isLoading.
-    loading: enabled && isLoading,
-    showClassic: enabled && data !== false,
-  };
+  return { loading: isInitialLoading, showClassic: enabled && data !== false };
 }

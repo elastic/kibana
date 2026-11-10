@@ -15,20 +15,6 @@ export type StreamsLayoutTab = (typeof STREAMS_LAYOUT_TABS)[number];
 export const isStreamsLayoutTab = (value: string): value is StreamsLayoutTab =>
   STREAMS_LAYOUT_TABS.includes(value as StreamsLayoutTab);
 
-export const getStreamsLayoutTabs = ({
-  showClassic,
-}: {
-  showClassic: boolean;
-}): readonly StreamsLayoutTab[] =>
-  showClassic ? STREAMS_LAYOUT_TABS : STREAMS_LAYOUT_TABS.filter((tab) => tab !== 'classic');
-
-/** Returns the tab the app opens on. Switch to `map` here once the new experience is GA. */
-export const getDefaultStreamsLayoutTab = ({
-  showClassic,
-}: {
-  showClassic: boolean;
-}): StreamsLayoutTab => (showClassic ? 'classic' : 'map');
-
 /** Root wired streams and query streams do not count. */
 export const hasClassicOrWiredStreams = (
   streams: ReadonlyArray<Pick<Streams.all.Definition, 'name' | 'type'>>

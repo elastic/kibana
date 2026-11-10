@@ -8,7 +8,6 @@
 import React from 'react';
 import { RedirectTo } from '../redirect_to';
 import { StreamCheckLoading } from './stream_check_loading';
-import { getDefaultStreamsLayoutTab } from './tab_ids';
 import { useShowClassicTab } from './use_show_classic_tab';
 
 /** Redirects to the default tab of `unitId`, or of the current unit when none is given. */
@@ -19,7 +18,8 @@ export function StreamsLayoutDefaultTabRedirect({ unitId }: { unitId?: string })
     return <StreamCheckLoading />;
   }
 
-  const tab = getDefaultStreamsLayoutTab({ showClassic });
+  // Switch to `map` once the new experience is GA.
+  const tab = showClassic ? 'classic' : 'map';
 
   return (
     <RedirectTo

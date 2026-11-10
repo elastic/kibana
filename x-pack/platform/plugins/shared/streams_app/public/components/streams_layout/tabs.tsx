@@ -14,24 +14,18 @@ import { DestinationsTab } from './destinations';
 import { SourcesTab } from './sources';
 import type { StreamsLayoutTab } from './tab_ids';
 
-type StreamsLayoutTabConfig =
-  | {
-      label: string;
-      Component: ComponentType;
-      /**
-       * Set for tabs that own their full-bleed surface, so the page body drops its
-       * padding instead of framing the content.
-       */
-      noPadding?: boolean;
-      techPreview?: boolean;
-      ownsHeader?: false;
-    }
-  | {
-      label: string;
-      /** Renders its own page header and body, with the layout tabs passed in. */
-      Component: ComponentType<{ tabs?: AppHeaderTab[] }>;
-      ownsHeader: true;
-    };
+interface StreamsLayoutTabConfig {
+  label: string;
+  Component: ComponentType<{ tabs?: AppHeaderTab[] }>;
+  /**
+   * Set for tabs that own their full-bleed surface, so the page body drops its
+   * padding instead of framing the content.
+   */
+  noPadding?: boolean;
+  techPreview?: boolean;
+  /** Renders its own page header and body, with the layout tabs passed in. */
+  ownsHeader?: boolean;
+}
 
 /**
  * Registry of the layout tabs. Adding a tab means adding its id in `tab_ids.ts` and a

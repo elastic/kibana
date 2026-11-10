@@ -17,7 +17,7 @@ import { RedirectTo } from '../redirect_to';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_template';
 import { StreamsLayoutDefaultTabRedirect } from './default_tab_redirect';
 import { StreamCheckLoading } from './stream_check_loading';
-import { getStreamsLayoutTabs, isStreamsLayoutTab } from './tab_ids';
+import { isStreamsLayoutTab, STREAMS_LAYOUT_TABS } from './tab_ids';
 import { streamsLayoutTabs } from './tabs';
 import { UnitNotFoundPrompt } from './unit_not_found_prompt';
 import { useShowClassicTab } from './use_show_classic_tab';
@@ -44,22 +44,25 @@ export function StreamsLayout() {
   const unitCheck = useUnitCheck(unitId);
   const { loading, showClassic } = useShowClassicTab();
 
-  const visibleTabs = useMemo(() => getStreamsLayoutTabs({ showClassic }), [showClassic]);
+  const visibleTabs = useMemo(
+    () => STREAMS_LAYOUT_TABS.filter((tabId) => showClassic || tabId !== 'classic'),
+    [showClassic]
+  );
 
   const appHeaderTabs = useMemo<AppHeaderTab[]>(
     () =>
       visibleTabs.map((tabId) => {
-        const config = streamsLayoutTabs[tabId];
+        const { label, techPreview } = streamsLayoutTabs[tabId];
         return {
           id: tabId,
-          label: config.label,
+          label,
           href: router.link('/v2/unit/{unitId}/{tab}', {
             path: { unitId, tab: tabId },
             query: { rangeFrom, rangeTo },
           }),
           isSelected: tab === tabId,
           'data-test-subj': `streamsLayoutTab-${tabId}`,
-          ...(!config.ownsHeader && config.techPreview ? { badge: techPreviewBadge } : {}),
+          ...(techPreview ? { badge: techPreviewBadge } : {}),
         };
       }),
     [visibleTabs, unitId, tab, router, rangeFrom, rangeTo]
@@ -74,13 +77,9 @@ export function StreamsLayout() {
     return <StreamsLayoutDefaultTabRedirect />;
   }
 
-  const config = streamsLayoutTabs[tab];
-  if (config.ownsHeader) {
-    if (loading) {
-      return <StreamCheckLoading />;
-    }
-    const { Component: OwnHeaderComponent } = config;
-    return <OwnHeaderComponent tabs={appHeaderTabs} />;
+  const { Component, noPadding, ownsHeader } = streamsLayoutTabs[tab];
+  if (ownsHeader) {
+    return loading ? <StreamCheckLoading /> : <Component tabs={appHeaderTabs} />;
   }
 
   const title = i18n.translate('xpack.streams.streamsLayout.pageHeaderTitle', {
@@ -106,7 +105,6 @@ export function StreamsLayout() {
     );
   }
 
-  const { Component, noPadding } = config;
   const body = (
     <StreamsAppPageTemplate.Body noPadding={noPadding} paddingSize="m">
       {/* The tab machines read the unit loader once, so a new unit needs a fresh mount. */}
