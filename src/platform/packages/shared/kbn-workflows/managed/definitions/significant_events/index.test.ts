@@ -155,7 +155,7 @@ describe('significant events persistence workflow contracts', () => {
     expect(isReport(fallback)).toBe(true);
     expect(fallback.with?.body).toMatchObject({
       outcome: 'failed',
-      error_type: '{{ error.type }}',
+      error_type: '{{ steps.run_discovery_agent.error.type }}',
       parent_execution_id: '{{ parent.executionId }}',
     });
   });

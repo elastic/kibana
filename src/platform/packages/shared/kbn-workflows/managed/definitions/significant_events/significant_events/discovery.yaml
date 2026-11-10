@@ -10,7 +10,8 @@ settings:
     max: 1
   # Reports the failed run for telemetry (nightshift-program#1956); the engine restores the error
   # afterwards, so the workflow still fails. Never reached by a step that declares its own
-  # `on-failure`, a cancelled run, or the workflow timeout.
+  # `on-failure`, a cancelled run, or the workflow timeout. The engine leaves `error` empty in a
+  # fallback, so the error is read from the steps that can fail the run; at most one has failed.
   on-failure:
     fallback:
       - name: report_discovery_failed
@@ -22,8 +23,8 @@ settings:
             discovery_execution_id: '{{ execution.id }}'
             parent_execution_id: '{{ parent.executionId }}'
             outcome: failed
-            error_type: '{{ error.type }}'
-            error_message: '${{ error.message | default: "" | truncate: 1024, "" }}'
+            error_type: '{{ steps.run_discovery_agent.error.type }}'
+            error_message: '${{ steps.run_discovery_agent.error.message | default: steps.get_written_rules_backlog.error.message | default: steps.resolve_model.error.message | default: steps.classify_detections.error.message | default: "" | truncate: 1024, "" }}'
           headers:
             x-elastic-internal-origin: 'kibana'
         timeout: '10s'
