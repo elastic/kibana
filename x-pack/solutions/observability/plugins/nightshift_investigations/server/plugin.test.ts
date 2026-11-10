@@ -240,7 +240,10 @@ describe('NightshiftInvestigationsPlugin start', () => {
 
   it('installs no knowledge workflow with every knowledge system off', async () => {
     const installed = await installedWorkflows({});
-    for (const workflowId of [...KNOWLEDGE_WORKFLOWS, NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID]) {
+    for (const workflowId of [
+      ...KNOWLEDGE_WORKFLOWS,
+      NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,
+    ]) {
       expect(installed).not.toContain(workflowId);
     }
   });
