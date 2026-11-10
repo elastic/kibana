@@ -24,6 +24,7 @@ import { useResolutionGroup, RESOLUTION_GROUP_ROUTE } from './hooks/use_resoluti
 import type { ResolutionGroup } from './hooks/use_resolution_group';
 import { useLinkEntities } from './hooks/use_link_entities';
 import { useUnlinkEntities } from './hooks/use_unlink_entities';
+import { useCanModifyResolution } from './hooks/use_can_modify_resolution';
 import { ResolutionGroupTable } from './resolution_group_table';
 import { AddEntitiesSection } from './add_entities_section';
 import { ConfirmResolutionModal } from './confirm_resolution_modal';
@@ -75,6 +76,8 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
     },
   });
   const unlinkEntities = useUnlinkEntities();
+
+  const { canModify, isLoading: isPrivilegesLoading } = useCanModifyResolution();
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
@@ -239,6 +242,8 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
           isLoading={isLoading || isFetching}
           isError={isError}
           showActions
+          canModify={canModify}
+          isPrivilegesLoading={isPrivilegesLoading}
           onRemoveEntity={handleRemoveEntity}
           targetEntityId={targetEntityId}
           removingEntityId={removingEntityId}
@@ -253,6 +258,8 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
           onEntityNameClick={handleEntityNameClick}
           addingEntityId={addingEntityId}
           disabled={!groupQueryReady}
+          canModify={canModify}
+          isPrivilegesLoading={isPrivilegesLoading}
         />
       </div>
       {modalState.isOpen && modalState.newEntity && currentEntityForModal && (

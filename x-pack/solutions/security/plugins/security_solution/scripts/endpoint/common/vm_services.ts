@@ -474,7 +474,12 @@ export const createVagrantHostVmClient = (
   };
 
   const destroy = async (): Promise<void> => {
-    const destroyResponse = await execa.command(`vagrant destroy -f`, execaOptions);
+    // Bounded so a slow halt rejects for the caller to handle instead of hanging past the
+    // 60s `taskTimeout` of the Cypress teardown tasks that destroy endpoint hosts.
+    const destroyResponse = await execa.command(`vagrant destroy -f`, {
+      ...execaOptions,
+      timeout: 30_000,
+    });
 
     log.debug(`VM [${name}] was destroyed successfully`, destroyResponse);
   };

@@ -24,18 +24,25 @@ export const resolveResourceForEsqlWithSamplingStats = async ({
   esClient,
   samplingSize,
   includeDatasets = false,
+  includeFrozen = false,
 }: {
   resourceName: string;
   esClient: ElasticsearchClient;
   samplingSize?: number;
   includeDatasets?: boolean;
+  includeFrozen?: boolean;
 }) => {
-  const resource = await resolveResourceForEsql({ resourceName, esClient, includeDatasets });
+  const resource = await resolveResourceForEsql({
+    resourceName,
+    esClient,
+    includeDatasets,
+    includeFrozen,
+  });
   // datasets are not searchable via `_search`, so skip sampling entirely for them
   const stats =
     resource.type === EsResourceType.dataset
       ? createStatsFromSamples({ samples: [] })
-      : await getSampleDocs({ esClient, index: resourceName, size: samplingSize })
+      : await getSampleDocs({ esClient, index: resourceName, size: samplingSize, includeFrozen })
           .then(({ samples }) => createStatsFromSamples({ samples }))
           .catch(() => createStatsFromSamples({ samples: [] }));
 

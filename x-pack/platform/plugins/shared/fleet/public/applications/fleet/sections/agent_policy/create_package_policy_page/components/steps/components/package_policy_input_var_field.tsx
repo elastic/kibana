@@ -173,7 +173,10 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
           pkgName={packageName}
           datastreams={datastreams}
           value={value}
-          onChange={onChange}
+          onChange={(newValue) => {
+            setIsDirty(true);
+            onChange(newValue);
+          }}
           errors={errors}
           isInvalid={isInvalid}
           isDisabled={isEditPage}
@@ -362,7 +365,7 @@ function getInputComponent({
       return (
         <EuiSwitch
           label={fieldLabel}
-          checked={value}
+          checked={Boolean(value)}
           showLabel={false}
           onChange={(e) => onChange(e.target.checked)}
           onBlur={() => setIsDirty(true)}

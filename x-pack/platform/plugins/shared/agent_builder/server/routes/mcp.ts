@@ -16,9 +16,13 @@ import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
+import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
+
+/** The maximum number of array elements and object keys in one tool call's arguments. */
+export const MCP_MAX_TOOL_INPUT_ELEMENTS = 10_000;
 
 export function filterToolsByNamespace(
   tools: InternalToolDefinition[],
@@ -64,6 +68,9 @@ export function registerMCPRoutes({ router, getInternalServices, logger }: Route
 > This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS Code, etc.) and should not be used directly via REST APIs. Use MCP Inspector or native MCP clients instead.
 To learn more about the Agent Builder MCP server, refer to the [MCP documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/mcp-server).`,
       options: {
+        timeout: {
+          idleSocket: AGENT_SOCKET_TIMEOUT_MS,
+        },
         tags: ['mcp', 'oas-tag:agent builder', 'security:acceptUiamOAuth'],
         xsrfRequired: false,
         availability: {
@@ -107,10 +114,13 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
           transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
 
           // Instantiate new MCP server upon every request, no session persistence
-          server = new McpServer({
-            name: MCP_SERVER_NAME,
-            version: MCP_SERVER_VERSION,
-          });
+          server = new McpServer(
+            {
+              name: MCP_SERVER_NAME,
+              version: MCP_SERVER_VERSION,
+            },
+            { maxToolInputElements: MCP_MAX_TOOL_INPUT_ELEMENTS }
+          );
 
           const { tools: toolService } = getInternalServices();
 

@@ -25,6 +25,8 @@ export const GetFileActionResult = memo<
   const actionRequestBody = useMemo<undefined | ResponseActionGetFileRequestBody>(() => {
     const { agentType, endpointId } = command.commandDefinition?.meta ?? {};
     const { path, comment } = command.args.args;
+    // `force` is a bare boolean flag; it is only ever defined for the `endpoint` agent type
+    const force = command.args.hasArg('force');
 
     return endpointId
       ? {
@@ -33,10 +35,11 @@ export const GetFileActionResult = memo<
           comment: comment?.[0],
           parameters: {
             path: path[0],
+            ...(force ? { force: true } : {}),
           },
         }
       : undefined;
-  }, [command.args.args, command.commandDefinition?.meta]);
+  }, [command.args, command.commandDefinition?.meta]);
 
   const { result, actionDetails } = useConsoleActionSubmitter<ResponseActionGetFileRequestBody>({
     ResultComponent,

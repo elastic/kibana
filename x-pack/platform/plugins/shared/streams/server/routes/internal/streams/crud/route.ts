@@ -12,7 +12,7 @@ import type {
   ClassicIngestStreamEffectiveLifecycle,
   EffectiveFailureStore,
 } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -147,10 +147,10 @@ export const streamDetailRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
     query: z.object({
-      start: z.string(),
-      end: z.string(),
+      start: z.string().max(64),
+      end: z.string().max(64),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<StreamDetailsResponse> => {
@@ -195,7 +195,7 @@ export const resolveIndexRoute = createServerRoute({
   },
   params: z.object({
     query: z.object({
-      index: z.string(),
+      index: z.string().max(255),
     }),
   }),
   handler: async ({
@@ -230,7 +230,7 @@ export const bulkGetStreamSummariesRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      names: z.array(z.string()).max(BULK_GET_SUMMARIES_MAX_NAMES),
+      names: z.array(z.string().max(MAX_STREAM_NAME_LENGTH)).max(BULK_GET_SUMMARIES_MAX_NAMES),
     }),
   }),
   handler: async ({

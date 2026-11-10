@@ -466,6 +466,7 @@ describe('cleanupILMPoliciesStep', () => {
 
     expect(mockDeletePrerequisiteAssets).toBeCalledWith(
       {
+        installSource: 'registry',
         indexAssets: [
           {
             id: '.metrics-endpoint.metadata_united_default',

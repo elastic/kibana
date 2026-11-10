@@ -88,7 +88,7 @@ Pick **one** pattern and wire it after `scout.js generate` completes:
 
 ### After wiring either pattern
 
-1. Run **`yarn kbn bootstrap`** so `packages/kbn-ts-projects/config-paths.json` picks up added or removed `tsconfig.json` paths.
+1. Run **`pnpm kbn bootstrap`** so `packages/kbn-ts-projects/config-paths.json` picks up added or removed `tsconfig.json` paths.
 2. Validate with **`node scripts/type_check --project <path-to-tsconfig.json>`** (plugin root `tsconfig.json` for **A**, or `test/<scout-root>/api/tsconfig.json` / UI sibling for **B**).
 
 ## After Generating

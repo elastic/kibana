@@ -138,7 +138,6 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
           name: 'test-query',
           passed: true,
           status: 'success',
-          descriptorVersion: 2,
           numDocs: 1,
           fieldNames: expect.arrayContaining(['@timestamp', 'user.name', 'event.action']),
         });
@@ -179,6 +178,97 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
 
         expect(result).toHaveLength(0);
         expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should skip queries whose expiresAt is in the past', async () => {
+        setupDefaultArtifact({ version: 4, expiresAt: '2000-01-01' });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should run queries whose expiresAt is today (last valid day)', async () => {
+        const today = new Date().toISOString().slice(0, 10);
+        setupDefaultArtifact({ version: 4, expiresAt: today });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result.length).toBeGreaterThan(0);
+      });
+
+      test('should skip queries whose expiresAt was yesterday', async () => {
+        const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        setupDefaultArtifact({ version: 4, expiresAt: yesterday });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result).toHaveLength(0);
+        expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+      });
+
+      test('should run queries whose expiresAt is in the future', async () => {
+        setupDefaultArtifact({ version: 4, expiresAt: '2099-12-31' });
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result.length).toBeGreaterThan(0);
+      });
+
+      test('should run queries with no expiresAt set', async () => {
+        setupDefaultArtifact();
+
+        const result = await service.runHealthDiagnosticQueries({});
+
+        expect(result.length).toBeGreaterThan(0);
+      });
+
+      describe('stackVersions filtering', () => {
+        const setupStackVersion = (stackVersion: string) => {
+          service.setup({
+            taskManager: { registerTaskDefinitions: jest.fn() } as never,
+            isServerless: false,
+            stackVersion,
+          });
+        };
+
+        test('should run a query when the cluster version satisfies stackVersions', async () => {
+          setupStackVersion('9.4.0');
+          setupDefaultArtifact({ version: 4, stackVersions: '>=8.17.7 <9.0.0 || >=9.4.0' });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result.length).toBeGreaterThan(0);
+        });
+
+        test('should silently skip a query when the cluster version is outside stackVersions', async () => {
+          setupStackVersion('9.2.0');
+          setupDefaultArtifact({ version: 4, stackVersions: '>=8.17.7 <9.0.0 || >=9.4.0' });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result).toHaveLength(0);
+          expect(mockQueryExecutor.search).not.toHaveBeenCalled();
+        });
+
+        test('should coerce a -SNAPSHOT cluster version before evaluating the range', async () => {
+          setupStackVersion('9.4.0-SNAPSHOT');
+          setupDefaultArtifact({ version: 4, stackVersions: '>=9.4.0' });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result.length).toBeGreaterThan(0);
+        });
+
+        test('should run a query with no stackVersions regardless of cluster version', async () => {
+          setupStackVersion('9.2.0');
+          setupDefaultArtifact({ version: 4 });
+
+          const result = await service.runHealthDiagnosticQueries({});
+
+          expect(result.length).toBeGreaterThan(0);
+        });
       });
 
       describe('query attribute filtering', () => {
@@ -333,7 +423,6 @@ enabled: true`,
           name: 'test-query',
           passed: false,
           status: 'failed',
-          descriptorVersion: 2,
           failure: {
             message: 'Query execution failed',
             reason: undefined,

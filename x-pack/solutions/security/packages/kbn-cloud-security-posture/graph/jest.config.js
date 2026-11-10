@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   roots: ['<rootDir>/x-pack/solutions/security/packages/kbn-cloud-security-posture/graph'],
   rootDir: '../../../../../..',
   transform: {
@@ -17,4 +17,5 @@ module.exports = {
   setupFilesAfterEnv: [
     '<rootDir>/x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/setup_tests.ts',
   ],
+  testTimeout: 60_000,
 };

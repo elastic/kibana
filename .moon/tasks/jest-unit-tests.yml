@@ -1,0 +1,40 @@
+$schema: https://moonrepo.dev/schemas/v2/tasks.json
+
+inheritedBy:
+  tags:
+    - jest-unit-tests
+
+fileGroups:
+  jestConfigs:
+    - '**/jest.config.{js,cjs,json}'
+    - '!**/__fixtures__/**'
+
+tasks:
+  jest:
+    command: node
+    tags:
+      - jest-unit-tests
+    args:
+      - scripts/moon_jest.js
+      - '@files(jestConfigs)'
+      - '--'
+    deps:
+      - target: '~:test-source-upstream'
+        cacheStrategy: hash
+      - target: 'jest-tooling:hash'
+        cacheStrategy: hash
+    inputs:
+      - '@group(default)'
+      - '!README*'
+      # Other runners own specs and configs; support files can be shared with Jest.
+      - '!**/*.spec.{js,mjs,ts,tsx}'
+      - '!test/{functional,ftr}/**/*'
+      - '!test/scout*/**/*playwright.config.ts'
+      - '!test/scout*/**/.meta/**/*'
+      - '!**/integration_tests/**/*'
+      - '!**/__integration_tests__/**/*'
+      - '!**/jest.integration.config.{js,cjs,json}'
+    options:
+      mergeArgs: append
+      cache: false
+      runFromWorkspaceRoot: true

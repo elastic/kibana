@@ -156,6 +156,30 @@ describe('createPlaywrightConfig', () => {
     expect(config.projects![2].name).toEqual('mki');
   });
 
+  it('mki project has a higher per-project timeout than the global default', () => {
+    const config = createPlaywrightConfig({ testDir: './my_tests' });
+    const mki = config.projects!.find((p) => p.name === 'mki');
+    const ech = config.projects!.find((p) => p.name === 'ech');
+    const local = config.projects!.find((p) => p.name === 'local');
+
+    // Cloud projects (ech/mki) need extra time: cloud SAML auth hits a real service and is slower than the local mock.
+    expect(mki).toHaveProperty('timeout', 90_000);
+    expect(ech).toHaveProperty('timeout', 90_000);
+    // local falls back to the global 60 s default (no per-project override)
+    expect(local).not.toHaveProperty('timeout');
+  });
+
+  it('cloud projects raise the navigation timeout above the global default', () => {
+    const config = createPlaywrightConfig({ testDir: './my_tests' });
+    const byName = (name: string) => config.projects!.find((p) => p.name === name)!.use;
+
+    // Every test gets a fresh browser context, so a cloud navigation is a cold, remote
+    // Kibana bootstrap and cannot reliably settle within the global 20 s cap.
+    expect(byName('ech')).toHaveProperty('navigationTimeout', 45_000);
+    expect(byName('mki')).toHaveProperty('navigationTimeout', 45_000);
+    expect(byName('local')).not.toHaveProperty('navigationTimeout');
+  });
+
   it('should add global.setup.ts and global.teardown.ts projects when runGlobalSetup is true', () => {
     const testDir = './my_tests';
     const defaultGlobalHookTimeout = 180000;
@@ -194,7 +218,11 @@ describe('createPlaywrightConfig', () => {
 
       expect(main).toBeDefined();
       expect(main).toHaveProperty('dependencies', [`setup-${projectName}`]);
-      expect(main).not.toHaveProperty('timeout');
+      if (projectName === 'mki' || projectName === 'ech') {
+        expect(main).toHaveProperty('timeout', 90_000);
+      } else {
+        expect(main).not.toHaveProperty('timeout');
+      }
 
       expect(teardown).toBeDefined();
       // The teardown project is always emitted; if a plugin doesn't ship `global.teardown.ts`,

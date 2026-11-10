@@ -10,6 +10,12 @@ import { EsResourceType } from '@kbn/agent-builder-common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { resolveResource, resolveResourceForEsql } from './resolve_resource';
 
+const fieldCapsRequest = (index: string) => ({
+  index,
+  fields: ['*'],
+  index_filter: { bool: { must_not: [{ term: { _tier: 'data_frozen' } }] } },
+});
+
 describe('resolveResource', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
 
@@ -50,10 +56,7 @@ describe('resolveResource', () => {
       });
 
       // Should use _field_caps, not _mapping
-      expect(esClient.fieldCaps).toHaveBeenCalledWith({
-        index: 'remote_cluster:my-index',
-        fields: ['*'],
-      });
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('remote_cluster:my-index'));
       expect(esClient.indices.getMapping).not.toHaveBeenCalled();
 
       expect(result).toEqual({
@@ -97,10 +100,7 @@ describe('resolveResource', () => {
       });
 
       // Should use _field_caps, not _data_stream/_mappings
-      expect(esClient.fieldCaps).toHaveBeenCalledWith({
-        index: 'remote_cluster:logs-ds',
-        fields: ['*'],
-      });
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('remote_cluster:logs-ds'));
       expect(esClient.transport.request).not.toHaveBeenCalled();
 
       expect(result).toEqual({
@@ -221,10 +221,7 @@ describe('resolveResource', () => {
 
       const result = await resolveResourceForEsql({ resourceName: 'logs-*', esClient });
 
-      expect(esClient.fieldCaps).toHaveBeenCalledWith({
-        index: 'logs-*',
-        fields: ['*'],
-      });
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('logs-*'));
       expect(esClient.indices.getMapping).not.toHaveBeenCalled();
       expect(result).toEqual({
         name: 'logs-*',
@@ -341,10 +338,7 @@ describe('resolveResource', () => {
 
       const result = await resolveResourceForEsql({ resourceName: 'alias-a,alias-b', esClient });
 
-      expect(esClient.fieldCaps).toHaveBeenCalledWith({
-        index: 'alias-a,alias-b',
-        fields: ['*'],
-      });
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('alias-a,alias-b'));
       expect(result).toEqual({
         name: 'alias-a,alias-b',
         type: EsResourceType.indexPattern,
@@ -377,10 +371,7 @@ describe('resolveResource', () => {
       });
 
       expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
-      expect(esClient.fieldCaps).toHaveBeenCalledWith({
-        index: 'remote_cluster:logs-*',
-        fields: ['*'],
-      });
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('remote_cluster:logs-*'));
       expect(result.name).toBe('remote_cluster:logs-*');
       expect(result.type).toBe(EsResourceType.indexPattern);
       expect(result.fields).toEqual(
@@ -640,7 +631,7 @@ describe('resolveResource', () => {
       const result = await resolveResource({ resourceName: 'metrics-host', esClient });
 
       expect(esClient.indices.getDataStream).toHaveBeenCalledWith({ name: 'metrics-host' });
-      expect(esClient.fieldCaps).toHaveBeenCalledWith({ index: 'metrics-host', fields: ['*'] });
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('metrics-host'));
       expect(result.isTsdb).toBe(true);
     });
 
@@ -722,6 +713,29 @@ describe('resolveResource', () => {
       await resolveResource({ resourceName: 'remote_cluster:logs-ds', esClient });
 
       expect(esClient.indices.getDataStream).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('frozen tier', () => {
+    beforeEach(() => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [{ name: 'my-alias', indices: ['backing-idx'] }],
+        data_streams: [],
+      });
+      esClient.fieldCaps.mockResolvedValue({ indices: ['backing-idx'], fields: {} });
+    });
+
+    it('excludes frozen tier indices from field caps by default', async () => {
+      await resolveResource({ resourceName: 'my-alias', esClient });
+
+      expect(esClient.fieldCaps).toHaveBeenCalledWith(fieldCapsRequest('my-alias'));
+    });
+
+    it('keeps frozen tier indices in field caps when they are included', async () => {
+      await resolveResource({ resourceName: 'my-alias', esClient, includeFrozen: true });
+
+      expect(esClient.fieldCaps).toHaveBeenCalledWith({ index: 'my-alias', fields: ['*'] });
     });
   });
 });

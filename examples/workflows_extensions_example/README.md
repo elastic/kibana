@@ -7,7 +7,7 @@ This example plugin demonstrates how to register a custom workflow step using th
 Example plugins are only loaded when Kibana is started with the `--run-examples` flag. Start Kibana with:
 
 ```bash
-yarn start --run-examples
+pnpm start --run-examples
 ```
 
 Then open **Developer examples** in the sidebar and click **Workflows Extensions Example**.

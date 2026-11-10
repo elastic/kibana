@@ -6,59 +6,63 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { AgentBuilderErrorCode } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
+import type { InferenceConnector } from '@kbn/inference-common';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
 import {
   createAgentsServiceStartMock,
   createMockedAgentRegistry,
 } from '../../../test_utils/agents';
+import { createConversationServiceMock } from '../../../test_utils/conversations';
 import { resolveServices } from './resolve_services';
 
-jest.mock('../../../utils/resolve_selected_connector_id');
-
-const resolveSelectedConnectorIdMock = resolveSelectedConnectorId as jest.MockedFn<
-  typeof resolveSelectedConnectorId
->;
-
-const createDeps = () => {
+const createDeps = ({
+  connectorId,
+  featureEndpoints = [],
+}: {
+  connectorId?: string;
+  featureEndpoints?: Array<Pick<InferenceConnector, 'connectorId'>>;
+} = {}) => {
   const agentRegistry = createMockedAgentRegistry();
+  agentRegistry.has.mockResolvedValue(true);
   const agentService = createAgentsServiceStartMock();
   agentService.getRegistry.mockResolvedValue(agentRegistry);
+  const getForFeature = jest.fn().mockResolvedValue({
+    endpoints: featureEndpoints,
+    warnings: [],
+    soEntryFound: false,
+  });
 
   return {
     agentRegistry,
+    getForFeature,
     deps: {
       agentId: 'private-agent',
-      connectorId: 'connector-1',
+      connectorId,
       telemetryMetadata: undefined,
       request: httpServerMock.createKibanaRequest(),
       logger: loggingSystemMock.createLogger(),
       inference: inferenceMock.createStartContract(),
-      conversationService: {} as Parameters<typeof resolveServices>[0]['conversationService'],
+      conversationService: createConversationServiceMock(),
       agentService,
-      uiSettings: uiSettingsServiceMock.createStartContract(),
-      savedObjects: savedObjectsServiceMock.createStartContract(),
-      searchInferenceEndpoints: {} as SearchInferenceEndpointsPluginStart,
+      searchInferenceEndpoints: {
+        features: {},
+        endpoints: { getForFeature },
+      } as unknown as SearchInferenceEndpointsPluginStart,
     },
   };
 };
 
 describe('resolveServices', () => {
-  beforeEach(() => {
-    resolveSelectedConnectorIdMock.mockResolvedValue('connector-1');
-  });
-
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('returns a 404 Agent Builder error when the scoped user cannot access the agent', async () => {
-    const { agentRegistry, deps } = createDeps();
+    const { agentRegistry, deps } = createDeps({ connectorId: 'connector-1' });
     agentRegistry.has.mockResolvedValue(false);
 
     await expect(resolveServices(deps)).rejects.toMatchObject({
@@ -69,5 +73,36 @@ describe('resolveServices', () => {
         statusCode: 404,
       },
     });
+  });
+
+  it('uses the explicit connectorId without resolving the feature endpoints', async () => {
+    const { deps, getForFeature } = createDeps({ connectorId: 'connector-1' });
+
+    const { selectedConnectorId } = await resolveServices(deps);
+
+    expect(selectedConnectorId).toBe('connector-1');
+    expect(getForFeature).not.toHaveBeenCalledWith(
+      AGENT_BUILDER_INFERENCE_FEATURE_ID,
+      expect.anything()
+    );
+  });
+
+  it('uses the first endpoint resolved for the Agent Builder feature', async () => {
+    const { deps, getForFeature } = createDeps({
+      featureEndpoints: [{ connectorId: 'endpoint-1' }, { connectorId: 'endpoint-2' }],
+    });
+
+    const { selectedConnectorId } = await resolveServices(deps);
+
+    expect(selectedConnectorId).toBe('endpoint-1');
+    expect(getForFeature).toHaveBeenCalledWith(AGENT_BUILDER_INFERENCE_FEATURE_ID, deps.request);
+  });
+
+  it('throws when no connector is available', async () => {
+    const { deps } = createDeps();
+
+    await expect(resolveServices(deps)).rejects.toThrow(
+      'No connector available for chat execution'
+    );
   });
 });

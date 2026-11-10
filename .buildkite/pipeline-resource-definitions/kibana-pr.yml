@@ -23,6 +23,7 @@ spec:
         KIBANA_GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_BUILD_COMMIT_STATUS_CONTEXT: kibana-ci
         SCOUT_REPORTER_ENABLED: 'true'
+        SCOUT_TEST_RUN_SCOPE: 'pull-request'
       allow_rebuilds: true
       branch_configuration: ''
       cancel_intermediate_builds: true
@@ -35,6 +36,7 @@ spec:
             paths:
               - .buildkite
               - .node-version
+              - .nvmrc
               - package.json
               - tsconfig.base.json
               - versions.json

@@ -8,7 +8,9 @@
 import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { useGetUrlParams, useUrlParams } from '../../hooks';
 import { deletePackagePolicy } from '../../state/monitor_management/api';
 import { MonitorNotFoundPage } from '../monitor_details/monitor_not_found_page';
@@ -29,7 +31,7 @@ const LeftoverIntegrationFound: React.FC = () => {
 
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { data, loading } = useFetcher(() => {
+  const { data, loading, error } = useFetcher(() => {
     if (!packagePolicyId || !isDeleting) return;
     return deletePackagePolicy(packagePolicyId);
   }, [isDeleting, packagePolicyId]);
@@ -42,6 +44,21 @@ const LeftoverIntegrationFound: React.FC = () => {
   }, [data, isDeleting, loading, updateUrlParams]);
 
   if (!packagePolicyId) return null;
+
+  if (error) {
+    return (
+      <EuiCallOut
+        data-test-subj="syntheticsLeftoverIntegrationDeleteError"
+        title={i18n.translate('xpack.synthetics.leftOver.errors.deleteFailedTitle', {
+          defaultMessage: 'Unable to delete integration',
+        })}
+        color="danger"
+        iconType="warning"
+      >
+        <p>{(error as IHttpFetchError<ResponseErrorBody>).body?.message ?? error.message}</p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <EuiCallOut title="Leftover integration found" color="warning" iconType="question">

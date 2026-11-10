@@ -7,6 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ConstructorOptions } from '../../../../rules_client/rules_client';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
@@ -25,7 +26,10 @@ import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
-import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
@@ -39,6 +43,13 @@ jest.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actio
     bulkMigrateLegacyActions: jest.fn(),
   };
 });
+
+jest.mock(
+  '../../../../rules_client/lib/siem_legacy_actions/transform_and_delete_legacy_actions',
+  () => ({
+    deleteLegacyActionsForRules: jest.fn(),
+  })
+);
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -163,6 +174,7 @@ describe('enable()', () => {
     });
     taskManager.get.mockResolvedValue(mockTask);
     (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
+    (deleteLegacyActionsForRules as jest.Mock).mockReset();
   });
 
   describe('authorization', () => {
@@ -193,6 +205,33 @@ describe('enable()', () => {
         operation: 'enable',
         ruleTypeId: 'myType',
       });
+    });
+
+    test('rejects enabling the rule when the rule type params authorizer denies the persisted params', async () => {
+      // Simulates params persisted through a path that skips the authorizer (e.g. import).
+      const persistedParams = { responseActions: [{ actionTypeId: '.endpoint' }] };
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...existingRule,
+        attributes: { ...existingRule.attributes, params: persistedParams },
+      });
+      const authorizeParams = jest
+        .fn()
+        .mockRejectedValue(new Error('Unauthorized to enable a privileged param'));
+      (rulesClientParams.ruleTypeRegistry.get as jest.Mock).mockReturnValue({
+        authorize: { params: { authorize: authorizeParams } },
+      });
+
+      await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Unauthorized to enable a privileged param"`
+      );
+
+      expect(authorizeParams).toHaveBeenCalledWith(
+        persistedParams,
+        expect.objectContaining({ request: rulesClientParams.request })
+      );
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(taskManager.schedule).not.toHaveBeenCalled();
+      expect(taskManager.bulkEnable).not.toHaveBeenCalled();
     });
   });
 
@@ -312,7 +351,7 @@ describe('enable()', () => {
     expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith(
       API_KEY_PENDING_INVALIDATION_TYPE
     );
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: myType/name', undefined);
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
       '1',
@@ -492,6 +531,47 @@ describe('enable()', () => {
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
   });
 
+  test('deletes the migrated legacy actions only after the rule is saved', async () => {
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['1']);
+
+    await rulesClient.enableRule({ id: '1' });
+
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['1']);
+    expect(
+      (unsecuredSavedObjectsClient.create as jest.Mock).mock.invocationCallOrder[0]
+    ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+  });
+
+  test('migrates again on the retry after a version conflict, and deletes the legacy actions once the retry saves', async () => {
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['1']);
+    unsecuredSavedObjectsClient.create.mockReset();
+    unsecuredSavedObjectsClient.create
+      .mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, '1')
+      )
+      .mockResolvedValueOnce({} as never);
+
+    await rulesClient.enableRule({ id: '1' });
+
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
+    expect(bulkMigrateLegacyActions).toHaveBeenCalledTimes(2);
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledTimes(1);
+    expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['1']);
+    expect(
+      (unsecuredSavedObjectsClient.create as jest.Mock).mock.invocationCallOrder[1]
+    ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
+  });
+
+  test('keeps the legacy actions when the rule saved object write fails, so the retry can migrate them', async () => {
+    (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue(['1']);
+    unsecuredSavedObjectsClient.create.mockReset();
+    unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail to update'));
+
+    await expect(rulesClient.enableRule({ id: '1' })).rejects.toThrow('Fail to update');
+
+    expect(deleteLegacyActionsForRules).not.toHaveBeenCalled();
+  });
+
   test('throws when unsecuredSavedObjectsClient update fails', async () => {
     rulesClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
@@ -506,6 +586,40 @@ describe('enable()', () => {
     expect(rulesClientParams.getUserName).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkEnable).not.toHaveBeenCalled();
+  });
+
+  test('clones the caller API key instead of persisting it when the borrowed-key flag is set', async () => {
+    // A rule created disabled stores no key, so on enable the caller's declaration that its
+    // API key is borrowed (cloneApiKeysOnCreate) must mint a framework-owned clone rather
+    // than persist the borrowed credential.
+    const clientWithBorrowedKey = new RulesClient({
+      ...rulesClientParams,
+      cloneApiKeysOnCreate: true,
+    });
+    encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(existingRuleWithoutApiKey);
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValue(true);
+    rulesClientParams.cloneAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: 'cloned', name: 'Alerting: myType/name', api_key: 'cloned-secret' },
+    });
+
+    await clientWithBorrowedKey.enableRule({ id: '1' });
+
+    // Asserts the decrypted read succeeded: on the SOC fallback `attributes` would come from a
+    // different fixture, and the test could pass without exercising the borrowed-key path.
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(rulesClientParams.cloneAPIKey).toHaveBeenCalledWith('Alerting: myType/name');
+    expect(rulesClientParams.getAuthenticationAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      expect.objectContaining({
+        enabled: true,
+        apiKey: Buffer.from('cloned:cloned-secret').toString('base64'),
+        apiKeyCreatedByUser: false,
+      }),
+      { version: '123' }
+    );
   });
 
   test('enables task when scheduledTaskId is defined and task exists', async () => {

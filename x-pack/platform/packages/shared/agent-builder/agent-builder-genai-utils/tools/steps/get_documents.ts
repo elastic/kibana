@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isCcsTarget } from '../utils/ccs';
+import { frozenTierClauses } from '../utils/data_tiers';
 
 export interface GetDocumentByIdSuccess {
   id: string;
@@ -26,10 +27,12 @@ export type GetDocumentByIdResult = GetDocumentByIdSuccess | GetDocumentByIdFail
 export const getDocumentById = async ({
   id,
   index,
+  includeFrozen = false,
   esClient,
 }: {
   id: string;
   index: string;
+  includeFrozen?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<GetDocumentByIdResult> => {
   // CCS fallback: the _doc (GET) API does not support cross-cluster index patterns,
@@ -38,7 +41,12 @@ export const getDocumentById = async ({
     const response = await esClient.search({
       index,
       size: 1,
-      query: { term: { _id: id } },
+      query: {
+        bool: {
+          filter: [{ term: { _id: id } }],
+          ...(includeFrozen ? {} : { must_not: frozenTierClauses() }),
+        },
+      },
     });
     const hit = response.hits?.hits?.[0];
     if (!hit || hit._source === undefined) {

@@ -250,6 +250,15 @@ export const CONSOLE_COMMANDS = {
           }
         ),
       },
+      force: {
+        about: i18n.translate(
+          'xpack.securitySolution.endpointConsoleCommands.getFile.force.about',
+          {
+            defaultMessage:
+              'Read a file that is locked by the operating system from a snapshot of its volume (Windows only)',
+          }
+        ),
+      },
     },
   },
   execute: {
@@ -543,4 +552,16 @@ export const RESPONSE_ACTION_STATUS = Object.freeze({
   successMessage: i18n.translate('xpack.securitySolution.responseActionStatus.success', {
     defaultMessage: 'Action successful',
   }),
+});
+
+export const ENDPOINT_VERSION_NOT_SUPPORTED = (unsupportedFeature: string): string => {
+  return i18n.translate('xpack.securitySolution.translations.endpointVersionNotSupported', {
+    defaultMessage:
+      'The version of Endpoint running on this host does not support {unsupportedFeature}.',
+    values: { unsupportedFeature },
+  });
+};
+
+export const HOST_ISOLATION = i18n.translate('xpack.securitySolution.translations.hostIsolation', {
+  defaultMessage: 'host isolation',
 });

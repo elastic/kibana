@@ -1,5 +1,5 @@
 {
-  "sha1": "4d2e6260504dc9f66f77b8ab66642fca22bb800d",
+  "sha1": "761f06a3df6247b69747fb6eea46c5e4f742c779",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -7,7 +7,7 @@
     {
       "id": "2d983a450230de2-481578a854c377f",
       "title": "Observability alert details context when logs are annotated with service.name returns no service summary and the service + container log categories when no params are specified",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -16,14 +16,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_with_service_name.spec.ts",
-        "line": 107,
+        "line": 108,
         "column": 16
       }
     },
     {
       "id": "2d983a450230de2-5207f806f1a5d66",
       "title": "Observability alert details context when logs are annotated with service.name returns Backend log categories when service.name is specified",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -32,14 +32,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_with_service_name.spec.ts",
-        "line": 120,
+        "line": 121,
         "column": 78
       }
     },
     {
       "id": "2d983a450230de2-74e43c3ec43089d",
       "title": "Observability alert details context when logs are annotated with service.name returns Backend log categories when container.id is specified",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -48,14 +48,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_with_service_name.spec.ts",
-        "line": 134,
+        "line": 135,
         "column": 78
       }
     },
     {
       "id": "2d983a450230de2-6708b2b7a291eb0",
       "title": "Observability alert details context when logs are annotated with service.name returns an empty service summary and container log categories for a non-existing service.name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -64,14 +64,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_with_service_name.spec.ts",
-        "line": 148,
+        "line": 149,
         "column": 27
       }
     },
     {
       "id": "5a65f566151c014-6f483bd5ee07fc0",
       "title": "Observability alert details context when logs are not annotated with service.name returns a single log category when no params are specified",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -80,14 +80,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
-        "line": 77,
+        "line": 78,
         "column": 14
       }
     },
     {
       "id": "5a65f566151c014-253b4ddf1bb1572",
       "title": "Observability alert details context when logs are not annotated with service.name returns service summary, downstream dependencies and log categories when service.name is specified",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -96,14 +96,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
-        "line": 87,
+        "line": 88,
         "column": 78
       }
     },
     {
       "id": "5a65f566151c014-ca981ba41f1e032",
       "title": "Observability alert details context when logs are not annotated with service.name returns service summary, downstream dependencies and log categories when container.id is specified",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -112,14 +112,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
-        "line": 132,
+        "line": 133,
         "column": 78
       }
     },
     {
       "id": "5a65f566151c014-8258847c7aa83fa",
       "title": "Observability alert details context when logs are not annotated with service.name returns nothing for a non-existing container id",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -128,14 +128,14 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
-        "line": 175,
+        "line": 176,
         "column": 25
       }
     },
     {
       "id": "5a65f566151c014-988cc7ef1a98699",
       "title": "Observability alert details context when logs are not annotated with service.name returns an empty service summary and log categories for a non-existing service.name",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -144,7 +144,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/api/tests/alert_details_context_logs_without_service_name.spec.ts",
-        "line": 183,
+        "line": 184,
         "column": 27
       }
     },

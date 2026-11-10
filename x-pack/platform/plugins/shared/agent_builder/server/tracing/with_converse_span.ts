@@ -19,6 +19,7 @@ import {
   type OpikDistributedTraceHeaders,
 } from './opik_distributed_tracing';
 import { withAgentBuilderContext } from './agent_builder_context';
+import type { TracingPrivacySettings } from './privacy_settings';
 
 interface WithConverseSpanOptions {
   agentId: string;
@@ -26,6 +27,7 @@ interface WithConverseSpanOptions {
   providerName: string;
   conversationId: string | undefined;
   spaceId: string;
+  privacySettings: TracingPrivacySettings;
   opikHeaders?: OpikDistributedTraceHeaders;
 }
 
@@ -36,6 +38,7 @@ export function withConverseSpan(
     providerName,
     conversationId,
     spaceId,
+    privacySettings,
     opikHeaders,
   }: WithConverseSpanOptions,
   cb: (span?: Span) => Observable<ChatEvent>
@@ -67,6 +70,6 @@ export function withConverseSpan(
           return cb(span);
         }
       ),
-    { spaceId, conversationId }
+    { spaceId, conversationId, privacySettings }
   );
 }

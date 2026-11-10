@@ -2,7 +2,7 @@ tags:
   - is-webpack-built
 tasks:
   build-webpack:
-    command: yarn
+    command: pnpm
     args:
       - build
     deps:
@@ -22,7 +22,7 @@ tasks:
     type: run
     options:
       persistent: true
-    command: yarn
+    command: pnpm
     args:
       - build
       - '--watch'

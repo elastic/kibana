@@ -9,22 +9,34 @@ import { schema } from '@kbn/config-schema';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
-import { resetSyncPrivateCleanUpState } from '../../../tasks/sync_private_locations_monitors_task';
+import { runCleanUpTaskNow } from '../../../tasks/clean_up_package_policies_task';
 
 export const cleanupPrivateLocationRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.PRIVATE_LOCATIONS_CLEANUP,
   validate: {
     query: schema.object({
+      // Kept for API compatibility; the clean up no longer keeps a latch to reset.
       hasAlreadyDoneCleanup: schema.maybe(schema.boolean()),
     }),
   },
   requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
-    const { server, request } = routeContext;
-    const { hasAlreadyDoneCleanup } = request.query;
+    const { server, response } = routeContext;
 
-    await resetSyncPrivateCleanUpState({ server, hasAlreadyDoneCleanup });
+    try {
+      await runCleanUpTaskNow(server);
+    } catch (error) {
+      // Reporting success here would claim cleanup was scheduled when it was not,
+      // leaving the caller to wait on work that only happens whenever the periodic
+      // task next runs.
+      return response.customError({
+        statusCode: 500,
+        body: {
+          message: `Failed to schedule private location cleanup: ${error.message}`,
+        },
+      });
+    }
 
     return {
       success: true,

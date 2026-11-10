@@ -23,13 +23,19 @@ export const buildScheduledActionResultsQuery = ({
   pagination,
   integrationNamespaces,
   ccsEnabled,
+  matchMissingSpaceId,
 }: ScheduledActionResultsRequestOptions): ISearchRequestParams => {
   // Top-level hit scoping is enforced centrally in the search strategy
   // (enforceSpaceScope). The aggregation below is a separate filter context that
   // the top-level query does not constrain, so it is scoped explicitly here.
-  // Scheduled action_responses emitted by osquerybeat may not carry a `space_id`
-  // field; buildSpaceIdFilter matches a missing field in the default space.
-  const spaceIdFilter = buildSpaceIdFilter(spaceId);
+  //
+  // No `action_data.space_id` fallback here: scheduled executions come from the
+  // agent policy rather than a Fleet action, so these documents have no
+  // `action_data` and already carry the top-level `space_id`. See
+  // ID_BOUND_FACTORY_QUERY_TYPES.
+  const spaceIdFilter = buildSpaceIdFilter(spaceId, {
+    matchMissingSpaceId: matchMissingSpaceId ?? true,
+  });
 
   const filterQuery: Array<Record<string, unknown>> = [
     { term: { schedule_id: scheduleId } },

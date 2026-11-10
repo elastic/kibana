@@ -12,7 +12,12 @@ import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import apm from 'elastic-apm-node';
-import { type Client, OpenFeature, type Provider } from '@openfeature/server-sdk';
+import {
+  type Client,
+  OpenFeature,
+  type Provider,
+  ServerProviderEvents,
+} from '@openfeature/server-sdk';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
@@ -72,6 +77,17 @@ describe('FeatureFlagsService Server', () => {
       expect(() => setProvider(fakeProvider)).toThrowErrorMatchingInlineSnapshot(
         `"A provider has already been set. This API cannot be called twice."`
       );
+    });
+
+    test('registers a handler to reevaluate flags when the provider is ready', () => {
+      const { setProvider } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
+      const addHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
+      const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
+      setProvider(fakeProvider);
+      expect(addHandlerSpy).toHaveBeenCalledWith(ServerProviderEvents.Ready, expect.any(Function));
+      addHandlerSpy.mockRestore();
     });
   });
 
@@ -370,6 +386,128 @@ describe('FeatureFlagsService Server', () => {
         startContract.getBooleanValue('myDestructuredObjPlugin.myOverriddenFlag', false)
       ).resolves.toEqual(true);
       expect(getBooleanValueSpy).not.toHaveBeenCalled();
+    });
+
+    describe('waits for evaluation context', () => {
+      let providerMetadataSpy: jest.SpiedGetter<typeof OpenFeature.providerMetadata>;
+
+      beforeEach(() => {
+        // A configured provider is what arms the wait: without it, evaluations use the NOOP
+        // provider and skip waiting (covered by the tests above).
+        providerMetadataSpy = jest
+          .spyOn(OpenFeature, 'providerMetadata', 'get')
+          .mockReturnValue({ name: 'test-provider' });
+      });
+
+      afterEach(() => {
+        providerMetadataSpy.mockRestore();
+      });
+
+      test('does not evaluate until context has targeting keys', async () => {
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        const evaluation = startContract.getBooleanValue('my-flag', false);
+
+        await Promise.resolve();
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        // A no-op context update must not unblock the wait.
+        startContract.appendContext({ kind: 'multi' });
+        await Promise.resolve();
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-1' } });
+        await expect(evaluation).resolves.toEqual(false);
+        expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
+        expect(getBooleanValueSpy).toHaveBeenCalledWith('my-flag', false);
+      });
+
+      test('does not wait when context is already set', async () => {
+        startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-1' } });
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+
+        await expect(startContract.getBooleanValue('my-flag', false)).resolves.toEqual(false);
+        expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
+      });
+
+      test('does not wait when the flag is overridden', async () => {
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+
+        await expect(startContract.getBooleanValue('my-overridden-flag', false)).resolves.toEqual(
+          true
+        );
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+      });
+
+      test('resolves if the service stops before context is ready', async () => {
+        const evaluation = startContract.getBooleanValue('my-flag', false);
+        await Promise.resolve();
+
+        await expect(featureFlagsService.stop()).resolves.toBeUndefined();
+        await expect(evaluation).resolves.toEqual(false);
+      });
+
+      test('times out and evaluates when a provider is set but context never arrives', async () => {
+        jest.useFakeTimers();
+        const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+        const evaluation = startContract.getBooleanValue('my-flag', false);
+
+        await Promise.resolve();
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        // Same shape as plugin functional tests: experiments provider is configured, but
+        // there is no xpack.cloud.id so appendContext never adds targeting keys.
+        await jest.advanceTimersByTimeAsync(199);
+        expect(getBooleanValueSpy).not.toHaveBeenCalled();
+
+        await jest.advanceTimersByTimeAsync(1);
+        await expect(evaluation).resolves.toEqual(false);
+        expect(getBooleanValueSpy).toHaveBeenCalledTimes(1);
+        expect(getBooleanValueSpy).toHaveBeenCalledWith('my-flag', false);
+      });
+
+      test('observable evaluation waits for context as well', async () => {
+        const observedValues: boolean[] = [];
+        const flag$ = startContract.getBooleanValue$('my-flag', false);
+        flag$.subscribe((value) => observedValues.push(value));
+
+        await Promise.resolve();
+        expect(observedValues).toHaveLength(0);
+
+        startContract.appendContext({ kind: 'multi', kibana: { key: 'kibana-1' } });
+        await expect(firstValueFrom(flag$)).resolves.toEqual(false);
+        expect(observedValues).toEqual([false]);
+      });
+    });
+
+    test('reevaluates subscribed flags when the provider becomes ready', async () => {
+      // setProvider is not called in this suite's beforeEach, so register it here.
+      const openFeatureAddHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
+      const { setProvider } = featureFlagsService.setup({
+        http: httpServiceMock.createInternalSetupContract(),
+      });
+      jest.spyOn(OpenFeature, 'setProviderAndWait').mockResolvedValue();
+      setProvider({ metadata: { name: 'fake provider' } } as Provider);
+
+      const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
+      getBooleanValueSpy.mockResolvedValue(false);
+
+      const observedValues: boolean[] = [];
+      const flag$ = startContract.getBooleanValue$('my-flag', false);
+      flag$.subscribe((v) => observedValues.push(v));
+      await expect(firstValueFrom(flag$)).resolves.toEqual(false);
+      expect(observedValues).toEqual([false]);
+
+      const readyHandler = openFeatureAddHandlerSpy.mock.calls.find(
+        ([event]) => event === ServerProviderEvents.Ready
+      )?.[1];
+      expect(readyHandler).toBeDefined();
+
+      getBooleanValueSpy.mockResolvedValue(true);
+      await readyHandler!();
+      await expect(firstValueFrom(flag$)).resolves.toEqual(true);
+      expect(observedValues).toEqual([false, true]);
+
+      openFeatureAddHandlerSpy.mockRestore();
     });
   });
 

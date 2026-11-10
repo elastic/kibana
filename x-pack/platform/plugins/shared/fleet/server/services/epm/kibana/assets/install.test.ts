@@ -121,6 +121,421 @@ describe('installKibanaSavedObjects', () => {
     expect(mockImporter.import).toHaveBeenCalledTimes(1);
     expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(1);
   });
+
+  it('preserves importer-provided destinationId in initial import success results for additional-space objects', async () => {
+    // When overwrite:true finds a single existing object sharing the same origin, core's
+    // import returns { id: spaceScopedId, destinationId: existingObjectId }. The initial
+    // normalization must preserve that destinationId rather than overwriting it with
+    // spaceScopedId, otherwise Fleet persists the wrong id and upgrades/uninstalls/markdown
+    // rewrites target the wrong saved object.
+    const archiveId = 'my-dashboard-archive-id';
+    const spaceId = 'my-space';
+    const existingDestId = 'existing-dest-uuid';
+
+    const archiveAsset = createAsset({
+      id: archiveId,
+      type: KibanaSavedObjectType.dashboard,
+      attributes: {},
+    });
+
+    const { getSpaceScopedAssetId } = await import('./install');
+    const spaceScopedId = getSpaceScopedAssetId(archiveId, spaceId);
+
+    // Initial import succeeds and returns the existing object as destinationId
+    mockImporter.import.mockResolvedValueOnce(
+      createImportResponse(
+        [],
+        [{ id: spaceScopedId, type: archiveAsset.type, meta: {}, destinationId: existingDestId }]
+      )
+    );
+
+    const result = await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [archiveAsset],
+      options: { installAsAdditionalSpace: true, spaceId },
+    });
+
+    // id must be the archive id; destinationId must be the importer-chosen existing object
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: archiveId, destinationId: existingDestId }),
+      ])
+    );
+  });
+
+  it('resolves ambiguous_conflict by calling resolveImportErrors with the most-recently-updated destinationId', async () => {
+    const asset = createAsset({ id: 'dashboard-abc', attributes: { hello: 'world' } });
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [
+          { id: 'dest-older', updatedAt: '2024-01-01T00:00:00.000Z' },
+          { id: 'dest-newer', updatedAt: '2025-06-01T00:00:00.000Z' },
+        ],
+      },
+    };
+    const ambiguousResponse = createImportResponse([ambiguousError]);
+    const successResponse = createImportResponse([], [createImportSuccess(asset)]);
+
+    mockImporter.import.mockResolvedValueOnce(ambiguousResponse);
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(successResponse);
+
+    await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [asset],
+    });
+
+    expect(mockImporter.import).toHaveBeenCalledTimes(1);
+    expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(1);
+    // Should pick the newer destination
+    expect(mockImporter.resolveImportErrors).toHaveBeenCalledWith(
+      expect.objectContaining({
+        retries: expect.arrayContaining([
+          expect.objectContaining({ id: asset.id, destinationId: 'dest-newer' }),
+        ]),
+      })
+    );
+  });
+
+  it('throws if resolveImportErrors itself fails on ambiguous_conflict', async () => {
+    const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [{ id: 'dest-1', updatedAt: '2024-01-01T00:00:00.000Z' }],
+      },
+    };
+    const ambiguousResponse = createImportResponse([ambiguousError]);
+    // resolveImportErrors itself returns an error
+    const resolveFailResponse = createImportResponse([createImportError(asset, 'conflict')]);
+
+    mockImporter.import.mockResolvedValueOnce(ambiguousResponse);
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(resolveFailResponse);
+
+    await expect(
+      installKibanaSavedObjects({
+        savedObjectsImporter: mockImporter,
+        logger: mockLogger,
+        kibanaAssets: [asset],
+      })
+    ).rejects.toThrow(/resolving ambiguous conflicts/);
+  });
+
+  it('deduplicates successResults when both ambiguous_conflict and missing_references resolve the same objects', async () => {
+    const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [{ id: 'dest-1', updatedAt: '2024-01-01T00:00:00.000Z' }],
+      },
+    };
+    const refError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: { type: 'missing_references', references: [] },
+    };
+    // Import returns both error types for the same object
+    const initialResponse = createImportResponse([ambiguousError, refError]);
+    // Ambiguous pass resolves the object successfully
+    const ambiguousResolveResponse = createImportResponse([], [createImportSuccess(asset)]);
+    // Reference pass also resolves the same object successfully
+    const refResolveResponse = createImportResponse([], [createImportSuccess(asset)]);
+
+    mockImporter.import.mockResolvedValueOnce(initialResponse);
+    mockImporter.resolveImportErrors
+      .mockResolvedValueOnce(ambiguousResolveResponse)
+      .mockResolvedValueOnce(refResolveResponse);
+
+    const result = await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [asset],
+    });
+
+    // The object must appear only once despite being in both successResults
+    expect(result.filter((r) => r.id === asset.id)).toHaveLength(1);
+  });
+
+  it('folds missing_references from ambiguous resolve pass into the reference-error handler instead of throwing', async () => {
+    const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [{ id: 'dest-1', updatedAt: '2024-01-01T00:00:00.000Z' }],
+      },
+    };
+    // First import: ambiguous_conflict
+    const ambiguousResponse = createImportResponse([ambiguousError]);
+    // Ambiguous resolve pass re-surfaces a missing_references error (tolerable)
+    const ambiguousResolveResponse = createImportResponse([
+      createImportError(asset, 'missing_references'),
+    ]);
+    // Reference-error resolve pass succeeds
+    const refResolveResponse = createImportResponse([], [createImportSuccess(asset)]);
+
+    mockImporter.import.mockResolvedValueOnce(ambiguousResponse);
+    mockImporter.resolveImportErrors
+      .mockResolvedValueOnce(ambiguousResolveResponse)
+      .mockResolvedValueOnce(refResolveResponse);
+
+    // Should NOT throw — missing_references from the ambiguous pass is recoverable
+    await expect(
+      installKibanaSavedObjects({
+        savedObjectsImporter: mockImporter,
+        logger: mockLogger,
+        kibanaAssets: [asset],
+      })
+    ).resolves.toBeDefined();
+
+    // resolveImportErrors called twice: once for ambiguous, once for missing_references
+    expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(2);
+  });
+
+  it('carries destinationId into the missing-references retry so ambiguous_conflict is not re-raised', async () => {
+    // Object has both ambiguous_conflict (from orphan) and missing_references (from a
+    // legacy index pattern ref). Without forwarding destinationId, the second
+    // resolveImportErrors call would re-trigger the origin search and re-raise
+    // ambiguous_conflict, causing a KibanaSOReferenceError.
+    const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [{ id: 'dest-chosen', updatedAt: '2024-01-01T00:00:00.000Z' }],
+      },
+    };
+    // Initial import raises ambiguous_conflict
+    mockImporter.import.mockResolvedValueOnce(createImportResponse([ambiguousError]));
+    // Ambiguous pass re-surfaces missing_references for the same object
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(
+      createImportResponse([createImportError(asset, 'missing_references')])
+    );
+    // Missing-references pass succeeds
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(
+      createImportResponse([], [createImportSuccess(asset)])
+    );
+
+    await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [asset],
+    });
+
+    // The second resolveImportErrors call (missing-references pass) must include
+    // destinationId so checkOriginConflicts skips the origin search.
+    expect(mockImporter.resolveImportErrors).toHaveBeenCalledTimes(2);
+    expect(mockImporter.resolveImportErrors).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        retries: expect.arrayContaining([
+          expect.objectContaining({ id: asset.id, destinationId: 'dest-chosen' }),
+        ]),
+      })
+    );
+  });
+
+  it('normalizes id/destinationId on ambiguous_conflict resolve results for additional-space objects', async () => {
+    // For additional-space installs, createSavedObjectKibanaAsset rewrites the archive id
+    // to a v5 UUID and stores the archive id in originId. The initial import normalizes
+    // results (lines 729-737), but the ambiguous-conflict resolve pass did not apply the
+    // same swap before the Libra fix. Without normalization the stored ref uses the
+    // space-scoped UUID instead of the archive id, breaking subsequent installs.
+    const archiveId = 'my-dashboard-archive-id';
+    const spaceId = 'my-space';
+
+    // A raw archive asset installed via installAsAdditionalSpace — createSavedObjectKibanaAsset
+    // rewrites its id to a v5 UUID and sets originId = archive id.
+    const archiveAsset = createAsset({
+      id: archiveId,
+      type: KibanaSavedObjectType.dashboard,
+      attributes: {},
+    });
+
+    // Compute the space-scoped id the same way createSavedObjectKibanaAsset does, so the
+    // ambiguous error and resolve response use the real rewritten id.
+    const { getSpaceScopedAssetId } = await import('./install');
+    const spaceScopedId = getSpaceScopedAssetId(archiveId, spaceId);
+
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: archiveAsset.type,
+      id: spaceScopedId,
+      meta: {},
+      error: {
+        type: 'ambiguous_conflict',
+        destinations: [{ id: 'dest-chosen-uuid', updatedAt: '2024-01-01T00:00:00.000Z' }],
+      },
+    };
+
+    const chosenDestId = 'dest-chosen-uuid';
+    mockImporter.import.mockResolvedValueOnce(createImportResponse([ambiguousError]));
+    // resolveImportErrors returns the space-scoped UUID as id and the chosen object as
+    // destinationId — exactly what the real importer produces for ambiguous_conflict resolution.
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(
+      createImportResponse(
+        [],
+        [{ id: spaceScopedId, type: archiveAsset.type, meta: {}, destinationId: chosenDestId }]
+      )
+    );
+
+    const result = await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [archiveAsset],
+      options: { installAsAdditionalSpace: true, spaceId },
+    });
+
+    // After normalization: id = archive id, destinationId = the importer-chosen object (not
+    // the space-scoped UUID). Previously the code always set destinationId = spaceScopedId,
+    // losing the real chosen destination.
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: archiveId, destinationId: chosenDestId }),
+      ])
+    );
+  });
+
+  it('sends pre-processed objects with correct id and originId to the importer on the preProcessedObjects path', async () => {
+    // Positive regression for the preProcessedObjects bypass: verifies that a SavedObjectToBe
+    // with id=spaceScopedId and originId=archiveId (as queued by replaceInMarkdown) is
+    // forwarded to the importer unchanged. Reverting to reconstruction via
+    // createSavedObjectKibanaAsset (without options) would drop originId, severing the
+    // origin chain.
+    const archiveId = 'dashboard-markdown-ref';
+    const spaceId = 'my-space';
+
+    const { getSpaceScopedAssetId } = await import('./install');
+    const spaceScopedId = getSpaceScopedAssetId(archiveId, spaceId);
+
+    // Simulate an already-processed SavedObjectToBe as replaceInMarkdown would queue it:
+    // id already rewritten to space-scoped UUID, originId = archive id.
+    const preProcessed = {
+      id: spaceScopedId,
+      type: KibanaSavedObjectType.dashboard,
+      originId: archiveId,
+      attributes: { description: 'updated markdown' },
+      references: [],
+    } as any;
+
+    // Capture the stream passed to the importer to inspect its contents
+    const capturedObjects: any[] = [];
+    mockImporter.import.mockImplementationOnce(async ({ readStream }) => {
+      for await (const obj of readStream) capturedObjects.push(obj);
+      return createImportResponse([], [{ id: spaceScopedId, type: preProcessed.type, meta: {} }]);
+    });
+
+    await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [
+        {
+          id: archiveId,
+          type: KibanaSavedObjectType.dashboard,
+          attributes: { description: 'updated markdown' },
+          references: [],
+        },
+      ],
+      options: { installAsAdditionalSpace: true, spaceId },
+    });
+
+    // The importer must have received an object with id=spaceScopedId and originId=archiveId
+    expect(capturedObjects).toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: spaceScopedId, originId: archiveId })])
+    );
+  });
+
+  it('normalizes id/destinationId on missing_references resolve results for additional-space objects', async () => {
+    // Regression: normalizeResolveResults is applied to both resolveImportErrors calls.
+    // This test covers the missing-references pass specifically: an additional-space
+    // dashboard whose initial import fails with missing_references must have its resolve
+    // result normalized (id = archiveId, destinationId = importer-chosen uuid) before
+    // being concatenated to allSuccessResults.
+    const archiveId = 'dashboard-with-ref-error';
+    const spaceId = 'my-space';
+    const chosenDestId = 'chosen-dest-uuid';
+
+    const archiveAsset = createAsset({
+      id: archiveId,
+      type: KibanaSavedObjectType.dashboard,
+      attributes: {},
+    });
+
+    const { getSpaceScopedAssetId } = await import('./install');
+    const spaceScopedId = getSpaceScopedAssetId(archiveId, spaceId);
+
+    // Initial import returns missing_references for the rewritten dashboard
+    mockImporter.import.mockResolvedValueOnce(
+      createImportResponse([
+        {
+          id: spaceScopedId,
+          type: archiveAsset.type,
+          meta: {},
+          error: { type: 'missing_references', references: [] },
+        },
+      ])
+    );
+    // resolveImportErrors returns the space-scoped id with a distinct destinationId
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(
+      createImportResponse(
+        [],
+        [{ id: spaceScopedId, type: archiveAsset.type, meta: {}, destinationId: chosenDestId }]
+      )
+    );
+
+    const result = await installKibanaSavedObjects({
+      savedObjectsImporter: mockImporter,
+      logger: mockLogger,
+      kibanaAssets: [archiveAsset],
+      options: { installAsAdditionalSpace: true, spaceId },
+    });
+
+    // After normalization: id = archive id, destinationId = importer-chosen object
+    expect(result).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: archiveId, destinationId: chosenDestId }),
+      ])
+    );
+  });
+
+  it('does not throw on empty destinations array in ambiguous_conflict error', async () => {
+    const asset = createAsset({ id: 'dashboard-abc', attributes: {} });
+    const ambiguousError: SavedObjectsImportFailure = {
+      type: asset.type,
+      id: asset.id,
+      meta: {},
+      error: { type: 'ambiguous_conflict', destinations: [] },
+    };
+    const ambiguousResponse = createImportResponse([ambiguousError]);
+    // resolveImportErrors is still called; it may fail or succeed
+    const successResponse = createImportResponse([], [createImportSuccess(asset)]);
+    mockImporter.import.mockResolvedValueOnce(ambiguousResponse);
+    mockImporter.resolveImportErrors.mockResolvedValueOnce(successResponse);
+
+    // Should not throw on the reduce() call
+    await expect(
+      installKibanaSavedObjects({
+        savedObjectsImporter: mockImporter,
+        logger: mockLogger,
+        kibanaAssets: [asset],
+      })
+    ).resolves.toBeDefined();
+  });
 });
 
 describe('createSavedObjectKibanaAsset', () => {
@@ -175,6 +590,26 @@ describe('createSavedObjectKibanaAsset', () => {
     expect(result.id).toEqual('system-logs-template');
     expect(result.originId).toBeUndefined();
   });
+
+  it('does not pick up originId from a raw archive asset (package JSON must not influence origin tracking)', () => {
+    // Raw package archive assets may contain an originId field in their JSON. Previously
+    // a cast to SavedObjectToBe would read it and preserve it, potentially remapping onto
+    // an existing user object with overwrite:true. createSavedObjectKibanaAsset must ignore
+    // archive-supplied originId on the normal import path.
+    const archiveAssetWithOriginId = {
+      id: 'my-dashboard-id',
+      type: KibanaSavedObjectType.dashboard,
+      // originId present in raw archive JSON — must be ignored
+      originId: 'some-other-origin',
+      attributes: { title: 'My Dashboard' },
+      references: [],
+    } as any;
+
+    const result = createSavedObjectKibanaAsset(archiveAssetWithOriginId);
+
+    // No rewriteId (no options), so originId must not be set from the archive field
+    expect(result.originId).toBeUndefined();
+  });
 });
 
 describe('replaceIdsInKibanaAsset', () => {
@@ -225,5 +660,68 @@ describe('replaceIdsInKibanaAsset', () => {
         },
       ]
     `);
+  });
+
+  it('preserves top-level id and originId even when the replacement map contains the originId value', () => {
+    // Regression test: the old implementation serialized the whole SO and did a global
+    // replace, which clobbered `originId` when the replacement map contained its value.
+    const originalId = 'kubernetes-3d4d9290-bcb1-11ec-b64f-7dd6e8e82013';
+    const newSpaceScopedId = 'a1b2c3d4-0000-0000-0000-000000000001';
+
+    const dashboardAsset = {
+      id: newSpaceScopedId,
+      type: KibanaSavedObjectType.dashboard,
+      originId: originalId,
+      attributes: {
+        description: `See [Pods](/app/dashboards#/view/${originalId})`,
+      },
+      references: [],
+    } as any;
+
+    const idReplacements = { [originalId]: newSpaceScopedId };
+
+    const { updated, updatedAsset } = replaceIdsInKibanaAsset(dashboardAsset, idReplacements);
+
+    expect(updated).toBe(true);
+    // Identity fields must be untouched.
+    expect(updatedAsset.id).toBe(newSpaceScopedId);
+    expect(updatedAsset.originId).toBe(originalId);
+    // The attribute content should have the replacement applied.
+    expect((updatedAsset.attributes as any).description).toBe(
+      `See [Pods](/app/dashboards#/view/${newSpaceScopedId})`
+    );
+  });
+
+  it('handles ids containing regex metacharacters without throwing', () => {
+    const idWithDots = 'some.id.with.dots+and[brackets]';
+    const replacedId = 'safe-new-id';
+
+    const dashboardAsset = createAsset({
+      id: 'dashboard-meta',
+      type: KibanaSavedObjectType.dashboard,
+      attributes: { description: `ref to ${idWithDots}` },
+    }) as any;
+
+    const idReplacements = { [idWithDots]: replacedId };
+
+    expect(() => replaceIdsInKibanaAsset(dashboardAsset, idReplacements)).not.toThrow();
+    const { updated, updatedAsset } = replaceIdsInKibanaAsset(dashboardAsset, idReplacements);
+    expect(updated).toBe(true);
+    expect((updatedAsset.attributes as any).description).toBe(`ref to ${replacedId}`);
+  });
+
+  it('returns updated=false and the original asset when no replacements match', () => {
+    const dashboardAsset = createAsset({
+      id: 'dashboard-no-match',
+      type: KibanaSavedObjectType.dashboard,
+      attributes: { description: 'nothing to replace here' },
+    }) as any;
+
+    const { updated, updatedAsset } = replaceIdsInKibanaAsset(dashboardAsset, {
+      'non-existent-id': 'new-id',
+    });
+
+    expect(updated).toBe(false);
+    expect(updatedAsset).toBe(dashboardAsset);
   });
 });

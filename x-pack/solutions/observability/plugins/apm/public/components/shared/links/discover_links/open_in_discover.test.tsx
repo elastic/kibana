@@ -8,6 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { OpenInDiscover } from './open_in_discover';
+import type { IndexType } from './get_esql_query';
 import { useApmIndexSettingsContext } from '../../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
@@ -53,8 +54,15 @@ const mockLocatorGet = jest.fn().mockReturnValue({
 
 type OpenInDiscoverProps = Parameters<typeof OpenInDiscover>[0];
 
+// OpenInDiscoverProps is a discriminated union over the index source. This helper covers the
+// APM branch, which resolves its pattern from apmIndexSettings; the logs branch carries its own
+// required `indexPattern` and is covered by use_discover_href.test.ts.
+type ApmOpenInDiscoverProps = Extract<OpenInDiscoverProps, { indexType: IndexType }>;
+
 function renderOpenInDiscover(
-  overrides: Partial<OpenInDiscoverProps> & { queryParams: OpenInDiscoverProps['queryParams'] }
+  overrides: Partial<ApmOpenInDiscoverProps> & {
+    queryParams: ApmOpenInDiscoverProps['queryParams'];
+  }
 ) {
   return render(
     <OpenInDiscover

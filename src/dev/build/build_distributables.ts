@@ -86,6 +86,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.CreateEmptyDirsAndFiles);
     await globalRun(Tasks.CreateReadme);
     await globalRun(Tasks.BuildPackages);
+    await globalRun(Tasks.AssertPackageEntryPoints);
     await globalRun(Tasks.ReplaceFavicon);
     // [rspack-transition] Use rspack or legacy webpack optimizer based on env var.
     // When legacy is removed, keep only Tasks.BuildRspackBundles.
@@ -124,6 +125,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await globalRun(Tasks.InstallChromium);
     await globalRun(Tasks.CopyBinScripts);
     await globalRun(Tasks.CleanNodeBuilds);
+    await globalRun(Tasks.CreateDistributionDefaults);
 
     await globalRun(Tasks.AssertFileTime);
     await globalRun(Tasks.AssertPathLength);
@@ -161,8 +163,8 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     }
     if (options.createRpmPackage) {
       // control w/ --rpm or --skip-os-packages
-      artifactTasks.push(Tasks.CreateRpmPackageX64);
-      artifactTasks.push(Tasks.CreateRpmPackageARM64);
+      artifactTasks.push(Tasks.CreateRpmPackage(config.getPlatform('linux', 'x64')));
+      artifactTasks.push(Tasks.CreateRpmPackage(config.getPlatform('linux', 'arm64')));
     }
   }
 

@@ -668,22 +668,11 @@ export class StreamsClient {
   }
 
   private async getStoredStreamDefinition(name: string): Promise<Streams.all.Definition> {
-    return await Promise.all([
-      this.dependencies.storageClient.get({ id: name }).then((response) => {
-        return this.getStreamDefinitionFromSource(response._source);
-      }),
-      checkAccess({
-        name,
-        esClient: this.dependencies.esClient,
-        isSecurityEnabled: this.dependencies.isSecurityEnabled,
-      }).then((privileges) => {
-        if (!privileges.read) {
-          throw new SecurityError(`Cannot read stream, insufficient privileges`);
-        }
-      }),
-    ]).then(([wiredDefinition]) => {
-      return wiredDefinition;
-    });
+    // Privilege check first so a storage 404 cannot race hasPrivileges and skip the 403.
+    await this.assertReadAccess(name);
+
+    const response = await this.dependencies.storageClient.get({ id: name });
+    return this.getStreamDefinitionFromSource(response._source);
   }
 
   async getDataStream(name: string): Promise<IndicesDataStream> {
@@ -793,6 +782,46 @@ export class StreamsClient {
     });
 
     return result;
+  }
+
+  /**
+   * Throws if the current user does not have Elasticsearch read access to the stream.
+   */
+  async assertReadAccess(name: string): Promise<void> {
+    if (!this.dependencies.isSecurityEnabled) {
+      return;
+    }
+
+    const privileges = await checkAccess({
+      name,
+      esClient: this.dependencies.esClient,
+      isSecurityEnabled: this.dependencies.isSecurityEnabled,
+    });
+
+    if (!privileges.read) {
+      throw new SecurityError('Cannot read stream, insufficient privileges');
+    }
+  }
+
+  /**
+   * Returns the subset of the given stream names the current user can read.
+   */
+  async getReadableStreamNames(names: string[]): Promise<string[]> {
+    if (names.length === 0) {
+      return [];
+    }
+
+    if (!this.dependencies.isSecurityEnabled) {
+      return names;
+    }
+
+    const privileges = await checkAccessBulk({
+      names,
+      esClient: this.dependencies.esClient,
+      isSecurityEnabled: this.dependencies.isSecurityEnabled,
+    });
+
+    return names.filter((name) => privileges[name]?.read === true);
   }
 
   private getRequiredManagePrivileges(): string[] {

@@ -75,10 +75,16 @@ export async function runEmailRuleResolution(deps: RunDeps): Promise<PerRuleStat
   }
 
   // Step 3: Resolve
-  const { resolutionsCreated, appliedBuckets, skippedAmbiguousBuckets, failedBuckets } =
-    await resolveMatchBuckets(resolutionClient, matchBuckets, logger);
+  const {
+    resolutionsCreated,
+    appliedBuckets,
+    skippedAmbiguousBuckets,
+    skippedBlockedBuckets,
+    skippedStaleOverlapBuckets,
+    failedBuckets,
+  } = await resolveMatchBuckets(resolutionClient, matchBuckets, logger);
   logger.info(
-    `Completed: ${resolutionsCreated} resolutions created, ${skippedAmbiguousBuckets} ambiguous buckets skipped, ${failedBuckets} buckets failed`
+    `Completed: ${resolutionsCreated} resolutions created, ${skippedAmbiguousBuckets} ambiguous buckets skipped, ${skippedBlockedBuckets} blocked cascades skipped, ${skippedStaleOverlapBuckets} stale-overlap buckets skipped, ${failedBuckets} buckets failed`
   );
 
   telemetry.report({
@@ -86,7 +92,7 @@ export async function runEmailRuleResolution(deps: RunDeps): Promise<PerRuleStat
       scanned: values.length,
       qualified: matchBuckets.length,
       applied: appliedBuckets,
-      skipped: skippedAmbiguousBuckets,
+      skipped: skippedAmbiguousBuckets + skippedBlockedBuckets + skippedStaleOverlapBuckets,
       failed: failedBuckets,
     },
     ...(resolutionsCreated > 0
@@ -94,10 +100,12 @@ export async function runEmailRuleResolution(deps: RunDeps): Promise<PerRuleStat
       : {}),
   });
 
-  // Step 4: Update state — don't advance watermark if any buckets failed,
-  // so the next run re-collects the same email values and retries.
+  // Step 4: Update state — don't advance watermark if any buckets failed or were skipped
+  // for overlapping ids written earlier in this run, so the next run re-collects the
+  // same email values and retries against refreshed documents.
+  const holdWatermark = failedBuckets > 0 || skippedStaleOverlapBuckets > 0;
   return {
-    lastProcessedTimestamp: failedBuckets > 0 ? state.lastProcessedTimestamp : maxTimestamp,
+    lastProcessedTimestamp: holdWatermark ? state.lastProcessedTimestamp : maxTimestamp,
     lastRun: { resolutionsCreated, skippedAmbiguousBuckets },
   };
 }
@@ -293,16 +301,48 @@ async function resolveMatchBuckets(
   resolutionsCreated: number;
   appliedBuckets: number;
   skippedAmbiguousBuckets: number;
+  skippedBlockedBuckets: number;
+  skippedStaleOverlapBuckets: number;
   failedBuckets: number;
 }> {
   let resolutionsCreated = 0;
   let appliedBuckets = 0;
   let skippedAmbiguousBuckets = 0;
+  let skippedBlockedBuckets = 0;
+  let skippedStaleOverlapBuckets = 0;
   let failedBuckets = 0;
+  // Entity ids written earlier in this run. Buckets are fetched up front and cascade
+  // writes are not refreshed, so a bucket touching these ids would read stale documents.
+  const mutatedIds = new Set<string>();
+
+  // Merge through cascade so a golden that already has aliases is retargeted.
+  // A blocked cascade (cycle or alias-of-alias) is a skip and leaves the watermark free to advance.
+  const applyCascade = async (targetId: string, aliasIds: string[]) => {
+    const result = await resolutionClient.cascadeLinkEntities(targetId, aliasIds);
+    resolutionsCreated += result.linked.length;
+    if (result.linked.length > 0 || result.retargeted.length > 0) {
+      appliedBuckets++;
+      [targetId, ...result.linked, ...result.retargeted].forEach((id) => mutatedIds.add(id));
+    } else if (result.cascadesBlocked > 0) {
+      skippedBlockedBuckets++;
+      logger.warn(
+        `Skipping blocked cascade for target '${targetId}': existing alias graph cannot be rewritten`
+      );
+    }
+  };
 
   for (const bucket of buckets) {
     try {
       const { existingTargetIds, unresolvedEntities } = bucket;
+
+      const bucketIds = [...unresolvedEntities.map((e) => e.entityId), ...existingTargetIds];
+      if (bucketIds.some((id) => mutatedIds.has(id))) {
+        skippedStaleOverlapBuckets++;
+        logger.debug(
+          `Skipping bucket '${bucket.emailValue}' overlapping ids written earlier in this run`
+        );
+        continue;
+      }
 
       if (existingTargetIds.length > 1) {
         logger.warn(
@@ -320,11 +360,7 @@ async function resolveMatchBuckets(
           .map((e) => e.entityId);
         if (aliasIds.length === 0) continue;
 
-        const result = await resolutionClient.linkEntities(targetId, aliasIds);
-        if (result.linked.length > 0) {
-          appliedBuckets++;
-        }
-        resolutionsCreated += result.linked.length;
+        await applyCascade(targetId, aliasIds);
       } else if (unresolvedEntities.length >= 2) {
         // New group: pick target via namespace priority, link the rest
         const targetEntity = selectTarget(unresolvedEntities);
@@ -332,11 +368,7 @@ async function resolveMatchBuckets(
           .filter((e) => e.entityId !== targetEntity.entityId)
           .map((e) => e.entityId);
 
-        const result = await resolutionClient.linkEntities(targetEntity.entityId, aliasIds);
-        if (result.linked.length > 0) {
-          appliedBuckets++;
-        }
-        resolutionsCreated += result.linked.length;
+        await applyCascade(targetEntity.entityId, aliasIds);
       }
       // else: only 1 unresolved, no existing targets → no match, skip
     } catch (err) {
@@ -345,5 +377,12 @@ async function resolveMatchBuckets(
     }
   }
 
-  return { resolutionsCreated, appliedBuckets, skippedAmbiguousBuckets, failedBuckets };
+  return {
+    resolutionsCreated,
+    appliedBuckets,
+    skippedAmbiguousBuckets,
+    skippedBlockedBuckets,
+    skippedStaleOverlapBuckets,
+    failedBuckets,
+  };
 }

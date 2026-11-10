@@ -12,8 +12,12 @@ import * as Fs from 'fs';
 import minimatch from 'minimatch';
 import { parse as loadYaml } from 'yaml';
 
-import { serverless, stateful } from '../../../ftr-manifests/ftr_configs_manifests.json';
-import type { FtrConfigsManifest } from './types';
+import { loadBuildkiteJson } from '../../load_buildkite_json.ts';
+import type { FtrConfigsManifest } from './types.ts';
+
+const { serverless, stateful } = loadBuildkiteJson<
+  typeof import('../../../ftr-manifests/ftr_configs_manifests.json')
+>('ftr-manifests/ftr_configs_manifests.json');
 
 const ALL_FTR_MANIFEST_REL_PATHS = serverless.concat(stateful);
 

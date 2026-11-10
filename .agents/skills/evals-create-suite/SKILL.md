@@ -169,7 +169,7 @@ Registration is optional for local dev (suites are auto-discovered from `createP
 
 ## Post-Scaffold Steps
 
-1. Run `yarn kbn bootstrap` to register the new package.
+1. Run `pnpm kbn bootstrap` to register the new package.
 2. Verify the suite appears: `node scripts/evals list`.
 3. Create your first spec file under `evals/` (see the `evals-write-spec` skill).
 4. Run locally: `node scripts/evals start --model <connector-id> --judge <connector-id>`.
@@ -182,4 +182,4 @@ Registration is optional for local dev (suites are auto-discovered from `createP
 - Forgetting `@kbn/evals` in `kbn_references` -- causes TS resolution failures.
 - Using `Path.join` instead of `Path.resolve` for `testDir` -- Playwright needs an absolute path.
 - Creating `evals/` specs that import from `@kbn/evals` but the suite's `src/evaluate.ts` re-exports a different fixture -- always import `evaluate` from the suite's own `src/evaluate` when extending.
-- Forgetting to run `yarn kbn bootstrap` after creating the package.
+- Forgetting to run `pnpm kbn bootstrap` after creating the package.

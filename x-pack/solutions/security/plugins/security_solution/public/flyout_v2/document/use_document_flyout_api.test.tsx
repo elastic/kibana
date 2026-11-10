@@ -67,6 +67,7 @@ describe('useDocumentFlyoutApi', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        storage: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
         telemetry: { reportEvent: mockReportEvent },
       },
     });
@@ -205,6 +206,7 @@ describe('useDocumentFlyoutApi', () => {
     expect(children.props.value).toEqual({
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
+      isChildFlyout: false,
     });
   });
 
@@ -224,6 +226,7 @@ describe('useDocumentFlyoutApi', () => {
     expect(children.props.value).toEqual({
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
+      isChildFlyout: false,
     });
   });
 
@@ -243,6 +246,7 @@ describe('useDocumentFlyoutApi', () => {
     expect(children.props.value).toEqual({
       session: 'inherit',
       historyKey: documentFlyoutHistoryKey,
+      isChildFlyout: false,
     });
   });
 

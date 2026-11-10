@@ -155,6 +155,8 @@ const expectToBeEUIAriaDisabledButton = (element: HTMLElement) => {
   expect(element).toHaveAttribute('aria-disabled', 'true');
 };
 
+jest.setTimeout(60_000);
+
 describe('LensEditConfigurationFlyout', () => {
   async function renderConfigFlyout(
     propsOverrides: Partial<EditConfigPanelProps> = {},

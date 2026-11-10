@@ -36,11 +36,9 @@ fileGroups:
     - '**/*.ts'
     - src/languages/painless/autocomplete_definitions/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks:
   build-webpack:
-    command: yarn
+    command: pnpm
     args:
       - build
     checks:
@@ -62,7 +60,7 @@ tasks:
     type: run
     options:
       persistent: true
-    command: yarn
+    command: pnpm
     args:
       - build
       - '--watch'

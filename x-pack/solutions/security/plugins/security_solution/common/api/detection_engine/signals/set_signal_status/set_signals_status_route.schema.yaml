@@ -153,6 +153,39 @@ components:
         - geo_point
       description: >-
         The data type for the runtime field type. Determines how the field value is indexed and queried.
+
+    RuntimeFieldMapping:
+      type: object
+      description: >-
+        A runtime field included in the status-update query so the query
+        can match fields that are not in the alerts index mapping, for
+        example scripted fields on a data view. Elasticsearch evaluates
+        the field at query time.
+      required: [type]
+      properties:
+        type:
+          $ref: '#/components/schemas/RuntimeFieldType'
+        script:
+          type: object
+          additionalProperties: false
+          description: >-
+            Inline Painless script that Elasticsearch evaluates for each alert.
+            Only `source` is accepted. Stored scripts, parameterized scripts
+            (`params`), and non-default `lang` values are not supported. Extra
+            properties are rejected with a 400 so the script is not run with
+            different semantics.
+          required: [source]
+          properties:
+            source:
+              type: string
+              description: Painless script source to execute.
+              maxLength: 10000
+        format:
+          type: string
+          description: >-
+            Format string for date runtime fields, for example
+            `strict_date_optional_time`.
+          maxLength: 100
     SetAlertsStatusByIdsBase:
       type: object
       properties:
@@ -221,6 +254,27 @@ components:
             the query as `runtime_mappings`. Use this to reference fields stored on the
             alert `_source` that are not part of the Elastic Common Schema (ECS) of the alerts index mapping,
             for example, custom fields that the rule's source index defined when the alerts were created.
+        runtime_mappings:
+          type: object
+          maxProperties: 100
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldMapping'
+          description: >-
+            Use this when the query references fields that are not in the
+            alerts index mapping, for example data view runtime fields with
+            a Painless script.
+
+            Kibana sends `type`, `script.source`, and `format` to Elasticsearch
+            as `runtime_mappings` on the status-update query. Unlike
+            `runtime_fields`, Kibana keeps your script and runs it at query
+            time. It does not replace the script with a `_source` reader.
+
+            When a script is present, Kibana sets `on_script_error` to
+            `continue`. If the script fails on one alert, that field has no
+            value for the alert and the update continues.
+
+            Unique field names across `runtime_fields` and `runtime_mappings`
+            combined cannot exceed 100. Larger maps are rejected.
       required: [query, status]
 
     CloseAlertsByQuery:
@@ -255,6 +309,27 @@ components:
             example, runtime fields the rule's source index defined at the
             time the alerts were created. Limited to 100 entries per
             request; larger maps are rejected.
+        runtime_mappings:
+          type: object
+          maxProperties: 100
+          additionalProperties:
+            $ref: '#/components/schemas/RuntimeFieldMapping'
+          description: >-
+            Use this when the query references fields that are not in the
+            alerts index mapping, for example data view runtime fields with
+            a Painless script.
+
+            Kibana sends `type`, `script.source`, and `format` to Elasticsearch
+            as `runtime_mappings` on the status-update query. Unlike
+            `runtime_fields`, Kibana keeps your script and runs it at query
+            time. It does not replace the script with a `_source` reader.
+
+            When a script is present, Kibana sets `on_script_error` to
+            `continue`. If the script fails on one alert, that field has no
+            value for the alert and the update continues.
+
+            Unique field names across `runtime_fields` and `runtime_mappings`
+            combined cannot exceed 100. Larger maps are rejected.
       required: [query, status]
 
     SetAlertsStatusByQuery:

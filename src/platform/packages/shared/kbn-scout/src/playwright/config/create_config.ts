@@ -21,6 +21,9 @@ import { VALID_CONFIG_MARKER } from '../types';
 
 const DEFAULT_CI_RETRIES = 1;
 
+/** Half of the Cloud projects' 90 s test timeout, so a stalled navigation still fails as one. */
+const CLOUD_NAVIGATION_TIMEOUT_MS = 45_000;
+
 const isBuildkiteStepRetry = (): boolean => {
   const retryCount = Number.parseInt(process.env.BUILDKITE_RETRY_COUNT ?? '', 10);
   return Number.isFinite(retryCount) && retryCount > 0;
@@ -64,22 +67,39 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     },
     {
       name: 'ech',
-
+      // Cloud SAML auth hits a real service and is slower than the local mock; 90 s gives
+      // enough headroom for auth + test body within a single Playwright test timeout.
+      timeout: 90_000,
       testIgnore: [
         // TODO: remove when AI suggestions are supported on ECH or when the new tagging system is in place
         '**/ai_suggestions_*.spec.ts',
         // TODO: remove when we find a way to run "no data" tests without being affected by others
         '**/no_data_*.spec.ts',
       ],
-      use: { ...devices['Desktop Chrome'], configName: 'cloud_ech' },
+      use: {
+        ...devices['Desktop Chrome'],
+        configName: 'cloud_ech',
+        // Each test gets a fresh browser context, so every navigation is a cold, remote
+        // Kibana bootstrap; the 20 s global cap is calibrated for a local stack.
+        navigationTimeout: CLOUD_NAVIGATION_TIMEOUT_MS,
+      },
     },
     {
       name: 'mki',
+      // Cloud SAML auth hits a real service and is slower than the local mock; 90 s gives
+      // enough headroom for auth + test body within a single Playwright test timeout.
+      timeout: 90_000,
       testIgnore: [
         // TODO: remove when we find a way to run "no data" tests without being affected by others
         '**/no_data_*.spec.ts',
       ],
-      use: { ...devices['Desktop Chrome'], configName: 'cloud_mki' },
+      use: {
+        ...devices['Desktop Chrome'],
+        configName: 'cloud_mki',
+        // Each test gets a fresh browser context, so every navigation is a cold, remote
+        // Kibana bootstrap; the 20 s global cap is calibrated for a local stack.
+        navigationTimeout: CLOUD_NAVIGATION_TIMEOUT_MS,
+      },
     },
   ];
 

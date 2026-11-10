@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema';
 import { badData } from '@hapi/boom';
 import type { Streams } from '@kbn/streams-schema';
@@ -34,8 +35,8 @@ export const createClassicStreamRoute = createServerRoute({
   },
   params: z.object({
     body: z.object({
-      name: z.string(),
-      description: z.string().optional(),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH),
+      description: z.string().max(1000).optional(),
       ingest: z.any(),
     }),
   }),

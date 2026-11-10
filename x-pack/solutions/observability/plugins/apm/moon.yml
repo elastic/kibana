@@ -175,12 +175,14 @@ dependsOn:
   - '@kbn/storybook'
   - '@kbn/lens-embeddable-utils'
   - '@kbn/lens-common'
+  - '@kbn/core-http-browser-mocks'
 tags:
   - plugin
   - prod
   - group-observability
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - .storybook/**/*
@@ -193,6 +195,4 @@ fileGroups:
     - server/**/*.json
     - test/scenarios/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LegacyMetricState } from '@kbn/lens-common';
+import { LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS, type LegacyMetricState } from '@kbn/lens-common';
 
 import type { LensAttributes } from '../../../../types';
 import type { NormalizerConfig } from './normalize';
@@ -54,5 +54,9 @@ export const normalizeLegacyMetric = mergeNormalizers<LegacyMetricAttributes>([
   })),
   alignId,
   alignLegacyTypes,
-  getPaletteNormalizer<LegacyMetricAttributes>('state.visualization.palette', () => true),
+  getPaletteNormalizer<LegacyMetricAttributes>(
+    'state.visualization.palette',
+    LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS,
+    () => true
+  ),
 ]);

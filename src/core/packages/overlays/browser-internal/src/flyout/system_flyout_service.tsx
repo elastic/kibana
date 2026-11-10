@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { flushSync, render } from 'react-dom';
 import { v4 as uuidV4 } from 'uuid';
 
 import type { EuiFlyoutMenuProps } from '@elastic/eui';
@@ -19,11 +19,112 @@ import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type {
   OverlaySystemFlyoutOpenOptions,
   OverlaySystemFlyoutStart,
+  SystemFlyoutSize,
+  SystemFlyoutType,
 } from '@kbn/core-overlays-browser';
+import { SystemFlyoutSizeContext, SystemFlyoutTypeContext } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SystemFlyoutRef } from './system_flyout_ref';
+
+interface SystemFlyoutControllerRenderState {
+  type: SystemFlyoutType;
+  size: SystemFlyoutSize;
+  /** Resize handler to pass to `EuiFlyout`; keeps state in sync and forwards to the consumer. */
+  onResize: (width: number) => void;
+}
+
+interface SystemFlyoutControllerProps {
+  /** The `type` open option, used to seed the reactive push/overlay state. */
+  initialType: SystemFlyoutType | undefined;
+  /** The `size` open option, used to seed the reactive size state. */
+  initialSize: SystemFlyoutSize;
+  /** The size `resetSize` returns the flyout to (the caller's default named size). */
+  resetSizeTarget: SystemFlyoutSize;
+  /** The consumer's resize handler (e.g. to persist the width). */
+  onResize: OverlaySystemFlyoutOpenOptions['onResize'];
+  /**
+   * Render-prop receiving the current (reactive) type/size and a resize handler, so the enclosing
+   * `EuiFlyout` markup only needs to thread them through.
+   */
+  children: (state: SystemFlyoutControllerRenderState) => React.ReactNode;
+}
+
+/**
+ * The `size` value `resetSize` pins the flyout to (synchronously) before restoring
+ * `resetSizeTarget`. EUI only re-seeds its width when the `size` prop changes, so this pinned value
+ * must differ from the target or the change back to it wouldn't register. A named target (e.g.
+ * `'m'`) never equals the dragged pixel width (a number), but `defaultSize` is `@public` and may be
+ * numeric — a consumer could pass a number equal to the dragged width. In that case, use an
+ * equivalent `${n}px` string: it renders the same width but is a distinct prop value, so the re-seed
+ * still fires. The returned value is always `!== resetSizeTarget`.
+ */
+export const resolveResetPinnedWidth = (
+  resizedWidth: number,
+  resetSizeTarget: SystemFlyoutSize
+): SystemFlyoutSize => (resizedWidth === resetSizeTarget ? `${resizedWidth}px` : resizedWidth);
+
+/**
+ * Owns the reactive push/overlay `type` and `size` of a system flyout and exposes them via
+ * {@link SystemFlyoutTypeContext} / {@link SystemFlyoutSizeContext}. Because the state lives here —
+ * above the `EuiFlyout` — content rendered inside the flyout can switch push/overlay or reset the
+ * size and have the live flyout re-render, rather than the change only applying on the next open.
+ *
+ * `size` tracks the live resized width (via `onResize`) so that a later `resetSize` always changes
+ * the `size` prop, forcing EUI to snap back to the default.
+ */
+const SystemFlyoutController: React.FC<SystemFlyoutControllerProps> = ({
+  initialType,
+  initialSize,
+  resetSizeTarget,
+  onResize,
+  children,
+}) => {
+  const [type, setType] = React.useState<SystemFlyoutType>(initialType ?? 'overlay');
+  const [size, setSize] = React.useState<SystemFlyoutSize>(initialSize);
+  // The latest user-resized width, tracked in a ref so resizing does NOT re-render with a new
+  // `size` prop — a managed flyout re-registers and replays its opening animation whenever `size`
+  // changes, which would flicker on every resize.
+  const resizedWidthRef = React.useRef<number | null>(null);
+  const sizeRef = React.useRef<SystemFlyoutSize>(size);
+  sizeRef.current = size;
+
+  const typeValue = React.useMemo(() => ({ type, setType }), [type]);
+
+  const resetSize = React.useCallback(() => {
+    // Changing `size` re-seeds the flyout. If the prop already equals the reset target (the flyout
+    // was dragged away from its default this session), EUI wouldn't re-seed — so first pin the prop
+    // to a value distinct from the target (synchronously, before paint), so the change back to the
+    // target registers. See {@link resolveResetPinnedWidth}.
+    const resizedWidth = resizedWidthRef.current;
+    if (sizeRef.current === resetSizeTarget && resizedWidth != null) {
+      flushSync(() => setSize(resolveResetPinnedWidth(resizedWidth, resetSizeTarget)));
+    }
+    setSize(resetSizeTarget);
+    resizedWidthRef.current = null;
+  }, [resetSizeTarget]);
+
+  const sizeValue = React.useMemo(() => ({ size, resetSize }), [size, resetSize]);
+
+  const handleResize = React.useCallback(
+    (width: number) => {
+      // Record the width and forward it to the consumer (to persist). Do NOT call `setSize` here,
+      // or the managed flyout would re-register and replay its opening animation on every resize.
+      resizedWidthRef.current = width;
+      onResize?.(width);
+    },
+    [onResize]
+  );
+
+  return (
+    <SystemFlyoutTypeContext.Provider value={typeValue}>
+      <SystemFlyoutSizeContext.Provider value={sizeValue}>
+        {children({ type, size, onResize: handleResize })}
+      </SystemFlyoutSizeContext.Provider>
+    </SystemFlyoutTypeContext.Provider>
+  );
+};
 
 interface SystemFlyoutStartDeps {
   analytics: AnalyticsServiceStart;
@@ -40,6 +141,13 @@ interface SystemFlyoutStartDeps {
 export class SystemFlyoutService {
   private targetDomElement: Element | null = null;
   private activeFlyouts = new Map<string, SystemFlyoutRef>();
+  /**
+   * The element EUI applies push-flyout offset padding to (the flyout manager's container element),
+   * captured while non-null. Used by {@link resetPushOffsetIfIdle} to clear a stranded offset once
+   * the last flyout closes.
+   */
+  private pushOffsetContainer: HTMLElement | null = null;
+  private managerUnsubscribe: (() => void) | null = null;
 
   public start({
     analytics,
@@ -50,10 +158,33 @@ export class SystemFlyoutService {
   }: SystemFlyoutStartDeps): OverlaySystemFlyoutStart {
     this.targetDomElement = targetDomElement;
 
+    // Workaround for https://github.com/elastic/eui/issues/9788 — EUI's per-flyout cleanup can
+    // restore stale padding and leave the push offset stranded. Remove once fixed upstream.
+    //
+    // A `type="push"` flyout makes EUI write inline offset padding onto its container element (or
+    // `document.body`). Each system flyout renders in its own React root, so EUI's per-flyout
+    // cleanup of that padding can race across roots and strand the offset on the container when the
+    // flyouts tear down. Track the container while it's set so we can reset it on the last close.
+    if (!this.managerUnsubscribe) {
+      const managerStore = getFlyoutManagerStore();
+      this.managerUnsubscribe = managerStore.subscribe(() => {
+        const containerElement = managerStore.getState().containerElement;
+        if (containerElement) {
+          this.pushOffsetContainer = containerElement;
+        }
+      });
+    }
+
     return {
       open: (
         content: React.ReactElement,
-        { session = 'start', title, ...options }: OverlaySystemFlyoutOpenOptions = {}
+        {
+          session = 'start',
+          title,
+          defaultSize,
+          onResize,
+          ...options
+        }: OverlaySystemFlyoutOpenOptions = {}
       ): OverlayRef => {
         const { flyoutMenuProps } = options;
         const flyoutId = `system-flyout-${uuidV4()}`;
@@ -69,6 +200,7 @@ export class SystemFlyoutService {
         // Handle close events
         flyoutRef.onClose.then(() => {
           this.activeFlyouts.delete(flyoutId);
+          this.resetPushOffsetIfIdle();
         });
 
         const onCloseFlyout = () => {
@@ -131,16 +263,31 @@ export class SystemFlyoutService {
             theme={theme}
             userProfile={userProfile}
           >
-            <EuiFlyout
-              {...options}
-              flyoutMenuProps={mergedFlyoutMenuProps}
-              session={session}
-              onClose={onCloseFlyout}
-              aria-label={options['aria-label']}
-              aria-labelledby={options['aria-labelledby']}
+            {/* `OverlaySystemFlyoutOpenOptions` is built from `Omit<EuiFlyoutProps |
+                EuiFlyoutResizableProps, …>`; omitting over that union widens `type`, so narrow it
+                back to `SystemFlyoutType` to seed the controller. */}
+            <SystemFlyoutController
+              initialType={options.type as SystemFlyoutType | undefined}
+              initialSize={options.size}
+              resetSizeTarget={defaultSize ?? options.size}
+              onResize={onResize}
             >
-              {content}
-            </EuiFlyout>
+              {({ type, size, onResize: handleResize }) => (
+                <EuiFlyout
+                  {...options}
+                  type={type}
+                  size={size}
+                  onResize={handleResize}
+                  flyoutMenuProps={mergedFlyoutMenuProps}
+                  session={session}
+                  onClose={onCloseFlyout}
+                  aria-label={options['aria-label']}
+                  aria-labelledby={options['aria-labelledby']}
+                >
+                  {content}
+                </EuiFlyout>
+              )}
+            </SystemFlyoutController>
           </KibanaRenderContextProvider>,
           flyoutContainer
         );
@@ -151,15 +298,62 @@ export class SystemFlyoutService {
   }
 
   /**
+   * Reset any push-flyout offset once no flyouts remain open.
+   *
+   * A `type="push"` flyout makes EUI write inline offset padding onto its container element (the app
+   * content area) or `document.body`. Because each system flyout renders in its own React root,
+   * EUI's per-flyout cleanup of that padding can race across roots and leave the offset stranded on
+   * teardown — the page stays pushed with no flyout open. Once nothing is open there can be no push
+   * offset, so clear it deterministically here.
+   */
+  private resetPushOffsetIfIdle(): void {
+    if (this.activeFlyouts.size > 0) {
+      return;
+    }
+    this.clearStrandedPushOffset();
+    // A late effect or ResizeObserver callback from the tearing-down flyout roots can re-apply the
+    // offset after this microtask, so clear once more on the next frame — still only while idle.
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => {
+        if (this.activeFlyouts.size === 0) {
+          this.clearStrandedPushOffset();
+        }
+      });
+    }
+  }
+
+  /**
+   * Remove any inline push-offset padding EUI left on the flyout container (resolved from both the
+   * tracked reference and the live manager store) or `document.body`. Only inline styles are
+   * touched, so the chrome layout's own `padding` rules are unaffected.
+   */
+  private clearStrandedPushOffset(): void {
+    const containerFromStore = getFlyoutManagerStore().getState().containerElement ?? null;
+    const targets = [this.pushOffsetContainer, containerFromStore, document.body].filter(
+      (el): el is HTMLElement => el != null
+    );
+    const paddingProps = ['padding-inline-start', 'padding-inline-end'];
+    for (const el of targets) {
+      for (const prop of paddingProps) {
+        el.style.removeProperty(prop);
+      }
+    }
+  }
+
+  /**
    * Cleanup method for when the service is stopped
    */
   public closeAllFlyouts(): void {
     this.activeFlyouts.forEach((flyout) => flyout.close());
     this.activeFlyouts.clear();
+    this.resetPushOffsetIfIdle();
   }
 
   public stop(): void {
     this.closeAllFlyouts();
+    this.managerUnsubscribe?.();
+    this.managerUnsubscribe = null;
+    this.pushOffsetContainer = null;
     this.targetDomElement = null;
   }
 }

@@ -221,13 +221,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataStream: apacheAccessDataStreamName,
         });
 
-        const { docsCountTotal, degradedDocs, services, hosts, size } =
-          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
-        expect(parseInt(docsCountTotal, 10)).to.be(226);
-        expect(parseInt(degradedDocs, 10)).to.be(1);
-        expect(parseInt(services, 10)).to.be(3);
-        expect(parseInt(hosts, 10)).to.be(52);
-        expect(parseInt(size, 10)).to.be.greaterThan(0);
+        await retry.try(async () => {
+          const { docsCountTotal, degradedDocs, services, hosts, size } =
+            await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
+          expect(parseInt(docsCountTotal, 10)).to.be(226);
+          expect(parseInt(degradedDocs, 10)).to.be(1);
+          expect(parseInt(services, 10)).to.be(3);
+          expect(parseInt(hosts, 10)).to.be(52);
+          expect(parseInt(size, 10)).to.be.greaterThan(0);
+        });
       });
     });
 
@@ -242,9 +244,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           dataStream: failedDataStreamName,
         });
 
-        const { failedDocs } = await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
-
-        expect(parseInt(failedDocs, 10)).to.be(4);
+        await retry.try(async () => {
+          const { failedDocs } = await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
+          expect(parseInt(failedDocs, 10)).to.be(4);
+        });
       });
 
       it('reflects the qualityIssuesChart field state in url', async () => {

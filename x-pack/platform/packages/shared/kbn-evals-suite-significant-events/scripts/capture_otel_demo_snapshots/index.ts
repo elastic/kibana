@@ -213,7 +213,7 @@ run(
       Prerequisites:
         - minikube running  (minikube start --cpus=4 --memory=8g)
         - Local Elasticsearch with GCS credentials in keystore:
-            yarn es snapshot --license trial \\
+            pnpm es snapshot --license trial \\
               --secure-files gcs.client.default.credentials_file=/path/to/creds.json
         - Local Kibana running with a preconfigured LLM connector
 

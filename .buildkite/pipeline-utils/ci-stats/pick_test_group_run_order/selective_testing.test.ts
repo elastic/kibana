@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-jest.mock('../../affected-packages', () => ({
+jest.mock('../../affected-packages/index.ts', () => ({
   ALWAYS_RUN_JEST_INTEGRATION_CONFIGS: ['always/jest.integration.config.js'],
   CRITICAL_FILES_JEST_INTEGRATION_TESTS: ['CRITICAL_INT'],
   CRITICAL_FILES_JEST_UNIT_TESTS: ['CRITICAL_UNIT'],
@@ -19,13 +19,13 @@ jest.mock('../../affected-packages', () => ({
     files.some((f) => critical.includes(f)),
 }));
 
-jest.mock('./jest_configs', () => ({ SHARD_ANNOTATION_SEP: '||shard=' }));
+jest.mock('./jest_configs.ts', () => ({ SHARD_ANNOTATION_SEP: '||shard=' }));
 
-import type { SelectiveTestingContext } from './selective_testing';
+import type { SelectiveTestingContext } from './selective_testing.ts';
 import {
   filterJestIntegrationConfigsByAffected,
   filterJestUnitConfigsByAffected,
-} from './selective_testing';
+} from './selective_testing.ts';
 
 const context = (
   affected: string[],
@@ -36,6 +36,22 @@ const context = (
 });
 
 describe('filterJestIntegrationConfigsByAffected', () => {
+  it('keeps package-selected configs while comparing Moon integration selection', () => {
+    const configs = [
+      'affected/one/jest.integration.config.js',
+      'affected/two/jest.integration.config.js',
+    ];
+    const result = filterJestIntegrationConfigsByAffected(
+      configs,
+      context(['affected/'], ['affected/one/example.test.ts']),
+      {
+        modeledConfigs: new Set(configs),
+        affectedConfigs: new Set([configs[0]]),
+      }
+    );
+    expect(result).toEqual(configs);
+  });
+
   it('drops unaffected configs but re-adds always-run configs', () => {
     const configs = [
       'always/jest.integration.config.js',
@@ -87,6 +103,63 @@ describe('filterJestIntegrationConfigsByAffected', () => {
 });
 
 describe('filterJestUnitConfigsByAffected', () => {
+  it('keeps package-selected configs while comparing Moon unit selection', () => {
+    const configs = ['affected/one/jest.config.js', 'affected/two/jest.config.js'];
+    const result = filterJestUnitConfigsByAffected(
+      configs,
+      context(['affected/'], ['affected/one/example.test.ts']),
+      {
+        modeledConfigs: new Set(configs),
+        affectedConfigs: new Set([configs[0]]),
+      }
+    );
+    expect(result).toEqual(configs);
+  });
+
+  it('logs Moon-only configs without changing package selection', () => {
+    const configs = [
+      'affected/jest.config.js',
+      'other/jest.config.js',
+      'nested/jest.config.js||shard=1/2',
+    ];
+    const result = filterJestUnitConfigsByAffected(configs, context(['nested/']), {
+      modeledConfigs: new Set(['affected/jest.config.js', 'other/jest.config.js']),
+      affectedConfigs: new Set(['affected/jest.config.js']),
+    });
+
+    expect(result).toEqual(['nested/jest.config.js||shard=1/2']);
+  });
+
+  it('keeps package-selected configs when Moon misses a modeled config', () => {
+    const configs = ['modeled/jest.config.js'];
+    expect(
+      filterJestUnitConfigsByAffected(configs, context(['modeled/']), {
+        modeledConfigs: new Set(configs),
+        affectedConfigs: new Set(),
+      })
+    ).toEqual(configs);
+  });
+
+  it('does not select unmodeled configs when no package has a Jest-relevant change', () => {
+    const configs = ['modeled/jest.config.js', 'nested/jest.config.js'];
+    expect(
+      filterJestUnitConfigsByAffected(configs, context([]), {
+        modeledConfigs: new Set(['modeled/jest.config.js']),
+        affectedConfigs: new Set(),
+      })
+    ).toEqual([]);
+  });
+
+  it('keeps critical changes as a full Jest run even when Moon finds no affected task', () => {
+    const configs = ['affected/jest.config.js', 'other/jest.config.js'];
+    expect(
+      filterJestUnitConfigsByAffected(configs, context([], ['CRITICAL_UNIT']), {
+        modeledConfigs: new Set(configs),
+        affectedConfigs: new Set(),
+      })
+    ).toEqual(configs);
+  });
+
   it('does not force always-run integration configs into unit runs', () => {
     const configs = ['always/jest.integration.config.js', 'affected/jest.config.js'];
 

@@ -63,11 +63,11 @@ These routes are protected by anonymization feature privileges:
 Run targeted tests:
 
 ```bash
-yarn test:jest x-pack/platform/plugins/shared/anonymization
+pnpm test:jest x-pack/platform/plugins/shared/anonymization
 ```
 
 Run API integration tests:
 
 ```bash
-yarn test:ftr --config x-pack/platform/test/api_integration/apis/anonymization/config.ts
+pnpm test:ftr --config x-pack/platform/test/api_integration/apis/anonymization/config.ts
 ```

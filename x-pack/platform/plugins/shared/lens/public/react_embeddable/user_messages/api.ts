@@ -171,7 +171,8 @@ export function buildUserMessagesHelpers(
           },
         },
         datasourceMap,
-        dataViewObject.indexPatterns
+        dataViewObject.indexPatterns,
+        activeData
       ),
       query: activeAttributes.state.query,
       filters: mergedSearchContext.filters ?? [],

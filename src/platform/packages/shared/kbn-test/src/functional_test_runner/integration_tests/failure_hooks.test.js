@@ -18,7 +18,7 @@ const FAILURE_HOOKS_CONFIG = require.resolve('./__fixtures__/failure_hooks/confi
 
 describe('failure hooks', function () {
   it('runs and prints expected output', () => {
-    const proc = spawnSync(process.execPath, [SCRIPT, '--config', FAILURE_HOOKS_CONFIG], {
+    const proc = spawnSync(process.execPath, [SCRIPT, '--config', FAILURE_HOOKS_CONFIG, '--info'], {
       // Disable APM so its transport-error logs don't interleave with the FTR
       // output lines this test parses positionally. See https://github.com/elastic/kibana/issues/271289
       env: { ...process.env, SCOUT_REPORTER_ENABLED: '0', ELASTIC_APM_ACTIVE: 'false' },

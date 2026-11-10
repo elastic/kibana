@@ -44,6 +44,7 @@ export function createInferenceClient({
   isTokenUsageTrackingEnabled,
   isDefaultConnectorOnly,
   getDefaultConnectorId,
+  resolveConnectorId,
 }: {
   request: KibanaRequest;
   namespace: string;
@@ -60,6 +61,7 @@ export function createInferenceClient({
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
 }): InferenceClient {
   const callbackManager = createCallbackManager(callbacks);
 
@@ -84,6 +86,7 @@ export function createInferenceClient({
     isTokenUsageTrackingEnabled,
     isDefaultConnectorOnly,
     getDefaultConnectorId,
+    resolveConnectorId,
   });
 
   const chatComplete = createChatCompleteApi({

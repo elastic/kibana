@@ -55,9 +55,9 @@ describe('#resolve()', () => {
   });
 
   it('resolves requests to src/', () => {
-    expect(resolver.resolve('src/core/public', FIXTURES_DIR)).toMatchInlineSnapshot(`
+    expect(resolver.resolve('src/core/packages/core/public', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/src/core/public/index.ts,
+        "absolute": <absolute path>/src/core/packages/core/public/index.ts,
         "type": "file",
       }
     `);

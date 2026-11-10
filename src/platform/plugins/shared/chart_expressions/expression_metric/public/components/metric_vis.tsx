@@ -198,8 +198,10 @@ export const MetricVis = ({
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
+    // Only finite numeric values can use palette bounds: the NaN fallback for empty results
+    // has no backing data row, so resolving its maximum dimension would throw.
     const paletteColor =
-      config.metric.palette?.params && typeof value === 'number'
+      config.metric.palette?.params && typeof value === 'number' && Number.isFinite(value)
         ? getColor(
             value,
             config.metric.palette,

@@ -25,6 +25,7 @@ import type { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import type { OverviewStatusQuery } from '../common';
 import { OverviewStatusService } from '../overview_status/overview_status_service';
 import type { SyntheticsEsClient } from '../../lib';
+import { PRIVATE_LOCATION_WRITE_API } from '../../feature';
 import { getPrivateLocationsAndAgentPolicies } from '../settings/private_locations/get_private_locations';
 import { getAgentPoliciesAsInternalUser } from '../settings/private_locations/get_agent_policies';
 import type { ServiceLocationErrors } from '../../../common/runtime_types';
@@ -202,9 +203,10 @@ export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () =
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_DIAGNOSTICS,
   validate: {},
-  // Diagnostics bundles include broad metadata; require the same `uptime-write`
-  // privilege as monitor edits so only operators with full Synthetics access can pull them.
+  // Bundles include private-location policy metadata. Require Synthetics write
+  // and the private-location manage privilege.
   writeAccess: true,
+  requiredPrivileges: [PRIVATE_LOCATION_WRITE_API],
   handler: async (routeContext) => {
     const {
       monitorConfigRepository,
@@ -225,7 +227,12 @@ export const getSyntheticsDiagnosticsRoute: SyntheticsRestApiRouteFactory = () =
       indices,
     ] = await Promise.all([
       monitorConfigRepository.getAll({}),
-      getPrivateLocationsAndAgentPolicies(savedObjectsClient, syntheticsMonitorClient),
+      getPrivateLocationsAndAgentPolicies(
+        savedObjectsClient,
+        syntheticsMonitorClient,
+        false,
+        spaceId
+      ),
       getAgentPoliciesAsInternalUser({ server, withAgentCount: true, spaceId }),
       listAllSyntheticsPackagePolicies(savedObjectsClient, server),
       collectGlobalParamMetadata(savedObjectsClient),

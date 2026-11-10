@@ -83,17 +83,34 @@ export const DEV_ONLY_LICENSE_ALLOWED = ['MPL-2.0', '(MPL-2.0 OR Apache-2.0)'];
 // but can be brought in on a per-package basis
 export const PER_PACKAGE_ALLOWED_LICENSES = {
   'openpgp@5.11.3': ['LGPL-3.0+'],
-  '@img/sharp-libvips-darwin-arm64@1.3.1': ['LGPL-3.0-or-later'],
-  '@img/sharp-libvips-linuxmusl-x64@1.3.1': ['LGPL-3.0-or-later'],
-  '@img/sharp-libvips-linux-x64@1.3.1': ['LGPL-3.0-or-later'],
-  'dompurify@3.4.14': ['(MPL-2.0 OR Apache-2.0)'],
+  // pnpm installs sharp's prebuilt libvips binaries for every platform (yarn only
+  // kept the current platform), so the license check sees all of them on CI.
+  '@img/sharp-libvips-darwin-arm64@1.3.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-darwin-x64@1.3.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linux-arm64@1.3.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linux-arm@1.3.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linux-ppc64@1.3.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linux-riscv64@1.3.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linux-s390x@1.3.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linux-x64@1.3.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linuxmusl-arm64@1.3.4': ['LGPL-3.0-or-later'],
+  '@img/sharp-libvips-linuxmusl-x64@1.3.4': ['LGPL-3.0-or-later'],
+  // sharp's wasm32 and win32 bindings statically bundle libvips (LGPL) instead of
+  // using the separate @img/sharp-libvips-* packages, so they carry LGPL themselves.
+  // These are SPDX AND-expressions, matched against the whole compound string.
+  '@img/sharp-wasm32@0.35.5': ['Apache-2.0 AND LGPL-3.0-or-later AND MIT'],
+  '@img/sharp-win32-arm64@0.35.5': ['Apache-2.0 AND LGPL-3.0-or-later'],
+  '@img/sharp-win32-ia32@0.35.5': ['Apache-2.0 AND LGPL-3.0-or-later'],
+  '@img/sharp-win32-x64@0.35.5': ['Apache-2.0 AND LGPL-3.0-or-later'],
+  'dompurify@3.4.11': ['(MPL-2.0 OR Apache-2.0)'],
+  'dompurify@3.4.17': ['(MPL-2.0 OR Apache-2.0)'],
   'node-liblzma@2.2.0': ['LGPL-3.0'],
 };
 // Globally overrides a license for a given package@version
 export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
-  '@elastic/ems-client@8.7.0': ['Elastic License 2.0'],
+  '@elastic/ems-client@8.8.1': ['Elastic License 2.0'],
   '@elastic/esql': ['Elastic License 2.0'],
   '@elastic/pretty-printer': ['Elastic License 2.0'],
   '@elastic/eui': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],

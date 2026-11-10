@@ -9,15 +9,15 @@ import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '../context/kibana_context/use_kibana';
 
 export function useLogsIndexPattern() {
-  const {
-    services: {
-      logsDataAccess: {
-        services: { logSourcesService },
-      },
-    },
-  } = useKibana();
+  const { services } = useKibana();
+  const logSourcesService = services.logsDataAccess?.services?.logSourcesService;
 
-  const { value, loading, error } = useAsync(logSourcesService.getFlattenedLogSources);
+  const { value, loading, error } = useAsync(async () => {
+    if (!logSourcesService) {
+      return undefined;
+    }
+    return logSourcesService.getFlattenedLogSources();
+  }, [logSourcesService]);
 
   return { logsIndexPattern: value, loading, error };
 }

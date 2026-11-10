@@ -79,10 +79,7 @@ export const colorMappingSlice = createSlice({
         assignment: ColorMapping.Assignment;
       }>
     ) => {
-      state.assignments[action.payload.assignmentIndex] = {
-        ...action.payload.assignment,
-        touched: true,
-      };
+      state.assignments[action.payload.assignmentIndex] = { ...action.payload.assignment };
     },
     updateAssignmentRule: (
       state,
@@ -124,7 +121,6 @@ export const colorMappingSlice = createSlice({
       state.assignments[action.payload.assignmentIndex] = {
         ...state.assignments[action.payload.assignmentIndex],
         color: action.payload.color,
-        touched: true,
       };
     },
 
@@ -138,24 +134,17 @@ export const colorMappingSlice = createSlice({
       state.specialAssignments[action.payload.assignmentIndex] = {
         ...state.specialAssignments[action.payload.assignmentIndex],
         color: action.payload.color,
-        touched: true,
       };
     },
     removeAssignment: (state, action: PayloadAction<number>) => {
       state.assignments.splice(action.payload, 1);
       if (state.assignments.length === 0) {
-        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = {
-          ...DEFAULT_OTHER_ASSIGNMENT,
-          touched: true,
-        };
+        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = { ...DEFAULT_OTHER_ASSIGNMENT };
       }
     },
     removeAllAssignments: (state) => {
       state.assignments = [];
-      state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = {
-        ...DEFAULT_OTHER_ASSIGNMENT,
-        touched: true,
-      };
+      state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = { ...DEFAULT_OTHER_ASSIGNMENT };
     },
     updateGradientColorStep: (
       state,
@@ -171,9 +160,7 @@ export const colorMappingSlice = createSlice({
       state.colorMode = {
         ...state.colorMode,
         steps: state.colorMode.steps.map((step, index) => {
-          return index === action.payload.index
-            ? { ...action.payload.color, touched: true }
-            : { ...step, touched: false };
+          return index === action.payload.index ? { ...action.payload.color } : step;
         }),
       };
     },
@@ -218,7 +205,7 @@ export const colorMappingSlice = createSlice({
         ...state.colorMode,
         steps: [
           ...state.colorMode.steps.slice(0, action.payload.at),
-          { ...action.payload.color, touched: false },
+          { ...action.payload.color },
           ...state.colorMode.steps.slice(action.payload.at),
         ],
       };

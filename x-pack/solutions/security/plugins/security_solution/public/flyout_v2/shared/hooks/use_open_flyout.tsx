@@ -18,6 +18,9 @@ import type { FlyoutTelemetryMeta } from './use_flyout_telemetry';
 import { trackFlyoutOpen } from './use_flyout_telemetry';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
 import type { MainFlyoutSession } from '../../session_context';
+import { FLYOUT_SURFACE } from '../../../common/lib/telemetry';
+import { getStoredFlyoutType } from './use_flyout_push_vs_overlay';
+import { getStoredFlyoutWidth, setStoredFlyoutWidth } from './use_flyout_width';
 
 /**
  * Opens a system flyout, optionally reporting telemetry for it. When `meta` is provided, an
@@ -41,7 +44,7 @@ export type OpenFlyout = (
  */
 export const useOpenFlyout = (): OpenFlyout => {
   const { services } = useKibana();
-  const { overlays } = services;
+  const { overlays, storage } = services;
   const store = useStore();
   const history = useHistory();
   const { session: mainSession, historyKey } = useFlyoutSessionContext();
@@ -49,18 +52,48 @@ export const useOpenFlyout = (): OpenFlyout => {
   return useCallback(
     (children, properties, meta, sessionOverride) => {
       const session = sessionOverride ?? mainSession;
+      // Seed the flyout's push/overlay mode from the persisted preference (read
+      // fresh at open time), unless the caller pinned an explicit `type`. The
+      // core system flyout keeps this reactive, so the settings menu can switch
+      // it live afterwards.
+      const type = properties.type ?? getStoredFlyoutType(storage);
+
+      // Persist/restore the user-resized width for main flyouts (document/entity/…) only.
+      // Tool flyouts (surface === TOOL) are skipped: they can open side-by-side with a document,
+      // where a saved standalone width can't be honored (EUI clamps it to the sibling's leftover
+      // space). Child flyouts (session: 'inherit') are also skipped — EUI throws on a numeric size
+      // for children. `defaultSize` records the flyout's default so the settings menu can reset
+      // back to it, and `onResize` persists the width whenever the user resizes — composing with,
+      // rather than overwriting, any `onResize` the caller supplied.
+      const persistsWidth =
+        properties.session !== 'inherit' && meta?.surface !== FLYOUT_SURFACE.TOOL;
+      // Child flyouts are always overlays and don't own a persisted width, so the settings menu
+      // (push/overlay toggle + reset size) is inert for them — the header hides the gear entirely.
+      const isChildFlyout = properties.session === 'inherit';
+      const storedWidth = persistsWidth ? getStoredFlyoutWidth(storage) : undefined;
+      const sizeProperties: Partial<OverlaySystemFlyoutOpenOptions> = persistsWidth
+        ? {
+            size: storedWidth ?? properties.size,
+            defaultSize: properties.size,
+            onResize: (width: number) => {
+              setStoredFlyoutWidth(storage, width);
+              properties.onResize?.(width);
+            },
+          }
+        : {};
+
       const ref = overlays.openSystemFlyout(
         flyoutProviders({
           services,
           store,
           history,
           children: (
-            <FlyoutSessionContextProvider value={{ session, historyKey }}>
+            <FlyoutSessionContextProvider value={{ session, historyKey, isChildFlyout }}>
               <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
             </FlyoutSessionContextProvider>
           ),
         }),
-        properties
+        { ...properties, type, ...sizeProperties }
       );
 
       if (meta) {
@@ -69,6 +102,6 @@ export const useOpenFlyout = (): OpenFlyout => {
 
       return ref;
     },
-    [overlays, services, store, history, mainSession, historyKey]
+    [overlays, storage, services, store, history, mainSession, historyKey]
   );
 };

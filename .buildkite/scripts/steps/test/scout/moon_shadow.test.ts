@@ -9,24 +9,33 @@
 
 jest.mock('#pipeline-utils', () => ({
   getAffectedProjectsMoon: jest.fn(),
+  queryMoonTestSelection: jest.fn(),
 }));
 
-import type { ToolingLog } from '@kbn/tooling-log';
-import { getAffectedProjectsMoon } from '#pipeline-utils';
-import { computeMoonShadow } from './moon_shadow';
+import { getAffectedProjectsMoon, queryMoonTestSelection } from '#pipeline-utils';
+import { computeMoonShadow } from './moon_shadow.ts';
+import type { ScoutLog } from './scout_log.ts';
 
 const mockGetAffectedProjectsMoon = getAffectedProjectsMoon as jest.Mock;
+const mockQueryMoonTestSelection = queryMoonTestSelection as jest.Mock;
 
-const createMockLog = (): ToolingLog =>
-  ({ info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog);
+const createMockLog = (): ScoutLog => ({ info: jest.fn(), warning: jest.fn() });
 
-afterEach(() => {
+beforeEach(() => {
   jest.clearAllMocks();
+  mockQueryMoonTestSelection.mockReturnValue({
+    modeledConfigs: new Set(),
+    affectedConfigs: new Set(),
+  });
 });
 
 describe('computeMoonShadow', () => {
   it('reports an empty diff when git and moon agree', () => {
     mockGetAffectedProjectsMoon.mockReturnValue(new Set(['@kbn/foo']));
+    mockQueryMoonTestSelection.mockReturnValue({
+      modeledConfigs: new Set(['foo/test/scout/ui/playwright.config.ts']),
+      affectedConfigs: new Set(['foo/test/scout/ui/playwright.config.ts']),
+    });
     const log = createMockLog();
 
     const result = computeMoonShadow({
@@ -37,6 +46,7 @@ describe('computeMoonShadow', () => {
     });
 
     expect(result?.diffFromGit).toEqual({ onlyInGit: [], onlyInMoon: [] });
+    expect(result?.scoutTasks?.affectedConfigs).toEqual(['foo/test/scout/ui/playwright.config.ts']);
     expect(log.warning).not.toHaveBeenCalled();
   });
 
@@ -73,6 +83,27 @@ describe('computeMoonShadow', () => {
 
     expect(result).toBeNull();
     expect(log.warning).toHaveBeenCalled();
+  });
+
+  it('retains the module comparison when the Scout task query fails', () => {
+    mockGetAffectedProjectsMoon.mockReturnValue(new Set(['@kbn/foo']));
+    mockQueryMoonTestSelection.mockImplementation(() => {
+      throw new Error('Scout task unavailable');
+    });
+    const log = createMockLog();
+
+    const result = computeMoonShadow({
+      mergeBase: 'main',
+      gitChangedFiles: ['foo/index.ts'],
+      gitAffectedModules: new Set(['@kbn/foo']),
+      log,
+    });
+
+    expect(result?.diffFromGit).toEqual({ onlyInGit: [], onlyInMoon: [] });
+    expect(result?.scoutTasks).toBeUndefined();
+    expect(log.warning).toHaveBeenCalledWith(
+      'Selective testing shadow mode: Moon Scout task comparison failed (Scout task unavailable)'
+    );
   });
 
   it('overlays implicit consumers from the changed-files list', () => {

@@ -37,12 +37,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.vulnerabilitiesIndex.add(vulnerabilitiesLatestMock);
 
       await findings.navigateToLatestVulnerabilitiesPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor(
         'Findings table to be loaded',
         async () =>
           (await latestVulnerabilitiesTable.getRowsCount()) === vulnerabilitiesLatestMock.length
       );
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
@@ -58,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: resourceName1,
         });
 
-        expect(await filterBar.hasFilter('resource.name', resourceName1)).to.be(true);
+        await filterBar.expectFilter('resource.name', resourceName1);
         expect(
           await latestVulnerabilitiesTable.hasColumnValue('resource.name', resourceName1)
         ).to.be(true);
@@ -67,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('remove filter', async () => {
         await filterBar.removeFilter('resource.name');
 
-        expect(await filterBar.hasFilter('resource.name', resourceName1)).to.be(false);
+        await filterBar.expectNoFilter('resource.name', resourceName1);
         expect(await latestVulnerabilitiesTable.getRowsCount()).to.be(
           vulnerabilitiesLatestMock.length
         );

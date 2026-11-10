@@ -29,14 +29,14 @@ Load the env vars, and start server:
 
 ```
 export KIBANA_SECURITY_GEN_AI_CONFIG=$(base64 -w 0 < scripts/genai/vault/config.json)
-yarn genai_evals:server:ess
+pnpm genai_evals:server:ess
 ```
 
 Then in another terminal, load vars and run the tests:
 
 ```
 export KIBANA_SECURITY_GEN_AI_CONFIG=$(base64 -w 0 < scripts/genai/vault/config.json)
-yarn genai_evals:runner:ess
+pnpm genai_evals:runner:ess
 ```
 
 ### To manually run on BuildKite:

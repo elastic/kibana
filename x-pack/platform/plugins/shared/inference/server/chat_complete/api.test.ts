@@ -467,9 +467,11 @@ describe('createChatCompleteApi', () => {
     const createChatCompleteWithCheck = ({
       isDefaultConnectorOnly,
       getDefaultConnectorId,
+      resolveConnectorId = jest.fn().mockRejectedValue(new Error('not found')),
     }: {
       isDefaultConnectorOnly: () => Promise<boolean>;
       getDefaultConnectorId: () => Promise<string | undefined>;
+      resolveConnectorId?: (connectorId: string) => Promise<string>;
     }) => {
       const callbackApi = createChatCompleteCallbackApi({
         request,
@@ -482,6 +484,7 @@ describe('createChatCompleteApi', () => {
         endpointIdCache,
         isDefaultConnectorOnly,
         getDefaultConnectorId,
+        resolveConnectorId,
       });
       return createChatCompleteApi({ callbackApi });
     };
@@ -601,6 +604,49 @@ describe('createChatCompleteApi', () => {
 
       expect(response.content).toBe('endpoint-chunk');
       expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
+    });
+
+    it('allows a stack connector id that resolves to the default inference endpoint', async () => {
+      const resolveConnectorId = jest.fn().mockResolvedValue('my-endpoint');
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('my-endpoint');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+        resolveConnectorId,
+      });
+
+      const response = await chatCompleteWithCheck({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        maxRetries: 0,
+      });
+
+      expect(response.content).toBe('chunk-1');
+      expect(resolveConnectorId).toHaveBeenCalledWith('connectorId');
+    });
+
+    it('blocks the call when resolving the requested connector fails', async () => {
+      const isDefaultConnectorOnly = jest.fn().mockResolvedValue(true);
+      const getDefaultConnectorId = jest.fn().mockResolvedValue('my-endpoint');
+      const chatCompleteWithCheck = createChatCompleteWithCheck({
+        isDefaultConnectorOnly,
+        getDefaultConnectorId,
+        resolveConnectorId: jest.fn().mockRejectedValue(new Error('not found')),
+      });
+
+      await expect(
+        chatCompleteWithCheck({
+          connectorId: 'connectorId',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        })
+      ).rejects.toMatchObject({
+        code: InferenceTaskErrorCode.requestError,
+        message: expect.stringContaining('not allowed'),
+      });
+
+      expect(inferenceAdapter.chatComplete).not.toHaveBeenCalled();
     });
 
     it('fails closed when reading the setting fails', async () => {

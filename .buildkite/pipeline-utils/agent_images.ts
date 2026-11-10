@@ -8,9 +8,9 @@
  */
 
 import { stringify } from 'yaml';
-import type { BuildkiteAgentTargetingRule } from './buildkite';
-import { BuildkiteClient } from './buildkite';
-import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels';
+import type { BuildkiteAgentTargetingRule } from './buildkite/index.ts';
+import { BuildkiteClient } from './buildkite/index.ts';
+import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels.ts';
 
 export const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
 export const USE_QA_IMAGE_GH_LABEL = 'ci:use-qa-image';
@@ -82,11 +82,17 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
 
 const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) => {
   const [kind, cores, addition] = queueName.split('-');
-  const zonesToUse =
-    'asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c';
+  const zonesToUse = [
+    'asia-south2-a',
+    'asia-south2-b',
+    'asia-south2-c',
+    'northamerica-northeast2-a',
+    'northamerica-northeast2-b',
+    'northamerica-northeast2-c',
+  ].join(',');
   const additionalProps =
     {
-      spot: { preemptible: true, spotZones: zonesToUse },
+      spot: { preemptible: true, spotZones: zonesToUse, diskType: 'pd-balanced' },
       virt: { enableNestedVirtualization: true, spotZones: zonesToUse },
     }[addition] || {};
 

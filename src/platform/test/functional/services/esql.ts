@@ -178,9 +178,7 @@ export class ESQLService extends FtrService {
     await this.retry.waitFor('ES|QL control flyout to close after saving the control', async () => {
       await this.testSubjects.waitForEnabled('saveEsqlControlsFlyoutButton');
       await this.testSubjects.click('saveEsqlControlsFlyoutButton');
-      const flyoutOpen = await this.testSubjects.exists('create_esql_control_flyout', {
-        timeout: 2000,
-      });
+      const flyoutOpen = await this.testSubjects.exists('create_esql_control_flyout');
       return !flyoutOpen;
     });
 

@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/features-plugin'
+  - '@kbn/content-sanitization'
   - '@kbn/licensing-plugin'
   - '@kbn/spaces-plugin'
   - '@kbn/core-spaces-common'
@@ -116,12 +117,14 @@ dependsOn:
   - '@kbn/core-user-profile-common'
   - '@kbn/core-chrome-browser-components'
   - '@kbn/unsaved-changes-prompt'
+  - '@kbn/core-logging-server'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -130,6 +133,4 @@ fileGroups:
     - test/**/*
     - __mocks__/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

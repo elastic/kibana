@@ -65,6 +65,4 @@ fileGroups:
     - __mocks__/**/*.ts
     - test/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

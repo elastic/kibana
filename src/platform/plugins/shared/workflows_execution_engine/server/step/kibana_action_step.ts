@@ -10,6 +10,7 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { ALERTING_CLONE_API_KEY_HEADER } from '@kbn/alerting-plugin/common';
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest, KibanaHttpMethods } from '@kbn/workflows';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
@@ -325,6 +326,12 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       ...headers,
       [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
       ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
+      // Our API key dies after the workflow run (Task Manager revokes it). This header tells alerting
+      // to give any rule it creates or enables its own key instead of keeping ours.
+      // Only alerting reads this header. Other routes ignore it, so it is safe to send on every call.
+      // Set after the step's own headers so a step cannot override it.
+      // See: https://github.com/elastic/kibana/pull/291318
+      [ALERTING_CLONE_API_KEY_HEADER]: 'true',
     };
 
     // Build full URL with query parameters

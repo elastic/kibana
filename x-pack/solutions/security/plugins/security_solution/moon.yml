@@ -311,6 +311,9 @@ tags:
   - prod
   - group-security
   - private
+  - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -320,6 +323,7 @@ fileGroups:
     - test/scout/**/*
     - test/scout_ai_value_report/**/*
     - test/scout_cps_local/**/*
+    - test/scout_es_max_response_size/**/*
     - test/scout_security_attacks_alignment/**/*
     - common/**/*.json
     - server/**/*.json

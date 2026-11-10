@@ -84,18 +84,19 @@ dependsOn:
   - '@kbn/core-user-profile-browser-mocks'
   - '@kbn/zod'
   - '@kbn/deeplinks-analytics'
+  - '@kbn/es-query'
+  - '@kbn/core-security-server'
 tags:
   - plugin
   - prod
   - group-platform
   - private
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}
