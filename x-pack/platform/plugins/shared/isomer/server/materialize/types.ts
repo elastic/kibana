@@ -9,6 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ColorMapping } from '@kbn/coloring';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { AggConfigSerialized, SerializedValue } from '@kbn/data-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -52,16 +53,30 @@ export interface EsqlDataRequest {
   context?: MaterializeContextOverride;
 }
 
-/** An aggregation request for a data view. */
-interface AggsDataRequest {
+/**
+ * Aggregations over a data view, run as the user the way Kibana's `esaggs` expression runs them:
+ * the server aggs service builds the request, and `tabify` turns the response into a `Datatable`.
+ * Time shifts, reduced time ranges and filtered metrics are the aggs' own params, as Lens sets them.
+ */
+export interface AggsDataRequest {
   /** Request kind discriminator. */
   kind: 'aggs';
-  /** Data view ID or title. */
-  dataView: string;
+  /** A saved data view's ID, or an ad hoc data view's spec. */
+  dataView: string | DataViewSpec;
   /** Serialized aggregations to execute. */
   aggs: AggConfigSerialized[];
-  /** Optional aggregation time shift. */
-  timeShift?: string;
+  /** The date fields the time range filters on. Defaults to the data view's time field. */
+  timeFields?: string[];
+  /** A metric column per bucket level, as `esaggs`' `metricsAtAllLevels`. */
+  metricsAtAllLevels?: boolean;
+  /** Rows for buckets that lack a sub-bucket, as `esaggs`' `partialRows`. */
+  partialRows?: boolean;
+  /** The share of documents to aggregate, through a random sampler, as `esaggs`' `probability`. */
+  probability?: number;
+  /** The random sampler's seed. */
+  samplerSeed?: number;
+  /** At most this many rows, below the pipeline's own cap. */
+  maxRows?: number;
   /** Optional context that overrides or extends the parent's context. */
   context?: MaterializeContextOverride;
 }

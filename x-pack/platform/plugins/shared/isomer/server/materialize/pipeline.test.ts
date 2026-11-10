@@ -54,6 +54,10 @@ const createDeps = (overrides: Partial<PipelineDeps> = {}) => ({
     ReturnType<PipelineDeps['executeEsql']>,
     Parameters<PipelineDeps['executeEsql']>
   >(async (request) => ({ table: table(request.query), losses: [] })),
+  executeAggs: jest.fn<
+    ReturnType<PipelineDeps['executeAggs']>,
+    Parameters<PipelineDeps['executeAggs']>
+  >(async (request) => ({ table: table(String(request.dataView)), losses: [] })),
   materialize: jest.fn<
     ReturnType<PipelineDeps['materialize']>,
     Parameters<PipelineDeps['materialize']>
@@ -124,6 +128,40 @@ describe('runPipeline', () => {
       },
     });
     expect(deps.validate).toHaveBeenCalledWith(node);
+  });
+
+  it('runs aggs and esql requests in their merged contexts, numbering tables in plan order', async () => {
+    const materializer = chart();
+    const deps = createDeps();
+    const config: ChartConfig = {
+      title: 'Requests',
+      requests: [
+        { kind: 'aggs', dataView: 'logs', aggs: [{ type: 'count', schema: 'metric' }] },
+        { kind: 'esql', query: 'FROM b' },
+        {
+          kind: 'aggs',
+          dataView: 'metrics',
+          aggs: [],
+          context: { ignoreGlobalFilters: true },
+        },
+      ],
+    };
+
+    await runPipeline({ type: 'lens', materializer, config, context }, deps);
+
+    expect(deps.executeAggs).toHaveBeenNthCalledWith(1, config.requests[0], absoluteContext, 0);
+    expect(deps.executeEsql).toHaveBeenCalledWith(config.requests[1], absoluteContext, 1);
+    expect(deps.executeAggs).toHaveBeenNthCalledWith(
+      2,
+      config.requests[2],
+      { timeRange: absoluteContext.timeRange },
+      2
+    );
+    expect(materializer.map).toHaveBeenCalledWith(
+      config,
+      { tables: [table('logs'), table('FROM b'), table('metrics')], nodes: [] },
+      expect.anything()
+    );
   });
 
   it("adds the executor's losses to the node's own", async () => {
@@ -250,7 +288,7 @@ describe('runPipeline', () => {
         materializer,
         config: {
           title: 'Requests',
-          requests: [{ kind: 'aggs', dataView: 'logs-*', aggs: [] }],
+          requests: [{ kind: 'search', dataView: 'logs-*', columns: [], size: 10 }],
         },
         context,
       },
@@ -262,7 +300,7 @@ describe('runPipeline', () => {
         type: 'unsupported',
         title: 'Requests',
         reason:
-          'The data for this lens could not be loaded: Kibana cannot run "aggs" data requests for materialization.',
+          'The data for this lens could not be loaded: Kibana cannot run "search" data requests for materialization.',
       })
     );
     expect(materializer.map).not.toHaveBeenCalled();

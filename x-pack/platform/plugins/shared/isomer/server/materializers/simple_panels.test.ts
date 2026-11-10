@@ -37,6 +37,7 @@ const setup = () => {
     validate: createNodeValidator(),
     getKitServices: createTestKitServices,
     getSelectionServices: jest.fn(),
+    getAggsServices: jest.fn(),
     kibanaVersion: '9.7.0',
     now: () => new Date('2025-01-15T12:00:00.000Z'),
   });

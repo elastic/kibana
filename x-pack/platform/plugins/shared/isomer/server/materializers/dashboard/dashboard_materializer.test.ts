@@ -169,6 +169,7 @@ const setup = ({ dashboardData = logsDashboardRead.data as DashboardData } = {})
     validate: createNodeValidator(),
     getKitServices: createTestKitServices,
     getSelectionServices: jest.fn(),
+    getAggsServices: jest.fn(),
     kibanaVersion: '9.7.0',
     now: () => NOW,
   });

@@ -8,6 +8,7 @@
 import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ValidationError } from '@kbn/isomer';
 import { createTestKitServices } from './kit/kit_services.mock';
+import type { AggsServices } from './executors/aggs';
 import { createScopedMaterializeClient } from './materialize_client';
 import { MaterializerRegistry } from './registry';
 import type { MaterializedNode, UnsupportedNode } from './nodes';
@@ -55,6 +56,9 @@ const setup = ({
   };
   const logger = loggingSystemMock.createLogger();
   const search = { esql: jest.fn() };
+  const getAggsServices = jest.fn(async (): Promise<AggsServices> => {
+    throw new Error('No data views in this test.');
+  });
   const client = createScopedMaterializeClient({
     registry,
     scope,
@@ -63,13 +67,14 @@ const setup = ({
     search,
     validate,
     getKitServices: createTestKitServices,
+    getAggsServices,
     getSelectionServices: jest.fn(async () => {
       throw new Error('No data views in this test.');
     }),
     kibanaVersion: '9.5.0',
     limits: { maxDepth: 1 },
   });
-  return { client, scope, logger, search, validate, registry };
+  return { client, scope, logger, search, validate, registry, getAggsServices };
 };
 
 const note: NoteConfig = { title: 'Open alerts', text: 'There are **3** open alerts.' };
@@ -240,6 +245,25 @@ describe('createScopedMaterializeClient', () => {
       );
       expect(search.esql.mock.calls[0][1].abortSignal).not.toBe(scope.abortSignal);
       expect(validate).toHaveBeenCalled();
+    });
+
+    it("loads the user's aggs services once per client for aggs requests", async () => {
+      const materializer = createNoteMaterializer({
+        plan: jest.fn(() => [
+          { kind: 'aggs' as const, dataView: 'logs', aggs: [] },
+          { kind: 'aggs' as const, dataView: 'metrics', aggs: [] },
+        ]),
+      });
+      const { client, getAggsServices } = setup({ materializer });
+
+      await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual(
+        expect.objectContaining({
+          type: 'unsupported',
+          reason: 'The data for this note could not be loaded: No data views in this test.',
+        })
+      );
+      expect(getAggsServices).toHaveBeenCalledTimes(1);
+      expect(materializer.map).not.toHaveBeenCalled();
     });
 
     it('returns unsupported for nesting past the depth limit', async () => {

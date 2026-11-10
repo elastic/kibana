@@ -19,6 +19,7 @@ import type {
 } from './nodes';
 import { isChartNode, isUnsupportedNode } from './nodes';
 import type {
+  AggsDataRequest,
   DataRequest,
   EsqlDataRequest,
   MaterializeDescription,
@@ -32,6 +33,12 @@ export interface PipelineDeps {
   /** Runs one ES|QL request in its merged context. `index` is its place among the plan's tables. */
   executeEsql: (
     request: EsqlDataRequest,
+    context: MaterializeContext,
+    index: number
+  ) => Promise<ExecutedTable>;
+  /** Runs one `aggs` request in its merged context. `index` is its place among the plan's tables. */
+  executeAggs: (
+    request: AggsDataRequest,
     context: MaterializeContext,
     index: number
   ) => Promise<ExecutedTable>;
@@ -97,6 +104,9 @@ const executePlan = async (
     switch (request.kind) {
       case 'esql':
         tables.push(deps.executeEsql(request, requestContext, tables.length));
+        break;
+      case 'aggs':
+        tables.push(deps.executeAggs(request, requestContext, tables.length));
         break;
       case 'materialize':
         nodes.push(deps.materialize(request.input, requestContext));
