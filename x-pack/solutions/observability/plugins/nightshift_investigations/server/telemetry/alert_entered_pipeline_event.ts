@@ -8,7 +8,6 @@
 import { createHash } from 'crypto';
 import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
-import { UNIVERSAL_ALERT_SOURCE } from '../../common';
 
 export const NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT = 'nightshift-alert-entered-pipeline';
 export const ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY = 0.1;
@@ -41,7 +40,7 @@ const alertEnteredPipelineSchema: RootSchema<AlertEnteredPipelineEvent> = {
     type: 'keyword',
     _meta: {
       description:
-        'Alert origin: internal for Elastic-configured rules, or the sender-provided integration identifier for external alerts.',
+        'Alert origin: internal for Elastic-configured rules, or the sender-provided integration identifier for external alerts; use source_kind to disambiguate an external sender that also uses internal.',
     },
   },
   fingerprint: {
@@ -111,7 +110,7 @@ export const reportAlertsEnteredPipeline = (
       alert_source: source,
       fingerprint,
       space_id: spaceId,
-      source_kind: source === UNIVERSAL_ALERT_SOURCE ? 'elastic_configured' : 'external',
+      source_kind: payload.rule === null ? 'external' : 'elastic_configured',
       sampling_probability: ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY,
     });
   }

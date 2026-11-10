@@ -15,7 +15,7 @@ describe('alert entered pipeline telemetry', () => {
   const unsampledGroupHash = 'ffffffffaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
   const sampledRuleFingerprint = '179390612a7be955ea2ffeae24130e6019fae04ec7b316c4b2256e82ab4ade7b';
 
-  it('reports sampled external and Elastic-configured episodes', () => {
+  it('reports sampled episodes and classifies them by rule presence', () => {
     const telemetry = { reportAlertEnteredPipeline: jest.fn() };
 
     reportAlertsEnteredPipeline(
@@ -31,6 +31,12 @@ describe('alert entered pipeline telemetry', () => {
           source: 'internal',
           alert: { groupHash: 'group-hash', status: 'active', previousStatus: 'inactive' },
           rule: { id: 'rule-25' },
+        },
+        {
+          spaceId: 'space-c',
+          source: 'internal',
+          alert: { groupHash: sampledGroupHash, status: 'active', previousStatus: null },
+          rule: null,
         },
       ],
       telemetry
@@ -48,6 +54,13 @@ describe('alert entered pipeline telemetry', () => {
       fingerprint: sampledRuleFingerprint,
       space_id: 'space-b',
       source_kind: 'elastic_configured',
+      sampling_probability: ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY,
+    });
+    expect(telemetry.reportAlertEnteredPipeline).toHaveBeenNthCalledWith(3, {
+      alert_source: 'internal',
+      fingerprint: sampledGroupHash,
+      space_id: 'space-c',
+      source_kind: 'external',
       sampling_probability: ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY,
     });
   });

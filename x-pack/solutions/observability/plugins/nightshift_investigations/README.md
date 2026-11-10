@@ -80,9 +80,10 @@ The `nightshift-alert-entered-pipeline` EBT event is emitted when a new external
 Alerting v2 episode or an Elastic-configured Alerting v2 rule episode enters Nightshift. It contains
 only `alert_source`, the opaque `fingerprint`, `space_id`, `source_kind`, and
 `sampling_probability`; it never includes alert titles, messages, tags, or customer alert data.
-`alert_source` is `internal` for Elastic-configured rules and the sender-provided integration
-identifier for external alerts. Significant Events are excluded because they have separate ingress
-telemetry.
+`alert_source` is `internal` for Elastic-configured rules and otherwise the sender-provided
+integration identifier. Because an external writer may also send `internal`, `source_kind`
+distinguishes rule alerts from external alerts. Significant Events are excluded because they have
+separate ingress telemetry.
 
 `fingerprint` identifies the alert series and is derived from the status change itself: the
 Alerting v2 `group_hash` for external alerts, which already covers space and source, and
