@@ -27,6 +27,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { useLocalSearch, searchIdField, useStartServices } from '../../../../hooks';
+import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
+import type { CreatePackagePolicyRouteState } from '../../../../types';
 
 import type { IntegrationCardItem } from '../../screens/home';
 import { withSearchMemberMatch } from '../../screens/home/search_member_match';
@@ -134,7 +136,7 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
   onCollectionVariantClick,
 }) => {
   const euiTheme = useEuiTheme();
-  const { application } = useStartServices();
+  const { application, http } = useStartServices();
   const localSearch = useLocalSearch(list, !!isLoading);
 
   const [isPopoverOpen, setPopover] = useState(false);
@@ -237,11 +239,32 @@ export const PackageListGrid: FunctionComponent<PackageListGridProps> = ({
             (href, member) => {
               onCollectionVariantClick?.(member);
               setOpenCollectionId(undefined);
-              application.navigateToUrl(href);
+
+              // Like `PackageCard`, navigate within the integrations app and hand the host's
+              // cancel/save targets over as route state: the add-integration page reads the save
+              // target only from state, not from the `returnAppId`/`returnPath` query params.
+              const integrationsBase = http.basePath.prepend(INTEGRATIONS_BASE_PATH);
+              if (!href.startsWith(integrationsBase)) {
+                application.navigateToUrl(href);
+                return;
+              }
+              const hostTarget: [string, { path: string }] = [
+                collectionReturnLocation.appId,
+                { path: collectionReturnLocation.path },
+              ];
+              const state: CreatePackagePolicyRouteState = {
+                onCancelNavigateTo: hostTarget,
+                onCancelUrl: application.getUrlForApp(...hostTarget),
+                onSaveNavigateTo: hostTarget,
+              };
+              application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+                path: href.slice(integrationsBase.length),
+                state,
+              });
             }
           )
         : [],
-    [openCollectionCard, collectionReturnLocation, onCollectionVariantClick, application]
+    [openCollectionCard, collectionReturnLocation, onCollectionVariantClick, application, http]
   );
 
   const splitSubcategories = (

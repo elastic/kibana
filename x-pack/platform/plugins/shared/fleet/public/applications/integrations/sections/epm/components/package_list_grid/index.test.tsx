@@ -109,7 +109,8 @@ describe('PackageListGrid', () => {
         description: `${title} description`,
         categories: ['web'],
         icons: [],
-        url: `/app/integrations/detail/${name}-1.0.0/overview`,
+        // card urls include the base path (the test renderer uses `/mock`)
+        url: `/mock/app/integrations/detail/${name}-1.0.0/overview`,
         version: '1.0.0',
         integration: '',
       } as IntegrationCardItem);
@@ -149,6 +150,36 @@ describe('PackageListGrid', () => {
       expect(href).toContain('/detail/nginx_otel-1.0.0/overview?');
       expect(href).toContain('returnAppId=securitySolutionUI');
       expect(href).toContain('returnPath=%2Fget_started');
+    });
+
+    it('hands the host cancel and save targets to the variant it navigates to', () => {
+      const onCollectionVariantClick = jest.fn();
+      const { utils, renderer } = renderPackageListGrid({
+        list: [collection],
+        collectionReturnLocation: { appId: 'securitySolutionUI', path: '/get_started' },
+        onCollectionVariantClick,
+      });
+      const { application } = renderer.startServices;
+      application.getUrlForApp.mockReturnValue('/app/security/get_started');
+
+      fireEvent.click(utils.getByTestId('integration-card:collection:nginx'));
+      fireEvent.click(
+        utils.getByTestId('collectionVariantRow-epr:nginx_otel').querySelector('a') as HTMLElement
+      );
+
+      expect(onCollectionVariantClick).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'nginx_otel' })
+      );
+      // The add-integration page reads its save target from route state, not from the query params.
+      expect(application.navigateToApp).toHaveBeenCalledWith('integrations', {
+        path: expect.stringContaining('/detail/nginx_otel-1.0.0/overview?'),
+        state: {
+          onCancelNavigateTo: ['securitySolutionUI', { path: '/get_started' }],
+          onCancelUrl: '/app/security/get_started',
+          onSaveNavigateTo: ['securitySolutionUI', { path: '/get_started' }],
+        },
+      });
+      expect(utils.queryByTestId('collectionFlyout')).not.toBeInTheDocument();
     });
 
     it('leaves the card click to the host when it does not opt in', () => {
