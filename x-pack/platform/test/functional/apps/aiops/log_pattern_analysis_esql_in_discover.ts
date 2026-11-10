@@ -91,12 +91,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // we check that the string contains part of a regex
       expect(regexText).to.contain('.*?');
 
-      // Click the view docs in Discover button
-      // ensure it opens a new tab and the discover doc count is greater than 0
+      // Click the view matching results button
+      // ensure it replaces the query with the matching documents query and the discover doc count is greater than 0
       // We cannot look for an exact count as the count may vary based on sampling (when that is added)
       await dataGrid.clickCellExpandPopoverAction('patterns-action-view-docs-in-discover');
 
       await discover.waitUntilTabIsLoaded();
+
+      const matchingResultsQuery = await monacoEditor.getCodeEditorValue();
+      expect(matchingResultsQuery).to.contain('FROM logstash-*');
+      expect(matchingResultsQuery).to.contain('MATCH(@message');
+      expect(matchingResultsQuery).not.to.contain('STATS');
 
       await aiops.logPatternAnalysisPage.assertDiscoverDocCountExists();
       // ensure the discover doc count is greater than 0

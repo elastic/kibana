@@ -34,6 +34,7 @@ export const useAdditionalCellActions = ({
   query,
   filters,
   timeRange,
+  esqlVariables,
 }: Omit<AdditionalCellActionContext, 'field' | 'value'>) => {
   const { uiActions } = useDiscoverServices();
   const [instanceId, setInstanceId] = useState<string | undefined>();
@@ -67,8 +68,8 @@ export const useAdditionalCellActions = ({
   }, [additionalCellActions, uiActions]);
 
   return useMemo<DiscoverCellActionMetadata>(
-    () => ({ instanceId, dataSource, dataView, query, filters, timeRange }),
-    [dataSource, dataView, filters, instanceId, query, timeRange]
+    () => ({ instanceId, dataSource, dataView, query, filters, timeRange, esqlVariables }),
+    [dataSource, dataView, esqlVariables, filters, instanceId, query, timeRange]
   );
 };
 

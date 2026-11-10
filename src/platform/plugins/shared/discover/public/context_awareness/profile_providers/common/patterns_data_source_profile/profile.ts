@@ -8,12 +8,7 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import {
-  extractCategorizeTokens,
-  getCategorizeColumns,
-  getCategorizeField,
-  getSparklineColumns,
-} from '@kbn/esql-utils';
+import { getCategorizeColumns, getSparklineColumns } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { createElement } from 'react';
@@ -23,8 +18,7 @@ import { DataSourceCategory } from '../../../profiles';
 import { getPatternCellRenderer } from './pattern_cell_renderer';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import { SparklineCellRenderer } from '../sparkline_data_source_profile/sparkline_cell_renderer';
-
-const DOC_LIMIT = 10000;
+import { getMatchingResultsQuery } from './get_matching_results_query';
 
 export const createPatternsDataSourceProfileProvider = (
   services: ProfileProviderServices
@@ -90,41 +84,34 @@ export const createPatternsDataSourceProfileProvider = (
               }
               return patternColumns.includes(field.name);
             },
-            execute: async (executeContext) => {
-              const index = executeContext.dataView?.getIndexPattern();
-              if (
-                !isOfAggregateQueryType(executeContext.query) ||
-                !executeContext.value ||
-                !index
-              ) {
+            execute: async ({ query, dataView, esqlVariables, field, value, timeRange }) => {
+              if (!isOfAggregateQueryType(query) || !dataView || typeof value !== 'string') {
                 return;
               }
 
-              const pattern = extractCategorizeTokens(executeContext.value as string).join(' ');
-              const categoryField = getCategorizeField(executeContext.query.esql)[0];
+              const matchingResultsQuery = getMatchingResultsQuery({
+                query,
+                dataView,
+                esqlVariables,
+                patternColumn: field.name,
+                pattern: value,
+              });
 
-              if (!categoryField || !pattern) {
+              if (!matchingResultsQuery) {
                 return;
               }
 
-              const query = {
-                ...executeContext.query,
-                esql: `FROM ${index}\n  | WHERE MATCH(${categoryField}, "${pattern}", {"auto_generate_synonyms_phrase_query": false, "fuzziness": 0, "operator": "AND"})\n  | LIMIT ${DOC_LIMIT}`,
-              };
-
-              if (toolkit.actions.openInNewTab) {
-                await toolkit.actions.openInNewTab({
-                  query,
-                  timeRange: executeContext.timeRange,
-                });
-              } else {
-                const discoverLink = services.locator.getRedirectUrl({
-                  query,
-                  timeRange: executeContext.timeRange,
-                  hideChart: false,
-                });
-                window.open(discoverLink, '_blank');
+              if (toolkit.actions.updateESQLQuery) {
+                toolkit.actions.updateESQLQuery(matchingResultsQuery.esql);
+                return;
               }
+
+              const discoverLink = services.locator.getRedirectUrl({
+                query: matchingResultsQuery,
+                timeRange,
+                hideChart: false,
+              });
+              window.open(discoverLink, '_blank');
             },
           },
         ];
