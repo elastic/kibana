@@ -288,14 +288,19 @@ export function createDetectionEngineSetupService({
       workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
       workloadId: DETECTION_ENGINE_WORKLOAD_ID,
     });
-    // Everything after the bind either completes the setup or puts the space back, so the
-    // binding alone means the space is set up: the UI reads it to decide whether to offer setup.
+    // The UI reads the binding alone to decide whether to offer setup, so a failed call must not
+    // leave a space that was never set up reading as set up. Once a workflow install has started,
+    // the workflows it reached run as the new account: putting a rebound space back on its
+    // previous account would split the engine and its workflows across two accounts, so a rebound
+    // space keeps the new binding and a retry converges on it.
+    let installsStarted = false;
     try {
       await assertBoundAccountIsDetectionAccount({ spaceId, serviceAccountId });
       // Installed with the caller's request: binding a workflow to an account needs the caller's
       // `manage_security`, which the workflows plugin enforces. Installing again with another
       // account rebinds an installed workflow and keeps its enabled state.
       const client = await workflowsExtensions.getClient(request);
+      installsStarted = true;
       for (const workflowId of SETUP_WORKFLOW_IDS) {
         try {
           await client.managedWorkflows.install(
@@ -346,7 +351,9 @@ export function createDetectionEngineSetupService({
       }
       await enableScheduledWorkflows({ request, spaceId, workflowsManagement });
     } catch (error) {
-      await restorePreviousBinding({ request, spaceId, serviceAccountId, previousAccountId });
+      if (!installsStarted || previousAccountId === undefined) {
+        await restorePreviousBinding({ request, spaceId, serviceAccountId, previousAccountId });
+      }
       throw error;
     }
     return { spaceId, serviceAccountId };

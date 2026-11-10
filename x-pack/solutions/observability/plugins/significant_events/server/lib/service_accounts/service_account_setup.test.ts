@@ -433,6 +433,33 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
     ).resolves.toBeNull();
   });
 
+  // The workflows the failed install reached run as the new account, so going back to the old one
+  // would split the engine and its workflows across two accounts.
+  it('keeps a rebound space on the new account when an install fails, for a retry to converge', async () => {
+    const { core } = createCore({ boundAccountId: 'account-0' });
+    const { install, ...workflows } = createWorkflowsExtensions();
+    install.mockRejectedValueOnce(new Error('index not ready'));
+
+    await expect(
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        ...workflows,
+        isServerless: false,
+      }).enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+    ).rejects.toMatchObject({
+      statusCode: 500,
+      message: expect.stringContaining('Call _enable again'),
+    });
+    await expect(
+      core.security.serviceAccounts.getWorkloadBinding({
+        workloadType: 'detection_engine',
+        workloadId: 'detection_engine',
+        spaceId: 'default',
+      })
+    ).resolves.toEqual({ serviceAccountId: 'account-1' });
+  });
+
   it('keeps the status of an install error and only suggests a retry for server errors', async () => {
     const { core } = createCore();
     const { install, ...workflows } = createWorkflowsExtensions();
