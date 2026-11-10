@@ -10,6 +10,7 @@
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS } from '../../../../common/constants';
+import { getSearchErrorAttributes } from '../../../../common/errors/classify_chart_section_error';
 import { isEsqlResponseError } from '../../../../common/errors/esql_response_error';
 import { useFeatureFlag } from '../../../../hooks/use_feature_flag';
 import { useReportChartSectionError } from '../../../chart/hooks/use_report_chart_section_error';
@@ -26,7 +27,6 @@ export type ExemplarsClusterSupport =
   | { status: 'disabled' }
   | { status: 'checking' }
   | { status: 'supported' }
-  | { status: 'unsupported'; errorMessage?: string }
   | { status: 'failed'; errorMessage?: string };
 
 const DISABLED: ExemplarsClusterSupport = { status: 'disabled' };
@@ -40,18 +40,11 @@ export const resetExemplarsClusterSupportCache = (): void => {
   cachedSessionClusterSupport = undefined;
 };
 
-const isUnknownExemplarsSetting = (error: unknown): boolean => {
-  if (!isEsqlResponseError(error)) {
-    return false;
-  }
-
-  const texts = [
-    error.reason,
-    error.message,
-    ...(error.rootCause ?? []).map((cause) => cause.reason),
-  ];
-  return texts.some((text) => text != null && UNKNOWN_EXEMPLARS_SETTING.test(text));
-};
+/** A plain `Error` that merely quotes the setting is retried; only an Elasticsearch error is cached. */
+const isUnknownExemplarsSetting = (error: unknown): boolean =>
+  error instanceof Error &&
+  UNKNOWN_EXEMPLARS_SETTING.test(error.message) &&
+  (isEsqlResponseError(error) || getSearchErrorAttributes(error)?.error != null);
 
 export interface UseExemplarsClusterSupportParams {
   fetchParams: ChartSectionProps['fetchParams'];
@@ -110,12 +103,12 @@ export const useExemplarsClusterSupport = ({
           labels: { profile_id: profileId },
         });
         const errorMessage = error instanceof Error ? error.message : undefined;
-        if (!isUnknownExemplarsSetting(error)) {
-          return { status: 'failed', errorMessage };
+        const failure: ExemplarsClusterSupport = { status: 'failed', errorMessage };
+        // An unknown setting will fail again, so keep it for the session. Other failures retry.
+        if (isUnknownExemplarsSetting(error)) {
+          cachedSessionClusterSupport = failure;
         }
-
-        cachedSessionClusterSupport = { status: 'unsupported', errorMessage };
-        return cachedSessionClusterSupport;
+        return failure;
       }
     },
     // Discover rebuilds the reload time and abort controller on every fetch.

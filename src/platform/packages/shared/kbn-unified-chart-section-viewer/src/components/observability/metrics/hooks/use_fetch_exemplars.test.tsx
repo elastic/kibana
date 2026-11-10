@@ -153,26 +153,7 @@ describe('useFetchExemplars', () => {
       expect(result.current).toEqual({ ...IDLE_FETCH, isLoading: true });
     });
 
-    it('surfaces an unsupported cluster without a per-chart search', async () => {
-      const errorMessage = 'verification_exception: unknown setting [exemplars]';
-      const params = createParams({
-        clusterSupport: { status: 'unsupported', errorMessage },
-      });
-      const { result } = renderHook(() => useFetchExemplars(params));
-
-      await flushAsync();
-      expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
-      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
-      expect(mockReportError).not.toHaveBeenCalled();
-      expect(result.current).toEqual({
-        exemplars: undefined,
-        hasError: true,
-        errorMessage,
-        isLoading: false,
-      });
-    });
-
-    it('surfaces a transient probe failure without a per-chart search', async () => {
+    it('surfaces a probe failure without a per-chart search', async () => {
       const errorMessage = 'network failure';
       const params = createParams({ clusterSupport: { status: 'failed', errorMessage } });
       const { result } = renderHook(() => useFetchExemplars(params));
@@ -222,6 +203,35 @@ describe('useFetchExemplars', () => {
     expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
     expect(result.current).toEqual(IDLE_FETCH);
   });
+
+  it.each([
+    ['disabled', { status: 'disabled' }],
+    ['checking', { status: 'checking' }],
+    ['failed', { status: 'failed', errorMessage: 'network failure' }],
+  ] as const)(
+    'stays idle for an unsupported chart when cluster support is %s',
+    async (_status, clusterSupport) => {
+      const params = createParams({ isSupported: false, clusterSupport });
+      const reportedLoading: boolean[] = [];
+      const { result } = renderHook(() => {
+        const state = useFetchExemplars(params);
+        reportedLoading.push(state.isLoading);
+        return state;
+      });
+
+      expect(result.current).toEqual(IDLE_FETCH);
+      expect(reportedLoading).not.toContain(true);
+      expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
+      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+
+      await flushAsync();
+      expect(result.current).toEqual(IDLE_FETCH);
+      expect(reportedLoading).not.toContain(true);
+      expect(mockCreateExemplarsQuery).not.toHaveBeenCalled();
+      expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
+      expect(mockReportError).not.toHaveBeenCalled();
+    }
+  );
 
   it('does not fetch when the chart query is empty', async () => {
     mockCreateExemplarsQuery.mockReturnValue('');

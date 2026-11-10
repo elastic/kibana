@@ -20,6 +20,7 @@ jest.mock('../../../chart/hooks/use_report_chart_section_error', () => ({
 
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { DataSource } from '@kbn/data-source';
+import { EsError } from '@kbn/search-errors';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { getFetchParamsMock } from '@kbn/unified-histogram/__mocks__/fetch_params';
 import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
@@ -147,7 +148,40 @@ describe('useExemplarsClusterSupport', () => {
     const { result, rerender } = renderClusterSupport(params);
 
     await waitFor(() =>
-      expect(result.current).toEqual({ status: 'unsupported', errorMessage: error.message })
+      expect(result.current).toEqual({ status: 'failed', errorMessage: error.message })
+    );
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockReportError).toHaveBeenCalledTimes(1);
+    expect(mockReportError).toHaveBeenCalledWith({
+      error,
+      source: 'useExemplarsClusterSupport',
+      labels: { profile_id: TEST_PROFILE_ID },
+    });
+
+    rerender(reload(params));
+    await flushAsync();
+    expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockReportError).toHaveBeenCalledTimes(1);
+  });
+
+  it('probes once when the search service rejects an unknown setting and keeps that result', async () => {
+    const error = new EsError(
+      {
+        statusCode: 400,
+        message: UNKNOWN_SETTING_REASON,
+        attributes: {
+          error: { type: 'verification_exception', reason: UNKNOWN_SETTING_REASON },
+        },
+      },
+      UNKNOWN_SETTING_REASON,
+      () => {}
+    );
+    mockExecuteEsqlQuery.mockRejectedValue(error);
+    const params = createParams();
+    const { result, rerender } = renderClusterSupport(params);
+
+    await waitFor(() =>
+      expect(result.current).toEqual({ status: 'failed', errorMessage: error.message })
     );
     expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
     expect(mockReportError).toHaveBeenCalledTimes(1);

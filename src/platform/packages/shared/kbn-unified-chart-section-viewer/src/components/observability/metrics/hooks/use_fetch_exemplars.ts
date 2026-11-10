@@ -56,8 +56,8 @@ export interface UseFetchExemplarsParams {
   /** False while Discover keeps the grid mounted but hidden; nothing is fetched then. */
   isComponentVisible: boolean;
   /**
-   * Grid-level gate. Per-chart searches run only when this is `supported`.
-   * `checking`, `unsupported`, and `failed` do not send a search.
+   * Grid-level gate. Per-chart searches run only when this is `supported` and the chart would
+   * otherwise fetch. `checking` and `failed` are ignored unless it would.
    */
   clusterSupport: ExemplarsClusterSupport;
 }
@@ -161,6 +161,10 @@ export const useFetchExemplars = ({
     { clearValueOnNext: true }
   );
 
+  // Charts that never fetch stay idle, including while the probe runs or the cluster rejects it.
+  if (!isSupported || !isComponentVisible || !dataSource) {
+    return { ...IDLE_EXEMPLARS_FETCH, isLoading: false };
+  }
   if (clusterSupport.status === 'checking') {
     return CHECKING_EXEMPLARS_FETCH;
   }
@@ -168,7 +172,7 @@ export const useFetchExemplars = ({
   if (clusterSupport.status === 'disabled') {
     return { ...IDLE_EXEMPLARS_FETCH, isLoading: false };
   }
-  if (clusterSupport.status === 'unsupported' || clusterSupport.status === 'failed') {
+  if (clusterSupport.status === 'failed') {
     return {
       exemplars: undefined,
       hasError: true,
