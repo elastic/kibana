@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { TransactionDetailFlyoutSummary } from './summary';
+import { renderHook } from '@testing-library/react';
+import { useTransactionDetailFlyoutSummaryItems } from './summary';
 
 const mockUseTransactionDetailFlyoutContext = jest.fn();
 jest.mock('./transaction_detail_flyout_context', () => ({
@@ -26,112 +24,76 @@ const FILTERS = {
   end: '2026-09-18T15:37:22.094Z',
 };
 
-function renderSummary() {
-  return render(
-    <IntlProvider locale="en">
-      <TransactionDetailFlyoutSummary />
-    </IntlProvider>
-  );
-}
-
-describe('TransactionDetailFlyoutSummary', () => {
-  beforeEach(() => {
-    mockUseTransactionDetailFlyoutContext.mockReturnValue({
-      deps: {
-        core: {
-          uiSettings: {
-            get: (key: string) => {
-              if (key === 'dateFormat:tz') {
-                return 'UTC';
-              }
-              return 'MMM D, YYYY @ HH:mm:ss.SSS';
-            },
+function makeContext(timeZone: string, filters = FILTERS) {
+  return {
+    deps: {
+      core: {
+        uiSettings: {
+          get: (key: string) => {
+            if (key === 'dateFormat:tz') {
+              return timeZone;
+            }
+            return 'MMM D, YYYY @ HH:mm:ss.SSS';
           },
         },
       },
-      filters: FILTERS,
-    });
-  });
+    },
+    filters,
+  };
+}
 
-  afterEach(() => {
-    cleanup();
+function renderSummaryItems() {
+  return renderHook(() => useTransactionDetailFlyoutSummaryItems());
+}
+
+describe('useTransactionDetailFlyoutSummaryItems', () => {
+  beforeEach(() => {
+    mockUseTransactionDetailFlyoutContext.mockReturnValue(makeContext('UTC'));
   });
 
   it('renders environment, type, and a combined date range', () => {
-    renderSummary();
+    const { result } = renderSummaryItems();
 
-    const summary = screen.getByTestId('transactionDetailFlyoutSummary');
-    expect(summary).not.toHaveTextContent('Transaction ID');
-    expect(summary).not.toHaveTextContent('Transaction name');
-    expect(summary).not.toHaveTextContent('Start date');
-    expect(summary).not.toHaveTextContent('End date');
-    expect(summary).toHaveTextContent('Environment');
-    expect(summary).toHaveTextContent('production');
-    expect(summary).toHaveTextContent('Transaction type');
-    expect(summary).toHaveTextContent('request');
-    expect(summary).toHaveTextContent('Date range');
-    expect(summary).toHaveTextContent('Sep 18, 2026 @ 15:22:22.094 → Sep 18, 2026 @ 15:37:22.094');
+    expect(result.current).toEqual([
+      { id: 'environment', title: 'Environment', value: 'production' },
+      { id: 'transactionType', title: 'Transaction type', value: 'request' },
+      {
+        id: 'dateRange',
+        title: 'Date range',
+        value: 'Sep 18, 2026 @ 15:22:22.094 → Sep 18, 2026 @ 15:37:22.094',
+      },
+    ]);
   });
 
   it('formats the date range with the configured Kibana timezone', () => {
-    mockUseTransactionDetailFlyoutContext.mockReturnValue({
-      deps: {
-        core: {
-          uiSettings: {
-            get: (key: string) => {
-              if (key === 'dateFormat:tz') {
-                return 'America/New_York';
-              }
-              return 'MMM D, YYYY @ HH:mm:ss.SSS';
-            },
-          },
-        },
-      },
-      filters: FILTERS,
-    });
+    mockUseTransactionDetailFlyoutContext.mockReturnValue(makeContext('America/New_York'));
 
-    renderSummary();
+    const { result } = renderSummaryItems();
 
-    expect(screen.getByTestId('transactionDetailFlyoutSummary')).toHaveTextContent(
+    expect(result.current.find(({ id }) => id === 'dateRange')?.value).toBe(
       'Sep 18, 2026 @ 11:22:22.094 → Sep 18, 2026 @ 11:37:22.094'
     );
   });
 
   it('updates immediately when service flyout filters change', () => {
-    const { rerender } = renderSummary();
+    const { result, rerender } = renderSummaryItems();
 
-    mockUseTransactionDetailFlyoutContext.mockReturnValue({
-      deps: {
-        core: {
-          uiSettings: {
-            get: (key: string) => {
-              if (key === 'dateFormat:tz') {
-                return 'UTC';
-              }
-              return 'MMM D, YYYY @ HH:mm:ss.SSS';
-            },
-          },
-        },
-      },
-      filters: {
+    mockUseTransactionDetailFlyoutContext.mockReturnValue(
+      makeContext('UTC', {
         ...FILTERS,
         environment: 'staging',
         rangeFrom: 'now-1h',
         rangeTo: 'now',
         start: '2026-09-18T14:37:22.094Z',
         end: '2026-09-18T15:37:22.094Z',
-      },
-    });
-
-    rerender(
-      <IntlProvider locale="en">
-        <TransactionDetailFlyoutSummary />
-      </IntlProvider>
+      })
     );
 
-    expect(screen.getByTestId('transactionDetailFlyoutSummary')).toHaveTextContent('staging');
-    expect(screen.getByTestId('transactionDetailFlyoutSummary')).toHaveTextContent(
-      'Sep 18, 2026 @ 14:37:22.094'
+    rerender();
+
+    expect(result.current.find(({ id }) => id === 'environment')?.value).toBe('staging');
+    expect(result.current.find(({ id }) => id === 'dateRange')?.value).toBe(
+      'Sep 18, 2026 @ 14:37:22.094 → Sep 18, 2026 @ 15:37:22.094'
     );
   });
 });

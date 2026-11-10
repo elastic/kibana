@@ -7,7 +7,7 @@
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
+import type { DeprecatedCellValueElementProps } from '@kbn/securitysolution-timeline-common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';

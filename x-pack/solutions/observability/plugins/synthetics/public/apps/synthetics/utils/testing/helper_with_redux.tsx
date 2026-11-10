@@ -31,15 +31,19 @@ export const MountWithReduxProvider: FC<
     useRealStore?: boolean;
   }>
 > = ({ children, state, useRealStore }) => {
-  const store = useRealStore
-    ? createRealStore()
-    : {
-        dispatch: jest.fn(),
-        getState: jest.fn().mockReturnValue(state || { selectedFilters: null }),
-        subscribe: jest.fn(),
-        replaceReducer: jest.fn(),
-        [Symbol.observable]: jest.fn(),
-      };
+  const store = React.useMemo(
+    () =>
+      useRealStore
+        ? createRealStore()
+        : {
+            dispatch: jest.fn(),
+            getState: jest.fn().mockReturnValue(state || { selectedFilters: null }),
+            subscribe: jest.fn(),
+            replaceReducer: jest.fn(),
+            [Symbol.observable]: jest.fn(),
+          },
+    [state, useRealStore]
+  );
 
   return <ReduxProvider store={store}>{children}</ReduxProvider>;
 };

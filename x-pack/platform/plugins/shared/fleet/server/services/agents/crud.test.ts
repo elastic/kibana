@@ -6,7 +6,11 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  savedObjectsClientMock,
+} from '@kbn/core/server/mocks';
 import { toElasticsearchQuery } from '@kbn/es-query';
 
 import { isSpaceAwarenessEnabled as _isSpaceAwarenessEnabled } from '../spaces/helpers';
@@ -802,6 +806,7 @@ describe('Agents CRUD test', () => {
         const query = searchMock.mock.calls.at(-1)[0].query;
         expect(query.bool.must_not).toEqual([
           buildPolicyBaseIdsWithFallbackEsFilter(agentlessPolicyIds),
+          { term: { unenrolled_reason: 'agentless' } },
         ]);
         // Verify the other filters (active + enrolled) are still applied via the filter branch.
         const filterStr = JSON.stringify(query.bool.filter);
@@ -853,6 +858,7 @@ describe('Agents CRUD test', () => {
         const query = searchMock.mock.calls.at(-1)[0].query;
         expect(query.bool.must_not).toEqual([
           buildPolicyBaseIdsWithFallbackEsFilter(crossSpacePolicyIds),
+          { term: { unenrolled_reason: 'agentless' } },
         ]);
       });
 
@@ -888,6 +894,26 @@ describe('Agents CRUD test', () => {
         const queryStr = JSON.stringify(searchMock.mock.calls.at(-1)[0].query);
         expect(queryStr).not.toContain('policy_base_id');
         expect(queryStr).not.toContain('policy_id');
+      });
+
+      it('excludes agents of deleted agentless policies by their unenrolled reason', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: false,
+          showInactive: false,
+        });
+
+        const query = searchMock.mock.calls.at(-1)[0].query;
+        expect(query.bool.must_not).toEqual([{ term: { unenrolled_reason: 'agentless' } }]);
+      });
+
+      it('does not exclude agents by unenrolled reason when showing agentless agents', async () => {
+        await getAgentsByKuery(esClientMock, soClientMock, {
+          showAgentless: true,
+          showInactive: false,
+        });
+
+        const queryStr = JSON.stringify(searchMock.mock.calls.at(-1)[0].query);
+        expect(queryStr).not.toContain('unenrolled_reason');
       });
     });
   });
@@ -1092,6 +1118,98 @@ describe('Agents CRUD test', () => {
         // consume to trigger search
       }
       expect(searchMock).toHaveBeenCalledWith(expect.objectContaining({ fields: ['status'] }));
+    });
+
+    describe('includeStatusRuntimeField', () => {
+      const consume = async (options: Parameters<typeof fetchAllAgentsByKuery>[2]) => {
+        searchMock.mockResolvedValueOnce(createEsSearchResultMock([]));
+        for await (const _ of await fetchAllAgentsByKuery(esClientMock, soClientMock, options)) {
+          // consume to trigger search
+        }
+        return searchMock.mock.calls[0][0] as any;
+      };
+
+      it('builds the status runtime field and filters inactive agents by status by default', async () => {
+        const request = await consume({ showInactive: false });
+
+        expect(request.runtime_mappings).toHaveProperty('status');
+        expect(request.fields).toContain('status');
+        expect(JSON.stringify(request.query)).toContain('status');
+      });
+
+      it('skips the status runtime field and filters by the stored active field when disabled', async () => {
+        const request = await consume({ showInactive: false, includeStatusRuntimeField: false });
+
+        expect(request.runtime_mappings).not.toHaveProperty('status');
+        expect(request.fields).not.toContain('status');
+        expect(JSON.stringify(request.query)).not.toContain('status');
+        expect(JSON.stringify(request.query)).toContain('"active"');
+      });
+
+      it('does not add an active filter when inactive agents are shown', async () => {
+        const request = await consume({ showInactive: true, includeStatusRuntimeField: false });
+
+        expect(JSON.stringify(request.query ?? {})).not.toContain('active');
+      });
+
+      it('keeps the status runtime field when the kuery references the status', async () => {
+        const request = await consume({
+          kuery: 'status:inactive',
+          showInactive: true,
+          includeStatusRuntimeField: false,
+        });
+
+        expect(request.runtime_mappings).toHaveProperty('status');
+      });
+
+      it.each([
+        'status : inactive',
+        'status:inactive',
+        'NOT status:online',
+        'a:b and status : (online or offline)',
+        'fleet-agents.status : inactive',
+        'fleet-agents.status:inactive',
+        'fleet-agents.attributes.status : inactive',
+      ])(
+        'keeps the status runtime field for the kuery %s that references the status',
+        async (kuery) => {
+          const request = await consume({
+            kuery,
+            showInactive: true,
+            includeStatusRuntimeField: false,
+          });
+
+          expect(request.runtime_mappings).toHaveProperty('status');
+        }
+      );
+
+      it('does not keep the status runtime field for a kuery that only contains the word status', async () => {
+        const request = await consume({
+          kuery: 'local_metadata.host.hostname:"status-host" and last_checkin_status:online',
+          showInactive: true,
+          includeStatusRuntimeField: false,
+        });
+
+        expect(request.runtime_mappings).not.toHaveProperty('status');
+      });
+
+      it('does not log an error for agents without the status field when disabled', async () => {
+        const logger = loggingSystemMock.createLogger();
+        jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
+        const mock = createEsSearchResultMock(['agent-1']);
+        delete (mock.hits.hits[0] as any).fields;
+        searchMock.mockResolvedValueOnce(mock).mockResolvedValueOnce(createEsSearchResultMock([]));
+
+        const agents: Agent[] = [];
+        for await (const page of await fetchAllAgentsByKuery(esClientMock, soClientMock, {
+          includeStatusRuntimeField: false,
+        })) {
+          agents.push(...page);
+        }
+
+        expect(agents.map((agent) => agent.id)).toEqual(['agent-1']);
+        expect(logger.error).not.toHaveBeenCalled();
+      });
     });
 
     it('should map agents correctly from filtered _source', async () => {

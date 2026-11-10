@@ -33,7 +33,7 @@ import { collectDescendantStepIds } from '../../../state_management/utils';
 import { getStepPanelColour } from '../../../utils';
 import type { StepConfigurationProps } from '../../steps_list';
 import { StepsListItem } from '../../steps_list';
-import { BlockDisableOverlay } from '../block_disable_overlay';
+import { BlockDisableOverlay } from '../../../../../../draggable_steps';
 import { CreateStepButton } from '../../../create_step_button';
 import { EmptyBranchDropTarget } from '../../empty_branch_drop_target';
 import { WhereBlockConfiguration } from './configuration';

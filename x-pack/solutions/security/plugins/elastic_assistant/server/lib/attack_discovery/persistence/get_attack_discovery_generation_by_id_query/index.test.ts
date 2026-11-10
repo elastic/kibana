@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG } from '@kbn/discoveries';
+
 import { getAttackDiscoveryGenerationByIdQuery } from '.';
 import { mockAuthenticatedUser } from '../../../../__mocks__/mock_authenticated_user';
 
@@ -125,8 +127,12 @@ describe('getAttackDiscoveryGenerationByIdQuery', () => {
             },
           },
           {
-            term: {
-              'user.name': 'test_user',
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                { term: { 'user.name': 'test_user' } },
+                { term: { tags: ATTACK_DISCOVERY_EVENT_SERVICE_ACCOUNT_TAG } },
+              ],
             },
           },
           {

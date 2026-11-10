@@ -126,6 +126,26 @@ describe('dynamic settings routes', () => {
       expect(result).toMatchObject({ rebalancePrivateLocationShardsEnabled: false });
     });
 
+    it('ignores privateLocationsSyncInterval from older clients', async () => {
+      jest
+        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
+        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      jest
+        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
+        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+      const server = buildServer();
+
+      const route = createPostDynamicSettingsRoute();
+      await route.handler(
+        buildRouteContext({
+          server,
+          request: { body: { privateLocationsSyncInterval: 10 } } as never,
+        })
+      );
+
+      expect(server.pluginsStart.taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
+
     it('does not clear pins when turning shard rebalance on', async () => {
       jest
         .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
@@ -196,41 +216,6 @@ describe('dynamic settings routes', () => {
       );
       expect(result).toMatchObject({ status: 409 });
     });
-
-    it('returns 409 when the sync interval does not persist on the task', async () => {
-      jest
-        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
-        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
-      jest
-        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
-        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
-      const server = buildServer();
-      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
-        schedule: { interval: '5m' },
-      });
-      const conflict = jest.fn((opts: { body: { message: string } }) => ({
-        status: 409,
-        ...opts,
-      }));
-
-      const route = createPostDynamicSettingsRoute();
-      const result = await route.handler(
-        buildRouteContext({
-          server,
-          response: { conflict } as never,
-          request: { body: { privateLocationsSyncInterval: 10 } } as never,
-        })
-      );
-
-      expect(conflict).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: expect.objectContaining({
-            message: expect.stringMatching(/sync task is currently running/i),
-          }),
-        })
-      );
-      expect(result).toMatchObject({ status: 409 });
-    });
   });
 
   describe('cluster-wide settings privilege', () => {
@@ -245,35 +230,30 @@ describe('dynamic settings routes', () => {
     const buildForbidden = () =>
       jest.fn((opts: { body: { message: string } }) => ({ status: 403, ...opts }));
 
-    it.each([
-      ['rebalancePrivateLocationShardsEnabled', { rebalancePrivateLocationShardsEnabled: false }],
-      ['privateLocationsSyncInterval', { privateLocationsSyncInterval: 10 }],
-    ])(
-      'returns 403 without writes when %s changes and the user lacks the global privilege',
-      async (_field, body) => {
-        const setSpy = mockSettingsSO();
-        const forbidden = buildForbidden();
-        const server = buildServer(false);
-        (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
-          schedule: { interval: '5m' },
-          state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
-        });
+    it('returns 403 without writes when rebalancing changes and the user lacks the global privilege', async () => {
+      const body = { rebalancePrivateLocationShardsEnabled: false };
+      const setSpy = mockSettingsSO();
+      const forbidden = buildForbidden();
+      const server = buildServer(false);
+      (server.pluginsStart.taskManager.get as jest.Mock).mockResolvedValue({
+        schedule: { interval: '5m' },
+        state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: true },
+      });
 
-        const route = createPostDynamicSettingsRoute();
-        const result = await route.handler(
-          buildRouteContext({
-            server,
-            response: { forbidden } as never,
-            request: { body } as never,
-          })
-        );
+      const route = createPostDynamicSettingsRoute();
+      const result = await route.handler(
+        buildRouteContext({
+          server,
+          response: { forbidden } as never,
+          request: { body } as never,
+        })
+      );
 
-        expect(result).toMatchObject({ status: 403 });
-        expect(setSpy).not.toHaveBeenCalled();
-        expect(server.pluginsStart.taskManager.bulkUpdateState).not.toHaveBeenCalled();
-        expect(server.pluginsStart.taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
-      }
-    );
+      expect(result).toMatchObject({ status: 403 });
+      expect(setSpy).not.toHaveBeenCalled();
+      expect(server.pluginsStart.taskManager.bulkUpdateState).not.toHaveBeenCalled();
+      expect(server.pluginsStart.taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+    });
 
     it('allows saving space settings that echo unchanged cluster-wide values', async () => {
       const setSpy = mockSettingsSO();

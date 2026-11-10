@@ -54,7 +54,8 @@
     "@kbn/event-annotation-common",
     "@kbn/ui-actions-plugin",
     "@kbn/presentation-publishing",
-    "@kbn/kql"
+    "@kbn/kql",
+    "@kbn/chart-icons"
   ],
   "exclude": ["target/**/*"]
 }

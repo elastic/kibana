@@ -111,13 +111,9 @@ Object {
       "type": "string",
     },
     "additionalFields": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
+      "type": Array [
+        "string",
+        "null",
       ],
     },
     "authType": Object {
@@ -159,15 +155,11 @@ Object {
       "type": "string",
     },
     "createCommentJson": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "createCommentMethod": Object {
       "anyOf": Array [
@@ -186,15 +178,11 @@ Object {
       ],
     },
     "createCommentUrl": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "createIncidentJson": Object {
       "type": "string",
@@ -214,15 +202,11 @@ Object {
       "type": "string",
     },
     "getIncidentJson": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "getIncidentMethod": Object {
       "default": "get",
@@ -308,59 +292,39 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "clientSecret": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "crt": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "key": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "password": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "pfx": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "secretHeaders": Object {
       "anyOf": Array [
@@ -380,15 +344,11 @@ Object {
       "default": null,
     },
     "user": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "type": "object",
@@ -439,59 +399,39 @@ Object {
               "additionalProperties": false,
               "properties": Object {
                 "description": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "externalId": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "id": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "severity": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "status": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "tags": Object {
                   "anyOf": Array [
@@ -645,15 +585,11 @@ Object {
       "type": "boolean",
     },
     "clientId": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "from": Object {
       "type": "string",
@@ -663,26 +599,18 @@ Object {
       "type": "boolean",
     },
     "host": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "oauthTokenUrl": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "port": Object {
       "anyOf": Array [
@@ -698,30 +626,22 @@ Object {
       "default": null,
     },
     "secure": Object {
-      "anyOf": Array [
-        Object {
-          "type": "boolean",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "boolean",
+        "null",
+      ],
     },
     "service": Object {
       "default": "other",
       "type": "string",
     },
     "tenantId": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "required": Array [
@@ -736,37 +656,25 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "clientSecret": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "password": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "user": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "type": "object",
@@ -842,15 +750,11 @@ Object {
       "type": "string",
     },
     "messageHTML": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "replyTo": Object {
       "items": Object {
@@ -1155,13 +1059,9 @@ Object {
       "type": "string",
     },
     "additionalFields": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
+      "type": Array [
+        "string",
+        "null",
       ],
     },
     "authType": Object {
@@ -1275,81 +1175,53 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "clientSecret": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "crt": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "key": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "password": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "pfx": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "proxyPassword": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "proxyUsername": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "secretHeaders": Object {
       "anyOf": Array [
@@ -1386,15 +1258,11 @@ Object {
       "default": null,
     },
     "user": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "type": "object",
@@ -1501,30 +1369,18 @@ Object {
       "additionalProperties": Object {
         "anyOf": Array [
           Object {
-            "anyOf": Array [
-              Object {
-                "type": "string",
-              },
-              Object {
-                "type": "number",
-              },
-              Object {
-                "type": "boolean",
-              },
+            "type": Array [
+              "string",
+              "number",
+              "boolean",
             ],
           },
           Object {
             "items": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "number",
-                },
-                Object {
-                  "type": "boolean",
-                },
+              "type": Array [
+                "string",
+                "number",
+                "boolean",
               ],
             },
             "type": "array",
@@ -1661,30 +1517,18 @@ Object {
       "additionalProperties": Object {
         "anyOf": Array [
           Object {
-            "anyOf": Array [
-              Object {
-                "type": "string",
-              },
-              Object {
-                "type": "number",
-              },
-              Object {
-                "type": "boolean",
-              },
+            "type": Array [
+              "string",
+              "number",
+              "boolean",
             ],
           },
           Object {
             "items": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "number",
-                },
-                Object {
-                  "type": "boolean",
-                },
+              "type": Array [
+                "string",
+                "number",
+                "boolean",
               ],
             },
             "type": "array",
@@ -1710,15 +1554,11 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "executionTimeField": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "index": Object {
       "type": "string",
@@ -1759,15 +1599,11 @@ Object {
       "type": "array",
     },
     "indexOverride": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "required": Array [
@@ -2007,37 +1843,25 @@ Object {
               "additionalProperties": false,
               "properties": Object {
                 "description": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "externalId": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "issueType": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "labels": Object {
                   "anyOf": Array [
@@ -2069,26 +1893,18 @@ Object {
                   "default": null,
                 },
                 "parent": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "priority": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "summary": Object {
                   "type": "string",
@@ -2512,15 +2328,11 @@ Object {
           "type": "string",
         },
         "ruleUrl": Object {
-          "anyOf": Array [
-            Object {
-              "type": "string",
-            },
-            Object {
-              "type": "null",
-            },
-          ],
           "default": null,
+          "type": Array [
+            "string",
+            "null",
+          ],
         },
         "tags": Object {
           "default": Array [],
@@ -2602,15 +2414,11 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "apiUrl": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "type": "object",
@@ -2868,41 +2676,29 @@ Object {
       "type": "string",
     },
     "clientId": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "isOAuth": Object {
       "default": false,
       "type": "boolean",
     },
     "jwtKeyId": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "userIdentifierValue": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "usesTableApi": Object {
       "default": true,
@@ -2921,59 +2717,39 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "clientSecret": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "password": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "privateKey": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "privateKeyPassword": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "username": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "type": "object",
@@ -3103,106 +2879,70 @@ Object {
                   "default": null,
                 },
                 "category": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "correlation_display": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "correlation_id": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": "{{rule.id}}:{{alert.id}}",
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "description": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "externalId": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "impact": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "severity": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "short_description": Object {
                   "type": "string",
                 },
                 "subcategory": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "urgency": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
               },
               "required": Array [
@@ -3277,15 +3017,11 @@ Object {
                   ],
                 },
                 "externalId": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
               },
               "type": "object",
@@ -3315,41 +3051,29 @@ Object {
       "type": "string",
     },
     "clientId": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "isOAuth": Object {
       "default": false,
       "type": "boolean",
     },
     "jwtKeyId": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "userIdentifierValue": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "required": Array [
@@ -3364,59 +3088,39 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "clientSecret": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "password": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "privateKey": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "privateKeyPassword": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "username": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "type": "object",
@@ -3437,125 +3141,81 @@ Object {
           "additionalProperties": false,
           "properties": Object {
             "additional_info": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "null",
-                },
-              ],
               "default": null,
+              "type": Array [
+                "string",
+                "null",
+              ],
             },
             "description": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "null",
-                },
-              ],
               "default": null,
+              "type": Array [
+                "string",
+                "null",
+              ],
             },
             "event_class": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "null",
-                },
-              ],
               "default": null,
+              "type": Array [
+                "string",
+                "null",
+              ],
             },
             "message_key": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "null",
-                },
-              ],
               "default": "{{rule.id}}:{{alert.id}}",
+              "type": Array [
+                "string",
+                "null",
+              ],
             },
             "metric_name": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "null",
-                },
-              ],
               "default": null,
+              "type": Array [
+                "string",
+                "null",
+              ],
             },
             "node": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "null",
-                },
-              ],
               "default": null,
+              "type": Array [
+                "string",
+                "null",
+              ],
             },
             "resource": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "null",
-                },
-              ],
               "default": null,
+              "type": Array [
+                "string",
+                "null",
+              ],
             },
             "severity": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "null",
-                },
-              ],
               "default": null,
+              "type": Array [
+                "string",
+                "null",
+              ],
             },
             "source": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "null",
-                },
-              ],
               "default": null,
+              "type": Array [
+                "string",
+                "null",
+              ],
             },
             "time_of_event": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "null",
-                },
-              ],
               "default": null,
+              "type": Array [
+                "string",
+                "null",
+              ],
             },
             "type": Object {
-              "anyOf": Array [
-                Object {
-                  "type": "string",
-                },
-                Object {
-                  "type": "null",
-                },
-              ],
               "default": null,
+              "type": Array [
+                "string",
+                "null",
+              ],
             },
           },
           "type": "object",
@@ -3608,41 +3268,29 @@ Object {
       "type": "string",
     },
     "clientId": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "isOAuth": Object {
       "default": false,
       "type": "boolean",
     },
     "jwtKeyId": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "userIdentifierValue": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "usesTableApi": Object {
       "default": true,
@@ -3661,59 +3309,39 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "clientSecret": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "password": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "privateKey": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "privateKeyPassword": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "username": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "type": "object",
@@ -3843,61 +3471,41 @@ Object {
                   "default": null,
                 },
                 "category": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "correlation_display": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "correlation_id": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": "{{rule.id}}:{{alert.id}}",
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "description": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "dest_ip": Object {
                   "anyOf": Array [
                     Object {
-                      "anyOf": Array [
-                        Object {
-                          "type": "string",
-                        },
-                        Object {
-                          "type": "null",
-                        },
-                      ],
                       "default": null,
+                      "type": Array [
+                        "string",
+                        "null",
+                      ],
                     },
                     Object {
                       "anyOf": Array [
@@ -3917,28 +3525,20 @@ Object {
                   "default": null,
                 },
                 "externalId": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "malware_hash": Object {
                   "anyOf": Array [
                     Object {
-                      "anyOf": Array [
-                        Object {
-                          "type": "string",
-                        },
-                        Object {
-                          "type": "null",
-                        },
-                      ],
                       "default": null,
+                      "type": Array [
+                        "string",
+                        "null",
+                      ],
                     },
                     Object {
                       "anyOf": Array [
@@ -3960,15 +3560,11 @@ Object {
                 "malware_url": Object {
                   "anyOf": Array [
                     Object {
-                      "anyOf": Array [
-                        Object {
-                          "type": "string",
-                        },
-                        Object {
-                          "type": "null",
-                        },
-                      ],
                       "default": null,
+                      "type": Array [
+                        "string",
+                        "null",
+                      ],
                     },
                     Object {
                       "anyOf": Array [
@@ -3988,15 +3584,11 @@ Object {
                   "default": null,
                 },
                 "priority": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "short_description": Object {
                   "type": "string",
@@ -4004,15 +3596,11 @@ Object {
                 "source_ip": Object {
                   "anyOf": Array [
                     Object {
-                      "anyOf": Array [
-                        Object {
-                          "type": "string",
-                        },
-                        Object {
-                          "type": "null",
-                        },
-                      ],
                       "default": null,
+                      "type": Array [
+                        "string",
+                        "null",
+                      ],
                     },
                     Object {
                       "anyOf": Array [
@@ -4032,15 +3620,11 @@ Object {
                   "default": null,
                 },
                 "subcategory": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
               },
               "required": Array [
@@ -4625,81 +4209,53 @@ Object {
               "additionalProperties": false,
               "properties": Object {
                 "alertId": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "caseId": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "caseName": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "description": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "externalId": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "ruleName": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
                 "severity": Object {
-                  "anyOf": Array [
-                    Object {
-                      "type": "string",
-                    },
-                    Object {
-                      "type": "null",
-                    },
-                  ],
                   "default": null,
+                  "type": Array [
+                    "string",
+                    "null",
+                  ],
                 },
               },
               "type": "object",
@@ -4766,15 +4322,11 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "organisation": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "url": Object {
       "type": "string",
@@ -4929,13 +4481,9 @@ Object {
       "type": "string",
     },
     "additionalFields": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
+      "type": Array [
+        "string",
+        "null",
       ],
     },
     "authType": Object {
@@ -5035,59 +4583,39 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "clientSecret": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "crt": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "key": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "password": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "pfx": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "secretHeaders": Object {
       "anyOf": Array [
@@ -5107,15 +4635,11 @@ Object {
       "default": null,
     },
     "user": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "type": "object",
@@ -5207,15 +4731,11 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "configUrl": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "usesBasic": Object {
       "default": true,
@@ -5231,37 +4751,25 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "password": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "secretsUrl": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
     "user": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "type": "object",
@@ -5324,15 +4832,11 @@ Object {
       "type": "string",
     },
     "apiKeyID": Object {
-      "anyOf": Array [
-        Object {
-          "type": "string",
-        },
-        Object {
-          "type": "null",
-        },
-      ],
       "default": null,
+      "type": Array [
+        "string",
+        "null",
+      ],
     },
   },
   "required": Array [

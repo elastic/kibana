@@ -45,8 +45,8 @@ wait $STACK_PID || STACK_EXIT=$?
 wait $SERVERLESS_PID || SERVERLESS_EXIT=$?
 
 # Post the PR comment whenever there is a pull request, regardless of exit code.
-# The notifier no-ops when a report has no caught changes, so posting is always
-# safe here and is decoupled from whether the check failed.
+# When both reports are empty, the notifier only updates an earlier comment and never
+# posts a new one, so running it is always safe and decoupled from whether the check failed.
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
   echo --- Notify API owners
   node .buildkite/scripts/steps/checks/notify_api_contract_owners.ts \

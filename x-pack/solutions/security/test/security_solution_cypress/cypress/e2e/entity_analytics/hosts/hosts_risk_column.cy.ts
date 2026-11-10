@@ -9,7 +9,7 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { hostsUrl } from '../../../urls/navigation';
 import { TABLE_CELL } from '../../../screens/alerts_details';
-import { kqlSearch } from '../../../tasks/security_header';
+import { kqlSearchGlobalBar } from '../../../tasks/security_header';
 import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
 describe(
@@ -40,7 +40,7 @@ describe(
 
     it('it renders risk column', () => {
       visitWithTimeRange(hostsUrl('allHosts'));
-      kqlSearch('host.name: "siem-kibana" {enter}');
+      kqlSearchGlobalBar('host.name: "siem-kibana" {enter}');
 
       cy.get('[data-test-subj="tableHeaderCell_node.risk_4"]').should('exist');
       cy.get(TABLE_CELL).eq(4).should('have.text', 'Critical');

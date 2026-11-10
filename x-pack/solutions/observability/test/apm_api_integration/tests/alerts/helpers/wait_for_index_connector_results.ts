@@ -34,6 +34,5 @@ export async function waitForIndexConnectorResults({
 
       return results;
     },
-    retryCount: 10,
   });
 }

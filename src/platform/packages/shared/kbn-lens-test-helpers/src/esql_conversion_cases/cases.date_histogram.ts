@@ -138,13 +138,22 @@ export const buildDateHistogramCases = (): EsqlConversionCase[] => {
     {
       group: 'date_histogram',
       dataset: ecommerce,
-      description: 'date histogram with drop partial buckets is not convertible',
+      description: 'date histogram with drop partial buckets preserves the flag',
       columns: {
         col1: dateHistogram('order_date', { interval: 'auto', dropPartials: true }),
         col2: count(),
       },
       columnOrder: ['col1', 'col2'],
-      expected: { success: false, reason: 'drop_partials_not_supported' },
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS COUNT(*) BY order_date = BUCKET(order_date, 75, ?_tstart, ?_tend)`,
+        columnNames: ['COUNT(*)', 'order_date'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col2'],
+          order_date: ['col1'],
+        },
+        expectedDropPartials: { order_date: true },
+      },
     },
     {
       group: 'date_histogram',

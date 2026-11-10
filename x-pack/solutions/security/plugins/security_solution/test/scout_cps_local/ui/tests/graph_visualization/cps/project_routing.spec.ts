@@ -153,7 +153,7 @@ const openAnyAlertGraphFlyout = async (params: {
   await page.goto(kbnUrl.app('security/alerts', { space: spaceId }));
   await pageObjects.alertsTablePage.waitForDetectionsAlertsWrapper();
   await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
-  await pageObjects.graphFlyoutPage.openGraphTab();
+  await pageObjects.graphFlyoutPage.openGraphTool();
 };
 
 const setupSpaceWithFiringRule = async (params: {

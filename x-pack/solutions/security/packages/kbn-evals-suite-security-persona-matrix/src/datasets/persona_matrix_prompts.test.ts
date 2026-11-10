@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import {
+  attachmentTools,
+  platformCoreCasesTools,
+  platformCoreTools,
+} from '@kbn/agent-builder-common';
 import { PERSONA_MATRIX_EXAMPLES } from './persona_matrix_prompts';
-import { PERSONA_MATRIX_TOOL_IDS } from '../fixtures/persona_matrix_tools_seed';
+import {
+  PERSONA_MATRIX_TOOL_IDS,
+  PERSONA_MATRIX_PARITY_TOOL_IDS,
+} from '../fixtures/persona_matrix_tools_seed';
 
 const byId = (id: string) => {
   const example = PERSONA_MATRIX_EXAMPLES.find((e) => e.id === id);
@@ -19,18 +27,21 @@ const byId = (id: string) => {
 describe('PERSONA_MATRIX_EXAMPLES prompt/annotation parity', () => {
   // Each dataset example is its own conversation (PersonaMatrixChatClient.query sends no
   // conversation id), so a question that points back at an earlier incident needs an attachment.
-  it('detection-rule-edit-c supplies the confirmed-threat context through an attachment', () => {
-    const { input } = byId('detection-rule-edit-c');
-    expect(input.question).toContain('this threat');
-    expect(input.attachment).toBeDefined();
-    expect(input.attachment).toContain('srv-win-defend-01');
-    expect(input.attachment).toContain('BluetoothService.exe');
-    expect(input.attachment).toContain('log.dll');
-    expect(input.attachment).toContain(
-      '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
-    );
-    expect(input.attachment).toContain('C:\\Users\\Public\\');
-  });
+  it.each(['detection-rule-edit-b', 'detection-rule-edit-c'])(
+    '%s supplies the earlier-hunt/confirmed-threat context through an attachment',
+    (id) => {
+      const { input } = byId(id);
+      expect(input.question).toMatch(/this threat|we just hunted down/);
+      expect(input.attachment).toBeDefined();
+      expect(input.attachment).toContain('srv-win-defend-01');
+      expect(input.attachment).toContain('BluetoothService.exe');
+      expect(input.attachment).toContain('log.dll');
+      expect(input.attachment).toContain(
+        '275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f'
+      );
+      expect(input.attachment).toContain('C:\\Users\\Public\\');
+    }
+  );
 
   describe.each([
     ['multi-step-a', ['virustotal_lookup', 'on_call_lookup']],
@@ -52,13 +63,143 @@ describe('PERSONA_MATRIX_EXAMPLES prompt/annotation parity', () => {
     expect(byId(id).output.reference).toContain('virustotal_lookup');
   });
 
-  it('only annotates seeded or registered tools that the suite can actually provide', () => {
-    const seeded = new Set<string>(PERSONA_MATRIX_TOOL_IDS);
-    for (const id of ['multi-step-a', 'multi-step-b', 'multi-step-c']) {
-      const custom = (byId(id).metadata.expectedTools ?? []).filter((tool) => !tool.includes('.'));
-      for (const tool of custom) {
-        expect(seeded.has(tool)).toBe(true);
-      }
+  // Exact-match assertions on the question wording: reference/expectedTools
+  // fixes must never alter the prompts (parity with the published matrix).
+  it.each([
+    [
+      'detection-rule-edit-c',
+      "Now that we've confirmed this threat, help me close the detection gap - create a rule " +
+        'so we catch this automatically next time, and ground it in the relevant Security Labs research.',
+    ],
+    [
+      'multi-step-a',
+      'Analyze this alert. If it involves a file hash, verify the hash on VirusTotal. ' +
+        'Then check who is on call, and create a Slack channel with the on-call analyst that includes ' +
+        'your findings from this alert (verdict, IOCs, and the on-call owner). ' +
+        'Walk me through each step as you go.',
+    ],
+    [
+      'multi-step-b',
+      "There's a confirmed Chrysalis incident on srv-win-defend-01. Run the full response: " +
+        'verify the loader hash 275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f ' +
+        'on VirusTotal, check the on-call schedule, open a critical Security case, then spin up a ' +
+        'Slack incident channel with the on-call responder and post the case summary and top IOCs. ' +
+        'Report what you did at each step.',
+    ],
+  ] as const)(
+    '%s question wording is byte-identical to the published matrix prompt',
+    (id, question) => {
+      expect(byId(id).input.question).toBe(question);
     }
+  );
+
+  // The default SEED_PROFILE is `minimal`, which seeds only PERSONA_MATRIX_TOOL_IDS, so an
+  // example may only annotate those plus registered builtins; parity-only shims would be
+  // impossible to satisfy under the default run.
+  it('every expectedTools entry is a minimal-profile seeded tool or a registered builtin tool id', () => {
+    const available = new Set<string>([...PERSONA_MATRIX_TOOL_IDS, ...BUILTIN_TOOL_IDS]);
+    const unavailable = PERSONA_MATRIX_EXAMPLES.flatMap((example) =>
+      (example.metadata.expectedTools ?? [])
+        .filter((tool) => !available.has(tool))
+        .map((tool) => `${example.id}: ${tool}`)
+    );
+    expect(unavailable).toEqual([]);
+  });
+
+  it('no example annotates a parity-only seeded tool', () => {
+    const parityOnly = new Set<string>(PERSONA_MATRIX_PARITY_TOOL_IDS);
+    const used = PERSONA_MATRIX_EXAMPLES.flatMap((example) =>
+      (example.metadata.expectedTools ?? [])
+        .filter((tool) => parityOnly.has(tool))
+        .map((tool) => `${example.id}: ${tool}`)
+    );
+    expect(used).toEqual([]);
+  });
+
+  describe('references only demand what the seeded environment can do', () => {
+    const ref = (id: string) => byId(id).output.reference;
+
+    // No Slack tool/connector is seeded: the reference must score the honest fallback.
+    it.each(['multi-step-a', 'multi-step-b'])('%s scores the no-Slack-tool fallback', (id) => {
+      expect(ref(id)).toMatch(/if none is exposed, states that Slack is unavailable/i);
+      expect(ref(id)).toMatch(/attempts the Slack step/i);
+      expect(ref(id)).not.toMatch(/then creates a Slack|and creates a Slack channel/i);
+    });
+
+    // Opening a case needs the case-management tool; platform.core.cases is the read-only search.
+    it('multi-step-b annotates and describes the case-management tool', () => {
+      expect(byId('multi-step-b').metadata.expectedTools).toContain(platformCoreCasesTools.manage);
+      expect(ref('multi-step-b')).toContain('via the case-management tool');
+    });
+
+    // Security Labs content is never installed: the tool tells the agent to stop.
+    it('detection-rule-edit-c scores the no-Security-Labs fallback', () => {
+      expect(ref('detection-rule-edit-c')).toMatch(/If no Security Labs research is/);
+      expect(ref('detection-rule-edit-c')).toMatch(/without fabricating/);
+      expect(ref('detection-rule-edit-c')).toMatch(
+        /stops as the tool instructs|makes no further tool calls/
+      );
+      expect(ref('detection-rule-edit-c')).not.toMatch(
+        /calls security\.create_detection_rule with a rule grounded in .*attachment/
+      );
+      expect(ref('detection-rule-edit-c')).toMatch(/GenAI Settings/);
+      expect(byId('detection-rule-edit-c').metadata.expectedTools).toEqual([
+        'security.security_labs_search',
+      ]);
+    });
+  });
+});
+
+// Registered builtin tool ids. The platform.core.*, platform.core.cases.* and attachments.*
+// ids come from agent-builder-common so they cannot drift; plugin-owned ids cannot be
+// imported here and stay hardcoded.
+const BUILTIN_TOOL_IDS: readonly string[] = [
+  ...Object.values(platformCoreTools),
+  ...Object.values(platformCoreCasesTools),
+  ...Object.values(attachmentTools),
+  'platform.workflows.validate_workflow',
+  'security.alerts',
+  'security.security_labs_search',
+  'security.create_detection_rule',
+  'security.get_entity',
+  'security.get_entity_risk_score_history',
+  'security.search_entities',
+];
+
+describe('PERSONA_MATRIX_EXAMPLES expectation contracts', () => {
+  // Point-in-time profile prompts must not demand the risk-over-time tool: its
+  // description reserves it for trend questions, so an agent following the tool
+  // contract would fail ExpectedToolCalled.
+  it('entity-analytics-a does not require the risk score history tool', () => {
+    expect(byId('entity-analytics-a').metadata.expectedTools).toEqual(['security.get_entity']);
+    expect(byId('entity-analytics-c').metadata.expectedTools).toContain(
+      'security.get_entity_risk_score_history'
+    );
+  });
+
+  it('every example whose question names a connector id declares that expectedConnectorId', () => {
+    const uuid = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g;
+    const mismatches = PERSONA_MATRIX_EXAMPLES.flatMap((example) => {
+      const named: string[] = example.input.question.match(uuid) ?? [];
+      if (named.length === 0) return [];
+      return named.includes(example.metadata.expectedConnectorId ?? '')
+        ? []
+        : [`${example.id}: names ${named.join(',')}`];
+    });
+    expect(mismatches).toEqual([]);
+  });
+
+  // The correctness judge reads the reference. A clause excusing an unconfirmed
+  // connector or a non-http step would let Factuality pass what the
+  // deterministic ConnectorInvoked check (connector id + step type) fails.
+  it('references never excuse a missing connector or a different step type', () => {
+    const excusing = PERSONA_MATRIX_EXAMPLES.filter(
+      ({ metadata, output }) =>
+        (metadata.expectedConnectorId || metadata.expectedStepType) &&
+        /could not be confirmed|is unknown|instead of a raw|does not contradict|not contradict/i.test(
+          output.reference ?? ''
+        )
+    ).map(({ id }) => id);
+    expect(excusing).toEqual([]);
   });
 });

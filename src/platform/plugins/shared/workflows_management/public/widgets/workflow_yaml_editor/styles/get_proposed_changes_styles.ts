@@ -9,6 +9,7 @@
 
 import { euiShadow, transparentize, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { BOTTOM_BAR_CLEARANCE_PX } from './constants';
 
 export const getProposedChangesStyles = (euiThemeContext: UseEuiTheme) => {
   const { euiTheme } = euiThemeContext;
@@ -194,7 +195,7 @@ export const getProposedChangesStyles = (euiThemeContext: UseEuiTheme) => {
 
     .wfDiffBulkBar {
       position: absolute;
-      bottom: ${euiTheme.size.m};
+      bottom: calc(${euiTheme.size.m} + ${BOTTOM_BAR_CLEARANCE_PX}px);
       left: 50%;
       transform: translateX(-50%);
       display: flex;

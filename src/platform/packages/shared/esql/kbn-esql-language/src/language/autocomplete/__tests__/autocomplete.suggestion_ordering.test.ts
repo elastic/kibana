@@ -61,6 +61,56 @@ describe('Suggestion Ordering', () => {
     });
   });
 
+  describe('HIGHLIGHT command', () => {
+    it('should order the ON list continuations as WITH, comma, new line, pipe', async () => {
+      const { suggest } = await setup();
+
+      for (const query of [
+        'FROM a | HIGHLIGHT "fox" ON textField /',
+        'FROM a | HIGHLIGHT ON textField/',
+      ]) {
+        const suggestions = await suggest(query);
+
+        expect(suggestions.slice(0, 4).map((s) => s.text)).toEqual([
+          'WITH { $0 }',
+          ', ',
+          '\n',
+          '| ',
+        ]);
+      }
+    });
+
+    it('should order the query suggestions before ON, WITH and the end of the command', async () => {
+      const { suggest } = await setup();
+      const texts = (await suggest('FROM a | HIGHLIGHT /')).map((s) => s.text);
+      const relevant = [
+        '"${0:The text to highlight}"',
+        'prefix = "${0:highlight_}"',
+        'MATCH($0)',
+        'ON ',
+        'WITH { $0 }',
+        '\n',
+        '| ',
+      ];
+
+      expect(texts.filter((text) => relevant.includes(text))).toEqual(relevant);
+    });
+
+    it('should order ON, WITH and the end of the command after a complete query', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM a | HIGHLIGHT "fox" /');
+
+      expect(suggestions.map((s) => s.text)).toEqual(['ON ', 'WITH { $0 }', '\n', '| ']);
+    });
+
+    it('should order * before the fields of the ON list', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM a | HIGHLIGHT "fox" ON /');
+
+      expect(suggestions[0].text).toBe('*');
+    });
+  });
+
   describe('FUSE command', () => {
     it('should start with next actions before the rest of the fuse suggestions', async () => {
       const { suggest } = await setup();

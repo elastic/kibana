@@ -99,7 +99,6 @@ dependsOn:
   - '@kbn/ml-validators'
   - '@kbn/ml-cps'
   - '@kbn/ml-cps-common'
-  - '@kbn/monaco'
   - '@kbn/observability-ai-assistant-plugin'
   - '@kbn/presentation-publishing'
   - '@kbn/presentation-util-plugin'
@@ -165,12 +164,15 @@ dependsOn:
   - '@kbn/core-rendering-browser'
   - '@kbn/app-header'
   - '@kbn/ui-callout'
+  - '@kbn/date-range-picker'
+  - '@kbn/date-range-picker-presets'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -183,6 +185,4 @@ fileGroups:
     - public/**/*.json
     - server/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

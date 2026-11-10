@@ -21,8 +21,8 @@ import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import React, { useState } from 'react';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { TRACE_WATERFALL_EBT_ELEMENTS } from '@kbn/apm-ui-shared';
+import { useResolvedApmIndices, type ApmIndicesSource } from '../../../../../hooks/use_apm_indices';
 import { getFlyoutDiscoverNavigation } from '../../../../shared/service_flyout/utils/get_flyout_discover_navigation';
-import { useApmIndices } from '../../../../shared/service_flyout/hooks/use_apm_indices';
 
 interface Props {
   traceId: string;
@@ -30,11 +30,19 @@ interface Props {
   rangeTo: string;
   share?: SharePublicStart;
   http: HttpStart;
+  indicesSource?: ApmIndicesSource;
 }
 
-export function TraceWaterfallFlyoutFooter({ traceId, rangeFrom, rangeTo, share, http }: Props) {
+export function TraceWaterfallFlyoutFooter({
+  traceId,
+  rangeFrom,
+  rangeTo,
+  share,
+  http,
+  indicesSource,
+}: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { indices } = useApmIndices({ http });
+  const indices = useResolvedApmIndices({ http, indicesSource });
 
   const { href: discoverHref } = getFlyoutDiscoverNavigation({
     share,

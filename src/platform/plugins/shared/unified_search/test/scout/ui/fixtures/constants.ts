@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { tags } from '@kbn/scout';
 import type { KibanaRole } from '@kbn/scout';
 
 export const ES_ARCHIVES = {
@@ -28,11 +29,7 @@ export const PRELOADED_SAVED_QUERY = {
   query: 'response:200',
 } as const;
 
-/**
- * Limit UI specs to local stateful runs — `browserAuth.loginWithCustomRole`
- * is not yet supported on Elastic Cloud Hosted (ECH).
- */
-export const SQM_UI_TAG = '@local-stateful-classic';
+export const SQM_UI_TAG = tags.stateful.classic;
 
 const LOGSTASH_ES_READ = {
   cluster: [],

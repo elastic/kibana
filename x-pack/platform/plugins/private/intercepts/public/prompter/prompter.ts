@@ -25,13 +25,17 @@ type ProductInterceptPrompterStartDeps = Omit<
   InterceptServiceStartDeps,
   'persistInterceptRunId' | 'staticAssetsHelper' | 'resetInterceptTimingRecord'
 > &
-  Pick<CoreStart, 'http'> & { userAllowsFeedback: boolean };
+  Pick<CoreStart, 'http'> & {
+    userAllowsFeedback: boolean;
+    isChromeVisible$: Rx.Observable<boolean>;
+  };
 
 export class InterceptPrompter {
   private userInterceptRunPersistenceService = new UserInterceptRunPersistenceService();
   private interceptDialogService = new InterceptDialogService();
   private queueIntercept?: ReturnType<InterceptDialogService['start']>['add'];
-  // observer for page visibility changes, shared across all intercepts
+  // observer for page visibility changes, shared across all intercepts.
+  // Hidden chrome (embed, fullscreen, print) counts as hidden, since nobody may be there to interact with the intercept.
   private pageHidden$?: Rx.Observable<boolean>;
   private userAllowsFeedback?: boolean;
 
@@ -73,7 +77,12 @@ export class InterceptPrompter {
     return {};
   }
 
-  start({ http, userAllowsFeedback, ...dialogServiceDeps }: ProductInterceptPrompterStartDeps) {
+  start({
+    http,
+    userAllowsFeedback,
+    isChromeVisible$,
+    ...dialogServiceDeps
+  }: ProductInterceptPrompterStartDeps) {
     this.userAllowsFeedback = userAllowsFeedback;
 
     const { getUserTriggerData$, updateUserTriggerData } =
@@ -86,10 +95,13 @@ export class InterceptPrompter {
       resetInterceptTimingRecord: this.clearInterceptTimerStartRecord.bind(this),
     }));
 
-    this.pageHidden$ = Rx.fromEvent(document, 'visibilitychange').pipe(
-      Rx.map(() => document.hidden),
-      Rx.startWith(document.hidden)
-    );
+    this.pageHidden$ = Rx.combineLatest([
+      Rx.fromEvent(document, 'visibilitychange').pipe(
+        Rx.map(() => document.hidden),
+        Rx.startWith(document.hidden)
+      ),
+      isChromeVisible$,
+    ]).pipe(Rx.map(([documentHidden, isChromeVisible]) => documentHidden || !isChromeVisible));
 
     return {
       /**

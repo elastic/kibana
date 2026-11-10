@@ -44,23 +44,28 @@ jest.mock('react-redux-v7', () => ({
   useSelector: (selector: unknown) => mockUseSelector(selector),
 }));
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({
-    value,
-    onChange,
-    dataTestSubj,
-  }: {
-    value: string;
-    onChange: (v: string) => void;
-    dataTestSubj: string;
-  }) => (
-    <textarea
-      data-test-subj={dataTestSubj}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
-  ),
-}));
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...actual,
+    CodeEditor: ({
+      value,
+      onChange,
+      dataTestSubj,
+    }: {
+      value: string;
+      onChange: (v: string) => void;
+      dataTestSubj: string;
+    }) => (
+      <textarea
+        data-test-subj={dataTestSubj}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    ),
+  };
+});
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });

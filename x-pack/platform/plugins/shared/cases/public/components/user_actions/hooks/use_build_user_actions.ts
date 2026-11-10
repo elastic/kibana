@@ -18,6 +18,7 @@ import type {
 } from '../../../containers/types';
 import type { CurrentUserProfile } from '../../types';
 import type { UnifiedAttachmentTypeRegistry } from '../../../client/attachment_framework/unified_attachment_registry';
+import type { RelatedRemovalOptions } from '../../../client/attachment_framework/types';
 import type { CasesPermissions } from '../../../../common/ui/types';
 import { isUserActionTypeSupported } from '../helpers';
 import { builderMap } from '../builder';
@@ -38,7 +39,11 @@ interface UseBuildUserActionsArgs {
   loadingCommentIds: string[];
   euiTheme: EuiThemeComputed<{}>;
   handleOutlineComment: (id: string) => void;
-  handleDeleteComment: (id: string, successToasterTitle: string) => void;
+  handleDeleteComment: (
+    id: string,
+    successToasterTitle: string,
+    options?: RelatedRemovalOptions
+  ) => void;
 }
 
 export const useBuildUserActions = ({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
@@ -18,31 +18,35 @@ import {
 
 export const UpdateNoteStepId = 'security.updateNote' as const;
 
-export const updateNoteInputSchema = z.object({
-  note_id: z
-    .string()
-    .min(1)
-    .max(MAX_NOTE_ID_LENGTH)
-    .describe('The `savedObjectId` of the note to update.'),
-  document_id: z
-    .string()
-    .min(1)
-    .max(MAX_DOCUMENT_ID_LENGTH)
-    .describe(
-      'The Elasticsearch `_id` of the alert, attack, or document the note is attached to. Used to locate the note and preserve its associations.'
-    ),
-  text: z
-    .string()
-    .min(1)
-    .max(MAX_NOTE_TEXT_LENGTH)
-    .describe('The new text content of the note. Markdown is supported.'),
-});
+export const updateNoteInputSchema = lazySchema(() =>
+  z.object({
+    note_id: z
+      .string()
+      .min(1)
+      .max(MAX_NOTE_ID_LENGTH)
+      .describe('The `savedObjectId` of the note to update.'),
+    document_id: z
+      .string()
+      .min(1)
+      .max(MAX_DOCUMENT_ID_LENGTH)
+      .describe(
+        'The Elasticsearch `_id` of the alert, attack, or document the note is attached to. Used to locate the note and preserve its associations.'
+      ),
+    text: z
+      .string()
+      .min(1)
+      .max(MAX_NOTE_TEXT_LENGTH)
+      .describe('The new text content of the note. Markdown is supported.'),
+  })
+);
 
-export const updateNoteOutputSchema = z.object({
-  success: z.boolean(),
-  note_id: z.string().optional().describe('The `savedObjectId` of the updated note.'),
-  message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
-});
+export const updateNoteOutputSchema = lazySchema(() =>
+  z.object({
+    success: z.boolean(),
+    note_id: z.string().optional().describe('The `savedObjectId` of the updated note.'),
+    message: z.string().max(MAX_WORKFLOW_MESSAGE_LENGTH).optional(),
+  })
+);
 
 export const updateNoteStepCommonDefinition: BaseStepDefinition<
   typeof updateNoteInputSchema,

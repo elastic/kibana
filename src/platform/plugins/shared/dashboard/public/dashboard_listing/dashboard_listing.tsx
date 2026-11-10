@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 
-import { TabbedTableListView } from '@kbn/content-management-tabbed-table-list-view';
+import type { TableListTabParentProps } from '@kbn/content-management-tabbed-table-list-view';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@kbn/react-query';
@@ -19,15 +19,23 @@ import type { EmbeddableEditorBreadcrumb } from '@kbn/embeddable-plugin/public';
 
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderTab } from '@kbn/app-header';
-import type { AppMenuConfig, AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import { KibanaContentListPage } from '@kbn/content-list-page';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 import { coreServices } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
-import { getDashboardListingTabs } from './get_dashboard_listing_tabs';
-import type { DashboardListingProps, DashboardListingTab } from './types';
+import { getDashboardListingTabs, toContentListPageTabs } from './get_dashboard_listing_tabs';
+import type { DashboardListingProps } from './types';
 import { openImportDashboardJsonFlyout } from './import_json/open_import_dashboard_json_flyout';
 import { importDashboardJsonStrings } from './import_json/_import_dashboard_json_strings';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
+import { confirmCreateWithUnsaved } from './confirm_overlays';
+import { getDashboardBackupService } from '../services/dashboard_api_services';
+
+const dashboardListingTitle = i18n.translate('dashboard.listing.title', {
+  defaultMessage: 'Dashboards',
+});
 
 export const DashboardListing = ({
   children,
@@ -46,6 +54,7 @@ export const DashboardListing = ({
   const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
 
   const [refreshListBouncer, setRefreshListBouncer] = useState(false);
+  const [pageDataTestSubject, setPageDataTestSubject] = useState<string>();
 
   const tabs = useMemo(
     () =>
@@ -67,8 +76,9 @@ export const DashboardListing = ({
     ]
   );
 
+  // Must resolve to an existing tab: `ActiveTab` throws on an unknown id
   const activeTabId = useMemo(() => {
-    return tabs.find((tab) => tab.id === activeTabParam)?.id ?? 'dashboards';
+    return tabs.find((tab) => tab.id === activeTabParam)?.id ?? DASHBOARD_APP_ID;
   }, [tabs, activeTabParam]);
 
   const changeActiveTab = useCallback(
@@ -89,13 +99,12 @@ export const DashboardListing = ({
     [tabs, activeTabId, changeActiveTab]
   );
 
+  const activeTabTitle = tabs.find((tab) => tab.id === activeTabId)?.title;
+
   const getBreadcrumbs = useCallback(
     (appId: string): EmbeddableEditorBreadcrumb[] => {
-      const activeTabTitle = tabs.find((tab) => tab.id === activeTabId)?.title;
       const dashboardBreadcrumb = {
-        text: i18n.translate('dashboard.listing.title', {
-          defaultMessage: 'Dashboards',
-        }),
+        text: dashboardListingTitle,
         href: coreServices.application.getUrlForApp(appId, {
           path: `#${LANDING_PAGE_PATH}`,
         }),
@@ -109,79 +118,111 @@ export const DashboardListing = ({
         dashboardBreadcrumb,
         {
           text: activeTabTitle,
-          href: coreServices.application.getUrlForApp(appId, { path: window.location.hash }),
+          href: coreServices.application.getUrlForApp(appId, {
+            path: `#${LANDING_PAGE_PATH}/${activeTabId}`,
+          }),
         },
       ];
     },
-    [tabs, activeTabId]
+    [activeTabId, activeTabTitle]
   );
 
-  const onImportSuccess = useCallback((id: string, title: string) => {
-    setRefreshListBouncer((b) => !b);
-    coreServices.notifications.toasts.addSuccess(importDashboardJsonStrings.getSuccessToast(title));
-  }, []);
+  const tabParentProps = useMemo<TableListTabParentProps>(
+    () => ({
+      getBreadcrumbs,
+      showCreateButton: false,
+      onFetchSuccess: () => undefined,
+      setPageDataTestSubject,
+    }),
+    [getBreadcrumbs]
+  );
+
+  const contentTabs = useMemo(
+    () =>
+      toContentListPageTabs(tabs, {
+        goToDashboard,
+        getDashboardUrl,
+        useSessionStorageIntegration,
+        initialFilter,
+        refreshListBouncer,
+        parentProps: tabParentProps,
+      }),
+    [
+      tabs,
+      goToDashboard,
+      getDashboardUrl,
+      useSessionStorageIntegration,
+      initialFilter,
+      refreshListBouncer,
+      tabParentProps,
+    ]
+  );
+
+  const onImportSuccess = useCallback(
+    (id: string, title: string) => {
+      // Only refresh the Dashboards table: importing a dashboard should not affect other registered tabs.
+      if (activeTabId === DASHBOARD_APP_ID) {
+        setRefreshListBouncer((b) => !b);
+      }
+      coreServices.notifications.toasts.addSuccess(
+        importDashboardJsonStrings.getSuccessToast(title)
+      );
+    },
+    [activeTabId]
+  );
+
+  const createDashboardAction = useCallback(() => {
+    if (useSessionStorageIntegration && getDashboardBackupService().dashboardHasUnsavedEdits()) {
+      confirmCreateWithUnsaved(() => {
+        getDashboardBackupService().clearState();
+        goToDashboard();
+      }, goToDashboard);
+      return;
+    }
+    goToDashboard();
+  }, [goToDashboard, useSessionStorageIntegration]);
 
   const appMenu = useMemo<AppMenuConfig | undefined>(() => {
-    const tabsByIdMap = new Map((tabs as DashboardListingTab[]).map((tab) => [tab.id, tab]));
-    const createDashboardAction = tabsByIdMap.get('dashboards')?.createAction;
-    const createVisualizationAction = tabsByIdMap.get('visualizations')?.createAction;
-    const createAnnotationAction = tabsByIdMap.get('annotations')?.createAction;
-    const createMenuItems: AppMenuPopoverItem[] = [];
-
-    if (createVisualizationAction) {
-      createMenuItems.push({
-        id: 'createVisualization',
-        order: 1,
-        label: i18n.translate('dashboard.listing.createVisualizationButtonLabel', {
-          defaultMessage: 'Create visualization',
-        }),
-        iconType: 'chartBarVertical',
-        testId: 'createVisualizationButton',
-        run: createVisualizationAction,
-      });
-    }
-
-    if (createAnnotationAction) {
-      createMenuItems.push({
-        id: 'createAnnotation',
-        order: 2,
-        label: i18n.translate('dashboard.listing.createAnnotationButtonLabel', {
-          defaultMessage: 'Create annotation',
-        }),
-        iconType: 'flag',
-        testId: 'createAnnotationButton',
-        run: createAnnotationAction,
-      });
-    }
-
-    if (!createDashboardAction) {
-      return undefined;
-    }
+    const { createNew } = getDashboardCapabilities();
+    const secondaryCreateActions = getTabs
+      ? getTabs()
+          .filter((tab) => Boolean(tab.createAction))
+          .map((tab) => ({
+            id: `create_${tab.id}`,
+            order: tab.createAction!.order,
+            label: tab.createAction!.label,
+            iconType: tab.createAction!.iconType,
+            testId: `create_${tab.id}_button`,
+            run: () => tab.createAction!.create(`#${LANDING_PAGE_PATH}/${tab.id}`),
+          }))
+      : [];
 
     return {
-      primaryActionItem: {
-        id: 'createDashboard',
-        testId: 'dashboardListingCreateButton',
-        iconType: 'plus',
-        label: i18n.translate('dashboard.listing.createButtonLabel', {
-          defaultMessage: 'Create dashboard',
-        }),
-        run: createDashboardAction,
-        popoverWidth: 200,
-        splitButtonProps:
-          createMenuItems.length > 0
-            ? {
-                secondaryButtonAriaLabel: i18n.translate(
-                  'dashboard.listing.createMoreActionsButtonAriaLabel',
-                  {
-                    defaultMessage: 'Create more dashboard content',
+      primaryActionItem: createNew
+        ? {
+            id: 'createDashboard',
+            testId: 'dashboardListingCreateButton',
+            iconType: 'plus',
+            label: i18n.translate('dashboard.listing.createButtonLabel', {
+              defaultMessage: 'Create dashboard',
+            }),
+            run: () => createDashboardAction(),
+            popoverWidth: 200,
+            splitButtonProps:
+              secondaryCreateActions.length > 0
+                ? {
+                    secondaryButtonAriaLabel: i18n.translate(
+                      'dashboard.listing.createMoreActionsButtonAriaLabel',
+                      {
+                        defaultMessage: 'Create more dashboard content',
+                      }
+                    ),
+                    items: secondaryCreateActions,
                   }
-                ),
-                items: createMenuItems,
-              }
-            : undefined,
-      },
-      items: getDashboardCapabilities().createNew
+                : undefined,
+          }
+        : undefined,
+      items: createNew
         ? [
             {
               id: 'importDashboardJson',
@@ -201,28 +242,22 @@ export const DashboardListing = ({
           ]
         : [],
     };
-  }, [tabs, onImportSuccess]);
+  }, [onImportSuccess, createDashboardAction, getTabs]);
+
+  const sectionLabel = activeTabTitle ?? dashboardListingTitle;
 
   return (
     <I18nProvider>
       <QueryClientProvider client={dashboardQueryClient}>
         {children}
-        <AppHeader
-          title={i18n.translate('dashboard.listing.title', {
-            defaultMessage: 'Dashboards',
-          })}
-          tabs={headerTabs}
-          menu={appMenu}
-        />
-        <TabbedTableListView
-          headingId="dashboardListingHeading"
-          getBreadcrumbs={getBreadcrumbs}
-          tabs={tabs}
-          activeTabId={activeTabId}
-          changeActiveTab={changeActiveTab}
-          showCreateButton={false}
-          hideTabs
-        />
+        <AppHeader title={dashboardListingTitle} tabs={headerTabs} menu={appMenu} />
+        <KibanaContentListPage data-test-subj={pageDataTestSubject}>
+          <KibanaContentListPage.Section aria-label={sectionLabel}>
+            <KibanaSectionErrorBoundary key={activeTabId} sectionName={sectionLabel}>
+              <KibanaContentListPage.ActiveTab tabs={contentTabs} activeTabId={activeTabId} />
+            </KibanaSectionErrorBoundary>
+          </KibanaContentListPage.Section>
+        </KibanaContentListPage>
       </QueryClientProvider>
     </I18nProvider>
   );

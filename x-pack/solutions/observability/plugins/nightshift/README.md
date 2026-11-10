@@ -1,6 +1,6 @@
 # Nightshift
 
-Owner: `@elastic/nightshift-context-and-research-team`, `@elastic/nightshift-sre-agent-team`
+Owner: `@elastic/nightshift`
 
 Browser-only plugin serving the Nightshift UI at `/app/nightshift`.
 
@@ -20,19 +20,47 @@ Significant Events can run, aggregating the rollout flag
 plugins. When it reports unavailable the app is hidden from navigation and direct visits
 redirect to the Observability overview.
 
+## Seeding investigations for local development
+
+`scripts/seed_nightshift_investigations.ts` fills the landing page with 14 investigations: every
+severity, open and closed, investigations without findings yet, and alert, significant event,
+question, and Slack thread subjects. Run it from the repo root against a running stack with
+`agenticInvestigations`, `proposals`, and `nightshiftInvestigations` enabled:
+
+```sh
+node -r @kbn/setup-node-env x-pack/solutions/observability/plugins/nightshift/scripts/seed_nightshift_investigations.ts \
+  --es-url http://localhost:9200 --kibana-url http://localhost:5601
+```
+
+Each scenario is written as a shared agentic investigation, the way a real run leaves it: an
+Agent Builder conversation on the `investigation` template (agent `nightshift.investigation`,
+public, owned by the `--auth` user) with its title and `status` / `severity` / `summary` /
+`verdict` metadata; its subject, impact, and hypotheses documents in the agentic investigations
+side indexes, attached to the conversation by reference; and its proposed actions, created through
+the proposals gate workflow that `proposals.create` runs. Kibana APIs do the writes where a route
+exists. The side-index documents and the conversation timestamps have none, so they are written to
+Elasticsearch as `kibana_system` (`--kibana-system-auth`). No AI connector or investigation run is
+needed.
+
+The conversation ids are derived from the scenarios, so a re-run replaces the earlier seeds.
+`--clean` only removes them. `--help` lists the connection flags.
+
 ## Turning `nightshift.enabled` off and on
 
-Flipping `nightshift.enabled` from on to off at runtime pauses Significant Events
-deployment-wide, like the Pause action in its settings: managed workflows are disabled in
-every space, in-flight executions are cancelled, and the continuous onboarding and
-scheduled discovery toggles are turned off, with their previous values kept for Resume.
-The maintenance state records `system:feature_flag` as who paused it. The alerting rules
-backing knowledge indicator queries keep running, because alerting v2 cannot toggle rules
-without a user request. A flag value only counts once it has held for 15 seconds, so the
-value read at startup, or a brief flip, never triggers a pause.
+Flipping `nightshift.enabled` from on to off at runtime pauses Significant Events in
+every space, like the Pause action in its settings does for one space: each space's
+scheduled workflows are disabled, in-flight executions are cancelled, and the continuous
+onboarding and scheduled discovery toggles are turned off, with their previous values kept
+for Resume. A space that a user already paused keeps its own record. The shared workflows
+stay enabled. The alerting rules backing knowledge indicator queries are disabled as the
+internal Kibana user. The maintenance state of each space records `system:feature_flag` as
+who paused it. A flag value only counts once it has held for 15 seconds, so the value read
+at startup, or a brief flip, never triggers a pause. If the spaces cannot be listed, nothing
+is paused and the failure is logged; the next managed-workflow install re-applies the pause
+only in spaces that are already paused.
 
 Flipping it back on does not resume. After the managed workflows are reinstalled the pause
 is re-asserted, and activity stays stopped until a user resumes it. While the flag is off,
 `POST /internal/significant_events/maintenance/_pause` and
 `GET /internal/significant_events/maintenance/_status` stay available (Resume does not), so
-activity can still be stopped by hand, rules included.
+activity can still be stopped by hand.

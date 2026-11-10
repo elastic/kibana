@@ -11,7 +11,12 @@ import { expect } from '@kbn/scout/api';
 import type { KbnClient } from '@kbn/kbn-client';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import { createLlmProxy } from '@kbn/ftr-llm-proxy';
-import { mockFinalAnswer, mockTitleGeneration, mockToolCall } from '../../common/llm_mocks';
+import {
+  mockFinalAnswer,
+  mockTemplateGeneration,
+  mockTitleGeneration,
+  mockToolCall,
+} from '../../common/llm_mocks';
 
 const COMMON_HEADERS = {
   'kbn-xsrf': 'kibana',
@@ -48,7 +53,7 @@ const CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE = 'platform.custom_content.panel_co
 const CUSTOM_CONTENT_UPDATE_TOOL_ID = 'custom_content_update_panel';
 const CUSTOM_CONTENT_UPDATED_UI_EVENT = 'custom_content:updated';
 const EMBEDDABLE_ID = 'panel-under-test';
-const UPDATED_ESQL_QUERY = 'FROM logs-* | STATS count = COUNT(*)';
+const UPDATED_ESQL_QUERY = 'ROW count = 3';
 
 interface ParsedSseBlock {
   type: string;
@@ -143,6 +148,7 @@ apiTest.describe(
           embeddable_id: EMBEDDABLE_ID,
           esqlQuery: UPDATED_ESQL_QUERY,
         });
+        mockTemplateGeneration(llmProxy, '<p>{{ rows[0]["count"].value }}</p>');
         mockFinalAnswer(llmProxy, 'Panel updated');
 
         const res = await apiClient.post(CHAT_CONVERSE_ASYNC, {

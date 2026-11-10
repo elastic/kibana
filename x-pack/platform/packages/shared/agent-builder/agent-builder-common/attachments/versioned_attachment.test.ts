@@ -9,6 +9,7 @@ import { AttachmentType } from './attachment_types';
 import {
   getLatestVersion,
   getVersion,
+  toAttachment,
   createVersionId,
   parseVersionId,
   isAttachmentActive,
@@ -125,6 +126,35 @@ describe('versioned_attachment', () => {
 
       const result = getVersion(attachment, 5);
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('toAttachment', () => {
+    it('returns the attachment at the given version, without its other versions', () => {
+      const v1 = createTestVersion({ version: 1, data: { content: 'v1' } });
+      const v2 = createTestVersion({
+        version: 2,
+        data: { content: 'v2' },
+        created_at: '2025-01-02T00:00:00Z',
+      });
+      const attachment = createTestAttachment({
+        versions: [v1, v2],
+        current_version: 2,
+        description: 'A note',
+        hidden: true,
+        origin: 'origin-1',
+        client_id: 'client-1',
+      });
+
+      expect(toAttachment(attachment, v1)).toEqual({
+        id: 'test-attachment-1',
+        type: 'text',
+        data: { content: 'v1' },
+        description: 'A note',
+        hidden: true,
+        origin: 'origin-1',
+        versionData: { version: 1, versionCount: 2, createdAt: '2025-01-01T00:00:00Z' },
+      });
     });
   });
 

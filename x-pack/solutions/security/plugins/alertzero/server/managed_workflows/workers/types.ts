@@ -20,14 +20,8 @@ export interface WorkerSettingsRegistration {
     patch: WorkerSettingsWrite
   ): { values: ManagedWorkflowTemplateValues } | { invalid: string };
   /**
-   * Copies declaration defaults onto schedule and extras keys the document does not have yet.
-   * Returns the same object when nothing is missing. A present value is never replaced.
-   */
-  withMissingDefaults(values: ManagedWorkflowTemplateValues): ManagedWorkflowTemplateValues;
-  /**
-   * Parses persisted template values into complete settings. Missing schedule and extras keys are
-   * filled from the declaration defaults first. Throws when a present value does not match the
-   * current shape.
+   * Parses persisted template values into complete settings, after the same upgrade the Worker's
+   * renderer applies. Throws when a present value does not match the current shape.
    */
   toSettings(values: ManagedWorkflowTemplateValues): WorkerSettings;
 }

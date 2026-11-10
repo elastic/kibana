@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './status_check';
+export type * from './status_check';

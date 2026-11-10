@@ -10,6 +10,13 @@ import type { KbnClient } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, mergeSyntheticsApiHeaders } from '../../../common/fixtures';
 import { addMonitor } from '../../../common/fixtures/monitors';
+import type { MaintenanceWindow } from '../../../common/fixtures/maintenance_windows';
+import {
+  MW_DURATION_MS,
+  createMaintenanceWindow,
+  deleteMaintenanceWindow,
+  parseMaintenanceWindowsVar,
+} from '../../../common/fixtures/maintenance_windows';
 
 /**
  * Ported from FTR
@@ -27,15 +34,7 @@ import { addMonitor } from '../../../common/fixtures/monitors';
  * monitor under test is created with a scoped admin API key via `apiClient`.
  */
 
-const MAINTENANCE_WINDOW_API = '/internal/alerting/rules/maintenance_window';
 const SYNTHETICS_MONITOR_TYPES = ['synthetics-monitor', 'synthetics-monitor-multi-space'];
-const MW_DURATION_MS = 60 * 60 * 1000;
-
-interface MaintenanceWindow {
-  id: string;
-  duration: number;
-  r_rule: { dtstart: string; tzid: string; freq: number; count: number };
-}
 
 interface PackagePolicyVar {
   type: string;
@@ -52,67 +51,7 @@ interface PackagePolicy {
   inputs?: PackagePolicyInput[];
 }
 
-interface FormattedMaintenanceWindow {
-  dtstart: string;
-  tzid: string;
-  count: number;
-  duration: string;
-}
-
 const spacePrefix = (spaceId?: string) => (spaceId && spaceId !== 'default' ? `/s/${spaceId}` : '');
-
-const createMaintenanceWindow = async (
-  kbnClient: KbnClient,
-  spaceId?: string
-): Promise<MaintenanceWindow> => {
-  const { data } = await kbnClient.request<MaintenanceWindow>({
-    method: 'POST',
-    path: `${spacePrefix(spaceId)}${MAINTENANCE_WINDOW_API}`,
-    body: {
-      title: `test-maintenance-window-${uuidv4()}`,
-      duration: MW_DURATION_MS,
-      r_rule: { dtstart: new Date().toISOString(), tzid: 'UTC', freq: 0, count: 1 },
-      category_ids: ['management'],
-    },
-  });
-  return data;
-};
-
-const deleteMaintenanceWindow = async (kbnClient: KbnClient, id: string, spaceId?: string) => {
-  await kbnClient.request({
-    method: 'DELETE',
-    path: `${spacePrefix(spaceId)}${MAINTENANCE_WINDOW_API}/${id}`,
-    ignoreErrors: [404],
-  });
-};
-
-const safeJsonParse = (value: string): unknown => {
-  try {
-    return JSON.parse(value);
-  } catch {
-    return undefined;
-  }
-};
-
-/**
- * Scans a package policy for the first non-empty `maintenance_windows` yaml var
- * (synthetics writes it onto every input stream via `commonVars`). The value is
- * the JSON-stringified output of the synthetics `formatMWs` helper.
- */
-const parseMaintenanceWindowsVar = (
-  pkgPolicy?: PackagePolicy
-): FormattedMaintenanceWindow[] | undefined => {
-  for (const input of pkgPolicy?.inputs ?? []) {
-    for (const stream of input?.streams ?? []) {
-      const value = stream?.vars?.maintenance_windows?.value;
-      const parsed = typeof value === 'string' ? safeJsonParse(value) : value;
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed as FormattedMaintenanceWindow[];
-      }
-    }
-  }
-  return undefined;
-};
 
 const fetchSyntheticsPackagePolicies = async (
   kbnClient: KbnClient,

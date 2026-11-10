@@ -409,12 +409,13 @@ describe('Endpoint exceptions flyout', () => {
             true, // didCloseAlert
             false // didBulkCloseAlerts
           );
-          expect(mockCloseAlerts).toHaveBeenCalledWith(
-            ['id-1', 'id-2'],
-            expect.any(Array),
-            'test-alert-id', // alertId is defined
-            undefined // bulkCloseIndex is undefined
-          );
+          expect(mockCloseAlerts).toHaveBeenCalledWith({
+            ruleStaticIds: ['id-1', 'id-2'],
+            exceptionItems: expect.any(Array),
+            alertIdToClose: 'test-alert-id',
+            bulkCloseIndex: undefined,
+            reason: undefined, // no closing reason selected
+          });
         });
       });
 
@@ -432,11 +433,28 @@ describe('Endpoint exceptions flyout', () => {
             false, // didCloseAlert
             true // didBulkCloseAlerts
           );
+          expect(mockCloseAlerts).toHaveBeenCalledWith({
+            ruleStaticIds: ['id-1', 'id-2'],
+            exceptionItems: expect.any(Array),
+            alertIdToClose: undefined,
+            bulkCloseIndex: ['mock-signal-index'],
+            reason: undefined, // no closing reason selected
+          });
+        });
+      });
+
+      it('should forward the selected closing reason to `closeAlerts`', async () => {
+        await userEvent.click(renderResult.getByTestId('closeAlertOnAddExceptionCheckbox'));
+        await userEvent.click(renderResult.getByTestId('exceptionFlyoutCloseReasonSelect'));
+        await userEvent.click(renderResult.getByRole('option', { name: 'Duplicate' }));
+        await userEvent.click(confirmButton);
+
+        await waitFor(() => {
           expect(mockCloseAlerts).toHaveBeenCalledWith(
-            ['id-1', 'id-2'],
-            expect.any(Array),
-            undefined, // alertId is undefined
-            ['mock-signal-index'] // bulkCloseIndex is defined
+            expect.objectContaining({
+              alertIdToClose: 'test-alert-id',
+              reason: 'duplicate',
+            })
           );
         });
       });

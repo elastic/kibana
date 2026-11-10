@@ -8,7 +8,10 @@
 import React from 'react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
-import type { DatasetBooleanFormValue } from '../../../create_dataset_form_state';
+import {
+  DEFAULT_TRIM_SPACES,
+  type DatasetBooleanFormValue,
+} from '../../../create_dataset_form_state';
 import type { ComboBoxChange } from '../../../components/combo_box_selection_validity';
 import {
   EuiComboBoxNoCustomOption,
@@ -40,7 +43,7 @@ export function TrimSpaces({
       onChange={onChange}
       onBlur={onBlur}
       options={OPTIONS}
-      defaultValue="false"
+      defaultValue={DEFAULT_TRIM_SPACES}
       isInvalid={isInvalid}
       placeholder={createDatasetWizardStrings.settingsTrimSpacesPlaceholder}
       aria-label={createDatasetWizardStrings.settingsTrimSpacesLabel}

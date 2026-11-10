@@ -44,7 +44,9 @@ export async function fetchAnchor(
       disableWarningToasts: true,
       inspector: {
         adapter,
-        title: 'anchor',
+        title: i18n.translate('discover.context.inspectorRequestTitleAnchor', {
+          defaultMessage: 'Anchor document',
+        }),
       },
     })
   );

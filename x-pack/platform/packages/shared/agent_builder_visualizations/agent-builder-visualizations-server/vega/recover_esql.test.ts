@@ -20,6 +20,21 @@ describe('extractEsqlFromSpec', () => {
     expect(extractEsqlFromSpec(spec)).toBe(ESQL);
   });
 
+  it('recovers the ES|QL query from an HJSON spec, as Kibana stores it', () => {
+    const spec = `{
+      // a comment
+      mark: bar
+      data: {
+        url: {
+          %type%: esql
+          query: ${ESQL}
+        }
+      }
+    }`;
+
+    expect(extractEsqlFromSpec(spec)).toBe(ESQL);
+  });
+
   it('recovers the ES|QL query from an already-parsed spec object', () => {
     expect(extractEsqlFromSpec({ data: { url: { '%type%': 'esql', query: ESQL } } })).toBe(ESQL);
   });

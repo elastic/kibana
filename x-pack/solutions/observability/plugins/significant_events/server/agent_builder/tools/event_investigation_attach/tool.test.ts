@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -38,7 +39,6 @@ describe('event_investigation_attach tool', () => {
     const logger = loggingSystemMock.createLogger();
     const tool = createEventInvestigationAttachTool({
       getScopedClients: jest.fn().mockResolvedValue({
-        getEventClient: jest.fn().mockResolvedValue({}),
         getEventSearchClient: jest.fn().mockResolvedValue({}),
         getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
         licensing: {},
@@ -64,5 +64,77 @@ describe('event_investigation_attach tool', () => {
     expect(attachEventInvestigationToolHandler).toHaveBeenCalledWith(
       expect.objectContaining({ logger })
     );
+  });
+
+  describe('alert identity telemetry', () => {
+    const params = {
+      event_id: 'event-1',
+      workflow_execution_id: 'workflow-id',
+      started_at: '2026-01-01T00:00:00.000Z',
+    };
+
+    const identity = {
+      alert_source: 'elastic.significant_events',
+      fingerprint: 'event-1',
+      space_id: 'space-a',
+    };
+
+    const run = async (trackAgentToolEventInvestigationAttach = jest.fn()) => {
+      const tool = createEventInvestigationAttachTool({
+        getScopedClients: jest.fn().mockResolvedValue({
+          getEventSearchClient: jest.fn().mockResolvedValue({}),
+          getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
+          licensing: {},
+        }) as unknown as GetScopedClients,
+        server: {} as SignificantEventsServer,
+        logger: loggingSystemMock.createLogger(),
+        telemetry: { trackAgentToolEventInvestigationAttach } as never,
+      });
+      const context = createMockToolContext();
+      context.request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
+      const result = await invokeHandler(tool as never, params, context);
+      return { payload: trackAgentToolEventInvestigationAttach.mock.calls[0]?.[0], result };
+    };
+
+    beforeEach(() => {
+      (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+      (assertCanManageSignificantEvents as jest.Mock).mockResolvedValue(undefined);
+    });
+
+    it('reports the attached event identity and ignores telemetry failures', async () => {
+      (attachEventInvestigationToolHandler as jest.Mock).mockResolvedValue({
+        updated: 1,
+        ignored: 0,
+      });
+      const track = jest.fn().mockImplementation(() => {
+        throw new Error('telemetry unavailable');
+      });
+
+      const { payload, result } = await run(track);
+
+      expect(payload).toEqual({
+        ...identity,
+        success: true,
+        event_id: 'event-1',
+        workflow_execution_id: 'workflow-id',
+      });
+      expect(result).toMatchObject({ results: [{ type: 'other' }] });
+    });
+
+    it('keeps the caller-named event as fingerprint when the attach fails', async () => {
+      (attachEventInvestigationToolHandler as jest.Mock).mockRejectedValue(
+        new Error('index unavailable')
+      );
+
+      const { payload } = await run();
+
+      expect(payload).toEqual({
+        ...identity,
+        success: false,
+        event_id: 'event-1',
+        workflow_execution_id: 'workflow-id',
+        error_message: 'index unavailable',
+      });
+    });
   });
 });

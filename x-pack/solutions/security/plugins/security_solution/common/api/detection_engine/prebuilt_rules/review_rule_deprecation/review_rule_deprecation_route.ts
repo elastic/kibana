@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Max number of deprecated rules returned per request. Conservative limit
@@ -14,15 +14,17 @@ import { z } from '@kbn/zod/v4';
 export const MAX_DEPRECATED_RULES_TO_RETURN = 200;
 
 export type ReviewRuleDeprecationRequestBody = z.infer<typeof ReviewRuleDeprecationRequestBody>;
-export const ReviewRuleDeprecationRequestBody = z
-  .object({
-    /**
-     * Optional list of saved-object IDs to filter by.
-     * Uses SO IDs instead of rule_ids to avoid ambiguity from duplicate rule_ids.
-     */
-    ids: z.array(z.string()).optional(),
-  })
-  .nullable();
+export const ReviewRuleDeprecationRequestBody = lazySchema(() =>
+  z
+    .object({
+      /**
+       * Optional list of saved-object IDs to filter by.
+       * Uses SO IDs instead of rule_ids to avoid ambiguity from duplicate rule_ids.
+       */
+      ids: z.array(z.string()).optional(),
+    })
+    .nullable()
+);
 
 export interface DeprecatedRuleForReview {
   /** Installed rule saved object ID */

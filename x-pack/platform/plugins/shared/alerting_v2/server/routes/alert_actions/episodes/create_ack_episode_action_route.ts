@@ -8,6 +8,7 @@
 import {
   ALERT_EPISODE_ACTION_TYPE,
   createAckEpisodeActionBodySchema,
+  errorResponseSchema,
 } from '@kbn/alerting-v2-schemas';
 import { createAckEpisodeActionOasExamples } from './create_ack_episode_action_oas_example';
 import { createEpisodeActionRouteForType } from './create_episode_action_route_for_type';
@@ -15,8 +16,15 @@ import { createEpisodeActionRouteForType } from './create_episode_action_route_f
 export const CreateAckEpisodeActionRoute = createEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.ACK,
   pathSuffix: '_ack',
-  summary: 'Acknowledge an alert episode',
+  summary: 'Acknowledge an alert',
   bodySchema: createAckEpisodeActionBodySchema,
   oasOperationObject: createAckEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
+  additionalResponses: {
+    409: {
+      body: () => errorResponseSchema,
+      description: 'Indicates the alert is already acknowledged.',
+    },
+  },
 });

@@ -28,6 +28,13 @@ jest.mock('../../../../../../hooks', () => ({
   sendBulkUpgradeAgentlessPolicies: jest.fn(),
 }));
 
+jest.mock('../../../installed_integrations/components/pending_upgrade_review_status', () => ({
+  PendingUpgradeReviewStatus: () => <div data-test-subj="pendingUpgradeReviewStatus" />,
+}));
+
+// These renders take ~45ms, so the 5s default only ever fails to a CI wall-clock stall.
+jest.setTimeout(30_000);
+
 const agentPolicies = [
   { id: 'agentless-1', name: 'Agentless', supports_agentless: true },
 ] as AgentPolicy[];
@@ -65,21 +72,47 @@ describe('PackagePolicyUpgradeCell', () => {
     }
   });
 
-  it('links to the legacy upgrade route for a non-agentless policy', async () => {
+  it('links to the legacy upgrade route for a non-agentless policy', () => {
     const utils = renderCell({ packagePolicy: createPackagePolicy({ supports_agentless: false }) });
-    const button = await utils.findByTestId('integrationPolicyUpgradeBtn');
+    const button = utils.getByTestId('integrationPolicyUpgradeBtn');
     expect(button).toHaveAttribute('href');
   });
 
-  it('links to the legacy upgrade route for an agentless policy while disableAgentlessLegacyAPI is off', async () => {
+  it('links to the legacy upgrade route for an agentless policy while disableAgentlessLegacyAPI is off', () => {
     jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
       ...allowedExperimentalValues,
       disableAgentlessLegacyAPI: false,
     });
     const utils = renderCell({ packagePolicy: createPackagePolicy({ supports_agentless: true }) });
-    const button = await utils.findByTestId('integrationPolicyUpgradeBtn');
+    const button = utils.getByTestId('integrationPolicyUpgradeBtn');
     // Flag off (default): the legacy edit-page upgrade still works, so the link is untouched.
     expect(button).toHaveAttribute('href');
+  });
+
+  it('does not link to the upgrade page of an agent-based policy managed by a cloud onboarding instance', () => {
+    const utils = renderCell({
+      packagePolicy: createPackagePolicy({
+        supports_agentless: false,
+        onboarding_deployment_id: 'deploy-1',
+      }),
+    });
+
+    // The upgrade page edits the policy, which only the onboarding flow may do.
+    expect(utils.queryByTestId('integrationPolicyUpgradeBtn')).not.toBeInTheDocument();
+  });
+
+  it('keeps the pending upgrade review of a package that keeps policies up to date for a policy managed by a cloud onboarding instance', () => {
+    // The review is a package-level prompt, not the policy's upgrade page.
+    const utils = renderCell({
+      packagePolicy: createPackagePolicy({
+        supports_agentless: false,
+        onboarding_deployment_id: 'deploy-1',
+        keepPoliciesUpToDate: true,
+        pendingUpgradeReview: { target_version: '0.5.0', action: 'pending' },
+      } as Partial<InMemoryPackagePolicy>),
+    });
+
+    expect(utils.getByTestId('pendingUpgradeReviewStatus')).toBeInTheDocument();
   });
 
   describe('with disableAgentlessLegacyAPI enabled', () => {
@@ -95,7 +128,7 @@ describe('PackagePolicyUpgradeCell', () => {
         packagePolicy: createPackagePolicy({ supports_agentless: true }),
       });
 
-      const button = await utils.findByTestId('integrationPolicyUpgradeBtn');
+      const button = utils.getByTestId('integrationPolicyUpgradeBtn');
       // The agentless upgrade opens a confirm modal instead of linking to the (blocked) legacy route.
       expect(button).not.toHaveAttribute('href');
 
@@ -104,7 +137,18 @@ describe('PackagePolicyUpgradeCell', () => {
       });
 
       // The shared agentless-upgrade confirm modal is shown.
-      expect(await utils.findByTestId('confirmModalConfirmButton')).toBeInTheDocument();
+      expect(utils.getByTestId('confirmModalConfirmButton')).toBeInTheDocument();
+    });
+
+    it('keeps the in-place upgrade of a managed integration managed by a cloud onboarding instance', () => {
+      const utils = renderCell({
+        packagePolicy: createPackagePolicy({
+          supports_agentless: true,
+          onboarding_deployment_id: 'deploy-1',
+        }),
+      });
+
+      expect(utils.getByTestId('integrationPolicyUpgradeBtn')).not.toHaveAttribute('href');
     });
   });
 });

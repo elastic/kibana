@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/saved-objects-finder-plugin'
   - '@kbn/expressions-plugin'
   - '@kbn/field-utils'
+  - '@kbn/chart-icons'
 tags:
   - shared-browser
   - package
@@ -40,6 +41,4 @@ fileGroups:
   src:
     - '**/*'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

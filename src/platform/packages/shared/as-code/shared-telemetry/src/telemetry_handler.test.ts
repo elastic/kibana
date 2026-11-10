@@ -11,8 +11,12 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
-import { telemetryHandler } from './telemetry_handler';
-import { AGENTIC_COUNTER_TYPE, ELASTIC_AGENTIC_USER_AGENT } from './telemetry_handler';
+import {
+  AGENTIC_COUNTER_TYPE,
+  ELASTIC_CLIENT_META_HEADER,
+  UNKNOWN_AGENT_CODE,
+  telemetryHandler,
+} from './telemetry_handler';
 
 describe('dashboard api telemetry handler', () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
@@ -88,92 +92,157 @@ describe('dashboard api telemetry handler', () => {
   });
 
   describe('agentic telemetry', () => {
-    it('increments counter twice for elastic-agentic user-agent when trackAgentic is true', async () => {
-      const request = httpServerMock.createKibanaRequest({
+    const cliUserAgent =
+      'elastic-cli/0.6.0 (linux x64; Node.js v22.0.0; anthropic/claude-sonnet-4-5)';
+    const counterName = 'post /api/dashboards 201';
+    const response = { status: 201 } as IKibanaResponse<any>;
+
+    const createRequest = (headers: Record<string, string>) =>
+      httpServerMock.createKibanaRequest({
         method: 'post',
         path: '/api/dashboards',
         routePath: '/api/dashboards',
-        headers: { 'user-agent': ELASTIC_AGENTIC_USER_AGENT },
+        headers,
       });
 
-      const response = { status: 201 } as IKibanaResponse<any>;
-      await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
-
-      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(2);
+    const expectAgenticCounters = (agentCode: string) => {
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(3);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({ counterName });
       expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: 'post /api/dashboards 201',
-      });
-      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
-        counterName: 'post /api/dashboards 201',
+        counterName,
         counterType: AGENTIC_COUNTER_TYPE,
       });
-    });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName,
+        counterType: `elastic-cli:${agentCode}`,
+      });
+    };
 
-    it('does not increment agentic counter for non-agentic requests', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        method: 'get',
-        path: actualPath,
-        routePath,
-        headers: { 'user-agent': 'Mozilla/5.0' },
+    const expectOnlyDefaultCounter = () => {
+      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({ counterName });
+    };
+
+    it('increments agentic and agent counters for elastic-cli requests with an agent code', async () => {
+      const request = createRequest({
+        'user-agent': cliUserAgent,
+        [ELASTIC_CLIENT_META_HEADER]: 'et=0.6.0,js=22.0.0,t=0.6.0,ag=cc',
       });
 
-      const response = { status: 200 } as IKibanaResponse<any>;
+      const result = await telemetryHandler(
+        request,
+        { usageCounter, trackAgentic: true },
+        () => response
+      );
+
+      expect(result).toBe(response);
+      expectAgenticCounters('cc');
+    });
+
+    it('passes through agent codes that are not known today', async () => {
+      const request = createRequest({
+        'user-agent': cliUserAgent,
+        [ELASTIC_CLIENT_META_HEADER]: 'et=0.6.0,js=22.0.0,t=0.6.0,ag=zz',
+      });
+
       await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
 
-      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
-      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
-        expect.objectContaining({ counterType: AGENTIC_COUNTER_TYPE })
-      );
+      expectAgenticCounters('zz');
     });
 
-    it('excludes agentic counter for Kibana-origin requests even with elastic-agentic user-agent', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        method: 'get',
-        path: actualPath,
-        routePath,
-        headers: {
-          [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
-          'user-agent': ELASTIC_AGENTIC_USER_AGENT,
-        },
+    it('lower-cases the agent code', async () => {
+      const request = createRequest({
+        'user-agent': cliUserAgent,
+        [ELASTIC_CLIENT_META_HEADER]: 'et=0.6.0, ag=CC',
       });
 
-      const response = { status: 200 } as IKibanaResponse<any>;
+      await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
+
+      expectAgenticCounters('cc');
+    });
+
+    it.each([['ag=a b'], [`ag=${'x'.repeat(50)}`], ['ag=c:c']])(
+      'counts malformed agent codes (%s) as unknown',
+      async (agentEntry) => {
+        const request = createRequest({
+          'user-agent': cliUserAgent,
+          [ELASTIC_CLIENT_META_HEADER]: `et=0.6.0,${agentEntry}`,
+        });
+
+        await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
+
+        expectAgenticCounters(UNKNOWN_AGENT_CODE);
+      }
+    );
+
+    it('reads the agent code from duplicate client meta headers joined by Node', async () => {
+      const request = createRequest({
+        'user-agent': cliUserAgent,
+        [ELASTIC_CLIENT_META_HEADER]: 'et=0.6.0,js=22.0.0, ag=cx',
+      });
+
+      await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
+
+      expectAgenticCounters('cx');
+    });
+
+    it('does not increment agentic counters for elastic-cli requests without client meta', async () => {
+      const request = createRequest({ 'user-agent': cliUserAgent });
+
+      await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
+
+      expectOnlyDefaultCounter();
+    });
+
+    it.each([['et=0.6.0,js=22.0.0,t=0.6.0'], ['et=0.6.0,ag=']])(
+      'does not increment agentic counters when client meta (%s) has no agent code',
+      async (clientMeta) => {
+        const request = createRequest({
+          'user-agent': cliUserAgent,
+          [ELASTIC_CLIENT_META_HEADER]: clientMeta,
+        });
+
+        await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
+
+        expectOnlyDefaultCounter();
+      }
+    );
+
+    it.each([['elastic-agentic'], ['Mozilla/5.0'], ['foo elastic-cli/0.6.0']])(
+      'does not increment agentic counters for non elastic-cli user-agent %s',
+      async (userAgent) => {
+        const request = createRequest({
+          'user-agent': userAgent,
+          [ELASTIC_CLIENT_META_HEADER]: 'et=0.6.0,ag=cc',
+        });
+
+        await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
+
+        expectOnlyDefaultCounter();
+      }
+    );
+
+    it('does not increment any counter for Kibana-origin elastic-cli requests', async () => {
+      const request = createRequest({
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        'user-agent': cliUserAgent,
+        [ELASTIC_CLIENT_META_HEADER]: 'et=0.6.0,ag=cc',
+      });
+
       await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
 
       expect(usageCounter.incrementCounter).not.toHaveBeenCalled();
     });
 
-    it('matches elastic-agentic user-agent case-insensitively', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        method: 'get',
-        path: actualPath,
-        routePath,
-        headers: { 'user-agent': 'Elastic-Agentic/1.0' },
+    it('does not increment agentic counters when trackAgentic is not set', async () => {
+      const request = createRequest({
+        'user-agent': cliUserAgent,
+        [ELASTIC_CLIENT_META_HEADER]: 'et=0.6.0,ag=cc',
       });
 
-      const response = { status: 200 } as IKibanaResponse<any>;
-      await telemetryHandler(request, { usageCounter, trackAgentic: true }, () => response);
-
-      expect(usageCounter.incrementCounter).toHaveBeenCalledWith(
-        expect.objectContaining({ counterType: AGENTIC_COUNTER_TYPE })
-      );
-    });
-
-    it('does not increment agentic counter when trackAgentic is not set', async () => {
-      const request = httpServerMock.createKibanaRequest({
-        method: 'get',
-        path: actualPath,
-        routePath,
-        headers: { 'user-agent': ELASTIC_AGENTIC_USER_AGENT },
-      });
-
-      const response = { status: 200 } as IKibanaResponse<any>;
       await telemetryHandler(request, { usageCounter }, () => response);
 
-      expect(usageCounter.incrementCounter).toHaveBeenCalledTimes(1);
-      expect(usageCounter.incrementCounter).not.toHaveBeenCalledWith(
-        expect.objectContaining({ counterType: AGENTIC_COUNTER_TYPE })
-      );
+      expectOnlyDefaultCounter();
     });
   });
 });

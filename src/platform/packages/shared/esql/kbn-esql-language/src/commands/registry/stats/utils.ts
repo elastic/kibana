@@ -9,6 +9,9 @@
 import type {
   ESQLAstAllCommands,
   ESQLAstItem,
+  ESQLAstQueryExpression,
+  ESQLCommand,
+  ESQLCommandOption,
   ESQLFunction,
   ESQLProperNode,
   ESQLSingleAstItem,
@@ -22,15 +25,29 @@ import {
   isLiteral,
   isAssignment,
   isColumn,
+  Parser,
   Walker,
 } from '@elastic/esql';
 import { commaCompleteItem, newLineCompleteItem, pipeCompleteItem } from '../complete_items';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
-import type { ISuggestionItem } from '../types';
-import { getFunctionDefinition } from '../../definitions/utils/functions';
+import type {
+  ESQLColumnData,
+  ESQLUserDefinedColumn,
+  GetColumnsByTypeFn,
+  ICommandCallbacks,
+  ICommandContext,
+  ISuggestionItem,
+  UnmappedFieldsStrategy,
+} from '../types';
+import { getExpressionType } from '../../definitions/utils/expressions';
+import { buildColumnSuggestions, getFunctionDefinition } from '../../definitions/utils/functions';
 import { FunctionDefinitionTypes } from '../../definitions/types';
 import { ReplacementRangeStrategyKind } from '../../../language/autocomplete/utils/prefix_range';
 import { endsWithComma, endsWithWhitespace } from '../../definitions/utils/regex';
+import { getColumnName } from '../../definitions/utils/columns';
+import { getBracketsToClose, removeAutocompleteMarkers } from '../../definitions/utils/ast';
+import { EDITOR_MARKER } from '../../definitions/constants';
+import { NOT_SUGGESTED_TYPES } from '../../../query_columns_service';
 
 /**
  * Position of the caret in the sort command:
@@ -204,4 +221,222 @@ export const getCommaAndPipe = (
   }
 
   return [newLineCompleteItem, pipeSuggestion, commaSuggestion];
+};
+
+type StatsCommand = ESQLCommand<'stats'> | ESQLCommand<'inline stats'>;
+
+export const isStatsCommand = (command: ESQLAstAllCommands): command is StatsCommand =>
+  command.type === 'command' && (command.name === 'stats' || command.name === 'inline stats');
+
+export const isByOption = (arg: ESQLAstItem): arg is ESQLCommandOption =>
+  !Array.isArray(arg) && isOptionNode(arg) && arg.name === 'by';
+
+/**
+ * Returns the columns defined in the BY clause, keyed by name with the rightmost
+ * definition winning (as Elasticsearch does when a name is reused).
+ * Given | STATS count = COUNT() BY addr = address
+ * returns { addr, { type: 'keyword' ... } }
+ * A bare expression grouping (e.g. BUCKET(@timestamp, 1 d)) defines an implicitly-named column;
+ * `query` is required to recover its source text, which is the name aggregations reference.
+ */
+export const getColumnsDefinedInByClause = (
+  command: Pick<ESQLCommand, 'args'>,
+  inputColumns: Map<string, ESQLColumnData>,
+  query?: string,
+  unmappedFieldsStrategy?: UnmappedFieldsStrategy
+): Map<string, ESQLUserDefinedColumn> => {
+  const typeOf = (thing: ESQLAstItem) =>
+    getExpressionType(thing, inputColumns, unmappedFieldsStrategy);
+
+  const assignments = new Map<string, ESQLUserDefinedColumn>();
+
+  for (const arg of command.args) {
+    if (!isByOption(arg)) {
+      continue;
+    }
+
+    for (const grouping of arg.args) {
+      // `name = expression` defines a new column, typed from the input columns.
+      if (isAssignment(grouping) && isColumn(grouping.args[0])) {
+        const target = grouping.args[0];
+        const name = getColumnName(target);
+        assignments.set(name, {
+          name,
+          type: typeOf(grouping.args[1]),
+          location: target.location,
+          userDefined: true,
+        });
+        continue;
+      }
+
+      // A bare column grouping references an input field already in scope, unless it reuses an
+      // assigned name — then it shadows that assignment with the input column it points to.
+      if (isColumn(grouping)) {
+        const name = getColumnName(grouping);
+        if (assignments.has(name)) {
+          assignments.set(name, {
+            name,
+            type: typeOf(grouping),
+            location: grouping.location,
+            userDefined: true,
+          });
+        }
+        continue;
+      }
+
+      // A bare expression grouping (e.g. `BUCKET(@timestamp, 1 d)`) defines an implicitly-named
+      // column whose name is its source text; aggregations reference it via a backtick identifier.
+      if (query !== undefined && !Array.isArray(grouping) && !isOptionNode(grouping)) {
+        const name = query.substring(grouping.location.min, grouping.location.max + 1);
+        assignments.set(name, {
+          name,
+          type: typeOf(grouping),
+          location: grouping.location,
+          userDefined: true,
+        });
+      }
+    }
+  }
+
+  return assignments;
+};
+
+/**
+ * Wraps a column retriever so the BY-clause columns are suggested alongside the input
+ * columns, filtered by the requested type and shadowing input fields of the same name.
+ */
+const suggestWithByColumns =
+  (
+    getByType: GetColumnsByTypeFn,
+    byColumns: Map<string, ESQLUserDefinedColumn>
+  ): GetColumnsByTypeFn =>
+  async (expectedType = 'any', ignored = [], options) => {
+    const baseSuggestions = await getByType(expectedType, ignored, options);
+    const requestedTypes = Array.isArray(expectedType) ? expectedType : [expectedType];
+
+    const matchingColumns = [...byColumns.values()].filter(
+      (column) =>
+        !ignored.includes(column.name) &&
+        (requestedTypes[0] === 'any' || requestedTypes.includes(column.type)) &&
+        !NOT_SUGGESTED_TYPES.includes(column.type)
+    );
+
+    // The base suggestions already carry the fields browser, so avoid building a second one.
+    const byColumnSuggestions = buildColumnSuggestions(matchingColumns, [], {
+      ...options,
+      isFieldsBrowserEnabled: false,
+    });
+
+    // BY columns shadow input fields of the same name, including aliases whose type
+    // does not match the requested type, so drop every shadowed base suggestion.
+    const shadowedNames = new Set(byColumns.keys());
+    return [
+      ...byColumnSuggestions,
+      ...baseSuggestions.filter((suggestion) => !shadowedNames.has(suggestion.label)),
+    ];
+  };
+
+/**
+ * Finds the re-parsed counterpart of the stats command the cursor is in and returns it only when it
+ * carries a BY clause. The command is matched by its start offset, which is stable because syntax
+ * corrections are appended after the cursor: this pins us to the exact command the caret sits in
+ * instead of a sibling stats command or one in a surrounding/nested query, whose BY columns are out
+ * of scope and must not leak into the suggestions.
+ */
+const statsWithByMatchingCursor = (
+  root: ESQLAstQueryExpression,
+  cursorCommand: ESQLAstAllCommands
+): ESQLCommand | undefined => {
+  let match: ESQLCommand | undefined;
+  Walker.walk(root, {
+    visitCommand: (command) => {
+      if (
+        isStatsCommand(command) &&
+        command.location.min === cursorCommand.location.min &&
+        command.args.some(isByOption)
+      ) {
+        match = command;
+      }
+    },
+  });
+  return match;
+};
+
+/**
+ * The query is parsed only up to the cursor, so a BY clause typed after the cursor is missing
+ * from the command. Recover the stats command together with its BY clause: the full query usually
+ * parses with the BY clause intact, but an incomplete expression at the cursor (e.g. an empty
+ * WHERE or an unclosed function call) can swallow it. In that case, complete the expression with an
+ * editor marker and close the brackets left open at the cursor so the BY clause parses as its own
+ * option instead of being pulled inside the unterminated expression. Returns undefined when there
+ * is nothing meaningful after the cursor or no BY clause is found. `query` is the text the
+ * command locations index into: the original query, or the repaired one when the fallback runs.
+ */
+const getCommandAtCursor = (
+  query: string,
+  cursorPosition: number,
+  cursorCommand: ESQLAstAllCommands
+): { command: ESQLCommand; query: string } | undefined => {
+  const afterCursor = query.slice(cursorPosition);
+  if (!afterCursor.trim()) {
+    return undefined;
+  }
+
+  // Try parsing the query as is.
+  const fromFullQuery = statsWithByMatchingCursor(Parser.parse(query).root, cursorCommand);
+  if (fromFullQuery) {
+    return { command: fromFullQuery, query };
+  }
+
+  // If the query errored when parsed, add an editor marker and close the brackets left open at the cursor.
+  // The repaired tree keeps locations in this string; callers must slice `corrected`, not the original query.
+  const beforeCursor = `${query.slice(0, cursorPosition)} ${EDITOR_MARKER} `;
+  const corrected = `${beforeCursor}${getBracketsToClose(beforeCursor).join('')}${afterCursor}`;
+  const root = removeAutocompleteMarkers(Parser.parse(corrected).root);
+  const command = statsWithByMatchingCursor(root, cursorCommand);
+  return command ? { command, query: corrected } : undefined;
+};
+
+/**
+ * Returns the context and callbacks used to autocomplete the aggregation expressions and the
+ * per-aggregation WHERE clause: the columns defined in the BY clause are overlaid so they
+ * resolve correctly and are offered as suggestions.
+ */
+export const getAggregationScope = (
+  fullQuery: string,
+  cursorPosition: number,
+  command: ESQLAstAllCommands,
+  context?: ICommandContext,
+  callbacks?: ICommandCallbacks
+): { context?: ICommandContext; callbacks?: ICommandCallbacks } => {
+  if (!context || !isStatsCommand(command)) {
+    return { context, callbacks };
+  }
+
+  // The command param is built from the query up to the cursor, so a BY clause typed after the
+  // cursor is missing. Parse the full text again, and slice implicit names from the query its
+  // locations refer to.
+  const commandAtCursor = getCommandAtCursor(fullQuery, cursorPosition, command);
+  const byColumns = getColumnsDefinedInByClause(
+    commandAtCursor?.command ?? command,
+    context.columns,
+    commandAtCursor?.query ?? fullQuery,
+    context.unmappedFieldsStrategy
+  );
+
+  if (byColumns.size === 0) {
+    return { context, callbacks };
+  }
+
+  const scopedContext: ICommandContext = {
+    ...context,
+    columns: new Map([...context.columns, ...byColumns]),
+  };
+
+  const getByType = callbacks?.getByType;
+  const scopedCallbacks: ICommandCallbacks | undefined = getByType
+    ? { ...callbacks, getByType: suggestWithByColumns(getByType, byColumns) }
+    : callbacks;
+
+  return { context: scopedContext, callbacks: scopedCallbacks };
 };

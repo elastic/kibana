@@ -547,16 +547,6 @@ export interface TableSuggestionColumn {
   operation: Operation;
 }
 
-export interface DataSourceInfo {
-  layerId: string;
-  dataView?: DataView;
-  columns: Array<{
-    id: string;
-    role: 'split' | 'metric';
-    operation: OperationDescriptor & { type: string; fields?: string[]; filter?: Query };
-  }>;
-}
-
 export interface VisualizationInfo {
   layers: Array<{
     layerId: string;
@@ -1230,6 +1220,10 @@ export interface SuggestionRequest<T = unknown> {
    * Visualizations can use it to tailor suggestions (e.g. prefer line for time series).
    */
   query?: AggregateQuery;
+  /**
+   * Caller-provided defaults (from `defaultVisualizationOverrides`), used only when there is no current `state`.
+   */
+  defaultOverrides?: Partial<T>;
 }
 
 /**

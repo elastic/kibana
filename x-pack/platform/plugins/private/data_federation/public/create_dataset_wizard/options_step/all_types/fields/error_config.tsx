@@ -13,6 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import {
+  DEFAULT_ERROR_MODE,
   errorModeAllowsBudget,
   type CreateDatasetFormValues,
   type DatasetErrorModeFormValue,
@@ -56,7 +57,7 @@ export function ErrorConfig({ control }: { control: Control<CreateDatasetFormVal
           <FormattedMessage
             id="xpack.dataFederation.createDatasetForm.settingsErrorModeHelpText"
             defaultMessage="{defaultValue} by default"
-            values={{ defaultValue: <EuiCode>fail fast</EuiCode> }}
+            values={{ defaultValue: <EuiCode>{DEFAULT_ERROR_MODE}</EuiCode> }}
           />
         }
         fullWidth

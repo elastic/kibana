@@ -7,20 +7,24 @@
 
 import type { RouteDependencies } from '../register_routes';
 import { registerHuntIndexScopeRoute } from './index_scope';
+import { registerHuntWorkerIndexCoverageRoute } from './worker_index_coverage';
 import { registerHuntForThreatRoute } from './hunt_for_threat';
 import { registerHuntBehaviorRoute } from './hunt_behavior';
 import { registerCandidatesRoute } from './candidates';
 import { registerHuntCoordinatorRoute } from './hunt_coordinator';
 import { registerFindOrCreateInvestigationRoute } from './find_or_create_investigation';
 import { registerWriteHuntEvidenceRoute } from './write_hunt_evidence';
+import { registerHuntThreatIntelSupplyRoutes } from './threat_intel_supply';
 
-/** Registers the hunt routes (index_scope, Tier 1, Tier 2, coordinator, candidates, find-or-create, write-evidence). */
+/** Registers the hunt routes (index_scope, worker coverage, Tier 1, Tier 2, coordinator, candidates, find-or-create, write-evidence, TI supply). */
 export const registerHuntRoutes = (deps: RouteDependencies): void => {
   registerHuntIndexScopeRoute(deps);
+  registerHuntWorkerIndexCoverageRoute(deps);
   registerHuntForThreatRoute(deps);
   registerHuntBehaviorRoute(deps);
   registerCandidatesRoute(deps);
   registerHuntCoordinatorRoute(deps);
   registerFindOrCreateInvestigationRoute(deps);
   registerWriteHuntEvidenceRoute(deps);
+  registerHuntThreatIntelSupplyRoutes(deps);
 };

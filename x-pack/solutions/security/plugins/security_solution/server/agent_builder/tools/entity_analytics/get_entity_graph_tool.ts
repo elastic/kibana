@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition, ToolAvailabilityContext } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
@@ -25,20 +25,22 @@ import {
 } from './entity_graph_attachment_utils';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
-const schema = z.object({
-  entityType: IdentifierType.describe(
-    'The type of entity: host, user, service, or generic'
-  ).optional(),
-  entityId: z
-    .string()
-    .min(1)
-    .describe(
-      'The entity id (EUID), canonical entity.name, or user.full_name to render the relationship graph for. ' +
-        'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), ' +
-        '"LAPTOP-SALES04" (entity.name), "John Doe" (user.full_name). ' +
-        'When a security.entity attachment identifies the target, use its prefixed entity id here.'
-    ),
-});
+const schema = lazySchema(() =>
+  z.object({
+    entityType: IdentifierType.describe(
+      'The type of entity: host, user, service, or generic'
+    ).optional(),
+    entityId: z
+      .string()
+      .min(1)
+      .describe(
+        'The entity id (EUID), canonical entity.name, or user.full_name to render the relationship graph for. ' +
+          'Examples: "host:server1" (prefixed EUID), "server1" (non-prefixed), ' +
+          '"LAPTOP-SALES04" (entity.name), "John Doe" (user.full_name). ' +
+          'When a security.entity attachment identifies the target, use its prefixed entity id here.'
+      ),
+  })
+);
 
 const DEFAULT_ENTITY_GRAPH_TIME_RANGE = { from: 'now-30d', to: 'now' } as const;
 
@@ -125,7 +127,10 @@ When the id/name resolves to multiple candidate entities, no attachment is store
           entityType,
         });
         if (!resolved.ok) {
-          return { results: resolved.results };
+          if (resolved.result.type === ToolResultType.error) {
+            telemetryTracker.recordFailure(resolved.result.data.message);
+          }
+          return { results: [resolved.result] };
         }
 
         const { identifierType, identifier, entityStoreId } = resolved.identity;

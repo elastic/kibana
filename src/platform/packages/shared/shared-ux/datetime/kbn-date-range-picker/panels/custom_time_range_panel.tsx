@@ -50,7 +50,7 @@ import {
 } from '../date_range_picker_panel_ui';
 import { useDateRangePickerContext } from '../date_range_picker_context';
 import { dateMathToRelativeParts, applyTimePrecision } from '../format';
-import type { DateType, DateOffset, TimeUnit } from '../types';
+import type { DateString, DateType, DateOffset, TimeUnit } from '../types';
 import {
   DATE_TYPE_ABSOLUTE,
   DATE_TYPE_RELATIVE,
@@ -319,6 +319,19 @@ const ShorthandDisplay = ({ value, isDisabled }: ShorthandDisplayProps) => {
 };
 
 /**
+ * What a parsed range means. Bound types and dates are derived from the bound strings, so
+ * `start`/`end` suffice and the identity churn of `TimeRange` is ignored.
+ */
+interface SyncedBounds {
+  start: DateString;
+  end: DateString;
+  absoluteFormat: string;
+}
+
+const isSameBounds = (a: SyncedBounds, b: SyncedBounds): boolean =>
+  a.start === b.start && a.end === b.end && a.absoluteFormat === b.absoluteFormat;
+
+/**
  * Panel for specifying a custom absolute or relative time range.
  */
 export function CustomTimeRangePanel() {
@@ -354,7 +367,15 @@ export function CustomTimeRangePanel() {
     [startState, endState]
   );
 
-  const isInternalChangeRef = useRef(false);
+  // Context text and parsed bounds the local state already reflects; re-deriving from them would
+  // clobber live edits. `null` bounds mean the panel just wrote `text` and the next parse of it
+  // should be adopted as-is rather than re-derived.
+  const syncedTextRef = useRef(text);
+  const syncedBoundsRef = useRef<SyncedBounds | null>({
+    start: timeRange.start,
+    end: timeRange.end,
+    absoluteFormat,
+  });
   const isPanelDrivenChangeRef = useRef(false);
 
   const handleStartStateChange = useCallback((next: DatePartState) => {
@@ -368,31 +389,34 @@ export function CustomTimeRangePanel() {
   }, []);
 
   useEffect(() => {
-    if (isInternalChangeRef.current) {
-      isInternalChangeRef.current = false;
-      return;
+    const bounds: SyncedBounds = { start: timeRange.start, end: timeRange.end, absoluteFormat };
+
+    if (text === syncedTextRef.current) {
+      if (syncedBoundsRef.current === null) {
+        syncedBoundsRef.current = bounds;
+        return;
+      }
+
+      // Same text and same meaning: an identity-only recomputation.
+      if (isSameBounds(bounds, syncedBoundsRef.current)) return;
     }
     // Both bounds must be present; skip when input is partial or unparseable.
     if (!timeRange.start || !timeRange.end) return;
+    syncedTextRef.current = text;
+    syncedBoundsRef.current = bounds;
     setStartState(
       deriveInitialState(timeRange.start, timeRange.startDate, timeRange.type[0], absoluteFormat)
     );
     setEndState(
       deriveInitialState(timeRange.end, timeRange.endDate, timeRange.type[1], absoluteFormat)
     );
-  }, [
-    timeRange.start,
-    timeRange.end,
-    timeRange.startDate,
-    timeRange.endDate,
-    timeRange.type,
-    absoluteFormat,
-  ]);
+  }, [text, timeRange, absoluteFormat]);
 
   useEffect(() => {
     if (!isPanelDrivenChangeRef.current) return;
     isPanelDrivenChangeRef.current = false;
-    isInternalChangeRef.current = true;
+    syncedTextRef.current = inputText;
+    syncedBoundsRef.current = null;
     setText(inputText);
   }, [inputText, setText]);
 

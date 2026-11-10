@@ -13,7 +13,9 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { AGGREGATION_OPTIONS, aggValueToLabel } from '../../../helpers/aggregation_options';
 import type { Option } from '../../../helpers/create_options';
 import { createOptionsFromFields } from '../../../helpers/create_options';
+import { useFormValues } from '../../../hooks/use_form_values';
 import type { CreateSLOForm } from '../../../types';
+import { HISTOGRAM_FIELD_TYPES } from '../../../constants';
 
 const fieldLabel = i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.fieldLabel', {
   defaultMessage: 'Field',
@@ -33,7 +35,7 @@ const fieldTooltip = (
   />
 );
 
-const NUMERIC_FIELD_TYPES = ['number', 'histogram'];
+const NUMERIC_FIELD_TYPES = ['number', ...HISTOGRAM_FIELD_TYPES];
 const CARDINALITY_FIELD_TYPES = ['number', 'string'];
 
 interface MetricInputProps {
@@ -49,9 +51,11 @@ export function MetricInput({
   isLoadingIndex,
   indexFields,
 }: MetricInputProps) {
-  const { control, watch } = useFormContext<CreateSLOForm>();
-  const metric = watch(`indicator.params.metric.metrics.${index}`);
-  const metricAggregation = watch(`indicator.params.metric.metrics.${index}.aggregation`);
+  const { control } = useFormContext<CreateSLOForm>();
+  const [metricName, metricAggregation] = useFormValues([
+    `indicator.params.metric.metrics.${index}.name`,
+    `indicator.params.metric.metrics.${index}.aggregation`,
+  ]);
 
   const [metricFields, setMetricFields] = useState(
     indexFields.filter((field) => NUMERIC_FIELD_TYPES.includes(field.type))
@@ -86,7 +90,7 @@ export function MetricInput({
               fullWidth
               label={
                 <span>
-                  {aggregationLabel} {metric.name}
+                  {aggregationLabel} {metricName}
                 </span>
               }
               isInvalid={fieldState.invalid}
@@ -158,7 +162,7 @@ export function MetricInput({
                     {i18n.translate('xpack.slo.sloEdit.sliType.timesliceMetric.percentileLabel', {
                       defaultMessage: 'Percentile',
                     })}{' '}
-                    {metric.name}
+                    {metricName}
                   </span>
                 }
               >
@@ -195,7 +199,7 @@ export function MetricInput({
                 isInvalid={fieldState.invalid}
                 label={
                   <span>
-                    {fieldLabel} {metric.name} {fieldTooltip}
+                    {fieldLabel} {metricName} {fieldTooltip}
                   </span>
                 }
               >

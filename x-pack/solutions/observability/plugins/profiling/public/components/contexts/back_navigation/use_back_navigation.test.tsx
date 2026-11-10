@@ -11,6 +11,7 @@ import { act, renderHook } from '@testing-library/react';
 import { MemoryRouter, useHistory } from 'react-router-dom';
 import type { AppHeaderBack } from '@kbn/app-header';
 import type { ProfilingStatus } from '@kbn/profiling-utils';
+import { ProfilingSchema } from '@kbn/profiling-utils';
 import { AsyncStatus } from '../../../hooks/use_async';
 import type { ProfilingDependencies } from '../profiling_dependencies/profiling_dependencies_context';
 import { ProfilingDependenciesContextProvider } from '../profiling_dependencies/profiling_dependencies_context';
@@ -38,7 +39,7 @@ const dependencies = {
 // The only back target the hook ever returns: the plugin root, labelled with the app name.
 const pluginRootTarget: AppHeaderBack = {
   href: '/base/app/profiling',
-  label: 'Universal Profiling',
+  label: 'Profiling',
 };
 
 const CONTENT_ROUTES = ['/stacktraces/threads', '/flamegraphs/flamegraph', '/functions/topn', '/'];
@@ -50,17 +51,19 @@ const UTILITY_ROUTES = ['/profiling-not-enabled'];
 const makeStatus = ({
   otelData = false,
   universalProfilingData = false,
+  universalProfilingSetup = true,
   legacyData = false,
 }: {
   otelData?: boolean;
   universalProfilingData?: boolean;
+  universalProfilingSetup?: boolean;
   legacyData?: boolean;
 }): ProfilingStatus => ({
   isEnabled: true,
   otel: { isAvailable: true, hasData: otelData },
   universalProfiling: {
     isAvailable: true,
-    hasSetup: true,
+    hasSetup: universalProfilingSetup,
     hasData: universalProfilingData,
     hasLegacyData: legacyData,
     canSetup: true,
@@ -193,6 +196,47 @@ describe('useBackNavigation', () => {
       expect(result.current.back).toEqual(pluginRootTarget);
     });
 
+    it.each(Object.values(ProfilingSchema))('keeps the %s schema of the current URL', (schema) => {
+      const { result } = renderBackNavigation({
+        initialEntry: `/settings?schema=${schema}`,
+        initialStatus: withData,
+      });
+      expect(result.current.back).toEqual({
+        ...pluginRootTarget,
+        href: `/base/app/profiling?schema=${schema}`,
+      });
+    });
+
+    it('does not keep an unknown schema', () => {
+      const { result } = renderBackNavigation({
+        initialEntry: '/settings?schema=semconv',
+        initialStatus: withData,
+      });
+      expect(result.current.back).toEqual(pluginRootTarget);
+    });
+
+    it('keeps the kuery of the current URL, but not its time range', () => {
+      const { result } = renderBackNavigation({
+        initialEntry: '/storage-explorer?rangeFrom=now-15m&rangeTo=now&kuery=foo',
+        initialStatus: withData,
+      });
+      expect(result.current.back).toEqual({
+        ...pluginRootTarget,
+        href: '/base/app/profiling?kuery=foo',
+      });
+    });
+
+    it('keeps both the kuery and the schema of the current URL', () => {
+      const { result } = renderBackNavigation({
+        initialEntry: `/settings?kuery=foo&schema=${ProfilingSchema.OTEL}`,
+        initialStatus: withData,
+      });
+      expect(result.current.back).toEqual({
+        ...pluginRootTarget,
+        href: `/base/app/profiling?kuery=foo&schema=${ProfilingSchema.OTEL}`,
+      });
+    });
+
     it('drops the back button again when navigating to a content route', () => {
       const { result } = renderBackNavigation({
         initialEntry: '/storage-explorer',
@@ -271,6 +315,23 @@ describe('useBackNavigation', () => {
       const { result } = renderBackNavigation({
         initialEntry: '/add-data-instructions',
         initialStatus: makeStatus({ otelData: true }),
+      });
+      expect(result.current.back).toEqual(pluginRootTarget);
+    });
+
+    it('returns the plugin root when there is only OTel data and Universal Profiling is not set up', () => {
+      const { result } = renderBackNavigation({
+        initialEntry: '/add-data-instructions',
+        initialStatus: makeStatus({ otelData: true, universalProfilingSetup: false }),
+      });
+      expect(result.current.back).toEqual(pluginRootTarget);
+    });
+
+    it('returns the plugin root when there is Universal Profiling data and its setup is incomplete', () => {
+      // The app can be used with that data, so users can leave the setup prompt.
+      const { result } = renderBackNavigation({
+        initialEntry: '/add-data-instructions',
+        initialStatus: makeStatus({ universalProfilingData: true, universalProfilingSetup: false }),
       });
       expect(result.current.back).toEqual(pluginRootTarget);
     });

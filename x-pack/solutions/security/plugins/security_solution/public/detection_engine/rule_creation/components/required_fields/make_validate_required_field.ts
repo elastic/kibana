@@ -14,12 +14,10 @@ export function makeValidateRequiredField(parentFieldPath: string) {
   return function validateRequiredField(
     ...args: Parameters<ValidationFunc<FormData, string, RequiredFieldInput>>
   ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined {
-    const [{ value, path, form }] = args;
+    const [{ value, path, form, formData }] = args;
 
-    const allRequiredFields = getAllRequiredFieldsValues(form, parentFieldPath);
-
-    const isFieldNameUsedMoreThanOnce =
-      allRequiredFields.filter((field) => field.name === value.name).length > 1;
+    const fieldNameCounts = getFieldNameCounts(form, formData, parentFieldPath);
+    const isFieldNameUsedMoreThanOnce = (fieldNameCounts.get(value.name) ?? 0) > 1;
 
     if (isFieldNameUsedMoreThanOnce) {
       return {
@@ -50,6 +48,50 @@ export function makeValidateRequiredField(parentFieldPath: string) {
       };
     }
   };
+}
+
+interface FieldNameCountsCacheEntry {
+  formData: FormData;
+  parentFieldPath: string;
+  counts: Map<string, number>;
+}
+
+let fieldNameCountsCache: FieldNameCountsCacheEntry | undefined;
+
+/*
+  The form validates all rows synchronously in a single pass, so counting names per row would make
+  the pass O(N^2). Counts are computed once and reused by the rest of the rows' validators in the
+  same pass. The cache is keyed by the form data object, which is shared within a pass and replaced
+  on any field value change, and is dropped in a microtask, so the next pass sees fresh values.
+*/
+function getFieldNameCounts(
+  form: { getFields: FormHook['getFields'] },
+  formData: FormData,
+  parentFieldPath: string
+): Map<string, number> {
+  if (
+    fieldNameCountsCache?.formData === formData &&
+    fieldNameCountsCache.parentFieldPath === parentFieldPath
+  ) {
+    return fieldNameCountsCache.counts;
+  }
+
+  const counts = new Map<string, number>();
+
+  for (const { name } of getAllRequiredFieldsValues(form, parentFieldPath)) {
+    counts.set(name, (counts.get(name) ?? 0) + 1);
+  }
+
+  const cacheEntry = { formData, parentFieldPath, counts };
+
+  fieldNameCountsCache = cacheEntry;
+  queueMicrotask(() => {
+    if (fieldNameCountsCache === cacheEntry) {
+      fieldNameCountsCache = undefined;
+    }
+  });
+
+  return counts;
 }
 
 function getAllRequiredFieldsValues(

@@ -7,7 +7,7 @@
 
 import type { OptimisticAttachments } from '../../utils/build_optimistic_attachments';
 
-export type StreamType = 'send' | 'resume';
+export type StreamType = 'send' | 'resume' | 'attach';
 
 export interface ActiveStream {
   type: StreamType;

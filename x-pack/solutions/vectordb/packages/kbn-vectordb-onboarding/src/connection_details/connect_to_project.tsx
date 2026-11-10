@@ -8,53 +8,38 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CompactApiKeys } from './compact_api_keys';
+import { EndpointUrl } from '@kbn/shared-components';
 import { endpointUrlItemStyle } from './connect_to_project.styles';
 import { OnboardingApiKeys } from './onboarding_api_keys';
-import { EndpointUrl } from './endpoint_url';
 import { ConnectionTypePopover, type ConnectionType } from './connection_type_popover';
+import { PATH_SELECTION_TELEMETRY_PREFIX } from './telemetry_prefix';
 import { useMcpServerUrl } from '../hooks/use_mcp_server_url';
 
 interface ConnectToProjectProps {
   elasticsearchUrl: string | null;
   apiKey: string | null;
   isLoading: boolean;
-  showLabel?: boolean;
-  isCompact?: boolean;
-  apiKeyButtonFill?: boolean;
-  showConnectionTypeSelector?: boolean;
-  /** Identifies the page the button was clicked on, used in `data-telemetry-id`. */
-  telemetryPage: string;
 }
 
 export const ConnectToProject = ({
   elasticsearchUrl,
   apiKey,
   isLoading,
-  showLabel = true,
-  isCompact = false,
-  apiKeyButtonFill = true,
-  showConnectionTypeSelector = false,
-  telemetryPage,
 }: ConnectToProjectProps) => {
   const [connectionType, setConnectionType] = useState<ConnectionType>('elasticsearch');
   const mcpServerUrl = useMcpServerUrl();
-  const isMcpServer = showConnectionTypeSelector && connectionType === 'mcpServer';
+  const isMcpServer = connectionType === 'mcpServer';
 
   return (
     <>
-      {showLabel && (
-        <>
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('vectordbOnboarding.pathSelection.connectLabel', {
-                defaultMessage: 'Connect to your project:',
-              })}
-            </strong>
-          </EuiText>
-          <EuiSpacer size="s" />
-        </>
-      )}
+      <EuiText size="s">
+        <strong>
+          {i18n.translate('vectordbOnboarding.pathSelection.connectLabel', {
+            defaultMessage: 'Connect to your project:',
+          })}
+        </strong>
+      </EuiText>
+      <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false} wrap>
         <EuiFlexItem grow={false} css={endpointUrlItemStyle}>
           <EndpointUrl
@@ -68,32 +53,30 @@ export const ConnectToProject = ({
                     defaultMessage: 'Copy Elasticsearch URL',
                   })
             }
-            isMcpServer={isMcpServer}
-            isCompact={isCompact}
             isLoading={isLoading}
-            telemetryPage={telemetryPage}
+            copyTestSubj="vectordbConnectToProjectCopyUrl"
+            copyTelemetryId={`${PATH_SELECTION_TELEMETRY_PREFIX}-copyEndpointUrl`}
+            description={
+              isMcpServer
+                ? i18n.translate('vectordbOnboarding.pathSelection.McpUrlDescription', {
+                    defaultMessage:
+                      'Access Elastic Agent Builder tools within your preferred agent interface.',
+                  })
+                : i18n.translate('vectordbOnboarding.pathSelection.esUrlDescription', {
+                    defaultMessage:
+                      'Copy your Elasticsearch endpoint and API key to securely connect your application.',
+                  })
+            }
             typeSelector={
-              showConnectionTypeSelector ? (
-                <ConnectionTypePopover
-                  connectionType={connectionType}
-                  onConnectionTypeChange={setConnectionType}
-                  telemetryPage={telemetryPage}
-                />
-              ) : undefined
+              <ConnectionTypePopover
+                connectionType={connectionType}
+                onConnectionTypeChange={setConnectionType}
+              />
             }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {isCompact ? (
-            <CompactApiKeys telemetryPage={telemetryPage} />
-          ) : (
-            <OnboardingApiKeys
-              apiKey={apiKey}
-              isLoading={isLoading}
-              fill={apiKeyButtonFill}
-              telemetryPage={telemetryPage}
-            />
-          )}
+          <OnboardingApiKeys apiKey={apiKey} isLoading={isLoading} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -49,6 +50,7 @@ describe('useEntitiesOverview', () => {
         getEntityIdentifiersFromDocument: mockGetEntityIdentifiersFromDocument,
         getEuidFromObject: mockGetEuidFromObject,
       },
+      getBuiltInEntityDefinition,
     });
     mockGetEntityIdentifiersFromDocument.mockReturnValue(undefined);
     mockGetEuidFromObject.mockReturnValue(undefined);
@@ -100,11 +102,11 @@ describe('useEntitiesOverview', () => {
     const hostEntityRecord = {
       entity: { id: 'host:store-id', name: 'store-host' },
     };
-    mockGetEntityIdentifiersFromDocument.mockImplementation((entityType: 'host' | 'user') => {
-      return entityType === 'user' ? { 'user.id': 'user-id' } : { 'host.id': 'host-id' };
+    mockGetEntityIdentifiersFromDocument.mockImplementation(({ type }: { type: string }) => {
+      return type === 'user' ? { 'user.id': 'user-id' } : { 'host.id': 'host-id' };
     });
-    mockGetEuidFromObject.mockImplementation((entityType: 'host' | 'user') => {
-      return `${entityType}:store-id`;
+    mockGetEuidFromObject.mockImplementation(({ type }: { type: string }) => {
+      return `${type}:store-id`;
     });
     mockUseEntityFromStore.mockImplementation(({ entityType }) => ({
       ...getDefaultEntityFromStoreResult(),
@@ -165,9 +167,21 @@ describe('useEntitiesOverview', () => {
 
     renderHook(() => useEntitiesOverview({ hit }));
 
-    expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith('host', hit.flattened);
-    expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith('user', hit.flattened);
-    expect(mockGetEuidFromObject).toHaveBeenCalledWith('host', hit.flattened);
-    expect(mockGetEuidFromObject).toHaveBeenCalledWith('user', hit.flattened);
+    expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('host'),
+      hit.flattened
+    );
+    expect(mockGetEntityIdentifiersFromDocument).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('user'),
+      hit.flattened
+    );
+    expect(mockGetEuidFromObject).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('host'),
+      hit.flattened
+    );
+    expect(mockGetEuidFromObject).toHaveBeenCalledWith(
+      getBuiltInEntityDefinition('user'),
+      hit.flattened
+    );
   });
 });

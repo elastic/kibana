@@ -1,0 +1,55 @@
+{
+  "crawlAndWait": {
+    "responses": [
+      {
+        "method": "POST",
+        "path": "/crawl",
+        "status": 200,
+        "body": {
+          "success": true,
+          "id": "0b8e1c52-6a1f-4c3e-9d7a-2f4b5c6d7e8f",
+          "url": "https://api.firecrawl.dev/v2/crawl/0b8e1c52-6a1f-4c3e-9d7a-2f4b5c6d7e8f"
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/crawl/{id}",
+        "status": 200,
+        "body": {
+          "status": "completed",
+          "total": 0,
+          "completed": 0,
+          "creditsUsed": 0,
+          "data": []
+        }
+      }
+    ]
+  },
+  "map": {
+    "queries": [
+      {
+        "source": "v2",
+        "method": "POST",
+        "path": "/map"
+      }
+    ]
+  },
+  "scrape": {
+    "queries": [
+      {
+        "source": "v2",
+        "method": "POST",
+        "path": "/scrape"
+      }
+    ]
+  },
+  "search": {
+    "queries": [
+      {
+        "source": "v2",
+        "method": "POST",
+        "path": "/search"
+      }
+    ]
+  }
+}

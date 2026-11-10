@@ -41,6 +41,7 @@ describe('PerOsNotifyUserOption', () => {
       onChange,
       mode,
       protection: 'malware',
+      os: 'mac',
       'data-test-subj': 'test',
     };
     const component = <PerOsNotifyUserOption {...props} />;

@@ -32,6 +32,7 @@ export interface Props {
   fieldFormatter?: (value: string) => string;
   onChange: (value: RangeSliderValue | undefined) => void;
   isEdit: boolean;
+  isInteractive?: boolean;
   isPinned: boolean;
   label?: string;
 }
@@ -50,6 +51,7 @@ export const RangeSliderControl: FC<Props> = ({
   fieldFormatter,
   onChange,
   isEdit,
+  isInteractive = true,
   isPinned,
   label,
 }: Props) => {
@@ -213,6 +215,7 @@ export const RangeSliderControl: FC<Props> = ({
           min={displayedMin}
           max={displayedMax}
           isLoading={isLoading}
+          disabled={!isInteractive}
           compressed={compressed}
           inputPopoverProps={{
             className: controlPanelClassName,

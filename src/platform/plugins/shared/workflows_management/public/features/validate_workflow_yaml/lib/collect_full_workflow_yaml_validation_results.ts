@@ -19,6 +19,7 @@ import { runWorkflowYamlValidations } from './run_workflow_yaml_validations';
 import { validateConnectorIds } from './validate_connector_ids';
 import { validateGraphBuild } from './validate_graph_build';
 import { validateStepProperties } from './validate_step_properties';
+import { validateWorkflowExecutionIdentity } from './validate_workflow_execution_identity';
 import { validateWorkflowInputs } from './validate_workflow_inputs';
 import type { WorkflowsResponse } from '../../../entities/workflows/model/types';
 import type { GraphBuildErrorInfo } from '../../../entities/workflows/store/workflow_detail/types';
@@ -41,6 +42,7 @@ export interface WorkflowYamlValidationContext {
   esqlCallbacks: ESQLCallbacks;
   signal?: AbortSignal;
   warnIgnoredKibanaFetcher?: boolean;
+  isManaged: boolean;
 }
 
 export interface CollectFullWorkflowYamlValidationResultsParams {
@@ -116,6 +118,9 @@ export async function collectFullWorkflowYamlValidationResults({
   }
 
   if (workflowLookup && lineCounter) {
+    results.push(
+      ...validateWorkflowExecutionIdentity(workflowLookup, lineCounter, context.isManaged)
+    );
     results.push(...validateWorkflowInputs(workflowLookup, workflows, lineCounter));
 
     const esqlSignal = signal ?? new AbortController().signal;
