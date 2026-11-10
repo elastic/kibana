@@ -10,6 +10,11 @@
 export { areEqual } from './are_equal';
 export { areTimesEqual, getUnifiedSearchComparators } from './unified_search';
 export {
+  approximationComparators,
+  DEFAULT_APPROXIMATION_STATE,
+  type ApproximationState,
+} from './approximation';
+export {
   DEFAULT_SETTINGS,
   deserializeSettings,
   settingsComparators,

@@ -19,6 +19,7 @@ import { areComparatorsEqual, type StateComparators } from '@kbn/presentation-pu
 import { isDashboardPanel } from '../is_dashboard_panel';
 import { DEFAULT_SETTINGS, deserializeSettings, settingsComparators } from './settings';
 import { getUnifiedSearchComparators } from './unified_search';
+import { approximationComparators, DEFAULT_APPROXIMATION_STATE } from './approximation';
 
 type PanelOrSection = DashboardPanel | DashboardSection;
 type GetComparators = (
@@ -109,6 +110,7 @@ async function arePinnedPanelsEqual(
  * `panels` and `pinned_panels` are compared with the comparators returned by `getComparators`.
  * Settings (`title`, `description`, `tags`, `options`) are compared with the settings comparators and defaults.
  * Unified search (`filters`, `query`, `refresh_interval`, `time_range`) is compared with the unified search comparators.
+ * `esql_approximation` is compared with the approximation comparators and defaults.
  * All other keys are compared with deep equality.
  */
 export async function areEqual(
@@ -128,6 +130,7 @@ export async function areEqual(
     query: _queryA,
     refresh_interval: _refreshIntervalA,
     time_range: _timeRangeA,
+    esql_approximation: _esqlApproximationA,
     /* eslint-enable @typescript-eslint/no-unused-vars */
     ...restA
   } = a;
@@ -143,6 +146,7 @@ export async function areEqual(
     query: _queryB,
     refresh_interval: _refreshIntervalB,
     time_range: _timeRangeB,
+    esql_approximation: _esqlApproximationB,
     /* eslint-enable @typescript-eslint/no-unused-vars */
     ...restB
   } = b;
@@ -156,6 +160,9 @@ export async function areEqual(
       DEFAULT_SETTINGS
     )
   ) {
+    return false;
+  }
+  if (!areComparatorsEqual(approximationComparators, a, b, DEFAULT_APPROXIMATION_STATE)) {
     return false;
   }
   // time range and refresh interval only count as changes when time is restored
