@@ -10,6 +10,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { TRANSFORM_PLUGIN_ID } from './constants/plugin';
 
 import {
+  calculateAuthz,
   calculateEndpointExceptionsPrivilegesFromCapabilities,
   calculateEndpointExceptionsPrivilegesFromKibanaPrivileges,
   calculatePackagePrivilegesFromCapabilities,
@@ -34,6 +35,52 @@ function generateActions<T>(privileges: T, overrides: Record<string, boolean> = 
 }
 
 describe('fleet authz', () => {
+  describe('calculateAuthz', () => {
+    it.each([
+      [false, false, false],
+      [true, false, false],
+      [false, true, false],
+      [true, true, true],
+    ])(
+      'with agent policies read %s and integrations read %s, readIntegrationPolicies is %s',
+      (agentPoliciesRead, integrationsRead, expected) => {
+        const authz = calculateAuthz({
+          fleet: {
+            all: false,
+            setup: false,
+            agentPolicies: { read: agentPoliciesRead, all: false },
+          },
+          integrations: { read: integrationsRead, all: false },
+        });
+
+        expect(authz.integrations.readIntegrationPolicies).toBe(expected);
+      }
+    );
+
+    it('does not grant readIntegrationPolicies with integrations all but no agent policies read', () => {
+      const authz = calculateAuthz({
+        fleet: {
+          all: false,
+          setup: false,
+          agentPolicies: { read: false, all: false },
+        },
+        integrations: { read: true, all: true },
+      });
+
+      expect(authz.integrations.readIntegrationPolicies).toBe(false);
+    });
+
+    it('does not grant readIntegrationPolicies with fleet setup only', () => {
+      const authz = calculateAuthz({
+        fleet: { all: false, setup: true },
+        integrations: { read: false, all: false },
+      });
+
+      expect(authz.fleet.readAgentPolicies).toBe(true);
+      expect(authz.integrations.readIntegrationPolicies).toBe(false);
+    });
+  });
+
   describe('calculatePackagePrivilegesFromCapabilities', () => {
     it('calculates privileges correctly', () => {
       const endpointCapabilities = {

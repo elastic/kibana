@@ -4,36 +4,66 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
-import type { DeleteByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import { z, lazySchema } from '@kbn/zod';
 
 import { dateType } from '../../schema/common';
 import { durationType } from '../../schema/duration';
 
-const fixedAgePurge = z.object({
-  purgeType: z.literal('fixed_age'),
-  age: durationType,
-});
+const PURGE_TYPE_DESCRIPTION =
+  'Specifies whether documents will be purged based on a specific age or on a timestamp';
 
-const fixedTimePurge = z.object({
-  purgeType: z.literal('fixed_time'),
-  timestamp: dateType,
-});
+const fixedAgePurge = lazySchema(() =>
+  z
+    .object({
+      purgeType: z.literal('fixed_age').describe(PURGE_TYPE_DESCRIPTION),
+      age: durationType.describe(
+        'The duration to determine which documents to purge, formatted as {duration}{unit}. This value should be greater than or equal to the time window of every SLO provided.'
+      ),
+    })
+    .meta({ id: 'SLOBulkPurgePolicyFixedAge' })
+);
 
-const bulkPurgePolicy = z.discriminatedUnion('purgeType', [fixedAgePurge, fixedTimePurge]);
+const fixedTimePurge = lazySchema(() =>
+  z
+    .object({
+      purgeType: z.literal('fixed_time').describe(PURGE_TYPE_DESCRIPTION),
+      timestamp: dateType.describe(
+        'The timestamp to determine which documents to purge, formatted in ISO. This value should be older than the applicable time window of every SLO provided.'
+      ),
+    })
+    .meta({ id: 'SLOBulkPurgePolicyFixedTime' })
+);
 
-const bulkPurgeRollupSchema = z.object({
-  body: z.object({
-    list: z.array(z.string()),
-    purgePolicy: bulkPurgePolicy,
-    force: z.boolean().optional(),
-  }),
-});
+const bulkPurgePolicy = lazySchema(() =>
+  z
+    .discriminatedUnion('purgeType', [fixedAgePurge, fixedTimePurge])
+    .describe('Policy that dictates which SLI documents to purge based on age')
+);
 
-interface BulkPurgeRollupResponse {
-  taskId?: DeleteByQueryResponse['task'];
-}
+const bulkPurgeRollupSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      list: z.array(z.string()).describe('An array of slo ids'),
+      purgePolicy: bulkPurgePolicy,
+      force: z.boolean().optional(),
+    }),
+  })
+);
 
+const bulkPurgeRollupResponseSchema = lazySchema(() =>
+  z
+    .object({
+      taskId: z.string().optional().describe('The task id of the purge operation'),
+    })
+    .meta({
+      id: 'SLOBulkPurgeRollupResponse',
+      description:
+        'The bulk purge rollup data response returns a task id from the elasticsearch deleteByQuery response.',
+      additionalProperties: true,
+    })
+);
+
+type BulkPurgeRollupResponse = z.output<typeof bulkPurgeRollupResponseSchema>;
 type BulkPurgePolicyInput = z.input<typeof bulkPurgePolicy>;
 type BulkPurgeRollupInput = z.input<typeof bulkPurgeRollupSchema.shape.body>;
 type BulkPurgeRollupParams = z.output<typeof bulkPurgeRollupSchema.shape.body>;
@@ -44,4 +74,4 @@ export type {
   BulkPurgeRollupInput,
   BulkPurgeRollupParams,
 };
-export { bulkPurgeRollupSchema };
+export { bulkPurgeRollupResponseSchema, bulkPurgeRollupSchema };

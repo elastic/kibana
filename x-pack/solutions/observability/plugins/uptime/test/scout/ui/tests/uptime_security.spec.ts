@@ -30,7 +30,9 @@ test.describe('Uptime feature controls - security', { tag: ['@local-stateful-cla
     await page.gotoApp('uptime');
 
     await test.step('shows Uptime navlink', async () => {
-      await expect(page.locator('.euiSideNavItemButton__label[title="Uptime"]')).toBeVisible({
+      await expect(
+        page.getByRole('navigation').getByRole('link', { name: 'Uptime Monitors', exact: true })
+      ).toBeVisible({
         timeout: 10_000,
       });
     });
@@ -66,7 +68,9 @@ test.describe('Uptime feature controls - security', { tag: ['@local-stateful-cla
     await page.testSubj.waitForSelector('uptimeApp', { timeout: 10_000 });
 
     await test.step('shows Uptime navlink', async () => {
-      await expect(page.locator('.euiSideNavItemButton__label[title="Uptime"]')).toBeVisible({
+      await expect(
+        page.getByRole('navigation').getByRole('link', { name: 'Uptime Monitors', exact: true })
+      ).toBeVisible({
         timeout: 10_000,
       });
     });
@@ -98,7 +102,9 @@ test.describe('Uptime feature controls - security', { tag: ['@local-stateful-cla
     await page.gotoApp('uptime');
 
     await test.step('does not show Uptime navlink', async () => {
-      await expect(page.locator('.euiSideNavItemButton__label[title="Uptime"]')).toBeHidden({
+      await expect(
+        page.getByRole('navigation').getByRole('link', { name: 'Uptime Monitors', exact: true })
+      ).toBeHidden({
         timeout: 10_000,
       });
     });

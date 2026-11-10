@@ -6,3 +6,4 @@
  */
 
 export { AppChromeLayout } from './app_chrome_layout';
+export { useAppHeadingTitle } from './app_heading_title';

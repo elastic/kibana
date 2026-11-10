@@ -9,7 +9,6 @@ import React, { useCallback, useMemo } from 'react';
 import {
   ConversationQueue,
   type BaseActionsProps,
-  type ConversationsActionsGroupProps,
   type Investigation,
 } from '@kbn/agentic-investigations-common';
 import { proposalOutcome } from '../proposal_outcome';
@@ -30,7 +29,6 @@ export interface QueueSectionProps {
   onClickCard: (id: Investigation['id']) => void;
   onOpenChat: (id: Investigation['id']) => void;
   canOpenInvestigationDetails?: boolean;
-  onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   getChatHref: (id: Investigation['id']) => string | undefined;
   canManageEscalations?: boolean;
   /** When true the "Close investigation" action is shown on each card. */

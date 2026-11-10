@@ -45,6 +45,7 @@ export interface BuildOptions {
   targetCloudPlatforms: boolean;
   skipFipsProvider: boolean;
   skipServerless: boolean;
+  skipDockerImageArchive: boolean;
   tarZstd: boolean;
   withExamplePlugins: boolean;
   withTestPlugins: boolean;

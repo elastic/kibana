@@ -218,6 +218,29 @@ describe('createEmulatorProxy', () => {
     expect(mock.calls).toEqual([]);
   });
 
+  it('answers with an async responder, as in-process', async () => {
+    await proxy.close();
+    mock = createEmulatorFetch({
+      specs: [spec],
+      respond: async (operation, _request, { next }) => {
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        return operation.id === 'getItem'
+          ? { statusCode: 200, headers: { 'content-type': 'application/json' }, body: { id: 7 } }
+          : next();
+      },
+    });
+    proxy = createEmulatorProxy({ fetch: mock.fetch, certificateAuthority });
+    proxyUrl = await proxy.listen();
+    const url = 'http://plain.vendor.example/items/7';
+
+    const response = await send(url, { agent: kibanaAgents(url).httpAgent });
+
+    expect(JSON.parse(response.body)).toEqual({ id: 7 });
+    expect(mock.calls).toEqual([
+      expect.objectContaining({ operation: 'getItem', status: 200, responseViolations: [] }),
+    ]);
+  });
+
   it('answers 502 when the mock throws', async () => {
     await proxy.close();
     proxy = createEmulatorProxy({

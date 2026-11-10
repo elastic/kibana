@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEvidenceQuoteGrounded, assertEsqlGroundedInReport } from './report_grounding';
+import { isEvidenceQuoteGrounded, assertEsqlGroundedInReport, clausesOf } from './report_grounding';
 import { UNGROUNDED_QUERY_FIXTURES } from './ungrounded_query_fixtures';
 
 describe('isEvidenceQuoteGrounded', () => {
@@ -64,6 +64,39 @@ describe('isEvidenceQuoteGrounded', () => {
 
   it('rejects an empty or whitespace-only quote', () => {
     expect(isEvidenceQuoteGrounded('   ', text)).toBe(false);
+  });
+
+  it('ignores punctuation and typography differences', () => {
+    const report =
+      'The service stops accepting connections while the device keeps running normally, and the actor’s tool – a loader – retries.';
+    expect(
+      isEvidenceQuoteGrounded(
+        'The service stops accepting connections while the device keeps running normally.',
+        report
+      )
+    ).toBe(true);
+    expect(isEvidenceQuoteGrounded("the actor's tool - a loader - retries", report)).toBe(true);
+  });
+
+  it('rejects a quote with one word changed', () => {
+    expect(isEvidenceQuoteGrounded('called sts.AssumeRole into escalated-group', text)).toBe(false);
+  });
+
+  it('accepts a verbatim quote of a report that uses an ellipsis itself', () => {
+    const report =
+      'It adds tool definitions (apex_score, apex_code_review, …) to outgoing requests.';
+    expect(
+      isEvidenceQuoteGrounded(
+        'tool definitions (apex_score, apex_code_review, …) to outgoing requests',
+        report
+      )
+    ).toBe(true);
+  });
+
+  it('rejects a quote word that only matches part of a report word', () => {
+    const report = 'The login was successfully blocked.';
+    expect(isEvidenceQuoteGrounded('The login was successful.', report)).toBe(false);
+    expect(isEvidenceQuoteGrounded('ogin was successfully', report)).toBe(false);
   });
 });
 
@@ -895,4 +928,40 @@ describe('UNGROUNDED_QUERY_FIXTURES', () => {
       });
     }
   );
+});
+
+describe('clausesOf', () => {
+  it('extracts ==, IN and LIKE clauses with their literals', () => {
+    expect(
+      clausesOf(
+        'FROM logs-* | WHERE event.action == "AssumeRole" AND user.name IN ("alice", "bob") AND process.name LIKE "cmd*"'
+      )
+    ).toEqual([
+      { column: 'event.action', operator: '==', literals: ['AssumeRole'] },
+      { column: 'user.name', operator: 'in', literals: ['alice', 'bob'] },
+      { column: 'process.name', operator: 'like', literals: ['cmd*'] },
+    ]);
+  });
+
+  it('flattens nested OR and AND into one clause per leaf comparison', () => {
+    expect(
+      clausesOf(
+        'FROM logs-* | WHERE (event.action == "AssumeRole" OR event.action == "GetCallerIdentity") AND host.name == "WIN-1"'
+      )
+    ).toEqual([
+      { column: 'event.action', operator: '==', literals: ['AssumeRole'] },
+      { column: 'event.action', operator: '==', literals: ['GetCallerIdentity'] },
+      { column: 'host.name', operator: '==', literals: ['WIN-1'] },
+    ]);
+  });
+
+  it('yields no literals for rlike, match, or colon operators', () => {
+    expect(clausesOf('FROM logs-* | WHERE message RLIKE "Assume.*"')).toEqual([]);
+    expect(clausesOf('FROM logs-* | WHERE MATCH(message, "AssumeRole")')).toEqual([]);
+    expect(clausesOf('FROM logs-* | WHERE message:"AssumeRole"')).toEqual([]);
+  });
+
+  it('returns an empty list when the query does not parse', () => {
+    expect(clausesOf('FROM logs-* | WHERE !!!')).toEqual([]);
+  });
 });

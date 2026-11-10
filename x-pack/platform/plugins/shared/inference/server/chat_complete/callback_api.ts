@@ -209,7 +209,7 @@ async function resolveEndpoint({
   target: ChatCompleteTarget;
   resolveFeatureEndpoint?: ScopedFeatureEndpointResolver;
   abortSignal?: AbortSignal;
-}): Promise<Pick<ChatCompleteOptions, 'connectorId' | 'temperature' | 'reasoning'>> {
+}): Promise<Pick<ChatCompleteOptions, 'connectorId' | 'reasoning'>> {
   if (target.featureId === undefined) {
     return { connectorId: target.connectorId };
   }
@@ -294,6 +294,7 @@ function createChatCompletePipeline({
             getContext: () =>
               buildTokenUsageContext({
                 connectorId,
+                spaceId: namespace,
                 model: callbackContext.model,
                 modelName,
                 featureId: featureId ?? metadata?.connectorTelemetry?.pluginId,

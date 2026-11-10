@@ -60,20 +60,29 @@ const getCreatorLabel = (creator?: ServiceAccountDirectoryCreator) => {
     });
   }
 
-  if (creator.displayName) {
-    return creator.displayName;
-  }
-
   switch (creator.type) {
     case 'user':
-      return creator.username;
-    case 'api_key':
-      return i18n.translate('xpack.security.management.serviceAccounts.table.createdByApiKey', {
-        defaultMessage: 'API key {apiKeyId}',
-        values: { apiKeyId: creator.apiKeyId },
-      });
+      return creator.displayName ?? creator.username;
+    case 'api_key': {
+      const apiKeyLabel =
+        creator.apiKeyName ??
+        i18n.translate('xpack.security.management.serviceAccounts.table.createdByApiKey', {
+          defaultMessage: 'API key {apiKeyId}',
+          values: { apiKeyId: creator.apiKeyId },
+        });
+      if (!creator.displayName) {
+        return apiKeyLabel;
+      }
+      return i18n.translate(
+        'xpack.security.management.serviceAccounts.table.createdByApiKeyWithOwner',
+        {
+          defaultMessage: '{apiKeyLabel} ({ownerName})',
+          values: { apiKeyLabel, ownerName: creator.displayName },
+        }
+      );
+    }
     case 'service_account':
-      return creator.serviceAccountId;
+      return creator.displayName ?? creator.serviceAccountId;
   }
 };
 
