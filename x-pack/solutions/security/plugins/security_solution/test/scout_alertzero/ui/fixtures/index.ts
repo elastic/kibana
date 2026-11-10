@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  spaceTest as spaceBaseTest,
-  apiTest,
-  tags,
-  test as baseTest,
-} from '@kbn/scout-security';
+import { spaceTest as spaceBaseTest, apiTest, tags, test as baseTest } from '@kbn/scout-security';
 import type {
   ScoutPage,
   SecurityPageObjects,
