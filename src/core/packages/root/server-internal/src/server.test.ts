@@ -316,6 +316,60 @@ test('runs services on "start"', async () => {
   expect(mockInjectionService.start).toHaveBeenCalledTimes(1);
 });
 
+describe('earlyStartHttp', () => {
+  const earlyStartWarning =
+    'Early start of the HTTP server configured. This should only be enabled in full zero-downtime deployments.';
+
+  beforeEach(() => {
+    // An earlier test leaves the node service mocked as a migrator-only node, which aborts `start`.
+    const nodeServiceContract: InternalNodeServicePreboot = {
+      roles: { migrator: false, ui: true, backgroundTasks: true },
+      roleNames: ['background_tasks', 'ui'],
+    };
+    mockNodeService.preboot.mockResolvedValue(nodeServiceContract);
+    mockNodeService.start.mockReturnValue(nodeServiceContract);
+    rawConfigService.getConfig$.mockReturnValue(new BehaviorSubject({}));
+  });
+
+  const startServer = async (earlyStartHttp: boolean) => {
+    mockConfigService.atPath.mockReturnValue(
+      new BehaviorSubject({
+        lifecycle: { disablePreboot: false },
+        earlyStartHttp,
+      })
+    );
+    const server = new Server(rawConfigService, env, logger);
+    await server.preboot();
+    await server.setup();
+    await server.start();
+  };
+
+  test('starts HTTP once, after saved object migrations, when earlyStartHttp is disabled', async () => {
+    await startServer(false);
+
+    expect(mockHttpService.start).toHaveBeenCalledTimes(1);
+    expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
+    expect(mockSavedObjectsService.start.mock.invocationCallOrder[0]).toBeLessThan(
+      mockHttpService.start.mock.invocationCallOrder[0]
+    );
+    expect(logger.get('server').warn).not.toHaveBeenCalledWith(earlyStartWarning);
+  });
+
+  test('starts HTTP before saved object migrations when earlyStartHttp is enabled', async () => {
+    await startServer(true);
+
+    expect(mockHttpService.start).toHaveBeenCalledTimes(2);
+    expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
+    expect(mockHttpService.start.mock.invocationCallOrder[0]).toBeLessThan(
+      mockSavedObjectsService.start.mock.invocationCallOrder[0]
+    );
+    expect(mockSavedObjectsService.start.mock.invocationCallOrder[0]).toBeLessThan(
+      mockHttpService.start.mock.invocationCallOrder[1]
+    );
+    expect(logger.get('server').warn).toHaveBeenCalledWith(earlyStartWarning);
+  });
+});
+
 test('does not fail on "setup" if there are unused paths detected', async () => {
   mockConfigService.getUnusedPaths.mockResolvedValue(['some.path', 'another.path']);
 

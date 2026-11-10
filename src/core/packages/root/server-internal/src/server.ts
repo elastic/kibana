@@ -579,6 +579,44 @@ export class Server {
     });
 
     const deprecationsStart = this.deprecations.start();
+
+    const httpStart = this.http.getStartContract();
+    httpStart.setRedactedSessionIdGetter((request) =>
+      securityStart.authc.getRedactedSessionId(request)
+    );
+    const uiam = securityStart.authc.apiKeys.uiam;
+    if (uiam) {
+      httpStart.setSelfClientUiamAttestationGetter((request, outboundAuthorization) => {
+        const credential = outboundAuthorization
+          ? HTTPAuthorizationHeader.parseFromValue(outboundAuthorization)
+          : null;
+        if (!credential || !isUiamCredential(credential)) {
+          return undefined;
+        }
+        if (uiam.isExternalApiKey(request)) {
+          return undefined;
+        }
+
+        return uiam.getInternalCallerAttestationHeaders(credential)[
+          UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
+        ];
+      });
+      httpStart.setSelfClientOwnClientAuthenticationCheck((value) =>
+        uiam.isOwnClientAuthentication(value)
+      );
+    }
+
+    const { earlyStartHttp } = await firstValueFrom(
+      this.configService.atPath<CoreConfigType>(coreConfig.path)
+    );
+
+    if (earlyStartHttp) {
+      this.log.warn(
+        'Early start of the HTTP server configured. This should only be enabled in full zero-downtime deployments.'
+      );
+      await this.http.start();
+    }
+
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await withActiveSpan(
       'saved_objects.migration',
@@ -630,31 +668,6 @@ export class Server {
     });
     const customBrandingStart = this.customBranding.start();
     const metricsStart = await this.metrics.start();
-    const httpStart = this.http.getStartContract();
-    httpStart.setRedactedSessionIdGetter((request) =>
-      securityStart.authc.getRedactedSessionId(request)
-    );
-    const uiam = securityStart.authc.apiKeys.uiam;
-    if (uiam) {
-      httpStart.setSelfClientUiamAttestationGetter((request, outboundAuthorization) => {
-        const credential = outboundAuthorization
-          ? HTTPAuthorizationHeader.parseFromValue(outboundAuthorization)
-          : null;
-        if (!credential || !isUiamCredential(credential)) {
-          return undefined;
-        }
-        if (uiam.isExternalApiKey(request)) {
-          return undefined;
-        }
-
-        return uiam.getInternalCallerAttestationHeaders(credential)[
-          UIAM_INTERNAL_CALLER_ATTESTATION_HEADER
-        ];
-      });
-      httpStart.setSelfClientOwnClientAuthenticationCheck((value) =>
-        uiam.isOwnClientAuthentication(value)
-      );
-    }
     const coreUsageDataStart = this.coreUsageData.start({
       elasticsearch: elasticsearchStart,
       savedObjects: savedObjectsStart,

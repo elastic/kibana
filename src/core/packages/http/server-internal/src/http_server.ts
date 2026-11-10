@@ -385,6 +385,10 @@ export class HttpServer {
       this.log.warn(`start called after stop`);
       return;
     }
+    if (this.isListening()) {
+      this.log.info('The HTTP server is already listening for requests. Skipping new start call.');
+      return;
+    }
     this.log.debug('starting http server');
 
     for (const router of this.registeredRouters) {

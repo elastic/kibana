@@ -108,6 +108,10 @@ xpack.cloud.base_url: 'https://cloud.elastic.co'
 # Disable preboot phase for serverless
 core.lifecycle.disablePreboot: true
 
+# Start the HTTP server early so that k8s probes can track the health of the Kibana node.
+# NOTE: HTTP traffic is only served when ES and SO migrations are ready (GET /api/status returns 200).
+core.earlyStartHttp: true
+
 # Enable ZDT migration algorithm
 migrations.algorithm: zdt
 

@@ -136,6 +136,51 @@ test('log listening address after started', async () => {
   `);
 });
 
+test('skips a second start when the server is already listening', async () => {
+  const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
+  router.get(
+    {
+      path: '/ping',
+      validate: false,
+      security: {
+        authz: {
+          requiredPrivileges: ['foo'],
+        },
+      },
+    },
+    (context, req, res) => res.ok({ body: 'pong' })
+  );
+
+  const { registerRouter, server: innerServer } = await server.setup({ config$ });
+  registerRouter(router);
+
+  await server.start();
+  await expect(server.start()).resolves.toBeUndefined();
+
+  expect(server.isListening()).toBe(true);
+  expect(loggingSystemMock.collect(loggingService).info).toEqual([
+    ['http server running at http://127.0.0.1:10002'],
+    ['The HTTP server is already listening for requests. Skipping new start call.'],
+  ]);
+
+  await supertest(innerServer.listener).get('/foo/ping').expect(200, 'pong');
+});
+
+test('warns when start is called after stop', async () => {
+  await server.setup({ config$ });
+  await server.start();
+  await server.stop();
+
+  await server.start();
+
+  expect(server.isListening()).toBe(false);
+  const logs = loggingSystemMock.collect(loggingService);
+  expect(logs.warn).toEqual([['start called after stop']]);
+  expect(logs.info.flat()).not.toContain(
+    'The HTTP server is already listening for requests. Skipping new start call.'
+  );
+});
+
 test('log listening address after started when configured with BasePath and rewriteBasePath = false', async () => {
   expect(server.isListening()).toBe(false);
 

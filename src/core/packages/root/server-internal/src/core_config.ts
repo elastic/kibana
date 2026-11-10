@@ -24,6 +24,17 @@ const coreConfigSchema = schema.object({
    * between our kibana-controller and the Kibana versions.
    */
   enableStripUnknownConfigWorkaround: schema.boolean({ defaultValue: false }),
+
+  /**
+   * Starts the HTTP server early, before the Saved Objects migrations and all the other start steps are completed.
+   * This should only be enabled in full Zero-downtime deployments.
+   *
+   * Since ES might not be ready yet, authenticated requests will fail with a 503 error until ES is ready.
+   *
+   * Use this option only if you need to track that the Kibana node is running but the loadbalancer gates the actual
+   * HTTP traffic based on the `/api/status` endpoint (which depends on ES being ready).
+   */
+  earlyStartHttp: schema.boolean({ defaultValue: false }),
 });
 
 export type CoreConfigType = TypeOf<typeof coreConfigSchema>;
