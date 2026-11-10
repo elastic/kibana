@@ -9,7 +9,8 @@ import chroma from 'chroma-js';
 
 /**
  * A CSS color as lowercase hex (`#rrggbb`, or `#rrggbbaa` when it isn't opaque), so colors from
- * the DOM (`rgb()`), Elastic Charts and Isomer compare as strings. Anything that isn't a color is
+ * the DOM (`rgb()`), Elastic Charts and Isomer compare as strings; every fully transparent color is
+ * `#00000000`. Anything that isn't a color is
  * kept as is, so it shows up in a difference rather than being hidden.
  */
 export const normalizeColor = (color: string): string => {
@@ -17,5 +18,9 @@ export const normalizeColor = (color: string): string => {
     return color;
   }
   const parsed = chroma(color);
+  if (parsed.alpha() === 0) {
+    // Fully transparent is one color, whatever its channels.
+    return '#00000000';
+  }
   return parsed.alpha() < 1 ? parsed.hex('rgba') : parsed.hex('rgb');
 };

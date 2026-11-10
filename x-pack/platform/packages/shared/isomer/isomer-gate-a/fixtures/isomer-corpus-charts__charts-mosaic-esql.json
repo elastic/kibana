@@ -1,0 +1,1073 @@
+{
+  "dashboard": "isomer-corpus-charts",
+  "panel": "charts-mosaic-esql",
+  "config": {
+    "data_source": {
+      "query": "FROM isomer-corpus-edge-cases | EVAL sign = CASE(signed >= 0, \"positive\", \"negative\") | STATS count = COUNT(*) BY sign, category | SORT sign, count DESC, category",
+      "type": "esql"
+    },
+    "group_breakdown_by": [
+      {
+        "color": {
+          "mapping": [],
+          "mode": "categorical",
+          "palette": "default"
+        },
+        "column": "category"
+      }
+    ],
+    "group_by": [
+      {
+        "color": {
+          "mapping": [],
+          "mode": "categorical",
+          "palette": "default"
+        },
+        "column": "sign"
+      }
+    ],
+    "ignore_global_filters": false,
+    "legend": {
+      "nested": false,
+      "position": "right",
+      "truncate_after_lines": 1,
+      "visibility": "visible"
+    },
+    "metric": {
+      "column": "count"
+    },
+    "sampling": 1,
+    "styling": {
+      "values": {
+        "mode": "percentage",
+        "percent_decimals": 2,
+        "visible": true
+      }
+    },
+    "title": "Mosaic of signs by category",
+    "type": "mosaic"
+  },
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    }
+  },
+  "chart_type": "mosaic",
+  "tables": [
+    {
+      "columns": [
+        {
+          "id": "partition_value_accessor_metric_0",
+          "isComputedColumn": true,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Slice size",
+            "esType": "long",
+            "params": {
+              "id": "number"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": false,
+              "sourceField": "count"
+            },
+            "type": "number"
+          },
+          "name": "count"
+        },
+        {
+          "id": "partition_value_accessor_group_by_0",
+          "isComputedColumn": true,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Slice",
+            "esType": "keyword",
+            "params": {
+              "id": "string"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": false,
+              "sourceField": "sign"
+            },
+            "type": "string"
+          },
+          "name": "sign"
+        },
+        {
+          "id": "partition_value_accessor_group_breakdown_by_0",
+          "isComputedColumn": false,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Slice",
+            "esType": "keyword",
+            "params": {
+              "id": "string"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": true,
+              "sourceField": "category"
+            },
+            "type": "string"
+          },
+          "name": "category"
+        }
+      ],
+      "meta": {
+        "query": "FROM isomer-corpus-edge-cases | EVAL sign = CASE(signed >= 0, \"positive\", \"negative\") | STATS count = COUNT(*) BY sign, category | SORT sign, count DESC, category",
+        "statistics": {
+          "totalCount": 26
+        },
+        "type": "es_ql"
+      },
+      "rows": [
+        {
+          "partition_value_accessor_group_breakdown_by_0": "alpha",
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 25
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "bravo",
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 10
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": null,
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 8
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "delta",
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 7
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "charlie",
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 6
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "echo",
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 6
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "foxtrot",
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 5
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "golf",
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 5
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "hotel",
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 5
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "juliett",
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 4
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "kilo",
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 4
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "india",
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 3
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "lima",
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_metric_0": 3
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "alpha",
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 19
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "bravo",
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 8
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": null,
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 8
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "charlie",
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 7
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "echo",
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 6
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "delta",
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 5
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "golf",
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 5
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "india",
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 4
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "juliett",
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 4
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "foxtrot",
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 3
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "hotel",
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 3
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "lima",
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 3
+        },
+        {
+          "partition_value_accessor_group_breakdown_by_0": "kilo",
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_metric_0": 2
+        }
+      ],
+      "type": "datatable",
+      "warning": "299 Elasticsearch-9.7.0-f981584e7fd18ed525f2ee20c81f87f608de2fcd \"No limit defined, adding default limit of [1000]\""
+    }
+  ],
+  "size": {
+    "height": 372,
+    "width": 506.625
+  },
+  "light": {
+    "debugState": {
+      "partition": [
+        {
+          "panelTitle": "",
+          "partitions": [
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                54,
+                186
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                131,
+                186
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                173,
+                186
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                208,
+                186
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                239,
+                186
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                270,
+                186
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                294,
+                186
+              ],
+              "depth": 1,
+              "name": "foxtrot",
+              "value": 8
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                317,
+                186
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                339,
+                186
+              ],
+              "depth": 1,
+              "name": "hotel",
+              "value": 8
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                359,
+                186
+              ],
+              "depth": 1,
+              "name": "juliett",
+              "value": 8
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                376,
+                186
+              ],
+              "depth": 1,
+              "name": "kilo",
+              "value": 6
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                392,
+                186
+              ],
+              "depth": 1,
+              "name": "india",
+              "value": 7
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                408,
+                186
+              ],
+              "depth": 1,
+              "name": "lima",
+              "value": 6
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                54,
+                119
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 25
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                54,
+                294
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 19
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                131,
+                117
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 10
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                131,
+                292
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 8
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                173,
+                108
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 8
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                173,
+                283
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 8
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                208,
+                122
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 7
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                208,
+                297
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 5
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                239,
+                114
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 7
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                239,
+                290
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 6
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                270,
+                108
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 6
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                270,
+                283
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 6
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                294,
+                130
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 5
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                294,
+                305
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 3
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                317,
+                108
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 5
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                317,
+                283
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 5
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                339,
+                130
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 5
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                339,
+                305
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 3
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                359,
+                108
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 4
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                359,
+                283
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 4
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                376,
+                137
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 4
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                376,
+                313
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 2
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                392,
+                120
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 4
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                392,
+                296
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 3
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                408,
+                108
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 3
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                408,
+                283
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "dark": {
+    "debugState": {
+      "partition": [
+        {
+          "panelTitle": "",
+          "partitions": [
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                54,
+                186
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                131,
+                186
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                173,
+                186
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                208,
+                186
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                239,
+                186
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                270,
+                186
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                294,
+                186
+              ],
+              "depth": 1,
+              "name": "foxtrot",
+              "value": 8
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                317,
+                186
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                339,
+                186
+              ],
+              "depth": 1,
+              "name": "hotel",
+              "value": 8
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                359,
+                186
+              ],
+              "depth": 1,
+              "name": "juliett",
+              "value": 8
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                376,
+                186
+              ],
+              "depth": 1,
+              "name": "kilo",
+              "value": 6
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                392,
+                186
+              ],
+              "depth": 1,
+              "name": "india",
+              "value": 7
+            },
+            {
+              "color": "rgba(0,0,0,0)",
+              "coords": [
+                408,
+                186
+              ],
+              "depth": 1,
+              "name": "lima",
+              "value": 6
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                54,
+                119
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 25
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                54,
+                294
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 19
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                131,
+                117
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 10
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                131,
+                292
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 8
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                173,
+                108
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 8
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                173,
+                283
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 8
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                208,
+                122
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 7
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                208,
+                297
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 5
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                239,
+                114
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 7
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                239,
+                290
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 6
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                270,
+                108
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 6
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                270,
+                283
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 6
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                294,
+                130
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 5
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                294,
+                305
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 3
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                317,
+                108
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 5
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                317,
+                283
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 5
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                339,
+                130
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 5
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                339,
+                305
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 3
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                359,
+                108
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 4
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                359,
+                283
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 4
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                376,
+                137
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 4
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                376,
+                313
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 2
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                392,
+                120
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 4
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                392,
+                296
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 3
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                408,
+                108
+              ],
+              "depth": 2,
+              "name": "negative",
+              "value": 3
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                408,
+                283
+              ],
+              "depth": 2,
+              "name": "positive",
+              "value": 3
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

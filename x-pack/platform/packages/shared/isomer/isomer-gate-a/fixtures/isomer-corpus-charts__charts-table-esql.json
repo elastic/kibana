@@ -1,0 +1,770 @@
+{
+  "dashboard": "isomer-corpus-charts",
+  "panel": "charts-table-esql",
+  "config": {
+    "data_source": {
+      "query": "FROM isomer-corpus-edge-cases | STATS count = COUNT(*), signed = ROUND(AVG(signed), 1), total = SUM(value) BY category | SORT count DESC, category",
+      "type": "esql"
+    },
+    "ignore_global_filters": false,
+    "metrics": [
+      {
+        "alignment": "right",
+        "color": {
+          "type": "auto"
+        },
+        "column": "count",
+        "label": "Documents",
+        "summary": {
+          "type": "sum"
+        },
+        "visible": true,
+        "width": 120
+      },
+      {
+        "alignment": "center",
+        "apply_color_to": "background",
+        "color": {
+          "range": "absolute",
+          "steps": [
+            {
+              "color": "#E7664C",
+              "lt": -20
+            },
+            {
+              "color": "#D6BF57",
+              "gte": -20,
+              "lt": 0
+            },
+            {
+              "color": "#54B399",
+              "gte": 0
+            }
+          ],
+          "type": "dynamic"
+        },
+        "column": "signed",
+        "label": "Signed average",
+        "visible": true
+      },
+      {
+        "alignment": "right",
+        "color": {
+          "type": "auto"
+        },
+        "column": "total",
+        "visible": false
+      }
+    ],
+    "rows": [
+      {
+        "alignment": "left",
+        "apply_color_to": "badge",
+        "click_filter": false,
+        "color": {
+          "type": "auto"
+        },
+        "column": "category",
+        "label": "Category",
+        "visible": true
+      }
+    ],
+    "sampling": 1,
+    "styling": {
+      "density": {
+        "mode": "compact"
+      },
+      "paging": 10
+    },
+    "title": "Counts and signed averages per category",
+    "type": "data_table"
+  },
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    }
+  },
+  "chart_type": "data_table",
+  "tables": [
+    {
+      "columns": [
+        {
+          "id": "datatable_accessor_row_0",
+          "isComputedColumn": false,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Datatable column",
+            "esType": "keyword",
+            "params": {
+              "id": "string"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": true,
+              "sourceField": "category"
+            },
+            "type": "string"
+          },
+          "name": "Category"
+        },
+        {
+          "id": "datatable_accessor_metric_0",
+          "isComputedColumn": true,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Datatable column",
+            "esType": "long",
+            "params": {
+              "id": "number"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": false,
+              "sourceField": "count"
+            },
+            "type": "number"
+          },
+          "name": "Documents"
+        },
+        {
+          "id": "datatable_accessor_metric_1",
+          "isComputedColumn": true,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Datatable column",
+            "esType": "double",
+            "params": {
+              "id": "number"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": false,
+              "sourceField": "signed"
+            },
+            "type": "number"
+          },
+          "name": "Signed average"
+        },
+        {
+          "id": "datatable_accessor_metric_2",
+          "isComputedColumn": true,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Datatable column",
+            "esType": "double",
+            "params": {
+              "id": "number"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": false,
+              "sourceField": "total"
+            },
+            "type": "number"
+          },
+          "name": "total"
+        }
+      ],
+      "meta": {
+        "query": "FROM isomer-corpus-edge-cases | STATS count = COUNT(*), signed = ROUND(AVG(signed), 1), total = SUM(value) BY category | SORT count DESC, category",
+        "statistics": {
+          "totalCount": 13
+        },
+        "type": "es_ql"
+      },
+      "rows": [
+        {
+          "datatable_accessor_metric_0": 44,
+          "datatable_accessor_metric_1": -19.9,
+          "datatable_accessor_metric_2": 573,
+          "datatable_accessor_row_0": "alpha"
+        },
+        {
+          "datatable_accessor_metric_0": 18,
+          "datatable_accessor_metric_1": -11.4,
+          "datatable_accessor_metric_2": 214.5,
+          "datatable_accessor_row_0": "bravo"
+        },
+        {
+          "datatable_accessor_metric_0": 16,
+          "datatable_accessor_metric_1": -15.3,
+          "datatable_accessor_metric_2": 253.5,
+          "datatable_accessor_row_0": null
+        },
+        {
+          "datatable_accessor_metric_0": 13,
+          "datatable_accessor_metric_1": -8.2,
+          "datatable_accessor_metric_2": 175.5,
+          "datatable_accessor_row_0": "charlie"
+        },
+        {
+          "datatable_accessor_metric_0": 12,
+          "datatable_accessor_metric_1": -19.2,
+          "datatable_accessor_metric_2": 130.5,
+          "datatable_accessor_row_0": "delta"
+        },
+        {
+          "datatable_accessor_metric_0": 12,
+          "datatable_accessor_metric_1": -9.3,
+          "datatable_accessor_metric_2": 169.5,
+          "datatable_accessor_row_0": "echo"
+        },
+        {
+          "datatable_accessor_metric_0": 10,
+          "datatable_accessor_metric_1": -7,
+          "datatable_accessor_metric_2": 147,
+          "datatable_accessor_row_0": "golf"
+        },
+        {
+          "datatable_accessor_metric_0": 8,
+          "datatable_accessor_metric_1": -18.5,
+          "datatable_accessor_metric_2": 82.5,
+          "datatable_accessor_row_0": "foxtrot"
+        },
+        {
+          "datatable_accessor_metric_0": 8,
+          "datatable_accessor_metric_1": -28.8,
+          "datatable_accessor_metric_2": 126,
+          "datatable_accessor_row_0": "hotel"
+        },
+        {
+          "datatable_accessor_metric_0": 8,
+          "datatable_accessor_metric_1": -10,
+          "datatable_accessor_metric_2": 114,
+          "datatable_accessor_row_0": "juliett"
+        },
+        {
+          "datatable_accessor_metric_0": 7,
+          "datatable_accessor_metric_1": -1.1,
+          "datatable_accessor_metric_2": 109.5,
+          "datatable_accessor_row_0": "india"
+        },
+        {
+          "datatable_accessor_metric_0": 6,
+          "datatable_accessor_metric_1": -30.2,
+          "datatable_accessor_metric_2": 97.5,
+          "datatable_accessor_row_0": "kilo"
+        },
+        {
+          "datatable_accessor_metric_0": 6,
+          "datatable_accessor_metric_1": -20.7,
+          "datatable_accessor_metric_2": 115.5,
+          "datatable_accessor_row_0": "lima"
+        }
+      ],
+      "type": "datatable",
+      "warning": "299 Elasticsearch-9.7.0-f981584e7fd18ed525f2ee20c81f87f608de2fcd \"No limit defined, adding default limit of [1000]\""
+    }
+  ],
+  "size": {
+    "height": 412,
+    "width": 787.9375
+  },
+  "light": {
+    "dataGrids": [
+      {
+        "headers": [
+          {
+            "text": "Category\u21a6"
+          },
+          {
+            "text": "Documents\u21a6"
+          },
+          {
+            "text": "Signed average\u21b5"
+          }
+        ],
+        "cells": [
+          {
+            "row": 0,
+            "column": 0,
+            "text": "alpha\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 0,
+            "column": 1,
+            "text": "44\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 0,
+            "column": 2,
+            "text": "-19.9\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 1,
+            "column": 0,
+            "text": "bravo\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 1,
+            "column": 1,
+            "text": "18\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 1,
+            "column": 2,
+            "text": "-11.4\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 2,
+            "column": 0,
+            "text": "-\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 2,
+            "column": 1,
+            "text": "16\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 2,
+            "column": 2,
+            "text": "-15.3\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 3,
+            "column": 0,
+            "text": "charlie\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 3,
+            "column": 1,
+            "text": "13\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 3,
+            "column": 2,
+            "text": "-8.2\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 4,
+            "column": 0,
+            "text": "delta\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 4,
+            "column": 1,
+            "text": "12\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 4,
+            "column": 2,
+            "text": "-19.2\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 5,
+            "column": 0,
+            "text": "echo\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 5,
+            "column": 1,
+            "text": "12\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 5,
+            "column": 2,
+            "text": "-9.3\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 6,
+            "column": 0,
+            "text": "golf\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 6,
+            "column": 1,
+            "text": "10\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 6,
+            "column": 2,
+            "text": "-7\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 7,
+            "column": 0,
+            "text": "foxtrot\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 7,
+            "column": 1,
+            "text": "8\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 7,
+            "column": 2,
+            "text": "-18.5\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 8,
+            "column": 0,
+            "text": "hotel\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 8,
+            "column": 1,
+            "text": "8\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 8,
+            "column": 2,
+            "text": "-28.8\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(231, 102, 76)"
+          },
+          {
+            "row": 9,
+            "column": 0,
+            "text": "juliett\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 9,
+            "column": 1,
+            "text": "8\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 9,
+            "column": 2,
+            "text": "-10\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 10,
+            "column": 0,
+            "text": "\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 10,
+            "column": 1,
+            "text": "Sum: 168\u21a6",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 10,
+            "column": 2,
+            "text": "\u21b5",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        ]
+      }
+    ]
+  },
+  "dark": {
+    "dataGrids": [
+      {
+        "headers": [
+          {
+            "text": "Category\u21a6"
+          },
+          {
+            "text": "Documents\u21a6"
+          },
+          {
+            "text": "Signed average\u21b5"
+          }
+        ],
+        "cells": [
+          {
+            "row": 0,
+            "column": 0,
+            "text": "alpha\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 0,
+            "column": 1,
+            "text": "44\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 0,
+            "column": 2,
+            "text": "-19.9\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 1,
+            "column": 0,
+            "text": "bravo\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 1,
+            "column": 1,
+            "text": "18\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 1,
+            "column": 2,
+            "text": "-11.4\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 2,
+            "column": 0,
+            "text": "-\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 2,
+            "column": 1,
+            "text": "16\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 2,
+            "column": 2,
+            "text": "-15.3\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 3,
+            "column": 0,
+            "text": "charlie\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 3,
+            "column": 1,
+            "text": "13\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 3,
+            "column": 2,
+            "text": "-8.2\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 4,
+            "column": 0,
+            "text": "delta\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 4,
+            "column": 1,
+            "text": "12\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 4,
+            "column": 2,
+            "text": "-19.2\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 5,
+            "column": 0,
+            "text": "echo\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 5,
+            "column": 1,
+            "text": "12\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 5,
+            "column": 2,
+            "text": "-9.3\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 6,
+            "column": 0,
+            "text": "golf\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 6,
+            "column": 1,
+            "text": "10\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 6,
+            "column": 2,
+            "text": "-7\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 7,
+            "column": 0,
+            "text": "foxtrot\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 7,
+            "column": 1,
+            "text": "8\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 7,
+            "column": 2,
+            "text": "-18.5\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 8,
+            "column": 0,
+            "text": "hotel\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 8,
+            "column": 1,
+            "text": "8\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 8,
+            "column": 2,
+            "text": "-28.8\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(231, 102, 76)"
+          },
+          {
+            "row": 9,
+            "column": 0,
+            "text": "juliett\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 9,
+            "column": 1,
+            "text": "8\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 9,
+            "column": 2,
+            "text": "-10\u21b5",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(214, 191, 87)"
+          },
+          {
+            "row": 10,
+            "column": 0,
+            "text": "\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 10,
+            "column": 1,
+            "text": "Sum: 168\u21a6",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "row": 10,
+            "column": 2,
+            "text": "\u21b5",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        ]
+      }
+    ]
+  }
+}

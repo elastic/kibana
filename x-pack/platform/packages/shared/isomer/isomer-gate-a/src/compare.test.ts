@@ -33,10 +33,23 @@ const visits = (theme: 'light' | 'dark') =>
   ) as NormalizedMetric;
 
 describe('listGateCases', () => {
-  it('finds the corpus ES|QL metric and xy panels, in both color modes', () => {
+  it('finds the corpus Lens panels, in both color modes', () => {
     const panels = new Set(cases.map(({ name }) => name.replace(/\/(light|dark)$/, '')));
     expect([...panels].sort()).toEqual([
       'isomer-corpus-buckets/buckets-xy-multivalue-esql',
+      ...[
+        'donut-esql',
+        'gauge-arc-esql',
+        'gauge-bullet-esql',
+        'heatmap-esql',
+        'legacy-metric',
+        'mosaic-esql',
+        'pie-esql',
+        'table-esql',
+        'tagcloud-esql',
+        'treemap-esql',
+        'waffle-esql',
+      ].map((panel) => `isomer-corpus-charts/charts-${panel}`),
       'isomer-corpus-values/values-metric-esql',
       'isomer-corpus-values/values-xy-huge-esql',
       'sample-logs/01d8e435-91c0-484f-a11e-856747050b0a',
@@ -63,6 +76,7 @@ describe('normalizeColor', () => {
     expect(normalizeColor('rgb(252, 196, 0)')).toBe('#fcc400');
     expect(normalizeColor('#16C5C0')).toBe('#16c5c0');
     expect(normalizeColor('rgba(0, 0, 0, 0)')).toBe('#00000000');
+    expect(normalizeColor('#FFFFFF00')).toBe('#00000000');
   });
 });
 

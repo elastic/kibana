@@ -14,12 +14,18 @@ import type { GateCase } from './corpus';
 import { kibanaChart, kibanaChartSize } from './corpus';
 import { normalizeDebugState } from './debug_state';
 import { normalizeMetricReadings } from './metric_dom';
+import { normalizeWordReadings } from './records';
 import { normalizeScene } from './scene';
 
-/** What an engine reports it drew: Elastic Charts' `DebugState` for xy, the DOM for metric. */
+/**
+ * What an engine reports it drew: Elastic Charts' `DebugState` (xy, partition, heat map, bullet),
+ * the metric's readings, a tag cloud's words, or nothing it can compare (`none`).
+ */
 export type EngineOutput =
   | { kind: 'xy'; debugState: DebugState }
-  | { kind: 'metric'; readings: MetricReading[] };
+  | { kind: 'metric'; readings: MetricReading[] }
+  | { kind: 'words'; texts: Array<{ text: string; fill: string }> }
+  | { kind: 'none' };
 
 /** A Scene renderer under test, such as `elastic-charts-node`, drawing at Kibana's size. */
 export interface GateAEngine {
@@ -49,9 +55,17 @@ export const runGateAVisual = async (
     return result;
   }
   const output = await engine.draw(scene, kibanaChartSize(gateCase));
+  if (output.kind === 'none') {
+    return result;
+  }
   const drawn =
     output.kind === 'xy'
-      ? normalizeDebugState(output.debugState)
+      ? normalizeDebugState(output.debugState, scene)
+      : output.kind === 'words'
+      ? normalizeWordReadings(
+          output.texts,
+          scene.kind === 'tagCloud' && scene.label ? [scene.label] : []
+        )
       : normalizeMetricReadings(output.readings);
   return { ...result, engine: compareCharts(expected, drawn, options) };
 };

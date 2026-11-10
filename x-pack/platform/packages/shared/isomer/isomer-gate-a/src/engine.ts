@@ -75,16 +75,32 @@ export const readMetricSvg = (svg: string): MetricReading[] => {
  * renderer, as Kibana's server draws chart pictures. Text is laid out with Elastic Charts'
  * Helvetica metrics, so text geometry differs from the browser's within the tolerance.
  */
+const TEXT = /<text\b([^>]*)>([^<]*)<\/text>/g;
+
+/** The words a headless `Wordcloud` drew: each SVG text and its fill, in document order. */
+export const readWordsSvg = (svg: string): Array<{ text: string; fill: string }> =>
+  [...svg.matchAll(TEXT)].map(([, attributes, text]) => ({
+    text: unescapeXml(text).trim(),
+    fill: attribute(attributes, 'fill') ?? '',
+  }));
+
 export const createElasticChartsHeadlessEngine = async (): Promise<
   GateAEngine & { close: () => Promise<void> }
 > => ({
   draw: async (scene, { width, height }): Promise<EngineOutput> => {
+    if (scene.kind === 'table' || scene.kind === 'legacyMetric') {
+      // The charts pack draws these itself, not through Elastic Charts.
+      return { kind: 'none' };
+    }
     const drawing = renderSceneSvg({ ...scene, size: { width, height } });
     if (scene.kind === 'metric') {
       return { kind: 'metric', readings: readMetricSvg(drawing.svg) };
     }
+    if (scene.kind === 'tagCloud') {
+      return { kind: 'words', texts: readWordsSvg(drawing.svg) };
+    }
     if (!drawing.debugState) {
-      throw new Error('Headless Elastic Charts reported no DebugState for an xy chart.');
+      throw new Error(`Headless Elastic Charts reported no DebugState for a ${scene.kind} chart.`);
     }
     return { kind: 'xy', debugState: drawing.debugState as DebugState };
   },

@@ -12,6 +12,7 @@ This package holds the corpus definition and the pure helpers the capture uses. 
 | `isomer-corpus-values` | `src/edge_case_dashboards.ts` | Null, negative, huge and tiny values in metric, xy and table panels |
 | `isomer-corpus-buckets` | `src/edge_case_dashboards.ts` | Other and missing buckets, multivalue fields, in xy, pie and table panels |
 | `isomer-corpus-long-titles` | `src/edge_case_dashboards.ts` | Long panel titles, long and non-ASCII labels and legends |
+| `isomer-corpus-charts` | `src/edge_case_dashboards.ts` | ES\|QL data table, pie, donut, treemap, mosaic, waffle, heat map, gauges and tag cloud, and a data view legacy metric, with their styling options |
 
 The edge-case dashboards are written in the as-code format (Lens API configs, `type: 'vis'`) and created with `PUT /api/dashboards/{id}`. Their data is `buildEdgeCaseDocuments()`: one document an hour for a week in the `isomer-corpus-edge-cases` index, a pure function of the document index. A unit test validates every panel against Lens's `lensApiConfigSchema` and every dashboard against the dashboard schema, and checks that the data holds each edge case.
 
@@ -24,7 +25,8 @@ For each panel of each dashboard, in light and dark, under `captures/<dashboard>
 | `panels/<panel>/config.json` | The as-code panel; for by-reference Lens panels, also the visualization | `GET /api/dashboards/{id}` (`transformDashboardOut`), `GET /api/visualizations/{id}` (Lens `transformOut`) |
 | `panels/<panel>/<theme>/capture.json` → `inspector.tables` | Kibana's `Datatable`s, keyed as the `tables` adapter keys them | The panel's inspector `tables` adapter |
 | `panels/<panel>/<theme>/capture.json` → `panel.charts[].debugState` | Elastic Charts' `DebugState` for every chart in the panel | `data-ech-debug-state`, with `window._echDebugStateFlag` on |
-| `panels/<panel>/<theme>/capture.json` → `panel.metrics`, `panel.dataGrids` | Text, inline and computed colors, in page order | The rendered Elastic Charts metric and EUI data grid |
+| `panels/<panel>/<theme>/capture.json` → `panel.metrics`, `panel.dataGrids`, `panel.legacyMetrics` | Text, inline and computed colors, in page order; a legacy metric tile's value, label and the background it sits on | The rendered Elastic Charts metric, EUI data grid and legacy metric |
+| `panels/<panel>/<theme>/capture.json` → `panel.charts[].svgTexts` | Each SVG text a chart drew, with its fill and size: a tag cloud's words, which `DebugState` doesn't report | The chart's SVG |
 | `panels/<panel>/<theme>/capture.json` → `context` | `now`, the relative and absolute time range, `dateFormat:tz`, the page's theme, time zone, locale and pixel ratio, the panel's grid position and size | The page and the run's settings |
 | `panels/<panel>/<theme>/screenshot.png` | One screenshot, for people to look at; never compared automatically | The page, cropped to the panel |
 

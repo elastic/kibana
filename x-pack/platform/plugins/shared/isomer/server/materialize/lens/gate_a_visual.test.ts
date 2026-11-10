@@ -7,7 +7,8 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import type { MetricNode, Scene, XyChartNode } from '@kbn/isomer';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { ChartNode, Scene } from '@kbn/isomer';
 import { resolveChart } from '@kbn/isomer';
 import type { GateAVisualResult, GateCase } from '@kbn/isomer-gate-a';
 import {
@@ -22,6 +23,31 @@ import type { KitServices } from '../kit/create_kit';
 import { createTestKitServices } from '../kit/kit_services.mock';
 import { isUnsupportedNode } from '../nodes';
 import { createLensMaterializer } from './materializer';
+import { compileLegacyMetric } from './plan';
+import type { LensLegacyMetricConfig } from './types';
+
+/**
+ * Kibana's tables as the pipeline's executors return them. The inspector shows a legacy metric's
+ * table after Lens renames its `esaggs` column, so it's renamed back.
+ */
+const executorTables = (gateCase: GateCase): Datatable[] => {
+  const tables = kibanaTables(gateCase);
+  if (gateCase.config.type !== 'legacy_metric') {
+    return tables;
+  }
+  const compiled = compileLegacyMetric(
+    materializer.parse(gateCase.config).chart as LensLegacyMetricConfig
+  );
+  if ('type' in compiled) {
+    throw new Error(compiled.reason);
+  }
+  const [esAggsId] = Object.keys(compiled.idMap);
+  return tables.map(({ columns: [column], rows, ...table }) => ({
+    ...table,
+    columns: [{ ...column, id: esAggsId }],
+    rows: rows.map((row) => ({ [esAggsId]: row[column.id] })),
+  }));
+};
 
 /**
  * Gate A-visual: Kibana's own captured tables go through the Lens mapping, `resolveChart` and
@@ -60,13 +86,13 @@ const sceneFor = (gateCase: GateCase): Scene => {
   });
   const node = materializer.map(
     materializer.parse(config),
-    { tables: kibanaTables(gateCase), nodes: [] },
+    { tables: executorTables(gateCase), nodes: [] },
     kit
   );
   if (isUnsupportedNode(node)) {
     throw new Error(`${gateCase.name} did not map: ${node.reason}`);
   }
-  return resolveChart(node as MetricNode | XyChartNode, {
+  return resolveChart(node as ChartNode, {
     scheme: theme,
     size: kibanaChartSize(gateCase),
     locale: 'en',
@@ -84,7 +110,7 @@ describe('Gate A-visual', () => {
     }
   });
 
-  it('covers every ES|QL metric and xy case in the corpus', () => {
+  it('covers every Lens case in the corpus', () => {
     expect(cases.length).toBeGreaterThan(0);
   });
 

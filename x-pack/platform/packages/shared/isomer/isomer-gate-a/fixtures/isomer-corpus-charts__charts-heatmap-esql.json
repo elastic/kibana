@@ -1,0 +1,2826 @@
+{
+  "dashboard": "isomer-corpus-charts",
+  "panel": "charts-heatmap-esql",
+  "config": {
+    "axis": {
+      "x": {
+        "labels": {
+          "orientation": "horizontal",
+          "visible": true
+        },
+        "scale": "ordinal",
+        "title": {
+          "visible": false
+        }
+      },
+      "y": {
+        "labels": {
+          "visible": true
+        },
+        "title": {
+          "text": "Category",
+          "visible": true
+        }
+      }
+    },
+    "data_source": {
+      "query": "FROM isomer-corpus-edge-cases | STATS count = COUNT(*) BY day = BUCKET(@timestamp, 1 day), category | SORT day, category",
+      "type": "esql"
+    },
+    "ignore_global_filters": false,
+    "legend": {
+      "position": "bottom",
+      "truncate_after_lines": 1,
+      "visibility": "visible"
+    },
+    "metric": {
+      "color": {
+        "type": "auto"
+      },
+      "column": "count"
+    },
+    "sampling": 1,
+    "styling": {
+      "cells": {
+        "labels": {
+          "visible": true
+        }
+      }
+    },
+    "title": "Documents per day and category",
+    "type": "heatmap",
+    "x": {
+      "column": "day"
+    },
+    "y": {
+      "column": "category"
+    }
+  },
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    }
+  },
+  "chart_type": "heatmap",
+  "tables": [
+    {
+      "columns": [
+        {
+          "id": "heatmap_value_accessor_value",
+          "isComputedColumn": true,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Metric",
+            "esType": "long",
+            "params": {
+              "id": "number"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": false,
+              "sourceField": "count"
+            },
+            "type": "number"
+          },
+          "name": "count"
+        },
+        {
+          "id": "heatmap_value_accessor_x",
+          "isComputedColumn": true,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "X axis",
+            "esMeta": {
+              "bucket": {
+                "interval": 1,
+                "unit": "day"
+              }
+            },
+            "esType": "date",
+            "params": {
+              "id": "date"
+            },
+            "sourceParams": {
+              "appliedTimeRange": {
+                "from": "2024-01-01T00:00:00.000Z",
+                "to": "2024-01-08T00:00:00.000Z"
+              },
+              "computedDomain": {
+                "max": 1704585600000,
+                "min": 1704067200000
+              },
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": false,
+              "params": {},
+              "sourceField": "day"
+            },
+            "type": "date"
+          },
+          "name": "day"
+        },
+        {
+          "id": "heatmap_value_accessor_y",
+          "isComputedColumn": false,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Y axis",
+            "esType": "keyword",
+            "params": {
+              "id": "string"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": true,
+              "sourceField": "category"
+            },
+            "type": "string"
+          },
+          "name": "category"
+        }
+      ],
+      "meta": {
+        "query": "FROM isomer-corpus-edge-cases | STATS count = COUNT(*) BY day = BUCKET(@timestamp, 1 day), category | SORT day, category",
+        "statistics": {
+          "totalCount": 75
+        },
+        "type": "es_ql"
+      },
+      "rows": [
+        {
+          "heatmap_value_accessor_value": 6,
+          "heatmap_value_accessor_x": "2024-01-01T00:00:00.000Z",
+          "heatmap_value_accessor_y": "alpha"
+        },
+        {
+          "heatmap_value_accessor_value": 3,
+          "heatmap_value_accessor_x": "2024-01-01T00:00:00.000Z",
+          "heatmap_value_accessor_y": "bravo"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-01T00:00:00.000Z",
+          "heatmap_value_accessor_y": "charlie"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-01T00:00:00.000Z",
+          "heatmap_value_accessor_y": "delta"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-01T00:00:00.000Z",
+          "heatmap_value_accessor_y": "echo"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-01T00:00:00.000Z",
+          "heatmap_value_accessor_y": "foxtrot"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-01T00:00:00.000Z",
+          "heatmap_value_accessor_y": "golf"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-01T00:00:00.000Z",
+          "heatmap_value_accessor_y": "india"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-01T00:00:00.000Z",
+          "heatmap_value_accessor_y": "juliett"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-01T00:00:00.000Z",
+          "heatmap_value_accessor_y": "lima"
+        },
+        {
+          "heatmap_value_accessor_value": 3,
+          "heatmap_value_accessor_x": "2024-01-01T00:00:00.000Z",
+          "heatmap_value_accessor_y": null
+        },
+        {
+          "heatmap_value_accessor_value": 7,
+          "heatmap_value_accessor_x": "2024-01-02T00:00:00.000Z",
+          "heatmap_value_accessor_y": "alpha"
+        },
+        {
+          "heatmap_value_accessor_value": 3,
+          "heatmap_value_accessor_x": "2024-01-02T00:00:00.000Z",
+          "heatmap_value_accessor_y": "bravo"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-02T00:00:00.000Z",
+          "heatmap_value_accessor_y": "charlie"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-02T00:00:00.000Z",
+          "heatmap_value_accessor_y": "delta"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-02T00:00:00.000Z",
+          "heatmap_value_accessor_y": "echo"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-02T00:00:00.000Z",
+          "heatmap_value_accessor_y": "golf"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-02T00:00:00.000Z",
+          "heatmap_value_accessor_y": "hotel"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-02T00:00:00.000Z",
+          "heatmap_value_accessor_y": "india"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-02T00:00:00.000Z",
+          "heatmap_value_accessor_y": "juliett"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-02T00:00:00.000Z",
+          "heatmap_value_accessor_y": "kilo"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-02T00:00:00.000Z",
+          "heatmap_value_accessor_y": null
+        },
+        {
+          "heatmap_value_accessor_value": 5,
+          "heatmap_value_accessor_x": "2024-01-03T00:00:00.000Z",
+          "heatmap_value_accessor_y": "alpha"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-03T00:00:00.000Z",
+          "heatmap_value_accessor_y": "bravo"
+        },
+        {
+          "heatmap_value_accessor_value": 3,
+          "heatmap_value_accessor_x": "2024-01-03T00:00:00.000Z",
+          "heatmap_value_accessor_y": "charlie"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-03T00:00:00.000Z",
+          "heatmap_value_accessor_y": "delta"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-03T00:00:00.000Z",
+          "heatmap_value_accessor_y": "echo"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-03T00:00:00.000Z",
+          "heatmap_value_accessor_y": "foxtrot"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-03T00:00:00.000Z",
+          "heatmap_value_accessor_y": "golf"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-03T00:00:00.000Z",
+          "heatmap_value_accessor_y": "hotel"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-03T00:00:00.000Z",
+          "heatmap_value_accessor_y": "juliett"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-03T00:00:00.000Z",
+          "heatmap_value_accessor_y": "lima"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-03T00:00:00.000Z",
+          "heatmap_value_accessor_y": null
+        },
+        {
+          "heatmap_value_accessor_value": 7,
+          "heatmap_value_accessor_x": "2024-01-04T00:00:00.000Z",
+          "heatmap_value_accessor_y": "alpha"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-04T00:00:00.000Z",
+          "heatmap_value_accessor_y": "bravo"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-04T00:00:00.000Z",
+          "heatmap_value_accessor_y": "charlie"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-04T00:00:00.000Z",
+          "heatmap_value_accessor_y": "delta"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-04T00:00:00.000Z",
+          "heatmap_value_accessor_y": "echo"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-04T00:00:00.000Z",
+          "heatmap_value_accessor_y": "foxtrot"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-04T00:00:00.000Z",
+          "heatmap_value_accessor_y": "golf"
+        },
+        {
+          "heatmap_value_accessor_value": 3,
+          "heatmap_value_accessor_x": "2024-01-04T00:00:00.000Z",
+          "heatmap_value_accessor_y": "india"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-04T00:00:00.000Z",
+          "heatmap_value_accessor_y": "kilo"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-04T00:00:00.000Z",
+          "heatmap_value_accessor_y": null
+        },
+        {
+          "heatmap_value_accessor_value": 7,
+          "heatmap_value_accessor_x": "2024-01-05T00:00:00.000Z",
+          "heatmap_value_accessor_y": "alpha"
+        },
+        {
+          "heatmap_value_accessor_value": 3,
+          "heatmap_value_accessor_x": "2024-01-05T00:00:00.000Z",
+          "heatmap_value_accessor_y": "bravo"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-05T00:00:00.000Z",
+          "heatmap_value_accessor_y": "charlie"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-05T00:00:00.000Z",
+          "heatmap_value_accessor_y": "delta"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-05T00:00:00.000Z",
+          "heatmap_value_accessor_y": "echo"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-05T00:00:00.000Z",
+          "heatmap_value_accessor_y": "foxtrot"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-05T00:00:00.000Z",
+          "heatmap_value_accessor_y": "hotel"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-05T00:00:00.000Z",
+          "heatmap_value_accessor_y": "juliett"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-05T00:00:00.000Z",
+          "heatmap_value_accessor_y": "lima"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-05T00:00:00.000Z",
+          "heatmap_value_accessor_y": null
+        },
+        {
+          "heatmap_value_accessor_value": 5,
+          "heatmap_value_accessor_x": "2024-01-06T00:00:00.000Z",
+          "heatmap_value_accessor_y": "alpha"
+        },
+        {
+          "heatmap_value_accessor_value": 3,
+          "heatmap_value_accessor_x": "2024-01-06T00:00:00.000Z",
+          "heatmap_value_accessor_y": "bravo"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-06T00:00:00.000Z",
+          "heatmap_value_accessor_y": "charlie"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-06T00:00:00.000Z",
+          "heatmap_value_accessor_y": "delta"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-06T00:00:00.000Z",
+          "heatmap_value_accessor_y": "echo"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-06T00:00:00.000Z",
+          "heatmap_value_accessor_y": "golf"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-06T00:00:00.000Z",
+          "heatmap_value_accessor_y": "india"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-06T00:00:00.000Z",
+          "heatmap_value_accessor_y": "juliett"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-06T00:00:00.000Z",
+          "heatmap_value_accessor_y": "kilo"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-06T00:00:00.000Z",
+          "heatmap_value_accessor_y": "lima"
+        },
+        {
+          "heatmap_value_accessor_value": 3,
+          "heatmap_value_accessor_x": "2024-01-06T00:00:00.000Z",
+          "heatmap_value_accessor_y": null
+        },
+        {
+          "heatmap_value_accessor_value": 7,
+          "heatmap_value_accessor_x": "2024-01-07T00:00:00.000Z",
+          "heatmap_value_accessor_y": "alpha"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-07T00:00:00.000Z",
+          "heatmap_value_accessor_y": "bravo"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-07T00:00:00.000Z",
+          "heatmap_value_accessor_y": "charlie"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-07T00:00:00.000Z",
+          "heatmap_value_accessor_y": "delta"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-07T00:00:00.000Z",
+          "heatmap_value_accessor_y": "echo"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-07T00:00:00.000Z",
+          "heatmap_value_accessor_y": "foxtrot"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-07T00:00:00.000Z",
+          "heatmap_value_accessor_y": "golf"
+        },
+        {
+          "heatmap_value_accessor_value": 3,
+          "heatmap_value_accessor_x": "2024-01-07T00:00:00.000Z",
+          "heatmap_value_accessor_y": "hotel"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-07T00:00:00.000Z",
+          "heatmap_value_accessor_y": "juliett"
+        },
+        {
+          "heatmap_value_accessor_value": 1,
+          "heatmap_value_accessor_x": "2024-01-07T00:00:00.000Z",
+          "heatmap_value_accessor_y": "kilo"
+        },
+        {
+          "heatmap_value_accessor_value": 2,
+          "heatmap_value_accessor_x": "2024-01-07T00:00:00.000Z",
+          "heatmap_value_accessor_y": null
+        }
+      ],
+      "type": "datatable",
+      "warning": "299 Elasticsearch-9.7.0-f981584e7fd18ed525f2ee20c81f87f608de2fcd \"No limit defined, adding default limit of [1000]\""
+    }
+  ],
+  "size": {
+    "height": 356,
+    "width": 1021.25
+  },
+  "light": {
+    "debugState": {
+      "axes": {
+        "x": [
+          {
+            "gridlines": [
+              {
+                "x": 0,
+                "y": 300.5
+              },
+              {
+                "x": 135.00650024414062,
+                "y": 300.5
+              },
+              {
+                "x": 270.01300048828125,
+                "y": 300.5
+              },
+              {
+                "x": 405.0195007324219,
+                "y": 300.5
+              },
+              {
+                "x": 540.0260009765625,
+                "y": 300.5
+              },
+              {
+                "x": 675.0325012207031,
+                "y": 300.5
+              },
+              {
+                "x": 810.0390014648438,
+                "y": 300.5
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 300.5
+              }
+            ],
+            "id": "x",
+            "labels": [
+              "2024-01-01",
+              "2024-01-02",
+              "2024-01-03",
+              "2024-01-04",
+              "2024-01-05",
+              "2024-01-06",
+              "2024-01-07"
+            ],
+            "position": "left",
+            "rotation": 0,
+            "values": [
+              1704067200000,
+              1704153600000,
+              1704240000000,
+              1704326400000,
+              1704412800000,
+              1704499200000,
+              1704585600000
+            ]
+          }
+        ],
+        "y": [
+          {
+            "gridlines": [
+              {
+                "x": 945.0455017089844,
+                "y": 0
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 24.625
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 49.25
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 73.875
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 98.5
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 123.125
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 147.75
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 172.375
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 197
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 221.625
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 246.25
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 270.875
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 295.5
+              }
+            ],
+            "id": "y",
+            "labels": [
+              "alpha",
+              "bravo",
+              "charlie",
+              "delta",
+              "echo",
+              "foxtrot",
+              "golf",
+              "india",
+              "juliett",
+              "lima",
+              "hotel",
+              "kilo"
+            ],
+            "position": "bottom",
+            "title": "Category",
+            "values": [
+              "alpha",
+              "bravo",
+              "charlie",
+              "delta",
+              "echo",
+              "foxtrot",
+              "golf",
+              "india",
+              "juliett",
+              "lima",
+              "hotel",
+              "kilo"
+            ]
+          }
+        ]
+      },
+      "heatmap": {
+        "cells": [
+          {
+            "datum": {
+              "originalIndex": 0,
+              "value": 6,
+              "x": 1704067200000,
+              "y": "alpha"
+            },
+            "fill": "rgba(246, 114, 106, 1)",
+            "formatted": "6",
+            "value": 6,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 1,
+              "value": 3,
+              "x": 1704067200000,
+              "y": "bravo"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 2,
+              "value": 1,
+              "x": 1704067200000,
+              "y": "charlie"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 3,
+              "value": 2,
+              "x": 1704067200000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 4,
+              "value": 2,
+              "x": 1704067200000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 5,
+              "value": 1,
+              "x": 1704067200000,
+              "y": "foxtrot"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 123.625
+          },
+          {
+            "datum": {
+              "originalIndex": 6,
+              "value": 2,
+              "x": 1704067200000,
+              "y": "golf"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 148.25
+          },
+          {
+            "datum": {
+              "originalIndex": 7,
+              "value": 1,
+              "x": 1704067200000,
+              "y": "india"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 172.875
+          },
+          {
+            "datum": {
+              "originalIndex": 8,
+              "value": 1,
+              "x": 1704067200000,
+              "y": "juliett"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 197.5
+          },
+          {
+            "datum": {
+              "originalIndex": 9,
+              "value": 2,
+              "x": 1704067200000,
+              "y": "lima"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 222.125
+          },
+          {
+            "datum": {
+              "originalIndex": 11,
+              "value": 7,
+              "x": 1704153600000,
+              "y": "alpha"
+            },
+            "fill": "rgba(246, 114, 106, 1)",
+            "formatted": "7",
+            "value": 7,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 12,
+              "value": 3,
+              "x": 1704153600000,
+              "y": "bravo"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 13,
+              "value": 2,
+              "x": 1704153600000,
+              "y": "charlie"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 14,
+              "value": 1,
+              "x": 1704153600000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 15,
+              "value": 2,
+              "x": 1704153600000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 16,
+              "value": 2,
+              "x": 1704153600000,
+              "y": "golf"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 148.25
+          },
+          {
+            "datum": {
+              "originalIndex": 17,
+              "value": 1,
+              "x": 1704153600000,
+              "y": "hotel"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 246.75
+          },
+          {
+            "datum": {
+              "originalIndex": 18,
+              "value": 1,
+              "x": 1704153600000,
+              "y": "india"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 172.875
+          },
+          {
+            "datum": {
+              "originalIndex": 19,
+              "value": 1,
+              "x": 1704153600000,
+              "y": "juliett"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 197.5
+          },
+          {
+            "datum": {
+              "originalIndex": 20,
+              "value": 2,
+              "x": 1704153600000,
+              "y": "kilo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 271.375
+          },
+          {
+            "datum": {
+              "originalIndex": 22,
+              "value": 5,
+              "x": 1704240000000,
+              "y": "alpha"
+            },
+            "fill": "rgba(255, 212, 207, 1)",
+            "formatted": "5",
+            "value": 5,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 23,
+              "value": 2,
+              "x": 1704240000000,
+              "y": "bravo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 24,
+              "value": 3,
+              "x": 1704240000000,
+              "y": "charlie"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 25,
+              "value": 2,
+              "x": 1704240000000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 26,
+              "value": 1,
+              "x": 1704240000000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 27,
+              "value": 2,
+              "x": 1704240000000,
+              "y": "foxtrot"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 123.625
+          },
+          {
+            "datum": {
+              "originalIndex": 28,
+              "value": 1,
+              "x": 1704240000000,
+              "y": "golf"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 148.25
+          },
+          {
+            "datum": {
+              "originalIndex": 29,
+              "value": 2,
+              "x": 1704240000000,
+              "y": "hotel"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 246.75
+          },
+          {
+            "datum": {
+              "originalIndex": 30,
+              "value": 2,
+              "x": 1704240000000,
+              "y": "juliett"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 197.5
+          },
+          {
+            "datum": {
+              "originalIndex": 31,
+              "value": 2,
+              "x": 1704240000000,
+              "y": "lima"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 222.125
+          },
+          {
+            "datum": {
+              "originalIndex": 33,
+              "value": 7,
+              "x": 1704326400000,
+              "y": "alpha"
+            },
+            "fill": "rgba(246, 114, 106, 1)",
+            "formatted": "7",
+            "value": 7,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 34,
+              "value": 2,
+              "x": 1704326400000,
+              "y": "bravo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 35,
+              "value": 1,
+              "x": 1704326400000,
+              "y": "charlie"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 36,
+              "value": 2,
+              "x": 1704326400000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 37,
+              "value": 2,
+              "x": 1704326400000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 38,
+              "value": 1,
+              "x": 1704326400000,
+              "y": "foxtrot"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 123.625
+          },
+          {
+            "datum": {
+              "originalIndex": 39,
+              "value": 2,
+              "x": 1704326400000,
+              "y": "golf"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 148.25
+          },
+          {
+            "datum": {
+              "originalIndex": 40,
+              "value": 3,
+              "x": 1704326400000,
+              "y": "india"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 172.875
+          },
+          {
+            "datum": {
+              "originalIndex": 41,
+              "value": 2,
+              "x": 1704326400000,
+              "y": "kilo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 271.375
+          },
+          {
+            "datum": {
+              "originalIndex": 43,
+              "value": 7,
+              "x": 1704412800000,
+              "y": "alpha"
+            },
+            "fill": "rgba(246, 114, 106, 1)",
+            "formatted": "7",
+            "value": 7,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 44,
+              "value": 3,
+              "x": 1704412800000,
+              "y": "bravo"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 45,
+              "value": 2,
+              "x": 1704412800000,
+              "y": "charlie"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 46,
+              "value": 2,
+              "x": 1704412800000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 47,
+              "value": 1,
+              "x": 1704412800000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 48,
+              "value": 2,
+              "x": 1704412800000,
+              "y": "foxtrot"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 123.625
+          },
+          {
+            "datum": {
+              "originalIndex": 49,
+              "value": 2,
+              "x": 1704412800000,
+              "y": "hotel"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 246.75
+          },
+          {
+            "datum": {
+              "originalIndex": 50,
+              "value": 2,
+              "x": 1704412800000,
+              "y": "juliett"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 197.5
+          },
+          {
+            "datum": {
+              "originalIndex": 51,
+              "value": 1,
+              "x": 1704412800000,
+              "y": "lima"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 222.125
+          },
+          {
+            "datum": {
+              "originalIndex": 53,
+              "value": 5,
+              "x": 1704499200000,
+              "y": "alpha"
+            },
+            "fill": "rgba(255, 212, 207, 1)",
+            "formatted": "5",
+            "value": 5,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 54,
+              "value": 3,
+              "x": 1704499200000,
+              "y": "bravo"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 55,
+              "value": 2,
+              "x": 1704499200000,
+              "y": "charlie"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 56,
+              "value": 2,
+              "x": 1704499200000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 57,
+              "value": 2,
+              "x": 1704499200000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 58,
+              "value": 2,
+              "x": 1704499200000,
+              "y": "golf"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 148.25
+          },
+          {
+            "datum": {
+              "originalIndex": 59,
+              "value": 2,
+              "x": 1704499200000,
+              "y": "india"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 172.875
+          },
+          {
+            "datum": {
+              "originalIndex": 60,
+              "value": 1,
+              "x": 1704499200000,
+              "y": "juliett"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 197.5
+          },
+          {
+            "datum": {
+              "originalIndex": 61,
+              "value": 1,
+              "x": 1704499200000,
+              "y": "kilo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 271.375
+          },
+          {
+            "datum": {
+              "originalIndex": 62,
+              "value": 1,
+              "x": 1704499200000,
+              "y": "lima"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 222.125
+          },
+          {
+            "datum": {
+              "originalIndex": 64,
+              "value": 7,
+              "x": 1704585600000,
+              "y": "alpha"
+            },
+            "fill": "rgba(246, 114, 106, 1)",
+            "formatted": "7",
+            "value": 7,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 65,
+              "value": 2,
+              "x": 1704585600000,
+              "y": "bravo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 66,
+              "value": 2,
+              "x": 1704585600000,
+              "y": "charlie"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 67,
+              "value": 1,
+              "x": 1704585600000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 68,
+              "value": 2,
+              "x": 1704585600000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 69,
+              "value": 2,
+              "x": 1704585600000,
+              "y": "foxtrot"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 123.625
+          },
+          {
+            "datum": {
+              "originalIndex": 70,
+              "value": 1,
+              "x": 1704585600000,
+              "y": "golf"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 148.25
+          },
+          {
+            "datum": {
+              "originalIndex": 71,
+              "value": 3,
+              "x": 1704585600000,
+              "y": "hotel"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 246.75
+          },
+          {
+            "datum": {
+              "originalIndex": 72,
+              "value": 1,
+              "x": 1704585600000,
+              "y": "juliett"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 197.5
+          },
+          {
+            "datum": {
+              "originalIndex": 73,
+              "value": 1,
+              "x": 1704585600000,
+              "y": "kilo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 271.375
+          }
+        ],
+        "selection": {
+          "area": null,
+          "data": null
+        }
+      },
+      "legend": {
+        "items": [
+          {
+            "color": "#61a2ff",
+            "key": "1 - 2.2",
+            "name": "1 - 2.2"
+          },
+          {
+            "color": "#cfe1ff",
+            "key": "2.2 - 3.4",
+            "name": "2.2 - 3.4"
+          },
+          {
+            "color": "#f6f9fc",
+            "key": "3.4 - 4.6",
+            "name": "3.4 - 4.6"
+          },
+          {
+            "color": "#ffd4cf",
+            "key": "4.6 - 5.8",
+            "name": "4.6 - 5.8"
+          },
+          {
+            "color": "#f6726a",
+            "key": "\u2265 5.8",
+            "name": "\u2265 5.8"
+          }
+        ]
+      }
+    }
+  },
+  "dark": {
+    "debugState": {
+      "axes": {
+        "x": [
+          {
+            "gridlines": [
+              {
+                "x": 0,
+                "y": 300.5
+              },
+              {
+                "x": 135.00650024414062,
+                "y": 300.5
+              },
+              {
+                "x": 270.01300048828125,
+                "y": 300.5
+              },
+              {
+                "x": 405.0195007324219,
+                "y": 300.5
+              },
+              {
+                "x": 540.0260009765625,
+                "y": 300.5
+              },
+              {
+                "x": 675.0325012207031,
+                "y": 300.5
+              },
+              {
+                "x": 810.0390014648438,
+                "y": 300.5
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 300.5
+              }
+            ],
+            "id": "x",
+            "labels": [
+              "2024-01-01",
+              "2024-01-02",
+              "2024-01-03",
+              "2024-01-04",
+              "2024-01-05",
+              "2024-01-06",
+              "2024-01-07"
+            ],
+            "position": "left",
+            "rotation": 0,
+            "values": [
+              1704067200000,
+              1704153600000,
+              1704240000000,
+              1704326400000,
+              1704412800000,
+              1704499200000,
+              1704585600000
+            ]
+          }
+        ],
+        "y": [
+          {
+            "gridlines": [
+              {
+                "x": 945.0455017089844,
+                "y": 0
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 24.625
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 49.25
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 73.875
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 98.5
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 123.125
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 147.75
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 172.375
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 197
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 221.625
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 246.25
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 270.875
+              },
+              {
+                "x": 945.0455017089844,
+                "y": 295.5
+              }
+            ],
+            "id": "y",
+            "labels": [
+              "alpha",
+              "bravo",
+              "charlie",
+              "delta",
+              "echo",
+              "foxtrot",
+              "golf",
+              "india",
+              "juliett",
+              "lima",
+              "hotel",
+              "kilo"
+            ],
+            "position": "bottom",
+            "title": "Category",
+            "values": [
+              "alpha",
+              "bravo",
+              "charlie",
+              "delta",
+              "echo",
+              "foxtrot",
+              "golf",
+              "india",
+              "juliett",
+              "lima",
+              "hotel",
+              "kilo"
+            ]
+          }
+        ]
+      },
+      "heatmap": {
+        "cells": [
+          {
+            "datum": {
+              "originalIndex": 0,
+              "value": 6,
+              "x": 1704067200000,
+              "y": "alpha"
+            },
+            "fill": "rgba(246, 114, 106, 1)",
+            "formatted": "6",
+            "value": 6,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 1,
+              "value": 3,
+              "x": 1704067200000,
+              "y": "bravo"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 2,
+              "value": 1,
+              "x": 1704067200000,
+              "y": "charlie"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 3,
+              "value": 2,
+              "x": 1704067200000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 4,
+              "value": 2,
+              "x": 1704067200000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 5,
+              "value": 1,
+              "x": 1704067200000,
+              "y": "foxtrot"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 123.625
+          },
+          {
+            "datum": {
+              "originalIndex": 6,
+              "value": 2,
+              "x": 1704067200000,
+              "y": "golf"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 148.25
+          },
+          {
+            "datum": {
+              "originalIndex": 7,
+              "value": 1,
+              "x": 1704067200000,
+              "y": "india"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 172.875
+          },
+          {
+            "datum": {
+              "originalIndex": 8,
+              "value": 1,
+              "x": 1704067200000,
+              "y": "juliett"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 197.5
+          },
+          {
+            "datum": {
+              "originalIndex": 9,
+              "value": 2,
+              "x": 1704067200000,
+              "y": "lima"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 0.5,
+            "y": 222.125
+          },
+          {
+            "datum": {
+              "originalIndex": 11,
+              "value": 7,
+              "x": 1704153600000,
+              "y": "alpha"
+            },
+            "fill": "rgba(246, 114, 106, 1)",
+            "formatted": "7",
+            "value": 7,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 12,
+              "value": 3,
+              "x": 1704153600000,
+              "y": "bravo"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 13,
+              "value": 2,
+              "x": 1704153600000,
+              "y": "charlie"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 14,
+              "value": 1,
+              "x": 1704153600000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 15,
+              "value": 2,
+              "x": 1704153600000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 16,
+              "value": 2,
+              "x": 1704153600000,
+              "y": "golf"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 148.25
+          },
+          {
+            "datum": {
+              "originalIndex": 17,
+              "value": 1,
+              "x": 1704153600000,
+              "y": "hotel"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 246.75
+          },
+          {
+            "datum": {
+              "originalIndex": 18,
+              "value": 1,
+              "x": 1704153600000,
+              "y": "india"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 172.875
+          },
+          {
+            "datum": {
+              "originalIndex": 19,
+              "value": 1,
+              "x": 1704153600000,
+              "y": "juliett"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 197.5
+          },
+          {
+            "datum": {
+              "originalIndex": 20,
+              "value": 2,
+              "x": 1704153600000,
+              "y": "kilo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 135.50650024414062,
+            "y": 271.375
+          },
+          {
+            "datum": {
+              "originalIndex": 22,
+              "value": 5,
+              "x": 1704240000000,
+              "y": "alpha"
+            },
+            "fill": "rgba(255, 212, 207, 1)",
+            "formatted": "5",
+            "value": 5,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 23,
+              "value": 2,
+              "x": 1704240000000,
+              "y": "bravo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 24,
+              "value": 3,
+              "x": 1704240000000,
+              "y": "charlie"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 25,
+              "value": 2,
+              "x": 1704240000000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 26,
+              "value": 1,
+              "x": 1704240000000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 27,
+              "value": 2,
+              "x": 1704240000000,
+              "y": "foxtrot"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 123.625
+          },
+          {
+            "datum": {
+              "originalIndex": 28,
+              "value": 1,
+              "x": 1704240000000,
+              "y": "golf"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 148.25
+          },
+          {
+            "datum": {
+              "originalIndex": 29,
+              "value": 2,
+              "x": 1704240000000,
+              "y": "hotel"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 246.75
+          },
+          {
+            "datum": {
+              "originalIndex": 30,
+              "value": 2,
+              "x": 1704240000000,
+              "y": "juliett"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 197.5
+          },
+          {
+            "datum": {
+              "originalIndex": 31,
+              "value": 2,
+              "x": 1704240000000,
+              "y": "lima"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 270.51300048828125,
+            "y": 222.125
+          },
+          {
+            "datum": {
+              "originalIndex": 33,
+              "value": 7,
+              "x": 1704326400000,
+              "y": "alpha"
+            },
+            "fill": "rgba(246, 114, 106, 1)",
+            "formatted": "7",
+            "value": 7,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 34,
+              "value": 2,
+              "x": 1704326400000,
+              "y": "bravo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 35,
+              "value": 1,
+              "x": 1704326400000,
+              "y": "charlie"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 36,
+              "value": 2,
+              "x": 1704326400000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 37,
+              "value": 2,
+              "x": 1704326400000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 38,
+              "value": 1,
+              "x": 1704326400000,
+              "y": "foxtrot"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 123.625
+          },
+          {
+            "datum": {
+              "originalIndex": 39,
+              "value": 2,
+              "x": 1704326400000,
+              "y": "golf"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 148.25
+          },
+          {
+            "datum": {
+              "originalIndex": 40,
+              "value": 3,
+              "x": 1704326400000,
+              "y": "india"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 172.875
+          },
+          {
+            "datum": {
+              "originalIndex": 41,
+              "value": 2,
+              "x": 1704326400000,
+              "y": "kilo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 405.5195007324219,
+            "y": 271.375
+          },
+          {
+            "datum": {
+              "originalIndex": 43,
+              "value": 7,
+              "x": 1704412800000,
+              "y": "alpha"
+            },
+            "fill": "rgba(246, 114, 106, 1)",
+            "formatted": "7",
+            "value": 7,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 44,
+              "value": 3,
+              "x": 1704412800000,
+              "y": "bravo"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 45,
+              "value": 2,
+              "x": 1704412800000,
+              "y": "charlie"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 46,
+              "value": 2,
+              "x": 1704412800000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 47,
+              "value": 1,
+              "x": 1704412800000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 48,
+              "value": 2,
+              "x": 1704412800000,
+              "y": "foxtrot"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 123.625
+          },
+          {
+            "datum": {
+              "originalIndex": 49,
+              "value": 2,
+              "x": 1704412800000,
+              "y": "hotel"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 246.75
+          },
+          {
+            "datum": {
+              "originalIndex": 50,
+              "value": 2,
+              "x": 1704412800000,
+              "y": "juliett"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 197.5
+          },
+          {
+            "datum": {
+              "originalIndex": 51,
+              "value": 1,
+              "x": 1704412800000,
+              "y": "lima"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 540.5260009765625,
+            "y": 222.125
+          },
+          {
+            "datum": {
+              "originalIndex": 53,
+              "value": 5,
+              "x": 1704499200000,
+              "y": "alpha"
+            },
+            "fill": "rgba(255, 212, 207, 1)",
+            "formatted": "5",
+            "value": 5,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 54,
+              "value": 3,
+              "x": 1704499200000,
+              "y": "bravo"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 55,
+              "value": 2,
+              "x": 1704499200000,
+              "y": "charlie"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 56,
+              "value": 2,
+              "x": 1704499200000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 57,
+              "value": 2,
+              "x": 1704499200000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 58,
+              "value": 2,
+              "x": 1704499200000,
+              "y": "golf"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 148.25
+          },
+          {
+            "datum": {
+              "originalIndex": 59,
+              "value": 2,
+              "x": 1704499200000,
+              "y": "india"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 172.875
+          },
+          {
+            "datum": {
+              "originalIndex": 60,
+              "value": 1,
+              "x": 1704499200000,
+              "y": "juliett"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 197.5
+          },
+          {
+            "datum": {
+              "originalIndex": 61,
+              "value": 1,
+              "x": 1704499200000,
+              "y": "kilo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 271.375
+          },
+          {
+            "datum": {
+              "originalIndex": 62,
+              "value": 1,
+              "x": 1704499200000,
+              "y": "lima"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 675.5325012207031,
+            "y": 222.125
+          },
+          {
+            "datum": {
+              "originalIndex": 64,
+              "value": 7,
+              "x": 1704585600000,
+              "y": "alpha"
+            },
+            "fill": "rgba(246, 114, 106, 1)",
+            "formatted": "7",
+            "value": 7,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 0.5
+          },
+          {
+            "datum": {
+              "originalIndex": 65,
+              "value": 2,
+              "x": 1704585600000,
+              "y": "bravo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 25.125
+          },
+          {
+            "datum": {
+              "originalIndex": 66,
+              "value": 2,
+              "x": 1704585600000,
+              "y": "charlie"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 49.75
+          },
+          {
+            "datum": {
+              "originalIndex": 67,
+              "value": 1,
+              "x": 1704585600000,
+              "y": "delta"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 74.375
+          },
+          {
+            "datum": {
+              "originalIndex": 68,
+              "value": 2,
+              "x": 1704585600000,
+              "y": "echo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 99
+          },
+          {
+            "datum": {
+              "originalIndex": 69,
+              "value": 2,
+              "x": 1704585600000,
+              "y": "foxtrot"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "2",
+            "value": 2,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 123.625
+          },
+          {
+            "datum": {
+              "originalIndex": 70,
+              "value": 1,
+              "x": 1704585600000,
+              "y": "golf"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 148.25
+          },
+          {
+            "datum": {
+              "originalIndex": 71,
+              "value": 3,
+              "x": 1704585600000,
+              "y": "hotel"
+            },
+            "fill": "rgba(207, 225, 255, 1)",
+            "formatted": "3",
+            "value": 3,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 246.75
+          },
+          {
+            "datum": {
+              "originalIndex": 72,
+              "value": 1,
+              "x": 1704585600000,
+              "y": "juliett"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 197.5
+          },
+          {
+            "datum": {
+              "originalIndex": 73,
+              "value": 1,
+              "x": 1704585600000,
+              "y": "kilo"
+            },
+            "fill": "rgba(97, 162, 255, 1)",
+            "formatted": "1",
+            "value": 1,
+            "valueShown": true,
+            "x": 810.5390014648438,
+            "y": 271.375
+          }
+        ],
+        "selection": {
+          "area": null,
+          "data": null
+        }
+      },
+      "legend": {
+        "items": [
+          {
+            "color": "#61a2ff",
+            "key": "1 - 2.2",
+            "name": "1 - 2.2"
+          },
+          {
+            "color": "#cfe1ff",
+            "key": "2.2 - 3.4",
+            "name": "2.2 - 3.4"
+          },
+          {
+            "color": "#f6f9fc",
+            "key": "3.4 - 4.6",
+            "name": "3.4 - 4.6"
+          },
+          {
+            "color": "#ffd4cf",
+            "key": "4.6 - 5.8",
+            "name": "4.6 - 5.8"
+          },
+          {
+            "color": "#f6726a",
+            "key": "\u2265 5.8",
+            "name": "\u2265 5.8"
+          }
+        ]
+      }
+    }
+  }
+}

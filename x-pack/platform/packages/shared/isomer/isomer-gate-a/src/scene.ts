@@ -7,6 +7,14 @@
 
 import type { MetricScene, MetricTile, Scene, XyScene } from '@kbn/isomer';
 import { normalizeColor } from './colors';
+import {
+  normalizeGaugeScene,
+  normalizeHeatmapScene,
+  normalizeLegacyMetricScene,
+  normalizePartitionScene,
+  normalizeTableScene,
+  normalizeTagCloudScene,
+} from './records';
 import type { NormalizedAxis, NormalizedChart, NormalizedText, NormalizedXy } from './model';
 import { SERIES_MARK_ORDER } from './model';
 
@@ -72,8 +80,21 @@ export const normalizeScene = (scene: Scene): NormalizedChart => {
   if (scene.kind === 'metric') {
     return normalizeMetricScene(scene);
   }
-  if (scene.kind === 'xy') {
-    return normalizeXyScene(scene);
+  switch (scene.kind) {
+    case 'xy':
+      return normalizeXyScene(scene);
+    case 'partition':
+      return normalizePartitionScene(scene);
+    case 'heatmap':
+      return normalizeHeatmapScene(scene);
+    case 'gauge':
+      return normalizeGaugeScene(scene);
+    case 'tagCloud':
+      return normalizeTagCloudScene(scene);
+    case 'table':
+      return normalizeTableScene(scene);
+    case 'legacyMetric':
+      return normalizeLegacyMetricScene(scene);
   }
-  throw new Error(`Gate A compares metric and xy Scenes, not ${scene.kind}.`);
+  throw new Error(`Gate A doesn't compare ${(scene as Scene).kind} Scenes.`);
 };

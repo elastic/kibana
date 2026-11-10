@@ -9,6 +9,7 @@ import type {
   NormalizedAxis,
   NormalizedChart,
   NormalizedMetric,
+  NormalizedRecords,
   NormalizedSeries,
   NormalizedXy,
   Point,
@@ -133,6 +134,21 @@ const compareMetric = (expected: NormalizedMetric, actual: NormalizedMetric) =>
   ]);
 
 /**
+ * Records compared list by list, for the lists both sides report: a source that can't see a list
+ * (such as a legend `DebugState` leaves out) doesn't make a difference of it.
+ */
+const compareRecords = (expected: NormalizedRecords, actual: NormalizedRecords) =>
+  Object.keys(expected.lists)
+    .filter((name) => name in actual.lists)
+    .flatMap((name) =>
+      compareLists(name, expected.lists[name], actual.lists[name], (label, a, b) =>
+        [...new Set([...Object.keys(a), ...Object.keys(b)])].flatMap((field) =>
+          compareField(label, field, a[field], b[field])
+        )
+      )
+    );
+
+/**
  * Every way `actual` differs from `expected`, Kibana's. Strings, colors, values and order must
  * match exactly; geometry is compared only where both sides have it, within `tolerance` pixels.
  * An empty list is a pass.
@@ -145,7 +161,11 @@ export const compareCharts = (
   if (expected.kind !== actual.kind) {
     return [`chart kind ${show(expected.kind)} vs ${show(actual.kind)}`];
   }
-  return expected.kind === 'metric'
-    ? compareMetric(expected, actual as NormalizedMetric)
-    : compareXy(expected, actual as NormalizedXy, tolerance);
+  if (expected.kind === 'metric') {
+    return compareMetric(expected, actual as NormalizedMetric);
+  }
+  if (expected.kind === 'xy') {
+    return compareXy(expected, actual as NormalizedXy, tolerance);
+  }
+  return compareRecords(expected, actual as NormalizedRecords);
 };

@@ -6,8 +6,14 @@
  */
 
 import type { DebugState, DebugStateValue } from '@elastic/charts';
+import type { Scene } from '@kbn/isomer';
 import { normalizeColor } from './colors';
-import type { NormalizedSeries, NormalizedXy, SeriesMark } from './model';
+import type { NormalizedChart, NormalizedSeries, NormalizedXy, SeriesMark } from './model';
+import {
+  normalizeBulletDebugState,
+  normalizeHeatmapDebugState,
+  normalizePartitionDebugState,
+} from './records';
 import { SERIES_MARK_ORDER } from './model';
 
 const values = (points: DebugStateValue[]): NormalizedSeries['values'] =>
@@ -17,7 +23,7 @@ const values = (points: DebugStateValue[]): NormalizedSeries['values'] =>
  * An xy chart's Elastic Charts `DebugState`, normalized: spec ids and keys, which differ between
  * Kibana and Isomer by construction, are dropped; series are grouped by mark in a fixed order.
  */
-export const normalizeDebugState = (state: DebugState): NormalizedXy => {
+const normalizeXyDebugState = (state: DebugState): NormalizedXy => {
   const series: Record<SeriesMark, NormalizedSeries[]> = { area: [], bar: [], line: [] };
   for (const { name, color, bars } of state.bars ?? []) {
     series.bar.push({ mark: 'bar', name, color: normalizeColor(color), values: values(bars) });
@@ -57,4 +63,26 @@ export const normalizeDebugState = (state: DebugState): NormalizedXy => {
     ),
     series: SERIES_MARK_ORDER.flatMap((mark) => series[mark]),
   };
+};
+
+/**
+ * Elastic Charts' `DebugState`, normalized by what it reports: partition slices, heat map cells, a
+ * bullet gauge, or xy series, axes and legend. Given the Scene an Isomer engine drew it from, its
+ * keys and positions read as the values they stand for.
+ */
+export const normalizeDebugState = (
+  state: DebugState,
+  scene?: Scene,
+  { waffle = scene?.kind === 'partition' && scene.shape === 'waffle' }: { waffle?: boolean } = {}
+): NormalizedChart => {
+  if (state.partition?.length) {
+    return normalizePartitionDebugState(state, { keyed: scene !== undefined, waffle });
+  }
+  if (state.heatmap) {
+    return normalizeHeatmapDebugState(state, scene?.kind === 'heatmap' ? scene : undefined);
+  }
+  if (state.bullet) {
+    return normalizeBulletDebugState(state);
+  }
+  return normalizeXyDebugState(state);
 };

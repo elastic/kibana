@@ -1,0 +1,2193 @@
+{
+  "dashboard": "isomer-corpus-charts",
+  "panel": "charts-waffle-esql",
+  "config": {
+    "data_source": {
+      "query": "FROM isomer-corpus-edge-cases | STATS count = COUNT(*) BY category | SORT count DESC, category",
+      "type": "esql"
+    },
+    "group_by": [
+      {
+        "color": {
+          "mapping": [],
+          "mode": "categorical",
+          "palette": "default"
+        },
+        "column": "category"
+      }
+    ],
+    "ignore_global_filters": false,
+    "legend": {
+      "position": "right",
+      "truncate_after_lines": 1,
+      "values": [
+        "absolute"
+      ],
+      "visibility": "auto"
+    },
+    "metrics": [
+      {
+        "color": {
+          "type": "auto"
+        },
+        "column": "count"
+      }
+    ],
+    "sampling": 1,
+    "styling": {
+      "values": {
+        "mode": "percentage",
+        "percent_decimals": 2,
+        "visible": true
+      }
+    },
+    "title": "Waffle of documents per category",
+    "type": "waffle"
+  },
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    }
+  },
+  "chart_type": "waffle",
+  "tables": [
+    {
+      "columns": [
+        {
+          "id": "partition_value_accessor_metric_0",
+          "isComputedColumn": true,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Slice size",
+            "esType": "long",
+            "params": {
+              "id": "number"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": false,
+              "sourceField": "count"
+            },
+            "type": "number"
+          },
+          "name": "count"
+        },
+        {
+          "id": "partition_value_accessor_group_by_0",
+          "isComputedColumn": false,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Slice",
+            "esType": "keyword",
+            "params": {
+              "id": "string"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": true,
+              "sourceField": "category"
+            },
+            "type": "string"
+          },
+          "name": "category"
+        }
+      ],
+      "meta": {
+        "query": "FROM isomer-corpus-edge-cases | STATS count = COUNT(*) BY category | SORT count DESC, category",
+        "statistics": {
+          "totalCount": 13
+        },
+        "type": "es_ql"
+      },
+      "rows": [
+        {
+          "partition_value_accessor_group_by_0": "alpha",
+          "partition_value_accessor_metric_0": 44
+        },
+        {
+          "partition_value_accessor_group_by_0": "bravo",
+          "partition_value_accessor_metric_0": 18
+        },
+        {
+          "partition_value_accessor_group_by_0": null,
+          "partition_value_accessor_metric_0": 16
+        },
+        {
+          "partition_value_accessor_group_by_0": "charlie",
+          "partition_value_accessor_metric_0": 13
+        },
+        {
+          "partition_value_accessor_group_by_0": "delta",
+          "partition_value_accessor_metric_0": 12
+        },
+        {
+          "partition_value_accessor_group_by_0": "echo",
+          "partition_value_accessor_metric_0": 12
+        },
+        {
+          "partition_value_accessor_group_by_0": "golf",
+          "partition_value_accessor_metric_0": 10
+        },
+        {
+          "partition_value_accessor_group_by_0": "foxtrot",
+          "partition_value_accessor_metric_0": 8
+        },
+        {
+          "partition_value_accessor_group_by_0": "hotel",
+          "partition_value_accessor_metric_0": 8
+        },
+        {
+          "partition_value_accessor_group_by_0": "juliett",
+          "partition_value_accessor_metric_0": 8
+        },
+        {
+          "partition_value_accessor_group_by_0": "india",
+          "partition_value_accessor_metric_0": 7
+        },
+        {
+          "partition_value_accessor_group_by_0": "kilo",
+          "partition_value_accessor_metric_0": 6
+        },
+        {
+          "partition_value_accessor_group_by_0": "lima",
+          "partition_value_accessor_metric_0": 6
+        }
+      ],
+      "type": "datatable",
+      "warning": "299 Elasticsearch-9.7.0-f981584e7fd18ed525f2ee20c81f87f608de2fcd \"No limit defined, adding default limit of [1000]\""
+    }
+  ],
+  "size": {
+    "height": 372,
+    "width": 506.625
+  },
+  "light": {
+    "debugState": {
+      "partition": [
+        {
+          "panelTitle": "",
+          "partitions": [
+            {
+              "color": "#16c5c0",
+              "coords": [
+                32,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                69,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                106,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                144,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                181,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                218,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                255,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                292,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                330,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                367,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                32,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                69,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                106,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                144,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                181,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                218,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                255,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                292,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                330,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                367,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                32,
+                93
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                69,
+                93
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                106,
+                93
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                144,
+                93
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                181,
+                93
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                218,
+                93
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                255,
+                93
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                292,
+                93
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                330,
+                93
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                367,
+                93
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                32,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                69,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                106,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                144,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                181,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                218,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                255,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#d0d4da",
+              "coords": [
+                292,
+                130
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#d0d4da",
+              "coords": [
+                330,
+                130
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#d0d4da",
+              "coords": [
+                367,
+                130
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#d0d4da",
+              "coords": [
+                32,
+                167
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#d0d4da",
+              "coords": [
+                69,
+                167
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#d0d4da",
+              "coords": [
+                106,
+                167
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#d0d4da",
+              "coords": [
+                144,
+                167
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#d0d4da",
+              "coords": [
+                181,
+                167
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#d0d4da",
+              "coords": [
+                218,
+                167
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                255,
+                167
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                292,
+                167
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                330,
+                167
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                367,
+                167
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                32,
+                205
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                69,
+                205
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                106,
+                205
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                144,
+                205
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                181,
+                205
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                218,
+                205
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                255,
+                205
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                292,
+                205
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                330,
+                205
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                367,
+                205
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                32,
+                242
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                69,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                106,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                144,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                181,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                218,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                255,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                292,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#f6726a",
+              "coords": [
+                330,
+                242
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "#f6726a",
+              "coords": [
+                367,
+                242
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "#f6726a",
+              "coords": [
+                32,
+                279
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "#f6726a",
+              "coords": [
+                69,
+                279
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "#f6726a",
+              "coords": [
+                106,
+                279
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "#f6726a",
+              "coords": [
+                144,
+                279
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "#ffc9c2",
+              "coords": [
+                181,
+                279
+              ],
+              "depth": 1,
+              "name": "foxtrot",
+              "value": 8
+            },
+            {
+              "color": "#ffc9c2",
+              "coords": [
+                218,
+                279
+              ],
+              "depth": 1,
+              "name": "foxtrot",
+              "value": 8
+            },
+            {
+              "color": "#ffc9c2",
+              "coords": [
+                255,
+                279
+              ],
+              "depth": 1,
+              "name": "foxtrot",
+              "value": 8
+            },
+            {
+              "color": "#ffc9c2",
+              "coords": [
+                292,
+                279
+              ],
+              "depth": 1,
+              "name": "foxtrot",
+              "value": 8
+            },
+            {
+              "color": "#ffc9c2",
+              "coords": [
+                330,
+                279
+              ],
+              "depth": 1,
+              "name": "foxtrot",
+              "value": 8
+            },
+            {
+              "color": "#eaae01",
+              "coords": [
+                367,
+                279
+              ],
+              "depth": 1,
+              "name": "hotel",
+              "value": 8
+            },
+            {
+              "color": "#eaae01",
+              "coords": [
+                32,
+                316
+              ],
+              "depth": 1,
+              "name": "hotel",
+              "value": 8
+            },
+            {
+              "color": "#eaae01",
+              "coords": [
+                69,
+                316
+              ],
+              "depth": 1,
+              "name": "hotel",
+              "value": 8
+            },
+            {
+              "color": "#eaae01",
+              "coords": [
+                106,
+                316
+              ],
+              "depth": 1,
+              "name": "hotel",
+              "value": 8
+            },
+            {
+              "color": "#eaae01",
+              "coords": [
+                144,
+                316
+              ],
+              "depth": 1,
+              "name": "hotel",
+              "value": 8
+            },
+            {
+              "color": "#fcd883",
+              "coords": [
+                181,
+                316
+              ],
+              "depth": 1,
+              "name": "juliett",
+              "value": 8
+            },
+            {
+              "color": "#fcd883",
+              "coords": [
+                218,
+                316
+              ],
+              "depth": 1,
+              "name": "juliett",
+              "value": 8
+            },
+            {
+              "color": "#fcd883",
+              "coords": [
+                255,
+                316
+              ],
+              "depth": 1,
+              "name": "juliett",
+              "value": 8
+            },
+            {
+              "color": "#fcd883",
+              "coords": [
+                292,
+                316
+              ],
+              "depth": 1,
+              "name": "juliett",
+              "value": 8
+            },
+            {
+              "color": "#fcd883",
+              "coords": [
+                330,
+                316
+              ],
+              "depth": 1,
+              "name": "juliett",
+              "value": 8
+            },
+            {
+              "color": "#51d4d0",
+              "coords": [
+                367,
+                316
+              ],
+              "depth": 1,
+              "name": "india",
+              "value": 7
+            },
+            {
+              "color": "#51d4d0",
+              "coords": [
+                32,
+                353
+              ],
+              "depth": 1,
+              "name": "india",
+              "value": 7
+            },
+            {
+              "color": "#51d4d0",
+              "coords": [
+                69,
+                353
+              ],
+              "depth": 1,
+              "name": "india",
+              "value": 7
+            },
+            {
+              "color": "#51d4d0",
+              "coords": [
+                106,
+                353
+              ],
+              "depth": 1,
+              "name": "india",
+              "value": 7
+            },
+            {
+              "color": "#bdf2f0",
+              "coords": [
+                144,
+                353
+              ],
+              "depth": 1,
+              "name": "kilo",
+              "value": 6
+            },
+            {
+              "color": "#bdf2f0",
+              "coords": [
+                181,
+                353
+              ],
+              "depth": 1,
+              "name": "kilo",
+              "value": 6
+            },
+            {
+              "color": "#bdf2f0",
+              "coords": [
+                218,
+                353
+              ],
+              "depth": 1,
+              "name": "kilo",
+              "value": 6
+            },
+            {
+              "color": "#89baff",
+              "coords": [
+                255,
+                353
+              ],
+              "depth": 1,
+              "name": "lima",
+              "value": 6
+            },
+            {
+              "color": "#89baff",
+              "coords": [
+                292,
+                353
+              ],
+              "depth": 1,
+              "name": "lima",
+              "value": 6
+            },
+            {
+              "color": "#89baff",
+              "coords": [
+                330,
+                353
+              ],
+              "depth": 1,
+              "name": "lima",
+              "value": 6
+            },
+            {
+              "color": "#89baff",
+              "coords": [
+                367,
+                353
+              ],
+              "depth": 1,
+              "name": "lima",
+              "value": 6
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "dark": {
+    "debugState": {
+      "partition": [
+        {
+          "panelTitle": "",
+          "partitions": [
+            {
+              "color": "#16c5c0",
+              "coords": [
+                32,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                69,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                106,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                144,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                181,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                218,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                255,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                292,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                330,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                367,
+                19
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                32,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                69,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                106,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                144,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                181,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                218,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                255,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                292,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                330,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                367,
+                56
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                32,
+                93
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                69,
+                93
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                106,
+                93
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                144,
+                93
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                181,
+                93
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#16c5c0",
+              "coords": [
+                218,
+                93
+              ],
+              "depth": 1,
+              "name": "alpha",
+              "value": 44
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                255,
+                93
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                292,
+                93
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                330,
+                93
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                367,
+                93
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                32,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                69,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                106,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                144,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                181,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                218,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#a6edea",
+              "coords": [
+                255,
+                130
+              ],
+              "depth": 1,
+              "name": "bravo",
+              "value": 18
+            },
+            {
+              "color": "#c9d4e6",
+              "coords": [
+                292,
+                130
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#c9d4e6",
+              "coords": [
+                330,
+                130
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#c9d4e6",
+              "coords": [
+                367,
+                130
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#c9d4e6",
+              "coords": [
+                32,
+                167
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#c9d4e6",
+              "coords": [
+                69,
+                167
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#c9d4e6",
+              "coords": [
+                106,
+                167
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#c9d4e6",
+              "coords": [
+                144,
+                167
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#c9d4e6",
+              "coords": [
+                181,
+                167
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#c9d4e6",
+              "coords": [
+                218,
+                167
+              ],
+              "depth": 1,
+              "name": null,
+              "value": 16
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                255,
+                167
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                292,
+                167
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                330,
+                167
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                367,
+                167
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                32,
+                205
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                69,
+                205
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                106,
+                205
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#bfdbff",
+              "coords": [
+                144,
+                205
+              ],
+              "depth": 1,
+              "name": "charlie",
+              "value": 13
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                181,
+                205
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                218,
+                205
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                255,
+                205
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                292,
+                205
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                330,
+                205
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                367,
+                205
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ee72a6",
+              "coords": [
+                32,
+                242
+              ],
+              "depth": 1,
+              "name": "delta",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                69,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                106,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                144,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                181,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                218,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                255,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#ffc7db",
+              "coords": [
+                292,
+                242
+              ],
+              "depth": 1,
+              "name": "echo",
+              "value": 12
+            },
+            {
+              "color": "#f6726a",
+              "coords": [
+                330,
+                242
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "#f6726a",
+              "coords": [
+                367,
+                242
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "#f6726a",
+              "coords": [
+                32,
+                279
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "#f6726a",
+              "coords": [
+                69,
+                279
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "#f6726a",
+              "coords": [
+                106,
+                279
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "#f6726a",
+              "coords": [
+                144,
+                279
+              ],
+              "depth": 1,
+              "name": "golf",
+              "value": 10
+            },
+            {
+              "color": "#ffc9c2",
+              "coords": [
+                181,
+                279
+              ],
+              "depth": 1,
+              "name": "foxtrot",
+              "value": 8
+            },
+            {
+              "color": "#ffc9c2",
+              "coords": [
+                218,
+                279
+              ],
+              "depth": 1,
+              "name": "foxtrot",
+              "value": 8
+            },
+            {
+              "color": "#ffc9c2",
+              "coords": [
+                255,
+                279
+              ],
+              "depth": 1,
+              "name": "foxtrot",
+              "value": 8
+            },
+            {
+              "color": "#ffc9c2",
+              "coords": [
+                292,
+                279
+              ],
+              "depth": 1,
+              "name": "foxtrot",
+              "value": 8
+            },
+            {
+              "color": "#ffc9c2",
+              "coords": [
+                330,
+                279
+              ],
+              "depth": 1,
+              "name": "foxtrot",
+              "value": 8
+            },
+            {
+              "color": "#eaae01",
+              "coords": [
+                367,
+                279
+              ],
+              "depth": 1,
+              "name": "hotel",
+              "value": 8
+            },
+            {
+              "color": "#eaae01",
+              "coords": [
+                32,
+                316
+              ],
+              "depth": 1,
+              "name": "hotel",
+              "value": 8
+            },
+            {
+              "color": "#eaae01",
+              "coords": [
+                69,
+                316
+              ],
+              "depth": 1,
+              "name": "hotel",
+              "value": 8
+            },
+            {
+              "color": "#eaae01",
+              "coords": [
+                106,
+                316
+              ],
+              "depth": 1,
+              "name": "hotel",
+              "value": 8
+            },
+            {
+              "color": "#eaae01",
+              "coords": [
+                144,
+                316
+              ],
+              "depth": 1,
+              "name": "hotel",
+              "value": 8
+            },
+            {
+              "color": "#fcd883",
+              "coords": [
+                181,
+                316
+              ],
+              "depth": 1,
+              "name": "juliett",
+              "value": 8
+            },
+            {
+              "color": "#fcd883",
+              "coords": [
+                218,
+                316
+              ],
+              "depth": 1,
+              "name": "juliett",
+              "value": 8
+            },
+            {
+              "color": "#fcd883",
+              "coords": [
+                255,
+                316
+              ],
+              "depth": 1,
+              "name": "juliett",
+              "value": 8
+            },
+            {
+              "color": "#fcd883",
+              "coords": [
+                292,
+                316
+              ],
+              "depth": 1,
+              "name": "juliett",
+              "value": 8
+            },
+            {
+              "color": "#fcd883",
+              "coords": [
+                330,
+                316
+              ],
+              "depth": 1,
+              "name": "juliett",
+              "value": 8
+            },
+            {
+              "color": "#51d4d0",
+              "coords": [
+                367,
+                316
+              ],
+              "depth": 1,
+              "name": "india",
+              "value": 7
+            },
+            {
+              "color": "#51d4d0",
+              "coords": [
+                32,
+                353
+              ],
+              "depth": 1,
+              "name": "india",
+              "value": 7
+            },
+            {
+              "color": "#51d4d0",
+              "coords": [
+                69,
+                353
+              ],
+              "depth": 1,
+              "name": "india",
+              "value": 7
+            },
+            {
+              "color": "#51d4d0",
+              "coords": [
+                106,
+                353
+              ],
+              "depth": 1,
+              "name": "india",
+              "value": 7
+            },
+            {
+              "color": "#bdf2f0",
+              "coords": [
+                144,
+                353
+              ],
+              "depth": 1,
+              "name": "kilo",
+              "value": 6
+            },
+            {
+              "color": "#bdf2f0",
+              "coords": [
+                181,
+                353
+              ],
+              "depth": 1,
+              "name": "kilo",
+              "value": 6
+            },
+            {
+              "color": "#bdf2f0",
+              "coords": [
+                218,
+                353
+              ],
+              "depth": 1,
+              "name": "kilo",
+              "value": 6
+            },
+            {
+              "color": "#89baff",
+              "coords": [
+                255,
+                353
+              ],
+              "depth": 1,
+              "name": "lima",
+              "value": 6
+            },
+            {
+              "color": "#89baff",
+              "coords": [
+                292,
+                353
+              ],
+              "depth": 1,
+              "name": "lima",
+              "value": 6
+            },
+            {
+              "color": "#89baff",
+              "coords": [
+                330,
+                353
+              ],
+              "depth": 1,
+              "name": "lima",
+              "value": 6
+            },
+            {
+              "color": "#89baff",
+              "coords": [
+                367,
+                353
+              ],
+              "depth": 1,
+              "name": "lima",
+              "value": 6
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

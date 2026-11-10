@@ -1,0 +1,127 @@
+{
+  "dashboard": "isomer-corpus-charts",
+  "panel": "charts-legacy-metric",
+  "config": {
+    "data_source": {
+      "index_pattern": "isomer-corpus-edge-cases",
+      "name": "isomer-corpus-edge-cases",
+      "time_field": "@timestamp",
+      "type": "data_view_spec"
+    },
+    "ignore_global_filters": false,
+    "metric": {
+      "apply_color_to": "background",
+      "color": {
+        "range": "absolute",
+        "steps": [
+          {
+            "color": "#E7664C",
+            "lt": 100
+          },
+          {
+            "color": "#54B399",
+            "gte": 100
+          }
+        ],
+        "type": "dynamic"
+      },
+      "empty_as_null": false,
+      "label": "Documents",
+      "operation": "count",
+      "size": "xl"
+    },
+    "sampling": 1,
+    "title": "Documents (legacy metric)",
+    "type": "legacy_metric"
+  },
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    }
+  },
+  "chart_type": "legacy_metric",
+  "tables": [
+    {
+      "columns": [
+        {
+          "id": "legacy_metric_accessor",
+          "meta": {
+            "dimensionName": "Metric",
+            "index": "isomer-corpus-edge-cases",
+            "params": {
+              "id": "number"
+            },
+            "source": "esaggs",
+            "sourceParams": {
+              "enabled": true,
+              "hasPrecisionError": false,
+              "id": "0",
+              "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+              "params": {
+                "emptyAsNull": false
+              },
+              "schema": "metric",
+              "type": "count"
+            },
+            "type": "number"
+          },
+          "name": "Documents"
+        }
+      ],
+      "meta": {
+        "source": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+        "statistics": {
+          "totalCount": 168
+        },
+        "type": "esaggs"
+      },
+      "rows": [
+        {
+          "legacy_metric_accessor": 168
+        }
+      ],
+      "type": "datatable"
+    }
+  ],
+  "size": {
+    "height": 328,
+    "width": 787.9375
+  },
+  "light": {
+    "legacyMetrics": [
+      {
+        "value": {
+          "text": "168",
+          "color": "rgb(56, 72, 97)"
+        },
+        "label": {
+          "text": "Documents",
+          "color": "rgb(56, 72, 97)"
+        },
+        "backgroundColor": "rgb(84, 179, 153)"
+      }
+    ]
+  },
+  "dark": {
+    "legacyMetrics": [
+      {
+        "value": {
+          "text": "168",
+          "color": "rgb(180, 193, 213)"
+        },
+        "label": {
+          "text": "Documents",
+          "color": "rgb(180, 193, 213)"
+        },
+        "backgroundColor": "rgb(84, 179, 153)"
+      }
+    ]
+  }
+}

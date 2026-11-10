@@ -11,15 +11,33 @@ export type { CompareOptions, Difference } from './src/compare';
 export { normalizeDebugState } from './src/debug_state';
 export { normalizeMetricReadings } from './src/metric_dom';
 export { normalizeScene } from './src/scene';
+export {
+  normalizeBulletDebugState,
+  normalizeDataGridReading,
+  normalizeGaugeScene,
+  normalizeHeatmapDebugState,
+  normalizeHeatmapScene,
+  normalizeLegacyMetricReadings,
+  normalizeLegacyMetricScene,
+  normalizePartitionDebugState,
+  normalizePartitionScene,
+  normalizeTableScene,
+  normalizeTagCloudScene,
+  normalizeWordReadings,
+} from './src/records';
+export type { DataGridReading, LegacyMetricTileReading } from './src/records';
 export type {
   NormalizedAxis,
   NormalizedChart,
   NormalizedMetric,
+  NormalizedRecord,
+  NormalizedRecords,
   NormalizedSeries,
   NormalizedText,
   NormalizedTile,
   NormalizedXy,
   Point,
+  RecordsKind,
 } from './src/model';
 export {
   GATE_FIXTURES_DIR,
@@ -48,4 +66,4 @@ export { SAMPLE_DATA_SETS } from './src/sample_data_sets';
 export { compareTables, datatableFromChartData } from './src/tables';
 export { runGateAVisual } from './src/run';
 export type { EngineOutput, GateAEngine, GateAVisualResult } from './src/run';
-export { createElasticChartsHeadlessEngine, readMetricSvg } from './src/engine';
+export { createElasticChartsHeadlessEngine, readMetricSvg, readWordsSvg } from './src/engine';

@@ -61,7 +61,22 @@ export interface NormalizedMetric {
   tiles: NormalizedTile[];
 }
 
-export type NormalizedChart = NormalizedXy | NormalizedMetric;
+/** The chart kinds compared as named lists of flat records. */
+export type RecordsKind = 'partition' | 'heatmap' | 'gauge' | 'table' | 'legacyMetric' | 'tagCloud';
+
+/** A flat record: what one slice, cell, band, word or tile shows. */
+export type NormalizedRecord = Record<string, string | number | null>;
+
+/**
+ * A chart as named lists of records, such as a partition's slices or a table's cells. Each list
+ * is in a stable order its normalizer states, so sources compare item by item and field by field.
+ */
+export interface NormalizedRecords {
+  kind: RecordsKind;
+  lists: Record<string, NormalizedRecord[]>;
+}
+
+export type NormalizedChart = NormalizedXy | NormalizedMetric | NormalizedRecords;
 
 /** Series kinds in the order normalized series list them, whatever order a source reports. */
 export const SERIES_MARK_ORDER: readonly SeriesMark[] = ['area', 'bar', 'line'];

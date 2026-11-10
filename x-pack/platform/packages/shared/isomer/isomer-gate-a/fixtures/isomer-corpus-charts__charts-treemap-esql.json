@@ -1,0 +1,856 @@
+{
+  "dashboard": "isomer-corpus-charts",
+  "panel": "charts-treemap-esql",
+  "config": {
+    "data_source": {
+      "query": "FROM isomer-corpus-edge-cases | EVAL sign = CASE(signed >= 0, \"positive\", \"negative\") | STATS count = COUNT(*) BY sign, category | SORT sign, count DESC, category",
+      "type": "esql"
+    },
+    "group_by": [
+      {
+        "color": {
+          "mapping": [],
+          "mode": "categorical",
+          "palette": "default"
+        },
+        "column": "sign"
+      },
+      {
+        "color": {
+          "mapping": [],
+          "mode": "categorical",
+          "palette": "default"
+        },
+        "column": "category"
+      }
+    ],
+    "ignore_global_filters": false,
+    "legend": {
+      "nested": false,
+      "position": "right",
+      "truncate_after_lines": 1,
+      "visibility": "auto"
+    },
+    "metrics": [
+      {
+        "color": {
+          "type": "auto"
+        },
+        "column": "count"
+      }
+    ],
+    "sampling": 1,
+    "styling": {
+      "values": {
+        "mode": "absolute",
+        "percent_decimals": 2,
+        "visible": true
+      }
+    },
+    "title": "Treemap of signs and categories",
+    "type": "treemap"
+  },
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    }
+  },
+  "chart_type": "treemap",
+  "tables": [
+    {
+      "columns": [
+        {
+          "id": "partition_value_accessor_metric_0",
+          "isComputedColumn": true,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Slice size",
+            "esType": "long",
+            "params": {
+              "id": "number"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": false,
+              "sourceField": "count"
+            },
+            "type": "number"
+          },
+          "name": "count"
+        },
+        {
+          "id": "partition_value_accessor_group_by_0",
+          "isComputedColumn": true,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Slice",
+            "esType": "keyword",
+            "params": {
+              "id": "string"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": false,
+              "sourceField": "sign"
+            },
+            "type": "string"
+          },
+          "name": "sign"
+        },
+        {
+          "id": "partition_value_accessor_group_by_1",
+          "isComputedColumn": false,
+          "isNull": false,
+          "meta": {
+            "dimensionName": "Slice",
+            "esType": "keyword",
+            "params": {
+              "id": "string"
+            },
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "isSourceFieldFilterable": true,
+              "sourceField": "category"
+            },
+            "type": "string"
+          },
+          "name": "category"
+        }
+      ],
+      "meta": {
+        "query": "FROM isomer-corpus-edge-cases | EVAL sign = CASE(signed >= 0, \"positive\", \"negative\") | STATS count = COUNT(*) BY sign, category | SORT sign, count DESC, category",
+        "statistics": {
+          "totalCount": 26
+        },
+        "type": "es_ql"
+      },
+      "rows": [
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": "alpha",
+          "partition_value_accessor_metric_0": 25
+        },
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": "bravo",
+          "partition_value_accessor_metric_0": 10
+        },
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": null,
+          "partition_value_accessor_metric_0": 8
+        },
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": "delta",
+          "partition_value_accessor_metric_0": 7
+        },
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": "charlie",
+          "partition_value_accessor_metric_0": 6
+        },
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": "echo",
+          "partition_value_accessor_metric_0": 6
+        },
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": "foxtrot",
+          "partition_value_accessor_metric_0": 5
+        },
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": "golf",
+          "partition_value_accessor_metric_0": 5
+        },
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": "hotel",
+          "partition_value_accessor_metric_0": 5
+        },
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": "juliett",
+          "partition_value_accessor_metric_0": 4
+        },
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": "kilo",
+          "partition_value_accessor_metric_0": 4
+        },
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": "india",
+          "partition_value_accessor_metric_0": 3
+        },
+        {
+          "partition_value_accessor_group_by_0": "negative",
+          "partition_value_accessor_group_by_1": "lima",
+          "partition_value_accessor_metric_0": 3
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": "alpha",
+          "partition_value_accessor_metric_0": 19
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": "bravo",
+          "partition_value_accessor_metric_0": 8
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": null,
+          "partition_value_accessor_metric_0": 8
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": "charlie",
+          "partition_value_accessor_metric_0": 7
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": "echo",
+          "partition_value_accessor_metric_0": 6
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": "delta",
+          "partition_value_accessor_metric_0": 5
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": "golf",
+          "partition_value_accessor_metric_0": 5
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": "india",
+          "partition_value_accessor_metric_0": 4
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": "juliett",
+          "partition_value_accessor_metric_0": 4
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": "foxtrot",
+          "partition_value_accessor_metric_0": 3
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": "hotel",
+          "partition_value_accessor_metric_0": 3
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": "lima",
+          "partition_value_accessor_metric_0": 3
+        },
+        {
+          "partition_value_accessor_group_by_0": "positive",
+          "partition_value_accessor_group_by_1": "kilo",
+          "partition_value_accessor_metric_0": 2
+        }
+      ],
+      "type": "datatable",
+      "warning": "299 Elasticsearch-9.7.0-f981584e7fd18ed525f2ee20c81f87f608de2fcd \"No limit defined, adding default limit of [1000]\""
+    }
+  ],
+  "size": {
+    "height": 372,
+    "width": 506.625
+  },
+  "light": {
+    "debugState": {
+      "partition": [
+        {
+          "panelTitle": "",
+          "partitions": [
+            {
+              "color": "#16C5C0",
+              "coords": [
+                137,
+                186
+              ],
+              "depth": 1,
+              "name": "negative",
+              "value": 91
+            },
+            {
+              "color": "#A6EDEA",
+              "coords": [
+                391,
+                186
+              ],
+              "depth": 1,
+              "name": "positive",
+              "value": 77
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                99,
+                87
+              ],
+              "depth": 2,
+              "name": "alpha",
+              "value": 25
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                234,
+                87
+              ],
+              "depth": 2,
+              "name": "bravo",
+              "value": 10
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                54,
+                195
+              ],
+              "depth": 2,
+              "name": null,
+              "value": 8
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                150,
+                195
+              ],
+              "depth": 2,
+              "name": "delta",
+              "value": 7
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                234,
+                195
+              ],
+              "depth": 2,
+              "name": "charlie",
+              "value": 6
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                44,
+                272
+              ],
+              "depth": 2,
+              "name": "echo",
+              "value": 6
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                44,
+                339
+              ],
+              "depth": 2,
+              "name": "foxtrot",
+              "value": 5
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                120,
+                275
+              ],
+              "depth": 2,
+              "name": "golf",
+              "value": 5
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                186,
+                275
+              ],
+              "depth": 2,
+              "name": "hotel",
+              "value": 5
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                246,
+                275
+              ],
+              "depth": 2,
+              "name": "juliett",
+              "value": 4
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                124,
+                342
+              ],
+              "depth": 2,
+              "name": "kilo",
+              "value": 4
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                189,
+                342
+              ],
+              "depth": 2,
+              "name": "india",
+              "value": 3
+            },
+            {
+              "color": "#65D1CC",
+              "coords": [
+                245,
+                342
+              ],
+              "depth": 2,
+              "name": "lima",
+              "value": 3
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                357,
+                81
+              ],
+              "depth": 2,
+              "name": "alpha",
+              "value": 19
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                471,
+                81
+              ],
+              "depth": 2,
+              "name": "bravo",
+              "value": 8
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                320,
+                190
+              ],
+              "depth": 2,
+              "name": null,
+              "value": 8
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                401,
+                190
+              ],
+              "depth": 2,
+              "name": "charlie",
+              "value": 7
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                472,
+                190
+              ],
+              "depth": 2,
+              "name": "echo",
+              "value": 6
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                316,
+                271
+              ],
+              "depth": 2,
+              "name": "delta",
+              "value": 5
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                316,
+                337
+              ],
+              "depth": 2,
+              "name": "golf",
+              "value": 5
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                392,
+                266
+              ],
+              "depth": 2,
+              "name": "india",
+              "value": 4
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                467,
+                266
+              ],
+              "depth": 2,
+              "name": "juliett",
+              "value": 4
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                376,
+                332
+              ],
+              "depth": 2,
+              "name": "foxtrot",
+              "value": 3
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                423,
+                322
+              ],
+              "depth": 2,
+              "name": "hotel",
+              "value": 3
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                477,
+                322
+              ],
+              "depth": 2,
+              "name": "lima",
+              "value": 3
+            },
+            {
+              "color": "#B9F1EE",
+              "coords": [
+                450,
+                360
+              ],
+              "depth": 2,
+              "name": "kilo",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "dark": {
+    "debugState": {
+      "partition": [
+        {
+          "panelTitle": "",
+          "partitions": [
+            {
+              "color": "#16C5C0",
+              "coords": [
+                137,
+                186
+              ],
+              "depth": 1,
+              "name": "negative",
+              "value": 91
+            },
+            {
+              "color": "#A6EDEA",
+              "coords": [
+                391,
+                186
+              ],
+              "depth": 1,
+              "name": "positive",
+              "value": 77
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                99,
+                87
+              ],
+              "depth": 2,
+              "name": "alpha",
+              "value": 25
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                234,
+                87
+              ],
+              "depth": 2,
+              "name": "bravo",
+              "value": 10
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                54,
+                195
+              ],
+              "depth": 2,
+              "name": null,
+              "value": 8
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                150,
+                195
+              ],
+              "depth": 2,
+              "name": "delta",
+              "value": 7
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                234,
+                195
+              ],
+              "depth": 2,
+              "name": "charlie",
+              "value": 6
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                44,
+                272
+              ],
+              "depth": 2,
+              "name": "echo",
+              "value": 6
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                44,
+                339
+              ],
+              "depth": 2,
+              "name": "foxtrot",
+              "value": 5
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                120,
+                275
+              ],
+              "depth": 2,
+              "name": "golf",
+              "value": 5
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                186,
+                275
+              ],
+              "depth": 2,
+              "name": "hotel",
+              "value": 5
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                246,
+                275
+              ],
+              "depth": 2,
+              "name": "juliett",
+              "value": 4
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                124,
+                342
+              ],
+              "depth": 2,
+              "name": "kilo",
+              "value": 4
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                189,
+                342
+              ],
+              "depth": 2,
+              "name": "india",
+              "value": 3
+            },
+            {
+              "color": "#00A0AD",
+              "coords": [
+                245,
+                342
+              ],
+              "depth": 2,
+              "name": "lima",
+              "value": 3
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                357,
+                81
+              ],
+              "depth": 2,
+              "name": "alpha",
+              "value": 19
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                471,
+                81
+              ],
+              "depth": 2,
+              "name": "bravo",
+              "value": 8
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                320,
+                190
+              ],
+              "depth": 2,
+              "name": null,
+              "value": 8
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                401,
+                190
+              ],
+              "depth": 2,
+              "name": "charlie",
+              "value": 7
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                472,
+                190
+              ],
+              "depth": 2,
+              "name": "echo",
+              "value": 6
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                316,
+                271
+              ],
+              "depth": 2,
+              "name": "delta",
+              "value": 5
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                316,
+                337
+              ],
+              "depth": 2,
+              "name": "golf",
+              "value": 5
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                392,
+                266
+              ],
+              "depth": 2,
+              "name": "india",
+              "value": 4
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                467,
+                266
+              ],
+              "depth": 2,
+              "name": "juliett",
+              "value": 4
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                376,
+                332
+              ],
+              "depth": 2,
+              "name": "foxtrot",
+              "value": 3
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                423,
+                322
+              ],
+              "depth": 2,
+              "name": "hotel",
+              "value": 3
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                477,
+                322
+              ],
+              "depth": 2,
+              "name": "lima",
+              "value": 3
+            },
+            {
+              "color": "#7FBFC7",
+              "coords": [
+                450,
+                360
+              ],
+              "depth": 2,
+              "name": "kilo",
+              "value": 2
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -12,6 +12,12 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import { normalizeDebugState } from './debug_state';
 import { normalizeMetricReadings } from './metric_dom';
 import type { NormalizedChart } from './model';
+import type { DataGridReading, LegacyMetricTileReading } from './records';
+import {
+  normalizeDataGridReading,
+  normalizeLegacyMetricReadings,
+  normalizeWordReadings,
+} from './records';
 
 /** Where the gate's cases live: one file per corpus panel. */
 export const GATE_FIXTURES_DIR = Path.resolve(__dirname, '../fixtures');
@@ -32,10 +38,17 @@ export interface CaptureContext {
   ui_settings: Record<string, unknown>;
 }
 
-/** What Kibana drew in one color mode: Elastic Charts' `DebugState`, or the metric DOM. */
+/**
+ * What Kibana drew in one color mode: Elastic Charts' `DebugState`, or what the page shows where
+ * a chart reports none: the metric's DOM, the data grid, the legacy metric's tiles, or the SVG
+ * words of a tag cloud.
+ */
 export interface CaptureRendering {
   debugState?: DebugState;
   metrics?: MetricReading[];
+  dataGrids?: DataGridReading[];
+  legacyMetrics?: LegacyMetricTileReading[];
+  svgTexts?: Array<{ text: string; fill: string; fontSize?: string }>;
 }
 
 /**
@@ -45,7 +58,8 @@ export interface CaptureRendering {
 export interface GateFixture {
   dashboard: string;
   panel: string;
-  chart_type: 'metric' | 'xy';
+  /** The Lens API chart type: `metric`, `xy`, `data_table`, `pie`, `heatmap`, and so on. */
+  chart_type: string;
   config: Record<string, unknown>;
   context: CaptureContext;
   tables: Datatable[];
@@ -54,7 +68,7 @@ export interface GateFixture {
   dark: CaptureRendering;
 }
 
-/** A gated case: a Lens ES|QL metric or xy panel in one color mode. */
+/** A gated case: a Lens panel in one color mode. */
 export interface GateCase {
   /** `dashboard/panel/theme`, unique and stable. */
   name: string;
@@ -101,16 +115,25 @@ export const kibanaTables = ({ fixture }: GateCase): Datatable[] =>
     };
   });
 
-/** What Kibana drew for a case: the metric's DOM readings, or the xy chart's `DebugState`. */
+/** What Kibana drew for a case: its page readings, or its chart's `DebugState`. */
 export const kibanaChart = ({ fixture, theme }: GateCase): NormalizedChart => {
-  const { debugState, metrics } = fixture[theme];
+  const { debugState, metrics, dataGrids, legacyMetrics, svgTexts } = fixture[theme];
   if (fixture.chart_type === 'metric' && metrics) {
     return normalizeMetricReadings(metrics);
+  }
+  if (dataGrids?.length) {
+    return normalizeDataGridReading(dataGrids[0]);
+  }
+  if (legacyMetrics?.length) {
+    return normalizeLegacyMetricReadings(legacyMetrics);
+  }
+  if (!debugState && svgTexts?.length) {
+    return normalizeWordReadings(svgTexts);
   }
   if (!debugState) {
     throw new Error(`${fixture.dashboard}/${fixture.panel} has no DebugState.`);
   }
-  return normalizeDebugState(debugState);
+  return normalizeDebugState(debugState, undefined, { waffle: fixture.chart_type === 'waffle' });
 };
 
 /** The size Kibana drew a case's chart at. */

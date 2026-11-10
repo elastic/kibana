@@ -44,12 +44,29 @@ export interface DataGridReading {
   columnCount: number | null;
 }
 
+/** An SVG text a chart drew, such as a word of a tag cloud, which reports no `DebugState`. */
+export interface SvgTextReading {
+  text: string;
+  fill: string;
+  fontSize: string;
+}
+
 export interface ChartReading {
   renderComplete: boolean;
   renderCount: number | null;
   rect: { width: number; height: number };
   /** Elastic Charts' `DebugState`, parsed from `data-ech-debug-state`; `null` when it wasn't on. */
   debugState: unknown;
+  /** The SVG texts the chart drew, in document order. */
+  svgTexts: SvgTextReading[];
+}
+
+/** A legacy metric tile (`legacyMtrVis`): its value and label, and the background it sits on. */
+export interface LegacyMetricReading {
+  value: DomTextReading | null;
+  label: DomTextReading | null;
+  /** The nearest non-transparent background, from the tile up to the panel. */
+  backgroundColor: string;
 }
 
 export interface PanelReading {
@@ -62,6 +79,7 @@ export interface PanelReading {
   charts: ChartReading[];
   metrics: MetricReading[];
   dataGrids: DataGridReading[];
+  legacyMetrics: LegacyMetricReading[];
 }
 
 export interface RenderContextReading {
@@ -122,6 +140,7 @@ export function readPanel(panelId: string): string {
       charts: [],
       metrics: [],
       dataGrids: [],
+      legacyMetrics: [],
     };
     return JSON.stringify(missing);
   }
@@ -140,6 +159,34 @@ export function readPanel(panelId: string): string {
       renderCount: status ? readNumberAttribute(status, 'data-ech-render-count') : null,
       rect: { width: chartRect.width, height: chartRect.height },
       debugState: debugText ? JSON.parse(debugText) : null,
+      svgTexts: Array.from(chart.querySelectorAll('svg text')).map((text) => ({
+        text: (text.textContent || '').trim(),
+        fill: text.getAttribute('fill') || window.getComputedStyle(text).fill,
+        fontSize: text.getAttribute('font-size') || window.getComputedStyle(text).fontSize,
+      })),
+    };
+  });
+
+  const isTransparent = (color: string) =>
+    color === '' || color === 'transparent' || /rgba\([^)]*,\s*0\)$/.test(color);
+  const legacyMetrics: LegacyMetricReading[] = Array.from(
+    panel.querySelectorAll('.legacyMtrVis__container')
+  ).map((tile) => {
+    let backgroundColor = '';
+    for (let element: Element | null = tile; element && element !== panel; ) {
+      const color = window.getComputedStyle(element).backgroundColor;
+      if (!isTransparent(color)) {
+        backgroundColor = color;
+        break;
+      }
+      element = element.parentElement;
+    }
+    const value = tile.querySelector('[data-test-subj="metric_value"]');
+    const label = tile.querySelector('[data-test-subj="metric_label"]');
+    return {
+      value: value ? readText(value) : null,
+      label: label ? readText(label) : null,
+      backgroundColor,
     };
   });
 
@@ -182,6 +229,7 @@ export function readPanel(panelId: string): string {
     charts,
     metrics,
     dataGrids,
+    legacyMetrics,
   };
   return JSON.stringify(reading);
 }

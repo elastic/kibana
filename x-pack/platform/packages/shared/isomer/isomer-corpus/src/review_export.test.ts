@@ -32,7 +32,13 @@ const capture = (theme: string): PanelCapture => ({
     renderComplete: true,
     errorText: null,
     charts: [
-      { renderComplete: true, renderCount: 1, rect: { width: 1, height: 1 }, debugState: null },
+      {
+        renderComplete: true,
+        renderCount: 1,
+        rect: { width: 1, height: 1 },
+        debugState: null,
+        svgTexts: [],
+      },
     ],
     metrics: [
       {
@@ -55,6 +61,7 @@ const capture = (theme: string): PanelCapture => ({
       },
     ],
     dataGrids: [],
+    legacyMetrics: [],
   },
 });
 
