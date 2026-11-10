@@ -19,7 +19,7 @@ export function ActionsJsmServiceProvider(
   common: ActionsCommon
 ) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
+  const browser = getService('browser');
 
   return {
     async createNewConnector(fields: ConnectorFormFields) {
@@ -45,18 +45,30 @@ export function ActionsJsmServiceProvider(
     },
 
     async getObjFromJsonEditor() {
-      const jsonEditor = await find.byCssSelector('.monaco-editor .view-lines');
-
-      return JSON.parse(await jsonEditor.getVisibleText());
+      const value = await browser.execute(() => {
+        const editor = window.MonacoEnvironment?.monaco.editor.getEditors()[0];
+        return editor?.getModel()?.getValue() ?? '';
+      });
+      return JSON.parse(value);
     },
 
     async setJsonEditor(value: object) {
       const stringified = JSON.stringify(value);
 
-      await find.clickByCssSelector('.monaco-editor');
-      const input = await find.activeElement();
-      await input.clearValueWithKeyboard({ charByChar: true });
-      await input.type(stringified);
+      await browser.execute((text: string) => {
+        const editor = window.MonacoEnvironment?.monaco.editor.getEditors()[0];
+        if (!editor) {
+          throw new Error('Monaco editor not found while setting JSON editor value');
+        }
+
+        const model = editor.getModel();
+        if (!model) {
+          throw new Error('Monaco editor model not found while setting JSON editor value');
+        }
+
+        model.setValue(text);
+        editor.focus();
+      }, stringified);
     },
   };
 }

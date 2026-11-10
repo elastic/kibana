@@ -397,4 +397,16 @@ describe('Buffered Task Store', () => {
       ]);
     });
   });
+
+  describe('getVerifiedCredential', () => {
+    test("proxies the TaskStore's `getVerifiedCredential`", async () => {
+      const taskStore = taskStoreMock.create();
+      const bufferedStore = new BufferedTaskStore(taskStore, {});
+      const result = asOk({ type: 'service_account' });
+      taskStore.getVerifiedCredential.mockResolvedValue(result);
+
+      await expect(bufferedStore.getVerifiedCredential('1')).resolves.toBe(result);
+      expect(taskStore.getVerifiedCredential).toHaveBeenCalledWith('1');
+    });
+  });
 });

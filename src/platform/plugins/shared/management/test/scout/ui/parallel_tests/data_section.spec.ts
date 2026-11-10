@@ -77,39 +77,34 @@ test.describe('Stack Management — data section', () => {
         const navLinks = await pageObjects.collapsibleNav.getNavLinks();
         expect(navLinks).toContain('Stack Management');
 
-        const sections = await pageObjects.management.readSidebarSections();
-        // cluster:manage also surfaces ingest (ingest_pipelines + logstash pipelines) and stack (license_management)
-        expect(sections).toHaveLength(4);
-        expect(sections[0]).toStrictEqual({
-          sectionId: 'ingest',
-          sectionLinks: ['ingest_pipelines', 'pipelines'],
-        });
-        expect(sections[1]).toStrictEqual({
-          sectionId: 'data',
-          sectionLinks: [
-            'index_management',
-            'index_lifecycle_management',
-            'snapshot_restore',
-            'rollup_jobs',
-            'transform',
-            'cross_cluster_replication',
-            'remote_clusters',
-          ],
-        });
-        expect(sections[2]).toStrictEqual({
-          sectionId: 'kibana',
-          sectionLinks: ['settings'],
-        });
-        expect(sections[3]).toStrictEqual({
-          sectionId: 'stack',
-          sectionLinks: ['license_management'],
-        });
+        // cluster:manage also surfaces ingest (ingest_pipelines + logstash pipelines) and stack (license_management).
+        // Polled because data_federation is enabled asynchronously once the license is fetched.
+        await expect
+          .poll(() => pageObjects.management.readSidebarSections())
+          .toStrictEqual([
+            { sectionId: 'ingest', sectionLinks: ['ingest_pipelines', 'pipelines'] },
+            {
+              sectionId: 'data',
+              sectionLinks: [
+                'index_management',
+                'data_federation',
+                'index_lifecycle_management',
+                'snapshot_restore',
+                'rollup_jobs',
+                'transform',
+                'cross_cluster_replication',
+                'remote_clusters',
+              ],
+            },
+            { sectionId: 'kibana', sectionLinks: ['settings'] },
+            { sectionId: 'stack', sectionLinks: ['license_management'] },
+          ]);
       });
     }
   );
 
   test(
-    'index_management_user sees index_management and transform in the data section',
+    'index_management_user sees index_management, esql_views, and transform in the data section',
     { tag: tags.stateful.classic },
     async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginWithCustomRole(CUSTOM_ROLES.dashboard_read_and_index_management);
@@ -123,7 +118,7 @@ test.describe('Stack Management — data section', () => {
         expect(sections).toHaveLength(2);
         expect(sections[0]).toStrictEqual({
           sectionId: 'data',
-          sectionLinks: ['index_management', 'transform'],
+          sectionLinks: ['index_management', 'esql_views', 'transform'],
         });
       });
     }

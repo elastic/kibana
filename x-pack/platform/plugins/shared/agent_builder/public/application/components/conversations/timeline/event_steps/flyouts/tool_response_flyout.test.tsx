@@ -57,6 +57,23 @@ const makeSubAgentStep = () =>
     ],
   });
 
+const makeSubAgentStepWithoutResults = () =>
+  createToolCallStep({
+    tool_call_id: 'c3',
+    tool_id: internalTools.runSubagent,
+    params: {},
+    results: [],
+  });
+
+const makeProgressionStep = () =>
+  createToolCallStep({
+    tool_call_id: 'c4',
+    tool_id: 'my_tool',
+    params: {},
+    results: [],
+    progression: [{ message: 'searching' }],
+  });
+
 const openSubAgentFlyout = async (user: ReturnType<typeof userEvent.setup>) => {
   await user.click(screen.getByRole('button', { name: /Sub-agent execution exec-1/ }));
 };
@@ -162,6 +179,58 @@ describe('ToolResponseFlyout', () => {
 
       expect(screen.getAllByRole('dialog')).toHaveLength(1);
       expect(onClose).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('stopped state', () => {
+    beforeEach(() => {
+      mockIsEmbeddedContext = true;
+    });
+
+    it('shows "Stopped" and an incomplete Execution step for a sub-agent call without results', () => {
+      renderWithProviders(
+        <ToolResponseFlyout step={makeSubAgentStepWithoutResults()} isAborted onClose={jest.fn()} />
+      );
+      expect(screen.getByText('Stopped')).toBeInTheDocument();
+      expect(screen.getByText('Step 2 is incomplete')).toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    });
+
+    it('keeps the spinner and the loading Execution step for a running sub-agent call', () => {
+      renderWithProviders(
+        <ToolResponseFlyout step={makeSubAgentStepWithoutResults()} onClose={jest.fn()} />
+      );
+      expect(screen.queryByText('Stopped')).not.toBeInTheDocument();
+      expect(screen.getByText('Step 2 is loading')).toBeInTheDocument();
+      expect(screen.getAllByRole('progressbar')).toHaveLength(2);
+    });
+
+    it('shows an incomplete progression Execution step instead of a loading one', () => {
+      renderWithProviders(
+        <ToolResponseFlyout step={makeProgressionStep()} isAborted onClose={jest.fn()} />
+      );
+      expect(screen.getByText('searching')).toBeInTheDocument();
+      expect(screen.getByText('Step 2 is incomplete')).toBeInTheDocument();
+      expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    });
+
+    it('shows a loading progression Execution step when not stopped', () => {
+      renderWithProviders(<ToolResponseFlyout step={makeProgressionStep()} onClose={jest.fn()} />);
+      expect(screen.getByText('Step 2 is loading')).toBeInTheDocument();
+    });
+
+    it('does not mark a finished sub-agent as stopped in the nested flyout', async () => {
+      const user = userEvent.setup();
+      renderWithProviders(
+        <ToolResponseFlyout step={makeSubAgentStep()} isAborted onClose={jest.fn()} />
+      );
+      await openSubAgentFlyout(user);
+
+      const nestedDialog = screen.getAllByRole('dialog').at(-1);
+      expect(nestedDialog).toBeDefined();
+      expect(
+        within(nestedDialog as HTMLElement).getByText('Step 2 is complete')
+      ).toBeInTheDocument();
     });
   });
 });

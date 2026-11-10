@@ -20,7 +20,8 @@ const toFiniteNumber = (value: RawHistogramBound): number | undefined => {
 };
 
 /**
- * Returns MIN/MAX when both values are finite and min is less than max.
+ * Returns MIN/MAX when both values are finite and min is not greater than max.
+ * A point (min === max) is kept. Missing, non-finite, or inverted bounds are undefined.
  */
 export const parseHistogramBounds = (
   rawMin: RawHistogramBound,
@@ -28,7 +29,7 @@ export const parseHistogramBounds = (
 ): HistogramBounds | undefined => {
   const min = toFiniteNumber(rawMin);
   const max = toFiniteNumber(rawMax);
-  if (min === undefined || max === undefined || min >= max) {
+  if (min === undefined || max === undefined || min > max) {
     return undefined;
   }
 

@@ -46,6 +46,9 @@ export class RunnerFactoryImpl implements RunnerFactory {
         inference,
         trackingService,
         searchInferenceEndpoints,
+        spaces: this.deps.spaces,
+        security: this.deps.security,
+        elasticsearch: this.deps.elasticsearch,
       }),
     };
   }

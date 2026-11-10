@@ -16,15 +16,16 @@ import { createEpisodeActionRouteForType } from './create_episode_action_route_f
 export const CreateActivateEpisodeActionRoute = createEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
   pathSuffix: '_activate',
-  summary: 'Activate an alert episode',
+  summary: 'Activate an alert',
   bodySchema: createActivateEpisodeActionBodySchema,
   oasOperationObject: createActivateEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
   additionalResponses: {
     409: {
       body: () => errorResponseSchema,
       description:
-        'Indicates the alert episode has been superseded by a newer episode of its series, or is already in the requested state.',
+        'Indicates the alert has been superseded by a newer alert in its series, or is already in the requested state.',
     },
   },
 });

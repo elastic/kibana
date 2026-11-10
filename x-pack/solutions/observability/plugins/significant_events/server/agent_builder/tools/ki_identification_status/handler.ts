@@ -9,23 +9,29 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 interface GetKiIdentificationStatusHandlerParams {
-  streamName: string;
+  sourceId: string;
+  sourceSlug: string;
+  /** The source's `esql_updated_at`; runs that started earlier ran another query. */
+  queryUpdatedAt?: string;
   request: KibanaRequest;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
 }
 
 export async function getKiIdentificationStatusToolHandler({
-  streamName,
+  sourceId,
+  sourceSlug,
+  queryUpdatedAt,
   request,
   streamsKIsOnboardingClient,
 }: GetKiIdentificationStatusHandlerParams) {
   const { executionId, ...statusResult } = await streamsKIsOnboardingClient.getStatus({
-    streamName,
+    sourceId,
+    sourceSlug,
+    queryUpdatedAt,
     request,
   });
 
   return {
-    stream_name: streamName,
     execution_id: executionId,
     ...statusResult,
   };

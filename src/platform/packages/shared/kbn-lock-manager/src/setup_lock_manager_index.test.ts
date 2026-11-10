@@ -13,7 +13,9 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
   removeLockIndexWithIncorrectMappings,
-  ensureTemplatesAndIndexCreated,
+  ensureTemplatesCreated,
+  ensureIndexCreated,
+  setupLockManagerIndex,
   LOCKS_CONCRETE_INDEX_NAME,
 } from './setup_lock_manager_index';
 
@@ -161,7 +163,24 @@ describe('removeLockIndexWithIncorrectMappings', () => {
   });
 });
 
-describe('ensureTemplatesAndIndexCreated', () => {
+describe('ensureTemplatesCreated', () => {
+  let esClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
+  const logger = loggingSystemMock.createLogger();
+
+  beforeEach(() => {
+    esClient = elasticsearchClientMock.createInternalClient();
+  });
+
+  it('creates the component and index templates', async () => {
+    await ensureTemplatesCreated(esClient, logger);
+
+    expect(esClient.cluster.putComponentTemplate).toHaveBeenCalled();
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalled();
+    expect(esClient.indices.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('ensureIndexCreated', () => {
   let esClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
   const logger = loggingSystemMock.createLogger();
 
@@ -170,10 +189,8 @@ describe('ensureTemplatesAndIndexCreated', () => {
   });
 
   it('creates index successfully', async () => {
-    await ensureTemplatesAndIndexCreated(esClient, logger);
+    await ensureIndexCreated(esClient, logger);
 
-    expect(esClient.cluster.putComponentTemplate).toHaveBeenCalled();
-    expect(esClient.indices.putIndexTemplate).toHaveBeenCalled();
     expect(esClient.indices.create).toHaveBeenCalledWith({ index: LOCKS_CONCRETE_INDEX_NAME });
   });
 
@@ -188,7 +205,7 @@ describe('ensureTemplatesAndIndexCreated', () => {
       })
     );
 
-    await expect(ensureTemplatesAndIndexCreated(esClient, logger)).resolves.not.toThrow();
+    await expect(ensureIndexCreated(esClient, logger)).resolves.not.toThrow();
   });
 
   it('handles invalid_index_name_exception (index name exists as alias) without throwing', async () => {
@@ -202,7 +219,7 @@ describe('ensureTemplatesAndIndexCreated', () => {
       })
     );
 
-    await expect(ensureTemplatesAndIndexCreated(esClient, logger)).resolves.not.toThrow();
+    await expect(ensureIndexCreated(esClient, logger)).resolves.not.toThrow();
   });
 
   it('throws on other errors', async () => {
@@ -216,6 +233,39 @@ describe('ensureTemplatesAndIndexCreated', () => {
       })
     );
 
-    await expect(ensureTemplatesAndIndexCreated(esClient, logger)).rejects.toThrow();
+    await expect(ensureIndexCreated(esClient, logger)).rejects.toThrow();
+  });
+});
+
+describe('setupLockManagerIndex', () => {
+  let esClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
+  const logger = loggingSystemMock.createLogger();
+
+  beforeEach(() => {
+    esClient = elasticsearchClientMock.createInternalClient();
+  });
+
+  it('creates the templates before deleting a mis-mapped index', async () => {
+    esClient.indices.getMapping.mockResolvedValueOnce({
+      [LOCKS_CONCRETE_INDEX_NAME]: {
+        mappings: {
+          dynamic: 'false',
+          properties: {
+            token: { type: 'text' },
+            expiresAt: { type: 'date' },
+          },
+        },
+      },
+    });
+
+    await setupLockManagerIndex(esClient, logger);
+
+    expect(esClient.indices.delete).toHaveBeenCalledWith({ index: LOCKS_CONCRETE_INDEX_NAME });
+    expect(esClient.indices.putIndexTemplate.mock.invocationCallOrder[0]).toBeLessThan(
+      esClient.indices.delete.mock.invocationCallOrder[0]
+    );
+    expect(esClient.indices.create.mock.invocationCallOrder[0]).toBeGreaterThan(
+      esClient.indices.delete.mock.invocationCallOrder[0]
+    );
   });
 });

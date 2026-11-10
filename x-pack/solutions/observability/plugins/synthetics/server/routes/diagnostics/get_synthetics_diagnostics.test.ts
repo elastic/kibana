@@ -45,7 +45,7 @@ describe('getSyntheticsDiagnosticsRoute', () => {
       close: jest.fn(),
     }),
   };
-  const syntheticsMonitorClient = { syntheticsService: { syncErrors: null } };
+  const syntheticsMonitorClient = { serviceManagedLocations: { syncErrors: null } };
   const server = {
     stackVersion: '9.6.0',
     fleet: {

@@ -6,16 +6,28 @@
  */
 
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { useFetchCoverageOverviewQuery } from '../../../rule_management/api/hooks/use_fetch_coverage_overview_query';
 
 import { getMockCoverageOverviewDashboard } from '../../../rule_management/model/coverage_overview/__mocks__';
 import { TestProviders } from '../../../../common/mock';
+import { CoverageOverviewAppHeader } from './coverage_overview_app_header';
 import { CoverageOverviewDashboard } from './coverage_overview_dashboard';
 import { CoverageOverviewDashboardContextProvider } from './coverage_overview_dashboard_context';
 
 jest.mock('../../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
 jest.mock('../../../rule_management/api/hooks/use_fetch_coverage_overview_query');
+
+jest.mock('../../../../common/components/app_header/use_ml_job_settings_menu_item', () => ({
+  useMlJobSettingsMenuItem: () => ({ item: undefined, flyout: null }),
+}));
+
+jest.mock('../../../../common/components/app_header/use_add_integrations_menu_item', () => ({
+  useAddIntegrationsMenuItem: () => undefined,
+}));
 
 // The invalid MITRE rules callout is gated behind the mitreAttackUpdatesUIEnabled
 // feature flag, which is off by default. Force it on for this test suite.
@@ -23,12 +35,22 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
+const mockUseAvailableMitreFrameworks = jest.fn();
+jest.mock('../../../../common/hooks/mitre/use_available_mitre_frameworks', () => ({
+  useAvailableMitreFrameworks: () => mockUseAvailableMitreFrameworks(),
+}));
+
 const renderCoverageOverviewDashboard = () => {
   return render(
     <TestProviders>
-      <CoverageOverviewDashboardContextProvider>
-        <CoverageOverviewDashboard />
-      </CoverageOverviewDashboardContextProvider>
+      <MemoryRouter>
+        <MockAppHeaderProvider>
+          <CoverageOverviewDashboardContextProvider>
+            <CoverageOverviewAppHeader />
+            <CoverageOverviewDashboard />
+          </CoverageOverviewDashboardContextProvider>
+        </MockAppHeaderProvider>
+      </MemoryRouter>
     </TestProviders>
   );
 };
@@ -36,12 +58,79 @@ const renderCoverageOverviewDashboard = () => {
 describe('CoverageOverviewDashboard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAvailableMitreFrameworks.mockReturnValue(['enterprise', 'atlas']);
     (useFetchCoverageOverviewQuery as jest.Mock).mockReturnValue({
       data: getMockCoverageOverviewDashboard(),
       isLoading: false,
       isMitreError: false,
+      frameworkVersion: '16.1',
       refetch: jest.fn(),
     });
+  });
+
+  test.each([
+    ['enterprise', 'MITRE ATT&CK®'],
+    ['atlas', 'MITRE ATLAS™'],
+  ])('describes the coverage of the %s framework below the tabs', async (framework, label) => {
+    const user = userEvent.setup();
+    renderCoverageOverviewDashboard();
+    await user.click(screen.getByTestId(`coverageOverviewFrameworkTab-${framework}`));
+
+    expect(
+      screen.getByText(
+        `Your current coverage of ${label} tactics and techniques, based on installed rules.`,
+        {
+          exact: false,
+        }
+      )
+    ).toBeInTheDocument();
+  });
+
+  test('links the description to the MITRE coverage documentation', () => {
+    renderCoverageOverviewDashboard();
+
+    expect(screen.getByRole('link', { name: /learn more/i })).toHaveAttribute(
+      'href',
+      expect.stringContaining('mitre-attack-coverage')
+    );
+  });
+
+  test('hides the framework tabs but still renders the matrix when the managed source is off', () => {
+    mockUseAvailableMitreFrameworks.mockReturnValue(['enterprise']);
+    renderCoverageOverviewDashboard();
+
+    expect(screen.queryByTestId('coverageOverviewFrameworkTab-enterprise')).not.toBeInTheDocument();
+    expect(screen.getByTestId('coverageOverviewMatrix')).toBeInTheDocument();
+  });
+
+  test('clicking the ATLAS tab switches the matrix to the ATLAS framework', async () => {
+    const user = userEvent.setup();
+    const enterpriseData = getMockCoverageOverviewDashboard();
+    enterpriseData.mitreTactics = [{ ...enterpriseData.mitreTactics[0], id: 'TA0001' }];
+    const atlasData = getMockCoverageOverviewDashboard();
+    atlasData.mitreTactics = [{ ...atlasData.mitreTactics[0], id: 'AML.TA0000' }];
+
+    (useFetchCoverageOverviewQuery as jest.Mock).mockImplementation(
+      (_filter: unknown, framework: string) => ({
+        data: framework === 'atlas' ? atlasData : enterpriseData,
+        isLoading: false,
+        isMitreError: false,
+        frameworkVersion: '16.1',
+        refetch: jest.fn(),
+      })
+    );
+
+    renderCoverageOverviewDashboard();
+    expect(screen.getByTestId('coverageOverviewTacticGroup-TA0001')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('coverageOverviewFrameworkTab-atlas'));
+
+    expect(screen.getByTestId('coverageOverviewTacticGroup-AML.TA0000')).toBeInTheDocument();
+    expect(screen.queryByTestId('coverageOverviewTacticGroup-TA0001')).not.toBeInTheDocument();
+    expect(screen.getByTestId('coverageOverviewFrameworkTab-atlas')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
   });
 
   test('it renders', () => {
@@ -71,6 +160,7 @@ describe('CoverageOverviewDashboard', () => {
       data: mockDashboard,
       isLoading: false,
       isMitreError: false,
+      frameworkVersion: '16.1',
       refetch: jest.fn(),
     });
 

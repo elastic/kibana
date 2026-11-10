@@ -27,6 +27,7 @@ import {
   postUnifiedActionsReleaseReq,
   postUnifiedAlertReq,
   postUnifiedAlertMultipleIdsReq,
+  buildUnifiedAlertReq,
   postUnifiedCommentReq,
   postUnifiedIndicatorReq,
   postUnifiedLensReq,
@@ -36,6 +37,7 @@ import {
   createCase,
   pushCase,
   createComment,
+  deleteComment,
   updateCase,
   deleteAllCaseItems,
   superUserSpace1Auth,
@@ -227,7 +229,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
-          `Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`,
+          `Elastic Alerts attached to the case: 3 added (3 total)\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`,
         ];
 
         /**
@@ -274,7 +276,119 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(allCommentRequests.length).be(1);
         expect(allCommentRequests[0].work_notes).eql(
-          `Elastic Alerts attached to the case: 3\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/s/space1/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`
+          `Elastic Alerts attached to the case: 3 added (3 total)\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/s/space1/app/management/insightsAndAlerting/cases/${patchedCase.id}/?tabId=alerts`
+        );
+      });
+
+      it('should not send the alerts summary again when no alert changed since the last push', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postUnifiedAlertReq, postUnifiedAlertMultipleIdsReq],
+        });
+
+        await pushCase({ supertest, caseId: postedCase.id, connectorId: connector.id });
+        const requestCountAfterFirstPush = serviceNowServer.allRequestData.length;
+
+        await pushCase({ supertest, caseId: postedCase.id, connectorId: connector.id });
+
+        const secondPushCommentRequests = serviceNowServer.allRequestData
+          .slice(requestCountAfterFirstPush)
+          .filter((request: ServiceNowRequest) => Boolean(request.work_notes));
+
+        expect(secondPushCommentRequests.length).be(0);
+      });
+
+      it('should report only the alerts added since the last push', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postUnifiedAlertReq, postUnifiedAlertMultipleIdsReq],
+        });
+
+        await pushCase({ supertest, caseId: postedCase.id, connectorId: connector.id });
+        const requestCountAfterFirstPush = serviceNowServer.allRequestData.length;
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            buildUnifiedAlertReq('securitySolutionFixture', {
+              alertId: 'test-id-3',
+              index: 'test-index',
+            }),
+          ],
+        });
+
+        await pushCase({ supertest, caseId: postedCase.id, connectorId: connector.id });
+
+        const secondPushCommentRequests = serviceNowServer.allRequestData
+          .slice(requestCountAfterFirstPush)
+          .filter((request: ServiceNowRequest) => Boolean(request.work_notes));
+
+        expect(secondPushCommentRequests.length).be(1);
+        expect(secondPushCommentRequests[0].work_notes).eql(
+          `Elastic Alerts attached to the case: 1 added (4 total)\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${postedCase.id}/?tabId=alerts`
+        );
+      });
+
+      it('should report the alerts removed since the last push', async () => {
+        const { postedCase, connector } = await createCaseWithConnector({
+          supertest,
+          serviceNowSimulatorURL,
+          actionsRemover,
+        });
+
+        const caseWithMultipleIds = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postUnifiedAlertMultipleIdsReq],
+        });
+        const caseWithAllAlerts = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [postUnifiedAlertReq],
+        });
+
+        const existingAttachmentIds = new Set(caseWithMultipleIds.comments?.map(({ id }) => id));
+        const singleAlertAttachment = caseWithAllAlerts.comments?.find(
+          ({ id }) => !existingAttachmentIds.has(id)
+        );
+
+        if (singleAlertAttachment == null) {
+          throw new Error('Expected the single alert attachment to be created');
+        }
+
+        await pushCase({ supertest, caseId: postedCase.id, connectorId: connector.id });
+        const requestCountAfterFirstPush = serviceNowServer.allRequestData.length;
+
+        await deleteComment({
+          supertest,
+          caseId: postedCase.id,
+          commentId: singleAlertAttachment.id,
+        });
+
+        await pushCase({ supertest, caseId: postedCase.id, connectorId: connector.id });
+
+        const secondPushCommentRequests = serviceNowServer.allRequestData
+          .slice(requestCountAfterFirstPush)
+          .filter((request: ServiceNowRequest) => Boolean(request.work_notes));
+
+        expect(secondPushCommentRequests.length).be(1);
+        expect(secondPushCommentRequests[0].work_notes).eql(
+          `Elastic Alerts attached to the case: 0 added, 1 removed (2 total)\n\nFor more details, view the alerts in Kibana\nAlerts URL: https://localhost:5601/app/management/insightsAndAlerting/cases/${postedCase.id}/?tabId=alerts`
         );
       });
     });

@@ -41,6 +41,7 @@ describe('Policy Memory Protections Card', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockedContext.setExperimentalFlag({ customYaraSignaturesEnabled: false });
 
     formProps = {
       policy: new FleetPackagePolicyGenerator('seed').generateEndpointPackagePolicy().inputs[0]
@@ -391,7 +392,9 @@ describe('Policy Memory Protections Card', () => {
         expect(
           getByTestId(testSubj.customYaraSignaturesEnableDisableSwitch).getAttribute('aria-checked')
         ).toBe('true');
-        expect(getByTestId(testSubj.card)).toHaveTextContent('Apply custom YARA signatures');
+        expect(getByTestId(testSubj.card)).toHaveTextContent(
+          'Apply custom YARA signatures in detection mode'
+        );
       });
     });
   });

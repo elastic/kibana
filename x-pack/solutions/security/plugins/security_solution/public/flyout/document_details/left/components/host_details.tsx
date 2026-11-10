@@ -236,10 +236,10 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
   const hostIdentityFieldsForStore = useMemo(
     () =>
       euidApi?.euid.getEntityIdentifiersFromDocument(
-        'host',
+        euidApi.getBuiltInEntityDefinition('host'),
         hostEntityFromStoreResult?.entityRecord ?? hostEntityFromStoreResult?.entity
       ),
-    [euidApi?.euid, hostEntityFromStoreResult?.entityRecord, hostEntityFromStoreResult?.entity]
+    [euidApi, hostEntityFromStoreResult?.entityRecord, hostEntityFromStoreResult?.entity]
   );
   const observedHost = useObservedHost(hostName, scopeId, hostEntityFromStoreResult);
 
@@ -497,7 +497,7 @@ export const HostDetails: React.FC<HostDetailsProps> = ({
       <AnomalyTableProvider
         criteriaFields={hostToCriteria({
           hostItem: hostDetails,
-          euid: euidApi?.euid,
+          euidApi: euidApi ?? undefined,
           entityRecord: hostEntityFromStoreResult?.entityRecord,
         })}
         startDate={from}

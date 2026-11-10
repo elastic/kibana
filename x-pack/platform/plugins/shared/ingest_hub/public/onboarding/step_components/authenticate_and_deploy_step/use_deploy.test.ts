@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
 import {
   getRegionFieldName,
@@ -151,6 +151,7 @@ jest.mock('react-use/lib/useSessionStorage', () => jest.fn());
 
 import {
   sendCreateAgentlessPolicy,
+  sendGetAgentlessPolicy,
   sendGetPackageInfoByKey,
   sendCreateCloudOnboardingDeployment,
   sendUpdateCloudOnboardingDeployment,
@@ -166,6 +167,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cleanupManagedIntegrationsPolicies } from './policy_cleanup_managed_integrations';
 
 const mockSendCreateAgentlessPolicy = sendCreateAgentlessPolicy as jest.Mock;
+const mockSendGetAgentlessPolicy = sendGetAgentlessPolicy as jest.Mock;
 const mockCleanupManagedIntegrationsPolicies = cleanupManagedIntegrationsPolicies as jest.Mock;
 const mockSendGetPackageInfoByKey = sendGetPackageInfoByKey as jest.Mock;
 const mockSendCreateCloudOnboardingDeployment = sendCreateCloudOnboardingDeployment as jest.Mock;
@@ -184,7 +186,6 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
   return {
     id: 'test_service',
     name: 'Test Service',
-    category: 'compute',
     signalTypes: ['logs'],
     dataStreams: ['test_service'],
     packageName: 'aws',
@@ -710,6 +711,7 @@ describe('buildInstanceStatuses', () => {
 function setupMocks({
   selectedServiceIds = ['ec2'],
   connectorId = undefined as string | undefined,
+  authMethod = undefined as string | undefined,
   staticKeys = undefined as { access_key_id: string; secret_access_key: string } | undefined,
   pendingIacTemplate = undefined as PendingIacTemplate | undefined,
   globalRegion = 'us-east-1',
@@ -723,6 +725,7 @@ function setupMocks({
 }: {
   selectedServiceIds?: string[];
   connectorId?: string;
+  authMethod?: string;
   staticKeys?: { access_key_id: string; secret_access_key: string };
   pendingIacTemplate?: PendingIacTemplate;
   globalRegion?: string;
@@ -741,8 +744,9 @@ function setupMocks({
 
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
-    authenticateAndDeployStep: { connectorId, staticKeys, pendingIacTemplate },
+    authenticateAndDeployStep: { connectorId, authMethod, staticKeys, pendingIacTemplate },
     setPendingIacTemplate: jest.fn(),
+    clearStagedStaticKeys: jest.fn(),
     detectAndReviewStep: {
       isDeploying: false,
       serviceStatuses: {},
@@ -1175,6 +1179,112 @@ describe('useDeploy', () => {
     expect(hasCloudtrailInput).toBe(false);
   });
 
+  describe('isCleanupOnly with a dirty session', () => {
+    const DEPLOYED_WITH_PENDING_CLEANUP = {
+      isDirty: true,
+      serviceStatuses: { ec2: 'receiving' },
+      policyIdsByInstance: { ec2: 'policy-1' },
+      pendingCleanupPolicyIds: { removed: 'policy-2' },
+    };
+    const STORED_KEYS_POLICY = {
+      item: {
+        vars: {
+          access_key_id: { isSecretRef: true, id: 'ref-akid' },
+          secret_access_key: { isSecretRef: true, id: 'ref-secret' },
+        },
+      },
+    };
+
+    it('is true once both keys are found stored on the deployed policy', async () => {
+      mockSendGetAgentlessPolicy.mockResolvedValue(STORED_KEYS_POLICY);
+      setupMocks({ authMethod: 'static_keys', detectAndReviewStep: DEPLOYED_WITH_PENDING_CLEANUP });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.isCleanupOnly).toBe(true));
+      expect(mockSendGetAgentlessPolicy).toHaveBeenCalledWith('policy-1');
+      expect(result.current.storedSecretFields).toEqual(['access_key_id', 'secret_access_key']);
+    });
+
+    it('reads the stored keys from a policy cleanup keeps, not one it deletes', async () => {
+      mockSendGetAgentlessPolicy.mockResolvedValue(STORED_KEYS_POLICY);
+      setupMocks({
+        authMethod: 'static_keys',
+        detectAndReviewStep: {
+          ...DEPLOYED_WITH_PENDING_CLEANUP,
+          policyIdsByInstance: { removed: 'policy-2', ec2: 'policy-1' },
+        },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      await waitFor(() =>
+        expect(result.current.storedSecretFields).toEqual(['access_key_id', 'secret_access_key'])
+      );
+      expect(mockSendGetAgentlessPolicy).toHaveBeenCalledTimes(1);
+      expect(mockSendGetAgentlessPolicy).toHaveBeenCalledWith('policy-1');
+    });
+
+    it('offers no stored keys when every deployed policy is being removed', () => {
+      setupMocks({
+        authMethod: 'static_keys',
+        detectAndReviewStep: {
+          ...DEPLOYED_WITH_PENDING_CLEANUP,
+          policyIdsByInstance: { removed: 'policy-2' },
+        },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(mockSendGetAgentlessPolicy).not.toHaveBeenCalled();
+      expect(result.current.storedSecretFields).toEqual([]);
+      expect(result.current.isStoredSecretsLoading).toBe(false);
+    });
+
+    it('is false while the stored secrets are still loading', () => {
+      mockSendGetAgentlessPolicy.mockReturnValue(new Promise(() => {}));
+      setupMocks({ authMethod: 'static_keys', detectAndReviewStep: DEPLOYED_WITH_PENDING_CLEANUP });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isStoredSecretsLoading).toBe(true);
+      expect(result.current.isCleanupOnly).toBe(false);
+    });
+
+    it('is false when only one of the keys is stored', async () => {
+      mockSendGetAgentlessPolicy.mockResolvedValue({
+        item: { vars: { secret_access_key: { isSecretRef: true, id: 'ref-secret' } } },
+      });
+      setupMocks({ authMethod: 'static_keys', detectAndReviewStep: DEPLOYED_WITH_PENDING_CLEANUP });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.isStoredSecretsLoading).toBe(false));
+      expect(result.current.isCleanupOnly).toBe(false);
+    });
+
+    it('is false when the policies hold no stored keys or the lookup fails', async () => {
+      mockSendGetAgentlessPolicy.mockRejectedValue(new Error('boom'));
+      setupMocks({ authMethod: 'static_keys', detectAndReviewStep: DEPLOYED_WITH_PENDING_CLEANUP });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.isStoredSecretsLoading).toBe(false));
+      expect(result.current.isCleanupOnly).toBe(false);
+    });
+
+    it('is false for identity federation even if the policy still has stored keys', async () => {
+      mockSendGetAgentlessPolicy.mockResolvedValue(STORED_KEYS_POLICY);
+      setupMocks({
+        authMethod: 'identity_federation',
+        connectorId: 'conn-1',
+        detectAndReviewStep: DEPLOYED_WITH_PENDING_CLEANUP,
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isCleanupOnly).toBe(false);
+      expect(result.current.storedSecretFields).toEqual([]);
+      // No lookup for a policy that authenticates through an identity.
+      expect(mockSendGetAgentlessPolicy).not.toHaveBeenCalled();
+    });
+
+    it('stays true without stored keys when the session is not dirty', () => {
+      setupMocks({
+        authMethod: 'static_keys',
+        detectAndReviewStep: { ...DEPLOYED_WITH_PENDING_CLEANUP, isDirty: false },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isCleanupOnly).toBe(true);
+    });
+  });
+
   describe('isAlreadyDeployed', () => {
     it('is false when serviceStatuses is empty', () => {
       setupMocks({
@@ -1183,6 +1293,15 @@ describe('useDeploy', () => {
       });
       const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
       expect(result.current.isAlreadyDeployed).toBe(false);
+    });
+
+    it('is true for a resumed session: every instance has a policy id but no status', () => {
+      setupMocks({
+        selectedServiceIds: ['ec2'],
+        detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: { ec2: 'policy-1' } },
+      });
+      const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+      expect(result.current.isAlreadyDeployed).toBe(true);
     });
 
     it('is false when status is instantiating (deploy in flight)', () => {
@@ -1394,6 +1513,98 @@ describe('useDeploy', () => {
 
       expect(mockSendCreateAgentlessPolicy).toHaveBeenCalled();
       expect(mockSendUpdateCloudOnboardingDeployment).not.toHaveBeenCalled();
+    });
+
+    describe('instances', () => {
+      const original = {
+        instanceId: 'ec2',
+        serviceId: 'ec2',
+        name: 'Amazon EC2',
+        isDuplicate: false,
+      };
+      const duplicate = {
+        instanceId: 'ec2__dup-1',
+        serviceId: 'ec2',
+        name: 'EC2 prod',
+        isDuplicate: true,
+      };
+
+      it('creates the SO with the instances, duplicates included', async () => {
+        setupMocks({
+          selectedServiceIds: ['ec2'],
+          connectorId: 'connector-abc',
+          instances: [original, duplicate],
+        });
+        const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+        await act(async () => {
+          await result.current.handleDeploy();
+        });
+
+        expect(mockSendCreateCloudOnboardingDeployment).toHaveBeenCalledWith(
+          expect.objectContaining({ instances: [original, duplicate] })
+        );
+      });
+
+      it('saves a base instance per selected service even when Step 2 stored none', async () => {
+        // Step 2 was skipped or never persisted its list: the deploy reconciles it, and the SO
+        // must still describe what was deployed.
+        setupMocks({
+          selectedServiceIds: ['ec2'],
+          connectorId: 'connector-abc',
+          instances: undefined,
+        });
+        const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+        await act(async () => {
+          await result.current.handleDeploy();
+        });
+
+        const { instances } = mockSendCreateCloudOnboardingDeployment.mock.calls[0][0];
+        expect(instances).toEqual([
+          expect.objectContaining({ instanceId: 'ec2', serviceId: 'ec2', isDuplicate: false }),
+        ]);
+      });
+
+      it('updates the SO with the instances after a deploy', async () => {
+        setupMocks({
+          selectedServiceIds: ['ec2'],
+          connectorId: 'connector-abc',
+          instances: [original, duplicate],
+          detectAndReviewStep: { onboardingDeploymentId: 'existing-dep-id' },
+        });
+        const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+        await act(async () => {
+          await result.current.handleDeploy(['ec2']);
+        });
+
+        expect(mockSendCreateCloudOnboardingDeployment).not.toHaveBeenCalled();
+        expect(mockSendUpdateCloudOnboardingDeployment).toHaveBeenCalledWith(
+          'existing-dep-id',
+          expect.objectContaining({ instances: [original, duplicate] })
+        );
+      });
+
+      it('keeps the instances in the update when the deploy fails, so a retry after resume has them', async () => {
+        setupMocks({
+          selectedServiceIds: ['ec2'],
+          connectorId: 'connector-abc',
+          instances: [original, duplicate],
+          detectAndReviewStep: { onboardingDeploymentId: 'existing-dep-id' },
+        });
+        mockSendCreateAgentlessPolicy.mockRejectedValue(new Error('API error'));
+        const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+        await act(async () => {
+          await result.current.handleDeploy(['ec2']);
+        });
+
+        expect(mockSendUpdateCloudOnboardingDeployment).toHaveBeenCalledWith(
+          'existing-dep-id',
+          expect.objectContaining({ status: 'failed', instances: [original, duplicate] })
+        );
+      });
     });
 
     it('uses existing onboardingDeploymentId on retry without creating a new SO', async () => {
@@ -1817,7 +2028,6 @@ describe('toSOServiceVars', () => {
     return {
       id: 'svc',
       name: 'Svc',
-      category: 'compute',
       signalTypes: ['logs'],
       dataStreams: ['svc'],
       packageName: 'aws',

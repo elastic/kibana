@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutParallelTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects } from '../fixtures';
 import { spaceTest, testData } from '../fixtures';
-
-type PageObjects = ScoutParallelTestFixtures['pageObjects'];
 
 const UNTITLED_TAB_LABEL = 'Untitled';
 const FIRST_TAB_LABEL = 'My first tab';
@@ -39,7 +37,7 @@ spaceTest.describe(
       await discoverScoutSpace.teardownDiscoverDefaults();
     });
 
-    const createClosedKqlTab = async (pageObjects: PageObjects) => {
+    const createClosedKqlTab = async (pageObjects: DiscoverPageObjects) => {
       const { discover, filterBar, unifiedTabs } = pageObjects;
 
       await unifiedTabs.createNewTab();
@@ -52,7 +50,7 @@ spaceTest.describe(
       await discover.waitUntilTabIsLoaded();
     };
 
-    const createTwoEsqlTabsAndLoadSavedSearch = async (pageObjects: PageObjects) => {
+    const createTwoEsqlTabsAndLoadSavedSearch = async (pageObjects: DiscoverPageObjects) => {
       const { discover, unifiedTabs } = pageObjects;
 
       await unifiedTabs.editTabLabel(0, FIRST_TAB_LABEL);

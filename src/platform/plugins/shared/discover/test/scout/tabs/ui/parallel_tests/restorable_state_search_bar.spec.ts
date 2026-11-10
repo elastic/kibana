@@ -7,25 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PageObjects } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverPageObjects } from '../fixtures';
 import { spaceTest } from '../fixtures';
 
 const DEFAULT_ESQL_QUERY = 'FROM logstash-* | SORT @timestamp DESC';
 
-const expectCleanClassicQueryState = async ({ discover, queryBar }: PageObjects, query: string) => {
+const expectCleanClassicQueryState = async (
+  { discover, queryBar }: DiscoverPageObjects,
+  query: string
+) => {
   expect(await queryBar.getQuery()).toBe(query);
   expect(await discover.getQuerySubmitButtonLabel()).toBe('Refresh query');
 };
 
-const expectDirtyClassicQueryState = async ({ discover, queryBar }: PageObjects, query: string) => {
+const expectDirtyClassicQueryState = async (
+  { discover, queryBar }: DiscoverPageObjects,
+  query: string
+) => {
   expect(await queryBar.getQuery()).toBe(query);
   expect(await discover.getQuerySubmitButtonLabel()).toBe('Needs updating');
 };
 
-const expectEsqlQueryState = async ({ discover }: PageObjects, query: string) => {
+const expectCleanEsqlQueryState = async ({ discover }: DiscoverPageObjects, query: string) => {
   expect(await discover.getEsqlQueryValue()).toBe(query);
-  expect(await discover.getQuerySubmitButtonLabel()).toBe('Search');
+  expect(await discover.getQuerySubmitButtonLabel()).toBe('Search again');
+};
+
+const expectDirtyEsqlQueryState = async ({ discover }: DiscoverPageObjects, query: string) => {
+  expect(await discover.getEsqlQueryValue()).toBe(query);
+  expect(await discover.getQuerySubmitButtonLabel()).toBe('Search with updated query');
 };
 
 spaceTest.describe(
@@ -102,47 +113,47 @@ spaceTest.describe(
 
       await discover.selectTextBaseLang();
       await discover.waitUntilTabIsLoaded();
-      await expectEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
+      await expectCleanEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
 
       await esqlEditor.setQuery(draftQuery0);
-      await expectEsqlQueryState(pageObjects, draftQuery0);
+      await expectDirtyEsqlQueryState(pageObjects, draftQuery0);
 
       await unifiedTabs.createNewTab();
       await discover.writeAndSubmitEsqlQuery(DEFAULT_ESQL_QUERY);
-      await expectEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
+      await expectCleanEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
 
       await unifiedTabs.createNewTab();
       await discover.writeAndSubmitEsqlQuery(DEFAULT_ESQL_QUERY);
-      await expectEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
+      await expectCleanEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
       await esqlEditor.setQuery(draftQuery2);
-      await expectEsqlQueryState(pageObjects, draftQuery2);
+      await expectDirtyEsqlQueryState(pageObjects, draftQuery2);
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      await expectEsqlQueryState(pageObjects, draftQuery0);
+      await expectDirtyEsqlQueryState(pageObjects, draftQuery0);
       expect(await discover.getHitCount()).toBe('1,000');
       await discover.submitQuery();
       await discover.waitUntilTabIsLoaded();
-      await expectEsqlQueryState(pageObjects, draftQuery0);
+      await expectCleanEsqlQueryState(pageObjects, draftQuery0);
       expect(await discover.getHitCount()).toBe('50');
 
       await unifiedTabs.selectTab(1);
       await discover.waitUntilTabIsLoaded();
-      await expectEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
+      await expectCleanEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
       expect(await discover.getHitCount()).toBe('1,000');
 
       await unifiedTabs.selectTab(2);
       await discover.waitUntilTabIsLoaded();
-      await expectEsqlQueryState(pageObjects, draftQuery2);
+      await expectDirtyEsqlQueryState(pageObjects, draftQuery2);
       expect(await discover.getHitCount()).toBe('1,000');
       await discover.submitQuery();
       await discover.waitUntilTabIsLoaded();
-      await expectEsqlQueryState(pageObjects, draftQuery2);
+      await expectCleanEsqlQueryState(pageObjects, draftQuery2);
       expect(await discover.getHitCount()).toBe('150');
 
       await unifiedTabs.selectTab(0);
       await discover.waitUntilTabIsLoaded();
-      await expectEsqlQueryState(pageObjects, draftQuery0);
+      await expectCleanEsqlQueryState(pageObjects, draftQuery0);
       expect(await discover.getHitCount()).toBe('50');
     });
 
@@ -156,27 +167,27 @@ spaceTest.describe(
 
         await discover.selectTextBaseLang();
         await discover.waitUntilTabIsLoaded();
-        await expectEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
+        await expectCleanEsqlQueryState(pageObjects, DEFAULT_ESQL_QUERY);
 
         await esqlEditor.setQuery(submittedQuery);
-        await expectEsqlQueryState(pageObjects, submittedQuery);
+        await expectDirtyEsqlQueryState(pageObjects, submittedQuery);
         await discover.submitQuery();
         await discover.waitUntilTabIsLoaded();
-        await expectEsqlQueryState(pageObjects, submittedQuery);
+        await expectCleanEsqlQueryState(pageObjects, submittedQuery);
         await unifiedTabs.createNewTab();
         await discover.writeAndSubmitEsqlQuery(DEFAULT_ESQL_QUERY);
         await esqlEditor.setQuery(draftQuery);
-        await expectEsqlQueryState(pageObjects, draftQuery);
+        await expectDirtyEsqlQueryState(pageObjects, draftQuery);
         expect(await discover.getHitCount()).toBe('1,000');
 
         await unifiedTabs.selectTab(0);
         await discover.waitUntilTabIsLoaded();
-        await expectEsqlQueryState(pageObjects, submittedQuery);
+        await expectCleanEsqlQueryState(pageObjects, submittedQuery);
         expect(await discover.getHitCount()).toBe('50');
 
         await unifiedTabs.selectTab(1);
         await discover.waitUntilTabIsLoaded();
-        await expectEsqlQueryState(pageObjects, draftQuery);
+        await expectDirtyEsqlQueryState(pageObjects, draftQuery);
         expect(await discover.getHitCount()).toBe('1,000');
       }
     );
@@ -197,8 +208,6 @@ spaceTest.describe(
       expect(await esqlEditor.getHeight()).toBe(initialHeight);
 
       await unifiedTabs.createNewTab();
-      await expect(historyPanel).toBeVisible();
-      await esqlEditor.toggleHistoryPanel();
       await expect(historyPanel).toBeHidden();
       await esqlEditor.setQuery(DEFAULT_ESQL_QUERY);
       await discover.submitQueryAndWait();

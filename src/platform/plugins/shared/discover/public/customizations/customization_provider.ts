@@ -10,7 +10,7 @@
 import { createContext, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { isFunction } from 'lodash';
-import { from } from 'rxjs';
+import { distinctUntilChanged, from, map } from 'rxjs';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type {
@@ -37,6 +37,7 @@ import type { DiscoverServices } from '../build_services';
 import {
   fromSavedObjectTabToAppState,
   fromSavedSearchToSavedObjectTab,
+  getDataViewOfSource,
   internalStateActions,
   selectTabRuntimeState,
   selectTabSavedSearch,
@@ -124,7 +125,10 @@ export const getExtendedDiscoverStateContainer = ({
     });
   },
   getCurrentTabDataView$: () =>
-    selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentDataView$.asObservable(),
+    selectTabRuntimeState(runtimeStateManager, getCurrentTab().id).currentDataSource$.pipe(
+      map(getDataViewOfSource),
+      distinctUntilChanged()
+    ),
   internalActions: {
     setAppState: internalStateActions.setAppState,
     updateGlobalState: internalStateActions.updateGlobalState,

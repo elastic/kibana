@@ -1,0 +1,34 @@
+version: "1"
+name: "Source knowledge reconciliation"
+enabled: true
+description: "Applies source changes before onboarding the current query."
+settings:
+  timeout: "60m"
+  concurrency:
+    key: "nightshift-source-reconciliation-{{ inputs.sourceId }}"
+    strategy: queue
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      - name: sourceId
+        type: string
+        required: true
+      - name: sourceSlug
+        type: string
+        required: true
+steps:
+  - name: reconcile_source
+    type: kibana.request
+    with:
+      method: POST
+      path: "/s/{{ workflow.spaceId }}/internal/streams/{{ inputs.sourceId }}/_reconcile_source"
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        sourceSlug: "${{ inputs.sourceSlug }}"
+    on-failure:
+      retry:
+        max-attempts: 240
+        delay: "10s"
+        strategy: fixed

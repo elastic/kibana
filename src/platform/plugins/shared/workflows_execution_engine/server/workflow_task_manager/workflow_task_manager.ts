@@ -10,8 +10,11 @@
 import { v4 } from 'uuid';
 import { type KibanaRequest, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
+  type ConcreteTaskInstance,
+  type RunSoonOptions,
   TaskAlreadyRunningError,
   type TaskManagerStartContract,
+  TaskPriority,
   TaskStatus,
 } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
@@ -19,10 +22,37 @@ import { getWorkflowRunTaskId } from './get_workflow_run_task_id';
 import { WORKFLOW_RESUME_TASK_TYPE, WORKFLOW_RUN_TASK_TYPE } from './types';
 import type { ResumeWorkflowExecutionParams, StartWorkflowExecutionParams } from './types';
 import { resolveQueueTtlMs } from '../concurrency/queue_concurrency_utils';
-import { getWorkflowOriginalRequest } from '../service_account_execution';
+import {
+  getWorkflowOriginalRequest,
+  getWorkflowTaskRunAs,
+  type WorkflowTaskRunAs,
+} from '../service_account_execution';
 import { generateExecutionTaskScope } from '../utils';
 
 export { getWorkflowRunTaskId } from './get_workflow_run_task_id';
+
+type ScheduleOptions = NonNullable<Parameters<TaskManagerStartContract['schedule']>[1]>;
+
+// Task Manager's `TaskCredential.type` for a task that runs as a service account workload.
+const SERVICE_ACCOUNT_CREDENTIAL_TYPE = 'service_account';
+
+/** A task of an execution started by a service account runs as the execution's binding. */
+const runAsFields = (
+  request: KibanaRequest | undefined,
+  runAs: WorkflowTaskRunAs | undefined = request && getWorkflowTaskRunAs(request)
+): { runAs?: WorkflowTaskRunAs } => (runAs ? { runAs } : {});
+
+/** Other tasks clone the caller's API key, which a service account's credential is not. */
+const cloneApiKeyOptions = (
+  request: KibanaRequest | undefined,
+  options: Omit<ScheduleOptions, 'request' | 'cloneApiKey'> = {}
+): ScheduleOptions | undefined =>
+  request && !getWorkflowTaskRunAs(request)
+    ? { request: getWorkflowOriginalRequest(request), cloneApiKey: true, ...options }
+    : undefined;
+
+export const getTaskPriority = (context?: Record<string, unknown> | null): TaskPriority =>
+  context?.isUserInteractive === true ? TaskPriority.UserInteractive : TaskPriority.Standard;
 
 /** Stable task id so idle-timeout (workflow + enclosing step) resumes dedupe per execution. */
 export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string): string =>
@@ -31,6 +61,8 @@ export const getWorkflowGlobalTimeoutResumeTaskId = (workflowExecutionId: string
 /**
  * Stable task id / deduplication key for any immediate `workflow:resume` (no runAt).
  * Task Manager owns this document throughout the run; callers must never replace it.
+ * While the execution is not terminal the runner stays parked between resumes.
+ * An approval replaces that parked key; a timer or wake poll leaves it in place.
  */
 export const getWorkflowImmediateResumeTaskId = (workflowExecutionId: string): string =>
   `workflow-immediate-resume-${workflowExecutionId}`;
@@ -40,6 +72,18 @@ export const getWorkflowWakeTaskId = (executionId: string): string =>
   `workflow-wake-${executionId}`;
 
 export const WORKFLOW_WAKE_POLL_INTERVAL_MS = 30_000;
+
+/** Lead time within which an idle task counts as about to be claimed. */
+const RESUME_TASK_DUE_GRACE_MS = 5_000;
+
+/** Tasks beyond one page re-arm the wake task when they fire, which removes them. */
+const REMOVE_EXECUTION_TASKS_PAGE_SIZE = 100;
+
+/**
+ * Parked runners only run when woken via `runSoon`; the far-future runAt keeps Task Manager
+ * from claiming them on its own.
+ */
+export const WORKFLOW_PARKED_RUNNER_DELAY_MS = 365 * 24 * 60 * 60 * 1000;
 
 export class WorkflowTaskManager {
   constructor(private taskManager: TaskManagerStartContract) {}
@@ -110,8 +154,9 @@ export class WorkflowTaskManager {
         state: {},
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+        ...runAsFields(fakeRequest),
       },
-      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+      cloneApiKeyOptions(fakeRequest)
     );
 
     return {
@@ -141,8 +186,9 @@ export class WorkflowTaskManager {
         state: {},
         runAt: resumeAt,
         scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+        ...runAsFields(fakeRequest),
       },
-      { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
+      cloneApiKeyOptions(fakeRequest)
     );
 
     return {
@@ -157,9 +203,12 @@ export class WorkflowTaskManager {
   async scheduleDormantQueuedRunTask({
     workflowExecution,
     request,
+    runAs,
   }: {
     workflowExecution: EsWorkflowExecution;
     request: KibanaRequest;
+    /** Set when a service account queued a bound execution: its credential can't be cloned. */
+    runAs?: WorkflowTaskRunAs;
   }): Promise<{ taskId: string }> {
     if (!workflowExecution.id || !workflowExecution.spaceId) {
       throw new Error('Workflow execution must have id and spaceId to schedule a queued run task');
@@ -172,6 +221,8 @@ export class WorkflowTaskManager {
     );
 
     await this.taskManager.removeIfExists(taskId);
+
+    const priority = getTaskPriority(workflowExecution.context);
 
     const task = await this.taskManager.schedule(
       {
@@ -189,8 +240,10 @@ export class WorkflowTaskManager {
         runAt,
         scope: generateExecutionTaskScope(workflowExecution),
         enabled: true,
+        priority,
+        ...runAsFields(request, runAs),
       },
-      { request: getWorkflowOriginalRequest(request), cloneApiKey: true }
+      runAs ? undefined : cloneApiKeyOptions(request)
     );
 
     return { taskId: task.id };
@@ -250,12 +303,23 @@ export class WorkflowTaskManager {
     executionId,
     spaceId,
     fakeRequest,
+    isUserInteractive,
+    regenerateApiKey,
+    ...params
   }: {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
+    regenerateApiKey?: boolean;
+    runAs?: WorkflowTaskRunAs;
   }): Promise<{ taskId: string }> {
     const taskId = getWorkflowImmediateResumeTaskId(executionId);
+    const priority = getTaskPriority({ isUserInteractive });
+    // A caller that knows the identity of the execution's tasks passes it, even when it is none.
+    const runAs =
+      'runAs' in params ? params.runAs : await this.getHandoffRunAs(executionId, fakeRequest);
+
     await this.taskManager.ensureScheduled(
       {
         id: taskId,
@@ -263,12 +327,86 @@ export class WorkflowTaskManager {
         params: { workflowRunId: executionId, spaceId } satisfies ResumeWorkflowExecutionParams,
         state: {},
         scope: [`workflow:execution:${executionId}`],
+        priority,
+        ...runAsFields(fakeRequest, runAs),
       },
-      fakeRequest
-        ? { request: getWorkflowOriginalRequest(fakeRequest), cloneApiKey: true }
-        : undefined
+      runAs
+        ? undefined
+        : cloneApiKeyOptions(fakeRequest, regenerateApiKey ? { regenerateApiKey: true } : {})
     );
     return { taskId };
+  }
+
+  /**
+   * The `runAs` of the tasks that hand off a resume for `executionId`. An approver's request has
+   * none, but a waiting execution's tasks may run as its binding, and Task Manager rejects updating
+   * a task with another identity, so the identity comes from the tasks the execution already has.
+   */
+  private async getHandoffRunAs(
+    executionId: string,
+    request: KibanaRequest | undefined
+  ): Promise<WorkflowTaskRunAs | undefined> {
+    const requestRunAs = request && getWorkflowTaskRunAs(request);
+    if (requestRunAs) {
+      return requestRunAs;
+    }
+    const tasks = await this.taskManager.bulkGet([
+      getWorkflowImmediateResumeTaskId(executionId),
+      getWorkflowWakeTaskId(executionId),
+      getWorkflowGlobalTimeoutResumeTaskId(executionId),
+    ]);
+    // A missing task has no identity to keep, but an unreadable one might run as the binding.
+    const unreadable = tasks.find(
+      (result) => result.tag === 'err' && result.error.error.statusCode !== 404
+    );
+    if (unreadable?.tag === 'err') {
+      throw new Error(`Failed to read task ${unreadable.error.id} while resolving its identity`);
+    }
+    for (const result of tasks) {
+      const { type, workloadType, workloadId, spaceId, expectedServiceAccountId } =
+        (result.tag === 'ok' && result.value.credential) || {};
+      if (type === SERVICE_ACCOUNT_CREDENTIAL_TYPE && workloadType && workloadId && spaceId) {
+        return {
+          workloadType,
+          workloadId,
+          spaceId,
+          expectedServiceAccountId: expectedServiceAccountId ?? null,
+        };
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Removes the remaining tasks scoped to a terminal execution, releasing their API keys.
+   * Skips active claims, since Task Manager cannot complete a task deleted mid-run; a claim
+   * taken between the read and the removal only loses its completion write. Also skips tasks
+   * awaiting a retry, which still finish the post-execution work of a failed attempt.
+   */
+  async removeTasksForExecution(
+    executionId: string,
+    { exceptTaskId }: { exceptTaskId?: string } = {}
+  ): Promise<void> {
+    const { docs } = await this.taskManager.fetch({
+      size: REMOVE_EXECUTION_TASKS_PAGE_SIZE,
+      query: {
+        bool: {
+          filter: [{ term: { 'task.scope': `workflow:execution:${executionId}` } }],
+          must_not: [{ terms: { 'task.status': [TaskStatus.Running, TaskStatus.Claiming] } }],
+        },
+      },
+    });
+    const candidateIds = docs.map(({ id }) => id).filter((id) => id !== exceptTaskId);
+    if (!candidateIds.length) return;
+
+    // Search results can trail a fresh claim; re-read each candidate before removing it.
+    const removableIds = (await this.taskManager.bulkGet(candidateIds))
+      .flatMap((result) => (result.tag === 'ok' ? [result.value] : []))
+      .filter(({ status, attempts }) => status === TaskStatus.Idle && attempts === 0)
+      .map(({ id }) => id);
+    if (!removableIds.length) return;
+
+    await this.taskManager.bulkRemove(removableIds);
   }
 
   /** Returns false when a wake-up must be retried after the current runner releases its claim. */
@@ -276,10 +414,15 @@ export class WorkflowTaskManager {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
+    regenerateApiKey?: boolean;
+    runAs?: WorkflowTaskRunAs;
   }): Promise<boolean> {
     const { taskId } = await this.scheduleImmediateResume(params);
     try {
-      const result = await this.taskManager.runSoon(taskId);
+      const result = params.isUserInteractive
+        ? await this.taskManager.runSoon(taskId, { priority: TaskPriority.UserInteractive })
+        : await this.taskManager.runSoon(taskId);
       return !result?.conflict;
     } catch (error) {
       // The task may complete between ensureScheduled and runSoon. Neither a busy
@@ -299,15 +442,70 @@ export class WorkflowTaskManager {
     executionId: string;
     spaceId: string;
     fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
+    regenerateApiKey?: boolean;
   }): Promise<void> {
-    if (await this.tryRunImmediateResume(params)) return;
+    const runAs = await this.getHandoffRunAs(params.executionId, params.fakeRequest);
+    if (await this.tryRunImmediateResume({ ...params, runAs })) return;
+    await this.handOffToWakeTask({ ...params, runAs });
+  }
+
+  /** Wakes the retained wake task, which keeps retrying while the immediate runner is claimed. */
+  async handOffToWakeTask(params: {
+    executionId: string;
+    spaceId: string;
+    fakeRequest?: KibanaRequest;
+    isUserInteractive?: boolean;
+    runAs?: WorkflowTaskRunAs;
+  }): Promise<void> {
     await this.ensureWakeTask(params);
     try {
-      await this.runSoonWithConflictRetry(getWorkflowWakeTaskId(params.executionId));
+      await this.runSoonWithConflictRetry(
+        getWorkflowWakeTaskId(params.executionId),
+        params.isUserInteractive ? { priority: TaskPriority.UserInteractive } : undefined
+      );
     } catch (error) {
       // A claimed wake task is retained and polls again; it cannot delete this request on success.
       if (!(error instanceof TaskAlreadyRunningError)) throw error;
     }
+  }
+
+  /**
+   * Whether a resume is already on its way: the immediate runner is claimed or about to be, or
+   * the wake task that pokes a busy runner is claimed or due within its poll interval. Throws
+   * when a task cannot be read, since a caller must not undo a resume it cannot rule out.
+   */
+  async isResumeInProgress(executionId: string): Promise<boolean> {
+    const wakeTaskId = getWorkflowWakeTaskId(executionId);
+    const results = await this.taskManager.bulkGet([
+      getWorkflowImmediateResumeTaskId(executionId),
+      wakeTaskId,
+    ]);
+    const now = Date.now();
+    const isOnItsWay = ({ id, status, runAt }: ConcreteTaskInstance): boolean => {
+      if (status === TaskStatus.Claiming || status === TaskStatus.Running) return true;
+      // An idle wake task pokes the runner when it fires, so it counts if it fires within a poll.
+      const dueWithinMs =
+        id === wakeTaskId
+          ? WORKFLOW_WAKE_POLL_INTERVAL_MS + RESUME_TASK_DUE_GRACE_MS
+          : RESUME_TASK_DUE_GRACE_MS;
+      return status === TaskStatus.Idle && runAt.getTime() <= now + dueWithinMs;
+    };
+
+    let unreadableTaskId: string | undefined;
+    for (const result of results) {
+      if (result.tag === 'ok') {
+        if (isOnItsWay(result.value)) return true;
+      } else if (result.error.error.statusCode !== 404) {
+        // A missing task cannot be resuming anything, but an unreadable one might be.
+        unreadableTaskId = result.error.id;
+      }
+    }
+
+    if (unreadableTaskId !== undefined) {
+      throw new Error(`Failed to read task ${unreadableTaskId} while checking for a resume`);
+    }
+    return false;
   }
 
   /** Ensures a retained wake task with cloned execution credentials exists before handoff. */
@@ -316,6 +514,7 @@ export class WorkflowTaskManager {
     spaceId: string;
     fakeRequest?: KibanaRequest;
     runAt?: Date;
+    runAs?: WorkflowTaskRunAs;
   }): Promise<void> {
     await this.taskManager.ensureScheduled(
       {
@@ -326,10 +525,9 @@ export class WorkflowTaskManager {
         state: {},
         runAt: params.runAt ?? new Date(Date.now() + 1000),
         scope: [`workflow:execution:${params.executionId}`],
+        ...runAsFields(params.fakeRequest, params.runAs),
       },
-      params.fakeRequest
-        ? { request: getWorkflowOriginalRequest(params.fakeRequest), cloneApiKey: true }
-        : undefined
+      params.runAs ? undefined : cloneApiKeyOptions(params.fakeRequest)
     );
   }
 
@@ -372,10 +570,12 @@ export class WorkflowTaskManager {
     }
   }
 
-  private async runSoonWithConflictRetry(taskId: string): Promise<void> {
+  private async runSoonWithConflictRetry(taskId: string, options?: RunSoonOptions): Promise<void> {
     // Re-read after a conflicting update; never report a wake-up that was not accepted.
     for (let attempt = 0; attempt < 3; attempt++) {
-      const result = await this.taskManager.runSoon(taskId);
+      const result = options
+        ? await this.taskManager.runSoon(taskId, options)
+        : await this.taskManager.runSoon(taskId);
       if (!result.conflict) return;
     }
     throw SavedObjectsErrorHelpers.createConflictError(

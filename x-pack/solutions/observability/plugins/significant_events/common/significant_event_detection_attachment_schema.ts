@@ -13,6 +13,6 @@ export const lifecycleDetectionAttachmentSchema = z.object({
   detection_id: z.string(),
   rule_name: z.string(),
   rule_uuid: z.string().optional(),
-  stream_name: z.string(),
+  source_id: z.string().optional(),
   change_point_type: z.enum(CHANGE_POINT_TYPES),
 });

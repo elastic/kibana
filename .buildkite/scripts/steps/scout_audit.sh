@@ -36,7 +36,7 @@ summary="$(jq -r '
 [[ -z "$summary" ]] && summary="no findings"
 
 channel="${SLACK_NOTIFICATIONS_CHANNEL:-}"
-if [[ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" != "true" || -z "$channel" ]]; then
+if [[ ( "${ELASTIC_SLACK_NOTIFICATIONS_ENABLED:-}" != "true" && "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" != "true" ) || -z "$channel" ]]; then
   echo "Slack notifications disabled or no channel set, not posting."
   echo "Summary: $summary"
   exit 0
@@ -60,6 +60,7 @@ notify_file="$(mktemp -t scout-audit-notify.XXXXXX.yml)"
   echo '      provider: gcp'
   echo '      machineType: n2-standard-2'
   echo '      preemptible: true'
+  echo '      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c'
   echo '    notify:'
   echo '      - slack:'
   echo '          channels:'

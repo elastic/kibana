@@ -123,15 +123,21 @@ describe('getAuthStatus()', () => {
     });
   });
 
+  let tokenClient: ReturnType<typeof connectorTokenClientMock.create>;
+
   function buildActionsClientWithProfile({
     inMemoryConnectors = [],
     profileUid,
     getCurrentUserProfileId: getCurrentUserProfileIdOverride,
+    usableConnectorIds = [],
   }: {
     inMemoryConnectors?: InMemoryConnector[];
     profileUid?: string;
     getCurrentUserProfileId?: (req: KibanaRequest) => Promise<string | undefined>;
+    usableConnectorIds?: string[];
   } = {}) {
+    tokenClient = connectorTokenClientMock.create();
+    tokenClient.getUsableOAuthConnectorIds.mockResolvedValue(new Set(usableConnectorIds));
     return new ActionsClient({
       logger,
       actionTypeRegistry,
@@ -144,7 +150,7 @@ describe('getAuthStatus()', () => {
       request,
       authorization: authorization as unknown as ActionsAuthorization,
       inMemoryConnectors,
-      connectorTokenClient: connectorTokenClientMock.create(),
+      connectorTokenClient: tokenClient,
       getEventLogClient,
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
@@ -155,40 +161,33 @@ describe('getAuthStatus()', () => {
   }
 
   test('returns not_applicable for shared-auth persisted connectors', async () => {
-    unsecuredSavedObjectsClient.find
-      .mockResolvedValueOnce({
-        total: 0,
-        per_page: 10000,
-        page: 1,
-        saved_objects: [],
-      })
-      .mockResolvedValueOnce({
-        total: 1,
-        per_page: 10000,
-        page: 1,
-        saved_objects: [
-          {
-            id: 'connector-shared',
-            type: 'action',
-            attributes: {
-              name: 'Shared connector',
-              actionTypeId: '.test-connector-type',
-              isMissingSecrets: false,
-              config: {},
-              authMode: 'shared',
-            },
-            score: 1,
-            references: [],
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 10000,
+      page: 1,
+      saved_objects: [
+        {
+          id: 'connector-shared',
+          type: 'action',
+          attributes: {
+            name: 'Shared connector',
+            actionTypeId: '.test-connector-type',
+            isMissingSecrets: false,
+            config: {},
+            authMode: 'shared',
           },
-        ],
-      });
+          score: 1,
+          references: [],
+        },
+      ],
+    });
 
     actionsClient = buildActionsClientWithProfile({ profileUid: 'test-profile-uid' });
     const result = await actionsClient.getAuthStatus();
 
     expect(result['connector-shared']).toEqual({ userAuthStatus: 'not_applicable' });
     expect(unsecuredSavedObjectsClient.find).toHaveBeenNthCalledWith(
-      2,
+      1,
       expect.objectContaining({
         type: 'action',
         perPage: 10000,
@@ -197,84 +196,62 @@ describe('getAuthStatus()', () => {
     );
   });
 
-  test('returns connected for per-user connector with matching token', async () => {
-    unsecuredSavedObjectsClient.find
-      .mockResolvedValueOnce({
-        total: 1,
-        per_page: 10000,
-        page: 1,
-        saved_objects: [
-          {
-            id: 'token-1',
-            type: 'user_connector_token',
-            attributes: {
-              profileUid: 'test-profile-uid',
-              connectorId: 'connector-per-user',
-              credentialType: 'oauth',
-              credentials: {},
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-            score: 1,
-            references: [],
+  test('returns connected for per-user connector with a usable token', async () => {
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 10000,
+      page: 1,
+      saved_objects: [
+        {
+          id: 'connector-per-user',
+          type: 'action',
+          attributes: {
+            name: 'Per-user connector',
+            actionTypeId: '.test-connector-type',
+            isMissingSecrets: false,
+            config: {},
+            authMode: 'per-user',
           },
-        ],
-      })
-      .mockResolvedValueOnce({
-        total: 1,
-        per_page: 10000,
-        page: 1,
-        saved_objects: [
-          {
-            id: 'connector-per-user',
-            type: 'action',
-            attributes: {
-              name: 'Per-user connector',
-              actionTypeId: '.test-connector-type',
-              isMissingSecrets: false,
-              config: {},
-              authMode: 'per-user',
-            },
-            score: 1,
-            references: [],
-          },
-        ],
-      });
+          score: 1,
+          references: [],
+        },
+      ],
+    });
 
-    actionsClient = buildActionsClientWithProfile({ profileUid: 'test-profile-uid' });
+    actionsClient = buildActionsClientWithProfile({
+      profileUid: 'test-profile-uid',
+      usableConnectorIds: ['connector-per-user'],
+    });
     const result = await actionsClient.getAuthStatus();
 
     expect(result['connector-per-user']).toEqual({ userAuthStatus: 'connected' });
+    expect(tokenClient.getUsableOAuthConnectorIds).toHaveBeenCalledWith({
+      profileUid: 'test-profile-uid',
+      connectorIds: ['connector-per-user'],
+    });
   });
 
-  test('returns not_connected for per-user connector without token', async () => {
-    unsecuredSavedObjectsClient.find
-      .mockResolvedValueOnce({
-        total: 0,
-        per_page: 10000,
-        page: 1,
-        saved_objects: [],
-      })
-      .mockResolvedValueOnce({
-        total: 1,
-        per_page: 10000,
-        page: 1,
-        saved_objects: [
-          {
-            id: 'connector-per-user',
-            type: 'action',
-            attributes: {
-              name: 'Per-user connector',
-              actionTypeId: '.test-connector-type',
-              isMissingSecrets: false,
-              config: {},
-              authMode: 'per-user',
-            },
-            score: 1,
-            references: [],
+  test('returns not_connected for per-user connector without a usable token (missing or expired)', async () => {
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 10000,
+      page: 1,
+      saved_objects: [
+        {
+          id: 'connector-per-user',
+          type: 'action',
+          attributes: {
+            name: 'Per-user connector',
+            actionTypeId: '.test-connector-type',
+            isMissingSecrets: false,
+            config: {},
+            authMode: 'per-user',
           },
-        ],
-      });
+          score: 1,
+          references: [],
+        },
+      ],
+    });
 
     actionsClient = buildActionsClientWithProfile({ profileUid: 'test-profile-uid' });
     const result = await actionsClient.getAuthStatus();
@@ -283,19 +260,12 @@ describe('getAuthStatus()', () => {
   });
 
   test('applies filterInferenceConnectors to in-memory connectors and omits filtered-out ids', async () => {
-    unsecuredSavedObjectsClient.find
-      .mockResolvedValueOnce({
-        total: 0,
-        per_page: 10000,
-        page: 1,
-        saved_objects: [],
-      })
-      .mockResolvedValueOnce({
-        total: 0,
-        per_page: 10000,
-        page: 1,
-        saved_objects: [],
-      });
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 0,
+      per_page: 10000,
+      page: 1,
+      saved_objects: [],
+    });
 
     const kept = createMockInMemoryConnector({
       id: 'in-memory-kept',
@@ -338,19 +308,12 @@ describe('getAuthStatus()', () => {
   });
 
   test('returns not_applicable for in-memory preconfigured connectors', async () => {
-    unsecuredSavedObjectsClient.find
-      .mockResolvedValueOnce({
-        total: 0,
-        per_page: 10000,
-        page: 1,
-        saved_objects: [],
-      })
-      .mockResolvedValueOnce({
-        total: 0,
-        per_page: 10000,
-        page: 1,
-        saved_objects: [],
-      });
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 0,
+      per_page: 10000,
+      page: 1,
+      saved_objects: [],
+    });
 
     actionsClient = buildActionsClientWithProfile({
       profileUid: 'test-profile-uid',
@@ -409,57 +372,77 @@ describe('getAuthStatus()', () => {
     const result = await actionsClient.getAuthStatus();
 
     expect(result['connector-per-user']).toEqual({ userAuthStatus: 'not_connected' });
+    expect(tokenClient.getUsableOAuthConnectorIds).not.toHaveBeenCalled();
   });
 
   test('returns connected for per-user connector when profile UID is resolved from Basic auth', async () => {
-    unsecuredSavedObjectsClient.find
-      .mockResolvedValueOnce({
-        total: 1,
-        per_page: 10000,
-        page: 1,
-        saved_objects: [
-          {
-            id: 'token-1',
-            type: 'user_connector_token',
-            attributes: {
-              profileUid: 'test-profile-uid',
-              connectorId: 'connector-per-user',
-              credentialType: 'oauth',
-              credentials: {},
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            },
-            score: 1,
-            references: [],
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 10000,
+      page: 1,
+      saved_objects: [
+        {
+          id: 'connector-per-user',
+          type: 'action',
+          attributes: {
+            name: 'Per-user connector',
+            actionTypeId: '.test-connector-type',
+            isMissingSecrets: false,
+            config: {},
+            authMode: 'per-user',
           },
-        ],
-      })
-      .mockResolvedValueOnce({
-        total: 1,
-        per_page: 10000,
-        page: 1,
-        saved_objects: [
-          {
-            id: 'connector-per-user',
-            type: 'action',
-            attributes: {
-              name: 'Per-user connector',
-              actionTypeId: '.test-connector-type',
-              isMissingSecrets: false,
-              config: {},
-              authMode: 'per-user',
-            },
-            score: 1,
-            references: [],
-          },
-        ],
-      });
+          score: 1,
+          references: [],
+        },
+      ],
+    });
 
     actionsClient = buildActionsClientWithProfile({
       getCurrentUserProfileId: async () => 'test-profile-uid',
+      usableConnectorIds: ['connector-per-user'],
     });
     const result = await actionsClient.getAuthStatus();
 
     expect(result['connector-per-user']).toEqual({ userAuthStatus: 'connected' });
+  });
+
+  test('only looks up tokens for per-user connectors', async () => {
+    const connectorSo = (id: string, authMode: 'shared' | 'per-user') => ({
+      id,
+      type: 'action',
+      attributes: {
+        name: id,
+        actionTypeId: '.test-connector-type',
+        isMissingSecrets: false,
+        config: {},
+        authMode,
+      },
+      score: 1,
+      references: [],
+    });
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 3,
+      per_page: 10000,
+      page: 1,
+      saved_objects: [
+        connectorSo('shared', 'shared'),
+        connectorSo('per-user-usable', 'per-user'),
+        connectorSo('per-user-expired', 'per-user'),
+      ],
+    });
+
+    actionsClient = buildActionsClientWithProfile({
+      profileUid: 'test-profile-uid',
+      usableConnectorIds: ['per-user-usable'],
+    });
+    const result = await actionsClient.getAuthStatus();
+
+    expect(tokenClient.getUsableOAuthConnectorIds).toHaveBeenCalledWith({
+      profileUid: 'test-profile-uid',
+      connectorIds: ['per-user-usable', 'per-user-expired'],
+    });
+    expect(result.shared).toEqual({ userAuthStatus: 'not_applicable' });
+    expect(result['per-user-usable']).toEqual({ userAuthStatus: 'connected' });
+    expect(result['per-user-expired']).toEqual({ userAuthStatus: 'not_connected' });
   });
 });

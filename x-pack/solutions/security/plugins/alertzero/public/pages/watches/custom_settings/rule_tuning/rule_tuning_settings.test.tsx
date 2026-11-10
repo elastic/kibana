@@ -26,6 +26,7 @@ const ruleTuning: Worker = {
   state: 'ok',
   settingsRevision: 1,
   workflowId: `${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}-default`,
+  blockingReasons: [],
   settings: {
     workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
     autonomy: 'manual',
@@ -87,18 +88,19 @@ describe('RuleTuningSettings', () => {
   });
 
   it.each(FIELDS)(
-    'hands back the complete extras object when a valid $name is committed on blur',
+    'hands back the complete extras object as soon as a valid $name is typed',
     ({ testSubj, valid, key }) => {
       const onExtrasChange = jest.fn();
       renderSettings(onExtrasChange);
       const field = screen.getByTestId(testSubj);
 
       fireEvent.change(field, { target: { value: String(valid) } });
-      expect(onExtrasChange).not.toHaveBeenCalled();
+      expect(onExtrasChange).toHaveBeenLastCalledWith({ ...SAVED_EXTRAS, [key]: valid });
+
+      // Blurring afterwards still leaves the complete object as the last thing handed back.
       fireEvent.blur(field);
 
-      expect(onExtrasChange).toHaveBeenCalledTimes(1);
-      expect(onExtrasChange).toHaveBeenCalledWith({ ...SAVED_EXTRAS, [key]: valid });
+      expect(onExtrasChange).toHaveBeenLastCalledWith({ ...SAVED_EXTRAS, [key]: valid });
     }
   );
 
@@ -164,7 +166,7 @@ describe('RuleTuningSettings', () => {
       const labelEl = within(row).getByText(label);
       const helpEl = within(row).getByText(help);
       expect(group).toHaveAttribute('aria-labelledby', labelEl.id);
-      expect(group).toHaveAttribute('aria-describedby', helpEl.id);
+      expect(group.getAttribute('aria-describedby')?.split(' ')).toContain(helpEl.id);
       return group;
     };
 
@@ -175,18 +177,19 @@ describe('RuleTuningSettings', () => {
     );
     expect(windowGroup).toContainElement(screen.getByTestId('alertZeroAnalysisWindowDays'));
 
-    expectRowWiring(
+    const thresholdsGroup = expectRowWiring(
       'alertZeroQualifyingThresholdsRow',
       'Qualifying thresholds',
-      /both are met within the analysis window/
+      /meets both thresholds in this window\. Count between 2 and 100, rate between 0 and 100%\./
     );
 
-    // Both threshold inputs point at the shared help line that names their ranges.
-    const help = screen.getByTestId('alertZeroQualifyingThresholdsHelp');
-    expect(help).toHaveTextContent('Count between 2 and 100, rate between 0 and 100%.');
-    for (const testSubj of ['alertZeroFpCountThreshold', 'alertZeroFpRateThresholdPct']) {
-      expect(screen.getByTestId(testSubj)).toHaveAttribute('aria-describedby', help.id);
-    }
+    // The threshold definitions sit behind an info icon; screen readers get them as part of the row
+    // description.
+    expect(screen.getByTestId('alertZeroQualifyingThresholdsRowTooltip')).toBeInTheDocument();
+    const tooltipText = within(screen.getByTestId('alertZeroQualifyingThresholdsRow')).getByText(
+      /Rate is the share of the rule's alerts closed as false positives\./
+    );
+    expect(thresholdsGroup.getAttribute('aria-describedby')?.split(' ')).toContain(tooltipText.id);
   });
 
   it('falls back to the defaults when extras are missing', () => {

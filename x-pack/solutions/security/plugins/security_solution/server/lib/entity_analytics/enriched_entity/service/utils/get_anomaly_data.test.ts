@@ -26,6 +26,8 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
       getEuidFilterBasedOnDocument: jest.fn(),
     },
   },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 
 const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
@@ -66,6 +68,7 @@ const makeAnomalySummaryEntry = (
   partitionFieldValue: null,
   recordScore: 75,
   recordId: 'record-1',
+  entityId: 'user:alice',
   timestamp: '2023-11-14T22:13:20.000Z',
   actual: [],
   typical: [],
@@ -180,7 +183,7 @@ describe('getAnomalyData', () => {
 
       expect(jest.mocked(getEntityAnomalies)).toHaveBeenCalledWith(
         expect.objectContaining({
-          entityId: 'user:alice',
+          entityIds: ['user:alice'],
           entityType: 'user',
           fromMs: 0,
           toMs: 1_700_000_000_000,

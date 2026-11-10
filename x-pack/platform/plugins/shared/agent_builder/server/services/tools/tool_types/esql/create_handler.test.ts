@@ -142,6 +142,20 @@ describe('createHandler', () => {
       );
     });
 
+    it('should not filter out frozen tier indices when the tool opts in', async () => {
+      const config: EsqlToolConfig = {
+        query: 'FROM users | LIMIT 10',
+        params: {},
+        include_frozen: true,
+      };
+
+      await createHandler(config)({}, mockContext as any);
+
+      expect(mockEsClient.asCurrentUser.esql.query).toHaveBeenCalledWith({
+        query: 'FROM users | LIMIT 10',
+      });
+    });
+
     it('should throw an error when required parameters are missing', async () => {
       const config: EsqlToolConfig = {
         query: 'FROM users | WHERE status == ?status',

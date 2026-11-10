@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Cache the results of a single-argument function, including `undefined` results (e.g. a
+ * missing file), so that every argument is computed only once.
+ */
 export function memoize<T, T2>(fn: (arg: T) => T2): (arg: T) => T2 {
-  const cache = new Map<T, T2>();
+  const cache = new Map<T, { value: T2 }>();
 
   return (arg) => {
-    const cached = cache.get(arg);
-    if (cached !== undefined) {
-      return cached;
+    let entry = cache.get(arg);
+    if (!entry) {
+      entry = { value: fn(arg) };
+      cache.set(arg, entry);
     }
 
-    const result = fn(arg);
-    cache.set(arg, result);
-    return result;
+    return entry.value;
   };
 }

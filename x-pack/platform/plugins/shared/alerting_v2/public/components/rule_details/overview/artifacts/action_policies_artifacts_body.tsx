@@ -126,12 +126,12 @@ export const ActionPoliciesSubsectionHeader = ({
 
 const PolicyArtifactRow = ({
   item,
-  ruleTags,
+  routingTags,
   connectorTypes,
   onOpen,
 }: {
   item: MatchedActionPolicy;
-  ruleTags: string[];
+  routingTags: string[];
   connectorTypes: string[];
   onOpen: (policyId: string) => void;
 }) => {
@@ -224,7 +224,7 @@ const PolicyArtifactRow = ({
               <MatchedPolicyReason
                 category={category}
                 matcher={actionPolicy.matcher}
-                ruleTags={ruleTags}
+                routingTags={routingTags}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -270,7 +270,7 @@ export const ActionPoliciesArtifactsBody = ({
   isError,
   isExpanded,
   onExpand,
-  ruleTags,
+  routingTags,
   connectorTypesByPolicy,
   onOpen,
 }: {
@@ -281,7 +281,7 @@ export const ActionPoliciesArtifactsBody = ({
   isError: boolean;
   isExpanded: boolean;
   onExpand: () => void;
-  ruleTags: string[];
+  routingTags: string[];
   connectorTypesByPolicy: Map<string, string[]>;
   onOpen: (policyId: string) => void;
 }) => {
@@ -358,7 +358,7 @@ export const ActionPoliciesArtifactsBody = ({
           <EuiFlexItem grow={false} key={item.action_policy.id}>
             <PolicyArtifactRow
               item={item}
-              ruleTags={ruleTags}
+              routingTags={routingTags}
               connectorTypes={connectorTypesByPolicy.get(item.action_policy.id) ?? []}
               onOpen={onOpen}
             />

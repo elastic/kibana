@@ -41,9 +41,12 @@ export const EditDescription: React.FC<EditDescriptionProps> = ({ connector, isD
   const { isLoading, mutate } = useMutation({
     mutationFn: async (inputDescription: string) => {
       const body = { description: inputDescription };
-      await http.post(`/internal/serverless_search/connectors/${connector.id}/description`, {
-        body: JSON.stringify(body),
-      });
+      await http.post(
+        `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/description`,
+        {
+          body: JSON.stringify(body),
+        }
+      );
       return inputDescription;
     },
     onSuccess: (successData) => {

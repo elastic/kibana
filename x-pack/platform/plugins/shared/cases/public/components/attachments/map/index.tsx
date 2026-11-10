@@ -11,13 +11,16 @@ import {
   MapAttachmentPayloadSchema,
   type MapAttachmentData,
   type MapAttachmentMetadata,
-} from '../../../../common/types/domain_zod/attachment/map/v2';
+} from '../../../../common/types/domain/attachment/map/v2';
 import {
   defineAttachment,
   type UnifiedReferenceAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import * as i18n from './translations';
-import { SavedObjectAddedEvent } from '../common/saved_object/saved_object_added_event';
+import {
+  SavedObjectAddedEvent,
+  getSavedObjectDeletedEvent,
+} from '../common/saved_object/saved_object_added_event';
 import { createSavedObjectAttachmentsTab } from '../common/saved_object/saved_object_attachments_tab';
 
 type MapViewProps = UnifiedReferenceAttachmentViewProps<
@@ -62,8 +65,17 @@ export const getMapAttachmentType = () =>
     getIcon: () => 'gisApp',
     getLabel: () => i18n.MAPS,
     getCreationActivity: getMapCreationActivity,
-    getRemovalActivity: () => ({ event: i18n.REMOVED_MAP }),
+    getRemovalActivity: ({ attachmentId, metadata }: MapViewProps) => ({
+      event: getSavedObjectDeletedEvent({
+        soType: MAP_SO_TYPE,
+        attachmentId,
+        title: metadata?.title,
+        label: i18n.REMOVED_MAP,
+        'data-test-subj': 'cases-map-deleted-event-link',
+      }),
+    }),
     getAttachmentList: () => ({ children: MapAttachmentsTab }),
+    getCountLabel: ({ count }) => i18n.MAPS_COUNT(count),
     schema: MapAttachmentPayloadSchema,
     // Exclude pesistable data from the workflow schema
     workflowSchema: MapAttachmentPayloadSchema.omit({ data: true }),

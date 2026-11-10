@@ -49,6 +49,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
         navigateToUrl: jest.fn(),
       },
       cases: {
+        config: { attachmentsEnabled: false },
         helpers: {
           canUseCases: jest.fn().mockReturnValue({
             all: true,
@@ -113,6 +114,7 @@ jest.mock(
       navigateToUrl: jest.fn(),
     },
     cases: {
+      config: { attachmentsEnabled: false },
       helpers: {
         canUseCases: jest.fn().mockReturnValue({
           all: true,

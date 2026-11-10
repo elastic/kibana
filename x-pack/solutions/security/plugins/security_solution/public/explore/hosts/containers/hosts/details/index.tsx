@@ -22,6 +22,10 @@ import {
 } from '../../../../../common/utils/execution_context';
 import { useUiSetting } from '../../../../../common/lib/kibana';
 import type { EntityStoreRecord } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  combineEntityGroupFilters,
+  getEntityGroupRecords,
+} from '../../../../../flyout/entity_details/shared/entity_store_group_utils';
 
 const HOST_DETAILS_CONTEXT = buildExecutionContext(
   EA_EXECUTION_CONTEXT_NAMES.EXPLORE_HOSTS_PAGE,
@@ -50,6 +54,11 @@ interface UseHostDetails {
    */
   entityRecord?: EntityStoreRecord | null;
   /**
+   * Resolution-group aliases of `entityRecord`. When present, the identity filter matches documents
+   * belonging to any record of the group (target or alias) instead of the target only.
+   */
+  aliasRecords?: readonly EntityStoreRecord[];
+  /**
    * When entity store v2 is enabled, indicates the entity-store record is *actively* being fetched
    * (react-query `isInitialLoading`, not raw `isLoading`). While `true` and no record is available
    * yet, the observed query is skipped so the entity-store record stays the base and the complementary
@@ -68,6 +77,7 @@ export const useHostDetails = ({
   hostName,
   entityId,
   entityRecord,
+  aliasRecords,
   entityStoreInitialLoading = false,
   indexNames,
   id = ID,
@@ -98,9 +108,17 @@ export const useHostDetails = ({
     }
 
     // For entity store v2, resolve the entity via an indexed-field identity filter built from the
-    // entity-store record. This replaces the previous `entity_id` runtime field, which forced
-    // Elasticsearch to run the EUID Painless script on every document in the time range.
-    const recordFilter = euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord('host', entityRecord);
+    // entity-store record(s). This replaces the previous `entity_id` runtime field, which forced
+    // Elasticsearch to run the EUID Painless script on every document in the time range. In the
+    // resolution-group view the target's and aliases' filters are OR-ed together.
+    const recordFilter = combineEntityGroupFilters(
+      getEntityGroupRecords(entityRecord, aliasRecords),
+      (record) =>
+        euidApi?.euid?.dsl?.getEuidFilterBasedOnEntityRecord(
+          euidApi.getBuiltInEntityDefinition('host'),
+          record
+        )
+    );
     if (recordFilter) {
       return recordFilter;
     }
@@ -108,7 +126,7 @@ export const useHostDetails = ({
     if (hostName) {
       return { term: { 'host.name': hostName } };
     }
-  }, [entityStoreV2Enabled, shouldSkip, hostName, entityRecord, euidApi?.euid]);
+  }, [entityStoreV2Enabled, shouldSkip, hostName, entityRecord, aliasRecords, euidApi]);
 
   const {
     loading,

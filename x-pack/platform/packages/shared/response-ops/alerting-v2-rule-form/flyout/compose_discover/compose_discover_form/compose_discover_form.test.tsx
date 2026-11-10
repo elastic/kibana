@@ -282,21 +282,25 @@ describe('step validation', () => {
   describe('notifications step validation', () => {
     const notificationsStep = getSteps(true).steps.find((s) => s.id === 'notifications')!;
 
-    it('has no declared fields and no custom validate', () => {
-      expect(notificationsStep.fields).toBeUndefined();
+    it('validates the routing tags field and has no custom validate', () => {
+      expect(notificationsStep.fields).toEqual(['metadata.routingTags']);
       expect(notificationsStep.validate).toBeUndefined();
     });
 
-    it('returns true without calling trigger when no fields are declared', async () => {
+    it('triggers validation of the routing tags field', async () => {
       const state = createState();
       const methods = {
-        trigger: jest.fn().mockResolvedValue(true),
+        trigger: jest.fn().mockResolvedValue(false),
       } as unknown as UseFormReturn<FormValues>;
 
       const result = await validateStep(notificationsStep, methods, state);
 
-      expect(methods.trigger).not.toHaveBeenCalled();
-      expect(result).toBe(true);
+      expect(methods.trigger).toHaveBeenCalledWith(['metadata.routingTags']);
+      expect(result).toBe(false);
+    });
+
+    it('is not a step for signal rules', () => {
+      expect(getSteps(false).steps.map(({ id }) => id)).not.toContain('notifications');
     });
   });
 

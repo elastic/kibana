@@ -10,10 +10,8 @@ import { Request } from '@kbn/core-di-server';
 import {
   errorResponseSchema,
   getRuleChangeHistoryEventParamsSchema,
-  getRuleChangeHistoryEventQuerySchema,
   ruleChangeHistoryDetailSchema,
   type GetRuleChangeHistoryEventParams,
-  type GetRuleChangeHistoryEventQuery,
 } from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import {
@@ -46,7 +44,6 @@ export class GetRuleChangeHistoryEventRoute extends BaseAlertingRoute {
   static schemas = {
     request: {
       params: getRuleChangeHistoryEventParamsSchema,
-      query: getRuleChangeHistoryEventQuerySchema,
     },
     response: {
       200: {
@@ -69,11 +66,7 @@ export class GetRuleChangeHistoryEventRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<
-      GetRuleChangeHistoryEventParams,
-      GetRuleChangeHistoryEventQuery,
-      unknown
-    >,
+    private readonly request: KibanaRequest<GetRuleChangeHistoryEventParams, unknown, unknown>,
     @inject(RuleChangesHistoryClientToken)
     private readonly ruleChangesHistoryClient: RuleChangesHistoryClientContract
   ) {
@@ -82,7 +75,6 @@ export class GetRuleChangeHistoryEventRoute extends BaseAlertingRoute {
 
   protected async execute() {
     const result = await this.ruleChangesHistoryClient.getRuleChange({
-      ruleId: this.request.query.rule_id,
       eventId: this.request.params.change_id,
     });
     return this.ctx.response.ok({ body: result });

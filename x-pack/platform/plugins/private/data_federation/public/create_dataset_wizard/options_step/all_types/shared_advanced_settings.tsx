@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
   DEFAULT_FILE_EXCLUSIONS,
+  DEFAULT_PARTITION_DETECTION,
   validatePartitionPath,
   type CreateDatasetFormValues,
 } from '../../create_dataset_form_state';
@@ -74,7 +75,7 @@ export function SharedAdvancedSettings({ control }: { control: Control<CreateDat
           <FormattedMessage
             id="xpack.dataFederation.createDatasetForm.settingsPartitionDetectionHelp"
             defaultMessage="{defaultValue} by default"
-            values={{ defaultValue: <EuiCode>auto</EuiCode> }}
+            values={{ defaultValue: <EuiCode>{DEFAULT_PARTITION_DETECTION}</EuiCode> }}
           />
         }
         fullWidth

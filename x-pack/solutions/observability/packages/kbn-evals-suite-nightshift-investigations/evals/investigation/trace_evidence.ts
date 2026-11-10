@@ -7,12 +7,7 @@
 
 import assert from 'assert';
 import { isDeepStrictEqual } from 'util';
-import {
-  isToolCallStep,
-  platformSignificantEventsTools,
-  ToolResultType,
-} from '@kbn/agent-builder-common';
-import { investigationStateSchema } from '@kbn/significant-events-schema';
+import { isToolCallStep, ToolResultType } from '@kbn/agent-builder-common';
 import { isErrorResult } from '@kbn/agent-builder-common/tools';
 import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ConversationRound, ToolResult } from '@kbn/agent-builder-common';
@@ -193,14 +188,9 @@ export const assertAgentTrace = (
       `Agent trace must retain the model tool call ${callId}`
     );
     assert(span, `Agent trace must include tool call ${callId}`);
-    // The progress schema orders recommendations before tool execution.
-    const executedParams =
-      toolId === platformSignificantEventsTools.reportInvestigationProgress
-        ? investigationStateSchema.parse(params)
-        : params;
     assert.deepStrictEqual(
       parseJsonAttr(span['gen_ai.tool.call.arguments']),
-      executedParams,
+      params,
       `Agent trace must retain arguments for ${callId}`
     );
     const result = parseJsonAttr<ToolResult[] | { results?: ToolResult[]; error?: string }>(

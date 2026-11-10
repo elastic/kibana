@@ -7,6 +7,7 @@
 
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
+import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import { contextEngineSignalsSkill } from './context_engine_signals_skill';
 
 describe('contextEngineSignalsSkill', () => {
@@ -20,8 +21,9 @@ describe('contextEngineSignalsSkill', () => {
     expect(isAllowedBuiltinSkill(contextEngineSignalsSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features', () => {
-    expect(contextEngineSignalsSkill.experimental).toBe(true);
+  it('is hidden in spaces where the Context Engine is off', () => {
+    expect(contextEngineSignalsSkill.experimental).toBeFalsy();
+    expect(contextEngineSignalsSkill.availability).toBe(contextEngineSkillAvailability);
   });
 
   it('ships non-empty markdown content', () => {

@@ -431,6 +431,25 @@ describe('prompts utilities', () => {
         expect(result.responses['auth-prompt']).toBeUndefined();
       });
 
+      it('scopes authorization responses out of a paused conversation the run cannot resume', () => {
+        const conversation = conversationWith({
+          lastRoundStatus: ConversationRoundStatus.awaitingPrompt,
+          responses: {
+            'auth-prompt': authorizedResponse,
+            'conf-prompt': confirmationResponse,
+          },
+        });
+
+        const result = getAgentPromptStorageState({
+          input: { message: 'Summarize' },
+          conversation,
+          allowResume: false,
+        });
+
+        expect(result.responses['auth-prompt']).toBeUndefined();
+        expect(result.responses['conf-prompt']).toEqual(confirmationResponse);
+      });
+
       it('keeps carried-over authorization responses when resuming an interrupted round', () => {
         const conversation = conversationWith({
           lastRoundStatus: ConversationRoundStatus.awaitingPrompt,

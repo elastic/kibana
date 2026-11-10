@@ -83,10 +83,13 @@ export const toMonitorPlacements = (
     if (!configId || byId.has(configId)) {
       continue;
     }
+    const type = monitorTypeOfPolicy(pkgPolicy);
     byId.set(configId, {
       id: configId,
-      cost: getMonitorCostMib(monitorTypeOfPolicy(pkgPolicy)),
+      type,
+      cost: getMonitorCostMib(type),
       currentAgentId: agentIdFromCondition(pkgPolicy.condition),
+      browser: type === 'browser',
     });
   }
   return [...byId.values()];

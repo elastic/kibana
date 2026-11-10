@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { getErrorMessage } from '../../../../../../common';
 import { RESOLUTION_RULE_KINDS } from '../../../../../../common/domain/resolution_rules/constants';
 import type { RegisterEntityMaintainerConfig } from '../../../../../tasks/entity_maintainers/types';
 import { resolveLatestEntitiesIndexName } from '../../../../asset_manager/resolve_entity_store_indices';
 import { ResolutionClient } from '../../..';
 import {
   AUTOMATED_RESOLUTION_STATE_VERSION,
+  EMPTY_RULE_STATE,
   type AutomatedResolutionState,
   type PerRuleState,
 } from './types';
@@ -18,10 +20,18 @@ import { migrate } from './migrate';
 import { RESOLUTION_RULE_CONFIGS } from '../..';
 import { runEsqlMatcherRule } from '../../matcher';
 import { runRelatedUserAliasResolution } from '../related_user_alias_resolution';
+import { CUSTOM_RULES_DEADLINE_MARGIN_MS, runCustomResolutionRules } from './custom_rules';
+import {
+  clearRuleFailure,
+  getBackoffUntil,
+  getConsecutiveFailures,
+  withRuleFailure,
+} from './rule_backoff';
 
 export const MAINTAINER_ID = 'automated-resolution';
 
-const EMPTY_RULE_STATE: PerRuleState = { lastProcessedTimestamp: null, lastRun: null };
+const MAINTAINER_TIMEOUT_MINUTES = 5;
+const MAINTAINER_TIMEOUT_MS = MAINTAINER_TIMEOUT_MINUTES * 60 * 1000;
 
 const createInitialState = (): AutomatedResolutionState => ({
   version: AUTOMATED_RESOLUTION_STATE_VERSION,
@@ -30,22 +40,29 @@ const createInitialState = (): AutomatedResolutionState => ({
 
 export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig = {
   id: MAINTAINER_ID,
-  description: 'Automatically resolves entities using field-matching rules',
+  description: 'Automatically resolves entities using built-in and custom resolution rules',
   interval: '5m',
+  timeout: `${MAINTAINER_TIMEOUT_MINUTES}m`,
   initialState: createInitialState(),
   minLicense: 'enterprise',
   run: async ({ status, signal, logger, esClient, resolutionRulesClient, telemetry }) => {
+    const runStartedAt = Date.now();
     const namespace = status.metadata.namespace;
     const state = migrate(status.state, logger);
 
-    const resolutionClient = new ResolutionClient({ logger, esClient, namespace });
-    const rules: Record<string, PerRuleState> = { ...state.rules };
+    const index = await resolveLatestEntitiesIndexName(esClient, namespace);
+    const resolutionClient = new ResolutionClient({
+      logger,
+      esClient,
+      namespace,
+      latestIndex: index,
+    });
+    const ruleStates: Record<string, PerRuleState> = { ...state.rules };
     const effectiveRules = new Map(
       (await resolutionRulesClient.getEffectiveRules()).map((rule) => [rule.id, rule])
     );
     const mutatedIds = new Set<string>();
     let backfillStarted = false;
-    const index = await resolveLatestEntitiesIndexName(esClient, namespace);
 
     for (const ruleConfig of RESOLUTION_RULE_CONFIGS) {
       if (signal.aborted) {
@@ -60,6 +77,16 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
       }
 
       const ruleState = state.rules[ruleConfig.id] ?? EMPTY_RULE_STATE;
+      const backoffUntil = getBackoffUntil(ruleState, Date.now());
+      if (backoffUntil) {
+        logger.debug(
+          `Skipping resolution rule '${ruleConfig.id}' after ${getConsecutiveFailures(
+            ruleState
+          )} failure(s) in a row; next attempt at ${backoffUntil}`
+        );
+        continue;
+      }
+
       const isMatcherBackfill =
         Boolean(ruleConfig.matcher) && ruleState.lastProcessedTimestamp == null;
       if (isMatcherBackfill) {
@@ -74,9 +101,8 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
 
       try {
         if (ruleConfig.matcher) {
-          rules[ruleConfig.id] = await runEsqlMatcherRule({
+          ruleStates[ruleConfig.id] = await runEsqlMatcherRule({
             state: ruleState,
-            namespace,
             esClient,
             logger,
             resolutionClient,
@@ -85,17 +111,20 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
             spec: ruleConfig.matcher,
             ruleId: ruleConfig.id,
             mutatedIds,
+            index,
           });
         } else if (ruleConfig.kind === RESOLUTION_RULE_KINDS.RELATED_USER_ALIAS_RESOLUTION) {
-          rules[ruleConfig.id] = await runRelatedUserAliasResolution({
+          const aliasState = await runRelatedUserAliasResolution({
             state: ruleState,
-            namespace,
             esClient,
             logger,
             resolutionClient,
             signal,
             telemetry,
+            index,
           });
+          // An aborted run returns the state it was given, which says nothing about success.
+          ruleStates[ruleConfig.id] = signal.aborted ? aliasState : clearRuleFailure(aliasState);
         } else {
           logger.warn(
             `Skipping resolution rule '${ruleConfig.id}': no matcher spec and unrecognized kind '${ruleConfig.kind}'`
@@ -105,10 +134,34 @@ export const automatedResolutionMaintainerConfig: RegisterEntityMaintainerConfig
 
         await esClient.indices.refresh({ index });
       } catch (error) {
-        logger.warn(`Resolution rule '${ruleConfig.id}' failed: ${error}`);
+        const failedState = withRuleFailure(ruleState, getErrorMessage(error), Date.now());
+        ruleStates[ruleConfig.id] = failedState;
+        logger.warn(
+          `Resolution rule '${ruleConfig.id}' failed: ${error}. Next attempt at ${failedState.nextAttemptAt}`
+        );
       }
     }
 
-    return { ...state, rules };
+    if (!signal.aborted) {
+      // A throw here would reject the run and lose the OOTB watermarks advanced above.
+      try {
+        await runCustomResolutionRules({
+          ruleStates,
+          resolutionRulesClient,
+          index,
+          esClient,
+          logger,
+          resolutionClient,
+          signal,
+          telemetry,
+          mutatedIds,
+          deadline: runStartedAt + MAINTAINER_TIMEOUT_MS - CUSTOM_RULES_DEADLINE_MARGIN_MS,
+        });
+      } catch (error) {
+        logger.warn(`Custom resolution rules failed this run: ${getErrorMessage(error)}`);
+      }
+    }
+
+    return { ...state, rules: ruleStates };
   },
 };

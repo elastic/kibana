@@ -11,7 +11,7 @@ applies_to:
 
 The SolarWinds Platform connector uses the [SolarWinds Information Service (SWIS) REST API](https://solarwinds.github.io/OrionSDK/docs/rest/) to read alerts and device data from a self-hosted SolarWinds Platform server (formerly Orion Platform), and to acknowledge alerts. Use it to triage SolarWinds network alerts in a workflow: find the active alerts, look up the affected device and the devices around it, and acknowledge the alert when the triage is done.
 
-This connector is currently available in **Workflows** only.
+You can use this connector in **Agent Builder** and **Workflows**.
 
 ## Create connectors in {{kib}} [define-solarwinds-platform-ui]
 

@@ -17,4 +17,4 @@ export type {
 } from './src/internal_contracts';
 export { WorkloadTypeRegistry } from './src/workload_type_registry';
 export { createCoreUiamService } from './src/uiam';
-export type { CoreUiamService, UiamClientAuthenticationParams } from './src/uiam';
+export type { CoreUiamService } from './src/uiam';

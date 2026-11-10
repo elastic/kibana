@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ModelCard } from './model_card';
 import type { GroupedModel } from '../../utils/eis_utils';
 import { EisModelStatus } from '../../types';
@@ -134,10 +135,12 @@ describe('ModelCard', () => {
         },
       };
       const { getByTestId, queryByTestId } = render(
-        <ModelCard model={model} onClick={jest.fn()} />
+        <I18nProvider>
+          <ModelCard model={model} onClick={jest.fn()} />
+        </I18nProvider>
       );
       const row = getByTestId('eisModelCardMeta-my-model');
-      expect(row).toHaveTextContent('Nearing end-of-life: 2026-08-01');
+      expect(row).toHaveTextContent('2026-08-01');
       expect(getByTestId('eisModelCardMetaIcon-my-model')).toHaveAttribute(
         'data-euiicon-type',
         'warning'
@@ -145,10 +148,7 @@ describe('ModelCard', () => {
       fireEvent.mouseOver(getByTestId('eisModelCardMetaDate-my-model'));
       await waitFor(() => {
         expect(getByTestId('eisModelCardNearingEndOfLifeTooltip-my-model')).toHaveTextContent(
-          'Model soon no longer available'
-        );
-        expect(getByTestId('eisModelCardNearingEndOfLifeTooltip-my-model')).toHaveTextContent(
-          'This model is reaching end of life on 2026-08-01. It will no longer be available after that date. We recommend using a more recent model.'
+          'This model will be unavailable after 2026-08-01.'
         );
       });
       expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
@@ -166,10 +166,12 @@ describe('ModelCard', () => {
         },
       };
       const { getByTestId, queryByTestId } = render(
-        <ModelCard model={model} onClick={jest.fn()} />
+        <I18nProvider>
+          <ModelCard model={model} onClick={jest.fn()} />
+        </I18nProvider>
       );
       const row = getByTestId('eisModelCardMeta-my-model');
-      expect(row).toHaveTextContent('End-of-life: 2026-02-01');
+      expect(row).toHaveTextContent('2026-02-01');
       expect(getByTestId('eisModelCardMetaIcon-my-model')).toHaveAttribute(
         'data-euiicon-type',
         'error'
@@ -177,10 +179,7 @@ describe('ModelCard', () => {
       fireEvent.mouseOver(getByTestId('eisModelCardMetaDate-my-model'));
       await waitFor(() => {
         expect(getByTestId('eisModelCardEndOfLifeTooltip-my-model')).toHaveTextContent(
-          'Model no longer available'
-        );
-        expect(getByTestId('eisModelCardEndOfLifeTooltip-my-model')).toHaveTextContent(
-          'This model has reached end of life on 2026-02-01. Use a more recent model instead.'
+          'This model has been unavailable since 2026-02-01.'
         );
       });
       expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
@@ -257,7 +256,7 @@ describe('ModelCard', () => {
         <ModelCard model={model} onClick={jest.fn()} />
       );
       expect(getByTestId('modelBlockedBadge-my-model')).toBeInTheDocument();
-      expect(getByTestId('eisModelCardMeta-my-model')).toHaveTextContent('End-of-life:');
+      expect(getByTestId('eisModelCardMeta-my-model')).toHaveTextContent(/\d{4}-\d{2}-\d{2}/);
       expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
     });
 

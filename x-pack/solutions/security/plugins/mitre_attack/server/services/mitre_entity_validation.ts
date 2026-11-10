@@ -25,8 +25,8 @@ export const validateMitreEntity = (entity: unknown): MitreEntity => {
     const entityId = typeof asRecord.id === 'string' ? asRecord.id : '(unknown id)';
     throw new BadRequestError(
       `name: "${entityName}", id: "${entityId}" within the mitre-attack-entity saved object ` +
-        `is not a valid MITRE ATT&CK entity. Expect the system ` +
-        `to not work with MITRE ATT&CK data until this entity is fixed ` +
+        `is not a valid MITRE entity. Expect the system ` +
+        `to not work with MITRE data until this entity is fixed ` +
         `or the document is removed. Error is: ${stringifyZodError(result.error)}, ` +
         `Full entity contents are:\n${JSON.stringify(entity, null, 2)}`
     );

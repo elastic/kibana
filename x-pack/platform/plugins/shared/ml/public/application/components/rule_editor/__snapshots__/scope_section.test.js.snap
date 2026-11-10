@@ -48,7 +48,6 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
   <div
     class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
     data-size="m"
-    style="--euiCallOutTypeColor: #0B64DD;"
   >
     <div
       class="css-1slkmya-wrapper"
@@ -423,7 +422,6 @@ exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
   <div
     class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
     data-size="m"
-    style="--euiCallOutTypeColor: #0B64DD;"
   >
     <div
       class="css-1slkmya-wrapper"

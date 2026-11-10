@@ -845,4 +845,176 @@ describe('useEntityNodeExpandPopover', () => {
       }
     });
   });
+
+  describe('telemetry', () => {
+    const onTelemetryEvent = jest.fn();
+
+    const clickItem = (testSubject: string, node: NodeProps) => {
+      const items = capturedItemsFn!(node);
+      const item = items.find(
+        (candidate) => candidate.type === 'item' && candidate.testSubject === testSubject
+      );
+      if (item?.type === 'item') {
+        item.onClick?.();
+      }
+    };
+
+    beforeEach(() => {
+      onTelemetryEvent.mockClear();
+    });
+
+    it('reports show_entity_relationships with the show state', () => {
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+        createMockNode('single-entity')
+      );
+
+      expect(onTelemetryEvent).toHaveBeenCalledTimes(1);
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_entity_relationships',
+        state: 'show',
+      });
+    });
+
+    it('reports show_entity_relationships with the hide state when already expanded', () => {
+      mockIsEntityRelationshipExpandedForScope.mockReturnValue(true);
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(
+        GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
+        createMockNode('single-entity')
+      );
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_entity_relationships',
+        state: 'hide',
+      });
+    });
+
+    it('reports show_actions_by for the actor filter', () => {
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID, createMockNode('single-entity'));
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_actions_by',
+        state: 'show',
+      });
+    });
+
+    it('reports show_actions_on for the target filter', () => {
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID, createMockNode('single-entity'));
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_actions_on',
+        state: 'show',
+      });
+    });
+
+    it('reports show_related_events with the show state', () => {
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID, createMockNode('single-entity'));
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_related_events',
+        state: 'show',
+      });
+    });
+
+    it('reports show_related_events with the hide state when already active', () => {
+      mockIsFilterActiveForScope.mockReturnValue(true);
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID, createMockNode('single-entity'));
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_related_events',
+        state: 'hide',
+      });
+    });
+
+    it('reports show_details for a single entity and still opens the preview', () => {
+      const node = createMockNode('single-entity');
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID, node);
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'entity',
+        action: 'show_details',
+      });
+      expect(mockOnOpenEventPreview).toHaveBeenCalledWith(node.data);
+    });
+
+    it('reports show_grouped_entities for a grouped entity node', () => {
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(
+        GRAPH_NODE_POPOVER_SHOW_GROUPED_ENTITIES_ITEM_ID,
+        createMockNode('grouped-entities')
+      );
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'grouped_entity',
+        action: 'show_grouped_entities',
+      });
+    });
+
+    it('does not report when no entity filter can be built for the node', () => {
+      const node = createMockNode('single-entity');
+      // No sourceFields means no filter spec can be built, so the click does nothing.
+      const entity = (node.data as { documentsData: Array<{ entity: object }> }).documentsData[0]
+        .entity as Record<string, unknown>;
+      delete entity.sourceFields;
+
+      renderHook(() =>
+        useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview, undefined, onTelemetryEvent)
+      );
+      clickItem(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID, node);
+      clickItem(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID, node);
+      clickItem(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID, node);
+
+      expect(onTelemetryEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not throw on any click path when onTelemetryEvent is omitted', () => {
+      const node = createMockNode('single-entity');
+      renderHook(() => useEntityNodeExpandPopover(scopeId, mockOnOpenEventPreview));
+
+      expect(() => {
+        clickItem(GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID, node);
+        clickItem(GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID, node);
+        clickItem(GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID, node);
+        clickItem(GRAPH_NODE_POPOVER_SHOW_RELATED_ITEM_ID, node);
+        clickItem(GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID, node);
+      }).not.toThrow();
+    });
+  });
 });

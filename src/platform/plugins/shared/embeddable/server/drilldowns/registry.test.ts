@@ -35,7 +35,8 @@ describe('drilldown registry', () => {
     }
 
     function getTriggerLiterals(match: z.core.JSONSchema.JSONSchema) {
-      const triggers = resolveAnyOf(match.allOf?.[1]?.properties?.trigger);
+      const triggerSchema = match.properties?.trigger ?? match.allOf?.[1]?.properties?.trigger;
+      const triggers = resolveAnyOf(triggerSchema);
       return triggers.map((trigger) => trigger.const);
     }
 

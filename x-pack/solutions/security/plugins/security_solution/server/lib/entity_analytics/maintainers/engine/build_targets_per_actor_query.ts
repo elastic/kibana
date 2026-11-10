@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { getFieldEvaluationsEsql } from '@kbn/entity-store/common/domain/euid';
 
 import type {
@@ -22,8 +22,8 @@ import { ENGINE_COLUMNS } from './columns';
  * Used as the actor-presence gate (the `AND (...)` clause appended after
  * `esqlWhereClause`) when the config supplies its own `customActor.fields`.
  * The default path (no `customActor`) keeps using
- * `euid.esql.getEuidDocumentsContainsIdFilter('user')` — same rationale as
- * the parallel helper in `build_actor_discovery_query.ts`. Today no shipped
+ * `euid.esql.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('user'))` — same
+ * rationale as the parallel helper in `build_actor_discovery_query.ts`. Today no shipped
  * `kind: 'standard' | 'bucketed'` config combines `customActor` with the
  * default builder, but Step 1 and Step 2 must agree about the actor-presence
  * gate so the inconsistency cannot reappear silently in a future config.
@@ -69,39 +69,55 @@ function resolveActorAndTargetEsql(
       actorEvalLines: `| EVAL ${ENGINE_COLUMNS.actor} = ${evalAssignment}`,
       targetGateLine:
         config.requireTargetEntityIdExists && config.targetEntityType !== 'host'
-          ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter(config.targetEntityType)})\n`
+          ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter(
+              getBuiltInEntityDefinition(config.targetEntityType)
+            )})\n`
           : '',
       targetEvalClause:
         config.targetEntityType === 'host'
           ? `| EVAL targetEntityId = CONCAT("host:", TO_STRING(\`host.id\`))`
-          : `| EVAL ${euid.esql.getEuidEvaluation(config.targetEntityType, 'targetEntityId', {
-              withTypeId: true,
-            })}`,
+          : `| EVAL ${euid.esql.getEuidEvaluation(
+              getBuiltInEntityDefinition(config.targetEntityType),
+              'targetEntityId',
+              {
+                withTypeId: true,
+              }
+            )}`,
     };
   }
 
   // TODO(#266748): 'user' hardcoded for actor — thread actorEntityType through config.
   const userFieldEvals = !config.customActor?.evalOverride
-    ? getFieldEvaluationsEsql('user')
+    ? getFieldEvaluationsEsql(getBuiltInEntityDefinition('user'))
     : undefined;
   const userFieldEvalsLine = userFieldEvals ? `| EVAL ${userFieldEvals}\n` : '';
   const actorEvalClause = config.customActor?.evalOverride
     ? `| EVAL ${ENGINE_COLUMNS.actor} = ${config.customActor.evalOverride}`
-    : `| EVAL ${euid.esql.getEuidEvaluation('user', ENGINE_COLUMNS.actor, { withTypeId: true })}`;
+    : `| EVAL ${euid.esql.getEuidEvaluation(
+        getBuiltInEntityDefinition('user'),
+        ENGINE_COLUMNS.actor,
+        { withTypeId: true }
+      )}`;
 
   return {
     actorPresenceGate: config.customActor
       ? buildAnyActorFieldNonEmptyEsql(config.customActor.fields)
-      : euid.esql.getEuidDocumentsContainsIdFilter('user'),
+      : euid.esql.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('user')),
     actorEvalLines: `${userFieldEvalsLine}${actorEvalClause}`,
     targetGateLine: config.requireTargetEntityIdExists
-      ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter(config.targetEntityType)})\n`
+      ? `    AND (${euid.esql.getEuidDocumentsContainsIdFilter(
+          getBuiltInEntityDefinition(config.targetEntityType)
+        )})\n`
       : '',
     targetEvalClause: config.targetEvalOverride
       ? `| EVAL targetEntityId = ${config.targetEvalOverride}`
-      : `| EVAL ${euid.esql.getEuidEvaluation(config.targetEntityType, 'targetEntityId', {
-          withTypeId: true,
-        })}`,
+      : `| EVAL ${euid.esql.getEuidEvaluation(
+          getBuiltInEntityDefinition(config.targetEntityType),
+          'targetEntityId',
+          {
+            withTypeId: true,
+          }
+        )}`,
   };
 }
 

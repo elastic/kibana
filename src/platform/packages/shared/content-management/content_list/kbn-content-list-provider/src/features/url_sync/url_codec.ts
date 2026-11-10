@@ -9,32 +9,17 @@
 
 import queryString from 'query-string';
 import type { ContentListFeatures } from '../types';
-import { isSearchConfig, isSortingConfig } from '../types';
-import { DEFAULT_INITIAL_SORT, DEFAULT_SORT_FIELDS } from '../sorting';
+import { isSearchConfig } from '../types';
+import type { SortDirectionsByField, SortState } from '../sorting';
+import {
+  getAllowedSorts,
+  getSortKey,
+  isAllowedSort,
+  parseSortKey,
+  toSortDirectionsByField,
+} from '../sorting';
 import { encodeQueryValue } from './encode_query_value';
 import type { ParsedQuery, UrlStateSlices } from './types';
-
-/**
- * The state of a sort configuration.
- *
- * @property field - The field to sort by.
- * @property direction - The direction to sort in.
- */
-export interface SortState {
-  field: string;
-  direction: 'asc' | 'desc';
-}
-
-/**
- * The configuration for a sorting URL.
- *
- * @property initialSort - The initial sort state.
- * @property validSortFields - The valid sort fields.
- */
-export interface SortingUrlConfig {
-  initialSort: SortState;
-  validSortFields: ReadonlySet<string>;
-}
 
 /**
  * The separator for sort configuration keys.
@@ -42,69 +27,24 @@ export interface SortingUrlConfig {
 const SORT_CONFIG_KEY_SEPARATOR = '\u001f';
 
 /**
- * Gets the sorting fields from the sorting configuration.
- *
- * @param sorting - The sorting configuration.
- * @returns The sorting fields.
- */
-const getSortingFields = (sorting: ContentListFeatures['sorting']): string[] => {
-  if (sorting === false) {
-    return [];
-  }
-  if (isSortingConfig(sorting)) {
-    if (sorting.fields) {
-      return sorting.fields.map(({ field }) => field);
-    }
-    if (sorting.options) {
-      return sorting.options.map(({ field }) => field);
-    }
-  }
-  return DEFAULT_SORT_FIELDS.map(({ field }) => field);
-};
-
-/**
- * Gets the initial sort from the sorting configuration.
- *
- * @param sorting - The sorting configuration.
- * @returns The initial sort.
- */
-const getInitialSort = (sorting: ContentListFeatures['sorting']): SortState => {
-  if (isSortingConfig(sorting) && sorting.initialSort) {
-    return sorting.initialSort;
-  }
-  return DEFAULT_INITIAL_SORT;
-};
-
-/**
  * Gets the sorting configuration key from the sorting configuration.
  *
  * @param sorting - The sorting configuration.
  * @returns The sorting configuration key.
  */
-export const getSortingConfigKey = (sorting: ContentListFeatures['sorting']): string => {
-  const initialSort = getInitialSort(sorting);
-  const fields = [...new Set(getSortingFields(sorting))].sort();
-  return [initialSort.field, initialSort.direction, ...fields].join(SORT_CONFIG_KEY_SEPARATOR);
-};
+export const getSortingConfigKey = (sorting: ContentListFeatures['sorting']): string =>
+  [...new Set(getAllowedSorts(sorting).map(getSortKey))].sort().join(SORT_CONFIG_KEY_SEPARATOR);
 
 /**
- * Gets the sorting URL configuration from the sorting configuration key.
+ * Gets the directions offered for each sortable field from the sorting configuration key.
  *
  * @param key - The sorting configuration key.
- * @returns The sorting URL configuration.
+ * @returns The directions offered for each sortable field.
  */
-export const getSortingUrlConfigFromKey = (key: string): SortingUrlConfig => {
-  const [
-    field = DEFAULT_INITIAL_SORT.field,
-    direction = DEFAULT_INITIAL_SORT.direction,
-    ...fields
-  ] = key.split(SORT_CONFIG_KEY_SEPARATOR);
-  const validDirection = direction === 'desc' ? 'desc' : 'asc';
-  return {
-    initialSort: { field, direction: validDirection },
-    validSortFields: new Set(fields),
-  };
-};
+export const getSortDirectionsByFieldFromKey = (key: string): SortDirectionsByField =>
+  toSortDirectionsByField(
+    key.split(SORT_CONFIG_KEY_SEPARATOR).flatMap((sortKey) => parseSortKey(sortKey) ?? [])
+  );
 
 /**
  * Gets the initial query text from the search configuration.
@@ -138,39 +78,32 @@ export const queryTextCodec = {
 /**
  * The codec for sort.
  *
- * @property key - The key for the sort.
- * @property encode - Encodes the sort.
- * @property decode - Decodes the sort.
+ * @param sortDirectionsByField - The directions offered for each sortable field.
+ * @param initialSort - The initial sort, omitted from the URL when active.
+ * @param onUnknownValue - Called with the raw `sort` value when it is malformed or not offered.
  */
 export const sortCodec = (
-  validSortFields: ReadonlySet<string>,
+  sortDirectionsByField: SortDirectionsByField,
   initialSort: SortState,
-  onUnknownField?: (field: string) => void
+  onUnknownValue?: (value: string) => void
 ) => ({
   key: 'sort',
   encode: (sort: SortState | undefined): Partial<ParsedQuery> => {
     if (!sort || (sort.field === initialSort.field && sort.direction === initialSort.direction)) {
       return { sort: undefined };
     }
-    return { sort: `${sort.field}:${sort.direction}` };
+    return { sort: getSortKey(sort) };
   },
   decode: (params: ParsedQuery): SortState | undefined => {
     if (typeof params.sort !== 'string') {
       return undefined;
     }
-
-    const [field, direction, extra] = params.sort.split(':');
-    if (extra !== undefined || !field || (direction !== 'asc' && direction !== 'desc')) {
-      onUnknownField?.(String(params.sort));
+    const sort = parseSortKey(params.sort);
+    if (!sort || !isAllowedSort(sortDirectionsByField, sort)) {
+      onUnknownValue?.(params.sort);
       return undefined;
     }
-
-    if (!validSortFields.has(field)) {
-      onUnknownField?.(field);
-      return undefined;
-    }
-
-    return { field, direction };
+    return sort;
   },
 });
 
@@ -226,28 +159,28 @@ export const encodeUrlState = (
   initialSort: SortState
 ): Partial<ParsedQuery> => ({
   ...queryTextCodec.encode(state.queryText ?? ''),
-  ...sortCodec(new Set([state.sort?.field ?? initialSort.field]), initialSort).encode(state.sort),
+  ...sortCodec(new Map(), initialSort).encode(state.sort),
 });
 
 /**
  * Decodes the new shape of the URL state.
  *
  * @param search - The search string.
- * @param validSortFields - The valid sort fields.
+ * @param sortDirectionsByField - The directions offered for each sortable field.
  * @param initialSort - The initial sort.
- * @param onUnknownField - A callback to call when an unknown field is encountered.
+ * @param onUnknownValue - A callback to call when a sort value is malformed or not offered.
  * @returns The decoded URL state.
  */
 export const decodeNewShape = (
   search: string,
-  validSortFields: ReadonlySet<string>,
+  sortDirectionsByField: SortDirectionsByField,
   initialSort: SortState,
-  onUnknownField?: (field: string) => void
+  onUnknownValue?: (value: string) => void
 ): UrlStateSlices => {
   const params = parseSearch(search);
   const state: UrlStateSlices = {};
   const queryText = queryTextCodec.decode(params);
-  const sort = sortCodec(validSortFields, initialSort, onUnknownField).decode(params);
+  const sort = sortCodec(sortDirectionsByField, initialSort, onUnknownValue).decode(params);
 
   if (queryText !== undefined) {
     state.queryText = queryText;

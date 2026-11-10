@@ -163,10 +163,9 @@ export function getClaimSort(definitions: TaskTypeDictionary): estypes.SortCombi
 // claimSort() is used to sort tasks returned from a claimer by priority and date.
 // Kept here so it should align with getClaimSort() above.
 // Returns a copy of the tasks passed in.
-export function claimSort(
-  definitions: TaskTypeDictionary,
-  tasks: ConcreteTaskInstance[]
-): ConcreteTaskInstance[] {
+export function claimSort<
+  T extends Pick<ConcreteTaskInstance, 'taskType' | 'priority' | 'retryAt' | 'runAt'>
+>(definitions: TaskTypeDictionary, tasks: T[]): T[] {
   // get the task definition priority
   const priorityMap: Record<string, TaskPriority> = {};
   tasks.forEach((task) => {
@@ -177,7 +176,7 @@ export function claimSort(
 
   return tasks.slice().sort(compare);
 
-  function compare(a: ConcreteTaskInstance, b: ConcreteTaskInstance) {
+  function compare(a: T, b: T) {
     // sort by priority, descending — task instance priority overrides task definition priority, and defaults to Standard
     const priorityA = a.priority ?? priorityMap[a.taskType] ?? TaskPriority.Standard;
     const priorityB = b.priority ?? priorityMap[b.taskType] ?? TaskPriority.Standard;

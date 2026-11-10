@@ -25,7 +25,9 @@ export const putConnectorNameAndDescription = async ({
   description = null,
   name = '',
 }: PutConnectorNameAndDescriptionArgs) => {
-  const route = `/internal/enterprise_search/connectors/${connectorId}/name_and_description`;
+  const route = `/internal/enterprise_search/connectors/${encodeURIComponent(
+    connectorId
+  )}/name_and_description`;
 
   await HttpLogic.values.http.put(route, {
     body: JSON.stringify({ description, name }),

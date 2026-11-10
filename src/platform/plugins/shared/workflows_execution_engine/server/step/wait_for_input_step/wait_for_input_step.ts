@@ -163,6 +163,14 @@ export class WaitForInputStepImpl implements NodeImplementation, CancellableNode
         channels,
         stepMessage: message,
         formUrl,
+        kibanaUrl,
+        inputSchema: stepInput.schema,
+        slackInteractiveResume: {
+          executionId: execution.id,
+          stepId: this.stepExecutionRuntime.stepExecutionId,
+          token: resumeToken.token,
+          spaceId,
+        },
         renderTemplate: (template) =>
           String(ctx.renderValueAccordingToContext(template, hitlTemplateContext)),
         connectorExecutor: this.connectorExecutor,

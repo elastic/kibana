@@ -9,10 +9,12 @@ import { EisModelStatus, type EisInferenceEndpoint } from '../../../common/types
 import {
   getModelName,
   getModelCreator,
+  getModelTitle,
   getProviderKeyForCreator,
   groupEndpointsByModel,
   getProviderOptions,
   filterGroupedModels,
+  isTemplateRequiredEisEndpoint,
   TASK_TYPE_CATEGORY,
   TASK_TYPE_DISPLAY_NAME,
   MODEL_TYPE_FILTERS,
@@ -39,6 +41,18 @@ const makeGroupedModel = (overrides: Partial<GroupedModel> = {}): GroupedModel =
   categories: ['Embedding'],
   endpoints: [],
   ...overrides,
+});
+
+describe('isTemplateRequiredEisEndpoint', () => {
+  it('is true only when templates.policy is required', () => {
+    expect(
+      isTemplateRequiredEisEndpoint({
+        metadata: { capabilities: { templates: { policy: 'required' } } },
+      })
+    ).toBe(true);
+    expect(isTemplateRequiredEisEndpoint({ metadata: { capabilities: {} } })).toBe(false);
+    expect(isTemplateRequiredEisEndpoint({})).toBe(false);
+  });
 });
 
 describe('utils', () => {
@@ -130,6 +144,20 @@ describe('utils', () => {
         service_settings: { model_id: '.multilingual-e5-small' },
       });
       expect(getModelCreator(endpoint)).toBe('Elastic Inference Service');
+    });
+  });
+
+  describe('getModelTitle', () => {
+    it('removes the model creator from the start of the model name', () => {
+      expect(getModelTitle('Anthropic Claude Opus 4.5', 'Anthropic')).toBe('Claude Opus 4.5');
+    });
+
+    it('returns the model name unchanged when it does not start with the model creator', () => {
+      expect(getModelTitle('Claude Opus 4.5', 'Anthropic')).toBe('Claude Opus 4.5');
+    });
+
+    it('does not remove a partial word match', () => {
+      expect(getModelTitle('JinaAI Reranker v2', 'Jina')).toBe('JinaAI Reranker v2');
     });
   });
 

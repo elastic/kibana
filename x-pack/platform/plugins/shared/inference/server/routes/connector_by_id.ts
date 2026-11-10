@@ -31,7 +31,7 @@ export function registerConnectorByIdRoute({
       },
       validate: {
         params: schema.object({
-          connectorId: schema.string(),
+          connectorId: schema.string({ maxLength: 512 }),
         }),
       },
     },

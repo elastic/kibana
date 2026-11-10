@@ -12,7 +12,7 @@ import { createFieldFormatMock } from '../test_utils';
 import { DurationFormatEditor } from './duration';
 import { formatId } from './constants';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 
 const fieldType = 'number';
 
@@ -41,6 +41,10 @@ const createDurationFormat = ({
         {
           kind: 'seconds',
           text: 'Seconds',
+        },
+        {
+          kind: 'milliseconds',
+          text: 'Milliseconds',
         },
       ],
       outputFormats: [
@@ -141,5 +145,18 @@ describe('DurationFormatEditor', () => {
     expect(switches).toHaveLength(2);
     expect(switches[0]).toBeEnabled();
     expect(switches[1]).toBeEnabled();
+  });
+
+  it('should fire change with the new input format when the input format is selected', () => {
+    renderDurationFormatEditor();
+
+    fireEvent.change(screen.getByTestId('durationEditorInputFormat'), {
+      target: { value: 'milliseconds' },
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...formatParams,
+      inputFormat: 'milliseconds',
+    });
   });
 });

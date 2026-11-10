@@ -11,10 +11,16 @@ import {
 } from '@kbn/cloud-security-posture-common/constants';
 
 export { type EuidSourceFields } from '@kbn/cloud-security-posture-common/constants';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 
-export const GRAPH_ACTOR_EUID_SOURCE_FIELDS = getGraphActorEuidSourceFields(euid);
-export const GRAPH_TARGET_EUID_SOURCE_FIELDS = getGraphTargetEuidSourceFields(euid);
+export const GRAPH_ACTOR_EUID_SOURCE_FIELDS = getGraphActorEuidSourceFields({
+  euid,
+  getBuiltInEntityDefinition,
+});
+export const GRAPH_TARGET_EUID_SOURCE_FIELDS = getGraphTargetEuidSourceFields({
+  euid,
+  getBuiltInEntityDefinition,
+});
 
 /**
  * Entity type prefixes that carry an explicit `<type>:` EUID prefix.

@@ -70,6 +70,8 @@ export interface ESQLEditorProps {
   hideQueryHistory?: boolean;
   /** hide quick search **/
   hideQuickSearch?: boolean;
+  /** set when the quick search visor is rendered next to the editor, so the empty editor doesn't advertise its own AI entry point **/
+  hasExternalVisor?: boolean;
   /** adds border in the editor **/
   hasOutline?: boolean;
   /** adds a documentation icon in the footer which opens the inline docs as a flyout **/
@@ -103,8 +105,14 @@ export interface ESQLEditorProps {
    * The parent receives `handler` and can pass it as `onNlResult` to a sibling
    * QuickSearchVisor (the non-inline case where the visor lives outside the editor).
    */
-  onVisorNlResultReady?: (handler: (generatedQuery: string) => void) => void;
+  onVisorNlResultReady?: (handler: VisorNlResultHandler) => void;
 }
+
+/** Receives the generated ES|QL for review and the callbacks for the user's decision */
+export type VisorNlResultHandler = (
+  generatedQuery: string,
+  review: { onAccept: () => void; onReject?: () => void }
+) => void;
 
 interface ESQLVariableService {
   isCreateControlSuggestionEnabled: boolean;

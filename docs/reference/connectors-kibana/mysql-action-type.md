@@ -15,6 +15,9 @@ The MySQL connector connects directly to a MySQL database so you can search, que
 This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
 ::::
 
+:::{include} _snippets/native-driver-memory-note.md
+:::
+
 ## Requirements [mysql-requirements]
 
 The MySQL connector connects directly to MySQL over the native MySQL protocol (default port 3306). Your MySQL server must be network-accessible from your Kibana instance. TLS is required by default.

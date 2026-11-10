@@ -223,6 +223,15 @@ describe('lazySchema', () => {
       expect(factory).toHaveBeenCalledTimes(1);
     });
 
+    it('passes `instanceof` checks by default (enabled)', () => {
+      const Schema = lazySchema(() => z.object({ id: z.string() }));
+
+      // Checked before any other property access to make sure `instanceof`
+      // doesn't depend on the schema being materialized beforehand.
+      expect(Schema).toBeInstanceOf(z.ZodObject);
+      expect(Schema).toBeInstanceOf(z.ZodType);
+    });
+
     it('calls the factory eagerly when disabled', () => {
       setLazySchemaDisabled(true);
 

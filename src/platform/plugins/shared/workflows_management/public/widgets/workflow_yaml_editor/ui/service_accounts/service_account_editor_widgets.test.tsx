@@ -35,6 +35,7 @@ const account = {
 };
 const mouseEvent = (position: monaco.Position | null): monaco.editor.IEditorMouseEvent => ({
   event: {
+    defaultPrevented: false,
     browserEvent: new MouseEvent('mousemove'),
     leftButton: false,
     middleButton: false,
@@ -129,7 +130,7 @@ describe('ServiceAccountEditorWidgets', () => {
     });
     await action('suggest');
     expect(await screen.findByText('Reads investigation events.')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Create account' }));
     expect(screen.getByText('Create flyout')).toBeInTheDocument();
     const props = jest
       .mocked(services.securityUi.components.getCreateServiceAccount)
@@ -139,7 +140,7 @@ describe('ServiceAccountEditorWidgets', () => {
     expect(editor.executeEdits).toHaveBeenCalledWith('serviceAccount', [
       expect.objectContaining({ text: JSON.stringify(account.id) }),
     ]);
-  });
+  }, 20000);
 
   it('keeps the draft unchanged when creation is cancelled or the model changes', async () => {
     const { action, services, editor, model } = setup(true, 'settings:\n  run_as: ', true);
@@ -148,7 +149,7 @@ describe('ServiceAccountEditorWidgets', () => {
       .mocked(services.securityUi.components.getCreateServiceAccount)
       .mockReturnValue(<div>{'Create flyout'}</div>);
     await action('suggest');
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Create account' }));
     const props = jest
       .mocked(services.securityUi.components.getCreateServiceAccount)
       .mock.calls.at(-1)?.[0];
@@ -156,7 +157,7 @@ describe('ServiceAccountEditorWidgets', () => {
     act(() => props.onClose());
     expect(editor.executeEdits).not.toHaveBeenCalled();
     await action('suggest');
-    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Create account' }));
     const nextProps = jest
       .mocked(services.securityUi.components.getCreateServiceAccount)
       .mock.calls.at(-1)?.[0];
@@ -232,6 +233,11 @@ describe('ServiceAccountEditorWidgets', () => {
         isRedoing: false,
         isFlush: false,
         isEolChange: false,
+        get detailedReasonsChangeLengths() {
+          return this.changes.map(
+            (change: monaco.editor.IModelContentChange) => change.rangeLength
+          );
+        },
       });
       jest.mocked(editor.onDidChangeCursorPosition).mock.calls[0][0]({
         position,
