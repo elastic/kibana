@@ -187,7 +187,7 @@ describe('GET /internal/significant_events/events', () => {
     }
   );
 
-  it('counts active events per deduplicated slug without losing either nullable feature field', async () => {
+  it('counts active events per deduplicated slug without losing a nullable topology field', async () => {
     const query = jest.fn().mockImplementation(async ({ query: statement }: { query: string }) =>
       statement.includes('STATS n')
         ? {
@@ -213,9 +213,12 @@ describe('GET /internal/significant_events/events', () => {
       unassigned: 4,
     });
     const statements = query.mock.calls.map(([request]) => request.query);
-    expect(statements.find((statement) => statement.includes('STATS n'))).toContain(
-      'MV_DEDUPE(CASE(a IS NULL, b, b IS NULL, a, MV_APPEND(a, b)))'
+    const countStatement = statements.find((statement) => statement.includes('STATS n'));
+    expect(countStatement).toContain(
+      'MV_DEDUPE(CASE(ab IS NULL, st, st IS NULL, ab, MV_APPEND(ab, st)))'
     );
+    expect(countStatement).toContain('FIELD_EXTRACT(data, "blast_radius.source")');
+    expect(countStatement).toContain('FIELD_EXTRACT(data, "blast_radius.target")');
     expect(statements.find((statement) => statement.includes('STATS n'))).toContain(
       'MV_EXPAND fid'
     );
