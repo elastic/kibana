@@ -6,7 +6,14 @@
  */
 
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingChart,
+  EuiPanel,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
@@ -52,6 +59,7 @@ function FlyoutLensChartComponent({
   executionContextDescription = 'apm service flyout chart data',
   executionContextProfileId = 'service-flyout',
 }: FlyoutLensChartProps) {
+  const { euiTheme } = useEuiTheme();
   const timeRange = useMemo(() => ({ from: rangeFrom, to: rangeTo }), [rangeFrom, rangeTo]);
 
   const { value: builtAttributes } = useAsync(async () => {
@@ -88,8 +96,11 @@ function FlyoutLensChartComponent({
         gutterSize="s"
         alignItems="center"
         justifyContent="spaceBetween"
+        // Reserve the compressed title action height on every chart, so headers with
+        // and without an action are equally tall and side-by-side plots stay aligned.
         css={css`
           padding: 8px 12px 0;
+          min-height: calc(${euiTheme.size.xl} + 8px);
         `}
       >
         <EuiFlexItem>

@@ -43,26 +43,27 @@ const CHARTS_LOAD_ERROR = i18n.translate('xpack.apm.transactionDetailFlyout.char
   defaultMessage: 'Unable to load charts',
 });
 
-function useSecondaryChartsGridCss() {
+// Single row of RED charts like the service flyout. This flyout is narrower, so the
+// columns and gap are smaller to keep all three charts (and their titles) on one row.
+function useRedMetricsChartsGridCss() {
   const { euiTheme } = useEuiTheme();
 
   return css`
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: ${euiTheme.size.m};
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: ${euiTheme.size.s};
   `;
 }
 
 function RedMetricsChartsSkeleton() {
-  const secondaryChartsGridCss = useSecondaryChartsGridCss();
+  const chartsGridCss = useRedMetricsChartsGridCss();
 
   return (
     <div data-test-subj="transactionDetailFlyoutRedMetricsSkeleton">
       <EuiSkeletonRectangle width="30%" height={16} borderRadius="m" />
       <EuiSpacer size="s" />
-      <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
-      <EuiSpacer size="m" />
-      <div css={secondaryChartsGridCss}>
+      <div css={chartsGridCss}>
+        <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
         <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
         <EuiSkeletonRectangle width="100%" height={CHART_HEIGHT} borderRadius="m" />
       </div>
@@ -101,20 +102,30 @@ function FlyoutTimeseriesChartPanel({
           padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
         `}
       >
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        {/* Title and action share one row, and every header reserves the compressed
+            action height, so panels with and without an action stay aligned. */}
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          responsive={false}
+          data-test-subj={`${id}-header`}
+          css={css`
+            min-height: ${euiTheme.size.xl};
+          `}
+        >
           <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h4>{title}</h4>
-            </EuiTitle>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <h4 css={{ whiteSpace: 'nowrap' }}>{title}</h4>
+                </EuiTitle>
+              </EuiFlexItem>
+              {titleTip ? <EuiFlexItem grow={false}>{titleTip}</EuiFlexItem> : null}
+            </EuiFlexGroup>
           </EuiFlexItem>
-          {titleTip ? <EuiFlexItem grow={false}>{titleTip}</EuiFlexItem> : null}
+          {titleAction ? <EuiFlexItem grow={false}>{titleAction}</EuiFlexItem> : null}
         </EuiFlexGroup>
-        {titleAction ? (
-          <>
-            <EuiSpacer size="xs" />
-            {titleAction}
-          </>
-        ) : null}
       </div>
       <div
         css={css`
@@ -143,7 +154,7 @@ function TransactionDetailFlyoutApiRedMetrics({
     filters,
   } = useTransactionDetailFlyoutContext();
   const timeZone = getTimeZone(core.uiSettings);
-  const secondaryChartsGridCss = useSecondaryChartsGridCss();
+  const chartsGridCss = useRedMetricsChartsGridCss();
 
   const {
     latencyTimeseries,
@@ -178,33 +189,32 @@ function TransactionDetailFlyoutApiRedMetrics({
 
   return (
     <ChartPointerEventContextProvider>
-      <FlyoutTimeseriesChartPanel
-        id="transactionDetailFlyoutRedMetricsChart-latency"
-        title={i18n.translate('xpack.apm.transactionDetailFlyout.latencyChartTitle', {
-          defaultMessage: 'Latency',
-        })}
-        titleAction={
-          <LatencyAggregationTypeSelect
-            latencyAggregationType={latencyAggregationType}
-            onChange={setLatencyAggregationType}
+      <div css={chartsGridCss} data-test-subj="transactionDetailFlyoutRedMetricsCharts">
+        <FlyoutTimeseriesChartPanel
+          id="transactionDetailFlyoutRedMetricsChart-latency"
+          title={i18n.translate('xpack.apm.transactionDetailFlyout.latencyChartTitle', {
+            defaultMessage: 'Latency',
+          })}
+          titleAction={
+            <LatencyAggregationTypeSelect
+              latencyAggregationType={latencyAggregationType}
+              onChange={setLatencyAggregationType}
+              compact
+            />
+          }
+        >
+          <TimeseriesChart
+            id="transactionDetailFlyoutLatencyChart"
+            height={CHART_HEIGHT}
+            fetchStatus={latencyStatus}
+            timeseries={latencyTimeseries}
+            yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
+            comparisonEnabled={false}
+            timeZone={timeZone}
+            showAnnotations={false}
           />
-        }
-      >
-        <TimeseriesChart
-          id="transactionDetailFlyoutLatencyChart"
-          height={CHART_HEIGHT}
-          fetchStatus={latencyStatus}
-          timeseries={latencyTimeseries}
-          yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-          comparisonEnabled={false}
-          timeZone={timeZone}
-          showAnnotations={false}
-        />
-      </FlyoutTimeseriesChartPanel>
+        </FlyoutTimeseriesChartPanel>
 
-      <EuiSpacer size="m" />
-
-      <div css={secondaryChartsGridCss}>
         <FlyoutTimeseriesChartPanel
           id="transactionDetailFlyoutRedMetricsChart-throughput"
           title={i18n.translate('xpack.apm.transactionDetailFlyout.throughputChartTitle', {
@@ -270,7 +280,7 @@ function TransactionDetailFlyoutEsqlRedMetrics({
     refreshToken,
   } = useTransactionDetailFlyoutContext();
   const projectRouting = useProjectRouting();
-  const secondaryChartsGridCss = useSecondaryChartsGridCss();
+  const chartsGridCss = useRedMetricsChartsGridCss();
 
   const charts = useMemo(
     () =>
@@ -286,6 +296,7 @@ function TransactionDetailFlyoutEsqlRedMetrics({
           <LatencyAggregationTypeSelect
             latencyAggregationType={latencyAggregationType}
             onChange={setLatencyAggregationType}
+            compact
           />
         ),
         projectRouting,
@@ -327,9 +338,8 @@ function TransactionDetailFlyoutEsqlRedMetrics({
     );
   }
 
-  const latencyChart = charts.find((chart) => chart.id === 'latency');
-  // Same layout as the API path: latency full-width, then throughput + failed rate.
-  const secondaryCharts = ['throughput', 'failedTransactionRate']
+  // Same layout as the API path: latency, throughput and failed rate in one row.
+  const orderedCharts = ['latency', 'throughput', 'failedTransactionRate']
     .map((id) => charts.find((chart) => chart.id === id))
     .filter((chart): chart is (typeof charts)[number] => chart != null);
 
@@ -352,14 +362,8 @@ function TransactionDetailFlyoutEsqlRedMetrics({
   );
 
   return (
-    <div data-test-subj="transactionDetailFlyoutEsqlRedMetrics">
-      {latencyChart ? renderLensChart(latencyChart) : null}
-      {secondaryCharts.length > 0 ? (
-        <>
-          <EuiSpacer size="m" />
-          <div css={secondaryChartsGridCss}>{secondaryCharts.map(renderLensChart)}</div>
-        </>
-      ) : null}
+    <div data-test-subj="transactionDetailFlyoutEsqlRedMetrics" css={chartsGridCss}>
+      {orderedCharts.map(renderLensChart)}
     </div>
   );
 }
