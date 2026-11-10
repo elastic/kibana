@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { timeoutSignal } from '@kbn/std';
 import assert from 'assert';
 import { createHash, randomBytes } from 'crypto';
 import pMap from 'p-map';
@@ -138,14 +139,19 @@ type OrcaEsRequest = (method: string, path: string, body?: object) => Promise<un
 const createOrcaEsRequest =
   (url: string, authorization: string, request: typeof globalThis.fetch): OrcaEsRequest =>
   async (method, path, body) => {
-    const response = await request(`${url}${path}`, {
-      method,
-      headers: { Authorization: authorization, 'Content-Type': 'application/json' },
-      ...(body ? { body: JSON.stringify(body) } : {}),
-      signal: AbortSignal.timeout(30_000),
-    });
-    assert(response.ok, `ORCA ${method} ${path} returned HTTP ${response.status}`);
-    return response.json();
+    const deadline = timeoutSignal(30_000);
+    try {
+      const response = await request(`${url}${path}`, {
+        method,
+        headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+        ...(body ? { body: JSON.stringify(body) } : {}),
+        signal: deadline,
+      });
+      assert(response.ok, `ORCA ${method} ${path} returned HTTP ${response.status}`);
+      return response.json();
+    } finally {
+      deadline.dispose();
+    }
   };
 
 const countSchema = lazySchema(() => z.object({ count: z.number() }));
