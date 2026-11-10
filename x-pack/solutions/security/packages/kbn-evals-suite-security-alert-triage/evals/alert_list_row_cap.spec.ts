@@ -6,6 +6,10 @@
  */
 
 /**
+ * The criteria do not name the seeded hosts, users or rules. In a project that holds other high
+ * severity alerts, the answer can correctly list those too, and the row limit can hide the seeded
+ * ones. The row and note evaluators count what the model received, whatever the alerts are.
+ *
  * List-style alert question eval: asks the agent to list alerts with no attachment, against more
  * alerts than the security.alerts row cap. It checks how many rows the model receives from
  * security.alerts, and that it is told when the rows were cut (security-team#20696).
@@ -212,15 +216,14 @@ evaluate.describe(
                 input: { question: 'List the high severity alerts from the last 24 hours.' },
                 output: {
                   expected:
-                    'The response lists or summarizes high severity alerts from hosts named ' +
-                    'list-eval-host-N, and says so when only part of the alerts is shown.',
+                    'The response lists or summarizes high severity alerts, and says so when ' +
+                    'only part of the alerts is shown.',
                 },
               },
             ],
           },
           criteria: [
             'The response lists or summarizes high severity alerts',
-            'The response only mentions hosts, users and rules that match the pattern list-eval-host-N, list-eval-user-N or "List eval suspicious activity rule N"',
             'If the response shows only part of the alerts, it says that the list is partial',
           ],
         });
