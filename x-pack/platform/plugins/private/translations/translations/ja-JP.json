@@ -73382,8 +73382,6 @@
     "xpack.triggersActionsUI.sections.rulesList.totalStatusesWarningDescription": "警告：{totalStatusesWarning}",
     "xpack.triggersActionsUI.sections.rulesList.typeFilterLabel": "型",
     "xpack.triggersActionsUI.sections.rulesList.typeFilterPopoverAriaLabel": "タイプでフィルタリング",
-    "xpack.triggersActionsUI.sections.rulesList.uiamApiKeyBannerDescription": "ElasticはServerlessプロジェクトのアラートセキュリティを改善しています。Elasticsearch APIキーは、アクセス制御を改善する新しいロールベースの形式に置き換えられています。お客様による対応は不要です。",
-    "xpack.triggersActionsUI.sections.rulesList.uiamApiKeyBannerTitle": "ルール用のUIAM APIキーのロールアウト",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadConnectorTypesMessage": "コネクタータイプを読み込めません",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadRulesMessage": "ルールを読み込めません",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleStatusInfoMessage": "ルールステータス情報を読み込めません",

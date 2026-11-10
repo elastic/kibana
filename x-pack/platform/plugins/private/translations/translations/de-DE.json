@@ -73173,8 +73173,6 @@
     "xpack.triggersActionsUI.sections.rulesList.totalStatusesWarningDescription": "Warnung: {totalStatusesWarning}",
     "xpack.triggersActionsUI.sections.rulesList.typeFilterLabel": "Typ",
     "xpack.triggersActionsUI.sections.rulesList.typeFilterPopoverAriaLabel": "Nach Typ filtern",
-    "xpack.triggersActionsUI.sections.rulesList.uiamApiKeyBannerDescription": "Elastic verbessert die Alerting-Sicherheit in Serverless-Projekten. Die Elasticsearch-API-Schlüssel werden durch ein neueres, rollenbasiertes Format ersetzt, das die Zugriffskontrolle verbessert. Es ist keine Aktion von Ihnen erforderlich.",
-    "xpack.triggersActionsUI.sections.rulesList.uiamApiKeyBannerTitle": "UIAM-API-Schlüssel-Rollout für Regeln",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadConnectorTypesMessage": "Konnektortypen können nicht geladen werden",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadRulesMessage": "Regeln können nicht geladen werden",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleStatusInfoMessage": "Regelstatusinformationen können nicht geladen werden",

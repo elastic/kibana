@@ -73394,8 +73394,6 @@
     "xpack.triggersActionsUI.sections.rulesList.totalStatusesWarningDescription": "Aviso: {totalStatusesWarning}",
     "xpack.triggersActionsUI.sections.rulesList.typeFilterLabel": "Tipo",
     "xpack.triggersActionsUI.sections.rulesList.typeFilterPopoverAriaLabel": "Filtrar por tipo",
-    "xpack.triggersActionsUI.sections.rulesList.uiamApiKeyBannerDescription": "A Elastic está aprimorando a segurança dos alertas em projetos Serverless. As chaves de API do Elasticsearch estão sendo substituídas por um formato mais recente, baseado em funções, que melhora o controle de acesso. Nenhuma ação sua é necessária.",
-    "xpack.triggersActionsUI.sections.rulesList.uiamApiKeyBannerTitle": "Implementação da chave de API UIAM para regras",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadConnectorTypesMessage": "Não é possível carregar tipos de conector",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadRulesMessage": "Não é possível carregar as regras",
     "xpack.triggersActionsUI.sections.rulesList.unableToLoadRuleStatusInfoMessage": "Não é possível carregar as informações de status da regra",
