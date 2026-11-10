@@ -43,6 +43,8 @@ export interface ProcessingFlyoutContext {
   telemetry: UnitSignal[];
   editable: boolean;
   steps: ProcessingStep[];
+  /** A processor was committed unchecked because the configuration service could not be reached. */
+  validationSkipped: boolean;
   /** Key of the step open in the editor; `undefined` while creating a new one. */
   editingKey?: string;
   /** Where the processor being created will be inserted. */
@@ -60,7 +62,12 @@ export type ProcessingFlyoutEvent =
   | { type: 'step.create'; position?: ProcessingStepPosition }
   | { type: 'step.edit'; key: string }
   | { type: 'step.cancel' }
-  | { type: 'step.commit'; processor: DraftProcessor }
+  | {
+      type: 'step.commit';
+      processor: DraftProcessor;
+      /** The editor could not have the processor checked; the save validates the whole unit. */
+      unchecked?: boolean;
+    }
   | { type: 'step.delete'; key: string }
   | { type: 'step.deleteAll' }
   | { type: 'step.duplicate'; key: string }
@@ -110,6 +117,7 @@ export const processingFlyoutMachine = setup({
       if (event.type !== 'step.commit') {
         return {};
       }
+      const validationSkipped = context.validationSkipped || event.unchecked === true;
       const { editingKey } = context;
       const existing = context.steps.find(({ key }) => key === editingKey);
       if (!existing) {
@@ -126,6 +134,7 @@ export const processingFlyoutMachine = setup({
           nextKey: context.nextKey + 1,
           editingKey: undefined,
           hasChanges: true,
+          validationSkipped,
         };
       }
       return {
@@ -140,6 +149,7 @@ export const processingFlyoutMachine = setup({
         ),
         editingKey: undefined,
         hasChanges: true,
+        validationSkipped,
       };
     }),
     deleteStep: assign(({ context, event }) =>
@@ -181,7 +191,7 @@ export const processingFlyoutMachine = setup({
       steps.splice(event.to, 0, moved);
       return { steps, hasChanges: true };
     }),
-    clearSaveFeedback: assign({ diagnostics: [], saveError: undefined }),
+    clearSaveFeedback: assign({ diagnostics: [], saveError: undefined, validationSkipped: false }),
     storeSaveFailure: assign(({ event }) =>
       event.type === 'save.failed'
         ? { saveError: event.message, diagnostics: event.diagnostics }
@@ -209,6 +219,7 @@ export const processingFlyoutMachine = setup({
     slot: input.slot,
     telemetry: input.telemetry,
     editable: input.editable,
+    validationSkipped: false,
     steps: input.processors.map((processor, index) => ({
       key: `step-${index}`,
       processor: toDraft(processor),

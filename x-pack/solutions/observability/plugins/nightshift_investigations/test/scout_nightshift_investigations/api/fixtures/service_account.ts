@@ -10,9 +10,9 @@ import {
   createHttpServiceAccountsApi,
   ensureNightshiftServiceAccountRoles,
   ensureNightshiftServiceAccounts,
-  type InvestigatorServiceAccountStatus,
   type NightshiftServiceAccountIds,
-} from '../../../../common';
+} from '@kbn/nightshift-shared';
+import type { InvestigatorServiceAccountStatus } from '../../../../common';
 import { COMMON_HEADERS } from './constants';
 
 export const SERVICE_ACCOUNT_PATH = 'internal/nightshift/investigations/service_account';

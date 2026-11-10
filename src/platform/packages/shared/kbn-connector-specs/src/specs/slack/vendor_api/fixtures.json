@@ -1,0 +1,5 @@
+{
+  "searchMessages": {
+    "queries": [{ "method": "POST", "path": "/api/assistant.search.context" }]
+  }
+}
