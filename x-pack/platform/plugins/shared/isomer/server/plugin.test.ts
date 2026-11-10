@@ -12,6 +12,7 @@ import { createKibanaIsomerRuntime, unsupportedSchema } from '@kbn/isomer';
 import type { MarkdownNode } from '@kbn/isomer-components';
 import { Observable, of } from 'rxjs';
 import { MATERIALIZE_API_PATH, MATERIALIZE_FEATURE_FLAG } from '../common/constants';
+import { MATERIALIZE_EVENT, RENDER_EVENT } from './instrumentation/events';
 import { IsomerPlugin } from './plugin';
 
 jest.mock('@kbn/isomer', () => {
@@ -228,5 +229,27 @@ describe('IsomerPlugin', () => {
       }),
     });
     expect(data.search.asScoped).toHaveBeenCalledWith(request);
+  });
+
+  it('registers and reports its instrumentation events', async () => {
+    const { coreSetup, coreStart, registerMaterializer, asScoped } = startPlugin();
+    expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(MATERIALIZE_EVENT);
+    expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(RENDER_EVENT);
+    registerMaterializer<{ text: string }>('note', {
+      version: 1,
+      parse: (config) => config as { text: string },
+      plan: () => [],
+      map: ({ text }) => ({ type: 'markdown', text }),
+    });
+
+    await asScoped(httpServerMock.createKibanaRequest()).materialize({
+      type: 'note',
+      config: { text: markdown.text },
+    });
+
+    expect(coreStart.analytics.reportEvent).toHaveBeenCalledWith(
+      MATERIALIZE_EVENT.eventType,
+      expect.objectContaining({ saved_object_type: 'note', outcome: 'node', depth: 0 })
+    );
   });
 });

@@ -7,6 +7,8 @@
 
 import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ValidationError } from '@kbn/isomer';
+import type { MaterializeEvent } from '../instrumentation/events';
+import { measureInput } from '../instrumentation/measure';
 import { createTestKitServices } from './kit/kit_services.mock';
 import type { AggsServices } from './executors/aggs';
 import { createScopedMaterializeClient } from './materialize_client';
@@ -59,6 +61,7 @@ const setup = ({
   const getAggsServices = jest.fn(async (): Promise<AggsServices> => {
     throw new Error('No data views in this test.');
   });
+  const report = jest.fn<void, [MaterializeEvent]>();
   const client = createScopedMaterializeClient({
     registry,
     scope,
@@ -73,8 +76,9 @@ const setup = ({
     }),
     kibanaVersion: '9.5.0',
     limits: { maxDepth: 1 },
+    report,
   });
-  return { client, scope, logger, search, validate, registry, getAggsServices };
+  return { client, scope, logger, search, validate, registry, getAggsServices, report };
 };
 
 const note: NoteConfig = { title: 'Open alerts', text: 'There are **3** open alerts.' };
@@ -397,6 +401,60 @@ describe('createScopedMaterializeClient', () => {
           { type: 'markdown', text: 'There are **3** open alerts.' }
         )
       ).rejects.toThrow('No data views in this test.');
+    });
+  });
+
+  describe('instrumentation', () => {
+    it('reports one event per node, with its size against the input budget', async () => {
+      const { client, report } = setup();
+      const node = await client.materialize({ type: 'note', config: note });
+
+      expect(report).toHaveBeenCalledTimes(1);
+      expect(report).toHaveBeenCalledWith({
+        saved_object_type: 'note',
+        outcome: 'node',
+        node_type: 'markdown',
+        depth: 0,
+        ...measureInput(node),
+        duration_ms: expect.any(Number),
+        data_requests: 0,
+        row_caps_hit: 0,
+        budget_refused: false,
+      });
+    });
+
+    it('reports nested nodes at their depth, and unsupported outcomes', async () => {
+      const materializer = createNoteMaterializer({
+        plan: jest.fn(({ title }: NoteConfig): DataRequest[] =>
+          title === 'Parent' ? [{ kind: 'materialize', input: { type: 'map', id: 'world' } }] : []
+        ),
+        map: jest.fn(
+          ({ text }: NoteConfig, { nodes }: MaterializeResults): MaterializedNode =>
+            nodes[0] ?? { type: 'markdown', text }
+        ),
+      });
+      const { client, report } = setup({ materializer });
+      await client.materialize({ type: 'note', config: { title: 'Parent', text: 'x' } });
+
+      expect(
+        report.mock.calls.map(
+          ([{ saved_object_type: type, depth, outcome, data_requests: requests }]) => ({
+            type,
+            depth,
+            outcome,
+            requests,
+          })
+        )
+      ).toEqual([
+        { type: 'map', depth: 1, outcome: 'unsupported', requests: 0 },
+        { type: 'note', depth: 0, outcome: 'unsupported', requests: 1 },
+      ]);
+    });
+
+    it('reports nothing while materialization is off', async () => {
+      const { client, report } = setup({ enabled: false });
+      await client.materialize({ type: 'note', config: note });
+      expect(report).not.toHaveBeenCalled();
     });
   });
 });

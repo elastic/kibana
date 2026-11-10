@@ -20,6 +20,9 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { KibanaIsomerRuntime } from '@kbn/isomer';
 import { firstValueFrom } from 'rxjs';
 import { MATERIALIZE_FEATURE_FLAG } from '../common/constants';
+import type { MaterializeEvent, RenderEvent } from './instrumentation/events';
+import { MATERIALIZE_EVENT, RENDER_EVENT } from './instrumentation/events';
+import { instrumentRuntime } from './instrumentation/instrument_runtime';
 import { createScopedMaterializeClient } from './materialize/materialize_client';
 import { createHasField } from './materialize/has_field';
 import { createKitServices } from './materialize/kit/create_kit';
@@ -97,6 +100,7 @@ export class IsomerPlugin
   private embeddable?: EmbeddableStart;
   private uiSettings?: CoreStart['uiSettings'];
   private elasticsearch?: CoreStart['elasticsearch'];
+  private reportEvent?: CoreStart['analytics']['reportEvent'];
   private readonly registry = new MaterializerRegistry();
   private runtime?: Promise<KibanaIsomerRuntime>;
   private featureFlags?: CoreStart['featureFlags'];
@@ -107,6 +111,8 @@ export class IsomerPlugin
   }
 
   setup(core: CoreSetup): IsomerPluginSetup {
+    core.analytics.registerEventType(MATERIALIZE_EVENT);
+    core.analytics.registerEventType(RENDER_EVENT);
     const router = core.http.createRouter();
     registerMaterializeRoute({ router, createClient: this.createClient });
     registerFiltersForSelectionRoute({
@@ -168,6 +174,7 @@ export class IsomerPlugin
     this.embeddable = embeddable;
     this.uiSettings = core.uiSettings;
     this.elasticsearch = core.elasticsearch;
+    this.reportEvent = core.analytics.reportEvent;
     this.featureFlags = core.featureFlags;
     return {
       getRuntime: this.getRuntime,
@@ -233,16 +240,27 @@ export class IsomerPlugin
       getSelectionServices: dataServices,
       validate: this.validateNode,
       kibanaVersion: this.kibanaVersion,
+      report: this.reportMaterialize,
     });
   };
 
   private readonly validateNode = createNodeValidator();
 
+  private readonly reportMaterialize = (event: MaterializeEvent) => {
+    this.logger.get('instrumentation').debug(() => `Materialized: ${JSON.stringify(event)}`);
+    this.reportEvent?.(MATERIALIZE_EVENT.eventType, event);
+  };
+
+  private readonly reportRender = (event: RenderEvent) => {
+    this.logger.get('instrumentation').debug(() => `Rendered: ${JSON.stringify(event)}`);
+    this.reportEvent?.(RENDER_EVENT.eventType, event);
+  };
+
   private readonly getRuntime = (): Promise<KibanaIsomerRuntime> => {
     this.runtime ??= createRuntime().then(
       (runtime) => {
         this.logger.debug('Built the Isomer runtime with the components pack.');
-        return runtime;
+        return instrumentRuntime(runtime, this.reportRender);
       },
       (error) => {
         this.runtime = undefined;

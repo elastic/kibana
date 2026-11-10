@@ -29,6 +29,8 @@ import type {
 } from './types';
 import { createUnsupportedNode } from './unsupported';
 
+const INPUT_OVER_BUDGET = 'INPUT_OVER_BUDGET';
+
 export interface PipelineDeps {
   /** Runs one ES|QL request in its merged context. `index` is its place among the plan's tables. */
   executeEsql: (
@@ -52,6 +54,14 @@ export interface PipelineDeps {
   validate: (node: MaterializedNode) => Promise<ValidationError[]>;
   kibanaVersion: string;
   now: () => Date;
+}
+
+/** What a run produced, and what limits it hit on the way. */
+export interface PipelineResult {
+  node: MaterializedNode;
+  dataRequests: number;
+  rowCapsHit: number;
+  budgetRefused: boolean;
 }
 
 export interface PipelineRun<TConfig> {
@@ -96,7 +106,7 @@ const executePlan = async (
   plan: DataRequest[],
   context: MaterializeContext,
   deps: PipelineDeps
-): Promise<{ results: MaterializeResults; losses: MaterializeLoss[] }> => {
+): Promise<{ results: MaterializeResults; losses: MaterializeLoss[]; rowCapsHit: number }> => {
   const tables: Array<Promise<ExecutedTable>> = [];
   const nodes: Array<Promise<MaterializedNode>> = [];
   for (const request of plan) {
@@ -119,6 +129,7 @@ const executePlan = async (
   return {
     results: { tables: executed.map(({ table }) => table), nodes: materialized },
     losses: executed.flatMap(({ losses }) => losses),
+    rowCapsHit: executed.filter(({ losses }) => losses.length > 0).length,
   };
 };
 
@@ -180,7 +191,7 @@ export const runPipeline = async <TConfig>(
     spaceId,
   }: PipelineRun<TConfig>,
   deps: PipelineDeps
-): Promise<MaterializedNode> => {
+): Promise<PipelineResult> => {
   const now = deps.now();
   const context = await withAbsoluteTimeRange(callerContext, now, deps.getTimeZone);
   const source: MaterializedNodeSource = {
@@ -200,29 +211,46 @@ export const runPipeline = async <TConfig>(
   const description = describe();
   const unsupported = (reason: string) => createUnsupportedNode(reason, description, source);
 
+  const result = (
+    node: MaterializedNode,
+    { dataRequests = 0, rowCapsHit = 0, budgetRefused = false } = {}
+  ): PipelineResult => ({ node, dataRequests, rowCapsHit, budgetRefused });
+
   const plan = materializer.plan(config, context);
   if (!Array.isArray(plan)) {
-    return rebuildUnsupported(plan, description, source);
+    return result(rebuildUnsupported(plan, description, source));
   }
+  const dataRequests = plan.length;
 
   let executed: Awaited<ReturnType<typeof executePlan>>;
   try {
     executed = await executePlan(plan, context, deps);
   } catch (error) {
-    return unsupported(
-      i18n.translate('xpack.isomer.materialize.dataFailed', {
-        defaultMessage: 'The data for this {type} could not be loaded: {message}',
-        values: { type, message: errorMessage(error) },
-      })
+    return result(
+      unsupported(
+        i18n.translate('xpack.isomer.materialize.dataFailed', {
+          defaultMessage: 'The data for this {type} could not be loaded: {message}',
+          values: { type, message: errorMessage(error) },
+        })
+      ),
+      { dataRequests }
     );
   }
+  const { rowCapsHit } = executed;
 
   const mapped = materializer.map(config, executed.results, await deps.createKit(context));
   if (isUnsupportedNode(mapped)) {
-    return rebuildUnsupported(mapped, description, source);
+    return result(rebuildUnsupported(mapped, description, source), { dataRequests, rowCapsHit });
   }
 
   const node = withProvenance(mapped, executed.losses, source);
   const errors = await deps.validate(node);
-  return errors.length > 0 ? unsupported(invalidNode(type, errors)) : node;
+  if (errors.length === 0) {
+    return result(node, { dataRequests, rowCapsHit });
+  }
+  return result(unsupported(invalidNode(type, errors)), {
+    dataRequests,
+    rowCapsHit,
+    budgetRefused: errors.some(({ code }) => code === INPUT_OVER_BUDGET),
+  });
 };

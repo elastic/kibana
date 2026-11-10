@@ -18,8 +18,11 @@ import { createMaterializeKit } from './kit/create_kit';
 import type { SelectionServices } from './selection/filters_for_selection';
 import { filtersForSelection } from './selection/filters_for_selection';
 import { DATA_REQUEST_TIMEOUT_MS, MAX_MATERIALIZE_DEPTH, MAX_ROWS_PER_REQUEST } from './limits';
+import type { MaterializeEvent } from '../instrumentation/events';
+import { measureInput } from '../instrumentation/measure';
 import type { MaterializedNode, MaterializedNodeSource } from './nodes';
 import { isUnsupportedNode } from './nodes';
+import type { PipelineResult } from './pipeline';
 import { runPipeline } from './pipeline';
 import type { MaterializerRegistry } from './registry';
 import type {
@@ -56,6 +59,8 @@ export interface ScopedMaterializeClientDeps {
   kibanaVersion: string;
   now?: () => Date;
   limits?: Partial<MaterializeLimits>;
+  /** Receives one event per node materialized, nested ones included. */
+  report?: (event: MaterializeEvent) => void;
 }
 
 const MAX_UNSUPPORTED_REASON_LENGTH = 10_000;
@@ -101,6 +106,7 @@ export const createScopedMaterializeClient = ({
   getSelectionServices,
   kibanaVersion,
   now = () => new Date(),
+  report,
   limits: {
     maxRowsPerRequest = MAX_ROWS_PER_REQUEST,
     dataRequestTimeoutMs = DATA_REQUEST_TIMEOUT_MS,
@@ -158,12 +164,21 @@ export const createScopedMaterializeClient = ({
       }
     };
 
-  const materializeAt = async (
+  const bare = (node: MaterializedNode): PipelineResult => ({
+    node,
+    dataRequests: 0,
+    rowCapsHit: 0,
+    budgetRefused: false,
+  });
+
+  const resolveAt = async (
     input: MaterializeInput,
     context: MaterializeContext,
     depth: number
-  ): Promise<MaterializedNode> => {
-    const unsupported = unsupportedFor(input.type);
+  ): Promise<PipelineResult> => {
+    const unsupported = async (
+      ...args: Parameters<ReturnType<typeof unsupportedFor>>
+    ): Promise<PipelineResult> => bare(await unsupportedFor(input.type)(...args));
     const materializer = registry.get(input.type);
     if (!materializer) {
       return unsupported(
@@ -210,7 +225,7 @@ export const createScopedMaterializeClient = ({
     }
 
     try {
-      const node = await runPipeline(
+      const result = await runPipeline(
         {
           type: input.type,
           materializer,
@@ -245,11 +260,12 @@ export const createScopedMaterializeClient = ({
           now,
         }
       );
-      if (isUnsupportedNode(node)) {
-        const { reason, title, link, source } = node;
-        return await unsupported(reason, { title, link }, source);
+      if (isUnsupportedNode(result.node)) {
+        const { reason, title, link, source } = result.node;
+        const node = await unsupportedFor(input.type)(reason, { title, link }, source);
+        return { ...result, node };
       }
-      return node;
+      return result;
     } catch (error) {
       logger.warn(`Materializing a ${input.type} config failed: ${errorMessage(error)}`);
       return unsupported(
@@ -260,6 +276,31 @@ export const createScopedMaterializeClient = ({
         describe()
       );
     }
+  };
+
+  const materializeAt = async (
+    input: MaterializeInput,
+    context: MaterializeContext,
+    depth: number
+  ): Promise<MaterializedNode> => {
+    const started = performance.now();
+    const { node, dataRequests, rowCapsHit, budgetRefused } = await resolveAt(
+      input,
+      context,
+      depth
+    );
+    report?.({
+      saved_object_type: input.type,
+      outcome: isUnsupportedNode(node) ? 'unsupported' : 'node',
+      node_type: node.type,
+      depth,
+      ...measureInput(node),
+      duration_ms: Math.round(performance.now() - started),
+      data_requests: dataRequests,
+      row_caps_hit: rowCapsHit,
+      budget_refused: budgetRefused,
+    });
+    return node;
   };
 
   return {

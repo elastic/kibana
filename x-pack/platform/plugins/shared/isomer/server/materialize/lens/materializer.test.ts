@@ -180,7 +180,7 @@ describe('Lens materializer: through the pipeline', () => {
     const services = await createTestKitServices();
     transformOut.mockReturnValue(corpusCases.logsVisits.config);
     const config = materializer.parse(await materializer.load!('chart-1', scope()));
-    const node = await runPipeline(
+    const { node } = await runPipeline(
       {
         type: LENS_TYPE,
         materializer,
