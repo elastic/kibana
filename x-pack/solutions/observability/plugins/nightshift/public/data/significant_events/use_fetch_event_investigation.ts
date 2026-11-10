@@ -31,11 +31,6 @@ interface AwaitedStart {
   id: string;
   startedAt: number;
   /**
-   * Whether the event's investigations were listed before the start. Without that the start cannot
-   * tell a new investigation from a continued one, so it stays pending until a run shows.
-   */
-  listedRead: boolean;
-  /**
    * The awaited investigation's `updated_at` before the start, when it already existed. A new
    * investigation's creating write records the run, so being listed is enough there.
    */
@@ -57,17 +52,10 @@ const isStartPending = (
   if (listed === undefined) {
     return true;
   }
-  if (!awaiting.listedRead) {
-    // The pre-start state was never read, so a listed result may still be the previous run.
-    return !listed.in_progress;
-  }
-  if (awaiting.listedUpdatedAt === undefined) {
-    // Nothing was listed before the start: it opens an investigation, whose creating write records
-    // the run, so being listed is enough.
+  if (listed.in_progress) {
     return false;
   }
-  // A follow-up reuses the id, which is listed before its run is.
-  return !listed.in_progress && listed.updated_at === awaiting.listedUpdatedAt;
+  return listed.updated_at === awaiting.listedUpdatedAt;
 };
 
 /**
@@ -91,15 +79,16 @@ export const useFetchEventInvestigation = (
 ): {
   investigation: InvestigationSummary | undefined;
   isAwaitingStart: boolean;
-  /** The list was read at least once, so the absence of an investigation is known, not unknown. */
-  isLoaded: boolean;
+  /** The first list read is in flight, so the absence of an investigation is not known yet. */
+  isListLoading: boolean;
 } => {
   const { http, agenticInvestigations } = useKibana().services;
 
-  // Ends on a timer, not on a fetch: if every list request fails, nothing else re-renders. Keyed by
-  // `startedAt`, since a follow-up reuses the id and must start its own wait.
+  // The wait ends on a timer, not on a fetch: if every list request fails, nothing else re-renders.
+  // Keyed by `startedAt`, since a follow-up reuses the id.
   const [settledStartAt, setSettledStartAt] = useState<number>();
   const awaitingStartedAt = awaiting?.startedAt;
+
   useEffect(() => {
     if (awaitingStartedAt === undefined) {
       return;
@@ -111,7 +100,7 @@ export const useFetchEventInvestigation = (
     return () => clearTimeout(timer);
   }, [awaitingStartedAt]);
 
-  const { data, isSuccess } = useQuery<ListInvestigationsResponse, Error>({
+  const { data, isInitialLoading } = useQuery<ListInvestigationsResponse, Error>({
     queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'event', episodeId],
     // The list API belongs to agenticInvestigations, an optional dependency.
     enabled: agenticInvestigations != null && Boolean(episodeId),
@@ -146,7 +135,7 @@ export const useFetchEventInvestigation = (
 
   return {
     investigation: pickEventInvestigation(data?.results),
-    isLoaded: isSuccess,
+    isListLoading: isInitialLoading,
     // A start returns before its run is observable: until then, the listed one (if any) is an older
     // run and must not read as the current one.
     isAwaitingStart:

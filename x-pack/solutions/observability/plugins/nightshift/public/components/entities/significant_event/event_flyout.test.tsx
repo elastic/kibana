@@ -28,7 +28,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 const mockUseInvestigation = jest.fn<UseInvestigationResult, [unknown]>();
 const mockSubjectInvestigation = jest.fn();
 const mockIsAwaitingStart = jest.fn(() => false);
-const mockIsLoaded = jest.fn(() => true);
+const mockIsListLoading = jest.fn(() => false);
 const mockAwaitingArg = jest.fn();
 jest.mock('../../../data/significant_events/use_fetch_event_investigation', () => ({
   useFetchEventInvestigation: (
@@ -39,7 +39,7 @@ jest.mock('../../../data/significant_events/use_fetch_event_investigation', () =
     return {
       investigation: mockSubjectInvestigation(episodeId),
       isAwaitingStart: mockIsAwaitingStart(),
-      isLoaded: mockIsLoaded(),
+      isListLoading: mockIsListLoading(),
     };
   },
 }));
@@ -208,8 +208,8 @@ describe('EventFlyout', () => {
     mockSubjectInvestigation.mockReset();
     mockIsAwaitingStart.mockReset();
     mockIsAwaitingStart.mockReturnValue(false);
-    mockIsLoaded.mockReset();
-    mockIsLoaded.mockReturnValue(true);
+    mockIsListLoading.mockReset();
+    mockIsListLoading.mockReturnValue(false);
     mockAwaitingArg.mockClear();
     mockOpenConversationDetails.mockClear();
     mockReportEvent.mockClear();
@@ -368,6 +368,18 @@ describe('EventFlyout', () => {
     );
   });
 
+  it('does not start an investigation until the list has been read', async () => {
+    mockCanManage = true;
+    mockIsListLoading.mockReturnValue(true);
+    renderFlyout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    expect(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton')).toHaveAttribute(
+      'aria-disabled',
+      'true'
+    );
+  });
+
   it('carries the listed state into the wait when the start continues that investigation', async () => {
     mockCanManage = true;
     mockSubjectInvestigation.mockReturnValue({
@@ -386,7 +398,6 @@ describe('EventFlyout', () => {
         expect.objectContaining({ id: 'conv-open', listedUpdatedAt: '2026-07-10T12:00:00Z' })
       )
     );
-    expect(mockAwaitingArg).toHaveBeenLastCalledWith(expect.objectContaining({ listedRead: true }));
   });
 
   it('waits without a baseline when the start opens a different investigation', async () => {

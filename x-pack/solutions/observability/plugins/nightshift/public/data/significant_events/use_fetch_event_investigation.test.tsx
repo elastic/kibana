@@ -93,7 +93,7 @@ describe('useFetchEventInvestigation', () => {
         .mockResolvedValueOnce({ results: [] })
         .mockResolvedValue({ results: [investigation('started', { inProgress: false })] });
       const { result } = renderFetch('episode-1', {
-        awaiting: { id: 'started', startedAt: Date.now(), listedRead: true },
+        awaiting: { id: 'started', startedAt: Date.now() },
       });
 
       await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
@@ -104,8 +104,13 @@ describe('useFetchEventInvestigation', () => {
         jest.advanceTimersByTime(5_000);
       });
       await waitFor(() => expect(result.current.investigation?.id).toBe('started'));
-      expect(httpGet).toHaveBeenCalledTimes(2);
       expect(result.current.isAwaitingStart).toBe(false);
+
+      // Settled: polling stops with it.
+      await act(async () => {
+        jest.advanceTimersByTime(5_000);
+      });
+      expect(httpGet).toHaveBeenCalledTimes(2);
     } finally {
       jest.useRealTimers();
     }
@@ -125,7 +130,6 @@ describe('useFetchEventInvestigation', () => {
         awaiting: {
           id: 'open-run',
           startedAt: Date.now(),
-          listedRead: true,
           listedUpdatedAt: '2026-07-10T12:00:00Z',
         },
       });
@@ -151,7 +155,6 @@ describe('useFetchEventInvestigation', () => {
       awaiting: {
         id: 'open-run',
         startedAt: Date.now(),
-        listedRead: true,
         listedUpdatedAt: '2026-07-10T12:00:00Z',
       },
     });
@@ -160,41 +163,12 @@ describe('useFetchEventInvestigation', () => {
     expect(result.current.isAwaitingStart).toBe(false);
   });
 
-  it('keeps an unread list from settling the start on the previous run', async () => {
-    jest.useFakeTimers();
-    try {
-      httpGet
-        .mockResolvedValueOnce({
-          results: [investigation('open-run', { updatedAt: '2026-07-10T12:00:00Z' })],
-        })
-        .mockResolvedValue({
-          results: [
-            investigation('open-run', { inProgress: true, updatedAt: '2026-07-10T12:00:05Z' }),
-          ],
-        });
-      const { result } = renderFetch('episode-1', {
-        awaiting: { id: 'open-run', startedAt: Date.now(), listedRead: false },
-      });
-
-      // The listed record looks idle, but nothing proved whether it predates the start.
-      await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
-      expect(result.current.isAwaitingStart).toBe(true);
-
-      await act(async () => {
-        jest.advanceTimersByTime(5_000);
-      });
-      await waitFor(() => expect(result.current.isAwaitingStart).toBe(false));
-    } finally {
-      jest.useRealTimers();
-    }
-  });
-
   it('stops reading a start as pending once the wait ends, even when every list request fails', async () => {
     jest.useFakeTimers();
     try {
       httpGet.mockRejectedValue(new Error('list failed'));
       const { result } = renderFetch('episode-1', {
-        awaiting: { id: 'started', startedAt: Date.now(), listedRead: true },
+        awaiting: { id: 'started', startedAt: Date.now() },
       });
 
       expect(result.current.isAwaitingStart).toBe(true);
