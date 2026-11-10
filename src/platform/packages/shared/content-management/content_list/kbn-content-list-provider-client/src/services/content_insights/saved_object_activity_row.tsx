@@ -65,47 +65,46 @@ export const SavedObjectActivityRow = ({
   item,
   entityNamePlural,
   isKibanaVersioningEnabled,
-}: SavedObjectActivityRowProps) => {
-  const activityItem = {
-    createdAt: item.createdAt,
-    createdBy: item.createdBy,
-    updatedAt: item.updatedAt?.toISOString(),
-    updatedBy: item.updatedBy,
-    managed: item.managed,
-  };
-
-  return (
-    <ContentInsightsProvider
-      contentInsightsClient={service}
-      isKibanaVersioningEnabled={isKibanaVersioningEnabled}
-    >
-      <EuiFormRow
-        fullWidth
-        label={
-          <>
-            <FormattedMessage
-              id="contentManagement.contentListProviderClient.contentEditor.activityLabel"
-              defaultMessage="Activity"
-            />{' '}
-            <EuiIconTip
-              type="info"
-              iconProps={{ style: { verticalAlign: 'bottom' } }}
-              content={
-                <FormattedMessage
-                  id="contentManagement.contentListProviderClient.contentEditor.activityLabelHelpText"
-                  defaultMessage="Activity data is auto-generated and cannot be updated."
-                />
-              }
-            />
-          </>
-        }
-      >
+}: SavedObjectActivityRowProps) => (
+  <ContentInsightsProvider
+    contentInsightsClient={service}
+    isKibanaVersioningEnabled={isKibanaVersioningEnabled}
+  >
+    <EuiFormRow
+      fullWidth
+      label={
         <>
-          <ActivityView item={activityItem} entityNamePlural={entityNamePlural} />
-          <EuiSpacer size="s" />
-          <ViewsStats item={item} />
+          <FormattedMessage
+            id="contentManagement.contentListProviderClient.contentEditor.activityLabel"
+            defaultMessage="Activity"
+          />{' '}
+          <EuiIconTip
+            type="info"
+            iconProps={{ style: { verticalAlign: 'bottom' } }}
+            content={
+              <FormattedMessage
+                id="contentManagement.contentListProviderClient.contentEditor.activityLabelHelpText"
+                defaultMessage="Activity data is auto-generated and cannot be updated."
+              />
+            }
+          />
         </>
-      </EuiFormRow>
-    </ContentInsightsProvider>
-  );
-};
+      }
+    >
+      <>
+        <ActivityView
+          item={{
+            createdAt: item.createdAt,
+            createdBy: item.createdBy,
+            updatedAt: item.updatedAt?.toISOString(),
+            updatedBy: item.updatedBy,
+            managed: item.managed,
+          }}
+          entityNamePlural={entityNamePlural}
+        />
+        <EuiSpacer size="s" />
+        <ViewsStats item={item} />
+      </>
+    </EuiFormRow>
+  </ContentInsightsProvider>
+);
