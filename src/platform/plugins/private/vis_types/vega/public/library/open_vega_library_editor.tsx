@@ -64,18 +64,22 @@ export const openVegaLibraryEditor = async ({
     );
   };
 
+  const sharedFlyoutProps = {
+    // A stray click would otherwise discard unsaved edits.
+    outsideClickCloses: false,
+    'data-test-subj': 'vegaLibraryEditorFlyout',
+  } as const;
+
   const flyoutRef = panel
     ? openLazyFlyout({
         core,
         parentApi: panel.parentApi,
         loadContent,
         flyoutProps: {
+          ...sharedFlyoutProps,
           // Placed like the by-value editor, next to the panel it previews in.
           focusedPanelId: panel.uuid,
           size: 'm',
-          // A stray click would otherwise discard unsaved edits.
-          outsideClickCloses: false,
-          'data-test-subj': 'vegaLibraryEditorFlyout',
         },
       })
     : // A system flyout, so the preview can open beside the editor as a child flyout.
@@ -83,15 +87,13 @@ export const openVegaLibraryEditor = async ({
         core,
         loadContent,
         flyoutProps: {
+          ...sharedFlyoutProps,
           // No `size`: the default width pairs with the size `m` preview flyout, while EUI doesn't
           // allow a parent and child flyout to both be `m`.
           title: vegaTitleInWizard,
           // The library page has no panel to push aside, so cover it like a dialog would.
           type: 'overlay',
           ownFocus: true,
-          // A stray click would otherwise discard unsaved edits.
-          outsideClickCloses: false,
-          'data-test-subj': 'vegaLibraryEditorFlyout',
         },
       });
 
