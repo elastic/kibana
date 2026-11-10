@@ -1983,8 +1983,9 @@ export class WorkflowsExecutionEnginePlugin
         }
 
         // `false` means the current execution was queued or terminalized before a task ran.
-        // `cancel-in-progress` returns true for the new execution; cancelled older executions
-        // resume sync parents through their own running task's normal cancellation path.
+        // `cancel-in-progress` returns true for the newest execution and false for one a newer
+        // execution already superseded; cancelled older executions resume sync parents through
+        // their own running task's normal cancellation path.
         await handleConcurrencyBlockedExecution({
           workflowExecutionId: p.workflowExecution.id as string,
           spaceId: p.workflowExecution.spaceId ?? 'default',
@@ -2365,7 +2366,8 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecution.workflowDefinition.settings.concurrency,
         workflowExecution.concurrencyGroupKey,
         workflowExecution.id,
-        workflowExecution.spaceId
+        workflowExecution.spaceId,
+        workflowExecution.createdAt
       );
 
       if (!canProceed) {

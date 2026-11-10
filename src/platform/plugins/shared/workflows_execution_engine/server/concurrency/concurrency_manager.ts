@@ -76,7 +76,10 @@ export class ConcurrencyManager {
    *
    * For 'cancel-in-progress' strategy:
    * - Queries slot-occupying executions with the same concurrency group key (excludes backlog `queued`)
-   * - If limit is exceeded, cancels the oldest execution(s) to make room
+   * - The newest executions win: given the current execution's `createdAt`, it cancels itself when at
+   *   least `max` newer executions already hold slots, and otherwise cancels only older executions.
+   *   Executions that arrive together then leave the newest running, whatever order they are checked in,
+   *   instead of cancelling each other. Without `createdAt`, every other execution counts as older.
    * - Returns true if the new execution can proceed, false otherwise
    *
    * For 'drop' strategy:
@@ -91,13 +94,15 @@ export class ConcurrencyManager {
    * @param concurrencyGroupKey - The evaluated concurrency group key
    * @param currentExecutionId - The ID of the current execution to check
    * @param spaceId - The space ID of the execution
+   * @param currentExecutionCreatedAt - When the current execution was created; orders it among the others
    * @returns Promise<boolean> - true if execution can proceed, false otherwise
    */
   public async checkConcurrency(
     concurrencySettings: ConcurrencySettings | undefined,
     concurrencyGroupKey: string | null,
     currentExecutionId: string,
-    spaceId: string
+    spaceId: string,
+    currentExecutionCreatedAt?: string
   ): Promise<boolean> {
     // If no concurrency settings or key, allow execution to proceed
     if (!concurrencySettings || !concurrencyGroupKey) {
@@ -181,13 +186,35 @@ export class ConcurrencyManager {
       return false; // Drop the new execution
     }
 
-    // Handle 'cancel-in-progress' strategy: cancel oldest execution(s) to make room
+    // Handle 'cancel-in-progress' strategy: the newest executions keep the slots
     if (strategy === 'cancel-in-progress') {
-      // Calculate how many executions to cancel
-      const executionsToCancel = activeCount - maxConcurrency + 1;
+      const olderExecutionIds = currentExecutionCreatedAt
+        ? await this.workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
+            concurrencyGroupKey,
+            spaceId,
+            currentExecutionId,
+            undefined,
+            { createdAt: currentExecutionCreatedAt, id: currentExecutionId }
+          )
+        : runningExecutionIds;
+      const newerCount = activeCount - olderExecutionIds.length;
 
-      // Cancel the oldest executions (they're already sorted by createdAt ascending)
-      const executionIdsToCancel = runningExecutionIds.slice(0, executionsToCancel);
+      // Newer executions already hold every slot: this one is the one superseded.
+      if (newerCount >= maxConcurrency) {
+        await this.workflowExecutionRepository.updateWorkflowExecution({
+          id: currentExecutionId,
+          status: ExecutionStatus.CANCELLED,
+          cancelRequested: true,
+          cancellationReason: `Cancelled due to concurrency limit (max: ${maxConcurrency}): superseded by a newer execution`,
+          cancelledAt: new Date().toISOString(),
+          cancelledBy: 'system',
+        });
+        return false;
+      }
+
+      // Cancel the oldest executions, never a newer one (sorted by createdAt ascending)
+      const executionsToCancel = activeCount - maxConcurrency + 1;
+      const executionIdsToCancel = olderExecutionIds.slice(0, executionsToCancel);
 
       // Bulk update all executions to cancelled status in a single ES request
       const cancellationTimestamp = new Date().toISOString();

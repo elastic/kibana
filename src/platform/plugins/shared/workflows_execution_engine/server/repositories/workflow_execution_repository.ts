@@ -481,7 +481,9 @@ export class WorkflowExecutionRepository {
     concurrencyGroupKey: string,
     spaceId: string,
     excludeExecutionId?: string,
-    size: number = 5000
+    size: number = 5000,
+    /** Only executions ordered before this one, by `createdAt` then `id` (the sort below). */
+    createdBefore?: { createdAt: string; id: string }
   ): Promise<string[]> {
     const filterClauses: Array<Record<string, unknown>> = [
       { term: { concurrencyGroupKey } },
@@ -502,6 +504,25 @@ export class WorkflowExecutionRepository {
       filterClauses.push({
         bool: {
           must_not: [{ term: { id: excludeExecutionId } }],
+        },
+      });
+    }
+
+    if (createdBefore) {
+      filterClauses.push({
+        bool: {
+          should: [
+            { range: { createdAt: { lt: createdBefore.createdAt } } },
+            {
+              bool: {
+                filter: [
+                  { term: { createdAt: createdBefore.createdAt } },
+                  { range: { id: { lt: createdBefore.id } } },
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
         },
       });
     }
