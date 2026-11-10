@@ -30,6 +30,14 @@ const mockSubjectInvestigation = jest.fn();
 const mockIsAwaitingStart = jest.fn(() => false);
 const mockIsListLoading = jest.fn(() => false);
 const mockAwaitingArg = jest.fn();
+const mockIsInvestigationAvailable = jest.fn(() => true);
+const mockIsAvailabilityLoading = jest.fn(() => false);
+jest.mock('../../../data/investigations/use_fetch_investigation_availability', () => ({
+  useFetchInvestigationAvailability: () => ({
+    isAvailable: mockIsInvestigationAvailable(),
+    isLoading: mockIsAvailabilityLoading(),
+  }),
+}));
 jest.mock('../../../data/significant_events/use_fetch_event_investigation', () => ({
   useFetchEventInvestigation: (
     episodeId: string | undefined,
@@ -211,6 +219,11 @@ describe('EventFlyout', () => {
     mockIsListLoading.mockReset();
     mockIsListLoading.mockReturnValue(false);
     mockAwaitingArg.mockClear();
+    mockInvestigationsFetch.mockClear();
+    mockIsInvestigationAvailable.mockReset();
+    mockIsInvestigationAvailable.mockReturnValue(true);
+    mockIsAvailabilityLoading.mockReset();
+    mockIsAvailabilityLoading.mockReturnValue(false);
     mockOpenConversationDetails.mockClear();
     mockReportEvent.mockClear();
     mockCanManage = false;
@@ -378,6 +391,56 @@ describe('EventFlyout', () => {
       'aria-disabled',
       'true'
     );
+  });
+
+  it('disables the investigation action for a user who cannot start investigations', async () => {
+    mockCanManage = true;
+    mockIsInvestigationAvailable.mockReturnValue(false);
+    renderFlyout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    const item = screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton');
+    expect(item).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(item);
+    expect(mockInvestigationsFetch).not.toHaveBeenCalled();
+  });
+
+  it('does not claim missing access while availability is still loading', async () => {
+    mockCanManage = true;
+    mockIsInvestigationAvailable.mockReturnValue(false);
+    mockIsAvailabilityLoading.mockReturnValue(true);
+    renderFlyout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.hover(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
+
+    expect(screen.queryByText(/write access to Agent Builder/)).not.toBeInTheDocument();
+  });
+
+  it('keeps a start with the event it was made for when another event is shown before it returns', async () => {
+    mockCanManage = true;
+    let resolveStart: (response: { investigation_id: string }) => void = () => {};
+    mockInvestigationsFetch.mockReturnValue(
+      new Promise((resolve) => {
+        resolveStart = resolve;
+      })
+    );
+    const otherEvent = { ...mockEvent, event_id: 'evt-002', episode_id: 'episode-002' };
+    const { rerender } = renderFlyout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
+    rerender(<EventFlyout event={otherEvent} onClose={jest.fn()} />);
+    await act(async () => {
+      resolveStart({ investigation_id: 'conv-a' });
+    });
+
+    await waitFor(() => expect(mockAddSuccess).toHaveBeenCalled());
+    expect(mockAwaitingArg).toHaveBeenLastCalledWith(undefined);
+
+    rerender(<EventFlyout event={mockEvent} onClose={jest.fn()} />);
+    expect(mockAwaitingArg).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'conv-a' }));
   });
 
   it('carries the listed state into the wait when the start continues that investigation', async () => {

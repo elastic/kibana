@@ -35,6 +35,7 @@ import {
 import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import { useFetchDetectionOccurrences } from '../../../data/detections/use_fetch_detection_occurrences';
 import { useFetchEventLifecycle } from '../../../data/significant_events/use_fetch_event_lifecycle';
+import { useFetchInvestigationAvailability } from '../../../data/investigations/use_fetch_investigation_availability';
 import { useFetchEventInvestigation } from '../../../data/significant_events/use_fetch_event_investigation';
 import { findDetectionSignal } from '../detection/resolve_detection_signal';
 import {
@@ -123,6 +124,13 @@ const NO_EPISODE_INVESTIGATION_TOOLTIP = i18n.translate(
   }
 );
 
+const INVESTIGATION_UNAVAILABLE_TOOLTIP = i18n.translate(
+  'xpack.nightshift.flyout.investigationUnavailableTooltip',
+  {
+    defaultMessage: 'Investigations are unavailable. You may need write access to Agent Builder.',
+  }
+);
+
 const FOLLOW_UP_INVESTIGATION_TOOLTIP = i18n.translate(
   'xpack.nightshift.flyout.followUpInvestigationTooltip',
   {
@@ -181,13 +189,15 @@ export function EventFlyout({
     awaiting:
       startedInvestigation?.episodeId === event.episode_id ? startedInvestigation : undefined,
   });
+  const { isAvailable: canInvestigate, isLoading: isAvailabilityLoading } =
+    useFetchInvestigationAvailability();
   const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation({
-    onTriggered: (investigationId) => {
+    onTriggered: (investigationId, { episode_id: episodeId }) => {
       const baseline = startBaselineRef.current;
       setStartedInvestigation({
         id: investigationId,
         startedAt: Date.now(),
-        episodeId: event.episode_id,
+        episodeId,
         // Only a continued investigation has a listed state to be recorded past.
         ...(baseline?.id === investigationId ? { listedUpdatedAt: baseline.updated_at } : {}),
       });
@@ -302,6 +312,9 @@ export function EventFlyout({
         toolTipContent:
           activityBlockTooltip ??
           (event.episode_id ? undefined : NO_EPISODE_INVESTIGATION_TOOLTIP) ??
+          (canInvestigate || isAvailabilityLoading
+            ? undefined
+            : INVESTIGATION_UNAVAILABLE_TOOLTIP) ??
           (latestInvestigationInProgress ? FOLLOW_UP_INVESTIGATION_TOOLTIP : undefined),
         onClick: () => {
           startBaselineRef.current = subjectInvestigation
@@ -310,7 +323,12 @@ export function EventFlyout({
           triggerInvestigation({ event_id: event.event_id, episode_id: event.episode_id });
         },
         // Until the list is read, a start cannot tell a new investigation from a continued one.
-        disabled: blocksActivity || triggeringEventId != null || !event.episode_id || isListLoading,
+        disabled:
+          blocksActivity ||
+          triggeringEventId != null ||
+          !event.episode_id ||
+          !canInvestigate ||
+          isListLoading,
         hasAriaDisabled: true,
         'data-test-subj': 'nightshiftEventFlyoutRunInvestigationButton',
         ...getEbtProps({
@@ -372,6 +390,8 @@ export function EventFlyout({
     activityBlockTooltip,
     agentBuilder,
     blocksActivity,
+    canInvestigate,
+    isAvailabilityLoading,
     canManage,
     conversationId,
     event.episode_id,

@@ -18,7 +18,7 @@ const investigationsFetch = jest.fn();
 const addSuccess = jest.fn();
 const addError = jest.fn();
 
-const renderTrigger = (onTriggered?: () => void) => {
+const renderTrigger = (onTriggered?: jest.Mock) => {
   const queryClient = new QueryClient({
     defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
   });
@@ -46,7 +46,12 @@ describe('useTriggerEventInvestigation', () => {
 
     act(() => result.current.triggerInvestigation({ event_id: 'evt-1', episode_id: 'episode-1' }));
 
-    await waitFor(() => expect(onTriggered).toHaveBeenCalledWith('investigation-1'));
+    await waitFor(() =>
+      expect(onTriggered).toHaveBeenCalledWith('investigation-1', {
+        event_id: 'evt-1',
+        episode_id: 'episode-1',
+      })
+    );
     expect(investigationsFetch).toHaveBeenCalledTimes(1);
     expect(investigationsFetch).toHaveBeenCalledWith('POST /internal/nightshift/investigations', {
       params: { body: { subject: { type: 'alert', ids: ['episode-1'] } } },

@@ -50,7 +50,8 @@ type InvestigatedEvent = Pick<SignificantEventResponse, 'event_id' | 'episode_id
 export const useTriggerEventInvestigation = ({
   onTriggered,
 }: {
-  onTriggered?: (investigationId: string) => void;
+  /** `event` is the one the start was made for, which may no longer be the one shown. */
+  onTriggered?: (investigationId: string, event: InvestigatedEvent) => void;
 } = {}) => {
   const {
     notifications: { toasts },
@@ -73,12 +74,12 @@ export const useTriggerEventInvestigation = ({
         signal: null,
       });
     },
-    onSuccess: ({ investigation_id: investigationId }) => {
+    onSuccess: ({ investigation_id: investigationId }, event) => {
       toasts.addSuccess({
         title: TRIGGER_SUCCESS_TOAST_TITLE,
         text: TRIGGER_SUCCESS_TOAST_TEXT,
       });
-      onTriggered?.(investigationId);
+      onTriggered?.(investigationId, event);
     },
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: TRIGGER_ERROR_TOAST_TITLE });
