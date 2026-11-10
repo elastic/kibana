@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
+import { getHostVmClient } from '../../../../../scripts/endpoint/common/vm_services';
 
 /**
  * Starts a long-lived `sleep` on the enrolled VM.

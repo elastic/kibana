@@ -1,5 +1,5 @@
 {
-  "sha1": "5a98c8a0a2ee26edb94c39f593f62cc5e9e7cd6d",
+  "sha1": "c899a3af51083c83883ad6be330e87c74861906e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,7 +13,7 @@
         "@local-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/artifact_policy_revision.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/api/tests/artifact_policy_revision.spec.ts",
         "line": 128,
         "column": 12
       }
@@ -27,7 +27,7 @@
         "@local-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/endpoint_generated_alerts.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/api/tests/endpoint_generated_alerts.spec.ts",
         "line": 53,
         "column": 12
       }
@@ -41,7 +41,7 @@
         "@local-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/host_isolation.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/api/tests/host_isolation.spec.ts",
         "line": 152,
         "column": 12
       }
@@ -55,7 +55,7 @@
         "@local-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/process_operations.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/api/tests/process_operations.spec.ts",
         "line": 138,
         "column": 12
       }
@@ -69,7 +69,7 @@
         "@local-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/scan_action.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/api/tests/scan_action.spec.ts",
         "line": 145,
         "column": 10
       }
@@ -83,7 +83,7 @@
         "@local-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/api/tests/scan_action.spec.ts",
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/shared_host/api/tests/scan_action.spec.ts",
         "line": 166,
         "column": 10
       }

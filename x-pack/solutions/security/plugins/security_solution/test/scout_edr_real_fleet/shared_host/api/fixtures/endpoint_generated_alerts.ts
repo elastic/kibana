@@ -15,15 +15,15 @@ import type {
   RoleApiCredentials,
   ScoutTestConfig,
 } from '@kbn/scout-security';
-import { ELASTIC_SECURITY_RULE_ID } from '../../../../common';
+import { ELASTIC_SECURITY_RULE_ID } from '../../../../../common';
 import {
   DEFAULT_ALERTS_INDEX,
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
-} from '../../../../common/constants';
-import { ENDPOINT_ALERTS_INDEX } from '../../../../scripts/endpoint/common/constants';
-import type { HostVmExecResponse } from '../../../../scripts/endpoint/common/types';
-import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
+} from '../../../../../common/constants';
+import { ENDPOINT_ALERTS_INDEX } from '../../../../../scripts/endpoint/common/constants';
+import type { HostVmExecResponse } from '../../../../../scripts/endpoint/common/types';
+import { getHostVmClient } from '../../../../../scripts/endpoint/common/vm_services';
 
 const DETECTION_ALERTS_INDEX = `${DEFAULT_ALERTS_INDEX}-default`;
 const HOST_COMMAND_TIMEOUT_MS = 60_000;

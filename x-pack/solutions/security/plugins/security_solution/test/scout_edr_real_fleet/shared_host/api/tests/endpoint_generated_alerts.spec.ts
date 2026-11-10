@@ -7,8 +7,8 @@
 
 import { PUBLIC_API_HEADERS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../common/constants';
-import { ENDPOINT_ALERTS_INDEX } from '../../../../scripts/endpoint/common/constants';
+import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
+import { ENDPOINT_ALERTS_INDEX } from '../../../../../scripts/endpoint/common/constants';
 import {
   countEndpointAlertsForFile,
   deleteEndpointSecurityAlerts,

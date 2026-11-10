@@ -13,8 +13,8 @@ import {
   HOST_METADATA_GET_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
   UNISOLATE_HOST_ROUTE_V2,
-} from '../../../../common/endpoint/constants';
-import { getEndpointOperationsAnalyst } from '../../../../scripts/endpoint/common/roles_users/endpoint_operations_analyst';
+} from '../../../../../common/endpoint/constants';
+import { getEndpointOperationsAnalyst } from '../../../../../scripts/endpoint/common/roles_users/endpoint_operations_analyst';
 import { apiTest } from '../fixtures';
 
 const ACTION_TIMEOUT_MS = 180_000;

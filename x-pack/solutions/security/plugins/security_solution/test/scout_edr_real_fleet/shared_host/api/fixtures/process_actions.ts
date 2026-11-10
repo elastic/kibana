@@ -12,13 +12,13 @@ import {
   GET_PROCESSES_ROUTE,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
-} from '../../../../common/endpoint/constants';
+} from '../../../../../common/endpoint/constants';
 import type {
   ActionDetails,
   ActionDetailsApiResponse,
   EndpointActionResponseDataOutput,
   ProcessesEntry,
-} from '../../../../common/endpoint/types';
+} from '../../../../../common/endpoint/types';
 
 const ACTION_TIMEOUT_MS = 120_000;
 

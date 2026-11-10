@@ -16,7 +16,7 @@ import {
   FLEET_AND_HOST_TIMEOUT_MS,
   withEnrolledEndpoint,
   type EnrolledEndpoint,
-} from '../../fixtures/enrolled_endpoint';
+} from '../../../fixtures/enrolled_endpoint';
 import type { EdrRealFleetPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
