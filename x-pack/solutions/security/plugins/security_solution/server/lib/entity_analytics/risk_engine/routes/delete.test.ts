@@ -149,9 +149,7 @@ describe('riskEngineCleanupRoute', () => {
     const response = await server.inject(buildRequest(), context);
 
     expect(response.status).toEqual(500);
-    expect(clients.core.elasticsearch.client.asInternalUser.updateByQuery).toHaveBeenCalledTimes(
-      2
-    );
+    expect(clients.core.elasticsearch.client.asInternalUser.updateByQuery).toHaveBeenCalledTimes(2);
     expect(removeIfExists).not.toHaveBeenCalled();
     expect(deleteSavedObjects).not.toHaveBeenCalled();
   });
