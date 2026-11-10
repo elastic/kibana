@@ -10,6 +10,7 @@ import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getSeverityColor } from '../../../common/anomaly_detection';
+import { EntityTypeTooltip } from './entity_type_tooltip';
 import type { ImpactGroupNodeData } from './transform_impact_map';
 
 /**
@@ -48,35 +49,37 @@ export const GroupNode = memo(
             visibility: hidden;
           `}
         />
-        <EuiFlexGroup
-          gutterSize="xs"
-          alignItems="center"
-          responsive={false}
-          className="impactMapGroupHeader"
-          css={css`
-            padding: ${euiTheme.size.s} ${euiTheme.size.m};
-            /* Only the title receives clicks, so the group itself can still open. */
-            pointer-events: auto;
-          `}
-        >
-          {data.euiIcon && (
+        <EntityTypeTooltip typeKindLabel={data.typeKindLabel} subtypeLabel={data.subtypeLabel}>
+          <EuiFlexGroup
+            gutterSize="xs"
+            alignItems="center"
+            responsive={false}
+            className="impactMapGroupHeader"
+            css={css`
+              padding: ${euiTheme.size.s} ${euiTheme.size.m};
+              /* Only the title receives clicks, so the group itself can still open. */
+              pointer-events: auto;
+            `}
+          >
+            {data.euiIcon && (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={data.euiIcon} size="m" aria-hidden="true" />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
-              <EuiIcon type={data.euiIcon} size="m" aria-hidden="true" />
+              <EuiText size="s">
+                <strong>{data.label}</strong>
+              </EuiText>
             </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>{data.label}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          {data.eventCount ? (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="primary" data-test-subj="impactMapEventCount">
-                {data.eventCount}
-              </EuiBadge>
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
+            {data.eventCount ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="primary" data-test-subj="impactMapEventCount">
+                  {data.eventCount}
+                </EuiBadge>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EntityTypeTooltip>
         <Handle
           type="source"
           position={sourcePosition ?? Position.Right}

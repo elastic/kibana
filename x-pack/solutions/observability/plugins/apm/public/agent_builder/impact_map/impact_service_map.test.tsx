@@ -12,6 +12,7 @@ import { MOCK_EUI_THEME_FOR_USE_THEME } from '../../components/shared/service_ma
 import { ImpactServiceMap } from './impact_service_map';
 import {
   IMPACT_SEVERITY_SCORES,
+  getEntityTypeTooltip,
   getImpactSeverityScore,
   getEuiIcon,
   getImpactState,
@@ -103,6 +104,35 @@ describe('getImpactSeverityScore', () => {
   });
 });
 
+describe('getEntityTypeTooltip', () => {
+  it('uses kind and catalog label, or span type and subtype when present', () => {
+    expect(
+      getEntityTypeTooltip(
+        { id: 'service', label: 'Service', kind: 'service' },
+        'service',
+        'nodejs'
+      )
+    ).toEqual({ typeKindLabel: 'Service', subtypeLabel: 'nodejs' });
+    expect(
+      getEntityTypeTooltip(
+        { id: 'host', label: 'Host', kind: 'infrastructure' },
+        'host'
+      )
+    ).toEqual({ typeKindLabel: 'Infrastructure', subtypeLabel: 'Host' });
+    expect(
+      getEntityTypeTooltip(
+        {
+          id: 'postgres',
+          label: 'PostgreSQL',
+          kind: 'dependency',
+          icon: { span_type: 'db', span_subtype: 'postgresql' },
+        },
+        'postgres'
+      )
+    ).toEqual({ typeKindLabel: 'db', subtypeLabel: 'postgresql' });
+  });
+});
+
 describe('getEuiIcon', () => {
   it('uses the named icon, guesses from labels, and never leaves a service empty', () => {
     expect(
@@ -163,11 +193,18 @@ describe('transformImpactMap', () => {
         agentName: 'nodejs',
         alertsCount: 3,
         serviceAnomalyStats: { anomalyScore: IMPACT_SEVERITY_SCORES.impacted },
+        typeKindLabel: 'Service',
+        subtypeLabel: 'nodejs',
       },
     });
     expect(nodes.find(({ id }) => id === 'payments-db')).toMatchObject({
       type: 'impactInfrastructure',
-      data: { euiIcon: 'logoPostgres', severityScore: IMPACT_SEVERITY_SCORES.rootCause },
+      data: {
+        euiIcon: 'logoPostgres',
+        severityScore: IMPACT_SEVERITY_SCORES.rootCause,
+        typeKindLabel: 'Infrastructure',
+        subtypeLabel: 'PostgreSQL',
+      },
     });
     expect(nodes.find(({ id }) => id === 'cart')?.data).not.toHaveProperty('serviceAnomalyStats');
   });

@@ -73,6 +73,40 @@ export const getImpactState = (annotations?: ImpactMapAnnotations): ImpactState 
   return undefined;
 };
 
+/** Hover tip: the entity's kind (type) and catalog / span detail (sub-type). */
+export type EntityTypeTooltip = {
+  typeKindLabel: string;
+  subtypeLabel: string;
+};
+
+/**
+ * Labels for the entity hover tip. Prefer APM span type / subtype when the catalog has them;
+ * otherwise kind is the type and the catalog label (or agent) is the sub-type.
+ */
+export const getEntityTypeTooltip = (
+  type: ImpactMapEntityType | undefined,
+  typeId: string,
+  agentName?: string
+): EntityTypeTooltip => {
+  if (type?.icon?.span_type) {
+    return {
+      typeKindLabel: type.icon.span_type,
+      subtypeLabel: type.icon.span_subtype ?? type.label ?? typeId,
+    };
+  }
+  const typeKindLabel =
+    type?.kind === 'service'
+      ? i18n.translate('xpack.apm.impactMap.entityType.service', {
+          defaultMessage: 'Service',
+        })
+      : i18n.translate('xpack.apm.impactMap.entityType.infrastructure', {
+          defaultMessage: 'Infrastructure',
+        });
+  const subtypeLabel =
+    (type?.kind === 'service' && agentName) || type?.label || typeId;
+  return { typeKindLabel, subtypeLabel };
+};
+
 export type ImpactServiceNodeData = ServiceNodeData & {
   /** The entity this one sits inside, when the map groups it. */
   parentId?: string;
@@ -81,6 +115,8 @@ export type ImpactServiceNodeData = ServiceNodeData & {
   eventCount?: number;
   /** Fallback glyph when there is no APM agent logo — every service circle still shows something. */
   euiIcon?: string;
+  typeKindLabel?: string;
+  subtypeLabel?: string;
 };
 
 const KUBERNETES_TYPE =
@@ -132,6 +168,8 @@ export type ImpactDependencyNodeData = DependencyNodeData & {
   impactState?: ImpactState;
   euiIcon?: string;
   eventCount?: number;
+  typeKindLabel?: string;
+  subtypeLabel?: string;
 };
 
 /** An entity that other entities sit inside: drawn as a labelled box around its members. */
@@ -143,6 +181,8 @@ export interface ImpactGroupNodeData extends Record<string, unknown> {
   impactState?: ImpactState;
   euiIcon?: string;
   eventCount?: number;
+  typeKindLabel?: string;
+  subtypeLabel?: string;
 }
 
 export type ImpactServiceMapNode =
@@ -258,6 +298,7 @@ export const transformImpactMap = (
       const agentName = (agentNames[id] ?? type?.icon?.agent_name) as AgentName | undefined;
       const euiIcon = getEuiIcon(type, label);
       const displayLabel = shortenEntityLabel(label);
+      const { typeKindLabel, subtypeLabel } = getEntityTypeTooltip(type, typeId, agentName);
 
       if (groupIds.has(id)) {
         // Members already show impact; a box only goes red when it is the root cause itself.
@@ -274,6 +315,8 @@ export const transformImpactMap = (
             impactState: groupIsRoot ? 'root_cause' : undefined,
             euiIcon: euiIcon === DEFAULT_SERVICE_ICON ? 'nested' : euiIcon,
             eventCount,
+            typeKindLabel,
+            subtypeLabel,
           },
         };
       }
@@ -295,6 +338,8 @@ export const transformImpactMap = (
             impactState,
             euiIcon,
             eventCount,
+            typeKindLabel,
+            subtypeLabel,
           },
         };
       }
@@ -312,6 +357,8 @@ export const transformImpactMap = (
           agentName,
           // When APM has no agent logo, the circle still shows a service (or guessed) glyph.
           euiIcon: agentName ? undefined : euiIcon,
+          typeKindLabel,
+          subtypeLabel,
           ...(score !== undefined && { serviceAnomalyStats: { anomalyScore: score } }),
           ...(annotations?.alert_count && { alertsCount: annotations.alert_count }),
         },

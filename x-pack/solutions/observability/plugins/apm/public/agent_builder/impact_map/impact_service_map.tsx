@@ -44,6 +44,7 @@ import { GroupNode } from './group_node';
 import { ImpactMapEdge } from './impact_edge';
 import { ServiceGlyphNode } from './service_glyph_node';
 import { applyEdgeHoverHighlight, EDGE_HOVERED_CLASS } from './edge_hover';
+import { EntityTypeTooltip } from './entity_type_tooltip';
 import { applyGroupedLayout, hasGroups } from './group_layout';
 import { ServiceNode } from '../../components/shared/service_map/service_node';
 import { applyDagreLayout } from '../../components/shared/service_map/layout';
@@ -160,7 +161,10 @@ function EventCountBadge({ count }: { count?: number }) {
 }
 
 const ImpactServiceNode = memo((props: NodeProps<Node<ImpactServiceNodeData>>) => (
-  <>
+  <EntityTypeTooltip
+    typeKindLabel={props.data.typeKindLabel}
+    subtypeLabel={props.data.subtypeLabel}
+  >
     {props.data.agentName ? (
       <ServiceNode {...(props as unknown as ComponentProps<typeof ServiceNode>)} />
     ) : (
@@ -168,16 +172,19 @@ const ImpactServiceNode = memo((props: NodeProps<Node<ImpactServiceNodeData>>) =
     )}
     {props.data.impactState === 'root_cause' && <StateBadge state="root_cause" floating />}
     <EventCountBadge count={props.data.eventCount} />
-  </>
+  </EntityTypeTooltip>
 ));
 ImpactServiceNode.displayName = 'ImpactServiceNode';
 
 const ImpactInfrastructureNode = memo((props: NodeProps<Node<ImpactDependencyNodeData>>) => (
-  <>
+  <EntityTypeTooltip
+    typeKindLabel={props.data.typeKindLabel}
+    subtypeLabel={props.data.subtypeLabel}
+  >
     <InfrastructureNode {...props} />
     {props.data.impactState === 'root_cause' && <StateBadge state="root_cause" floating />}
     <EventCountBadge count={props.data.eventCount} />
-  </>
+  </EntityTypeTooltip>
 ));
 ImpactInfrastructureNode.displayName = 'ImpactInfrastructureNode';
 
