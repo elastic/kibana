@@ -40,6 +40,7 @@
     "@kbn/controls-schemas",
     "@kbn/lens-common",
     "@kbn/charts-plugin",
-    "@kbn/expression-gauge-plugin"
+    "@kbn/expression-gauge-plugin",
+    "@kbn/expression-legacy-metric-vis-plugin"
   ]
 }

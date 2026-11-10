@@ -12,12 +12,15 @@ import { i18n } from '@kbn/i18n';
 import type { MaterializeContext } from '../../../common';
 import type { UnsupportedNode } from '../nodes';
 import type { DataRequest, EsqlDataRequest, MaterializeContextOverride } from '../types';
+import { compileLensDataViewChart } from '../lens_aggs/compile_chart';
+import type { CompiledLensLayer } from '../lens_aggs/compile_layer';
 import { createUnsupportedNode } from '../unsupported';
 import type {
   LensApiConfig,
   LensDatatableConfig,
   LensGaugeConfig,
   LensHeatmapConfig,
+  LensLegacyMetricConfig,
   LensMetricConfig,
   LensPartitionConfig,
   LensTagcloudConfig,
@@ -100,10 +103,29 @@ const unsupportedDataView = () =>
     })
   );
 
+const unsupportedPanelQuery = () =>
+  createUnsupportedNode(
+    i18n.translate('xpack.isomer.materialize.lens.unsupportedPanelQuery', {
+      defaultMessage:
+        'Lens charts on a data view with a query of their own cannot be materialized yet.',
+    })
+  );
+
 /** The chart, narrowed to the ES|QL chart types the materializer maps, or why it can't be. */
 export const asMappedChart = (
   chart: LensApiConfig
-): { single: LensSingleQueryConfig } | { xy: LensXyConfig } | UnsupportedNode => {
+):
+  | { single: LensSingleQueryConfig }
+  | { xy: LensXyConfig }
+  | { legacyMetric: LensLegacyMetricConfig }
+  | UnsupportedNode => {
+  if (chart.type === 'legacy_metric') {
+    // Lens's API takes legacy metrics on data views only, as a single metric operation, which
+    // the aggs path compiles (#303006). Its own query isn't planned yet.
+    return chart.query?.expression.trim()
+      ? unsupportedPanelQuery()
+      : { legacyMetric: chart as LensLegacyMetricConfig };
+  }
   if (SINGLE_QUERY_TYPES.has(chart.type)) {
     return isEsqlSource(chart as { data_source?: { type: string } })
       ? { single: chart as LensSingleQueryConfig }
@@ -125,6 +147,21 @@ export const asMappedChart = (
     return { xy: chart as LensXyConfig };
   }
   return unsupportedType(chart.type);
+};
+
+/**
+ * A data-view legacy metric's `aggs` request and the Lens column each table column fills, as
+ * `compileLensDataViewChart` compiles Lens's own layer for it, or why it can't run yet.
+ */
+export const compileLegacyMetric = (
+  chart: LensLegacyMetricConfig
+): CompiledLensLayer | UnsupportedNode => {
+  const layers = compileLensDataViewChart(chart);
+  const [layer] = layers;
+  if (layers.length !== 1 || !layer) {
+    return unsupportedDataView();
+  }
+  return 'unsupported' in layer ? createUnsupportedNode(layer.unsupported) : layer.compiled;
 };
 
 /** The panel's own filters, as the Kibana filters Lens applies with them. */
@@ -164,6 +201,19 @@ export const planLensChart = (
   const filters = panelFilters(chart);
   if ('single' in mapped) {
     return [esqlRequest(mapped.single as EsqlSource, filters)];
+  }
+  if ('legacyMetric' in mapped) {
+    const compiled = compileLegacyMetric(mapped.legacyMetric);
+    if ('type' in compiled) {
+      return compiled;
+    }
+    const { request } = compiled;
+    return [
+      {
+        ...request,
+        ...(filters.length > 0 ? { context: { ...request.context, filters } } : {}),
+      },
+    ];
   }
   return xyQueryLayers(mapped.xy).map((layer) => esqlRequest(layer as EsqlSource, filters));
 };

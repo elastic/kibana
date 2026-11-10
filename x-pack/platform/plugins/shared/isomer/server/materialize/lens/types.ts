@@ -50,11 +50,8 @@ export type LensGaugeConfig = GaugeConfigESQL;
 /** An ES|QL tag cloud. */
 export type LensTagcloudConfig = TagcloudConfigESQL;
 
-/** An ES|QL legacy metric. */
-export type LensLegacyMetricConfig = Extract<
-  LensApiConfig,
-  { type: 'legacy_metric'; data_source: { type: 'esql' } }
->;
+/** A legacy metric. Lens's API takes them on data views only. */
+export type LensLegacyMetricConfig = Extract<LensApiConfig, { type: 'legacy_metric' }>;
 
 export type LensXyDataLayer = Exclude<
   Extract<XYLayer, { data_source: { type: 'esql' } }>,

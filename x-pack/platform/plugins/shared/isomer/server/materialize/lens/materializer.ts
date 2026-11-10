@@ -13,10 +13,11 @@ import { openInLensLabel } from './shared';
 import { mapLensDatatable } from './datatable';
 import { mapLensGauge } from './gauge';
 import { mapLensHeatmap } from './heatmap';
+import { mapLensLegacyMetric } from './legacy_metric';
 import { mapLensMetric } from './metric';
 import { mapLensPartition } from './partition';
 import { mapLensTagcloud } from './tagcloud';
-import { asMappedChart, planLensChart } from './plan';
+import { asMappedChart, compileLegacyMetric, planLensChart } from './plan';
 import type { LensApiConfig, LensMaterializeConfig, LensSavedObjectReference } from './types';
 import { mapLensXy } from './xy';
 
@@ -130,6 +131,12 @@ export const createLensMaterializer = ({
     }
     if ('xy' in mapped) {
       return mapLensXy(mapped.xy, tables, kit, savedObject);
+    }
+    if ('legacyMetric' in mapped) {
+      const compiled = compileLegacyMetric(mapped.legacyMetric);
+      return 'type' in compiled
+        ? compiled
+        : mapLensLegacyMetric(mapped.legacyMetric, compiled, tables, kit, savedObject);
     }
     const { single } = mapped;
     switch (single.type) {
