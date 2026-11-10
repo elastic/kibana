@@ -182,7 +182,8 @@ The `evals_nightshift_investigations` server config extends `evals_tracing` when
 exports sandbox credentials. Otherwise it is plain `evals_tracing`, so the smoke eval needs no
 sandbox credentials. It enables the investigation engine, its `nightshift.enabled` feature flag
 and sandbox, pauses online evals (`nightshift.onlineEvals.paused`) so investigations are judged
-only by the suite, disables Cortex, and exports full Agent Builder payloads (user messages, system
+only by the suite, disables Wiki and Semantic Memory unless [knowledge switches](#knowledge-switches)
+turn them on, and exports full Agent Builder payloads (user messages, system
 instructions, responses, tool arguments/results and conversation IDs) to the profile's configured
 destination. Trace-exporter headers and connector credentials reach Kibana through
 environment references in committed YAML, without generated secret files or credential arguments.
@@ -357,7 +358,7 @@ investigator response confirms a cause and those edges carry ✅, and that decla
 agree with the tree before the run and the tree after it. An LLM judge scores whether those merges
 and paths match the investigation. The spec fails when that reinforce step does not finish or when
 the code score is below 1. It is not part of an unset or `all` run: selecting it exports
-`NIGHTSHIFT_DECISION_TREES`, which enables decision trees without turning Cortex on. It cannot be
+`NIGHTSHIFT_DECISION_TREES`, which enables decision trees without turning Wiki on. It cannot be
 combined with other dataset ids. Restart Scout when switching to or from it. Each example's trace is the reinforcement agent's Agent Builder
 trace, which shows the system prompt and the submit tool schema. It is not the eval task span.
 The system prompt does not yet ask the agent to report traversals; those fields are on the submit
@@ -386,14 +387,89 @@ JSON file `{"examples":[...]}` whose examples carry `input.question`, `input.res
 a causal path that disagrees with the response, or a merge that does not match the two trees scores
 0. The judge's explanation is what shows whether the arguments and merged nodes look right.
 
+## Knowledge switches
+
+Investigations run without learned knowledge by default. `NIGHTSHIFT_KNOWLEDGE` turns on any of
+`memory`, `wiki` and `decision-trees` (comma-separated), and the eval then copies that system's
+knowledge from the endpoint under test into the run's space before the first example:
+
+```bash
+NIGHTSHIFT_KNOWLEDGE=memory,decision-trees NIGHTSHIFT_DATASETS=trace-only \
+  NIGHTSHIFT_EXAMPLES_FILE=/private/path/examples.json \
+  node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 1 \
+  --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
+```
+
+- The knowledge comes from the endpoint the [connector set](#connector-sets) investigates:
+  `nightshiftKnowledge.default` for customer0 and `nightshiftKnowledge.orcabench` for ORCA, each
+  with the `url` and `apiKey` of the Elasticsearch cluster behind that endpoint's Kibana, and the
+  `spaceId` that holds its knowledge (default `default`). For the default set only, without a
+  profile block, the hook reads `NIGHTSHIFT_KNOWLEDGE_ES_URL`, `NIGHTSHIFT_KNOWLEDGE_ES_API_KEY`
+  and `NIGHTSHIFT_KNOWLEDGE_SPACE_ID` from the shell; an ORCA run needs its own block, so stale
+  customer0 values in the shell can't load customer0 knowledge into it. See
+  [Knowledge source key](#knowledge-source-key).
+- Before the first example, the eval clears all three knowledge indices in its space, then copies
+  every selected system's documents from the source space, moving their ids and `space_id` into its
+  own space. Embeddings are recomputed by the eval cluster on write. A source space with no
+  documents for a selected system fails the run.
+- The Scout config set turns on each selected system and turns learning off
+  (`xpack.nightshift_investigations.learning.enabled=false`), so the post-run optimize hook doesn't
+  change the knowledge while examples run. Decision trees do not need Wiki, so
+  `decision-trees` alone leaves Wiki off.
+- Every score records `knowledge` (the selection, or `none`), `knowledge_source`, and per system the
+  number of documents loaded and the newest one's `@timestamp`.
+- Changing `NIGHTSHIFT_KNOWLEDGE` restarts Scout, since it changes the server's flags.
+
+### Knowledge source key
+
+The knowledge indices live on the Elasticsearch cluster behind the endpoint's deployed Kibana, and
+the connector keys don't grant access to them, so the copy needs its own key. The `dev-vault` profile
+has no `nightshiftKnowledge` block yet, so for now each developer mints a short-lived read-only key
+with credentials for that cluster (any user with `manage_own_api_key`):
+
+```bash
+curl -s -u "$ES_USER:$ES_PASSWORD" -H 'Content-Type: application/json' \
+  -X POST "$KNOWLEDGE_ES_URL/_security/api_key" -d '{
+    "name": "nightshift-evals-knowledge-read-<you>",
+    "expiration": "7d",
+    "role_descriptors": { "knowledge_read": { "indices": [
+      { "names": ["ai-index-idx-nightshift-*"], "privileges": ["read"] }
+    ] } }
+  }'
+```
+
+Use the response's `encoded` value as the key, and keep it out of the repo, for example in a
+`chmod 600` file loaded before the run:
+
+```bash
+# ~/.nightshift-knowledge-c0.env
+NIGHTSHIFT_KNOWLEDGE_ES_URL=https://<cluster>.es.<region>.elastic.cloud
+NIGHTSHIFT_KNOWLEDGE_ES_API_KEY=<encoded>
+NIGHTSHIFT_KNOWLEDGE_SPACE_ID=default
+```
+
+```bash
+set -a; source ~/.nightshift-knowledge-c0.env; set +a
+NIGHTSHIFT_KNOWLEDGE=memory,wiki node scripts/evals start --suite nightshift-investigations ...
+```
+
+The URL must not embed credentials, and the hook fails the run before Scout starts when the key or
+URL is missing. A key past its expiration fails the copy with a 401; mint a new one. CI and the
+`orcabench` connector set need the key in the profile's `nightshiftKnowledge.<set>` block instead.
+
+Known limitation: the copy is the source space's knowledge as it is at run time. It is not
+filtered against the cases under test, so it can hold knowledge that an earlier investigation of
+the same case derived, which can give away the reference cause. Read knowledge-on scores with that
+in mind until the copy excludes each case's own investigations.
+
 ## Connector probes
 
 `NIGHTSHIFT_DATASETS=connector-probe` asks the hidden **Nightshift Assistant** agent
 (`nightshift.assistant`) each question in one `POST /api/agent_builder/converse` call. The
-assistant has the investigator's tools, connectors, Cortex and Semantic Memory hooks, but a short
+assistant has the investigator's tools, connectors, Wiki and Semantic Memory hooks, but a short
 direct-answer prompt that reads the workspace `.md` files only when needed, and no decision trees,
 so a probe takes a few model turns instead of a full investigation. Use it to iterate quickly on
-how the agent queries Elasticsearch. Cortex and memory optimize still run after each reply, so
+how the agent queries Elasticsearch. Wiki and memory optimize still run after each reply, so
 probes update the space's wiki and memories like investigations do.
 
 It is opt-in: unset and `all` never select it, because it needs a
@@ -423,9 +499,9 @@ Set `SELECTED_EVALUATORS=connector_used,within_time_budget` to skip the judge. E
 case, duration, tool-call count, conversation and trace ids and scores. A failed `converse` call
 fails the test; low scores do not.
 
-## Cortex optimizer replay
+## Wiki optimizer replay
 
-`NIGHTSHIFT_DATASETS=cortex-optimize` replays saved investigation rounds through the real Cortex
+`NIGHTSHIFT_DATASETS=wiki-optimize` replays saved investigation rounds through the real Wiki
 optimizer with a real model and scores the wiki pages it writes. No investigation runs and no
 sandbox is needed, so a run takes a few model calls per example and isolates what the optimizer
 learns from a round: recurring tool failures and a correction in a follow-up message. The
@@ -435,15 +511,15 @@ It is opt-in: unset and `all` never select it. It still needs a model endpoint, 
 way as the other evals:
 
 ```bash
-NIGHTSHIFT_DATASETS=cortex-optimize \
+NIGHTSHIFT_DATASETS=wiki-optimize \
   node scripts/evals start --suite nightshift-investigations --profile dev-vault --repetitions 3 \
   --model eis-anthropic-claude-5-5-sonnet --judge eis-anthropic-claude-4-6-sonnet
 ```
 
 The model is not deterministic, so use several repetitions and read the per-evaluator pass rates.
-The bundled `evals/cortex_optimize/synthetic.json` uses made-up services. Replays built from real
+The bundled `evals/wiki_optimize/synthetic.json` uses made-up services. Replays built from real
 traces name real infrastructure, so they live outside the repository: point
-`NIGHTSHIFT_CORTEX_REPLAY_FILE` at a file in the same format.
+`NIGHTSHIFT_WIKI_REPLAY_FILE` at a file in the same format.
 
 Each example replays one or more `rounds` against one store, optionally starting from `seed_pages`:
 
@@ -628,17 +704,18 @@ against.
 
 ## Environment variables
 
-| Variable                               | Effect |
-| -------------------------------------- | ------ |
-| `NIGHTSHIFT_DATASETS`                  | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all`, `trace-only`, or `reinforcement` fails before any test runs, even when Scout is reused. `reinforcement` selects the Customer-0 reinforcement micro-eval and enables decision trees without turning Cortex on; it cannot be combined with other ids, and unset and `all` never include it. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `cortex-optimize` selects the [Cortex optimizer replay](#cortex-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
-| `NIGHTSHIFT_PROBE_EXAMPLES_FILE`       | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes). |
-| `NIGHTSHIFT_CORTEX_REPLAY_FILE`        | Replay file for `cortex-optimize`; the bundled synthetic examples when unset. Same `nightshift/` dataset-file format as the investigation examples, with the round and expectation fields in [Cortex optimizer replay](#cortex-optimizer-replay). |
-| `NIGHTSHIFT_PROBE_TIME_BUDGET_S`       | Seconds a probe may take before `within_time_budget` scores 0 (default 30). |
+| Variable                         | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NIGHTSHIFT_DATASETS`                  | Comma-separated dataset ids (whitespace trimmed). Smoke dataset ids such as `synthetic-smoke` select seeded evals; `trace-only` selects the file-driven investigations; they can be combined, e.g. `synthetic-smoke,trace-only`. Unset or `all` runs every eval when sandbox credentials are present, except that a stored `NIGHTSHIFT_DATASET_NAME` defaults to trace-only when selection is unset. Without them, unset runs only smoke with a warning, while an explicit `all`, `trace-only`, or `reinforcement` fails before any test runs, even when Scout is reused. `reinforcement` selects the Customer-0 reinforcement micro-eval and enables decision trees without turning Wiki on; it cannot be combined with other ids, and unset and `all` never include it. `connector-probe` selects the [connector probes](#connector-probes), which unset and `all` never include. `wiki-optimize` selects the [Wiki optimizer replay](#wiki-optimizer-replay), which unset and `all` never include and which needs no sandbox credentials. `orcabench` selects the isolated ORCA dataset and cannot be combined with other ids; it requires an ORCA-configured Scout server. Unknown ids fail early. |
+| `NIGHTSHIFT_KNOWLEDGE`           | Comma-separated knowledge systems (`memory`, `wiki`, `decision-trees`) to turn on and restore before the first example. Unset turns them all off. See [knowledge switches](#knowledge-switches).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `NIGHTSHIFT_PROBE_EXAMPLES_FILE` | Examples file for `connector-probe`; required when it is selected. See [connector probes](#connector-probes).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `NIGHTSHIFT_WIKI_REPLAY_FILE` | Replay file for `wiki-optimize`; the bundled synthetic examples when unset. Same `nightshift/` dataset-file format as the investigation examples, with the round and expectation fields in [Wiki optimizer replay](#wiki-optimizer-replay). |
+| `NIGHTSHIFT_PROBE_TIME_BUDGET_S` | Seconds a probe may take before `within_time_budget` scores 0 (default 30).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `NIGHTSHIFT_REINFORCEMENT_DATASET`     | When set, the micro-eval runs the first examples of this Customer-0 investigation dataset instead of replaying the committed rounds. A new tree from that path cannot declare merges. |
 | `NIGHTSHIFT_REINFORCEMENT_LIMIT`       | How many of that dataset's examples to run, from 1 to 5. Defaults to 3. Used only with `NIGHTSHIFT_REINFORCEMENT_DATASET`. |
 | `NIGHTSHIFT_REINFORCEMENT_TRACES_FILE` | JSON file of full investigation rounds. When set, the micro-eval replays those rounds instead of the committed ones. |
-| `SELECTED_EVALUATORS`                  | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`). |
-| `GCS_CREDENTIALS`                      | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite. |
+| `SELECTED_EVALUATORS`            | Standard `@kbn/evals` filter, by evaluator name (`documents_restored`, `timestamps_replayed`).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `GCS_CREDENTIALS`                | Service account JSON Elasticsearch uses to reach the seed-data bucket. Read access is enough to run the suite.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 Because every eval dataset gets its own `describe` block, Playwright's `--grep` filters by dataset id as well.
 

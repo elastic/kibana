@@ -1,7 +1,7 @@
 version: '1'
 name: Nightshift Agent Optimize
 description: >
-  Post-round workflow that reuses the conversation sandbox, runs Cortex and
+  Post-round workflow that reuses the conversation sandbox, runs Wiki and
   Semantic Memory optimize in parallel, then distills the round into the decision
   tree. Both writers receive the same sandbox_id obtain produced so they address the
   workspace hydrate and the bash tools used. Authorization to execute this managed
@@ -12,7 +12,7 @@ tags:
   - observability
   - nightshift
   - investigation
-  - cortex
+  - wiki
   - semantic-memory
   - decision-tree
 
@@ -66,7 +66,7 @@ triggers:
         tool_calls:
           type: array
           description: >
-            Tool calls from the completed round (parameters). Shows the Cortex and
+            Tool calls from the completed round (parameters). Shows the Wiki and
             Semantic Memory optimizers which services, indices, and integrations the
             investigator queried, and decision-tree reinforcement which
             decision-tree files the investigator actually opened.
@@ -77,7 +77,7 @@ triggers:
           type: array
           description: >
             Results of the completed round's tool calls, keyed by tool_call_id.
-            Shows the Cortex and Semantic Memory optimizers what each query returned.
+            Shows the Wiki and Semantic Memory optimizers what each query returned.
           items:
             type: object
             additionalProperties: true
@@ -108,10 +108,10 @@ steps:
     timeout: 150s
     branch-timeout: 120s
     branches:
-      - name: cortex
+      - name: wiki
         steps:
-          - name: optimize_cortex
-            type: nightshift.cortexOptimize
+          - name: optimize_wiki
+            type: nightshift.wikiOptimize
             with:
               prompt: '{{ inputs.prompt }}'
               response: '{{ inputs.response }}'

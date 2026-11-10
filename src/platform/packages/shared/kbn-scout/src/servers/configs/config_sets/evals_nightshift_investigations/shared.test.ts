@@ -57,6 +57,7 @@ describe.each([
     delete process.env.NIGHTSHIFT_DATASETS;
     delete process.env.NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG;
     delete process.env.NIGHTSHIFT_DECISION_TREES;
+    delete process.env.NIGHTSHIFT_KNOWLEDGE;
     for (const key of Object.keys(process.env)) {
       if (key.startsWith('SANDBOX_')) delete process.env[key];
     }
@@ -123,29 +124,6 @@ describe.each([
     );
   });
 
-  it('enables decision trees only when the reinforcement hook exported NIGHTSHIFT_DECISION_TREES', () => {
-    const off = loadServers(configPath, {
-      SANDBOX_KIBANA_CONFIG,
-      NIGHTSHIFT_DATASETS: 'reinforcement',
-    });
-    expect(off.kbnTestServer.serverArgs).toContain(
-      '--xpack.nightshift_investigations.cortex.enabled=false'
-    );
-    expect(off.kbnTestServer.serverArgs).toContain(
-      '--xpack.nightshift_investigations.decision_trees.enabled=false'
-    );
-    const on = loadServers(configPath, {
-      SANDBOX_KIBANA_CONFIG,
-      NIGHTSHIFT_DECISION_TREES: 'true',
-    });
-    expect(on.kbnTestServer.serverArgs).toContain(
-      '--xpack.nightshift_investigations.cortex.enabled=false'
-    );
-    expect(on.kbnTestServer.serverArgs).toContain(
-      '--xpack.nightshift_investigations.decision_trees.enabled=true'
-    );
-  });
-
   it('reserves capacity for sixteen investigations and five background tasks', () => {
     const servers = loadServers(configPath, { SANDBOX_KIBANA_CONFIG });
     expect(servers.kbnTestServer.serverArgs).toContain('--xpack.task_manager.capacity=21');
@@ -181,6 +159,47 @@ describe.each([
     expect(servers.kbnTestServer.serverArgs).toContain(
       `--config=${join(__dirname, 'kibana.tracing.yml')}`
     );
+  });
+
+  const knowledgeArgsFor = (env: Record<string, string> = {}) =>
+    loadServers(configPath, { SANDBOX_KIBANA_CONFIG, ...env }).kbnTestServer.serverArgs.filter(
+      (arg: string) => /nightshift_investigations\.(wiki|memory|decision_trees|learning)\./.test(arg)
+    );
+
+  // Decision trees default on and do not require Wiki, so leaving their flag out would turn them on.
+  it('keeps every knowledge system off without NIGHTSHIFT_KNOWLEDGE', () => {
+    expect(knowledgeArgsFor({ NIGHTSHIFT_DATASETS: 'reinforcement' })).toEqual([
+      '--xpack.nightshift_investigations.wiki.enabled=false',
+      '--xpack.nightshift_investigations.memory.enabled=false',
+      '--xpack.nightshift_investigations.decision_trees.enabled=false',
+    ]);
+  });
+
+  it('turns on only the selected knowledge systems and freezes learning', () => {
+    expect(knowledgeArgsFor({ NIGHTSHIFT_KNOWLEDGE: 'memory' })).toEqual([
+      '--xpack.nightshift_investigations.wiki.enabled=false',
+      '--xpack.nightshift_investigations.memory.enabled=true',
+      '--xpack.nightshift_investigations.decision_trees.enabled=false',
+      '--xpack.nightshift_investigations.learning.enabled=false',
+    ]);
+  });
+
+  it('runs decision trees without Wiki', () => {
+    expect(knowledgeArgsFor({ NIGHTSHIFT_KNOWLEDGE: 'decision-trees' })).toEqual([
+      '--xpack.nightshift_investigations.wiki.enabled=false',
+      '--xpack.nightshift_investigations.memory.enabled=false',
+      '--xpack.nightshift_investigations.decision_trees.enabled=true',
+      '--xpack.nightshift_investigations.learning.enabled=false',
+    ]);
+  });
+
+  // The live reinforcement mode waits on the post-run hook, which learning gates.
+  it('enables decision trees and keeps learning on when the reinforcement hook exported NIGHTSHIFT_DECISION_TREES', () => {
+    expect(knowledgeArgsFor({ NIGHTSHIFT_DECISION_TREES: 'true' })).toEqual([
+      '--xpack.nightshift_investigations.wiki.enabled=false',
+      '--xpack.nightshift_investigations.memory.enabled=false',
+      '--xpack.nightshift_investigations.decision_trees.enabled=true',
+    ]);
   });
 
   it('fails fast when the connector set YAML is missing', () => {

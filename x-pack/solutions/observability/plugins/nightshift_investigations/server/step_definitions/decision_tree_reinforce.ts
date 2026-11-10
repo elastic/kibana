@@ -142,8 +142,8 @@ export const decisionTreeReinforceStepDefinition = ({
         ),
     }),
     handler: async (context) => {
-      // The combined optimize workflow installs with Cortex or Memory, so this step is registered
-      // even when the tree feature is off.
+      // The combined optimize workflow also installs with Wiki or Memory alone, so this step is
+      // registered even when the tree feature is off.
       if (isEnabled && !isEnabled()) {
         context.logger.info('Skipped decision tree reinforcement (flag off)');
         return { output: { message: '', skipped: true, submissions_json: '[]' } };

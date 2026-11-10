@@ -6,6 +6,14 @@
  */
 
 import { parseMatrixConfig } from '@kbn/security-evals-matrix';
+import { AD_FAILURE_CLASS_EVALUATOR_NAME } from './evaluators/ad_failure_class_evaluator';
+import { CHAIN_COVERAGE_EVALUATOR_NAME } from './evaluators/chain_coverage_evaluator';
+import { EICAR_TRAP_EVALUATOR_NAME } from './evaluators/eicar_trap_evaluator';
+import { RUBRIC_CAP_NO_TOOL_CALL_EVALUATOR_NAME } from './evaluators/rubric_cap_no_tool_call_evaluator';
+import { SIMULATION_AWARENESS_EVALUATOR_NAME } from './evaluators/simulation_awareness_evaluator';
+import { STALLED_AFTER_LOAD_SKILL_EVALUATOR_NAME } from './evaluators/stalled_after_load_skill_evaluator';
+import { UNREQUESTED_SIDE_EFFECTS_EVALUATOR_NAME } from './evaluators/unrequested_side_effects_evaluator';
+import { WORKFLOW_VALIDITY_EVALUATOR_NAME } from './evaluators/workflow_validity_evaluator';
 import config from '../persona_matrix.config.json';
 import productionConfig from '../persona_matrix.production.config.json';
 import suitesMetadata from '../../../../../../.buildkite/pipelines/evals/evals.suites.json';
@@ -141,5 +149,44 @@ describe('persona_matrix.config.json extra-suite branch pins', () => {
     // The pinned branches last exported 2026-07-30 and 2026-08-11; a 14-day
     // window silently drops them even with the branch pinned correctly.
     expect(config.lookbackDays).toBeGreaterThanOrEqual(45);
+  });
+});
+
+/**
+ * The deterministic behaviour evaluators are per-cell diagnostics. If one is missing from
+ * `excludeEvaluators` it silently folds into every cell mean and moves published scores.
+ * Overriding `excludeEvaluators` replaces the schema default, so the defaults are listed too.
+ */
+// Mirrors `DEFAULT_EXCLUDED_EVALUATORS` in @kbn/security-evals-matrix, which the package does not export.
+const DEFAULT_EXCLUDED_EVALUATORS = [
+  'Latency',
+  'Tool Calls',
+  'Input Tokens',
+  'Output Tokens',
+  'Cached Tokens',
+  'Skill Invoked',
+];
+
+describe.each([
+  ['persona_matrix.config.json', config],
+  ['persona_matrix.production.config.json', productionConfig],
+])('%s excludeEvaluators', (_name, raw) => {
+  const excluded: string[] = raw.excludeEvaluators ?? [];
+
+  it('keeps every default observability exclusion', () => {
+    expect(DEFAULT_EXCLUDED_EVALUATORS.filter((name) => !excluded.includes(name))).toEqual([]);
+  });
+
+  it.each([
+    WORKFLOW_VALIDITY_EVALUATOR_NAME,
+    EICAR_TRAP_EVALUATOR_NAME,
+    SIMULATION_AWARENESS_EVALUATOR_NAME,
+    UNREQUESTED_SIDE_EFFECTS_EVALUATOR_NAME,
+    STALLED_AFTER_LOAD_SKILL_EVALUATOR_NAME,
+    RUBRIC_CAP_NO_TOOL_CALL_EVALUATOR_NAME,
+    CHAIN_COVERAGE_EVALUATOR_NAME,
+    AD_FAILURE_CLASS_EVALUATOR_NAME,
+  ])('excludes %s from cell means', (name) => {
+    expect(excluded).toContain(name);
   });
 });

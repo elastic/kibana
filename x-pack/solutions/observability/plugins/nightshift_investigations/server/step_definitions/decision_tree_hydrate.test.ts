@@ -123,8 +123,9 @@ describe('decisionTreeHydrateStepDefinition', () => {
     );
   });
 
-  // The combined materialize workflow installs with Cortex or Memory, so this step is registered
-  // even when the tree feature is off. It must no-op rather than write trees or fail the round.
+  // The combined materialize workflow also installs with Wiki or Memory alone, so this step is
+  // registered even when the tree feature is off. It must no-op rather than write trees or fail
+  // the round.
   it('skips without touching the sandbox when the feature is disabled', async () => {
     const sandboxStart = makeSandboxStart();
     const definition = decisionTreeHydrateStepDefinition({

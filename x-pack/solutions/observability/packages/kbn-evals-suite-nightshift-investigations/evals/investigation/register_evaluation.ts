@@ -12,6 +12,7 @@ import type { EvaluationDataset, EvalsClient } from '@kbn/evals';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
+import { restoreKnowledge } from '../../src/knowledge/restore_knowledge';
 import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
 import { saveConnectorSetOnInvestigator } from './connector_sets';
@@ -118,6 +119,7 @@ export const registerInvestigationEvaluation = ({
         });
         await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
+        const knowledgeMetadata = await restoreKnowledge({ esClient, log });
         const [experiment] = await executorClient.runExperiment(
           {
             name: orca
@@ -126,7 +128,7 @@ export const registerInvestigationEvaluation = ({
             datasets: [dataset],
             trustUpstreamDataset,
             concurrency,
-            metadata: { ...experimentMetadata, concurrency },
+            metadata: { ...experimentMetadata, ...knowledgeMetadata, concurrency },
             task: (example) => runInvestigation(fetch, example, connector),
           },
           evaluators

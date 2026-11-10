@@ -57,7 +57,7 @@ export class DecisionTreeVersionWriteError extends Error {
 
 /**
  * Structured fields live under `attributes` so they inherit the AI-index template's flattened
- * mapping, the same way Cortex stores `status` / `slug` / `space_id`. The backing index is
+ * mapping, the same way Wiki stores `status` / `slug` / `space_id`. The backing index is
  * auto-created on first write from that template; we never call `indices.create`.
  */
 interface DecisionTreeAttributes {
@@ -235,7 +235,7 @@ const mergeLearnings = (
   return [...bySlot.values()];
 };
 
-/** Flattened attributes may come back as strings; coerce the same way Cortex does. */
+/** Flattened attributes may come back as strings; coerce the same way Wiki does. */
 const toCount = (value: number | string | undefined, fallback = 0): number => {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return Math.max(0, Math.floor(value));

@@ -27,7 +27,7 @@ export type MemoryListResult = ListMemoryPagesResponse;
 export type MemoryDetailResult = GetMemoryPageResponse;
 export type MemorySummary = MemoryPageSummary;
 
-/** The sidebar's own selection state, mirroring the Cortex tab. */
+/** The sidebar's own selection state, mirroring the Wiki tab. */
 export type MemorySidebarSelection =
   | { kind: 'home' }
   | { kind: 'activity' }

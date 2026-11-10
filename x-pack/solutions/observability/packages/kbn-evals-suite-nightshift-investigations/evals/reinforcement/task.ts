@@ -43,7 +43,7 @@ const SPACE_ID = 'default';
  * (bounded at 900s), on top of the investigation itself.
  */
 export const CUSTOMER0_REINFORCEMENT_TIMEOUT_MS = 45 * 60_000;
-/** Reinforce is bounded at 900s; cortex optimize can use its branch timeout first. */
+/** Reinforce is bounded at 900s; wiki optimize can use its branch timeout first. */
 const MAX_WAIT_MS = 20 * 60_000;
 /** How long to wait for the post-execution execution to be searchable after the investigation. */
 const EXECUTION_LOOKUP_MS = 30_000;
@@ -739,7 +739,7 @@ const findOptimizeExecution = async (
   return undefined;
 };
 
-/** The post-execution workflow can still be in its cortex step when the investigation reports done. */
+/** The post-execution workflow can still be in its wiki step when the investigation reports done. */
 const waitForOptimizeExecution = async (
   fetch: HttpHandler,
   execution: WorkflowExecutionDto

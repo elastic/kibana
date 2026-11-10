@@ -407,7 +407,7 @@ describe('nightshift_submit_optimizer_result', () => {
       const { result } = await runSubmit({
         store,
         markdown: markdownFor(FULL_TREE),
-        submission: { file_path: '/workspace/cortex/runbooks/checkout.md' },
+        submission: { file_path: '/workspace/wiki/runbooks/checkout.md' },
       });
 
       expectRejected(result, /file_path for symptom:checkout-high-latency must be/);
