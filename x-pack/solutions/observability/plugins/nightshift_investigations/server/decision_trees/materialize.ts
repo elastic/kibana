@@ -13,7 +13,7 @@ import {
   symptomFilePath,
   type LearningRecord,
 } from '@kbn/nightshift-decision-trees';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../sandbox_audit';
 import type { DecisionTreeStore } from './store';
 import type { DecisionTreeSummary } from '../../common/decision_trees';
 
@@ -184,7 +184,7 @@ export const materializeDecisionTrees = async ({
   treeIds,
   signal,
 }: {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   store: DecisionTreeStore;
   logger: Logger;
   /**
