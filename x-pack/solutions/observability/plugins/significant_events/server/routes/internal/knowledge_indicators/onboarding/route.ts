@@ -71,7 +71,7 @@ const onboardingExecuteRoute = createServerRoute({
           to: timestampFromString,
           recencyThresholdHours: z
             .number()
-            .positive()
+            .nonnegative()
             .optional()
             .describe(
               'Hours within which identified features count as recent and are not refreshed.'
