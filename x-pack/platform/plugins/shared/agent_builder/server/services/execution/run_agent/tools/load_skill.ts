@@ -12,7 +12,6 @@ import type {
   AgentBuilderAnalytics,
   AgentBuilderTracking,
   InternalBuiltinToolDefinition,
-  ToolReturnSummarizerFn,
 } from '@kbn/agent-builder-server';
 import { loadSkillTools, type LoadSkillToolsResult } from '../../../skills/load_skill_tools';
 import { resolveSkill } from '../../../skills/utils';
@@ -24,13 +23,6 @@ import {
 const schema = z.object({
   skill: z.string().describe('The skill name or path'),
 });
-
-/**
- * Identity transform. Returning the original results unchanged causes the
- * conversation result transformer to mark them as cleaned, which opts the
- * tool's results out of filestore substitution at high context usage.
- */
-const preserveResults: ToolReturnSummarizerFn = (toolReturn) => toolReturn.results;
 
 const skillParamDescription = `The 'skill' parameter accepts the skill name, the full path of the skill's folder, or the full path of the skill's SKILL.md file.`;
 
@@ -63,7 +55,6 @@ export const createLoadSkillTool = ({
   type: ToolType.builtin,
   schema,
   tags: ['skills'],
-  summarizeToolReturn: preserveResults,
   // greater limit for skill content
   maxResultTokens: 100_000,
   handler: async ({ skill: skillInput }, ctx) => {

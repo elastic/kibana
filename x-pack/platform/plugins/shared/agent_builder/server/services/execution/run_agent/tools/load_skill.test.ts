@@ -213,24 +213,12 @@ describe('load_skill tool', () => {
     await expect(callHandler(tool, { skill: 'my-skill' }, ctx)).resolves.toBeDefined();
   });
 
-  it('exposes an identity summarizeToolReturn that returns the original results unchanged', () => {
+  it('has no summarizer, so its results render the same in history as in the round it ran', () => {
+    // A summarizer would tag the history results as summaries, changing the bytes and breaking
+    // the prompt cache at the next round. Being internal already keeps them out of substitution.
     const tool = createLoadSkillTool();
-    expect(tool.summarizeToolReturn).toBeDefined();
-
-    const toolCall = {
-      tool_id: 'load_skill',
-      tool_call_id: 'call-1',
-      params: { name: 'my-skill' },
-      results: [
-        {
-          tool_result_id: 'r-1',
-          type: 'other' as const,
-          data: { foo: 'bar' },
-        },
-      ],
-    };
-
-    expect(tool.summarizeToolReturn!(toolCall as any)).toBe(toolCall.results);
+    expect(tool.summarizeToolReturn).toBeUndefined();
+    expect(isExcludedFromFilestore(tool.id)).toBe(true);
   });
 
   describe('with dynamic tools enabled', () => {
