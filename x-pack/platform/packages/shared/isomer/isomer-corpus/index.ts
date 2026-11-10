@@ -52,3 +52,29 @@ export type {
   PanelReading,
   RenderContextReading,
 } from './src/browser_readers';
+export {
+  diffJson,
+  diffLensAttributes,
+  getLensIdAliases,
+  replaceIds,
+  toFieldPattern,
+} from './src/round_trip';
+export type { JsonDifference } from './src/round_trip';
+export { renderRoundTripReport } from './src/round_trip_report';
+export type { RoundTripDashboardResult, RoundTripPanelResult } from './src/round_trip_report';
+export {
+  REVIEW_FORMAT,
+  toExpectedChart,
+  toExpectedStrings,
+  toHexColor,
+  toVisibleText,
+} from './src/review_export';
+export type {
+  ExpectedAxis,
+  ExpectedChart,
+  ExpectedStrings,
+  ExpectedText,
+  PanelCapture,
+} from './src/review_export';
+export { exportReview } from './src/export_review';
+export type { ReviewCase, ReviewIndex } from './src/export_review';

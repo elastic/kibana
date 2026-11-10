@@ -10,5 +10,6 @@ import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Isomer corpus', function () {
     loadTestFile(require.resolve('./capture'));
+    loadTestFile(require.resolve('./round_trip'));
   });
 }
