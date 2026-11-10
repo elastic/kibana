@@ -272,6 +272,41 @@ describe('buildAclReadFilter', () => {
     });
   });
 
+  describe('with an object shared to all spaces', () => {
+    const ordinaryOnly = { recoverySpaces: [], ordinarySpaces: [SPACE] };
+
+    /** Whether `probe` finds an object stored with `namespaces: ['*']` at `view`. */
+    const findsSharedObject = (
+      source: Record<string, unknown>,
+      probe: FixtureProbe,
+      spaces: { recoverySpaces: string[]; ordinarySpaces: string[] }
+    ) =>
+      isVisible(
+        buildAclReadFilter({
+          policy: FIXTURE_POLICY,
+          principal: FIXTURE_PROBES[probe],
+          level: 'view',
+          ...spaces,
+        }),
+        indexDocument(source, ['*'])
+      );
+
+    it('finds it in an ordinary space under the ACL rules', () => {
+      expect(findsSharedObject({}, 'stranger', ordinaryOnly)).toBe(true);
+      expect(findsSharedObject({ acl: PRIVATE }, 'stranger', ordinaryOnly)).toBe(false);
+      expect(findsSharedObject({ acl: PRIVATE }, 'owner', ordinaryOnly)).toBe(true);
+    });
+
+    it('finds it in a recovery space, whatever its ACL', () => {
+      expect(
+        findsSharedObject({ acl: PRIVATE }, 'stranger', {
+          recoverySpaces: [SPACE],
+          ordinarySpaces: [],
+        })
+      ).toBe(true);
+    });
+  });
+
   describe('with recovery and ordinary spaces together', () => {
     const privateObject = { acl: PRIVATE };
     const objectWithoutAcl = {};

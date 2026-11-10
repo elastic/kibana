@@ -43,7 +43,10 @@ export interface BuildAclReadFilterParams {
   ordinarySpaces: readonly string[];
 }
 
-/** Stands for every space the search covers. */
+/**
+ * Stands for every space. In a space list, it means every space the search covers. In an object's
+ * spaces, it means the object is shared to all spaces.
+ */
 const ALL_SPACES = '*';
 /** The Saved Objects field that lists the spaces of an object. */
 const SPACES_FIELD = 'namespaces';
@@ -240,8 +243,11 @@ const entryClause = (
 };
 
 const spacesClause = (spaces: readonly string[]): estypes.QueryDslQueryContainer =>
-  // A search across all spaces is already limited to the spaces the caller can reach.
-  spaces.includes(ALL_SPACES) ? { match_all: {} } : { terms: { [SPACES_FIELD]: [...spaces] } };
+  // A search across all spaces is already limited to the spaces the caller can reach. An object
+  // shared to all spaces stores `'*'`, and it is in every listed space.
+  spaces.includes(ALL_SPACES)
+    ? { match_all: {} }
+    : { terms: { [SPACES_FIELD]: [...spaces, ALL_SPACES] } };
 
 /**
  * Excludes documents where `field` holds any of `values`. Returns no clause for no values.

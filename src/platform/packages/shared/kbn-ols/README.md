@@ -186,7 +186,9 @@ The filter takes two lists of spaces. In `recoverySpaces`, the caller has recove
 object of the type), and sees every object, whatever its ACL. In `ordinarySpaces`, only the rules above apply. `['*']`
 stands for every space that the search already covers. The two lists work together in one filter: an object in a
 recovery space always matches, an object in an ordinary space matches only under the rules above, and an object in
-neither list never matches. A space in both lists works as a recovery space. When both lists are empty, the filter
+neither list never matches. A space in both lists works as a recovery space. An object shared to all spaces is
+stored with `"namespaces": ["*"]`, and it counts as being in every listed space, the same way the Saved Objects
+repository treats it. When both lists are empty, the filter
 matches nothing.
 
 The filter contains `nested` queries on `acl.entries` in most cases: the absent-ACL clause uses one whenever the
