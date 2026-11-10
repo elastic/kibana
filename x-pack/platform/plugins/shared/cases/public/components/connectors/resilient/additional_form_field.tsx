@@ -65,8 +65,14 @@ const AdditionalDateField = React.memo<AdditionalFieldProps & { showTimeSelect: 
   ({ path, label, 'data-test-subj': dataTestSubj, showTimeSelect, field }) => {
     const fieldProps = useMemo(() => {
       return {
-        config: { label },
-        defaultValue: moment(),
+        config: {
+          label,
+          // Fallback only: a value saved on the form takes precedence
+          defaultValue: moment(),
+          // Resilient saved values are epoch numbers (see formFieldToResilientFieldValue).
+          deserializer: (value: Moment | number) =>
+            typeof value === 'number' ? moment(value) : value,
+        },
         componentProps: {
           euiFieldProps: {
             'data-test-subj': dataTestSubj,
@@ -77,10 +83,9 @@ const AdditionalDateField = React.memo<AdditionalFieldProps & { showTimeSelect: 
       };
     }, [label, dataTestSubj, showTimeSelect, field]);
     return (
-      <UseField<Moment>
+      <UseField<Moment | number>
         path={path}
         config={fieldProps.config}
-        defaultValue={fieldProps.defaultValue}
         component={DatePickerField}
         componentProps={fieldProps.componentProps}
       />
@@ -110,7 +115,9 @@ const AdditionalSelectField = React.memo<AdditionalFieldProps>(
         { options: [], defaultValue: undefined }
       );
       return {
-        config: { label },
+        // The connector default goes on `config`, not the `defaultValue` prop: the prop
+        // outranks the form's default value, which holds the user's saved value.
+        config: { label, defaultValue: calculatedOptions.defaultValue },
         componentProps: {
           euiFieldProps: {
             'data-test-subj': dataTestSubj,
@@ -121,7 +128,6 @@ const AdditionalSelectField = React.memo<AdditionalFieldProps>(
             options: calculatedOptions.options,
           },
         },
-        defaultValue: calculatedOptions.defaultValue,
       };
     }, [label, dataTestSubj, field]);
     return (
@@ -130,7 +136,6 @@ const AdditionalSelectField = React.memo<AdditionalFieldProps>(
         config={fieldProps.config}
         component={SelectField}
         componentProps={fieldProps.componentProps}
-        defaultValue={fieldProps.defaultValue}
       />
     );
   }
@@ -207,9 +212,9 @@ const AdditionalMultiSelectField = React.memo<AdditionalFieldProps>(
         'data-test-subj': dataTestSubj,
       };
       return {
-        config: { defaultValue: [] },
+        // Fallback only: a value saved on the form takes precedence (see AdditionalSelectField).
+        config: { defaultValue: preparedOptions.defaultValue },
         componentProps,
-        defaultValue: preparedOptions.defaultValue,
       };
     }, [label, dataTestSubj, field]);
 
@@ -219,7 +224,6 @@ const AdditionalMultiSelectField = React.memo<AdditionalFieldProps>(
         config={fieldProps.config}
         component={AdditionalMultiSelectInnerField}
         componentProps={fieldProps.componentProps}
-        defaultValue={fieldProps.defaultValue}
       />
     );
   }

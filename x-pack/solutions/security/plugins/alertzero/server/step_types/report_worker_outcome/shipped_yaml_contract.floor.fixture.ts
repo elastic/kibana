@@ -11,11 +11,7 @@ import {
 } from '@kbn/workflows/managed';
 import { SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID } from '@kbn/alertzero-common';
 import type { WorkerWorkflowContract } from './shipped_yaml_contract.test_helpers';
-import {
-  CHANGED_STATUS,
-  INVESTIGATION_ID,
-  OPENED_INVESTIGATION,
-} from './shipped_yaml_contract.test_helpers';
+import { CHANGED_STATUS, INVESTIGATION_ID } from './shipped_yaml_contract.test_helpers';
 
 /**
  * The Alert Triage Worker's workflows with report steps, and runs where every report step's guard
@@ -29,12 +25,21 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
           classify_alerts: {
             output: { false_positive_count: 3, inconclusive_count: 1, true_positive_count: 2 },
           },
-          create_investigation: OPENED_INVESTIGATION,
+          tag_pattern_keys: {
+            output: {
+              alerts_with_strict_key: 5,
+              fp_candidates_on_fallback: 1,
+              strict_keys: 3,
+              strict_keys_single_alert: 1,
+              wide_keys: 2,
+              wide_keys_single_alert: 0,
+            },
+          },
         },
         variables: {
           alert_count: 6,
           fp_candidate_count: 3,
-          review_dispatch: 'started',
+          started_alert_count: 3,
           verdict_count: 6,
         },
       },
@@ -43,13 +48,17 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
           classify_alerts: {
             output: { false_positive_count: 0, inconclusive_count: 0, true_positive_count: 4 },
           },
-          close_no_fp: { output: CHANGED_STATUS },
-          create_investigation: OPENED_INVESTIGATION,
+          close_batch_investigation: { output: CHANGED_STATUS },
         },
-        variables: { alert_count: 5, fp_candidate_count: 0, verdict_count: 4 },
+        variables: {
+          alert_count: 5,
+          fp_candidate_count: 0,
+          home_conversation_id: INVESTIGATION_ID,
+          verdict_count: 4,
+        },
       },
       {
-        steps: { create_investigation: OPENED_INVESTIGATION },
+        steps: {},
         variables: { alert_count: 3, fp_candidate_count: 0, verdict_count: 0 },
       },
     ],
@@ -63,6 +72,7 @@ export const SHIPPED_YAML_CONTRACTS: WorkerWorkflowContract[] = [
         close_investigation_after_approval: { output: CHANGED_STATUS },
         close_investigation_after_dismissal: { output: CHANGED_STATUS },
         close_investigation_after_expiry: { output: CHANGED_STATUS },
+        close_investigation_after_join: { output: CHANGED_STATUS },
         get_proposal: { output: {} },
       },
       variables: { failed_retag_count: 1, fp_candidate_count: 9, proposal_outcome: outcome },

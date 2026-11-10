@@ -96,12 +96,16 @@ test.describe(
       await expect(page).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
     });
 
-    test('starts and views an investigation from the alert detail action menu', async ({
+    test('starts from the alert details header and immediately links to the investigation', async ({
       page,
       pageObjects,
-    }) => {
+    }, testInfo) => {
       await pageObjects.alertPage.goto(alertId);
-      await pageObjects.alertPage.openActionsMenu();
+      await expect(page.testSubj.locator('alertDetailsInvestigate')).toBeVisible();
+      await testInfo.attach('investigation-header-desktop', {
+        body: await page.screenshot(),
+        contentType: 'image/png',
+      });
 
       const requestPromise = page.waitForRequest(
         (request) =>
@@ -113,11 +117,15 @@ test.describe(
       expect((await requestPromise).postDataJSON()).toMatchObject({
         subject: { type: 'alert', ids: [alertId] },
       });
-
       await pageObjects.toasts.waitForToastWithText('Investigation started');
       expect(await pageObjects.toasts.getMessageText()).toContain('You will find it in Nightshift');
-      await pageObjects.alertPage.viewStartedInvestigation();
-      await expect(page).toHaveURL(/\/app\/nightshift\?investigationId=investigation-1$/);
+      await expect(page.testSubj.locator('alertDetailsViewInvestigation')).toBeVisible();
+      await expect(page.testSubj.locator('alertDetailsInvestigate')).toBeHidden();
+      expect(new URL(page.url()).pathname).toContain(`/observability/alerts/${alertId}`);
+      await pageObjects.alertPage.clickViewInvestigation();
+      await expect
+        .poll(() => page.url())
+        .toContain('/app/nightshift?investigationId=investigation-1');
     });
 
     test('views a completed investigation from an alert row action', async ({
@@ -145,22 +153,24 @@ test.describe(
         .toContain(`/app/nightshift?investigationId=investigation-1`);
     });
 
-    test('views a completed investigation from the alert detail action menu', async ({
-      page,
-      pageObjects,
-    }) => {
-      await mockInvestigationApi(page, { includeCompletedInvestigation: true });
-      await pageObjects.alertPage.goto(alertId);
-      await pageObjects.alertPage.openActionsMenu();
+    for (const inProgress of [false, true]) {
+      test(`views a ${
+        inProgress ? 'running' : 'completed'
+      } investigation from the alert details header`, async ({ page, pageObjects }) => {
+        await mockInvestigationApi(page, {
+          includeCompletedInvestigation: !inProgress,
+          includeRunningInvestigation: inProgress,
+        });
+        await pageObjects.alertPage.goto(alertId);
+        await expect(page.testSubj.locator('alertDetailsViewInvestigation')).toBeVisible();
+        await expect(page.testSubj.locator('alertDetailsInvestigate')).toBeHidden();
+        await pageObjects.alertPage.clickViewInvestigation();
 
-      await pageObjects.alertPage.clickViewInvestigation();
-
-      // The Nightshift app opens the investigation's Agent Builder conversation details flyout for
-      // this link (covered by its unit tests); the serverless config set has no agentic
-      // investigations, which that flyout needs.
-      await expect
-        .poll(() => page.url())
-        .toContain(`/app/nightshift?investigationId=investigation-1`);
-    });
+        // The URL is verified here; the Nightshift flyout has its own unit coverage.
+        await expect
+          .poll(() => page.url())
+          .toContain('/app/nightshift?investigationId=investigation-1');
+      });
+    }
   }
 );

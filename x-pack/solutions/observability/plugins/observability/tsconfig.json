@@ -13,6 +13,7 @@
     "test/scout*/**/*"
   ],
   "kbn_references": [
+    "@kbn/entity-inventory-app-plugin",
     "@kbn/rule-data-utils",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/i18n",
@@ -172,6 +173,7 @@
     "@kbn/alerting-v2-utils",
     "@kbn/alerting-v2-constants",
     "@kbn/agentic-investigations-plugin",
+    "@kbn/shared-ux-ai-components",
     "@kbn/slo-constants"
   ],
   "exclude": ["target/**/*"]

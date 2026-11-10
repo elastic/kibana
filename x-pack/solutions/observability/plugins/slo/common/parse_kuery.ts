@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { QuerySchema } from '@kbn/slo-schema';
-import { is, kqlQuerySchemaZod } from '@kbn/slo-schema';
+import { is, kqlQuerySchema } from '@kbn/slo-schema';
 import { buildEsQuery } from '@kbn/es-query';
 import type { DataViewBase } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
@@ -20,8 +20,8 @@ export function getElasticsearchQueryOrThrow(
     if (isEmpty(kuery)) {
       return { match_all: {} };
     }
-    const kqlQuery = is(kqlQuerySchemaZod, kuery) ? kuery : kuery.kqlQuery;
-    const filters = is(kqlQuerySchemaZod, kuery) ? [] : kuery.filters;
+    const kqlQuery = is(kqlQuerySchema, kuery) ? kuery : kuery.kqlQuery;
+    const filters = is(kqlQuerySchema, kuery) ? [] : kuery.filters;
     return buildEsQuery(
       dataView,
       {

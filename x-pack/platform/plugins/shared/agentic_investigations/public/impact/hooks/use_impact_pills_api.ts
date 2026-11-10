@@ -94,10 +94,13 @@ export const useProposalImpactPills = ({
   origin,
   categories,
   decidedWithinHours,
+  enabled = true,
 }: {
   origin: ProposalOrigin;
   categories: readonly string[];
   decidedWithinHours?: number;
+  /** Turn off when the user cannot read investigations; the request would only fail. */
+  enabled?: boolean;
 }): PagedImpactPills =>
   useImpactPillsPages({
     queryKey: [...impactPillsQueryKeys.proposals(), origin, categories, decidedWithinHours ?? null],
@@ -107,6 +110,7 @@ export const useProposalImpactPills = ({
       categories: [...categories],
       ...(decidedWithinHours !== undefined ? { decidedWithinHours } : {}),
     },
+    enabled,
   });
 
 /** The entities across every open and closed escalation. */

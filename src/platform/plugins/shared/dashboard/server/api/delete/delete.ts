@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandlerContext } from '@kbn/core/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardOut } from '../transforms';
+import type { DashboardRequestServices } from '../types';
 import type { DashboardDeleteResponseBody } from './types';
 import {
   addToHistory,
@@ -20,13 +20,12 @@ import {
 } from '../../change_history/utils';
 
 export async function deleteDashboard(
-  requestCtx: RequestHandlerContext,
+  services: DashboardRequestServices,
   id: string,
   strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   spaceId?: string
 ): Promise<DashboardDeleteResponseBody> {
-  const { core } = await requestCtx.resolve(['core']);
-  const savedObject = await core.savedObjects.client.get<DashboardSavedObjectAttributes>(
+  const savedObject = await services.savedObjects.client.get<DashboardSavedObjectAttributes>(
     'dashboard',
     id
   );
@@ -38,7 +37,7 @@ export async function deleteDashboard(
     undefined,
     strictValidationSchema
   );
-  await core.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
+  await services.savedObjects.client.delete(DASHBOARD_SAVED_OBJECT_TYPE, id);
   const deletedAt = new Date().toISOString(); // SO client does not provide deletedAt timestamp, so this is the next-best thing
 
   const snapshot = getHistorySnapshot({
@@ -54,7 +53,7 @@ export async function deleteDashboard(
       currentSequence: savedObject.attributes.historySequence,
     });
     await addToHistory({
-      ctx: requestCtx,
+      user: services.security.authc.getCurrentUser(),
       dashboardId: id,
       snapshot,
       spaceId,

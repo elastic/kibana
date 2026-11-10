@@ -132,6 +132,80 @@ describe('useServiceSettings — incompleteInstances', () => {
     expect(result.current.isReady).toBe(true);
   });
 
+  it('keeps the stream-level var_group option chosen in the flyout when the fields are saved', () => {
+    const varDefsByInput = {
+      'aws-cloudwatch': {
+        log_group_arn: makeTextVarDef('log_group_arn'),
+        log_group_name: makeTextVarDef('log_group_name'),
+        region_name: makeTextVarDef('region_name'),
+      },
+    };
+    const optionalConfig = ['log_group_arn', 'log_group_name', 'region_name'];
+    const varGroupsByInput = {
+      'aws-cloudwatch': [
+        {
+          name: 'log_group_source',
+          title: 'Log group',
+          selector_title: 'Identify the log group by',
+          required: true,
+          options: [
+            { name: 'log_group_arn', title: 'Log Group ARN', vars: ['log_group_arn'] },
+            {
+              name: 'log_group_name',
+              title: 'Log Group Name',
+              vars: ['log_group_name', 'region_name'],
+            },
+          ],
+        },
+      ],
+    };
+    const svcWithGroup = makeEntry('svc_a', {
+      signalTypes: ['logs'],
+      dataStreams: ['svc_a'],
+      inputs: ['aws-cloudwatch'],
+      defaultEnabledInputs: ['aws-cloudwatch'],
+      optionalConfig,
+      varDefsByInput,
+      varGroupsByInput,
+      varDefsByDataStream: {
+        svc_a: {
+          inputs: ['aws-cloudwatch'],
+          defaultEnabledInputs: ['aws-cloudwatch'],
+          optionalConfig,
+          varDefsByInput,
+          varGroupsByInput,
+        },
+      },
+    });
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: ['svc_a'] },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map([['svc_a', svcWithGroup]]),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
+    // The default option (ARN) is unfilled.
+    expect(result.current.incompleteInstances.map((i) => i.instanceId)).toContain('svc_a');
+
+    // Saving the "Log Group Name" option with its field filled must not fall back to the ARN.
+    act(() =>
+      result.current.setServiceFieldsAndInputs(
+        'svc_a',
+        {
+          svc_a: {
+            enabledInputs: ['aws-cloudwatch'],
+            varsByInput: { 'aws-cloudwatch': { log_group_name: '/aws/x' } },
+            varGroupSelectionsByInput: { 'aws-cloudwatch': { log_group_source: 'log_group_name' } },
+          },
+        },
+        ['svc_a']
+      )
+    );
+    expect(result.current.incompleteInstances).toHaveLength(0);
+  });
+
   it('duplicate instance also appears in incompleteInstances when its required var is empty', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.addDuplicate('svc_a', 'svc_a [Duplicate]', {}, []));
@@ -702,6 +776,39 @@ describe('getIncompleteInstances — required set follows the matrix view', () =
     }
   );
 
+  it('does not require a source for a never-configured data stream the manifest disables by default', () => {
+    // Bedrock: metrics streams on by default, the CloudWatch log stream off. Before the flyout is
+    // ever saved, the log stream must not count as active.
+    const optionalVar = (name: string) => ({
+      name,
+      type: 'text',
+      required: false,
+      show_user: true,
+    });
+    const logVars = {
+      'aws-cloudwatch': {
+        log_group_arn: optionalVar('log_group_arn'),
+        log_group_name: optionalVar('log_group_name'),
+      },
+    };
+    const bedrock = {
+      ...base,
+      dataStreams: ['guardrails', 'invocation'],
+      inputs: ['aws-cloudwatch'],
+      varDefsByInput: logVars,
+      varDefsByDataStream: {
+        guardrails: { inputs: ['aws-cloudwatch'], defaultEnabledInputs: ['aws-cloudwatch'] },
+        invocation: {
+          inputs: ['aws-cloudwatch'],
+          defaultEnabledInputs: [],
+          varDefsByInput: logVars,
+        },
+      },
+    } as unknown as AwsServiceMatrixEntry;
+
+    expect(getIncompleteInstances(instances, {}, new Map([['cloudtrail', bedrock]]))).toEqual([]);
+  });
+
   it('under ECF, ignores a stored input ECF cannot route and requires a supported one', () => {
     // WAF: agent-based allows CloudWatch, ECF routes S3 only (ecfInputs). A CloudWatch-only
     // selection left over from agent-based must not count as a complete ECF config.
@@ -1039,6 +1146,66 @@ describe('useServiceSettings — integration name and description', () => {
       expect(onContinue).toHaveBeenCalled();
     });
 
+    it('does not save the instances, which describe the last deploy and are saved only with one', async () => {
+      withDeployment('dep-1');
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+      // A duplicate added in this step is not deployed yet: it must not come back on resume.
+      act(() => result.current.addDuplicate(policyService.id, 'svc_p [Duplicate]', {}, []));
+      expect(result.current.instances).toHaveLength(2);
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
+        integrationName: 'aws-1',
+        description: null,
+      });
+    });
+
+    it('leaves the switch to the deploy, so it stays paired with the namespace', async () => {
+      withDeployment('dep-1');
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+      act(() => result.current.setNamespace('prod'));
+      act(() => result.current.setDedicatedNamespaceTemplates(true));
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment.mock.calls[0][1]).not.toHaveProperty(
+        'dedicatedNamespaceTemplates'
+      );
+    });
+
+    describe('turning the switch off', () => {
+      it('is saved at once on an existing deployment, so reopening it does not turn the switch back on', async () => {
+        withDeployment('dep-1');
+        const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+        await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+        act(() => result.current.setNamespace('prod'));
+        act(() => result.current.setDedicatedNamespaceTemplates(true));
+        expect(mockUpdateDeployment).not.toHaveBeenCalled();
+
+        act(() => result.current.setDedicatedNamespaceTemplates(false));
+
+        expect(mockUpdateDeployment).toHaveBeenCalledTimes(1);
+        expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
+          dedicatedNamespaceTemplates: false,
+        });
+      });
+
+      it('writes nothing before the first deploy has created the record', async () => {
+        withDeployment(undefined);
+        const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+        await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+        act(() => result.current.setNamespace('prod'));
+
+        act(() => result.current.setDedicatedNamespaceTemplates(true));
+        act(() => result.current.setDedicatedNamespaceTemplates(false));
+
+        expect(mockUpdateDeployment).not.toHaveBeenCalled();
+      });
+    });
+
     it('leaves the namespace to the deploy, so a change is still detected as drift', async () => {
       withDeployment('dep-1');
       const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
@@ -1059,5 +1226,103 @@ describe('useServiceSettings — integration name and description', () => {
 
       expect(mockUpdateDeployment).not.toHaveBeenCalled();
     });
+  });
+});
+
+// --- proxy URL ---
+
+describe('useServiceSettings — proxy URL', () => {
+  const withProxy = makeEntry('svc_p', {
+    dataStreams: [],
+    declaresProxyUrl: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+  });
+  const withoutProxy = makeEntry('svc_n', {
+    dataStreams: [],
+    declaresProxyUrl: false,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+  });
+  const ecfOnly = makeEntry('svc_e', {
+    dataStreams: [],
+    declaresProxyUrl: true,
+    deploymentMethods: [{ method: 'ecf', preferred: true }],
+  });
+
+  const render = (
+    deploymentMethod: 'agent_based' | 'managed_integration' | 'ecf',
+    entries: AwsServiceMatrixEntry[]
+  ) => {
+    mockUseOnboardingFlow.mockReturnValue({
+      servicesStep: { selectedServiceIds: entries.map((e) => e.id) },
+      removeDeployInstance: jest.fn(),
+      awsServicesMap: new Map(entries.map((e) => [e.id, e])),
+      deploymentMethod,
+      setServiceSettingsMethod: jest.fn(),
+    } as unknown as ReturnType<typeof useOnboardingFlow>);
+    return renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+  };
+
+  const makeReady = (result: ReturnType<typeof render>['result']) => {
+    act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
+  };
+
+  it.each(['agent_based', 'managed_integration'] as const)(
+    'is offered for %s when a selected package declares it',
+    (method) => {
+      expect(render(method, [withProxy]).result.current.isProxyUrlSupported).toBe(true);
+    }
+  );
+
+  it('is not offered for ECF', () => {
+    expect(render('ecf', [withProxy]).result.current.isProxyUrlSupported).toBe(false);
+  });
+
+  it('is not offered when no selected package declares it', () => {
+    expect(render('agent_based', [withoutProxy]).result.current.isProxyUrlSupported).toBe(false);
+  });
+
+  it('is offered when only one of several selected packages declares it', () => {
+    expect(
+      render('managed_integration', [withoutProxy, withProxy]).result.current.isProxyUrlSupported
+    ).toBe(true);
+  });
+
+  it('ignores an ECF-only service under managed integration', () => {
+    expect(render('managed_integration', [ecfOnly]).result.current.isProxyUrlSupported).toBe(false);
+  });
+
+  it('reports an invalid URL and is not ready', () => {
+    const { result } = render('agent_based', [withProxy]);
+    makeReady(result);
+    expect(result.current.isReady).toBe(true);
+
+    act(() => result.current.setPolicySetting('proxy_url', 'ftp://proxy'));
+
+    expect(result.current.proxyUrlError).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+  });
+
+  it('is ready again once the URL is valid or cleared', () => {
+    const { result } = render('agent_based', [withProxy]);
+    makeReady(result);
+    act(() => result.current.setPolicySetting('proxy_url', 'not a url'));
+    expect(result.current.isReady).toBe(false);
+
+    act(() => result.current.setPolicySetting('proxy_url', 'http://proxy:3128'));
+    expect(result.current.proxyUrlError).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
+
+    act(() => result.current.setPolicySetting('proxy_url', ''));
+    expect(result.current.isReady).toBe(true);
+  });
+
+  it('does not block Continue with a leftover invalid value where the field is hidden', () => {
+    const { result } = render('ecf', [withProxy]);
+    makeReady(result);
+    act(() => result.current.setPolicySetting('proxy_url', 'ftp://proxy'));
+
+    expect(result.current.proxyUrlError).toBeUndefined();
+    expect(result.current.isReady).toBe(true);
   });
 });

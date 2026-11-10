@@ -16,7 +16,7 @@ const FAVORITE_TYPE = 'dashboard';
 
 apiTest.describe(
   'content management - dashboard favorites: access control',
-  { tag: tags.stateful.classic },
+  { tag: tags.deploymentAgnostic },
   () => {
     let adminCredentials: RoleApiCredentials;
     let user1CookieHeader: Record<string, string>;

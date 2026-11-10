@@ -13,11 +13,14 @@ import {
   ESCALATIONS_UI_CAPABILITY_SHOW,
   ESCALATIONS_UI_CAPABILITY_MANAGE,
   INVESTIGATIONS_UI_CAPABILITY_MANAGE,
+  INVESTIGATIONS_UI_CAPABILITY_READ,
 } from '../../common';
 
 export interface AgenticInvestigationsCapabilities {
   showEscalations: boolean;
   manageEscalations: boolean;
+  /** Reading investigations, which includes the impact (entities) of proposals. */
+  readInvestigations: boolean;
   manageInvestigations: boolean;
   canAccessAgentBuilder: boolean;
 }
@@ -33,6 +36,7 @@ export const getAgenticInvestigationsCapabilities = (
   return {
     showEscalations: investigationsCap?.[ESCALATIONS_UI_CAPABILITY_SHOW] === true,
     manageEscalations: investigationsCap?.[ESCALATIONS_UI_CAPABILITY_MANAGE] === true,
+    readInvestigations: investigationsCap?.[INVESTIGATIONS_UI_CAPABILITY_READ] === true,
     manageInvestigations: investigationsCap?.[INVESTIGATIONS_UI_CAPABILITY_MANAGE] === true,
     canAccessAgentBuilder: capabilities.agentBuilder?.show === true,
   };

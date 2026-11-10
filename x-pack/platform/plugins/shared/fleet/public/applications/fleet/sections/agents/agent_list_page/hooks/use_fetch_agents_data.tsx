@@ -25,6 +25,7 @@ import {
   sendGetAgentTagsForRq,
   sendBulkGetAgentPoliciesForRq,
   useAgentlessResources,
+  useRestartAgentAction,
 } from '../../../../hooks';
 import { AgentStatusKueryHelper } from '../../../../services';
 import {
@@ -108,6 +109,7 @@ export function useFetchAgentsData() {
   const history = useHistory();
   const { urlParams, toUrlParams } = useUrlParams();
   const { showAgentless } = useAgentlessResources();
+  const { isRestartAgentActionEnabled } = useRestartAgentAction();
   const defaultKuery: string = (urlParams.kuery as string) || '';
   const urlHasInactive = (urlParams.showInactive as string) === 'true';
   const isUsingParams = defaultKuery || urlHasInactive;
@@ -324,6 +326,7 @@ export function useFetchAgentsData() {
             showUpgradeable,
             getStatusSummary: true,
             withMetrics: true,
+            withPendingRestart: isRestartAgentActionEnabled,
           }),
           sendGetAgentStatus({
             kuery: AgentStatusKueryHelper.buildKueryForInactiveAgents(),

@@ -16,11 +16,12 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
 import type { AutomaticImportAgentStateType } from '../state';
 import {
-  flattenDoc,
+  collectFieldPaths,
   formatSimulateDoc,
   groupErrors,
   stripBoilerplateFields,
   processSimulationResults,
+  validateCustomFieldNames,
 } from './pipeline_utils';
 
 const MAX_UNIQUE_ERROR_TYPES = 10;
@@ -88,9 +89,53 @@ interface EcsValidationResult {
   fieldNamingErrors: string[];
 }
 
+// ECS types whose values are stored as a unit: their children are never ECS fields.
+const OPAQUE_ECS_TYPES = new Set(['geo_point', 'flattened']);
+// ECS types that may either define children (dns.answers) or accept any key (labels).
+const CONTAINER_ECS_TYPES = new Set(['object', 'nested']);
+
+const getAncestorPaths = (fieldPath: string): string[] => {
+  const parts = fieldPath.split('.');
+  return parts.slice(0, -1).map((_, index) => parts.slice(0, index + 1).join('.'));
+};
+
+/**
+ * Collapses every path that descends into an ECS field without ECS-defined descendants
+ * (geo_point, flattened, or an open object such as labels) to that ECS field, so that
+ * its values are not mistaken for custom fields under an ECS root.
+ */
+async function collapseEcsContainerPaths(
+  fieldPaths: Set<string>,
+  fieldsMetadataClient: IFieldsMetadataClient
+): Promise<Set<string>> {
+  const ecsFields = (await fieldsMetadataClient.find({ source: ['ecs'] })).getFields();
+
+  // Every prefix of an ECS field name: an ECS container listed here defines descendants.
+  const ecsAncestors = new Set<string>();
+  for (const ecsName of Object.keys(ecsFields)) {
+    for (const ancestor of getAncestorPaths(ecsName)) {
+      ecsAncestors.add(ancestor);
+    }
+  }
+
+  const isOpenContainer = (name: string): boolean => {
+    const type = ecsFields[name]?.type ?? 'unknown';
+    if (OPAQUE_ECS_TYPES.has(type)) return true;
+    return CONTAINER_ECS_TYPES.has(type) && !ecsAncestors.has(name);
+  };
+
+  const collapsed = new Set<string>();
+  for (const fieldPath of fieldPaths) {
+    const openAncestor = getAncestorPaths(fieldPath).find(isOpenContainer);
+    collapsed.add(openAncestor ?? fieldPath);
+  }
+  return collapsed;
+}
+
 async function validateEcsCompliance(
   successfulDocuments: unknown[],
-  allFieldPaths: Set<string>,
+  documentFieldPaths: Set<string>,
+  customFieldPaths: Set<string>,
   fieldsMetadataClient: IFieldsMetadataClient,
   customFieldPrefix: string
 ): Promise<EcsValidationResult> {
@@ -98,6 +143,7 @@ async function validateEcsCompliance(
   const fieldNamingErrors: string[] = [];
 
   try {
+    const allFieldPaths = await collapseEcsContainerPaths(documentFieldPaths, fieldsMetadataClient);
     const [ecsHitDict, ecsFieldsets, eventKindField] = await Promise.all([
       fieldsMetadataClient.find({ fieldNames: [...allFieldPaths], source: ['ecs'] }),
       fieldsMetadataClient.getECSFieldsets(),
@@ -167,6 +213,9 @@ async function validateEcsCompliance(
       `ECS validation unavailable: ${(ecsError as Error).message ?? String(ecsError)}`
     );
   }
+
+  // Needs no metadata, so it runs even when ECS validation is unavailable.
+  fieldNamingErrors.push(...validateCustomFieldNames(customFieldPaths, customFieldPrefix));
 
   return { ecsWarnings, fieldNamingErrors };
 }
@@ -267,16 +316,24 @@ export function ingestPipelineValidatorTool(options: ValidatorToolOptions): Dyna
 
       const errorGroups = groupErrors(failedSamples, MAX_UNIQUE_ERROR_TYPES);
 
-      const allFieldPaths = new Set<string>();
+      // Paths descend into arrays of objects, like the package field generator does when it
+      // builds fields.yml. ECS validation then collapses values of opaque ECS containers
+      // (geo_point, flattened, open objects such as labels) back to the ECS field.
+      const documentFieldPaths = new Set<string>();
+      const customFieldPaths = new Set<string>();
       for (const doc of successfulDocuments.slice(0, 20)) {
-        for (const fp of Object.keys(flattenDoc(doc as Record<string, unknown>))) {
-          allFieldPaths.add(fp);
+        for (const fp of collectFieldPaths(doc as Record<string, unknown>)) {
+          documentFieldPaths.add(fp);
+          if (fp.startsWith(customFieldPrefix)) {
+            customFieldPaths.add(fp);
+          }
         }
       }
 
       const { ecsWarnings, fieldNamingErrors } = await validateEcsCompliance(
         successfulDocuments,
-        allFieldPaths,
+        documentFieldPaths,
+        customFieldPaths,
         fieldsMetadataClient,
         customFieldPrefix
       );

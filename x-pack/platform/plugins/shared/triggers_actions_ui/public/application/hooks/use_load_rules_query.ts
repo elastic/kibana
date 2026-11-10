@@ -98,7 +98,9 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
     refetchOnWindowFocus: false,
   });
 
-  const hasData = Boolean(rulesResponse && rulesResponse.data.length > 0);
+  const hasData = Boolean(
+    rulesResponse && (rulesResponse.data.length > 0 || (rulesResponse.errors ?? []).length > 0)
+  );
 
   return {
     rulesState: {
@@ -106,6 +108,7 @@ export const useLoadRulesQuery = (props: UseLoadRulesQueryProps) => {
       data: rulesResponse?.data ?? [],
       totalItemCount: rulesResponse?.total ?? 0,
       initialLoad: isLoading || isInitialLoading,
+      errors: rulesResponse?.errors ?? [],
     },
     lastUpdate: moment(dataUpdatedAt).format(),
     hasData,

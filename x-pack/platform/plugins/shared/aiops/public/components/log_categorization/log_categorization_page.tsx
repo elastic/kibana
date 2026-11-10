@@ -17,8 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageBody,
-  EuiComboBox,
-  EuiFormRow,
   EuiSkeletonText,
 } from '@elastic/eui';
 
@@ -56,6 +54,7 @@ import { createDocumentStatsHash } from './utils';
 import { TableHeader } from './category_table/table_header';
 import { useActions } from './category_table/use_actions';
 import { AttachmentsMenu } from './attachments_menu';
+import { CategoryFieldSelector } from './category_field_selector';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
@@ -330,13 +329,16 @@ export const LogCategorizationPage: FC = () => {
     [fields, loadCategories, selectedField, stateFromUrl.field]
   );
 
-  const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
-    setData(null);
-    setFieldValidationResult(null);
-    const field = value && value.length ? value[0].label : undefined;
-    setSelectedField(field);
-    setUrlState({ field });
-  };
+  const onFieldChange = useCallback(
+    (value: EuiComboBoxOptionOption[] | undefined) => {
+      setData(null);
+      setFieldValidationResult(null);
+      const field = value && value.length ? value[0].label : undefined;
+      setSelectedField(field);
+      setUrlState({ field });
+    },
+    [setUrlState]
+  );
 
   const actions = getActions(true);
 
@@ -365,23 +367,12 @@ export const LogCategorizationPage: FC = () => {
       <EuiFlexGroup>
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false} css={{ minWidth: '400px' }}>
-            <EuiFormRow
-              label={i18n.translate('xpack.aiops.logCategorization.categoryFieldSelect', {
-                defaultMessage: 'Category field',
-              })}
-            >
-              <EuiComboBox
-                compressed
-                isDisabled={loading === true}
-                options={fields}
-                onChange={onFieldChange}
-                selectedOptions={
-                  selectedField === undefined ? undefined : [{ label: selectedField }]
-                }
-                singleSelection={{ asPlainText: true }}
-                data-test-subj="aiopsLogPatternAnalysisCategoryField"
-              />
-            </EuiFormRow>
+            <CategoryFieldSelector
+              fields={fields}
+              selectedField={selectedField}
+              isDisabled={loading === true}
+              onChange={onFieldChange}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
             {loading === false ? (

@@ -28,9 +28,6 @@ import {
 } from './entity_details/generic_details_left';
 import type { GenericEntityPanelExpandableFlyoutProps } from './entity_details/generic_right';
 import { GenericEntityPanel } from './entity_details/generic_right';
-import type { EaseDetailsProps } from './ease/types';
-import { EaseDetailsProvider } from './ease/context';
-import { EasePanel } from './ease';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
@@ -65,7 +62,6 @@ import {
   GenericEntityPanelKey,
   HostPanelKey,
   ServicePanelKey,
-  WatchlistsFlyoutKey,
   UserPanelKey,
 } from './entity_details/shared/constants';
 import { buildEntityPreviewPanel } from './entity_details/shared/utils/build_entity_preview_panel';
@@ -82,7 +78,6 @@ import {
   DOCUMENT_DETAILS_PREVIEW_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_RIGHT_PANEL_ARIA_LABEL,
   DOCUMENT_DETAILS_SESSION_VIEW_PANEL_ARIA_LABEL,
-  EASE_PANEL_ARIA_LABEL,
   GENERIC_ENTITY_DETAILS_PANEL_ARIA_LABEL,
   GENERIC_ENTITY_PANEL_ARIA_LABEL,
   GRAPH_GROUPED_NODE_PREVIEW_PANEL_ARIA_LABEL,
@@ -103,16 +98,12 @@ import {
   USER_PREVIEW_PANEL_ARIA_LABEL,
   VULNERABILITY_FINDINGS_PANEL_ARIA_LABEL,
   VULNERABILITY_FINDINGS_PREVIEW_PANEL_ARIA_LABEL,
-  WATCHLISTS_PANEL_ARIA_LABEL,
 } from './panel_aria_labels';
-import type { WatchlistsFlyoutExpandableFlyoutProps } from './entity_details/watchlists_right';
-import { WatchlistsFlyoutPanel } from './entity_details/watchlists_right';
 import {
   MisconfigurationFindingsPanelKey,
   MisconfigurationFindingsPreviewPanelKey,
 } from './csp_details/findings_flyout/constants';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
-import { EasePanelKey } from './ease/constants/panel_keys';
 import {
   VulnerabilityFindingsPanelKey,
   VulnerabilityFindingsPreviewPanelKey,
@@ -345,15 +336,6 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
     'aria-label': MISCONFIGURATION_PANEL_ARIA_LABEL,
   },
   {
-    key: EasePanelKey,
-    component: (props) => (
-      <EaseDetailsProvider {...(props as EaseDetailsProps).params}>
-        <EasePanel />
-      </EaseDetailsProvider>
-    ),
-    'aria-label': EASE_PANEL_ARIA_LABEL,
-  },
-  {
     key: AttackDetailsRightPanelKey,
     component: (props) => (
       <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
@@ -415,13 +397,6 @@ export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredP
       </IOCDetailsProvider>
     ),
     'aria-label': IOC_RIGHT_PANEL_ARIA_LABEL,
-  },
-  {
-    key: WatchlistsFlyoutKey,
-    component: (props) => (
-      <WatchlistsFlyoutPanel {...(props as WatchlistsFlyoutExpandableFlyoutProps).params} />
-    ),
-    'aria-label': WATCHLISTS_PANEL_ARIA_LABEL,
   },
 ];
 

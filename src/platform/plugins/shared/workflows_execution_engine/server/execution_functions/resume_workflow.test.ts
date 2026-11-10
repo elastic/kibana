@@ -422,6 +422,82 @@ describe('resumeWorkflow', () => {
       expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
     });
 
+    describe('a stored HITL response', () => {
+      const stamp = { resumedBy: 'analyst', resumedAt: '2026-10-20T16:00:48.350Z' };
+      const resumeWith = async (context: Record<string, unknown>, taken: boolean) => {
+        const resume = jest.fn().mockResolvedValue(undefined);
+        mockSetupDependencies.mockResolvedValue({
+          workflowRuntime: { resume, ...nonFailedRuntimeMethods() },
+          stepExecutionRuntimeFactory: {},
+          workflowExecutionState: {
+            getWorkflowExecution: () => ({
+              status: ExecutionStatus.WAITING_FOR_INPUT,
+              context: { resumeInput: { approved: true }, ...context },
+            }),
+          },
+          workflowLogger: {},
+          nodesFactory: {},
+          workflowExecutionGraph: {},
+          esClient: {},
+          workflowTaskManager: {},
+          workflowExecutionRepository: {
+            getWorkflowExecutionById: jest.fn().mockResolvedValue(null),
+          },
+        } as never);
+        const workflowExecutionRepository = {
+          ...mockWorkflowExecutionRepositoryForResume,
+          tryTakeResumeInput: jest.fn().mockResolvedValue(taken),
+        };
+
+        const result = await resumeWorkflow({
+          workflowRunId,
+          spaceId,
+          signal: new AbortController().signal,
+          dependencies,
+          logger: logger as Logger,
+          config: { logging: { console: false } } as never,
+          fakeRequest,
+          workflowsExecutionEngine: mockWorkflowExecutionEngine,
+          workflowExecutionRepository: workflowExecutionRepository as any,
+          stepExecutionRepository: mockStepExecutionRepositoryForResume,
+        });
+        return {
+          result,
+          resume,
+          tryTakeResumeInput: workflowExecutionRepository.tryTakeResumeInput,
+        };
+      };
+
+      it('is marked as taken before the workflow resumes', async () => {
+        const { resume, tryTakeResumeInput } = await resumeWith(stamp, true);
+
+        expect(tryTakeResumeInput).toHaveBeenCalledWith({
+          workflowExecutionId: workflowRunId,
+          spaceId,
+          ...stamp,
+        });
+        expect(resume).toHaveBeenCalledTimes(1);
+        expect(mockWorkflowExecutionLoop).toHaveBeenCalledTimes(1);
+      });
+
+      it('is not applied when it was taken back, and the run is retried shortly', async () => {
+        const before = Date.now();
+
+        const { result, resume } = await resumeWith(stamp, false);
+
+        expect(result.retryAt?.getTime()).toBeGreaterThanOrEqual(before + 1_000);
+        expect(resume).not.toHaveBeenCalled();
+        expect(mockWorkflowExecutionLoop).not.toHaveBeenCalled();
+      });
+
+      it('is applied as before when it carries no stamp', async () => {
+        const { resume, tryTakeResumeInput } = await resumeWith({}, false);
+
+        expect(tryTakeResumeInput).not.toHaveBeenCalled();
+        expect(resume).toHaveBeenCalledTimes(1);
+      });
+    });
+
     it('runs resume when status is RUNNING (e.g. mid-loop)', async () => {
       const resume = jest.fn().mockResolvedValue(undefined);
       mockSetupDependencies.mockResolvedValue({
