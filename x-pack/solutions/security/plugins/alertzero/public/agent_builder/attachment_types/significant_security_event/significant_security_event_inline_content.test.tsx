@@ -739,17 +739,25 @@ describe('SignificantSecurityEventInlineContent', () => {
     });
 
     it('shows a truncated host count under Scope as a floor, not an exact count', () => {
+      // Only behavior detections carry the flag: Tier 2 caps `affected_hosts` and marks it.
       renderWithI18n(
         <SignificantSecurityEventInlineContent
           {...renderProps(
             buildAttachment({
               ...baseData,
               detections: [
-                iocDetection({
+                {
+                  id: 'behavior:T1021',
+                  kind: 'behavior',
+                  technique_id: 'T1021',
+                  technique_name: 'Remote Services',
+                  basis: 'behavior_only',
+                  matched_on: [],
+                  total: 40,
                   host_count: 20,
                   hosts_truncated: true,
                   hosts: Array.from({ length: 20 }, (_, index) => `host-${index}`),
-                }),
+                },
               ],
             })
           )}

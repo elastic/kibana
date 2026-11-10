@@ -215,6 +215,36 @@ describe('toSseViewModel', () => {
     expect(toSseViewModel(parsed).basis).toBeUndefined();
   });
 
+  it('derives a technique-scoped payload without detections from its cited events, not the report-wide per_ioc', () => {
+    // Entries written before `detections[]` existed carry the report-wide `per_ioc`, which
+    // can name IOCs another technique matched. The cited events are already scoped.
+    const parsed = parseOrThrow({
+      ...baseParsed,
+      corroborated_technique_id: 'T1021',
+      detections: undefined,
+      events: [
+        {
+          event_id: 'evt-1',
+          source_index: '.ds-logs-endpoint.events.process-default-2026.09.22-000001',
+          matched: { ioc: { type: 'ip', value: '127.0.0.1' }, field: 'source.ip' },
+        },
+      ],
+      hunt_result: {
+        ...tier1OnlyHunt,
+        tier1: {
+          ...tier1OnlyHunt.tier1,
+          per_ioc: [
+            { type: 'ip', value: '127.0.0.1', field: 'source.ip', count: 4 },
+            { type: 'ip', value: '203.0.113.5', field: 'destination.ip', count: 4 },
+          ],
+        },
+      },
+    });
+
+    const ids = toSseViewModel(parsed).detections.map((detection) => detection.id);
+    expect(ids).toEqual(['ioc:ip:127.0.0.1']);
+  });
+
   it('falls back to hit_sources when no IOC event exists', () => {
     const behaviorOnly = parseOrThrow({
       ...baseParsed,

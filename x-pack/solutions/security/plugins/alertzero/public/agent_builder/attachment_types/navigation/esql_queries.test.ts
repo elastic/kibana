@@ -176,6 +176,26 @@ describe('esql_queries', () => {
     ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_STRING(source.ip), "not-an-ip")');
   });
 
+  it('skips the pivot for a CIDR ip IOC, since no single-value predicate can match a range', () => {
+    // Tier 1's term query on an `ip` field accepts CIDR, so `10.0.0.0/8` can be a confirmed
+    // match; `"10.0.0.0/8"::ip` is null and `CIDR_MATCH` is null on multivalued cells.
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-*'],
+        field: 'source.ip',
+        value: '10.0.0.0/8',
+        iocType: 'ip',
+      })
+    ).toBeUndefined();
+    expect(
+      buildIocMatchEsql({ indices: ['logs-*'], field: 'source.ip', value: '2001:db8::/32' })
+    ).toBeUndefined();
+    // A slash that does not follow an address is not a range (a url path, say).
+    expect(
+      buildIocMatchEsql({ indices: ['logs-*'], field: 'url.path', value: 'evil/8', iocType: 'url' })
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_STRING(url.path), "evil/8")');
+  });
+
   it('builds entity lookup ES|QL on the exact ECS field', () => {
     expect(buildEntityLookupEsql({ field: 'host.name', value: 'web-01' })).toBe(
       'FROM "logs-*" | WHERE host.name == "web-01"'

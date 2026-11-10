@@ -141,6 +141,19 @@ export const buildEntityLookupEsql = ({
 };
 
 /**
+ * `address/prefix` with a well-formed address. Tier 1's term query on an `ip` field
+ * accepts CIDR notation, so a range can be a confirmed match, but no single-value
+ * predicate here can reproduce it: `::ip` rejects the range and `CIDR_MATCH` is null on
+ * a multivalued cell.
+ */
+const isCidrRange = (value: string): boolean => {
+  const slash = value.lastIndexOf('/');
+  if (slash === -1) return false;
+  const prefix = value.slice(slash + 1);
+  return /^\d{1,3}$/.test(prefix) && normalizeIpAddress(value.slice(0, slash)) !== undefined;
+};
+
+/**
  * Discover exit for an IOC detection: the caller-supplied indices (Tier 1 `per_index`,
  * else the cited events' sources), filtered to the ECS field and value that matched.
  *
@@ -155,7 +168,9 @@ export const buildEntityLookupEsql = ({
  * string via `TO_STRING`. The ip literal is the canonical spelling, not the stored value:
  * `"bad"::ip`, `"[::1]"::ip` and `"010.0.0.1"::ip` are all null, and `MV_CONTAINS(field, null)`
  * matches every row, so an `ip` IOC whose value does not parse takes the string branch
- * instead. Absent when field/value/indices are empty.
+ * instead. Absent when field/value/indices are empty, and for a CIDR `ip` IOC: a range
+ * cannot be pivoted on with a single-value predicate, and no link beats one that opens
+ * empty for a confirmed match.
  */
 export const buildIocMatchEsql = ({
   indices,
@@ -174,8 +189,12 @@ export const buildIocMatchEsql = ({
     return undefined;
   }
 
-  const ipLiteral =
-    iocType === 'ip' || iocType === undefined ? normalizeIpAddress(value) : undefined;
+  const mayBeIp = iocType === 'ip' || iocType === undefined;
+  if (mayBeIp && isCidrRange(value.trim())) {
+    return undefined;
+  }
+
+  const ipLiteral = mayBeIp ? normalizeIpAddress(value) : undefined;
   const predicate = ipLiteral
     ? `MV_CONTAINS(TO_IP(${field}), "${ipLiteral}"::ip)`
     : iocType && HUNT_CASE_INSENSITIVE_IOC_TYPES.has(iocType)
