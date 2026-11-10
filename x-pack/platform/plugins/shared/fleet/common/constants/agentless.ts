@@ -14,6 +14,10 @@ import { outputType } from './output';
 // the route only carries the `packagePolicyId` (shared with agent-based policies).
 export const IS_AGENTLESS_QUERY_PARAM = 'isAgentless';
 
+// Written to `unenrolled_reason` of the agents of a deleted agentless policy, so they stay hidden
+// when agentless agents are not shown: the policy no longer exists to identify them as agentless.
+export const AGENTLESS_UNENROLLED_REASON = 'agentless';
+
 export const AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT = 3600;
 export const AGENTLESS_AGENT_POLICY_MONITORING: MonitoringType = ['logs', 'metrics'];
 export const AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION = 'organization';
