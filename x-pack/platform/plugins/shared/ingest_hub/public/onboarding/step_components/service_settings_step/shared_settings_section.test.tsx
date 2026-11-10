@@ -175,11 +175,58 @@ describe('SharedSettingsSection', () => {
       expect(screen.getByTestId('sharedSettingsNamespace-note')).toBeInTheDocument();
     });
 
+    it('notes that a launched ECF stack has to be updated in AWS', () => {
+      renderSection({ hasLaunchedEcfStack: true });
+
+      fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+      expect(screen.getByTestId('sharedSettingsNamespace-note')).toHaveTextContent(
+        'A launched CloudFormation stack takes the new value once you update it in AWS.'
+      );
+    });
+
+    it('notes that some selected services do not use the namespace', () => {
+      renderSection({ hasServicesIgnoringNamespace: true });
+
+      fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+      expect(screen.getByTestId('sharedSettingsNamespace-note')).toHaveTextContent(
+        'does not use this setting'
+      );
+    });
+
     it('has no deployed note before anything is deployed', () => {
       renderSection();
 
       fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
       expect(screen.queryByTestId('sharedSettingsNamespace-note')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('proxy URL', () => {
+    it('is hidden unless the deployment method offers it', () => {
+      renderSection();
+
+      expect(screen.queryByTestId('sharedSettingsProxyUrl')).not.toBeInTheDocument();
+    });
+
+    it('reports edits', () => {
+      const onChange = jest.fn();
+      renderSection({ proxyUrl: { value: '', onChange } });
+
+      fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+      fireEvent.change(screen.getByTestId('sharedSettingsProxyUrl'), {
+        target: { value: 'http://proxy:3128' },
+      });
+
+      expect(onChange).toHaveBeenCalledWith('http://proxy:3128');
+    });
+
+    it('opens the advanced options on its own while the URL is invalid', () => {
+      renderSection({
+        proxyUrl: { value: 'ftp://x', onChange: jest.fn(), error: 'Enter a valid proxy URL' },
+      });
+
+      expect(screen.getByTestId('sharedSettingsProxyUrl')).toBeVisible();
+      expect(screen.getByText('Enter a valid proxy URL')).toBeInTheDocument();
     });
   });
 

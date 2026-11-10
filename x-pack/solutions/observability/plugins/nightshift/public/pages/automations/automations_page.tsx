@@ -8,11 +8,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
-import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useHistory, useParams } from 'react-router-dom';
 import { RETRY_BUTTON_LABEL } from '../../common/messages';
-import { useRunQuotas } from '../../data/run_quotas/use_significant_events_run_quotas';
 import { useKibana } from '../../hooks/use_kibana';
 import { useInvestigatorServiceAccount } from '../../data/service_accounts/use_investigator_service_account';
 import {
@@ -23,6 +21,7 @@ import {
 import { CreateAutomationFlyout } from './flyouts/create_flyout/create_automation_flyout';
 import { useAutomationFilters } from './hooks/use_automation_filters';
 import { useAutomationUsage, type TimeRange } from './hooks/use_automation_usage';
+import { useGlobalLimit } from './hooks/use_global_limit';
 import {
   AUTOMATIONS_LOAD_ERROR_TITLE,
   useCreateAutomation,
@@ -43,7 +42,6 @@ import { AutomationDetailFlyout } from './detail_flyout/automation_detail_flyout
 import {
   getAutomationFacets,
   isAutomationRateLimited,
-  isGlobalInvestigationLimitReached,
   isOnlyRateLimitedFilter,
   statusLabels,
 } from './utils/filter_automations';
@@ -105,11 +103,13 @@ export const AutomationsPage = (): React.ReactElement => {
     visibleAutomations,
     options,
   } = useAutomationFilters(automations, getFacets);
-  const { data: quotas, refetch: refetchQuotas } = useRunQuotas();
-  const isGlobalLimitReached = isGlobalInvestigationLimitReached(quotas);
-  const globalLimitSettingsHref = quotas?.canManage
-    ? services.application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/settings/investigations' })
-    : undefined;
+  const {
+    isReached: isGlobalLimitReached,
+    blockingLimit,
+    limit: globalLimit,
+    settingsHref: globalLimitSettingsHref,
+    refetch: refetchQuotas,
+  } = useGlobalLimit();
   const rateLimitedCount = automations.filter(isRateLimited).length;
   const openCreateFlyout = canManage ? () => navigate('/automations/new') : undefined;
   const isEmpty = !isInitialLoading && !error && automations.length === 0;
@@ -165,6 +165,7 @@ export const AutomationsPage = (): React.ReactElement => {
         usedToday={usedToday}
         getFacets={getFacets}
         isRateLimited={isRateLimited}
+        isGlobalLimitReached={isGlobalLimitReached}
         pageIndex={pageIndex}
         pageSize={page.size}
         onPageChange={(index, size) => setPage({ index, size })}
@@ -196,10 +197,11 @@ export const AutomationsPage = (): React.ReactElement => {
       )}
       {!isEmpty && (
         <>
-          {isGlobalLimitReached && quotas && (
+          {blockingLimit && globalLimit !== undefined && (
             <>
               <GlobalLimitCallout
-                limit={quotas.limits.investigation}
+                group={blockingLimit}
+                limit={globalLimit}
                 settingsHref={globalLimitSettingsHref}
               />
               <EuiSpacer size="m" />

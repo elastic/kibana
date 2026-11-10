@@ -8,10 +8,11 @@
  */
 
 export interface EdotBrowserResourceAttributes {
-  'browser.name': string;
+  /** Missing for user agents that EDOT Browser can't make sense of, like crawlers and in-app webviews. */
+  'browser.name'?: string;
   'browser.version': string;
-  'browser.platform': string;
-  'browser.mobile': boolean;
+  'browser.platform'?: string;
+  'browser.mobile'?: boolean;
   'browser.language': string;
   /** Only populated by Chromium-based browsers, which implement `navigator.userAgentData`. */
   'browser.brands'?: string[];
@@ -113,6 +114,19 @@ export const BROWSER_PROFILES: Readonly<Record<BrowserProfileId, BrowserProfile>
     },
   },
 };
+
+/**
+ * The profile of a user agent that EDOT Browser can't make sense of, like a crawler or an in-app
+ * webview: it only knows the language and the raw user agent, and no name, platform or mobile flag.
+ */
+export const withoutBrowserDetails = (profile: BrowserProfile): BrowserProfile => ({
+  ...profile,
+  resourceAttributes: {
+    'browser.version': profile.resourceAttributes['browser.version'],
+    'browser.language': profile.resourceAttributes['browser.language'],
+    'user_agent.original': profile.resourceAttributes['user_agent.original'],
+  },
+});
 
 /** Picks a browser profile by weight; `weightOverrides` lets an app skew its audience. */
 export const pickBrowserProfile = (

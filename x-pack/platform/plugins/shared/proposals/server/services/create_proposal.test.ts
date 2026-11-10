@@ -18,13 +18,21 @@ const setup = ({
   findByWorkflowExecutionId = jest.fn().mockResolvedValue(proposal),
 } = {}) => {
   const executeWorkflow = jest.fn().mockResolvedValue({ workflowExecutionId: 'exec-1' });
+  const createDirectly = jest.fn().mockResolvedValue(proposal);
   const { create, assertAvailable } = createProposalCreator({
-    getProposalsService: () => ({ findByWorkflowExecutionId } as never),
+    getProposalsService: () => ({ findByWorkflowExecutionId, create: createDirectly } as never),
     getWorkflowsApi: () => ({ isWorkflowsAvailable, executeWorkflow } as never),
     privileges: { assertCanManage } as never,
     wait: { timeoutMs: 20, intervalMs: 5 },
   });
-  return { create, assertAvailable, executeWorkflow, assertCanManage, findByWorkflowExecutionId };
+  return {
+    create,
+    assertAvailable,
+    executeWorkflow,
+    assertCanManage,
+    findByWorkflowExecutionId,
+    createDirectly,
+  };
 };
 
 const input = {
@@ -63,14 +71,60 @@ describe('createProposalCreator', () => {
 
     await create({
       ...input,
-      proposal: { ...input.proposal, impact: 'high', confidence: 'low', category: 'todo' },
+      proposal: { ...input.proposal, impact: 'high', confidence: 'low', category: 'tune' },
     });
 
     expect(executeWorkflow.mock.calls[0][0].inputs).toMatchObject({
       impact: 'high',
       confidence: 'low',
-      category: 'todo',
+      category: 'tune',
     });
+  });
+
+  it('writes a to-do directly, with no gate behind it', async () => {
+    const { create, executeWorkflow, createDirectly, assertCanManage } = setup();
+
+    await expect(
+      create({ ...input, proposal: { ...input.proposal, category: 'todo', impact: 'high' } })
+    ).resolves.toEqual({ proposal });
+
+    // Nothing parks on a to-do, and the answer carries no execution to poll.
+    expect(executeWorkflow).not.toHaveBeenCalled();
+    expect(assertCanManage).toHaveBeenCalledWith(request);
+    expect(createDirectly).toHaveBeenCalledWith(
+      {
+        gate: 'none',
+        conversationId: 'conv-1',
+        title: 'Restore the secrets',
+        comment: 'Re-create them.',
+        origin: 'nightshift',
+        category: 'todo',
+        impact: 'high',
+        confidence: 'medium',
+      },
+      { spaceId: 'default', request }
+    );
+  });
+
+  it('drops an impact or confidence it does not recognize', async () => {
+    const { create, createDirectly } = setup();
+
+    await create({
+      ...input,
+      proposal: { ...input.proposal, category: 'todo', impact: 'enormous', confidence: '' },
+    });
+
+    const [params] = createDirectly.mock.calls[0];
+    expect(params.impact).toBeUndefined();
+    expect(params.confidence).toBe('medium');
+  });
+
+  it('creates a to-do for a user without Workflows available', async () => {
+    const { create, createDirectly } = setup({ isWorkflowsAvailable: false });
+
+    await create({ ...input, proposal: { ...input.proposal, category: 'todo' } });
+
+    expect(createDirectly).toHaveBeenCalled();
   });
 
   it('returns the execution without a proposal when it is not stored in time', async () => {

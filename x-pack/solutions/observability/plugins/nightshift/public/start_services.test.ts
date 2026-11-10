@@ -22,6 +22,7 @@ describe('startNightshiftServices', () => {
   });
 
   it('cleans up a late attachment registration after services stop', async () => {
+    const onAvailabilityChange = jest.fn();
     const subscription = startNightshiftServices({
       pluginsStart: {
         agentBuilder: {},
@@ -40,11 +41,40 @@ describe('startNightshiftServices', () => {
       } as never,
       chrome: {} as never,
       focusedSignificantEventService: new FocusedSignificantEventService(),
+      onAvailabilityChange,
     });
 
     subscription.unsubscribe();
     await new Promise<void>((resolve) => setImmediate(resolve));
 
     expect(mockCleanup).toHaveBeenCalledTimes(1);
+    expect(onAvailabilityChange).not.toHaveBeenCalled();
+  });
+
+  it('reports Significant Events availability', async () => {
+    const onAvailabilityChange = jest.fn();
+    const subscription = startNightshiftServices({
+      pluginsStart: {
+        significantEvents: {
+          significantEventsRepositoryClient: {
+            fetch: jest.fn().mockResolvedValue({ available: true }),
+          },
+        },
+      } as never,
+      appUpdater$: new BehaviorSubject<AppUpdater>(() => ({})),
+      context: {
+        logger: {
+          get: jest.fn(() => ({ error: jest.fn() })),
+        },
+      } as never,
+      chrome: {} as never,
+      focusedSignificantEventService: new FocusedSignificantEventService(),
+      onAvailabilityChange,
+    });
+
+    await new Promise<void>((resolve) => setImmediate(resolve));
+
+    expect(onAvailabilityChange).toHaveBeenCalledWith(true);
+    subscription.unsubscribe();
   });
 });
