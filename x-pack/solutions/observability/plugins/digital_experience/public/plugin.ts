@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, from, map, switchMap, take } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, map, take } from 'rxjs';
 import type {
   AppMountParameters,
   AppUpdater,
@@ -24,20 +24,14 @@ export class DigitalExperiencePlugin
   implements Plugin<void, void, DigitalExperienceSetupDeps, DigitalExperienceStartDeps>
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  /** Whether this user sees Digital Experience, decided once per page load in `start`. */
+  private readonly isVisible$ = new ReplaySubject<boolean>(1);
 
   public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
     plugins.observabilityShared.navigation.registerSections(
-      from(core.getStartServices()).pipe(
-        switchMap(([coreStart]) =>
-          coreStart.featureFlags.getBooleanValue$(DIGITAL_EXPERIENCE_ENABLED_FLAG, false).pipe(
-            take(1),
-            map((isEnabled) => {
-              return isEnabled && hasDigitalExperienceAccess(coreStart.application.capabilities);
-            })
-          )
-        ),
-        map((hasAccess) =>
-          hasAccess
+      this.isVisible$.pipe(
+        map((isVisible) =>
+          isVisible
             ? [
                 {
                   label: DIGITAL_EXPERIENCE_LABEL,
@@ -83,7 +77,9 @@ export class DigitalExperiencePlugin
       .getBooleanValue$(DIGITAL_EXPERIENCE_ENABLED_FLAG, false)
       .pipe(take(1))
       .subscribe((isEnabled) => {
-        if (!isEnabled || !hasDigitalExperienceAccess(core.application.capabilities)) {
+        const isVisible = isEnabled && hasDigitalExperienceAccess(core.application.capabilities);
+        this.isVisible$.next(isVisible);
+        if (!isVisible) {
           this.appUpdater$.next(() => ({ status: AppStatus.inaccessible }));
           return;
         }

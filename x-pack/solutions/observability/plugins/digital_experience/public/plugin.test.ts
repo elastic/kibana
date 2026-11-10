@@ -116,7 +116,8 @@ describe('DigitalExperiencePlugin', () => {
     [true, 1],
     [false, 0],
   ])('registers the nav section only when show is %s', async (show, expectedSections) => {
-    const { sections$ } = setup({ show });
+    const { sections$, start } = setup({ show });
+    start();
 
     const sections = await firstValueFrom(sections$);
 
@@ -154,14 +155,16 @@ describe('DigitalExperiencePlugin', () => {
     });
 
     it('registers no nav section, even with access', async () => {
-      const { sections$ } = setup({ show: true, flag: false });
+      const { sections$, start } = setup({ show: true, flag: false });
+      start();
 
       expect(await firstValueFrom(sections$)).toEqual([]);
     });
   });
 
   it('keeps Applications selected on every page, including the app root', async () => {
-    const { sections$ } = setup({ show: true });
+    const { sections$, start } = setup({ show: true });
+    start();
 
     const [{ entries }] = (await firstValueFrom(sections$)) as Array<{
       entries: Array<{ matchPath: (path: string) => boolean }>;

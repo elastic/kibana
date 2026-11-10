@@ -15,18 +15,22 @@ describe('digital experience route repository', () => {
     expect(routes.length).toBeGreaterThan(0);
   });
 
-  it.each(routes)('%s answers 404 when the feature flag is off', async (_endpoint, route) => {
-    const getBooleanValue = jest.fn().mockResolvedValue(false);
-    const resources = {
-      logger: loggingSystemMock.createLogger(),
-      context: { core: Promise.resolve({ featureFlags: { getBooleanValue } }) },
-    };
-    const handler = route.handler as unknown as (resources: unknown) => Promise<unknown>;
+  // Calls the handlers directly: over HTTP, authz and param validation run before this guard.
+  it.each(routes)(
+    '%s handler answers 404 when the feature flag is off',
+    async (_endpoint, route) => {
+      const getBooleanValue = jest.fn().mockResolvedValue(false);
+      const resources = {
+        logger: loggingSystemMock.createLogger(),
+        context: { core: Promise.resolve({ featureFlags: { getBooleanValue } }) },
+      };
+      const handler = route.handler as unknown as (resources: unknown) => Promise<unknown>;
 
-    await expect(handler(resources)).rejects.toMatchObject({
-      isBoom: true,
-      output: { statusCode: 404 },
-    });
-    expect(getBooleanValue).toHaveBeenCalledWith('digitalExperience.enabled', false);
-  });
+      await expect(handler(resources)).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 404 },
+      });
+      expect(getBooleanValue).toHaveBeenCalledWith('digitalExperience.enabled', false);
+    }
+  );
 });
