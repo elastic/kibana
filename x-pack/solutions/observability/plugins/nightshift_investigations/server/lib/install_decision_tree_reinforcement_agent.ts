@@ -7,7 +7,6 @@
 
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import {
   DECISION_TREE_REINFORCEMENT_AGENT_DESCRIPTION,
   DECISION_TREE_REINFORCEMENT_AGENT_NAME,
@@ -19,18 +18,15 @@ import { assertNightshiftSpace } from './assert_nightshift_space';
 export const installDecisionTreeReinforcementAgent = async ({
   agentBuilder,
   spaceId,
-  availability,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   spaceId: string;
-  availability?: AgentAvailabilityConfig;
 }): Promise<void> => {
   // Nightshift runs in the default space only, so the reinforcement agent must not show up in
   // another space's Agent Builder.
   assertNightshiftSpace(spaceId);
   await agentBuilder.agents.ensure({
     spaceId,
-    availability,
     agent: {
       id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
       type: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID,

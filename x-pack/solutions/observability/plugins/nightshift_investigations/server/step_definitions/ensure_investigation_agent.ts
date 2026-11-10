@@ -10,7 +10,6 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decision_tree_reinforcement';
@@ -33,10 +32,8 @@ const VISIBILITY_RETRY_OPTIONS = { retries: 9, factor: 1, minTimeout: 300 } as c
 
 export const ensureInvestigationAgentStepDefinition = ({
   getAgentBuilder,
-  getAgentAvailability,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
-  getAgentAvailability: () => AgentAvailabilityConfig;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.ensureInvestigationAgent',
@@ -67,11 +64,7 @@ export const ensureInvestigationAgentStepDefinition = ({
       // reaches zod, so a schema-level default would leave `agent_id` undefined at runtime.
       const agentId = context.input.agent_id ?? NIGHTSHIFT_INVESTIGATION_AGENT_ID;
 
-      await AGENT_INSTALLERS[agentId]({
-        agentBuilder,
-        spaceId,
-        availability: getAgentAvailability(),
-      });
+      await AGENT_INSTALLERS[agentId]({ agentBuilder, spaceId });
 
       // Polls in the space the agent was just written to: the fake request carries no space, so
       // `callKibanaApi` prefixes the path from `workflow.spaceId` instead. Reading through

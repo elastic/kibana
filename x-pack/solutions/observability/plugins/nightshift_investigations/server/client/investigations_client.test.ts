@@ -167,7 +167,6 @@ const mockLogger = {
 } as unknown as Logger;
 
 const mockRequest = {} as KibanaRequest;
-const mockAgentAvailability = { cacheMode: 'space' as const, handler: jest.fn() };
 const investigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
 const getConnectorById = jest.fn(async (connectorId: string) => ({ connectorId }));
 const mockInference = {
@@ -190,7 +189,6 @@ const makeClient = (
     spaceIdOverride: SPACE_ID,
     agentBuilder: mockAgentBuilder,
     agenticInvestigations: mockAgenticInvestigations,
-    agentAvailability: mockAgentAvailability,
     investigationQuotaCallback,
     inference: mockInference,
     savedObjects: mockSavedObjects,
@@ -512,7 +510,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(installInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
       spaceId: SPACE_ID,
-      availability: mockAgentAvailability,
     });
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
       expect.objectContaining({ id: BOUND_WORKFLOW_ID }),
@@ -547,7 +544,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(installAssistantAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
       spaceId: SPACE_ID,
-      availability: mockAgentAvailability,
     });
   });
 
@@ -985,7 +981,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
     expect(installInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
       spaceId: SPACE_ID,
-      availability: mockAgentAvailability,
     });
     expect(installInvestigationAgentMock.mock.invocationCallOrder[0]).toBeLessThan(
       mockManagement.runWorkflow.mock.invocationCallOrder[0]
@@ -1061,7 +1056,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
       workflowsManagement: mockWorkflowsManagement,
       logger: mockLogger,
       spaceIdOverride: SPACE_ID,
-      agentAvailability: mockAgentAvailability,
       isAvailable: jest.fn().mockResolvedValue(true),
       isInfrastructureAvailable: jest.fn().mockResolvedValue(true),
     });
@@ -2105,7 +2099,6 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(installInvestigationAgentMock).toHaveBeenCalledWith({
       agentBuilder: mockAgentBuilder,
       spaceId: SPACE_ID,
-      availability: mockAgentAvailability,
     });
     expect(installInvestigationAgentMock.mock.invocationCallOrder[0]).toBeLessThan(
       conversations.create.mock.invocationCallOrder[0]

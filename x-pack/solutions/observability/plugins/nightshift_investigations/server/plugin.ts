@@ -33,6 +33,7 @@ import {
   InvestigationLocatorDefinition,
   NightshiftSettingsLocatorDefinition,
 } from '../common/locators';
+import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../common';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { createIsNightshiftEnabledSync } from './is_nightshift_enabled';
 import { createGatedSandboxStart } from './sandbox_gate';
@@ -44,12 +45,10 @@ import { installOnlineEvalsWorkflow } from './lib/managed_workflows/install_onli
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
 import { installSandboxMaterializeWorkspaceWorkflow } from './lib/managed_workflows/install_sandbox_materialize_workspace';
 import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/install_agent_optimizations';
-import { installInvestigationAgent } from './lib/install_investigation_agent';
 import {
   createInvestigatorServiceAccountService,
   type InvestigatorServiceAccountService,
 } from './lib/service_account/investigator_service_account';
-import { installAssistantAgent } from './lib/install_assistant_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import type { GetEpisodeLookup } from './routes/types';
@@ -96,7 +95,10 @@ import { registerInvestigationAgentType } from './agents/investigation';
 import { registerFindingsRecorder } from './findings_recorder';
 import { createRecorderProposals } from './findings_recorder/proposals_adapter';
 import { createRecorderWorkspace } from './findings_recorder/workspace_tools';
-import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
+import {
+  NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
+  registerDecisionTreeReinforcementAgentType,
+} from './agents/decision_tree_reinforcement';
 import { registerAssistantAgentType } from './agents/assistant';
 import { getInvestigatorConnectorIds } from './agents/assistant/inherited_connectors';
 import { createDecisionTreeTools } from './tools/decision_tree';
@@ -288,7 +290,6 @@ export class NightshiftInvestigationsPlugin
         workflowsManagement: this.workflowsManagement,
         spaces: this.spaces,
         agentBuilder: this.agentBuilder,
-        agentAvailability: this.getInvestigationAvailability(),
         assistantEnabled: this.assistantEnabled,
         actions: this.actionsStart,
         elasticsearch: this.elasticsearch,
@@ -439,6 +440,31 @@ export class NightshiftInvestigationsPlugin
         this.assistantEnabled = true;
       }
 
+      // Availability and picker visibility are code-owned and process-local, so every node has to
+      // declare them, whether or not the agent documents exist yet. Declaring them here writes
+      // nothing to Elasticsearch; the documents are installed when a user enables Nightshift in a
+      // space (see the onboarding client) and by the just-in-time paths that run investigations.
+      const agentVisibilityAvailability = this.getInvestigationAvailability();
+      plugins.agentBuilder.agents.registerPersistedAgentVisibility({
+        agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+        availability: agentVisibilityAvailability,
+        // Users pick the assistant when it exists and reach the investigator through investigations.
+        hidden: this.assistantEnabled,
+      });
+      if (this.assistantEnabled) {
+        plugins.agentBuilder.agents.registerPersistedAgentVisibility({
+          agentId: NIGHTSHIFT_ASSISTANT_AGENT_ID,
+          availability: agentVisibilityAvailability,
+          hidden: false,
+        });
+      }
+      if (this.decisionTreesEnabled) {
+        plugins.agentBuilder.agents.registerPersistedAgentVisibility({
+          agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
+          availability: agentVisibilityAvailability,
+        });
+      }
+
       if (plugins.sandbox?.isAvailable) {
         const sandboxLogger = this.logger.get('sandbox');
 
@@ -569,7 +595,6 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           ensureInvestigationAgentStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
-            getAgentAvailability: () => this.getInvestigationAvailability(),
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -829,29 +854,6 @@ export class NightshiftInvestigationsPlugin
       logger: this.logger,
     });
 
-    // Installed here so the agent is visible in the Agent Builder UI before the first run.
-    if (plugins.agentBuilder) {
-      const { agentBuilder } = plugins;
-      void installInvestigationAgent({
-        agentBuilder,
-        spaceId: DEFAULT_SPACE_ID,
-        availability: this.getInvestigationAvailability(),
-        // Users pick the assistant when it exists and reach the investigator through investigations.
-        hidden: this.assistantEnabled,
-      }).catch((err) => {
-        this.logger.error(`Failed to install investigation agent in default space: ${err.message}`);
-      });
-      if (this.assistantEnabled) {
-        void installAssistantAgent({
-          agentBuilder,
-          spaceId: DEFAULT_SPACE_ID,
-          availability: this.getInvestigationAvailability(),
-        }).catch((err) => {
-          this.logger.error(`Failed to install assistant agent in default space: ${err.message}`);
-        });
-      }
-    }
-
     if (plugins.workflowsExtensions) {
       this.managedWorkflowsClient = plugins.workflowsExtensions.initManagedWorkflowsClient(
         NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
@@ -940,7 +942,6 @@ export class NightshiftInvestigationsPlugin
       ensureFailureSweep: () => this.ensureFailureSweep(request, resolvedSpaceId),
       agentBuilder: this.agentBuilder,
       agenticInvestigations: this.agenticInvestigations,
-      agentAvailability: this.getInvestigationAvailability(),
       assistantEnabled: this.assistantEnabled,
       investigationQuotaCallback: this.investigationQuotaCallback,
       telemetry: this.telemetry,
@@ -1005,7 +1006,6 @@ export class NightshiftInvestigationsPlugin
       },
       spaces: this.spaces,
       getAgentBuilder: () => this.agentBuilder,
-      getAgentAvailability: () => this.getInvestigationAvailability(),
       isAssistantEnabled: () => this.assistantEnabled,
       getAutomationsSoClient: this.getAutomationsSoClient,
       lockManager: this.lockManager,

@@ -151,6 +151,29 @@ export interface AgentsSetup {
    * agent configurations.
    */
   registerAiIndexResolver: (resolver: AiIndexResolver) => void;
+  /**
+   * Declares the availability and UI visibility of a persisted agent the plugin installs.
+   *
+   * Both are code-owned and process-local, so they have to be declared on every Kibana node,
+   * whether or not the agent document exists yet. Declaring them here keeps that free: unlike
+   * {@link AgentsStart.ensure}, this writes nothing to Elasticsearch, so it is safe during setup.
+   * An agent with no declared availability is treated as available, and a system-created
+   * non-chat agent with no declared visibility is hidden.
+   */
+  registerPersistedAgentVisibility: (visibility: PersistedAgentVisibility) => void;
+}
+
+/**
+ * Code-owned availability and UI visibility for a persisted agent, declared independently of
+ * the agent document.
+ */
+export interface PersistedAgentVisibility {
+  /** Id of the persisted agent this applies to. */
+  agentId: string;
+  /** Resolves whether the agent is usable, e.g. behind a feature flag or per-space setup. */
+  availability?: AgentAvailabilityConfig;
+  /** Whether the agent is hidden from UI listings such as the agent picker. */
+  hidden?: boolean;
 }
 
 export interface AgentsStart {

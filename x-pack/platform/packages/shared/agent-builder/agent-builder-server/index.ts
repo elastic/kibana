@@ -194,6 +194,7 @@ export type {
   SkillsStart,
   AgentsSetup,
   AgentsStart,
+  PersistedAgentVisibility,
   ExecutionStart,
   PluginsSetup,
   PluginsStart,

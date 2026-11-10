@@ -60,9 +60,15 @@ export interface AgentsServiceStartDeps {
 export class AgentsService {
   private builtinRegistry: BuiltinAgentRegistry;
   private typeRegistry: AgentTypeRegistry;
-  /** In-memory availability for persisted agents, keyed by agent id. Filled by `ensure`. */
+  /**
+   * In-memory availability for persisted agents, keyed by agent id. Filled by
+   * `registerPersistedAgentVisibility` and by `ensure`.
+   */
   private readonly availabilityByAgentId = new Map<string, AgentAvailabilityConfig>();
-  /** In-memory UI visibility overrides for persisted agents, keyed by agent id. Filled by `ensure`. */
+  /**
+   * In-memory UI visibility overrides for persisted agents, keyed by agent id. Filled by
+   * `registerPersistedAgentVisibility` and by `ensure`.
+   */
   private readonly hiddenByAgentId = new Map<string, boolean>();
   private aiIndexResolver?: AiIndexResolver;
 
@@ -102,6 +108,14 @@ export class AgentsService {
           throw new Error('An AI index resolver is already registered');
         }
         this.aiIndexResolver = resolver;
+      },
+      registerPersistedAgentVisibility: ({ agentId, availability, hidden }) => {
+        if (availability) {
+          this.availabilityByAgentId.set(agentId, availability);
+        }
+        if (hidden !== undefined) {
+          this.hiddenByAgentId.set(agentId, hidden);
+        }
       },
     };
   }

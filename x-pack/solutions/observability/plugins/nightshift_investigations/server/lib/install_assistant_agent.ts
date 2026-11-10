@@ -7,7 +7,6 @@
 
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import {
   ASSISTANT_AGENT_DESCRIPTION,
   ASSISTANT_AGENT_NAME,
@@ -21,21 +20,20 @@ import { assertNightshiftSpace } from './assert_nightshift_space';
  *
  * Only in the default space: Nightshift does not run elsewhere, so its agent must not show up in
  * another space's Agent Builder.
+ *
+ * Availability and picker visibility are declared once per process in the plugin's setup, so this
+ * only writes the agent document.
  */
 export const installAssistantAgent = async ({
   agentBuilder,
   spaceId,
-  availability,
 }: {
   agentBuilder: AgentBuilderPluginStart;
   spaceId: string;
-  availability: AgentAvailabilityConfig;
 }): Promise<void> => {
   assertNightshiftSpace(spaceId);
   await agentBuilder.agents.ensure({
     spaceId,
-    availability,
-    hidden: false,
     agent: {
       id: NIGHTSHIFT_ASSISTANT_AGENT_ID,
       type: NIGHTSHIFT_ASSISTANT_AGENT_TYPE_ID,

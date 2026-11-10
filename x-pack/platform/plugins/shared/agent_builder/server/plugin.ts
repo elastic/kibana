@@ -327,6 +327,8 @@ export class AgentBuilderPlugin
         registerAiIndexResolver: serviceSetups.agents.registerAiIndexResolver.bind(
           serviceSetups.agents
         ),
+        registerPersistedAgentVisibility:
+          serviceSetups.agents.registerPersistedAgentVisibility.bind(serviceSetups.agents),
       },
       attachments: {
         registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),

@@ -13,7 +13,6 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { createAgentNotFoundError } from '@kbn/agent-builder-common';
-import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { LockManagerService } from '@kbn/lock-manager';
 import { BOUND_WORKFLOW_IDS } from './bound_workflows';
 import { getBoundInvestigationWorkflowId } from './constants';
@@ -26,10 +25,6 @@ const SPACE_ID = 'default';
 const AGENT_ACCOUNT = 'uiam-sa-7f3c2a';
 const AUTOMATIONS_ACCOUNT = 'uiam-sa-91be04';
 const IDS = { agent: AGENT_ACCOUNT, automations: AUTOMATIONS_ACCOUNT };
-const AVAILABILITY: AgentAvailabilityConfig = {
-  handler: async () => ({ status: 'available' }),
-  cacheMode: 'global',
-};
 const ENTRY_POINT_ID = `${NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID}-${SPACE_ID}`;
 
 const setup = ({
@@ -158,7 +153,6 @@ const setup = ({
     getInstalledWorkflowState,
     spaces,
     getAgentBuilder: () => agentBuilder,
-    getAgentAvailability: () => AVAILABILITY,
     isAssistantEnabled: () => assistantEnabled,
     getAutomationsSoClient: automations ? () => automationsSoClient as never : undefined,
     lockManager,

@@ -20,7 +20,6 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart, ConversationPublicClient } from '@kbn/agent-builder-server';
-import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
 import { isConversationNotFoundError } from '@kbn/agent-builder-common';
 import type {
@@ -366,7 +365,6 @@ export interface NightshiftInvestigationsClientDeps {
   /** Stores investigations: subjects, claims, and the open-investigation lookup. */
   agenticInvestigations?: AgenticInvestigationsPluginStart;
   /** Passed through to `agents.ensure` so a pre-installed agent is hidden while unavailable. */
-  agentAvailability: AgentAvailabilityConfig;
   /** Installs the assistant agent wherever the investigation agent is installed. */
   assistantEnabled?: boolean;
   investigationQuotaCallback?: InvestigationQuotaCallback;
@@ -389,7 +387,6 @@ export class NightshiftInvestigationsClient {
   private readonly spaceIdOverride?: string;
   private readonly agentBuilder?: AgentBuilderPluginStart;
   private readonly agenticInvestigations?: AgenticInvestigationsPluginStart;
-  private readonly agentAvailability: AgentAvailabilityConfig;
   private readonly assistantEnabled: boolean;
   private readonly investigationQuotaCallback?: InvestigationQuotaCallback;
   private readonly telemetry?: NightshiftTelemetryClient;
@@ -410,7 +407,6 @@ export class NightshiftInvestigationsClient {
     this.spaceIdOverride = deps.spaceIdOverride;
     this.agentBuilder = deps.agentBuilder;
     this.agenticInvestigations = deps.agenticInvestigations;
-    this.agentAvailability = deps.agentAvailability;
     this.assistantEnabled = deps.assistantEnabled ?? false;
     this.investigationQuotaCallback = deps.investigationQuotaCallback;
     this.telemetry = deps.telemetry;
@@ -433,13 +429,12 @@ export class NightshiftInvestigationsClient {
     agentBuilder: AgentBuilderPluginStart,
     spaceId: string
   ): Promise<void> => {
-    const availability = this.agentAvailability;
     if (this.assistantEnabled) {
-      installAssistantAgent({ agentBuilder, spaceId, availability }).catch((err) => {
+      installAssistantAgent({ agentBuilder, spaceId }).catch((err) => {
         this.logger.warn(`Failed to install assistant agent in space ${spaceId}: ${err.message}`);
       });
     }
-    await installInvestigationAgent({ agentBuilder, spaceId, availability });
+    await installInvestigationAgent({ agentBuilder, spaceId });
   };
 
   private getSpaceId(): string {

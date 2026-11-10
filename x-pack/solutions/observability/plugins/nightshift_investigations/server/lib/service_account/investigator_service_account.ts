@@ -15,7 +15,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { isAgentNotFoundError } from '@kbn/agent-builder-common';
-import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { isLockAcquisitionError, type LockManagerService } from '@kbn/lock-manager';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -63,7 +62,6 @@ interface Deps {
   /** Binds the investigation agent to the space's agent account; Agent Builder starts after us. */
   getAgentBuilder?: () => NightshiftInvestigationsStartDeps['agentBuilder'] | undefined;
   /** Where the investigation agent is available when setup has to install it. */
-  getAgentAvailability: () => AgentAvailabilityConfig;
   /** Whether the assistant agent exists in this deployment, so setup binds it too. */
   isAssistantEnabled: () => boolean;
   /** Automations are hidden saved objects; this client can read and write them. */
@@ -121,7 +119,6 @@ export const createInvestigatorServiceAccountService = ({
   getInstalledWorkflowState,
   spaces,
   getAgentBuilder,
-  getAgentAvailability,
   isAssistantEnabled,
   getAutomationsSoClient,
   lockManager,
@@ -468,12 +465,11 @@ export const createInvestigatorServiceAccountService = ({
       throw Boom.serverUnavailable('Agent Builder is not available; cannot bind the agent.');
     }
     const registry = await agentBuilder.agents.getRegistry({ request });
-    const availability = getAgentAvailability();
     // The agents are installed lazily, by the onboarding and by the workflows that need them, so a
     // space being set up for the first time may not have them yet.
-    await installInvestigationAgent({ agentBuilder, spaceId, availability });
+    await installInvestigationAgent({ agentBuilder, spaceId });
     if (isAssistantEnabled()) {
-      await installAssistantAgent({ agentBuilder, spaceId, availability });
+      await installAssistantAgent({ agentBuilder, spaceId });
     }
     for (const agentId of getBoundAgentIds()) {
       // A just-installed agent is found by a search that may not see it until the next refresh.

@@ -193,7 +193,6 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
         },
       }),
     } as never,
-    agentAvailability: { cacheMode: 'space', handler: () => ({ status: 'available' }) },
     isAvailable: async () => true,
     isInfrastructureAvailable: async () => true,
   });

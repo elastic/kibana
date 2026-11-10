@@ -24,7 +24,7 @@ import {
 import type { AgentConfiguration, AgentDefinition } from '@kbn/agent-builder-common';
 import { AgentsService } from './agents_service';
 import { defaultAiIndices } from './default_ai_indices';
-import type { AgentsServiceStart } from './types';
+import type { AgentsServiceSetup, AgentsServiceStart } from './types';
 import type { AgentsServiceStartDeps } from './agents_service';
 import { createMockedAgent, createToolsServiceStartMock } from '../../test_utils';
 import { createClient, createSystemClient } from './persisted/client';
@@ -167,12 +167,14 @@ describe('AgentsService', () => {
 
   describe('#start', () => {
     let started: AgentsServiceStart;
+    let setupContract: AgentsServiceSetup;
     let request: KibanaRequest;
     const ensureAgent = jest.fn();
 
     beforeEach(() => {
       isAllowedBuiltinAgentMock.mockReturnValue(true);
-      service.setup({ logger }).registerType({ id: 'test-agent-type', baseConfiguration: {} });
+      setupContract = service.setup({ logger });
+      setupContract.registerType({ id: 'test-agent-type', baseConfiguration: {} });
       ensureAgent.mockReset();
       createClientMock.mockResolvedValue({
         getAgentsUsingTools: (params: { toolIds: string[] }) =>
@@ -358,6 +360,59 @@ describe('AgentsService', () => {
 
           expect((await getAgent()).hidden).toBe(false);
         });
+      });
+    });
+
+    describe('#registerPersistedAgentVisibility', () => {
+      const typedAgent = {
+        id: 'typed-system-agent',
+        type: 'test-agent-type',
+        name: 'System agent',
+        description: 'Installed on demand',
+        configuration: { tools: [] },
+      };
+      const persistedTypedAgent = {
+        ...typedAgent,
+        access_control: undefined,
+        created_by: { id: undefined, username: SYSTEM_USER_ID },
+        permissions: { update_agent: true, update_access_control: true, update_approvals: true },
+      };
+
+      const getAgent = async () => {
+        createClientMock.mockResolvedValue({
+          has: jest.fn().mockResolvedValue(true),
+          getWithAccess: jest.fn().mockResolvedValue(persistedTypedAgent),
+        } as any);
+        const registry = await started.getRegistry({ request });
+        return registry.get(typedAgent.id);
+      };
+
+      it('applies availability declared without ensure, and writes nothing', async () => {
+        setupContract.registerPersistedAgentVisibility({
+          agentId: typedAgent.id,
+          availability: {
+            cacheMode: 'none',
+            handler: async () => ({ status: 'unavailable', reason: 'off' }),
+          },
+        });
+
+        await expect(getAgent()).rejects.toThrow(`Agent ${typedAgent.id} is not available`);
+        expect(createSystemClientMock).not.toHaveBeenCalled();
+        expect(ensureAgent).not.toHaveBeenCalled();
+      });
+
+      it('applies hidden declared without ensure', async () => {
+        setupContract.registerPersistedAgentVisibility({
+          agentId: typedAgent.id,
+          hidden: false,
+        });
+
+        expect((await getAgent()).hidden).toBe(false);
+        expect(ensureAgent).not.toHaveBeenCalled();
+      });
+
+      it('leaves the default visibility in place when nothing is declared', async () => {
+        expect((await getAgent()).hidden).toBe(true);
       });
     });
 

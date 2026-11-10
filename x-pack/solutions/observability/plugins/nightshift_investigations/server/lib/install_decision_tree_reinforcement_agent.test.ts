@@ -16,17 +16,11 @@ import { installDecisionTreeReinforcementAgent } from './install_decision_tree_r
 describe('installDecisionTreeReinforcementAgent', () => {
   it('ensures a shared persisted agent, so the agent service account can run it from agent optimize but not change it', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
-    const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
-    await installDecisionTreeReinforcementAgent({
-      agentBuilder,
-      spaceId: 'default',
-      availability,
-    });
+    await installDecisionTreeReinforcementAgent({ agentBuilder, spaceId: 'default' });
 
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
       spaceId: 'default',
-      availability,
       agent: expect.objectContaining({
         id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
         type: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID,
@@ -37,10 +31,9 @@ describe('installDecisionTreeReinforcementAgent', () => {
 
   it('refuses to install the reinforcement agent in another space', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
-    const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
     await expect(
-      installDecisionTreeReinforcementAgent({ agentBuilder, spaceId: 'marketing', availability })
+      installDecisionTreeReinforcementAgent({ agentBuilder, spaceId: 'marketing' })
     ).rejects.toThrow(/only available in the "default" space/);
     expect(agentBuilder.agents.ensure).not.toHaveBeenCalled();
   });

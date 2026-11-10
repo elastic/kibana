@@ -13,6 +13,7 @@ import type {
   AgentBaseConfiguration,
   AiIndexResolver,
 } from '@kbn/agent-builder-server/agents';
+import type { PersistedAgentVisibility } from '@kbn/agent-builder-server';
 import type {
   AgentConfiguration,
   AgentCreateRequest,
@@ -25,6 +26,7 @@ export interface AgentsServiceSetup {
   register(agent: BuiltInAgentDefinition): void;
   registerType(type: AgentTypeDefinition): void;
   registerAiIndexResolver(resolver: AiIndexResolver): void;
+  registerPersistedAgentVisibility(visibility: PersistedAgentVisibility): void;
 }
 
 export interface ToolRefsParams {

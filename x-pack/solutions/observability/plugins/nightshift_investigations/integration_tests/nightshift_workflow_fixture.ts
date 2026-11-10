@@ -46,7 +46,6 @@ import {
 import { z } from '@kbn/zod/v4';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { AgentBuilderPluginStart, RunAgentParams } from '@kbn/agent-builder-server';
-import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import type { AuditedSandboxSession, NightshiftSandboxStart } from '../server/sandbox_audit';
 import type { NightshiftTelemetryClient } from '../server/telemetry';
 
@@ -331,7 +330,6 @@ export const createNightshiftWorkflowFixture = ({
     }),
     ensureInvestigationAgentStepDefinition({
       getAgentBuilder: () => agentBuilder as unknown as AgentBuilderPluginStart,
-      getAgentAvailability: () => ({} as AgentAvailabilityConfig),
     }),
     decisionTreeReinforceStepDefinition({
       getAgentBuilder: () => agentBuilder as unknown as AgentBuilderPluginStart,
