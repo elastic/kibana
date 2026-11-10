@@ -29,8 +29,11 @@ export interface CollectionFlyoutProps {
 }
 
 /**
- * Chooser flyout for a technology that ships several collection variants.
- * Opened when `?collection=<groupId>` is present in the browse page URL.
+ * Chooser flyout for a technology that ships several collection variants. It is controlled by its
+ * host:
+ * - Fleet's browse pages open it while `?collection=<groupId>` is present in the URL.
+ * - `PackageListGrid` opens it from local state when the host passes `collectionReturnLocation`
+ *   (e.g. Security onboarding).
  */
 export const CollectionFlyout = ({
   title,

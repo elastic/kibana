@@ -14,7 +14,15 @@ import type { CollectionVariant, IntegrationCardItem } from './card_utils';
 /**
  * Builds the chooser rows for a collection card. Each variant links to the member's detail
  * page, carrying `returnAppId`/`returnPath` so the detail and add-integration pages navigate
- * back to the host app (and the open chooser) when the user cancels or saves.
+ * back to the host app when the user cancels or saves. What the user lands on is up to the
+ * host's `returnPath`:
+ * - Fleet's browse pages pass their own path including `?collection=<groupId>`, so the chooser
+ *   reopens.
+ * - Hosts using the chooser built into `PackageListGrid` (e.g. Security onboarding) pass their own
+ *   page path. The chooser is closed when the user comes back.
+ *
+ * With `onNavigate`, a plain click calls it instead of following the `href` (modified clicks still
+ * use the `href`), so the host can navigate with route state.
  */
 export const buildCollectionVariants = (
   card: IntegrationCardItem,
