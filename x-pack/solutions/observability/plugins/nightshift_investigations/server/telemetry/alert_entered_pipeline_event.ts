@@ -7,6 +7,7 @@
 
 import { createHash } from 'crypto';
 import type { EventTypeOpts, RootSchema } from '@kbn/core/server';
+import type { AlertStatusChangedOptIn } from '@kbn/alerting-v2-plugin/server';
 import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 
 export const NIGHTSHIFT_ALERT_ENTERED_PIPELINE_EVENT = 'nightshift-alert-entered-pipeline';
@@ -15,20 +16,21 @@ export const ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY = 0.1;
 export interface AlertEnteredPipelineEvent {
   alert_source: string;
   fingerprint: string;
+  group_hash: string;
   space_id: string;
   source_kind: 'elastic_configured' | 'external';
   sampling_probability: number;
 }
 
+type AlertStatusChangedPayload = Parameters<
+  NonNullable<AlertStatusChangedOptIn['onStatusChanges']>
+>[0][number];
+
 interface AlertStatusChange {
   spaceId: string;
   source: string;
-  alert: {
-    groupHash: string;
-    status: string;
-    previousStatus: string | null;
-  };
-  rule: { id: string } | null;
+  alert: Pick<AlertStatusChangedPayload['alert'], 'groupHash' | 'status' | 'previousStatus'>;
+  rule: Pick<NonNullable<AlertStatusChangedPayload['rule']>, 'id'> | null;
 }
 
 interface AlertEnteredPipelineReporter {
@@ -47,6 +49,12 @@ const alertEnteredPipelineSchema: RootSchema<AlertEnteredPipelineEvent> = {
     type: 'keyword',
     _meta: {
       description: 'Opaque stable identifier used to join telemetry for the same alert series.',
+    },
+  },
+  group_hash: {
+    type: 'keyword',
+    _meta: {
+      description: 'Alerting v2 series key of the alert, joining the event back to `.rule-events`.',
     },
   },
   space_id: {
@@ -76,16 +84,14 @@ export const isAlertEnteredPipelineSampled = (
   probability = ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY
 ): boolean => {
   const sample = Number.parseInt(fingerprint.slice(0, 8), 16) / 0x100000000;
-  return Number.isFinite(sample) && sample < probability;
+  return sample < probability;
 };
 
-// Rule group hashes are rule-local; a written alert's already covers space and source.
-const toFingerprint = ({ spaceId, source, alert, rule }: AlertStatusChange): string =>
-  rule
-    ? createHash('sha256')
-        .update(`${spaceId}:${source}:${rule.id}:${alert.groupHash}`)
-        .digest('hex')
-    : alert.groupHash;
+// Rule group hashes are only unique within a rule; hashing every path keeps the sampler input hex.
+export const toAlertFingerprint = ({ spaceId, source, alert, rule }: AlertStatusChange): string =>
+  createHash('sha256')
+    .update(`${spaceId}:${source}:${rule?.id ?? ''}:${alert.groupHash}`)
+    .digest('hex');
 
 export const reportAlertsEnteredPipeline = (
   payloads: readonly AlertStatusChange[],
@@ -101,7 +107,7 @@ export const reportAlertsEnteredPipeline = (
       continue;
     }
 
-    const fingerprint = toFingerprint(payload);
+    const fingerprint = toAlertFingerprint(payload);
     if (!isAlertEnteredPipelineSampled(fingerprint)) {
       continue;
     }
@@ -109,6 +115,7 @@ export const reportAlertsEnteredPipeline = (
     telemetry.reportAlertEnteredPipeline({
       alert_source: source,
       fingerprint,
+      group_hash: alert.groupHash,
       space_id: spaceId,
       source_kind: payload.rule === null ? 'external' : 'elastic_configured',
       sampling_probability: ALERT_ENTERED_PIPELINE_SAMPLING_PROBABILITY,
