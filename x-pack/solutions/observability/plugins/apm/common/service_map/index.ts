@@ -19,7 +19,7 @@ export {
 export { getPaths } from './get_paths';
 export { transformToReactFlow } from './transform_to_react_flow';
 export { groupResourceNodes } from './group_resource_nodes';
-export { markIdleServices } from './mark_idle_services';
+export { markIdleServices, shouldKeepVisibleDespiteLowTraffic } from './mark_idle_services';
 export {
   aggregateServiceMapStats,
   getFailingServiceMembers,

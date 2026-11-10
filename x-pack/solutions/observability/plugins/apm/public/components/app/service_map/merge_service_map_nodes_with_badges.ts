@@ -33,6 +33,11 @@ export function mergeServiceMapNodesWithBadges(
     const serviceName = node.data.label;
     const alertsCount = alertsByService.get(serviceName);
     const slo = slosByService.get(serviceName);
+    // Badges load after idle marking; keep alerting / SLO-breaching services sharp.
+    const keepVisible =
+      (alertsCount !== undefined && alertsCount > 0) ||
+      slo?.sloStatus === 'violated' ||
+      slo?.sloStatus === 'degrading';
 
     return {
       ...node,
@@ -40,6 +45,7 @@ export function mergeServiceMapNodesWithBadges(
         ...node.data,
         ...(alertsCount !== undefined ? { alertsCount } : {}),
         ...(slo ? { sloStatus: slo.sloStatus, sloCount: slo.sloCount } : {}),
+        ...(keepVisible ? { isIdle: false } : {}),
       },
     };
   });
