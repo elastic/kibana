@@ -20,6 +20,7 @@ import { collapseTable } from './collapse';
 import { toColorMappingConfig } from './color_mapping';
 import { applyLensFormats, toLensFieldFormat } from './formats';
 import { isXyDataLayer, isXyEsqlReferenceLinesLayer, xyQueryLayers } from './plan';
+import { dateMinInterval, timeXDomain } from './time_domain';
 import {
   bucketInterval,
   collectColumns,
@@ -601,13 +602,31 @@ export const mapLensXy = (
       : 'ordinal'
     : chart.axis?.x?.scale;
   const xDomain = chart.axis?.x?.domain;
-  const xInterval = xScale === 'ordinal' ? undefined : bucketInterval(xColumn);
+  // On a time chart, Lens gives Elastic Charts `getXDomain`'s extended domain and its adjusted
+  // interval, whatever `axis.x.domain` says (elastic/isomer#391's time axis reads both).
+  const timeDomain =
+    xScale === 'temporal'
+      ? timeXDomain(
+          mapped.flatMap(({ layer, table }) => (layer.x ? [{ table, x: layer.x.column }] : [])),
+          dateMinInterval(xColumn),
+          mapped.some(({ layer }) => MARKS[layer.type].mark === 'bar'),
+          kit.context.timeZone
+        )
+      : undefined;
+  const xInterval =
+    xScale === 'temporal'
+      ? timeDomain?.minInterval ?? dateMinInterval(xColumn)
+      : xScale === 'ordinal'
+      ? undefined
+      : bucketInterval(xColumn);
   const axes: NodeAxes = {
     x: {
       ...axisOf(chart.axis?.x, xLabel),
       ...(xScale ? { scale: xScale } : {}),
       ...(xInterval ? { interval: xInterval } : {}),
-      ...(xDomain
+      ...(timeDomain
+        ? { domain: { kind: 'custom' as const, min: timeDomain.min, max: timeDomain.max } }
+        : xDomain
         ? {
             domain:
               xDomain.type === 'custom'

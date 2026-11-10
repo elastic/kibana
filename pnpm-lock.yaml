@@ -220,9 +220,9 @@ overrides:
   '@babel/traverse': 7.29.8
   '@babel/types': 7.29.8
   '@elastic/charts': file:x-pack/platform/packages/shared/isomer/vendor/elastic-charts-73.3.2-pr2939-a87de627.tgz
-  '@elastic/isomer-primitives-charts': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz
-  '@elastic/isomer-runtime': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz
-  '@elastic/isomer-sdk': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c8.05c3442.tgz
+  '@elastic/isomer-primitives-charts': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c9.ade3578.tgz
+  '@elastic/isomer-runtime': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c9.ade3578.tgz
+  '@elastic/isomer-sdk': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c9.ade3578.tgz
   '@emotion/sheet': npm:@elastic/emotion-sheet@1.4.1
   '@hapi/mimos>mime-db': 1.53.0
   '@hello-pangea/dnd': 18.0.1
@@ -419,20 +419,20 @@ importers:
         specifier: 1.1.2
         version: 1.1.2
       '@elastic/isomer-charts-elastic':
-        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c8.05c3442.tgz
-        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c8.05c3442.tgz(@elastic/charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-charts-73.3.2-pr2939-a87de627.tgz(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c9.ade3578.tgz
+        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c9.ade3578.tgz(@elastic/charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-charts-73.3.2-pr2939-a87de627.tgz(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       '@elastic/isomer-image-takumi':
-        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c8.05c3442.tgz
-        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c8.05c3442.tgz(csstype@3.0.7)(react@18.2.0)
+        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c9.ade3578.tgz
+        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c9.ade3578.tgz(csstype@3.0.7)(react@18.2.0)
       '@elastic/isomer-primitives-charts':
-        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz
-        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c9.ade3578.tgz
+        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c9.ade3578.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       '@elastic/isomer-runtime':
-        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz
-        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c9.ade3578.tgz
+        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c9.ade3578.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       '@elastic/isomer-sdk':
-        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c8.05c3442.tgz
-        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c9.ade3578.tgz
+        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c9.ade3578.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       '@elastic/kibana-d3-color':
         specifier: 2.0.1
         version: 2.0.1
@@ -11272,38 +11272,38 @@ packages:
   '@elastic/filesaver@1.1.2':
     resolution: {integrity: sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==}
 
-  '@elastic/isomer-charts-elastic@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c8.05c3442.tgz':
-    resolution: {integrity: sha512-XEb11gkbcNQ43vwvOPJw2H5zqltGvQzLtrz1sQk1EMUeIFEXmPxlkX1myaiB+eCZ8WpAC4uiuNr4YRXUexeCoQ==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c8.05c3442.tgz}
-    version: 0.0.0-c8.05c3442
+  '@elastic/isomer-charts-elastic@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c9.ade3578.tgz':
+    resolution: {integrity: sha512-1sPF2eV6RrDXNsS2+0RQYwIMoEZkSRyXGk0QYypv1o6R/zy4q51Gidla/TM4rS9JSrDisV9kQsHiYKHOhV5UXA==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c9.ade3578.tgz}
+    version: 0.0.0-c9.ade3578
     peerDependencies:
       '@elastic/charts': ^73.3.0
       react: ^18.0.0
       react-dom: ^18.0.0
       zod: 4.6.5
 
-  '@elastic/isomer-image-takumi@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c8.05c3442.tgz':
-    resolution: {integrity: sha512-+RaIncTxqjsrmqOKM2y0YmPGWKgau5/GWILi/kqgS3lnLmFYS1MjW2NNApp+EUZK1XzQT3vClnLQeOmQqdVceg==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c8.05c3442.tgz}
-    version: 0.0.0-c8.05c3442
+  '@elastic/isomer-image-takumi@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c9.ade3578.tgz':
+    resolution: {integrity: sha512-48qk6AFyYTQ/ifQicJ2u5CZNS17cpGwQYrGq/XpC+mW1l0qRwEsSQW7mRfRN9zFJBJ372TED4ca69eU5a3Jb2A==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c9.ade3578.tgz}
+    version: 0.0.0-c9.ade3578
 
-  '@elastic/isomer-primitives-charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz':
-    resolution: {integrity: sha512-wrGNydwHBVHakOrFSVbY8rQJldj7cB/JGMppIB4VFuauOFEty+fBmWCZXduc8q51+Lzd7iVzas7IcHmNlhi1xA==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz}
-    version: 0.0.0-c8.05c3442
+  '@elastic/isomer-primitives-charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c9.ade3578.tgz':
+    resolution: {integrity: sha512-4L+TOipePprUi8pCQwh5iZDHZ6cq0s1fWD/9qntOzllpZL0UtqEo1R4N3AQPlcJyDGq2Moop7Z0FScwQffmELw==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c9.ade3578.tgz}
+    version: 0.0.0-c9.ade3578
     peerDependencies:
       react: '>=18 <20'
       zod: 4.6.5
 
-  '@elastic/isomer-runtime@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz':
-    resolution: {integrity: sha512-M8zLaY9YFWl9C63qEY+grufKIRNF0FPQAryaDOflliQHfgoNwMsZCv8RCJ8VFsgg9luUMhFqHgVv8TZOyb7Ojg==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz}
-    version: 0.0.0-c8.05c3442
+  '@elastic/isomer-runtime@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c9.ade3578.tgz':
+    resolution: {integrity: sha512-SRW6851B3uVU4pH+yzxQDhqMHCH2UvQDdDiy4wctQpCmWpIg9v+nVDPh58dyiiAuqyBvP3rem1eGYAapPbsBGQ==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c9.ade3578.tgz}
+    version: 0.0.0-c9.ade3578
     engines: {node: '>=22.13.0'}
     peerDependencies:
       react: '>=18 <20'
       react-dom: '>=18 <20'
       zod: 4.6.5
 
-  '@elastic/isomer-sdk@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c8.05c3442.tgz':
-    resolution: {integrity: sha512-65KhwPeidw4XixOmmuUmnjMjFMRUCyCvDdiBQ/8EniCR4xHcT9lbxUh6JdrG+zNImwnKzj4iGXpl4dwbhrfRhQ==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c8.05c3442.tgz}
-    version: 0.0.0-c8.05c3442
+  '@elastic/isomer-sdk@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c9.ade3578.tgz':
+    resolution: {integrity: sha512-I4NKTihw6VpP7vfSK5+pIdGWvXNyT63Y0JEtBozie2gyV30E673D38XmU6+FZ7s/gd6v0R8t/CZgaaM1pvjhIg==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c9.ade3578.tgz}
+    version: 0.0.0-c9.ade3578
     engines: {node: '>=22.13.0'}
     peerDependencies:
       react: '>=18 <20'
@@ -27508,17 +27508,17 @@ snapshots:
 
   '@elastic/filesaver@1.1.2': {}
 
-  '@elastic/isomer-charts-elastic@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c8.05c3442.tgz(@elastic/charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-charts-73.3.2-pr2939-a87de627.tgz(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
+  '@elastic/isomer-charts-elastic@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-charts-elastic-0.0.0-c9.ade3578.tgz(@elastic/charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-charts-73.3.2-pr2939-a87de627.tgz(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
       '@elastic/charts': file:x-pack/platform/packages/shared/isomer/vendor/elastic-charts-73.3.2-pr2939-a87de627.tgz(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)
-      '@elastic/isomer-primitives-charts': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+      '@elastic/isomer-primitives-charts': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c9.ade3578.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       zod: 4.6.5
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/isomer-image-takumi@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c8.05c3442.tgz(csstype@3.0.7)(react@18.2.0)':
+  '@elastic/isomer-image-takumi@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-image-takumi-0.0.0-c9.ade3578.tgz(csstype@3.0.7)(react@18.2.0)':
     dependencies:
       '@takumi-rs/core': 2.18.1(csstype@3.0.7)(react@18.2.0)
       '@takumi-rs/helpers': 2.18.1(react@18.2.0)
@@ -27528,26 +27528,26 @@ snapshots:
       - preact
       - react
 
-  '@elastic/isomer-primitives-charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
+  '@elastic/isomer-primitives-charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c9.ade3578.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
       '@elastic/distillate': 0.2.0
-      '@elastic/isomer-sdk': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+      '@elastic/isomer-sdk': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c9.ade3578.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       react: 18.2.0
       zod: 4.6.5
     transitivePeerDependencies:
       - react-dom
       - supports-color
 
-  '@elastic/isomer-runtime@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
+  '@elastic/isomer-runtime@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c9.ade3578.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
-      '@elastic/isomer-sdk': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+      '@elastic/isomer-sdk': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c9.ade3578.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       zod: 4.6.5
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/isomer-sdk@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
+  '@elastic/isomer-sdk@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c9.ade3578.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:
       acorn: 8.18.0
       mdast-util-from-markdown: 2.0.3(supports-color@10.2.2)

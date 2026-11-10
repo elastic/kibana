@@ -13,7 +13,8 @@ import type { MaterializeLoss, MaterializedNode } from '../nodes';
 import type { MaterializeKit } from '../types';
 import type { ChartColumnRole } from '../kit/types';
 import { applyLensFormats } from './formats';
-import { bucketInterval, collectColumns, findColumn, lensLink } from './shared';
+import { collectColumns, findColumn, lensLink } from './shared';
+import { dateMinInterval } from './time_domain';
 import type { LensHeatmapConfig, LensSavedObjectReference } from './types';
 import { isColorByValue, toValueBands } from './value_colors';
 
@@ -117,6 +118,16 @@ export const mapLensHeatmap = (
     y?.column,
     losses
   );
+  if (y && table.rows.some((row) => row[y.column] === null || row[y.column] === undefined)) {
+    losses.push({
+      path: 'y.column',
+      kind: 'dropped',
+      note: i18n.translate('xpack.isomer.materialize.lens.heatmapMissingY', {
+        defaultMessage:
+          'Kibana draws rows whose y value is missing in a row of their own; they are not drawn here.',
+      }),
+    });
+  }
   const { labels, formats } = collectColumns(refs);
   const roles: Record<string, ChartColumnRole> = {
     [x.column]: 'dimension',
@@ -131,7 +142,8 @@ export const mapLensHeatmap = (
 
   const xColumn = findColumn(table, x.column);
   const isTime = xColumn.meta.type === 'date';
-  const interval = isTime ? bucketInterval(xColumn) : undefined;
+  // Lens's heat map buckets a time axis by the x column's date histogram interval.
+  const interval = isTime ? dateMinInterval(xColumn) : undefined;
   const label = (id: string) =>
     data.columns.find((column) => column.id === id)?.label ?? findColumn(table, id).name;
 

@@ -17,6 +17,7 @@ import { mapLensLegacyMetric } from './legacy_metric';
 import { mapLensMetric } from './metric';
 import { mapLensPartition } from './partition';
 import { mapLensTagcloud } from './tagcloud';
+import { prepareEsqlDateHistogram } from './time_domain';
 import { asMappedChart, compileLegacyMetric, planLensChart } from './plan';
 import type { LensApiConfig, LensMaterializeConfig, LensSavedObjectReference } from './types';
 import { mapLensXy } from './xy';
@@ -124,8 +125,12 @@ export const createLensMaterializer = ({
 
   plan: ({ chart }, context) => planLensChart(chart, context),
 
-  map: ({ chart, savedObject }, { tables }, kit) => {
+  map: ({ chart, savedObject }, results, kit) => {
     const mapped = asMappedChart(chart);
+    // Every ES|QL Lens layer runs `lens_date_histogram_textbased` on its table.
+    const tables = results.tables.map((table) =>
+      prepareEsqlDateHistogram(table, kit.context.timeZone)
+    );
     if ('type' in mapped) {
       return mapped;
     }
