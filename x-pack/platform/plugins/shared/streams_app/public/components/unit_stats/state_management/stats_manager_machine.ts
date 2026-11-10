@@ -253,7 +253,7 @@ export const statsManagerMachine = setup({
   context: ({ input }) => ({
     getWindow: input.getWindow,
     pollIntervalMs: input.pollIntervalMs,
-    components: { destination: {}, processor: {} },
+    components: { destination: {}, processor: {}, source: {} },
     request: NO_REQUEST,
     requestFailed: false,
   }),

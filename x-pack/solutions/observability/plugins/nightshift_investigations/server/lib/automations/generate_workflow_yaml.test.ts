@@ -249,6 +249,84 @@ describe('generateWorkflowYaml', () => {
       });
     });
 
+    describe.each([
+      ['alerting.v1.alertStatusChanged', 'recovered'],
+      ['alerting.alertStatusChanged', 'inactive'],
+    ])('%s severity filtering', (triggerType, recoveredStatus) => {
+      const matches = (
+        rows: AlertRow[],
+        alert: Record<string, unknown>,
+        rule: Record<string, unknown> | null = { name: 'CPU usage', tags: ['prod'] }
+      ): boolean => {
+        const automation = baseAutomation();
+        automation.trigger.rows = rows;
+        const yaml = parse(generateWorkflowYaml({ automationId: 'auto-123', automation }));
+        const trigger = yaml.triggers.find(({ type }: { type: string }) => type === triggerType);
+        return evaluateKql(trigger.on.condition, { event: { alert, rule } });
+      };
+
+      it('matches selected activation severities and allows recoveries with no severity', () => {
+        const rows: AlertRow[] = [{ kind: 'alert', severities: ['high', 'critical', 'warning'] }];
+        expect(matches(rows, { status: 'active', severity: 'high', previousStatus: null })).toBe(
+          true
+        );
+        expect(
+          matches(rows, { status: 'active', severity: 'critical', previousStatus: null })
+        ).toBe(true);
+        expect(matches(rows, { status: 'active', severity: 'warning', previousStatus: null })).toBe(
+          true
+        );
+        expect(matches(rows, { status: 'active', severity: 'medium', previousStatus: null })).toBe(
+          false
+        );
+        expect(matches(rows, { status: 'active', severity: null, previousStatus: null })).toBe(
+          false
+        );
+        expect(matches(rows, { status: 'active', previousStatus: null })).toBe(false);
+        expect(matches(rows, { status: recoveredStatus, severity: null })).toBe(true);
+        for (const severities of [undefined, []]) {
+          expect(
+            matches([{ kind: 'alert', severities }], {
+              status: 'active',
+              severity: null,
+              previousStatus: null,
+            })
+          ).toBe(true);
+        }
+      });
+
+      it('combines severity with rule filters and preserves alternatives between rows', () => {
+        const rows: AlertRow[] = [
+          { kind: 'alert', severities: ['high'], tags: ['prod'] },
+          { kind: 'alert', severities: ['major'], ruleNames: ['Disk full'] },
+        ];
+        expect(matches(rows, { status: 'active', severity: 'high', previousStatus: null })).toBe(
+          true
+        );
+        expect(
+          matches(
+            rows,
+            { status: 'active', severity: 'major', previousStatus: null },
+            { name: 'Disk full' }
+          )
+        ).toBe(true);
+        expect(matches(rows, { status: 'active', severity: 'major', previousStatus: null })).toBe(
+          false
+        );
+        expect(
+          matches(rows, { status: 'active', severity: 'high', previousStatus: null }, null)
+        ).toBe(false);
+        expect(matches(rows, { status: recoveredStatus, severity: null }, null)).toBe(false);
+        expect(
+          matches(
+            [{ kind: 'alert', severities: ['high'] }],
+            { status: 'active', severity: 'high', previousStatus: null },
+            null
+          )
+        ).toBe(true);
+      });
+    });
+
     it('keeps the steps of each alert trigger inside its own guard in a mixed automation', () => {
       const automation = baseAutomation();
       automation.trigger.rows = [{ kind: 'alert' }, { kind: 'slack', event: 'message' }];
@@ -335,8 +413,12 @@ describe('generateWorkflowYaml', () => {
     });
 
     describe('universal alert trigger', () => {
-      const v2Event = (alert: Record<string, unknown>, rule: Record<string, unknown> | null) => ({
-        event: { alert: { id: 'ep-1', ...alert }, rule },
+      const v2Event = (
+        alert: Record<string, unknown>,
+        rule: Record<string, unknown> | null,
+        source?: string
+      ) => ({
+        event: { alert: { id: 'ep-1', ...alert }, rule, source },
       });
       const v2Matches = (row: AlertRow, event: ReturnType<typeof v2Event>): boolean => {
         const automation = baseAutomation();
@@ -350,18 +432,27 @@ describe('generateWorkflowYaml', () => {
       const rule = { id: 'rule-1', name: 'High CPU usage', tags: ['k8s'] };
 
       it('matches new activations and recoveries, but not a flap back to active or in-between states', () => {
-        const row: AlertRow = { kind: 'alert' };
-        expect(v2Matches(row, v2Event({ status: 'active', previousStatus: null }, rule))).toBe(
-          true
-        );
-        expect(v2Matches(row, v2Event({ status: 'active', previousStatus: 'pending' }, rule))).toBe(
-          true
-        );
+        const row: AlertRow = { kind: 'alert', severities: ['high'] };
+        expect(
+          v2Matches(
+            row,
+            v2Event({ status: 'active', severity: 'high', previousStatus: null }, rule)
+          )
+        ).toBe(true);
+        expect(
+          v2Matches(
+            row,
+            v2Event({ status: 'active', severity: 'high', previousStatus: 'pending' }, rule)
+          )
+        ).toBe(true);
         expect(
           v2Matches(row, v2Event({ status: 'inactive', previousStatus: 'recovering' }, rule))
         ).toBe(true);
         expect(
-          v2Matches(row, v2Event({ status: 'active', previousStatus: 'recovering' }, rule))
+          v2Matches(
+            row,
+            v2Event({ status: 'active', severity: 'high', previousStatus: 'recovering' }, rule)
+          )
         ).toBe(false);
         expect(
           v2Matches(row, v2Event({ status: 'recovering', previousStatus: 'active' }, rule))
@@ -386,10 +477,24 @@ describe('generateWorkflowYaml', () => {
       });
 
       describe('alert source filter', () => {
-        const sourceEvent = (source: string) => {
-          const base = v2Event({ status: 'active', previousStatus: null }, rule);
-          return { event: { ...base.event, source } };
-        };
+        it.each([
+          ['internal', 'active', 'high', true],
+          ['pagerduty', 'active', 'high', false],
+          ['internal', 'active', 'medium', false],
+          ['internal', 'inactive', null, true],
+          ['pagerduty', 'inactive', null, false],
+        ])('combines source and severity for %s %s %s', (source, status, severity, expected) => {
+          const row: AlertRow = {
+            kind: 'alert',
+            alertSources: ['internal'],
+            severities: ['high'],
+          };
+          const event = v2Event({ status, severity, previousStatus: null }, rule, source);
+          expect(v2Matches(row, event)).toBe(expected);
+        });
+
+        const sourceEvent = (source: string) =>
+          v2Event({ status: 'active', previousStatus: null }, rule, source);
 
         it('keeps only the included sources', () => {
           const row: AlertRow = {
@@ -615,7 +720,7 @@ describe('generateWorkflowYaml', () => {
         with: {
           automation_id: 'auto-123',
           subject_type: 'manual',
-          subject_id: 'manual',
+          subject_id: 'scheduled-auto-123-{{ event.scheduledFor | default: execution.id }}',
           title: 'Test automation',
           summary: 'Test automation',
           trigger_type: 'automatic',
@@ -696,7 +801,7 @@ describe('generateWorkflowYaml', () => {
       expect(new Set([scheduled.name, alert.name, slack.name]).size).toBe(3);
       expect(scheduled.with).toMatchObject({
         subject_type: 'manual',
-        subject_id: 'manual',
+        subject_id: 'scheduled-auto-123-{{ event.scheduledFor | default: execution.id }}',
         timeout_seconds: 120,
       });
       expect(alert.with).toMatchObject({
