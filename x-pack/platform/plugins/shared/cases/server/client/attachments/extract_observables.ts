@@ -8,7 +8,8 @@
 import { getFlattenedObject } from '@kbn/std';
 
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
-import type { Case } from '../../../common/types/domain';
+import type { Case, Observable } from '../../../common/types/domain';
+import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
 import type { AlertInfo } from '../../common/types';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
@@ -61,6 +62,95 @@ const toFlattedEcsData = (flatDoc: Record<string, unknown>): FlattedEcsData[] =>
     value: toStringArray(value),
   }));
 
+interface ExtractObservablesCounts {
+  /** Number of alert/event references that were looked up. */
+  alertsRequested: number;
+  /** Number of looked-up documents that were found and readable. */
+  alertsFound: number;
+}
+
+export type ExtractObservablesOutcome =
+  | (ExtractObservablesCounts & {
+      status: 'extracted';
+      caseWithPatch: CaseSavedObjectTransformed;
+      newlyAddedObservables: Observable[];
+    })
+  | (ExtractObservablesCounts & {
+      status: 'alerts_not_found' | 'no_matching_fields' | 'no_new_observables' | 'cap_reached';
+    });
+
+/**
+ * Reads the referenced alert/event documents, extracts observables from them, and persists the
+ * new ones to the case. Reports what happened instead of hiding it.
+ *
+ * Callers MUST enforce the extraction setting, the Platinum license gate, and authorization
+ * first, and call notifyUsage themselves. Callers also emit the observables-added event.
+ * Errors are thrown to the caller.
+ */
+export const extractObservablesFromAlerts = async (
+  caseId: string,
+  alertInfo: AlertInfo[],
+  clientArgs: CasesClientArgs
+): Promise<ExtractObservablesOutcome> => {
+  const {
+    services: { alertsService, caseService },
+  } = clientArgs;
+
+  const alertsRequested = alertInfo.length;
+
+  // Fetch the ECS source documents
+  const mgetResponse = await alertsService.getAlerts(alertInfo);
+
+  if (!mgetResponse || mgetResponse.docs.length === 0) {
+    return { status: 'alerts_not_found', alertsRequested, alertsFound: 0 };
+  }
+
+  // Flatten each _source into FlattedEcsData[] for the extractor
+  const ecsDataArray: FlattedEcsData[][] = mgetResponse.docs.reduce<FlattedEcsData[][]>(
+    (allDocs, doc) => {
+      if ('_source' in doc && doc._source != null && typeof doc._source === 'object') {
+        allDocs.push(toFlattedEcsData(getFlattenedObject(doc._source)));
+      }
+      return allDocs;
+    },
+    []
+  );
+
+  const alertsFound = ecsDataArray.length;
+
+  if (alertsFound === 0) {
+    return { status: 'alerts_not_found', alertsRequested, alertsFound };
+  }
+
+  const observables = getObservablesFromEcs(ecsDataArray);
+
+  if (observables.length === 0) {
+    return { status: 'no_matching_fields', alertsRequested, alertsFound };
+  }
+
+  const retrievedCase = await caseService.getCase({ id: caseId });
+  const result = await applyObservablesToCase(caseId, observables, clientArgs, retrievedCase);
+
+  if (!result) {
+    const isCapReached =
+      (retrievedCase.attributes.observables ?? []).length >= MAX_OBSERVABLES_PER_CASE;
+
+    return {
+      status: isCapReached ? 'cap_reached' : 'no_new_observables',
+      alertsRequested,
+      alertsFound,
+    };
+  }
+
+  return {
+    status: 'extracted',
+    alertsRequested,
+    alertsFound,
+    caseWithPatch: result.caseWithPatch,
+    newlyAddedObservables: result.newlyAddedObservables,
+  };
+};
+
 /**
  * Best-effort: extract observables from the alert/event attachments in a
  * bulkCreate request and persist them to the case.
@@ -88,7 +178,7 @@ export const extractAndAddObservables = async (
 
   const {
     logger,
-    services: { alertsService, licensingService },
+    services: { licensingService },
   } = clientArgs;
 
   try {
@@ -110,48 +200,25 @@ export const extractAndAddObservables = async (
       return;
     }
 
-    // Fetch the ECS source documents
-    const mgetResponse = await alertsService.getAlerts(documentInfo);
+    const outcome = await extractObservablesFromAlerts(caseId, documentInfo, clientArgs);
 
-    if (!mgetResponse || mgetResponse.docs.length === 0) {
-      return;
-    }
-
-    // Flatten each _source into FlattedEcsData[] for the extractor
-    const ecsDataArray: FlattedEcsData[][] = mgetResponse.docs.reduce<FlattedEcsData[][]>(
-      (allDocs, doc) => {
-        if ('_source' in doc && doc._source != null && typeof doc._source === 'object') {
-          allDocs.push(toFlattedEcsData(getFlattenedObject(doc._source)));
-        }
-        return allDocs;
-      },
-      []
-    );
-
-    if (ecsDataArray.length === 0) {
-      return;
-    }
-
-    const observables = getObservablesFromEcs(ecsDataArray);
-
-    if (observables.length === 0) {
-      return;
-    }
-
-    const result = await applyObservablesToCase(caseId, observables, clientArgs);
-    if (!result) {
+    if (outcome.status === 'no_new_observables' || outcome.status === 'cap_reached') {
       logger.debug(`[extractAndAddObservables] No new observables added to case ${caseId}`);
       return;
     }
 
+    if (outcome.status !== 'extracted') {
+      return;
+    }
+
     // Best-effort path — a bus error here is caught by the outer try and logged.
-    emitObservablesAddedEvent(clientArgs, result.caseWithPatch, result.newlyAddedObservables);
+    emitObservablesAddedEvent(clientArgs, outcome.caseWithPatch, outcome.newlyAddedObservables);
 
     logger.debug(
-      `[extractAndAddObservables] Added ${result.newlyAddedObservables.length} observable(s) to case ${caseId}`
+      `[extractAndAddObservables] Added ${outcome.newlyAddedObservables.length} observable(s) to case ${caseId}`
     );
 
-    return result.caseWithPatch;
+    return outcome.caseWithPatch;
   } catch (error) {
     logger.warn(
       `[extractAndAddObservables] Failed to extract observables for case ${caseId}: ${error}`
