@@ -155760,7 +155760,7 @@ components:
           minLength: 1
           type: string
         name:
-          description: Rule name. It does not have to be unique.
+          description: Rule name.
           maxLength: 256
           minLength: 1
           type: string
@@ -155809,7 +155809,7 @@ components:
           nullable: true
           type: string
         name:
-          description: Rule name. It does not have to be unique.
+          description: Rule name.
           maxLength: 256
           minLength: 1
           type: string

@@ -270,7 +270,7 @@ describe('rule template create-rule schema coupling', () => {
                   "type": "string",
                 },
                 "name": Object {
-                  "description": "Rule name. It does not have to be unique.",
+                  "description": "Rule name.",
                   "maxLength": 256,
                   "minLength": 1,
                   "type": "string",
