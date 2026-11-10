@@ -1,0 +1,789 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import {
+  appDocumentSchema,
+  findNode,
+  getDocumentIssues,
+  type AppDocument,
+  type AppNode,
+  type DocumentIssue,
+} from '@kbn/custom-app-common';
+import { PropertiesPanel } from './properties_panel';
+
+jest.mock('@kbn/esql/public', () => jest.requireActual('./fields/esql_editor.mock'));
+// The template editor is a Monaco editor, which cannot run under Jest.
+jest.mock('@kbn/code-editor', () => ({
+  CodeEditor: ({
+    value,
+    onChange,
+    'aria-label': label,
+  }: {
+    value: string;
+    onChange: (value: string) => void;
+    'aria-label': string;
+  }) => <textarea aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} />,
+}));
+
+const initial = (): AppDocument =>
+  appDocumentSchema.parse({
+    state: {
+      service: { type: 'string', default: 'checkout' },
+      filter: { type: 'string', default: 'x' },
+      reason: { type: 'string', default: '' },
+      users: { type: 'list', default: [] },
+    },
+    root: {
+      type: 'stack',
+      id: 'root',
+      children: [
+        { type: 'heading', id: 'title', text: 'Hello' },
+        { type: 'text', id: 'intro', text: 'Intro' },
+        { type: 'callout', id: 'note', title: 'Note', text: 'Body', color: 'primary' },
+        { type: 'stat', id: 'stat', title: 'Users', query: 'ROW users = 1' },
+        {
+          type: 'chart',
+          id: 'trend',
+          query: 'FROM logs | STATS c = COUNT(*) BY d = DATE_TRUNC(1 hour, @timestamp)',
+        },
+        { type: 'custom_content', id: 'board', query: 'FROM status', template: '<b>hi</b>' },
+        { type: 'custom_content', id: 'note-board', template: '<p>static</p>', height: 400 },
+        { type: 'table', id: 'table', query: 'FROM rows', caption: 'Rows' },
+        { type: 'key_value', id: 'facts', query: 'FROM detail', fields: ['a', 'b'] },
+        {
+          type: 'select',
+          id: 'pick',
+          label: 'Pick',
+          bind: 'service',
+          options: [
+            { value: 'checkout', label: 'Checkout' },
+            { value: 'cart', label: 'Cart' },
+          ],
+        },
+        {
+          type: 'select',
+          id: 'with-query',
+          label: 'Level',
+          bind: 'filter',
+          options: [],
+          optionsQuery: 'FROM logs | STATS BY level',
+        },
+        {
+          type: 'button_group',
+          id: 'group',
+          label: 'Group',
+          bind: 'filter',
+          options: [{ value: 'x' }],
+        },
+        { type: 'search', id: 'find', label: 'Find', bind: 'filter', placeholder: 'Look' },
+        {
+          type: 'list_input',
+          id: 'names',
+          label: 'Usernames',
+          bind: 'users',
+          placeholder: 'One per line',
+        },
+        { type: 'button', id: 'isolate', label: 'Isolate host', onClick: [] },
+        {
+          type: 'form',
+          id: 'escalate',
+          submitLabel: 'Escalate',
+          fields: [{ bind: 'reason', kind: 'text', label: 'Reason', placeholder: 'Why?' }],
+          onSubmit: [],
+        },
+        {
+          type: 'link',
+          id: 'to-discover',
+          label: 'See it',
+          to: { type: 'discover', from: 'table' },
+        },
+        {
+          type: 'link',
+          id: 'to-app',
+          label: 'Open dashboard',
+          to: { type: 'app', app: 'dashboards', path: '#/view/{{state.service}}' },
+        },
+        { type: 'link', id: 'to-custom', label: 'Open app', to: { type: 'custom_app', id: 'abc' } },
+        { type: 'time_range', id: 'period' },
+        { type: 'table', id: 'case-list', source: { type: 'cases', status: 'open' } },
+        {
+          type: 'stat',
+          id: 'case-count',
+          title: 'Open cases',
+          source: { type: 'cases', count: true },
+        },
+        { type: 'stack', id: 'row', direction: 'horizontal', children: [] },
+        { type: 'flyout', id: 'detail-flyout', title: 'Details', children: [] },
+      ],
+    },
+  });
+
+/** Holds the document the way the editor does, so edits that reach beyond the component apply. */
+const setup = (id: string, issues?: readonly DocumentIssue[]) => {
+  const onChange = jest.fn();
+  const latest: { document: AppDocument } = { document: initial() };
+
+  const Host = () => {
+    const [document, setDocument] = useState(initial());
+    latest.document = document;
+    return (
+      <PropertiesPanel
+        node={findNode(document.root, id)!.node as AppNode}
+        document={document}
+        issues={issues ?? getDocumentIssues(document)}
+        onChange={onChange}
+        onEdit={(change) => setDocument((current) => change(current))}
+      />
+    );
+  };
+  render(<Host />);
+  return { onChange, latest };
+};
+
+describe('PropertiesPanel', () => {
+  it('names the kind of component and its id', () => {
+    setup('title');
+
+    expect(screen.getByRole('heading', { name: 'Heading' })).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
+  });
+
+  it.each([
+    'title',
+    'intro',
+    'note',
+    'stat',
+    'table',
+    'facts',
+    'pick',
+    'group',
+    'find',
+    'row',
+    'detail-flyout',
+  ])('leaves how %s looks to the app, with no size, spacing or format to choose', (id) => {
+    setup(id);
+
+    expect(screen.queryByLabelText(/^(size|spacing|gap|format|color|width|height)/i)).toBeNull();
+    expect(screen.queryByText(/^(size|spacing|format)$/i)).toBeNull();
+  });
+
+  describe('content', () => {
+    it('edits a heading, and offers to insert a value into its text', async () => {
+      const { onChange } = setup('title');
+
+      await userEvent.type(screen.getByLabelText('Text'), '!');
+      expect(onChange).toHaveBeenLastCalledWith({ text: 'Hello!' });
+
+      await userEvent.click(screen.getByRole('button', { name: 'Insert a value' }));
+      await userEvent.click(screen.getByRole('button', { name: 'service' }));
+      expect(onChange).toHaveBeenLastCalledWith({ text: 'Hello{{state.service}}' });
+    });
+
+    it('edits text', async () => {
+      const { onChange } = setup('intro');
+
+      await userEvent.type(screen.getByLabelText('Text'), '!');
+
+      expect(onChange).toHaveBeenLastCalledWith({ text: 'Intro!' });
+    });
+
+    it('edits a callout, removes its body rather than keeping an empty one, and picks its kind', async () => {
+      const { onChange } = setup('note');
+
+      await userEvent.type(screen.getByLabelText('Title'), '!');
+      expect(onChange).toHaveBeenLastCalledWith({ title: 'Note!' });
+
+      await userEvent.clear(screen.getByLabelText('Text'));
+      expect(onChange).toHaveBeenLastCalledWith({ text: undefined });
+
+      await userEvent.selectOptions(screen.getByLabelText('Kind'), 'danger');
+      expect(onChange).toHaveBeenLastCalledWith({ color: 'danger' });
+    });
+  });
+
+  describe('a component that shows cases', () => {
+    it('says where its data comes from, and has no query to edit', () => {
+      setup('case-list');
+
+      expect(screen.getByLabelText('Data from')).toHaveValue('cases');
+      expect(screen.queryByLabelText('ES|QL query editor')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Status')).toHaveValue('value');
+      expect(screen.getByLabelText('Status is')).toHaveValue('open');
+    });
+
+    it('is a source that replaces the query when the data is changed to cases, and back', async () => {
+      const { onChange } = setup('table');
+
+      await userEvent.selectOptions(screen.getByLabelText('Data from'), 'cases');
+      expect(onChange).toHaveBeenLastCalledWith({ query: undefined, source: { type: 'cases' } });
+    });
+
+    it('is offered to count the cases only for a stat', () => {
+      setup('case-count');
+
+      expect(screen.getByText('Show how many there are')).toBeInTheDocument();
+    });
+
+    it('is not offered to count them for a table, which shows them', () => {
+      setup('case-list');
+
+      expect(screen.queryByText('Show how many there are')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('a time range', () => {
+    it('is a component of its own, named as one', () => {
+      setup('period');
+
+      expect(screen.getByRole('heading', { name: 'Time range' })).toBeInTheDocument();
+    });
+
+    it('says what it does and where to put it, and has nothing to set', () => {
+      setup('period');
+
+      expect(
+        screen.getByText(/Lets people change the period the whole app shows/)
+      ).toBeInTheDocument();
+      expect(screen.getByText(/An app has one/)).toBeInTheDocument();
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+      expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('a button', () => {
+    it('edits what is written on it', async () => {
+      const { onChange } = setup('isolate');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Label' }), '!');
+
+      expect(onChange).toHaveBeenLastCalledWith({ label: 'Isolate host!' });
+    });
+
+    it('says what it does when it is pressed, which is nothing until a workflow is added', async () => {
+      const { onChange } = setup('isolate');
+
+      expect(screen.getByRole('heading', { name: 'When it is pressed' })).toBeInTheDocument();
+      expect(screen.getByText('This does nothing yet.')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('customAppAddWorkflowAction'));
+      expect(onChange).toHaveBeenLastCalledWith({
+        onClick: [{ type: 'runWorkflow', workflow: '', inputs: {} }],
+      });
+    });
+
+    it('is a component of its own, named as one', () => {
+      setup('isolate');
+
+      expect(screen.getByRole('heading', { name: 'Button' })).toBeInTheDocument();
+    });
+  });
+
+  describe('a select with options from a query', () => {
+    it('can take options from a query as well as the ones that are written', async () => {
+      const { onChange } = setup('pick');
+      expect(screen.queryByLabelText('ES|QL query editor')).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByText('Also take options from a query'));
+
+      expect(onChange).toHaveBeenLastCalledWith({ optionsQuery: 'ROW value = 1' });
+    });
+
+    it('edits that query, and says what its columns are', () => {
+      const { latest } = setup('with-query');
+
+      expect(screen.getByLabelText('ES|QL query editor')).toHaveValue('FROM logs | STATS BY level');
+      expect(screen.getByText(/The first column is the value of an option/)).toBeInTheDocument();
+      expect(latest.document).toBeDefined();
+    });
+
+    it('can stop taking options from a query', async () => {
+      const { onChange } = setup('with-query');
+
+      await userEvent.click(screen.getByText('Also take options from a query'));
+
+      expect(onChange).toHaveBeenLastCalledWith({ optionsQuery: undefined });
+    });
+
+    it('asks what it starts as in words and not from a list, since the options are not known here', () => {
+      setup('with-query');
+
+      expect(screen.getByRole('textbox', { name: 'Starts as' })).toBeInTheDocument();
+      expect(screen.queryByRole('combobox', { name: 'Starts as' })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('a chart', () => {
+    it('says what happens when a bar, point or slice is clicked, and lets columns be remembered', () => {
+      setup('trend');
+
+      expect(
+        screen.getByRole('heading', { name: 'When a bar, point or slice is clicked' })
+      ).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Remember a column' })).toBeInTheDocument();
+    });
+  });
+
+  describe('a link', () => {
+    it('is a component of its own, with its words and where it goes', () => {
+      setup('to-app');
+
+      expect(screen.getByRole('heading', { name: 'Link' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('Open dashboard');
+      expect(screen.getByRole('combobox', { name: 'Goes to' })).toHaveValue('app');
+      expect(screen.getByRole('textbox', { name: 'Application' })).toHaveValue('dashboards');
+      expect(screen.getByRole('textbox', { name: 'Path' })).toHaveValue('#/view/{{state.service}}');
+    });
+
+    it('edits what is written on it', async () => {
+      const { onChange } = setup('to-app');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Label' }), '!');
+
+      expect(onChange).toHaveBeenLastCalledWith({ label: 'Open dashboard!' });
+    });
+
+    it('edits the application and the path of a page', async () => {
+      const { onChange } = setup('to-app');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Application' }), 'x');
+      expect(onChange).toHaveBeenLastCalledWith({
+        to: { type: 'app', app: 'dashboardsx', path: '#/view/{{state.service}}' },
+      });
+
+      await userEvent.clear(screen.getByRole('textbox', { name: 'Path' }));
+      expect(onChange).toHaveBeenLastCalledWith({ to: { type: 'app', app: 'dashboards' } });
+    });
+
+    it('chooses the component whose query Discover opens, from the ones that have one', async () => {
+      const { onChange } = setup('to-discover');
+      const choose = screen.getByRole('combobox', { name: 'Opens the query of' });
+
+      expect(choose).toHaveValue('table');
+      const offered = Array.from((choose as HTMLSelectElement).options).map(({ value }) => value);
+      expect(offered).toContain('table');
+      expect(offered).toContain('stat');
+      // Cases are not ES|QL, and the options of a select are not a component.
+      expect(offered).not.toContain('case-list');
+      expect(offered.some((id) => id.endsWith(':options'))).toBe(false);
+
+      await userEvent.selectOptions(choose, 'stat');
+      expect(onChange).toHaveBeenLastCalledWith({ to: { type: 'discover', from: 'stat' } });
+    });
+
+    it('goes from one kind of place to another, with what that kind needs', async () => {
+      const { onChange } = setup('to-app');
+
+      await userEvent.selectOptions(
+        screen.getByRole('combobox', { name: 'Goes to' }),
+        'custom_app'
+      );
+      expect(onChange).toHaveBeenLastCalledWith({ to: { type: 'custom_app', id: '' } });
+
+      await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Goes to' }), 'discover');
+      expect(onChange).toHaveBeenLastCalledWith({
+        to: { type: 'discover', from: expect.any(String) },
+      });
+    });
+
+    it('edits the id of another app', async () => {
+      const { onChange } = setup('to-custom');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Id of the app' }), 'd');
+
+      expect(onChange).toHaveBeenLastCalledWith({ to: { type: 'custom_app', id: 'abcd' } });
+    });
+  });
+
+  describe('a list of values', () => {
+    it('edits what is written above the box and its placeholder', async () => {
+      const { onChange } = setup('names');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Label' }), '!');
+      expect(onChange).toHaveBeenLastCalledWith({ label: 'Usernames!' });
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Placeholder' }), '?');
+      expect(onChange).toHaveBeenLastCalledWith({ placeholder: 'One per line?' });
+    });
+
+    it('says it sets a list, and how a query uses it', () => {
+      setup('names');
+
+      expect(screen.getByText(/It sets a list, one value to a line/)).toBeInTheDocument();
+      expect(screen.getByText(/WHERE field IN \(\?users\)/)).toBeInTheDocument();
+    });
+
+    it('is a component of its own, named as one, with nothing to start as', () => {
+      setup('names');
+
+      expect(screen.getByRole('heading', { name: 'List of values' })).toBeInTheDocument();
+      expect(screen.queryByRole('textbox', { name: 'Starts as' })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('a select that takes several options', () => {
+    it('can allow choosing several, which makes what it sets a list', async () => {
+      const { latest } = setup('pick');
+      expect(latest.document.state.service).toEqual({ type: 'string', default: 'checkout' });
+
+      await userEvent.click(screen.getByText('Allow choosing several'));
+
+      expect(findNode(latest.document.root, 'pick')!.node).toMatchObject({ multiple: true });
+      expect(latest.document.state.service).toEqual({ type: 'list', default: [] });
+      expect(getDocumentIssues(latest.document)).toEqual([]);
+    });
+
+    it('can go back to one, which makes what it sets a text again, starting as its first option', async () => {
+      const { latest } = setup('pick');
+      await userEvent.click(screen.getByText('Allow choosing several'));
+
+      await userEvent.click(screen.getByText('Allow choosing several'));
+
+      expect(findNode(latest.document.root, 'pick')!.node).not.toHaveProperty('multiple', true);
+      expect(latest.document.state.service).toEqual({ type: 'string', default: 'checkout' });
+      expect(getDocumentIssues(latest.document)).toEqual([]);
+    });
+
+    it('has nothing to start as when it takes several, which starts with none', async () => {
+      setup('pick');
+      expect(screen.getByRole('combobox', { name: 'Starts as' })).toBeInTheDocument();
+
+      await userEvent.click(screen.getByText('Allow choosing several'));
+
+      expect(screen.queryByRole('combobox', { name: 'Starts as' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('textbox', { name: 'Starts as' })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('a form', () => {
+    it('edits what is written on its button', async () => {
+      const { onChange } = setup('escalate');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Submit button' }), '!');
+
+      expect(onChange).toHaveBeenLastCalledWith({ submitLabel: 'Escalate!' });
+    });
+
+    it('shows each question, what it is answered with, and the value its answer is', () => {
+      setup('escalate');
+
+      expect(screen.getByRole('heading', { name: 'Questions' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: 'Question 1' })).toHaveValue('Reason');
+      expect(screen.getByRole('combobox', { name: 'Answered with 1' })).toHaveValue('text');
+      expect(screen.getByRole('textbox', { name: 'Placeholder 1' })).toHaveValue('Why?');
+      expect(screen.getByText(/The answer is the value reason/)).toBeInTheDocument();
+    });
+
+    it('edits the words of a question', async () => {
+      const { onChange } = setup('escalate');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Question 1' }), '?');
+
+      expect(onChange).toHaveBeenLastCalledWith({
+        fields: [{ bind: 'reason', kind: 'text', label: 'Reason?', placeholder: 'Why?' }],
+      });
+    });
+
+    it('makes a question required', async () => {
+      const { onChange } = setup('escalate');
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Required (question 1)' }));
+
+      expect(onChange).toHaveBeenLastCalledWith({
+        fields: [
+          { bind: 'reason', kind: 'text', label: 'Reason', placeholder: 'Why?', required: true },
+        ],
+      });
+    });
+
+    it('turns a question into a choice, which starts with two options and has no placeholder', async () => {
+      const { onChange } = setup('escalate');
+
+      await userEvent.selectOptions(
+        screen.getByRole('combobox', { name: 'Answered with 1' }),
+        'select'
+      );
+
+      expect(onChange).toHaveBeenLastCalledWith({
+        fields: [
+          {
+            bind: 'reason',
+            kind: 'select',
+            label: 'Reason',
+            options: [{ value: 'option-1' }, { value: 'option-2' }],
+          },
+        ],
+      });
+    });
+
+    it('adds a question with a value of its own, made with it', async () => {
+      const { latest } = setup('escalate');
+
+      await userEvent.click(screen.getByTestId('customAppAddFormField'));
+
+      const form = findNode(latest.document.root, 'escalate')!.node;
+      expect(form).toMatchObject({
+        fields: [
+          { bind: 'reason', kind: 'text' },
+          { bind: 'question_2', kind: 'text', label: 'Question 2' },
+        ],
+      });
+      expect(latest.document.state.question_2).toEqual({ type: 'string', default: '' });
+      expect(getDocumentIssues(latest.document)).toEqual([]);
+    });
+
+    it('cannot lose its only question, as a form that asks nothing is not a form', () => {
+      setup('escalate');
+
+      expect(screen.queryByRole('button', { name: 'Remove question 1' })).not.toBeInTheDocument();
+    });
+
+    it('says what it does when it is submitted, which is nothing until a workflow is added', async () => {
+      const { onChange } = setup('escalate');
+
+      expect(screen.getByRole('heading', { name: 'When it is submitted' })).toBeInTheDocument();
+      expect(screen.getByText('This does nothing yet.')).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('customAppAddWorkflowAction'));
+      expect(onChange).toHaveBeenLastCalledWith({
+        onSubmit: [{ type: 'runWorkflow', workflow: '', inputs: {} }],
+      });
+    });
+
+    it('is a component of its own, named as one', () => {
+      setup('escalate');
+
+      expect(screen.getByRole('heading', { name: 'Form' })).toBeInTheDocument();
+    });
+  });
+
+  describe('data', () => {
+    it('gives each data component an ES|QL editor with its own query', () => {
+      setup('table');
+
+      expect(screen.getByLabelText('ES|QL query editor')).toHaveValue('FROM rows');
+    });
+
+    it('edits a stat: its title and its query, and has no column to choose', async () => {
+      const { onChange } = setup('stat');
+
+      await userEvent.type(screen.getByLabelText('ES|QL query editor'), '2');
+      expect(onChange).toHaveBeenLastCalledWith({ query: 'ROW users = 12' });
+
+      // It shows the first column; a query that wants another can KEEP it.
+      expect(screen.queryByLabelText('Column')).not.toBeInTheDocument();
+    });
+
+    it('edits a chart: its heading, its type and its query', async () => {
+      const { onChange } = setup('trend');
+
+      await userEvent.type(screen.getByRole('textbox', { name: 'Title' }), 'T');
+      expect(onChange).toHaveBeenLastCalledWith({ title: 'T' });
+
+      await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Chart type' }), 'line');
+      expect(onChange).toHaveBeenLastCalledWith({ chartType: 'line' });
+
+      await userEvent.type(screen.getByLabelText('ES|QL query editor'), ' ');
+      expect(onChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ query: expect.any(String) })
+      );
+    });
+
+    it('lets a chart go back to the type Lens suggests', async () => {
+      const { onChange } = setup('trend');
+
+      await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Chart type' }), 'bar');
+      await userEvent.selectOptions(screen.getByRole('combobox', { name: 'Chart type' }), 'auto');
+
+      expect(onChange).toHaveBeenLastCalledWith({ chartType: undefined });
+    });
+
+    it('edits the template of custom content, in a code editor', async () => {
+      const { onChange } = setup('board');
+
+      expect(screen.getByLabelText('Template editor')).toHaveValue('<b>hi</b>');
+      await userEvent.type(screen.getByLabelText('Template editor'), '!');
+
+      expect(onChange).toHaveBeenLastCalledWith({ template: '<b>hi</b>!' });
+    });
+
+    it('lets custom content use a query or not, and has no say in how tall it is', async () => {
+      const { onChange } = setup('note-board');
+
+      expect(screen.queryByLabelText('ES|QL query editor')).not.toBeInTheDocument();
+      expect(screen.queryByRole('spinbutton', { name: 'Height' })).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole('switch'));
+      expect(onChange).toHaveBeenLastCalledWith({ query: 'ROW value = 1' });
+    });
+
+    it('lets custom content that has a query drop it', async () => {
+      const { onChange } = setup('board');
+
+      expect(screen.getByLabelText('ES|QL query editor')).toHaveValue('FROM status');
+      await userEvent.click(screen.getByRole('switch'));
+
+      expect(onChange).toHaveBeenLastCalledWith({ query: undefined });
+    });
+
+    it('edits the query of a table', async () => {
+      const { onChange } = setup('table');
+
+      await userEvent.type(screen.getByLabelText('ES|QL query editor'), '!');
+
+      expect(onChange).toHaveBeenLastCalledWith({ query: 'FROM rows!' });
+    });
+
+    it('lets a table choose its columns, and says what a row click does', async () => {
+      const { onChange } = setup('table');
+
+      await userEvent.click(screen.getByRole('switch', { name: 'Choose which columns to show' }));
+      expect(onChange).toHaveBeenLastCalledWith({ columns: [{ field: '' }] });
+
+      expect(screen.getByText('When a row is clicked')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Remember a column' })).toBeInTheDocument();
+    });
+
+    it('remembers a column of the clicked row as a value named after it', async () => {
+      const { latest } = setup('table');
+
+      await userEvent.click(screen.getByRole('button', { name: 'Remember a column' }));
+      await userEvent.type(screen.getByLabelText('Column 1'), 'service name');
+      await userEvent.tab();
+
+      const table = findNode(latest.document.root, 'table')!.node;
+      expect(table).toMatchObject({
+        onRowClick: [
+          { type: 'setState', key: 'service_name', value: { fromColumn: 'service name' } },
+        ],
+      });
+      expect(latest.document.state.service_name).toEqual({ type: 'string', default: '' });
+    });
+
+    it('edits the fields of a key-value list', async () => {
+      const { onChange } = setup('facts');
+      expect(screen.getByLabelText('Fields to show')).toHaveValue('a, b');
+
+      await userEvent.type(screen.getByLabelText('Fields to show'), 'x');
+
+      expect(onChange).toHaveBeenLastCalledWith({ fields: ['a', 'bx'] });
+    });
+  });
+
+  describe('inputs', () => {
+    it('edits the label and the options of a select', async () => {
+      const { onChange } = setup('pick');
+
+      await userEvent.type(screen.getByLabelText('Label'), '!');
+      expect(onChange).toHaveBeenLastCalledWith({ label: 'Pick!' });
+
+      await userEvent.click(screen.getByRole('button', { name: 'Add option' }));
+      expect(onChange).toHaveBeenLastCalledWith({
+        options: [
+          { value: 'checkout', label: 'Checkout' },
+          { value: 'cart', label: 'Cart' },
+          { value: 'option-3' },
+        ],
+      });
+    });
+
+    it('says what a select starts as, from its own options, and lets that change', async () => {
+      const { latest } = setup('pick');
+      const startsAs = screen.getByLabelText('Starts as');
+      expect(startsAs).toHaveValue('checkout');
+      expect(
+        Array.from(startsAs.querySelectorAll('option')).map((option) => option.textContent)
+      ).toEqual(['Checkout', 'Cart']);
+
+      await userEvent.selectOptions(startsAs, 'cart');
+
+      expect(latest.document.state.service).toEqual({ type: 'string', default: 'cart' });
+    });
+
+    it('says what a search box starts as, as text', async () => {
+      const { latest } = setup('find');
+      const startsAs = screen.getByLabelText('Starts as');
+      expect(startsAs).toHaveValue('x');
+
+      await userEvent.clear(startsAs);
+      await userEvent.type(startsAs, 'checkout');
+
+      expect(latest.document.state.filter).toEqual({ type: 'string', default: 'checkout' });
+    });
+
+    it('tells the author the name queries use for what an input sets', () => {
+      setup('pick');
+
+      expect(screen.getByText('Queries use this value as ?service')).toBeInTheDocument();
+    });
+
+    it('has nothing to pick the value it sets, or actions to run after: that is automatic', () => {
+      setup('pick');
+
+      expect(screen.queryByLabelText('Value it sets')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Add action' })).not.toBeInTheDocument();
+    });
+
+    it('edits a button group like a select', async () => {
+      const { onChange } = setup('group');
+
+      await userEvent.type(screen.getByLabelText('Label'), '!');
+
+      expect(onChange).toHaveBeenLastCalledWith({ label: 'Group!' });
+      expect(screen.getByLabelText('Value 1')).toHaveValue('x');
+    });
+
+    it('edits a search box, and removes an emptied placeholder', async () => {
+      const { onChange } = setup('find');
+
+      await userEvent.clear(screen.getByLabelText('Placeholder'));
+
+      expect(onChange).toHaveBeenLastCalledWith({ placeholder: undefined });
+    });
+  });
+
+  describe('layout', () => {
+    it('lets a stack be top to bottom or side by side, and nothing else', async () => {
+      const { onChange } = setup('row');
+
+      await userEvent.selectOptions(screen.getByLabelText('Layout'), 'vertical');
+
+      expect(onChange).toHaveBeenLastCalledWith({ direction: 'vertical' });
+    });
+
+    it('edits only the title of a flyout', async () => {
+      const { onChange } = setup('detail-flyout');
+
+      await userEvent.type(screen.getByLabelText('Title'), '!');
+
+      expect(onChange).toHaveBeenLastCalledWith({ title: 'Details!' });
+    });
+  });
+
+  describe('problems', () => {
+    it('lists only the problems of the selected component', () => {
+      setup('stat', [
+        { message: 'Node "stat", query: Too small', nodeId: 'stat' },
+        { message: 'Node "table", caption: Too long', nodeId: 'table' },
+        { message: 'Something about the whole document' },
+      ]);
+
+      expect(screen.getByText('This component needs attention')).toBeInTheDocument();
+      expect(screen.getByText('Node "stat", query: Too small')).toBeInTheDocument();
+      expect(screen.queryByText(/"table"/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/whole document/)).not.toBeInTheDocument();
+    });
+
+    it('shows nothing when the component is fine', () => {
+      setup('stat', []);
+
+      expect(screen.queryByText('This component needs attention')).not.toBeInTheDocument();
+    });
+  });
+});
