@@ -160,8 +160,10 @@ values that Elasticsearch indexes for it. It returns `undefined` when no ACL fie
 Numbers have one limit. Elasticsearch indexes a number in a `keyword` field with the text that the document used, so
 `1.0` becomes `"1.0"`, and `1e2` becomes `"1e2"`. Kibana gets the source as parsed JSON, where both are numbers, so
 the reader returns `"1"` and `"100"`. A number in its shortest form, such as `1` or `42`, reads the same both ways.
-User profile UIDs start with `u_`, service account IDs contain `/`, and no level or principal kind is a number. So
-this difference cannot change who gets access.
+Kibana writes every keyword ACL value as a string, so only a direct write to the index can store such a number. User
+profile UIDs start with `u_`, service account IDs contain `/`, and no level or principal kind is a number. So this
+difference cannot change who gets access. A later principal kind whose IDs can be plain numbers, such as groups, has
+to close this gap.
 
 `toAclSource` does the reverse, for a rewrite of the whole document. It turns a `StoredAcl` back into a value for the
 `acl` field that indexes to the same values, and that has no dotted keys. The caller also removes the dotted `acl.*`
@@ -182,20 +184,24 @@ usually `view`. A search adds the clause to its filters. The clause applies the 
   values from different entries never combine.
 - A caller without a principal matches only through general access or an absent ACL.
 
-The filter takes two lists of spaces. In `recoverySpaces`, the caller has recovery authority (the right to repair any
-object of the type), and sees every object, whatever its ACL. In `ordinarySpaces`, only the rules above apply. `['*']`
-stands for every space that the search already covers. The two lists work together in one filter: an object in a
-recovery space always matches, an object in an ordinary space matches only under the rules above, and an object in
-neither list never matches. A space in both lists works as a recovery space. An object shared to all spaces is
-stored with `"namespaces": ["*"]`, and it counts as being in every listed space, the same way the Saved Objects
-repository treats it. When both lists are empty, the filter matches nothing.
+The filter takes two lists of spaces:
+
+- `ordinarySpaces`: the rules above apply.
+- `recoverySpaces`: the caller has recovery authority, the right to repair any object of the type. At `view`, the
+  caller sees every object in these spaces, whatever its ACL. At any other level, the rules above apply, because
+  recovery never lets a caller use, edit, or delete an object.
+
+An object in neither list never matches, and when both lists are empty, the filter matches nothing. A space in both
+lists counts as a recovery space. `['*']` stands for every space that the search already covers. An object shared to
+all spaces is stored with `"namespaces": ["*"]`, and it counts as being in every listed space, the same way the Saved
+Objects repository treats it.
 
 The filter contains `nested` queries on `acl.entries` in most cases: the absent-ACL clause uses one whenever the
 type's default general access reaches the level, and the entry clause uses one when the caller has a principal and
 the type allows an entry level that reaches it. Elasticsearch rejects a search that contains a `nested` query when
-`search.allow_expensive_queries` is `false`, so those searches fail. A filter without one, such as a filter for
-recovery spaces only, still works. A search that must always fail when the setting is off therefore checks the
-setting itself, instead of relying on the shape of the filter.
+`search.allow_expensive_queries` is `false`, so those searches fail, and Kibana never retries them without the filter.
+A filter without a `nested` query, such as a filter for recovery spaces only at `view`, still filters completely, so
+its search runs.
 
 ## The fixture table
 
@@ -214,15 +220,3 @@ The expectations are written by hand, and that's the point: they are the contrac
 object and the query that filters a search must produce exactly these answers, so a list can never show an object
 that opening it would deny. When you add a shape, decide its expected access from the rules above, not from what any
 implementation returns.
-
-The tests of the reader and the filter use the table:
-
-- The reader tests expect an ACL for every fixture whose state is not `absent`, and expect `toAclSource` to write
-  each one back unchanged.
-- The filter tests index each fixture in memory, with the values that the reader returns. Then they run the filter
-  for every probe at `view`, `use`, `edit`, and `manage`, and expect exactly the levels up to the one in the
-  fixture's `access`. They also expect every fixture to match in a recovery space.
-
-Four shapes are in the reader and filter tests, and not in the table, because they test how the reader reads the
-source: a key that the mapping does not define, an entry with only `added_at`, an empty string, and sibling dotted
-entry keys.

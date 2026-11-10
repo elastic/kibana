@@ -32,8 +32,10 @@ export interface BuildAclReadFilterParams {
   /** The level the caller needs, usually `view`. */
   level: EntryLevel;
   /**
-   * Spaces where the caller has recovery authority, and sees every object of the type, whatever its
-   * ACL. `['*']` stands for every space the search covers.
+   * Spaces where the caller has recovery authority. At `view`, the caller sees every object of the
+   * type there, whatever its ACL. At any other level, these spaces get the same ACL check as
+   * `ordinarySpaces`, because recovery never lets a caller use, edit, or delete an object. `['*']`
+   * stands for every space the search covers.
    */
   recoverySpaces: readonly string[];
   /**
@@ -66,12 +68,13 @@ const otherKinds = (kind: PrincipalType) => PRINCIPAL_TYPES.filter((other) => ot
 /**
  * Builds the query clause that keeps only the objects of one type that the caller can access at
  * `level`. It applies the same rules as reading a single object, so a list never shows an object
- * that opening it would deny.
+ * that opening it would deny. In recovery spaces, the clause matches every object at `view`,
+ * whatever its ACL. At other levels, it applies the ACL there too.
  *
  * The clause holds `nested` queries on `acl.entries` in most cases, and Elasticsearch rejects any
- * search that holds one when `search.allow_expensive_queries` is `false`. Some clauses hold none,
- * for example one for recovery spaces only, so a caller that must fail whenever that setting is
- * off has to check the setting itself, not rely on the query shape.
+ * search that holds one when `search.allow_expensive_queries` is `false`. The caller must never
+ * retry such a search without the clause. Some clauses hold none, for example one for recovery
+ * spaces only at `view`. Such a clause still filters completely, so its search can run.
  *
  * @param params The type's policy, the caller, the level they need, and the spaces to search.
  * @returns A query clause to add to the search's filters. It matches nothing when both space lists
@@ -84,12 +87,18 @@ export const buildAclReadFilter = ({
   recoverySpaces,
   ordinarySpaces,
 }: BuildAclReadFilterParams): estypes.QueryDslQueryContainer => {
+  // Recovery lets a caller view any object, but never use, edit, or delete it. So above `view`, a
+  // recovery space gets the same ACL check as an ordinary space.
+  const aclExemptSpaces = level === 'view' ? recoverySpaces : [];
+  const aclCheckedSpaces =
+    level === 'view' ? ordinarySpaces : [...ordinarySpaces, ...recoverySpaces];
+
   const should: estypes.QueryDslQueryContainer[] = [];
-  if (recoverySpaces.length > 0) {
-    should.push(spacesClause(recoverySpaces));
+  if (aclExemptSpaces.length > 0) {
+    should.push(spacesClause(aclExemptSpaces));
   }
 
-  if (ordinarySpaces.length > 0) {
+  if (aclCheckedSpaces.length > 0) {
     const grants: estypes.QueryDslQueryContainer[] = [generalAccessClause(policy, level)];
     if (principal) {
       grants.push(ownerClause(principal), entryClause(policy, principal, level));
@@ -104,7 +113,7 @@ export const buildAclReadFilter = ({
 
     should.push({
       bool: {
-        filter: [spacesClause(ordinarySpaces)],
+        filter: [spacesClause(aclCheckedSpaces)],
         should: ordinary,
         minimum_should_match: 1,
       },

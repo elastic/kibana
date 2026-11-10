@@ -149,12 +149,14 @@ const levelsUpTo = (level: EntryLevel | undefined) =>
   level ? LEVELS.filter((other) => compareLevels(other, level) <= 0) : [];
 
 /**
- * Checks that the filter finds each probe at exactly the levels up to the one in `access`.
+ * Checks that the filter finds each probe at exactly the levels up to the one in `access`. With
+ * `recovery`, the object's space is a recovery space, so each probe also finds it at `view`.
  */
 const expectAccess = (
   source: Record<string, unknown>,
   policy: AccessPolicy,
-  access: Partial<Record<FixtureProbe, EntryLevel>>
+  access: Partial<Record<FixtureProbe, EntryLevel>>,
+  { recovery = false }: { recovery?: boolean } = {}
 ) => {
   const document = indexDocument(source);
   const levelsFound = (probe: FixtureProbe) =>
@@ -164,15 +166,19 @@ const expectAccess = (
           policy,
           principal: FIXTURE_PROBES[probe],
           level,
-          recoverySpaces: [],
-          ordinarySpaces: [SPACE],
+          recoverySpaces: recovery ? [SPACE] : [],
+          ordinarySpaces: recovery ? [] : [SPACE],
         }),
         document
       )
     );
+  const levelsExpected = (probe: FixtureProbe) =>
+    LEVELS.filter(
+      (level) => (recovery && level === 'view') || levelsUpTo(access[probe]).includes(level)
+    );
 
   expect(Object.fromEntries(PROBES.map((probe) => [probe, levelsFound(probe)]))).toEqual(
-    Object.fromEntries(PROBES.map((probe) => [probe, levelsUpTo(access[probe])]))
+    Object.fromEntries(PROBES.map((probe) => [probe, levelsExpected(probe)]))
   );
 };
 
@@ -186,17 +192,23 @@ describe('buildAclReadFilter', () => {
     );
 
     it.each(INDEXABLE_FIXTURES)(
-      'finds the object in a recovery space, whatever its ACL: %s',
-      (_, { source, policy = FIXTURE_POLICY }) => {
+      'finds the object in a recovery space at view, and applies the ACL above view: %s',
+      (_, { source, policy = FIXTURE_POLICY, access }) => {
+        expectAccess(source, policy, access, { recovery: true });
+
+        // A caller without a principal also finds it at `view`.
         const document = indexDocument(source);
-        for (const level of LEVELS) {
-          expect(
-            isVisible(
-              buildAclReadFilter({ policy, level, recoverySpaces: [SPACE], ordinarySpaces: [] }),
-              document
-            )
-          ).toBe(true);
-        }
+        expect(
+          isVisible(
+            buildAclReadFilter({
+              policy,
+              level: 'view',
+              recoverySpaces: [SPACE],
+              ordinarySpaces: [],
+            }),
+            document
+          )
+        ).toBe(true);
       }
     );
   });
@@ -275,17 +287,18 @@ describe('buildAclReadFilter', () => {
   describe('with an object shared to all spaces', () => {
     const ordinaryOnly = { recoverySpaces: [], ordinarySpaces: [SPACE] };
 
-    /** Whether `probe` finds an object stored with `namespaces: ['*']` at `view`. */
+    /** Whether `probe` finds an object stored with `namespaces: ['*']` at `level`. */
     const findsSharedObject = (
       source: Record<string, unknown>,
       probe: FixtureProbe,
-      spaces: { recoverySpaces: string[]; ordinarySpaces: string[] }
+      spaces: { recoverySpaces: string[]; ordinarySpaces: string[] },
+      level: EntryLevel = 'view'
     ) =>
       isVisible(
         buildAclReadFilter({
           policy: FIXTURE_POLICY,
           principal: FIXTURE_PROBES[probe],
-          level: 'view',
+          level,
           ...spaces,
         }),
         indexDocument(source, ['*'])
@@ -297,7 +310,7 @@ describe('buildAclReadFilter', () => {
       expect(findsSharedObject({ acl: PRIVATE }, 'owner', ordinaryOnly)).toBe(true);
     });
 
-    it('finds it in a recovery space, whatever its ACL', () => {
+    it('finds it in a recovery space at view, whatever its ACL', () => {
       expect(
         findsSharedObject({ acl: PRIVATE }, 'stranger', {
           recoverySpaces: [SPACE],
@@ -305,27 +318,39 @@ describe('buildAclReadFilter', () => {
         })
       ).toBe(true);
     });
+
+    it('applies the ACL rules in a recovery space above view', () => {
+      const recoveryOnly = { recoverySpaces: [SPACE], ordinarySpaces: [] };
+      expect(findsSharedObject({ acl: PRIVATE }, 'stranger', recoveryOnly, 'use')).toBe(false);
+      expect(findsSharedObject({ acl: PRIVATE }, 'owner', recoveryOnly, 'use')).toBe(true);
+    });
   });
 
   describe('with recovery and ordinary spaces together', () => {
     const privateObject = { acl: PRIVATE };
     const objectWithoutAcl = {};
 
-    /** Whether the stranger finds the object in `space` at `view`. */
-    const strangerFinds = (
+    /** Whether `probe` finds the object in `space` at `level`. */
+    const finds = (
       source: Record<string, unknown>,
       space: string,
-      spaces: { recoverySpaces: string[]; ordinarySpaces: string[] }
+      spaces: { recoverySpaces: string[]; ordinarySpaces: string[] },
+      { probe = 'stranger', level = 'view' }: { probe?: FixtureProbe; level?: EntryLevel } = {}
     ) =>
       isVisible(
         buildAclReadFilter({
           policy: FIXTURE_POLICY,
-          principal: FIXTURE_PROBES.stranger,
-          level: 'view',
+          principal: FIXTURE_PROBES[probe],
+          level,
           ...spaces,
         }),
         indexDocument(source, [space])
       );
+    const strangerFinds = (
+      source: Record<string, unknown>,
+      space: string,
+      spaces: { recoverySpaces: string[]; ordinarySpaces: string[] }
+    ) => finds(source, space, spaces);
 
     it('applies recovery only in recovery spaces, and the ACL only in ordinary spaces', () => {
       const spaces = { recoverySpaces: ['recovery'], ordinarySpaces: ['ordinary'] };
@@ -348,6 +373,33 @@ describe('buildAclReadFilter', () => {
 
       expect(strangerFinds(privateObject, 'ordinary', spaces)).toBe(true);
       expect(strangerFinds(privateObject, 'other', spaces)).toBe(true);
+    });
+
+    describe('above view', () => {
+      const atUse = (probe: FixtureProbe) => ({ probe, level: 'use' as const });
+
+      it('applies the ACL in recovery spaces too', () => {
+        const spaces = { recoverySpaces: ['recovery'], ordinarySpaces: ['ordinary'] };
+
+        expect(finds(privateObject, 'recovery', spaces, atUse('stranger'))).toBe(false);
+        expect(finds(privateObject, 'recovery', spaces, atUse('owner'))).toBe(true);
+        expect(finds(objectWithoutAcl, 'recovery', spaces, atUse('stranger'))).toBe(true);
+        expect(finds(privateObject, 'other', spaces, atUse('owner'))).toBe(false);
+      });
+
+      it('applies the ACL in a space that is in both lists', () => {
+        const spaces = { recoverySpaces: ['both'], ordinarySpaces: ['both'] };
+
+        expect(finds(privateObject, 'both', spaces, atUse('stranger'))).toBe(false);
+        expect(finds(privateObject, 'both', spaces, atUse('owner'))).toBe(true);
+      });
+
+      it('applies the ACL in every space for *', () => {
+        const spaces = { recoverySpaces: ['*'], ordinarySpaces: [] };
+
+        expect(finds(privateObject, 'other', spaces, atUse('stranger'))).toBe(false);
+        expect(finds(privateObject, 'other', spaces, atUse('owner'))).toBe(true);
+      });
     });
   });
 
