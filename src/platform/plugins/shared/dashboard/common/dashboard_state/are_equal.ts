@@ -18,6 +18,7 @@ import type {
 import { areComparatorsEqual, type StateComparators } from '@kbn/presentation-publishing';
 import { isDashboardPanel } from '../is_dashboard_panel';
 import { DEFAULT_SETTINGS, deserializeSettings, settingsComparators } from './settings';
+import { getUnifiedSearchComparators } from './unified_search';
 
 type PanelOrSection = DashboardPanel | DashboardSection;
 type GetComparators = (
@@ -107,6 +108,7 @@ async function arePinnedPanelsEqual(
  *
  * `panels` and `pinned_panels` are compared with the comparators returned by `getComparators`.
  * Settings (`title`, `description`, `tags`, `options`) are compared with the settings comparators and defaults.
+ * Unified search (`filters`, `query`, `refresh_interval`, `time_range`) is compared with the unified search comparators.
  * All other keys are compared with deep equality.
  */
 export async function areEqual(
@@ -122,6 +124,10 @@ export async function areEqual(
     description: _descriptionA,
     tags: _tagsA,
     options: _optionsA,
+    filters: _filtersA,
+    query: _queryA,
+    refresh_interval: _refreshIntervalA,
+    time_range: _timeRangeA,
     /* eslint-enable @typescript-eslint/no-unused-vars */
     ...restA
   } = a;
@@ -133,6 +139,10 @@ export async function areEqual(
     description: _descriptionB,
     tags: _tagsB,
     options: _optionsB,
+    filters: _filtersB,
+    query: _queryB,
+    refresh_interval: _refreshIntervalB,
+    time_range: _timeRangeB,
     /* eslint-enable @typescript-eslint/no-unused-vars */
     ...restB
   } = b;
@@ -144,6 +154,16 @@ export async function areEqual(
       deserializeSettings(a),
       deserializeSettings(b),
       DEFAULT_SETTINGS
+    )
+  ) {
+    return false;
+  }
+  // time range and refresh interval only count as changes when time is restored
+  if (
+    !areComparatorsEqual(
+      getUnifiedSearchComparators({ isTimeRestored: () => Boolean(b.time_range) }),
+      a,
+      b
     )
   ) {
     return false;

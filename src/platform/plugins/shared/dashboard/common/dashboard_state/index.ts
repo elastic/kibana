@@ -8,6 +8,7 @@
  */
 
 export { areEqual } from './are_equal';
+export { areTimesEqual, getUnifiedSearchComparators } from './unified_search';
 export {
   DEFAULT_SETTINGS,
   deserializeSettings,
