@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, fireEvent, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
@@ -732,6 +732,182 @@ describe('CreateDataStreamFlyout', () => {
 
       expect(mockUploadMutateAsync.mock.calls[0][0].samples).toEqual(['log line 1', 'log line 2']);
       expect(mockAddWarning).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('log file validation', () => {
+    const formWithoutLogSample = { ...validForm, logSample: undefined };
+
+    const selectFile = async (file: File) => {
+      const input = document.querySelector('input[type="file"]');
+      expect(input).not.toBeNull();
+      await act(async () => {
+        fireEvent.change(input!, { target: { files: [file] } });
+      });
+    };
+
+    it('rejects a file with a blocked extension', async () => {
+      const { findByText, getByTestId } = await renderFlyout(formWithoutLogSample);
+
+      await selectFile(new File(['print("hello")'], 'script.py'));
+
+      expect(
+        await findByText(
+          "Files of type .py aren't supported. Upload a file that contains log samples."
+        )
+      ).toBeInTheDocument();
+
+      await act(async () => {
+        fireEvent.click(getByTestId('analyzeLogsButton'));
+      });
+      expectNothingSubmitted();
+    });
+
+    it('rejects a compressed file', async () => {
+      const { findByText } = await renderFlyout(formWithoutLogSample);
+
+      await selectFile(new File(['compressed'], 'syslog.2.gz'));
+
+      expect(
+        await findByText(
+          "Compressed files aren't supported. Decompress the file and upload the logs."
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('rejects an image renamed to .log', async () => {
+      const { findByText } = await renderFlyout(formWithoutLogSample);
+      const jpegBytes = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49]);
+
+      await selectFile(new File([jpegBytes], 'photo.log'));
+
+      expect(
+        await findByText("This file doesn't appear to contain text log samples.")
+      ).toBeInTheDocument();
+    });
+
+    it('rejects a script renamed to .log', async () => {
+      const { findByText } = await renderFlyout(formWithoutLogSample);
+
+      await selectFile(
+        new File(['#!/usr/bin/env python\nimport os\nprint(os.getcwd())\n'], 'script.log')
+      );
+
+      expect(
+        await findByText('This file looks like a script or source code, not log samples.')
+      ).toBeInTheDocument();
+    });
+
+    it('rejects source code without a shebang renamed to .log', async () => {
+      const { findByText } = await renderFlyout(formWithoutLogSample);
+
+      await selectFile(
+        new File(
+          ['"""Validation for Dynaconf settings."""\n\nfrom dynaconf.validator import Validator\n'],
+          'test.log'
+        )
+      );
+
+      expect(
+        await findByText('This file looks like a script or source code, not log samples.')
+      ).toBeInTheDocument();
+    });
+
+    it('rejects a file without any log lines', async () => {
+      const { findByText } = await renderFlyout(formWithoutLogSample);
+
+      await selectFile(new File(['\n  \n'], 'empty.log'));
+
+      expect(await findByText("This file doesn't contain any log lines.")).toBeInTheDocument();
+    });
+
+    it('explains when every line is too long to upload', async () => {
+      const { findByText } = await renderFlyout(formWithoutLogSample);
+
+      await selectFile(new File([`{"Records":["${'a'.repeat(100_001)}"]}`], 'cloudtrail.json'));
+
+      expect(
+        await findByText(
+          'Every line in this file is longer than 100,000 characters. Put each log event on its own line.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('accepts a log file and uploads its samples', async () => {
+      const { getByTestId, queryByText } = await renderFlyout(formWithoutLogSample);
+
+      await selectFile(
+        new File(
+          [
+            '<134>Nov  9 14:06:01 host sshd[123]: Accepted\n<134>Nov  9 14:06:02 host sshd[123]: Closed',
+          ],
+          'auth.log'
+        )
+      );
+      await waitFor(() => {
+        expect(getByTestId('analyzeLogsButton')).toBeEnabled();
+      });
+
+      fireEvent.click(getByTestId('analyzeLogsButton'));
+
+      await waitFor(() => {
+        expect(mockUploadMutateAsync).toHaveBeenCalledTimes(1);
+      });
+      expect(mockUploadMutateAsync.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          samples: [
+            '<134>Nov  9 14:06:01 host sshd[123]: Accepted',
+            '<134>Nov  9 14:06:02 host sshd[123]: Closed',
+          ],
+          originalSource: { sourceType: 'file', sourceValue: 'auth.log' },
+        })
+      );
+      expect(queryByText("This file doesn't appear to contain text log samples.")).toBeNull();
+    });
+
+    it('ignores a slower earlier file once a newer file is rejected', async () => {
+      const { findByText, getByTestId } = await renderFlyout(formWithoutLogSample);
+      const slowFile = new File(['<134>Nov  9 14:06:01 host sshd[123]: Accepted'], 'slow.log');
+      const originalReadAsText = FileReader.prototype.readAsText;
+      let releaseSlowRead: (() => Promise<void>) | undefined;
+      const readAsTextSpy = jest
+        .spyOn(FileReader.prototype, 'readAsText')
+        .mockImplementation(function (this: FileReader, blob: Blob, encoding?: string) {
+          if (blob === slowFile) {
+            releaseSlowRead = () =>
+              new Promise((resolve) => {
+                this.addEventListener('loadend', () => resolve());
+                originalReadAsText.call(this, blob, encoding);
+              });
+            return;
+          }
+          originalReadAsText.call(this, blob, encoding);
+        });
+
+      try {
+        await selectFile(slowFile);
+        await waitFor(() => expect(releaseSlowRead).toBeDefined());
+
+        await selectFile(new File(['print("hello")'], 'script.py'));
+        const blockedMessage =
+          "Files of type .py aren't supported. Upload a file that contains log samples.";
+        expect(await findByText(blockedMessage)).toBeInTheDocument();
+
+        await act(async () => {
+          await releaseSlowRead?.();
+        });
+
+        expect(await findByText(blockedMessage)).toBeInTheDocument();
+        await waitFor(() => {
+          expect(getByTestId('analyzeLogsButton')).toBeEnabled();
+        });
+        await act(async () => {
+          fireEvent.click(getByTestId('analyzeLogsButton'));
+        });
+        expectNothingSubmitted();
+      } finally {
+        readAsTextSpy.mockRestore();
+      }
     });
   });
 });

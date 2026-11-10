@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlyout,
@@ -33,9 +33,15 @@ import type { FieldHook, FormHook } from '@kbn/es-ui-shared-plugin/static/forms/
 import { css } from '@emotion/react';
 import { useParams } from 'react-router-dom';
 import {
+  LOG_SAMPLE_SIGNATURE_BYTES,
   normalizeLogSamplesFromFileContent,
+  UPLOAD_SAMPLES_MAX_LINE_LENGTH,
+  validateLogSampleContent,
+  validateLogSampleFileName,
+  validateLogSampleFileSignature,
   type DataStream,
   type InputType,
+  type LogSampleValidationResult,
 } from '../../../../../common';
 import { PLUGIN_ID } from '../../../../../common/constants';
 import type { IntegrationFormData, LogsSourceOption } from '../../forms/types';
@@ -121,6 +127,75 @@ const readFileAsText = (file: File): Promise<string> => {
   });
 };
 
+const readFileHeader = (file: File, byteCount: number): Promise<Uint8Array> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const result = e.target?.result;
+      if (result == null || typeof result === 'string') {
+        reject(new Error(i18n.LOG_FILE_ERROR.CAN_NOT_READ));
+        return;
+      }
+      resolve(new Uint8Array(result));
+    };
+
+    reader.onerror = () => {
+      reject(new Error(i18n.LOG_FILE_ERROR.CAN_NOT_READ));
+    };
+
+    reader.onabort = () => {
+      reject(new Error(i18n.LOG_FILE_ERROR.CAN_NOT_READ));
+    };
+
+    reader.readAsArrayBuffer(file.slice(0, byteCount));
+  });
+};
+
+const getLogSampleValidationError = (result: LogSampleValidationResult): string | undefined => {
+  if (result.valid) {
+    return undefined;
+  }
+  switch (result.code) {
+    case 'blocked_extension':
+      return i18n.LOG_FILE_ERROR.BLOCKED_EXTENSION(result.extension);
+    case 'compressed_file':
+      return i18n.LOG_FILE_ERROR.COMPRESSED_FILE;
+    case 'binary_file':
+    case 'binary_content':
+      return i18n.LOG_FILE_ERROR.BINARY_FILE;
+    case 'script_content':
+      return i18n.LOG_FILE_ERROR.SCRIPT_FILE;
+    case 'empty':
+      return i18n.LOG_FILE_ERROR.EMPTY_FILE;
+  }
+};
+
+const validateLogSampleFile = async (file: File): Promise<string> => {
+  const fileNameError = getLogSampleValidationError(validateLogSampleFileName(file.name));
+  if (fileNameError) {
+    throw new Error(fileNameError);
+  }
+
+  const header = await readFileHeader(file, LOG_SAMPLE_SIGNATURE_BYTES);
+  const signatureError = getLogSampleValidationError(validateLogSampleFileSignature(header));
+  if (signatureError) {
+    throw new Error(signatureError);
+  }
+
+  const content = await readFileAsText(file);
+  const { samples, linesOmittedOverLimit } = normalizeLogSamplesFromFileContent(content);
+  if (samples.length === 0 && linesOmittedOverLimit > 0) {
+    throw new Error(i18n.LOG_FILE_ERROR.LINES_TOO_LONG(UPLOAD_SAMPLES_MAX_LINE_LENGTH));
+  }
+  const contentError = getLogSampleValidationError(validateLogSampleContent(samples));
+  if (contentError) {
+    throw new Error(contentError);
+  }
+
+  return content;
+};
+
 const dataCollectionMethodOptions: Array<EuiComboBoxOptionOption<string>> = [
   { value: 'filestream', label: 'File Stream' },
   { value: 'aws-s3', label: 'AWS S3' },
@@ -173,6 +248,7 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
   const [uploadedFileName, setUploadedFileName] = useState<string | undefined>(undefined);
   const [collectionMethodResetKey, setCollectionMethodResetKey] = useState(0);
   const [integrationErrors, setIntegrationErrors] = useState<string[]>([]);
+  const fileSelectionIdRef = useRef(0);
 
   const logsSourceOption = formData?.logsSourceOption ?? 'file';
   const logSample = formData?.logSample;
@@ -192,9 +268,12 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
 
   const onChangeLogFile = useCallback(
     async (files: FileList | null) => {
+      const selectionId = ++fileSelectionIdRef.current;
+
       if (!files || files.length === 0) {
         setFileError(undefined);
         setUploadedFileName(undefined);
+        setIsParsing(false);
         form.setFieldValue('logSample', undefined);
         return;
       }
@@ -205,14 +284,18 @@ export const CreateDataStreamFlyout: React.FC<CreateDataStreamFlyoutProps> = ({ 
       try {
         const file = files[0];
         setUploadedFileName(file.name);
-        const content = await readFileAsText(file);
+        const content = await validateLogSampleFile(file);
+        if (selectionId !== fileSelectionIdRef.current) return;
         form.setFieldValue('logSample', content);
       } catch (error) {
+        if (selectionId !== fileSelectionIdRef.current) return;
         setFileError(error instanceof Error ? error.message : i18n.LOG_FILE_ERROR.CAN_NOT_READ);
         setUploadedFileName(undefined);
         form.setFieldValue('logSample', undefined);
       } finally {
-        setIsParsing(false);
+        if (selectionId === fileSelectionIdRef.current) {
+          setIsParsing(false);
+        }
       }
     },
     [form]
