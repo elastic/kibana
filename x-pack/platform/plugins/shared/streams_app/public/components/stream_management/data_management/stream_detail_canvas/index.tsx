@@ -887,7 +887,7 @@ function StreamsCanvasInner() {
                 })}
               />
             )}
-            {nodes.length === 0 && <CanvasEmptyState />}
+            {nodes.length === 0 && <CanvasEmptyState onAddSource={addSource} />}
             <CanvasSearchOverlay flow={searchedFlow} />
             {flyoutDestination ? (
               <UnitDestinationFlyout

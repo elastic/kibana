@@ -6,30 +6,35 @@
  */
 
 import type { ComponentType } from 'react';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { StreamsCanvas } from '../stream_management/data_management/stream_detail_canvas';
+import { StreamListView } from '../stream_list_view';
 import { DestinationsTab } from './destinations';
 import { SourcesTab } from './sources';
+import type { StreamsLayoutTab } from './tab_ids';
 
-interface StreamsLayoutTabConfig {
-  label: string;
-  Component: ComponentType;
-  /**
-   * Set for tabs that own their full-bleed surface, so the page body drops its
-   * padding instead of framing the content.
-   */
-  noPadding?: boolean;
-}
-
-/** Tab ids in the order they render in the header. */
-export const STREAMS_LAYOUT_TABS = ['map', 'sources', 'destinations'] as const;
-
-export type StreamsLayoutTab = (typeof STREAMS_LAYOUT_TABS)[number];
-
-export const DEFAULT_STREAMS_LAYOUT_TAB: StreamsLayoutTab = 'map';
+type StreamsLayoutTabConfig =
+  | {
+      label: string;
+      Component: ComponentType;
+      /**
+       * Set for tabs that own their full-bleed surface, so the page body drops its
+       * padding instead of framing the content.
+       */
+      noPadding?: boolean;
+      techPreview?: boolean;
+      ownsHeader?: false;
+    }
+  | {
+      label: string;
+      /** Renders its own page header and body, with the layout tabs passed in. */
+      Component: ComponentType<{ tabs?: AppHeaderTab[] }>;
+      ownsHeader: true;
+    };
 
 /**
- * Registry of the layout tabs. Adding a tab means adding its id above and a
+ * Registry of the layout tabs. Adding a tab means adding its id in `tab_ids.ts` and a
  * single entry here.
  */
 export const streamsLayoutTabs: Record<StreamsLayoutTab, StreamsLayoutTabConfig> = {
@@ -39,20 +44,27 @@ export const streamsLayoutTabs: Record<StreamsLayoutTab, StreamsLayoutTabConfig>
     }),
     Component: StreamsCanvas,
     noPadding: true,
+    techPreview: true,
   },
   sources: {
     label: i18n.translate('xpack.streams.streamsLayout.sourcesTab', {
       defaultMessage: 'Sources',
     }),
     Component: SourcesTab,
+    techPreview: true,
   },
   destinations: {
     label: i18n.translate('xpack.streams.streamsLayout.destinationsTab', {
       defaultMessage: 'Destinations',
     }),
     Component: DestinationsTab,
+    techPreview: true,
+  },
+  classic: {
+    label: i18n.translate('xpack.streams.streamsLayout.classicTab', {
+      defaultMessage: 'Classic Streams',
+    }),
+    Component: StreamListView,
+    ownsHeader: true,
   },
 };
-
-export const isStreamsLayoutTab = (value: string): value is StreamsLayoutTab =>
-  STREAMS_LAYOUT_TABS.includes(value as StreamsLayoutTab);

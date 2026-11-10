@@ -8,9 +8,8 @@
 import React from 'react';
 import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
-import { RedirectTo } from '../redirect_to';
 import { StreamListView } from '../stream_list_view';
-import { DEFAULT_STREAMS_LAYOUT_TAB } from '../streams_layout/tabs';
+import { StreamsLayoutDefaultTabRedirect } from '../streams_layout/default_tab_redirect';
 import { StreamsNoAccessPrompt } from '../streams_no_access_prompt';
 
 /**
@@ -21,12 +20,7 @@ export function StreamsRootRedirect() {
   const { access } = useStreamsPrivileges();
 
   if (access.v2) {
-    return (
-      <RedirectTo
-        path="/v2/unit/{unitId}/{tab}"
-        params={{ path: { unitId: STREAMS_DEFAULT_UNIT_ID, tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
-      />
-    );
+    return <StreamsLayoutDefaultTabRedirect unitId={STREAMS_DEFAULT_UNIT_ID} />;
   }
 
   if (access.legacy) {

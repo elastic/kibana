@@ -9,8 +9,9 @@ import { tags } from '@kbn/scout';
 import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-ids';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+import { mockStreamsList } from '../fixtures/mock_streams_list';
 
-const TAB_NAMES = ['map', 'sources', 'destinations'];
+const TAB_NAMES = ['map', 'sources', 'destinations', 'classic'];
 
 test.describe('Streams layout', { tag: tags.serverless.observability.complete }, () => {
   test.beforeAll(async ({ kbnClient }) => {
@@ -19,7 +20,8 @@ test.describe('Streams layout', { tag: tags.serverless.observability.complete },
     });
   });
 
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, page }) => {
+    await mockStreamsList(page, [{ name: 'logs-test-default', type: 'classic' }]);
     await browserAuth.loginAsAdmin();
   });
 
@@ -29,20 +31,43 @@ test.describe('Streams layout', { tag: tags.serverless.observability.complete },
     });
   });
 
-  test('renders every tab and lands on map', async ({ pageObjects: { streams } }) => {
+  test('renders every tab and lands on the classic tab', async ({
+    page,
+    pageObjects: { streams },
+  }) => {
     await streams.gotoStreamsLayout();
 
     for (const tabName of TAB_NAMES) {
       await expect(streams.getStreamsLayoutTab(tabName)).toBeVisible();
     }
 
-    await expect(streams.getStreamsLayoutTab('map')).toHaveAttribute('aria-selected', 'true');
+    await expect(streams.getStreamsLayoutTab('classic')).toHaveAttribute('aria-selected', 'true');
+    await expect(page.testSubj.locator('streamsTable')).toBeVisible();
   });
 
-  test('falls back to the map tab for an unknown tab', async ({ pageObjects: { streams } }) => {
+  test('falls back to the classic tab for an unknown tab', async ({ pageObjects: { streams } }) => {
     await streams.gotoStreamsLayoutTab('does-not-exist');
 
+    await expect(streams.getStreamsLayoutTab('classic')).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('the new experience callout opens the map and stays dismissed', async ({
+    page,
+    pageObjects: { streams },
+  }) => {
+    await streams.gotoStreamsLayoutTab('classic');
+    await expect(streams.newExperienceCallout).toBeVisible();
+
+    await streams.newExperienceCalloutOpenMapButton.click();
     await expect(streams.getStreamsLayoutTab('map')).toHaveAttribute('aria-selected', 'true');
+
+    await streams.gotoStreamsLayoutTab('classic');
+    await streams.dismissNewExperienceCallout();
+    await expect(streams.newExperienceCallout).toHaveCount(0);
+
+    await page.reload();
+    await expect(page.testSubj.locator('streamsTable')).toBeVisible();
+    await expect(streams.newExperienceCallout).toHaveCount(0);
   });
 
   test('renders the sources table', async ({ pageObjects: { streams } }) => {

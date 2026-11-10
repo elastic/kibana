@@ -18,7 +18,7 @@ import { StreamsRootRedirect } from '../components/streams_root_redirect';
 import { StreamDetailRoot } from '../components/stream_root';
 import { StreamDetailManagement } from '../components/stream_management/data_management/stream_detail_management';
 import { StreamsLayout } from '../components/streams_layout';
-import { DEFAULT_STREAMS_LAYOUT_TAB } from '../components/streams_layout/tabs';
+import { StreamsLayoutDefaultTabRedirect } from '../components/streams_layout/default_tab_redirect';
 import { IndexInspectPage } from '../components/index_inspect/index_inspect_page';
 import { DEFAULT_INDEX_INSPECT_TAB } from '../components/index_inspect/types';
 
@@ -89,25 +89,13 @@ const streamsAppRoutes = {
         element: <Outlet />,
         children: {
           '/v2': {
-            element: (
-              <RedirectTo
-                path="/v2/unit/{unitId}/{tab}"
-                params={{
-                  path: { unitId: STREAMS_DEFAULT_UNIT_ID, tab: DEFAULT_STREAMS_LAYOUT_TAB },
-                }}
-              />
-            ),
+            element: <StreamsLayoutDefaultTabRedirect unitId={STREAMS_DEFAULT_UNIT_ID} />,
             params: t.partial({
               query: timeRangeQueryParams,
             }),
           },
           '/v2/unit/{unitId}': {
-            element: (
-              <RedirectTo
-                path="/v2/unit/{unitId}/{tab}"
-                params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
-              />
-            ),
+            element: <StreamsLayoutDefaultTabRedirect />,
             params: t.intersection([
               t.type({
                 path: t.type({

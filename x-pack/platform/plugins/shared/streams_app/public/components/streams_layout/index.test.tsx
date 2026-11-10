@@ -7,20 +7,24 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../hooks/use_time_range';
+import { useShowClassicTab } from './use_show_classic_tab';
 import { useUnitCheck, type UnitCheck } from './use_unit_check';
 import { StreamsLayout } from '.';
 
 const mockTabMounted = jest.fn();
+const mockHeaderProps = jest.fn();
 
 jest.mock('../../hooks/use_streams_app_params', () => ({ useStreamsAppParams: jest.fn() }));
 jest.mock('../../hooks/use_streams_app_router', () => ({ useStreamsAppRouter: jest.fn() }));
 jest.mock('../../hooks/use_streams_privileges', () => ({ useStreamsPrivileges: jest.fn() }));
 jest.mock('../../hooks/use_time_range', () => ({ useTimeRange: jest.fn() }));
 jest.mock('./use_unit_check', () => ({ useUnitCheck: jest.fn() }));
+jest.mock('./use_show_classic_tab', () => ({ useShowClassicTab: jest.fn() }));
 jest.mock('./unit_not_found_prompt', () => ({
   UnitNotFoundPrompt: ({ unitId }: { unitId: string }) => (
     <div data-test-subj="streamsUnitNotFoundPrompt">{unitId}</div>
@@ -29,11 +33,16 @@ jest.mock('./unit_not_found_prompt', () => ({
 jest.mock('../redirect_to', () => ({
   RedirectTo: ({ path }: { path: string }) => <div data-test-subj="redirectTo" data-path={path} />,
 }));
+jest.mock('./default_tab_redirect', () => ({
+  StreamsLayoutDefaultTabRedirect: ({ unitId }: { unitId?: string }) => (
+    <div data-test-subj="defaultTabRedirect" data-unit-id={unitId} />
+  ),
+}));
 jest.mock('./tabs', () => {
   const { useEffect } = jest.requireActual('react');
-  const tabIds = ['map', 'sources', 'destinations'];
   const createTab = (id: string) => ({
     label: id,
+    techPreview: true,
     Component: () => {
       useEffect(() => {
         mockTabMounted(id);
@@ -42,16 +51,25 @@ jest.mock('./tabs', () => {
     },
   });
   return {
-    STREAMS_LAYOUT_TABS: tabIds,
-    DEFAULT_STREAMS_LAYOUT_TAB: 'map',
-    isStreamsLayoutTab: (value: string) => tabIds.includes(value),
-    streamsLayoutTabs: Object.fromEntries(tabIds.map((id) => [id, createTab(id)])),
+    streamsLayoutTabs: {
+      map: createTab('map'),
+      sources: createTab('sources'),
+      destinations: createTab('destinations'),
+      classic: {
+        label: 'classic',
+        ownsHeader: true,
+        Component: ({ tabs }: { tabs?: AppHeaderTab[] }) => (
+          <div data-test-subj="streamsLayoutTabContent-classic">{tabs?.length}</div>
+        ),
+      },
+    },
   };
 });
 jest.mock('../streams_app_page_template', () => ({
-  StreamsAppHeader: ({ tabs }: { tabs?: unknown[] }) => (
-    <div data-test-subj="streamsLayoutHeader">{tabs?.length ?? 0}</div>
-  ),
+  StreamsAppHeader: (props: { tabs?: AppHeaderTab[] }) => {
+    mockHeaderProps(props);
+    return <div data-test-subj="streamsLayoutHeader">{props.tabs?.length ?? 0}</div>;
+  },
   StreamsAppPageTemplate: {
     Body: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     EmptyPrompt: ({
@@ -71,11 +89,15 @@ const setup = ({
   tab = 'sources',
   check = 'ready',
   v2 = true,
+  showClassic = true,
+  loading = false,
 }: {
   unitId?: string;
   tab?: string;
   check?: UnitCheck;
   v2?: boolean;
+  showClassic?: boolean;
+  loading?: boolean;
 }) => {
   jest
     .mocked(useStreamsAppParams)
@@ -90,6 +112,7 @@ const setup = ({
     access: { v2 },
   } as unknown as ReturnType<typeof useStreamsPrivileges>);
   jest.mocked(useUnitCheck).mockReturnValue(check);
+  jest.mocked(useShowClassicTab).mockReturnValue({ loading, showClassic });
 };
 
 describe('StreamsLayout', () => {
@@ -122,12 +145,60 @@ describe('StreamsLayout', () => {
     expect(screen.queryByTestId('streamsLayoutTabContent-sources')).not.toBeInTheDocument();
   });
 
-  it('shows not found instead of redirecting an unknown tab of a missing unit', () => {
+  it('redirects an unknown tab of a missing unit to the default tab', () => {
     setup({ check: 'notFound', tab: 'bogus' });
     render(<StreamsLayout />);
 
-    expect(screen.getByTestId('streamsUnitNotFoundPrompt')).toBeInTheDocument();
-    expect(screen.queryByTestId('redirectTo')).not.toBeInTheDocument();
+    expect(screen.getByTestId('defaultTabRedirect')).not.toHaveAttribute('data-unit-id');
+    expect(screen.queryByTestId('streamsUnitNotFoundPrompt')).not.toBeInTheDocument();
+  });
+
+  it('renders the classic tab with its own header and without a unit check', () => {
+    setup({ tab: 'classic', check: 'checking' });
+    render(<StreamsLayout />);
+
+    expect(screen.getByTestId('streamsLayoutTabContent-classic')).toHaveTextContent('4');
+    expect(screen.queryByTestId('streamsLayoutHeader')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('streamsUnitCheckLoading')).not.toBeInTheDocument();
+  });
+
+  it('hides the classic tab when the stream check finds none', () => {
+    setup({ tab: 'map', showClassic: false });
+    render(<StreamsLayout />);
+
+    expect(screen.getByTestId('streamsLayoutHeader')).toHaveTextContent('3');
+  });
+
+  it('redirects the classic tab when the stream check finds none', () => {
+    setup({ tab: 'classic', showClassic: false });
+    render(<StreamsLayout />);
+
+    expect(screen.getByTestId('defaultTabRedirect')).toBeInTheDocument();
+    expect(screen.queryByTestId('streamsLayoutTabContent-classic')).not.toBeInTheDocument();
+  });
+
+  it('waits for the stream check before rendering the classic tab', () => {
+    setup({ tab: 'classic', loading: true, showClassic: true });
+    render(<StreamsLayout />);
+
+    expect(screen.getByTestId('streamsDefaultTabLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('streamsLayoutTabContent-classic')).not.toBeInTheDocument();
+  });
+
+  it('marks only the new tabs as technical preview', () => {
+    setup({ tab: 'map' });
+    render(<StreamsLayout />);
+
+    const { tabs } = mockHeaderProps.mock.calls.at(-1)[0] as { tabs: AppHeaderTab[] };
+    const badges = Object.fromEntries(tabs.map(({ id, badge }) => [id, badge]));
+    const techPreviewBadge = { iconType: 'flask', tooltip: 'Technical preview' };
+
+    expect(badges).toEqual({
+      map: techPreviewBadge,
+      sources: techPreviewBadge,
+      destinations: techPreviewBadge,
+      classic: undefined,
+    });
   });
 
   it('renders the tab and unit scoped tab links for a found unit', () => {
@@ -135,7 +206,7 @@ describe('StreamsLayout', () => {
     render(<StreamsLayout />);
 
     expect(screen.getByTestId('streamsLayoutTabContent-sources')).toBeInTheDocument();
-    expect(screen.getByTestId('streamsLayoutHeader')).toHaveTextContent('3');
+    expect(screen.getByTestId('streamsLayoutHeader')).toHaveTextContent('4');
     expect(link).toHaveBeenCalledWith(
       '/v2/unit/{unitId}/{tab}',
       expect.objectContaining({ path: { unitId: 'edge', tab: 'map' } })
