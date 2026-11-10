@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*"],
+  "include": ["common/**/*", "server/**/*", "server/**/*.json"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -31,6 +31,12 @@
     "@kbn/ui-theme",
     "@kbn/rison",
     "@kbn/data-views-plugin",
-    "@kbn/isomer-gate-a"
+    "@kbn/isomer-gate-a",
+    "@kbn/dashboard-plugin",
+    "@kbn/as-code-filters-schema",
+    "@kbn/as-code-shared-schemas",
+    "@kbn/as-code-shared-transforms",
+    "@kbn/controls-constants",
+    "@kbn/controls-schemas"
   ]
 }

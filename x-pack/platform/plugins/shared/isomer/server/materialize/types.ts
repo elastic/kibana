@@ -155,6 +155,11 @@ export interface Materializer<TConfig = unknown> {
   parse(config: unknown): TConfig;
   /** Loads a saved object as its as-code config. Without it, by-reference input is unsupported. */
   load?(id: string, scope: MaterializeScope): Promise<unknown>;
+  /**
+   * Completes a parsed config, by reference or by value, with what only the user's services can
+   * answer before planning: a dashboard's control selections as filters, for example.
+   */
+  resolve?(config: TConfig, scope: MaterializeScope): Promise<TConfig>;
   /** The title and deep link a placeholder carries when this config fails. */
   describe?(config: TConfig): MaterializeDescription;
   /** The data the config needs, or why it can't be materialized. */

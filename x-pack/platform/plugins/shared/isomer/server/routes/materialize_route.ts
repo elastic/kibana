@@ -6,6 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import type { Composition } from '@kbn/isomer';
 import type { MaterializeContext } from '../../common';
 import {
@@ -15,6 +16,7 @@ import {
 } from '../../common/constants';
 import { abortSignalFor } from '../materialize/abort_signal';
 import type { MaterializedNode } from '../materialize/nodes';
+import { isUnsupportedNode } from '../materialize/nodes';
 import type { MaterializeScope, ScopedMaterializeClient } from '../materialize/types';
 import type { MaterializeRequestBody } from './schemas';
 import { materializeRequestBodySchema, materializeResponseBodySchema } from './schemas';
@@ -43,13 +45,41 @@ const toContext = ({
   ...(locale ? { locale } : {}),
 });
 
+/** Marks a grid with placeholders among its panels as degraded, saying how many. */
+const partialFailure = (
+  node: MaterializedNode
+): NonNullable<Composition['meta']>['partialFailure'] => {
+  if (node.type !== 'grid') {
+    return undefined;
+  }
+  const panels = [...node.panels, ...(node.sections ?? []).flatMap(({ panels: inner }) => inner)];
+  const unsupported = panels.filter((panel) => isUnsupportedNode(panel.node)).length;
+  return unsupported > 0
+    ? {
+        degraded: true,
+        reason: i18n.translate('xpack.isomer.materialize.route.panelsUnavailable', {
+          defaultMessage:
+            '{unsupported} of {total} {total, plural, one {panel} other {panels}} could not be shown.',
+          values: { unsupported, total: panels.length },
+        }),
+      }
+    : undefined;
+};
+
 /** Wraps a node in the composition the route returns. */
-const toComposition = (node: MaterializedNode): Composition<MaterializedNode> => ({
-  type: 'view',
-  ...('title' in node && typeof node.title === 'string' ? { title: node.title } : {}),
-  body: [node],
-  meta: { source: 'kibana', generatedAt: new Date().toISOString() },
-});
+export const toComposition = (node: MaterializedNode): Composition<MaterializedNode> => {
+  const degraded = partialFailure(node);
+  return {
+    type: 'view',
+    ...('title' in node && typeof node.title === 'string' ? { title: node.title } : {}),
+    body: [node],
+    meta: {
+      source: 'kibana',
+      generatedAt: new Date().toISOString(),
+      ...(degraded ? { partialFailure: degraded } : {}),
+    },
+  };
+};
 
 /** Registers the versioned public route that returns a one-node Isomer composition. */
 export const registerMaterializeRoute = ({ router, createClient }: MaterializeRouteDeps) => {

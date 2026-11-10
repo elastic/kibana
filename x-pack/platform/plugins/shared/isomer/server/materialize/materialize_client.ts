@@ -181,6 +181,9 @@ export const createScopedMaterializeClient = ({
     let config: unknown;
     try {
       config = materializer.parse(await loadConfig(materializer, input, scope));
+      if (materializer.resolve) {
+        config = await materializer.resolve(config, scope);
+      }
     } catch (error) {
       logger.debug(
         `Could not load the ${input.type} config to materialize: ${errorMessage(error)}`
