@@ -93,6 +93,7 @@ COLOR:
 - Use the "color" ENCODING only to distinguish a meaningful categorical dimension, and leave its scale to the theme: do NOT set a "scheme", "range", or hand-authored "domain" for categorical color.
 - Only for a quantitative color encoding may you set a sequential "scheme" ("blues", "viridis"), since there is no themed default for continuous scales.
 - Single-series charts need no color at all — the theme supplies the default series color.
+- Exception: when the request names a color for the marks (e.g. "make the bars blue"), it overrides the rules above. Set it on the mark (e.g. "mark": { "type": "bar", "color": "#1F77B4" }), or on the color scale's "range" for named categories, and leave every other color to the theme. Never report a requested color as applied by the theme default.
 
 TITLE RULES:
 - Always set "title" to a clear, self-explanatory visualization / dashboard panel title.

@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
   ALERTING_TOOL_IDS,
+  ALERTING_API_IDS,
   RULE_KIND_LABELS,
 } from '@kbn/alerting-v2-constants';
 import {
@@ -1093,8 +1094,8 @@ export const generateMultiRuleActionPolicyDoc = (): string =>
     '  `alert.data.*` — because query columns often differ across rules. If two rules need',
     '  different message shapes, use two policies (or two workflows) rather than one',
     '  brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).',
-    '- **Search first**: run `platform.alerting.find_action_policies` for existing policies before adding',
-    '  another catch-all or overlapping tag matcher.',
+    `- **Search first**: list existing policies with the Kibana API tools (\`${ALERTING_API_IDS.listActionPolicies}\`)`,
+    '  before adding another catch-all or overlapping tag matcher.',
     '- **Grouping**: `per_alert` is still a safe default. `all` batches mixed-rule',
     '  alerts into a single notification; only use it when the user wants one combined',
     '  message.',
