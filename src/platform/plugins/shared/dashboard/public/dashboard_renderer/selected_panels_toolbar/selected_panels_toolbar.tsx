@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiToolTip,
+  euiCanAnimate,
   transparentize,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
@@ -28,7 +29,6 @@ import {
   userCanCopyToDashboard,
   openCopyToDashboardModal,
 } from '../../dashboard_actions/copy_to_dashboard_action';
-import { createSpringTiming } from './spring';
 
 const clearSelectionLabel = i18n.translate('dashboard.selectedPanelsToolbar.clearSelectionLabel', {
   defaultMessage: 'Clear selection (Esc)',
@@ -153,21 +153,9 @@ export const SelectedPanelsToolbar = () => {
   );
 };
 
-/**
- * Entrance: a 15px rise and a fade driven by one spring (stiffness 460, damping 27: lands at ~135ms,
- * overshoots ~6%, then settles). Opacity follows the same curve, so it briefly exceeds 1 with the
- * overshoot, which the browser clamps.
- */
-const ENTER_SPRING = createSpringTiming({ stiffness: 460, damping: 27 });
-
-/** Fallback curve for browsers without `linear()` easing */
-const EASE_OUT = 'cubic-bezier(0.2, 0, 0, 1)';
-
-// Opacity starts slightly below zero, so the toolbar is already moving when it becomes visible
-// (the browser clamps the negative part). Animates `translate`, which composes with the centering
-// `transform` instead of overriding it.
+// Animates `translate`, which composes with the centering `transform` instead of overriding it
 const enter = keyframes({
-  from: { opacity: -0.1, translate: '0 15px' },
+  from: { opacity: 0, translate: '0 15px' },
   to: { opacity: 1, translate: '0 0' },
 });
 
@@ -179,12 +167,9 @@ const selectedPanelsToolbarStyles = {
       left: '50%',
       transform: 'translateX(-50%)',
       zIndex: euiTheme.levels.toast,
-      transformOrigin: 'center bottom',
-      animation: `${enter} 200ms ${EASE_OUT}`,
-      '@supports (animation-timing-function: linear(0, 1))': {
-        animation: `${enter} ${ENTER_SPRING.duration}ms ${ENTER_SPRING.easing}`,
+      [euiCanAnimate]: {
+        animation: `${enter} ${euiTheme.animation.normal} ${euiTheme.animation.bounce}`,
       },
-      '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
       // In dark mode the default panel color is too close to the dashboard behind it and a dark
       // shadow is invisible: a lighter neutral surface, a stronger edge and a soft white glow keep
       // the toolbar visible
