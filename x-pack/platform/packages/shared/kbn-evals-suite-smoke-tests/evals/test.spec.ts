@@ -160,7 +160,7 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
   evaluate(
     'smoke tests: trace-retrieval',
     async ({ executorClient, inferenceClient, evaluators }) => {
-      const { inputTokens, outputTokens } = evaluators.traceBasedEvaluators;
+      const { inputTokens, outputTokens, estimatedCost } = evaluators.traceBasedEvaluators;
 
       const result = await executorClient.runExperiment(
         {
@@ -180,7 +180,7 @@ evaluate.describe('kbn-evals framework smoke tests', { tag: tags.stateful.classi
             return { response: response.content };
           },
         },
-        [inputTokens, outputTokens]
+        [inputTokens, outputTokens, estimatedCost]
       );
 
       const scores = result[0].evaluationRuns.map((r) => r.result?.score);
