@@ -170,7 +170,7 @@ export interface HeaderBadge {
   label: string;
   /** Optional EUI badge color (e.g. 'hollow', 'success', 'warning', 'accent'). */
   color?: string;
-  /** Optional icon to display alongside the label. Inline cards render only the icon, with the label as a tooltip. */
+  /** Optional icon to display alongside the label. */
   iconType?: IconType;
 }
 
