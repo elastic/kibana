@@ -545,6 +545,11 @@ export class ModelsProvider {
   async getPipelineToIndicesMap(pipelineIds: Set<string>): Promise<Record<string, string[]>> {
     const pipelineIdsToDestinationIndices: Record<string, string[]> = {};
 
+    // No model pipelines to match, so avoid fetching settings for every index in the cluster
+    if (pipelineIds.size === 0) {
+      return pipelineIdsToDestinationIndices;
+    }
+
     let indicesPermissions;
     let indicesSettings;
 
@@ -566,11 +571,25 @@ export class ModelsProvider {
       return pipelineIdsToDestinationIndices;
     }
 
+    // From list of model pipelines, find all indices that have pipeline set as index.default_pipeline
+    const indexToPipeline = new Map<string, string>();
+    for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
+      const defaultPipeline = settings?.index?.default_pipeline;
+      if (defaultPipeline && pipelineIds.has(defaultPipeline)) {
+        indexToPipeline.set(indexName, defaultPipeline);
+      }
+    }
+
+    if (indexToPipeline.size === 0) {
+      return pipelineIdsToDestinationIndices;
+    }
+
     try {
+      // Only check privileges for the matching indices, not every index with a default pipeline
       const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
         index: [
           {
-            names: Object.keys(indicesSettings),
+            names: Array.from(indexToPipeline.keys()),
             privileges: ['read'],
           },
         ],
@@ -584,14 +603,8 @@ export class ModelsProvider {
       return pipelineIdsToDestinationIndices;
     }
 
-    // From list of model pipelines, find all indices that have pipeline set as index.default_pipeline
-    for (const [indexName, { settings }] of Object.entries(indicesSettings)) {
-      const defaultPipeline = settings?.index?.default_pipeline;
-      if (
-        defaultPipeline &&
-        pipelineIds.has(defaultPipeline) &&
-        indicesPermissions[indexName]?.read === true
-      ) {
+    for (const [indexName, defaultPipeline] of indexToPipeline) {
+      if (indicesPermissions[indexName]?.read === true) {
         if (Array.isArray(pipelineIdsToDestinationIndices[defaultPipeline])) {
           pipelineIdsToDestinationIndices[defaultPipeline].push(indexName);
         } else {

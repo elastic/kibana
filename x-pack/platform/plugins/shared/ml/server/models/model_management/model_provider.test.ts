@@ -461,4 +461,57 @@ describe('modelsProvider', () => {
       expect(mlLog.error).toHaveBeenCalledWith(notFoundError);
     });
   });
+
+  describe('#getPipelineToIndicesMap', () => {
+    test('should not call Elasticsearch when there are no pipelines to match', async () => {
+      const result = await modelService.getPipelineToIndicesMap(new Set());
+
+      expect(result).toEqual({});
+      expect(mockClient.asInternalUser.indices.getSettings).not.toHaveBeenCalled();
+      expect(mockClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('should not check privileges when no index uses a model pipeline', async () => {
+      mockClient.asInternalUser.indices.getSettings.mockResolvedValue({
+        'metrics-system.cpu-default': { settings: { index: { default_pipeline: 'metrics-1' } } },
+      });
+
+      const result = await modelService.getPipelineToIndicesMap(new Set(['model-pipeline']));
+
+      expect(result).toEqual({});
+      expect(mockClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
+    });
+
+    test('should only check privileges for indices that use a model pipeline', async () => {
+      mockClient.asInternalUser.indices.getSettings.mockResolvedValue({
+        'metrics-system.cpu-default': { settings: { index: { default_pipeline: 'metrics-1' } } },
+        'index-a': { settings: { index: { default_pipeline: 'model-pipeline' } } },
+        'index-b': { settings: { index: { default_pipeline: 'model-pipeline' } } },
+        'index-c': { settings: { index: { default_pipeline: 'other-model-pipeline' } } },
+      });
+      mockClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        username: 'test',
+        has_all_requested: false,
+        cluster: {},
+        application: {},
+        index: {
+          'index-a': { read: true },
+          'index-b': { read: false },
+          'index-c': { read: true },
+        },
+      });
+
+      const result = await modelService.getPipelineToIndicesMap(
+        new Set(['model-pipeline', 'other-model-pipeline'])
+      );
+
+      expect(mockClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
+        index: [{ names: ['index-a', 'index-b', 'index-c'], privileges: ['read'] }],
+      });
+      expect(result).toEqual({
+        'model-pipeline': ['index-a'],
+        'other-model-pipeline': ['index-c'],
+      });
+    });
+  });
 });
