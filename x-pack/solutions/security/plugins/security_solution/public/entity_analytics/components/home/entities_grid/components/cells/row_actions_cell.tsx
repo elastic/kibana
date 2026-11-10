@@ -48,6 +48,10 @@ const i18nStrings = {
     'xpack.securitySolution.entityAnalytics.home.rowActions.addToChatLabel',
     { defaultMessage: 'Add to chat' }
   ),
+  addToWatchlist: i18n.translate(
+    'xpack.securitySolution.entityAnalytics.home.rowActions.addToWatchlistLabel',
+    { defaultMessage: 'Add to watchlist' }
+  ),
 };
 
 export interface RowActions {
@@ -58,6 +62,8 @@ export interface RowActions {
   onAddToChat?: (row: Row) => void;
   /** Absent when attaching to cases is unavailable, which hides the item. */
   onAddToCase?: (row: Row) => void;
+  /** Absent when watchlists are off or the user cannot manage them, which hides the item. */
+  onAddToWatchlist?: (row: Row) => void;
 }
 
 interface RowActionsCellProps {
@@ -65,6 +71,7 @@ interface RowActionsCellProps {
   onOpenEntityGraph: () => void;
   onAddToChat?: () => void;
   onAddToCase?: () => void;
+  onAddToWatchlist?: () => void;
 }
 
 export const RowActionsCell: React.FC<RowActionsCellProps> = ({
@@ -72,6 +79,7 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
   onOpenEntityGraph,
   onAddToChat,
   onAddToCase,
+  onAddToWatchlist,
 }) => {
   const [isMoreActionsOpen, setIsMoreActionsOpen] = useState(false);
   const moreActionsButton = (
@@ -115,7 +123,7 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
           />
         </EuiToolTip>
       </EuiFlexItem>
-      {(onAddToChat || onAddToCase) && (
+      {(onAddToChat || onAddToCase || onAddToWatchlist) && (
         <EuiFlexItem grow={false}>
           {/* Mounted only once opened: a mounted popover scans its button for focusables, too costly per row. */}
           {isMoreActionsOpen ? (
@@ -154,6 +162,21 @@ export const RowActionsCell: React.FC<RowActionsCellProps> = ({
                           }}
                         >
                           {ADD_TO_CASE}
+                        </EuiContextMenuItem>,
+                      ]
+                    : []),
+                  ...(onAddToWatchlist
+                    ? [
+                        <EuiContextMenuItem
+                          key="addToWatchlist"
+                          icon="eye"
+                          data-test-subj="eaGridRowAddToWatchlist"
+                          onClick={() => {
+                            setIsMoreActionsOpen(false);
+                            onAddToWatchlist();
+                          }}
+                        >
+                          {i18nStrings.addToWatchlist}
                         </EuiContextMenuItem>,
                       ]
                     : []),

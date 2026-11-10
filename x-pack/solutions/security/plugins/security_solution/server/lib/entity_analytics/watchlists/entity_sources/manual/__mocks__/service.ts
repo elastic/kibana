@@ -7,8 +7,11 @@
 
 export const mockAssign = jest.fn();
 export const mockUnassign = jest.fn();
+export const mockListManualWatchlistEntities = jest.fn();
 
 export const createManualEntityService = jest.fn(() => ({
   assign: mockAssign,
   unassign: mockUnassign,
 }));
+
+export const listManualWatchlistEntities = mockListManualWatchlistEntities;

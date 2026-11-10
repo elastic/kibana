@@ -267,6 +267,37 @@ describe('EntitiesGrid', () => {
     expect(screen.getAllByRole('button', { name: 'Open entity graph' }).length).toBeGreaterThan(0);
   });
 
+  it.each([
+    ['resolved', RESOLVED_ROWS_COLUMNS, 0, GROUP],
+    ['individual', INDIVIDUAL_ROWS_COLUMNS, 1, SINGLE_ENTITY],
+  ] as const)(
+    'passes the row to "Add to watchlist" in the More actions menu of %s rows',
+    async (rowsMode, columns, rowIndex, expectedRow) => {
+      const onAddToWatchlist = jest.fn();
+      renderGrid({
+        rowsMode,
+        columns,
+        rowActions: { onOpenEntityGraph: jest.fn(), onAddToWatchlist },
+      });
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'More actions' })[rowIndex]);
+      fireEvent.click(await screen.findByText('Add to watchlist'));
+
+      expect(onAddToWatchlist).toHaveBeenCalledTimes(1);
+      expect(onAddToWatchlist).toHaveBeenCalledWith(expectedRow);
+    }
+  );
+
+  it('has no More actions menu when no action in it is available', () => {
+    renderGrid({
+      rowsMode: 'individual',
+      columns: INDIVIDUAL_ROWS_COLUMNS,
+      rowActions: { onOpenEntityGraph: jest.fn() },
+    });
+
+    expect(screen.queryByRole('button', { name: 'More actions' })).not.toBeInTheDocument();
+  });
+
   it('resets to the default sort when the user unsorts a column', () => {
     const onSortChange = jest.fn();
     renderGrid({ onSortChange });

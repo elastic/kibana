@@ -388,6 +388,11 @@ import type {
   AssignWatchlistEntitiesResponse,
 } from './entity_analytics/watchlists/entities/assign.gen';
 import type {
+  ListManualWatchlistEntitiesRequestQueryInput,
+  ListManualWatchlistEntitiesRequestParamsInput,
+  ListManualWatchlistEntitiesResponse,
+} from './entity_analytics/watchlists/entities/list_manual.gen';
+import type {
   UnassignWatchlistEntitiesRequestParamsInput,
   UnassignWatchlistEntitiesRequestBodyInput,
   UnassignWatchlistEntitiesResponse,
@@ -2735,6 +2740,29 @@ List all entity source configurations.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Lists the entities that were assigned to the watchlist by hand, one page at a time.
+An entity that is only on the watchlist through a rule or a CSV upload is not listed.
+An entity assigned by hand that also matches a rule is listed, and its `sources` say so.
+
+    */
+  async listManualWatchlistEntities(props: ListManualWatchlistEntitiesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API ListManualWatchlistEntities`);
+    return this.kbnClient
+      .request<ListManualWatchlistEntitiesResponse>({
+        path: replaceParams(
+          '/internal/entity_analytics/watchlists/{watchlist_id}/entities/manual',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
     * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
@@ -4357,6 +4385,10 @@ export interface InternalUploadAssetCriticalityV2CsvProps {
 }
 export interface ListEntitySourcesProps {
   query: ListEntitySourcesRequestQueryInput;
+}
+export interface ListManualWatchlistEntitiesProps {
+  query: ListManualWatchlistEntitiesRequestQueryInput;
+  params: ListManualWatchlistEntitiesRequestParamsInput;
 }
 export interface ListPrivMonUsersProps {
   query: ListPrivMonUsersRequestQueryInput;

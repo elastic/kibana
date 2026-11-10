@@ -111,11 +111,23 @@ import {
   WATCHLISTS_INDICES_URL,
   WATCHLISTS_CSV_UPLOAD_URL,
   WATCHLISTS_PRIVILEGES_URL,
+  WATCHLISTS_ENTITIES_ASSIGN_URL,
+  WATCHLISTS_ENTITIES_UNASSIGN_URL,
+  WATCHLISTS_MANUAL_ENTITIES_LIST_INTERNAL_URL,
 } from '../../../common/entity_analytics/watchlists/constants';
 import {
   RISK_SCORE_HISTORY_URL,
   RISK_SCORE_MAINTAINER_ID,
 } from '../../../common/entity_analytics/risk_score/constants';
+import type {
+  AssignWatchlistEntitiesRequestBodyInput,
+  AssignWatchlistEntitiesResponse,
+} from '../../../common/api/entity_analytics/watchlists/entities/assign.gen';
+import type { ListManualWatchlistEntitiesResponse } from '../../../common/api/entity_analytics/watchlists/entities/list_manual.gen';
+import type {
+  UnassignWatchlistEntitiesRequestBodyInput,
+  UnassignWatchlistEntitiesResponse,
+} from '../../../common/api/entity_analytics/watchlists/entities/unassign.gen';
 import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import {
   GENERATE_LEADS_URL,
@@ -878,6 +890,57 @@ export const useEntityAnalyticsRoutes = () => {
         context,
       });
 
+    const assignWatchlistEntities = async (params: {
+      watchlistId: string;
+      body: AssignWatchlistEntitiesRequestBodyInput;
+    }) =>
+      http.fetch<AssignWatchlistEntitiesResponse>(
+        WATCHLISTS_ENTITIES_ASSIGN_URL.replace(
+          '{watchlist_id}',
+          encodeURIComponent(params.watchlistId)
+        ),
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'POST',
+          body: JSON.stringify(params.body),
+        }
+      );
+
+    const unassignWatchlistEntities = async (params: {
+      watchlistId: string;
+      body: UnassignWatchlistEntitiesRequestBodyInput;
+    }) =>
+      http.fetch<UnassignWatchlistEntitiesResponse>(
+        WATCHLISTS_ENTITIES_UNASSIGN_URL.replace(
+          '{watchlist_id}',
+          encodeURIComponent(params.watchlistId)
+        ),
+        {
+          version: API_VERSIONS.public.v1,
+          method: 'POST',
+          body: JSON.stringify(params.body),
+        }
+      );
+
+    const listManualWatchlistEntities = async (params: {
+      watchlistId: string;
+      page: number;
+      perPage: number;
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<ListManualWatchlistEntitiesResponse>(
+        WATCHLISTS_MANUAL_ENTITIES_LIST_INTERNAL_URL.replace(
+          '{watchlist_id}',
+          encodeURIComponent(params.watchlistId)
+        ),
+        {
+          version: API_VERSIONS.internal.v1,
+          method: 'GET',
+          query: { page: params.page, per_page: params.perPage },
+          signal: params.signal,
+        }
+      );
+
     const listWatchlistEntitySources = async (params: {
       watchlistId: string;
       signal?: AbortSignal;
@@ -1144,6 +1207,9 @@ export const useEntityAnalyticsRoutes = () => {
       getWatchlist,
       updateWatchlist,
       deleteWatchlist,
+      assignWatchlistEntities,
+      unassignWatchlistEntities,
+      listManualWatchlistEntities,
       listWatchlistEntitySources,
       updateWatchlistEntitySource,
       createWatchlistEntitySource,
