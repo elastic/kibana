@@ -157,6 +157,18 @@ const hasUnappliedReport = ({
   new Date(attributes.expires_at).getTime() > Date.now() &&
   isClaimStale(updatedAt);
 
+/**
+ * A claim on a record past its expiry that nobody is applying any more. The poll stops recovering
+ * reports once the record has expired, so nothing would ever settle it.
+ */
+const isAbandonedClaim = ({
+  attributes,
+  updated_at: updatedAt,
+}: SavedObject<ProvisioningCallbackSOAttributes>): boolean =>
+  attributes.status === 'receiving' &&
+  new Date(attributes.expires_at).getTime() <= Date.now() &&
+  isClaimStale(updatedAt);
+
 const isSamePayload = (
   stored: ProvisioningCallbackSOAttributes,
   payload: CloudConnectorCallbackReceivedValues
@@ -559,7 +571,8 @@ class ProvisioningCallbackService {
    * Retires a record the browser no longer waits on, so its token is refused. A record the stack has
    * already reported to is returned as it is, so the caller can pick up the identity instead of
    * creating one by hand. A report that made its connector but never got marked received is
-   * finished here.
+   * finished here. A report left behind on a record that has since expired is retired with it:
+   * the poll no longer recovers it, so the browser would otherwise wait for good.
    */
   public async cancel(
     soClient: SavedObjectsClientContract,
@@ -573,11 +586,16 @@ class ProvisioningCallbackService {
     if (attributes.status === 'receiving') {
       const spaceClient = appContextService.getInternalUserSOClientForSpaceId(attributes.space_id);
       const connector = await this.findCloudConnector(spaceClient, so.id);
-      return connector
-        ? this.finish(soClient, so.id, attributes, connector)
-        : toItem(so.id, attributes);
-    }
-    if (attributes.status !== 'pending') {
+      if (connector) {
+        return this.finish(soClient, so.id, attributes, connector);
+      }
+      if (!isAbandonedClaim(so)) {
+        return toItem(so.id, attributes);
+      }
+      this.logger.warn(
+        `Provisioning callback [id=${so.id}] expired while its report was being applied; no identity was created for it`
+      );
+    } else if (attributes.status !== 'pending') {
       return toItem(so.id, attributes);
     }
 

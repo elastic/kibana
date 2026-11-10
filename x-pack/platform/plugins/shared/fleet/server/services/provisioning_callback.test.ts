@@ -1089,6 +1089,66 @@ describe('provisioningCallbackService', () => {
       expect(item).toMatchObject({ status: 'receiving', ...PAYLOAD });
     });
 
+    it('retires a claim nobody is applying any more once the record has expired', async () => {
+      soClient.get.mockImplementation(async (type) => {
+        if (type === PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE) {
+          return soWith(pendingAttrs({ ...CLAIM, expires_at: PAST }));
+        }
+        throw CONNECTOR_NOT_FOUND;
+      });
+      soClient.update.mockResolvedValue({} as any);
+
+      const item = await provisioningCallbackService.cancel(soClient, 'cb-1');
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+        'cb-1',
+        { status: 'cancelled' },
+        { version: 'v1' }
+      );
+      expect(item).toMatchObject({ status: 'cancelled', ...PAYLOAD });
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Provisioning callback [id=cb-1] expired while its report was being applied; no identity was created for it'
+      );
+    });
+
+    it('leaves a fresh claim on an expired record to the request holding it', async () => {
+      soClient.get.mockImplementation(async (type) => {
+        if (type === PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE) {
+          return soWith(pendingAttrs({ ...CLAIM, expires_at: PAST }), FRESH);
+        }
+        throw CONNECTOR_NOT_FOUND;
+      });
+
+      const item = await provisioningCallbackService.cancel(soClient, 'cb-1');
+
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(item).toMatchObject({ status: 'receiving', ...PAYLOAD });
+    });
+
+    it('hands back what a takeover stored when retiring an abandoned claim loses to it', async () => {
+      const takenOver = pendingAttrs({
+        status: 'received',
+        ...PAYLOAD,
+        cloud_connector_id: 'cb-1',
+        expires_at: PAST,
+      });
+      soClient.get
+        .mockResolvedValueOnce(soWith(pendingAttrs({ ...CLAIM, expires_at: PAST })))
+        .mockRejectedValueOnce(CONNECTOR_NOT_FOUND)
+        .mockResolvedValueOnce(soWith(takenOver));
+      soClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(
+          PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+          'cb-1'
+        )
+      );
+
+      const item = await provisioningCallbackService.cancel(soClient, 'cb-1');
+
+      expect(item).toMatchObject({ status: 'received', cloud_connector_id: 'cb-1' });
+    });
+
     it('finishes a report whose connector exists but was never marked received', async () => {
       soClient.get.mockImplementation(async (type, id) => {
         if (type === PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE) {
