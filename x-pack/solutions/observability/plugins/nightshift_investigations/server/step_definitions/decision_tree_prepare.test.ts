@@ -8,11 +8,18 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createConversationNotFoundError } from '@kbn/agent-builder-common';
+import { HYPOTHESES_ATTACHMENT_TYPE } from '@kbn/agentic-investigations-plugin/common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
+import {
+  ALERT_RECOVERED_MESSAGE_PREFIX,
+  buildAlertRecoveredFollowUpMessage,
+  buildInvestigationRoundMessage,
+} from '../client/build_investigation_message';
 import { NO_CAUSAL_VERDICT } from '../decision_trees/causal_check';
 import { prepareReinforcementTurn } from '../decision_trees/register_decision_trees';
 import { createOptimizeModel } from '../lib/create_optimize_model';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
+import * as tracing from '../tracing';
 import { decisionTreePrepareStepDefinition } from './decision_tree_prepare';
 
 jest.mock('../decision_trees/register_decision_trees', () => ({
@@ -38,18 +45,23 @@ describe('decisionTreePrepareStepDefinition', () => {
   const logger = loggerMock.create();
   const request = httpServerMock.createKibanaRequest();
   const conversationsGet = jest.fn();
+  const reportDecisionTreeCausalCheck = jest.fn();
+  const telemetry = { reportDecisionTreeCausalCheck } as never;
   const agentBuilder = {
     conversations: {
       getScopedClient: jest.fn().mockResolvedValue({ get: conversationsGet }),
     },
   };
 
-  const createContext = (input: Record<string, unknown>) =>
+  const createContext = (input: Record<string, unknown>, executionId = 'exec-1') =>
     ({
       input,
       rawInput: input,
       contextManager: {
-        getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'space-1' } }),
+        getContext: jest.fn().mockReturnValue({
+          workflow: { spaceId: 'space-1' },
+          ...(executionId ? { execution: { id: executionId } } : {}),
+        }),
         getFakeRequest: jest.fn().mockReturnValue(request),
         getScopedEsClient: jest.fn().mockReturnValue({}),
         renderInputTemplate: jest.fn((val) => val),
@@ -61,11 +73,12 @@ describe('decisionTreePrepareStepDefinition', () => {
       stepType: 'nightshift.decisionTreePrepare',
     } as never);
 
-  const run = (input: Record<string, unknown>) =>
+  const run = (input: Record<string, unknown>, executionId?: string) =>
     decisionTreePrepareStepDefinition({
       getAgentBuilder: () => agentBuilder as never,
       logger,
-    }).handler(createContext(input));
+      telemetry,
+    }).handler(createContext(input, executionId));
 
   const investigatorRound = {
     agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
@@ -311,6 +324,253 @@ describe('decisionTreePrepareStepDefinition', () => {
           },
         },
       });
+    });
+
+    describe('telemetry, structured logs, and background span attributes', () => {
+      const setAttribute = jest.fn();
+      let spanSpy: jest.SpyInstance;
+
+      beforeEach(() => {
+        setAttribute.mockReset();
+        spanSpy = jest
+          .spyOn(tracing, 'withNightshiftBackgroundSpan')
+          .mockImplementation(async (_options, fn) => fn({ setAttribute } as never));
+        jest
+          .mocked(prepareReinforcementTurn)
+          .mockImplementation(async ({ checkCausal, turnKind }) => ({
+            skipped: false,
+            message: 'turn prompt',
+            treeCount: 2,
+            turnKind,
+            openedTreeIds: ['symptom:checkout-latency'],
+            ...(turnKind === 'feedback_reinforcement' && checkCausal
+              ? { verdict: await checkCausal() }
+              : {}),
+          }));
+      });
+
+      afterEach(() => {
+        spanSpy.mockRestore();
+      });
+
+      it('does not report a causal-check event on a first round', async () => {
+        conversationsGet.mockResolvedValue({ rounds: [] });
+
+        await run(investigatorRound);
+
+        expect(reportDecisionTreeCausalCheck).not.toHaveBeenCalled();
+      });
+
+      it('reports confirmed outcome with recorder transition, structured ECS labels, and span attributes', async () => {
+        const slackPrompt = buildInvestigationRoundMessage({
+          message: 'Confirmed: api.paygate-eu.net timed out on charge calls.',
+          isSlackMessage: true,
+        });
+        conversationsGet.mockResolvedValue({
+          rounds: [
+            { id: 'round-1', started_at: '2026-11-02T10:00:00.000Z', steps: [] },
+            {
+              id: 'round-2',
+              started_at: '2026-11-02T10:10:00.000Z',
+              input: { message: slackPrompt },
+              steps: [],
+            },
+          ],
+          attachments: [
+            {
+              type: HYPOTHESES_ATTACHMENT_TYPE,
+              versions: [
+                {
+                  created_at: '2026-11-02T10:05:00.000Z',
+                  data: {
+                    hypotheses: [{ candidate: 'Paygate timeout', status: 'investigating' }],
+                  },
+                },
+                {
+                  created_at: '2026-11-02T10:12:00.000Z',
+                  data: {
+                    hypotheses: [{ candidate: 'Paygate timeout', status: 'confirmed' }],
+                  },
+                },
+              ],
+            },
+          ],
+        });
+        output.mockResolvedValue({
+          output: {
+            is_feedback_message: true,
+            causal_confirmed: true,
+            causal_summary: 'Paygate edge timed out.',
+            learning: 'Check external payment gateway latency.',
+          },
+        });
+
+        await run({ ...followUp, prompt: slackPrompt });
+
+        expect(reportDecisionTreeCausalCheck).toHaveBeenCalledWith(
+          expect.objectContaining({
+            agent_id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+            conversation_id: 'inv-1',
+            round_id: 'round-2',
+            workflow_execution_id: 'exec-1',
+            outcome: 'confirmed',
+            follow_up_source: 'slack',
+            is_feedback: true,
+            causal_confirmed: true,
+            has_learning: true,
+            tree_count: 2,
+            opened_tree_count: 1,
+            recorder_outcome: 'found',
+            recorder_has_confirmed_cause: true,
+            duration_ms: expect.any(Number),
+          })
+        );
+        expect(logger.info).toHaveBeenCalledWith(
+          expect.stringContaining('outcome=confirmed source=slack'),
+          expect.objectContaining({
+            tags: ['nightshift', 'decision_trees', 'causal_check'],
+            labels: expect.objectContaining({
+              outcome: 'confirmed',
+              follow_up_source: 'slack',
+              recorder_outcome: 'found',
+              recorder_has_confirmed_cause: true,
+            }),
+          })
+        );
+        expect(setAttribute).toHaveBeenCalledWith('nightshift.causal_check.outcome', 'confirmed');
+        expect(setAttribute).toHaveBeenCalledWith(
+          'nightshift.causal_check.follow_up_source',
+          'slack'
+        );
+        expect(setAttribute).toHaveBeenCalledWith(
+          'nightshift.causal_check.recorder_outcome',
+          'found'
+        );
+        expect(setAttribute).toHaveBeenCalledWith(
+          'nightshift.causal_check.recorder_has_confirmed_cause',
+          true
+        );
+        expect(setAttribute).toHaveBeenCalledWith('nightshift.causal_check.confirmed', true);
+        expect(setAttribute).toHaveBeenCalledWith('nightshift.causal_check.has_learning', true);
+        expect(setAttribute).toHaveBeenCalledWith(
+          'nightshift.causal_check.duration_ms',
+          expect.any(Number)
+        );
+      });
+
+      it('distinguishes unconfirmed_feedback from not_feedback and classifies alert_recovery vs direct prompts', async () => {
+        await run({
+          ...followUp,
+          // Without the <alert_data> block, a user starting their message with the prefix stays `direct`.
+          prompt: `${ALERT_RECOVERED_MESSAGE_PREFIX} Our team says it was the egress proxy.`,
+        });
+
+        expect(reportDecisionTreeCausalCheck).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            outcome: 'unconfirmed_feedback',
+            follow_up_source: 'direct',
+            is_feedback: true,
+            causal_confirmed: false,
+            has_learning: true,
+          })
+        );
+
+        const recoveryPrompt = buildAlertRecoveredFollowUpMessage({
+          alertUuid: 'alert-uuid-1',
+          alertId: 'instance-1',
+          ruleName: 'Checkout Latency',
+        });
+        output.mockResolvedValue({
+          output: {
+            is_feedback_message: false,
+            causal_confirmed: false,
+            causal_summary: '',
+            learning: '',
+          },
+        });
+
+        await run({ ...followUp, prompt: recoveryPrompt });
+
+        expect(reportDecisionTreeCausalCheck).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            outcome: 'not_feedback',
+            follow_up_source: 'alert_recovery',
+            is_feedback: false,
+            causal_confirmed: false,
+            has_learning: false,
+          })
+        );
+      });
+
+      it('reports skipped_no_trees when a follow-up has no editable trees', async () => {
+        jest.mocked(prepareReinforcementTurn).mockResolvedValue({ skipped: true });
+
+        await expect(run(followUp)).resolves.toEqual(skipped);
+
+        expect(reportDecisionTreeCausalCheck).toHaveBeenCalledWith(
+          expect.objectContaining({
+            outcome: 'skipped_no_trees',
+            follow_up_source: 'direct',
+            tree_count: 0,
+            opened_tree_count: 0,
+            recorder_outcome: 'unknown',
+          })
+        );
+        expect(setAttribute).toHaveBeenCalledWith(
+          'nightshift.causal_check.outcome',
+          'skipped_no_trees'
+        );
+      });
+
+      it.each([
+        ['model_unavailable', () => jest.mocked(createOptimizeModel).mockResolvedValue(undefined)],
+        [
+          'timeout',
+          () =>
+            output.mockRejectedValue(Object.assign(new Error('aborted'), { name: 'AbortError' })),
+        ],
+        ['inference_error', () => output.mockRejectedValue(new Error('connector down'))],
+      ])(
+        'reports failed with error_code=%s and omits verdict flags when the causal check fails',
+        async (expectedCode, arrange) => {
+          arrange();
+
+          const res = await run(followUp);
+
+          expect(res.output?.skipped).toBe(false);
+          expect(reportDecisionTreeCausalCheck).toHaveBeenCalledWith(
+            expect.objectContaining({
+              outcome: 'failed',
+              error_code: expectedCode,
+              tree_count: 2,
+              opened_tree_count: 1,
+              duration_ms: expect.any(Number),
+            })
+          );
+          const reported = reportDecisionTreeCausalCheck.mock.calls[0][0];
+          expect(reported).not.toHaveProperty('is_feedback');
+          expect(reported).not.toHaveProperty('causal_confirmed');
+          expect(logger.warn).toHaveBeenCalledWith(
+            expect.stringContaining(`causal check failed (${expectedCode})`),
+            expect.objectContaining({
+              tags: ['nightshift', 'decision_trees', 'causal_check'],
+              labels: expect.objectContaining({
+                outcome: 'failed',
+                error_code: expectedCode,
+              }),
+            })
+          );
+          expect(setAttribute).toHaveBeenCalledWith('nightshift.causal_check.outcome', 'failed');
+          expect(setAttribute).toHaveBeenCalledWith(
+            'nightshift.causal_check.error_code',
+            expectedCode
+          );
+          expect(setAttribute).not.toHaveBeenCalledWith(
+            'nightshift.causal_check.is_feedback',
+            expect.anything()
+          );
+        }
+      );
     });
   });
 

@@ -16,6 +16,10 @@ import { NIGHTSHIFT_INVESTIGATION_DECISION_TREE_USAGE_ID } from '@kbn/nightshift
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { usesDecisionTrees } from '../agents/agent_policy';
 import {
+  ALERT_RECOVERED_MESSAGE_PREFIX,
+  SLACK_MESSAGE_PREFIX,
+} from '../client/build_investigation_message';
+import {
   extractAccessedTreeIdsFromRounds,
   roundsBefore,
   type InvestigationToolCall,
@@ -31,13 +35,82 @@ import {
   createInvestigationBackgroundTelemetry,
   createOptimizeModel,
 } from '../lib/create_optimize_model';
-import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';
+import {
+  investigationRoundInputsSchema,
+  resolveRound,
+  withToolResults,
+} from '../investigation_round';
+import type {
+  CausalCheckErrorCode,
+  CausalCheckFollowUpSource,
+  CausalCheckOutcome,
+  DecisionTreeCausalCheckEvent,
+  NightshiftTelemetryClient,
+} from '../telemetry';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { toolCallsSchema, toolResultsSchema } from './tool_calls_schema';
 import { withTimeout } from './with_timeout';
 
 /** Matches Deductive's causal check, which gives the call 90s. */
 const CAUSAL_CHECK_TIMEOUT_MS = 90_000;
+const CAUSAL_CHECK_TIMEOUT_MESSAGE = `Causal check timed out after ${CAUSAL_CHECK_TIMEOUT_MS}ms`;
+const CAUSAL_CHECK_LOG_TAGS = ['nightshift', 'decision_trees', 'causal_check'];
+
+class CausalCheckModelUnavailableError extends Error {
+  constructor() {
+    super('No model is available for the causal check');
+    this.name = 'CausalCheckModelUnavailableError';
+  }
+}
+
+type CausalCheckAttempt =
+  | {
+      status: 'completed';
+      verdict: CausalCheckResult;
+      durationMs: number;
+    }
+  | {
+      status: 'failed';
+      error: Error;
+      errorCode: CausalCheckErrorCode;
+      durationMs: number;
+    };
+
+/**
+ * Reads the prompt envelope Nightshift wraps around alert-recovery and Slack messages so telemetry
+ * can segment follow-up outcomes by channel without extra I/O. Observational only — never used to
+ * gate reinforcement.
+ */
+const classifyFollowUpSource = (message: string | undefined): CausalCheckFollowUpSource => {
+  const trimmed = message?.trimStart() ?? '';
+  if (trimmed.startsWith(ALERT_RECOVERED_MESSAGE_PREFIX) && trimmed.includes('<alert_data>')) {
+    return 'alert_recovery';
+  }
+  if (trimmed.startsWith(SLACK_MESSAGE_PREFIX) && trimmed.includes('<slack_data>')) {
+    return 'slack';
+  }
+  return 'direct';
+};
+
+const classifyCausalCheckError = (error: unknown, parentAborted: boolean): CausalCheckErrorCode => {
+  if (error instanceof CausalCheckModelUnavailableError) {
+    return 'model_unavailable';
+  }
+  if (
+    (error instanceof Error && error.message === CAUSAL_CHECK_TIMEOUT_MESSAGE) ||
+    (!parentAborted && error instanceof Error && error.name === 'AbortError')
+  ) {
+    return 'timeout';
+  }
+  return 'inference_error';
+};
+
+const outcomeFromVerdict = (verdict: CausalCheckResult): CausalCheckOutcome => {
+  if (verdict.causalConfirmed) {
+    return 'confirmed';
+  }
+  return verdict.isFeedback ? 'unconfirmed_feedback' : 'not_feedback';
+};
 
 export const decisionTreePrepareStepDefinition = ({
   getAgentBuilder,
@@ -46,6 +119,7 @@ export const decisionTreePrepareStepDefinition = ({
   getUiSettings,
   logger,
   isEnabled,
+  telemetry,
 }: {
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   getInference?: () => InferenceServerStart | undefined;
@@ -53,6 +127,7 @@ export const decisionTreePrepareStepDefinition = ({
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
   isEnabled?: () => boolean;
+  telemetry?: NightshiftTelemetryClient;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.decisionTreePrepare',
@@ -182,6 +257,12 @@ export const decisionTreePrepareStepDefinition = ({
       });
       const rounds = conversation?.rounds ?? [];
       const earlierRounds = roundsBefore(rounds, roundId);
+      const isFollowUp = earlierRounds.length > 0;
+      const savedCurrentRound = rounds.find((round) => round.id === roundId);
+      const followUpSource = classifyFollowUpSource(prompt || savedCurrentRound?.input?.message);
+      const roundResolution = isFollowUp
+        ? resolveRound({ rounds, attachments: conversation?.attachments }, { roundId })
+        : undefined;
       const roundToolCalls = withToolResults(
         (toolCalls ?? []) as InvestigationToolCall[],
         toolResults ?? []
@@ -191,9 +272,12 @@ export const decisionTreePrepareStepDefinition = ({
       const { spaceId } = workflowContext.workflow;
       const executionId = workflowContext.execution?.id;
 
+      let causalCheckAttempt: CausalCheckAttempt | undefined;
+
       // A lost verdict leaves the tree where it was before causal checks existed: extended, with
       // no cause claimed. Failing here would also stop the reinforcement run.
       const checkCausal = async (): Promise<CausalCheckResult> => {
+        const startedAtMs = Date.now();
         try {
           const verdict = await withTimeout(
             async (signal) => {
@@ -212,9 +296,9 @@ export const decisionTreePrepareStepDefinition = ({
                 logger,
               });
               if (!model) {
-                throw new Error('No model is available for the causal check');
+                throw new CausalCheckModelUnavailableError();
               }
-              const startedAt = rounds.find((round) => round.id === roundId)?.started_at;
+              const startedAt = savedCurrentRound?.started_at;
               return createLlmCausalCheck({ inferenceClient: model.inferenceClient, signal })(
                 buildCausalCheckTranscript({
                   earlierRounds,
@@ -228,26 +312,125 @@ export const decisionTreePrepareStepDefinition = ({
               );
             },
             CAUSAL_CHECK_TIMEOUT_MS,
-            `Causal check timed out after ${CAUSAL_CHECK_TIMEOUT_MS}ms`,
+            CAUSAL_CHECK_TIMEOUT_MESSAGE,
             context.abortSignal
           );
-          context.logger.info(
-            `Round "${roundId}" of "${conversationId}" causal check: feedback=${verdict.isFeedback} confirmed=${verdict.causalConfirmed}`
-          );
+          const durationMs = Math.max(0, Math.round(Date.now() - startedAtMs));
+          causalCheckAttempt = { status: 'completed', verdict, durationMs };
           return verdict;
-        } catch (error) {
-          context.logger.warn(
-            `Round "${roundId}" of "${conversationId}" has no causal verdict: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
+        } catch (err) {
+          const error = err instanceof Error ? err : new Error(String(err));
+          const durationMs = Math.max(0, Math.round(Date.now() - startedAtMs));
+          const errorCode = classifyCausalCheckError(error, Boolean(context.abortSignal?.aborted));
+          causalCheckAttempt = { status: 'failed', error, errorCode, durationMs };
           return NO_CAUSAL_VERDICT;
         }
       };
+
+      const recordCausalCheckTelemetry = ({
+        span,
+        outcome,
+        treeCount,
+        openedTreeCount,
+        verdict,
+        durationMs,
+        errorCode,
+        error,
+      }: {
+        span?: Parameters<Parameters<typeof withNightshiftBackgroundSpan>[1]>[0];
+        outcome: CausalCheckOutcome;
+        treeCount: number;
+        openedTreeCount: number;
+        verdict?: CausalCheckResult;
+        durationMs?: number;
+        errorCode?: CausalCheckErrorCode;
+        error?: Error;
+      }): void => {
+        const event: DecisionTreeCausalCheckEvent = {
+          agent_id: agentId ?? 'unknown',
+          conversation_id: conversationId,
+          round_id: roundId,
+          ...(executionId ? { workflow_execution_id: executionId } : {}),
+          outcome,
+          follow_up_source: followUpSource,
+          ...(verdict
+            ? {
+                is_feedback: verdict.isFeedback,
+                causal_confirmed: verdict.causalConfirmed,
+                has_learning: verdict.learning.trim().length > 0,
+              }
+            : {}),
+          tree_count: treeCount,
+          opened_tree_count: openedTreeCount,
+          ...(roundResolution ? { recorder_outcome: roundResolution.outcome } : {}),
+          ...(roundResolution?.hasConfirmedCause !== undefined
+            ? { recorder_has_confirmed_cause: roundResolution.hasConfirmedCause }
+            : {}),
+          ...(durationMs !== undefined ? { duration_ms: durationMs } : {}),
+          ...(errorCode ? { error_code: errorCode } : {}),
+        };
+
+        span?.setAttribute('nightshift.causal_check.outcome', outcome);
+        span?.setAttribute('nightshift.causal_check.follow_up_source', followUpSource);
+        if (roundResolution) {
+          span?.setAttribute('nightshift.causal_check.recorder_outcome', roundResolution.outcome);
+          if (roundResolution.hasConfirmedCause !== undefined) {
+            span?.setAttribute(
+              'nightshift.causal_check.recorder_has_confirmed_cause',
+              roundResolution.hasConfirmedCause
+            );
+          }
+        }
+        if (verdict) {
+          span?.setAttribute('nightshift.causal_check.is_feedback', verdict.isFeedback);
+          span?.setAttribute('nightshift.causal_check.confirmed', verdict.causalConfirmed);
+          span?.setAttribute(
+            'nightshift.causal_check.has_learning',
+            verdict.learning.trim().length > 0
+          );
+        }
+        if (durationMs !== undefined) {
+          span?.setAttribute('nightshift.causal_check.duration_ms', durationMs);
+        }
+        if (errorCode) {
+          span?.setAttribute('nightshift.causal_check.error_code', errorCode);
+        }
+
+        if (outcome === 'failed') {
+          context.logger.warn(
+            `Round "${roundId}" of "${conversationId}" causal check failed (${errorCode}): ${
+              error?.message ?? 'unknown error'
+            }`,
+            {
+              tags: CAUSAL_CHECK_LOG_TAGS,
+              labels: { ...event },
+              ...(error ? { error } : {}),
+            }
+          );
+        } else {
+          context.logger.info(
+            `Round "${roundId}" of "${conversationId}" causal check: outcome=${outcome} source=${followUpSource}` +
+              (verdict
+                ? ` feedback=${verdict.isFeedback} confirmed=${verdict.causalConfirmed}`
+                : '') +
+              (roundResolution ? ` recorder=${roundResolution.outcome}` : '') +
+              ` trees=${treeCount}`,
+            {
+              tags: CAUSAL_CHECK_LOG_TAGS,
+              labels: { ...event },
+            }
+          );
+        }
+
+        telemetry?.reportDecisionTreeCausalCheck(event);
+      };
+
       const turn = await withNightshiftBackgroundSpan(
         {
           name: 'nightshift.decisionTreePrepare',
           traceId: context.input.background_trace_id || executionId,
+          roundId,
+          conversationId,
           spaceId,
           workflowExecutionId: executionId,
           request: context.contextManager?.getFakeRequest?.(),
@@ -257,8 +440,7 @@ export const decisionTreePrepareStepDefinition = ({
         },
         async (span) => {
           const res = await prepareReinforcementTurn({
-            turnKind:
-              earlierRounds.length === 0 ? 'initial_investigation' : 'feedback_reinforcement',
+            turnKind: isFollowUp ? 'feedback_reinforcement' : 'initial_investigation',
             investigationId: conversationId,
             roundId,
             earlierAccessedTreeIds: extractAccessedTreeIdsFromRounds(earlierRounds),
@@ -271,14 +453,43 @@ export const decisionTreePrepareStepDefinition = ({
           });
           if (res.skipped) {
             span?.setAttribute('nightshift.skipped', true);
+            if (isFollowUp) {
+              recordCausalCheckTelemetry({
+                span,
+                outcome: 'skipped_no_trees',
+                treeCount: 0,
+                openedTreeCount: 0,
+              });
+            }
             return res;
           }
           span?.setAttribute('nightshift.tree_count', res.treeCount);
           span?.setAttribute('nightshift.turn_kind', res.turnKind);
           span?.setAttribute('nightshift.opened_tree_ids', JSON.stringify(res.openedTreeIds));
-          if (res.verdict) {
-            span?.setAttribute('nightshift.causal_check.is_feedback', res.verdict.isFeedback);
-            span?.setAttribute('nightshift.causal_check.confirmed', res.verdict.causalConfirmed);
+          if (isFollowUp) {
+            if (causalCheckAttempt?.status === 'failed') {
+              recordCausalCheckTelemetry({
+                span,
+                outcome: 'failed',
+                treeCount: res.treeCount,
+                openedTreeCount: res.openedTreeIds.length,
+                durationMs: causalCheckAttempt.durationMs,
+                errorCode: causalCheckAttempt.errorCode,
+                error: causalCheckAttempt.error,
+              });
+            } else if (res.verdict) {
+              recordCausalCheckTelemetry({
+                span,
+                outcome: outcomeFromVerdict(res.verdict),
+                treeCount: res.treeCount,
+                openedTreeCount: res.openedTreeIds.length,
+                verdict: res.verdict,
+                durationMs:
+                  causalCheckAttempt?.status === 'completed'
+                    ? causalCheckAttempt.durationMs
+                    : undefined,
+              });
+            }
           }
           return res;
         }
