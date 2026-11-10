@@ -313,6 +313,31 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(lastWrite.pausedSettings).toBeUndefined();
     });
 
+    it('turns the cleanup workflow back on when the space was set up while paused', async () => {
+      const { api, updateWorkflow } = makeManagementApi();
+      const { service, soClient } = makeService({ management: api });
+
+      await service.pause({ request: REQUEST });
+      // Set up while paused leaves cleanup off and nothing recorded for it.
+      await soClient
+        .forSpace('default')
+        .update(
+          SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
+          SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
+          { disabledWorkflows: [] }
+        );
+      updateWorkflow.mockClear();
+
+      await service.reset({ request: REQUEST });
+
+      expect(updateWorkflow).toHaveBeenCalledWith(
+        cleanupDocumentId('default'),
+        { enabled: true },
+        expect.any(String),
+        REQUEST
+      );
+    });
+
     it('keeps a settings-backed workflow running when its toggle could not be turned off', async () => {
       const { api, updateWorkflow } = makeManagementApi();
       const { service } = makeService({

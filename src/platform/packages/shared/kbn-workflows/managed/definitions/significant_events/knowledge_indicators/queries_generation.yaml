@@ -143,7 +143,12 @@ steps:
           finalized: "${{ steps.generate_queries.output.finalized }}"
           connectorId: "${{ steps.generate_queries.output.connectorId }}"
           queries: "${{ steps.generate_queries.output.queries }}"
-          tokensUsed: "${{ steps.generate_queries.output.tokensUsed }}"
+          # Every attempt runs a full agent conversation, so usage is summed across attempts.
+          tokensUsed:
+            completion: "${{ variables.tokensUsed.completion | plus: steps.generate_queries.output.tokensUsed.completion }}"
+            prompt: "${{ variables.tokensUsed.prompt | plus: steps.generate_queries.output.tokensUsed.prompt }}"
+            total: "${{ variables.tokensUsed.total | plus: steps.generate_queries.output.tokensUsed.total }}"
+            cached: "${{ variables.tokensUsed.cached | plus: steps.generate_queries.output.tokensUsed.cached }}"
 
   # -----------------------------------------------------------------------
   # Step 3: Fail when no attempt finalized.
