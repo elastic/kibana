@@ -8,7 +8,13 @@
  */
 
 import type { JsonObject } from './json_pointer';
-import { getAtTokens, isJsonObject, localRefToPointer, toTokens } from './json_pointer';
+import {
+  getAtTokens,
+  isJsonObject,
+  localRefToPointer,
+  resolvePathItem,
+  toTokens,
+} from './json_pointer';
 import type { ManifestPagination } from './manifest';
 
 export interface PaginationProposal {
@@ -453,7 +459,10 @@ export const assessPagination = (
   // Operations under AutoRest's `x-ms-paths`, such as Azure Blob Storage's `/?comp=list`, too.
   const pathItem = resolveObject(
     document,
-    getAtTokens(document, ['paths', path]) ?? getAtTokens(document, ['x-ms-paths', path])
+    resolvePathItem(
+      document,
+      getAtTokens(document, ['paths', path]) ?? getAtTokens(document, ['x-ms-paths', path])
+    )
   );
   const operation = resolveObject(document, pathItem[method]);
   const parameters = parametersOf(document, pathItem, operation);

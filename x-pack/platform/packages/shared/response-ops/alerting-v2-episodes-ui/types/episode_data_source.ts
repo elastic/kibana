@@ -14,7 +14,7 @@ import type {
   EpisodesFilterState,
   EpisodesSortState,
 } from '../queries/episodes_query';
-import type { HistogramEpisodeRow } from '../utils/histogram_utils';
+import type { HistogramBucketCount, TimeBucket } from '../utils/histogram_utils';
 import type { EpisodeAction } from '../actions/types';
 import type { EpisodeActionsDeps } from '../actions/create_episode_actions';
 
@@ -51,6 +51,10 @@ export interface FetchSourceHistogramParams extends EpisodeDataSourceBaseParams 
   filterState?: EpisodesFilterState;
   timeRange?: TimeRange | null;
   breakdownField?: string;
+  /** Time buckets the counts must be keyed by (`bucketStart` = `TimeBucket.start`). */
+  buckets: TimeBucket[];
+  /** Open episodes count only in buckets that start before this instant (epoch ms). */
+  nowMs: number;
 }
 
 export interface FetchSourceTagOptionsParams extends EpisodeDataSourceBaseParams {
@@ -71,8 +75,13 @@ export interface EpisodeSourceKpis {
 }
 
 export interface EpisodeSourceHistogram {
-  rows: HistogramEpisodeRow[];
+  counts: HistogramBucketCount[];
   isCapHit: boolean;
+  /**
+   * Alerts per breakdown value across the time range, used to rank which values get their own
+   * series. Counts the source already folded carry the `HISTOGRAM_OTHER_BREAKDOWN` breakdown value.
+   */
+  breakdownTotals?: Record<string, number>;
 }
 
 export type EpisodeFetchErrorSurface = 'list' | 'kpis' | 'histogram';

@@ -255,10 +255,10 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
             <h3>
               {isInferSchemaSelected
                 ? i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsTitleOptional', {
-                    defaultMessage: 'Field mappings (optional)',
+                    defaultMessage: 'Field definitions (optional)',
                   })
                 : i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsTitle', {
-                    defaultMessage: 'Field mappings',
+                    defaultMessage: 'Field definitions',
                   })}
             </h3>
           </EuiTitle>
@@ -277,11 +277,11 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
       <EuiText size="s" color="subdued">
         {isInferSchemaSelected
           ? i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsSubheadingInfer', {
-              defaultMessage: "Schema will be inferred at query time for fields you don't map.",
+              defaultMessage: "Fields you don't define are inferred at query time.",
             })
           : i18n.translate('xpack.dataFederation.mappingEditor.fieldMappingsSubheading', {
               defaultMessage:
-                'Map at least one field to continue. Unmapped fields will not be available to query.',
+                "Define at least one field to continue. Fields you don't define aren't available to query.",
             })}
       </EuiText>
       <EuiSpacer size="m" />

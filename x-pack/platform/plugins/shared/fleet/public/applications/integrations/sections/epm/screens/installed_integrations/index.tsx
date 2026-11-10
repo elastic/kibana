@@ -171,6 +171,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent<{
           installedPackages={installedPackages}
           selection={{ selectedItems, setSelectedItems }}
           onboardingInstanceCounts={onboardingInstanceCounts}
+          isOnboardingEnabled={isOnboardingInstancesEnabled}
         />
       </div>
       {viewPoliciesSelectedItem ? (

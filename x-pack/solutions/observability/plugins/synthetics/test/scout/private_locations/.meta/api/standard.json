@@ -1,5 +1,5 @@
 {
-  "sha1": "6d0950fcf67523f26ff9c4ac7dcd86830b14e426",
+  "sha1": "b095ea503efbc3a7468b980a7da0a2ae7cd9bc62",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -80,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/clean_up_extra_package_policies.spec.ts",
-        "line": 49,
-        "column": 13
+        "line": 54,
+        "column": 40
       }
     },
     {
@@ -726,6 +726,48 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/migrate_legacy_policies.spec.ts",
         "line": 359,
         "column": 11
+      }
+    },
+    {
+      "id": "bfe71bfe55df22b-788616bff506122",
+      "title": "MonitorHealthAllSpaces POST _health returns health for both monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/monitor_health_all_spaces.spec.ts",
+        "line": 105,
+        "column": 7
+      }
+    },
+    {
+      "id": "bfe71bfe55df22b-7541d4fbb2bed0b",
+      "title": "MonitorHealthAllSpaces GET {monitorId}/_health returns health for each monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/monitor_health_all_spaces.spec.ts",
+        "line": 117,
+        "column": 7
+      }
+    },
+    {
+      "id": "bfe71bfe55df22b-68716c5556870c0",
+      "title": "MonitorHealthAllSpaces POST _health by locationIds returns the location monitors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/private_locations/api/tests/monitor_health_all_spaces.spec.ts",
+        "line": 132,
+        "column": 13
       }
     },
     {

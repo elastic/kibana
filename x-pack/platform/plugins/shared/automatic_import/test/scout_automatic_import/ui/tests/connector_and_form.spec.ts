@@ -71,7 +71,7 @@ test.describe(
       await expect(pageObjects.integrationManagement.getConnectorSelector()).toBeVisible();
     });
 
-    test('does not show the Add new connector button when connectors exist', async ({
+    test('does not show the Add AI connector button when connectors exist', async ({
       pageObjects,
     }) => {
       await expect(pageObjects.integrationManagement.getAddNewConnectorButton()).toBeHidden();
@@ -79,7 +79,7 @@ test.describe(
 
     // --- Connector Selector — no connectors (override route then re-navigate) ---
 
-    test('shows Add new connector button when no AI connectors are available', async ({
+    test('shows the AI connector callout instead of the connector selector on load when no AI connectors are available', async ({
       page,
       pageObjects,
     }) => {
@@ -91,10 +91,72 @@ test.describe(
         })
       );
       await pageObjects.integrationManagement.navigateToCreate();
-      await expect(pageObjects.integrationManagement.getAddNewConnectorButton()).toBeVisible();
+
+      const callout = pageObjects.integrationManagement.getAiConnectorRequiredCallout();
+      await expect(callout).toBeVisible();
+      await expect(callout.getByRole('button', { name: 'Add AI connector' })).toBeVisible();
+      await expect(pageObjects.integrationManagement.getConnectorSelector()).toBeHidden();
     });
 
-    test('opens the connector setup flyout when Add new connector is clicked', async ({
+    // --- AI connector required callout ---
+
+    test('does not show the AI connector callout when a connector is available', async ({
+      pageObjects,
+    }) => {
+      await expect(pageObjects.integrationManagement.getConnectorSelector()).toBeVisible();
+      await pageObjects.integrationManagement.getAddDataStreamButton().click();
+      await expect(pageObjects.integrationManagement.getAiConnectorRequiredCallout()).toBeHidden();
+    });
+
+    test('Add data stream shows inline errors and does not open the flyout when no connector exists', async ({
+      page,
+      pageObjects,
+    }) => {
+      await page.route(CONNECTORS_API, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(CONNECTORS_EMPTY_RESPONSE),
+        })
+      );
+      await pageObjects.integrationManagement.navigateToCreate();
+      const callout = pageObjects.integrationManagement.getAiConnectorRequiredCallout();
+      await expect(callout).toBeVisible();
+
+      await pageObjects.integrationManagement.getAddDataStreamButton().click();
+
+      await expect(page.getByText('Integration name is required')).toBeVisible();
+      await expect(page.getByText('Description is required')).toBeVisible();
+      await expect(callout).toBeVisible();
+      await expect(pageObjects.integrationManagement.getCreateDataStreamFlyout()).toBeHidden();
+    });
+
+    test('Add data stream does not open the flyout when no connector exists and the other fields are valid', async ({
+      page,
+      pageObjects,
+    }) => {
+      await page.route(CONNECTORS_API, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(CONNECTORS_EMPTY_RESPONSE),
+        })
+      );
+      await pageObjects.integrationManagement.navigateToCreate();
+      await pageObjects.integrationManagement
+        .getIntegrationTitleInput()
+        .fill('My Custom Integration');
+      await pageObjects.integrationManagement
+        .getIntegrationDescriptionInput()
+        .fill('Parses custom log format');
+
+      await pageObjects.integrationManagement.getAddDataStreamButton().click();
+
+      await expect(pageObjects.integrationManagement.getAiConnectorRequiredCallout()).toBeVisible();
+      await expect(pageObjects.integrationManagement.getCreateDataStreamFlyout()).toBeHidden();
+    });
+
+    test('opens the connector setup flyout from the AI connector callout', async ({
       page,
       pageObjects,
     }) => {
@@ -132,6 +194,24 @@ test.describe(
       await expect(pageObjects.integrationManagement.getIntegrationDescriptionInput()).toHaveValue(
         'Parses custom log format'
       );
+    });
+
+    test('Add data stream shows inline errors and does not open the flyout when name and description are empty', async ({
+      page,
+      pageObjects,
+    }) => {
+      const addDataStreamButton = pageObjects.integrationManagement.getAddDataStreamButton();
+
+      await expect(addDataStreamButton).toBeEnabled();
+      await addDataStreamButton.click();
+
+      await expect(page.getByText('Integration name is required')).toBeVisible();
+      await expect(page.getByText('Description is required')).toBeVisible();
+      await expect(pageObjects.integrationManagement.getIntegrationTitleInput()).toHaveAttribute(
+        'aria-invalid',
+        'true'
+      );
+      await expect(pageObjects.integrationManagement.getCreateDataStreamFlyout()).toBeHidden();
     });
 
     test('Done button is disabled when no data streams have been added', async ({

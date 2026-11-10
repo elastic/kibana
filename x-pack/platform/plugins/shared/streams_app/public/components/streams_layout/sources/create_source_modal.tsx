@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
+import { Controller, FormProvider } from 'react-hook-form';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -35,18 +36,15 @@ import { SOURCE_TYPE_CONFIGS, SOURCE_TYPE_CONFIG_BY_TYPE } from './source_type_c
 import { SourceSetupInstructions } from './source_setup_instructions';
 import { SourceSignalsFields } from './source_signals_fields';
 import { RevealedApiKeyCallout } from './revealed_api_key_callout';
+import { useSourceCreationForm } from './use_source_creation_form';
 
 interface CreateSourceModalProps {
   sources: Pick<
     SourcesController,
     | 'createSource'
-    | 'sourceType'
+    | 'unitDefinition'
     | 'availableSourceTypes'
-    | 'sourceName'
-    | 'sourceNameError'
-    | 'sourceSignals'
-    | 'sourceSignalsError'
-    | 'canCreateSource'
+    | 'isUnitSaving'
     | 'createdSource'
     | 'revealedApiKey'
     | 'apiKeyError'
@@ -54,10 +52,6 @@ interface CreateSourceModalProps {
     | 'isCreatingSource'
     | 'isSavingSource'
     | 'isCreateFailed'
-    | 'setCreateSourceType'
-    | 'setCreateSourceName'
-    | 'setCreateSourceSignals'
-    | 'validateCreateSourceName'
   >;
   onClose: () => void;
 }
@@ -65,13 +59,9 @@ interface CreateSourceModalProps {
 export const CreateSourceModal = ({ sources, onClose }: CreateSourceModalProps) => {
   const {
     createSource,
-    sourceType,
+    unitDefinition,
     availableSourceTypes,
-    sourceName,
-    sourceNameError,
-    sourceSignals,
-    sourceSignalsError,
-    canCreateSource,
+    isUnitSaving,
     createdSource,
     revealedApiKey,
     apiKeyError,
@@ -79,11 +69,15 @@ export const CreateSourceModal = ({ sources, onClose }: CreateSourceModalProps) 
     isCreatingSource,
     isSavingSource,
     isCreateFailed,
-    setCreateSourceType,
-    setCreateSourceName,
-    setCreateSourceSignals,
-    validateCreateSourceName,
   } = sources;
+  const {
+    methods,
+    formData: { sourceType },
+    formErrors: { sourceName: sourceNameError, signals: sourceSignalsError },
+    canSubmit,
+    selectSourceType,
+  } = useSourceCreationForm({ unitDefinition, availableSourceTypes });
+  const formId = useGeneratedHtmlId({ prefix: 'streamsCreateSourceForm' });
 
   const sourceTypeOptions = useMemo(
     () =>
@@ -111,14 +105,6 @@ export const CreateSourceModal = ({ sources, onClose }: CreateSourceModalProps) 
     defaultMessage: 'Create source',
   });
   const modalTitleId = useGeneratedHtmlId({ prefix: 'streamsCreateSourceModalTitle' });
-
-  const continueToSetup = useCallback(() => {
-    createSource();
-  }, [createSource]);
-
-  const done = useCallback(() => {
-    onClose();
-  }, [onClose]);
 
   return (
     <EuiModal
@@ -186,59 +172,65 @@ export const CreateSourceModal = ({ sources, onClose }: CreateSourceModalProps) 
             )}
           </>
         ) : (
-          <EuiForm
-            component="form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              createSource();
-            }}
-          >
-            <EuiFormRow
-              fullWidth
-              label={i18n.translate('xpack.streams.sources.sourceTypeLabel', {
-                defaultMessage: 'Source type',
-              })}
+          <FormProvider {...methods}>
+            <EuiForm
+              id={formId}
+              component="form"
+              noValidate
+              onSubmit={methods.handleSubmit(createSource)}
             >
-              <EuiSelect
+              <EuiFormRow
                 fullWidth
-                value={sourceType}
-                disabled={isCreatingSource}
-                options={sourceTypeOptions}
-                onChange={(event) => setCreateSourceType(event.target.value as SourceType)}
-                data-test-subj="streamsSourceTypeSelect"
-              />
-            </EuiFormRow>
-            <EuiFormRow
-              fullWidth
-              isInvalid={Boolean(sourceNameErrorText)}
-              error={sourceNameErrorText}
-              label={i18n.translate('xpack.streams.sources.sourceNameLabel', {
-                defaultMessage: 'Source name',
-              })}
-            >
-              <EuiFieldText
+                label={i18n.translate('xpack.streams.sources.sourceTypeLabel', {
+                  defaultMessage: 'Source type',
+                })}
+              >
+                <EuiSelect
+                  fullWidth
+                  value={sourceType}
+                  disabled={isCreatingSource}
+                  options={sourceTypeOptions}
+                  onChange={(event) => selectSourceType(event.target.value as SourceType)}
+                  data-test-subj="streamsSourceTypeSelect"
+                />
+              </EuiFormRow>
+              <EuiFormRow
                 fullWidth
-                value={sourceName}
-                disabled={isCreatingSource}
-                onChange={(event) => setCreateSourceName(event.target.value)}
-                onBlur={validateCreateSourceName}
                 isInvalid={Boolean(sourceNameErrorText)}
-                data-test-subj="streamsSourceNameInput"
+                error={sourceNameErrorText}
+                label={i18n.translate('xpack.streams.sources.sourceNameLabel', {
+                  defaultMessage: 'Source name',
+                })}
+              >
+                <Controller
+                  control={methods.control}
+                  name="sourceName"
+                  render={({ field: { value, onChange, onBlur, ref } }) => (
+                    <EuiFieldText
+                      fullWidth
+                      value={value}
+                      inputRef={ref}
+                      disabled={isCreatingSource}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      isInvalid={Boolean(sourceNameErrorText)}
+                      data-test-subj="streamsSourceNameInput"
+                    />
+                  )}
+                />
+              </EuiFormRow>
+              <SourceSignalsFields
+                sourceType={sourceType}
+                disabled={isCreatingSource}
+                isInvalid={sourceSignalsError === 'required'}
               />
-            </EuiFormRow>
-            <SourceSignalsFields
-              sourceType={sourceType}
-              signals={sourceSignals}
-              disabled={isCreatingSource}
-              isInvalid={sourceSignalsError === 'required'}
-              onChange={setCreateSourceSignals}
-            />
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.streams.sources.immutableSourceFieldsDescription', {
-                defaultMessage: 'Source type and name cannot be changed later',
-              })}
-            </EuiText>
-          </EuiForm>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.streams.sources.immutableSourceFieldsDescription', {
+                  defaultMessage: 'Source type and name cannot be changed later',
+                })}
+              </EuiText>
+            </EuiForm>
+          </FormProvider>
         )}
       </EuiModalBody>
       <EuiModalFooter>
@@ -249,7 +241,7 @@ export const CreateSourceModal = ({ sources, onClose }: CreateSourceModalProps) 
             })}
           </EuiButton>
         ) : isSetup ? (
-          <EuiButton fill onClick={done} data-test-subj="streamsCreateSourceDoneButton">
+          <EuiButton fill onClick={onClose} data-test-subj="streamsCreateSourceDoneButton">
             {i18n.translate('xpack.streams.sources.doneButtonLabel', {
               defaultMessage: 'Done',
             })}
@@ -263,8 +255,9 @@ export const CreateSourceModal = ({ sources, onClose }: CreateSourceModalProps) 
             </EuiButtonEmpty>
             <EuiButton
               fill
-              onClick={continueToSetup}
-              isDisabled={!canCreateSource || isCreatingSource}
+              type="submit"
+              form={formId}
+              isDisabled={!canSubmit || isUnitSaving || isCreatingSource}
               isLoading={isCreatingSource || isGeneratingApiKey}
               data-test-subj="streamsCreateSourceContinueButton"
             >

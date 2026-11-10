@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import {
@@ -24,7 +24,10 @@ import { EventTimeline } from './event_timeline';
 import { TruncatableSummary } from '../../ui/truncatable_summary';
 import { SIGNIFICANT_EVENT_SEVERITY } from '../../ui/severity_badge';
 import { useFlyoutShareUrlCustomAction } from '../../ui/flyout_share_url_button';
-import { buildNightshiftEventFlyoutShareUrl } from '../../../common/url_params';
+import {
+  buildNightshiftEventFlyoutShareUrl,
+  buildNightshiftEventsPageUrl,
+} from '../../../common/url_params';
 import {
   buildInvestigationConversationChatOptions,
   buildNewSignificantEventChatOptions,
@@ -128,9 +131,21 @@ const MARK_INACTIVE_LABEL = i18n.translate('xpack.nightshift.flyout.markInactive
 export interface EventFlyoutProps {
   event: SignificantEventResponse;
   onClose: () => void;
+  /**
+   * `push` shares the page with the app that opens it. `overlay` stacks over another flyout, such
+   * as an investigation, without a mask or replacing it.
+   */
+  type?: 'push' | 'overlay';
+  /** The flyout's width: an EUI size or pixels. */
+  size?: 's' | 'm' | number;
 }
 
-export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactElement {
+export function EventFlyout({
+  event,
+  onClose,
+  type = 'push',
+  size = 's',
+}: EventFlyoutProps): React.ReactElement {
   const formatTimestamp = useFormatTimestamp();
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, application, focusedSignificantEventService, http } = useKibana().services;
@@ -139,6 +154,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
   const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
   const [isMarkInactiveModalOpen, setIsMarkInactiveModalOpen] = useState(false);
+  const stagedOverlayEventId = useRef<string>();
   const lifecycleQuery = useFetchEventLifecycle(event.event_id);
   const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation({
     onTriggered: () => {
@@ -176,9 +192,26 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   }, [event.event_id]);
 
   useEffect(() => {
+    // The focused event belongs to Nightshift's own chat; an overlay over another page, such as an
+    // investigation, must not take it over unless its New chat action explicitly stages the event.
+    if (type === 'overlay') {
+      return;
+    }
     focusedSignificantEventService.setFocusedEvent(event);
-    return () => focusedSignificantEventService.clearFocusedEvent(event.event_id);
-  }, [event, focusedSignificantEventService]);
+    return () => {
+      focusedSignificantEventService.clearFocusedEvent(event.event_id);
+    };
+  }, [event, focusedSignificantEventService, type]);
+
+  useEffect(() => {
+    return () => {
+      const stagedEventId = stagedOverlayEventId.current;
+      if (stagedEventId) {
+        focusedSignificantEventService.clearFocusedEvent(stagedEventId);
+        stagedOverlayEventId.current = undefined;
+      }
+    };
+  }, [focusedSignificantEventService]);
 
   useEffect(() => {
     if (
@@ -215,8 +248,13 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   }, []);
 
   const getShareUrl = useCallback(
-    () => buildNightshiftEventFlyoutShareUrl(event.event_id),
-    [event.event_id]
+    () =>
+      // Outside Nightshift the page behind the flyout cannot reopen the event, so the link goes to
+      // the events page, which can.
+      type === 'overlay'
+        ? buildNightshiftEventsPageUrl(application.getUrlForApp, event.event_id)
+        : buildNightshiftEventFlyoutShareUrl(event.event_id),
+    [application.getUrlForApp, event.event_id, type]
   );
   const shareUrlCustomAction = useFlyoutShareUrlCustomAction(getShareUrl);
   const flyoutMenuProps = useMemo(
@@ -227,7 +265,8 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     agentBuilder?.openChat(buildNewSignificantEventChatOptions(event));
     // An open sidebar replaces its draft on openChat without a new conversation id, so re-stage the event.
     focusedSignificantEventService.setFocusedEvent(event);
-  }, [agentBuilder, event, focusedSignificantEventService]);
+    stagedOverlayEventId.current = type === 'overlay' ? event.event_id : undefined;
+  }, [agentBuilder, event, focusedSignificantEventService, type]);
   const openInvestigationChat = useCallback(() => {
     if (conversationId) {
       agentBuilder?.openChat(buildInvestigationConversationChatOptions(conversationId));
@@ -325,8 +364,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     <>
       <FlyoutTemplate
         onClose={onClose}
-        size="s"
-        type="push"
+        size={size}
+        type={type}
+        ownFocus={type === 'overlay' ? false : undefined}
         session="start"
         historyKey={EVENT_FLYOUT_HISTORY_KEY}
         resizable

@@ -38,6 +38,13 @@ const STRIPPED_METHOD_CHANGE_HEADERS = [
 
 type RequestClass = 'finite' | 'persistent';
 
+export class McpFetchTimeoutError extends Error {
+  constructor(timeout: number) {
+    super(`Request timed out after ${timeout}ms`);
+    this.name = 'McpFetchTimeoutError';
+  }
+}
+
 export interface CreateFetchResourceOpts {
   networkSettings: ConnectorNetworkSettings;
   logger: Logger;
@@ -322,7 +329,7 @@ export function createFetchResource({
       // One timeout for the whole finite logical request, reused across every redirect hop.
       finiteController = new AbortController();
       timeoutHandle = setTimeout(() => {
-        finiteController?.abort(new Error(`Request timed out after ${timeout}ms`));
+        finiteController?.abort(new McpFetchTimeoutError(timeout));
       }, timeout);
       signal = callerSignal
         ? combineAbortSignals([callerSignal, finiteController.signal])
@@ -336,6 +343,12 @@ export function createFetchResource({
         requestClass,
         Object.keys(authHeaders)
       );
+    } catch (err) {
+      const timeoutError = finiteController?.signal.reason;
+      if (timeoutError instanceof McpFetchTimeoutError) {
+        throw timeoutError;
+      }
+      throw err;
     } finally {
       if (timeoutHandle !== undefined) {
         clearTimeout(timeoutHandle);
