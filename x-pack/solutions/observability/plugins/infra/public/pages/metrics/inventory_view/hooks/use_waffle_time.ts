@@ -13,8 +13,8 @@ import DateMath from '@kbn/datemath';
 import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
-import type { Moment } from 'moment';
 import type { InventoryView } from '../../../../../common/inventory_views';
+import { staticInventoryViewId } from '../../../../../common/inventory_views';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 import { useInventoryViewsContext } from './use_inventory_views';
 export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
@@ -22,11 +22,11 @@ export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
   isAutoReloading: false,
 };
 
-function mapInventoryViewToState(savedView: InventoryView, defaultTime?: Moment): WaffleTimeState {
+function mapInventoryViewToState(savedView: InventoryView, defaultTime?: number): WaffleTimeState {
   const { time, autoReload } = savedView.attributes;
 
   return {
-    currentTime: time ?? defaultTime?.toDate().getTime() ?? Date.now(),
+    currentTime: time ?? defaultTime ?? Date.now(),
     isAutoReloading: autoReload,
   };
 }
@@ -38,7 +38,7 @@ export const useWaffleTime = () => {
   const kibanaTime = DateMath.parse(getTime().to);
   const [urlState, setUrlState] = useUrlState<WaffleTimeState>({
     defaultState: currentView
-      ? mapInventoryViewToState(currentView, kibanaTime)
+      ? mapInventoryViewToState(currentView, kibanaTime?.valueOf())
       : {
           ...DEFAULT_WAFFLE_TIME_STATE,
           currentTime: kibanaTime ? kibanaTime.toDate().getTime() : Date.now(),
@@ -49,10 +49,10 @@ export const useWaffleTime = () => {
     writeDefaultState: true,
   });
 
-  const previousViewId = useRef<string | undefined>(currentView?.id);
+  const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
-      setUrlState(mapInventoryViewToState(currentView));
+      setUrlState((previous) => mapInventoryViewToState(currentView, previous.currentTime));
       previousViewId.current = currentView.id;
     }
   }, [currentView, setUrlState]);
