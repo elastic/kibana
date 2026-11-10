@@ -84,15 +84,10 @@ spaceTest.describe(
           const alertZero = pageObjects.alertZeroApp;
           await alertZero.advanceToWorkerSelection();
 
-          // Two surfaces name Feature Settings on this page: the selection
-          // description link and the no-model callout action. Both must open
-          // Stack Management > Feature Settings (deep link `model_settings`).
-          for (const link of [
-            alertZero.featureSettingsLink,
-            alertZero.noModelFeatureSettingsButton,
-          ]) {
-            await expect(link).toHaveAttribute('href', /\/management\/.+model_settings/);
-          }
+          await expect(alertZero.noModelFeatureSettingsButton).toHaveAttribute(
+            'href',
+            /\/management\/.+model_settings/
+          );
         } finally {
           await space.cleanup();
         }

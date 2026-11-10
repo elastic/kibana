@@ -117,7 +117,7 @@ spaceTest.describe(
           // queue before the user retries or leaves (use_enable_workers.ts).
           await expect(alertZero.selectedCount).toBeVisible({ timeout: 120_000 });
           await expect(alertZero.proposalsTrendChartRow).toBeHidden();
-          await expect(page.getByText('Some settings were saved before the error')).toBeVisible({
+          await expect(page.getByText('Some changes were saved before the error')).toBeVisible({
             timeout: 60_000,
           });
 
