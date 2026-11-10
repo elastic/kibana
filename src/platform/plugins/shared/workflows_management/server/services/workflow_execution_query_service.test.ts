@@ -496,7 +496,7 @@ describe('WorkflowExecutionQueryService', () => {
         workflowRunId: 'exec-1',
         status: 'completed',
         spaceId: 'default',
-      };
+      } as EsWorkflowStepExecution;
       mockStepDataClient.getByIds.mockResolvedValue(
         createMockGetExecutionsByIdsResponse([stepSource])
       );
@@ -516,7 +516,7 @@ describe('WorkflowExecutionQueryService', () => {
             id: 'step-1',
             workflowRunId: 'other-exec',
             spaceId: 'default',
-          },
+          } as EsWorkflowStepExecution,
         ])
       );
 
@@ -530,7 +530,7 @@ describe('WorkflowExecutionQueryService', () => {
             id: 'step-1',
             workflowRunId: 'exec-1',
             spaceId: 'other-space',
-          },
+          } as EsWorkflowStepExecution,
         ])
       );
 
