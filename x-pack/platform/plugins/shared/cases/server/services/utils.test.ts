@@ -19,7 +19,7 @@ describe('bulkDecodeSOAttributes', () => {
   });
 
   it('throws an error when SO is not valid', () => {
-    expect(() => bulkDecodeSOAttributes([{ id: '1', attributes: {} }], schemaToTest)).toThrowError(
+    expect(() => bulkDecodeSOAttributes([{ id: '1', attributes: {} }], schemaToTest)).toThrow(
       'foo: Invalid input: expected string, received undefined'
     );
   });

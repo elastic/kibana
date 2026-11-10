@@ -76,7 +76,7 @@ describe('ServiceAccountFakeRequests', () => {
       async (maxLifetimeMs) => {
         await expect(
           fakeRequests.create({ serviceAccountId: 'sa-id', maxLifetimeMs })
-        ).rejects.toThrowError('must be a positive number of milliseconds');
+        ).rejects.toThrow('must be a positive number of milliseconds');
         expect(mintToken).not.toHaveBeenCalled();
       }
     );
@@ -84,7 +84,7 @@ describe('ServiceAccountFakeRequests', () => {
     it('rejects an unbounded lifetime that no mint interceptor stands behind', async () => {
       await expect(
         fakeRequests.create({ serviceAccountId: 'sa-id', maxLifetimeMs: Number.POSITIVE_INFINITY })
-      ).rejects.toThrowError('must have a mint interceptor');
+      ).rejects.toThrow('must have a mint interceptor');
       expect(mintToken).not.toHaveBeenCalled();
     });
 
@@ -114,7 +114,7 @@ describe('ServiceAccountFakeRequests', () => {
 
     it('propagates mint failures', async () => {
       mintToken.mockRejectedValueOnce(new Error('exchange failed'));
-      await expect(fakeRequests.create({ serviceAccountId: 'sa-id' })).rejects.toThrowError(
+      await expect(fakeRequests.create({ serviceAccountId: 'sa-id' })).rejects.toThrow(
         'exchange failed'
       );
     });
@@ -180,7 +180,7 @@ describe('ServiceAccountFakeRequests', () => {
     it('throws for requests it did not mint', async () => {
       await expect(
         fakeRequests.ensureFreshToken(httpServerMock.createFakeKibanaRequest({}), 0)
-      ).rejects.toThrowError('The provided request is not bound to a service account.');
+      ).rejects.toThrow('The provided request is not bound to a service account.');
       expect(mintToken).not.toHaveBeenCalled();
     });
 
@@ -255,7 +255,7 @@ describe('ServiceAccountFakeRequests', () => {
       await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toBe(error);
 
       // Within the backoff window, no mint attempt is made.
-      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
+      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrow(
         'A recent attempt to mint a service account token failed; refusing to retry yet.'
       );
       expect(mintToken).toHaveBeenCalledTimes(1);
@@ -283,8 +283,8 @@ describe('ServiceAccountFakeRequests', () => {
 
       rejectMint(new Error('exchange failed'));
 
-      await expect(first).rejects.toThrowError('exchange failed');
-      await expect(second).rejects.toThrowError('exchange failed');
+      await expect(first).rejects.toThrow('exchange failed');
+      await expect(second).rejects.toThrow('exchange failed');
       expect(mintToken).toHaveBeenCalledTimes(1);
       // The stale token is left in place, but this request can no longer refresh.
       expect(request.headers.authorization).toBe('Bearer essu_token_1');
@@ -296,7 +296,7 @@ describe('ServiceAccountFakeRequests', () => {
 
       jest.advanceTimersByTime(REQUEST_LIFETIME_MS + 1);
 
-      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
+      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrow(
         'The lease on this service account bound request has expired; refusing to mint a replacement credential.'
       );
       expect(mintToken).not.toHaveBeenCalled();
@@ -319,7 +319,7 @@ describe('ServiceAccountFakeRequests', () => {
 
       jest.advanceTimersByTime(1_001);
 
-      await expect(fakeRequests.ensureFreshToken(request, 0)).rejects.toThrowError(
+      await expect(fakeRequests.ensureFreshToken(request, 0)).rejects.toThrow(
         'The lease on this service account bound request has expired; refusing to mint a replacement credential.'
       );
       expect(mintToken).not.toHaveBeenCalled();
@@ -440,7 +440,7 @@ describe('ServiceAccountFakeRequests', () => {
 
       await expect(
         fakeRequests.create({ serviceAccountId: 'sa-id', mintInterceptor })
-      ).rejects.toThrowError('binding no longer exists');
+      ).rejects.toThrow('binding no longer exists');
       expect(mintToken).not.toHaveBeenCalled();
     });
 
@@ -458,7 +458,7 @@ describe('ServiceAccountFakeRequests', () => {
       refuse = true;
 
       jest.advanceTimersByTime(MAX_AGE_MS);
-      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
+      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrow(
         'binding no longer exists'
       );
       expect(mintToken).not.toHaveBeenCalled();
@@ -467,7 +467,7 @@ describe('ServiceAccountFakeRequests', () => {
       // interceptor is not consulted again even once the workload would permit minting anew.
       refuse = false;
       jest.advanceTimersByTime(SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS);
-      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
+      await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrow(
         'binding no longer exists'
       );
       expect(mintInterceptor).toHaveBeenCalledTimes(2);
@@ -494,7 +494,7 @@ describe('ServiceAccountFakeRequests', () => {
         fail = true;
 
         jest.advanceTimersByTime(MAX_AGE_MS);
-        await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
+        await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrow(
           'cluster unavailable'
         );
         expect(mintToken).not.toHaveBeenCalled();
@@ -502,7 +502,7 @@ describe('ServiceAccountFakeRequests', () => {
         expect(request.headers.authorization).toBe('Bearer essu_token_1');
 
         // Within the backoff window the interceptor is not consulted again.
-        await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrowError(
+        await expect(fakeRequests.ensureFreshToken(request, MAX_AGE_MS)).rejects.toThrow(
           'refusing to retry yet'
         );
         expect(mintInterceptor).toHaveBeenCalledTimes(2);
@@ -992,7 +992,7 @@ describe('ServiceAccountFakeRequests', () => {
       fakeRequests.release(request);
 
       expect(fakeRequests.isServiceAccountRequest(request)).toBe(false);
-      await expect(fakeRequests.ensureFreshToken(request, 0)).rejects.toThrowError(
+      await expect(fakeRequests.ensureFreshToken(request, 0)).rejects.toThrow(
         'The provided request is not bound to a service account.'
       );
       expect(mintToken).not.toHaveBeenCalled();
@@ -1027,7 +1027,7 @@ describe('ServiceAccountFakeRequests', () => {
 
       // The execution bracket has closed, so the caller that was awaiting this mint is refused
       // rather than allowed to continue on a credential minted after the release.
-      await expect(inflight).rejects.toThrowError(
+      await expect(inflight).rejects.toThrow(
         'The request bound to this service account was released while its credential was being replaced.'
       );
       // The release stripped the credential, and the late mint must not put one back.
@@ -1049,7 +1049,7 @@ describe('ServiceAccountFakeRequests', () => {
       fakeRequests.release(request);
       rejectMint(new Error('exchange failed'));
 
-      await expect(inflight).rejects.toThrowError('exchange failed');
+      await expect(inflight).rejects.toThrow('exchange failed');
       // Nothing will ever ask this entry to refresh again, so there is no failure to report.
       expect(logger.warn).not.toHaveBeenCalled();
     });

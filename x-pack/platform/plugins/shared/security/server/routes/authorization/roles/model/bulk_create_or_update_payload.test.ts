@@ -64,13 +64,13 @@ describe('getBulkCreateOrUpdatePayloadSchema', () => {
       Array.from({ length: 1001 }, (_, i) => [`role${i}`, { kibana: [] }])
     );
 
-    expect(() => bulkCreateOrUpdatePayloadSchema.validate({ roles })).toThrowError(
+    expect(() => bulkCreateOrUpdatePayloadSchema.validate({ roles })).toThrow(
       '[roles]: cannot contain more than 1000 roles'
     );
   });
 
   it('should throw an error when no roles are provided', () => {
-    expect(() => bulkCreateOrUpdatePayloadSchema.validate({ roles: {} })).toThrowError(
+    expect(() => bulkCreateOrUpdatePayloadSchema.validate({ roles: {} })).toThrow(
       '[roles]: cannot be empty'
     );
   });
@@ -86,12 +86,12 @@ describe('getBulkCreateOrUpdatePayloadSchema', () => {
   it('should throw an error when a role name is too long', () => {
     expect(() =>
       bulkCreateOrUpdatePayloadSchema.validate({ roles: { ['a'.repeat(1025)]: { kibana: [] } } })
-    ).toThrowError(/key\("a+"\)/);
+    ).toThrow(/key\("a+"\)/);
   });
 
   it('should throw an error for an empty role name', () => {
     expect(() =>
       bulkCreateOrUpdatePayloadSchema.validate({ roles: { '': { kibana: [] } } })
-    ).toThrowError(/key\(""\)/);
+    ).toThrow(/key\(""\)/);
   });
 });

@@ -90,14 +90,14 @@ expect(valueSchema.validate({ isEnabled: true }, { envName: 'staging' })).toEqua
 // Fail because of type mismatch
 expect(() =>
   valueSchema.validate({ isEnabled: 'non-bool' }, { envName: 'staging' })
-).toThrowError(
+).toThrow(
   '[isEnabled]: expected value of type [boolean] but got [string]'
 );
 
 // Fail because of type mismatch and prefix error with a custom namespace
 expect(() =>
   valueSchema.validate({ isEnabled: 'non-bool' }, { envName: 'staging' }, 'configuration')
-).toThrowError(
+).toThrow(
   '[configuration.isEnabled]: expected value of type [boolean] but got [string]'
 );
 ```

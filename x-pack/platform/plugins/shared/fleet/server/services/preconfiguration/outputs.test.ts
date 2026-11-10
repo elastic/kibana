@@ -757,7 +757,7 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
       expect(mockedOutputService.create.mock.calls[0][2]).toMatchObject({
         hosts: ['http://default-es:9200'],
       });
@@ -878,8 +878,8 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
     });
 
     it('should skip the OTLP output but create the non-OTLP output when the version requirement is not met', async () => {
@@ -1913,9 +1913,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     const SCENARIOS: Array<{ name: string; data: PreconfiguredOutput }> = [
