@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { isConditionComplete } from '@kbn/streamlang';
 import { identifyMetricsEntities } from './identify_metrics_entities';
 import {
   buildKubernetesEntityId,
+  ENTITY_KEY_TABLE,
+  foldNodeRows,
+  foldWorkloadRows,
   getDataStreamFamily,
   KUBERNETES_ENTITY_STORE_TYPES,
 } from './entity_key_table';
@@ -108,6 +112,127 @@ describe('buildKubernetesEntityId', () => {
       `${KUBERNETES_ENTITY_STORE_TYPES.daemonset}:payments/metricbeat`,
       `${KUBERNETES_ENTITY_STORE_TYPES.node}:node-a`,
     ]);
+  });
+});
+
+describe('Kubernetes entity derivation', () => {
+  it('builds derived owners, guards prefixes, and emits complete filters', () => {
+    const lastSeen = '2026-11-10T12:00:00.000Z';
+    const { features } = foldWorkloadRows([
+      {
+        'orchestrator.cluster.name': 'cluster-a',
+        'kubernetes.namespace': 'apps',
+        kind: 'deployment',
+        workload: 'api',
+        owner_derived: true,
+        replicas: 2,
+        last_seen: lastSeen,
+      },
+      {
+        'orchestrator.cluster.name': 'cluster-a',
+        'kubernetes.namespace': 'apps',
+        kind: 'deployment',
+        workload: 'kb',
+        owner_derived: true,
+        replicas: 1,
+        last_seen: lastSeen,
+      },
+      {
+        'orchestrator.cluster.name': 'cluster-a',
+        'kubernetes.namespace': 'apps',
+        kind: 'deployment',
+        workload: 'kb-ui',
+        owner_derived: true,
+        replicas: 1,
+        last_seen: lastSeen,
+      },
+      {
+        'orchestrator.cluster.name': 'cluster-a',
+        'kubernetes.namespace': 'ops',
+        kind: 'cronjob',
+        workload: 'nightly-backup',
+        owner_derived: true,
+        replicas: 1,
+        last_seen: lastSeen,
+      },
+      {
+        'orchestrator.cluster.name': 'cluster-a',
+        'kubernetes.namespace': 'ops',
+        kind: 'job',
+        workload: 'migrate-2',
+        owner_derived: false,
+        replicas: 1,
+        last_seen: lastSeen,
+      },
+    ]);
+    const byId = new Map(features.map((feature) => [feature.id, feature]));
+
+    expect(byId.get('k8s.deployment:apps/api')?.filter).toEqual({
+      and: [
+        { field: 'kubernetes.namespace', eq: 'apps' },
+        {
+          or: [
+            { field: 'kubernetes.deployment.name', eq: 'api' },
+            {
+              and: [
+                { not: { field: 'kubernetes.deployment.name', exists: true } },
+                { field: 'kubernetes.replicaset.name', startsWith: 'api-' },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    expect(byId.get('k8s.deployment:apps/kb')?.filter).toEqual({
+      and: [
+        { field: 'kubernetes.namespace', eq: 'apps' },
+        { field: 'kubernetes.deployment.name', eq: 'kb' },
+      ],
+    });
+    expect(byId.get('k8s.cronjob:ops/nightly-backup')?.filter).toEqual({
+      and: [
+        { field: 'kubernetes.namespace', eq: 'ops' },
+        {
+          or: [
+            { field: 'kubernetes.cronjob.name', eq: 'nightly-backup' },
+            {
+              and: [
+                { not: { field: 'kubernetes.cronjob.name', exists: true } },
+                { field: 'kubernetes.job.name', startsWith: 'nightly-backup-' },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    expect(byId.get('k8s.job:ops/migrate-2')?.filter).toEqual({
+      and: [
+        { field: 'kubernetes.namespace', eq: 'ops' },
+        { field: 'kubernetes.job.name', eq: 'migrate-2' },
+      ],
+    });
+
+    const workloadQuery =
+      ENTITY_KEY_TABLE.find(({ id }) => id === 'ecs.k8s_workload')?.buildQuery('TS metrics') ?? '';
+    expect(workloadQuery).toContain('`kubernetes.labels.pod-template-hash`');
+    expect(workloadQuery).toContain('SUBSTRING(rs, 1, LENGTH(rs) - LENGTH(h) - 1)');
+    expect(workloadQuery).toContain('kubernetes.job.name RLIKE ".*-[0-9]{8,}"');
+    expect(workloadQuery).toContain('REPLACE(kubernetes.job.name, "-[0-9]{8,}$", "")');
+    expect(workloadQuery).toContain(
+      'BY orchestrator.cluster.name, kubernetes.namespace, kind, workload, owner_derived'
+    );
+
+    const nodeFeatures = foldNodeRows([
+      {
+        'orchestrator.cluster.name': 'cluster-a',
+        'kubernetes.node.name': 'node-a',
+        replicas: 1,
+        last_seen: lastSeen,
+      },
+    ]).features;
+    expect([...features, ...nodeFeatures].every(({ filter }) => isConditionComplete(filter))).toBe(
+      true
+    );
   });
 });
 

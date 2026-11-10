@@ -6,6 +6,7 @@
  */
 
 import type { FeatureUpsert } from '@kbn/significant-events-schema';
+import type { Condition } from '@kbn/streamlang';
 
 export type EsqlCell = string | number | boolean | null;
 export type EsqlRow = Readonly<Record<string, EsqlCell>>;
@@ -75,6 +76,7 @@ interface WorkloadGroup {
   kind: WorkloadKind;
   namespace: string;
   name: string;
+  ownerDerived: boolean;
   clusters: Record<string, ClusterMetrics>;
 }
 
@@ -87,6 +89,52 @@ const replicasOf = (row: EsqlRow): number => (typeof row.replicas === 'number' ?
 const lastSeenOf = (row: EsqlRow): string =>
   typeof row.last_seen === 'string' ? row.last_seen : '';
 const latest = (left: string, right: string): string => (left > right ? left : right);
+
+const derivedOwnerSources: Partial<
+  Record<WorkloadKind, { stampedField: string; sourceField: string }>
+> = {
+  deployment: {
+    stampedField: 'kubernetes.deployment.name',
+    sourceField: 'kubernetes.replicaset.name',
+  },
+  cronjob: {
+    stampedField: 'kubernetes.cronjob.name',
+    sourceField: 'kubernetes.job.name',
+  },
+};
+
+export const buildWorkloadFilter = (
+  target: Pick<WorkloadGroup, 'kind' | 'namespace' | 'name' | 'ownerDerived'>,
+  workloads: ReadonlyArray<Pick<WorkloadGroup, 'kind' | 'namespace' | 'name'>>
+): Condition => {
+  const ownerField = workloadOwnerFields[target.kind];
+  const stampedOwner: Condition = { field: ownerField, eq: target.name };
+  const derivedOwner = derivedOwnerSources[target.kind];
+  const hasPrefixCollision = workloads.some(
+    (workload) =>
+      workload.kind === target.kind &&
+      workload.namespace === target.namespace &&
+      workload.name !== target.name &&
+      workload.name.startsWith(`${target.name}-`)
+  );
+  const owner =
+    target.ownerDerived && derivedOwner && !hasPrefixCollision
+      ? {
+          or: [
+            stampedOwner,
+            {
+              and: [
+                { not: { field: derivedOwner.stampedField, exists: true } },
+                { field: derivedOwner.sourceField, startsWith: `${target.name}-` },
+              ],
+            },
+          ],
+        }
+      : stampedOwner;
+  return {
+    and: [{ field: 'kubernetes.namespace', eq: target.namespace }, owner],
+  };
+};
 
 const addClusterMetrics = (
   clusters: Record<string, ClusterMetrics>,
@@ -117,18 +165,31 @@ const entityTotals = (
 
 const buildWorkloadQuery = (tsPrefix: string): string => `${tsPrefix}
 | WHERE TRANGE(1 hour) AND data_stream.dataset == "kubernetes.pod"
-| EVAL kind = CASE(kubernetes.deployment.name IS NOT NULL, "deployment",
+| EVAL h = \`kubernetes.labels.pod-template-hash\`,
+       rs = kubernetes.replicaset.name,
+       derived_deployment = CASE(
+         kubernetes.deployment.name IS NULL AND h IS NOT NULL AND rs IS NOT NULL
+           AND ENDS_WITH(rs, CONCAT("-", h)),
+         SUBSTRING(rs, 1, LENGTH(rs) - LENGTH(h) - 1)),
+       derived_cronjob = CASE(
+         kubernetes.cronjob.name IS NULL
+           AND kubernetes.job.name RLIKE ".*-[0-9]{8,}",
+         REPLACE(kubernetes.job.name, "-[0-9]{8,}$", ""))
+| EVAL kind = CASE(COALESCE(kubernetes.deployment.name, derived_deployment) IS NOT NULL,
+                   "deployment",
                    kubernetes.statefulset.name IS NOT NULL, "statefulset",
                    kubernetes.daemonset.name   IS NOT NULL, "daemonset",
-                   kubernetes.cronjob.name     IS NOT NULL, "cronjob",
+                   COALESCE(kubernetes.cronjob.name, derived_cronjob) IS NOT NULL, "cronjob",
                    kubernetes.job.name         IS NOT NULL, "job",
                    kubernetes.replicaset.name  IS NOT NULL, "replicaset", NULL),
-       workload = COALESCE(kubernetes.deployment.name, kubernetes.statefulset.name,
-                           kubernetes.daemonset.name, kubernetes.cronjob.name,
-                           kubernetes.job.name, kubernetes.replicaset.name)
+       workload = COALESCE(kubernetes.deployment.name, derived_deployment,
+                           kubernetes.statefulset.name, kubernetes.daemonset.name,
+                           kubernetes.cronjob.name, derived_cronjob, kubernetes.job.name,
+                           kubernetes.replicaset.name),
+       owner_derived = derived_deployment IS NOT NULL OR derived_cronjob IS NOT NULL
 | WHERE workload IS NOT NULL
 | STATS replicas = COUNT_DISTINCT(kubernetes.pod.uid), last_seen = MAX(@timestamp)
-  BY orchestrator.cluster.name, kubernetes.namespace, kind, workload`;
+  BY orchestrator.cluster.name, kubernetes.namespace, kind, workload, owner_derived`;
 
 export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
   const groups = new Map<string, WorkloadGroup>();
@@ -152,12 +213,14 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
     const id = buildKubernetesEntityId({ kind, namespace, name });
     let group = groups.get(id);
     if (!group) {
-      group = { kind, namespace, name, clusters: {} };
+      group = { kind, namespace, name, ownerDerived: false, clusters: {} };
       groups.set(id, group);
     }
+    group.ownerDerived = group.ownerDerived || row.owner_derived === true;
     addClusterMetrics(group.clusters, cluster, row);
   }
 
+  const workloads = [...groups.values()];
   const features = [...groups.entries()].map(([id, group]): FeatureUpsert => {
     const ownerField = workloadOwnerFields[group.kind];
     const { replicas, lastSeen } = entityTotals(group.clusters);
@@ -168,12 +231,7 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
       id,
       title: group.name,
       description: `Kubernetes ${group.kind} ${group.name} in namespace ${group.namespace}.`,
-      filter: {
-        and: [
-          { field: 'kubernetes.namespace', eq: group.namespace },
-          { field: ownerField, eq: group.name },
-        ],
-      },
+      filter: buildWorkloadFilter(group, workloads),
       properties: {
         identity: {
           'kubernetes.namespace': group.namespace,
