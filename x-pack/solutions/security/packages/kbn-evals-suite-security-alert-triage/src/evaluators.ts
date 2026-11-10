@@ -6,7 +6,7 @@
  */
 
 import { getToolCallSteps, type TaskOutput } from '@kbn/evals';
-import { attachmentTools, internalTools } from '@kbn/agent-builder-common';
+import { attachmentTools, internalTools, ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
@@ -69,3 +69,74 @@ export const createToolUsageEvaluators = (log: ToolingLog) => [
     },
   },
 ];
+
+interface RawToolStep {
+  type?: string;
+  tool_id?: string;
+  params?: Record<string, unknown>;
+  results?: Array<{ type?: string; data?: unknown }>;
+}
+
+const getRawToolSteps = (output: unknown): RawToolStep[] =>
+  ((output as { steps?: RawToolStep[] })?.steps ?? []).filter((step) => step?.type === 'tool_call');
+
+/**
+ * CODE evaluator: 1 when the agent loaded the given skill with load_skill. The agent loads skills
+ * with this tool, so it replaces the trace check that looks for a filestore.read of SKILL.md.
+ */
+export const createSkillLoadedEvaluator = (skillName: string) => ({
+  name: `Skill loaded (${skillName})`,
+  kind: 'CODE' as const,
+  direction: 'maximize' as const,
+  evaluate: async ({ output }: { output: unknown }) => {
+    const loaded = getRawToolSteps(output).some(
+      ({ tool_id: toolId, params }) =>
+        toolId === internalTools.loadSkill &&
+        typeof params?.skill === 'string' &&
+        params.skill.includes(skillName)
+    );
+    return { score: loaded ? 1 : 0 };
+  },
+});
+
+/**
+ * CODE evaluator: the most ES|QL rows any single security.alerts call returned to the model, and
+ * how many results told the model that the rows were cut. Shows whether the row cap ran.
+ */
+export const createAlertRowsEvaluator = (log: ToolingLog) => ({
+  name: 'security.alerts rows (max per call)',
+  kind: 'CODE' as const,
+  direction: 'minimize' as const,
+  evaluate: async ({ output }: { output: unknown }) => {
+    const alertCalls = getRawToolSteps(output).filter(
+      ({ tool_id: toolId }) => toolId === SECURITY_ALERTS_TOOL_ID
+    );
+    const rowCounts = alertCalls.map(({ results = [] }) =>
+      results
+        .filter(({ type }) => type === ToolResultType.esqlResults)
+        .reduce(
+          (total, { data }) => total + ((data as { values?: unknown[] })?.values?.length ?? 0),
+          0
+        )
+    );
+    const truncationNotes = alertCalls.reduce(
+      (total, { results = [] }) =>
+        total +
+        results.filter(
+          ({ type, data }) =>
+            type === ToolResultType.other &&
+            String((data as { message?: string })?.message ?? '').startsWith('Showing the first')
+        ).length,
+      0
+    );
+    log.info(
+      `security.alerts calls: ${alertCalls.length}, rows per call: [${rowCounts.join(
+        ', '
+      )}], truncation notes: ${truncationNotes}`
+    );
+    return {
+      score: rowCounts.length ? Math.max(...rowCounts) : 0,
+      metadata: { rowCounts, truncationNotes },
+    };
+  },
+});

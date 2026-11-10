@@ -12,16 +12,15 @@
  * A single alert does NOT trigger summary mode (threshold >5 batches), so
  * expectedAttachmentReads is 0 and the attachment_read tool is not expected.
  *
- * The createSkillInvocationEvaluator trace check confirms that the
- * alert-analysis skill's SKILL.md was read during the session, ensuring the
- * trimmed prompt correctly delegates to the registered skill.
+ * The createSkillLoadedEvaluator check confirms that the alert-analysis skill
+ * was loaded with load_skill during the session, ensuring the trimmed prompt
+ * correctly delegates to the registered skill.
  */
 
 import { tags } from '@kbn/scout';
 import type { EsClient } from '@kbn/scout';
 import {
   selectEvaluators,
-  createSkillInvocationEvaluator,
   type DefaultEvaluators,
   type EvaluationDataset,
   type EvalsExecutorClient,
@@ -31,7 +30,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import { evaluate as base } from '../src/evaluate';
 import { callConverse } from '../src/converse_task';
-import { attachmentReadCompliance, createToolUsageEvaluators } from '../src/evaluators';
+import {
+  attachmentReadCompliance,
+  createSkillLoadedEvaluator,
+  createToolUsageEvaluators,
+} from '../src/evaluators';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -72,14 +75,12 @@ function createEvaluateSingleAlertTriage({
   connector,
   evaluators,
   executorClient,
-  traceEsClient,
   log,
 }: {
   fetch: HttpHandler;
   connector: { id: string };
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
-  traceEsClient: EsClient;
   log: ToolingLog;
 }) {
   return async function evaluateSingleAlertTriage({
@@ -93,7 +94,7 @@ function createEvaluateSingleAlertTriage({
       evaluators.criteria(criteria),
       attachmentReadCompliance,
       ...createToolUsageEvaluators(log),
-      createSkillInvocationEvaluator({ traceEsClient, log, skillName: 'alert-analysis' }),
+      createSkillLoadedEvaluator('alert-analysis'),
       ...Object.values(evaluators.traceBasedEvaluators),
     ]);
 
@@ -128,14 +129,13 @@ type EvaluateSingleAlertTriage = ReturnType<typeof createEvaluateSingleAlertTria
 
 const evaluate = base.extend<{ evaluateSingleAlertTriage: EvaluateSingleAlertTriage }, {}>({
   evaluateSingleAlertTriage: [
-    ({ fetch, connector, evaluators, executorClient, traceEsClient, log }, use) => {
+    ({ fetch, connector, evaluators, executorClient, log }, use) => {
       use(
         createEvaluateSingleAlertTriage({
           fetch,
           connector,
           evaluators,
           executorClient,
-          traceEsClient,
           log,
         })
       );
