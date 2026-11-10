@@ -506,6 +506,30 @@ describe('treesAfterRun', () => {
       })),
     } as unknown as SubmitArguments);
 
+  it('fails rather than skip a tree whose provenance it could not read', async () => {
+    const { esClient } = fakeEsClient([], {});
+    jest
+      .mocked(esClient.get)
+      .mockRejectedValueOnce(Object.assign(new Error('unavailable'), { statusCode: 503 }));
+
+    await expect(
+      treesAfterRun(esClient, [naming('symptom:gateway'), naming('symptom:proxy')], RUN)
+    ).rejects.toThrow('unavailable');
+  });
+
+  it('skips a tree named only by a rejected submit when its head is missing', async () => {
+    const { esClient } = fakeEsClient([], {});
+    jest
+      .mocked(esClient.get)
+      .mockRejectedValueOnce(Object.assign(new Error('not found'), { statusCode: 404 }));
+
+    await expect(
+      treesAfterRun(esClient, [naming('symptom:gateway'), naming('symptom:proxy')], RUN)
+    ).resolves.toEqual([
+      { tree_id: 'symptom:proxy', prior_mermaid: undefined, submitted_mermaid: undefined },
+    ]);
+  });
+
   it('grades against the version before the run, skipping every commit the run made', async () => {
     const { esClient } = fakeEsClient([], {
       'default:dtree_gateway': treeDoc('v3', 3, RUN),

@@ -629,6 +629,7 @@ const writtenByRun = (head: StoredTree | undefined, conversationId: string): boo
   head?.attributes?.conversation_id === conversationId ||
   head?.attributes?.counts_conversation_id === conversationId;
 
+/** Undefined only when the document is missing; any other failure throws, so no tree is skipped on a transient error. */
 const readTreeDoc = async (esClient: Client, id: string): Promise<StoredTree | undefined> => {
   try {
     const response = await esClient.get<StoredTree>({
@@ -636,8 +637,9 @@ const readTreeDoc = async (esClient: Client, id: string): Promise<StoredTree | u
       id,
     });
     return response._source ?? undefined;
-  } catch {
-    return undefined;
+  } catch (error) {
+    if ((error as { statusCode?: number }).statusCode === 404) return undefined;
+    throw error;
   }
 };
 
