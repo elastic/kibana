@@ -258,6 +258,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
     'data-test-subj': 'componentTemplatesTable',
     sorting,
     panelled: true,
+    hasBackground: true,
     selection: privs.manageIndexTemplates ? selectionConfig : undefined,
     rowProps: () => ({
       'data-test-subj': 'componentTemplateTableRow',

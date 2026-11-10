@@ -482,6 +482,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         pagination={pagination}
         loading={isLoading}
         data-test-subj="dataStreamTable"
+        hasBackground
         tableCaption={i18n.translate('xpack.idxMgmt.dataStreamList.table.caption', {
           defaultMessage: 'Data streams',
         })}

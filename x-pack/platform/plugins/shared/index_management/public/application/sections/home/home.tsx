@@ -50,11 +50,12 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
 
   // POC: card outline on list tables across Index Management tabs
   // Plain tables: .euiTable__wrapper. Panelled: wrapper + sibling pagination bar share one card.
+  // POC: Indices tab is excluded to keep the default transparent table for comparison.
   const tableCardBorder = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
   const tableCardRadius = euiTheme.border.radius.control;
 
   const indexMgmtTableCardCss = css`
-    .euiTable__wrapper {
+    .euiTable__wrapper:not(:has(> [data-test-subj='indexTable'])) {
       border: ${tableCardBorder};
       border-radius: ${tableCardRadius};
     }

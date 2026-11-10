@@ -313,6 +313,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
           'data-test-subj': 'cell',
         })}
         data-test-subj="templateTable"
+        hasBackground
         tableCaption={i18n.translate(
           'xpack.idxMgmt.templateList.table.indexTemplatesTableCaption',
           {

@@ -179,6 +179,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
   return (
     <EuiInMemoryTable
       data-test-subj="enrichPoliciesTable"
+      hasBackground
       items={policies}
       itemId="name"
       columns={columns}

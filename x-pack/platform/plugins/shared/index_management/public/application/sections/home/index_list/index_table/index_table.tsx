@@ -897,7 +897,6 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
                   scrollableInline
                   responsiveBreakpoint={false}
                   tableLayout="auto"
-                  hasBackground
                 >
                   <EuiScreenReaderOnly>
                     <caption role="status" aria-relevant="text" aria-live="polite">
