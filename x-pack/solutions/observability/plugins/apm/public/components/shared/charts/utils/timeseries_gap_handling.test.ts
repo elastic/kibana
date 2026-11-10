@@ -195,15 +195,38 @@ describe('trimPartialTrailingBucket', () => {
     ]);
   });
 
-  it('keeps the final bucket when the range is bucket-aligned', () => {
-    // bucket size is 10, last bucket covers [30, 40) and end = 40 aligns to its
-    // boundary, so the bucket is complete and the real data point is kept.
+  it('keeps the final bucket when end lands exactly on its boundary', () => {
+    // bucket size is 10, last bucket covers [30, 40). end === last.x + bucketSize
+    // (40) is the boundary, so the bucket is complete and its point is kept.
     const data = [
       { x: 10, y: 5 },
       { x: 20, y: 8 },
       { x: 30, y: 2 },
     ];
     expect(trimPartialTrailingBucket(data, 40)).toBe(data);
+  });
+
+  it('drops the final bucket when end is one millisecond short of its boundary', () => {
+    // One millisecond before the boundary (39) leaves the last bucket partial, so
+    // it is trimmed. This pins the comparison as strictly greater-than.
+    const data = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: 2 },
+    ];
+    expect(trimPartialTrailingBucket(data, 39)).toEqual([
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+    ]);
+  });
+
+  it('returns the same reference when end is Infinity', () => {
+    const data = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: 2 },
+    ];
+    expect(trimPartialTrailingBucket(data, Infinity)).toBe(data);
   });
 
   it('keeps a trailing bucket that has no value (carries the dotted-edge signal)', () => {
@@ -223,6 +246,59 @@ describe('trimPartialTrailingBucket', () => {
     ];
     trimPartialTrailingBucket(data, 35);
     expect(data).toHaveLength(3);
+  });
+});
+
+describe('trimPartialTrailingBucket + splitSeriesAtNullGaps', () => {
+  it('splits an interior gap after the partial last bucket has been trimmed', () => {
+    // bucket size is 10, last bucket [40, 50) extends past end = 45 so {x:40} is
+    // trimmed first; the remaining series still has an interior null gap.
+    const data = [
+      { x: 10, y: 5 },
+      { x: 20, y: null },
+      { x: 30, y: 8 },
+      { x: 40, y: 2 },
+    ];
+    const { mainSegments, leadingEdge, trailingEdge, interiorEdges } = splitSeriesAtNullGaps(
+      trimPartialTrailingBucket(data, 45)
+    );
+
+    expect(mainSegments).toEqual([[{ x: 10, y: 5 }], [{ x: 30, y: 8 }]]);
+    expect(interiorEdges).toEqual([
+      [
+        { x: 10, y: 5 },
+        { x: 30, y: 8 },
+      ],
+    ]);
+    expect(leadingEdge).toBeNull();
+    expect(trailingEdge).toBeNull();
+  });
+
+  it('leaves a leading edge intact when trimming only removes the last bucket', () => {
+    // bucket size is 10, last bucket [40, 50) extends past end = 45 so {x:40} is
+    // trimmed; the leading null still produces a leading edge from the range start.
+    const data = [
+      { x: 10, y: null },
+      { x: 20, y: 5 },
+      { x: 30, y: 8 },
+      { x: 40, y: 2 },
+    ];
+    const { mainSegments, leadingEdge, trailingEdge, interiorEdges } = splitSeriesAtNullGaps(
+      trimPartialTrailingBucket(data, 45)
+    );
+
+    expect(mainSegments).toEqual([
+      [
+        { x: 20, y: 5 },
+        { x: 30, y: 8 },
+      ],
+    ]);
+    expect(leadingEdge).toEqual([
+      { x: 10, y: 5 },
+      { x: 20, y: 5 },
+    ]);
+    expect(trailingEdge).toBeNull();
+    expect(interiorEdges).toEqual([]);
   });
 });
 
