@@ -77,15 +77,9 @@ const INVESTIGATE_LABEL = i18n.translate('xpack.nightshift.onboarding.investigat
 
 export function OnboardingFirstInvestigationStep({
   execution,
-  previewOnly = false,
   onInvestigationStarted,
 }: {
   execution: OnboardingSuggestionsExecution;
-  /**
-   * Design URL preview: show chrome without starting investigations or retrying the
-   * suggestions workflow (used for fabricated `?suggestions=` / `?analyzing=` states).
-   */
-  previewOnly?: boolean;
   onInvestigationStarted: (investigationId: string) => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -97,7 +91,6 @@ export function OnboardingFirstInvestigationStep({
   });
   const retry = useStartOnboardingSuggestions();
   const isRunning = execution.status === 'running';
-  const actionsDisabled = previewOnly || isStarting;
 
   // A failed run and a run with nothing to suggest look the same: an empty state with a retry.
   const suggestions = useMemo(
@@ -108,11 +101,11 @@ export function OnboardingFirstInvestigationStep({
 
   const start = useCallback(
     (prompt: string, title?: string) => {
-      if (previewOnly || isStarting) return;
+      if (isStarting) return;
       setStartingPrompt(prompt);
       startInvestigation(prompt, title);
     },
-    [isStarting, previewOnly, startInvestigation]
+    [isStarting, startInvestigation]
   );
 
   if (isRunning) {
@@ -149,7 +142,7 @@ export function OnboardingFirstInvestigationStep({
       {hasSuggestions ? (
         <SuggestionList
           suggestions={suggestions}
-          isStarting={actionsDisabled}
+          isStarting={isStarting}
           startingPrompt={startingPrompt}
           onInvestigate={(suggestion) => start(suggestion.prompt, suggestion.title)}
         />
@@ -200,10 +193,7 @@ export function OnboardingFirstInvestigationStep({
                 size="s"
                 iconType="refresh"
                 isLoading={retry.isLoading}
-                isDisabled={previewOnly}
-                onClick={() => {
-                  if (!previewOnly) retry.mutate();
-                }}
+                onClick={() => retry.mutate()}
                 data-test-subj="nightshiftOnboardingRetryButton"
               >
                 {i18n.translate('xpack.nightshift.onboarding.investigate.retryButton', {
@@ -220,7 +210,7 @@ export function OnboardingFirstInvestigationStep({
         })}
         value={message}
         onChange={setMessage}
-        isStarting={actionsDisabled}
+        isStarting={isStarting}
         isLoading={isStarting && startingPrompt === message.trim()}
         onSubmit={() => {
           const prompt = message.trim();

@@ -18,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import type { OnboardingSuggestionsExecution } from '@kbn/nightshift-investigations-plugin/common';
 import { NightshiftHeader } from '../header';
 import { useFlyoutShareUrlCustomAction } from '../../../components/ui/flyout_share_url_button';
 import {
@@ -100,12 +99,6 @@ const AUTOMATE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.autom
   defaultMessage: 'Try first investigation',
 });
 
-/** Stub execution so analyze/suggestions URL forces work before a real workflow run exists. */
-const DESIGN_PREVIEW_EXECUTION: OnboardingSuggestionsExecution = {
-  execution_id: 'design-preview',
-  status: 'running',
-};
-
 /**
  * First-run Nightshift: enable the space, add telemetry data, connect other sources, try a first
  * investigation, create a first automation. The steps follow from the latest onboarding workflow
@@ -135,34 +128,8 @@ export function NightshiftOnboarding({
   const [stepOverride, setStepOverride] = useState<StepOverride>();
   const automations = useFetchAutomations({ enabled: automationsHref != null });
   const hasAutomation = (automations.data?.automations.length ?? 0) > 0;
-  // Design/dev URL forces (keep while iterating onboarding UI):
-  //   ?analyzing=1 — gathering banner
-  //   ?suggestions=1 — live suggestion list when the space has any (else empty)
-  //   ?suggestions=empty — empty suggestions state
-  //   ?investigating=1 — trial card in progress
-  //   (no force) — investigation ready / automate when a trial exists
-  const searchParams = new URLSearchParams(search);
-  const forceAnalyzing = searchParams.get('analyzing') === '1';
-  const suggestionsParam = searchParams.get('suggestions');
-  const forceSuggestionsFilled = suggestionsParam === '1';
-  const forceSuggestionsEmpty = suggestionsParam === 'empty';
-  const forceSuggestions = forceSuggestionsFilled || forceSuggestionsEmpty;
-  const forceInvestigating = searchParams.get('investigating') === '1';
 
   const execution = data?.execution;
-  const liveSuggestions = execution?.suggestions;
-  // Forced empty / analyzing must not start real investigations or retries.
-  const isDesignPreviewReadOnly = forceAnalyzing || forceSuggestionsEmpty;
-  const designExecution: OnboardingSuggestionsExecution | undefined = forceAnalyzing
-    ? { ...(execution ?? DESIGN_PREVIEW_EXECUTION), status: 'running', suggestions: undefined }
-    : forceSuggestions
-    ? {
-        ...(execution ?? DESIGN_PREVIEW_EXECUTION),
-        status: 'succeeded',
-        // No hardcoded fallbacks — same stance as #304159 (empty when nothing real).
-        suggestions: forceSuggestionsEmpty ? [] : liveSuggestions ?? [],
-      }
-    : execution;
   // Step 1 is done once the space is bound to its service accounts and the agent is installed:
   // one click does both, and removing the binding brings the step back.
   const isEnabled = data?.agent_installed === true && isNightshiftSetUp(serviceAccount.data);
@@ -186,23 +153,15 @@ export function NightshiftOnboarding({
   }
 
   // Before an exploration run exists, Proceed on Add data moves to Connect other sources locally.
-  const step: OnboardingStepId =
-    forceAnalyzing || forceSuggestions
-      ? 'investigate'
-      : !isEnabled
-      ? 'enable'
-      : stepOverride === 'addData' || stepOverride === 'connectSources'
-      ? stepOverride
-      : !isConnected
-      ? 'addData'
-      : latestInvestigation && stepOverride !== 'investigate'
-      ? 'automate'
-      : 'investigate';
-
-  const trialInvestigation =
-    forceInvestigating && latestInvestigation
-      ? { ...latestInvestigation, in_progress: true }
-      : latestInvestigation;
+  const step: OnboardingStepId = !isEnabled
+    ? 'enable'
+    : stepOverride === 'addData' || stepOverride === 'connectSources'
+    ? stepOverride
+    : !isConnected
+    ? 'addData'
+    : latestInvestigation && stepOverride !== 'investigate'
+    ? 'automate'
+    : 'investigate';
 
   const selectedInvestigationId = useMemo(
     () => getNightshiftInvestigationIdFromSearch(search),
@@ -292,7 +251,7 @@ export function NightshiftOnboarding({
       status: statusOf('investigate'),
       onClick: linkTo('investigate'),
       hint:
-        step === 'investigate' && designExecution?.status === 'running'
+        step === 'investigate' && execution?.status === 'running'
           ? i18n.translate('xpack.nightshift.onboarding.steps.analyzingHint', {
               defaultMessage: 'Analyzing your data…',
             })
@@ -426,18 +385,17 @@ export function NightshiftOnboarding({
             <NightshiftSetupPrompt status={serviceAccount.data} />
           ) : step === 'connectSources' ? (
             <OnboardingConnectSourcesStep />
-          ) : step === 'addData' || !designExecution ? (
+          ) : step === 'addData' || !execution ? (
             <OnboardingAddDataStep />
-          ) : step === 'investigate' || !trialInvestigation ? (
+          ) : step === 'investigate' || !latestInvestigation ? (
             <OnboardingFirstInvestigationStep
-              execution={designExecution}
-              previewOnly={isDesignPreviewReadOnly}
+              execution={execution}
               onInvestigationStarted={() => setStepOverride(undefined)}
             />
           ) : (
             <OnboardingAutomationStep
-              investigation={trialInvestigation}
-              isInvestigationSelected={selectedInvestigationId === trialInvestigation.id}
+              investigation={latestInvestigation}
+              isInvestigationSelected={selectedInvestigationId === latestInvestigation.id}
               automations={automations.data?.automations ?? []}
               automationsAvailable={automationsHref != null}
               onInvestigationClick={openInvestigation}
