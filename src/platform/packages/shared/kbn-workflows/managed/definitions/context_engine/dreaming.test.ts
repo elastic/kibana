@@ -346,12 +346,12 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     });
   });
 
-  it('batches only memories with the same permissions, 50 at a time', () => {
+  it('batches only memories with the same permissions, 20 at a time', () => {
     const batches = findStep(findStep(render().steps, 'dream').steps ?? [], 'batches');
     const audience = (name: string) => ({
       kibana: { privileges: [{ space: 'default', name: [name], count: 1 }] },
     });
-    const open = Array.from({ length: 60 }, (_, index) => ({ id: `open-${index}` }));
+    const open = Array.from({ length: 30 }, (_, index) => ({ id: `open-${index}` }));
     const memories = [
       ...open,
       { id: 'a-1', permissions: audience('ai_index:a/read') },
@@ -365,8 +365,8 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
     );
 
     expect(rendered.map((batch) => batch.map(({ id }) => id))).toEqual([
-      open.slice(0, 50).map(({ id }) => id),
-      open.slice(50).map(({ id }) => id),
+      open.slice(0, 20).map(({ id }) => id),
+      open.slice(20).map(({ id }) => id),
       ['a-1', 'a-2'],
       ['b-1'],
     ]);

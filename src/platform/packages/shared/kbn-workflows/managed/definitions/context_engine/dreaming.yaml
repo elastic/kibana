@@ -185,7 +185,7 @@ steps:
           {%- assign batches = "" | split: "" -%}
           {%- assign audiences = variables.memories | group_by_exp: "memory", "memory.permissions | json" -%}
           {%- for audience in audiences -%}
-          {%- assign chunks = audience.items | chunk: 50 -%}
+          {%- assign chunks = audience.items | chunk: 20 -%}
           {%- assign batches = batches | concat: chunks -%}
           {%- endfor -%}
           {{ batches | json }}

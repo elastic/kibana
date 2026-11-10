@@ -88,6 +88,9 @@ export const referencedIds = ({ entities, facts }: DreamChangeSet): string[] => 
   return [...new Set(refs.filter((ref) => !ref.startsWith(NEW_REF_PREFIX)))];
 };
 
+const withoutPrefix = (type: string | undefined, prefix: string): string | undefined =>
+  type?.startsWith(prefix) ? type.slice(prefix.length) : type;
+
 class RejectedItemError extends Error {}
 
 const reject: (reason: string) => never = (reason) => {
@@ -157,7 +160,9 @@ export const resolveChangeSet = (
         operations.push({ op: 'delete', id: entity.ref });
         return;
       }
-      const type = entity.type ?? current?.type.slice(ENTITY_TYPE_PREFIX.length);
+      const type =
+        withoutPrefix(entity.type, ENTITY_TYPE_PREFIX) ??
+        current?.type.slice(ENTITY_TYPE_PREFIX.length);
       const title = entity.title ?? current?.title;
       if (!type || !title) {
         reject('a new entity needs a type and a title');
@@ -208,7 +213,8 @@ export const resolveChangeSet = (
       if (!current && !fact.ref.startsWith(NEW_REF_PREFIX)) {
         reject(`'${fact.ref}' is neither an existing fact nor a new key`);
       }
-      const type = fact.type ?? current?.type.slice(FACT_TYPE_PREFIX.length);
+      const type =
+        withoutPrefix(fact.type, FACT_TYPE_PREFIX) ?? current?.type.slice(FACT_TYPE_PREFIX.length);
       const title = fact.title ?? current?.title;
       const content = fact.content ?? baseContent(current?.content);
       if (!type || !title || !content) {

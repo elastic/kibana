@@ -160,6 +160,30 @@ describe('resolveChangeSet', () => {
     });
   });
 
+  it('accepts types written with their kind prefix, as EXISTING shows them', () => {
+    const { operations, rejected } = resolveChangeSet(
+      changeSet({
+        entities: [
+          { ref: 'new:1', type: 'entity.team', title: 'Platform Team', source_memory_ids: ['m-1'] },
+        ],
+        facts: [
+          {
+            ref: 'new:2',
+            type: 'fact.preference',
+            title: 'Bob prefers tea',
+            content: 'Bob prefers tea.',
+            source_memory_ids: ['m-2'],
+          },
+        ],
+      }),
+      context()
+    );
+
+    expect(rejected).toEqual([]);
+    expect(operations[0]).toMatchObject({ id: 'entity-team--platform-team', type: 'team' });
+    expect(operations[1]).toMatchObject({ type: 'preference' });
+  });
+
   it('rejects unconfigured types and attributes item by item', () => {
     const { operations, rejected } = resolveChangeSet(
       changeSet({
