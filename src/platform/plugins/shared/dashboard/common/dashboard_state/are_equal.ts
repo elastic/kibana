@@ -16,7 +16,8 @@ import type {
   DashboardState,
 } from '@kbn/as-code-dashboard-schema';
 import { areComparatorsEqual, type StateComparators } from '@kbn/presentation-publishing';
-import { isDashboardPanel } from './is_dashboard_panel';
+import { isDashboardPanel } from '../is_dashboard_panel';
+import { DEFAULT_SETTINGS, deserializeSettings, settingsComparators } from './settings';
 
 type PanelOrSection = DashboardPanel | DashboardSection;
 type GetComparators = (
@@ -105,6 +106,7 @@ async function arePinnedPanelsEqual(
  * Checks whether two dashboard states are equal.
  *
  * `panels` and `pinned_panels` are compared with the comparators returned by `getComparators`.
+ * Settings (`title`, `description`, `tags`, `options`) are compared with the settings comparators and defaults.
  * All other keys are compared with deep equality.
  */
 export async function areEqual(
@@ -112,10 +114,40 @@ export async function areEqual(
   b: DashboardState,
   getComparators: GetComparators
 ): Promise<boolean> {
-  const { panels: panelsA, pinned_panels: pinnedPanelsA, ...restA } = a;
-  const { panels: panelsB, pinned_panels: pinnedPanelsB, ...restB } = b;
+  const {
+    panels: panelsA,
+    pinned_panels: pinnedPanelsA,
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    title: _titleA,
+    description: _descriptionA,
+    tags: _tagsA,
+    options: _optionsA,
+    /* eslint-enable @typescript-eslint/no-unused-vars */
+    ...restA
+  } = a;
+  const {
+    panels: panelsB,
+    pinned_panels: pinnedPanelsB,
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    title: _titleB,
+    description: _descriptionB,
+    tags: _tagsB,
+    options: _optionsB,
+    /* eslint-enable @typescript-eslint/no-unused-vars */
+    ...restB
+  } = b;
 
   if (!deepEqual(restA, restB)) return false;
+  if (
+    !areComparatorsEqual(
+      settingsComparators,
+      deserializeSettings(a),
+      deserializeSettings(b),
+      DEFAULT_SETTINGS
+    )
+  ) {
+    return false;
+  }
   return (
     (await arePinnedPanelsEqual(
       pinnedPanelsA as DashboardPinnedPanel[] | undefined,
