@@ -100,12 +100,22 @@ interface ManagedInstallWrite {
   stored?: VersionedWorkflowDocument;
 }
 
+/** What one batch install did, for its summary log line. */
+interface ManagedInstallStats {
+  created: number;
+  updated: number;
+  skipped: number;
+  bulkRequests: number;
+}
+
 interface ManagedWorkflowsServiceDeps {
   crudService: WorkflowCrudService;
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   logger: Logger;
   /** When true, abort before primary ES writes (plugin stop mid-install). */
   isStopping?: () => boolean;
+  /** Wait before a batch install retries the workflows that lost a concurrent write. */
+  retryDelayMs?: number;
   audit?: Pick<
     WorkflowManagementAuditLog,
     'logWorkflowCreated' | 'logWorkflowUpdated' | 'logWorkflowDeleted'
@@ -427,6 +437,7 @@ export class ManagedWorkflowsService {
 
     const isStartupWindow = !this.readyPluginIds.has(registeredPluginId);
     const now = new Date();
+    const stats: ManagedInstallStats = { created: 0, updated: 0, skipped: 0, bulkRequests: 0 };
     let pending = targets;
     for (let attempt = 0; pending.length > 0; attempt++) {
       if (attempt > 0) {
@@ -447,7 +458,7 @@ export class ManagedWorkflowsService {
         this.logger.debug(
           `Managed workflows: retrying install of ${pending.length} workflow(s) after concurrent update conflicts`
         );
-        await delayMs(DEFAULT_RETRY_DELAY_MS);
+        await delayMs(this.deps.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS);
       }
 
       let storedById: Map<string, VersionedWorkflowDocument>;
@@ -469,12 +480,14 @@ export class ManagedWorkflowsService {
         isStartupWindow,
         now,
         failed,
+        stats,
       });
       const { conflicted, aborted } = await this.writeManagedInstallChunks({
         writes,
         registeredPluginId,
         now,
         failed,
+        stats,
       });
       if (aborted) {
         break;
@@ -482,6 +495,13 @@ export class ManagedWorkflowsService {
       pending = conflicted;
     }
 
+    this.logger.debug(
+      `Managed workflows: installed ${items.length} workflow(s) for plugin '${registeredPluginId}': ` +
+        `${stats.created} created, ${stats.updated} updated, ${stats.skipped} unchanged or deferred, ` +
+        `${failed.length} failed, with ${stats.bulkRequests} bulk request(s) in ${
+          Date.now() - now.getTime()
+        } ms`
+    );
     return { failed };
   }
 
@@ -533,12 +553,14 @@ export class ManagedWorkflowsService {
     isStartupWindow,
     now,
     failed,
+    stats,
   }: {
     targets: readonly ManagedInstallTarget[];
     storedById: ReadonlyMap<string, VersionedWorkflowDocument>;
     isStartupWindow: boolean;
     now: Date;
     failed: ManagedWorkflowInstallFailure[];
+    stats: ManagedInstallStats;
   }): Promise<ManagedInstallWrite[]> {
     const writes: ManagedInstallWrite[] = [];
     for (const target of targets) {
@@ -552,6 +574,8 @@ export class ManagedWorkflowsService {
         if (write) {
           writes.push(write);
           await yieldToEventLoop();
+        } else {
+          stats.skipped++;
         }
       } catch (error) {
         failed.push(this.toInstallFailure(target, error));
@@ -621,11 +645,13 @@ export class ManagedWorkflowsService {
     registeredPluginId,
     now,
     failed,
+    stats,
   }: {
     writes: readonly ManagedInstallWrite[];
     registeredPluginId: string;
     now: Date;
     failed: ManagedWorkflowInstallFailure[];
+    stats: ManagedInstallStats;
   }): Promise<{ conflicted: ManagedInstallTarget[]; aborted: boolean }> {
     const chunks = chunkByCountAndBytes(writes, {
       maxCount: MANAGED_INSTALL_BULK_MAX_DOCUMENTS,
@@ -647,7 +673,7 @@ export class ManagedWorkflowsService {
         return { conflicted, aborted: true };
       }
 
-      await this.writeManagedInstallChunk({ chunk, now, failed, conflicted });
+      await this.writeManagedInstallChunk({ chunk, now, failed, conflicted, stats });
     }
 
     return { conflicted, aborted: false };
@@ -659,13 +685,16 @@ export class ManagedWorkflowsService {
     now,
     failed,
     conflicted,
+    stats,
   }: {
     chunk: readonly ManagedInstallWrite[];
     now: Date;
     failed: ManagedWorkflowInstallFailure[];
     conflicted: ManagedInstallTarget[];
+    stats: ManagedInstallStats;
   }): Promise<void> {
     let results: WorkflowDocumentBulkWriteResult[];
+    stats.bulkRequests++;
     try {
       results = await this.deps.crudService.bulkWriteWorkflowDocuments(
         chunk.map(({ target, document, stored }) => ({
@@ -684,6 +713,11 @@ export class ManagedWorkflowsService {
       const result = results[index];
       if (result.status === 'written') {
         written.push(write);
+        if (write.stored) {
+          stats.updated++;
+        } else {
+          stats.created++;
+        }
       } else if (result.status === 'conflict') {
         conflicted.push(write.target);
       } else {

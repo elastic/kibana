@@ -237,38 +237,50 @@ export class WorkflowCrudService {
   }
 
   /**
-   * Reads workflow documents by id in one search, across all spaces and including deleted ones.
-   * Callers decide what a document in another space or a deleted one means for them.
+   * Reads workflow documents by id with one real-time multi-get, across all spaces and including
+   * deleted ones. Being real-time, it sees a write another Kibana node made before it is refreshed,
+   * which is what a writer needs after losing that write with a 409.
    */
   async getWorkflowDocumentsWithVersionByIds(
     ids: readonly string[]
   ): Promise<Map<string, VersionedWorkflowDocument>> {
     const uniqueIds = [...new Set(ids)];
-    if (uniqueIds.length === 0) {
-      return new Map();
-    }
-
-    const searchResponse = await this.deps.workflowStorage.getClient().search({
-      query: { ids: { values: uniqueIds } },
-      seq_no_primary_term: true,
-      size: uniqueIds.length,
-      track_total_hits: false,
-      allow_partial_search_results: false,
-    });
-    // An incomplete search would otherwise read as missing workflows.
-    if (searchResponse.timed_out) {
-      throw new Error('Could not read workflows from an incomplete search.');
-    }
-
     const documents = new Map<string, VersionedWorkflowDocument>();
-    for (const {
-      _id: id,
-      _source: source,
-      _seq_no: seqNo,
-      _primary_term: primaryTerm,
-    } of searchResponse.hits.hits) {
-      if (id && source && seqNo != null && primaryTerm != null) {
-        documents.set(id, { source: source as WorkflowProperties, seqNo, primaryTerm });
+    if (uniqueIds.length === 0) {
+      return documents;
+    }
+
+    let response;
+    try {
+      response = await this.deps
+        .getCoreStart()
+        .elasticsearch.client.asInternalUser.mget<WorkflowProperties>({
+          index: workflowIndexName,
+          ids: uniqueIds,
+          realtime: true,
+        });
+    } catch (error) {
+      // No workflow has been written yet, so the index does not exist.
+      if (isNotFoundError(error)) {
+        return documents;
+      }
+      throw error;
+    }
+
+    for (const doc of response.docs) {
+      // A failed read would otherwise look like a missing workflow.
+      if ('error' in doc) {
+        throw new Error(`Could not read workflow ${doc._id}: ${extractBulkItemError(doc.error)}`);
+      }
+      if (doc.found) {
+        if (!doc._source || doc._seq_no == null || doc._primary_term == null) {
+          throw new Error(`Missing workflow revision or source for ${doc._id}.`);
+        }
+        documents.set(doc._id, {
+          source: doc._source,
+          seqNo: doc._seq_no,
+          primaryTerm: doc._primary_term,
+        });
       }
     }
     return documents;

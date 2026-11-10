@@ -39,6 +39,7 @@ import {
 import * as workflowPrepare from '../api/lib/workflow_prepare';
 import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import { applyWorkflowVersion } from '../lib/workflow_version';
+import { workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
@@ -500,38 +501,89 @@ describe('WorkflowCrudService', () => {
   });
 
   describe('getWorkflowDocumentsWithVersionByIds', () => {
-    it('reads every requested id once, across spaces and including deleted documents', async () => {
-      const { deps, client } = makeDeps();
-      client.search.mockResolvedValue({
-        hits: { hits: [occSearchHit('wf-1', { spaceId: 'other' }, 3, 2)] },
+    const makeMgetDeps = () => {
+      const core = {
+        ...coreMock.createStart(),
+        elasticsearch: elasticsearchServiceMock.createStart(),
+      };
+      const { deps } = makeDeps(undefined, { getCoreStart: () => core });
+      return { deps, mget: core.elasticsearch.client.asInternalUser.mget };
+    };
+
+    it('reads every requested id once in real time, across spaces and including deleted documents', async () => {
+      const { deps, mget } = makeMgetDeps();
+      mget.mockResolvedValue({
+        docs: [
+          {
+            _index: workflowIndexName,
+            _id: 'wf-1',
+            found: true,
+            _seq_no: 3,
+            _primary_term: 2,
+            _source: makeSource({
+              spaceId: 'other',
+              deleted_at: new Date('2024-02-01T00:00:00.000Z'),
+            }),
+          },
+          { _index: workflowIndexName, _id: 'wf-2', found: false },
+        ],
       });
 
       const service = new WorkflowCrudService(deps);
       const result = await service.getWorkflowDocumentsWithVersionByIds(['wf-1', 'wf-2', 'wf-1']);
 
-      expect(client.search).toHaveBeenCalledWith({
-        query: { ids: { values: ['wf-1', 'wf-2'] } },
-        seq_no_primary_term: true,
-        size: 2,
-        track_total_hits: false,
-        allow_partial_search_results: false,
+      expect(mget).toHaveBeenCalledWith({
+        index: workflowIndexName,
+        ids: ['wf-1', 'wf-2'],
+        realtime: true,
       });
       expect([...result]).toEqual([
         [
           'wf-1',
-          { source: expect.objectContaining({ spaceId: 'other' }), seqNo: 3, primaryTerm: 2 },
+          {
+            source: expect.objectContaining({ spaceId: 'other', deleted_at: expect.any(Date) }),
+            seqNo: 3,
+            primaryTerm: 2,
+          },
         ],
       ]);
     });
 
-    it('throws instead of reporting workflows as missing when the search is incomplete', async () => {
-      const { deps, client } = makeDeps();
-      client.search.mockResolvedValue({ timed_out: true, hits: { hits: [] } });
+    it('reads no workflows before the workflow index exists', async () => {
+      const { deps, mget } = makeMgetDeps();
+      mget.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'index_not_found_exception' } },
+          headers: {},
+          warnings: [],
+          meta: {} as any,
+        })
+      );
+
+      const service = new WorkflowCrudService(deps);
+
+      await expect(service.getWorkflowDocumentsWithVersionByIds(['wf-1'])).resolves.toEqual(
+        new Map()
+      );
+    });
+
+    it('throws instead of reporting a workflow as missing when it cannot be read', async () => {
+      const { deps, mget } = makeMgetDeps();
+      mget.mockResolvedValue({
+        docs: [
+          {
+            _index: workflowIndexName,
+            _id: 'wf-1',
+            error: { type: 'shard_not_available', reason: 'shard unavailable' },
+          },
+        ],
+      });
 
       const service = new WorkflowCrudService(deps);
 
       await expect(service.getWorkflowDocumentsWithVersionByIds(['wf-1'])).rejects.toThrow(
-        'incomplete search'
+        'Could not read workflow wf-1: shard unavailable'
       );
     });
   });

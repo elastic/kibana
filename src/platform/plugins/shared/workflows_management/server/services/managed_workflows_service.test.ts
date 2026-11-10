@@ -409,6 +409,7 @@ const createService = (crudService = createCrudServiceMock()) => {
     workflowsExecutionEngine,
     logger,
     audit,
+    retryDelayMs: 0,
   });
 
   return {
@@ -1401,6 +1402,32 @@ describe('ManagedWorkflowsService', () => {
         spaceId: SPACE_ID,
         reason: 'install',
       });
+    });
+
+    it('logs one summary of what the pass did', async () => {
+      const unchanged = createDefinition({ id: 'system-unchanged' });
+      const missing = createDefinition({ id: 'system-missing' });
+      const dynamic = createDefinition({
+        id: 'system-dynamic',
+        management: { lifecycle: 'dynamic' },
+      });
+      mockManagedWorkflowDefinitions = [unchanged, missing, dynamic];
+      const { crudService, logger, service } = createService();
+      crudService.getWorkflowDocumentsWithVersionByIds.mockResolvedValue(
+        new Map([[unchanged.id, createVersionedDocument(createInstalledSource(unchanged))]])
+      );
+
+      await service.installManagedWorkflows(toItems([unchanged, missing, dynamic]), PLUGIN_ID);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringMatching(
+          new RegExp(
+            `^Managed workflows: installed 3 workflow\\(s\\) for plugin '${PLUGIN_ID}': ` +
+              '1 created, 0 updated, 1 unchanged or deferred, 1 failed, ' +
+              'with 1 bulk request\\(s\\) in \\d+ ms$'
+          )
+        )
+      );
     });
 
     it('reads once and writes nothing when every workflow is unchanged', async () => {

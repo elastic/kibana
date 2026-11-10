@@ -17,7 +17,7 @@ A write with `refresh: true` keeps its thread until the shard is refreshed (a fl
 
 ## What `installMany` does
 
-- One search reads the stored documents of every workflow in the batch. Unchanged workflows are skipped, so a restart with nothing to change costs that one search.
+- One real-time multi-get reads the stored documents of every workflow in the batch. Unchanged workflows are skipped, so a restart with nothing to change costs that one read.
 - Missing and changed workflows are written with `_bulk`: at most 50 documents or 2 MB per request, one request at a time, each with `refresh: true`.
 - Each request goes to the index's one shard, so the install holds at most one `system_write` thread and pays one refresh per request instead of one per workflow.
 - When another Kibana node writes the same workflow first, the conflicting workflows are read again and skipped if they are already up to date.

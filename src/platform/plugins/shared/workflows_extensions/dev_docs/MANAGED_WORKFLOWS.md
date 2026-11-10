@@ -177,7 +177,7 @@ Use `installMany` for the static workflows a plugin installs in `start()`, and `
 
 Every write to the workflow index runs on Elasticsearch's small `system_write` thread pool, which login sessions, saved objects and Task Manager also write with. `install` writes one workflow per request with `refresh: true`, so a burst of start-up installs fills that pool and delays logins on a fresh deployment. `installMany` instead:
 
-- reads the stored documents of the whole batch with one search, and skips unchanged workflows, so a restart with nothing to change costs that one search;
+- reads the stored documents of the whole batch with one real-time multi-get, and skips unchanged workflows, so a restart with nothing to change costs that one read;
 - writes missing and changed workflows with `_bulk`, at most 50 documents or 2 MB per request, one request at a time, each with `refresh: true`. The workflows are readable as soon as the call resolves, and the pass never holds more than one `system_write` thread;
 - re-reads workflows that another Kibana node wrote at the same time, and skips them when they are already up to date.
 
