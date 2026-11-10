@@ -527,7 +527,7 @@ importers:
         version: 18.0.1(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@kbn/aad-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/aad
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad
       '@kbn/access-control-test-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin
@@ -536,7 +536,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/actions
       '@kbn/actions-simulators-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/actions_simulators
       '@kbn/actions-types':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-actions-types
@@ -671,7 +671,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-aiops-utils
       '@kbn/alerting-api-integration-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts
       '@kbn/alerting-comparators':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-alerting-comparators
@@ -680,7 +680,7 @@ importers:
         version: link:x-pack/examples/alerting_example
       '@kbn/alerting-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_with_es_ssl/plugins/alerts
+        version: link:x-pack/platform/test_plugins/response_ops/functional_with_es_ssl/alerts
       '@kbn/alerting-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/alerting
@@ -725,7 +725,7 @@ importers:
         version: link:x-pack/solutions/observability/packages/kbn-alerts-grouping
       '@kbn/alerts-restricted-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts_restricted
       '@kbn/alerts-ui-shared':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-alerts-ui-shared
@@ -2195,7 +2195,7 @@ importers:
         version: link:src/platform/plugins/private/event_annotation
       '@kbn/event-log-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/event_log
+        version: link:x-pack/platform/test_plugins/response_ops/plugin_api_integration/event_log
       '@kbn/event-log-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/event_log
@@ -3155,7 +3155,7 @@ importers:
         version: link:src/platform/packages/private/kbn-reporting/export_types/png_common
       '@kbn/reporting-fixture':
         specifier: workspace:*
-        version: link:x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture
+        version: link:x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_fixture
       '@kbn/reporting-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/reporting
@@ -3167,7 +3167,7 @@ importers:
         version: link:src/platform/packages/private/kbn-reporting/server
       '@kbn/reporting-test-routes':
         specifier: workspace:*
-        version: link:x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes
+        version: link:x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_test_routes
       '@kbn/resizable-layout':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-resizable-layout
@@ -3275,7 +3275,7 @@ importers:
         version: link:x-pack/platform/plugins/shared/sample_data_ingest
       '@kbn/sample-task-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin
+        version: link:x-pack/platform/test_plugins/response_ops/plugin_api_integration/sample_task_plugin
       '@kbn/sandbox-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/sandbox
@@ -3842,16 +3842,16 @@ importers:
         version: link:x-pack/platform/plugins/private/task_manager_dependencies
       '@kbn/task-manager-fixture-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture
+        version: link:x-pack/platform/test_plugins/response_ops/alerting_api_integration/task_manager_fixture
       '@kbn/task-manager-performance-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance
+        version: link:x-pack/platform/test_plugins/response_ops/plugin_api_perf/task_manager_performance
       '@kbn/task-manager-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/task_manager
       '@kbn/task-manager-service-accounts-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/task_manager/plugins/service_accounts
+        version: link:x-pack/platform/test_plugins/response_ops/task_manager/service_accounts
       '@kbn/telemetry':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-telemetry
@@ -5169,7 +5169,7 @@ importers:
         version: 29.6.3
       '@kbn/alerting-api-integration-helpers':
         specifier: workspace:*
-        version: link:x-pack/platform/test/alerting_api_integration/packages/helpers
+        version: link:x-pack/platform/packages/shared/test/response_ops/alerting-api-integration-helpers
       '@kbn/ambient-common-types':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-ambient-common-types
@@ -9316,6 +9316,8 @@ importers:
 
   x-pack/platform/packages/shared/security/plugin_types_server: {}
 
+  x-pack/platform/packages/shared/test/response_ops/alerting-api-integration-helpers: {}
+
   x-pack/platform/plugins/private/ai_anonymization_settings: {}
 
   x-pack/platform/plugins/private/banners: {}
@@ -9574,18 +9576,6 @@ importers:
 
   x-pack/platform/test: {}
 
-  x-pack/platform/test/alerting_api_integration/common/plugins/aad: {}
-
-  x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators: {}
-
-  x-pack/platform/test/alerting_api_integration/common/plugins/alerts: {}
-
-  x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted: {}
-
-  x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture: {}
-
-  x-pack/platform/test/alerting_api_integration/packages/helpers: {}
-
   x-pack/platform/test/cloud_integration/plugins/saml_provider: {}
 
   x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
@@ -9596,23 +9586,11 @@ importers:
 
   x-pack/platform/test/functional_execution_context/plugins/alerts: {}
 
-  x-pack/platform/test/functional_with_es_ssl/plugins/alerts: {}
-
   x-pack/platform/test/licensing_plugin/plugins/test_feature_usage: {}
 
   x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client: {}
 
-  x-pack/platform/test/plugin_api_integration/plugins/event_log: {}
-
   x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test: {}
-
-  x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin: {}
-
-  x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance: {}
-
-  x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture: {}
-
-  x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes: {}
 
   x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin: {}
 
@@ -9638,8 +9616,6 @@ importers:
 
   x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin: {}
 
-  x-pack/platform/test/task_manager/plugins/service_accounts: {}
-
   x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin: {}
 
   x-pack/platform/test/usage_collection/plugins/application_usage_test: {}
@@ -9647,6 +9623,30 @@ importers:
   x-pack/platform/test/usage_collection/plugins/stack_management_usage_test: {}
 
   x-pack/platform/test_plugins/agent_builder_sml_test_types: {}
+
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/aad: {}
+
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/actions_simulators: {}
+
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts: {}
+
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts_restricted: {}
+
+  x-pack/platform/test_plugins/response_ops/alerting_api_integration/task_manager_fixture: {}
+
+  x-pack/platform/test_plugins/response_ops/functional_with_es_ssl/alerts: {}
+
+  x-pack/platform/test_plugins/response_ops/plugin_api_integration/event_log: {}
+
+  x-pack/platform/test_plugins/response_ops/plugin_api_integration/sample_task_plugin: {}
+
+  x-pack/platform/test_plugins/response_ops/plugin_api_perf/task_manager_performance: {}
+
+  x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_fixture: {}
+
+  x-pack/platform/test_plugins/response_ops/reporting_api_integration/reporting_test_routes: {}
+
+  x-pack/platform/test_plugins/response_ops/task_manager/service_accounts: {}
 
   x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases: {}
 
