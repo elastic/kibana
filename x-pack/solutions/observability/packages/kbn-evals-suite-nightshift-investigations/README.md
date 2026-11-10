@@ -146,7 +146,10 @@ Investigations only run as the Nightshift agent service account, so the eval fir
 account's roles on stateful (`ensureNightshiftServiceAccountRoles`), finds or creates the accounts
 (`ensureNightshiftServiceAccounts`, as the app's setup step does), and sets up the space with `POST /internal/nightshift/investigations/service_account/_enable` (idempotent; the eval
 user holds `manage_security`). The `evals_nightshift_investigations` config set turns on
-`xpack.security.serviceAccounts.enabled`.
+`xpack.security.serviceAccounts.enabled`. Nightshift allows five manual investigations a day by
+default and the eval starts one per example, so it turns the daily investigation limits off with
+`PUT /internal/significant_events/run_quotas` (`investigationLimitsEnabled: false`), as an admin
+would on the Nightshift settings page. The setting stays on that stack.
 
 The native framework still requires an evaluation endpoint in its configuration; the command
 reuses the target endpoint for that metadata. This suite never invokes an LLM evaluator or judge.

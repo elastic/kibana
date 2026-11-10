@@ -219,6 +219,12 @@ export const registerInvestigationEvaluation = ({
             { timeout: 60_000 }
           )
           .toBe(true);
+        // Nightshift caps manual investigations per day (five by default), and an eval starts one per
+        // example, so the eval stack runs without the investigation limits.
+        await setupRequest('/internal/significant_events/run_quotas', {
+          method: 'PUT',
+          body: JSON.stringify({ investigationLimitsEnabled: false }),
+        });
         await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
         const knowledgeMetadata = await restoreKnowledge({ esClient, log });
         const runExperiment = ({
