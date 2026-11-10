@@ -306,7 +306,8 @@ export const snapshotDecisionTrees = async (
 
 /**
  * Rolls back only the trees the replay owns: `treeIds` plus every tree `conversationId` wrote,
- * including a counts-only traversal the replay never got to report. An owned tree in `snapshots` is
+ * including a counts-only traversal the replay never got to report. When that search fails, each of
+ * `candidateIds` whose head carries `conversationId` still counts. An owned tree in `snapshots` is
  * put back and one absent from it is deleted; every other tree, including one another investigation
  * wrote meanwhile, is left alone. Keeps going past a failed tree and throws the first error at the
  * end.
@@ -314,7 +315,11 @@ export const snapshotDecisionTrees = async (
 export const restoreDecisionTrees = async (
   esClient: Client,
   snapshots: ReadonlyMap<string, readonly IndexedTreeDoc[]>,
-  { treeIds, conversationId }: { treeIds: readonly string[]; conversationId: string }
+  {
+    treeIds,
+    candidateIds = [],
+    conversationId,
+  }: { treeIds: readonly string[]; candidateIds?: readonly string[]; conversationId: string }
 ): Promise<void> => {
   let firstError: unknown;
   let stampedIds: string[] = [];
@@ -322,6 +327,15 @@ export const restoreDecisionTrees = async (
     stampedIds = await listDecisionTreeIdsForConversation(esClient, conversationId);
   } catch (error) {
     firstError = error;
+    for (const id of candidateIds) {
+      try {
+        if (writtenByRun(await readTreeDoc(esClient, headId(id)), conversationId)) {
+          stampedIds.push(id);
+        }
+      } catch (readError) {
+        firstError ??= readError;
+      }
+    }
   }
   for (const id of new Set([...treeIds, ...stampedIds])) {
     try {
@@ -588,7 +602,11 @@ export const runReinforcementExample = async ({
     }
     // A submit names trees it may never have written, so only the seeded tree and the trees the
     // replay's writes are stamped with count as its own.
-    await restoreDecisionTrees(esClient, snapshots, { treeIds: [treeId], conversationId });
+    await restoreDecisionTrees(esClient, snapshots, {
+      treeIds: [treeId],
+      candidateIds: submittedTreeIds(submissions),
+      conversationId,
+    });
   }
 };
 

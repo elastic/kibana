@@ -428,6 +428,40 @@ describe('restoreDecisionTrees', () => {
     );
   });
 
+  it('still restores a submitted tree the replay stamped when the provenance search fails', async () => {
+    const search = jest
+      .fn()
+      .mockImplementation(async (request: SearchRequest) =>
+        termOf(request, 'attributes.conversation_id') === CONVERSATION_ID
+          ? Promise.reject({ statusCode: 503 })
+          : searchPage([])
+      );
+    const get = jest.fn().mockImplementation(async ({ id }: { id: string }) => ({
+      found: true,
+      _source: {
+        attributes: {
+          conversation_id: id === 'default:dtree_stamped' ? CONVERSATION_ID : 'other-investigation',
+        },
+      },
+    }));
+    const esClient = client({ get, search });
+    const snapshots = new Map([
+      ['symptom:stamped', [{ id: 'default:dtree_stamped', source: { content: 'original' } }]],
+      ['symptom:foreign', [{ id: 'default:dtree_foreign', source: { content: 'original' } }]],
+    ]);
+
+    await expect(
+      restoreDecisionTrees(esClient, snapshots, {
+        treeIds: [],
+        candidateIds: ['symptom:stamped', 'symptom:foreign'],
+        conversationId: CONVERSATION_ID,
+      })
+    ).rejects.toMatchObject({ statusCode: 503 });
+    expect(esClient.index.mock.calls.map(([request]) => request.id)).toEqual([
+      'default:dtree_stamped',
+    ]);
+  });
+
   it('keeps restoring after one tree fails and throws the first error', async () => {
     const failure = new Error('index failed');
     const index = jest.fn().mockRejectedValueOnce(failure).mockResolvedValue({});
