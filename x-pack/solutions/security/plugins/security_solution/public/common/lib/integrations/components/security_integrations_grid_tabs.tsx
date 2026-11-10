@@ -106,7 +106,11 @@ export const SecurityIntegrationsGridTabs = React.memo<SecurityIntegrationsGridT
     );
 
     // Collection tiles (several packages for one technology) open Fleet's variant chooser inside
-    // the grid. Picked variants return to the onboarding page, like regular package tiles.
+    // the grid. Picked variants return to the onboarding page (Get started) after Cancel/Save, like
+    // regular package tiles, which hardcode the same `ONBOARDING_PATH` in `useAddSecurityProps`.
+    // This grid is also rendered on Manage Automatic Migrations (`/siem_migrations/manage`), so a
+    // user starting there is returned to Get started too. That is the existing behaviour for all
+    // tiles; returning to the originating page would have to change both kinds of tile.
     const collectionReturnLocation = useMemo(
       () => ({ appId: APP_UI_ID, path: ONBOARDING_PATH }),
       []
