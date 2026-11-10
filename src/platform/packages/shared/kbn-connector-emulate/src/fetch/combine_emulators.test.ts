@@ -72,6 +72,23 @@ const selfHostedSpec: OpenApiDocument = {
   },
 };
 
+// A self-hosted product whose server is only a host variable, as Okta's `https://{yourOktaDomain}`.
+const anyHostSpec: OpenApiDocument = {
+  ...selfHostedSpec,
+  servers: [{ url: 'https://{host}', variables: { host: { default: 'example.com' } } }],
+};
+
+// The same, with the host variable limited to the vendor's regions.
+const regionHostSpec: OpenApiDocument = {
+  ...selfHostedSpec,
+  servers: [
+    {
+      url: 'https://{region}',
+      variables: { region: { default: 'eu.region.example', enum: ['eu.region.example'] } },
+    },
+  ],
+};
+
 const vendorSpec: OpenApiDocument = {
   openapi: '3.0.3',
   info: { title: 'Vendor', version: '1' },
@@ -184,6 +201,41 @@ describe('combineEmulators', () => {
       await fetch('https://api.vendor.example/x/y', bearer(emulatorCredential('self_hosted')));
 
       expect(calls).toEqual([expect.objectContaining({ connector: 'self_hosted' })]);
+    });
+  });
+
+  describe('with a connector whose server is only a host variable', () => {
+    const createWithAnyHost = (spec: OpenApiDocument) =>
+      combineEmulators({
+        any_host: createEmulatorFetch({ specs: [spec] }),
+        vendor: createEmulatorFetch({ specs: [vendorSpec] }),
+      });
+
+    it('routes to the connector whose specs name the host, even when it comes later', async () => {
+      const { fetch, calls, namesHost } = createWithAnyHost(anyHostSpec);
+
+      await fetch('https://api.vendor.example/v2/scrape', { method: 'POST' });
+
+      expect(calls).toEqual([
+        expect.objectContaining({ connector: 'vendor', operation: 'scrape' }),
+      ]);
+      expect(namesHost('GET', new URL('https://okta.internal.example/x/y'))).toBe(false);
+    });
+
+    it('still reaches that server on hosts no spec names', async () => {
+      const { fetch, calls } = createWithAnyHost(anyHostSpec);
+
+      expect((await fetch('https://okta.internal.example/x/y')).status).toBe(204);
+      expect(calls).toEqual([
+        expect.objectContaining({ connector: 'any_host', operation: 'getItem' }),
+      ]);
+    });
+
+    it('names the host when an enum limits the variable', () => {
+      const { namesHost } = createWithAnyHost(regionHostSpec);
+
+      expect(namesHost('GET', new URL('https://eu.region.example/x/y'))).toBe(true);
+      expect(namesHost('GET', new URL('https://other.example/x/y'))).toBe(false);
     });
   });
 

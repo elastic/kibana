@@ -35,6 +35,7 @@ import { createGraphQLProtocol, isGraphQLSpec, toEndpoint } from '../graphql/gra
 import type { McpSpec } from '../mcp/mcp_protocol';
 import { createMcpProtocol, isMcpSpec } from '../mcp/mcp_protocol';
 import type { ContractOperation, OpenApiDocument } from '../openapi';
+import type { OperationServer } from '../openapi/types';
 import { loadContractOperations } from '../openapi';
 import type { OperationMatch } from '../openapi/match_operation';
 import { createOperationMatcher } from '../openapi/match_operation';
@@ -134,7 +135,8 @@ export interface Emulator {
   readonly answers: (method: string, url: URL) => boolean;
   /**
    * Like `answers`, but only through a server that names the URL's host. A relative server, as
-   * specs of self-hosted products declare, matches any host.
+   * specs of self-hosted products declare, matches any host, as does one whose host is only
+   * variables without an `enum`, such as `https://{host}`.
    */
   readonly namesHost: (method: string, url: URL) => boolean;
   readonly calls: ContractCall[];
@@ -281,6 +283,20 @@ const toProtocolEndpoints = (loaded: readonly LoadedProtocol[]): Map<string, Con
       instance.endpoints.map((endpoint) => [endpoint, instance] as const)
     )
   );
+
+const SERVER_HOST = /^[a-z][a-z0-9+.-]*:\/\/([^/]*)/i;
+
+// A server names a host when its host has a literal part or a variable limited by an `enum`.
+const namesAHost = ({ url, variables }: OperationServer): boolean => {
+  const host = SERVER_HOST.exec(url)?.[1];
+  if (host === undefined) {
+    return false;
+  }
+  const fixed = host.replace(/\{([^}]+)\}/g, (variable, name: string) =>
+    variables[name]?.enum?.length ? variable : ''
+  );
+  return /[^.:-]/.test(fixed);
+};
 
 const toOperationRef = ({ method, path, spec: { source } }: ContractOperation): OperationRef => ({
   method,
@@ -561,7 +577,7 @@ export const createEmulatorFetch = ({
   // Built on first use, as only combined emulators ask and large specs take time to compile.
   const getWithHosts = once(() => {
     const named = operations.flatMap((operation) => {
-      const servers = operation.servers.filter(({ url }) => !url.startsWith('/'));
+      const servers = operation.servers.filter(namesAHost);
       return servers.length > 0 ? [{ ...operation, servers }] : [];
     });
     return { route: createOperationMatcher(named), tokens: findTokenEndpoints(named) };
