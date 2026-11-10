@@ -137,3 +137,17 @@ export const bucketInterval = (column: DatatableColumn | undefined): number | un
   }
   return bucket.unit ? undefined : bucket.interval;
 };
+
+const escapeKeyPart = (text: string): string => text.replace(/[\\:]/g, '\\$&');
+
+/**
+ * A cell as part of a `colors.byKey` key, in the encoding the charts pack documents
+ * (`KEY_PART_RULE`): the value as a string with `\` and `:` escaped, a missing cell as `\null`, and
+ * a multivalue cell as `\` and its escaped JSON text.
+ */
+export const toKeyPart = (cell: unknown): string =>
+  cell === null || cell === undefined
+    ? '\\null'
+    : Array.isArray(cell)
+    ? `\\${escapeKeyPart(JSON.stringify(cell))}`
+    : escapeKeyPart(String(cell));

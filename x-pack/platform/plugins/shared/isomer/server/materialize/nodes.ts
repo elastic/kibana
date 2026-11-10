@@ -13,11 +13,17 @@
 import type {
   Cell,
   ChartEvent,
+  DataTableNode,
+  GaugeNode,
   GridNode,
+  HeatmapNode,
+  LegacyMetricNode,
   Loss,
   MetricNode,
+  PartitionChartNode,
   PrimitiveNode,
   Provenance,
+  TagCloudNode,
   UnsupportedNode,
   XyChartNode,
 } from '@kbn/isomer';
@@ -33,7 +39,15 @@ export type MaterializedNodeSource = Provenance;
 export type MaterializeLoss = Loss;
 
 /** A chart node from the charts pack, with the provenance and losses its core carries. */
-export type MaterializedChartNode = MetricNode | XyChartNode;
+export type MaterializedChartNode =
+  | MetricNode
+  | XyChartNode
+  | DataTableNode
+  | PartitionChartNode
+  | HeatmapNode
+  | GaugeNode
+  | TagCloudNode
+  | LegacyMetricNode;
 
 /** A layout node from the charts pack, which places other nodes. */
 export type MaterializedLayoutNode = GridNode;
@@ -64,6 +78,12 @@ export const isUnsupportedNode = (node: PrimitiveNode): node is UnsupportedNode 
 const chartNodeTypes: ReadonlySet<string> = new Set<MaterializedChartNode['type']>([
   'metric',
   'xyChart',
+  'dataTable',
+  'partitionChart',
+  'heatmap',
+  'gauge',
+  'tagCloud',
+  'legacyMetric',
 ]);
 
 /** Whether `node` is a chart node, which carries provenance and losses. */

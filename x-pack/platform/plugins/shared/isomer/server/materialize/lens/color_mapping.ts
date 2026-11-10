@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { ColorMapping } from '@kbn/coloring';
+import { deserializeField } from '@kbn/data-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { KbnPaletteId } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
+import type { ConcreteColor } from '../kit/colors';
+import type { MaterializeKit } from '../types';
+import { toKeyPart } from './shared';
 import type { LensApiColorMapping } from './types';
 
 type ColorDef = Extract<LensApiColorMapping, { mode: 'categorical' }>['mapping'][number]['color'];
@@ -97,4 +104,37 @@ export const toColorMappingConfig = (
       specialAssignments,
     } as ColorMapping.Config,
   };
+};
+
+/**
+ * Each distinct value of `column` keyed for `colors.byKey` with the color Kibana's color mapping
+ * gives it, the categories in the order Lens meets them (`getColorCategories`, as Lens's datatable,
+ * partition and tag cloud charts collect them). Without a color mapping, Lens's default one applies.
+ */
+export const categoryColorsByKey = (
+  rows: Datatable['rows'],
+  columns: string[],
+  colorMapping: LensApiColorMapping | undefined,
+  kit: MaterializeKit,
+  { exclude, paletteFallback }: { exclude?: unknown[]; paletteFallback?: string } = {}
+): Record<string, ConcreteColor> => {
+  const categories = getColorCategories(
+    rows,
+    columns,
+    exclude as Parameters<typeof getColorCategories>[2]
+  );
+  const mapping = toColorMappingConfig(
+    colorMapping ?? {
+      mode: 'categorical',
+      palette: paletteFallback ?? KbnPalette.Default,
+      mapping: [],
+    }
+  );
+  const colors =
+    'config' in mapping
+      ? kit.colorMappingColors(categories, mapping.config)
+      : kit.paletteColors(categories.length, mapping.legacyPalette);
+  return Object.fromEntries(
+    categories.map((category, index) => [toKeyPart(deserializeField(category)), colors[index]])
+  );
 };

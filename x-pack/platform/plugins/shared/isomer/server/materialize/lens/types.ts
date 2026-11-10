@@ -6,8 +6,16 @@
  */
 
 import type {
+  DatatableConfigESQL,
+  GaugeConfigESQL,
+  HeatmapConfigESQL,
   LensApiConfig,
   MetricConfigESQL,
+  MosaicConfigESQL,
+  PieConfigESQL,
+  TagcloudConfigESQL,
+  TreemapConfigESQL,
+  WaffleConfigESQL,
   XYConfigESQL,
   XYLayer,
 } from '@kbn/lens-embeddable-utils';
@@ -22,6 +30,31 @@ export type LensMetricConfig = MetricConfigESQL;
 export type LensXyConfig = XYConfigESQL;
 
 export type LensXyLayer = XYConfigESQL['layers'][number];
+
+/** An ES|QL data table. */
+export type LensDatatableConfig = DatatableConfigESQL;
+
+/** An ES|QL pie (or donut), treemap, mosaic or waffle chart. */
+export type LensPartitionConfig =
+  | PieConfigESQL
+  | TreemapConfigESQL
+  | MosaicConfigESQL
+  | WaffleConfigESQL;
+
+/** An ES|QL heat map. */
+export type LensHeatmapConfig = HeatmapConfigESQL;
+
+/** An ES|QL gauge. */
+export type LensGaugeConfig = GaugeConfigESQL;
+
+/** An ES|QL tag cloud. */
+export type LensTagcloudConfig = TagcloudConfigESQL;
+
+/** An ES|QL legacy metric. */
+export type LensLegacyMetricConfig = Extract<
+  LensApiConfig,
+  { type: 'legacy_metric'; data_source: { type: 'esql' } }
+>;
 
 export type LensXyDataLayer = Exclude<
   Extract<XYLayer, { data_source: { type: 'esql' } }>,
