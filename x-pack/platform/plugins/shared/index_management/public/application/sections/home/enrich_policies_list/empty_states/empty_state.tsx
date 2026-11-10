@@ -22,6 +22,9 @@ export const EmptyState = () => {
 
   return (
     <KibanaPageTemplate.EmptyPrompt
+      // POC: lifts the prompt off the recessed glass surface; shadow requires no border.
+      hasShadow
+      hasBorder={false}
       iconType="managementApp"
       data-test-subj="sectionEmpty"
       title={
