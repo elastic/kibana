@@ -220,9 +220,6 @@ export const setAssetCriticalityTool = (
             namespace: spaceId,
             soClient: savedObjectsClient,
             logger,
-            collectScores: true,
-            telemetry: core.analytics,
-            profiling,
           });
           if (!canRecalculate) {
             logger.warn(
