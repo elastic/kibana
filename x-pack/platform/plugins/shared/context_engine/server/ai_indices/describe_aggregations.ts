@@ -26,7 +26,7 @@ const KEYWORD_TYPES: ReadonlySet<string> = new Set(['keyword', 'constant_keyword
 export interface AiIndexAggregationsDescription {
   kiTypeCounts: KiTypeCount[];
   tagCounts: AiIndexTagCount[];
-  factTypeCounts: KiTypeCount[];
+  dreamedTypeCounts: KiTypeCount[];
 }
 
 export interface DescribeAiIndexAggregationsParams {
@@ -34,16 +34,16 @@ export interface DescribeAiIndexAggregationsParams {
   dest: AiIndexDest;
   spaceId: string;
   fields: AiIndexField[];
-  /** Whether the AI index dreams: `kiTypeCounts` and `tagCounts` then leave out the types dreaming writes. */
-  dreams?: boolean;
-  /** The `fact.<type>` KI types to count in `factTypeCounts`. */
-  factTypes?: string[];
+  /** The prefixes of the kinds the AI index dreams, left out of `kiTypeCounts` and `tagCounts`. */
+  dreamedPrefixes?: readonly string[];
+  /** The configured `fact.<type>` and `entity.<type>` KI types to count in `dreamedTypeCounts`. */
+  dreamedTypes?: string[];
 }
 
 const NO_COUNTS: AiIndexAggregationsDescription = {
   kiTypeCounts: [],
   tagCounts: [],
-  factTypeCounts: [],
+  dreamedTypeCounts: [],
 };
 
 const isAggregatableKeyword = (fields: AiIndexField[], path: string): boolean =>
@@ -92,8 +92,8 @@ export const describeAiIndexAggregations = async ({
   dest,
   spaceId,
   fields,
-  dreams = false,
-  factTypes = [],
+  dreamedPrefixes = [],
+  dreamedTypes = [],
 }: DescribeAiIndexAggregationsParams): Promise<AiIndexAggregationsDescription> => {
   const hasType = isAggregatableKeyword(fields, KI_TYPE_FIELD);
   const hasTags = isAggregatableKeyword(fields, KI_TAGS_FIELD);
@@ -103,8 +103,8 @@ export const describeAiIndexAggregations = async ({
 
   const typeCounts = (size: number, condition: string) =>
     runCounts(esClient, spaceId, countsQuery(dest, KI_TYPE_FIELD, size, condition));
-  const excludeMemory = excludeMemoryKiTypesCondition(dreams);
-  const [types, tags, facts] = await Promise.all([
+  const excludeMemory = excludeMemoryKiTypesCondition(dreamedPrefixes);
+  const [types, tags, dreamed] = await Promise.all([
     hasType ? typeCounts(MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS, excludeMemory) : [],
     hasTags
       ? runCounts(
@@ -118,10 +118,10 @@ export const describeAiIndexAggregations = async ({
           )
         )
       : [],
-    hasType && factTypes.length > 0
+    hasType && dreamedTypes.length > 0
       ? typeCounts(
-          factTypes.length,
-          `type IN (${factTypes.map((factType) => `"${factType}"`).join(', ')})`
+          dreamedTypes.length,
+          `type IN (${dreamedTypes.map((dreamedType) => `"${dreamedType}"`).join(', ')})`
         )
       : [],
   ]);
@@ -131,6 +131,6 @@ export const describeAiIndexAggregations = async ({
   return {
     kiTypeCounts: toTypeCounts(types),
     tagCounts: tags.map((row) => ({ tag: String(row.tags), count: Number(row.count) })),
-    factTypeCounts: toTypeCounts(facts),
+    dreamedTypeCounts: toTypeCounts(dreamed),
   };
 };

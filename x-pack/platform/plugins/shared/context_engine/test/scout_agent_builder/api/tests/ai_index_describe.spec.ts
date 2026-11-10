@@ -162,7 +162,7 @@ const OTHER_INDEX_ROLE: KibanaRole = {
 const registerAiIndex = (
   id: string,
   dest: { type: 'index' | 'data_stream'; value: string },
-  dreaming?: { enabled: boolean; facts: Array<{ type: string; description?: string }> }
+  dreaming?: typeof MEMORY_DREAMING_CONFIG
 ) => ({
   id,
   description: `Scout describe fixture ${id}`,
@@ -176,6 +176,9 @@ const registerAiIndex = (
 const MEMORY_DREAMING_CONFIG = {
   enabled: false,
   facts: [{ type: 'note', description: 'A detail worth keeping' }],
+  entities: {
+    nodes: [{ type: 'customer', description: 'A paying account', attributes: ['plan'] }],
+  },
 };
 
 // The `agent_builder` Scout config set pins `contextEngine:enabled=true` through
@@ -351,6 +354,8 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
           'Use platform.context_engine.remember to write memory.',
           'Use platform.context_engine.forget with a memory id to tombstone memory.',
           '"fact.note": 1 - A detail worth keeping',
+          '"entity.customer": 1 - A paying account (attributes: plan)',
+          'An entity by name, across entity types:',
         ])
       );
       expect(sectionLines(block, 'Knowledge item types')).toStrictEqual([

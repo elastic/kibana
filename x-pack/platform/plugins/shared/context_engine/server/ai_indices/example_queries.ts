@@ -20,17 +20,15 @@ const KEEP = '| KEEP title, description, content, type, tags';
 export const FACT_TYPE_PATTERN = `${FACT_TYPE_PREFIX}*`;
 export const ENTITY_TYPE_PATTERN = `${ENTITY_TYPE_PREFIX}*`;
 
-/** Leaves out memory types and, when the AI index dreams, the fact and entity types dreaming writes. */
-export const excludeMemoryKiTypesCondition = (dreams: boolean): string =>
+/** Leaves out memory types and the KI types under `dreamedPrefixes`, the kinds the AI index dreams. */
+export const excludeMemoryKiTypesCondition = (dreamedPrefixes: readonly string[]): string =>
   `type IS NULL OR (${[
     ...MEMORY_KI_TYPES.map((type) => `type != "${type}"`),
-    ...(dreams ? [FACT_TYPE_PATTERN, ENTITY_TYPE_PATTERN] : []).map(
-      (pattern) => `NOT type LIKE "${pattern}"`
-    ),
+    ...dreamedPrefixes.map((prefix) => `NOT type LIKE "${prefix}*"`),
   ].join(' AND ')})`;
 
-export const excludeMemoryKiTypesFilter = (dreams: boolean): string =>
-  `| WHERE ${excludeMemoryKiTypesCondition(dreams)}`;
+export const excludeMemoryKiTypesFilter = (dreamedPrefixes: readonly string[]): string =>
+  `| WHERE ${excludeMemoryKiTypesCondition(dreamedPrefixes)}`;
 
 /**
  * Three fixed ES|QL shapes for the canonical KI schema (`title`, `description`, `content`, their
@@ -40,12 +38,15 @@ export const excludeMemoryKiTypesFilter = (dreams: boolean): string =>
  */
 export const buildExampleQueries = (
   { type, value }: AiIndexDest,
-  { excludeMemory = false, dreams = false }: { excludeMemory?: boolean; dreams?: boolean } = {}
+  {
+    excludeMemory = false,
+    dreamedPrefixes = [],
+  }: { excludeMemory?: boolean; dreamedPrefixes?: readonly string[] } = {}
 ): AiIndexExampleQuery[] => {
   const from = [
     `FROM ${value} METADATA _id, _index, _score`,
     ...kiLifecyclePipeline(type).map((command) => `| ${command}`),
-    ...(excludeMemory ? [excludeMemoryKiTypesFilter(dreams)] : []),
+    ...(excludeMemory ? [excludeMemoryKiTypesFilter(dreamedPrefixes)] : []),
   ];
   return [
     {

@@ -43,4 +43,27 @@ describe('buildMemoryExampleQueries', () => {
       expect(esql).toContain('\n| SORT updated_at DESC, _id ASC\n');
     }
   });
+
+  it('finds an entity by name with a full text match on title, after the latest revision', () => {
+    expect(queries.entityByName).toBe(
+      [
+        'FROM ai-index-idx-support METADATA _id, _score',
+        '| WHERE type LIKE "entity.*"',
+        '| INLINE STATS latest_at = MAX(@timestamp) BY id',
+        '| WHERE @timestamp == latest_at',
+        '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active")',
+        '  AND (expires_at IS NULL OR expires_at > NOW())',
+        '| WHERE title:"<name>"',
+        '| SORT _score DESC, _id ASC',
+        '| KEEP id, title, description, content, type, tags, updated_at, references.uri, references.relation, references.description',
+        '| LIMIT 5',
+      ].join('\n')
+    );
+  });
+
+  it('lists entities of one type, newest first', () => {
+    expect(queries.entitiesOfType).toContain('\n| WHERE type == "entity.<entity type>"\n');
+    expect(queries.entitiesOfType).toContain('\n| WHERE @timestamp == latest_at\n');
+    expect(queries.entitiesOfType).toContain('\n| SORT updated_at DESC, _id ASC\n');
+  });
 });

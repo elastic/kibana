@@ -58,7 +58,7 @@ describe('describeAiIndexAggregations', () => {
     });
 
     expect(esqlQuery).not.toHaveBeenCalled();
-    expect(result).toEqual({ kiTypeCounts: [], tagCounts: [], factTypeCounts: [] });
+    expect(result).toEqual({ kiTypeCounts: [], tagCounts: [], dreamedTypeCounts: [] });
   });
 
   it('skips fields whose type conflicts across indices or is not a keyword', async () => {
@@ -68,7 +68,7 @@ describe('describeAiIndexAggregations', () => {
     });
 
     expect(esqlQuery).not.toHaveBeenCalled();
-    expect(result).toEqual({ kiTypeCounts: [], tagCounts: [], factTypeCounts: [] });
+    expect(result).toEqual({ kiTypeCounts: [], tagCounts: [], dreamedTypeCounts: [] });
   });
 
   it('accepts every keyword-family type', async () => {
@@ -166,7 +166,7 @@ describe('describeAiIndexAggregations', () => {
         { type: 'detection', count: 2 },
       ],
       tagCounts: [{ tag: 'billing', count: 3 }],
-      factTypeCounts: [],
+      dreamedTypeCounts: [],
     });
   });
 
@@ -174,7 +174,7 @@ describe('describeAiIndexAggregations', () => {
     await describeAiIndexAggregations({
       ...params,
       fields: [field('type', true), field('tags', true)],
-      dreams: true,
+      dreamedPrefixes: ['fact.', 'entity.'],
     });
 
     expect(queries()).toHaveLength(2);
@@ -184,7 +184,7 @@ describe('describeAiIndexAggregations', () => {
     }
   });
 
-  it('counts only the given fact types, each of them', async () => {
+  it('counts the given fact and entity types in one query', async () => {
     const fields = [field('type', true)];
     await describeAiIndexAggregations({ ...params, fields });
     expect(queries()).toHaveLength(1);
@@ -192,29 +192,36 @@ describe('describeAiIndexAggregations', () => {
     esqlQuery.mockReset();
     esqlQuery.mockResolvedValueOnce(emptyResponse).mockResolvedValueOnce({
       columns: [{ name: 'count' }, { name: 'type' }],
-      values: [[4, 'fact.preference']],
+      values: [
+        [4, 'fact.preference'],
+        [2, 'entity.customer'],
+      ],
     });
     const result = await describeAiIndexAggregations({
       ...params,
       fields,
-      factTypes: ['fact.preference', 'fact.policy'],
+      dreamedTypes: ['fact.preference', 'fact.policy', 'entity.customer'],
     });
 
+    expect(esqlQuery).toHaveBeenCalledTimes(2);
     expect(esqlQuery).toHaveBeenLastCalledWith({
       query: [
         'FROM ai-index-idx-* METADATA _id, _index',
         LIFECYCLE,
-        '| WHERE type IN ("fact.preference", "fact.policy")',
+        '| WHERE type IN ("fact.preference", "fact.policy", "entity.customer")',
         '| WHERE type IS NOT NULL',
         '| STATS count = COUNT(*) BY type',
         '| SORT count DESC, type ASC',
-        '| LIMIT 2',
+        '| LIMIT 3',
       ].join('\n'),
       filter: buildAiIndexSpaceFilter('team-a'),
       allow_partial_results: false,
     });
     expect(Parser.parse(queries()[1]).errors).toEqual([]);
-    expect(result.factTypeCounts).toEqual([{ type: 'fact.preference', count: 4 }]);
+    expect(result.dreamedTypeCounts).toEqual([
+      { type: 'fact.preference', count: 4 },
+      { type: 'entity.customer', count: 2 },
+    ]);
   });
 
   it('rethrows Elasticsearch errors', async () => {

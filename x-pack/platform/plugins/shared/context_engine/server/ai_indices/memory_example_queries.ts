@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { FACT_TYPE_PREFIX } from '../../common/dreaming';
-import { FACT_TYPE_PATTERN } from './example_queries';
+import { ENTITY_TYPE_PREFIX, FACT_TYPE_PREFIX } from '../../common/dreaming';
+import { ENTITY_TYPE_PATTERN, FACT_TYPE_PATTERN } from './example_queries';
 
 export interface MemoryExampleQueries {
   crossSession: string;
   factsOfType: string;
   recentFacts: string;
+  entityByName: string;
+  entitiesOfType: string;
 }
 
 const latestActiveRevision = [
@@ -24,7 +26,7 @@ const latestActiveRevision = [
 const KEEP_WITH_REFERENCES =
   '| KEEP id, title, description, content, type, tags, updated_at, references.uri, references.relation, references.description';
 
-const newestFacts = (target: string, typeFilter: string): string =>
+const newestOfType = (target: string, typeFilter: string): string =>
   [
     `FROM ${target} METADATA _id`,
     `| WHERE ${typeFilter}`,
@@ -53,6 +55,16 @@ export const buildMemoryExampleQueries = (
     KEEP_WITH_REFERENCES,
     '| LIMIT 10',
   ].join('\n'),
-  factsOfType: newestFacts(target, `type == "${FACT_TYPE_PREFIX}<fact type>"`),
-  recentFacts: newestFacts(target, `type LIKE "${FACT_TYPE_PATTERN}"`),
+  factsOfType: newestOfType(target, `type == "${FACT_TYPE_PREFIX}<fact type>"`),
+  recentFacts: newestOfType(target, `type LIKE "${FACT_TYPE_PATTERN}"`),
+  entityByName: [
+    `FROM ${target} METADATA _id, _score`,
+    `| WHERE type LIKE "${ENTITY_TYPE_PATTERN}"`,
+    ...latestActiveRevision,
+    '| WHERE title:"<name>"',
+    '| SORT _score DESC, _id ASC',
+    KEEP_WITH_REFERENCES,
+    '| LIMIT 5',
+  ].join('\n'),
+  entitiesOfType: newestOfType(target, `type == "${ENTITY_TYPE_PREFIX}<entity type>"`),
 });

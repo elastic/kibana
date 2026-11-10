@@ -63,7 +63,7 @@ describe('buildExampleQueries', () => {
       expect(esql).not.toContain('memory.session');
     }
     for (const { esql } of queriesExcludingMemory) {
-      expect(esql).toContain(excludeMemoryKiTypesFilter(false));
+      expect(esql).toContain(excludeMemoryKiTypesFilter([]));
       expect(esql).not.toContain('fact.*');
     }
   });
@@ -71,7 +71,7 @@ describe('buildExampleQueries', () => {
   it('also excludes the types dreaming writes when the AI index dreams', () => {
     const dreaming = buildExampleQueries(
       { type: 'index', value: 'ai-index-idx-support*' },
-      { excludeMemory: true, dreams: true }
+      { excludeMemory: true, dreamedPrefixes: ['fact.', 'entity.'] }
     );
 
     for (const { esql } of dreaming) {
@@ -79,6 +79,19 @@ describe('buildExampleQueries', () => {
         '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")'
       );
       expect(Parser.parse(esql).errors).toEqual([]);
+    }
+  });
+
+  it('excludes only the kinds the AI index dreams', () => {
+    const factsOnly = buildExampleQueries(
+      { type: 'index', value: 'ai-index-idx-support*' },
+      { excludeMemory: true, dreamedPrefixes: ['fact.'] }
+    );
+
+    for (const { esql } of factsOnly) {
+      expect(esql).toContain(
+        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*")\n'
+      );
     }
   });
 
