@@ -46,7 +46,7 @@ describe('routingFlyoutMachine', () => {
     expect(context.rules).toEqual([
       {
         key: 'rule-0',
-        condition: undefined,
+        when: undefined,
         action: 'move',
         telemetry: ['logs'],
         base: { destinations: ['es-logs'] },
@@ -74,7 +74,7 @@ describe('routingFlyoutMachine', () => {
       type: 'rule.update',
       key: 'rule-1',
       changes: {
-        condition: { field: 'team', operator: 'equals', value: 'a' },
+        when: 'resource.attributes["team"] == "a"',
         action: 'copy',
       },
     });
@@ -86,6 +86,26 @@ describe('routingFlyoutMachine', () => {
     ]);
   });
 
+  it('writes the condition typed into the rule as its when', () => {
+    const { flyout, requests } = startFlyout({
+      target: { kind: 'pipeline', pipelineId: 'routing' },
+      rules: [
+        { when: 'resource.attributes["env"] == "prod"', destinations: ['es-a'] },
+        { destinations: ['es-logs'] },
+      ],
+    });
+    flyout.send({
+      type: 'rule.update',
+      key: 'rule-0',
+      changes: { when: '  severity_number >= 17 and IsMatch(body, "error")  ' },
+    });
+    flyout.send({ type: 'flyout.save' });
+    expect(requests[0].rules).toEqual([
+      { when: 'severity_number >= 17 and IsMatch(body, "error")', destinations: ['es-a'] },
+      { destinations: ['es-logs'] },
+    ]);
+  });
+
   it('widens the routing node to the signals its rules handle', () => {
     const { flyout, requests } = startFlyout();
     flyout.send({ type: 'rule.add' });
@@ -93,7 +113,7 @@ describe('routingFlyoutMachine', () => {
       type: 'rule.update',
       key: 'rule-1',
       changes: {
-        condition: { field: 'service.name', operator: 'equals', value: 'x' },
+        when: 'resource.attributes["service.name"] == "x"',
         telemetry: ['traces', 'logs'],
       },
     });
@@ -133,7 +153,7 @@ describe('routingFlyoutMachine', () => {
     flyout.send({
       type: 'rule.update',
       key: 'rule-1',
-      changes: { condition: { field: 'body', operator: 'equals', value: 'x' } },
+      changes: { when: 'resource.attributes["body"] == "x"' },
     });
     const unmatched = () => {
       const { rules, availableSignals } = flyout.getSnapshot().context;
@@ -223,11 +243,11 @@ describe('routingFlyoutMachine', () => {
     flyout.send({
       type: 'rule.update',
       key: 'rule-0',
-      changes: { condition: { field: '  ', operator: 'equals', value: 'a' } },
+      changes: { when: '  ' },
     });
     const { rules } = flyout.getSnapshot().context;
     expect(keys()).toEqual(['rule-1', 'rule-2', 'rule-0']);
-    expect(rules[2].condition).toBeUndefined();
+    expect(rules[2].when).toBeUndefined();
 
     // Default rules cannot be dragged above the conditional ones.
     flyout.send({ type: 'rule.reorder', from: 2, to: 0 });
@@ -256,7 +276,7 @@ describe('routingFlyoutMachine', () => {
     flyout.send({
       type: 'rule.update',
       key: 'rule-0',
-      changes: { condition: { field: '', operator: 'equals', value: '' } },
+      changes: { when: '' },
     });
     flyout.send({ type: 'flyout.save' });
     expect(requests[0].rules).toEqual([{ destinations: ['es-logs', 'es-a'] }]);
@@ -286,7 +306,7 @@ describe('routingFlyoutMachine', () => {
     flyout.send({
       type: 'rule.update',
       key: 'rule-2',
-      changes: { condition: { field: 'team', operator: 'equals', value: 'a' } },
+      changes: { when: 'resource.attributes["team"] == "a"' },
     });
     flyout.send({ type: 'rule.reorder', from: 1, to: 0 });
     expect(keys()).toEqual(['rule-2', 'rule-0', 'rule-1']);
@@ -306,7 +326,7 @@ describe('routingFlyoutMachine', () => {
     flyout.send({
       type: 'rule.update',
       key: 'rule-1',
-      changes: { condition: { field: '', operator: 'equals', value: '' } },
+      changes: { when: '' },
     });
     expect(flyout.getSnapshot().context.rules.map(({ key }) => key)).toEqual(['rule-0']);
 
@@ -326,7 +346,7 @@ describe('routingFlyoutMachine', () => {
     flyout.send({
       type: 'rule.update',
       key: 'rule-1',
-      changes: { condition: { field: 'team', operator: 'equals', value: 'a' } },
+      changes: { when: 'resource.attributes["team"] == "a"' },
     });
     flyout.send({ type: 'flyout.save' });
     expect(requests[0].rules).toEqual([
@@ -349,7 +369,7 @@ describe('routingFlyoutMachine', () => {
     flyout.send({
       type: 'rule.update',
       key: 'rule-1',
-      changes: { condition: undefined, telemetry: ['traces'] },
+      changes: { when: undefined, telemetry: ['traces'] },
     });
     expect(keys()).toEqual(['rule-0', 'rule-1']);
 
@@ -357,7 +377,7 @@ describe('routingFlyoutMachine', () => {
     flyout.send({
       type: 'rule.update',
       key: 'rule-2',
-      changes: { condition: undefined, action: 'copy', telemetry: ['logs'] },
+      changes: { when: undefined, action: 'copy', telemetry: ['logs'] },
     });
     expect(keys()).toEqual(['rule-2', 'rule-0', 'rule-1']);
   });
@@ -378,7 +398,7 @@ describe('routingFlyoutMachine', () => {
     flyout.send({
       type: 'rule.update',
       key: 'rule-3',
-      changes: { condition: undefined, telemetry: ['logs', 'traces'] },
+      changes: { when: undefined, telemetry: ['logs', 'traces'] },
     });
     expect(keys()).toEqual(['rule-0', 'rule-1', 'rule-2']);
 
@@ -404,7 +424,7 @@ describe('routingFlyoutMachine', () => {
     flyout.send({
       type: 'rule.update',
       key: 'rule-2',
-      changes: { condition: undefined, telemetry: ['logs', 'traces'] },
+      changes: { when: undefined, telemetry: ['logs', 'traces'] },
     });
     const { rules, availableSignals } = flyout.getSnapshot().context;
     expect(rules.map(({ key }) => key)).toEqual(['rule-0', 'rule-1', 'rule-2']);

@@ -13,12 +13,7 @@ import {
   type UnitSignal,
 } from '../../../services/unit_pipeline';
 import type { UnitRoutableLine } from '../../../services/unit_connections';
-import {
-  createEmptyCondition,
-  parseWhen,
-  serializeCondition,
-  type RoutingRuleCondition,
-} from '../routing_rule_condition';
+import { normalizeWhen } from '../routing_rule_condition';
 
 /** What a rule does with matching data: `move` it to the targets, or `copy` it and keep evaluating. */
 export type RoutingAction = NonNullable<RouteRule['action']>;
@@ -33,8 +28,11 @@ export type RoutingFlyoutTarget =
 export interface RoutingRuleDraft {
   /** Stable list key; routing rules have no id of their own. */
   key: string;
-  /** `undefined` for a rule with no condition, which matches all remaining data. */
-  condition?: RoutingRuleCondition;
+  /**
+   * The rule's OTTL condition; `undefined` for a rule with no condition, which
+   * matches all remaining data. A rule added here has an empty one until applied.
+   */
+  when?: string;
   action: RoutingAction;
   /** Signals the rule handles; never empty. */
   telemetry: UnitSignal[];
@@ -70,9 +68,7 @@ export interface RoutingFlyoutContext {
   parentRef: AnyActorRef;
 }
 
-export type RoutingRuleChanges = Partial<
-  Pick<RoutingRuleDraft, 'condition' | 'action' | 'telemetry'>
->;
+export type RoutingRuleChanges = Partial<Pick<RoutingRuleDraft, 'when' | 'action' | 'telemetry'>>;
 
 export type RoutingFlyoutEvent =
   | { type: 'rule.add' }
@@ -96,7 +92,7 @@ const toDraft =
   (signals: readonly UnitSignal[]) =>
   (rule: RouteRule, index: number): RoutingRuleDraft => ({
     key: `rule-${index}`,
-    condition: parseWhen(rule.when),
+    when: rule.when,
     action: rule.action ?? DEFAULT_ROUTING_ACTION,
     telemetry: [...(rule.telemetry ?? signals)],
     base: rule,
@@ -123,7 +119,7 @@ export const getUnmatchedSignals = (
   const handled = getRulesTelemetry(rules, availableSignals);
   const covered = new Set(
     rules
-      .filter(({ condition }) => serializeCondition(condition) === undefined)
+      .filter(({ when }) => normalizeWhen(when) === undefined)
       .flatMap(({ telemetry }) => telemetry)
   );
   return (handled.length > 0 ? handled : [...availableSignals]).filter(
@@ -139,10 +135,10 @@ const sameSignals = (left: readonly UnitSignal[], right: readonly UnitSignal[]):
  * node leaves `telemetry` unset, unless it set one before.
  */
 export const toRouteRule = (
-  { condition, action, telemetry, base }: RoutingRuleDraft,
+  { when: draftWhen, action, telemetry, base }: RoutingRuleDraft,
   supportedTelemetry: readonly UnitSignal[]
 ): RouteRule => {
-  const when = serializeCondition(condition);
+  const when = normalizeWhen(draftWhen);
   // Leave the default action implicit on rules that never set it.
   const writeAction = base.action !== undefined || action !== DEFAULT_ROUTING_ACTION;
   const writeTelemetry =
@@ -167,8 +163,8 @@ export const toRouteRule = (
  * Whether the rule moves all remaining data, having no condition once saved. A
  * copy rule with no condition passes the data on, so it can sit anywhere.
  */
-export const isDefaultRule = ({ condition, action }: RoutingRuleDraft): boolean =>
-  action === 'move' && serializeCondition(condition) === undefined;
+export const isDefaultRule = ({ when, action }: RoutingRuleDraft): boolean =>
+  action === 'move' && normalizeWhen(when) === undefined;
 
 /**
  * Rules with conditions first, then the default rules, each in their current
@@ -227,7 +223,7 @@ const mergeRouteTargets = (kept: RouteRule, duplicate: RouteRule): RouteRule | u
 };
 
 const isSameRule = (left: RoutingRuleDraft, right: RoutingRuleDraft): boolean =>
-  serializeCondition(left.condition) === serializeCondition(right.condition) &&
+  normalizeWhen(left.when) === normalizeWhen(right.when) &&
   left.action === right.action &&
   sameSignals(left.telemetry, right.telemetry);
 
@@ -290,7 +286,7 @@ export const routingFlyoutMachine = setup({
     addRule: assign(({ context }) => {
       const added: RoutingRuleDraft = {
         key: `rule-${context.nextKey}`,
-        condition: createEmptyCondition(),
+        when: '',
         action: DEFAULT_ROUTING_ACTION,
         telemetry: [...context.signals],
         // Rules added here route nowhere until they are connected on the canvas.
@@ -311,9 +307,10 @@ export const routingFlyoutMachine = setup({
       }
       const next: RoutingRuleDraft = { ...updated, ...event.changes };
       const others = context.rules.filter(({ key }) => key !== event.key);
-      if (serializeCondition(next.condition) === undefined) {
+      const when = normalizeWhen(next.when);
+      if (when === undefined) {
         // A cleared condition leaves no condition; a move rule then joins the default rules at the end.
-        const cleared = { ...next, condition: undefined };
+        const cleared = { ...next, when: undefined };
         return {
           rules: withDuplicateMerged(
             isDefaultRule(cleared)
@@ -326,7 +323,7 @@ export const routingFlyoutMachine = setup({
       }
       return {
         rules: withDuplicateMerged(
-          context.rules.map((rule) => (rule.key === event.key ? next : rule)),
+          context.rules.map((rule) => (rule.key === event.key ? { ...next, when } : rule)),
           event.key
         ),
         hasChanges: true,

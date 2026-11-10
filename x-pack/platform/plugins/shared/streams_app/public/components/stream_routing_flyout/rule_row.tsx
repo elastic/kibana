@@ -22,7 +22,6 @@ import {
   EuiIcon,
   EuiPanel,
   EuiRadioGroup,
-  EuiSelect,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -30,17 +29,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { UnitSignal } from '../../services/unit_pipeline';
 import { ROUTING_SIGNAL_LABELS } from './signal_labels';
-import {
-  createEmptyCondition,
-  isRawCondition,
-  serializeCondition,
-  type RoutingConditionOperator,
-  type RoutingFieldCondition,
-  type RoutingRuleCondition,
-} from './routing_rule_condition';
+import { normalizeWhen } from './routing_rule_condition';
 import {
   isDefaultRule,
   type RoutingAction,
@@ -79,74 +70,18 @@ const actionDescriptions: Readonly<Record<RoutingAction, string>> = {
 
 const routingActions: readonly RoutingAction[] = ['move', 'copy'];
 
-const operatorOptions: Array<{ value: RoutingConditionOperator; text: string }> = [
-  {
-    value: 'equals',
-    text: i18n.translate('xpack.streams.routingFlyout.rule.equalsOperator', {
-      defaultMessage: 'Equals',
-    }),
-  },
-  {
-    value: 'notEquals',
-    text: i18n.translate('xpack.streams.routingFlyout.rule.notEqualsOperator', {
-      defaultMessage: 'Does not equal',
-    }),
-  },
-];
+type RoutingRuleEdit = Pick<RoutingRuleDraft, 'when' | 'action' | 'telemetry'>;
 
-type RoutingRuleEdit = Pick<RoutingRuleDraft, 'condition' | 'action' | 'telemetry'>;
+/** A rule added in the flyout has an empty condition until it is applied, so it opens ready to edit. */
+const isUnsetCondition = ({ when }: RoutingRuleDraft): boolean => when === '';
 
-/** A rule added in the flyout has no field yet, so it opens ready to edit. */
-const isUnsetCondition = ({ condition }: RoutingRuleDraft): boolean =>
-  condition !== undefined && !isRawCondition(condition) && condition.field === '';
-
-function RoutingConditionSummary({ condition }: { condition: RoutingFieldCondition }) {
-  const field = <EuiCode>{condition.field}</EuiCode>;
-  const value = <EuiCode>{`"${condition.value}"`}</EuiCode>;
-  return (
-    <EuiText size="s" data-test-subj="streamsRoutingRuleConditionSummary">
-      {condition.operator === 'notEquals' ? (
-        <FormattedMessage
-          id="xpack.streams.routingFlyout.rule.notEqualsSummary"
-          defaultMessage="{field} does not equal {value}"
-          values={{ field, value }}
-        />
-      ) : (
-        <FormattedMessage
-          id="xpack.streams.routingFlyout.rule.equalsSummary"
-          defaultMessage="{field} equals {value}"
-          values={{ field, value }}
-        />
-      )}
-    </EuiText>
-  );
-}
-
-function RoutingRawCondition({ raw }: { raw: string }) {
-  return (
-    <EuiFormRow
-      fullWidth
-      label={i18n.translate('xpack.streams.routingFlyout.rule.conditionLabel', {
-        defaultMessage: 'Condition',
-      })}
-      helpText={i18n.translate('xpack.streams.routingFlyout.rule.rawConditionHelp', {
-        defaultMessage: 'This condition can only be edited in the YAML configuration.',
-      })}
-    >
-      <EuiCode data-test-subj="streamsRoutingRuleRawCondition">{raw}</EuiCode>
-    </EuiFormRow>
-  );
-}
-
-function RoutingRuleView({ rule: { condition, action, telemetry } }: { rule: RoutingRuleDraft }) {
-  const isCatchAll = serializeCondition(condition) === undefined;
+function RoutingRuleView({ rule: { when, action, telemetry } }: { rule: RoutingRuleDraft }) {
+  const condition = normalizeWhen(when);
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
       <EuiFlexItem>
-        {isRawCondition(condition) ? (
-          <EuiCode data-test-subj="streamsRoutingRuleRawCondition">{condition.raw}</EuiCode>
-        ) : condition && !isCatchAll ? (
-          <RoutingConditionSummary condition={condition} />
+        {condition !== undefined ? (
+          <EuiCode data-test-subj="streamsRoutingRuleCondition">{condition}</EuiCode>
         ) : action === 'copy' ? (
           <EuiText data-test-subj="streamsRoutingRuleCatchAll">
             {i18n.translate('xpack.streams.routingFlyout.rule.copyAllBadge', {
@@ -173,90 +108,31 @@ function RoutingRuleView({ rule: { condition, action, telemetry } }: { rule: Rou
 }
 
 function RoutingConditionForm({
-  condition,
+  when,
   onChange,
 }: {
-  condition: RoutingRuleCondition | undefined;
-  onChange: (condition: RoutingFieldCondition) => void;
+  when: string | undefined;
+  onChange: (when: string) => void;
 }) {
-  if (isRawCondition(condition)) {
-    return <RoutingRawCondition raw={condition.raw} />;
-  }
-  const current = condition ?? createEmptyCondition();
-  const update = (changes: Partial<RoutingFieldCondition>) => onChange({ ...current, ...changes });
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-      <EuiFlexItem>
-        <EuiText color="default">
-          <strong>
-            {i18n.translate('xpack.streams.renderConditionForm.strong.conditionLabel', {
-              defaultMessage: 'Condition',
-            })}
-          </strong>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup gutterSize="s" responsive={false}>
-          <EuiFlexItem>
-            <EuiFormRow
-              fullWidth
-              aria-label={i18n.translate('xpack.streams.routingFlyout.rule.fieldLabel', {
-                defaultMessage: 'Field',
-              })}
-            >
-              <EuiFieldText
-                fullWidth
-                compressed
-                value={current.field}
-                placeholder={i18n.translate('xpack.streams.routingFlyout.rule.fieldPlaceholder', {
-                  defaultMessage: 'service.name',
-                })}
-                onChange={(event) => update({ field: event.target.value })}
-                data-test-subj="streamsRoutingRuleField"
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              aria-label={i18n.translate('xpack.streams.routingFlyout.rule.operatorLabel', {
-                defaultMessage: 'Operator',
-              })}
-            >
-              <EuiSelect
-                compressed
-                options={operatorOptions}
-                value={current.operator}
-                onChange={(event) => {
-                  const selected = operatorOptions.find(
-                    (option) => option.value === event.target.value
-                  );
-                  if (selected) {
-                    update({ operator: selected.value });
-                  }
-                }}
-                data-test-subj="streamsRoutingRuleOperator"
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              fullWidth
-              aria-label={i18n.translate('xpack.streams.routingFlyout.rule.valueLabel', {
-                defaultMessage: 'Value',
-              })}
-            >
-              <EuiFieldText
-                fullWidth
-                compressed
-                value={current.value}
-                onChange={(event) => update({ value: event.target.value })}
-                data-test-subj="streamsRoutingRuleValue"
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFormRow
+      fullWidth
+      label={i18n.translate('xpack.streams.routingFlyout.rule.conditionLabel', {
+        defaultMessage: 'Condition',
+      })}
+      helpText={i18n.translate('xpack.streams.routingFlyout.rule.conditionHelp', {
+        defaultMessage: 'An OTTL condition. Leave it empty to match all remaining data.',
+      })}
+    >
+      <EuiFieldText
+        fullWidth
+        compressed
+        value={when ?? ''}
+        placeholder='resource.attributes["env"] == "prod"'
+        onChange={(event) => onChange(event.target.value)}
+        data-test-subj="streamsRoutingRuleConditionInput"
+      />
+    </EuiFormRow>
   );
 }
 
@@ -280,10 +156,7 @@ function RoutingRuleEditForm({
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        <RoutingConditionForm
-          condition={draft.condition}
-          onChange={(condition) => onChange({ ...draft, condition })}
-        />
+        <RoutingConditionForm when={draft.when} onChange={(when) => onChange({ ...draft, when })} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFormRow
@@ -390,12 +263,12 @@ export function RoutingRuleRow({
   dragHandleProps,
 }: RoutingRuleRowProps) {
   const { euiTheme } = useEuiTheme();
-  const { key, condition, action, telemetry } = rule;
+  const { key, when, action, telemetry } = rule;
   // A new rule is only created once its form is submitted; cancelling it removes the rule.
   const [isCreated, setIsCreated] = useState(() => !isUnsetCondition(rule));
   // Edits stay in the row until they are applied, so cancelling leaves the rule unchanged.
   const [edit, setEdit] = useState<RoutingRuleEdit | undefined>(() =>
-    isUnsetCondition(rule) ? { condition, action, telemetry } : undefined
+    isUnsetCondition(rule) ? { when, action, telemetry } : undefined
   );
   const isEditing = editable && edit !== undefined;
   const isCatchAll = isDefaultRule(rule);
@@ -448,7 +321,7 @@ export function RoutingRuleRow({
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            {editable && rule.condition && (
+            {editable && !isCatchAll && (
               <EuiFlexItem grow={false}>
                 <EuiPanel
                   color="transparent"
@@ -486,7 +359,7 @@ export function RoutingRuleRow({
                   <EuiButtonIcon
                     iconType="pencil"
                     aria-label={editLabel}
-                    onClick={() => setEdit({ condition, action, telemetry })}
+                    onClick={() => setEdit({ when, action, telemetry })}
                     data-test-subj="streamsRoutingRuleEditToggle"
                   />
                 </EuiToolTip>

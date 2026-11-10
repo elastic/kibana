@@ -295,7 +295,7 @@ describe('canvas routing flyout', () => {
       type: 'rule.update',
       key: 'rule-1',
       changes: {
-        condition: { field: 'service.name', operator: 'equals', value: 'x' },
+        when: 'resource.attributes["service.name"] == "x"',
         action: 'copy',
       },
     });
