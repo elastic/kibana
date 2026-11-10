@@ -27,6 +27,7 @@ import { useAppStateSelector } from '../../state_management/redux';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
 import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
+import { GroupSimilarMessagesButton } from '../group_similar_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {
   internalStateActions,
@@ -133,6 +134,13 @@ export const DiscoverMainContent = ({
           hitsCounterVariant={hitsCounterVariant}
           dataView={dataView}
           focusOnMountRef={viewModeFocusOnMountRef}
+          append={
+            isEsqlMode &&
+            viewMode === VIEW_MODE.DOCUMENT_LEVEL &&
+            hitsCounterVariant !== 'groups' ? (
+              <GroupSimilarMessagesButton />
+            ) : undefined
+          }
           prepend={
             showPanelsToggle ? (
               <PanelsToggle
