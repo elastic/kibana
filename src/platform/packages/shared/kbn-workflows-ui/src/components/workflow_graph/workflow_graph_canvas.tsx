@@ -367,7 +367,6 @@ function CanvasMinimap({
               onClick={() => setIsExpanded(true)}
               data-test-subj="workflowCanvas-expand-minimap"
               title=""
-              css={{ borderRadius: 6 }}
             />
           </EuiToolTip>
         </EuiButtonGroup>
@@ -393,7 +392,6 @@ function CanvasMinimap({
             onClick={() => setIsExpanded(false)}
             data-test-subj="workflowCanvas-collapse-minimap"
             title=""
-            css={{ borderRadius: 6 }}
           />
         </EuiToolTip>
       </div>
