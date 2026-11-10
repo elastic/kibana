@@ -293,7 +293,7 @@ steps:
             - exit_status: '-1'
               limit: 3
 
-      # G10: security-persona-matrix-attack-discovery drives the production attack-discovery
+      # security-persona-matrix-attack-discovery drives the production attack-discovery
       # _generate API end to end (Chrysalis 95-alert snapshot). The attack_discovery_runner
       # and attack_discovery_review managed workflows are enabled shipped AlertZero workers,
       # so this suite gates shipped behavior and belongs in the weekly signal.
@@ -313,8 +313,8 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: '-1'
@@ -337,7 +337,6 @@ steps:
           imageProject: elastic-images-prod
           provider: gcp
           machineType: n2-standard-8
-          diskSizeGb: 130
           preemptible: true
           spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:

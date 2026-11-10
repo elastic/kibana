@@ -254,14 +254,15 @@ function configureExperiment({
           const firstExpectedIndex = domainToolCalls.findIndex(
             (t) => t.tool_id === expectedOnlyToolId
           );
+          const isAllowedPreceding = (id: unknown) =>
+            typeof id === 'string' && allowedPrecedingToolIds.includes(id);
           const allAllowed =
             domainToolCalls.every(
-              (t) =>
-                t.tool_id === expectedOnlyToolId || allowedPrecedingToolIds.includes(t.tool_id!)
+              (t) => t.tool_id === expectedOnlyToolId || isAllowedPreceding(t.tool_id)
             ) &&
             // every allowed-preceding call must happen before the first expected call
             domainToolCalls.every((t, i) =>
-              allowedPrecedingToolIds.includes(t.tool_id!) ? i < firstExpectedIndex : true
+              isAllowedPreceding(t.tool_id) ? i < firstExpectedIndex : true
             );
           return {
             score: hasExpected && allAllowed ? 1 : 0,

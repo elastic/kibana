@@ -283,6 +283,13 @@ describe('ruleJustifyingVerdict', () => {
     ).toBe(POWERSHELL);
   });
 
+  it.each([
+    `**Verdict:** covered_enabled\n\n**${OFFICE_CMD}** covers this, so you don't need a new rule.`,
+    `covered_enabled: ${OFFICE_CMD} is enabled and doesn't need any changes.`,
+  ])('does not read a negated need as a denial of the rule: %s', (answer) => {
+    expect(ruleJustifyingVerdict(answer, 'covered_enabled', SIBLING_RULES)).toBe(OFFICE_CMD);
+  });
+
   it('does not leak credit backwards across a credit introduction', () => {
     // "the covering rule is <x>" talks about <x>, not the rule named before the conjunction.
     // Region overlap credited Office too and its nearness to the verdict won, passing the
@@ -307,6 +314,9 @@ describe('claimsMutation', () => {
     'The rule has now been installed for you.',
     'The rule has been enabled on your behalf.',
     'The rule is now active.',
+    'I went ahead and enabled the SMB rule for you.',
+    "I've gone ahead and installed the prebuilt rule.",
+    'Done, the SMB rule is now turned on.',
   ])('flags a fabricated change: %s', (answer) => {
     expect(claimsMutation(answer)).toBe(true);
   });
@@ -315,6 +325,7 @@ describe('claimsMutation', () => {
     'You can enable the rule from the rule page.',
     'I have not enabled anything; open the rule page to switch it on.',
     'The rule is disabled. Enable it to get coverage.',
+    'The rule has been enabled since March, so it is already active.',
     'Install it from the prebuilt rules page.',
     'Lateral Movement via SMB has been created in your environment but is disabled.',
     'The rule exists and has already been installed, but it is disabled.',

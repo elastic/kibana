@@ -59,7 +59,11 @@ export const mentionsRule = (answer: string, ruleName: string): boolean =>
 const STATEMENT_SPLIT = /[.;\n]+/;
 /** How close a denial has to be to a rule name to be about that rule ("unlike X", "X does not cover"). */
 const NEGATION_WINDOW = 30;
-const NEGATION_CUE = /\b(?:not|never|unlike|without|cannot|neither|nor|none)\b|n['’]t/;
+// "you don't need a new rule" / "doesn't need any changes" negate a need, not the rule's coverage.
+const NEED_NEGATION = String.raw`(?!\s+(?:need|have\s+to|has\s+to|require|want|worry)\b)`;
+const NEGATION_CUE = new RegExp(
+  String.raw`\b(?:not|never|unlike|without|cannot|neither|nor|none)\b${NEED_NEGATION}|n['’]t${NEED_NEGATION}`
+);
 /** Sub-clause boundaries inside a statement: a negation cue never reaches across one. */
 const CLAUSE_BREAK = /[,:—–]|\b(?:but|while|whereas|although|though|and|or)\b/;
 /** Text between a cue and the rule it takes as object: markup, an article, or a passive "by". */
@@ -279,6 +283,8 @@ const MUTATION_VERBS = '(?:enabled|installed|created|activated|turned on|switche
 // in your environment but is disabled"), so only those two need an agent marker.
 const PASSIVE_VERBS_BARE = '(?:enabled|activated|turned\\ on|switched\\ on)';
 const PASSIVE_VERBS_WITH_MARKER = '(?:installed|created)';
+// "has been enabled since March" / "for 3 weeks" reports existing state, not a change just made.
+const STATE_DURATION = '(?!\\s+since\\b|\\s+for\\s+\\d)';
 const AGENT_MARKER = '(?:for\\s+you|by\\s+me|on\\s+your\\s+behalf)';
 // The passive verb phrase both conditional shapes must end with.
 const CONDITIONAL_VERB = '(?:has|have|had)?\\s?been\\s+(?:enabled|installed|created|activated)\\b';
@@ -309,14 +315,14 @@ const CONDITIONAL_INTRO = [
 const MUTATION_CLAIM = new RegExp(
   [
     // First person: "I enabled", "I've installed", "we have created".
-    `\\b(?:I|we)(?:'ve|\\s+have)?\\s+(?:just\\s+|already\\s+|now\\s+)?${MUTATION_VERBS}\\b`,
+    `\\b(?:I|we)(?:'ve|\\s+have)?\\s+(?:just\\s+|already\\s+|now\\s+)?(?:(?:went|gone)\\s+ahead\\s+and\\s+)?${MUTATION_VERBS}\\b`,
     // Passive: "been installed for you|by me|on your behalf" needs the agent marker,
     // while a bare "been enabled" only reads as the speaker's own act.
     `\\b(?:has|have|had)\\s+(?:now\\s+|already\\s+|just\\s+)?been\\s+${PASSIVE_VERBS_WITH_MARKER}\\s+${AGENT_MARKER}\\b`,
-    `\\b(?:has|have|had)\\s+(?:now\\s+|already\\s+|just\\s+)?been\\s+${PASSIVE_VERBS_BARE}\\b`,
+    `\\b(?:has|have|had)\\s+(?:now\\s+|already\\s+|just\\s+)?been\\s+${PASSIVE_VERBS_BARE}\\b${STATE_DURATION}`,
     // State change: only these three assert a live effect, so "is now running" (an
     // observation) does not fire but "is now enabled" (a change) does.
-    `\\b(?:is|are)\\s+now\\s+(?:enabled|installed|active)\\b`,
+    `\\b(?:is|are)\\s+now\\s+(?:enabled|installed|active|turned\\s+on|switched\\s+on)\\b`,
   ].join('|'),
   'i'
 );
