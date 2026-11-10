@@ -31,6 +31,7 @@ export const workflowsExecutionEngineMock = {
       isEnabled: jest.fn().mockReturnValue(false),
       bindWorkload: jest.fn(),
       unbindWorkload: jest.fn(),
+      bulkUpdateWorkloadBindings: jest.fn(),
       getWorkloadBinding: jest.fn(),
     },
     __internalStorage: {

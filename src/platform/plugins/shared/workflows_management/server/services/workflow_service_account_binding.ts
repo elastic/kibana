@@ -8,8 +8,15 @@
  */
 
 import Boom from '@hapi/boom';
+import chunk from 'lodash/chunk';
 import isEqual from 'lodash/isEqual';
+import pMap from 'p-map';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
+import type {
+  ServiceAccountWorkloadBinding,
+  ServiceAccountWorkloadBindingChange,
+} from '@kbn/core-security-server';
+import { SERVICE_ACCOUNT_WORKLOAD_BINDING_CHANGES_MAX } from '@kbn/core-security-server';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 
@@ -19,6 +26,13 @@ import { applyWorkflowVersion } from '../lib/workflow_version';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 type Bindings = WorkflowsExecutionEnginePluginStart['serviceAccountBindings'];
+
+type WorkflowRevision = { seqNo: number; primaryTerm: number; accountId?: string } | null;
+
+export const BINDING_COMPENSATION_FAILED_MESSAGE =
+  'Workflow write and service account binding compensation failed. Reconcile the workflow binding before retrying.';
+
+const RECONCILE_READ_CONCURRENCY = 10;
 
 export const ensureWorkflowServiceAccountMutationAuthorized = async (
   core: CoreStart,
@@ -35,6 +49,193 @@ export const ensureWorkflowServiceAccountMutationAuthorized = async (
     throw Boom.forbidden('Modifying a service-account workflow requires manage_security.');
   }
   return request;
+};
+
+const ensureBindingChangeAllowed = async ({
+  bindings,
+  core,
+  getSpaceId,
+  spaceId,
+  request,
+}: {
+  bindings: Bindings;
+  core: CoreStart;
+  getSpaceId: (request: KibanaRequest) => string;
+  spaceId: string;
+  request?: KibanaRequest;
+}): Promise<KibanaRequest> => {
+  if (spaceId === GLOBAL_WORKFLOW_SPACE_ID) {
+    throw Boom.badRequest(
+      'Service account bindings require a workflow installed in a specific space.'
+    );
+  }
+  if (!bindings.isEnabled()) throw Boom.forbidden('Service account execution is disabled.');
+  const authenticatedRequest = await ensureWorkflowServiceAccountMutationAuthorized(core, request);
+  if (getSpaceId(authenticatedRequest) !== spaceId) {
+    throw Boom.badRequest('The authenticated request must target the workflow binding space.');
+  }
+  return authenticatedRequest;
+};
+
+/** The binding a workflow should end up with: bound to `accountId`, or unbound without one. */
+export interface WorkflowBindingTarget {
+  workflowId: string;
+  accountId?: string;
+}
+
+/**
+ * The outcome of one workflow's binding change. `written` is the binding the change left, or
+ * `null` after an unbind, and `changed` is false for an unbind that found no binding. A failure
+ * with `mayHaveApplied` set is a server error, which can still have reached the binding store.
+ */
+export type WorkflowBindingChangeOutcome =
+  | { ok: true; written: ServiceAccountWorkloadBinding | null; changed: boolean }
+  | { ok: false; error: string; mayHaveApplied: boolean };
+
+/** A binding change to undo because its workflow write failed. `undefined` when it is unknown. */
+export interface WorkflowBindingToReconcile {
+  workflowId: string;
+  written?: ServiceAccountWorkloadBinding | null;
+}
+
+/**
+ * Applies binding changes for many workflows of one space in bulk, before their workflow writes.
+ * Rejects, having changed nothing, when the request may not change bindings at all. Otherwise
+ * resolves an outcome per workflow, and one workflow's failure leaves the others applied.
+ */
+export const applyWorkflowBindingChanges = async ({
+  bindings,
+  core,
+  getSpaceId,
+  spaceId,
+  request,
+  targets,
+}: {
+  bindings: Bindings;
+  core: CoreStart;
+  getSpaceId: (request: KibanaRequest) => string;
+  spaceId: string;
+  request?: KibanaRequest;
+  targets: readonly WorkflowBindingTarget[];
+}): Promise<Map<string, WorkflowBindingChangeOutcome>> => {
+  const outcomes = new Map<string, WorkflowBindingChangeOutcome>();
+  if (targets.length === 0) return outcomes;
+  const authenticatedRequest = await ensureBindingChangeAllowed({
+    bindings,
+    core,
+    getSpaceId,
+    spaceId,
+    request,
+  });
+  for (const batch of chunk(targets, SERVICE_ACCOUNT_WORKLOAD_BINDING_CHANGES_MAX)) {
+    const results = await bindings.bulkUpdateWorkloadBindings(
+      authenticatedRequest,
+      batch.map(toBindingChange)
+    );
+    for (const result of results) {
+      if (!result.ok) {
+        const { statusCode, message } = result.error;
+        outcomes.set(result.workloadId, {
+          ok: false,
+          error: message,
+          mayHaveApplied: statusCode >= 500,
+        });
+      } else {
+        outcomes.set(
+          result.workloadId,
+          result.op === 'bind'
+            ? { ok: true, written: result.binding, changed: true }
+            : { ok: true, written: null, changed: result.removed }
+        );
+      }
+    }
+  }
+  return outcomes;
+};
+
+const toBindingChange = ({
+  workflowId,
+  accountId,
+}: WorkflowBindingTarget): ServiceAccountWorkloadBindingChange =>
+  accountId
+    ? { op: 'bind', workloadType: 'workflow', workloadId: workflowId, serviceAccountId: accountId }
+    : { op: 'unbind', workloadType: 'workflow', workloadId: workflowId };
+
+/**
+ * Undoes binding changes whose workflow writes failed, the way {@link withWorkflowBindingChange}
+ * compensates one: each binding is reconciled to the persisted workflow revision, and a binding
+ * changed concurrently since it was written is left alone. Resolves the workflows that could not
+ * be reconciled.
+ */
+export const reconcileWorkflowBindings = async ({
+  bindings,
+  logger,
+  spaceId,
+  request,
+  workflows,
+  getWorkflowRevision,
+}: {
+  bindings: Bindings;
+  logger: Logger;
+  spaceId: string;
+  request: KibanaRequest;
+  workflows: readonly WorkflowBindingToReconcile[];
+  getWorkflowRevision: (workflowId: string) => Promise<WorkflowRevision>;
+}): Promise<Set<string>> => {
+  const unreconciled = new Set<string>();
+  const targets = await pMap(
+    workflows,
+    async ({ workflowId, written }): Promise<WorkflowBindingTarget | undefined> => {
+      try {
+        const current = await bindings.getWorkloadBinding({
+          workloadType: 'workflow',
+          workloadId: workflowId,
+          spaceId,
+        });
+        // Both reads are best effort: workflow storage and bindings have no shared CAS.
+        if (written !== undefined && !isEqual(current, written)) {
+          logger.error(
+            `Binding compensation skipped after a concurrent change to workflow ${workflowId}.`
+          );
+          return undefined;
+        }
+        const targetAccountId = (await getWorkflowRevision(workflowId))?.accountId;
+        if (targetAccountId === current?.serviceAccountId) return undefined;
+        if (!targetAccountId && !current) return undefined;
+        return { workflowId, accountId: targetAccountId };
+      } catch (error) {
+        logger.error(
+          `Binding compensation failed for workflow ${workflowId}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        unreconciled.add(workflowId);
+        return undefined;
+      }
+    },
+    { concurrency: RECONCILE_READ_CONCURRENCY }
+  );
+  const changes = targets.filter((target): target is WorkflowBindingTarget => !!target);
+  for (const batch of chunk(changes, SERVICE_ACCOUNT_WORKLOAD_BINDING_CHANGES_MAX)) {
+    let failures: Array<{ workflowId: string; message: string }>;
+    try {
+      const results = await bindings.bulkUpdateWorkloadBindings(
+        request,
+        batch.map(toBindingChange)
+      );
+      failures = results.flatMap((result) =>
+        result.ok ? [] : [{ workflowId: result.workloadId, message: result.error.message }]
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      failures = batch.map(({ workflowId }) => ({ workflowId, message }));
+    }
+    for (const { workflowId, message } of failures) {
+      logger.error(`Binding compensation failed for workflow ${workflowId}: ${message}`);
+      unreconciled.add(workflowId);
+    }
+  }
+  return unreconciled;
 };
 
 export const withWorkflowBindingChange = async <T>({
@@ -67,16 +268,13 @@ export const withWorkflowBindingChange = async <T>({
   } | null>;
 }): Promise<T> => {
   if (!previousAccountId && !accountId) return write();
-  if (spaceId === GLOBAL_WORKFLOW_SPACE_ID) {
-    throw Boom.badRequest(
-      'Service account bindings require a workflow installed in a specific space.'
-    );
-  }
-  if (!bindings.isEnabled()) throw Boom.forbidden('Service account execution is disabled.');
-  const authenticatedRequest = await ensureWorkflowServiceAccountMutationAuthorized(core, request);
-  if (getSpaceId(authenticatedRequest) !== spaceId) {
-    throw Boom.badRequest('The authenticated request must target the workflow binding space.');
-  }
+  const authenticatedRequest = await ensureBindingChangeAllowed({
+    bindings,
+    core,
+    getSpaceId,
+    spaceId,
+    request,
+  });
   const coordinates = { workloadType: 'workflow', workloadId: workflowId, spaceId };
   const previous = await bindings.getWorkloadBinding(coordinates);
   const changed = accountId !== previous?.serviceAccountId;
@@ -132,9 +330,7 @@ export const withWorkflowBindingChange = async <T>({
               : String(compensationError)
           }`
         );
-        throw Boom.internal(
-          'Workflow write and service account binding compensation failed. Reconcile the workflow binding before retrying.'
-        );
+        throw Boom.internal(BINDING_COMPENSATION_FAILED_MESSAGE);
       }
     }
     throw error;
