@@ -120,8 +120,9 @@ export async function update(
 
   let expectedVersion = existing.version;
   if (shouldChangeAccessMode) {
+    // passing the version makes the change fail with a conflict if another save landed since `existing` was read
     const changeAccessModeResponse = await services.savedObjects.client.changeAccessMode(
-      [{ type: DASHBOARD_SAVED_OBJECT_TYPE, id }],
+      [{ type: DASHBOARD_SAVED_OBJECT_TYPE, id, version: existing.version }],
       {
         accessMode: desiredAccessMode,
       }

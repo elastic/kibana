@@ -275,6 +275,7 @@ export const changeObjectAccessControl = async (
     }
 
     const { id, type, esRequestIndex } = expectedBulkGetResult.value;
+    const { version } = objects[esRequestIndex];
     const rawDoc = bulkGetResponse!.body.docs[esRequestIndex];
 
     if (isMgetError(rawDoc) || !rawDoc?.found) {
@@ -304,7 +305,7 @@ export const changeObjectAccessControl = async (
     const currentSource = rawDoc._source;
 
     const versionProperties = getExpectedVersionProperties(
-      undefined,
+      version,
       rawDoc as unknown as SavedObjectsRawDoc
     );
 

@@ -51,12 +51,24 @@ describe('update history sequence', () => {
     // in-memory saved objects client with the optimistic concurrency control of the real one
     supportsAccessControl = false;
     savedObjectsClient = {
-      changeAccessMode: jest.fn(async (objects: Array<{ type: string; id: string }>) => {
-        stored = { ...stored, version: stored.version + 1 };
-        return {
-          objects: objects.map(({ type, id }) => ({ type, id, version: String(stored.version) })),
-        };
-      }),
+      changeAccessMode: jest.fn(
+        async (objects: Array<{ type: string; id: string; version?: string }>) => {
+          const [{ type, id, version }] = objects;
+          if (version !== undefined && version !== String(stored.version)) {
+            return {
+              objects: [
+                {
+                  type,
+                  id,
+                  error: SavedObjectsErrorHelpers.createConflictError(type, id).output.payload,
+                },
+              ],
+            };
+          }
+          stored = { ...stored, version: stored.version + 1 };
+          return { objects: [{ type, id, version: String(stored.version) }] };
+        }
+      ),
       get: jest.fn(async () => ({
         id: ID,
         type: 'dashboard',
@@ -154,6 +166,33 @@ describe('update history sequence', () => {
         expect.objectContaining({ version: '2' })
       );
       expect(stored.version).toBe(3);
+    });
+
+    it('passes the version it read to changeAccessMode', async () => {
+      await saveWithAccessMode();
+
+      expect(savedObjectsClient.changeAccessMode).toHaveBeenCalledWith(
+        [{ type: 'dashboard', id: ID, version: '1' }],
+        expect.anything()
+      );
+    });
+
+    it('rejects with a conflict, without updating, if another save landed before changeAccessMode', async () => {
+      savedObjectsClient.get.mockImplementationOnce(async () => {
+        const read = {
+          id: ID,
+          type: 'dashboard',
+          attributes: { ...stored.attributes },
+          references: [],
+          version: String(stored.version),
+        };
+        // a concurrent save commits after our read
+        stored = { ...stored, version: stored.version + 1 };
+        return read;
+      });
+
+      await expect(saveWithAccessMode()).rejects.toMatchObject({ statusCode: 409 });
+      expect(savedObjectsClient.update).not.toHaveBeenCalled();
     });
 
     it('throws if changeAccessMode does not return a version', async () => {
