@@ -366,6 +366,11 @@ export interface WorkflowExecutionListDto {
    * Absent when there are no further results.
    */
   searchAfter?: unknown[];
+  /**
+   * True when any execution matching this query has a name, including executions
+   * outside the current page. Absent when the search did not check.
+   */
+  hasNamedExecution?: boolean;
 }
 
 export interface WorkflowStepExecutionListDto {

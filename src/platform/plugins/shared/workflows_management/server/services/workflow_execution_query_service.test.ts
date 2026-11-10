@@ -36,6 +36,7 @@ import {
   WORKFLOWS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../../common';
+import { NAMED_EXECUTION_AGGREGATION } from '../api/lib/search_workflow_executions';
 
 describe('WorkflowExecutionQueryService', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
@@ -217,6 +218,41 @@ describe('WorkflowExecutionQueryService', () => {
       expect(must).not.toEqual(
         expect.arrayContaining([expect.objectContaining({ script: expect.anything() })])
       );
+    });
+
+    it('reports a named execution that is not on the current page', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 50, relation: 'eq' } },
+        aggregations: { [NAMED_EXECUTION_AGGREGATION]: { doc_count: 1 } },
+      } as any);
+
+      const result = await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', size: 50 },
+        'default'
+      );
+
+      expect(mockEsClient.search.mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          aggs: {
+            [NAMED_EXECUTION_AGGREGATION]: {
+              filter: { wildcard: { runName: { value: '?*' } } },
+            },
+          },
+        })
+      );
+      expect(result.hasNamedExecution).toBe(true);
+      expect(result.results).toEqual([]);
+    });
+
+    it('reports that no matching execution has a name', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [], total: { value: 50, relation: 'eq' } },
+        aggregations: { [NAMED_EXECUTION_AGGREGATION]: { doc_count: 0 } },
+      } as any);
+
+      const result = await service.getWorkflowExecutions({ workflowId: 'wf-1' }, 'default');
+
+      expect(result.hasNamedExecution).toBe(false);
     });
 
     it('does not add a name filter for blank input', async () => {

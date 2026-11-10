@@ -24,6 +24,9 @@ import {
   isResultWindowTooLargeError,
 } from './es_error_helpers';
 
+/** Filter aggregation: at least one non-empty `runName` in the full query, not just this page. */
+export const NAMED_EXECUTION_AGGREGATION = 'namedExecutions';
+
 interface SearchWorkflowExecutionsParams {
   workflowExecutionsDataClient: WorkflowExecutionsDataClient;
   logger: Logger;
@@ -35,6 +38,8 @@ interface SearchWorkflowExecutionsParams {
   page?: number;
   /** When set, uses cursor pagination instead of `from`. */
   searchAfter?: FieldValue[];
+  /** Set `hasNamedExecution` from executions matching `query` beyond this page. */
+  includeNamedExecution?: boolean;
 }
 
 /** Fields required to build {@link WorkflowExecutionListDto} without fetching full execution snapshots. */
@@ -75,6 +80,7 @@ export const searchWorkflowExecutions = async ({
   from,
   page = 1,
   searchAfter,
+  includeNamedExecution = false,
 }: SearchWorkflowExecutionsParams): Promise<WorkflowExecutionListDto> => {
   try {
     logger.debug('Searching workflow executions');
@@ -87,9 +93,18 @@ export const searchWorkflowExecutions = async ({
       ...(searchAfter && searchAfter.length > 0 ? { search_after: searchAfter } : { from }),
       collapse,
       track_total_hits: true,
+      ...(includeNamedExecution
+        ? {
+            aggs: {
+              [NAMED_EXECUTION_AGGREGATION]: {
+                filter: { wildcard: { runName: { value: '?*' } } },
+              },
+            },
+          }
+        : {}),
     });
 
-    return transformToWorkflowExecutionListModel(response, page, size);
+    return transformToWorkflowExecutionListModel(response, page, size, includeNamedExecution);
   } catch (error) {
     if (isIndexNotFoundError(error)) {
       return {
@@ -97,6 +112,7 @@ export const searchWorkflowExecutions = async ({
         size,
         page,
         total: 0,
+        ...(includeNamedExecution ? { hasNamedExecution: false } : {}),
       };
     }
 
@@ -114,10 +130,19 @@ export const searchWorkflowExecutions = async ({
   }
 };
 
+function readHasNamedExecution(response: SearchResponse<EsWorkflowExecution>): boolean | undefined {
+  const aggregate = response.aggregations?.[NAMED_EXECUTION_AGGREGATION];
+  if (!aggregate || !('doc_count' in aggregate)) {
+    return undefined;
+  }
+  return aggregate.doc_count > 0;
+}
+
 function transformToWorkflowExecutionListModel(
   response: SearchResponse<EsWorkflowExecution>,
   page: number,
-  size: number
+  size: number,
+  includeNamedExecution: boolean
 ): WorkflowExecutionListDto {
   const total =
     typeof response.hits.total === 'number' ? response.hits.total : response.hits.total?.value ?? 0;
@@ -158,11 +183,16 @@ function transformToWorkflowExecutionListModel(
   const nextSearchAfter =
     results.length >= size && lastHit?.sort != null ? [...lastHit.sort] : undefined;
 
+  const hasNamedExecution = includeNamedExecution
+    ? readHasNamedExecution(response) ?? false
+    : undefined;
+
   return {
     results,
     size,
     page,
     total,
     ...(nextSearchAfter ? { searchAfter: nextSearchAfter } : {}),
+    ...(hasNamedExecution !== undefined ? { hasNamedExecution } : {}),
   };
 }

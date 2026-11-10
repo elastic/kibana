@@ -183,6 +183,9 @@ export function useWorkflowExecutions(
     const firstPage = data.pages[0];
     const lastPage = data.pages[data.pages.length - 1];
     const allResults = data.pages.flatMap((page) => page.results);
+    const namedExecutionWasChecked = data.pages.some(
+      (page) => page.hasNamedExecution !== undefined
+    );
 
     return {
       results: allResults,
@@ -190,6 +193,9 @@ export function useWorkflowExecutions(
       size: firstPage.size,
       total: firstPage.total,
       ...(lastPage.searchAfter ? { searchAfter: lastPage.searchAfter } : {}),
+      ...(namedExecutionWasChecked
+        ? { hasNamedExecution: data.pages.some((page) => page.hasNamedExecution === true) }
+        : {}),
     };
   }, [data]);
 

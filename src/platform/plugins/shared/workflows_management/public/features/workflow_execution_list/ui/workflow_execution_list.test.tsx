@@ -117,6 +117,16 @@ describe('WorkflowExecutionList', () => {
     expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
   });
 
+  it('shows the execution name column when an unloaded run has a name', () => {
+    renderComponent({
+      executions: {
+        ...mockExecutions,
+        hasNamedExecution: true,
+      },
+    });
+    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
+  });
+
   it('renders the container with the data-test-subj attribute', () => {
     renderComponent();
     expect(screen.getByTestId('workflowExecutionList')).toBeInTheDocument();

@@ -281,6 +281,8 @@ export class WorkflowExecutionQueryService {
       sort,
       searchAfter: params.searchAfter,
       collapse: params.collapse ? { field: params.collapse } : undefined,
+      // History can hide the name column. The flag covers named runs that are not on this page.
+      includeNamedExecution: Boolean(params.workflowId),
     });
   }
 

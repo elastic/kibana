@@ -52,7 +52,7 @@ export interface WorkflowExecutionListProps {
   /** Last opened execution — persists after Back until a different row is opened. */
   lastViewedId: string | null;
   setPaginationObserver: (ref: HTMLDivElement | null) => void;
-  /** Saved workflow defines `run-name`. Historical names still show the column on their own. */
+  /** Saved workflow defines `run-name`. */
   workflowUsesExecutionNames?: boolean;
   showExecutor?: boolean;
   canCancel: boolean;
@@ -140,7 +140,11 @@ export const WorkflowExecutionList = ({
   }, [executedByUserProfiles, executedByValuesToResolve, showUnresolvedExecutors]);
 
   const showExecutionName = useMemo(() => {
-    if (workflowUsesExecutionNames || Boolean(filters.runName?.trim())) {
+    if (
+      workflowUsesExecutionNames ||
+      Boolean(filters.runName?.trim()) ||
+      executions?.hasNamedExecution
+    ) {
       return true;
     }
     return executions?.results.some((execution) => Boolean(execution.runName?.trim())) ?? false;
