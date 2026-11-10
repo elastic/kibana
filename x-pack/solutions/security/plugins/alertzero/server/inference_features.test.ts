@@ -16,11 +16,11 @@ import {
 } from '@kbn/alertzero-common';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 
-const OPUS_5 = '.anthropic-claude-5-opus-chat_completion';
+const OPUS_5_5 = '.anthropic-claude-5.5-opus-chat_completion';
 const SONNET_5 = '.anthropic-claude-5-sonnet-chat_completion';
 const SONNET_5_5 = '.anthropic-claude-5.5-sonnet-chat_completion';
 const GPT_6_SOL = '.openai-gpt-6-sol-chat_completion';
-const GPT_5_6_SOL = '.openai-gpt-5.6-sol-chat_completion';
+const GPT_6_LUNA = '.openai-gpt-6-luna-chat_completion';
 const GLM_5_2 = '.zai-glm-5-2-chat_completion';
 const KIMI_K3 = '.moonshot-kimi-k3-chat_completion';
 
@@ -86,7 +86,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
     });
   });
 
-  it('registers the efficient tier on the cost-saving rung', () => {
+  it('registers the efficient tier', () => {
     const { setup, register } = createSetupMock();
 
     registerAlertZeroInferenceFeatures(setup, logger);
@@ -99,18 +99,12 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureId: ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
       featureName: 'Efficient models',
       featureDescription:
-        'Quick, lightweight judgment on calls that run often, such as checking detection coverage. Choose a small, low-cost model.',
-      recommendedEndpoints: [
-        '.openai-gpt-6-luna-chat_completion',
-        '.google-gemini-3.5-flash-lite-chat_completion',
-        '.anthropic-claude-4.5-haiku-chat_completion',
-        GLM_5_2,
-      ],
+        'Calls that run on every alert sweep, such as triaging alerts and checking detection coverage. A triage verdict can lead to a close proposal, so choose a model that stays accurate at volume.',
+      recommendedEndpoints: [GPT_6_SOL, SONNET_5_5, GLM_5_2],
     });
   });
 
-  // Frequent or many-round calls multiply frontier latency and cost, so a mid-size model leads.
-  it('registers the balanced tier on the mid-size rung', () => {
+  it('registers the balanced tier', () => {
     const { setup, register } = createSetupMock();
 
     registerAlertZeroInferenceFeatures(setup, logger);
@@ -123,17 +117,12 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureId: ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
       featureName: 'Balanced models',
       featureDescription:
-        'Calls where accuracy matters but that run often or use tools over many steps, such as triaging alerts or diagnosing a noisy rule. Choose a strong mid-size model.',
-      recommendedEndpoints: [
-        SONNET_5_5,
-        '.openai-gpt-5.6-terra-chat_completion',
-        '.google-gemini-3.6-flash-chat_completion',
-        SONNET_5,
-      ],
+        'Calls that use tools over many steps, such as diagnosing a noisy rule or analyzing endpoint forensics. Choose a model that is strong at multi-step tool use.',
+      recommendedEndpoints: [SONNET_5_5, GPT_6_SOL, SONNET_5],
     });
   });
 
-  it('registers the frontier tier on the most capable rung', () => {
+  it('registers the frontier tier', () => {
     const { setup, register } = createSetupMock();
 
     registerAlertZeroInferenceFeatures(setup, logger);
@@ -147,7 +136,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
       featureName: 'Frontier models',
       featureDescription:
         'Complex, single-pass work where output quality matters most, such as generating attack discoveries or drafting a detection rule. Choose your most capable model.',
-      recommendedEndpoints: [GPT_6_SOL, GPT_5_6_SOL, OPUS_5, KIMI_K3],
+      recommendedEndpoints: [GPT_6_SOL, OPUS_5_5, KIMI_K3],
     });
   });
 
@@ -172,9 +161,9 @@ describe('registerAlertZeroInferenceFeatures', () => {
     }
   });
 
-  // A mid-size model in the frontier chain would silently downgrade Attack Discovery and rule
-  // creation whenever the frontier models above it are unavailable.
-  it('keeps mid-size models out of the frontier tier', () => {
+  // Sonnet 5 is trial-served, but it matched the gold verdict on far fewer Attack Discovery Worker
+  // runs than Kimi K3, so a trial cluster must not resolve the frontier tier to it.
+  it('keeps Claude Sonnet 5 out of the frontier tier', () => {
     const { setup, register } = createSetupMock();
 
     registerAlertZeroInferenceFeatures(setup, logger);
@@ -183,17 +172,10 @@ describe('registerAlertZeroInferenceFeatures', () => {
       register,
       ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID
     );
-    const { recommendedEndpoints: balancedEndpoints } = registeredTier(
-      register,
-      ALERTZERO_BALANCED_INFERENCE_FEATURE_ID
-    );
     expect(recommendedEndpoints).not.toContain(SONNET_5);
-    for (const endpoint of balancedEndpoints) {
-      expect(recommendedEndpoints).not.toContain(endpoint);
-    }
   });
 
-  it('keeps a distinct trial-served model on every tier', () => {
+  it('falls back to the strongest trial-served model on every tier', () => {
     const { setup, register } = createSetupMock();
 
     registerAlertZeroInferenceFeatures(setup, logger);
@@ -230,9 +212,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
     });
   });
 
-  // The tiers sit on deliberately different rungs. If the cluster-wide default were allowed to
-  // win, all three would collapse onto one model, losing the cost saving on the efficient tier and
-  // the quality on the frontier one.
+  // Otherwise the cluster-wide default would replace lists picked from each tier's own evals.
   it('opts every tier out of the global default', () => {
     const { setup, register } = createSetupMock();
 
@@ -245,9 +225,9 @@ describe('registerAlertZeroInferenceFeatures', () => {
     expect(tiers.every((tier) => tier.ignoreGlobalDefault === true)).toBe(true);
   });
 
-  // The efficient tier takes the highest-volume calls, so a mid-size or frontier recommendation
-  // here silently bills the busiest path in AlertZero at those rates.
-  it('keeps mid-size and frontier models out of the efficient tier', () => {
+  // Alert triage runs on the efficient tier, and GPT-6 Luna lost about one verdict in five on the
+  // triage evals. A wrong verdict can become a close proposal, so it must not be recommended here.
+  it('keeps GPT-6 Luna out of the efficient tier', () => {
     const { setup, register } = createSetupMock();
 
     registerAlertZeroInferenceFeatures(setup, logger);
@@ -256,11 +236,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
       register,
       ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID
     );
-    expect(recommendedEndpoints).not.toContain(OPUS_5);
-    expect(recommendedEndpoints).not.toContain(SONNET_5);
-    expect(recommendedEndpoints).not.toContain(SONNET_5_5);
-    expect(recommendedEndpoints).not.toContain(GPT_6_SOL);
-    expect(recommendedEndpoints).not.toContain(GPT_5_6_SOL);
+    expect(recommendedEndpoints).not.toContain(GPT_6_LUNA);
   });
 
   it('is a no-op when the optional plugin is unavailable', () => {
