@@ -4,7 +4,7 @@ The plugin is behind the `digitalExperience.enabled` feature flag (default `fals
 
 | Folder | Flag | Server config | Deployments (`tags.ts`) |
 | --- | --- | --- | --- |
-| `scout/` | off | default | every Observability deployment, Cloud included |
+| `scout/` | off, forced by each `global.setup.ts` and restored in `global.teardown.ts` | default | every Observability deployment, Cloud included |
 | `scout_digital_experience/` | on | `digital_experience` config set (`feature_flags.overrides.digitalExperience.enabled=true`) | local stateful and serverless Observability Complete |
 
 Specs that need the ux plugin (Classic RUM dashboard, legacy navigation) run on stateful only, because serverless disables it.

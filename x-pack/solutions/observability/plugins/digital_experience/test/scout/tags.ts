@@ -7,8 +7,8 @@
 
 import { tags } from '@kbn/scout-oblt';
 
-// Every Observability deployment, Cloud included. They expect `digitalExperience.enabled` off, so a
-// LaunchDarkly rule that turns it on for a Cloud test deployment breaks them.
+// Every Observability deployment, Cloud included. Their global setup forces
+// `digitalExperience.enabled` off, so a rollout rule for the deployment doesn't change what they test.
 export const DIGITAL_EXPERIENCE_DISABLED_TAGS = [
   ...tags.stateful.classic,
   ...tags.serverless.observability.all,
