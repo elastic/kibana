@@ -20,6 +20,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { UISchemas, type ConnectorSpec } from '../../connector_spec';
 import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
 import { githubEvents } from './events';
+import { toTimelinePage } from './timeline';
 import type {
   AddAssigneeInput,
   AddIssueCommentInput,
@@ -33,6 +34,7 @@ import type {
   GetFileContentsInput,
   GetIssueCommentsInput,
   GetIssueInput,
+  GetIssueTimelineInput,
   GetLatestReleaseInput,
   ListBranchesInput,
   ListCommitsInput,
@@ -65,6 +67,7 @@ import {
   GetFileContentsInputSchema,
   GetIssueCommentsInputSchema,
   GetIssueInputSchema,
+  GetIssueTimelineInputSchema,
   GetLatestReleaseInputSchema,
   GetMeInputSchema,
   ListBranchesInputSchema,
@@ -430,6 +433,31 @@ export const GithubConnector: ConnectorSpec = {
       },
     },
 
+    getIssueTimeline: {
+      isTool: true,
+      scope: 'read',
+      description:
+        'Get the timeline of an issue or pull request with exact timestamps: label added or removed, comments, cross-references from other issues or repositories, close and reopen with the reason, review requests and reviews. Use it to answer "when" and "who" questions about the history of an issue. Pass excludeEventTypes such as ["subscribed","mentioned"] to drop the noise before paging, and eventTypes to keep only some types. Returns one page of up to 100 events, oldest first, so the most recent events are on the last page. Use page to read more while hasMore is true. When eventTypes is set, a page can be empty while hasMore is still true: keep paging. The connected and disconnected events show when and who, not which pull request or issue was linked.',
+      input: GetIssueTimelineInputSchema,
+      handler: async (ctx, input: GetIssueTimelineInput) => {
+        const { owner, repo, issueNumber, eventTypes, excludeEventTypes, page, perPage } = input;
+        const response = await ctx.client.get<object[]>(
+          `${GITHUB_API_BASE}/repos/${encodeURIComponent(owner)}/${encodeURIComponent(
+            repo
+          )}/issues/${issueNumber}/timeline`,
+          {
+            params: {
+              page,
+              per_page: perPage,
+              ...(excludeEventTypes?.length ? { exclude: excludeEventTypes.join(',') } : {}),
+            },
+            headers: GITHUB_API_VERSION_HEADER,
+          }
+        );
+        return toTimelinePage(response, { page, eventTypes });
+      },
+    },
+
     createIssue: {
       isTool: true,
       scope: 'write',
@@ -739,6 +767,7 @@ export const GithubConnector: ConnectorSpec = {
     '- For broad discovery: use search* actions (searchCode, searchRepositories, searchIssues, searchPullRequests, searchUsers).',
     '- For browsing a specific repo: use list* actions (listIssues, listPullRequests, listCommits, listBranches, listReleases, listTags). All use cursor-based pagination via "first" + "after".',
     '- For specific details: use get* actions (getIssue, getIssueComments, pullRequestRead, getCommit, getLatestRelease, getFileContents).',
+    '- For history (who or when a label was added, links from other repos, review requests): getIssueTimeline. Events are oldest first: read the last page for the latest change, and keep paging while hasMore is true.',
     '- Write actions (require write permission on the repo):',
     '  - Issues: createIssue, updateIssue, addIssueComment, addLabels, addAssignee.',
     '  - Pull requests: createPullRequest, updatePullRequest, mergePullRequest, requestReviewers.',

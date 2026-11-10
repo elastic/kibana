@@ -211,6 +211,9 @@ The GitHub connector exposes the following actions:
 `getIssueComments`
 :   Get comments for a specific issue in a repository.
 
+`getIssueTimeline` {applies_to}`serverless:` {applies_to}`stack: ga 9.7+`
+:   Get the timeline of an issue or pull request with exact timestamps: labels added or removed, comments, cross-references from other issues or repositories, closes and reopens with the reason, review requests, and reviews. Returns one page of up to 100 events, oldest first, so the latest events are on the last page. Use `excludeEventTypes`, for example `subscribed` and `mentioned`, to drop noisy events before paging, and use `page` to read the next page while `hasMore` is `true`.
+
 `createIssue` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
 :   Create a new issue in a repository.
 
