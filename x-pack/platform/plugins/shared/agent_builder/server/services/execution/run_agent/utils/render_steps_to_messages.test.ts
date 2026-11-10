@@ -129,8 +129,7 @@ describe('renderHistorySteps', () => {
   it('renders a grouped tool call with reasoning and wrapped results', async () => {
     const steps: ConversationRoundStep[] = [
       reasoning('group thought', { tool_call_group_id: 'g' }),
-      reasoning('why a', { tool_call_group_id: 'g', tool_call_id: 'a' }),
-      call('a', { tool_call_group_id: 'g' }),
+      call('a', { tool_call_group_id: 'g', intent: 'Looking up a' }),
       call('b', { tool_call_group_id: 'g' }),
     ];
     const messages = await renderHistorySteps({ steps });
@@ -139,12 +138,23 @@ describe('renderHistorySteps', () => {
     const [ai, toolA, toolB] = messages as [AIMessage, ToolMessage, ToolMessage];
     expect(ai.content).toBe('group thought');
     expect(ai.tool_calls).toEqual([
-      { id: 'a', name: 'my_tool', args: { _reasoning: 'why a', q: 'a' }, type: 'tool_call' },
+      { id: 'a', name: 'my_tool', args: { _intent: 'Looking up a', q: 'a' }, type: 'tool_call' },
       { id: 'b', name: 'my_tool', args: { q: 'b' }, type: 'tool_call' },
     ]);
     expect(toolA.tool_call_id).toBe('a');
     expect(toolA.content).toBe(wrapToolResultContent(JSON.stringify({ results: [other('a')] })));
     expect(toolB.tool_call_id).toBe('b');
+  });
+
+  it('ignores legacy reasoning bound to a tool call', async () => {
+    const steps: ConversationRoundStep[] = [
+      reasoning('legacy why', { tool_call_group_id: 'g', tool_call_id: 'a' }),
+      call('a', { tool_call_group_id: 'g' }),
+    ];
+    const [ai] = (await renderHistorySteps({ steps })) as [AIMessage];
+
+    expect(ai.tool_calls![0].args).toEqual({ q: 'a' });
+    expect(ai.content).toBe('');
   });
 
   it('passes results through the transformer', async () => {
@@ -649,8 +659,7 @@ describe('dynamic tool calls', () => {
 
   it('renders a history step as the execute_dynamic_tool call the model made', async () => {
     const steps: ConversationRoundStep[] = [
-      reasoning('why a', { tool_call_group_id: 'g', tool_call_id: 'a' }),
-      dynamicCall('a', { tool_call_group_id: 'g' }),
+      dynamicCall('a', { tool_call_group_id: 'g', intent: 'Looking up a' }),
       call('b', { tool_call_group_id: 'g' }),
     ];
     const [ai, toolA] = (await renderHistorySteps({ steps })) as [AIMessage, ToolMessage];
@@ -659,7 +668,7 @@ describe('dynamic tool calls', () => {
       {
         id: 'a',
         name: internalTools.executeDynamicTool,
-        args: { _reasoning: 'why a', tool_id: 'skill.tool', params: { q: 'a' } },
+        args: { _intent: 'Looking up a', tool_id: 'skill.tool', params: { q: 'a' } },
         type: 'tool_call',
       },
       { id: 'b', name: 'my_tool', args: { q: 'b' }, type: 'tool_call' },

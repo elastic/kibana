@@ -91,7 +91,7 @@ describe('NightshiftSetupPrompt', () => {
     renderPrompt();
 
     expect(screen.getByTestId('nightshiftSetupAskAdmin')).toHaveTextContent(
-      'A Nightshift administrator has to enable Elastic Nightshift'
+      'A Nightshift administrator has to enable Elastic nightshift'
     );
     expect(screen.getByTestId('nightshiftSetUpServiceAccount')).toBeDisabled();
   });

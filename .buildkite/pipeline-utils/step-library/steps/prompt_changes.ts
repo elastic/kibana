@@ -16,7 +16,7 @@ export const promptChanges = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/checks/prompt_changes_detector.sh',
     label: 'Check Prompt Changes',
     key: 'prompt_changes',
-    agents: spotAgent('n2-standard-2', spotZones.centralFCA),
+    agents: spotAgent('n2-standard-2', spotZones.n2),
     timeout_in_minutes: 10,
     retry: retry.agentLoss,
   }),

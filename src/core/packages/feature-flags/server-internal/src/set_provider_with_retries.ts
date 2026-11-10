@@ -17,8 +17,8 @@ import pRetry from 'p-retry';
  * @param provider The OpenFeature provider to set up.
  * @param logger You know, for logging.
  */
-export function setProviderWithRetries(provider: Provider, logger: Logger): void {
-  pRetry(() => OpenFeature.setProviderAndWait(provider), {
+export function setProviderWithRetries(provider: Provider, logger: Logger): Promise<void> {
+  return pRetry(() => OpenFeature.setProviderAndWait(provider), {
     retries: 5,
     onFailedAttempt: (error) => {
       logger.warn(
