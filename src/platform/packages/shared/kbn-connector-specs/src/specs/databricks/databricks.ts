@@ -44,6 +44,7 @@ import type {
   GetAlertInput,
   GetRunInput,
   GetRunOutputInput,
+  ListClustersInput,
   ListRunsInput,
   PollResponseInput,
   RepairRunInput,
@@ -357,12 +358,18 @@ export const Databricks: ConnectorSpec = {
       isTool: true,
       scope: 'read',
       description:
-        'List all clusters in the Databricks workspace. Returns cluster metadata including cluster_id, ' +
+        'List clusters in the Databricks workspace, a page at a time. Returns cluster metadata including cluster_id, ' +
         'cluster_name, state (RUNNING, TERMINATED, PENDING, etc.), spark_version, and node type. ' +
+        'When the response has a next_page_token, pass it as pageToken to list the next page. ' +
         'Use this to discover available clusters before starting or restarting one.',
       input: ListClustersInputSchema,
-      handler: async (ctx) => {
-        const { data } = await ctx.client.get(`${workspaceOrigin(ctx)}/api/2.0/clusters/list`);
+      handler: async (ctx, input: ListClustersInput) => {
+        const params: Record<string, unknown> = {};
+        if (input.pageSize !== undefined) params.page_size = input.pageSize;
+        if (input.pageToken !== undefined) params.page_token = input.pageToken;
+        const { data } = await ctx.client.get(`${workspaceOrigin(ctx)}/api/2.1/clusters/list`, {
+          params,
+        });
         return data;
       },
     },
@@ -375,7 +382,7 @@ export const Databricks: ConnectorSpec = {
         'Startup is asynchronous — use listClusters to poll until state is RUNNING.',
       input: ClusterIdInputSchema,
       handler: async (ctx, input: ClusterIdInput) => {
-        const { data } = await ctx.client.post(`${workspaceOrigin(ctx)}/api/2.0/clusters/start`, {
+        const { data } = await ctx.client.post(`${workspaceOrigin(ctx)}/api/2.1/clusters/start`, {
           cluster_id: input.clusterId,
         });
         return data;
@@ -390,7 +397,7 @@ export const Databricks: ConnectorSpec = {
         'Restart is asynchronous — use listClusters to poll until state returns to RUNNING.',
       input: ClusterIdInputSchema,
       handler: async (ctx, input: ClusterIdInput) => {
-        const { data } = await ctx.client.post(`${workspaceOrigin(ctx)}/api/2.0/clusters/restart`, {
+        const { data } = await ctx.client.post(`${workspaceOrigin(ctx)}/api/2.1/clusters/restart`, {
           cluster_id: input.clusterId,
         });
         return data;
@@ -526,7 +533,7 @@ export const Databricks: ConnectorSpec = {
     '- `runJobNow`, `cancelRun`, and `repairRun` are workflow-only (not exposed to agents).',
     '',
     '### Clusters',
-    '- Use `listClusters` to discover available clusters and their current state.',
+    '- Use `listClusters` to discover available clusters and their current state; follow `next_page_token` with `pageToken` to see more than one page.',
     '- `startCluster` and `restartCluster` are async — poll `listClusters` until state is RUNNING.',
     '- These actions are workflow-only and not exposed to agents.',
     '',

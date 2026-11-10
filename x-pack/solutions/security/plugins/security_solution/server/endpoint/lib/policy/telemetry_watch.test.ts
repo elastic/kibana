@@ -12,6 +12,7 @@ import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  type ListResult,
   type PackagePolicy,
   type UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
@@ -21,6 +22,8 @@ import type { PolicyConfig } from '../../../../common/endpoint/types';
 import { TelemetryConfigWatcher } from './telemetry_watch';
 import { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 import { createMockEndpointAppContextService } from '../../mocks';
+import { EndpointAppContentServicesNotStartedError } from '../../errors';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
@@ -43,6 +46,16 @@ describe('Telemetry config watcher', () => {
   let mockedLogger: MockedLogger;
   let packagePolicyServiceMock: jest.Mocked<PackagePolicyClient>;
   let telemetryWatcher: TelemetryConfigWatcher;
+  let endpointAppContextServiceMock: jest.Mocked<EndpointAppContextService>;
+
+  /** Mirrors `EndpointAppContextService.stop()` dropping its start dependencies on plugin shutdown */
+  const stopEndpointAppContextService = () => {
+    Object.defineProperty(endpointAppContextServiceMock, 'savedObjects', {
+      get: () => {
+        throw new EndpointAppContentServicesNotStartedError();
+      },
+    });
+  };
 
   const preparePackagePolicyMock = ({
     isGlobalTelemetryEnabled,
@@ -70,7 +83,7 @@ describe('Telemetry config watcher', () => {
     });
 
     mockedLogger = loggerMock.create();
-    const endpointAppContextServiceMock = createMockEndpointAppContextService();
+    endpointAppContextServiceMock = createMockEndpointAppContextService();
     endpointAppContextServiceMock.createLogger = jest.fn().mockReturnValue(mockedLogger);
 
     telemetryWatcher = new TelemetryConfigWatcher(
@@ -136,6 +149,64 @@ describe('Telemetry config watcher', () => {
 
     expect(mockedLogger.warn).not.toHaveBeenCalled();
     expect(mockedLogger.error).not.toHaveBeenCalled();
+  });
+
+  describe('when stopped', () => {
+    it('abandons an in-flight run without using endpoint services', async () => {
+      const firstPage = Promise.withResolvers<ListResult<PackagePolicy>>();
+      packagePolicyServiceMock.list.mockReturnValueOnce(firstPage.promise);
+
+      const watching = telemetryWatcher.watch(false);
+      telemetryWatcher.stop();
+      stopEndpointAppContextService();
+
+      firstPage.resolve({
+        items: [
+          MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+            pc.global_telemetry_enabled = true;
+            return pc;
+          }),
+        ],
+        total: 150,
+        page: 1,
+        perPage: 100,
+      });
+      await watching;
+
+      expect(packagePolicyServiceMock.list).toHaveBeenCalledTimes(1);
+      expect(packagePolicyServiceMock.bulkUpdate).not.toHaveBeenCalled();
+      expect(mockedLogger.warn).not.toHaveBeenCalled();
+      expect(mockedLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('does not retry fetching package policies', async () => {
+      packagePolicyServiceMock.list.mockImplementationOnce(async () => {
+        telemetryWatcher.stop();
+        stopEndpointAppContextService();
+        throw new Error('connection reset');
+      });
+
+      await telemetryWatcher.watch(true);
+
+      expect(packagePolicyServiceMock.list).toHaveBeenCalledTimes(1);
+      expect(mockedLogger.warn).not.toHaveBeenCalled();
+      expect(mockedLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('does not retry bulk updating package policies', async () => {
+      preparePackagePolicyMock({ isGlobalTelemetryEnabled: true });
+      packagePolicyServiceMock.bulkUpdate.mockImplementationOnce(async () => {
+        telemetryWatcher.stop();
+        stopEndpointAppContextService();
+        throw new Error('connection reset');
+      });
+
+      await telemetryWatcher.watch(false);
+
+      expect(packagePolicyServiceMock.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(mockedLogger.warn).not.toHaveBeenCalled();
+      expect(mockedLogger.error).not.toHaveBeenCalled();
+    });
   });
 
   describe('error handling', () => {

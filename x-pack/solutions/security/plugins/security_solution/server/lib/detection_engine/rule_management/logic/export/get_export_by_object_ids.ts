@@ -36,7 +36,7 @@ export const getExportByObjectIds = async (
   exceptionLists: string | null;
   actionConnectors: string;
 }> =>
-  withSecuritySpan('getExportByObjectIds', async () => {
+  withSecuritySpan('ruleManagement.getExportByObjectIds', async () => {
     const rulesAndErrors = await fetchRulesByIds(rulesClient, ruleIds);
     const { rules, missingRuleIds } = rulesAndErrors;
 
@@ -89,7 +89,7 @@ const fetchRulesByIds = async (
   // exporting rules simultaneously. By using limited parallelization via p-map we trade speed for stability and scalability.
   const CHUNKS_PROCESSED_IN_PARALLEL = 2;
   const processChunk = async (ids: string[]) =>
-    withSecuritySpan('processChunk', async () => {
+    withSecuritySpan('ruleManagement.processChunk', async () => {
       const rulesResult = await findRules({
         rulesClient,
         filter: `alert.attributes.params.ruleId: (${ids.join(' OR ')})`,

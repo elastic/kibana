@@ -7,22 +7,16 @@
 
 import type { CoreSetup } from '@kbn/core/server';
 import { NIGHTSHIFT_ONLINE_EVALS_INCLUDE_EXPLANATIONS_FLAG } from '@kbn/nightshift-shared';
+import { followBooleanFlag } from './follow_boolean_flag';
 
 /**
- * Follows the `nightshift.onlineEvals.includeExplanations` flag, so turning it on or off applies to
- * the next score event without a redeploy. Reads off until start services resolve, so explanations
- * are never sent before the flag has been read.
+ * Follows the `nightshift.onlineEvals.includeExplanations` flag. Reads off until start services
+ * resolve, so explanations are never sent before the flag has been read.
  */
 export const createShouldIncludeExplanations = (
   getStartServices: CoreSetup['getStartServices']
-): (() => boolean) => {
-  let includeExplanations = false;
-  void getStartServices().then(([{ featureFlags }]) => {
-    featureFlags
-      .getBooleanValue$(NIGHTSHIFT_ONLINE_EVALS_INCLUDE_EXPLANATIONS_FLAG, false)
-      .subscribe((value) => {
-        includeExplanations = value;
-      });
+): (() => boolean) =>
+  followBooleanFlag(getStartServices, NIGHTSHIFT_ONLINE_EVALS_INCLUDE_EXPLANATIONS_FLAG, {
+    fallback: false,
+    untilRead: false,
   });
-  return () => includeExplanations;
-};

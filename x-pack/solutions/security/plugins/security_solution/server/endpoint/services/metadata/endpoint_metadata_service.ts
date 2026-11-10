@@ -596,8 +596,8 @@ export class EndpointMetadataService {
     };
   }
 
-  async getAllEndpointPackagePolicies() {
-    return getAllEndpointPackagePolicies(this.fleetServices.packagePolicy, this.soClient);
+  async getAllEndpointPackagePolicies(signal?: AbortSignal) {
+    return getAllEndpointPackagePolicies(this.fleetServices.packagePolicy, this.soClient, signal);
   }
 
   async getMetadataForEndpoints(endpointIDs: string[]): Promise<HostMetadata[]> {

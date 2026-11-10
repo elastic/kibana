@@ -14,7 +14,7 @@ import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import type { StartInvestigationResponse } from '@kbn/nightshift-investigations-plugin/common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { extractAccessedDecisionTrees } from './decision_tree_evidence';
-import { extractToolCallTrajectory } from './tool_call_trajectory';
+import { extractFinalResponse, extractToolCallTrajectory } from './tool_call_trajectory';
 import { countToolCalls, extractUsage } from './usage';
 import type {
   InvestigationExample,
@@ -111,6 +111,20 @@ const readConversation = async (
   }
 };
 
+/**
+ * Why the last round stopped, when the agent failed or was aborted. Agent Builder keeps such a
+ * round as `completed`, so without this a crash would read as an investigation that concluded nothing.
+ */
+const roundInterruptionError = (rounds: ConversationRound[]): string | undefined => {
+  const interruption = rounds.at(-1)?.interruption;
+  if (!interruption) return undefined;
+  if (interruption.type === 'failed') {
+    return `Investigation round failed: ${interruption.error.message}`;
+  }
+  const source = interruption.aborted_by?.source;
+  return `Investigation round was aborted${source ? ` by ${source}` : ''}`;
+};
+
 const isPersisted = (conversation: { rounds: ConversationRound[] } | undefined): boolean =>
   Boolean(
     conversation &&
@@ -157,6 +171,30 @@ export const toInvestigationReport = ({
   proposals: proposals.map(({ title, comment, status }) => ({ title, comment, status })),
 });
 
+/**
+ * Waits up to `timeoutMs` for an investigation, its last round included, to end, and says whether
+ * it did. One not found yet may still be created by its workflow, so it does not count as ended.
+ */
+export const waitForInvestigationToEnd = async (
+  fetch: HttpHandler,
+  id: string,
+  timeoutMs: number
+): Promise<boolean> => {
+  const started = Date.now();
+  for (;;) {
+    const investigation = await readInvestigation(fetch, id);
+    if (
+      investigation &&
+      !investigation.in_progress &&
+      isPersisted(await readConversation(fetch, id))
+    ) {
+      return true;
+    }
+    if (Date.now() - started >= timeoutMs) return false;
+    await setTimeout(POLL_INTERVAL_MS);
+  }
+};
+
 /** Runs a manual investigation and retains a bounded report with references to its full evidence. */
 export const runInvestigation = async (
   fetch: HttpHandler,
@@ -179,9 +217,6 @@ export const runInvestigation = async (
           subject: { type: 'manual' },
           message: example.input.question,
           connector_id: connector.id,
-          ...(example.input.telemetry_target
-            ? { telemetry_target: example.input.telemetry_target }
-            : {}),
         }),
       }
     );
@@ -218,10 +253,6 @@ export const runInvestigation = async (
   try {
     output.workflow_status = investigation.in_progress ? 'running' : 'complete';
     output.structured_report = toInvestigationReport(investigation);
-    if (!investigation.in_progress && !investigation.metadata.verdict) {
-      // There is no failed state: a run that ended without a conclusion recorded none.
-      output.execution_error ??= NO_CONCLUSION_ERROR;
-    }
     if (!isPersisted(conversation)) {
       conversation = await readFinishedConversation(
         fetch,
@@ -232,6 +263,25 @@ export const runInvestigation = async (
     if (!conversation) throw new Error('Investigation conversation has no persisted rounds');
     if (!investigation.in_progress && !isPersisted(conversation)) {
       output.execution_error = UNPERSISTED_CONVERSATION_ERROR;
+    }
+    const reply = extractFinalResponse(conversation.rounds);
+    if (reply && !output.structured_report.conclusion) {
+      // The agent answers in its final message instead of recording a verdict on the investigation.
+      output.structured_report = {
+        ...output.structured_report,
+        summary: output.structured_report.summary ?? reply,
+        conclusion: reply,
+      };
+    }
+    if (!investigation.in_progress) {
+      // The investigation has no failed state, so its last round says whether the agent crashed,
+      // even after recording a verdict, or simply recorded no conclusion.
+      const interruption = roundInterruptionError(conversation.rounds);
+      if (interruption) {
+        output.execution_error ??= interruption;
+      } else if (!output.structured_report.conclusion) {
+        output.execution_error ??= NO_CONCLUSION_ERROR;
+      }
     }
     output.conversation_round_count = conversation.rounds.length;
     output.usage = extractUsage(conversation.rounds);

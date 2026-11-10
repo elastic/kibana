@@ -23,14 +23,7 @@ jest.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => ({
 }));
 
 const mockOpenUserFlyout = jest.fn();
-const mockOpenFlyout = jest.fn();
 
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: jest.fn() }),
-}));
-jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
-  useIsNewFlyoutEnabled: () => true,
-}));
 jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
   useFlyoutApi: () => ({
     openUserFlyout: mockOpenUserFlyout,
@@ -45,7 +38,6 @@ describe('Users Table Component', () => {
 
   beforeEach(() => {
     mockOpenUserFlyout.mockClear();
-    mockOpenFlyout.mockClear();
   });
 
   describe('rendering', () => {
@@ -242,7 +234,6 @@ describe('Users Table Component', () => {
       fireEvent.click(getByTestId('users-link-anchor'));
 
       expect(mockOpenUserFlyout).not.toHaveBeenCalled();
-      expect(mockOpenFlyout).not.toHaveBeenCalled();
     });
   });
 });
