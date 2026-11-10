@@ -198,7 +198,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for alert document to be updated
       await retry.try(async () => {
@@ -227,7 +227,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for alert to be muted
       await retry.try(async () => {
@@ -242,7 +242,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getUnmuteInstanceRequest(ruleId, alertInstanceId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for alert document to be updated
       await retry.try(async () => {
@@ -268,7 +268,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for all alert documents to be updated
       await retry.try(async () => {
@@ -293,7 +293,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.getMuteAllRequest(ruleId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for alerts to be muted
       await retry.try(async () => {
@@ -308,7 +308,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await alertUtils.unmuteAll(ruleId);
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for all alert documents to be updated
       await retry.try(async () => {
@@ -374,7 +374,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       });
 
       // Run the rule to trigger reconciliation
-      await alertUtils.runSoonWhenIdle(ruleId, taskManagerUtils);
+      await alertUtils.runSoonWhenIdle(ruleId, retry, taskManagerUtils);
 
       // Wait for reconciliation to fix the muted state
       await retry.try(async () => {
