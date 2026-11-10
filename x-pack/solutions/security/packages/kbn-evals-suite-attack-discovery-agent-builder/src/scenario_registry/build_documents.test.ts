@@ -50,6 +50,21 @@ describe('AD2 scenario registry (clean profile)', () => {
     expect(plan.runMarker).toContain(AD2_SCENARIO_SEED_LABEL);
   });
 
+  it('carries the run marker in message, the text field a marker search targets', () => {
+    const plan = buildAd2SeedPlan({ profile: 'dense', baseTime: fixedBaseTime });
+
+    const marked = plan.alerts.filter((alert) =>
+      String(alert.source.message).includes(plan.runMarker)
+    );
+    expect(marked).toHaveLength(plan.alerts.length);
+    expect(plan.alerts.length).toBeGreaterThan(0);
+    // Appended to the step's own text, not a replacement for it: the alert the
+    // model reasons over is unchanged apart from the suffix.
+    expect(
+      plan.alerts.every((alert) => String(alert.source.message).length > plan.runMarker.length)
+    ).toBe(true);
+  });
+
   it('writes the ids the resolver hands the reference discoveries', () => {
     const plan = buildAd2SeedPlan({
       profile: 'clean',

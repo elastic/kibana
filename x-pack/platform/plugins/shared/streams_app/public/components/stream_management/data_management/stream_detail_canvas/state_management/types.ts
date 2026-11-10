@@ -16,7 +16,10 @@ import type {
   ProcessingSaveRequest,
   ProcessingStepPosition,
 } from '../../../../stream_processing_flyout/state_management/processing_flyout_machine';
-import type { DestinationsActorRef } from '../../../../streams_layout/destinations/state_machines/destinations_state_machine';
+import type {
+  DestinationsActorRef,
+  DestinationsTimeDeps,
+} from '../../../../streams_layout/destinations/state_machines/destinations_state_machine';
 import type { SourcesActorRef } from '../../../../streams_layout/sources/state_machines/sources_state_machine';
 import type { SourceApiKeyGenerationDeps } from '../../../../streams_layout/sources/source_api_keys';
 import type { SourceEnvironmentLoader } from '../../../../streams_layout/sources/source_environment';
@@ -33,14 +36,19 @@ export interface CanvasCreateHistoryRef {
   current: CanvasCreateHistoryHandlers;
 }
 
-export interface CanvasStateServiceDeps {
+export interface CanvasStateServiceDeps extends DestinationsTimeDeps {
   core: CoreStart;
   urlStateStorageContainer: IKbnUrlStateStorage;
   apiKeyGenerationDeps: SourceApiKeyGenerationDeps;
   loadSourceEnvironment?: SourceEnvironmentLoader;
   loadUnitDefinition: UnitRepository['load'];
   persistUnitDefinition: UnitRepository['persist'];
-  validateUnitDefinition?: (unit: Unit) => Promise<void>;
+  validateUnitDefinition?: (input: UnitValidationInput) => Promise<void>;
+}
+
+export interface UnitValidationInput {
+  unit: Unit;
+  checkConnections: boolean;
 }
 
 export type CanvasFlyoutKind = 'destination' | 'index';
@@ -121,7 +129,8 @@ export type CanvasUrlEvent =
   | { type: 'xstate.error.actor.validateUnitDefinition'; error: unknown }
   | {
       type: 'xstate.done.actor.persistUnitDefinition';
-      output: { unitDefinition: Unit };
+      /** `unitDefinition` is the unit as stored; `stagedUnitDefinition` keeps wiring the save left out. */
+      output: { unitDefinition: Unit; stagedUnitDefinition: Unit };
     }
   | { type: 'xstate.error.actor.persistUnitDefinition'; error: unknown }
   | { type: 'flyout.open'; flyoutName: string; flyoutKind?: CanvasFlyoutKind }

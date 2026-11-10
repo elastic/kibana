@@ -21,6 +21,7 @@ import type { RulesFindAllResultItem } from '../services/rules_saved_object_serv
 import { RuleSavedObjectsClientToken } from '../services/rules_saved_object_service/tokens';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
+import { createSpacesServiceMock } from '../services/spaces_service/spaces_service.mock';
 import { createRuleSoAttributes } from '../test_utils';
 import { InternalRulesClient } from './internal_rules_client';
 import { InternalRulesClientProvider } from './internal_rules_client_provider';
@@ -53,6 +54,7 @@ const setup = (
   spaces.spacesService.spaceIdToNamespace.mockImplementation((spaceId: string) =>
     spaceId === 'default' ? undefined : spaceId
   );
+  const { spacesService } = createSpacesServiceMock(spaces);
 
   const rulesSavedObjectService = createRulesSavedObjectServiceMock();
   rulesSavedObjectService.findByIds.mockResolvedValue(found);
@@ -91,7 +93,12 @@ const setup = (
   };
 
   const { loggerService, mockLogger } = createLoggerService();
-  const provider = new InternalRulesClientProvider(injection, savedObjects, spaces, loggerService);
+  const provider = new InternalRulesClientProvider(
+    injection,
+    savedObjects,
+    spacesService,
+    loggerService
+  );
   const client = new InternalRulesClient(provider, rulesSavedObjectService);
   return {
     client,

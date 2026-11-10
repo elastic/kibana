@@ -19,7 +19,11 @@ import { login } from '../../../../tasks/login';
 import { interceptBulkFillRulesGaps, interceptGetRuleGaps } from '../../../../tasks/api_calls/gaps';
 import { visit } from '../../../../tasks/navigation';
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
-import { goToExecutionLogTab } from '../../../../tasks/rule_details';
+import {
+  disableRuleOnDetailsPage,
+  expectRuleEnabledOnDetailsPage,
+  goToExecutionLogTab,
+} from '../../../../tasks/rule_details';
 
 describe('bulk fill rule gaps', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
@@ -74,14 +78,8 @@ describe('bulk fill rule gaps', { tags: ['@ess', '@serverless', '@skipInServerle
     cy.wait('@getRuleManualRuns');
 
     // Disable the rule
-    cy.get('[data-test-subj="ruleSwitch"]').click();
-
-    cy.waitUntil(() =>
-      cy
-        .get('[data-test-subj="ruleSwitch"]')
-        .invoke('attr', 'aria-checked')
-        .then((checked) => checked === 'false')
-    );
+    disableRuleOnDetailsPage();
+    expectRuleEnabledOnDetailsPage(false);
 
     // Attempt to schedule the backfill
     cy.get(RULE_FILL_ALL_GAPS_BUTTON).click();

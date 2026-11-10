@@ -1411,11 +1411,11 @@ describe('MetricsGrid', () => {
           lensConfig: expect.objectContaining({
             chartType: 'heatmap',
             title: histogramItem.metricName,
+            ySort: 'desc',
             dataset: {
-              esql: expect.stringMatching(
-                /BUCKET\(latency\.exp, 10, 1, 9\)[\s\S]*SORT bucket DESC/
-              ),
+              esql: expect.stringMatching(/BUCKET\(latency\.exp, 10, 1, 9\)/),
             },
+            color: expect.objectContaining({ type: 'dynamic', steps: expect.any(Array) }),
           }),
         }),
         expect.anything()

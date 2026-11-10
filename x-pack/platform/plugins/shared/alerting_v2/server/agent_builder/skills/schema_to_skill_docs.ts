@@ -6,7 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ACTION_POLICY_AUTHORING_SKILL_ID, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
+import {
+  ACTION_POLICY_AUTHORING_SKILL_ID,
+  ALERTING_API_IDS,
+  RULE_KIND_LABELS,
+} from '@kbn/alerting-v2-constants';
 import {
   createRuleDataBaseSchema,
   createActionPolicyDataSchema,
@@ -1086,8 +1090,8 @@ export const generateMultiRuleActionPolicyDoc = (): string =>
     '  `alert.data.*` — because query columns often differ across rules. If two rules need',
     '  different message shapes, use two policies (or two workflows) rather than one',
     '  brittle template. See [workflow-dispatch-payload](./workflow-dispatch-payload.md).',
-    '- **Search first**: run `platform.core.sml_search` for existing policies before adding',
-    '  another catch-all or overlapping tag matcher.',
+    `- **Search first**: list existing policies with the Kibana API tools (\`${ALERTING_API_IDS.listActionPolicies}\`)`,
+    '  before adding another catch-all or overlapping tag matcher.',
     '- **Grouping**: `per_alert` is still a safe default. `all` batches mixed-rule',
     '  alerts into a single notification; only use it when the user wants one combined',
     '  message.',
@@ -1185,7 +1189,18 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '- Top-level fields: `{{ inputs.payload.<field> }}`',
     '- Alert iteration: `{% for alert in inputs.payload.alerts %}{{ alert.<field> }}{% endfor %}`',
     '- Rule metadata: `{{ inputs.payload.rules[alert.rule_id].name }}`',
+    '- Rule grouping fields: `{{ inputs.payload.rules[alert.rule_id].grouping_fields | join: ", " }}` (empty when the rule has no grouping; dotted names are nested under `alert.data`, e.g. `alert.data.host.name`)',
     '- Alert details link: `{{ alert.alert_url }}` (absolute URL; include it in every notification)',
+    '',
+    '### Test notifications (`execution.isTestRun`)',
+    '',
+    '"Send test notification" on an action policy runs its destination workflows as workflow',
+    'test runs, with a payload of the same shape built from synthetic alerts and placeholder rules.',
+    'Ids are prefixed with `test-`, and `alert.alert_url` points to an alert that does not exist.',
+    '',
+    '- Detect a test with `{{ execution.isTestRun }}` (`true` for test runs, `false` otherwise).',
+    '- Guard steps that act on alerts or page people, for example',
+    '  `{% if execution.isTestRun %}[TEST] {% endif %}` in a message, or an `if` step condition.',
     '',
     '### `data` (dynamic query columns)',
     '',
@@ -1218,14 +1233,20 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '      to:',
     '        - <user-provided-email>',
     '      subject: "Alert: {{ inputs.payload.alerts | size }} alert(s)"',
-    '      message: >',
-    '        {% for alert in inputs.payload.alerts %}',
-    '        - Rule: {{ inputs.payload.rules[alert.rule_id].name | default: "unknown" }}',
-    '          Host: {{ alert.data.host.name | default: "unknown" }}',
-    '          Errors: {{ alert.data.error_count | default: "n/a" }}',
-    '          Status: {{ alert.alert_status }}',
-    '          View alert: {{ alert.alert_url }}',
-    '        {% endfor %}',
+    '      message: |',
+    '        {%- assign alert_count = inputs.payload.alerts | size -%}',
+    '        {%- if alert_count > 1 -%}',
+    '        **{{ alert_count }} alerts**',
+    '',
+    '        {% endif -%}',
+    '        {%- for alert in inputs.payload.alerts -%}',
+    '        **{{ inputs.payload.rules[alert.rule_id].name | default: "Unnamed rule" }}** — {{ alert.alert_status | capitalize }}{% if alert.severity %} · {{ alert.severity | capitalize }}{% endif %}\\',
+    '        Last event {{ alert.last_event_timestamp | date: "%Y-%m-%d %H:%M UTC", 0 }} · [View in app]({{ alert.alert_url }})\\',
+    '        Alert id: {{ alert.alert_id }}\\',
+    '        Host: {{ alert.data.host.name | default: "unknown" }} · Errors: {{ alert.data.error_count | default: "n/a" }}',
+    '        {% unless forloop.last %}',
+    '        {% endunless -%}',
+    '        {%- endfor -%}',
     '```'
   );
 

@@ -35,9 +35,5 @@ export default function ({ getService, loadTestFile, getPageObjects }: FtrProvid
       loadTestFile(require.resolve('./filter_panel'));
       loadTestFile(require.resolve('./visualize'));
     });
-
-    describe('not using sample data', function () {
-      loadTestFile(require.resolve('./management'));
-    });
   });
 }

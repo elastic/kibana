@@ -9,6 +9,7 @@ import { MAX_ACTION_SOURCE_NAME_LENGTH } from '../../../../constants';
 import {
   ActionSourceSchema,
   ActionSourceTypes,
+  PersistedActionSourceSchema,
   isActionSource,
   isHeaderActionSource,
   toActionSource,
@@ -30,6 +31,20 @@ describe('ActionSource', () => {
     const value = { type: 'rule', id: 'rule-1' };
 
     expect(ActionSourceSchema.safeParse(value)).toEqual({ success: true, data: value });
+  });
+
+  it('ActionSourceSchema rejects an unknown type', () => {
+    expect(ActionSourceSchema.safeParse({ type: 'futuristic', id: 'x1' }).success).toBe(false);
+  });
+
+  it('PersistedActionSourceSchema accepts an unknown type', () => {
+    const value = { type: 'futuristic', id: 'x1' };
+
+    expect(PersistedActionSourceSchema.safeParse(value)).toEqual({ success: true, data: value });
+  });
+
+  it('hides unknown types from the header', () => {
+    expect(isHeaderActionSource({ type: 'futuristic', id: 'x1' })).toBe(false);
   });
 
   it('isActionSource accepts a valid source', () => {

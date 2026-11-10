@@ -24,6 +24,7 @@ import {
   McpConnectionTransportError,
   MCP_CONNECT_RETRY_DELAY_MS,
 } from './client_type';
+import { McpFetchTimeoutError } from './fetch_resource';
 
 jest.mock('@kbn/mcp-client', () => {
   const actual = jest.requireActual('@kbn/mcp-client');
@@ -37,6 +38,7 @@ jest.mock('@kbn/mcp-client', () => {
 });
 
 jest.mock('./fetch_resource', () => ({
+  ...jest.requireActual('./fetch_resource'),
   createFetchResource: jest.fn().mockReturnValue({
     fetch: jest.fn(),
     close: jest.fn().mockResolvedValue(undefined),
@@ -689,9 +691,18 @@ describe('createMcpClientType', () => {
       [new McpError(McpErrorCode.ConnectionClosed, 'Connection closed'), true],
       [new McpNotConnectedError('kibana-mcp', '1.0.0'), true],
       [new Error('Not connected'), true],
-      [new McpError(McpErrorCode.RequestTimeout, 'Request timed out'), false],
+      [new McpError(McpErrorCode.RequestTimeout, 'Request timed out'), true],
       [new McpError(McpErrorCode.InvalidParams, 'bad params'), false],
-      [new StreamableHTTPError(500, 'boom'), false],
+      [new StreamableHTTPError(500, 'boom'), true],
+      [new StreamableHTTPError(502, 'bad gateway'), true],
+      [new StreamableHTTPError(503, 'unavailable'), true],
+      [new StreamableHTTPError(504, 'gateway timeout'), true],
+      [new StreamableHTTPError(400, 'bad request'), false],
+      [new McpConnectionHttpError(503, new Error('bad gateway')), true],
+      [new McpConnectionHttpError(401, new Error('nope')), true],
+      [new McpConnectionHttpError(403, new Error('forbidden')), true],
+      [new McpConnectionTransportError('UND_ERR_CONNECT_TIMEOUT', new Error('timeout')), true],
+      [new McpFetchTimeoutError(1_000), true],
       [new Error('boom'), false],
     ])('classifies terminal errors', (error, expected) => {
       expect(createMcpClientType().shouldInvalidateOnError?.(error)).toBe(expected);
@@ -705,6 +716,30 @@ describe('createMcpClientType', () => {
     it('returns true when a terminal undici code is on cause (fetch failed)', () => {
       const cause = Object.assign(new Error('closed'), { code: 'UND_ERR_CLOSED' });
       const err = new TypeError('fetch failed', { cause });
+      expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
+    });
+
+    it.each([
+      ['ECONNREFUSED', true],
+      ['EHOSTUNREACH', true],
+      ['ENETUNREACH', true],
+      ['EAI_AGAIN', true],
+      ['UND_ERR_CONNECT_TIMEOUT', true],
+      ['ECONNRESET', false],
+    ])('classifies fetch failed with cause code %s as %s', (code, expected) => {
+      expect(createMcpClientType().shouldInvalidateOnError?.(fetchFailed(code))).toBe(expected);
+    });
+
+    it('returns true when a connect-phase request timeout is wrapped as cause', () => {
+      // McpClient.connect() rethrows SDK errors as a plain Error with the original as cause.
+      const err = new Error('Error connecting to MCP server: MCP error -32001: Request timed out', {
+        cause: new McpError(McpErrorCode.RequestTimeout, 'Request timed out'),
+      });
+      expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
+    });
+
+    it('returns true when the fetch deadline error is wrapped as cause', () => {
+      const err = new Error('fetch failed', { cause: new McpFetchTimeoutError(1_000) });
       expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
     });
 

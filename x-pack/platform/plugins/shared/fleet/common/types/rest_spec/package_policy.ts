@@ -62,6 +62,9 @@ export type UpdatePackagePolicyRequest = GetOnePackagePolicyRequest & {
 export type UpdatePackagePolicyResponse = CreatePackagePolicyResponse;
 
 export interface DeletePackagePoliciesRequest {
+  query?: {
+    onboarding_deployment_id?: string;
+  };
   body: {
     packagePolicyIds: string[];
     force?: boolean;
