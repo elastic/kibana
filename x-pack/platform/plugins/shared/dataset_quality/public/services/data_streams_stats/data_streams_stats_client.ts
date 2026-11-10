@@ -54,11 +54,16 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
       'types' in params && params.types
         ? rison.encodeArray(params.types.length === 0 ? KNOWN_TYPES : params.types)
         : undefined;
+    const statsTypes =
+      'statsTypes' in params && params.statsTypes
+        ? rison.encodeArray(params.statsTypes)
+        : undefined;
     const response = await this.http
       .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/data_streams/stats', {
         query: {
           ...params,
           types,
+          statsTypes,
         },
       })
       .catch((error) => {

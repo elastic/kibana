@@ -268,6 +268,7 @@ describe('DatasetQualityControllerStateMachine', () => {
       expect(actor.getSnapshot().context.authorizedDatasetTypes).toEqual(['metrics']);
       expect(dataStreamStatsClient.getDataStreamsStats).toHaveBeenCalledWith({
         types: ['logs', 'metrics', 'traces', 'synthetics'],
+        statsTypes: ['logs'],
       });
       expect(dataStreamStatsClient.getDataStreamsDegradedStats).toHaveBeenCalledWith(
         expect.objectContaining({ types: ['metrics'] })
@@ -977,6 +978,10 @@ describe('DatasetQualityControllerStateMachine', () => {
         expect(dataStreamStatsClient.getDataStreamsDegradedStats).toHaveBeenCalledTimes(
           degradedCallsBefore
         );
+        expect(dataStreamStatsClient.getDataStreamsStats).toHaveBeenLastCalledWith({
+          types: ['logs', 'metrics', 'traces', 'synthetics'],
+          statsTypes: ['logs'],
+        });
 
         resolveRefreshDiscovery({
           dataStreamsStats: [
@@ -1247,6 +1252,7 @@ describe('DatasetQualityControllerStateMachine', () => {
         unknown
       >;
       expect(statsCall?.types).toEqual(['logs']);
+      expect(statsCall?.statsTypes).toEqual(['logs']);
 
       actor.stop();
     });
@@ -1277,6 +1283,9 @@ describe('DatasetQualityControllerStateMachine', () => {
         unknown
       >;
       expect(statsCall?.types).toEqual(
+        expect.arrayContaining(['logs', 'metrics', 'traces', 'synthetics'])
+      );
+      expect(statsCall?.statsTypes).toEqual(
         expect.arrayContaining(['logs', 'metrics', 'traces', 'synthetics'])
       );
 

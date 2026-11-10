@@ -130,5 +130,30 @@ apiTest.describe(
         expect(stat?.totalDocs).toBeGreaterThan(0);
       }
     });
+
+    apiTest(
+      'discovers every requested type but only calculates stats for selected types',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(
+          testData.buildStatsUrl({
+            types: 'logs,synthetics',
+            statsTypes: 'logs',
+          }),
+          {
+            headers: adminHeaders,
+            responseType: 'json',
+          }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        const stats: DataStreamStat[] = response.body.dataStreamsStats;
+        expect(findStat(stats, LOGS_DATA_STREAM)).toBeDefined();
+        const syntheticsStat = findStat(stats, SYNTHETICS_DATA_STREAM);
+        expect(syntheticsStat).toBeDefined();
+        expect(syntheticsStat?.size).toBeUndefined();
+        expect(syntheticsStat?.sizeBytes).toBeUndefined();
+        expect(syntheticsStat?.totalDocs).toBeUndefined();
+      }
+    );
   }
 );

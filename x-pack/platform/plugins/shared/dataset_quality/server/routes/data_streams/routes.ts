@@ -21,6 +21,7 @@ import type {
   UpdateFailureStoreResponse,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
+import { indexNameToDataStreamParts } from '../../../common/utils';
 import { dataStreamService, datasetQualityPrivileges } from '../../services';
 import { rangeRt, typeRt, typesRt } from '../../types/default_api_types';
 import { createDatasetQualityESClient } from '../../utils';
@@ -53,7 +54,7 @@ const statsRoute = createDatasetQualityServerRoute({
         t.intersection([t.type({ types: typesRt }), t.partial({ datasetQuery: t.string })]),
         t.intersection([t.type({ datasetQuery: t.string }), t.partial({ types: typesRt })]),
       ]),
-      t.partial({ includeCreationDate: toBooleanRt }),
+      t.partial({ includeCreationDate: toBooleanRt, statsTypes: typesRt }),
     ]),
   }),
   options: {
@@ -93,9 +94,19 @@ const statsRoute = createDatasetQualityServerRoute({
       datasetQualityPrivileges.getCanViewIntegrations(esClient, isSecurityEnabled),
     ]);
 
-    const privilegedDataStreams = dataStreams.filter((dataStream) => {
-      return dataStream.userPrivileges.canMonitor;
-    });
+    const requestedStatsTypes = params.query.statsTypes ?? params.query.types;
+    const hasAccessibleRequestedStatsType =
+      !requestedStatsTypes ||
+      dataStreams.some(({ name }) =>
+        requestedStatsTypes.includes(indexNameToDataStreamParts(name).type)
+      );
+    const privilegedDataStreams = dataStreams.filter(
+      ({ name, userPrivileges }) =>
+        userPrivileges.canMonitor &&
+        (!hasAccessibleRequestedStatsType ||
+          !requestedStatsTypes ||
+          requestedStatsTypes.includes(indexNameToDataStreamParts(name).type))
+    );
 
     const dataStreamsNames = privilegedDataStreams.map((stream) => stream.name);
     const [dataStreamsStats, dataStreamsCreationDate] = await Promise.all([
@@ -221,7 +232,7 @@ const totalDocsRoute = createDatasetQualityServerRoute({
           esClient,
           start,
           end,
-          index: readableDataStreamNames.join(','),
+          index: readableDataStreamNames,
         })
       : [];
 

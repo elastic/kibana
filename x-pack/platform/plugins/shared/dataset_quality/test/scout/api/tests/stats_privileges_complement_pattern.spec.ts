@@ -44,8 +44,7 @@ apiTest.describe(
       );
     });
 
-    apiTest.afterAll(async ({ esClient, log, logsSynthtraceEsClient }) => {
-      await logsSynthtraceEsClient.clean();
+    apiTest.afterAll(async ({ esClient, log }) => {
       for (const dataStream of DATA_STREAMS) {
         await deleteDataStreamIfExists(esClient, dataStream, log);
       }

@@ -10,6 +10,7 @@ import type {
   QueryDslBoolQuery,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { bytePartition } from '@kbn/std';
 import { extractIndexNameFromBackingIndex } from '../../../common/utils';
 import type { DataStreamDocsStat } from '../../../common/api_types';
 import { createDatasetQualityESClient } from '../../utils';
@@ -23,13 +24,29 @@ const SIZE_LIMIT = 10000;
 
 export async function getAggregatedDatasetPaginatedResults(options: {
   esClient: ElasticsearchClient;
-  index: string;
+  index: string | string[];
   start: number;
   end: number;
   query?: QueryDslBoolQuery;
   after?: Dataset;
   prevResults?: DataStreamDocsStat[];
 }): Promise<DataStreamDocsStat[]> {
+  if (Array.isArray(options.index)) {
+    const chunkResults = await Promise.all(
+      bytePartition(options.index).map((indexChunk) =>
+        getAggregatedDatasetPaginatedResults({
+          esClient: options.esClient,
+          index: indexChunk.join(','),
+          start: options.start,
+          end: options.end,
+          query: options.query,
+        })
+      )
+    );
+
+    return mergeDatasetDocCounts(chunkResults.flat());
+  }
+
   const { esClient, index, query, start, end, after, prevResults = [] } = options;
 
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
@@ -87,11 +104,14 @@ export async function getAggregatedDatasetPaginatedResults(options: {
     });
   }
 
-  return Object.entries(
+  return mergeDatasetDocCounts(results);
+}
+
+const mergeDatasetDocCounts = (results: DataStreamDocsStat[]): DataStreamDocsStat[] =>
+  Object.entries(
     results.reduce((acc, curr) => {
       const dataset = extractIndexNameFromBackingIndex(curr.dataset);
       acc[dataset] = (acc[dataset] ?? 0) + curr.count;
       return acc;
     }, {} as Record<string, number>)
   ).map(([dataset, count]) => ({ dataset, count }));
-}

@@ -737,17 +737,25 @@ const filterDataStreamsBySelectedTypes = (
   );
 };
 
-const getValidDatasetTypes = (
+const getSelectedDatasetTypes = (
   context: DatasetQualityControllerContext,
   isDatasetQualityAllSignalsAvailable: boolean
 ) =>
   (isDatasetQualityAllSignalsAvailable
-    ? context.authorizedDatasetTypes.length === 0
-      ? KNOWN_TYPES
-      : context.filters.types.length
+    ? context.filters.types.length
       ? context.filters.types
-      : context.authorizedDatasetTypes
+      : context.authorizedDatasetTypes.length > 0
+      ? context.authorizedDatasetTypes
+      : KNOWN_TYPES
     : [DEFAULT_DATASET_TYPE]) as DataStreamType[];
+
+const getDataStreamDiscoveryTypes = (
+  context: DatasetQualityControllerContext,
+  isDatasetQualityAllSignalsAvailable: boolean
+): DataStreamType[] =>
+  isDatasetQualityAllSignalsAvailable && context.useInitialDataStreamStats
+    ? KNOWN_TYPES
+    : getSelectedDatasetTypes(context, isDatasetQualityAllSignalsAvailable);
 
 const isTypeSelected = (type: DataStreamType, context: DatasetQualityControllerContext) =>
   (context.filters.types.length === 0 && context.authorizedDatasetTypes.includes(type)) ||
@@ -762,11 +770,14 @@ const createLoadDataStreamStatsActor = ({
   dataStreamStatsClient,
   isDatasetQualityAllSignalsAvailable,
 }: ActorDeps) =>
-  fromPromise(async ({ input }: { input: DatasetQualityControllerContext }) =>
-    dataStreamStatsClient.getDataStreamsStats({
-      types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
-    })
-  );
+  fromPromise(async ({ input }: { input: DatasetQualityControllerContext }) => {
+    const selectedTypes = getSelectedDatasetTypes(input, isDatasetQualityAllSignalsAvailable);
+
+    return dataStreamStatsClient.getDataStreamsStats({
+      types: getDataStreamDiscoveryTypes(input, isDatasetQualityAllSignalsAvailable),
+      statsTypes: selectedTypes,
+    });
+  });
 
 const createLoadDataStreamDocsStatsActor = ({ dataStreamStatsClient }: ActorDeps) =>
   fromCallback<
@@ -799,7 +810,7 @@ const createLoadDegradedDocsActor = ({
     const { startDate: start, endDate: end } = getDateISORange(input.filters.timeRange);
 
     return dataStreamStatsClient.getDataStreamsDegradedStats({
-      types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
+      types: getSelectedDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
       start,
       end,
     });
@@ -813,7 +824,7 @@ const createLoadFailedDocsActor = ({
     const { startDate: start, endDate: end } = getDateISORange(input.filters.timeRange);
 
     return dataStreamStatsClient.getDataStreamsFailedStats({
-      types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
+      types: getSelectedDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
       start,
       end,
     });
@@ -827,7 +838,7 @@ const createLoadNonAggregatableDatasetsActor = ({
     const { startDate: start, endDate: end } = getDateISORange(input.filters.timeRange);
 
     return dataStreamStatsClient.getNonAggregatableDatasets({
-      types: getValidDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
+      types: getSelectedDatasetTypes(input, isDatasetQualityAllSignalsAvailable),
       start,
       end,
     });
