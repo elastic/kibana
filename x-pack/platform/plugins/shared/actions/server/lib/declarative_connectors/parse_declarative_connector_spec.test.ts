@@ -56,7 +56,7 @@ describe('parseDeclarativeConnectorSpec', () => {
         },
       },
     });
-    expect(parsed.config.properties?.baseUrl.xUi?.validate?.allowedHosts).toBe(true);
+    expect(parsed.config.properties?.baseUrl.meta?.validate?.allowedHosts).toBe(true);
     expect(parsed.test.request).toEqual(
       expect.objectContaining({
         method: 'GET',
@@ -317,27 +317,24 @@ describe('parseDeclarativeConnectorSpec', () => {
     expect(parsed.auth.types[0]).toEqual({ type: authTypeId, defaults: {} });
   });
 
-  it('rejects okta because auth.prefix is not supported', () => {
-    expect(() => parseDeclarativeConnectorSpec(loadFixture('okta-1.0.0.yaml'))).toThrow(
-      /auth\.prefix is not supported/
-    );
-  });
-
-  it('normalizes legacy auth without a prefix', () => {
+  it('rejects auth without types', () => {
     const raw = minimalSpec(`      method: GET
       url: https://example.com`).replace(
       `auth:
   types:
     - none`,
       `auth:
-  type: api_key_header
-  header: Key`
+  type: none`
     );
-    const parsed = parseDeclarativeConnectorSpec(raw);
 
-    expect(parsed.auth.types).toEqual([
-      { type: 'api_key_header', defaults: { headerField: 'Key' } },
-    ]);
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/auth/);
+  });
+
+  it('rejects okta because auth.prefix is not supported', () => {
+    expect(() => parseDeclarativeConnectorSpec(loadFixture('okta-1.0.0.yaml'))).toThrow(
+      /auth\.prefix is not supported/
+    );
   });
 
   it('rejects a secrets template and names the action', () => {

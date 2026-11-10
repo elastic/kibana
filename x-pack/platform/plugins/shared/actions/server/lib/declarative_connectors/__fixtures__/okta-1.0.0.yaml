@@ -23,18 +23,23 @@ config:
       format: uri
       default: http://127.0.0.1:8090
       description: Okta organization base URL
-      xUi:
+      meta:
         label: Org URL
         placeholder: https://your-okta-domain.okta.com
         helpText: Use the local mock URL for the PoC or your Okta organization URL for live testing.
         validate:
           allowedHosts: true
 auth:
-  type: api_key_header
-  header: Authorization
-  prefix: "SSWS "
-  label: API token (SSWS)
-  placeholder: local-poc-token
+  types:
+    - type: api_key_header
+      defaults:
+        headerField: Authorization
+      overrides:
+        meta:
+          Authorization:
+            label: API token (SSWS)
+            placeholder: local-poc-token
+      prefix: "SSWS "
 actions:
   listUsers:
     description: List users with bounded Link-header pagination.

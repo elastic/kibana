@@ -16,7 +16,7 @@ import type {
   DeclarativeRequest,
   DeclarativeTemplateRoot,
 } from './types';
-import { DeclarativeConnectorSpecError } from './types';
+import { declarativeFieldMetaSchema, DeclarativeConnectorSpecError } from './types';
 
 const TEMPLATE_PATTERN = /\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g;
 const UNSAFE_PATH_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor']);
@@ -66,21 +66,7 @@ const jsonSchema: z.ZodType<DeclarativeJsonSchema> = z.lazy(() =>
         .min(1)
         .optional(),
       additionalProperties: z.boolean().optional(),
-      xUi: z
-        .object({
-          label: z.string().optional(),
-          placeholder: z.string().optional(),
-          helpText: z.string().optional(),
-          hidden: z.boolean().optional(),
-          validate: z
-            .object({
-              allowedHosts: z.boolean().optional(),
-            })
-            .strict()
-            .optional(),
-        })
-        .strict()
-        .optional(),
+      meta: declarativeFieldMetaSchema.optional(),
     })
     .strict()
     .superRefine((definition, context) => {
@@ -213,34 +199,6 @@ const authTypeDefinitionSchema = lazySchema(() =>
     })
 );
 
-const legacyAuthSchema = lazySchema(() =>
-  z
-    .object({
-      type: authTypeIdSchema,
-      header: z.string().min(1).max(256).optional(),
-      prefix: z.string().max(128).optional(),
-      label: z.string().max(256).optional(),
-      placeholder: z.string().max(256).optional(),
-    })
-    .strict()
-    .superRefine((auth, context) => {
-      if (auth.prefix !== undefined) {
-        context.addIssue({
-          code: 'custom',
-          path: ['prefix'],
-          message:
-            'auth.prefix is not supported. Auth values are applied by the auth type, not a prefix.',
-        });
-      }
-      if (auth.type === 'api_key_header' && !auth.header) {
-        context.addIssue({
-          code: 'custom',
-          message: 'api_key_header requires a header.',
-        });
-      }
-    })
-);
-
 const connectorSpecAuthSchema = lazySchema(() =>
   z
     .object({
@@ -252,24 +210,7 @@ const connectorSpecAuthSchema = lazySchema(() =>
     .strict()
 );
 
-interface ParsedAuthTypeDef {
-  type: string;
-  isRecommended?: boolean;
-  isLegacy?: boolean;
-  isExperimental?: boolean;
-  supportsSandbox?: boolean;
-  defaults: Record<string, unknown>;
-  overrides?: AuthTypeDef['overrides'];
-  prefix?: string;
-}
-
-interface ParsedLegacyAuth {
-  type: string;
-  header?: string;
-  prefix?: string;
-  label?: string;
-  placeholder?: string;
-}
+type ParsedAuthTypeDef = z.infer<typeof authTypeDefinitionSchema>;
 
 const assertSupportedAuthType = (typeId: string): void => {
   const spec = Object.values(authTypeSpecs).find((candidate) => candidate.id === typeId);
@@ -307,50 +248,15 @@ const toAuthTypeDef = (authType: string | ParsedAuthTypeDef): AuthTypeDef => {
   };
 };
 
-const normalizeLegacyAuth = (auth: ParsedLegacyAuth): AuthTypeDef[] => {
-  if (auth.prefix !== undefined) {
-    throw new DeclarativeConnectorSpecError(
-      'auth.prefix is not supported. Auth values are applied by the auth type, not a prefix.'
-    );
-  }
-  if (auth.type === 'api_key_header') {
-    return [
-      {
-        type: 'api_key_header',
-        defaults: { headerField: auth.header },
-        ...(auth.label || auth.placeholder
-          ? {
-              overrides: {
-                meta: {
-                  [auth.header ?? '']: {
-                    ...(auth.label ? { label: auth.label } : {}),
-                    ...(auth.placeholder ? { placeholder: auth.placeholder } : {}),
-                  },
-                },
-              },
-            }
-          : {}),
-      },
-    ];
-  }
-  return [{ type: auth.type, defaults: {} }];
-};
-
-const normalizeAuth = (
-  auth: { types: Array<string | ParsedAuthTypeDef> } | ParsedLegacyAuth
-): AuthTypeDef[] => {
-  if ('types' in auth) {
-    return auth.types.map((authType) => {
-      if (typeof authType !== 'string' && authType.prefix !== undefined) {
-        throw new DeclarativeConnectorSpecError(
-          'auth.prefix is not supported. Auth values are applied by the auth type, not a prefix.'
-        );
-      }
-      return toAuthTypeDef(authType);
-    });
-  }
-  return normalizeLegacyAuth(auth);
-};
+const normalizeAuth = (auth: { types: Array<string | ParsedAuthTypeDef> }): AuthTypeDef[] =>
+  auth.types.map((authType) => {
+    if (typeof authType !== 'string' && authType.prefix !== undefined) {
+      throw new DeclarativeConnectorSpecError(
+        'auth.prefix is not supported. Auth values are applied by the auth type, not a prefix.'
+      );
+    }
+    return toAuthTypeDef(authType);
+  });
 
 const collectTemplatePaths = (value: unknown, found: string[] = []): string[] => {
   if (typeof value === 'string') {
@@ -432,7 +338,7 @@ const connectorSpecSchema = lazySchema(() =>
         })
         .strict(),
       config: jsonSchema,
-      auth: z.union([connectorSpecAuthSchema, legacyAuthSchema]),
+      auth: connectorSpecAuthSchema,
       actions: z
         .record(
           z.string(),

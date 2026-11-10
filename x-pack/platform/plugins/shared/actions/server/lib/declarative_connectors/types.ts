@@ -6,6 +6,7 @@
  */
 
 import type { ActionScope, AuthTypeDef, ConnectorMetadata } from '@kbn/connector-specs';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export interface DeclarativeConnectorIcon {
   path: string;
@@ -16,13 +17,19 @@ export type DeclarativeConnectorMetadata = Omit<ConnectorMetadata, 'id' | 'icon'
   icon?: DeclarativeConnectorIcon;
 };
 
-export interface DeclarativeFieldUi {
-  label?: string;
-  placeholder?: string;
-  helpText?: string;
-  hidden?: boolean;
-  validate?: { allowedHosts?: boolean };
-}
+export const declarativeFieldMetaSchema = lazySchema(() =>
+  z
+    .object({
+      label: z.string().optional(),
+      placeholder: z.string().optional(),
+      helpText: z.string().optional(),
+      hidden: z.boolean().optional(),
+      validate: z.object({ allowedHosts: z.boolean().optional() }).strict().optional(),
+    })
+    .strict()
+);
+
+export type DeclarativeFieldMeta = z.infer<typeof declarativeFieldMetaSchema>;
 
 export interface DeclarativeJsonSchema {
   type: 'object' | 'string' | 'number' | 'integer' | 'boolean' | 'array';
@@ -38,7 +45,7 @@ export interface DeclarativeJsonSchema {
   maxLength?: number;
   enum?: Array<string | number | boolean>;
   additionalProperties?: boolean;
-  xUi?: DeclarativeFieldUi;
+  meta?: DeclarativeFieldMeta;
 }
 
 export type DeclarativeTemplateRoot = 'input' | 'config';
