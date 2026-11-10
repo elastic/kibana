@@ -7,15 +7,14 @@
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { fromKueryExpression } from '@kbn/es-query';
-import { UI_SETTINGS } from '@kbn/data-service';
 import type { EntityInventoryEntityCategory } from '../../types';
-import { DEFAULT_TIME_RANGE, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../constants';
+import { ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
 import { clampTimeRange } from '../utils/clamp_time_range';
-import { EMPTY_SELECTION } from '../filters/utils/selection';
+import { validateQuery } from '../utils/validate_query';
 import type { FilterControlsSelection } from '../filters/utils/selection';
+import { useUrlSearchState } from './use_url_search_state';
 
 export interface EntityInventorySearchSubmitPayload {
   dateRange: TimeRange;
@@ -30,15 +29,14 @@ export interface EntityInventorySearchContextValue {
   setFilters: (filters: Filter[]) => void;
   filterControls: FilterControlsSelection;
   setFilterControls: (selection: FilterControlsSelection) => void;
+  refreshToken: number;
   /** Commits a search and returns the effective date range. An invalid query is not committed. */
   submit: (payload: EntityInventorySearchSubmitPayload) => TimeRange;
 }
 
-const DEFAULT_QUERY: Query = { language: 'kuery', query: '' };
-
 const EntityInventorySearchContext = createContext<EntityInventorySearchContextValue | null>(null);
 
-/** Holds the page's controlled search state; it never writes to the global query services. */
+/** Holds the page's search state in the URL; it never writes to the global query services. */
 export const EntityInventorySearchProvider = ({
   entityCategory,
   children,
@@ -49,20 +47,17 @@ export const EntityInventorySearchProvider = ({
   const {
     services: { notifications, uiSettings },
   } = useKibana();
-  const [query, setQuery] = useState<Query>(DEFAULT_QUERY);
-  const [filters, setFilters] = useState<Filter[]>([]);
-  const [dateRange, setDateRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
-  const [selectionState, setSelectionState] = useState({
-    entityCategory,
-    selection: EMPTY_SELECTION,
-  });
-  if (selectionState.entityCategory !== entityCategory) {
-    setSelectionState({ entityCategory, selection: EMPTY_SELECTION });
-  }
-  const filterControls = selectionState.selection;
+  const [{ query, filters, dateRange, filterControls }, updateSearchState] = useUrlSearchState();
+  const [refreshToken, setRefreshToken] = useState(0);
+
+  const setFilters = useCallback(
+    (nextFilters: Filter[]) => updateSearchState({ filters: nextFilters }),
+    [updateSearchState]
+  );
+
   const setFilterControls = useCallback(
-    (selection: FilterControlsSelection) => setSelectionState({ entityCategory, selection }),
-    [entityCategory]
+    (selection: FilterControlsSelection) => updateSearchState({ filterControls: selection }),
+    [updateSearchState]
   );
 
   const submit = useCallback(
@@ -70,15 +65,10 @@ export const EntityInventorySearchProvider = ({
       let queryToCommit = submittedQuery;
       // SearchBar submits the raw query text without parsing it; reject invalid KQL here so the
       // last valid query is kept and consumers never receive a query that fails to parse.
-      if (submittedQuery?.language === 'kuery') {
-        try {
-          fromKueryExpression(submittedQuery.query, {
-            allowLeadingWildcards: uiSettings.get(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS),
-          });
-        } catch (error) {
-          notifications.toasts.addError(error, { title: INVALID_QUERY_TOAST_TITLE });
-          queryToCommit = undefined;
-        }
+      const queryError = submittedQuery && validateQuery(submittedQuery, uiSettings);
+      if (queryError) {
+        notifications.toasts.addError(queryError, { title: INVALID_QUERY_TOAST_TITLE });
+        queryToCommit = undefined;
       }
 
       const { range, wasClamped, isValid } = clampTimeRange(
@@ -90,14 +80,15 @@ export const EntityInventorySearchProvider = ({
       if (wasClamped) {
         notifications.toasts.addWarning({ title: TIME_RANGE_CLAMPED_TOAST_TITLE });
       }
-      if (queryToCommit) {
-        setQuery(queryToCommit);
-      }
-      setDateRange(effectiveRange);
+      updateSearchState({
+        ...(queryToCommit && { query: queryToCommit }),
+        dateRange: effectiveRange,
+      });
+      setRefreshToken((token) => token + 1);
 
       return effectiveRange;
     },
-    [dateRange, notifications, uiSettings]
+    [dateRange, notifications, updateSearchState, uiSettings]
   );
 
   const value = useMemo(
@@ -109,9 +100,20 @@ export const EntityInventorySearchProvider = ({
       setFilters,
       filterControls,
       setFilterControls,
+      refreshToken,
       submit,
     }),
-    [entityCategory, query, filters, dateRange, filterControls, setFilterControls, submit]
+    [
+      entityCategory,
+      query,
+      filters,
+      dateRange,
+      setFilters,
+      filterControls,
+      setFilterControls,
+      refreshToken,
+      submit,
+    ]
   );
 
   return (

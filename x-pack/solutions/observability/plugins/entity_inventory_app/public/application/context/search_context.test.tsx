@@ -6,37 +6,35 @@
  */
 
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { act, renderHook } from '@testing-library/react';
 import type { Filter } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { EntityInventoryEntityCategory } from '../../types';
 import { DEFAULT_TIME_RANGE } from '../constants';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
 import { EntityInventorySearchProvider, useEntityInventorySearch } from './search_context';
 
-const renderSearchHook = () => {
+const renderSearchHook = (initialEntry = '/kubernetes') => {
   const core = coreMock.createStart();
+  const history = createMemoryHistory({ initialEntries: [initialEntry] });
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <KibanaContextProvider services={core}>
-      <EntityInventorySearchProvider entityCategory="kubernetes">
-        {children}
-      </EntityInventorySearchProvider>
+      <Router history={history}>
+        <EntityInventorySearchProvider entityCategory="kubernetes">
+          {children}
+        </EntityInventorySearchProvider>
+      </Router>
     </KibanaContextProvider>
   );
 
-  return { core, ...renderHook(() => useEntityInventorySearch(), { wrapper }) };
+  return { core, history, ...renderHook(() => useEntityInventorySearch(), { wrapper }) };
 };
 
 const kuery = (query: string) => ({ language: 'kuery', query });
 
 describe('EntityInventorySearchProvider', () => {
-  let category: EntityInventoryEntityCategory = 'kubernetes';
-
-  beforeEach(() => {
-    category = 'kubernetes';
-  });
-
   it('exposes the default search state and the entity category', () => {
     const { result } = renderSearchHook();
 
@@ -61,34 +59,6 @@ describe('EntityInventorySearchProvider', () => {
       type: 'k8s.pod',
       attributes: { 'k8s.pod.phase': ['Running'] },
     });
-  });
-
-  it('resets the filter selection every time the entity category changes', () => {
-    const core = coreMock.createStart();
-    const { result, rerender } = renderHook(() => useEntityInventorySearch(), {
-      wrapper: ({ children }: { children?: React.ReactNode }) => (
-        <KibanaContextProvider services={core}>
-          <EntityInventorySearchProvider entityCategory={category}>
-            {children}
-          </EntityInventorySearchProvider>
-        </KibanaContextProvider>
-      ),
-    });
-
-    act(() => {
-      result.current.setFilterControls({ attributes: { 'os.type': ['linux'] } });
-    });
-    expect(result.current.filterControls).toEqual({ attributes: { 'os.type': ['linux'] } });
-
-    category = 'hosts';
-    rerender();
-
-    expect(result.current.filterControls).toEqual({ attributes: {} });
-
-    category = 'kubernetes';
-    rerender();
-
-    expect(result.current.filterControls).toEqual({ attributes: {} });
   });
 
   it('commits a submission within the maximum time range as-is', () => {
@@ -163,7 +133,24 @@ describe('EntityInventorySearchProvider', () => {
       result.current.setFilters(filters);
     });
 
-    expect(result.current.filters).toBe(filters);
+    expect(result.current.filters).toEqual(filters);
+  });
+
+  it('changes the refresh token on every submit, even for the same search', () => {
+    const { result } = renderSearchHook();
+    const submission = { dateRange: { from: 'now-1h', to: 'now' }, query: kuery('host.name:a') };
+    const initialToken = result.current.refreshToken;
+
+    act(() => {
+      result.current.submit(submission);
+    });
+    const tokenAfterFirstSubmit = result.current.refreshToken;
+    act(() => {
+      result.current.submit(submission);
+    });
+
+    expect(tokenAfterFirstSubmit).not.toBe(initialToken);
+    expect(result.current.refreshToken).not.toBe(tokenAfterFirstSubmit);
   });
 
   it('throws a descriptive error when used outside the provider', () => {
@@ -172,5 +159,40 @@ describe('EntityInventorySearchProvider', () => {
     expect(() => renderHook(() => useEntityInventorySearch())).toThrow(
       'useEntityInventorySearch must be used within an EntityInventorySearchProvider'
     );
+  });
+
+  describe('URL state', () => {
+    it('writes the committed state to the _a parameter', () => {
+      const { result, history } = renderSearchHook();
+
+      act(() => {
+        result.current.submit({
+          dateRange: { from: 'now-1h', to: 'now' },
+          query: kuery('host.name:a'),
+        });
+      });
+
+      expect(history.location.search).toContain('_a=');
+      expect(history.location.search).toContain('host.name');
+    });
+
+    it('restores the state it wrote when the page loads again', () => {
+      const first = renderSearchHook();
+      act(() => {
+        first.result.current.submit({
+          dateRange: { from: 'now-1h', to: 'now' },
+          query: kuery('host.name:a'),
+        });
+        first.result.current.setFilterControls({ attributes: { 'os.type': ['linux'] } });
+      });
+
+      const second = renderSearchHook(`/kubernetes${first.history.location.search}`);
+
+      expect(second.result.current.dateRange).toEqual({ from: 'now-1h', to: 'now' });
+      expect(second.result.current.query).toEqual(kuery('host.name:a'));
+      expect(second.result.current.filterControls).toEqual({
+        attributes: { 'os.type': ['linux'] },
+      });
+    });
   });
 });
