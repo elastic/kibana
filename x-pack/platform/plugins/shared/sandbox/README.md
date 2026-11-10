@@ -1,9 +1,12 @@
 # Sandbox plugin
 
-Remote sandboxed containers for AI agents. Plugins get a `SandboxSession` from
-`SandboxPluginStart.getSession` (or `getSessionForSpace` when no `KibanaRequest` is
-available, for example in workflow step handlers) and use it to run commands and read, write
-and stat files inside the sandbox.
+Provides sandboxed containers for AI agents to run untrusted commands.
+
+## Getting a session
+
+Plugins get a `SandboxSession` from `SandboxPluginStart.getSession` (or `getSessionForSpace`
+when no `KibanaRequest` is available, for example in workflow step handlers) and use it to run
+commands and read, write and stat files inside the sandbox.
 
 ## Every sandbox RPC reports itself
 
