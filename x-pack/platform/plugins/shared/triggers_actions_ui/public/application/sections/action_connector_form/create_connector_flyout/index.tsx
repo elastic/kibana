@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -31,6 +31,7 @@ import {
   DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE,
   DEPRECATED_LLM_CONNECTOR_INFO,
 } from '@kbn/response-ops-rule-form/src/translations';
+import { SectionLoading } from '../../../components/section_loading';
 import { CreateConnectorFilter } from './create_connector_filter';
 import type {
   ActionConnector,
@@ -427,15 +428,26 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               )}
           </>
         ) : (
-          <ActionTypeMenu
-            featureId={featureId}
-            onActionTypeChange={setActionType}
-            setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
-            setAllActionTypes={setAllActionTypes}
-            actionTypeRegistry={actionTypeRegistry}
-            searchValue={searchValue}
-            selectedFeatureIds={selectedFeatureIds}
-          />
+          <Suspense
+            fallback={
+              <SectionLoading>
+                {i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionsConnectorsList.loadingConnectorTypesDescription',
+                  { defaultMessage: 'Loading connector types…' }
+                )}
+              </SectionLoading>
+            }
+          >
+            <ActionTypeMenu
+              featureId={featureId}
+              onActionTypeChange={setActionType}
+              setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
+              setAllActionTypes={setAllActionTypes}
+              actionTypeRegistry={actionTypeRegistry}
+              searchValue={searchValue}
+              selectedFeatureIds={selectedFeatureIds}
+            />
+          </Suspense>
         )}
       </EuiFlyoutBody>
       <FlyoutFooter
