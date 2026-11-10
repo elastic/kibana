@@ -881,7 +881,7 @@ importers:
         version: link:x-pack/platform/plugins/private/canvas
       '@kbn/cases-api-integration-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/cases
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases
       '@kbn/cases-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-cases-components
@@ -2339,7 +2339,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-ftr-llm-proxy
       '@kbn/functional-with-es-ssl-cases-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_with_es_ssl/plugins/cases
+        version: link:x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases
       '@kbn/gen-ai-settings-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/gen_ai_settings
@@ -2700,6 +2700,9 @@ importers:
       '@kbn/management-settings-field-definition':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-management/settings/field_definition
+      '@kbn/management-settings-hooks':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-management/settings/hooks
       '@kbn/management-settings-ids':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-management/settings/setting_ids
@@ -2933,7 +2936,7 @@ importers:
         version: link:x-pack/solutions/observability/packages/alerting-test-data
       '@kbn/observability-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/observability
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability
       '@kbn/observability-get-padded-alert-time-range-util':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/get-padded-alert-time-range-util
@@ -3173,7 +3176,7 @@ importers:
         version: link:examples/resizable_layout_examples
       '@kbn/resolver-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/plugin_functional/plugins/resolver_test
+        version: link:x-pack/solutions/security/test_plugins/resolver_test
       '@kbn/response-ops-alert-snooze':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/response-ops/alert-snooze
@@ -3458,7 +3461,7 @@ importers:
         version: link:x-pack/solutions/security/packages/features
       '@kbn/security-solution-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/security_solution
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution
       '@kbn/security-solution-navigation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/navigation
@@ -4801,8 +4804,8 @@ importers:
         specifier: 4.0.1
         version: 4.0.1
       re2js:
-        specifier: 2.8.5
-        version: 2.8.5
+        specifier: 2.9.1
+        version: 2.9.1
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -8238,6 +8241,8 @@ importers:
 
   src/platform/packages/shared/kbn-management/settings/field_definition: {}
 
+  src/platform/packages/shared/kbn-management/settings/hooks: {}
+
   src/platform/packages/shared/kbn-management/settings/section_registry: {}
 
   src/platform/packages/shared/kbn-management/settings/setting_ids: {}
@@ -9586,11 +9591,11 @@ importers:
 
   x-pack/platform/test/alerting_api_integration/packages/helpers: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/cases: {}
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/observability: {}
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/security_solution: {}
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution: {}
 
   x-pack/platform/test/cloud_integration/plugins/saml_provider: {}
 
@@ -9604,7 +9609,7 @@ importers:
 
   x-pack/platform/test/functional_with_es_ssl/plugins/alerts: {}
 
-  x-pack/platform/test/functional_with_es_ssl/plugins/cases: {}
+  x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases: {}
 
   x-pack/platform/test/licensing_plugin/plugins/test_feature_usage: {}
 
@@ -9946,7 +9951,7 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test/plugin_functional/plugins/resolver_test: {}
+  x-pack/solutions/security/test_plugins/resolver_test: {}
 
   x-pack/solutions/security/test/security_solution_api_integration: {}
 
@@ -22552,9 +22557,9 @@ packages:
     resolution: {integrity: sha512-KTOIcZTSOpOxbu3i0+T6mFQ6tkxXKlTxfcMFs1trQbsMnG84qNq+DjXr8Afu+FEFjvF1NNlldpC7roPyazFI8g==}
     deprecated: Accidental publish of breaking changes. Please downgrade to 1.3.3 or upgrade to the latest version.
 
-  re2js@2.8.5:
-    resolution: {integrity: sha512-L13fl3sRU6GgC/3fGrZ3DBZt2knDy/MVTw90oVBKhdlLr9uKwrxlxJUD+zkEMm8X/nq1XMi5GS4jq8O4FjmHoA==}
-    engines: {node: '>=18.0.0'}
+  re2js@2.9.1:
+    resolution: {integrity: sha512-JIT3bEEUZTOR2YS1walNEIfH4cF/cQeZcBUFq7ldqO6lR6g0X5CBq/S8rsa9omzZcsNf8qc36jCkWpKKtncrZg==}
+    engines: {node: '>=20.0.0'}
 
   react-clientside-effect@1.2.8:
     resolution: {integrity: sha512-ma2FePH0z3px2+WOu6h+YycZcEvFmmxIlAb62cF52bG86eMySciO/EQZeQMXd07kPCYB0a1dWDT5J+KE9mCDUw==}
@@ -40709,7 +40714,7 @@ snapshots:
 
   re2js@1.4.0: {}
 
-  re2js@2.8.5: {}
+  re2js@2.9.1: {}
 
   react-clientside-effect@1.2.8(react@18.2.0):
     dependencies:
