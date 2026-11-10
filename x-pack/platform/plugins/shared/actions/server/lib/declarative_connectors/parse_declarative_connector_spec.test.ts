@@ -92,4 +92,208 @@ describe('parseDeclarativeConnectorSpec', () => {
     expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
     expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(/url or baseUrl/);
   });
+
+  it.each([
+    [
+      'url and baseUrl without path',
+      '      url: https://example.com\n      baseUrl: https://example.com',
+    ],
+    ['url and path without baseUrl', '      url: https://example.com\n      path: /ping'],
+    ['baseUrl without path', '      baseUrl: https://example.com'],
+    ['path without baseUrl', '      path: /ping'],
+  ])('rejects a request with %s', (_name, urlFields) => {
+    const raw = minimalSpec(`      method: GET\n${urlFields}`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(
+      /Provide either url or baseUrl with path/
+    );
+  });
+
+  it('accepts a request with only baseUrl and path', () => {
+    const raw = minimalSpec(`      method: GET
+      baseUrl: https://example.com
+      path: /ping`);
+
+    expect(() => parseDeclarativeConnectorSpec(raw)).not.toThrow();
+  });
+
+  describe('JSON schema validation', () => {
+    const specWithInput = (inputYaml: string): string =>
+      minimalSpec(`      method: GET
+      url: https://example.com/ping`).replace(
+        `    input:
+      type: object
+      additionalProperties: false
+`,
+        `    input:\n${inputYaml}\n`
+      );
+
+    it.each([
+      [
+        'required name without a property',
+        `      type: object
+      required: [missing]
+      properties:
+        other:
+          type: string`,
+        /Required field "missing" has no property definition/,
+      ],
+      [
+        'required name with no properties at all',
+        `      type: object
+      required: [missing]`,
+        /Required field "missing" has no property definition/,
+      ],
+      [
+        'properties on a string',
+        `      type: string
+      properties:
+        a:
+          type: string`,
+        /"properties" is only supported for object schemas/,
+      ],
+      [
+        'required on a string',
+        `      type: string
+      required: [a]`,
+        /"required" is only supported for object schemas/,
+      ],
+      [
+        'items on an object',
+        `      type: object
+      items:
+        type: string`,
+        /"items" is only supported for array schemas/,
+      ],
+      [
+        'format on a number',
+        `      type: number
+      format: uri`,
+        /"format" is only supported for string schemas/,
+      ],
+      [
+        'minLength on a number',
+        `      type: number
+      minLength: 1`,
+        /"minLength" is only supported for string schemas/,
+      ],
+      [
+        'maxLength on an integer',
+        `      type: integer
+      maxLength: 1`,
+        /"maxLength" is only supported for string schemas/,
+      ],
+      [
+        'minimum on a string',
+        `      type: string
+      minimum: 1`,
+        /"minimum" is only supported for number or integer schemas/,
+      ],
+      [
+        'maximum on a string',
+        `      type: string
+      maximum: 1`,
+        /"maximum" is only supported for number or integer schemas/,
+      ],
+      [
+        'additionalProperties on a string',
+        `      type: string
+      additionalProperties: false`,
+        /"additionalProperties" is only supported for object schemas/,
+      ],
+      [
+        'string default on a number',
+        `      type: number
+      default: abc`,
+        /Default value must match type "number"/,
+      ],
+      [
+        'non-integer default on an integer',
+        `      type: integer
+      default: 1.5`,
+        /Default value must match type "integer"/,
+      ],
+      [
+        'number default on a string',
+        `      type: string
+      default: 1`,
+        /Default value must match type "string"/,
+      ],
+      [
+        'string enum entry on a number',
+        `      type: number
+      enum: [1, abc]`,
+        /Enum value must match type "number"/,
+      ],
+      [
+        'non-integer enum entry on an integer',
+        `      type: integer
+      enum: [1, 1.5]`,
+        /Enum value must match type "integer"/,
+      ],
+      [
+        'number enum entry on a string',
+        `      type: string
+      enum: [a, 2]`,
+        /Enum value must match type "string"/,
+      ],
+      [
+        'invalid keyword inside nested properties',
+        `      type: object
+      properties:
+        name:
+          type: string
+          minimum: 1`,
+        /properties\.name\.minimum: "minimum" is only supported/,
+      ],
+      [
+        'undefined required inside nested properties',
+        `      type: object
+      properties:
+        child:
+          type: object
+          required: [missing]`,
+        /properties\.child\.required: Required field "missing"/,
+      ],
+      [
+        'wrong default type inside nested properties',
+        `      type: object
+      properties:
+        count:
+          type: integer
+          default: abc`,
+        /properties\.count\.default: Default value must match type "integer"/,
+      ],
+      [
+        'invalid keyword inside items',
+        `      type: array
+      items:
+        type: object
+        items:
+          type: string`,
+        /items\.items: "items" is only supported for array schemas/,
+      ],
+      [
+        'wrong enum type inside items',
+        `      type: array
+      items:
+        type: string
+        enum: [a, 2]`,
+        /items\.enum\.1: Enum value must match type "string"/,
+      ],
+      [
+        'wrong default type inside items',
+        `      type: array
+      items:
+        type: boolean
+        default: yes-please`,
+        /items\.default: Default value must match type "boolean"/,
+      ],
+    ])('rejects %s', (_name, inputYaml, message) => {
+      const raw = specWithInput(inputYaml);
+
+      expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(DeclarativeConnectorSpecError);
+      expect(() => parseDeclarativeConnectorSpec(raw)).toThrow(message);
+    });
+  });
 });

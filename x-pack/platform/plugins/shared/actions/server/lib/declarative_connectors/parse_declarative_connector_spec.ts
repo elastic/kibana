@@ -140,9 +140,12 @@ const httpRequestSchema = lazySchema(() =>
     })
     .strict()
     .superRefine((request, context) => {
-      const hasUrl = request.url !== undefined;
-      const hasBaseAndPath = request.baseUrl !== undefined && request.path !== undefined;
-      if (hasUrl === hasBaseAndPath) {
+      const { url, baseUrl, path } = request;
+      const isValid =
+        url !== undefined
+          ? baseUrl === undefined && path === undefined
+          : baseUrl !== undefined && path !== undefined;
+      if (!isValid) {
         context.addIssue({
           code: 'custom',
           message: 'Provide either url or baseUrl with path.',
