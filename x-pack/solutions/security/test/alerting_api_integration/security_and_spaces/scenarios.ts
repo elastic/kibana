@@ -159,7 +159,7 @@ const Space1AllWithRestrictedFixture: User = {
 
 /**
  * This user is needed to test system actions.
- * In x-pack/platform/plugins/private/test/response_ops/alerting_api_integration/alerts/server/action_types.ts
+ * In x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/action_types.ts
  * we registered a system action type which requires access to Cases. This user has
  * access to Cases only in the Stack Management. The tests use this user to
  * execute the system action and verify that the authorization is performed

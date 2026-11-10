@@ -93,7 +93,7 @@ While paused, workload/overdue stats grow and the health API may report a degrad
 
 Plugins define tasks by calling the `registerTaskDefinitions` method on the `server.plugins.task_manager` object.
 
-A sample task can be found in the [x-pack/platform/plugins/private/test/response_ops/plugin_api_integration/sample_task_plugin/](../../private/test/response_ops/plugin_api_integration/sample_task_plugin/server/plugin.ts) folder.
+A sample task can be found in the [x-pack/platform/test_plugins/response_ops/plugin_api_integration/sample_task_plugin/](../../private/test/response_ops/plugin_api_integration/sample_task_plugin/server/plugin.ts) folder.
 
 ```js
 export class Plugin {

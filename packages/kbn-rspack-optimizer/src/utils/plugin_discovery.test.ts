@@ -196,7 +196,7 @@ describe('discoverPlugins with explicit paths', () => {
   it('includes an explicitly selected response ops fixture', async () => {
     const pluginPath = Path.resolve(
       REPO_ROOT,
-      'x-pack/platform/plugins/private/test/response_ops/functional_with_es_ssl/alerts'
+      'x-pack/platform/test_plugins/response_ops/functional_with_es_ssl/alerts'
     );
     const plugins = await discoverPlugins({
       repoRoot: REPO_ROOT,

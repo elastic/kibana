@@ -43,7 +43,7 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/platform/plugins/shared/screenshotting/server/browsers/chromium/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/screenshotting/server/browsers/download/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/plugins/shared/stack_connectors/server/connector_types/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/plugins/private/test/response_ops/alerting_api_integration/alerts/server/sub_action_connector.ts',
+  'x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/sub_action_connector.ts',
   'x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/tests/alerting/mustache_templates.ts',
   'x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/mustache_templates.ts',
   'x-pack/platform/test/fleet_api_integration/**/*.{js,mjs,ts,tsx}',
