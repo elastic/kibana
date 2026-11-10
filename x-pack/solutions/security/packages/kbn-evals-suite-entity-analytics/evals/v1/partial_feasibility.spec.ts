@@ -84,9 +84,9 @@ evaluate.describe(
                 ],
                 toolCalls: [
                   {
-                    id: 'security.search_entities',
+                    id: 'security.get_entity_risk_score_history',
                     criteria: [
-                      'The response uses entity analytics with ESQL over risk-score indices, optionally filtering by user (e.g. user.name or id).',
+                      'The response uses risk score history for John Smith, by name or entity id.',
                     ],
                   },
                 ],

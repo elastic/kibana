@@ -1457,8 +1457,7 @@ paths:
       x-state: Technical Preview
   /api/risk_score/engine/dangerously_delete_data:
     delete:
-      description: Cleaning up the the Risk Engine by removing the indices, mapping
-        and transforms
+      description: Stops risk scoring for the space. Removes the risk score data stream, the lookup index and its template, the risk engine configuration, and the risk score maintainer task, and clears risk fields stored on entity documents.
       operationId: CleanUpRiskEngine
       responses:
         '200':

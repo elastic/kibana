@@ -147,7 +147,7 @@ If asset criticality records already exist for the specified entities, those rec
       .send(props.body as object);
   },
   /**
-   * Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+   * Stops risk scoring for the space. Removes the risk score data stream, the lookup index and its template, the risk engine configuration, and the risk score maintainer task, and clears risk fields stored on entity documents.
    */
   cleanUpRiskEngine(kibanaSpace: string = 'default') {
     return supertest

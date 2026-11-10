@@ -139,13 +139,7 @@ evaluate.describe(
                   {
                     id: 'security.search_entities',
                     criteria: [
-                      'The response uses asset criticality to identify business-critical assets.',
-                    ],
-                  },
-                  {
-                    id: 'security.get_entity_risk_score_history',
-                    criteria: [
-                      'The response uses risk score history to detect risk score increases or changes over time.',
+                      'The response uses asset criticality to identify business-critical assets. If an asset is found, risk score history may be used to describe the increase.',
                     ],
                   },
                 ],

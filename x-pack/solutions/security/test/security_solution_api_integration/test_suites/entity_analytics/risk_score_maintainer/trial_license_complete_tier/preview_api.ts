@@ -313,12 +313,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
       const unweightedScore = unweighted.scores.host?.[0];
       const weightedScore = weighted.scores.host?.[0];
+      const unweightedValue = unweightedScore?.calculated_score;
+      const weightedValue = weightedScore?.calculated_score;
+      if (unweightedValue == null || weightedValue == null) {
+        throw new Error('expected host scores');
+      }
       expect(unweightedScore?.id_field).to.be('entity.id');
       expect(weightedScore?.id_field).to.be('entity.id');
       expect(weightedScore?.id_value).to.be(testEntities[0].expectedEuid);
-      expect(weightedScore?.calculated_score < (unweightedScore?.calculated_score ?? 0)).to.be(
-        true
-      );
+      expect(weightedValue < unweightedValue).to.be(true);
     });
 
     it('ranks the entity with the higher alert risk above the lower one', async () => {
@@ -353,15 +356,16 @@ export default ({ getService }: FtrProviderContext): void => {
         (score) => score.id_value === high.testEntities[0].expectedEuid
       );
 
+      const lowNorm = lowScore?.calculated_score_norm;
+      const highNorm = highScore?.calculated_score_norm;
+      if (lowNorm == null || highNorm == null) {
+        throw new Error('expected host scores');
+      }
       expect(lowScore?.id_field).to.be('entity.id');
       expect(highScore?.id_field).to.be('entity.id');
-      expect(lowScore?.calculated_score_norm >= 0 && lowScore?.calculated_score_norm <= 100).to.be(
-        true
-      );
-      expect(
-        highScore?.calculated_score_norm >= 0 && highScore?.calculated_score_norm <= 100
-      ).to.be(true);
-      expect(highScore?.calculated_score_norm > (lowScore?.calculated_score_norm ?? 0)).to.be(true);
+      expect(lowNorm >= 0 && lowNorm <= 100).to.be(true);
+      expect(highNorm >= 0 && highNorm <= 100).to.be(true);
+      expect(highNorm > lowNorm).to.be(true);
     });
 
     it('excludes closed alerts by default', async () => {

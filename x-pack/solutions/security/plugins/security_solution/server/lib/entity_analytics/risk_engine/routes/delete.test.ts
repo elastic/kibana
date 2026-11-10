@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import { RISK_ENGINE_CLEANUP_URL } from '../../../../../common/constants';
 import {
   serverMock,
@@ -85,6 +86,39 @@ describe('riskEngineCleanupRoute', () => {
       clients.core.elasticsearch.client.asInternalUser.ingest.deletePipeline
     ).not.toHaveBeenCalled();
     expect(removeIfExists).toHaveBeenCalledWith('risk-score:default');
+    expect(clients.core.elasticsearch.client.asInternalUser.updateByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: getEntitiesAlias(ENTITY_LATEST, 'default'),
+      })
+    );
+  });
+
+  it('returns 400 and does not delete anything when Task Manager is unavailable', async () => {
+    getStartServicesMock.mockResolvedValue([
+      {},
+      {
+        security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
+      },
+    ]);
+
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(400);
+    expect(clients.core.elasticsearch.client.asCurrentUser.indices.delete).not.toHaveBeenCalled();
+    expect(clients.riskScoreDataClient.tearDown).not.toHaveBeenCalled();
+    expect(deleteSavedObjects).not.toHaveBeenCalled();
+  });
+
+  it('does not remove the maintainer task when the caller cannot delete the risk score index', async () => {
+    clients.core.elasticsearch.client.asCurrentUser.indices.delete.mockRejectedValueOnce(
+      Object.assign(new Error('delete_index denied'), { meta: { statusCode: 403 } })
+    );
+
+    const response = await server.inject(buildRequest(), context);
+
+    expect(response.status).toEqual(500);
+    expect(removeIfExists).not.toHaveBeenCalled();
+    expect(deleteSavedObjects).not.toHaveBeenCalled();
   });
 
   it('returns 500 when cleanup reports a real error', async () => {

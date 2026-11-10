@@ -13,9 +13,20 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { CleanUpRiskEngineResponse } from '../../../../../common/api/entity_analytics';
+import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import { deleteSavedObjects } from '../utils/saved_object_configuration';
 import { getIndexPatternLookup } from '../../risk_score/configurations';
 import { RISK_SCORE_MAINTAINER_ID } from '../../../../../common/entity_analytics/risk_score/constants';
+import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
+
+const CLEAR_ENTITY_RISK_SCRIPT = `
+  if (ctx._source.entity != null) {
+    ctx._source.entity.remove('risk');
+    if (ctx._source.entity.relationships != null && ctx._source.entity.relationships.resolution != null) {
+      ctx._source.entity.relationships.resolution.remove('risk');
+    }
+  }
+`;
 
 const isMissingResourceError = (error: unknown): boolean => {
   if (typeof error !== 'object' || error == null) {
@@ -66,6 +77,18 @@ export const riskEngineCleanupRoute = (
             }
             errors.push(error instanceof Error ? error : new Error(String(error)));
           };
+          const failureResponse = () =>
+            siemResponse.error({
+              statusCode: 500,
+              body: {
+                cleanup_successful: false,
+                errors: errors.map((error, seq) => ({
+                  seq: seq + 1,
+                  error: error.message,
+                })),
+              },
+              bypassErrorFormat: true,
+            });
 
           securitySolution.getAuditLogger()?.log({
             message: 'User attempted to clean up risk score resources',
@@ -77,29 +100,18 @@ export const riskEngineCleanupRoute = (
             },
           });
 
+          if (!plugins.taskManager) {
+            return siemResponse.error({
+              statusCode: 400,
+              body: TASK_MANAGER_UNAVAILABLE_ERROR,
+            });
+          }
+
           try {
-            await deleteSavedObjects({
-              savedObjectsClient: core.savedObjects.client,
-              namespace,
-            }).catch(addError);
-
-            const riskScoreErrors = await securitySolution.getRiskScoreDataClient().tearDown();
-            errors.push(...riskScoreErrors);
-
             const alias = `risk-score.risk-score-${namespace}`;
-            if (!plugins.taskManager) {
-              addError(
-                new Error(
-                  'Task Manager is unavailable; the risk score maintainer task was not removed'
-                )
-              );
-            } else {
-              await plugins.taskManager
-                .removeIfExists(`${RISK_SCORE_MAINTAINER_ID}:${namespace}`)
-                .catch(addError);
-            }
             // The privilege check grants read/write, not delete_index. Delete the caller's
-            // risk-score index and lookup index as that user so a missing delete privilege fails closed.
+            // risk-score index and lookup index as that user so a missing delete privilege
+            // fails before the saved object or the maintainer task is removed.
             await currentUserEsClient.indices
               .delete({ index: alias }, { ignore: [404] })
               .catch(addError);
@@ -109,19 +121,44 @@ export const riskEngineCleanupRoute = (
             await currentUserEsClient.indices
               .deleteIndexTemplate({ name: lookupIndex.template }, { ignore: [404] })
               .catch(addError);
+            if (errors.length > 0) {
+              return failureResponse();
+            }
+
+            await core.elasticsearch.client.asInternalUser
+              .updateByQuery({
+                index: getEntitiesAlias(ENTITY_LATEST, namespace),
+                ignore_unavailable: true,
+                conflicts: 'proceed',
+                refresh: true,
+                query: {
+                  bool: {
+                    should: [
+                      { exists: { field: 'entity.risk' } },
+                      { exists: { field: 'entity.relationships.resolution.risk' } },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                script: { lang: 'painless', source: CLEAR_ENTITY_RISK_SCRIPT },
+              })
+              .catch(addError);
+            if (errors.length > 0) {
+              return failureResponse();
+            }
+
+            const riskScoreErrors = await securitySolution.getRiskScoreDataClient().tearDown();
+            errors.push(...riskScoreErrors);
+            await deleteSavedObjects({
+              savedObjectsClient: core.savedObjects.client,
+              namespace,
+            }).catch(addError);
+            await plugins.taskManager
+              .removeIfExists(`${RISK_SCORE_MAINTAINER_ID}:${namespace}`)
+              .catch(addError);
 
             if (errors.length > 0) {
-              return siemResponse.error({
-                statusCode: 500,
-                body: {
-                  cleanup_successful: false,
-                  errors: errors.map((error, seq) => ({
-                    seq: seq + 1,
-                    error: error.message,
-                  })),
-                },
-                bypassErrorFormat: true,
-              });
+              return failureResponse();
             }
 
             return response.ok({ body: { cleanup_successful: true } });
