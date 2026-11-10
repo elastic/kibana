@@ -14,6 +14,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR" && git rev-parse --show-toplevel)"
 ASSETS="$SCRIPT_DIR"
 STATE_DIR="${STREAMS_LOCAL_STATE_DIR:-${TMPDIR:-/tmp}/streams-full-dev}"
+ENCRYPTION_KEY_DIR="$STATE_DIR/streams-encryption-key"
 KUBE_CONTEXT="${KUBE_CONTEXT:-kind-streams}"
 UNIT_ID="${STREAMS_UNIT_ID:-default}"
 UNIT_NS="${STREAMS_UNIT_NAMESPACE:-project-dev}"
@@ -270,6 +271,20 @@ cmd_status() {
   else
     missing "StreamUnit $UNIT_NS/$UNIT_ID"
   fi
+  if [[ -s "$ENCRYPTION_KEY_DIR/current-kid" ]] \
+    && kubectl_ctx -n "$UNIT_NS" get secret streams-encryption-key >/dev/null 2>&1; then
+    ok "Streams encryption key (Kibana directory + $UNIT_NS Secret)"
+  else
+    missing "Streams encryption key"
+  fi
+  # Source validation reads the registry per target, which answers 503 until every unit in it has the annotation.
+  # Every ingest request then fails, not only the ones for a source.
+  unannotated="$(kubectl_ctx -n "$UNIT_NS" get streamunit -o json 2>/dev/null \
+    | jq -r '.items[] | select(.metadata.annotations["streams.k8s.elastic.co/sources"] == null) | .metadata.name' \
+    | paste -sd, - || true)"
+  if [[ -n "$unannotated" ]]; then
+    missing "sources annotation on $UNIT_NS/$unannotated  →  kubectl -n $UNIT_NS annotate streamunit <name> streams.k8s.elastic.co/sources= (until then ingest answers 503)"
+  fi
   if ds_has_docs "$LOGS_DEV_DS" || ds_has_docs "$LOGS_PROD_DS"; then
     ok "demo logs ($LOGS_DEV_DS / $LOGS_PROD_DS)"
   else
@@ -279,6 +294,13 @@ cmd_status() {
     ok "collector metrics ($METRICS_DS)"
   else
     missing "collector metrics ($METRICS_DS)"
+  fi
+  if [[ -n "$ES" ]] && es_curl "$ES/$METRICS_DS/_count" -H 'Content-Type: application/json' \
+      -d '{"query":{"exists":{"field":"metrics.streams.source.items"}}}' 2>/dev/null \
+      | jq -e '.count > 0' >/dev/null 2>&1; then
+    ok "source metrics (metrics.streams.source.items)"
+  else
+    missing "source metrics (metrics.streams.source.items)  →  run traffic; setup needs yq and helm to enable them"
   fi
 }
 
@@ -357,7 +379,10 @@ if "telemetry.newPipelineTelemetry" not in text:
         changed = True
         print("patched feature_gates telemetry.newPipelineTelemetry")
 
-if "user_facing:" not in text:
+# Newer controllers have no unit telemetry block: streams-transpiler compiles the telemetry into the unit.
+if "user_facing:" not in text and "      internal:\n" not in text:
+    print("skipping user_facing telemetry (the controller no longer configures unit telemetry)")
+elif "user_facing:" not in text:
     old_header = "    telemetry:\n      log_level: debug\n      internal:\n"
     new_header = "    telemetry:\n      log_level: debug\n      metrics_level: detailed\n      internal:\n"
     if old_header in text:
@@ -423,10 +448,76 @@ ensure_es_alias() {
   kubectl_ctx apply -f "$ASSETS/es_alias.yaml" >/dev/null
 }
 
+# Prints the collector config overlay that emits the source metrics (streams.source.*), or nothing.
+# The ingest collector owns that curation pipeline, so it is rendered from its chart at the commit
+# the image tag names, never copied here. The chart's 30s reporting interval is shortened for dev.
+source_metrics_overlay() {
+  local repo="${STREAMS_HOSTED_OTEL_COLLECTOR:-}"
+  local chart_dir="$STATE_DIR/hosted-otel-collector-chart"
+  local interval_ms="${STREAMS_SOURCE_METRICS_INTERVAL_MS:-10000}"
+  local sha rendered missing=""
+
+  [[ "$MOTEL_COLLECTOR_TAG" =~ ^git-([0-9a-f]{7,40})$ ]] || {
+    warn "source metrics off: image tag $MOTEL_COLLECTOR_TAG is not git-<commit>, so no chart matches it"
+    return 0
+  }
+  sha="${BASH_REMATCH[1]}"
+  [[ -d "$repo/.git" ]] || missing="a hosted-otel-collector checkout (STREAMS_HOSTED_OTEL_COLLECTOR)"
+  command -v helm >/dev/null 2>&1 || missing="${missing:+$missing, }helm"
+  command -v yq >/dev/null 2>&1 || missing="${missing:+$missing, }yq (brew install yq)"
+  [[ -z "$missing" ]] || {
+    warn "source metrics off: need $missing"
+    return 0
+  }
+  git -C "$repo" cat-file -e "$sha^{commit}" 2>/dev/null || {
+    warn "source metrics off: commit $sha is not in $repo, run git fetch there"
+    return 0
+  }
+
+  rm -rf "$chart_dir"
+  mkdir -p "$chart_dir"
+  git -C "$repo" archive "$sha" helm | tar -x -C "$chart_dir"
+  rendered="$STATE_DIR/hosted-otel-collector-config.yaml"
+  (
+    cd "$chart_dir/helm/ingest"
+    helm dependency build >/dev/null
+    helm template motel . --show-only templates/configmap.yaml \
+      --set streamsTelemetry.enabled=true --set sourceValidation.enabled=true
+  ) | yq '.data."collector-config.yaml"' > "$rendered" 2>/dev/null || {
+    warn "source metrics off: could not render the chart at $sha"
+    return 0
+  }
+  [[ "$(yq '.service.pipelines | has("metrics/streams-telemetry")' "$rendered")" == "true" ]] || {
+    warn "source metrics off: the chart at $sha has no streams-telemetry pipeline, use a newer image"
+    return 0
+  }
+
+  interval_ms="$interval_ms" yq '{
+    "receivers": {"otlp/streams-telemetry": .receivers["otlp/streams-telemetry"]},
+    "processors": (.processors | with_entries(select(.key | test("/streams-telemetry$")))),
+    "exporters": {"kafka": {"metrics": .exporters.kafka.metrics}},
+    "service": {
+      "telemetry": {"metrics": {
+        "level": .service.telemetry.metrics.level,
+        "readers": [.service.telemetry.metrics.readers[] | select(.periodic.exporter.otlp.endpoint == "http://localhost:4350")],
+        "views": .service.telemetry.metrics.views
+      }},
+      "pipelines": {"metrics/streams-telemetry": .service.pipelines["metrics/streams-telemetry"]}
+    }
+  }
+  | .processors["interval/streams-telemetry"].interval = strenv(interval_ms) + "ms"
+  | .service.telemetry.metrics.readers[0].periodic.interval = (strenv(interval_ms) | to_number)' "$rendered"
+}
+
 ensure_motel() {
   log "ensuring motel"
   local rendered="$STATE_DIR/motel.yaml"
   sed "s/__COLLECTOR_TAG__/$MOTEL_COLLECTOR_TAG/g" "$ASSETS/motel.yaml" > "$rendered"
+  local overlay
+  overlay="$(source_metrics_overlay)"
+  if [[ -n "$overlay" ]]; then
+    OVERLAY="$overlay" yq -i 'select(.kind == "ConfigMap").data."streams-telemetry.yaml" = strenv(OVERLAY)' "$rendered"
+  fi
   local applied
   applied="$(kubectl_ctx apply -f "$rendered")"
   if [[ -n "${STREAMS_CONTROLLER:-}" && -x "$STREAMS_CONTROLLER/dev/registry-secret.sh" ]]; then
@@ -460,6 +551,31 @@ ensure_index_collector() {
     kubectl_ctx -n "$INDEX_NS" rollout restart deploy/motel-index-collector >/dev/null
   fi
   kubectl_ctx -n "$INDEX_NS" rollout status deploy/motel-index-collector --timeout=180s
+}
+
+ensure_encryption_key() {
+  local kid key_file
+  mkdir -p "$ENCRYPTION_KEY_DIR"
+  chmod 700 "$ENCRYPTION_KEY_DIR"
+  if [[ ! -s "$ENCRYPTION_KEY_DIR/current-kid" ]]; then
+    need openssl
+    kid="$(date -u +%Y%m%d_%H%M%S)_$(openssl rand -hex 4)"
+    printf '%s' "$kid" > "$ENCRYPTION_KEY_DIR/current-kid"
+    openssl rand 32 > "$ENCRYPTION_KEY_DIR/streams-encryption-key.$kid"
+  fi
+  kid="$(cat "$ENCRYPTION_KEY_DIR/current-kid")"
+  [[ "$kid" =~ ^[A-Za-z0-9_-]{1,64}$ ]] || die "invalid kid in $ENCRYPTION_KEY_DIR/current-kid"
+  key_file="$ENCRYPTION_KEY_DIR/streams-encryption-key.$kid"
+  [[ -f "$key_file" && "$(wc -c < "$key_file" | tr -d ' ')" -eq 32 ]] \
+    || die "$key_file must contain exactly 32 bytes"
+  chmod 600 "$ENCRYPTION_KEY_DIR/current-kid" "$key_file"
+  kubectl_ctx get namespace "$UNIT_NS" >/dev/null 2>&1 \
+    || die "namespace $UNIT_NS does not exist; wait for the controller to create it"
+  kubectl_ctx -n "$UNIT_NS" create secret generic streams-encryption-key \
+    --from-file=current-kid="$ENCRYPTION_KEY_DIR/current-kid" \
+    --from-file="streams-encryption-key.$kid=$key_file" \
+    --dry-run=client -o yaml | kubectl_ctx apply -f - >/dev/null
+  log "Streams encryption key is ready in $ENCRYPTION_KEY_DIR and $UNIT_NS/streams-encryption-key"
 }
 
 motel_reachable() {
@@ -506,6 +622,7 @@ print_managed_otlp_setting() {
   echo "Add this to config/kibana.dev.yml and restart Kibana:"
   echo
   echo "xpack.cloud.managed_otlp.url: \"$MANAGED_OTLP_URL\""
+  echo "xpack.streams.encryptionKey.path: \"$ENCRYPTION_KEY_DIR\""
   echo
   echo "OTLP sources in Map then mint endpoints under $MANAGED_OTLP_URL/inputs/otlp/<source-id>/v1/{logs,metrics,traces}."
 }
@@ -541,7 +658,7 @@ mint_source_api_key() {
   SOURCE_KEY="$(printf '%s' "$body" | jq -r '.encodedApiKey // empty')"
   if [[ -z "$SOURCE_KEY" || "$SOURCE_KEY" == "null" ]]; then
     printf '%s\n' "$body" >&2
-    die "failed to mint a source API key (does elastic_serverless have ingest_source_manager / manage_own_api_key?)"
+    die "failed to mint a source API key (does the Kibana user have manage_own_api_key and the streams application write privilege on source:$SOURCE_ID?)"
   fi
   printf '%s' "$SOURCE_KEY" > "$STATE_DIR/source_api_key"
   chmod 600 "$STATE_DIR/source_api_key"
@@ -565,7 +682,7 @@ normalize_otlp_logs_url() {
 
 post_otlp_payload() {
   local url="$1" key="${2:-}" payload="$3"
-  local args=(-sS -X POST "$url" -H 'Content-Type: application/json' -H "X-Elastic-Project-Id: $TARGET_ID")
+  local args=(-sS --max-time 90 -X POST "$url" -H 'Content-Type: application/json' -H "X-Elastic-Project-Id: $TARGET_ID")
   if [[ -n "$key" ]]; then
     args+=(-H "Authorization: ApiKey $key")
   fi
@@ -588,13 +705,15 @@ wait_for_unit_artifact() {
 }
 
 publish_unit() {
-  local unit_file="$STATE_DIR/unit.yaml"
-  sed "s/__API_KEY__/$KEY/g" "$ASSETS/unit.yaml" > "$unit_file"
+  local unit_file="$STATE_DIR/unit-envelope.json"
+  jq --arg api_key "$KEY" \
+    '{ unit: ., ui_metadata: {}, secrets: { "streams-full-dev-api-key": $api_key } }' \
+    "$ASSETS/unit.json" > "$unit_file"
   chmod 600 "$unit_file"
   log "PUT $KIBANA_URL/internal/streams/unit/$UNIT_ID (distributor validate+publish, up to 90s)"
   local body
   body="$(kb_curl -X PUT "$KIBANA_URL/internal/streams/unit/$UNIT_ID" \
-    -H 'Content-Type: application/yaml' \
+    -H 'Content-Type: application/json' \
     --data-binary @"$unit_file")"
   if ! printf '%s' "$body" | jq -e '.compiled_config or .acknowledged' >/dev/null 2>&1; then
     printf '%s\n' "$body" >&2
@@ -603,6 +722,13 @@ publish_unit() {
   log "unit publish acknowledged"
   rm -f "$unit_file"
   wait_for_unit_artifact
+}
+
+refresh_motel_kafka_metadata() {
+  log "restarting motel after unit publish to refresh Kafka topic metadata"
+  kubectl_ctx -n "$MOTEL_NS" rollout restart deploy/motel-ingest-collector >/dev/null
+  kubectl_ctx -n "$MOTEL_NS" rollout status deploy/motel-ingest-collector --timeout=180s
+  ensure_motel_forward
 }
 
 # Rewrites the TLS block under every Elasticsearch exporter in the artifact: the local ES CA
@@ -714,15 +840,15 @@ ensure_unit_tls() {
   patch_artifact_tls
 }
 
-# body.text is a keyword on OTEL logs, so match_phrase on a marker substring misses.
-marker_prefix_query() {
-  jq -n --arg m "$1" '{query:{prefix:{"body.text":$m}}}'
+# body.text is analyzed text, so match the marker as a phrase.
+marker_query() {
+  jq -n --arg m "$1" '{query:{match_phrase:{"body.text":$m}}}'
 }
 
 count_marker_docs() {
   local marker="$1"
   local q main fail
-  q="$(marker_prefix_query "$marker")"
+  q="$(marker_query "$marker")"
   main="$(es_curl "$ES/logs-*/_count" -H 'Content-Type: application/json' -d "$q" | jq -r '.count // 0')"
   fail="$(es_curl "$ES/logs-*::failures/_count" -H 'Content-Type: application/json' -d "$q" \
     | jq -r '.count // 0')"
@@ -731,7 +857,7 @@ count_marker_docs() {
 
 wait_for_marker_docs() {
   local marker="$1"
-  log "waiting for marker $marker in logs-* (body.text prefix; OTEL stores it as keyword)"
+  log "waiting for marker $marker in logs-* (body.text phrase)"
   local i main fail
   detect_es
   for i in $(seq 1 24); do
@@ -739,7 +865,7 @@ wait_for_marker_docs() {
     if [[ "${main:-0}" -gt 0 || "${fail:-0}" -gt 0 ]]; then
       log "$((main + fail)) docs with that marker ($main in logs-*, $fail in ::failures)"
       es_curl "$ES/logs-*/_search?size=0" -H 'Content-Type: application/json' \
-        -d "$(jq -n --arg m "$marker" '{query:{prefix:{"body.text":$m}},aggs:{idx:{terms:{field:"_index",size:20}}}}')" \
+        -d "$(jq -n --arg m "$marker" '{query:{match_phrase:{"body.text":$m}},aggs:{idx:{terms:{field:"_index",size:20}}}}')" \
         | jq -r '.aggregations.idx.buckets[]? | "    \(.key)  \(.doc_count)"'
       return 0
     fi
@@ -853,7 +979,7 @@ send_traffic_round() {
 print_ready() {
   echo
   echo "Local Streams backend is ready. Login: $ES_USER / $ES_PASS"
-  echo "  Canvas   ${KIBANA_URL:-http://localhost:5601}/app/streams/new-experience/"
+  echo "  Canvas   ${KIBANA_URL:-http://localhost:5601}/app/streams/v2/unit/$UNIT_ID/map"
   echo "  Discover ${KIBANA_URL:-http://localhost:5601}/app/discover"
   echo "  Logs     FROM $LOGS_DEV_DS  |  FROM $LOGS_PROD_DS"
   echo "  Failures FROM $LOGS_DEV_DS::failures  |  FROM $LOGS_PROD_DS::failures"
@@ -918,6 +1044,7 @@ require_stack() {
 
 cmd_setup() {
   require_stack
+  ensure_encryption_key
   ensure_controller_patches
   ensure_es_alias
   ensure_motel
@@ -928,12 +1055,14 @@ cmd_setup() {
 
 cmd_seed() {
   require_stack
+  ensure_encryption_key
   ensure_controller_patches
   ensure_es_alias
   ensure_motel
   ensure_index_collector
   mint_api_key
   publish_unit
+  refresh_motel_kafka_metadata
   patch_artifact_tls
   mint_source_api_key
   send_logs
@@ -1054,7 +1183,7 @@ PY
   send_ui_flow_docs "$url" "$TEST_API_KEY" "$ok_payload" "$fail_payload" "$marker"
   echo
   echo "Sent 100 logs with marker $marker"
-  echo "  Valid:          body.text prefix \"$marker\" on the destination index"
+  echo "  Valid:          body.text containing \"$marker\" on the destination index"
   echo "  Failure store:  FROM <your-dest-index>::failures  (env type conflict)"
   if wait_for_marker_docs "$marker"; then
     return 0
@@ -1167,7 +1296,7 @@ reset_canvas_unit() {
     -H 'Content-Type: application/json' -d '{}' || true)"
   if ! printf '%s' "$body" | jq -e '.acknowledged == true' >/dev/null 2>&1; then
     printf '%s\n' "$body" >&2
-    warn "Canvas unit reset did not acknowledge; reload /app/streams/new-experience/ after Kibana is up"
+    warn "Canvas unit reset did not acknowledge; reload /app/streams/v2/unit/$UNIT_ID/map after Kibana is up"
   fi
 }
 
@@ -1183,7 +1312,9 @@ cmd_reset() {
     kubectl_ctx -n "$UNIT_NS" delete "streamunit/$UNIT_ID" --wait=true
   fi
   rm -f "$STATE_DIR/api_key" "$STATE_DIR/source_api_key" "$STATE_DIR/unit.yaml" \
-    "$STATE_DIR/artifact.yaml" "$STATE_DIR/artifact.patched.yaml"
+    "$STATE_DIR/unit-envelope.json" "$STATE_DIR/artifact.yaml" "$STATE_DIR/artifact.patched.yaml"
+  kubectl_ctx -n "$UNIT_NS" delete secret streams-encryption-key --ignore-not-found >/dev/null
+  rm -rf "$ENCRYPTION_KEY_DIR"
   restore_controller_patches
   log "reset done. Reload Canvas — the graph should be empty. Re-run $0 to stand the demo unit back up."
 }
@@ -1209,8 +1340,9 @@ Usage:
   $0 reset          drop Map unit, demo data, StreamUnit CR, controller patches
   $0                setup + seed
 
-Edit unit.yaml and re-run seed to publish a different graph. Keep __API_KEY__
-on elasticsearch destinations. Source id defaults to "input" (STREAMS_SOURCE_ID).
+Edit unit.json and re-run seed to publish a different graph. Keep the
+streams-full-dev-api-key credential reference on Elasticsearch destinations.
+Source id defaults to "input" (STREAMS_SOURCE_ID).
 
 Login: $ES_USER / $ES_PASS (local serverless defaults)
 

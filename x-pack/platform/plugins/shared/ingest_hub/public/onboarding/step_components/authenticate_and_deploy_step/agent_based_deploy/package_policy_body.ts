@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { RegistryVarGroup } from '@kbn/fleet-plugin/common';
 import type { AwsServiceMatrixEntry } from '../../../aws_service_matrix';
+import { getDefaultEnabledDataStreams } from '../../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../../onboarding_flow_context';
 import type { ServiceVars } from '../../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '../package_inputs';
@@ -14,6 +16,11 @@ import { REGION_FIELD_NAMES } from '../../service_settings_step/field_config';
 import type { DeployGroup } from '../deploy_groups';
 import type { SecretRefValue } from '../secret_refs';
 import { buildGroupPolicyNameStem, deriveGroupPolicyName } from '../deploy_group_helpers';
+import {
+  getPolicySettings,
+  getPolicyVarSettings,
+  type PolicySettings,
+} from '../../../common/policy_settings';
 
 export interface BuildPackagePolicyOpts {
   namespace: string;
@@ -25,6 +32,8 @@ export interface BuildPackagePolicyOpts {
   /** Integration name as entered in step 2; the policy name is derived from it. */
   integrationName?: string;
   description?: string;
+  /** Package policy fields from Step 2 that every policy gets, such as the output. */
+  policySettings?: PolicySettings;
 }
 
 export interface PkgInfo {
@@ -132,6 +141,46 @@ function getRequiredVarNamesForInput(service: AwsServiceMatrixEntry, inputType: 
     .map(([name]) => name);
 }
 
+/**
+ * The stream-level var_groups that apply to one stream of `inputType`. buildPackageInputs keys
+ * streams as `<packageName>.<dsId>`, so the stream's own data stream decides: another data stream
+ * on the same input may declare different groups, or none. Falls back to the service-wide union
+ * only when the key does not name a known data stream.
+ */
+function getVarGroupsForStream(
+  service: AwsServiceMatrixEntry,
+  inputType: string,
+  streamKey: string
+): RegistryVarGroup[] {
+  const prefix = `${service.packageName}.`;
+  const dsId = streamKey.startsWith(prefix) ? streamKey.slice(prefix.length) : undefined;
+  const dsInfo = dsId ? service.varDefsByDataStream?.[dsId] : undefined;
+  if (dsInfo) return dsInfo.varGroupsByInput?.[inputType] ?? [];
+  return service.varGroupsByInput?.[inputType] ?? [];
+}
+
+/**
+ * Required var names for one stream: the input's required vars plus the vars of the option
+ * selected for each required stream-level var_group (region vars are backfilled by
+ * buildStreamVars, so they never block). Streams are per data stream, and Fleet validates each
+ * one independently.
+ */
+function getRequiredVarNamesForStream(
+  service: AwsServiceMatrixEntry,
+  inputType: string,
+  streamKey: string,
+  stream: PackageInputEntry['streams'][string]
+): string[] {
+  const selectedOptionVars = getVarGroupsForStream(service, inputType, streamKey)
+    .filter((group) => group.required)
+    .flatMap((group) => {
+      const selected = stream.var_group_selections?.[group.name];
+      const option = group.options.find((o) => o.name === selected) ?? group.options[0];
+      return (option?.vars ?? []).filter((name) => !REGION_FIELD_NAMES.has(name));
+    });
+  return [...getRequiredVarNamesForInput(service, inputType), ...selectedOptionVars];
+}
+
 function isVarSatisfied(value: string | boolean | string[] | undefined): boolean {
   if (value === undefined || value === null) return false;
   if (typeof value === 'string') return value.trim() !== '';
@@ -146,17 +195,13 @@ function pruneUnsatisfiedInputs(
   const kept: Record<string, PackageInputEntry> = {};
 
   for (const [inputKey, entry] of Object.entries(inputs)) {
-    const requiredVarNames = getRequiredVarNamesForInput(service, getInputType(inputKey, service));
+    const inputType = getInputType(inputKey, service);
 
-    if (requiredVarNames.length === 0) {
-      kept[inputKey] = entry;
-      continue;
-    }
-
-    // Every stream of the input must satisfy every required var. Streams are per data stream,
-    // and Fleet validates each one independently.
-    const allStreamsSatisfied = Object.values(entry.streams).every((stream) =>
-      requiredVarNames.every((name) => isVarSatisfied(stream.vars?.[name]))
+    // Every stream of the input must satisfy every required var (none required → kept).
+    const allStreamsSatisfied = Object.entries(entry.streams).every(([streamKey, stream]) =>
+      getRequiredVarNamesForStream(service, inputType, streamKey, stream).every((name) =>
+        isVarSatisfied(stream.vars?.[name])
+      )
     );
 
     if (allStreamsSatisfied) {
@@ -179,11 +224,10 @@ function describeMissingRequiredVars(
 
   for (const [inputKey, entry] of Object.entries(inputs)) {
     const inputType = getInputType(inputKey, service);
-    const requiredVarNames = getRequiredVarNamesForInput(service, inputType);
     const missing = new Set<string>();
 
-    for (const stream of Object.values(entry.streams)) {
-      for (const name of requiredVarNames) {
+    for (const [streamKey, stream] of Object.entries(entry.streams)) {
+      for (const name of getRequiredVarNamesForStream(service, inputType, streamKey, stream)) {
         if (!isVarSatisfied(stream.vars?.[name])) missing.add(name);
       }
     }
@@ -224,7 +268,9 @@ export async function buildGroupPackagePolicy(
   description?: string;
   package: { name: string; version: string };
   namespace?: string;
-  vars?: Record<string, string | SecretRefValue>;
+  output_id?: string;
+  condition?: string;
+  vars?: Record<string, string | SecretRefValue | null>;
   inputs: Record<string, unknown>;
 }> {
   const { members } = group;
@@ -237,8 +283,10 @@ export async function buildGroupPackagePolicy(
     agentCredentials,
     integrationName,
     description,
+    policySettings,
   } = opts;
   const descriptionField = description?.trim() ? { description: description.trim() } : {};
+  const policySettingsFields = getPolicySettings(policySettings, 'agent_based');
 
   // Build serviceVarsMap for all members. Key by service.id for buildPackageInputs.
   // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
@@ -249,7 +297,7 @@ export async function buildGroupPackagePolicy(
     const rawVars = storedServiceVars[instance.instanceId] ?? storedServiceVars[instance.serviceId];
     if (!rawVars) {
       serviceVarsMap[service.id] = {
-        enabledDataStreams: service.dataStreams,
+        enabledDataStreams: getDefaultEnabledDataStreams(service),
         varsByDataStream: {},
       };
     } else {
@@ -264,7 +312,12 @@ export async function buildGroupPackagePolicy(
   }
 
   const services = members.map(({ service }) => service);
-  const allInputs = buildPackageInputs(services, serviceVarsMap, globalRegion);
+  const allInputs = buildPackageInputs(
+    services,
+    serviceVarsMap,
+    globalRegion,
+    getPolicyVarSettings(policySettings, 'agent_based')
+  );
 
   // For a bundled group (multiple services), we apply per-service pruning independently.
   // For a duplicate group (one member), this is equivalent to the old single-target pruning.
@@ -293,7 +346,8 @@ export async function buildGroupPackagePolicy(
     authenticateAndDeployStep.staticKeys,
     pkgVarNames,
     agentCredentials,
-    authenticateAndDeployStep.existingSecretRefs
+    authenticateAndDeployStep.existingSecretRefs,
+    getPolicyVarSettings(policySettings, 'agent_based', pkgVarNames)
   );
 
   if (Object.keys(prunedInputs).length === 0) {
@@ -309,6 +363,7 @@ export async function buildGroupPackagePolicy(
         ...descriptionField,
         package: { name: firstService.packageName, version: pkgVersion },
         ...(group.namespace ? { namespace: group.namespace } : {}),
+        ...policySettingsFields,
         ...(vars ? { vars } : {}),
         inputs: { ...disabledOtherInputs, ...selfDisabled },
       };
@@ -341,6 +396,7 @@ export async function buildGroupPackagePolicy(
     ...descriptionField,
     package: { name: firstService.packageName, version: pkgVersion },
     ...(group.namespace ? { namespace: group.namespace } : {}),
+    ...policySettingsFields,
     ...(vars ? { vars } : {}),
     // disabled entries first so our enabled inputs win if there's any key overlap
     inputs: { ...disabledOtherInputs, ...disabledOwnInputs, ...prunedInputs },

@@ -19,6 +19,8 @@ export type {
   AgenticInvestigationsPublicConfig,
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
+  AlertFlyoutProps,
+  AlertFlyoutRegistration,
 } from './types';
 
 export {

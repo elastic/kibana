@@ -18,7 +18,11 @@ import type { AgentSOAttributes, Agent, ListWithKuery } from '../../types';
 import { appContextService, agentPolicyService } from '..';
 import { getAgentPolicySavedObjectType } from '../agent_policy';
 import type { AgentStatus, FleetServerAgent } from '../../../common/types';
-import { ALL_SPACES_ID, SO_SEARCH_LIMIT } from '../../../common/constants';
+import {
+  AGENTLESS_UNENROLLED_REASON,
+  ALL_SPACES_ID,
+  SO_SEARCH_LIMIT,
+} from '../../../common/constants';
 import { getSortConfig } from '../../../common';
 import { isAgentUpgradeAvailable } from '../../../common/services';
 import {
@@ -447,11 +451,15 @@ export async function getAgentsByKuery(
       sort,
       query: (() => {
         const baseQuery = kueryNode ? toElasticsearchQuery(kueryNode) : undefined;
-        if (!agentlessExcludeFilter) return baseQuery;
+        if (showAgentless !== false) return baseQuery;
+        // Agents of already deleted agentless policies are not matched by the policy id filter.
         return {
           bool: {
             ...(baseQuery ? { filter: [baseQuery] } : {}),
-            must_not: [agentlessExcludeFilter],
+            must_not: [
+              ...(agentlessExcludeFilter ? [agentlessExcludeFilter] : []),
+              { term: { unenrolled_reason: AGENTLESS_UNENROLLED_REASON } },
+            ],
           },
         };
       })(),

@@ -199,7 +199,8 @@ class Package {
       dir.startsWith('x-pack/platform/test_plugins/') ||
       dir.startsWith('x-pack/solutions/search/test/') ||
       dir.startsWith('x-pack/solutions/observability/test/') ||
-      dir.startsWith('x-pack/solutions/security/test/');
+      dir.startsWith('x-pack/solutions/security/test/') ||
+      dir.startsWith('x-pack/solutions/security/test_plugins/');
     return {
       oss,
       example,
