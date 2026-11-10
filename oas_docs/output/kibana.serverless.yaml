@@ -42770,6 +42770,8 @@ paths:
                           type: string
                         unenrolled_at:
                           type: string
+                        unenrolled_reason:
+                          type: string
                         unenrollment_started_at:
                           type: string
                         unhealthy_reason:
@@ -43459,6 +43461,8 @@ paths:
                         type: string
                       unenrolled_at:
                         type: string
+                      unenrolled_reason:
+                        type: string
                       unenrollment_started_at:
                         type: string
                       unhealthy_reason:
@@ -43956,6 +43960,8 @@ paths:
                           - OPAMP
                         type: string
                       unenrolled_at:
+                        type: string
+                      unenrolled_reason:
                         type: string
                       unenrollment_started_at:
                         type: string
@@ -48711,6 +48717,10 @@ paths:
                             - ecs
                             - otel
                           type: string
+                        dedicatedNamespaceTemplates:
+                          description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                          type: boolean
+                          x-state: Experimental
                         deploymentId:
                           description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                           type: string
@@ -49124,6 +49134,10 @@ paths:
                     - ecs
                     - otel
                   type: string
+                dedicatedNamespaceTemplates:
+                  description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                  type: boolean
+                  x-state: Experimental
                 description:
                   description: Integration description from the Service settings step.
                   maxLength: 2048
@@ -49344,6 +49358,10 @@ paths:
                           - ecs
                           - otel
                         type: string
+                      dedicatedNamespaceTemplates:
+                        description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                        type: boolean
+                        x-state: Experimental
                       deploymentId:
                         description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                         type: string
@@ -49793,6 +49811,10 @@ paths:
                           - ecs
                           - otel
                         type: string
+                      dedicatedNamespaceTemplates:
+                        description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                        type: boolean
+                        x-state: Experimental
                       deploymentId:
                         description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                         type: string
@@ -50134,6 +50156,10 @@ paths:
                   maxLength: 255
                   nullable: true
                   type: string
+                dedicatedNamespaceTemplates:
+                  description: Whether the global namespace uses dedicated index templates. Omit it to keep the stored value. Applied to the installed packages after a deployment.
+                  type: boolean
+                  x-state: Experimental
                 deploymentId:
                   description: CFN stack ARN (or equivalent); provided by the client after manual deployment.
                   maxLength: 2048
@@ -50405,6 +50431,10 @@ paths:
                           - ecs
                           - otel
                         type: string
+                      dedicatedNamespaceTemplates:
+                        description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                        type: boolean
+                        x-state: Experimental
                       deploymentId:
                         description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                         type: string
@@ -50781,6 +50811,10 @@ paths:
                             - ecs
                             - otel
                           type: string
+                        dedicatedNamespaceTemplates:
+                          description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                          type: boolean
+                          x-state: Experimental
                         deploymentId:
                           description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                           type: string
