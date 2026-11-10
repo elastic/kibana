@@ -23,7 +23,7 @@ import { createRuleAuthoringSkill } from './rule_authoring_skill';
 export type RegisterSkillsDeps = ManageRuleToolDeps &
   AttachRuleToolDeps &
   ManageActionPolicyToolDeps &
-  AttachActionPolicyToolDeps & 
+  AttachActionPolicyToolDeps &
   LinkRuleAndActionPolicyToolDeps & {
     availability: AvailabilityConfig;
   };
