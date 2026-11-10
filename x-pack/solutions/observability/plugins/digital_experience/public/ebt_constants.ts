@@ -14,20 +14,28 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
   OPEN_FILTER: 'openFilter',
   /** The user narrows the list, e.g. to one environment or source. */
   SET_FILTER: 'setFilter',
+  /** The user leaves a value out of the data, e.g. every Chrome page load. */
+  EXCLUDE_FILTER_VALUE: 'excludeFilterValue',
   /** The user opens the list of columns to show or hide. */
   SELECT_COLUMNS: 'selectColumns',
   /** The user loads the list again after it failed. */
   RETRY_LOAD: 'retryLoad',
   /** The user sets up sessions, or updates them. */
   ENABLE_SESSIONS: 'enableSessions',
+  /** The user opens the sessions list narrowed to what they clicked, e.g. a browser. */
+  VIEW_SESSIONS: 'viewSessions',
+  /** The user opens the full list behind a summary, e.g. every error from the Overview. */
+  VIEW_ALL: 'viewAll',
   /** The user opens a session's details. */
   VIEW_SESSION: 'viewSession',
+  /** The user jumps from the session timeline to one of its page visits. */
+  SELECT_PAGE_VISIT: 'selectPageVisit',
   /** The user leaves a session for the sessions list. */
   BACK_TO_SESSIONS: 'backToSessions',
-  /** The user copies a session's ID. */
-  COPY_SESSION_ID: 'copySessionId',
   /** The user clears the list's search and filters. */
   CLEAR_FILTERS: 'clearFilters',
+  /** The user closes the filters flyout without applying what they picked. */
+  CANCEL_FILTERS: 'cancelFilters',
 } as const;
 
 /*
@@ -38,6 +46,7 @@ export const DIGITAL_EXPERIENCE_EBT_ACTIONS = {
 /** Elements that more than one page shows. */
 export const DIGITAL_EXPERIENCE_EBT_ELEMENTS = {
   ENVIRONMENT_FILTER: 'environmentFilter',
+  INSTRUMENTATION_DOCS_LINK: 'instrumentationDocsLink',
 } as const;
 
 export const APPLICATIONS_LIST_EBT_ELEMENTS = {
@@ -52,6 +61,34 @@ export const APPLICATIONS_LIST_EBT_ELEMENTS = {
 
 export const APPLICATION_OVERVIEW_EBT_ELEMENTS = {
   RETRY: 'overviewRetry',
+  USAGE_RETRY: 'overviewUsageRetry',
+  BROWSER_SESSIONS_LINK: 'overviewBrowserSessionsLink',
+  OS_SESSIONS_LINK: 'overviewOsSessionsLink',
+  BROWSER_FILTER: 'overviewBrowserFilter',
+  OS_FILTER: 'overviewOsFilter',
+  DEVICE_FILTER: 'overviewDeviceFilter',
+  COUNTRY_FILTER: 'overviewCountryFilter',
+  APP_VERSION_FILTER: 'overviewAppVersionFilter',
+  PAGE_FILTER: 'overviewPageFilter',
+  PAGE_CONTAINS_FILTER: 'overviewPageContainsFilter',
+  ALL_FILTERS: 'overviewAllFilters',
+  ALL_FILTERS_APPLY: 'overviewAllFiltersApply',
+  ALL_FILTERS_CANCEL: 'overviewAllFiltersCancel',
+  ALL_FILTERS_RESET: 'overviewAllFiltersReset',
+  CLEAR_FILTERS: 'overviewClearFilters',
+  PERCENTILE: 'overviewPercentile',
+} as const;
+
+export const ERRORS_EBT_ELEMENTS = {
+  RETRY: 'errorsRetry',
+  ERROR: 'errorsError',
+  VIEW_ALL: 'errorsViewAll',
+  CLEAR_KUERY: 'errorsClearKuery',
+} as const;
+
+export const NETWORK_EBT_ELEMENTS = {
+  RETRY: 'networkRetry',
+  RENDER_BLOCKING_FILTER: 'networkRenderBlockingFilter',
 } as const;
 
 export const SESSIONS_EBT_ELEMENTS = {
@@ -67,9 +104,8 @@ export const SESSIONS_EBT_ELEMENTS = {
   COUNTRY_FILTER: 'sessionsCountryFilter',
   ENTRY_PAGE_FILTER: 'sessionsEntryPageFilter',
   CLEAR_FILTERS: 'sessionsClearFilters',
+  WATERFALL_PAGE: 'sessionWaterfallPage',
   DOCS_LINK: 'sessionsDocsLink',
   COLUMN_SELECTOR: 'sessionsColumnSelector',
-  SESSION_BACK: 'sessionBack',
   SESSION_NOT_FOUND_BACK: 'sessionNotFoundBack',
-  SESSION_ID_COPY: 'sessionIdCopy',
 } as const;

@@ -358,7 +358,8 @@ async function runWatchBuild(
         const hasErrors = stats.hasErrors();
 
         if (hasErrors) {
-          const timings = stats.stats[0]?.toJson({
+          const failedStats = stats.stats.find((childStats) => childStats.hasErrors());
+          const timings = failedStats?.toJson({
             timings: true,
             assets: false,
             errors: false,

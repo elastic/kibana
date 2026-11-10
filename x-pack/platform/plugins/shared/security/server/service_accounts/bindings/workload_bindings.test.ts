@@ -86,8 +86,10 @@ describe('ServiceAccountWorkloadBindings', () => {
       create: jest.fn(),
       list: jest.fn(),
       get: jest.fn(),
+      getSummary: jest.fn(),
       createFakeRequest: jest.fn().mockResolvedValue(mintedRequest),
       reauthenticateFakeRequest: jest.fn(),
+      refreshFakeRequestBeforeUse: jest.fn(),
       releaseFakeRequest: jest.fn(),
       getFakeRequestPrincipal: jest.fn(),
       delete: jest.fn(),
@@ -520,6 +522,64 @@ describe('ServiceAccountWorkloadBindings', () => {
     it('reports an unbound workload as null rather than an error', async () => {
       store.getVerified.mockResolvedValue(null);
       await expect(bindings.getBinding(PLUGIN_ID, WORKLOAD_IN_SPACE)).resolves.toBeNull();
+    });
+  });
+
+  describe('#getServiceAccountSummary', () => {
+    const summary = {
+      id: 'service-account-id',
+      name: 'Nightshift relay',
+      enabled: true,
+      assumable: true,
+    };
+
+    beforeEach(() => {
+      backend.getSummary.mockResolvedValue(summary);
+    });
+
+    it('names the account of the verified binding, scoped to the plugin Core supplied', async () => {
+      await expect(
+        bindings.getServiceAccountSummary(PLUGIN_ID, WORKLOAD_IN_SPACE)
+      ).resolves.toEqual(summary);
+      expect(store.getVerified).toHaveBeenCalledWith(COORDINATES);
+      expect(backend.getSummary).toHaveBeenCalledWith('service-account-id');
+    });
+
+    it('resolves `null` without reading an account when the workload is unbound', async () => {
+      store.getVerified.mockResolvedValue(null);
+
+      await expect(
+        bindings.getServiceAccountSummary(PLUGIN_ID, WORKLOAD_IN_SPACE)
+      ).resolves.toBeNull();
+      expect(backend.getSummary).not.toHaveBeenCalled();
+    });
+
+    it('resolves `null` when the bound account no longer exists', async () => {
+      backend.getSummary.mockResolvedValue(null);
+
+      await expect(
+        bindings.getServiceAccountSummary(PLUGIN_ID, WORKLOAD_IN_SPACE)
+      ).resolves.toBeNull();
+    });
+
+    it('propagates a binding that fails its integrity check', async () => {
+      const error = new Error('failed integrity verification');
+      store.getVerified.mockRejectedValue(error);
+
+      await expect(bindings.getServiceAccountSummary(PLUGIN_ID, WORKLOAD_IN_SPACE)).rejects.toBe(
+        error
+      );
+      expect(backend.getSummary).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when security features are disabled in Elasticsearch', async () => {
+      license.isEnabled.mockReturnValue(false);
+
+      await expect(
+        bindings.getServiceAccountSummary(PLUGIN_ID, WORKLOAD_IN_SPACE)
+      ).rejects.toMatchObject({ output: { statusCode: 403 } });
+      expect(store.getVerified).not.toHaveBeenCalled();
+      expect(backend.getSummary).not.toHaveBeenCalled();
     });
   });
 

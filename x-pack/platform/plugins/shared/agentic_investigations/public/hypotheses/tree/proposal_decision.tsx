@@ -39,7 +39,7 @@ export const ProposalDecision = ({
   } = useKibana<CoreStart>();
   const { data: proposal, isLoading } = useProposal(proposalId);
   const { readOnly, isSubmitting, currentActorName, approve, dismiss, reopen, isReopening } =
-    useProposalDecision(proposalId);
+    useProposalDecision(proposalId, proposal);
 
   const refreshInvestigation = useCallback(
     () =>

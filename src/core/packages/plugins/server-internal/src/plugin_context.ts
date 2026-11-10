@@ -269,6 +269,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
       setSelfClientUnauthorizedErrorHandler: deps.http.setSelfClientUnauthorizedErrorHandler,
+      setSelfClientCredentialRefresher: deps.http.setSelfClientCredentialRefresher,
     },
     i18n: deps.i18n,
     logging: {

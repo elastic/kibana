@@ -11,8 +11,13 @@ import type {
   ProcessingNodeRef,
   UnitEdgeForwarding,
   UnitEdgeProcessingTarget,
+  UnitEdgeReference,
 } from '../../../../services/unit_graph';
-import type { DestinationSignal } from '../../../streams_layout/destinations/types';
+import type {
+  DestinationSignal,
+  DestinationViewModel,
+} from '../../../streams_layout/destinations/types';
+import type { SourceType } from '../../../streams_layout/sources/types';
 
 export const SOURCE_NODE_TYPE = 'source';
 export const DESTINATION_NODE_TYPE = 'destination';
@@ -22,8 +27,8 @@ export const ANIMATED_EDGE_TYPE = 'animated';
 
 export interface SourceNodeData extends Record<string, unknown> {
   sourceId?: string;
-  /** A source has one outgoing connection, so a connected source cannot start another. */
-  hasConnection?: boolean;
+  /** Decides whether the node shows stats. A node without it shows none. */
+  sourceType?: SourceType;
   unconfiguredNodeId?: string;
   configurationLabel?: string;
   title: string;
@@ -37,10 +42,14 @@ export interface DestinationNodeData extends Record<string, unknown> {
   subtitle?: string;
   streamName?: string;
   bucket?: string;
+  endpoint?: string;
   destinationId?: string;
+  /** Decides whether the node shows stats. A node without it shows none. */
+  destinationType?: DestinationViewModel['type'];
   signals?: DestinationSignal[];
   indexCount?: number;
   targetedIndexNames?: string[];
+  remoteIndexNames?: string[];
 }
 
 export interface RoutingNodeRule {
@@ -74,13 +83,13 @@ export type ProcessingNodeOutput = 'connect' | 'reconnect' | 'fixed';
 
 /** Edge data for lines derived from the unit's pipelines. */
 export interface UnitEdgeData extends Record<string, unknown> {
-  /** Lines into a destination from a source or pipeline processing can be reconnected or unhooked. */
-  unitConnection?: boolean;
-  forwarding?: UnitEdgeForwarding;
+  /** Whether the line can be moved to another handle or unhooked. */
+  editable: boolean;
+  forwarding: UnitEdgeForwarding;
+  /** The pipeline list the line is stored in; unset for the fixed lines between a pipeline's own nodes. */
+  reference?: UnitEdgeReference;
   /** The slot "Add processing" writes to; unset when the line leads to a read-only node. */
   processingTarget?: UnitEdgeProcessingTarget;
-  /** Lines into a routing node or out of one of its rules. */
-  routing?: boolean;
 }
 
 export type SourceNode = Node<SourceNodeData, typeof SOURCE_NODE_TYPE>;

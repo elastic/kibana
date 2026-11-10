@@ -85,7 +85,7 @@ export const CreateDestinationModal = ({ destinations, onClose }: CreateDestinat
         })
       : destinationNameError === 'tooLong'
       ? i18n.translate('xpack.streams.destinations.destinationNameTooLongErrorMessage', {
-          defaultMessage: 'This name is too long for an S3 destination.',
+          defaultMessage: 'This name is too long for this destination type.',
         })
       : destinationNameError === 'credentialConflict'
       ? i18n.translate('xpack.streams.destinations.destinationNameCredentialConflictErrorMessage', {

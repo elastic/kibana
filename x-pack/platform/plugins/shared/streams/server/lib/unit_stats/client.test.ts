@@ -16,7 +16,7 @@ import {
 import { UnitStatsClient } from './client';
 
 const unit: StreamsUnit.Configuration = {
-  sources: [],
+  sources: [{ id: 'otlp-input', type: 'otlp', supported_telemetry: ['logs'] }],
   destinations: [
     { id: 'es-prod', type: 'elasticsearch', supported_telemetry: ['logs'] },
     { id: 'es-dev', type: 'elasticsearch', supported_telemetry: ['logs'] },
@@ -72,6 +72,13 @@ const responses = {
       ['uppercase-message', 'main', null, 1.2, 4.1e-6],
     ],
   },
+  sourceRate: {
+    columns: [
+      { name: 'id', type: 'keyword' },
+      { name: 'accepted_rate', type: 'double' },
+    ],
+    values: [['otlp-input', 1.2]],
+  },
 };
 
 type QueryName = keyof typeof responses;
@@ -81,6 +88,7 @@ const isProbe = (query: string) => query.endsWith('| LIMIT 0');
 const isDestinationRateQuery = (query: string) => query.includes('window_seconds');
 
 const queryName = (query: string): QueryName => {
+  if (query.includes('metrics.streams.source.items')) return 'sourceRate';
   if (!query.includes('scope.attributes.streams.destination.id')) return 'processor';
 
   return isDestinationRateQuery(query) ? 'destinationRate' : 'destinationSums';
@@ -88,8 +96,8 @@ const queryName = (query: string): QueryName => {
 
 /**
  * Answers each `esql.query` by what the query asks for: the probe, or the stats query of
- * destinations (rates, or the series) or of processors. An override replaces the answer, and can
- * throw.
+ * destinations (rates, or the series), of processors or of sources. An override replaces the
+ * answer, and can throw.
  */
 const makeEsql = (overrides: Partial<Record<QueryName, () => EsqlResponse>> = {}) =>
   jest.fn(async ({ query }: { query: string }) => {
@@ -199,6 +207,7 @@ describe('UnitStatsClient.getStats', () => {
 
       expect(Object.keys(response.components.destinations)).toEqual(['es-prod', 'es-dev', 'dbg']);
       expect(Object.keys(response.components.processors)).toEqual(['uppercase-message']);
+      expect(Object.keys(response.components.sources)).toEqual(['otlp-input']);
       expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
     });
 
@@ -207,7 +216,7 @@ describe('UnitStatsClient.getStats', () => {
 
       const response = await run(esql, { components: [] });
 
-      expect(response.components).toEqual({ destinations: {}, processors: {} });
+      expect(response.components).toEqual({ destinations: {}, processors: {}, sources: {} });
       expect(esql).not.toHaveBeenCalled();
       expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
     });
@@ -235,6 +244,36 @@ describe('UnitStatsClient.getStats', () => {
       );
     });
 
+    it('answers a source of the unit with its accepted rate, and nothing for the other kinds', async () => {
+      const esql = makeEsql();
+
+      const response = await run(esql, { components: [{ kind: 'source', id: 'otlp-input' }] });
+
+      expect(response.components.destinations).toEqual({});
+      expect(response.components.processors).toEqual({});
+      expect(response.components.sources).toEqual({
+        'otlp-input': {
+          events: { accepted: { rate: { value: 1.2, unit: '{item}', time_unit: 's' } } },
+        },
+      });
+      statsQueries(esql).forEach((query) =>
+        expect(query).toContain('metrics.streams.source.items')
+      );
+      expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
+    });
+
+    it('answers a source with no row as no data', async () => {
+      const noRows = () => ({ ...responses.sourceRate, values: [] });
+
+      const response = await run(makeEsql({ sourceRate: noRows }), {
+        components: [{ kind: 'source', id: 'otlp-input' }],
+      });
+
+      expect(response.components.sources['otlp-input']).toEqual({
+        events: { accepted: { rate: { value: null, unit: '{item}', time_unit: 's' } } },
+      });
+    });
+
     it('answers not_found from the config without querying', async () => {
       const esql = makeEsql();
 
@@ -242,12 +281,14 @@ describe('UnitStatsClient.getStats', () => {
         components: [
           { kind: 'destination', id: 'nope' },
           { kind: 'processor', id: 'nope' },
+          { kind: 'source', id: 'nope' },
         ],
       });
 
       expect(esql).not.toHaveBeenCalled();
       expect(response.components.destinations.nope.error?.code).toBe('not_found');
       expect(response.components.processors.nope.error?.code).toBe('not_found');
+      expect(response.components.sources.nope.error?.code).toBe('not_found');
     });
   });
 
@@ -279,21 +320,29 @@ describe('UnitStatsClient.getStats', () => {
 
       const unpinnedQueries = statsQueries(unpinned);
       const pinnedQueries = statsQueries(pinned);
-      expect(unpinnedQueries).toHaveLength(3);
+      const isSourceQuery = (query: string) => query.includes('metrics.streams.source.items');
+      expect(unpinnedQueries).toHaveLength(4);
       unpinnedQueries.forEach((query) => {
         expect(query).toContain('resource.attributes.unit.id == "default"');
         expect(query).toContain(`@timestamp >= "${timeRange.start}"`);
         expect(query).toContain(`@timestamp < "${timeRange.end}"`);
         expect(query).not.toContain('config.hash');
       });
-      pinnedQueries.forEach((query) =>
-        expect(query).toContain('resource.attributes.streams.config.hash == "h1"')
-      );
+      pinnedQueries
+        .filter((query) => !isSourceQuery(query))
+        .forEach((query) =>
+          expect(query).toContain('resource.attributes.streams.config.hash == "h1"')
+        );
+      // The ingest collector's source metrics have no config hash, so a pinned one does not apply.
+      pinnedQueries
+        .filter(isSourceQuery)
+        .forEach((query) => expect(query).not.toContain('config.hash'));
     });
 
     describe('with the most destinations one request allows', () => {
       const destinationsOf = (count: number): StreamsUnit.Configuration => ({
         ...unit,
+        sources: [],
         processors: [],
         destinations: Array.from({ length: count }, (_, index) => ({
           id: `destination-${index}`,
@@ -336,6 +385,15 @@ describe('UnitStatsClient.getStats', () => {
 
         await expect(
           run(esql, {}, destinationsOf(MAX_STREAMS_UNIT_STATS_COMPONENTS + 1))
+        ).rejects.toMatchObject({ statusCode: 400 });
+        expect(esql).not.toHaveBeenCalled();
+      });
+
+      it('counts the sources toward that limit', async () => {
+        const esql = makeEsql();
+
+        await expect(
+          run(esql, {}, { ...maxDestinations, sources: unit.sources })
         ).rejects.toMatchObject({ statusCode: 400 });
         expect(esql).not.toHaveBeenCalled();
       });
@@ -413,6 +471,14 @@ describe('UnitStatsClient.getStats', () => {
       expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBe(4.6);
     });
 
+    it('puts the same error on every source when a source query fails', async () => {
+      const response = await run(makeEsql({ sourceRate: failWith(responseError(500)) }));
+
+      expect(response.components.sources['otlp-input'].error?.code).toBe('error');
+      expect(response.components.destinations['es-prod'].error).toBeUndefined();
+      expect(response.components.processors['uppercase-message'].error).toBeUndefined();
+    });
+
     it('logs a query that fails or times out at warn, and an expected cluster state at debug', async () => {
       const logsFor = async (error: Error) => {
         const logger = loggingSystemMock.createLogger();
@@ -445,9 +511,23 @@ describe('UnitStatsClient.getStats', () => {
           makeEsql({
             destinationSums: failWith(responseError(429)),
             processor: failWith(responseError(429)),
+            sourceRate: failWith(responseError(429)),
           })
         )
       ).rejects.toMatchObject({ code: 'unavailable', statusCode: 503 });
+    });
+
+    it('returns the kinds that worked when only some kinds failed', async () => {
+      const response = await run(
+        makeEsql({
+          destinationSums: failWith(responseError(429)),
+          processor: failWith(responseError(429)),
+        })
+      );
+
+      expect(response.components.destinations['es-prod'].error?.code).toBe('unavailable');
+      expect(response.components.sources['otlp-input'].error).toBeUndefined();
+      expect(response.components.sources['otlp-input'].events.accepted.rate.value).toBe(1.2);
     });
 
     it('fails the request with the most actionable error when every kind failed with a different code', async () => {
@@ -456,6 +536,7 @@ describe('UnitStatsClient.getStats', () => {
           makeEsql({
             destinationRate: failWith(responseError(429)),
             processor: failWith(responseError(403)),
+            sourceRate: failWith(responseError(429)),
           })
         )
       ).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
@@ -464,6 +545,7 @@ describe('UnitStatsClient.getStats', () => {
           makeEsql({
             destinationRate: failWith(responseError(429)),
             processor: failWith(new errors.TimeoutError('timeout', {} as never)),
+            sourceRate: failWith(responseError(429)),
           })
         )
       ).rejects.toMatchObject({ code: 'timeout', statusCode: 503 });
@@ -475,6 +557,11 @@ describe('UnitStatsClient.getStats', () => {
           components: [{ kind: 'destination', id: 'es-prod' }],
         })
       ).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
+      await expect(
+        run(makeEsql({ sourceRate: failWith(responseError(403)) }), {
+          components: [{ kind: 'source', id: 'otlp-input' }],
+        })
+      ).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
     });
 
     it('fails the request with a 500 when every kind failed with an unexpected error', async () => {
@@ -483,6 +570,7 @@ describe('UnitStatsClient.getStats', () => {
           makeEsql({
             destinationRate: failWith(responseError(500)),
             processor: failWith(responseError(500)),
+            sourceRate: failWith(responseError(500)),
           })
         )
       ).rejects.toMatchObject({ code: 'error', statusCode: 500 });

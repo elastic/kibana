@@ -6,7 +6,11 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { ALERT_EPISODE_STATUS, type AlertEventSeverity } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_STATUS,
+  SEVERITY_LEVELS,
+  type AlertEventSeverity,
+} from '@kbn/alerting-v2-schemas';
 import type { AlertStatusChangedTriggerPayload } from '../../../../common/workflows/triggers';
 import type { AlertStatusTransition } from '../../director/director';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
@@ -57,6 +61,8 @@ const toPayload = (
  * A later batch can re-read the same pre-run state (the store does not
  * refresh), so the same change can be computed again. The step remembers
  * what it published in this run and skips repeats.
+ * Severity is the highest among the stored rows for the alert and status in
+ * the first published batch, rather than across the whole run.
  *
  * The publisher owns the opt-in check, so with no opt-in nothing reaches the
  * event bus.
@@ -80,11 +86,19 @@ export class PublishAlertStatusChangesStep implements RuleExecutionStep {
         return { type: 'continue', state };
       }
 
-      const storedSeverities = new Map(
-        storedAlertEvents.flatMap(({ alert, severity }) =>
-          alert ? [[toKey(alert.id, alert.status), severity] as const] : []
-        )
-      );
+      const storedSeverities = new Map<string, AlertEventSeverity | undefined>();
+      for (const { alert, severity } of storedAlertEvents) {
+        if (!alert) continue;
+        const key = toKey(alert.id, alert.status);
+        const previous = storedSeverities.get(key);
+        if (
+          previous === undefined ||
+          (severity !== undefined &&
+            SEVERITY_LEVELS.indexOf(severity) > SEVERITY_LEVELS.indexOf(previous))
+        ) {
+          storedSeverities.set(key, severity);
+        }
+      }
 
       const transitions = alertStatusTransitions.filter(({ episodeId, status }) => {
         const key = toKey(episodeId, status);
