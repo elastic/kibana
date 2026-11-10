@@ -253,6 +253,15 @@ groups:
           ech: ga
           self: ga
 
+      - setting: xpack.actions.inboundEvents.enabled
+        description: |
+          Whether connectors can receive events from external systems, such as webhook requests that start workflows. When `true`, you can turn on **Receive events** for connectors that support it, and you can create [Inbound Webhook](/reference/connectors-kibana/inbound-webhook-action-type.md) connectors. When `false`, {{kib}} accepts no events for any connector, **Receive events** doesn't appear, and the Inbound Webhook connector type isn't available. Restart {{kib}} after you change this setting.
+        datatype: bool
+        default: true
+        applies_to:
+          stack: preview 9.6+
+          self: preview 9.6+
+
       - setting: xpack.actions.microsoftExchangeUrl
         description: |
           The URL for the Microsoft Azure Active Directory endpoint to use for MS Exchange email authentication.
