@@ -55,7 +55,7 @@ import {
   isNotNumeric,
   isNumeric,
   MAX_NUM_OF_COLUMNS,
-  operationFromDataType,
+  operationFromColumn,
   resolveTextBasedColumnType,
 } from './utils';
 import {
@@ -815,11 +815,10 @@ export function getTextBasedDatasource({
             return null;
           }
           const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
-          const resolvedType = resolveTextBasedColumnType(
+          const { dataType, isBucketed, scale } = operationFromColumn(
             column,
             activeDataTable?.columns.find((col) => col.id === columnId)
           );
-          const { dataType, isBucketed, scale } = operationFromDataType(resolvedType);
 
           return {
             dataType,

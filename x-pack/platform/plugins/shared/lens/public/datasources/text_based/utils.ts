@@ -206,17 +206,21 @@ export function hasNumericColumn(
 }
 
 /**
- * Derives the type-shaped operation metadata (dataType, isBucketed, scale) from a single
- * resolved Query Result Type from activeData, so these fields never disagree with each other.
+ * Derives the type-shaped operation metadata (dataType, isBucketed, scale) from a column,
+ * resolved against activeData when available, so these fields never disagree with each other.
  */
-export function operationFromDataType(
-  dataType: DataType
+export function operationFromColumn(
+  column: TextBasedLayerColumn,
+  activeColumn?: DatatableColumn
 ): Pick<OperationMetadata, 'dataType' | 'isBucketed' | 'scale'> {
+  const dataType = resolveTextBasedColumnType(column, activeColumn);
   switch (dataType) {
     case 'date':
       return { dataType, isBucketed: true, scale: 'interval' };
     case 'number':
-      return { dataType, isBucketed: false, scale: 'ratio' };
+      return (activeColumn ?? column).meta?.esMeta?.bucket !== undefined
+        ? { dataType, isBucketed: true, scale: 'interval' }
+        : { dataType, isBucketed: false, scale: 'ratio' };
     default:
       return { dataType, isBucketed: true, scale: 'ordinal' };
   }
