@@ -9,6 +9,7 @@ import React from 'react';
 import { render, act } from '@testing-library/react';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
+import { getFrequencyLabel, getGroupingModeLabel } from '../../components/action_policy/labels';
 import { ActionPolicyCanvasContent } from './action_policy_canvas_content';
 
 const flushPromises = async () => {
@@ -78,7 +79,7 @@ const defaultData = {
   description: 'A test policy',
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: { tags: ['abc'] },
-  groupingMode: 'per_alert' as const,
+  grouping: { mode: 'per_alert' as const },
   throttle: { strategy: 'on_status_change' as const },
 };
 
@@ -148,6 +149,16 @@ describe('ActionPolicyCanvasContent', () => {
       expect(getByTestId('actionPolicyDetailsFlyoutDefinition')).toBeDefined();
       expect(getByTestId('actionPolicyDetailsFlyoutNotification')).toBeDefined();
       expect(getByTestId('actionPolicyDetailsFlyoutDestinations')).toBeDefined();
+    });
+
+    it('maps the attachment grouping and throttle to the Notification section', async () => {
+      const { getByTestId } = await renderCanvas();
+      expect(getByTestId('actionPolicyDetailsFlyoutDispatchModeBlock').textContent).toContain(
+        getGroupingModeLabel('per_alert')
+      );
+      expect(getByTestId('actionPolicyDetailsFlyoutFrequencyBlock').textContent).toContain(
+        getFrequencyLabel({ strategy: 'on_status_change' }, 'per_alert')
+      );
     });
 
     it('renders the policy description', async () => {
