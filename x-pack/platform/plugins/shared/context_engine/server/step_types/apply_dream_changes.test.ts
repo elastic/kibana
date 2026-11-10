@@ -23,7 +23,7 @@ const dreaming = {
 const dest = { type: 'index' as const, value: 'ai-index-idx-support' };
 
 const existingCustomer = {
-  id: 'entity-customer-customer-825464',
+  id: 'entity-customer--customer-825464',
   type: 'entity.customer',
   title: 'Customer 825464',
   content: 'Nova member.',
@@ -120,7 +120,7 @@ describe('getApplyDreamChangesStepDefinition', () => {
       rejected: [{ item: 'fact new:3', reason: "fact type 'complaint' is not configured" }],
       dropped_access_patterns: 0,
     });
-    expect(stored['entity-city-montreal']).toEqual(
+    expect(stored['entity-city--montreal']).toEqual(
       expect.objectContaining({ type: 'entity.city', title: 'Montreal' })
     );
     expect(stored[existingCustomer.id]).toEqual(
@@ -134,7 +134,7 @@ describe('getApplyDreamChangesStepDefinition', () => {
         references: [
           { uri: 'ki://mem-1', relation: 'derived_from' },
           { uri: 'ki://mem-2', relation: 'derived_from' },
-          { uri: 'ki://entity-city-montreal', relation: 'relates_to', description: 'lives_in' },
+          { uri: 'ki://entity-city--montreal', relation: 'relates_to', description: 'lives_in' },
         ],
         governance: expect.objectContaining({
           provenance: { created_by: mockKiWriter, updated_by: mockKiWriter },
@@ -148,6 +148,98 @@ describe('getApplyDreamChangesStepDefinition', () => {
           { uri: `ki://${existingCustomer.id}`, relation: 'relates_to', description: 'about' },
           { uri: 'ki://mem-2', relation: 'derived_from' },
         ],
+      })
+    );
+  });
+
+  it('keeps what it writes as restricted as the memories it came from, and ignores KIs this space cannot see', async () => {
+    const permissions = {
+      kibana: { privileges: [{ space: 'default', name: ['ai_index:support/read'], count: 1 }] },
+    };
+    const stored: Record<string, Record<string, unknown>> = {
+      [existingCustomer.id]: {
+        ...existingCustomer,
+        permissions: { kibana: { privileges: [{ space: 'team-b', name: [], count: 0 }] } },
+      },
+    };
+    const esClient = createEsClient(stored);
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        memories: [
+          {
+            id: 'mem-2',
+            updated_at: '2026-11-02T18:40:12.000Z',
+            title: 'Prefers mornings',
+            permissions,
+          },
+        ],
+        changes,
+      },
+      esClient,
+    });
+
+    const { output } = await definition(aiIndexService()).handler(context);
+
+    expect(output).toEqual(expect.objectContaining({ created: 1, updated: 0 }));
+    expect(stored['entity-city--montreal']).toEqual(expect.objectContaining({ permissions }));
+    expect(stored[existingCustomer.id]).not.toEqual(
+      expect.objectContaining({ content: changes.entities[0].content })
+    );
+  });
+
+  it('on a dry run, reports what it would write and writes nothing', async () => {
+    const stored: Record<string, Record<string, unknown>> = {
+      [existingCustomer.id]: existingCustomer,
+    };
+    const esClient = createEsClient(stored);
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        memories: [
+          { id: 'mem-2', updated_at: '2026-11-02T18:40:12.000Z', title: 'Prefers mornings' },
+        ],
+        changes,
+        dry_run: true,
+      },
+      esClient,
+    });
+
+    const { output } = await definition(aiIndexService()).handler(context);
+
+    expect(esClient.index).not.toHaveBeenCalled();
+    expect(stored).toEqual({ [existingCustomer.id]: existingCustomer });
+    expect(output).toEqual(
+      expect.objectContaining({
+        created: 2,
+        updated: 2,
+        deleted: 0,
+        rejected: [{ item: 'fact new:3', reason: "fact type 'complaint' is not configured" }],
+      })
+    );
+    expect(output?.would_write).toEqual([
+      {
+        id: existingCustomer.id,
+        change: 'updated',
+        type: existingCustomer.type,
+        title: existingCustomer.title,
+      },
+      { id: 'entity-city--montreal', change: 'created', type: 'entity.city', title: 'Montreal' },
+      {
+        id: expect.stringMatching(/^fact-/),
+        change: 'created',
+        type: expect.stringMatching(/^fact\./),
+        title: expect.any(String),
+      },
+    ]);
+    expect(output?.documents?.map(({ id }) => id)).toEqual(
+      output?.would_write?.map(({ id }) => id)
+    );
+    expect(output?.documents?.[0]).toEqual(
+      expect.objectContaining({
+        references: expect.arrayContaining([
+          { uri: 'ki://entity-city--montreal', relation: 'relates_to', description: 'lives_in' },
+        ]),
       })
     );
   });

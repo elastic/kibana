@@ -11,7 +11,11 @@ describe('dreaming ids', () => {
   it('folds case, accents and punctuation out of entity names', () => {
     expect(slugify('Acme Corp.')).toBe('acme-corp');
     expect(slugify('  Montréal, Québec ')).toBe('montreal-quebec');
-    expect(entityId('customer', 'Customer 825464')).toBe('entity-customer-customer-825464');
+    expect(entityId('customer', 'Customer 825464')).toBe('entity-customer--customer-825464');
+  });
+
+  it('keeps entities apart whose type and name split the same words differently', () => {
+    expect(entityId('support_team', 'Billing')).not.toBe(entityId('support', 'Team Billing'));
   });
 
   it('falls back to a hash for names with nothing to keep', () => {
