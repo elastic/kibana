@@ -11,13 +11,12 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 
 import type { ChangeHistoryPreviewProps } from './change_history_preview';
 
-/** the preview pulls in Monaco, so it is split into its own chunk and only fetched when rendered */
+/** the preview pulls in Monaco, so lazy load is used to prevent package bloat */
 const LazyPreview = lazy(async () => {
   const { ChangeHistoryPreview } = await import('./change_history_preview');
   return { default: ChangeHistoryPreview };
 });
 
-/** code-split wrapper around the Monaco-based preview, so importing the package doesn't load Monaco */
 export const ChangeHistoryPreview = (props: ChangeHistoryPreviewProps): JSX.Element => (
   <Suspense fallback={<EuiLoadingSpinner size="xl" />}>
     <LazyPreview {...props} />
