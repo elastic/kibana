@@ -245,7 +245,7 @@ export const ContextApp = ({
     <Fragment>
       <AppHeader title={title} back={back} spacing="compact" />
       {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
-        <ContextErrorMessage status={fetchedState.anchorStatus} />
+        <ContextErrorMessage type="anchor" status={fetchedState.anchorStatus} />
       ) : (
         <Fragment>
           <h1
@@ -282,8 +282,8 @@ export const ContextApp = ({
                 predecessors={fetchedState.predecessors}
                 successors={fetchedState.successors}
                 anchorStatus={fetchedState.anchorStatus.value}
-                predecessorsStatus={fetchedState.predecessorsStatus.value}
-                successorsStatus={fetchedState.successorsStatus.value}
+                predecessorsStatus={fetchedState.predecessorsStatus}
+                successorsStatus={fetchedState.successorsStatus}
                 interceptedWarnings={interceptedWarnings}
                 isWarningCalloutDismissed={isWarningCalloutDismissed}
                 onDismissWarningCallout={onDismissWarningCallout}

@@ -11,8 +11,9 @@
  * Constants for the Security-in-Discover experience tests.
  *
  * These tests exercise the Security Solution context-awareness profile that enhances Discover's
- * document viewer flyout for security documents (alert / event / attack / IOC). The profile only activates
- * under the `security` space solution view; document type is detected purely from fields
+ * document viewer flyout for security documents (alert / event / attack / IOC). The profile activates
+ * under the `security` space solution view, and under `classic` for recognized Security sources (e.g.
+ * `.alerts-security.alerts-*`); document type is detected purely from fields
  * (`event.kind === 'signal'` → alert, the Attack Discovery rule type → attack, `event.kind`
  * present & ≠ signal → event, `event.type` includes `indicator` → IOC), so plain synthetic indices
  * are sufficient.
@@ -20,7 +21,7 @@
 
 /** Synthetic ES indices created in global setup (see ./generators). */
 export const SECURITY_INDICES = {
-  ALERTS: 'security-discover-alerts',
+  ALERTS: '.alerts-security.alerts-discover',
   EVENTS: 'security-discover-events',
   ATTACKS: 'security-discover-attacks',
   IOCS: 'security-discover-iocs',
@@ -41,12 +42,8 @@ export const SECURITY_DATA_VIEWS = {
 export const SECURITY_SAVED_SEARCH_TITLE = 'Security Discover alerts saved search';
 
 /**
- * Saved search used by the cell-renderer tests. The Security profile only registers its custom
- * cell renderers (and default columns) when the data view's index pattern includes
- * `.alerts-security.alerts-` (see `security_root_profile/profile.tsx`). Our synthetic alerts index
- * doesn't match that, so this saved search points at a data view whose title appends a (non-matching)
- * `.alerts-security.alerts-*` pattern to satisfy the gate while still resolving the synthetic index.
- * Its explicit `columns` (rule name, source IP, host, user) keep the rendered grid deterministic.
+ * Saved search used by the cell-renderer tests. Its explicit `columns` (rule name, source IP, host,
+ * user) keep the rendered grid deterministic.
  */
 export const SECURITY_CELL_RENDERER_SAVED_SEARCH = 'Security Discover cell renderers';
 

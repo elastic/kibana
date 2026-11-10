@@ -18,6 +18,8 @@ import type {
   ConversationTemplatesStart,
 } from '@kbn/agent-builder-server';
 import type { ConversationSearchSort } from '@kbn/agent-builder-common';
+import type { EscalationLinkActor } from '../../../common/escalations/can_link_escalation';
+import { canLinkEscalation } from '../../../common/escalations/can_link_escalation';
 import type {
   CreateEscalationRequest,
   EscalationConversation,
@@ -26,6 +28,7 @@ import type {
   ListEscalationsQuery,
   ListEscalationsResponse,
   ListLinkedInvestigationsResponse,
+  SyncEscalationResponse,
 } from '../../../common/escalations/escalation';
 import type {
   EscalationClosePreviewResponse,
@@ -45,19 +48,28 @@ import {
   ESCALATION_TEMPLATE_ID,
   INVESTIGATION_TEMPLATE_ID,
   MAX_ESCALATION_LINKED_INVESTIGATIONS,
+  MAX_ESCALATIONS_PAGE_SIZE,
 } from '../../../common/escalations/constants';
+import { MAX_ESCALATIONS_SCAN } from '../constants';
 import {
+  EscalationLinkForbiddenError,
   InvalidLinkedInvestigationError,
   NotAnEscalationError,
   TooManyLinkedInvestigationsError,
 } from './errors';
 import {
+  ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
   ESCALATION_CREATED_FROM_INVESTIGATION_EVENT_TYPE,
   ESCALATION_INVESTIGATION_LINKED_EVENT_TYPE,
+  type EscalationAttachmentsSyncedEventData,
   type EscalationInvestigationEventData,
 } from '../../../common/escalations/conversation_events';
 import { filterMetadataToTemplateFields } from './filter_template_metadata';
-import { copyInvestigationAttachments } from './copy_investigation_attachments';
+import {
+  copyInvestigationAttachments,
+  isCopyableAttachment,
+  toCopiedAttachmentId,
+} from './copy_investigation_attachments';
 
 /** Agent Builder rejects `addEvents` calls with more events than this. */
 const MAX_EVENTS_PER_REQUEST = 10;
@@ -92,7 +104,7 @@ const toEventData = ({
  * `metadata.linked_investigations` tests array membership.
  */
 const buildEscalationsFilter = (
-  query: Pick<ListEscalationsQuery, 'status' | 'linked_investigation_id'>
+  query: Pick<ListEscalationsQuery, 'status' | 'linked_investigation_id' | 'search'>
 ): string => {
   const base = `template_id: "${ESCALATION_TEMPLATE_ID}"`;
 
@@ -124,6 +136,16 @@ export interface EscalationsServiceDeps {
   conversationTemplates: ConversationTemplatesStart;
   getInvestigationStatusService: () => InvestigationStatusService;
   getImpactClient: (request: KibanaRequest) => ImpactReadClient;
+  /**
+   * Pending proposals per conversation id, absent ids having none. Undefined when proposals are
+   * unavailable or the caller may not read them.
+   */
+  countPendingProposals: (
+    request: KibanaRequest,
+    conversationIds: string[]
+  ) => Promise<Map<string, number> | undefined>;
+  /** Conversation principal of the caller, matching `user.id` and ACL entry ids. */
+  getLinkActor: (request: KibanaRequest) => EscalationLinkActor | Promise<EscalationLinkActor>;
 }
 
 export class EscalationsService {
@@ -137,6 +159,8 @@ export class EscalationsService {
   ) => Promise<AttachmentPublicClient>;
   private readonly conversationTemplates: ConversationTemplatesStart;
   private readonly getInvestigationStatusService: () => InvestigationStatusService;
+  private readonly countPendingProposals: EscalationsServiceDeps['countPendingProposals'];
+  private readonly getLinkActor: EscalationsServiceDeps['getLinkActor'];
 
   constructor({
     logger,
@@ -145,6 +169,8 @@ export class EscalationsService {
     conversationTemplates,
     getInvestigationStatusService,
     getImpactClient,
+    countPendingProposals,
+    getLinkActor,
   }: EscalationsServiceDeps) {
     this.logger = logger;
     this.getImpactClient = getImpactClient;
@@ -152,6 +178,8 @@ export class EscalationsService {
     this.getAttachmentsClient = getAttachmentsClient;
     this.conversationTemplates = conversationTemplates;
     this.getInvestigationStatusService = getInvestigationStatusService;
+    this.countPendingProposals = countPendingProposals;
+    this.getLinkActor = getLinkActor;
   }
 
   async create(
@@ -241,6 +269,14 @@ export class EscalationsService {
       throw new NotAnEscalationError(escalationId);
     }
 
+    // Converse access also covers every authenticated user on a public escalation.
+    // Attaching copies the investigation onto that escalation, so require ownership
+    // or a listed participant before the metadata write.
+    const actor = await this.getLinkActor(request);
+    if (!canLinkEscalation(current, actor)) {
+      throw new EscalationLinkForbiddenError(escalationId);
+    }
+
     const toAdd = body.linked_investigations;
     // bulkGet omits inaccessible / non-existent ids silently, so we detect them
     // via absence in the result map.
@@ -294,7 +330,10 @@ export class EscalationsService {
   private async addTimelineEvents(
     client: ConversationPublicClient,
     escalationId: string,
-    events: Array<{ type: string; data: EscalationInvestigationEventData }>
+    events: Array<{
+      type: string;
+      data: EscalationInvestigationEventData | EscalationAttachmentsSyncedEventData;
+    }>
   ): Promise<void> {
     for (let i = 0; i < events.length; i += MAX_EVENTS_PER_REQUEST) {
       try {
@@ -360,6 +399,82 @@ export class EscalationsService {
     }
 
     return { copied: totalCopied, failed: totalFailed };
+  }
+
+  /**
+   * Brings the escalation's attachments up to date with its linked investigations.
+   *
+   * An investigation needs syncing when it changed after the escalation (`updated_at`) or when
+   * one of its copyable attachments has no copy in the escalation yet. The id check catches what
+   * the timestamp can miss: escalation edits (assignees, status) also advance the escalation's
+   * `updated_at`. Copies are stored as `${investigationId}:${attachmentId}`. Ids rather than
+   * counts, so a replaced attachment is noticed even when the totals match. Changes to
+   * attachments that were already copied are not propagated.
+   *
+   * Linked investigations the user cannot access are skipped. Like `addAttachments` it is
+   * idempotent and never throws for individual attachment failures.
+   */
+  async sync(request: KibanaRequest, escalationId: string): Promise<SyncEscalationResponse> {
+    const client = await this.getConversationClient(request);
+    const escalation = await client.get(escalationId);
+    if (escalation.template_id !== ESCALATION_TEMPLATE_ID) {
+      throw new NotAnEscalationError(escalationId);
+    }
+
+    const linkedIds = (
+      (escalation.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD] ?? []) as unknown[]
+    ).filter((v): v is string => typeof v === 'string' && v.length > 0);
+    if (linkedIds.length === 0) {
+      return { copied: 0, failed: 0 };
+    }
+
+    // Includes inactive attachments so a copy the user removed is not written again.
+    const existingIds = new Set((escalation.attachments ?? []).map((att) => att.id));
+
+    // `bulkGet` omits inaccessible / non-existent ids and returns attachment summaries (id and
+    // type), which is all the checks below need.
+    const resolved = await client.bulkGet(linkedIds);
+    const escalationUpdatedAt = Date.parse(escalation.updated_at);
+    const staleIds = linkedIds.filter((id) => {
+      const investigation = resolved.get(id);
+      if (!investigation || investigation.template_id !== INVESTIGATION_TEMPLATE_ID) return false;
+      return (
+        Date.parse(investigation.updated_at) > escalationUpdatedAt ||
+        (investigation.attachments ?? []).some(
+          (att) => isCopyableAttachment(att) && !existingIds.has(toCopiedAttachmentId(id, att.id))
+        )
+      );
+    });
+
+    const attachmentsClient = await this.getAttachmentsClient(request);
+    let copied = 0;
+    let failed = 0;
+
+    // Sequential: all copies target the same escalation document.
+    for (const investigationId of staleIds) {
+      const investigation = await client.get(investigationId);
+      const result = await copyInvestigationAttachments({
+        attachmentsClient,
+        escalation,
+        investigation,
+        logger: this.logger,
+        existingAttachmentIds: existingIds,
+        // Written before the copy so the event sits above the attachment cards in the timeline.
+        // Only investigations that actually gain attachments get one. The ids are the planned
+        // ones: a copy that then fails is logged, but stays listed.
+        onBeforeCopy: (attachmentIds) =>
+          this.addTimelineEvents(client, escalationId, [
+            {
+              type: ESCALATION_ATTACHMENTS_SYNCED_EVENT_TYPE,
+              data: { ...toEventData(investigation), attachment_ids: attachmentIds },
+            },
+          ]),
+      });
+      copied += result.copied;
+      failed += result.failed;
+    }
+
+    return { copied, failed };
   }
 
   async getClosePreview(
@@ -529,8 +644,11 @@ export class EscalationsService {
     request: KibanaRequest,
     query: ListEscalationsQuery
   ): Promise<ListEscalationsResponse> {
-    const client = await this.getConversationClient(request);
+    if (query.entity !== undefined) {
+      return this.listByEntity(request, { ...query, entity: query.entity });
+    }
 
+    const client = await this.getConversationClient(request);
     const { results, total } = await client.search({
       filter: buildEscalationsFilter(query),
       sort: ESCALATIONS_LIST_SORT,
@@ -539,9 +657,75 @@ export class EscalationsService {
       query: query.search,
     });
 
+    const actor = await this.getLinkActor(request);
+    const withEntities = await this.withEntityIds(request, results);
+
     return {
       pagination: { total, page: query.page, per_page: query.per_page },
-      results: await this.withEntityIds(request, results),
+      results: withEntities.map((escalation) => ({
+        ...escalation,
+        can_link: canLinkEscalation(escalation, actor),
+      })),
+    };
+  }
+
+  /**
+   * The newest escalations of a status, up to {@link MAX_ESCALATIONS_SCAN}, with their entity ids.
+   * Throws when the impact read fails, so a filter or a pill count never rests on partial data.
+   */
+  async scanWithEntityIds(
+    request: KibanaRequest,
+    query: Pick<ListEscalationsQuery, 'status' | 'linked_investigation_id' | 'search'>
+  ): Promise<ListEscalationsResponse['results']> {
+    const client = await this.getConversationClient(request);
+    const filter = buildEscalationsFilter(query);
+    const searchPage = (page: number) =>
+      client.search({
+        filter,
+        sort: ESCALATIONS_LIST_SORT,
+        page,
+        perPage: MAX_ESCALATIONS_PAGE_SIZE,
+        query: query.search,
+      });
+
+    const first = await searchPage(1);
+    const reachable = Math.min(first.total, MAX_ESCALATIONS_SCAN);
+    if (first.total > MAX_ESCALATIONS_SCAN) {
+      this.logger.warn(
+        `Escalation scan truncated to ${MAX_ESCALATIONS_SCAN} of ${first.total} ${query.status} escalations`
+      );
+    }
+    const pageCount = Math.ceil(reachable / MAX_ESCALATIONS_PAGE_SIZE);
+    const rest = await Promise.all(
+      Array.from({ length: Math.max(pageCount - 1, 0) }, (_, index) => searchPage(index + 2))
+    );
+
+    const byId = new Map(
+      [first, ...rest]
+        .flatMap(({ results }) => results)
+        .map((escalation) => [escalation.id, escalation])
+    );
+    return this.withEntityIds(request, [...byId.values()].slice(0, MAX_ESCALATIONS_SCAN), {
+      strict: true,
+    });
+  }
+
+  private async listByEntity(
+    request: KibanaRequest,
+    query: ListEscalationsQuery & { entity: string }
+  ): Promise<ListEscalationsResponse> {
+    const { entity, page, per_page: perPage } = query;
+    const scanned = await this.scanWithEntityIds(request, query);
+    const matching = scanned.filter((escalation) => escalation.entity_ids?.includes(entity));
+    const actor = await this.getLinkActor(request);
+    const pageResults = matching.slice((page - 1) * perPage, page * perPage);
+
+    return {
+      pagination: { total: matching.length, page, per_page: perPage },
+      results: pageResults.map((escalation) => ({
+        ...escalation,
+        can_link: canLinkEscalation(escalation, actor),
+      })),
     };
   }
 
@@ -552,7 +736,8 @@ export class EscalationsService {
    */
   private async withEntityIds(
     request: KibanaRequest,
-    escalations: ListEscalationsResponse['results']
+    escalations: ListEscalationsResponse['results'],
+    { strict = false }: { strict?: boolean } = {}
   ): Promise<ListEscalationsResponse['results']> {
     const linkedIdsByEscalation = escalations.map((escalation) => {
       const linked = escalation.metadata?.[ESCALATION_LINKED_INVESTIGATIONS_FIELD];
@@ -562,19 +747,31 @@ export class EscalationsService {
     if (allLinkedIds.length === 0) return escalations;
 
     try {
-      const entityIdsByInvestigation = await this.getImpactClient(
+      const entitiesByInvestigation = await this.getImpactClient(
         request
-      ).getEntityIdsByConversationId(allLinkedIds);
+      ).getEntitiesByConversationId(allLinkedIds);
 
       return escalations.map((escalation, index) => {
-        const entityIds = [
-          ...new Set(
-            linkedIdsByEscalation[index].flatMap((id) => entityIdsByInvestigation.get(id) ?? [])
-          ),
-        ];
-        return entityIds.length > 0 ? { ...escalation, entity_ids: entityIds } : escalation;
+        const entities = linkedIdsByEscalation[index].flatMap(
+          (id) => entitiesByInvestigation.get(id) ?? []
+        );
+        const entityIds = [...new Set(entities.map((entity) => entity.id))];
+        if (entityIds.length === 0) return escalation;
+        const entityTypes: Record<string, string> = {};
+        const entityNames: Record<string, string> = {};
+        for (const { id, type, name } of entities) {
+          if (type && !(id in entityTypes)) entityTypes[id] = type;
+          if (name && !(id in entityNames)) entityNames[id] = name;
+        }
+        return {
+          ...escalation,
+          entity_ids: entityIds,
+          ...(Object.keys(entityTypes).length > 0 ? { entity_types: entityTypes } : {}),
+          ...(Object.keys(entityNames).length > 0 ? { entity_names: entityNames } : {}),
+        };
       });
     } catch (err) {
+      if (strict) throw err;
       this.logger.debug(`Could not resolve escalation impact: ${err}`);
       return escalations;
     }
@@ -586,6 +783,7 @@ export class EscalationsService {
    * that are inaccessible to the current user are silently dropped by `client.bulkGet`.
    *
    * Status follows the same "missing or non-closed ⇒ open" rule as the escalations list filter.
+   * Open investigations also carry `pending_proposal_count`, from one aggregation over their ids.
    */
   async listLinkedInvestigations(
     request: KibanaRequest,
@@ -610,7 +808,7 @@ export class EscalationsService {
 
     // Preserve stored order; silently omit ids that bulkGet couldn't resolve or that resolved to
     // a non-investigation conversation (stale/corrupt linked_investigations entries).
-    const results: LinkedInvestigationSummary[] = linkedIds.flatMap((id) => {
+    const summaries: LinkedInvestigationSummary[] = linkedIds.flatMap((id) => {
       const conv = resolved.get(id);
       if (!conv || conv.template_id !== INVESTIGATION_TEMPLATE_ID) return [];
       const rawStatus = conv.metadata?.status;
@@ -618,6 +816,18 @@ export class EscalationsService {
         typeof rawStatus === 'string' && rawStatus === 'closed' ? 'closed' : 'open';
       return [{ id: conv.id, title: conv.title, status, agent_id: conv.agent_id }];
     });
+
+    // A closed investigation has nothing left to decide, so only open ones are counted.
+    const openIds = summaries.filter(({ status }) => status === 'open').map(({ id }) => id);
+    const pendingCounts =
+      openIds.length > 0 ? await this.countPendingProposals(request, openIds) : undefined;
+    const results = pendingCounts
+      ? summaries.map((summary) => ({
+          ...summary,
+          pending_proposal_count:
+            summary.status === 'open' ? pendingCounts.get(summary.id) ?? 0 : 0,
+        }))
+      : summaries;
 
     return { results };
   }

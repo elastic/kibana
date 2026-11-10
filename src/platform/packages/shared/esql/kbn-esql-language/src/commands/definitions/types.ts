@@ -10,8 +10,8 @@ import { type EsqlFieldType, esqlFieldTypes } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation, ESQLNumericLiteralType } from '@elastic/esql/types';
+import type { InlineCastMap } from '@elastic/esql-definitions';
 import type { Location } from '../registry/types';
-import type { inlineCastsMapping } from './generated/inline_casts_mapping';
 
 /**
  * This is the list of all data types that are supported in ES|QL.
@@ -228,6 +228,7 @@ export enum PromQLFunctionDefinitionTypes {
   TIME = 'time',
   HISTOGRAM = 'histogram',
   METADATA = 'metadata',
+  RESULT_ORDERING = 'result_ordering',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
@@ -514,9 +515,17 @@ export interface ValidationErrors {
     message: string;
     type: { paramName: string; value: string; allowedValues: string };
   };
-  highlightMissingOnClause: {
+  highlightInvalidOnPattern: {
+    message: string;
+    type: { pattern: string };
+  };
+  highlightWildcardWithFields: {
     message: string;
     type: {};
+  };
+  highlightQueryFieldNotInOn: {
+    message: string;
+    type: { field: string; fields: string };
   };
   highlightInvalidPrefixModifier: {
     message: string;
@@ -596,4 +605,4 @@ export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;
 
 export const ESQL_NAMED_PARAMS_TYPE = 'function_named_parameters' as const;
 
-export type InlineCastingType = keyof typeof inlineCastsMapping;
+export type InlineCastingType = keyof InlineCastMap;

@@ -69,7 +69,7 @@ describe('createRequest composite identity', () => {
   });
 
   it('evaluates a SemConv pod request on k8s.pod.uid', async () => {
-    // createRequest trusts the caller's effective schema; pod ECS coerce lives in getData.
+    // createRequest trusts the caller's schema; getData passes the stored schema through.
     const request = await createRequest(
       'metrics-*',
       'pod',

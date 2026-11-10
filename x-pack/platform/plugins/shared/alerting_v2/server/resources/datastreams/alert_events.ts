@@ -7,7 +7,7 @@
 
 import type { MappingsDefinition } from '@kbn/es-mappings';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { alertEventSeveritySchema } from '@kbn/alerting-v2-schemas';
 import { getIngestTimestampPipeline } from './ingest_timestamp_pipeline';
 import type { ResourceDefinition } from './types';
@@ -58,35 +58,39 @@ const mappings: MappingsDefinition = {
   },
 };
 
-const alertEventStatusSchema = z.enum(['breached', 'recovered', 'no_data']);
-const alertEventTypeSchema = z.enum(['signal', 'alert']);
-const alertEpisodeStatusSchema = z.enum(['inactive', 'pending', 'active', 'recovering']);
-const alertEpisodeStatusCountSchema = z.number().int().optional();
+const alertEventStatusSchema = lazySchema(() => z.enum(['breached', 'recovered', 'no_data']));
+const alertEventTypeSchema = lazySchema(() => z.enum(['signal', 'alert']));
+const alertEpisodeStatusSchema = lazySchema(() =>
+  z.enum(['inactive', 'pending', 'active', 'recovering'])
+);
+const alertEpisodeStatusCountSchema = lazySchema(() => z.number().int().optional());
 
 export const alertEventStatus = alertEventStatusSchema.enum;
 export const alertEventType = alertEventTypeSchema.enum;
 export const alertEpisodeStatus = alertEpisodeStatusSchema.enum;
 
-export const alertEventSchema = z.object({
-  '@timestamp': z.string(),
-  scheduled_timestamp: z.string().optional(),
-  rule: z.object({ id: z.string().optional(), version: z.number().optional() }).optional(),
-  group_hash: z.string(),
-  data: z.record(z.string(), z.unknown()),
-  status: alertEventStatusSchema,
-  source: z.string(),
-  type: alertEventTypeSchema,
-  // Matches the `alert` mapping field (renamed from `episode` in v8).
-  alert: z
-    .object({
-      id: z.string(),
-      status: alertEpisodeStatusSchema,
-      status_count: alertEpisodeStatusCountSchema,
-    })
-    .optional(),
-  space_id: z.string(),
-  severity: alertEventSeveritySchema.optional(),
-});
+export const alertEventSchema = lazySchema(() =>
+  z.object({
+    '@timestamp': z.string(),
+    scheduled_timestamp: z.string().optional(),
+    rule: z.object({ id: z.string().optional(), version: z.number().optional() }).optional(),
+    group_hash: z.string(),
+    data: z.record(z.string(), z.unknown()),
+    status: alertEventStatusSchema,
+    source: z.string(),
+    type: alertEventTypeSchema,
+    // Matches the `alert` mapping field (renamed from `episode` in v8).
+    alert: z
+      .object({
+        id: z.string(),
+        status: alertEpisodeStatusSchema,
+        status_count: alertEpisodeStatusCountSchema,
+      })
+      .optional(),
+    space_id: z.string(),
+    severity: alertEventSeveritySchema.optional(),
+  })
+);
 
 export type AlertEvent = z.infer<typeof alertEventSchema>;
 /**
@@ -122,12 +126,15 @@ export const buildRuleEventDocument = (params: AlertEventDocument): AlertEventDo
   return doc;
 };
 
-export const getAlertEventsResourceDefinition = (): ResourceDefinition => ({
+export const getAlertEventsResourceDefinition = ({
+  dataRetention,
+}: { dataRetention?: string } = {}): ResourceDefinition => ({
   key: ALERT_EVENTS_RESOURCE_KEY,
   dataStreamName: ALERT_EVENTS_DATA_STREAM,
   version: ALERT_EVENTS_DATA_STREAM_VERSION,
   mappings,
-  lifecycle: {},
+  lifecycle: dataRetention ? { data_retention: dataRetention } : {},
+  manageLifecycle: true,
   finalPipeline: getIngestTimestampPipeline(ALERT_EVENTS_DATA_STREAM),
   // Data streams created from v7 or below map `episode.*` as concrete fields, which cannot be
   // turned into aliases in place. Keep this at 7 when bumping the version.

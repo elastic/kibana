@@ -13,10 +13,13 @@ import type {
   RenderAssignees,
   RenderStatus,
 } from '@kbn/agentic-investigations-common';
-import type { AgenticInvestigationsPublicStartDependencies } from '../../types';
+import type { SubjectServices } from '../../subjects/attachments/subject_services';
+import type { AgenticInvestigationsPublicStartDependencies, ImpactEntityOpener } from '../../types';
 
 export type TemplateStartDependencies = AgenticInvestigationsPublicStartDependencies & {
   agentBuilder: AgentBuilderPluginStart;
+  /** The flyout registered for an alert source; the subject rows in a template read it too. */
+  getAlertFlyout?: SubjectServices['getAlertFlyout'];
 };
 
 /** What the connected render props read through `useKibana`. */
@@ -42,6 +45,8 @@ export interface TemplateRegistrationContext {
   groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   renderAssignees: RenderAssignees;
   renderStatus: RenderStatus;
+  /** Read at render time: a solution registers the opener from its own start, after this plugin's. */
+  getImpactEntityOpener: () => ImpactEntityOpener | undefined;
 }
 
 /** A conversation template whose details flyout UI this plugin registers with Agent Builder. */

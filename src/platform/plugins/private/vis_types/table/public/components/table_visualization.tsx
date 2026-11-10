@@ -63,7 +63,7 @@ const TableVisualizationComponent = ({
   const hasColumnDirection = direction === 'column';
 
   const className = classNames('tbvChart', {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     tbvChart__splitColumns: hasColumnDirection,
   });
 
@@ -81,6 +81,7 @@ const TableVisualizationComponent = ({
               table={table}
               visConfig={visConfig}
               uiStateProps={uiStateProps}
+              isInteractive={handlers.isInteractive()}
             />
           ) : (
             <TableVisSplit
@@ -89,6 +90,7 @@ const TableVisualizationComponent = ({
               visConfig={visConfig}
               uiStateProps={uiStateProps}
               enforceMinWidth={direction === 'column'}
+              isInteractive={handlers.isInteractive()}
             />
           )}
         </div>

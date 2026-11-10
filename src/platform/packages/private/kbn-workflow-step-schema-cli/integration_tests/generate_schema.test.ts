@@ -131,7 +131,8 @@ async function waitForStepRegistry(
   );
 }
 
-describe('workflow step schema generation', () => {
+// Temporarily skipped: the generated artifact is causing merge conflicts across PRs.
+describe.skip('workflow step schema generation', () => {
   const log = new ToolingLog({ level: 'info', writeTo: process.stdout });
 
   let esServer: TestElasticsearchUtils;

@@ -77,6 +77,98 @@ components:
             $ref: '#/components/schemas/EvaluateResultScore'
         error:
           $ref: '#/components/schemas/EvaluateResultError'
+        usage:
+          $ref: '#/components/schemas/EvaluateResultUsage'
+    EvaluateResultUsage:
+      type: object
+      description: >-
+        Tokens used by the evaluator's model calls, summed over every call it made. A
+        call the inference client retried counts once, with the tokens of its final
+        attempt, so tokens spent by the retried attempts aren't counted; a call that
+        failed counts once with no tokens. Absent when the evaluator made no model call.
+        Named like Agent Builder's round usage, so the two can be summed.
+      required:
+        - input_tokens
+        - output_tokens
+        - llm_calls
+        - llm_calls_without_usage
+        - calls
+      properties:
+        input_tokens:
+          type: integer
+          minimum: 0
+          description: Input tokens, including tokens served from the prompt cache.
+        cached_input_tokens:
+          type: integer
+          minimum: 0
+          description: Input tokens served from the prompt cache (part of `input_tokens`), when reported.
+        output_tokens:
+          type: integer
+          minimum: 0
+          description: Output tokens, including reasoning tokens.
+        reasoning_tokens:
+          type: integer
+          minimum: 0
+          description: Reasoning tokens (part of `output_tokens`), when reported.
+        llm_calls:
+          type: integer
+          minimum: 0
+          description: Model calls the evaluator attempted, including calls that failed before reaching a model.
+        llm_calls_without_usage:
+          type: integer
+          minimum: 0
+          description: >-
+            Calls with no token counts in the totals: the call failed, or the provider
+            reported no usage.
+        calls:
+          type: array
+          description: Each model call, in the order it finished.
+          items:
+            $ref: '#/components/schemas/EvaluateResultUsageCall'
+    EvaluateResultUsageCall:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+            - error
+        model:
+          type: string
+          maxLength: 256
+          description: Model the provider reported serving the call, when it did.
+        input_tokens:
+          type: integer
+          minimum: 0
+          description: Input tokens, including cached ones. Absent when no usage was reported.
+        cached_input_tokens:
+          type: integer
+          minimum: 0
+          description: Input tokens served from the prompt cache, when reported.
+        output_tokens:
+          type: integer
+          minimum: 0
+          description: Output tokens, including reasoning ones. Absent when no usage was reported.
+        reasoning_tokens:
+          type: integer
+          minimum: 0
+          description: Reasoning tokens, when reported.
+        error:
+          type: object
+          required:
+            - message
+          properties:
+            code:
+              type: string
+              maxLength: 64
+              description: >-
+                The inference client's error code, such as `providerError` or
+                `requestError`, when the error carries one.
+            message:
+              type: string
+              maxLength: 8192
     EvaluateResultEvaluator:
       type: object
       required:
@@ -144,6 +236,11 @@ components:
           type: string
           enum:
             - evidence_unmet
+            - not_applicable
+          description: >-
+            `evidence_unmet`: the round lacks the evidence the evaluator requires.
+            `not_applicable`: the evaluator read the round and reported that it
+            does not apply.
         message:
           type: string
           maxLength: 8192

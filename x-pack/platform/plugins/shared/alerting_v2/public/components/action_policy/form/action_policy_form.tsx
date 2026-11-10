@@ -55,9 +55,11 @@ export const ActionPolicyForm = ({ config }: ActionPolicyFormProps) => {
           name="name"
           control={control}
           rules={{
-            required: i18n.translate('xpack.alertingV2.actionPolicy.form.name.required', {
-              defaultMessage: 'Name is required.',
-            }),
+            validate: (value) =>
+              value.trim().length > 0 ||
+              i18n.translate('xpack.alertingV2.actionPolicy.form.name.required', {
+                defaultMessage: 'Name is required.',
+              }),
           }}
           render={({ field: { ref, ...field }, fieldState: { error } }) => (
             <EuiFormRow

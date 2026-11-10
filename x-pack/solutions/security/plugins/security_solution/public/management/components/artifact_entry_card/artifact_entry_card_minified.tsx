@@ -26,6 +26,7 @@ import { useNormalizedArtifact } from './hooks/use_normalized_artifact';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { DESCRIPTION_LABEL } from './components/translations';
 import { DescriptionField } from './components/description_field';
+import { ArtifactEnabledStatus } from './components/artifact_enabled_status';
 import type { ArtifactEntryCardDecoratorProps } from './artifact_entry_card';
 
 const CardContainerPanel = styled(EuiSplitPanel.Outer)`
@@ -48,6 +49,13 @@ export interface ArtifactEntryCardMinifiedProps extends CommonProps {
    * above the selected OS and the condition entries.
    */
   Decorator?: React.ComponentType<ArtifactEntryCardDecoratorProps>;
+  /**
+   * Replaces the default field, operator, and value criteria block.
+   * When omitted, the card renders `CriteriaConditions`.
+   */
+  CriteriaComponent?: React.ComponentType<CriteriaConditionsProps>;
+  /** When true, shows a read-only enabled or disabled badge next to the artifact name. */
+  showEnabledColumn?: boolean;
 }
 
 /**
@@ -61,6 +69,8 @@ export const ArtifactEntryCardMinified = memo(
     onToggleSelectedArtifact,
     'data-test-subj': dataTestSubj,
     Decorator,
+    CriteriaComponent = CriteriaConditions,
+    showEnabledColumn = false,
     ...commonProps
   }: ArtifactEntryCardMinifiedProps) => {
     const artifact = useNormalizedArtifact(item);
@@ -94,10 +104,25 @@ export const ArtifactEntryCardMinified = memo(
                 <h5 data-test-subj={getTestId('title')}>{artifact.name}</h5>
               </EuiTitle>
             </EuiFlexItem>
+            {showEnabledColumn && (
+              <EuiFlexItem grow={false}>
+                <ArtifactEnabledStatus
+                  tags={artifact.tags}
+                  data-test-subj={getTestId('enabledStatus')}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </CustomSplitInnerPanel>
       ),
-      [artifact.name, getTestId, isSelected, onToggleSelectedArtifact]
+      [
+        artifact.name,
+        artifact.tags,
+        getTestId,
+        isSelected,
+        onToggleSelectedArtifact,
+        showEnabledColumn,
+      ]
     );
 
     return (
@@ -138,7 +163,7 @@ export const ArtifactEntryCardMinified = memo(
               <EuiAccordion id="showDetails" arrowDisplay="none" forceState={accordionTrigger}>
                 {Decorator && <Decorator item={item} data-test-subj={getTestId('decorator')} />}
 
-                <CriteriaConditions
+                <CriteriaComponent
                   os={artifact.os as CriteriaConditionsProps['os']}
                   entries={artifact.entries}
                   data-test-subj={getTestId('criteriaConditions')}

@@ -14,6 +14,46 @@ components:
         Minimum confidence score (0–1) for the Alert Triage Worker to auto-close an alert
         as a false positive. Alerts below this threshold require human review.
 
+    BudgetPerHour:
+      type: integer
+      minimum: 10
+      maximum: 5000
+      description: >-
+        Triage work the sweep may plan per hour, in cost units (a batch costs a fixed overhead
+        plus a cost per alert). Scaled to the sweep interval, so changing the interval does not
+        change the hourly total.
+
+    LookbackHours:
+      type: integer
+      minimum: 1
+      maximum: 168
+      description: >-
+        How many hours back the sweep looks for alerts to triage. Older pending alerts are
+        tagged stale instead of analysed.
+
+    MinSeverity:
+      type: string
+      enum: [low, medium, high, critical]
+      description: >-
+        Lowest alert severity the sweep triages. Alerts below it are never sent to the Worker, so
+        `low` triages every alert.
+
+    ExcludeBuildingBlocks:
+      type: boolean
+      description: >-
+        Whether the sweep skips building-block alerts. An EQL sequence still gets triaged through
+        its own alert, which is not a building block.
+
+    ExcludedRuleTags:
+      type: array
+      maxItems: 50
+      items:
+        type: string
+        minLength: 1
+        maxLength: 256
+      description: >-
+        Alerts from rules carrying any of these tags are never sent to the Worker.
+
     AlertTriageWorkerExtras:
       type: object
       additionalProperties: false
@@ -22,6 +62,21 @@ components:
         Sent whole on write; a replacement missing a field is rejected.
       required:
         - autoCloseConfidenceScoreMinThreshold
+        - budgetPerHour
+        - lookbackHours
+        - minSeverity
+        - excludeBuildingBlocks
+        - excludedRuleTags
       properties:
         autoCloseConfidenceScoreMinThreshold:
           $ref: '#/components/schemas/AutoCloseConfidenceScoreMinThreshold'
+        budgetPerHour:
+          $ref: '#/components/schemas/BudgetPerHour'
+        lookbackHours:
+          $ref: '#/components/schemas/LookbackHours'
+        minSeverity:
+          $ref: '#/components/schemas/MinSeverity'
+        excludeBuildingBlocks:
+          $ref: '#/components/schemas/ExcludeBuildingBlocks'
+        excludedRuleTags:
+          $ref: '#/components/schemas/ExcludedRuleTags'

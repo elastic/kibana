@@ -9,7 +9,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { v4 as uuidv4 } from 'uuid';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { BuiltinToolDefinition, ModelProvider } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { StartServicesAccessor } from '@kbn/core/server';
@@ -48,7 +48,7 @@ const schema = lazySchema(() =>
       .optional()
       .describe(
         'Name or partial name of the AI connector to use for lead generation (e.g. "OpenAI", "Claude"). ' +
-          'Case-insensitive. If omitted, the previously configured connector is used.'
+          'Case-insensitive. If omitted, the previously configured connector is used, or the chat connector when none is configured.'
       ),
   })
 );
@@ -90,6 +90,16 @@ const resolveConnectorIdByName = (
   };
 };
 
+/** Connector of the current chat, or undefined when the chat has none. */
+const getChatConnectorId = async (modelProvider: ModelProvider): Promise<string | undefined> => {
+  try {
+    const { connector } = await modelProvider.getDefaultModel();
+    return connector.connectorId;
+  } catch {
+    return undefined;
+  }
+};
+
 export const generateLeadsTool = (
   core: SecuritySolutionPluginCoreSetupDependencies,
   logger: Logger,
@@ -119,7 +129,7 @@ export const generateLeadsTool = (
     },
     handler: async (
       params,
-      { request, spaceId, esClient, savedObjectsClient, prompts, callContext }
+      { request, spaceId, esClient, savedObjectsClient, prompts, callContext, modelProvider }
     ) => {
       logger.debug(`${SECURITY_GENERATE_LEADS_TOOL_ID} tool called`);
 
@@ -201,6 +211,7 @@ export const generateLeadsTool = (
         } else {
           resolvedConnectorId = (await getLeadGenerationConfig(savedObjectsClient, spaceId))
             ?.connectorId;
+          resolvedConnectorId ??= await getChatConnectorId(modelProvider);
         }
 
         if (!resolvedConnectorId) {
@@ -221,6 +232,7 @@ export const generateLeadsTool = (
         }
 
         const currentEsClient = esClient.asCurrentUser;
+        const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
         const crudClient = startPlugins.entityStore.createCRUDClient(currentEsClient, spaceId);
         const relationshipsClient = startPlugins.entityStore.createRelationshipsClient(
           currentEsClient,
@@ -251,6 +263,7 @@ export const generateLeadsTool = (
           pipelineArgs: {
             listEntities: () => fetchCandidateEntities(crudClient, logger),
             esClient: currentEsClient,
+            internalEsClient,
             logger,
             spaceId,
             riskScoreDataClient,

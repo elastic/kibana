@@ -20,11 +20,8 @@ import moment from 'moment';
 import { EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import {
-  getFormattedSeverityScore,
-  getThemeResolvedSeverityColor,
-  getSeverityWithLow,
-} from '@kbn/ml-anomaly-utils';
+import { getFormattedSeverityScore, getSeverityWithLow } from '@kbn/ml-anomaly-utils';
+import { getThemeResolvedSeverityColor } from '@kbn/ml-anomaly-utils/use_severity_color';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import { context } from '@kbn/kibana-react-plugin/public';
 
@@ -76,6 +73,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     id: PropTypes.string.isRequired,
     euiTheme: PropTypes.object.isRequired,
     isEmbeddable: PropTypes.bool,
+    isInteractive: PropTypes.bool,
   };
 
   constructor(props) {
@@ -122,9 +120,9 @@ export class ExplorerChartSingleMetric extends React.Component {
       timeBuckets,
       showSelectedInterval,
       onPointerUpdate,
+      isInteractive,
       id: chartId,
     } = this.props;
-
     const element = this.rootNode;
     const config = this.props.seriesConfig;
     const severity = this.props.severity;
@@ -403,16 +401,16 @@ export class ExplorerChartSingleMetric extends React.Component {
       // Remove dots that are no longer needed i.e. if number of chart points has decreased.
       dots.exit().remove();
       // Create any new dots that are needed i.e. if number of chart points has increased.
-      dots
-        .enter()
-        .append('circle')
-        .attr('r', LINE_CHART_ANOMALY_RADIUS)
-        .on('click', function (d) {
+      const dot = dots.enter().append('circle').attr('r', LINE_CHART_ANOMALY_RADIUS);
+      if (isInteractive) {
+        dot.on('click', function (d) {
           d3.event.preventDefault();
           if (d.anomalyScore === undefined) return;
           showAnomalyPopover(d, this);
-        })
-        // Don't use an arrow function since we need access to `this`.
+        });
+      }
+      // Don't use an arrow function since we need access to `this`.
+      dot
         .on('mouseover', function (d) {
           // Show the tooltip only if the actions menu isn't active
           if (that.state.popoverData === null) {
@@ -466,13 +464,17 @@ export class ExplorerChartSingleMetric extends React.Component {
         .attr(
           'class',
           (d) => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`
-        )
-        .on('click', function (d) {
+        );
+
+      if (isInteractive) {
+        multiBucketMarkers.on('click', function (d) {
           d3.event.preventDefault();
           if (d.anomalyScore === undefined) return;
           showAnomalyPopover(d, this);
-        })
-        // Don't use an arrow function since we need access to `this`.
+        });
+      }
+      // Don't use an arrow function since we need access to `this`.
+      multiBucketMarkers
         .on('mouseover', function (d) {
           showLineChartTooltip(d, this);
         })

@@ -21,6 +21,7 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { APIKeysType, UiamOAuthType } from '@kbn/core-security-server';
+import { UIAM_ERROR_CODES } from '@kbn/core-security-server';
 import type { UserActivityServiceStart } from '@kbn/core-user-activity-server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import { i18n as i18nLib } from '@kbn/i18n';
@@ -48,6 +49,7 @@ import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { createRedirectHtmlPage } from '../lib/html_page_utils';
 import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
 import type { ServiceAccountsServiceStart } from '../service_accounts';
+import { ServiceAccountCredentialRefusedError } from '../service_accounts/credential_refused_error';
 import type { Session } from '../session_management';
 import {
   getProtectedResource,
@@ -64,6 +66,7 @@ interface AuthenticationServiceSetupParams {
     | 'csp'
     | 'registerAuth'
     | 'registerOnPreResponse'
+    | 'setSelfClientCredentialRefresher'
     | 'setSelfClientUnauthorizedErrorHandler'
     | 'staticAssets'
   >;
@@ -427,6 +430,30 @@ export class AuthenticationService {
         .catch(() => null);
       return authHeaders ? toolkit.retry({ authHeaders }) : toolkit.notHandled();
     });
+
+    // The handler above can only recover a call the authentication lifecycle rejected. Once the
+    // target route handler runs, it holds the credential it was called with and cannot have it
+    // replaced, so a service account token that would expire before the call can time out is
+    // replaced now, while Kibana still knows the request is bound to a service account.
+    http.setSelfClientCredentialRefresher(async ({ request, timeoutMs }, toolkit) => {
+      if (!request.isFakeRequest || !license.isLicenseAvailable() || !license.isEnabled()) {
+        return toolkit.notHandled();
+      }
+
+      try {
+        const authHeaders = await getServiceAccounts()?.backend.refreshFakeRequestBeforeUse(
+          request,
+          timeoutMs
+        );
+        return authHeaders ? toolkit.replace({ authHeaders }) : toolkit.notHandled();
+      } catch (error) {
+        // Only a definitive refusal fails the call. Anything else is a failure of the refresh
+        // itself, and the credential the call already carries may still be good enough.
+        return error instanceof ServiceAccountCredentialRefusedError
+          ? toolkit.reject({ error })
+          : toolkit.notHandled();
+      }
+    });
   }
 
   start({
@@ -457,6 +484,8 @@ export class AuthenticationService {
       kibanaFeatures,
       buildFlavor,
       uiam,
+      serviceAccountsEnabled: config.serviceAccounts.enabled,
+      getCurrentUser,
     });
 
     const uiamAPIKeys = uiam
@@ -643,6 +672,5 @@ function isTokenExpiredError(error: errors.ResponseError) {
     return true;
   }
 
-  // If expired the UIAM access token, it should have `authentication_error_code` set to `0x7E0116`.
-  return error.body?.error?.caused_by?.authentication_error_code === '0x7E0116';
+  return error.body?.error?.caused_by?.authentication_error_code === UIAM_ERROR_CODES.TOKEN_EXPIRED;
 }

@@ -11,7 +11,7 @@ export const kiQueryGeneration: DatasetConfig['kiQueryGeneration'] = [
   {
     input: {
       scenario_id: 'healthy-baseline',
-      stream_name: 'logs',
+      source_id: 'logs',
       stream_description:
         'Bank of Anthos application logs under healthy conditions with normal banking transactions across all microservices',
     },
@@ -66,7 +66,7 @@ export const kiQueryGeneration: DatasetConfig['kiQueryGeneration'] = [
   {
     input: {
       scenario_id: 'ledger-db-disconnect',
-      stream_name: 'logs',
+      source_id: 'logs',
       stream_description:
         'Bank of Anthos logs where the ledger-db PostgreSQL database becomes unreachable, causing frontend, ledgerwriter, balancereader, and transactionhistory to fail',
     },

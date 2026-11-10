@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getHasData } from './has_data';
@@ -21,6 +20,8 @@ const defaultIndices = {
 
 const makeHits = (value: number) => ({ hits: { total: { value } } });
 
+// The two-phase probe itself is covered by `lib/helpers/has_apm_data.test.ts`;
+// these cases cover what this route adds on top of it.
 describe('getHasData', () => {
   it('returns true immediately when phase 1 finds data (no phase 2 call)', async () => {
     const search = jest.fn().mockResolvedValue(makeHits(1));
@@ -50,51 +51,6 @@ describe('getHasData', () => {
 
     expect(result).toEqual({ hasData: false, indices: defaultIndices });
     expect(search).toHaveBeenCalledTimes(2);
-  });
-
-  it('phase 1 carries an @timestamp range and cold/frozen tier exclusion', async () => {
-    const search = jest.fn().mockResolvedValue(makeHits(0));
-    const apmEventClient = { search } as unknown as APMEventClient;
-
-    await getHasData({ indices: defaultIndices, apmEventClient });
-
-    const [, phase1Params] = search.mock.calls[0];
-    expect(phase1Params.query?.bool?.filter).toEqual(
-      expect.arrayContaining([
-        { range: { '@timestamp': { gte: 'now-24h/h' } } },
-        expect.objectContaining({
-          bool: {
-            must_not: [{ terms: { _tier: expect.arrayContaining(['data_cold', 'data_frozen']) } }],
-          },
-        }),
-      ])
-    );
-  });
-
-  it('phase 1 targets all three processor events', async () => {
-    const search = jest.fn().mockResolvedValue(makeHits(0));
-    const apmEventClient = { search } as unknown as APMEventClient;
-
-    await getHasData({ indices: defaultIndices, apmEventClient });
-
-    const [, phase1Params] = search.mock.calls[0];
-    expect(phase1Params.apm.events).toEqual(
-      expect.arrayContaining([
-        ProcessorEvent.transaction,
-        ProcessorEvent.error,
-        ProcessorEvent.metric,
-      ])
-    );
-  });
-
-  it('phase 2 carries no query (unbounded)', async () => {
-    const search = jest.fn().mockResolvedValue(makeHits(0));
-    const apmEventClient = { search } as unknown as APMEventClient;
-
-    await getHasData({ indices: defaultIndices, apmEventClient });
-
-    const [, phase2Params] = search.mock.calls[1];
-    expect(phase2Params.query).toBeUndefined();
   });
 
   it('echoes indices back in the response', async () => {

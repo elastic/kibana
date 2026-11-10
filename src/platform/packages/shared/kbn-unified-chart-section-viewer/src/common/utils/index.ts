@@ -9,6 +9,7 @@
 
 export * from './esql/create_esql_query';
 export * from './esql/create_aggregation';
+export * from './esql/create_histogram_distribution_query';
 export * from './esql/get_aggregation_label';
 export * from './esql/resolve_conflicting_field_types';
 export * from './first_null_nullable';

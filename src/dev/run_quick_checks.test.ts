@@ -14,8 +14,69 @@ jest.mock('@kbn/dev-cli-runner', () => ({
   run: jest.fn(),
 }));
 
+import childProcess from 'child_process';
+import { EventEmitter } from 'events';
+import fs from 'fs';
+import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { ToolingLog } from '@kbn/tooling-log';
 import { buildPipelineAnnotation } from './run_quick_checks';
+
+describe('cancelGatedStepsOnFirstCommit', () => {
+  const ORIGINAL_CHECK_GATE = process.env.CHECK_GATE;
+  const markerFile = join(REPO_ROOT, '.collect_commits_marker');
+  const cancelScript = join(REPO_ROOT, '.buildkite/scripts/steps/gate_failure/cancel.sh');
+  const log = new ToolingLog();
+
+  let spawnSpy: jest.SpyInstance;
+  let existsSyncSpy: jest.SpyInstance;
+  let cancelGatedStepsOnFirstCommit: (log: ToolingLog) => void;
+
+  beforeEach(() => {
+    process.env.CHECK_GATE = 'true';
+    spawnSpy = jest
+      .spyOn(childProcess, 'spawn')
+      .mockReturnValue(new EventEmitter() as childProcess.ChildProcess);
+    existsSyncSpy = jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+    jest.isolateModules(() => {
+      ({ cancelGatedStepsOnFirstCommit } = jest.requireActual('./run_quick_checks'));
+    });
+  });
+
+  afterEach(() => {
+    process.env.CHECK_GATE = ORIGINAL_CHECK_GATE;
+    jest.restoreAllMocks();
+  });
+
+  it('does nothing until a commit is recorded', () => {
+    cancelGatedStepsOnFirstCommit(log);
+
+    expect(existsSyncSpy).toHaveBeenCalledWith(markerFile);
+    expect(spawnSpy).not.toHaveBeenCalled();
+  });
+
+  it('runs the cancel-on-gate-failure script once after the first commit', () => {
+    existsSyncSpy.mockReturnValue(true);
+
+    cancelGatedStepsOnFirstCommit(log);
+    cancelGatedStepsOnFirstCommit(log);
+
+    expect(spawnSpy).toHaveBeenCalledTimes(1);
+    expect(spawnSpy).toHaveBeenCalledWith('bash', [cancelScript], {
+      cwd: REPO_ROOT,
+      stdio: 'inherit',
+    });
+  });
+
+  it('does nothing outside of check gate steps', () => {
+    delete process.env.CHECK_GATE;
+    existsSyncSpy.mockReturnValue(true);
+
+    cancelGatedStepsOnFirstCommit(log);
+
+    expect(spawnSpy).not.toHaveBeenCalled();
+  });
+});
 
 describe('buildFailureAnnotation', () => {
   it('creates an annotation for a single failed check', () => {

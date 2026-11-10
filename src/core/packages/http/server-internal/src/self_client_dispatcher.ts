@@ -8,7 +8,7 @@
  */
 
 import { rootCertificates } from 'node:tls';
-import { Agent, type Dispatcher } from 'undici';
+import { Agent, getGlobalDispatcher, type Dispatcher } from 'undici';
 import type { IBasePath } from '@kbn/core-http-server';
 import type { HttpConfig } from './http_config';
 
@@ -56,6 +56,13 @@ const buildConnectOptions = (
   }
 };
 
+/** Applies a per-request headers timeout on top of any dispatcher's shared pool. */
+export const withHeadersTimeout =
+  (headersTimeout: number): Dispatcher.DispatcherComposeInterceptor =>
+  (dispatch) =>
+  (opts, handler) =>
+    dispatch({ ...opts, headersTimeout }, handler);
+
 export class SelfHttpDispatcherProvider {
   private readonly dispatchers = new Map<
     'local' | 'public',
@@ -64,7 +71,28 @@ export class SelfHttpDispatcherProvider {
 
   constructor(private readonly params: SelfHttpDispatcherProviderParams) {}
 
-  public get(url: URL, target: 'local' | 'public'): Dispatcher | undefined {
+  public get(
+    url: URL,
+    target: 'local' | 'public',
+    headersTimeout?: number
+  ): Dispatcher | undefined {
+    const dispatcher = this.getBaseDispatcher(url, target);
+    if (headersTimeout === undefined) {
+      return dispatcher;
+    }
+    // Per-request timeouts compose over the shared dispatcher (or the global one for
+    // plain HTTP), so every timeout value reuses the same connection pool. The composed
+    // proxy holds no resources of its own, so there is nothing extra to close.
+    return (dispatcher ?? getGlobalDispatcher()).compose(withHeadersTimeout(headersTimeout));
+  }
+
+  public async close(): Promise<void> {
+    const dispatchers = [...this.dispatchers.values()];
+    this.dispatchers.clear();
+    await Promise.all(dispatchers.map(({ agent }) => agent?.close()));
+  }
+
+  private getBaseDispatcher(url: URL, target: 'local' | 'public'): Dispatcher | undefined {
     if (url.protocol !== 'https:') {
       return undefined;
     }
@@ -113,12 +141,6 @@ export class SelfHttpDispatcherProvider {
       trustKey
     );
     return this.dispatchers.get(target)?.agent;
-  }
-
-  public async close(): Promise<void> {
-    const dispatchers = [...this.dispatchers.values()];
-    this.dispatchers.clear();
-    await Promise.all(dispatchers.map(({ agent }) => agent?.close()));
   }
 
   private replaceDispatcher(

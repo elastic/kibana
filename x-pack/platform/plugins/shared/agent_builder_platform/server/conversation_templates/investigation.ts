@@ -9,7 +9,7 @@ import type { ConversationTemplate } from '@kbn/agent-builder-common';
 
 export const investigationTemplate: ConversationTemplate = {
   id: 'investigation',
-  version: 2,
+  version: 5,
   name: 'Investigation',
   description: 'Use for investigations',
   fields: {
@@ -19,6 +19,7 @@ export const investigationTemplate: ConversationTemplate = {
       default_value: 'open',
       required: true,
       options: ['open', 'closed'],
+      report_changes: true,
     },
     severity: {
       input_type: 'SELECT',
@@ -53,6 +54,7 @@ export const investigationTemplate: ConversationTemplate = {
       description: 'Reason the investigation was closed.',
       required: false,
       options: ['false_positive', 'benign', 'resolved', 'duplicate', 'other'],
+      report_changes: true,
     },
     workflow_execution_ids: {
       input_type: 'TEXT_ARRAY',

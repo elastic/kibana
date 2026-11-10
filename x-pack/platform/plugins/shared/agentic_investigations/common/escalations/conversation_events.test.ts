@@ -10,7 +10,11 @@ import {
   CONVERSATION_TITLE_MAX_LENGTH,
   agentIdMaxLength,
 } from '@kbn/agent-builder-common';
-import { escalationInvestigationEventSchema } from './conversation_events';
+import {
+  MAX_SYNCED_ATTACHMENT_IDS,
+  escalationAttachmentsSyncedEventSchema,
+  escalationInvestigationEventSchema,
+} from './conversation_events';
 
 const valid = { investigation_id: 'inv-1', title: 'Phishing', agent_id: 'agent-1' };
 
@@ -40,5 +44,27 @@ describe('escalationInvestigationEventSchema', () => {
         agent_id: 'a'.repeat(agentIdMaxLength),
       }).success
     ).toBe(true);
+  });
+});
+
+describe('escalationAttachmentsSyncedEventSchema', () => {
+  const synced = { ...valid, attachment_ids: ['inv-1:a'] };
+
+  it('accepts the investigation snapshot with the synced attachment ids', () => {
+    expect(escalationAttachmentsSyncedEventSchema.safeParse(synced).success).toBe(true);
+  });
+
+  it.each([
+    ['missing ids', { attachment_ids: undefined }],
+    ['no ids', { attachment_ids: [] }],
+    ['an empty id', { attachment_ids: [''] }],
+    [
+      'too many ids',
+      { attachment_ids: Array.from({ length: MAX_SYNCED_ATTACHMENT_IDS + 1 }, (_, i) => `a${i}`) },
+    ],
+  ])('rejects %s', (_name, override) => {
+    expect(
+      escalationAttachmentsSyncedEventSchema.safeParse({ ...synced, ...override }).success
+    ).toBe(false);
   });
 });

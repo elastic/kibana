@@ -1,5 +1,5 @@
 {
-  "sha1": "320fc9571cb547bd9bd4ed49a7e74c874fb6c208",
+  "sha1": "1599ada04a24c297e4eca5e9587a410cedace8ca",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -26,7 +26,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/alert_flyout_results.spec.ts",
-        "line": 53,
+        "line": 55,
         "column": 35
       }
     },
@@ -37,12 +37,11 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/form_rbac.spec.ts",
-        "line": 51,
+        "line": 50,
         "column": 7
       }
     },
@@ -53,13 +52,26 @@
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-serverless-security_complete"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/form_rbac.spec.ts",
         "line": 64,
-        "column": 15
+        "column": 11
+      }
+    },
+    {
+      "id": "09a79759062225a-c198245c2494f63",
+      "title": "Response console get-file from the endpoint list retrieves a file and shows the download link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/get_file_from_console.spec.ts",
+        "line": 45,
+        "column": 25
       }
     },
     {
@@ -86,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/isolate_from_alert.spec.ts",
-        "line": 37,
-        "column": 7
+        "line": 59,
+        "column": 31
       }
     },
     {
@@ -100,8 +112,51 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/isolate_from_case.spec.ts",
-        "line": 64,
-        "column": 31
+        "line": 72,
+        "column": 9
+      }
+    },
+    {
+      "id": "7d91e45b882d028-f94b75edaad1ce6",
+      "title": "Response console from an alert opens the console from the alert flyout and keeps its output when reopened from the endpoint list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/response_console_from_alerts.spec.ts",
+        "line": 37,
+        "column": 33
+      }
+    },
+    {
+      "id": "7d91e45b882d028-cb1b20981a6e278",
+      "title": "Response console from an alert opens the console from the alert flyout in Timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/response_console_from_alerts.spec.ts",
+        "line": 51,
+        "column": 53
+      }
+    },
+    {
+      "id": "0777301b4e4271c-c239d1acb0f5178",
+      "title": "Response console from a case opens the console from the case alert and keeps the history date picker usable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/response_console_from_case.spec.ts",
+        "line": 48,
+        "column": 7
       }
     }
   ]

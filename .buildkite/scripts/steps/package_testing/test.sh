@@ -23,7 +23,15 @@ elif [[ "$TEST_PACKAGE" == "rpm" ]]; then
   download_artifact 'kibana-*-x86_64.rpm' . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.6"
 elif [[ "$TEST_PACKAGE" == "docker" ]]; then
-  download_artifact "kibana-$KIBANA_PKG_VERSION*-docker-image-amd64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  case "${KIBANA_DOCKER_IMAGE_VARIANT:-default}" in
+    default) KIBANA_DOCKER_IMAGE_PREFIX=kibana ;;
+    cloud) KIBANA_DOCKER_IMAGE_PREFIX=kibana-cloud ;;
+    *)
+      echo "Error: KIBANA_DOCKER_IMAGE_VARIANT must be default or cloud"
+      exit 1
+      ;;
+  esac
+  download_artifact "$KIBANA_DOCKER_IMAGE_PREFIX-$KIBANA_PKG_VERSION*-docker-image-amd64.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
   KIBANA_IP_ADDRESS="192.168.56.7"
 fi
 cd ..

@@ -39,6 +39,7 @@ import {
 import { type PluginsService, createPluginsService } from './plugins';
 import { CallbackDeliveryService } from './execution/callback';
 import { createSpaceSettingsService } from './space_settings';
+import { SurfacesServiceImpl } from './surfaces';
 import { ConversationTemplatesService } from './conversation/templates';
 
 interface ServiceInstances {
@@ -88,7 +89,10 @@ export class ServiceManager {
         logger: logger.get('metering'),
       }),
       consumption: createConsumptionService(),
-      callbackDelivery: new CallbackDeliveryService({ actions }),
+      callbackDelivery: new CallbackDeliveryService({
+        actions,
+        logger: logger.get('callbacks'),
+      }),
       conversationTemplates: new ConversationTemplatesService(),
     };
 
@@ -109,6 +113,7 @@ export class ServiceManager {
       plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
       conversationTemplates: this.services.conversationTemplates.setup(),
+      callbacks: this.services.callbackDelivery.setup(),
     };
 
     return this.internalSetup;
@@ -133,6 +138,9 @@ export class ServiceManager {
     licensing,
     deploymentInfo,
     deductiveRegister,
+    isomer,
+    getSmlTypeDefinition,
+    cloud,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
@@ -208,6 +216,11 @@ export class ServiceManager {
       trackingService,
     });
 
+    const auditLogService = new AuditLogService({
+      security,
+      logger: logger.get('audit'),
+    });
+
     const conversations = new ConversationServiceImpl({
       logger: logger.get('conversations'),
       security,
@@ -216,6 +229,8 @@ export class ServiceManager {
       agents,
       eventBus: conversationEventBus,
       conversationEvents,
+      auditLogService,
+      analyticsService,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -255,9 +270,12 @@ export class ServiceManager {
       conversations,
     });
 
-    const auditLogService = new AuditLogService({
-      security,
-      logger: logger.get('audit'),
+    const surfaces = new SurfacesServiceImpl({
+      attachmentsService: attachments,
+      isomer,
+      basePath: http.basePath,
+      cloud,
+      logger: logger.get('surfaces'),
     });
 
     const taskHandler = createTaskHandler({
@@ -276,6 +294,7 @@ export class ServiceManager {
       meteringService: this.services.metering,
       searchInferenceEndpoints,
       callbackDeliveryService: this.services.callbackDelivery,
+      surfacesService: surfaces,
     });
 
     executionService = createAgentExecutionService({
@@ -289,12 +308,15 @@ export class ServiceManager {
       agentService: agents,
       runAgent: runner.runAgent,
       attachmentsService: attachments,
+      getSmlTypeDefinition,
       uiSettings,
       savedObjects,
       trackingService,
       analyticsService,
       meteringService: this.services.metering,
       searchInferenceEndpoints,
+      callbackDeliveryService: this.services.callbackDelivery,
+      securityPlugin,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
@@ -322,6 +344,7 @@ export class ServiceManager {
       plugins,
       consumption,
       searchInferenceEndpoints,
+      inference,
       callbackDeliveryService: this.services.callbackDelivery,
       spaceSettings,
       conversationTemplates: conversationTemplatesStart,

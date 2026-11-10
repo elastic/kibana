@@ -31,6 +31,6 @@ describe('getEsqlLexerTokens', () => {
       .filter(isVisibleToken)
       .map(({ text }) => text);
 
-    expect(visibleTokenTexts).toEqual(['FROM', 'a', '|', 'EVAL']);
+    expect(visibleTokenTexts).toEqual(['FROM', 'a', '|', 'EVAL', ')']);
   });
 });

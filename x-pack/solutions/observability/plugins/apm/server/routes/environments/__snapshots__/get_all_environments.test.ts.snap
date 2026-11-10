@@ -6,7 +6,12 @@ Object {
     "environments": Object {
       "terms": Object {
         "field": "service.environment",
-        "missing": undefined,
+        "size": 50,
+      },
+    },
+    "otelEnvironments": Object {
+      "terms": Object {
+        "field": "resource.attributes.deployment.environment.name",
         "size": 50,
       },
     },
@@ -40,7 +45,30 @@ Object {
     "environments": Object {
       "terms": Object {
         "field": "service.environment",
-        "missing": "ENVIRONMENT_NOT_DEFINED",
+        "size": 50,
+      },
+    },
+    "missingEnvironments": Object {
+      "filter": Object {
+        "bool": Object {
+          "must_not": Array [
+            Object {
+              "exists": Object {
+                "field": "service.environment",
+              },
+            },
+            Object {
+              "exists": Object {
+                "field": "resource.attributes.deployment.environment.name",
+              },
+            },
+          ],
+        },
+      },
+    },
+    "otelEnvironments": Object {
+      "terms": Object {
+        "field": "resource.attributes.deployment.environment.name",
         "size": 50,
       },
     },

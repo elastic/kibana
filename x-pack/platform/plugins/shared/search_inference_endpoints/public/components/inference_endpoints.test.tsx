@@ -139,8 +139,8 @@ describe('InferenceEndpoints', () => {
     renderComponent();
 
     expect(screen.getByTestId('externalInferenceEmptyPrompt')).toBeInTheDocument();
-    expect(screen.getByText('Connect to external model providers')).toBeInTheDocument();
     expect(screen.getByTestId('addEndpointButton')).toBeInTheDocument();
+    expect(screen.getByTestId('selfHostedDocumentationLink')).toBeInTheDocument();
     expect(screen.getByTestId('viewDocumentationLink')).toBeInTheDocument();
     expect(screen.queryByTestId('allInferenceEndpointsPage')).not.toBeInTheDocument();
   });

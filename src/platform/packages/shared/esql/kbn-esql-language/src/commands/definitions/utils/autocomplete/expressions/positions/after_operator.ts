@@ -46,7 +46,12 @@ export async function suggestAfterOperator(ctx: ExpressionContext): Promise<ISug
 
   const rightmostOperator = getRightmostOperator(expressionRoot as ESQLFunction);
   const getExprType = (expression: ESQLAstItem) =>
-    getExpressionType(expression, context?.columns, context?.unmappedFieldsStrategy);
+    getExpressionType(
+      expression,
+      context?.columns,
+      context?.unmappedFieldsStrategy,
+      context?.isTimeseriesSource === true
+    );
   const reason = getIncompleteOperatorReason(rightmostOperator, getExprType);
   const shouldDispatchSpecialOperator =
     reason !== undefined || parenthesizedExpressionPosition !== 'after';

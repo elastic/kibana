@@ -26,6 +26,8 @@ export interface RegisterTemplateOptions {
   /** `xpack.agenticInvestigations.escalations.enabled`. */
   escalationsEnabled: boolean;
   groupedAttachments: FlyoutGroupedAttachmentsRegistry;
+  /** Read at render time: a solution registers the opener from its own start, after this plugin's. */
+  getImpactEntityOpener: TemplateRegistrationContext['getImpactEntityOpener'];
   templates: readonly TemplateDefinition[];
 }
 
@@ -39,6 +41,7 @@ export const registerTemplate = ({
   startDeps,
   escalationsEnabled,
   groupedAttachments,
+  getImpactEntityOpener,
   templates,
 }: RegisterTemplateOptions): void => {
   const services: TemplateServices = { ...core, ...startDeps };
@@ -115,6 +118,7 @@ export const registerTemplate = ({
     groupedAttachments,
     renderAssignees,
     renderStatus,
+    getImpactEntityOpener,
   };
 
   for (const { templateId, register } of templates) {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
@@ -16,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 import type { ColorMode } from '@xyflow/react';
 import { Background, Controls, ReactFlow, ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -36,9 +37,9 @@ import type {
   SequenceEdgeType,
 } from '@kbn/alerting-v2-rule-form';
 import { RulesApi } from '../../services/rules_api';
-import { toFindRulesRequest } from '../../hooks/use_fetch_rules';
 import { useCanvasFitView } from './use_canvas_fit_view';
 import { CollapsibleSidePanel } from './collapsible_side_panel';
+import { listSequenceBuilderRules } from './list_sequence_builder_rules';
 
 const nodeTypes = { sequenceStage: SequenceNode };
 const edgeTypes = { sequenceHop: SequenceEdge };
@@ -47,7 +48,7 @@ interface FetchedRule {
   id: string;
   name: string;
   groupingFields: string[];
-  kind: 'alert' | 'signal';
+  kind: RuleKind;
 }
 
 interface CanvasContentProps {
@@ -72,7 +73,12 @@ const AlertCanvasContent: React.FC<CanvasContentProps> = ({
 
   return (
     <div
-      style={{ height: '100%', position: 'relative' }}
+      css={css`
+        flex: 1;
+        min-block-size: 0;
+        block-size: 100%;
+        position: relative;
+      `}
       onDragOver={(e) => e.preventDefault()}
       onDrop={onDrop}
       data-test-subj="sequenceBuilderAlertCanvas"
@@ -168,7 +174,6 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   const { colorMode } = useEuiTheme();
   const rulesApi = useService(RulesApi);
 
-  // TODO: Add pagination or infinite scroll for users with more than 200 rules
   const {
     data: rulesData,
     isLoading: isLoadingRules,
@@ -176,8 +181,8 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   } = useQuery({
     queryKey: ['sequence-builder-available-rules'],
     refetchOnWindowFocus: false,
-    queryFn: () =>
-      rulesApi.listRules(toFindRulesRequest({ perPage: 200, sortField: 'name', sortOrder: 'asc' })),
+    retry: false,
+    queryFn: () => listSequenceBuilderRules((params) => rulesApi.listRules(params)),
   });
 
   const fetchedRules = useMemo<FetchedRule[]>(
@@ -190,6 +195,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
       })),
     [rulesData]
   );
+  const isRulesListTruncated = (rulesData?.total ?? 0) > fetchedRules.length;
 
   const usedRuleIds = useMemo<Set<string>>(
     () => new Set(seqValues.steps.flatMap((s) => s.rules.map((r) => r.ruleId))),
@@ -218,16 +224,24 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
           .filter((s) => s.rules.length > 0);
 
         const hopWindows = [...prev.hopWindows];
-        if (removedIdx !== -1 && nextSteps.length < prev.steps.length) {
+        const stepWasRemoved = removedIdx !== -1 && nextSteps.length < prev.steps.length;
+        if (stepWasRemoved) {
           const hopToRemove = removedIdx > 0 ? removedIdx - 1 : 0;
           hopWindows.splice(hopToRemove, 1);
         }
+
+        const recoveryStepIndices =
+          stepWasRemoved && prev.recoveryStepIndices
+            ? prev.recoveryStepIndices
+                .filter((i) => i !== removedIdx)
+                .map((i) => (i > removedIdx ? i - 1 : i))
+            : prev.recoveryStepIndices;
 
         return {
           ...prev,
           steps: nextSteps,
           hopWindows: hopWindows.slice(0, Math.max(0, nextSteps.length - 1)),
-          recoveryStepIndices: [Math.max(0, nextSteps.length - 1)],
+          recoveryStepIndices,
         };
       });
     },
@@ -247,7 +261,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   const addRuleToStep = useCallback(
     (
       stepId: string,
-      payload: { id: string; name: string; groupingFields: string[]; kind: 'alert' | 'signal' }
+      payload: { id: string; name: string; groupingFields: string[]; kind: RuleKind }
     ) => {
       setSeqValues((prev) => ({
         ...prev,
@@ -297,7 +311,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
           id: string;
           name: string;
           groupingFields: string[];
-          kind: 'alert' | 'signal';
+          kind: RuleKind;
         };
         setSeqValues((prev) => {
           if (prev.steps.some((s) => s.rules.some((r) => r.ruleId === id))) return prev;
@@ -314,7 +328,6 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
               0,
               nextSteps.length - 1
             ),
-            recoveryStepIndices: [nextSteps.length - 1],
           };
         });
       } catch {
@@ -328,7 +341,11 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
     () =>
       seqValues.steps.map((step) => ({
         stepId: step.id,
-        rules: step.rules.map((r) => ({ ruleId: r.ruleId, ruleName: r.ruleName ?? r.ruleId })),
+        rules: step.rules.map((r) => ({
+          ruleId: r.ruleId,
+          ruleName: r.ruleName ?? r.ruleId,
+          isMissing: r.isMissing,
+        })),
         operator: step.operator,
       })),
     [seqValues.steps]
@@ -365,7 +382,14 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="none" style={{ height: '100%', overflow: 'hidden' }}>
+    <EuiFlexGroup
+      gutterSize="none"
+      css={css`
+        flex: 1;
+        min-block-size: 0;
+        overflow: hidden;
+      `}
+    >
       <CollapsibleSidePanel
         title={availableRulesTitle}
         isOpen={isRuleListOpen}
@@ -389,7 +413,7 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
                 <RuleListItem rule={rule} />
               </EuiFlexItem>
             ))}
-            {availableRules.length === 0 && (
+            {availableRules.length === 0 && !isRulesListTruncated && (
               <EuiText size="s" color="subdued">
                 {fetchedRules.length === 0 ? (
                   <FormattedMessage
@@ -404,11 +428,27 @@ export const AlertConditionCanvas: React.FC<AlertConditionCanvasProps> = ({
                 )}
               </EuiText>
             )}
+            {isRulesListTruncated && (
+              <EuiText size="s" color="subdued" data-test-subj="sequenceBuilderRulesTruncated">
+                <FormattedMessage
+                  id="xpack.alertingV2.sequenceBuilderPage.rulesTruncatedDescription"
+                  defaultMessage="Showing the first {count} rules."
+                  values={{ count: <FormattedNumber value={fetchedRules.length} /> }}
+                />
+              </EuiText>
+            )}
           </EuiFlexGroup>
         )}
       </CollapsibleSidePanel>
 
-      <EuiFlexItem style={{ minWidth: 0 }}>
+      <EuiFlexItem
+        css={css`
+          min-inline-size: 0;
+          min-block-size: 0;
+          display: flex;
+          flex-direction: column;
+        `}
+      >
         <ReactFlowProvider>
           <AlertCanvasContent
             nodes={nodes}

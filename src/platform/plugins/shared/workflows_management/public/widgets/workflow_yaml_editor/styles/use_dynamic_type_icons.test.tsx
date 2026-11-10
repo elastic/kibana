@@ -122,6 +122,33 @@ describe('useDynamicTypeIcons', () => {
     unmount();
   });
 
+  it('starts every icon lookup without waiting for earlier ones to resolve', () => {
+    jest.mocked(getIconBase64).mockReturnValue(new Promise(() => {}));
+    const services = createStartServicesMock();
+    const connectorsData: ConnectorsResponse = {
+      totalConnectors: 0,
+      connectorTypes: {
+        '.jira': connectorTypeStub('.jira'),
+        '.teams': connectorTypeStub('.teams'),
+      },
+    };
+
+    const { unmount } = renderHook(() => useDynamicTypeIcons(connectorsData, undefined, true), {
+      wrapper: getTestProvider({ services }),
+    });
+
+    // Asserted synchronously on purpose: both lookups start in the effect's first tick, so any
+    // waiting here would weaken the claim and only ever burn the test's budget on failure.
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.jira', kind: 'step' })
+    );
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.teams', kind: 'step' })
+    );
+
+    unmount();
+  });
+
   it('injects step icons and connector trigger icons', async () => {
     // Colored brand marks clear the mask. Length must exceed isValidDataUrl's 50-character minimum.
     const resolvedTriggerIcon = `data:image/svg+xml;base64,${btoa(

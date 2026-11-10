@@ -18,11 +18,11 @@ import type { SnapshotCustomMetricInput } from '../../../../../../common/http_ap
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
 import { useSnapshot } from '../../hooks/use_snaphot';
-import { useInventoryRequestSchema } from '../../hooks/use_inventory_request_schema';
 import { createInventoryMetricFormatter } from '../../lib/create_inventory_metric_formatter';
 import { getSnapshotMetricTranslations } from '../../../../../../common/inventory_models/intl_strings';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { createFormatterForMetric } from '../../../metrics_explorer/components/helpers/create_formatter_for_metric';
+import { getInventoryRequestSchema } from '../../lib/get_inventory_request_schema';
 
 export interface Props {
   currentTime: number;
@@ -37,7 +37,7 @@ export const ConditionalToolTip = ({ node, nodeType, currentTime }: Props) => {
   const requestCurrentTime = useRef(currentTime);
   const model = findInventoryModel(nodeType);
   const { customMetrics, preferredSchema } = useWaffleOptionsContext();
-  const requestSchema = useInventoryRequestSchema(nodeType, preferredSchema);
+  const requestSchema = getInventoryRequestSchema(preferredSchema);
   const { id: nodeIdField } = findInventoryFields(nodeType, requestSchema);
 
   const requestMetrics = model.metrics

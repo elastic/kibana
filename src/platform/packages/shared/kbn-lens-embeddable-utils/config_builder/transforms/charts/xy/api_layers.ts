@@ -9,7 +9,6 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { isQueryAnnotationConfig, isRangeAnnotationConfig } from '@kbn/event-annotation-common';
-import type { AvailableReferenceLineIcon } from '@kbn/expression-xy-plugin/common';
 import type {
   FormBasedLayer,
   SeriesType,
@@ -22,11 +21,11 @@ import type {
   YConfig,
 } from '@kbn/lens-common';
 import {
-  AvailableReferenceLineIcons,
   isPersistedByReferenceAnnotationsLayer,
   isPersistedLinkedByValueAnnotationsLayer,
   isRuntimeByReferenceAnnotationsLayer,
 } from '@kbn/lens-common';
+import { DataViewNotFoundError } from '../../../errors';
 import type {
   AnnotationLayerByValueType,
   AnnotationLayerType,
@@ -68,7 +67,7 @@ import {
 } from '../../utils';
 import { stripUndefined } from '../utils';
 import { getYAccessorAxisModeMap, type ResolveAxisId } from './chart';
-import { xyIconCompat } from './helpers';
+import { getAnnotationIconAPIName } from './helpers';
 
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,
@@ -103,7 +102,7 @@ function convertDataLayerToAPI(
       throw new Error('X axis must be a bucket operation');
     }
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     const breakdown_by =
       visualization.splitAccessors && visualization.splitAccessors.length > 0
         ? operationFromColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
@@ -136,7 +135,7 @@ function convertDataLayerToAPI(
           };
         })
         .filter(nonNullable) ?? [];
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+    // eslint-disable-next-line @kbn/compat/typescript-naming-convention
     const aggregate_first =
       visualization.splitAccessors &&
       visualization.splitAccessors.length > 0 &&
@@ -164,7 +163,7 @@ function convertDataLayerToAPI(
   }
 
   const x = visualization.xAccessor ? getValueApiColumn(visualization.xAccessor, layer) : undefined;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+  // eslint-disable-next-line @kbn/compat/typescript-naming-convention
   const breakdown_by =
     visualization.splitAccessors && visualization.splitAccessors.length > 0
       ? getValueApiColumn(visualization.splitAccessors[0], layer) // TODO temp fix for this PR until XY API will be upgraded to support multiple splits
@@ -266,12 +265,6 @@ export function buildAPIDataLayer(
 
 type ReferenceLineDef = ReferenceLineLayerType['thresholds'][number];
 
-const referenceLinesAvailableIconsSet = new Set(Object.values(AvailableReferenceLineIcons));
-
-function isReferenceLineValidIcon(icon: string | undefined): icon is AvailableReferenceLineIcon {
-  return Boolean(icon && referenceLinesAvailableIconsSet.has(icon as AvailableReferenceLineIcon));
-}
-
 function convertReferenceLinesDecorationsToAPIFormat(
   yConfig: Omit<YConfig, 'forAccessor'>,
   resolveAxisId: ResolveAxisId
@@ -288,10 +281,7 @@ function convertReferenceLinesDecorationsToAPIFormat(
     color: fromStaticColorLensStateToAPI(yConfig.color) ?? AUTO_COLOR,
     stroke_dash: yConfig.lineStyle,
     stroke_width: yConfig.lineWidth,
-    icon:
-      isReferenceLineValidIcon(yConfig.icon) && yConfig.icon !== 'empty'
-        ? xyIconCompat.toAPI(yConfig.icon)
-        : undefined,
+    icon: getAnnotationIconAPIName(yConfig.icon),
     position: yConfig.iconPosition,
     fill: yConfig.fill && yConfig.fill !== 'none' ? yConfig.fill : undefined,
     axis: resolvedOnAxis(),
@@ -353,25 +343,6 @@ function convertReferenceLineLayerToAPI(
   };
 }
 
-export function buildAPIReferenceLinesLayer(
-  visualization: XYReferenceLineLayerConfig,
-  layer: Omit<FormBasedLayer, 'indexPatternId'>,
-  adHocDataViews: Record<string, unknown>,
-  resolveAxisId: ResolveAxisId,
-  references: SavedObjectReference[],
-  adhocReferences?: SavedObjectReference[]
-): ReferenceLineLayerTypeNoESQL;
-/**
- * @deprecated ES|QL reference lines are not yet supported
- */
-export function buildAPIReferenceLinesLayer(
-  visualization: XYReferenceLineLayerConfig,
-  layer: TextBasedLayer,
-  adHocDataViews: Record<string, unknown>,
-  resolveAxisId: ResolveAxisId,
-  references: SavedObjectReference[],
-  adhocReferences?: SavedObjectReference[]
-): ReferenceLineLayerTypeESQL;
 export function buildAPIReferenceLinesLayer(
   visualization: XYReferenceLineLayerConfig,
   layer: Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer,
@@ -483,7 +454,7 @@ export function buildAPIAnnotationsLayer(
 
   if (hasQueryAnnotation && !dataViewId) {
     // A query annotation without a resolvable data view cannot be represented.
-    throw new Error('XY visualization: cannot find data view ID for annotation layer.');
+    throw new DataViewNotFoundError(layer.layerId);
   }
 
   const dataSource: DataSourceTypeNoESQL | null =
@@ -511,7 +482,7 @@ export function buildAPIAnnotationsLayer(
           color: fromStaticColorLensStateToAPI(annotation.color) ?? AUTO_COLOR,
           ...(annotation.isHidden != null ? { visible: !annotation.isHidden } : {}),
           ...getTextConfigurationForQueryAnnotation(annotation),
-          ...(annotation.icon ? { icon: xyIconCompat.toAPI(annotation.icon) } : {}),
+          ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
           // lineWidth isn't allowed to be zero, so the truthy check is valid here
           ...(annotation.lineWidth || annotation.lineStyle
             ? {
@@ -548,7 +519,7 @@ export function buildAPIAnnotationsLayer(
             }
           : {}),
         ...(annotation.label ? { label: annotation.label } : {}),
-        ...(annotation.icon ? { icon: xyIconCompat.toAPI(annotation.icon) } : {}),
+        ...(annotation.icon ? { icon: getAnnotationIconAPIName(annotation.icon) } : {}),
         ...(annotation.lineWidth || annotation.lineStyle
           ? {
               line: {

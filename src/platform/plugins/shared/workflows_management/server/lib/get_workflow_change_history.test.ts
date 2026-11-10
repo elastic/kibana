@@ -8,7 +8,6 @@
  */
 
 import type { ChangeHistoryDocument } from '@kbn/change-history';
-import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 
@@ -79,17 +78,12 @@ describe('get_workflow_change_history', () => {
       getHistory: jest.fn().mockResolvedValue(historyResult),
     } as unknown as IWorkflowChangeHistoryService;
 
-    const userProfileService = userProfileServiceMock.createStart();
-    userProfileService.bulkGet.mockResolvedValue([]);
-
     return {
       deps: {
         changeHistoryService,
-        userProfileService,
         getWorkflowSource: jest.fn().mockResolvedValue(workflowResult),
       },
       changeHistoryService,
-      userProfileService,
     };
   };
 
@@ -268,41 +262,31 @@ describe('get_workflow_change_history', () => {
       expect(changeHistoryService.getHistory).not.toHaveBeenCalled();
     });
 
-    it('resolves the display name from the user profile when the profile id is known', async () => {
+    it('uses the profile display name resolved by the change history client', async () => {
       const historyDocument = {
         ...createHistoryDocument('event-1', 2),
-        user: { id: 'profile-1', name: 'test-user' },
+        user: { id: 'profile-1', name: 'test-user', full_name: 'Test User' },
       };
-      const { deps, userProfileService } = createDeps({
+      const { deps } = createDeps({
         historyResult: { total: 1, items: [historyDocument] },
       });
-      userProfileService.bulkGet.mockResolvedValue([
-        {
-          uid: 'profile-1',
-          enabled: true,
-          user: { username: 'test-user', full_name: 'Test User' },
-          data: {},
-        },
-      ]);
 
       const result = await getHistoryForWorkflow(deps, {
         workflowId: 'wf-1',
         spaceId: 'default',
       });
 
-      expect(userProfileService.bulkGet).toHaveBeenCalledWith({ uids: new Set(['profile-1']) });
       expect(result.items[0].user).toEqual({ profileId: 'profile-1', name: 'Test User' });
     });
 
-    it('falls back to the raw username when the user profile cannot be resolved', async () => {
+    it('falls back to the raw username when no profile display name was resolved', async () => {
       const historyDocument = {
         ...createHistoryDocument('event-1', 2),
         user: { id: 'profile-1', name: 'test-user' },
       };
-      const { deps, userProfileService } = createDeps({
+      const { deps } = createDeps({
         historyResult: { total: 1, items: [historyDocument] },
       });
-      userProfileService.bulkGet.mockResolvedValue([]);
 
       const result = await getHistoryForWorkflow(deps, {
         workflowId: 'wf-1',
@@ -310,20 +294,6 @@ describe('get_workflow_change_history', () => {
       });
 
       expect(result.items[0].user).toEqual({ profileId: 'profile-1', name: 'test-user' });
-    });
-
-    it('does not call bulkGet when no history items carry a profile id', async () => {
-      const historyDocument = createHistoryDocument('event-1', 2);
-      const { deps, userProfileService } = createDeps({
-        historyResult: { total: 1, items: [historyDocument] },
-      });
-
-      await getHistoryForWorkflow(deps, {
-        workflowId: 'wf-1',
-        spaceId: 'default',
-      });
-
-      expect(userProfileService.bulkGet).not.toHaveBeenCalled();
     });
 
     it('returns empty list when no history exists', async () => {

@@ -7,7 +7,11 @@
 
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
-import { fetchClassicAlertsAsEpisodes } from './fetch_classic_episodes';
+import type { AlertEpisode } from '../../queries/episodes_query';
+import {
+  enrichClassicEpisodesWithSnoozeState,
+  fetchClassicAlertsAsEpisodes,
+} from './fetch_classic_episodes';
 import { CLASSIC_ALERT_EPISODE_SOURCE_FIELDS } from '../utils/map_alert';
 
 const mockHttp = httpServiceMock.createStartContract();
@@ -204,5 +208,31 @@ describe('fetchClassicAlertsAsEpisodes', () => {
     const episodes = await callFetch();
     expect(episodes[0].snoozed_until).toBe(expiresAt);
     expect(episodes[0].is_muted).toBe(true);
+  });
+});
+
+describe('enrichClassicEpisodesWithSnoozeState', () => {
+  const episode = { 'rule.id': 'rule-1' } as AlertEpisode;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('rethrows an aborted snooze lookup', async () => {
+    const abortError = new Error('The user aborted a request.');
+    abortError.name = 'AbortError';
+    mockHttp.post.mockRejectedValue(abortError);
+
+    await expect(enrichClassicEpisodesWithSnoozeState([episode], mockHttp)).rejects.toBe(
+      abortError
+    );
+  });
+
+  it('returns the episodes unchanged when the snooze lookup fails', async () => {
+    mockHttp.post.mockRejectedValue(new Error('boom'));
+
+    await expect(enrichClassicEpisodesWithSnoozeState([episode], mockHttp)).resolves.toEqual([
+      episode,
+    ]);
   });
 });

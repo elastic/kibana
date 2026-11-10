@@ -90,5 +90,69 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(nonMatchingEnvironment.body).to.empty();
       });
     });
+
+    describe('when data has both kubernetes fields and a container id', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await generateData({
+          apmSynthtraceEsClient,
+          start,
+          end,
+          containerFields: { 'kubernetes.pod.uid': 'test', 'container.id': 'abc123' },
+        });
+      });
+
+      after(() => apmSynthtraceEsClient.clean());
+
+      it('returns Kubernetes as container type', async () => {
+        const { status, body } = await callApi();
+
+        expect(status).to.be(200);
+        expect(body.containerType).to.be('Kubernetes');
+      });
+    });
+
+    describe('when data has a container id and no kubernetes fields', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await generateData({
+          apmSynthtraceEsClient,
+          start,
+          end,
+          containerFields: { 'container.id': 'abc123' },
+        });
+      });
+
+      after(() => apmSynthtraceEsClient.clean());
+
+      it('returns Docker as container type', async () => {
+        const { status, body } = await callApi();
+
+        expect(status).to.be(200);
+        expect(body.containerType).to.be('Docker');
+      });
+    });
+
+    describe('when data has neither container nor kubernetes fields', () => {
+      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+      before(async () => {
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await generateData({ apmSynthtraceEsClient, start, end, containerFields: {} });
+      });
+
+      after(() => apmSynthtraceEsClient.clean());
+
+      it('does not return a container type', async () => {
+        const { status, body } = await callApi();
+
+        expect(status).to.be(200);
+        expect(body.containerType).to.be(undefined);
+      });
+    });
   });
 }

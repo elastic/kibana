@@ -6,7 +6,7 @@ on:
       - main
       - '[0-9]+.[0-9]+'
     paths:
-      - 'oas_docs/output/kibana.yaml'
+      - 'oas_docs/output/kibana_full.yaml'
 
 concurrency:
   group: openapi-publish-stateful-${{ github.ref }}
@@ -25,9 +25,9 @@ jobs:
 
       - uses: elastic/docs-actions/openapi/lint@v1
         with:
-          spec-path: oas_docs/output/kibana.yaml
+          spec-path: oas_docs/output/kibana_full.yaml
 
       - uses: elastic/docs-actions/openapi/upload@v1
         with:
-          spec-path: oas_docs/output/kibana.yaml
+          spec-path: oas_docs/output/kibana_full.yaml
           spec-name: kibana

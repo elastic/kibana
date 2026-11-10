@@ -10,6 +10,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import { type ExecutionStatus, type ExecutionType, isInProgressStatus } from '@kbn/workflows';
 import { WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useWorkflowsApi, useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -28,13 +29,8 @@ export interface ExecutionListFiltersQueryParams {
   statuses: ExecutionStatus[];
   executionTypes: ExecutionType[];
   executedBy: string[];
+  runName?: string;
 }
-
-const DEFAULT_FILTERS: ExecutionListFiltersQueryParams = {
-  statuses: [],
-  executionTypes: [],
-  executedBy: [],
-};
 
 interface WorkflowExecutionListProps {
   workflowId: string | null;
@@ -45,8 +41,10 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
   const api = useWorkflowsApi();
   const telemetry = useTelemetry();
   const showExecutor = useUiSetting<boolean>(WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID, true);
-  const [filters, setFilters] = useState<ExecutionListFiltersQueryParams>(DEFAULT_FILTERS);
   const [isCancelInProgress, setIsCancelInProgress] = useState(false);
+  const { selectedExecutionId, lastViewedExecutionId, executionListFilters, updateUrlState } =
+    useWorkflowUrlState();
+  const runName = useDebouncedValue(executionListFilters.runName, 200);
 
   const { canCancelWorkflowExecution } = useWorkflowsCapabilities();
 
@@ -60,9 +58,10 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     hasNextPage,
   } = useWorkflowExecutions({
     workflowId,
-    statuses: filters.statuses,
-    executionTypes: filters.executionTypes,
-    executedBy: filters.executedBy,
+    statuses: executionListFilters.statuses,
+    executionTypes: executionListFilters.executionTypes,
+    executedBy: executionListFilters.executedBy,
+    runName,
   });
 
   const workflowExecutionsRef = useRef(workflowExecutions);
@@ -86,17 +85,28 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
     pollKey: workflowId,
   });
 
-  const { selectedExecutionId, updateUrlState } = useWorkflowUrlState();
-  const [lastViewedExecutionId, setLastViewedExecutionId] = useState<string | null>(null);
+  const setFilters = useCallback(
+    (next: ExecutionListFiltersQueryParams) => {
+      updateUrlState({
+        executionStatuses: next.statuses,
+        executionTypes: next.executionTypes,
+        executedBy: next.executedBy,
+        runName: next.runName || undefined,
+      });
+    },
+    [updateUrlState]
+  );
 
   const handleViewWorkflowExecution = useCallback(
     (executionId: string) => {
-      setLastViewedExecutionId(executionId);
       // replace: false so Back returns to the draft. updateUrlState replaces by default.
+      // lastViewed stays in the URL after the detail closes, so the row is still highlighted
+      // when the list mounts again.
       updateUrlState(
         {
           tab: 'executions',
           executionId,
+          lastViewedExecutionId: executionId,
           stepExecutionId: undefined,
           stepId: undefined,
         },
@@ -153,11 +163,11 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
       executions={workflowExecutions ?? null}
       onExecutionClick={handleViewWorkflowExecution}
       selectedId={selectedExecutionId ?? null}
-      lastViewedId={lastViewedExecutionId}
+      lastViewedId={lastViewedExecutionId ?? null}
       isInitialLoading={isLoadingWorkflowExecutions}
       isLoadingMore={isLoadingMoreWorkflowExecutions}
       error={error as Error | null}
-      filters={filters}
+      filters={executionListFilters}
       onFiltersChange={setFilters}
       setPaginationObserver={setPaginationObserver}
       showExecutor={showExecutor}

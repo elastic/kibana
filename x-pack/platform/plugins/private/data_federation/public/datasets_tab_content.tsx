@@ -16,6 +16,7 @@ import { DatasetsTable, type DataSetListRow } from './datasets_table';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
+import { UI_COUNTER_EVENTS } from './ui_counters';
 
 export interface DatasetsTabContentProps {
   dataSources: DataSource[];
@@ -29,7 +30,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
   loadDataSets,
 }) => {
   const {
-    services: { datasetsClient, toasts },
+    services: { datasetsClient, toasts, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
 
   const [selectedDataSets, setSelectedDataSets] = useState<DataSetListRow[]>([]);
@@ -97,6 +98,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     setDeleteDataSetError(null);
     try {
       await datasetsClient.delete(pendingDeleteDataSet.name);
+      reportUiCounter?.(UI_COUNTER_EVENTS.datasetDelete);
       setSelectedDataSets([]);
       setPendingDeleteDataSet(null);
       void refreshDataSets();
@@ -110,7 +112,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     } finally {
       setIsDeletingDataSet(false);
     }
-  }, [datasetsClient, pendingDeleteDataSet, refreshDataSets, toasts]);
+  }, [datasetsClient, pendingDeleteDataSet, refreshDataSets, reportUiCounter, toasts]);
 
   const confirmDeleteDataSets = useCallback(async () => {
     if (!pendingDeleteDataSets || pendingDeleteDataSets.length === 0) {
@@ -121,6 +123,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     setDeleteDataSetsError(null);
     try {
       await datasetsClient.delete(pendingDeleteDataSets.map((item) => item.name));
+      reportUiCounter?.(UI_COUNTER_EVENTS.datasetDelete, pendingDeleteDataSets.length);
       setSelectedDataSets([]);
       setPendingDeleteDataSets(null);
       void refreshDataSets();
@@ -134,7 +137,7 @@ export const DatasetsTabContent: FunctionComponent<DatasetsTabContentProps> = ({
     } finally {
       setIsDeletingDataSets(false);
     }
-  }, [datasetsClient, pendingDeleteDataSets, refreshDataSets, toasts]);
+  }, [datasetsClient, pendingDeleteDataSets, refreshDataSets, reportUiCounter, toasts]);
 
   return (
     <>

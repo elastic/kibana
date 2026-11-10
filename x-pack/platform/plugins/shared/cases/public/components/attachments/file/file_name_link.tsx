@@ -11,21 +11,22 @@ import { EuiLink } from '@elastic/eui';
 
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import * as i18n from './translations';
-import { isImage } from './utils';
+import { getFileDisplayName, isImage } from './utils';
 
 interface FileNameLinkProps {
   file: Pick<FileJSON, 'name' | 'extension' | 'mimeType'>;
   showPreview: () => void;
+  canPreview?: boolean;
 }
 
-const FileNameLinkComponent: React.FC<FileNameLinkProps> = ({ file, showPreview }) => {
-  let fileName = file.name;
+const FileNameLinkComponent: React.FC<FileNameLinkProps> = ({
+  file,
+  showPreview,
+  canPreview = true,
+}) => {
+  const fileName = getFileDisplayName(file);
 
-  if (typeof file.extension !== 'undefined') {
-    fileName += `.${file.extension}`;
-  }
-
-  if (isImage(file)) {
+  if (canPreview && isImage(file)) {
     return (
       <EuiLink onClick={showPreview} data-test-subj="cases-files-name-link">
         {fileName}

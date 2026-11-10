@@ -15,6 +15,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/app-header",
     "@kbn/config-schema",
     "@kbn/management-plugin",
     "@kbn/security-plugin",
@@ -58,5 +59,6 @@
     "@kbn/workflows-management-plugin",
     "@kbn/navigation-plugin",
     "@kbn/scout-security",
+    "@kbn/deeplinks-security",
   ]
 }

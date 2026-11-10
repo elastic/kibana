@@ -175,28 +175,5 @@ export const policySettingsReducer: ImmutableReducer<PolicyDetailsState, AppActi
     }
   }
 
-  if (action.type === 'userChangedCredentialHardening') {
-    if (state.policyItem) {
-      const policyConfig = fullPolicy(state);
-
-      return {
-        ...state,
-        policyItem: updatePolicyConfigInPolicyData(state.policyItem, {
-          ...policyConfig,
-          windows: {
-            ...policyConfig.windows,
-            attack_surface_reduction: {
-              credential_hardening: {
-                enabled: action.payload.enabled,
-              },
-            },
-          },
-        }),
-      };
-    } else {
-      return state;
-    }
-  }
-
   return state;
 };

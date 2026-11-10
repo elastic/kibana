@@ -217,6 +217,7 @@ Object {
       "query": "host.name: *",
     },
     "visualization": Object {
+      "areaFill": "solid",
       "axisTitlesVisibilitySettings": Object {
         "x": false,
         "yLeft": false,

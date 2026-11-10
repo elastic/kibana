@@ -7,6 +7,7 @@
 
 import { EuiBadge, EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { PolicyMatcher } from '@kbn/alerting-v2-schemas';
+import { normalizeMatcher } from '@kbn/alerting-v2-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -38,14 +39,9 @@ export const POLICY_SCOPE_SUMMARIES: Record<PolicyScopeKind, string> = {
   }),
 };
 
-const normalizeMatcher = (matcher?: PolicyMatcher | null) => ({
-  tags: matcher?.tags?.length ? matcher.tags : null,
-  expression: matcher?.expression?.trim() || null,
-});
-
 /** Classifies a policy matcher by whether routing tags, the matching query, or both narrow down its alerts. */
 export const getPolicyScopeKind = (matcher?: PolicyMatcher | null): PolicyScopeKind => {
-  const { tags, expression } = normalizeMatcher(matcher);
+  const { tags, expression } = normalizeMatcher(matcher) ?? {};
   if (tags) {
     return expression ? 'tagsAndExpression' : 'tagsOnly';
   }
@@ -57,7 +53,7 @@ interface Props {
 }
 
 export const PolicyScopeSummary = ({ matcher }: Props) => {
-  const { tags: matcherTags, expression: matcherExpression } = normalizeMatcher(matcher);
+  const { tags: matcherTags, expression: matcherExpression } = normalizeMatcher(matcher) ?? {};
 
   return (
     <>

@@ -18,6 +18,7 @@ on:
 
 resources:
   - prefetch-pr-context.yml
+  - prefetch-same-team-fix-prs.yml
 
 permissions:
   contents: read
@@ -77,6 +78,7 @@ concurrency:
 env:
   PR_NUMBER: &pr_number ${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   PR_CONTEXT_ARTIFACT_NAME: &pr_context_artifact_name prefetched-pr-context-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
+  SAME_TEAM_FIX_PRS_ARTIFACT_NAME: &same_team_fix_prs_artifact_name same-team-fix-prs-${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}
   # Lets the agent omit `-o elastic` on every `bk` invocation.
   BUILDKITE_ORGANIZATION_SLUG: elastic
 
@@ -90,6 +92,7 @@ engine:
   model: opus
   max-turns: 120
   env:
+    BUILDKITE_API_TOKEN: ${{ steps.buildkite_auth.outputs.token }}
     ANTHROPIC_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     ANTHROPIC_BASE_URL: https://openrouter.ai/api
     ANTHROPIC_DEFAULT_OPUS_MODEL: anthropic/claude-opus-5
@@ -122,6 +125,8 @@ sandbox:
 # Check out the PR head by number (available for every trigger) so the
 # `push_to_pull_request_branch` handler's own branch fetch is a fast no-op
 # instead of an unbounded fetch that hangs on a repo Kibana's size.
+# This replaces gh-aw's base-branch checkout, so the agent job's first custom
+# step below restores the agent config folders from the base-branch snapshot.
 checkout:
   ref: refs/pull/${{ github.event.pull_request.number || github.event.issue.number || github.event.inputs.pr_number }}/head
   fetch-depth: 2
@@ -175,12 +180,37 @@ jobs:
       pr_number: *pr_number
       repo: ${{ github.repository }}
       artifact_name: *pr_context_artifact_name
+  prefetch_same_team_fix_prs:
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    uses: ./.github/workflows/prefetch-same-team-fix-prs.yml
+    with:
+      pr_number: *pr_number
+      artifact_name: *same_team_fix_prs_artifact_name
 
 steps:
+  # The workspace holds the PR head, so Claude Code would otherwise load the PR's
+  # `.claude/settings.json` hooks, skills and instruction files. gh-aw only emits
+  # this step for its own PR checkout; mirror it here using the snapshot the
+  # activation job saved from the base branch (lists must match the save step).
+  - name: Restore agent config folders from base branch
+    env:
+      GH_AW_AGENT_FOLDERS: '.agents .claude .github'
+      GH_AW_AGENT_FILES: 'AGENTS.md CLAUDE.md'
+    run: bash "${RUNNER_TEMP}/gh-aw/actions/restore_base_github_folders.sh"
   - name: Download prefetched PR context
     uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
     with:
       name: ${{ env.PR_CONTEXT_ARTIFACT_NAME }}
+      path: /tmp/gh-aw/agent
+  - name: Download same-team fix PRs
+    # Absent when duplicate detection failed; the agent treats a missing file as "no candidates".
+    continue-on-error: true
+    uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+    with:
+      name: ${{ env.SAME_TEAM_FIX_PRS_ARTIFACT_NAME }}
       path: /tmp/gh-aw/agent
   - name: Precompute flaky run count
     env:
@@ -203,22 +233,14 @@ steps:
       fs.writeFileSync(path.join(dir, 'flaky-run-count.json'), `${JSON.stringify({ triggeredByBot })}\n`);
       console.log(`Flaky runs already triggered by kibanamachine: ${triggeredByBot}`);
       NODE
-  - name: Detect duplicate fix PRs
-    # Shortlist the `flaky-test-fixer` PRs whose `failed-test` issue is owned by the same
-    # team as this PR, so the agent triages a short, relevant set instead of blind-searching.
-    # Non-fatal: a detection failure must not block verification — the agent treats a missing
-    # file as "no candidates".
-    uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
-    with:
-      script: |
-        const { writeDuplicateCandidates } = require('./.github/scripts/find_duplicate_fix_prs.js');
-        try {
-          await writeDuplicateCandidates({ github, core, prNumber: Number(process.env.PR_NUMBER) });
-        } catch (err) {
-          core.warning(`Duplicate detection failed: ${err.message}`);
-        }
 
 safe-outputs:
+  threat-detection:
+    engine:
+      id: claude
+      version: '2.1.165'
+      env:
+        BUILDKITE_API_TOKEN: ${{ '' }}
   activation-comments: false
   report-failure-as-issue: false
   add-comment:
@@ -409,7 +431,7 @@ You verify a flaky test fix PR by running the flaky test runner against it, revi
 
 ## Prefetched PR context
 
-A prior job has already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer reading these files over live GitHub API/tool calls — they are the deterministic source of truth for this run:
+Preparation jobs have already fetched this PR's data into `/tmp/gh-aw/agent/`. Prefer reading these files over live GitHub API/tool calls — they are the deterministic source of truth for this run:
 
 - `pr-metadata.json` — title, body, labels, head/base branch, and cross-referenced PRs/issues.
 - `pr-diff.txt` — unified diff of every changed file.

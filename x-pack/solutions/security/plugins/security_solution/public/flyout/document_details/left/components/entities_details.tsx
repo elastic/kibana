@@ -58,11 +58,11 @@ export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
 
   const euidApi = useEntityStoreEuidApi();
   const userEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
-    'user',
+    euidApi.getBuiltInEntityDefinition('user'),
     dataAsNestedObject
   ) as IdentityFields;
   const hostEntityIdentifiers = euidApi?.euid.getEntityIdentifiersFromDocument(
-    'host',
+    euidApi.getBuiltInEntityDefinition('host'),
     dataAsNestedObject
   ) as IdentityFields;
 
@@ -77,7 +77,10 @@ export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
       ? ({ 'user.name': resolvedUserName } as IdentityFields)
       : undefined;
 
-  const userEntityId = euidApi?.euid.getEuidFromObject('user', dataAsNestedObject);
+  const userEntityId = euidApi?.euid.getEuidFromObject(
+    euidApi.getBuiltInEntityDefinition('user'),
+    dataAsNestedObject
+  );
   const userEntityFromStore = useEntityFromStore({
     entityId: userEntityId,
     identityFields: userEntityIdentifiers ?? legacyUserIdentityForStore,
@@ -100,7 +103,10 @@ export const EntitiesDetails: React.FC<EntitySectionOverrideBuilders> = ({
       ? ({ 'host.name': resolvedHostNameFromDocument } as IdentityFields)
       : undefined;
 
-  const hostEntityId = euidApi?.euid.getEuidFromObject('host', dataAsNestedObject);
+  const hostEntityId = euidApi?.euid.getEuidFromObject(
+    euidApi.getBuiltInEntityDefinition('host'),
+    dataAsNestedObject
+  );
   const hostEntityFromStore = useEntityFromStore({
     entityId: hostEntityId,
     identityFields: hostEntityIdentifiers ?? legacyHostIdentityForStore,

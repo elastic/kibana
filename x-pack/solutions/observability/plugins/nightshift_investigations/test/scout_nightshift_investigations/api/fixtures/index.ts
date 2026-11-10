@@ -12,25 +12,51 @@ export {
   INVESTIGATIONS_WRITE_ROLE,
   NO_AGENT_BUILDER_ROLE,
 } from './constants';
+export { ensureInvestigation, uniqueId } from './helpers';
 export {
-  seedInvestigation,
-  deleteInvestigation,
-  getInvestigation,
-  listInvestigations,
-  updateInvestigation,
-  ensureInvestigation,
-  uniqueId,
-  seedTimeWindow,
-} from './helpers';
-export type { SeedTimeWindow } from './helpers';
+  cancelRunsOf,
+  cancelWorkflowRuns,
+  createAlertStartWorkflow,
+  deleteWorkflow,
+  findInvestigationBySubject,
+  findOrCreateSlackThread,
+  getSharedInvestigation,
+  listSharedInvestigations,
+  makeAlertSnapshot,
+  runAlertStartWorkflow,
+  setInvestigationStatus,
+  startInvestigation,
+  startUnresponsiveLlm,
+  waitForInvestigation,
+  waitForInvestigationInProgress,
+} from './write_path';
+export { POLL_TIMEOUT_MS } from './write_path';
+export type {
+  SharedInvestigation,
+  SharedInvestigationSubject,
+  WorkflowExecution,
+} from './write_path';
 export {
+  cancelScoringRuns,
+  getStepOutput,
+  listInvestigationRuns,
+  listScoringRuns,
+  startAnsweringLlm,
+  waitForFinishedRuns,
+} from './online_evals';
+export {
+  NIGHTSHIFT_MANAGE_ENGINES_ROLE,
   NIGHTSHIFT_MANAGE_ROLE,
   NIGHTSHIFT_READ_ROLE,
   NIGHTSHIFT_NO_ACCESS_ROLE,
-  getSandboxSecrets,
-  putSandboxSecrets,
-  replaceSandboxSecrets,
-} from './sandbox_secrets';
+} from './roles';
+export { ensureNightshiftServiceAccountRoles } from '@kbn/nightshift-shared';
+export {
+  getNightshiftServiceAccountStatus,
+  setUpNightshiftServiceAccount,
+  SERVICE_ACCOUNT_PATH,
+} from './service_account';
+export { disableInvestigationRunLimits } from './run_quotas';
 export { getCustomContext, putCustomContext, replaceCustomContext } from './custom_context';
 export {
   archiveMemoryPage,

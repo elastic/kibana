@@ -1,0 +1,36 @@
+{
+  "10.1.0": [
+    {
+      "date": "2026-09-03",
+      "group": "detection",
+      "count": 12
+    },
+    {
+      "date": "2026-09-03",
+      "group": "investigation",
+      "count": 2
+    },
+    {
+      "date": "2026-09-04",
+      "group": "ki_extraction",
+      "count": 0
+    }
+  ],
+  "10.2.0": [
+    {
+      "date": "2026-09-03",
+      "group": "detection",
+      "count": 12
+    },
+    {
+      "date": "2026-09-03",
+      "group": "investigation",
+      "count": 2
+    },
+    {
+      "date": "2026-09-04",
+      "group": "ki_extraction",
+      "count": 0
+    }
+  ]
+}

@@ -7,6 +7,31 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ALERT_TIMELINE_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.title',
+  { defaultMessage: 'Alert series' }
+);
+
+export const ALERT_TIMELINE_EMPTY_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.emptyTitle',
+  { defaultMessage: 'No alert activity' }
+);
+
+export const ALERT_TIMELINE_EMPTY_BODY = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.emptyBody',
+  { defaultMessage: 'Alert activity appears here when episode events are available.' }
+);
+
+export const ALERT_TIMELINE_LIFECYCLE_LANE_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.lifecycleLaneLabel',
+  { defaultMessage: 'Lifecycle' }
+);
+
+export const ALERT_TIMELINE_SEVERITY_LANE_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.alertTimeline.severityLaneLabel',
+  { defaultMessage: 'Severity' }
+);
+
 /** --- Overview list --- */
 export const OVERVIEW_LIST_SECTION_LOAD_ERROR = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.overviewListSection.loadError',
@@ -68,7 +93,7 @@ export const FLYOUT_TAB_TIMELINE = i18n.translate(
 export const FLYOUT_TAB_METADATA = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.tab.metadata',
   {
-    defaultMessage: 'Metadata',
+    defaultMessage: 'Data container',
   }
 );
 
@@ -124,6 +149,13 @@ export const FLYOUT_INFO_BLOCK_ASSIGNEE = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.assignee',
   {
     defaultMessage: 'Assignee',
+  }
+);
+
+export const FLYOUT_INFO_BLOCK_SOURCE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.details.flyout.infoBlock.source',
+  {
+    defaultMessage: 'Source',
   }
 );
 
@@ -363,7 +395,7 @@ export const METADATA_LIST_TAGS_LABEL = i18n.translate(
 export const METADATA_LIST_SOURCE_URL_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.metadataList.sourceUrlLabel',
   {
-    defaultMessage: 'Source',
+    defaultMessage: 'Alert URL',
   }
 );
 

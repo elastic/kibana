@@ -41,6 +41,7 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
   const esClientMock = {
     bulk: jest.fn(),
+    mget: jest.fn(),
     search: jest.fn(),
   } as unknown as ElasticsearchClient;
 
@@ -59,6 +60,8 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // by default no document is indexed yet
+    esClientMock.mget = jest.fn().mockResolvedValue({ docs: [] });
     client = new RuleMigrationsDataIntegrationsClient(
       getIndexName,
       currentUser,
@@ -227,6 +230,128 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
       await expect(client.populate()).rejects.toThrow('test error');
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('test error'));
     });
+
+    describe('package versions', () => {
+      const bulkedDoc = () => (esClientMock.bulk as jest.Mock).mock.calls[0][0].operations[1].doc;
+
+      const storedVersions = (versions: Record<string, string>) => {
+        esClientMock.mget = jest.fn().mockResolvedValue({
+          docs: Object.entries(versions).map(([id, version]) => ({
+            _index: 'mock-index',
+            _id: id,
+            found: true,
+            _source: { version },
+          })),
+        });
+      };
+
+      beforeEach(() => {
+        esClientMock.bulk = jest.fn().mockResolvedValue({ errors: false, items: [] });
+      });
+
+      afterEach(() => {
+        // jest.clearAllMocks() does not reset implementations set by a test
+        mockPackageService.asInternalUser.getPackage.mockReset();
+      });
+
+      it('should index each integration with its package version', async () => {
+        mockGetPackages.mockResolvedValue([createMockPackage({ version: '1.2.0' })]);
+        await client.populate();
+        expect(bulkedDoc().version).toBe('1.2.0');
+      });
+
+      it('should still index the other integrations when one package archive cannot be read', async () => {
+        mockGetPackages.mockResolvedValue([
+          createMockPackage({ name: 'broken' }),
+          createMockPackage({ name: 'healthy' }),
+        ]);
+        mockPackageService.asInternalUser.getPackage.mockImplementation(async (name: string) => {
+          if (name === 'broken') {
+            throw new Error('registry down');
+          }
+          return undefined as never;
+        });
+        await client.populate();
+
+        const indexedIds = (esClientMock.bulk as jest.Mock).mock.calls[0][0].operations
+          .filter((operation: { update?: unknown }) => operation.update)
+          .map((operation: { update: { _id: string } }) => operation.update._id);
+        expect(indexedIds).toEqual(['healthy']);
+      });
+
+      it('should still index an integration without fields metadata when its fields metadata cannot be read', async () => {
+        mockGetPackages.mockResolvedValue([createMockPackage({ name: 'broken' })]);
+        mockGetFieldMetadata.mockRejectedValueOnce(new Error('metadata down'));
+        await client.populate();
+
+        expect(bulkedDoc().fields_metadata).toBeUndefined();
+      });
+
+      it('should index the other integrations when the fields metadata of one package cannot be read', async () => {
+        mockGetPackages.mockResolvedValue([
+          createMockPackage({ name: 'broken' }),
+          createMockPackage({ name: 'healthy' }),
+        ]);
+        mockGetFieldMetadata.mockImplementation(
+          async ({ packageName }: { packageName: string }) => {
+            if (packageName === 'broken') {
+              throw new Error('metadata down');
+            }
+            return undefined as never;
+          }
+        );
+        await client.populate();
+
+        const indexedIds = (esClientMock.bulk as jest.Mock).mock.calls[0][0].operations
+          .filter((operation: { update?: unknown }) => operation.update)
+          .map((operation: { update: { _id: string } }) => operation.update._id);
+        expect(indexedIds).toEqual(['broken', 'healthy']);
+      });
+
+      it('should warn which package has no fields metadata when it cannot be read', async () => {
+        mockGetPackages.mockResolvedValue([createMockPackage({ name: 'broken' })]);
+        mockGetFieldMetadata.mockRejectedValueOnce(new Error('metadata down'));
+        await client.populate();
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Failed to fetch fields metadata for package broken: metadata down'
+        );
+      });
+
+      it('should not index any integration when every package version is unchanged', async () => {
+        mockGetPackages.mockResolvedValue([createMockPackage({ version: '1.0.0' })]);
+        storedVersions({ 'mock-package': '1.0.0' });
+        await client.populate();
+        expect(esClientMock.bulk).not.toHaveBeenCalled();
+      });
+
+      it('should not read the package archive of unchanged packages', async () => {
+        mockGetPackages.mockResolvedValue([createMockPackage({ version: '1.0.0' })]);
+        storedVersions({ 'mock-package': '1.0.0' });
+        await client.populate();
+        expect(mockPackageService.asInternalUser.getPackage).not.toHaveBeenCalled();
+      });
+
+      it('should not fetch fields metadata of unchanged packages', async () => {
+        mockGetPackages.mockResolvedValue([createMockPackage({ version: '1.0.0' })]);
+        storedVersions({ 'mock-package': '1.0.0' });
+        await client.populate();
+        expect(mockGetFieldMetadata).not.toHaveBeenCalled();
+      });
+
+      it('should only index the integrations whose package version changed', async () => {
+        mockGetPackages.mockResolvedValue([
+          createMockPackage({ name: 'same', version: '1.0.0' }),
+          createMockPackage({ name: 'changed', version: '2.0.0' }),
+        ]);
+        storedVersions({ same: '1.0.0', changed: '1.0.0' });
+        await client.populate();
+
+        const indexedIds = (esClientMock.bulk as jest.Mock).mock.calls[0][0].operations
+          .filter((operation: { update?: unknown }) => operation.update)
+          .map((operation: { update: { _id: string } }) => operation.update._id);
+        expect(indexedIds).toEqual(['changed']);
+      });
+    });
   });
 
   describe('fetchPackageKnowledgeBase (via populate)', () => {
@@ -347,13 +472,19 @@ describe('RuleMigrationsDataIntegrationsClient', () => {
       expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('token limit'));
     });
 
-    it('should return empty string when getPackage throws', async () => {
+    it('should not index an integration whose package archive cannot be read', async () => {
       mockGetPackage.mockRejectedValue(new Error('archive not found'));
 
       await client.populate();
 
-      const kb = getKnowledgeBaseFromMockEsCall();
-      expect(kb).toBe('');
+      expect(esClientMock.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should warn that the integration will be retried when its package archive cannot be read', async () => {
+      mockGetPackage.mockRejectedValue(new Error('archive not found'));
+
+      await client.populate();
+
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Failed to fetch package archive')
       );

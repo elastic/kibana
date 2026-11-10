@@ -10,6 +10,11 @@ import type { Indices } from '@elastic/elasticsearch/lib/api/types';
 
 import type { SecuritySolutionRequestHandlerContext } from '../../../../../types';
 import type { SetAlertTagsRequestBody } from '../../../../../../common/api/detection_engine/alert_tags';
+import {
+  auditAlertUpdateFailure,
+  auditAlertUpdateIntent,
+  auditAlertUpdateResponseFailure,
+} from './audit_alert_updates';
 
 interface UpdateAlertsTagsArgs {
   context: SecuritySolutionRequestHandlerContext;
@@ -24,18 +29,33 @@ interface UpdateAlertsTagsArgs {
  */
 export const updateAlertsTags = async ({ context, index, ids, tags }: UpdateAlertsTagsArgs) => {
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+  const auditLogger = (await context.securitySolution).getAuditLogger();
+  const target = { ids };
 
-  return esClient.updateByQuery({
-    index,
-    refresh: true,
-    script: getUpdateAlertTagsScript(tags),
-    query: {
-      bool: {
-        filter: { terms: { _id: ids } },
+  auditAlertUpdateIntent(auditLogger, target);
+
+  try {
+    const response = await esClient.updateByQuery({
+      index,
+      refresh: true,
+      script: getUpdateAlertTagsScript(tags),
+      query: {
+        bool: {
+          filter: { terms: { _id: ids } },
+        },
       },
-    },
-    ignore_unavailable: true,
-  });
+      ignore_unavailable: true,
+    });
+    auditAlertUpdateResponseFailure(auditLogger, target, response);
+    return response;
+  } catch (error) {
+    auditAlertUpdateFailure(
+      auditLogger,
+      target,
+      error instanceof Error ? error : new Error(String(error))
+    );
+    throw error;
+  }
 };
 
 export const getUpdateAlertTagsScript = (tags: SetAlertTagsRequestBody['tags']) => {

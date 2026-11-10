@@ -11,6 +11,7 @@ import { spaceTest, testData } from '../fixtures';
 spaceTest.describe('Graph - blocklist', { tag: testData.GRAPH_UI_TAGS }, () => {
   let dataViewId: string | undefined;
   const dataViewName = `graph-blocklist-${Date.now()}`;
+  const workspaceName = `graph blocklist ${Date.now()}`;
 
   spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
     const { data } = await apiServices.dataViews.create({
@@ -30,10 +31,11 @@ spaceTest.describe('Graph - blocklist', { tag: testData.GRAPH_UI_TAGS }, () => {
     if (dataViewId) {
       await apiServices.dataViews.delete(dataViewId, scoutSpace.id);
     }
+    await scoutSpace.savedObjects.cleanStandardList();
   });
 
   spaceTest(
-    'shows blocklisted nodes in settings and allows unblocking them',
+    'persists a blocklisted node across save and reopen',
     async ({ page, pageObjects: { graph } }) => {
       await graph.createWorkspaceWithQuery({
         dataViewTitle: testData.SECREPO_INDEX,
@@ -46,8 +48,15 @@ spaceTest.describe('Graph - blocklist', { tag: testData.GRAPH_UI_TAGS }, () => {
       await graph.blockSelection();
       await expect(graph.node('admin')).toHaveCount(0);
 
+      await graph.saveWorkspaceAs(workspaceName);
+      await graph.goToListingViaBreadcrumb();
+      await graph.waitForListing();
+      await graph.openWorkspace(workspaceName);
+      await graph.waitForWorkspace();
+
+      await expect(graph.node('admin')).toHaveCount(0);
       await graph.openHiddenList();
-      const settingsFlyout = page.testSubj.locator('graphSettingsFlyout');
+      const settingsFlyout = page.getByTestId('graphSettingsFlyout');
       await expect(settingsFlyout.getByText('admin', { exact: true })).toBeVisible();
       await graph.unblockAllNodes();
       await expect(settingsFlyout.getByText('admin', { exact: true })).toHaveCount(0);

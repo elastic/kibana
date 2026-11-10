@@ -62,6 +62,37 @@ export function CasesTableServiceProvider(
   const CASE_ROWS_SELECTOR =
     '[data-test-subj^="cases-table-row-"],[data-test-subj^="cases-list-item-clickable-"]';
 
+  const getCaseIdByRowIndex = async (index: number) => {
+    const actionButtons = await find.allByCssSelector(
+      '[data-test-subj^="case-action-popover-button-"]',
+      100
+    );
+
+    assertCaseExists(index, actionButtons.length);
+
+    const dataTestSubj = await actionButtons[index].getAttribute('data-test-subj');
+    if (dataTestSubj === null) {
+      throw new Error(`Cannot determine the id of case at index ${index}.`);
+    }
+
+    return dataTestSubj.replace('case-action-popover-button-', '');
+  };
+
+  const waitForMenuOptionToStopMoving = async (optionSubj: string) => {
+    let stableSamples = 0;
+    let previousPosition = await (await testSubjects.find(optionSubj)).getPosition();
+
+    await retry.waitFor(`menu option ${optionSubj} to stop animating`, async () => {
+      const currentPosition = await (await testSubjects.find(optionSubj)).getPosition();
+      stableSamples =
+        currentPosition.x === previousPosition.x && currentPosition.y === previousPosition.y
+          ? stableSamples + 1
+          : 0;
+      previousPosition = currentPosition;
+      return stableSamples >= 2;
+    });
+  };
+
   return {
     /**
      * Whether the card list view is currently rendered (as opposed to the table view which reuses `cases-table`).
@@ -332,6 +363,7 @@ export function CasesTableServiceProvider(
     },
 
     async changeStatus(status: CaseStatuses, index: number) {
+      const caseId = await getCaseIdByRowIndex(index);
       await this.openRowActions(index);
 
       await retry.waitFor('status panel exists', async () => {
@@ -343,12 +375,17 @@ export function CasesTableServiceProvider(
       await statusButton.click();
 
       await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
+      await waitForMenuOptionToStopMoving(`cases-bulk-action-status-${status}`);
       await testSubjects.click(`cases-bulk-action-status-${status}`);
       await header.waitUntilLoadingHasFinished();
       await this.waitForTableToFinishLoading();
+      await find.byCssSelector(
+        `[data-test-subj="cases-table-row-${caseId}"] [data-test-subj="case-status-badge-${status}"]`
+      );
     },
 
     async changeSeverity(severity: CaseSeverity, index: number) {
+      const caseId = await getCaseIdByRowIndex(index);
       await this.openRowActions(index);
 
       await retry.waitFor('severity panel exists', async () => {
@@ -362,10 +399,13 @@ export function CasesTableServiceProvider(
       await statusButton.click();
 
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
+      await waitForMenuOptionToStopMoving(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
       await header.waitUntilLoadingHasFinished();
       await this.waitForTableToFinishLoading();
-      await testSubjects.existOrFail(`case-severity-badge-${severity}`);
+      await find.byCssSelector(
+        `[data-test-subj="cases-table-row-${caseId}"] [data-test-subj="case-severity-badge-${severity}"]`
+      );
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {

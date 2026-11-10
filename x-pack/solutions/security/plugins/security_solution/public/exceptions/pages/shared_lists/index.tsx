@@ -8,21 +8,15 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPageHeader,
   EuiPagination,
   EuiPopover,
   EuiScreenReaderLive,
   EuiSpacer,
-  EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import styled from '@emotion/styled';
 
@@ -59,8 +53,7 @@ import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/co
 import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { EndpointExceptionsMovedCallout } from '../../components/endpoint_exceptions_moved_callout';
-
-export type Func = () => Promise<void>;
+import { SharedListsAppHeader } from '../../components/shared_lists_app_header/shared_lists_app_header';
 
 interface ReferenceModalState {
   contentText: string;
@@ -106,9 +99,8 @@ export const SharedLists = React.memo(() => {
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
   const {
-    services: { http, application, notifications, timelines },
+    services: { http, notifications },
   } = useKibana();
-  const { navigateToApp } = application;
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
 
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState(false);
@@ -472,18 +464,20 @@ export const SharedLists = React.memo(() => {
 
   const goToPage = (pageNumber: number) => setActivePage(pageNumber);
 
-  const [isCreatePopoverOpen, setIsCreatePopoverOpen] = useState(false);
   const [displayAddExceptionItemFlyout, setDisplayAddExceptionItemFlyout] = useState(false);
   const [displayCreateSharedListFlyout, setDisplayCreateSharedListFlyout] = useState(false);
 
-  const createButtonRef = useRef<HTMLButtonElement | null>(null);
+  const returnFocusRef = useRef<(() => void) | undefined>();
 
-  const onCreateButtonClick = () => setIsCreatePopoverOpen((isOpen) => !isOpen);
-  const onCloseCreatePopover = () => {
-    setDisplayAddExceptionItemFlyout(false);
-    setIsCreatePopoverOpen(false);
-  };
-  const onCreateExceptionListOpenClick = () => setDisplayCreateSharedListFlyout(true);
+  const onCreateExceptionListOpenClick = useCallback((returnFocus?: () => void) => {
+    returnFocusRef.current = returnFocus;
+    setDisplayCreateSharedListFlyout(true);
+  }, []);
+  const onCreateExceptionItemOpenClick = useCallback(
+    () => setDisplayAddExceptionItemFlyout(true),
+    []
+  );
+  const onImportOpenClick = useCallback(() => setDisplayImportListFlyout(true), []);
 
   const isReadOnly = canReadExceptions && !canEditExceptions;
 
@@ -501,97 +495,20 @@ export const SharedLists = React.memo(() => {
 
   return (
     <>
+      <SharedListsAppHeader
+        canCreate={canEditExceptions}
+        canImport={canEditExceptions || canWriteEndpointExceptions}
+        isLoading={loading}
+        lastUpdated={lastUpdated}
+        onCreateSharedList={onCreateExceptionListOpenClick}
+        onCreateExceptionItem={onCreateExceptionItemOpenClick}
+        onImport={onImportOpenClick}
+      />
+      <EuiSpacer size="m" />
       <EuiScreenReaderLive aria-live="assertive" aria-atomic="true" focusRegionOnTextChange>
         {screenReaderMessage}
       </EuiScreenReaderLive>
       <MissingDetectionsPrivilegesCallOut />
-      <EuiPageHeader
-        pageTitle={i18n.ALL_EXCEPTIONS}
-        description={
-          <EuiFlexGroup gutterSize="xs" direction="column">
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="none" direction="row">
-                <EuiFlexItem grow={false}>
-                  <EuiText>{i18n.ALL_EXCEPTIONS_SUBTITLE}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiToolTip content="go-to-rules" disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      iconType="external"
-                      aria-label="go-to-rules"
-                      color="primary"
-                      onClick={() =>
-                        navigateToApp('security', { openInNewTab: true, path: '/rules' })
-                      }
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              {timelines.getLastUpdated({
-                showUpdating: loading,
-                updatedAt: lastUpdated,
-              })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        rightSideItems={[
-          <EuiPopover
-            aria-label={i18n.CREATE_BUTTON}
-            data-test-subj="manageExceptionListCreateButton"
-            button={
-              canEditExceptions && (
-                <EuiButton
-                  buttonRef={(node: HTMLButtonElement | null) => {
-                    createButtonRef.current = node;
-                  }}
-                  iconType="chevronSingleDown"
-                  onClick={onCreateButtonClick}
-                >
-                  {i18n.CREATE_BUTTON}
-                </EuiButton>
-              )
-            }
-            isOpen={isCreatePopoverOpen}
-            closePopover={onCloseCreatePopover}
-          >
-            <EuiContextMenuPanel
-              items={[
-                <EuiContextMenuItem
-                  key={'createList'}
-                  data-test-subj="manageExceptionListCreateExceptionListButton"
-                  onClick={() => {
-                    onCloseCreatePopover();
-                    onCreateExceptionListOpenClick();
-                  }}
-                >
-                  {i18n.CREATE_SHARED_LIST_BUTTON}
-                </EuiContextMenuItem>,
-                <EuiContextMenuItem
-                  key={'createItem'}
-                  data-test-subj="manageExceptionListCreateExceptionButton"
-                  onClick={() => {
-                    onCloseCreatePopover();
-                    setDisplayAddExceptionItemFlyout(true);
-                  }}
-                >
-                  {i18n.CREATE_BUTTON_ITEM_BUTTON}
-                </EuiContextMenuItem>,
-              ]}
-            />
-          </EuiPopover>,
-          (canEditExceptions || canWriteEndpointExceptions) && (
-            <EuiButton
-              data-test-subj="importSharedExceptionList"
-              iconType={'download'}
-              onClick={() => setDisplayImportListFlyout(true)}
-            >
-              {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
-            </EuiButton>
-          ),
-        ]}
-      />
 
       {displayCreateSharedListFlyout && (
         <CreateSharedListFlyout
@@ -602,7 +519,7 @@ export const SharedLists = React.memo(() => {
           handleCloseFlyout={() => {
             setDisplayCreateSharedListFlyout(false);
             // Without requestAnimationFrame, the flyout's cleanup resets focus before we can move it to the button.
-            requestAnimationFrame(() => createButtonRef.current?.focus());
+            requestAnimationFrame(() => returnFocusRef.current?.());
           }}
         />
       )}
@@ -631,7 +548,6 @@ export const SharedLists = React.memo(() => {
         />
       )}
 
-      <EuiHorizontalRule />
       <div data-test-subj="allExceptionListsPanel">
         {isEndpointExceptionsMovedFFEnabled &&
           (endpointPerPolicyOptIn?.status === false ||
@@ -650,7 +566,7 @@ export const SharedLists = React.memo(() => {
             viewerStatus={viewerStatus}
             buttonText={i18n.CREATE_SHARED_LIST_BUTTON}
             body={i18n.NO_LISTS_BODY}
-            onEmptyButtonStateClick={onCreateExceptionListOpenClick}
+            onEmptyButtonStateClick={() => onCreateExceptionListOpenClick()}
           />
         ) : (
           <>
