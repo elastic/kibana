@@ -54,6 +54,11 @@ describe('runWatchdogWorker', () => {
           format: 'json',
           service: { node: { roles: ['ui'] }, version: '9.3.0', type: 'kibana' },
         },
+        profiling: {
+          startAfterMs: { starting: 30_000, running: 30_000 },
+          maxDurationMs: { starting: 10_000, running: 10_000 },
+          cooldownMs: { starting: 60_000, running: 60_000 },
+        },
         ...overrides,
       },
       { logger, nowUs: readClock, heapUsed: () => 1234 }

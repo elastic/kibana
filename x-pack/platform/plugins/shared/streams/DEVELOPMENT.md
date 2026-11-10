@@ -53,7 +53,7 @@ Settings marked UI-readonly can only be turned on through `uiSettings.overrides`
 
 ## Access via URL
 
-With the feature flags enabled you can then access V2 via `/app/streams/new-experience/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges").
+With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/default/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges").
 
 ## Privileges
 
@@ -75,7 +75,7 @@ With the feature flags enabled you can then access V2 via `/app/streams/new-expe
 - Granted per space, but the unit is shared, so V2 `all` in any space can edit it.
 - In Elasticsearch it is the application privilege `{ "application": "kibana-.kibana", "privileges": ["feature_streamsV2.all"], "resources": ["*"] }`. Use `space:<id>` for one space and `feature_streamsV2.read` for read.
 - The data stream stats routes (`/internal/streams/doc_counts/*`, `/internal/streams/storage_stats`) accept `read_stream` or `read_streams_v2`. Other legacy routes need `read_stream` / `manage_stream`.
-- V2 access means `streamsV2.show` plus `observability:streamsEnableCanvas` on in the space. It decides the nav entry and whether `/` redirects to `/new-experience/{tab}`.
+- V2 access means `streamsV2.show` plus `observability:streamsEnableCanvas` on in the space. It decides the nav entry and whether `/` redirects to `/v2/unit/default/map`.
 - Without `streamsV2.manage`, the Map and the Sources and Destinations tables are read-only.
 
 ### What each V2 request needs
@@ -276,9 +276,11 @@ Important consequences:
 
 Plaintext secrets live in the configuration SO `secrets` map (`{ "<name>": "<value>" }`), never inside `unit`. The unit references a credential by name with a config value of exactly `{ "credential": "<name>" }`, as the streams-spec credential contract defines. A plain string value is never a reference.
 
-Names follow the unit identifier grammar (`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`, at most 256 characters). The same name is the reference, the key in `secrets`, and the `credentials[].name` sent to the distributor. The UI convention is `<nodeId>-<field>` with `_` turned into `-`, for example `s3-archive-secret-access-key`. That convention can collide (`a-b` + `c` and `a` + `b_c` both give `a-b-c`), so the UI must check before saving. Two nodes that reference the same name share one secret. The S3 destination modal is the first client sender: it writes `{ credential: <id>-access-key-id }` and `{ credential: <id>-secret-access-key }` into the node and sends both plaintext values in `secrets` on the same PUT.
+Names follow the unit identifier grammar (`^[a-z0-9]([a-z0-9-]*[a-z0-9])?$`, at most 256 characters). The same name is the reference, the key in `secrets`, and the `credentials[].name` sent to the distributor. The UI convention is `<nodeId>-<field>` with `_` turned into `-`, for example `s3-archive-secret-access-key`. That convention can collide (`a-b` + `c` and `a` + `b_c` both give `a-b-c`), so the UI must check before saving. Two nodes that reference the same name share one secret. The S3 destination modal writes `{ credential: <id>-access-key-id }` and `{ credential: <id>-secret-access-key }` into the node and sends both plaintext values in `secrets` on the same PUT.
 
 The remote Elasticsearch destination modal does the same with one key: it writes `{ credential: <id>-api-key }` into the node and sends the user's key in `secrets`. Kibana never mints or revokes that key.
+
+The local Elasticsearch destination modal mints its API key, writes `{ credential: <id>-api-key }` into the node, and sends the encoded key in `secrets`. Kibana records and revokes that key as before.
 
 A JSON envelope that stores a secret references it from the node and sends the value next to the unit:
 
@@ -330,8 +332,6 @@ openssl rand 32 > "/tmp/streams-encryption-key/streams-encryption-key.$KID"
 ```
 
 Without a client certificate (a local fake distributor), set `xpack.cloud.serverless.project_id` explicitly in `kibana.dev.yml` (identifier grammar, at most 32 bytes). The UIAM dev path in `src/cli/serve/serve.js` defaults it to `abcdef12345678901234567890123456`, but not every local start goes through that path.
-
-The distributor's main branch ignores `credentials` on validate and cannot compile `{ credential }` references yet, so a local tilt run with a reference fails validation until the backend catches up (ingest-dev#9480).
 
 #### Republish and key rotation
 
@@ -399,7 +399,7 @@ Content-Type: application/json
               {
                 "action": "upsert",
                 "location": "resource",
-                "path": "attributes[\"env\"]",
+                "name": "env",
                 "value": "prod"
               }
             ]

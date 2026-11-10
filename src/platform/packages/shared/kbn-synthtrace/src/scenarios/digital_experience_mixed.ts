@@ -24,6 +24,8 @@
  * Scenario options:
  * - withSessionId (boolean, default: true): write `attributes.session.id` on EDOT Browser data
  * - includeRawAttribution (boolean, default: false): write web vital attribution JSON bodies
+ * - environments (boolean, default: false): spread the EDOT Browser apps over several
+ *   environments. The classic RUM app then runs in `production`.
  * - scale (number, default: 1): multiplies the number of sessions/page loads per minute
  * - seed (string or number, default: the run's `from` in milliseconds): makes the data
  *   reproducible
@@ -43,6 +45,7 @@ import { withClient } from '../lib/utils/with_client';
 import {
   generateEdotBrowserSessions,
   parseDigitalExperienceScenarioOpts,
+  PRODUCTION_ENVIRONMENT,
   SEED_LOG_HINT,
 } from './helpers/digital_experience_apps';
 import { generateClassicRumPageLoads } from './helpers/classic_rum_page_loads';
@@ -78,7 +81,11 @@ const scenario: Scenario<OtelDocument | ApmFields> = async ({ scenarioOpts, logg
       ),
       withClient(
         apmEsClient,
-        generateClassicRumPageLoads(range, { ...opts, environment: ENVIRONMENT })
+        // With environments, the classic agent is the one of the production storefront
+        generateClassicRumPageLoads(range, {
+          ...opts,
+          environment: opts.environments ? PRODUCTION_ENVIRONMENT : ENVIRONMENT,
+        })
       ),
     ],
   };

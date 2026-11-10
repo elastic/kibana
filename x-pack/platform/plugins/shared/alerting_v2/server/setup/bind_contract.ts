@@ -7,6 +7,7 @@
 
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { Setup, Start } from '@kbn/core-di';
+import type { CoreDiServiceStart } from '@kbn/core-di';
 import { Global } from '@kbn/core-di-internal';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -28,73 +29,83 @@ import type {
   AlertEventsClientApi,
 } from '../types';
 
-export function bindContract({ bind }: ContainerModuleLoadOptions) {
-  bind(Setup).toDynamicValue(({ get }) => {
-    const registry = get(ArtifactTypeRegistry);
-    const alertStatusChangedOptIns = get(AlertStatusChangedOptIns);
-    const contract: AlertingServerSetup = {
-      registerArtifactType: (definition) => {
-        registry.register(definition);
-      },
-      enableAlertStatusChanged: (optIn) => {
-        alertStatusChangedOptIns.register(optIn);
-      },
-    };
-    return contract;
-  });
+/** Builds the plugin's setup contract from its injected registries. */
+const createSetupContract = (
+  registry: ArtifactTypeRegistry,
+  alertStatusChangedOptIns: AlertStatusChangedOptIns
+): AlertingServerSetup => ({
+  registerArtifactType: (definition) => {
+    registry.register(definition);
+  },
+  enableAlertStatusChanged: (optIn) => {
+    alertStatusChangedOptIns.register(optIn);
+  },
+});
 
-  bind(Start).toDynamicValue(({ get }) => {
-    const injection = get(CoreStart('injection'));
+/**
+ * Builds the plugin's start contract. Per-request clients are resolved from a
+ * forked request scope that carries the request, rules-client options, and
+ * (optionally) the space id; the internal rules client is the injected
+ * singleton, so it needs no scope.
+ */
+const createStartContract = (
+  injection: CoreDiServiceStart,
+  internalRulesClient: InternalRulesClientApi
+): AlertingServerStart => {
+  const buildScope = (
+    request: KibanaRequest,
+    spaceId?: SpaceId,
+    rulesClientOptions?: CreateRulesClientOptions
+  ) => {
+    const scope = injection.fork();
+    scope.bind(Request).toConstantValue(request);
+    scope.bind(Global).toConstantValue(Request);
+    scope.bind(RulesClientOptionsToken).toConstantValue(rulesClientOptions ?? {});
+    scope.bind(Global).toConstantValue(RulesClientOptionsToken);
+    if (spaceId) {
+      scope.bind(RequestSpaceIdToken).toConstantValue(spaceId);
+      scope.bind(Global).toConstantValue(RequestSpaceIdToken);
+    }
+    return scope;
+  };
 
-    const buildScope = (
+  return {
+    async getRulesClientWithRequest(
       request: KibanaRequest,
-      spaceId?: SpaceId,
-      rulesClientOptions?: CreateRulesClientOptions
-    ) => {
-      const scope = injection.fork();
-      scope.bind(Request).toConstantValue(request);
-      scope.bind(Global).toConstantValue(Request);
-      scope.bind(RulesClientOptionsToken).toConstantValue(rulesClientOptions ?? {});
-      scope.bind(Global).toConstantValue(RulesClientOptionsToken);
-      if (spaceId) {
-        scope.bind(RequestSpaceIdToken).toConstantValue(spaceId);
-        scope.bind(Global).toConstantValue(RequestSpaceIdToken);
-      }
-      return scope;
-    };
+      options?: CreateRulesClientOptions
+    ): Promise<RulesClientApi> {
+      return buildScope(request, undefined, options).get(RulesClient);
+    },
+    async getRulesClientWithRequestInSpace(
+      request: KibanaRequest,
+      spaceId: SpaceId,
+      options?: CreateRulesClientOptions
+    ): Promise<RulesClientApi> {
+      return buildScope(request, spaceId, options).get(RulesClient);
+    },
+    async getUnsafeInternalRulesClient(): Promise<InternalRulesClientApi> {
+      return internalRulesClient;
+    },
+    async getActionPolicyClientWithRequest(request: KibanaRequest): Promise<ActionPolicyClientApi> {
+      return buildScope(request).get(ActionPolicyClient);
+    },
+    async getActionPolicyClientWithRequestInSpace(
+      request: KibanaRequest,
+      spaceId: SpaceId
+    ): Promise<ActionPolicyClientApi> {
+      return buildScope(request, spaceId).get(ActionPolicyClient);
+    },
+    async getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi> {
+      return buildScope(request).get(AlertEventsClient);
+    },
+  };
+};
 
-    const contract: AlertingServerStart = {
-      async getRulesClientWithRequest(
-        request: KibanaRequest,
-        options?: CreateRulesClientOptions
-      ): Promise<RulesClientApi> {
-        return buildScope(request, undefined, options).get(RulesClient);
-      },
-      async getRulesClientWithRequestInSpace(
-        request: KibanaRequest,
-        spaceId: SpaceId,
-        options?: CreateRulesClientOptions
-      ): Promise<RulesClientApi> {
-        return buildScope(request, spaceId, options).get(RulesClient);
-      },
-      async getUnsafeInternalRulesClient(): Promise<InternalRulesClientApi> {
-        return get(InternalRulesClient);
-      },
-      async getActionPolicyClientWithRequest(
-        request: KibanaRequest
-      ): Promise<ActionPolicyClientApi> {
-        return buildScope(request).get(ActionPolicyClient);
-      },
-      async getActionPolicyClientWithRequestInSpace(
-        request: KibanaRequest,
-        spaceId: SpaceId
-      ): Promise<ActionPolicyClientApi> {
-        return buildScope(request, spaceId).get(ActionPolicyClient);
-      },
-      async getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi> {
-        return buildScope(request).get(AlertEventsClient);
-      },
-    };
-    return contract;
-  });
+export function bindContract({ bind }: ContainerModuleLoadOptions) {
+  bind(Setup).toResolvedValue(createSetupContract, [
+    ArtifactTypeRegistry,
+    AlertStatusChangedOptIns,
+  ]);
+
+  bind(Start).toResolvedValue(createStartContract, [CoreStart('injection'), InternalRulesClient]);
 }

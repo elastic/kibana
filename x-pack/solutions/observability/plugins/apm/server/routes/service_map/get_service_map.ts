@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { BoolQuery } from '@kbn/es-query';
 import type { ServiceMapSpan } from '../../../common/service_map/types';
 import { type ServiceMapResponse } from '../../../common/service_map';
+import type { SavedServiceGroup } from '../../../common/service_groups';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import type { APMConfig } from '../..';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -21,6 +22,7 @@ import type { EnhancedServiceStatsOptions } from './get_enhanced_service_stats';
 import { getEnhancedServiceStats } from './get_enhanced_service_stats';
 import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
 import { getServiceCallGraph } from './get_service_call_graph';
+import { getServiceGroupingAttributes } from './get_service_grouping_attributes';
 import { matchCallGraphToServices } from './match_service_call_graph';
 
 export interface IEnvOptions {
@@ -34,6 +36,8 @@ export interface IEnvOptions {
   start: number;
   end: number;
   serviceGroupKuery?: string;
+  /** Saved groups to match for grouping. Omitted or empty when already on a group map. */
+  savedServiceGroups?: SavedServiceGroup[];
   kuery?: string;
   /** Pre-built ES query from the client (query + filter bar + Controls API). */
   esQuery?: { bool: BoolQuery };
@@ -118,6 +122,15 @@ export function getServiceMap(
           })
         : Promise.resolve(undefined);
 
+    const groupingAttributesPromise =
+      grouping.enabled && !options.serviceName
+        ? getServiceGroupingAttributes({ ...options, source: grouping.source }).catch((error) => {
+            logger.debug(`Unable to retrieve grouping attributes for service maps.`, { error });
+            return undefined;
+          })
+        : Promise.resolve(undefined);
+
+    // groupingAttributes is fetched for group selection. It stays off the response until then.
     const [connectionData, servicesData, anomalies, callGraph] = await Promise.all([
       getConnectionData(options),
       grouping.enabled
@@ -125,9 +138,10 @@ export function getServiceMap(
         : getServiceStats(options),
       anomaliesPromise,
       callGraphPromise,
+      groupingAttributesPromise,
     ]);
 
-    // Group selection will use this list. It stays off the response until then.
+    // Group selection will use the call graph. It stays off the response until then.
     if (callGraph) {
       try {
         matchCallGraphToServices({

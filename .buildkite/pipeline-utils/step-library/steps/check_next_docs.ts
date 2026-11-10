@@ -8,7 +8,7 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { preemptibleAgent, retry } from '../presets.ts';
+import { retry, spotAgent, spotZones } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const checkNextDocs = (): readonly Step[] => [
@@ -16,7 +16,7 @@ export const checkNextDocs = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/next_docs/build_and_validate_docs.sh',
     label: 'Build and Validate Next Docs',
     key: 'check_next_docs',
-    agents: preemptibleAgent('n2-standard-4'),
+    agents: spotAgent('n2-standard-4', spotZones.n2),
     timeout_in_minutes: 30,
     retry: retry.agentLoss,
   }),
