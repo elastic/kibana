@@ -63,23 +63,13 @@ test.describe(
       });
     });
 
-    test('the switch only shows once the dataset is customised, on by default', async ({
-      page,
-    }) => {
-      await mockManagedIntegrations(page);
-      await openEc2Flyout(page);
-      await expect(page.testSubj.locator('datasetComboBox')).toBeVisible();
-      await expect(page.testSubj.locator(SWITCH)).toBeHidden();
-
-      await setDataset(page, 'aws.prod');
-
-      await expect(page.testSubj.locator(SWITCH)).toHaveAttribute('aria-checked', 'true');
-    });
-
     test('turning the switch off sends the opt-out with the deploy', async ({ page }) => {
       const requests = await mockManagedIntegrations(page);
       await openEc2Flyout(page);
+      await expect(page.testSubj.locator('datasetComboBox')).toBeVisible();
+      await expect(page.testSubj.locator(SWITCH)).toBeHidden();
       await setDataset(page, 'aws.prod');
+      await expect(page.testSubj.locator(SWITCH)).toHaveAttribute('aria-checked', 'true');
       await page.testSubj.locator(SWITCH).click();
       await expect(page.testSubj.locator(SWITCH)).toHaveAttribute('aria-checked', 'false');
       await saveFlyout(page);

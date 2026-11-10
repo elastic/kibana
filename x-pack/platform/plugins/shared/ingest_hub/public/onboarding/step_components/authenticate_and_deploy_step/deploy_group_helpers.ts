@@ -271,7 +271,11 @@ export function getCreateDatasetTemplates(
   const customised: boolean[] = [];
   for (const { instance, service } of group.members) {
     const vars = storedServiceVars[instance.instanceId] ?? storedServiceVars[instance.serviceId];
-    for (const [dsId, dsVars] of Object.entries(vars?.varsByDataStream ?? {})) {
+    // Only data streams that deploy count: one turned off keeps its stored vars, and its switch
+    // must not cancel the opt-out of the streams that do.
+    for (const dsId of vars?.enabledDataStreams ?? []) {
+      const dsVars = vars?.varsByDataStream[dsId];
+      if (!dsVars || !service.dataStreams.includes(dsId)) continue;
       const dsView = makeDsView(service, dsId);
       for (const input of dsVars.enabledInputs) {
         if (isCustomDataset(dsView, input, dsVars.varsByInput[input])) {

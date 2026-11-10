@@ -397,6 +397,33 @@ describe('getCreateDatasetTemplates', () => {
     expect(getCreateDatasetTemplates(group(['a', 'b']), stored)).toBeUndefined();
   });
 
+  it('ignores a data stream that is turned off, which keeps its stored vars', () => {
+    const twoStreams = {
+      ...otelService,
+      dataStreams: ['ec2', 'lambda'],
+      varDefsByDataStream: {
+        ...otelService.varDefsByDataStream,
+        lambda: otelService.varDefsByDataStream?.ec2,
+      },
+    } as unknown as AwsServiceMatrixEntry;
+    const stored: Record<string, ServiceVars> = {
+      a: {
+        enabledDataStreams: ['ec2'],
+        varsByDataStream: {
+          ec2: vars('aws.prod', false).varsByDataStream.ec2,
+          // Turned off, with a custom dataset and the switch still on.
+          lambda: vars('aws.other').varsByDataStream.ec2,
+        },
+      },
+    };
+    const g = {
+      members: [{ ...member('a'), service: twoStreams }],
+      instanceIds: ['a'],
+    } as unknown as Parameters<typeof getCreateDatasetTemplates>[0];
+
+    expect(getCreateDatasetTemplates(g, stored)).toBe(false);
+  });
+
   it('returns false for a bundled group only when every customised dataset opted out', () => {
     const stored = { a: vars('aws.prod', false), b: vars('aws.dev', false), c: vars('aws.ec2') };
     expect(getCreateDatasetTemplates(group(['a', 'b', 'c']), stored)).toBe(false);
