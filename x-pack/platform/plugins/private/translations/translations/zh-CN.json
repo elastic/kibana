@@ -64444,7 +64444,6 @@
     "xpack.slo.compositeSloList.activeAlerts.ariaLabel": "在新的浏览器标签页中查看活动告警",
     "xpack.slo.compositeSloList.activeAlerts.tooltip": "成员 SLO 中的 {count, plural, one {# burn rate alert} other {# 个消耗速度告警}}。在新浏览器选项卡中打开。",
     "xpack.slo.compositeSloList.burnRate.windowSelectorAriaLabel": "选择消耗速度窗口",
-    "xpack.slo.compositeSloList.clearFilters": "清除筛选",
     "xpack.slo.compositeSloList.collapseRowFor": "折叠行：{name}",
     "xpack.slo.compositeSloList.columns.actions": "操作",
     "xpack.slo.compositeSloList.columns.activeAlerts": "活动告警",

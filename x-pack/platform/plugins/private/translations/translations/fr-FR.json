@@ -64051,7 +64051,6 @@
     "xpack.slo.compositeSloList.actions.editDescription": "Modifier ce SLO composite",
     "xpack.slo.compositeSloList.activeAlerts.ariaLabel": "Voir les alertes actives dans un nouvel onglet de navigateur",
     "xpack.slo.compositeSloList.burnRate.windowSelectorAriaLabel": "Sélectionnez la fenêtre du taux d'avancement",
-    "xpack.slo.compositeSloList.clearFilters": "Effacer les filtres",
     "xpack.slo.compositeSloList.collapseRowFor": "Réduire la ligne : {name}",
     "xpack.slo.compositeSloList.columns.actions": "Actions",
     "xpack.slo.compositeSloList.columns.activeAlerts": "Alertes actives",

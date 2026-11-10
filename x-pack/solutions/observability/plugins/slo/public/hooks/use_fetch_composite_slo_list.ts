@@ -32,6 +32,7 @@ export interface UseFetchCompositeSloListResponse {
   isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
+  refetch: () => void;
 }
 
 export function useFetchCompositeSloList({
@@ -51,47 +52,49 @@ export function useFetchCompositeSloList({
   const tagsParam = tags.length > 0 ? tags.join(',') : undefined;
   const statusParam = status.length > 0 ? status.join(',') : undefined;
 
-  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: sloKeys.compositeList({
-      page,
-      perPage,
-      search,
-      tags: tagsParam,
-      sortBy,
-      sortDirection,
-      status: statusParam,
-    }),
-    queryFn: async ({ signal }) => {
-      return await sloClient.fetch('GET /api/observability/slo_composites 2023-10-31', {
-        params: {
-          query: {
-            ...(search && { search }),
-            ...(tagsParam && { tags: tagsParam }),
-            ...(statusParam && { status: statusParam }),
-            page: String(page),
-            perPage: String(perPage),
-            sortBy,
-            sortDirection,
+  const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
+    {
+      queryKey: sloKeys.compositeList({
+        page,
+        perPage,
+        search,
+        tags: tagsParam,
+        sortBy,
+        sortDirection,
+        status: statusParam,
+      }),
+      queryFn: async ({ signal }) => {
+        return await sloClient.fetch('GET /api/observability/slo_composites 2023-10-31', {
+          params: {
+            query: {
+              ...(search && { search }),
+              ...(tagsParam && { tags: tagsParam }),
+              ...(statusParam && { status: statusParam }),
+              page: String(page),
+              perPage: String(perPage),
+              sortBy,
+              sortDirection,
+            },
           },
-        },
-        signal,
-      });
-    },
-    refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      if (String(error) === 'Error: Forbidden') {
-        return false;
-      }
-      return failureCount < 4;
-    },
-    onError: (error: Error) => {
-      toasts.addError(error, {
-        title: i18n.translate('xpack.slo.compositeSloList.errorNotification', {
-          defaultMessage: 'Something went wrong while fetching composite SLOs',
-        }),
-      });
-    },
-  });
+          signal,
+        });
+      },
+      refetchOnWindowFocus: false,
+      retry: (failureCount, error) => {
+        if (String(error) === 'Error: Forbidden') {
+          return false;
+        }
+        return failureCount < 4;
+      },
+      onError: (error: Error) => {
+        toasts.addError(error, {
+          title: i18n.translate('xpack.slo.compositeSloList.errorNotification', {
+            defaultMessage: 'Something went wrong while fetching composite SLOs',
+          }),
+        });
+      },
+    }
+  );
 
   return {
     data,
@@ -100,5 +103,6 @@ export function useFetchCompositeSloList({
     isRefetching,
     isSuccess,
     isError,
+    refetch,
   };
 }
