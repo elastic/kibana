@@ -126,6 +126,7 @@ describe('validateLogSampleContent', () => {
     ['JavaScript default import', "import React from 'react';"],
     ['CommonJS export', 'module.exports = {'],
     ['JavaScript function', 'function main() {'],
+    ['JavaScript anonymous async function', 'async function (event) {'],
     ['JavaScript const', 'export const config = {'],
     ['TypeScript type import', "import type { Logger } from '@kbn/core/server';"],
     ['TypeScript re-export', "export { useKibana } from './hooks/use_kibana';"],
@@ -177,6 +178,15 @@ describe('validateLogSampleContent', () => {
     ],
   ])('allows %s', (_name, samples) => {
     expect(validateLogSampleContent(samples)).toEqual({ valid: true });
+  });
+
+  it.each([
+    ['a class keyword', `class ${'a'.repeat(100_000)}`],
+    ['a function keyword', `export async function${' '.repeat(100_000)}!`],
+  ])('quickly allows a very long first line that starts with %s', (_name, firstLine) => {
+    const start = performance.now();
+    expect(validateLogSampleContent([firstLine])).toEqual({ valid: true });
+    expect(performance.now() - start).toBeLessThan(1_000);
   });
 
   it('allows a stray NUL character in otherwise normal logs', () => {

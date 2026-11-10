@@ -148,14 +148,14 @@ const SOURCE_CODE_FIRST_LINE_PATTERNS: readonly RegExp[] = [
   /^export\s*(\{|\*|(default|type|interface|class|enum)\s)/, // JavaScript or TypeScript export
   /^from\s+[\w.]+\s+import\s+/, // Python from-import
   /^def\s+\w+\s*\(/, // Python function
-  /^class\s+\w+.*[:{]$/, // Class declaration
+  /^class\s+\w+(?!\w).*[:{]$/, // Class declaration
   /^package\s+[\w.]+;?$/, // Java or Go package
   /^using\s+[\w.]+;$/, // C# using directive
   /^#include\s*[<"]/, // C or C++ include
   /^<\?php/, // PHP
   /^['"]use strict['"];?$/, // JavaScript strict mode
   /^module\.exports\s*=/, // CommonJS export
-  /^(export\s+)?(async\s+)?function\s*\w*\s*\(/, // JavaScript function
+  /^(export\s+)?(async\s+)?function(\s+\w+)?\s*\(/, // JavaScript function
   /^(export\s+)?(const|let|var)\s+\w+\s*=/, // JavaScript variable
 ];
 
@@ -163,6 +163,9 @@ const SOURCE_CODE_FIRST_LINE_PATTERNS: readonly RegExp[] = [
 const LEADING_COMMENT_LINE_PATTERN = /^(\/\/|\/\*|\*|#(?!!|include\b))/;
 
 const MAX_LEADING_COMMENT_LINES = 50;
+
+/** A first line of source code is short, and the length cap bounds the cost of the patterns. */
+const MAX_SOURCE_CODE_FIRST_LINE_LENGTH = 1_000;
 
 const getFirstNonCommentLine = (samples: readonly string[]): string | undefined =>
   samples
@@ -230,6 +233,7 @@ export const validateLogSampleContent = (
   const firstLine = getFirstNonCommentLine(nonEmptySamples);
   if (
     firstLine !== undefined &&
+    firstLine.length <= MAX_SOURCE_CODE_FIRST_LINE_LENGTH &&
     SOURCE_CODE_FIRST_LINE_PATTERNS.some((pattern) => pattern.test(firstLine))
   ) {
     return { valid: false, code: 'script_content' };

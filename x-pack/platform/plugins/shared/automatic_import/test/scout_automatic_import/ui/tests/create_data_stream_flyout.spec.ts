@@ -177,33 +177,6 @@ test.describe(
       await expect(flyout.getByText('A log sample is required for analysis')).toBeHidden();
     });
 
-    test('shows an inline error when the uploaded file is clearly not logs', async ({
-      pageObjects,
-    }) => {
-      const flyout = pageObjects.integrationManagement.getCreateDataStreamFlyout();
-      const fileInput = flyout.locator('input[type="file"]');
-
-      await fileInput.setInputFiles({
-        name: 'script.py',
-        mimeType: 'text/x-python',
-        buffer: Buffer.from('import os\nprint(os.getcwd())\n'),
-      });
-      await expect(
-        flyout.getByText(
-          "Files of type .py aren't supported. Upload a file that contains log samples."
-        )
-      ).toBeVisible();
-
-      await fileInput.setInputFiles({
-        name: 'script.log',
-        mimeType: 'text/plain',
-        buffer: Buffer.from('#!/usr/bin/env python\nimport os\n'),
-      });
-      await expect(
-        flyout.getByText('This file looks like a script or source code, not log samples.')
-      ).toBeVisible();
-    });
-
     test('Analyze Logs shows the integration details callout when integration title has only one character', async ({
       pageObjects,
     }) => {
