@@ -23,7 +23,7 @@ export const wikiPagesReadJudge: RegisteredEvaluatorDefinition = {
           name: 'wiki_pages_read',
           score: pages.length,
           label: `${pages.length} pages`,
-          explanation: pages.map(({ id }) => id).join(', ') || 'none',
+          explanation: 'Number of distinct pages the agent read',
           metadata: { page_ids: pages.map(({ id }) => id) },
         },
       ],
