@@ -26,10 +26,20 @@ jest.mock('@kbn/proposals-plugin/public', () => ({
   queryKeys: { proposals: { all: ['proposals'] } },
 }));
 
+const previewData: {
+  pending_proposal_count: number;
+  pending_proposals: Array<{ id: string; action_name: string | null }>;
+  requires_discard_reason: boolean;
+} = {
+  pending_proposal_count: 1,
+  pending_proposals: [{ id: 'p-1', action_name: 'a' }],
+  requires_discard_reason: true,
+};
+
 jest.mock('../../../investigations/hooks/use_investigations_api', () => ({
   useSetInvestigationStatus: () => ({ mutateAsync: mockMutateAsync, isLoading: false }),
   useInvestigationClosePreview: () => ({
-    data: { pending_proposal_count: 1, pending_proposals: [{ id: 'p-1', action_name: 'a' }] },
+    data: previewData,
     isFetching: false,
     isError: false,
     refetch: jest.fn(),
@@ -50,7 +60,10 @@ jest.mock('../close_confirmation/close_investigation_modal', () => ({
 const investigation = { id: 'conv-1', conversationId: 'conv-1' } as Investigation;
 
 describe('ConnectedCloseInvestigationModal', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    previewData.requires_discard_reason = true;
+  });
 
   it('settles the dismissed proposals, with the host’s drop callback, and closes the modal', async () => {
     mockMutateAsync.mockResolvedValue({
@@ -100,6 +113,47 @@ describe('ConnectedCloseInvestigationModal', () => {
 
     await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledTimes(1));
     expect(mockSettleDeclinedProposals).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('closes without showing the modal when no pending proposal needs a reason', async () => {
+    previewData.requires_discard_reason = false;
+    mockMutateAsync.mockResolvedValue({ failed_proposal_ids: [], dismissed_proposal_ids: ['p-1'] });
+    const onClose = jest.fn();
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ConnectedCloseInvestigationModal investigation={investigation} onClose={onClose} />
+      </QueryClientProvider>
+    );
+
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+    expect(screen.queryByText('confirm close')).not.toBeInTheDocument();
+    expect(mockMutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ status: 'closed', dismiss_reason: undefined }),
+      })
+    );
+  });
+
+  it('falls back to the modal when a skipped close is rejected', async () => {
+    previewData.requires_discard_reason = false;
+    mockMutateAsync.mockRejectedValue(
+      Object.assign(new Error('Conflict'), {
+        request: {},
+        response: { status: 409 },
+        body: { attributes: { code: 'close_targets_changed' } },
+      })
+    );
+    const onClose = jest.fn();
+
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ConnectedCloseInvestigationModal investigation={investigation} onClose={onClose} />
+      </QueryClientProvider>
+    );
+
+    expect(await screen.findByText('confirm close')).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
   });
 });
