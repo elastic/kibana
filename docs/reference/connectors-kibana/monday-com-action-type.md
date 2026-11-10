@@ -11,7 +11,7 @@ applies_to:
 
 The Monday.com connector connects to Monday.com through the official remote Model Context Protocol (MCP) server at `https://mcp.monday.com/mcp`. Agents and workflows use the connector to search boards, read and create items, post updates, and discover workspaces. The connector supports two authentication methods: Monday.com OAuth 2.0 (recommended) and Personal API Token.
 
-You can use this connector in **Agent Builder** and **Workflows**.
+You can use this connector in **Agent Builder** and **Workflows**. To limit which actions this connector allows, use the **Actions** setting. That limit applies to agents, workflows, and the Run a connector API on this connector. Refer to [Limit a connector's actions](docs-content://explore-analyze/ai-features/agent-builder/connectors.md#limit-a-connectors-actions).
 
 ## Create connectors in {{kib}} [define-monday-com-ui]
 
@@ -58,16 +58,16 @@ The Monday.com connector exposes the following actions:
 :   Find items on a Monday.com board where a specific column matches a given value. Use `getBoardInfo` to discover column IDs and the expected value format for each column type. Returns matching items with their names, column values, and group membership.
 
 `createItem`
-:   Create a new item (row) on a Monday.com board (available in Workflows only). Optionally assign it to a specific group and set initial column values. Use `getBoardInfo` to discover group IDs and column IDs before calling this action.
+:   Create a new item (row) on a Monday.com board. Optionally assign it to a specific group and set initial column values. Use `getBoardInfo` to discover group IDs and column IDs before calling this action.
 
 `changeItemColumnValues`
-:   Update one or more column values on an existing Monday.com item (available in Workflows only). Provide a map of column IDs to new values. Use `getBoardInfo` to discover column IDs and their expected value formats.
+:   Update one or more column values on an existing Monday.com item. Provide a map of column IDs to new values. Use `getBoardInfo` to discover column IDs and their expected value formats.
 
 `createSubitem`
-:   Create a subitem under an existing Monday.com item (available in Workflows only). Subitems share the column structure of the parent board's subitems board. Returns the created subitem with its ID.
+:   Create a subitem under an existing Monday.com item. Subitems share the column structure of the parent board's subitems board. Returns the created subitem with its ID.
 
 `moveItemToGroup`
-:   Move a Monday.com item to a different group within the same board (available in Workflows only). Use `getBoardInfo` to discover available group IDs.
+:   Move a Monday.com item to a different group within the same board. Use `getBoardInfo` to discover available group IDs.
 
 `archiveItem`
 :   Archive a Monday.com item (available in Workflows only). Archived items are hidden from the board view but remain accessible via filters and are not permanently deleted.
