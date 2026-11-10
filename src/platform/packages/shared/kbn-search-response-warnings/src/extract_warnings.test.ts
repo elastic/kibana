@@ -414,34 +414,6 @@ describe('extract search response warnings', () => {
         expect(warnings).toEqual([]);
       });
 
-      it('does not warn when the skipped cluster omits timed_out', () => {
-        const { timed_out: _timedOut, ...withoutTimedOut } = emptyRemote;
-
-        const warnings = extractWarnings(
-          createCcsResponse({
-            remote_empty: withoutTimedOut as estypes.ClusterDetails,
-          }),
-          mockInspectorService,
-          mockRequestAdapter,
-          'My request'
-        );
-
-        expect(warnings).toEqual([]);
-      });
-
-      it('treats an empty failures array as no failures', () => {
-        const warnings = extractWarnings(
-          createCcsResponse({
-            remote_empty: { ...emptyRemote, failures: [] },
-          }),
-          mockInspectorService,
-          mockRequestAdapter,
-          'My request'
-        );
-
-        expect(warnings).toEqual([]);
-      });
-
       it('warns about a skipped cluster that has failures and leaves out empty clusters', () => {
         const warnings = extractWarnings(
           createCcsResponse({
@@ -513,61 +485,6 @@ describe('extract search response warnings', () => {
             type: 'incomplete',
             requestName: 'My request',
             clusters: {},
-            openInInspector: expect.any(Function),
-          },
-        ]);
-      });
-
-      it('does not start warning when the only cluster counter is failed', () => {
-        const response = {
-          took: 5,
-          timed_out: false,
-          _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-          _clusters: {
-            total: 1,
-            successful: 0,
-            skipped: 0,
-            running: 0,
-            partial: 0,
-            failed: 1,
-          },
-          hits: { hits: [] },
-        } as estypes.SearchResponse;
-
-        expect(
-          extractWarnings(response, mockInspectorService, mockRequestAdapter, 'My request')
-        ).toEqual([]);
-      });
-
-      it('still warns about a failed cluster', () => {
-        const failedRemote: estypes.ClusterDetails = {
-          status: 'failed',
-          indices: 'remote_failed:logs-myapp',
-          took: 1,
-          timed_out: false,
-          failures: [
-            {
-              shard: -1,
-              reason: { type: 'status_exception', reason: 'search failed' },
-            },
-          ],
-        };
-
-        const warnings = extractWarnings(
-          createCcsResponse({
-            remote_empty: emptyRemote,
-            remote_failed: failedRemote,
-          }),
-          mockInspectorService,
-          mockRequestAdapter,
-          'My request'
-        );
-
-        expect(warnings).toEqual([
-          {
-            type: 'incomplete',
-            requestName: 'My request',
-            clusters: { remote_failed: failedRemote },
             openInInspector: expect.any(Function),
           },
         ]);

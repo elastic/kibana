@@ -20,7 +20,7 @@ const isEmptySkippedCluster = (cluster: estypes.ClusterDetails): boolean =>
   cluster.status === 'skipped' &&
   cluster.timed_out !== true &&
   cluster._shards?.total === 0 &&
-  (cluster.failures == null || cluster.failures.length === 0);
+  !cluster.failures?.length;
 
 const clustersForWarning = (
   clusters: estypes.ClusterStatistics
@@ -31,28 +31,32 @@ const clustersForWarning = (
       )
     : {};
 
-const hasClusterProblem = (clusters: estypes.ClusterStatistics): boolean => {
-  // Same counters as before. `failed` alone did not warn, and still does not.
-  const counterProblem = clusters.partial > 0 || clusters.running > 0 || clusters.skipped > 0;
-  if (!counterProblem) {
+const hasClusterProblem = ({
+  partial,
+  running,
+  skipped,
+  details,
+}: estypes.ClusterStatistics): boolean => {
+  // `failed` alone is not a problem.
+  if (partial + running + skipped === 0) {
     return false;
   }
 
-  const details = clusters.details;
-  // No per-cluster details means a skip cannot be told apart from a disconnect.
+  // Without per-cluster details a skip cannot be told apart from a disconnect.
   if (details == null) {
     return true;
   }
 
-  const emptySkippedCount = Object.values(details).filter(isEmptySkippedCluster).length;
-  const skippedAreOnlyEmpty = clusters.skipped > 0 && clusters.skipped <= emptySkippedCount;
-  if (!skippedAreOnlyEmpty || clusters.partial > 0 || clusters.running > 0) {
+  const clusters = Object.values(details);
+  const emptySkippedCount = clusters.filter(isEmptySkippedCluster).length;
+
+  // The counters report problems that the details do not explain, so trust the counters.
+  if (partial > 0 || running > 0 || skipped > emptySkippedCount) {
     return true;
   }
 
-  // The skip count is only empty clusters. Another cluster in the details can still be a problem.
-  return Object.values(details).some(
-    (cluster) => !isEmptySkippedCluster(cluster) && cluster.status !== 'successful'
+  return clusters.some(
+    (cluster) => cluster.status !== 'successful' && !isEmptySkippedCluster(cluster)
   );
 };
 
