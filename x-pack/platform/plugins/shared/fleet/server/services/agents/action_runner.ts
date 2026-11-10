@@ -74,7 +74,7 @@ export const ACTION_SORT_ORDER = 'asc' as const;
  * until then it is exempt rather than paying for a read that cannot find anything, and a restarted
  * rollback re-sends to agents an earlier run already handled, as it does today.
  */
-const DEDUPLICATION_EXEMPT_TASK_TYPES: readonly BulkActionTaskType[] = [
+const DEDUPLICATION_EXEMPT_TASK_TYPES: readonly string[] = [
   BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY,
   BulkActionTaskType.ROLLBACK_RETRY,
 ];
@@ -514,8 +514,7 @@ export abstract class ActionRunner {
    */
   private shouldDeduplicate(): boolean {
     return (
-      !!this.retryParams.retryCount &&
-      !DEDUPLICATION_EXEMPT_TASK_TYPES.includes(this.getTaskType() as BulkActionTaskType)
+      !!this.retryParams.retryCount && !DEDUPLICATION_EXEMPT_TASK_TYPES.includes(this.getTaskType())
     );
   }
 

@@ -274,6 +274,9 @@ const MAX_LOGGED_RESULT_FAILURES = 10;
 /** How many times a result write is attempted before its refused items are only logged. */
 const MAX_RESULT_WRITE_ATTEMPTS = 3;
 
+/** How many result ids one lookup asks about, well below any `index.max_result_window`. */
+const MAX_RESULT_IDS_PER_LOOKUP = 1_000;
+
 /** Multiplied by the attempt number for the wait between those attempts. */
 const RESULT_WRITE_RETRY_DELAY_MS = 2_000;
 
@@ -282,7 +285,9 @@ const RESULT_WRITE_RETRY_DELAY_MS = 2_000;
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Per item statuses no further attempt can get past, so the only ones given up on.
+ * Per item statuses no further attempt can get past, so the only ones given up on. A conflict is
+ * not among them: with the ids reused across attempts it is the expected answer to a resend of
+ * something that landed, and is read as success before this list is consulted.
  *
  * A deny list rather than an allow list, because the two mistakes do not cost the same. Rewriting
  * an item Elasticsearch will refuse again costs two requests and a few seconds; not rewriting one
@@ -294,7 +299,6 @@ const PERMANENT_RESULT_STATUS_CODES = [
   400, // malformed, or a mapping failure
   403, // forbidden
   404, // no such index
-  409, // only reached if the id were reused outside a retry, which it is not
 ];
 
 export async function bulkCreateAgentActionResults(
@@ -329,11 +333,13 @@ export async function bulkCreateAgentActionResults(
    * failures, drives the acknowledged count negative and can complete an action early. Reusing the
    * id turns that case into a per item 409 instead, which is read below as "already written".
    *
-   * That conflict is only guaranteed within one backing index, though: `.fleet-actions-results` is
-   * a data stream, and a `create` goes to whichever backing index is the write index when it
-   * arrives, so a rollover between a landed attempt and its resend would be accepted rather than
-   * refused. `findAlreadyWritten` is what covers the gap, which is why it runs before a resend that
-   * follows a transport error — the only case where an id may already be in the index.
+   * That conflict is only guaranteed within one index, though. `.fleet-actions-results` rolls
+   * over — results come back from `.ds-`-prefixed indices, and Fleet Server owns how it is set up,
+   * so nothing here settles whether that is a data stream or an alias. Either way a write goes to
+   * whichever index is the write index when it arrives and `_id` uniqueness is per index, so a
+   * rollover between a landed attempt and its resend would be accepted rather than refused.
+   * `findAlreadyWritten` is what covers the gap, which is why it runs before a resend that follows
+   * a transport error — the only case where an id may already be there.
    *
    * The ids stay local to this call rather than being derived from the action and agent: nothing
    * here owns the `_id` scheme of an index Fleet Server also writes to.
@@ -347,17 +353,30 @@ export async function bulkCreateAgentActionResults(
    * search sees only what has refreshed, so this can report an id as absent that is about to
    * appear; resending it is then still safe, since the conflict covers everything but a rollover
    * in between.
+   *
+   * Read in pages rather than in one request: a batch is as large as the caller's `batchSize`,
+   * which nothing here bounds, and a `size` above `index.max_result_window` is refused outright —
+   * which would quietly turn this check off at exactly the batch sizes that make it worth having.
    */
   const findAlreadyWritten = async (toCheck: typeof pending) => {
-    const res = await esClient.search({
-      index: AGENT_ACTIONS_RESULTS_INDEX,
-      ignore_unavailable: true,
-      size: toCheck.length,
-      _source: false,
-      track_total_hits: false,
-      query: { ids: { values: toCheck.map(({ documentId }) => documentId) } },
-    });
-    return new Set(res.hits.hits.map((hit) => hit._id));
+    const found = new Set<string>();
+    for (let from = 0; from < toCheck.length; from += MAX_RESULT_IDS_PER_LOOKUP) {
+      const page = toCheck.slice(from, from + MAX_RESULT_IDS_PER_LOOKUP);
+      const res = await esClient.search({
+        index: AGENT_ACTIONS_RESULTS_INDEX,
+        ignore_unavailable: true,
+        size: page.length,
+        _source: false,
+        track_total_hits: false,
+        query: { ids: { values: page.map(({ documentId }) => documentId) } },
+      });
+      for (const hit of res.hits.hits) {
+        if (hit._id) {
+          found.add(hit._id);
+        }
+      }
+    }
+    return found;
   };
 
   /**

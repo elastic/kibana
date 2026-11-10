@@ -1041,6 +1041,34 @@ describe('Agent actions', () => {
       }
     });
 
+    it('looks up the ids in pages, so a large batch does not turn the check off', async () => {
+      jest.useFakeTimers();
+      try {
+        // a batch is as large as the caller's batchSize, which nothing here bounds, and a size
+        // above index.max_result_window is refused outright
+        const manyResults = Array.from({ length: 2_500 }, (_, i) => ({
+          actionId: 'action1',
+          agentId: `agent${i}`,
+        }));
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk
+          .mockRejectedValueOnce(new Error('socket hang up'))
+          .mockResolvedValueOnce(okResponse as any);
+        esClientMock.search.mockResolvedValue({ hits: { hits: [] } } as any);
+
+        const written = bulkCreateAgentActionResults(esClientMock, manyResults);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
+
+        expect(esClientMock.search).toHaveBeenCalledTimes(3);
+        for (const [request] of esClientMock.search.mock.calls) {
+          expect((request as any).query.ids.values.length).toBeLessThanOrEqual(1_000);
+        }
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
     it('does not look for already written results when items were merely refused', async () => {
       jest.useFakeTimers();
       try {
