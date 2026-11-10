@@ -106,6 +106,13 @@ export function createNavigationTree({
               defaultMessage: 'Indices and data streams',
             }),
           },
+          {
+            id: 'ingest',
+            children: [{ link: 'management:content_connectors', breadcrumbStatus: 'hidden' }],
+            title: i18n.translate('xpack.serverlessVectordb.nav.ingest.title', {
+              defaultMessage: 'Ingest',
+            }),
+          },
         ],
         icon: 'database',
         id: DATA_MANAGEMENT_NAV_ID,
