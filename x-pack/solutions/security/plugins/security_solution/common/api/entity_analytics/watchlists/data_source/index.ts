@@ -11,3 +11,4 @@ export * from './get.gen';
 export * from './list.gen';
 export * from './update.gen';
 export * from './common.gen';
+export * from './update_api_key.gen';

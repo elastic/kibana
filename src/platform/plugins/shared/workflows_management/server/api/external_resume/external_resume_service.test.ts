@@ -71,13 +71,54 @@ describe('external resume service', () => {
       respondedBy: 'external_resume:step-exec-1',
       respondedAt: '2026-04-29T10:00:00.000Z',
       channel: 'external',
-      strippedToken: { hash: TOKEN_HASH, expiresAt: FUTURE_DATE },
+      strippedToken: {
+        hash: TOKEN_HASH,
+        expiresAt: FUTURE_DATE,
+        source: 'state',
+        mirroredOnInput: false,
+      },
     });
     workflowsService.getWorkflowsExecutionEngine.mockResolvedValue({
       resumeWorkflowExecution: jest.fn().mockResolvedValue({
         resumedBy: 'external_resume:step-exec-1',
       }),
     } as unknown as WorkflowsExecutionEnginePluginStart);
+  });
+
+  it('resumes when the token is stored on step state', async () => {
+    workflowsService.getStepExecution.mockResolvedValue(
+      createStepExecution({
+        input: {
+          schema: {
+            type: 'object',
+            properties: {
+              severity: { type: 'string', title: 'Severity' },
+            },
+          },
+        },
+        state: {
+          [HITL_TOKEN_HASH_INPUT_FIELD]: TOKEN_HASH,
+          [HITL_TOKEN_EXPIRES_AT_INPUT_FIELD]: FUTURE_DATE,
+        },
+      })
+    );
+
+    await resumeWorkflowExecutionExternallyWithInput(workflowsService, {
+      executionId: 'exec-1',
+      stepId: 'step-exec-1',
+      spaceId: 'default',
+      token: TOKEN,
+      input: { severity: 'high' },
+    });
+
+    const engine = await workflowsService.getWorkflowsExecutionEngine();
+    expect(engine.resumeWorkflowExecution).toHaveBeenCalledWith(
+      'exec-1',
+      'default',
+      { severity: 'high' },
+      undefined,
+      { resumedBy: 'external_resume:step-exec-1' }
+    );
   });
 
   it('resumes a waiting waitForInput step with validated POST input', async () => {

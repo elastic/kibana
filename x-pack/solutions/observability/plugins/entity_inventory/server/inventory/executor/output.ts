@@ -51,12 +51,14 @@ export const planRowLimit = (requested: number): number => {
 };
 
 /**
- * The total and whether rows were left out. There is no count query: each plan asks for one row
- * more than requested, so a plan that returns its full limit is known to be cut. When no plan is
- * cut and none is partial the merge holds every entity in the window and the total is exact; a cut
- * or partial plan makes it unknown. `MAX_PLAN_ROWS` is 10,000 because Elasticsearch silently
- * shortens a `LIMIT` above `esql.query.result_truncation_max_size` (default 10,000), so a higher
- * limit could be cut without any signal (elastic/elasticsearch#161965).
+ * The total and whether the row limit left rows out. There is no count query: each plan asks for
+ * one row more than requested, so a plan that returns its full limit is known to be cut. `truncated`
+ * is true only for a cut plan or a merge over `requested` rows; a partial plan is not truncation,
+ * since a narrower window would not fix it. When no plan is cut and none is partial the merge holds
+ * every entity in the window and the total is exact; otherwise the total is null. `MAX_PLAN_ROWS`
+ * is 10,000 because Elasticsearch silently shortens a `LIMIT` above
+ * `esql.query.result_truncation_max_size` (default 10,000), so a higher limit could be cut without
+ * any signal (elastic/elasticsearch#161965).
  */
 export const summarizeResults = (
   results: PlanResult[],
@@ -68,7 +70,7 @@ export const summarizeResults = (
   const partial = results.some(({ isPartial }) => isPartial);
   return {
     total: cut || partial ? null : mergedRowCount,
-    truncated: cut || partial || mergedRowCount > requested,
+    truncated: cut || mergedRowCount > requested,
   };
 };
 
