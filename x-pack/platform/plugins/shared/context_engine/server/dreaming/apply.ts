@@ -21,6 +21,7 @@ import {
   findKiRevision,
   isKiDeleted,
   putKiRevision,
+  type KiRevision,
   type KiWriter,
   type StoredKi,
 } from '../ai_indices/ki_revision';
@@ -41,6 +42,7 @@ import {
   type DreamedKiReference,
 } from './dreamed_ki';
 import { kiUri } from './ids';
+import { derivedPermissions, isVisibleInSpace, type KiPermissions } from './permissions';
 import type {
   DreamingOperation,
   RelationshipOperation,
@@ -56,12 +58,24 @@ export interface ApplyCounts {
   deleted: number;
 }
 
+/** A KI a dry run would write, as it would be stored; `ki` is absent when it would be deleted. */
+export interface PlannedWrite {
+  change: 'created' | 'updated' | 'deleted';
+  ki?: StoredKi;
+}
+
 export interface ApplyContext {
   esClient: ElasticsearchClient;
   aiIndexId: string;
   dest: AiIndexDest;
   writer: KiWriter;
+  /** The space dreaming runs in: KIs it cannot see there are left alone. */
+  spaceId: string;
+  /** The permissions of each memory the model was shown. */
+  memoryPermissions: ReadonlyMap<string, KiPermissions | undefined>;
   abortSignal?: AbortSignal;
+  /** Collects the writes by KI id instead of storing them. */
+  dryRun?: Map<string, PlannedWrite>;
 }
 
 const referenceKey = ({ uri, relation, description }: DreamedKiReference): string =>
@@ -94,12 +108,94 @@ const sourceReferences = (sourceMemoryIds: readonly string[]): DreamedKiReferenc
 
 type BuildDocument = (current: DreamedKi | undefined) => Omit<DreamedKi, 'governance'> | undefined;
 
-const writeDocument = async (
-  { esClient, aiIndexId, dest, writer, abortSignal }: ApplyContext,
+const activeSource = (revision: KiRevision | undefined): DreamedKi | undefined => {
+  const source = revision?.source as DreamedKi | undefined;
+  return source && !isKiDeleted(source) ? source : undefined;
+};
+
+const storedDocument = (
+  document: Omit<DreamedKi, 'governance'>,
+  kiId: string,
+  current: DreamedKi | undefined,
+  writer: KiWriter
+): StoredKi => {
+  const now = new Date().toISOString();
+  return {
+    ...document,
+    '@timestamp': now,
+    id: kiId,
+    updated_at: now,
+    governance: {
+      provenance: {
+        created_by: current?.governance?.provenance?.created_by ?? writer,
+        updated_by: writer,
+      },
+      lifecycle: { status: 'active' },
+    },
+  } satisfies StoredKi;
+};
+
+const hiddenFrom = ({ spaceId }: ApplyContext, revision: KiRevision | undefined): boolean => {
+  const source = revision?.source as DreamedKi | undefined;
+  return source !== undefined && !isVisibleInSpace(source.permissions, spaceId);
+};
+
+const withDerivedPermissions =
+  (
+    { spaceId, memoryPermissions }: ApplyContext,
+    sourceMemoryIds: readonly string[],
+    build: BuildDocument
+  ): BuildDocument =>
+  (current) => {
+    const document = build(current);
+    if (!document) {
+      return undefined;
+    }
+    const permissions = derivedPermissions(
+      [current?.permissions, ...sourceMemoryIds.map((id) => memoryPermissions.get(id))],
+      spaceId
+    );
+    return permissions ? { ...document, permissions } : document;
+  };
+
+const planDocument = async (
+  context: ApplyContext,
+  planned: Map<string, PlannedWrite>,
   kiId: string,
   build: BuildDocument
-): Promise<'created' | 'updated' | 'skipped'> =>
-  pRetry(
+): Promise<'created' | 'updated' | 'skipped'> => {
+  const { esClient, aiIndexId, dest, writer, abortSignal } = context;
+  const previous = planned.get(kiId);
+  const revision = previous
+    ? undefined
+    : await findKiRevision({ esClient, aiIndexId, dest, kiId, includeSource: true, abortSignal });
+  if (hiddenFrom(context, revision)) {
+    return 'skipped';
+  }
+  const current = previous ? (previous.ki as DreamedKi | undefined) : activeSource(revision);
+  const document = build(current);
+  if (!document) {
+    return 'skipped';
+  }
+  planned.set(kiId, {
+    change: previous?.change === 'created' || !current ? 'created' : 'updated',
+    ki: storedDocument(document, kiId, current, writer),
+  });
+  return current ? 'updated' : 'created';
+};
+
+const writeDocument = async (
+  context: ApplyContext,
+  kiId: string,
+  sourceMemoryIds: readonly string[],
+  buildDocument: BuildDocument
+): Promise<'created' | 'updated' | 'skipped'> => {
+  const { esClient, aiIndexId, dest, writer, abortSignal, dryRun } = context;
+  const build = withDerivedPermissions(context, sourceMemoryIds, buildDocument);
+  if (dryRun) {
+    return planDocument(context, dryRun, kiId, build);
+  }
+  return pRetry(
     async () => {
       const revision = await findKiRevision({
         esClient,
@@ -109,31 +205,20 @@ const writeDocument = async (
         includeSource: true,
         abortSignal,
       });
-      const source = revision?.source as DreamedKi | undefined;
-      const current = source && !isKiDeleted(source) ? source : undefined;
+      if (hiddenFrom(context, revision)) {
+        return 'skipped' as const;
+      }
+      const current = activeSource(revision);
       const document = build(current);
       if (!document) {
         return 'skipped' as const;
       }
-      const now = new Date().toISOString();
       await putKiRevision({
         esClient,
         aiIndexId,
         dest,
         kiId,
-        document: {
-          ...document,
-          '@timestamp': now,
-          id: kiId,
-          updated_at: now,
-          governance: {
-            provenance: {
-              created_by: current?.governance?.provenance?.created_by ?? writer,
-              updated_by: writer,
-            },
-            lifecycle: { status: 'active' },
-          },
-        } satisfies StoredKi,
+        document: storedDocument(document, kiId, current, writer),
         existing: dest.type === 'data_stream' ? undefined : revision,
         failIfExists: revision === undefined,
         refresh: true,
@@ -150,6 +235,7 @@ const writeDocument = async (
       },
     }
   );
+};
 
 const latest = (...dates: Array<string | undefined>): string | undefined =>
   dates
@@ -193,7 +279,7 @@ const withAccessPatterns = (
 };
 
 const upsertEntity = (context: ApplyContext, operation: UpsertEntityOperation) =>
-  writeDocument(context, operation.id, (current) => ({
+  writeDocument(context, operation.id, operation.sourceMemoryIds, (current) => ({
     ...current,
     id: operation.id,
     type: `${ENTITY_TYPE_PREFIX}${operation.type}`,
@@ -208,7 +294,7 @@ const upsertEntity = (context: ApplyContext, operation: UpsertEntityOperation) =
   }));
 
 const upsertFact = (context: ApplyContext, operation: UpsertFactOperation) =>
-  writeDocument(context, operation.id, (current) => {
+  writeDocument(context, operation.id, operation.sourceMemoryIds, (current) => {
     const { about } = operation;
     const kept =
       about === undefined
@@ -238,7 +324,7 @@ const upsertFact = (context: ApplyContext, operation: UpsertFactOperation) =>
   });
 
 const applyRelationship = (context: ApplyContext, operation: RelationshipOperation) =>
-  writeDocument(context, operation.sourceId, (current) => {
+  writeDocument(context, operation.sourceId, operation.sourceMemoryIds, (current) => {
     if (!current) {
       return undefined;
     }
@@ -268,8 +354,39 @@ const applyRelationship = (context: ApplyContext, operation: RelationshipOperati
     };
   });
 
+const deletable = async (context: ApplyContext, kiId: string): Promise<boolean> => {
+  const { esClient, aiIndexId, dest, abortSignal } = context;
+  const revision = await findKiRevision({
+    esClient,
+    aiIndexId,
+    dest,
+    kiId,
+    includeSource: true,
+    abortSignal,
+  });
+  return revision !== undefined && !hiddenFrom(context, revision);
+};
+
+const planDelete = async (
+  context: ApplyContext,
+  planned: Map<string, PlannedWrite>,
+  kiId: string
+): Promise<boolean> => {
+  const exists = planned.has(kiId) || (await deletable(context, kiId));
+  if (exists) {
+    planned.set(kiId, { change: 'deleted' });
+  }
+  return exists;
+};
+
 const deleteKi = async (context: ApplyContext, kiId: string): Promise<boolean> => {
-  const { esClient, aiIndexId, dest, writer, abortSignal } = context;
+  const { esClient, aiIndexId, dest, writer, abortSignal, dryRun } = context;
+  if (dryRun) {
+    return planDelete(context, dryRun, kiId);
+  }
+  if (!(await deletable(context, kiId))) {
+    return false;
+  }
   try {
     await softDeleteKi(esClient, { aiIndexId, dest, kiId, writer, refresh: true, abortSignal });
     return true;

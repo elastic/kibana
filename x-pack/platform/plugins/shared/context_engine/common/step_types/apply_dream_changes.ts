@@ -32,6 +32,9 @@ export const APPLY_DREAM_CHANGES_STEP_ID = 'context-engine.applyDreamChanges' as
 
 const MAX_SOURCE_IDS = 100;
 const MAX_TIMESTAMP_LENGTH = 64;
+const MAX_PRIVILEGE_GROUPS = 100;
+const MAX_PRIVILEGE_NAMES = 50;
+const MAX_PRIVILEGE_LENGTH = 256;
 
 const refSchema = lazySchema(() => z.string().min(1).max(MAX_KI_ID_LENGTH));
 const typeSchema = lazySchema(() => z.string().max(MAX_DREAMING_TYPE_LENGTH));
@@ -125,14 +128,41 @@ export const applyDreamChangesInputSchema = lazySchema(() =>
                 lifecycle: z.object({ status: z.string().max(64).optional() }).optional(),
               })
               .optional(),
+            permissions: z
+              .object({
+                kibana: z
+                  .object({
+                    privileges: z
+                      .array(
+                        z.object({
+                          space: z.string().max(MAX_PRIVILEGE_LENGTH),
+                          name: z
+                            .array(z.string().max(MAX_PRIVILEGE_LENGTH))
+                            .max(MAX_PRIVILEGE_NAMES)
+                            .optional(),
+                          count: z.number().optional(),
+                        })
+                      )
+                      .max(MAX_PRIVILEGE_GROUPS)
+                      .optional(),
+                  })
+                  .optional(),
+              })
+              .optional(),
           })
           .passthrough()
       )
       .max(MAX_DREAMING_STEP_MEMORIES)
       .describe(
-        'The memories the model was shown, as read from the AI index: the latest revision of each. Every item it writes must cite some of them, or memories the item already cites. Deleted ones are ignored.'
+        'The memories the model was shown, as read from the AI index: the latest revision of each. Every item it writes must cite some of them, or memories the item already cites, and is visible only where they all are. Deleted ones are ignored.'
       ),
     changes: dreamChangeSetSchema.describe('The change set the dreaming model returned'),
+    dry_run: z
+      .boolean()
+      .optional()
+      .describe(
+        'Check and resolve the change set and report what it would write, without writing. Each call is previewed on its own, without what earlier calls of the same run would write.'
+      ),
   })
 );
 
@@ -141,6 +171,19 @@ const rejectedItemSchema = lazySchema(() =>
     item: z.string().describe('Which item of the change set, such as `fact new:1`'),
     reason: z.string().describe('Why it was not applied'),
   })
+);
+
+const plannedWriteSchema = lazySchema(() =>
+  z.object({
+    id: z.string().describe('The KI id'),
+    change: z.enum(['created', 'updated', 'deleted']),
+    type: z.string().optional().describe('Absent when it would be deleted'),
+    title: z.string().optional().describe('Absent when it would be deleted'),
+  })
+);
+
+const plannedDocumentSchema = lazySchema(() =>
+  z.object({ id: z.string(), type: z.string(), title: z.string() }).passthrough()
 );
 
 export const applyDreamChangesOutputSchema = lazySchema(() =>
@@ -154,6 +197,14 @@ export const applyDreamChangesOutputSchema = lazySchema(() =>
     dropped_access_patterns: z
       .number()
       .describe('Access patterns dropped because their example query did not run'),
+    would_write: z
+      .array(plannedWriteSchema)
+      .optional()
+      .describe('On a dry run, each KI it would write; nothing is stored'),
+    documents: z
+      .array(plannedDocumentSchema)
+      .optional()
+      .describe('On a dry run, each KI it would create or update, as it would be stored'),
   })
 );
 
@@ -185,7 +236,8 @@ export const applyDreamChangesStepCommonDefinition: CommonStepDefinition<
           'configured type, such as fact.preference or entity.customer. Every item must cite ' +
           'the memories it is based on. ' +
           'An item that breaks a rule is rejected and the rest still apply. Access patterns ' +
-          'whose example query does not run are dropped.',
+          'whose example query does not run are dropped. A dry run reports what it would ' +
+          'write and writes nothing.',
       }
     ),
   },

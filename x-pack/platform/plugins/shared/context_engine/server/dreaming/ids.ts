@@ -34,9 +34,9 @@ export const slugify = (name: string): string => {
   return lossless ? slug : `${slug}-${shortHash(identity)}`;
 };
 
-/** The KI id of an entity, from its type and name. */
+/** The KI id of an entity, from its type and name; a slug never holds `--`, so they cannot run together. */
 export const entityId = (type: string, name: string): string =>
-  `entity-${slugify(type)}-${slugify(name)}`;
+  `entity-${slugify(type)}--${slugify(name)}`;
 
 /** The KI id of a new fact, from the run, the batch of memories and the model's key. */
 export const factId = (executionId: string, batchKey: string, ref: string): string =>
