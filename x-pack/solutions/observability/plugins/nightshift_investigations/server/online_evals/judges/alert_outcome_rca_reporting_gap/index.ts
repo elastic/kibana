@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { MessageRole } from '@kbn/inference-common';
 import type { EvaluatorResult, RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
 import type { AlertOutcomeReferenceData } from '../alert_outcome_shared';
 import { MAX_JUDGE_INPUT_CHARS, alertOutcomeReferenceDataSchema } from '../alert_outcome_shared';
-import { renderTranscript, roundEvidenceSchema, truncate } from '../render_round';
-import { capExplanation, gradeToScore, runJudge } from '../run_judge';
+import { isEvidenceToolCall } from '../../../investigation_round';
+import { renderTraceMessages, roundEvidenceSchema, truncate } from '../render_round';
+import { capExplanation, gradeToScore, runConversationJudge } from '../run_judge';
 import type { AlertOutcomeRcaReportingGapOutput } from './prompt';
 import {
-  ALERT_OUTCOME_RCA_REPORTING_GAP_TOOL_NAME,
+  ALERT_OUTCOME_RCA_REPORTING_GAP_SYSTEM_PROMPT,
   alertOutcomeRcaReportingGapOutputSchema,
-  alertOutcomeRcaReportingGapPrompt,
+  alertOutcomeRcaReportingGapTool,
+  buildScoringRequest,
 } from './prompt';
 
 /** The transcript grade from which the cause counts as found during the investigation. */
@@ -52,7 +55,7 @@ const toScores = (output: AlertOutcomeRcaReportingGapOutput): EvaluatorResult['s
       name: 'alert_outcome_rca_no_reporting_gap',
       score: gap ? 0 : 1,
       label: `gap=${gap}`,
-      explanation: capExplanation(transcriptOnlySignals || reasoning),
+      explanation: capExplanation(transcriptOnlySignals || 'none'),
     },
   ];
 };
@@ -78,19 +81,37 @@ const definition: RegisteredEvaluatorDefinition<AlertOutcomeReferenceData> = {
       return { scores: [], notApplicable: { reason: 'no confirmed cause' } };
     }
 
-    if (round.steps.length === 0) {
+    // The transcript is the evidence the agent gathered: skip its own recording tools and reads of
+    // Nightshift-seeded files (wiki, memories, decision trees), which aren't investigation evidence.
+    const evidenceSteps = round.steps.filter(({ tool_id: toolId, arguments: args }) =>
+      isEvidenceToolCall(
+        toolId,
+        typeof args === 'object' && args !== null ? (args as Record<string, unknown>) : undefined
+      )
+    );
+    if (evidenceSteps.length === 0) {
       return { scores: [], notApplicable: { reason: 'no investigation transcript' } };
     }
 
-    const output = await runJudge({
+    const { messages, omittedToolCalls } = renderTraceMessages(
+      { ...round, steps: evidenceSteps },
+      { includeFinalAnswer: false }
+    );
+    const output = await runConversationJudge({
       inferenceClient,
-      prompt: alertOutcomeRcaReportingGapPrompt,
-      input: {
-        confirmed_root_cause: truncate(confirmedRootCause, MAX_JUDGE_INPUT_CHARS),
-        investigation_transcript: renderTranscript(round),
-        investigation_report: truncate(round.response.message, MAX_JUDGE_INPUT_CHARS),
-      },
-      toolName: ALERT_OUTCOME_RCA_REPORTING_GAP_TOOL_NAME,
+      system: ALERT_OUTCOME_RCA_REPORTING_GAP_SYSTEM_PROMPT,
+      messages: [
+        ...messages,
+        {
+          role: MessageRole.User,
+          content: buildScoringRequest({
+            confirmedRootCause: truncate(confirmedRootCause, MAX_JUDGE_INPUT_CHARS),
+            investigationReport: truncate(round.response.message, MAX_JUDGE_INPUT_CHARS),
+            omittedToolCalls,
+          }),
+        },
+      ],
+      tool: alertOutcomeRcaReportingGapTool,
       outputSchema: alertOutcomeRcaReportingGapOutputSchema,
     });
 

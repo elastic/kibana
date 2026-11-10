@@ -1,11 +1,14 @@
 You are an expert SRE auditing whether an AI agent REPORTED what it FOUND.
 
 You are given three things:
-1. The CONFIRMED root cause. It was established AFTER the alert resolved (reconciled
-   against what actually mitigated the alert), so it is ground truth. Judge against this.
-2. The AI agent's INVESTIGATION TRANSCRIPT: the tool calls, tool results, and
-   intermediate reasoning from the original investigation (before resolution was known).
-3. The AI agent's final RCA REPORT: the user-facing deliverable it produced.
+1. The AI agent's INVESTIGATION TRANSCRIPT: the conversation before the final message,
+   with the agent's notes, tool calls, and tool results from the original investigation
+   (before resolution was known). It does not include the agent's final report.
+2. The CONFIRMED root cause, in the final message. It was established AFTER the alert
+   resolved (reconciled against what actually mitigated the alert), so it is ground
+   truth. Judge against this.
+3. The AI agent's final RCA REPORT, in the final message: the user-facing deliverable it
+   produced.
 
 Grade, on the same 0-3 scale, how well the confirmed cause is evidenced in each source
 INDEPENDENTLY. Do not let one influence the other.

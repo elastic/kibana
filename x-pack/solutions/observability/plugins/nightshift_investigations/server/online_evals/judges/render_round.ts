@@ -39,7 +39,11 @@ const stringify = (value: unknown): string => {
   return typeof value === 'string' ? value : JSON.stringify(value);
 };
 
-const renderSteps = (round: EvidenceRound, { withNotes }: { withNotes: boolean }): string[] => {
+/**
+ * Renders the round as the transcript reference-free judges read: the user input, every tool
+ * call with its arguments and result, and the agent's final answer.
+ */
+export const renderRound = (round: EvidenceRound): string => {
   const renderedSteps: string[] = [];
   let usedChars = 0;
   let omitted = 0;
@@ -49,13 +53,8 @@ const renderSteps = (round: EvidenceRound, { withNotes }: { withNotes: boolean }
       omitted++;
       return;
     }
-    const note =
-      withNotes && step.reasoning
-        ? [`Agent note:\n${truncate(step.reasoning, MAX_TOOL_FIELD_CHARS)}`]
-        : [];
     const rendered = [
       `## Tool call ${index + 1}: ${step.tool_id ?? 'unknown tool'}`,
-      ...note,
       `Arguments:\n${truncate(stringify(step.arguments), MAX_TOOL_FIELD_CHARS)}`,
       `Result:\n${truncate(stringify(step.result), MAX_TOOL_FIELD_CHARS)}`,
     ].join('\n');
@@ -67,23 +66,12 @@ const renderSteps = (round: EvidenceRound, { withNotes }: { withNotes: boolean }
     renderedSteps.push(`[${omitted} more tool calls omitted to fit the judge's context]`);
   }
 
-  return renderedSteps;
-};
-
-/**
- * Renders the round as the transcript reference-free judges read: the user input, every tool
- * call with its arguments and result, and the agent's final answer.
- */
-export const renderRound = (round: EvidenceRound): string =>
-  [
+  return [
     `## User\n${round.input.message}`,
-    ...renderSteps(round, { withNotes: false }),
+    ...renderedSteps,
     `## Agent final answer\n${round.response.message}`,
   ].join('\n\n');
-
-/** Renders the user input and every tool call with the agent's note, leaving out the final answer. */
-export const renderTranscript = (round: EvidenceRound): string =>
-  [`## User\n${round.input.message}`, ...renderSteps(round, { withNotes: true })].join('\n\n');
+};
 
 const toToolCallArguments = (value: unknown): ToolCallArguments => {
   const serialized = stringify(value);
@@ -99,10 +87,12 @@ const toToolCallArguments = (value: unknown): ToolCallArguments => {
  * Renders the round as the conversation the agent had: the user input, then each tool call as an
  * assistant message (carrying the agent's note before the call, when it wrote one) followed by its
  * tool result, then the agent's final answer as an assistant
- * message. Tool calls past the character budget are counted in `omittedToolCalls`, not rendered.
+ * message, unless `includeFinalAnswer` is false. Tool calls past the character budget are counted
+ * in `omittedToolCalls`, not rendered.
  */
 export const renderTraceMessages = (
-  round: EvidenceRound
+  round: EvidenceRound,
+  { includeFinalAnswer = true }: { includeFinalAnswer?: boolean } = {}
 ): { messages: Message[]; omittedToolCalls: number } => {
   const messages: Message[] = [{ role: MessageRole.User, content: round.input.message }];
   let usedChars = 0;
@@ -131,6 +121,8 @@ export const renderTraceMessages = (
     );
   });
 
-  messages.push({ role: MessageRole.Assistant, content: round.response.message });
+  if (includeFinalAnswer) {
+    messages.push({ role: MessageRole.Assistant, content: round.response.message });
+  }
   return { messages, omittedToolCalls };
 };
