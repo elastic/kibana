@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
+
 import {
   ADD_INTEGRATION_POLICY_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
@@ -13,15 +15,13 @@ import {
 } from '../screens/integrations';
 import { EXISTING_HOSTS_TAB } from '../screens/fleet';
 import { CONFIRM_MODAL } from '../screens/navigation';
-const INPUT_TEST_PACKAGE = 'input_package-1.0.0';
-const INTEGRATION_TEST_PACKAGE = 'logs_integration-1.0.0';
-const INTEGRATION_TEST_PACKAGE_NO_DATASET = 'logs_int_no_dataset-1.0.0';
-
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
-
 import { request } from '../tasks/common';
 import { login } from '../tasks/login';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
+
+const INPUT_TEST_PACKAGE = 'input_package-1.0.0';
+const INTEGRATION_TEST_PACKAGE = 'logs_integration-1.0.0';
+const INTEGRATION_TEST_PACKAGE_NO_DATASET = 'logs_int_no_dataset-1.0.0';
 
 describe('Input package create and edit package policy', () => {
   beforeEach(() => {

@@ -5658,7 +5658,7 @@ importers:
         version: link:packages/kbn-find-used-node-modules
       '@kbn/fleet-plugin-cypress':
         specifier: workspace:*
-        version: link:x-pack/platform/plugins/shared/fleet/cypress
+        version: link:x-pack/platform/plugins/shared/fleet-cypress
       '@kbn/ftr-benchmarks':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-ftr-benchmarks
@@ -9488,7 +9488,7 @@ importers:
 
   x-pack/platform/plugins/shared/fleet: {}
 
-  x-pack/platform/plugins/shared/fleet/cypress: {}
+  x-pack/platform/plugins/shared/fleet-cypress: {}
 
   x-pack/platform/plugins/shared/global_search: {}
 

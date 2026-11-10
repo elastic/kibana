@@ -1293,7 +1293,7 @@ x-pack/platform/plugins/shared/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/features @elastic/kibana-core
 x-pack/platform/plugins/shared/fields_metadata @elastic/streams-ui
 x-pack/platform/plugins/shared/fleet @elastic/streams-ui
-x-pack/platform/plugins/shared/fleet/cypress @elastic/streams-ui
+x-pack/platform/plugins/shared/fleet-cypress @elastic/streams-ui
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/inbox @elastic/security-generative-ai
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management

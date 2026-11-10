@@ -1,6 +1,6 @@
 # Cypress Tests
 
-The `fleet/cypress` directory contains functional UI tests that execute using [Cypress](https://www.cypress.io/).
+The `fleet-cypress` directory contains functional UI tests that execute using [Cypress](https://www.cypress.io/).
 
 ## Running the tests
 
@@ -85,7 +85,7 @@ Cypress convention. Fixtures are used as external pieces of static data when we 
 
 ### plugins/
 
-Cypress convention. As a convenience, by default Cypress will automatically include the plugins file cypress/plugins/index.js before every single spec file it runs.
+Cypress convention. As a convenience, by default Cypress will automatically include the plugins file plugins/index.ts before every single spec file it runs.
 
 We use the plugins file to register [tasks](https://docs.cypress.io/api/commands/task#Syntax) which are helper functions which run in the parent node process instead of the browser. Tasks can be used to make elastic commands for example.
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 import {
   ADD_INTEGRATION_POLICY_BTN,
   CREATE_PACKAGE_POLICY_SAVE_BTN,
@@ -14,7 +15,6 @@ import {
 import { EXISTING_HOSTS_TAB } from '../screens/fleet';
 import { CONFIRM_MODAL } from '../screens/navigation';
 
-import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { login } from '../tasks/login';
 import { request } from '../tasks/common';

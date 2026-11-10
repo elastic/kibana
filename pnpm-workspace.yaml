@@ -1494,7 +1494,7 @@ packages:
   - 'x-pack/platform/plugins/shared/features'
   - 'x-pack/platform/plugins/shared/fields_metadata'
   - 'x-pack/platform/plugins/shared/fleet'
-  - 'x-pack/platform/plugins/shared/fleet/cypress'
+  - 'x-pack/platform/plugins/shared/fleet-cypress'
   - 'x-pack/platform/plugins/shared/global_search'
   - 'x-pack/platform/plugins/shared/inbox'
   - 'x-pack/platform/plugins/shared/index_management'
