@@ -127,6 +127,7 @@ export const ModelSettings: React.FC = () => {
   const history = useHistory();
   const unblockRef = useRef<(() => void) | null>(null);
   const [pendingLocation, setPendingLocation] = useState<Location | null>(null);
+  const [discardVersion, setDiscardVersion] = useState(0);
 
   useEffect(() => {
     if (!isDirty) {
@@ -180,6 +181,7 @@ export const ModelSettings: React.FC = () => {
   const handleDiscard = useCallback(() => {
     resetFeatures();
     resetDefaultModel();
+    setDiscardVersion((version) => version + 1);
   }, [resetFeatures, resetDefaultModel]);
 
   const handleDiscardAndLeave = useCallback(() => {
@@ -396,6 +398,7 @@ export const ModelSettings: React.FC = () => {
                     isTechPreview={section.isTechPreview}
                     globalDefaultId={defaultModelState.defaultModelId}
                     canManage={canManage}
+                    discardVersion={discardVersion}
                   />
                   <EuiSpacer size="xl" />
                 </React.Fragment>

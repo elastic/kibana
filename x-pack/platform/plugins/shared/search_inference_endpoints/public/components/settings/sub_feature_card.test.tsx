@@ -324,6 +324,37 @@ describe('SubFeatureCard', () => {
       expect(screen.getByTestId('add-model-button')).toBeInTheDocument();
     });
 
+    it('leaves custom mode when the page discards unsaved changes', () => {
+      const cardProps = {
+        featureId: feature.featureId,
+        feature,
+        endpointIds: ['ep-1'],
+        effectiveRecommendedEndpoints: ['ep-1'],
+        onEndpointsChange,
+        invalidEndpointIds: new Set<string>(),
+        deprecatedEndpointsMap: new Map(),
+        ...defaultGlobalRowProps,
+      };
+      const { rerender } = render(
+        <Wrapper>
+          <SubFeatureCard {...cardProps} discardVersion={0} />
+        </Wrapper>
+      );
+
+      fireEvent.click(screen.getByTestId('useRecommendedDefaultsToggle-test_feature'));
+      fireEvent.click(screen.getByText('Turn off recommended defaults'));
+      expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).not.toBeChecked();
+
+      rerender(
+        <Wrapper>
+          <SubFeatureCard {...cardProps} discardVersion={1} />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('useRecommendedDefaultsToggle-test_feature')).toBeChecked();
+      expect(screen.queryByTestId('add-model-button')).not.toBeInTheDocument();
+    });
+
     it('opens the reset modal when toggling OFF to ON', () => {
       render(
         <Wrapper>

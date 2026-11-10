@@ -32,8 +32,14 @@ jest.mock('./no_models_empty_prompt', () => ({
   NoModelsEmptyPrompt: () => <div data-test-subj="settings-no-models">NoModelsEmptyPrompt</div>,
 }));
 jest.mock('./feature_section', () => ({
-  FeatureSection: ({ parentName }: { parentName: string }) => (
-    <div data-test-subj={`featureSection-${parentName}`} />
+  FeatureSection: ({
+    parentName,
+    discardVersion,
+  }: {
+    parentName: string;
+    discardVersion?: number;
+  }) => (
+    <div data-test-subj={`featureSection-${parentName}`} data-discard-version={discardVersion} />
   ),
 }));
 jest.mock('./default_model_section', () => ({
@@ -479,11 +485,21 @@ describe('ModelSettings', () => {
         </Wrapper>
       );
 
+      expect(screen.getByTestId('featureSection-Search')).toHaveAttribute(
+        'data-discard-version',
+        '0'
+      );
+
       fireEvent.click(screen.getByTestId('settings-cancel-button'));
 
       expect(resetFeatures).toHaveBeenCalledTimes(1);
       expect(resetDefaultModel).toHaveBeenCalledTimes(1);
       expect(mockNavigateToUrl).not.toHaveBeenCalled();
+      // Sub-feature cards drop their sticky custom-mode flag on discard.
+      expect(screen.getByTestId('featureSection-Search')).toHaveAttribute(
+        'data-discard-version',
+        '1'
+      );
     });
   });
 

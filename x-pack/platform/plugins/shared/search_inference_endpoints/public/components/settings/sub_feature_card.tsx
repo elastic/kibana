@@ -60,6 +60,8 @@ interface SubFeatureCardProps {
   isFeatureDirty: boolean;
   globalDefaultId: string;
   canManage?: boolean;
+  /** Bumped by the page each time unsaved changes are discarded; clears the sticky custom-mode flag. */
+  discardVersion?: number;
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -74,6 +76,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   isFeatureDirty,
   globalDefaultId,
   canManage = true,
+  discardVersion = 0,
 }) => {
   const { data: connectors = [] } = useConnectors();
   const { features: registeredFeatures } = useRegisteredFeatures();
@@ -85,6 +88,10 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   // Sticky session flag: the editable list is seeded with the recommended endpoints, so without this
   // the toggle would snap back to ON immediately after the user confirms "Turn off recommended defaults".
   const [hasOptedIntoCustomMode, setHasOptedIntoCustomMode] = useState(false);
+  useEffect(() => {
+    // Discarding restores the saved assignments, so the card must also leave custom mode.
+    setHasOptedIntoCustomMode(false);
+  }, [discardVersion]);
   const listRef = useRef<HTMLDivElement>(null);
   const { isTechPreview, isBeta } = feature;
 
