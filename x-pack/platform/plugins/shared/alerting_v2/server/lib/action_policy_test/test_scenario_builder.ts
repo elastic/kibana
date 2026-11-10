@@ -18,9 +18,10 @@ import {
 /**
  * Builds the workflow payloads a policy would dispatch for a synthetic scenario, one per action
  * group. Grouping goes through the dispatcher's own `buildActionGroups`, so group keys and payloads
- * match production. Group ids are prefixed with `TEST_ID_PREFIX` so a test run can never share an
- * id with a real group of the same policy. The policy KQL matcher is not applied: synthetic alerts
- * are not generated to satisfy it.
+ * match production. Generated group ids are prefixed with `TEST_ID_PREFIX` so they differ from the
+ * ids of real groups of the same policy. The send route does not enforce this: a payload edited
+ * by the user is sent as is. The policy KQL matcher is not applied: synthetic alerts are not
+ * generated to satisfy it.
  *
  * The synthetic alerts share their grouping values, so this always builds exactly one group, and
  * callers send the first one. Building several groups also needs send results per group, not only

@@ -5,31 +5,66 @@
  * 2.0.
  */
 
+import { isObject, isPlainObject, isString } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { McpToolConfig } from '@kbn/agent-builder-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { ListToolsResponse } from '@kbn/mcp-client';
+import type {
+  ActionResult,
+  ActionsClient,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
+import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mcp/constants';
+import type { ListToolsResponse, Tool } from '@kbn/mcp-client';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type { Logger } from '@kbn/core/server';
 import type { ToolTypeDefinition } from '../definitions';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 import { validateConfig } from './validate_configuration';
 
+const isMcpServerTool = (value: unknown): value is Tool =>
+  isObject(value) &&
+  'name' in value &&
+  isString(value.name) &&
+  'inputSchema' in value &&
+  isPlainObject(value.inputSchema);
+
+const isListToolsResponse = (value: unknown): value is ListToolsResponse =>
+  isObject(value) &&
+  'tools' in value &&
+  Array.isArray(value.tools) &&
+  value.tools.every(isMcpServerTool);
+
 /**
- * Lists available tools from an MCP connector by calling the listTools subAction.
+ * Builds the error message for a connector that is not an MCP (`.mcp`) connector.
+ *
+ * @param connectorId - ID of the connector referenced by the MCP tool.
+ * @param actionTypeId - The connector's actual type.
+ * @returns A message naming the expected and actual connector types.
  */
-export async function listMcpTools({
-  actions,
-  request,
-  connectorId,
+export const getNotMcpConnectorMessage = (connectorId: string, actionTypeId: string): string =>
+  `Connector '${connectorId}' is not an MCP connector. Expected type '${MCP_CONNECTOR_TYPE_ID}', got '${actionTypeId}'`;
+
+/**
+ * Lists available tools from an already-loaded connector by calling the listTools subAction.
+ *
+ * @param actionsClient - Actions client scoped to the current request.
+ * @param connector - The connector to list tools from, as returned by `actionsClient.get`.
+ * @throws {Error} when the connector is not an MCP (`.mcp`) connector, or the sub-action
+ * fails or returns an unexpected response.
+ */
+export async function listConnectorMcpTools({
+  actionsClient,
+  connector: { id: connectorId, actionTypeId },
 }: {
-  actions: ActionsPluginStart;
-  request: KibanaRequest;
-  connectorId: string;
+  actionsClient: ActionsClient;
+  connector: Pick<ActionResult, 'id' | 'actionTypeId'>;
 }): Promise<ListToolsResponse> {
-  const actionsClient = await actions.getActionsClientWithRequest(request);
+  if (actionTypeId !== MCP_CONNECTOR_TYPE_ID) {
+    throw new Error(getNotMcpConnectorMessage(connectorId, actionTypeId));
+  }
+
   const result = await actionsClient.execute({
     actionId: connectorId,
     params: {
@@ -42,7 +77,32 @@ export async function listMcpTools({
     throw new Error(result.serviceMessage ?? result.message ?? 'Failed to list MCP tools');
   }
 
-  return result.data as ListToolsResponse;
+  const { data } = result;
+  if (!isListToolsResponse(data)) {
+    throw new Error(`Unexpected listTools response from connector '${connectorId}'`);
+  }
+
+  return data;
+}
+
+/**
+ * Lists available tools from an MCP connector by calling the listTools subAction.
+ *
+ * @throws {Error} when the connector cannot be loaded, is not an MCP (`.mcp`) connector,
+ * or the sub-action fails or returns an unexpected response.
+ */
+export async function listMcpTools({
+  actions,
+  request,
+  connectorId,
+}: {
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
+  connectorId: string;
+}): Promise<ListToolsResponse> {
+  const actionsClient = await actions.getActionsClientWithRequest(request);
+  const connector = await actionsClient.get({ id: connectorId });
+  return listConnectorMcpTools({ actionsClient, connector });
 }
 
 /**
@@ -89,7 +149,8 @@ interface McpToolExecutionResultError {
 type McpToolExecutionResult = McpToolExecutionResultSuccess | McpToolExecutionResultError;
 
 /**
- * Executes an MCP tool via the connector's callTool sub-action
+ * Executes an MCP tool via the connector's callTool sub-action.
+ * Connectors that are not of type `.mcp` are rejected without being executed.
  */
 async function executeMcpTool({
   actions,
@@ -105,6 +166,19 @@ async function executeMcpTool({
   toolArguments: Record<string, unknown>;
 }): Promise<McpToolExecutionResult> {
   const actionsClient = await actions.getActionsClientWithRequest(request);
+
+  const { actionTypeId } = await actionsClient.get({ id: connectorId });
+  if (actionTypeId !== MCP_CONNECTOR_TYPE_ID) {
+    return {
+      isError: true,
+      content:
+        `${getNotMcpConnectorMessage(
+          connectorId,
+          actionTypeId
+        )}, so MCP tool '${toolName}' cannot run. ` +
+        'Do not retry. Tell the user this tool must be deleted or updated to use an MCP connector.',
+    };
+  }
 
   const result = await actionsClient.execute({
     actionId: connectorId,
@@ -143,8 +217,10 @@ async function executeMcpTool({
  */
 export const getMcpToolType = ({
   actions,
+  logger,
 }: {
   actions: ActionsPluginStart;
+  logger: Logger;
 }): ToolTypeDefinition<ToolType.mcp, McpToolConfig, z.ZodObject<any>> => {
   return {
     toolType: ToolType.mcp,
@@ -158,7 +234,16 @@ export const getMcpToolType = ({
             actions,
             request,
             connectorId: config.connector_id,
-          }).catch(() => undefined);
+          }).catch((error) => {
+            logger.warn(
+              `Failed to list tools for MCP tool '${config.tool_name}' on connector '${
+                config.connector_id
+              }', falling back to an empty schema: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            return undefined;
+          });
         }
         return toolsPromise;
       };
@@ -166,9 +251,9 @@ export const getMcpToolType = ({
       return {
         getHandler: () => {
           return async (params, context) => {
-            const { logger } = context;
+            const { logger: executionLogger } = context;
 
-            logger.debug(
+            executionLogger.debug(
               `Executing MCP tool: connector=${config.connector_id}, tool=${config.tool_name}`
             );
 
@@ -205,7 +290,7 @@ export const getMcpToolType = ({
                 ],
               };
             } catch (error) {
-              logger.error(`MCP tool execution failed: ${error}`);
+              executionLogger.error(`MCP tool execution failed: ${error}`);
               return {
                 results: [
                   {
@@ -223,13 +308,28 @@ export const getMcpToolType = ({
         },
 
         getSchema: async () => {
-          const result = await getToolsOnce();
-          const inputSchema = result?.tools.find((t) => t.name === config.tool_name)?.inputSchema;
-          if (inputSchema) {
-            const zodSchema = fromJSONSchema(inputSchema as Record<string, unknown>);
-            return (zodSchema ?? z.object({})) as z.ZodObject<any>;
+          // A single unresolvable schema must not fail every agent round or MCP server
+          // response that includes this tool, so any failure falls back to an empty schema.
+          try {
+            const result = await getToolsOnce();
+            const inputSchema = result?.tools.find(
+              (tool) => tool.name === config.tool_name
+            )?.inputSchema;
+            if (inputSchema) {
+              const zodSchema = fromJSONSchema(inputSchema as Record<string, unknown>);
+              return (zodSchema ?? z.object({})) as z.ZodObject<any>;
+            }
+            return z.object({});
+          } catch (error) {
+            logger.warn(
+              `Failed to resolve input schema for MCP tool '${config.tool_name}' on connector '${
+                config.connector_id
+              }', falling back to an empty schema: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            );
+            return z.object({});
           }
-          return z.object({});
         },
 
         getLlmDescription: ({ description }) => {

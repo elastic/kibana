@@ -80,6 +80,9 @@ components:
           type: string
         tool_id:
           type: string
+        reasoning:
+          type: string
+          description: The agent's own note immediately before this call, when the source records one.
         # Wrap unknown schemas so the generator preserves OpenAPI optionality.
         arguments:
           anyOf:

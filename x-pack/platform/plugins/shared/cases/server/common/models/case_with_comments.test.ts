@@ -10,6 +10,7 @@ import { createCasesClientMockArgs } from '../../client/mocks';
 import { mockCaseComments, mockCases } from '../../mocks';
 import { CaseCommentModel } from './case_with_comments';
 import {
+  MAX_ALERTS_PER_CASE,
   MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
@@ -1065,6 +1066,105 @@ describe('CaseCommentModel', () => {
   });
 
   describe('updateComment', () => {
+    const currentAlert = {
+      ...currentAttachment,
+      attributes: {
+        ...currentAttachment.attributes,
+        ...unifiedAlertComment,
+      },
+    } as unknown as typeof currentAttachment;
+
+    const replaceAlert = (
+      target: CaseCommentModel,
+      attachmentId: string | string[],
+      index: string | string[] = 'alert-index-1'
+    ) =>
+      target.updateComment({
+        updateRequest: {
+          id: 'comment-id',
+          version: 'comment-version',
+          ...unifiedAlertComment,
+          attachmentId,
+          metadata: { ...unifiedAlertComment.metadata, index },
+        },
+        updatedAt: createdDate,
+        currentAttachment: currentAlert,
+      });
+
+    beforeEach(() => {
+      clientArgs.services.caseService.getCase.mockResolvedValue(theCase);
+      clientArgs.services.attachmentService.countAlertsWithinCase.mockResolvedValue(1);
+      clientArgs.services.attachmentService.countPersistableStateAndExternalReferenceAttachments.mockResolvedValue(
+        0
+      );
+    });
+
+    it('writes the attachment with a refresh before the totals are aggregated', async () => {
+      await model.updateComment({
+        updateRequest: { id: 'comment-id', version: 'comment-version', ...unifiedComment },
+        updatedAt: createdDate,
+        currentAttachment,
+      });
+
+      const [{ options }] = clientArgs.services.attachmentService.update.mock.calls[0];
+      expect(options?.refresh).toBe(true);
+      expect(clientArgs.services.attachmentService.update.mock.invocationCallOrder[0]).toBeLessThan(
+        clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mock
+          .invocationCallOrder[0]
+      );
+    });
+
+    it('throws if an update adds an alert to a closed case', async () => {
+      clientArgs.services.caseService.getCase.mockResolvedValue(closedCase);
+      const modelForClosedCase = await CaseCommentModel.create(closedCase.id, clientArgs);
+
+      await expect(replaceAlert(modelForClosedCase, 'alert-id-2')).rejects.toThrow(
+        'Alert cannot be attached to a closed case'
+      );
+      expect(clientArgs.services.attachmentService.update).not.toHaveBeenCalled();
+    });
+
+    it('allows updating an alert on a closed case without adding references', async () => {
+      clientArgs.services.caseService.getCase.mockResolvedValue(closedCase);
+      const modelForClosedCase = await CaseCommentModel.create(closedCase.id, clientArgs);
+
+      await expect(replaceAlert(modelForClosedCase, 'alert-id-1')).resolves.not.toThrow();
+    });
+
+    it('throws if the update would push the case over the alert limit', async () => {
+      clientArgs.services.attachmentService.countAlertsWithinCase.mockResolvedValue(
+        MAX_ALERTS_PER_CASE
+      );
+
+      await expect(
+        replaceAlert(model, ['alert-id-1', 'alert-id-2'], ['alert-index-1', 'alert-index-2'])
+      ).rejects.toThrow('Case has reached the maximum allowed number');
+      expect(clientArgs.services.attachmentService.update).not.toHaveBeenCalled();
+    });
+
+    it('does not count the replaced alerts twice when the case is at the alert limit', async () => {
+      clientArgs.services.attachmentService.countAlertsWithinCase.mockResolvedValue(
+        MAX_ALERTS_PER_CASE
+      );
+
+      await expect(replaceAlert(model, 'alert-id-2')).resolves.not.toThrow();
+    });
+
+    it('links only the newly referenced alerts to the case', async () => {
+      await replaceAlert(model, ['alert-id-1', 'alert-id-2'], ['alert-index-1', 'alert-index-2']);
+
+      expect(clientArgs.services.alertsService.bulkUpdateCases).toHaveBeenCalledWith({
+        alerts: [{ id: 'alert-id-2', index: 'alert-index-2' }],
+        caseIds: [theCase.id],
+      });
+    });
+
+    it('does not link alerts when the update adds no references', async () => {
+      await replaceAlert(model, 'alert-id-1');
+
+      expect(clientArgs.services.alertsService.bulkUpdateCases).not.toHaveBeenCalled();
+    });
+
     it('partial updates the case', async () => {
       await model.updateComment({
         updateRequest: {
@@ -1554,6 +1654,43 @@ describe('CaseCommentModel', () => {
           status: model.savedObject.attributes.status,
         },
       ]);
+    });
+
+    describe('updateComment', () => {
+      const currentAttack = {
+        ...currentAttachment,
+        attributes: { ...currentAttachment.attributes, ...unifiedAttackComment },
+      } as unknown as typeof currentAttachment;
+
+      const replaceAttack = (attachmentId: string) =>
+        model.updateComment({
+          updateRequest: {
+            id: 'comment-id',
+            version: 'comment-version',
+            ...unifiedAttackComment,
+            attachmentId,
+          },
+          updatedAt: createdDate,
+          currentAttachment: currentAttack,
+        });
+
+      it('syncs a newly referenced attack to the current case status', async () => {
+        await replaceAttack('attack-id-2');
+
+        expect(clientArgs.services.alertsService.updateAlertsStatus).toHaveBeenCalledWith([
+          {
+            id: 'attack-id-2',
+            index: '.alerts-security.attack.discovery.alerts-default',
+            status: model.savedObject.attributes.status,
+          },
+        ]);
+      });
+
+      it('does not sync when the update keeps the same attack', async () => {
+        await replaceAttack('attack-id-1');
+
+        expect(clientArgs.services.alertsService.updateAlertsStatus).not.toHaveBeenCalled();
+      });
     });
 
     it('does not write the case id onto the attack document', async () => {

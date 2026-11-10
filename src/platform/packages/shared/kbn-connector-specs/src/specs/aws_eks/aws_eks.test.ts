@@ -1017,5 +1017,13 @@ describe('AwsEks', () => {
     ] as const)('%s at the boundary: %#', (action, input, expected) => {
       expect(isValid(action, input)).toBe(expected);
     });
+
+    it.each([
+      ['left out', {}, true],
+      ['with one tag', { tags: { team: 'platform' } }, true],
+      ['empty', { tags: {} }, false],
+    ] as const)('createAccessEntry tags: %s', (_name, input, expected) => {
+      expect(isValid('createAccessEntry', input)).toBe(expected);
+    });
   });
 });

@@ -35,6 +35,7 @@ import { getRunMode } from '../../workflow_execution_detail/lib/get_run_mode';
 
 /** Fixed column widths for the execution-history table (panel must not scroll horizontally). */
 export const EXECUTION_HISTORY_COLUMN_WIDTHS = {
+  runName: '200px',
   /** Fits the HITL 'Action is required' badge (wider than Success / Waiting). */
   status: '160px',
   /** Fits `Yesterday 22:04` / `Aug 17 14:03` without clipping. */
@@ -147,6 +148,8 @@ const RunModeFlask = ({ isTestRun, stepId }: { isTestRun: boolean; stepId?: stri
 
 export interface ExecutionHistoryColumnContext {
   euiTheme: EuiThemeComputed;
+  /** The workflow has a named execution, or an execution-name filter is active. */
+  showExecutionName: boolean;
   showExecutor: boolean;
   executedByUserProfiles: Map<string, UserProfileWithAvatar>;
   showUnresolvedExecutors: boolean;
@@ -182,7 +185,25 @@ export const getExecutionHistoryColumns = (
     }
   );
 
-  return [
+  const columns: Array<EuiBasicTableColumn<WorkflowExecutionListItemDto>> = [];
+
+  if (ctx.showExecutionName) {
+    columns.push({
+      field: 'runName',
+      name: i18n.translate('workflows.workflowExecutionList.column.executionNameLabel', {
+        defaultMessage: 'Execution name',
+      }),
+      width: EXECUTION_HISTORY_COLUMN_WIDTHS.runName,
+      truncateText: true,
+      render: (runName: string | undefined) => (
+        <EuiText size="xs" data-test-subj="workflowExecutionListRunNameCell">
+          <EuiTextTruncate text={runName ?? EM_DASH} />
+        </EuiText>
+      ),
+    });
+  }
+
+  columns.push(
     {
       field: 'status',
       name: i18n.translate('workflows.workflowExecutionList.column.status', {
@@ -354,6 +375,8 @@ export const getExecutionHistoryColumns = (
           </EuiFlexGroup>
         );
       },
-    },
-  ];
+    }
+  );
+
+  return columns;
 };

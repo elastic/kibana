@@ -22,7 +22,7 @@ export const EmptyState = () => {
 
   return (
     <KibanaPageTemplate.EmptyPrompt
-      iconType="managementApp"
+      iconType="gear"
       data-test-subj="sectionEmpty"
       title={
         <h2>

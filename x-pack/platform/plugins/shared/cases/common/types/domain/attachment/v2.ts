@@ -72,6 +72,7 @@ export const UnifiedAttachmentAttributesSchema = UnifiedAttachmentPayloadSchema.
 export const UnifiedAttachmentSchema = UnifiedAttachmentAttributesSchema.and(
   z.object({ id: z.string(), version: z.string() })
 );
+export const UnifiedAttachmentsSchema = lazySchema(() => z.array(UnifiedAttachmentSchema));
 
 /**
  * Partial payload props for patch (reference and value). `owner` cannot be changed after creation.
@@ -98,6 +99,7 @@ export type UnifiedValueAttachmentPayload = z.infer<typeof UnifiedValueAttachmen
 export type UnifiedAttachmentPayload = z.infer<typeof UnifiedAttachmentPayloadSchema>;
 export type UnifiedAttachmentAttributes = z.infer<typeof UnifiedAttachmentAttributesSchema>;
 export type UnifiedAttachment = z.infer<typeof UnifiedAttachmentSchema>;
+export type UnifiedAttachments = z.infer<typeof UnifiedAttachmentsSchema>;
 
 /**
  * Combined v1 legacy and v2 unified attachment types

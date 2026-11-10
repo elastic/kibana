@@ -45,7 +45,7 @@ export const prBaseSteps = (): readonly Step[] => [
   gateStep({
     command: '.buildkite/scripts/steps/quick_checks.sh',
     label: 'Quick Checks',
-    agents: spotAgent('n2d-standard-8', spotZones.n2dPreemptible),
+    agents: spotAgent('n2-standard-8', spotZones.n2),
     key: 'quick_checks',
     timeout_in_minutes: 60,
     retry: retry.agentLoss,
@@ -54,7 +54,7 @@ export const prBaseSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/checks.sh',
     label: 'Checks',
     key: 'checks',
-    agents: spotAgent('n2d-standard-2', spotZones.n2dPreemptible),
+    agents: spotAgent('n2-standard-2', spotZones.n2),
     timeout_in_minutes: 60,
     retry: retry.agentLoss,
   }),
@@ -62,7 +62,7 @@ export const prBaseSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/lint.sh',
     label: 'Linting',
     agents: {
-      ...spotAgent('n4-standard-16', spotZones.allUS),
+      ...spotAgent('n4-standard-16', spotZones.n4),
       ...hyperdiskBalanced,
     },
     key: 'linting',
@@ -73,7 +73,7 @@ export const prBaseSteps = (): readonly Step[] => [
     command: '.buildkite/scripts/steps/lint_with_types.sh',
     label: 'Linting (with types)',
     agents: {
-      ...spotAgent('n4-standard-32', spotZones.allUS),
+      ...spotAgent('n4-standard-32', spotZones.n4),
       ...hyperdiskBalanced,
     },
     key: 'linting_with_types',
