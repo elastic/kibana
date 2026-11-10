@@ -7,7 +7,7 @@
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { fixtureInputs } from './__fixtures__/forensics_summary_inputs';
 import { getForensicsAttachmentIds } from './constants';
 import { renderForensicsSummaryHtml } from './render_forensics_summary_html';
@@ -21,11 +21,17 @@ const CONVERSATION_ID = 'investigation-1';
 const ids = getForensicsAttachmentIds(KI_ID);
 const request = {} as KibanaRequest;
 
-const versioned = (id: string, data: unknown, description?: string): VersionedAttachment => ({
+const versioned = (
+  id: string,
+  data: unknown,
+  description?: string,
+  active?: boolean
+): VersionedAttachment => ({
   id,
   type: 'test',
   current_version: 1,
   description,
+  ...(active === undefined ? {} : { active }),
   versions: [{ version: 1, data, created_at: '2026-11-02T10:00:00Z', content_hash: 'h' }],
 });
 
@@ -93,6 +99,7 @@ const setup = ({
   const attachmentsClient = {
     create: jest.fn().mockResolvedValue({}),
     update: jest.fn().mockResolvedValue({}),
+    delete: jest.fn().mockResolvedValue(undefined),
   };
   const deps: RunForensicsSummaryDeps = {
     getConversationClient: async () => ({
@@ -100,6 +107,7 @@ const setup = ({
     }),
     getAttachmentsClient: async () => attachmentsClient,
     listProposals: jest.fn().mockResolvedValue(proposals),
+    logger: loggingSystemMock.createLogger(),
   };
   const run = (abortSignal?: AbortSignal) =>
     runForensicsSummary({
@@ -185,15 +193,82 @@ describe('runForensicsSummary', () => {
     expect(attachmentsClient.update).not.toHaveBeenCalled();
   });
 
-  it('updates the card silently while decisions are still open', async () => {
-    const { data, description } = expectedCard([]);
+  it('updates the card silently when what changed is not a decision', async () => {
+    const { data, description } = expectedCard();
+    const stale = { ...data, visualization: { ...data.visualization, template: '<p>older</p>' } };
     const { run, attachmentsClient } = setup({
-      attachments: [...evidenceAttachments(), versioned(ids.summary, data, description)],
+      attachments: [...evidenceAttachments(), versioned(ids.summary, stale, description)],
     });
     await expect(run()).resolves.toMatchObject({ action: 'updated' });
     expect(attachmentsClient.update).toHaveBeenCalledWith(
       expect.objectContaining({ attachmentId: ids.summary, render_inline: false })
     );
+  });
+
+  /** Asserts the card was posted again as the given id and the cards before it were deleted. */
+  const expectReposted = (
+    attachmentsClient: ReturnType<typeof setup>['attachmentsClient'],
+    attachmentId: string,
+    deleted: string[],
+    decisions: string
+  ) => {
+    expect(attachmentsClient.update).not.toHaveBeenCalled();
+    expect(attachmentsClient.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: attachmentId,
+        render_inline: true,
+        description: expect.stringContaining(`decisions: ${decisions}`),
+      })
+    );
+    expect(attachmentsClient.delete.mock.calls).toEqual(
+      deleted.map((id) => [{ conversationId: CONVERSATION_ID, attachmentId: id }])
+    );
+    // Posted before the older card goes, so the chat never shows no card.
+    expect(attachmentsClient.create.mock.invocationCallOrder[0]).toBeLessThan(
+      attachmentsClient.delete.mock.invocationCallOrder[0]
+    );
+  };
+
+  it('posts the card again in place of the old one when proposals are raised', async () => {
+    const before = expectedCard([]);
+    const { run, attachmentsClient } = setup({
+      attachments: [
+        ...evidenceAttachments(),
+        versioned(ids.summary, before.data, before.description),
+      ],
+    });
+    expect(before.description).toContain('decisions: none');
+    await expect(run()).resolves.toEqual({
+      skipped: false,
+      attachment_id: `${ids.summary}-2`,
+      action: 'reposted',
+    });
+    expectReposted(
+      attachmentsClient,
+      `${ids.summary}-2`,
+      [ids.summary],
+      '1 awaiting, 1 done, 1 closed'
+    );
+  });
+
+  it('posts the card again when a decision is made, even with others still open', async () => {
+    const open = fixtureInputs.proposals.map((proposal) => ({
+      ...proposal,
+      status: 'pending' as const,
+    }));
+    const before = expectedCard(open);
+    const oneDismissed = open.map((proposal, index) =>
+      index === 0 ? { ...proposal, status: 'no_action' as const, decision: 'dismissed' } : proposal
+    );
+    const { run, attachmentsClient } = setup({
+      attachments: [
+        ...evidenceAttachments(),
+        versioned(ids.summary, before.data, before.description),
+      ],
+      proposals: oneDismissed,
+    });
+    await run();
+    expectReposted(attachmentsClient, `${ids.summary}-2`, [ids.summary], '2 awaiting, 1 closed');
   });
 
   it('posts the card again once the last open decision settles', async () => {
@@ -205,17 +280,66 @@ describe('runForensicsSummary', () => {
     const { run, attachmentsClient } = setup({
       attachments: [
         ...evidenceAttachments(),
-        versioned(ids.summary, before.data, before.description),
+        versioned(ids.summary, before.data, before.description, false),
+        versioned(`${ids.summary}-2`, before.data, before.description),
       ],
       proposals: decided,
     });
     await run();
+    expectReposted(attachmentsClient, `${ids.summary}-3`, [`${ids.summary}-2`], '3 done');
+  });
+
+  it('updates the newest card, and never reuses the id of a deleted one', async () => {
+    const { data, description } = expectedCard();
+    const stale = { ...data, visualization: { ...data.visualization, template: '<p>older</p>' } };
+    const { run, attachmentsClient } = setup({
+      attachments: [
+        ...evidenceAttachments(),
+        versioned(ids.summary, stale, description, false),
+        versioned(`${ids.summary}-2`, stale, description),
+        versioned(`${ids.summary}-other`, stale, description),
+      ],
+    });
+    await expect(run()).resolves.toMatchObject({
+      attachment_id: `${ids.summary}-2`,
+      action: 'updated',
+    });
     expect(attachmentsClient.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        render_inline: true,
-        description: expect.stringContaining('0 open decisions'),
-      })
+      expect.objectContaining({ attachmentId: `${ids.summary}-2`, render_inline: false })
     );
+  });
+
+  it('posts a new card when every card was deleted', async () => {
+    const { data, description } = expectedCard();
+    const { run, attachmentsClient } = setup({
+      attachments: [...evidenceAttachments(), versioned(ids.summary, data, description, false)],
+    });
+    await expect(run()).resolves.toEqual({
+      skipped: false,
+      attachment_id: `${ids.summary}-2`,
+      action: 'created',
+    });
+    expect(attachmentsClient.delete).not.toHaveBeenCalled();
+  });
+
+  it('deletes every older card, and logs one it could not delete without failing', async () => {
+    const before = expectedCard([]);
+    const { run, attachmentsClient, deps } = setup({
+      attachments: [
+        ...evidenceAttachments(),
+        versioned(ids.summary, before.data, before.description),
+        versioned(`${ids.summary}-2`, before.data, before.description),
+      ],
+    });
+    attachmentsClient.delete.mockRejectedValueOnce(new Error('conflict'));
+    await expect(run()).resolves.toMatchObject({ action: 'reposted' });
+    expectReposted(
+      attachmentsClient,
+      `${ids.summary}-3`,
+      [ids.summary, `${ids.summary}-2`],
+      '1 awaiting, 1 done, 1 closed'
+    );
+    expect(deps.logger?.warn).toHaveBeenCalledWith(expect.stringContaining('conflict'));
   });
 
   it('writes nothing when a newer run cancels it while it reads', async () => {

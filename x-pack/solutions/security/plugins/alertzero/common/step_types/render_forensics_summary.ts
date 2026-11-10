@@ -32,11 +32,13 @@ const outputSchema = lazySchema(() =>
       .describe(
         'Why nothing was written: the Investigation has no finished Endpoint Analysis, the card is already current, or a newer run cancelled this one.'
       ),
-    attachment_id: z.string().optional().describe('Id of the summary card attachment.'),
+    attachment_id: z.string().optional().describe('Id of the current summary card attachment.'),
     action: z
-      .enum(['created', 'updated'])
+      .enum(['created', 'updated', 'reposted'])
       .optional()
-      .describe('Whether the card was added or a new version of it was written.'),
+      .describe(
+        'Whether the first card was added, the current card was updated silently, or the card was posted again in place of the older one because its decisions changed.'
+      ),
   })
 );
 

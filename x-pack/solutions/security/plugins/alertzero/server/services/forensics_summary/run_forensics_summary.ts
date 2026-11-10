@@ -10,7 +10,11 @@ import type { AttachmentPublicClient } from '@kbn/agent-builder-server/attachmen
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { RenderForensicsSummaryStepOutput } from '../../../common/step_types/render_forensics_summary';
-import { FORENSICS_SUMMARY_TITLE, getForensicsAttachmentIds } from './constants';
+import {
+  FORENSICS_SUMMARY_TITLE,
+  getForensicsSummaryCardGeneration,
+  getForensicsSummaryCardId,
+} from './constants';
 import {
   findEndpointAnalysisIndicator,
   getAttachmentData,
@@ -19,7 +23,7 @@ import {
 } from './read_forensics_inputs';
 import { renderForensicsSummaryHtml } from './render_forensics_summary_html';
 import type { ForensicsProposal } from './types';
-import { buildForensicsSummaryViewModel, countOpenDecisions } from './view_model';
+import { buildForensicsSummaryViewModel } from './view_model';
 import type { ForensicsSummaryViewModel } from './view_model';
 
 export interface ForensicsConversationReader {
@@ -29,7 +33,10 @@ export interface ForensicsConversationReader {
   }>;
 }
 
-export type ForensicsAttachmentWriter = Pick<AttachmentPublicClient, 'create' | 'update'>;
+export type ForensicsAttachmentWriter = Pick<
+  AttachmentPublicClient,
+  'create' | 'update' | 'delete'
+>;
 
 export interface RunForensicsSummaryDeps {
   getConversationClient: (request: KibanaRequest) => Promise<ForensicsConversationReader>;
@@ -49,26 +56,44 @@ const renderedCardSchema = lazySchema(() =>
   })
 );
 
-const OPEN_DECISIONS = /(\d+) open decisions?/;
+const DECISIONS_PREFIX = 'decisions: ';
 
-/** The card's description; it also records how many decisions were open, so a re-post can tell when they settle. */
-export const describeForensicsSummary = (viewModel: ForensicsSummaryViewModel): string => {
-  const open = countOpenDecisions(viewModel);
-  return `${FORENSICS_SUMMARY_TITLE}: ${viewModel.title} · ${viewModel.verdict.replace(
+/** The decision counts by state, as the description records them: `1 awaiting, 3 closed`, or `none`. */
+const describeDecisions = ({ decisions }: ForensicsSummaryViewModel): string =>
+  Object.entries(decisions)
+    .filter(([, count]) => count > 0)
+    .map(([group, count]) => `${count} ${group}`)
+    .join(', ') || 'none';
+
+/** The card's description; it also records the decision counts, so an update can tell when a decision changed. */
+export const describeForensicsSummary = (viewModel: ForensicsSummaryViewModel): string =>
+  `${FORENSICS_SUMMARY_TITLE}: ${viewModel.title} · ${viewModel.verdict.replace(
     /_/g,
     ' '
-  )} · ${open} open ${open === 1 ? 'decision' : 'decisions'}`;
+  )} · ${DECISIONS_PREFIX}${describeDecisions(viewModel)}`;
+
+const readDecisions = (description: string | undefined): string | undefined => {
+  const index = description?.lastIndexOf(DECISIONS_PREFIX) ?? -1;
+  return index === -1 ? undefined : description?.slice(index + DECISIONS_PREFIX.length);
 };
 
-const readOpenDecisions = (description: string | undefined): number => {
-  const match = description?.match(OPEN_DECISIONS);
-  return match ? Number(match[1]) : 0;
-};
+/** The analysis's summary cards, oldest first, each with the generation it was posted as. */
+const listSummaryCards = (attachments: readonly VersionedAttachment[], kiId: string) =>
+  attachments
+    .flatMap((attachment) => {
+      const generation = getForensicsSummaryCardGeneration(kiId, attachment.id);
+      return generation === undefined ? [] : [{ attachment, generation }];
+    })
+    .sort((a, b) => a.generation - b.generation);
 
 /**
  * Renders the forensics summary card for an Investigation whose Endpoint Analysis has finished, and adds it,
- * or writes a new version of it when what it shows changed. Interim updates are silent; once the last open
- * decision settles the card is posted in the chat again, since the chat shows an attachment as it was posted.
+ * or writes a new version of it when what it shows changed.
+ *
+ * The chat draws a posted card at the version it was posted with, and an update can't change that. So when
+ * the decision counts change (proposals raised, decided or settled), the card is posted again as a new
+ * attachment and the cards before it are deleted, which drops them from the chat: it shows one card, the
+ * latest. Any other change, such as a new summary, updates the current card silently.
  */
 export const runForensicsSummary = async ({
   request,
@@ -129,53 +154,69 @@ export const runForensicsSummary = async ({
   });
   const { html, height } = renderForensicsSummaryHtml(viewModel);
   const description = describeForensicsSummary(viewModel);
-  const attachmentId = getForensicsAttachmentIds(indicator.kiId).summary;
   const data = {
     renderer: 'custom_content',
     query: FORENSICS_SUMMARY_TITLE,
     visualization: { template: html, height, title: FORENSICS_SUMMARY_TITLE },
   };
 
-  const existing = attachments.find(({ id }) => id === attachmentId);
+  const cards = listSummaryCards(attachments, indicator.kiId);
+  const activeCards = cards.filter(({ attachment }) => attachment.active !== false);
+  const current = activeCards[activeCards.length - 1]?.attachment;
   const attachmentsClient = await deps.getAttachmentsClient(request);
-  if (!existing) {
-    await attachmentsClient.create({
-      conversationId,
-      id: attachmentId,
-      type: 'visualization',
-      data,
-      description,
-      render_inline: true,
-      access: 'converse',
-    });
-    deps.logger?.debug(`forensics summary: added ${attachmentId} to ${conversationId}`);
-    return { skipped: false, attachment_id: attachmentId, action: 'created' };
+
+  if (current) {
+    const previous = renderedCardSchema.safeParse(getAttachmentData(attachments, current.id));
+    const unchanged =
+      previous.success &&
+      previous.data.visualization.template === html &&
+      previous.data.visualization.height === height &&
+      current.description === description;
+    if (unchanged) {
+      return { skipped: true, reason: 'unchanged', attachment_id: current.id };
+    }
+    if (readDecisions(current.description) === describeDecisions(viewModel)) {
+      await attachmentsClient.update({
+        conversationId,
+        attachmentId: current.id,
+        data,
+        description,
+        render_inline: false,
+        access: 'converse',
+      });
+      deps.logger?.debug(`forensics summary: updated ${current.id} on ${conversationId}`);
+      return { skipped: false, attachment_id: current.id, action: 'updated' };
+    }
   }
 
-  const previous = renderedCardSchema.safeParse(getAttachmentData(attachments, attachmentId));
-  if (
-    previous.success &&
-    previous.data.visualization.template === html &&
-    previous.data.visualization.height === height &&
-    existing.description === description
-  ) {
-    return { skipped: true, reason: 'unchanged', attachment_id: attachmentId };
-  }
-
-  const settled =
-    readOpenDecisions(existing.description) > 0 && countOpenDecisions(viewModel) === 0;
-  await attachmentsClient.update({
+  // A deleted card keeps its generation, so a new one never reuses an id the chat already drew.
+  const generation = (cards[cards.length - 1]?.generation ?? 0) + 1;
+  const attachmentId = getForensicsSummaryCardId(indicator.kiId, generation);
+  await attachmentsClient.create({
     conversationId,
-    attachmentId,
+    id: attachmentId,
+    type: 'visualization',
     data,
     description,
-    render_inline: settled,
+    render_inline: true,
     access: 'converse',
   });
-  deps.logger?.debug(
-    `forensics summary: updated ${attachmentId} on ${conversationId}${
-      settled ? ' and re-posted it' : ''
-    }`
-  );
-  return { skipped: false, attachment_id: attachmentId, action: 'updated' };
+  // Every older card is deleted, not just the last, so one that a failed delete left behind goes on the next post.
+  for (const { attachment } of activeCards) {
+    try {
+      await attachmentsClient.delete({ conversationId, attachmentId: attachment.id });
+    } catch (error) {
+      deps.logger?.warn(
+        `forensics summary: could not delete the older card ${
+          attachment.id
+        } on ${conversationId}: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+  deps.logger?.debug(`forensics summary: posted ${attachmentId} on ${conversationId}`);
+  return {
+    skipped: false,
+    attachment_id: attachmentId,
+    action: current ? 'reposted' : 'created',
+  };
 };

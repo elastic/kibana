@@ -28,6 +28,30 @@ export const getForensicsAttachmentIds = (kiId: string) =>
     summary: `forensic-summary-${kiId}`,
   } as const);
 
+/**
+ * The id of the summary card posted as the given generation. Each post is a new attachment, so the chat can
+ * drop the one before it; the first keeps the plain id.
+ */
+export const getForensicsSummaryCardId = (kiId: string, generation: number): string => {
+  const { summary } = getForensicsAttachmentIds(kiId);
+  return generation <= 1 ? summary : `${summary}-${generation}`;
+};
+
+/** The generation a summary card id was posted as, or undefined when the id is not one of the analysis's cards. */
+export const getForensicsSummaryCardGeneration = (
+  kiId: string,
+  attachmentId: string
+): number | undefined => {
+  const { summary } = getForensicsAttachmentIds(kiId);
+  if (attachmentId === summary) {
+    return 1;
+  }
+  const suffix = attachmentId.startsWith(`${summary}-`)
+    ? attachmentId.slice(summary.length + 1)
+    : '';
+  return /^[1-9][0-9]{0,5}$/.test(suffix) ? Number(suffix) : undefined;
+};
+
 export const MAX_PROPOSALS = 50;
 export const MAX_TIMELINE_EVENTS = 8;
 export const MAX_ALERTS = 8;
