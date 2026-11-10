@@ -80,6 +80,7 @@ describe('useFetchInvestigations', () => {
       expect(result.current.investigations.map(({ id }) => id)).toEqual(['running', 'done'])
     );
     expect(result.current.total).toBe(2);
+    expect(result.current.matchTotal).toBe(12);
     expect(result.current.hasMore).toBe(false);
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations',

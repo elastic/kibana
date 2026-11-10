@@ -40,16 +40,19 @@ const investigation = (id: string): InvestigationSummary => ({
 const sectionResult = ({
   ids = [],
   total = ids.length,
+  matchTotal = total,
   isPreviousData = false,
   refetch = jest.fn(),
 }: {
   ids?: string[];
   total?: number;
+  matchTotal?: number;
   isPreviousData?: boolean;
   refetch?: jest.Mock;
 } = {}) => ({
   investigations: ids.map(investigation),
   total,
+  matchTotal,
   hasMore: false,
   isInitialLoading: false,
   isFetchingNextPage: false,
@@ -147,7 +150,7 @@ describe('useInvestigationSections', () => {
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations/_severity_counts',
       expect.objectContaining({
-        query: { in_progress: false, query: 'checkout' },
+        query: { in_progress: false, status: 'open', query: 'checkout' },
         version: '1',
       })
     );
@@ -159,7 +162,7 @@ describe('useInvestigationSections', () => {
     await waitFor(() => expect(result.current.severityCounts.critical).toBe(3));
     expect(httpGet).toHaveBeenCalledWith(
       '/internal/investigations/investigations/_severity_counts',
-      expect.objectContaining({ query: { in_progress: false } })
+      expect.objectContaining({ query: { in_progress: false, status: 'open' } })
     );
   });
 

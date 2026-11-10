@@ -99,6 +99,7 @@ function makeSection(
     id,
     investigations: [],
     total: 0,
+    matchTotal: 0,
     hasMore: false,
     isInitialLoading: false,
     isFetchingNextPage: false,
@@ -114,12 +115,14 @@ function makeSection(
 function setSections({
   sections,
   hasActiveInvestigations = false,
+  activeInvestigationCount,
   isInitialLoading = false,
   isFetching = false,
   areSeverityCountsLoading = false,
 }: {
   sections: InvestigationSectionState[];
   hasActiveInvestigations?: boolean;
+  activeInvestigationCount?: number;
   isInitialLoading?: boolean;
   isFetching?: boolean;
   areSeverityCountsLoading?: boolean;
@@ -133,11 +136,14 @@ function setSections({
     medium: sectionTotal('medium'),
     low: sectionTotal('low'),
   };
+  const resolvedActiveCount =
+    activeInvestigationCount ?? (hasActiveInvestigations ? sectionTotal('in-progress') : 0);
   mockUseInvestigationSections.mockReturnValue({
     sections,
     severityCounts,
     areSeverityCountsLoading,
-    hasActiveInvestigations,
+    hasActiveInvestigations: hasActiveInvestigations || resolvedActiveCount > 0,
+    activeInvestigationCount: resolvedActiveCount,
     isInitialLoading,
     isFetching,
     totalCount: sections.reduce((sum, section) => sum + section.total, 0),
@@ -232,6 +238,44 @@ describe('NightshiftApp', () => {
         }),
       })
     );
+  });
+
+  it('shows the finished open severity sum when nothing is in progress', () => {
+    setSections({
+      sections: defaultSections({
+        critical: { investigations: [investigation], total: 3 },
+        high: { total: 2 },
+        medium: { total: 1 },
+      }),
+    });
+
+    renderApp();
+
+    expect(screen.getByText('6 investigations need you')).toBeInTheDocument();
+  });
+
+  it('keeps the loading hero title until severity counts arrive when idle', () => {
+    setSections({
+      sections: defaultSections(),
+      areSeverityCountsLoading: true,
+    });
+
+    renderApp();
+
+    expect(screen.getByText('Looking into your data...')).toBeInTheDocument();
+  });
+
+  it('uses the API active count for the hero, not the capped in-progress page', () => {
+    setSections({
+      sections: defaultSections({
+        'in-progress': { investigations: [investigation], total: 1 },
+      }),
+      activeInvestigationCount: 21,
+    });
+
+    renderApp();
+
+    expect(screen.getByText('Investigating 21 new problems')).toBeInTheDocument();
   });
 
   it('dismisses the detection setup banner from its dismiss button', () => {

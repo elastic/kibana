@@ -93,6 +93,7 @@ export function NightshiftApp({
     sections,
     severityCounts,
     areSeverityCountsLoading,
+    activeInvestigationCount,
     isInitialLoading,
     isFetching,
     totalCount,
@@ -113,7 +114,6 @@ export function NightshiftApp({
     [sections]
   );
 
-  const activeInvestigationCount = sections.find(({ id }) => id === 'in-progress')?.total ?? 0;
   const needsYouCount =
     severityCounts.critical + severityCounts.high + severityCounts.medium + severityCounts.low;
 
