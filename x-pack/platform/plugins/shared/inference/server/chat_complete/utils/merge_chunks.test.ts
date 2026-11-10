@@ -438,4 +438,41 @@ describe('mergeChunks', () => {
       ]);
     }).toThrow('Tool call key is missing for index 0');
   });
+
+  it('skips a fully empty continuation chunk for an index whose tool call never started', async () => {
+    // An all-empty delta (no toolCallId, no name, no arguments) for a source
+    // index that never opened. Skipping it must not 500 the converse request
+    // nor corrupt the merged calls.
+    const merged = mergeChunks([
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: { name: 'myFunction', arguments: '{ "a": 1 }' },
+            index: 0,
+            toolCallId: '001',
+          },
+        ],
+      },
+      {
+        content: '',
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        tool_calls: [
+          {
+            function: { name: '', arguments: '' },
+            index: 2,
+            toolCallId: '',
+          },
+        ],
+      },
+    ]);
+
+    expect(merged.tool_calls).toEqual([
+      {
+        function: { name: 'myFunction', arguments: '{ "a": 1 }' },
+        toolCallId: '001',
+      },
+    ]);
+  });
 });

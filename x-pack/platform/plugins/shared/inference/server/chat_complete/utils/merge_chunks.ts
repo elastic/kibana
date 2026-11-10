@@ -31,6 +31,14 @@ const mergeToolCalls = (chunks: ChatCompletionChunkEvent[]): UnvalidatedToolCall
     chunk.tool_calls?.forEach((toolCall) => {
       const key = resolveIndex(toolCall);
       if (key === undefined) {
+        // Some providers (observed: gpt-oss-120b via the EIS gateway) emit a
+        // fully empty continuation chunk — no toolCallId, no name, no arguments —
+        // for a source index whose tool call never started. There is nothing to
+        // merge, so skipping loses no data; throwing here 500s the whole converse
+        // request and takes the agent run down with it.
+        if (!toolCall.toolCallId && !toolCall.function.name && !toolCall.function.arguments) {
+          return;
+        }
         throw new Error(
           `Tool call key is missing for index ${toolCall.index} in chunk ${JSON.stringify(chunk)}`
         );
