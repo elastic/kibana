@@ -3777,7 +3777,6 @@ x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @
 x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/generic_right @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity/generic @elastic/contextual-security-apps @elastic/siem-beacon
-/x-pack/solutions/security/plugins/security_solution/public/flyout/csp_details @elastic/contextual-security-apps @elastic/siem-beacon
 /x-pack/solutions/security/plugins/security_solution/public/flyout_v2/csp @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/graph @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/session_view @elastic/contextual-security-apps @elastic/siem-beacon
