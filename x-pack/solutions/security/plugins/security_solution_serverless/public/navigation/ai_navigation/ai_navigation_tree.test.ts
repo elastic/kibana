@@ -26,7 +26,7 @@ describe('createAiNavigationTree', () => {
   });
 
   it('returns the Workflows link between Agents and Value report when `workflows` is enabled', () => {
-    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true, false);
+    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true);
 
     const primaryNavSection = navigationTree.body[3];
     const children = 'children' in primaryNavSection ? primaryNavSection.children : [];
@@ -42,7 +42,7 @@ describe('createAiNavigationTree', () => {
   });
 
   it('does not include the Workflows link when `workflows` is disabled', () => {
-    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, false, false);
+    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, false);
 
     const primaryNavSection = navigationTree.body[3];
     const children = 'children' in primaryNavSection ? primaryNavSection.children : [];
@@ -54,16 +54,8 @@ describe('createAiNavigationTree', () => {
     expect(workflowsIndex).toBe(-1);
   });
 
-  it('places the Agent Builder link first when `agentBuilderNavAtTop` is enabled', () => {
-    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true, true);
-
-    const firstNavItem = navigationTree.body[0];
-
-    expect('link' in firstNavItem && firstNavItem.link).toBe('agent_builder');
-  });
-
-  it('places the Agent Builder later in the nav  when `agentBuilderNavAtTop` is disabled', () => {
-    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true, false);
+  it('places the Agent Builder later in the nav', () => {
+    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true);
 
     const primaryNavSection = navigationTree.body[3];
     const children = 'children' in primaryNavSection ? primaryNavSection.children : [];
@@ -76,7 +68,7 @@ describe('createAiNavigationTree', () => {
   });
 
   it('includes service accounts in Admin and Settings', () => {
-    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true, false);
+    const navigationTree = createAiNavigationTree(core, AIChatExperience.Agent, true);
 
     expect(containsLink(navigationTree.footer ?? [], 'management:service_accounts')).toBe(true);
   });

@@ -16,12 +16,12 @@ import { getMapSettings, getQueryableUniqueIndexPatternIds } from '../selectors/
 import { autoFitToBounds, syncDataForLayerId } from '../actions/data_request_actions';
 
 export function initializeDataViews(store: MapStore) {
-  const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
+  const dataSources$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   let dataViewsFetchToken: symbol | undefined;
 
   async function updateDataViews() {
     const queryableDataViewIds = getQueryableUniqueIndexPatternIds(store.getState());
-    const prevDataViewIds = dataViews$.getValue()?.map((dataView) => {
+    const prevDataViewIds = dataSources$.getValue()?.map((dataView) => {
       return dataView.id;
     });
     if (isEqual(queryableDataViewIds.sort(), prevDataViewIds?.sort())) {
@@ -34,7 +34,7 @@ export function initializeDataViews(store: MapStore) {
     if (currentDataViewsFetchToken !== dataViewsFetchToken) {
       return;
     }
-    dataViews$.next(dataViews);
+    dataSources$.next(dataViews);
   }
 
   updateDataViews();
@@ -42,7 +42,7 @@ export function initializeDataViews(store: MapStore) {
   const syncLayerTokens: Record<string, symbol> = {};
 
   return {
-    dataViews$,
+    dataSources$,
     setLayerList(layerList: LayerDescriptor[]) {
       store.dispatch<any>(replaceLayerList(layerList));
       updateDataViews();

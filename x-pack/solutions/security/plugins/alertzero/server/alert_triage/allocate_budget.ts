@@ -12,6 +12,10 @@ import type { RuleAllocation, TriageAlert } from './types';
 export const getSweepBudget = (budgetPerHour: number, intervalMinutes: number): number =>
   Math.floor((budgetPerHour * intervalMinutes) / 60);
 
+/** The batch dimension: the rule, plus the detection when the rule overrides its alerts' names. */
+export const getBatchKey = ({ ruleId, detection }: TriageAlert): string =>
+  detection ? `${ruleId}\u0000${detection}` : ruleId;
+
 /** Risk descending, then oldest first, then id so equal alerts order the same way every time. */
 const compareAlerts = (a: TriageAlert, b: TriageAlert): number =>
   b.riskScore - a.riskScore || a.timestamp - b.timestamp || a.id.localeCompare(b.id);
@@ -42,14 +46,15 @@ export const allocateBudget = ({
 }: AllocateBudgetParams): BudgetAllocation => {
   const byRule = new Map<string, TriageAlert[]>();
   for (const alert of alerts) {
-    byRule.set(alert.ruleId, [...(byRule.get(alert.ruleId) ?? []), alert]);
+    const key = getBatchKey(alert);
+    byRule.set(key, [...(byRule.get(key) ?? []), alert]);
   }
   const rules = [...byRule.entries()]
-    .map(([ruleId, ruleAlerts]) => {
+    .map(([key, ruleAlerts]) => {
       const sorted = [...ruleAlerts].sort(compareAlerts);
-      return { ruleId, ruleName: sorted[0].ruleName, alerts: sorted };
+      return { key, ruleId: sorted[0].ruleId, ruleName: sorted[0].ruleName, alerts: sorted };
     })
-    .sort((a, b) => compareAlerts(a.alerts[0], b.alerts[0]) || a.ruleId.localeCompare(b.ruleId));
+    .sort((a, b) => compareAlerts(a.alerts[0], b.alerts[0]) || a.key.localeCompare(b.key));
 
   const served: Array<{ ruleId: string; ruleName: string; alerts: TriageAlert[]; take: number }> =
     [];

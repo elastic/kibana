@@ -8,20 +8,31 @@
  */
 
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import type { CSSProperties } from 'react';
+import type { CSSProperties, DragEventHandler } from 'react';
+import type { EuiBadgeProps, IconType } from '@elastic/eui';
 import { EuiBadge, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
 interface Props {
   currentPosition: CSSProperties;
   path: string | null;
+  badgeColor?: EuiBadgeProps['color'];
+  badgeIconType?: IconType;
+  /** When provided, the highlight box becomes a native drag source. */
+  onDragStart?: DragEventHandler<HTMLDivElement>;
 }
 
 /**
  * InspectHighlight displays a highlight box around the currently
  * inspected HTML element, along with a badge containing the source component display name.
  */
-export const InspectHighlight = ({ currentPosition, path }: Props) => {
+export const InspectHighlight = ({
+  currentPosition,
+  path,
+  badgeColor = 'primary',
+  badgeIconType,
+  onDragStart,
+}: Props) => {
   const { euiTheme } = useEuiTheme();
   const { transform, ...rest } = currentPosition;
 
@@ -30,6 +41,7 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
   const [badgeOffsetX, setBadgeOffsetX] = useState(0);
   const [badgeOffsetY, setBadgeOffsetY] = useState(0);
   const isFixed = currentPosition.position === 'fixed';
+  const isDraggable = Boolean(onDragStart);
 
   const containerCss = css({
     position: currentPosition.position || 'absolute',
@@ -42,7 +54,12 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
     position: 'absolute',
     backgroundColor: transparentize(euiTheme.colors.primary, 0.3),
     border: `2px solid ${euiTheme.colors.primary}`,
-    pointerEvents: 'none',
+    pointerEvents: isDraggable ? 'auto' : 'none',
+    ...(isDraggable && {
+      cursor: 'grab',
+      userSelect: 'none',
+      '&:active': { cursor: 'grabbing' },
+    }),
     ...(isFixed ? { top: 0, left: 0, right: 0, bottom: 0 } : rest),
   });
 
@@ -109,10 +126,17 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
 
   return (
     <div ref={containerRef} className={containerCss} data-test-subj="inspectHighlightContainer">
-      <div className={highlightCss} data-test-subj="inspectHighlightBox" />
+      <div
+        className={highlightCss}
+        data-test-subj="inspectHighlightBox"
+        draggable={isDraggable}
+        onDragStart={onDragStart}
+      />
       {path && (
         <div ref={badgeRef} className={badgeCss} data-test-subj="inspectHighlightBadge">
-          <EuiBadge color="primary">{path}</EuiBadge>
+          <EuiBadge color={badgeColor} iconType={badgeIconType}>
+            {path}
+          </EuiBadge>
         </div>
       )}
     </div>

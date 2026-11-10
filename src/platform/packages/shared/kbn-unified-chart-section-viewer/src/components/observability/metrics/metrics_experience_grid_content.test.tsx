@@ -133,7 +133,7 @@ describe('MetricsExperienceGridContent', () => {
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
-      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramVisualization: 'lnsHeatmap' },
       recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
@@ -204,7 +204,7 @@ describe('MetricsExperienceGridContent', () => {
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
-      gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
+      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramVisualization: 'lnsHeatmap' },
       recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
@@ -324,6 +324,54 @@ describe('MetricsExperienceGridContent', () => {
     );
   });
 
+  it('passes only the metadata fields that the WHERE uses to the grid and the histogram bounds fetch', () => {
+    const loadedFetchParams = {
+      ...fetchParams,
+      query: {
+        esql: 'TS test-metrics-histograms METADATA _id, _ignored | WHERE _ignored IS NULL',
+      },
+    };
+
+    render(
+      <MetricsExperienceGridContent
+        {...defaultProps}
+        fetchParams={loadedFetchParams}
+        loadedFetchParams={loadedFetchParams}
+      />,
+      { wrapper: IntlProvider }
+    );
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ metadataFields: ['_ignored'] })
+    );
+
+    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+    expect(MetricsGrid).toHaveBeenLastCalledWith(
+      expect.objectContaining({ metadataFields: ['_ignored'] }),
+      expect.anything()
+    );
+  });
+
+  it('passes no metadata fields when the WHERE does not use them', () => {
+    const loadedFetchParams = {
+      ...fetchParams,
+      query: { esql: 'TS test-metrics-histograms METADATA _id | WHERE host.name == "a"' },
+    };
+
+    render(
+      <MetricsExperienceGridContent
+        {...defaultProps}
+        fetchParams={loadedFetchParams}
+        loadedFetchParams={loadedFetchParams}
+      />,
+      { wrapper: IntlProvider }
+    );
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ metadataFields: [] })
+    );
+  });
+
   it('sends no fetch params to the histogram bounds hook before METRICS_INFO has landed', () => {
     render(<MetricsExperienceGridContent {...defaultProps} />, { wrapper: IntlProvider });
 
@@ -343,6 +391,19 @@ describe('MetricsExperienceGridContent', () => {
 
     expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ enabled: true })
+    );
+  });
+
+  it('skips the histogram bounds fetch when a percentile is selected', () => {
+    useMetricsExperienceStateMock.mockReturnValue({
+      ...useMetricsExperienceStateMock(),
+      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramPercentile: 'p95' },
+    });
+
+    render(<MetricsExperienceGridContent {...defaultProps} />, { wrapper: IntlProvider });
+
+    expect(useFetchHistogramBoundsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
     );
   });
 

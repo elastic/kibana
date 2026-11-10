@@ -39,7 +39,7 @@ describe('ServiceAccountName', () => {
       wrapper: createQueryClientWrapper(queryClient),
     });
     expect(await screen.findByText('Investigation reader')).toBeInTheDocument();
-    expect(screen.getByText('opaque-id')).toBeInTheDocument();
+    expect(screen.queryByText('opaque-id')).not.toBeInTheDocument();
     expect(
       document.querySelector('[data-test-subj=workflowServiceAccountResolved]')
     ).toBeInTheDocument();
@@ -61,17 +61,32 @@ describe('ServiceAccountName', () => {
     expect(
       document.querySelector('[data-test-subj=workflowServiceAccountUnavailable]')
     ).toBeInTheDocument();
-    expect(screen.getByText('opaque-id')).toBeInTheDocument();
   });
 
-  it.each([403, 404, 503])('keeps the ID when lookup returns %s', async (status) => {
-    services.http.get.mockRejectedValue({ response: { status } });
+  it.each([403, 404, 503])(
+    'falls back to the short name from the ID when lookup returns %s',
+    async (status) => {
+      services.http.get.mockRejectedValue({ response: { status } });
+      render(<ServiceAccountName id="kibana/investigation_reader" />, {
+        wrapper: createQueryClientWrapper(queryClient),
+      });
+      await waitFor(() => expect(queryClient.isFetching()).toBe(0));
+      expect(screen.getByText('investigation_reader')).toBeInTheDocument();
+      expect(screen.queryByText('kibana/investigation_reader')).not.toBeInTheDocument();
+      expect(
+        document.querySelector('[data-test-subj=workflowServiceAccountResolved]')
+      ).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Copy service account ID' })).toBeInTheDocument();
+    }
+  );
+
+  it('falls back to the whole ID when it has no namespace', async () => {
+    services.http.get.mockRejectedValue({ response: { status: 404 } });
     render(<ServiceAccountName id="opaque-id" />, {
       wrapper: createQueryClientWrapper(queryClient),
     });
     await waitFor(() => expect(queryClient.isFetching()).toBe(0));
     expect(screen.getByText('opaque-id')).toBeInTheDocument();
-    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
   it('does not fetch when the feature is off', () => {

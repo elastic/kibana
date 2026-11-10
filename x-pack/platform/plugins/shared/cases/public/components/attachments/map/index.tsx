@@ -11,7 +11,7 @@ import {
   MapAttachmentPayloadSchema,
   type MapAttachmentData,
   type MapAttachmentMetadata,
-} from '../../../../common/types/domain_zod/attachment/map/v2';
+} from '../../../../common/types/domain/attachment/map/v2';
 import {
   defineAttachment,
   type UnifiedReferenceAttachmentViewProps,

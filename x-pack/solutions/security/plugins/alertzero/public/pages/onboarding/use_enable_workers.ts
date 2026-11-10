@@ -11,7 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { API_VERSIONS, buildWorkerUrl } from '@kbn/alertzero-common';
-import type { ListWorkersResponse } from '@kbn/alertzero-common';
+import type { ListWorkersResponse, Worker } from '@kbn/alertzero-common';
 import { notifyWorkerUpdateError } from '../../hooks/use_workers_api';
 import { queryKeys } from '../../query_keys';
 import { useReportToastError } from '../../telemetry';
@@ -24,7 +24,7 @@ import * as onboardingI18n from './translations';
 
 const PARTIAL_SUCCESS_WARNING = i18n.translate('xpack.alertzero.onboarding.partialSuccessWarning', {
   defaultMessage:
-    'Some settings were saved before the error. Check Watches to review the current status.',
+    'Some changes were saved before the error. Go to Watches to check which Workers are on.',
 });
 
 type WorkerEnabledMap = Record<string, boolean>;
@@ -47,34 +47,31 @@ export const useEnableWorkers = (
     // the server response are not sent a PATCH that would return 404.
     const cached = queryClient.getQueryData<ListWorkersResponse>(queryKeys.workers.list());
     if (!cached) {
+      // Cache miss: we cannot safely determine which workers exist server-side.
+      // Bail out rather than blindly PATCHing all IDs and hitting 404s.
       return;
     }
     const visibleIds = new Set(cached.workers.map((w) => w.id));
-    const workerById = new Map(cached.workers.map((worker) => [worker.id, worker]));
-    // A retry must not re-send what the previous press already committed: the list is
-    // refetched between presses, so a worker already on — and already bound to an
-    // account, when turning on — has nothing left to save. Turning off is always
-    // sent: `enabled` alone cannot distinguish "wants it off" from "enable failed".
-    const idsToUpdate = workerIds.filter(
-      (id) =>
-        visibleIds.has(id) &&
-        (workerEnabled[id] !== true ||
-          !workerById.get(id)?.enabled ||
-          !workerById.get(id)?.settings?.serviceAccountId)
-    );
+    const idsToUpdate = workerIds.filter((id) => visibleIds.has(id));
 
     setIsSaving(true);
     onSavingChange?.(true);
-    // Workers being turned on without a service account get their prebuilt one first. A Worker
-    // whose account cannot be set up stays off; pressing the button again retries it.
-    const needsAccount = idsToUpdate.filter(
-      (id) => workerEnabled[id] === true && !workerById.get(id)?.settings?.serviceAccountId
+    // Workers being turned on get their prebuilt service account first, including those whose
+    // bound account has since disappeared. A Worker whose account cannot be set up stays off;
+    // pressing the button again retries it.
+    const workerById = new Map(cached.workers.map((worker) => [worker.id, worker]));
+    const needsAccount = idsToUpdate.filter((id) => workerEnabled[id] === true);
+    const boundAccountIds = new Map(
+      needsAccount.flatMap((id) => {
+        const accountId = workerById.get(id)?.settings?.serviceAccountId;
+        return accountId ? [[id, accountId] as [string, string]] : [];
+      })
     );
     const accounts = await ensureWorkerServiceAccounts(
       services.http!,
       services.serviceAccounts,
       needsAccount,
-      { isServerless: services.isServerless ?? false }
+      { isServerless: services.isServerless ?? false, boundAccountIds }
     );
     const accountFailures = needsAccount.flatMap((id) => {
       const account = accounts.get(id);
@@ -82,7 +79,21 @@ export const useEnableWorkers = (
         ? [{ name: workerName(id, workerById.get(id)?.name), error: account.error }]
         : [];
     });
-    const idsToPatch = idsToUpdate.filter((id) => accounts.get(id)?.ok !== false);
+    // The list is refetched between presses, so a worker already on with its account kept is not
+    // re-sent. Turning off is always sent: `enabled: false` cannot tell "wanted off" from "failed".
+    const isAlreadySaved = (id: string) => {
+      const account = accounts.get(id);
+      return (
+        workerEnabled[id] === true &&
+        workerById.get(id)?.enabled === true &&
+        account?.ok === true &&
+        account.serviceAccountId === boundAccountIds.get(id) &&
+        !account.replacedBound
+      );
+    };
+    const idsToPatch = idsToUpdate.filter(
+      (id) => accounts.get(id)?.ok !== false && !isAlreadySaved(id)
+    );
 
     // Direct http.patch calls instead of useUpdateWorker so no replaceWorkerInList
     // fires per-PATCH. LandingPage's showQueue guard must only react to real server
@@ -90,23 +101,35 @@ export const useEnableWorkers = (
     // that would prematurely unmount OnboardingPage before all PATCHes settle.
     // allSettled keeps isSaving true for the full fan-out so a single rejection does
     // not re-enable the button while the remaining PATCHes are still in-flight.
+    let committedClear = false;
     const results = await Promise.allSettled(
-      idsToPatch.map((id) => {
+      idsToPatch.map(async (id) => {
         const turningOn = workerEnabled[id] === true;
         const account = accounts.get(id);
-        // An existing binding is kept; only a newly set up account is written.
-        const body =
-          turningOn && account?.ok
-            ? {
-                enabled: true,
-                settings: { serviceAccountId: account.serviceAccountId },
-                settingsRevision: workerById.get(id)?.settingsRevision ?? null,
-              }
-            : { enabled: turningOn };
-        return services.http!.patch(buildWorkerUrl(id), {
-          version: API_VERSIONS.internal.v1,
-          body: JSON.stringify(body),
-        });
+        const patchWorker = (body: object) =>
+          services.http!.patch<{ worker: Worker }>(buildWorkerUrl(id), {
+            version: API_VERSIONS.internal.v1,
+            body: JSON.stringify(body),
+          });
+        if (!turningOn || !account?.ok) return patchWorker({ enabled: turningOn });
+        // An existing binding is kept; only a new or replaced account is written.
+        const { serviceAccountId, replacedBound } = account;
+        if (serviceAccountId === boundAccountIds.get(id) && !replacedBound) {
+          return patchWorker({ enabled: true });
+        }
+        let settingsRevision = workerById.get(id)?.settingsRevision ?? null;
+        if (serviceAccountId === boundAccountIds.get(id)) {
+          // The account came back under the same id, which the binding would treat as unchanged
+          // and keep its stale `boundAt`. Clearing it first makes the next write bind afresh.
+          const cleared = await patchWorker({
+            enabled: false,
+            settings: { serviceAccountId: null },
+            settingsRevision,
+          });
+          committedClear = true;
+          settingsRevision = cleared.worker.settingsRevision;
+        }
+        return patchWorker({ enabled: true, settings: { serviceAccountId }, settingsRevision });
       })
     );
 
@@ -130,10 +153,11 @@ export const useEnableWorkers = (
       }
     });
 
-    if (hadFailure && hadSuccess) {
-      // A successful enable writes settings and bumps settingsRevision. Refresh before the
-      // button can be pressed again, or the retry resends the revision from before this save
-      // and the workers that landed come back as conflicts. This stays after the fan-out:
+    if (hadFailure && (hadSuccess || committedClear)) {
+      // A successful enable, or a clear whose rebind then failed, writes settings and bumps
+      // settingsRevision. Refresh before the
+      // button can be pressed again, or the retry resends the revision and binding from before
+      // this save and the workers that landed come back as conflicts. This stays after the fan-out:
       // per-patch cache writes would let LandingPage leave onboarding early.
       await queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
     }
@@ -155,8 +179,8 @@ export const useEnableWorkers = (
       return;
     }
 
-    // Full success: release the save lock and navigate. Invalidate first so the
-    // Watches page gets fresh state on mount.
+    // Full success: release the save lock, invalidate the cache, and navigate.
+    // Invalidate first so the Watches page gets fresh state on mount.
     queryClient.invalidateQueries({ queryKey: queryKeys.workers.list() });
     onSavingChange?.(false);
     onSuccess?.();

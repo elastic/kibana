@@ -208,6 +208,14 @@ describe('createWorkflowTroubleshootingSkill', () => {
       expect(skill.content).toContain('interrupted');
     });
 
+    it('lists the content_filter error category in the Response Format', () => {
+      expect(skill.content).toContain('`content_filter`');
+    });
+
+    it('warns that a connector without refusal reporting can turn a content filter into a timeout', () => {
+      expect(skill.content).toContain("On connectors that don't report a refusal to Kibana");
+    });
+
     it('describes how to diagnose a missing skill report (4th, fire-and-forget run)', () => {
       expect(skill.content).toContain('Missing Report');
       expect(skill.content).toContain('system-attack-discovery-skill-report');
@@ -341,6 +349,20 @@ describe('createWorkflowTroubleshootingSkill', () => {
         const { content } = getExpandedErrorCategoriesContent() ?? {};
 
         expect(content).toContain('Not a permission issue');
+      });
+
+      it('documents the content_filter error category and its remediation', () => {
+        const { content } = getExpandedErrorCategoriesContent() ?? {};
+
+        expect(content).toContain('### content_filter');
+        expect(content).toContain('Select a different model for Attack Discovery');
+        expect(content).toContain('Do NOT suggest reducing the number of');
+      });
+
+      it('tells the timeout remediation to check the connector for a content_filter refusal first', () => {
+        const { content } = getExpandedErrorCategoriesContent() ?? {};
+
+        expect(content).toContain('Check the connector first');
       });
 
       it('documents the interrupted error category and its remediation', () => {

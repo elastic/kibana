@@ -931,6 +931,39 @@ describe('AgentBasedSection', () => {
     });
   });
 
+  describe('"Create a new agent policy" option in edit mode', () => {
+    const newPolicyRadio = () => screen.getByRole('radio', { name: 'Create a new agent policy' });
+
+    it('stays enabled when the session has no agent policies (e.g. failed managed integration deploy)', async () => {
+      setupMocks({ agentHostsMode: 'new', isEditMode: true });
+      renderSection();
+      await waitFor(() => expect(newPolicyRadio()).toBeEnabled());
+    });
+
+    it('is disabled when the session has selected agent policies', async () => {
+      setupMocks({ agentHostsMode: 'existing', selectedAgentPolicyIds: ['p1'], isEditMode: true });
+      renderSection();
+      await waitFor(() => expect(newPolicyRadio()).toBeDisabled());
+    });
+
+    it('is disabled when the session has created an agent policy', async () => {
+      setupMocks({
+        agentHostsMode: 'existing',
+        agentPolicyId: 'created-policy',
+        selectedAgentPolicyIds: ['created-policy'],
+        isEditMode: true,
+      });
+      renderSection();
+      await waitFor(() => expect(newPolicyRadio()).toBeDisabled());
+    });
+
+    it('is enabled outside edit mode', async () => {
+      setupMocks({ agentHostsMode: 'existing', selectedAgentPolicyIds: ['p1'], isEditMode: false });
+      renderSection();
+      await waitFor(() => expect(newPolicyRadio()).toBeEnabled());
+    });
+  });
+
   describe('selectedAgentPolicyIds reconciliation after policies load', () => {
     it('filters out deleted/managed policy ids from selectedAgentPolicyIds when policies load', async () => {
       const setAgentBasedDeployment = jest.fn();

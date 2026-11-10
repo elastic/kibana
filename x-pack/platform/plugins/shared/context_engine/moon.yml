@@ -86,12 +86,17 @@ dependsOn:
   - '@kbn/datemath'
   - '@kbn/esql-utils'
   - '@kbn/ebt-click'
+  - '@kbn/std'
+  - '@kbn/usage-collection-plugin'
+  - '@kbn/unsaved-changes-prompt'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod
   - group-platform
   - shared
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

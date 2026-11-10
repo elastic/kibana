@@ -8,6 +8,7 @@
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
 import {
+  badGateway,
   badRequest,
   conflict,
   entityTooLarge,
@@ -67,6 +68,9 @@ export const createServerRoute: CreateServerRouteFactory<
 
               case 500:
                 throw internal(error, 'data' in error ? error.data : undefined);
+
+              case 502:
+                throw badGateway(error, 'data' in error ? error.data : undefined);
 
               case 503:
                 throw serverUnavailable(error, 'data' in error ? error.data : undefined);

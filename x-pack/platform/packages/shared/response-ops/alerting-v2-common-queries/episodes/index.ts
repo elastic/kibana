@@ -16,6 +16,18 @@ export {
   normalizeEpisodeSeverity,
 } from './episode_severity';
 
+export {
+  EPISODE_SOURCE_FILTER_CLASSIC,
+  EPISODE_SOURCE_FILTER_UNIVERSAL,
+  EPISODE_SOURCE_FILTER_SYSTEM_IDS,
+  NATIVE_EPISODE_SOURCE,
+  isEpisodeSourceFilterSystemId,
+  isConnectorEpisodeSource,
+  sourceFilterIncludesClassic,
+  sourceFilterIncludesV2,
+} from './episode_source';
+export type { EpisodeSourceFilterSystemId } from './episode_source';
+
 export { asTypedEsqlQuery, rowsFromEsql, asEsqlRows } from './typed_esql_query';
 export type { TypedEsqlQuery } from './typed_esql_query';
 
@@ -42,14 +54,24 @@ export {
 } from './kql_to_esql';
 export type { EpisodeKqlTranslationErrorReason } from './kql_to_esql';
 
-export { buildEpisodeQuery, buildEpisodeGroupHashQuery } from './episode_query';
-export type { EpisodeGroupHashEsqlRow } from './episode_query';
+export {
+  addEpisodeSummaryStats,
+  buildEpisodeQuery,
+  buildEpisodeDataRequest,
+  buildEpisodesDataRequest,
+  buildSeriesSnoozeQuery,
+  EPISODE_DATA_FILTER,
+  EPISODE_EVENTS_FIELDS,
+} from './episode_query';
+export type {
+  EpisodeDataEsqlRow,
+  EpisodeEventsEsqlRow,
+  EpisodesDataEsqlRow,
+  SeriesSnoozeEsqlRow,
+} from './episode_query';
 
 export { buildEpisodeEventsQuery, ALERT_EPISODE_EVENT_FIELDS } from './episode_events_query';
 export type { EpisodeEventRow, BuildEpisodeEventsQueryOptions } from './episode_events_query';
-
-export { buildEpisodeEventDataQuery } from './episode_event_data_query';
-export type { EpisodeEventDataRow } from './episode_event_data_query';
 
 export { buildEpisodeActionsQuery } from './episode_actions_query';
 export type { EpisodeActionRow } from './episode_actions_query';

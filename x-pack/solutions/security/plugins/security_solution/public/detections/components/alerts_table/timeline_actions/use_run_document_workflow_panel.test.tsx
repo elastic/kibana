@@ -7,10 +7,14 @@
 
 import React from 'react';
 import { render, renderHook, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { WorkflowListItemDto } from '@kbn/workflows';
+import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import type { RunWorkflowPanelProps } from '@kbn/workflows-ui';
+import type { TimelineItem } from '../../../../../common/search_strategy';
+import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import {
   useRunDocumentWorkflowPanel,
   RUN_DOCUMENT_WORKFLOW_PANEL_ID,
@@ -91,17 +95,42 @@ jest.mock('@kbn/workflows-ui', () => ({
   },
 }));
 
+jest.mock('../../../../timelines/containers');
+
 const useKibanaMock = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
+
+const useTimelineEventsHandlerMock = useTimelineEventsHandler as jest.MockedFunction<
+  typeof useTimelineEventsHandler
+>;
+
+const timelineItem = (id: string, index: string): TimelineItem =>
+  ({ _id: id, _index: index, data: [], ecs: { _id: id } } as TimelineItem);
+
+/**
+ * Stubs the id-resolving search so a select-all run resolves to `events` out of `totalCount`
+ * total matches. `totalCount` above `events.length` is what signals a trimmed selection.
+ */
+const mockDocumentIdSearch = ({
+  events,
+  totalCount,
+}: {
+  events: TimelineItem[];
+  totalCount: number;
+}) => {
+  const searchHandler = jest.fn((onResponse) => {
+    onResponse?.({ events, totalCount } as never);
+  });
+  useTimelineEventsHandlerMock.mockReturnValue([
+    undefined as never,
+    undefined as never,
+    searchHandler as never,
+  ]);
+  return searchHandler;
+};
 
 const defaultProps: UseRunDocumentWorkflowPanelProps = {
   closePopover: jest.fn(),
-  documents: [
-    {
-      _id: 'doc-123',
-      _index: 'documents-index',
-      'host.name': 'test-host',
-    },
-  ],
+  documentIds: [{ _id: 'doc-123', _index: 'documents-index' }],
 };
 
 const createMockWorkflow = (id: string, triggerType: 'alert' | 'manual'): WorkflowListItemDto => ({
@@ -136,11 +165,14 @@ const createMockKibana = (
   };
 };
 
+const ROOT_PANEL_ID = 0;
+
 const renderContextMenu = (
   items: DocumentTableContextMenuItem[],
-  panels: EuiContextMenuPanelDescriptor[]
+  panels: EuiContextMenuPanelDescriptor[],
+  initialPanelId = panels[0]?.id ?? 1
 ) => {
-  const panelsToRender = [{ id: 0, items }, ...panels];
+  const panelsToRender = [{ id: ROOT_PANEL_ID, items }, ...panels];
   return render(
     <EuiPopover
       aria-label="Context menu"
@@ -150,7 +182,7 @@ const renderContextMenu = (
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu initialPanelId={panels[0]?.id ?? 1} panels={panelsToRender} />
+      <EuiContextMenu initialPanelId={initialPanelId} panels={panelsToRender} />
     </EuiPopover>
   );
 };
@@ -172,6 +204,7 @@ describe('useRunDocumentWorkflowPanel', () => {
     });
     mockUseWorkflowsUIEnabledSetting.mockReturnValue(true);
     useKibanaMock.mockReturnValue(createMockKibana());
+    mockDocumentIdSearch({ events: [], totalCount: 0 });
   });
 
   afterEach(() => {
@@ -203,7 +236,7 @@ describe('useRunDocumentWorkflowPanel', () => {
         () =>
           useRunDocumentWorkflowPanel({
             ...defaultProps,
-            documents: [
+            documentIds: [
               { _id: 'doc-1', _index: 'documents-index' },
               { _id: 'doc-2', _index: 'documents-index' },
             ],
@@ -292,14 +325,14 @@ describe('useRunDocumentWorkflowPanel', () => {
       await waitFor(() =>
         expect(lastPanelProps()?.telemetry).toEqual({
           origin: 'document',
-          itemCount: defaultProps.documents.length,
+          itemCount: defaultProps.documentIds.length,
           owner: 'securitySolution',
         })
       );
     });
 
     it('reports a bulk action as a bulk document run over the selected documents', async () => {
-      renderPanel({ documents: twoDocuments, isBulk: true });
+      renderPanel({ documentIds: twoDocuments, isBulk: true });
 
       await waitFor(() =>
         expect(lastPanelProps()?.telemetry).toEqual({
@@ -323,7 +356,7 @@ describe('useRunDocumentWorkflowPanel', () => {
         telemetry: caseTelemetry,
       });
 
-      renderPanel({ documents: twoDocuments, isBulk: true });
+      renderPanel({ documentIds: twoDocuments, isBulk: true });
 
       await waitFor(() => expect(lastPanelProps()?.telemetry).toEqual(caseTelemetry));
     });
@@ -395,6 +428,16 @@ describe('useRunDocumentWorkflowPanel', () => {
       expect(result.current.runDocumentWorkflowPanel).toHaveLength(1);
     });
 
+    it('returns empty lists outside a case with no documents', () => {
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, documentIds: [] }),
+        { wrapper: TestProviders }
+      );
+
+      expect(result.current.runWorkflowMenuItem).toEqual([]);
+      expect(result.current.runDocumentWorkflowPanel).toEqual([]);
+    });
+
     it('returns the menu item inside a case with originEventId when Cases runs are available', () => {
       mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
 
@@ -422,7 +465,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
 
       const { result } = renderHook(
-        () => useRunDocumentWorkflowPanel({ ...defaultProps, documents: [] }),
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, documentIds: [] }),
         { wrapper: TestProviders }
       );
 
@@ -464,7 +507,7 @@ describe('useRunDocumentWorkflowPanel', () => {
       expect(panelProps.inputs).toEqual({
         event: {
           triggerType: 'document',
-          documents: defaultProps.documents,
+          documentIds: defaultProps.documentIds,
         },
       });
       expect(panelProps.visibility).toBeUndefined();
@@ -482,6 +525,212 @@ describe('useRunDocumentWorkflowPanel', () => {
         manualWorkflow,
         alertWorkflow,
       ]);
+    });
+  });
+
+  // A table only hands over its loaded rows, so a "select all" has to be resolved from the
+  // table's query before the run payload can be built.
+  describe('select all', () => {
+    const selectionScope = {
+      dataViewId: 'security-solution-default',
+      indexNames: ['logs-*'],
+      filterQuery: '{"bool":{}}',
+      from: '2026-01-01T00:00:00.000Z',
+      to: '2026-01-02T00:00:00.000Z',
+      runtimeMappings: {},
+      queryId: 'test-table-run-workflow-selection',
+    };
+    const pageDocumentIds = [{ _id: 'doc-1', _index: 'logs-a' }];
+
+    const renderSelectAllPanel = (
+      props: Partial<UseRunDocumentWorkflowPanelProps> = {},
+      initialPanelId?: number
+    ) => {
+      const { result } = renderHook(
+        () =>
+          useRunDocumentWorkflowPanel({
+            closePopover: jest.fn(),
+            documentIds: pageDocumentIds,
+            isAllSelected: true,
+            selectionScope,
+            ...props,
+          }),
+        { wrapper: TestProviders }
+      );
+      return renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel,
+        initialPanelId
+      );
+    };
+
+    const lastPanelProps = () => {
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      if (!panelProps) {
+        throw new Error('Expected RunWorkflowPanel to render');
+      }
+      return panelProps;
+    };
+
+    it('does not resolve beyond the loaded rows when only the page is selected', () => {
+      const searchHandler = mockDocumentIdSearch({ events: [], totalCount: 0 });
+
+      renderSelectAllPanel({ isAllSelected: false });
+
+      expect(searchHandler).not.toHaveBeenCalled();
+      expect(lastPanelProps().inputs).toEqual({
+        event: { triggerType: 'document', documentIds: pageDocumentIds },
+      });
+    });
+
+    it('runs on the loaded rows without a selection scope when they are the whole select-all', () => {
+      const searchHandler = mockDocumentIdSearch({ events: [], totalCount: 0 });
+
+      renderSelectAllPanel({ selectionScope: undefined, totalItems: pageDocumentIds.length });
+
+      expect(searchHandler).not.toHaveBeenCalled();
+      expect(lastPanelProps().inputs).toEqual({
+        event: { triggerType: 'document', documentIds: pageDocumentIds },
+      });
+    });
+
+    it('does not resolve the selection until the run panel opens', async () => {
+      const searchHandler = mockDocumentIdSearch({
+        events: [timelineItem('doc-1', 'logs-a')],
+        totalCount: 1,
+      });
+
+      const { getByTestId } = renderSelectAllPanel({}, ROOT_PANEL_ID);
+
+      expect(useTimelineEventsHandlerMock).not.toHaveBeenCalled();
+      expect(searchHandler).not.toHaveBeenCalled();
+
+      await userEvent.click(getByTestId('run-document-workflow-action'));
+
+      await waitFor(() => expect(searchHandler).toHaveBeenCalledTimes(1));
+    });
+
+    it('runs on every matching document, not just the loaded rows, when all are selected', async () => {
+      // `doc-2` is not in `pageDocumentIds`, so it can only come from the resolving search.
+      mockDocumentIdSearch({
+        events: [timelineItem('doc-1', 'logs-a'), timelineItem('doc-2', 'logs-b')],
+        totalCount: 2,
+      });
+
+      renderSelectAllPanel();
+
+      await waitFor(() => {
+        expect(lastPanelProps().inputs).toEqual({
+          event: {
+            triggerType: 'document',
+            documentIds: [
+              { _id: 'doc-1', _index: 'logs-a' },
+              { _id: 'doc-2', _index: 'logs-b' },
+            ],
+          },
+        });
+      });
+    });
+
+    it('resolves the selection against the caller scope, capped at the supported maximum', () => {
+      mockDocumentIdSearch({ events: [timelineItem('doc-1', 'logs-a')], totalCount: 1 });
+
+      renderSelectAllPanel();
+
+      expect(useTimelineEventsHandlerMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataViewId: selectionScope.dataViewId,
+          indexNames: selectionScope.indexNames,
+          filterQuery: selectionScope.filterQuery,
+          startDate: selectionScope.from,
+          endDate: selectionScope.to,
+          id: selectionScope.queryId,
+          limit: MAX_RUN_WORKFLOW_DOCS,
+          fields: ['_id'],
+        })
+      );
+    });
+
+    describe('selection limit', () => {
+      const renderMenuItem = (props: Partial<UseRunDocumentWorkflowPanelProps>) =>
+        renderHook(
+          () =>
+            useRunDocumentWorkflowPanel({
+              closePopover: jest.fn(),
+              documentIds: pageDocumentIds,
+              isAllSelected: true,
+              selectionScope,
+              ...props,
+            }),
+          { wrapper: TestProviders }
+        ).result.current.runWorkflowMenuItem[0];
+
+      it('disables the action and explains why when a select-all covers more than the maximum', () => {
+        const menuItem = renderMenuItem({ totalItems: MAX_RUN_WORKFLOW_DOCS + 1 });
+
+        expect(menuItem.disabled).toBe(true);
+        expect(menuItem.toolTipContent).toBe(
+          i18n.RUN_WORKFLOW_SELECTION_TOO_LARGE(MAX_RUN_WORKFLOW_DOCS)
+        );
+      });
+
+      it('keeps the action enabled when a select-all covers exactly the maximum', () => {
+        const menuItem = renderMenuItem({ totalItems: MAX_RUN_WORKFLOW_DOCS });
+
+        expect(menuItem.disabled).toBeUndefined();
+        expect(menuItem.toolTipContent).toBeUndefined();
+      });
+
+      // Without a scope only the loaded rows can be run on, which would silently drop the rest.
+      it.each([
+        ['covers more than the loaded rows', pageDocumentIds.length + 1],
+        ['has no known total', undefined],
+      ])(
+        'disables the action and explains why when a select-all without a scope %s',
+        (_, totalItems) => {
+          const menuItem = renderMenuItem({ selectionScope: undefined, totalItems });
+
+          expect(menuItem.disabled).toBe(true);
+          expect(menuItem.toolTipContent).toBe(i18n.RUN_WORKFLOW_SELECT_ALL_UNSUPPORTED);
+        }
+      );
+
+      it('keeps the action enabled without a scope when the loaded rows are the whole select-all', () => {
+        const menuItem = renderMenuItem({
+          selectionScope: undefined,
+          totalItems: pageDocumentIds.length,
+        });
+
+        expect(menuItem.disabled).toBeUndefined();
+        expect(menuItem.toolTipContent).toBeUndefined();
+      });
+
+      it('ignores the table total when only the loaded rows are selected', () => {
+        const menuItem = renderMenuItem({
+          isAllSelected: false,
+          totalItems: MAX_RUN_WORKFLOW_DOCS + 1,
+        });
+
+        expect(menuItem.disabled).toBeUndefined();
+      });
+    });
+
+    it('surfaces an error instead of a partial run when resolving the selection fails', async () => {
+      // The timeline search reports failures through its error callback, never by throwing.
+      useTimelineEventsHandlerMock.mockReturnValue([
+        undefined as never,
+        undefined as never,
+        ((_onResponse: unknown, onError: (error: unknown) => void) => {
+          onError(new Error('search failed'));
+        }) as never,
+      ]);
+
+      const { getByTestId, queryByTestId } = renderSelectAllPanel();
+
+      await waitFor(() => {
+        expect(getByTestId('bulk-run-workflow-selection-error')).toBeInTheDocument();
+      });
+      expect(queryByTestId('run-workflow-execute-button')).not.toBeInTheDocument();
     });
   });
 });

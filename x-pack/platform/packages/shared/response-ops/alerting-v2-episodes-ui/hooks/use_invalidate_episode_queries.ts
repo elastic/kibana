@@ -31,10 +31,11 @@ export const useInvalidateEpisodeQueries = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.actionsHistoryAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.listAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.episodeAll() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.episodeDataAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.episodeEventsAll() }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.episodeEventDataAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.tagSuggestionsAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.tagOptionsAll() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.connectorSourcesAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.histogramAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.kpisAll() }),
         ...(additionalEpisodesDataSource
