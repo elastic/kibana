@@ -6,6 +6,8 @@
  */
 
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
+import type { KibanaRequest } from '@kbn/core/server';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_events_client.mock';
 import { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import { internalEventsRoutes } from './route';
@@ -707,15 +709,17 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
     createAlertEvent = jest.fn().mockResolvedValue(undefined),
     emitTrigger,
     body = { status: 'inactive' as const },
+    request = { spaceId: 'default' },
   }: {
     findLatestByEventId: jest.Mock;
     createAlertEvent?: jest.Mock;
     emitTrigger?: jest.Mock;
     body?: { status: 'active' | 'inactive'; assessment_note?: string };
+    request?: object;
   }) =>
     eventsUpdateRoute.handler({
       params: { path: { id: 'event-1' }, body },
-      request: { spaceId: 'default' },
+      request,
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () =>
@@ -753,6 +757,27 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
       })
     );
     expect(emitTrigger).toHaveBeenCalledTimes(1);
+  });
+
+  it('stamps the calling workflow run on the version it writes', async () => {
+    const createAlertEvent = jest.fn().mockResolvedValue(undefined);
+    const request = { spaceId: 'default' };
+    setWorkflowEventChainContext(request as unknown as KibanaRequest, {
+      depth: 0,
+      sourceExecutionId: 'workflow-run-1',
+    });
+
+    await run({
+      findLatestByEventId: jest.fn().mockResolvedValue(stored),
+      createAlertEvent,
+      request,
+    });
+
+    expect(createAlertEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ workflow_execution_id: 'workflow-run-1' }),
+      })
+    );
   });
 });
 

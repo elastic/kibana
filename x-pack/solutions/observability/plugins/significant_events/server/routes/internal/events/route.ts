@@ -478,6 +478,7 @@ const eventsUpdateRoute = createServerRoute({
       eventId: params.path.id,
       change: StatusChange.byOperator(params.body.status),
       assessmentNote: params.body.assessment_note,
+      workflowExecutionId: getWorkflowExecutionIdFromRequest(request),
     });
   },
 });

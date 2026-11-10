@@ -40,6 +40,7 @@ import {
   investigationRunFailedEventSchema,
 } from '@kbn/agentic-investigations-plugin/common';
 import { assertNever } from '@kbn/std';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { assertNightshiftSpace } from '../lib/assert_nightshift_space';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
@@ -127,6 +128,20 @@ const correlationFromContext = (context: unknown): LifecycleCorrelation => {
     event_id: asLifecycleCorrelationId(context.event_id),
     source_workflow_execution_id: asLifecycleCorrelationId(context.source_workflow_execution_id),
   };
+};
+
+/** The significant event behind a run: its subject, or the event whose alert triggered it. */
+const significantEventIdOf = (
+  subject: InvestigationSubject,
+  alerts: InvestigationAlertSnapshot[]
+): string | undefined => {
+  if (subject.type === 'significant_event') return asLifecycleCorrelationId(subject.id);
+  const data = alerts.flatMap((alert) =>
+    alert.alert_version === 'v2' && alert.source === SIGNIFICANT_EVENTS_ALERT_SOURCE && alert.data
+      ? [alert.data]
+      : []
+  )[0];
+  return asLifecycleCorrelationId(data?.event_id);
 };
 
 /** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
@@ -683,6 +698,7 @@ export class NightshiftInvestigationsClient {
       await this.createAcceptedInvestigation({ conversations, investigationId, executionId });
     }
 
+    const correlation = correlationFromContext(prepared.context);
     this.telemetry?.reportInvestigationStarted({
       investigation_id: investigationId,
       workflow_execution_id: executionId,
@@ -691,7 +707,8 @@ export class NightshiftInvestigationsClient {
       subject_type: resolvedSubject.type,
       is_follow_up: isFollowUp,
       automation_id: automationId,
-      ...correlationFromContext(prepared.context),
+      ...correlation,
+      event_id: significantEventIdOf(resolvedSubject, alerts) ?? correlation.event_id,
     });
 
     this.logger.info(

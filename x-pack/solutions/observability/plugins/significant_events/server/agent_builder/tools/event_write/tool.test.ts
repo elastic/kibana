@@ -14,6 +14,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
@@ -798,6 +799,26 @@ describe('events_write tool', () => {
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledTimes(2);
     expect(telemetry.trackAgentToolEventsWrite).toHaveBeenLastCalledWith(
       expect.objectContaining({ success: false, written: false, error_message: 'busy' })
+    );
+  });
+
+  it('stamps the invoking workflow run on the written items and the telemetry', async () => {
+    (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
+      { index: 0, event_id: 'event-1', status: 'active', written: true },
+    ]);
+    const telemetry = { trackAgentToolEventsWrite: jest.fn() };
+    const context = createMockToolContext();
+    setWorkflowEventChainContext(context.request, { depth: 0, sourceExecutionId: 'discovery-run' });
+
+    await invokeHandler(createTool(telemetry) as never, { items: [input] }, context);
+
+    expect(eventsWriteBulkHandler).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inputs: [expect.objectContaining({ workflow_execution_id: 'discovery-run' })],
+      })
+    );
+    expect(telemetry.trackAgentToolEventsWrite).toHaveBeenCalledWith(
+      expect.objectContaining({ workflow_execution_id: 'discovery-run' })
     );
   });
 

@@ -59,7 +59,7 @@ const baseInvestigationSchema = lazySchema(() =>
       .string()
       .max(500)
       .optional()
-      .describe('Workflow execution that produced the triggering significant event.'),
+      .describe('Workflow execution that wrote the triggering significant event version.'),
     investigation_id: z
       .string()
       .describe('ID of the investigation, which is the id of its Agent Builder conversation.'),

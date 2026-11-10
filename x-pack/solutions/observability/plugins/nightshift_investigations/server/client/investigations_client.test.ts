@@ -919,6 +919,57 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
+  it('reports the significant event of the subject when the context names none', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-1');
+    const telemetry = { reportInvestigationStarted: jest.fn() };
+
+    await makeClient({ telemetry: telemetry as never }).start(
+      {
+        subject: { type: 'significant_event', id: 'event-1' },
+        trigger_type: 'manual',
+        context: { event_id: '' },
+      },
+      { entryPoint: 'start_api' }
+    );
+
+    expect(telemetry.reportInvestigationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({ event_id: 'event-1' })
+    );
+  });
+
+  it('reports the significant event behind an alert-triggered investigation', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockManagement.runWorkflow.mockResolvedValue('exec-1');
+    const telemetry = { reportInvestigationStarted: jest.fn() };
+
+    await makeClient({ telemetry: telemetry as never }).start(
+      {
+        subject: { type: 'alert', id: 'episode-1' },
+        trigger_type: 'automatic',
+        context: {
+          alerts: [
+            {
+              alert_version: 'v2',
+              id: 'episode-1',
+              rule_id: 'v2-rule-1',
+              group_hash: 'hash-1',
+              status: 'active',
+              start: '2026-08-24T12:00:00.000Z',
+              source: 'elastic.significant_events',
+              data: { event_id: 'event-1' },
+            },
+          ],
+        },
+      },
+      { entryPoint: 'automation', automationId: 'a1' }
+    );
+
+    expect(telemetry.reportInvestigationStarted).toHaveBeenCalledWith(
+      expect.objectContaining({ event_id: 'event-1' })
+    );
+  });
+
   it('reports the producer workflow of an alert-triggered investigation', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('investigation-exec');
