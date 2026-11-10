@@ -338,8 +338,12 @@ export async function bulkCreateAgentActionResults(
    * so nothing here settles whether that is a data stream or an alias. Either way a write goes to
    * whichever index is the write index when it arrives and `_id` uniqueness is per index, so a
    * rollover between a landed attempt and its resend would be accepted rather than refused.
-   * `findAlreadyWritten` is what covers the gap, which is why it runs before a resend that follows
-   * a transport error — the only case where an id may already be there.
+   * `findAlreadyWritten` narrows that window rather than closing it, which is why it runs before a
+   * resend that follows a transport error — the only case where an id may already be there. It
+   * cannot close it: the lookup and the resend are two requests, a search sees only what has
+   * refreshed, and nothing holds the write index still in between. What is left is a rollover
+   * landing inside that window, which would duplicate the batch's results as a fresh id per
+   * attempt does on every retry. Closing it would take deduplication where the results are read.
    *
    * The ids stay local to this call rather than being derived from the action and agent: nothing
    * here owns the `_id` scheme of an index Fleet Server also writes to.

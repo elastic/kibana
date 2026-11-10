@@ -1017,8 +1017,8 @@ describe('Agent actions', () => {
     it('does not resend a result an earlier attempt already wrote', async () => {
       jest.useFakeTimers();
       try {
-        // the conflict only holds within one backing index, and this is a data stream: a rollover
-        // between a landed attempt and its resend would be accepted rather than refused
+        // the conflict only holds within one index, and .fleet-actions-results rolls over: a
+        // rollover between a landed attempt and its resend would be accepted rather than refused
         const esClientMock = elasticsearchServiceMock.createInternalClient();
         esClientMock.bulk
           .mockRejectedValueOnce(new Error('socket hang up'))
