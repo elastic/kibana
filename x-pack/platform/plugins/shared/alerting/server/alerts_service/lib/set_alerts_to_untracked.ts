@@ -6,6 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
+import Boom from '@hapi/boom';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import type { AlertStatus } from '@kbn/rule-data-utils';
@@ -217,7 +218,7 @@ const bulkEnsureAuthorizedToUntrack = async (
 
   for (const pair of ruleTypeIdConsumersPairs) {
     if (pair.consumers.includes('siem')) {
-      throw new Error('Untracking Security alerts is not permitted');
+      throw Boom.forbidden('Untracking Security alerts is not permitted');
     }
   }
 
