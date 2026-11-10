@@ -11,6 +11,15 @@ import type { SignalSource } from '../../types';
  * Elasticsearch metadata fields that cannot be added inside a document. An ES|QL result column
  * with one of these names (for example from `METADATA _source, _ignored`) would make the alert
  * document be rejected. `_id`, `_index` and `_version` are handled separately by the executor.
+ *
+ * The list starts from the document metadata fields page and was completed by indexing a document
+ * with each name as a top-level field. Elasticsearch rejects every name below with
+ * "failed to parse field [<name>] of type [<name>]", including the ones the page does not list
+ * (`_ignored_source`, `_index_mode`, `_nested_path`, `_seq_no`, `_data_stream_timestamp`, `_feature`).
+ * https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/document-metadata-fields
+ *
+ * Names that only exist when an optional plugin adds the metadata mapper, such as `_size` from
+ * `mapper-size`, are not included. Without the plugin Elasticsearch stores them like any other field.
  */
 const RESERVED_METADATA_FIELDS: ReadonlySet<string> = new Set([
   '_source',
@@ -23,6 +32,7 @@ const RESERVED_METADATA_FIELDS: ReadonlySet<string> = new Set([
   '_field_names',
   '_nested_path',
   '_data_stream_timestamp',
+  '_feature',
 ]);
 
 const isReserved = (name: string): boolean => RESERVED_METADATA_FIELDS.has(name);

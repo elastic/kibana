@@ -2347,34 +2347,34 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('reserved metadata columns', () => {
-      it('should create suppressed and not suppressed alerts without the metadata column when events miss the suppression field', async () => {
+      const timestamp = '2020-10-28T06:00:00.000Z';
+
+      const getRule = (id: string): EsqlRuleCreateProps => ({
+        ...getCreateEsqlRulesSchemaMock('rule-1', true),
+        query: `from ecs_compliant metadata _id, _index, _version, _source ${internalIdPipe(id)}`,
+        from: 'now-35m',
+        interval: '30m',
+        alert_suppression: {
+          group_by: ['host.name'],
+          duration: {
+            value: 60,
+            unit: 'm',
+          },
+          missing_fields_strategy: 'doNotSuppress',
+        },
+      });
+
+      it('should suppress events that have the suppression field and create the alert without the metadata column', async () => {
         const id = uuidv4();
-        const timestamp = '2020-10-28T06:00:00.000Z';
 
         await indexListOfDocuments([
           { id, '@timestamp': timestamp, host: { name: 'host-a' } },
-          { id, '@timestamp': timestamp, host: { ip: '127.0.0.5' } }, // missing host.name field
-          { id, '@timestamp': timestamp, host: { ip: '127.0.0.6' } }, // missing host.name field
+          { id, '@timestamp': timestamp, host: { name: 'host-a' } },
         ]);
-
-        const rule: EsqlRuleCreateProps = {
-          ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          query: `from ecs_compliant metadata _id, _index, _version, _source ${internalIdPipe(id)}`,
-          from: 'now-35m',
-          interval: '30m',
-          alert_suppression: {
-            group_by: ['host.name'],
-            duration: {
-              value: 60,
-              unit: 'm',
-            },
-            missing_fields_strategy: 'doNotSuppress',
-          },
-        };
 
         const { logs, previewId } = await previewRule({
           supertest,
-          rule,
+          rule: getRule(id),
           timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
         });
 
@@ -2384,18 +2384,46 @@ export default ({ getService }: FtrProviderContext) => {
         );
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts).toHaveLength(3);
+        expect(previewAlerts).toHaveLength(1);
+        expect(previewAlerts[0]._source).toHaveProperty('id', id);
+        expect(previewAlerts[0]._source).not.toHaveProperty('_source');
+        expect(previewAlerts[0]._source).toHaveProperty([ALERT_SUPPRESSION_DOCS_COUNT], 1);
+        expect(previewAlerts[0]._source).toHaveProperty(
+          [ALERT_SUPPRESSION_TERMS],
+          [{ field: 'host.name', value: 'host-a' }]
+        );
+      });
+
+      it('should create one alert per event without the metadata column when events miss the suppression field', async () => {
+        const id = uuidv4();
+
+        await indexListOfDocuments([
+          { id, '@timestamp': timestamp, host: { ip: '127.0.0.5' } }, // missing host.name field
+          { id, '@timestamp': timestamp, host: { ip: '127.0.0.6' } }, // missing host.name field
+        ]);
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule: getRule(id),
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].errors).toEqual([]);
+        expect(logs[0].warnings).toEqual(
+          expect.arrayContaining([getReservedMetadataColumnsWarning(['_source'])])
+        );
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(2);
+        expect(
+          previewAlerts.map((previewAlert) => previewAlert._source?.['host.ip']).sort()
+        ).toEqual(['127.0.0.5', '127.0.0.6']);
         previewAlerts.forEach((previewAlert) => {
           expect(previewAlert._source).toHaveProperty('id', id);
           expect(previewAlert._source).not.toHaveProperty('_source');
+          expect(previewAlert._source).not.toHaveProperty([ALERT_SUPPRESSION_DOCS_COUNT]);
+          expect(previewAlert._source).not.toHaveProperty([ALERT_SUPPRESSION_TERMS]);
         });
-
-        // one alert is suppressed by host.name, the other two are created without suppression
-        const suppressedAlerts = previewAlerts.filter(
-          (previewAlert) => previewAlert._source?.[ALERT_SUPPRESSION_TERMS] !== undefined
-        );
-        expect(suppressedAlerts).toHaveLength(1);
-        expect(suppressedAlerts[0]._source).toHaveProperty([ALERT_SUPPRESSION_DOCS_COUNT], 0);
       });
     });
   });

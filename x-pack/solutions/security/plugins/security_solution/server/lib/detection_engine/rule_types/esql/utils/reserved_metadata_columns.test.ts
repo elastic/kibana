@@ -28,6 +28,14 @@ describe('reserved metadata columns', () => {
       ]);
     });
 
+    it('includes _feature, which Elasticsearch rejects as well', () => {
+      expect(getReservedMetadataColumns([{ _feature: 'x' }])).toEqual(['_feature']);
+    });
+
+    it('does not include _size, which Elasticsearch only rejects when the mapper-size plugin is installed', () => {
+      expect(getReservedMetadataColumns([{ _size: '1' }])).toEqual([]);
+    });
+
     it('returns an empty array when no column is reserved', () => {
       const documents = [{ _id: 'doc-1', _score: '1', _custom: 'value', 'host.name': 'host-1' }];
 
