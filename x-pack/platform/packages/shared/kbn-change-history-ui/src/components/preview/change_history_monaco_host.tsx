@@ -13,12 +13,12 @@ import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
-import type { ChangeHistoryCompareMode } from '../../telemetry';
+import type { ChangeHistoryDiffViewMode } from '../../telemetry';
 import { buildChangeHistoryUnifiedDiffLayoutStyles } from './change_history_unified_diff_layout';
 
 export interface ChangeHistoryMonacoHostProps {
   containerRef: RefObject<HTMLDivElement>;
-  compareMode: ChangeHistoryCompareMode;
+  compareMode: ChangeHistoryDiffViewMode;
   isCompareMode: boolean;
   'data-test-subj'?: string;
 }

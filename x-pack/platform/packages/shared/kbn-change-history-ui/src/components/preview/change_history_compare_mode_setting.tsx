@@ -12,10 +12,8 @@ import type { ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
-import type { ChangeHistoryCompareMode } from '../../telemetry';
+import type { ChangeHistoryDiffViewMode } from '../../telemetry';
 import { changeHistoryPreviewTypography } from './change_history_preview_typography';
-
-export type ChangeHistoryDiffViewMode = ChangeHistoryCompareMode;
 
 /** A selectable entry in the mode setting. */
 export interface ChangeHistoryPreviewModeOption {

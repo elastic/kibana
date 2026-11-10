@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 
 import type { ChangeHistoryProviderProps } from '@kbn/change-history-ui';
-import {
-  ChangeHistoryModal,
-  ChangeHistoryProvider,
-  useChangeHistoryModal,
-} from '@kbn/change-history-ui';
+import { ChangeHistoryModal, ChangeHistoryProvider } from '@kbn/change-history-ui';
 import { i18n } from '@kbn/i18n';
 
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -29,15 +25,6 @@ export interface DashboardChangeHistoryProviderProps {
   children: React.ReactNode;
 }
 
-/** clears the comparison when the modal closes, since the provider stays mounted */
-const ResetOnClose = ({ onClose }: { onClose: () => void }): null => {
-  const { isOpen } = useChangeHistoryModal();
-  useEffect(() => {
-    if (!isOpen) onClose();
-  }, [isOpen, onClose]);
-  return null;
-};
-
 export const DashboardChangeHistoryProvider = ({
   children,
 }: DashboardChangeHistoryProviderProps): JSX.Element => {
@@ -45,9 +32,6 @@ export const DashboardChangeHistoryProvider = ({
   const dashboardId = dashboardApi.savedObjectId$.getValue() ?? dashboardApi.uuid;
 
   const { analytics } = coreServices;
-  const [isComparingToPrevious, setIsComparingToPrevious] = useState<boolean>(false);
-  const ignoreEventPropagation = useRef<boolean>(false);
-
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [previewTitle, setPreviewTitle] = useState<string>(
     dashboardApi?.title$.getValue() ?? dashboardId
@@ -76,29 +60,19 @@ export const DashboardChangeHistoryProvider = ({
     [dashboardApi]
   );
 
-  // selecting a row clears the comparison, except when the select was triggered by clicking that row's "changes" button
-  const onSelectChange = useCallback<
-    NonNullable<ChangeHistoryProviderProps['onSelectChange']>
-  >(() => {
-    if (!ignoreEventPropagation.current) {
-      setIsComparingToPrevious(false);
-    }
-    ignoreEventPropagation.current = false;
-  }, []);
-
   // renders the nChanges string as a link that triggers the comparison view
   const renderChanges = useCallback<NonNullable<ChangeHistoryProviderProps['renderChanges']>>(
-    ({ item, nChanges }) =>
-      item.metadata?.version === 1 ? (
-        nChanges // version 1 has nothing to compare to so don't make it a button, even if it has a change count
+    ({ item, nChanges, requestCompareToPrevious }) =>
+      item.metadata?.version === 1 || !requestCompareToPrevious ? (
+        nChanges // version 1 has nothing to compare to (and compare may be unavailable) so don't make it a button
       ) : (
         <EuiButtonEmpty
           data-test-subj="changeHistoryItemChanges"
           size={'xs'}
           flush={'both'}
-          onClick={() => {
-            ignoreEventPropagation.current = true; // if clicking the nChanges button, ignore propogation up to `onSelectChange`
-            setIsComparingToPrevious(true);
+          onClick={(event: React.MouseEvent) => {
+            event.stopPropagation(); // the compare request already selects this row
+            requestCompareToPrevious();
           }}
         >
           {nChanges}
@@ -107,30 +81,23 @@ export const DashboardChangeHistoryProvider = ({
     []
   );
 
-  // renders the dashboard preview and/or the JSON comparison mode, depending on isComparingToPrevious
+  // renders the dashboard preview, or the JSON comparison when the user requested one
   const renderPreview = useCallback<NonNullable<ChangeHistoryProviderProps['renderPreview']>>(
     (props) => (
       <DashboardChangeHistoryView
         previewProps={props}
         setPreviewTitle={setPreviewTitle}
-        isComparingToPrevious={isComparingToPrevious}
         inheritedTimeRange={dashboardApi?.timeRange$.getValue()}
       />
     ),
-    [isComparingToPrevious, dashboardApi]
+    [dashboardApi]
   );
-
-  const resetComparison = useCallback(() => {
-    ignoreEventPropagation.current = false;
-    setIsComparingToPrevious(false);
-  }, []);
 
   return (
     <ChangeHistoryProvider
       objectId={dashboardId}
       adapter={adapter}
       renderPreview={renderPreview}
-      onSelectChange={onSelectChange}
       renderBadge={renderDashboardChangeHistoryBadge}
       renderChanges={renderChanges}
       labels={{
@@ -145,7 +112,6 @@ export const DashboardChangeHistoryProvider = ({
       analytics={analytics}
     >
       {children}
-      <ResetOnClose onClose={resetComparison} />
       <ChangeHistoryModal />
     </ChangeHistoryProvider>
   );

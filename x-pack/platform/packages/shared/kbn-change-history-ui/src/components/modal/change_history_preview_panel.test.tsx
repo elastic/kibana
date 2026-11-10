@@ -150,7 +150,7 @@ describe('ChangeHistoryPreviewPanel', () => {
     );
   });
 
-  it('forwards compareOverride to useChangeHistoryCompare', () => {
+  it('forwards compareMode to useChangeHistoryCompare', () => {
     mockUseChangeHistoryDetail.mockReturnValue({
       change: previousChange,
       isLoading: false,
@@ -165,14 +165,14 @@ describe('ChangeHistoryPreviewPanel', () => {
       <ChangeHistoryPreviewPanel
         selectedChangeId="evt-previous"
         listItems={listItems}
-        compareOverride={{ type: 'vs_row', rowChangeId: 'evt-current' }}
+        compareMode={{ type: 'vs_row', rowChangeId: 'evt-current' }}
       />,
       { wrapper: TestProvider }
     );
 
     expect(mockUseChangeHistoryCompare).toHaveBeenCalledWith(
       expect.objectContaining({
-        compareOverride: { type: 'vs_row', rowChangeId: 'evt-current' },
+        compareMode: { type: 'vs_row', rowChangeId: 'evt-current' },
       })
     );
   });

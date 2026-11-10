@@ -9,6 +9,7 @@ import { createContext } from 'react';
 
 export interface ChangeHistoryModalSelectionContextValue {
   requestCompareToVersion?: (changeId: string) => void;
+  requestCompareToPrevious?: (changeId: string) => void;
   requestRestoreVersion?: (changeId: string) => void;
 }
 

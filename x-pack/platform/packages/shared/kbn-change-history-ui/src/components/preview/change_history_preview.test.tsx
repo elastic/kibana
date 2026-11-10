@@ -226,8 +226,8 @@ describe('ChangeHistoryPreview', () => {
       target: 'name: current\n',
       baseline: 'name: original\n',
       diffTelemetry: {
-        compareMode: 'unified',
-        setCompareMode: jest.fn(),
+        diffMode: 'unified',
+        setDiffMode: jest.fn(),
         reportDiffViewed,
         reportDiffChangeNavigated: jest.fn(),
       },
@@ -245,8 +245,8 @@ describe('ChangeHistoryPreview', () => {
       target: 'name: same\n',
       baseline: 'name: same\n',
       diffTelemetry: {
-        compareMode: 'unified',
-        setCompareMode: jest.fn(),
+        diffMode: 'unified',
+        setDiffMode: jest.fn(),
         reportDiffViewed,
         reportDiffChangeNavigated: jest.fn(),
       },

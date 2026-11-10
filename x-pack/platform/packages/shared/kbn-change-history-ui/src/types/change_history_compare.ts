@@ -9,7 +9,7 @@ import type { ChangeHistoryDetail } from './change_history_detail';
 import type { ChangeHistoryComparisonType } from '../telemetry/types';
 
 export type { ChangeHistoryComparisonType };
-export type { ChangeHistoryCompareRowOverride } from './change_history_compare_override';
+export type { ChangeHistoryCompareMode } from './change_history_compare_mode';
 
 export interface ChangeHistoryCompareEndpoints {
   comparisonType: ChangeHistoryComparisonType;

@@ -27,7 +27,7 @@ export type {
   ChangeHistoryCompareEndpoints,
   ChangeHistoryComparisonType,
 } from './change_history_compare';
-export type { ChangeHistoryCompareRowOverride } from './change_history_compare_override';
+export type { ChangeHistoryCompareMode } from './change_history_compare_mode';
 export type { ChangeHistoryBadgeRenderFn } from './change_history_badge';
 export type { ChangeHistoryAdapter } from './change_history_adapter';
 export type {

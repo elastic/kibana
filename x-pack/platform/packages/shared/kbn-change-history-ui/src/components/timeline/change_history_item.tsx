@@ -212,6 +212,12 @@ export const ChangeHistoryItem = memo(function ChangeHistoryItem({
                                 changes: item.changes,
                                 summary: item.changes.summary,
                                 nChanges: i18n.N_CHANGES(item.changes.count),
+                                ...(supports.compare && modalSelection?.requestCompareToPrevious
+                                  ? {
+                                      requestCompareToPrevious: () =>
+                                        modalSelection.requestCompareToPrevious?.(item.id),
+                                    }
+                                  : {}),
                               })
                             ) : (
                               <>

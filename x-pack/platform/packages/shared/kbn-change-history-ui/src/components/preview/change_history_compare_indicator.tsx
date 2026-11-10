@@ -12,7 +12,7 @@ import React, { useContext } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { ChangeHistoryConfigContext } from '../../provider/change_history_config_context';
-import type { ChangeHistoryCompareMode } from '../../telemetry';
+import type { ChangeHistoryDiffViewMode } from '../../telemetry';
 import type { ChangeHistoryCompareSpec } from '../../types';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import { ChangeHistoryActionBadge } from '../timeline/change_history_action_badge';
@@ -134,7 +134,7 @@ const ChangeHistoryCompareSplitPaneLabels = ({
 export interface ChangeHistoryCompareIndicatorProps {
   /** The compared rows. Nothing is labelled when omitted. */
   compareSpec?: ChangeHistoryCompareSpec;
-  compareMode: ChangeHistoryCompareMode;
+  compareMode: ChangeHistoryDiffViewMode;
 }
 
 /** Labels the compared rows above the diff: one bar when unified, one label per pane when split. */

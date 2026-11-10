@@ -19,7 +19,7 @@ import { useChangeHistoryConfig } from '../../provider/use_change_history_config
 import { useChangeHistoryDetail } from '../../hooks/use_change_history_detail';
 import { useChangeHistoryCompare } from '../../hooks/use_change_history_compare';
 import { useChangeHistoryDiffTelemetry } from '../../hooks/use_change_history_diff_telemetry';
-import type { ChangeHistoryCompareRowOverride } from '../../types/change_history_compare_override';
+import type { ChangeHistoryCompareMode } from '../../types/change_history_compare_mode';
 import type { ChangeHistoryListItem } from '../../types/change_history_list_item';
 import { getChangeHistoryErrorMessage } from '../../utils/get_change_history_error_message';
 import * as i18n from '../timeline/translations';
@@ -87,13 +87,13 @@ const PreviewPanelState = ({
 export interface ChangeHistoryPreviewPanelProps {
   selectedChangeId?: string;
   listItems?: ChangeHistoryListItem[];
-  compareOverride?: ChangeHistoryCompareRowOverride;
+  compareMode?: ChangeHistoryCompareMode;
 }
 
 export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
   selectedChangeId,
   listItems = [],
-  compareOverride,
+  compareMode,
 }) => {
   const previewFrameCss = usePreviewFrameStyles();
   const { adapter, objectId, renderPreview, supports } = useChangeHistoryConfig();
@@ -104,13 +104,15 @@ export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
     enabled: Boolean(selectedChangeId),
   });
 
+  const activeCompareMode = supports.compare ? compareMode : undefined;
+
   const { compareSpec, isLoadingCompareContext } = useChangeHistoryCompare({
     adapter,
     objectId,
     listItems,
     selectedChange: change,
     selectedChangeId,
-    compareOverride: supports.compare ? compareOverride : undefined,
+    compareMode: activeCompareMode,
     enabled: supports.compare,
   });
 
@@ -185,6 +187,7 @@ export const ChangeHistoryPreviewPanel: FC<ChangeHistoryPreviewPanelProps> = ({
             change,
             objectId,
             compareSpec,
+            compareMode: activeCompareMode,
             isLoadingCompareContext,
             diffTelemetry,
           })}

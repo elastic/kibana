@@ -11,7 +11,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useEuiTheme } from '@elastic/eui';
 import { applyKbnCodeEditorChromeOverrides, monaco } from '@kbn/code-editor';
 
-import type { ChangeHistoryCompareMode } from '../../telemetry';
+import type { ChangeHistoryDiffViewMode } from '../../telemetry';
 import type { ChangeHistoryDiffTelemetry } from '../../types';
 import type {
   ChangeHistoryMonacoLanguage,
@@ -28,23 +28,23 @@ import {
 import { changeHistoryEditorChromeOverrides, useChangeHistoryMonacoTheme } from './monaco_theme';
 
 const getDiffEditorOptions = (
-  compareMode: ChangeHistoryCompareMode,
+  diffMode: ChangeHistoryDiffViewMode,
   theme: string,
   editorOptions: monaco.editor.IEditorOptions | undefined
 ): monaco.editor.IStandaloneDiffEditorConstructionOptions => ({
   ...CHANGE_HISTORY_DIFF_MONACO_BASE_OPTIONS,
   theme,
-  ...(compareMode === 'split'
+  ...(diffMode === 'split'
     ? CHANGE_HISTORY_SPLIT_DIFF_EDITOR_OPTIONS
     : CHANGE_HISTORY_UNIFIED_DIFF_MODIFIED_EDITOR_OPTIONS),
   ...editorOptions,
-  renderSideBySide: compareMode === 'split',
-  renderIndicators: compareMode === 'split',
+  renderSideBySide: diffMode === 'split',
+  renderIndicators: diffMode === 'split',
 });
 
 export const configureDiffEditors = (
   diffEditor: monaco.editor.IStandaloneDiffEditor,
-  compareMode: ChangeHistoryCompareMode,
+  diffMode: ChangeHistoryDiffViewMode,
   editorOptions: monaco.editor.IEditorOptions | undefined
 ): void => {
   const sharedChildOptions: monaco.editor.IEditorOptions & monaco.editor.IGlobalEditorOptions = {
@@ -54,7 +54,7 @@ export const configureDiffEditors = (
     ...editorOptions,
   };
 
-  if (compareMode === 'split') {
+  if (diffMode === 'split') {
     const splitOptions: monaco.editor.IEditorOptions = {
       ...sharedChildOptions,
       ...CHANGE_HISTORY_SPLIT_DIFF_EDITOR_OPTIONS,
@@ -131,7 +131,7 @@ export interface UseChangeHistoryMonacoEditorParams {
   target: string;
   language: ChangeHistoryMonacoLanguage;
   editorOptions?: monaco.editor.IEditorOptions;
-  compareMode: ChangeHistoryCompareMode;
+  diffMode: ChangeHistoryDiffViewMode;
   diffTelemetry?: ChangeHistoryDiffTelemetry;
 }
 
@@ -148,7 +148,7 @@ export const useChangeHistoryMonacoEditor = ({
   target,
   language,
   editorOptions,
-  compareMode,
+  diffMode,
   diffTelemetry,
 }: UseChangeHistoryMonacoEditorParams): UseChangeHistoryMonacoEditorResult => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -160,8 +160,8 @@ export const useChangeHistoryMonacoEditor = ({
   const [diffCurrentIndex, setDiffCurrentIndex] = useState(0);
   const [diffTotalChanges, setDiffTotalChanges] = useState(0);
 
-  const compareModeRef = useRef(compareMode);
-  compareModeRef.current = compareMode;
+  const diffModeRef = useRef(diffMode);
+  diffModeRef.current = diffMode;
   const editorOptionsRef = useRef(editorOptions);
   editorOptionsRef.current = editorOptions;
 
@@ -180,7 +180,7 @@ export const useChangeHistoryMonacoEditor = ({
   const stableConfigureDiffEditors = useCallback(
     (
       diffEditor: monaco.editor.IStandaloneDiffEditor,
-      mode: ChangeHistoryCompareMode,
+      mode: ChangeHistoryDiffViewMode,
       extraOptions?: monaco.editor.IEditorOptions
     ) => configureDiffEditors(diffEditor, mode, extraOptions ?? editorOptionsRef.current),
     []
@@ -193,7 +193,7 @@ export const useChangeHistoryMonacoEditor = ({
       editorRef,
       diffEditorRef,
       decorationsRef,
-      compareModeRef,
+      diffModeRef,
       configureDiffEditors: stableConfigureDiffEditors,
     }),
     [isEditorMounted, getActiveEditor, stableConfigureDiffEditors]
@@ -257,16 +257,16 @@ export const useChangeHistoryMonacoEditor = ({
     }
 
     if (isCompareMode) {
-      const mountCompareMode = compareModeRef.current;
+      const mountDiffMode = diffModeRef.current;
       const originalModel = monaco.editor.createModel(baseline, language);
       const modifiedModel = monaco.editor.createModel(target, language);
       const diffEditor = monaco.editor.createDiffEditor(
         container,
-        getDiffEditorOptions(mountCompareMode, monacoThemeRef.current, editorOptionsRef.current)
+        getDiffEditorOptions(mountDiffMode, monacoThemeRef.current, editorOptionsRef.current)
       );
 
       diffEditor.setModel({ original: originalModel, modified: modifiedModel });
-      configureDiffEditors(diffEditor, mountCompareMode, editorOptionsRef.current);
+      configureDiffEditors(diffEditor, mountDiffMode, editorOptionsRef.current);
       diffEditor.layout();
       diffEditorRef.current = diffEditor;
       editorRef.current = null;
@@ -345,12 +345,12 @@ export const useChangeHistoryMonacoEditor = ({
     }
 
     diffEditor.updateOptions({
-      renderSideBySide: compareMode === 'split',
-      renderIndicators: compareMode === 'split',
+      renderSideBySide: diffMode === 'split',
+      renderIndicators: diffMode === 'split',
     });
-    configureDiffEditors(diffEditor, compareMode, editorOptionsRef.current);
+    configureDiffEditors(diffEditor, diffMode, editorOptionsRef.current);
     diffEditor.layout();
-  }, [compareMode, isCompareMode]);
+  }, [diffMode, isCompareMode]);
 
   // Consumer-supplied options (e.g. validation display) are applied after mount and on change.
   useEffect(() => {
@@ -362,7 +362,7 @@ export const useChangeHistoryMonacoEditor = ({
     const diffEditor = diffEditorRef.current;
     if (diffEditor) {
       diffEditor.updateOptions(editorOptions);
-      configureDiffEditors(diffEditor, compareModeRef.current, editorOptions);
+      configureDiffEditors(diffEditor, diffModeRef.current, editorOptions);
     }
   }, [editorOptions, baseline, target, language, monacoTheme]);
 

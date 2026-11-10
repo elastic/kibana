@@ -12,7 +12,7 @@ import type { MutableRefObject, ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { monaco } from '@kbn/code-editor';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import type { ChangeHistoryCompareMode } from '../../telemetry';
+import type { ChangeHistoryDiffViewMode } from '../../telemetry';
 import type { ChangeHistoryCompareSpec, ChangeHistoryDiffTelemetry } from '../../types';
 import { useChangeHistoryDiffModeOptions } from './change_history_compare_mode_setting';
 import { ChangeHistoryCompareIndicator } from './change_history_compare_indicator';
@@ -39,14 +39,14 @@ export interface ChangeHistoryPreviewEditorContext {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
   diffEditorRef: MutableRefObject<monaco.editor.IStandaloneDiffEditor | null>;
   decorationsRef: MutableRefObject<monaco.editor.IEditorDecorationsCollection | null>;
-  compareModeRef: MutableRefObject<ChangeHistoryCompareMode>;
+  diffModeRef: MutableRefObject<ChangeHistoryDiffViewMode>;
   /**
    * Re-applies the unified/split child-editor options, merged with `editorOptions` (stable
    * identity). Pass `extraOptions` to apply options that are not yet part of the prop.
    */
   configureDiffEditors: (
     diffEditor: monaco.editor.IStandaloneDiffEditor,
-    compareMode: ChangeHistoryCompareMode,
+    diffMode: ChangeHistoryDiffViewMode,
     extraOptions?: monaco.editor.IEditorOptions
   ) => void;
 }
@@ -130,7 +130,7 @@ export const ChangeHistoryPreview = ({
   const diffModeOptions = useChangeHistoryDiffModeOptions();
   // Without a baseline there is nothing to compare, so only the lone read-only editor is shown.
   const modes = baselineComparison === undefined ? diffModeOptions.slice(0, 1) : diffModeOptions;
-  const [compareMode, setCompareMode] = useState<ChangeHistoryCompareMode>('unified');
+  const [compareMode, setCompareMode] = useState<ChangeHistoryDiffViewMode>('unified');
 
   const isCompareMode = baselineComparison !== undefined;
 
@@ -139,7 +139,7 @@ export const ChangeHistoryPreview = ({
     target: targetComparison,
     language,
     editorOptions,
-    compareMode,
+    diffMode: compareMode,
     diffTelemetry,
   });
 
@@ -149,7 +149,7 @@ export const ChangeHistoryPreview = ({
         return;
       }
       setCompareMode(modeId);
-      diffTelemetry?.setCompareMode(modeId);
+      diffTelemetry?.setDiffMode(modeId);
     },
     [diffTelemetry]
   );

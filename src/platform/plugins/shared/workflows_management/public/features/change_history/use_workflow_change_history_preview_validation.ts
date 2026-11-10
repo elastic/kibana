@@ -20,7 +20,7 @@ import type { SchemasSettings } from 'monaco-yaml';
 import type { MutableRefObject } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Document } from 'yaml';
-import { type ChangeHistoryCompareMode } from '@kbn/change-history-ui';
+import { type ChangeHistoryDiffViewMode } from '@kbn/change-history-ui';
 import { monaco } from '@kbn/code-editor';
 import { getWorkflowValidationDisplayOptions } from '@kbn/workflows-ui';
 import { validationResultsFingerprint, type YamlValidationResult } from '@kbn/workflows-yaml';
@@ -57,10 +57,10 @@ export interface UseWorkflowChangeHistoryPreviewValidationParams {
   isEditorMounted: boolean;
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>;
   diffEditorRef: MutableRefObject<monaco.editor.IStandaloneDiffEditor | null>;
-  compareModeRef: MutableRefObject<ChangeHistoryCompareMode>;
+  diffModeRef: MutableRefObject<ChangeHistoryDiffViewMode>;
   configureDiffEditors: (
     diffEditor: monaco.editor.IStandaloneDiffEditor,
-    compareMode: ChangeHistoryCompareMode,
+    diffMode: ChangeHistoryDiffViewMode,
     extraOptions?: monaco.editor.IEditorOptions
   ) => void;
 }
@@ -80,7 +80,7 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
   isEditorMounted,
   editorRef,
   diffEditorRef,
-  compareModeRef,
+  diffModeRef,
   configureDiffEditors,
 }: UseWorkflowChangeHistoryPreviewValidationParams): UseWorkflowChangeHistoryPreviewValidationResult => {
   const [publishedValidationResults, setPublishedValidationResults] = useState<
@@ -176,10 +176,10 @@ export const useWorkflowChangeHistoryPreviewValidation = ({
       const diffEditor = diffEditorRef.current;
       if (diffEditor) {
         diffEditor.updateOptions(displayOptions);
-        configureDiffEditors(diffEditor, compareModeRef.current, displayOptions);
+        configureDiffEditors(diffEditor, diffModeRef.current, displayOptions);
       }
     },
-    [compareModeRef, configureDiffEditors, diffEditorRef, editorRef]
+    [diffModeRef, configureDiffEditors, diffEditorRef, editorRef]
   );
 
   const clearEditorValidation = useCallback(() => {

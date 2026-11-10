@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import type { ChangeHistoryAdapter } from '../types/change_history_adapter';
 import type { ChangeHistoryCompareSpec } from '../types/change_history_compare';
 import type { ChangeHistoryDetail } from '../types/change_history_detail';
-import type { ChangeHistoryCompareRowOverride } from '../types/change_history_compare_override';
+import type { ChangeHistoryCompareMode } from '../types/change_history_compare_mode';
 import type { ChangeHistoryListItem } from '../types/change_history_list_item';
 import { resolveChangeHistoryCompareEndpoints } from '../utils/resolve_change_history_compare_endpoints';
 import { useChangeHistoryDetail } from './use_change_history_detail';
@@ -20,7 +20,7 @@ export interface UseChangeHistoryCompareArgs {
   listItems: ChangeHistoryListItem[];
   selectedChange?: ChangeHistoryDetail;
   selectedChangeId?: string;
-  compareOverride?: ChangeHistoryCompareRowOverride;
+  compareMode?: ChangeHistoryCompareMode;
   /** When false, compare resolution and detail loads are skipped. Defaults to true. */
   enabled?: boolean;
 }
@@ -36,15 +36,15 @@ export const useChangeHistoryCompare = ({
   listItems,
   selectedChange,
   selectedChangeId,
-  compareOverride,
+  compareMode,
   enabled = true,
 }: UseChangeHistoryCompareArgs): UseChangeHistoryCompareResult => {
   const endpoints = useMemo(
     () =>
       enabled && selectedChangeId
-        ? resolveChangeHistoryCompareEndpoints(listItems, selectedChangeId, compareOverride)
+        ? resolveChangeHistoryCompareEndpoints(listItems, selectedChangeId, compareMode)
         : undefined,
-    [compareOverride, enabled, listItems, selectedChangeId]
+    [compareMode, enabled, listItems, selectedChangeId]
   );
 
   const baselineChangeId = endpoints?.baselineChangeId;

@@ -27,22 +27,17 @@ export interface DashboardChangeHistoryViewProps {
   previewProps: PreviewProps;
   setPreviewTitle: (title: string) => void;
   inheritedTimeRange: DashboardState['time_range'];
-  isComparingToPrevious?: boolean; // when true (or when comparing against a chosen row), shows the JSON comparison instead of the dashboard
 }
 
-/** switches between rendered dashboard preview and JSON comparison depending on isComparingToPrevious */
+/** switches between the rendered dashboard preview and the JSON comparison, depending on whether a comparison was requested */
 export const DashboardChangeHistoryView = ({
   previewProps,
   setPreviewTitle,
   inheritedTimeRange,
-  isComparingToPrevious,
 }: DashboardChangeHistoryViewProps): JSX.Element => {
-  const { compareSpec, diffTelemetry } = previewProps;
+  const { compareSpec, compareMode, diffTelemetry } = previewProps;
 
-  // "Compare to this version" only sets a `vs_row` compare spec, it doesn't go through the "changes" button
-  const showComparison = isComparingToPrevious || compareSpec?.comparisonType === 'vs_row';
-
-  const isShowingComparison = Boolean(showComparison && compareSpec);
+  const isShowingComparison = Boolean(compareMode && compareSpec);
   const { title } = previewProps.change.snapshot as DashboardState;
 
   // dashboardPreview sets the title when mounted; the JSON comparison doesn't mount it
@@ -50,7 +45,7 @@ export const DashboardChangeHistoryView = ({
     if (isShowingComparison) setPreviewTitle(title);
   }, [isShowingComparison, title, setPreviewTitle]);
 
-  if (showComparison && compareSpec) {
+  if (isShowingComparison && compareSpec) {
     return (
       <ChangeHistoryPreview
         baseline={compareSpec.baseline.snapshot as object}

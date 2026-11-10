@@ -31,7 +31,7 @@ export type ChangeHistoryFilterType = 'timeRange' | 'actor';
 
 export type ChangeHistoryComparisonType = 'vs_previous' | 'vs_row';
 
-export type ChangeHistoryCompareMode = 'unified' | 'split';
+export type ChangeHistoryDiffViewMode = 'unified' | 'split';
 
 export interface ChangeHistoryTelemetryBaseParams {
   eventName: string;
@@ -70,7 +70,7 @@ export interface ReportChangeHistoryDiffViewedActionParams
   eventName: string;
   comparisonType: ChangeHistoryComparisonType;
   versionDistance?: number;
-  compareMode?: ChangeHistoryCompareMode;
+  compareMode?: ChangeHistoryDiffViewMode;
   /** True when the host provides `renderChangesSummary` and the target row has summary data. */
   hasChangesSummaryTooltip?: boolean;
 }

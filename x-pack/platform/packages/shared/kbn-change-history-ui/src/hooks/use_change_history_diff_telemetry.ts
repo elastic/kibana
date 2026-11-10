@@ -7,7 +7,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useChangeHistoryConfig } from '../provider/use_change_history_config';
-import type { ChangeHistoryCompareMode } from '../telemetry/types';
+import type { ChangeHistoryDiffViewMode } from '../telemetry/types';
 import type { ChangeHistoryCompareSpec } from '../types/change_history_compare';
 import type { ChangeHistoryDiffTelemetry } from '../types/change_history_diff_telemetry';
 import { computeChangeHistoryVersionDistance } from '../utils/compute_change_history_version_distance';
@@ -24,15 +24,15 @@ const buildCompareSpecKey = (compareSpec: ChangeHistoryCompareSpec): string =>
 
 const buildDiffViewedKey = (
   compareSpec: ChangeHistoryCompareSpec,
-  compareMode: ChangeHistoryCompareMode
-): string => `${buildCompareSpecKey(compareSpec)}:${compareMode}`;
+  diffMode: ChangeHistoryDiffViewMode
+): string => `${buildCompareSpecKey(compareSpec)}:${diffMode}`;
 
 export const useChangeHistoryDiffTelemetry = ({
   compareSpec,
   isLoadingCompareContext = false,
 }: UseChangeHistoryDiffTelemetryArgs): ChangeHistoryDiffTelemetry | undefined => {
   const { renderChangesSummary, telemetry } = useChangeHistoryConfig();
-  const [compareMode, setCompareModeState] = useState<ChangeHistoryCompareMode>('unified');
+  const [diffMode, setDiffModeState] = useState<ChangeHistoryDiffViewMode>('unified');
   const lastDiffViewedKeyRef = useRef<string | undefined>();
   const diffDisplayedRef = useRef(false);
   const compareSpecKey = compareSpec ? buildCompareSpecKey(compareSpec) : undefined;
@@ -43,7 +43,7 @@ export const useChangeHistoryDiffTelemetry = ({
   }, [compareSpecKey]);
 
   const emitDiffViewed = useCallback(
-    (mode: ChangeHistoryCompareMode) => {
+    (mode: ChangeHistoryDiffViewMode) => {
       if (!compareSpec || isLoadingCompareContext) {
         return;
       }
@@ -76,12 +76,12 @@ export const useChangeHistoryDiffTelemetry = ({
   );
 
   const reportDiffViewed = useCallback(() => {
-    emitDiffViewed(compareMode);
-  }, [compareMode, emitDiffViewed]);
+    emitDiffViewed(diffMode);
+  }, [diffMode, emitDiffViewed]);
 
-  const setCompareMode = useCallback(
-    (mode: ChangeHistoryCompareMode) => {
-      setCompareModeState(mode);
+  const setDiffMode = useCallback(
+    (mode: ChangeHistoryDiffViewMode) => {
+      setDiffModeState(mode);
       if (diffDisplayedRef.current) {
         emitDiffViewed(mode);
       }
@@ -105,8 +105,8 @@ export const useChangeHistoryDiffTelemetry = ({
   }
 
   return {
-    compareMode,
-    setCompareMode,
+    diffMode,
+    setDiffMode,
     reportDiffViewed,
     reportDiffChangeNavigated,
   };

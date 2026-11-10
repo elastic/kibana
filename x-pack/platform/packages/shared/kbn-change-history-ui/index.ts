@@ -94,7 +94,7 @@ export {
   registerChangeHistoryTelemetryEvents,
 } from './src/telemetry';
 export type {
-  ChangeHistoryCompareMode,
+  ChangeHistoryDiffViewMode,
   ChangeHistoryComparisonType,
   ChangeHistoryDiffNavigationSource,
   ChangeHistoryFilterType,

@@ -22,4 +22,5 @@ export type ChangeHistoryChangesRenderFn = (props: {
   changes: ChangeHistoryListItemChanges;
   summary: unknown;
   nChanges: string; // localized "N changes" label for this row
+  requestCompareToPrevious?: () => void; // selects this row and compares it to the previous change
 }) => ReactNode;
