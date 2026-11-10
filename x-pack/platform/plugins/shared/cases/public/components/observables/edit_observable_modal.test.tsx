@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
 import { renderWithTestingProviders } from '../../common/mock';
 import { EditObservableModal, type EditObservableModalProps } from './edit_observable_modal';
@@ -48,6 +48,40 @@ describe('EditObservableModal', () => {
     await userEvent.click(screen.getByText('Save observable'));
 
     expect(patchObservable).toHaveBeenCalled();
+  });
+
+  it('leaves the metadata out when the user did not change it', async () => {
+    renderWithTestingProviders(
+      <EditObservableModal
+        {...props}
+        observable={{ ...props.observable, metadata: { triage: 'confirmed' } }}
+      />
+    );
+
+    await userEvent.click(screen.getByText('Save observable'));
+
+    await waitFor(() => expect(patchObservable).toHaveBeenCalled());
+    const [[{ observable }]] = jest.mocked(patchObservable).mock.calls;
+    expect(observable).not.toHaveProperty('metadata');
+  });
+
+  it('shows the stored metadata and clears it when every pair is removed', async () => {
+    renderWithTestingProviders(
+      <EditObservableModal
+        {...props}
+        observable={{ ...props.observable, metadata: { triage: 'confirmed' } }}
+      />
+    );
+
+    expect(screen.getByTestId('observable-metadata-key')).toHaveValue('triage');
+    expect(screen.getByTestId('observable-metadata-value')).toHaveValue('confirmed');
+
+    await userEvent.click(screen.getByTestId('observable-metadata-remove'));
+    await userEvent.click(screen.getByText('Save observable'));
+
+    await waitFor(() => expect(patchObservable).toHaveBeenCalled());
+    const [[{ observable }]] = jest.mocked(patchObservable).mock.calls;
+    expect(observable.metadata).toEqual({});
   });
 
   it('calls onCancel', async () => {

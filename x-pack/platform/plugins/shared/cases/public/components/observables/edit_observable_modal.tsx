@@ -14,15 +14,15 @@ import {
 } from '@elastic/eui';
 import React, { type FC } from 'react';
 import type { ObservablePatch } from '../../../common/types/api/observable/v1';
-import type { Observable } from '../../../common/types/domain/observable/v1';
 import { ObservableForm } from './observable_form';
 import * as i18n from './translations';
 import { usePatchObservable } from '../../containers/use_patch_observables';
 import { type CaseUI } from '../../containers/types';
+import type { ObservableWithMetadata } from '../../../common/types/api';
 
 export interface EditObservableModalProps {
   onCloseModal: VoidFunction;
-  observable: Observable;
+  observable: ObservableWithMetadata;
   caseData: CaseUI;
 }
 
