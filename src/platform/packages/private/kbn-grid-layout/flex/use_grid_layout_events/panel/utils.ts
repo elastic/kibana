@@ -126,21 +126,37 @@ export const getNextKeyboardPositionForPanel = (
   handlePosition: { clientX: number; clientY: number }
 ) => {
   const {
+    gridLayout$,
+    panelRefs: { current: panelElements },
     activePanelEvent$: { value: activePanel },
     gridSettings$: {
-      value: { rowHeight, gutterSize, keyboardDragTopLimit },
+      value: { rowHeight, gutterSize },
     },
   } = gridLayoutStateManager;
 
   const { type } = activePanel ?? {};
   const panelPosition = activePanel?.position ?? activePanel?.panelDiv.getBoundingClientRect();
 
-  if (!panelPosition) return handlePosition;
+  if (!activePanel || !panelPosition) return handlePosition;
+
+  const layout = gridLayout$.getValue();
+  const gridPosition = gridLayoutStateManager.layoutRef.current?.getBoundingClientRect();
 
   const stepY = rowHeight + gutterSize;
-  const stepX = stepY;
-  const gridPosition = gridLayoutStateManager.layoutRef.current?.getBoundingClientRect();
-  const scrollContainer = gridLayoutStateManager.scrollContainer$.getValue();
+  // skip past the neighbouring panel (by order) in the given direction
+  const getStepX = (direction: 'left' | 'right'): number => {
+    const { order } = layout[activePanel.id];
+    const neighbourOrder = direction === 'left' ? order - 1 : order + 1;
+
+    const neighbourId = Object.keys(layout).find(
+      (id) => id !== activePanel.id && layout[id].order === neighbourOrder
+    );
+    const neighbourWidth = neighbourId
+      ? panelElements[neighbourId]?.getBoundingClientRect().width
+      : undefined;
+
+    return (neighbourWidth ?? panelPosition.right - panelPosition.left) + gutterSize;
+  };
 
   switch (ev.code) {
     case KeyboardCode.Right: {
@@ -151,7 +167,7 @@ export const getNextKeyboardPositionForPanel = (
 
       return {
         ...handlePosition,
-        clientX: Math.min(handlePosition.clientX + stepX, maxRight),
+        clientX: Math.min(handlePosition.clientX + getStepX('right'), maxRight),
       };
     }
     case KeyboardCode.Left:
@@ -161,39 +177,22 @@ export const getNextKeyboardPositionForPanel = (
 
       return {
         ...handlePosition,
-        clientX: Math.max(handlePosition.clientX - stepX, maxLeft),
+        clientX: Math.max(handlePosition.clientX - getStepX('left'), maxLeft),
       };
 
     case KeyboardCode.Down: {
-      // check if we are at the end of the scroll of the page
-      const bottomOfPageReached = isAtBottomOfPage(scrollContainer);
-
-      // check if next key will cross the bottom edge
-      // if we're at the end of the scroll of the page, the dragged handle can go down even more so we can reorder with the last row
-      const bottomMaxPosition = bottomOfPageReached
-        ? panelPosition.bottom + stepY - (panelPosition.bottom - panelPosition.top) * 0.5
-        : panelPosition.bottom + stepY + KEYBOARD_DRAG_BOTTOM_LIMIT;
-
-      const { clientHeight } = getScrollDimensions(scrollContainer);
-      const isCloseToBottom = bottomMaxPosition > clientHeight;
-
+      const isCloseToBottom =
+        panelPosition.bottom + stepY > (gridPosition?.bottom ?? Infinity) - gutterSize;
       return {
         ...handlePosition,
-        clientY: updateClientY(
-          handlePosition.clientY,
-          stepY,
-          isCloseToBottom,
-          type,
-          scrollContainer
-        ),
+        clientY: isCloseToBottom ? handlePosition.clientY : handlePosition.clientY + stepY,
       };
     }
     case KeyboardCode.Up: {
-      // check if next key will cross the top edge
-      const isCloseToTop = panelPosition.top - stepY - keyboardDragTopLimit < 0;
+      const isCloseToTop = panelPosition.top - stepY < (gridPosition?.top ?? Infinity) - gutterSize;
       return {
         ...handlePosition,
-        clientY: updateClientY(handlePosition.clientY, -stepY, isCloseToTop, type, scrollContainer),
+        clientY: isCloseToTop ? handlePosition.clientY : handlePosition.clientY - stepY,
       };
     }
     default:
