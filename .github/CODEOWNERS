@@ -1336,6 +1336,10 @@ x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/plugins/shared/usage_api @elastic/kibana-core
 x-pack/platform/test
+x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases @elastic/security-investigations
+x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability @elastic/security-investigations
+x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution @elastic/security-investigations
+x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases @elastic/security-investigations
 x-pack/platform/test/agent_builder_sml/plugins/sml_test_types @elastic/workchat-eng
 x-pack/platform/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
@@ -1343,16 +1347,12 @@ x-pack/platform/test/alerting_api_integration/common/plugins/alerts @elastic/res
 x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/packages/helpers @elastic/response-ops
-x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/security-investigations
-x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/security-investigations
-x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/security-investigations
 x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
 x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
 x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/platform/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 x-pack/platform/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/platform/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
-x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/security-investigations
 x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
@@ -2869,7 +2869,7 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /x-pack/platform/test/functional/fixtures/kbn_archives/rules_scheduled_task_id @elastic/security-investigations
 /x-pack/platform/test/functional/services/cases/ @elastic/security-investigations
 /x-pack/platform/test/functional_with_es_ssl/apps/cases/ @elastic/security-investigations
-/x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/security-investigations
+/x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases @elastic/security-investigations
 
 /x-pack/solutions/search/test/serverless/functional/test_suites/cases/ @elastic/security-investigations
 
