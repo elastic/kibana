@@ -21,6 +21,10 @@ import {
   DiscoverInDashboardEventDataKeys,
   DiscoverInDashboardEventName,
 } from './discover_in_dashboard_event_definition';
+import {
+  EsqlCategorizeEventDataKeys,
+  EsqlCategorizeEventName,
+} from './esql_categorize_event_definition';
 
 jest.mock('@kbn/ebt-tools', () => ({
   ...jest.requireActual('@kbn/ebt-tools'),
@@ -201,6 +205,26 @@ describe('DiscoverEBTManager', () => {
             _meta: {
               description: 'Tab identifier switched to (present for tabSwitched)',
               optional: true,
+            },
+          },
+        },
+      });
+
+      expect(coreSetupMock.analytics.registerEventType).toHaveBeenCalledWith({
+        eventType: 'discover_esql_categorize',
+        schema: {
+          eventName: {
+            type: 'keyword',
+            _meta: {
+              description: 'The ES|QL categorize action that occurred',
+              optional: false,
+            },
+          },
+          fieldName: {
+            type: 'keyword',
+            _meta: {
+              description: 'The name of the field that was categorized',
+              optional: false,
             },
           },
         },
@@ -1406,6 +1430,30 @@ describe('DiscoverEBTManager', () => {
         savedSessionId: 'session-1',
         tabSwitchedFromId: 'tab-1',
         tabSwitchedToId: 'tab-2',
+      });
+    });
+  });
+
+  describe('trackEsqlCategorizeEvent', () => {
+    it('should track a group similar messages click', () => {
+      discoverEBTContextManager.initialize({
+        core: coreSetupMock,
+        discoverEbtContext$,
+      });
+
+      const scopedManager = discoverEBTContextManager.createScopedEBTManager();
+      scopedManager.setAsActiveManager();
+
+      scopedManager.trackEsqlCategorizeEvent({
+        [EsqlCategorizeEventDataKeys.EVENT_NAME]:
+          EsqlCategorizeEventName.GROUP_SIMILAR_MESSAGES_CLICKED,
+        [EsqlCategorizeEventDataKeys.FIELD_NAME]: 'message',
+      });
+
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(coreSetupMock.analytics.reportEvent).toHaveBeenCalledWith('discover_esql_categorize', {
+        eventName: 'group_similar_messages_clicked',
+        fieldName: 'message',
       });
     });
   });

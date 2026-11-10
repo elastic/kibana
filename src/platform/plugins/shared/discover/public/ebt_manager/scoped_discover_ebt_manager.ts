@@ -43,6 +43,11 @@ import {
   type DiscoverInDashboardEBTEvent,
 } from './discover_in_dashboard_event_definition';
 import {
+  ESQL_CATEGORIZE_EVENT_TYPE,
+  EsqlCategorizeEventDataKeys,
+  type EsqlCategorizeEBTEvent,
+} from './esql_categorize_event_definition';
+import {
   CASCADE_EVENT_TYPE,
   CascadeEventDataKeys,
   type CascadeEBTEvent,
@@ -507,6 +512,16 @@ export class ScopedDiscoverEBTManager {
     }
     this.reportEvent(DISCOVER_IN_DASHBOARD_EVENT_TYPE, {
       [DiscoverInDashboardEventDataKeys.EVENT_NAME]: eventName,
+      ...payload,
+    });
+  }
+
+  public trackEsqlCategorizeEvent({ eventName, ...payload }: EsqlCategorizeEBTEvent) {
+    if (!this.reportEvent) {
+      return;
+    }
+    this.reportEvent(ESQL_CATEGORIZE_EVENT_TYPE, {
+      [EsqlCategorizeEventDataKeys.EVENT_NAME]: eventName,
       ...payload,
     });
   }
