@@ -253,7 +253,7 @@ export const mintOrcaCutoffKeys = async ({
   const mint = async (cutoff: string) => {
     const { id, encoded } = apiKeySchema.parse(
       await asEvalUser('POST', '/_security/api_key', {
-        // `_security/_authenticate` shows a key its own name, so the name is only the hash.
+        // A key can read its own record, so its name and metadata leave out the cutoff and variant.
         name: `nightshift-orcabench-eval-${orcaCutoffSuffix(cutoff, variant)}`,
         expiration: `${Math.ceil(expiresInMs / 60_000)}m`,
         role_descriptors: {
@@ -267,7 +267,7 @@ export const mintOrcaCutoffKeys = async ({
             ],
           },
         },
-        metadata: { purpose: 'nightshift-orcabench-eval', run, cutoff, variant },
+        metadata: { purpose: 'nightshift-orcabench-eval', run },
       })
     );
     minted.push(id);

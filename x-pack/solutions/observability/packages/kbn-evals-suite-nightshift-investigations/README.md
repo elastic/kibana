@@ -587,9 +587,12 @@ read. The agent investigates unchanged and no query it writes can see past its t
   per cutoff in the run, with `read` and `view_index_metadata` on those patterns and the
   document-level security query `{"range": {"@timestamp": {"lte": "<cutoff>"}}}`. A key expires
   when the test's own timeout would, so it outlives every investigation that reads with it, and is
-  invalidated as soon as the experiment ends. Its name is `nightshift-orcabench-eval-<hash>`, the
-  same hash as its space, because the agent can read its key's name with `_security/_authenticate`;
-  the cutoff and variant are only in the key's metadata. No key is logged, stored in a start input
+  invalidated as soon as the experiment ends. A key can read its own record, so the agent could see
+  its name, metadata and role. The name is `nightshift-orcabench-eval-<hash>`, the same hash as its
+  space, and the metadata holds only the purpose and a run id. The role's query still shows the
+  cutoff and, for `no-flags`, the demo's flag keys, but neither is new to the agent: it can find
+  the cutoff with a `max` on `@timestamp`, and the flag keys are in the demo source it is pointed
+  at (`src/flagd/demo.flagd.json`). No key is logged, stored in a start input
   or written to experiment metadata; each lives only in its connector's secrets, and the eval writes
   the connector without letting `kbnClient` log a failed response.
 - **Spaces.** Connectors are saved on the investigator as a whole, so each cutoff gets its own

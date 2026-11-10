@@ -139,7 +139,10 @@ const fakeOrca = ({
 } = {}) => {
   const stuck = new Set(stuckKeys);
   let invalidationFailures = failInvalidations;
-  const minted: Array<{ id: string; body: { name: string; role_descriptors: unknown } }> = [];
+  const minted: Array<{
+    id: string;
+    body: { name: string; role_descriptors: unknown; metadata: unknown };
+  }> = [];
   const invalidated: unknown[] = [];
   const pinned =
     variant === 'full'
@@ -207,7 +210,7 @@ describe('mintOrcaCutoffKeys', () => {
       [cutoffs[0], 'encoded-key-2'],
       [cutoffs[1], 'encoded-key-3'],
     ]);
-    // Named by its space's hash alone, since the investigator can read its key's name.
+    // Named by its space's hash alone, since the investigator can read its key's record.
     const keyName = (cutoff: string) =>
       `nightshift-orcabench-eval-${groupOrcaCasesByCutoff(
         [task('a', { telemetry_snapshot_time: cutoff })],
@@ -215,6 +218,9 @@ describe('mintOrcaCutoffKeys', () => {
       )[0].spaceId.slice('orca-'.length)}`;
     expect(orca.minted.map(({ body }) => body.name)).toEqual(
       [ORCA_REFERENCE_CUTOFF, ...cutoffs].map(keyName)
+    );
+    expect(orca.minted.map(({ body }) => body.metadata)).toEqual(
+      Array(3).fill({ purpose: 'nightshift-orcabench-eval', run: expect.any(String) })
     );
     expect(orca.minted[1].body.role_descriptors).toEqual({
       orca_cutoff: {
