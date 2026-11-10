@@ -2168,6 +2168,35 @@ describe('writePipelineRoutes', () => {
     expect(getPipelineRoutes(next, 'child')).toEqual([{ destinations: ['es-logs'] }]);
   });
 
+  it('removes only a routing node left without rules, keeping the routing nodes it fed', () => {
+    const next = writePipelineRoutes(mixedUnit(), 'main', []);
+    expect(next.unit.pipelines.map(({ id }) => id)).toEqual(['child']);
+    expect(getPipelineRoutes(next, 'child')).toEqual([{ destinations: ['es-logs', 'es-traces'] }]);
+  });
+
+  it('removes a child routing node left without rules, keeping the rule that delegated to it', () => {
+    const next = writePipelineRoutes(mixedUnit(), 'child', []);
+    expect(next.unit.pipelines.map(({ id }) => id)).toEqual(['main']);
+    expect(getPipelineRoutes(next, 'main')).toEqual([
+      { when: 'resource.attributes["team"] == "a"', pipelines: [] },
+      { destinations: ['es-logs', 'es-traces'] },
+    ]);
+  });
+
+  it('keeps the processing node and the rule feeding it when the routing node after them is removed', () => {
+    const unit = mixedUnit();
+    unit.unit.pipelines[1].config = [
+      { name: 'processors', value: ['tag'] },
+      ...unit.unit.pipelines[1].config,
+    ];
+    unit.unit.processors = [{ id: 'tag', type: 'add_fields', supported_telemetry: ['logs'] }];
+
+    const next = writePipelineRoutes(unit, 'child', []);
+    expect(pipelineConfig(next, 'child')).toEqual([{ name: 'processors', value: ['tag'] }]);
+    expect(next.unit.processors?.map(({ id }) => id)).toEqual(['tag']);
+    expect(getPipelineRoutes(next, 'main')).toEqual(getPipelineRoutes(unit, 'main'));
+  });
+
   it('keeps a rule whose targets all stop fitting, without targets', () => {
     const next = writePipelineRoutes(
       mixedUnit(),
@@ -2211,10 +2240,24 @@ describe('writePipelineRoutes', () => {
     ]);
   });
 
-  it('leaves missing pipelines and empty rule lists alone', () => {
+  it('leaves missing pipelines alone', () => {
     const unit = processedUnit(['es-logs']);
     expect(canEditPipelineRoutes(unit, 'missing')).toBe(false);
     expect(writePipelineRoutes(unit, 'missing', [{ destinations: ['es-logs'] }])).toBe(unit);
-    expect(writePipelineRoutes(unit, 'main', [])).toBe(unit);
+    expect(writePipelineRoutes(unit, 'missing', [])).toBe(unit);
+  });
+
+  it('keeps the processing node of a routing node left without rules', () => {
+    const unit = routeLine(
+      processedUnit(['es-logs']),
+      { origin: processing('main'), destinationId: 'es-logs' },
+      [{ destinations: ['es-logs'] }]
+    );
+    const next = writePipelineRoutes(unit, 'main', []);
+    expect(pipelineConfig(next, 'main')).toEqual([
+      { name: 'sources', value: ['otlp-input'] },
+      { name: 'processors', value: ['tag'] },
+    ]);
+    expect(next.unit.processors?.map(({ id }) => id)).toEqual(['tag']);
   });
 });

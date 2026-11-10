@@ -376,12 +376,12 @@ export const routingFlyoutMachine = setup({
         from !== to && from >= 0 && to >= 0 && from < conditionalCount && to < conditionalCount
       );
     },
-    // A new routing node can be created as it starts, with its catch-all rule.
+    // A new routing node can be created as it starts, but needs a rule. An existing
+    // one can be saved with no rules, which removes it.
     canSave: ({ context }) =>
       context.editable &&
-      context.rules.length > 0 &&
       context.rules.every(({ telemetry }) => telemetry.length > 0) &&
-      (context.hasChanges || context.target.kind === 'line'),
+      (context.target.kind === 'line' ? context.rules.length > 0 : context.hasChanges),
   },
 }).createMachine({
   id: 'routingFlyout',

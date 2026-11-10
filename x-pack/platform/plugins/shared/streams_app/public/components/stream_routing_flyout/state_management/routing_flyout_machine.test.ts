@@ -478,6 +478,21 @@ describe('routingFlyoutMachine', () => {
     expect(requests).toEqual([]);
   });
 
+  it('saves an existing routing node left without rules, so it is removed', () => {
+    const { flyout, requests } = startFlyout({ target: { kind: 'pipeline', pipelineId: 'main' } });
+    flyout.send({ type: 'rule.delete', key: 'rule-0' });
+    expect(flyout.getSnapshot().context.rules).toEqual([]);
+
+    flyout.send({ type: 'flyout.save' });
+    expect(requests).toEqual([
+      expect.objectContaining({
+        type: 'routing.save',
+        target: { kind: 'pipeline', pipelineId: 'main' },
+        rules: [],
+      }),
+    ]);
+  });
+
   it('cannot save without rules, or when read-only', () => {
     const { flyout } = startFlyout();
     flyout.send({ type: 'rule.delete', key: 'rule-0' });

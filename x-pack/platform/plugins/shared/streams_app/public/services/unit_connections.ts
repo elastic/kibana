@@ -805,9 +805,46 @@ const withoutUnfitRuleTargets = (unit: Unit, pipelineId: string): Unit =>
   }, unit);
 
 /**
+ * Removes only the routing node of `pipeline`: its processing node stays, left
+ * without outputs. A pipeline with no processing goes, and rules that
+ * delegated to it stay, without that target.
+ */
+const removePipelineRouting = (unit: Unit, pipeline: UnitPipeline): Unit => {
+  if (pipelineHasProcessors(pipeline.config)) {
+    return replacePipelines(
+      unit,
+      unit.unit.pipelines.map((current) =>
+        current.id === pipeline.id
+          ? {
+              ...current,
+              config: current.config.filter(
+                ({ name }) => name !== PIPELINE_ENTRY.routes && name !== PIPELINE_ENTRY.destinations
+              ),
+            }
+          : current
+      )
+    );
+  }
+  return replacePipelines(
+    unit,
+    unit.unit.pipelines.flatMap((current) =>
+      current.id === pipeline.id
+        ? []
+        : [
+            keepRoutes(current, (route) =>
+              isDelegatingRoute(route) && route.pipelines.includes(pipeline.id)
+                ? [{ ...route, pipelines: route.pipelines.filter((id) => id !== pipeline.id) }]
+                : [route]
+            ),
+          ]
+    )
+  );
+};
+
+/**
  * Replaces the rules of a routing node. A routed child pipeline with a plain
- * destinations list is turned into routes. Returns `unit` unchanged when the
- * pipeline is missing or scoped, or `routes` is empty.
+ * destinations list is turned into routes, and no `routes` removes the node.
+ * Returns `unit` unchanged when the pipeline is missing or scoped.
  */
 export const writePipelineRoutes = (
   unit: Unit,
@@ -817,8 +854,11 @@ export const writePipelineRoutes = (
 ): Unit => {
   const pipelineIndex = findPipelineIndex(unit, pipelineId);
   const pipeline = unit.unit.pipelines[pipelineIndex];
-  if (!pipeline || hasScopedWiring(pipeline.config) || routes.length === 0) {
+  if (!pipeline || hasScopedWiring(pipeline.config)) {
     return unit;
+  }
+  if (routes.length === 0) {
+    return removePipelineRouting(unit, pipeline);
   }
   return withoutUnfitRuleTargets(
     writePipeline(

@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import type { OnDragEndResponder } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
-import { KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { UnitSignal } from '../../services/unit_pipeline';
 import { RoutingRuleRow } from './rule_row';
 import { ROUTING_SIGNAL_LABELS } from './signal_labels';
@@ -35,6 +35,8 @@ interface RoutingRuleListProps {
   rules: RoutingRuleDraft[];
   availableSignals: UnitSignal[];
   editable: boolean;
+  /** Whether the rules are for a routing node that does not exist yet. */
+  isNew: boolean;
   onAdd: () => void;
   onChange: (key: string, changes: RoutingRuleChanges) => void;
   onDelete: (key: string) => void;
@@ -45,6 +47,7 @@ export function RoutingRuleList({
   rules,
   availableSignals,
   editable,
+  isNew,
   onAdd,
   onChange,
   onDelete,
@@ -106,7 +109,25 @@ export function RoutingRuleList({
         ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {unmatchedSignals.length > 0 ? (
+      {rules.length === 0 ? (
+        <>
+          <KbnInfoCallout
+            size="s"
+            title={
+              isNew
+                ? i18n.translate('xpack.streams.routingFlyout.noRulesNewCallout', {
+                    defaultMessage: 'Add a rule to create this routing.',
+                  })
+                : i18n.translate('xpack.streams.routingFlyout.noRulesCallout', {
+                    defaultMessage:
+                      'There are no rules. Applying removes this routing and the connections that go through it.',
+                  })
+            }
+            data-test-subj="streamsRoutingFlyoutNoRules"
+          />
+          <EuiSpacer size="m" />
+        </>
+      ) : unmatchedSignals.length > 0 ? (
         <>
           <KbnWarningCallout
             size="s"

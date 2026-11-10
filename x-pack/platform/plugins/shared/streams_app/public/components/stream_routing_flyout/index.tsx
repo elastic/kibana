@@ -244,6 +244,7 @@ function RoutingFlyoutForm({
             rules={rules}
             availableSignals={availableSignals}
             editable={editable && !isSaving}
+            isNew={isNew}
             onAdd={addRule}
             onChange={updateRule}
             onDelete={deleteRule}
