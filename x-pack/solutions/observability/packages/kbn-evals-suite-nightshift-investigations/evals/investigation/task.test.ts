@@ -377,6 +377,23 @@ it('keeps polling when a read fails because a shard is not ready yet', async () 
   });
 });
 
+it('keeps the finished investigation when the read after the poll fails transiently', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'investigation' })
+    .mockResolvedValueOnce(investigation())
+    .mockResolvedValueOnce({ rounds: [{ trace_id: 'agent-trace', steps: [] }] })
+    .mockRejectedValueOnce(httpError(503, 'no shard available'));
+
+  const output = await runInvestigation(fetch, example, connector);
+
+  expect(output.execution_error).toBeUndefined();
+  expect(output).toMatchObject({
+    workflow_status: 'complete',
+    structured_report: { conclusion: 'Synthetic timeouts increased.' },
+  });
+});
+
 it('still fails when transient reads never recover before the timeout', async () => {
   const clock = jest
     .spyOn(Date, 'now')

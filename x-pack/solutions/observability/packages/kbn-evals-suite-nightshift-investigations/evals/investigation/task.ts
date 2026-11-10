@@ -302,8 +302,9 @@ export const runInvestigation = async (
         investigation = (await readSnapshot()) ?? investigation;
       }
     }
-    // The verdict may have been written after the last read, while the round was finishing.
-    investigation = (await readInvestigation(fetch, investigationId)) ?? investigation;
+    // The verdict may have been written after the last read, while the round was finishing. A
+    // transient failure here keeps the snapshot already read.
+    investigation = (await readSnapshot()) ?? investigation;
   } catch (error) {
     output.execution_error = errorMessage(error);
   }
