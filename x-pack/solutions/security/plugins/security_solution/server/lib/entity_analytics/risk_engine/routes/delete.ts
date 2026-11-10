@@ -7,13 +7,13 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import type { IKibanaResponse } from '@kbn/core-http-server';
+import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
 import { RISK_ENGINE_CLEANUP_URL, APP_ID, API_VERSIONS } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { RiskEngineAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { CleanUpRiskEngineResponse } from '../../../../../common/api/entity_analytics';
-import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 import { deleteSavedObjects } from '../utils/saved_object_configuration';
 import { getIndexPatternLookup } from '../../risk_score/configurations';
 import { RISK_SCORE_MAINTAINER_ID } from '../../../../../common/entity_analytics/risk_score/constants';
