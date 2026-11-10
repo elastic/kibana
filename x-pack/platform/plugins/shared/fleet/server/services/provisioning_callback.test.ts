@@ -881,6 +881,49 @@ describe('provisioningCallbackService', () => {
       });
     });
 
+    it('marks the record received over a cancel that landed while the connector was being made', async () => {
+      const cancelled = pendingAttrs({ status: 'cancelled', ...PAYLOAD, expires_at: PAST });
+      soClient.get.mockImplementation(async (type) => {
+        if (type === PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE) {
+          return soClient.get.mock.calls.length > 1 ? soWith(cancelled) : soWith(pendingAttrs());
+        }
+        throw CONNECTOR_NOT_FOUND;
+      });
+      soClient.update
+        .mockResolvedValueOnce({ version: 'v2' } as any)
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(
+            PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+            'cb-1'
+          )
+        )
+        .mockResolvedValueOnce({} as any);
+
+      const result = await provisioningCallbackService.receive(soClient, 'cb-1', {
+        token: TOKEN,
+        payload: PAYLOAD,
+      });
+
+      expect(soClient.update).toHaveBeenCalledTimes(3);
+      expect(soClient.update).toHaveBeenLastCalledWith(
+        PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+        'cb-1',
+        {
+          status: 'received',
+          received_at: NOW.toISOString(),
+          connector_name: 'ElasticWorkloadIdentity-abc',
+          cloud_connector_id: 'cc-1',
+        }
+      );
+      expect(result).toMatchObject({
+        outcome: 'received',
+        item: { status: 'received', cloud_connector_id: 'cc-1' },
+      });
+      expect(logger.info).toHaveBeenCalledWith(
+        'Provisioning callback [id=cb-1] was cancelled while its identity was being created; marking it received [cloud_connector_id=cc-1]'
+      );
+    });
+
     it('reuses the connector a concurrent report created when its own create fails', async () => {
       let connectorExists = false;
       soClient.get.mockImplementation(async (type, id) => {
@@ -1109,6 +1152,49 @@ describe('provisioningCallbackService', () => {
       expect(item).toMatchObject({ status: 'cancelled', ...PAYLOAD });
       expect(logger.warn).toHaveBeenCalledWith(
         'Provisioning callback [id=cb-1] expired while its report was being applied; no identity was created for it'
+      );
+    });
+
+    it('reports the identity when its connector lands while the abandoned claim is being cancelled', async () => {
+      let connectorLookups = 0;
+      soClient.get.mockImplementation(async (type, id) => {
+        if (type === PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE) {
+          return soWith(pendingAttrs({ ...CLAIM, expires_at: PAST }));
+        }
+        connectorLookups += 1;
+        if (connectorLookups === 1) {
+          throw CONNECTOR_NOT_FOUND;
+        }
+        return { id, type, references: [], attributes: { name: 'my-identity' } } as any;
+      });
+      soClient.update.mockResolvedValueOnce({ version: 'v2' } as any).mockResolvedValue({} as any);
+
+      const item = await provisioningCallbackService.cancel(soClient, 'cb-1');
+
+      expect(soClient.update).toHaveBeenNthCalledWith(
+        1,
+        PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+        'cb-1',
+        { status: 'cancelled' },
+        { version: 'v1' }
+      );
+      // Guarded by the cancelled write, so a report that marked it received first is not redone.
+      expect(soClient.update).toHaveBeenNthCalledWith(
+        2,
+        PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+        'cb-1',
+        {
+          status: 'received',
+          received_at: NOW.toISOString(),
+          connector_name: 'my-identity',
+          cloud_connector_id: 'cb-1',
+        },
+        { version: 'v2' }
+      );
+      expect(item).toMatchObject({ status: 'received', cloud_connector_id: 'cb-1' });
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(mockedAudit.writeCustomAuditLog).not.toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'User cancelling provisioning callback [id=cb-1]' })
       );
     });
 

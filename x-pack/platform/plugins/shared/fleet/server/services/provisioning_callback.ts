@@ -489,7 +489,8 @@ class ProvisioningCallbackService {
    * Marks the record received for the connector made from it. The token has nothing left to do
    * from here: a repeat of the same report is answered the same way, anything else is refused.
    * With a version, the write only lands on the claim this attempt holds; when another attempt
-   * took the claim over and finished first, its result is returned instead.
+   * took the claim over and finished first, its result is returned instead. A cancel that landed
+   * while the connector was being made is overridden: the identity exists, so the record says so.
    */
   private async finish(
     soClient: SavedObjectsClientContract,
@@ -516,6 +517,12 @@ class ProvisioningCallbackService {
         throw error;
       }
       const current = await this.getSavedObject(soClient, id);
+      if (current?.attributes.status === 'cancelled') {
+        this.logger.info(
+          `Provisioning callback [id=${id}] was cancelled while its identity was being created; marking it received [cloud_connector_id=${connector.id}]`
+        );
+        return this.finish(soClient, id, current.attributes, connector);
+      }
       if (current) {
         return toItem(current.id, current.attributes);
       }
@@ -572,7 +579,9 @@ class ProvisioningCallbackService {
    * already reported to is returned as it is, so the caller can pick up the identity instead of
    * creating one by hand. A report that made its connector but never got marked received is
    * finished here. A report left behind on a record that has since expired is retired with it:
-   * the poll no longer recovers it, so the browser would otherwise wait for good.
+   * the poll no longer recovers it, so the browser would otherwise wait for good. The connector
+   * is looked up again once the record is cancelled, in case that report was only slow; a
+   * connector that lands later still turns the record received, after the caller was answered.
    */
   public async cancel(
     soClient: SavedObjectsClientContract,
@@ -583,8 +592,8 @@ class ProvisioningCallbackService {
       return undefined;
     }
     const { attributes, version } = so;
+    const spaceClient = appContextService.getInternalUserSOClientForSpaceId(attributes.space_id);
     if (attributes.status === 'receiving') {
-      const spaceClient = appContextService.getInternalUserSOClientForSpaceId(attributes.space_id);
       const connector = await this.findCloudConnector(spaceClient, so.id);
       if (connector) {
         return this.finish(soClient, so.id, attributes, connector);
@@ -592,21 +601,19 @@ class ProvisioningCallbackService {
       if (!isAbandonedClaim(so)) {
         return toItem(so.id, attributes);
       }
-      this.logger.warn(
-        `Provisioning callback [id=${so.id}] expired while its report was being applied; no identity was created for it`
-      );
     } else if (attributes.status !== 'pending') {
       return toItem(so.id, attributes);
     }
 
     const update: Partial<ProvisioningCallbackSOAttributes> = { status: 'cancelled' };
+    let cancelledVersion: string | undefined;
     try {
-      await soClient.update<ProvisioningCallbackSOAttributes>(
+      ({ version: cancelledVersion } = await soClient.update<ProvisioningCallbackSOAttributes>(
         PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
         so.id,
         update,
         { version }
-      );
+      ));
     } catch (error) {
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         throw error;
@@ -614,6 +621,18 @@ class ProvisioningCallbackService {
       // A report claimed the record first; hand back what it is doing.
       const claimed = await this.getSavedObject(soClient, id);
       return claimed ? toItem(claimed.id, claimed.attributes) : undefined;
+    }
+    if (attributes.status === 'receiving') {
+      // A claim that looked abandoned may only have been slow, and its connector can land while
+      // the record is being cancelled. Report the identity rather than leave it behind a record
+      // that denies it. The write is guarded, so a report that got there first is not redone.
+      const connector = await this.findCloudConnector(spaceClient, so.id);
+      if (connector) {
+        return this.finish(soClient, so.id, attributes, connector, cancelledVersion);
+      }
+      this.logger.warn(
+        `Provisioning callback [id=${so.id}] expired while its report was being applied; no identity was created for it`
+      );
     }
     this.logger.info(`Provisioning callback cancelled [id=${so.id}]`);
 
