@@ -217,7 +217,7 @@ describe('NightshiftApp', () => {
 
     expect(screen.queryByTestId('o11yNightshiftAppShowAllLink')).not.toBeInTheDocument();
     expect(screen.getByText('Checkout errors are elevated')).toBeInTheDocument();
-    expect(screen.getByText('Investigations are underway')).toBeInTheDocument();
+    expect(screen.getByText('Investigating 1 new problem')).toBeInTheDocument();
     expect(mockUsePageReady).toHaveBeenCalledWith(
       expect.objectContaining({
         isReady: true,

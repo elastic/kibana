@@ -93,7 +93,6 @@ export function NightshiftApp({
     sections,
     severityCounts,
     areSeverityCountsLoading,
-    hasActiveInvestigations,
     isInitialLoading,
     isFetching,
     totalCount,
@@ -113,6 +112,10 @@ export function NightshiftApp({
       ),
     [sections]
   );
+
+  const activeInvestigationCount = sections.find(({ id }) => id === 'in-progress')?.total ?? 0;
+  const needsYouCount =
+    severityCounts.critical + severityCounts.high + severityCounts.medium + severityCounts.low;
 
   // Investigations are Agent Builder conversations listed by the agentic investigations API.
   const isInvestigationsAvailable =
@@ -351,8 +354,10 @@ export function NightshiftApp({
       `}
     >
       <NightshiftHeader
-        isLoading={isInitialLoading}
-        hasActiveInvestigations={hasActiveInvestigations}
+        isLoading={isInitialLoading || (activeInvestigationCount === 0 && areSeverityCountsLoading)}
+        activeInvestigationCount={activeInvestigationCount}
+        needsYouCount={needsYouCount}
+        severityCounts={severityCounts}
       />
 
       <EuiSpacer size="l" />
