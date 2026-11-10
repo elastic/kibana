@@ -7,7 +7,8 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EntityDefinitionsClient, RegisteredEntityDefinition } from '@kbn/entity-store/server';
-import { InventoryTypeDefinitionError, InventoryTypeNotFoundError } from '../inventory/errors';
+import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
+import { InventoryTypeNotFoundError } from '../inventory/errors/inventory_type_not_found_error';
 import {
   applyLimit,
   applyValueLabels,

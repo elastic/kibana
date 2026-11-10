@@ -7,11 +7,9 @@
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import {
-  InventoryRequestError,
-  InventoryTypeDefinitionError,
-  InventoryTypeNotFoundError,
-} from '../inventory/errors';
+import { InventoryRequestError } from '../inventory/errors/inventory_request_error';
+import { InventoryTypeDefinitionError } from '../inventory/errors/inventory_type_definition_error';
+import { InventoryTypeNotFoundError } from '../inventory/errors/inventory_type_not_found_error';
 import { createEntityInventoryServerRoute } from './create_server_route';
 import { INTERIM_AUTHZ } from './interim_authz';
 

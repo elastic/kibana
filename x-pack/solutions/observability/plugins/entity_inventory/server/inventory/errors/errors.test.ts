@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { InventoryRequestError, InventoryTypeDefinitionError, InventoryTypeNotFoundError } from '.';
+import { InventoryRequestError } from './inventory_request_error';
+import { InventoryTypeDefinitionError } from './inventory_type_definition_error';
+import { InventoryTypeNotFoundError } from './inventory_type_not_found_error';
 
 describe('inventory errors', () => {
   it('InventoryTypeNotFoundError names the type and carries 404', () => {
