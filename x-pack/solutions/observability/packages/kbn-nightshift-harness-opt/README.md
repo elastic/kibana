@@ -83,4 +83,12 @@ node scripts/nightshift_harness_opt.js report --serve --port 7712
 - Single tier (one model, `full` telemetry). The `no-flags` tier and the customer0 canary from the
   issue are not wired into the gate yet.
 - Small subsets saturate: on 4 tasks the incumbent already scores 1.0, leaving nothing to search.
+- **Run-to-run noise dominates at one rollout.** The unchanged incumbent gave different rewards on
+  6 of 10 cases it ran more than once (per-case sd ≈ 0.19, mostly 0.3 ↔ 1.0 flips on multi-flag
+  tasks). An 8-incident, 1-rollout gate has a CI of about ±0.4; resolving a +0.1 effect needs on
+  the order of 10 rollouts per gate incident. Rollouts of one cutoff run in parallel, so more
+  rollouts cost money more than wall clock.
+- The reviewer blocked 2 of 3 proposals in the first 3-round campaign for the same idea: "name
+  every independent failure you measured as a cause". ORCA's multi-flag answer sets reward exactly
+  that, so the line between better multi-cause RCA and padding the cause list is a policy choice.
 - The proposer runs with write access to the candidate worktree. Local only, never in CI.
