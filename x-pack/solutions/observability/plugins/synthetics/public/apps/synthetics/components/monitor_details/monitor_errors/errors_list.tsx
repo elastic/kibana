@@ -26,6 +26,7 @@ import { css } from '@emotion/react';
 import { useSelectedLocation } from '../hooks/use_selected_location';
 import { ErrorDetailsLink } from '../../common/links/error_details_link';
 import type { PingState, ErrorGroupItem } from '../../../../../../common/runtime_types';
+import { getTimespanEnd } from '../../../../../../common/utils/get_timespan_end';
 import { useErrorFailedStep } from '../hooks/use_error_failed_step';
 import { formatTestDuration } from '../../../utils/monitor_test_result/test_time_formats';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
@@ -269,7 +270,7 @@ export const ErrorsList = ({
       render: (value: string, item: PingState) => {
         let activeDuration = 0;
         if (item.monitor.timespan) {
-          const diff = moment(item.monitor.timespan.lt).diff(
+          const diff = moment(getTimespanEnd(item.monitor.timespan)).diff(
             moment(item.monitor.timespan.gte),
             'millisecond'
           );

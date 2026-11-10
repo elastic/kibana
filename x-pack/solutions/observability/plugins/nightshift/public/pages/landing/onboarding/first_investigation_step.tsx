@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiEmptyPrompt,
   EuiIcon,
   EuiProgress,
   EuiSpacer,
@@ -28,37 +29,11 @@ import type {
   OnboardingSuggestionsExecution,
 } from '@kbn/nightshift-investigations-plugin/common';
 import { useStartInvestigation } from '../../../data/investigations/use_start_investigation';
-import { ConnectSourcesGrid } from '../../../components/entities/sandbox_connector/connect_sources_grid';
+import {
+  ConnectSourcesGrid,
+  isAdditionalType,
+} from '../../../components/entities/sandbox_connector/connect_sources_grid';
 import { useStartOnboardingSuggestions } from './use_onboarding';
-
-/** Generic prompts offered when the suggestion run failed; they work on any cluster. */
-const FALLBACK_SUGGESTIONS: OnboardingSuggestion[] = [
-  {
-    title: i18n.translate('xpack.nightshift.onboarding.fallback.errors.title', {
-      defaultMessage: 'Noisiest errors in the last 24 hours',
-    }),
-    prompt: 'Which services logged the most errors in the last 24 hours, and why?',
-    rationale: '',
-    source: 'error_spike',
-  },
-  {
-    title: i18n.translate('xpack.nightshift.onboarding.fallback.degrading.title', {
-      defaultMessage: 'Anything degrading right now?',
-    }),
-    prompt:
-      'Is anything in my system degrading right now? Check error rates and latency of the last hour against the day before.',
-    rationale: '',
-    source: 'latency',
-  },
-  {
-    title: i18n.translate('xpack.nightshift.onboarding.fallback.changes.title', {
-      defaultMessage: 'What changed in the last hour?',
-    }),
-    prompt: 'What changed in my system in the last hour, and did it cause any errors?',
-    rationale: '',
-    source: 'other',
-  },
-];
 
 const SOURCE_LABELS: Record<OnboardingSuggestion['source'], string> = {
   alert: i18n.translate('xpack.nightshift.onboarding.source.alert', { defaultMessage: 'Alert' }),
@@ -113,13 +88,12 @@ export function OnboardingFirstInvestigationStep({
   const retry = useStartOnboardingSuggestions();
   const isRunning = execution.status === 'running';
 
+  // A failed run and a run with nothing to suggest look the same: an empty state with a retry.
   const suggestions = useMemo(
-    () =>
-      execution.status === 'failed' || execution.suggestions?.length === 0
-        ? FALLBACK_SUGGESTIONS
-        : execution.suggestions ?? [],
+    () => (execution.status === 'failed' ? [] : execution.suggestions ?? []),
     [execution.status, execution.suggestions]
   );
+  const hasSuggestions = suggestions.length > 0;
 
   const start = useCallback(
     (prompt: string, title?: string) => {
@@ -150,7 +124,7 @@ export function OnboardingFirstInvestigationStep({
             </h4>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <ConnectSourcesGrid group="additional" />
+          <ConnectSourcesGrid filter={isAdditionalType} />
         </section>
       </div>
     );
@@ -165,43 +139,60 @@ export function OnboardingFirstInvestigationStep({
         gap: ${euiTheme.size.base};
       `}
     >
-      {execution.status === 'failed' && (
-        <EuiCallOut
-          announceOnMount
-          size="s"
-          color="warning"
-          iconType="warning"
-          title={i18n.translate('xpack.nightshift.onboarding.investigate.failedTitle', {
-            defaultMessage: 'Nightshift could not suggest investigations for your data',
-          })}
-        >
-          <p>
-            {i18n.translate('xpack.nightshift.onboarding.investigate.failedDescription', {
-              defaultMessage:
-                'Start with one of these general questions, write your own, or try again.',
-            })}
-          </p>
-          <EuiButton
-            size="s"
-            color="warning"
-            iconType="refresh"
-            isLoading={retry.isLoading}
-            onClick={() => retry.mutate()}
-            data-test-subj="nightshiftOnboardingRetryButton"
-          >
-            {i18n.translate('xpack.nightshift.onboarding.investigate.retryButton', {
-              defaultMessage: 'Try again',
-            })}
-          </EuiButton>
-        </EuiCallOut>
+      {hasSuggestions ? (
+        <SuggestionList
+          suggestions={suggestions}
+          isStarting={isStarting}
+          startingPrompt={startingPrompt}
+          onInvestigate={(suggestion) => start(suggestion.prompt, suggestion.title)}
+        />
+      ) : (
+        <EuiEmptyPrompt
+          iconType="search"
+          titleSize="xs"
+          paddingSize="m"
+          hasBorder
+          title={
+            <h3>
+              {i18n.translate('xpack.nightshift.onboarding.investigate.emptyTitle', {
+                defaultMessage: 'Nothing to suggest yet',
+              })}
+            </h3>
+          }
+          body={
+            <p>
+              {i18n.translate('xpack.nightshift.onboarding.investigate.emptyBody', {
+                defaultMessage:
+                  "Nightshift couldn't find anything worth investigating in your data. Try again later, or ask your own question below.",
+              })}
+            </p>
+          }
+          actions={
+            <EuiButton
+              size="s"
+              iconType="refresh"
+              isLoading={retry.isLoading}
+              onClick={() => retry.mutate()}
+              data-test-subj="nightshiftOnboardingRetryButton"
+            >
+              {i18n.translate('xpack.nightshift.onboarding.investigate.retryButton', {
+                defaultMessage: 'Try again',
+              })}
+            </EuiButton>
+          }
+          data-test-subj="nightshiftOnboardingSuggestionsEmpty"
+        />
       )}
-      <SuggestionList
-        suggestions={suggestions}
-        isStarting={isStarting}
-        startingPrompt={startingPrompt}
-        onInvestigate={(suggestion) => start(suggestion.prompt, suggestion.title)}
-      />
       <ComposeCard
+        title={
+          hasSuggestions
+            ? i18n.translate('xpack.nightshift.onboarding.investigate.customTitle', {
+                defaultMessage: 'Want something else investigated?',
+              })
+            : i18n.translate('xpack.nightshift.onboarding.investigate.ownQuestionTitle', {
+                defaultMessage: 'Ask your own question',
+              })
+        }
         value={message}
         onChange={setMessage}
         isStarting={isStarting}
@@ -437,14 +428,16 @@ function SuggestionRow({
   );
 }
 
-/** "Want something else investigated?": a free-text question, with its own Investigate. */
+/** A free-text question, with its own Investigate. */
 function ComposeCard({
+  title,
   value,
   onChange,
   isStarting,
   isLoading,
   onSubmit,
 }: {
+  title: string;
   value: string;
   onChange: (value: string) => void;
   isStarting: boolean;
@@ -452,9 +445,6 @@ function ComposeCard({
   onSubmit: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
-  const title = i18n.translate('xpack.nightshift.onboarding.investigate.customTitle', {
-    defaultMessage: 'Want something else investigated?',
-  });
   const hasDraft = value.trim().length > 0;
 
   return (

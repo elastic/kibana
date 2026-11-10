@@ -16,7 +16,7 @@ export class AdminSessionRequestError extends Error {
 }
 
 export interface AdminSessionRequestOptions {
-  method: 'GET' | 'POST';
+  method: 'GET' | 'POST' | 'PUT';
   query?: Record<string, string | number>;
   body?: string;
   version?: string;

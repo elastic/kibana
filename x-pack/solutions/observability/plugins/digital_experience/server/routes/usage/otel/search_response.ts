@@ -10,7 +10,3 @@ import type { usageSearch } from './search_request';
 
 /** `usageSearch`: the panels below the KPIs, in the selected environment. */
 export type UsageAggregations = AggregationsOf<ReturnType<typeof usageSearch>>;
-
-/** Terms of a boolean field: the key is `1` or `0`, and `key_as_string` `true` or `false`. */
-export type DeviceBucket =
-  UsageAggregations['inEnvironment']['pageLoads']['devices']['buckets'][number];
