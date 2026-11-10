@@ -72,6 +72,7 @@ interface OverlayPointsProps {
 
 export const OverlayPoints = ({ overlays, yAxesConfiguration, isTimeVis }: OverlayPointsProps) => {
   const { euiTheme } = useEuiTheme();
+  const color = euiTheme.colors.vis.euiColorVis6;
 
   return (
     <>
@@ -88,12 +89,13 @@ export const OverlayPoints = ({ overlays, yAxesConfiguration, isTimeVis }: Overl
             yAccessors={['y']}
             data={[...overlay.points]}
             hideInLegend
-            color={euiTheme.colors.vis.euiColorVis6}
+            color={color}
             bubbleSeriesStyle={{
               point: {
                 shape: PointShape.Diamond,
                 radius: 6,
                 strokeWidth: 1,
+                fill: color,
                 stroke: euiTheme.colors.emptyShade,
                 opacity: 1,
               },
