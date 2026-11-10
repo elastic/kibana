@@ -36,6 +36,13 @@ jest.mock('../../../data/service_accounts/use_investigator_service_account', () 
 jest.mock('../../../data/sandbox_connectors/use_connectors_by_type', () => ({
   useConnectorsByType: jest.fn(),
 }));
+jest.mock('../../../data/automations/use_automations', () => ({
+  useFetchAutomations: () => ({
+    data: { automations: [] },
+    isInitialLoading: false,
+    isError: false,
+  }),
+}));
 jest.mock('../header', () => ({ NightshiftHeader: () => null }));
 jest.mock('./intro_banner', () => ({
   OnboardingIntroBanner: () => <div data-test-subj="introBannerStub" />,
@@ -121,6 +128,7 @@ describe('NightshiftOnboarding', () => {
       expect(
         screen.queryByTestId('nightshiftOnboardingAddDataProceedButton')
       ).not.toBeInTheDocument();
+      expect(linkedSteps()).toEqual([]);
     });
 
     it('ignores connectors that belong to the Connect other sources page', () => {
@@ -205,6 +213,18 @@ describe('NightshiftOnboarding', () => {
       expect(currentStep()).toBe('addData');
       expect(stepsCard()).not.toHaveTextContent('Optional');
     });
+
+    it('links forward again from Add data before any run, since Proceed is available', () => {
+      mockConnectors({ '.new_relic': 1, '.github': 0 });
+
+      goToSources();
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-addData'));
+
+      expect(linkedSteps()).toEqual(['connectSources']);
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
+      expect(currentStep()).toBe('connectSources');
+      expect(mockStartSuggestions).not.toHaveBeenCalled();
+    });
   });
 
   describe('while suggestions are shown, before any investigation', () => {
@@ -213,15 +233,26 @@ describe('NightshiftOnboarding', () => {
       mockConnectors({ '.new_relic': 1, '.github': 0 });
     });
 
-    it('does not let the user jump ahead to a step not done yet', () => {
+    it('does not let the user jump ahead to Create first automation', () => {
       renderOnboarding();
 
       expect(currentStep()).toBe('investigate');
       expect(linkedSteps()).toEqual(['addData', 'connectSources']);
+    });
+
+    it('links back to Try first investigation from a detour', () => {
+      renderOnboarding();
 
       fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-connectSources'));
       expect(currentStep()).toBe('connectSources');
-      expect(linkedSteps()).toEqual(['addData']);
+      expect(linkedSteps()).toEqual(['addData', 'investigate']);
+
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-addData'));
+      expect(currentStep()).toBe('addData');
+      expect(linkedSteps()).toEqual(['connectSources', 'investigate']);
+
+      fireEvent.click(screen.getByTestId('nightshiftOnboardingStepLink-investigate'));
+      expect(currentStep()).toBe('investigate');
     });
   });
 

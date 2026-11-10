@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { StreamsAppStartDependencies } from '../../../types';
 
 export interface DestinationApiKeyServicesDeps {
   streamsRepositoryClient: StreamsAppStartDependencies['streams']['streamsRepositoryClient'];
-  unitId?: string;
+  unitId: string;
 }
 
 export type DestinationApiKeyGenerationDeps = DestinationApiKeyServicesDeps;
@@ -29,7 +28,7 @@ export interface DestinationApiKeyServices {
 
 export const createDestinationApiKeyServices = ({
   streamsRepositoryClient,
-  unitId = STREAMS_DEFAULT_UNIT_ID,
+  unitId,
 }: DestinationApiKeyServicesDeps): DestinationApiKeyServices => ({
   generate: async (destinationId, patterns) => {
     const response = await streamsRepositoryClient.fetch(

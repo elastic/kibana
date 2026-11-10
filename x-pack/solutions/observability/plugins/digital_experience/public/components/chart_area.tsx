@@ -13,7 +13,13 @@ import { EuiFlexGroup, EuiLoadingChart, EuiText } from '@elastic/eui';
 const fillCss = css({ blockSize: '100%' });
 
 interface ChartAreaProps {
+  /** The height of the chart, or its least height when it `grow`s. */
   height: number;
+  /**
+   * Takes the room left in a flex column, down to `height`; the parent has to be a flex column.
+   * The chart fills the area, so it has to size itself to its container.
+   */
+  grow?: boolean;
   isLoading: boolean;
   hasData: boolean;
   emptyMessage: string;
@@ -31,7 +37,7 @@ const chartAreaContent = ({
   hasData,
   emptyMessage,
   children,
-}: Omit<ChartAreaProps, 'height'>): ReactNode => {
+}: Omit<ChartAreaProps, 'height' | 'grow'>): ReactNode => {
   if (isLoading) {
     return centered(<EuiLoadingChart size="l" />);
   }
@@ -46,6 +52,15 @@ const chartAreaContent = ({
 };
 
 /** A chart that keeps its height while loading or without data, so the panel does not jump. */
-export function ChartArea({ height, ...content }: ChartAreaProps) {
-  return <div css={{ blockSize: height }}>{chartAreaContent(content)}</div>;
+export function ChartArea({ height, grow = false, ...content }: ChartAreaProps) {
+  if (!grow) {
+    return <div css={{ blockSize: height }}>{chartAreaContent(content)}</div>;
+  }
+  // The content is laid over the area, so that what it measures is the area's height, which is
+  // what the flex column gives it, and not the height of the content.
+  return (
+    <div css={{ flex: '1 1 0', minBlockSize: height, position: 'relative' }}>
+      <div css={{ position: 'absolute', inset: 0 }}>{chartAreaContent(content)}</div>
+    </div>
+  );
 }
