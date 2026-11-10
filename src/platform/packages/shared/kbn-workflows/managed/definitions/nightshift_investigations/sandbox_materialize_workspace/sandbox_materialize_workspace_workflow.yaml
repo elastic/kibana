@@ -2,7 +2,7 @@ version: '1'
 name: Nightshift Sandbox Materialize Workspace
 description: >
   Pre-execution workflow that allocates the investigator sandbox once, then
-  materializes Cortex, Semantic Memory, and the decision trees into that same
+  materializes Wiki, Semantic Memory, and the decision trees into that same
   workspace. Writers run as parallel branches so they share the sandbox_id from
   obtain rather than each triggering GetContainer.
 enabled: true
@@ -10,7 +10,7 @@ tags:
   - observability
   - nightshift
   - investigation
-  - cortex
+  - wiki
   - semantic-memory
   - decision-tree
 
@@ -60,10 +60,10 @@ steps:
     timeout: 60s
     branch-timeout: 45s
     branches:
-      - name: cortex
+      - name: wiki
         steps:
-          - name: hydrate_cortex
-            type: nightshift.cortexHydrate
+          - name: hydrate_wiki
+            type: nightshift.wikiHydrate
             with:
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
       - name: memory
@@ -96,9 +96,9 @@ steps:
       # is false in exactly that case; a writer that ran reports its own failure in
       # `notification` instead.
       writers:
-        - directory: /workspace/cortex
-          notification: '{{ steps.hydrate_cortex.output.notification }}'
-          completed: '${{ steps.hydrate_cortex.output != null }}'
+        - directory: /workspace/wiki
+          notification: '{{ steps.hydrate_wiki.output.notification }}'
+          completed: '${{ steps.hydrate_wiki.output != null }}'
         - directory: /workspace/memories
           notification: '{{ steps.memory_materialize_to_sandbox.output.notification }}'
           completed: '${{ steps.memory_materialize_to_sandbox.output != null }}'

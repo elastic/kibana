@@ -29,7 +29,12 @@ const EVIDENCE_DESCRIPTION_SHARED_CRITERIA: EvaluationCriterion[] = [
 const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'evidence_description_is_grounded_check',
-    text: 'Every fresh signal must set `verdict` to `confirms`, `refutes`, `off_topic`, `inconclusive`, or `not_checked`. Do not repeat a Verdict label in the description or add process narration and a "Testing: … Expected: …" preamble. For `confirms`, `refutes`, and `off_topic`, the description states the observed row signature and impact. For `inconclusive`, the description states why the query could not establish a conclusion (empty, error, or ambiguous result). For `not_checked`, the description states that no query ran and why. Entries carried forward unchanged from prior cycles (older `collected_at`) are acceptable in any format. Informational entries need no structured verification account: quiet-rule signals (evidence is null) and "no confirming query available" dispositions are acceptable as written.',
+    text: 'Every fresh signal must set `verdict` to `confirms`, `refutes`, `off_topic`, `inconclusive`, or `not_checked`. Do not repeat a Verdict label in the description or add process narration and a "Testing: … Expected: …" preamble. Stating that a figure was not measured, and why in a few words, is required content, not narration. For `confirms`, `refutes`, and `off_topic`, the description states the observed row signature and impact. For `inconclusive`, the description states why the query could not establish a conclusion (empty, error, or ambiguous result). For `not_checked`, the description states that no query ran and why. Entries carried forward unchanged from prior cycles (older `collected_at`) are acceptable in any format. Informational entries need no structured verification account: quiet-rule signals (evidence is null) and "no confirming query available" dispositions are acceptable as written.',
+    score: 1,
+  },
+  {
+    id: 'evidence_description_coverage_and_sampling_scope',
+    text: 'Descriptions must preserve the evidence scope. When dimensions show one distinct non-null value (`f = 1`) but the field is present in fewer failing rows than the dimensions query counted, state the partial coverage and do not claim that every failing row carries that value. Repeated identical example messages are still sampled observations, not proof of population-wide uniformity, unless dimensions explicitly establish full row coverage.',
     score: 1,
   },
   ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,

@@ -6,8 +6,6 @@
  */
 
 import { inject, injectable } from 'inversify';
-import { PluginInitializer } from '@kbn/core-di-server';
-import type { PluginInitializerContext } from '@kbn/core/server';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { guardedMapStep } from '../stream_utils';
 import { fetchActiveAlertGroupHashes } from '../fetch_active_alert_group_hashes';
@@ -18,7 +16,7 @@ import {
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
-import type { PluginConfig } from '../../../config';
+import { ConfigService } from '../../services/config_service/config_service';
 
 /**
  * Fetches the rule's currently-active group hashes once, before the breach query
@@ -36,10 +34,9 @@ export class FetchActiveGroupsStep implements RuleExecutionStep {
   constructor(
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(QueryServiceInternalToken) private readonly internalQueryService: QueryServiceContract,
-    @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    @inject(ConfigService) configService: ConfigService
   ) {
-    this.maxActiveGroups = pluginConfigAccessor.get<PluginConfig>().rules.run.alerts.max;
+    this.maxActiveGroups = configService.get('rules.run.alerts.max');
   }
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {

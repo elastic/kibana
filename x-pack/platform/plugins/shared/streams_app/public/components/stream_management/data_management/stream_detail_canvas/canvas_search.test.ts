@@ -139,6 +139,22 @@ describe('resolveCanvasSearch', () => {
     ]);
   });
 
+  it('matches remote index names on a remote Elasticsearch destination node', () => {
+    const destination: DestinationNode = {
+      id: configuredDestinationNodeId('d-remote'),
+      type: DESTINATION_NODE_TYPE,
+      position: { x: 0, y: 0 },
+      data: {
+        destinationId: 'd-remote',
+        title: 'Backup',
+        remoteIndexNames: ['archive-logs'],
+      },
+    };
+    expect(
+      nodeIdsOf(resolveCanvasSearch({ nodes: [destination], edges: [] }, 'archive-logs'))
+    ).toEqual([configuredDestinationNodeId('d-remote')]);
+  });
+
   it('matches the S3 bucket when a description replaces it as the subtitle', () => {
     const destination: DestinationNode = {
       id: configuredDestinationNodeId('d-s3'),
@@ -154,6 +170,23 @@ describe('resolveCanvasSearch', () => {
     expect(
       nodeIdsOf(resolveCanvasSearch({ nodes: [destination], edges: [] }, 'archive-bucket'))
     ).toEqual([configuredDestinationNodeId('d-s3')]);
+  });
+
+  it('matches the remote Elasticsearch endpoint when a description replaces it as the subtitle', () => {
+    const destination: DestinationNode = {
+      id: configuredDestinationNodeId('d-remote'),
+      type: DESTINATION_NODE_TYPE,
+      position: { x: 0, y: 0 },
+      data: {
+        destinationId: 'd-remote',
+        title: 'Backup',
+        subtitle: 'Long-term copy',
+        endpoint: 'https://backup-cluster.example.com:9243',
+      },
+    };
+    expect(
+      nodeIdsOf(resolveCanvasSearch({ nodes: [destination], edges: [] }, 'backup-cluster'))
+    ).toEqual([configuredDestinationNodeId('d-remote')]);
   });
 });
 

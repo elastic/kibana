@@ -466,7 +466,10 @@ describe('TriggerEventHandler', () => {
         ...buildChildEventChainContext({ workflowId: 'loop-parent', eventChainDepth: 1 }),
       },
       defaultTriggeredBy: 'workflow-step',
-      authenticatedUser: 'user-1',
+      authenticatedUser: {
+        executedBy: 'user-1',
+        user: { name: 'user-1', username: 'user-1' },
+      },
       now: new Date(),
       maxEventChainDepth: 10,
       getConcurrencyGroupKey: () => null,

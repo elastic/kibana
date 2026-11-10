@@ -505,6 +505,12 @@ export function getSharedModuleRules(
       type: 'asset/resource',
       generator: { filename: 'maplibre-gl/[name].[contenthash].mjs' },
     },
+    // MapLibre wraps a cross-origin (CDN) worker URL with `new URL(url, import.meta.url)`.
+    // Rspack would otherwise bundle that as an asset context module and throw at runtime.
+    {
+      test: /[\\/]maplibre-gl[\\/]dist[\\/]maplibre-gl\.mjs$/,
+      parser: { url: false },
+    },
     getRawQueryLoaderRule(),
     getPeggyLoaderRule(),
   ];
