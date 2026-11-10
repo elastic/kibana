@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
 import { SearchHomepagePlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new SearchHomepagePlugin(initializerContext);
+export function plugin() {
+  return new SearchHomepagePlugin();
 }
-
-export type {
-  SearchHomepagePluginSetup,
-  SearchHomepagePluginStart,
-  SearchHomepageAppInfo,
-} from './types';

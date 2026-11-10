@@ -16,7 +16,7 @@ import type {
 } from '@kbn/core-feature-flags-server';
 import type { Logger } from '@kbn/logging';
 import { addSpanLabels } from '@kbn/apm-utils';
-import { getFlattenedObject } from '@kbn/std';
+import { getFlattenedObject, withTimeout } from '@kbn/std';
 import {
   type Client,
   OpenFeature,
@@ -38,6 +38,9 @@ import {
   timeout,
   timer,
   EMPTY,
+  skip,
+  concatMap,
+  debounceTime,
 } from 'rxjs';
 import { get } from 'lodash';
 import type { InitialFeatureFlagsGetter } from '@kbn/core-feature-flags-server/src/contracts';
@@ -170,6 +173,8 @@ export class FeatureFlagsService {
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private initialFeatureFlagsGetter: InitialFeatureFlagsGetter = async () => ({});
   private waitForContextReadyPromise: Promise<void> | undefined;
+  private readonly providerReady$ = new BehaviorSubject<boolean>(true); // true by default if no provider is set
+  private waitForProviderReadyPromise: Promise<unknown> | undefined;
   /** Last value returned for each flag this node has evaluated. */
   private readonly evaluatedFlags = new Map<string, FeatureFlagOverrideValue>();
 
@@ -211,9 +216,10 @@ export class FeatureFlagsService {
         if (OpenFeature.providerMetadata !== NOOP_PROVIDER.metadata) {
           throw new Error('A provider has already been set. This API cannot be called twice.');
         }
-        setProviderWithRetries(provider, this.logger);
-        // Emit a context change event when the provider is ready to force the reevaluation of the subscribed flags.
-        OpenFeature.addHandler(ServerProviderEvents.Ready, () => this.contextChanged$.next());
+        this.providerReady$.next(false); // Set the provider as not ready.
+        setProviderWithRetries(provider, this.logger).finally(() => this.providerReady$.next(true));
+        // Unblock in-flight evaluations and reevaluate subscribed flags once the provider is ready.
+        OpenFeature.addHandler(ServerProviderEvents.Ready, () => this.providerReady$.next(true));
       },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
@@ -248,10 +254,17 @@ export class FeatureFlagsService {
         // Flag changes
         featureFlagsChanged$,
         // Context changes (we need to reevaluate)
-        this.contextChanged$.pipe(map(() => [flagName]))
+        this.contextChanged$.pipe(map(() => [flagName])),
+        // Provider ready changes to true (we need to reevaluate)
+        this.providerReady$.pipe(
+          skip(1), // skip the first value because it is the initial value (it's a BehaviorSubject)
+          filter((ready) => ready),
+          map(() => [flagName])
+        )
       ).pipe(
         filter((flagNames) => flagNames.includes(flagName)),
         startWith([flagName]), // only to emit on the first call
+        debounceTime(10), // debounce the emissions to avoid too many reevaluations caused by rapid fired feature flag changes + context changes + provider ready changes
         takeUntil(this.stop$) // stop the observable when the service stops
       );
 
@@ -273,14 +286,14 @@ export class FeatureFlagsService {
         ),
       getBooleanValue$: (flagName, fallbackValue) => {
         return observeFeatureFlag$(flagName).pipe(
-          switchMap(() =>
+          concatMap(() =>
             this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue)
           )
         );
       },
       getStringValue$: <Value extends string>(flagName: string, fallbackValue: Value) => {
         return observeFeatureFlag$(flagName).pipe(
-          switchMap(() =>
+          concatMap(() =>
             this.evaluateFlag<Value>(
               this.featureFlagsClient.getStringValue,
               flagName,
@@ -291,7 +304,7 @@ export class FeatureFlagsService {
       },
       getNumberValue$: <Value extends number>(flagName: string, fallbackValue: Value) => {
         return observeFeatureFlag$(flagName).pipe(
-          switchMap(() =>
+          concatMap(() =>
             this.evaluateFlag<Value>(
               this.featureFlagsClient.getNumberValue,
               flagName,
@@ -313,6 +326,7 @@ export class FeatureFlagsService {
     } finally {
       this.stop$.next();
       this.stop$.complete();
+      this.providerReady$.complete();
       this.overrides$.complete();
       this.configOverrides$.complete();
       this.runtimeOverrides$.complete();
@@ -336,10 +350,8 @@ export class FeatureFlagsService {
 
     // Only wait for the context to be ready if there is no override.
     if (typeof override === 'undefined') {
-      // DISCLAIMER: During evaluations, we're only waiting for the context to be ready.
-      // We don't check the provider's status because we don't want to halt Kibana if the provider is suffering any sort of downtime.
-      // This is by design.
-      await this.waitForContextReady();
+      // DISCLAIMER: During evaluations, we're waiting for the context and the provider to be ready.
+      await Promise.all([this.waitForContextReady(), this.waitForProviderReady()]);
     }
 
     const value =
@@ -449,6 +461,21 @@ export class FeatureFlagsService {
         return response.accepted();
       }
     );
+  }
+
+  private async waitForProviderReady(): Promise<void> {
+    if (this.providerReady$.value) {
+      return Promise.resolve();
+    }
+    if (!this.waitForProviderReadyPromise) {
+      this.waitForProviderReadyPromise = withTimeout({
+        promise: firstValueFrom(this.providerReady$.pipe(filter((ready) => ready)), {
+          defaultValue: undefined,
+        }),
+        timeoutMs: 10_000, // Hold 10 seconds for the provider to be ready.
+      });
+    }
+    await this.waitForProviderReadyPromise;
   }
 
   /** Runtime overrides replace config overrides for the same key. */
