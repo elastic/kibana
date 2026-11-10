@@ -59,6 +59,20 @@
           ]
         }
       ]
-    }
+    },
+    "relationships": [
+      {
+        "type": "affects",
+        "description": "An issue hits a product area, platform or plan."
+      },
+      {
+        "type": "happens_on",
+        "description": "An issue happens on a platform."
+      },
+      {
+        "type": "repeats",
+        "description": "An issue repeats an earlier one."
+      }
+    ]
   }
 }

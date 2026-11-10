@@ -63,7 +63,7 @@ export const dreamingTemplateValuesFor = (
   dreaming: AiIndexDreamingConfig,
   spaceId: string
 ): ContextEngineDreamingWorkflowTemplateValues => {
-  const { facts, entities } = dreamingTypesOf(dreaming);
+  const { facts, entities, relationships } = dreamingTypesOf(dreaming);
   return {
     aiIndexId: aiIndex.id,
     instanceKey: managedWorkflowIdSuffixFor(aiIndex.id, spaceId),
@@ -75,6 +75,7 @@ export const dreamingTemplateValuesFor = (
     instructions: dreaming.instructions ?? '',
     factTypes: facts,
     entityTypes: entities,
+    relationshipTypes: relationships,
   };
 };
 

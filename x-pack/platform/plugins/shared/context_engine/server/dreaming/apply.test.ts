@@ -22,17 +22,19 @@ jest.mock('../ai_indices/ki_write', () => ({ softDeleteKi: jest.fn() }));
 
 const writer = { uri: 'workflow://dreaming', metadata: { run_id: 'exec-1' } };
 
+const linkedRelationships = (...ids: string[]) =>
+  ({
+    hits: { hits: ids.map((id) => ({ _index: 'ai-index-idx-a', _source: { id } })) },
+  } as unknown as Awaited<ReturnType<ApplyContext['esClient']['search']>>);
+
 const context = (
   dest: ApplyContext['dest'] = { type: 'index', value: 'ai-index-idx-a' },
   memoryPermissions: ApplyContext['memoryPermissions'] = new Map()
-): ApplyContext => ({
-  esClient: elasticsearchServiceMock.createElasticsearchClient(),
-  aiIndexId: 'a',
-  dest,
-  writer,
-  spaceId: 'team-a',
-  memoryPermissions,
-});
+): ApplyContext => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  esClient.search.mockResolvedValue(linkedRelationships());
+  return { esClient, aiIndexId: 'a', dest, writer, spaceId: 'team-a', memoryPermissions };
+};
 
 const restrictedTo = (...groups: Array<{ space: string; name?: string[] }>) => ({
   kibana: { privileges: groups.map((group) => ({ ...group, count: group.name?.length ?? 0 })) },
@@ -491,6 +493,209 @@ describe('applyOperations', () => {
     }
     expect(putKiRevision).not.toHaveBeenCalled();
     expect(softDeleteKi).not.toHaveBeenCalled();
+  });
+
+  describe('relationships', () => {
+    const relationship = {
+      op: 'upsert_relationship' as const,
+      id: 'relationship-1',
+      key: 'entity-person--bob|member_of|entity-team--ops',
+      relation: 'member_of',
+      from: { id: 'entity-person--bob', title: 'Bob' },
+      to: { id: 'entity-team--ops', title: 'Ops' },
+      description: 'Bob joined Ops in March.',
+      sourceMemoryIds: ['m-1'],
+    };
+
+    it('writes a relationship with its type, key, ends and memories', async () => {
+      const counts = await applyOperations(context(), [relationship]);
+
+      expect(counts).toEqual({ created: 1, updated: 0, deleted: 0, rejected: [] });
+      expect(written()[0]).toEqual(
+        expect.objectContaining({
+          id: 'relationship-1',
+          type: 'memory.relationship',
+          title: 'Bob member of Ops',
+          description: 'Bob joined Ops in March.',
+          content: 'Bob member of Ops.\nBob joined Ops in March.',
+          attributes: {
+            'relationship.relation': 'member_of',
+            'memory.key': 'entity-person--bob|member_of|entity-team--ops',
+          },
+          references: [
+            { uri: 'ki://entity-person--bob', relation: 'relates_to', description: 'from' },
+            { uri: 'ki://entity-team--ops', relation: 'relates_to', description: 'to' },
+            { uri: 'ki://m-1', relation: 'derived_from' },
+          ],
+        })
+      );
+    });
+
+    it('leaves a relationship alone when nothing about it changed, and updates it otherwise', async () => {
+      await applyOperations(context(), [relationship]);
+      stored.set('relationship-1', written()[0]);
+      jest.mocked(putKiRevision).mockClear();
+
+      const unchanged = await applyOperations(context(), [relationship]);
+      const updated = await applyOperations(context(), [
+        { ...relationship, description: 'Bob leads Ops.', sourceMemoryIds: ['m-2'] },
+      ]);
+
+      expect(unchanged).toEqual({ created: 0, updated: 0, deleted: 0, rejected: [] });
+      expect(updated).toEqual({ created: 0, updated: 1, deleted: 0, rejected: [] });
+      expect(written()).toHaveLength(1);
+      expect(written()[0]).toMatchObject({
+        description: 'Bob leads Ops.',
+        content: 'Bob member of Ops.\nBob leads Ops.',
+      });
+      expect(written()[0].references).toContainEqual({ uri: 'ki://m-1', relation: 'derived_from' });
+      expect(written()[0].references).toContainEqual({ uri: 'ki://m-2', relation: 'derived_from' });
+    });
+
+    it('rejects an update to a relationship with different permissions than its memories', async () => {
+      stored.set('relationship-1', {
+        id: 'relationship-1',
+        type: 'memory.relationship',
+        title: 'Bob member of Ops',
+        permissions: restrictedTo({ space: 'team-a', name: ['ai_index:a/read'] }),
+      });
+
+      const counts = await applyOperations(context(), [relationship]);
+
+      expect(counts.rejected).toEqual([
+        {
+          item: 'relationship entity-person--bob member_of entity-team--ops',
+          reason: 'it has different permissions than its memories',
+        },
+      ]);
+      expect(putKiRevision).not.toHaveBeenCalled();
+    });
+
+    it("rejects a delete of a relationship with different permissions than the batch's memories", async () => {
+      stored.set('relationship-1', {
+        id: 'relationship-1',
+        type: 'memory.relationship',
+        title: 'Bob member of Ops',
+        permissions: restrictedTo({ space: 'team-a', name: ['ai_index:a/read'] }),
+      });
+
+      const counts = await applyOperations(context(), [{ op: 'delete', id: 'relationship-1' }]);
+
+      expect(counts).toEqual({
+        created: 0,
+        updated: 0,
+        deleted: 0,
+        rejected: [
+          {
+            item: 'delete relationship-1',
+            reason: "it has different permissions than this batch's memories",
+          },
+        ],
+      });
+      expect(softDeleteKi).not.toHaveBeenCalled();
+    });
+
+    it('deletes the relationships linking a deleted fact or entity', async () => {
+      stored.set('entity-person--bob', {
+        id: 'entity-person--bob',
+        type: 'entity.person',
+        title: 'Bob',
+      });
+      stored.set('relationship-1', {
+        id: 'relationship-1',
+        type: 'memory.relationship',
+        title: 'R',
+      });
+      const applyContext = context();
+      jest
+        .mocked(applyContext.esClient.search)
+        .mockResolvedValueOnce(linkedRelationships('relationship-1'))
+        .mockResolvedValue(linkedRelationships());
+
+      const counts = await applyOperations(applyContext, [
+        { op: 'delete', id: 'entity-person--bob' },
+      ]);
+
+      expect(counts).toEqual({ created: 0, updated: 0, deleted: 1, rejected: [] });
+      expect(jest.mocked(applyContext.esClient.search).mock.calls[0][0]).toEqual(
+        expect.objectContaining({
+          index: 'ai-index-idx-a',
+          collapse: { field: 'id' },
+          query: {
+            bool: {
+              filter: [
+                { term: { type: 'memory.relationship' } },
+                { term: { 'references.uri': 'ki://entity-person--bob' } },
+              ],
+            },
+          },
+        })
+      );
+      expect(jest.mocked(softDeleteKi).mock.calls.map(([, { kiId }]) => kiId)).toEqual([
+        'entity-person--bob',
+        'relationship-1',
+      ]);
+    });
+
+    it('does not delete a linked relationship that is already deleted', async () => {
+      stored.set('fact-1', { id: 'fact-1', type: 'fact.note', title: 'A' });
+      const applyContext = context();
+      jest.mocked(applyContext.esClient.search).mockResolvedValueOnce({
+        hits: {
+          hits: [
+            {
+              _index: 'ai-index-idx-a',
+              _source: { id: 'relationship-1', governance: { lifecycle: { status: 'deleted' } } },
+            },
+          ],
+        },
+      } as unknown as Awaited<ReturnType<ApplyContext['esClient']['search']>>);
+
+      await applyOperations(applyContext, [{ op: 'delete', id: 'fact-1' }]);
+
+      expect(jest.mocked(softDeleteKi).mock.calls.map(([, { kiId }]) => kiId)).toEqual(['fact-1']);
+    });
+
+    it('plans the deletes of linked relationships on a dry run', async () => {
+      stored.set('fact-1', { id: 'fact-1', type: 'fact.note', title: 'A' });
+      stored.set('relationship-1', {
+        id: 'relationship-1',
+        type: 'memory.relationship',
+        title: 'R',
+      });
+      const applyContext = context();
+      jest
+        .mocked(applyContext.esClient.search)
+        .mockResolvedValueOnce(linkedRelationships('relationship-1'))
+        .mockResolvedValue(linkedRelationships());
+      const dryRun = new Map();
+
+      await applyOperations({ ...applyContext, dryRun }, [{ op: 'delete', id: 'fact-1' }]);
+
+      expect(softDeleteKi).not.toHaveBeenCalled();
+      expect([...dryRun]).toEqual([
+        ['fact-1', { change: 'deleted' }],
+        ['relationship-1', { change: 'deleted' }],
+      ]);
+    });
+  });
+
+  it('collects each KI it stores', async () => {
+    const collected = new Map();
+
+    await applyOperations({ ...context(), written: collected }, [
+      {
+        op: 'upsert_fact',
+        id: 'fact-2',
+        type: 'note',
+        title: 'A',
+        content: 'A.',
+        sourceMemoryIds: ['m-1'],
+      },
+    ]);
+
+    expect([...collected.keys()]).toEqual(['fact-2']);
+    expect(collected.get('fact-2')).toEqual(written()[0]);
   });
 
   describe('on a dry run', () => {

@@ -167,6 +167,7 @@ describe('DreamingTemplatePage', () => {
       instructions: 'Acme customer support knowledge base.\n\nRecord confirmed fixes.',
       facts: SUPPORT.dreaming.facts,
       entities: null,
+      relationships: [],
     });
   });
 
@@ -208,6 +209,7 @@ describe('DreamingTemplatePage', () => {
       facts: [{ type: 'incident_cause' }],
       entities: null,
       instructions: 'Incident reviews.',
+      relationships: [],
     });
   });
 

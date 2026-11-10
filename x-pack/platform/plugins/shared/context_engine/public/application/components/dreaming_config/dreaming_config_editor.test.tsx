@@ -19,6 +19,7 @@ import {
 const SUPPORT = draftOf({
   facts: [{ type: 'solution', description: 'A confirmed fix.' }],
   entities: { nodes: [{ type: 'issue', attributes: ['severity'] }, { type: 'product_area' }] },
+  relationships: [{ type: 'affects', description: 'An issue affects a product area.' }],
 });
 
 let latest: DreamingConfigDraft;
@@ -48,6 +49,7 @@ describe('DreamingConfigEditor', () => {
     expect(typesOfDraft(off)).toEqual({
       facts: SUPPORT.facts,
       entities: null,
+      relationships: SUPPORT.relationships,
     });
     expect(typesOfDraft(SUPPORT).entities).toEqual(SUPPORT.entities);
   });
@@ -86,6 +88,32 @@ describe('DreamingConfigEditor', () => {
     expect(latest.entities).toEqual({ nodes: [{ type: 'problem', attributes: ['severity'] }] });
   });
 
+  it('adds, renames and deletes relationship types', () => {
+    renderEditor(<Editable initial={SUPPORT} />);
+
+    fireEvent.click(screen.getByTestId('contextDreamingConfigRelationships-add'));
+    fillName('Fixed By');
+    save();
+    expect(latest.relationships).toEqual([...SUPPORT.relationships, { type: 'fixed_by' }]);
+
+    fireEvent.click(screen.getByTestId('contextDreamingConfigRelationship-fixed_by-edit'));
+    fillName('affects');
+    save();
+    expect(screen.getByTestId('contextDreamingRelationshipTypeModal')).toHaveTextContent(
+      '"affects" is already used.'
+    );
+    fillName('about');
+    save();
+    expect(screen.getByTestId('contextDreamingRelationshipTypeModal')).toHaveTextContent(
+      '"about" is already used.'
+    );
+    fillName('solved_by');
+    save();
+    fireEvent.click(screen.getByTestId('contextDreamingConfigRelationship-affects-delete'));
+
+    expect(latest.relationships).toEqual([{ type: 'solved_by' }]);
+  });
+
   it('suggests entities when they are turned on with none', () => {
     renderEditor(
       <DreamingConfigEditor
@@ -99,7 +127,7 @@ describe('DreamingConfigEditor', () => {
 
     fireEvent.click(screen.getByTestId('contextDreamingConfigEntitiesSwitch'));
 
-    expect(latest).toEqual({ ...SUPPORT, entitiesEnabled: true });
+    expect(latest).toEqual({ ...SUPPORT, relationships: [], entitiesEnabled: true });
   });
 
   it('shows a config it cannot change without edit controls', () => {

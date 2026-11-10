@@ -18,6 +18,7 @@ export const MAX_DREAMING_TYPE_DESCRIPTION_LENGTH = 2048;
 export const MAX_DREAMING_FACT_TYPES = 50;
 export const MAX_DREAMING_ENTITY_TYPES = 50;
 export const MAX_DREAMING_ENTITY_ATTRIBUTES = 50;
+export const MAX_DREAMING_RELATIONSHIP_TYPES = 50;
 export const MAX_DREAMING_CONNECTOR_ID_LENGTH = 256;
 
 /** Type prefixes of the KIs dreaming writes: `fact.<fact type>` and `entity.<entity type>`. */
@@ -32,6 +33,15 @@ export const DREAMING_MEMORY_KI_TYPES: readonly string[] = [
   'memory.session_fact',
   'memory.session',
 ];
+
+/** The KI type of a relationship between two facts or entities. */
+export const RELATIONSHIP_KI_TYPE = 'memory.relationship';
+/** The relationship type of a relationship KI, such as `member_of`. */
+export const RELATIONSHIP_RELATION_ATTRIBUTE = 'relationship.relation';
+/** `<from id>|<relationship type>|<to id>`, so queries can filter on either end. */
+export const RELATIONSHIP_KEY_ATTRIBUTE = 'memory.key';
+/** The built-in relationship type from a fact to an entity it is about. Configured types link two entities. */
+export const ABOUT_RELATIONSHIP_TYPE = 'about';
 
 /** How many memories a fact or entity was seen in. */
 export const OCCURRENCES_ATTRIBUTE = 'memory.number_of_occurrences';
@@ -72,9 +82,14 @@ export interface DreamingEntities {
   nodes: DreamingEntityType[];
 }
 
+export interface DreamingRelationshipType {
+  type: string;
+  description?: string;
+}
+
 /**
- * What an AI index learns from its memories: facts and entities. A kind with no types configured is
- * not built.
+ * What an AI index learns from its memories: facts, entities, and the relationships between them.
+ * A kind with no types configured is not built.
  */
 export interface AiIndexDreamingConfig {
   /** Whether dreaming runs on its schedule. */
@@ -89,10 +104,18 @@ export interface AiIndexDreamingConfig {
   facts?: DreamingFactType[] | null;
   /** Entity types. Missing: no entities. */
   entities?: DreamingEntities | null;
+  /**
+   * Relationship types linking two entities. Missing or empty: no relationships. When set, facts
+   * also link to the entities they are about, with the built-in `about` type.
+   */
+  relationships?: DreamingRelationshipType[] | null;
 }
 
 /** The parts of a dreaming config that say what it builds. */
-export type DreamingTypesConfig = Pick<AiIndexDreamingConfig, 'facts' | 'entities'>;
+export type DreamingTypesConfig = Pick<
+  AiIndexDreamingConfig,
+  'facts' | 'entities' | 'relationships'
+>;
 
 /** Response of `GET` and `PUT /api/context_engine/ai_index/{aiIndexId}/_dreaming`. */
 export interface GetAiIndexDreamingResponse {
@@ -102,15 +125,21 @@ export interface GetAiIndexDreamingResponse {
 /** The dreaming config of an AI index that never configured it. */
 export const DREAMING_DISABLED: AiIndexDreamingConfig = { enabled: false };
 
-/** The fact and entity types a config builds. */
+/** The fact, entity and relationship types a config builds. */
 export interface DreamingTypes {
   facts: DreamingFactType[];
   entities: DreamingEntityType[];
+  relationships: DreamingRelationshipType[];
 }
 
-export const dreamingTypesOf = ({ facts, entities }: DreamingTypesConfig): DreamingTypes => ({
+export const dreamingTypesOf = ({
+  facts,
+  entities,
+  relationships,
+}: DreamingTypesConfig): DreamingTypes => ({
   facts: facts ?? [],
   entities: entities?.nodes ?? [],
+  relationships: relationships ?? [],
 });
 
 /**
@@ -136,6 +165,7 @@ const findDuplicate = (values: readonly string[]): string | undefined =>
 export const validateDreamingTypes = ({
   facts,
   entities,
+  relationships,
 }: DreamingTypesConfig): string | undefined => {
   const duplicateFact = findDuplicate((facts ?? []).map(({ type }) => type));
   if (duplicateFact !== undefined) {
@@ -151,6 +181,14 @@ export const validateDreamingTypes = ({
     if (duplicateAttribute !== undefined) {
       return `Entity type '${type}' lists attribute '${duplicateAttribute}' twice.`;
     }
+  }
+  const relationshipTypes = (relationships ?? []).map(({ type }) => type);
+  if (relationshipTypes.includes(ABOUT_RELATIONSHIP_TYPE)) {
+    return `Relationship type '${ABOUT_RELATIONSHIP_TYPE}' is built in.`;
+  }
+  const duplicateRelationship = findDuplicate(relationshipTypes);
+  if (duplicateRelationship !== undefined) {
+    return `Relationship type '${duplicateRelationship}' is listed twice.`;
   }
   return undefined;
 };

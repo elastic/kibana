@@ -17,22 +17,25 @@ const customer = { type: 'customer', attributes: ['tier'] };
 const city = { type: 'city' };
 
 describe('dreamingTypesOf', () => {
-  it('returns the facts and entities a config builds', () => {
+  it('returns the facts, entities and relationships a config builds', () => {
     expect(
       dreamingTypesOf({
         facts: [{ type: 'preference' }],
         entities: { nodes: [customer, city] },
+        relationships: [{ type: 'lives_in' }],
       })
     ).toEqual({
       facts: [{ type: 'preference' }],
       entities: [customer, city],
+      relationships: [{ type: 'lives_in' }],
     });
   });
 
   it('treats missing and null kinds as empty', () => {
-    expect(dreamingTypesOf({ facts: null, entities: null })).toEqual({
+    expect(dreamingTypesOf({ facts: null, entities: null, relationships: null })).toEqual({
       facts: [],
       entities: [],
+      relationships: [],
     });
   });
 });
@@ -43,9 +46,10 @@ describe('dreamingBuildsAnything', () => {
     expect(dreamingBuildsAnything({ entities: { nodes: [city] } })).toBe(true);
   });
 
-  it('is false with neither', () => {
+  it('is false with neither, since relationships need facts or entities to link', () => {
     expect(dreamingBuildsAnything({})).toBe(false);
     expect(dreamingBuildsAnything({ facts: [], entities: { nodes: [] } })).toBe(false);
+    expect(dreamingBuildsAnything({ relationships: [{ type: 'lives_in' }] })).toBe(false);
   });
 });
 
@@ -86,6 +90,15 @@ describe('validateDreamingTypes', () => {
     );
     expect(validateDreamingTypes({ entities: { nodes: [city, city] } })).toBe(
       "Entity type 'city' is listed twice."
+    );
+    expect(
+      validateDreamingTypes({ relationships: [{ type: 'lives_in' }, { type: 'lives_in' }] })
+    ).toBe("Relationship type 'lives_in' is listed twice.");
+  });
+
+  it('rejects the built-in about relationship type', () => {
+    expect(validateDreamingTypes({ relationships: [{ type: 'about' }] })).toBe(
+      "Relationship type 'about' is built in."
     );
   });
 

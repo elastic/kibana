@@ -1,6 +1,6 @@
 version: '1'
 name: __NAME__
-description: 'Turns the memories agents save in a Context Engine AI index into long-term facts and entities, as the AI index dreaming config describes.'
+description: 'Turns the memories agents save in a Context Engine AI index into long-term facts, entities and the relationships between them, as the AI index dreaming config describes.'
 enabled: false
 tags:
   - context-engine
@@ -20,6 +20,7 @@ consts:
   instructions: __INSTRUCTIONS__
   fact_types: __FACT_TYPES__
   entity_types: __ENTITY_TYPES__
+  relationship_types: __RELATIONSHIP_TYPES__
 outputs:
   - name: memories
     type: number
@@ -30,6 +31,14 @@ outputs:
   - name: deleted
     type: number
   - name: rejected
+    type: number
+  - name: relationships_created
+    type: number
+  - name: relationships_updated
+    type: number
+  - name: relationships_deleted
+    type: number
+  - name: relationships_rejected
     type: number
   - name: resume_from
     type: string
@@ -173,6 +182,10 @@ steps:
       updated: 0
       deleted: 0
       rejected: 0
+      relationships_created: 0
+      relationships_updated: 0
+      relationships_deleted: 0
+      relationships_rejected: 0
       would_write: []
 
   - name: dream
@@ -461,6 +474,170 @@ steps:
               rejected: '${{ variables.rejected | plus: steps.apply_changes.output.rejected.size }}'
               would_write: '${{ variables.would_write | concat: steps.apply_changes.output.would_write }}'
 
+          - name: relationships
+            type: if
+            condition: '${{ consts.relationship_types.size > 0 and steps.apply_changes.output.documents.size > 0 }}'
+            steps:
+              - name: read_relationships
+                type: elasticsearch.search
+                on-failure:
+                  continue: true
+                with:
+                  index: '{{ consts.memories_index }}'
+                  ignore_unavailable: true
+                  size: 200
+                  sort:
+                    - updated_at: desc
+                  collapse:
+                    field: id
+                  _source:
+                    - id
+                    - description
+                    - attributes
+                    - permissions
+                    - governance.lifecycle.status
+                  query:
+                    bool:
+                      filter:
+                        - term:
+                            type: memory.relationship
+                        - terms:
+                            references.uri: '${{ steps.apply_changes.output.documents | map: "id" | join: "|ki://" | prepend: "ki://" | split: "|" }}'
+                        - bool:
+                            should:
+                              - bool:
+                                  must_not:
+                                    nested:
+                                      path: permissions.kibana.privileges
+                                      query:
+                                        match_all: {}
+                                      ignore_unmapped: true
+                              - nested:
+                                  path: permissions.kibana.privileges
+                                  ignore_unmapped: true
+                                  query:
+                                    bool:
+                                      should:
+                                        - term:
+                                            permissions.kibana.privileges.space: '{{ workflow.spaceId }}'
+                                        - term:
+                                            permissions.kibana.privileges.space: '*'
+                                      minimum_should_match: 1
+                            minimum_should_match: 1
+
+              - name: relate
+                type: ai.prompt
+                connector-id: '{{ consts.connector_id }}'
+                connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+                on-failure:
+                  retry:
+                    max-attempts: 2
+                    delay: '30s'
+                  continue: true
+                with:
+                  prompt: |
+                    You link long-term facts and entities with typed relationships.
+
+                    You are given NEW items (facts and entities just written from new memories), EXISTING entities they could link to, and EXISTING relationships of the NEW items.
+
+                    Return only changes. Each relationship has from and to, each an id from NEW or EXISTING ENTITIES, and relation, one of the RELATIONSHIP TYPES. Read it as "from relation to": "Priya manages Alex" has from Priya, relation manages, to Alex.
+                    - Create a relationship with a description: one sentence on why it holds, from what NEW says.
+                    - Update one by repeating its from, relation and to with a new description.
+                    - Delete one with delete: true when NEW says it no longer holds.
+
+                    Rules:
+                    - Link only what NEW states or clearly implies. Every relationship has at least one end in NEW.
+                    - from and to are different items.
+                    - Link a fact only to the entities it is about, with relation about: from is the fact, to is the entity. Never use another type from or to a fact.
+                    - Every other type links two entities. Use one only when its description fits both ends; otherwise leave the pair unlinked.
+                    - Leave out EXISTING relationships that do not change.
+                    - An empty list is a valid answer.
+
+                    RELATIONSHIP TYPES:
+                    - about: A fact is about an entity. Built in; the only type for facts.
+                    {%- for relationship_type in consts.relationship_types %}
+                    - {{ relationship_type.type }}{% if relationship_type.description %}: {{ relationship_type.description }}{% endif %}
+                    {%- endfor %}
+
+                    INSTRUCTIONS:
+
+                    {{ consts.instructions }}
+
+                    NEW (one item per line):
+                    {%- for document in steps.apply_changes.output.documents %}
+                    {{ document | pick: "id", "type", "title", "description", "content" | json }}
+                    {%- endfor %}
+
+                    EXISTING ENTITIES (one per line, none when empty):
+                    {%- assign new_ids = steps.apply_changes.output.documents | map: "id" %}
+                    {%- assign audience = foreach.item.first.permissions | json %}
+                    {%- for hit in steps.read_existing.output.hits.hits %}
+                    {%- assign item_audience = hit._source.permissions | json %}
+                    {%- assign kind = hit._source.type | split: "." | first %}
+                    {%- unless kind != 'entity' or new_ids contains hit._source.id or hit._source.governance.lifecycle.status == 'deleted' or hit._source.governance.lifecycle.status == 'verification_failed' or item_audience != audience %}
+                    {{ hit._source | pick: "id", "type", "title", "description" | json }}
+                    {%- endunless %}
+                    {%- endfor %}
+
+                    EXISTING RELATIONSHIPS (one per line, none when empty):
+                    {%- for hit in steps.read_relationships.output.hits.hits %}
+                    {%- assign item_audience = hit._source.permissions | json %}
+                    {%- unless hit._source.governance.lifecycle.status == 'deleted' or item_audience != audience %}
+                    {%- assign key = hit._source.attributes["memory.key"] | split: "|" %}
+                    {"from": {{ key[0] | json }}, "relation": {{ key[1] | json }}, "to": {{ key[2] | json }}, "description": {{ hit._source.description | json }}}
+                    {%- endunless %}
+                    {%- endfor %}
+                  schema:
+                    type: object
+                    properties:
+                      relationships:
+                        type: array
+                        description: Relationships to create, update, or delete. Leave out relationships that do not change.
+                        items:
+                          type: object
+                          properties:
+                            from:
+                              type: string
+                              description: The id of the item the relationship goes from, from NEW or EXISTING ENTITIES.
+                            relation:
+                              type: string
+                              description: One of the relationship types; about for a fact.
+                            to:
+                              type: string
+                              description: The id of the item the relationship goes to, from NEW or EXISTING ENTITIES.
+                            description:
+                              type: string
+                              description: One sentence on why the relationship holds. Required to create one.
+                            delete:
+                              type: boolean
+                              description: True deletes an existing relationship.
+                          required:
+                            - from
+                            - relation
+                            - to
+                    required:
+                      - relationships
+
+              - name: apply_relationships
+                type: context-engine.applyDreamRelationships
+                on-failure:
+                  continue: true
+                with:
+                  ai_index_id: '{{ consts.ai_index_id }}'
+                  memories: '${{ foreach.item }}'
+                  changes: '${{ steps.relate.output.content }}'
+                  documents: '${{ steps.apply_changes.output.documents }}'
+                  dry_run: '${{ inputs.dry_run == true }}'
+
+              - name: tally_relationships
+                type: data.set
+                with:
+                  relationships_created: '${{ variables.relationships_created | plus: steps.apply_relationships.output.created }}'
+                  relationships_updated: '${{ variables.relationships_updated | plus: steps.apply_relationships.output.updated }}'
+                  relationships_deleted: '${{ variables.relationships_deleted | plus: steps.apply_relationships.output.deleted }}'
+                  relationships_rejected: '${{ variables.relationships_rejected | plus: steps.apply_relationships.output.rejected.size }}'
+                  would_write: '${{ variables.would_write | concat: steps.apply_relationships.output.would_write }}'
+
   - name: dry_run_result
     type: if
     condition: '${{ inputs.dry_run == true }}'
@@ -474,6 +651,10 @@ steps:
           updated: '${{ variables.updated | default: 0 }}'
           deleted: '${{ variables.deleted | default: 0 }}'
           rejected: '${{ variables.rejected | default: 0 }}'
+          relationships_created: '${{ variables.relationships_created | default: 0 }}'
+          relationships_updated: '${{ variables.relationships_updated | default: 0 }}'
+          relationships_deleted: '${{ variables.relationships_deleted | default: 0 }}'
+          relationships_rejected: '${{ variables.relationships_rejected | default: 0 }}'
           would_write: '${{ variables.would_write }}'
           reason: 'Dry run: nothing was written.'
 
@@ -485,5 +666,9 @@ steps:
       updated: '${{ variables.updated | default: 0 }}'
       deleted: '${{ variables.deleted | default: 0 }}'
       rejected: '${{ variables.rejected | default: 0 }}'
+      relationships_created: '${{ variables.relationships_created | default: 0 }}'
+      relationships_updated: '${{ variables.relationships_updated | default: 0 }}'
+      relationships_deleted: '${{ variables.relationships_deleted | default: 0 }}'
+      relationships_rejected: '${{ variables.relationships_rejected | default: 0 }}'
       resume_from: '{{ variables.resume_from }}'
       resume_after_id: '{{ variables.resume_after_id }}'

@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexHttpItem, KiTypeCount } from '../../common/http_api/ai_indices';
-import { MEMORY_KI_TYPES } from '../../common/memory';
+import { RETRIEVAL_EXCLUDED_MEMORY_KI_TYPES } from '../../common/memory';
 import {
   dreamingTypesOf,
   ENTITY_TYPE_PREFIX,
@@ -22,7 +22,7 @@ import { buildExampleQueries, excludeMemoryKiTypesFilter } from './example_queri
 import { buildMemoryExampleQueries, type MemoryExampleQueries } from './memory_example_queries';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
-const MEMORY_KI_TYPE_SET: ReadonlySet<string> = new Set(MEMORY_KI_TYPES);
+const MEMORY_KI_TYPE_SET: ReadonlySet<string> = new Set(RETRIEVAL_EXCLUDED_MEMORY_KI_TYPES);
 
 export interface DescribeAiIndexParams {
   esClient: ElasticsearchClient;

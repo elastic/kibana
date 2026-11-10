@@ -383,7 +383,7 @@ apiTest.describe('context engine AI index describe API', { tag: tags.stateful.cl
         `FROM ${INDEX_A} METADATA _id, _index, _score\n` +
           '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n' +
           '| WHERE expires_at IS NULL OR expires_at > NOW()\n' +
-          '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")\n' +
+          '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND type != "memory.relationship" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")\n' +
           '| FORK\n'
       )
     ).toBe(true);

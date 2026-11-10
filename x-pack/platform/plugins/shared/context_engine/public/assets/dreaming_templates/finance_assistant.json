@@ -59,6 +59,20 @@
           ]
         }
       ]
-    }
+    },
+    "relationships": [
+      {
+        "type": "reported_in",
+        "description": "A metric appears in a report."
+      },
+      {
+        "type": "owned_by",
+        "description": "A metric or budget belongs to a department."
+      },
+      {
+        "type": "covers",
+        "description": "An audit covers a department."
+      }
+    ]
   }
 }
