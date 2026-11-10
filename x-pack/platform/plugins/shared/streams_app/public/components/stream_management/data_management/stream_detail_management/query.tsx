@@ -13,6 +13,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useStreamsListLink } from '../../../streams_layout/use_streams_list_link';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { QueryStreamSchemaEditor } from '../../../query_streams/query_stream_schema_editor';
@@ -51,6 +52,7 @@ export function QueryStreamDetailManagement({
     },
   } = useKibana();
   const router = useStreamsAppRouter();
+  const streamsListLink = useStreamsListLink();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
@@ -179,7 +181,7 @@ export function QueryStreamDetailManagement({
     <>
       <StreamsAppHeader
         title={key}
-        back={{ href: router.link('/'), label: backToStreamsLabel }}
+        back={{ href: streamsListLink, label: backToStreamsLabel }}
         badges={badges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}

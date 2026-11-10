@@ -11,6 +11,7 @@ import { EuiCallOut } from '@elastic/eui';
 import type { AppHeaderBadge } from '@kbn/app-header';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useStreamsListLink } from '../../../streams_layout/use_streams_list_link';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { RedirectTo } from '../../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
@@ -89,6 +90,7 @@ function WiredStreamDetailManagementContent({
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
   const router = useStreamsAppRouter();
+  const streamsListLink = useStreamsListLink();
   const { rangeFrom, rangeTo } = useTimeRange();
   const importLifecycleFlyout = useImportLifecycleFlyoutContext();
 
@@ -111,7 +113,7 @@ function WiredStreamDetailManagementContent({
       <>
         <StreamsAppHeader
           title={key}
-          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          back={{ href: streamsListLink, label: backToStreamsLabel }}
           badges={wiredBadges}
         />
         <StreamsAppPageTemplate.Body>
@@ -145,7 +147,7 @@ function WiredStreamDetailManagementContent({
       <>
         <StreamsAppHeader
           title={key}
-          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          back={{ href: streamsListLink, label: backToStreamsLabel }}
           badges={wiredBadges}
         />
         <StreamsAppPageTemplate.Body>
@@ -167,7 +169,7 @@ function WiredStreamDetailManagementContent({
       <>
         <StreamsAppHeader
           title={key}
-          back={{ href: router.link('/'), label: backToStreamsLabel }}
+          back={{ href: streamsListLink, label: backToStreamsLabel }}
           badges={wiredBadges}
         />
         <StreamsAppPageTemplate.Body>

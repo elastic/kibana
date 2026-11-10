@@ -22,6 +22,7 @@ import { KbnUrlStateStorageFromRouterProvider } from '../../util/kbn_url_state_c
 import { DateRangeRedirect } from '../date_range_redirect';
 import { UpdateExecutionContextOnRouteChange } from './update_execution_context_on_route_change';
 import { CLASSIC_TAB_QUERY_KEY } from '../streams_layout/use_show_classic_tab';
+import { rememberClassicTabOrigin } from '../streams_layout/use_streams_list_link';
 
 const queryClient = new QueryClient();
 
@@ -39,8 +40,15 @@ export function AppRoot({
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
 
-  // On unmount, not mount: a mount effect runs after the routes have already started the check.
-  useEffect(() => () => queryClient.removeQueries({ queryKey: CLASSIC_TAB_QUERY_KEY }), []);
+  // Leaving Streams resets the stream check and the Classic tab origin. On unmount, not mount:
+  // a mount effect runs after the routes have already started the check.
+  useEffect(
+    () => () => {
+      queryClient.removeQueries({ queryKey: CLASSIC_TAB_QUERY_KEY });
+      rememberClassicTabOrigin(false);
+    },
+    []
+  );
 
   const context = {
     appParams: appMountParameters,

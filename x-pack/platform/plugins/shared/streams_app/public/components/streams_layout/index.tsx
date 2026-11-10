@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -15,12 +15,11 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { RedirectTo } from '../redirect_to';
 import { StreamsAppHeader, StreamsAppPageTemplate } from '../streams_app_page_template';
-import { StreamsLayoutDefaultTabRedirect } from './default_tab_redirect';
-import { StreamCheckLoading } from './stream_check_loading';
-import { isStreamsLayoutTab, STREAMS_LAYOUT_TABS } from './tab_ids';
+import { DEFAULT_STREAMS_LAYOUT_TAB, isStreamsLayoutTab, STREAMS_LAYOUT_TABS } from './tab_ids';
 import { streamsLayoutTabs } from './tabs';
 import { UnitNotFoundPrompt } from './unit_not_found_prompt';
 import { useShowClassicTab } from './use_show_classic_tab';
+import { rememberClassicTabOrigin } from './use_streams_list_link';
 import { useUnitCheck } from './use_unit_check';
 
 const techPreviewBadge = {
@@ -43,6 +42,10 @@ export function StreamsLayout() {
   const { access } = useStreamsPrivileges();
   const unitCheck = useUnitCheck(unitId);
   const { loading, showClassic } = useShowClassicTab();
+
+  useEffect(() => {
+    rememberClassicTabOrigin(tab === 'classic');
+  }, [tab]);
 
   const visibleTabs = useMemo(
     () => STREAMS_LAYOUT_TABS.filter((tabId) => showClassic || tabId !== 'classic'),
@@ -74,12 +77,24 @@ export function StreamsLayout() {
 
   // Runs before the unit check so a bad tab never shows the unit not-found prompt first.
   if (!isStreamsLayoutTab(tab) || !visibleTabs.includes(tab)) {
-    return <StreamsLayoutDefaultTabRedirect />;
+    return (
+      <RedirectTo
+        path="/v2/unit/{unitId}/{tab}"
+        params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
+      />
+    );
   }
 
   const { Component, noPadding, ownsHeader } = streamsLayoutTabs[tab];
   if (ownsHeader) {
-    return loading ? <StreamCheckLoading /> : <Component tabs={appHeaderTabs} />;
+    return loading ? (
+      <StreamsAppPageTemplate.EmptyPrompt
+        data-test-subj="streamsClassicTabLoading"
+        icon={<EuiLoadingSpinner size="xl" />}
+      />
+    ) : (
+      <Component tabs={appHeaderTabs} />
+    );
   }
 
   const title = i18n.translate('xpack.streams.streamsLayout.pageHeaderTitle', {

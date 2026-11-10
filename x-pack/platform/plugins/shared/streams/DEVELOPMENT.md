@@ -53,7 +53,7 @@ Settings marked UI-readonly can only be turned on through `uiSettings.overrides`
 
 ## Access via URL
 
-With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/default/map`. `/app/streams` redirects there for a user with V2 access, or to the Classic Streams tab (`/v2/unit/default/classic`) when they also have Streams access and classic or non-root wired streams exist (see "Privileges").
+With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/default/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges"). A user who also has Streams access gets a Classic Streams tab with the V1 list when classic or non-root wired streams exist. `metrics-streams.otel-default`, where the V2 backend writes unit telemetry, doesn't count.
 
 ## Privileges
 
@@ -75,7 +75,7 @@ With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/
 - Granted per space, but the unit is shared, so V2 `all` in any space can edit it.
 - In Elasticsearch it is the application privilege `{ "application": "kibana-.kibana", "privileges": ["feature_streamsV2.all"], "resources": ["*"] }`. Use `space:<id>` for one space and `feature_streamsV2.read` for read.
 - The data stream stats routes (`/internal/streams/doc_counts/*`, `/internal/streams/storage_stats`) accept `read_stream` or `read_streams_v2`. Other legacy routes need `read_stream` / `manage_stream`.
-- V2 access means `streamsV2.show` plus `observability:streamsEnableCanvas` on in the space. It decides the nav entry and whether `/` redirects into V2.
+- V2 access means `streamsV2.show` plus `observability:streamsEnableCanvas` on in the space. It decides the nav entry and whether `/` redirects to `/v2/unit/default/map`.
 - Without `streamsV2.manage`, the Map and the Sources and Destinations tables are read-only.
 
 ### What each V2 request needs

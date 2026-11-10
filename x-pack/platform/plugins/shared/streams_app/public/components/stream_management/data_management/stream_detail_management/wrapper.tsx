@@ -29,6 +29,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
+import { useStreamsListLink } from '../../../streams_layout/use_streams_list_link';
 import {
   STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   useStreamDocCountsFetch,
@@ -71,6 +72,7 @@ export function Wrapper({
   topContent?: ReactNode;
 }) {
   const router = useStreamsAppRouter();
+  const streamsListLink = useStreamsListLink();
   const { definition } = useStreamDetail();
   const {
     core: {
@@ -347,7 +349,7 @@ export function Wrapper({
     <>
       <StreamsAppHeader
         title={streamId}
-        back={{ href: router.link('/'), label: backToStreamsLabel }}
+        back={{ href: streamsListLink, label: backToStreamsLabel }}
         badges={appHeaderBadges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}

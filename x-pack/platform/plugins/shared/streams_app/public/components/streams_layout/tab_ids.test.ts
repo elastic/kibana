@@ -22,6 +22,11 @@ describe('hasClassicOrWiredStreams', () => {
       false,
     ],
     ['a query stream', [{ name: 'logs.otel.errors', type: 'query' }], false],
+    [
+      'only the unit metrics stream',
+      [{ name: 'metrics-streams.otel-default', type: 'classic' }],
+      false,
+    ],
     ['a classic stream', [{ name: 'logs-nginx-default', type: 'classic' }], true],
     ['a wired child stream', [{ name: 'logs.otel.nginx', type: 'wired' }], true],
   ])('%s', (_, streams, expected) => {

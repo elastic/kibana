@@ -14,6 +14,7 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useShowClassicTab } from './use_show_classic_tab';
 import { useUnitCheck, type UnitCheck } from './use_unit_check';
+import { CLASSIC_TAB_ORIGIN_KEY } from './use_streams_list_link';
 import { StreamsLayout } from '.';
 
 const mockTabMounted = jest.fn();
@@ -31,11 +32,8 @@ jest.mock('./unit_not_found_prompt', () => ({
   ),
 }));
 jest.mock('../redirect_to', () => ({
-  RedirectTo: ({ path }: { path: string }) => <div data-test-subj="redirectTo" data-path={path} />,
-}));
-jest.mock('./default_tab_redirect', () => ({
-  StreamsLayoutDefaultTabRedirect: ({ unitId }: { unitId?: string }) => (
-    <div data-test-subj="defaultTabRedirect" data-unit-id={unitId} />
+  RedirectTo: ({ path, params }: { path: string; params?: unknown }) => (
+    <div data-test-subj="redirectTo" data-path={path} data-params={JSON.stringify(params)} />
   ),
 }));
 jest.mock('./tabs', () => {
@@ -145,11 +143,14 @@ describe('StreamsLayout', () => {
     expect(screen.queryByTestId('streamsLayoutTabContent-sources')).not.toBeInTheDocument();
   });
 
-  it('redirects an unknown tab of a missing unit to the default tab', () => {
+  it('redirects an unknown tab of a missing unit to the map', () => {
     setup({ check: 'notFound', tab: 'bogus' });
     render(<StreamsLayout />);
 
-    expect(screen.getByTestId('defaultTabRedirect')).not.toHaveAttribute('data-unit-id');
+    expect(screen.getByTestId('redirectTo')).toHaveAttribute(
+      'data-params',
+      JSON.stringify({ path: { tab: 'map' } })
+    );
     expect(screen.queryByTestId('streamsUnitNotFoundPrompt')).not.toBeInTheDocument();
   });
 
@@ -169,11 +170,14 @@ describe('StreamsLayout', () => {
     expect(screen.getByTestId('streamsLayoutHeader')).toHaveTextContent('3');
   });
 
-  it('redirects the classic tab when the stream check finds none', () => {
+  it('redirects the classic tab to the map when the stream check finds none', () => {
     setup({ tab: 'classic', showClassic: false });
     render(<StreamsLayout />);
 
-    expect(screen.getByTestId('defaultTabRedirect')).toBeInTheDocument();
+    expect(screen.getByTestId('redirectTo')).toHaveAttribute(
+      'data-params',
+      JSON.stringify({ path: { tab: 'map' } })
+    );
     expect(screen.queryByTestId('streamsLayoutTabContent-classic')).not.toBeInTheDocument();
   });
 
@@ -181,7 +185,7 @@ describe('StreamsLayout', () => {
     setup({ tab: 'classic', loading: true, showClassic: true });
     render(<StreamsLayout />);
 
-    expect(screen.getByTestId('streamsDefaultTabLoading')).toBeInTheDocument();
+    expect(screen.getByTestId('streamsClassicTabLoading')).toBeInTheDocument();
     expect(screen.queryByTestId('streamsLayoutTabContent-classic')).not.toBeInTheDocument();
   });
 
@@ -211,6 +215,16 @@ describe('StreamsLayout', () => {
       '/v2/unit/{unitId}/{tab}',
       expect.objectContaining({ path: { unitId: 'edge', tab: 'map' } })
     );
+  });
+
+  it('remembers whether the Classic tab is open', () => {
+    setup({ tab: 'classic' });
+    const { rerender } = render(<StreamsLayout />);
+    expect(sessionStorage.getItem(CLASSIC_TAB_ORIGIN_KEY)).toBe('true');
+
+    setup({ tab: 'map' });
+    rerender(<StreamsLayout />);
+    expect(sessionStorage.getItem(CLASSIC_TAB_ORIGIN_KEY)).toBeNull();
   });
 
   it('remounts the tab when the unit changes', () => {

@@ -79,17 +79,17 @@ describe('useShowClassicTab', () => {
     jest.useFakeTimers();
     mockAnswer();
     const { wrapper } = setup();
-    const redirect = renderHook(() => useShowClassicTab(), { wrapper });
-    await waitFor(() => expect(redirect.result.current.loading).toBe(false));
-    redirect.unmount();
+    const first = renderHook(() => useShowClassicTab(), { wrapper });
+    await waitFor(() => expect(first.result.current.loading).toBe(false));
+    first.unmount();
 
     // react-query drops an unused query after its cache time, 5 minutes by default.
     act(() => {
       jest.advanceTimersByTime(10 * 60 * 1000);
     });
-    const layout = renderHook(() => useShowClassicTab(), { wrapper });
+    const later = renderHook(() => useShowClassicTab(), { wrapper });
 
-    expect(layout.result.current.loading).toBe(false);
+    expect(later.result.current.loading).toBe(false);
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 });
