@@ -11,9 +11,17 @@ import type { Condition } from '@kbn/streamlang';
 export type EsqlCell = string | number | boolean | null;
 export type EsqlRow = Readonly<Record<string, EsqlCell>>;
 
+export interface DroppedMetricsEntityRows {
+  ownerless: number;
+  nullNamespace: number;
+  nullNodeName: number;
+}
+
 export interface EntityFoldResult {
   features: FeatureUpsert[];
   droppedIncompleteRowsCount: number;
+  droppedRows: DroppedMetricsEntityRows;
+  unknownClusterRows: number;
 }
 
 export interface EntityKeyRow {
@@ -89,6 +97,16 @@ const replicasOf = (row: EsqlRow): number => (typeof row.replicas === 'number' ?
 const lastSeenOf = (row: EsqlRow): string =>
   typeof row.last_seen === 'string' ? row.last_seen : '';
 const latest = (left: string, right: string): string => (left > right ? left : right);
+const UNKNOWN_CLUSTER = '_unknown_cluster';
+
+const createDroppedRows = (): DroppedMetricsEntityRows => ({
+  ownerless: 0,
+  nullNamespace: 0,
+  nullNodeName: 0,
+});
+
+const droppedRowsCount = (droppedRows: DroppedMetricsEntityRows): number =>
+  droppedRows.ownerless + droppedRows.nullNamespace + droppedRows.nullNodeName;
 
 const derivedOwnerSources: Partial<
   Record<WorkloadKind, { stampedField: string; sourceField: string }>
@@ -187,29 +205,33 @@ const buildWorkloadQuery = (tsPrefix: string): string => `${tsPrefix}
                            kubernetes.cronjob.name, derived_cronjob, kubernetes.job.name,
                            kubernetes.replicaset.name),
        owner_derived = derived_deployment IS NOT NULL OR derived_cronjob IS NOT NULL
-| WHERE workload IS NOT NULL
 | STATS replicas = COUNT_DISTINCT(kubernetes.pod.uid), last_seen = MAX(@timestamp)
   BY orchestrator.cluster.name, kubernetes.namespace, kind, workload, owner_derived`;
 
 export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
   const groups = new Map<string, WorkloadGroup>();
-  let droppedIncompleteRowsCount = 0;
+  const droppedRows = createDroppedRows();
+  let unknownClusterRows = 0;
 
   for (const row of rows) {
-    const cluster = row['orchestrator.cluster.name'];
     const namespace = row['kubernetes.namespace'];
     const kind = row.kind;
     const name = row.workload;
-    if (
-      typeof cluster !== 'string' ||
-      typeof namespace !== 'string' ||
-      !isWorkloadKind(kind) ||
-      typeof name !== 'string'
-    ) {
-      droppedIncompleteRowsCount += 1;
+    if (!isWorkloadKind(kind) || typeof name !== 'string') {
+      droppedRows.ownerless += 1;
+      continue;
+    }
+    if (typeof namespace !== 'string') {
+      droppedRows.nullNamespace += 1;
       continue;
     }
 
+    const clusterValue = row['orchestrator.cluster.name'];
+    const hasKnownCluster = typeof clusterValue === 'string';
+    const cluster = hasKnownCluster ? clusterValue : UNKNOWN_CLUSTER;
+    if (!hasKnownCluster) {
+      unknownClusterRows += 1;
+    }
     const id = buildKubernetesEntityId({ kind, namespace, name });
     let group = groups.get(id);
     if (!group) {
@@ -249,7 +271,12 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
     };
   });
 
-  return { features, droppedIncompleteRowsCount };
+  return {
+    features,
+    droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
+    droppedRows,
+    unknownClusterRows,
+  };
 };
 
 const buildNodeQuery = (tsPrefix: string): string => `${tsPrefix}
@@ -259,16 +286,22 @@ const buildNodeQuery = (tsPrefix: string): string => `${tsPrefix}
 
 export const foldNodeRows = (rows: EsqlRow[]): EntityFoldResult => {
   const groups = new Map<string, NodeGroup>();
-  let droppedIncompleteRowsCount = 0;
+  const droppedRows = createDroppedRows();
+  let unknownClusterRows = 0;
 
   for (const row of rows) {
-    const cluster = row['orchestrator.cluster.name'];
     const name = row['kubernetes.node.name'];
-    if (typeof cluster !== 'string' || typeof name !== 'string') {
-      droppedIncompleteRowsCount += 1;
+    if (typeof name !== 'string') {
+      droppedRows.nullNodeName += 1;
       continue;
     }
 
+    const clusterValue = row['orchestrator.cluster.name'];
+    const hasKnownCluster = typeof clusterValue === 'string';
+    const cluster = hasKnownCluster ? clusterValue : UNKNOWN_CLUSTER;
+    if (!hasKnownCluster) {
+      unknownClusterRows += 1;
+    }
     const id = buildKubernetesEntityId({ kind: 'node', name });
     let group = groups.get(id);
     if (!group) {
@@ -301,7 +334,12 @@ export const foldNodeRows = (rows: EsqlRow[]): EntityFoldResult => {
     };
   });
 
-  return { features, droppedIncompleteRowsCount };
+  return {
+    features,
+    droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
+    droppedRows,
+    unknownClusterRows,
+  };
 };
 
 export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [

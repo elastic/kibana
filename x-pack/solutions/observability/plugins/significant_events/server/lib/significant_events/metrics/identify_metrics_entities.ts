@@ -15,6 +15,7 @@ import { getMetricsCatalogue } from './catalogue';
 import {
   ENTITY_KEY_TABLE,
   getDataStreamFamily,
+  type DroppedMetricsEntityRows,
   type EsqlCell,
   type EsqlRow,
 } from './entity_key_table';
@@ -42,6 +43,8 @@ export interface IdentifyMetricsEntitiesResult {
   metricsEntityRowsCount: number;
   droppedIncompleteRowsCount: number;
   droppedOverflowRowsCount: number;
+  droppedRows: DroppedMetricsEntityRows;
+  unknownClusterRows: number;
   timings: {
     catalogueMs: number;
     inventoryMs: number;
@@ -51,6 +54,12 @@ export interface IdentifyMetricsEntitiesResult {
 }
 
 const errorMessage = (error: Error): string => error.message;
+
+const createDroppedRows = (): DroppedMetricsEntityRows => ({
+  ownerless: 0,
+  nullNamespace: 0,
+  nullNodeName: 0,
+});
 
 const toCell = (value: ESQLSearchResponse['values'][number][number]): EsqlCell => {
   if (
@@ -108,6 +117,8 @@ export const identifyMetricsEntities = async ({
       metricsEntityRowsCount: 0,
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
+      droppedRows: createDroppedRows(),
+      unknownClusterRows: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: catalogueMs },
       errors: [{ stage: 'catalogue', message }],
     };
@@ -130,6 +141,8 @@ export const identifyMetricsEntities = async ({
       metricsEntityRowsCount: 0,
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
+      droppedRows: createDroppedRows(),
+      unknownClusterRows: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: Date.now() - startedAt },
       errors: [],
     };
@@ -161,6 +174,8 @@ export const identifyMetricsEntities = async ({
       metricsEntityRowsCount: 0,
       droppedIncompleteRowsCount: 0,
       droppedOverflowRowsCount: 0,
+      droppedRows: createDroppedRows(),
+      unknownClusterRows: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: Date.now() - startedAt },
       errors: [],
     };
@@ -177,6 +192,8 @@ export const identifyMetricsEntities = async ({
   const features: FeatureUpsert[] = [];
   let metricsEntityRowsCount = 0;
   let droppedIncompleteRowsCount = 0;
+  const droppedRows = createDroppedRows();
+  let unknownClusterRows = 0;
 
   for (const keyRow of matchedKeyRows) {
     const response = (await esClient.esql.query(
@@ -188,6 +205,10 @@ export const identifyMetricsEntities = async ({
     const folded = keyRow.foldRows(rows);
     features.push(...folded.features);
     droppedIncompleteRowsCount += folded.droppedIncompleteRowsCount;
+    droppedRows.ownerless += folded.droppedRows.ownerless;
+    droppedRows.nullNamespace += folded.droppedRows.nullNamespace;
+    droppedRows.nullNodeName += folded.droppedRows.nullNodeName;
+    unknownClusterRows += folded.unknownClusterRows;
   }
 
   const selectedFeatures = [...features].sort(
@@ -221,6 +242,8 @@ export const identifyMetricsEntities = async ({
     metricsEntityRowsCount,
     droppedIncompleteRowsCount,
     droppedOverflowRowsCount,
+    droppedRows,
+    unknownClusterRows,
     timings: { catalogueMs, inventoryMs, totalMs: Date.now() - startedAt },
     errors: [],
   };

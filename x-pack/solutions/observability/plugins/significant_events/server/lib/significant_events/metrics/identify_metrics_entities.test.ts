@@ -259,6 +259,8 @@ describe('identifyMetricsEntities', () => {
         ['cluster-a', 'payments', 'deployment', 'checkout', 3, '2026-11-10T12:00:00.000Z'],
         ['cluster-b', 'payments', 'deployment', 'checkout', 2, '2026-11-10T12:05:00.000Z'],
         ['cluster-a', 'payments', 'daemonset', 'checkout', 4, '2026-11-10T12:03:00.000Z'],
+        [null, 'payments', 'deployment', 'unknown-cluster', 1, '2026-11-10T12:04:00.000Z'],
+        ['cluster-a', 'payments', null, null, 0, '2026-11-10T12:02:00.000Z'],
         ['cluster-a', null, 'deployment', 'missing-namespace', 1, '2026-11-10T12:00:00.000Z'],
       ],
     };
@@ -267,6 +269,7 @@ describe('identifyMetricsEntities', () => {
       values: [
         ['cluster-a', 'node-a', 1, '2026-11-10T12:00:00.000Z'],
         ['cluster-b', 'node-a', 1, '2026-11-10T12:06:00.000Z'],
+        ['cluster-a', null, 1, '2026-11-10T12:01:00.000Z'],
       ],
     };
     const harness = createHarness([firstCataloguePage, secondCataloguePage, workloads, nodes]);
@@ -281,26 +284,29 @@ describe('identifyMetricsEntities', () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        metricsEntitiesCount: 3,
+        metricsEntitiesCount: 4,
         metricsCatalogueRowsCount: 116,
         matchedEntityKeyRowsCount: 2,
         uncoveredDataStreamsCount: 0,
-        metricsEntityRowsCount: 6,
-        droppedIncompleteRowsCount: 1,
+        metricsEntityRowsCount: 9,
+        droppedIncompleteRowsCount: 3,
         droppedOverflowRowsCount: 0,
+        droppedRows: { ownerless: 1, nullNamespace: 1, nullNodeName: 1 },
+        unknownClusterRows: 1,
         handled: true,
         errors: [],
       })
     );
     expect(harness.bulk).toHaveBeenCalledTimes(1);
     const operations = harness.bulk.mock.calls[0][1];
-    expect(operations).toHaveLength(3);
+    expect(operations).toHaveLength(4);
     expect(
       operations.map(({ index }: { index: { feature: { id: string } } }) => index.feature.id)
     ).toEqual([
       'k8s.deployment:payments/checkout',
       'k8s.daemonset:payments/checkout',
       'k8s.node:node-a',
+      'k8s.deployment:payments/unknown-cluster',
     ]);
     expect(operations[0].index.feature).toEqual({
       type: 'entity',
@@ -332,6 +338,14 @@ describe('identifyMetricsEntities', () => {
       },
       confidence: 100,
       expires_at: '2026-12-10T12:00:00.000Z',
+    });
+    expect(
+      operations.find(
+        ({ index }: { index: { feature: { id: string } } }) =>
+          index.feature.id === 'k8s.deployment:payments/unknown-cluster'
+      )?.index.feature.properties.clusters
+    ).toEqual({
+      _unknown_cluster: { replicas: 1, last_seen: '2026-11-10T12:04:00.000Z' },
     });
     expect(
       operations.some(({ index }: { index: { feature: { id: string } } }) =>
