@@ -22,6 +22,7 @@ import type { UnsupportedNode } from '../../materialize/nodes';
 import { MaterializerRegistry } from '../../materialize/registry';
 import type { MaterializeScope, Materializer } from '../../materialize/types';
 import { createNodeValidator } from '../../materialize/validate_node';
+import { createMarkdownMaterializer } from '../markdown';
 import { createDashboardMaterializer } from './dashboard_materializer';
 import { logsDashboardRead, logsDroppedAppPanels } from './fixtures/logs_dashboard';
 
@@ -133,6 +134,7 @@ const setup = ({ dashboardData = logsDashboardRead.data as DashboardData } = {})
   const lens = createLensStub();
   const registry = new MaterializerRegistry();
   registry.register('lens', lens.materializer);
+  registry.register('markdown', createMarkdownMaterializer());
   registry.register(
     'dashboard',
     createDashboardMaterializer({
@@ -256,13 +258,12 @@ describe('the dashboard materializer', () => {
     expect((panelById(grid, '14').node as UnsupportedNode).reason).toBe(
       'Kibana cannot materialize saved objects of type "visualization".'
     );
+    // The legacy Markdown visualization stored inside the dashboard materializes as Markdown.
     const markdown = panelById(grid, '343f0bef-0b19-452e-b1c8-59beb18b6f0c');
     expect(markdown).not.toHaveProperty('title');
     expect(markdown.node).toEqual({
-      type: 'unsupported',
-      title: '[Logs] Markdown Instructions',
-      reason: 'Kibana cannot materialize "legacy_vis" panels stored inside a dashboard.',
-      link: LOGS_LINK,
+      type: 'markdown',
+      text: '## Sample Logs Data\nThis dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html).',
     });
   });
 
@@ -324,7 +325,12 @@ describe('the dashboard materializer', () => {
             grid: { y: 5 },
             panels: [
               { id: 'inner', type: 'vis', grid: { x: 0, y: 0, w: 24, h: 5 }, config: {} },
-              { id: 'note', type: 'markdown', grid: { x: 24, y: 0, w: 24, h: 5 }, config: {} },
+              {
+                id: 'swimlane',
+                type: 'ml_anomaly_swimlane',
+                grid: { x: 24, y: 0, w: 24, h: 5 },
+                config: {},
+              },
             ],
           },
         ],
@@ -341,11 +347,11 @@ describe('the dashboard materializer', () => {
         panels: [
           expect.objectContaining({ id: 'inner', x: 0, y: 0, w: 24, h: 5 }),
           expect.objectContaining({
-            id: 'note',
+            id: 'swimlane',
             node: {
               type: 'unsupported',
               title: 'Content not available',
-              reason: 'Kibana cannot materialize saved objects of type "markdown".',
+              reason: 'Kibana cannot materialize saved objects of type "ml_anomaly_swimlane".',
             },
           }),
         ],

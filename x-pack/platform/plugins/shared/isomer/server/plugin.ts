@@ -33,6 +33,9 @@ import {
   DASHBOARD_SAVED_OBJECT_TYPE,
   createDashboardMaterializer,
 } from './materializers/dashboard';
+import { IMAGE_PANEL_TYPE, createImageMaterializer } from './materializers/image';
+import { LINKS_SAVED_OBJECT_TYPE, createLinksMaterializer } from './materializers/links';
+import { MARKDOWN_SAVED_OBJECT_TYPE, createMarkdownMaterializer } from './materializers/markdown';
 import { registerFiltersForSelectionRoute } from './routes/filters_for_selection_route';
 import { registerMaterializeRoute } from './routes/materialize_route';
 
@@ -111,6 +114,11 @@ export class IsomerPlugin
       createClient: this.createClient,
       validateNode: this.validateNode,
     });
+    const getKibanaUrl = (request: KibanaRequest) => {
+      const { basePath } = core.http;
+      const origin = basePath.publicBaseUrl ? new URL(basePath.publicBaseUrl).origin : '';
+      return `${origin}${basePath.get(request)}`;
+    };
     this.registry.register(
       LENS_TYPE,
       createLensMaterializer({
@@ -140,13 +148,12 @@ export class IsomerPlugin
         },
         getUiSettings: ({ savedObjectsClient }) =>
           this.startServices().uiSettings.asScopedToClient(savedObjectsClient),
-        getKibanaUrl: (request) => {
-          const { basePath } = core.http;
-          const origin = basePath.publicBaseUrl ? new URL(basePath.publicBaseUrl).origin : '';
-          return `${origin}${basePath.get(request)}`;
-        },
+        getKibanaUrl,
       })
     );
+    this.registry.register(MARKDOWN_SAVED_OBJECT_TYPE, createMarkdownMaterializer());
+    this.registry.register(IMAGE_PANEL_TYPE, createImageMaterializer());
+    this.registry.register(LINKS_SAVED_OBJECT_TYPE, createLinksMaterializer({ getKibanaUrl }));
     return {
       registerMaterializer: (type, materializer) => this.registry.register(type, materializer),
     };

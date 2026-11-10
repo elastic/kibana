@@ -53,6 +53,16 @@ The `dashboard` materializer turns a dashboard, by ID or as a `DashboardState`, 
 3. **Fan-out.** One `materialize` request per panel, run in parallel, through the panel's saved object type (`vis` panels as `lens`, `discover_session` as `search`, `legacy_vis` as `visualization`, others as their panel type): by reference when the panel has a `ref_id`, by value otherwise.
 4. **Grid.** Each panel keeps its 48-column position, and sections keep their panels. Panel titles and descriptions sit on the grid panel, not the node, and are left out where the panel or dashboard hides titles. Chart nodes drop their own title, and their `source.meta` gains the panel's ID (`panelId`). Panels that fail or have no materializer, and control panels in the grid, are `unsupported` placeholders named for the panel, linking to the dashboard ("Open in Kibana") when it was loaded by ID. If the whole grid is over Isomer's input budget, its largest panels become placeholders until it fits.
 
+Legacy Markdown visualizations stored inside a dashboard, which the Dashboard API drops, are recovered with their content and materialize as Markdown panels.
+
+### Markdown, Image and Links panels
+
+Panels whose config is their content map onto the components pack, with no data requests:
+
+- **`markdown`**: a Markdown panel by value, or a Markdown library item by ID, becomes `markdown` with its content.
+- **`image`**: an image at an absolute http(s) URL becomes a `markdown` image with its alt text. Its fit and background color have no equivalent. An image uploaded to Kibana is a file only an authenticated Kibana request can read, so it's `unsupported` until the components pack has an `image` that takes a file ID.
+- **`links`**: a Links panel by value. One link becomes `link`: a dashboard link by app route (`dashboards`, `#/view/{id}`), which the host resolves in its space, and an external link by URL. Several links become `markdown`, a list or, for a horizontal layout, one line, with dashboard links as URLs in the request's space. Unlabeled dashboard links show the dashboard's title, and an unreadable dashboard shows "Error fetching dashboard", as the links panel does. Links don't carry the dashboard's filters or time range, which Kibana's dashboard links can.
+
 The route marks a composition whose grid holds placeholders as degraded (`meta.partialFailure`), saying how many panels couldn't be shown.
 
 ### Lens
