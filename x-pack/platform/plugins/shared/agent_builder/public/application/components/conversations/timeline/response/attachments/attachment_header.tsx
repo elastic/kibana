@@ -190,24 +190,11 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
                       {badges && badges.length > 0 && (
                         <EuiFlexItem grow={false}>
                           <EuiBadgeGroup gutterSize="xs">
-                            {badges.map((badge, index) =>
-                              !isCanvas && badge.iconType ? (
-                                // Inline cards are tight on space: show the icon only, label on hover.
-                                <EuiToolTip key={index} content={badge.label}>
-                                  <EuiBadge
-                                    color={badge.color}
-                                    iconType={badge.iconType}
-                                    tabIndex={0}
-                                    aria-label={badge.label}
-                                    data-test-subj="attachmentHeaderIconBadge"
-                                  />
-                                </EuiToolTip>
-                              ) : (
-                                <EuiBadge key={index} color={badge.color} iconType={badge.iconType}>
-                                  {badge.label}
-                                </EuiBadge>
-                              )
-                            )}
+                            {badges.map((badge, index) => (
+                              <EuiBadge key={index} color={badge.color} iconType={badge.iconType}>
+                                {badge.label}
+                              </EuiBadge>
+                            ))}
                           </EuiBadgeGroup>
                         </EuiFlexItem>
                       )}
