@@ -82,7 +82,23 @@ describe('SelectedPanelsToolbar', () => {
     );
   });
 
-  describe('Remove', () => {
+  it('clears the selection', async () => {
+    renderToolbar();
+
+    await userEvent.click(screen.getByTestId('dashboardSelectedPanelsClear'));
+
+    expect(mockDashboardApi.clearSelectedPanels).toHaveBeenCalled();
+    expect(mockDashboardApi.removePanels).not.toHaveBeenCalled();
+  });
+
+  describe('Delete panels', () => {
+    it('is an icon button labelled "Delete panels"', () => {
+      renderToolbar();
+      expect(screen.getByTestId('dashboardSelectedPanelsRemove')).toHaveAccessibleName(
+        'Delete panels'
+      );
+    });
+
     it('removes exactly the selected panels and clears the selection', async () => {
       renderToolbar();
 
@@ -99,6 +115,32 @@ describe('SelectedPanelsToolbar', () => {
       await userEvent.click(screen.getByTestId('dashboardSelectedPanelsRemove'));
 
       expect(mockDashboardApi.removePanels).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('entrance', () => {
+    it('plays when the toolbar first appears', () => {
+      renderToolbar();
+      expect(screen.getByTestId('dashboardSelectedPanelsToolbar')).toHaveAttribute(
+        'data-skip-entrance',
+        'false'
+      );
+    });
+
+    it('is skipped when panels are selected again right after the toolbar left', async () => {
+      renderToolbar();
+      act(() => mockDashboardApi.selectedPanelIds$.next([]));
+      await waitFor(() =>
+        expect(screen.queryByTestId('dashboardSelectedPanelsToolbar')).not.toBeInTheDocument()
+      );
+      act(() => mockDashboardApi.selectedPanelIds$.next(['panel1']));
+
+      await waitFor(() =>
+        expect(screen.getByTestId('dashboardSelectedPanelsToolbar')).toHaveAttribute(
+          'data-skip-entrance',
+          'true'
+        )
+      );
     });
   });
 
