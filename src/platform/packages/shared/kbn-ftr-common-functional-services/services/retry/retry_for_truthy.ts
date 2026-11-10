@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Lifecycle } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { retryForSuccess } from './retry_for_success';
 
 interface Options {
+  lifecycle?: Lifecycle;
   timeout: number;
   methodName: string;
   description: string;
@@ -21,11 +23,12 @@ interface Options {
 
 export async function retryForTruthy(
   log: ToolingLog,
-  { timeout, methodName, description, block, onFailureBlock }: Options
+  { lifecycle, timeout, methodName, description, block, onFailureBlock }: Options
 ) {
   log.debug(`Waiting up to ${timeout}ms for ${description}...`);
 
   await retryForSuccess(log, {
+    lifecycle,
     timeout,
     methodName,
     block,

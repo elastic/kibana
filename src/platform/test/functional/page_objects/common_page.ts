@@ -277,7 +277,11 @@ export class CommonPageObject extends FtrService {
 
   async sleep(sleepMilliseconds: number) {
     this.log.debug(`... sleep(${sleepMilliseconds}) start`);
-    await setTimeoutAsync(sleepMilliseconds);
+    await this.ctx
+      .getService('lifecycle')
+      .recordWait('sleep', `common.sleep(${sleepMilliseconds})`, () =>
+        setTimeoutAsync(sleepMilliseconds)
+      );
     this.log.debug(`... sleep(${sleepMilliseconds}) end`);
   }
 
