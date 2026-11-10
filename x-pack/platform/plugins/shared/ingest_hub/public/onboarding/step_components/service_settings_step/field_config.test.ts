@@ -14,6 +14,7 @@ import {
   resolveVarGroupSelections,
   shouldDefaultCollectS3Logs,
   getRegionFieldName,
+  isCustomDataset,
   getRequiredTextFields,
   getFlyoutFields,
   resolveFieldMeta,
@@ -517,5 +518,31 @@ describe('S3 collection mode (collect_s3_logs)', () => {
         'queue_url',
       ]);
     });
+  });
+});
+
+describe('isCustomDataset', () => {
+  const service = {
+    varDefsByInput: {
+      otelcol: {
+        'data_stream.dataset': makeVarDef('data_stream.dataset', 'text', { default: 'aws.ec2' }),
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+
+  it('is false for the manifest default, an empty value and no vars', () => {
+    expect(isCustomDataset(service, 'otelcol', { 'data_stream.dataset': 'aws.ec2' })).toBe(false);
+    expect(isCustomDataset(service, 'otelcol', { 'data_stream.dataset': '  ' })).toBe(false);
+    expect(isCustomDataset(service, 'otelcol', undefined)).toBe(false);
+  });
+
+  it('is true when the dataset differs from the default', () => {
+    expect(isCustomDataset(service, 'otelcol', { 'data_stream.dataset': 'aws.prod' })).toBe(true);
+  });
+
+  it('is false for a service without a dataset var', () => {
+    expect(
+      isCustomDataset({} as AwsServiceMatrixEntry, 'otelcol', { 'data_stream.dataset': 'x' })
+    ).toBe(false);
   });
 });

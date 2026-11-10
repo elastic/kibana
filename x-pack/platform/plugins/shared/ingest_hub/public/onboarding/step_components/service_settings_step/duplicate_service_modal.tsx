@@ -272,6 +272,16 @@ export function DuplicateServiceModal({
               };
             })
           }
+          onCreateDatasetTemplatesChange={(dsId, enabled) =>
+            setDraftByDs((prev) => {
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const defaultInputs = singleDs
+                ? dsInfo?.inputs ?? []
+                : dsInfo?.defaultEnabledInputs ?? [];
+              const existing = prev[dsId] ?? { enabledInputs: defaultInputs, varsByInput: {} };
+              return { ...prev, [dsId]: { ...existing, createDatasetTemplates: enabled } };
+            })
+          }
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];

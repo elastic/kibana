@@ -60,6 +60,12 @@ export interface ServiceDataStreamVars {
    * (the group's first option), resolved by `resolveVarGroupSelections`.
    */
   varGroupSelectionsByInput?: Record<string, Record<string, string>>;
+  /**
+   * Whether Fleet creates a dedicated index template for a customised dataset of this data stream.
+   * Absent means on, as in Fleet. Stored beside the vars rather than in them, so it is never sent
+   * as a package var.
+   */
+  createDatasetTemplates?: boolean;
 }
 
 export interface ServiceVars {
@@ -162,6 +168,11 @@ function mergeVarsByDataStream(
       ...(Object.keys(mergedSelections).length > 0 && {
         varGroupSelectionsByInput: mergedSelections,
       }),
+      ...(dsVars.createDatasetTemplates !== undefined
+        ? { createDatasetTemplates: dsVars.createDatasetTemplates }
+        : existing.createDatasetTemplates !== undefined && {
+            createDatasetTemplates: existing.createDatasetTemplates,
+          }),
     };
   }
   return result;

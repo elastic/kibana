@@ -221,6 +221,17 @@ export function ServiceSettingsFlyout({
               };
             })
           }
+          isDeployed={isDeployed}
+          onCreateDatasetTemplatesChange={(dsId, enabled) =>
+            setDraftByDs((prev) => {
+              const dsInfo = service.varDefsByDataStream?.[dsId];
+              const existing = prev[dsId] ?? {
+                enabledInputs: getDefaultDsInputs(dsInfo, isSingleDs, service.defaultEnabledInputs),
+                varsByInput: {},
+              };
+              return { ...prev, [dsId]: { ...existing, createDatasetTemplates: enabled } };
+            })
+          }
           onInputToggle={(dsId, input, enabled) =>
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];

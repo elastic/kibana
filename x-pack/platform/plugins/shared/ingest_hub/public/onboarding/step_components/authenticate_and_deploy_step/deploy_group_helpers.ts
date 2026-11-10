@@ -6,7 +6,9 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import { makeDsView } from '../../aws_service_matrix';
 import { getEffectiveNamespace } from '../../common/effective_namespace';
+import { isCustomDataset } from '../service_settings_step/field_config';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
 import type { DeployGroup } from './deploy_groups';
 import { extractErrorMessage } from './deploy_errors';
@@ -255,4 +257,28 @@ export function collectDeployResults<G extends { instanceIds: string[] }>(
   }
 
   return { policyIdsByInstance, failedInstances, errorsByInstance };
+}
+
+/**
+ * The `create_dataset_templates` flag for a group's policy: `false` when every customised dataset
+ * of its members opted out, otherwise unset so Fleet keeps its default (on). One policy takes one
+ * flag, so a single member that still wants its template keeps it for the group.
+ */
+export function getCreateDatasetTemplates(
+  group: DeployGroup,
+  storedServiceVars: Record<string, ServiceVars>
+): false | undefined {
+  const customised: boolean[] = [];
+  for (const { instance, service } of group.members) {
+    const vars = storedServiceVars[instance.instanceId] ?? storedServiceVars[instance.serviceId];
+    for (const [dsId, dsVars] of Object.entries(vars?.varsByDataStream ?? {})) {
+      const dsView = makeDsView(service, dsId);
+      for (const input of dsVars.enabledInputs) {
+        if (isCustomDataset(dsView, input, dsVars.varsByInput[input])) {
+          customised.push(dsVars.createDatasetTemplates !== false);
+        }
+      }
+    }
+  }
+  return customised.length > 0 && customised.every((enabled) => !enabled) ? false : undefined;
 }

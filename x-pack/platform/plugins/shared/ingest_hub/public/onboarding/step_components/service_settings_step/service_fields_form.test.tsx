@@ -589,3 +589,80 @@ describe('ServiceFieldsForm — VarField onChange suppression', () => {
     expect(onFieldChange).not.toHaveBeenCalled();
   });
 });
+
+describe('ServiceFieldsForm — dedicated index template switch for a custom dataset', () => {
+  const SWITCH = 'serviceSettingsFlyout-createDatasetTemplatesSwitch';
+  const DATASET_SERVICE = {
+    id: 'test_otel',
+    name: 'Test OTel',
+    packageName: 'aws',
+    dataStreams: ['otel_logs'],
+    inputs: ['aws-s3'],
+    showInUI: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    varDefsByDataStream: {
+      otel_logs: {
+        title: 'OTel Logs',
+        type: 'logs',
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        requiredConfig: ['data_stream.dataset'],
+        varDefsByInput: {
+          'aws-s3': {
+            'data_stream.dataset': {
+              name: 'data_stream.dataset',
+              type: 'text',
+              title: 'Dataset',
+              show_user: true,
+              default: 'aws.test',
+            },
+          },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+
+  const varsWithDataset = (dataset: string, createDatasetTemplates?: boolean) => ({
+    otel_logs: {
+      enabledInputs: ['aws-s3'],
+      varsByInput: { 'aws-s3': { 'data_stream.dataset': dataset } },
+      ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
+    },
+  });
+
+  it('is hidden while the dataset is the manifest default', () => {
+    const { queryByTestId } = renderForm(DATASET_SERVICE, {
+      varsByDataStream: varsWithDataset('aws.test'),
+      onCreateDatasetTemplatesChange: jest.fn(),
+    });
+    expect(queryByTestId(SWITCH)).toBeNull();
+  });
+
+  it('shows on once the dataset is customised', () => {
+    const { getByTestId } = renderForm(DATASET_SERVICE, {
+      varsByDataStream: varsWithDataset('aws.prod'),
+      onCreateDatasetTemplatesChange: jest.fn(),
+    });
+    expect(getByTestId(SWITCH)).toBeChecked();
+  });
+
+  it('reflects a stored opt-out and reports a change with the data stream', () => {
+    const onCreateDatasetTemplatesChange = jest.fn();
+    const { getByTestId } = renderForm(DATASET_SERVICE, {
+      varsByDataStream: varsWithDataset('aws.prod', false),
+      onCreateDatasetTemplatesChange,
+    });
+    expect(getByTestId(SWITCH)).not.toBeChecked();
+    fireEvent.click(getByTestId(SWITCH));
+    expect(onCreateDatasetTemplatesChange).toHaveBeenCalledWith('otel_logs', true);
+  });
+
+  it('is hidden for a deployed service, where Fleet ignores the flag on update', () => {
+    const { queryByTestId } = renderForm(DATASET_SERVICE, {
+      varsByDataStream: varsWithDataset('aws.prod'),
+      onCreateDatasetTemplatesChange: jest.fn(),
+      isDeployed: true,
+    });
+    expect(queryByTestId(SWITCH)).toBeNull();
+  });
+});

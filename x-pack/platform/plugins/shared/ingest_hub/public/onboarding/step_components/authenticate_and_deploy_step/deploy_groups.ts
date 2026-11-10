@@ -16,6 +16,7 @@ import type {
 import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 import {
+  getCreateDatasetTemplates,
   reconcileInstances,
   groupByPackage,
   buildGroupPolicyNameStem,
@@ -225,6 +226,8 @@ export async function deployGroup(
     getPolicyVarSettings(policySettings, 'managed_integration', pkgVarNames)
   );
 
+  const createDatasetTemplates = getCreateDatasetTemplates(group, storedServiceVars);
+
   const response = await sendCreateAgentlessPolicy({
     name: buildAgentlessPolicyName(group, integrationName),
     ...(description?.trim() ? { description: description.trim() } : {}),
@@ -232,6 +235,7 @@ export async function deployGroup(
     package: { name: firstService.packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
+    ...(createDatasetTemplates === false ? { create_dataset_templates: false } : {}),
     ...getPolicySettings(policySettings, 'managed_integration'),
     ...(connectorId
       ? {

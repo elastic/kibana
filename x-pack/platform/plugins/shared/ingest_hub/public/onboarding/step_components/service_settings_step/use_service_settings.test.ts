@@ -132,6 +132,40 @@ describe('useServiceSettings — incompleteInstances', () => {
     expect(result.current.isReady).toBe(true);
   });
 
+  it('keeps the dedicated index template choice of a data stream when the fields are saved', () => {
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    const save = (createDatasetTemplates?: boolean) =>
+      act(() =>
+        result.current.setServiceFieldsAndInputs(
+          'svc_a',
+          {
+            svc_a: {
+              enabledInputs: ['aws-s3'],
+              varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::my-bucket' } },
+              ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
+            },
+          },
+          ['svc_a']
+        )
+      );
+
+    save(false);
+    expect(
+      result.current.getServiceVars('svc_a').varsByDataStream.svc_a.createDatasetTemplates
+    ).toBe(false);
+
+    // A later save that does not touch the choice keeps it.
+    save();
+    expect(
+      result.current.getServiceVars('svc_a').varsByDataStream.svc_a.createDatasetTemplates
+    ).toBe(false);
+
+    save(true);
+    expect(
+      result.current.getServiceVars('svc_a').varsByDataStream.svc_a.createDatasetTemplates
+    ).toBe(true);
+  });
+
   it('keeps the stream-level var_group option chosen in the flyout when the fields are saved', () => {
     const varDefsByInput = {
       'aws-cloudwatch': {

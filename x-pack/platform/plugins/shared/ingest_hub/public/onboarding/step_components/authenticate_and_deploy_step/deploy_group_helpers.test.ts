@@ -11,6 +11,7 @@ import {
   DEFAULT_NAMESPACE,
   deriveGroupPolicyName,
   getBareNamePackage,
+  getCreateDatasetTemplates,
   getSourcePolicyName,
   groupByPackage,
 } from './deploy_group_helpers';
@@ -342,5 +343,62 @@ describe('getSourcePolicyName', () => {
     expect(deriveGroupPolicyName(prodGroup, 'my-aws')).toBe(
       getSourcePolicyName('my-aws', 'aws', 'prod')
     );
+  });
+});
+
+describe('getCreateDatasetTemplates', () => {
+  const otelService = {
+    id: 'ec2',
+    packageName: 'aws_cloudwatch_input_otel',
+    dataStreams: ['ec2'],
+    varDefsByDataStream: {
+      ec2: {
+        inputs: ['otelcol'],
+        varDefsByInput: {
+          otelcol: { 'data_stream.dataset': { name: 'data_stream.dataset', default: 'aws.ec2' } },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+
+  const member = (id: string) => ({
+    instance: { instanceId: id, serviceId: 'ec2', name: id, isDuplicate: false } as ServiceInstance,
+    service: otelService,
+  });
+  const group = (ids: string[]) =>
+    ({ members: ids.map(member), instanceIds: ids } as unknown as Parameters<
+      typeof getCreateDatasetTemplates
+    >[0]);
+  const vars = (dataset: string, createDatasetTemplates?: boolean): ServiceVars => ({
+    enabledDataStreams: ['ec2'],
+    varsByDataStream: {
+      ec2: {
+        enabledInputs: ['otelcol'],
+        varsByInput: { otelcol: { 'data_stream.dataset': dataset } },
+        ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
+      },
+    },
+  });
+
+  it('leaves the flag unset by default so Fleet keeps its own', () => {
+    expect(getCreateDatasetTemplates(group(['a']), { a: vars('aws.prod') })).toBeUndefined();
+  });
+
+  it('returns false when the only customised dataset opted out', () => {
+    expect(getCreateDatasetTemplates(group(['a']), { a: vars('aws.prod', false) })).toBe(false);
+  });
+
+  it('ignores an opt-out left over after the dataset went back to the default', () => {
+    expect(getCreateDatasetTemplates(group(['a']), { a: vars('aws.ec2', false) })).toBeUndefined();
+  });
+
+  it('keeps the template for a bundled group while any customised dataset still wants it', () => {
+    const stored = { a: vars('aws.prod', false), b: vars('aws.dev') };
+    expect(getCreateDatasetTemplates(group(['a', 'b']), stored)).toBeUndefined();
+  });
+
+  it('returns false for a bundled group only when every customised dataset opted out', () => {
+    const stored = { a: vars('aws.prod', false), b: vars('aws.dev', false), c: vars('aws.ec2') };
+    expect(getCreateDatasetTemplates(group(['a', 'b', 'c']), stored)).toBe(false);
   });
 });
