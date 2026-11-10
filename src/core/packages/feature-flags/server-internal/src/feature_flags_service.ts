@@ -216,8 +216,8 @@ export class FeatureFlagsService {
       ).pipe(
         filter((flagNames) => flagNames.includes(flagName)),
         startWith([flagName]), // only to emit on the first call
-        takeUntil(this.stop$), // stop the observable when the service stops
-        debounceTime(10) // debounce the emissions to avoid too many reevaluations caused by rapid fired feature flag changes + context changes + provider ready changes
+        debounceTime(10), // debounce the emissions to avoid too many reevaluations caused by rapid fired feature flag changes + context changes + provider ready changes
+        takeUntil(this.stop$) // stop the observable when the service stops
       );
 
     return {
