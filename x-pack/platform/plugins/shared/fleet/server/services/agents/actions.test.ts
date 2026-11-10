@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { merge } from 'lodash';
 
@@ -304,7 +305,7 @@ describe('Agent actions', () => {
     });
   });
 
-  describe('bulkCreateAgentActionResults refused items', () => {
+  describe('bulkCreateAgentActionResults', () => {
     it('should call audit logger', async () => {
       const mockEsClient = elasticsearchServiceMock.createInternalClient();
 
@@ -922,7 +923,7 @@ describe('Agent actions', () => {
     });
   });
 
-  describe('bulkCreateAgentActionResults', () => {
+  describe('bulkCreateAgentActionResults refused items', () => {
     const okResponse = { errors: false, items: [] };
     const results = [
       { actionId: 'action1', agentId: 'agent1' },
@@ -944,7 +945,7 @@ describe('Agent actions', () => {
       esClientMock.bulk
         .mockResolvedValueOnce({
           errors: true,
-          items: [{ create: {} }, { create: { error: { reason: 'rejected' } } }],
+          items: [{ create: {} }, { create: { status: 429, error: { reason: 'rejected' } } }],
         } as any)
         .mockResolvedValueOnce(okResponse as any);
 
@@ -958,16 +959,58 @@ describe('Agent actions', () => {
       expect(mockContext.logger.error).not.toHaveBeenCalled();
     });
 
-    it('gives up after a bounded number of attempts and names the agents', async () => {
+    it('gives up after a bounded number of attempts, waiting in between', async () => {
+      jest.useFakeTimers();
+      try {
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk.mockResolvedValue({
+          errors: true,
+          items: [{ create: { status: 429, error: { reason: 'rejected' } } }, { create: {} }],
+        } as any);
+
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
+
+        // what gets an item refused rather than the whole request is a full write queue, which
+        // milliseconds will not have cleared
+        expect(esClientMock.bulk).toHaveBeenCalledTimes(3);
+        expect(mockContext.logger.error).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to write 1 of 2 agent action results, for agents agent1')
+        );
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('does not write the whole bulk again when it throws', async () => {
+      // every item carries a freshly generated id, so this write is not idempotent and the
+      // failures a transient retry covers are the ones that reach it with the bulk already
+      // indexed; replaying the batch under a new action id is what keeps results from colliding
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+      esClientMock.bulk.mockRejectedValue(new EsErrors.TimeoutError('Request timed out'));
+
+      await expect(bulkCreateAgentActionResults(esClientMock, results)).rejects.toThrow(
+        'Request timed out'
+      );
+      expect(esClientMock.bulk).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not write an item again that Elasticsearch will refuse again', async () => {
+      // a mapping failure cannot succeed on a second attempt, so another one is only load on a
+      // cluster that is already struggling
       const esClientMock = elasticsearchServiceMock.createInternalClient();
       esClientMock.bulk.mockResolvedValue({
         errors: true,
-        items: [{ create: { error: { reason: 'rejected' } } }, { create: {} }],
+        items: [
+          { create: { status: 400, error: { reason: 'mapper_parsing_exception' } } },
+          { create: {} },
+        ],
       } as any);
 
       await bulkCreateAgentActionResults(esClientMock, results);
 
-      expect(esClientMock.bulk).toHaveBeenCalledTimes(3);
+      expect(esClientMock.bulk).toHaveBeenCalledTimes(1);
       expect(mockContext.logger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to write 1 of 2 agent action results, for agents agent1')
       );
@@ -979,7 +1022,7 @@ describe('Agent actions', () => {
       const esClientMock = elasticsearchServiceMock.createInternalClient();
       esClientMock.bulk.mockResolvedValue({
         errors: true,
-        items: [{ create: { error: { reason: 'rejected' } } }, { create: {} }],
+        items: [{ create: { status: 400, error: { reason: 'rejected' } } }, { create: {} }],
       } as any);
 
       await expect(bulkCreateAgentActionResults(esClientMock, results)).resolves.toBeUndefined();
@@ -1023,58 +1066,9 @@ describe('Agent actions', () => {
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
           ignore_unavailable: true,
-          query: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [{ terms: { action_id: ['action1', 'child1'] } }],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-            },
-          },
+          query: { bool: { filter: [{ terms: { action_id: ['action1', 'child1'] } }] } },
         })
       );
-    });
-
-    it('also matches the documents written under ids derived from the action id', async () => {
-      // rollback writes one action per rollback version under an id of its own; deriving them from
-      // the action's id is what lets a later run find them with no state to rely on
-      const esClientMock = elasticsearchServiceMock.createInternalClient();
-      esClientMock.search.mockResolvedValue(mockHits([['agent1']]) as any);
-
-      await collect(esClientMock, ['action1'], { actionIdPrefix: 'action1-rollback-' });
-
-      expect(esClientMock.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: {
-            bool: {
-              filter: [
-                {
-                  bool: {
-                    should: [
-                      { terms: { action_id: ['action1'] } },
-                      { prefix: { action_id: 'action1-rollback-' } },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              ],
-            },
-          },
-        })
-      );
-    });
-
-    it('reads on a prefix alone, without an action id', async () => {
-      const esClientMock = elasticsearchServiceMock.createInternalClient();
-      esClientMock.search.mockResolvedValue(mockHits([['agent1']]) as any);
-
-      await expect(
-        collect(esClientMock, [], { actionIdPrefix: 'action1-rollback-' })
-      ).resolves.toEqual(new Set(['agent1']));
     });
 
     it('adds to the set it is given rather than replacing it', async () => {
@@ -1110,12 +1104,7 @@ describe('Agent actions', () => {
           query: {
             bool: {
               filter: [
-                {
-                  bool: {
-                    should: [{ terms: { action_id: ['action1'] } }],
-                    minimum_should_match: 1,
-                  },
-                },
+                { terms: { action_id: ['action1'] } },
                 { range: { '@timestamp': { gte: '2026-11-07T10:00:00.000Z' } } },
               ],
             },

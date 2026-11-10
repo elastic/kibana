@@ -125,20 +125,6 @@ export abstract class ActionRunner {
     this.nbAgentsProcessed = retryParams.nbAgentsProcessed ?? 0;
   }
 
-  /**
-   * Prefix shared by the action ids this action's documents are written under when they are not
-   * the action's own id, or undefined when every document carries the action's own id.
-   *
-   * Only rollback needs it: it writes one action per rollback version, each under an id of its
-   * own, so nothing links them to the action that created them. Deriving those ids from the
-   * action's own id makes the link part of the id itself, which means a resumed run finds them by
-   * reading `.fleet-actions` rather than by trusting that an earlier run managed to record them
-   * somewhere first.
-   */
-  protected getChildActionIdPrefix(): string | undefined {
-    return undefined;
-  }
-
   protected abstract getActionType(): string;
 
   protected abstract getTaskType(): string;
@@ -478,7 +464,6 @@ export abstract class ActionRunner {
         since: this.actionedAgentIdsReadAt,
         limit: MAX_ACTIONED_AGENT_IDS,
         agentsPerDocument: this.actionParams.batchSize ?? SO_SEARCH_LIMIT,
-        actionIdPrefix: this.getChildActionIdPrefix(),
       }
     );
     this.actionedAgentIdsReadAt = readStartedAt;
@@ -495,43 +480,11 @@ export abstract class ActionRunner {
   }
 
   /**
-   * Whether this action can finish with an agent that none of its action documents name.
-   *
-   * False for every action type but rollback, which rejects an agent — hosted, agentless, expired
-   * or without a rollback to make — by writing it an error result under a child action id while
-   * leaving it out of that action's `agents`. Reading the documents alone would therefore show
-   * such an agent as untouched, and a replay would reject it a second time, duplicating its error
-   * result and recreating the action that carries it.
-   */
-  protected hasAgentsHandledOutsideActionDocuments(): boolean {
-    return false;
-  }
-
-  /**
    * The agents of a batch that no earlier run of this action has already dealt with.
    */
   private async getUnhandledAgents(agents: Agent[]): Promise<Agent[]> {
     const actionedAgentIds = await this.getActionedAgentIds();
-    const remainingAgents = actionedAgentIds.size
-      ? agents.filter(({ id }) => !actionedAgentIds.has(id))
-      : agents;
-
-    if (!this.hasAgentsHandledOutsideActionDocuments() || remainingAgents.length === 0) {
-      return remainingAgents;
-    }
-
-    // Checked against this batch's own agents rather than read in full like the action documents
-    // are: there is one result per agent rather than one per batch, so a complete read would page
-    // through as many documents as the action has agents.
-    const unhandledAgentIds = new Set(
-      await getAgentsWithoutActionResults(
-        this.esClient,
-        [this.actionParams.actionId!],
-        remainingAgents.map(({ id }) => id),
-        { actionIdPrefix: this.getChildActionIdPrefix() }
-      )
-    );
-    return remainingAgents.filter(({ id }) => unhandledAgentIds.has(id));
+    return actionedAgentIds.size ? agents.filter(({ id }) => !actionedAgentIds.has(id)) : agents;
   }
 
   /**

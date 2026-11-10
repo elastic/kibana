@@ -87,10 +87,6 @@ class TestActionRunner extends ActionRunner {
   public batchWithoutActionableAgents = false;
   /** Overridden by the tests that exercise an action type with its own deduplication rules. */
   public taskType: string = TASK_TYPE;
-  /** Prefix of the ids a batch writes its documents under, as rollback's version groups do. */
-  public childActionIdPrefix?: string;
-  /** Makes the runner read error results too, as rollback's does. */
-  public agentsHandledOutsideActionDocuments = false;
 
   protected getActionType() {
     return 'test-action';
@@ -102,14 +98,6 @@ class TestActionRunner extends ActionRunner {
 
   protected isBatchWithoutActionableAgents(): boolean {
     return this.batchWithoutActionableAgents;
-  }
-
-  protected hasAgentsHandledOutsideActionDocuments(): boolean {
-    return this.agentsHandledOutsideActionDocuments;
-  }
-
-  protected getChildActionIdPrefix(): string | undefined {
-    return this.childActionIdPrefix;
   }
 
   protected async processAgents(agents: Agent[]): Promise<{ actionId: string }> {
@@ -822,54 +810,6 @@ describe('ActionRunner', () => {
         expect.anything(),
         TASK_TYPE,
         RETRY_TASK_ID
-      );
-    });
-
-    it('treats an agent with an error result as handled when the action type needs it', async () => {
-      mockAgentPages(1, 2);
-      // rollback rejects an agent by writing it an error result under a child action id while
-      // leaving it out of that action's `agents`, so the documents alone show it as untouched
-      mockActionedAgentIds([]);
-      mockedGetAgentsWithoutActionResults.mockResolvedValue(['agent-1']);
-
-      const runner = createRunner({ total: 2 });
-      runner.agentsHandledOutsideActionDocuments = true;
-      runner.childActionIdPrefix = `${ACTION_ID}-rollback-`;
-
-      await runner.runActionAsyncWithRetry();
-
-      expect(runner.processedBatches).toEqual([['agent-1']]);
-      expect(mockedGetAgentsWithoutActionResults).toHaveBeenCalledWith(
-        esClient,
-        [ACTION_ID],
-        ['agent-0', 'agent-1'],
-        { actionIdPrefix: `${ACTION_ID}-rollback-` }
-      );
-    });
-
-    it('does not read error results for an action type that names every agent it handles', async () => {
-      mockAgentPages(1, 2);
-      mockActionedAgentIds(['agent-0']);
-
-      await createRunner({ total: 2 }).runActionAsyncWithRetry();
-
-      expect(mockedGetAgentsWithoutActionResults).not.toHaveBeenCalled();
-    });
-
-    it('reads the documents written under child action ids by their prefix', async () => {
-      mockAgentPages(2, 2);
-      const runner = createRunner();
-      // rollback writes one action per rollback version under an id of its own, derived from this
-      // action's id so that nothing has to record it anywhere for a later run to find it
-      runner.childActionIdPrefix = `${ACTION_ID}-rollback-`;
-
-      await runner.runActionAsyncWithRetry();
-
-      expect(mockedCollectAgentIdsFromActions).toHaveBeenLastCalledWith(
-        esClient,
-        [ACTION_ID],
-        expect.any(Set),
-        expect.objectContaining({ actionIdPrefix: `${ACTION_ID}-rollback-` })
       );
     });
 

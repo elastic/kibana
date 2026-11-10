@@ -51,8 +51,6 @@ import {
   toCompiledSecretRef,
 } from '../secrets';
 
-import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
-
 import { bulkUpdateAgents } from './crud';
 
 const ONE_MONTH_IN_MS = 2592000000;
@@ -276,6 +274,17 @@ const MAX_LOGGED_RESULT_FAILURES = 10;
 /** How many times a result write is attempted before its refused items are only logged. */
 const MAX_RESULT_WRITE_ATTEMPTS = 3;
 
+/** Multiplied by the attempt number for the wait between those attempts. */
+const RESULT_WRITE_RETRY_DELAY_MS = 2_000;
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Per item statuses another attempt could get past. */
+const RETRYABLE_RESULT_STATUS_CODES = [
+  429, // the write queue is full
+  503, // unavailable
+];
+
 export async function bulkCreateAgentActionResults(
   esClient: ElasticsearchClient,
   results: Array<{
@@ -296,8 +305,21 @@ export async function bulkCreateAgentActionResults(
   }
 
   const logger = appContextService.getLogger();
+  /** Results Elasticsearch refused for a reason another attempt cannot get past. */
+  const permanentlyRefused: typeof results = [];
 
-  /** Writes the given results and hands back the ones Elasticsearch refused, in request order. */
+  /**
+   * Writes the given results and hands back the ones Elasticsearch refused and might yet accept,
+   * in request order.
+   *
+   * Deliberately not wrapped in `retryTransientEsErrors`: every item carries a freshly generated
+   * `_id`, so this write is not idempotent, and the failures that wrapper retries — a timeout, a
+   * dropped connection — are exactly the ones that reach it with the bulk already indexed. Retrying
+   * those would write a second result for every agent in the batch, and `action_status` counts
+   * result documents rather than agents, so that inflates failures, drives the acknowledged count
+   * negative and can complete an action early. Letting it throw replays the batch under a new
+   * action id instead, where its results cannot collide with these.
+   */
   const writeResults = async (toWrite: typeof results) => {
     const operations = toWrite.flatMap((result) => [
       { create: { _id: uuidv4() } },
@@ -310,44 +332,55 @@ export async function bulkCreateAgentActionResults(
       },
     ]);
 
-    const res = await retryTransientEsErrors(
-      () =>
-        esClient.bulk({
-          index: AGENT_ACTIONS_RESULTS_INDEX,
-          operations,
-          refresh: 'wait_for',
-        }),
-      { logger }
-    );
+    const res = await esClient.bulk({
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      operations,
+      refresh: 'wait_for',
+    });
     if (!res.errors) {
       return [];
     }
-    // Items come back in request order, so this is which of `toWrite` did not land. A refused item
-    // indexed nothing, so rewriting it cannot produce a second result for that agent.
-    return toWrite.filter((_, index) => {
+    // Items come back in request order, so this is which of `toWrite` did not land. Only the
+    // statuses that another attempt could get past are handed back for one: a refused item indexed
+    // nothing, so rewriting it cannot produce a second result for that agent, but rewriting one
+    // Elasticsearch will refuse again — a mapping failure, say — only adds load. The rest are set
+    // aside so that they are still reported.
+    const retryable: typeof results = [];
+    toWrite.forEach((result, index) => {
       const item = res.items[index]?.create ?? res.items[index]?.index;
-      return !!item?.error;
+      if (!item?.error) {
+        return;
+      }
+      if (RETRYABLE_RESULT_STATUS_CODES.includes(item.status)) {
+        retryable.push(result);
+      } else {
+        permanentlyRefused.push(result);
+      }
     });
+    return retryable;
   };
 
   // A bulk reports per item failures in its response rather than throwing, so a write that only
   // partly landed would otherwise read as complete, and an action counting an agent whose result
-  // never arrived waits for it forever. The refused items are therefore written again before this
-  // gives up on them.
+  // never arrived waits for it forever. The refused items are therefore written again, after a
+  // wait: what gets an item refused rather than the whole request is a full write queue, which
+  // milliseconds will not have cleared.
   let pending = await writeResults(results);
-  for (let attempt = 0; attempt < MAX_RESULT_WRITE_ATTEMPTS - 1 && pending.length > 0; attempt++) {
+  for (let attempt = 1; attempt < MAX_RESULT_WRITE_ATTEMPTS && pending.length > 0; attempt++) {
+    await delay(RESULT_WRITE_RETRY_DELAY_MS * attempt);
     pending = await writeResults(pending);
   }
 
-  if (pending.length > 0) {
+  const refused = [...permanentlyRefused, ...pending];
+  if (refused.length > 0) {
     // Not thrown: these results are written for a whole batch at once, and failing the batch would
     // have the retry rewrite the ones that did land under a new action id while the action they
     // belong to stayed short either way. Logging is what is left.
-    const failedAgentIds = pending.map(({ agentId }) => agentId);
+    const failedAgentIds = refused.map(({ agentId }) => agentId);
     // Naming one agent per line would be one line per agent, so only the first few are named: a
     // mapping problem or a full disk refuses every item of a batch that can hold ten thousand.
     logger.error(
-      `Failed to write ${pending.length} of ${
+      `Failed to write ${refused.length} of ${
         results.length
       } agent action results, for agents ${failedAgentIds
         .slice(0, MAX_LOGGED_RESULT_FAILURES)
@@ -415,26 +448,6 @@ const ACTION_DOCS_PAGE_SIZE = 1000;
  */
 const ACTION_DOCS_PIT_KEEP_ALIVE = '2m';
 
-/**
- * Matches an action's own documents and, when it writes some under generated ids of its own, those
- * too.
- *
- * Composite action ids and the prefix query that reads them back are established in
- * `.fleet-actions`, where scheduled unenroll already does both. `.fleet-actions-results` has no
- * such precedent, but the requirement is the same one its sibling `action_id` already meets there:
- * a keyword mapping, which `action_status.ts` depends on to aggregate the field.
- */
-const actionIdQuery = (actionIds: string[], actionIdPrefix?: string): QueryDslQueryContainer => {
-  const should: QueryDslQueryContainer[] = [];
-  if (actionIds.length > 0) {
-    should.push({ terms: { action_id: actionIds } });
-  }
-  if (actionIdPrefix) {
-    should.push({ prefix: { action_id: actionIdPrefix } });
-  }
-  return { bool: { should, minimum_should_match: 1 } };
-};
-
 /** Collects a page's agent ids, stopping at `limit`. Returns whether the limit has been reached. */
 const collectAgentIds = (
   hits: Array<SearchHit<Pick<FleetServerAgentAction, 'agents'>>>,
@@ -473,10 +486,6 @@ const collectAgentIds = (
  * is already there, and counting those against a limit of its own would let a nearly full set stop
  * paging before reaching the documents it has never seen.
  *
- * `actionIdPrefix` additionally matches the action documents whose id starts with it, which is how
- * an action whose documents are written under generated ids of its own finds them without having
- * recorded them anywhere.
- *
  * `limit` stops the read — collecting and paging both — once `agentIds` holds that many. It is the
  * caller's memory bound, so it has to be honoured here rather than applied to the result: an
  * action that has touched a million agents would otherwise be a million ids and the documents
@@ -489,15 +498,10 @@ export async function collectAgentIdsFromActions(
   esClient: ElasticsearchClient,
   actionIds: string[],
   agentIds: Set<string>,
-  options: {
-    since?: string;
-    limit?: number;
-    agentsPerDocument?: number;
-    actionIdPrefix?: string;
-  } = {}
+  options: { since?: string; limit?: number; agentsPerDocument?: number } = {}
 ): Promise<void> {
   const limit = options.limit ?? Infinity;
-  if ((actionIds.length === 0 && !options.actionIdPrefix) || agentIds.size >= limit) {
+  if (actionIds.length === 0 || agentIds.size >= limit) {
     return;
   }
   const agentsPerDocument = Math.max(1, options.agentsPerDocument ?? 1);
@@ -512,7 +516,7 @@ export async function collectAgentIdsFromActions(
       )
     );
 
-  const filter: QueryDslQueryContainer[] = [actionIdQuery(actionIds, options.actionIdPrefix)];
+  const filter: QueryDslQueryContainer[] = [{ terms: { action_id: actionIds } }];
   if (options.since) {
     filter.push({ range: { '@timestamp': { gte: options.since } } });
   }
@@ -588,16 +592,14 @@ interface AgentIdsWithResultsAggregation {
 
 /**
  * Which of the given agents have no result yet under any of the given action ids, so that results
- * are not written twice for an agent that already has one, and so that an agent an action has
- * already dealt with is recognised even when no action document names it.
+ * are not written twice for an agent that already has one.
  */
 export async function getAgentsWithoutActionResults(
   esClient: ElasticsearchClient,
   actionIds: string[],
-  agentIds: string[],
-  options: { actionIdPrefix?: string } = {}
+  agentIds: string[]
 ): Promise<string[]> {
-  if (agentIds.length === 0 || (actionIds.length === 0 && !options.actionIdPrefix)) {
+  if (agentIds.length === 0 || actionIds.length === 0) {
     return [];
   }
   try {
@@ -616,10 +618,7 @@ export async function getAgentsWithoutActionResults(
       index: AGENT_ACTIONS_RESULTS_INDEX,
       query: {
         bool: {
-          must: [
-            actionIdQuery(actionIds, options.actionIdPrefix),
-            { terms: { agent_id: agentIds } },
-          ],
+          must: [{ terms: { action_id: actionIds } }, { terms: { agent_id: agentIds } }],
         },
       },
       size: 0,
