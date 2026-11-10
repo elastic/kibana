@@ -904,9 +904,15 @@ describe('DiscoverSessionSaveModalContainer', () => {
     it('should pin the first tab of the saved session when adding it to a dashboard', async () => {
       const services = createDiscoverServicesMock();
       const transferSpy = jest.spyOn(services.embeddableEditor, 'transferBackToEditor');
-      const saveSpy = jest.fn<ReturnType<DiscoverSessionService['save']>, Parameters<DiscoverSessionService['save']>>(
-        (discoverSession) =>
-          Promise.resolve({ ...discoverSession, id: discoverSession.id ?? 'new-session', managed: false })
+      const saveSpy = jest.fn<
+        ReturnType<DiscoverSessionService['save']>,
+        Parameters<DiscoverSessionService['save']>
+      >((discoverSession) =>
+        Promise.resolve({
+          ...discoverSession,
+          id: discoverSession.id ?? 'new-session',
+          managed: false,
+        })
       );
       const { modalProps } = await setup({ mockSaveDiscoverSession: saveSpy, services });
 
