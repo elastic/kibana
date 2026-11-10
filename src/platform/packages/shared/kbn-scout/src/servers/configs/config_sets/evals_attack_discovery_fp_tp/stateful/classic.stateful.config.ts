@@ -21,9 +21,7 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  * same internal-tool surface production does. Turning it on registers `write_todos` and
  * `search_relevant_skills`, which an agent with no tools must not call.
  *
- * `agenticInvestigations` and `proposals` are both **required** plugins of alertzero and both
- * default to `enabled: false`. Without either flag Kibana cascade-disables alertzero entirely,
- * so the feature is never registered and the suite's inference override is ignored.
+ * `alertzero`, `agenticInvestigations` and `proposals` are all on by default in stateful.
  *
  * Since #295215 alertzero installs no managed workflows unless service accounts are enabled.
  *
@@ -37,9 +35,6 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
       ...serviceAccountsServerArgs,
-      '--xpack.alertzero.enabled=true',
-      '--xpack.agenticInvestigations.enabled=true',
-      '--xpack.proposals.enabled=true',
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
     ],

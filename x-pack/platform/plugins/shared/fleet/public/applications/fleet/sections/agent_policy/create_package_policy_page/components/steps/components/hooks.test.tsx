@@ -391,6 +391,58 @@ describe('useVarGroupSelections', () => {
       });
     });
 
+    it('should apply policy effects for the default selection on mount when packagePolicy is provided', () => {
+      // Agentless default is the provider option; its support-flag var starts undefined
+      // on a new policy and must be set by the same effects a user selection applies.
+      const providerVarGroups: RegistryVarGroup[] = [
+        {
+          name: 'credential_type',
+          title: 'Setup Access',
+          selector_title: 'Preferred method',
+          required: true,
+          options: [
+            {
+              name: 'identity_federation',
+              title: 'Identity Federation',
+              vars: ['role_arn', 'supports_identity_federation'],
+              provider: 'aws',
+              hide_in_deployment_modes: ['default'],
+            },
+            {
+              name: 'direct_access_key',
+              title: 'Direct Access Keys',
+              vars: ['access_key_id', 'secret_access_key'],
+            },
+          ],
+        },
+      ];
+
+      renderHook(() =>
+        useVarGroupSelections({
+          varGroups: providerVarGroups,
+          savedSelections: undefined,
+          isAgentlessEnabled: true,
+          onSelectionsChange: mockOnSelectionsChange,
+          packagePolicy: {
+            vars: {
+              role_arn: { type: 'text', value: undefined },
+              supports_identity_federation: { type: 'bool', value: undefined },
+            },
+          } as any,
+        })
+      );
+
+      expect(mockOnSelectionsChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          var_group_selections: { credential_type: 'identity_federation' },
+          supports_cloud_connector: true,
+          vars: expect.objectContaining({
+            supports_identity_federation: { type: 'bool', value: true },
+          }),
+        })
+      );
+    });
+
     it('should not call onSelectionsChange when savedSelections is already set', () => {
       renderHook(() =>
         useVarGroupSelections({

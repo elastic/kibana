@@ -53,7 +53,7 @@ Settings marked UI-readonly can only be turned on through `uiSettings.overrides`
 
 ## Access via URL
 
-With the feature flags enabled you can then access V2 via `/app/streams/new-experience/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges").
+With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/default/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges").
 
 ## Privileges
 
@@ -75,7 +75,7 @@ With the feature flags enabled you can then access V2 via `/app/streams/new-expe
 - Granted per space, but the unit is shared, so V2 `all` in any space can edit it.
 - In Elasticsearch it is the application privilege `{ "application": "kibana-.kibana", "privileges": ["feature_streamsV2.all"], "resources": ["*"] }`. Use `space:<id>` for one space and `feature_streamsV2.read` for read.
 - The data stream stats routes (`/internal/streams/doc_counts/*`, `/internal/streams/storage_stats`) accept `read_stream` or `read_streams_v2`. Other legacy routes need `read_stream` / `manage_stream`.
-- V2 access means `streamsV2.show` plus `observability:streamsEnableCanvas` on in the space. It decides the nav entry and whether `/` redirects to `/new-experience/{tab}`.
+- V2 access means `streamsV2.show` plus `observability:streamsEnableCanvas` on in the space. It decides the nav entry and whether `/` redirects to `/v2/unit/default/map`.
 - Without `streamsV2.manage`, the Map and the Sources and Destinations tables are read-only.
 
 ### What each V2 request needs
@@ -172,7 +172,7 @@ Index privileges are on the targets of a local Elasticsearch destination, which 
 
 1. `index`: that index.
 2. `write_patterns`: those patterns.
-3. Neither: the Auto pattern `<signal>-*-*`.
+3. Neither: the Auto pattern `<signal>-*-*` (`logs-*`, `metrics-*` and `traces-*` for docs).
 
 | Destination mode in the create form | Unit config per signal | Targets, for example |
 | --- | --- | --- |
@@ -204,7 +204,7 @@ The create form enforces those shapes. A unit written with the API can contain a
 
 Direct source keys (not in technical preview) would also need `write` and `auto_configure` on `*`.
 
-`logs-*`, `metrics-*` and `traces-*` cover every target the create form can produce, plus `metrics-streams.otel-default`. To narrow a user, use their destinations' targets instead (see "Destination targets") and keep `read` on `metrics-streams.otel-default`.
+`logs-*`, `metrics-*` and `traces-*` cover every target the create form can produce, plus `metrics-streams.otel-default`. The exception is a Fixed docs index, which can have any name. To narrow a user, use their destinations' targets instead (see "Destination targets") and keep `read` on `metrics-streams.otel-default`.
 
 The `streams` application privilege can only be set with the Elasticsearch role API, because the Kibana role API only writes `kibana-.kibana`. Serverless accepts it since [elasticsearch-serverless#7570](https://github.com/elastic/elasticsearch-serverless/pull/7570). One role, as used by the Scout specs:
 
@@ -399,7 +399,7 @@ Content-Type: application/json
               {
                 "action": "upsert",
                 "location": "resource",
-                "path": "attributes[\"env\"]",
+                "name": "env",
                 "value": "prod"
               }
             ]
@@ -522,6 +522,26 @@ POST kbn:/internal/streams/components/_validate
 The local snapshot `streams_app/public/services/component_catalogue/catalogue_snapshot/components_v1.json` is a test, Storybook and Scout fixture only. Scout UI specs mock both routes through `streams_app/test/scout/common/ui/fixtures/component_catalogue_mocks.ts`.
 
 Scout specs for V2 live in `test/scout_streams_v2/` (`streams` for API, `streams_app` for UI). That directory name selects the `streams_v2` config set, which boots Kibana with `xpack.streams.canvas.enabled=true`. V2 ships only on Serverless, so the set and the specs target Serverless Observability (complete) only. `v2_privileges.spec.ts` in each holds the privilege tests. Scout gives each test user one role, so both log in as a non-admin V2 manager with the one-role form from "Non-admin V2 managers".
+
+## Managed `_bulk` sources and the docs signal
+
+A Managed `_bulk` source (`async_bulk`) carries documents only. The UI saves it with `supported_telemetry: [docs]` and no `config`. Its endpoints are `<managed input url>/inputs/elasticsearch/<source_id>/_bulk` and `.../<source_id>/<target>/_bulk`, where `<target>` is the fallback `_index`.
+
+The ingress takes `create` actions only. Each document's `_index` must start with `logs-`, `metrics-` or `traces-`, otherwise that document gets a 403 inside an HTTP 200. A 201 means queued, not indexed.
+
+Local Elasticsearch destinations take docs in every mode:
+
+| Mode | Saved config for docs | Key scope for docs |
+|---|---|---|
+| Auto | `docs` in `supported_telemetry` | `logs-*`, `metrics-*`, `traces-*` |
+| Auto, custom write patterns | one `write_patterns` entry scoped to `[docs]`, each pattern starting with `logs-`, `metrics-` or `traces-` | those patterns |
+| Fixed | one `index` entry scoped to `[docs]`, any name | that index |
+
+A Fixed docs index replaces the `_index` after the ingress checks it, so requests still need a prefixed `_index`.
+
+Units saved before this change aren't migrated. An `async_bulk` source with OTel signals fails validate with E021, which blocks every unit PUT until the source is recreated. An Auto destination saved with `[logs, metrics, traces]` doesn't connect to a docs source until it is recreated.
+
+There is no Logstash tab. The ingress has no `GET` routes, and the Logstash Elasticsearch output hangs on its startup health checks.
 
 ## End-to-end testing
 
