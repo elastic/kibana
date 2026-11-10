@@ -3504,6 +3504,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/ent
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/explore @elastic/security-entity-analytics
 
 /x-pack/solutions/security/packages/test-api-clients/supertest/entity_analytics.gen.ts @elastic/security-entity-analytics
+/x-pack/solutions/security/packages/test-api-clients/scout/entity_analytics.gen.ts @elastic/security-entity-analytics
 
 ## Security Solution sub teams - Entity Store / Maintainers / Entity Details (contextual-security-apps co-ownership)
 x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details @elastic/contextual-security-apps @elastic/security-entity-analytics
