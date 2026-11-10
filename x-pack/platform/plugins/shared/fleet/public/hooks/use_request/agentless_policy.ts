@@ -55,13 +55,17 @@ export const sendUpdateAgentlessPolicy = async (
   policyId: string,
   body: UpdateAgentlessPolicyRequest['body'],
   // Optional: surfaces a failed template-details write after the save; see CloudConnectorIacPersistOptions.
-  { onIacPersistError }: CloudConnectorIacPersistOptions = {}
+  {
+    onIacPersistError,
+    query,
+  }: CloudConnectorIacPersistOptions & { query?: UpdateAgentlessPolicyRequest['query'] } = {}
 ) => {
   const result = await sendRequestForRq<UpdateAgentlessPolicyResponse>({
     path: agentlessPolicyRouteService.getUpdatePath(policyId),
     method: 'put',
     version: API_VERSIONS.public.v1,
     body: JSON.stringify(body),
+    query,
   });
   await persistPendingCloudConnectorIac({
     policyName: body.name,
@@ -84,12 +88,18 @@ export const sendDeleteAgentlessPolicy = (
   });
 };
 
-export const sendBulkUpgradeAgentlessPolicies = (policyIds: string[]) => {
+export const sendBulkUpgradeAgentlessPolicies = (
+  policyIds: string[],
+  options?: { acknowledgeBreakingChanges?: boolean }
+) => {
   return sendRequestForRq<BulkUpgradeAgentlessPoliciesResponse>({
     path: agentlessPolicyRouteService.getUpgradePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
-    body: JSON.stringify({ policyIds }),
+    body: JSON.stringify({
+      policyIds,
+      ...(options?.acknowledgeBreakingChanges ? { acknowledge_breaking_changes: true } : {}),
+    }),
   });
 };
 

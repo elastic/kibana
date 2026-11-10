@@ -2,6 +2,27 @@
 
 This plugin provides the domain API for starting and reading investigations, independent of which entity (significant event, alert, etc.) triggers them.
 
+## Automation instructions
+
+After choosing a trigger, its panel shows an instructions field limited to 5,000 characters.
+Alert and Slack triggers accept optional **Additional Instructions**. Scheduled triggers require
+**Instructions**, which define the task for each tick. Clearing optional instructions restores the
+default investigation behavior. The form and automation API enforce the same limit.
+
+Instructions are operator guidance for the current round, below agent and system rules. Alert
+snapshots and, in the new Slack workflow format, the triggering Slack message are untrusted
+evidence. Each automation that joins an open investigation supplies its own round's guidance;
+previous instructions remain in conversation history rather than being concatenated into a new
+configuration. The saved conversation input includes the effective instructions, so later edits
+to the automation do not change the record of earlier rounds.
+
+Automation configuration still stores `execution.promptTemplate`. New workflows send alert and
+Slack guidance separately as `instructions` to `nightshift.triggerInvestigation`; schedules keep
+using `message` as the task. Existing alert workflows that send guidance as `message` are supported.
+Legacy combined Slack messages retain their existing interpretation. New formatting takes effect
+on create or the next save; no bulk workflow regeneration or historical rewrite is performed.
+The stored `reasoningMode` remains compatible but is not exposed as an Investigate / Ask control.
+
 ## Scheduled automations
 
 Hourly, daily and weekly automation presets generate calendar-based workflow triggers. Daily and
@@ -19,23 +40,54 @@ fresh investigation using a `manual` question subject with an `automatic` trigge
 automatic-investigation quotas apply. An assessment that finds no issues still creates a conversation.
 The Investigate/Ask selector does not select a different execution path.
 
+The **Run** item in an automation's row menu and details **Actions** menu immediately requests a
+run of its saved scheduled investigation. Only enabled, schedule-only automations can be run
+manually. Disabled automations and those with alert or Slack triggers, including mixed triggers,
+show a disabled Run item with an explanation. Enable a disabled automation before running it.
+With the default `drop` overlap policy, Run is also disabled while the automation has a pending,
+running, queued, or waiting execution, or a linked investigation still running after dispatch ends.
+Open menus check live activity independently of the history range and poll every five seconds to
+re-enable Run after completion. A just-accepted execution is
+tracked directly before it appears in search. Saved `queue` and `cancel_in_progress` policies still
+allow another manual request; workflow concurrency remains authoritative for concurrent callers.
+Run is disabled when the daily manual or total investigation quota is reached, with a tooltip
+showing which limit blocks it and when the UTC window resets. Open menus refresh quotas every
+five seconds, including after asynchronous admission or a window reset. Automatic-investigation
+and per-automation limits do not block manual Run. Server quota enforcement still handles races.
+
+The caller needs Nightshift management, bound-workflow management, and Workflows execution
+permissions. The run uses the automation service account, saved instructions, scope, destination,
+timeout, and overlap policy. It creates a fresh investigation, bypasses the per-automation budget,
+and follows existing manual investigation quota enforcement. History shows it as Manual with the
+initiating user's display name and a link to the investigation. Ordinary Workflows UI runs retain
+their existing accounting; caller-supplied metadata cannot grant manual accounting.
+
+The automation's enabled state continues to control its backing workflow and scheduled triggers.
+Run requires the saved workflow to be enabled, valid, and bound to the automation service account.
+Missing or invalid configuration must be repaired by saving the automation. A manual run leaves the saved workflow
+YAML, schedule, and next scheduled time unchanged.
+
 `runtime.dailyDispatchLimit` caps the new investigations an automation opens, per space and UTC day.
 Attempts that continue an open investigation and starts with the `manual` trigger type do not count
 and are never blocked, even when the limit is reached. For an automatic attempt that would open a new
 investigation, the investigation client charges the automation budget, then the global
-automatic-investigation quota. Each charge is the check: the budget slot is reserved atomically, so
+investigation quota (see "Daily investigation limits" below). Each charge is the check: the budget slot is reserved atomically, so
 overlapping runs across Kibana instances cannot exceed the limit. An attempt denied by either limit
 creates no investigation and appears as skipped in automation history: with reason `daily_limit`
 when the automation limit denies it, and with reason `investigation_limit` when the global quota
 denies it. The automation limit is checked first, so `daily_limit` wins when both are reached. When
 the global quota denies an attempt, the client gives back the automation slot. The client also gives
-it back when the attempt loses the subject claim to a concurrent start and continues that
-investigation instead; the global quota has no refund, so that case still counts against it. An
+back both slots when the attempt loses the subject claim to a concurrent start and continues that
+investigation instead. The global quota check fails closed:
+a missing callback, a timeout after ten seconds, or an error denies the attempt. An
 attempt that fails after claiming its subjects keeps its slot: the claim stays live for two minutes,
 and an attempt that joins it in that window continues the claimed investigation and gives back only
-its own slot, so the investigation counts once. A failure while the investigation runs does not give
+its own slot, so the investigation counts once. An attempt whose claim fails part way also keeps
+both slots. The claims it wrote are removed, but a concurrent start can join them before the
+removal, and a failed removal leaves them live. Keeping the slots means the count never falls below
+the number of investigations; a retry after such a failure is charged again. A failure while the investigation runs does not give
 back either slot. The limit is at least 1, and an omitted limit allows unlimited new investigations.
-To stop an automation from opening investigations, disable it. Changing the limit takes effect on
+To stop automatic investigation starts, disable the automation. Changing the limit takes effect on
 the next attempt.
 
 The API-only `scopeQuery` field is forwarded as `scope_query` guidance in the investigation context.
@@ -77,7 +129,7 @@ Starting an investigation also needs Agent Builder `all` (the start route's own 
 
 ## Service accounts
 
-Nightshift runs investigations only as the agent service account, `nightshift_agent`. There is no fallback that runs them as the user who starts them, so a space can use Nightshift only after an admin sets it up. Until then, every Nightshift page shows the onboarding with "Enable Elastic Nightshift" as its first step: users with `manage_security` get the button, others are told to ask an administrator, and the step says so when service accounts are turned off. The plan and the remaining PRs are tracked in elastic/obs-execution#570.
+Nightshift runs investigations only as the agent service account, `nightshift_agent`. There is no fallback that runs them as the user who starts them, so a space can use Nightshift only after an admin sets it up. Until then, every Nightshift page shows the onboarding with "Enable Elastic Nightshift" as its first step: users with `manage_security` and the Nightshift Manage engines privilege get the button, others are told to ask an administrator, and the step says so when service accounts are turned off. The plan and the remaining PRs are tracked in elastic/obs-execution#570.
 
 ### Accounts and roles
 
@@ -112,9 +164,9 @@ xpack.encryptedSavedObjects.encryptionKey: '<32+ characters>'
 ```
 
 ```
-POST /internal/nightshift/investigations/service_account/_enable   # needs manage_security
+POST /internal/nightshift/investigations/service_account/_enable   # manage_security, Nightshift manage and Manage engines
 GET  /internal/nightshift/investigations/service_account           # status, read_nightshift
-POST /internal/nightshift/investigations/service_account/_disable  # teardown
+POST /internal/nightshift/investigations/service_account/_disable  # teardown, same privileges as _enable
 ```
 
 Only the service accounts backend assigns account ids: `kibana/<name>` on stateful, a generated id on Serverless (UIAM). So the caller finds or creates the accounts first, as the current user, with `ensureNightshiftServiceAccounts` from `common`, and passes their ids to `_enable` as `{ "serviceAccountIds": { "agent": "...", "automations": "..." } }`. The setup step in the app does both on one click.
@@ -123,14 +175,15 @@ Every space does that: the account directory is the one source of which account 
 
 `_enable`:
 
-1. Refuses with 400 when service accounts are off, 403 without `manage_security`, and 404 when the space does not exist, before writing anything.
-2. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. The entry point also keeps the automations account's id, as its `automationsServiceAccountId` template value. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
-3. Turns bound workflows an admin disabled back on.
-4. Checks that every installed workflow is bound to the agent account and that the entry point is enabled, and fails otherwise.
+1. Refuses with 400 when service accounts are off, 403 without `manage_security` or the Nightshift Manage engines privilege, and 404 when the space does not exist, before writing anything.
+2. Installs the investigation agent, and the assistant agent where it is enabled, if the space does not have them yet, and binds both to the agent account, so every run of them - a workflow's, a hook's or a user's chat - executes as that account. The assistant is bound too because it is the agent users pick in the Agent Builder UI and it runs the investigator's tools, connectors and sandbox, which an unbound one would run as the caller. This happens before any workflow is installed, since installing the entry point is what makes the space read as set up: a failed binding cannot leave a setup that looks done. The decision-tree reinforcement agent stays unbound - only `nightshift.decisionTreeReinforce` runs it, through `agents.runAgent`, which runs it as that step's workflow and never consults a binding.
+3. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. The entry point also keeps the automations account's id, as its `automationsServiceAccountId` template value. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
+4. Turns bound workflows an admin disabled back on.
+5. Checks that every installed workflow is bound to the agent account and that the entry point is enabled, and fails otherwise.
 
 Setups of one space run one after another. `_enable` is idempotent: running it again repairs a space whose workflows were removed, disabled, or bound to another account. A workflow can only be bound from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings.
 
-A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` uninstalls the space's bound workflows and keeps the accounts, which other spaces share.
+A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` unbinds the investigation and assistant agents and uninstalls the space's bound workflows, and keeps the accounts, which other spaces share. The agents go first, so a space never reads as removed while its agents still run as the account. Because Agent Builder refuses every binding change while service accounts are off, `_disable` refuses with 400 in that state whenever the agent is installed, and uninstalls nothing; a space whose agent was never installed is torn down normally.
 
 ### What setup changes
 
@@ -176,7 +229,17 @@ If any of those subjects is part of an open investigation that the caller owns, 
 
 If none match, the start claims the subjects for a new investigation id. That way, of two concurrent starts for one subject, the second continues the first. Closed investigations never match. One start always lands on exactly one investigation.
 
-The daily quota for automatic starts (`trigger_type: automatic`) only counts starts that open a new investigation. It is checked after the subject matching and before the claim, so a follow-up on an open investigation is never denied, and a denied start claims nothing.
+#### Daily investigation limits
+
+The global investigation quota is registered by Significant Events and set on the Nightshift settings page. It has three deployment-wide limits per UTC day, each of which can be turned off:
+
+- automatic investigations (`trigger_type: automatic`, all automations combined), default 5;
+- manual investigations (`trigger_type: manual`: the start API behind the homepage and the CLI, and Slack mentions), default 5;
+- all investigations, default 10. It can be lower than the other two added up.
+
+A start is charged to the limit for its trigger type and to the limit for all investigations. A start denied by either limit leaves both counts unchanged and fails with 429, with a message naming the limit that was reached. The quota only counts starts that open a new investigation. It is checked after the subject matching and before the claim, so a follow-up on an open investigation is never denied, and a denied start claims nothing.
+
+A Slack mention of the Nightshift assistant or investigation agent that opens a new Agent Builder conversation is charged as a manual start, through an Agent Builder on-before-new-conversation hook (`registerOnBeforeNewConversation`). The hook runs after the caller is authorized to run the agent and before the conversation is written, and never for a replayed delivery. The slot is given back when the turn is refused before it writes anything (a failed or duplicate execution record, or a busy or conflicting conversation write); after any other failure it stays taken. A mention in a thread that already has a conversation is not charged. A denied mention is refused with 429, or with 503 when the quota check is unavailable, and leaves nothing behind.
 
 The start then runs the `system-nightshift-investigation` workflow with `investigation_id` and the new subjects, and returns `{ investigation_id }`. It does not write to the investigation itself. The workflow's `_ensure` step does all of that:
 
@@ -240,7 +303,11 @@ Destinations and delivery history live in a hidden, readonly `nightshift.notific
 
 The investigation workflow sends a started message, stores its confirmed Slack thread reference, and replies with completion or failure. Later executions reuse that thread. An explicitly supplied parent timestamp is also supported. Failure delivery initializes routing even before the started step runs. A failure without an existing or explicit thread posts directly to the configured channel and stores its confirmed thread reference. Terminal delivery selects one persisted outcome, preventing contradictory completion and failure messages.
 
+The managed failure sweep runs every five minutes and stores its checkpoint in ordinary workflow output. It pages through a fixed time window, then retains a completed time watermark so subsequent sweeps query new failures with a ten-minute overlap rather than all retained history. The overlap tolerates delayed search visibility; terminal recovery writes with a new finish timestamp enter a later window. Writes backdated beyond the overlap are not guaranteed to be discovered. Reporting failures keep the page cursor before the first failed candidate for up to three sweeps, tracked in the checkpoint, while an additional recent-failure query prioritizes fresh outcomes during a backlog. After that candidate blocks three sweeps, the sweep logs the unresolved execution and advances; its reporting may remain incomplete. The overlap can revisit it while it is still recent. Explicit investigation-not-found results are skipped without holding the cursor; failed creation is retained as a recovery error. Timeline read/write failures remain retryable after subject recovery and execution association. Slack delivery still proceeds if conversation recovery fails, and confirmed delivery claims prevent duplicate messages during retries.
+
 Each execution, destination, and phase is claimed as `unconfirmed` before connector execution. The shared attachment factory handles versioned writes, and the connector executes once using workflow authentication, the investigation's space, and the abort signal. A confirmed message timestamp produces `sent`; connector error responses produce `failed`; exceptions, cancellation after claiming, and missing timestamps remain `unconfirmed`. Replay skips all existing attempts. An uncertain root blocks automatic root recreation across later executions; a definitely failed root may be attempted again by a later execution.
+
+Routing readers preserve additional fields, including nested fields, when updating documents written by newer versions. Stored phases and attempt statuses accept bounded unfamiliar values; operation inputs still validate supported phases. An unfamiliar terminal phase stops delivery for that execution. An unfamiliar attempt status retains its claim and counts as `unconfirmed` for the requested phase. An unfamiliar root-delivery status also blocks automatic root recreation unless a thread is already confirmed. Invalid required fields still fail validation instead of resetting the routing record and losing delivery history. This supports additive format changes; changes to required field types still need a coordinated rollout.
 
 The `nightshift.sendNotifications` step validates the persisted workflow execution and its investigation binding, and reads the investigation (title, severity, summary, impact, first pending proposed action) through the shared query API. Until Agent Builder titles the investigation, messages use the run's `title` input. Investigation and execution IDs may differ for explicit continuation. It returns persisted `sent`, `failed`, and `unconfirmed` counts for the requested execution and phase; full diagnostics are available through authorized attachment reads. Notification-step failures continue the investigation workflow, while persistence failures stop further posts within that step. There is no automatic claim expiry, resend, or routing-document cleanup on investigation or space deletion. A confirmed root post from the Elastic Slack app claims its thread as a `slack_thread` subject using the thread key the Relay returns, so a mention or reply in it continues the investigation. Posts through a custom Slack connector and replies under a caller-named message register nothing here; a thread another investigation holds stays with it.
 
@@ -248,10 +315,10 @@ The `nightshift.sendNotifications` step validates the persisted workflow executi
 
 When the global investigation quota denies an automatic start from a Slack trigger,
 `nightshift.triggerInvestigation` skips the start with `investigation_limit` and replies in the
-triggering Slack thread, once per Slack channel and UTC day. The reply says the limit was reached
-and links the Nightshift settings in the workflow's space for an admin to raise it, or omits the
-link when no Kibana URL is known. The once-a-day marker is claimed before posting, so a failed post is not
-retried. Alert, schedule, and manual runs post nothing.
+triggering Slack thread, once per Slack channel and UTC day. The reply names today's deployment-wide
+limit, says new investigations resume at 00:00 UTC, and links settings in the workflow's space for an
+admin to raise it, or says "settings" without a link when no Kibana URL is known. The once-a-day marker
+is claimed before posting, so a failed post is not retried. Alert, schedule, and manual runs post nothing.
 
 ### Workflow failures
 
@@ -279,3 +346,44 @@ these fallbacks. Reporting those outcomes needs a durable Workflows terminal-out
 coordinated with recovery (#1677), before #1820 can be closed. Future intentional-cancellation messages
 should say "Investigation stopped". The separate Slack follow-up workflow's status-message editor is
 unchanged; consolidating it with investigation-owned notifications remains follow-up work.
+
+## Unexpected termination reconciliation
+
+Nightshift installs `system-nightshift-investigation-failure-sweep-<spaceId>` when the space is
+onboarded or an investigation is created. The managed copy is enabled using the caller's normal
+Workflows scheduling authorization and retains that scheduler identity. Installation failure is
+logged without failing investigation creation; a subsequent enable/start attempts setup again.
+Existing spaces acquire the sweep on their next onboarding enable or investigation creation.
+
+The sweep runs every five minutes with a four-minute workflow timeout and drops overlapping runs.
+This budget covers execution reads, context persistence, and notifications; the sweep never invokes
+an agent or waits for an investigation to finish. It reads
+permission-filtered, non-test `failed` and `timed_out` executions of the investigation workflow and
+its managed copies, then revalidates each source execution and investigation binding. It never
+classifies running, waiting, or queued work as terminal. Recovery still owns that decision.
+
+A history pass starts at the sweep copy's creation time and has a fixed upper completion-time
+bound. Each run scans at most 100 records by ID and saves its cursor in normal workflow output;
+the next completed sweep resumes that pass. Finishing a pass advances a completed-time watermark;
+subsequent windows retain a ten-minute overlap for late-visible writes and recent retries. During a
+large history pass, an additional page of at most 100 failures from the last ten minutes gets priority, overlapping
+consecutive runs to tolerate scheduling and persistence delays. Reporting latency is normally the
+schedule interval, but depends on scheduling and backlog volume. Workflows history retention bounds
+catch-up. Failures completed before installation are not backfilled.
+
+The reporter uses the source execution ID and its validated inputs for request context, subjects,
+and notification destinations. It preserves conversation rounds and open/closed state and does not
+recreate a deleted investigation known to have been accepted or ensured. A timeout has a distinct
+conversation entry and Slack message; existing failure-trigger subscribers receive an unsuccessful
+outcome with the original execution ID. A delayed sweep suppresses that aggregate lifecycle update
+when a newer run is found in the same concurrency group, including queued follow-ups. If the group
+or its lookup is unavailable, the sweep also skips aggregate lifecycle emission; per-run context and
+Slack reporting still proceed. Started notifications, normal completion, and the ordinary
+failure fallback remain in the investigation workflow.
+
+Slack claims and receipts suppress repeated or uncertain external delivery. Conversation entries
+are reused by execution ID, and a persisted claim limits terminal lifecycle emission to one attempt.
+This is best effort: a process exit after a claim can leave delivery unconfirmed or lifecycle
+emission missing. Denied writes remain denied, cancellation is outside this sweep's scope, and a
+per-space schedule that cannot run requires its normal Workflows identity/scheduling issue to be
+repaired. There is no new watcher service, storage index, or engine hook.

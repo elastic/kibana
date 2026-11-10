@@ -8,13 +8,14 @@
  */
 
 import type { OpenApiDocument } from '@kbn/connector-emulate';
-import { convertSwagger2 } from '@kbn/connector-emulate';
+import { AWS_JSON_EXTENSION, convertSwagger2 } from '@kbn/connector-emulate';
 import type { JsonObject } from './json_pointer';
 import {
   forEachRef,
   getAtTokens,
   isJsonObject,
   localRefToPointer,
+  resolvePathItem,
   setAtTokens,
   toPointer,
   toTokens,
@@ -46,6 +47,11 @@ const LITERAL_KEYWORDS = new Set([
   'x-ms-pageable',
   // Path parameters whose values span segments, which the mock matches.
   'x-ms-skip-url-encoding',
+  // Routing that converted Smithy models carry, which the mock reads: a server variable that is
+  // also a path parameter (S3's virtual-hosted buckets), and fixed query parameters requests may
+  // leave out (S3's `x-id`).
+  'x-path-parameter',
+  'x-optional-fixed-query',
 ]);
 
 // Objects whose keys are names (properties, status codes, media types, ...), not keywords.
@@ -100,17 +106,6 @@ export const normalizeSpecNode = (value: unknown, isNameMap = false): unknown =>
     }
   }
   return result;
-};
-
-// A Path Item `$ref` to another path item in the document, whose fields the entry's own override.
-const resolvePathItem = (document: OpenApiDocument, item: unknown): unknown => {
-  if (!isJsonObject(item) || typeof item.$ref !== 'string') {
-    return item;
-  }
-  const { $ref: ref, ...own } = item;
-  const pointer = localRefToPointer(ref);
-  const referenced = pointer === undefined ? undefined : getAtTokens(document, toTokens(pointer));
-  return isJsonObject(referenced) ? { ...referenced, ...own } : item;
 };
 
 // AutoRest's `x-ms-paths` holds operations whose keys add fixed query parameters, such as Azure
@@ -172,6 +167,11 @@ export const projectSpec = (
   const msPaths = pickPaths(document, operations, 'x-ms-paths');
   if (Object.keys(msPaths).length > 0) {
     projected['x-ms-paths'] = normalizeSpecNode(msPaths, true);
+  }
+  // Converted awsJson models are served by `X-Amz-Target`, which this marks.
+  const awsJson = document[AWS_JSON_EXTENSION];
+  if (awsJson !== undefined) {
+    projected[AWS_JSON_EXTENSION] = awsJson;
   }
 
   const kept = new Set<string>();

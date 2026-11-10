@@ -12,6 +12,7 @@ import { merge } from 'lodash';
 import type {
   DateMapping,
   KeywordMapping,
+  WildcardMapping,
   TextMapping,
   MatchOnlyTextMapping,
   SemanticTextMapping,
@@ -82,6 +83,16 @@ export function keyword(def?: WithoutTypeField<KeywordMapping>): KeywordMapping 
     {
       type: 'keyword',
       ignore_above: 1024,
+    },
+    def
+  );
+  return merge(defaults, def);
+}
+
+export function wildcard(def?: WithoutTypeField<WildcardMapping>): WildcardMapping {
+  const defaults: WildcardMapping = omitUnsetKeys(
+    {
+      type: 'wildcard',
     },
     def
   );

@@ -245,6 +245,19 @@ export class SubjectsService {
     return { subjects, claims };
   }
 
+  /** Releases the claims of a new investigation whose start failed before it ran. */
+  async releaseClaims({
+    spaceId,
+    conversationId,
+  }: {
+    spaceId: string;
+    conversationId: string;
+  }): Promise<void> {
+    assertBoundedId(spaceId, 'spaceId');
+    assertBoundedId(conversationId, 'conversationId');
+    await this.deps.claims.release({ spaceId, conversationId });
+  }
+
   /** Maintenance: removes the subject claims the given investigations hold in the space. */
   async deleteClaimsByConversationIds(conversationIds: string[], spaceId: string): Promise<number> {
     assertBoundedId(spaceId, 'spaceId');

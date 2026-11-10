@@ -95,7 +95,6 @@ dependsOn:
   - '@kbn/reporting-export-types-pdf-common'
   - '@kbn/reporting-export-types-png-common'
   - '@kbn/reporting-server'
-  - '@kbn/intercepts-plugin'
   - '@kbn/lens-plugin'
   - '@kbn/mock-idp-utils'
   - '@kbn/es'

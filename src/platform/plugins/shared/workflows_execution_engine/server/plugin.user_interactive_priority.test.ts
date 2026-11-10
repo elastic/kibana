@@ -29,7 +29,10 @@ jest.mock('./lib/check_license', () => ({
   checkLicense: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock('./lib/get_user', () => ({
-  getAuthenticatedUser: jest.fn().mockResolvedValue('test-user'),
+  getAuthenticatedUser: jest.fn().mockResolvedValue({
+    executedBy: 'test-user',
+    user: { name: 'Test User', username: 'test-user' },
+  }),
 }));
 
 const mockBulkCreateWorkflowExecutions = jest.fn();
@@ -131,6 +134,7 @@ describe('user-interactive task priority', () => {
     taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as any);
     taskManager.ensureScheduled.mockResolvedValue({ id: 'scheduled-task' } as any);
     taskManager.runSoon.mockResolvedValue({ id: 'scheduled-task', conflict: false } as any);
+    taskManager.bulkGet.mockResolvedValue([]);
     pluginStart = plugin.start(coreStart, {
       taskManager,
       actions: {} as any,

@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 
 import { dateType } from './common';
+import { kqlWithFiltersSchema } from './indicators';
 import { optionalSettingsSchema, settingsSchema } from './slo';
 
 describe('Schema', () => {
@@ -171,6 +172,41 @@ describe('Schema', () => {
     it('rejects whitespace-only projectRoutings', () => {
       const result = optionalSettingsSchema.safeParse({ projectRoutings: '   ' });
       expect(result.success).toBe(false);
+    });
+  });
+
+  describe('kqlWithFiltersSchema', () => {
+    const withFilterMetaValue = (value: string | object) => ({
+      kqlQuery: '',
+      filters: [
+        {
+          meta: { type: 'range', key: 'http.response.status_code', value },
+          query: { range: { 'http.response.status_code': { lt: '500' } } },
+        },
+      ],
+    });
+
+    it('decodes a filter meta value set as a string', () => {
+      expect(kqlWithFiltersSchema.safeParse(withFilterMetaValue('200')).success).toBe(true);
+    });
+
+    it('decodes a range filter meta value set as the range params', () => {
+      const result = kqlWithFiltersSchema.safeParse(
+        withFilterMetaValue({ gte: 200, lt: '500', format: 'strict_date_optional_time' })
+      );
+      expect(result.success).toBe(true);
+    });
+
+    it('decodes a phrases filter meta value set as an array', () => {
+      expect(kqlWithFiltersSchema.safeParse(withFilterMetaValue(['200', 201, true])).success).toBe(
+        true
+      );
+    });
+
+    it('fails decoding a range filter meta value with a non scalar bound', () => {
+      expect(
+        kqlWithFiltersSchema.safeParse(withFilterMetaValue({ lt: { nested: 1 } })).success
+      ).toBe(false);
     });
   });
 });

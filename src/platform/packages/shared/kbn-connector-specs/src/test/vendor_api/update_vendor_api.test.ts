@@ -167,6 +167,39 @@ describe('updateVendorApi', () => {
     expect(snapshot.components.schemas.Item).toEqual(expect.objectContaining({ type: 'object' }));
   });
 
+  it('records the sources an inspection added to the manifest, as fetched then', async () => {
+    await fs.writeFile(
+      path.join(directory, 'manifest.json'),
+      JSON.stringify({
+        sources: {
+          main: {
+            format: 'openapi',
+            url: SPEC_URL,
+            apiVersion: '0.9',
+            fetchedAt: '2026-10-01T08:00:00.000Z',
+          },
+        },
+        operations: {},
+      })
+    );
+
+    const result = await update({ fetchedAt: () => new Date('2026-10-01T08:00:00.000Z') });
+
+    expect(result.problems).toEqual([]);
+    expect(fetched).toEqual([SPEC_URL, MODELS_URL]);
+    expect(await readJson('manifest.json')).toEqual({
+      sources: {
+        main: {
+          format: 'openapi',
+          url: SPEC_URL,
+          apiVersion: '1.0',
+          fetchedAt: '2026-10-01T08:00:00.000Z',
+        },
+      },
+      operations: { listItems: [itemsOperation] },
+    });
+  });
+
   it('records offline against the snapshots and changes nothing on a re-run', async () => {
     await update({ sources: { main: SPEC_URL } });
     fetched = [];
@@ -338,9 +371,37 @@ actions:
       { source: 'main', method: 'get', path: '/legacy' },
     ]);
     expect(Object.keys((await readJson('snapshots/main.openapi.json')).paths)).toEqual(['/items']);
-    expect(warnings).toEqual([
-      'overlay.yaml action 1 matches nothing in any source; the vendor may have fixed it',
-    ]);
+  });
+
+  describe('with an overlay action that matches nothing', () => {
+    beforeEach(async () => {
+      await update({ sources: { main: SPEC_URL } });
+      warnings = [];
+      await fs.writeFile(
+        path.join(directory, 'overlay.yaml'),
+        `
+overlay: 1.0.0
+info: { title: Example fixes, version: '1' }
+actions:
+  - target: $.paths['/gone']
+    remove: true
+`
+      );
+    });
+
+    it('stays quiet offline, as the route may just be left out of the snapshot', async () => {
+      await update();
+
+      expect(warnings).toEqual([]);
+    });
+
+    it('warns with --refresh, as the vendor spec has been fetched', async () => {
+      await update({ refresh: true });
+
+      expect(warnings).toEqual([
+        'overlay.yaml action 0 matches nothing in any source; the vendor may have fixed it',
+      ]);
+    });
   });
 
   it('keeps the components that overlay updates reference in the snapshot', async () => {
