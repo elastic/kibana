@@ -28,12 +28,20 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 const mockUseInvestigation = jest.fn<UseInvestigationResult, [unknown]>();
 const mockSubjectInvestigation = jest.fn();
 const mockIsAwaitingStart = jest.fn(() => false);
+const mockIsLoaded = jest.fn(() => true);
+const mockAwaitingArg = jest.fn();
 jest.mock('../../../data/significant_events/use_fetch_event_investigation', () => ({
-  useFetchEventInvestigation: (episodeId: string | undefined) => ({
-    investigation: mockSubjectInvestigation(episodeId),
-    isAwaitingStart: mockIsAwaitingStart(),
-    isLoading: false,
-  }),
+  useFetchEventInvestigation: (
+    episodeId: string | undefined,
+    options: { awaiting?: unknown } | undefined
+  ) => {
+    mockAwaitingArg(options?.awaiting);
+    return {
+      investigation: mockSubjectInvestigation(episodeId),
+      isAwaitingStart: mockIsAwaitingStart(),
+      isLoaded: mockIsLoaded(),
+    };
+  },
 }));
 
 jest.mock('@kbn/investigation-output', () => ({
@@ -200,6 +208,9 @@ describe('EventFlyout', () => {
     mockSubjectInvestigation.mockReset();
     mockIsAwaitingStart.mockReset();
     mockIsAwaitingStart.mockReturnValue(false);
+    mockIsLoaded.mockReset();
+    mockIsLoaded.mockReturnValue(true);
+    mockAwaitingArg.mockClear();
     mockOpenConversationDetails.mockClear();
     mockReportEvent.mockClear();
     mockCanManage = false;
@@ -354,6 +365,48 @@ describe('EventFlyout', () => {
           signal: null,
         }
       )
+    );
+  });
+
+  it('carries the listed state into the wait when the start continues that investigation', async () => {
+    mockCanManage = true;
+    mockSubjectInvestigation.mockReturnValue({
+      id: 'conv-open',
+      in_progress: false,
+      updated_at: '2026-07-10T12:00:00Z',
+    });
+    mockInvestigationsFetch.mockResolvedValue({ investigation_id: 'conv-open' });
+    renderFlyout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
+
+    await waitFor(() =>
+      expect(mockAwaitingArg).toHaveBeenLastCalledWith(
+        expect.objectContaining({ id: 'conv-open', listedUpdatedAt: '2026-07-10T12:00:00Z' })
+      )
+    );
+    expect(mockAwaitingArg).toHaveBeenLastCalledWith(expect.objectContaining({ listedRead: true }));
+  });
+
+  it('waits without a baseline when the start opens a different investigation', async () => {
+    mockCanManage = true;
+    mockSubjectInvestigation.mockReturnValue({
+      id: 'conv-open',
+      in_progress: false,
+      updated_at: '2026-07-10T12:00:00Z',
+    });
+    mockInvestigationsFetch.mockResolvedValue({ investigation_id: 'conv-new' });
+    renderFlyout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions' }));
+    await userEvent.click(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
+
+    await waitFor(() =>
+      expect(mockAwaitingArg).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'conv-new' }))
+    );
+    expect(mockAwaitingArg).toHaveBeenLastCalledWith(
+      expect.not.objectContaining({ listedUpdatedAt: expect.anything() })
     );
   });
 

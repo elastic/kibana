@@ -166,20 +166,22 @@ export function EventFlyout({
     id: string;
     startedAt: number;
     episodeId: string | undefined;
+    listedRead: boolean;
     listedUpdatedAt?: string;
   }>();
   /** The listed investigation when a start was clicked: a follow-up's run is recorded past it. */
-  const startBaselineRef = useRef<{ id: string; updated_at: string }>();
+  const startBaselineRef = useRef<{ read: boolean; id?: string; updated_at?: string }>();
   const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
   // The investigation is found through its subject (the event's alert, by episode id), as for any
   // alert. The event's own `investigations[]` is not read here.
-  const { investigation: subjectInvestigation, isAwaitingStart } = useFetchEventInvestigation(
-    event.episode_id,
-    {
-      awaiting:
-        startedInvestigation?.episodeId === event.episode_id ? startedInvestigation : undefined,
-    }
-  );
+  const {
+    investigation: subjectInvestigation,
+    isAwaitingStart,
+    isLoaded,
+  } = useFetchEventInvestigation(event.episode_id, {
+    awaiting:
+      startedInvestigation?.episodeId === event.episode_id ? startedInvestigation : undefined,
+  });
   const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation({
     onTriggered: (investigationId) => {
       const baseline = startBaselineRef.current;
@@ -187,8 +189,11 @@ export function EventFlyout({
         id: investigationId,
         startedAt: Date.now(),
         episodeId: event.episode_id,
+        listedRead: baseline?.read ?? false,
         // Only a continued investigation has a listed state to be recorded past.
-        ...(baseline?.id === investigationId ? { listedUpdatedAt: baseline.updated_at } : {}),
+        ...(baseline?.id === investigationId && baseline.updated_at !== undefined
+          ? { listedUpdatedAt: baseline.updated_at }
+          : {}),
       });
       void lifecycleQuery.refetch();
     },
@@ -303,9 +308,12 @@ export function EventFlyout({
           (event.episode_id ? undefined : NO_EPISODE_INVESTIGATION_TOOLTIP) ??
           (latestInvestigationInProgress ? FOLLOW_UP_INVESTIGATION_TOOLTIP : undefined),
         onClick: () => {
-          startBaselineRef.current = subjectInvestigation
-            ? { id: subjectInvestigation.id, updated_at: subjectInvestigation.updated_at }
-            : undefined;
+          startBaselineRef.current = {
+            read: isLoaded,
+            ...(subjectInvestigation
+              ? { id: subjectInvestigation.id, updated_at: subjectInvestigation.updated_at }
+              : {}),
+          };
           triggerInvestigation({ event_id: event.event_id, episode_id: event.episode_id });
         },
         disabled: blocksActivity || triggeringEventId != null || !event.episode_id,
@@ -376,6 +384,7 @@ export function EventFlyout({
     event.event_id,
     event.status,
     hasInvestigation,
+    isLoaded,
     latestInvestigationInProgress,
     openInvestigationChat,
     openNewChat,
