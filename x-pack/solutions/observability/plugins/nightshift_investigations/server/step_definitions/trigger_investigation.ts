@@ -224,6 +224,7 @@ export const triggerInvestigationStepDefinition = (
       'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking, or skip_reason when the automation daily limit or the deployment-wide investigation limit is reached.',
     inputSchema,
     outputSchema: z.object({
+      execution_id: z.string().optional(),
       investigation_id: z
         .string()
         .optional()

@@ -44,6 +44,16 @@ The **Run** item in an automation's row menu and details **Actions** menu immedi
 run of its saved scheduled investigation. Only enabled, schedule-only automations can be run
 manually. Disabled automations and those with alert or Slack triggers, including mixed triggers,
 show a disabled Run item with an explanation. Enable a disabled automation before running it.
+With the default `drop` overlap policy, Run is also disabled while the automation has a pending,
+running, queued, or waiting execution, or a linked investigation still running after dispatch ends.
+Open menus check live activity independently of the history range and poll every five seconds to
+re-enable Run after completion. A just-accepted execution is
+tracked directly before it appears in search. Saved `queue` and `cancel_in_progress` policies still
+allow another manual request; workflow concurrency remains authoritative for concurrent callers.
+Run is disabled when the daily manual or total investigation quota is reached, with a tooltip
+showing which limit blocks it and when the UTC window resets. Open menus refresh quotas every
+five seconds, including after asynchronous admission or a window reset. Automatic-investigation
+and per-automation limits do not block manual Run. Server quota enforcement still handles races.
 
 The caller needs Nightshift management, bound-workflow management, and Workflows execution
 permissions. The run uses the automation service account, saved instructions, scope, destination,

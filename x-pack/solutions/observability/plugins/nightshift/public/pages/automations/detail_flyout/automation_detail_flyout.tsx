@@ -51,11 +51,17 @@ import {
   getSaveBlocker,
   isTriggerValid,
 } from '../flyouts/form/validation';
-import { RUN_AUTOMATION_LABEL, getRunAutomationDisabledReason } from '../utils/run_automation';
+import { useRunQuotas } from '../../../data/run_quotas/use_significant_events_run_quotas';
+import {
+  RUN_AUTOMATION_LABEL,
+  getRunAutomationDisabledReason,
+  getManualRunQuotaDisabledReason,
+} from '../utils/run_automation';
 import { toAutomationUpdateBody } from '../flyouts/form/to_automation_request';
 import { SectionHeader, FormSection } from '../flyouts/form/section_header';
 import {
   useAutomationRunsInRange,
+  useAutomationRunActivity,
   useToggleAutomation,
   useUpdateAutomation,
   type Automation,
@@ -178,7 +184,6 @@ export const AutomationDetailFlyout = ({
   onEmbeddedRunsTabChange?: (isRunsTab: boolean) => void;
 }) => {
   const titleId = useGeneratedHtmlId();
-  const runDisabledReason = getRunAutomationDisabledReason(automation);
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
   const {
@@ -197,6 +202,10 @@ export const AutomationDetailFlyout = ({
   const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [selectedRun, setSelectedRun] = useState<Run>();
   const [isActionsOpen, setIsActionsOpen] = useState(false);
+  const activity = useAutomationRunActivity(automation, { enabled: isActionsOpen });
+  const quotas = useRunQuotas({ enabled: isActionsOpen, poll: isActionsOpen });
+  const runDisabledReason =
+    getRunAutomationDisabledReason(automation, activity) ?? getManualRunQuotaDisabledReason(quotas);
   const originalValues = useMemo(() => toAutomationFormValues(automation), [automation]);
   const [values, setValues] = useState<AutomationFormValues>(originalValues);
   const updateAutomation = useUpdateAutomation();

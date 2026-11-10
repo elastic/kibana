@@ -10,9 +10,11 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { I18nProvider } from '@kbn/i18n-react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
+import { useRunQuotas } from '../../../data/run_quotas/use_significant_events_run_quotas';
 import { AutomationDetailFlyout } from './automation_detail_flyout';
 import {
   useAutomationRunsInRange,
+  useAutomationRunActivity,
   useToggleAutomation,
   useUpdateAutomation,
 } from '../../../data/automations/use_automations';
@@ -21,8 +23,12 @@ import type { Automation } from '../../../data/automations/use_automations';
 
 jest.mock('../../../data/automations/use_automations', () => ({
   useAutomationRunsInRange: jest.fn(),
+  useAutomationRunActivity: jest.fn(),
   useToggleAutomation: jest.fn(),
   useUpdateAutomation: jest.fn(),
+}));
+jest.mock('../../../data/run_quotas/use_significant_events_run_quotas', () => ({
+  useRunQuotas: jest.fn(),
 }));
 jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('../hooks/use_global_limit', () => ({
@@ -63,6 +69,8 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const navigateToUrl = jest.fn();
 
   beforeEach(() => {
+    (useAutomationRunActivity as jest.Mock).mockReturnValue({ data: { isRunning: false } });
+    (useRunQuotas as jest.Mock).mockReturnValue({ data: undefined });
     onRun.mockClear();
     jest.clearAllMocks();
     mutate.mockReset();
@@ -139,6 +147,76 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
       expect(screen.queryByTestId('automationRunButton')).not.toBeInTheDocument()
     );
   });
+
+  it.each([undefined, 'drop', 'queue', 'cancel_in_progress'] as const)(
+    'handles an active execution with overlap policy %s in Actions',
+    async (overlapPolicy) => {
+      (useAutomationRunActivity as jest.Mock).mockReturnValue({ data: { isRunning: true } });
+      renderFlyout({
+        selectedAutomation: {
+          ...automation,
+          isEnabled: true,
+          trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+          runtime: { ...automation.runtime, overlapPolicy },
+        },
+      });
+      fireEvent.click(screen.getByTestId('automationActionsButton'));
+      const run = screen.getByTestId('automationRunButton');
+      if (overlapPolicy === undefined || overlapPolicy === 'drop') {
+        expect(run).toBeDisabled();
+        fireEvent.click(run);
+        expect(onRun).not.toHaveBeenCalled();
+        fireEvent.mouseOver(run);
+        expect(await screen.findByRole('tooltip')).toHaveTextContent(
+          'This automation is already running. Wait for it to finish before running it again.'
+        );
+      } else {
+        expect(run).toBeEnabled();
+        fireEvent.click(run);
+        expect(onRun).toHaveBeenCalledTimes(1);
+      }
+    }
+  );
+
+  it.each(['manual_investigation', 'total_investigation'] as const)(
+    'disables Run in Actions at the %s quota and shows its reset time',
+    async (group) => {
+      (useRunQuotas as jest.Mock).mockReturnValue({
+        data: {
+          enabled: true,
+          investigationLimitsEnabled: true,
+          limits: { investigation: 0, manual_investigation: 0, total_investigation: 0, [group]: 1 },
+          counts: { investigation: 0, manual_investigation: 0, total_investigation: 0, [group]: 1 },
+          window: {
+            start: '2040-01-01T00:00:00.000Z',
+            resetsAt: '2040-01-02T00:00:00.000Z',
+            timezone: 'UTC',
+          },
+        },
+      });
+      renderFlyout({
+        selectedAutomation: {
+          ...automation,
+          isEnabled: true,
+          trigger: { rows: [{ kind: 'schedule', schedulePreset: 'hourly' }] },
+        },
+      });
+      fireEvent.click(screen.getByTestId('automationActionsButton'));
+      const run = screen.getByTestId('automationRunButton');
+      expect(run).toBeDisabled();
+      fireEvent.click(run);
+      expect(onRun).not.toHaveBeenCalled();
+      fireEvent.mouseOver(run);
+      const tooltip = await screen.findByRole('tooltip');
+      expect(tooltip).toHaveTextContent(
+        group === 'manual_investigation'
+          ? 'The daily manual investigation limit has been reached.'
+          : 'The daily total investigation limit has been reached.'
+      );
+      expect(tooltip).toHaveTextContent('Jan 2');
+      expect(tooltip).toHaveTextContent('UTC');
+    }
+  );
 
   it('disables Run in Actions for a disabled automation and explains why', async () => {
     renderFlyout({
