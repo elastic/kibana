@@ -209,7 +209,7 @@ spaceTest.describe('Run workflow alert action', { tag: [...tags.stateful.classic
         .filter({ hasText: ruleName });
       const alertCheckbox = ruleNameCell
         .locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]')
-        .locator('.euiCheckbox__input');
+        .getByRole('checkbox');
       await alertCheckbox.check();
 
       // Open the bulk-actions popover ("N selected" button) before clicking the menu item
