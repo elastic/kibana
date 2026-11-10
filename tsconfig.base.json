@@ -1985,6 +1985,8 @@
       "@kbn/nightshift-ai/*": ["./x-pack/platform/packages/shared/kbn-nightshift-ai/*"],
       "@kbn/nightshift-decision-trees": ["./x-pack/solutions/observability/packages/kbn-nightshift-decision-trees"],
       "@kbn/nightshift-decision-trees/*": ["./x-pack/solutions/observability/packages/kbn-nightshift-decision-trees/*"],
+      "@kbn/nightshift-harness-opt": ["./x-pack/solutions/observability/packages/kbn-nightshift-harness-opt"],
+      "@kbn/nightshift-harness-opt/*": ["./x-pack/solutions/observability/packages/kbn-nightshift-harness-opt/*"],
       "@kbn/nightshift-investigations-plugin": ["./x-pack/solutions/observability/plugins/nightshift_investigations"],
       "@kbn/nightshift-investigations-plugin/*": ["./x-pack/solutions/observability/plugins/nightshift_investigations/*"],
       "@kbn/nightshift-plugin": ["./x-pack/solutions/observability/plugins/nightshift"],

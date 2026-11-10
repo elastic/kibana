@@ -1947,6 +1947,7 @@
     "@kbn/mock-idp-plugin": "workspace:*",
     "@kbn/mock-idp-utils": "workspace:*",
     "@kbn/moon": "workspace:*",
+    "@kbn/nightshift-harness-opt": "workspace:*",
     "@kbn/oas-docs": "workspace:*",
     "@kbn/observability-synthetics-test-data": "workspace:*",
     "@kbn/openapi-bundler": "workspace:*",

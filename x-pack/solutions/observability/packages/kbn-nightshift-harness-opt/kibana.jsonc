@@ -1,0 +1,8 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/nightshift-harness-opt",
+  "owner": "@elastic/nightshift",
+  "group": "observability",
+  "visibility": "shared",
+  "devOnly": true
+}

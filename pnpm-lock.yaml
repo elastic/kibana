@@ -5764,6 +5764,9 @@ importers:
       '@kbn/moon':
         specifier: workspace:*
         version: link:packages/kbn-moon
+      '@kbn/nightshift-harness-opt':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/packages/kbn-nightshift-harness-opt
       '@kbn/oas-docs':
         specifier: workspace:*
         version: link:oas_docs
@@ -9677,6 +9680,8 @@ importers:
   x-pack/solutions/observability/packages/kbn-investigation-output: {}
 
   x-pack/solutions/observability/packages/kbn-nightshift-decision-trees: {}
+
+  x-pack/solutions/observability/packages/kbn-nightshift-harness-opt: {}
 
   x-pack/solutions/observability/packages/kbn-nightshift-shared: {}
 
