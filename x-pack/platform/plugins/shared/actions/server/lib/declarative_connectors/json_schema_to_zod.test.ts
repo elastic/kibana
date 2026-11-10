@@ -7,6 +7,7 @@
 
 import { getMeta } from '@kbn/connector-specs';
 import type { z } from '@kbn/zod/v4';
+import type { DeclarativeJsonSchema } from './types';
 import { loadFixture } from './__fixtures__/load_fixture';
 import { declarativeJsonSchemaToZod } from './json_schema_to_zod';
 import { parseDeclarativeConnectorSpec } from './parse_declarative_connector_spec';
@@ -24,6 +25,42 @@ describe('declarativeJsonSchemaToZod', () => {
     });
     expect(() => schema.parse({ ipAddress: '1.2.3.4', extra: true })).toThrow();
     expect(() => schema.parse({ ipAddress: '1.2.3.4', maxAgeInDays: 0 })).toThrow();
+  });
+
+  it('enforces the checkIp maxAgeInDays maximum', () => {
+    const schema = declarativeJsonSchemaToZod(connector.actions.checkIp.input);
+
+    expect(schema.parse({ ipAddress: '1.2.3.4', maxAgeInDays: 365 })).toEqual(
+      expect.objectContaining({ maxAgeInDays: 365 })
+    );
+    expect(() => schema.parse({ ipAddress: '1.2.3.4', maxAgeInDays: 366 })).toThrow();
+  });
+
+  it('enforces the reportIp comment maxLength', () => {
+    const schema = declarativeJsonSchemaToZod(connector.actions.reportIp.input);
+    const input = { ip: '1.2.3.4', categories: [18] };
+
+    expect(schema.parse({ ...input, comment: 'a'.repeat(1024) })).toEqual(
+      expect.objectContaining({ comment: 'a'.repeat(1024) })
+    );
+    expect(() => schema.parse({ ...input, comment: 'a'.repeat(1025) })).toThrow();
+  });
+
+  it('enforces enum and minLength keywords', () => {
+    const jsonSchema: DeclarativeJsonSchema = {
+      type: 'object',
+      additionalProperties: false,
+      required: ['mode', 'name'],
+      properties: {
+        mode: { type: 'string', enum: ['fast', 'slow'] },
+        name: { type: 'string', minLength: 2 },
+      },
+    };
+    const schema = declarativeJsonSchemaToZod(jsonSchema);
+
+    expect(schema.parse({ mode: 'fast', name: 'ab' })).toEqual({ mode: 'fast', name: 'ab' });
+    expect(() => schema.parse({ mode: 'other', name: 'ab' })).toThrow();
+    expect(() => schema.parse({ mode: 'fast', name: 'a' })).toThrow();
   });
 
   it('converts reportIp categories to an array of integers', () => {
