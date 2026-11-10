@@ -167,4 +167,19 @@ describe('ServiceFlyoutApmCharts', () => {
       rangeTo: '2024-01-02T00:00:00.000Z',
     });
   });
+
+  it('passes compact mode to latency aggregation select for narrow flyout columns', () => {
+    renderCharts();
+
+    expect(mockLatencyChart).toHaveBeenCalledWith(
+      expect.objectContaining({
+        panelPaddingSize: 's',
+      })
+    );
+    // The latency chart uses panelPaddingSize to determine whether to render
+    // the latency aggregation select in compact mode (without the "Metric" prepend),
+    // which helps the select fit in the narrow flyout columns without wrapping
+    // onto a second line that would break alignment with throughput and failed
+    // transaction rate chart headers.
+  });
 });
