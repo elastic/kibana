@@ -8,50 +8,202 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import type { Coordinate } from '../../../../../typings/timeseries';
-import { SparkPlotItem } from '.';
+import { SparkPlot, SparkPlotItem } from '.';
 
-function renderSparkPlotItem(series: Coordinate[] | null, end?: number) {
+// Capture the `data` prop each series receives, keyed by series id, so the tests
+// can assert on exactly what the chart is handed after trimming.
+const seriesData = new Map<string, Coordinate[]>();
+
+jest.mock('@elastic/charts', () => {
+  const original = jest.requireActual('@elastic/charts');
+  const recordSeries = (props: any) => {
+    if (props.id) {
+      seriesData.set(props.id, props.data);
+    }
+    return null;
+  };
+  return {
+    ...original,
+    Chart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    Settings: () => null,
+    Tooltip: () => null,
+    LineSeries: recordSeries,
+    BarSeries: recordSeries,
+    AreaSeries: recordSeries,
+  };
+});
+
+beforeEach(() => {
+  seriesData.clear();
+});
+
+function renderSparkPlotItem(props: Partial<React.ComponentProps<typeof SparkPlotItem>>) {
   return render(
-    <SparkPlotItem type="line" color="#000" isLoading={false} series={series} end={end} />
+    <SparkPlotItem type="line" color="#000" isLoading={false} series={null} {...props} />
   );
 }
 
 describe('SparkPlotItem', () => {
   it('renders the no-data icon when the series has no valid points', () => {
-    const { container } = renderSparkPlotItem([
-      { x: 1, y: null },
-      { x: 2, y: null },
-    ]);
+    const { container } = renderSparkPlotItem({
+      series: [
+        { x: 1, y: null },
+        { x: 2, y: null },
+      ],
+    });
 
     expect(container.querySelector('[data-euiicon-type="chartLine"]')).toBeInTheDocument();
   });
 
-  it('keeps the untrimmed series when trimming would remove the only valid point', () => {
-    // A newly reporting service only has data in its final, partial bucket.
-    // Trimming would leave an all-null series, so the untrimmed series is kept
-    // and the chart (not the no-data icon) is rendered.
-    const { container } = renderSparkPlotItem(
-      [
-        { x: 1, y: null },
-        { x: 2, y: null },
-        { x: 3, y: 5 },
+  it('trims the partial trailing bucket from the line data when end cuts it off', () => {
+    renderSparkPlotItem({
+      series: [
+        { x: 10, y: 5 },
+        { x: 20, y: 8 },
+        { x: 30, y: 2 },
       ],
-      3.5
-    );
+      end: 35,
+    });
 
-    expect(container.querySelector('[data-euiicon-type="chartLine"]')).not.toBeInTheDocument();
+    // splitSeriesAtNullGaps always copies line segments, so compare by value.
+    expect(seriesData.get('Sparkline')).toEqual([
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+    ]);
   });
 
-  it('renders the chart when valid points remain after trimming', () => {
-    const { container } = renderSparkPlotItem(
-      [
-        { x: 1, y: 5 },
-        { x: 2, y: 8 },
-        { x: 3, y: 0 },
+  it('keeps the same data (by value) when the range is bucket-aligned', () => {
+    const series = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: 2 },
+    ];
+    renderSparkPlotItem({ series, end: 40 });
+
+    expect(seriesData.get('Sparkline')).toEqual(series);
+  });
+
+  it('keeps the bar data reference when the range is bucket-aligned', () => {
+    const series = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: 2 },
+    ];
+    renderSparkPlotItem({ type: 'bar', series, end: 40 });
+
+    // Bars are passed straight through without splitting, so the reference holds.
+    expect(seriesData.get('barSeries')).toBe(series);
+  });
+
+  it('applies the same cut to the comparison series', () => {
+    renderSparkPlotItem({
+      type: 'bar',
+      series: [
+        { x: 10, y: 5 },
+        { x: 20, y: 8 },
+        { x: 30, y: 2 },
       ],
-      3.5
+      comparisonSeries: [
+        { x: 10, y: 1 },
+        { x: 20, y: 2 },
+        { x: 30, y: 3 },
+      ],
+      comparisonSeriesColor: '#111',
+      end: 35,
+    });
+
+    expect(seriesData.get('barSeries')).toEqual([
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+    ]);
+    expect(seriesData.get('comparisonBarSeries')).toEqual([
+      { x: 10, y: 1 },
+      { x: 20, y: 2 },
+    ]);
+  });
+
+  it('keeps the untrimmed series when only the last bucket has data', () => {
+    const series = [
+      { x: 10, y: null },
+      { x: 20, y: null },
+      { x: 30, y: 5 },
+    ];
+    renderSparkPlotItem({ type: 'bar', series, end: 35 });
+
+    // Trimming would leave no valid points, so the untrimmed series is kept.
+    expect(seriesData.get('barSeries')).toBe(series);
+  });
+
+  it('does not trim a two-point series', () => {
+    const series = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+    ];
+    renderSparkPlotItem({ type: 'bar', series, end: 25 });
+
+    expect(seriesData.get('barSeries')).toBe(series);
+  });
+
+  it('does not trim when end is undefined', () => {
+    const series = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: 2 },
+    ];
+    renderSparkPlotItem({ type: 'bar', series });
+
+    expect(seriesData.get('barSeries')).toBe(series);
+  });
+
+  it('does not trim when end is NaN', () => {
+    const series = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: 2 },
+    ];
+    renderSparkPlotItem({ type: 'bar', series, end: NaN });
+
+    expect(seriesData.get('barSeries')).toBe(series);
+  });
+
+  it('keeps a stable bar data reference across rerenders', () => {
+    const series = [
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+      { x: 30, y: 2 },
+    ];
+    const { rerender } = render(
+      <SparkPlotItem type="bar" color="#000" isLoading={false} series={series} end={35} />
+    );
+    const first = seriesData.get('barSeries');
+
+    rerender(<SparkPlotItem type="bar" color="#000" isLoading={false} series={series} end={35} />);
+    const second = seriesData.get('barSeries');
+
+    expect(second).toBe(first);
+  });
+});
+
+describe('SparkPlot', () => {
+  it('forwards end to the trimming logic', () => {
+    render(
+      <SparkPlot
+        type="bar"
+        color="#000"
+        isLoading={false}
+        valueLabel={null}
+        series={[
+          { x: 10, y: 5 },
+          { x: 20, y: 8 },
+          { x: 30, y: 2 },
+        ]}
+        end={35}
+      />
     );
 
-    expect(container.querySelector('[data-euiicon-type="chartLine"]')).not.toBeInTheDocument();
+    expect(seriesData.get('barSeries')).toEqual([
+      { x: 10, y: 5 },
+      { x: 20, y: 8 },
+    ]);
   });
 });

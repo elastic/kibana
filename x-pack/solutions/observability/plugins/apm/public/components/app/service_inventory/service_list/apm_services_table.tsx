@@ -101,8 +101,8 @@ export function getServiceColumns({
   onSloBadgeClick: (serviceName: string, agentName?: AgentName) => void;
   locators: SharePluginStart['url']['locators'] | undefined;
   // Range end (epoch ms), forwarded to the sparkline columns so they trim the
-  // partial trailing bucket.
-  rangeEnd: number;
+  // partial trailing bucket. Undefined disables trimming.
+  rangeEnd?: number;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
