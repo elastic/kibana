@@ -424,8 +424,13 @@ describe('getCreateDatasetTemplates', () => {
     expect(getCreateDatasetTemplates(g, stored)).toBe(false);
   });
 
-  it('returns false for a bundled group only when every customised dataset opted out', () => {
+  it('returns false for a bundled group only when every dataset opted out', () => {
+    const stored = { a: vars('aws.prod', false), b: vars('aws.dev', false) };
+    expect(getCreateDatasetTemplates(group(['a', 'b']), stored)).toBe(false);
+  });
+
+  it('keeps the template for a bundled group while a member sits at its default dataset', () => {
     const stored = { a: vars('aws.prod', false), b: vars('aws.dev', false), c: vars('aws.ec2') };
-    expect(getCreateDatasetTemplates(group(['a', 'b', 'c']), stored)).toBe(false);
+    expect(getCreateDatasetTemplates(group(['a', 'b', 'c']), stored)).toBeUndefined();
   });
 });

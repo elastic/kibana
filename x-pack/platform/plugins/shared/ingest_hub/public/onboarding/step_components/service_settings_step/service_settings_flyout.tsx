@@ -27,6 +27,7 @@ import { makeDsView } from '../../aws_service_matrix';
 import { shouldDefaultCollectS3Logs } from './field_config';
 import type { ServiceVars, ServiceDataStreamVars } from './use_service_settings';
 import { isServiceConfigIncomplete } from './use_service_settings';
+import type { DatasetTemplatesBundle } from './dataset_templates';
 import { ServiceFieldsForm } from './service_fields_form';
 import {
   InstanceNamespaceField,
@@ -77,6 +78,8 @@ interface ServiceSettingsFlyoutProps {
   globalNamespace?: string;
   /** Whether the instance is already deployed, which changes what a new namespace means. */
   isDeployed?: boolean;
+  /** The other services that deploy in the same policy, which share the template choice. */
+  datasetTemplatesBundle?: DatasetTemplatesBundle;
   onApply: (
     varsByDataStream: Record<string, ServiceDataStreamVars>,
     enabledDataStreams: string[],
@@ -93,6 +96,7 @@ export function ServiceSettingsFlyout({
   isDuplicate = false,
   globalNamespace = '',
   isDeployed = false,
+  datasetTemplatesBundle,
   onApply,
   onClose,
 }: ServiceSettingsFlyoutProps) {
@@ -222,6 +226,7 @@ export function ServiceSettingsFlyout({
             })
           }
           isDeployed={isDeployed}
+          datasetTemplatesBundle={datasetTemplatesBundle}
           onCreateDatasetTemplatesChange={(dsId, enabled) =>
             setDraftByDs((prev) => {
               const dsInfo = service.varDefsByDataStream?.[dsId];

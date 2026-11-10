@@ -164,6 +164,65 @@ describe('ServiceSettingsFlyout — dedicated index template for a custom datase
   });
 });
 
+describe('ServiceSettingsFlyout — services that deploy in the same policy', () => {
+  const customised: ServiceVars = {
+    enabledDataStreams: ['ec2'],
+    varsByDataStream: {
+      ec2: {
+        enabledInputs: ['otelcol'],
+        varsByInput: { otelcol: { 'data_stream.dataset': 'aws.prod' } },
+        createDatasetTemplates: false,
+      },
+    },
+  };
+  const renderWithBundle = (datasetTemplatesBundle: {
+    requiredBy: string[];
+    sharedWith: string[];
+  }) =>
+    render(
+      <I18nProvider>
+        <ServiceSettingsFlyout
+          service={service}
+          config={customised}
+          globalRegion="us-east-1"
+          datasetTemplatesBundle={datasetTemplatesBundle}
+          onApply={jest.fn()}
+          onClose={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+  it('locks the switch on and names the service that needs its template', () => {
+    renderWithBundle({ requiredBy: ['Amazon Lambda'], sharedWith: ['Amazon Lambda'] });
+
+    expect(screen.getByTestId(SWITCH)).toBeChecked();
+    expect(screen.getByTestId(SWITCH)).toBeDisabled();
+    expect(
+      screen.getByTestId('serviceSettingsFlyout-createDatasetTemplatesRequired')
+    ).toHaveTextContent('Amazon Lambda');
+    expect(screen.queryByTestId('serviceSettingsFlyout-createDatasetTemplatesShared')).toBeNull();
+  });
+
+  it('keeps the switch editable and says the choice covers the whole policy', () => {
+    renderWithBundle({ requiredBy: [], sharedWith: ['Amazon RDS'] });
+
+    expect(screen.getByTestId(SWITCH)).toBeEnabled();
+    expect(screen.getByTestId(SWITCH)).not.toBeChecked();
+    expect(
+      screen.getByTestId('serviceSettingsFlyout-createDatasetTemplatesShared')
+    ).toHaveTextContent('Amazon RDS');
+    expect(screen.queryByTestId('serviceSettingsFlyout-createDatasetTemplatesRequired')).toBeNull();
+  });
+
+  it('shows no note for a service that has its policy to itself', () => {
+    renderWithBundle({ requiredBy: [], sharedWith: [] });
+
+    expect(screen.getByTestId(SWITCH)).toBeEnabled();
+    expect(screen.queryByTestId('serviceSettingsFlyout-createDatasetTemplatesRequired')).toBeNull();
+    expect(screen.queryByTestId('serviceSettingsFlyout-createDatasetTemplatesShared')).toBeNull();
+  });
+});
+
 describe('DuplicateServiceModal — dedicated index template for a custom dataset', () => {
   it('starts from the source choice and adds the duplicate with the new one', () => {
     const onAdd = jest.fn();
