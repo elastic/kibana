@@ -210,9 +210,13 @@ describe('ki_query_create tool', () => {
       telemetry,
     });
 
-    const { results } = await invokeHandler(tool as never, queryParams, createMockToolContext());
+    const result = await invokeHandler(tool as never, queryParams, createMockToolContext());
 
-    expect(results[0].data).toEqual(expect.objectContaining(expected));
+    if (!('results' in result)) {
+      throw new Error('expected a tool result');
+    }
+
+    expect(result.results[0].data).toEqual(expect.objectContaining(expected));
   });
 
   it('tracks failure telemetry when query KI creation fails', async () => {

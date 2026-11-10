@@ -221,9 +221,13 @@ describe('ki_feature_create tool', () => {
       telemetry,
     });
 
-    const { results } = await invokeHandler(tool as never, featureParams, createMockToolContext());
+    const result = await invokeHandler(tool as never, featureParams, createMockToolContext());
 
-    expect(results[0].data).toEqual(expect.objectContaining(expected));
+    if (!('results' in result)) {
+      throw new Error('expected a tool result');
+    }
+
+    expect(result.results[0].data).toEqual(expect.objectContaining(expected));
   });
 
   it('stores the feature against the source id when the slug differs', async () => {
