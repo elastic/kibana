@@ -722,7 +722,8 @@ read. The agent investigates unchanged and no query it writes can see past its t
   ([`orca_cutoff_gate.ts`](evals/investigation/orca_cutoff_gate.ts)). Before a cutoff's tasks start,
   the `orcabench-es` connector gets that cutoff's key; up to eight of them run together, and the
   next cutoff waits until all have ended. An investigation that outlives its poll gets two more
-  minutes to end before the run fails, so no key is swapped under a running investigation. Cutoffs
+  minutes to end; if it hasn't ended, or can't be found, the run stops before any other key goes
+  on, so no key is swapped under a running investigation. Cutoffs
   take turns in dataset order, and the test's timeout counts one batch per cutoff. A run is
   therefore close to serial: the sampled 50 has 41 cutoffs. Run one ORCA eval on a stack at a time,
   since both would write the one connector.

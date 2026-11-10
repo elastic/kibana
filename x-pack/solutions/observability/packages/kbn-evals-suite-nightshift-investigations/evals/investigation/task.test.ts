@@ -441,9 +441,9 @@ describe('waitForInvestigationToEnd', () => {
     await expect(waitForInvestigationToEnd(fetch, 'investigation', 0)).resolves.toBe(false);
   });
 
-  it('treats an investigation that was never created as ended', async () => {
+  it('does not take an investigation that is not found yet as ended', async () => {
     const fetch = jest.fn().mockRejectedValue(notFound());
 
-    await expect(waitForInvestigationToEnd(fetch, 'investigation', 60_000)).resolves.toBe(true);
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 0)).resolves.toBe(false);
   });
 });

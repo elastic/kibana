@@ -76,18 +76,20 @@ describe('createOrcaCutoffGate', () => {
     await Promise.all(results);
   });
 
-  it('frees the slot of work that throws', async () => {
-    const { gate, events, run, end } = createHarness(1);
+  it('stops for good once work throws, so no other key goes on', async () => {
+    const { gate, events, run, end } = createHarness(8);
+    const running = run('a', 'a1');
     const failed = gate('a', async () => {
-      throw new Error('broken');
+      throw new Error('investigation still running');
     });
-    const next = run('b', 'b1');
+    const queued = run('b', 'b1');
 
-    await expect(failed).rejects.toThrow('broken');
-    await flush();
-    expect(events).toEqual(['activate a', 'activate b', 'start b1']);
-    await end('b1');
-    await expect(next).resolves.toBe('b1');
+    await expect(failed).rejects.toThrow('investigation still running');
+    await expect(queued).rejects.toThrow('investigation still running');
+    await expect(run('a', 'a2')).rejects.toThrow('investigation still running');
+    await end('a1');
+    await expect(running).resolves.toBe('a1');
+    expect(events).toEqual(['activate a', 'start a1', 'end a1']);
   });
 
   it("fails a cutoff's work when its key cannot be put in place, and moves on", async () => {

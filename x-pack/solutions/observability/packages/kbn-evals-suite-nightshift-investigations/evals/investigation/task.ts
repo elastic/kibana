@@ -173,7 +173,7 @@ export const toInvestigationReport = ({
 
 /**
  * Waits up to `timeoutMs` for an investigation, its last round included, to end, and says whether
- * it did. One that was never created has nothing left to run.
+ * it did. One not found yet may still be created by its workflow, so it does not count as ended.
  */
 export const waitForInvestigationToEnd = async (
   fetch: HttpHandler,
@@ -183,8 +183,13 @@ export const waitForInvestigationToEnd = async (
   const started = Date.now();
   for (;;) {
     const investigation = await readInvestigation(fetch, id);
-    if (!investigation) return true;
-    if (!investigation.in_progress && isPersisted(await readConversation(fetch, id))) return true;
+    if (
+      investigation &&
+      !investigation.in_progress &&
+      isPersisted(await readConversation(fetch, id))
+    ) {
+      return true;
+    }
     if (Date.now() - started >= timeoutMs) return false;
     await setTimeout(POLL_INTERVAL_MS);
   }

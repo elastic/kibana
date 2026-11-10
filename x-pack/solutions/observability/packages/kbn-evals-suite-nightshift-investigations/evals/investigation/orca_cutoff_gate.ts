@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-/** Runs `work` once its cutoff's key is on the ORCA connector, and keeps it there until it ends. */
+/**
+ * Runs `work` once its cutoff's key is on the ORCA connector, and keeps it there until it ends.
+ * Work that throws may have left its investigation running, so the gate then stops for good.
+ */
 export type OrcaCutoffGate = <T>(cutoff: string, work: () => Promise<T>) => Promise<T>;
 
 /**
@@ -23,6 +26,7 @@ export const createOrcaCutoffGate = ({
   concurrency: number;
 }): OrcaCutoffGate => {
   const waiting: Array<{ cutoff: string; start: () => void; fail: (error: unknown) => void }> = [];
+  let stopped: { error: unknown } | undefined;
   let active: string | undefined;
   let running = 0;
   let switching = false;
@@ -34,6 +38,10 @@ export const createOrcaCutoffGate = ({
 
   const pump = (): void => {
     if (switching) return;
+    if (stopped) {
+      for (const entry of waiting.splice(0)) entry.fail(stopped.error);
+      return;
+    }
     while (active !== undefined && running < concurrency) {
       const entry = take(active);
       if (!entry) break;
@@ -67,6 +75,10 @@ export const createOrcaCutoffGate = ({
     });
     try {
       return await work();
+    } catch (error) {
+      // No other cutoff's key may go on while this work's investigation could still be reading.
+      stopped ??= { error };
+      throw error;
     } finally {
       running -= 1;
       pump();
