@@ -29,6 +29,8 @@ import { OAuthStateClient } from '../lib/oauth_state_client';
 import { requestOAuthAuthorizationCodeToken } from '../lib/request_oauth_authorization_code_token';
 import { buildTokenResponseOptions } from '../lib/request_oauth_token';
 import { requestEarsToken } from '../lib/ears/request_ears_token';
+import type { EarsLogEvent } from '../lib/ears/log_ears_event';
+import { getEarsErrorLogFields, logEarsEvent } from '../lib/ears/log_ears_event';
 import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import { UserConnectorTokenClient } from '../lib/user_connector_token_client';
 import { getConnectorAuthType, recordConnectorAuth } from '../lib/connector_metrics';
@@ -585,6 +587,24 @@ export const oauthCallbackRoute = (
           });
         }
 
+        let isEarsFlow = false;
+        let earsProvider: string | undefined;
+        let earsRequestId: string | undefined;
+        const logEarsTokenExchange = (
+          fields: Pick<EarsLogEvent, 'outcome' | 'earsRequestId' | 'status' | 'extra'>
+        ) => {
+          if (!isEarsFlow) return;
+          logEarsEvent(routeLogger, {
+            step: 'token_exchange',
+            connectorId: stateConnectorId,
+            provider: earsProvider,
+            profileUid,
+            spaceId: oauthState.spaceId,
+            state: stateParam,
+            ...fields,
+          });
+        };
+
         let connectorTypeId: string | undefined;
         let connectorAuthType = 'unknown';
         try {
@@ -611,6 +631,8 @@ export const oauthCallbackRoute = (
 
           let tokenResult;
           if (authType === 'ears') {
+            isEarsFlow = true;
+            earsProvider = provider;
             if (!provider) {
               throw new Error('Connector missing required OAuth configuration (provider)');
             }
@@ -624,6 +646,7 @@ export const oauthCallbackRoute = (
               },
               configurationUtilities
             );
+            earsRequestId = tokenResult.earsRequestId;
           } else {
             const clientId = secrets.clientId || config?.clientId;
             const clientSecret = secrets.clientSecret;
@@ -700,6 +723,9 @@ export const oauthCallbackRoute = (
 
           await oauthStateClient.delete(oauthState.id);
 
+          // after the delete, so a failure there is logged once, as a failure
+          logEarsTokenExchange({ outcome: 'success', earsRequestId });
+
           recordConnectorAuth({
             phase: 'authorize',
             authType: connectorAuthType,
@@ -712,6 +738,12 @@ export const oauthCallbackRoute = (
         } catch (err) {
           // Log the underlying cause for operators; return a generic message to the client.
           routeLogger.error(`OAuth callback failed: ${getErrorMessage(err)}`);
+          // keep the id of an exchange that succeeded before a later step failed
+          logEarsTokenExchange({
+            outcome: 'failure',
+            earsRequestId,
+            ...getEarsErrorLogFields(err),
+          });
           if (err instanceof Error && err.stack) {
             routeLogger.debug(`OAuth callback error stack: ${err.stack}`);
           }

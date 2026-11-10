@@ -1,0 +1,50 @@
+overlay: 1.0.0
+info:
+  title: Databricks API corrections
+  version: 1.0.0
+actions:
+  # The connector calls Jobs API 2.1, while the reference documents 2.2. The operations it calls
+  # take the same requests in both. In responses, 2.2 drops the root `has_more` of runs/list and
+  # pages runs/get's tasks and job_clusters past 100 elements; the connector returns both as they
+  # come. See https://docs.databricks.com/aws/en/reference/jobs-api-2-2-updates.
+  - target: $.paths
+    update:
+      /api/2.1/jobs/runs/list:
+        $ref: '#/paths/~1api~12.2~1jobs~1runs~1list'
+      /api/2.1/jobs/runs/get:
+        $ref: '#/paths/~1api~12.2~1jobs~1runs~1get'
+      /api/2.1/jobs/runs/get-output:
+        $ref: '#/paths/~1api~12.2~1jobs~1runs~1get-output'
+      /api/2.1/jobs/run-now:
+        $ref: '#/paths/~1api~12.2~1jobs~1run-now'
+      /api/2.1/jobs/runs/cancel:
+        $ref: '#/paths/~1api~12.2~1jobs~1runs~1cancel'
+      /api/2.1/jobs/runs/repair:
+        $ref: '#/paths/~1api~12.2~1jobs~1runs~1repair'
+
+  # The list pages only say they return "a list of ClusterInfo objects" or "EndpointInfo objects";
+  # their example responses show the envelope.
+  - target: $.paths['/api/2.1/clusters/list'].get.responses['200'].content['application/json']
+    update:
+      schema:
+        type: object
+        properties:
+          clusters:
+            type: array
+            items:
+              $ref: '#/components/schemas/ClusterInfo'
+          next_page_token:
+            type: string
+          prev_page_token:
+            type: string
+  - target: $.paths['/api/2.0/sql/warehouses'].get.responses['200'].content['application/json']
+    update:
+      schema:
+        type: object
+        properties:
+          warehouses:
+            type: array
+            items:
+              $ref: '#/components/schemas/EndpointInfo'
+          next_page_token:
+            type: string

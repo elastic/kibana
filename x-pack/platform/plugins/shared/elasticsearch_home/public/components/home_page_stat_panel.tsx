@@ -16,9 +16,9 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiPopover,
-  EuiSkeletonText,
   EuiSpacer,
   EuiStat,
   EuiText,
@@ -26,8 +26,7 @@ import {
   EuiToolTip,
   EuiSplitPanel,
 } from '@elastic/eui';
-import type { EuiFlexGridProps } from '@elastic/eui';
-import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { EuiFlexGridProps, IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { NewIndexDetails } from '../../common/types';
 import { useNewIndexDismissal } from '../hooks/use_new_index_dismissal';
@@ -37,12 +36,11 @@ export interface HomePageStatPanelMetric {
   key: string;
   label: string;
   value: string;
-  isLoading: boolean;
 }
 
 export interface HomePageStatPanelAction {
   key: string;
-  iconType?: EuiIconType;
+  iconType?: IconType;
   label: string;
   onClick: () => void;
   testSubj?: string;
@@ -50,8 +48,9 @@ export interface HomePageStatPanelAction {
 }
 
 export interface HomePageStatPanelProps {
-  iconType: EuiIconType;
+  iconType: IconType;
   title: string;
+  titleTooltip?: string;
   testSubj: string;
   metrics: HomePageStatPanelMetric[];
   showPrimary?: boolean;
@@ -63,6 +62,7 @@ export interface HomePageStatPanelProps {
 export const HomePageStatPanel = ({
   iconType,
   title,
+  titleTooltip,
   testSubj,
   metrics,
   actions,
@@ -108,12 +108,28 @@ export const HomePageStatPanel = ({
             <EuiIcon type={iconType} size="m" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiTitle size="xxxs" css={{ whiteSpace: 'nowrap' }}>
                   <h3>{title}</h3>
                 </EuiTitle>
               </EuiFlexItem>
+              {titleTooltip && (
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    type="info"
+                    size="s"
+                    color="subdued"
+                    display="flex"
+                    content={titleTooltip}
+                    aria-label={i18n.translate('xpack.elasticsearchHome.home.statPanel.titleInfo', {
+                      defaultMessage: 'About {title}',
+                      values: { title },
+                    })}
+                    iconProps={{ 'data-test-subj': `${testSubj}TitleInfo` }}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           {actions.length > 0 && (
@@ -169,22 +185,12 @@ export const HomePageStatPanel = ({
             Every card defines at most 4 metrics so we are safe to cast. If in future a card with more 
             than 4 metrics was added, the count would need to be clamped. */}
         <EuiFlexGrid columns={metrics.length as EuiFlexGridProps['columns']} gutterSize="m">
-          {metrics.map(({ key, label, value, isLoading }) => (
+          {metrics.map(({ key, label, value }) => (
             <EuiFlexItem key={key}>
               <EuiPanel color="plain" paddingSize="m" hasBorder={true}>
                 <EuiStat
                   data-test-subj={`${testSubj}-${key}`}
-                  title={
-                    isLoading ? (
-                      <EuiSkeletonText
-                        size="m"
-                        lines={1}
-                        data-test-subj={`${testSubj}-${key}-loading`}
-                      />
-                    ) : (
-                      <span data-test-subj={`${testSubj}-${key}-value`}>{value}</span>
-                    )
-                  }
+                  title={<span data-test-subj={`${testSubj}-${key}-value`}>{value}</span>}
                   titleColor="text"
                   titleElement="div"
                   description={

@@ -57,6 +57,25 @@ describe('Color mapping - color generation', () => {
     expect(colorFactory('not_available')).toBe(neutralPaletteColors[DEFAULT_NEUTRAL_PALETTE_INDEX]);
   });
 
+  it('generates palette colors once per color factory, not per category', () => {
+    const colorsSpy = jest.spyOn(palettes.get(KbnPalette.Default), 'colors');
+    const categories = Array.from({ length: 100 }, (_, i) => `cat${i}`);
+    const colorFactory = getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, palettes, false, {
+      type: 'categories',
+      categories,
+    });
+    categories.forEach((category) => colorFactory(category));
+    expect(colorsSpy).toHaveBeenCalledTimes(1);
+
+    // a new factory, e.g. on chart re-render, generates its own colors
+    getColorFactory(DEFAULT_COLOR_MAPPING_CONFIG, palettes, false, {
+      type: 'categories',
+      categories,
+    })('cat0');
+    expect(colorsSpy).toHaveBeenCalledTimes(2);
+    colorsSpy.mockRestore();
+  });
+
   it('by default loops colors defined in palette', () => {
     const colorFactory = getColorFactory(
       {

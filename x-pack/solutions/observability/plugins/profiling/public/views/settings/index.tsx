@@ -28,10 +28,11 @@ import {
   profilingCostPervCPUPerHour,
   profilingShowErrorFrames,
 } from '@kbn/observability-plugin/common';
-import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { useEditableSettings } from '@kbn/management-settings-hooks';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { BottomBarActions } from './bottom_bar_actions';
@@ -54,6 +55,7 @@ const costSettings = [
   profilingCostPervCPUPerHour,
 ];
 const miscSettings = [profilingShowErrorFrames];
+const SETTINGS_KEYS = [...co2Settings, ...costSettings, ...miscSettings];
 
 export function Settings() {
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
@@ -64,16 +66,13 @@ export function Settings() {
   } = useProfilingDependencies();
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings([...co2Settings, ...costSettings, ...miscSettings]);
+    useEditableSettings({ settingsKeys: SETTINGS_KEYS, settingsClient: settings.client });
 
   async function handleSave() {
     try {
-      const reloadPage = Object.keys(unsavedChanges).some((key) => {
-        return fields[key].requiresPageReload;
-      });
-      await saveAll();
+      const { requiresReload } = await saveAll();
       trackProfilingEvent({ metric: 'general_settings_save' });
-      if (reloadPage) {
+      if (requiresReload) {
         window.location.reload();
       }
     } catch (e) {

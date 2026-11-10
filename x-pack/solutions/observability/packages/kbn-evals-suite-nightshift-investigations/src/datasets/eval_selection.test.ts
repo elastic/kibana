@@ -21,6 +21,7 @@ describe('resolveEvalSelection', () => {
         runSmoke: true,
         runInvestigations: true,
         runConnectorProbes: false,
+        runWikiOptimize: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: false,
       });
@@ -32,6 +33,7 @@ describe('resolveEvalSelection', () => {
         runSmoke: true,
         runInvestigations: false,
         runConnectorProbes: false,
+        runWikiOptimize: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: true,
       });
@@ -55,6 +57,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: false,
       runInvestigations: true,
       runConnectorProbes: false,
+      runWikiOptimize: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
@@ -66,6 +69,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: true,
       runInvestigations: false,
       runConnectorProbes: false,
+      runWikiOptimize: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -79,6 +83,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: true,
       runInvestigations: true,
       runConnectorProbes: false,
+      runWikiOptimize: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -92,14 +97,50 @@ describe('resolveEvalSelection', () => {
       runSmoke: false,
       runInvestigations: false,
       runConnectorProbes: true,
+      runWikiOptimize: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
   });
 
+  it('runs only the Wiki optimizer replay for wiki-optimize, without credentials', () => {
+    expect(resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'wiki-optimize' })).toEqual({
+      runOrca: false,
+      runSmoke: false,
+      runInvestigations: false,
+      runConnectorProbes: false,
+      runWikiOptimize: true,
+      smokeDatasetsRequest: undefined,
+      fellBackToSmoke: false,
+    });
+  });
+
+  it('combines wiki-optimize with other evals', () => {
+    expect(
+      resolveEvalSelection({
+        ...WITH_SANDBOX,
+        NIGHTSHIFT_DATASETS: 'synthetic-smoke,wiki-optimize',
+      })
+    ).toMatchObject({
+      runSmoke: true,
+      runWikiOptimize: true,
+      runInvestigations: false,
+      smokeDatasetsRequest: 'synthetic-smoke',
+    });
+  });
+
+  it('never selects the Wiki optimizer replay for all or unset', () => {
+    for (const value of [undefined, 'all']) {
+      expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toMatchObject({
+        runWikiOptimize: false,
+      });
+    }
+  });
+
   it('never selects the connector probes for all', () => {
     expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'all' })).toMatchObject({
       runConnectorProbes: false,
+      runWikiOptimize: false,
     });
   });
 
@@ -150,7 +191,7 @@ describe('resolveEvalSelection', () => {
 });
 
 describe('ORCA selection', () => {
-  const orcaEnv = { ...WITH_SANDBOX, NIGHTSHIFT_ORCA_TELEMETRY: '1' };
+  const orcaEnv = { ...WITH_SANDBOX, NIGHTSHIFT_CONNECTOR_SET: 'orcabench' };
   it.each([{ EVAL_SHARD_ID: 'orcabench' }, { NIGHTSHIFT_DATASETS: 'orcabench' }])(
     'isolates the ORCA job from existing coverage: %j',
     (selection) => {
@@ -159,15 +200,19 @@ describe('ORCA selection', () => {
         runSmoke: false,
         runInvestigations: false,
         runConnectorProbes: false,
+        runWikiOptimize: false,
       });
     }
   );
-  it('rejects an ORCA run on a reused server with another telemetry target', () => {
-    expect(() =>
-      resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'orcabench' })
-    ).toThrow('ORCA telemetry hook');
-  });
-  it('rejects mixed telemetry sources on one Scout server', () => {
+  it.each([{}, { NIGHTSHIFT_CONNECTOR_SET: 'default' }])(
+    'rejects an ORCA run on a reused server with another connector set: %j',
+    (connectorSet) => {
+      expect(() =>
+        resolveEvalSelection({ ...WITH_SANDBOX, ...connectorSet, NIGHTSHIFT_DATASETS: 'orcabench' })
+      ).toThrow('orcabench connector set');
+    }
+  );
+  it('rejects mixed connector sets on one Scout server', () => {
     expect(() =>
       resolveEvalSelection({ ...orcaEnv, NIGHTSHIFT_DATASETS: 'trace-only,orcabench' })
     ).toThrow('own Scout server');

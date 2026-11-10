@@ -739,6 +739,10 @@ export interface BulkActionsConfig {
   icon?: EuiContextMenuPanelItemDescriptor['icon'];
   groupId?: BulkActionGroupId;
   'data-test-subj'?: string;
+  /**
+   * Disables the item when a "select all" includes alerts that aren't loaded,
+   * because `onClick` only receives loaded alerts.
+   */
   disableOnQuery: boolean;
   disabledLabel?: string;
   /**

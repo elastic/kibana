@@ -68,6 +68,7 @@ jest.mock('../../hooks/use_filter', () => ({
     getFilterOutValueButton: jest.fn(),
     getCopyButton: jest.fn(),
     filterManager: {},
+    addSuccess: jest.fn(),
   }),
 }));
 

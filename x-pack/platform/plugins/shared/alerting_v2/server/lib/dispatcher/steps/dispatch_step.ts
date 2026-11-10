@@ -8,6 +8,7 @@
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { KibanaRequest } from '@kbn/core/server';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type {
   BulkScheduleWorkflowResult,
   WorkflowDetailDto,
@@ -41,7 +42,6 @@ import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicyDestination,
-  ActionPolicyWorkflowPayload,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -49,6 +49,7 @@ import type {
 } from '../types';
 import { AlertTriage, DispatchOutcome, DispatchPlan, PolicyCatalog, RuleCatalog } from '../state';
 import { withDispatcherSpan } from '../with_dispatcher_span';
+import { toWorkflowPayload } from '../workflow_payload';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 import { toNotifiedActions } from './utils/action_documents';
@@ -286,12 +287,15 @@ export class DispatchStep implements DispatcherStep {
       return;
     }
 
-    const batches: DispatchBatch[] = [...groupsByApiKey].map(([apiKey, batchGroups]) => ({
-      groups: batchGroups,
-      request: this.craftFakeRequest(apiKey),
-      workflowsBySpace: new Map(),
-      failedSpaces: new Map(),
-    }));
+    // One batch per (API key, space): the request's space scopes the scheduled workflow runs.
+    const batches: DispatchBatch[] = [...groupsByApiKey].flatMap(([apiKey, keyGroups]) =>
+      [...Map.groupBy(keyGroups, ({ spaceId }) => spaceId)].map(([spaceId, batchGroups]) => ({
+        groups: batchGroups,
+        request: this.craftFakeRequest(apiKey, spaceId),
+        workflowsBySpace: new Map(),
+        failedSpaces: new Map(),
+      }))
+    );
     await this.prefetchWorkflows(batches, logger);
     for (const { groups: batchGroups, request, workflowsBySpace, failedSpaces } of batches) {
       if (signal.aborted) return;
@@ -511,18 +515,10 @@ export class DispatchStep implements DispatcherStep {
       definition: workflow.definition ?? undefined,
       yaml: workflow.yaml,
     };
-    const payload: ActionPolicyWorkflowPayload = {
-      id: group.id,
-      policyId: group.policyId,
-      groupKey: group.groupKey,
-      alerts: group.alerts,
-      rules: group.rules,
-    };
-
     return {
       workflow: model,
       spaceId: group.spaceId,
-      inputs: { payload },
+      inputs: { payload: toWorkflowPayload(group) },
       triggeredBy: ACTION_POLICY_TRIGGER,
     };
   }
@@ -626,15 +622,17 @@ export class DispatchStep implements DispatcherStep {
 
   /**
    * Workflows are looked up and scheduled as the policy's API key owner, so a policy only reaches
-   * the workflows its owner may access.
+   * the workflows its owner may access. The request is scoped to the policy's space so the
+   * scheduled workflow runs, and resolves its connectors, in that space.
    */
-  private craftFakeRequest(apiKey: string): KibanaRequest {
+  private craftFakeRequest(apiKey: string, spaceId: string): KibanaRequest {
     const requestHeaders: Headers = {
       authorization: `ApiKey ${getUiamApiKeySecret(apiKey)}`,
     };
 
     const fakeRawRequest: FakeRawRequest = {
       headers: requestHeaders,
+      spaceId: brandSpaceId(spaceId),
     };
 
     return kibanaRequestFactory(fakeRawRequest);

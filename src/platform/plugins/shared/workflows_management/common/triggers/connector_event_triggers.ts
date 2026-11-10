@@ -10,6 +10,7 @@
 import { connectorSpecHasEvents, connectorsSpecs } from '@kbn/connector-specs';
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
+import { HITL_SLACK_ACTION_EVENT_ID } from '@kbn/workflows';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 import { z } from '@kbn/zod/v4';
 
@@ -81,14 +82,17 @@ export const getConnectorEventTriggerDefinitions = ({
   }
 
   return specs.filter(isConnectorSpecWithEvents).flatMap((spec) =>
-    Object.values(spec.events.definitions).map((eventDefinition) => ({
-      id: eventDefinition.eventId,
-      title: formatConnectorEventTriggerTitle(spec.metadata.displayName, eventDefinition.title),
-      description: eventDefinition.description,
-      eventSchema: toConnectorEventTriggerSchema(eventDefinition.eventSchema),
-      stability: 'tech_preview' as const,
-      requiresConnectorId: true,
-    }))
+    Object.values(spec.events.definitions)
+      // HITL interactivity resumes a paused step; it must not start workflows.
+      .filter((eventDefinition) => eventDefinition.eventId !== HITL_SLACK_ACTION_EVENT_ID)
+      .map((eventDefinition) => ({
+        id: eventDefinition.eventId,
+        title: formatConnectorEventTriggerTitle(spec.metadata.displayName, eventDefinition.title),
+        description: eventDefinition.description,
+        eventSchema: toConnectorEventTriggerSchema(eventDefinition.eventSchema),
+        stability: 'tech_preview' as const,
+        requiresConnectorId: true,
+      }))
   );
 };
 

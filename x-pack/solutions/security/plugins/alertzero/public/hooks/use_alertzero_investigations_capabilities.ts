@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ALERTZERO_FEATURE_ID } from '@kbn/alertzero-common';
 import type { Capabilities, CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
@@ -14,22 +13,13 @@ import {
 } from '@kbn/agentic-investigations-plugin/public';
 
 /**
- * The agentic-investigations UI capability flags as they apply inside AlertZero: the manage
- * flags additionally require the AlertZero All privilege.
+ * The agentic-investigations UI capability flags as they apply inside AlertZero. AlertZero grants
+ * no investigation or escalation privileges, so they follow the Agentic Investigations feature
+ * alone.
  */
 export const getAlertZeroInvestigationsCapabilities = (
   capabilities: Capabilities
-): AgenticInvestigationsCapabilities => {
-  const canWrite = capabilities[ALERTZERO_FEATURE_ID]?.write === true;
-  const { showEscalations, manageEscalations, manageInvestigations, canAccessAgentBuilder } =
-    getAgenticInvestigationsCapabilities(capabilities);
-  return {
-    showEscalations,
-    manageEscalations: canWrite && manageEscalations,
-    manageInvestigations: canWrite && manageInvestigations,
-    canAccessAgentBuilder,
-  };
-};
+): AgenticInvestigationsCapabilities => getAgenticInvestigationsCapabilities(capabilities);
 
 /** React hook wrapper around `getAlertZeroInvestigationsCapabilities`. */
 export const useAlertZeroInvestigationsCapabilities = (): AgenticInvestigationsCapabilities => {

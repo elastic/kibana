@@ -7,6 +7,7 @@
 
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
@@ -18,10 +19,11 @@ const createPlugin = (memoryEnabled = false) =>
   new NightshiftInvestigationsPlugin(
     coreMock.createPluginInitializerContext({
       enabled: true,
-      sandbox: undefined,
-      cortex: { enabled: false },
+      wiki: { enabled: false },
       decision_trees: { enabled: true },
       memory: { enabled: memoryEnabled },
+      learning: { enabled: true },
+      findings_recorder: { enabled: true },
     })
   );
 
@@ -31,6 +33,43 @@ const createSetupDeps = () =>
   } as unknown as NightshiftInvestigationsSetupDeps);
 
 describe('NightshiftInvestigationsPlugin setup', () => {
+  it('registers the investigator and the assistant without connectors of their own', async () => {
+    const agentBuilder = agentBuilderMocks.createSetup();
+    const plugin = new NightshiftInvestigationsPlugin(
+      coreMock.createPluginInitializerContext({
+        enabled: true,
+        wiki: { enabled: false },
+        decision_trees: { enabled: false },
+        memory: { enabled: false },
+        learning: { enabled: true },
+      })
+    );
+    plugin.setup(coreMock.createSetup(), {
+      ...createSetupDeps(),
+      agentBuilder,
+      sandbox: { isAvailable: true },
+    });
+
+    const connectorsFor = async (id: string): Promise<string[] | undefined> => {
+      const definition = agentBuilder.agents.registerType.mock.calls.find(
+        ([type]) => type.id === id
+      )?.[0];
+      if (!definition) throw new Error(`Agent type not registered: ${id}`);
+      const { baseConfiguration } = definition;
+      const configuration =
+        typeof baseConfiguration === 'function'
+          ? await baseConfiguration({
+              spaceId: 'default',
+              request: httpServerMock.createKibanaRequest(),
+            })
+          : baseConfiguration;
+      return configuration.connector_ids;
+    };
+    // Connectors are the ones users assign to the investigator; no setting adds one.
+    await expect(connectorsFor('platform.nightshift.investigation-type')).resolves.toEqual([]);
+    await expect(connectorsFor('platform.nightshift.assistant-type')).resolves.toEqual([]);
+  });
+
   it('registers the investigation locator on the server', async () => {
     const dependencies = createSetupDeps();
     createPlugin().setup(coreMock.createSetup(), dependencies);
@@ -83,7 +122,28 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     );
   });
 
-  it('registers investigation steps when Cortex, memory, and decision trees are disabled', () => {
+  it('registers the reference-free, alert-outcome and Wiki judges with the evals plugin', () => {
+    const registerEvaluator = jest.fn();
+
+    createPlugin().setup(coreMock.createSetup(), {
+      ...createSetupDeps(),
+      evals: { enabled: true, mode: 'runtime', registerTaskProvider: jest.fn(), registerEvaluator },
+    });
+
+    expect(registerEvaluator.mock.calls.map(([{ name, version }]) => `${name}@${version}`)).toEqual(
+      [
+        'nightshift_rca_reward@1.0.0',
+        'nightshift_investigation_process@1.0.0',
+        'nightshift_conclusion_quality@1.0.0',
+        'nightshift_alert_outcome_rca_accuracy@1.0.0',
+        'nightshift_alert_outcome_benign_classification@1.0.0',
+        'nightshift_wiki_pages_read@1.0.0',
+        'nightshift_wiki_page_influence@1.0.0',
+      ]
+    );
+  });
+
+  it('registers investigation steps when Wiki, memory, and decision trees are disabled', () => {
     const registerStepDefinition = jest.fn();
     const dependencies = {
       ...createSetupDeps(),
@@ -100,12 +160,14 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     expect(registerStepDefinition.mock.calls.map(([definition]) => definition.id)).toEqual(
       expect.arrayContaining([
         'nightshift.resolveModel',
+        'nightshift.onlineEvals.classifyRound',
+        'nightshift.onlineEvals.score',
         'nightshift.sendNotifications',
         'nightshift.obtainSandbox',
-        'nightshift.cortexHydrate',
+        'nightshift.wikiHydrate',
         'nightshift.memoryMaterializeToSandbox',
         'nightshift.composeHydrateNotifications',
-        'nightshift.cortexOptimize',
+        'nightshift.wikiOptimize',
         'nightshift.memoryOptimize',
       ])
     );

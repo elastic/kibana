@@ -57,7 +57,7 @@ export const getSectionsById = ({
 /** Section id of every panel, or null for panels at the top level. */
 export const getSectionIdByPanelId = ({
   panels,
-}: DashboardAttachmentData): Map<string, string | null> =>
+}: Pick<DashboardAttachmentData, 'panels'>): Map<string, string | null> =>
   new Map(
     panels.flatMap(
       (widget): Array<[string, string | null]> =>

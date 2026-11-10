@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-/* eslint-disable require-atomic-updates */
+/* eslint-disable @kbn/compat/eslint-require-atomic-updates */
 
 import { blue, green } from 'chalk';
 import type { DistinctQuestion } from 'inquirer';

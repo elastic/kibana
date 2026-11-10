@@ -13,6 +13,7 @@ const getParams = (search: string) => Object.fromEntries(new URLSearchParams(sea
 
 interface Props {
   serviceName: string;
+  environment?: string;
   timeRange?: ClassicRumTimeRange;
   onTimeRangeChange?: (timeRange: ClassicRumTimeRange) => void;
 }
@@ -28,6 +29,20 @@ describe('useEmbeddedHistory', () => {
 
     expect(getParams(result.current.location.search)).toEqual({
       serviceName: 'my-app',
+      ...timeRange,
+    });
+  });
+
+  it('starts in the host environment', () => {
+    const { result } = renderUseEmbeddedHistory({
+      serviceName: 'my-app',
+      environment: 'production',
+      timeRange,
+    });
+
+    expect(getParams(result.current.location.search)).toEqual({
+      serviceName: 'my-app',
+      environment: 'production',
       ...timeRange,
     });
   });

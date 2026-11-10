@@ -7,7 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import { APP_ID, DOC_TYPE, getBasePath, getEditPath, STAGE_ID } from '../common/constants';
+import {
+  APP_ID,
+  DOC_TYPE,
+  getBasePath,
+  getEditPath,
+  LENS_ICON,
+  STAGE_ID,
+} from '../common/constants';
 import { getLensBasicClient } from './persistence/basic_lens_client';
 
 export const lensVisTypeAlias: VisTypeAlias = {
@@ -24,7 +31,7 @@ export const lensVisTypeAlias: VisTypeAlias = {
     defaultMessage: 'Build charts, metrics, and tables with a point-and-click editor.',
   }),
   order: 60,
-  icon: 'productLens',
+  icon: LENS_ICON,
   stage: STAGE_ID,
   appExtensions: {
     visualizations: {
@@ -42,7 +49,7 @@ export const lensVisTypeAlias: VisTypeAlias = {
           updatedAt,
           managed,
           editor: { editUrl: getEditPath(id), editApp: 'lens' },
-          icon: 'productLens',
+          icon: LENS_ICON,
           stage: STAGE_ID,
           savedObjectType: type,
           type: DOC_TYPE,

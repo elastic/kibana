@@ -25,6 +25,7 @@ import type {
   ActionTypeSecrets,
   InMemoryConnector,
 } from './types';
+import { isSandboxCapableConnectorType } from './application/connector/lib/is_sandbox_capable_connector';
 
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
@@ -38,6 +39,7 @@ export interface ActionTypeRegistryOpts {
 interface ListOpts {
   featureId?: string;
   exposeValidation?: boolean;
+  sandboxCapableOnly?: boolean;
 }
 
 export class ActionTypeRegistry {
@@ -121,6 +123,12 @@ export class ActionTypeRegistry {
    */
   public isSystemActionType = (actionTypeId: string): boolean =>
     Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
+
+  /**
+   * Returns true if the action type is defined by a connector spec
+   */
+  public isSpecActionType = (actionTypeId: string): boolean =>
+    this.actionTypes.get(actionTypeId)?.source === ACTION_TYPE_SOURCES.spec;
 
   /**
    * Returns true if the connector type has a sub-feature type defined
@@ -271,12 +279,15 @@ export class ActionTypeRegistry {
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(
-    { featureId, exposeValidation }: ListOpts = { exposeValidation: false }
+    { featureId, exposeValidation, sandboxCapableOnly }: ListOpts = { exposeValidation: false }
   ): CommonActionType[] {
     return Array.from(this.actionTypes)
       .filter(([_, actionType]) => {
         return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
       })
+      .filter(([_, actionType]) =>
+        sandboxCapableOnly ? isSandboxCapableConnectorType(actionType) : true
+      )
       .map(([actionTypeId, actionType]) => ({
         id: actionTypeId,
         name: actionType.name,

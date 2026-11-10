@@ -130,6 +130,13 @@ steps:
   # ---------------------------------------------------------------------------
   - name: plan_sweep
     type: alertzero.triage.planSweep
+    # A claim that loses a race with another writer is retried inside the step; this covers what
+    # is left. The step output is read below, so there is no `continue: true`. A retry plans again,
+    # and the alerts a failed attempt claimed have no execution tag, so it reclaims them.
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 10s
     with:
       batch_workflow_id: "{{ consts.batch_workflow_id }}"
       analysis_tag_prefix: "{{ steps.fetch_analysis_runtime_config.output.tagPrefix }}"
