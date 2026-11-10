@@ -249,6 +249,32 @@ describe('usePanelSelectionGestures', () => {
       expect(getSelection()).toEqual(['panel1']);
     });
 
+    it('handles Escape and Ctrl+A while the panel checkbox is focused', () => {
+      const checkbox = createElement(
+        createElement(panels.panel1, 'div', { class: 'embPanel__selectPanel' }),
+        'input',
+        { type: 'checkbox' }
+      );
+      renderGestures();
+
+      fireEvent.keyDown(checkbox, { key: 'a', ctrlKey: true });
+      expect(getSelection()).toEqual(['panel1', 'panel2', 'panel3']);
+
+      fireEvent.keyDown(checkbox, { key: 'Escape' });
+      expect(getSelection()).toEqual([]);
+    });
+
+    it('moves focus off a previously focused input on a selection gesture, so Escape clears', () => {
+      renderGestures();
+      input.focus();
+
+      click(panels.panel2, { ctrlKey: true });
+      expect(document.activeElement).not.toBe(input);
+
+      fireEvent.keyDown(document.activeElement ?? document, { key: 'Escape' });
+      expect(getSelection()).toEqual([]);
+    });
+
     it('selects every mounted panel on Ctrl+A instead of selecting the page text', () => {
       renderGestures({ unmountedPanelIds: ['collapsedPanel'] });
 

@@ -92,7 +92,7 @@ export const MARQUEE_PREVIEW_CLASS = 'dshDashboardGrid__item--marqueePreview';
  */
 const KEYBOARD_OWNED_BY_TARGET_SELECTOR = [
   '[data-euiportal]',
-  'input',
+  'input:not([type="checkbox"]):not([type="radio"])',
   'textarea',
   'select',
   '[contenteditable="true"]',
@@ -274,6 +274,9 @@ export const usePanelSelectionGestures = ({
 
       e.preventDefault(); // no text selection or native drag
       e.stopPropagation(); // charts, maps and the grid drag/resize handles never see this mousedown
+      // preventDefault also keeps focus where it was (e.g. the query bar), which would then receive
+      // the selection keyboard shortcuts
+      if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
 
       // The page may scroll while the rectangle is being drawn (auto-scroll near the viewport edges),
       // so the start corner is anchored to the document and converted back to viewport coordinates
