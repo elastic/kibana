@@ -17,7 +17,7 @@ import {
 } from '@kbn/workflows';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import {
-  PAGE_DEFINITION_API_PATH,
+  PAGE_API_PATH,
   PAGE_FORM_PATH,
   PAGE_LINK_API_PATH,
   PAGE_ROTATE_API_PATH,
@@ -34,7 +34,6 @@ import {
 import {
   EXTERNAL_RESUME_SECURITY,
   handleExternalResumeError,
-  htmlSuccess,
 } from '../executions/external_resume_route_helpers';
 import type { RouteDependencies } from '../types';
 import { INTERNAL_API_VERSION } from '../utils/route_constants';
@@ -47,15 +46,7 @@ const pageParamsSchema = schema.object({
   secret: schema.string({ maxLength: PAGE_SECRET_MAX_LENGTH }),
 });
 
-/** The page is a hosted app, not an API, so it stays out of the OpenAPI spec. */
-const PAGE_ROUTE_OPTIONS = { access: 'public', excludeFromOAS: true } as const;
-
 const JSON_NO_STORE_HEADERS = { 'cache-control': 'no-store', 'referrer-policy': 'no-referrer' };
-
-const isJsonRequest = (headers: Record<string, unknown>): boolean => {
-  const contentType = headers['content-type'];
-  return typeof contentType === 'string' && contentType.includes('application/json');
-};
 
 /**
  * JSON twin of `handleExternalResumeError` for the page app. A miss never says why, so
@@ -145,7 +136,7 @@ export function registerPageDefinitionRoute(deps: RouteDependencies) {
 
   router.get(
     {
-      path: PAGE_DEFINITION_API_PATH,
+      path: PAGE_API_PATH,
       security: EXTERNAL_RESUME_SECURITY,
       options: { access: 'internal', excludeFromOAS: true },
       validate: { params: pageParamsSchema },
@@ -164,15 +155,15 @@ export function registerPageDefinitionRoute(deps: RouteDependencies) {
   );
 }
 
-/** POST a page submission, which validates the input and runs the workflow. */
+/** POST a page submission as JSON. It validates the input and runs the workflow. */
 export function registerPageSubmitRoute(deps: RouteDependencies) {
   const { router, api, workflowsService, spaces, logger, audit } = deps;
 
   router.post(
     {
-      path: PAGE_FORM_PATH,
+      path: PAGE_API_PATH,
       security: EXTERNAL_RESUME_SECURITY,
-      options: { ...PAGE_ROUTE_OPTIONS, xsrfRequired: false },
+      options: { access: 'internal', excludeFromOAS: true },
       validate: {
         params: pageParamsSchema,
         body: schema.recordOf(schema.string({ maxLength: 256 }), schema.any()),
@@ -185,8 +176,7 @@ export function registerPageSubmitRoute(deps: RouteDependencies) {
         const spaceId = spaces.getSpaceId(request);
         const page = await resolvePage(workflowsService, { ...request.params, spaceId });
         workflowId = page.workflow.id;
-        const isJson = isJsonRequest(request.headers);
-        const inputs = parsePageSubmission(request.body, page.inputsSchema, { isJson });
+        const inputs = parsePageSubmission(request.body, page.inputsSchema);
         const submitter = getPageSubmitter(request.headers, request.socket?.remoteAddress);
 
         // The visitor has no Kibana identity, so the run uses the workflow's `run_as`
@@ -201,16 +191,12 @@ export function registerPageSubmitRoute(deps: RouteDependencies) {
 
         audit.logWorkflowRun(request, { workflowId, executionId: workflowExecutionId });
         // The visitor gets no execution id: it would name a run they cannot see.
-        return isJson
-          ? response.ok({ body: { submitted: true }, headers: JSON_NO_STORE_HEADERS })
-          : htmlSuccess(response);
+        return response.ok({ body: { submitted: true }, headers: JSON_NO_STORE_HEADERS });
       } catch (error) {
         if (workflowId) {
           audit.logWorkflowRun(request, { workflowId, error });
         }
-        return isJsonRequest(request.headers)
-          ? pageJsonError(response, error, logger)
-          : handleExternalResumeError(response, error, logger, 404);
+        return pageJsonError(response, error, logger);
       }
     })
   );

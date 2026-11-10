@@ -11,7 +11,8 @@
 export const PAGE_APP_ROUTE = '/pages';
 
 /**
- * Unauthenticated route that returns the form definition of a page (title, description,
- * schema, ui). The secret in the path is the credential, as on the page URL.
+ * Unauthenticated JSON API of a page. GET returns the form definition (title, description,
+ * schema, ui). POST submits the form. The secret in the path is the credential, as on the
+ * page URL.
  */
-export const PAGE_DEFINITION_API_PATH = '/internal/workflows/pages/{workflowId}/k/{secret}';
+export const PAGE_API_PATH = '/internal/workflows/pages/{workflowId}/k/{secret}';

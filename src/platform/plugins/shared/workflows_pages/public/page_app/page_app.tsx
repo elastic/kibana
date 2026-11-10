@@ -28,7 +28,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { PageInputs, PageUi } from '@kbn/workflows/spec/schema/triggers/page_trigger_schema';
 import { PageFormValidator } from './page_validator';
 import { pageTemplates, pageWidgets, toRenderSchema, withWidgetComponents } from './page_widgets';
-import { PAGE_DEFINITION_API_PATH } from '../../common';
+import { PAGE_API_PATH } from '../../common';
 
 /** The form definition returned by the server, after the secret check. */
 interface PageDefinition {
@@ -56,11 +56,8 @@ export const parsePagePath = (path: string): PageRef | undefined => {
   return { workflowId: decodeURIComponent(match[1]), secret: decodeURIComponent(match[2]) };
 };
 
-const pagePath = ({ workflowId, secret }: PageRef) =>
-  `/pages/${encodeURIComponent(workflowId)}/k/${encodeURIComponent(secret)}`;
-
-const definitionPath = ({ workflowId, secret }: PageRef) =>
-  PAGE_DEFINITION_API_PATH.replace('{workflowId}', encodeURIComponent(workflowId)).replace(
+const pageApiPath = ({ workflowId, secret }: PageRef) =>
+  PAGE_API_PATH.replace('{workflowId}', encodeURIComponent(workflowId)).replace(
     '{secret}',
     encodeURIComponent(secret)
   );
@@ -109,7 +106,7 @@ export const PageApp = ({ http, page }: { http: HttpSetup; page: PageRef | undef
       return;
     }
     http
-      .get<PageDefinition>(definitionPath(page))
+      .get<PageDefinition>(pageApiPath(page))
       .then((definition) => setLoadState({ status: 'ready', definition }))
       .catch(() => setLoadState({ status: 'failed' }));
   }, [http, page]);
@@ -130,7 +127,7 @@ export const PageApp = ({ http, page }: { http: HttpSetup; page: PageRef | undef
       setIsSubmitting(true);
       setSubmitError(undefined);
       try {
-        await http.post(pagePath(page), { body: JSON.stringify(submitted ?? {}) });
+        await http.post(pageApiPath(page), { body: JSON.stringify(submitted ?? {}) });
         setIsSubmitted(true);
       } catch (error) {
         setSubmitError(errorMessage(error));

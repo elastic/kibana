@@ -132,24 +132,20 @@ describe('parsePageSubmission', () => {
     };
 
     it('requires a field once its rule applies', () => {
-      expect(() =>
-        parsePageSubmission({ notify: true }, conditionalSchema, { isJson: true })
-      ).toThrow('email: This field is required');
+      expect(() => parsePageSubmission({ notify: true }, conditionalSchema)).toThrow(
+        'email: This field is required'
+      );
     });
 
     it('keeps a conditional field from a JSON submission', () => {
       expect(
-        parsePageSubmission({ notify: true, email: 'a@example.com' }, conditionalSchema, {
-          isJson: true,
-        })
+        parsePageSubmission({ notify: true, email: 'a@example.com' }, conditionalSchema)
       ).toEqual({ notify: true, email: 'a@example.com' });
     });
 
     it('drops a conditional field whose rule does not apply', () => {
       expect(
-        parsePageSubmission({ notify: false, email: 'a@example.com' }, conditionalSchema, {
-          isJson: true,
-        })
+        parsePageSubmission({ notify: false, email: 'a@example.com' }, conditionalSchema)
       ).toEqual({ notify: false });
     });
   });

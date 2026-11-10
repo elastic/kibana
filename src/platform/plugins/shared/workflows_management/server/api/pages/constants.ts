@@ -8,8 +8,8 @@
  */
 
 /**
- * Public page URL. GET serves the page app, POST submits it. Spaces strips the
- * `/s/{spaceId}` prefix before routing, so one path serves every space.
+ * Public page URL. GET serves the page app, which submits through `PAGE_API_PATH`.
+ * Spaces strips the `/s/{spaceId}` prefix before routing, so one path serves every space.
  *
  * `{secret}` is the page's capability: anyone with the URL can submit the page.
  * It lives in an encrypted saved object, never in the YAML or the workflow
@@ -17,7 +17,7 @@
  */
 export const PAGE_FORM_PATH = '/pages/{workflowId}/k/{secret}';
 
-export { PAGE_DEFINITION_API_PATH } from '@kbn/workflows-pages-plugin/common';
+export { PAGE_API_PATH } from '@kbn/workflows-pages-plugin/common';
 export { PAGE_LINK_API_PATH, PAGE_ROTATE_API_PATH } from '../../../common/lib/api_constants';
 
 export const PAGE_WORKFLOW_ID_MAX_LENGTH = 255;

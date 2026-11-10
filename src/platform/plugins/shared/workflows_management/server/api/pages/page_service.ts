@@ -11,11 +11,9 @@ import { isPageTrigger } from '@kbn/workflows';
 import type { PageTrigger, WorkflowDetailDto } from '@kbn/workflows';
 import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
 import { validatePageInputs } from '@kbn/workflows/spec/lib/page_inputs';
-import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import type { PageInputs, PageUi } from '@kbn/workflows/spec/schema/triggers/page_trigger_schema';
 import { PAGE_FORM_PATH } from './constants';
 import { ExternalResumeError } from '../external_resume/external_resume_error';
-import { parseExternalResumeFormBody } from '../external_resume/external_resume_form_fields';
 
 /** Where the submitting client came from. Recorded on the execution for the POC. */
 export interface PageSubmitter {
@@ -112,25 +110,14 @@ export const toPageDefinition = ({ trigger, inputsSchema }: ResolvedPage): PageD
 });
 
 /**
- * Validates a submission against the page's input schema, with its `if`/`then` rules
- * applied. The page app posts JSON. A plain HTML form posts strings, so those are coerced
- * to the declared root types first.
+ * Validates a JSON submission against the page's input schema, with its `if`/`then` rules
+ * applied.
  */
 export const parsePageSubmission = (
   body: Record<string, unknown>,
-  inputsSchema: PageInputs | undefined,
-  { isJson = false }: { isJson?: boolean } = {}
+  inputsSchema: PageInputs | undefined
 ): Record<string, unknown> => {
-  let values: Record<string, unknown>;
-  try {
-    values = isJson
-      ? body
-      : parseExternalResumeFormBody(body, inputsSchema as JsonModelSchemaType | undefined);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Invalid form submission';
-    throw new ExternalResumeError(message, 400, true);
-  }
-  const result = validatePageInputs(inputsSchema, values);
+  const result = validatePageInputs(inputsSchema, body);
   if (!result.success) {
     const [issue] = result.issues;
     const field = issue?.path.join('.');
