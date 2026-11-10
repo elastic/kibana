@@ -7,7 +7,6 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import type { TinesStoryExport } from '../../../../../../common/siem_migrations/model/vendor/workflows/tines.gen';
 import type { WorkflowMigrationWorkflow } from '../../../../../../common/siem_migrations/model/workflow_migration.gen';
 import { SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH } from '../../../../../../common/siem_migrations/workflows/constants';
 import {
@@ -22,21 +21,6 @@ import { withExistingMigration } from '../../../common/api/util/with_existing_mi
 import { authz } from '../util/authz';
 
 type CreateMigrationWorkflowInput = CreateMigrationItemInput<WorkflowMigrationWorkflow>;
-
-const toWorkflowItem = (
-  migrationId: string,
-  story: TinesStoryExport
-): CreateMigrationWorkflowInput => ({
-  migration_id: migrationId,
-  original_workflow: {
-    id: story.guid != null && story.guid.length > 0 ? story.guid : story.name,
-    vendor: 'tines',
-    title: story.name,
-    ...(typeof story.description === 'string' ? { description: story.description } : {}),
-    data: JSON.stringify(story),
-    format: 'json',
-  },
-});
 
 export const registerSiemWorkflowMigrationsCreateWorkflowsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -61,8 +45,8 @@ export const registerSiemWorkflowMigrationsCreateWorkflowsRoute = (
       withLicense(
         withExistingMigration(async (context, req, res): Promise<IKibanaResponse> => {
           const { migration_id: migrationId } = req.params;
-          const stories = req.body;
-          if (stories.length === 0) {
+          const originalWorkflows = req.body;
+          if (originalWorkflows.length === 0) {
             return res.noContent();
           }
 
@@ -76,25 +60,26 @@ export const registerSiemWorkflowMigrationsCreateWorkflowsRoute = (
               ctx.securitySolution.siemMigrations.getWorkflowsClient();
             await siemMigrationAuditLogger.logAddWorkflows({
               migrationId,
-              count: stories.length,
+              count: originalWorkflows.length,
             });
 
-            await workflowsMigrationsClient.data.items.create(
-              stories.map((story) => toWorkflowItem(migrationId, story))
+            const workflows = originalWorkflows.map<CreateMigrationWorkflowInput>(
+              (originalWorkflow) => ({
+                migration_id: migrationId,
+                original_workflow: originalWorkflow,
+              })
             );
+            await workflowsMigrationsClient.data.items.create(workflows);
 
             return res.ok();
           } catch (error) {
-            logger.error(`Error creating workflows for migration ID ${migrationId}: ${error}`);
+            logger.error(error);
             await siemMigrationAuditLogger.logAddWorkflows({
               migrationId,
-              count: stories.length,
+              count: originalWorkflows.length,
               error,
             });
-            return res.customError({
-              statusCode: 500,
-              body: error instanceof Error ? error.message : String(error),
-            });
+            return res.badRequest({ body: error.message });
           }
         })
       )

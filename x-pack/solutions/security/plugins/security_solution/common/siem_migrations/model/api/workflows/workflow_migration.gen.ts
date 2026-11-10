@@ -20,11 +20,34 @@ import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers/v4';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { MigrationTaskStats, MigrationTranslationStats, LangSmithOptions } from '../../common.gen';
 import {
+  OriginalWorkflow,
   WorkflowMigration,
   WorkflowMigrationWorkflow,
   UpdateWorkflowMigrationWorkflow,
 } from '../../workflow_migration.gen';
 import { TinesStoryExport } from '../../vendor/workflows/tines.gen';
+
+export const CreateTinesWorkflowMigrationWorkflowsRequestParams = lazySchema(() =>
+  z.object({
+    migration_id: NonEmptyString,
+  })
+);
+export type CreateTinesWorkflowMigrationWorkflowsRequestParams = z.infer<
+  typeof CreateTinesWorkflowMigrationWorkflowsRequestParams
+>;
+export type CreateTinesWorkflowMigrationWorkflowsRequestParamsInput = z.input<
+  typeof CreateTinesWorkflowMigrationWorkflowsRequestParams
+>;
+
+export const CreateTinesWorkflowMigrationWorkflowsRequestBody = lazySchema(() =>
+  z.array(TinesStoryExport).max(1000)
+);
+export type CreateTinesWorkflowMigrationWorkflowsRequestBody = z.infer<
+  typeof CreateTinesWorkflowMigrationWorkflowsRequestBody
+>;
+export type CreateTinesWorkflowMigrationWorkflowsRequestBodyInput = z.input<
+  typeof CreateTinesWorkflowMigrationWorkflowsRequestBody
+>;
 
 export const CreateWorkflowMigrationRequestBody = lazySchema(() =>
   z.object({
@@ -62,7 +85,7 @@ export type CreateWorkflowMigrationWorkflowsRequestParamsInput = z.input<
 >;
 
 export const CreateWorkflowMigrationWorkflowsRequestBody = lazySchema(() =>
-  z.array(TinesStoryExport).max(1000)
+  z.array(OriginalWorkflow).max(1000)
 );
 export type CreateWorkflowMigrationWorkflowsRequestBody = z.infer<
   typeof CreateWorkflowMigrationWorkflowsRequestBody

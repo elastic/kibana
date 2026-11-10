@@ -15,6 +15,7 @@ import {
   SIEM_WORKFLOW_MIGRATION_START_PATH,
   SIEM_WORKFLOW_MIGRATION_STATS_PATH,
   SIEM_WORKFLOW_MIGRATION_STOP_PATH,
+  SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
   SIEM_WORKFLOW_MIGRATION_TRANSLATION_STATS_PATH,
   SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
 } from '../../../../../common/siem_migrations/workflows/constants';
@@ -32,6 +33,7 @@ import { registerSiemWorkflowMigrationsStartRoute } from './start';
 import { registerSiemWorkflowMigrationsUpdateRoute } from './update';
 import { registerSiemWorkflowMigrationsCreateWorkflowsRoute } from './workflows/create';
 import { registerSiemWorkflowMigrationsGetWorkflowsRoute } from './workflows/get';
+import { registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute } from './workflows/tines/create';
 
 const enabledConfig = {
   experimentalFeatures: { tinesWorkflowsMigration: true },
@@ -72,6 +74,7 @@ describe('workflow migration routes', () => {
     ]);
     expect(registeredPaths(server, 'post')).toEqual([
       SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
+      SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
       SIEM_WORKFLOW_MIGRATION_START_PATH,
       SIEM_WORKFLOW_MIGRATION_STOP_PATH,
     ]);
@@ -228,7 +231,15 @@ describe('workflow migration routes', () => {
       expect(response.status).toEqual(500);
     });
 
-    it('stores a Tines story as a workflow document', async () => {
+    it('stores an original workflow with the vendor from the request', async () => {
+      const originalWorkflow = {
+        id: 'wf-1',
+        vendor: 'tines',
+        title: 'Receive alert',
+        description: 'Already normalized',
+        data: '{"name":"Receive alert"}',
+        format: 'json',
+      };
       registerSiemWorkflowMigrationsCreateWorkflowsRoute(server.router, logger);
       const response = await invokeHandler(
         'post',
@@ -237,6 +248,58 @@ describe('workflow migration routes', () => {
           method: 'post',
           path: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
           routePath: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
+          params: { migration_id: 'mig-1' },
+          body: [originalWorkflow],
+        })
+      );
+
+      expect(clients.siemWorkflowMigrationsClient.data.items.create).toHaveBeenCalledWith([
+        { migration_id: 'mig-1', original_workflow: originalWorkflow },
+      ]);
+      expect(response.ok).toHaveBeenCalled();
+    });
+
+    it('does not store workflows when the original workflow list is empty', async () => {
+      registerSiemWorkflowMigrationsCreateWorkflowsRoute(server.router, logger);
+      const response = await invokeHandler(
+        'post',
+        SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
+        requestMock.create({
+          method: 'post',
+          path: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
+          routePath: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
+          params: { migration_id: 'mig-1' },
+          body: [],
+        })
+      );
+
+      expect(clients.siemWorkflowMigrationsClient.data.items.create).not.toHaveBeenCalled();
+      expect(response.noContent).toHaveBeenCalled();
+    });
+
+    it('rejects a workflow body that is not an original workflow', () => {
+      registerSiemWorkflowMigrationsCreateWorkflowsRoute(server.router, logger);
+      const result = server.validate(
+        requestMock.create({
+          method: 'post',
+          path: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
+          params: { migration_id: 'mig-1' },
+          body: [tinesStory],
+        })
+      );
+
+      expect(result.badRequest).toHaveBeenCalled();
+    });
+
+    it('stores a Tines story as a workflow document', async () => {
+      registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute(server.router, logger);
+      const response = await invokeHandler(
+        'post',
+        SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
+        requestMock.create({
+          method: 'post',
+          path: SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
+          routePath: SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
           params: { migration_id: 'mig-1' },
           body: [tinesStory],
         })
@@ -264,14 +327,14 @@ describe('workflow migration routes', () => {
         description: null,
         agents: [{ type: 'Agents::EventTransformationAgent', name: 'Map', guid: 'agent-2' }],
       };
-      registerSiemWorkflowMigrationsCreateWorkflowsRoute(server.router, logger);
+      registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute(server.router, logger);
       await invokeHandler(
         'post',
-        SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
+        SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
         requestMock.create({
           method: 'post',
-          path: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
-          routePath: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
+          path: SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
+          routePath: SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
           params: { migration_id: 'mig-1' },
           body: [story],
         })
@@ -291,15 +354,15 @@ describe('workflow migration routes', () => {
       ]);
     });
 
-    it('does not store workflows when the story list is empty', async () => {
-      registerSiemWorkflowMigrationsCreateWorkflowsRoute(server.router, logger);
+    it('does not store workflows when the Tines story list is empty', async () => {
+      registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute(server.router, logger);
       const response = await invokeHandler(
         'post',
-        SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
+        SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
         requestMock.create({
           method: 'post',
-          path: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
-          routePath: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
+          path: SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
+          routePath: SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
           params: { migration_id: 'mig-1' },
           body: [],
         })
@@ -309,12 +372,12 @@ describe('workflow migration routes', () => {
       expect(response.noContent).toHaveBeenCalled();
     });
 
-    it('rejects a workflow body that is not a Tines story', () => {
-      registerSiemWorkflowMigrationsCreateWorkflowsRoute(server.router, logger);
+    it('rejects a Tines body that is not a story export', () => {
+      registerSiemWorkflowMigrationsCreateTinesWorkflowsRoute(server.router, logger);
       const result = server.validate(
         requestMock.create({
           method: 'post',
-          path: SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
+          path: SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
           params: { migration_id: 'mig-1' },
           body: [{ name: 'Missing agents' }],
         })

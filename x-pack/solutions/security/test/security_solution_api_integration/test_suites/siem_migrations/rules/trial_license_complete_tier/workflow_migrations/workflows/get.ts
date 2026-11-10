@@ -26,7 +26,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('lists the workflows stored for a migration', async () => {
-      await workflowMigrationRoutes.addWorkflowsToMigration({
+      await workflowMigrationRoutes.addTinesWorkflowsToMigration({
         migrationId,
         body: [tinesStoryExport],
       });

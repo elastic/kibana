@@ -30,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('deletes the migration and its stored workflows', async () => {
-      await workflowMigrationRoutes.addWorkflowsToMigration({
+      await workflowMigrationRoutes.addTinesWorkflowsToMigration({
         migrationId,
         body: [tinesStoryExport],
       });

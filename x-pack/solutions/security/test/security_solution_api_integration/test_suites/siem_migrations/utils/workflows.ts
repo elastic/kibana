@@ -13,9 +13,11 @@ import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import {
   SIEM_WORKFLOW_MIGRATIONS_PATH,
   SIEM_WORKFLOW_MIGRATION_PATH,
+  SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH,
   SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH,
 } from '@kbn/security-solution-plugin/common/siem_migrations/workflows/constants';
 import type {
+  CreateTinesWorkflowMigrationWorkflowsRequestBody,
   CreateWorkflowMigrationRequestBody,
   CreateWorkflowMigrationResponse,
   CreateWorkflowMigrationWorkflowsRequestBody,
@@ -111,6 +113,27 @@ export const workflowMigrationRouteFactory = (supertest: SuperTest.Agent) => {
       body: CreateWorkflowMigrationWorkflowsRequestBody;
     }): Promise<{ body: undefined }> => {
       const url = replaceParams(SIEM_WORKFLOW_MIGRATION_WORKFLOWS_PATH, {
+        migration_id: migrationId,
+      });
+      const response = await supertest
+        .post(url)
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(body);
+
+      assertStatusCode(expectStatusCode, response);
+      return response;
+    },
+
+    addTinesWorkflowsToMigration: async ({
+      migrationId,
+      body,
+      expectStatusCode = 200,
+    }: MigrationRequestParams & {
+      body: CreateTinesWorkflowMigrationWorkflowsRequestBody;
+    }): Promise<{ body: undefined }> => {
+      const url = replaceParams(SIEM_WORKFLOW_MIGRATION_TINES_WORKFLOWS_PATH, {
         migration_id: migrationId,
       });
       const response = await supertest

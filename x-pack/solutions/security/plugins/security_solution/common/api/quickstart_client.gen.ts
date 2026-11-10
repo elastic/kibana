@@ -564,6 +564,8 @@ import type {
   UpsertRuleMigrationResourcesResponse,
 } from '../siem_migrations/model/api/rules/rule_migration.gen';
 import type {
+  CreateTinesWorkflowMigrationWorkflowsRequestParamsInput,
+  CreateTinesWorkflowMigrationWorkflowsRequestBodyInput,
   CreateWorkflowMigrationRequestBodyInput,
   CreateWorkflowMigrationResponse,
   CreateWorkflowMigrationWorkflowsRequestParamsInput,
@@ -1065,6 +1067,25 @@ For detailed information on Kibana actions and alerting, and additional API call
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Parses Tines story exports and stores each story as an original workflow with vendor tines and format json. Use this for a raw Tines story export. An empty list stores nothing. A body that is not a Tines story is rejected and stores nothing. A missing migration id returns 404.
+   */
+  async createTinesWorkflowMigrationWorkflows(props: CreateTinesWorkflowMigrationWorkflowsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateTinesWorkflowMigrationWorkflows`);
+    return this.kbnClient
+      .request({
+        path: replaceParams(
+          '/internal/siem_migrations/workflows/{migration_id}/tines/workflows',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Create a new Timeline or Timeline template.
    */
   async createTimelines(props: CreateTimelinesProps) {
@@ -1148,7 +1169,7 @@ For detailed information on Kibana actions and alerting, and additional API call
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Adds original Tines story exports to an already existing workflow migration
+   * Adds original workflows to an existing migration. Each workflow already includes its vendor, so this route does not parse a vendor export. Use it when the caller has an OriginalWorkflow. An empty list stores nothing. A missing migration id returns 404.
    */
   async createWorkflowMigrationWorkflows(props: CreateWorkflowMigrationWorkflowsProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateWorkflowMigrationWorkflows`);
@@ -4088,6 +4109,10 @@ export interface CreateRuleMigrationRulesProps {
 export interface CreateSentinelRuleMigrationRulesProps {
   params: CreateSentinelRuleMigrationRulesRequestParamsInput;
   body: CreateSentinelRuleMigrationRulesRequestBodyInput;
+}
+export interface CreateTinesWorkflowMigrationWorkflowsProps {
+  params: CreateTinesWorkflowMigrationWorkflowsRequestParamsInput;
+  body: CreateTinesWorkflowMigrationWorkflowsRequestBodyInput;
 }
 export interface CreateTimelinesProps {
   body: CreateTimelinesRequestBodyInput;
