@@ -1,5 +1,5 @@
 {
-  "sha1": "b45a50d5fba97baac1f6acc23158960750620aca",
+  "sha1": "1599ada04a24c297e4eca5e9587a410cedace8ca",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -114,6 +114,34 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/isolate_from_case.spec.ts",
         "line": 72,
         "column": 9
+      }
+    },
+    {
+      "id": "7d91e45b882d028-f94b75edaad1ce6",
+      "title": "Response console from an alert opens the console from the alert flyout and keeps its output when reopened from the endpoint list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/response_console_from_alerts.spec.ts",
+        "line": 37,
+        "column": 33
+      }
+    },
+    {
+      "id": "7d91e45b882d028-cb1b20981a6e278",
+      "title": "Response console from an alert opens the console from the alert flyout in Timeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/edr_response_actions/ui/parallel_tests/response_console_from_alerts.spec.ts",
+        "line": 51,
+        "column": 53
       }
     },
     {
