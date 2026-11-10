@@ -12,14 +12,13 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { MissingDataStreamCallout } from './missing_data_stream_callout';
 
 const mockFetch = jest.fn();
-const mockNavigateToApp = jest.fn();
+const mockNavigateToStreamsList = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockOpenConfirm = jest.fn();
 
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     core: {
-      application: { navigateToApp: mockNavigateToApp },
       notifications: { toasts: { addSuccess: mockAddSuccess } },
       overlays: { openConfirm: mockOpenConfirm },
     },
@@ -33,6 +32,10 @@ jest.mock('../../../../hooks/use_kibana', () => ({
       },
     },
   }),
+}));
+
+jest.mock('../../../streams_layout/use_streams_list_link', () => ({
+  useNavigateToStreamsList: () => mockNavigateToStreamsList,
 }));
 
 describe('MissingDataStreamCallout', () => {
@@ -83,7 +86,7 @@ describe('MissingDataStreamCallout', () => {
     expect(refreshDefinition).toHaveBeenCalled();
   });
 
-  it('deletes stream definition after confirmation and navigates away', async () => {
+  it('deletes stream definition after confirmation and goes back to the streams list', async () => {
     const refreshDefinition = jest.fn();
     const user = userEvent.setup();
 
@@ -106,7 +109,7 @@ describe('MissingDataStreamCallout', () => {
       signal: expect.anything(),
     });
     expect(mockAddSuccess).toHaveBeenCalled();
-    expect(mockNavigateToApp).toHaveBeenCalledWith('/streams');
+    expect(mockNavigateToStreamsList).toHaveBeenCalled();
   });
 
   it('does not delete if confirmation is cancelled', async () => {
@@ -130,7 +133,7 @@ describe('MissingDataStreamCallout', () => {
       'DELETE /api/streams/{name} 2023-10-31',
       expect.anything()
     );
-    expect(mockNavigateToApp).not.toHaveBeenCalled();
+    expect(mockNavigateToStreamsList).not.toHaveBeenCalled();
   });
 
   describe('canDelete prop', () => {

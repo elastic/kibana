@@ -8,12 +8,20 @@
 import { renderHook } from '@testing-library/react';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
-import { rememberClassicTabOrigin, useStreamsListLink } from './use_streams_list_link';
+import {
+  rememberClassicTabOrigin,
+  useNavigateToStreamsList,
+  useStreamsListLink,
+} from './use_streams_list_link';
 
 jest.mock('../../hooks/use_streams_app_router', () => ({ useStreamsAppRouter: jest.fn() }));
 jest.mock('../../hooks/use_streams_privileges', () => ({ useStreamsPrivileges: jest.fn() }));
+jest.mock('../../hooks/use_time_range', () => ({
+  useTimeRange: () => ({ rangeFrom: 'now-15m', rangeTo: 'now' }),
+}));
 
 const link = jest.fn((path: string, params?: unknown) => JSON.stringify({ path, params }));
+const push = jest.fn();
 
 const CLASSIC_TAB_LINK = JSON.stringify({
   path: '/v2/unit/{unitId}/{tab}',
@@ -24,11 +32,21 @@ const ROOT_LINK = JSON.stringify({ path: '/' });
 const renderLink = ({ legacy = true, v2 = true }: { legacy?: boolean; v2?: boolean } = {}) => {
   jest
     .mocked(useStreamsAppRouter)
-    .mockReturnValue({ link } as unknown as ReturnType<typeof useStreamsAppRouter>);
+    .mockReturnValue({ link, push } as unknown as ReturnType<typeof useStreamsAppRouter>);
   jest.mocked(useStreamsPrivileges).mockReturnValue({
     access: { legacy, v2 },
   } as unknown as ReturnType<typeof useStreamsPrivileges>);
   return renderHook(() => useStreamsListLink()).result.current;
+};
+
+const renderNavigate = () => {
+  jest
+    .mocked(useStreamsAppRouter)
+    .mockReturnValue({ link, push } as unknown as ReturnType<typeof useStreamsAppRouter>);
+  jest.mocked(useStreamsPrivileges).mockReturnValue({
+    access: { legacy: true, v2: true },
+  } as unknown as ReturnType<typeof useStreamsPrivileges>);
+  return renderHook(() => useNavigateToStreamsList()).result.current;
 };
 
 describe('useStreamsListLink', () => {
@@ -57,5 +75,33 @@ describe('useStreamsListLink', () => {
     rememberClassicTabOrigin(true);
 
     expect(renderLink({ v2: false })).toBe(ROOT_LINK);
+  });
+});
+
+describe('useNavigateToStreamsList', () => {
+  afterEach(() => {
+    sessionStorage.clear();
+    push.mockClear();
+  });
+
+  it('goes to the Classic tab when the stream was opened from it', () => {
+    const navigateToStreamsList = renderNavigate();
+    rememberClassicTabOrigin(true);
+
+    navigateToStreamsList();
+
+    expect(push).toHaveBeenCalledWith('/v2/unit/{unitId}/{tab}', {
+      path: { unitId: 'default', tab: 'classic' },
+      query: { rangeFrom: 'now-15m', rangeTo: 'now' },
+    });
+  });
+
+  it('goes to / when the stream was opened from anywhere else', () => {
+    renderNavigate()();
+
+    expect(push).toHaveBeenCalledWith('/', {
+      path: {},
+      query: { rangeFrom: 'now-15m', rangeTo: 'now' },
+    });
   });
 });

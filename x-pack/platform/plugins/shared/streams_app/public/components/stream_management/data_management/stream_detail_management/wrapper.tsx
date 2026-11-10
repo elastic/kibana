@@ -29,7 +29,10 @@ import useAsync from 'react-use/lib/useAsync';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
-import { useStreamsListLink } from '../../../streams_layout/use_streams_list_link';
+import {
+  useNavigateToStreamsList,
+  useStreamsListLink,
+} from '../../../streams_layout/use_streams_list_link';
 import {
   STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   useStreamDocCountsFetch,
@@ -73,11 +76,9 @@ export function Wrapper({
 }) {
   const router = useStreamsAppRouter();
   const streamsListLink = useStreamsListLink();
+  const navigateToStreamsList = useNavigateToStreamsList();
   const { definition } = useStreamDetail();
   const {
-    core: {
-      application: { navigateToApp },
-    },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -279,8 +280,8 @@ export function Wrapper({
       params: { path: { name: definition.stream.name } },
       signal: abortController.signal,
     });
-    navigateToApp('/streams');
-  }, [definition, abortController.signal, navigateToApp, streamsRepositoryClient]);
+    navigateToStreamsList();
+  }, [definition, abortController.signal, navigateToStreamsList, streamsRepositoryClient]);
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
     defaultMessage: 'Streams',

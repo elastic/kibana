@@ -13,7 +13,10 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
-import { useStreamsListLink } from '../../../streams_layout/use_streams_list_link';
+import {
+  useNavigateToStreamsList,
+  useStreamsListLink,
+} from '../../../streams_layout/use_streams_list_link';
 import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { QueryStreamSchemaEditor } from '../../../query_streams/query_stream_schema_editor';
@@ -42,9 +45,6 @@ export function QueryStreamDetailManagement({
   refreshDefinition: () => void;
 }) {
   const {
-    core: {
-      application: { navigateToApp },
-    },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -53,6 +53,7 @@ export function QueryStreamDetailManagement({
   } = useKibana();
   const router = useStreamsAppRouter();
   const streamsListLink = useStreamsListLink();
+  const navigateToStreamsList = useNavigateToStreamsList();
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
@@ -118,8 +119,13 @@ export function QueryStreamDetailManagement({
       params: { path: { name: definition.stream.name } },
       signal: abortController.signal,
     });
-    navigateToApp('/streams');
-  }, [definition.stream.name, abortController.signal, navigateToApp, streamsRepositoryClient]);
+    navigateToStreamsList();
+  }, [
+    definition.stream.name,
+    abortController.signal,
+    navigateToStreamsList,
+    streamsRepositoryClient,
+  ]);
 
   const appHeaderMenu = useMemo<AppHeaderMenu | undefined>(() => {
     const items: NonNullable<AppHeaderMenu['items']> = [];
