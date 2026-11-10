@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const createMockTimeHistory = () => ({
+import { of } from 'rxjs';
+import type { TimeRange } from '@kbn/es-query';
+import type { TimeHistoryContract } from '@kbn/data-plugin/public';
+
+export const createMockTimeHistory = (): TimeHistoryContract => ({
   get: () => {
     return [];
   },
   add: jest.fn(),
-  get$: () => {
-    return {
-      pipe: () => {},
-    };
-  },
+  get$: () => of<TimeRange[]>([]),
 });
 
 export const createMockWebStorage = () => ({

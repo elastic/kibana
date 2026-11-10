@@ -21,3 +21,5 @@ export interface GenerationPrompts {
 }
 
 export interface CombinedPrompts extends AttackDiscoveryPrompts, GenerationPrompts {}
+
+export { getCombinedAttackDiscoveryPrompt } from './get_combined_attack_discovery_prompt';

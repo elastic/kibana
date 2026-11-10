@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { SecurityPageName } from '../../../../app/types';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
@@ -18,7 +18,7 @@ import {
   NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TEXT,
   NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE,
 } from '../mini_callout/translations';
-import { AllRulesTabs } from '../rules_table/rules_table_toolbar';
+import { AllRulesTabs } from '../rules_table/constants';
 
 interface RuleUpdateCalloutsProps {
   shouldShowNewRulesCallout?: boolean;
@@ -51,23 +51,30 @@ export const RuleUpdateCallouts = ({
     navigateToUrl(href);
   }, [navigateToUrl, href]);
 
+  if (!shouldDisplayUpdateRulesCallout && !shouldDisplayNewRulesCallout) {
+    return null;
+  }
+
   return (
-    <EuiFlexGroup direction="column">
-      {shouldDisplayUpdateRulesCallout && (
-        <MiniCallout
-          data-test-subj="prebuilt-rules-update-callout"
-          title={getUpdateRulesCalloutTitle()}
-          text={getUpdateRulesCalloutText(updateCallOutOnClick)}
-        />
-      )}
-      {shouldDisplayNewRulesCallout && (
-        <MiniCallout
-          color="success"
-          data-test-subj="prebuilt-rules-new-callout"
-          title={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE}
-          text={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TEXT}
-        />
-      )}
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup direction="column">
+        {shouldDisplayUpdateRulesCallout && (
+          <MiniCallout
+            data-test-subj="prebuilt-rules-update-callout"
+            title={getUpdateRulesCalloutTitle()}
+            text={getUpdateRulesCalloutText(updateCallOutOnClick)}
+          />
+        )}
+        {shouldDisplayNewRulesCallout && (
+          <MiniCallout
+            color="success"
+            data-test-subj="prebuilt-rules-new-callout"
+            title={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TITLE}
+            text={NEW_PREBUILT_RULES_AVAILABLE_CALLOUT_TEXT}
+          />
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+    </>
   );
 };

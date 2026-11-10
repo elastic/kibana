@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { DslQuery } from '@kbn/es-query';
+
 export const createLastValueAggBucketScript = (key: string, field?: string) => {
   return {
     [key]: {
@@ -18,7 +20,12 @@ export const createLastValueAggBucketScript = (key: string, field?: string) => {
   };
 };
 
-export const createLastValueAggBucket = (key: string, timeFieldName: string, field?: string) => {
+export const createLastValueAggBucket = (
+  key: string,
+  timeFieldName: string,
+  field?: string,
+  filterQuery?: DslQuery
+) => {
   return {
     [`_${key}`]: {
       filter: {
@@ -29,6 +36,7 @@ export const createLastValueAggBucket = (key: string, timeFieldName: string, fie
                 field,
               },
             },
+            ...(filterQuery ? [filterQuery] : []),
           ],
         },
       },

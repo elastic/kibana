@@ -50,6 +50,20 @@ export class InspectComponentPluginPublic implements Plugin<void, PluginStartDep
           </Suspense>
         ),
       });
+
+      plugins.developerToolbar.registerItem({
+        id: 'Grab Component',
+        children: (
+          <Suspense fallback={null}>
+            <LazyInspectButton
+              core={core}
+              branch={this.branch}
+              buttonLocation="developerToolbar"
+              mode="grab"
+            />
+          </Suspense>
+        ),
+      });
     }
 
     return {};

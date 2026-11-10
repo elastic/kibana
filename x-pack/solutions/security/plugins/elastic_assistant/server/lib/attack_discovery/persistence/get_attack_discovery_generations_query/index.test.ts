@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getAttackDiscoveryEventOwnerFilter } from '@kbn/discoveries';
+
 import { getAttackDiscoveryGenerationsQuery, DEFAULT_START, DEFAULT_END } from '.';
 import { ATTACK_DISCOVERY_EVENT_PROVIDER } from '../../../../../common/constants';
 import { mockAuthenticatedUser } from '../../../../__mocks__/mock_authenticated_user';
@@ -55,7 +57,7 @@ describe('getAttackDiscoveryGenerationsQuery', () => {
       bool: {
         must: [
           { term: { 'event.provider': ATTACK_DISCOVERY_EVENT_PROVIDER } },
-          { term: { 'user.name': defaultProps.authenticatedUser.username } },
+          getAttackDiscoveryEventOwnerFilter(defaultProps.authenticatedUser.username),
           { term: { 'kibana.space_ids': defaultProps.spaceId } },
           {
             range: {

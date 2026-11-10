@@ -8,10 +8,11 @@
 import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
-import { routeToRules } from '../../constants';
+import { routeToRules, routeToSettings } from '../../constants';
 import { RulesPageActionsProvider } from './rules_page_actions';
 import { RulesListContainer } from '../rules_list/rules_list_page';
 import { LogsListContainer } from '../logs_list/logs_list_page';
+import { RulesSettingsPageContainer } from '../rules_settings_page/rules_settings_page';
 
 /*
  * Some consumers are still using /rules. This contains a temporary redirect to /.
@@ -21,6 +22,7 @@ const RulesPage = () => {
     <RulesPageActionsProvider>
       <Routes>
         <Route exact path="/logs" component={LogsListContainer} />
+        <Route exact path={routeToSettings} component={RulesSettingsPageContainer} />
         <Route exact path="/" component={RulesListContainer} />
         <Redirect exact from={routeToRules} to="/" />
       </Routes>

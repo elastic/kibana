@@ -49,7 +49,7 @@ describe('SolarWindsPlatform', () => {
 
   it('has the expected metadata and auth', () => {
     expect(SolarWindsPlatform.metadata.id).toBe('.solarwinds_platform');
-    expect(SolarWindsPlatform.metadata.supportedFeatureIds).toEqual(['workflows']);
+    expect(SolarWindsPlatform.metadata.supportedFeatureIds).toEqual(['workflows', 'agentBuilder']);
     expect(SolarWindsPlatform.test?.enabled).toBe(true);
     const types = (SolarWindsPlatform.auth?.types as Array<{ type: string }>).map(
       ({ type }) => type

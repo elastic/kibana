@@ -27,7 +27,7 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-// eslint-disable-next-line import/order
+// eslint-disable-next-line @kbn/compat/import-order
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
@@ -207,6 +207,61 @@ describe('FlyoutTemplate', () => {
       pushMinBreakpoint: 'l',
       includeSelectorInFocusTrap: '.myWidget',
     });
+  });
+
+  it('names the flyout menu from a string header title', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title="Service inventory" />
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps().flyoutMenuProps).toEqual({ title: 'Service inventory' });
+  });
+
+  it('names the flyout menu from titleText when the header title is a node', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header
+          title={<a href="#service">opbeans-java</a>}
+          titleText="opbeans-java"
+        />
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps().flyoutMenuProps).toEqual({ title: 'opbeans-java' });
+  });
+
+  it('leaves the flyout menu unnamed when a node title has no titleText', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never">
+        <FlyoutTemplate.Header title={<a href="#service">opbeans-java</a>} />
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps().flyoutMenuProps).toBeUndefined();
+  });
+
+  it('lets an explicit flyoutMenuProps title win over titleText', () => {
+    renderTemplate(
+      <FlyoutTemplate onClose={noop} session="never" flyoutMenuProps={{ title: 'Chosen' }}>
+        <FlyoutTemplate.Header title={<span>opbeans-java</span>} titleText="opbeans-java" />
+        <FlyoutTemplate.Body>
+          <span>body content</span>
+        </FlyoutTemplate.Body>
+      </FlyoutTemplate>
+    );
+
+    expect(forwardedProps().flyoutMenuProps).toEqual({ title: 'Chosen' });
   });
 
   it('keeps flyoutMenuDisplayMode template-owned', () => {

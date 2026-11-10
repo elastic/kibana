@@ -11,7 +11,7 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getBuiltInStepDefinition, isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
-import { ParallelIcon } from '@kbn/workflows-ui';
+import { HardcodedIcons, ParallelIcon } from '@kbn/workflows-ui';
 import { buildBuiltInTriggerOptions, buildRegisteredTriggerOptions } from './build_trigger_options';
 import { getAllConnectors, isDeprecatedStepType } from '../../../../common/schema';
 import { triggerSchemas } from '../../../trigger_schemas';
@@ -80,6 +80,33 @@ function getBuiltInNestedFlowControlStepOptions(
       description: def.description,
       iconType: 'nested' as const,
       iconColor: euiTheme.colors.textAccentSecondary,
+      stability: def.stability,
+    }));
+}
+
+function getBuiltInWorkflowEndStepOptions(euiTheme: UseEuiTheme['euiTheme']): ActionOptionData[] {
+  return (['workflow.output', 'workflow.fail'] as const)
+    .map((stepId) => getBuiltInStepDefinition(stepId))
+    .filter((def): def is NonNullable<typeof def> => def !== undefined)
+    .map((def) => ({
+      id: def.id,
+      label: def.label,
+      description: def.description,
+      iconType: HardcodedIcons[def.id],
+      iconColor: euiTheme.colors.textAccentSecondary,
+      stability: def.stability,
+    }));
+}
+
+function getBuiltInMiscStepOptions(): ActionOptionData[] {
+  return (['console'] as const)
+    .map((stepId) => getBuiltInStepDefinition(stepId))
+    .filter((def): def is NonNullable<typeof def> => def !== undefined)
+    .map((def) => ({
+      id: def.id,
+      label: def.label,
+      description: def.description,
+      iconType: 'commandLine',
       stability: def.stability,
     }));
 }
@@ -307,7 +334,19 @@ export function getActionOptions(
         stability: getBuiltInStepDefinition('waitForInput')?.stability,
       },
       ...getBuiltInNestedFlowControlStepOptions(euiTheme),
+      ...getBuiltInWorkflowEndStepOptions(euiTheme),
     ],
+  };
+  const miscGroup: ActionOptionData = {
+    iconType: 'ellipsis',
+    id: 'misc',
+    label: i18n.translate('workflows.actionsMenu.misc', {
+      defaultMessage: 'Miscellaneous',
+    }),
+    description: i18n.translate('workflows.actionsMenu.miscDescription', {
+      defaultMessage: 'Other utility steps, such as logging',
+    }),
+    options: getBuiltInMiscStepOptions(),
   };
   const elasticSearchGroup: ActionOptionData = {
     iconType: 'logoElasticsearch',
@@ -414,6 +453,7 @@ export function getActionOptions(
   dataTransformationGroup.iconVariant = 'dataTransformation';
   externalGroup.iconVariant = 'external';
   flowControlGroup.iconVariant = 'flowControl';
+  miscGroup.iconVariant = 'neutral';
 
   for (const opt of isActionGroup(aiGroup) ? aiGroup.options : []) {
     if ('iconType' in opt) {
@@ -430,6 +470,7 @@ export function getActionOptions(
     aiGroup,
     dataTransformationGroup,
     flowControlGroup,
+    miscGroup,
   ];
   for (const group of topLevelOptions) {
     if (isActionGroup(group)) {

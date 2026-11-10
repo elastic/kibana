@@ -11,8 +11,10 @@ import { DEFAULT_TIMEOUT } from '../task';
 import { isRetryableError } from '../task_running';
 import { intervalFromDate, maxIntervalFromDate, parseIntervalAsSecond } from './intervals';
 
+type TaskRetryFields = Pick<ConcreteTaskInstance, 'schedule' | 'timeoutOverride' | 'attempts'>;
+
 export function getRetryAt(
-  task: ConcreteTaskInstance,
+  task: TaskRetryFields,
   taskDefinition: TaskDefinition | undefined
 ): Date | undefined {
   const taskTimeout = getTimeout(task, taskDefinition);
@@ -72,7 +74,7 @@ export function calculateDelayBasedOnAttempts(attempts: number) {
 }
 
 export function getTimeout(
-  task: ConcreteTaskInstance,
+  task: Pick<TaskRetryFields, 'schedule' | 'timeoutOverride'>,
   taskDefinition: TaskDefinition | undefined
 ): string {
   if (task.schedule) {

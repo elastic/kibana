@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { isContextLengthExceededError } from '@kbn/inference-common';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { type SeverityLevel, type ThreatCategory } from '../../../common/threat_intel';
 import { severityScore } from './severity';
 import { logStageUsage } from '../lib/cost_tracker';
@@ -16,8 +16,9 @@ import {
   furtherShrinkOverflowArticleContext,
   selectOverflowRetryArticleContext,
 } from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
-const severityLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
+const severityLevelSchema = lazySchema(() => z.enum(['low', 'medium', 'high', 'critical']));
 
 /**
  * Bounds a free-text model field before it is stored. Truncates rather than
@@ -28,10 +29,12 @@ const boundedText = (max: number) => z.string().transform((v) => v.slice(0, max)
 /** A sentence or two justifying the level, not an essay. */
 const SEVERITY_RATIONALE_CHAR_LIMIT = 2_000;
 
-export const classifySeverityLlmOutputSchema = z.object({
-  level: severityLevelSchema,
-  rationale: boundedText(SEVERITY_RATIONALE_CHAR_LIMIT).optional(),
-});
+export const classifySeverityLlmOutputSchema = lazySchema(() =>
+  z.object({
+    level: severityLevelSchema,
+    rationale: boundedText(SEVERITY_RATIONALE_CHAR_LIMIT).optional(),
+  })
+);
 
 export type ClassifySeverityLlmOutput = z.infer<typeof classifySeverityLlmOutputSchema>;
 
@@ -115,33 +118,22 @@ export const classifySeverity = async (
     includeRaw: true,
   });
 
-  // withStructuredOutput casts the raw tool-call args to the schema's inferred
-  // type without validating them; re-parse so boundedText truncation actually
-  // runs. `parsed` stays nullable: a failed tool call falls back to null/undefined
-  // here, which the caller already treats as "no severity verdict."
   const invokeSeverity = async (
     promptText: string
   ): Promise<{
     raw: { response_metadata: Record<string, unknown> };
-    parsed: ClassifySeverityLlmOutput | undefined;
+    parsed: ClassifySeverityLlmOutput | null;
   }> => {
-    const invoked = (await structured.invoke(
-      buildSeverityPrompt({ ...params, text: promptText })
-    )) as {
+    return (await structured.invoke(buildSeverityPrompt({ ...params, text: promptText }))) as {
       raw: { response_metadata: Record<string, unknown> };
-      parsed: unknown;
-    };
-    return {
-      raw: invoked.raw,
-      parsed:
-        invoked.parsed == null ? undefined : classifySeverityLlmOutputSchema.parse(invoked.parsed),
+      parsed: ClassifySeverityLlmOutput | null;
     };
   };
 
   let text = params.text;
   let result: {
     raw: { response_metadata: Record<string, unknown> };
-    parsed: ClassifySeverityLlmOutput | undefined;
+    parsed: ClassifySeverityLlmOutput | null;
   };
   try {
     result = await invokeSeverity(text);
@@ -166,14 +158,9 @@ export const classifySeverity = async (
     result.raw.response_metadata ?? {}
   );
 
-  // classifySeverityLlmOutputSchema.parse (above) already guarantees `level` is
-  // a valid SeverityLevel whenever parsed is present; the only remaining
-  // failure is the model producing no usable tool call at all.
-  if (!result.parsed) {
-    throw new Error(`classify_severity returned no parsed output report_id=${params.report_id}`);
-  }
+  const { parsed } = requireParsedStructuredOutput(result, 'classify_severity');
 
-  const classified = toSeverityResult(result.parsed.level);
+  const classified = toSeverityResult(parsed.level);
   logger.debug(
     `classify_severity ok level=${classified.level} score=${classified.score} ` +
       `report_id=${params.report_id}`
@@ -181,6 +168,6 @@ export const classifySeverity = async (
 
   return {
     ...classified,
-    ...(result.parsed?.rationale ? { rationale: result.parsed.rationale } : {}),
+    ...(parsed.rationale ? { rationale: parsed.rationale } : {}),
   };
 };

@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
+import { getRelatedEpisodesScope } from '../../../queries/related_episodes_query';
 import { getPanelTitleSize } from '../panel_title_sizes';
 import { RelatedEpisodesRuleSubsection } from './rule_subsection';
 import { RelatedEpisodesGroupSubsection } from './group_subsection';
@@ -17,6 +18,7 @@ export interface AlertEpisodesRelatedProps {
   currentEpisodeId: string | undefined;
   groupHash: string | undefined;
   ruleState: RuleState;
+  source?: string;
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**
    * Whether to render the "Related episodes" section heading. Defaults to `true`.
@@ -36,13 +38,14 @@ export function AlertEpisodesRelated({
   currentEpisodeId,
   groupHash,
   ruleState,
+  source,
   getEpisodeDetailsHref,
   showHeading = true,
   compressed = false,
 }: AlertEpisodesRelatedProps) {
-  const ruleId = getRuleIdFromRuleState(ruleState);
+  const scope = getRelatedEpisodesScope({ ruleId: getRuleIdFromRuleState(ruleState), source });
 
-  if (!ruleId) {
+  if (!scope) {
     return null;
   }
 
@@ -66,6 +69,7 @@ export function AlertEpisodesRelated({
             currentEpisodeId={currentEpisodeId}
             groupHash={groupHash}
             ruleState={ruleState}
+            scope={scope}
             getEpisodeDetailsHref={getEpisodeDetailsHref}
             compressed={compressed}
           />
@@ -76,6 +80,7 @@ export function AlertEpisodesRelated({
         currentEpisodeId={currentEpisodeId}
         currentGroupHash={groupHash}
         ruleState={ruleState}
+        scope={scope}
         getEpisodeDetailsHref={getEpisodeDetailsHref}
         compressed={compressed}
       />

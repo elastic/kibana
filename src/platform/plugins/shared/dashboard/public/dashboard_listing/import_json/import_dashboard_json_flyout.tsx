@@ -36,7 +36,6 @@ export const ImportDashboardJsonFlyout = ({
       closeFlyout={closeFlyout}
       dataTestSubjPrefix="importDashboardJson"
       services={coreServices}
-      isTechnicalPreview
       description={
         <EuiText size="s">
           <p>

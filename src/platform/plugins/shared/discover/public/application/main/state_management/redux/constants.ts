@@ -35,7 +35,6 @@ export const DEFAULT_TAB_STATE: Omit<TabState, keyof TabItem> = {
   cascadedDocumentsState: {
     availableCascadeGroups: [],
     selectedCascadeGroups: [],
-    columnsMeta: {},
     cascadedDocumentsMap: {},
   },
   esqlVariables: [],

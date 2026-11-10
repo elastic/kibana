@@ -7,7 +7,14 @@
 
 import type { PolicyConfig } from '../types';
 import { PolicyOperatingSystem, ProtectionModes, AntivirusRegistrationModes } from '../types';
-import { DefaultPolicyNotificationMessage, policyFactory } from './policy_config';
+import {
+  DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
+  DefaultPolicyDeviceNotificationMessage,
+  policyFactory,
+  policyFactoryWithoutPaidEnterpriseFeatures,
+  policyFactoryWithoutPaidFeatures,
+} from './policy_config';
 import {
   clearCustomYaraSignaturesIfEnabled,
   disableProtections,
@@ -18,9 +25,14 @@ import {
   checkIfPopupMessagesContainCustomNotifications,
   resetCustomNotifications,
   removeCustomYaraSignatures,
+  removeAiDataCollection,
   removeDeviceControl,
   removeLinuxDnsEvents,
+  removeLinuxRansomware,
+  isLinuxRansomwareProtectionEnabled,
+  removeRegistryCredentialHardening,
   setCustomYaraSignatures,
+  setProtectionModeAndPopup,
 } from './policy_config_helpers';
 import { get, merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -42,6 +54,45 @@ describe('Policy Config helpers', () => {
       for (const os of ['windows', 'mac', 'linux'] as const) {
         expect(result[os].memory_protection).not.toHaveProperty('custom_yara_signatures');
       }
+    });
+
+    it('leaves an absent Linux ransomware absent', () => {
+      const policy = policyFactory();
+      delete policy.linux.ransomware;
+
+      expect(disableProtections(policy).linux).not.toHaveProperty('ransomware');
+    });
+
+    it('turns Linux ransomware off without adding a Linux ransomware notification when the Linux popup is missing', () => {
+      const policy = policyFactory();
+      Reflect.deleteProperty(policy.linux, 'popup');
+
+      const result = disableProtections(policy);
+
+      expect(result.linux.ransomware?.mode).toBe(ProtectionModes.off);
+      expect(result.linux.popup).not.toHaveProperty('ransomware');
+    });
+
+    it('leaves an absent registry_credential_hardening absent', () => {
+      const policy = policyFactory();
+      delete policy.windows.attack_surface_reduction.registry_credential_hardening;
+
+      const result = disableProtections(policy);
+
+      expect(result.windows.attack_surface_reduction).not.toHaveProperty(
+        'registry_credential_hardening'
+      );
+    });
+
+    it('turns an enabled registry_credential_hardening into false', () => {
+      const policy = policyFactory();
+      policy.windows.attack_surface_reduction.registry_credential_hardening = { enabled: true };
+
+      const result = disableProtections(policy);
+
+      expect(result.windows.attack_surface_reduction.registry_credential_hardening).toEqual({
+        enabled: false,
+      });
     });
 
     it('does not enable supported fields', () => {
@@ -76,6 +127,7 @@ describe('Policy Config helpers', () => {
           ...defaultPolicy.linux,
           memory_protection: notSupported,
           behavior_protection: notSupportedBehaviorProtection,
+          ransomware: notSupported,
         },
       };
 
@@ -96,6 +148,7 @@ describe('Policy Config helpers', () => {
           ...eventsOnlyPolicy().linux,
           memory_protection: notSupported,
           behavior_protection: notSupportedBehaviorProtection,
+          ransomware: notSupported,
         },
       };
 
@@ -188,6 +241,11 @@ describe('Policy Config helpers', () => {
         expectedResult: false,
       },
       {
+        keyPath: `${PolicyOperatingSystem.linux}.ransomware.mode`,
+        keyValue: ProtectionModes.prevent,
+        expectedResult: false,
+      },
+      {
         keyPath: `${PolicyOperatingSystem.linux}.memory_protection.mode`,
         keyValue: ProtectionModes.off,
         expectedResult: true,
@@ -199,6 +257,11 @@ describe('Policy Config helpers', () => {
       },
       {
         keyPath: `${PolicyOperatingSystem.windows}.attack_surface_reduction.credential_hardening.enabled`,
+        keyValue: true,
+        expectedResult: false,
+      },
+      {
+        keyPath: `${PolicyOperatingSystem.windows}.attack_surface_reduction.registry_credential_hardening.enabled`,
         keyValue: true,
         expectedResult: false,
       },
@@ -218,6 +281,29 @@ describe('Policy Config helpers', () => {
         });
       }
     );
+
+    it('treats an absent Linux ransomware as off', () => {
+      delete policy.linux.ransomware;
+
+      expect(isPolicySetToEventCollectionOnly(policy)).toEqual({
+        isOnlyCollectingEvents: true,
+        message: undefined,
+      });
+    });
+
+    it.each([
+      `${PolicyOperatingSystem.windows}.ransomware.mode`,
+      `${PolicyOperatingSystem.mac}.ransomware.mode`,
+      `${PolicyOperatingSystem.linux}.malware.mode`,
+      `${PolicyOperatingSystem.windows}.antivirus_registration.enabled`,
+    ])('does not treat an absent `%s` as off', (keyPath) => {
+      set(policy, keyPath, undefined);
+
+      expect(isPolicySetToEventCollectionOnly(policy)).toEqual({
+        isOnlyCollectingEvents: false,
+        message: `property [${keyPath}] is set to [undefined]`,
+      });
+    });
   });
 
   describe('isBillablePolicy', () => {
@@ -247,6 +333,34 @@ describe('Policy Config helpers', () => {
         }
       }
     );
+  });
+
+  describe('registry credential hardening absent-is-disabled semantics', () => {
+    it('isPolicySetToEventCollectionOnly stays true when the key is absent', () => {
+      const policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
+      delete policy.windows.attack_surface_reduction.registry_credential_hardening;
+
+      expect(isPolicySetToEventCollectionOnly(policy)).toEqual({
+        isOnlyCollectingEvents: true,
+        message: undefined,
+      });
+    });
+
+    it('is not billable when the key is absent', () => {
+      const policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
+      delete policy.windows.attack_surface_reduction.registry_credential_hardening;
+      policy.meta.serverless = true;
+
+      expect(isBillablePolicy(policy)).toBe(false);
+    });
+
+    it('is billable when set to true', () => {
+      const policy = ensureOnlyEventCollectionIsAllowed(policyFactory());
+      policy.meta.serverless = true;
+      policy.windows.attack_surface_reduction.registry_credential_hardening = { enabled: true };
+
+      expect(isBillablePolicy(policy)).toBe(true);
+    });
   });
 
   describe('checkIfPopupMessagesContainCustomNotifications', () => {
@@ -283,6 +397,75 @@ describe('Policy Config helpers', () => {
       set(policy, 'windows.popup.ransomware.message', '');
       expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(false);
     });
+
+    it('returns false for a policy after removeDeviceControl (popup.device_control absent)', () => {
+      const stripped = removeDeviceControl(policyFactory());
+      expect(checkIfPopupMessagesContainCustomNotifications(stripped)).toBe(false);
+    });
+
+    it('returns false when a message is null', () => {
+      set(policy, 'windows.popup.malware.message', null);
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(false);
+    });
+
+    it('returns false for UI-shaped per-key defaults (memory/behavior = {rule}, malware = {filename})', () => {
+      set(policy, 'windows.popup.malware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'mac.popup.malware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'linux.popup.malware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'windows.popup.ransomware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'mac.popup.ransomware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'windows.popup.memory_protection.message', DefaultPolicyRuleNotificationMessage);
+      set(policy, 'mac.popup.memory_protection.message', DefaultPolicyRuleNotificationMessage);
+      set(policy, 'linux.popup.memory_protection.message', DefaultPolicyRuleNotificationMessage);
+      set(
+        policy,
+        'windows.popup.behavior_protection.message',
+        DefaultPolicyRuleNotificationMessage
+      );
+      set(policy, 'mac.popup.behavior_protection.message', DefaultPolicyRuleNotificationMessage);
+      set(policy, 'linux.popup.behavior_protection.message', DefaultPolicyRuleNotificationMessage);
+      set(policy, 'windows.popup.device_control.message', DefaultPolicyDeviceNotificationMessage);
+      set(policy, 'mac.popup.device_control.message', DefaultPolicyDeviceNotificationMessage);
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(false);
+    });
+
+    it('returns false for all-{filename} legacy policy (migrated Essentials)', () => {
+      set(policy, 'windows.popup.malware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'mac.popup.malware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'linux.popup.malware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'windows.popup.ransomware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'mac.popup.ransomware.message', DefaultPolicyNotificationMessage);
+      set(policy, 'windows.popup.memory_protection.message', DefaultPolicyNotificationMessage);
+      set(policy, 'mac.popup.memory_protection.message', DefaultPolicyNotificationMessage);
+      set(policy, 'linux.popup.memory_protection.message', DefaultPolicyNotificationMessage);
+      set(policy, 'windows.popup.behavior_protection.message', DefaultPolicyNotificationMessage);
+      set(policy, 'mac.popup.behavior_protection.message', DefaultPolicyNotificationMessage);
+      set(policy, 'linux.popup.behavior_protection.message', DefaultPolicyNotificationMessage);
+      set(policy, 'windows.popup.device_control.message', DefaultPolicyNotificationMessage);
+      set(policy, 'mac.popup.device_control.message', DefaultPolicyNotificationMessage);
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(false);
+    });
+
+    it('returns true when malware message is {rule} (not the malware default)', () => {
+      set(policy, 'windows.popup.malware.message', DefaultPolicyRuleNotificationMessage);
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(true);
+    });
+
+    it('returns true when any message is a non-empty custom string', () => {
+      set(policy, 'windows.popup.behavior_protection.message', 'My org policy violation');
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(true);
+    });
+
+    it('treats an absent Linux ransomware notification as default', () => {
+      expect(checkIfPopupMessagesContainCustomNotifications(removeLinuxRansomware(policy))).toBe(
+        false
+      );
+    });
+
+    it('returns true when the Linux ransomware message is custom', () => {
+      set(policy, 'linux.popup.ransomware.message', 'Custom message');
+      expect(checkIfPopupMessagesContainCustomNotifications(policy)).toBe(true);
+    });
   });
 
   describe('resetCustomNotifications', () => {
@@ -297,56 +480,74 @@ describe('Policy Config helpers', () => {
       'windows.popup.behavior_protection.message',
       'windows.popup.memory_protection.message',
       'windows.popup.ransomware.message',
+      'windows.popup.device_control.message',
       'linux.popup.malware.message',
       'linux.popup.behavior_protection.message',
       'linux.popup.memory_protection.message',
+      'linux.popup.ransomware.message',
       'mac.popup.malware.message',
       'mac.popup.behavior_protection.message',
       'mac.popup.memory_protection.message',
-    ])('resets %s to default message', (keyPath) => {
-      set(policy, keyPath, `Custom message`);
-      const defaultNotifications = resetCustomNotifications();
+      'mac.popup.ransomware.message',
+      'mac.popup.device_control.message',
+    ])('resets %s to the factory default (empty string)', (keyPath) => {
+      set(policy, keyPath, 'Custom message');
 
-      const updatedPolicy = merge({}, policy, defaultNotifications);
-      expect(get(updatedPolicy, keyPath)).toBe(DefaultPolicyNotificationMessage);
+      const updatedPolicy = merge({}, policy, resetCustomNotifications(policy));
+
+      expect(get(updatedPolicy, keyPath)).toBe('');
     });
 
-    it('does not change default messages', () => {
+    it('resets UI-filled templates to the factory default', () => {
       set(policy, 'windows.popup.malware.message', DefaultPolicyNotificationMessage);
-      const defaultNotifications = resetCustomNotifications();
+      set(policy, 'mac.popup.memory_protection.message', DefaultPolicyRuleNotificationMessage);
 
-      const updatedPolicy = merge({}, policy, defaultNotifications);
-      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
-        DefaultPolicyNotificationMessage
-      );
+      const updatedPolicy = merge({}, policy, resetCustomNotifications(policy));
+
+      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe('');
+      expect(get(updatedPolicy, 'mac.popup.memory_protection.message')).toBe('');
     });
 
-    it('resets empty messages to default messages', () => {
-      set(policy, 'windows.popup.malware.message', '');
-      const defaultNotifications = resetCustomNotifications();
-
-      const updatedPolicy = merge({}, policy, defaultNotifications);
-      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
-        DefaultPolicyNotificationMessage
-      );
-    });
-
-    it('resets messages for all operating systems', () => {
+    it('matches the popup messages of a factory policy', () => {
       set(policy, 'windows.popup.malware.message', 'Custom message');
-      set(policy, 'mac.popup.memory_protection.message', 'Another custom message');
-      set(policy, 'linux.popup.behavior_protection.message', 'Yet another custom message');
-      const defaultNotifications = resetCustomNotifications();
+      set(policy, 'linux.popup.behavior_protection.message', 'Another custom message');
 
-      const updatedPolicy = merge({}, policy, defaultNotifications);
-      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(
-        DefaultPolicyNotificationMessage
+      const updatedPolicy = merge({}, policy, resetCustomNotifications(policy));
+
+      for (const os of ['windows', 'mac', 'linux'] as const) {
+        expect(updatedPolicy[os].popup).toEqual(policyFactory()[os].popup);
+      }
+    });
+
+    it('applies an override string to all keys when provided', () => {
+      const override = 'custom test';
+
+      const updatedPolicy = merge({}, policy, resetCustomNotifications(policy, override));
+
+      expect(get(updatedPolicy, 'windows.popup.malware.message')).toBe(override);
+      expect(get(updatedPolicy, 'windows.popup.memory_protection.message')).toBe(override);
+      expect(get(updatedPolicy, 'mac.popup.behavior_protection.message')).toBe(override);
+    });
+
+    it('does not create popup.device_control for a stripped (Essentials) policy', () => {
+      const stripped = removeDeviceControl(policyFactory());
+
+      const updatedPolicy = merge({}, stripped, resetCustomNotifications(stripped));
+
+      expect(get(updatedPolicy, 'windows.popup.device_control')).toBeUndefined();
+      expect(get(updatedPolicy, 'mac.popup.device_control')).toBeUndefined();
+    });
+
+    it('does not add a Linux ransomware notification to a policy without one', () => {
+      const withoutLinuxRansomware = removeLinuxRansomware(policy);
+
+      const updatedPolicy = merge(
+        {},
+        withoutLinuxRansomware,
+        resetCustomNotifications(withoutLinuxRansomware)
       );
-      expect(get(updatedPolicy, 'mac.popup.memory_protection.message')).toBe(
-        DefaultPolicyNotificationMessage
-      );
-      expect(get(updatedPolicy, 'linux.popup.behavior_protection.message')).toBe(
-        DefaultPolicyNotificationMessage
-      );
+
+      expect(updatedPolicy.linux.popup).not.toHaveProperty('ransomware');
     });
   });
 
@@ -528,6 +729,296 @@ describe('Policy Config helpers', () => {
     });
   });
 
+  describe('removeLinuxRansomware', () => {
+    it('removes Linux ransomware and its notification and leaves every other field untouched', () => {
+      const policy = policyFactory();
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+
+      const result = removeLinuxRansomware(policy);
+
+      expect(result.linux).not.toHaveProperty('ransomware');
+      expect(result.linux.popup).not.toHaveProperty('ransomware');
+      const {
+        ransomware: removed,
+        popup: { ransomware: removedPopup, ...popupRest },
+        ...linuxRest
+      } = originalPolicy.linux;
+      expect(result).toEqual({ ...originalPolicy, linux: { ...linuxRest, popup: popupRest } });
+      expect(policy).toEqual(originalPolicy);
+    });
+
+    it('removes Linux ransomware without adding a popup when the Linux popup is missing', () => {
+      const policy = policyFactory();
+      Reflect.deleteProperty(policy.linux, 'popup');
+
+      const result = removeLinuxRansomware(policy);
+
+      expect(result.linux).not.toHaveProperty('ransomware');
+      expect(result.linux).not.toHaveProperty('popup');
+    });
+
+    it('removes a null Linux ransomware', () => {
+      const policy = policyFactory();
+      set(policy, 'linux.ransomware', null);
+
+      expect(removeLinuxRansomware(policy).linux).not.toHaveProperty('ransomware');
+    });
+  });
+
+  describe('isLinuxRansomwareProtectionEnabled', () => {
+    it.each([
+      [true, true, true],
+      [true, false, false],
+      [false, true, false],
+      [false, false, false],
+    ])(
+      'linuxRansomwareProtection: %s, perOsPolicySettings: %s returns %s',
+      (linuxRansomwareProtection, perOsPolicySettings, expected) => {
+        expect(
+          isLinuxRansomwareProtectionEnabled({ linuxRansomwareProtection, perOsPolicySettings })
+        ).toBe(expected);
+      }
+    );
+  });
+
+  describe('setProtectionModeAndPopup', () => {
+    it('writes the Linux ransomware notification alongside Windows and macOS', () => {
+      const policy = policyFactory();
+
+      setProtectionModeAndPopup({
+        policy,
+        protection: 'ransomware',
+        osList: ['windows', 'mac', 'linux'],
+        mode: ProtectionModes.detect,
+        syncPopupEnabled: true,
+        popupEnabled: false,
+      });
+
+      expect(policy.linux.ransomware?.mode).toBe(ProtectionModes.detect);
+      expect(policy.linux.popup.ransomware?.enabled).toBe(false);
+      expect(policy.windows.popup.ransomware.enabled).toBe(false);
+      expect(policy.mac.popup.ransomware.enabled).toBe(false);
+    });
+  });
+
+  describe('removeAiDataCollection', () => {
+    let policy: PolicyConfig;
+
+    beforeEach(() => {
+      policy = policyFactory();
+    });
+
+    it.each(['windows', 'mac', 'linux'] as const)('removes ai_data_collection from %s', (os) => {
+      const result = removeAiDataCollection(policy);
+
+      expect(result[os]).not.toHaveProperty('ai_data_collection');
+    });
+
+    it.each(['windows', 'mac', 'linux'] as const)('preserves all other %s fields', (os) => {
+      const result = removeAiDataCollection(policy);
+      const { ai_data_collection: _removed, ...rest } = policy[os];
+
+      expect(result[os]).toEqual(rest);
+    });
+
+    it('preserves global fields unchanged', () => {
+      const result = removeAiDataCollection(policy);
+
+      expect(result.global_manifest_version).toEqual(policy.global_manifest_version);
+      expect(result.global_telemetry_enabled).toEqual(policy.global_telemetry_enabled);
+      expect(result.meta).toEqual(policy.meta);
+    });
+
+    it('returns a new policy object without mutating the original', () => {
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+      const result = removeAiDataCollection(policy);
+
+      expect(policy).toEqual(originalPolicy);
+      expect(policy.windows.ai_data_collection).toBeDefined();
+      expect(policy.mac.ai_data_collection).toBeDefined();
+      expect(policy.linux.ai_data_collection).toBeDefined();
+
+      expect(result).not.toBe(policy);
+      expect(result.windows).not.toBe(policy.windows);
+      expect(result.mac).not.toBe(policy.mac);
+      expect(result.linux).not.toBe(policy.linux);
+    });
+  });
+
+  describe('removeRegistryCredentialHardening', () => {
+    it('removes the registry_credential_hardening field from Windows', () => {
+      const policy = policyFactory();
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.attack_surface_reduction).not.toHaveProperty(
+        'registry_credential_hardening'
+      );
+    });
+
+    it('preserves credential_hardening and other Windows fields', () => {
+      const policy = policyFactory();
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.attack_surface_reduction.credential_hardening).toEqual(
+        policy.windows.attack_surface_reduction.credential_hardening
+      );
+      expect(result.windows.malware).toEqual(policy.windows.malware);
+      expect(result.mac).toEqual(policy.mac);
+      expect(result.linux).toEqual(policy.linux);
+    });
+
+    it('returns a new policy object without mutating the original', () => {
+      const policy = policyFactory();
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(policy).toEqual(originalPolicy);
+      expect(policy.windows.attack_surface_reduction.registry_credential_hardening).toBeDefined();
+      expect(result).not.toBe(policy);
+      expect(result.windows).not.toBe(policy.windows);
+      expect(result.windows.attack_surface_reduction).not.toBe(
+        policy.windows.attack_surface_reduction
+      );
+    });
+
+    it('is a no-op when the key is already absent', () => {
+      const policy = policyFactory();
+      delete policy.windows.attack_surface_reduction.registry_credential_hardening;
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.attack_surface_reduction).not.toHaveProperty(
+        'registry_credential_hardening'
+      );
+      expect(result.windows.attack_surface_reduction.credential_hardening).toEqual(
+        policy.windows.attack_surface_reduction.credential_hardening
+      );
+    });
+
+    it('removes the advanced descendants setting while keeping sibling kernel and advanced settings', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = {
+        kernel: {
+          connect: 'false',
+          registry_credential_hardening: { descendants: 'true', future_setting: 'true' },
+        },
+        alerts: {
+          rollback: { self_healing: { enabled: true } },
+        },
+      };
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.advanced).toEqual({
+        kernel: {
+          connect: 'false',
+          registry_credential_hardening: { future_setting: 'true' },
+        },
+        alerts: {
+          rollback: { self_healing: { enabled: true } },
+        },
+      });
+    });
+
+    it('prunes registry_credential_hardening and then kernel once empty, keeping advanced as {}', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = {
+        kernel: { registry_credential_hardening: { descendants: 'true' } },
+      };
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.advanced).toEqual({});
+    });
+
+    it('leaves windows.advanced absent when it was not already present', () => {
+      const policy = policyFactory();
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows).not.toHaveProperty('advanced');
+    });
+
+    it('leaves a malformed windows.advanced untouched instead of throwing', () => {
+      const policy = policyFactory();
+      // `advanced` is free-form, so a policy written straight through the Fleet API can hold a
+      // primitive where a settings namespace is expected.
+      Reflect.set(policy.windows, 'advanced', 'legacy-value');
+
+      const result = removeRegistryCredentialHardening(policy);
+
+      expect(result.windows.advanced).toBe('legacy-value');
+    });
+
+    it('does not mutate the nested windows.advanced objects on the input policy', () => {
+      const policy = policyFactory();
+      policy.windows.advanced = {
+        kernel: {
+          connect: 'false',
+          registry_credential_hardening: { descendants: 'true' },
+        },
+      };
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+
+      removeRegistryCredentialHardening(policy);
+
+      expect(policy).toEqual(originalPolicy);
+    });
+  });
+
+  describe('policyFactoryWithoutPaidEnterpriseFeatures and policyFactoryWithoutPaidFeatures', () => {
+    it.each([
+      ['policyFactoryWithoutPaidEnterpriseFeatures', policyFactoryWithoutPaidEnterpriseFeatures],
+      ['policyFactoryWithoutPaidFeatures', policyFactoryWithoutPaidFeatures],
+    ])('%s keeps an absent registry_credential_hardening absent', (_name, factory) => {
+      const policy = policyFactory();
+      delete policy.windows.attack_surface_reduction.registry_credential_hardening;
+
+      const result = factory(policy);
+
+      expect(result.windows.attack_surface_reduction).not.toHaveProperty(
+        'registry_credential_hardening'
+      );
+    });
+
+    it.each([
+      ['policyFactoryWithoutPaidEnterpriseFeatures', policyFactoryWithoutPaidEnterpriseFeatures],
+      ['policyFactoryWithoutPaidFeatures', policyFactoryWithoutPaidFeatures],
+    ])('%s turns an enabled registry_credential_hardening into false', (_name, factory) => {
+      const policy = policyFactory();
+      policy.windows.attack_surface_reduction.registry_credential_hardening = { enabled: true };
+
+      const result = factory(policy);
+
+      expect(result.windows.attack_surface_reduction.registry_credential_hardening).toEqual({
+        enabled: false,
+      });
+    });
+
+    it('policyFactoryWithoutPaidEnterpriseFeatures leaves credential_hardening untouched', () => {
+      const policy = policyFactory();
+
+      const result = policyFactoryWithoutPaidEnterpriseFeatures(policy);
+
+      expect(result.windows.attack_surface_reduction.credential_hardening).toEqual(
+        policy.windows.attack_surface_reduction.credential_hardening
+      );
+    });
+
+    it('policyFactoryWithoutPaidFeatures disables credential_hardening', () => {
+      const policy = policyFactory();
+
+      const result = policyFactoryWithoutPaidFeatures(policy);
+
+      expect(result.windows.attack_surface_reduction.credential_hardening).toEqual({
+        enabled: false,
+      });
+    });
+  });
+
   describe('custom_yara_signatures', () => {
     it('writes custom_yara_signatures only for OSes in osList', () => {
       const policy = policyFactory();
@@ -658,6 +1149,7 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     billable: false,
   },
   windows: {
+    ai_data_collection: { enabled: true },
     events: {
       credential_access: true,
       dll_and_driver_load: true,
@@ -686,9 +1178,13 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     },
     logging: { file: 'info' },
     antivirus_registration: { enabled: false, mode: AntivirusRegistrationModes.disabled },
-    attack_surface_reduction: { credential_hardening: { enabled: false } },
+    attack_surface_reduction: {
+      credential_hardening: { enabled: false },
+      registry_credential_hardening: { enabled: false },
+    },
   },
   mac: {
+    ai_data_collection: { enabled: true },
     events: { dns: true, process: true, file: true, network: true, security: true },
     malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
@@ -712,6 +1208,7 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     },
   },
   linux: {
+    ai_data_collection: { enabled: true },
     events: {
       dns: true,
       file: true,
@@ -721,6 +1218,7 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
       tty_io: false,
     },
     malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
+    ransomware: { mode: ProtectionModes.off, supported: true },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: {
       mode: ProtectionModes.off,
@@ -731,6 +1229,7 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
       malware: { message: '', enabled: false },
       behavior_protection: { message: '', enabled: false },
       memory_protection: { message: '', enabled: false },
+      ransomware: { message: '', enabled: false },
     },
     logging: { file: 'info' },
     advanced: {

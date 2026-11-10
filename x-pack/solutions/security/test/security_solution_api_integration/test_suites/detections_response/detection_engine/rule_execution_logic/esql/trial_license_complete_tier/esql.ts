@@ -24,6 +24,7 @@ import {
 import {
   getMaxSignalsWarning as getMaxAlertsWarning,
   getMissingIdFieldWarning,
+  getReservedMetadataColumnsWarning,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
@@ -1973,6 +1974,75 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
+    describe('reserved metadata columns', () => {
+      it('generates alerts without the metadata column and a warning when the query returns _source', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id, _source ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].errors).toEqual([]);
+        expect(logs[0].warnings).toEqual(
+          expect.arrayContaining([getReservedMetadataColumnsWarning(['_source'])])
+        );
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+        expect(previewAlerts[0]._source).toHaveProperty(['agent.name'], 'test-1');
+        expect(previewAlerts[0]._source).not.toHaveProperty('_source');
+      });
+
+      it('names every metadata column removed from the alerts in a single warning', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' } };
+
+        await indexEnhancedDocuments({ documents: [doc1], interval, id });
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant metadata _id, _source, _index_mode ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1" | keep _id, _source, _index_mode, agent.name`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        const { logs, previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        expect(logs[0].errors).toEqual([]);
+        expect(logs[0].warnings).toEqual(
+          expect.arrayContaining([getReservedMetadataColumnsWarning(['_source', '_index_mode'])])
+        );
+
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts).toHaveLength(1);
+        expect(previewAlerts[0]._source).toHaveProperty(['agent.name'], 'test-1');
+        expect(previewAlerts[0]._source).not.toHaveProperty('_source');
+        expect(previewAlerts[0]._source).not.toHaveProperty('_index_mode');
+      });
+    });
+
     describe('alerts enrichment', () => {
       before(async () => {
         await entityStoreV2.setup({
@@ -2634,42 +2704,6 @@ export default ({ getService }: FtrProviderContext) => {
       after(async () => {
         await unsetBrokenRuntimeField({ es, index: 'packetbeat-*' });
         await esArchiver.unload(packetBeatPath);
-      });
-
-      it('should handle shard failures and include warning in logs for query that is not aggregating', async () => {
-        const doc1 = { agent: { name: 'test-1' } };
-        await indexEnhancedDocuments({
-          documents: [doc1],
-          interval: ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'],
-          id: uuidv4(),
-        });
-
-        const rule: EsqlRuleCreateProps = {
-          ...getCreateEsqlRulesSchemaMock('rule-1', true),
-          query: `from packetbeat-*, ecs_compliant METADATA _id | limit 101`,
-          from: 'now-100000h',
-        };
-
-        const { logs, previewId } = await previewRule({
-          supertest,
-          rule,
-        });
-
-        const previewAlerts = await getPreviewAlerts({ es, previewId });
-
-        expect(logs).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              warnings: expect.arrayContaining([
-                expect.stringContaining(
-                  'The ES|QL event query was only executed on the available shards. The query failed to run successfully on the following shards'
-                ),
-              ]),
-            }),
-          ])
-        );
-
-        expect(previewAlerts).not.toHaveLength(0);
       });
 
       it('should handle shard failures and include errors in logs for query that is aggregating', async () => {

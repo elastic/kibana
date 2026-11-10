@@ -27,3 +27,29 @@ export const ESCALATIONS_PAGE_INFO = Object.freeze({
     defaultMessage: 'Assignees updated',
   }),
 });
+
+export const ESCALATIONS_EMPTY_BANNER = Object.freeze({
+  title: i18n.translate('xpack.alertzero.escalationsPage.emptyBanner.title', {
+    defaultMessage: 'No escalations yet',
+  }),
+  body: i18n.translate('xpack.alertzero.escalationsPage.emptyBanner.body', {
+    defaultMessage:
+      'Escalations bring together investigations that need a human decision. When you escalate an investigation, the escalation appears here.',
+  }),
+  docsLink: i18n.translate('xpack.alertzero.escalationsPage.emptyBanner.docsLink', {
+    defaultMessage: 'Read more about escalations',
+  }),
+  exampleBadge: i18n.translate('xpack.alertzero.escalationsPage.emptyBanner.exampleBadge', {
+    defaultMessage: 'Example',
+  }),
+});
+
+export const ESCALATIONS_OPEN_NOTE = Object.freeze({
+  emptyTitle: i18n.translate('xpack.alertzero.escalationsPage.openNote.emptyTitle', {
+    defaultMessage: 'No open escalations',
+  }),
+  body: i18n.translate('xpack.alertzero.escalationsPage.openNote.body', {
+    defaultMessage:
+      "When you escalate an investigation, the escalation appears here until it's closed.",
+  }),
+});

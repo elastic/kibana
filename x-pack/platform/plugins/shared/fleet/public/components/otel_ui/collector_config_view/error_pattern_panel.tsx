@@ -124,8 +124,19 @@ export const ErrorPatternPanel: React.FC = () => {
   const backgroundColors = useEuiBackgroundColorCSS();
   const discoverLocator = useDiscoverLocator();
 
-  const { errorPatterns, warningPatterns, errorCount, warningCount, totalLogCount, isLoading } =
-    useErrorPatterns({ serviceInstanceId: serviceInstanceId ?? '', timeRange, enrolledAt });
+  const {
+    errorPatterns,
+    warningPatterns,
+    errorCount,
+    warningCount,
+    totalLogCount,
+    isLoading,
+    error,
+  } = useErrorPatterns({ serviceInstanceId: serviceInstanceId ?? '', timeRange, enrolledAt });
+
+  // The counts are only meaningful when a search actually ran and succeeded: without a
+  // service instance id the query is disabled, and after a failure the arrays are just empty.
+  const hideCounts = !serviceInstanceId || !!error;
 
   const patterns = useMemo(
     () => sortPatterns(selectedLevel === 'error' ? errorPatterns : warningPatterns, sortField),
@@ -315,16 +326,18 @@ export const ErrorPatternPanel: React.FC = () => {
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-            color={
-              currentCount === 0 ? 'subdued' : selectedLevel === 'error' ? 'danger' : 'warning'
-            }
-          >
-            {summaryText}
-          </EuiText>
-        </EuiFlexItem>
+        {!hideCounts && (
+          <EuiFlexItem grow={false}>
+            <EuiText
+              size="xs"
+              color={
+                currentCount === 0 ? 'subdued' : selectedLevel === 'error' ? 'danger' : 'warning'
+              }
+            >
+              {summaryText}
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -350,10 +363,14 @@ export const ErrorPatternPanel: React.FC = () => {
               withNext
               data-test-subj="errorPatternLevelToggle-error"
             >
-              {i18n.translate('xpack.fleet.collectorDetail.errorPatterns.errorsToggle', {
-                defaultMessage: 'Errors ({count})',
-                values: { count: errorCount },
-              })}
+              {hideCounts
+                ? i18n.translate('xpack.fleet.collectorDetail.errorPatterns.errorsToggleNoCount', {
+                    defaultMessage: 'Errors',
+                  })
+                : i18n.translate('xpack.fleet.collectorDetail.errorPatterns.errorsToggle', {
+                    defaultMessage: 'Errors ({count})',
+                    values: { count: errorCount },
+                  })}
             </EuiFilterButton>
             <EuiFilterButton
               isSelected={selectedLevel === 'warning'}
@@ -362,10 +379,17 @@ export const ErrorPatternPanel: React.FC = () => {
               color={selectedLevel === 'warning' && warningCount > 0 ? 'warning' : 'text'}
               data-test-subj="errorPatternLevelToggle-warning"
             >
-              {i18n.translate('xpack.fleet.collectorDetail.errorPatterns.warningsToggle', {
-                defaultMessage: 'Warnings ({count})',
-                values: { count: warningCount },
-              })}
+              {hideCounts
+                ? i18n.translate(
+                    'xpack.fleet.collectorDetail.errorPatterns.warningsToggleNoCount',
+                    {
+                      defaultMessage: 'Warnings',
+                    }
+                  )
+                : i18n.translate('xpack.fleet.collectorDetail.errorPatterns.warningsToggle', {
+                    defaultMessage: 'Warnings ({count})',
+                    values: { count: warningCount },
+                  })}
             </EuiFilterButton>
           </EuiFilterGroup>
         </EuiFlexItem>
@@ -395,6 +419,13 @@ export const ErrorPatternPanel: React.FC = () => {
         })}
         tableLayout="auto"
         loading={isLoading}
+        error={
+          error
+            ? i18n.translate('xpack.fleet.collectorDetail.errorPatterns.loadError', {
+                defaultMessage: 'Unable to load error patterns',
+              })
+            : undefined
+        }
         noItemsMessage={emptyMessage}
         rowProps={() => ({
           css: rowBackgroundCss,

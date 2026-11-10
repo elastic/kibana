@@ -30,7 +30,7 @@ const services = {
 const renderComponent = (props: Partial<React.ComponentProps<typeof OnboardingApiKeys>> = {}) =>
   render(
     <KibanaContextProvider services={services}>
-      <OnboardingApiKeys apiKey={null} isLoading={false} telemetryPage="testPage" {...props} />
+      <OnboardingApiKeys apiKey={null} isLoading={false} {...props} />
     </KibanaContextProvider>
   );
 
@@ -44,15 +44,9 @@ describe('OnboardingApiKeys', () => {
     it('renders the copy variant of the primary action', () => {
       const { container } = renderComponent({ apiKey: 'test-api-key' });
 
-      const primaryButton = container.querySelector(
-        '[data-test-subj="vectordbPathSelectionCopyApiKey"]'
-      );
-
-      expect(primaryButton).toBeInTheDocument();
-      expect(primaryButton).toHaveAttribute(
-        'data-telemetry-id',
-        'vectordbOnboarding-testPage-copyApiKey'
-      );
+      expect(
+        container.querySelector('[data-test-subj="vectordbPathSelectionCopyApiKey"]')
+      ).toBeInTheDocument();
       expect(
         container.querySelector('[data-test-subj="vectordbPathSelectionGenerateApiKey"]')
       ).not.toBeInTheDocument();
@@ -73,15 +67,9 @@ describe('OnboardingApiKeys', () => {
     it('renders the generate variant of the primary action', () => {
       const { container } = renderComponent({ apiKey: null });
 
-      const primaryButton = container.querySelector(
-        '[data-test-subj="vectordbPathSelectionGenerateApiKey"]'
-      );
-
-      expect(primaryButton).toBeInTheDocument();
-      expect(primaryButton).toHaveAttribute(
-        'data-telemetry-id',
-        'vectordbOnboarding-testPage-generateApiKey'
-      );
+      expect(
+        container.querySelector('[data-test-subj="vectordbPathSelectionGenerateApiKey"]')
+      ).toBeInTheDocument();
       expect(
         container.querySelector('[data-test-subj="vectordbPathSelectionCopyApiKey"]')
       ).not.toBeInTheDocument();

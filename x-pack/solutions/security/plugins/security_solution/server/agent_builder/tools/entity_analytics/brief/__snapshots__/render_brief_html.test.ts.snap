@@ -1,0 +1,205 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderBriefHtml renders the fixture brief 1`] = `
+"<style>/* The renderer's tokens carry no subdued text or tint, so they are mixed from its text color. */
+.brief{--subdued:color-mix(in srgb,var(--cc-color-text) 75%,transparent);--tint:color-mix(in srgb,var(--cc-color-text) 7%,transparent);max-width:736px;font:14px/1.5 var(--cc-font-family);color:var(--cc-color-text);font-variant-numeric:tabular-nums}
+.brief *{box-sizing:border-box}
+.brief h1,.brief h2,.brief h3,.brief p,.brief ol,.brief figure{margin:0}
+/* The type scale: h1, then h2 and the entity name, then h3, then the small subdued text of details and notes. */
+.brief h1{margin:4px 0 12px;font-size:20px;line-height:1.25}
+.brief h2,.brief .name{font-size:16px;font-weight:600;line-height:1.3}
+.brief h3{font-size:14px;font-weight:600;line-height:20px}
+.brief .meta{font-size:12px;line-height:16px;color:var(--subdued);overflow-wrap:anywhere}
+.brief .meta strong{font-weight:600}
+.brief h2 .meta{font-weight:400}
+.brief .meta>span:not(:last-child)::after{content:' ·'}
+.brief .eyebrow{margin-bottom:4px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--cc-color-primary)}
+.brief .header{padding-bottom:24px;border-bottom:1px solid var(--cc-color-border)}
+.brief .section{margin-top:24px}
+.brief h2{margin-bottom:8px}
+/* A card is a bordered panel. */
+.brief .count,.brief .priority{border:1px solid var(--cc-color-border);border-radius:calc(var(--cc-radius) * 3);background:var(--cc-color-surface)}
+/* A badge is a pill, hollow or tinted by a status. */
+.brief .badge{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 9px;border-radius:24px;font-size:12px;font-weight:500;line-height:18px;white-space:nowrap;background:var(--tint);color:var(--subdued)}
+.brief .hollow{border:1px solid var(--cc-color-border);background:var(--cc-color-surface);color:var(--cc-color-text)}
+/* EUI's badge colors for the light and dark theme. The renderer has no tokens for the green, orange and yellow ones, so they are written out like the criticality dots. */
+.brief .success{background:light-dark(#C9F3E3,#0D362B);color:light-dark(#09724D,#24C292)}
+.brief .risk{background:light-dark(#FFDEBF,#4A221C);color:light-dark(#9E3A16,#FF995E)}
+.brief .warning{background:light-dark(#FDE9B5,#3D3014);color:light-dark(#825803,#FCD883)}
+.brief .danger{background:color-mix(in srgb,var(--cc-color-danger) 15%,transparent);color:var(--cc-color-danger)}
+.brief .neutral{background:color-mix(in srgb,var(--cc-color-primary) 12%,transparent);color:var(--cc-color-primary)}
+/* The counts mirror the page's Needs-attention tiles: title and description top-left, value and change bottom-right. */
+.brief .counts{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-top:12px}
+.brief .count{display:flex;flex-direction:column;align-items:flex-end;padding:12px}
+.brief .count-label,.brief .count-description{align-self:stretch;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.2}
+.brief .count-label{font-size:13px;font-weight:600}
+.brief .count-description{margin-top:6px;font-size:12px;color:var(--subdued)}
+.brief .count-value{margin-top:auto;padding-top:16px;font-size:28px;font-weight:600;line-height:1.2}
+.brief .flat{font-size:11px;line-height:1.2;color:var(--subdued)}
+.brief .priorities{display:flex;flex-direction:column;gap:8px;margin-top:12px;padding:0;list-style:none}
+.brief .priority{display:grid;grid-template-columns:24px 1fr;gap:12px;padding:12px 16px}
+/* Everything after the rank and the title row spans under the title. */
+.brief .priority>:nth-child(n+3){grid-column:2/-1}
+.brief .rank{display:flex;align-items:center;justify-content:center;width:24px;height:24px;margin-top:2px;border-radius:50%;background:var(--cc-color-primary);color:var(--cc-color-surface);font-size:12px;font-weight:600}
+.brief .head{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.brief .name{overflow-wrap:anywhere}
+.brief .badges{display:flex;flex-wrap:wrap;gap:6px;max-width:100%}
+.brief .block{display:flex;flex-direction:column;gap:4px}
+/* The page's criticality colours: EUI's severity colours, which the card's tokens don't carry. */
+.brief .dot{flex:none;width:8px;height:8px;border-radius:50%;background:#E3E8F2}
+.brief .dot[data-level=extreme_impact]{background:#EE4C48}
+.brief .dot[data-level=high_impact]{background:#FF995E}
+.brief .dot[data-level=medium_impact]{background:#FCD883}
+.brief .dot[data-level=low_impact]{background:#B5E5F2}
+.brief .chart{padding-top:16px;border-top:1px solid var(--cc-color-border)}
+.brief .chart figcaption{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:4px;font-size:12px}
+.brief .chart figcaption span{font-weight:500}
+.brief .chart svg{display:block;color:var(--cc-color-primary)}
+.brief .chart line{stroke:var(--cc-color-border);stroke-dasharray:3 3}
+.brief .chart text{font-size:11px;fill:var(--subdued)}
+.brief .chart .strong{font-weight:600;fill:var(--cc-color-text)}
+.brief .chart polygon{fill:currentColor;opacity:.08}
+.brief .chart polyline{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+.brief .chart circle{fill:currentColor}
+</style>
+<div class=\\"brief\\">
+  <header class=\\"header\\">
+    <p class=\\"eyebrow\\">Entity Analytics AI brief</p>
+    <h1>Nothing to prioritize right now</h1>
+    <p class=\\"meta\\"><span><strong>Captured:</strong> 20 Oct 2026, 10:53 UTC</span> <span><strong>Time range:</strong> Last 7 days</span> </p>
+  </header>
+  <section class=\\"section\\">
+    <h2>What needs attention</h2>
+    <p>Five entities have alerts this period, including one privileged user newly rated high/critical and on the watchlist, and two hosts seen for the first time in the last few days.</p>
+  </section>
+  <section class=\\"section\\">
+    <h2>This period at a glance <span class=\\"meta\\">vs previous 7 days</span></h2>
+    <div class=\\"counts\\">
+      <div class=\\"count\\">
+        <div class=\\"count-label\\">Entities with alerts</div>
+        <div class=\\"count-description\\">Entities with at least one open alert.</div>
+        <div class=\\"count-value\\">5</div>
+        <div class=\\"badge danger\\">+5 ↑</div>
+      </div>
+      <div class=\\"count\\">
+        <div class=\\"count-label\\">Newly high/critical</div>
+        
+        <div class=\\"count-value\\">1</div>
+        <div class=\\"flat\\">No comparison</div>
+      </div>
+      <div class=\\"count\\">
+        <div class=\\"count-label\\">Watchlisted</div>
+        
+        <div class=\\"count-value\\">1</div>
+        <div class=\\"flat\\">No change</div>
+      </div>
+      <div class=\\"count\\">
+        <div class=\\"count-label\\">New entity</div>
+        
+        <div class=\\"count-value\\">2</div>
+        <div class=\\"badge danger\\">+2 ↑</div>
+      </div>
+    </div>
+  </section>
+  <section class=\\"section\\">
+    <h2>Recommended next step</h2>
+    <p>Start by reviewing the alerts and new High risk score tied to a.rodriguez, given its privileged, high-impact, multi-flagged status.</p>
+  </section>
+  <section class=\\"section\\">
+    <h2>Entities to investigate first</h2>
+    
+    <ol class=\\"priorities\\">
+      <li class=\\"priority\\">
+        <span class=\\"rank\\">1</span>
+        <div class=\\"head\\">
+          <div class=\\"name\\">a.rodriguez</div>
+          <div class=\\"badges\\">
+            <span class=\\"badge hollow\\">User</span>
+            <span class=\\"badge risk\\"><svg viewBox=\\"0 0 16 16\\" width=\\"12\\" height=\\"12\\" role=\\"img\\" aria-label=\\"resolution group\\"><path fill=\\"currentColor\\" fill-rule=\\"evenodd\\" clip-rule=\\"evenodd\\" d=\\"M11.984 9.63a2 2 0 1 1-.707.707L8.5 7.56v3.857a2 2 0 1 1-1 0V7.56l-2.777 2.777a2 2 0 1 1-.707-.707L7.5 6.147V2.56L5.353 4.707 4.646 4 8 .646 11.353 4l-.707.707L8.5 2.56v3.586l3.484 3.485Zm1.016.724a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-6 3a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm-5-2a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z\\"/></svg>Risk: High, 76</span>
+            <span class=\\"badge hollow\\"><span class=\\"dot\\" data-level=\\"high_impact\\"></span>High impact</span>
+          </div>
+        </div>
+        <p class=\\"meta\\"><span><strong>Watchlist:</strong> Privileged User</span> </p>
+        <div class=\\"block\\">
+          <h3>Evidence</h3>
+          <p>Credential and remote access activity on a privileged identity newly at High risk is the shape of account misuse.</p>
+        </div>
+        <div class=\\"block\\">
+          <h3>Why prioritized</h3>
+          <p>Privilege and a fresh threshold crossing make it the clearest place to confirm first.</p>
+        </div>
+        <div class=\\"block\\">
+          <h3>Next step</h3>
+          <p>Review the alerts behind the new High risk score and confirm recent access activity.</p>
+        </div>
+<figure class=\\"chart\\">
+  <figcaption><h3>Risk score, last 7 days, resolution group</h3><span>34 Low → 76 High</span></figcaption>
+  <svg viewBox=\\"0 0 640 96\\" width=\\"100%\\" role=\\"img\\" aria-label=\\"Risk score rose from 34 on 15 Oct to 76 on 20 Oct\\">
+    <line x1=\\"30\\" x2=\\"570\\" y1=\\"20\\" y2=\\"20\\"/>
+    <text x=\\"576\\" y=\\"23\\">Critical 90</text>
+    <line x1=\\"30\\" x2=\\"570\\" y1=\\"32\\" y2=\\"32\\"/>
+    <text x=\\"576\\" y=\\"35\\">High 70</text>
+    <line x1=\\"30\\" x2=\\"570\\" y1=\\"50\\" y2=\\"50\\"/>
+    <text x=\\"576\\" y=\\"53\\">Moderate 40</text>
+    <polygon points=\\"30,74 30,54 150,36 270,31 391,30 511,28 570,28 570,74\\"/>
+    <polyline points=\\"30,54 150,36 270,31 391,30 511,28 570,28\\"/>
+    <circle cx=\\"30\\" cy=\\"54\\" r=\\"3\\"/><circle cx=\\"150\\" cy=\\"36\\" r=\\"3\\"/><circle cx=\\"270\\" cy=\\"31\\" r=\\"3\\"/><circle cx=\\"391\\" cy=\\"30\\" r=\\"3\\"/><circle cx=\\"511\\" cy=\\"28\\" r=\\"3\\"/><circle cx=\\"570\\" cy=\\"28\\" r=\\"3\\"/>
+    <text x=\\"30\\" y=\\"47\\" text-anchor=\\"middle\\">34</text>
+    <text class=\\"strong\\" x=\\"563\\" y=\\"22\\" text-anchor=\\"end\\">76</text>
+    <text x=\\"35\\" y=\\"90\\" text-anchor=\\"middle\\">16 Oct</text><text x=\\"155\\" y=\\"90\\" text-anchor=\\"middle\\">17 Oct</text><text x=\\"275\\" y=\\"90\\" text-anchor=\\"middle\\">18 Oct</text><text x=\\"396\\" y=\\"90\\" text-anchor=\\"middle\\">19 Oct</text><text x=\\"516\\" y=\\"90\\" text-anchor=\\"middle\\">20 Oct</text>
+  </svg>
+</figure>
+      </li>
+      <li class=\\"priority\\">
+        <span class=\\"rank\\">2</span>
+        <div class=\\"head\\">
+          <div class=\\"name\\">docker-host-prod-01</div>
+          <div class=\\"badges\\">
+            <span class=\\"badge hollow\\">Host</span>
+            <span class=\\"badge warning\\">Risk: Moderate, 66</span>
+            <span class=\\"badge hollow\\"><span class=\\"dot\\" data-level=\\"extreme_impact\\"></span>Extreme impact</span>
+          </div>
+        </div>
+        <p class=\\"meta\\"><span><strong>First seen:</strong> 2 days ago</span> </p>
+        <div class=\\"block\\">
+          <h3>Evidence</h3>
+          <p>A host that appeared this week and is already alerting looks more like a provisioning problem.</p>
+        </div>
+        <div class=\\"block\\">
+          <h3>Why prioritized</h3>
+          <p>A new asset of this criticality is worth confirming on its own.</p>
+        </div>
+        <div class=\\"block\\">
+          <h3>Next step</h3>
+          <p>Check what triggered the alerts and verify the host&#39;s provisioning is expected.</p>
+        </div>
+      </li>
+      <li class=\\"priority\\">
+        <span class=\\"rank\\">3</span>
+        <div class=\\"head\\">
+          <div class=\\"name\\">jump-box-01</div>
+          <div class=\\"badges\\">
+            <span class=\\"badge hollow\\">Host</span>
+            <span class=\\"badge warning\\">Risk: Moderate, 58</span>
+            <span class=\\"badge hollow\\"><span class=\\"dot\\" data-level=\\"high_impact\\"></span>High impact</span>
+          </div>
+        </div>
+        <p class=\\"meta\\"><span><strong>First seen:</strong> 3 days ago</span> </p>
+        <div class=\\"block\\">
+          <h3>Evidence</h3>
+          <p>A new host with alerts of the same kind as the first priority is worth a second look.</p>
+        </div>
+        <div class=\\"block\\">
+          <h3>Why prioritized</h3>
+          <p>Its recent appearance and the overlap in alert type put it ahead of the other hosts.</p>
+        </div>
+        <div class=\\"block\\">
+          <h3>Next step</h3>
+          <p>Review the alerts and confirm the host&#39;s role and ownership.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+</div>
+"
+`;

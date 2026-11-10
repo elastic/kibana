@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
+  CHAT_MESSAGE_MAX_LENGTH,
   ChatEventType,
   ConversationOriginType,
   TimelineEventType,
@@ -81,6 +82,18 @@ describe('promptResponseEntrySchema', () => {
 });
 
 describe('conversePayloadSchema', () => {
+  it('accepts an input of the maximum length', () => {
+    expect(() =>
+      conversePayloadSchema.validate({ input: 'a'.repeat(CHAT_MESSAGE_MAX_LENGTH) })
+    ).not.toThrow();
+  });
+
+  it('rejects an input longer than the maximum length', () => {
+    expect(() =>
+      conversePayloadSchema.validate({ input: 'a'.repeat(CHAT_MESSAGE_MAX_LENGTH + 1) })
+    ).toThrow(/input/);
+  });
+
   it('rejects trigger_mode', () => {
     expect(() => conversePayloadSchema.validate({ input: 'Hello', trigger_mode: 'never' })).toThrow(
       /trigger_mode/
@@ -410,6 +423,7 @@ describe('registerChatRoutes', () => {
         useTaskManager: true,
         params: expect.objectContaining({
           conversationId: undefined,
+          autoCreateConversationWithId: false,
           origin,
           callback: {
             url: 'https://callback.example.com/events?token=abc',

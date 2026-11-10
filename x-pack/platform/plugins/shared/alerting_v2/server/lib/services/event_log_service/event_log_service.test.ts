@@ -6,10 +6,7 @@
  */
 
 import type { IEvent } from '@kbn/event-log-plugin/server';
-import {
-  ACTION_POLICY_EVENT_ACTIONS,
-  ACTION_POLICY_EVENT_PROVIDER,
-} from '../../dispatcher/steps/constants';
+import { ACTION_POLICY_EVENT_ACTIONS, ACTION_POLICY_EVENT_PROVIDER } from './constants';
 import { createEventLogService } from './event_log_service.mock';
 import type { FindRuleExecutionsQuery } from './types';
 
@@ -178,20 +175,20 @@ describe('EventLogService', () => {
       expect(boolClause.bool.minimum_should_match).toBe(1);
     });
 
-    it('forwards episodeIds as an episode_ids terms filter to the ES query', async () => {
+    it('forwards alertIds as an alert_ids terms filter to the ES query', async () => {
       const { eventLogService, mockEsClient } = createEventLogService();
       mockEsClient.search.mockResolvedValue(buildSearchResponse());
 
       await eventLogService.findActionPolicyExecutionEvents({
         spaceId: 'default',
         startDate: SINCE,
-        episodeIds: ['ep-1', 'ep-2'],
+        alertIds: ['alert-1', 'alert-2'],
       });
 
       const [args] = mockEsClient.search.mock.calls[0] as [any];
       expect(args.query.bool.filter).toEqual(
         expect.arrayContaining([
-          { terms: { 'kibana.alerting_v2.dispatcher.episode_ids': ['ep-1', 'ep-2'] } },
+          { terms: { 'kibana.alerting_v2.dispatcher.alert_ids': ['alert-1', 'alert-2'] } },
         ])
       );
     });

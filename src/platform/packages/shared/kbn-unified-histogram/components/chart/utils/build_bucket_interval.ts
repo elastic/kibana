@@ -11,7 +11,6 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { search, tabifyAggResponse } from '@kbn/data-plugin/public';
 import type { DataSource } from '@kbn/data-source';
-import { DataViewSource } from '@kbn/data-source';
 import type { TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramBucketInterval } from '../../../types';
 import { getChartAggConfigs } from './get_chart_agg_configs';
@@ -38,7 +37,7 @@ export const buildBucketInterval = ({
     return {};
   }
 
-  if (!(dataSource instanceof DataViewSource)) {
+  if (dataSource.kind !== 'index-pattern') {
     return {};
   }
 

@@ -10,6 +10,7 @@ import { EuiSkeletonText, EuiSkeletonTitle, EuiSpacer, EuiText } from '@elastic/
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { isRuleLoading } from '../../types/rule_state';
+import { getConnectorSource } from '../../source_labels';
 import { AlertEpisodesRelated } from './related/related';
 import { AlertEpisodeCardListSkeleton } from './section_skeletons';
 import type { AlertEpisodeDetailsServices } from './types';
@@ -54,7 +55,9 @@ export const AlertEpisodesRelatedSection = ({
     );
   }
 
-  if (isEpisodeError || !ruleId) {
+  const source = getConnectorSource(episode?.source);
+
+  if (isEpisodeError) {
     return (
       <EuiText size="s" color="danger" data-test-subj="alertingV2EpisodesRelatedSectionError">
         {i18n.RELATED_SECTION_LOAD_ERROR}
@@ -62,11 +65,17 @@ export const AlertEpisodesRelatedSection = ({
     );
   }
 
+  // An episode with neither a rule nor an external source has nothing to be related by.
+  if (!ruleId && !source) {
+    return null;
+  }
+
   return (
     <AlertEpisodesRelated
       currentEpisodeId={episodeId}
       groupHash={groupHash}
       ruleState={ruleState}
+      source={source}
       getEpisodeDetailsHref={getEpisodeDetailsHref}
       showHeading={showHeading}
       compressed={compressed}

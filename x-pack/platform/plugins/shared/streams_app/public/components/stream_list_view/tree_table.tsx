@@ -17,7 +17,6 @@ import {
   EuiHighlight,
   EuiIconTip,
   EuiButtonIcon,
-  EuiTourStep,
   EuiBadge,
   EuiToolTip,
   EuiFilterGroup,
@@ -36,7 +35,7 @@ import {
 } from '@kbn/streams-schema';
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
-import { useStreamsTour } from '../streams_tour';
+import { useDebouncedValue } from '@kbn/react-hooks';
 import type { TableRow, SortableField } from './utils';
 import {
   buildStreamRows,
@@ -95,6 +94,8 @@ import {
   TechnicalPreviewBadge,
 } from '../stream_badges';
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 export function StreamsTreeTable({
   loading,
   streams = [],
@@ -113,9 +114,10 @@ export function StreamsTreeTable({
   const { rangeFrom, rangeTo } = useTimeRange();
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
-  const { getStepPropsByStepId } = useStreamsTour();
 
-  const [searchText, setSearchText] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  // Filtering re-renders up to 25 rows and each new row starts a histogram search.
+  const searchText = useDebouncedValue(searchInput, SEARCH_DEBOUNCE_MS);
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
   // Collapsed state: Set of collapsed node names
@@ -141,13 +143,15 @@ export function StreamsTreeTable({
     );
   }, [streams]);
 
-  const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
-    groupTotalCountByTimestamp: true,
-    getCanReadFailureStore: (streamName: string | undefined) =>
-      streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
-    numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
-    fetchIngestionDocCounts: true,
-  });
+  const { getStreamDocCounts, getStreamHistogram, retainStreamHistogram } = useStreamDocCountsFetch(
+    {
+      groupTotalCountByTimestamp: true,
+      getCanReadFailureStore: (streamName: string | undefined) =>
+        streamName ? privilegeMap.get(streamName) ?? false : hasFailureStoreAccess,
+      numDataPoints: STREAMS_HISTOGRAM_NUM_DATA_POINTS,
+      fetchIngestionDocCounts: true,
+    }
+  );
 
   const docCountsFetch = getStreamDocCounts();
 
@@ -372,33 +376,13 @@ export function StreamsTreeTable({
     </EuiToolTip>
   );
 
-  const streamsListStepProps = getStepPropsByStepId('streams_list');
-
   const nameColumnHeader = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       {shouldComposeTree(sortField) && hasExpandable && (
         <EuiFlexItem grow={false}>{expandCollapseAllButton}</EuiFlexItem>
       )}
       <EuiFlexItem>
-        {streamsListStepProps ? (
-          <EuiTourStep
-            step={streamsListStepProps.step}
-            stepsTotal={streamsListStepProps.stepsTotal}
-            title={streamsListStepProps.title}
-            subtitle={streamsListStepProps.subtitle}
-            content={streamsListStepProps.content}
-            anchorPosition={streamsListStepProps.anchorPosition}
-            offset={streamsListStepProps.offset}
-            maxWidth={streamsListStepProps.maxWidth}
-            isStepOpen={streamsListStepProps.isStepOpen}
-            footerAction={streamsListStepProps.footerAction}
-            onFinish={streamsListStepProps.onFinish}
-          >
-            <span>{NAME_COLUMN_HEADER}</span>
-          </EuiTourStep>
-        ) : (
-          <span>{NAME_COLUMN_HEADER}</span>
-        )}
+        <span>{NAME_COLUMN_HEADER}</span>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -420,8 +404,8 @@ export function StreamsTreeTable({
               compressed
               incremental
               aria-label={STREAMS_TABLE_SEARCH_ARIA_LABEL}
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -635,6 +619,7 @@ export function StreamsTreeTable({
                   <DocumentsColumn
                     indexPattern={item.stream.name}
                     histogramQueryFetch={getStreamHistogram(item.stream.name)}
+                    retainHistogramQueryFetch={retainStreamHistogram}
                     timeState={timeState}
                     numDataPoints={STREAMS_HISTOGRAM_NUM_DATA_POINTS}
                   />

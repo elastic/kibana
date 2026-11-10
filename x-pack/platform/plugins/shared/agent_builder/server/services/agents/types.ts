@@ -49,6 +49,7 @@ export interface AgentsServiceStart {
     spaceId: string;
     agent: AgentCreateRequest;
     availability?: AgentAvailabilityConfig;
+    hidden?: boolean;
   }) => Promise<void>;
   resolveAgentConfiguration: (opts: {
     agent: AgentDefinition;

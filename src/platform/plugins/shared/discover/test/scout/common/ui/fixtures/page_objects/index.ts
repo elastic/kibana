@@ -8,3 +8,4 @@
  */
 
 export { InsightsAndAlerting } from './insights_and_alerting';
+export { DiscoverPage } from './discover_page';

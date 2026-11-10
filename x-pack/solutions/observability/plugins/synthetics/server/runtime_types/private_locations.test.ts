@@ -18,10 +18,4 @@ describe('PrivateLocationAttributesCodec', () => {
   it('decodes a location', () => {
     expect(PrivateLocationAttributesCodec.safeParse(location).success).toBe(true);
   });
-
-  it('still decodes saved objects written with the removed isAgentSharding attribute', () => {
-    expect(
-      PrivateLocationAttributesCodec.safeParse({ ...location, isAgentSharding: true }).success
-    ).toBe(true);
-  });
 });

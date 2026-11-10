@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293142
-issues:
-- https://github.com/elastic/kibana/issues/291344
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: Fix agentless queries returning results from other spaces

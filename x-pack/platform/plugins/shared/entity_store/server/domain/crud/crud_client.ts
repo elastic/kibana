@@ -13,12 +13,14 @@ import type {
   QueryDslQueryContainer,
   Result,
   SearchHit,
+  SortCombinations,
   SortOrder,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
 import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
+import { getBuiltInEntityDefinition } from '../../../common/domain/definitions/registry';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import {
   BadCRUDRequestError,
@@ -68,6 +70,8 @@ export interface ListEntitiesParams {
   size?: number;
   source?: string[] | undefined;
   searchAfter?: Array<string | number>;
+  /** Cursor-mode sort; defaults to `@timestamp` desc. A `_shard_doc` tiebreaker is always appended. */
+  sort?: SortCombinations[];
   fields?: (QueryDslFieldAndFormat | string)[];
   /** Page/search mode (unified latest index); mutually exclusive with KQL `filter` / cursor params on the route. */
   entityTypes?: EntityType[];
@@ -106,6 +110,11 @@ export interface BulkObjectResponse {
 interface BulkUpdateEntityParams {
   objects: BulkObject[];
   force?: boolean;
+  /**
+   * Defaults to `wait_for`, so callers can read their writes right away. Batch writers that don't
+   * read them back can pass `false` and refresh the entity index once when they're done.
+   */
+  refresh?: 'wait_for' | false;
 }
 
 export interface CreateEntityFromSourceRequest {
@@ -153,6 +162,7 @@ export class CRUDClient {
   private readonly esClient: ElasticsearchClient;
   private readonly namespace: string;
   private readonly eventPublisher: WorkflowEventPublisher;
+  private latestIndexNamePromise: Promise<string> | undefined;
 
   constructor(deps: CRUDClientDependencies) {
     this.logger = deps.logger;
@@ -358,8 +368,14 @@ export class CRUDClient {
     }
   }
 
-  public async latestIndexName(): Promise<string> {
-    return resolveLatestEntitiesIndexName(this.esClient, this.namespace);
+  /**
+   * Resolving the index name checks for legacy indices and takes several requests, so each client
+   * resolves it once. Clients live for one request, task run or workflow step, so a migration that
+   * lands mid-way only affects the current one.
+   */
+  public latestIndexName(): Promise<string> {
+    this.latestIndexNamePromise ??= resolveLatestEntitiesIndexName(this.esClient, this.namespace);
+    return this.latestIndexNamePromise;
   }
 
   /**
@@ -384,7 +400,7 @@ export class CRUDClient {
   // 3. Identity only - no ID and identifying data - ID will be generated
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     await this.assertInstalled();
-    const generatedId = getEuidFromObject(entityType, doc);
+    const generatedId = getEuidFromObject(getBuiltInEntityDefinition(entityType), doc);
     const valid = validateAndTransformDoc(
       'update',
       entityType,
@@ -428,6 +444,7 @@ export class CRUDClient {
   public async bulkUpdateEntity({
     objects,
     force = false,
+    refresh = 'wait_for',
   }: BulkUpdateEntityParams): Promise<BulkObjectResponse[]> {
     await this.assertInstalled();
 
@@ -436,7 +453,7 @@ export class CRUDClient {
 
     this.logger.debug(`Preparing ${objects.length} entities for bulk update`);
     for (const { type: entityType, doc } of objects) {
-      const generatedId = getEuidFromObject(entityType, doc);
+      const generatedId = getEuidFromObject(getBuiltInEntityDefinition(entityType), doc);
       const valid = validateAndTransformDoc(
         'update',
         entityType,
@@ -461,7 +478,7 @@ export class CRUDClient {
     const resp = await this.esClient.bulk({
       index: await this.latestIndexName(),
       operations,
-      refresh: 'wait_for',
+      refresh,
     });
 
     const errors: BulkObjectResponse[] = resp.errors
@@ -499,7 +516,7 @@ export class CRUDClient {
   // createEntity generates EUID and creates the entity in the LATEST index
   public async createEntity(entityType: EntityType, doc: Entity): Promise<void> {
     await this.assertInstalled();
-    const id = getEuidFromObject(entityType, doc);
+    const id = getEuidFromObject(getBuiltInEntityDefinition(entityType), doc);
     if (!id) {
       throw new BadCRUDRequestError(`Could not derive EUID from document`);
     }
@@ -672,7 +689,7 @@ export class CRUDClient {
 
     this.logger.debug('Listing entities (cursor mode)');
 
-    const { filter, size, searchAfter, source, fields } = p;
+    const { filter, size, searchAfter, source, fields, sort } = p;
 
     let query: QueryDslQueryContainer = { match_all: {} };
     if (filter) {
@@ -689,7 +706,7 @@ export class CRUDClient {
       index: await this.latestIndexName(),
       query,
       size,
-      sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],
+      sort: [...(sort ?? [{ '@timestamp': 'desc' }]), { _shard_doc: 'desc' }],
       search_after: searchAfter,
       ...(fields && fields.length > 0 ? { fields } : {}),
       ...buildEntityListSourceFilter({

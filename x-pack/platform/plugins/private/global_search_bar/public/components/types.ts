@@ -27,3 +27,5 @@ export interface SearchProps {
 export interface SearchModalProps extends SearchProps {
   onClose: () => void | Promise<void>;
 }
+
+export type SearchErrorType = 'license' | 'generic';

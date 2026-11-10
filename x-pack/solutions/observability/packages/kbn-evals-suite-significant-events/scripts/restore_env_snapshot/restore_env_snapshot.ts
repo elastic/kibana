@@ -10,10 +10,15 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { Client, errors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { LoadResult } from '@kbn/es-snapshot-loader';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { createGcsRepository, replaySnapshot, restoreSnapshot } from '@kbn/es-snapshot-loader';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { getConnectionConfig } from '../lib/get_connection_config';
-import { GCS_BUCKET, SIGNIFICANT_EVENTS_DATA_STREAMS } from '../lib/constants';
+import {
+  GCS_BUCKET,
+  SIGNIFICANT_EVENTS_CLEANABLE_DATA_STREAMS,
+  SIGNIFICANT_EVENTS_DATA_STREAMS,
+} from '../lib/constants';
 import {
   ensureCleanEnvironment,
   ensureKnownAliases,
@@ -26,6 +31,26 @@ import { promoteQueries, resetQueriesPromotion } from '../lib/significant_events
 import { withTempSuperuser } from '../lib/user_utils';
 
 const SIGEVENTS_INDEX_TEMPLATE = 'sigevents-logs-template';
+
+async function cleanSignificantEventsRuleEvents(esClient: Client, log: ToolingLog): Promise<void> {
+  try {
+    const result = await esClient.deleteByQuery({
+      index: '.rule-events',
+      conflicts: 'proceed',
+      refresh: true,
+      query: {
+        term: { source: SIGNIFICANT_EVENTS_ALERT_SOURCE },
+      },
+    });
+    log.info(`Cleaned ${result.deleted ?? 0} Significant Events document(s) from ".rule-events"`);
+  } catch (err) {
+    if (err instanceof errors.ResponseError && err.statusCode === 404) {
+      log.info('".rule-events" not found, skipping Significant Events cleanup');
+      return;
+    }
+    throw err;
+  }
+}
 
 async function extractMappingFromTempIndex(
   esClient: Client,
@@ -228,11 +253,14 @@ export const restoreEnvSnapshot = async ({
     await ensureCleanEnvironment({
       esClient: sysClient,
       log,
-      dataStreamIndices: [...SIGNIFICANT_EVENTS_DATA_STREAMS],
+      dataStreamIndices: [...SIGNIFICANT_EVENTS_CLEANABLE_DATA_STREAMS],
       alertIndices,
       logsIndex,
       clean,
     });
+    if (clean) {
+      await cleanSignificantEventsRuleEvents(sysClient, log);
+    }
 
     log.info('');
     log.info('Step 1/5 — Enabling streams...');

@@ -67,9 +67,6 @@ jest.mock('../../../../../hooks/use_kibana', () => ({
 }));
 
 jest.mock('../../hooks/use_waffle_options');
-jest.mock('../../../../../hooks/use_is_pod_schema_selector_enabled', () => ({
-  useIsPodSchemaSelectorEnabled: jest.fn(() => true),
-}));
 
 jest.mock('@kbn/metrics-data-access-plugin/public', () => ({
   useAssetDetailsRedirect: () => ({
@@ -91,13 +88,9 @@ jest.mock('../../../../../alerting/inventory/components/alert_flyout', () => ({
 }));
 
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
-import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';
 
 const mockedUseWaffleOptionsContext = useWaffleOptionsContext as jest.MockedFunction<
   typeof useWaffleOptionsContext
->;
-const mockedUseIsPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled as jest.MockedFunction<
-  typeof useIsPodSchemaSelectorEnabled
 >;
 
 const POD_NODE: InfraWaffleMapNode = {
@@ -152,7 +145,6 @@ const mockPreferredSchema = (preferredSchema: DataSchemaFormat) => {
 describe('NodeContextMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(true);
   });
 
   it('uses k8s.pod.uid for subtitle, logs, and APM when preferredSchema is semconv', () => {
@@ -220,31 +212,6 @@ describe('NodeContextMenu', () => {
       })
     );
 
-    expect(mockGetAssetDetailUrl).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entityType: 'pod',
-        entityId: 'pod-uid-1',
-        preferredSchema: 'ecs',
-      })
-    );
-  });
-
-  it('keeps a leftover Hosts OpenTelemetry schema on kubernetes.pod.uid while the selector flag is off', () => {
-    mockedUseIsPodSchemaSelectorEnabled.mockReturnValue(false);
-    mockPreferredSchema('semconv');
-    renderMenu(POD_NODE, 'pod');
-
-    expect(screen.getByTestId('nodeContextMenu')).toHaveTextContent(
-      'View details for kubernetes.pod.uid pod-uid-1'
-    );
-    expect(screen.getByTestId('viewLogsContextMenuItem').getAttribute('href')).toContain(
-      'kubernetes.pod.uid'
-    );
-    expect(mockUseLinkProps).toHaveBeenCalledWith(
-      expect.objectContaining({
-        search: { kuery: 'kubernetes.pod.uid:"pod-uid-1"' },
-      })
-    );
     expect(mockGetAssetDetailUrl).toHaveBeenCalledWith(
       expect.objectContaining({
         entityType: 'pod',

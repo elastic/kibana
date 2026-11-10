@@ -47,7 +47,7 @@ function sortSeries(visData, model) {
 function TopNVisualization(props) {
   const [accessDeniedDrilldownUrl, setAccessDeniedDrilldownUrl] = useState(null);
   const coreStart = getCoreStart();
-  const { backgroundColor, model, visData, fieldFormatMap, getConfig } = props;
+  const { backgroundColor, model, visData, fieldFormatMap, getConfig, isInteractive } = props;
 
   const series = sortSeries(visData, model).map((item) => {
     const id = first(item.id.split(SERIES_SEPARATOR));
@@ -55,7 +55,13 @@ function TopNVisualization(props) {
     if (seriesConfig) {
       const tickFormatter =
         seriesConfig.formatter === DATA_FORMATTERS.DEFAULT
-          ? createReactFieldFormatter(getMetricsField(seriesConfig.metrics), fieldFormatMap)
+          ? createReactFieldFormatter(
+              getMetricsField(seriesConfig.metrics),
+              fieldFormatMap,
+              false,
+              undefined,
+              isInteractive
+            )
           : createTickFormatter(seriesConfig.formatter, seriesConfig.value_template, getConfig);
 
       const value = getLastValue(item.data);
@@ -115,6 +121,7 @@ function TopNVisualization(props) {
 }
 
 TopNVisualization.propTypes = {
+  isInteractive: PropTypes.bool,
   backgroundColor: PropTypes.string,
   className: PropTypes.string,
   model: PropTypes.object,

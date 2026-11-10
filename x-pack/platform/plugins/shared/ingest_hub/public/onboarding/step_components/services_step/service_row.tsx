@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { SignalTypeBadge } from './signal_type_badge';
@@ -17,6 +17,8 @@ interface ServiceRowProps {
   isSelected: boolean;
   onToggle: (key: string, checked: boolean) => void;
   displayName?: string;
+  /** When set, the service cannot be selected and the reason is shown in a tooltip. */
+  disabledReason?: string;
 }
 
 export const ServiceRow: React.FC<ServiceRowProps> = ({
@@ -24,8 +26,9 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({
   isSelected,
   onToggle,
   displayName,
+  disabledReason,
 }) => {
-  return (
+  const row = (
     <div data-test-subj={`servicesStep-serviceRow-${service.id}`} css={{ flex: 1 }}>
       <EuiCheckableCard
         id={`service-toggle-${service.id}`}
@@ -48,8 +51,19 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({
         }
         checkableType="checkbox"
         checked={isSelected}
+        disabled={disabledReason !== undefined}
         onChange={(e) => onToggle(service.id, e.target.checked)}
       />
     </div>
+  );
+
+  // The anchor takes the hover and focus: a disabled card has pointer-events: none and cannot be
+  // focused, so the tooltip would never fire from the card itself.
+  return disabledReason !== undefined ? (
+    <EuiToolTip content={disabledReason} display="block" anchorProps={{ tabIndex: 0 }}>
+      {row}
+    </EuiToolTip>
+  ) : (
+    row
   );
 };

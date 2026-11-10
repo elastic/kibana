@@ -1,5 +1,5 @@
 {
-  "sha1": "785be450a4e8cf90988bada2442e23c267662d01",
+  "sha1": "665e92291883a330392bf1973ce2ab9821c8f6e8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -262,7 +262,7 @@
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
         "line": 86,
-        "column": 21
+        "column": 24
       }
     },
     {
@@ -288,7 +288,7 @@
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
         "line": 90,
-        "column": 77
+        "column": 78
       }
     },
     {
@@ -327,7 +327,7 @@
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
         "line": 112,
-        "column": 11
+        "column": 23
       }
     },
     {
@@ -353,7 +353,7 @@
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
         "line": 132,
-        "column": 11
+        "column": 23
       }
     },
     {
@@ -366,7 +366,7 @@
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
         "line": 140,
-        "column": 21
+        "column": 22
       }
     },
     {
@@ -405,7 +405,7 @@
       "location": {
         "file": "x-pack/platform/packages/private/kbn-scout-release-testing/test/scout/ui/tests/discover/discovery.spec.ts",
         "line": 171,
-        "column": 11
+        "column": 23
       }
     },
     {

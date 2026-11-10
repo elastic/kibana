@@ -22,6 +22,8 @@ interface FilterCreationOptions {
     | 'exists'
     | 'does not exist';
   value?: string | string[] | { from: string; to: string };
+  /** Data view to create the filter for. Only needed when the filter editor shows a data view picker. */
+  dataView?: string;
 }
 
 interface FilterFormOptions {
@@ -45,10 +47,29 @@ export class FilterBar {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
+  /**
+   * Opens the filter editor and returns the visible field options (virtualized lists only mount
+   * a subset), then closes the editor.
+   */
+  async getFilterEditorFields(): Promise<string[]> {
+    await this.page.testSubj.click('addFilter');
+    const fields = await this.page.components
+      .comboBox('filterFieldSuggestionList')
+      .getAllVisibleOptions();
+    await this.page.testSubj.click('cancelSaveFilter');
+    await expect(this.page.testSubj.locator('addFilterPopover')).toBeHidden();
+    return fields;
+  }
+
   async addFilter(options: FilterCreationOptions) {
     const previousCount = await this.getFilterCount();
     await this.page.testSubj.click('addFilter');
     await this.page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
+    if (options.dataView) {
+      await this.page.components
+        .comboBox('filterIndexPatternsSelect')
+        .setSelectedOptions([options.dataView]);
+    }
     // Prefer EUI comboBox helpers over typeWithDelay: under load the operator combo can be
     // "stable" while a character-by-character type still times out (overlay / remount race).
     await this.page.components

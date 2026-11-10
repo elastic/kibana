@@ -15,6 +15,9 @@ import {
 } from '@kbn/agent-builder-common';
 import {
   canChangeAgentAccessControl,
+  canConfigureAgentApprovals,
+  canConfigureAgentExecutionIdentity,
+  canEditBoundAgent,
   canDeleteAgent,
   getEffectiveAgentRole,
   hasAgentReadAccess,
@@ -252,6 +255,104 @@ describe('agent access-control authorization', () => {
           currentUser: bob,
         })
       ).toBe(false);
+    });
+  });
+
+  describe('canConfigureAgentApprovals', () => {
+    const accessControlFor = (role: AgentAccessControlRole) => ({
+      access_mode: AgentAccessControlMode.Public,
+      entries: [{ type: 'user' as const, id: 'bob-id', role }],
+    });
+
+    it.each([
+      { caller: 'an admin', currentUser: adminUser, role: undefined, expected: true },
+      { caller: 'the owner', currentUser: ownerUser, role: undefined, expected: true },
+      {
+        caller: 'a Manager',
+        currentUser: bob,
+        role: AgentAccessControlRole.Manager,
+        expected: true,
+      },
+      {
+        caller: 'an Editor',
+        currentUser: bob,
+        role: AgentAccessControlRole.Editor,
+        expected: false,
+      },
+      { caller: 'a User', currentUser: bob, role: AgentAccessControlRole.User, expected: false },
+    ])('returns $expected for $caller', ({ currentUser, role, expected }) => {
+      expect(
+        canConfigureAgentApprovals({
+          agentId: 'agent-1',
+          accessControl: role ? accessControlFor(role) : undefined,
+          owner,
+          currentUser,
+        })
+      ).toBe(expected);
+    });
+
+    it.each([
+      { caller: 'an admin', currentUser: adminUser, expected: true },
+      { caller: 'the owner', currentUser: ownerUser, expected: false },
+      { caller: 'a Manager', currentUser: bob, expected: false },
+    ])('returns $expected for $caller on the default agent', ({ currentUser, expected }) => {
+      expect(
+        canConfigureAgentApprovals({
+          agentId: agentBuilderDefaultAgentId,
+          accessControl: accessControlFor(AgentAccessControlRole.Manager),
+          owner,
+          currentUser,
+        })
+      ).toBe(expected);
+    });
+  });
+});
+
+describe('bound service accounts', () => {
+  const privateAccess = { access_mode: AgentAccessControlMode.Private, entries: [] };
+
+  describe('canConfigureAgentExecutionIdentity', () => {
+    it('requires write access and manage_security, and never the default agent', () => {
+      const securityOwner = { ...ownerUser, canManageSecurity: true };
+      expect(
+        canConfigureAgentExecutionIdentity({ owner, currentUser: securityOwner, agentId: 'a' })
+      ).toBe(true);
+      expect(
+        canConfigureAgentExecutionIdentity({ owner, currentUser: ownerUser, agentId: 'a' })
+      ).toBe(false);
+      expect(
+        canConfigureAgentExecutionIdentity({
+          accessControl: privateAccess,
+          owner,
+          currentUser: { ...bob, canManageSecurity: true },
+          agentId: 'a',
+        })
+      ).toBe(false);
+      expect(
+        canConfigureAgentExecutionIdentity({
+          owner,
+          currentUser: { ...adminUser, canManageSecurity: true },
+          agentId: agentBuilderDefaultAgentId,
+        })
+      ).toBe(false);
+    });
+  });
+
+  describe('canEditBoundAgent', () => {
+    it('is unrestricted on an unbound agent', () => {
+      expect(canEditBoundAgent({ currentUser: ownerUser })).toBe(true);
+    });
+
+    it('needs manage_security on a bound agent, even for the owner', () => {
+      expect(
+        canEditBoundAgent({ currentUser: ownerUser, boundServiceAccountId: 'kibana/sa-1' })
+      ).toBe(false);
+      expect(
+        canEditBoundAgent({
+          currentUser: { ...ownerUser, canManageSecurity: true },
+          boundServiceAccountId: 'kibana/sa-1',
+        })
+      ).toBe(true);
     });
   });
 });

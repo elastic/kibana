@@ -8,7 +8,7 @@
 /**
  * A single regex PII detection rule, as authored in a workflow definition.
  *
- * Deliberately independent of `RegexAnonymizationRule` in `@kbn/inference-common`:
+ * Deliberately independent of `RegexAnonymizationRule` in `@kbn/ai-anonymization-common`:
  * that type belongs to the legacy text-level anonymization path and carries fields
  * (NER variants, mask types) this runtime does not implement. Rules here arrive from
  * workflow YAML, so the workflow step schema is the only contract that shapes them.

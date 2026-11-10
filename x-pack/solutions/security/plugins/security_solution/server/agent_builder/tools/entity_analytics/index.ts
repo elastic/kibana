@@ -32,6 +32,12 @@ export {
   SECURITY_REMOVE_ENTITIES_FROM_WATCHLIST_TOOL_ID,
   SECURITY_UPDATE_WATCHLIST_TOOL_ID,
   updateWatchlistTool,
+  setWatchlistRuleBasedDataSourceTool,
+  SECURITY_SET_WATCHLIST_RULE_BASED_DATA_SOURCE_TOOL_ID,
+  removeWatchlistRuleBasedDataSourceTool,
+  SECURITY_REMOVE_WATCHLIST_RULE_BASED_DATA_SOURCE_TOOL_ID,
+  listWatchlistDataSourcesTool,
+  SECURITY_LIST_WATCHLIST_DATA_SOURCES_TOOL_ID,
 } from './watchlists';
 export { listLeadsTool, SECURITY_LIST_LEADS_TOOL_ID } from './leads/list_leads_tool';
 export { generateLeadsTool, SECURITY_GENERATE_LEADS_TOOL_ID } from './leads/generate_leads_tool';
@@ -40,3 +46,15 @@ export {
   setAssetCriticalityTool,
   SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
 } from './set_asset_criticality_tool';
+export {
+  getResolutionGroupTool,
+  SECURITY_GET_RESOLUTION_GROUP_TOOL_ID,
+  linkEntitiesTool,
+  SECURITY_LINK_ENTITIES_TOOL_ID,
+  unlinkEntitiesTool,
+  SECURITY_UNLINK_ENTITIES_TOOL_ID,
+  listResolutionRulesTool,
+  SECURITY_LIST_RESOLUTION_RULES_TOOL_ID,
+  setResolutionRulesTool,
+  SECURITY_SET_RESOLUTION_RULES_TOOL_ID,
+} from './resolution';

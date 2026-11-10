@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 import { test as baseTest, createLazyPageObject } from '@kbn/scout';
 import { DocViewer } from '@kbn/unified-doc-viewer/test/scout/ui/fixtures/page_objects';
+import type { DiscoverPageObjects } from '@kbn/discover-plugin/test/scout/common/ui/fixtures';
+import { DiscoverPage } from '@kbn/discover-plugin/test/scout/common/ui/fixtures';
 import { DashboardLinks } from './page_objects';
 
 export interface ReleaseTestingTestFixtures extends ScoutTestFixtures {
-  pageObjects: PageObjects & {
+  pageObjects: DiscoverPageObjects & {
     dashboardLinks: DashboardLinks;
     docViewer: DocViewer;
   };
@@ -30,6 +32,7 @@ export const test = baseTest.extend<ReleaseTestingTestFixtures, ScoutWorkerFixtu
   ) => {
     await use({
       ...pageObjects,
+      discover: createLazyPageObject(DiscoverPage, page),
       dashboardLinks: createLazyPageObject(DashboardLinks, page),
       docViewer: createLazyPageObject(DocViewer, page),
     });

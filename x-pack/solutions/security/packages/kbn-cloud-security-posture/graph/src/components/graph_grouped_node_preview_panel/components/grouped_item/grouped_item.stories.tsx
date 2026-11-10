@@ -41,7 +41,7 @@ interface EntityStoryProps extends BaseStoryProps {
 interface EventAlertStoryProps extends BaseStoryProps {
   action?: string;
   actor?: { id: string; icon?: string; label?: string };
-  target?: { id: string; icon?: string; label?: string };
+  target?: { ids: string[]; icon?: string; label?: string };
 }
 
 const meta: Meta = {
@@ -114,7 +114,7 @@ EventItem.args = {
   action: 'process_start',
   timestamp: Date.now(),
   actor: { id: 'actorId', label: 'user1', icon: 'user' },
-  target: { id: 'targetId', label: 'proc.exe', icon: 'document' },
+  target: { ids: ['targetId'], label: 'proc.exe', icon: 'document' },
 };
 
 EventItem.argTypes = {
@@ -147,7 +147,7 @@ AlertItem.args = {
   action: 'suspicious_activity',
   timestamp: Date.now(),
   actor: { id: 'actorId', label: 'user1', icon: 'user' },
-  target: { id: 'targetId', label: 'proc.exe', icon: 'document' },
+  target: { ids: ['targetId'], label: 'proc.exe', icon: 'document' },
 };
 
 AlertItem.argTypes = {
