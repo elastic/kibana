@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   ActionButtonType,
   type AttachmentRenderProps,
@@ -19,12 +20,15 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
 import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
-import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
+import {
+  ActionPolicySummaryBody,
+  ActionPolicySummaryDefinitionSection,
+  ActionPolicySummaryDestinationsSection,
+  ActionPolicySummaryNotificationSection,
+} from '../../components/action_policy/action_policy_summary';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
 import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
-
-const EMPTY_VALUE = '-';
 
 type ActionPolicyCanvasData = ActionPolicyAttachment['data'] & { id: string; name: string };
 
@@ -41,6 +45,7 @@ export const ActionPolicyCanvasContent = ({
   const workflowApi = useService(WorkflowApi);
   const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
+  const [queryClient] = useState(() => new QueryClient());
 
   const { data: rawData, origin } = attachment;
   const data = rawData as ActionPolicyCanvasData;
@@ -198,12 +203,14 @@ export const ActionPolicyCanvasContent = ({
   ]);
 
   return (
-    <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
-      <EuiTitle size="s">
-        <h2>{data.name ?? EMPTY_VALUE}</h2>
-      </EuiTitle>
-      <EuiSpacer size="m" />
-      <ActionPolicyDefinitionList policy={data} />
-    </EuiPanel>
+    <QueryClientProvider client={queryClient}>
+      <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
+        <ActionPolicySummaryBody policy={data}>
+          <ActionPolicySummaryDefinitionSection />
+          <ActionPolicySummaryNotificationSection />
+          <ActionPolicySummaryDestinationsSection />
+        </ActionPolicySummaryBody>
+      </EuiPanel>
+    </QueryClientProvider>
   );
 };
