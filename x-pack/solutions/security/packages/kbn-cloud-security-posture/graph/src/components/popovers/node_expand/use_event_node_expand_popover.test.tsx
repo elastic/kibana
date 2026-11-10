@@ -89,7 +89,7 @@ const createMockSingleEventNode = (): NodeProps => {
 };
 
 const createMockSingleAlertNode = (): NodeProps => {
-  const base = createMockLabelNode();
+  const base = createMockEventNode();
   return {
     ...base,
     data: {
@@ -238,51 +238,51 @@ describe('useEventNodeExpandPopover', () => {
         | undefined;
 
     it('labels the details item "Show grouped events" for a grouped-events node', () => {
-      renderHook(() => useLabelNodeExpandPopover(scopeId, jest.fn()));
+      renderHook(() => useEventNodeExpandPopover(scopeId, jest.fn()));
 
       const items = capturedItemsFn!(createMockGroupedEventsNode());
 
-      expect(findItem(items, GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID)?.label).toBe(
+      expect(findItem(items, GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID)?.label).toBe(
         'Show grouped events'
       );
     });
 
     it('omits the grouped events item when no preview handler is provided', () => {
-      renderHook(() => useLabelNodeExpandPopover(scopeId));
+      renderHook(() => useEventNodeExpandPopover(scopeId));
 
       const items = capturedItemsFn!(createMockGroupedEventsNode());
 
       expect(
-        findItem(items, GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID)
+        findItem(items, GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID)
       ).toBeUndefined();
     });
 
     it('keeps "Show event details" for a single event and "Show alert details" for a single alert', () => {
-      renderHook(() => useLabelNodeExpandPopover(scopeId, jest.fn()));
+      renderHook(() => useEventNodeExpandPopover(scopeId, jest.fn()));
 
       const eventItems = capturedItemsFn!(createMockSingleEventNode());
       const alertItems = capturedItemsFn!(createMockSingleAlertNode());
 
       expect(
-        findItem(eventItems, GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID)?.label
+        findItem(eventItems, GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID)?.label
       ).toBe('Show event details');
       expect(
-        findItem(alertItems, GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID)?.label
+        findItem(alertItems, GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID)?.label
       ).toBe('Show alert details');
     });
 
     it('keeps the filter item label independent of grouped mode', () => {
-      renderHook(() => useLabelNodeExpandPopover(scopeId, jest.fn()));
+      renderHook(() => useEventNodeExpandPopover(scopeId, jest.fn()));
 
       const showItems = capturedItemsFn!(createMockGroupedEventsNode());
       expect(
-        findItem(showItems, GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID)?.label
+        findItem(showItems, GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID)?.label
       ).toBe('Show related events');
 
       mockIsFilterActiveForScope.mockReturnValue(true);
       const hideItems = capturedItemsFn!(createMockGroupedEventsNode());
       expect(
-        findItem(hideItems, GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID)?.label
+        findItem(hideItems, GRAPH_EVENT_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID)?.label
       ).toBe('Hide related events');
     });
   });
