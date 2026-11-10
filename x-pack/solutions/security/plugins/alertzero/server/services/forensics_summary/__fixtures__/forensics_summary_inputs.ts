@@ -77,3 +77,36 @@ export const fixtureInputs: ForensicsSummaryInputs = {
     { ruleName: 'Ransomware behavior', severity: 'critical', riskScore: 95 },
   ],
 };
+
+/**
+ * A false positive: the attack and its alerts, but no endpoint evidence attached, and the close
+ * question the analysis raised still awaiting a decision.
+ */
+export const falsePositiveInputs: ForensicsSummaryInputs = {
+  verdict: 'not_an_incident',
+  autonomy: 'supervised',
+  analyzedAt: '2026-11-04T16:40:00.000Z',
+  summary:
+    'The flagged PowerShell on build-agent-03 is the nightly packaging job run by svc-build; the encoded command matches the signed release script.',
+  attack: {
+    title: 'Encoded PowerShell on build-agent-03',
+    tactics: ['Execution', 'Defense Evasion'],
+    alertIds: ['b1', 'b2'],
+  },
+  proposals: [
+    {
+      title: 'Close the attack and its 2 alerts',
+      status: 'pending',
+      category: 'respond',
+      impact: 'low',
+      confidence: 'high',
+      expiresAt: '2026-11-05T16:40:00.000Z',
+      actionWorkflowId: CLOSE_ATTACK_ACTION_WORKFLOW_ID,
+      comment: 'Close as a false positive: the activity is the scheduled packaging job.',
+    },
+  ],
+  alerts: [
+    { ruleName: 'Encoded PowerShell command', severity: 'medium', riskScore: 47 },
+    { ruleName: 'PowerShell obfuscation', severity: 'low', riskScore: 21 },
+  ],
+};

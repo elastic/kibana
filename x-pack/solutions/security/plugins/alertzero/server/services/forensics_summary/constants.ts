@@ -20,12 +20,18 @@ export const CLOSE_ATTACK_ACTION_WORKFLOW_ID =
 
 export const FORENSICS_SUMMARY_TITLE = 'Forensics summary' as const;
 
+const SUMMARY_CARD_ID_PREFIX = 'forensic-summary-';
+
+/** Whether an attachment id is one of the forensics summary cards, whichever analysis or generation. */
+export const isForensicsSummaryCardId = (attachmentId: string): boolean =>
+  attachmentId.startsWith(SUMMARY_CARD_ID_PREFIX);
+
 /** The ids the Endpoint Analysis run writes its findings under, and the card's own. */
 export const getForensicsAttachmentIds = (kiId: string) =>
   ({
     timeline: `forensic-timeline-${kiId}`,
     iocs: `forensic-iocs-${kiId}`,
-    summary: `forensic-summary-${kiId}`,
+    summary: `${SUMMARY_CARD_ID_PREFIX}${kiId}`,
   } as const);
 
 /**

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fixtureInputs } from './__fixtures__/forensics_summary_inputs';
+import { falsePositiveInputs, fixtureInputs } from './__fixtures__/forensics_summary_inputs';
 import { MAX_IOCS_PER_KIND, MAX_TIMELINE_EVENTS } from './constants';
 import {
   buildForensicsSummaryViewModel,
@@ -18,6 +18,25 @@ describe('buildForensicsSummaryViewModel', () => {
   it('builds a view model the renderer contract accepts', () => {
     const viewModel = buildForensicsSummaryViewModel(fixtureInputs);
     expect(forensicsSummaryViewModelSchema.parse(viewModel)).toEqual(viewModel);
+  });
+
+  it('builds a false positive with no evidence around its attack and close question', () => {
+    const viewModel = buildForensicsSummaryViewModel(falsePositiveInputs);
+    expect(forensicsSummaryViewModelSchema.parse(viewModel)).toEqual(viewModel);
+    expect(viewModel).toMatchObject({
+      verdict: 'not_an_incident',
+      autonomy: 'supervised',
+      title: 'Encoded PowerShell on build-agent-03',
+      host: undefined,
+      attackTitle: undefined,
+      decisions: { awaiting: 1, running: 0, done: 0, failed: 0, closed: 0 },
+      peakRisk: { score: 47, severity: 'medium' },
+      scope: { hosts: 0, identities: 0, network: 0 },
+      timeline: { events: [], total: 0 },
+      indicators: [],
+      alerts: { total: 2, closePending: true },
+    });
+    expect(viewModel.killChain.filter(({ detected }) => detected)).toHaveLength(2);
   });
 
   it('titles the card with the host and keeps the attack under it', () => {

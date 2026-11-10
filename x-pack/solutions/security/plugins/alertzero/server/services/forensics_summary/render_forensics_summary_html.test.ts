@@ -16,12 +16,13 @@ import {
   CUSTOM_CONTENT_MIN_HEIGHT,
 } from '@kbn/custom-content-common';
 import { sanitizeHtml } from '@kbn/custom-content-renderer';
-import { fixtureInputs } from './__fixtures__/forensics_summary_inputs';
+import { falsePositiveInputs, fixtureInputs } from './__fixtures__/forensics_summary_inputs';
 import { renderForensicsSummaryHtml } from './render_forensics_summary_html';
 import { buildForensicsSummaryViewModel } from './view_model';
 
 const fixtureViewModel = buildForensicsSummaryViewModel(fixtureInputs);
 const emptyViewModel = buildForensicsSummaryViewModel({ proposals: [], alerts: [] });
+const falsePositiveViewModel = buildForensicsSummaryViewModel(falsePositiveInputs);
 
 const textOf = (html: string): string =>
   (new DOMParser().parseFromString(html, 'text/html').body.textContent ?? '').replace(/\s+/g, ' ');
@@ -83,6 +84,30 @@ describe('renderForensicsSummaryHtml', () => {
     expect(text).not.toContain('Alerts in this attack');
   });
 
+  it('renders a false positive with no endpoint evidence around its attack and close question', () => {
+    const { html } = renderForensicsSummaryHtml(falsePositiveViewModel);
+    const text = textOf(html);
+    expect(html).toContain('<span class="badge success">Not an incident</span>');
+    expect(text).toContain('Supervised');
+    expect(text).toContain('Encoded PowerShell on build-agent-03');
+    expect(text).toContain(
+      'No endpoint evidence: Endpoint Analysis attached no timeline or indicators and resolved no host.'
+    );
+    expect(text).toContain('47medium');
+    expect(text).toContain('Kill chain 2 of 14 MITRE ATT&CK tactics');
+    expect(text).toContain('Decide 1 proposal');
+    expect(text).toContain(
+      'Close as a false positive: the activity is the scheduled packaging job.'
+    );
+    expect(text).toContain('closes 2 alerts');
+    expect(html).toContain('<details class="alerts" open>');
+    expect(text).toContain('An approved close reaches all 2 alerts and the attack.');
+    expect(text).not.toContain('Searched');
+    expect(text).not.toContain('Timeline');
+    expect(text).not.toContain('Entities');
+    expect(text).not.toContain('Indicators');
+  });
+
   it('opens the alerts under the decisions only while a close awaits one', () => {
     const { html } = renderForensicsSummaryHtml(fixtureViewModel);
     expect(html).toContain('<details class="alerts" open>');
@@ -116,9 +141,11 @@ describe('renderForensicsSummaryHtml', () => {
 
   it('declares a height within the renderer bounds that grows with the content', () => {
     const full = renderForensicsSummaryHtml(fixtureViewModel).height;
+    const falsePositive = renderForensicsSummaryHtml(falsePositiveViewModel).height;
     const empty = renderForensicsSummaryHtml(emptyViewModel).height;
     expect(empty).toBeGreaterThanOrEqual(CUSTOM_CONTENT_MIN_HEIGHT);
-    expect(full).toBeGreaterThan(empty);
+    expect(falsePositive).toBeGreaterThan(empty);
+    expect(full).toBeGreaterThan(falsePositive);
     expect(full).toBeLessThanOrEqual(CUSTOM_CONTENT_MAX_HEIGHT);
   });
 
@@ -139,8 +166,12 @@ describe('renderForensicsSummaryHtml', () => {
     expect(Buffer.byteLength(html, 'utf8')).toBeLessThan(CUSTOM_CONTENT_MAX_TEMPLATE_BYTES / 10);
   });
 
-  it('passes through the sanitiser unchanged, so the card shows everything', () => {
-    const { html } = renderForensicsSummaryHtml(fixtureViewModel);
+  it.each([
+    ['a confirmed incident', fixtureViewModel],
+    ['a false positive', falsePositiveViewModel],
+    ['an analysis with nothing', emptyViewModel],
+  ])('passes %s through the sanitiser unchanged, so the card shows everything', (_, viewModel) => {
+    const { html } = renderForensicsSummaryHtml(viewModel);
     const bodyOf = (document: string) =>
       new DOMParser().parseFromString(document, 'text/html').body.innerHTML;
 

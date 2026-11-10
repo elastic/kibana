@@ -21,7 +21,10 @@ import {
   type RevertResumeContextParams,
   type RevertResumeContextResult,
 } from '../../server/repositories/resume_context_revert';
-import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } from '../../server/repositories/workflow_execution_repository';
+import type {
+  ConcurrencySlotHolder,
+  WorkflowExecutionRepository as WorkflowExecutionRepositoryType,
+} from '../../server/repositories/workflow_execution_repository';
 
 export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecutionRepositoryType> {
   public workflowExecutions = new Map<string, EsWorkflowExecution>();
@@ -279,39 +282,27 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
     return { results, total, nextSearchAfter };
   }
 
-  public async getRunningExecutionsByConcurrencyGroup(
+  public async getRunningExecutionSlotHolders(
     concurrencyGroupKey: string,
     spaceId: string,
     excludeExecutionId?: string,
-    size: number = 5000,
-    createdBefore?: { createdAt: string; id: string }
-  ): Promise<string[]> {
-    const isBefore = (exec: { createdAt: string; id: string }) => {
-      if (!createdBefore) {
-        return true;
-      }
-      const time = new Date(exec.createdAt).getTime();
-      const beforeTime = new Date(createdBefore.createdAt).getTime();
-      return time < beforeTime || (time === beforeTime && exec.id < createdBefore.id);
-    };
-    const results = Array.from(this.workflowExecutions.values())
+    size: number = 5000
+  ): Promise<ConcurrencySlotHolder[]> {
+    return Array.from(this.workflowExecutions.values())
       .filter(
         (exec) =>
           exec.concurrencyGroupKey === concurrencyGroupKey &&
           exec.spaceId === spaceId &&
           ConcurrencySlotOccupyingExecutionStatuses.includes(exec.status) &&
-          (!excludeExecutionId || exec.id !== excludeExecutionId) &&
-          isBefore(exec)
+          (!excludeExecutionId || exec.id !== excludeExecutionId)
       )
       .sort((a, b) => {
         const aTime = new Date(a.createdAt).getTime();
         const bTime = new Date(b.createdAt).getTime();
         return aTime - bTime !== 0 ? aTime - bTime : a.id.localeCompare(b.id);
       })
-      .map((exec) => exec.id)
+      .map(({ id, createdAt }) => ({ id, createdAt }))
       .slice(0, Math.min(size, 10000)); // Cap at ES default max_result_window
-
-    return results;
   }
 
   public async countExecutionsByConcurrencyGroupAndStatuses(

@@ -6,7 +6,7 @@
       <p class="meta">{{#windowFacts}}<span>{{.}}</span>{{/windowFacts}}</p>
       <h1>{{title}}</h1>
       {{#attackTitle}}<p class="sub">{{attackTitle}}</p>{{/attackTitle}}
-      <div class="flow">{{#flow}}{{^first}}<span class="sep" aria-hidden="true">›</span>{{/first}}<span class="step {{className}}">{{label}}</span>{{/flow}}</div>
+      <div class="flow">{{#flow}}{{^first}}<span class="sep" aria-hidden="true">›</span>{{/first}}<span class="step{{#className}} {{className}}{{/className}}">{{label}}</span>{{/flow}}</div>
     </div>
     <div class="pills">
       <span class="badge {{verdictClass}}">{{verdictLabel}}</span>
@@ -37,7 +37,7 @@
     {{#peakKpi}}
     <div class="card kpi" title="Highest risk score among the attack's alerts">
       <p class="kpi-label">Peak risk</p>
-      <div class="kpi-value {{className}}">{{value}}<small>{{suffix}}</small></div>
+      <div class="kpi-value{{#className}} {{className}}{{/className}}">{{value}}<small>{{suffix}}</small></div>
       <span class="split">{{#split}}<i class="{{className}}" style="width:{{width}}%"></i>{{/split}}</span>
       <span class="kpi-text">{{text}}</span>
     </div>

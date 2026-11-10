@@ -25,6 +25,24 @@ import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task
  * - Enforcing concurrency limits per group
  * - Implementing collision strategies (drop, cancel-in-progress, queue)
  */
+/** Whether the holder was created before the current execution, by `createdAt` then `id`, the order the repository sorts in. */
+const isOlder = (
+  holder: { createdAt: string; id: string },
+  currentExecutionId: string,
+  currentExecutionCreatedAt: string | undefined
+): boolean => {
+  // Without a timestamp to order by, every other execution counts as older.
+  if (!currentExecutionCreatedAt) {
+    return true;
+  }
+  const holderTime = Date.parse(holder.createdAt);
+  const currentTime = Date.parse(currentExecutionCreatedAt);
+  if (Number.isNaN(holderTime) || Number.isNaN(currentTime)) {
+    return holder.createdAt < currentExecutionCreatedAt;
+  }
+  return holderTime < currentTime || (holderTime === currentTime && holder.id < currentExecutionId);
+};
+
 export class ConcurrencyManager {
   private readonly workflowTaskManager: WorkflowTaskManager;
   private readonly workflowExecutionRepository: WorkflowExecutionRepository;
@@ -157,15 +175,15 @@ export class ConcurrencyManager {
       return false;
     }
 
-    // Slot-occupying execution IDs (excludes concurrency backlog `queued`).
-    const runningExecutionIds =
-      await this.workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
-        concurrencyGroupKey,
-        spaceId,
-        currentExecutionId
-      );
+    // Slot-occupying executions (excludes concurrency backlog `queued`), read once: every count below is
+    // taken from this one snapshot, so they can't disagree about who holds a slot.
+    const slotHolders = await this.workflowExecutionRepository.getRunningExecutionSlotHolders(
+      concurrencyGroupKey,
+      spaceId,
+      currentExecutionId
+    );
 
-    const activeCount = runningExecutionIds.length;
+    const activeCount = slotHolders.length;
 
     // If we're within the limit, allow execution to proceed
     if (activeCount < maxConcurrency) {
@@ -188,15 +206,11 @@ export class ConcurrencyManager {
 
     // Handle 'cancel-in-progress' strategy: the newest executions keep the slots
     if (strategy === 'cancel-in-progress') {
-      const olderExecutionIds = currentExecutionCreatedAt
-        ? await this.workflowExecutionRepository.getRunningExecutionsByConcurrencyGroup(
-            concurrencyGroupKey,
-            spaceId,
-            currentExecutionId,
-            undefined,
-            { createdAt: currentExecutionCreatedAt, id: currentExecutionId }
-          )
-        : runningExecutionIds;
+      const olderExecutionIds = slotHolders
+        .filter(({ createdAt, id }) =>
+          isOlder({ createdAt, id }, currentExecutionId, currentExecutionCreatedAt)
+        )
+        .map(({ id }) => id);
       const newerCount = activeCount - olderExecutionIds.length;
 
       // Newer executions already hold every slot: this one is the one superseded.

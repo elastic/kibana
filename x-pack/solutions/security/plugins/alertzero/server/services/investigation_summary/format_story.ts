@@ -7,6 +7,7 @@
 
 import { TimelineEventType } from '@kbn/agent-builder-common';
 import { PROPOSAL_ATTACHMENT_TYPE, isTerminal, proposalStatusSchema } from '@kbn/proposals-common';
+import { isForensicsSummaryCardId } from '../forensics_summary/constants';
 
 const TEXT_NOTE = 'text_note';
 const STORY_MAX_CHARS = 16_000;
@@ -147,6 +148,11 @@ const lineForEvent = (
   }
   if (event.type === TimelineEventType.attachmentAdded) {
     const id = stringField(data, 'attachment_id');
+    // The forensics summary card is drawn from this story's summary, so it is not part of the story. A
+    // deleted older card still has its event, which is why this reads the id from the event.
+    if (id && isForensicsSummaryCardId(id)) {
+      return undefined;
+    }
     const type = stringField(data, 'attachment_type') ?? 'attachment';
     const attachment = id ? attachmentsById.get(id) : undefined;
     if (attachment?.hidden || attachment?.active === false) {

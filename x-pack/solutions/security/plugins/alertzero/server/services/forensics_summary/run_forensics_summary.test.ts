@@ -98,7 +98,6 @@ const setup = ({
 
   const attachmentsClient = {
     create: jest.fn().mockResolvedValue({}),
-    update: jest.fn().mockResolvedValue({}),
     delete: jest.fn().mockResolvedValue(undefined),
   };
   const deps: RunForensicsSummaryDeps = {
@@ -190,18 +189,23 @@ describe('runForensicsSummary', () => {
       attachment_id: ids.summary,
     });
     expect(attachmentsClient.create).not.toHaveBeenCalled();
-    expect(attachmentsClient.update).not.toHaveBeenCalled();
   });
 
-  it('updates the card silently when what changed is not a decision', async () => {
+  it('posts the card again when what changed is not a decision', async () => {
     const { data, description } = expectedCard();
     const stale = { ...data, visualization: { ...data.visualization, template: '<p>older</p>' } };
     const { run, attachmentsClient } = setup({
       attachments: [...evidenceAttachments(), versioned(ids.summary, stale, description)],
     });
-    await expect(run()).resolves.toMatchObject({ action: 'updated' });
-    expect(attachmentsClient.update).toHaveBeenCalledWith(
-      expect.objectContaining({ attachmentId: ids.summary, render_inline: false })
+    await expect(run()).resolves.toMatchObject({
+      attachment_id: `${ids.summary}-2`,
+      action: 'reposted',
+    });
+    expectReposted(
+      attachmentsClient,
+      `${ids.summary}-2`,
+      [ids.summary],
+      '1 awaiting, 1 done, 1 closed'
     );
   });
 
@@ -212,7 +216,6 @@ describe('runForensicsSummary', () => {
     deleted: string[],
     decisions: string
   ) => {
-    expect(attachmentsClient.update).not.toHaveBeenCalled();
     expect(attachmentsClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
         id: attachmentId,
@@ -289,7 +292,7 @@ describe('runForensicsSummary', () => {
     expectReposted(attachmentsClient, `${ids.summary}-3`, [`${ids.summary}-2`], '3 done');
   });
 
-  it('updates the newest card, and never reuses the id of a deleted one', async () => {
+  it('replaces the newest card, and never reuses the id of a deleted one', async () => {
     const { data, description } = expectedCard();
     const stale = { ...data, visualization: { ...data.visualization, template: '<p>older</p>' } };
     const { run, attachmentsClient } = setup({
@@ -301,11 +304,14 @@ describe('runForensicsSummary', () => {
       ],
     });
     await expect(run()).resolves.toMatchObject({
-      attachment_id: `${ids.summary}-2`,
-      action: 'updated',
+      attachment_id: `${ids.summary}-3`,
+      action: 'reposted',
     });
-    expect(attachmentsClient.update).toHaveBeenCalledWith(
-      expect.objectContaining({ attachmentId: `${ids.summary}-2`, render_inline: false })
+    expectReposted(
+      attachmentsClient,
+      `${ids.summary}-3`,
+      [`${ids.summary}-2`],
+      '1 awaiting, 1 done, 1 closed'
     );
   });
 
@@ -352,7 +358,6 @@ describe('runForensicsSummary', () => {
     });
     await expect(run(controller.signal)).resolves.toEqual({ skipped: true, reason: 'cancelled' });
     expect(attachmentsClient.create).not.toHaveBeenCalled();
-    expect(attachmentsClient.update).not.toHaveBeenCalled();
   });
 
   it('passes the abort signal to its searches', async () => {

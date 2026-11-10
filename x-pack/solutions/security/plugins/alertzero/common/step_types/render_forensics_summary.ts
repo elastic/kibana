@@ -34,10 +34,10 @@ const outputSchema = lazySchema(() =>
       ),
     attachment_id: z.string().optional().describe('Id of the current summary card attachment.'),
     action: z
-      .enum(['created', 'updated', 'reposted'])
+      .enum(['created', 'reposted'])
       .optional()
       .describe(
-        'Whether the first card was added, the current card was updated silently, or the card was posted again in place of the older one because its decisions changed.'
+        'Whether the first card was added, or the card was posted again in place of the older one because what it shows changed.'
       ),
   })
 );

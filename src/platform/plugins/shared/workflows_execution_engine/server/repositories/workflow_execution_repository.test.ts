@@ -818,7 +818,7 @@ describe('WorkflowExecutionRepository', () => {
     });
   });
 
-  describe('getRunningExecutionsByConcurrencyGroup', () => {
+  describe('getRunningExecutionSlotHolders', () => {
     it('should query for concurrency-slot execution IDs by concurrency group key', async () => {
       const mockExecutions = [
         {
@@ -841,7 +841,7 @@ describe('WorkflowExecutionRepository', () => {
         })
       );
 
-      const result = await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default');
+      const result = await repository.getRunningExecutionSlotHolders('server-1', 'default');
 
       expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         query: {
@@ -857,14 +857,14 @@ describe('WorkflowExecutionRepository', () => {
             ],
           },
         },
-        _source: ['id'],
+        _source: ['id', 'createdAt'],
         sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
         size: 5000,
       });
 
       expect(result).toHaveLength(2);
-      expect(result[0]).toBe('exec-1');
-      expect(result[1]).toBe('exec-2');
+      expect(result[0]).toEqual({ id: 'exec-1', createdAt: '' });
+      expect(result[1]).toEqual({ id: 'exec-2', createdAt: '' });
     });
 
     it('should exclude specified execution ID from results', async () => {
@@ -883,7 +883,7 @@ describe('WorkflowExecutionRepository', () => {
         })
       );
 
-      await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default', 'exec-1');
+      await repository.getRunningExecutionSlotHolders('server-1', 'default', 'exec-1');
 
       expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith({
         query: {
@@ -904,7 +904,7 @@ describe('WorkflowExecutionRepository', () => {
             ],
           },
         },
-        _source: ['id'],
+        _source: ['id', 'createdAt'],
         sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
         size: 5000,
       });
@@ -938,13 +938,13 @@ describe('WorkflowExecutionRepository', () => {
         })
       );
 
-      const result = await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default');
+      const result = await repository.getRunningExecutionSlotHolders('server-1', 'default');
 
       // ES returns sorted results, so we expect them in order
       expect(result).toHaveLength(3);
-      expect(result[0]).toBe('exec-1');
-      expect(result[1]).toBe('exec-2');
-      expect(result[2]).toBe('exec-3');
+      expect(result[0]).toEqual({ id: 'exec-1', createdAt: '' });
+      expect(result[1]).toEqual({ id: 'exec-2', createdAt: '' });
+      expect(result[2]).toEqual({ id: 'exec-3', createdAt: '' });
     });
 
     it('should return empty array when no running executions found', async () => {
@@ -954,7 +954,7 @@ describe('WorkflowExecutionRepository', () => {
         })
       );
 
-      const result = await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default');
+      const result = await repository.getRunningExecutionSlotHolders('server-1', 'default');
 
       expect(result).toHaveLength(0);
     });
@@ -966,7 +966,7 @@ describe('WorkflowExecutionRepository', () => {
         })
       );
 
-      await repository.getRunningExecutionsByConcurrencyGroup('server-1', 'default');
+      await repository.getRunningExecutionSlotHolders('server-1', 'default');
 
       expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -993,7 +993,7 @@ describe('WorkflowExecutionRepository', () => {
         );
       });
 
-      const result = await repository.getRunningExecutionsByConcurrencyGroup(
+      const result = await repository.getRunningExecutionSlotHolders(
         'server-1',
         'default',
         undefined,
@@ -1015,12 +1015,7 @@ describe('WorkflowExecutionRepository', () => {
         })
       );
 
-      await repository.getRunningExecutionsByConcurrencyGroup(
-        'server-1',
-        'default',
-        undefined,
-        15000
-      );
+      await repository.getRunningExecutionSlotHolders('server-1', 'default', undefined, 15000);
 
       expect(workflowExecutionsDataClient.search).toHaveBeenCalledWith(
         expect.objectContaining({

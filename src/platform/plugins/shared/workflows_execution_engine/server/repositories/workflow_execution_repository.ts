@@ -38,6 +38,12 @@ const UPDATE_RETRY_ON_CONFLICT = 3;
 const isCreateConflict = (error: { type?: string } | undefined): boolean =>
   error?.type === 'version_conflict_engine_exception';
 
+/** An execution occupying a concurrency slot, with the timestamp that orders it among the others. */
+export interface ConcurrencySlotHolder {
+  id: string;
+  createdAt: string;
+}
+
 export class WorkflowExecutionRepository {
   constructor(private workflowExecutionsDataClient: WorkflowExecutionsDataClient) {}
 
@@ -465,26 +471,24 @@ export class WorkflowExecutionRepository {
   }
 
   /**
-   * Retrieves concurrency-slot IDs by concurrency group key (excludes persisted `queued` backlog).
+   * Retrieves the executions that occupy a concurrency slot in a concurrency group (excludes persisted `queued` backlog).
    * Cancel-in-progress and drop strategies only consider executions that occupy a concurrency slot.
    *
-   * Only returns execution IDs (not full documents) for efficiency, as we only need IDs for cancellation.
-   * Results are sorted by createdAt ascending (oldest first).
+   * Returns only `id` and `createdAt`, in one read, so a caller can order the holders against an execution
+   * of its own without a second query that could see a different set.
+   * Results are sorted by createdAt ascending (oldest first), then by id.
    *
    * @param concurrencyGroupKey - The concurrency group key to filter by.
    * @param spaceId - The ID of the space associated with the workflow execution.
    * @param excludeExecutionId - Optional execution ID to exclude from results (e.g., current execution).
    * @param size - Optional limit on the number of results to return. Defaults to 5000.
-   * @returns A promise that resolves to an array of execution IDs sorted by createdAt (oldest first).
    */
-  public async getRunningExecutionsByConcurrencyGroup(
+  public async getRunningExecutionSlotHolders(
     concurrencyGroupKey: string,
     spaceId: string,
     excludeExecutionId?: string,
-    size: number = 5000,
-    /** Only executions ordered before this one, by `createdAt` then `id` (the sort below). */
-    createdBefore?: { createdAt: string; id: string }
-  ): Promise<string[]> {
+    size: number = 5000
+  ): Promise<ConcurrencySlotHolder[]> {
     const filterClauses: Array<Record<string, unknown>> = [
       { term: { concurrencyGroupKey } },
       { term: { spaceId } },
@@ -508,32 +512,13 @@ export class WorkflowExecutionRepository {
       });
     }
 
-    if (createdBefore) {
-      filterClauses.push({
-        bool: {
-          should: [
-            { range: { createdAt: { lt: createdBefore.createdAt } } },
-            {
-              bool: {
-                filter: [
-                  { term: { createdAt: createdBefore.createdAt } },
-                  { range: { id: { lt: createdBefore.id } } },
-                ],
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      });
-    }
-
     const response = await this.workflowExecutionsDataClient.search({
       query: {
         bool: {
           filter: filterClauses, // Filter context = no scoring = faster
         },
       },
-      _source: ['id'], // Only fetch ID field for efficiency
+      _source: ['id', 'createdAt'], // Only what ordering the holders needs
       sort: [
         { createdAt: { order: 'asc' } },
         { id: { order: 'asc' } }, // Tie-break for determinism when createdAt collides; not chronological order
@@ -541,9 +526,13 @@ export class WorkflowExecutionRepository {
       size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
     });
 
-    return response.hits.hits
-      .map((hit) => (hit._source as Pick<EsWorkflowExecution, 'id'> | undefined)?.id ?? hit._id)
-      .filter((id): id is string => id !== undefined);
+    return response.hits.hits.flatMap((hit) => {
+      const source = hit._source as
+        | Partial<Pick<EsWorkflowExecution, 'id' | 'createdAt'>>
+        | undefined;
+      const id = source?.id ?? hit._id;
+      return id === undefined ? [] : [{ id, createdAt: source?.createdAt ?? '' }];
+    });
   }
 
   /**

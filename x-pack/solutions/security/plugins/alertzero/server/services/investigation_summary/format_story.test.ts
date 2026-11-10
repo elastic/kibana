@@ -57,6 +57,33 @@ describe('formatInvestigationStory', () => {
     );
   });
 
+  it('leaves out the forensics summary cards, even one that was deleted', () => {
+    const story = formatInvestigationStory({
+      events: [
+        {
+          type: TimelineEventType.userMessage,
+          created_at: '2026-10-06T00:00:00.000Z',
+          data: { message: 'Okta rule fired for the admin.' },
+        },
+        ...['forensic-summary-ki-1', 'forensic-summary-ki-1-2'].map((id, index) => ({
+          type: TimelineEventType.attachmentAdded,
+          created_at: `2026-10-06T00:0${index + 1}:00.000Z`,
+          data: { attachment_id: id, attachment_type: 'visualization' },
+        })),
+      ],
+      // The first card was deleted when the second was posted, so only the second is still attached.
+      attachments: [
+        {
+          id: 'forensic-summary-ki-1-2',
+          type: 'visualization',
+          description: 'Forensics summary: win-fin-07 · decisions: 1 awaiting',
+        },
+      ],
+    });
+
+    expect(story).toBe('User: Okta rule fired for the admin.');
+  });
+
   it('skips hidden attachments and empty notes', () => {
     expect(
       formatInvestigationStory({

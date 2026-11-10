@@ -33,10 +33,7 @@ export interface ForensicsConversationReader {
   }>;
 }
 
-export type ForensicsAttachmentWriter = Pick<
-  AttachmentPublicClient,
-  'create' | 'update' | 'delete'
->;
+export type ForensicsAttachmentWriter = Pick<AttachmentPublicClient, 'create' | 'delete'>;
 
 export interface RunForensicsSummaryDeps {
   getConversationClient: (request: KibanaRequest) => Promise<ForensicsConversationReader>;
@@ -56,8 +53,6 @@ const renderedCardSchema = lazySchema(() =>
   })
 );
 
-const DECISIONS_PREFIX = 'decisions: ';
-
 /** The decision counts by state, as the description records them: `1 awaiting, 3 closed`, or `none`. */
 const describeDecisions = ({ decisions }: ForensicsSummaryViewModel): string =>
   Object.entries(decisions)
@@ -65,17 +60,12 @@ const describeDecisions = ({ decisions }: ForensicsSummaryViewModel): string =>
     .map(([group, count]) => `${count} ${group}`)
     .join(', ') || 'none';
 
-/** The card's description; it also records the decision counts, so an update can tell when a decision changed. */
+/** The card's description; it also records the decision counts. */
 export const describeForensicsSummary = (viewModel: ForensicsSummaryViewModel): string =>
   `${FORENSICS_SUMMARY_TITLE}: ${viewModel.title} · ${viewModel.verdict.replace(
     /_/g,
     ' '
-  )} · ${DECISIONS_PREFIX}${describeDecisions(viewModel)}`;
-
-const readDecisions = (description: string | undefined): string | undefined => {
-  const index = description?.lastIndexOf(DECISIONS_PREFIX) ?? -1;
-  return index === -1 ? undefined : description?.slice(index + DECISIONS_PREFIX.length);
-};
+  )} · decisions: ${describeDecisions(viewModel)}`;
 
 /** The analysis's summary cards, oldest first, each with the generation it was posted as. */
 const listSummaryCards = (attachments: readonly VersionedAttachment[], kiId: string) =>
@@ -88,12 +78,12 @@ const listSummaryCards = (attachments: readonly VersionedAttachment[], kiId: str
 
 /**
  * Renders the forensics summary card for an Investigation whose Endpoint Analysis has finished, and adds it,
- * or writes a new version of it when what it shows changed.
+ * or posts it again when what it shows changed.
  *
  * The chat draws a posted card at the version it was posted with, and an update can't change that. So when
- * the decision counts change (proposals raised, decided or settled), the card is posted again as a new
- * attachment and the cards before it are deleted, which drops them from the chat: it shows one card, the
- * latest. Any other change, such as a new summary, updates the current card silently.
+ * anything the card shows changes (a new summary, proposals raised, decided or settled), the card is posted
+ * again as a new attachment and the cards before it are deleted, which drops them from the chat: it shows
+ * one card, the latest.
  */
 export const runForensicsSummary = async ({
   request,
@@ -174,18 +164,6 @@ export const runForensicsSummary = async ({
       current.description === description;
     if (unchanged) {
       return { skipped: true, reason: 'unchanged', attachment_id: current.id };
-    }
-    if (readDecisions(current.description) === describeDecisions(viewModel)) {
-      await attachmentsClient.update({
-        conversationId,
-        attachmentId: current.id,
-        data,
-        description,
-        render_inline: false,
-        access: 'converse',
-      });
-      deps.logger?.debug(`forensics summary: updated ${current.id} on ${conversationId}`);
-      return { skipped: false, attachment_id: current.id, action: 'updated' };
     }
   }
 

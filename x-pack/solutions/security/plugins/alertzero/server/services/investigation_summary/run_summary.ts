@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { MetadataFieldValue } from '@kbn/agent-builder-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
@@ -36,6 +37,7 @@ export interface InvestigationConversationReader {
     template_id?: string;
     events?: StoryEvent[];
     attachments?: StoryAttachment[];
+    metadata?: Record<string, MetadataFieldValue>;
   }>;
   patchMetadata(
     conversationId: string,
@@ -59,9 +61,22 @@ export interface RunInvestigationSummaryDeps {
 
 export interface InvestigationSummaryResult {
   skipped: boolean;
-  reason?: 'template' | 'no_proposal' | 'empty' | 'no_connector' | 'incomplete' | 'cancelled';
+  reason?:
+    | 'template'
+    | 'no_proposal'
+    | 'empty'
+    | 'unchanged'
+    | 'no_connector'
+    | 'incomplete'
+    | 'cancelled';
   summary?: string;
 }
+
+/** The metadata field that records which story the stored summary was written from. */
+const STORY_HASH_FIELD = 'summary_story_hash';
+
+const hashStory = (story: string): string =>
+  createHash('sha256').update(story).digest('hex').slice(0, 32);
 
 const clip = (value: string, max: number): string => value.trim().slice(0, max);
 
@@ -177,6 +192,13 @@ export const runInvestigationSummary = async ({
     return { skipped: true, reason: 'empty' };
   }
 
+  // A write that adds nothing to the story, such as the forensics card being posted, would otherwise
+  // pay for a model call and likely reword the summary, which updates the card and starts another run.
+  const storyHash = hashStory(story);
+  if (conversation.metadata?.[STORY_HASH_FIELD] === storyHash) {
+    return { skipped: true, reason: 'unchanged' };
+  }
+
   const chatModel = await deps.resolveChatModel(request);
   if (!chatModel) {
     return { skipped: true, reason: 'no_connector' };
@@ -194,7 +216,11 @@ export const runInvestigationSummary = async ({
     return { skipped: true, reason: 'incomplete' };
   }
 
-  await client.patchMetadata(conversationId, { summary: output.summary }, { access: 'converse' });
+  await client.patchMetadata(
+    conversationId,
+    { summary: output.summary, [STORY_HASH_FIELD]: storyHash },
+    { access: 'converse' }
+  );
 
   return { skipped: false, summary: output.summary };
 };
