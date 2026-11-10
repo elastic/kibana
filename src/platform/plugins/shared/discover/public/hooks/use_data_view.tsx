@@ -8,9 +8,38 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { RootProfileState } from '../context_awareness';
 import { useDiscoverServices } from './use_discover_services';
+
+type LoadedRootProfileState = Extract<RootProfileState, { rootProfileLoading: false }>;
+
+const loadDataView = ({
+  dataViews,
+  index,
+  rootProfileState,
+}: {
+  dataViews: DataViewsContract;
+  index: string | DataViewSpec;
+  rootProfileState: LoadedRootProfileState;
+}): Promise<DataView> => {
+  if (typeof index === 'object') {
+    return dataViews.create(index);
+  }
+
+  // Default profile ad hoc data views (e.g. "All logs") are not persisted and their spec
+  // is only passed through the history state, so fall back to the root profile spec
+  // when only the ID is available (e.g. after a full page reload)
+  const profileDataViewSpec = rootProfileState
+    .getDefaultAdHocDataViews()
+    .find(({ id }) => id === index);
+
+  if (profileDataViewSpec) {
+    return dataViews.create({ ...profileDataViewSpec, managed: true });
+  }
+
+  return dataViews.get(index);
+};
 
 export const useDataView = ({
   index,
@@ -28,21 +57,7 @@ export const useDataView = ({
       return;
     }
 
-    // Default profile ad hoc data views (e.g. "All logs") are not persisted and their spec
-    // is only passed through the history state, so fall back to the root profile spec
-    // when only the ID is available (e.g. after a full page reload)
-    const profileDataViewSpec =
-      typeof index === 'string'
-        ? rootProfileState.getDefaultAdHocDataViews().find(({ id }) => id === index)
-        : undefined;
-
-    const promise = profileDataViewSpec
-      ? dataViews.create({ ...profileDataViewSpec, managed: true })
-      : typeof index === 'object'
-      ? dataViews.create(index)
-      : dataViews.get(index);
-
-    promise.then(setDataView).catch(setError);
+    loadDataView({ dataViews, index, rootProfileState }).then(setDataView).catch(setError);
   }, [dataViews, index, rootProfileState]);
 
   return { dataView, error };
