@@ -11,6 +11,7 @@ import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 import type { Materializer } from '../types';
 import { openInLensLabel } from './shared';
 import { mapLensDatatable } from './datatable';
+import { mapLensHeatmap } from './heatmap';
 import { mapLensMetric } from './metric';
 import { mapLensPartition } from './partition';
 import { asMappedChart, planLensChart } from './plan';
@@ -139,6 +140,8 @@ export const createLensMaterializer = ({
       case 'mosaic':
       case 'waffle':
         return mapLensPartition(single, tables, kit, savedObject);
+      case 'heatmap':
+        return mapLensHeatmap(single, tables, kit, savedObject);
     }
   },
 });
