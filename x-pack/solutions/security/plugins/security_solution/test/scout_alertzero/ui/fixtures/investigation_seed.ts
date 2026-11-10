@@ -277,5 +277,7 @@ export const withSecuritySolution = (
       body: { id, name, solution: 'security' },
       retries: 1,
     }),
+  // Idempotent alongside the create-body solution above; required by SpacesService.
+  setSolutionView: spaces.setSolutionView,
   delete: spaces.delete,
 });
