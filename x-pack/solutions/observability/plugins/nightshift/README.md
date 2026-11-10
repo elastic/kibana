@@ -20,6 +20,8 @@ Significant Events can run, aggregating the rollout flag
 plugins. When it reports unavailable the app is hidden from navigation and direct visits
 redirect to the Observability overview.
 
+`nightshift.metricsEntities.enabled` enables deterministic Kubernetes entity extraction during metrics source onboarding.
+
 ## Seeding investigations for local development
 
 `scripts/seed_nightshift_investigations.ts` fills the landing page with 14 investigations: every

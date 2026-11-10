@@ -23,6 +23,9 @@ export const NIGHTSHIFT_FEATURE_ID = 'nightshift';
  */
 export const NIGHTSHIFT_ENABLED_FLAG = 'nightshift.enabled';
 
+/** Enables deterministic Kubernetes entity extraction when onboarding metrics sources. */
+export const NIGHTSHIFT_METRICS_ENTITIES_FLAG = 'nightshift.metricsEntities.enabled';
+
 /**
  * Kill switch for online evals: when `true`, investigations start no scoring workflow. Read with a
  * `false` fallback, so deployments that can't reach LaunchDarkly keep scoring. Defined in the
@@ -133,6 +136,8 @@ export {
   type ISourceReadTargets,
   type SourceTypeAnalysis,
 } from './src/sources/validate_source_query';
+
+export { toTimeSeriesSourceQuery } from './src/sources/to_time_series_query';
 
 export {
   NIGHTSHIFT_USAGE_PARENT_ID,
