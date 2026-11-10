@@ -10,6 +10,7 @@ import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { globalSetupHook, tags } from '@kbn/scout-oblt';
 import type { SignificantEventsAvailabilityResponse } from '../../../../common';
 import { COMMON_API_HEADERS } from '../fixtures/constants';
+import { setUpDetectionEngineAccount } from '../fixtures/service_account';
 
 const AVAILABILITY_PATH = '/internal/significant_events/availability';
 const AVAILABILITY_TIMEOUT_MS = 30_000;
@@ -18,7 +19,7 @@ const AVAILABILITY_POLL_INTERVAL_MS = 1_000;
 globalSetupHook(
   'Setup environment for Significant Events API tests',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
-  async ({ apiServices, kbnClient, log }) => {
+  async ({ apiServices, kbnClient, kbnUrl, esClient, samlAuth, config, log }) => {
     log.debug('[setup] Enabling Streams...');
     await apiServices.streams.enable();
     log.debug('[setup] Streams enabled successfully');
@@ -54,6 +55,16 @@ globalSetupHook(
       lastResponse = data;
       if (data.available) {
         log.debug('[setup] Significant events availability confirmed');
+        // Rules and sources are refused with 503 until the default space's detection engine is
+        // bound to its service account. Once for the whole run: two workers creating the same
+        // account at once conflict.
+        await setUpDetectionEngineAccount({
+          kbnUrl,
+          esClient,
+          samlAuth,
+          isServerless: Boolean(config.serverless),
+          log,
+        });
         return;
       }
       await delay(AVAILABILITY_POLL_INTERVAL_MS);

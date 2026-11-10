@@ -65,6 +65,7 @@ const enableServiceAccountRoute = createServerRoute({
       workflowsManagement: server.workflowsManagement,
       getMaintenanceState: (stateRequest) => maintenanceService.getState({ request: stateRequest }),
       isServerless: server.isServerless,
+      logger: server.logger,
     }).enable({
       request,
       spaceId,

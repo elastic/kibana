@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -48,6 +48,7 @@ const createCore = ({
   boundAccountId,
   privilegeProbeFails = false,
   accountSummary = { name: 'nightshift_detection', enabled: true },
+  accountReadStatus,
 }: {
   enabled?: boolean;
   canManageSecurity?: boolean;
@@ -56,6 +57,8 @@ const createCore = ({
   privilegeProbeFails?: boolean;
   /** What core knows of the bound account, or `null` when it does not exist. */
   accountSummary?: { name: string; enabled: boolean } | null;
+  /** Makes reading the account fail with this status, as UIAM does when Kibana may not read it. */
+  accountReadStatus?: number;
 } = {}) => {
   const hasPrivileges = jest.fn(async () => {
     if (privilegeProbeFails) {
@@ -82,9 +85,14 @@ const createCore = ({
         getWorkloadBinding: jest.fn(async () =>
           currentAccountId ? { serviceAccountId: currentAccountId } : null
         ),
-        getWorkloadServiceAccountSummary: jest.fn(async () =>
-          accountSummary && currentAccountId ? { id: currentAccountId, ...accountSummary } : null
-        ),
+        getWorkloadServiceAccountSummary: jest.fn(async () => {
+          if (accountReadStatus) {
+            throw Object.assign(new Error('Forbidden'), { statusCode: accountReadStatus });
+          }
+          return accountSummary && currentAccountId
+            ? { id: currentAccountId, ...accountSummary }
+            : null;
+        }),
       },
     },
     elasticsearch: {
@@ -149,6 +157,36 @@ describe('createDetectionEngineSetupService.enable', () => {
       workloadId: 'detection_engine',
     });
     expect(install).not.toHaveBeenCalled();
+  });
+
+  it('keeps the binding and warns when the account cannot be read', async () => {
+    const { core, unbindWorkload } = createCore({ accountReadStatus: 403 });
+    const logger = { warn: jest.fn() } as unknown as Logger;
+
+    const result = await createDetectionEngineSetupService({
+      core,
+      spaces: undefined,
+      ...createWorkflowsExtensions(),
+      isServerless: true,
+      logger,
+    }).enable({ request, spaceId: 'default', serviceAccountId: 'account-1' });
+
+    expect(result).toMatchObject({ serviceAccountId: 'account-1' });
+    expect(unbindWorkload).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Could not verify'));
+  });
+
+  it('fails when reading the account fails for another reason', async () => {
+    const { core } = createCore({ accountReadStatus: 500 });
+
+    await expect(
+      createDetectionEngineSetupService({
+        core,
+        spaces: undefined,
+        ...createWorkflowsExtensions(),
+        isServerless: true,
+      }).enable({ request, spaceId: 'default', serviceAccountId: 'account-1' })
+    ).rejects.toMatchObject({ statusCode: 500 });
   });
 
   it('refuses another account and puts the previous binding back', async () => {

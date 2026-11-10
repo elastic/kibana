@@ -6,7 +6,7 @@
  */
 
 import { isBoom } from '@hapi/boom';
-import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { getNightshiftRoleName, getNightshiftServiceAccountName } from '@kbn/nightshift-shared';
 import {
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
@@ -83,6 +83,7 @@ export function createDetectionEngineSetupService({
   workflowsManagement,
   getMaintenanceState,
   isServerless,
+  logger,
 }: {
   core: CoreStart;
   spaces: SpacesPluginStart | undefined;
@@ -91,6 +92,7 @@ export function createDetectionEngineSetupService({
   /** The space's maintenance state, which decides whether the scheduled workflows start. */
   getMaintenanceState?: (request: KibanaRequest) => Promise<SignificantEventsMaintenanceState>;
   isServerless: boolean;
+  logger?: Logger;
 }): DetectionEngineSetupService {
   const role = getNightshiftRoleName('detection', { isServerless });
 
@@ -147,11 +149,29 @@ export function createDetectionEngineSetupService({
     request: KibanaRequest;
   }): Promise<void> => {
     const expectedName = getNightshiftServiceAccountName('detection');
-    const summary = await core.security.serviceAccounts.getWorkloadServiceAccountSummary({
-      workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
-      workloadId: DETECTION_ENGINE_WORKLOAD_ID,
-      spaceId,
-    });
+    let summary: Awaited<
+      ReturnType<typeof core.security.serviceAccounts.getWorkloadServiceAccountSummary>
+    >;
+    try {
+      summary = await core.security.serviceAccounts.getWorkloadServiceAccountSummary({
+        workloadType: DETECTION_ENGINE_WORKLOAD_TYPE,
+        workloadId: DETECTION_ENGINE_WORKLOAD_ID,
+        spaceId,
+      });
+    } catch (error) {
+      // UIAM answers 403 when Kibana's own identity may not read the account, as in the local
+      // UIAM of the functional tests. The account cannot be checked then, and refusing would make
+      // the space impossible to set up. A missing, renamed or disabled account is still refused.
+      if (getStatusCode(error) !== 403) {
+        throw error;
+      }
+      logger?.warn(
+        `Could not verify that service account [${serviceAccountId}] is the [${expectedName}] account: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return;
+    }
     if (summary?.name === expectedName && summary.enabled) {
       return;
     }
