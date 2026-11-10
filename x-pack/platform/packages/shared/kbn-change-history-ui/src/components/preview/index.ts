@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { ChangeHistoryPreview } from './change_history_preview';
+export { ChangeHistoryPreview } from './lazy_change_history_preview';
 export { CHANGE_HISTORY_PREVIEW_FOOTER_HEIGHT } from './change_history_preview_footer';
 export type {
   ChangeHistoryPreviewProps,
