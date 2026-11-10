@@ -95,13 +95,6 @@ export interface DocLinks {
     readonly auditdModule: string;
     readonly systemModule: string;
   };
-  readonly searchHomepage: {
-    readonly visitSearchLabs: string;
-    readonly notebooksExamples: string;
-    readonly customerEngineerRequestForm: string;
-    readonly elasticCommunity: string;
-    readonly elasticCloud: string;
-  };
   readonly searchGettingStarted: {
     readonly visitSearchLabs: string;
     readonly notebooksExamples: string;
