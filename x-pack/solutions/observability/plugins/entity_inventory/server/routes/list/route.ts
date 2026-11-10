@@ -9,7 +9,12 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import type { ListResponse } from '../types';
 import { createEntityInventoryServerRoute } from '../create_server_route';
 import { INTERIM_AUTHZ } from '../interim_authz';
-import { instantParam, listLimitParam } from '../utils/request_params';
+import {
+  dateRangeRefinement,
+  instantParam,
+  isFromEarlierThanTo,
+  listLimitParam,
+} from '../utils/request_params';
 import { typeNameSchema } from '../utils/type_name_schema';
 import { createAbortSignal } from '../utils/create_abort_signal';
 
@@ -25,9 +30,7 @@ export const listRoute = createEntityInventoryServerRoute({
           limit: listLimitParam,
         })
         .strict()
-        .refine(({ from, to }) => Date.parse(from) < Date.parse(to), {
-          message: 'from must be earlier than to',
-        }),
+        .refine(isFromEarlierThanTo, dateRangeRefinement),
     })
   ),
   options: {

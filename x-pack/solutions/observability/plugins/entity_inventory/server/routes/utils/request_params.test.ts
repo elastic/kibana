@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { instantParam, listLimitParam } from './request_params';
+import { z } from '@kbn/zod/v4';
+import {
+  dateRangeRefinement,
+  instantParam,
+  isFromEarlierThanTo,
+  listLimitParam,
+} from './request_params';
 
 describe('instantParam', () => {
   it.each(['2026-11-01T00:00:00Z', '2026-11-01T01:00:00+02:00', '2026-11-01T00:00:00.123456789Z'])(
@@ -40,5 +46,31 @@ describe('listLimitParam', () => {
 
   it.each([0, -1, 10000, 1.5, 'abc'])('rejects %s', (limit) => {
     expect(listLimitParam.safeParse(limit).success).toBe(false);
+  });
+});
+
+describe('isFromEarlierThanTo + dateRangeRefinement', () => {
+  const schema = z
+    .object({ from: instantParam, to: instantParam })
+    .refine(isFromEarlierThanTo, dateRangeRefinement);
+
+  it('accepts a range whose from is earlier than to', () => {
+    expect(
+      schema.safeParse({ from: '2026-11-01T00:00:00Z', to: '2026-11-01T00:00:01Z' }).success
+    ).toBe(true);
+  });
+
+  it.each([
+    ['from equals to', '2026-11-01T00:00:00Z', '2026-11-01T00:00:00Z'],
+    ['from is after to', '2026-11-02T00:00:00Z', '2026-11-01T00:00:00Z'],
+  ])('rejects a range where %s, reporting the error on to', (_label, from, to) => {
+    const result = schema.safeParse({ from, to });
+
+    expect(result.success).toBe(false);
+    console.log(result.error);
+    expect(result.error?.issues[0]).toMatchObject({
+      message: 'from must be earlier than to',
+      path: ['to'],
+    });
   });
 });

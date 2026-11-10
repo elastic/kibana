@@ -22,3 +22,11 @@ export const instantParam = lazySchema(() =>
 export const listLimitParam = lazySchema(() =>
   z.number().int().min(1).max(MAX_LIST_LIMIT).default(MAX_LIST_LIMIT)
 );
+
+export const isFromEarlierThanTo = ({ from, to }: { from: string; to: string }): boolean =>
+  Date.parse(from) < Date.parse(to);
+
+export const dateRangeRefinement = {
+  message: 'from must be earlier than to',
+  path: ['to'],
+};
