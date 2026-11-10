@@ -101,10 +101,13 @@ export const formatGap = (seconds: number): string => {
   return `+${Math.round(seconds / 3600)}h`;
 };
 
-/** An ISO timestamp's time of day in UTC; unparseable text is kept. */
+/**
+ * An ISO timestamp's time of day, labeled UTC. The card is rendered on the server and can't know the viewer's
+ * zone, so every time it shows is UTC and says so. Unparseable text is kept.
+ */
 export const formatTimeOfDay = (timestamp: string): string => {
   const time = Date.parse(timestamp);
-  return Number.isNaN(time) ? timestamp : new Date(time).toISOString().slice(11, 19);
+  return Number.isNaN(time) ? timestamp : `${new Date(time).toISOString().slice(11, 19)} UTC`;
 };
 
 export interface TimelinePlot {

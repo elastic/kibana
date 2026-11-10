@@ -14,8 +14,8 @@ import type { ForensicsSummaryViewModel } from './view_model';
 
 const MARGIN = 16;
 const HEIGHTS = {
-  /** The frame and the renderer's padding, the header with its line of facts, the KPI tiles, and the Decide heading. */
-  base: 316,
+  /** The renderer's padding, the header with its line of facts, the KPI tiles, and the Decide heading. */
+  base: 294,
   /** The attack's title under the host. */
   subtitle: 20,
   /** The "What happened" callout with one line, and its second line. */

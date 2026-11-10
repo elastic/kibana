@@ -106,8 +106,17 @@ const formatUtc = (timestamp: string, precision: typeof MINUTES | typeof SECONDS
     : `${new Date(time).toISOString().slice(0, precision).replace('T', ' ')} UTC`;
 };
 
-/** An ISO timestamp as `HH:mm`, for a window inside one day. */
-const formatHourMinute = (timestamp: string): string => formatTimeOfDay(timestamp).slice(0, 5);
+/** A window as `HH:mm–HH:mm UTC` inside one day, or with both dates when it spans more. Unparseable text is kept. */
+const formatWindow = (start: string, end: string): string => {
+  const [startTime, endTime] = [Date.parse(start), Date.parse(end)];
+  if (Number.isNaN(startTime) || Number.isNaN(endTime)) {
+    return `${start}–${end}`;
+  }
+  const [startIso, endIso] = [new Date(startTime).toISOString(), new Date(endTime).toISOString()];
+  return startIso.slice(0, 10) === endIso.slice(0, 10)
+    ? `${startIso.slice(11, 16)}–${endIso.slice(11, 16)} UTC`
+    : `${startIso.slice(0, 16).replace('T', ' ')} – ${endIso.slice(0, 16).replace('T', ' ')} UTC`;
+};
 
 const countOf = (count: number, one: string, many: string): string =>
   `${count} ${count === 1 ? one : many}`;
@@ -118,7 +127,7 @@ const capitalize = (text: string): string => text.charAt(0).toUpperCase() + text
 const toPlainSummary = (summary: string): string => summary.replace(/\*\*|`/g, '');
 
 const buildHeader = (viewModel: ForensicsSummaryViewModel) => {
-  const { verdict, autonomy, analyzedAt, alerts, timeline, indicators, decisions } = viewModel;
+  const { verdict, autonomy, alerts, timeline, indicators, decisions } = viewModel;
   const { label: verdictLabel, className: verdictClass } = VERDICTS[verdict];
   const hasEvidence = timeline.total > 0 || indicators.length > 0;
   const proposalCount = sum(Object.values(decisions));
@@ -129,15 +138,10 @@ const buildHeader = (viewModel: ForensicsSummaryViewModel) => {
     verdictClass,
     autonomyLabel: autonomy === 'supervised' ? 'Supervised' : 'Manual approval',
     windowFacts: [
-      ...(analyzedAt ? [`Analyzed ${formatUtc(analyzedAt, MINUTES)}`] : []),
-      countOf(alerts.total, 'correlated alert', 'correlated alerts'),
       ...(timeline.window
-        ? [
-            `searched ${formatHourMinute(timeline.window.start)}–${formatHourMinute(
-              timeline.window.end
-            )}`,
-          ]
+        ? [`Searched ${formatWindow(timeline.window.start, timeline.window.end)}`]
         : []),
+      countOf(alerts.total, 'correlated alert', 'correlated alerts'),
     ],
     flow: [
       { label: 'Attack Discovery', className: 'done' },

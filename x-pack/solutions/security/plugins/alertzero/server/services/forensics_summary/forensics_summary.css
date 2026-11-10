@@ -22,8 +22,8 @@
   --sev-medium:light-dark(#FACB3D,#FEC514);
   --sev-low:light-dark(#00BFB3,#48EFCF);
   --mono:'Roboto Mono',Menlo,Courier,monospace;
-  max-width:736px;padding:10px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);
-  background:var(--cc-color-surface);color:var(--cc-color-text);
+  /* No frame of its own: the chat already draws one around the attachment. */
+  max-width:736px;color:var(--cc-color-text);
   font:14px/1.5 var(--cc-font-family);font-variant-numeric:tabular-nums;overflow-x:hidden
 }
 .fs *{box-sizing:border-box}

@@ -78,7 +78,11 @@ describe('buildTimelinePlot', () => {
       [669, 3],
     ]);
     expect(plot?.gaps).toEqual([{ x: 394, label: '+10m' }]);
-    expect(plot).toMatchObject({ start: '08:00:00', end: '08:10:00', spanMinutes: 10 });
+    expect(plot).toMatchObject({
+      start: '08:00:00 UTC',
+      end: '08:10:00 UTC',
+      spanMinutes: 10,
+    });
   });
 
   it('plots only the alerts inside the axis', () => {

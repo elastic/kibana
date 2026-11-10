@@ -2,7 +2,7 @@
 <div class="fs">
   <header class="hdr">
     <div class="hdr-text">
-      <p class="eyebrow"><span class="brand">Elastic Security</span> · Forensics summary</p>
+      <p class="eyebrow"><span class="brand">Elastic Security</span> · Forensics Watch → Endpoint Analysis</p>
       <p class="meta">{{#windowFacts}}<span>{{.}}</span>{{/windowFacts}}</p>
       <h1>{{title}}</h1>
       {{#attackTitle}}<p class="sub">{{attackTitle}}</p>{{/attackTitle}}
@@ -62,7 +62,7 @@
   {{/hasKillChain}}
 
   <section class="section">
-    <h2>Decide <span class="meta">{{proposalCount}} · urgent containment first</span></h2>
+    <h2>Decide <span class="meta">{{proposalCount}}</span></h2>
     {{^proposalGroups}}<p class="meta">Endpoint Analysis proposed nothing for this host.</p>{{/proposalGroups}}
     {{#proposalGroups}}
     <p class="group">{{label}}</p>

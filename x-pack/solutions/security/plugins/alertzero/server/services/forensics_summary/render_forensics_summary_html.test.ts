@@ -29,7 +29,10 @@ const textOf = (html: string): string =>
 describe('renderForensicsSummaryHtml', () => {
   it('renders every section of the card', () => {
     const text = textOf(renderForensicsSummaryHtml(fixtureViewModel).html);
-    expect(text).toContain('Forensics summary');
+    expect(text).toContain('Elastic Security · Forensics Watch → Endpoint Analysis');
+    expect(text).toContain('Searched 08:00–10:00 UTC3 correlated alerts');
+    expect(text).toContain('Decide 3 proposals Respond');
+    expect(text).not.toContain('Analyzed');
     expect(text).toContain('win-fin-07');
     expect(text).toContain('Confirmed incident');
     expect(text).toContain('What happened');
@@ -42,6 +45,30 @@ describe('renderForensicsSummaryHtml', () => {
     expect(text).toContain('Entities from the indicators');
     expect(text).toContain('Indicators 8 extracted');
     expect(text).toContain('An approved close reaches all 3 alerts and the attack.');
+  });
+
+  it('labels every time it shows as UTC', () => {
+    const text = textOf(renderForensicsSummaryHtml(fixtureViewModel).html);
+    expect(text).toContain('Searched 08:00–10:00 UTC');
+    expect(text).toContain('expires 2026-11-03 10:15 UTC');
+    // The axis ticks, the event list and the events' tooltips.
+    expect(text).toContain('08:12:03 UTC');
+    expect(text).toContain('08:14:40 UTC');
+    // No time anywhere without its zone.
+    expect(text).not.toMatch(/\d{2}:\d{2}(:\d{2})?(?! UTC|–)\b(?!:)/);
+  });
+
+  it('shows both dates for a search window that spans days', () => {
+    const viewModel = buildForensicsSummaryViewModel({
+      ...fixtureInputs,
+      timeline: {
+        events: fixtureInputs.timeline?.events ?? [],
+        window: { start: '2026-11-01T22:00:00Z', end: '2026-11-02T10:00:00Z' },
+      },
+    });
+    expect(textOf(renderForensicsSummaryHtml(viewModel).html)).toContain(
+      'Searched 2026-11-01 22:00 – 2026-11-02 10:00 UTC'
+    );
   });
 
   it('renders a card for an analysis that left no evidence', () => {
