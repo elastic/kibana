@@ -8,7 +8,10 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import moment from 'moment';
 import { lastValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
@@ -17,7 +20,7 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { convertTimeValueToIso } from './date_conversion';
 import type { IntervalValue } from './generate_intervals';
-import type { SurrDocType } from '../services/context';
+import { SurrDocType } from '../services/context';
 import type { DiscoverServices } from '../../../build_services';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 
@@ -26,6 +29,24 @@ interface RangeQuery {
   lte?: string | null;
   gte?: string | null;
 }
+
+const getRequestTitle = (
+  type: SurrDocType,
+  start: IntervalValue,
+  uiSettings: IUiSettingsClient
+): string => {
+  const time = moment(start).locale(i18n.getLocale()).format(uiSettings.get('dateFormat'));
+
+  return type === SurrDocType.SUCCESSORS
+    ? i18n.translate('discover.context.inspectorRequestTitleOlderDocumentsBefore', {
+        defaultMessage: 'Older documents (before {time})',
+        values: { time },
+      })
+    : i18n.translate('discover.context.inspectorRequestTitleNewerDocumentsAfter', {
+        defaultMessage: 'Newer documents (after {time})',
+        values: { time },
+      });
+};
 
 /**
  * Fetch the hits between a given `interval` up to a maximum of `maxCount` documents.
@@ -95,7 +116,7 @@ export async function fetchHitsInInterval(
       disableWarningToasts: true,
       inspector: {
         adapter,
-        title: type,
+        title: getRequestTitle(type, start, services.uiSettings),
       },
     });
 

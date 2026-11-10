@@ -92,6 +92,146 @@ describe('readParameters', () => {
     });
   });
 
+  it('reads form-exploded objects from the query keys no other parameter takes', () => {
+    const parameters = [
+      { name: 'limit', in: 'query', schema: { type: 'integer' } },
+      {
+        name: 'labels',
+        in: 'query',
+        schema: { type: 'object', additionalProperties: { type: 'integer' } },
+      },
+    ];
+    const query = { limit: '5', env: '1', team: '2', 'contract-mock-page': '3' };
+
+    expect(read(parameters, { query })).toEqual({
+      'query.limit': 5,
+      'query.labels': { env: 1, team: 2 },
+    });
+    expect(read(parameters, { query: { limit: '5' } })).toEqual({
+      'query.limit': 5,
+      'query.labels': undefined,
+    });
+  });
+
+  it('wraps lone values of form-exploded maps whose values are arrays', () => {
+    const parameters = [
+      {
+        name: 'tags',
+        in: 'query',
+        schema: {
+          type: 'object',
+          additionalProperties: { type: 'array', items: { type: 'string' } },
+        },
+      },
+    ];
+
+    expect(read(parameters, { query: { env: 'prod', team: ['a', 'b'] } })).toEqual({
+      'query.tags': { env: ['prod'], team: ['a', 'b'] },
+    });
+  });
+
+  it('gives each form-exploded object the keys it declares', () => {
+    const parameters = [
+      {
+        name: 'color',
+        in: 'query',
+        schema: {
+          type: 'object',
+          properties: { color: { type: 'string' } },
+          additionalProperties: false,
+        },
+      },
+      {
+        name: 'size',
+        in: 'query',
+        schema: {
+          type: 'object',
+          properties: { size: { type: 'integer' } },
+          additionalProperties: false,
+        },
+      },
+      {
+        name: 'labels',
+        in: 'query',
+        schema: { type: 'object', additionalProperties: { type: 'string' } },
+      },
+    ];
+
+    expect(read(parameters, { query: { color: 'blue', size: '1', env: 'prod' } })).toEqual({
+      'query.color': { color: 'blue' },
+      'query.size': { size: 1 },
+      'query.labels': { env: 'prod' },
+    });
+  });
+
+  it('reads declared properties whatever their schema, and leaves unknown keys to validation', () => {
+    const parameters = [
+      {
+        name: 'filter',
+        in: 'query',
+        schema: {
+          type: 'object',
+          properties: { foo: true, color: { type: 'string' } },
+          additionalProperties: false,
+        },
+      },
+    ];
+
+    expect(read(parameters, { query: { foo: 'x', color: 'blue', typo: 'y' } })).toEqual({
+      'query.filter': { foo: 'x', color: 'blue', typo: 'y' },
+    });
+  });
+
+  it('gives unknown keys to an object with an open alternative', () => {
+    const parameters = [
+      {
+        name: 'color',
+        in: 'query',
+        schema: {
+          type: 'object',
+          properties: { color: { type: 'string' } },
+          additionalProperties: false,
+        },
+      },
+      {
+        name: 'extra',
+        in: 'query',
+        schema: {
+          oneOf: [
+            { type: 'object', additionalProperties: false },
+            { type: 'object', additionalProperties: { type: 'string' } },
+          ],
+        },
+      },
+    ];
+
+    expect(read(parameters, { query: { color: 'blue', env: 'prod' } })).toEqual({
+      'query.color': { color: 'blue' },
+      'query.extra': { env: 'prod' },
+    });
+  });
+
+  it('leaves the keys of deepObject parameters out of form-exploded maps', () => {
+    const parameters = [
+      {
+        name: 'filter',
+        in: 'query',
+        style: 'deepObject',
+        schema: { type: 'object', properties: { name: { type: 'string' } } },
+      },
+      {
+        name: 'counts',
+        in: 'query',
+        schema: { type: 'object', additionalProperties: { type: 'integer' } },
+      },
+    ];
+
+    expect(read(parameters, { query: { 'filter[name]': 'logs', errors: '2' } })).toEqual({
+      'query.filter': { name: 'logs' },
+      'query.counts': { errors: 2 },
+    });
+  });
+
   it.each([
     ['simple', false, '3,4'],
     ['label', false, '.3,4'],

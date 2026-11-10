@@ -27,7 +27,7 @@ import {
   getChangePointLabel,
   getOccurrenceBucketIntervalMs,
   type OccurrencePoint,
-} from './change_point';
+} from '../../../common/change_point';
 import { useChartThemes } from '../../../hooks/use_chart_themes';
 import { ChangePointAnnotationTooltip } from './change_point_annotation_tooltip';
 

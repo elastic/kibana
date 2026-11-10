@@ -580,6 +580,20 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(stepIn('load_events_per_alert')?.steps?.[0]?.with?._source).toEqual(expect.any(Array));
     });
 
+    it('returns the entity fields the entity_role check reads', () => {
+      expect(stepIn('load_entities')?.with?._source).toEqual(
+        expect.arrayContaining([
+          'entity.sub_type',
+          'entity.name',
+          'asset.environment',
+          'asset.name',
+          'asset.model',
+          'asset.owner',
+          'asset.vendor',
+        ])
+      );
+    });
+
     it('keeps the alert fields the workflow expressions read', () => {
       expect(stepIn('load_alerts')?.with?._source).toEqual(
         expect.arrayContaining(['host.id', 'user.name', 'kibana.alert.original_time'])
@@ -1167,6 +1181,33 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
           })
         )
       ).toBe('true');
+    });
+
+    const realEntityContext = (citedId: string, verdict: string) => {
+      const context = groundingContext({
+        world: [{ source: 'entity_store', id: citedId }],
+        eventIds: ['event-1'],
+        entityIds: [],
+        verdict,
+      });
+      (context.steps.load_entities.output.hits as { hits: unknown[] }).hits = [
+        { _id: 'cc6e7258465a02d8e5f9389f2e020dc4', _source: { entity: { id: 'host:host-1' } } },
+      ];
+      return context;
+    };
+
+    it('returns false when a true positive cites an entity hit by its entity.id', () => {
+      expect(ungrounded(realEntityContext('host:host-1', 'true_positive'))).toBe('false');
+    });
+
+    it('returns false when a true positive cites an entity hit by its document _id', () => {
+      expect(
+        ungrounded(realEntityContext('cc6e7258465a02d8e5f9389f2e020dc4', 'true_positive'))
+      ).toBe('false');
+    });
+
+    it('returns true when a true positive cites an entity id that matches neither', () => {
+      expect(ungrounded(realEntityContext('host:invented', 'true_positive'))).toBe('true');
     });
 
     it('returns true when a false positive cites an entity id that was not returned', () => {

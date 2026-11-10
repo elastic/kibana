@@ -7,24 +7,22 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { EuiPopover, EuiFilterButton, EuiHealth, useEuiTheme } from '@elastic/eui';
-import type { EuiThemeComputed } from '@elastic/eui';
+import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { alertTimelineStatusColor } from '../../alert_timeline/alert_timeline_status_palette';
 import { InlineFilterPopover } from './inline_filter_popover';
 import * as i18n from './translations';
 
-type StatusDotColorKey = Extract<keyof EuiThemeComputed['colors'], `text${string}`>;
-
-// The dot uses a resolved theme color (rather than a named token like `danger`) so it keeps its
-// color when its row is highlighted/selected: `EuiIcon` applies custom color values inline, which
-// beats `EuiSelectable`'s highlighted-row recolor. Colors mirror the status badge colors.
+// The dot uses a resolved theme color so it keeps its color when its row is
+// highlighted/selected: `EuiIcon` applies custom color values inline, which
+// beats `EuiSelectable`'s highlighted-row recolor. Colors match the Lifecycle lane.
 const EPISODE_STATUS_OPTIONS: Array<{
   label: string;
-  value: string;
-  colorKey: StatusDotColorKey;
+  value: AlertEpisodeStatus;
 }> = [
-  { label: i18n.STATUS_FILTER_ACTIVE_LABEL, value: 'active', colorKey: 'textDanger' },
-  { label: i18n.STATUS_FILTER_RECOVERING_LABEL, value: 'recovering', colorKey: 'textPrimary' },
-  { label: i18n.STATUS_FILTER_PENDING_LABEL, value: 'pending', colorKey: 'textWarning' },
-  { label: i18n.STATUS_FILTER_INACTIVE_LABEL, value: 'inactive', colorKey: 'textSuccess' },
+  { label: i18n.STATUS_FILTER_ACTIVE_LABEL, value: ALERT_EPISODE_STATUS.ACTIVE },
+  { label: i18n.STATUS_FILTER_RECOVERING_LABEL, value: ALERT_EPISODE_STATUS.RECOVERING },
+  { label: i18n.STATUS_FILTER_PENDING_LABEL, value: ALERT_EPISODE_STATUS.PENDING },
+  { label: i18n.STATUS_FILTER_INACTIVE_LABEL, value: ALERT_EPISODE_STATUS.INACTIVE },
 ];
 
 interface AlertEpisodesStatusFilterProps {
@@ -43,10 +41,10 @@ export function AlertEpisodesStatusFilter({
 
   const options = useMemo(
     () =>
-      EPISODE_STATUS_OPTIONS.map(({ label, value, colorKey }) => ({
+      EPISODE_STATUS_OPTIONS.map(({ label, value }) => ({
         label,
         value,
-        prepend: <EuiHealth color={euiTheme.colors[colorKey]} />,
+        prepend: <EuiHealth color={alertTimelineStatusColor(euiTheme, value)} />,
       })),
     [euiTheme]
   );

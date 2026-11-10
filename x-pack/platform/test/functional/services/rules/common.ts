@@ -65,10 +65,13 @@ export function RulesCommonServiceProvider({ getService, getPageObject }: FtrPro
       await testSubjects.click('ofExpressionPopover');
       const ofComboBox = await find.byCssSelector('#ofField');
       await ofComboBox.click();
-      const ofOptionsString = await comboBox.getOptionsList('availableFieldsOptionsComboBox');
-      const ofOptions = ofOptionsString.trim().split('\n');
-      expect(ofOptions.length > 0).to.be(true);
-      await comboBox.set('availableFieldsOptionsComboBox', ofOptions[0]);
+      // Selecting a field closes the popover and unmounts the combo box, so comboBox.set can't be used.
+      await retry.try(async () => {
+        const [firstOfOption] = await comboBox.getOptions('availableFieldsOptionsComboBox');
+        expect(firstOfOption).not.to.be(undefined);
+        await firstOfOption.clickMouseButton();
+      });
+      await testSubjects.missingOrFail('availableFieldsOptionsComboBox');
 
       await testSubjects.scrollIntoView('ruleDetailsNameInput');
       await testSubjects.setValue('ruleDetailsNameInput', alertName);

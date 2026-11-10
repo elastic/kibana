@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
+import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardStart } from './plugin';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
@@ -128,23 +129,27 @@ export function dashboardContextWrapper({
     savedObjectId,
   });
 
+  const changeHistoryModal = { isOpen: false, openModal: jest.fn(), closeModal: jest.fn() };
+
   return ({ children }: { children: React.ReactNode }) => (
     <I18nProvider>
-      <DashboardContext.Provider
-        value={{
-          ...api,
-          ...(apiOverrides ?? {}),
-        }}
-      >
-        <DashboardInternalContext.Provider
+      <ChangeHistoryModalContext.Provider value={changeHistoryModal}>
+        <DashboardContext.Provider
           value={{
-            ...internalApi,
-            ...(internalApiOverrides ?? {}),
+            ...api,
+            ...(apiOverrides ?? {}),
           }}
         >
-          {children}
-        </DashboardInternalContext.Provider>
-      </DashboardContext.Provider>
+          <DashboardInternalContext.Provider
+            value={{
+              ...internalApi,
+              ...(internalApiOverrides ?? {}),
+            }}
+          >
+            {children}
+          </DashboardInternalContext.Provider>
+        </DashboardContext.Provider>
+      </ChangeHistoryModalContext.Provider>
     </I18nProvider>
   );
 }

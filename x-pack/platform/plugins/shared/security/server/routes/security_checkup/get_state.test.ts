@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/order
+// eslint-disable-next-line @kbn/compat/import-order
 import { mockCreateClusterDataCheck } from './get_state.test.mock';
 
 import type { Observable } from 'rxjs';

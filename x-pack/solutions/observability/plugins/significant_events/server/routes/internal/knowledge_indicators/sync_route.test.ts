@@ -20,7 +20,7 @@ type HandlerParams = Parameters<typeof route.handler>[0];
 const makeHandlerParams = ({ sourceIds }: { sourceIds: string[] }): HandlerParams =>
   ({
     params: {},
-    request: {},
+    request: { spaceId: 'default' },
     getScopedClients: jest.fn().mockResolvedValue({
       licensing: {},
       sourcesClient: {
@@ -94,7 +94,7 @@ describe('reconcileSourceRoute', () => {
     const logger = { error: jest.fn(), warn: jest.fn() };
     const handlerParams = {
       params: { path: { sourceId: SOURCE.id }, body: { sourceSlug: SOURCE.slug } },
-      request: {},
+      request: { spaceId: 'default' },
       logger,
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},

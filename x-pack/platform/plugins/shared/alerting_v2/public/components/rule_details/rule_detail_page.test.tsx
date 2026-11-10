@@ -18,7 +18,7 @@ import { RuleProvider } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { createMockLocators, MockLocatorProvider } from '../../test_utils/test_providers';
-import { createAlertingV2HostApp } from '../../locators';
+import { createAlertingV2HostApp } from '../../../common/locators';
 
 const TEST_HOST = createAlertingV2HostApp('test-app', {
   rules: '/alerting/rules',
@@ -27,7 +27,7 @@ const TEST_HOST = createAlertingV2HostApp('test-app', {
   actionPolicies: '/alerting/action-policies',
   executionHistory: '/alerting/execution-history',
 });
-import { AlertingV2RulesLocatorDefinition } from '../../locators';
+import { AlertingV2RulesLocatorDefinition } from '../../../common/locators';
 
 const mockLocators = createMockLocators();
 
@@ -386,6 +386,12 @@ describe('RuleDetailPage', () => {
     renderPage(baseRule);
     fireEvent.click(screen.getByTestId('openEditRuleFlyoutButton'));
     expect(mockOpenEditFlyout).toHaveBeenCalledWith(baseRule);
+  });
+
+  it('does not include View details in the overflow menu', async () => {
+    renderPage(baseRule);
+    await openAppMenuOverflow();
+    expect(screen.queryByText('View details')).not.toBeInTheDocument();
   });
 
   it('does not render enable/disable options in the overflow menu', async () => {

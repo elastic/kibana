@@ -11,11 +11,11 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   approve: i18n.translate('xpack.proposals.approvalModal.approve', {
     defaultMessage: 'Approve',
   }),
-  /** The single decision a to-do proposal offers: the human did what it proposes. */
+  /** To-do primary: analyst confirms they carried it out. */
   markApplied: i18n.translate('xpack.proposals.approvalModal.markApplied', {
-    defaultMessage: "I've applied",
+    defaultMessage: 'Mark as applied',
   }),
-  /** Takes back a to-do proposal's "I've applied", re-offering it. */
+  /** Re-offers a marked-applied to-do. */
   markNotApplied: i18n.translate('xpack.proposals.approvalModal.markNotApplied', {
     defaultMessage: 'Mark as not applied',
   }),
@@ -51,7 +51,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   noActionBadge: i18n.translate('xpack.proposals.approvalModal.noActionBadge', {
     defaultMessage: 'Approved',
   }),
-  /** A to-do proposal the analyst marked as applied: they carried it out, nothing automated ran. */
+  /** To-do the analyst marked as applied (nothing automated ran). */
   markedAppliedBadge: i18n.translate('xpack.proposals.approvalModal.markedAppliedBadge', {
     defaultMessage: 'Applied',
   }),
@@ -71,7 +71,7 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     defaultMessage: 'Irreversible',
   }),
   appliedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.appliedTitle', {
-    defaultMessage: 'Applied successfully',
+    defaultMessage: 'Applied',
   }),
   declinedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.declinedTitle', {
     defaultMessage: 'Declined',
@@ -79,11 +79,19 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   applyingBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.applyingTitle', {
     defaultMessage: 'Applying',
   }),
+  /** The detail after an outcome banner's title: who asked or decided, and when if known. */
+  whoAndWhenBannerDescription: (name: string, time?: string) =>
+    time
+      ? i18n.translate('xpack.proposals.approvalModal.outcome.whoAndWhenDescription', {
+          defaultMessage: '{name} on {time}',
+          values: { name, time },
+        })
+      : name,
   decliningBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.decliningTitle', {
     defaultMessage: 'Declining',
   }),
   failedBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.failedTitle', {
-    defaultMessage: 'Action failed',
+    defaultMessage: 'Failed',
   }),
   noActionBannerTitle: i18n.translate('xpack.proposals.approvalModal.outcome.noActionTitle', {
     defaultMessage: 'Approved',
@@ -92,9 +100,9 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     'xpack.proposals.approvalModal.outcome.markedAppliedTitle',
     { defaultMessage: 'Marked as applied' }
   ),
-  /** The caption's name for the to-do category, which reads oddly sentence-cased as "Todo". */
+  /** Caption label for `todo` (avoids sentence-cased "Todo"). */
   todoCategory: i18n.translate('xpack.proposals.approvalModal.caption.todoCategory', {
-    defaultMessage: 'To do',
+    defaultMessage: 'Apply manually',
   }),
   actionErrorTitle: i18n.translate('xpack.proposals.approvalModal.outcome.actionError', {
     defaultMessage: 'Could not record the decision. Try again.',
@@ -103,11 +111,11 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
     defaultMessage: 'You',
   }),
   unknownActorFallback: i18n.translate('xpack.proposals.approvalModal.outcome.unknownActor', {
-    defaultMessage: 'Someone',
+    defaultMessage: 'Unknown user',
   }),
   previousFailureCalloutTitle: i18n.translate(
     'xpack.proposals.approvalModal.previousFailureCallout',
-    { defaultMessage: 'A previous attempt at this action failed' }
+    { defaultMessage: 'Previous attempt to apply this proposal failed' }
   ),
   failedAttemptCalloutTitle: i18n.translate('xpack.proposals.approvalModal.failedAttemptCallout', {
     defaultMessage: 'This attempt failed to execute the action',
@@ -116,7 +124,6 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   // passes and when the workflow settles a proposal as `status: 'expired'` beforehand (e.g. after
   // exhausting its retry attempts), and this wording has to be true for either cause.
   expiredCalloutTitle: i18n.translate('xpack.proposals.approvalModal.expiredCallout', {
-    defaultMessage:
-      'This proposal expired before a decision was made and can no longer be actioned.',
+    defaultMessage: 'Expired and can no longer be applied',
   }),
 });
