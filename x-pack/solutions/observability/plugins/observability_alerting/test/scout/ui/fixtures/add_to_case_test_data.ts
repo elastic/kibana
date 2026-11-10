@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import {
   CUSTOM_THRESHOLD_RULE_TYPE_ID,
   OBS_THRESHOLD_ALERTS_INDEX_PATTERN,
+  READER_ES_PRIVILEGES,
 } from './privilege_test_data';
 
 export const ADD_TO_CASE_RULE_NAME = '[scout] Add to case rule';
@@ -20,11 +21,6 @@ export const ADD_TO_CASE_DATA_VIEW_ID = 'scout-add-to-case-threshold-dv';
 const ADD_TO_CASE_GROUPS = ['host-a', 'host-b'] as const;
 
 export const ADD_TO_CASE_ALERT_COUNT = ADD_TO_CASE_GROUPS.length;
-
-const READER_ES_PRIVILEGES: KibanaRole['elasticsearch'] = {
-  cluster: [],
-  indices: [{ names: ['*'], privileges: ['read', 'view_index_metadata'] }],
-};
 
 /** Read access to classic alerts (no v2 alerts privilege) plus full Observability cases access. */
 export const LOGS_READ_WITH_CASES_ROLE: KibanaRole = {

@@ -48,6 +48,7 @@ import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hook
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import { episodeSupportsTimeline } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
+import { useSourceWriteAccess } from '@kbn/alerting-v2-episodes-ui/hooks/use_source_write_access';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
@@ -96,10 +97,6 @@ import {
   getDiscoverHrefForAlertEventsHistory,
   getDiscoverHrefForRuleAndAlertTimestamp,
 } from '../../utils/discover_href_for_alert';
-import {
-  filterAlertActionsByPrivilege,
-  ALERT_ACTIONS_PRIVILEGE,
-} from '../../utils/filter_alert_actions_by_privilege';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useManageRulesHref } from '../../application/manage_rules_href_context';
 
@@ -227,9 +224,12 @@ const AlertsListPageContent = () => {
   const { rulesLocators, episodesLocators } = useAlertingLocators();
   const queryClient = useQueryClient();
   const additionalDataSource = useAdditionalEpisodesDataSource();
-  const alertsCapability = useService(UserCapabilities).canWrite('alerts')
-    ? ALERT_ACTIONS_PRIVILEGE.all
-    : ALERT_ACTIONS_PRIVILEGE.read;
+  const canWriteAlerts = useService(UserCapabilities).canWrite('alerts');
+  const canWriteSourceEpisode = useSourceWriteAccess({
+    application: services.application,
+    http: services.http,
+    notifications: services.notifications,
+  });
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
   const { euiTheme } = useEuiTheme();
   const largeMediaQuery = useEuiMinBreakpoint('m');
@@ -430,49 +430,48 @@ const AlertsListPageContent = () => {
 
   const episodeActions: EpisodeAction[] = useMemo(
     () =>
-      filterAlertActionsByPrivilege(
-        createEpisodeActions({
-          http: services.http,
-          overlays: services.overlays,
-          notifications: services.notifications,
-          rendering: services.rendering,
-          application: services.application,
-          userProfile: services.userProfile,
-          docLinks: services.docLinks,
-          expressions: services.expressions,
-          spaces: services.spaces,
-          queryClient,
-          additionalDataSource,
-          isRuleAvailable: (ruleId) => Boolean(rulesCache[ruleId]),
-          getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
-            getDiscoverHrefForRuleAndAlertTimestamp({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-              ruleEsql: rulesCache[ruleId]?.query
-                ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
-                : undefined,
-              alertIsoTimestamp: episodeIsoTimestamp,
-            }),
-          getAlertEventsHistoryHref: ({ episodeId, episodeStart, spaceId }) =>
-            getDiscoverHrefForAlertEventsHistory({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-              episodeId,
-              episodeStart,
-              spaceId,
-            }),
-          isAlertEventsHistoryAvailable: () =>
-            canOpenDiscover({
-              share: services.share,
-              capabilities: services.application.capabilities,
-              uiSettings: services.uiSettings,
-            }),
-        }),
-        alertsCapability
-      ),
-    [services, queryClient, additionalDataSource, rulesCache, alertsCapability]
+      createEpisodeActions({
+        http: services.http,
+        overlays: services.overlays,
+        notifications: services.notifications,
+        rendering: services.rendering,
+        application: services.application,
+        userProfile: services.userProfile,
+        docLinks: services.docLinks,
+        expressions: services.expressions,
+        spaces: services.spaces,
+        queryClient,
+        additionalDataSource,
+        canWriteNativeEpisodes: canWriteAlerts,
+        canWriteSourceEpisode,
+        isRuleAvailable: (ruleId) => Boolean(rulesCache[ruleId]),
+        getDiscoverHref: ({ episodeIsoTimestamp, ruleId }) =>
+          getDiscoverHrefForRuleAndAlertTimestamp({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            ruleEsql: rulesCache[ruleId]?.query
+              ? getBreachEsqlQuery(rulesCache[ruleId]!.query)
+              : undefined,
+            alertIsoTimestamp: episodeIsoTimestamp,
+          }),
+        getAlertEventsHistoryHref: ({ episodeId, episodeStart, spaceId }) =>
+          getDiscoverHrefForAlertEventsHistory({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+            episodeId,
+            episodeStart,
+            spaceId,
+          }),
+        isAlertEventsHistoryAvailable: () =>
+          canOpenDiscover({
+            share: services.share,
+            capabilities: services.application.capabilities,
+            uiSettings: services.uiSettings,
+          }),
+      }),
+    [services, queryClient, additionalDataSource, rulesCache, canWriteAlerts, canWriteSourceEpisode]
   );
   const tableEpisodeActions = useMemo(
     () => episodeActions.filter(({ id }) => id !== OPEN_ALERT_EVENTS_HISTORY_ACTION_ID),
