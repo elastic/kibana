@@ -28,17 +28,21 @@ export const DEFAULT_SETTINGS: WithAllKeys<DashboardSettings> = {
   title: '',
 };
 
-export const settingsComparators: StateComparators<DashboardSettings> = {
-  title: 'referenceEquality',
-  description: 'referenceEquality',
+export const optionsComparators: StateComparators<Required<DashboardOptions>> = {
   hide_panel_titles: 'referenceEquality',
   hide_panel_borders: 'referenceEquality',
   sync_colors: 'referenceEquality',
   sync_cursor: 'referenceEquality',
   sync_tooltips: 'referenceEquality',
   auto_apply_filters: 'referenceEquality',
-  time_restore: 'referenceEquality',
   use_margins: 'referenceEquality',
+};
+
+export const settingsComparators: StateComparators<DashboardSettings> = {
+  ...optionsComparators,
+  title: 'referenceEquality',
+  description: 'referenceEquality',
+  time_restore: 'referenceEquality',
   project_routing_restore: 'referenceEquality',
   tags: 'deepEquality',
 };

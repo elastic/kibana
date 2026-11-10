@@ -17,10 +17,7 @@ import type {
 } from '@kbn/as-code-dashboard-schema';
 import { areComparatorsEqual, type StateComparators } from '@kbn/presentation-publishing';
 import { isDashboardPanel } from '../is_dashboard_panel';
-import { DEFAULT_SETTINGS, deserializeSettings, settingsComparators } from './settings';
-import { getUnifiedSearchComparators } from './unified_search';
-import { getProjectRoutingComparators } from './project_routing';
-import { approximationComparators, DEFAULT_APPROXIMATION_STATE } from './approximation';
+import { DASHBOARD_COMPARATOR_DEFAULTS, getDashboardComparators } from './comparators';
 
 type PanelOrSection = DashboardPanel | DashboardSection;
 type GetComparators = (
@@ -109,86 +106,22 @@ async function arePinnedPanelsEqual(
  * Checks whether two dashboard states are equal.
  *
  * `panels` and `pinned_panels` are compared with the comparators returned by `getComparators`.
- * Settings (`title`, `description`, `tags`, `options`) are compared with the settings comparators and defaults.
- * Unified search (`filters`, `query`, `refresh_interval`, `time_range`) is compared with the unified search comparators.
- * `esql_approximation` is compared with the approximation comparators and defaults.
- * `project_routing` is compared with the project routing comparators.
- * All other keys are compared with deep equality.
+ * All other keys are compared with the comparators from `getDashboardComparators`.
  */
 export async function areEqual(
   a: DashboardState,
   b: DashboardState,
   getComparators: GetComparators
 ): Promise<boolean> {
-  const {
-    panels: panelsA,
-    pinned_panels: pinnedPanelsA,
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    title: _titleA,
-    description: _descriptionA,
-    tags: _tagsA,
-    options: _optionsA,
-    filters: _filtersA,
-    query: _queryA,
-    refresh_interval: _refreshIntervalA,
-    time_range: _timeRangeA,
-    esql_approximation: _esqlApproximationA,
-    project_routing: _projectRoutingA,
-    /* eslint-enable @typescript-eslint/no-unused-vars */
-    ...restA
-  } = a;
-  const {
-    panels: panelsB,
-    pinned_panels: pinnedPanelsB,
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    title: _titleB,
-    description: _descriptionB,
-    tags: _tagsB,
-    options: _optionsB,
-    filters: _filtersB,
-    query: _queryB,
-    refresh_interval: _refreshIntervalB,
-    time_range: _timeRangeB,
-    esql_approximation: _esqlApproximationB,
-    project_routing: _projectRoutingB,
-    /* eslint-enable @typescript-eslint/no-unused-vars */
-    ...restB
-  } = b;
+  const { panels: panelsA, pinned_panels: pinnedPanelsA } = a;
+  const { panels: panelsB, pinned_panels: pinnedPanelsB } = b;
 
-  if (!deepEqual(restA, restB)) return false;
-  if (
-    !areComparatorsEqual(
-      settingsComparators,
-      deserializeSettings(a),
-      deserializeSettings(b),
-      DEFAULT_SETTINGS
-    )
-  ) {
-    return false;
-  }
-  if (!areComparatorsEqual(approximationComparators, a, b, DEFAULT_APPROXIMATION_STATE)) {
-    return false;
-  }
-  // project routing only counts as a change when it is restored
-  if (
-    !areComparatorsEqual(
-      getProjectRoutingComparators({ isRestored: () => Boolean(b.project_routing) }),
-      a,
-      b
-    )
-  ) {
-    return false;
-  }
-  // time range and refresh interval only count as changes when time is restored
-  if (
-    !areComparatorsEqual(
-      getUnifiedSearchComparators({ isTimeRestored: () => Boolean(b.time_range) }),
-      a,
-      b
-    )
-  ) {
-    return false;
-  }
+  const comparators = getDashboardComparators({
+    // Restored when either state restores it, so adding or removing time or project routing is a change.
+    isTimeRestored: () => Boolean(a.time_range) || Boolean(b.time_range),
+    isProjectRoutingRestored: () => Boolean(a.project_routing) || Boolean(b.project_routing),
+  });
+  if (!areComparatorsEqual(comparators, a, b, DASHBOARD_COMPARATOR_DEFAULTS)) return false;
   return (
     (await arePinnedPanelsEqual(
       pinnedPanelsA as DashboardPinnedPanel[] | undefined,
