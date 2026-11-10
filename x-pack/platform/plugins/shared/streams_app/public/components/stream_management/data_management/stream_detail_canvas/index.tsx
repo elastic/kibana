@@ -36,6 +36,7 @@ import { useTimefilter } from '../../../../hooks/use_timefilter';
 import { useUnitId } from '../../../../hooks/use_unit_id';
 import {
   buildUnitCanvasGraph,
+  withRoutingDiagnostics,
   configuredDestinationNodeId,
   configuredSourceNodeId,
   readConfiguredDestinationId,
@@ -57,7 +58,7 @@ import { CanvasToolbar } from './canvas_toolbar';
 import { CanvasReadOnlyProvider } from './canvas_read_only_context';
 import { UnitReadOnlyCallout } from '../../../streams_layout/unit_read_only_callout';
 import { applyLayout } from './layout';
-import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
+import { getGraphNodeIds, syncCanvasNodeMetadata, syncCanvasEdgeData } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
 import { useSyncStatsWithSavedUnit } from './use_sync_stats_with_saved_unit';
@@ -66,6 +67,7 @@ import type { IndexInspectTabId } from '../../../index_inspect/types';
 import {
   DESTINATION_NODE_TYPE,
   PROCESSING_NODE_TYPE,
+  ROUTING_NODE_TYPE,
   SOURCE_NODE_TYPE,
   type ClassicCanvasEdge,
   type ClassicCanvasGraph,
@@ -87,6 +89,7 @@ import {
   useCanvasDestinationsRef,
   useCanvasSourcesRef,
   useCanvasUrlRef,
+  useCanvasRoutingDiagnostics,
   useCanvasRoutingFlyout,
   useCanvasProcessingFlyout,
 } from './state_management';
@@ -119,7 +122,6 @@ import {
   withUnitDestinations,
 } from '../../../streams_layout/destinations/destination_models';
 import {
-  addTestRoutingToLine,
   canConnectLine,
   canMoveLine,
   connectLine,
@@ -130,7 +132,6 @@ import {
   type UnitLineOrigin,
   type UnitLineTarget,
 } from '../../../../services/unit_connections';
-import { GRAPH_ENDPOINT_KIND, LINE_TARGET_KIND } from '../../../../services/unit_graph';
 import { RoutingFlyout } from '../../../stream_routing_flyout';
 import { ProcessingFlyout } from '../../../stream_processing_flyout';
 import { STATS_POLL_INTERVAL_MS } from '../../../unit_stats/state_management/constants';
@@ -219,7 +220,7 @@ function StreamsCanvasInner() {
     saveUnit,
     changeUnitConnection,
     openProcessingFlyout,
-    closeRoutingFlyout,
+    openRoutingFlyout,
   } = useCanvasEvents();
   const unitDefinition = useCanvasUnitDefinition();
   const hasUnsavedChanges = useCanvasHasUnsavedChanges();
@@ -227,7 +228,8 @@ function StreamsCanvasInner() {
   const isInitializing = useCanvasIsInitializing();
   const isUnitUnavailable = useCanvasIsUnitUnavailable();
   const nodePositions = useCanvasNodePositions();
-  const [routingFlyout, mode] = useCanvasRoutingFlyout();
+  const routingFlyout = useCanvasRoutingFlyout();
+  const routingDiagnostics = useCanvasRoutingDiagnostics();
   const processingFlyout = useCanvasProcessingFlyout();
   const nodePositionsRef = useRef(nodePositions);
   useEffect(() => {
@@ -301,14 +303,14 @@ function StreamsCanvasInner() {
     const graphNodes = [
       ...configuredSourceNodes,
       ...processingNodes,
-      ...routingNodes,
+      ...withRoutingDiagnostics(routingNodes, routingDiagnostics),
       ...configuredDestinationNodes,
     ];
     return {
       nodes: applyLayout(graphNodes, edges),
       edges,
     };
-  }, [destinations, resolvedIndicesByDestination, sources, unitDefinition]);
+  }, [destinations, resolvedIndicesByDestination, routingDiagnostics, sources, unitDefinition]);
 
   // Local (non-persisted) node state so nodes can be dragged around the canvas.
   // Metadata-only updates (e.g. index count after resolved indices reload) are
@@ -364,6 +366,8 @@ function StreamsCanvasInner() {
       if (graphEdgeIdsRef.current !== nextEdgeIds) {
         graphEdgeIdsRef.current = nextEdgeIds;
         setEdges(graph.edges);
+      } else {
+        setEdges((current) => syncCanvasEdgeData(current, graph.edges));
       }
       return;
     }
@@ -607,36 +611,6 @@ function StreamsCanvasInner() {
     ]
   );
 
-  // Testing aid for the routing flyout: unset when the line cannot be routed. TO BE REMOVED
-  const createTestRouting = useMemo(() => {
-    const edge = routingFlyout ? graph.edges.find(({ id }) => id === routingFlyout) : undefined;
-    const origin = edge ? readConnectionOrigin(edge.source, edge.sourceHandle) : undefined;
-    const target = edge ? readConnectionTarget(edge.target) : undefined;
-    const next =
-      origin &&
-      origin.kind !== GRAPH_ENDPOINT_KIND.rule &&
-      target?.kind === LINE_TARGET_KIND.destination
-        ? addTestRoutingToLine(unitDefinition, origin, target.id)
-        : unitDefinition;
-    if (next === unitDefinition) {
-      return undefined;
-    }
-    return () => {
-      record();
-      changeUnitConnection(next);
-      closeRoutingFlyout();
-    };
-  }, [
-    changeUnitConnection,
-    closeRoutingFlyout,
-    graph.edges,
-    readConnectionOrigin,
-    readConnectionTarget,
-    record,
-    routingFlyout,
-    unitDefinition,
-  ]);
-
   const onNodesDelete = useCallback<OnNodesDelete<ClassicCanvasNode>>(
     (deletedNodes) => {
       const removedSourceIds: string[] = [];
@@ -674,6 +648,11 @@ function StreamsCanvasInner() {
         openProcessingFlyout(node.data.ref);
         return;
       }
+      if (node.type === ROUTING_NODE_TYPE && !event.shiftKey) {
+        event.preventDefault();
+        openRoutingFlyout({ kind: 'pipeline', pipelineId: node.data.pipelineId }, readOnly);
+        return;
+      }
       if (node.type === SOURCE_NODE_TYPE && node.data.sourceId && !event.shiftKey) {
         event.preventDefault();
         openSourceFlyout(node.data.sourceId);
@@ -684,7 +663,7 @@ function StreamsCanvasInner() {
         openDestinationFlyout(node.data.destinationId);
       }
     },
-    [openDestinationFlyout, openProcessingFlyout, openSourceFlyout]
+    [openDestinationFlyout, openProcessingFlyout, openRoutingFlyout, openSourceFlyout, readOnly]
   );
 
   const reopenContextMenu = useCallback(
@@ -751,6 +730,9 @@ function StreamsCanvasInner() {
       if (selectedNode.type === PROCESSING_NODE_TYPE) {
         openProcessingFlyout(selectedNode.data.ref);
       }
+      if (selectedNode.type === ROUTING_NODE_TYPE) {
+        openRoutingFlyout({ kind: 'pipeline', pipelineId: selectedNode.data.pipelineId }, readOnly);
+      }
       if (selectedNode.type === SOURCE_NODE_TYPE && selectedNode.data.sourceId) {
         openSourceFlyout(selectedNode.data.sourceId);
       }
@@ -758,7 +740,14 @@ function StreamsCanvasInner() {
         openDestinationFlyout(selectedNode.data.destinationId);
       }
     }
-  }, [nodes, openDestinationFlyout, openProcessingFlyout, openSourceFlyout]);
+  }, [
+    nodes,
+    openDestinationFlyout,
+    openProcessingFlyout,
+    openRoutingFlyout,
+    openSourceFlyout,
+    readOnly,
+  ]);
 
   useCanvasKeyboardShortcuts({
     onUndo: readOnly ? noop : handleUndo,
@@ -938,10 +927,12 @@ function StreamsCanvasInner() {
                 onClose={closeCreateDestinationModal}
               />
             )}
-            {routingFlyout && mode === 'routing' ? (
+            {routingFlyout ? (
               <RoutingFlyout
-                edge={routingFlyout}
-                onCreateTestRouting={readOnly ? undefined : createTestRouting}
+                key={routingFlyout.ref?.sessionId}
+                flyout={routingFlyout}
+                onBeforeSave={record}
+                readOnly={readOnly}
               />
             ) : null}
             {processingFlyout ? (
@@ -1009,6 +1000,7 @@ const buildConfiguredSourceNode = (source: SourceViewModel): SourceNode => {
           }),
     data: {
       sourceId: source.id,
+      sourceType: source.type,
       title: name,
       subtitle: SOURCE_TYPE_CONFIG_BY_TYPE[source.type].shortLabel,
       iconType: SOURCE_TYPE_ICONS[source.type],

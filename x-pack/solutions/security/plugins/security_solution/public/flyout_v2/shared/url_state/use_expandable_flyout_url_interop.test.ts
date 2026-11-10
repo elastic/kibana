@@ -13,7 +13,6 @@ import { useFlyoutApi } from '../../use_flyout_api';
 import { createFlyoutApiMock } from '../../use_flyout_api.mock';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
 import { FLYOUT_V2_URL_PARAM } from './flyout_v2_url_param';
@@ -28,7 +27,6 @@ import { Router } from '@kbn/shared-ux-router';
 // ---------------------------------------------------------------------------
 
 jest.mock('../../use_flyout_api');
-jest.mock('../../../common/hooks/use_is_new_flyout_enabled');
 jest.mock('@kbn/unified-doc-viewer-plugin/public', () => ({
   useEsDocSearch: jest.fn(),
 }));
@@ -36,7 +34,6 @@ jest.mock('../../../data_view_manager/hooks/use_data_view');
 
 const mockFlyoutApi = createFlyoutApiMock();
 (useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
-(useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
 
 const mockDataView = { getRuntimeMappings: jest.fn(() => ({})) };
 (useDataView as jest.Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
@@ -497,28 +494,8 @@ describe('useLegacyFlyoutUrlInterop', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useFlyoutApi as jest.Mock).mockReturnValue(mockFlyoutApi);
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(true);
     (useDataView as jest.Mock).mockReturnValue({ dataView: mockDataView, status: 'ready' });
     noHit();
-  });
-
-  it('does nothing when new flyout is disabled', async () => {
-    (useIsNewFlyoutEnabled as jest.Mock).mockReturnValue(false);
-    const legacyState = {
-      right: {
-        id: 'document-details-right',
-        params: { id: 'doc-1', indexName: 'idx', scopeId: 'sc' },
-      },
-    };
-    const { history } = renderInterop(buildLegacyUrl(legacyState));
-
-    await act(async () => {
-      await Promise.resolve();
-    });
-
-    expect(mockFlyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
-    // Legacy param should still be present
-    expect(new URLSearchParams(history.location.search).get(LEGACY_PARAM)).toBeTruthy();
   });
 
   it('does nothing when the v2 param is already present', async () => {
