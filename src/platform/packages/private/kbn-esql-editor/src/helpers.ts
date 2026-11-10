@@ -10,7 +10,12 @@
 import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { monaco, type MonacoMessage } from '@kbn/code-editor';
+import {
+  monaco,
+  type CodeEditorScope,
+  type KbnCodeEditorChromeOverrides,
+  type MonacoMessage,
+} from '@kbn/code-editor';
 import { uniqBy, type MapCache } from 'lodash';
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -277,117 +282,162 @@ export const onKeyDownResizeHandler = (
   }
 };
 
-export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
+/**
+ * The ES|QL editor's chrome: colors Monaco reads from its `--vscode-*` custom properties, applied
+ * to this editor's own nodes only (see `CodeEditor`'s `chromeOverrides`). Syntax highlighting is a
+ * separate layer — the ES|QL language theme — and is not affected by anything here. The full list
+ * of properties is at
+ * https://github.com/microsoft/vscode/blob/main/build/lib/stylelint/vscode-known-variables.json.
+ */
+export const esqlEditorChromeOverrides: KbnCodeEditorChromeOverrides = ({ euiTheme }) => {
+  const { colors } = euiTheme;
+
+  const borderColor = colors.lightestShade || colors.borderBasePlain;
+  const bgColor = colors.emptyShade || colors.backgroundBasePlain;
+  // EUI types these as `string | number | undefined`; an undefined entry is dropped.
+  const cssValue = (value: string | number | undefined) =>
+    value === undefined ? undefined : String(value);
+
+  return {
+    '--vscode-cornerRadius-large': cssValue(euiTheme.border.radius.inline),
+    '--vscode-shadow-lg': cssValue(euiTheme.shadows.l.down),
+    '--vscode-editor-foreground': colors.textParagraph,
+    '--vscode-editor-background': bgColor,
+    '--vscode-editor-selectionHighlightBackground': borderColor,
+    '--vscode-editor-selectionHighlightBorder': borderColor,
+    '--vscode-editorLineNumber-foreground': colors.textDisabled,
+    '--vscode-editorLineNumber-activeForeground': colors.textSubdued,
+    '--vscode-editorHoverWidget-background': bgColor,
+    '--vscode-editorSuggestWidget-foreground': colors.textParagraph,
+    '--vscode-editorSuggestWidget-focusHighlightForeground': bgColor,
+    '--vscode-editorSuggestWidget-highlightForeground': colors.primary,
+    '--vscode-editorSuggestWidget-selectedBackground': colors.primary,
+    '--vscode-editorSuggestWidget-selectedForeground': bgColor,
+  };
+};
+
+/**
+ * The ES|QL editor's structural styles: things Monaco exposes no colour property for (hiding,
+ * z-index, spacing, radius on widgets). Every selector starts from the scope `CodeEditor` hands
+ * over, so the rules reach this editor's inline nodes and its portaled widgets, and nothing else.
+ */
+export const getEditorScopedStyles = (theme: UseEuiTheme<{}>, scope: CodeEditorScope) => {
+  const { colors } = theme.euiTheme;
+
   return css`
-    .monaco-editor {
-      --vscode-cornerRadius-large: ${theme.euiTheme.border.radius.inline};
-      --vscode-shadow-lg: ${theme.euiTheme.shadows.l.down};
+    // Monaco paints the current line from a rule it generates with the colour already resolved,
+    // so the lineHighlight CSS variables never reach it and chromeOverrides cannot set them.
+    // These rules are scoped to this editor and more specific than the ones Monaco generates.
+    ${scope.editor} .monaco-editor.focused .view-overlays .current-line {
+      background-color: ${colors.lightestShade || colors.borderBasePlain};
     }
 
-    .monaco-editor .suggest-details .scrollbar {
-      display: none !important;
+    ${scope.editor} .monaco-editor .view-overlays .current-line-exact {
+      border-color: ${colors.lightestShade || colors.borderBasePlain};
     }
 
-    .monaco-hover {
-      background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
+    ${scope.overflowWidgets} .suggest-details .scrollbar {
+      display: none;
+    }
+
+    ${scope.editor} .monaco-hover,
+    ${scope.overflowWidgets} .monaco-hover {
       line-height: 1.5rem;
-      border-radius: ${theme.euiTheme.border.radius.medium} !important;
-      box-shadow: ${theme.euiTheme.shadows.l.down} !important;
+      border-radius: ${theme.euiTheme.border.radius.medium};
+      box-shadow: ${theme.euiTheme.shadows.l.down};
       z-index: ${theme.euiTheme.levels.flyout};
     }
 
     // Fixes inline suggestions hover styles and only
-    .monaco-hover:has(.inlineSuggestionsHints) {
-      height: auto !important;
-      width: auto !important;
-      overflow-y: hidden !important;
+    ${scope.editor} .monaco-hover:has(.inlineSuggestionsHints),
+    ${scope.overflowWidgets} .monaco-hover:has(.inlineSuggestionsHints) {
+      height: auto;
+      width: auto;
+      overflow-y: hidden;
       a {
-        color: ${theme.euiTheme.colors.textParagraph} !important;
+        color: ${theme.euiTheme.colors.textParagraph};
       }
       .inlineSuggestionStatusBarItemLabel {
-        font-size: 10px !important;
+        font-size: 10px;
         display: flex;
         align-items: center;
-        color: ${theme.euiTheme.colors.textParagraph} !important;
+        color: ${theme.euiTheme.colors.textParagraph};
       }
       .slider {
         display: none;
       }
       .keybinding {
-        opacity: 1 !important;
+        opacity: 1;
       }
       .monaco-keybinding-key {
-        background-color: ${theme.euiTheme.colors.backgroundBaseSubdued} !important;
-        box-shadow: none !important;
-        border: 1px solid ${theme.euiTheme.colors.borderBasePlain} !important;
+        background-color: ${theme.euiTheme.colors.backgroundBaseSubdued};
+        box-shadow: none;
+        border: 1px solid ${theme.euiTheme.colors.borderBasePlain};
       }
       .codicon-toolbar-more {
-        opacity: 0 !important;
+        opacity: 0;
       }
       .codicon-inline-suggestion-hints-next {
-        margin-right: ${theme.euiTheme.size.xs} !important;
+        margin-right: ${theme.euiTheme.size.xs};
       }
       .codicon-inline-suggestion-hints-previous,
       .codicon-inline-suggestion-hints-next {
-        color: ${theme.euiTheme.colors.textParagraph} !important;
+        color: ${theme.euiTheme.colors.textParagraph};
       }
     }
 
     /* Hide View Problem action, it's always the first action */
-    .monaco-hover .hover-row.status-bar .actions > .action-container:nth-of-type(1) {
+    ${scope.editor} .monaco-hover .hover-row.status-bar .actions > .action-container:nth-of-type(1),
+    ${scope.overflowWidgets} .monaco-hover .hover-row.status-bar .actions > .action-container:nth-of-type(1) {
       display: none;
     }
-    .monaco-editor .action-widget {
+
+    ${scope.editor} .action-widget,
+    ${scope.overflowWidgets} .action-widget {
       min-width: calc(${theme.euiTheme.size.xl} * 6);
     }
 
-    .margin-view-overlays .line-numbers {
-      color: ${theme.euiTheme.colors.textDisabled};
-    }
-    .current-line ~ .line-numbers {
-      color: ${theme.euiTheme.colors.textSubdued};
-    }
-
-    .suggest-widget,
-    .suggest-details-container {
+    ${scope.overflowWidgets} .suggest-widget,
+    ${scope.overflowWidgets} .suggest-details-container {
       // Suggestions must be rendered above flyouts
-      z-index: ${theme.euiTheme.levels.toast} !important;
+      z-index: ${theme.euiTheme.levels.toast};
     }
 
-    .suggest-widget.message {
-      display: none !important;
+    ${scope.overflowWidgets} .suggest-widget.message {
+      display: none;
     }
 
-    .suggest-details-container {
+    ${scope.overflowWidgets} .suggest-details-container {
       background-color: ${theme.euiTheme.colors.backgroundBasePlain};
       line-height: 1.5rem;
       border-radius: ${theme.euiTheme.border.radius.inline};
       box-shadow: ${theme.euiTheme.shadows.l.down};
     }
 
-    .suggest-details {
+    ${scope.overflowWidgets} .suggest-details {
       padding-left: ${theme.euiTheme.size.m};
       padding-right: ${theme.euiTheme.size.m};
       text-align: justify;
     }
 
-    .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
+    ${scope.overflowWidgets} .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
       border-radius: ${theme.euiTheme.border.radius.medium};
     }
+
     // fixes the bug with the broken suggestion details https://github.com/elastic/kibana/issues/217998
-    .suggest-details > .monaco-scrollable-element > .body > .header > .type {
-      white-space: normal !important;
+    ${scope.overflowWidgets} .suggest-details > .monaco-scrollable-element > .body > .header > .type {
+      white-space: normal;
     }
 
-    .suggest-details .rendered-markdown h1 {
+    ${scope.overflowWidgets} .suggest-details .rendered-markdown h1 {
       display: block;
       margin-top: ${theme.euiTheme.size.m};
       font-size: ${theme.euiTheme.size.base};
       font-weight: ${theme.euiTheme.font.weight.bold};
     }
 
-    .suggest-details [data-code] {
-      overflow-x: auto !important;
+    ${scope.overflowWidgets} .suggest-details [data-code] {
+      overflow-x: auto;
     }
   `;
 };

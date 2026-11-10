@@ -41,6 +41,7 @@ dependsOn:
   - '@kbn/es'
   - '@kbn/dot-text'
   - '@kbn/dev-utils'
+  - '@kbn/std'
 tags:
   - test-helper
   - package

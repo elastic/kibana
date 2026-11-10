@@ -1,5 +1,5 @@
 {
-  "sha1": "444391ef751880c64378db75a520753681fb521c",
+  "sha1": "e4f4a90e7cea95bf3c3030f4af78c08fbf0b6485",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -30,8 +30,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/live_query_details.spec.ts",
-        "line": 37,
-        "column": 18
+        "line": 38,
+        "column": 7
       }
     },
     {
@@ -331,6 +331,104 @@
       }
     },
     {
+      "id": "8b5997c32f9798f-c1cb47d64c6e43e",
+      "title": "Osquery RBAC - running a pack or saved query requires read access to it returns 403 when running a pack without Packs read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_reference_read.spec.ts",
+        "line": 83,
+        "column": 13
+      }
+    },
+    {
+      "id": "8b5997c32f9798f-d4199427218ad14",
+      "title": "Osquery RBAC - running a pack or saved query requires read access to it authorizes a pack run when the caller can read packs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_reference_read.spec.ts",
+        "line": 86,
+        "column": 92
+      }
+    },
+    {
+      "id": "8b5997c32f9798f-4081f4a23c5c9e2",
+      "title": "Osquery RBAC - running a pack or saved query requires read access to it returns 403 when running a saved query without Saved queries read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_reference_read.spec.ts",
+        "line": 92,
+        "column": 13
+      }
+    },
+    {
+      "id": "8b5997c32f9798f-58aa0884d8dcae0",
+      "title": "Osquery RBAC - running a pack or saved query requires read access to it authorizes a saved query run when the caller can read saved queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_reference_read.spec.ts",
+        "line": 95,
+        "column": 24
+      }
+    },
+    {
+      "id": "8b5997c32f9798f-db8e01d34ca5b60",
+      "title": "Osquery RBAC - running a pack or saved query requires read access to it returns 403 when a live query writer without Packs read runs a pack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_reference_read.spec.ts",
+        "line": 100,
+        "column": 32
+      }
+    },
+    {
+      "id": "8b5997c32f9798f-c69cd62007a0c62",
+      "title": "Osquery RBAC - running a pack or saved query requires read access to it authorizes an ad-hoc query for a live query writer without Packs read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_reference_read.spec.ts",
+        "line": 112,
+        "column": 7
+      }
+    },
+    {
+      "id": "8b5997c32f9798f-f53f4c98747661e",
+      "title": "Osquery RBAC - running a pack or saved query requires read access to it authorizes a pack run for t1_analyst (osquery read + run saved queries)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/rbac_reference_read.spec.ts",
+        "line": 120,
+        "column": 26
+      }
+    },
+    {
       "id": "9ceeda67018d324-da1717e57b98569",
       "title": "Osquery RBAC - t1_analyst role is not rejected when running a saved query via live query",
       "expectedStatus": "passed",
@@ -566,7 +664,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 86,
+        "line": 93,
         "column": 7
       }
     },
@@ -582,7 +680,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 124,
+        "line": 131,
         "column": 14
       }
     },
@@ -598,7 +696,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 154,
+        "line": 161,
         "column": 84
       }
     },
@@ -614,7 +712,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 194,
+        "line": 201,
         "column": 14
       }
     },
@@ -630,7 +728,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 234,
+        "line": 241,
         "column": 14
       }
     },
@@ -646,7 +744,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 266,
+        "line": 273,
         "column": 14
       }
     },
@@ -662,7 +760,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 356,
+        "line": 363,
         "column": 17
       }
     },
@@ -678,7 +776,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 376,
+        "line": 383,
         "column": 91
       }
     },
@@ -694,8 +792,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 406,
+        "line": 413,
         "column": 31
+      }
+    },
+    {
+      "id": "7b92809161cb2f2-ce29dbd02b028ff",
+      "title": "Detection rules with Osquery response actions rejects a pack response action for an author without Packs read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
+        "line": 433,
+        "column": 17
+      }
+    },
+    {
+      "id": "7b92809161cb2f2-9de474432954f2f",
+      "title": "Detection rules with Osquery response actions rejects a saved-query response action for an author without Saved queries read",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
+        "line": 454,
+        "column": 94
       }
     },
     {
@@ -710,8 +840,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 427,
-        "column": 31
+        "line": 476,
+        "column": 17
       }
     },
     {
@@ -726,8 +856,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 459,
-        "column": 11
+        "line": 508,
+        "column": 25
       }
     },
     {
@@ -742,8 +872,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 485,
-        "column": 16
+        "line": 534,
+        "column": 11
       }
     },
     {
@@ -758,8 +888,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 512,
-        "column": 27
+        "line": 561,
+        "column": 11
       }
     },
     {
@@ -774,8 +904,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/osquery/test/scout/api/tests/response_actions_rules.spec.ts",
-        "line": 548,
-        "column": 11
+        "line": 597,
+        "column": 25
       }
     },
     {

@@ -8,10 +8,8 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import type { Observable } from 'rxjs';
 import type { ChatEvent, Conversation, ConversationEvent } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import type { BrowserChatEvent } from '@kbn/agent-builder-browser/events';
 import useObservable from 'react-use/lib/useObservable';
 import { ConversationStreamService } from '../../../../services/events/conversation_stream_service';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
@@ -109,14 +107,10 @@ jest.mock('./agent_turn', () => ({
 }));
 
 const conversationId = 'conv-1';
-const chatEvents$ = new Subject<ChatEvent>();
-const streamEnded$ = new Subject<void>();
-const streamStarted$ = new Subject<string>();
-const mockStreamService = new ConversationStreamService({
-  getChatEvents$: () => chatEvents$.asObservable() as Observable<BrowserChatEvent>,
-  getStreamEnded$: () => streamEnded$.asObservable(),
-  getStreamStarted$: () => streamStarted$.asObservable(),
-});
+const mockStreamService = new ConversationStreamService();
+// One stream per test, fed into the service the way a mutation feeds its own copy of the UI.
+let chatEvents$ = new Subject<ChatEvent>();
+const streamEnded$ = { next: () => chatEvents$.complete() };
 
 const pendingAttachments = {
   fallbackAttachments: [{ id: 'a-1', type: 'text', data: { content: 'hello' } }],
@@ -169,6 +163,8 @@ describe('TimelineConnector', () => {
     mockUseRealTimeline.current = false;
     mockStreamService.clearPersistedExecution(conversationId, 'round-1::execution');
     mockStreamService.clearPersistedExecution(conversationId, 'round-2::execution');
+    chatEvents$ = new Subject<ChatEvent>();
+    chatEvents$.pipe(mockStreamService.trackStream(conversationId)).subscribe();
   });
 
   // `useLiveEvents` tells React about stream updates at most once per animation frame.

@@ -241,7 +241,12 @@ export const importPluginOverrides: OxlintOverride[] = [
     },
   },
   {
-    files: ['src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}'],
+    // Node-only dev tooling, not reachable from the package entry points
+    files: [
+      'src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}',
+      'src/platform/packages/shared/kbn-connector-specs/scripts/**/*.ts',
+      'src/platform/packages/shared/kbn-connector-specs/src/test/**/*.ts',
+    ],
     rules: {
       'import/no-nodejs-modules': 'off',
     },
@@ -333,6 +338,7 @@ export const importPluginOverrides: OxlintOverride[] = [
         'kbn-evals-suite-hunt-watch',
         'kbn-evals-suite-lead-generation',
         'kbn-evals-suite-security-alert-triage',
+        'kbn-evals-suite-security-persona-matrix',
         'security-mitre-attack-server',
       ].map((pkg) => `x-pack/solutions/security/packages/${pkg}`)
     ),

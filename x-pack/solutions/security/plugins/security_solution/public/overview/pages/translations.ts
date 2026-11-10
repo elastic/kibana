@@ -32,10 +32,10 @@ export const DATE_PICKER_TOOLTIP = i18n.translate(
   }
 );
 
-export const ELASTIC_COMMON_SCHEMA = i18n.translate(
-  'xpack.securitySolution.dataQualityDashboard.elasticCommonSchemaReferenceLink',
+export const DATA_QUALITY_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.dataQualityDashboard.pageDescription',
   {
-    defaultMessage: 'Elastic Common Schema (ECS)',
+    defaultMessage: 'Check index mappings and values against the Elastic Common Schema (ECS).',
   }
 );
 

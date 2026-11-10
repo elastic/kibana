@@ -29,10 +29,10 @@ export const ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID =
  * `hunt.yaml`.
  */
 export const ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 1,
+  version: 2,
   yaml: FIND_OR_CREATE_INVESTIGATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;

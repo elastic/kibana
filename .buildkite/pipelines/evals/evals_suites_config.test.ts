@@ -166,3 +166,26 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
     expect(problems).toEqual([]);
   });
 });
+
+describe('Nightshift CI coverage', () => {
+  it('runs the Customer-0 stored datasets alongside an isolated ORCA spec', () => {
+    const suite = suites.find(({ id }) => id === 'nightshift-investigations');
+    expect(suite?.ciLabels).toEqual(['evals:nightshift-investigations']);
+    expect(suite?.shards?.map(({ id }) => id)).toEqual([
+      'customer0-golden',
+      'customer0-connector-probes',
+      'orcabench',
+    ]);
+    const files = suite?.shards?.flatMap(({ specFiles }) => specFiles) ?? [];
+    expect(files).toEqual([
+      'evals/investigation/stored.spec.ts',
+      'evals/connector_probe/stored.spec.ts',
+      'evals/investigation/orcabench.spec.ts',
+    ]);
+    const configPath = suite?.configPath;
+    expect(configPath).toBeDefined();
+    if (!configPath) throw new Error('Nightshift config is missing');
+    const suiteRoot = Path.dirname(Path.resolve(__dirname, '../../..', configPath));
+    for (const file of files) expect(Fs.existsSync(Path.join(suiteRoot, file))).toBe(true);
+  });
+});

@@ -20,6 +20,10 @@ import {
   GetCloudOnboardingDeploymentResponseSchema,
   GetCloudOnboardingDeploymentsByConnectorIdRequestSchema,
   GetCloudOnboardingDeploymentsByConnectorIdResponseSchema,
+  GetCloudOnboardingDeploymentsRequestSchema,
+  GetCloudOnboardingDeploymentsResponseSchema,
+  GetCloudOnboardingDeploymentCountsRequestSchema,
+  GetCloudOnboardingDeploymentCountsResponseSchema,
   UpdateCloudOnboardingDeploymentRequestSchema,
   UpdateCloudOnboardingDeploymentResponseSchema,
   DeleteCloudOnboardingDeploymentRequestSchema,
@@ -30,6 +34,8 @@ import {
   createCloudOnboardingDeploymentHandler,
   getCloudOnboardingDeploymentHandler,
   getCloudOnboardingDeploymentsByConnectorIdHandler,
+  getCloudOnboardingDeploymentsHandler,
+  getCloudOnboardingDeploymentCountsHandler,
   updateCloudOnboardingDeploymentHandler,
   deleteCloudOnboardingDeploymentHandler,
 } from './handlers';
@@ -51,10 +57,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Create cloud onboarding deployment',
-      description: 'Create a new Fleet cloud onboarding deployment.',
+      summary: 'Create cloud onboarding instance',
+      description: 'Create a new Fleet cloud onboarding instance.',
       options: {
-        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        tags: ['oas-tag:Fleet cloud onboarding instances'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -85,6 +91,98 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       createCloudOnboardingDeploymentHandler
     );
 
+  // GET /api/fleet/cloud_onboarding_deployments
+  router.versioned
+    .get({
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.LIST_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+              ],
+            },
+          ],
+        },
+      },
+      summary: 'Get cloud onboarding instances',
+      description:
+        'List cloud onboarding instances, newest first. Optionally filter by package name or provider.',
+      options: {
+        tags: ['oas-tag:Fleet cloud onboarding instances'],
+        availability: {
+          since: '9.7.0',
+          stability: 'experimental',
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/get_cloud_onboarding_deployments.yaml'),
+        },
+        validate: {
+          request: GetCloudOnboardingDeploymentsRequestSchema,
+          response: {
+            200: {
+              body: () => GetCloudOnboardingDeploymentsResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      getCloudOnboardingDeploymentsHandler
+    );
+
+  // GET /internal/fleet/cloud_onboarding_deployments/counts
+  // Internal: only the Installed integrations Instances column needs it.
+  router.versioned
+    .get({
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.COUNTS_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
+              ],
+            },
+          ],
+        },
+      },
+      summary: 'Get cloud onboarding instance counts',
+      description: 'Count the cloud onboarding instances that cover each package.',
+      access: 'internal',
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.internal.v1,
+        validate: {
+          request: GetCloudOnboardingDeploymentCountsRequestSchema,
+          response: {
+            200: {
+              body: () => GetCloudOnboardingDeploymentCountsResponseSchema,
+              description: 'OK: A successful request.',
+            },
+            400: {
+              body: genericErrorResponse,
+              description: 'A bad request.',
+            },
+          },
+        },
+      },
+      getCloudOnboardingDeploymentCountsHandler
+    );
+
   // GET /api/fleet/cloud_onboarding_deployments/{id}
   router.versioned
     .get({
@@ -101,10 +199,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Get cloud onboarding deployment',
-      description: 'Get a cloud onboarding deployment by ID.',
+      summary: 'Get cloud onboarding instance',
+      description: 'Get a cloud onboarding instance by ID.',
       options: {
-        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        tags: ['oas-tag:Fleet cloud onboarding instances'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -155,10 +253,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Get cloud onboarding deployments by connector ID',
-      description: 'List all cloud onboarding deployments for a given connector ID.',
+      summary: 'Get cloud onboarding instances by connector ID',
+      description: 'List all cloud onboarding instances for a given connector ID.',
       options: {
-        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        tags: ['oas-tag:Fleet cloud onboarding instances'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -205,10 +303,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Update cloud onboarding deployment',
-      description: 'Update a cloud onboarding deployment by ID.',
+      summary: 'Update cloud onboarding instance',
+      description: 'Update a cloud onboarding instance by ID.',
       options: {
-        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        tags: ['oas-tag:Fleet cloud onboarding instances'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',
@@ -259,10 +357,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Delete cloud onboarding deployment',
-      description: 'Delete a cloud onboarding deployment by ID.',
+      summary: 'Delete cloud onboarding instance',
+      description: 'Delete a cloud onboarding instance by ID.',
       options: {
-        tags: ['oas-tag:Fleet cloud onboarding deployments'],
+        tags: ['oas-tag:Fleet cloud onboarding instances'],
         availability: {
           since: '9.5.0',
           stability: 'experimental',

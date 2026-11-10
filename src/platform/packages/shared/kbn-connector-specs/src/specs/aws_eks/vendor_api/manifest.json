@@ -1,0 +1,224 @@
+{
+  "operations": {
+    "associateAccessPolicy": [
+      {
+        "method": "post",
+        "path": "/clusters/{clusterName}/access-entries/{principalArn}/access-policies",
+        "source": "eks"
+      }
+    ],
+    "createAccessEntry": [
+      {
+        "method": "post",
+        "path": "/clusters/{clusterName}/access-entries",
+        "source": "eks"
+      }
+    ],
+    "deleteAccessEntry": [
+      {
+        "method": "delete",
+        "path": "/clusters/{clusterName}/access-entries/{principalArn}",
+        "source": "eks"
+      }
+    ],
+    "describeAccessEntry": [
+      {
+        "method": "get",
+        "path": "/clusters/{clusterName}/access-entries/{principalArn}",
+        "source": "eks"
+      }
+    ],
+    "describeNodegroup": [
+      {
+        "method": "get",
+        "path": "/clusters/{clusterName}/node-groups/{nodegroupName}",
+        "source": "eks"
+      }
+    ],
+    "describeUpdate": [
+      {
+        "method": "get",
+        "path": "/clusters/{name}/updates/{updateId}",
+        "source": "eks"
+      }
+    ],
+    "disassociateAccessPolicy": [
+      {
+        "method": "delete",
+        "path": "/clusters/{clusterName}/access-entries/{principalArn}/access-policies/{policyArn}",
+        "source": "eks"
+      }
+    ],
+    "getCluster": [
+      {
+        "method": "get",
+        "path": "/clusters/{name}",
+        "source": "eks"
+      }
+    ],
+    "getToken": [
+      {
+        "method": "get",
+        "path": "/clusters/{name}",
+        "source": "eks"
+      }
+    ],
+    "listAccessEntries": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "nextToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "accessEntries",
+            "nextPath": "nextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/clusters/{clusterName}/access-entries",
+        "source": "eks"
+      }
+    ],
+    "listAccessPolicies": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "nextToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "accessPolicies",
+            "nextPath": "nextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/access-policies",
+        "source": "eks"
+      }
+    ],
+    "listAssociatedAccessPolicies": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "nextToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "associatedAccessPolicies",
+            "nextPath": "nextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/clusters/{clusterName}/access-entries/{principalArn}/access-policies",
+        "source": "eks"
+      }
+    ],
+    "listClusters": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "nextToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "clusters",
+            "nextPath": "nextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/clusters",
+        "source": "eks"
+      }
+    ],
+    "listNodegroups": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "nextToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "nodegroups",
+            "nextPath": "nextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/clusters/{clusterName}/node-groups",
+        "source": "eks"
+      }
+    ],
+    "listTagsForResource": [
+      {
+        "method": "get",
+        "path": "/tags/{resourceArn}",
+        "source": "eks"
+      }
+    ],
+    "listUpdates": [
+      {
+        "method": "get",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "nextToken",
+            "sizeParam": "maxResults"
+          },
+          "response": {
+            "itemsPath": "updateIds",
+            "nextPath": "nextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/clusters/{name}/updates",
+        "source": "eks"
+      }
+    ],
+    "updateAccessEntry": [
+      {
+        "method": "post",
+        "path": "/clusters/{clusterName}/access-entries/{principalArn}",
+        "source": "eks"
+      }
+    ],
+    "updateClusterAccessConfig": [
+      {
+        "method": "post",
+        "path": "/clusters/{name}/update-config",
+        "source": "eks"
+      }
+    ],
+    "updateClusterConfig": [
+      {
+        "method": "post",
+        "path": "/clusters/{name}/update-config",
+        "source": "eks"
+      }
+    ],
+    "updateNodegroupConfig": [
+      {
+        "method": "post",
+        "path": "/clusters/{clusterName}/node-groups/{nodegroupName}/update-config",
+        "source": "eks"
+      }
+    ]
+  },
+  "sources": {
+    "eks": {
+      "apiVersion": "2017-11-01",
+      "fetchedAt": "2026-11-01T19:13:26.023Z",
+      "format": "smithy",
+      "url": "https://raw.githubusercontent.com/aws/api-models-aws/1b9ff13fe6c28ea9774a527e53cda6a3b91369dc/models/eks/service/2017-11-01/eks-2017-11-01.json"
+    }
+  }
+}

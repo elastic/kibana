@@ -127,7 +127,7 @@ export class FollowerIndicesList extends PureComponent<
   renderEmpty() {
     return (
       <EuiPageTemplate.EmptyPrompt
-        iconType="managementApp"
+        iconType="gear"
         data-test-subj="emptyPrompt"
         title={
           <h2>

@@ -37,19 +37,25 @@ export const getUpdateProposalStepDefinition = ({
 
         await privileges.assertCanManage(request);
 
-        // An authenticated resume clones the resumer's API key onto the task,
-        // so the request is the better attribution when it yields anything.
+        // The gate resolves each answer in a child that runs as whoever
+        // answered, so the request is the attribution whenever it names a user.
         // It does not on every surface — an external resume runs under the
         // workflow runner — which is why the gate's own `respondedBy` is the
-        // fallback rather than the other way round. A blank `decidedBy` means
-        // nobody answered the gate, so the Worker running it auto-approved;
-        // only then is the Worker the decider.
+        // fallback rather than the other way round: any workflow can pass a
+        // `decidedBy`, so it must never outrank the request. A blank
+        // `decidedBy` means nobody answered the gate, so the Worker running it
+        // auto-approved; only then is the Worker the decider, and only then is
+        // the decision recorded as automatic.
+        const { decidedBy: respondedBy } = input;
+        const answered = !!respondedBy;
+        const decisionMode =
+          input.decision === undefined ? undefined : answered ? 'manual' : 'auto';
         const decidedBy =
           input.decision === undefined
             ? undefined
-            : input.decidedBy
+            : answered
             ? (await resolveUser(request)) ?? {
-                username: input.decidedBy,
+                username: respondedBy,
                 fullName: null,
                 email: null,
               }
@@ -67,6 +73,7 @@ export const getUpdateProposalStepDefinition = ({
             status: input.status,
             decision: input.decision,
             decidedBy,
+            decisionMode,
             dismissReason: input.dismissReason,
             rationale: input.rationale,
             executionError: input.executionError,

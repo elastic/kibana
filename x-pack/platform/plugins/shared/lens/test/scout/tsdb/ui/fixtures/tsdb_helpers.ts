@@ -24,9 +24,6 @@ export interface TsdbScenarioContext {
   pageObjects: LensPageObjects;
 }
 
-export const sumFirstNValues = (count: number, bars: Array<{ y: number }> | undefined): number =>
-  (bars ?? []).slice(0, count).reduce((sum, bar) => sum + bar.y, 0);
-
 const PICKER_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 /** Offsets a time string by the given milliseconds and returns a picker-formatted string. */

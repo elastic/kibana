@@ -27,7 +27,6 @@ export interface CreateDatasetDetailsFieldsProps {
   dataSources: DataSource[];
   existingDataSetNames?: readonly string[];
   isEditMode?: boolean;
-  datasetNameToEdit?: string;
   loadDataSources: () => Promise<void>;
 }
 
@@ -36,19 +35,12 @@ export function CreateDatasetDetailsFields({
   dataSources,
   existingDataSetNames = [],
   isEditMode = false,
-  datasetNameToEdit = '',
   loadDataSources,
 }: CreateDatasetDetailsFieldsProps) {
   const { field: nameField, fieldState: nameFieldState } = useController({
     name: 'name',
     control,
-    rules: {
-      validate: validateDatasetName({
-        existingDataSetNames,
-        isEditMode,
-        datasetNameToEdit,
-      }),
-    },
+    rules: isEditMode ? undefined : { validate: validateDatasetName(existingDataSetNames) },
   });
 
   const { field: descriptionField } = useController({
@@ -114,6 +106,7 @@ export function CreateDatasetDetailsFields({
           onChange={(e) => nameField.onChange(e.target.value)}
           name={nameField.name}
           inputRef={nameField.ref}
+          readOnly={isEditMode}
         />
       </EuiFormRow>
       <EuiFormRow

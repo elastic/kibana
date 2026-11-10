@@ -16,17 +16,18 @@ import {
   isStateTransitionAllowed,
   putRuleDataSchema,
   updateRuleDataSchema,
+  type BulkCreateError,
+  type BulkGetRulesResponse,
   type PutRuleData,
   type RuleKind,
 } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
-import { Request, PluginInitializer } from '@kbn/core-di-server';
+import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsUtils,
   type KibanaRequest as CoreKibanaRequest,
-  type PluginInitializerContext,
   type SavedObjectReference,
 } from '@kbn/core/server';
 import type { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -34,7 +35,6 @@ import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/err
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
-import type { EventOriginActor } from '../event_origin/origin_schemas';
 import { toEventOrigin } from '../event_origin/event_origin';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
@@ -57,7 +57,6 @@ import {
   getRuleExecutorTaskId,
 } from '../rule_executor/schedule';
 import type { AlertingPublisherContext } from '../events/domain_events';
-import { EventOriginActorToken } from '../event_origin/token';
 import { RuleEventPublisher } from '../events/rule_event_publisher/rule_event_publisher';
 import type { EventRule } from '../events/rule_event_publisher/rule_event_publisher';
 import {
@@ -76,11 +75,12 @@ import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import type { PluginConfig } from '../../config';
+import { ConfigService } from '../services/config_service/config_service';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
-import type { CreateRulesClientOptions } from './types';
+import type { RulesClientEventOrigin } from './types';
 import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
-import { RulesClientOptionsToken } from './tokens';
+import { RulesClientEventOriginToken } from './tokens';
 import type {
   BulkByIdsParams,
   BulkByQueryParams,
@@ -152,17 +152,29 @@ const toBulkCreateError = (
   },
 });
 
-const toPerItemBoomError = (id: string, err: Boom.Boom): BulkOperationError => {
+const toPerItemError = (err: Boom.Boom): BulkOperationError['error'] => {
   const data = err.data as { code?: string; details?: Record<string, unknown> } | undefined;
   return {
-    id,
-    error: {
-      code: data?.code ?? ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
-      message: err.message,
-      ...(data?.details ? { details: data.details } : {}),
-    },
+    code: data?.code ?? ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR,
+    message: err.message,
+    ...(data?.details ? { details: data.details } : {}),
   };
 };
+
+const toRuleNotFoundError = (id: string): BulkOperationError => ({
+  id,
+  error: {
+    code: ALERTING_ERROR_CODES.RULE_NOT_FOUND,
+    message: getRuleNotFoundMessage(id),
+    details: { rule_id: id },
+  },
+});
+
+/** Where a prepared bulk-create item came from, so its errors are reported by request position. */
+interface BulkCreateItemPosition {
+  index: number;
+  id?: string;
+}
 
 const errorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
@@ -206,7 +218,7 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
 
 @injectable()
 export class RulesClient {
-  private readonly config: PluginConfig;
+  private readonly rulesConfig: PluginConfig['rules'];
   private readonly logger: LoggerServiceContract;
   private readonly eventContext: AlertingPublisherContext;
 
@@ -218,18 +230,19 @@ export class RulesClient {
     private readonly taskManager: TaskManagerStartContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
-    @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config'],
+    @inject(ConfigService) configService: ConfigService,
     @inject(RulesSavedObjectServiceInternalToken)
     private readonly rulesSavedObjectServiceInternal: RulesSavedObjectServiceContract,
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
-    @inject(EventOriginActorToken) actor: EventOriginActor,
-    @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions
+    @inject(RulesClientEventOriginToken) eventOrigin: RulesClientEventOrigin
   ) {
-    this.eventContext = { request, origin: toEventOrigin(actor, request, rulesClientOptions) };
-    this.config = pluginConfigAccessor.get<PluginConfig>();
+    this.eventContext = {
+      request,
+      origin: toEventOrigin(eventOrigin.actor, request, eventOrigin.options),
+    };
+    this.rulesConfig = configService.get('rules');
     this.logger = loggerService.forSubsystem('rulesClient');
   }
 
@@ -275,7 +288,7 @@ export class RulesClient {
       return;
     }
 
-    const { maxScheduledPerMinute } = this.config.rules;
+    const { maxScheduledPerMinute } = this.rulesConfig;
     const addedSchedulesPerMinute = limitItems.reduce(
       (sum, rule) => sum + convertEveryToSchedulesPerMinute(rule.updatedEvery),
       0
@@ -321,7 +334,7 @@ export class RulesClient {
    * `xpack.alerting_v2.rules.minimumScheduleInterval`.
    */
   private assertScheduleIntervalAllowed(every: string): void {
-    const { minimumScheduleInterval } = this.config.rules;
+    const { minimumScheduleInterval } = this.rulesConfig;
     const everyMs = parseDurationToMs(every);
     const minimumMs = parseDurationToMs(minimumScheduleInterval);
 
@@ -498,7 +511,7 @@ export class RulesClient {
 
       this.logger.error({
         error: new Error(message),
-        code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+        code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED,
       });
 
       for (const id of driftedRuleIds) {
@@ -701,7 +714,12 @@ export class RulesClient {
       references: persisted.references,
     });
     this.ruleEventPublisher.emitRuleCreated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      {
+        ruleId: rule.id,
+        spaceId: this.spaceId,
+        rule,
+        templateId: persisted.attributes.metadata.template?.id,
+      },
     ]);
     return rule;
   }
@@ -714,30 +732,35 @@ export class RulesClient {
     const nowIso = new Date().toISOString();
     const ruleVersion = this.getNextVersion();
 
-    const errors: BulkOperationError[] = [];
+    const errors: BulkCreateError[] = [];
     const prepared: PreparedRule[] = [];
+    // Persist-time errors come back keyed by the stored id, which for an item
+    // without a client-supplied id is one the caller never saw; map them back
+    // to the request position instead.
+    const positions = new Map<string, BulkCreateItemPosition>();
 
-    for (const item of parsed.items) {
+    parsed.items.forEach((item, index) => {
       const { id, enabled, ...data } = item;
+      const position: BulkCreateItemPosition = { index, ...(id ? { id } : {}) };
       try {
-        prepared.push(
-          this.prepareRuleForCreate({
-            data,
-            id,
-            enabled,
-            actor,
-            nowIso,
-            version: ruleVersion,
-          })
-        );
+        const rule = this.prepareRuleForCreate({
+          data,
+          id,
+          enabled,
+          actor,
+          nowIso,
+          version: ruleVersion,
+        });
+        prepared.push(rule);
+        positions.set(rule.id, position);
       } catch (e) {
         if (Boom.isBoom(e)) {
-          errors.push(toPerItemBoomError(id ?? SavedObjectsUtils.generateId(), e));
-          continue;
+          errors.push({ ...position, error: toPerItemError(e) });
+          return;
         }
         throw e;
       }
-    }
+    });
 
     await this.validateSchedule(
       prepared
@@ -749,7 +772,16 @@ export class RulesClient {
     );
 
     const persisted = await this.persistPreparedRules(prepared);
-    errors.push(...persisted.errors);
+    for (const error of persisted.errors) {
+      const position = positions.get(error.id);
+      if (!position) {
+        throw Boom.badImplementation(
+          `Bulk create reported an error for unknown rule "${error.id}"`
+        );
+      }
+      errors.push({ ...position, error: error.error });
+    }
+    errors.sort((a, b) => a.index - b.index);
 
     const items: RuleResponse[] = [];
     const createdRules: EventRule[] = [];
@@ -764,6 +796,7 @@ export class RulesClient {
         ruleId: rule.id,
         spaceId,
         rule,
+        templateId: doc.attributes.metadata.template?.id,
       });
     }
 
@@ -836,9 +869,20 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
+    const prevRule = this.toRuleApiResponse({
+      id,
+      attrs: existingAttrs,
+      references: existingReferences,
+    });
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      {
+        ruleId: rule.id,
+        spaceId: this.spaceId,
+        rule,
+        templateId: nextAttrs.metadata.template?.id,
+        prevRule,
+      },
     ]);
 
     return rule;
@@ -850,15 +894,33 @@ export class RulesClient {
     return this.toRuleApiResponse({ id, attrs, references });
   }
 
+  /**
+   * Resolves rules by id with per-item errors: a missing rule is reported as
+   * `RULE_NOT_FOUND` in `errors` and never fails the request, so `_bulk_get`
+   * behaves like every other bulk route.
+   */
   @withApm
-  public async getRules(ids: string[]): Promise<RuleResponse[]> {
+  public async getRules(ids: string[]): Promise<BulkGetRulesResponse> {
     const result = await this.rulesSavedObjectService.bulkGetByIds(ids);
 
     const rulesById = new Map<string, RuleResponse>();
+    const errors: BulkOperationError[] = [];
 
     for (const doc of result) {
       if ('error' in doc) {
-        throw new Boom.Boom(doc.error.message, { statusCode: doc.error.statusCode });
+        errors.push(
+          doc.error.statusCode === 404
+            ? toRuleNotFoundError(doc.id)
+            : {
+                id: doc.id,
+                error: {
+                  code: bulkErrorCodeForStatus(doc.error.statusCode),
+                  message: doc.error.message,
+                  details: { statusCode: doc.error.statusCode },
+                },
+              }
+        );
+        continue;
       }
       rulesById.set(
         doc.id,
@@ -870,7 +932,9 @@ export class RulesClient {
       );
     }
 
-    return ids.map((id) => rulesById.get(id)!).filter(Boolean);
+    const items = ids.map((id) => rulesById.get(id)).filter((rule) => rule !== undefined);
+
+    return { items, errors };
   }
 
   @withApm
@@ -908,7 +972,12 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDeleted(this.eventContext, [
-      { ruleId: id, spaceId: this.spaceId, rule },
+      {
+        ruleId: id,
+        spaceId: this.spaceId,
+        rule,
+        templateId: existingAttrs.metadata.template?.id,
+      },
     ]);
   }
 
@@ -1006,7 +1075,12 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleEnabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      {
+        ruleId: rule.id,
+        spaceId: this.spaceId,
+        rule,
+        templateId: nextAttrs.metadata.template?.id,
+      },
     ]);
     return rule;
   }
@@ -1046,7 +1120,12 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDisabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      {
+        ruleId: rule.id,
+        spaceId: this.spaceId,
+        rule,
+        templateId: nextAttrs.metadata.template?.id,
+      },
     ]);
     return rule;
   }
@@ -1257,8 +1336,13 @@ export class RulesClient {
                 attrs: { ...doc.attrs, version: this.getNextVersion(doc.attrs.version) },
                 references: doc.references,
               }),
+              templateId: doc.attrs.metadata.template?.id,
             }
-          : { ruleId: result.id, spaceId }
+          : {
+              ruleId: result.id,
+              spaceId,
+              templateId: undefined,
+            }
       );
     }
 
@@ -1341,7 +1425,7 @@ export class RulesClient {
 
         this.logger.error({
           error: new Error(message),
-          code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+          code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED,
         });
 
         for (const id of driftedRuleIds) {
@@ -1383,6 +1467,7 @@ export class RulesClient {
           ruleId: rule.id,
           spaceId,
           rule,
+          templateId: item.attrs.metadata.template?.id,
         });
       }
 
@@ -1468,6 +1553,7 @@ export class RulesClient {
           ruleId: rule.id,
           spaceId,
           rule,
+          templateId: item.attrs.metadata.template?.id,
         });
       }
     }
@@ -1501,9 +1587,12 @@ export class RulesClient {
    *   - disabled rules (`RULE_DISABLED`) — a disabled rule has no executor task;
    *     rotating would recreate one and corrupt a later re-enable, so they are
    *     rejected before any Task Manager call.
-   *   - currently-running rules (`RULE_ALREADY_RUNNING`) — `bulkUpdateSchedules`
-   *     only touches `idle` tasks, so a running task is skipped; we surface it
-   *     instead of silently leaving its key un-rotated.
+   *   - rules whose executor task is in a state Task Manager cannot update
+   *     (`failed`/`unrecognized`/`dead_letter`/`should_delete`) — surfaced instead
+   *     of silently leaving the key un-rotated. A *running* task is not one of
+   *     them: rotation passes `includeRunningTasks: true`, so a rule whose own
+   *     executor run is in flight rotates in place (Task Manager holds the
+   *     replaced key's invalidation back until that run finishes).
    *   - rules whose rotation call failed — reported per-rule; a failure in one
    *     interval group never aborts the others, so successful groups still rotate.
    *
@@ -1592,10 +1681,17 @@ export class RulesClient {
         attrs: item.attrs,
         references: item.references,
       });
+      const prevRule = this.toRuleApiResponse({
+        id: item.id,
+        attrs: rotatedCandidates[i].attrs,
+        references: item.references,
+      });
       updatedRules.push({
         ruleId: rule.id,
         spaceId,
         rule,
+        templateId: item.attrs.metadata.template?.id,
+        prevRule,
       });
     }
 
@@ -1606,14 +1702,16 @@ export class RulesClient {
 
   /**
    * Rotates the executor task API keys for the given (enabled) candidates via
-   * `bulkUpdateSchedules({ regenerateApiKey: true })`, which grants a new key and
-   * invalidates the old one. That API takes one schedule per call and only
-   * updates `idle` tasks, so candidates are grouped by their interval (passing
-   * each group its own interval leaves the schedule unchanged) and any task
-   * skipped for being mid-run is reported as `RULE_ALREADY_RUNNING`.
+   * `bulkUpdateSchedules({ regenerateApiKey: true, includeRunningTasks: true })`,
+   * which grants a new key and invalidates the old one. That API takes one
+   * schedule per call, so candidates are grouped by their interval (passing each
+   * group its own interval leaves the schedule unchanged). `includeRunningTasks`
+   * widens the update beyond `idle` to `running`/`claiming`, so a rule whose own
+   * executor run is in flight rotates in place rather than being skipped — the
+   * rotation must not depend on the rule's run cadence.
    *
    * Returns the candidates whose key actually rotated, plus the per-rule errors
-   * (running tasks and per-task/group failures) to merge into the bulk response.
+   * (skipped tasks and per-task/group failures) to merge into the bulk response.
    * A group whose rotation fails (e.g. the key grant is rejected) is reported as
    * per-rule errors rather than aborting the other groups — so a partial failure
    * still rotates and stamps the groups that succeeded.
@@ -1643,6 +1741,7 @@ export class RulesClient {
               request: this.request,
               regenerateApiKey: true,
               cloneApiKey: true,
+              includeRunningTasks: true,
             }
           );
 
@@ -1681,8 +1780,9 @@ export class RulesClient {
       { concurrency: ROTATION_CONCURRENCY }
     );
 
-    // `bulkUpdateSchedules` only touches `idle` tasks, so a candidate that was
-    // neither rotated nor errored was skipped because its task is non-idle.
+    // `bulkUpdateSchedules` only touches updatable (`idle`/`running`/`claiming`)
+    // tasks, so a candidate that was neither rotated nor errored was skipped
+    // because its task is in some other state.
     const rotated: RotationCandidate[] = [];
     const skipped: RotationCandidate[] = [];
     for (const candidate of candidates) {
@@ -1704,13 +1804,14 @@ export class RulesClient {
   }
 
   /**
-   * Classifies executor tasks that `bulkUpdateSchedules` skipped (non-idle) by
-   * observing their real status rather than assuming they are running: only a
-   * mid-run task (`running`/`claiming`) frees up on its own, so only those get
-   * `RULE_ALREADY_RUNNING`. Any other non-idle state (`failed`/`unrecognized`/`dead_letter`/…)
-   * or a task that can't be read is reported as a generic rotation failure.
-   * If the status lookup itself fails we fall back to `RULE_ALREADY_RUNNING`,
-   * the most likely non-idle reason.
+   * Classifies executor tasks that `bulkUpdateSchedules` skipped by observing
+   * their real status rather than assuming they are running. Because rotation
+   * passes `includeRunningTasks: true`, a skipped task is normally in a state that
+   * never frees up on its own (`failed`/`unrecognized`/`dead_letter`/…) — that, or
+   * a task that can't be read, is reported as a generic rotation failure. A task
+   * that moved back into `running`/`claiming` between the two reads still gets the
+   * retryable `RULE_ALREADY_RUNNING`. If the status lookup itself fails we fall
+   * back to `RULE_ALREADY_RUNNING`, the most likely reason for the skip.
    */
   private async classifySkippedRotations(
     skipped: RotationCandidate[]
@@ -1911,8 +2012,19 @@ export class RulesClient {
       attrs: nextAttrs,
       references,
     });
+    const prevRule = this.toRuleApiResponse({
+      id,
+      attrs: existingAttrs,
+      references: existingReferences,
+    });
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      {
+        ruleId: rule.id,
+        spaceId: this.spaceId,
+        rule,
+        templateId: nextAttrs.metadata.template?.id,
+        prevRule,
+      },
     ]);
     return { rule, created: false };
   }
