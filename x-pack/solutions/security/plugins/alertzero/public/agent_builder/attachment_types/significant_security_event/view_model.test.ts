@@ -181,6 +181,30 @@ describe('toSseViewModel', () => {
     expect(toSseViewModel(parsed).basis).toBe('ioc_weak');
   });
 
+  it('keeps a stored empty detections array instead of deriving from the report-wide per_ioc', () => {
+    // A technique-scoped entry confirmed by an attributed alert alone has nothing that
+    // matched; the mapper writes `detections: []`. The report-wide `per_ioc` still rides
+    // on `hunt_result`, and deriving from it would show another technique's IOCs here.
+    const parsed = parseOrThrow({
+      ...baseParsed,
+      corroborated_technique_id: 'T1021',
+      detections: [],
+      events: [],
+      hunt_result: {
+        ...tier1OnlyHunt,
+        tier1: {
+          ...tier1OnlyHunt.tier1,
+          per_ioc: [{ type: 'ip', value: '203.0.113.5', field: 'destination.ip', count: 4 }],
+        },
+      },
+    });
+
+    const viewModel = toSseViewModel(parsed);
+    expect(viewModel.detections).toEqual([]);
+    expect(viewModel.basis).toBeUndefined();
+    expect(viewModel.summary).toBe(baseParsed.title);
+  });
+
   it('omits the basis for a Tier 1 hit whose IOC strength is unknown, instead of grading it weak', () => {
     const parsed = parseOrThrow({
       ...baseParsed,

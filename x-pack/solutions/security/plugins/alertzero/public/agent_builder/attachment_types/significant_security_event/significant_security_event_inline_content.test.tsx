@@ -540,6 +540,7 @@ describe('SignificantSecurityEventInlineContent', () => {
         indices,
         field: 'destination.ip',
         value: '203.0.113.5',
+        iocType: 'ip',
       });
 
       renderWithI18n(
@@ -735,6 +736,29 @@ describe('SignificantSecurityEventInlineContent', () => {
       expect(whatMatched).toHaveTextContent('4 hosts');
       expect(whatMatched).toHaveTextContent('host-a, host-b, host-c +1 more');
       expect(whatMatched).toHaveTextContent('alice, bob');
+    });
+
+    it('shows a truncated host count under Scope as a floor, not an exact count', () => {
+      renderWithI18n(
+        <SignificantSecurityEventInlineContent
+          {...renderProps(
+            buildAttachment({
+              ...baseData,
+              detections: [
+                iocDetection({
+                  host_count: 20,
+                  hosts_truncated: true,
+                  hosts: Array.from({ length: 20 }, (_, index) => `host-${index}`),
+                }),
+              ],
+            })
+          )}
+        />
+      );
+
+      const whatMatched = screen.getByTestId(SSE_ATTACHMENT_WHAT_MATCHED_TEST_ID);
+      expect(whatMatched).toHaveTextContent('20+ hosts');
+      expect(whatMatched).not.toHaveTextContent('20 hosts');
     });
 
     it('falls back to the behavior title when technique_name is absent', () => {

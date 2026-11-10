@@ -24,24 +24,80 @@ const parseIpv4Octets = (value: string): number[] | undefined => {
   return octets.every((octet) => octet >= 0 && octet <= 255) ? octets : undefined;
 };
 
+const IPV6_HEXTET_COUNT = 8;
+
 /**
- * IPv6 ranges that never name one internet host: loopback / unspecified
- * (`::1`, `::`), unique-local (fc00::/7) and link-local (fe80::/10). Compared on
- * the lowercased, bracket-stripped value; an IPv4-mapped form (`::ffff:a.b.c.d`)
- * is graded by its IPv4 part.
+ * Expands an IPv6 literal to its eight 16-bit hextets, so equivalent spellings
+ * (`::1` and `0:0:0:0:0:0:0:1`, `::ffff:10.0.0.1` and `::ffff:a00:1`, upper and
+ * lower case, bracketed or not) grade the same. Returns undefined for anything
+ * that is not a well-formed IPv6 address.
  */
-const isWeakIpv6 = (value: string): boolean => {
+const parseIpv6Hextets = (value: string): number[] | undefined => {
   const normalized = value
     .trim()
     .toLowerCase()
     .replace(/^\[|\]$/g, '');
-  if (!normalized.includes(':')) return false;
-  if (normalized === '::1' || normalized === '::') return true;
-  const mapped = /^::ffff:(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/.exec(normalized);
-  if (mapped) return isWeakIpv4(mapped[1]);
-  const firstHextet = normalized.split(':')[0];
-  if (/^f[cd][0-9a-f]{0,2}$/.test(firstHextet)) return true; // fc00::/7 unique-local
-  if (/^fe[89ab][0-9a-f]?$/.test(firstHextet)) return true; // fe80::/10 link-local
+  if (!normalized.includes(':')) return undefined;
+
+  // An embedded IPv4 tail (`::ffff:10.0.0.1`) is two hextets.
+  let body = normalized;
+  const tail: number[] = [];
+  const embedded = /^(.*:)(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/.exec(normalized);
+  if (embedded) {
+    const octets = parseIpv4Octets(embedded[2]);
+    if (!octets) return undefined;
+    body = embedded[1];
+    tail.push(octets[0] * 256 + octets[1], octets[2] * 256 + octets[3]);
+  }
+
+  const parseGroups = (part: string): number[] | undefined => {
+    if (part === '') return [];
+    const groups: number[] = [];
+    for (const group of part.split(':')) {
+      if (!/^[0-9a-f]{1,4}$/.test(group)) return undefined;
+      groups.push(parseInt(group, 16));
+    }
+    return groups;
+  };
+
+  const gap = body.indexOf('::');
+  if (gap === -1) {
+    const groups = parseGroups(body.replace(/:$/, ''));
+    if (!groups) return undefined;
+    const hextets = [...groups, ...tail];
+    return hextets.length === IPV6_HEXTET_COUNT ? hextets : undefined;
+  }
+  if (body.indexOf('::', gap + 1) !== -1) return undefined;
+  const head = parseGroups(body.slice(0, gap));
+  const rest = parseGroups(body.slice(gap + 2).replace(/:$/, ''));
+  if (!head || !rest) return undefined;
+  const fill = IPV6_HEXTET_COUNT - head.length - rest.length - tail.length;
+  if (fill < 1) return undefined;
+  return [...head, ...new Array<number>(fill).fill(0), ...rest, ...tail];
+};
+
+/**
+ * IPv6 ranges that never name one internet host: loopback / unspecified
+ * (`::1`, `::`), unique-local (fc00::/7) and link-local (fe80::/10). Graded on
+ * the expanded hextets, so every spelling of the same address grades alike; an
+ * IPv4-mapped address (`::ffff:a.b.c.d`, or its hex form) is graded by its IPv4
+ * part. Unparseable values are not graded weak.
+ */
+const isWeakIpv6 = (value: string): boolean => {
+  const hextets = parseIpv6Hextets(value);
+  if (!hextets) return false;
+  const [first] = hextets;
+  const leadingZero = hextets.slice(0, 5).every((hextet) => hextet === 0);
+  if (leadingZero && hextets[5] === 0xffff) {
+    const [high, low] = [hextets[6], hextets[7]];
+    const ipv4 = `${Math.floor(high / 256)}.${high % 256}.${Math.floor(low / 256)}.${low % 256}`;
+    return isWeakIpv4(ipv4);
+  }
+  if (leadingZero && hextets[5] === 0 && hextets[6] === 0 && hextets[7] <= 1) {
+    return true; // unspecified (::) and loopback (::1)
+  }
+  if (first >= 0xfc00 && first <= 0xfdff) return true; // fc00::/7 unique-local
+  if (first >= 0xfe80 && first <= 0xfebf) return true; // fe80::/10 link-local
   return false;
 };
 

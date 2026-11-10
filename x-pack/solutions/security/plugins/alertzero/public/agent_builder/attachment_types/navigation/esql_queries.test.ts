@@ -105,7 +105,7 @@ describe('esql_queries', () => {
         iocType: 'hash',
       })
     ).toBe(
-      'FROM "logs-endpoint.events.process-default" | WHERE TO_LOWER(process.hash.sha256) == "abcdef0123"'
+      'FROM "logs-endpoint.events.process-default" | WHERE MV_CONTAINS(TO_LOWER(process.hash.sha256), "abcdef0123")'
     );
     expect(
       buildIocMatchEsql({
@@ -114,7 +114,9 @@ describe('esql_queries', () => {
         value: 'Evil.Example',
         iocType: 'domain',
       })
-    ).toBe('FROM "logs-dns-default" | WHERE TO_LOWER(dns.question.name) == "evil.example"');
+    ).toBe(
+      'FROM "logs-dns-default" | WHERE MV_CONTAINS(TO_LOWER(dns.question.name), "evil.example")'
+    );
     expect(
       buildIocMatchEsql({
         indices: ['logs-*'],
@@ -122,8 +124,24 @@ describe('esql_queries', () => {
         value: 'https://Evil.Example/A',
         iocType: 'url',
       })
-    ).toBe('FROM "logs-*" | WHERE url.full == "https://Evil.Example/A"');
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(url.full, "https://Evil.Example/A")');
     expect(buildIocMatchEsql({ indices: [], field: 'url.full', value: 'x' })).toBeUndefined();
+  });
+
+  it('pivots IOC matches with a multivalue-aware predicate, comparing ip IOCs as ip', () => {
+    // Tier 1 term queries hit any element of `host.ip` / `related.ip`; scalar `==` would
+    // be null on that cell and open Discover with no rows for a confirmed match.
+    expect(
+      buildIocMatchEsql({
+        indices: ['logs-*'],
+        field: 'related.ip',
+        value: '203.0.113.77',
+        iocType: 'ip',
+      })
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(TO_IP(related.ip), "203.0.113.77"::ip)');
+    expect(
+      buildIocMatchEsql({ indices: ['logs-*'], field: 'source.ip', value: '2001:DB8::1' })
+    ).toBe('FROM "logs-*" | WHERE MV_CONTAINS(source.ip, "2001:DB8::1")');
   });
 
   it('builds entity lookup ES|QL on the exact ECS field', () => {

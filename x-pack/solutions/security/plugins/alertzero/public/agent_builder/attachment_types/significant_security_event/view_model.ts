@@ -190,16 +190,21 @@ const classifyBasisFromDetections = (
  * Builds the hit-centric view model after parse. New payloads keep their stored
  * `summary` / `basis` / `detections`; old ones derive them via the shared helpers
  * so the card renders the same shape either way.
+ *
+ * A stored `detections` array is authoritative even when empty: a technique-scoped
+ * entry confirmed by an attributed alert alone has nothing that matched, and the
+ * mapper writes `[]` to say so. Only an absent array (a payload written before the
+ * field existed) is derived, because `hunt_result.tier1.per_ioc` is report-wide and
+ * deriving from it would show IOCs that another technique matched under this one.
  */
 export const toSseViewModel = (parsed: SignificantSecurityEventAttachmentData): SseViewModel => {
   const events = parsed.events ?? [];
   const huntResult = parsed.hunt_result;
   const rawDetections =
-    parsed.detections && parsed.detections.length > 0
-      ? parsed.detections
-      : deriveDetections(huntResult, events, {
-          techniqueId: parsed.corroborated_technique_id,
-        });
+    parsed.detections ??
+    deriveDetections(huntResult, events, {
+      techniqueId: parsed.corroborated_technique_id,
+    });
   // Stored `per_ioc.field` can name the first searched slot rather than the field that
   // actually hit; reconcile against cited events so What matched + Discover pivots agree.
   const detections = reconcileIocDetectionFields(rawDetections, events);

@@ -142,9 +142,15 @@ export const buildEntityLookupEsql = ({
 /**
  * Discover exit for an IOC detection: the caller-supplied indices (Tier 1 `per_index`,
  * else the cited events' sources), filtered to the ECS field and value that matched.
- * Hash and domain IOCs compare case-folded, matching Tier 1's case-insensitive clauses,
- * so a mixed-case digest in the report still finds the lowercase indexed one. Absent
- * when field/value/indices are empty.
+ *
+ * The predicate is `MV_CONTAINS`, not `==`: Tier 1 matches with term queries, which hit
+ * any element of a multivalued field (`host.ip`, `related.ip`, `kubernetes.audit.sourceIPs`),
+ * while ES|QL scalar `==` is null on a multivalued cell and would open Discover empty for
+ * a confirmed match. `MV_CONTAINS` is typed, so the field is coerced to the literal's type:
+ * `ip` IOCs compare as `ip` (which also canonicalizes IPv6 spellings and accepts keyword
+ * fields that hold addresses); hash and domain IOCs compare case-folded, matching Tier 1's
+ * case-insensitive clauses; everything else compares the string as is. Absent when
+ * field/value/indices are empty.
  */
 export const buildIocMatchEsql = ({
   indices,
@@ -155,7 +161,7 @@ export const buildIocMatchEsql = ({
   indices: readonly string[];
   field: string;
   value: string;
-  /** IOC type of `value`; decides whether the predicate folds case. */
+  /** IOC type of `value`; decides how the field is coerced before comparing. */
   iocType?: string;
 }): string | undefined => {
   const cleanedIndices = uniqueNonEmpty([...indices]);
@@ -164,8 +170,10 @@ export const buildIocMatchEsql = ({
   }
 
   const predicate =
-    iocType && HUNT_CASE_INSENSITIVE_IOC_TYPES.has(iocType)
-      ? `TO_LOWER(${field}) == "${escapeEsqlString(value.toLowerCase())}"`
-      : `${field} == "${escapeEsqlString(value)}"`;
+    iocType === 'ip'
+      ? `MV_CONTAINS(TO_IP(${field}), "${escapeEsqlString(value)}"::ip)`
+      : iocType && HUNT_CASE_INSENSITIVE_IOC_TYPES.has(iocType)
+      ? `MV_CONTAINS(TO_LOWER(${field}), "${escapeEsqlString(value.toLowerCase())}")`
+      : `MV_CONTAINS(${field}, "${escapeEsqlString(value)}")`;
   return `FROM ${cleanedIndices.map(quoteEsqlIdentifier).join(', ')} | WHERE ${predicate}`;
 };

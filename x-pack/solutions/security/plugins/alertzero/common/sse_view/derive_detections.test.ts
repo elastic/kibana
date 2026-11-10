@@ -296,6 +296,37 @@ describe('deriveDetections', () => {
     });
   });
 
+  it('flags a behavior host/user count as a lower bound when Tier 2 truncated the names', () => {
+    const huntResult: DeriveDetectionsHuntResult = {
+      tier1: {},
+      tier2: {
+        behaviors: [
+          {
+            technique_id: 'T1059',
+            technique_name: 'Command and Scripting Interpreter',
+            tactic_ids: ['TA0002'],
+            confidence: 0.8,
+            title: 'Suspicious interpreter use',
+            execution: { executed: true, hit: true, row_count: 40 },
+            affected_hosts: Array.from({ length: 20 }, (_, index) => `host-${index}`),
+            affected_hosts_truncated: true,
+            affected_users: ['alice'],
+          },
+        ],
+      },
+    };
+
+    const [detection] = deriveDetections(huntResult, []);
+
+    expect(detection).toMatchObject({
+      kind: 'behavior',
+      host_count: 20,
+      hosts_truncated: true,
+      user_count: 1,
+    });
+    expect(detection.users_truncated).toBeUndefined();
+  });
+
   it('grades a behavior detection behavior_only when no IOC detection exists', () => {
     const huntResult: DeriveDetectionsHuntResult = {
       tier1: {},
