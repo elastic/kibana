@@ -52,6 +52,8 @@ done
 
 # Home's config, minus what can't be per project in one process, with TLS to Elasticsearch verified.
 # Every ES call is logged with the client that served it: tenant-<project id>, or data for the home cluster.
+# server.cdn.url is cleared so Kibana serves its own assets: a PR image only has assets on the CDN if its
+# Build Project Image step finished, and the browser shows "Elastic did not load properly" when they 404.
 loggers=$(jq -c '[.[].id | {name: "elasticsearch.query.tenant-\(.)", level: "debug"}] +
   [{name: "elasticsearch.query.data", level: "debug"}]' "$state")
 kibana_yml=$(project_yml "$home" | yq '
@@ -59,6 +61,7 @@ kibana_yml=$(project_yml "$home" | yq '
   .elasticsearch.ssl.certificateAuthorities = ["'"$mt"'/ca_shard.crt"] |
   del(.server.publicBaseUrl) |
   del(.xpack.security.authc.providers.saml) |
+  .server.cdn.url = null |
   .server.ssl.certificate = "/tls/tls.crt" | .server.ssl.key = "/tls/tls.key" |
   .tenants.file = "'"$mt"'/tenants.yml" |
   .logging.loggers = '"$loggers"'
