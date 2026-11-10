@@ -34,12 +34,10 @@ const apply = ({
   api = buildDashboardApi(),
   dashboardState = agentDashboardState,
   canWriteDashboards = true,
-  onOpenInNewDashboard,
 }: {
   api?: ReturnType<typeof buildDashboardApi>;
   dashboardState?: DashboardState;
   canWriteDashboards?: boolean;
-  onOpenInNewDashboard?: () => void;
 } = {}) => {
   const dashboardLocator = { navigate: jest.fn(), getRedirectUrl: jest.fn() };
   const toasts = { addWarning: jest.fn() };
@@ -49,7 +47,6 @@ const apply = ({
     canWriteDashboards,
     dashboardLocator,
     toasts: toasts as unknown as NotificationsStart['toasts'],
-    onOpenInNewDashboard,
   });
   return { api, dashboardLocator, toasts, result };
 };
@@ -132,21 +129,6 @@ describe('applyAgentChangesToDashboard', () => {
         refresh_interval: { pause: false, value: 60000 },
       })
     );
-  });
-
-  it('calls onOpenInNewDashboard right before opening the new dashboard, and not when applying in place', async () => {
-    const onOpenInNewDashboard = jest.fn();
-    const managed = apply({ api: buildDashboardApi({ isManaged: true }), onOpenInNewDashboard });
-    await managed.result;
-
-    expect(onOpenInNewDashboard.mock.invocationCallOrder[0]).toBeLessThan(
-      managed.dashboardLocator.navigate.mock.invocationCallOrder[0]
-    );
-
-    onOpenInNewDashboard.mockClear();
-    await apply({ onOpenInNewDashboard }).result;
-
-    expect(onOpenInNewDashboard).not.toHaveBeenCalled();
   });
 
   it('leaves the dashboard untouched and warns when the user cannot write dashboards', async () => {

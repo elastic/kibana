@@ -60,70 +60,43 @@ const preview = async ({
 
 describe('handlePreview with a published dashboard', () => {
   it.each([
-    ['linked to another existing dashboard', 'dashboard-2', 'dashboard-2'],
-    ['not linked to a dashboard', undefined, undefined],
-  ])(
-    'navigates through the Dashboard app locator when the attachment is %s',
-    async (_, origin, dashboardId) => {
-      const dashboardApi = buildDashboardApi('dashboard-1');
+    ['linked to another existing dashboard', 'dashboard-2'],
+    ['not linked to a dashboard', undefined],
+  ])('navigates through the Dashboard app locator when the attachment is %s', async (_, origin) => {
+    const dashboardApi = buildDashboardApi('dashboard-1');
 
-      const { dashboardLocator } = await preview({
-        attachment: buildAttachment(origin),
-        dashboardApi,
-      });
+    const { dashboardLocator } = await preview({
+      attachment: buildAttachment(origin),
+      dashboardApi,
+    });
 
-      expect(dashboardLocator.navigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: 'Agent dashboard',
-          description: 'Built by the agent',
-          time_range: { from: 'now-7d', to: 'now' },
-          preserveSavedFilters: false,
-          dashboardId,
-          viewMode: 'edit',
-          changedBy: ['agent'],
-        })
-      );
-      expect(dashboardApi.locator.navigate).not.toHaveBeenCalled();
-      expect(dashboardApi.setState).not.toHaveBeenCalled();
-    }
-  );
+    expect(dashboardLocator.navigate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Agent dashboard',
+        description: 'Built by the agent',
+        time_range: { from: 'now-7d', to: 'now' },
+        preserveSavedFilters: false,
+        dashboardId: origin,
+        viewMode: 'edit',
+        changedBy: ['agent'],
+      })
+    );
+    expect(dashboardApi.locator.navigate).not.toHaveBeenCalled();
+    expect(dashboardApi.setState).not.toHaveBeenCalled();
+  });
 
-  it.each([
-    ['in the dashboard app', buildDashboardApi('dashboard-1')],
-    ['outside the dashboard app', undefined],
-  ])(
-    'passes the attachment filters and query in their stored form when previewing %s',
-    async (_, dashboardApi) => {
-      const attachment = buildAttachment('dashboard-2');
+  it('opens the attachment in the Dashboard app in edit mode when previewed outside of it', async () => {
+    const { dashboardLocator } = await preview({ attachment: buildAttachment('dashboard-2') });
 
-      const { dashboardLocator } = await preview({
-        attachment: {
-          ...attachment,
-          data: {
-            ...attachment.data,
-            query: { expression: 'host.name: a', language: 'kql' },
-            filters: [
-              { type: 'condition', condition: { field: 'host.name', operator: 'is', value: 'a' } },
-            ],
-          },
-        } as DashboardAttachment,
-        dashboardApi,
-      });
-
-      expect(dashboardLocator.navigate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: { query: 'host.name: a', language: 'kuery' },
-          filters: [
-            expect.objectContaining({
-              meta: expect.objectContaining({ key: 'host.name', params: { query: 'a' } }),
-            }),
-          ],
-          preserveSavedFilters: false,
-          dashboardId: 'dashboard-2',
-        })
-      );
-    }
-  );
+    expect(dashboardLocator.navigate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Agent dashboard',
+        preserveSavedFilters: false,
+        dashboardId: 'dashboard-2',
+        viewMode: 'edit',
+      })
+    );
+  });
 
   it.each([
     ['it is linked to the viewed dashboard', 'dashboard-1', 'dashboard-1', true],

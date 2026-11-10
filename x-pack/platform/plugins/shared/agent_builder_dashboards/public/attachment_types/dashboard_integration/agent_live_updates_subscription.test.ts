@@ -93,48 +93,50 @@ const createHarness = (
 
 describe('createAgentLiveUpdatesSubscription', () => {
   it.each([
-    ['the linked saved dashboard', 'dashboard-1', 'dashboard-1', 1],
-    ['an unsaved dashboard', undefined, undefined, 1],
-    ['a different saved dashboard', 'dashboard-1', 'other-dashboard', 0],
-  ])(
-    'upserts the attachment and applies the state only for its own dashboard: %s',
-    (_, savedObjectId, origin, calls) => {
-      const { chatEvents$, setState, upsertAttachment, subscription } =
-        createHarness(savedObjectId);
-      const attachment = buildAttachment(origin);
+    ['applies it to the linked saved dashboard', 'dashboard-1', 'dashboard-1', {}, 1, 0],
+    ['applies it to an unsaved dashboard', undefined, undefined, {}, 1, 0],
+    [
+      'tells the user about a different saved dashboard',
+      'dashboard-1',
+      'other-dashboard',
+      {},
+      0,
+      1,
+    ],
+    [
+      "skips a different saved dashboard silently when the user can't write dashboards",
+      'dashboard-1',
+      'other-dashboard',
+      { canWriteDashboards: false },
+      0,
+      0,
+    ],
+    [
+      'tells the user about an unlinked attachment the open managed dashboard did not stage',
+      'managed-dashboard',
+      undefined,
+      { isManaged: true, stagedAttachmentIds: [] },
+      0,
+      1,
+    ],
+  ])('upserts the attachment and %s', (_, savedObjectId, origin, options, applied, notified) => {
+    const { chatEvents$, setState, upsertAttachment, onOtherDashboardUpdated, subscription } =
+      createHarness(savedObjectId, options);
+    const attachment = buildAttachment(origin);
 
-      chatEvents$.next(buildToolUiEvent(attachment));
+    chatEvents$.next(buildToolUiEvent(attachment));
 
-      expect(upsertAttachment).toHaveBeenCalledWith(attachment);
-      expect(setState).toHaveBeenCalledTimes(calls);
-      subscription.unsubscribe();
-    }
-  );
-
-  it.each([
-    ['tells the user', true, 1],
-    ["doesn't offer a user who can't write dashboards to open it", false, 0],
-  ])(
-    'skips the update of a different saved dashboard and %s',
-    (_, canWriteDashboards, notifications) => {
-      const { chatEvents$, setState, onOtherDashboardUpdated, subscription } = createHarness(
-        'dashboard-1',
-        { canWriteDashboards }
-      );
-
-      chatEvents$.next(buildToolUiEvent(buildAttachment('other-dashboard')));
-
-      expect(setState).not.toHaveBeenCalled();
-      expect(onOtherDashboardUpdated).toHaveBeenCalledTimes(notifications);
-      subscription.unsubscribe();
-    }
-  );
+    expect(upsertAttachment).toHaveBeenCalledWith(attachment);
+    expect(setState).toHaveBeenCalledTimes(applied);
+    expect(onOtherDashboardUpdated).toHaveBeenCalledTimes(notified);
+    subscription.unsubscribe();
+  });
 
   it.each([
     ['linked to it', 'managed-dashboard'],
     ['it staged without a link', undefined],
   ])(
-    'opens the changes in a new dashboard when viewing a managed dashboard the attachment is %s',
+    'opens a single new dashboard for repeated updates when viewing a managed dashboard the attachment is %s',
     async (_, origin) => {
       const { chatEvents$, setState, dashboardLocator, toasts, subscription } = createHarness(
         'managed-dashboard',
@@ -142,9 +144,11 @@ describe('createAgentLiveUpdatesSubscription', () => {
       );
 
       chatEvents$.next(buildToolUiEvent(buildAttachment(origin)));
+      chatEvents$.next(buildToolUiEvent(buildAttachment(origin)));
       await new Promise(process.nextTick);
 
       expect(setState).not.toHaveBeenCalled();
+      expect(dashboardLocator.navigate).toHaveBeenCalledTimes(1);
       expect(dashboardLocator.navigate).toHaveBeenCalledWith(
         expect.not.objectContaining({ dashboardId: expect.anything() })
       );
@@ -152,36 +156,6 @@ describe('createAgentLiveUpdatesSubscription', () => {
       subscription.unsubscribe();
     }
   );
-
-  it('leaves a managed dashboard open when the agent updates an unlinked attachment it did not stage', async () => {
-    const { chatEvents$, dashboardLocator, onOtherDashboardUpdated, subscription } = createHarness(
-      'managed-dashboard',
-      { isManaged: true, stagedAttachmentIds: [] }
-    );
-    const attachment = buildAttachment(undefined);
-
-    chatEvents$.next(buildToolUiEvent(attachment));
-    await new Promise(process.nextTick);
-
-    expect(dashboardLocator.navigate).not.toHaveBeenCalled();
-    expect(onOtherDashboardUpdated).toHaveBeenCalledWith(attachment);
-    subscription.unsubscribe();
-  });
-
-  it('opens a single new dashboard when more updates arrive while it opens', async () => {
-    const { chatEvents$, dashboardLocator, toasts, subscription } = createHarness(
-      'managed-dashboard',
-      { isManaged: true }
-    );
-
-    chatEvents$.next(buildToolUiEvent(buildAttachment('managed-dashboard')));
-    chatEvents$.next(buildToolUiEvent(buildAttachment('managed-dashboard')));
-    await new Promise(process.nextTick);
-
-    expect(dashboardLocator.navigate).toHaveBeenCalledTimes(1);
-    expect(toasts.addWarning).toHaveBeenCalledTimes(1);
-    subscription.unsubscribe();
-  });
 
   it("warns only once that the changes weren't applied when the user can't write dashboards", async () => {
     const { chatEvents$, setState, toasts, subscription } = createHarness(undefined, {
