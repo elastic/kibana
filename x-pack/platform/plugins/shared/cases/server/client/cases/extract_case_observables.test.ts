@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
 import type { Observable } from '../../../common/types/domain';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
+import { Operations } from '../../authorization';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { extractCaseObservables } from './extract_case_observables';
@@ -93,11 +94,10 @@ describe('extractCaseObservables', () => {
       'not allowed'
     );
 
-    expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
-      expect.objectContaining({
-        entities: [{ id: caseWithExtractionOn.id, owner: caseWithExtractionOn.attributes.owner }],
-      })
-    );
+    expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+      operation: Operations.updateCase,
+      entities: [{ id: caseWithExtractionOn.id, owner: caseWithExtractionOn.attributes.owner }],
+    });
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).not.toHaveBeenCalled();
   });
 
