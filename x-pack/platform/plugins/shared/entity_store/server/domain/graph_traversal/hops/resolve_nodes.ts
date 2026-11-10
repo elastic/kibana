@@ -131,7 +131,10 @@ const parseStoredEntities = (result: EsqlResult): StoredEntity[] => {
   if (idIndex < 0) {
     throw new Error(`Resolve query result lacks the ${ENTITY_ID_FIELD} column`);
   }
-  const indexes = new Map(RESOLVE_QUERY_COLUMNS.map((name) => [name, column(name)] as const));
+  // Keyed by string: the reader callback is handed any field name, not only the listed columns.
+  const indexes = new Map<string, number>(
+    RESOLVE_QUERY_COLUMNS.map((name) => [name, column(name)])
+  );
 
   const entities: StoredEntity[] = [];
   for (const row of result.values) {
