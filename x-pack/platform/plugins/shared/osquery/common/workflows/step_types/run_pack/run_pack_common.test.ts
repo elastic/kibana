@@ -138,6 +138,8 @@ describe('contract', () => {
   it('declares the pack pre-dispatch codes and keeps RESULTS_UNREADABLE', () => {
     expect(PreDispatchErrorCode.PACK_NOT_FOUND).toBe('PACK_NOT_FOUND');
     expect(PreDispatchErrorCode.PACK_AMBIGUOUS).toBe('PACK_AMBIGUOUS');
+    expect(PreDispatchErrorCode.PACK_QUERY_HAS_PLACEHOLDERS).toBe('PACK_QUERY_HAS_PLACEHOLDERS');
+    expect(PreDispatchErrorCode.PACK_HAS_NO_ENABLED_QUERIES).toBe('PACK_HAS_NO_ENABLED_QUERIES');
     expect(PreDispatchErrorCode.PREBUILT_PACK_NOT_LOADED).toBe('PREBUILT_PACK_NOT_LOADED');
     expect(PreDispatchErrorCode.PREBUILT_PACK_AMBIGUOUS).toBe('PREBUILT_PACK_AMBIGUOUS');
     expect(OutputErrorCode.RESULTS_UNREADABLE).toBe('RESULTS_UNREADABLE');

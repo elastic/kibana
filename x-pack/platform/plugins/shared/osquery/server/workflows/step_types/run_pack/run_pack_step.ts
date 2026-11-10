@@ -80,7 +80,7 @@ export const runPackStepDefinition = createPollServerStepDefinition({
     // placeholders, at least one) and never sends a bare `pack_id` the caller could not read.
     // The check is best-effort: the route reloads the pack and, for a `pack_id`, ignores inline
     // queries, so an edit that lands between this read and the POST is dispatched as saved.
-    const pack = await resolvePack(contextManager, input);
+    const { packId } = await resolvePack(contextManager, input);
     await assertCanReadLiveQueries(contextManager);
 
     const dispatched = await dispatchLiveQuery({
@@ -88,7 +88,7 @@ export const runPackStepDefinition = createPollServerStepDefinition({
       logger,
       // Only `pack_id`: the route builds one query per enabled pack query and the step sends no
       // `alert_ids`, so nothing is substituted.
-      fields: { pack_id: pack.packId },
+      fields: { pack_id: packId },
       target,
     });
     if (dispatched.type === 'unconfirmed') {

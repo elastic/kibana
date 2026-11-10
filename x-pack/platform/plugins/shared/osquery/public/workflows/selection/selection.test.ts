@@ -7,6 +7,7 @@
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import type { SelectionContext } from '@kbn/workflows/types/latest';
+import { escapeMarkdown } from './escape_markdown';
 import { createPackSelection } from './pack_selection';
 import { createPrebuiltPackSelection } from './prebuilt_pack_selection';
 import { createSavedQuerySelection } from './saved_query_selection';
@@ -23,6 +24,36 @@ describe('osquery workflow step pickers', () => {
 
   beforeEach(() => {
     http = httpServiceMock.createSetupContract();
+  });
+
+  describe.each([
+    ['pack', createPackSelection],
+    ['prebuilt_pack', createPrebuiltPackSelection],
+  ] as const)('%s hover escaping', (key, createSelection) => {
+    const unsafe = '<img src=x onerror=alert(1)> **[link](command:evil)** & `code`';
+
+    it('escapes names in found and missing details', async () => {
+      const selection = createSelection(http);
+      const missing = await selection.getDetails(unsafe, context(key), null);
+      const found = await selection.getDetails(unsafe, context(key), {
+        value: unsafe,
+        label: unsafe,
+      });
+      for (const details of [missing, found]) {
+        expect(details.message).toContain(escapeMarkdown(unsafe));
+        expect(details.message).not.toContain('<img');
+        expect(details.message).not.toContain('[link]');
+      }
+    });
+
+    it('escapes failure reasons', async () => {
+      const selection = createSelection(http);
+      http.get.mockRejectedValue({ body: { message: unsafe } });
+      await selection.resolve('x', context(key));
+      expect((await selection.getDetails('x', context(key), null)).message).toContain(
+        escapeMarkdown(unsafe)
+      );
+    });
   });
 
   describe('createSavedQuerySelection', () => {
@@ -129,6 +160,23 @@ describe('osquery workflow step pickers', () => {
       expect(other.message).toMatch(/install/i);
     });
 
+    it.each([
+      [{ body: { message: 'Body reason' }, message: 'Other reason' }, 'Body reason'],
+      [{ message: 'Network reason' }, 'Network reason'],
+      [{}, 'The saved query request failed.'],
+    ])('preserves shared failure reason precedence and fallback for %j', async (error, reason) => {
+      const selection = createSavedQuerySelection(http);
+      http.get.mockRejectedValue(error);
+      await selection.search('x', context('saved_query'));
+      expect((await selection.getDetails('x', context('saved_query'), null)).message).toBe(
+        `Could not load saved queries: ${reason}`
+      );
+      await selection.resolve('x', context('saved_query'));
+      expect((await selection.getDetails('x', context('saved_query'), null)).message).toBe(
+        `Could not load saved queries: ${reason}`
+      );
+    });
+
     it('explains how to fix a missing saved query', async () => {
       const details = await createSavedQuerySelection(http).getDetails(
         'missing',
@@ -168,7 +216,7 @@ describe('osquery workflow step pickers', () => {
 
       expect(http.get).toHaveBeenCalledWith('/api/osquery/packs', {
         version: '2023-10-31',
-        query: { page: 1, pageSize: 20, search: 'my*' },
+        query: { page: 1, pageSize: 100, search: 'my*' },
       });
       expect(options).toEqual([
         {
@@ -189,12 +237,12 @@ describe('osquery workflow step pickers', () => {
 
       expect((http.get.mock.calls[0] as unknown[])[1]).toEqual({
         version: '2023-10-31',
-        query: { page: 1, pageSize: 20, search: 'alphabeta*' },
+        query: { page: 1, pageSize: 100, search: 'alphabeta*' },
       });
       // Nothing left after stripping: list without a filter rather than send a bare `*`.
       expect((http.get.mock.calls[1] as unknown[])[1]).toEqual({
         version: '2023-10-31',
-        query: { page: 1, pageSize: 20 },
+        query: { page: 1, pageSize: 100 },
       });
     });
 
@@ -205,7 +253,7 @@ describe('osquery workflow step pickers', () => {
 
       expect((http.get.mock.calls[0] as unknown[])[1]).toEqual({
         version: '2023-10-31',
-        query: { page: 1, pageSize: 20 },
+        query: { page: 1, pageSize: 100 },
       });
     });
 
@@ -220,7 +268,7 @@ describe('osquery workflow step pickers', () => {
     it('resolves a pack name by exact match through a quoted search', async () => {
       http.get.mockResolvedValue({ data: [pack] });
 
-      const option = await createPackSelection(http).resolve(' My pack ', context('pack'));
+      const option = await createPackSelection(http).resolve('My pack', context('pack'));
 
       expect(http.get).toHaveBeenCalledWith('/api/osquery/packs', {
         version: '2023-10-31',
@@ -249,14 +297,114 @@ describe('osquery workflow step pickers', () => {
       expect(details.message).toBe('No pack named "My pack" in this space.');
     });
 
-    it('resolves to null and says so when more packs match than one page holds', async () => {
+    it('resolves an exact match even when the scan hits the page cap', async () => {
       const selection = createPackSelection(http);
-      http.get.mockResolvedValue({ data: [pack], total: 250 });
+      const fuzzy = Array.from({ length: 100 }, () => ({ ...pack, name: 'other' }));
+      http.get.mockResolvedValue({ data: fuzzy, total: 1001 });
+      http.get.mockResolvedValueOnce({ data: [pack, ...fuzzy.slice(1)], total: 1001 });
+
+      expect(await selection.resolve('My pack', context('pack'))).toMatchObject({
+        value: 'My pack',
+      });
+      expect(http.get).toHaveBeenCalledTimes(10);
+    });
+
+    it('finds an exact match on a later page', async () => {
+      http.get.mockResolvedValueOnce({
+        data: Array.from({ length: 100 }, () => ({ ...pack, name: 'other' })),
+        total: 101,
+      });
+      http.get.mockResolvedValueOnce({ data: [pack], total: 101 });
+
+      expect(await createPackSelection(http).resolve('My pack', context('pack'))).toMatchObject({
+        value: 'My pack',
+      });
+      expect(http.get).toHaveBeenLastCalledWith('/api/osquery/packs', {
+        version: '2023-10-31',
+        query: { page: 2, pageSize: 100, search: '"My pack"' },
+      });
+    });
+
+    it('reports too many matches only when a scan without an exact match is truncated', async () => {
+      const selection = createPackSelection(http);
+      http.get.mockResolvedValue({
+        data: Array.from({ length: 100 }, () => ({ ...pack, name: 'other' })),
+        total: 1001,
+      });
 
       expect(await selection.resolve('My pack', context('pack'))).toBeNull();
+      expect(http.get).toHaveBeenCalledTimes(10);
       const details = await selection.getDetails('My pack', context('pack'), null);
+      expect(details.message).toBe('Too many packs match "My pack"; refine the name.');
+    });
 
-      expect(details.message).toContain('Too many packs match this name');
+    it('reports a completed scan without an exact match as missing', async () => {
+      const selection = createPackSelection(http);
+      http.get.mockResolvedValue({
+        data: Array.from({ length: 100 }, () => ({ ...pack, name: 'other' })),
+        total: 1000,
+      });
+
+      expect(await selection.resolve('My pack', context('pack'))).toBeNull();
+      expect(http.get).toHaveBeenCalledTimes(10);
+      expect((await selection.getDetails('My pack', context('pack'), null)).message).toContain(
+        'No pack named'
+      );
+    });
+
+    it('excludes duplicate names across search pages from cached options', async () => {
+      http.get.mockResolvedValueOnce({
+        data: [
+          pack,
+          ...Array.from({ length: 99 }, (_, index) => ({ ...pack, name: `other ${index}` })),
+        ],
+        total: 101,
+      });
+      http.get.mockResolvedValueOnce({ data: [pack], total: 101 });
+
+      const options = await createPackSelection(http).search('', context('pack'));
+      expect(options).toHaveLength(20);
+      expect(options.some(({ value }) => value === pack.name)).toBe(false);
+    });
+
+    it('does not cache selectable options from a truncated search', async () => {
+      http.get.mockResolvedValue({
+        data: Array.from({ length: 100 }, (_, index) => ({ ...pack, name: `pack ${index}` })),
+        total: 1001,
+      });
+      expect(await createPackSelection(http).search('', context('pack'))).toEqual([]);
+      expect(http.get).toHaveBeenCalledTimes(10);
+    });
+
+    it('detects duplicate exact names on different pages', async () => {
+      const selection = createPackSelection(http);
+      http.get.mockResolvedValueOnce({
+        data: [pack, ...Array.from({ length: 99 }, () => ({ ...pack, name: 'other' }))],
+        total: 101,
+      });
+      http.get.mockResolvedValueOnce({ data: [pack], total: 101 });
+      expect(await selection.resolve('My pack', context('pack'))).toBeNull();
+      expect((await selection.getDetails('My pack', context('pack'), null)).message).toContain(
+        'Multiple packs are named'
+      );
+    });
+
+    it('uses raw values for resolution and lookup errors', async () => {
+      const selection = createPackSelection(http);
+      http.get.mockResolvedValueOnce({ data: [pack] });
+      expect(await selection.resolve(' My pack ', context('pack'))).toBeNull();
+      expect(http.get).toHaveBeenLastCalledWith('/api/osquery/packs', {
+        version: '2023-10-31',
+        query: { page: 1, pageSize: 100, search: '" My pack "' },
+      });
+      http.get.mockRejectedValueOnce({ message: 'Forbidden' });
+      await selection.resolve(' My pack ', context('pack'));
+      expect((await selection.getDetails(' My pack ', context('pack'), null)).message).toContain(
+        'Forbidden'
+      );
+      expect((await selection.getDetails('My pack', context('pack'), null)).message).not.toContain(
+        'Forbidden'
+      );
     });
 
     it('resolves to null for duplicates and says the name is ambiguous', async () => {
@@ -268,7 +416,22 @@ describe('osquery workflow step pickers', () => {
       expect(await selection.resolve('My pack', context('pack'))).toBeNull();
       const details = await selection.getDetails('My pack', context('pack'), null);
 
-      expect(details.message).toContain('More than one pack has this name');
+      expect(details.message).toBe('Multiple packs are named "My pack". Rename the duplicates.');
+    });
+
+    it('escapes ambiguous names in validation details', async () => {
+      const name = '<b>**pack**</b>';
+      const selection = createPackSelection(http);
+      http.get.mockResolvedValue({
+        data: [
+          { ...pack, name },
+          { ...pack, name },
+        ],
+      });
+      expect(await selection.resolve(name, context('pack'))).toBeNull();
+      expect((await selection.getDetails(name, context('pack'), null)).message).toBe(
+        `Multiple packs are named "${escapeMarkdown(name)}". Rename the duplicates.`
+      );
     });
 
     it('escapes quotes and backslashes in the search phrase', async () => {
@@ -524,6 +687,26 @@ describe('osquery workflow step pickers', () => {
       expect(details.message).toMatch(/not loaded in this space/);
     });
 
+    it('does not trim a prebuilt name or asset id and keys errors by raw value', async () => {
+      const selection = createPrebuiltPackSelection(http);
+      http.get.mockResolvedValue({ data: [persistence] });
+      expect(
+        await selection.resolve(' forensic-persistence ', context('prebuilt_pack'))
+      ).toBeNull();
+      expect(
+        await selection.resolve(' osquery_manager-1111 ', context('prebuilt_pack'))
+      ).toBeNull();
+      http.get.mockRejectedValueOnce({ message: 'Forbidden' });
+      await selection.resolve(' forensic-persistence ', context('prebuilt_pack'));
+      expect(
+        (await selection.getDetails(' forensic-persistence ', context('prebuilt_pack'), null))
+          .message
+      ).toContain('Forbidden');
+      expect(
+        (await selection.getDetails('forensic-persistence', context('prebuilt_pack'), null)).message
+      ).not.toContain('Forbidden');
+    });
+
     it('does not call the API for an empty value', async () => {
       expect(
         await createPrebuiltPackSelection(http).resolve(' ', context('prebuilt_pack'))
@@ -579,7 +762,7 @@ describe('osquery workflow step pickers', () => {
         { value: 'network-recon', label: 'network-recon' }
       );
 
-      expect(details.message).toMatch(/network-recon/);
+      expect(details.message).toContain(escapeMarkdown('network-recon'));
       expect(details.links?.[0].path).toBe('/s/my-space/app/osquery/packs');
     });
   });

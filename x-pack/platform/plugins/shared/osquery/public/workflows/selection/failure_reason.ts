@@ -18,14 +18,3 @@ export const failureReason = (error: unknown, fallback: string): string => {
 
   return fallback;
 };
-
-/** Whether a failed `core.http` call was an HTTP 404 (an unknown id, not a failed lookup). */
-export const isNotFound = (error: unknown): boolean => {
-  const httpError = error as {
-    status?: unknown;
-    response?: { status?: unknown };
-    body?: { statusCode?: unknown };
-  };
-
-  return [httpError.status, httpError.response?.status, httpError.body?.statusCode].includes(404);
-};

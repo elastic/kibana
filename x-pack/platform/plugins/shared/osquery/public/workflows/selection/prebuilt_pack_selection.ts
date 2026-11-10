@@ -14,6 +14,7 @@ import {
   type PrebuiltPackListItem,
 } from '../../../common/prebuilt_packs';
 import { failureReason } from './failure_reason';
+import { escapeMarkdown } from './escape_markdown';
 
 /**
  * A shared package name only makes the name ambiguous: resolve still answers for the asset id
@@ -78,7 +79,7 @@ export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionH
       const search = key.toLowerCase();
       try {
         const packs = await listPacks();
-        lookupErrors.delete(key);
+        lookupErrors.delete(input);
 
         return packs.flatMap((pack) => {
           const value = storedValue(pack);
@@ -93,7 +94,7 @@ export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionH
         });
       } catch (error) {
         lookupErrors.set(
-          key,
+          input,
           failureReason(
             error,
             i18n.translate('xpack.osquery.workflows.selection.prebuiltPack.requestFailed', {
@@ -106,8 +107,8 @@ export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionH
       }
     },
     resolve: async (value) => {
-      const name = value.trim();
-      if (!name) return null;
+      const name = value;
+      if (!name.trim()) return null;
 
       try {
         const packs = await listPacks();
@@ -150,23 +151,23 @@ export const createPrebuiltPackSelection = (http: HttpSetup): PropertySelectionH
       }
     },
     getDetails: async (value, _context, option) => {
-      const lookupError = lookupErrors.get(value.trim());
+      const lookupError = lookupErrors.get(value);
 
       return {
         message: option
           ? i18n.translate('xpack.osquery.workflows.selection.prebuiltPack.found', {
               defaultMessage: 'Runs this space\'s copy of the prebuilt pack "{name}".',
-              values: { name: option.label ?? value },
+              values: { name: escapeMarkdown(option.label ?? value) },
             })
           : lookupError
           ? i18n.translate('xpack.osquery.workflows.selection.prebuiltPack.lookupFailed', {
               defaultMessage: 'Could not use prebuilt pack "{id}": {reason}',
-              values: { id: value, reason: lookupError },
+              values: { id: escapeMarkdown(value), reason: escapeMarkdown(lookupError) },
             })
           : i18n.translate('xpack.osquery.workflows.selection.prebuiltPack.notLoaded', {
               defaultMessage:
                 'Prebuilt pack "{id}" is not loaded in this space. Load Elastic prebuilt packs in this space.',
-              values: { id: value },
+              values: { id: escapeMarkdown(value) },
             }),
         links: [
           {

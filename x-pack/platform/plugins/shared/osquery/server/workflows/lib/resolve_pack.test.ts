@@ -38,7 +38,7 @@ const notFoundWithReason = (reason: string) =>
   });
 
 describe('resolvePack', () => {
-  it('finds the pack by name, reads it and lists the ecs keys of the enabled queries only', async () => {
+  it('finds the pack by name, validates it and returns only its id', async () => {
     const contextManager = createContextManager({
       [FIND_PACKS]: () => FIND_ONE,
       [READ_PACK]: () => PACK,
@@ -46,7 +46,6 @@ describe('resolvePack', () => {
 
     await expect(resolvePack(contextManager, { pack: 'My pack' })).resolves.toEqual({
       packId: 'pack-so-id',
-      ecsKeysByQuery: { cron: ['cron.command'], launchd: [] },
     });
     expect(contextManager.callKibanaApi).toHaveBeenCalledTimes(2);
   });
@@ -66,15 +65,42 @@ describe('resolvePack', () => {
     });
   });
 
-  it('encodes the prebuilt name or id in the path', async () => {
-    const contextManager = createContextManager({
-      'GET /internal/osquery/packs/_resolve_prebuilt/a%2Fb': () => ({ pack_id: 'pack-so-id' }),
-      [READ_PACK]: () => PACK,
-    });
+  it.each(['a/b', 'a%2Fb', 'a%2fb', 'a\\b', '.', '..', 'a\u0000b', 'a\u007fb', '\ud800'])(
+    'rejects invalid prebuilt path identifier %s before any API call',
+    async (prebuiltPack) => {
+      const contextManager = createContextManager({});
 
-    await expect(resolvePack(contextManager, { prebuilt_pack: 'a/b' })).resolves.toMatchObject({
-      packId: 'pack-so-id',
-    });
+      await expect(
+        resolvePack(contextManager, { prebuilt_pack: prebuiltPack })
+      ).rejects.toMatchObject({
+        type: 'ValidationError',
+        details: { code: 'INVALID_INPUT' },
+      });
+      expect(contextManager.callKibanaApi).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(['a/b', 'a%2Fb', 'a\\b', '.', '..'])(
+    'rejects invalid resolved pack id %s before reading the pack',
+    async (packId) => {
+      const contextManager = createContextManager({
+        [FIND_PACKS]: () => ({ total: 1, data: [{ saved_object_id: packId, name: 'My pack' }] }),
+      });
+
+      await expect(resolvePack(contextManager, { pack: 'My pack' })).rejects.toMatchObject({
+        details: { code: 'INVALID_INPUT' },
+      });
+      expect(contextManager.callKibanaApi).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it('rejects an invalid id returned by prebuilt resolution before reading the pack', async () => {
+    const contextManager = createContextManager({ [RESOLVE]: () => ({ pack_id: 'a/b' }) });
+
+    await expect(
+      resolvePack(contextManager, { prebuilt_pack: 'forensic-persistence' })
+    ).rejects.toMatchObject({ details: { code: 'INVALID_INPUT' } });
+    expect(contextManager.callKibanaApi).toHaveBeenCalledTimes(1);
   });
 
   it('fails with PREBUILT_PACK_NOT_LOADED on a 404 that says the pack is not loaded', async () => {
@@ -178,7 +204,7 @@ describe('resolvePack', () => {
     });
   });
 
-  it('rejects a {{…}} placeholder in an enabled query with SAVED_QUERY_HAS_PLACEHOLDERS', async () => {
+  it('rejects a {{…}} placeholder in an enabled query with PACK_QUERY_HAS_PLACEHOLDERS', async () => {
     const contextManager = createContextManager({
       [FIND_PACKS]: () => FIND_ONE,
       [READ_PACK]: () => ({
@@ -189,7 +215,7 @@ describe('resolvePack', () => {
     const error = (await resolvePack(contextManager, { pack: 'My pack' }).catch((e) => e)) as Error;
 
     expect((error as never as { details: unknown }).details).toEqual({
-      code: 'SAVED_QUERY_HAS_PLACEHOLDERS',
+      code: 'PACK_QUERY_HAS_PLACEHOLDERS',
     });
     expect(error.message).toContain('bad');
   });
@@ -208,7 +234,7 @@ describe('resolvePack', () => {
     });
 
     await expect(resolvePack(contextManager, { pack: 'My pack' })).resolves.toMatchObject({
-      ecsKeysByQuery: { ok: [] },
+      packId: 'pack-so-id',
     });
   });
 
@@ -226,7 +252,7 @@ describe('resolvePack', () => {
     });
 
     await expect(resolvePack(contextManager, { pack: 'My pack' })).rejects.toMatchObject({
-      details: { code: 'REQUEST_REJECTED' },
+      details: { code: 'PACK_HAS_NO_ENABLED_QUERIES' },
       message: expect.stringContaining('no enabled queries'),
     });
   });
@@ -332,6 +358,66 @@ describe('resolvePack', () => {
       expect(contextManager.callKibanaApi.mock.calls[1][0]).toMatchObject({
         query: { search: '"My pack"', page: 2, pageSize: 100 },
       });
+    });
+
+    it('deduplicates the same pack id when an update shifts it onto the next page', async () => {
+      const match = { saved_object_id: 'pack-so-id', name: 'My pack' };
+      const firstPage = [
+        match,
+        ...Array.from({ length: 99 }, (_, index) => ({
+          saved_object_id: `fuzzy-${index}`,
+          name: `My pack ${index}`,
+        })),
+      ];
+      const find = jest.fn(({ query }: { query?: Record<string, unknown> }) => ({
+        total: 101,
+        data: query?.page === 1 ? firstPage : [match],
+      }));
+      const contextManager = createContextManager({ [FIND_PACKS]: find, [READ_PACK]: () => PACK });
+
+      await expect(resolvePack(contextManager, { pack: 'My pack' })).resolves.toEqual({
+        packId: 'pack-so-id',
+      });
+      expect(find).toHaveBeenCalledTimes(2);
+    });
+
+    it('scans without search for a name with no searchable terms', async () => {
+      const contextManager = createContextManager({
+        [FIND_PACKS]: () => ({
+          total: 2,
+          data: [
+            { saved_object_id: 'other', name: '--' },
+            { saved_object_id: 'pack-so-id', name: '---' },
+          ],
+        }),
+        [READ_PACK]: () => PACK,
+      });
+
+      await expect(resolvePack(contextManager, { pack: '---' })).resolves.toEqual({
+        packId: 'pack-so-id',
+      });
+      expect(contextManager.callKibanaApi.mock.calls[0][0].query).toEqual({
+        page: 1,
+        pageSize: 100,
+      });
+    });
+
+    it('preserves whitespace when searching and matching pack names', async () => {
+      const contextManager = createContextManager({
+        [FIND_PACKS]: () => ({
+          total: 2,
+          data: [
+            { saved_object_id: 'other', name: 'My pack' },
+            { saved_object_id: 'pack-so-id', name: ' My pack ' },
+          ],
+        }),
+        [READ_PACK]: () => PACK,
+      });
+
+      await expect(resolvePack(contextManager, { pack: ' My pack ' })).resolves.toEqual({
+        packId: 'pack-so-id',
+      });
+      expect(contextManager.callKibanaApi.mock.calls[0][0].query?.search).toBe('" My pack "');
     });
 
     it('stops after a short page', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
+import type { Client, estypes } from '@elastic/elasticsearch';
 import { set } from '@kbn/safer-lodash-set';
 import type { KbnClient, ScoutTestConfig } from '@kbn/scout';
 import { createEsClientForTesting } from '@kbn/test-es-server';
@@ -318,17 +318,53 @@ export const deletePack = async (kbnClient: KbnClient, packId: string, spaceId?:
 /** The osquery action documents dispatched for a pack id (a live query run with `pack_id`). */
 export const findPackActionDocs = async (
   systemEs: Client,
-  packId: string
+  packId: string,
+  actionId?: string
 ): Promise<Array<Record<string, any>>> => {
   await systemEs.indices.refresh({ index: OSQUERY_ACTIONS_INDEX }, { ignore: [404] });
   const result = await systemEs.search({
     index: OSQUERY_ACTIONS_INDEX,
     ignore_unavailable: true,
     size: 10,
-    query: { term: { pack_id: packId } },
+    query: {
+      bool: {
+        filter: [
+          { term: { pack_id: packId } },
+          ...(actionId ? [{ term: { action_id: actionId } }] : []),
+        ],
+      },
+    },
   });
 
   return result.hits.hits.map((hit) => hit._source as Record<string, any>);
+};
+
+/** All osquery action ids for one agent, including actions from earlier executions. */
+export const findAgentActionIds = async (
+  systemEs: Client,
+  agentId: string
+): Promise<Set<string>> => {
+  await systemEs.indices.refresh({ index: OSQUERY_ACTIONS_INDEX }, { ignore: [404] });
+  const ids = new Set<string>();
+  let searchAfter: estypes.SortResults | undefined;
+  while (true) {
+    const result = await systemEs.search<{ action_id: string }>({
+      index: OSQUERY_ACTIONS_INDEX,
+      ignore_unavailable: true,
+      size: 100,
+      query: { term: { agents: agentId } },
+      sort: [{ action_id: 'asc' }],
+      search_after: searchAfter,
+      _source: ['action_id'],
+    });
+    const { hits } = result.hits;
+    for (const hit of hits) {
+      if (hit._source) ids.add(hit._source.action_id);
+    }
+
+    if (hits.length < 100) return ids;
+    searchAfter = hits[hits.length - 1].sort;
+  }
 };
 
 /**

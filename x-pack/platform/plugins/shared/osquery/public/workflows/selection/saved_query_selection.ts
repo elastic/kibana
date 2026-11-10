@@ -9,6 +9,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { PropertySelectionHandler, SelectionOption } from '@kbn/workflows/types/latest';
 import { API_VERSIONS } from '../../../common/constants';
+import { failureReason } from './failure_reason';
 
 const PAGE_SIZE = 20;
 
@@ -26,20 +27,10 @@ const toOption = (item: SavedQueryItem): SelectionOption<string> => ({
   ...(item.query ? { documentation: item.query } : {}),
 });
 
-const failureReason = (error: unknown): string => {
-  const httpError = error as { body?: { message?: unknown }; message?: unknown };
-  if (typeof httpError.body?.message === 'string' && httpError.body.message) {
-    return httpError.body.message;
-  }
-
-  if (typeof httpError.message === 'string' && httpError.message) {
-    return httpError.message;
-  }
-
-  return i18n.translate('xpack.osquery.workflows.selection.savedQuery.requestFailed', {
+const requestFailed = () =>
+  i18n.translate('xpack.osquery.workflows.selection.savedQuery.requestFailed', {
     defaultMessage: 'The saved query request failed.',
   });
-};
 
 /**
  * Picker for `osquery.runQuery` `saved_query`. It stores the saved query's name (its `id`
@@ -70,7 +61,7 @@ export const createSavedQuerySelection = (http: HttpSetup): PropertySelectionHan
 
         return (data ?? []).map(toOption);
       } catch (error) {
-        lookupErrors.set(search, failureReason(error));
+        lookupErrors.set(search, failureReason(error, requestFailed()));
 
         return [];
       }
@@ -90,7 +81,7 @@ export const createSavedQuerySelection = (http: HttpSetup): PropertySelectionHan
 
         return matches.length === 1 ? toOption(matches[0]) : null;
       } catch (error) {
-        lookupErrors.set(name, failureReason(error));
+        lookupErrors.set(name, failureReason(error, requestFailed()));
 
         return null;
       }

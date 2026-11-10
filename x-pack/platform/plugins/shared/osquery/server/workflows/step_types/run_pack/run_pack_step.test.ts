@@ -322,7 +322,7 @@ describe('osquery.runPack step', () => {
             }),
           },
           {},
-          'SAVED_QUERY_HAS_PLACEHOLDERS',
+          'PACK_QUERY_HAS_PLACEHOLDERS',
         ],
         [
           'no enabled query',
@@ -332,7 +332,7 @@ describe('osquery.runPack step', () => {
             }),
           },
           {},
-          'REQUEST_REJECTED',
+          'PACK_HAS_NO_ENABLED_QUERIES',
         ],
         [
           'no live_queries_read privilege',

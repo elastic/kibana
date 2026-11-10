@@ -24,6 +24,7 @@ import {
   deletePack,
   deleteSystemIndicesUser,
   deleteTestSpace,
+  findAgentActionIds,
   findPackActionDocs,
   indexFakeAgents,
   loadPrebuiltPacks,
@@ -111,6 +112,7 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
         'osq-wf-pack-partial',
         runPackStep(`pack: osq-wf-pack`, '      max_rows: 1')
       );
+      const before = await findAgentActionIds(systemEs, AGENT.id);
       const executionId = await workflows.run(workflowId);
       const state = await workflows.waitForDispatch(executionId, 'p');
 
@@ -154,9 +156,14 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
       expect(byId.users).toMatchObject({ status: 'failed', rows: [], row_count: 0 });
       expect(byId.users.agents).toMatchObject({ total: 1, responded: 1, failed: 1 });
 
-      // One POST: one action document, from the pack name alone.
-      const [action, ...others] = await findPackActionDocs(systemEs, packId);
-      expect(others).toHaveLength(0);
+      // One POST creates one action, regardless of which tests ran the pack before this one.
+      const after = await findAgentActionIds(systemEs, AGENT.id);
+      expect(new Set([...after].filter((actionId) => !before.has(actionId)))).toStrictEqual(
+        new Set([state.action_id])
+      );
+      const actions = await findPackActionDocs(systemEs, packId, state.action_id);
+      expect(actions).toHaveLength(1);
+      const [action] = actions;
       expect(action.action_id).toBe(state.action_id);
       expect(action.alert_ids).toBeUndefined();
       expect(action.queries.map((query: { id: string }) => query.id).sort()).toStrictEqual([
@@ -254,11 +261,12 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
         'osq-wf-pack-not-found',
         runPackStep('pack: osq-wf-does-not-exist')
       );
+      const before = await findAgentActionIds(systemEs, AGENT.id);
       const execution = await workflows.waitForEnd(await workflows.run(workflowId));
 
       expect(execution.status).toBe('failed');
       expect(stepOf(execution, 'p').error?.details?.code).toBe('PACK_NOT_FOUND');
-      expect(await findPackActionDocs(systemEs, 'osq-wf-does-not-exist')).toHaveLength(0);
+      expect(await findAgentActionIds(systemEs, AGENT.id)).toStrictEqual(before);
       await workflows.delete(workflowId);
     }
   );
@@ -301,11 +309,12 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
         'osq-wf-pack-placeholder',
         runPackStep(`pack: osq-wf-pack-placeholder`)
       );
+      const before = await findAgentActionIds(systemEs, AGENT.id);
       const execution = await workflows.waitForEnd(await workflows.run(workflowId));
 
       expect(execution.status).toBe('failed');
-      expect(stepOf(execution, 'p').error?.details?.code).toBe('SAVED_QUERY_HAS_PLACEHOLDERS');
-      expect(await findPackActionDocs(systemEs, placeholderPackId)).toHaveLength(0);
+      expect(stepOf(execution, 'p').error?.details?.code).toBe('PACK_QUERY_HAS_PLACEHOLDERS');
+      expect(await findAgentActionIds(systemEs, AGENT.id)).toStrictEqual(before);
       await workflows.delete(workflowId);
     }
   );
@@ -321,11 +330,12 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
         'osq-wf-pack-no-packs-read',
         runPackStep(`pack: osq-wf-pack`)
       );
+      const before = await findAgentActionIds(systemEs, AGENT.id);
       const execution = await workflows.waitForEnd(await workflows.run(workflowId));
 
       expect(execution.status).toBe('failed');
       expect(stepOf(execution, 'p').error?.details?.code).toBe('MISSING_PRIVILEGE');
-      expect(await findPackActionDocs(systemEs, packId)).toHaveLength(0);
+      expect(await findAgentActionIds(systemEs, AGENT.id)).toStrictEqual(before);
       await workflows.delete(workflowId);
     }
   );
@@ -344,12 +354,36 @@ apiTest.describe('osquery.runPack workflow step', { tag: ['@local-stateful-class
         'osq-wf-pack-no-read',
         runPackStep(`pack: osq-wf-pack`)
       );
+      const before = await findAgentActionIds(systemEs, AGENT.id);
       const execution = await workflows.waitForEnd(await workflows.run(workflowId));
 
       expect(execution.status).toBe('failed');
       expect(stepOf(execution, 'p').error?.details?.code).toBe('MISSING_PRIVILEGE');
       expect(stepOf(execution, 'p').error?.message).toMatch(/live_queries_read/);
-      expect(await findPackActionDocs(systemEs, packId)).toHaveLength(0);
+      expect(await findAgentActionIds(systemEs, AGENT.id)).toStrictEqual(before);
+      await workflows.delete(workflowId);
+    }
+  );
+
+  apiTest(
+    'MISSING_PRIVILEGE without either run_saved_queries or live_queries_all, before anything is dispatched',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        osqueryRole(['minimal_read', 'packs_read', 'live_queries_read'])
+      );
+      const workflows = workflowsClient(apiClient, apiKeyHeader);
+      const workflowId = await workflows.create(
+        'osq-wf-pack-no-run',
+        runPackStep(`pack: osq-wf-pack`)
+      );
+      const before = await findAgentActionIds(systemEs, AGENT.id);
+      const execution = await workflows.waitForEnd(await workflows.run(workflowId));
+
+      expect(execution.status).toBe('failed');
+      const { error } = stepOf(execution, 'p');
+      expect(error?.details?.code).toBe('MISSING_PRIVILEGE');
+      expect(error?.message).toMatch(/Live query rejected \(HTTP 403\)/);
+      expect(await findAgentActionIds(systemEs, AGENT.id)).toStrictEqual(before);
       await workflows.delete(workflowId);
     }
   );

@@ -6,6 +6,7 @@
  */
 
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
+import { isPackQueryEnabled } from '../../../common/pack_execution';
 import { PREBUILT_PACK_RESOLVE_REASON } from '../../../common/prebuilt_packs';
 import { PreDispatchErrorCode } from '../../../common/workflows/contract/error_codes';
 import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from './api_headers';
@@ -16,16 +17,11 @@ import type { KibanaApiCaller } from './types';
 export interface ResolvedPack {
   /** Saved-object id of the pack the live query is created from. */
   packId: string;
-  /** Per enabled pack query: the keys of its `ecs_mapping`. Disabled queries are not listed. */
-  ecsKeysByQuery: Record<string, string[]>;
 }
 
 interface ReadPackResponse {
   data?: {
-    queries?: Record<
-      string,
-      { query?: string; ecs_mapping?: Record<string, unknown>; enabled?: boolean }
-    >;
+    queries?: Record<string, { query?: string; enabled?: boolean }>;
   };
 }
 
@@ -64,7 +60,9 @@ const resolvePackIdByName = async (
   }
 
   const phrase = `"${name.replace(/["\\]/g, '\\$&')}"`;
-  const ids: string[] = [];
+  // Punctuation-only names have no searchable terms in the route's analyzer.
+  const search = /[\p{L}\p{N}]/u.test(name) ? { search: phrase } : {};
+  const ids = new Set<string>();
   // True when the page cap ended the search while the route still had more hits to give.
   let truncated = false;
   try {
@@ -72,12 +70,12 @@ const resolvePackIdByName = async (
       const { body } = await contextManager.callKibanaApi<FindPacksResponse>({
         method: 'GET',
         path: '/api/osquery/packs',
-        query: { search: phrase, page, pageSize: FIND_PAGE_SIZE },
+        query: { ...search, page, pageSize: FIND_PAGE_SIZE },
         headers: PUBLIC_API_HEADERS,
       });
       const data = body.data ?? [];
       for (const pack of data) {
-        if (pack.name === name) ids.push(pack.saved_object_id);
+        if (pack.name === name) ids.add(pack.saved_object_id);
       }
 
       if (data.length < FIND_PAGE_SIZE || page * FIND_PAGE_SIZE >= (body.total ?? 0)) break;
@@ -96,7 +94,7 @@ const resolvePackIdByName = async (
     );
   }
 
-  if (ids.length === 0) {
+  if (ids.size === 0) {
     throw stepError(
       PreDispatchErrorCode.PACK_NOT_FOUND,
       `No pack is named "${name}" in this space.`,
@@ -104,14 +102,41 @@ const resolvePackIdByName = async (
     );
   }
 
-  if (ids.length > 1) {
+  if (ids.size > 1) {
     throw stepError(
       PreDispatchErrorCode.PACK_AMBIGUOUS,
       `More than one pack is named "${name}" in this space. Rename the duplicates.`
     );
   }
 
-  return ids[0];
+  const [packId] = ids;
+
+  return packId;
+};
+
+const encodePackPathId = (id: string): string => {
+  if (
+    id === '.' ||
+    id === '..' ||
+    /[/\\]|%(?:2f|5c)/i.test(id) ||
+    Array.from(id).some(
+      (character) => character.charCodeAt(0) < 32 || character.charCodeAt(0) === 127
+    )
+  ) {
+    throw stepError(
+      PreDispatchErrorCode.INVALID_INPUT,
+      'Pack identifier is not a valid URL path segment.'
+    );
+  }
+
+  try {
+    return encodeURIComponent(id);
+  } catch {
+    throw stepError(
+      PreDispatchErrorCode.INVALID_INPUT,
+      'Pack identifier is not a valid URL path segment.'
+    );
+  }
 };
 
 const resolvePrebuiltPackId = async (
@@ -127,10 +152,11 @@ const resolvePrebuiltPackId = async (
     );
   }
 
+  const encodedId = encodePackPathId(assetIdOrName);
   try {
     const { body } = await contextManager.callKibanaApi<{ pack_id: string }>({
       method: 'GET',
-      path: `/internal/osquery/packs/_resolve_prebuilt/${encodeURIComponent(assetIdOrName)}`,
+      path: `/internal/osquery/packs/_resolve_prebuilt/${encodedId}`,
       headers: INTERNAL_API_HEADERS,
     });
 
@@ -176,11 +202,12 @@ export const resolvePack = async (
   // Messages name the pack the way the workflow does, not by its saved-object id.
   const label = input.pack ?? (input.prebuilt_pack as string);
 
+  const encodedPackId = encodePackPathId(packId);
   let queries: NonNullable<NonNullable<ReadPackResponse['data']>['queries']>;
   try {
     const { body } = await contextManager.callKibanaApi<ReadPackResponse>({
       method: 'GET',
-      path: `/api/osquery/packs/${encodeURIComponent(packId)}`,
+      path: `/api/osquery/packs/${encodedPackId}`,
       headers: PUBLIC_API_HEADERS,
     });
     queries = body.data?.queries ?? {};
@@ -196,25 +223,22 @@ export const resolvePack = async (
     throw toPreDispatchReadError(`Reading the pack "${label}"`, error);
   }
 
-  const ecsKeysByQuery: Record<string, string[]> = {};
-  for (const [name, packQuery] of Object.entries(queries)) {
-    if (packQuery.enabled === false) continue;
+  const enabledQueries = Object.entries(queries).filter(([, query]) => isPackQueryEnabled(query));
+  for (const [name, packQuery] of enabledQueries) {
     if (hasPlaceholders(packQuery.query ?? '')) {
       throw stepError(
-        PreDispatchErrorCode.SAVED_QUERY_HAS_PLACEHOLDERS,
+        PreDispatchErrorCode.PACK_QUERY_HAS_PLACEHOLDERS,
         `Query "${name}" of pack "${label}" contains {{…}} placeholders, which workflow steps never substitute.`
       );
     }
-
-    ecsKeysByQuery[name] = Object.keys(packQuery.ecs_mapping ?? {});
   }
 
-  if (Object.keys(ecsKeysByQuery).length === 0) {
+  if (enabledQueries.length === 0) {
     throw stepError(
-      PreDispatchErrorCode.REQUEST_REJECTED,
+      PreDispatchErrorCode.PACK_HAS_NO_ENABLED_QUERIES,
       `Pack "${label}" has no enabled queries, so there is nothing to run.`
     );
   }
 
-  return { packId, ecsKeysByQuery };
+  return { packId };
 };

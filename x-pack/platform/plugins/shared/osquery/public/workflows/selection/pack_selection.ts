@@ -11,6 +11,7 @@ import type { PropertySelectionHandler, SelectionOption } from '@kbn/workflows/t
 import { API_VERSIONS } from '../../../common/constants';
 import { sanitizeSearch } from '../../common/sanitize_search';
 import { failureReason } from './failure_reason';
+import { escapeMarkdown } from './escape_markdown';
 
 const PAGE_SIZE = 20;
 
@@ -38,8 +39,9 @@ const requestFailed = () =>
     defaultMessage: 'The pack request failed.',
   });
 
-/** Enough to hold every pack whose name or description contains the exact name. */
+// Keep the scan limit in sync with server/workflows/lib/resolve_pack.ts.
 const RESOLVE_PAGE_SIZE = 100;
+const RESOLVE_MAX_PAGES = 10;
 
 /**
  * Picker for `osquery.runPack` `pack`: stores the pack name, which the step resolves in the
@@ -51,6 +53,7 @@ export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<s
   // no options; the validation message explains why. Keyed by the looked-up value because the
   // validator resolves every runPack step's `pack` in parallel.
   const lookupErrors = new Map<string, string>();
+  const validationErrors = new Map<string, string>();
 
   return {
     search: async (input) => {
@@ -59,66 +62,92 @@ export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<s
       // the user are stripped, then a trailing `*` matches while they are still typing a word.
       const sanitized = sanitizeSearch(search);
       try {
-        const { data } = await http.get<{ data?: PackItem[] }>('/api/osquery/packs', {
-          version: API_VERSIONS.public.v1,
-          query: {
-            page: 1,
-            pageSize: PAGE_SIZE,
-            ...(sanitized ? { search: `${sanitized}*` } : {}),
-          },
-        });
-        lookupErrors.delete(search);
+        const packs: PackItem[] = [];
+        for (let page = 1; page <= RESOLVE_MAX_PAGES; page++) {
+          const { data = [], total = 0 } = await http.get<{
+            data?: PackItem[];
+            total?: number;
+          }>('/api/osquery/packs', {
+            version: API_VERSIONS.public.v1,
+            query: {
+              page,
+              pageSize: RESOLVE_PAGE_SIZE,
+              ...(sanitized ? { search: `${sanitized}*` } : {}),
+            },
+          });
+          packs.push(...data);
+          if (data.length < RESOLVE_PAGE_SIZE || page * RESOLVE_PAGE_SIZE >= total) break;
+          // An unseen duplicate could otherwise validate through the editor's option cache.
+          if (page === RESOLVE_MAX_PAGES) return [];
+        }
 
-        return (data ?? []).map(toOption);
+        lookupErrors.delete(input);
+        validationErrors.delete(input);
+        const counts = new Map<string, number>();
+        for (const { name } of packs) counts.set(name, (counts.get(name) ?? 0) + 1);
+
+        return packs
+          .filter(({ name }) => counts.get(name) === 1)
+          .slice(0, PAGE_SIZE)
+          .map(toOption);
       } catch (error) {
-        lookupErrors.set(search, failureReason(error, requestFailed()));
+        lookupErrors.set(input, failureReason(error, requestFailed()));
 
         return [];
       }
     },
     resolve: async (value) => {
-      const name = value.trim();
-      if (!name) return null;
+      const name = value;
+      if (!name.trim()) return null;
 
+      lookupErrors.delete(name);
+      validationErrors.delete(name);
       try {
-        // The route has no exact-name filter: search the quoted name, keep exact matches only.
-        const { data, total } = await http.get<{ data?: PackItem[]; total?: number }>(
-          '/api/osquery/packs',
-          {
+        const matches: PackItem[] = [];
+        let truncated = false;
+        for (let page = 1; page <= RESOLVE_MAX_PAGES; page++) {
+          // The route has no exact-name filter: search the quoted name, keep exact matches only.
+          const { data = [], total = 0 } = await http.get<{
+            data?: PackItem[];
+            total?: number;
+          }>('/api/osquery/packs', {
             version: API_VERSIONS.public.v1,
             query: {
-              page: 1,
+              page,
               pageSize: RESOLVE_PAGE_SIZE,
               search: `"${name.replace(/["\\]/g, '\\$&')}"`,
             },
-          }
-        );
-        const matches = (data ?? []).filter((pack) => pack.name === name);
-        lookupErrors.delete(name);
-        if ((total ?? 0) > RESOLVE_PAGE_SIZE) {
-          // Only the first page was read: a duplicate or the match itself may be on a later one.
-          lookupErrors.set(
+          });
+          matches.push(...data.filter((pack) => pack.name === name));
+          if (matches.length > 1) break;
+          if (data.length < RESOLVE_PAGE_SIZE || page * RESOLVE_PAGE_SIZE >= total) break;
+          if (page === RESOLVE_MAX_PAGES) truncated = true;
+        }
+
+        if (matches.length > 1) {
+          validationErrors.set(
             name,
-            i18n.translate('xpack.osquery.workflows.selection.pack.tooManyMatches', {
-              defaultMessage:
-                'Too many packs match this name to tell which one the step runs. Use a more specific name.',
+            i18n.translate('xpack.osquery.workflows.selection.pack.ambiguousErrorMessage', {
+              defaultMessage: 'Multiple packs are named "{name}". Rename the duplicates.',
+              values: { name: escapeMarkdown(name) },
             })
           );
 
           return null;
         }
 
-        if (matches.length > 1) {
-          lookupErrors.set(
+        if (matches.length === 1) return toOption(matches[0]);
+        if (truncated) {
+          validationErrors.set(
             name,
-            i18n.translate('xpack.osquery.workflows.selection.pack.ambiguous', {
-              defaultMessage:
-                'More than one pack has this name in this space, so the step cannot tell which to run. Rename the duplicates.',
+            i18n.translate('xpack.osquery.workflows.selection.pack.tooManyMatchesErrorMessage', {
+              defaultMessage: 'Too many packs match "{name}"; refine the name.',
+              values: { name: escapeMarkdown(name) },
             })
           );
         }
 
-        return matches.length === 1 ? toOption(matches[0]) : null;
+        return null;
       } catch (error) {
         lookupErrors.set(name, failureReason(error, requestFailed()));
 
@@ -126,23 +155,25 @@ export const createPackSelection = (http: HttpSetup): PropertySelectionHandler<s
       }
     },
     getDetails: async (value, _context, option) => {
-      const lookupError = lookupErrors.get(value.trim());
+      const lookupError = lookupErrors.get(value);
 
       return {
         message: option
           ? i18n.translate('xpack.osquery.workflows.selection.pack.found', {
               defaultMessage:
                 'Pack "{name}" runs as a live pack in the workflow space; disabled queries are skipped.',
-              values: { name: option.label ?? value },
+              values: { name: escapeMarkdown(option.label ?? value) },
             })
+          : validationErrors.has(value)
+          ? validationErrors.get(value) ?? ''
           : lookupError
           ? i18n.translate('xpack.osquery.workflows.selection.pack.loadFailed', {
               defaultMessage: 'Could not load packs: {reason}',
-              values: { reason: lookupError },
+              values: { reason: escapeMarkdown(lookupError) },
             })
           : i18n.translate('xpack.osquery.workflows.selection.pack.notFound', {
               defaultMessage: 'No pack named "{name}" in this space.',
-              values: { name: value },
+              values: { name: escapeMarkdown(value) },
             }),
         links: [
           {
