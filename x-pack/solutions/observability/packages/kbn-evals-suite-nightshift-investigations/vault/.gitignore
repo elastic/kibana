@@ -1,0 +1,5 @@
+#
+# Local-only Nightshift vault config (contains secrets) — never commit.
+#
+config*.json
+!config.example.json

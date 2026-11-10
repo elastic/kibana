@@ -25,6 +25,7 @@ export interface GetAgentsRequest {
     showInactive?: boolean;
     showUpgradeable?: boolean;
     withMetrics?: boolean;
+    withPendingRestart?: boolean;
     searchAfter?: string;
     openPit?: boolean;
     pitId?: string;
@@ -48,6 +49,7 @@ export interface GetOneAgentRequest {
   };
   query: {
     withMetrics?: boolean;
+    withPendingRestart?: boolean;
   };
 }
 

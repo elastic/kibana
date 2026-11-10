@@ -24,7 +24,7 @@ import type {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
-import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { parseDuration, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import type { RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { TimeUnitChar } from '@kbn/observability-plugin/common';
@@ -141,7 +141,7 @@ export const createMetricThresholdExecutor =
       startedAt,
       executionId,
       spaceId,
-      rule: { id: ruleId },
+      rule: { id: ruleId, schedule },
     } = options;
 
     const { criteria } = params;
@@ -301,7 +301,8 @@ export const createMetricThresholdExecutor =
       dataView,
       state.lastRunTimestamp,
       { end: startedAt.valueOf() },
-      convertStringsToMissingGroupsRecord(previousMissingGroups)
+      convertStringsToMissingGroupsRecord(previousMissingGroups),
+      parseDuration(schedule.interval)
     );
 
     const resultGroupSet = new Set<string>();
@@ -541,7 +542,7 @@ export const createMetricThresholdExecutor =
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),
         originalAlertStateWasALERT: originalActionGroup === FIRED_ACTIONS.id,
         originalAlertStateWasWARNING: originalActionGroup === WARNING_ACTIONS.id,
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         originalAlertStateWasNO_DATA: originalActionGroup === NO_DATA_ACTIONS.id,
         ...additionalContext,
       });

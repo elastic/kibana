@@ -109,6 +109,11 @@ triggers:
           description: >
             The investigation (Agent Builder conversation) to run in. The start API always sets
             it; a run without it starts a new investigation whose id is the workflow execution ID.
+        timeout_seconds:
+          type: number
+          description: >
+            Upper bound the caller asked for. The space's entry point caps its investigation step
+            with it and hands the inputs on unchanged, so this run accepts it and ignores it.
       required:
         - message
       additionalProperties: false
@@ -242,5 +247,37 @@ steps:
     with:
       investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
       phase: completed
+    on-failure:
+      continue: true
+
+  # Online evals: decides whether this run's round gets scored. The step reports its own failures
+  # and never throws; `continue` covers failures in the engine itself.
+  - name: classify_for_online_evals
+    type: nightshift.onlineEvals.classifyRound
+    with:
+      investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+      investigation_started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}'
+      follow_up: '{{ inputs.context.follow_up }}'
+    on-failure:
+      continue: true
+
+  # Started without waiting, so this run ends, and the next one for the investigation starts,
+  # while the judges run. The scoring workflow has no account of its own and runs as this run's.
+  - name: start_online_evals
+    type: workflow.executeAsync
+    if: '${{ steps.classify_for_online_evals.output.should_score == true }}'
+    with:
+      workflow-id: system-nightshift-online-evals
+      run-as-mode: inherit
+      inputs:
+        investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+        round_id: '{{ steps.classify_for_online_evals.output.round_id }}'
+        round_kind: '{{ steps.classify_for_online_evals.output.round_kind }}'
+        investigation_started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}'
+        investigation_ended_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}'
+        investigation_execution_id: '{{ execution.id }}'
+        # `${{ }}` passes a missing optional value as undefined; `{{ }}` would pass an empty string.
+        entry_point: '${{ inputs.context.entry_point }}'
+        alert_rule_type: '${{ inputs.context.alerts[0].rule_type_id }}'
     on-failure:
       continue: true

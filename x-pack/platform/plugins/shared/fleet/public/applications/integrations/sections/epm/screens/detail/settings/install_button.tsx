@@ -23,6 +23,9 @@ import { getNumTransformAssets } from '../../../../../../../components/transform
 import { ConfirmPackageInstall } from './confirm_package_install';
 
 type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version' | 'assets'> & {
+  /** `assets` labels the button "Install {title} Assets" instead of "Install {title}" */
+  variant?: 'package' | 'assets';
+  'data-test-subj'?: string;
   disabled?: boolean;
   dryRunData?: UpgradePackagePolicyDryRunResponse | null;
   isUpgradingPackagePolicies?: boolean;
@@ -31,7 +34,14 @@ type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version' | 
   setIsUpgradingPackagePolicies?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 export function InstallButton(props: InstallationButtonProps) {
-  const { name, title, version, assets } = props;
+  const {
+    name,
+    title,
+    version,
+    assets,
+    variant = 'package',
+    'data-test-subj': dataTestSubj = 'installAssetsButton',
+  } = props;
 
   const authz = useAuthz();
   const canInstallPackages = authz.integrations.installPackages;
@@ -85,9 +95,27 @@ export function InstallButton(props: InstallationButtonProps) {
         iconType={'download'}
         isLoading={isInstalling}
         onClick={toggleInstallModal}
-        data-test-subj="installAssetsButton"
+        data-test-subj={dataTestSubj}
       >
-        {isInstalling ? (
+        {variant === 'assets' ? (
+          isInstalling ? (
+            <FormattedMessage
+              id="xpack.fleet.integrations.installPackage.installingAssetsButtonLabel"
+              defaultMessage="Installing {title} Assets"
+              values={{
+                title,
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.integrations.installPackage.installAssetsButtonLabel"
+              defaultMessage="Install {title} Assets"
+              values={{
+                title,
+              }}
+            />
+          )
+        ) : isInstalling ? (
           <FormattedMessage
             id="xpack.fleet.integrations.installPackage.installingPackageButtonLabel"
             defaultMessage="Installing {title}"

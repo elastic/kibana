@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export const getAlertSeriesNotFoundMessage = (groupHash: string): string =>
-  `Alert series with group_hash [${groupHash}] not found`;
+export const getAlertSeriesNotFoundMessage = (seriesId: string): string =>
+  `Alert series with series_id [${seriesId}] not found`;
+
+export const getInvalidSeriesIdMessage = (seriesId: string): string =>
+  `[${seriesId}] is not a valid series_id`;
 
 export const getAlertEpisodeNotFoundMessage = (episodeId: string): string =>
   `Alert with alert_id [${episodeId}] not found`;

@@ -10,7 +10,9 @@
 import { WorkflowDisabledError } from './workflow_disabled_error';
 import { WorkflowExecutionInvalidStatusError } from './workflow_execution_invalid_status_error';
 import { WorkflowExecutionNotFoundError } from './workflow_execution_not_found_error';
+import { WorkflowInvalidError } from './workflow_invalid_error';
 import { WorkflowNotFoundError } from './workflow_not_found_error';
+import { WorkflowResumeNotAppliedError } from './workflow_resume_not_applied_error';
 
 describe('workflow error classes', () => {
   it.each<{ create: () => Error; expectedName: string; expectedMessage: string }>([
@@ -34,6 +36,16 @@ describe('workflow error classes', () => {
       expectedName: 'WorkflowDisabledError',
       expectedMessage: 'Workflow is disabled: wf-123. Enable the workflow to run it.',
     },
+    {
+      create: () => new WorkflowInvalidError('wf-123'),
+      expectedName: 'WorkflowInvalidError',
+      expectedMessage: 'Workflow is not valid: wf-123. Fix the workflow YAML errors to run it.',
+    },
+    {
+      create: () => new WorkflowResumeNotAppliedError('exec-1', new Error('scheduling failed')),
+      expectedName: 'WorkflowResumeNotAppliedError',
+      expectedMessage: 'Workflow execution "exec-1" was not resumed: scheduling failed',
+    },
   ])(
     '$expectedName sets name, message, and extends Error',
     ({ create, expectedName, expectedMessage }) => {
@@ -45,10 +57,20 @@ describe('workflow error classes', () => {
     }
   );
 
-  it.each([new WorkflowDisabledError('wf-123'), new WorkflowNotFoundError('wf-123')])(
-    '%s is marked as a user error',
-    (error) => {
-      expect(error).toHaveProperty('isUserError', true);
-    }
-  );
+  it.each([
+    new WorkflowDisabledError('wf-123'),
+    new WorkflowInvalidError('wf-123'),
+    new WorkflowNotFoundError('wf-123'),
+  ])('%s is marked as a user error', (error) => {
+    expect(error).toHaveProperty('isUserError', true);
+  });
+
+  it('WorkflowResumeNotAppliedError keeps the original failure as its cause', () => {
+    const cause = new Error('scheduling failed');
+
+    expect(new WorkflowResumeNotAppliedError('exec-1', cause).cause).toBe(cause);
+    expect(new WorkflowResumeNotAppliedError('exec-1', 'not an error').message).toBe(
+      'Workflow execution "exec-1" was not resumed: not an error'
+    );
+  });
 });

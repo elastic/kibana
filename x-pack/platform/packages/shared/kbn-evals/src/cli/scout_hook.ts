@@ -23,10 +23,12 @@ const scoutHookOutputSchema = z.strictObject({
 export const runScoutHook = (
   repoRoot: string,
   hookPath: string,
-  config: object
+  config: object,
+  { env = process.env }: { env?: NodeJS.ProcessEnv } = {}
 ): Record<string, string> => {
   const result = spawnSync('bash', [Path.resolve(repoRoot, hookPath)], {
     cwd: repoRoot,
+    env,
     input: JSON.stringify(config),
     encoding: 'utf8',
     stdio: ['pipe', 'pipe', 'inherit'],

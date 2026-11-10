@@ -38,6 +38,7 @@ interface CreateEpisodeActionRouteForTypeOptions<
   >;
   oasOperationObject?: RouteConfigOptions<RouteMethod>['oasOperationObject'];
   access?: RouteConfigOptions<RouteMethod>['access'];
+  availability?: RouteConfigOptions<RouteMethod>['availability'];
   /** Statuses only some action types can produce, declared by those routes. */
   additionalResponses?: NonNullable<AlertingRouteSchemas['response']>;
 }
@@ -51,6 +52,7 @@ export const createEpisodeActionRouteForType = <
   bodySchema,
   oasOperationObject,
   access,
+  availability,
   additionalResponses,
 }: CreateEpisodeActionRouteForTypeOptions<TAction>): RouteDefinition<
   EpisodeAlertActionParams,
@@ -74,6 +76,7 @@ export const createEpisodeActionRouteForType = <
     };
     static routeOptions = {
       access,
+      availability,
       summary,
       description: 'Create an action for a specific alert.',
       oasOperationObject,

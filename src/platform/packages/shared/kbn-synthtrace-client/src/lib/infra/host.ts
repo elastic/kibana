@@ -27,7 +27,13 @@ interface HostDocument extends Fields {
   'host.os.name'?: string;
   'host.os.version'?: string;
   'host.os.platform'?: string;
+  'host.os.kernel'?: string;
   'cloud.provider'?: string;
+  'cloud.instance.id'?: string;
+  'cloud.instance.name'?: string;
+  'cloud.availability_zone'?: string;
+  'cloud.machine.type'?: string;
+  'cloud.project.id'?: string;
 }
 
 export class Host extends Entity<HostDocument> {
@@ -199,7 +205,13 @@ export function host(name: string): Host {
     'host.os.name': 'Linux',
     'host.os.platform': 'ubuntu',
     'host.os.version': '4.19.76-linuxkit',
+    'host.os.kernel': '5.15.0-91-generic',
     'cloud.provider': 'gcp',
+    'cloud.instance.id': `instance-${name}`,
+    'cloud.instance.name': name,
+    'cloud.availability_zone': 'us-central1-a',
+    'cloud.machine.type': 'n1-standard-4',
+    'cloud.project.id': 'elastic-obs-integrations-dev',
   });
 }
 

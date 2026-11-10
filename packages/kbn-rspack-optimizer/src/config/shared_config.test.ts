@@ -128,7 +128,7 @@ describe('shared_config', () => {
       // builds run from the plugin directory and must not depend on it.
       const globals = Path.resolve(
         REPO_ROOT,
-        'src/core/public/styles/core_app/_globals_borealislight.scss'
+        'src/core/packages/core/public/styles/core_app/_globals_borealislight.scss'
       );
       const originalCwd = process.cwd();
       process.chdir(Os.tmpdir());

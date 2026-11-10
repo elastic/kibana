@@ -8,8 +8,11 @@
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { TaskOutput } from '@kbn/evals';
 import { ACTION_POLICY_ATTACHMENT_TYPE, RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import type { RuleManagementExample } from '../types';
 import {
   RENDER_ATTACHMENT_TAG_RE,
+  collectAttachmentDataCheckNames,
+  createAttachmentDataCheckEvaluator,
   createExpectedAttachmentDataEvaluator,
   createExpectedRenderAttachmentEvaluator,
   getAttachmentVersionData,
@@ -261,5 +264,91 @@ describe('createExpectedAttachmentDataEvaluator', () => {
     );
     expect(result.score).toBe(0);
     expect(result.explanation).toMatch(/length|Expected/i);
+  });
+
+  it('runs every named check and reports each failure by name', async () => {
+    const result = await runAttachmentData({ attachments: [] } as TaskOutput, {
+      expectAttachmentData: {
+        passes: () => {},
+        routingTagLinked: () => {
+          throw new Error('no shared tag');
+        },
+        workflowLinksAlertDetails: () => {
+          throw new Error('no alert_url');
+        },
+      },
+    });
+    expect(result.score).toBe(0);
+    expect(result.explanation).toBe(
+      '[routingTagLinked] no shared tag\n[workflowLinksAlertDetails] no alert_url'
+    );
+    expect(result.metadata).toMatchObject({
+      failedChecks: ['routingTagLinked', 'workflowLinksAlertDetails'],
+    });
+  });
+
+  it('throws when a named check is not a function', async () => {
+    await expect(
+      runAttachmentData({ attachments: [] } as TaskOutput, {
+        expectAttachmentData: { routingTagLinked: true },
+      })
+    ).rejects.toThrow(/must be a function or a non-empty record/i);
+  });
+});
+
+describe('createAttachmentDataCheckEvaluator', () => {
+  const runCheck = (checkName: string, expected: Record<string, unknown>) =>
+    createAttachmentDataCheckEvaluator(checkName).evaluate({
+      input: { turns: [] },
+      output: { attachments: [] } as TaskOutput,
+      expected,
+      metadata: null,
+    });
+
+  it('is named after the check', () => {
+    expect(createAttachmentDataCheckEvaluator('routingTagLinked').name).toBe(
+      'AttachmentData:routingTagLinked'
+    );
+  });
+
+  it('scores only its own check', async () => {
+    const expectAttachmentData = {
+      routingTagLinked: () => {},
+      workflowLinksAlertDetails: () => {
+        throw new Error('no alert_url');
+      },
+    };
+    expect((await runCheck('routingTagLinked', { expectAttachmentData })).score).toBe(1);
+    const failed = await runCheck('workflowLinksAlertDetails', { expectAttachmentData });
+    expect(failed.score).toBe(0);
+    expect(failed.explanation).toBe('no alert_url');
+  });
+
+  it('skips examples that do not define the check', async () => {
+    const result = await runCheck('routingTagLinked', {
+      expectAttachmentData: () => {},
+    });
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('skipped');
+  });
+});
+
+describe('collectAttachmentDataCheckNames', () => {
+  it('returns distinct named checks in first-seen order and ignores bare functions', () => {
+    const example = (
+      expectAttachmentData?: RuleManagementExample['output']['expectAttachmentData']
+    ): RuleManagementExample => ({
+      input: { turns: [] },
+      output: { expectAttachmentData },
+    });
+
+    expect(
+      collectAttachmentDataCheckNames([
+        example({ draftsComposed: () => {}, routingTagLinked: () => {} }),
+        example(() => {}),
+        example(),
+        example({ routingTagLinked: () => {}, policyIsCatchAll: () => {} }),
+      ])
+    ).toEqual(['draftsComposed', 'routingTagLinked', 'policyIsCatchAll']);
   });
 });

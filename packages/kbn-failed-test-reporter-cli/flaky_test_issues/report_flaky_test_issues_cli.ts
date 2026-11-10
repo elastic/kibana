@@ -29,6 +29,8 @@ const DEFAULT_TRACKING_REPO = DEFAULT_GITHUB_REPO;
  */
 const DEFAULT_CLOSED_SINCE_DAYS = 365;
 const DEFAULT_MAX_NEW_ISSUES = 10;
+/** A daily report would otherwise comment on a suite failing every day each morning. */
+const DEFAULT_COMMENT_COOLDOWN_DAYS = 3;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 /** `owner/name`, as GitHub spells a repository. */
@@ -42,6 +44,7 @@ export function runReportFlakyTestIssuesCli() {
       const summaryPath = Path.resolve(REPO_ROOT, flagsReader.requiredString('summary-path'));
       const dryRun = flagsReader.boolean('dry-run');
       const omitSkippedTests = flagsReader.boolean('omit-skipped-tests');
+      const updateIssues = flagsReader.boolean('update-issues');
       const token = process.env.GITHUB_TOKEN;
       if (!token) {
         throw createFlagError('GITHUB_TOKEN must be set to read and write GitHub issues');
@@ -62,6 +65,10 @@ export function runReportFlakyTestIssuesCli() {
       const maxNewIssues = flagsReader.requiredNumber('max-new-issues');
       if (!Number.isInteger(maxNewIssues) || maxNewIssues < 0) {
         throw createFlagError('--max-new-issues must be a non-negative integer');
+      }
+      const commentCooldownDays = flagsReader.requiredNumber('comment-cooldown-days');
+      if (!Number.isInteger(commentCooldownDays) || commentCooldownDays < 1) {
+        throw createFlagError('--comment-cooldown-days must be a positive integer');
       }
       const closedSince = new Date(Date.now() - closedSinceDays * MS_PER_DAY);
 
@@ -84,7 +91,11 @@ export function runReportFlakyTestIssuesCli() {
             ? `, and a suite whose every test has one in ${tracking.repo} is skipped`
             : '') +
           `; at most ${maxNewIssues} new issues` +
-          (omitSkippedTests ? ', flaky tests skipped since are left out' : '')
+          (omitSkippedTests ? ', flaky tests skipped since are left out' : '') +
+          (updateIssues
+            ? `, suite issues of suites flaky again are refreshed and commented on, with ` +
+              `${commentCooldownDays} days between comments at least`
+            : '')
       );
 
       const summary = await reportFlakySuiteIssues({
@@ -96,21 +107,25 @@ export function runReportFlakyTestIssuesCli() {
         closedSince,
         maxNewIssues,
         omitSkippedTests,
+        updateIssues,
+        commentCooldownDays,
         dryRun,
       });
 
       Fs.mkdirSync(Path.dirname(summaryPath), { recursive: true });
       Fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2));
 
-      const { created, skipped, failed } = summary.counts;
+      const { created, updated, skipped, failed } = summary.counts;
       log.info(
-        `${summary.suites} flaky suites: ${created} issues created, ${skipped} skipped, ` +
-          `${failed} failed, ${summary.omittedTests} skipped tests left out` +
+        `${summary.suites} flaky suites: ${created} issues created, ${updated} updated, ` +
+          `${skipped} skipped, ${failed} failed, ${summary.omittedTests} skipped tests left out` +
           `${dryRun ? ' (dry run, nothing was written)' : ''} (summary in ${summaryPath})`
       );
       log.success(`Finished in ${((performance.now() - startedAt) / 1000).toFixed(2)}s`);
       if (failed > 0) {
-        throw createFailError(`${failed} GitHub issues could not be created, see the log above`);
+        throw createFailError(
+          `${failed} GitHub issues could not be created or updated, see the log above`
+        );
       }
     },
     {
@@ -119,9 +134,14 @@ export function runReportFlakyTestIssuesCli() {
         \`node scripts/scout discover-flaky-tests\` that no issue is about yet, worst suites first
         and up to --max-new-issues per run. Lists every open failed-test issue and the recently
         closed ones in --github-repo and in --tracking-repo, then matches locally. A suite gets no
-        issue when every one of its tests has one in either repository, open or closed, a per-test
-        issue about it or an issue about the suite or its file; a single test without one is
-        enough for the suite issue to be filed. Flaky tests skipped since are left out.
+        issue when every one of its tests has one in either repository, a per-test issue about it
+        or an issue about the suite or its file, open or closed after the test last failed; a
+        single test without one is enough for the suite issue to be filed, which links the closed
+        issues it takes over from. Flaky tests skipped since are left out. A suite
+        with an issue of its own in --github-repo has it refreshed: the body's metadata records
+        this report, a comment with its numbers is posted when the suite failed since the issue
+        was filed or last commented on, and that was --comment-cooldown-days ago at least, and
+        an issue closed before such a failure is reopened. The body's text stays as filed.
 
         Examples:
           GITHUB_TOKEN=... node scripts/report_flaky_test_issues --input .scout/flaky_tests.json --dry-run
@@ -135,8 +155,9 @@ export function runReportFlakyTestIssuesCli() {
           'tracking-repo',
           'closed-since-days',
           'max-new-issues',
+          'comment-cooldown-days',
         ],
-        boolean: ['dry-run', 'omit-skipped-tests'],
+        boolean: ['dry-run', 'omit-skipped-tests', 'update-issues'],
         default: {
           input: DEFAULT_INPUT,
           'summary-path': DEFAULT_SUMMARY_PATH,
@@ -144,8 +165,10 @@ export function runReportFlakyTestIssuesCli() {
           'tracking-repo': DEFAULT_TRACKING_REPO,
           'closed-since-days': String(DEFAULT_CLOSED_SINCE_DAYS),
           'max-new-issues': String(DEFAULT_MAX_NEW_ISSUES),
+          'comment-cooldown-days': String(DEFAULT_COMMENT_COOLDOWN_DAYS),
           'dry-run': false,
           'omit-skipped-tests': true,
+          'update-issues': true,
         },
         help: `
           --input               Flaky test report to read [default: ${DEFAULT_INPUT}]
@@ -155,7 +178,9 @@ export function runReportFlakyTestIssuesCli() {
           --closed-since-days   Only closed issues updated within this many days count as tracking a suite [default: ${DEFAULT_CLOSED_SINCE_DAYS}]
           --max-new-issues      Issues created per run, worst suites first [default: ${DEFAULT_MAX_NEW_ISSUES}]
           --no-omit-skipped-tests  Keep flaky tests that were skipped since
-          --dry-run             Read issues and log what would be filed without writing
+          --no-update-issues    Skip suites with an issue of their own instead of refreshing it
+          --comment-cooldown-days  Days to wait after a comment before the issue can get another; reopens always comment [default: ${DEFAULT_COMMENT_COOLDOWN_DAYS}]
+          --dry-run             Read issues and log what would be filed or updated without writing
         `,
       },
     }

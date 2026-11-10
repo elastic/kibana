@@ -16,6 +16,7 @@ import {
   EuiEmptyPrompt,
   EuiButton,
   useEuiTheme,
+  useEuiOverflowScroll,
 } from '@elastic/eui';
 
 import type { ComponentTemplateListItem } from '../../../../../common';
@@ -35,7 +36,6 @@ interface Filters {
 
 const useStyles = ({ isSearchResultEmpty }: { isSearchResultEmpty: boolean }) => {
   const { euiTheme } = useEuiTheme();
-  const heightHeader = `calc(${euiTheme.size.l} * 2)`;
 
   return {
     container: css`
@@ -44,11 +44,8 @@ const useStyles = ({ isSearchResultEmpty }: { isSearchResultEmpty: boolean }) =>
       border-top: none;
       width: 100%;
       height: 100%;
-      overflow: hidden;
     `,
     header: css`
-      height: ${heightHeader};
-
       .euiFormControlLayout {
         max-width: initial;
       }
@@ -78,8 +75,7 @@ const useStyles = ({ isSearchResultEmpty }: { isSearchResultEmpty: boolean }) =>
     `,
     listWrapper: css`
       width: 100%;
-      height: calc(100% - ${heightHeader});
-      overflow-y: auto;
+      ${useEuiOverflowScroll('y', true)}
 
       ${isSearchResultEmpty &&
       css`
@@ -221,7 +217,12 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
   };
 
   return (
-    <div css={styles.container} data-test-subj="componentTemplates">
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      css={styles.container}
+      data-test-subj="componentTemplates"
+    >
       <div css={styles.header}>
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
@@ -241,13 +242,13 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>
-      <div css={styles.listWrapper} className="eui-yScrollWithShadows">
+      <div css={styles.listWrapper}>
         {isSearchResultEmpty ? (
           renderEmptyResult()
         ) : (
           <ComponentTemplatesList components={filteredComponents} listItemProps={listItemProps} />
         )}
       </div>
-    </div>
+    </EuiFlexGroup>
   );
 };

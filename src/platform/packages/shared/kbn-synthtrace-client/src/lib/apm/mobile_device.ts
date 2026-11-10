@@ -264,4 +264,13 @@ export class MobileDevice extends Entity<ApmFields> {
       'error.exception': [{ message, ...{ type: 'crash' } }],
     });
   }
+
+  // Unlike `crash`, this leaves `error.type` unset, so the document is picked up by the
+  // "errors that are not crashes" queries behind the mobile errors tab.
+  error({ message, type }: { message: string; type?: string }) {
+    return new ApmError({
+      ...this.fields,
+      'error.exception': [{ message, ...(type ? { type } : {}) }],
+    });
+  }
 }

@@ -97,6 +97,8 @@ export const withEvalsTracing = (baseConfig: ScoutServerConfig): ScoutServerConf
       serverArgs: [
         ...baseConfig.kbnTestServer.serverArgs,
         '--xpack.evals.enabled=true',
+        // Suites ingest scores and read datasets through the evals routes.
+        '--xpack.evals.mode=full',
         ...(shouldEnableTracing
           ? [
               '--elastic.apm.active=false',

@@ -12,6 +12,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import { DASHBOARD_DELETE_ACTION } from '../../common/constants';
 import { coreServices, taggingService } from '../kibana_services';
 import type { DashboardCreateResponseBody } from '../api/create';
 import type { DashboardDeleteResponseBody } from '../api/delete';
@@ -52,7 +53,7 @@ export async function trackDeleteDashboardAction(
   coreServices.userActivity.trackUserAction({
     message: `User deleted dashboard "${result.data.title}" (id: ${result.id}).`,
     event: {
-      action: 'dashboard_delete',
+      action: DASHBOARD_DELETE_ACTION,
       type: ['deletion'],
     },
     object: await getUserActivityObject(result, request),
@@ -73,7 +74,10 @@ export async function getUserActivityObject(
         tagPromises.push(tagClient.get(tag));
       });
     }
-    tagTitles = (await Promise.all(tagPromises)).map((tag) => tag.name);
+    // Skip tags that cannot be resolved (e.g. non-existent tag ids) instead of failing the whole lookup
+    tagTitles = (await Promise.allSettled(tagPromises)).flatMap((settled) =>
+      settled.status === 'fulfilled' ? [settled.value.name] : []
+    );
   }
   return {
     id: result.id,

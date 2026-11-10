@@ -1,0 +1,4 @@
+[
+  {"number": 123, "state": "open", "title": "[Detection Engineering] [Bug] Alerts table shows 0 results after changing the time range", "body": "On Security > Alerts the table says 0 results although alerts exist in the range. 9.3.0 ECH, default space. Being investigated."},
+  {"number": 98, "state": "closed", "title": "[Detection Engineering] [Bug] Alerts table empty with Last 24 hours", "body": "Fixed in 9.2.1. Alerts table showed 0 results for the Last 24 hours preset."}
+]

@@ -579,7 +579,7 @@ const rolloverDataStream = (
     () =>
       esClient.transport.request({
         method: 'POST',
-        path: `/${dataStreamName}/_rollover`,
+        path: `/${encodeURIComponent(dataStreamName)}/_rollover`,
         querystring: {
           lazy: true,
         },
@@ -789,7 +789,7 @@ const updateExistingDataStream = async ({
         () =>
           esClient.transport.request({
             method: 'PUT',
-            path: `_data_stream/${dataStreamName}/_lifecycle`,
+            path: `_data_stream/${encodeURIComponent(dataStreamName)}/_lifecycle`,
             body: { data_retention: lifecycle.data_retention },
           }),
         { logger }
