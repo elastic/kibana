@@ -52,6 +52,7 @@ describe('ElasticsearchActionStepImpl', () => {
         config: { maxResponseSize: new ByteSizeValue(10 * 1024 * 1024) },
       }),
       renderValueAccordingToContext: jest.fn((value) => value),
+      renderObjectAccordingToContextAsync: jest.fn(async (value) => value),
       getEsClientAsUser: jest.fn().mockReturnValue(mockEsClient),
     } as any;
 
@@ -499,6 +500,29 @@ describe('ElasticsearchActionStepImpl', () => {
       expect(result.error).toBeDefined();
       // Should be a generic error, not StepSizeLimitExceeded
       expect(result.error.type).not.toBe('StepSizeLimitExceeded');
+    });
+  });
+
+  describe('getInput', () => {
+    it('renders `with` with the async renderer', async () => {
+      const stepWith = { index: '{{ inputs.index }}' };
+      mockContextManager.renderObjectAccordingToContextAsync.mockResolvedValue({ index: 'logs' });
+      const step = {
+        id: 'search_step',
+        type: 'elasticsearch.search',
+        stepId: 'search_step',
+        stepType: 'elasticsearch.search',
+        configuration: { name: 'search_step', type: 'elasticsearch.search', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await expect(esStep.getInput()).resolves.toEqual({ index: 'logs' });
+      expect(mockContextManager.renderObjectAccordingToContextAsync).toHaveBeenCalledWith(stepWith);
     });
   });
 });

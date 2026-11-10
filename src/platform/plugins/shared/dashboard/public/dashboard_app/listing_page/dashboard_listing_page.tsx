@@ -31,11 +31,16 @@ export interface DashboardListingPageProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
   redirectTo: DashboardRedirect;
   initialFilter?: string;
-  title?: string;
+  /**
+   * Title of a dashboard to redirect to, read from the `title` URL param.
+   * Only the value at mount is used: on load, the dashboard with a matching title is looked up
+   * and redirected to. If there is no unique match, the listing is filtered by this title instead.
+   */
+  redirectTitle?: string;
 }
 
 export const DashboardListingPage = ({
-  title,
+  redirectTitle,
   redirectTo,
   initialFilter,
   kbnUrlStateStorage,
@@ -43,6 +48,9 @@ export const DashboardListingPage = ({
   const { getListingTabs } = useDashboardMountContext();
   const { activeTab: activeTabParam } = useParams<{ activeTab?: string }>();
   const [showNoDataPage, setShowNoDataPage] = useState<boolean | undefined>();
+  // Hold off rendering the listing until the title lookup settles.
+  // The listing table removes the title from the URL on load, so it must not mount mid-lookup.
+  const [isFindingTitle, setIsFindingTitle] = useState(Boolean(redirectTitle));
   useEffect(() => {
     let isMounted = true;
     (async () => {
@@ -97,21 +105,35 @@ export const DashboardListingPage = ({
       dataService.query,
       kbnUrlStateStorage
     );
-    if (title) {
-      findService.findByTitle(title).then((result) => {
-        if (!result) return;
+
+    return () => {
+      stopSyncingQueryServiceStateWithUrl();
+    };
+  }, [kbnUrlStateStorage]);
+
+  useEffect(() => {
+    if (!redirectTitle) return;
+
+    findService
+      .findByTitle(redirectTitle)
+      .then((result) => {
+        if (!result) {
+          setIsFindingTitle(false);
+          return;
+        }
         redirectTo({
           destination: 'dashboard',
           id: result.id,
           useReplace: true,
         });
+      })
+      .catch(() => {
+        // show the listing filtered by title if the dashboard can not be looked up
+        setIsFindingTitle(false);
       });
-    }
-
-    return () => {
-      stopSyncingQueryServiceStateWithUrl();
-    };
-  }, [title, redirectTo, kbnUrlStateStorage]);
+    // Title search only occurs on the initial value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Both feed `DashboardListing`'s tab definitions; an unstable identity there remounts the active tab.
   const goToDashboard = useCallback(
@@ -131,9 +153,7 @@ export const DashboardListingPage = ({
     []
   );
 
-  const titleFilter = title ? `${title}` : '';
-
-  if (showNoDataPage === undefined) {
+  if (showNoDataPage === undefined || isFindingTitle) {
     return null;
   }
 
@@ -145,7 +165,7 @@ export const DashboardListingPage = ({
       {!showNoDataPage && (
         <DashboardListing
           useSessionStorageIntegration={true}
-          initialFilter={initialFilter ?? titleFilter}
+          initialFilter={initialFilter ?? redirectTitle ?? ''}
           goToDashboard={goToDashboard}
           getDashboardUrl={getDashboardUrl}
           getTabs={getListingTabs}

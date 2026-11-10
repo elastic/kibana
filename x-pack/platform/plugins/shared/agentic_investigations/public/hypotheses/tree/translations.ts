@@ -69,10 +69,25 @@ export const moreSubjectsLabel = (count: number): string =>
     values: { count },
   });
 
-export const hypothesisStatusCountLabel = (status: HypothesisStatus, count: number): string =>
+export const UNRESOLVED_HYPOTHESIS_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.hypothesisTree.status.unresolved',
+  { defaultMessage: 'Unresolved' }
+);
+
+/** A hypothesis left `investigating` once no agent is running was never settled, not in progress. */
+export const getHypothesisStatusLabel = (status: HypothesisStatus, isRunning: boolean): string =>
+  status === 'investigating' && !isRunning
+    ? UNRESOLVED_HYPOTHESIS_LABEL
+    : HYPOTHESIS_STATUS_LABELS[status];
+
+export const hypothesisStatusCountLabel = (
+  status: HypothesisStatus,
+  count: number,
+  isRunning: boolean
+): string =>
   i18n.translate('xpack.agenticInvestigations.hypothesisTree.statusCount', {
     defaultMessage: '{count} {status}',
-    values: { count, status: HYPOTHESIS_STATUS_LABELS[status] },
+    values: { count, status: getHypothesisStatusLabel(status, isRunning) },
   });
 
 export const PROPOSAL_CONFIDENCE_LABELS: Record<ProposalConfidence, string> = {

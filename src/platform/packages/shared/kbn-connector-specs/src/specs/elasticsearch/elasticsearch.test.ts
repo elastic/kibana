@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { z } from '@kbn/zod/v4';
+import axios from 'axios';
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
+import { ApiKeyHeaderAuth } from '../../auth_types/api_key_header';
+import { getSandboxHosts } from '../../get_sandbox_hosts';
+import { getSchemaForAuthType } from '../../lib/get_schema_for_auth_type';
 import { Elasticsearch } from './elasticsearch';
 import { EsqlInputSchema, RequestInputSchema, SearchInputSchema } from './types';
 
@@ -71,6 +76,113 @@ describe('Elasticsearch connector', () => {
         expect.objectContaining({ type: 'api_key_header', supportsSandbox: true }),
         expect.objectContaining({ type: 'basic', supportsSandbox: true }),
       ]);
+    });
+
+    describe('API key field', () => {
+      const getApiKeySchema = () => {
+        const apiKeyAuth = (Elasticsearch.auth?.types ?? []).find(
+          (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'api_key_header'
+        );
+        if (!apiKeyAuth) {
+          throw new Error('api_key_header auth type is missing');
+        }
+        return getSchemaForAuthType(apiKeyAuth).schema;
+      };
+
+      const parseApiKey = (value: string) =>
+        getApiKeySchema().safeParse({ authType: 'api_key_header', Authorization: value });
+
+      it('adds the ApiKey prefix to an encoded key pasted without it', () => {
+        const result = parseApiKey('  aWQ6c2VjcmV0  ');
+        expect(result.success && result.data.Authorization).toBe('ApiKey aWQ6c2VjcmV0');
+      });
+
+      it.each(['ApiKey aWQ6c2VjcmV0', 'apikey aWQ6c2VjcmV0', 'Bearer token', 'Basic dXNlcjpwYXNz'])(
+        'keeps a value that already has an auth scheme: %s',
+        (value) => {
+          const result = parseApiKey(value);
+          expect(result.success && result.data.Authorization).toBe(value);
+        }
+      );
+
+      it('rejects an empty key', () => {
+        expect(parseApiKey('   ').success).toBe(false);
+      });
+
+      it('rejects a non-string key', () => {
+        expect(
+          getApiKeySchema().safeParse({ authType: 'api_key_header', Authorization: 123 }).success
+        ).toBe(false);
+      });
+
+      it('shows the label and help text on the stored field', () => {
+        const { properties } = z.toJSONSchema(getApiKeySchema()) as {
+          properties: Record<string, Record<string, unknown>>;
+        };
+        expect(properties.Authorization).toEqual(
+          expect.objectContaining({
+            type: 'string',
+            label: 'API Key',
+            sensitive: true,
+            helpText:
+              'Enter the base64-encoded "id:api_key" value from the Elasticsearch create API key response (POST /_security/api_key). Grant the key at minimum: read on the indices you search.',
+          })
+        );
+        expect(properties.Authorization).not.toHaveProperty('placeholder');
+      });
+    });
+
+    it('declares the host of the configured cluster URL as its only sandbox host', () => {
+      expect(
+        getSandboxHosts(Elasticsearch.sandbox, {
+          url: 'https://my-cluster.es.us-east-1.aws.elastic.cloud:443',
+        })
+      ).toEqual(['my-cluster.es.us-east-1.aws.elastic.cloud']);
+    });
+  });
+
+  describe('API key request header', () => {
+    it.each([
+      ['raw encoded key', 'aWQ6c2VjcmV0'],
+      ['saved ApiKey value', 'ApiKey aWQ6c2VjcmV0'],
+    ])('sends the expected Authorization header for a %s', async (_description, value) => {
+      const authType = (Elasticsearch.auth?.types ?? []).find(
+        (type): type is AuthTypeDef => typeof type === 'object' && type.type === 'api_key_header'
+      );
+      if (!authType) throw new Error('api_key_header auth type is missing');
+
+      const parsedSecrets = getSchemaForAuthType(authType).schema.parse({
+        authType: 'api_key_header',
+        Authorization: value,
+      });
+      let authorizationHeader: unknown;
+      const client = axios.create({
+        adapter: async (config) => {
+          authorizationHeader = config.headers.get('Authorization');
+          return {
+            data: { hits: { hits: [] } },
+            status: 200,
+            statusText: 'OK',
+            headers: {},
+            config,
+          };
+        },
+      });
+      await ApiKeyHeaderAuth.configure(
+        {} as Parameters<typeof ApiKeyHeaderAuth.configure>[0],
+        client,
+        parsedSecrets as Parameters<typeof ApiKeyHeaderAuth.configure>[2]
+      );
+
+      await Elasticsearch.actions.search.handler({ ...mockContext, client } as ActionContext, {
+        index: 'my-index',
+        query: { match_all: {} },
+        size: 10,
+        from: 0,
+        timeout: '30s',
+      });
+
+      expect(authorizationHeader).toBe('ApiKey aWQ6c2VjcmV0');
     });
   });
 

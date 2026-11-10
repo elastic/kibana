@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { UnitApiKey } from '../../../../lib/unit_config/unit_api_keys';
+
 export const STREAMS_SOURCES_MANAGED_BY = 'streams-sources';
 
 export const MANAGED_SOURCE_TYPE_SLUGS = ['otlp', 'async-bulk', 'prometheus-remote-write'] as const;
@@ -91,39 +93,41 @@ export const createSourceApiKeyPrivilegeCheck = ({
   };
 };
 
-export type SourceApiKeyPrivilegeFailure = 'none' | 'cluster' | 'source';
+/**
+ * `source`: a managed source type, missing the `streams` application `write` privilege on `source:<id>`.
+ * `index`: a direct source type, missing the index privileges its key writes with.
+ */
+export type SourceApiKeyPrivilegeFailure = 'none' | 'cluster' | 'source' | 'index';
 
 export interface SourceApiKeyPrivilegeResult {
   canCreate: boolean;
-  canList: boolean;
   failure: SourceApiKeyPrivilegeFailure;
 }
 
 export const interpretSourceApiKeyPrivileges = ({
+  sourceTypeSlug,
   hasAllRequested,
   canManageApiKeys,
 }: {
+  sourceTypeSlug: SourceTypeSlug;
   hasAllRequested: boolean;
   canManageApiKeys: boolean;
 }): SourceApiKeyPrivilegeResult => {
   if (!canManageApiKeys) {
-    return { canCreate: false, canList: false, failure: 'cluster' };
+    return { canCreate: false, failure: 'cluster' };
   }
   if (!hasAllRequested) {
-    return { canCreate: false, canList: true, failure: 'source' };
+    return {
+      canCreate: false,
+      failure: isDirectSourceTypeSlug(sourceTypeSlug) ? 'index' : 'source',
+    };
   }
-  return { canCreate: true, canList: true, failure: 'none' };
+  return { canCreate: true, failure: 'none' };
 };
 
-export const isOwnedBySource = ({
-  metadata,
-  sourceResource,
-  unitId,
-}: {
-  metadata: Record<string, unknown> | undefined;
-  sourceResource: string;
-  unitId?: string;
-}): boolean =>
-  metadata?.managed_by === STREAMS_SOURCES_MANAGED_BY &&
-  metadata?.source_resource === sourceResource &&
-  (unitId === undefined || metadata?.streams_unit_id === unitId);
+export const sourceApiKeyName = (sourceId: string): string => `stream-source-${sourceId}`;
+
+export const isSourceApiKey =
+  (sourceId: string) =>
+  ({ component_type: componentType, component_id: componentId }: UnitApiKey): boolean =>
+    componentType === 'source' && componentId === sourceId;

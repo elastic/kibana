@@ -41,7 +41,7 @@ jest.mock('./common/resolve_index_scope', () => ({
 
 jest.mock('./common/match_hunt_datasets', () => ({
   ...jest.requireActual('./common/match_hunt_datasets'),
-  matchDatasetsWithModel: jest.fn().mockResolvedValue(undefined),
+  matchDatasetsWithModel: jest.fn().mockResolvedValue({ status: 'empty' }),
 }));
 
 jest.mock('./common/load_report_context', () => ({
@@ -118,7 +118,7 @@ describe('huntCoordinator', () => {
     expect(result.completed_successfully).toBe(true);
   });
 
-  it('defaults tier2_when to always so a no-hit run still attempts Tier 2', async () => {
+  it('defaults tier2_when to always so a no-hit run still attempts Behavior Hunt', async () => {
     const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
       spaceId: 'default',
       indexPatterns: INDEX_PATTERNS,
@@ -194,7 +194,7 @@ describe('huntCoordinator', () => {
       ['frontier', { efficient: model }, ['frontier'], 'the Frontier tier'],
       ['frontier', { efficient: model, balanced: model }, ['frontier'], 'the Frontier tier'],
     ] as Array<[string, HuntModels, string[], string]>)(
-      'skips Tier 2 as no_inference and names the tier when %s is unavailable',
+      'skips Behavior Hunt as no_inference and names the tier when %s is unavailable',
       async (_label, models, missing, phrase) => {
         tier1Hit();
 
@@ -210,7 +210,7 @@ describe('huntCoordinator', () => {
       }
     );
 
-    it('still runs Tier 2 when only the efficient tier is unavailable, and reports it', async () => {
+    it('still runs Behavior Hunt when only the efficient tier is unavailable, and reports it', async () => {
       tier1Hit();
 
       const result = await run({ frontier: model }, 'run-no-efficient');
@@ -296,7 +296,7 @@ describe('huntCoordinator', () => {
       expect(mockModelMatch.mock.calls[0][0].model).toBe(efficient);
     });
 
-    it('runs both Tier 2 jobs, extraction and ES|QL generation, on the frontier model', async () => {
+    it('runs both Behavior Hunt jobs, extraction and ES|QL generation, on the frontier model', async () => {
       mockT1.mockResolvedValueOnce(tier1(false));
 
       await run('run-tier-tier2');
@@ -307,7 +307,7 @@ describe('huntCoordinator', () => {
       expect(mockT2.mock.calls[0][0].esql).not.toBe(balanced);
     });
 
-    it('still runs Tier 2 when only the balanced tier is unavailable, since no job runs on it', async () => {
+    it('still runs Behavior Hunt when only the balanced tier is unavailable, since no job runs on it', async () => {
       mockT1.mockResolvedValueOnce(tier1(false));
 
       const result = await huntCoordinator(
@@ -339,7 +339,7 @@ describe('huntCoordinator', () => {
       expect(recommendationsInvoke).toHaveBeenCalled();
     });
 
-    describe('when the efficient tier is missing and Tier 2 is otherwise reachable', () => {
+    describe('when the efficient tier is missing and Behavior Hunt is otherwise reachable', () => {
       const withoutEfficient: HuntModels = { frontier };
       const runWithoutEfficient = (runId: string) =>
         huntCoordinator({ esClient, reportsEsClient: esClient }, withoutEfficient, logger, {
@@ -444,6 +444,72 @@ describe('huntCoordinator', () => {
         expect(result.completed_successfully).toBe(true);
       });
 
+      it('stays retryable as no_inference when the efficient model was asked and the call failed', async () => {
+        nothingElsePointsAnywhere();
+        mockModelMatch.mockResolvedValueOnce({ status: 'failed', message: 'connector down' });
+
+        const result = await run('run-efficient-match-failed');
+
+        expect(mockModelMatch).toHaveBeenCalledTimes(1);
+        expect(result.tier2_skipped_reason).toBe('no_inference');
+        expect(result.tier2_skip_detail).toBe('connector down');
+        expect(result.completeness).toBe('incomplete_retryable');
+        expect(result.completed_successfully).toBe(false);
+        expect(result.message).toContain('dataset-match model call failed');
+        expect(result.narrative).toContain('the model call that chooses where to hunt failed');
+        expect(result.narrative).not.toContain('Efficient tier had no model');
+      });
+
+      it('stays retryable as no_inference when the cyber model was asked and the call failed', async () => {
+        nothingElsePointsAnywhere();
+        mockModelMatch.mockResolvedValueOnce({ status: 'failed', message: 'template rejected' });
+        const cyber = {
+          chatModel: { withStructuredOutput },
+          connector: { connectorId: 'daybreak', metadata: {} },
+        } as unknown as ScopedModel;
+
+        const result = await huntCoordinator(
+          { esClient, reportsEsClient: esClient },
+          { frontier, cyber },
+          logger,
+          {
+            spaceId: 'default',
+            indexPatterns: INDEX_PATTERNS,
+            trigger: 'scheduled',
+            run_id: 'run-cyber-match-failed',
+            tier2_when: 'always',
+            iocs: [{ type: 'ip', value: '192.0.2.30' }],
+            text: 'report text',
+          }
+        );
+
+        expect(mockModelMatch.mock.calls[0][0].model).toBe(cyber);
+        expect(result.tier2_skipped_reason).toBe('no_inference');
+        expect(result.tier2_skip_detail).toBe('template rejected');
+        expect(result.completeness).toBe('incomplete_retryable');
+        expect(result.completed_successfully).toBe(false);
+      });
+
+      it('still hunts other targets and completes when the match call failed but process telemetry is in scope', async () => {
+        mockScope.mockResolvedValueOnce({
+          ...okScope,
+          report_matches: [],
+          actionable_indices: ['logs-endpoint.events.process-default*'],
+          discovered: [oktaDataset],
+        });
+        mockT1.mockResolvedValueOnce(tier1(false));
+        mockModelMatch.mockResolvedValueOnce({ status: 'failed', message: 'connector down' });
+
+        const result = await run('run-match-failed-has-actionable');
+
+        expect(mockModelMatch).toHaveBeenCalledTimes(1);
+        expect(mockT2).toHaveBeenCalledTimes(1);
+        expect(result.tier2_skipped_reason).toBeUndefined();
+        expect(result.tier2_skip_detail).toBeUndefined();
+        expect(result.completeness).toBe('complete');
+        expect(result.completed_successfully).toBe(true);
+      });
+
       it.each([
         [
           'the report matched a dataset',
@@ -452,7 +518,7 @@ describe('huntCoordinator', () => {
           },
         ],
         [
-          'Tier 1 hit an index',
+          'IOC Hunt hit an index',
           () => {
             mockScope.mockResolvedValueOnce({ ...okScope, report_matches: [] });
             mockT1.mockResolvedValueOnce(tier1(true));
@@ -470,7 +536,7 @@ describe('huntCoordinator', () => {
           },
         ],
       ])(
-        'does not block Tier 2 when %s, since the model was not needed',
+        'does not block Behavior Hunt when %s, since the model was not needed',
         async (_label, arrange) => {
           arrange();
 
@@ -588,7 +654,9 @@ describe('huntCoordinator', () => {
       tier2_when: 'on_hits',
     });
 
-    expect(result.headline).toBe('no confirmed hits: Tier 1 found no matches; Tier 2 skipped');
+    expect(result.headline).toBe(
+      'no confirmed hits: IOC Hunt found no matches; Behavior Hunt skipped'
+    );
     expect(result.narrative).toContain(
       '### Hunt Watch found no confirmed hits\n\nHunt Watch found no confirmed hits for threat report **"CloudTrail retrospective"** (`rpt-1`).'
     );
@@ -596,10 +664,10 @@ describe('huntCoordinator', () => {
       '- **Indices:** `logs-*`, `filebeat-*` and `-*elastic-cloud-logs-*`'
     );
     expect(result.narrative).toContain(
-      "- **Tier 2 targets:** `logs-aws.cloudtrail-*` (from the report's vendor or product)"
+      "- **Behavior Hunt targets:** `logs-aws.cloudtrail-*` (from the report's vendor or product)"
     );
     expect(result.narrative).not.toMatch(/technolog/i);
-    expect(result.narrative).toContain('only escalates to Tier 2 on a hit');
+    expect(result.narrative).toContain('only escalates to Behavior Hunt on a hit');
     expect(result.narrative).toContain('_Hunt run `run-narrative`._');
   });
 
@@ -773,7 +841,7 @@ describe('huntCoordinator', () => {
       });
     });
 
-    it('hands scope resolution only the IOCs Tier 1 can query, so an IOC no search would use carries no weight in matching', async () => {
+    it('hands scope resolution only the IOCs IOC Hunt can query, so an IOC no search would use carries no weight in matching', async () => {
       mockLoad.mockResolvedValueOnce({
         // Six hex characters is no md5, sha1, or sha256; Tier 1 builds no clause for it.
         iocs: [
@@ -900,7 +968,7 @@ describe('huntCoordinator', () => {
       expect(result.index_patterns).toEqual([]);
     });
 
-    it('reports no Tier 2 targets, sources, or actionable indices', () => {
+    it('reports no Behavior Hunt targets, sources, or actionable indices', () => {
       expect(result.tier2_targets).toEqual([]);
       expect(result.tier2_target_sources).toEqual([]);
       expect(result.actionable_indices).toEqual([]);
@@ -914,11 +982,11 @@ describe('huntCoordinator', () => {
       expect(result.tier2_skipped_reason).toBe('scope_blocked');
     });
 
-    it('marks Tier 1 as scope_blocked rather than no hits', () => {
+    it('marks IOC Hunt as scope_blocked rather than no hits', () => {
       expect(result.tier1.status).toBe('scope_blocked');
     });
 
-    it('never runs Tier 1', () => {
+    it('never runs IOC Hunt', () => {
       const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
       expect(mockT1).not.toHaveBeenCalled();
     });
@@ -1006,7 +1074,7 @@ describe('huntCoordinator', () => {
     });
   });
 
-  it('skips Tier 2 with configured_never and still completes', async () => {
+  it('skips Behavior Hunt with configured_never and still completes', async () => {
     const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
       spaceId: 'default',
       indexPatterns: INDEX_PATTERNS,
@@ -1022,7 +1090,7 @@ describe('huntCoordinator', () => {
     );
   });
 
-  it("gates on_hits on Tier 1's confirmed-hit verdict, not merely on Tier 1 having matched documents", async () => {
+  it("gates on_hits on IOC Hunt's confirmed-hit verdict, not merely on IOC Hunt having matched documents", async () => {
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockT2.mockClear();
@@ -1059,7 +1127,7 @@ describe('huntCoordinator', () => {
     expect(mockT2).not.toHaveBeenCalled();
   });
 
-  it('fails the run when Tier 2 throws', async () => {
+  it('fails the run when Behavior Hunt throws', async () => {
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockT1.mockResolvedValueOnce({
@@ -1306,7 +1374,7 @@ describe('huntCoordinator', () => {
     });
   });
 
-  it('returns has_confirmed_hit true when Tier 2 alone hits', async () => {
+  it('returns has_confirmed_hit true when Behavior Hunt alone hits', async () => {
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockT1.mockResolvedValueOnce({
@@ -1368,7 +1436,7 @@ describe('huntCoordinator', () => {
         }
       );
 
-    it('reports the techniques Tier 2 executed or collapsed, and not those it failed or never reached', async () => {
+    it('reports the techniques Behavior Hunt executed or collapsed, and not those it failed or never reached', async () => {
       mockT2.mockResolvedValueOnce({
         status: 'behaviors_proposed',
         behaviors: [
@@ -1389,7 +1457,7 @@ describe('huntCoordinator', () => {
       expect(result.searched_technique_ids).toEqual(['T1001', 'T1003']);
     });
 
-    it('reports an empty list when Tier 2 searched nothing', async () => {
+    it('reports an empty list when Behavior Hunt searched nothing', async () => {
       const result = await run('run-searched-none');
 
       expect(result.searched_technique_ids).toEqual([]);
@@ -1413,7 +1481,7 @@ describe('huntCoordinator', () => {
       expect(result.pending_technique_ids).toEqual(['T1001']);
     });
 
-    it('reports no pending techniques when Tier 2 left none', async () => {
+    it('reports no pending techniques when Behavior Hunt left none', async () => {
       const result = await run('run-pending-none');
 
       expect(result.pending_technique_ids).toEqual([]);
@@ -1495,7 +1563,7 @@ describe('huntCoordinator', () => {
       }
     );
 
-    it('omits the list when Tier 2 did not run', async () => {
+    it('omits the list when Behavior Hunt did not run', async () => {
       const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
         spaceId: 'default',
         indexPatterns: INDEX_PATTERNS,
@@ -1549,8 +1617,29 @@ describe('huntCoordinator', () => {
 
       expect(result.completeness).toBe('incomplete_final');
       expect(result.pending_technique_ids).toEqual([]);
+      expect(result.retryable_reasons).toEqual([]);
       // The gaps are still reported, so the narrative names what was not searched.
       expect(result.tier2?.incomplete).toEqual([budgetGap('T1059'), budgetGap('T1003')]);
+    });
+
+    it('reports only the gaps still retryable, not the budget gap of a technique it gave up on', async () => {
+      mockLoad.mockResolvedValueOnce(loaded);
+      mockT2.mockResolvedValueOnce({
+        status: 'behaviors_proposed',
+        behaviors: [{ technique_id: 'T1059', execution: { executed: false } }],
+        indexed_behaviors: [],
+        incomplete: [
+          { reason: 'search_partial', technique_id: 'T1059', detail: 'shards failed' },
+          budgetGap('T1003'),
+        ],
+        has_hit: false,
+        next_step: 'none',
+      });
+
+      const result = await run('run-partial-and-dropped');
+
+      expect(result.completeness).toBe('incomplete_retryable');
+      expect(result.retryable_reasons).toEqual(['search_partial']);
     });
 
     it('keeps a pending technique the run extracted again but left over budget', async () => {
@@ -1588,6 +1677,7 @@ describe('huntCoordinator', () => {
 
       expect(result.completeness).toBe('incomplete_retryable');
       expect(result.pending_technique_ids).toEqual(['T1059']);
+      expect(result.retryable_reasons).toEqual(['execute_failed']);
     });
 
     it('keeps a pending technique the model returned but whose quote did not ground', async () => {
@@ -1706,7 +1796,7 @@ describe('huntCoordinator', () => {
     );
   });
 
-  it('surfaces a budget-truncated Tier 2 as retryable, without failing the run', async () => {
+  it('surfaces a budget-truncated Behavior Hunt as retryable, without failing the run', async () => {
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockT2.mockResolvedValueOnce({
       status: 'behaviors_proposed',
@@ -1752,7 +1842,7 @@ describe('huntCoordinator', () => {
     expect(result.completeness).toBe('incomplete_retryable');
   });
 
-  it('forwards the Tier 1 window into huntBehavior for execute', async () => {
+  it('forwards the IOC Hunt window into huntBehavior for execute', async () => {
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockT2.mockClear();
@@ -1828,7 +1918,7 @@ describe('huntCoordinator', () => {
     );
   });
 
-  it('forwards Tier 1 sample_event_summaries into Tier 2 article_context', async () => {
+  it('forwards IOC Hunt sample_event_summaries into Behavior Hunt article_context', async () => {
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     mockT2.mockClear();
@@ -1893,7 +1983,7 @@ describe('huntCoordinator', () => {
     );
   });
 
-  describe('stage 2: what Tier 2 may read', () => {
+  describe('stage 2: what Behavior Hunt may read', () => {
     const { resolveHuntScope: mockScope } = jest.requireMock('./common/resolve_index_scope');
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
@@ -1946,10 +2036,10 @@ describe('huntCoordinator', () => {
     beforeEach(() => {
       mockT2.mockClear();
       mockModelMatch.mockClear();
-      mockModelMatch.mockResolvedValue(undefined);
+      mockModelMatch.mockResolvedValue({ status: 'empty' });
     });
 
-    it('unions the report match, the indices Tier 1 hit, and the actionable indices, and records each source', async () => {
+    it('unions the report match, the indices IOC Hunt hit, and the actionable indices, and records each source', async () => {
       mockScope.mockResolvedValueOnce({
         ...okScope,
         report_matches: ['logs-okta.system-*'],
@@ -1980,7 +2070,7 @@ describe('huntCoordinator', () => {
       );
     });
 
-    it('carries a Tier 1 hit in a beats index into the targets with a wildcard suffix', async () => {
+    it('carries an IOC Hunt hit in a beats index into the targets with a wildcard suffix', async () => {
       mockScope.mockResolvedValueOnce({ ...okScope, report_matches: [] });
       mockT1.mockResolvedValueOnce(tier1HitIn('winlogbeat-8.15.0-2026.09.30'));
 
@@ -2013,7 +2103,7 @@ describe('huntCoordinator', () => {
       expect(mockModelMatch).not.toHaveBeenCalled();
     });
 
-    it('does not call the model when Tier 1 hit', async () => {
+    it('does not call the model when IOC Hunt hit', async () => {
       mockScope.mockResolvedValueOnce({
         ...okScope,
         report_matches: [],
@@ -2026,7 +2116,7 @@ describe('huntCoordinator', () => {
       expect(mockModelMatch).not.toHaveBeenCalled();
     });
 
-    it('falls back to the model when the report matched nothing and Tier 1 hit nothing', async () => {
+    it('falls back to the model when the report matched nothing and IOC Hunt hit nothing', async () => {
       mockScope.mockResolvedValueOnce({
         ...okScope,
         report_matches: [],
@@ -2035,6 +2125,7 @@ describe('huntCoordinator', () => {
       });
       mockT1.mockResolvedValueOnce(tier1Clean());
       mockModelMatch.mockResolvedValueOnce({
+        status: 'matched',
         matches: [oktaDataset],
         confidence: 0.9,
         scored: [{ dataset: 'okta.system', confidence: 0.9 }],
@@ -2056,7 +2147,7 @@ describe('huntCoordinator', () => {
       expect(result.tier2_target_sources).toEqual(['model', 'actionable']);
     });
 
-    it('never calls the model for a run Tier 2 will not reach', async () => {
+    it('never calls the model for a run Behavior Hunt will not reach', async () => {
       mockScope.mockResolvedValueOnce({
         ...okScope,
         report_matches: [],
@@ -2070,7 +2161,7 @@ describe('huntCoordinator', () => {
       expect(result.tier2_skipped_reason).toBe('configured_never');
     });
 
-    it('skips Tier 2 with no_tier2_targets when every signal is empty, even under always', async () => {
+    it('skips Behavior Hunt with no_tier2_targets when every signal is empty, even under always', async () => {
       mockScope.mockResolvedValueOnce({ ...okScope, report_matches: [] });
       mockT1.mockResolvedValueOnce(tier1Clean());
 
@@ -2081,14 +2172,14 @@ describe('huntCoordinator', () => {
       expect(result.tier2_skipped_reason).toBe('no_tier2_targets');
       expect(result.tier2_targets).toEqual([]);
       expect(result.tier2_target_sources).toEqual([]);
-      expect(result.next_step).toContain('Tier 2 had no safe target');
+      expect(result.next_step).toContain('Behavior Hunt had no safe target');
       // Tier 1 searched the whole universe and found nothing, with no gaps of its own; the
       // absence of a target is deterministic, so it is not lost coverage.
       expect(result.completeness).toBe('complete');
       expect(result.completed_successfully).toBe(true);
     });
 
-    it('lets always run Tier 2 against a matched dataset even when Tier 1 hit nothing', async () => {
+    it('lets always run Behavior Hunt against a matched dataset even when IOC Hunt hit nothing', async () => {
       mockT1.mockResolvedValueOnce(tier1Clean());
 
       const result = await run('run-stage2-always');
@@ -2103,7 +2194,7 @@ describe('huntCoordinator', () => {
       );
     });
 
-    it('skips a run whose Tier 1 hit nothing under on_hits before any target is chosen', async () => {
+    it('skips a run whose IOC Hunt hit nothing under on_hits before any target is chosen', async () => {
       mockT1.mockResolvedValueOnce(tier1Clean());
 
       const result = await run('run-stage2-on-hits-clean', 'on_hits');
@@ -2195,7 +2286,7 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(true);
     });
 
-    it('carries a transient Tier 1 gap through as incomplete_retryable, so the report is swept again', async () => {
+    it('carries a transient IOC Hunt gap through as incomplete_retryable, so the report is swept again', async () => {
       mockT1.mockResolvedValueOnce(
         tier1Result({
           incomplete: [{ reason: 'search_partial', detail: 'shards failed' }],
@@ -2209,7 +2300,7 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(false);
     });
 
-    it('carries a deterministic Tier 2 gap through as incomplete_final, so the report is not re-swept forever', async () => {
+    it('carries a deterministic Behavior Hunt gap through as incomplete_final, so the report is not re-swept forever', async () => {
       mockT1.mockResolvedValueOnce(tier1Result());
       mockT2.mockResolvedValueOnce(
         tier2Result({
@@ -2230,7 +2321,7 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(true);
     });
 
-    it('retires a report whose Tier 2 queries were ungrounded when Tier 1 had nothing to search', async () => {
+    it('retires a report whose Behavior Hunt queries were ungrounded when IOC Hunt had nothing to search', async () => {
       // A KEV-shaped report: no IOCs or techniques for Tier 1, prose with no literal values
       // for Tier 2 to ground a query in. The same text fails grounding identically every
       // sweep, so leaving it retryable re-spends a Tier 2 call per sweep and never retires.
@@ -2320,7 +2411,7 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(false);
     });
 
-    it('keeps an ungrounded Tier 2 query retryable when Tier 1 did have terms to search', async () => {
+    it('keeps an ungrounded Behavior Hunt query retryable when IOC Hunt did have terms to search', async () => {
       mockT1.mockResolvedValueOnce(tier1Result());
       mockT2.mockResolvedValueOnce(
         tier2Result({
@@ -2352,7 +2443,7 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(false);
     });
 
-    it('carries a collapsed Tier 2 gap through as incomplete_final, so the report is not re-swept forever', async () => {
+    it('carries a collapsed Behavior Hunt gap through as incomplete_final, so the report is not re-swept forever', async () => {
       mockT1.mockResolvedValueOnce(tier1Result());
       mockT2.mockResolvedValueOnce(
         tier2Result({
@@ -2367,7 +2458,7 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(true);
     });
 
-    it('reports nothing_searched when Tier 1 mapped no term and Tier 2 was configured off', async () => {
+    it('reports nothing_searched when IOC Hunt mapped no term and Behavior Hunt was configured off', async () => {
       mockT1.mockResolvedValueOnce(tier1Result({ status: 'no_searchable_terms' }));
 
       const result = await huntCoordinator(
@@ -2389,7 +2480,7 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(true);
     });
 
-    it('treats a missing connector as transient when Tier 1 also searched nothing', async () => {
+    it('treats a missing connector as transient when IOC Hunt also searched nothing', async () => {
       mockT1.mockResolvedValueOnce(tier1Result({ status: 'no_searchable_terms' }));
 
       const result = await huntCoordinator({ esClient, reportsEsClient: esClient }, {}, logger, {
@@ -2406,7 +2497,7 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(false);
     });
 
-    it('leaves a Tier 1 hit with no mapped terms alone — the tiers did search', async () => {
+    it('leaves an IOC Hunt hit with no mapped terms alone — the tiers did search', async () => {
       mockT1.mockResolvedValueOnce(tier1Result({ status: 'environment_hits_found' }));
       mockT2.mockResolvedValueOnce(tier2Result());
 
@@ -2415,7 +2506,7 @@ describe('huntCoordinator', () => {
       expect(result.completeness).toBe('complete');
     });
 
-    it('reports a requested Tier 2 that could not run, even though Tier 1 searched', async () => {
+    it('reports a requested Behavior Hunt that could not run, even though IOC Hunt searched', async () => {
       // The hole Libra found in the first version of this: keying the gap on Tier 1
       // having mapped nothing meant a report whose IOCs *were* searched, on a run with
       // no connector, reported `complete` and was retired before its behavioral
@@ -2438,7 +2529,7 @@ describe('huntCoordinator', () => {
       ['never', 'configured_never'],
       ['on_hits', 'no_environment_hits'],
     ] as const)(
-      'treats Tier 2 not being asked for (%s) as a complete run, not lost coverage',
+      'treats Behavior Hunt not being asked for (%s) as a complete run, not lost coverage',
       async (tier2When, expectedReason) => {
         // The other half of the same decision: reporting the caller's own gating as a
         // gap would make every deliberate Tier-1-only run look incomplete.
@@ -2464,7 +2555,7 @@ describe('huntCoordinator', () => {
       }
     );
 
-    it('reports nothing_searched when Tier 2 ran but extracted nothing and Tier 1 mapped nothing', async () => {
+    it('reports nothing_searched when Behavior Hunt ran but extracted nothing and IOC Hunt mapped nothing', async () => {
       // Tier 2 running is not Tier 2 searching. Extraction returning no candidate means
       // no query reached Elasticsearch, and zero hits from zero queries is not clean.
       mockT1.mockResolvedValueOnce(tier1Result({ status: 'no_searchable_terms' }));
@@ -2491,7 +2582,7 @@ describe('huntCoordinator', () => {
       expect(result.completeness).toBe('incomplete_final');
     });
 
-    it('stays complete when Tier 2 executed something, even though Tier 1 mapped nothing', async () => {
+    it('stays complete when Behavior Hunt executed something, even though IOC Hunt mapped nothing', async () => {
       // Tier 1 mapping no IOC is not itself a gap — decision #4 maps it to clean — so
       // long as something did query the environment.
       mockT1.mockResolvedValueOnce(tier1Result({ status: 'no_searchable_terms' }));
@@ -2658,7 +2749,7 @@ describe('huntCoordinator', () => {
       expect(result.completeness).toBe('complete');
     });
 
-    it('fails the run as retryable when Tier 2 throws', async () => {
+    it('fails the run as retryable when Behavior Hunt throws', async () => {
       mockT1.mockResolvedValueOnce(tier1Result());
       mockT2.mockRejectedValueOnce(new Error('connector down'));
 
@@ -2670,7 +2761,7 @@ describe('huntCoordinator', () => {
     });
   });
 
-  describe('when Tier 1 had nothing to search (decision 9)', () => {
+  describe('when IOC Hunt had nothing to search (decision 9)', () => {
     const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
     const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
     const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
@@ -2696,7 +2787,7 @@ describe('huntCoordinator', () => {
       mockT1.mockResolvedValueOnce(nothingSearchable());
     });
 
-    it('runs Tier 2 under on_hits when the run has report text, since Tier 1 never ran', async () => {
+    it('runs Behavior Hunt under on_hits when the run has report text, since IOC Hunt never ran', async () => {
       const result = await huntCoordinator(
         { esClient, reportsEsClient: esClient },
         mockModels,
@@ -2717,7 +2808,7 @@ describe('huntCoordinator', () => {
       expect(result.tier2_skipped_reason).toBeUndefined();
     });
 
-    it('does not gate on_hits on Tier 1 when the report names a vendor but carries no text yet', async () => {
+    it('does not gate on_hits on IOC Hunt when the report names a vendor but carries no text yet', async () => {
       mockLoad.mockResolvedValueOnce({ iocs: [], techniques: [], vendor: 'Fortinet' });
 
       const result = await huntCoordinator(
@@ -2742,7 +2833,7 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(false);
     });
 
-    it('still skips with no_searchable_input under on_hits when there is nothing for Tier 2 either', async () => {
+    it('still skips with no_searchable_input under on_hits when there is nothing for Behavior Hunt either', async () => {
       const result = await huntCoordinator(
         { esClient, reportsEsClient: esClient },
         mockModels,
@@ -2783,7 +2874,7 @@ describe('huntCoordinator', () => {
       expect(result.tier2_skipped_reason).toBe('configured_never');
     });
 
-    it('keeps running Tier 2 under always', async () => {
+    it('keeps running Behavior Hunt under always', async () => {
       const result = await huntCoordinator(
         { esClient, reportsEsClient: esClient },
         mockModels,
@@ -2990,7 +3081,7 @@ describe('huntCoordinator', () => {
       ],
     };
 
-    it('passes excluded_iocs to huntBehavior and sets excluded_report_iocs on a Tier 1+2 result', async () => {
+    it('passes excluded_iocs to huntBehavior and sets excluded_report_iocs on an IOC Hunt and Behavior Hunt result', async () => {
       const { loadReportHuntContext: mockLoad } = jest.requireMock('./common/load_report_context');
       const { huntBehavior: mockT2 } = jest.requireMock('./tier2/hunt_behavior');
       const { huntForThreat: mockT1 } = jest.requireMock('./tier1/hunt_for_threat');
