@@ -90,6 +90,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add write actions to the GitHub connector [#283473]({{kib-pull}}283473).
 * Add eight write actions to the Gmail connector: `listLabels`, `modifyLabels`, `markAsRead`, `markAsUnread`, `trashMessage`, `untrashMessage`, `sendMessage`, and `replyMessage`. These actions require OAuth 2.0 authorization code authentication with the `gmail.modify` scope [#284912]({{kib-pull}}284912).
 * Add 14 write actions to the Jira Cloud connector to create and update issues, post comments, transition statuses, assign users, manage attachments, and more [#284910]({{kib-pull}}284910).
+* Add the `getBlacklist` action to the AbuseIPDB connector, return the last reported date for an IP address, and accept IPv6 addresses. The connector is available in Agent Builder and Workflows [#284667]({{kib-pull}}284667).
 * Add the Azure SQL connector, available in Agent Builder [#294876]({{kib-pull}}294876).
 * Add the Azure Functions connector, available in Agent Builder [#293758]({{kib-pull}}293758).
 * Add the Azure AKS connector, available in Agent Builder [#289161]({{kib-pull}}289161).
@@ -245,6 +246,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Add {{esql}} views to the data source browser in the {{esql}} editor, with a filter that shows only views [#292608]({{kib-pull}}292608).
 * Create an {{esql}} view from the {{esql}} editor in Discover and in dashboards. Find the option in the editor menu and in the query history [#294468]({{kib-pull}}294468).
 * Expand the {{esql}} editor to fit a long query when you paste one or when AI inserts one [#279712]({{kib-pull}}279712).
+* Enable filtering by a field that an {{esql}} query renames with `EVAL new = old`, when the original field exists in the index [#278075]({{kib-pull}}278075).
 
 #### {{kib}} platform [kibana-9.6.0-features-kibana-platform]
 * Disallow code generation from strings in Node.js by default, which hardens {{kib}} against code injection. Code that builds functions from strings at run time, such as `eval`, now fails unless an administrator sets the `KBN_DISALLOW_CODE_GEN_FROM_STRINGS` environment variable to `false` [#278233]({{kib-pull}}278233).
