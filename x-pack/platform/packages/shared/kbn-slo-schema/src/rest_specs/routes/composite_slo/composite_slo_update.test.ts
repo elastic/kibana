@@ -43,4 +43,24 @@ describe('UpdateCompositeSLO schema validation', () => {
       'Composite SLO members must be unique by sloId and instanceId'
     );
   });
+
+  it.each([
+    ['an empty members array', []],
+    ['a single member', [{ sloId: 'slo-id-1', weight: 1 }]],
+    [
+      'more than 25 members',
+      Array.from({ length: 26 }, (_, index) => ({ sloId: `slo-id-${index}`, weight: 1 })),
+    ],
+    [
+      'a non-integer weight',
+      [
+        { sloId: 'slo-id-1', weight: 1.5 },
+        { sloId: 'slo-id-2', weight: 1 },
+      ],
+    ],
+  ])('rejects %s', (_, members) => {
+    const result = updateCompositeSLOParamsSchema.safeParse(buildRequest(members));
+
+    expect(result.success).toBe(false);
+  });
 });

@@ -10,6 +10,7 @@
 import { spawn } from 'node:child_process';
 import Path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { REPORT_BURST } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
 
 const HARNESS = Path.resolve(__dirname, 'fixtures', 'watchdog_harness.ts');
 
@@ -21,33 +22,53 @@ interface PhaseStats {
 
 /** The parts of a worker log line these tests read. */
 interface WorkerLogLine {
+  /** When the worker's logger wrote the line, by the wall clock. */
+  '@timestamp': string;
   message: string;
   log: { level: string; logger: string };
   kibana?: {
     event_loop_watchdog?: {
       phase?: string;
       blockedMs?: number;
+      ongoing?: boolean;
       stats?: { starting: PhaseStats; running: PhaseStats; heapUsed: number };
     };
   };
 }
 
+interface MainLogLine {
+  level: string;
+  message: string;
+  /** When the main thread wrote the line, by the wall clock; only on some lines. */
+  at?: number;
+}
+
 interface HarnessResult {
   exitCode: number | null;
+  signal: NodeJS.Signals | null;
   /** Worker log lines from the child's stdout, parsed as JSON. */
   workerLogLines: WorkerLogLine[];
   /** Raw stdout log lines that weren't JSON. */
   unparsedLogLines: string[];
   /** Main-thread log lines, from the child's fd 3. */
-  mainLogLines: Array<{ level: string; message: string }>;
+  mainLogLines: MainLogLine[];
   stderr: string;
+}
+
+interface RunHarnessOptions {
+  timeoutMs?: number;
+  /** Checked after each stdout log line; the child is killed with SIGKILL once it returns true. */
+  killWhen?: (workerLogLines: WorkerLogLine[]) => boolean;
 }
 
 /**
  * Runs a harness scenario in a child `node` with a piped stdout and without NODE_OPTIONS.
  * `@kbn/setup-node-env` makes the child exit with code 1 on any process warning.
  */
-const runHarness = (scenario: string, timeoutMs = 90_000): Promise<HarnessResult> =>
+const runHarness = (
+  scenario: string,
+  { timeoutMs = 90_000, killWhen }: RunHarnessOptions = {}
+): Promise<HarnessResult> =>
   new Promise((resolve, reject) => {
     // CI sets --max-old-space-size in NODE_OPTIONS, which overrides the worker's heap limit.
     const { NODE_OPTIONS, ...env } = process.env;
@@ -56,10 +77,30 @@ const runHarness = (scenario: string, timeoutMs = 90_000): Promise<HarnessResult
       ['-e', `require('@kbn/setup-node-env'); require(${JSON.stringify(HARNESS)});`, scenario],
       { cwd: REPO_ROOT, env, stdio: ['ignore', 'pipe', 'pipe', 'pipe'] }
     );
-    let stdout = '';
+    const workerLogLines: WorkerLogLine[] = [];
+    const unparsedLogLines: string[] = [];
+    let pendingStdout = '';
     let stderr = '';
     let mainLog = '';
-    child.stdout?.on('data', (chunk) => (stdout += chunk));
+    let killed = false;
+    // Line-buffered: a chunk can end in the middle of a log line.
+    const readStdout = (chunk: string, flush = false) => {
+      pendingStdout += chunk;
+      const lines = pendingStdout.split('\n');
+      pendingStdout = flush ? '' : lines.pop() ?? '';
+      for (const line of lines.filter(Boolean)) {
+        try {
+          workerLogLines.push(JSON.parse(line));
+        } catch {
+          unparsedLogLines.push(line);
+        }
+      }
+      if (killWhen && !killed && killWhen(workerLogLines)) {
+        killed = true;
+        child.kill('SIGKILL');
+      }
+    };
+    child.stdout?.on('data', (chunk) => readStdout(String(chunk)));
     child.stderr?.on('data', (chunk) => (stderr += chunk));
     child.stdio[3]?.on('data', (chunk) => (mainLog += chunk));
     const timer = setTimeout(() => {
@@ -74,22 +115,21 @@ const runHarness = (scenario: string, timeoutMs = 90_000): Promise<HarnessResult
       reject(error);
     });
     // `close`, not `exit`: `exit` can fire before stdout, stderr and fd 3 are drained.
-    child.on('close', (exitCode) => {
+    child.on('close', (exitCode, signal) => {
       clearTimeout(timer);
-      const workerLogLines: HarnessResult['workerLogLines'] = [];
-      const unparsedLogLines: string[] = [];
-      for (const line of stdout.split('\n').filter(Boolean)) {
-        try {
-          workerLogLines.push(JSON.parse(line));
-        } catch {
-          unparsedLogLines.push(line);
-        }
-      }
-      const mainLogLines = mainLog
+      readStdout('', true);
+      const mainLogLines: MainLogLine[] = mainLog
         .split('\n')
         .filter(Boolean)
         .map((line) => JSON.parse(line));
-      resolve({ exitCode, workerLogLines, unparsedLogLines, mainLogLines, stderr });
+      resolve({
+        exitCode,
+        signal,
+        workerLogLines,
+        unparsedLogLines,
+        mainLogLines,
+        stderr,
+      });
     });
   });
 
@@ -103,6 +143,7 @@ const statsOf = ({ workerLogLines }: HarnessResult) =>
   workerLogLines.flatMap(({ kibana }) => kibana?.event_loop_watchdog?.stats ?? []);
 const statsLogLines = ({ workerLogLines }: HarnessResult) =>
   workerLogLines.filter(({ kibana }) => kibana?.event_loop_watchdog?.stats);
+const blockOf = ({ kibana }: WorkerLogLine) => kibana?.event_loop_watchdog;
 
 describe('event loop watchdog in a child process', () => {
   let blocks: HarnessResult;
@@ -199,4 +240,32 @@ describe('event loop watchdog in a child process', () => {
       message: expect.stringMatching(/^Worker event-loop-watchdog exited unexpectedly \(oom,/),
     });
   }, 120_000);
+
+  it('detects ongoing event loop blocks once short-block notifications exceed the rate limit', async () => {
+    const blockWarnings = (lines: WorkerLogLine[], ongoing: boolean) =>
+      lines.filter((line) => blockOf(line)?.ongoing === ongoing);
+    // The main thread logs "blocking" right before it blocks for good. The child is killed as soon
+    // as the worker reports the block, and the run times out if it never does.
+    const result = await runHarness('permanent_block', {
+      timeoutMs: 60_000,
+      killWhen: (lines) => blockWarnings(lines, true).length > 0,
+    });
+    // Killed while still blocked: the block never ended, so the warning came while it lasted.
+    expect(result.signal).toBe('SIGKILL');
+    expect(blockWarnings(result.workerLogLines, false)).toHaveLength(REPORT_BURST);
+    const [warning] = blockWarnings(result.workerLogLines, true);
+    expect(warning).toMatchObject({
+      message: expect.stringMatching(/^Event loop blocked for ~\d+ms so far$/),
+      log: { level: 'WARN', logger: 'metrics.event_loop_watchdog' },
+      kibana: { event_loop_watchdog: { phase: 'running', ongoing: true } },
+    });
+    const blocking = result.mainLogLines.find(({ message }) => message === 'blocking');
+    expect(blocking).toMatchObject({ at: expect.any(Number) });
+    // Both times are taken where the log lines are written, so they don't depend on when the test
+    // reads them: after the main thread blocked, and inside the ~10 s it takes a blocked event loop
+    // to fail a liveness probe.
+    const sinceBlockingMs = Date.parse(warning['@timestamp']) - (blocking?.at ?? NaN);
+    expect(sinceBlockingMs).toBeGreaterThan(0);
+    expect(sinceBlockingMs).toBeLessThan(10_000);
+  }, 90_000);
 });

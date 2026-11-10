@@ -14,6 +14,10 @@ import type { EntityInventoryEntityCategory } from '../../types';
 import { useEntityInventorySearch } from '../context/search_context';
 import { EntityInventoryPageShell } from './page_shell';
 
+jest.mock('../hooks/use_entity_inventory_data_view', () => ({
+  useEntityInventoryDataView: () => ({ dataView: undefined }),
+}));
+
 const renderWithServices = (ui: React.ReactElement) => {
   const unifiedSearch = unifiedSearchPluginMock.createStartContract();
   unifiedSearch.ui.SearchBar = () => <div data-test-subj="mockSearchBar" />;

@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildProbeQuery probes metrics-*-* for a time-series index with no parameters 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+TS metrics-*-*
+| KEEP \`@timestamp\`
+| LIMIT 0",
+  "params": Array [],
+}
+`;
+
+exports[`buildProbeQuery probes metrics-kubeletstatsreceiver.otel-default for a time-series index with no parameters 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+TS metrics-kubeletstatsreceiver.otel-default
+| KEEP \`@timestamp\`
+| LIMIT 0",
+  "params": Array [],
+}
+`;

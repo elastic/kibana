@@ -51,13 +51,13 @@ const renderTab = ({
   investigationOverrides,
   proposedActionsContent,
   proposedActionsCount,
-  isRunning,
+  showLoadingSection,
 }: {
   attachments?: VersionedAttachment[];
   investigationOverrides?: Partial<Investigation>;
   proposedActionsContent?: React.ReactNode;
   proposedActionsCount?: React.ReactNode;
-  isRunning?: boolean;
+  showLoadingSection?: boolean;
 } = {}) =>
   render(
     <OverviewTab
@@ -66,7 +66,7 @@ const renderTab = ({
       groupedAttachments={groupedAttachments}
       proposedActionsContent={proposedActionsContent}
       proposedActionsCount={proposedActionsCount}
-      isRunning={isRunning}
+      showLoadingSection={showLoadingSection}
     />
   );
 
@@ -181,13 +181,9 @@ describe('OverviewTab', () => {
     );
 
     const headings = screen.getAllByRole('heading').map(({ textContent }) => textContent);
-    expect(headings).toEqual([
-      'Subject',
-      "What's happened",
-      'Impact',
-      'Conclusion',
-      'Proposed actions',
-    ]);
+    expect(headings).toEqual(["What's happened", 'Impact', 'Conclusion', 'Proposed actions']);
+    expect(screen.queryByRole('heading', { name: 'Subject' })).not.toBeInTheDocument();
+    expect(screen.getByTestId('investigationOverviewSubjects')).toHaveTextContent('checkout alert');
     expect(screen.getByTestId('groupedAttachmentsSection')).toBeInTheDocument();
     expect(screen.getByText('bad')).toBeInTheDocument();
     expect(screen.getByTestId('investigationOverviewReasoning')).toHaveTextContent(
@@ -252,8 +248,8 @@ describe('OverviewTab', () => {
     expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
   });
 
-  it('ends in a loading skeleton while the investigation is running', () => {
-    renderTab({ isRunning: true });
+  it('ends in a loading skeleton when the host asks for one', () => {
+    renderTab({ showLoadingSection: true });
 
     expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
     expect(
@@ -261,8 +257,8 @@ describe('OverviewTab', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders no loading skeleton once nothing works on the investigation', () => {
-    renderTab({ isRunning: false });
+  it('renders no loading skeleton otherwise', () => {
+    renderTab({ showLoadingSection: false });
 
     expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
   });
