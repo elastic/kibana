@@ -9,10 +9,7 @@ import { lazySchema, z } from '@kbn/zod/v4';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import {
-  classifyInvestigationRun,
-  type OnlineEvalsRoundClassification,
-} from '../online_evals/classify_round';
+import { resolveRound, type RoundResolution } from '../investigation_round';
 import { OnlineEvalsStepError, reportOnlineEvalsStepFailure } from '../online_evals/step_failure';
 import type { NightshiftTelemetryClient } from '../telemetry';
 
@@ -38,7 +35,6 @@ const skipReasonSchema = lazySchema(() =>
     'paused',
     'no_round',
     'follow_up_not_scored',
-    'recovery_verdict_unavailable',
     'recovery_unresolved',
     'classification_failed',
   ])
@@ -47,25 +43,21 @@ const skipReasonSchema = lazySchema(() =>
 type SkipReason = z.infer<typeof skipReasonSchema>;
 
 /**
- * Scores initial rounds and recoveries with a resolved verdict. Follow-ups aren't scored yet:
- * telling a follow-up that changes the root cause from a question or Slack chatter comes with
- * follow-up scoring.
+ * Scores initial rounds, and recoveries unless they leave no confirmed root cause. Follow-ups
+ * aren't scored yet: telling a follow-up that changes the root cause from a question or Slack
+ * chatter comes with follow-up scoring.
  */
 const getRoundSkipReason = ({
   roundKind,
-  recoveryVerdict,
-}: OnlineEvalsRoundClassification): SkipReason | undefined => {
+  hasConfirmedCause,
+}: RoundResolution): SkipReason | undefined => {
   if (roundKind === 'follow_up') {
     return 'follow_up_not_scored';
   }
-  if (roundKind === 'alert_recovery') {
-    if (recoveryVerdict === undefined) {
-      return 'recovery_verdict_unavailable';
-    }
-    // An unresolved cause gives the alert-outcome judges no ground truth to grade against.
-    if (recoveryVerdict === 'unresolved') {
-      return 'recovery_unresolved';
-    }
+  // With no confirmed cause the alert-outcome judges have no ground truth. When the hypotheses
+  // can't be compared, the round is scored and the judges' not-applicable check decides.
+  if (roundKind === 'alert_recovery' && hasConfirmedCause === false) {
+    return 'recovery_unresolved';
   }
   return undefined;
 };
@@ -92,7 +84,7 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
     label: 'Classify an Investigation Round for Online Evals',
     category: StepCategory.Ai,
     description:
-      'Decides whether the round this investigation run created has anything to score: an initial round, or an alert recovery with a resolved verdict. Makes no LLM call, and never fails: a failure is reported as telemetry and the round is not scored.',
+      'Decides whether the round this investigation run created has anything to score: an initial round, or an alert recovery that leaves a confirmed root cause. Makes no LLM call, and never fails: a failure is reported as telemetry and the round is not scored.',
     inputSchema,
     outputSchema: z.object({
       should_score: z.boolean().describe('Whether to start the scoring workflow for this round.'),
@@ -101,10 +93,12 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
         .optional()
         .describe('What kind of round this run created.'),
       round_id: z.string().optional().describe('The round this run created.'),
-      recovery_verdict: z
-        .string()
+      root_cause_outcome: z
+        .enum(['found', 'changed', 'withdrawn', 'unchanged', 'unknown'])
         .optional()
-        .describe("Alert recoveries only: the recovery round's verdict on the root cause."),
+        .describe(
+          "What the round did to the confirmed root cause, from the findings recorder's hypotheses before and after it. `unknown` when they can't be compared."
+        ),
       skip_reason: skipReasonSchema.optional().describe('Why the round is not scored.'),
     }),
     handler: async (context) => {
@@ -124,7 +118,7 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
             'Agent Builder is not available, so the investigation cannot be read'
           );
         }
-        const { rounds } = await agentBuilder.conversations
+        const conversation = await agentBuilder.conversations
           .getScopedClient({ request: context.contextManager.getFakeRequest() })
           .then((conversations) => conversations.get(input.investigation_id))
           .catch((error) => {
@@ -134,23 +128,23 @@ export const classifyOnlineEvalsRoundStepDefinition = ({
             );
           });
 
-        const classification = classifyInvestigationRun({
-          rounds: rounds.map(({ id, started_at: startedAt }) => ({ id, started_at: startedAt })),
+        // Runs after the agent's round, so the latest round is the one this run created.
+        const resolution = resolveRound(conversation, {
           followUp: input.follow_up || undefined,
           runStartedAt: input.investigation_started_at,
         });
-        if (!classification) {
+        if (!resolution) {
           return skip('no_round');
         }
 
-        const { roundKind, roundId, recoveryVerdict } = classification;
+        const { roundKind, roundId, outcome } = resolution;
         const roundOutput = {
           round_kind: roundKind,
           round_id: roundId,
-          ...(recoveryVerdict ? { recovery_verdict: recoveryVerdict } : {}),
+          root_cause_outcome: outcome,
         };
 
-        const skipReason = getRoundSkipReason(classification);
+        const skipReason = getRoundSkipReason(resolution);
         return skipReason
           ? { output: { should_score: false, ...roundOutput, skip_reason: skipReason } }
           : { output: { should_score: true, ...roundOutput } };

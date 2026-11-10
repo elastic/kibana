@@ -310,6 +310,13 @@ export const EPISODES_LIST_COLUMN_SUPPRESSED = i18n.translate(
   }
 );
 
+export const EPISODES_LIST_COLUMN_REASON = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodes.columns.reason',
+  {
+    defaultMessage: 'Reason',
+  }
+);
+
 export const EPISODES_LIST_ITEM_COUNT = (count: number) =>
   i18n.translate('xpack.alertingV2EpisodesUi.episodes.itemCount', {
     defaultMessage: 'Showing {count, plural, one {# alert} other {# alerts}}',

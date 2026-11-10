@@ -178,7 +178,7 @@ if [[ "${EVAL_FANOUT:-}" == "1" ]] && [[ -z "${EVAL_PROJECT:-}" ]]; then
   if ! command -v buildkite-agent >/dev/null 2>&1; then
     echo "EVAL_FANOUT=1 requires buildkite-agent; falling back to running all projects in-process"
   else
-    # One JSON object per line: { connectorId, shardId, specFiles }. Read below with `jq`.
+    # One JSON object per line: { connectorId, shardId, specFiles, judge? }. Read below with `jq`.
     # Weekly runs apply specModelGroups[] so a connector only gets the specs in a shard that asked for it.
     FANOUT_MATRIX="$(
       EVAL_SUITE_INFO="${EVAL_SUITE_INFO}" \
@@ -265,6 +265,11 @@ EOF
         fi
         fanout_step_keys+=("$step_key")
 
+        # A shard's `judge` in evals.suites.json pins its evaluation connector. The agent model
+        # stays EVAL_PROJECT, and shards without one keep the suite-wide judge.
+        row_judge="$(jq -r '.judge // ""' <<<"$row")"
+        step_judge_connector="${row_judge:-${EVAL_CONNECTOR_ID:-}}"
+
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
       - label: "${step_label}"
         key: "${step_key}"
@@ -275,7 +280,7 @@ EOF
           FTR_EIS_CCM: "${FTR_EIS_CCM:-}"
           EVAL_INCLUDE_EIS_MODELS: "${EVAL_INCLUDE_EIS_MODELS:-}"
           EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
-          EVAL_CONNECTOR_ID: "${EVAL_CONNECTOR_ID:-}"
+          EVAL_CONNECTOR_ID: "${step_judge_connector}"
           EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
           EVAL_SUITE_NAME: "${EVAL_SUITE_NAME:-}"
           EVAL_SUITE_SLACK_CHANNEL: "${EVAL_SUITE_SLACK_CHANNEL:-}"
@@ -310,6 +315,7 @@ EOF
         if [[ "$fanout_preemptible" == "true" ]]; then
           cat >>"$FANOUT_PIPELINE_FILE" <<EOF
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: "-1"
@@ -376,6 +382,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
       fi
 
@@ -408,6 +415,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
         # Refresh baseline block + trigger (top-level — 2-space indent).
         # The trigger fires a fresh main eval run so the PR comment is updated
@@ -468,6 +476,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
       fi
 

@@ -7,11 +7,15 @@
 
 import { Parser } from '@elastic/esql';
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
+import { euid } from '@kbn/entity-store/common/euid_helpers';
 import {
   INVENTORY_DEFINITION_FIXTURES,
+  entityIdFixture,
   k8sDeploymentFixture,
   k8sNodeFixture,
+  rankedEntityIdFixture,
 } from '../__fixtures__/definitions';
+import { probeAllAs } from '../__fixtures__/source_probes';
 import { buildColumns, planColumnNames } from './columns';
 import { InventoryDefinitionError } from './errors';
 import { quoteIdentifier } from './esql_syntax';
@@ -19,7 +23,7 @@ import { resolveIdentityPlan } from './identity';
 import { buildListQuery, generateListQueries } from './list_query';
 import { assertParses } from './parse_guard';
 import { planSources } from './source_plans';
-import type { QueryEngine, TimeWindow } from './types';
+import type { QueryPlan, TimeWindow } from './types';
 
 jest.mock('./parse_guard', () => {
   const actual = jest.requireActual('./parse_guard');
@@ -29,14 +33,23 @@ jest.mock('./parse_guard', () => {
 const window: TimeWindow = { from: '2026-10-19T10:00:00.000Z', to: '2026-10-19T11:00:00.000Z' };
 const LIMIT = 10000;
 
-const plansOf = (definition: EntityDefinitionWithoutId, engine: QueryEngine) =>
-  planSources(
-    definition,
-    (definition.dynamic?.sources ?? []).map((): QueryEngine => engine)
-  );
+const plansOf = (definition: EntityDefinitionWithoutId, hasTimeSeries: boolean) =>
+  planSources(definition, probeAllAs(definition, hasTimeSeries));
 
-const cases = INVENTORY_DEFINITION_FIXTURES.flatMap((definition) =>
-  (['TS', 'FROM'] as const).map((engine) => [definition.type, engine, definition] as const)
+const WINDOW_PREDICATE = '`@timestamp` >= ?from AND `@timestamp` < ?to';
+
+// The source line and the leading `WHERE` lines each engine writes before the plan's filter.
+const sourceLinesOf = ({ engine, indexPattern }: QueryPlan): string[] =>
+  engine === 'TS'
+    ? [`TS ${indexPattern}`, `| WHERE ${WINDOW_PREDICATE}`]
+    : [
+        `FROM ${indexPattern} METADATA _index_mode`,
+        '| WHERE `_index_mode` != "time_series"',
+        `    AND ${WINDOW_PREDICATE}`,
+      ];
+
+const cases = INVENTORY_DEFINITION_FIXTURES.map(
+  (definition) => [definition.type, definition] as const
 );
 
 describe('buildListQuery', () => {
@@ -44,14 +57,14 @@ describe('buildListQuery', () => {
     jest.mocked(assertParses).mockClear();
   });
 
-  describe.each(cases)('%s under %s', (_type, engine, definition) => {
-    const plans = plansOf(definition, engine);
+  describe.each(cases)('%s with time-series indices', (_type, definition) => {
+    const plans = plansOf(definition, true);
     const identity = resolveIdentityPlan(definition);
     const columns = buildColumns(definition, plans, identity);
 
-    it.each(plans.map((plan) => [plan.index, plan] as const))(
-      'builds the list query of plan %i',
-      (_index, plan) => {
+    it.each(plans.map((plan) => [plan.index, plan.engine, plan] as const))(
+      'builds the list query of plan %i under %s',
+      (_index, _engine, plan) => {
         const query = buildListQuery({ plan, identity, columns, window, limit: LIMIT });
         const { esql, params } = query;
         const lines = esql.split('\n');
@@ -59,18 +72,15 @@ describe('buildListQuery', () => {
         expect(query).toMatchSnapshot();
         expect(params).toEqual([{ from: window.from }, { to: window.to }]);
 
+        const sourceLines = sourceLinesOf(plan);
+        const afterSource = 1 + sourceLines.length;
         expect(lines[0]).toBe('SET unmapped_fields="nullify";');
-        expect(lines[1]).toBe(`${engine} ${plan.indexPattern}`);
-        expect(lines[2]).toBe('| WHERE `@timestamp` >= ?from AND `@timestamp` < ?to');
-        const predicates =
+        expect(lines.slice(1, afterSource)).toEqual(sourceLines);
+        expect(lines.slice(afterSource, afterSource + 2)).toEqual(
           plan.filter !== undefined
             ? [`    AND (${plan.filter})`, `    AND ${identity.presenceFilter}`]
-            : [`    AND ${identity.presenceFilter}`];
-        expect(lines.slice(3, 4 + predicates.length)).toEqual([
-          ...predicates,
-          `| EVAL ${identity.normalization}`,
-        ]);
-        expect(lines[4 + predicates.length]).toMatch(/^\| STATS /);
+            : [`    AND ${identity.presenceFilter}`, expect.stringMatching(/^\| STATS /)]
+        );
 
         plan.attributes.forEach(({ name, field }) => {
           const quotedField = quoteIdentifier(field);
@@ -94,7 +104,10 @@ describe('buildListQuery', () => {
           `| KEEP ${planColumnNames(columns, plan).map(quoteIdentifier).join(', ')}`
         );
 
-        expect(lines.slice(-2)).toEqual(['| SORT `last_seen` DESC NULLS LAST', `| LIMIT ${LIMIT}`]);
+        expect(lines.slice(-2)).toEqual([
+          '| SORT `last_seen` DESC NULLS LAST, `entity.id` ASC',
+          `| LIMIT ${LIMIT}`,
+        ]);
 
         expect(Parser.parse(esql).errors).toEqual([]);
         expect(assertParses).toHaveBeenCalledTimes(1);
@@ -104,7 +117,7 @@ describe('buildListQuery', () => {
   });
 
   it('drops the store helper columns from KEEP', () => {
-    const plans = plansOf(k8sDeploymentFixture, 'FROM');
+    const plans = plansOf(k8sDeploymentFixture, false);
     const identity = resolveIdentityPlan(k8sDeploymentFixture);
     const { esql } = buildListQuery({
       plan: plans[0],
@@ -119,20 +132,44 @@ describe('buildListQuery', () => {
     expect(keepLine).not.toContain('_present');
   });
 
-  it('keeps entity.id once when it is the identity field', () => {
-    const definition: EntityDefinitionWithoutId = {
-      ...k8sNodeFixture,
-      identityField: { singleField: 'entity.id' },
-    };
-    const [{ esql }] = generateListQueries(definition, plansOf(definition, 'FROM'), window, LIMIT);
-    const lines = esql.split('\n');
-    const keepLine = lines.find((line) => line.startsWith('| KEEP '));
+  it.each([
+    [
+      entityIdFixture.type,
+      entityIdFixture,
+      'BY `entity.id`',
+      '| KEEP `entity.id`, `cluster`, `os`, `os.type`, `last_seen`, `raw:entity.id`',
+    ],
+    [
+      rankedEntityIdFixture.type,
+      rankedEntityIdFixture,
+      'BY `entity.id`, `host.hostname`',
+      '| KEEP `entity.id`, `host.hostname`, `os`, `last_seen`, `raw:entity.id`',
+    ],
+  ] as const)(
+    'keeps entity.id once for %s, with its raw value copied before the id evaluation',
+    (_type, definition, byLine, keepLine) => {
+      const [{ esql }] = generateListQueries(definition, plansOf(definition, false), window, LIMIT);
+      const lines = esql.split('\n');
 
-    expect(lines.find((line) => line.trimStart().startsWith('BY '))?.trim()).toBe('BY `entity.id`');
-    expect(keepLine).toBe('| KEEP `entity.id`, `cluster`, `os`, `os.type`, `last_seen`');
-    expect(keepLine?.match(/`entity\.id`/g)).toHaveLength(1);
-    expect(Parser.parse(esql).errors).toEqual([]);
-  });
+      expect(esql).toMatchSnapshot();
+      expect(lines.find((line) => line.trimStart().startsWith('BY '))?.trim()).toBe(byLine);
+      expect(esql).toContain(
+        `\n| EVAL \`raw:entity.id\` = \`entity.id\`, ${
+          resolveIdentityPlan(definition).idEvaluation
+        }\n`
+      );
+      expect(lines.find((line) => line.startsWith('| KEEP '))).toBe(keepLine);
+      expect(Parser.parse(esql).errors).toEqual([]);
+
+      // The TS plan carries the same raw column lines.
+      const [ts] = generateListQueries(definition, plansOf(definition, true), window, LIMIT);
+      const tsLines = ts.esql.split('\n');
+      expect(tsLines[1]).toMatch(/^TS /);
+      expect(
+        tsLines.filter((line) => line.startsWith('| EVAL ') || line.startsWith('| KEEP '))
+      ).toEqual(lines.filter((line) => line.startsWith('| EVAL ') || line.startsWith('| KEEP ')));
+    }
+  );
 
   it('quotes reserved words and numeric path segments so the query parses', () => {
     const definition: EntityDefinitionWithoutId = {
@@ -149,7 +186,7 @@ describe('buildListQuery', () => {
         ],
       },
     };
-    const [{ esql }] = generateListQueries(definition, plansOf(definition, 'TS'), window, LIMIT);
+    const [{ esql }] = generateListQueries(definition, plansOf(definition, true), window, LIMIT);
 
     expect(esql).toContain('`last` = LAST(`count`, `@timestamp`) WHERE `count` IS NOT NULL');
     expect(esql).toContain(
@@ -170,7 +207,7 @@ describe('buildListQuery', () => {
         ],
       },
     };
-    const [{ esql }] = generateListQueries(definition, plansOf(definition, 'FROM'), window, LIMIT);
+    const [{ esql }] = generateListQueries(definition, plansOf(definition, false), window, LIMIT);
 
     expect(esql).toContain(
       '`host.os.type` = LAST(`host.os.type`, `@timestamp`) WHERE `host.os.type` IS NOT NULL'
@@ -180,7 +217,7 @@ describe('buildListQuery', () => {
   });
 
   it.each([0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY])('rejects a limit of %p', (limit) => {
-    const plans = plansOf(k8sDeploymentFixture, 'FROM');
+    const plans = plansOf(k8sDeploymentFixture, false);
     const identity = resolveIdentityPlan(k8sDeploymentFixture);
 
     expect(() =>
@@ -200,17 +237,17 @@ describe('buildListQuery', () => {
 
 describe('generateListQueries', () => {
   it('returns one query per plan in plan order for k8s.deployment', () => {
-    const plans = plansOf(k8sDeploymentFixture, 'FROM');
+    const plans = plansOf(k8sDeploymentFixture, true);
     const queries = generateListQueries(k8sDeploymentFixture, plans, window, LIMIT);
 
     expect(queries).toHaveLength(plans.length);
     queries.forEach(({ esql }, index) => {
-      expect(esql.split('\n')[1]).toBe(`FROM ${plans[index].indexPattern}`);
+      expect(esql.split('\n')[1]).toBe(sourceLinesOf(plans[index])[0]);
     });
   });
 
   it('builds k8s.deployment plans that differ only in pattern, filter and the paused attribute', () => {
-    const plans = plansOf(k8sDeploymentFixture, 'TS');
+    const plans = plansOf(k8sDeploymentFixture, false);
     const [kubeletstats, stateDeployment] = generateListQueries(
       k8sDeploymentFixture,
       plans,
@@ -231,32 +268,57 @@ describe('generateListQueries', () => {
     expect(normalised).toBe(kubeletstats);
   });
 
-  it('generates the full k8s.deployment state_deployment query under TS', () => {
-    const [, { esql }] = generateListQueries(
+  it('generates both plans of the k8s.deployment state_deployment source, TS first', () => {
+    const [, , tsQuery, fromQuery] = generateListQueries(
       k8sDeploymentFixture,
-      plansOf(k8sDeploymentFixture, 'TS'),
+      plansOf(k8sDeploymentFixture, true),
       window,
       LIMIT
     );
-
-    expect(esql).toBe(`SET unmapped_fields="nullify";
-TS metrics-kubernetes.state_deployment-*
-| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
-    AND (metricset.name == "state_deployment")
-    AND (CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL AND CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL)
-| EVAL \`kubernetes.namespace\` = CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))), \`kubernetes.deployment.name\` = CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name)))
+    const namespaceValue = euid.esql.getIdentityValue('kubernetes.namespace');
+    const nameValue = euid.esql.getIdentityValue('kubernetes.deployment.name');
+    const tail = `    AND (metricset.name == "state_deployment")
+    AND (${namespaceValue} IS NOT NULL AND ${nameValue} IS NOT NULL)
 | STATS \`cluster\` = LAST(\`orchestrator.cluster.name\`, \`@timestamp\`) WHERE \`orchestrator.cluster.name\` IS NOT NULL,
     \`paused\` = LAST(\`kubernetes.deployment.paused\`, \`@timestamp\`) WHERE \`kubernetes.deployment.paused\` IS NOT NULL,
     \`last_seen\` = MAX(\`@timestamp\`)
     BY \`kubernetes.namespace\`, \`kubernetes.deployment.name\`
-| EVAL kubernetes_namespace_present = CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace))) IS NOT NULL,
- kubernetes_deployment_name_present = CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name))) IS NOT NULL,
- kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, CASE(MV_MIN(TO_STRING(kubernetes.namespace)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.namespace))), 1, 1)), MV_MIN(TO_STRING(kubernetes.namespace)))),
- kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, CASE(MV_MIN(TO_STRING(kubernetes.deployment.name)) == "", MV_FIRST(MV_SLICE(MV_SORT(MV_DEDUPE(TO_STRING(kubernetes.deployment.name))), 1, 1)), MV_MIN(TO_STRING(kubernetes.deployment.name)))),
+| EVAL kubernetes_namespace_present = ${namespaceValue} IS NOT NULL,
+ kubernetes_deployment_name_present = ${nameValue} IS NOT NULL,
+ kubernetes_namespace_present_or_null = CASE(kubernetes_namespace_present, ${namespaceValue}),
+ kubernetes_deployment_name_present_or_null = CASE(kubernetes_deployment_name_present, ${nameValue}),
  entity.id = CONCAT("k8s.deployment:", CONCAT(kubernetes_namespace_present_or_null, "/", kubernetes_deployment_name_present_or_null))
 | KEEP \`entity.id\`, \`kubernetes.namespace\`, \`kubernetes.deployment.name\`, \`cluster\`, \`paused\`, \`last_seen\`
-| SORT \`last_seen\` DESC NULLS LAST
-| LIMIT 10000`);
+| SORT \`last_seen\` DESC NULLS LAST, \`entity.id\` ASC
+| LIMIT 10000`;
+
+    expect(tsQuery.esql).toBe(`SET unmapped_fields="nullify";
+TS metrics-kubernetes.state_deployment-*
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+${tail}`);
+    expect(fromQuery.esql).toBe(`SET unmapped_fields="nullify";
+FROM metrics-kubernetes.state_deployment-* METADATA _index_mode
+| WHERE \`_index_mode\` != "time_series"
+    AND \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+${tail}`);
+  });
+
+  it('names the pattern as written under both engines, with no concrete index', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      dynamic: { sources: [{ indexPattern: 'metrics-*-*', filter: 'service.type == "k8s"' }] },
+    };
+    const queries = generateListQueries(definition, plansOf(definition, true), window, LIMIT);
+
+    expect(queries.map(({ esql }) => esql.split('\n')[1])).toEqual([
+      'TS metrics-*-*',
+      'FROM metrics-*-* METADATA _index_mode',
+    ]);
+    queries.forEach(({ esql, params }) => {
+      expect(esql).toContain('\n    AND (service.type == "k8s")\n');
+      expect(params).toEqual([{ from: window.from }, { to: window.to }]);
+      expect(Parser.parse(esql).errors).toEqual([]);
+    });
   });
 
   it('rejects an unsafe index pattern before assembling a query', () => {
@@ -266,7 +328,7 @@ TS metrics-kubernetes.state_deployment-*
     };
 
     expect(() =>
-      generateListQueries(definition, plansOf(definition, 'FROM'), window, LIMIT)
+      generateListQueries(definition, plansOf(definition, false), window, LIMIT)
     ).toThrow(InventoryDefinitionError);
   });
 
@@ -277,7 +339,7 @@ TS metrics-kubernetes.state_deployment-*
     };
 
     expect(() =>
-      generateListQueries(definition, plansOf(definition, 'FROM'), window, LIMIT)
+      generateListQueries(definition, plansOf(definition, false), window, LIMIT)
     ).toThrow(InventoryDefinitionError);
   });
 
@@ -285,7 +347,7 @@ TS metrics-kubernetes.state_deployment-*
     const { dynamic, ...definition } = k8sDeploymentFixture;
 
     expect(() =>
-      generateListQueries(definition, plansOf(k8sDeploymentFixture, 'FROM'), window, LIMIT)
+      generateListQueries(definition, plansOf(k8sDeploymentFixture, false), window, LIMIT)
     ).toThrow(InventoryDefinitionError);
   });
 });

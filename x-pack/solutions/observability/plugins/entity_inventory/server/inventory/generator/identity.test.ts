@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import {
   INVENTORY_DEFINITION_FIXTURES,
+  entityIdFixture,
   hostLikeFixture,
   k8sDeploymentFixture,
   k8sNodeFixture,
+  rankedEntityIdFixture,
 } from '../__fixtures__/definitions';
 import { InventoryDefinitionError } from './errors';
 import { resolveIdentityPlan } from './identity';
@@ -26,6 +29,37 @@ describe('resolveIdentityPlan', () => {
     [hostLikeFixture.type, hostLikeFixture, ['host.id', 'host.name']],
   ] as const)('resolves the grouping fields of %s', (_type, definition, groupingFields) => {
     expect(resolveIdentityPlan(definition).groupingFields).toEqual(groupingFields);
+  });
+
+  it.each([
+    [
+      k8sDeploymentFixture.type,
+      k8sDeploymentFixture,
+      [['kubernetes.namespace', 'kubernetes.deployment.name']],
+    ],
+    [k8sNodeFixture.type, k8sNodeFixture, [['kubernetes.node.name']]],
+    [hostLikeFixture.type, hostLikeFixture, [['host.id'], ['host.name']]],
+  ] as const)(
+    'lists the identity compositions of %s as field lists',
+    (_type, definition, compositions) => {
+      expect(resolveIdentityPlan(definition).compositions).toEqual(compositions);
+    }
+  );
+
+  // The store rejects a conditional branch at registration; the inventory does not re-check it.
+  it('takes the compositions of a ranking without an unconditional branch from the store', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...hostLikeFixture,
+      identityField: {
+        ...hostLikeFixture.identityField,
+        euidRanking: {
+          branches: [
+            { when: { field: 'host.id', exists: true }, ranking: [[{ field: 'host.id' }]] },
+          ],
+        },
+      },
+    };
+    expect(resolveIdentityPlan(definition).compositions).toEqual([['host.id']]);
   });
 
   it.each([
@@ -57,6 +91,24 @@ describe('resolveIdentityPlan', () => {
     }
   );
 
+  it.each(
+    [entityIdFixture, rankedEntityIdFixture].map((definition) => [definition.type, definition])
+  )(
+    'gives %s a raw column of entity.id, which the id evaluation overwrites',
+    (_type, definition) => {
+      expect(resolveIdentityPlan(definition).rawIdentityColumns).toEqual(
+        new Map([['entity.id', 'raw:entity.id']])
+      );
+    }
+  );
+
+  it.each(INVENTORY_DEFINITION_FIXTURES.map((definition) => [definition.type, definition]))(
+    'gives %s no raw column when the id evaluation overwrites no grouping field',
+    (_type, definition) => {
+      expect(resolveIdentityPlan(definition).rawIdentityColumns.size).toBe(0);
+    }
+  );
+
   it.each(INVENTORY_DEFINITION_FIXTURES.map((definition) => [definition.type, definition]))(
     'the presence filter of %s mentions every grouping field and nothing else',
     (_type, definition) => {
@@ -69,6 +121,7 @@ describe('resolveIdentityPlan', () => {
         'IS',
         'NULL',
         'TO_STRING',
+        // the identity value of a multi-valued field
         'CASE',
         'MV_MIN',
         'MV_FIRST',
@@ -115,23 +168,13 @@ describe('resolveIdentityPlan', () => {
   it.each(INVENTORY_DEFINITION_FIXTURES.map((definition) => [definition.type, definition]))(
     'the identity output of %s parses in a query',
     (_type, definition) => {
-      const { groupingFields, normalization, presenceFilter, idEvaluation } =
-        resolveIdentityPlan(definition);
-      const esql = `FROM x | WHERE ${presenceFilter} | EVAL ${normalization} | STATS c = COUNT(*) BY ${groupingFields.join(
+      const { groupingFields, presenceFilter, idEvaluation } = resolveIdentityPlan(definition);
+      const esql = `FROM x | WHERE ${presenceFilter} | STATS c = COUNT(*) BY ${groupingFields.join(
         ', '
       )} | EVAL ${idEvaluation}`;
       expect(() => assertParses(esql)).not.toThrow();
     }
   );
-
-  it('reduces each grouping field to its identity value under its own name', () => {
-    const { groupingFields, normalization } = resolveIdentityPlan(k8sNodeFixture);
-
-    expect(normalization.split(/,\s(?=`)/)).toHaveLength(groupingFields.length);
-    groupingFields.forEach((field) => {
-      expect(normalization).toContain(`\`${field}\` = CASE(MV_MIN(TO_STRING(${field})) == ""`);
-    });
-  });
 
   it('throws InventoryDefinitionError for a definition without dynamic', () => {
     const { dynamic, ...withoutDynamic } = k8sNodeFixture;

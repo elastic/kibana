@@ -447,6 +447,13 @@ interface InstanceChipStateParams {
   agentHealth?: AgentHealthState;
   hasData: boolean;
   isTimedOut: boolean;
+  /**
+   * Whether the data of the instance lands in the local cluster, where it can be detected.
+   * Defaults to true; false for an output that sends to another cluster (remote Elasticsearch).
+   */
+  isDataVerifiable?: boolean;
+  /** Whether an agent running the instance is online. */
+  hasLiveAgent?: boolean;
 }
 
 export const deriveInstanceChipState = ({
@@ -455,12 +462,16 @@ export const deriveInstanceChipState = ({
   agentHealth,
   hasData,
   isTimedOut,
+  isDataVerifiable = true,
+  hasLiveAgent = false,
 }: InstanceChipStateParams): ServiceChipState => {
   // A deployment failure or an unhealthy agent wins over any data signal.
   if (deployError || contextStatus === 'error' || agentHealth === 'unhealthy') return 'error';
   if (contextStatus === 'receiving') return 'receiving';
   const isSettling = contextStatus === 'detecting' || contextStatus === 'instantiating';
   if (isSettling && hasData) return 'receiving';
+  // The data goes elsewhere, so waiting for it here would only end in a false timeout.
+  if (isSettling && !isDataVerifiable && hasLiveAgent) return 'unverified';
   if (isSettling && isTimedOut) return 'timeout';
   return contextStatus;
 };
@@ -474,5 +485,6 @@ export const aggregateInstanceChipStates = (states: ServiceChipState[]): Service
   if (states.includes('error')) return 'error';
   if (states.includes('timeout')) return 'timeout';
   if (states.every((state) => state === 'receiving')) return 'receiving';
+  if (states.every((state) => state === 'receiving' || state === 'unverified')) return 'unverified';
   return states.includes('detecting') ? 'detecting' : 'instantiating';
 };
