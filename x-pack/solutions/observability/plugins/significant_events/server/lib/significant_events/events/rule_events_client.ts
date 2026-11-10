@@ -283,19 +283,21 @@ const ruleUuidsIntersects = (values: string[]): ESQLAstExpression =>
   )}), [${values.map((value) => esql.str(value))}])`;
 
 /**
- * Topology feature filter: an event matches when either
- * `causal_features.feature_id` or `blast_radius.feature_id` contains any requested ID, both read
- * through `FIELD_EXTRACT` since they live in the flattened `data` column. Verified live against
- * `.rule-events` on nightshift-program#1517.
+ * Topology feature filter: an event matches when any requested ID appears in
+ * `causal_features.feature_id`, `blast_radius.feature_id`, or a dependency blast-radius entry's
+ * `source` or `target`. All four are read through `FIELD_EXTRACT` since they live in the flattened
+ * `data` column. `FIELD_EXTRACT` loses the pairing with `type`, but `source` and `target` exist
+ * only on dependency rows. The two `feature_id` paths were verified live against `.rule-events`
+ * on nightshift-program#1517.
  */
 const topologyFeatureIdsIntersects = (values: string[]): ESQLAstExpression => {
   const literals = values.map((value) => esql.str(value));
   const dataCol = esql.col('data');
-  return esql.exp`(MV_INTERSECTS(FIELD_EXTRACT(${dataCol}, ${esql.str(
-    'causal_features.feature_id'
-  )}), [${literals}]) OR MV_INTERSECTS(FIELD_EXTRACT(${dataCol}, ${esql.str(
+  const intersects = (path: string) =>
+    esql.exp`MV_INTERSECTS(FIELD_EXTRACT(${dataCol}, ${esql.str(path)}), [${literals}])`;
+  return esql.exp`(${intersects('causal_features.feature_id')} OR ${intersects(
     'blast_radius.feature_id'
-  )}), [${literals}]))`;
+  )} OR ${intersects('blast_radius.source')} OR ${intersects('blast_radius.target')})`;
 };
 
 const INVESTIGATION_STATE_COLUMN = 'investigation_state';
@@ -585,9 +587,12 @@ export class RuleEventsClient {
   ): Promise<{ entities: Record<string, number>; unassigned: number }> {
     const { esClient } = this.clients;
     const base = this.buildLatestByCurrentStateQuery({ ...options, status: ['active'] });
-    // CASE preserves events whose causal features or blast radius is absent.
-    const entitiesQuery = base.pipe`EVAL a = FIELD_EXTRACT(data, "causal_features.feature_id"), b = FIELD_EXTRACT(data, "blast_radius.feature_id")`
-      .pipe`EVAL fid = MV_DEDUPE(CASE(a IS NULL, b, b IS NULL, a, MV_APPEND(a, b)))`
+    // CASE preserves a side when the other extract is null: MV_APPEND(null, x) would drop x.
+    // Dependency endpoints live only on source and target, so they join the same id set the
+    // topology filter matches.
+    const entitiesQuery = base.pipe`EVAL a = FIELD_EXTRACT(data, "causal_features.feature_id"), b = FIELD_EXTRACT(data, "blast_radius.feature_id"), s = FIELD_EXTRACT(data, "blast_radius.source"), t = FIELD_EXTRACT(data, "blast_radius.target")`
+      .pipe`EVAL ab = CASE(a IS NULL, b, b IS NULL, a, MV_APPEND(a, b)), st = CASE(s IS NULL, t, t IS NULL, s, MV_APPEND(s, t))`
+      .pipe`EVAL fid = MV_DEDUPE(CASE(ab IS NULL, st, st IS NULL, ab, MV_APPEND(ab, st)))`
       .pipe`MV_EXPAND fid`;
     try {
       const [rows, unassigned] = await Promise.all([

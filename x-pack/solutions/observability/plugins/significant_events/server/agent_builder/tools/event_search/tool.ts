@@ -105,7 +105,7 @@ const searchEventsSchema = lazySchema(() =>
             'xpack.significantEvents.agentBuilder.tools.eventSearch.schema.topologyFeatureIds',
             {
               defaultMessage:
-                'Optional Knowledge Indicator feature.id values to match against causal_features.feature_id or blast_radius.feature_id. Defaults to no topology filter. An event matches when either topology field contains any requested ID.',
+                "Optional Knowledge Indicator feature.id values. Defaults to no topology filter. An event matches when any requested ID appears in causal_features.feature_id, blast_radius.feature_id, or a dependency blast radius entry's source or target.",
             }
           )
         ),
