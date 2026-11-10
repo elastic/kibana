@@ -25,7 +25,7 @@ import {
 import type { DetectionClient } from '../../../lib/significant_events/detections';
 import {
   attachInvestigationState,
-  investigationStateUnavailable,
+  createInvestigationStateUnavailableError,
   toEpisodes,
   toInvestigationFilter,
 } from '../../../lib/significant_events/events/attach_investigation_state';
@@ -214,7 +214,7 @@ const eventsSearchRoute = createServerRoute({
         logger,
       });
       if (listed === 'unavailable') {
-        throw investigationStateUnavailable();
+        throw createInvestigationStateUnavailableError();
       }
       sets = listed;
     }
@@ -272,25 +272,37 @@ const eventsFacetsRoute = createServerRoute({
 
     const eventClient = await getEventSearchClient();
     const states = toArray(params.query?.investigation_state);
-    const listed = await listInvestigationStateSets({
+    // Started now so the severity and status counts do not wait for it, unless a filter needs it.
+    const listing = listInvestigationStateSets({
       agenticInvestigations: server.agenticInvestigations,
       request,
       logger,
     });
-    // The other dimensions honor the investigation filter, so they need the sets as well. Without a
-    // filter, an unreadable state only leaves the investigation counts out.
-    if (states?.length && listed === 'unavailable') {
-      throw investigationStateUnavailable();
+    let sets: InvestigationStateSets | undefined;
+    if (states?.length) {
+      // The other dimensions honor the investigation filter, so they need the sets as well.
+      const listed = await listing;
+      if (listed === 'unavailable') {
+        throw createInvestigationStateUnavailableError();
+      }
+      sets = listed;
     }
-    const sets = listed === 'unavailable' ? undefined : listed;
-    const facets = await eventClient.countFacets(
-      {
-        ...(await toEventsFilterOptions(params.query ?? {}, scopedClients)),
-        investigation: toInvestigationFilter(states, sets),
-      },
-      sets ? toEpisodes(sets) : null
+    // Without a filter, an unreadable state only leaves the investigation counts out.
+    const investigationEpisodes = listing.then((listed) =>
+      listed === 'unavailable' ? undefined : toEpisodes(listed)
     );
-    return { ...facets, ...(sets?.truncated ? { investigation_window_truncated: true } : {}) };
+    const facets = await eventClient.countFacets({
+      ...(await toEventsFilterOptions(params.query ?? {}, scopedClients)),
+      investigation: toInvestigationFilter(states, sets),
+      investigationEpisodes,
+    });
+    const listed = await listing;
+    return {
+      ...facets,
+      ...(listed !== 'unavailable' && listed.truncated
+        ? { investigation_window_truncated: true }
+        : {}),
+    };
   },
 });
 

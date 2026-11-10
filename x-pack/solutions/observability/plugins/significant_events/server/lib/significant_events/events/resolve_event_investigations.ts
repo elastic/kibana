@@ -27,10 +27,14 @@ export type InvestigationsReader = Pick<
   'getInvestigationsClient' | 'getSubjectsClient'
 >;
 
+// The three limits below mirror the agentic_investigations plugin
+// (`common/investigations/constants.ts` and its subjects request limit); keep them in sync by hand.
 const MAX_SUBJECT_KEYS_PER_READ = 50; // MAX_SUBJECTS_PER_REQUEST
 const MAX_IDS_PER_READ = 100; // MAX_INVESTIGATIONS_PAGE_SIZE
 const READ_CONCURRENCY = 3;
 const READ_TIMEOUT_MS = 5_000;
+/** The whole listing, not one page: a slow Investigations plugin must not hold a request for 10 pages. */
+const LIST_DEADLINE_MS = 10_000;
 const MAX_LISTED_INVESTIGATIONS = 1_000; // MAX_INVESTIGATION_CANDIDATES
 const LIST_PAGE_SIZE = 100;
 
@@ -143,19 +147,25 @@ export const listInvestigationStateSets = async ({
   let loaded = 0;
   let total = 0;
 
+  const deadline = Date.now() + LIST_DEADLINE_MS;
+
   try {
     for (let page = 1; (page - 1) * LIST_PAGE_SIZE < MAX_LISTED_INVESTIGATIONS; page++) {
+      const timeoutMs = Math.min(READ_TIMEOUT_MS, deadline - Date.now());
+      if (timeoutMs <= 0) throw new Error(`Listing took longer than ${LIST_DEADLINE_MS}ms`);
       const outcome = await withTimeout({
         promise: client.list({
           subject_type: ALERT_SUBJECT_TYPE,
-          sort_field: 'updated_at',
+          // Creation time never changes, so a running investigation cannot move between pages
+          // while the pages are read one after another.
+          sort_field: 'created_at',
           sort_order: 'desc',
           page,
           per_page: LIST_PAGE_SIZE,
         }),
-        timeoutMs: READ_TIMEOUT_MS,
+        timeoutMs,
       });
-      if (outcome.timedout) throw new Error(`Timed out after ${READ_TIMEOUT_MS}ms`);
+      if (outcome.timedout) throw new Error(`Timed out after ${timeoutMs}ms`);
       const response = outcome.value;
       total = response.pagination.total;
       loaded += response.results.length;
@@ -163,7 +173,7 @@ export const listInvestigationStateSets = async ({
         const open = isOpen(summary);
         for (const episodeId of getAlertSubjectIds(summary)) {
           const current = byEpisode.get(episodeId);
-          // Newest first: an episode keeps its newest investigation unless an open one follows.
+          // Newest created first: an episode keeps its newest investigation unless an open one follows.
           if (!current || (!current.open && open)) {
             byEpisode.set(episodeId, { open, state: toState(summary) });
           }

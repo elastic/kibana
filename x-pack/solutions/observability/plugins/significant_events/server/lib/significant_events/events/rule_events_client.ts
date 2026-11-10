@@ -309,21 +309,35 @@ const topologyFeatureIdsIntersects = (values: string[]): ESQLAstExpression => {
 const INVESTIGATION_STATE_COLUMN = 'investigation_state';
 
 /**
- * Derives `not_started` / `in_progress` / `completed` from the flattened `investigations` entries:
- * an entry without `completed_at` means a run is still open. `FIELD_EXTRACT` drops duplicate
- * values, so two runs finishing in the same millisecond would read as in progress (verified live).
+ * Derives `not_started` / `in_progress` / `completed` from the episode id (`alert.id`) of the
+ * current revision: the episodes of a running investigation, then the ones of a finished one, and
+ * `not_started` for any other. An empty list is left out because `IN ()` is not valid ES|QL.
  */
-const withInvestigationState = (query: ComposerQuery): ComposerQuery => {
-  const dataCol = esql.col('data');
-  const started = esql.exp`COALESCE(MV_COUNT(FIELD_EXTRACT(${dataCol}, ${esql.str(
-    'investigations.workflow_execution_id'
-  )})), 0)`;
-  const completed = esql.exp`COALESCE(MV_COUNT(FIELD_EXTRACT(${dataCol}, ${esql.str(
-    'investigations.completed_at'
-  )})), 0)`;
-  return query.pipe`EVAL ${esql.col(INVESTIGATION_STATE_COLUMN)} = CASE(${started} == 0, ${esql.str(
-    'not_started'
-  )}, ${completed} < ${started}, ${esql.str('in_progress')}, ${esql.str('completed')})`;
+const withInvestigationState = (
+  query: ComposerQuery,
+  { inProgress, completed }: InvestigationEpisodes
+): ComposerQuery => {
+  const stateCol = esql.col(INVESTIGATION_STATE_COLUMN);
+  const episode = esql.col('alert.id');
+  const ids = (episodeIds: string[]) => episodeIds.map((id) => esql.str(id));
+  const notStarted = esql.str('not_started');
+
+  if (inProgress.length && completed.length) {
+    return query.pipe`EVAL ${stateCol} = CASE(${episode} IN (${ids(inProgress)}), ${esql.str(
+      'in_progress'
+    )}, ${episode} IN (${ids(completed)}), ${esql.str('completed')}, ${notStarted})`;
+  }
+  if (inProgress.length) {
+    return query.pipe`EVAL ${stateCol} = CASE(${episode} IN (${ids(inProgress)}), ${esql.str(
+      'in_progress'
+    )}, ${notStarted})`;
+  }
+  if (completed.length) {
+    return query.pipe`EVAL ${stateCol} = CASE(${episode} IN (${ids(completed)}), ${esql.str(
+      'completed'
+    )}, ${notStarted})`;
+  }
+  return query.pipe`EVAL ${stateCol} = ${notStarted}`;
 };
 
 const SORT_RANK_COLUMN = 'sort_rank';
@@ -554,11 +568,17 @@ export class RuleEventsClient {
     };
   }
 
-  /** Counts the latest revisions per severity, status and investigation state (left out when `investigationEpisodes` is null). */
-  async countFacets(
-    options: RuleEventsCurrentStateSearchOptions,
-    investigationEpisodes: InvestigationEpisodes | null
-  ): Promise<SignificantEventsFacets> {
+  /**
+   * Counts the latest revisions per severity, status and investigation state. The investigation
+   * counts wait for `investigationEpisodes`, so a slow listing does not hold back the other two,
+   * and are left out when it resolves to `undefined` (the episodes could not be read).
+   */
+  async countFacets({
+    investigationEpisodes,
+    ...options
+  }: RuleEventsCurrentStateSearchOptions & {
+    investigationEpisodes?: Promise<InvestigationEpisodes | undefined>;
+  } = {}): Promise<SignificantEventsFacets> {
     const { esClient } = this.clients;
     const [severity, status, investigation] = await Promise.all([
       countBy({
@@ -574,17 +594,19 @@ export class RuleEventsClient {
         column: 'event_status',
         keys: SIGNIFICANT_EVENT_STATUS_OPTIONS,
       }),
-      investigationEpisodes
-        ? countBy({
-            esClient,
-            query: withInvestigationState(
-              this.buildLatestByCurrentStateQuery({ ...options, investigation: undefined }),
-              investigationEpisodes
-            ),
-            column: INVESTIGATION_STATE_COLUMN,
-            keys: SIGNIFICANT_EVENT_INVESTIGATION_STATES,
-          })
-        : undefined,
+      investigationEpisodes?.then((episodes) =>
+        episodes
+          ? countBy({
+              esClient,
+              query: withInvestigationState(
+                this.buildLatestByCurrentStateQuery({ ...options, investigation: undefined }),
+                episodes
+              ),
+              column: INVESTIGATION_STATE_COLUMN,
+              keys: SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+            })
+          : undefined
+      ),
     ]);
 
     return { severity, status, ...(investigation ? { investigation } : {}) };

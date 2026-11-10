@@ -58,8 +58,7 @@ export const episodeHistory = (history: SignificantEvent[]): SignificantEvent[] 
 /**
  * Returns true when the latest stored version for this event_id has the same severity and status
  * as the candidate and the candidate introduces no new detection rules — indicating this snapshot
- * would produce a pure-churn duplicate. `severity` is the tier this write would store, after the
- * investigation lock.
+ * would produce a pure-churn duplicate. `severity` is the tier this write would store.
  */
 export const shouldSkipAsNoOp = ({
   candidate,
@@ -178,9 +177,8 @@ export const loadHistory = async ({
 
 /**
  * Merges this candidate's signals and topology with its prior versions (continuation only), then
- * takes the agent's proposed severity, floors an inactive event to low and applies the
- * investigation lock — the facts shared by the no-op check and the final document, derived once per
- * candidate so the two cannot disagree.
+ * takes the agent's proposed severity and floors an inactive event to low — the facts shared by
+ * the no-op check and the final document, derived once per candidate so the two cannot disagree.
  */
 export const computeEventFacts = ({
   candidate,

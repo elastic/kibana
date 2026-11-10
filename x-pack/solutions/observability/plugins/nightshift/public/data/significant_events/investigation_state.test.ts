@@ -16,6 +16,8 @@ describe('getInvestigationsRefetchInterval', () => {
     queryClient = new QueryClient();
   });
 
+  afterEach(() => jest.restoreAllMocks());
+
   it('polls every 5s while an investigation runs', () => {
     expect(
       getInvestigationsRefetchInterval(
@@ -43,6 +45,5 @@ describe('getInvestigationsRefetchInterval', () => {
     expect(
       getInvestigationsRefetchInterval([{ investigation_state: 'not_started' }], queryClient)
     ).toBe(false);
-    jest.restoreAllMocks();
   });
 });

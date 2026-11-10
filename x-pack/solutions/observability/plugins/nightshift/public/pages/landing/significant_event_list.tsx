@@ -20,12 +20,12 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import type { NightshiftSignificantEvent } from '../data/significant_events/use_fetch_significant_events';
+import type { NightshiftSignificantEvent } from '../../data/significant_events/use_fetch_significant_events';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
-} from '../common/ebt_constants';
+} from '../../common/ebt_constants';
 import { SignificantEventItem } from './significant_event_item';
 
 export interface SignificantEventListProps {

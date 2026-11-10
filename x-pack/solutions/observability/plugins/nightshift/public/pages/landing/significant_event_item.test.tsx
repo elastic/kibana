@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { NightshiftSignificantEvent } from '../data/significant_events/use_fetch_significant_events';
+import type { NightshiftSignificantEvent } from '../../data/significant_events/use_fetch_significant_events';
 import { SignificantEventItem } from './significant_event_item';
 
 const mockEvent: NightshiftSignificantEvent = {

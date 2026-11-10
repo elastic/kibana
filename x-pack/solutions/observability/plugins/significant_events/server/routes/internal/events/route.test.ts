@@ -797,7 +797,8 @@ describe('events investigation state', () => {
 
       const response = await eventsFacetsRoute.handler(params);
 
-      expect(countFacets).toHaveBeenCalledWith(expect.anything(), {
+      const { investigationEpisodes } = countFacets.mock.calls[0][0];
+      await expect(investigationEpisodes).resolves.toEqual({
         inProgress: ['ep-run'],
         completed: [],
       });
@@ -810,7 +811,8 @@ describe('events investigation state', () => {
 
       const response = await eventsFacetsRoute.handler(params);
 
-      expect(countFacets).toHaveBeenCalledWith(expect.anything(), null);
+      const { investigationEpisodes } = countFacets.mock.calls[0][0];
+      await expect(investigationEpisodes).resolves.toBeUndefined();
       expect(response.investigation).toBeUndefined();
     });
 

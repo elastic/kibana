@@ -679,17 +679,15 @@ describe('RuleEventsClient', () => {
         return { columns: [], values: [] } as unknown as ESQLSearchResponse;
       });
 
-      const facets = await client.countFacets(
-        {
-          severity: ['critical'],
-          status: ['active'],
-          investigation: {
-            states: ['completed'],
-            episodes: { inProgress: ['ep-1'], completed: ['ep-2'] },
-          },
+      const facets = await client.countFacets({
+        severity: ['critical'],
+        status: ['active'],
+        investigation: {
+          states: ['completed'],
+          episodes: { inProgress: ['ep-1'], completed: ['ep-2'] },
         },
-        { inProgress: ['ep-1'], completed: ['ep-2'] }
-      );
+        investigationEpisodes: Promise.resolve({ inProgress: ['ep-1'], completed: ['ep-2'] }),
+      });
 
       expect(facets.severity).toEqual({ critical: 0, high: 3, medium: 0, low: 0 });
       expect(facets.status).toEqual({ active: 0, recovering: 0, inactive: 0 });
@@ -712,7 +710,9 @@ describe('RuleEventsClient', () => {
         async () => ({ columns: [], values: [] } as unknown as ESQLSearchResponse)
       );
 
-      const facets = await client.countFacets({}, null);
+      const facets = await client.countFacets({
+        investigationEpisodes: Promise.resolve(undefined),
+      });
 
       expect(facets.investigation).toBeUndefined();
       expect(

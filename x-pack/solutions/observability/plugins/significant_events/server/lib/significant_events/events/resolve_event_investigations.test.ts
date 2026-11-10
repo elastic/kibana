@@ -210,7 +210,7 @@ describe('listInvestigationStateSets', () => {
     expect(list).toHaveBeenCalledWith(
       expect.objectContaining({
         subject_type: 'alert',
-        sort_field: 'updated_at',
+        sort_field: 'created_at',
         sort_order: 'desc',
       })
     );
@@ -238,6 +238,31 @@ describe('listInvestigationStateSets', () => {
     if (sets !== 'unavailable') {
       expect(sets.completed).toHaveLength(1_000);
       expect(sets.truncated).toBe(true);
+    }
+  });
+
+  it('is unavailable when the whole listing outlasts its deadline, not only one page', async () => {
+    const { reader, list } = createLister(
+      [
+        Array.from({ length: 100 }, (_, offset) => ({
+          id: `a-${offset}`,
+          alertIds: [`ep-a-${offset}`],
+        })),
+        [{ id: 'b', alertIds: ['ep-b'] }],
+      ],
+      101
+    );
+    const now = jest.spyOn(Date, 'now');
+    // The deadline is set and checked for page 1 at t=0, then page 2 starts after it has passed.
+    now.mockReturnValueOnce(0).mockReturnValueOnce(0).mockReturnValue(60_000);
+
+    try {
+      expect(
+        await listInvestigationStateSets({ agenticInvestigations: reader, request, logger })
+      ).toBe('unavailable');
+      expect(list).toHaveBeenCalledTimes(1);
+    } finally {
+      now.mockRestore();
     }
   });
 

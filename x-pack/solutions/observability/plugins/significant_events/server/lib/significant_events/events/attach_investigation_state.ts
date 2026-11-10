@@ -31,12 +31,15 @@ export const toInvestigationFilter = (
 ): EventsFilterOptions['investigation'] =>
   states?.length && sets ? { states, episodes: toEpisodes(sets) } : undefined;
 
-export const investigationStateUnavailable = () =>
+export const createInvestigationStateUnavailableError = () =>
   serverUnavailable(
     'The investigation state is unavailable, so events cannot be filtered by it. Check that Agentic Investigations is available and that you can read investigations.'
   );
 
-/** Gives each event its investigation state: from `sets` when the list is filtered, else resolved per event. */
+/**
+ * Gives each event its investigation state: from `sets` when the list is filtered, else resolved
+ * per event. Only the unfiltered path knows the investigation id, so a filtered row carries none.
+ */
 export const attachInvestigationState = async ({
   hits,
   sets,

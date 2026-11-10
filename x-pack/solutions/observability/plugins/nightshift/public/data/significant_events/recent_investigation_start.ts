@@ -10,6 +10,8 @@ import type { QueryClient } from '@kbn/react-query';
 /** How long after a start the events keep being read, until the new investigation is listed. */
 const RECENT_START_WINDOW_MS = 60_000;
 
+// Kept in the query cache so every events list and detail hook sees it without a provider of their
+// own. No query observes it, and the cache keeps it past the one-minute window (gcTime is 5 minutes).
 const INVESTIGATION_STARTED_AT_KEY = ['nightshift.investigationStartedAt'] as const;
 
 export const markInvestigationStarted = (queryClient: QueryClient, now: number = Date.now()) => {

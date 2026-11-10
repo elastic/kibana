@@ -19,8 +19,8 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
-import type { NightshiftSignificantEvent } from '../data/significant_events/use_fetch_significant_events';
-import { InvestigationStatusBadge } from '../components/entities/investigation/investigation_status_badge';
+import type { NightshiftSignificantEvent } from '../../data/significant_events/use_fetch_significant_events';
+import { InvestigationStatusBadge } from '../../components/entities/investigation/investigation_status_badge';
 import {
   getStatusColor,
   isNeedsActionStatus,
