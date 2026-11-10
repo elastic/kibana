@@ -400,7 +400,11 @@ export function MachineLearningCommonUIProvider({
 
     async ensureAllMenuPopoversClosed() {
       await retry.tryForTime(5000, async () => {
-        await browser.pressKeys(browser.keys.ESCAPE);
+        // ESCAPE is a global key press: a focused EuiFieldSearch clears itself on it, dropping the
+        // table filter, so only send it when there is actually a popover to close.
+        if (await find.existsByCssSelector('.euiContextMenuPanel', 0)) {
+          await browser.pressKeys(browser.keys.ESCAPE);
+        }
         const popoverExists = await find.existsByCssSelector('.euiContextMenuPanel', 0);
         expect(popoverExists).to.eql(false, 'All popovers should be closed');
       });

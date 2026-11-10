@@ -37,7 +37,7 @@ import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_ta
 
 const config = TasksConfig[EntityStoreTaskType.enum.statusReport];
 
-const getStatusReportTaskId = (namespace: string): string => `${config.type}:${namespace}`;
+export const getStatusReportTaskId = (namespace: string): string => `${config.type}:${namespace}`;
 
 const SOURCE_TERMS_SIZE = 100;
 const MISSING_SOURCE = 'unknown';

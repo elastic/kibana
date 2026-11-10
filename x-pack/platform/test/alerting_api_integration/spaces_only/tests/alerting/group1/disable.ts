@@ -284,37 +284,44 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         .send(
           getTestRuleData({
             enabled: true,
+            // a rule runs as soon as it is created, so a long interval keeps that the only run
             schedule: {
-              interval: '3s',
+              interval: '1d',
             },
           })
         )
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      // wait for rule to run once
+      // wait for rule to run once; `last_run.timestamp` is already set at creation, so only the
+      // run history proves a run happened
       await retry.try(async () => {
         const rule = await getRule(createdRule.id);
-        expect(rule?.monitoring?.run?.last_run?.timestamp).not.to.be(undefined);
+        expect(rule?.monitoring?.run?.history?.length).to.greaterThan(0);
       });
+
+      // let Task Manager release the task, so the writes below cannot land mid-claim
+      await waitForIdleTask(createdRule.scheduled_task_id, true);
 
       // disable rule, and implicitly task
       await ruleUtils.disable(createdRule.id);
+      await waitForIdleTask(createdRule.scheduled_task_id, false);
 
-      // wait for the task to be disabled
-      await waitForDisabledTask(createdRule.scheduled_task_id);
+      // manually enable task, and make it due since the rule's interval put `runAt` a day out
+      await taskManagerUtils.setTaskEnabled(createdRule.scheduled_task_id, true, new Date());
 
-      // manually enable task
-      await taskManagerUtils.setTaskEnabled(createdRule.scheduled_task_id, true);
-
-      // wait for the task to be disabled
-      await waitForDisabledTask(createdRule.scheduled_task_id);
+      // the task runs, finds the rule disabled, and disables itself again
+      await waitForIdleTask(createdRule.scheduled_task_id, false);
     });
 
-    async function waitForDisabledTask(taskId: string) {
+    async function waitForIdleTask(taskId: string, enabled: boolean) {
       await retry.try(async () => {
         const taskDoc = await getScheduledTask(taskId);
-        expect(taskDoc.task.enabled).to.be(false);
+        expect(taskDoc.task.enabled).to.be(enabled);
+        expect(taskDoc.task.status).to.eql('idle');
+        expect(taskDoc.task.ownerId).to.be(null);
+        expect(taskDoc.task.startedAt).to.be(null);
+        expect(taskDoc.task.retryAt).to.be(null);
       });
     }
   });

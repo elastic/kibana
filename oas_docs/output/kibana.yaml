@@ -28563,7 +28563,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR fleet-setup.
+        Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: (fleet-agent-policies-read AND integrations-read) OR fleet-setup.
       operationId: get-fleet-agent-policies-agentpolicyid-download
       parameters:
         - description: The ID of the agent policy
@@ -28681,7 +28681,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read.
+        Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read AND integrations-read.
       operationId: get-fleet-agent-policies-agentpolicyid-full
       parameters:
         - description: The ID of the agent policy
@@ -65440,6 +65440,81 @@ paths:
             {
               "entityTypes": ["user", "host", "service", "generic"]
             }
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/security/entity_store/update_api_key:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security/entity_store/update_api_key</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Replace the API key of every Entity Store background task with one owned by the user making this request, for example after the user who installed the Entity Store is removed. The tasks keep their schedules and state, and no entity data is changed. The user needs the same privileges as the install endpoint. Tasks that could not be updated are listed in `failed`; call the endpoint again to retry them.<br/><br/>[Required authorization] Route required privileges: securitySolution.
+      operationId: post-security-entity-store-update-api-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              updateApiKeyExample:
+                description: Re-grant the API key of every Entity Store task as the user making the request.
+                summary: Update the API key of the Entity Store tasks
+                value: {}
+            schema:
+              additionalProperties: false
+              type: object
+              properties: {}
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                updateApiKeyPartialExample:
+                  description: Call the endpoint again to retry the tasks listed in `failed`.
+                  summary: Some tasks could not be updated
+                  value:
+                    failed:
+                      - id: entity_store:v2:status_report_task:default
+                        message: Version conflict
+                        statusCode: 409
+                    ok: false
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                updateApiKeySuccessExample:
+                  description: Every Entity Store task now runs with an API key owned by the caller.
+                  summary: All tasks updated
+                  value:
+                    failed: []
+                    ok: true
+                    updated:
+                      - entity_store:v2:history_snapshot_task:default
+                      - entity_store:v2:status_report_task:default
+          description: Indicates that the request was processed. Check `ok` and `failed` to see whether every task was updated.
+      summary: Update the API key of the Entity Store tasks
+      tags:
+        - Security entity store
+      x-codeSamples:
+        - lang: curl
+          source: |
+            curl -X POST -H "kbn-xsrf: true" -H "Authorization: ApiKey ${API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{}' \
+              "${KIBANA_URL}/api/security/entity_store/update_api_key"
+        - lang: Console
+          source: |
+            POST kbn://api/security/entity_store/update_api_key
+            {}
+      x-state: Generally available; added in 9.5.7
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -136033,6 +136108,11 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         force:
           default: false
           type: boolean
@@ -136318,6 +136398,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_managed_integrations_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Experimental; added in 9.5.0
         policyIds:
           description: IDs of the managed integrations to upgrade to their installed package version.
           items:
@@ -136332,6 +136417,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_packages_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         force:
           default: false
           type: boolean
@@ -145432,6 +145522,11 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         force:
           default: false
           type: boolean
@@ -167067,6 +167162,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         shipper:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
@@ -167236,6 +167332,7 @@ components:
                   required:
                     - id
                 - type: string
+              nullable: true
             ssl:
               additionalProperties: false
               type: object
@@ -167252,6 +167349,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
               required:
                 - key
         shipper:
@@ -167343,6 +167441,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         shipper:
           allOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_output_shipper'
@@ -167432,6 +167531,7 @@ components:
                   required:
                     - id
                 - type: string
+              nullable: true
             ssl:
               additionalProperties: false
               type: object
@@ -167448,6 +167548,7 @@ components:
                       required:
                         - id
                     - type: string
+                  nullable: true
         service_token:
           nullable: true
           type: string
@@ -168032,6 +168133,11 @@ components:
     Kibana_HTTP_APIs_upgrade_package_policies_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         packagePolicyIds:
           items:
             type: string
@@ -184219,6 +184325,10 @@ components:
             parameters:
               type: object
               properties:
+                force:
+                  description: Read a file locked by the OS from a volume snapshot. Endpoint on Windows only.
+                  example: true
+                  type: boolean
                 path:
                   description: The full file path to retrieve from the endpoint.
                   type: string

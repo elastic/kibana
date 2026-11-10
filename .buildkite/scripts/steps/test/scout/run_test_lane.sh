@@ -295,7 +295,7 @@ run_scout_tests() {
   esac
 }
 
-# Upload Scout reporter events and clean up event reports, preserving failure reports
+# Upload Scout reporter events in the background, preserving failure reports for annotations
 upload_report_events() {
   local config_path="$1"
 
@@ -308,23 +308,16 @@ upload_report_events() {
     return
   fi
 
-  echo "~~~ Uploading report events: $config_path"
+  echo "Uploading report events in the background: $config_path"
 
-  set +e
-  node scripts/scout upload-events --dontFailOnError
-  local exit_code=$?
-  set -e
-
-  if [[ $exit_code -ne 0 ]]; then
-    echo "Upload failed for $config_path (exit code $exit_code)"
-  fi
-
-  # Clean up event reports to avoid double ingestion, preserving failure reports for annotations
+  local event_dirs=()
   for dir in .scout/reports/scout-playwright-*; do
     if [[ -d "$dir" ]] && [[ "$dir" != *"scout-playwright-test-failures-"* ]]; then
-      rm -rf "$dir"
+      event_dirs+=("$dir")
     fi
   done
+
+  scout_upload_events_in_background "${event_dirs[@]}"
 }
 
 # Return the final status of a config path based on the run results
@@ -407,7 +400,7 @@ if [[ -n "$PLAYWRIGHT_GREP_INVERT" ]]; then
   PLAYWRIGHT_GREP_INVERT_ARGS=("--grep-invert=$PLAYWRIGHT_GREP_INVERT")
 fi
 
-trap stop_server EXIT
+trap 'scout_await_event_uploads; stop_server' EXIT
 
 for i in "${!LOAD_IDS[@]}"; do
   config_path="${LOAD_IDS[$i]}"

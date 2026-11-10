@@ -157,9 +157,9 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         // authMode is only present on auth-type unions (set by get_schema_for_auth_type,
         // always one of 'per-user' | 'shared'). Other discriminated unions omit it, and
         // any unexpected value falls through to no badge rather than a wrong label.
-        // Label + icon mirror the "Authentication" column in the Stack Management
+        // Label + icon mirror the "Credential scope" column in the Stack Management
         // connectors list (triggers_actions_ui actions_connectors_list.tsx:
-        // authModePerUser = "Personal credentials", authModeShared = "Service account").
+        // authModePerUser = "Personal credentials", authModeShared = "Shared credentials").
         // Duplicated intentionally to avoid coupling this generic package to that plugin;
         // keep the wording/icons in sync if either side changes.
         const authMode = (optionMeta as Record<string, unknown>).authMode;
@@ -173,7 +173,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
           ) : authMode === 'shared' ? (
             <EuiBadge color="hollow" iconType="users">
               {i18n.translate('responseOps.formGenerator.multiOptionUnionWidget.sharedAuthLabel', {
-                defaultMessage: 'Service account',
+                defaultMessage: 'Shared credentials',
               })}
             </EuiBadge>
           ) : null;

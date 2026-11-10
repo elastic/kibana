@@ -217,6 +217,40 @@ describe('MetricsExperienceGridContent', () => {
     expect(getByTestId('unifiedMetricsExperienceGrid')).toBeInTheDocument();
   });
 
+  it('passes only the metadata fields that the WHERE uses to the grid', () => {
+    const metadataFetchParams = {
+      ...fetchParams,
+      query: { esql: 'TS metrics-* METADATA _id, _ignored | WHERE _ignored IS NULL' },
+    };
+
+    render(<MetricsExperienceGridContent {...defaultProps} fetchParams={metadataFetchParams} />, {
+      wrapper: IntlProvider,
+    });
+
+    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+    expect(MetricsGrid).toHaveBeenLastCalledWith(
+      expect.objectContaining({ metadataFields: ['_ignored'] }),
+      expect.anything()
+    );
+  });
+
+  it('passes no metadata fields when the WHERE does not use them', () => {
+    const metadataFetchParams = {
+      ...fetchParams,
+      query: { esql: 'TS metrics-* METADATA _id, _ignored | WHERE host.name == "a"' },
+    };
+
+    render(<MetricsExperienceGridContent {...defaultProps} fetchParams={metadataFetchParams} />, {
+      wrapper: IntlProvider,
+    });
+
+    const { MetricsGrid } = jest.requireMock('./metrics_grid');
+    expect(MetricsGrid).toHaveBeenLastCalledWith(
+      expect.objectContaining({ metadataFields: [] }),
+      expect.anything()
+    );
+  });
+
   it('renders the loading state when Discover is reloading', () => {
     const { getByTestId } = render(
       <MetricsExperienceGridContent {...defaultProps} isDiscoverLoading />,

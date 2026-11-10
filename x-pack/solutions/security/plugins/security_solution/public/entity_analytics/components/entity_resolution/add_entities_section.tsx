@@ -42,6 +42,7 @@ import {
   RISK_SCORE_COLUMN,
   ACTIONS_COLUMN,
   ADD_ENTITIES_TABLE_CAPTION,
+  INSUFFICIENT_PRIVILEGES_TOOLTIP,
 } from './translations';
 import {
   ADD_ENTITIES_SECTION_TEST_ID,
@@ -63,12 +64,16 @@ interface AddEntitiesSectionProps {
   onEntityNameClick?: (entity: Record<string, unknown>) => void;
   addingEntityId?: string;
   disabled?: boolean;
+  canModify?: boolean;
+  isPrivilegesLoading?: boolean;
 }
 
 export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
   entityType,
   excludeEntityIds,
   disabled,
+  canModify = true,
+  isPrivilegesLoading = false,
   onAddEntity,
   onEntityNameClick,
   addingEntityId,
@@ -118,6 +123,8 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
         render: (entity: Record<string, unknown>) => {
           const entityId = getEntityId(entity);
           const isThisEntityAdding = addingEntityId === entityId;
+          const lacksPrivileges = !isPrivilegesLoading && !canModify;
+
           return (
             <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -131,13 +138,16 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={ADD_ENTITY_BUTTON} disableScreenReaderOutput>
+                <EuiToolTip
+                  content={lacksPrivileges ? INSUFFICIENT_PRIVILEGES_TOOLTIP : ADD_ENTITY_BUTTON}
+                  disableScreenReaderOutput={!lacksPrivileges}
+                >
                   <EuiButtonIcon
                     iconType="plus"
                     color="primary"
                     aria-label={ADD_ENTITY_BUTTON}
                     onClick={() => onAddEntity(entity)}
-                    disabled={disabled || !!addingEntityId}
+                    disabled={disabled || isPrivilegesLoading || !canModify || !!addingEntityId}
                     isLoading={isThisEntityAdding}
                   />
                 </EuiToolTip>
@@ -190,7 +200,7 @@ export const AddEntitiesSection: React.FC<AddEntitiesSectionProps> = ({
         },
       },
     ],
-    [onAddEntity, onEntityNameClick, addingEntityId, disabled]
+    [onAddEntity, onEntityNameClick, addingEntityId, disabled, canModify, isPrivilegesLoading]
   );
 
   const pagination = useMemo(

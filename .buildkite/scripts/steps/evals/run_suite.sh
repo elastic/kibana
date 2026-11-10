@@ -208,6 +208,7 @@ EOF
           provider: gcp
           machineType: n2-standard-8
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
         retry:
           automatic:
             - exit_status: "-1"
@@ -274,6 +275,7 @@ EOF
           provider: gcp
           machineType: n2-standard-2
           preemptible: true
+          spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
 EOF
       fi
 

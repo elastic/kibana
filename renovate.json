@@ -1360,15 +1360,6 @@
       "enabled": true
     },
     {
-      "groupName": "package.json/pnpm-lock.yaml utils",
-      "matchDepNames": ["sort-package-json"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "cbor2",
       "matchDepNames": ["cbor2"],
       "reviewers": ["team:kibana-operations"],
@@ -2559,15 +2550,6 @@
     {
       "groupName": "lightningcss",
       "matchDepNames": ["lightningcss"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "tar-fs",
-      "matchDepNames": ["tar-fs"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
