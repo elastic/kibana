@@ -524,7 +524,7 @@ When adding new toolkit actions:
 
 - **Root and data source events**: Emitted when data source resolution is applied, via `trackContextualProfileResolvedEvent({ contextLevel, profileId })`.
 - **Document events**: Emitted lazily when the proxied record's `context` property is read.
-- **Active profiles context**: Updated on data source resolution via `updateProfilesContextWith([rootId, dataSourceId])`, which sets the EBT context for all subsequent events in that session.
+- **Active profiles context**: Updated on data source resolution via `updateProfilesContextWith`, which sets `discoverProfiles` for all subsequent events in that session. The list contains the root profile id and the data source profile id. When a provider defines `telemetryLabels`, inherited labels are included too, and the active profile id is appended when it is not already one of them.
 
 The `ScopedDiscoverEBTManager` is injected at scoped manager creation time.
 

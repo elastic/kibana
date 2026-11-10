@@ -115,10 +115,10 @@ export interface AsyncProfileProvider<TProfile extends PartialProfile, TParams, 
 }
 
 /**
- * Context object with an injected profile ID
+ * Context object with an injected profile ID and, when the provider defines them, telemetry labels
  */
 export type ContextWithProfileId<TContext> = TContext &
-  Pick<BaseProfileProvider<{}, {}>, 'profileId'>;
+  Pick<BaseProfileProvider<{}, {}>, 'profileId' | 'telemetryLabels'>;
 
 /**
  * Used to extract the profile type from a profile provider
