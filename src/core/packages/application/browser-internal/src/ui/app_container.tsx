@@ -11,7 +11,7 @@ import { css, keyframes } from '@emotion/react';
 import type { Observable } from 'rxjs';
 import type { FC, MutableRefObject } from 'react';
 import React, { Fragment, useLayoutEffect, useRef, useState } from 'react';
-import { EuiLoadingElasticRing, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import type { CoreTheme } from '@kbn/core-theme-browser';
@@ -53,7 +53,6 @@ export const AppContainer: FC<Props> = ({
   setIsMounting,
   setAppNotFoundState,
   theme$,
-  showPlainSpinner,
 }: Props) => {
   const [error, setError] = useState<Error | null>(null);
   const [showSpinner, setShowSpinner] = useState(true);
@@ -134,15 +133,13 @@ export const AppContainer: FC<Props> = ({
     <Fragment>
       <ThrowIfError error={error} />
       {appNotFound && <AppNotFound />}
-      {showSpinner && !appNotFound && (
-        <AppLoadingPlaceholder showPlainSpinner={Boolean(showPlainSpinner)} />
-      )}
+      {showSpinner && !appNotFound && <AppLoadingPlaceholder />}
       <div className={APP_WRAPPER_CLASS} key={appId} ref={elementRef} aria-busy={showSpinner} />
     </Fragment>
   );
 };
 
-const AppLoadingPlaceholder: FC<{ showPlainSpinner: boolean }> = ({ showPlainSpinner }) => {
+const AppLoadingPlaceholder: FC = () => {
   const { euiTheme } = useEuiTheme();
   const appContainerFadeIn = keyframes({
     '0%': { opacity: 0 },
@@ -161,26 +158,16 @@ const AppLoadingPlaceholder: FC<{ showPlainSpinner: boolean }> = ({ showPlainSpi
     animationDuration: '2s',
   });
 
-  if (showPlainSpinner) {
-    return (
-      <EuiLoadingSpinner
-        size={'xxl'}
-        css={appContainerStyles}
-        data-test-subj="appContainer-loadingSpinner"
-        aria-label={i18n.translate('core.application.appContainer.plainSpinner.loadingAriaLabel', {
-          defaultMessage: 'Loading application',
-        })}
-      />
-    );
-  }
-  // POC: EuiLoadingElastic → EuiLoadingElasticRing (xxl → xl; label vs aria-label)
+  // POC: the Elastic ring is reserved for the boot splash (before the workspace is visible);
+  // app mounts inside the workspace always use the plain spinner.
   return (
-    <EuiLoadingElasticRing
+    <EuiLoadingSpinner
+      size={'xxl'}
       css={appContainerStyles}
-      label={i18n.translate('core.application.appContainer.loadingAriaLabel', {
+      data-test-subj="appContainer-loadingSpinner"
+      aria-label={i18n.translate('core.application.appContainer.plainSpinner.loadingAriaLabel', {
         defaultMessage: 'Loading application',
       })}
-      size="xl"
     />
   );
 };
