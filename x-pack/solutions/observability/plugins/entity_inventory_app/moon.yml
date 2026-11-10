@@ -39,6 +39,8 @@ dependsOn:
   - '@kbn/react-hooks'
   - '@kbn/ui-callout'
   - '@kbn/shared-ux-router'
+  - '@kbn/rison'
+  - '@kbn/kibana-utils-plugin'
 tags:
   - plugin
   - prod

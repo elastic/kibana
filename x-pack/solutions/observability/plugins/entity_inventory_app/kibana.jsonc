@@ -12,6 +12,6 @@
     "configPath": ["xpack", "entityInventoryApp"],
     "requiredPlugins": ["dataViews", "observabilityShared", "share", "unifiedSearch"],
     "optionalPlugins": [],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact", "kibanaUtils"]
   }
 }
