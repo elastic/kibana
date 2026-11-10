@@ -57,11 +57,18 @@ export const toValueBands = (
     kit,
     losses,
     steps = DEFAULT_COLOR_STEPS,
+    defaultPalette = DEFAULT_PALETTE_NAME,
+    colorsValues = true,
   }: {
     path: string;
     kit: MaterializeKit;
     losses: MaterializeLoss[];
+    /** How many bands a named palette spreads, as the chart's Lens transform passes it. */
     steps?: number;
+    /** The palette Lens spreads without one configured. */
+    defaultPalette?: string;
+    /** False where the bands color a scale's sections rather than look values up, as a gauge's do. */
+    colorsValues?: boolean;
   }
 ): ValueBands => {
   if (color?.type === 'dynamic') {
@@ -77,7 +84,7 @@ export const toValueBands = (
       }),
     };
   }
-  const palette = color?.palette ?? DEFAULT_PALETTE_NAME;
+  const palette = color?.palette ?? defaultPalette;
   const colors = kit.paletteColors(steps, palette);
   if (color?.type === 'legacy_dynamic' && color.shift) {
     losses.push({
@@ -89,7 +96,7 @@ export const toValueBands = (
       }),
     });
   }
-  if (color) {
+  if (color && colorsValues) {
     // A named palette has no stops, so `workoutColorForValue` finds a value's segment with `<=`:
     // a value on a boundary takes the lower band. Lens's default palette has stops, found with `<`.
     losses.push({

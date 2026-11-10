@@ -39,6 +39,7 @@
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
     "@kbn/lens-common",
-    "@kbn/charts-plugin"
+    "@kbn/charts-plugin",
+    "@kbn/expression-gauge-plugin"
   ]
 }

@@ -11,6 +11,7 @@ import { lensApiConfigSchema } from '@kbn/lens-embeddable-utils';
 import type { Materializer } from '../types';
 import { openInLensLabel } from './shared';
 import { mapLensDatatable } from './datatable';
+import { mapLensGauge } from './gauge';
 import { mapLensHeatmap } from './heatmap';
 import { mapLensMetric } from './metric';
 import { mapLensPartition } from './partition';
@@ -142,6 +143,8 @@ export const createLensMaterializer = ({
         return mapLensPartition(single, tables, kit, savedObject);
       case 'heatmap':
         return mapLensHeatmap(single, tables, kit, savedObject);
+      case 'gauge':
+        return mapLensGauge(single, tables, kit, savedObject);
     }
   },
 });

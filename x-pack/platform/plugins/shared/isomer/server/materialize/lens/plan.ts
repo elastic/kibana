@@ -16,6 +16,7 @@ import { createUnsupportedNode } from '../unsupported';
 import type {
   LensApiConfig,
   LensDatatableConfig,
+  LensGaugeConfig,
   LensHeatmapConfig,
   LensMetricConfig,
   LensPartitionConfig,
@@ -33,7 +34,8 @@ export type LensSingleQueryConfig =
   | LensMetricConfig
   | LensDatatableConfig
   | LensPartitionConfig
-  | LensHeatmapConfig;
+  | LensHeatmapConfig
+  | LensGaugeConfig;
 
 /** The chart types that run one query, which the Lens materializer maps. */
 const SINGLE_QUERY_TYPES: ReadonlySet<string> = new Set<LensSingleQueryConfig['type']>([
@@ -44,6 +46,7 @@ const SINGLE_QUERY_TYPES: ReadonlySet<string> = new Set<LensSingleQueryConfig['t
   'mosaic',
   'waffle',
   'heatmap',
+  'gauge',
 ]);
 
 interface EsqlSource {
