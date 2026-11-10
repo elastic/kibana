@@ -27,15 +27,17 @@ import {
   noDestinationStats,
 } from './mappers/map_destination_stats_result';
 import { mapProcessorStatsRows, noProcessorStats } from './mappers/map_processor_stats_result';
+import { mapSourceStatsRows, noSourceStats } from './mappers/map_source_stats_result';
 import {
   buildDestinationRateQuery,
   buildDestinationSumsQuery,
 } from './query_builders/build_destination_stats_queries';
 import { buildProcessorSumsQuery } from './query_builders/build_processor_stats_queries';
+import { buildSourceRateQuery } from './query_builders/build_source_stats_queries';
 import { buildStreamProbeQuery } from './query_builders/build_stream_probe_query';
 import type { StatsQueryBaseParams } from './query_builders/filters';
 import { getSeriesBucketMs } from './utils/series_bucket';
-import { validateDestination, validateProcessor } from './validate_components';
+import { validateDestination, validateProcessor, validateSource } from './validate_components';
 
 /** The results of one kind, and the error when its queries failed. */
 interface KindOutcome<TResult> {
@@ -72,13 +74,15 @@ export class UnitStatsClient {
 
     const destinationConfigs = new Map((unit.destinations ?? []).map((d) => [d.id, d]));
     const processorConfigs = new Map((unit.processors ?? []).map((p) => [p.id, p]));
+    const sourceConfigs = new Map((unit.sources ?? []).map((s) => [s.id, s]));
 
-    // Omitted: every destination and processor in the unit, if one request can hold them. A list,
-    // even an empty one, names exactly the components to answer for.
+    // Omitted: every destination, processor and source in the unit, if one request can hold them. A
+    // list, even an empty one, names exactly the components to answer for.
     const refs = request.components ?? this.getAllUnitRefs(unit);
 
     const destinations: Record<string, StreamsUnit.StatsDestinationResult> = {};
     const processors: Record<string, StreamsUnit.StatsProcessorResult> = {};
+    const sources: Record<string, StreamsUnit.StatsSourceResult> = {};
     const queryableRefs: StreamsUnit.StatsComponentRef[] = [];
 
     for (const ref of refs) {
@@ -89,44 +93,51 @@ export class UnitStatsClient {
         });
         destinations[ref.id] = result;
         if (queryable) queryableRefs.push(ref);
-      } else {
+      } else if (ref.kind === 'processor') {
         const { result, queryable } = validateProcessor({
           config: processorConfigs.get(ref.id),
         });
         processors[ref.id] = result;
         if (queryable) queryableRefs.push(ref);
+      } else {
+        const { result, queryable } = validateSource({
+          config: sourceConfigs.get(ref.id),
+        });
+        sources[ref.id] = result;
+        if (queryable) queryableRefs.push(ref);
       }
     }
 
-    const [destinationOutcome, processorOutcome] = await this.getComponentStats({
+    const [destinationOutcome, processorOutcome, sourceOutcome] = await this.getComponentStats({
       baseParams,
       refs: queryableRefs,
       bucketMs,
     });
     Object.assign(destinations, destinationOutcome?.results);
     Object.assign(processors, processorOutcome?.results);
+    Object.assign(sources, sourceOutcome?.results);
 
     // Every kind that ran failed: there is nothing to return, so the request fails with the most
     // actionable error, and `createServerRoute` maps it to its HTTP status.
-    const failures = [destinationOutcome, processorOutcome].flatMap((outcome) =>
-      outcome?.error ? [outcome.error] : []
-    );
-    const ranKinds = [destinationOutcome, processorOutcome].filter(Boolean).length;
+    const outcomes = [destinationOutcome, processorOutcome, sourceOutcome];
+    const failures = outcomes.flatMap((outcome) => (outcome?.error ? [outcome.error] : []));
+    const ranKinds = outcomes.filter(Boolean).length;
     if (failures.length > 0 && failures.length === ranKinds) {
       throw mostActionableFailure(failures);
     }
 
     return {
-      components: { destinations, processors },
+      components: { destinations, processors, sources },
       meta: { window, ...(configHash ? { config_hash: configHash } : {}) },
     };
   }
 
-  /** Every destination and processor in the unit, as long as one request can name them all. */
+  /** Every destination, processor and source in the unit, as long as one request can name them all. */
   private getAllUnitRefs(unit: StreamsUnit.Configuration): StreamsUnit.StatsComponentRef[] {
     const refs = [
       ...(unit.destinations ?? []).map(({ id }) => ({ kind: 'destination' as const, id })),
       ...(unit.processors ?? []).map(({ id }) => ({ kind: 'processor' as const, id })),
+      ...(unit.sources ?? []).map(({ id }) => ({ kind: 'source' as const, id })),
     ];
     if (refs.length > MAX_STREAMS_UNIT_STATS_COMPONENTS) {
       throw new StatusError(
@@ -154,6 +165,7 @@ export class UnitStatsClient {
   }) {
     const destinationIds = refs.flatMap(({ kind, id }) => (kind === 'destination' ? [id] : []));
     const processorIds = refs.flatMap(({ kind, id }) => (kind === 'processor' ? [id] : []));
+    const sourceIds = refs.flatMap(({ kind, id }) => (kind === 'source' ? [id] : []));
 
     if (refs.length === 0) return [];
 
@@ -166,9 +178,18 @@ export class UnitStatsClient {
 
       return [
         destinationIds.length > 0
-          ? this.destinationFailure({ ids: destinationIds, bucketMs, failure })
+          ? this.componentKindFailure({
+              ids: destinationIds,
+              failure,
+              noData: () => noDestinationStats(bucketMs),
+            })
           : undefined,
-        processorIds.length > 0 ? this.processorFailure({ ids: processorIds, failure }) : undefined,
+        processorIds.length > 0
+          ? this.componentKindFailure({ ids: processorIds, failure, noData: noProcessorStats })
+          : undefined,
+        sourceIds.length > 0
+          ? this.componentKindFailure({ ids: sourceIds, failure, noData: noSourceStats })
+          : undefined,
       ];
     }
 
@@ -179,6 +200,7 @@ export class UnitStatsClient {
       processorIds.length > 0
         ? this.getProcessorStats({ baseParams, ids: processorIds })
         : undefined,
+      sourceIds.length > 0 ? this.getSourceStats({ baseParams, ids: sourceIds }) : undefined,
     ]);
   }
 
@@ -267,26 +289,12 @@ export class UnitStatsClient {
       const failure = toSearchError(error, what);
       this.logFailure(failure, { unitId: baseParams.unitId, what });
 
-      return this.destinationFailure({ ids, bucketMs, failure });
+      return this.componentKindFailure({
+        ids,
+        failure,
+        noData: () => noDestinationStats(bucketMs),
+      });
     }
-  }
-
-  /** The same error on every destination, with no data. */
-  private destinationFailure({
-    ids,
-    bucketMs,
-    failure,
-  }: {
-    ids: string[];
-    bucketMs: number;
-    failure: UnitStatsError;
-  }): KindOutcome<StreamsUnit.StatsDestinationResult> {
-    return {
-      results: Object.fromEntries(
-        ids.map((id) => [id, { ...noDestinationStats(bucketMs), error: failure.toStatsError() }])
-      ),
-      error: failure,
-    };
   }
 
   private async getProcessorStats({
@@ -319,21 +327,49 @@ export class UnitStatsClient {
       const failure = toSearchError(error, what);
       this.logFailure(failure, { unitId: baseParams.unitId, what });
 
-      return this.processorFailure({ ids, failure });
+      return this.componentKindFailure({ ids, failure, noData: noProcessorStats });
     }
   }
 
-  /** The same error on every processor, with no data. */
-  private processorFailure({
+  private async getSourceStats({
+    baseParams,
+    ids,
+  }: {
+    baseParams: StatsQueryBaseParams;
+    ids: string[];
+  }): Promise<KindOutcome<StreamsUnit.StatsSourceResult>> {
+    const what = 'source stats';
+
+    try {
+      const rows = await this.runQuery(buildSourceRateQuery({ ...baseParams, ids }));
+      const mapped = mapSourceStatsRows({ rows });
+
+      return {
+        results: Object.fromEntries(
+          ids.map((id) => [id, Object.hasOwn(mapped, id) ? mapped[id] : noSourceStats()])
+        ),
+      };
+    } catch (error) {
+      const failure = toSearchError(error, what);
+      this.logFailure(failure, { unitId: baseParams.unitId, what });
+
+      return this.componentKindFailure({ ids, failure, noData: noSourceStats });
+    }
+  }
+
+  /** The same error on every component of a kind, each with no data. */
+  private componentKindFailure<TResult extends object>({
     ids,
     failure,
+    noData,
   }: {
     ids: string[];
     failure: UnitStatsError;
-  }): KindOutcome<StreamsUnit.StatsProcessorResult> {
+    noData: () => TResult;
+  }): KindOutcome<TResult> {
     return {
       results: Object.fromEntries(
-        ids.map((id) => [id, { ...noProcessorStats(), error: failure.toStatsError() }])
+        ids.map((id) => [id, { ...noData(), error: failure.toStatsError() }])
       ),
       error: failure,
     };

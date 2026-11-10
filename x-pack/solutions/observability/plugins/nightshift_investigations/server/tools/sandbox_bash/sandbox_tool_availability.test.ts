@@ -16,11 +16,14 @@ const setup = ({
   withSecurity = true,
   useRbac = true,
   hasManagePrivilege = true,
+  spaceId = 'default',
 }: {
   enabled?: boolean;
   withSecurity?: boolean;
   useRbac?: boolean;
   hasManagePrivilege?: boolean;
+  /** Space the request targets; the space Nightshift runs in unless a test overrides it. */
+  spaceId?: string;
 } = {}) => {
   const { featureFlags } = coreMock.createStart();
   featureFlags.getBooleanValue$.mockReturnValue(of(enabled));
@@ -40,7 +43,7 @@ const setup = ({
     handler({
       request: httpServerMock.createKibanaRequest(),
       uiSettings: uiSettingsServiceMock.createClient(),
-      spaceId: 'default',
+      spaceId,
     });
 
   return { check, featureFlags, checkPrivileges };
@@ -55,6 +58,17 @@ describe('createSandboxToolAvailability', () => {
     expect(checkPrivileges).toHaveBeenCalledWith({
       kibana: [`api:${NIGHTSHIFT_API_PRIVILEGES.manage}`],
     });
+  });
+
+  it('is unavailable outside the space Nightshift runs in', async () => {
+    const { check, featureFlags, checkPrivileges } = setup({ spaceId: 'marketing' });
+
+    await expect(check()).resolves.toEqual({
+      status: 'unavailable',
+      reason: expect.stringContaining('default'),
+    });
+    expect(featureFlags.getBooleanValue$).not.toHaveBeenCalled();
+    expect(checkPrivileges).not.toHaveBeenCalled();
   });
 
   it('is unavailable while the flag is off', async () => {
@@ -102,13 +116,19 @@ describe('checkSandboxAccess', () => {
 
   it('denies a user without the manage privilege, for anything that reads a workspace', async () => {
     await expect(
-      checkSandboxAccess({ request, featureFlags, security: security(false) })
+      checkSandboxAccess({ request, spaceId: 'default', featureFlags, security: security(false) })
+    ).resolves.toMatchObject({ status: 'unavailable' });
+  });
+
+  it('denies a workspace read outside the space Nightshift runs in', async () => {
+    await expect(
+      checkSandboxAccess({ request, spaceId: 'marketing', featureFlags, security: security(true) })
     ).resolves.toMatchObject({ status: 'unavailable' });
   });
 
   it('allows a user with it', async () => {
     await expect(
-      checkSandboxAccess({ request, featureFlags, security: security(true) })
+      checkSandboxAccess({ request, spaceId: 'default', featureFlags, security: security(true) })
     ).resolves.toEqual({ status: 'available' });
   });
 });

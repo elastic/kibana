@@ -325,7 +325,7 @@ export class SlackAppService {
     //   `manage_nightshift`. `configure_nightshift` stays out. Connectors/LLM go through
     //   `actions` (read) via the internal Kibana client, so no grants on system/dot indices
     //   (unsupported in serverless) are needed.
-    // - The agent's before/after workflows read and write the Cortex, memory and
+    // - The agent's before/after workflows read and write the Wiki, memory and
     //   decision-tree AI indices as the caller.
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
@@ -341,7 +341,7 @@ export class SlackAppService {
               },
               {
                 names: [
-                  'ai-index-idx-nightshift-cortex',
+                  'ai-index-idx-nightshift-wiki',
                   'ai-index-idx-nightshift-semantic-memory',
                   'ai-index-idx-nightshift-decision-trees',
                 ],

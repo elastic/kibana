@@ -76,7 +76,10 @@ export const WORKFLOW_CREATE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.create] },
 };
 export const WORKFLOW_CLONE_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.clone] },
+  authz: {
+    requiredPrivileges: [...WorkflowsManagementOperationPrivileges.clone],
+    extendedPrivileges: [WorkflowsManagementApiActions.readManaged],
+  },
 };
 export const WORKFLOW_BULK_CREATE_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.bulkCreate] },
