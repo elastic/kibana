@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createNavigationEssSuite } from './navigation_rbac_test_suite';
+import identifierRule from './identifier_rule.text';
 
-describe('Navigation RBAC - ESS (siem v1)', { tags: ['@ess'] }, () => {
-  createNavigationEssSuite('siem');
-});
+/** Appends the rule that keeps identifiers out of a judge's reasoning to its system prompt. */
+export const withIdentifierRule = (systemPrompt: string): string =>
+  `${systemPrompt}${identifierRule}`;
