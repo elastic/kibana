@@ -182,7 +182,9 @@ const MID_CLAUSE_FRAMES: readonly RegExp[] = [
 const MID_CLAUSE_CANCEL = new RegExp(`${NEGATION.source}|\\b(?:whether|if)\\b`, 'i');
 
 const VERIFY_VERB = '(?:confirm\\w*|verif\\w+|validat\\w+)';
-const SUSPECT_ADJECTIVE = '(?:malicious|unauthori[sz]ed|suspicious|compromised)';
+/** A finding against the activity, including the owner not recognizing it ("if the IP is unrecognized"). */
+const SUSPECT_ADJECTIVE =
+  '(?:malicious|unauthori[sz]ed|suspicious|compromised|unrecogni[sz]ed|unexpected|illegitimate|unapproved)';
 /**
  * A condition word counts only with a finding it waits on. Only if/once/unless/pending open a
  * condition (and "should" in SHOULD_PROVE_CUE, "only after/when" as an explicit gate); bare

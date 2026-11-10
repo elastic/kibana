@@ -12,7 +12,13 @@ import { positiveChainWithNoiseScenario } from './scenarios/positive_chain_with_
 import { sameDisplayNameCrossAccountScenario } from './scenarios/same_display_name_cross_account';
 import { sharedCiEgressScenario } from './scenarios/shared_ci_egress';
 import { thresholdMetaAlertsScenario } from './scenarios/threshold_meta_alerts';
-import type { AuditExampleMetadata, AuditGold, AuditInputVariant, AuditScenario } from './types';
+import type {
+  AuditExampleMetadata,
+  AuditGold,
+  AuditGoldVariantOverride,
+  AuditInputVariant,
+  AuditScenario,
+} from './types';
 
 /** Every scenario the audit-failure-class eval runs. */
 export const AUDIT_SCENARIOS: readonly AuditScenario[] = [
@@ -62,15 +68,18 @@ export const getAuditRendering = (
 
 /**
  * The gold that applies to one variant: the scenario gold with the recall target
- * (`requiredGroup` / `requiredAnyOf`) replaced by the variant override, when there is one.
+ * (`requiredGroup` / `requiredAnyOf`) replaced by the variant override, when there is one, and
+ * the forbidden pairs replaced when the override sets them.
  */
 export const getGoldForVariant = (gold: AuditGold, variant: AuditInputVariant): AuditGold => {
-  const { variantOverrides, requiredGroup, requiredAnyOf, ...rest } = gold;
-  const target = variantOverrides?.[variant] ?? { requiredGroup, requiredAnyOf };
+  const { variantOverrides, requiredGroup, requiredAnyOf, forbiddenCoCitation, ...rest } = gold;
+  const override = variantOverrides?.[variant];
+  const target = override ?? { requiredGroup, requiredAnyOf };
   return {
     ...rest,
     ...(target.requiredGroup !== undefined ? { requiredGroup: target.requiredGroup } : {}),
     ...(target.requiredAnyOf !== undefined ? { requiredAnyOf: target.requiredAnyOf } : {}),
+    forbiddenCoCitation: override?.forbiddenCoCitation ?? forbiddenCoCitation,
   };
 };
 
@@ -100,17 +109,25 @@ export const validateGold = (scenario: AuditScenario): void => {
   const requireGroup = (group: string, where: string): void => {
     if (!groups.includes(group)) fail(`${where} names unknown group "${group}"`);
   };
-  gold.forbiddenCoCitation.forEach((pair) => {
-    if (pair.length !== 2 || pair[0] === pair[1]) {
-      fail(`forbiddenCoCitation needs two distinct groups, got ${JSON.stringify(pair)}`);
-    }
-    pair.forEach((group) => requireGroup(group, 'forbiddenCoCitation'));
-  });
+  const checkPairs = (pairs: AuditGold['forbiddenCoCitation'], where: string): void =>
+    pairs.forEach((pair) => {
+      if (pair.length !== 2 || pair[0] === pair[1]) {
+        fail(`${where} needs two distinct groups, got ${JSON.stringify(pair)}`);
+      }
+      pair.forEach((group) => requireGroup(group, where));
+    });
+  checkPairs(gold.forbiddenCoCitation, 'forbiddenCoCitation');
   gold.confirmedGroups.forEach((group) => requireGroup(group, 'confirmedGroups'));
   (gold.metaAlertGroups ?? []).forEach((group) => requireGroup(group, 'metaAlertGroups'));
 
   const overrides = Object.entries(gold.variantOverrides ?? {});
-  [{ where: 'gold', target: gold as Pick<AuditGold, 'requiredGroup' | 'requiredAnyOf'> }]
+  overrides.forEach(([variant, override]) =>
+    checkPairs(
+      override.forbiddenCoCitation ?? [],
+      `variantOverrides.${variant}.forbiddenCoCitation`
+    )
+  );
+  [{ where: 'gold', target: gold as AuditGoldVariantOverride }]
     .concat(
       overrides.map(([variant, target]) => ({ where: `variantOverrides.${variant}`, target }))
     )

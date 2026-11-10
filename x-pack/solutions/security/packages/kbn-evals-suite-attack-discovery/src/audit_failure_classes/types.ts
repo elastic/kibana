@@ -14,6 +14,15 @@ import type { AnonymizedAlert } from '../types';
  */
 export type AuditInputVariant = 'baseline' | 'enriched' | 'enriched_context';
 
+/**
+ * Per-variant replacement of parts of the gold: the recall target (`requiredGroup` /
+ * `requiredAnyOf`) and, when set, the forbidden pairs (`forbiddenCoCitation`; `[]` means no pair
+ * is forbidden in that variant).
+ */
+export type AuditGoldVariantOverride = Partial<
+  Pick<AuditGold, 'requiredGroup' | 'requiredAnyOf' | 'forbiddenCoCitation'>
+>;
+
 export type AuditExpectedDiscoveries = 'none' | 'atLeastOne';
 
 /** A synthetic alert: a flat, single-valued field map. `_id` is carried separately. */
@@ -37,13 +46,12 @@ export interface AuditGold {
    */
   requiredAnyOf?: readonly string[];
   /**
-   * Per-variant replacement of the recall target, for scenarios where the input of one variant
-   * cannot support the gold of another. An override replaces both `requiredGroup` and
-   * `requiredAnyOf`.
+   * Per-variant replacement of the recall target and the forbidden pairs, for scenarios where the
+   * input of one variant cannot support the gold of another. An override replaces both
+   * `requiredGroup` and `requiredAnyOf`; `forbiddenCoCitation` is replaced only when the override
+   * sets it (`[]` means no pair is forbidden in that variant).
    */
-  variantOverrides?: Partial<
-    Record<AuditInputVariant, Pick<AuditGold, 'requiredGroup' | 'requiredAnyOf'>>
-  >;
+  variantOverrides?: Partial<Record<AuditInputVariant, AuditGoldVariantOverride>>;
   /**
    * Groups whose alerts alone establish malicious activity. Containment advice that cites only
    * these groups is not scored by `ConditionalRemediation`; advice that cites anything else is.
