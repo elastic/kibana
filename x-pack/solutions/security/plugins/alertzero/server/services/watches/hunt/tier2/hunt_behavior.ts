@@ -17,6 +17,12 @@ import type {
   HuntIncompleteness,
   HuntIncompleteReason,
 } from '@kbn/alertzero-common';
+import {
+  HUNT_EVIDENCE_FIELD_KEYS,
+  HUNT_EVIDENCE_FIELDS_MAX_KEYS,
+  HUNT_EVIDENCE_FIELD_VALUE_MAX,
+  HUNT_HIT_NAME_MAX,
+} from '@kbn/alertzero-common';
 import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type { HuntBehaviorModels } from '../types';
 import { isIndexExclusion } from '../../../../../common/remote_cluster';
@@ -197,6 +203,39 @@ const DEFAULT_GENERATION_INDEX = 'logs-*';
 const columnIndex = (columns: Array<{ name: string }> | undefined, name: string): number =>
   columns?.findIndex((c) => c.name === name) ?? -1;
 
+const cellAsString = (value: unknown): string | undefined => {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const str = cellAsString(item);
+      if (str !== undefined) return str;
+    }
+    return undefined;
+  }
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  return undefined;
+};
+
+/** Allowlisted evidence columns present on a row. Empty when none kept. */
+const evidenceFieldsFromRow = (
+  row: unknown[],
+  columns: Array<{ name: string }>
+): Record<string, string> => {
+  const fields: Record<string, string> = {};
+  for (const key of HUNT_EVIDENCE_FIELD_KEYS) {
+    if (Object.keys(fields).length >= HUNT_EVIDENCE_FIELDS_MAX_KEYS) break;
+    const col = columnIndex(columns, key);
+    if (col < 0) continue;
+    const str = cellAsString(row[col]);
+    if (str === undefined) continue;
+    fields[key] =
+      str.length > HUNT_EVIDENCE_FIELD_VALUE_MAX
+        ? str.slice(0, HUNT_EVIDENCE_FIELD_VALUE_MAX)
+        : str;
+  }
+  return fields;
+};
+
 const uniqueTrimmed = (values: unknown[], max: number): { items: string[]; truncated: boolean } => {
   const seen = new Set<string>();
   for (const value of values) {
@@ -367,10 +406,19 @@ const executeValidatedEsql = async ({
         if (typeof id !== 'string' || id.length === 0) continue;
         if (typeof index !== 'string' || index.length === 0) continue;
         const timestamp = tsCol >= 0 ? row[tsCol] : undefined;
+        // The wire schema caps both names; a longer computed value would fail the envelope.
+        const hostRaw =
+          hostCol >= 0 ? cellAsString(row[hostCol])?.slice(0, HUNT_HIT_NAME_MAX) : undefined;
+        const userRaw =
+          userCol >= 0 ? cellAsString(row[userCol])?.slice(0, HUNT_HIT_NAME_MAX) : undefined;
+        const fields = evidenceFieldsFromRow(row, columns);
         hits.push({
           id,
           index,
           ...(typeof timestamp === 'string' && timestamp.length > 0 ? { timestamp } : {}),
+          ...(hostRaw && hostRaw.length > 0 ? { host: hostRaw } : {}),
+          ...(userRaw && userRaw.length > 0 ? { user: userRaw } : {}),
+          fields,
         });
       }
     }
@@ -727,7 +775,7 @@ const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): 
     }
   }
   if (atomicRules?.length) {
-    lines.push('- Proposed atomic rules (already drafted from Tier 1 IOC hits):');
+    lines.push('- Proposed atomic rules (already drafted from IOC Hunt hits):');
     for (const rule of atomicRules.slice(0, 10)) {
       lines.push(`    • ${rule.rule_name}  [${rule.ioc_type}=${rule.ioc_value}]`);
     }
@@ -736,7 +784,9 @@ const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): 
     }
   }
   if (lines.length === 0) return '';
-  return `\n\n--- ENVIRONMENT CONTEXT (Tier 1 hits) ---\n${CONTEXT_PREAMBLE}\n${lines.join('\n')}`;
+  return `\n\n--- ENVIRONMENT CONTEXT (IOC Hunt hits) ---\n${CONTEXT_PREAMBLE}\n${lines.join(
+    '\n'
+  )}`;
 };
 
 export const huntBehavior = async (

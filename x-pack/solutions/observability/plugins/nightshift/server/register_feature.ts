@@ -28,6 +28,7 @@ const PROPOSALS_API_PRIVILEGE_MANAGE = 'manage_proposals';
 // Significant Events manages the Alerting v2 rules behind query knowledge indicators with the
 // current user's saved objects client.
 const ALERTING_V2_RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
+const RELAY_APP_CONNECTION_SAVED_OBJECT_TYPE = 'relay-app-connection';
 
 export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
   features.registerKibanaFeature({
@@ -56,7 +57,11 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         alerts: { read: true },
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
         savedObject: {
-          all: [NIGHTSHIFT_SOURCE_SO_TYPE, ALERTING_V2_RULE_SAVED_OBJECT_TYPE],
+          all: [
+            NIGHTSHIFT_SOURCE_SO_TYPE,
+            ALERTING_V2_RULE_SAVED_OBJECT_TYPE,
+            RELAY_APP_CONNECTION_SAVED_OBJECT_TYPE,
+          ],
           read: [],
         },
       },
@@ -73,7 +78,11 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
         savedObject: {
           all: [],
-          read: [NIGHTSHIFT_SOURCE_SO_TYPE, ALERTING_V2_RULE_SAVED_OBJECT_TYPE],
+          read: [
+            NIGHTSHIFT_SOURCE_SO_TYPE,
+            ALERTING_V2_RULE_SAVED_OBJECT_TYPE,
+            RELAY_APP_CONNECTION_SAVED_OBJECT_TYPE,
+          ],
         },
       },
     },
@@ -85,7 +94,8 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         description: i18n.translate(
           'xpack.nightshift.featureRegistry.configureSubFeatureDescription',
           {
-            defaultMessage: 'Pause activity, edit settings, and manage limits.',
+            defaultMessage:
+              'Pause activity, edit settings, manage limits, and create, edit, enable, disable or delete sources. Sources decide which indices the Nightshift service account reads, and the significant events and detections it finds are shown to everyone with Nightshift access in the space.',
           }
         ),
         privilegeGroups: [

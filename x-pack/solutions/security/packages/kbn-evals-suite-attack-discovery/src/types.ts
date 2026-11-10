@@ -72,8 +72,14 @@ export interface AttackDiscoveryTaskExpectedOutput {
   criteria?: string[];
 }
 
+/**
+ * Raw doc from `GET /api/attack_discovery/_find` (snake_case wire format), as returned in
+ * generateApi mode.
+ */
+export type AttackDiscoveryFindDoc = Record<string, unknown>;
+
 export interface AttackDiscoveryTaskOutput {
-  insights: AttackDiscovery[] | null;
+  insights: ReadonlyArray<AttackDiscovery | AttackDiscoveryFindDoc> | null;
   errors?: string[];
   raw?: unknown;
   traceId?: string;

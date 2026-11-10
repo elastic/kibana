@@ -151,6 +151,15 @@ const { alerts, alertGroups } = defineAlerts(SCENARIO_ID, buildSharedCiEgressDra
  * `source.as.*` on every alert, from the documentation ranges), `user.id` and
  * `user_agent.original`; they do not make the principals any more separable than baseline did.
  * No discovery should span two of them.
+ *
+ * Gold decision: no discovery at all is expected, so `expectedDiscoveries` is `'none'` and
+ * `NegativeControl` also scores this scenario, including a discovery about one principal alone.
+ * Each principal has two low-severity (21) alerts of one kind, each repeating the same
+ * user agent from the shared NAT address: a console login or an unusual-source `ListBuckets` or
+ * `AssumeRole` call. Nothing follows the access (no privilege change, data read or persistence),
+ * so there is no behaviour to report even per principal. `ForbiddenJoin` is still the
+ * evaluator that isolates the join failure; `NegativeControl` adds the check that the batch is
+ * not escalated into a story at all.
  */
 export const sharedCiEgressScenario: AuditScenario = {
   id: SCENARIO_ID,

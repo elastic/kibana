@@ -280,6 +280,13 @@ so joining them contradicts the evidence in front of the model. The enriched var
 shared-NAT signal (`source.as.*`, documentation ranges) on every alert; they do not make the
 principals any more separable. `registry.test.ts` pins both facts.
 
+Its gold also sets `expectedDiscoveries: 'none'`, so `NegativeControl` scores this scenario too:
+any discovery, even one about a single principal, is a false positive. That is deliberate. Each
+principal has only two low-severity alerts of one kind (a console login, a bucket listing or an
+`AssumeRole` call from the shared NAT address) with no later privilege change, data access or
+persistence, so there is no behaviour to report. `ForbiddenJoin` isolates the join failure;
+`NegativeControl` checks the batch is not turned into a story at all.
+
 Filter results by example-name suffix (`.baseline` / `.enriched` / `.enriched_context`) for a
 model x input-variant grid.
 
@@ -287,8 +294,8 @@ model x input-variant grid.
 
 | Evaluator | Scores |
 |---|---|
-| `ForbiddenJoin` | 0 if one discovery cites alerts from two groups the gold forbids joining; 1 when there are no discoveries (nothing was joined; `NegativeControl` and `PositiveControlRecall` are what penalise a silent model); N/A without forbidden pairs; N/A (null, `no_citations`) when discoveries exist but none cites an alert id |
-| `MetaAlertAsEvidence` | 0 if a discovery's citations are only meta-alert groups (`metaAlertGroups`); 1 (label `no_discoveries`) when there are no discoveries, for the same reason as `ForbiddenJoin`; N/A without meta-alert gold; N/A (`no_citations`) when no discovery cites an alert id |
+| `ForbiddenJoin` | 0 if one discovery cites alerts from two groups the gold forbids joining; 1 when there are no discoveries (nothing was joined; `NegativeControl` and `PositiveControlRecall` are what penalise a silent model); N/A without forbidden pairs; N/A (null, `no_citations`) when discoveries exist but none cites an alert id from the scenario (invented ids are ignored) |
+| `MetaAlertAsEvidence` | 0 if a discovery's citations are only meta-alert groups (`metaAlertGroups`); 1 (label `no_discoveries`) when there are no discoveries, for the same reason as `ForbiddenJoin`; N/A without meta-alert gold; N/A (`no_citations`) when no discovery cites a known alert id |
 | `EntityCoOccurrence` | Grounded / asserted pairs of a `user.*` token with a `source.ip`, `cloud.account.id` or `host.*` token in one discovery; a pair is grounded when one cited alert carries both values; N/A with no asserted pair |
 | `NegativeControl` | On a `none`-expected scenario: 1 when it produced zero discoveries, 0 (`false_positive`) when it reported any; N/A on scenarios that expect a discovery |
 | `PositiveControlRecall` | Fraction of the required group's alert ids cited by discoveries that cite no group the gold forbids joining with it (a discovery merging the group with a forbidden partner earns it no recall); with `requiredAnyOf`, the best fraction over those groups; label `recalled` at >= 0.6 |
@@ -409,7 +416,7 @@ by a statement, one question covering every follow-up cue in a chain, narrative 
   counts even if the sentence does not link them. A value the variant does not render (for example
   `cloud.account.id` in `baseline`) can never be grounded, so compare variants rather than reading one
   in isolation.
-- `ForbiddenJoin` cannot judge a discovery that cites no alert ids; it reports `no_citations`.
+- `ForbiddenJoin` cannot judge a discovery that cites no known alert ids (none, or only ids the model invented); it reports `no_citations`.
 - `NegativeControl` treats any discovery as a failure; it does not judge whether the discovery is
   reasonable.
 

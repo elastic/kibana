@@ -17,6 +17,7 @@ export type OnlineEvalsStepFailureCode =
   | 'agent_builder_unavailable'
   | 'investigation_unavailable'
   | 'round_not_found'
+  | 'judge_model_unavailable'
   | 'unexpected';
 
 /** An online evals step that failed and returned without scoring, instead of failing its workflow. */
@@ -38,7 +39,7 @@ const onlineEvalsStepFailedSchema: RootSchema<OnlineEvalsStepFailedEvent> = {
     type: 'keyword',
     _meta: {
       description:
-        'Why it failed: invalid_input, agent_builder_unavailable, investigation_unavailable, round_not_found or unexpected.',
+        'Why it failed: invalid_input, agent_builder_unavailable, investigation_unavailable, round_not_found, judge_model_unavailable or unexpected.',
     },
   },
   investigation_id: {

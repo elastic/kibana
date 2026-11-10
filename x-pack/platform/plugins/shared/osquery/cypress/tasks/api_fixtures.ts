@@ -344,7 +344,7 @@ export const loadCase = (owner: string) =>
       description: 'Test security case',
       assignees: [],
       connector: { id: 'none', name: 'none', type: '.none', fields: null },
-      settings: { syncAlerts: true, extractObservables: true },
+      settings: { syncAlerts: true, extractObservables: owner === 'securitySolution' },
       owner,
     },
   }).then((response) => response.body);

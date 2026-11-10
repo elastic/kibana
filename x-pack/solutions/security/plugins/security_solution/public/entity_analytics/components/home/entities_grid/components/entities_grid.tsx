@@ -117,6 +117,11 @@ export interface EntitiesGridProps {
   /** Without them the grid has no toolbar, as inside a group. */
   toolbarControls?: React.ReactNode;
   onFullScreenChange?: (isFullScreen: boolean) => void;
+  /**
+   * Set when the active tile has more entities than the table is filtered by: the toolbar then
+   * says how many of the tile's entities the table shows.
+   */
+  cappedTile?: { total: number; limit: number };
   /** Only the page's own grid reports its loads; the grids inside groups don't pass it. */
   loadTelemetry?: {
     /** What the user asked for: a new key is a new load. */
@@ -144,6 +149,7 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   readAccess,
   toolbarControls,
   onFullScreenChange,
+  cappedTile,
   loadTelemetry,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -300,13 +306,28 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
 
   const columnVisibility = useMemo(() => ({ visibleColumns, setVisibleColumns }), [visibleColumns]);
 
-  const shown = isAtLoadLimit ? rows.length : undefined;
+  // The table is only filtered by the first entities of a tile that has more: say how many of the
+  // tile's entities it shows. The numbers wait for the table's own total, like the plain one.
+  const toolbarTotal = total == null ? undefined : cappedTile?.total ?? total;
+  const shown = cappedTile ? total : isAtLoadLimit ? rows.length : undefined;
+  const limitNote = useMemo(
+    () =>
+      cappedTile
+        ? i18n.translate('xpack.securitySolution.entityAnalytics.home.grid.tileLimitNote', {
+            defaultMessage:
+              'The table is limited to {limit} entities. Narrow the time range or filters to see a smaller set.',
+            values: { limit: cappedTile.limit.toLocaleString() },
+          })
+        : undefined,
+    [cappedTile]
+  );
   const toolbarVisibility = useMemo(
     () =>
       toolbarControls
         ? getEntityGridToolbarVisibility({
-            total,
+            total: toolbarTotal,
             shown,
+            limitNote,
             isIndividualRows,
             visibleColumns,
             onAddColumn,
@@ -317,8 +338,9 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
           })
         : false,
     [
-      total,
+      toolbarTotal,
       shown,
+      limitNote,
       isIndividualRows,
       visibleColumns,
       onAddColumn,

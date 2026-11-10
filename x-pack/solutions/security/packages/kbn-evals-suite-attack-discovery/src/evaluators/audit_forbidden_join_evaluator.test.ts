@@ -97,10 +97,24 @@ describe('ForbiddenJoin evaluator', () => {
     it('judges only the citing discoveries in a mix, and reports the skipped ones', async () => {
       const clean = await runDiscoveries([{ alertIds: [] }, { alertIds: ['a1'] }]);
       expect(clean).toMatchObject({ score: 1, label: 'no_forbidden_join' });
-      expect(clean.explanation).toContain('1 discoveries without citations');
+      expect(clean.explanation).toContain('1 discoveries without known citations');
 
       const joined = await runDiscoveries([{ alertIds: [] }, { alertIds: ['a1', 'b1'] }]);
       expect(joined).toMatchObject({ score: 0, label: 'forbidden_join' });
+    });
+
+    it('ignores invented alert ids: a discovery citing only unknown ids is not judged', async () => {
+      const result = await runDiscoveries([{ alertIds: ['made-up-1', 'made-up-2'] }]);
+      expect(result).toMatchObject({ score: null, label: 'no_citations' });
+    });
+
+    it('judges the known ids of a discovery that also cites invented ones', async () => {
+      const joined = await runDiscoveries([{ alertIds: ['made-up-1', 'a1', 'b1'] }]);
+      expect(joined).toMatchObject({ score: 0, label: 'forbidden_join' });
+
+      const mixed = await runDiscoveries([{ alertIds: ['made-up-1'] }, { alertIds: ['a1'] }]);
+      expect(mixed).toMatchObject({ score: 1, label: 'no_forbidden_join' });
+      expect(mixed.explanation).toContain('1 discoveries without known citations');
     });
 
     it('keeps score 1 when there are no discoveries at all', async () => {
