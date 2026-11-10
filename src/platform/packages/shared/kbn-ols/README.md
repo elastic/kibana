@@ -188,8 +188,7 @@ stands for every space that the search already covers. The two lists work togeth
 recovery space always matches, an object in an ordinary space matches only under the rules above, and an object in
 neither list never matches. A space in both lists works as a recovery space. An object shared to all spaces is
 stored with `"namespaces": ["*"]`, and it counts as being in every listed space, the same way the Saved Objects
-repository treats it. When both lists are empty, the filter
-matches nothing.
+repository treats it. When both lists are empty, the filter matches nothing.
 
 The filter contains `nested` queries on `acl.entries` in most cases: the absent-ACL clause uses one whenever the
 type's default general access reaches the level, and the entry clause uses one when the caller has a principal and
