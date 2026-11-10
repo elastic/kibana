@@ -88,7 +88,15 @@ describe('toDefaultMessage', () => {
     expect(literalIcuText(message)).toContain('${name}');
   });
 
-  it('quotes angle brackets and braces in one pass', () => {
+  it('keeps comparison operators unquoted', () => {
+    const input = 'strict (`>`) by default and inclusive (`>=`), or (`<`) and (`<=`)';
+    const message = JSON.parse(toDefaultMessage(input));
+
+    expect(message).toBe(input);
+    expect(literalIcuText(message)).toBe(input);
+  });
+
+  it('quotes braces next to angle brackets without splitting operators', () => {
     const message = JSON.parse(toDefaultMessage('<{foo}>'));
 
     expect(literalIcuText(message)).toBe('<{foo}>');

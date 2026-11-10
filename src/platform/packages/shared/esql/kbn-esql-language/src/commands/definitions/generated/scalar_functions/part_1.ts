@@ -4978,7 +4978,7 @@ const dayDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.DAY,
   description: i18n.translate('esqlLanguage.esql.definitions.day', {
     defaultMessage:
-      'Extracts the day of month (1-31) from a date, using the query time zone.\nEquivalent to `DATE_EXTRACT("day_of_month", date)`.\nThis function accepts a `date` or `date_nanos` value. Unix timestamps in seconds must be converted first.\nFor example: `TO_DATETIME(start * 1000)`.\nThis extract is cyclic: `DAY(ts) \'>\' 15` is not rewritten to a timestamp range.',
+      'Extracts the day of month (1-31) from a date, using the query time zone.\nEquivalent to `DATE_EXTRACT("day_of_month", date)`.\nThis function accepts a `date` or `date_nanos` value. Unix timestamps in seconds must be converted first.\nFor example: `TO_DATETIME(start * 1000)`.\nThis extract is cyclic: `DAY(ts) > 15` is not rewritten to a timestamp range.',
   }),
   preview: false,
   alias: undefined,
@@ -6319,7 +6319,7 @@ const hourDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.HOUR,
   description: i18n.translate('esqlLanguage.esql.definitions.hour', {
     defaultMessage:
-      'Extracts the hour of day (0-23) from a date, using the query time zone.\nEquivalent to `DATE_EXTRACT("hour_of_day", date)`.\nThis function accepts a `date` or `date_nanos` value. Unix timestamps in seconds must be converted first.\nFor example: `TO_DATETIME(start * 1000)`.\nThis extract is cyclic: `HOUR(ts) \'>\' 9` is not rewritten to a timestamp range.',
+      'Extracts the hour of day (0-23) from a date, using the query time zone.\nEquivalent to `DATE_EXTRACT("hour_of_day", date)`.\nThis function accepts a `date` or `date_nanos` value. Unix timestamps in seconds must be converted first.\nFor example: `TO_DATETIME(start * 1000)`.\nThis extract is cyclic: `HOUR(ts) > 9` is not rewritten to a timestamp range.',
   }),
   preview: false,
   alias: undefined,
@@ -9683,7 +9683,7 @@ const monthDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.MONTH,
   description: i18n.translate('esqlLanguage.esql.definitions.month', {
     defaultMessage:
-      'Extracts the month of year (1-12) from a date, using the query time zone.\nEquivalent to `DATE_EXTRACT("month_of_year", date)`.\nThis function accepts a `date` or `date_nanos` value. Unix timestamps in seconds must be converted first.\nFor example: `TO_DATETIME(start * 1000)`.\nThis extract is cyclic: `MONTH(ts) \'>\' 3` is not rewritten to a timestamp range.',
+      'Extracts the month of year (1-12) from a date, using the query time zone.\nEquivalent to `DATE_EXTRACT("month_of_year", date)`.\nThis function accepts a `date` or `date_nanos` value. Unix timestamps in seconds must be converted first.\nFor example: `TO_DATETIME(start * 1000)`.\nThis extract is cyclic: `MONTH(ts) > 3` is not rewritten to a timestamp range.',
   }),
   preview: false,
   alias: undefined,
@@ -11964,7 +11964,7 @@ const mvGreaterDefinition: FunctionDefinition = {
   name: EsqlFunctionNames.MV_GREATER,
   description: i18n.translate('esqlLanguage.esql.definitions.mv_greater', {
     defaultMessage:
-      "Returns `true` if at least one value of `field` is greater than `bound`, using the natural order of the type. A null or empty field returns `false`, as does a null or multivalued bound. The comparison is strict (`'>'`) by default; set `include_bound` to `true` in the optional `options` map to make it inclusive (`'>'=`). Works on any ordered type: numbers, dates, IPs, versions, and strings (compared by their UTF-8 bytes).",
+      'Returns `true` if at least one value of `field` is greater than `bound`, using the natural order of the type. A null or empty field returns `false`, as does a null or multivalued bound. The comparison is strict (`>`) by default; set `include_bound` to `true` in the optional `options` map to make it inclusive (`>=`). Works on any ordered type: numbers, dates, IPs, versions, and strings (compared by their UTF-8 bytes).',
   }),
   preview: true,
   alias: undefined,

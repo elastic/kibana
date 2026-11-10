@@ -23,9 +23,9 @@ export function clearDocumentationDirectives(docString: string): string {
 
 /** Builds a JSON string literal for an i18n defaultMessage from upstream documentation. */
 export function toDefaultMessage(text: string): string {
-  // ICU reads `{` `}` as placeholders and `<` `>` as rich-text tags.
-  // A run is quoted together so adjacent characters such as `<{` do not become `''`.
+  // `{` `}` are placeholders. `<` starts a tag only when a letter or `/` follows,
+  // so comparison operators such as `>` and `>=` stay unquoted.
   return JSON.stringify(
-    clearDocumentationDirectives(text).replace(/[{}<>]+/g, (run) => `'${run}'`)
+    clearDocumentationDirectives(text).replace(/[{}]|<(?=[A-Za-z/])/g, (token) => `'${token}'`)
   );
 }
