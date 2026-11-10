@@ -50,6 +50,44 @@ every time, which is the gate working, but it is the clearest lever found.
 
 The last three rounds were +0.006, −0.015, +0.012 — plateaued.
 
+## The held-out check: the three accepted edits do not survive
+
+All three accepted variants together, measured against the harness the campaign started from, on
+the sealed split (50 seeds, 2 repeats per side, both sides pinned to `claude-5.5-haiku`, both
+measured in one session):
+
+| metric | baseline | final incumbent | Δ |
+|---|---|---|---|
+| reward | 0.827 | 0.833 | **+0.006** |
+| anchors — security regression (n=7) | 0.543 | 0.571 | +0.029 |
+| anchors — agent-builder spec (n=1) | 1.000 | 1.000 | +0.000 |
+| expert-authored (n=14) | 0.907 | 0.929 | +0.021 |
+| generated corpus (n=28) | 0.852 | 0.844 | −0.008 |
+| cost (USD) | 0.223 | 0.241 | 1.08× |
+
+Paired bootstrap over seeds: Δreward **+0.006**, 95% CI [−0.015, 0.028]; 3 seeds improved, 0
+regressed. **No held-out gain — the interval includes zero.** The gate's +0.045, +0.122 and
++0.030 were measured on the split the loop optimized against for twenty rounds; on data the
+proposer never saw, what remains is a point estimate an order of magnitude smaller than the sum
+of the accepted deltas and indistinguishable from noise.
+
+That is the result the apparatus exists to produce, and it matches the literature the plan was
+built on: gate gains overstate held-out gains. Two things are worth separating, though — the
+sign is positive on every human-authored tier and negative only on the generated corpus, and the
++0.122 of round 9 is confounded with its model switch, which this check holds fixed by pinning
+one model on both sides.
+
+Reproduce (no baseline snapshot existed for this campaign, so the baseline is the commit the
+chain starts from):
+
+```bash
+node scripts/esql_harness_opt.js check --split sealed --baseline 0e384dbea840 \
+  --repeats 2 --model anthropic-claude-5.5-haiku
+```
+
+Raw output: `~/.esql-harness/lineage/held-out-check-*.md`; the report renders it under
+**Campaign → Held-out check**.
+
 ## What this measures, exactly
 
 Reward per example, no LLM judge anywhere:
@@ -131,10 +169,13 @@ was swept into an infrastructure commit.
 
 ## Open questions
 
-- **Is round 9's gain the prose or the model?** Not separated. Measure the current incumbent on
-  the default model to find out.
-- **Does any of it survive on the sealed split?** The previous campaign's gate gains did not
-  (anchor subset went down while generated went up, on 8 anchor seeds — too few to conclude).
+- **Is round 9's gain the prose or the model?** Still not separated. The held-out check pins one
+  model on both sides, so it measures the prose alone — and finds +0.006. That is consistent
+  with the +0.122 having been mostly the model, but it does not prove it; measuring the
+  incumbent on the code default would.
+- **Why is the held-out effect positive on every human-authored tier and negative only on the
+  generated corpus?** Each tier alone is too small to resolve +0.02, so this may be nothing.
+  More anchor and expert seeds would decide it.
 - **`graph.ts` has never been edited** in 20 rounds despite being named as untouched in the
   prompt. Control flow remains unexplored.
 - **Anchors are too thin to gate on** (8–14 seeds per split). The detectable effect size is about

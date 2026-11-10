@@ -64,6 +64,10 @@ node scripts/esql_harness_opt.js campaign --rounds 5 \
 # the honest number, once
 node scripts/esql_harness_opt.js sealed --tiers <connectorA>
 
+# ...or as an A/B against what the campaign started from: both sides in one session, repeated
+# (--baseline is only needed when the campaign recorded no starting snapshot)
+node scripts/esql_harness_opt.js check --split sealed --repeats 2 --model <model alias>
+
 # browse everything
 node scripts/esql_harness_opt.js report --serve --port 7711
 ```
@@ -101,6 +105,8 @@ Either way: ≤2 regressed seeds, and the candidate must clear every model tier.
 
 - 193 seeds. Enough to resolve effects around +0.05 reward; not enough to promote to production
   defaults without more data.
+- The three accepted variants show **no held-out gain**: +0.006 reward, 95% CI [−0.015, 0.028]
+  on the sealed split (`EXPERIMENT_LOG.md`). Treat a gate delta as a search signal, not a result.
 - 11 of the 34 anchor gold queries do not execute against the fixtures; those score on
   `executes` / `ast_valid` only.
 - The proposer runs with write access to the candidate worktree. Local-only, never in CI.

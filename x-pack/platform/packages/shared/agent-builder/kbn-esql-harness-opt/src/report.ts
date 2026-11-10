@@ -15,6 +15,7 @@ import { harnessPaths } from './workspace';
 import { reportTemplate } from './report_template';
 import { costUsd } from './pricing';
 import { verifyManifest } from './verification';
+import { gateCandidate } from './gate';
 import type { ExampleRun, RunSummary } from './runner';
 
 interface StoredRun {
@@ -100,6 +101,110 @@ const backfillCost = (result: ExampleRun): number =>
 
 const meanBy = <T>(items: T[], pick: (item: T) => number): number =>
   items.length === 0 ? 0 : items.reduce((total, item) => total + pick(item), 0) / items.length;
+
+const rewardByProvenance = (results: ExampleRun[]): Record<string, number> => {
+  const provenances = [...new Set(results.map((result) => result.provenance))];
+  return Object.fromEntries(
+    provenances.map((provenance) => [
+      provenance,
+      meanBy(
+        results.filter((result) => result.provenance === provenance),
+        (result) => result.score.reward
+      ),
+    ])
+  );
+};
+
+const pooledSummary = (label: string, results: ExampleRun[]): RunSummary => ({
+  label,
+  configHash: label,
+  runs: results,
+  meanReward: meanBy(results, (result) => result.score.reward),
+  meanExecutes: meanBy(results, (result) => (result.score.executes ? 1 : 0)),
+  meanResultEquivalence: meanBy(results, (result) => result.score.resultEquivalence ?? 0),
+  meanTries: meanBy(results, (result) => result.tries ?? 1),
+  totalInputTokens: results.reduce((total, result) => total + (result.inputTokens ?? 0), 0),
+  totalOutputTokens: results.reduce((total, result) => total + (result.outputTokens ?? 0), 0),
+  totalCostUsd: results.reduce((total, result) => total + (result.costUsd ?? 0), 0),
+  meanLatencyMs: meanBy(results, (result) => result.latencyMs),
+  rewardByProvenance: {},
+});
+
+/**
+ * The `check` command's runs, re-derived from disk rather than from its markdown output.
+ *
+ * It writes one directory per check containing `sealed-current-*` and `sealed-baseline-*`, both
+ * measured in the same session. Pooling the repeats and re-running the gate's paired bootstrap
+ * here means the report shows the held-out verdict for every check ever run, including ones
+ * whose markdown has been lost, and always with the current statistics code.
+ */
+const heldOutChecks = (runs: ReturnType<typeof loadRuns>) => {
+  const groups = [...new Set(runs.map((run) => run.group))].filter((group) =>
+    group.startsWith('verify-')
+  );
+
+  return groups
+    .map((group) => {
+      const side = (prefix: string): ExampleRun[] =>
+        runs
+          .filter((run) => run.group === group && run.label.startsWith(prefix))
+          .flatMap((run) =>
+            (run.stored.runs ?? []).map((result) => ({
+              ...result,
+              costUsd: backfillCost(result),
+            }))
+          );
+
+      const current = side('sealed-current');
+      const baseline = side('sealed-baseline');
+      if (current.length === 0 || baseline.length === 0) return undefined;
+
+      const candidateSummary = pooledSummary('current', current);
+      const baselineSummary = pooledSummary('baseline', baseline);
+      const gate = gateCandidate({ incumbent: baselineSummary, candidate: candidateSummary });
+      const seeds = new Set(current.map((result) => result.seedId));
+      const repeats = new Set(
+        runs
+          .filter((run) => run.group === group && run.label.startsWith('sealed-current'))
+          .map((run) => run.label)
+      ).size;
+
+      return {
+        id: group,
+        when: new Date(Number(group.replace('verify-', '')) || 0).toISOString(),
+        seeds: seeds.size,
+        repeats,
+        models: [
+          ...new Set(
+            current.map((result) => (result.connectorId ?? '').replace('harness-opt-', ''))
+          ),
+        ].filter(Boolean),
+        variantHash:
+          runs.find((run) => run.group === group && run.label.startsWith('sealed-current'))?.stored
+            .variant?.hash ?? 'current',
+        meanDelta: gate.meanDelta,
+        ciLow: gate.ciLow,
+        ciHigh: gate.ciHigh,
+        costRatio: gate.costRatio,
+        improvements: gate.improvements.length,
+        regressions: gate.regressions.length,
+        current: {
+          meanReward: candidateSummary.meanReward,
+          totalCostUsd: candidateSummary.totalCostUsd,
+          costPerSolved: gate.candidateCostPerSolved,
+          byProvenance: rewardByProvenance(current),
+        },
+        baseline: {
+          meanReward: baselineSummary.meanReward,
+          totalCostUsd: baselineSummary.totalCostUsd,
+          costPerSolved: gate.incumbentCostPerSolved,
+          byProvenance: rewardByProvenance(baseline),
+        },
+      };
+    })
+    .filter((check): check is NonNullable<typeof check> => check !== undefined)
+    .sort((a, b) => a.when.localeCompare(b.when));
+};
 
 /** Mean reward per example id, so two runs can be compared example by example. */
 const rewardByExample = (runs: ExampleRun[]): Map<string, number> => {
@@ -334,6 +439,7 @@ export const buildReportPayload = () => {
     examples: [...examples.values()],
     exampleCount: examples.size,
     sealed: sealedRuns,
+    heldOut: heldOutChecks(runs),
     totalCostUsd: runViews.reduce((total, run) => total + run.totalCostUsd, 0),
   };
 };

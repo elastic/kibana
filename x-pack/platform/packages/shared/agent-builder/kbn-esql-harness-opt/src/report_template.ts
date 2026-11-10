@@ -47,6 +47,7 @@ pre { background:var(--panel); border:1px solid var(--line); border-radius:6px; 
 .card .k { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.05em; }
 .card .v { font-size:17px; margin-top:2px; }
 .pill { display:inline-block; padding:1px 8px; border-radius:999px; border:1px solid var(--line); font-size:11px; }
+hr.rule { border:0; border-top:1px solid var(--line); margin:18px 0; }
 .pill.good { border-color:var(--good); } .pill.bad { border-color:var(--bad); }
 .timeline { display:flex; gap:10px; overflow-x:auto; padding:6px 0 12px; }
 .node { min-width:190px; background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--line);
@@ -293,6 +294,43 @@ function lineageGraph() {
     'dead ends that were measured and rejected, yellow ones never reached the gate.</p>';
 }
 
+/*
+ * One check run: both sides measured in the same session on the split the proposer never saw.
+ *
+ * Shown apart from the campaign's own numbers on purpose — a gate delta is measured against a
+ * split the loop optimized against for twenty rounds, and this is the only figure that is not.
+ */
+function heldOutCheck(check) {
+  const provenances = Object.keys(
+    Object.assign({}, check.baseline.byProvenance, check.current.byProvenance)
+  );
+  const row = (label, before, after) =>
+    '<tr><td>' + esc(label) + '</td><td>' + n(before) + '</td><td>' + n(after) +
+    '</td><td class="' + cls(after - before) + '">' + sign(after - before) + '</td></tr>';
+
+  return '<p class="muted">' + esc(check.when.slice(0, 16).replace('T', ' ')) + ' · variant ' +
+    esc(check.variantHash) + ' · ' + check.seeds + ' seeds × ' + check.repeats +
+    ' repeat(s) per side · ' + esc(check.models.join(', ') || 'code default') + '</p>' +
+    '<table><tr><th>metric</th><th>baseline</th><th>current</th><th>Δ</th></tr>' +
+    row('reward (all)', check.baseline.meanReward, check.current.meanReward) +
+    provenances.map((provenance) => row(
+      provenance,
+      check.baseline.byProvenance[provenance] || 0,
+      check.current.byProvenance[provenance] || 0
+    )).join('') +
+    '<tr><td>cost (USD)</td><td>' + usd(check.baseline.totalCostUsd) + '</td><td>' +
+    usd(check.current.totalCostUsd) + '</td><td>' + check.costRatio.toFixed(2) + '×</td></tr>' +
+    '<tr><td>$ per solved</td><td>' + usd(check.baseline.costPerSolved) + '</td><td>' +
+    usd(check.current.costPerSolved) + '</td><td></td></tr></table>' +
+    '<p class="' + cls(check.ciLow) + '">Paired bootstrap over seeds: Δ ' + sign(check.meanDelta) +
+    ', 95% CI [' + n(check.ciLow) + ', ' + n(check.ciHigh) + '] — ' +
+    (check.ciLow > 0
+      ? 'the gain survives on data the proposer never saw.'
+      : 'no held-out gain: the interval includes zero.') + '</p>' +
+    '<p class="muted">Seeds improved: ' + check.improvements + ' · regressed: ' +
+    check.regressions + '</p>';
+}
+
 /* ------------------------------------------------------------- campaign */
 function viewCampaign() {
   const accepted = DATA.rounds.filter((r) => r.gate && r.gate.accepted).length;
@@ -308,6 +346,10 @@ function viewCampaign() {
         usd(run.costPerSolved) + '</td></tr>').join('') + '</table>'
     : '<p class="muted">No sealed-split runs yet.</p>';
 
+  const heldOutBlock = (DATA.heldOut || []).length
+    ? (DATA.heldOut || []).map(heldOutCheck).join('<hr class="rule">')
+    : '<p class="muted">No held-out check has been run on this variant yet.</p>';
+
   return '<h2>Campaign</h2>' +
     cards([
       ['rounds', DATA.rounds.length],
@@ -317,6 +359,7 @@ function viewCampaign() {
       ['spend (all runs)', usd(DATA.totalCostUsd)],
     ]) +
     '<h3>Lineage — configs tried, and what was built on what</h3>' + timeline +
+    '<h3>Held-out check — current harness vs. its starting point</h3>' + heldOutBlock +
     '<h3>Sealed split</h3>' + sealedTable +
     '<h3>What each round proposed</h3>' +
     '<table><tr><th>campaign</th><th>round</th><th>files</th><th>Δ reward [CI]</th><th>$/solved</th><th>regressions</th><th>verdict</th><th>rationale</th></tr>' +
