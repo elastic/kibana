@@ -118,6 +118,7 @@ export const AlertCountCell = memo(
         <EuiFlexItem grow={false}>
           {onAlertCountClick ? (
             <EuiBadge
+              data-test-subj="eaGridAlertCountBadge"
               color="hollow"
               title={fullCount}
               onClick={() => onAlertCountClick(row)}

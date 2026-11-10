@@ -55,3 +55,10 @@ export const getElasticsearchErrorMessage = (error: unknown): string | undefined
 
   return error.message;
 };
+
+/**
+ * Returns true if the error is an ES rejection of from/size pagination past `index.max_result_window`.
+ */
+export const isResultWindowTooLargeError = (error: unknown): boolean =>
+  isResponseError(error) &&
+  /Result window is too large/.test(getElasticsearchErrorMessage(error) ?? '');

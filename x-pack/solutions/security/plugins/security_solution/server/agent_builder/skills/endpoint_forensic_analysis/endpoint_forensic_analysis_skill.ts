@@ -250,19 +250,28 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
         const { hosts } = parsed;
         const searchedWindow = resolveSearchWindow(parsed);
 
+        // `_resolve/index` needs only `view_index_metadata`, which the Forensics worker role holds;
+        // `_cat/indices` needs `monitor` and is denied to it.
         let availableIndices: string[] = [];
+        let discoveryError: string | undefined;
         try {
-          const catResponse = await context.esClient.asCurrentUser.cat.indices({
-            index: 'logs-endpoint.events.*',
-            format: 'json',
-            h: 'index',
+          const resolved = await context.esClient.asCurrentUser.indices.resolveIndex({
+            name: [...ENDPOINT_TELEMETRY_INDEX_PATTERNS],
+            expand_wildcards: 'open',
           });
-          availableIndices = (catResponse as Array<{ index?: string }>)
-            .map((row) => row.index)
-            .filter((index): index is string => Boolean(index));
-        } catch {
-          availableIndices = [];
+          availableIndices = [
+            ...resolved.data_streams.map(({ name }) => name),
+            ...resolved.indices.filter(({ data_stream: ds }) => !ds).map(({ name }) => name),
+            ...resolved.aliases.map(({ name }) => name),
+          ].sort();
+        } catch (error) {
+          discoveryError = error instanceof Error ? error.message : String(error);
         }
+        const missingPatterns = discoveryError
+          ? []
+          : ENDPOINT_TELEMETRY_INDEX_PATTERNS.filter(
+              (pattern) => !availableIndices.some((name) => name.startsWith(pattern.slice(0, -1)))
+            );
 
         return {
           results: [
@@ -271,6 +280,8 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
               data: {
                 recommended_indices: [...ENDPOINT_TELEMETRY_INDEX_PATTERNS],
                 available_indices: availableIndices,
+                ...(missingPatterns.length ? { patterns_without_data: missingPatterns } : {}),
+                ...(discoveryError ? { index_discovery_error: discoveryError } : {}),
                 scoped_hosts: hosts ?? [],
                 searched_window: searchedWindow,
                 guidance:
@@ -302,11 +313,31 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
         const parsed = extractIocsSchema.parse(args);
         const { hosts } = parsed;
         const searchedWindow = resolveSearchWindow(parsed);
-        const hostFilter = hosts.map((h) => `"${h}"`).join(', ');
+        if (hosts.length === 0) {
+          return {
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  scoped_hosts: hosts,
+                  searched_window: searchedWindow,
+                  error: 'No hosts given.',
+                  guidance:
+                    'Call this tool again with the host.name values of the hosts under investigation.',
+                },
+              },
+            ],
+          };
+        }
+        const hostFilter = hosts.map((h) => JSON.stringify(h)).join(', ');
+        // Each Defend stream maps only its own fields (registry.* exists only in the registry
+        // stream), and hosts without a stream are normal (no registry stream off Windows), so
+        // unmapped KEEP columns must resolve to null rather than fail verification.
         // Sorting ascending before the limit keeps the truncated set anchored on the start of the
         // attack, so the comment each indicator keeps describes its earliest occurrence.
         const esqlQuery = [
-          `FROM logs-endpoint.events.process-*, logs-endpoint.events.network-*, logs-endpoint.events.file-*, logs-endpoint.events.registry-*`,
+          `SET unmapped_fields="nullify";`,
+          `FROM ${ENDPOINT_TELEMETRY_INDEX_PATTERNS.join(', ')}`,
           `| WHERE host.name IN (${hostFilter}) AND ${toEsqlTimestampClause(searchedWindow)}`,
           `| KEEP process.hash.sha256, process.executable, process.name, process.command_line, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, registry.value, file.path, user.name, event.action, host.name, @timestamp`,
           `| SORT @timestamp ASC`,

@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { spaceTest as spaceBaseTest, apiTest, tags } from '@kbn/scout-security';
-import type { ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
+import {
+  spaceTest as spaceBaseTest,
+  apiTest,
+  tags,
+  test as baseTest,
+} from '@kbn/scout-security';
+import type {
+  ScoutPage,
+  SecurityPageObjects,
+  SecurityTestFixtures,
+  SecurityWorkerFixtures,
+} from '@kbn/scout-security';
 import { extendPageObjects, type AlertZeroPageObjects } from './page_objects';
 
 export interface AlertZeroTestFixtures {
@@ -22,7 +32,20 @@ export const spaceTest = spaceBaseTest.extend<AlertZeroTestFixtures>({
   },
 });
 
+export const test = baseTest.extend<
+  AlertZeroTestFixtures & SecurityTestFixtures,
+  SecurityWorkerFixtures
+>({
+  pageObjects: async (
+    { pageObjects, page }: { pageObjects: SecurityPageObjects; page: ScoutPage },
+    use: (pageObjects: AlertZeroPageObjects) => Promise<void>
+  ) => {
+    await use(extendPageObjects(pageObjects, page));
+  },
+});
+
 export { apiTest, tags };
+export * as testData from './constants';
 export { ALERTZERO_READ_ONLY_ROLE, TI_HEADERS } from './constants';
 export {
   createApi,
@@ -65,3 +88,5 @@ export {
   type SeededProposal,
   type SpacesService,
 } from './onboarding';
+export { createInvestigation, deleteInvestigation, enableAlertZero } from './investigations';
+export { cleanupProposalsOfConversation, seedApprovedNoActionProposal } from './proposals';

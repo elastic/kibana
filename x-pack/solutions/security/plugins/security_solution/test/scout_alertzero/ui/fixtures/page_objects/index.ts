@@ -8,9 +8,11 @@
 import type { ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
 import { createLazyPageObject } from '@kbn/scout-security';
 import { AlertZeroAppPage } from './alertzero_app_page';
+import { AlertZeroQueuePage } from './alertzero_queue';
 
 export interface AlertZeroPageObjects extends SecurityPageObjects {
   alertZeroApp: AlertZeroAppPage;
+  alertZeroQueue: AlertZeroQueuePage;
 }
 
 export const extendPageObjects = (
@@ -19,4 +21,7 @@ export const extendPageObjects = (
 ): AlertZeroPageObjects => ({
   ...pageObjects,
   alertZeroApp: createLazyPageObject(AlertZeroAppPage, page),
+  alertZeroQueue: createLazyPageObject(AlertZeroQueuePage, page),
 });
+
+export { AlertZeroQueuePage } from './alertzero_queue';

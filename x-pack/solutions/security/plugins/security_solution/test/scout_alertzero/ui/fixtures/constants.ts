@@ -36,3 +36,6 @@ export const ALERTZERO_READ_ONLY_ROLE: KibanaRole = {
     },
   ],
 };
+
+export const WIDE_VIEWPORT = { width: 1600, height: 900 };
+export const NARROW_VIEWPORT = { width: 900, height: 900 };

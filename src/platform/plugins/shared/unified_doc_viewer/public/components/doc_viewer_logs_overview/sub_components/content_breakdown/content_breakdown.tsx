@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 
 import {
-  formatFieldStringValueWithHighlights,
   getMessageFieldWithFallbacks,
   type DataTableRecord,
   type LogDocumentOverview,
 } from '@kbn/discover-utils';
+import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils/components';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Badges } from '../badges/badges';

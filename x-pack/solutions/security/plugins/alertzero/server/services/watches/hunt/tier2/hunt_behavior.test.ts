@@ -18,6 +18,7 @@ import {
 } from '../common/hunt_prompt_templates';
 import { ESQL_GENERATION_INSTRUCTIONS } from './extraction_contract';
 import { buildMitreCatalog } from './mitre_catalog';
+import { getSearchedTechniqueIds } from './searched_technique_ids';
 import { UNGROUNDED_QUERY_FIXTURES } from './ungrounded_query_fixtures';
 
 /**
@@ -627,8 +628,89 @@ describe('huntBehavior', () => {
         id: 'doc-1',
         index: 'logs-aws.cloudtrail-default',
         timestamp: '2026-09-24T12:00:00.000Z',
+        host: 'WIN-ANALYST01',
+        fields: {},
       },
     ]);
+  });
+
+  it('copies allowlisted evidence columns onto hits, capped and truncated', async () => {
+    const long = 'x'.repeat(300);
+    executeEsqlMock.mockResolvedValue({
+      columns: [
+        col('_id'),
+        col('_index'),
+        col('host.name'),
+        col('user.name'),
+        col('process.name'),
+        col('process.command_line'),
+        col('event.action'),
+        col('source.ip'),
+        col('destination.ip'),
+        col('destination.domain'),
+        col('url.full'),
+        col('file.path'),
+        col('file.hash.sha256'),
+        col('dns.question.name'),
+        col('process.executable'),
+        col('process.parent.name'),
+      ],
+      values: [
+        [
+          'doc-1',
+          'logs-aws.cloudtrail-default',
+          'WIN-1',
+          'alice',
+          // ES|QL can return multi-valued cells; cast past FieldValue's scalar union.
+          ['cmd.exe', 'ignored'] as unknown as string,
+          long,
+          'AssumeRole',
+          '10.0.0.1',
+          '1.2.3.4',
+          'evil.test',
+          'https://evil.test',
+          '/tmp/a',
+          'abc',
+          'q.example',
+          true,
+          42,
+        ],
+      ],
+    });
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      executeParams,
+      esClient
+    );
+    const hit = result.behaviors[0].hits?.[0];
+    expect(hit?.host).toBe('WIN-1');
+    expect(hit?.user).toBe('alice');
+    expect(Object.keys(hit?.fields ?? {})).toHaveLength(8);
+    expect(hit?.fields?.['process.name']).toBe('cmd.exe');
+    expect(hit?.fields?.['process.command_line']).toHaveLength(256);
+    expect(hit?.fields?.['process.parent.name']).toBe('42');
+    expect(hit?.fields?.['process.executable']).toBe('true');
+    expect(hit?.fields?.['destination.domain']).toBeUndefined();
+  });
+
+  it('yields empty fields when the KEEP has no allowlisted evidence columns', async () => {
+    executeEsqlMock.mockResolvedValue({
+      columns: [col('_id'), col('_index'), col('host.name'), col('some.other.field')],
+      values: [['doc-1', 'logs-aws.cloudtrail-default', 'WIN-1', 'nope']],
+    });
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      executeParams,
+      esClient
+    );
+    expect(result.behaviors[0].hits?.[0]).toEqual({
+      id: 'doc-1',
+      index: 'logs-aws.cloudtrail-default',
+      host: 'WIN-1',
+      fields: {},
+    });
   });
 
   it('returns execution.hit true for a required-index row', async () => {
@@ -1515,6 +1597,56 @@ describe('huntBehavior', () => {
       );
     });
 
+    describe('when the survivor did not search the shared artifacts', () => {
+      const sharedQuote = 'evidence mentioning evil.example.com directly';
+      // 22 behaviors: the first 3 share an artifact set and collapse to one survivor, and the
+      // other 19 are distinct. 20 survivors fill the budget, which leaves the 2 siblings to be
+      // settled on what their survivor did.
+      const buildSiblingCandidates = () =>
+        [...enterpriseCatalog.techniqueById.keys()].slice(0, 22).map((technique_id, index) => ({
+          technique_id,
+          evidence_quote: index < 3 ? sharedQuote : 'evidence',
+          llm_confidence: 0.5 + index * 0.01,
+        }));
+
+      const siblingParams = { text: `${REPORT_TEXT} ${sharedQuote}`, iocs: [sharedIoc] };
+
+      beforeEach(() => {
+        generateEsqlMock.mockResolvedValue({ query: COVERING_ESQL });
+      });
+
+      it('records generation_budget, not collapsed, when every execute fails', async () => {
+        executeEsqlMock.mockRejectedValue(new Error('verification_exception'));
+
+        const result = await huntBehavior(
+          buildMockModel(buildSiblingCandidates()),
+          logger,
+          { ...executeParams, ...siblingParams },
+          esClient
+        );
+
+        expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+        expect(result.incomplete?.filter((i) => i.reason === 'generation_budget')).toHaveLength(2);
+        expect(result.incomplete?.filter((i) => i.reason === 'execute_failed')).toHaveLength(20);
+        // Nothing searched the siblings' artifacts, so none of the 22 is reported as searched.
+        expect(getSearchedTechniqueIds(result)).toEqual([]);
+      });
+
+      it('records generation_budget, not collapsed, when nothing could execute', async () => {
+        const result = await huntBehavior(
+          buildMockModel(buildSiblingCandidates()),
+          logger,
+          { text: siblingParams.text, iocs: siblingParams.iocs, allowed_indices: ['logs-aws.*'] },
+          esClient
+        );
+
+        expect(executeEsqlMock).not.toHaveBeenCalled();
+        expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+        expect(result.incomplete?.filter((i) => i.reason === 'generation_budget')).toHaveLength(2);
+        expect(getSearchedTechniqueIds(result)).toEqual([]);
+      });
+    });
+
     it('does not mark siblings collapsed when their survivor is cut by the generation budget', async () => {
       // 20 high-confidence unique behaviors fill the budget. Three lower-confidence behaviors
       // (still above the 0.5 extraction floor) share one artifact; collapse keeps one survivor,
@@ -1662,6 +1794,168 @@ describe('huntBehavior', () => {
 
       expect(result.incomplete).toBeUndefined();
       expect(result.next_step).not.toContain('partially hunted');
+    });
+  });
+  describe('techniques an earlier run already searched', () => {
+    const catalogIds = () => [...enterpriseCatalog.techniqueById.keys()].slice(0, 22);
+    const candidatesFor = (ids: string[]) =>
+      ids.map((technique_id, index) => ({
+        technique_id,
+        evidence_quote: 'evidence',
+        // Ascending, so the last ids are the highest-confidence ones.
+        llm_confidence: 0.5 + index * 0.01,
+      }));
+
+    it('spends the budget on the techniques not yet searched instead of the same top ones', async () => {
+      const ids = catalogIds();
+      const highest = ids.slice(2);
+      generateEsqlMock.mockResolvedValue({ query: GROUNDED_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel(candidatesFor(ids)),
+        logger,
+        { ...executeParams, already_searched_technique_ids: highest },
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.behaviors.map((b) => b.technique_id).sort()).toEqual(ids.slice(0, 2).sort());
+      expect(result.incomplete?.some((i) => i.reason === 'generation_budget')).not.toBe(true);
+    });
+
+    it('reports no gap and no behavior for a technique it skipped as already searched', async () => {
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate, t1566Candidate]),
+        logger,
+        { ...executeParams, already_searched_technique_ids: ['T1078.004'] },
+        esClient
+      );
+
+      expect(result.behaviors.map((b) => b.technique_id)).toEqual(['T1566']);
+      expect(result.indexed_behaviors.map((b) => b.technique_id)).toEqual(['T1566']);
+      expect(result.incomplete).toBeUndefined();
+    });
+
+    it('does not report a gap for an already-searched technique whose quote no longer grounds', async () => {
+      // The model's quotes vary between runs. A technique the ledger already settled must not turn
+      // into a retryable gap because this run's quote for it is not in the report text.
+      const result = await huntBehavior(
+        buildMockModel([
+          t1566Candidate,
+          { ...t1078Candidate, evidence_quote: 'never written in the report' },
+        ]),
+        logger,
+        { ...executeParams, already_searched_technique_ids: ['T1078.004'] },
+        esClient
+      );
+
+      expect(result.behaviors.map((b) => b.technique_id)).toEqual(['T1566']);
+      expect(result.incomplete).toBeUndefined();
+    });
+
+    it('says there was nothing new to hunt when every extracted technique was already searched', async () => {
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate, t1566Candidate]),
+        logger,
+        { ...executeParams, already_searched_technique_ids: ['T1078.004', 'T1566'] },
+        esClient
+      );
+
+      expect(generateEsqlMock).not.toHaveBeenCalled();
+      expect(result.behaviors).toEqual([]);
+      expect(result.incomplete).toBeUndefined();
+      expect(result.next_step).toContain('already searched by an earlier run');
+    });
+
+    it('hunts everything when the earlier run recorded nothing', async () => {
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate, t1566Candidate]),
+        logger,
+        { ...executeParams, already_searched_technique_ids: [] },
+        esClient
+      );
+
+      expect(result.behaviors).toHaveLength(2);
+    });
+
+    describe('techniques an earlier run left pending', () => {
+      it('reports one the extraction did not return as a retryable gap, so the run is not complete', async () => {
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          {
+            ...executeParams,
+            already_searched_technique_ids: [],
+            pending_technique_ids: ['T1566'],
+          },
+          esClient
+        );
+
+        expect(result.incomplete).toEqual([
+          expect.objectContaining({ reason: 'generation_budget', technique_id: 'T1566' }),
+        ]);
+      });
+
+      it('reports it even when every extracted technique was already searched', async () => {
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          {
+            ...executeParams,
+            already_searched_technique_ids: ['T1078.004'],
+            pending_technique_ids: ['T1566'],
+          },
+          esClient
+        );
+
+        expect(generateEsqlMock).not.toHaveBeenCalled();
+        expect(result.incomplete).toEqual([
+          expect.objectContaining({ reason: 'generation_budget', technique_id: 'T1566' }),
+        ]);
+        expect(result.next_step).toContain('the report is settled');
+        expect(result.next_step).not.toContain('No extracted candidate survived validation');
+      });
+
+      it('reports it when the extraction returned nothing at all', async () => {
+        const result = await huntBehavior(
+          buildMockModel([]),
+          logger,
+          { ...executeParams, pending_technique_ids: ['T1566'] },
+          esClient
+        );
+
+        expect(result.status).toBe('no_behaviors_found');
+        expect(result.incomplete).toEqual([
+          expect.objectContaining({ reason: 'generation_budget', technique_id: 'T1566' }),
+        ]);
+      });
+
+      it('adds no gap for one the extraction returned again, which gets its own query', async () => {
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate, t1566Candidate]),
+          logger,
+          { ...executeParams, pending_technique_ids: ['T1566'] },
+          esClient
+        );
+
+        expect(result.behaviors.map((b) => b.technique_id)).toContain('T1566');
+        expect(result.incomplete).toBeUndefined();
+      });
+
+      it('adds no gap for one an earlier run has since searched', async () => {
+        const result = await huntBehavior(
+          buildMockModel([t1078Candidate]),
+          logger,
+          {
+            ...executeParams,
+            already_searched_technique_ids: ['T1566'],
+            pending_technique_ids: ['T1566'],
+          },
+          esClient
+        );
+
+        expect(result.incomplete).toBeUndefined();
+      });
     });
   });
 });

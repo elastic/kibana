@@ -1,0 +1,64 @@
+---
+id: kibDevDocsSharedUxEslintPluginKbnMonaco
+slug: /kibana-dev-docs/shared-ux/kbn-eslint-plugin-kbn-monaco
+title: '@kbn/eslint-plugin-kbn-monaco'
+description: A package holding an eslint plugin with custom rules that guard the '@kbn/monaco' and '@kbn/code-editor' boundary
+tags: ['kibana', 'dev', 'contributor', 'shared-ux', 'eslint', 'monaco']
+---
+
+`@kbn/eslint-plugin-kbn-monaco` is a collection of custom lint rules that keep Monaco behind `@kbn/code-editor`.
+
+The rules run in both Oxlint and ESLint, including editors using the ESLint extension. The import rule is configured in `.oxlint/imports.mts` and the theme-call rule in `.oxlint/kibana.mts`; both are also enabled in `packages/kbn-eslint-config/.eslintrc.js` with matching severities. `.oxlint/index.mts` loads `oxlint_plugin.js`, which registers `@kbn/swc-register` so Oxlint can load this TypeScript package. The rules use Oxlint's `createOnce` API and are wrapped with `eslintCompatPlugin` so ESLint can run the same implementation.
+
+Rule test cases live in `src/rules/*.cases.ts` and run through Oxlint's `RuleTester` from `src/rules/oxlint_rules.test.ts`.
+
+Both rules skip the files of `@kbn/monaco` and `@kbn/code-editor` themselves, the two packages that own the boundary. See `is_monaco_package_file.ts`.
+
+## `@kbn/kbn-monaco/no_direct_monaco_import`
+
+Disallows importing from `@kbn/monaco` directly, on any path, and from `@kbn/code-editor` subpaths. Import from the root of `@kbn/code-editor` instead. If the symbol you need is not exported there yet, add it to that package's index.
+
+Every way of asking for a module is covered: `import`, `export ... from`, `import()`, `require()`, `require.resolve()`, and the jest methods that take a module request (`jest.mock`, `jest.requireActual`, ...). A request that is not a plain string, such as a template with an expression, cannot be known and is left alone.
+
+### Examples
+
+```ts
+// valid
+import { CodeEditor } from '@kbn/code-editor';
+
+// invalid
+import { monaco } from '@kbn/monaco';
+import { CodeEditor } from '@kbn/code-editor/code_editor';
+jest.mock('@kbn/monaco/src/monaco_imports');
+```
+
+Where importing `@kbn/monaco` directly is intended, say why next to the disable comment:
+
+```ts
+// eslint-disable-next-line @kbn/kbn-monaco/no_direct_monaco_import -- the Scout page object drives the real Monaco
+```
+
+## `@kbn/kbn-monaco/no_direct_monaco_theme_calls`
+
+Disallows `<anything>.editor.defineTheme(...)` and `<anything>.editor.setTheme(...)`.
+
+Monaco has one active theme per page, so both calls change how every editor on the page looks, not just the caller's. Kibana defines exactly one theme, scopes syntax colors per language inside it, and scopes editor chrome per editor instance. The reasoning, and the alternatives that were rejected, are in the [`@kbn/monaco` theming README](../../src/platform/packages/shared/kbn-monaco/src/languages/theming/README.md).
+
+Instead of calling them:
+
+- **Syntax colors:** register a language theme resolver. It contributes token `rules` and nothing else.
+- **One editor's chrome** (background, gutter, widgets, diff colors): pass `chromeOverrides` to `CodeEditor`, or use `applyKbnCodeEditorChromeOverrides` for an editor created with `monaco.editor.create*`.
+- **Selecting the theme** for an editor created with `monaco.editor.create*`: call `initializeRegisteredLanguagesTheme(euiTheme)` before creating it, and pass `CODE_EDITOR_DEFAULT_THEME_ID` as its `theme` option.
+
+The rule matches on the member chain, `<anything>.editor.<method>(...)`, rather than on the method name alone, because `setTheme` is also the name of unrelated services (`setTheme(core.theme)`).
+
+A bare identifier is only flagged when it can be traced back to Monaco, since `editor` is a common name (an Ace or CodeMirror instance has one too). These are followed, where `monaco` is an import from `@kbn/monaco`, `@kbn/code-editor` or `monaco-editor`, or an alias of one:
+
+```ts
+const { editor } = monaco;
+const { editor: monacoEditor } = monaco;
+const editor = monaco.editor;
+import { editor } from 'monaco-editor/editor/editor.api.js';
+```
+
+What cannot be traced is left alone, so a missed call is preferred to an error on someone else's `editor`: function parameters, call results, imports from other packages, and the methods destructured on their own (`const { setTheme } = monaco.editor`). It is a guardrail rather than a guarantee.

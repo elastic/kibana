@@ -1,0 +1,237 @@
+{
+  "operations": {
+    "batchGetTraces": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "Traces",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/Traces",
+        "source": "xray"
+      }
+    ],
+    "getGroups": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "Groups",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/Groups",
+        "source": "xray"
+      }
+    ],
+    "getInsight": [
+      {
+        "method": "post",
+        "path": "/Insight",
+        "source": "xray"
+      }
+    ],
+    "getInsightEvents": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxResults"
+          },
+          "response": {
+            "itemsPath": "InsightEvents",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/InsightEvents",
+        "source": "xray"
+      }
+    ],
+    "getInsightImpactGraph": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "Services",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/InsightImpactGraph",
+        "source": "xray"
+      }
+    ],
+    "getInsightSummaries": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body",
+            "sizeParam": "MaxResults"
+          },
+          "response": {
+            "itemsPath": "InsightSummaries",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/InsightSummaries",
+        "source": "xray"
+      }
+    ],
+    "getRetrievedTracesGraph": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "Services",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/GetRetrievedTracesGraph",
+        "source": "xray"
+      }
+    ],
+    "getSamplingRules": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "SamplingRuleRecords",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/GetSamplingRules",
+        "source": "xray"
+      }
+    ],
+    "getServiceGraph": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "Services",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/ServiceGraph",
+        "source": "xray"
+      }
+    ],
+    "getTimeSeriesServiceStatistics": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "TimeSeriesServiceStatistics",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/TimeSeriesServiceStatistics",
+        "source": "xray"
+      }
+    ],
+    "getTraceGraph": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "Services",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/TraceGraph",
+        "source": "xray"
+      }
+    ],
+    "getTraceSummaries": [
+      {
+        "method": "post",
+        "pagination": {
+          "end": "missing",
+          "request": {
+            "cursorParam": "NextToken",
+            "in": "body"
+          },
+          "response": {
+            "itemsPath": "TraceSummaries",
+            "nextPath": "NextToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/TraceSummaries",
+        "source": "xray"
+      }
+    ],
+    "startTraceRetrieval": [
+      {
+        "method": "post",
+        "path": "/StartTraceRetrieval",
+        "source": "xray"
+      }
+    ]
+  },
+  "sources": {
+    "xray": {
+      "apiVersion": "2016-04-12",
+      "fetchedAt": "2026-11-01T19:13:46.652Z",
+      "format": "smithy",
+      "url": "https://raw.githubusercontent.com/aws/api-models-aws/1b9ff13fe6c28ea9774a527e53cda6a3b91369dc/models/xray/service/2016-04-12/xray-2016-04-12.json"
+    }
+  }
+}

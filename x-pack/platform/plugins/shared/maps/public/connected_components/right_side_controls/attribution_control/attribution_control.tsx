@@ -38,7 +38,7 @@ function AttributionContainer({
   return (
     <div
       className={classNames('mapAttributionControl', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+        // eslint-disable-next-line @kbn/compat/typescript-naming-convention
         mapAttributionControl__fullScreen: isFullScreen,
       })}
       css={{ backgroundColor: euiTheme.colors.body }}

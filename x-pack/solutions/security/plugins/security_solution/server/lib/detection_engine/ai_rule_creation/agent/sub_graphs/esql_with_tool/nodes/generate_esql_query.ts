@@ -10,6 +10,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ScopedModel, ToolEventEmitter } from '@kbn/agent-builder-server';
 import { generateEsql, GenerateEsqlNoDataError } from '@kbn/agent-builder-genai-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RejectionCode, RuleCreationState } from '../../../state';
 
 interface GenerateEsqlQueryParams {
@@ -92,6 +93,20 @@ Optimize for Elastic Security: Suggest additional filters, aggregations, or enha
         return {
           ...state,
           errors: ['Generated ES|QL query is empty'],
+        };
+      }
+
+      // A detection rule must read from an index. When no index fits, the model can still
+      // return a syntactically valid query with no source, e.g. `ROW status = "No suitable
+      // index was found"`, which would otherwise become a rule that never matches anything.
+      if (!getIndexPatternFromESQLQuery(esqlResponse.query)) {
+        events?.reportProgress('Generated ES|QL query does not read from any index');
+        return {
+          rejectionReason: {
+            code: 'NO_DATA' as RejectionCode,
+            message: 'The generated ES|QL query does not read from any index',
+            details: esqlResponse.query,
+          },
         };
       }
 

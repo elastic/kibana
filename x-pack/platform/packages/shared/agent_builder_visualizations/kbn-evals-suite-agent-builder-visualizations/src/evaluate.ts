@@ -11,12 +11,15 @@ import type { EvaluateDataset } from './evaluate_dataset';
 import { createEvaluateDataset } from './evaluate_dataset';
 import type { EvaluateCustomContentDataset } from './custom_content/evaluate_custom_content_dataset';
 import { createEvaluateCustomContentDataset } from './custom_content/evaluate_custom_content_dataset';
+import type { EvaluateRoutingDataset } from './custom_content/routing/evaluate_routing_dataset';
+import { createEvaluateRoutingDataset } from './custom_content/routing/evaluate_routing_dataset';
 
 export const evaluate = evalsBase.extend<
   {},
   {
     evaluateDataset: EvaluateDataset;
     evaluateCustomContentDataset: EvaluateCustomContentDataset;
+    evaluateRoutingDataset: EvaluateRoutingDataset;
   }
 >({
   evaluateDataset: [
@@ -57,6 +60,20 @@ export const evaluate = evalsBase.extend<
           evaluators,
           executorClient,
           esClient,
+          log,
+        })
+      );
+    },
+    { scope: 'worker' },
+  ],
+  evaluateRoutingDataset: [
+    ({ agentBuilderClient, evaluators, executorClient, log }, use) => {
+      use(
+        createEvaluateRoutingDataset({
+          agentBuilderClient,
+          agentId: agentBuilderDefaultAgentId,
+          evaluators,
+          executorClient,
           log,
         })
       );
