@@ -9,6 +9,7 @@
 
 /**
  * Clears MyST inline directives that can be found in documentation strings.
+ * A `$` before `{` is a capture reference such as `${name}`, not a directive.
  * @param docString
  * @returns
  */
@@ -16,6 +17,15 @@ export function clearDocumentationDirectives(docString: string): string {
   return (
     docString
       // MyST directives have the following format {name}`content`
-      .replace(/\{([a-zA-Z_]+)\}`([^`]*)`/g, '')
+      .replace(/(?<!\$)\{([a-zA-Z_]+)\}`([^`]*)`/g, '')
+  );
+}
+
+/** Builds a JSON string literal for an i18n defaultMessage from upstream documentation. */
+export function toDefaultMessage(text: string): string {
+  // ICU reads `{` `}` as placeholders and `<` `>` as rich-text tags.
+  // A run is quoted together so adjacent characters such as `<{` do not become `''`.
+  return JSON.stringify(
+    clearDocumentationDirectives(text).replace(/[{}<>]+/g, (run) => `'${run}'`)
   );
 }
