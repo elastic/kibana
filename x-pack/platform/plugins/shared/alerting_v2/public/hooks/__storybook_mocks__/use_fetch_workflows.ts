@@ -18,7 +18,15 @@ const MOCK_WORKFLOWS: WorkflowListDto = {
       name: 'Slack notification workflow',
       description: 'Sends alerts to Slack',
       enabled: true,
-      definition: null,
+      managed: true,
+      definition: {
+        version: '1',
+        name: 'Slack notification workflow',
+        enabled: true,
+        triggers: [],
+        steps: [],
+        tags: ['slack', 'notifications'],
+      },
       createdAt: '2026-01-01T00:00:00.000Z',
       history: [],
       valid: true,
@@ -37,7 +45,7 @@ const MOCK_WORKFLOWS: WorkflowListDto = {
       id: 'workflow-3',
       name: 'Email digest workflow',
       description: 'Sends email digests',
-      enabled: true,
+      enabled: false,
       definition: null,
       createdAt: '2026-01-01T00:00:00.000Z',
       history: [],
@@ -50,5 +58,6 @@ export const useFetchWorkflows = (_params?: { query: string; isEnabled?: boolean
   ({
     data: MOCK_WORKFLOWS,
     isLoading: false,
+    isError: false,
     refetch: async () => ({}),
   } as UseQueryResult<WorkflowListDto, Error>);
