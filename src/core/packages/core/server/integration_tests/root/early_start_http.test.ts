@@ -80,10 +80,14 @@ function holdSavedObjectMigrations(root: TestRoot) {
   const migrationsGate = new Promise<void>((resolve) => {
     releaseMigrations = resolve;
   });
-  let migrationsEntered = false;
+  let markMigrationsEntered = () => {};
+  // Resolves when `savedObjects.start` is entered, so a failed start does not leave a timer running.
+  const migrationsEntered = new Promise<void>((resolve) => {
+    markMigrationsEntered = resolve;
+  });
   const originalStart = server.savedObjects.start.bind(server.savedObjects);
   server.savedObjects.start = async (deps: unknown) => {
-    migrationsEntered = true;
+    markMigrationsEntered();
     await migrationsGate;
     return originalStart(deps);
   };
@@ -95,7 +99,7 @@ function holdSavedObjectMigrations(root: TestRoot) {
 
   return {
     releaseMigrations,
-    hasEnteredMigrations: () => migrationsEntered,
+    migrationsEntered,
     isHttpListening: () => server.http.httpServer.isListening(),
     listener: () => server.http.httpServer.server.listener,
     startPromise,
@@ -105,23 +109,23 @@ function holdSavedObjectMigrations(root: TestRoot) {
 async function waitUntilMigrationsHeld(
   held: ReturnType<typeof holdSavedObjectMigrations>
 ): Promise<void> {
-  await Promise.race([
-    (async () => {
-      while (!held.hasEnteredMigrations()) {
-        await new Promise((resolve) => setTimeout(resolve, 25));
-      }
-    })(),
-    held.startPromise.then(
-      () => {
-        throw new Error(
-          'Kibana finished starting before saved objects startup was paused. The early HTTP window was missed.'
-        );
-      },
-      (error: unknown) => {
-        throw error instanceof Error ? error : new Error(String(error));
-      }
-    ),
-  ]);
+  let migrationsHeld = false;
+  try {
+    await Promise.race([
+      held.migrationsEntered.then(() => {
+        migrationsHeld = true;
+      }),
+      held.startPromise,
+    ]);
+  } catch (error) {
+    throw error instanceof Error ? error : new Error(String(error));
+  }
+
+  if (!migrationsHeld) {
+    throw new Error(
+      'Kibana finished starting before saved objects startup was paused. The early HTTP window was missed.'
+    );
+  }
 }
 
 function consoleMessages(mockConsoleLog: jest.SpyInstance): string[] {
