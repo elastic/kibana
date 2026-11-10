@@ -9,7 +9,7 @@
 
 import { getSafe } from '@kbn/std';
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep, filter, map as lodashMap, max, pick } from 'lodash';
+import { cloneDeep, filter, map as lodashMap, max, omit, pick } from 'lodash';
 import {
   BehaviorSubject,
   combineLatest,
@@ -359,34 +359,28 @@ export function initializeLayoutManager(
     return (await getChildApi(uuid)) as ApiType;
   };
 
-  const removePanel = (uuid: string) => {
+  // Removes grid and pinned panels in a single layout update, so subscribers never see a partial removal
+  const removePanels = (uuids: string[]) => {
     const currentLayout = layout$.value;
-    const panels = { ...currentLayout.panels };
-    const pinnedPanels = { ...currentLayout.pinnedPanels };
-    if (panels[uuid]) {
-      delete panels[uuid];
-      layout$.next({ ...layout$.value, panels });
-    } else if (pinnedPanels[uuid]) {
-      delete pinnedPanels[uuid];
-      // Recompute the order of the remaining pinned panels
-      const newPinnedPanels: typeof pinnedPanels = Object.entries(pinnedPanels)
-        .sort(([, a], [, b]) => a.order - b.order)
-        .reduce(
-          (result, [key, value], i) => ({ ...result, [key as string]: { ...value, order: i } }),
-          {}
-        );
-      layout$.next({ ...layout$.value, pinnedPanels: newPinnedPanels });
-    }
+    const gridPanelIds = uuids.filter((uuid) => Boolean(currentLayout.panels[uuid]));
+    const pinnedPanelIds = uuids.filter((uuid) => Boolean(currentLayout.pinnedPanels[uuid]));
+    if (!gridPanelIds.length && !pinnedPanelIds.length) return;
 
-    const children = { ...children$.value };
-    if (children[uuid]) {
-      delete children[uuid];
-      children$.next(children);
-    }
-    if (currentChildState[uuid]) {
-      delete currentChildState[uuid];
-    }
+    // Panels whose API never registered (e.g. in a collapsed section) are not in children$, so
+    // removeOrphanedChildrenSubscription would not clear their state
+    [...gridPanelIds, ...pinnedPanelIds].forEach((uuid) => delete currentChildState[uuid]);
+
+    // removeOrphanedChildrenSubscription drops the removed panels from children$
+    layout$.next({
+      ...currentLayout,
+      panels: gridPanelIds.length ? omit(currentLayout.panels, gridPanelIds) : currentLayout.panels,
+      pinnedPanels: pinnedPanelIds.length
+        ? reorderPinnedPanels(omit(currentLayout.pinnedPanels, pinnedPanelIds))
+        : currentLayout.pinnedPanels,
+    });
   };
+
+  const removePanel = (uuid: string) => removePanels([uuid]);
 
   const replacePanel = async (idToRemove: string, panelPackage: PanelPackage) => {
     try {
@@ -630,6 +624,7 @@ export function initializeLayoutManager(
       addNewPanel,
       addIncomingEmbeddables,
       removePanel,
+      removePanels,
       replacePanel,
       duplicatePanel,
       getDashboardPanelFromId,
@@ -748,6 +743,17 @@ function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
     ? baseTitle + ` (${clonedTag})`
     : baseTitle + ` (${clonedTag} ${similarBaseTitlesCount + 1})`;
 }
+
+/** Renumbers the pinned panels' `order` from 0 so removed panels leave no gaps */
+const reorderPinnedPanels = (
+  pinnedPanels: DashboardLayout['pinnedPanels']
+): DashboardLayout['pinnedPanels'] =>
+  Object.entries(pinnedPanels)
+    .sort(([, a], [, b]) => a.order - b.order)
+    .reduce<DashboardLayout['pinnedPanels']>(
+      (result, [key, value], i) => ({ ...result, [key]: { ...value, order: i } }),
+      {}
+    );
 
 const transformDashboardLayoutToGridLayout = (
   layout: DashboardLayout,

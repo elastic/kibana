@@ -8,13 +8,11 @@
 import { setTimeout as delay } from 'timers/promises';
 import {
   KIS_ONBOARDING_IN_PROGRESS_STATUSES,
-  SIGNIFICANT_EVENTS_ALERT_SOURCE,
   type SignificantEventsWorkflowStatus,
 } from '@kbn/significant-events-schema';
 import type { ApiClientFixture, ApiClientResponse, EsClient, KbnClient } from '@kbn/scout-oblt';
 import { COMMON_API_HEADERS, PUBLIC_API_HEADERS } from './constants';
 
-export const RULE_EVENTS_INDEX = '.rule-events';
 export const DETECTIONS_DATA_STREAM = '.significant_events-detections';
 /** The ES|QL behind the source the suites store their knowledge indicators and detections under. */
 export const ACCESS_SOURCE_ESQL = 'FROM logs.otel, logs.otel.*';
@@ -116,42 +114,6 @@ export const buildRuleBackedQuery = ({
   esql: { query: `FROM ${viewName} | WHERE severity_text == "ERROR"` },
   source_id: sourceId,
 });
-
-/** Indexes a significant event straight into `.rule-events`, the way the alerting v2 executor stores it. */
-export const seedSignificantEvent = async (esClient: EsClient, eventId: string): Promise<void> => {
-  const now = new Date().toISOString();
-  await esClient.index({
-    index: RULE_EVENTS_INDEX,
-    op_type: 'create',
-    refresh: true,
-    document: {
-      '@timestamp': now,
-      scheduled_timestamp: now,
-      type: 'alert',
-      source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
-      space_id: 'default',
-      status: 'breached',
-      severity: 'high',
-      group_hash: eventId,
-      rule: { id: eventId, version: 1 },
-      alert: { id: eventId, status: 'active' },
-      data: { event_id: eventId, title: 'Built-in role access check', source_ids: [] },
-    },
-  });
-};
-
-export const deleteSignificantEvent = async (
-  esClient: EsClient,
-  eventId: string
-): Promise<void> => {
-  await esClient.deleteByQuery({
-    index: RULE_EVENTS_INDEX,
-    // Status updates are written with a hashed `group_hash`, so match on the event id instead.
-    query: { term: { 'data.event_id': eventId } },
-    refresh: true,
-    ignore_unavailable: true,
-  });
-};
 
 export const seedDetection = async ({
   kbnClient,

@@ -17,7 +17,6 @@ import {
   EuiHighlight,
   EuiIconTip,
   EuiButtonIcon,
-  EuiTourStep,
   EuiBadge,
   EuiToolTip,
   EuiFilterGroup,
@@ -37,7 +36,6 @@ import {
 import useAsync from 'react-use/lib/useAsync';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { useDebouncedValue } from '@kbn/react-hooks';
-import { useStreamsTour } from '../streams_tour';
 import type { TableRow, SortableField } from './utils';
 import {
   buildStreamRows,
@@ -116,7 +114,6 @@ export function StreamsTreeTable({
   const { rangeFrom, rangeTo } = useTimeRange();
   const { euiTheme } = useEuiTheme();
   const { timeState } = useTimefilter();
-  const { getStepPropsByStepId } = useStreamsTour();
 
   const [searchInput, setSearchInput] = useState('');
   // Filtering re-renders up to 25 rows and each new row starts a histogram search.
@@ -379,33 +376,13 @@ export function StreamsTreeTable({
     </EuiToolTip>
   );
 
-  const streamsListStepProps = getStepPropsByStepId('streams_list');
-
   const nameColumnHeader = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       {shouldComposeTree(sortField) && hasExpandable && (
         <EuiFlexItem grow={false}>{expandCollapseAllButton}</EuiFlexItem>
       )}
       <EuiFlexItem>
-        {streamsListStepProps ? (
-          <EuiTourStep
-            step={streamsListStepProps.step}
-            stepsTotal={streamsListStepProps.stepsTotal}
-            title={streamsListStepProps.title}
-            subtitle={streamsListStepProps.subtitle}
-            content={streamsListStepProps.content}
-            anchorPosition={streamsListStepProps.anchorPosition}
-            offset={streamsListStepProps.offset}
-            maxWidth={streamsListStepProps.maxWidth}
-            isStepOpen={streamsListStepProps.isStepOpen}
-            footerAction={streamsListStepProps.footerAction}
-            onFinish={streamsListStepProps.onFinish}
-          >
-            <span>{NAME_COLUMN_HEADER}</span>
-          </EuiTourStep>
-        ) : (
-          <span>{NAME_COLUMN_HEADER}</span>
-        )}
+        <span>{NAME_COLUMN_HEADER}</span>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -18,7 +18,7 @@ import { applyVersion, assertValidCoreVersion } from './utils';
 export class DocumentDowngradePipeline implements MigrationPipeline {
   private document: SavedObjectUnsanitizedDoc;
   private kibanaVersion: string;
-  private originalDoc: SavedObjectUnsanitizedDoc;
+  private readonly originalType: string;
   private typeTransforms: TypeTransforms;
   private targetTypeVersion: string;
   private targetCoreVersion?: string;
@@ -29,16 +29,22 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
     typeTransforms,
     targetTypeVersion,
     targetCoreVersion,
+    allowSkipClone = false,
   }: {
     document: SavedObjectUnsanitizedDoc;
     typeTransforms: TypeTransforms;
     kibanaVersion: string;
     targetTypeVersion: string;
     targetCoreVersion?: string;
+    /**
+     * Skip cloning when the caller hands over ownership of the document.
+     * See `DocumentMigrateOptions.allowSkipClone`.
+     */
+    allowSkipClone?: boolean;
   }) {
-    this.originalDoc = document;
+    this.originalType = document.type;
     this.kibanaVersion = kibanaVersion;
-    this.document = cloneDeep(document);
+    this.document = allowSkipClone ? document : cloneDeep(document);
     this.typeTransforms = typeTransforms;
     this.targetTypeVersion = targetTypeVersion;
     this.targetCoreVersion = targetCoreVersion;
@@ -53,7 +59,7 @@ export class DocumentDowngradePipeline implements MigrationPipeline {
         continue;
       }
       const { transformedDoc } = transform.transformDown(this.document);
-      if (this.document.type !== this.originalDoc.type) {
+      if (transformedDoc.type !== this.originalType) {
         throw new Error(`Changing a document's type during a migration is not supported.`);
       }
       this.document = applyVersion({ document: transformedDoc, transform });

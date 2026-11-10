@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
@@ -57,12 +57,14 @@ const customContentUpdateFields = {
     .describe(
       'An ES|QL query the user supplied verbatim; it replaces the current one. Omit to keep the existing query. Pass null to remove it entirely. Do not write a query yourself: to change the data, set regenerateEsql to true and describe the change in "prompt". The server runs the query to sample its schema and rejects the whole operation if Elasticsearch refuses it.'
     ),
-  regenerateEsql: z
-    .boolean()
-    .optional()
-    .describe(
-      'Set true when the edit changes what the panel shows: the server regenerates the ES|QL query from "prompt", keeping the parts the request does not change. Omit for layout, copy and style edits, which keep the current query. Requires "prompt".'
-    ),
+  regenerateEsql: lazySchema(() =>
+    z
+      .boolean()
+      .optional()
+      .describe(
+        'Set true when the edit needs different data: a new measure or field ("also show the average bytes"), a new grouping or filter, or another time window. Without it the stored query is kept and the new data can never appear. The server regenerates the ES|QL query from "prompt", keeping the parts the request does not change. Omit for edits that only change the look: colors, sizes, wording, layout. Requires "prompt".'
+      )
+  ),
   index: z
     .string()
     .max(256)

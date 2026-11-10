@@ -16,7 +16,7 @@ import type { ListWatchlistsResponse } from '../../../../../../common/api/entity
 import { WatchlistConfigClient } from '../watchlist_config';
 import { getWatchlistSavedObjectClient } from '../../shared/utils';
 import { ensurePrebuiltWatchlists } from '../../migrations/install_prebuilt_watchlists';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../../risk_score/tasks/helpers';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../../utils/internal_saved_objects_client';
 import { watchlistEntitySourceTypeName } from '../../entity_sources/infra';
 
 export const listWatchlistsRoute = (
@@ -64,7 +64,7 @@ export const listWatchlistsRoute = (
             // Uses an internal SO client so the self-heal runs as the system.
             // Best-effort: a self-heal failure must not break the list read path.
             const [coreStart] = await getStartServices();
-            const internalSoClient = buildScopedInternalSavedObjectsClientUnsafe({
+            const internalSoClient = buildNamespacedInternalSavedObjectsClientUnsafe({
               coreStart,
               namespace,
               includedHiddenTypes: [watchlistEntitySourceTypeName],
