@@ -125,6 +125,8 @@ Every call is recorded in the combined `calls` with its `connector`, and `operat
 
 Runtime fixtures and `describeOperation` are per connector too. A fixture goes to its `connector` (or the `?connector=` of `PUT /_mock/fixtures`, or `runtimeFixtures.set(fixtures, { connector })`), else to the one connector whose specs have its operation; when several have it, as Outlook and OneDrive both have Graph's `GET /me`, it is rejected until one is named, and when any fixture is rejected none is set on any connector. Listed fixtures carry their `connector`, and `GET /_mock/operations/<id>?connector=<id>` describes one connector's operation (without it, the first connector's that has it). The MCP server's tools take a `connector` argument, listing the connectors in their schemas.
 
+**Running tests in parallel.** One Kibana sends its requests through one emulator, so tests running at the same time share its state. Tests on different connectors may run in parallel when they scope what they read and change with `?connector=` (or `createEmulatorControl(proxyUrl, { connector })`). Tests on the same connector that set fixtures, read calls or reset must run serially: they share that connector's calls and runtime fixtures, so one test's fixture answers another's requests, and one test's reset clears what another set up.
+
 ## GraphQL
 
 GraphQL APIs are specs too: the schema in SDL, and the URLs the vendor serves it at.
