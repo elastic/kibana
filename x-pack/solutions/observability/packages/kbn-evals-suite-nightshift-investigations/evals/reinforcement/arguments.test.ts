@@ -320,6 +320,46 @@ describe('submissionsForTree', () => {
     expect(submissionsForTree(submissions, OTHER_ID)).toHaveLength(2);
   });
 
+  it('keeps the merge and traversal an earlier submit saved when the retry leaves them out', () => {
+    // The retry names the saved tree again, without its merge or traversal; the tool kept both.
+    const retry: SubmitArguments = {
+      symptom_trees: [{ tree_id: TREE_ID, merged_nodes: [] }, ...(otherTree.symptom_trees ?? [])],
+      traversals: otherTree.traversals,
+    };
+
+    const { score, explanation } = gradeSubmissions({
+      submissions: submissionsForTree([savedTree, retry], TREE_ID),
+      prior,
+      submitted,
+      response: CONFIRMED,
+      requireMerge: true,
+    });
+
+    expect(explanation).not.toContain('merged_nodes is empty');
+    expect(score).toBe(1);
+  });
+
+  it('does not count a merge from a rejected submit that the retry dropped', () => {
+    const unmerged = parseMermaidDecisionTree(PRIOR, TREE_ID);
+    const rejected: SubmitArguments = {
+      symptom_trees: [{ tree_id: TREE_ID, merged_nodes: [{ from: ['E3'], into: 'E2' }] }],
+    };
+    const retry: SubmitArguments = {
+      symptom_trees: [{ tree_id: TREE_ID, merged_nodes: [] }],
+      traversals: [{ tree_id: TREE_ID, visited_path: ['S1', 'E1'], causal_path: [] }],
+    };
+
+    const { score, explanation } = gradeSubmissions({
+      submissions: [rejected, retry],
+      prior,
+      submitted: unmerged,
+      response: 'No cause was confirmed.',
+    });
+
+    expect(explanation).not.toContain('still in the submitted tree');
+    expect(score).toBe(1);
+  });
+
   it('keeps a submit that names the tree by its bare slug', () => {
     const bareSlug: SubmitArguments = {
       symptom_trees: [{ ...savedTree.symptom_trees?.[0], tree_id: 'eql-slo-burn-rate' }],
