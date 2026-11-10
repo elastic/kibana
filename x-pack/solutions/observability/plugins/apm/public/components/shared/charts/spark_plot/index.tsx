@@ -17,7 +17,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { unit } from '@kbn/apm-common';
@@ -35,6 +35,10 @@ function hasValidTimeseries(series?: Coordinate[] | null): series is Coordinate[
 
 const flexGroupStyle = { overflow: 'hidden' };
 
+// Stable default so the trimming memo in SparkPlotItem is not invalidated by a
+// fresh array on every render.
+const EMPTY_COMPARISON_SERIES: Coordinate[] = [];
+
 type SparkPlotType = 'line' | 'bar';
 
 export function SparkPlot({
@@ -42,10 +46,11 @@ export function SparkPlot({
   color,
   isLoading,
   series,
-  comparisonSeries = [],
+  comparisonSeries = EMPTY_COMPARISON_SERIES,
   valueLabel,
   compact,
   comparisonSeriesColor,
+  end,
 }: {
   type?: SparkPlotType;
   color: string;
@@ -55,6 +60,9 @@ export function SparkPlot({
   compact?: boolean;
   comparisonSeries?: Coordinate[];
   comparisonSeriesColor?: string;
+  // Range end (epoch ms). When set, the partial trailing bucket is trimmed; when
+  // undefined nothing is trimmed, so callers that do not pass it are unaffected.
+  end?: number;
 }) {
   return (
     <EuiFlexGroup
@@ -74,6 +82,7 @@ export function SparkPlot({
           comparisonSeries={comparisonSeries}
           comparisonSeriesColor={comparisonSeriesColor}
           compact={compact}
+          end={end}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -88,6 +97,7 @@ export function SparkPlotItem({
   comparisonSeries,
   comparisonSeriesColor,
   compact,
+  end,
 }: {
   type?: SparkPlotType;
   color: string;
@@ -96,11 +106,38 @@ export function SparkPlotItem({
   compact?: boolean;
   comparisonSeries?: Coordinate[];
   comparisonSeriesColor?: string;
+  // Range end (epoch ms). When set, the partial trailing bucket is trimmed.
+  end?: number;
 }) {
   const { euiTheme } = useEuiTheme();
   const defaultChartThemes = useChartThemes();
   const comparisonChartTheme = getComparisonChartTheme();
-  const hasComparisonSeries = !!comparisonSeries?.length;
+
+  // Decide the cut once from the main series and apply it to both series, so the
+  // main and comparison lines always end on the same bucket. If trimming would
+  // leave no valid points (a service reporting only in its latest, partial
+  // bucket) keep the untrimmed series so the row still shows a chart. This must
+  // sit above the isLoading early return to satisfy the rules of hooks.
+  const { trimmedSeries, trimmedComparisonSeries } = useMemo(() => {
+    const untrimmed = { trimmedSeries: series, trimmedComparisonSeries: comparisonSeries };
+    if (end === undefined || !series) {
+      return untrimmed;
+    }
+    const trimmed = trimPartialTrailingBucket(series, end);
+    const didTrim = trimmed.length < series.length;
+    if (!didTrim || !hasValidTimeseries(trimmed)) {
+      return untrimmed;
+    }
+    // comparisonSeries x values are already shifted onto the current period
+    // (detailed-statistics route), so dropping its last point applies the same
+    // cut as the main series.
+    return {
+      trimmedSeries: trimmed,
+      trimmedComparisonSeries: comparisonSeries?.slice(0, -1),
+    };
+  }, [series, comparisonSeries, end]);
+
+  const hasComparisonSeries = !!trimmedComparisonSeries?.length;
 
   const sparkplotChartTheme: PartialTheme = {
     chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
@@ -133,17 +170,14 @@ export function SparkPlotItem({
     );
   }
 
-  const trimmedSeries = trimPartialTrailingBucket(series);
-
   if (hasValidTimeseries(trimmedSeries)) {
-    const trimmedComparisonSeries = trimPartialTrailingBucket(comparisonSeries);
-
     const { mainSegments, leadingEdge, trailingEdge, interiorEdges } =
       splitSeriesAtNullGaps(trimmedSeries);
 
-    const comparisonSplit = hasComparisonSeries
-      ? splitSeriesAtNullGaps(trimmedComparisonSeries)
-      : null;
+    const comparisonSplit =
+      hasComparisonSeries && trimmedComparisonSeries
+        ? splitSeriesAtNullGaps(trimmedComparisonSeries)
+        : null;
 
     return (
       <Chart size={chartSize}>
