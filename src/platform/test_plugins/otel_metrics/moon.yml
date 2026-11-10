@@ -15,7 +15,7 @@ project:
   description: Moon project for @kbn/open-telemetry-instrumented-plugin
   channel: ''
   owner: '@elastic/obs-signals-metrics-team'
-  sourceRoot: src/platform/test/common/plugins/otel_metrics
+  sourceRoot: src/platform/test_plugins/otel_metrics
 dependsOn:
   - '@kbn/core'
 tags:

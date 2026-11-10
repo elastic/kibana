@@ -957,10 +957,10 @@ src/platform/plugins/shared/workflows_execution_engine @elastic/workflows-eng
 src/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
 src/platform/plugins/shared/workflows_management @elastic/workflows-eng
 src/platform/test
+src/platform/test_plugins/otel_metrics @elastic/obs-signals-metrics-team
 src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
 src/platform/test/common/plugins/newsfeed @elastic/kibana-core
-src/platform/test/common/plugins/otel_metrics @elastic/obs-signals-metrics-team
 src/platform/test/health_gateway/plugins/status @elastic/kibana-core
 src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
 src/platform/test/node_roles_functional/plugins/core_plugin_initializer_context @elastic/kibana-core
@@ -1903,7 +1903,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts @elastic/obs-signals-metrics-team @elastic/nightshift-sre-agent-team # Shared config: loads alerting tests
 /x-pack/solutions/observability/test/functional/page_objects/infra_* @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/test/fixtures/es_archives/infra @elastic/obs-signals-metrics-team
-/src/platform/test/common/plugins/otel_metrics @elastic/obs-signals-metrics-team
+/src/platform/test_plugins/otel_metrics @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/plugins/infra/common @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/plugins/infra/common/alerting/metrics @elastic/nightshift-sre-agent-team
 /x-pack/solutions/observability/plugins/infra/docs @elastic/obs-signals-metrics-team

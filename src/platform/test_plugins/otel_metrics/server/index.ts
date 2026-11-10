@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OpenTelemetryUsageTest } from './plugin';
-
-export const plugin = async () => new OpenTelemetryUsageTest();
+export const plugin = async () => {
+  const { OpenTelemetryUsageTest } = await import('./plugin');
+  return new OpenTelemetryUsageTest();
+};

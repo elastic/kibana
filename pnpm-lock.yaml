@@ -2978,7 +2978,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-ols
       '@kbn/open-telemetry-instrumented-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/common/plugins/otel_metrics
+        version: link:src/platform/test_plugins/otel_metrics
       '@kbn/openapi-common':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-openapi-common
@@ -8822,8 +8822,6 @@ importers:
 
   src/platform/test/common/plugins/newsfeed: {}
 
-  src/platform/test/common/plugins/otel_metrics: {}
-
   src/platform/test/health_gateway/plugins/status: {}
 
   src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline: {}
@@ -8895,6 +8893,8 @@ importers:
   src/platform/test/server_integration/plugins/status_plugin_b: {}
 
   src/platform/test/user_storage/plugins/user_storage_test: {}
+
+  src/platform/test_plugins/otel_metrics: {}
 
   src/setup_node_env: {}
 
