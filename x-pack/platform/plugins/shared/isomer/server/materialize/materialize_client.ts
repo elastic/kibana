@@ -12,7 +12,7 @@ import type { ValidationError } from '@kbn/isomer';
 import type { MaterializeContext, MaterializeInput } from '../../common';
 import { executeEsql } from './executors/esql';
 import { DATA_REQUEST_TIMEOUT_MS, MAX_MATERIALIZE_DEPTH, MAX_ROWS_PER_REQUEST } from './limits';
-import type { MaterializedNode } from './nodes';
+import type { MaterializedNode, MaterializedNodeSource } from './nodes';
 import { isUnsupportedNode } from './nodes';
 import { runPipeline } from './pipeline';
 import type { MaterializerRegistry } from './registry';
@@ -100,9 +100,13 @@ export const createScopedMaterializeClient = ({
   /** A validated `unsupported` node, dropping a description that does not validate. */
   const unsupportedFor =
     (type: string) =>
-    async (reason: string, description?: MaterializeDescription): Promise<MaterializedNode> => {
+    async (
+      reason: string,
+      description?: MaterializeDescription,
+      source?: MaterializedNodeSource
+    ): Promise<MaterializedNode> => {
       const boundedReason = reason.slice(0, MAX_UNSUPPORTED_REASON_LENGTH);
-      const node = createUnsupportedNode(boundedReason, description);
+      const node = createUnsupportedNode(boundedReason, description, source);
       try {
         await validateNode(node);
         return node;
@@ -110,8 +114,10 @@ export const createScopedMaterializeClient = ({
         if (!description) {
           throw error;
         }
-        logger.warn(`Validating the ${type} unsupported description failed: ${errorMessage(error)}`);
-        const fallback = createUnsupportedNode(boundedReason);
+        logger.warn(
+          `Validating the ${type} unsupported description failed: ${errorMessage(error)}`
+        );
+        const fallback = createUnsupportedNode(boundedReason, undefined, source);
         await validateNode(fallback);
         return fallback;
       }
@@ -173,6 +179,7 @@ export const createScopedMaterializeClient = ({
           config,
           context,
           describe,
+          spaceId: scope.request.spaceId,
           ...(isByReference(input) ? { savedObjectId: input.id } : {}),
         },
         {
@@ -191,8 +198,8 @@ export const createScopedMaterializeClient = ({
         }
       );
       if (isUnsupportedNode(node)) {
-        const { reason, title, link } = node;
-        return await unsupported(reason, { title, link });
+        const { reason, title, link, source } = node;
+        return await unsupported(reason, { title, link }, source);
       }
       return node;
     } catch (error) {

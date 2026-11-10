@@ -5,18 +5,25 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import type { MaterializedNodeSource, UnsupportedNode } from './nodes';
+import { UNSUPPORTED_NODE_TYPE } from './nodes';
 import type { MaterializeDescription } from './types';
-import type { UnsupportedNode } from './nodes';
 
-const UNSUPPORTED_NODE_TYPE = 'unsupported';
+const defaultTitle = () =>
+  i18n.translate('xpack.isomer.materialize.unsupportedTitle', {
+    defaultMessage: 'Content not available',
+  });
 
 /** A renderable explanation for a materialization result that could not be produced. */
 export const createUnsupportedNode = (
   reason: string,
-  { title, link }: MaterializeDescription = {}
+  { title, link }: MaterializeDescription = {},
+  source?: MaterializedNodeSource
 ): UnsupportedNode => ({
   type: UNSUPPORTED_NODE_TYPE,
+  title: title || defaultTitle(),
   reason,
-  ...(title ? { title } : {}),
   ...(link ? { link } : {}),
+  ...(source ? { source } : {}),
 });

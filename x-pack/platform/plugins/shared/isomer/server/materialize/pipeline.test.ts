@@ -7,7 +7,8 @@
 
 import type { Filter } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { MaterializedNode, UnsupportedNode } from './nodes';
+import { metricExamples } from '@kbn/isomer';
+import type { MaterializedChartNode, MaterializedNode, UnsupportedNode } from './nodes';
 import type { PipelineDeps } from './pipeline';
 import { runPipeline } from './pipeline';
 import type { DataRequest, Materializer } from './types';
@@ -28,6 +29,8 @@ const filter = (value: string): Filter => ({
   query: { match_phrase: { 'host.name': value } },
 });
 
+const [{ node: metricNode }] = metricExamples;
+
 const chart = (overrides: Partial<Materializer<ChartConfig>> = {}): Materializer<ChartConfig> => ({
   version: 3,
   parse: (config) => config as ChartConfig,
@@ -38,9 +41,8 @@ const chart = (overrides: Partial<Materializer<ChartConfig>> = {}): Materializer
   plan: jest.fn(({ requests }: ChartConfig): DataRequest[] | UnsupportedNode => requests),
   map: jest.fn(
     (_config: ChartConfig, { tables }): MaterializedNode => ({
-      type: 'metric',
-      title: 'Requests',
-      data: tables.map(({ columns }) => columns[0].id),
+      ...metricNode,
+      description: tables.map(({ columns }) => columns[0].id).join(', '),
     })
   ),
   ...overrides,
@@ -64,6 +66,18 @@ const createDeps = (overrides: Partial<PipelineDeps> = {}) => ({
 });
 
 const context = { timeRange: { from: 'now-15m', to: 'now' }, filters: [filter('web-01')] };
+// `now-15m` to `now`, resolved against `now` below.
+const absoluteContext = {
+  ...context,
+  timeRange: { from: '2026-11-04T05:45:00.000Z', to: '2026-11-04T06:00:00.000Z' },
+};
+const meta = { materializer: 'lens', materializerVersion: 3 };
+const source = {
+  host: 'kibana',
+  hostVersion: '9.5.0',
+  meta,
+  capturedAt: '2026-11-04T06:00:00.000Z',
+};
 
 describe('runPipeline', () => {
   it('runs each request in its merged context and maps the tables in plan order', async () => {
@@ -78,34 +92,30 @@ describe('runPipeline', () => {
     };
 
     const node = await runPipeline(
-      { type: 'lens', materializer, config, context, savedObjectId: 'abc' },
+      { type: 'lens', materializer, config, context, savedObjectId: 'abc', spaceId: 'ops' },
       deps
     );
 
-    expect(deps.executeEsql).toHaveBeenNthCalledWith(1, config.requests[0], context, 0);
+    expect(materializer.plan).toHaveBeenCalledWith(config, absoluteContext);
+    expect(deps.executeEsql).toHaveBeenNthCalledWith(1, config.requests[0], absoluteContext, 0);
     expect(deps.executeEsql).toHaveBeenNthCalledWith(
       2,
       config.requests[1],
-      { ...context, filters: [filter('web-01'), filter('web-02')] },
+      { ...absoluteContext, filters: [filter('web-01'), filter('web-02')] },
       1
     );
     expect(materializer.map).toHaveBeenCalledWith(
       config,
       { tables: [table('FROM a'), table('FROM b')], nodes: [] },
-      { context }
+      { context: absoluteContext }
     );
     expect(node).toEqual({
-      type: 'metric',
-      title: 'Requests',
-      data: ['FROM a', 'FROM b'],
+      ...metricNode,
+      description: 'FROM a, FROM b',
       source: {
-        kind: 'kibana-panel',
-        kibanaVersion: '9.5.0',
-        adapter: 'lens',
-        adapterVersion: 3,
-        savedObjectId: 'abc',
-        timeRange: { from: 'now-15m', to: 'now' },
-        capturedAt: '2026-11-04T06:00:00.000Z',
+        ...source,
+        meta: { ...meta, spaceId: 'ops', savedObjectType: 'lens', savedObjectId: 'abc' },
+        timeRange: absoluteContext.timeRange,
       },
     });
     expect(deps.validate).toHaveBeenCalledWith(node);
@@ -119,7 +129,7 @@ describe('runPipeline', () => {
     };
     const ownLoss = { path: 'colors', kind: 'approximated' as const, note: 'Palette.' };
     const materializer = chart({
-      map: () => ({ type: 'metric', losses: [ownLoss] }),
+      map: (): MaterializedChartNode => ({ ...metricNode, losses: [ownLoss] }),
     });
     const deps = createDeps({
       executeEsql: jest.fn(async () => ({ table: table('x'), losses: [rowCap] })),
@@ -140,9 +150,7 @@ describe('runPipeline', () => {
   });
 
   it('materializes nested inputs in their merged context', async () => {
-    const materializer = chart({
-      map: (_config, { nodes }) => ({ type: 'grid', panels: nodes }),
-    });
+    const materializer = chart();
     const deps = createDeps();
     const requests: DataRequest[] = [
       { kind: 'materialize', input: { type: 'lens', id: 'p1' } },
@@ -153,31 +161,41 @@ describe('runPipeline', () => {
       },
     ];
 
-    const node = await runPipeline(
+    await runPipeline(
       { type: 'dashboard', materializer, config: { title: 'Logs', requests }, context },
       deps
     );
 
-    expect(deps.materialize).toHaveBeenNthCalledWith(1, { type: 'lens', id: 'p1' }, context);
+    expect(deps.materialize).toHaveBeenNthCalledWith(
+      1,
+      { type: 'lens', id: 'p1' },
+      absoluteContext
+    );
     expect(deps.materialize).toHaveBeenNthCalledWith(
       2,
       { type: 'markdown', config: {} },
-      { timeRange: context.timeRange }
+      { timeRange: absoluteContext.timeRange }
     );
-    expect(node).toEqual(
-      expect.objectContaining({
-        type: 'grid',
-        panels: [
+    expect(materializer.map).toHaveBeenCalledWith(
+      expect.anything(),
+      {
+        tables: [],
+        nodes: [
           { type: 'markdown', text: 'lens' },
           { type: 'markdown', text: 'markdown' },
         ],
-      })
+      },
+      expect.anything()
     );
   });
 
   it("returns a plan's unsupported node with the config's title and link", async () => {
     const materializer = chart({
-      plan: () => ({ type: 'unsupported', reason: 'Region maps are not supported.' }),
+      plan: (): UnsupportedNode => ({
+        type: 'unsupported',
+        title: '',
+        reason: 'Region maps are not supported.',
+      }),
     });
     const deps = createDeps();
 
@@ -191,13 +209,14 @@ describe('runPipeline', () => {
       title: 'Countries',
       reason: 'Region maps are not supported.',
       link: { href: '/app/lens#/edit/abc', label: 'Open in Lens' },
+      source: { ...source, timeRange: absoluteContext.timeRange },
     });
     expect(deps.validate).not.toHaveBeenCalled();
   });
 
-  it("returns a mapping's unsupported node without provenance or validation", async () => {
+  it("returns a mapping's unsupported node with provenance, without validation", async () => {
     const materializer = chart({
-      map: () => ({ type: 'unsupported', title: 'Own title', reason: 'No rows.' }),
+      map: (): UnsupportedNode => ({ type: 'unsupported', title: 'Own title', reason: 'No rows.' }),
     });
     const deps = createDeps();
 
@@ -211,6 +230,7 @@ describe('runPipeline', () => {
       title: 'Own title',
       reason: 'No rows.',
       link: { href: '/app/lens#/edit/abc', label: 'Open in Lens' },
+      source: { ...source, timeRange: absoluteContext.timeRange },
     });
     expect(deps.validate).not.toHaveBeenCalled();
   });

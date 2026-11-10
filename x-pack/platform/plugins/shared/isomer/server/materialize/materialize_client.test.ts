@@ -101,6 +101,7 @@ describe('createScopedMaterializeClient', () => {
 
       await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
         type: 'unsupported',
+        title: 'Content not available',
         reason: 'Materialization is not enabled in this Kibana.',
       });
       expect(materializer.parse).not.toHaveBeenCalled();
@@ -110,6 +111,7 @@ describe('createScopedMaterializeClient', () => {
       const { client } = setup();
       await expect(client.materialize({ type: 'map', id: 'map-1' })).resolves.toEqual({
         type: 'unsupported',
+        title: 'Content not available',
         reason: 'Kibana cannot materialize saved objects of type "map".',
       });
     });
@@ -118,6 +120,7 @@ describe('createScopedMaterializeClient', () => {
       const { client } = setup();
       await expect(client.materialize({ type: 'note', id: 'note-1' })).resolves.toEqual({
         type: 'unsupported',
+        title: 'Content not available',
         reason:
           'The note config could not be read: Saved objects of type "note" can only be materialized by value.',
       });
@@ -131,6 +134,7 @@ describe('createScopedMaterializeClient', () => {
         client.materialize({ type: 'note', config: { title: 'Open alerts' } })
       ).resolves.toEqual({
         type: 'unsupported',
+        title: 'Content not available',
         reason: 'The note config could not be read: title and text must be strings',
       });
       expect(materializer.plan).not.toHaveBeenCalled();
@@ -144,13 +148,15 @@ describe('createScopedMaterializeClient', () => {
 
       await expect(client.materialize({ type: 'note', id: 'note-1' })).resolves.toEqual({
         type: 'unsupported',
+        title: 'Content not available',
         reason: 'The note config could not be read: Saved object [note/note-1] not found',
       });
     });
 
     it('returns the unsupported node a plan returns', async () => {
-      const unsupported = {
-        type: 'unsupported' as const,
+      const unsupported: UnsupportedNode = {
+        type: 'unsupported',
+        title: '',
         reason: 'Region maps are not supported.',
       };
       const materializer = createNoteMaterializer({ plan: jest.fn(() => unsupported) });
@@ -159,6 +165,10 @@ describe('createScopedMaterializeClient', () => {
       await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
         ...unsupported,
         title: 'Open alerts',
+        source: expect.objectContaining({
+          host: 'kibana',
+          meta: expect.objectContaining({ materializer: 'note' }),
+        }),
       });
       expect(materializer.map).not.toHaveBeenCalled();
     });
@@ -210,8 +220,11 @@ describe('createScopedMaterializeClient', () => {
 
       await expect(client.materialize({ type: 'note', config: nest(0) })).resolves.toEqual({
         type: 'unsupported',
-        title: 'Level 1',
+        title: 'Content not available',
         reason: 'This note is nested more than 1 levels deep.',
+        source: expect.objectContaining({
+          meta: expect.objectContaining({ materializer: 'note', spaceId: 'default' }),
+        }),
       });
       expect(materializer.plan).toHaveBeenCalledTimes(2);
     });
@@ -245,6 +258,7 @@ describe('createScopedMaterializeClient', () => {
 
       await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
         type: 'unsupported',
+        title: 'Content not available',
         reason: 'Materializing this note failed: mapping failed',
       });
       expect(logger.warn).toHaveBeenCalledWith(
@@ -272,6 +286,7 @@ describe('createScopedMaterializeClient', () => {
 
       await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
         type: 'unsupported',
+        title: 'Content not available',
         reason: 'Materializing this note failed: mapping failed',
       });
       expect(logger.warn).toHaveBeenCalledWith(
@@ -295,6 +310,10 @@ describe('createScopedMaterializeClient', () => {
         type: 'unsupported',
         title: 'Open alerts',
         reason: 'The note materialized into an invalid node: text is too small',
+        source: expect.objectContaining({
+          host: 'kibana',
+          meta: expect.objectContaining({ materializer: 'note' }),
+        }),
       });
       expect(validate).toHaveBeenCalledTimes(2);
     });
@@ -308,13 +327,13 @@ describe('createScopedMaterializeClient', () => {
           {
             node: 'panel-1',
             kind: 'select',
-            target: 'datum',
+            target: 'category',
             rows: [0],
             columns: ['host.name'],
             description: 'host.name: web-01',
             values: { 'host.name': 'web-01' },
           },
-          { type: 'markdown' }
+          { type: 'markdown', text: 'There are **3** open alerts.' }
         )
       ).rejects.toThrow('Kibana cannot turn a selection on node "panel-1" into filters.');
     });

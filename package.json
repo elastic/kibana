@@ -164,6 +164,7 @@
     "@elastic/eui-illustrations": "1.1.0",
     "@elastic/eui-theme-borealis": "8.1.0",
     "@elastic/filesaver": "1.1.2",
+    "@elastic/isomer-primitives-charts": "file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz",
     "@elastic/isomer-runtime": "file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz",
     "@elastic/isomer-sdk": "file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c8.05c3442.tgz",
     "@elastic/kibana-d3-color": "2.0.1",

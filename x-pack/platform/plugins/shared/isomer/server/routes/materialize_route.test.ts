@@ -12,11 +12,12 @@ import {
   MATERIALIZE_API_VERSION,
   MATERIALIZE_FEATURE_FLAG,
 } from '../../common/constants';
+import type { MaterializedNode } from '../materialize/nodes';
 import { isomerPluginMock } from '../mocks';
 import { registerMaterializeRoute } from './materialize_route';
 import { materializeRequestBodySchema } from './schemas';
 
-const node = { type: 'markdown', text: 'There are **3** open alerts.' };
+const node: MaterializedNode = { type: 'markdown', text: 'There are **3** open alerts.' };
 
 const setup = () => {
   const router = httpServiceMock.createRouter();

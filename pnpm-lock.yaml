@@ -416,6 +416,9 @@ importers:
       '@elastic/filesaver':
         specifier: 1.1.2
         version: 1.1.2
+      '@elastic/isomer-primitives-charts':
+        specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz
+        version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
       '@elastic/isomer-runtime':
         specifier: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz
         version: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
@@ -11249,6 +11252,13 @@ packages:
 
   '@elastic/filesaver@1.1.2':
     resolution: {integrity: sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==}
+
+  '@elastic/isomer-primitives-charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz':
+    resolution: {integrity: sha512-wrGNydwHBVHakOrFSVbY8rQJldj7cB/JGMppIB4VFuauOFEty+fBmWCZXduc8q51+Lzd7iVzas7IcHmNlhi1xA==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz}
+    version: 0.0.0-c8.05c3442
+    peerDependencies:
+      react: '>=18 <20'
+      zod: 4.6.5
 
   '@elastic/isomer-runtime@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz':
     resolution: {integrity: sha512-M8zLaY9YFWl9C63qEY+grufKIRNF0FPQAryaDOflliQHfgoNwMsZCv8RCJ8VFsgg9luUMhFqHgVv8TZOyb7Ojg==, tarball: file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz}
@@ -27383,6 +27393,16 @@ snapshots:
       vfile: 4.2.1
 
   '@elastic/filesaver@1.1.2': {}
+
+  '@elastic/isomer-primitives-charts@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-primitives-charts-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
+    dependencies:
+      '@elastic/distillate': 0.2.0
+      '@elastic/isomer-sdk': file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-sdk-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)
+      react: 18.2.0
+      zod: 4.6.5
+    transitivePeerDependencies:
+      - react-dom
+      - supports-color
 
   '@elastic/isomer-runtime@file:x-pack/platform/packages/shared/isomer/vendor/elastic-isomer-runtime-0.0.0-c8.05c3442.tgz(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)(zod@4.6.5)':
     dependencies:

@@ -7,7 +7,7 @@
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { createKibanaIsomerRuntime } from '@kbn/isomer';
+import { createKibanaIsomerRuntime, unsupportedSchema } from '@kbn/isomer';
 import type { MarkdownNode } from '@kbn/isomer-components';
 import { Observable, of } from 'rxjs';
 import { MATERIALIZE_API_PATH, MATERIALIZE_FEATURE_FLAG } from '../common/constants';
@@ -154,7 +154,7 @@ describe('IsomerPlugin', () => {
   });
 
   it('returns unsupported when a materializer maps an invalid node', async () => {
-    const { registerMaterializer, asScoped, getRuntime } = startPlugin();
+    const { registerMaterializer, asScoped } = startPlugin();
     registerMaterializer('note', {
       version: 1,
       parse: (config) => config,
@@ -172,7 +172,7 @@ describe('IsomerPlugin', () => {
         reason: expect.stringMatching(/^The note materialized into an invalid node: text /),
       })
     );
-    expect((await getRuntime()).validate({ type: 'view', body: [node] }).errors).toEqual([]);
+    expect(unsupportedSchema.safeParse(node).success).toBe(true);
   });
 
   it("validates every result against the runtime's packs", async () => {
@@ -197,7 +197,12 @@ describe('IsomerPlugin', () => {
       asScoped(request).materialize({ type: 'note', config: { text: '' } })
     ).resolves.toEqual({
       type: 'unsupported',
+      title: 'Content not available',
       reason: expect.stringMatching(/^The note materialized into an invalid node: text /),
+      source: expect.objectContaining({
+        host: 'kibana',
+        meta: expect.objectContaining({ materializer: 'note' }),
+      }),
     });
     expect(data.search.asScoped).toHaveBeenCalledWith(request);
   });

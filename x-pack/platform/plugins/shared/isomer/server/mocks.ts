@@ -7,21 +7,21 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { metricExamples } from '@kbn/isomer';
 import { IsomerPlugin } from './plugin';
 import type { IsomerPluginSetup, IsomerPluginStart } from './plugin';
 import type { ScopedMaterializeClient } from './materialize/types';
-import { createUnsupportedNode } from './materialize/unsupported';
 
 const createSetupContract = (): jest.Mocked<IsomerPluginSetup> => ({
   registerMaterializer: jest.fn(),
 });
 
-/** A scoped client whose `materialize` returns an `unsupported` node until a test says otherwise. */
+/** A scoped client whose `materialize` returns the charts pack's first metric example until a test says otherwise. */
 const createScopedClient = (): jest.Mocked<ScopedMaterializeClient> => ({
   materialize: jest.fn<
     ReturnType<ScopedMaterializeClient['materialize']>,
     Parameters<ScopedMaterializeClient['materialize']>
-  >(async () => createUnsupportedNode('Not materialized in this test.')),
+  >(async () => metricExamples[0].node),
   filtersForSelection: jest.fn<
     ReturnType<ScopedMaterializeClient['filtersForSelection']>,
     Parameters<ScopedMaterializeClient['filtersForSelection']>
