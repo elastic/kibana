@@ -303,7 +303,7 @@ describe('useProvisioningCallback', () => {
       expect(result.current.created).toEqual({ id: 'cc-1', name: 'cc-1', ...RECEIVED_VALUES });
     });
 
-    it('waits a little longer, once, when the report is still being applied', async () => {
+    it('keeps waiting while the report is still being applied, until the server settles it', async () => {
       mockedDelete.mockResolvedValue({
         data: { item: pendingItem('cb-1', { status: 'receiving', ...RECEIVED_VALUES }) },
         error: null,
@@ -317,7 +317,21 @@ describe('useProvisioningCallback', () => {
       jest.setSystemTime(Date.now() + PROVISIONING_CALLBACK_RECEIVING_GRACE_MS + 1);
       await poll();
       expect(mockedDelete).toHaveBeenCalledTimes(2);
-      expect(result.current.status).toBe('expired');
+      expect(result.current.status).toBe('receiving');
+
+      mockedGet.mockResolvedValue({
+        data: {
+          item: pendingItem('cb-1', {
+            status: 'received',
+            ...RECEIVED_VALUES,
+            cloud_connector_id: 'cc-1',
+          }),
+        },
+        error: null,
+      } as any);
+      await poll();
+      expect(result.current.status).toBe('received');
+      expect(result.current.created).toEqual({ id: 'cc-1', name: 'cc-1', ...RECEIVED_VALUES });
     });
 
     it('leaves a newer launch alone when its cancel settles after that launch', async () => {
@@ -567,6 +581,42 @@ describe('useProvisioningCallback', () => {
       expect(result.current.status).toBe('receiving');
       await poll();
       expect(mockedGet).toHaveBeenCalledWith('cb-1');
+    });
+
+    it('ignores a poll answer that lands after a cancel surfaced the identity', async () => {
+      let answerPoll!: (value: unknown) => void;
+      mockedGet.mockReturnValueOnce(
+        new Promise((resolve) => {
+          answerPoll = resolve;
+        }) as any
+      );
+      mockedDelete.mockResolvedValue({
+        data: {
+          item: pendingItem('cb-1', {
+            status: 'received',
+            ...RECEIVED_VALUES,
+            cloud_connector_id: 'cc-1',
+          }),
+        },
+        error: null,
+      } as any);
+      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
+      await act(async () => {
+        await result.current.start({});
+      });
+      await poll();
+      expect(mockedGet).toHaveBeenCalledTimes(1);
+
+      await act(async () => {
+        await result.current.cancel();
+      });
+      expect(result.current.status).toBe('received');
+
+      await act(async () => {
+        answerPoll({ data: { item: pendingItem('cb-1') }, error: null });
+      });
+      expect(result.current.status).toBe('received');
+      expect(result.current.created).toEqual({ id: 'cc-1', name: 'cc-1', ...RECEIVED_VALUES });
     });
 
     it('reports the identity when a poll saw the report land while the cancel was in flight', async () => {

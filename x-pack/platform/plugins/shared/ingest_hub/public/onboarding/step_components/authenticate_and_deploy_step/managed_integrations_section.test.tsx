@@ -193,6 +193,7 @@ function renderSection(
     storedSecretFields?: Array<'access_key_id' | 'secret_access_key'>;
     isStoredSecretsLoading?: boolean;
     onReplaceFormDirtyChange?: jest.Mock;
+    isCleanupOnly?: boolean;
   } = {}
 ) {
   return render(
@@ -210,6 +211,7 @@ function renderSection(
           storedSecretFields={props.storedSecretFields}
           isStoredSecretsLoading={props.isStoredSecretsLoading}
           onReplaceFormDirtyChange={props.onReplaceFormDirtyChange}
+          isCleanupOnly={props.isCleanupOnly}
         />
       </React.Suspense>
     </I18nProvider>
@@ -242,6 +244,15 @@ describe('ManagedIntegrationsSection', () => {
       // The stack's report made and selected the identity: Deploy is the next click, so it must
       // not sit under "Create stack manually".
       fireEvent.click(screen.getByText('mark-ready'));
+      expect(screen.getByTestId('manual-entry-actions')).toBeEmptyDOMElement();
+      expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeEnabled();
+    });
+
+    it('keeps Deploy below the form on the New Identity tab when only a cleanup is left', () => {
+      setupMocks();
+      renderSection({ showIdentityFederation: true, isCleanupOnly: true });
+      fireEvent.click(screen.getByText('tab-new'));
+
       expect(screen.getByTestId('manual-entry-actions')).toBeEmptyDOMElement();
       expect(screen.getByTestId('managedIntegrationsSection-deployButton')).toBeEnabled();
     });

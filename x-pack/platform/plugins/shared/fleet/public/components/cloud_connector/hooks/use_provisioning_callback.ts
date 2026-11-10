@@ -23,7 +23,7 @@ import { IAC_PROVISIONER_API_ROUTES } from '../../../../common/constants';
 export const PROVISIONING_CALLBACK_POLL_INTERVAL_MS = 3_000;
 /** Stop polling after this even if the record has not expired yet. */
 export const PROVISIONING_CALLBACK_POLL_TIMEOUT_MS = 10 * 60 * 1000;
-/** Extra time to wait when the deadline finds the stack's report still being applied. */
+/** How much longer to wait each time the deadline finds the stack's report still being applied. */
 export const PROVISIONING_CALLBACK_RECEIVING_GRACE_MS = 60 * 1000;
 
 /** `receiving`: the stack has reported and the server is creating the identity. */
@@ -199,7 +199,6 @@ export const useProvisioningCallback = ({
         new Date(expiresAt).getTime(),
         Date.now() + PROVISIONING_CALLBACK_POLL_TIMEOUT_MS
       );
-      let hasGrace = true;
       let isRetiring = false;
       timerRef.current = setInterval(async () => {
         if (activeIdRef.current !== id) {
@@ -222,14 +221,9 @@ export const useProvisioningCallback = ({
           if (outcome === 'cancelled') {
             setStatus('expired');
           } else if (outcome === 'created' && activeIdRef.current === id) {
-            // Still being applied. Give it a little longer, once.
-            if (hasGrace) {
-              hasGrace = false;
-              deadline = Date.now() + PROVISIONING_CALLBACK_RECEIVING_GRACE_MS;
-            } else {
-              stopPolling();
-              setStatus('expired');
-            }
+            // The report is being applied. The server either finishes it or hands the record
+            // back to pending, and the next pass settles either way, so keep watching.
+            deadline = Date.now() + PROVISIONING_CALLBACK_RECEIVING_GRACE_MS;
           } else if (outcome === 'failed') {
             // The record is still live; the id is kept so a manual Create retries the cancel.
             stopPolling();

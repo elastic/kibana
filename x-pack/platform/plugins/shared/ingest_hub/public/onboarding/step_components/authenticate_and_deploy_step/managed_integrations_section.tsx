@@ -175,11 +175,15 @@ export function ManagedIntegrationsSection({
   // value is not. Emptying the fields again clears the change.
   // On the identity form's New Identity tab the only click is Launch; Deploy belongs to the
   // manual fallback there, next to Create Identity. Everywhere else it sits below the form,
-  // including on that tab once the stack has made the identity: Deploy is the next click then,
-  // and must not be folded away under a section the user never needed.
+  // including on that tab once the stack has made the identity, or when only a cleanup is left
+  // to deploy: Deploy is the next click then, and must not be folded away under a section the
+  // user never needed.
   const [isNewIdentityTab, setIsNewIdentityTab] = useState(true);
   const isDeployInManualSection =
-    preferredMethod === 'identity_federation' && isNewIdentityTab && !isDeployReady;
+    preferredMethod === 'identity_federation' &&
+    isNewIdentityTab &&
+    !isDeployReady &&
+    !isCleanupOnly;
   const isEditingDeployedKeys = isStaticKeysEditMode || storedSecretFields.length > 0;
   const handleStoredKeysFormChange = useCallback(
     (fields: AwsStaticKeyCredentials | undefined) => {

@@ -623,7 +623,15 @@ describe('provisioningCallbackService', () => {
       );
       // Two audit entries: the identity made from the record, and the report that led to it.
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `Provisioning callback received [id=cb-1] [cloud_connector_id=cc-1] [role_arn=${ROLE_ARN}]`,
+        message: 'Provisioning callback received, cloud connector created',
+        event: {
+          action: 'provisioning_callback_received',
+          category: ['database'],
+          type: ['creation'],
+          outcome: 'success',
+        },
+        kibana: { saved_object: { type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, id: 'cc-1' } },
+        labels: { provisioning_callback_id: 'cb-1', role_arn: ROLE_ARN, stack_arn: STACK_ARN },
       });
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
         message: 'Provisioning callback report accepted',

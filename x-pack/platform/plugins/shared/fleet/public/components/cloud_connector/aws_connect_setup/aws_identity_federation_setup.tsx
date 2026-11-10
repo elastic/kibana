@@ -9,6 +9,7 @@ import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import {
   EuiAccordion,
   EuiButton,
+  EuiButtonEmpty,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -39,7 +40,10 @@ import type { CloudConnectorIacState } from '../../../../common/types/models/clo
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
-import { useProvisioningCallback } from '../hooks/use_provisioning_callback';
+import {
+  useProvisioningCallback,
+  type CloudConnectorCallbackCreated,
+} from '../hooks/use_provisioning_callback';
 import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_tabs';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -263,13 +267,38 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     getLaunchStackParams: isCallbackAvailable ? getLaunchStackParams : undefined,
   });
 
+  const notifyCancelFailed = useCallback(() => {
+    notifications?.toasts.addDanger({
+      title: i18n.translate('xpack.fleet.cloudConnector.provisioningCallback.cancelFailed', {
+        defaultMessage:
+          'Could not stop waiting for CloudFormation. Try again, or wait for the stack to report back.',
+      }),
+    });
+  }, [notifications]);
+
   // A later launch that never reached the console cannot call back, so retire the record an
   // earlier launch created.
   useEffect(() => {
     if (callbackStatus === 'pending' && templateGenerationError) {
-      cancelCallback();
+      cancelCallback().then((outcome) => {
+        if (outcome === 'failed') {
+          notifyCancelFailed();
+        }
+      });
     }
-  }, [callbackStatus, templateGenerationError, cancelCallback]);
+  }, [callbackStatus, templateGenerationError, cancelCallback, notifyCancelFailed]);
+
+  // The way out of a wait the user does not want to see through: the console was closed, or
+  // opened in the wrong account. The form unlocks once the record is retired.
+  const [isCancelling, setIsCancelling] = useState(false);
+  const handleCancelWait = useCallback(async () => {
+    setIsCancelling(true);
+    const outcome = await cancelCallback();
+    setIsCancelling(false);
+    if (outcome === 'failed') {
+      notifyCancelFailed();
+    }
+  }, [cancelCallback, notifyCancelFailed]);
 
   // Once the wait has ended without an identity, the fields unlock and a hint says so.
   const hasCallbackGivenUp = callbackStatus === 'expired' || callbackStatus === 'error';
@@ -286,14 +315,16 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     }
   }, [isManualEntryTheOnlyWay]);
 
-  const notifyCancelFailed = useCallback(() => {
-    notifications?.toasts.addDanger({
-      title: i18n.translate('xpack.fleet.cloudConnector.provisioningCallback.cancelFailed', {
-        defaultMessage:
-          'Could not stop waiting for CloudFormation. Try again, or wait for the stack to report back.',
-      }),
-    });
-  }, [notifications]);
+  // The stack deployed the template rendered for this integration set, so the identity is
+  // current by construction; IacKeyCheck only mounts on the Existing tab and would otherwise
+  // never lift the pessimistic initial verdict.
+  const selectCreatedIdentity = useCallback(
+    (created: CloudConnectorCallbackCreated) => {
+      setSelected({ id: created.id, name: created.name });
+      setCheckVerdict({ key: `${created.id}|${integrationsKey}`, isValid: true });
+    },
+    [integrationsKey]
+  );
 
   const handledCreatedIdRef = useRef<string | undefined>(undefined);
   useEffect(() => {
@@ -309,14 +340,21 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     // screen stays as it is, so the user is not moved away from the progress they are watching.
     setRoleArn(callbackCreated.role_arn ?? '');
     setStackArn(callbackCreated.stack_arn ?? '');
-    setSelected({ id: callbackCreated.id, name: callbackCreated.name });
-    // The stack deployed the template rendered for this integration set, so the identity is
-    // current by construction; IacKeyCheck only mounts on the Existing tab and would otherwise
-    // never lift the pessimistic initial verdict.
-    setCheckVerdict({ key: `${callbackCreated.id}|${integrationsKey}`, isValid: true });
+    // On the Existing tab the user has picked an identity, and that pick stands. The New tab
+    // selects the created identity when it is shown again.
+    if (selectedTabId === TABS.NEW_CONNECTION) {
+      selectCreatedIdentity(callbackCreated);
+    }
     // The template details belong to the identity the stack just created.
     clearIacConfirm();
-  }, [callbackCreated, integrationsKey, queryClient, notifications, clearIacConfirm]);
+  }, [
+    callbackCreated,
+    selectedTabId,
+    selectCreatedIdentity,
+    queryClient,
+    notifications,
+    clearIacConfirm,
+  ]);
 
   const { mutate: createConnector, isLoading: isCreating } = useCreateCloudConnector(
     (connector) => {
@@ -392,11 +430,11 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     if (tab.id === TABS.NEW_CONNECTION) {
       // The New tab starts without a selection, unless it still shows the identity the stack
       // created: that one stays selected, since the tab cannot make another until a new Launch.
-      setSelected(
-        callbackStatus === 'received' && callbackCreated
-          ? { id: callbackCreated.id, name: callbackCreated.name }
-          : undefined
-      );
+      if (callbackStatus === 'received' && callbackCreated) {
+        selectCreatedIdentity(callbackCreated);
+      } else {
+        setSelected(undefined);
+      }
     }
   };
 
@@ -507,6 +545,22 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                     )}
                   </EuiText>
                 </EuiFlexItem>
+                {/* Once the stack has reported there is nothing left to cancel. */}
+                {callbackStatus === 'pending' && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="s"
+                      isLoading={isCancelling}
+                      onClick={handleCancelWait}
+                      data-test-subj="awsIdentityFederationSetup-cancelCallback"
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.cloudConnector.provisioningCallback.cancelButton"
+                        defaultMessage="Cancel"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                )}
               </EuiFlexGroup>
             </>
           )}

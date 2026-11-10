@@ -742,13 +742,14 @@ describe('AwsIdentityFederationSetup', () => {
         'Creating stack'
       );
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackSpinner')).toBeInTheDocument();
-      // Nothing but the stage: no hint text and no way to take over by hand.
+      // The stage and a way to stop waiting, nothing else: no hint text and no manual take-over.
       expect(
         screen.queryByTestId('awsIdentityFederationSetup-enterManually')
       ).not.toBeInTheDocument();
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
-        /^Creating stack$/
+        /^Creating stackCancel$/
       );
+      expect(screen.getByTestId('awsIdentityFederationSetup-cancelCallback')).toBeEnabled();
     });
 
     it('keeps the ARN fields and Create inside a collapsed "Create stack manually" section', () => {
@@ -889,6 +890,72 @@ describe('AwsIdentityFederationSetup', () => {
       expect(lastIacKeyCheckProps()).toBeUndefined();
       expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
       expect(clearIacConfirm).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves an identity picked on the Existing Identity tab alone when the stack reports', async () => {
+      const user = userEvent.setup();
+      // A project with identities opens on the Existing tab, with one of them chosen.
+      mockGetConnectors();
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      const { rerender } = renderSetup({ cloud, integrations, initialConnectorId: 'connector-1' });
+      expect(screen.getByRole('tab', { name: 'Existing Identity' })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+      expect(onConnectorIdChange).toHaveBeenLastCalledWith('connector-1', 'AWS Connector 1');
+
+      mockUseProvisioningCallback.mockReturnValue(
+        callbackState({ status: 'received', created: { id: 'cc-1', name: 'my-identity' } })
+      );
+      rerender(setupElement({ cloud, integrations, initialConnectorId: 'connector-1' }));
+
+      expect(mockAddSuccess).toHaveBeenCalledWith({
+        title: 'Federated identity created successfully',
+      });
+      expect(onConnectorIdChange).toHaveBeenLastCalledWith('connector-1', 'AWS Connector 1');
+      expect(screen.getByRole('tab', { name: 'Existing Identity' })).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
+
+      // Back on the New tab, the identity the stack created is the one shown and ready.
+      await user.click(screen.getByRole('tab', { name: 'New Identity' }));
+      expect(onConnectorIdChange).toHaveBeenLastCalledWith('cc-1', 'my-identity');
+      expect(lastReadyValue(onReadyChange)).toBe(true);
+    });
+
+    it('offers Cancel while waiting for the stack and retires the record on click', async () => {
+      const user = userEvent.setup();
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      renderSetup({ cloud, integrations });
+
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-cancelCallback'));
+
+      expect(mockCallbackCancel).toHaveBeenCalledTimes(1);
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+
+    it('says so when the wait could not be cancelled', async () => {
+      const user = userEvent.setup();
+      mockCallbackCancel.mockResolvedValue('failed');
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      renderSetup({ cloud, integrations });
+
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-cancelCallback'));
+
+      expect(mockAddDanger).toHaveBeenCalledWith({
+        title:
+          'Could not stop waiting for CloudFormation. Try again, or wait for the stack to report back.',
+      });
+    });
+
+    it('does not offer Cancel once the stack has reported and the identity is being created', () => {
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'receiving' }));
+      renderSetup({ cloud, integrations });
+
+      expect(
+        screen.queryByTestId('awsIdentityFederationSetup-cancelCallback')
+      ).not.toBeInTheDocument();
     });
 
     it('keeps the identity the stack created selected after a round trip through Existing Identity', async () => {

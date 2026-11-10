@@ -510,7 +510,19 @@ class ProvisioningCallbackService {
     }
 
     auditLoggingService.writeCustomAuditLog({
-      message: `Provisioning callback received [id=${id}] [cloud_connector_id=${connector.id}] [role_arn=${attributes.role_arn}]`,
+      message: 'Provisioning callback received, cloud connector created',
+      event: {
+        action: 'provisioning_callback_received',
+        category: ['database'],
+        type: ['creation'],
+        outcome: 'success',
+      },
+      kibana: { saved_object: { type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE, id: connector.id } },
+      labels: {
+        provisioning_callback_id: id,
+        role_arn: attributes.role_arn,
+        stack_arn: attributes.stack_arn,
+      },
     });
 
     return toItem(id, { ...attributes, ...update });
