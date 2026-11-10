@@ -136,6 +136,8 @@ const logCall = (
   }
 };
 
+const plural = (count: number, noun: string) => `${count} ${noun}${count === 1 ? '' : 's'}`;
+
 /** The connector's `metadata.id` without the leading dot, as flags and credentials name it. */
 const connectorName = ({ connector }: FoundConnector) => connector.metadata.id.replace(/^\./, '');
 
@@ -315,11 +317,17 @@ run(
       ].join('\n')
     );
 
+    const { length: rejectedCount } = mock.rejectedResponses;
+    const loaded = `${plural(fixtureCount, 'fixture')} and ${plural(
+      recordingCount,
+      'recording'
+    )} loaded`;
+
     log.info(
-      `${fixtureCount} fixtures and ${recordingCount} recordings loaded${
-        mock.rejectedResponses.length > 0
-          ? ` (${mock.rejectedResponses.length} not served, listed above)`
-          : '. Run with --help to find out how to pass fixtures or use recordings.'
+      `${loaded}${rejectedCount > 0 ? ` (${rejectedCount} not served, listed above)` : ''}.${
+        fixtureCount + recordingCount === 0
+          ? ' Run with --help to find out how to pass fixtures or use recordings.'
+          : ''
       }\n`
     );
 
