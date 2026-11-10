@@ -14,25 +14,27 @@ import type {
   Evaluator,
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
-  AUDIT_SCENARIOS,
   getGoldForVariant,
   type AuditReferenceResolver,
-} from '../audit_failure_classes/registry';
+  createAuditConditionalRemediationEvaluator,
+  createAuditConditionalRemediationJudgeEvaluator,
+  createAuditForbiddenJoinEvaluator,
+  createAuditMetaAlertAsEvidenceEvaluator,
+  createAuditNegativeControlEvaluator,
+  createAuditPositiveControlRecallEvaluator,
+} from '@kbn/evals-suite-attack-discovery';
 import { collectReviewArtifact, collectWorkerArtifacts, isReviewSettled } from '../collect';
 import type { CohortRouting } from '../cohort_routing';
 import { REVIEW_SETTLE_TIMEOUT_MS, REVIEW_WORKFLOW_ID } from '../constants';
 import { errorMessage } from '../kibana_api';
 import { assertCleanSpace, cleanupSeed, seedScenario } from '../seed';
-import { SEEDED_FALSE_POSITIVE_TITLE } from '../audit_failure_classes/scenarios/seeded_false_positive';
+import { WORKER_AUDIT_SCENARIOS } from '../scenarios';
+import { SEEDED_FALSE_POSITIVE_TITLE } from '../scenarios/seeded_false_positive';
 import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
 import type { AttackDiscoveryWorkerClient } from '../worker_client';
 import type { Stage, WorkerArtifacts, WorkerExample, WorkerExpected } from '../worker_types';
-import { createAuditConditionalRemediationEvaluator } from './audit_conditional_remediation_evaluator';
-import { createAuditForbiddenJoinEvaluator } from './audit_forbidden_join_evaluator';
-import { createAuditMetaAlertAsEvidenceEvaluator } from './audit_meta_alert_as_evidence_evaluator';
-import { createAuditNegativeControlEvaluator } from './audit_negative_control_evaluator';
-import { createAuditPositiveControlRecallEvaluator } from './audit_positive_control_recall_evaluator';
 import {
   CODE_SCORERS,
   scoreStageModelResolved,
@@ -54,6 +56,12 @@ export type WorkerEvaluator = Evaluator<WorkerExample, WorkerArtifacts>;
 export interface JudgeProvenance {
   judgeConnectorId: string;
   judgeConnectorName?: string;
+}
+
+/** What `ConditionalRemediationJudge` needs: a bound inference client and a log. */
+export interface AuditJudgeDeps {
+  inferenceClient: BoundInferenceClient;
+  log: ToolingLog;
 }
 
 const DIRECTION = 'maximize' as const;
@@ -153,7 +161,7 @@ const baselineResolver: AuditReferenceResolver = (metadata) => {
     typeof metadata === 'object' && metadata !== null
       ? (metadata as { scenarioId?: unknown }).scenarioId
       : undefined;
-  const scenario = AUDIT_SCENARIOS.find(({ id }) => id === scenarioId);
+  const scenario = WORKER_AUDIT_SCENARIOS.find(({ id }) => id === scenarioId);
   return scenario
     ? { gold: getGoldForVariant(scenario.gold, 'baseline'), replacements: {} }
     : undefined;
@@ -181,14 +189,33 @@ const adaptAuditEvaluator = (
     routing
   );
 
-/** The generation-quality checks from the audit suite, run over the persisted discoveries. */
-export const createAuditEvaluators = (routing: CohortRouting): WorkerEvaluator[] =>
+/**
+ * The generation-quality checks from the audit suite, run over the persisted discoveries. The
+ * `ConditionalRemediationJudge` (an LLM judge, so never in the code-score gate) confirms the
+ * regex `ConditionalRemediation` screen's flags on the same discoveries; the regex evaluator
+ * stays as the deterministic lower bound.
+ */
+export const createAuditEvaluators = ({
+  routing,
+  judge,
+}: {
+  routing: CohortRouting;
+  judge?: AuditJudgeDeps;
+}): WorkerEvaluator[] =>
   [
     createAuditForbiddenJoinEvaluator(baselineResolver),
     createAuditMetaAlertAsEvidenceEvaluator(baselineResolver),
     createAuditNegativeControlEvaluator(baselineResolver),
     createAuditPositiveControlRecallEvaluator(baselineResolver),
     createAuditConditionalRemediationEvaluator(baselineResolver),
+    ...(judge
+      ? [
+          createAuditConditionalRemediationJudgeEvaluator({
+            ...judge,
+            resolveReference: baselineResolver,
+          }),
+        ]
+      : []),
   ].map((audit) => adaptAuditEvaluator(audit, routing));
 
 export const discoveryNarrativeOf = ({ insights }: WorkerArtifacts): string =>
@@ -308,6 +335,7 @@ export const createEvaluateDataset =
     executorClient,
     esClient,
     fetch,
+    inferenceClient,
     log,
     routing,
     floorWorkflowId,
@@ -318,6 +346,7 @@ export const createEvaluateDataset =
     executorClient: EvalsExecutorClient;
     esClient: Client;
     fetch: HttpHandler;
+    inferenceClient?: BoundInferenceClient;
     log: ToolingLog;
     routing: CohortRouting;
     /** Per-space floor worker workflow that every row starts. */
@@ -333,7 +362,18 @@ export const createEvaluateDataset =
   }): Promise<void> => {
     const all = evaluatorOverrides ?? [
       ...createCodeEvaluators(routing),
-      ...createAuditEvaluators(routing),
+      ...createAuditEvaluators({
+        routing,
+        judge:
+          inferenceClient && judge
+            ? {
+                inferenceClient: inferenceClient.bindTo({
+                  connectorId: judge.judgeConnectorId,
+                }),
+                log,
+              }
+            : undefined,
+      }),
       ...createJudgeEvaluators({ evaluators, routing, judge }),
     ];
     const collector = createRunCollector();
@@ -369,7 +409,7 @@ export const createEvaluateDataset =
       if (closed) return failedRowArtifacts('experiment aborted');
       rowsStarted += 1;
       const rowLabel = describeRow(input);
-      const scenario = AUDIT_SCENARIOS.find(({ id }) => id === input?.scenarioId);
+      const scenario = WORKER_AUDIT_SCENARIOS.find(({ id }) => id === input?.scenarioId);
       if (!input || !scenario) {
         const error = new Error(
           `Unknown scenario "${input?.scenarioId ?? 'unknown'}" in dataset "${dataset.name}"`

@@ -30,6 +30,7 @@ import {
   attackDiscoveryIndexForSpace,
 } from './constants';
 import { apiVersion, errorMessage, httpStatus, spacePath } from './kibana_api';
+import { STEP_USAGE_TELEMETRY_GAP } from './evaluators/code_scores';
 import type { SeededScenario } from './seed';
 import { isTerminal, stepsOf, type AttackDiscoveryWorkerClient } from './worker_client';
 import type {
@@ -244,9 +245,7 @@ export const analysisUsageOf = (
     inputTokens: sum(({ inputTokens }) => inputTokens),
     outputTokens: sum(({ outputTokens }) => outputTokens),
     cachedTokens: sum(({ cachedTokens }) => cachedTokens),
-    ...(hasUnknown
-      ? { unresolvedReason: `step ${FP_TP_ANALYZE_STEP_ID} usage carried no connector id` }
-      : {}),
+    ...(hasUnknown ? { unresolvedReason: STEP_USAGE_TELEMETRY_GAP } : {}),
   };
 };
 

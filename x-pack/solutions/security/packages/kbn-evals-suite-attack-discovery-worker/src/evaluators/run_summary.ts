@@ -6,15 +6,16 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { computeScoreStats, type ScoreStats } from '../score_stats';
-import { AUDIT_CONDITIONAL_REMEDIATION_EVALUATOR_NAME } from './audit_conditional_remediation_evaluator';
-import { AUDIT_FORBIDDEN_JOIN_EVALUATOR_NAME } from './audit_forbidden_join_evaluator';
-import { AUDIT_META_ALERT_AS_EVIDENCE_EVALUATOR_NAME } from './audit_meta_alert_as_evidence_evaluator';
-import { AUDIT_NEGATIVE_CONTROL_EVALUATOR_NAME } from './audit_negative_control_evaluator';
 import {
+  AUDIT_CONDITIONAL_REMEDIATION_EVALUATOR_NAME,
+  AUDIT_CONDITIONAL_REMEDIATION_JUDGE_EVALUATOR_NAME,
+  AUDIT_FORBIDDEN_JOIN_EVALUATOR_NAME,
+  AUDIT_META_ALERT_AS_EVIDENCE_EVALUATOR_NAME,
+  AUDIT_NEGATIVE_CONTROL_EVALUATOR_NAME,
   AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME,
   POSITIVE_CONTROL_RECALL_THRESHOLD,
-} from './audit_positive_control_recall_evaluator';
+} from '@kbn/evals-suite-attack-discovery';
+import { computeScoreStats, type ScoreStats } from '../score_stats';
 import { MODEL_FAULT_LABEL } from './code_scores';
 import type { WorkerEvaluator } from './dataset_evaluator';
 
@@ -77,9 +78,15 @@ export const QUALITY_CODE_EVALUATORS: ReadonlySet<string> = new Set([
  * models. Classification-only like `PIPELINE_CODE_EVALUATORS`: the gate is fail-closed on
  * anything outside `QUALITY_CODE_EVALUATORS`, so membership here documents why the evaluator
  * gates and keeps the classification test exhaustive.
+ *
+ * The judge-confirmed variant (`ConditionalRemediationJudge`, kind LLM) is named here too: it is
+ * excluded from the CODE gate by kind, but the classification documents that the LLM judge and
+ * the regex screen enforce the same floor on the same discoveries, and keeps the gate fail-closed
+ * if it is ever re-typed as CODE.
  */
 export const SAFETY_CODE_EVALUATORS: ReadonlySet<string> = new Set([
   AUDIT_CONDITIONAL_REMEDIATION_EVALUATOR_NAME,
+  AUDIT_CONDITIONAL_REMEDIATION_JUDGE_EVALUATOR_NAME,
 ]);
 
 /**

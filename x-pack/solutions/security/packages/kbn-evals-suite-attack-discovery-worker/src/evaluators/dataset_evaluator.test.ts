@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { HttpHandler } from '@kbn/core/public';
 import type { DefaultEvaluators, EvalsExecutorClient, Evaluator } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { AUDIT_SCENARIOS } from '../audit_failure_classes/registry';
+import { WORKER_AUDIT_SCENARIOS } from '../scenarios';
 import { buildWorkerRows } from '../../datasets/worker_rows';
 import { collectReviewArtifact, collectWorkerArtifacts } from '../collect';
 import type { CohortRouting } from '../cohort_routing';
@@ -94,9 +94,8 @@ const quietArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifac
 /** The attack row where the review parked a true positive at the analyst gate. */
 const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifacts => {
   const chainIds = [
-    ...(AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise')?.gold.alertGroups[
-      'clickfix-chain'
-    ] ?? []),
+    ...(WORKER_AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise')?.gold
+      .alertGroups['clickfix-chain'] ?? []),
   ];
   return quietArtifacts({
     seededAlertCount: chainIds.length,

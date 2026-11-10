@@ -6,7 +6,10 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { POSITIVE_CONTROL_RECALL_THRESHOLD } from './audit_positive_control_recall_evaluator';
+import {
+  AUDIT_CONDITIONAL_REMEDIATION_JUDGE_EVALUATOR_NAME,
+  POSITIVE_CONTROL_RECALL_THRESHOLD,
+} from '@kbn/evals-suite-attack-discovery';
 import { computeScoreStats } from '../score_stats';
 import type { CohortRouting } from '../cohort_routing';
 import {
@@ -66,14 +69,26 @@ const ROUTING = {
   reviewModel: 'm',
 } as unknown as CohortRouting;
 
+/** Registers the audit evaluators with the LLM judge included, as the real run does. */
+const registeredEvaluators = (): WorkerEvaluator[] => [
+  ...createCodeEvaluators(ROUTING),
+  ...createAuditEvaluators({
+    routing: ROUTING,
+    judge: {
+      inferenceClient: { bindTo: jest.fn() },
+      log: {} as ToolingLog,
+      // A stub client suffices: the judge's evaluate is never invoked here, only its name/kind.
+    } as unknown as NonNullable<Parameters<typeof createAuditEvaluators>[0]>['judge'],
+  }),
+];
+
 describe('CODE gate', () => {
   describe('pipeline vs quality evaluators', () => {
-    const registeredCodeNames = [
-      ...createCodeEvaluators(ROUTING),
-      ...createAuditEvaluators(ROUTING),
-    ]
+    const registered = registeredEvaluators();
+    const registeredCodeNames = registered
       .filter(({ kind }) => kind === 'CODE')
       .map(({ name }) => name);
+    const registeredNames = registered.map(({ name }) => name);
 
     it('classifies every registered CODE evaluator as exactly one of pipeline, quality or safety', () => {
       expect(registeredCodeNames.length).toBeGreaterThan(0);
@@ -89,12 +104,22 @@ describe('CODE gate', () => {
     });
 
     it('names no evaluator that is not registered', () => {
+      // Any kind: the SAFETY set lists the judge (kind LLM) as classification-only documentation.
       const unknown = [
         ...PIPELINE_CODE_EVALUATORS,
         ...QUALITY_CODE_EVALUATORS,
         ...SAFETY_CODE_EVALUATORS,
-      ].filter((name) => !registeredCodeNames.includes(name));
+      ].filter((name) => !registeredNames.includes(name));
       expect(unknown).toEqual([]);
+    });
+
+    it('keeps every LLM-kind evaluator out of the CODE classification and the gate', () => {
+      const llmNames = registered.filter(({ kind }) => kind === 'LLM').map(({ name }) => name);
+      expect(llmNames).toContain(AUDIT_CONDITIONAL_REMEDIATION_JUDGE_EVALUATOR_NAME);
+      // The judge is classified in SAFETY for documentation but never gated by kind.
+      llmNames.forEach((name) => {
+        expect(registeredCodeNames).not.toContain(name);
+      });
     });
 
     it.each([...SAFETY_CODE_EVALUATORS])(

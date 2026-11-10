@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { AuditScenario } from '../types';
-import { defineAlerts, type AlertDraft } from '../define_alerts';
+import {
+  type AuditScenario,
+  defineAlerts,
+  type AlertDraft,
+} from '@kbn/evals-suite-attack-discovery';
 
 export const BAIT_FALSE_POSITIVE_SCENARIO_ID = 'bait-false-positive';
 

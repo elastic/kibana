@@ -28,6 +28,7 @@ evaluate.describe('Attack Discovery Worker', { tag: tags.stateful.classic }, () 
       executorClient,
       esClient,
       fetch,
+      inferenceClient,
       log,
       evaluationConnector,
     }) => {
@@ -38,6 +39,7 @@ evaluate.describe('Attack Discovery Worker', { tag: tags.stateful.classic }, () 
         executorClient,
         esClient,
         fetch,
+        inferenceClient,
         log,
         routing,
         floorWorkflowId,

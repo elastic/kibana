@@ -6,7 +6,7 @@
  */
 
 import type { CohortRouting } from '../cohort_routing';
-import { MODEL_REFUSAL_PATTERN } from '../constants';
+import { FP_TP_ANALYZE_STEP_ID, MODEL_REFUSAL_PATTERN } from '../constants';
 import type {
   GenerationFault,
   ReviewArtifact,
@@ -489,6 +489,14 @@ export const stageUsageMetadata = (artifacts: WorkerArtifacts): Record<string, u
  * in the usage of the analysis child's `analyze` step. A stage whose model cannot be read fails:
  * an unverifiable model is not the planned one. A stage with no output is N/A.
  */
+/**
+ * The one `unresolvedReason` that is a telemetry gap, not a wrong or unreadable model: the step
+ * ran and reported usage, but the engine never stamped its connector id. Nothing else in the
+ * execution doc carries a connector id for the step, so the model is genuinely unresolvable from
+ * telemetry — reported as N/A instead of failing the run.
+ */
+export const STEP_USAGE_TELEMETRY_GAP = `step ${FP_TP_ANALYZE_STEP_ID} usage carried no connector id`;
+
 export const scoreStageModelResolved =
   ({ generationModel, reviewModel }: StageRouting): CodeScorer =>
   (_expected, artifacts) => {
@@ -510,11 +518,17 @@ export const scoreStageModelResolved =
       }
     }
 
+    /** Reviews whose model is unresolvable because the telemetry gap, not the run. */
+    const telemetryGapped: string[] = [];
     artifacts.reviews.forEach((review) => {
       const label = review.attackDiscoveryId ?? review.executionId;
       const { analysis } = review;
       if (!analysis) {
         problems.push(`review ${label} model undeterminable: it ran no analysis step`);
+      } else if (analysis.unresolvedReason === STEP_USAGE_TELEMETRY_GAP) {
+        // The step ran (usage was reported) but the engine stamped no connector id: nothing else
+        // in the execution doc carries one, so this is a telemetry gap, not a model mismatch.
+        telemetryGapped.push(label);
       } else if (analysis.unresolvedReason || analysis.connectorIds.length === 0) {
         problems.push(
           `review ${label} model undeterminable: ${
@@ -531,10 +545,27 @@ export const scoreStageModelResolved =
     });
 
     if (problems.length > 0) return { ...fail(problems.join('; ')), metadata };
-    if (checked.length === 0) {
+    if (checked.length === 0 && telemetryGapped.length === 0) {
       return { ...notApplicable('no stage produced output to attribute a model to'), metadata };
     }
-    return { ...pass(`resolved as planned: ${checked.join('; ')}`), metadata };
+    if (checked.length === 0) {
+      return {
+        ...notApplicable(
+          `model unverifiable from telemetry for ${telemetryGapped.length} review(s): ${STEP_USAGE_TELEMETRY_GAP}`
+        ),
+        metadata,
+      };
+    }
+    return {
+      ...pass(
+        `resolved as planned: ${checked.join('; ')}${
+          telemetryGapped.length > 0
+            ? `; ${telemetryGapped.length} review(s) unverifiable from telemetry (${STEP_USAGE_TELEMETRY_GAP})`
+            : ''
+        }`
+      ),
+      metadata,
+    };
   };
 
 /** Scorer and the stage it belongs to, so generation and review quality can be read apart. */

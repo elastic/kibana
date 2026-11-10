@@ -22,7 +22,7 @@ export interface WorkerInput extends Record<string, unknown> {
 
 /**
  * Per-scenario answer key for the review stage. The generation-stage gold (alert groups,
- * forbidden joins) lives with the scenario in `audit_failure_classes/`.
+ * forbidden joins) lives with the scenario in `@kbn/evals-suite-attack-discovery`.
  */
 export interface WorkerExpected extends Record<string, unknown> {
   goldVerdict: GoldVerdict;

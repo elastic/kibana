@@ -8,7 +8,7 @@
 import { createHash } from 'crypto';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { AuditAlert, AuditScenario } from './audit_failure_classes/types';
+import type { AuditAlert, AuditScenario } from '@kbn/evals-suite-attack-discovery';
 import {
   AD_WORKFLOWS_SETTING,
   ALERTS_INDEX_POLL_INTERVAL_MS,
@@ -35,7 +35,7 @@ import { buildWorld, hasWorld, hostIdFor, type WorldDoc } from './worker_world';
 import {
   buildSeededFalsePositiveDiscovery,
   SEEDED_FALSE_POSITIVE_SCENARIO_ID,
-} from './audit_failure_classes/scenarios/seeded_false_positive';
+} from './scenarios/seeded_false_positive';
 
 /** Index holding the fingerprints that `match_fingerprints` compares new attacks against. */
 export const ATTACK_FINGERPRINT_INDEX = 'ai-index-idx-security-attack-fingerprints';

@@ -12,7 +12,8 @@ import type { WorkerExample, WorkerExpected } from '../src/worker_types';
 /**
  * Per-scenario answer key for the review stage. The scenarios and their generation gold (alert
  * groups, forbidden joins) are copied from the audit failure classes of
- * `kbn-evals-suite-attack-discovery` (elastic/kibana#302714, `src/audit_failure_classes/`).
+ * `kbn-evals-suite-attack-discovery` (elastic/kibana#302714), imported from
+ * `@kbn/evals-suite-attack-discovery`.
  *
  * The verdict gold reads the alerts as an analyst would:
  * - shared egress, benign batch and threshold alerts carry no attack: false positive;

@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-worker
 dependsOn:
   - '@kbn/evals'
+  - '@kbn/evals-suite-attack-discovery'
   - '@kbn/tooling-log'
   - '@kbn/workflows'
   - '@kbn/core'

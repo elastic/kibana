@@ -21,7 +21,7 @@ import {
   toNestedSource,
   type SeededScenario,
 } from './seed';
-import { AUDIT_SCENARIOS } from './audit_failure_classes/registry';
+import { WORKER_AUDIT_SCENARIOS } from './scenarios';
 
 /** Reads a dotted path through a nested `_source`, as ES resolves a field name. */
 const getPath = (doc: Record<string, unknown> | undefined, path: string): unknown =>
@@ -212,7 +212,7 @@ describe('seedScenario', () => {
       seedScenario({
         esClient: esWith({ bulk, count, deleteByQuery }),
         log: { info: jest.fn(), warning } as unknown as ToolingLog,
-        scenario: AUDIT_SCENARIOS[0],
+        scenario: WORKER_AUDIT_SCENARIOS[0],
         spaceId: 's',
         wait,
       })
@@ -235,7 +235,7 @@ describe('seedScenario', () => {
     await seedScenario({
       esClient: esWith({ bulk, count, deleteByQuery, search }),
       log: { info: jest.fn(), warning } as unknown as ToolingLog,
-      scenario: AUDIT_SCENARIOS[0],
+      scenario: WORKER_AUDIT_SCENARIOS[0],
       spaceId: 's',
       wait,
     });
@@ -249,7 +249,7 @@ describe('seedScenario', () => {
   });
 
   it('records the open alert ids of the space after seeding, mapped to scenario ids', async () => {
-    const scenario = AUDIT_SCENARIOS[0];
+    const scenario = WORKER_AUDIT_SCENARIOS[0];
     const search = jest.fn(async () => ({ hits: { hits: [] as Array<{ _id: string }> } }));
     const bulk = jest.fn(async () => ({ errors: false, items: [] }));
     search.mockImplementation(async () => ({
@@ -274,7 +274,7 @@ describe('seedScenario', () => {
 describe('seedScenario world documents', () => {
   const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
   const scenarioById = (id: string) => {
-    const found = AUDIT_SCENARIOS.find((scenario) => scenario.id === id);
+    const found = WORKER_AUDIT_SCENARIOS.find((scenario) => scenario.id === id);
     if (!found) throw new Error(`no scenario ${id}`);
     return found;
   };
@@ -524,7 +524,7 @@ describe('seedScenario world documents', () => {
 
 describe('seedScenario partial failure', () => {
   const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
-  const scenario = AUDIT_SCENARIOS[0];
+  const scenario = WORKER_AUDIT_SCENARIOS[0];
   interface BulkArgs {
     refresh?: boolean | string;
     operations: Array<Record<string, { _id?: string; _index?: string }>>;
@@ -992,7 +992,7 @@ describe('eval space solution view', () => {
 
 describe('seedScenario world verification', () => {
   const log = { info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog;
-  const scenario = AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
+  const scenario = WORKER_AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
   const seed = (esOverrides: Record<string, unknown>) => {
     if (!scenario) throw new Error('no scenario');
     return seedScenario({
@@ -1019,7 +1019,7 @@ describe('seedScenario world verification', () => {
 
 describe('seedScenario world indices', () => {
   it('creates a missing world index with keyword host.id, and leaves an existing one alone', async () => {
-    const scenario = AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
+    const scenario = WORKER_AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
     if (!scenario) throw new Error('no scenario');
     const create = jest.fn(async (_args: { index: string; mappings?: unknown }) => ({}));
     const exists = jest.fn(async ({ index }: { index: string }) =>
@@ -1063,7 +1063,7 @@ describe('seedScenario world indices', () => {
   });
 
   // Host entities only: a scenario with user entities is covered by the mixed-index tests below.
-  const scenario = AUDIT_SCENARIOS.find(({ id }) => id === 'benign-batch');
+  const scenario = WORKER_AUDIT_SCENARIOS.find(({ id }) => id === 'benign-batch');
 
   /** An ES that finds every id it is asked for and applies the `terms` filter against the bulked bodies. */
   const searchableEs = ({
@@ -1279,7 +1279,7 @@ describe('seedScenario world indices', () => {
   });
 
   it('accepts an entities index that mixes host entities with user entities that have no host.id', async () => {
-    const withUsers = AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
+    const withUsers = WORKER_AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
     if (!withUsers) throw new Error('no scenario');
     const bodiesById = new Map<string, Record<string, unknown>>();
     await seedScenario({
@@ -1304,7 +1304,7 @@ describe('seedScenario world indices', () => {
   });
 
   it('names user.name when a user entity is not searchable by it', async () => {
-    const withUsers = AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
+    const withUsers = WORKER_AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
     if (!withUsers) throw new Error('no scenario');
     const bodiesById = new Map<string, Record<string, unknown>>();
     const es = searchableEs({ exists: jest.fn(async () => true), indices: {}, bodiesById });
@@ -1364,7 +1364,7 @@ describe('seeded document shape', () => {
     expect(alert.process).toEqual({ parent: { name: 'explorer.exe' } });
   });
 
-  it.each(AUDIT_SCENARIOS.map(({ id, alerts }) => [id, alerts] as const))(
+  it.each(WORKER_AUDIT_SCENARIOS.map(({ id, alerts }) => [id, alerts] as const))(
     'nests every alert of %s without a value-versus-object collision',
     (_id, alerts) => {
       for (const scenarioAlert of alerts) {

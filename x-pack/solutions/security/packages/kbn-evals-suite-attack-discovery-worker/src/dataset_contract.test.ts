@@ -6,7 +6,8 @@
  */
 
 import { hasWorld } from './worker_world';
-import { AUDIT_SCENARIOS, getGoldForVariant } from './audit_failure_classes/registry';
+import { getGoldForVariant } from '@kbn/evals-suite-attack-discovery';
+import { WORKER_AUDIT_SCENARIOS } from './scenarios';
 import { buildWorkerRows, WORKER_SCENARIOS } from '../datasets/worker_rows';
 import type { CohortRouting } from './cohort_routing';
 
@@ -22,7 +23,9 @@ describe('worker dataset contract', () => {
   const rows = buildWorkerRows(routing);
 
   it('has one row per audit scenario and no row for an unknown one', () => {
-    expect(rows.map(({ id }) => id).sort()).toEqual(AUDIT_SCENARIOS.map(({ id }) => id).sort());
+    expect(rows.map(({ id }) => id).sort()).toEqual(
+      WORKER_AUDIT_SCENARIOS.map(({ id }) => id).sort()
+    );
   });
 
   it('has a unique id per row', () => {
@@ -32,7 +35,7 @@ describe('worker dataset contract', () => {
   it.each(WORKER_SCENARIOS.map((row) => [row.scenarioId, row] as const))(
     '%s agrees with its generation gold',
     (_id, { scenarioId, expected }) => {
-      const scenario = AUDIT_SCENARIOS.find(({ id }) => id === scenarioId);
+      const scenario = WORKER_AUDIT_SCENARIOS.find(({ id }) => id === scenarioId);
       expect(scenario).toBeDefined();
       expect(expected.expectedDiscoveries).toBe(
         getGoldForVariant(scenario!.gold, 'baseline').expectedDiscoveries

@@ -8,7 +8,7 @@
 import {
   BAIT_ENCODED_COMMAND_LINE,
   BAIT_FALSE_POSITIVE_SCENARIO_ID,
-} from './audit_failure_classes/scenarios/bait_false_positive';
+} from './scenarios/bait_false_positive';
 
 /**
  * The world around the seeded alerts: the entity store records and raw endpoint events the

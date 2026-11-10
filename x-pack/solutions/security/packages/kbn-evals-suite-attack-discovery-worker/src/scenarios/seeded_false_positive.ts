@@ -6,8 +6,11 @@
  */
 
 import { createHash } from 'crypto';
-import type { AuditScenario } from '../types';
-import { defineAlerts, type AlertDraft } from '../define_alerts';
+import {
+  type AuditScenario,
+  defineAlerts,
+  type AlertDraft,
+} from '@kbn/evals-suite-attack-discovery';
 
 export const SEEDED_FALSE_POSITIVE_SCENARIO_ID = 'seeded-false-positive';
 
