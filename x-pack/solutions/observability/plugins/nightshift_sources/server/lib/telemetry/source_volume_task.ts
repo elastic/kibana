@@ -28,7 +28,6 @@ import { SOURCE_VOLUME_EVENT_TYPE, type SourceVolumeEntry } from './source_volum
 
 export const SOURCE_VOLUME_TASK_TYPE = 'nightshiftSources:sourceVolumeTelemetry';
 export const SOURCE_VOLUME_TASK_ID = 'nightshift-sources:source-volume-telemetry';
-const LEGACY_SOURCE_VOLUME_TASK_ID = 'nightshift-sources:source-volume-telemetry:1.0.0';
 const TASK_INTERVAL = '24h';
 const TASK_TIMEOUT = '10m';
 const WINDOW_MS = 24 * 60 * 60 * 1000;
@@ -174,7 +173,6 @@ export const scheduleSourceVolumeTask = async (
     state: {},
     scope: ['nightshiftSources'],
   };
-  await taskManager.removeIfExists(LEGACY_SOURCE_VOLUME_TASK_ID);
   await taskManager.ensureScheduled(task, { request, regenerateApiKey: true });
 };
 
@@ -182,8 +180,5 @@ export const scheduleSourceVolumeTask = async (
 export const removeSourceVolumeTask = async (
   taskManager: TaskManagerStartContract
 ): Promise<void> => {
-  await Promise.all([
-    taskManager.removeIfExists(SOURCE_VOLUME_TASK_ID),
-    taskManager.removeIfExists(LEGACY_SOURCE_VOLUME_TASK_ID),
-  ]);
+  await taskManager.removeIfExists(SOURCE_VOLUME_TASK_ID);
 };

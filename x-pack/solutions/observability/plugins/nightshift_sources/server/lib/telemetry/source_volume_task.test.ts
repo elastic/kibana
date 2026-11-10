@@ -20,7 +20,6 @@ import { measureSourceVolume } from './measure_source_volume';
 import { SOURCE_VOLUME_EVENT_TYPE } from './source_volume_event';
 import {
   registerSourceVolumeTask,
-  removeSourceVolumeTask,
   reportSourceVolumes,
   scheduleSourceVolumeTask,
   SOURCE_VOLUME_TASK_ID,
@@ -213,23 +212,9 @@ describe('source volume task credentials', () => {
     await scheduleSourceVolumeTask(taskManager, request);
 
     expect(SOURCE_VOLUME_TASK_ID).toBe('nightshift-sources:source-volume-telemetry');
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith(
-      'nightshift-sources:source-volume-telemetry:1.0.0'
-    );
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
       expect.objectContaining({ id: SOURCE_VOLUME_TASK_ID }),
       { request, regenerateApiKey: true }
-    );
-  });
-
-  it('removes the stable and legacy task documents', async () => {
-    const taskManager = taskManagerMock.createStart();
-
-    await removeSourceVolumeTask(taskManager);
-
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith(SOURCE_VOLUME_TASK_ID);
-    expect(taskManager.removeIfExists).toHaveBeenCalledWith(
-      'nightshift-sources:source-volume-telemetry:1.0.0'
     );
   });
 });
