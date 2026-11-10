@@ -37,7 +37,7 @@ const DEFAULT_SETTINGS: WithAllKeys<DashboardSettings> = {
   title: DASHBOARD_COMPARATOR_DEFAULTS.title,
 };
 
-const settingsComparators: StateComparators<DashboardSettings> = {
+const comparators: StateComparators<DashboardSettings> = {
   ...optionsComparators,
   ...metadataComparators,
   time_restore: 'referenceEquality',
@@ -59,7 +59,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
   const stateManager = initializeStateManager(
     deserializeState(initialState),
     DEFAULT_SETTINGS,
-    settingsComparators
+    comparators
   );
 
   const deferBelowFold = coreServices.uiSettings.get('labs:dashboard:deferBelowFold', false);
@@ -126,7 +126,7 @@ export function initializeSettingsManager(initialState: DashboardState) {
               project_routing_restore,
               title,
               ...optionDiffs
-            } = diffComparators(settingsComparators, lastSavedState, latestState, DEFAULT_SETTINGS);
+            } = diffComparators(comparators, lastSavedState, latestState, DEFAULT_SETTINGS);
             // options needs to contain all values and not just diffs since is spread into saved state
             const options = Object.keys(optionDiffs).length
               ? { ...serializeSettings().options, ...optionDiffs }
