@@ -314,6 +314,43 @@ To make a new connector eligible, add `'contextEngine'` to the
 `supportedFeatureIds` list on the connector spec (in `kbn-connector-specs`).
 No changes to the Context Engine plugin are required.
 
+## Session memory
+
+Context Engine can forget session memories over HTTP. The route is public and experimental:
+
+```
+POST /api/context_engine/session_memory/_forget
+```
+
+```json
+{ "user_id": "jdoe", "ids": ["7c1f0b2e-5a43-4b0e-9a57-2f0f6f1d3a10"], "mode": "tombstone" }
+```
+
+`ids` takes 1 to 100 ids and duplicates are collapsed. `mode` is `tombstone` (the
+default) or `hard_delete`. A tombstone keeps the memory's revisions until retention
+removes them. A hard delete removes every revision, tombstones included.
+
+The response lists one outcome per unique id, in request order:
+
+- `tombstone`: `forgotten`, `already_forgotten`, or `not_found`.
+- `hard_delete`: `deleted` or `not_found`.
+
+The space comes from the request URL. A memory of another user or in another space is
+reported as `not_found`, so the route never reveals that it exists. The route is gated by
+`contextEngine:enabled` (404 while it is off) but not by the memory setting, so forgetting
+still works after memory is turned off.
+
+### Privileges and audit
+
+The route needs `contextEngine:write` for both modes. `user_id` is the subject of the
+memory, supplied by the caller as the session memory RFC describes. It is not checked
+against the authenticated user, and a mismatch with the memory's owner reads as `not_found`.
+
+Each unique id writes one audit event, `session_memory_forget` or
+`session_memory_hard_delete`. The event records the authenticated actor in `user.*`, the
+memory's owner in `user.target.id`, and the memory in `kibana.saved_object`. `not_found`
+and Elasticsearch errors are recorded as failures.
+
 ## Signals
 
 Signals are observations classified from Agent Builder traces and stored in the

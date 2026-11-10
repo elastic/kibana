@@ -14,6 +14,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import type { AddVersionOpts, VersionedRouteValidation } from '@kbn/core-http-server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { registerAiIndexRoutes } from './ai_indices';
+import { registerSessionMemoryRoutes } from './session_memory';
 
 interface ExampleMediaType {
   content: { 'application/json': { examples: Record<string, { value: unknown }> } };
@@ -51,16 +52,18 @@ const disabledContext = {
   core: Promise.resolve({ uiSettings: { client: { get: async () => false } } }),
 } as unknown as RequestHandlerContext;
 
+const routerCapturingRoutes = {
+  versioned: {
+    get: captureMethod('GET'),
+    post: captureMethod('POST'),
+    put: captureMethod('PUT'),
+    patch: captureMethod('PATCH'),
+    delete: captureMethod('DELETE'),
+  },
+} as unknown as IRouter;
+
 registerAiIndexRoutes({
-  router: {
-    versioned: {
-      get: captureMethod('GET'),
-      post: captureMethod('POST'),
-      put: captureMethod('PUT'),
-      patch: captureMethod('PATCH'),
-      delete: captureMethod('DELETE'),
-    },
-  } as unknown as IRouter,
+  router: routerCapturingRoutes,
   logger: loggerMock.create(),
   analyticsService: { reportKiWrite: jest.fn() } as never,
   getAiIndexService: jest.fn(),
@@ -72,6 +75,12 @@ registerAiIndexRoutes({
   getAgentBuilder: jest.fn(),
   getWorkflowsManagementApi: jest.fn(),
   getSpaces: jest.fn(),
+});
+
+registerSessionMemoryRoutes({
+  router: routerCapturingRoutes,
+  getSpaces: jest.fn(),
+  getSessionMemoryService: jest.fn(),
 });
 
 const routesWithExamples = registered.flatMap(({ route, opts, handler }) => {
@@ -95,9 +104,9 @@ const codeSampleBody = ({ lang, source }: CodeSample) =>
     lang === 'curl' ? /-d '([\s\S]*)'/.exec(source)?.[1] ?? '' : source.slice(source.indexOf('\n'))
   );
 
-describe('AI index route examples', () => {
+describe('route examples', () => {
   it('covers every route that links an example file', () => {
-    expect(routesWithExamples).toHaveLength(7);
+    expect(routesWithExamples).toHaveLength(8);
   });
 
   describe.each(routesWithExamples)('$route', ({ validation, examples, handler }) => {

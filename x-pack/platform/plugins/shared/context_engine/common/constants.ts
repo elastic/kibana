@@ -20,6 +20,11 @@ export const AI_INDEX_FEEDBACK_ANALYSIS_PATH = `${INTERNAL_API_PATH}/ai_index/{a
 export const AI_INDEX_KI_LIST_PATH = `${INTERNAL_API_PATH}/ai_index/{aiIndexId}/kis`;
 export const AI_INDEX_KI_BY_ID_PATH = `${AI_INDEX_KI_LIST_PATH}/{kiId}`;
 export const AI_INDEX_KI_RESTORE_PATH = `${AI_INDEX_KI_BY_ID_PATH}/_restore`;
+export const SESSION_MEMORY_FORGET_PATH = `${PUBLIC_API_PATH}/session_memory/_forget`;
+
+export const MAX_SESSION_MEMORY_FORGET_IDS = 100;
+export const MAX_SESSION_MEMORY_ID_LENGTH = 256;
+export const MAX_SESSION_MEMORY_USER_ID_LENGTH = 1024;
 
 /** Default and maximum page size when listing Knowledge Indicators for an AI index. */
 export const DEFAULT_KI_PAGE_SIZE = 25;
