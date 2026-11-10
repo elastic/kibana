@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  type CoreStart,
-  type Logger,
-  type AnalyticsServiceSetup,
-  SECURITY_EXTENSION_ID,
-} from '@kbn/core/server';
+import type { CoreStart, Logger, AnalyticsServiceSetup } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -20,14 +15,13 @@ import type {
 
 import moment from 'moment';
 import type { RunSoonResult } from '@kbn/task-manager-plugin/server/task_scheduling';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { ConfigType } from '../../../../config';
 
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from '../constants';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
+import { buildNamespacedInternalSavedObjectsClientUnsafe } from '../../utils/internal_saved_objects_client';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -245,13 +239,10 @@ const runPrivilegeMonitoringTask = async ({
     }
     const maxUsersAllowed =
       config.entityAnalytics.monitoring.privileges.users.maxPrivilegedUsersAllowed;
-    const request = kibanaRequestFactory({
-      headers: {},
-      spaceId: brandSpaceId(state.namespace),
-    });
-    const soClient = core.savedObjects.getScopedClient(request, {
+    const soClient = buildNamespacedInternalSavedObjectsClientUnsafe({
+      coreStart: core,
+      namespace: state.namespace,
       includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
-      excludedExtensions: [SECURITY_EXTENSION_ID],
     });
     const dataSourcesService = createDataSourcesService(dataClient, soClient, maxUsersAllowed);
     await dataSourcesService.syncAllSources();

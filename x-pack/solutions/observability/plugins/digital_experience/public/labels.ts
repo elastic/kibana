@@ -20,9 +20,12 @@ export const PAGE_LOADS_LABEL = i18n.translate('xpack.digitalExperience.pageLoad
   defaultMessage: 'Page loads',
 });
 
-export const LOAD_TIME_LABEL = i18n.translate('xpack.digitalExperience.loadTime.label', {
-  defaultMessage: 'Load time (p75)',
-});
+/** The name of the load time at the given percentile, e.g. "Load time (p95)". */
+export const loadTimeLabel = (percentile: number): string =>
+  i18n.translate('xpack.digitalExperience.loadTime.label', {
+    defaultMessage: 'Load time (p{percentile})',
+    values: { percentile },
+  });
 
 export const LAST_SEEN_LABEL = i18n.translate('xpack.digitalExperience.lastSeen.label', {
   defaultMessage: 'Last seen',
