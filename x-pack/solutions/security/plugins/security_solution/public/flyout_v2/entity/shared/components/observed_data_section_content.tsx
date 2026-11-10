@@ -25,7 +25,6 @@ import type { IdentityFields } from '../../../../flyout/document_details/shared/
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { EntityType } from '../../../../../common/entity_analytics/types';
 import { UsersType } from '../../../../explore/users/store/model';
-import { useIsNewFlyoutEnabled } from '../../../../common/hooks/use_is_new_flyout_enabled';
 
 export type ObservedData<T> = Omit<ObservedEntityData<T>, 'anomalies'> & {
   entityRecord?: EntityStoreRecord | null;
@@ -101,8 +100,6 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
     scopeId,
     hideAnomalies = false,
   } = props;
-
-  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
 
   const globalTime = useGlobalTime();
   const { isInitializing } = globalTime;
@@ -185,7 +182,7 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
       contextID={contextID}
       scopeId={scopeId}
       observedFields={typedFields}
-      entityLink={newFlyoutSystemEnabled ? renderFlyoutLink : undefined}
+      entityLink={renderFlyoutLink}
     />
   );
 });

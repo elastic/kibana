@@ -257,11 +257,11 @@ overrides:
   '@babel/plugin-transform-typescript': 7.24.7
   '@bufbuild/protobuf': 2.5.2
   '@elastic/elasticsearch@9>@elastic/transport': 9.4.0
-  '@elastic/esql-definitions': 4.36.0
-  '@elastic/esql-grammar': 4.36.0
-  '@elastic/esql-promql-grammar': 4.36.0
-  '@elastic/esql-types': 4.36.0
-  '@elastic/pretty-printer': 4.36.0
+  '@elastic/esql-definitions': 4.38.0
+  '@elastic/esql-grammar': 4.38.0
+  '@elastic/esql-promql-grammar': 4.38.0
+  '@elastic/esql-types': 4.38.0
+  '@elastic/pretty-printer': 4.38.0
   '@emnapi/core': 1.11.1
   '@emnapi/runtime': 1.11.1
   '@paulirish/trace_engine>legacy-javascript': 0.0.3
@@ -377,7 +377,7 @@ importers:
         version: 2.0.11(react-router-dom@5.3.4(react@18.2.0))(react@18.2.0)
       '@elastic/charts':
         specifier: 73.3.2
-        version: 73.3.2(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)
+        version: 73.3.2(@types/react@18.2.79)(moment-timezone@0.6.6)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)
       '@elastic/datemath':
         specifier: 5.0.3
         version: 5.0.3(moment@2.31.0)
@@ -397,11 +397,11 @@ importers:
         specifier: 8.8.1
         version: 8.8.1
       '@elastic/esql':
-        specifier: 4.36.0
-        version: 4.36.0
+        specifier: 4.38.0
+        version: 4.38.0
       '@elastic/esql-definitions':
-        specifier: 4.36.0
-        version: 4.36.0
+        specifier: 4.38.0
+        version: 4.38.0
       '@elastic/eui':
         specifier: 123.3.0
         version: 123.3.0(@elastic/datemath@5.0.3(moment@2.31.0))(@elastic/eui-theme-borealis@8.1.0(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(@emotion/css@11.13.5(supports-color@10.2.2))(@emotion/react@11.14.0(@types/react@18.2.79)(react@18.2.0)(supports-color@10.2.2))(@types/react-dom@18.2.25)(@types/react@18.2.79)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@6.0.3)
@@ -881,7 +881,7 @@ importers:
         version: link:x-pack/platform/plugins/private/canvas
       '@kbn/cases-api-integration-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/cases
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases
       '@kbn/cases-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-cases-components
@@ -2339,7 +2339,7 @@ importers:
         version: link:src/platform/packages/shared/kbn-ftr-llm-proxy
       '@kbn/functional-with-es-ssl-cases-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/functional_with_es_ssl/plugins/cases
+        version: link:x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases
       '@kbn/gen-ai-settings-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/gen_ai_settings
@@ -2936,7 +2936,7 @@ importers:
         version: link:x-pack/solutions/observability/packages/alerting-test-data
       '@kbn/observability-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/observability
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability
       '@kbn/observability-get-padded-alert-time-range-util':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/get-padded-alert-time-range-util
@@ -3176,7 +3176,7 @@ importers:
         version: link:examples/resizable_layout_examples
       '@kbn/resolver-test-plugin':
         specifier: workspace:*
-        version: link:x-pack/solutions/security/test/plugin_functional/plugins/resolver_test
+        version: link:x-pack/solutions/security/test_plugins/resolver_test
       '@kbn/response-ops-alert-snooze':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/response-ops/alert-snooze
@@ -3461,7 +3461,7 @@ importers:
         version: link:x-pack/solutions/security/packages/features
       '@kbn/security-solution-fixtures-plugin':
         specifier: workspace:*
-        version: link:x-pack/platform/test/cases_api_integration/common/plugins/security_solution
+        version: link:x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution
       '@kbn/security-solution-navigation':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/navigation
@@ -4699,8 +4699,8 @@ importers:
         specifier: 2.3.2
         version: 2.3.2
       moment-timezone:
-        specifier: 0.6.2
-        version: 0.6.2
+        specifier: 0.6.6
+        version: 0.6.6
       monaco-editor:
         specifier: 0.56.0
         version: 0.56.0
@@ -4930,8 +4930,8 @@ importers:
         specifier: 5.12.5
         version: 5.12.5
       safe-stable-stringify:
-        specifier: 2.5.0
-        version: 2.5.0
+        specifier: 3.0.0
+        version: 3.0.0
       seedrandom:
         specifier: 3.0.5
         version: 3.0.5
@@ -6715,9 +6715,6 @@ importers:
       listr2:
         specifier: 8.2.5
         version: 8.2.5
-      lmdb:
-        specifier: 3.5.6
-        version: 3.5.6
       magic-string:
         specifier: 0.30.21
         version: 0.30.21
@@ -9591,12 +9588,6 @@ importers:
 
   x-pack/platform/test/alerting_api_integration/packages/helpers: {}
 
-  x-pack/platform/test/cases_api_integration/common/plugins/cases: {}
-
-  x-pack/platform/test/cases_api_integration/common/plugins/observability: {}
-
-  x-pack/platform/test/cases_api_integration/common/plugins/security_solution: {}
-
   x-pack/platform/test/cloud_integration/plugins/saml_provider: {}
 
   x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin: {}
@@ -9608,8 +9599,6 @@ importers:
   x-pack/platform/test/functional_execution_context/plugins/alerts: {}
 
   x-pack/platform/test/functional_with_es_ssl/plugins/alerts: {}
-
-  x-pack/platform/test/functional_with_es_ssl/plugins/cases: {}
 
   x-pack/platform/test/licensing_plugin/plugins/test_feature_usage: {}
 
@@ -9658,6 +9647,14 @@ importers:
   x-pack/platform/test/usage_collection/plugins/application_usage_test: {}
 
   x-pack/platform/test/usage_collection/plugins/stack_management_usage_test: {}
+
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases: {}
+
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability: {}
+
+  x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution: {}
+
+  x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases: {}
 
   x-pack/solutions/observability/packages/alert-details: {}
 
@@ -9951,13 +9948,13 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test/plugin_functional/plugins/resolver_test: {}
-
   x-pack/solutions/security/test/security_solution_api_integration: {}
 
   x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response: {}
 
   x-pack/solutions/security/test/security_solution_endpoint: {}
+
+  x-pack/solutions/security/test_plugins/resolver_test: {}
 
   x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding: {}
 
@@ -11185,29 +11182,29 @@ packages:
       eslint: ^8.57.0 || ^9.0.0
       typescript: 6.0.3
 
-  '@elastic/esql-ast@4.36.0':
-    resolution: {integrity: sha512-DF6gfruk8imGPjQXkhPGZ8weJ67BEIXC90iajhQqGrP9bb0U31RgSUyC27oN6lYPrN5XHWS/6So+47snPOyhfQ==}
+  '@elastic/esql-ast@4.38.0':
+    resolution: {integrity: sha512-FmDI4o9K2vSG/uXsVmU9kVaCP0hlSAz7zgeNdVf7lpdgs5Mdh2Rav4KClICt7Lcy8qNSMK4QorKsNaqMbRebPw==}
 
-  '@elastic/esql-definitions@4.36.0':
-    resolution: {integrity: sha512-Yfm/nHY4ru7LdGP0uidKLdqGUFc7DBSbRK4TZ1n2lUVOv3l2tqeC+gE58axMsHpqbWdIprwyMA8dnMACMbfOcw==}
+  '@elastic/esql-definitions@4.38.0':
+    resolution: {integrity: sha512-Q891U0Z3j8OZEZ/KiDYR2ft7kmL0BZicz1Hy+HGYbnZat7r2LXGV3ZgIwTOiPPsy0GtGtY2i/5BwxswyGRjLIA==}
 
-  '@elastic/esql-grammar@4.36.0':
-    resolution: {integrity: sha512-EB7rHhxl6K1av3xTc5xsRmK3xpdBWwxQWIFOMHhsruXjDA6rdD+vZq0Kvby2e0A+tVssSqYU09ZGBILPX+o56g==}
+  '@elastic/esql-grammar@4.38.0':
+    resolution: {integrity: sha512-KY1YsOQ9H5ZWI363EGCaPQXS+iU6el8R23Gp188GZVjjJ/EmkiXH1hS8wmKDSjVdE5OF/FjZ1+3gwq/WpSMO4Q==}
 
-  '@elastic/esql-parser@4.36.0':
-    resolution: {integrity: sha512-nedlmMnBaB99X+BmpLo6Od7BnWHCN1scHeYzBeeem2MFOJj/hWxdEE0geO8DHf6oCS2NXZlDJGiJUMaTITlsSA==}
+  '@elastic/esql-parser@4.38.0':
+    resolution: {integrity: sha512-9OpUJshtUQgcj/gKsGLL7FeMdhuUPkXmYg5CbB9pEqmlyzQlUbuJaRMtpCJHkPQjiBADi9+bIOC4FpMep1Wqyw==}
 
-  '@elastic/esql-promql-grammar@4.36.0':
-    resolution: {integrity: sha512-VFx0EPvV4a1kNtqdepJrA5S5dMroSkiCrp2xeTWq+dQ016hocwDaJvV8ChkRL1LRYAp/Z6ysbhJFhZ6D/hZ+gw==}
+  '@elastic/esql-promql-grammar@4.38.0':
+    resolution: {integrity: sha512-xW+Ik+3C7+c2bxd0ZLCqe1F0Aeuv5mCcaL301S0ykjZJTIEz2ANdzXbBw+pzCjaAOzVNTb6alIx6H32LsniIkg==}
 
-  '@elastic/esql-traversal@4.36.0':
-    resolution: {integrity: sha512-wEjbq53jpEfnPk+I27ixqlAFBAteFtNYLjdQoMxlFMTZEynxLlgU2Uv/8+ePYHDtS7yFtTPyPo+zf0+Yvyb15w==}
+  '@elastic/esql-traversal@4.38.0':
+    resolution: {integrity: sha512-cCLIyuHQAK9E52ep/mnOzbP86po74oyD3tXrVFXcTsNdxzyLu+hMtRyhTEWpJAot6JtSgaqO316UDk71MPPj8w==}
 
-  '@elastic/esql-types@4.36.0':
-    resolution: {integrity: sha512-QxU/F/X3cukG9bDArKK9avv5q6H9L7bOF1uP0MxyUhKC4m8AGuRhY3DY75MIPbyhvdnW2dKn5L3hbJgxgUspyA==}
+  '@elastic/esql-types@4.38.0':
+    resolution: {integrity: sha512-eS4Nrw4PD+v5DABvKdjfTaA8qTAWujA/h8Dn5hiyknNb6UwXt5fHLCXnDDXRf6XX7ec3ay8KgyQBhmnLJFQtgw==}
 
-  '@elastic/esql@4.36.0':
-    resolution: {integrity: sha512-dv65a2IEA1RhL2nSF3kx/ZUBndXDXwe4XsYJregM0JgUim0/EglnefxhO1z68amOK7nsDDljINzlLMZ1m25Sdw==}
+  '@elastic/esql@4.38.0':
+    resolution: {integrity: sha512-SnGBlDGS4eGlhVE+ZOHhZ4shbB132DcbByKcvvUGLYlzB76Xj8wunPoQbVY9snJ7wtxG8y383bO5YWEIeK2/jA==}
 
   '@elastic/eui-illustrations@1.1.0':
     resolution: {integrity: sha512-xqOf5dcFmB0WylGy7w2aTJfHMIOjGxW1xops2WkxsfWEpqSFz4r0y4QCpGW+zEhRBVemWcB/lr3S+GoFqm+AFQ==}
@@ -11299,8 +11296,8 @@ packages:
     resolution: {integrity: sha512-/WCA7YiM855/QVxJIcNSiqw4/U5t0TFmPktbelcpT4e1NEosHRS7soQ7k7YMV21MlS2cnFcmvTq9fob59gs/Qw==}
     engines: {node: ^18.19.0 || >=20.6.0}
 
-  '@elastic/pretty-printer@4.36.0':
-    resolution: {integrity: sha512-cUxLIKNAi6SVbYcHaj2d6yVCVDY8NsIgtnY1EWuYnFHO2n+3+B5WDkibciqkK+XeGzSVwbzT22yFPs3AKSoqBw==}
+  '@elastic/pretty-printer@4.38.0':
+    resolution: {integrity: sha512-vgQR/z09mIa0J6HOTVNXdQgFTi2wfqJDEF7QS1WjzektV+gIM+f0ugwLKQzqyyJNdzZUmFjhxIl7CWKcRFUuaA==}
 
   '@elastic/prismjs-esql@4.28.0':
     resolution: {integrity: sha512-nl0x5VIZu1/duqOpcAYofBJBuqzuBJL3szSIytHtiNCDl4xgndnV5FR5D37r8OZmGY4M1nOYhKk2rZ/Iwl7XPA==}
@@ -11898,9 +11895,6 @@ packages:
   '@hapi/wreck@18.1.2':
     resolution: {integrity: sha512-3dMnV2pfhQiyEqu8DL3VBmxkdLiRDiiUDuG79Dp+UK1gL9ZxAfDOUhB6k3D5MLqcgJJ1IARyGFhwoc1NITr/pg==}
 
-  '@harperfast/extended-iterable@1.0.3':
-    resolution: {integrity: sha512-sSAYhQca3rDWtQUHSAPeO7axFIUJOI6hn1gjRC5APVE1a90tuyT8f5WIgRsFhhWA7htNkju2veB9eWL6YHi/Lw==}
-
   '@hello-pangea/dnd@18.0.1':
     resolution: {integrity: sha512-xojVWG8s/TGrKT1fC8K2tIWeejJYTAeJuj36zM//yEm/ZrnZUSFGS15BpO+jGZT1ybWvyXmeDJwPYb4dhWlbZQ==}
     peerDependencies:
@@ -12374,41 +12368,6 @@ packages:
       '@launchdarkly/node-server-sdk': ^9.0.0
       '@openfeature/server-sdk': ^1.16.0
 
-  '@lmdb/lmdb-darwin-arm64@3.5.6':
-    resolution: {integrity: sha512-mY5FG4TjPAkY4P0w+OhHaUka5mDh2TX2WKYIwuKzJ1zeW3VvRgxdam/lGJTquI+bthTx5CSHDW+BAQCnNAzkEA==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@lmdb/lmdb-darwin-x64@3.5.6':
-    resolution: {integrity: sha512-foa+pwitysO8k+xhs7psBFfTKnVgR69NlZRRTHaFVDqphh7AdGpLeyRzKw/ofatr/sN6TiHRRW6mmop0ZrrppQ==}
-    cpu: [x64]
-    os: [darwin]
-
-  '@lmdb/lmdb-linux-arm64@3.5.6':
-    resolution: {integrity: sha512-HmiyFFdJa38s1heCMSooSPaBSFTHJ3C+ERPp28xAPlDX1YiALJVOgbry065nXd8Y7KISWjnw05zpG1RX8IfftA==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@lmdb/lmdb-linux-arm@3.5.6':
-    resolution: {integrity: sha512-QR4YRyR5h5Z8eGXrNQjiyo2NNDfqi3tCc9dQG5Is1blCt+qWw1ZoBWhlWAr5d+jshkifMIJjVHzHGKbkKzF8Tw==}
-    cpu: [arm]
-    os: [linux]
-
-  '@lmdb/lmdb-linux-x64@3.5.6':
-    resolution: {integrity: sha512-ADzCuCF2cTNiX9kDScqcz1fjnAkxPpQNneV3KFTdV3wWtVlI2sTGzySoMTgDpinkMMFj1NTJlxA6XR8fwc4hlA==}
-    cpu: [x64]
-    os: [linux]
-
-  '@lmdb/lmdb-win32-arm64@3.5.6':
-    resolution: {integrity: sha512-J7A9aEQsQiv0TYtBGL7NDIPp2lOS8nnl+zm4sWZm1xlsTTaQ4PgD096Adzdrk27rw3UxCkDXdCUa4ax41oztBQ==}
-    cpu: [arm64]
-    os: [win32]
-
-  '@lmdb/lmdb-win32-x64@3.5.6':
-    resolution: {integrity: sha512-1g7G0knRX2iV/voDu54yxrGqw5Dk0w2oIYb7dgJq8IkOi+m7wbD8Q3QpPFjh0C01G58S88dqGn03len6UPCXsg==}
-    cpu: [x64]
-    os: [win32]
-
   '@loaders.gl/core@3.4.7':
     resolution: {integrity: sha512-iKyOKtUTYsgmIaXFmkaV1bc4h36TiHoKzc4xrolU4eSw9BQzR3UATEx/356sUI8g90uQe1SosAcKAUgAvFqgGg==}
 
@@ -12579,36 +12538,6 @@ packages:
 
   '@moonrepo/core-windows-x64-msvc@2.6.2':
     resolution: {integrity: sha512-ABfBlco/Qbn8ed6SvTL4bqqD5dMUrbCCkIthaWfNrviM8WHjnbaFt8oYpGwInC/S2zmyWuxoEroV3gjkFNfrTg==}
-    cpu: [x64]
-    os: [win32]
-
-  '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.4':
-    resolution: {integrity: sha512-LCkGo6JDfaBhgST7UpPWgNgLINpcpabaHfyz5OBx75nUYxBsaEPxjnyNjWpeb/xBup/682QnBfRBy2/LvPutZQ==}
-    cpu: [arm64]
-    os: [darwin]
-
-  '@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.4':
-    resolution: {integrity: sha512-zExlW9zUJKZH/tOtVMttwjKa4Xm/3KcNjnE3dPN92uCktwavMxpgCA3MoJK/DOnTWsQgo224OaST27/mPNAf+w==}
-    cpu: [x64]
-    os: [darwin]
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.4':
-    resolution: {integrity: sha512-dgX0P/9wGPJeHFBG+ZmhgE6bmtMt7NP5CRBGyyktpopdk/mW4POnrpQsSLtKI1dwpc+pPLuXHDh6vvskyQE/sw==}
-    cpu: [arm64]
-    os: [linux]
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm@3.0.4':
-    resolution: {integrity: sha512-Tg3yX65f5GbtXLkrYEHE5oibZG9epyYWas7FogTTEJeDEF9JlXJzKgXaNhT3UXlTOeA+AfZpYZYZ0uPj7Cfquw==}
-    cpu: [arm]
-    os: [linux]
-
-  '@msgpackr-extract/msgpackr-extract-linux-x64@3.0.4':
-    resolution: {integrity: sha512-8TNXMEjJc3QEy7R/x1INhgiU+XakDAFUzBhaz7+Rbrs8NH5UQeHQxxmzsSBJGyV6I1jW79undiQm8tOI+D+8FQ==}
-    cpu: [x64]
-    os: [linux]
-
-  '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.4':
-    resolution: {integrity: sha512-CmCXPQrkbwExx3j946/PtHWHbYJiCRBRDl4BlkRQcJB/YOwQxJRTpoo7aTsortjgoJ1x7opzTSxn7C+ASSLVjQ==}
     cpu: [x64]
     os: [win32]
 
@@ -20598,10 +20527,6 @@ packages:
     resolution: {integrity: sha512-iyAZCeyD+c1gPyE9qpFu8af0Y+MRtmKOncdGoA2S5EY8iFq99dmmvkNnHiWo+pj0s7yH7l3KPIgee77tKpXPWQ==}
     engines: {node: '>=18.0.0'}
 
-  lmdb@3.5.6:
-    resolution: {integrity: sha512-j3uE8ReKNyUWDjhfEFSJqE/1DLtfTR5Z8yFzVHvBjAk37wNg7HdScjcv8ttPHRvrdgPQMPWxFFI0SsdBzI5lBw==}
-    hasBin: true
-
   loader-runner@4.3.2:
     resolution: {integrity: sha512-DFEqQ3ihfS9blba08cLfYf1NRAIEm+dDjic073DRDc3/JspI/8wYmtDsHwd3+4hwvdxSK7PGaElfTmm0awWJ4w==}
     engines: {node: '>=6.11.5'}
@@ -21258,8 +21183,8 @@ packages:
   moment-duration-format@2.3.2:
     resolution: {integrity: sha512-cBMXjSW+fjOb4tyaVHuaVE/A5TqkukDWiOfxxAjY+PEqmmBQlLwn+8OzwPiG3brouXKY5Un4pBjAeB6UToXHaQ==}
 
-  moment-timezone@0.6.2:
-    resolution: {integrity: sha512-lDsQv8FoGdBUdf0+TjGsq2orxKuXdwFlQ6Zw6TX3xIcTwTfEpCLyKqvEauvCHJ8iu3KBV8+uPhlv70YsNGdUBQ==}
+  moment-timezone@0.6.6:
+    resolution: {integrity: sha512-LF5AAYsMduXFW2ungr/D9JqNq9ykZyhWgYG6wFtdGZW5ZlBDTBgTUFqW8EC7Fa+Dvs3IMZxlWkSR09sW2D/+0w==}
 
   moment@2.31.0:
     resolution: {integrity: sha512-0acOTfMiWOheYS4eoWb80yYMb/JLvVv9SHbs2PehaDzfUG0Bw855SKyk0IKTnPGa5+U2bmi3W68l1+sGLX/pvw==}
@@ -21343,13 +21268,6 @@ packages:
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
-
-  msgpackr-extract@3.0.4:
-    resolution: {integrity: sha512-4kmO/MdyUIkLIvTPr8VHLil4AtoKIoniWPIEk5+CDy0xnWC84azhSFmuJ7PxZdsYtiP5kEeQsORAVIeMgxT+Hw==}
-    hasBin: true
-
-  msgpackr@1.12.1:
-    resolution: {integrity: sha512-4EUH9tQHnMmEgzW/MdAP0KIfa1T9AF+htl0ffe2n5vb2EKn9y2co8ccpgWko6S52Jy1PQZKwRnx5/KkYjtd9MQ==}
 
   mssql@12.7.2:
     resolution: {integrity: sha512-zhpPw+WXBWLw7d7J6Y0aWgQy0EV8HKDGNSvmkAjP8bSM4H41X0fweAeKWI+bg9Ri+JHCbsf/QScjmACBFcEo8A==}
@@ -21449,9 +21367,6 @@ packages:
   node-abort-controller@3.1.1:
     resolution: {integrity: sha512-AGK2yQKIjRuqnc6VkX2Xj5d+QW8xZ87pa1UK6yA6ouUyuxfHuMP6umE5QK7UmTeOAymo+Zx1Fxiuw9rVx8taHQ==}
 
-  node-addon-api@6.1.0:
-    resolution: {integrity: sha512-+eawOlIgy680F0kBzPUNFhMZGtJ1YmqM6l4+Crf4IkImjYrO/mqPwRMh352g23uIaQKFItcQ64I7KMaJxHgAVA==}
-
   node-addon-api@7.1.1:
     resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
 
@@ -21490,10 +21405,6 @@ packages:
   node-forge@1.4.2:
     resolution: {integrity: sha512-rRtAR5XLJ8gCKd9du4qrKAsgCG1ObGP4gLeNJMa4vYSeq4bmBMOJk5IHkrviBV0q7uoAJlVd8HEQYQSVUb4FGQ==}
     engines: {node: '>= 6.13.0'}
-
-  node-gyp-build-optional-packages@5.2.2:
-    resolution: {integrity: sha512-s+w+rBWnpTMwSFbaE0UXsRlg7hU4FjekKU4eyAih5T8nJuNZT1nNsskXpxmeqSK9UzkBl6UgRlnKc8hz8IEqOw==}
-    hasBin: true
 
   node-gyp-build@4.8.4:
     resolution: {integrity: sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==}
@@ -21747,9 +21658,6 @@ packages:
   ora@9.4.1:
     resolution: {integrity: sha512-6VlU9MLXbjVQD04AZCMX28hVtA5bUoadvUqO76MUCVA0ilwJbMiHsITRPfyVm6p/BC0Av/BXMujx39WCe1LEqw==}
     engines: {node: '>=20'}
-
-  ordered-binary@1.6.2:
-    resolution: {integrity: sha512-BY+qgDArmYpvvmij141xbkB4Cw8RFLBQM5Zj4MODFb1SyXBRE/xO4Xj/QWbR7aUEBxbkjuNdsFVCL2TmbYrlNg==}
 
   original-url@1.2.3:
     resolution: {integrity: sha512-BYm+pKYLtS4mVe/mgT3YKGtWV5HzN/XKiaIu1aK4rsxyjuHeTW9N+xVBEpJcY1onB3nccfH0RbzUEoimMqFUHQ==}
@@ -23317,6 +23225,10 @@ packages:
   safe-stable-stringify@2.5.0:
     resolution: {integrity: sha512-b3rppTKm9T+PsVCBEOUR46GWI7fdOs00VKZ1+9c1EWDaDMvjQc6tUwuFyIprgGgTcWoVHSKrU8H31ZHA2e0RHA==}
     engines: {node: '>=10'}
+
+  safe-stable-stringify@3.0.0:
+    resolution: {integrity: sha512-1z5+QfsSGAtBGJrCw2DP9cwfdvSEMRN4BKKaZxFIKwcwRbshkrtKzzueVFAJ2d1QJm+J3AmpYvI88jFnlEZmyg==}
+    engines: {node: '>=18'}
 
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
@@ -25116,9 +25028,6 @@ packages:
 
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==}
-
-  weak-lru-cache@1.2.2:
-    resolution: {integrity: sha512-DEAoo25RfSYMuTGc9vPJzZcZullwIqRDSI9LOy+fkCJPi6hykCnfKaXTuPBDuXAUcqHXyOgFtHNp/kB2FjYHbw==}
 
   web-features@3.40.1:
     resolution: {integrity: sha512-HRdUYqZRNawtIEI39iKjk6E6g1yO/bct/8bFcD/O+bNGYsbG475PV80+HTrpkYOiZnoEaVSMu5Q/LTVwnBH5ag==}
@@ -27149,7 +27058,7 @@ snapshots:
     dependencies:
       object-hash: 1.3.1
 
-  '@elastic/charts@73.3.2(@types/react@18.2.79)(moment-timezone@0.6.2)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)':
+  '@elastic/charts@73.3.2(@types/react@18.2.79)(moment-timezone@0.6.6)(moment@2.31.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@5.0.1)(reselect@5.1.0)':
     dependencies:
       '@popperjs/core': 2.11.8
       '@reduxjs/toolkit': 2.12.0(react-redux@9.2.0(@types/react@18.2.79)(react@18.2.0)(redux@5.0.1))(react@18.2.0)
@@ -27165,7 +27074,7 @@ snapshots:
       immer: 11.1.8
       luxon: 1.28.1
       moment: 2.31.0
-      moment-timezone: 0.6.2
+      moment-timezone: 0.6.6
       prop-types: 15.8.1
       re-reselect: 4.0.1(reselect@5.1.0)
       react: 18.2.0
@@ -27251,56 +27160,56 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@elastic/esql-ast@4.36.0':
+  '@elastic/esql-ast@4.38.0':
     dependencies:
-      '@elastic/esql-definitions': 4.36.0
-      '@elastic/esql-grammar': 4.36.0
-      '@elastic/esql-promql-grammar': 4.36.0
-      '@elastic/esql-types': 4.36.0
+      '@elastic/esql-definitions': 4.38.0
+      '@elastic/esql-grammar': 4.38.0
+      '@elastic/esql-promql-grammar': 4.38.0
+      '@elastic/esql-types': 4.38.0
       tslib: 2.8.1
 
-  '@elastic/esql-definitions@4.36.0': {}
+  '@elastic/esql-definitions@4.38.0': {}
 
-  '@elastic/esql-grammar@4.36.0':
+  '@elastic/esql-grammar@4.38.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-parser@4.36.0':
+  '@elastic/esql-parser@4.38.0':
     dependencies:
-      '@elastic/esql-ast': 4.36.0
-      '@elastic/esql-definitions': 4.36.0
-      '@elastic/esql-grammar': 4.36.0
-      '@elastic/esql-promql-grammar': 4.36.0
-      '@elastic/esql-traversal': 4.36.0
-      '@elastic/esql-types': 4.36.0
+      '@elastic/esql-ast': 4.38.0
+      '@elastic/esql-definitions': 4.38.0
+      '@elastic/esql-grammar': 4.38.0
+      '@elastic/esql-promql-grammar': 4.38.0
+      '@elastic/esql-traversal': 4.38.0
+      '@elastic/esql-types': 4.38.0
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-promql-grammar@4.36.0':
+  '@elastic/esql-promql-grammar@4.38.0':
     dependencies:
       antlr4: 4.13.2
       tslib: 2.8.1
 
-  '@elastic/esql-traversal@4.36.0':
+  '@elastic/esql-traversal@4.38.0':
     dependencies:
-      '@elastic/esql-ast': 4.36.0
-      '@elastic/esql-types': 4.36.0
+      '@elastic/esql-ast': 4.38.0
+      '@elastic/esql-types': 4.38.0
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
-  '@elastic/esql-types@4.36.0': {}
+  '@elastic/esql-types@4.38.0': {}
 
-  '@elastic/esql@4.36.0':
+  '@elastic/esql@4.38.0':
     dependencies:
-      '@elastic/esql-ast': 4.36.0
-      '@elastic/esql-definitions': 4.36.0
-      '@elastic/esql-grammar': 4.36.0
-      '@elastic/esql-parser': 4.36.0
-      '@elastic/esql-promql-grammar': 4.36.0
-      '@elastic/esql-traversal': 4.36.0
-      '@elastic/esql-types': 4.36.0
-      '@elastic/pretty-printer': 4.36.0
+      '@elastic/esql-ast': 4.38.0
+      '@elastic/esql-definitions': 4.38.0
+      '@elastic/esql-grammar': 4.38.0
+      '@elastic/esql-parser': 4.38.0
+      '@elastic/esql-promql-grammar': 4.38.0
+      '@elastic/esql-traversal': 4.38.0
+      '@elastic/esql-types': 4.38.0
+      '@elastic/pretty-printer': 4.38.0
       antlr4: 4.13.2
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
@@ -27419,7 +27328,7 @@ snapshots:
 
   '@elastic/monaco-esql@4.37.0(monaco-editor@0.56.0)':
     dependencies:
-      '@elastic/esql-definitions': 4.36.0
+      '@elastic/esql-definitions': 4.38.0
       monaco-editor: 0.56.0
 
   '@elastic/node-crypto@1.2.3': {}
@@ -27500,14 +27409,14 @@ snapshots:
       - encoding
       - supports-color
 
-  '@elastic/pretty-printer@4.36.0':
+  '@elastic/pretty-printer@4.38.0':
     dependencies:
       tree-dump: 1.1.0(tslib@2.8.1)
       tslib: 2.8.1
 
   '@elastic/prismjs-esql@4.28.0':
     dependencies:
-      '@elastic/esql-definitions': 4.36.0
+      '@elastic/esql-definitions': 4.38.0
 
   '@elastic/react-search-ui-views@1.24.2(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(supports-color@10.2.2)':
     dependencies:
@@ -28265,8 +28174,6 @@ snapshots:
       '@hapi/bourne': 3.0.0
       '@hapi/hoek': 11.0.7
 
-  '@harperfast/extended-iterable@1.0.3': {}
-
   '@hello-pangea/dnd@18.0.1(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -28904,27 +28811,6 @@ snapshots:
       '@launchdarkly/openfeature-js-server-common': 2.0.6(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@lmdb/lmdb-darwin-arm64@3.5.6':
-    optional: true
-
-  '@lmdb/lmdb-darwin-x64@3.5.6':
-    optional: true
-
-  '@lmdb/lmdb-linux-arm64@3.5.6':
-    optional: true
-
-  '@lmdb/lmdb-linux-arm@3.5.6':
-    optional: true
-
-  '@lmdb/lmdb-linux-x64@3.5.6':
-    optional: true
-
-  '@lmdb/lmdb-win32-arm64@3.5.6':
-    optional: true
-
-  '@lmdb/lmdb-win32-x64@3.5.6':
-    optional: true
-
   '@loaders.gl/core@3.4.7':
     dependencies:
       '@babel/runtime': 7.29.7
@@ -29145,24 +29031,6 @@ snapshots:
     optional: true
 
   '@moonrepo/core-windows-x64-msvc@2.6.2':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.4':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.4':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.4':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-linux-arm@3.0.4':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-linux-x64@3.0.4':
-    optional: true
-
-  '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.4':
     optional: true
 
   '@mswjs/http-middleware@0.10.3(msw@2.15.0(@types/node@24.10.13)(typescript@6.0.3))(supports-color@10.2.2)':
@@ -38364,23 +38232,6 @@ snapshots:
       rfdc: 1.4.1
       wrap-ansi: 9.0.2
 
-  lmdb@3.5.6:
-    dependencies:
-      '@harperfast/extended-iterable': 1.0.3
-      msgpackr: 1.12.1
-      node-addon-api: 6.1.0
-      node-gyp-build-optional-packages: 5.2.2
-      ordered-binary: 1.6.2
-      weak-lru-cache: 1.2.2
-    optionalDependencies:
-      '@lmdb/lmdb-darwin-arm64': 3.5.6
-      '@lmdb/lmdb-darwin-x64': 3.5.6
-      '@lmdb/lmdb-linux-arm': 3.5.6
-      '@lmdb/lmdb-linux-arm64': 3.5.6
-      '@lmdb/lmdb-linux-x64': 3.5.6
-      '@lmdb/lmdb-win32-arm64': 3.5.6
-      '@lmdb/lmdb-win32-x64': 3.5.6
-
   loader-runner@4.3.2: {}
 
   loader-utils@2.0.4:
@@ -39264,7 +39115,7 @@ snapshots:
 
   moment-duration-format@2.3.2: {}
 
-  moment-timezone@0.6.2:
+  moment-timezone@0.6.6:
     dependencies:
       moment: 2.31.0
 
@@ -39340,22 +39191,6 @@ snapshots:
   ms@2.1.2: {}
 
   ms@2.1.3: {}
-
-  msgpackr-extract@3.0.4:
-    dependencies:
-      node-gyp-build-optional-packages: 5.2.2
-    optionalDependencies:
-      '@msgpackr-extract/msgpackr-extract-darwin-arm64': 3.0.4
-      '@msgpackr-extract/msgpackr-extract-darwin-x64': 3.0.4
-      '@msgpackr-extract/msgpackr-extract-linux-arm': 3.0.4
-      '@msgpackr-extract/msgpackr-extract-linux-arm64': 3.0.4
-      '@msgpackr-extract/msgpackr-extract-linux-x64': 3.0.4
-      '@msgpackr-extract/msgpackr-extract-win32-x64': 3.0.4
-    optional: true
-
-  msgpackr@1.12.1:
-    optionalDependencies:
-      msgpackr-extract: 3.0.4
 
   mssql@12.7.2(supports-color@10.2.2):
     dependencies:
@@ -39476,8 +39311,6 @@ snapshots:
 
   node-abort-controller@3.1.1: {}
 
-  node-addon-api@6.1.0: {}
-
   node-addon-api@7.1.1: {}
 
   node-addon-api@8.9.2:
@@ -39505,10 +39338,6 @@ snapshots:
       whatwg-url: 5.0.0
 
   node-forge@1.4.2: {}
-
-  node-gyp-build-optional-packages@5.2.2:
-    dependencies:
-      detect-libc: 2.1.2
 
   node-gyp-build@4.8.4:
     optional: true
@@ -39816,8 +39645,6 @@ snapshots:
       log-symbols: 7.0.1
       stdin-discarder: 0.3.2
       string-width: 8.3.0
-
-  ordered-binary@1.6.2: {}
 
   original-url@1.2.3:
     dependencies:
@@ -41670,6 +41497,8 @@ snapshots:
       sql-escape-string: 1.1.0
 
   safe-stable-stringify@2.5.0: {}
+
+  safe-stable-stringify@3.0.0: {}
 
   safer-buffer@2.1.2: {}
 
@@ -43813,8 +43642,6 @@ snapshots:
   wcwidth@1.0.1:
     dependencies:
       defaults: 1.0.4
-
-  weak-lru-cache@1.2.2: {}
 
   web-features@3.40.1: {}
 
