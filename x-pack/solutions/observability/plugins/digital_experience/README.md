@@ -124,8 +124,10 @@ A tab of EDOT Browser applications only, as sessions are built from EDOT Browser
 
 - **Status:** before sessions are set up, the tab shows a **Set up sessions** button to users with the
   manage sessions privilege and tells everyone else whom to ask. Once set up, a callout flags sessions
-  that need an update (with an **Update sessions** button for those users), a failing transform, or
-  one that is behind.
+  that need an update (with an **Update sessions** button for those users, or a note that the update
+  applies by itself when the transforms run with a stored API key), a failing transform, an
+  invalidated API key, or one that is behind. While the sessions index is first built, after setup
+  or a version update, an empty list says sessions are being built.
 - **KPIs:** sessions, sessions with errors, median duration, pages per session and bounce rate, over
   the listed sessions, so they follow the search and filters.
 - **Filters:** a debounced search (session ID, user, pages, browser, OS, location), **Has errors**,
@@ -207,6 +209,22 @@ Each enable records the username and time on the transforms (`_meta.enabled_by`,
 not. The status route reports who last enabled sessions, and the roles or API key the transforms
 run with, only to users who can set sessions up.
 
+When `xpack.encryptedSavedObjects.encryptionKey` is set and Task Manager is available (it runs the
+health task that uses the key), enabling also grants an API key on the user's behalf and the transforms run with that key instead of the user's own credentials. Its role
+descriptors only allow what transform secondary credentials need: `read` and `view_index_metadata`
+on `traces-*.otel-*` and `logs-*.otel-*`, and the `digital-experience-sessions-*` privileges above.
+Like any granted key, it keeps the access the user had when it was granted, and it has no
+expiration: an expiring key would stop automatic updates on a fixed date. The key is stored in an
+encrypted saved object (`digital-experience-sessions-api-key`, one per cluster), with its name, id
+and who granted it bound to the encrypted key. Enabling again grants a new key, applies it, and
+invalidates the previous one. The saved object is replaced only if nothing replaced it since it was
+read, so when two enables run at the same time, the key stored first is kept and the other is
+invalidated; the health task moves any transform left on it to the stored key. Without an
+encryption key, when security or API keys are disabled, or when the user can't grant a key (for
+example when authenticated with an API key), the transforms run with the user's credentials as
+before, and any stored key is deleted and invalidated, so it can't be put back. A grant that fails
+because Elasticsearch is unavailable fails the enable instead, and changes nothing.
+
 Enabling again is safe. It refreshes the transforms' stored credentials to the enabling user,
 restarts failed transforms, replaces transforms left over from an older version, and applies a
 changed `frequency` or partition count. It never replaces transforms from a newer version (after a
@@ -240,16 +258,38 @@ xpack.digital_experience.sessions:
   changing the count rewrites documents in place without emptying the list. EDOT Browser session
   ids are random UUIDs, so the slices are even.
 
-Settings changes take effect after a user with that privilege enables sessions again.
-The status route reports the drift until then.
+Settings changes take effect on the health task's next run when the transforms run with a stored
+API key, and otherwise after a user with that privilege enables sessions again. The status route
+reports the drift until then.
 
-A background task (`digital_experience:sessions-health`, every 5 minutes) only reads transform
-health, version and lag. It logs when transforms become degraded or lagging (more than three missed
+A background task (`digital_experience:sessions-health`, every 5 minutes) reads transform health,
+version and lag. It logs when transforms become degraded or lagging (more than three missed
 checkpoints plus the sync delay behind, at least 5 minutes), recover, need an update, or come from a
-newer Kibana: once per change, not on every run. It never creates or
-updates a transform: an update re-stamps the transform with the updater's privileges, which as the
-internal user would bypass the enabling user's index privileges. If transforms fall behind under
-peak traffic, they lag and then catch up; no data is lost.
+newer Kibana: once per change, not on every run. When an update is needed (a new sessions version
+after a Kibana upgrade, or changed settings) and the transforms run with the stored API key, it
+applies the update with that same key, so they keep running with the same access, and writes a
+`digital_experience_sessions_auto_update` audit event naming the key and who granted it.
+`_meta.enabled_by` and `enabled_at` keep their enable-time values. If the update fails, the next
+runs retry it, and status stops saying it applies by itself and asks a user with the manage
+sessions privilege to update sessions instead. New transforms are created before the ones they
+replace are removed, so a failure part-way leaves the old ones running. A version update drops the old
+sessions index and rebuilds it from up to 30 days of data. The task never updates transforms from a
+newer Kibana, and never updates a transform as the internal user: an update re-stamps the transform
+with the updater's privileges, which as the internal user would bypass the enabling user's index
+privileges. Elasticsearch can't protect an API key from deletion: anyone with `manage_api_key` or
+`manage_security`, or the enabling user with `manage_own_api_key`, can invalidate it. The key is
+named "Digital Experience sessions (used by the sessions transforms)" and marked managed, so the API
+keys page warns before deleting it. A deleted key doesn't stop the transforms: they keep the
+identity they were last created or updated with, and keep summarizing sessions. It only stops
+Kibana from updating them without a user, so an upgrade or settings change then needs **Update
+sessions**. The health task checks the key until it finds it deleted, then logs it once, as a
+warning, and doesn't authenticate with that key again. Status checks it for users with the manage
+sessions privilege, and shows the others what the health task found. When one of those users opens
+the Sessions tab, it grants a new key automatically, as the **Update sessions** button would. If the
+key or the health task's state can't be read, status still loads, without automatic updates. If
+transforms fall behind under peak traffic, they lag and then catch up; no data is lost.
+
+There is no disable action yet. One must invalidate the stored API key and delete its saved object.
 
 > **Security note:** the sessions index contains summaries of everything the enabling user could
 > read in the source indices, regardless of the document- and field-level security or index

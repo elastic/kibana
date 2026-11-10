@@ -27,5 +27,3 @@ export const NIGHTSHIFT_SOURCE_GET_TOOL_ID = observabilityNightshiftSourceTools.
 export const NIGHTSHIFT_SOURCE_CREATE_TOOL_ID = observabilityNightshiftSourceTools.createSource;
 export const NIGHTSHIFT_SOURCE_UPDATE_TOOL_ID = observabilityNightshiftSourceTools.updateSource;
 export const NIGHTSHIFT_SOURCE_DELETE_TOOL_ID = observabilityNightshiftSourceTools.deleteSource;
-export const SIGNIFICANT_EVENTS_EVENT_INVESTIGATION_ATTACH_TOOL_ID =
-  platformSignificantEventsTools.attachInvestigation;

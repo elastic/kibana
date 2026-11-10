@@ -21,11 +21,8 @@ requestBody:
               timestamp: '2024-12-31T00:00:00.000Z'
 responses:
   '200':
-    description: Successful request
     content:
       application/json:
-        schema:
-          $ref: ../oas_schemas.yaml#/bulk_purge_rollup_response
         examples:
           bulkPurgeResponse:
             summary: Bulk purge response with task ID
@@ -36,7 +33,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/400_response
+          $ref: ../oas_error_schemas.yaml#/400_response
         examples:
           badRequestExample:
             summary: Bad request
@@ -49,7 +46,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/401_response
+          $ref: ../oas_error_schemas.yaml#/401_response
         examples:
           unauthorizedExample:
             summary: Unauthorized
@@ -62,7 +59,7 @@ responses:
     content:
       application/json:
         schema:
-          $ref: ../oas_schemas.yaml#/403_response
+          $ref: ../oas_error_schemas.yaml#/403_response
         examples:
           forbiddenExample:
             summary: Forbidden

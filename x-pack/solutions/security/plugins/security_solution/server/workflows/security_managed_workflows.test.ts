@@ -85,6 +85,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: true,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -104,6 +105,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -128,6 +130,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: true,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -147,6 +150,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -167,6 +171,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: true,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady,
       core: coreMock.createStart(),
     });
@@ -228,6 +233,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });

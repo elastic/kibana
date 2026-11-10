@@ -6,7 +6,9 @@
  */
 
 import type { RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
+import { alertOutcomeBenignClassificationJudge } from './alert_outcome_benign_classification';
 import { alertOutcomeRcaAccuracyJudge } from './alert_outcome_rca_accuracy';
+import { alertOutcomeRcaReportingGapJudge } from './alert_outcome_rca_reporting_gap';
 import { conclusionQualityJudge } from './conclusion_quality';
 import { wikiPageInfluenceJudge } from './wiki_page_influence';
 import { wikiPagesReadJudge } from './wiki_pages_read';
@@ -23,6 +25,8 @@ export const referenceFreeJudges: readonly RegisteredEvaluatorDefinition[] = [
 /** Reference-based judges ported from Deductive's alert-outcome scoring. */
 export const alertOutcomeJudges: readonly RegisteredEvaluatorDefinition[] = [
   alertOutcomeRcaAccuracyJudge,
+  alertOutcomeBenignClassificationJudge,
+  alertOutcomeRcaReportingGapJudge,
 ];
 
 /** Judges of how an investigation used the Wiki pages it read. */

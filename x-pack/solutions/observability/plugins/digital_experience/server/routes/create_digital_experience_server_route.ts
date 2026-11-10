@@ -10,6 +10,8 @@ import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository-
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
 import type { SessionsSettings } from '../../common/sessions';
 import { describeError, toClientError } from '../lib/helpers/errors';
+import type { SessionsApiKeys } from '../sessions/sessions_api_key';
+import type { SessionsAutoUpdateState } from '../sessions/sessions_auto_update';
 
 export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHandlerResources {
   /** Optional: only the Classic source needs it. */
@@ -19,6 +21,10 @@ export interface DigitalExperienceRouteHandlerResources extends DefaultRouteHand
   isUxEnabled: boolean;
   /** `xpack.digitalExperience.sessions` config: the transforms' frequency and partitions. */
   sessionsSettings: SessionsSettings;
+  /** The API key the sessions transforms run with, when Kibana can store one. */
+  sessionsApiKeys: SessionsApiKeys;
+  /** What the health task's last run found about automatic updates of the sessions transforms. */
+  getSessionsAutoUpdateState: () => Promise<SessionsAutoUpdateState>;
 }
 
 const createServerRoute = createServerRouteFactory<
