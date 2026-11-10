@@ -100,35 +100,29 @@ ca="$(pem_path SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
 # A connector set is the group of preconfigured connectors one Scout stack starts with,
 # scout/connector_sets/<set>.yml. The eval saves every connector in the set on the investigator, as
 # a user would, and the agent finds them in connectors.md like in production. The ORCA shard uses
-# `orcabench`; any other run with Elasticsearch credentials uses `default`.
+# `orcabench`, which preconfigures none: the eval signs in as the ORCA eval user, mints one
+# time-bounded read key per task cutoff and creates each connector itself. Any other run with
+# Elasticsearch credentials uses `default`.
 
 connector_set=''
 es_url=''
 es_key=''
+orca_username=''
+orca_password=''
 if [[ "${EVAL_SHARD_ID:-}" == orcabench || "${NIGHTSHIFT_DATASETS:-}" == orcabench ]]; then
-  # Only the suite's own config holds the ORCA key. CI forwards this same input when the native
-  # CLI invokes the hook again.
+  # Only the suite's own config holds the ORCA credential. CI forwards this same input when the
+  # native CLI invokes the hook again.
   if ! printf '%s' "$config" | jq -e '.nightshiftOrcaEs |
     type == "object" and (.url | type == "string" and startswith("https://") and (contains("@") | not))
-    and (.apiKey | type == "string" and length > 0 and (contains("REPLACE_ME") | not))
+    and all(.username, .password; type == "string" and length > 0 and (contains("REPLACE_ME") | not))
   ' >/dev/null 2>&1; then
-    echo "nightshift-investigations scout hook: ORCA requires nightshiftOrcaEs.url and apiKey in the Nightshift evals config" >&2
+    echo "nightshift-investigations scout hook: ORCA requires nightshiftOrcaEs.url, username and password in the Nightshift evals config" >&2
     exit 1
   fi
   connector_set=orcabench
   es_url="$(config_value '.nightshiftOrcaEs.url')"
-  # The flag ablation reads through its own restricted key, kept next to the full one, so selecting
-  # the variant never means swapping the key every other ORCA run uses.
-  if [[ "${NIGHTSHIFT_ORCA_TELEMETRY_VARIANT:-full}" == no-flags ]]; then
-    es_key="$(config_value '.nightshiftOrcaEs.noFlagsApiKey')"
-    if [[ -z "$es_key" ]]; then
-      echo "nightshift-investigations scout hook: NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags requires" \
-        "nightshiftOrcaEs.noFlagsApiKey in the Nightshift evals config" >&2
-      exit 1
-    fi
-  else
-    es_key="$(config_value '.nightshiftOrcaEs.apiKey')"
-  fi
+  orca_username="$(config_value '.nightshiftOrcaEs.username')"
+  orca_password="$(config_value '.nightshiftOrcaEs.password')"
 else
   # The Elasticsearch URL and key come from one source, so a partial profile block is never
   # completed from the shell. The Vault field keeps its original name, `nightshift.telemetry`.
@@ -245,6 +239,8 @@ HOOK_HOST="$host" \
   HOOK_CONNECTORS_CONFIG="${connector_set:+$script_dir/connector_sets/$connector_set.yml}" \
   HOOK_ES_URL="$es_url" \
   HOOK_ES_KEY="$es_key" \
+  HOOK_ORCA_USERNAME="$orca_username" \
+  HOOK_ORCA_PASSWORD="$orca_password" \
   HOOK_KNOWLEDGE="$knowledge" \
   HOOK_KNOWLEDGE_URL="$knowledge_url" \
   HOOK_KNOWLEDGE_KEY="$knowledge_key" \
@@ -264,13 +260,17 @@ HOOK_HOST="$host" \
       SANDBOX_KIBANA_CONFIG: $ENV.HOOK_KIBANA_CONFIG
     } + (if $ENV.HOOK_DECISION_TREES != "" then {
       NIGHTSHIFT_DECISION_TREES: $ENV.HOOK_DECISION_TREES
-    } else {} end) + (if $ENV.HOOK_CONNECTOR_SET == "" then {} else {
-      NIGHTSHIFT_CONNECTOR_SET: $ENV.HOOK_CONNECTOR_SET,
+    } else {} end) + (if $ENV.HOOK_CONNECTOR_SET == "default" then {
+      NIGHTSHIFT_CONNECTOR_SET: "default",
       NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG: $ENV.HOOK_CONNECTORS_CONFIG,
       NIGHTSHIFT_ES_URL: $ENV.HOOK_ES_URL,
       NIGHTSHIFT_ES_API_KEY: $ENV.HOOK_ES_KEY
-    } end) + (if $ENV.HOOK_CONNECTOR_SET == "orcabench" then {
-      NIGHTSHIFT_DATASETS: "orcabench"
+    } elif $ENV.HOOK_CONNECTOR_SET == "orcabench" then {
+      NIGHTSHIFT_CONNECTOR_SET: "orcabench",
+      NIGHTSHIFT_DATASETS: "orcabench",
+      NIGHTSHIFT_ORCA_ES_URL: $ENV.HOOK_ES_URL,
+      NIGHTSHIFT_ORCA_ES_USERNAME: $ENV.HOOK_ORCA_USERNAME,
+      NIGHTSHIFT_ORCA_ES_PASSWORD: $ENV.HOOK_ORCA_PASSWORD
     } else {} end) + (if $ENV.HOOK_KNOWLEDGE == "" then {} else {
       NIGHTSHIFT_KNOWLEDGE: $ENV.HOOK_KNOWLEDGE,
       NIGHTSHIFT_KNOWLEDGE_ES_URL: $ENV.HOOK_KNOWLEDGE_URL,

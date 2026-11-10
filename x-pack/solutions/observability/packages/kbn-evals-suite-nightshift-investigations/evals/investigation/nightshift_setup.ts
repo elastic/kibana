@@ -17,7 +17,10 @@ import {
 import { createAdminSessionRequest } from './admin_session_request';
 import type { AdminSessionRequestOptions } from './admin_session_request';
 
-/** Creates the Nightshift service accounts, binds the space, and waits until the given managed workflows are installed. */
+/**
+ * Creates the Nightshift service accounts, binds the space, waits until the given managed workflows
+ * are installed, and lifts the daily investigation limits.
+ */
 export const ensureNightshiftSetup = async ({
   esClient,
   fetch,
@@ -112,4 +115,10 @@ export const ensureNightshiftSetup = async ({
       )
       .toBe(true);
   }
+  // Nightshift caps manual investigations per day (five by default), and an eval starts one per
+  // example, so the eval stack runs without the investigation limits.
+  await setupRequest('/internal/significant_events/run_quotas', {
+    method: 'PUT',
+    body: JSON.stringify({ investigationLimitsEnabled: false }),
+  });
 };

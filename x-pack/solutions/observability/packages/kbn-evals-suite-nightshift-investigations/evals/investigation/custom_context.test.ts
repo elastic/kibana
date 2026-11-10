@@ -11,6 +11,7 @@ import {
   CUSTOMER0_CUSTOM_CONTEXT,
   RETROSPECTIVE_GUARDRAIL_CONTEXT,
   getDatasetCustomContext,
+  ORCA_CUSTOM_CONTEXT,
   readCustomContext,
 } from './custom_context';
 
@@ -37,6 +38,15 @@ describe('getDatasetCustomContext', () => {
       []
     );
     expect(getDatasetCustomContext({ name: 'ns-investigation-golden-2610' })).toEqual([]);
+  });
+
+  it('points every ORCA release at the demo source the paper pins', () => {
+    for (const name of ['nightshift/orca-sampled50-v4', 'nightshift/orca-bench-public755-v2']) {
+      expect(getDatasetCustomContext({ name })).toEqual(ORCA_CUSTOM_CONTEXT);
+    }
+    expect(ORCA_CUSTOM_CONTEXT.join(' ')).toContain(
+      'github.com/open-telemetry/opentelemetry-demo at commit fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733'
+    );
   });
 });
 

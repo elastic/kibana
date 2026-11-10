@@ -130,7 +130,7 @@ describe.each([
   });
 
   it('loads the optional connector set YAML and keeps tracing exporter headers in the environment', () => {
-    const connectorsConfig = join(SANDBOX_KIBANA_CONFIG, '../connector_sets/orcabench.yml');
+    const connectorsConfig = join(SANDBOX_KIBANA_CONFIG, '../connector_sets/default.yml');
     const exporters = JSON.stringify([
       {
         http: {
