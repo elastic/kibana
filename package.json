@@ -75,7 +75,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "24.22.1",
+    "node": ">=24.22.0",
     "pnpm": "~12.17.0"
   },
   "resolutions": {
@@ -2327,5 +2327,7 @@
     "xml-crypto": "6.1.2",
     "yaml-language-server": "1.23.0"
   },
+  "packageManager": "pnpm@12.4.2"
+}
   "packageManager": "pnpm@12.17.0"
 }
