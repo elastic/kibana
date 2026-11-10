@@ -151478,8 +151478,6 @@ components:
           additionalProperties: false
           type: object
           properties:
-            agent_download_reserve_diskspace_enabled:
-              nullable: true
             agent_download_target_directory:
               nullable: true
             agent_download_timeout:
@@ -171008,8 +171006,6 @@ components:
           additionalProperties: false
           type: object
           properties:
-            agent_download_reserve_diskspace_enabled:
-              nullable: true
             agent_download_target_directory:
               nullable: true
             agent_download_timeout:
@@ -181354,8 +181350,6 @@ components:
           additionalProperties: false
           type: object
           properties:
-            agent_download_reserve_diskspace_enabled:
-              nullable: true
             agent_download_target_directory:
               nullable: true
             agent_download_timeout:

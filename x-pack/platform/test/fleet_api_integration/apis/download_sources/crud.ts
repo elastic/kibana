@@ -1683,66 +1683,6 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('should let the agent policy advanced setting override reserve_diskspace', async function () {
-        const { body: postResponse } = await supertest
-          .post(`/api/fleet/agent_download_sources`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'download source with reserve_diskspace enabled',
-            host: 'http://test.fr:443',
-            is_default: false,
-            reserve_diskspace: true,
-          })
-          .expect(200);
-
-        const { body: postAgentPolicyResponse } = await supertest
-          .post(`/api/fleet/agent_policies`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'agent policy overriding reserve_diskspace',
-            namespace: 'default',
-            description: '',
-            is_default: false,
-            download_source_id: postResponse.item.id,
-            advanced_settings: {
-              agent_download_reserve_diskspace_enabled: false,
-            },
-          })
-          .expect(200);
-
-        const { id: agentPolicyId } = postAgentPolicyResponse.item;
-
-        const { body: getAgentPolicyResponse } = await supertest
-          .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
-          .expect(200);
-
-        expect(getAgentPolicyResponse.item.agent.download.reserve_diskspace).to.eql({
-          enabled: false,
-        });
-
-        // clearing the override falls back to the download source value
-        await supertest
-          .put(`/api/fleet/agent_policies/${agentPolicyId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            name: 'agent policy overriding reserve_diskspace',
-            namespace: 'default',
-            download_source_id: postResponse.item.id,
-            advanced_settings: {
-              agent_download_reserve_diskspace_enabled: null,
-            },
-          })
-          .expect(200);
-
-        const { body: getAgentPolicyClearedResponse } = await supertest
-          .get(`/api/fleet/agent_policies/${agentPolicyId}/full`)
-          .expect(200);
-
-        expect(getAgentPolicyClearedResponse.item.agent.download.reserve_diskspace).to.eql({
-          enabled: true,
-        });
-      });
-
       it('should return a 400 when reserve_diskspace is not a boolean', async function () {
         await supertest
           .post(`/api/fleet/agent_download_sources`)

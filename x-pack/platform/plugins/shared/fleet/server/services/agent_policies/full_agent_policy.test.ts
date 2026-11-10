@@ -2041,37 +2041,6 @@ describe('getFullAgentPolicy', () => {
     });
   });
 
-  it('should set agent.download.reserve_diskspace.enabled from advanced_settings', async () => {
-    mockAgentPolicy({
-      advanced_settings: {
-        agent_download_reserve_diskspace_enabled: false,
-      },
-    });
-    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
-
-    expect(agentPolicy).toMatchObject({
-      agent: {
-        download: {
-          sourceURI: 'http://default-registry.co',
-          reserve_diskspace: {
-            enabled: false,
-          },
-        },
-      },
-    });
-  });
-
-  it('should not set agent.download.reserve_diskspace when the advanced setting is cleared', async () => {
-    mockAgentPolicy({
-      advanced_settings: {
-        agent_download_reserve_diskspace_enabled: null,
-      },
-    });
-    const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
-
-    expect(agentPolicy?.agent?.download.reserve_diskspace).toBeUndefined();
-  });
-
   describe('fleet server host ssl', () => {
     const baseFleetServerHost = {
       name: 'default Fleet Server',

@@ -84,8 +84,7 @@ export function _getSettingsValuesForAgentPolicy(
     }
 
     const val = agentPolicy.advanced_settings?.[setting.api_field.name];
-    // null clears the setting, it should not be rendered in the agent policy
-    if (val !== undefined && val !== null && val !== '') {
+    if (val !== undefined && val !== '') {
       const convertedVal = convertValue(val, setting.type);
       if (convertedVal !== undefined) {
         settingsValues[setting.name] = convertedVal;
