@@ -23,7 +23,6 @@ const mockOpenConnectionDetails = openWiredConnectionDetails as jest.Mock;
 
 const ES_URL = 'https://my-project.es.example.com';
 
-/** The "Generate API key" button only renders at the `xl` breakpoint, which starts at 1200px. */
 const setViewportWidth = (value: number) =>
   Object.defineProperty(window, 'innerWidth', { writable: true, configurable: true, value });
 
@@ -41,14 +40,15 @@ describe('ConnectionDetails', () => {
     expect(screen.getByTestId('elasticsearchHomeCopyEndpointUrl')).toBeInTheDocument();
   });
 
-  it('renders nothing when cloud reports no endpoint', () => {
+  // self-managed deployments have no cloud endpoint, but can still create API keys
+  it('keeps the API key and connection details buttons when cloud reports no endpoint', () => {
     mockUseElasticsearchUrl.mockReturnValue({ url: null, isLoading: false });
 
     renderWithHomeContext(<ConnectionDetails />);
 
-    expect(
-      screen.queryByTestId('elasticsearchHomeConnectionDetailsButton')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('elasticsearchHomeCopyEndpointUrl')).not.toBeInTheDocument();
+    expect(screen.getByTestId('elasticsearchHomeGenerateApiKeyButton')).toBeInTheDocument();
+    expect(screen.getByTestId('elasticsearchHomeConnectionDetailsButton')).toBeInTheDocument();
   });
 
   it('opens the connection details flyout on the API keys tab', async () => {
@@ -69,12 +69,13 @@ describe('ConnectionDetails', () => {
     expect(mockOpenConnectionDetails).toHaveBeenCalledWith();
   });
 
-  it('drops the API key button below the xl breakpoint, to keep the header from overflowing', () => {
-    setViewportWidth(800);
+  // WCAG 1.4.10 Reflow: at 400% zoom the viewport is narrow, so the button must wrap, not disappear
+  it('keeps the API key button on narrow viewports', () => {
+    setViewportWidth(320);
 
     renderWithHomeContext(<ConnectionDetails />);
 
-    expect(screen.queryByTestId('elasticsearchHomeGenerateApiKeyButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('elasticsearchHomeGenerateApiKeyButton')).toBeInTheDocument();
     expect(screen.getByTestId('elasticsearchHomeConnectionDetailsButton')).toBeInTheDocument();
   });
 

@@ -376,6 +376,26 @@ describe('FeatureFlagsService Server', () => {
       expect(observedValues).toStrictEqual([true, false, false]);
     });
 
+    test('treats string boolean overrides as booleans', async () => {
+      config$.next({
+        overrides: {
+          'securitySolution.attackDiscoveryWorkflowsEnabled': 'false',
+          'ingestHub.onboardingEnabled': 'true',
+          'my-string-flag': 'false',
+        },
+      });
+
+      await expect(
+        startContract.getBooleanValue('securitySolution.attackDiscoveryWorkflowsEnabled', true)
+      ).resolves.toBe(false);
+      await expect(
+        startContract.getBooleanValue('ingestHub.onboardingEnabled', false)
+      ).resolves.toBe(true);
+      await expect(startContract.getStringValue('my-string-flag', 'fallback')).resolves.toBe(
+        'false'
+      );
+    });
+
     test('overrides with dotted names', async () => {
       const getBooleanValueSpy = jest.spyOn(featureFlagsClient, 'getBooleanValue');
       await expect(

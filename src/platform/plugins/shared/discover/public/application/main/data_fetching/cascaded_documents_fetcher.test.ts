@@ -163,7 +163,6 @@ describe('CascadedDocumentsFetcher', () => {
         esqlVariables: params.esqlVariables,
         esqlSource: extensionSource,
         data: discoverServices.data,
-        expressions: discoverServices.expressions,
         timeRange: params.timeRange,
         scopedProfilesManager,
         inspectorAdapters: {

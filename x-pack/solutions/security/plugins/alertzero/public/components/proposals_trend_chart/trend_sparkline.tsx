@@ -163,45 +163,49 @@ export const TrendSparkline: React.FC<TrendSparklineProps> = ({
       <EuiScreenReaderOnly>
         <span>{ariaLabel}</span>
       </EuiScreenReaderOnly>
-      <div ref={setWrapper} css={{ width: '100%', height: chartHeight, minWidth: 0 }}>
+      <div
+        ref={setWrapper}
+        css={{ position: 'relative', width: '100%', height: chartHeight, minWidth: 0 }}
+      >
         {chartWidth > 0 && series.length > 0 && (
-          <Chart
-            size={{ height: chartHeight, width: chartWidth }}
-            aria-hidden="true"
+          <div
+            css={{ position: 'absolute', top: 0, left: 0 }}
             data-test-subj="alertZeroProposalsTrendSparkline"
           >
-            <Settings
-              theme={[PARTIAL_THEME]}
-              baseTheme={chartBaseTheme}
-              showLegend={false}
-              locale={locale}
-              xDomain={xDomain}
-            />
-            <Tooltip type={TooltipType.VerticalCursor} headerFormatter={headerFormatter} />
-            <Axis
-              id={`${panelId}-y`}
-              position={Position.Left}
-              hide={true}
-              gridLine={{ visible: false }}
-              domain={yDomain}
-            />
-            <AreaSeries
-              id={panelId}
-              name={seriesName}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor="x"
-              yAccessors={['y']}
-              data={series}
-              timeZone={timeZone}
-              curve={CurveType.CURVE_MONOTONE_X}
-              color={color}
-              yNice={false}
-              areaSeriesStyle={areaSeriesStyle}
-              pointStyleAccessor={endpointStyle}
-              tickFormat={valueFormatter}
-            />
-          </Chart>
+            <Chart size={{ height: chartHeight, width: chartWidth }} aria-hidden="true">
+              <Settings
+                theme={[PARTIAL_THEME]}
+                baseTheme={chartBaseTheme}
+                showLegend={false}
+                locale={locale}
+                xDomain={xDomain}
+              />
+              <Tooltip type={TooltipType.VerticalCursor} headerFormatter={headerFormatter} />
+              <Axis
+                id={`${panelId}-y`}
+                position={Position.Left}
+                hide={true}
+                gridLine={{ visible: false }}
+                domain={yDomain}
+              />
+              <AreaSeries
+                id={panelId}
+                name={seriesName}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor="x"
+                yAccessors={['y']}
+                data={series}
+                timeZone={timeZone}
+                curve={CurveType.CURVE_MONOTONE_X}
+                color={color}
+                yNice={false}
+                areaSeriesStyle={areaSeriesStyle}
+                pointStyleAccessor={endpointStyle}
+                tickFormat={valueFormatter}
+              />
+            </Chart>
+          </div>
         )}
       </div>
     </>

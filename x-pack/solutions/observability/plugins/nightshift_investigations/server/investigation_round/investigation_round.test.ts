@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
@@ -116,6 +117,69 @@ describe('server/investigation_round', () => {
           isError: false,
         },
       ]);
+    });
+
+    it('stops reading on the first attempt when the caller cannot read the conversation', async () => {
+      // A service-account-bound agent in a conversation its owner keeps private: the read is
+      // denied as not-found, and no amount of waiting makes it readable.
+      const getConversation = jest
+        .fn()
+        .mockRejectedValue(createConversationNotFoundError({ conversationId: 'conv-1' }));
+      const agentBuilder = {
+        conversations: {
+          getScopedClient: jest.fn().mockResolvedValue({ get: getConversation }),
+        },
+      } as unknown as AgentBuilderPluginStart;
+
+      const loaded = await loadInvestigationRound({
+        agentBuilder,
+        request,
+        conversationId: 'conv-1',
+        roundId: 'round-1',
+        fallbackToolCalls: [{ tool_id: SANDBOX_BASH_TOOL_ID, tool_call_id: 'tc-1', params: {} }],
+        fallbackToolResults: [
+          { tool_call_id: 'tc-1', results: [{ type: 'other', data: { stdout: 'ok' } }] },
+        ],
+        logger,
+        retryDelaysMs: [1, 1],
+      });
+
+      expect(getConversation).toHaveBeenCalledTimes(1);
+      // No transcript at all: the caller must skip learning rather than use the hook's view.
+      expect(loaded).toEqual({
+        source: 'conversation_unreadable',
+        roundId: 'round-1',
+        steps: [],
+        toolCalls: [],
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('conversation not readable by this caller')
+      );
+    });
+
+    it('keeps retrying while the round itself is not saved yet', async () => {
+      const getConversation = jest.fn().mockResolvedValue({ id: 'conv-1', rounds: [] });
+      const agentBuilder = {
+        conversations: {
+          getScopedClient: jest.fn().mockResolvedValue({ get: getConversation }),
+        },
+      } as unknown as AgentBuilderPluginStart;
+
+      const loaded = await loadInvestigationRound({
+        agentBuilder,
+        request,
+        conversationId: 'conv-1',
+        roundId: 'round-1',
+        fallbackToolCalls: [{ tool_id: SANDBOX_BASH_TOOL_ID, tool_call_id: 'tc-1', params: {} }],
+        fallbackToolResults: [
+          { tool_call_id: 'tc-1', results: [{ type: 'other', data: { stdout: 'ok' } }] },
+        ],
+        logger,
+        retryDelaysMs: [1, 1],
+      });
+
+      expect(getConversation).toHaveBeenCalledTimes(3);
+      expect(loaded.source).toBe('hook_tool_calls');
     });
 
     it('falls back to hook tool_calls + tool_results when persisted round is unavailable', async () => {
@@ -295,7 +359,7 @@ describe('server/investigation_round', () => {
     it('detects all 4 seeded workspace kinds by default across view_file and bash', () => {
       expect(
         isSeededWorkspaceAccess(SANDBOX_VIEW_FILE_TOOL_ID, {
-          file_path: '/workspace/cortex/services/checkout.md',
+          file_path: '/workspace/wiki/services/checkout.md',
         })
       ).toBe(true);
       expect(
@@ -310,7 +374,7 @@ describe('server/investigation_round', () => {
       ).toBe(true);
       expect(
         isSeededWorkspaceAccess(SANDBOX_VIEW_FILE_TOOL_ID, {
-          file_path: '/workspace/elastic.md',
+          file_path: '/workspace/.connector-docs/elastic.md',
         })
       ).toBe(true);
       expect(
@@ -325,7 +389,7 @@ describe('server/investigation_round', () => {
       ).toBe(true);
       expect(
         isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
-          command: 'grep -rn redis ./cortex/',
+          command: 'grep -rn redis ./wiki/',
         })
       ).toBe(true);
       expect(
@@ -340,7 +404,7 @@ describe('server/investigation_round', () => {
         isSeededWorkspaceAccess(
           SANDBOX_VIEW_FILE_TOOL_ID,
           { file_path: '/workspace/memories/redis-evictions.md' },
-          { skipRoots: ['cortex', 'decision_trees'] }
+          { skipRoots: ['wiki', 'decision_trees'] }
         )
       ).toBe(false);
 
@@ -417,24 +481,24 @@ describe('server/investigation_round', () => {
   });
 
   describe('extractWorkspaceReads', () => {
-    it('extracts canonical Cortex, Memory, and Decision Tree IDs and indexReads across file tools and bash', () => {
+    it('extracts canonical Wiki, Memory, and Decision Tree IDs and indexReads across file tools and bash', () => {
       const steps = stepsFromRound([
         {
           type: 'tool_call',
           tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
-          params: { file_path: '/workspace/cortex/INDEX.md' },
-          results: [{ type: 'other', data: '# Cortex index' }],
+          params: { file_path: '/workspace/wiki/INDEX.md' },
+          results: [{ type: 'other', data: '# Wiki index' }],
         },
         {
           type: 'tool_call',
           tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
-          params: { file_path: '/workspace/cortex/README.md' },
+          params: { file_path: '/workspace/wiki/README.md' },
           results: [{ type: 'other', data: '# README' }],
         },
         {
           type: 'tool_call',
           tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
-          params: { file_path: '/workspace/cortex/services/checkout-service.md' },
+          params: { file_path: '/workspace/wiki/services/checkout-service.md' },
           results: [{ type: 'other', data: '# Checkout' }],
         },
         {
@@ -442,7 +506,7 @@ describe('server/investigation_round', () => {
           tool_id: SANDBOX_BASH_TOOL_ID,
           params: {
             command:
-              'jq . /workspace/memories/.index.json && cat /workspace/memories/redis-pool-exhaustion.md && head cortex/alerts/high-latency.md',
+              'jq . /workspace/memories/.index.json && cat /workspace/memories/redis-pool-exhaustion.md && head wiki/alerts/high-latency.md',
           },
           results: [{ type: 'other', data: { stdout: '...', exit_code: 0 } }],
         },
@@ -462,11 +526,11 @@ describe('server/investigation_round', () => {
 
       const reads = extractWorkspaceReads(steps);
       expect(reads).toEqual({
-        cortexIds: ['cortex_service_checkout-service', 'cortex_alert_high-latency'],
+        wikiIds: ['wiki_service_checkout-service', 'wiki_alert_high-latency'],
         memoryIds: ['memory_redis-pool-exhaustion'],
         decisionTreeIds: ['symptom:payment-5xx'],
         indexReads: {
-          cortexIndex: true,
+          wikiIndex: true,
           memoryIndex: true,
           decisionTreeIndex: true,
         },
@@ -484,7 +548,7 @@ describe('server/investigation_round', () => {
         {
           type: 'tool_call',
           tool_id: SANDBOX_BASH_TOOL_ID,
-          params: { command: 'cat /workspace/cortex/services/missing-service.md' },
+          params: { command: 'cat /workspace/wiki/services/missing-service.md' },
           results: [{ type: 'other', data: { stderr: 'No such file', exit_code: 1 } }],
         },
         {
@@ -497,7 +561,7 @@ describe('server/investigation_round', () => {
 
       const reads = extractWorkspaceReads(steps);
       expect(reads.memoryIds).toEqual(['memory_valid-page']);
-      expect(reads.cortexIds).toEqual([]);
+      expect(reads.wikiIds).toEqual([]);
     });
 
     it('supports extractWorkspaceReadsFromToolCalls for hook payloads', () => {
@@ -519,7 +583,7 @@ describe('server/investigation_round', () => {
       expect(reads.decisionTreeIds).toEqual(['symptom:checkout-latency']);
     });
 
-    it('resolves relative bash references against working_directory and excludes write-only operations from Cortex/Memory impressions', () => {
+    it('resolves relative bash references against working_directory and excludes write-only operations from Wiki/Memory impressions', () => {
       expect(
         isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
           working_directory: '/workspace/memories',
@@ -541,9 +605,9 @@ describe('server/investigation_round', () => {
           SANDBOX_BASH_TOOL_ID,
           {
             working_directory: '/workspace/memories',
-            command: 'cat ../cortex/services/checkout-service.md',
+            command: 'cat ../wiki/services/checkout-service.md',
           },
-          { skipRoots: ['cortex'] }
+          { skipRoots: ['wiki'] }
         )
       ).toBe(true);
       expect(
@@ -553,7 +617,7 @@ describe('server/investigation_round', () => {
             working_directory: '/workspace/memories',
             command: 'cat redis-pool-exhaustion.md',
           },
-          { skipRoots: ['cortex'] }
+          { skipRoots: ['wiki'] }
         )
       ).toBe(false);
 
@@ -562,10 +626,10 @@ describe('server/investigation_round', () => {
         isSeededWorkspaceAccess(
           SANDBOX_BASH_TOOL_ID,
           {
-            working_directory: '/workspace/cortex',
+            working_directory: '/workspace/wiki',
             command: 'grep -R redis services/',
           },
-          { skipRoots: ['cortex'] }
+          { skipRoots: ['wiki'] }
         )
       ).toBe(true);
       expect(
@@ -603,7 +667,7 @@ describe('server/investigation_round', () => {
       expect(
         isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
           command:
-            'curl -s localhost:9200/_search -d \'{"query":{"term":{"service.name":"cortex"}}}\'',
+            'curl -s localhost:9200/_search -d \'{"query":{"term":{"service.name":"wiki"}}}\'',
         })
       ).toBe(false);
       expect(
@@ -678,7 +742,7 @@ describe('server/investigation_round', () => {
           type: 'tool_call',
           tool_id: SANDBOX_BASH_TOOL_ID,
           params: {
-            working_directory: 'cortex/services',
+            working_directory: 'wiki/services',
             command: 'cat checkout-service.md',
           },
           results: [{ type: 'other', data: { stdout: '...', exit_code: 0 } }],
@@ -697,7 +761,7 @@ describe('server/investigation_round', () => {
           type: 'tool_call',
           tool_id: SANDBOX_BASH_TOOL_ID,
           params: {
-            working_directory: '/workspace/cortex/services',
+            working_directory: '/workspace/wiki/services',
             command: "cat <<'EOF' > unwritten-service.md\n# Service\nEOF",
           },
           results: [{ type: 'other', data: { stdout: '', exit_code: 0 } }],
@@ -734,7 +798,7 @@ describe('server/investigation_round', () => {
           type: 'tool_call',
           tool_id: SANDBOX_WRITE_FILE_TOOL_ID,
           params: {
-            file_path: '/workspace/cortex/services/overwritten-service.md',
+            file_path: '/workspace/wiki/services/overwritten-service.md',
             content: 'new content',
           },
           results: [{ type: 'other', data: 'written' }],
@@ -756,7 +820,7 @@ describe('server/investigation_round', () => {
         'memory_heredoc-read',
         'memory_inline-script-read',
       ]);
-      expect(reads.cortexIds).toEqual(['cortex_service_checkout-service']);
+      expect(reads.wikiIds).toEqual(['wiki_service_checkout-service']);
       expect(reads.decisionTreeIds).toEqual(['symptom:edited-tree']);
       expect(reads.indexReads.memoryIndex).toBe(true);
     });

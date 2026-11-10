@@ -23,11 +23,8 @@ import { LAST_SEEN_AGGREGATION } from '../../../lib/helpers/aggregations';
 import { dateHistogram } from '../../../lib/helpers/time_series';
 import { environmentFilter, environmentNotDefinedFilter } from '../../../lib/helpers/environment';
 import { vitalStatsAggs } from '../../../lib/helpers/web_vitals';
-import {
-  MAX_APPLICATIONS_PER_SOURCE,
-  MAX_ENVIRONMENTS,
-  MAX_ENVIRONMENTS_PER_APPLICATION,
-} from '../constants';
+import { MAX_ENVIRONMENTS } from '../../../lib/constants';
+import { MAX_APPLICATIONS_PER_SOURCE, MAX_ENVIRONMENTS_PER_APPLICATION } from '../constants';
 import {
   CLASSIC_RUM_AGENT_NAMES,
   CLS_FIELD,

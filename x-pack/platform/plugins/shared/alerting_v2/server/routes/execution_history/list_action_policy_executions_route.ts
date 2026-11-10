@@ -126,7 +126,6 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
 
   protected async execute() {
     const result = await this.executionHistoryClient.listExecutionHistory({
-      request: this.request,
       ...toListExecutionHistoryArgs(this.request.query),
     });
 

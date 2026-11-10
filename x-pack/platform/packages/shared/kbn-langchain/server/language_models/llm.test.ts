@@ -13,6 +13,7 @@ import { ActionsClientLlm } from './llm';
 import { mockActionResponse } from './mocks';
 import { getDefaultArguments } from '..';
 import { DEFAULT_TIMEOUT } from './constants';
+import { ModelRefusalError } from './model_refusal_error';
 
 const connectorId = 'mock-connector-id';
 
@@ -268,6 +269,43 @@ describe('ActionsClientLlm', () => {
         expect(actionsClient.execute).not.toHaveBeenCalled();
       });
 
+      it('passes telemetryMetadata to chatComplete as connectorTelemetry', async () => {
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+          telemetryMetadata: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+        });
+
+        await actionsClientLlm._call(prompt);
+
+        expect(mockInferenceClient.chatComplete).toHaveBeenCalledWith(
+          expect.objectContaining({
+            metadata: {
+              connectorTelemetry: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+            },
+          })
+        );
+      });
+
+      it('sends no metadata when telemetryMetadata is not set', async () => {
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+        });
+
+        await actionsClientLlm._call(prompt);
+
+        const chatComplete = mockInferenceClient.chatComplete as jest.Mock;
+        expect(chatComplete).toHaveBeenCalledTimes(1);
+        expect(chatComplete.mock.lastCall?.[0]).not.toHaveProperty('metadata');
+      });
+
       it('passes model and temperature when provided', async () => {
         const actionsClientLlm = new ActionsClientLlm({
           actionsClient,
@@ -344,6 +382,30 @@ describe('ActionsClientLlm', () => {
         });
 
         await expect(actionsClientLlm._call(prompt)).rejects.toThrow('quota exceeded');
+      });
+
+      it('throws a ModelRefusalError when the response carries a content filter refusal', async () => {
+        (mockInferenceClient.chatComplete as jest.Mock).mockResolvedValue({
+          content: '{"insights":[{"title":',
+          refusal:
+            'The response was stopped by the provider content filter (finish_reason: content_filter).',
+        });
+
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+          model: 'claude-opus-5-5',
+        });
+
+        await expect(actionsClientLlm._call(prompt)).rejects.toThrow(ModelRefusalError);
+        await expect(actionsClientLlm._call(prompt)).rejects.toMatchObject({
+          connectorId,
+          model: 'claude-opus-5-5',
+          partialContentLength: 22,
+        });
       });
     });
   });

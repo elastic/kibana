@@ -62,6 +62,26 @@ describe('goldenPathExamples fixture partitioning', () => {
     expect(filterByFixture('status-only')).toHaveLength(1);
   });
 
+  // The product short-circuits a zero-alert run to `completed` with
+  // `alerts_context_count: 0`, while an agent that skips the AD tool reports
+  // null — both are correct, so the passed count must be UNSCORED (key absent;
+  // `null` would assert null and fail the correct short-circuit run). The
+  // forbidden stages are what still fail a run that passed alerts through.
+  it('missing-alert-retrieval forbids pipeline stages and leaves the passed count unscored', () => {
+    const [example] = filterByFixture('missing-alert-retrieval');
+    expect(example.output?.forbiddenWorkflowStages).toEqual(['generation', 'validation']);
+    expect(Object.prototype.hasOwnProperty.call(example.output, 'expectedPassedAlertCount')).toBe(
+      false
+    );
+    expect(example.output?.expectedRetrievedAlertCount).toBeNull();
+  });
+
+  it('status-only still asserts the AD tool never ran (passed count null)', () => {
+    const [example] = filterByFixture('status-only');
+    expect(example.output?.expectedPassedAlertCount).toBeNull();
+    expect(example.output?.forbiddenWorkflowStages).toBeUndefined();
+  });
+
   it('every fixture-partitioned slice is mutually exclusive', () => {
     const fixtures = [
       'provided-alerts',

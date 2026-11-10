@@ -40,6 +40,7 @@ import type { QueryParamValue } from '@kbn/connector-schemas/http/schemas/v1';
 import { SecretsSchema } from '@kbn/connector-schemas/http/schemas/v1';
 import type { HttpFormDataField } from '@kbn/connector-schemas/http/types/v1';
 import { safeJsonStringify } from '@kbn/std';
+import { getSandboxHosts as getSpecSandboxHosts } from '@kbn/connector-specs';
 import type {
   HttpConnectorType,
   HttpConnectorTypeExecutorOptions,
@@ -93,6 +94,7 @@ export const getConnectorType = (): HttpConnectorType => ({
   // rather than connector-spec auth type defs.
   isSandboxCapable,
   getSandboxAuthHeaders,
+  getSandboxHosts,
   validate: {
     config: {
       schema: ConfigSchema,
@@ -201,6 +203,11 @@ function isSandboxCapable({
     authType === AuthType.OAuth2ClientCredentials ||
     authType === AuthType.OAuth2Password
   );
+}
+
+// Sandbox commands may only send this connector's headers to the host of its configured URL.
+function getSandboxHosts({ config }: { config: Record<string, unknown> }): string[] {
+  return getSpecSandboxHosts({ hostsFromConfig: ['url'] }, config);
 }
 
 async function getSandboxAuthHeaders(

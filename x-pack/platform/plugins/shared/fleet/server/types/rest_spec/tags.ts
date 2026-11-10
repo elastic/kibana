@@ -14,7 +14,8 @@ import { AGENTS_PREFIX, AGENT_MAPPINGS } from '../../constants';
 export const GetTagsRequestSchema = {
   query: schema.object({
     kuery: schema.maybe(
-      schema.string({
+      schema.searchFilter.warn({
+        label: 'fleet.agent_tags.kuery',
         meta: { description: 'A KQL query string to filter results' },
         validate: (value: string) => {
           const validationObj = validateKuery(value, [AGENTS_PREFIX], AGENT_MAPPINGS, true);

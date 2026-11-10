@@ -73,6 +73,30 @@ describe('DirectorStep', () => {
     expect(result.state.newEpisodeIds).toHaveLength(2);
   });
 
+  it('threads the batch status transitions on state for alertable rules', async () => {
+    const { directorService, mockEsClient } = createDirectorService();
+    const step = new DirectorStep(directorService);
+
+    // No previous episode state, so the event opens a new pending episode.
+    mockEsClient.esql.query.mockResolvedValue(createEmptyEsqlResponse());
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+    });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.state.alertStatusTransitions).toEqual([
+      {
+        groupHash: 'hash-1',
+        episodeId: result.state.alertEventsBatch?.[0].alert?.id,
+        previousStatus: null,
+        status: 'pending',
+      },
+    ]);
+  });
+
   it('skips episode tracking for signal rules', async () => {
     const { directorService, mockEsClient } = createDirectorService();
     const step = new DirectorStep(directorService);

@@ -94,6 +94,12 @@ export const queryKeys = {
     queryV2Source?: boolean
   ) =>
     [...queryKeys.tagOptionsAll(), spaceId, timeRange, additionalSourceId, queryV2Source] as const,
+  connectorSourcesAll: () => [...queryKeys.all, 'connector-sources'] as const,
+  connectorSources: (
+    spaceId: string,
+    timeRange?: { from: string; to: string } | null,
+    queryV2Source?: boolean
+  ) => [...queryKeys.connectorSourcesAll(), spaceId, timeRange, queryV2Source] as const,
   tagSuggestionsAll: () => [...queryKeys.all, 'tag-suggestions'] as const,
   tagSuggestions: (spaceId: string) => [...queryKeys.tagSuggestionsAll(), spaceId] as const,
   assigneeSuggestions: (searchTerm: string) =>
@@ -108,6 +114,7 @@ export const queryKeys = {
     filterState: EpisodesFilterState,
     timeRange: TimeRange | undefined,
     breakdownField: string | undefined,
+    bucketInterval: string,
     additionalSourceId?: string,
     queryV2Source?: boolean
   ) =>
@@ -117,6 +124,7 @@ export const queryKeys = {
       filterState,
       timeRange,
       breakdownField,
+      bucketInterval,
       additionalSourceId,
       queryV2Source,
     ] as const,

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { getFormattedFields } from './get_formatted_fields';
-import { formatFieldValueReact } from './format_value';
+import { formatFieldValueReact } from './format_value_react';
 import type { DataTableRecord } from '../types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
-jest.mock('./format_value', () => ({
+jest.mock('./format_value_react', () => ({
   formatFieldValueReact: jest.fn(),
 }));
 

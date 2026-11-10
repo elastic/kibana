@@ -10,6 +10,7 @@ import {
   ProposalConflictError,
   ProposalForbiddenError,
   ProposalInvalidActionInputError,
+  ProposalInvalidGateError,
   ProposalNotFoundError,
 } from '../services/errors';
 
@@ -30,7 +31,10 @@ export const handleRouteError = (
   if (error instanceof ProposalConflictError) {
     return response.conflict({ body: { message: error.message } });
   }
-  if (error instanceof ProposalInvalidActionInputError) {
+  if (
+    error instanceof ProposalInvalidActionInputError ||
+    error instanceof ProposalInvalidGateError
+  ) {
     return response.badRequest({ body: { message: error.message } });
   }
   if (error instanceof ProposalForbiddenError) {
