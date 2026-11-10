@@ -8,6 +8,33 @@
 import { buildRoleAssignments, readApplicationRoles } from './role_assignments';
 import type { UiamProjectRoleAssignment } from '../uiam';
 
+describe('buildRoleAssignments', () => {
+  it('grants the roles as application-only on this project alone', () => {
+    expect(
+      buildRoleAssignments(
+        {
+          organizationId: 'organization-id',
+          projectId: 'project-id',
+          projectType: 'observability',
+        },
+        ['viewer']
+      )
+    ).toEqual({
+      project: {
+        observability: [
+          {
+            role_id: 'observability-application-only',
+            organization_id: 'organization-id',
+            all: false,
+            project_ids: ['project-id'],
+            application_roles: ['viewer'],
+          },
+        ],
+      },
+    });
+  });
+});
+
 describe('readApplicationRoles', () => {
   const context = {
     organizationId: 'organization-id',
@@ -27,6 +54,15 @@ describe('readApplicationRoles', () => {
     expect(
       readApplicationRoles(context, buildRoleAssignments(context, ['viewer', 'editor']))
     ).toEqual(['viewer', 'editor']);
+  });
+
+  it('does not read the roles `buildRoleAssignments` sends on another project', () => {
+    expect(
+      readApplicationRoles(
+        { ...context, projectId: 'linked-project-id' },
+        buildRoleAssignments(context, ['viewer', 'editor'])
+      )
+    ).toEqual([]);
   });
 
   it('includes project entries that cover this project, by id or by `all`', () => {

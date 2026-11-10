@@ -249,27 +249,17 @@ export const CreateServiceAccountFlyout = ({
                     { defaultMessage: 'About role privileges' }
                   )}
                   content={
-                    <>
-                      {isServerless ? (
-                        <FormattedMessage
-                          id="xpack.security.management.serviceAccounts.create.serverlessRolesHelpDescription"
-                          defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
-                          defaultMessage="The account receives the privileges granted by its selected roles."
-                        />
-                      )}
-                      {isServerless && (
-                        <p>
-                          <FormattedMessage
-                            id="xpack.security.management.serviceAccounts.create.crossProjectRolesHelpDescription"
-                            defaultMessage="For cross-project search, selected role names also apply in linked projects where those roles exist. Custom roles are not copied between projects."
-                          />
-                        </p>
-                      )}
-                    </>
+                    isServerless ? (
+                      <FormattedMessage
+                        id="xpack.security.management.serviceAccounts.create.serverlessRolesHelpDescription"
+                        defaultMessage="An account can only use privileges allowed by both its selected roles and your access at creation time. Selecting a role does not grant privileges you do not have."
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.security.management.serviceAccounts.create.rolesHelpDescription"
+                        defaultMessage="The account receives the privileges granted by its selected roles."
+                      />
+                    )
                   }
                 />
               </>

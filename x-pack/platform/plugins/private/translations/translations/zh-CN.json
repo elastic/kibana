@@ -53307,7 +53307,6 @@
     "xpack.security.management.serviceAccounts.create.builtInRoleBadge": "内置",
     "xpack.security.management.serviceAccounts.create.cancelButtonLabel": "取消",
     "xpack.security.management.serviceAccounts.create.createRoleLinkText": "创建新角色",
-    "xpack.security.management.serviceAccounts.create.crossProjectRolesHelpDescription": "对于跨项目搜索，所选角色名称也适用于存在这些角色的关联项目。自定义角色不会在项目之间复制。",
     "xpack.security.management.serviceAccounts.create.customRolesLabel": "定制角色",
     "xpack.security.management.serviceAccounts.create.deprecatedRoleBadge": "已弃用",
     "xpack.security.management.serviceAccounts.create.descriptionLabel": "描述（可选）",

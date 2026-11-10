@@ -53203,7 +53203,6 @@
     "xpack.security.management.serviceAccounts.create.builtInRoleBadge": "integriert",
     "xpack.security.management.serviceAccounts.create.cancelButtonLabel": "Abbrechen",
     "xpack.security.management.serviceAccounts.create.createRoleLinkText": "Neue Rolle erstellen",
-    "xpack.security.management.serviceAccounts.create.crossProjectRolesHelpDescription": "Bei der projektübergreifenden Suche gelten ausgewählte Rollennamen auch in verknüpften Projekten, in denen diese Rollen vorhanden sind. Benutzerdefinierte Rollen werden nicht zwischen Projekten kopiert.",
     "xpack.security.management.serviceAccounts.create.customRolesLabel": "Benutzerdefinierte Rollen",
     "xpack.security.management.serviceAccounts.create.deprecatedRoleBadge": "veraltet",
     "xpack.security.management.serviceAccounts.create.descriptionLabel": "Beschreibung (optional)",

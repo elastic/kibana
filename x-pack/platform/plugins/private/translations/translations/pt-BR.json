@@ -53339,7 +53339,6 @@
     "xpack.security.management.serviceAccounts.create.builtInRoleBadge": "integrado",
     "xpack.security.management.serviceAccounts.create.cancelButtonLabel": "Cancelar",
     "xpack.security.management.serviceAccounts.create.createRoleLinkText": "Criar nova função",
-    "xpack.security.management.serviceAccounts.create.crossProjectRolesHelpDescription": "Para a busca entre projetos, os nomes das funções selecionadas também se aplicam aos projetos vinculados em que essas funções existirem. As funções personalizadas não são copiadas entre projetos.",
     "xpack.security.management.serviceAccounts.create.customRolesLabel": "Funções personalizadas",
     "xpack.security.management.serviceAccounts.create.deprecatedRoleBadge": "obsoleto",
     "xpack.security.management.serviceAccounts.create.descriptionLabel": "Descrição (opcional)",

@@ -428,12 +428,10 @@ describe('ServiceAccountsApp', () => {
       await user.hover(screen.getByText('About role privileges'));
       if (isServerless) {
         expect(await screen.findByText(/An account can only use privileges/)).toBeVisible();
-        expect(screen.getByText(/For cross-project search/)).toBeVisible();
         expect(screen.queryByText(/The account receives the privileges/)).not.toBeInTheDocument();
       } else {
         expect(await screen.findByText(/The account receives the privileges/)).toBeVisible();
         expect(screen.queryByText(/An account can only use privileges/)).not.toBeInTheDocument();
-        expect(screen.queryByText(/For cross-project search/)).not.toBeInTheDocument();
       }
     }
   );

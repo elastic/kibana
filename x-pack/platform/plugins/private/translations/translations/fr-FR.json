@@ -53091,7 +53091,6 @@
     "xpack.security.management.serviceAccounts.create.builtInRoleBadge": "intégré",
     "xpack.security.management.serviceAccounts.create.cancelButtonLabel": "Annuler",
     "xpack.security.management.serviceAccounts.create.createRoleLinkText": "Créer un nouveau rôle",
-    "xpack.security.management.serviceAccounts.create.crossProjectRolesHelpDescription": "Pour la recherche interprojets, les noms des rôles sélectionnés s'appliquent également aux projets liés dans lesquels ces rôles existent. Les rôles personnalisés ne sont pas copiés d'un projet à l'autre.",
     "xpack.security.management.serviceAccounts.create.customRolesLabel": "Rôles personnalisés",
     "xpack.security.management.serviceAccounts.create.deprecatedRoleBadge": "déclassé",
     "xpack.security.management.serviceAccounts.create.descriptionLabel": "Description (facultatif)",

@@ -53322,7 +53322,6 @@
     "xpack.security.management.serviceAccounts.create.builtInRoleBadge": "ビルトイン",
     "xpack.security.management.serviceAccounts.create.cancelButtonLabel": "キャンセル",
     "xpack.security.management.serviceAccounts.create.createRoleLinkText": "新しいロールを作成",
-    "xpack.security.management.serviceAccounts.create.crossProjectRolesHelpDescription": "プロジェクト横断検索では、選択されたロール名は、それらのロールが存在するリンク先プロジェクトにも適用されます。カスタムロールはプロジェクト間でコピーされません。",
     "xpack.security.management.serviceAccounts.create.customRolesLabel": "カスタムロール",
     "xpack.security.management.serviceAccounts.create.deprecatedRoleBadge": "廃止予定",
     "xpack.security.management.serviceAccounts.create.descriptionLabel": "説明（オプション）",
