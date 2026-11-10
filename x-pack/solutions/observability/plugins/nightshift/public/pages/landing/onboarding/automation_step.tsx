@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { connectedPowerPlug } from '@elastic/eui-illustrations';
@@ -417,6 +418,8 @@ function FirstAutomationCard({
   canManage: boolean;
   editDisabledReason?: string;
 }): React.ReactElement {
+  // Keep EuiToolTip (not native title / actionProps) so the manage_security reason stays
+  // hover- and keyboard-discoverable — same as AutomationsPage / SourceCard.
   return (
     <EuiBanner
       size="m"
@@ -433,18 +436,20 @@ function FirstAutomationCard({
           data-test-subj="nightshiftOnboardingFirstAutomationIllustration"
         />
       }
-      actionProps={{
-        primary: {
-          children: CREATE_AUTOMATION,
-          fill: true,
-          iconType: 'plus',
-          onClick: onCreate,
-          isDisabled: !canManage,
-          title: editDisabledReason,
-          'data-test-subj': 'nightshiftOnboardingCreateAutomation',
-        },
-      }}
-    />
+    >
+      <EuiToolTip content={editDisabledReason}>
+        <EuiButton
+          size="s"
+          fill
+          iconType="plus"
+          onClick={onCreate}
+          isDisabled={!canManage}
+          data-test-subj="nightshiftOnboardingCreateAutomation"
+        >
+          {CREATE_AUTOMATION}
+        </EuiButton>
+      </EuiToolTip>
+    </EuiBanner>
   );
 }
 

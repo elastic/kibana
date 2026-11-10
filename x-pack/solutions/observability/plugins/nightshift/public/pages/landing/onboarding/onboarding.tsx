@@ -18,7 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import type { OnboardingSuggestion } from '@kbn/nightshift-investigations-plugin/common';
+import type {
+  OnboardingSuggestion,
+  OnboardingSuggestionsExecution,
+} from '@kbn/nightshift-investigations-plugin/common';
 import { NightshiftHeader } from '../header';
 import { useFlyoutShareUrlCustomAction } from '../../../components/ui/flyout_share_url_button';
 import {
@@ -140,6 +143,12 @@ const DESIGN_ONBOARDING_SUGGESTIONS: OnboardingSuggestion[] = [
   },
 ];
 
+/** Stub execution so analyze/suggestions URL forces work before a real workflow run exists. */
+const DESIGN_PREVIEW_EXECUTION: OnboardingSuggestionsExecution = {
+  execution_id: 'design-preview',
+  status: 'running',
+};
+
 /**
  * First-run Nightshift: enable the space, add telemetry data, connect other sources, try a first
  * investigation, create a first automation. The steps follow from the latest onboarding workflow
@@ -184,20 +193,26 @@ export function NightshiftOnboarding({
   const forceInvestigating = searchParams.get('investigating') === '1';
 
   const execution = data?.execution;
-  const designExecution =
-    forceAnalyzing && execution
-      ? { ...execution, status: 'running' as const }
-      : forceSuggestions && execution
-      ? {
-          ...execution,
-          status: 'succeeded' as const,
-          suggestions: forceSuggestionsEmpty
-            ? []
-            : execution.suggestions && execution.suggestions.length > 0
-            ? execution.suggestions
-            : DESIGN_ONBOARDING_SUGGESTIONS,
-        }
-      : execution;
+  const liveSuggestions = execution?.suggestions;
+  const hasLiveSuggestions = (liveSuggestions?.length ?? 0) > 0;
+  // Fabricated sample rows (or a forced empty list) must not start real investigations.
+  const isDesignPreviewReadOnly =
+    forceAnalyzing ||
+    forceSuggestionsEmpty ||
+    (forceSuggestionsFilled && !hasLiveSuggestions);
+  const designExecution: OnboardingSuggestionsExecution | undefined = forceAnalyzing
+    ? { ...(execution ?? DESIGN_PREVIEW_EXECUTION), status: 'running', suggestions: undefined }
+    : forceSuggestions
+    ? {
+        ...(execution ?? DESIGN_PREVIEW_EXECUTION),
+        status: 'succeeded',
+        suggestions: forceSuggestionsEmpty
+          ? []
+          : hasLiveSuggestions
+          ? liveSuggestions
+          : DESIGN_ONBOARDING_SUGGESTIONS,
+      }
+    : execution;
   // Step 1 is done once the space is bound to its service accounts and the agent is installed:
   // one click does both, and removing the binding brings the step back.
   const isEnabled = data?.agent_installed === true && isNightshiftSetUp(serviceAccount.data);
@@ -461,11 +476,12 @@ export function NightshiftOnboarding({
             <NightshiftSetupPrompt status={serviceAccount.data} />
           ) : step === 'connectSources' ? (
             <OnboardingConnectSourcesStep />
-          ) : step === 'addData' || !execution ? (
+          ) : step === 'addData' || !designExecution ? (
             <OnboardingAddDataStep />
           ) : step === 'investigate' || !trialInvestigation ? (
             <OnboardingFirstInvestigationStep
-              execution={designExecution ?? execution}
+              execution={designExecution}
+              previewOnly={isDesignPreviewReadOnly}
               onInvestigationStarted={() => setStepOverride(undefined)}
             />
           ) : (
