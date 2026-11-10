@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory } from 'history';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryApiClient } from '../../inventory_api/client';
@@ -23,16 +25,24 @@ const createClientMock = (
   getEntities: jest.fn(client.getEntities),
 });
 
-const renderUseEntityList = (inventoryApi: EntityInventoryApiClient, entityType = 'host') =>
-  renderHook(() => ({ search: useEntityInventorySearch(), result: useEntityList(entityType) }), {
-    wrapper: ({ children }) => (
-      <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-        <EntityInventorySearchProvider entityCategory="hosts">
-          {children}
-        </EntityInventorySearchProvider>
-      </KibanaContextProvider>
-    ),
-  });
+const renderUseEntityList = (inventoryApi: EntityInventoryApiClient, entityType = 'host') => {
+  const history = createMemoryHistory();
+
+  return renderHook(
+    () => ({ search: useEntityInventorySearch(), result: useEntityList(entityType) }),
+    {
+      wrapper: ({ children }) => (
+        <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
+          <Router history={history}>
+            <EntityInventorySearchProvider entityCategory="hosts">
+              {children}
+            </EntityInventorySearchProvider>
+          </Router>
+        </KibanaContextProvider>
+      ),
+    }
+  );
+};
 
 describe('useEntityList', () => {
   it('lists the entities of the type over the committed range resolved to absolute bounds', async () => {
@@ -80,6 +90,23 @@ describe('useEntityList', () => {
     await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
     const [, request] = inventoryApi.getEntities.mock.calls[1];
     expect(Date.parse(request.to) - Date.parse(request.from)).toBe(60 * 60 * 1000);
+  });
+
+  it('lists again when the same search is submitted again', async () => {
+    const inventoryApi = createClientMock();
+    const { result } = renderUseEntityList(inventoryApi);
+    await waitFor(() => expect(result.current.result.loading).toBe(false));
+    const submission = { dateRange: { from: 'now-1h', to: 'now' } };
+
+    act(() => {
+      result.current.search.submit(submission);
+    });
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(2));
+    act(() => {
+      result.current.search.submit(submission);
+    });
+
+    await waitFor(() => expect(inventoryApi.getEntities).toHaveBeenCalledTimes(3));
   });
 
   it('lists again on refresh', async () => {

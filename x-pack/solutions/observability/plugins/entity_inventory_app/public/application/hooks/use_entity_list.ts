@@ -36,25 +36,29 @@ export const useEntityList = (entityType: string): UseEntityListResult => {
   const {
     services: { inventoryApi, uiSettings },
   } = useKibana();
-  const { dateRange, query, filters, filterControls } = useEntityInventorySearch();
+  const { dateRange, query, filters, filterControls, refreshToken } = useEntityInventorySearch();
 
-  const documentFilter = useMemo(
-    () =>
-      buildDocumentFilter({
+  const search = useMemo(
+    () => ({
+      dateRange,
+      documentFilter: buildDocumentFilter({
         query,
         filters,
         attributes: filterControls.attributes,
         esQueryConfig: getEsQueryConfig(uiSettings),
       }),
-    [query, filters, filterControls.attributes, uiSettings]
+      refreshToken,
+    }),
+    [dateRange, query, filters, filterControls.attributes, uiSettings, refreshToken]
   );
 
   const { value, loading, error, refresh } = useAbortableAsync(
     async ({ signal }) => {
+      const { dateRange: committedRange, documentFilter } = search;
       // Resolved here so a relative range is measured from when the request is sent.
-      const range = toAbsoluteTimeRange(dateRange);
+      const range = toAbsoluteTimeRange(committedRange);
       if (!range) {
-        throw new Error(`Invalid time range: ${dateRange.from} to ${dateRange.to}`);
+        throw new Error(`Invalid time range: ${committedRange.from} to ${committedRange.to}`);
       }
 
       // Both requests start together. The type lookup is judged first, so an unknown type is
@@ -83,7 +87,7 @@ export const useEntityList = (entityType: string): UseEntityListResult => {
       }
       return { entityType: description, list: listResult.value };
     },
-    [inventoryApi, entityType, dateRange, documentFilter],
+    [inventoryApi, entityType, search],
     { clearValueOnNext: false }
   );
 
