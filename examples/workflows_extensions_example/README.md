@@ -139,8 +139,8 @@ steps:
 ### Key concepts
 
 - **`system-` prefix** is reserved for managed workflow IDs; user-created workflows cannot use it.
-- **`yamlTemplate.render(values)`** enables install-time parameterization; `values` are persisted and reused on upgrades. **`yamlTemplate.hashValues`** are fixed values the platform renders with to compute the definition hash, so template changes roll out without a version bump.
-- **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when the template changes.
+- **`yamlTemplate.render(values)`** enables install-time parameterization; `values` are persisted and reused on upgrades. **`yamlTemplate.hashValues`** are fixed values the platform renders with to compute the definition hash, so template changes those values reach roll out without a version bump. A change only on a branch they skip, such as the service-account workflow's YAML without `run_as`, still needs a `version` bump.
+- **`versionStrategy: 'auto'`** means the platform re-installs the workflow on startup when its definition hash or `version` changes.
 - **`enablement: 'restorable'`** preserves user-toggled enabled state across managed updates.
 - **`spaceId`** is mandatory — use `'*'` (the global space constant) for workflows visible from every space.
 

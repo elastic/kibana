@@ -85,6 +85,15 @@ export const RULE_COVERAGE_WORKER_SETTINGS_DEFAULTS = {
   extras: { defaultValue: { lookbackDays: 14, maxGapsPerRun: 5 } },
 } as const satisfies WorkerSettingsDefaults;
 
+/** A Worker's `hashValues`: `settings` at `supervised` autonomy with a service account bound. */
+export const workerHashValues = <TSettings extends { settingsVersion: number }>(
+  settings: TSettings
+): TSettings & { autonomyLevel: WorkerAutonomyLevel; serviceAccountId: string } => ({
+  ...settings,
+  autonomyLevel: 'supervised',
+  serviceAccountId: 'alertzero-worker',
+});
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 

@@ -9,7 +9,7 @@
 
 import BOUND_INVESTIGATION_WORKFLOW_YAML from './bound_investigation_workflow.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../../types';
-import { renderRunAs } from '../render_bound_yaml';
+import { NIGHTSHIFT_BOUND_HASH_VALUES, renderRunAs } from '../render_bound_yaml';
 
 export const NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID = 'system-nightshift-investigation-bound';
 
@@ -53,7 +53,7 @@ export const NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW = {
   version: 2,
   billable: false,
   yamlTemplate: {
-    hashValues: { serviceAccountId: 'kibana/nightshift_agent' },
+    hashValues: NIGHTSHIFT_BOUND_HASH_VALUES,
     render: renderBoundInvestigationYaml,
   },
   management: {

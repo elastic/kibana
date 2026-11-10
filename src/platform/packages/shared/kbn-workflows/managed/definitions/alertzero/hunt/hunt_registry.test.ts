@@ -10,29 +10,20 @@
 import { parse } from 'yaml';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from '.';
 import { ALERTZERO_HUNT_CHILD_WORKFLOW_IDS } from '..';
-import { managedWorkflowDefinitions } from '../../..';
+import { getManagedWorkflowHashedYaml, managedWorkflowDefinitions } from '../../..';
 import {
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
 } from '../../threat_intel';
 
-const renderWorkflowYaml = (definition: (typeof managedWorkflowDefinitions)[number]): string =>
-  'yaml' in definition
-    ? definition.yaml
-    : definition.yamlTemplate.render({
-        settingsVersion: 1,
-        autonomyLevel: 'manual',
-        serviceAccountId: 'kibana/nightshift_agent',
-      } as never);
-
 describe('Hunt Watch: registry-wide checks', () => {
-  // Every managed definition, rendered once (yamlTemplate ones with representative
-  // values), parsed for its top-level `tags`. Reused by both checks below so a templated
+  // Every managed definition, rendered once (yamlTemplate ones with their `hashValues`),
+  // parsed for its top-level `tags`. Reused by both checks below so a templated
   // definition is rendered only once for this whole block.
   const parsedDefinitions = managedWorkflowDefinitions.map((definition) => ({
     id: definition.id,
-    parsed: parse(renderWorkflowYaml(definition)) as {
+    parsed: parse(getManagedWorkflowHashedYaml(definition)) as {
       tags?: string[];
       steps?: Array<{
         type?: string;

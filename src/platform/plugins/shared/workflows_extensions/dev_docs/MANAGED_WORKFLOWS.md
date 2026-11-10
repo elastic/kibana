@@ -515,7 +515,7 @@ await managed.install(HEALTH_CHECK_WORKFLOW_ID, {
 
 Use when some values are only known at install time (entity id, connector id, rule id, etc.). `yamlTemplate.render(values)` runs at install/update time, install values are persisted alongside the document, and re-installs are idempotent on `(definition hash, definition version, persisted values)`.
 
-`yamlTemplate.hashValues` are fixed values the platform renders the template with to compute the definition hash. The hash therefore covers everything that shapes the output for those values — imported YAML files, render helpers, defaults — so such changes roll out without a `version` bump. Write them in code, never from runtime or instance data, so the hash is identical on every instance. Choose values that reach every branch of `render`: a change only on a branch `hashValues` never reach does not change the hash (see [When to bump `version`](#version--definition-versioning)).
+`yamlTemplate.hashValues` are fixed values the platform renders the template with to compute the definition hash. The hash therefore covers everything that shapes the output for those values — imported YAML files, render helpers, defaults — so such changes roll out without a `version` bump. Write them in code, never from runtime or instance data, so the hash is identical on every instance. Choose values that reach as many branches of `render` as one set of values can, including YAML sections it includes only for some values. One set cannot take both sides of a branch, such as a value being present or absent, so a change only on a branch or section `hashValues` never reach does not change the hash and needs a `version` bump (see [When to bump `version`](#version--definition-versioning)).
 
 ```ts
 import type { ManagedWorkflowDefinition } from '@kbn/workflows/managed';
@@ -582,7 +582,7 @@ The definition's `version` is persisted as `managedVersion` on the workflow docu
 - **Bump** when the change involves non-YAML config (e.g. `billable`, `management` policy changes), or when it is a YAML change you want explicit visibility/auditability for.
 - **Optional** for YAML-only changes on a fixed `yaml` definition because its content hash triggers the upgrade.
 - **Optional** for `yamlTemplate` changes that alter the output for `hashValues`, including edits to imported YAML, render helpers and defaults.
-- **Required** for `yamlTemplate` changes that `hashValues` do not reach, such as a branch taken only for other values or a default `render` applies only when a value is missing. The rendered output for `hashValues` is unchanged, so the hash is too.
+- **Required** for `yamlTemplate` changes that `hashValues` do not reach, such as a branch or YAML section rendered only for other values, or a default `render` applies only when a value is missing. The rendered output for `hashValues` is unchanged, so the hash is too.
 
 ### `billable` — execution metering
 

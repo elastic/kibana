@@ -12,6 +12,7 @@ import DETECTION_RULE_TUNING_YAML from './detection_rule_tuning.yaml';
 import {
   RULE_TUNING_WORKER_SETTINGS_DEFAULTS,
   upgradeStoredWorkerSettings,
+  workerHashValues,
 } from './worker_settings_defaults';
 import {
   renderRuleTuningWorkerYaml,
@@ -29,12 +30,11 @@ export const ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW = {
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
   version: 12,
   yamlTemplate: {
-    hashValues: {
+    hashValues: workerHashValues({
       settingsVersion: 1,
-      autonomyLevel: 'manual',
-      scheduleInterval: '2h',
-      extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
-    },
+      scheduleInterval: RULE_TUNING_WORKER_SETTINGS_DEFAULTS.scheduleInterval.defaultValue,
+      extras: RULE_TUNING_WORKER_SETTINGS_DEFAULTS.extras.defaultValue,
+    }),
     render: (values: RuleTuningWorkerTemplateValues): string =>
       renderRuleTuningWorkerYaml(
         DETECTION_RULE_TUNING_YAML,

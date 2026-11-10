@@ -18,6 +18,7 @@ import type {
   ManagedWorkflowTemplateValues,
   ManagedWorkflowVisibility,
   ManagedWorkflowVisibilityContext,
+  ManagedYamlTemplate,
 } from './types';
 
 export type {
@@ -30,7 +31,9 @@ export type {
   ManagedWorkflowTemplateValues,
   ManagedWorkflowVisibility,
   ManagedWorkflowVisibilityContext,
+  ManagedYamlTemplate,
 };
+export { getManagedWorkflowHashedYaml } from './hashed_yaml';
 export {
   getManagedWorkflowSelectorVisibilityContext,
   getManagedWorkflowSolutionVisibilityContext,

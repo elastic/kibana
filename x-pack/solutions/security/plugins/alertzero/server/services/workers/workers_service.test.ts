@@ -71,9 +71,7 @@ const renderManagedWorkflowYaml = (id: string, values: Record<string, unknown> |
   if (!definition) throw new Error(`Missing managed workflow definition for "${id}"`);
   if ('yaml' in definition && typeof definition.yaml === 'string') return definition.yaml;
   if ('yamlTemplate' in definition && definition.yamlTemplate && values) {
-    return (definition.yamlTemplate.render as (templateValues: Record<string, unknown>) => string)(
-      values
-    );
+    return definition.yamlTemplate.render(values);
   }
   throw new Error(`Managed workflow "${id}" cannot be rendered`);
 };

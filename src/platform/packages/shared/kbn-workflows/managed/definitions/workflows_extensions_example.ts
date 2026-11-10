@@ -67,7 +67,7 @@ export const EXAMPLE_SERVICE_ACCOUNT_WORKFLOW = {
   version: 2,
   billable: false,
   yamlTemplate: {
-    // Sets every option so the hash covers every branch of the template.
+    // Sets every option; edits to the branches these values skip need a `version` bump.
     hashValues: {
       serviceAccountId: 'example-account',
       childWorkflowId: 'example-child',

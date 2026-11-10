@@ -9,7 +9,7 @@
 
 import SLACK_THREAD_WORKFLOW_YAML from './slack_thread_workflow.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../../types';
-import { renderRunAs } from '../render_bound_yaml';
+import { NIGHTSHIFT_BOUND_HASH_VALUES, renderRunAs } from '../render_bound_yaml';
 
 export const NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID = 'system-nightshift-slack-thread-bound';
 
@@ -35,7 +35,7 @@ export const NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW = {
   version: 3,
   billable: false,
   yamlTemplate: {
-    hashValues: { serviceAccountId: 'kibana/nightshift_agent' },
+    hashValues: NIGHTSHIFT_BOUND_HASH_VALUES,
     render: renderBoundSlackThreadYaml,
   },
   management: {

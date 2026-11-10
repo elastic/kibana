@@ -28,7 +28,8 @@ const render = (values: ServiceAccountWorkflowTemplateValues) => {
     (d) => d.id === EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID
   );
   if (!definition?.yamlTemplate) throw new Error('expected yamlTemplate');
-  return { definition: parse(definition.yamlTemplate.render(values)) as unknown as WorkflowYaml };
+  const parsed: WorkflowYaml = parse(definition.yamlTemplate.render(values));
+  return { definition: parsed };
 };
 
 describe(`${EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID} conditionalChild`, () => {

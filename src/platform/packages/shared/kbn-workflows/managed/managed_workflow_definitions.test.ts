@@ -9,8 +9,7 @@
 
 import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
-import { managedWorkflowDefinitions } from '.';
-import type { ManagedWorkflowTemplateValuesById } from '.';
+import { getManagedWorkflowHashedYaml, managedWorkflowDefinitions } from '.';
 import {
   ALERTZERO_ACTION_WORKFLOW_IDS,
   ALERTZERO_ALERT_TRIAGE_WORKFLOW_IDS,
@@ -18,25 +17,13 @@ import {
   ALERTZERO_FORENSICS_WORKFLOW_IDS,
   ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS,
   ALERTZERO_RULE_WORKFLOW_IDS,
-  ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID,
-  ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
-  ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
-  ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
-  ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
-  ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
-  CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
-  EXAMPLE_MANAGED_WORKFLOW_ID,
-  EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
-  NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
-  SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
-import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
+import type {
+  ManagedWorkflowDefinition,
+  ManagedWorkflowTemplateValues,
+  ManagedYamlTemplate,
+} from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
 const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
@@ -52,86 +39,8 @@ type TemplateManagedWorkflowDefinition<TDefinition> = TDefinition extends {
 type RegistryTemplateManagedWorkflowDefinition =
   TemplateManagedWorkflowDefinition<RegistryManagedWorkflowDefinition>;
 type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
-  yamlTemplate: { render: (values: ManagedWorkflowTemplateValues) => string };
+  yamlTemplate: ManagedYamlTemplate<ManagedWorkflowTemplateValues>;
 };
-
-const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
-  [EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID]: { serviceAccountId: 'example-account' },
-  [NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
-  [NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID]: {
-    serviceAccountId: 'kibana/nightshift_agent',
-  },
-  [NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
-  [NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW_ID]: {
-    serviceAccountId: 'kibana/nightshift_agent',
-  },
-  [NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW_ID]: { serviceAccountId: 'kibana/nightshift_agent' },
-  [EXAMPLE_MANAGED_WORKFLOW_ID]: {
-    recipient: 'World',
-  },
-  [CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID]: {
-    aiIndexId: 'my-ai-index',
-    intervalMinutes: 1440,
-  },
-  [ALERTZERO_WORKER_FLOOR_ALERT_TRIAGE_WORKFLOW_ID]: {
-    settingsVersion: 2,
-    autonomyLevel: 'manual',
-    scheduleInterval: '15m',
-    extras: {
-      autoCloseConfidenceScoreMinThreshold: 0.85,
-      budgetPerHour: 1300,
-      lookbackHours: 24,
-      minSeverity: 'low',
-      excludeBuildingBlocks: false,
-      excludedRuleTags: [],
-    },
-  },
-  [ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID]: {
-    settingsVersion: 1,
-    autonomyLevel: 'manual',
-    scheduleInterval: '24h',
-  },
-  [ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID]: {
-    settingsVersion: 1,
-    autonomyLevel: 'manual',
-  },
-  [ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID]: {
-    settingsVersion: 1,
-    autonomyLevel: 'manual',
-    scheduleInterval: '4h',
-  },
-  [ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID]: {
-    settingsVersion: 1,
-    autonomyLevel: 'manual',
-    scheduleInterval: '2h',
-    extras: { analysisWindowDays: 7, fpCountThreshold: 10, fpRateThresholdPct: 50 },
-  },
-  [ALERTZERO_WORKER_DETECTION_RULE_COVERAGE_WORKFLOW_ID]: {
-    settingsVersion: 1,
-    autonomyLevel: 'manual',
-    scheduleInterval: '1h',
-    extras: { lookbackDays: 14, maxGapsPerRun: 5 },
-  },
-  [SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
-    detectionIntervalMinutes: 30,
-    detectionBucketIntervalMinutes: 1,
-    detectionLookbackMinutes: 40,
-    targetCoverageMinutes: 30,
-  },
-  [SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID]: {
-    reviewIntervalMinutes: 10,
-    discoveryBatchSize: 3,
-    maxReviewPasses: 3,
-    flakyRuleDetectionThreshold: 10,
-    flakyRuleProbeAfterMinutes: 360,
-    flakyRuleExemptSeverityScore: 80,
-  },
-};
-
-const templateValuesLookup = templateRepresentativeValuesById as Record<
-  string,
-  ManagedWorkflowTemplateValues | undefined
->;
 
 const managedDefinitionsById: Array<[string, RegistryManagedWorkflowDefinition]> =
   managedWorkflowDefinitions.map((definition) => [definition.id, definition]);
@@ -154,6 +63,12 @@ const alertZeroDefinitionsById = managedDefinitionsById.filter(([id]) =>
   alertZeroWorkflowIds.has(id)
 );
 
+const alertZeroWorkerWorkflowIds = new Set<string>(ALERTZERO_MANAGED_WORKER_WORKFLOW_IDS);
+
+const alertZeroWorkerDefinitionsById = managedDefinitionsById.filter(([id]) =>
+  alertZeroWorkerWorkflowIds.has(id)
+);
+
 function hasYamlTemplate(
   definition: ManagedWorkflowDefinition
 ): definition is YamlTemplateManagedWorkflowDefinition {
@@ -166,29 +81,34 @@ function hasYaml(
   return typeof definition.yaml === 'string';
 }
 
-function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
-  const { id } = definition;
-
-  if (hasYaml(definition)) {
-    return definition.yaml;
-  }
-
+function renderWorkerYamlWithoutServiceAccount(definition: ManagedWorkflowDefinition): string {
   if (!hasYamlTemplate(definition)) {
-    throw new Error(`Managed workflow '${id}' must define either yaml or yamlTemplate`);
+    throw new Error(`AlertZero Worker '${definition.id}' must define a yamlTemplate`);
   }
 
-  const representativeValues = templateValuesLookup[definition.id];
-  if (!representativeValues) {
-    throw new Error(
-      `Missing representative template values for managed workflow '${definition.id}'. Add an entry to templateRepresentativeValuesById.`
-    );
-  }
-
-  return definition.yamlTemplate.render(representativeValues);
+  const {
+    yamlTemplate: { hashValues, render },
+  } = definition;
+  const { serviceAccountId: _serviceAccountId, ...valuesWithoutAccount } = hashValues;
+  return render({ ...valuesWithoutAccount, autonomyLevel: 'manual' });
 }
+
+const RUN_AS_SETTING_PATTERN = /^\s*run_as:/m;
 
 /** Matches the `__SCREAMING_SNAKE__` placeholders that yamlTemplate definitions substitute. */
 const UNREPLACED_TOKEN_PATTERN = /__[A-Z][A-Z0-9_]*__/g;
+
+function assertTemplateRendersCleanly(workflowId: string, renderedYaml: string): void {
+  expect(typeof renderedYaml).toBe('string');
+  expect(renderedYaml.trim()).not.toHaveLength(0);
+  expect(renderedYaml).not.toContain('undefined');
+  // A token the template map never replaces stays behind as a valid YAML
+  // string, so it survives schema validation and ships a workflow pointing
+  // at the literal placeholder. Only a mismatch between the yaml text and
+  // the token keys can cause this, and nothing else would catch it.
+  expect(renderedYaml.match(UNREPLACED_TOKEN_PATTERN) ?? []).toEqual([]);
+  assertWorkflowYamlIsValid(workflowId, renderedYaml);
+}
 
 function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): void {
   let parsedYaml: unknown;
@@ -329,17 +249,10 @@ describe('managedWorkflowDefinitions', () => {
     }
   );
 
-  it('defines representative template values for every yamlTemplate workflow', () => {
-    const templatedIds = managedTemplateDefinitionsById.map(([id]) => id).sort();
-    const representedIds = Object.keys(templateRepresentativeValuesById).sort();
-
-    expect(representedIds).toEqual(templatedIds);
-  });
-
   it.each(managedDefinitionsById)(
     '%s parses and validates as a workflow definition',
     (id, definition) => {
-      const renderedYaml = renderWorkflowYaml(definition);
+      const renderedYaml = getManagedWorkflowHashedYaml(definition);
       assertWorkflowYamlIsValid(id, renderedYaml);
     }
   );
@@ -347,27 +260,33 @@ describe('managedWorkflowDefinitions', () => {
   // Asset criticality is the customer's to set: appearing in an attack does not change how much an
   // identity matters. No managed workflow, including the Workers, may write it, so a change has to
   // be made by an analyst in Entity Analytics. Templated definitions are rendered first: their
-  // `yamlTemplate` is a function, so the text to scan only exists after it runs.
+  // text to scan only exists after `yamlTemplate.render` runs.
   it.each(managedDefinitionsById)('%s never writes asset criticality', (_id, definition) => {
-    expect(renderWorkflowYaml(definition)).not.toMatch(
+    expect(getManagedWorkflowHashedYaml(definition)).not.toMatch(
       /api\/asset_criticality|entityStore\.updateAssetCriticality/
     );
   });
 
+  // The definition hash is `render(hashValues)`, computed on every reconciliation, so a render that
+  // throws or ships an invalid workflow for these values would break installs.
   it.each(managedTemplateDefinitionsById)(
-    '%s yamlTemplate renders cleanly with representative values',
+    '%s yamlTemplate renders cleanly with its hashValues',
     (id, definition) => {
-      const renderedYaml = renderWorkflowYaml(definition);
+      assertTemplateRendersCleanly(id, getManagedWorkflowHashedYaml(definition));
+    }
+  );
 
-      expect(typeof renderedYaml).toBe('string');
-      expect(renderedYaml.trim()).not.toHaveLength(0);
-      expect(renderedYaml).not.toContain('undefined');
-      // A token the template map never replaces stays behind as a valid YAML
-      // string, so it survives schema validation and ships a workflow pointing
-      // at the literal placeholder. Only a mismatch between the yaml text and
-      // the token keys can cause this, and nothing else would catch it.
-      expect(renderedYaml.match(UNREPLACED_TOKEN_PATTERN) ?? []).toEqual([]);
-      assertWorkflowYamlIsValid(id, renderedYaml);
+  // Worker hashValues bind a service account, so the test above never renders a Worker without
+  // one. Production does: the Workers list renders defaults for uninstalled Workers, disabled
+  // Workers can be saved without an account, and installs from before accounts were required
+  // re-render on boot, falling back to `settings: {}` when `run_as` was the only setting.
+  it.each(alertZeroWorkerDefinitionsById)(
+    '%s yamlTemplate renders cleanly without a service account at manual autonomy',
+    (id, definition) => {
+      const renderedYaml = renderWorkerYamlWithoutServiceAccount(definition);
+
+      expect(renderedYaml).not.toMatch(RUN_AS_SETTING_PATTERN);
+      assertTemplateRendersCleanly(id, renderedYaml);
     }
   );
 
@@ -381,7 +300,7 @@ describe('managedWorkflowDefinitions', () => {
     (id, definition) => {
       const aiAgentSteps = collectStepsOfType(
         AI_AGENT_STEP_TYPE,
-        parse(renderWorkflowYaml(definition))
+        parse(getManagedWorkflowHashedYaml(definition))
       );
       const unpinnedStepNames = aiAgentSteps
         .filter((step) => !namesAlertZeroTier(step[CONNECTOR_ID_BY_FEATURE]))
@@ -399,7 +318,7 @@ describe('managedWorkflowDefinitions', () => {
     (id, definition) => {
       const runSteps = collectStepsOfType(
         ATTACK_DISCOVERY_RUN_STEP_TYPE,
-        parse(renderWorkflowYaml(definition))
+        parse(getManagedWorkflowHashedYaml(definition))
       );
       const unpinnedStepNames = runSteps
         .filter((step) => !namesAlertZeroTier(getNamedTier(step, FEATURE_ID)))
@@ -416,7 +335,7 @@ describe('managedWorkflowDefinitions', () => {
     (id, definition) => {
       const aiAgentSteps = collectStepsOfType(
         AI_AGENT_STEP_TYPE,
-        parse(renderWorkflowYaml(definition))
+        parse(getManagedWorkflowHashedYaml(definition))
       );
       const unattributedStepNames = aiAgentSteps
         .filter(

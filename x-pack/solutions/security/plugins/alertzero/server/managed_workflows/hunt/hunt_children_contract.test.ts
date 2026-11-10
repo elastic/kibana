@@ -402,11 +402,8 @@ describe(ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID, () => {
     if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
       throw new Error('Missing Worker yamlTemplate');
     }
-    const yamlTemplate = definition.yamlTemplate.render as (
-      values: Record<string, unknown>
-    ) => string;
     return parse(
-      yamlTemplate({
+      definition.yamlTemplate.render({
         settingsVersion: 1,
         autonomyLevel: 'manual',
         scheduleInterval: '4h',
@@ -478,11 +475,8 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
         throw new Error('Missing Worker yamlTemplate');
       }
-      const yamlTemplate = definition.yamlTemplate.render as (
-        values: Record<string, unknown>
-      ) => string;
       return parse(
-        yamlTemplate({
+        definition.yamlTemplate.render({
           settingsVersion: 1,
           autonomyLevel: 'manual',
           scheduleInterval: '4h',

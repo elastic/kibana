@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/** `hashValues` of every bound Nightshift workflow: the service account they are bound to. */
+export const NIGHTSHIFT_BOUND_HASH_VALUES = {
+  serviceAccountId: 'kibana/nightshift_agent',
+} as const;
+
 /** Placeholder a bound workflow YAML uses as its `settings.run_as` value. */
 export const SERVICE_ACCOUNT_ID_TOKEN = '__SERVICE_ACCOUNT_ID__';
 

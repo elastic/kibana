@@ -14,6 +14,7 @@ import { requiresDelegatedIdentity, toWorkflowExecutionEngineModel } from '@kbn/
 import {
   getManagedWorkflowDefinition,
   getManagedWorkflowDefinitions,
+  getManagedWorkflowHashedYaml,
   getManagedWorkflowVisibilityContexts,
   type ManagedWorkflowDefinition,
   type ManagedWorkflowId,
@@ -982,16 +983,7 @@ export class ManagedWorkflowsService {
   }
 
   private computeManagedDefinitionHash(definition: ManagedWorkflowDefinition): string {
-    if (definition.yamlTemplate) {
-      const { render, hashValues } = definition.yamlTemplate;
-      return computeDefinitionHash(render(hashValues));
-    }
-    if (!definition.yaml) {
-      throw new Error(
-        `Managed workflow '${definition.id}' must define either yaml or yamlTemplate`
-      );
-    }
-    return computeDefinitionHash(definition.yaml);
+    return computeDefinitionHash(getManagedWorkflowHashedYaml(definition));
   }
 
   private areTemplateValuesEqual(

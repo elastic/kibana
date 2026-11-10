@@ -53,15 +53,7 @@ export interface ManagedWorkflowTemplateValues {
 }
 
 export interface ManagedYamlTemplate<TValues extends ManagedWorkflowTemplateValues> {
-  /**
-   * Fixed values the definition hash renders the template with, so an edit to anything that
-   * shapes the output (imported YAML, helpers, defaults) rolls out without a `version` bump.
-   * They only feed the hash and are never installed.
-   *
-   * Write them in code and never read them from runtime or instance data: the hash must be
-   * identical on every instance. Prefer values that reach every branch of the template.
-   * Changing them only changes the hash, so each instance reindexes once on its next update.
-   */
+  /** Fixed values, written in code, that the hash renders; edits on branches they skip need a version bump. */
   hashValues: TValues;
   render(values: TValues): string;
 }

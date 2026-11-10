@@ -50,6 +50,21 @@ const renderTemplate = (template: string, values: Record<string, string | number
     template
   );
 
+// The two constants below are rendered for installs predating these fields, and hashed, so a change
+// re-renders them. The other hashValues are arbitrary fixed values: the significantEvents plugin
+// always passes those fields, so their values do not change what the hash covers.
+const SCHEDULED_DETECTION_FIELD_DEFAULTS = {
+  detectionBucketIntervalMinutes: 1,
+  detectionLookbackMinutes: 40,
+  targetCoverageMinutes: 30,
+} as const;
+
+const SCHEDULED_REVIEW_FIELD_DEFAULTS = {
+  flakyRuleDetectionThreshold: 10,
+  flakyRuleProbeAfterMinutes: 360,
+  flakyRuleExemptSeverityScore: 80,
+} as const;
+
 export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   pluginId: 'significantEvents',
@@ -62,17 +77,12 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW = {
   // Defaults below only matter on a Kibana restart with an install from before these fields
   // existed: this workflow re-renders from old persisted values on boot, which won't have them.
   yamlTemplate: {
-    hashValues: {
-      detectionIntervalMinutes: 30,
-      detectionBucketIntervalMinutes: 1,
-      detectionLookbackMinutes: 40,
-      targetCoverageMinutes: 30,
-    },
+    hashValues: { detectionIntervalMinutes: 30, ...SCHEDULED_DETECTION_FIELD_DEFAULTS },
     render: ({
       detectionIntervalMinutes,
-      detectionBucketIntervalMinutes = 1,
-      detectionLookbackMinutes = 40,
-      targetCoverageMinutes = 30,
+      detectionBucketIntervalMinutes = SCHEDULED_DETECTION_FIELD_DEFAULTS.detectionBucketIntervalMinutes,
+      detectionLookbackMinutes = SCHEDULED_DETECTION_FIELD_DEFAULTS.detectionLookbackMinutes,
+      targetCoverageMinutes = SCHEDULED_DETECTION_FIELD_DEFAULTS.targetCoverageMinutes,
     }) =>
       renderTemplate(SCHEDULED_DETECTION_YAML, {
         __DETECTION_INTERVAL_MINUTES__: detectionIntervalMinutes,
@@ -97,17 +107,15 @@ export const SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW = {
       reviewIntervalMinutes: 10,
       discoveryBatchSize: 3,
       maxReviewPasses: 3,
-      flakyRuleDetectionThreshold: 10,
-      flakyRuleProbeAfterMinutes: 360,
-      flakyRuleExemptSeverityScore: 80,
+      ...SCHEDULED_REVIEW_FIELD_DEFAULTS,
     },
     render: ({
       reviewIntervalMinutes,
       discoveryBatchSize,
       maxReviewPasses,
-      flakyRuleDetectionThreshold = 10,
-      flakyRuleProbeAfterMinutes = 360,
-      flakyRuleExemptSeverityScore = 80,
+      flakyRuleDetectionThreshold = SCHEDULED_REVIEW_FIELD_DEFAULTS.flakyRuleDetectionThreshold,
+      flakyRuleProbeAfterMinutes = SCHEDULED_REVIEW_FIELD_DEFAULTS.flakyRuleProbeAfterMinutes,
+      flakyRuleExemptSeverityScore = SCHEDULED_REVIEW_FIELD_DEFAULTS.flakyRuleExemptSeverityScore,
     }) =>
       renderTemplate(SCHEDULED_REVIEW_YAML, {
         __REVIEW_INTERVAL_MINUTES__: reviewIntervalMinutes,

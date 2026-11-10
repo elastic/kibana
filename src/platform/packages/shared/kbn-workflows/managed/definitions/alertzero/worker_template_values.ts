@@ -21,10 +21,10 @@ const RUN_AS_LINE_TOKEN = '  __WORKER_RUN_AS_LINE__:\n';
 /**
  * Workers enabled before a service account was required have no account id stored. Upgrade and
  * boot re-render their YAML from those stored values, and they must stay valid so they keep
- * running until an admin selects an account. Alert Triage, Rule Tuning, and Rule Coverage have
- * no other settings key, so omitting `run_as` would leave a bare `settings:`. That parses as
- * null and fails workflow validation, which would mark the worker unavailable. `settings: {}`
- * is valid because every settings field is optional.
+ * running until an admin selects an account. Rule Tuning and Rule Coverage have no other settings
+ * key, so omitting `run_as` would leave a bare `settings:`. That parses as null and fails workflow
+ * validation, which would mark the worker unavailable. `settings: {}` is valid because every
+ * settings field is optional.
  */
 const EMPTY_ONLY_RUN_AS_SETTINGS = /settings:\n {2}__WORKER_RUN_AS_LINE__:\n(?=\S|$)/g;
 

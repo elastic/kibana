@@ -12,6 +12,7 @@ import { ALERTZERO_ACTION_WORKFLOW_IDS } from '.';
 import { ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID } from './constants';
 import { managedWorkflowDefinitions } from '../..';
 import { WorkflowExecuteStepInputSchema } from '../../../spec/schema';
+import type { ManagedWorkflowDefinition } from '../../types';
 
 interface YamlStep {
   name: string;
@@ -47,13 +48,10 @@ const actionIds: readonly string[] = ALERTZERO_ACTION_WORKFLOW_IDS;
 
 const childCalls = managedWorkflowDefinitions
   .filter(({ pluginId }) => pluginId === ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID)
-  .flatMap((definition) => {
-    const yaml =
-      'yamlTemplate' in definition
-        ? (definition.yamlTemplate.render as (values: typeof TEMPLATE_VALUES) => string)(
-            TEMPLATE_VALUES
-          )
-        : definition.yaml;
+  .flatMap((definition: ManagedWorkflowDefinition) => {
+    const yaml = definition.yamlTemplate
+      ? definition.yamlTemplate.render(TEMPLATE_VALUES)
+      : definition.yaml;
     return flatten((parse(yaml) as { steps: YamlStep[] }).steps)
       .filter(({ type }) => type === 'workflow.execute' || type === 'workflow.executeAsync')
       .map((step) => ({ owner: definition.id, step }));

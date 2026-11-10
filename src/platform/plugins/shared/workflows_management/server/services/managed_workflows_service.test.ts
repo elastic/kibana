@@ -23,6 +23,7 @@ import type {
   ManagedWorkflowId,
   ManagedWorkflowManagement,
   ManagedWorkflowTemplateValues,
+  ManagedYamlTemplate,
 } from '@kbn/workflows/managed';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
@@ -44,6 +45,8 @@ jest.mock('@kbn/workflows/managed', () => ({
   getManagedWorkflowDefinition: (id: string) =>
     mockManagedWorkflowDefinitions.find((definition) => definition.id === id),
   getManagedWorkflowDefinitions: () => [...mockManagedWorkflowDefinitions],
+  getManagedWorkflowHashedYaml:
+    jest.requireActual('@kbn/workflows/managed').getManagedWorkflowHashedYaml,
   getManagedWorkflowSelectorVisibilityContext: (selector: string) => `selector:${selector}`,
   getManagedWorkflowSolutionVisibilityContext: (solution: string) => `solution:${solution}`,
   getManagedWorkflowVisibilityContexts: (visibility?: {
@@ -72,10 +75,7 @@ interface TemplateValues extends ManagedWorkflowTemplateValues {
 
 type YamlManagedWorkflowDefinition = ManagedWorkflowDefinition & { yaml: string };
 type TemplateManagedWorkflowDefinition = ManagedWorkflowDefinition<TemplateValues> & {
-  yamlTemplate: {
-    hashValues: TemplateValues;
-    render: (values: TemplateValues) => string;
-  };
+  yamlTemplate: ManagedYamlTemplate<TemplateValues>;
 };
 
 const workflowYaml = ({

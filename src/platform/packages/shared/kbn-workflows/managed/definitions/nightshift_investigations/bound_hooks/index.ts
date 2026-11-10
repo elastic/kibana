@@ -13,7 +13,11 @@ import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '../agent_optimize';
 import AGENT_OPTIMIZE_WORKFLOW_YAML from '../agent_optimize/agent_optimize_workflow.yaml';
 import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from '../decision_tree_hydrate';
 import DECISION_TREE_HYDRATE_WORKFLOW_YAML from '../decision_tree_hydrate/decision_tree_hydrate_workflow.yaml';
-import { renderRunAs, SERVICE_ACCOUNT_ID_TOKEN } from '../render_bound_yaml';
+import {
+  NIGHTSHIFT_BOUND_HASH_VALUES,
+  renderRunAs,
+  SERVICE_ACCOUNT_ID_TOKEN,
+} from '../render_bound_yaml';
 import { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID } from '../sandbox_materialize_workspace';
 import SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_YAML from '../sandbox_materialize_workspace/sandbox_materialize_workspace_workflow.yaml';
 
@@ -127,7 +131,7 @@ export const NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW = {
   version: 1,
   billable: false,
   yamlTemplate: {
-    hashValues: { serviceAccountId: 'kibana/nightshift_agent' },
+    hashValues: NIGHTSHIFT_BOUND_HASH_VALUES,
     render: ({ serviceAccountId }: NightshiftBoundHookTemplateValues) =>
       renderBoundHookYaml({
         hookWorkflowId: NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
@@ -145,7 +149,7 @@ export const NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW = {
   version: 2,
   billable: false,
   yamlTemplate: {
-    hashValues: { serviceAccountId: 'kibana/nightshift_agent' },
+    hashValues: NIGHTSHIFT_BOUND_HASH_VALUES,
     render: ({ serviceAccountId }: NightshiftBoundHookTemplateValues) =>
       renderBoundHookYaml({
         hookWorkflowId: NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID,
@@ -163,7 +167,7 @@ export const NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW = {
   version: 1,
   billable: false,
   yamlTemplate: {
-    hashValues: { serviceAccountId: 'kibana/nightshift_agent' },
+    hashValues: NIGHTSHIFT_BOUND_HASH_VALUES,
     render: ({ serviceAccountId }: NightshiftBoundHookTemplateValues) =>
       renderBoundHookYaml({
         hookWorkflowId: NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID,

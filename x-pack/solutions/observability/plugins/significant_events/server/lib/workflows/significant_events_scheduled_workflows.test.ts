@@ -52,7 +52,7 @@ const getParsedWorkflowYaml = (id: string, values: Record<string, unknown>): Par
   if (!definition || !('yamlTemplate' in definition) || !definition.yamlTemplate) {
     throw new Error(`Managed workflow definition ${id} is missing a yamlTemplate`);
   }
-  return parse(definition.yamlTemplate.render(values)) as ParsedWorkflow;
+  return parse(definition.yamlTemplate.render(values));
 };
 
 const getParsedStaticWorkflowYaml = (id: string): ParsedWorkflow => {
@@ -60,7 +60,7 @@ const getParsedStaticWorkflowYaml = (id: string): ParsedWorkflow => {
   if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
     throw new Error(`Managed workflow definition ${id} is missing yaml`);
   }
-  return parse(definition.yaml) as ParsedWorkflow;
+  return parse(definition.yaml);
 };
 
 const findStep = (steps: ParsedWorkflowStep[], name: string): ParsedWorkflowStep | undefined => {
