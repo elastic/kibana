@@ -158,6 +158,7 @@ export const registerDashboardAppIntegration = ({
         dashboardLocator,
         toasts,
         checkSavedDashboardExist,
+        linkedAttachmentId,
         linkNextDashboard,
       }).catch((error: Error) =>
         toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE })

@@ -23,6 +23,7 @@ interface HandlePreviewParams {
   toasts: NotificationsStart['toasts'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   openCanvas?: () => void;
+  linkedAttachmentId?: string;
   linkNextDashboard?: (attachmentId: string) => void;
 }
 
@@ -41,6 +42,7 @@ const openPreview = async ({
   toasts,
   checkSavedDashboardExist,
   openCanvas,
+  linkedAttachmentId,
   linkNextDashboard,
 }: HandlePreviewParams): Promise<void> => {
   // sidebar in dashboard experience - synchronize dashboard app to attachment
@@ -52,6 +54,7 @@ const openPreview = async ({
       dashboardLocator,
       toasts,
       checkSavedDashboardExist,
+      linkedAttachmentId,
       linkNextDashboard,
     });
   }

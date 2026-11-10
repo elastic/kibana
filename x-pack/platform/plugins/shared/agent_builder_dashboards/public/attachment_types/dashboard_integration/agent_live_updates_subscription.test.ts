@@ -38,7 +38,13 @@ const createHarness = (
     isNewConversation = false,
     isManaged = false,
     linkedAttachmentId,
-  }: { isNewConversation?: boolean; isManaged?: boolean; linkedAttachmentId?: string } = {}
+    canWriteDashboards = true,
+  }: {
+    isNewConversation?: boolean;
+    isManaged?: boolean;
+    linkedAttachmentId?: string;
+    canWriteDashboards?: boolean;
+  } = {}
 ) => {
   const chatEvents$ = new Subject();
   const activeConversation$ = new BehaviorSubject<{ id?: string }>({
@@ -65,7 +71,7 @@ const createHarness = (
       setState,
       setViewMode,
     } as unknown as DashboardApi,
-    canWriteDashboards: true,
+    canWriteDashboards,
     dashboardLocator,
     toasts: toasts as unknown as NotificationsStart['toasts'],
     linkedAttachmentId,
@@ -118,6 +124,19 @@ describe('createAgentLiveUpdatesSubscription', () => {
 
     expect(setState).not.toHaveBeenCalled();
     expect(onOtherDashboardUpdated).toHaveBeenCalledWith(attachment);
+    subscription.unsubscribe();
+  });
+
+  it("doesn't offer a user who can't write dashboards to open the update of a different saved dashboard", () => {
+    const { chatEvents$, setState, onOtherDashboardUpdated, subscription } = createHarness(
+      'dashboard-1',
+      { canWriteDashboards: false }
+    );
+
+    chatEvents$.next(buildToolUiEvent(buildAttachment('other-dashboard')));
+
+    expect(setState).not.toHaveBeenCalled();
+    expect(onOtherDashboardUpdated).not.toHaveBeenCalled();
     subscription.unsubscribe();
   });
 

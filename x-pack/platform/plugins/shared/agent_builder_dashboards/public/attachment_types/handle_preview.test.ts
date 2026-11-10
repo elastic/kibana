@@ -212,4 +212,26 @@ describe('handlePreview with a published dashboard', () => {
     expect(toasts.addWarning).toHaveBeenCalledTimes(1);
     expect(linkNextDashboard).toHaveBeenCalledWith('attachment-1');
   });
+
+  it('applies the attachment in place on the new dashboard it opened, even though it still points to the managed dashboard', async () => {
+    const dashboardApi = buildDashboardApi(undefined);
+    const dashboardLocator = buildLocator();
+
+    await handlePreview({
+      attachment: buildAttachment('managed-dashboard'),
+      dashboardApi: dashboardApi as unknown as DashboardApi,
+      canWriteDashboards: true,
+      isSidebar: true,
+      dashboardLocator,
+      toasts: buildToasts(),
+      checkSavedDashboardExist: async () => true,
+      linkedAttachmentId: 'attachment-1',
+    });
+
+    expect(dashboardApi.setState).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Agent dashboard' }),
+      { changedBy: ['agent'] }
+    );
+    expect(dashboardLocator.navigate).not.toHaveBeenCalled();
+  });
 });

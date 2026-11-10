@@ -180,6 +180,8 @@ export const registerDashboardAttachmentUiDefinition = ({
               toasts,
               checkSavedDashboardExist,
               openCanvas,
+              linkedAttachmentId:
+                previewDashboardApi && newDashboardLink.getLinkedAttachmentId(previewDashboardApi),
               linkNextDashboard: previewDashboardApi
                 ? (attachmentId) =>
                     newDashboardLink.linkNextDashboard(previewDashboardApi, attachmentId)

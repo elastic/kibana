@@ -42,12 +42,7 @@ export const createOriginSyncSubscription = ({
     }
     const attachmentToSync =
       attachments.find(({ id }) => id === linkedAttachmentId) ??
-      attachments.find(({ origin }) => {
-        if (origin === previousDashboardId || origin === dashboardId) {
-          return true;
-        }
-        return false;
-      });
+      attachments.find(({ origin }) => origin === previousDashboardId || origin === dashboardId);
     if (attachmentToSync) {
       return updateOrigin(attachmentToSync.id, dashboardId);
     }

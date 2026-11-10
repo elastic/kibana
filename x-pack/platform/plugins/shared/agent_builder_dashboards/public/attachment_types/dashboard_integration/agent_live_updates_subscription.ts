@@ -76,7 +76,10 @@ export const createAgentLiveUpdatesSubscription = ({
 
       // Skip if viewing a saved dashboard that differs from the attachment's linked dashboard
       if (currentSavedObjectId && !isOwnAttachment) {
-        onOtherDashboardUpdated(attachment);
+        // without write access, opening it would show unsaved changes that look saved
+        if (canWriteDashboards) {
+          onOtherDashboardUpdated(attachment);
+        }
         return;
       }
 

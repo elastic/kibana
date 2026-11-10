@@ -19,6 +19,8 @@ interface PreviewAttachmentInDashboardParams {
   dashboardLocator?: DashboardRendererProps['locator'];
   toasts: NotificationsStart['toasts'];
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
+  /** The attachment whose changes opened this dashboard as a new one. */
+  linkedAttachmentId?: string;
   /** Links the next dashboard that opens to the attachment whose changes it shows. */
   linkNextDashboard?: (attachmentId: string) => void;
 }
@@ -30,6 +32,7 @@ export const previewAttachmentInDashboard = async ({
   dashboardLocator,
   toasts,
   checkSavedDashboardExist,
+  linkedAttachmentId,
   linkNextDashboard,
 }: PreviewAttachmentInDashboardParams) => {
   const dashboardState = attachmentDataToDashboardState(attachment.data);
@@ -45,8 +48,9 @@ export const previewAttachmentInDashboard = async ({
     });
 
   // a) Viewing saved dashboard + attachment linked to same dashboard -> apply state
-  // Also handles both being undefined (unsaved dashboard, unlinked attachment)
-  if (attachment.origin === currentSavedObjectId) {
+  // Also handles both being undefined (unsaved dashboard, unlinked attachment), and the new
+  // dashboard the attachment's changes opened in
+  if (attachment.id === linkedAttachmentId || attachment.origin === currentSavedObjectId) {
     return applyAgentChanges();
   }
 
