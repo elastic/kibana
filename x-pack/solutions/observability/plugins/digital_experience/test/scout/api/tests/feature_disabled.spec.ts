@@ -7,6 +7,7 @@
 
 import { apiTest } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
+import { FLAG_OFF_OVERRIDE, getGlobalFlagOverride } from '../../feature_flag';
 import { DIGITAL_EXPERIENCE_DISABLED_TAGS } from '../../tags';
 
 const TIME_RANGE = 'start=2026-01-01T00:00:00.000Z&end=2026-01-02T00:00:00.000Z';
@@ -21,9 +22,17 @@ const ROUTES: ReadonlyArray<{ method: 'get' | 'post'; path: string }> = [
 ];
 
 apiTest.describe(
-  'Digital Experience disabled by default',
+  'Digital Experience with its feature flag off',
   { tag: DIGITAL_EXPERIENCE_DISABLED_TAGS },
   () => {
+    apiTest.beforeAll(async ({ apiServices }) => {
+      await apiServices.core.settings(FLAG_OFF_OVERRIDE);
+    });
+
+    apiTest.afterAll(async ({ apiServices, config }) => {
+      await apiServices.core.settings(getGlobalFlagOverride(config));
+    });
+
     for (const { method, path } of ROUTES) {
       apiTest(
         `${method.toUpperCase()} ${path.split('?')[0]} answers 404`,

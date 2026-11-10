@@ -72,6 +72,5 @@ fileGroups:
     - public/**/*
     - server/**/*
     - test/scout/**/*
-    - test/scout_digital_experience/**/*
     - '!target/**/*'
 tasks: {}

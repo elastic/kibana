@@ -6,14 +6,30 @@
  */
 
 import { globalSetupHook } from '@kbn/scout-oblt';
-import { FLAG_OFF_OVERRIDE } from '../../feature_flag';
-import { DIGITAL_EXPERIENCE_DISABLED_TAGS } from '../../tags';
+import { ES_ARCHIVES } from '../../common/fixtures/constants';
+import { ingestOtelRumData } from '../../common/fixtures/otel_rum_data';
+import { FLAG_ON_OVERRIDE } from '../../feature_flag';
+import { DIGITAL_EXPERIENCE_TAGS } from '../../tags';
 
-// These specs also run on Cloud, where a rollout rule could turn the flag on for the deployment.
 globalSetupHook(
-  'Turn the Digital Experience feature flag off',
-  { tag: DIGITAL_EXPERIENCE_DISABLED_TAGS },
+  'Turn the Digital Experience feature flag on',
+  { tag: DIGITAL_EXPERIENCE_TAGS },
   async ({ apiServices }) => {
-    await apiServices.core.settings(FLAG_OFF_OVERRIDE);
+    await apiServices.core.settings(FLAG_ON_OVERRIDE);
+  }
+);
+
+globalSetupHook(
+  'Ingest RUM test data',
+  { tag: DIGITAL_EXPERIENCE_TAGS },
+  async ({ esArchiver, esClient, config }) => {
+    await ingestOtelRumData(esClient);
+
+    // CI runs the setup in every lane of this config; only stateful specs read Classic RUM data,
+    // and the archive's ILM settings do not exist on serverless.
+    if (config.serverless) {
+      return;
+    }
+    await esArchiver.loadIfNeeded(ES_ARCHIVES.RUM_TEST_DATA);
   }
 );

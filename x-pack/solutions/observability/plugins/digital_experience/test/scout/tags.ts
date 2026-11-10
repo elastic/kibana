@@ -7,8 +7,21 @@
 
 import { tags } from '@kbn/scout-oblt';
 
-// Every Observability deployment, Cloud included. Their global setup forces
-// `digitalExperience.enabled` off, so a rollout rule for the deployment doesn't change what they test.
+// Flag-on specs. Local only: they ingest mock data and set up sessions transforms, which haven't
+// been tried against Cloud deployments yet.
+export const DIGITAL_EXPERIENCE_TAGS = [
+  '@local-stateful-classic',
+  '@local-serverless-observability_complete',
+];
+
+// Stateful only: serverless disables the ux plugin, which the Classic RUM data and the legacy
+// navigation need.
+export const DIGITAL_EXPERIENCE_WITH_UX_TAGS = ['@local-stateful-classic'];
+
+export const DIGITAL_EXPERIENCE_SERVERLESS_TAGS = ['@local-serverless-observability_complete'];
+
+// Flag-off specs: every Observability deployment, Cloud included. They turn the flag off
+// themselves, so a rollout rule for the deployment doesn't change what they test.
 export const DIGITAL_EXPERIENCE_DISABLED_TAGS = [
   ...tags.stateful.classic,
   ...tags.serverless.observability.all,
