@@ -42770,6 +42770,8 @@ paths:
                           type: string
                         unenrolled_at:
                           type: string
+                        unenrolled_reason:
+                          type: string
                         unenrollment_started_at:
                           type: string
                         unhealthy_reason:
@@ -43459,6 +43461,8 @@ paths:
                         type: string
                       unenrolled_at:
                         type: string
+                      unenrolled_reason:
+                        type: string
                       unenrollment_started_at:
                         type: string
                       unhealthy_reason:
@@ -43956,6 +43960,8 @@ paths:
                           - OPAMP
                         type: string
                       unenrolled_at:
+                        type: string
+                      unenrolled_reason:
                         type: string
                       unenrollment_started_at:
                         type: string
@@ -48711,6 +48717,10 @@ paths:
                             - ecs
                             - otel
                           type: string
+                        dedicatedNamespaceTemplates:
+                          description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                          type: boolean
+                          x-state: Experimental
                         deploymentId:
                           description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                           type: string
@@ -48891,7 +48901,7 @@ paths:
                         policySettings:
                           additionalProperties:
                             default: null
-                            maxLength: 1024
+                            maxLength: 10000
                             nullable: true
                             type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -49124,6 +49134,10 @@ paths:
                     - ecs
                     - otel
                   type: string
+                dedicatedNamespaceTemplates:
+                  description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                  type: boolean
+                  x-state: Experimental
                 description:
                   description: Integration description from the Service settings step.
                   maxLength: 2048
@@ -49193,7 +49207,7 @@ paths:
                 policySettings:
                   additionalProperties:
                     default: null
-                    maxLength: 1024
+                    maxLength: 10000
                     nullable: true
                     type: string
                   description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -49344,6 +49358,10 @@ paths:
                           - ecs
                           - otel
                         type: string
+                      dedicatedNamespaceTemplates:
+                        description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                        type: boolean
+                        x-state: Experimental
                       deploymentId:
                         description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                         type: string
@@ -49503,7 +49521,7 @@ paths:
                       policySettings:
                         additionalProperties:
                           default: null
-                          maxLength: 1024
+                          maxLength: 10000
                           nullable: true
                           type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -49793,6 +49811,10 @@ paths:
                           - ecs
                           - otel
                         type: string
+                      dedicatedNamespaceTemplates:
+                        description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                        type: boolean
+                        x-state: Experimental
                       deploymentId:
                         description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                         type: string
@@ -49952,7 +49974,7 @@ paths:
                       policySettings:
                         additionalProperties:
                           default: null
-                          maxLength: 1024
+                          maxLength: 10000
                           nullable: true
                           type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -50134,6 +50156,10 @@ paths:
                   maxLength: 255
                   nullable: true
                   type: string
+                dedicatedNamespaceTemplates:
+                  description: Whether the global namespace uses dedicated index templates. Omit it to keep the stored value. Applied to the installed packages after a deployment.
+                  type: boolean
+                  x-state: Experimental
                 deploymentId:
                   description: CFN stack ARN (or equivalent); provided by the client after manual deployment.
                   maxLength: 2048
@@ -50297,7 +50323,7 @@ paths:
                 policySettings:
                   additionalProperties:
                     default: null
-                    maxLength: 1024
+                    maxLength: 10000
                     nullable: true
                     type: string
                   description: Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.
@@ -50405,6 +50431,10 @@ paths:
                           - ecs
                           - otel
                         type: string
+                      dedicatedNamespaceTemplates:
+                        description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                        type: boolean
+                        x-state: Experimental
                       deploymentId:
                         description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                         type: string
@@ -50564,7 +50594,7 @@ paths:
                       policySettings:
                         additionalProperties:
                           default: null
-                          maxLength: 1024
+                          maxLength: 10000
                           nullable: true
                           type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -50781,6 +50811,10 @@ paths:
                             - ecs
                             - otel
                           type: string
+                        dedicatedNamespaceTemplates:
+                          description: Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.
+                          type: boolean
+                          x-state: Experimental
                         deploymentId:
                           description: Opaque deployment identifier; for AWS, the CFN stack ARN.
                           type: string
@@ -50940,7 +50974,7 @@ paths:
                         policySettings:
                           additionalProperties:
                             default: null
-                            maxLength: 1024
+                            maxLength: 10000
                             nullable: true
                             type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
@@ -142834,6 +142868,7 @@ paths:
                 getWorkflowExecutionsResponseExample:
                   description: Example response returning a paginated list of executions for a workflow
                   value:
+                    hasNamedExecution: false
                     page: 1
                     results:
                       - duration: 3000
@@ -153300,7 +153335,7 @@ components:
           minLength: 1
           type: string
         name:
-          description: Rule name (must be unique within the space).
+          description: Rule name.
           maxLength: 256
           minLength: 1
           type: string
@@ -153349,7 +153384,7 @@ components:
           nullable: true
           type: string
         name:
-          description: Rule name (must be unique within the space).
+          description: Rule name.
           maxLength: 256
           minLength: 1
           type: string

@@ -15,6 +15,7 @@ import type {
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { ZodObject } from '@kbn/zod/v4';
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from '@kbn/server-route-repository';
@@ -26,6 +27,7 @@ import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/ma
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
+import { LockManagerService } from '@kbn/lock-manager';
 import type { NightshiftInvestigationsConfig } from './config';
 import {
   InvestigationLocatorDefinition,
@@ -170,12 +172,15 @@ export class NightshiftInvestigationsPlugin
   private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
+  private nightshiftSources?: NightshiftInvestigationsStartDeps['nightshiftSources'];
+  private isomerStart?: IsomerPluginStart;
   private cloudSetup?: NightshiftInvestigationsSetupDeps['cloud'];
   private esHosts: string[] = [];
   private securityStart?: NightshiftInvestigationsStartDeps['security'];
   private security?: CoreStart['security'];
   private coreStart?: CoreStart;
   private investigatorServiceAccountService?: InvestigatorServiceAccountService;
+  private lockManager?: LockManagerService;
   /** The managed workflows client of this plugin, shared by startup installs and setup. */
   private managedWorkflowsClient?: Promise<ManagedWorkflowsClient>;
   private notificationRoutingService?: InvestigationAttachmentDocService<StoredNotificationRouting>;
@@ -196,6 +201,7 @@ export class NightshiftInvestigationsPlugin
     plugins: NightshiftInvestigationsSetupDeps
   ): NightshiftInvestigationsServerSetup {
     this.workflowsManagement = plugins.workflowsManagement;
+    this.lockManager = new LockManagerService(core, this.logger);
     const investigationLocator = plugins.share.url.locators.create(
       new InvestigationLocatorDefinition()
     );
@@ -223,7 +229,9 @@ export class NightshiftInvestigationsPlugin
     // this, so nothing can reach the sandbox service while `nightshift.enabled` is off.
     const getGatedSandboxStart = createGatedSandboxStart({
       getSandboxStart: () => this.sandboxStart,
+      getAudit: () => this.security?.audit,
       isNightshiftEnabled: isNightshiftEnabledSync,
+      logger: this.logger.get('sandbox'),
     });
     const telemetry = setupNightshiftTelemetry({
       analytics: core.analytics,
@@ -398,7 +406,11 @@ export class NightshiftInvestigationsPlugin
                 resolvedCredentials: new Map(),
               });
               return createRecorderWorkspace({
-                session: sandboxStart.getSessionForSpace(spaceId, conversationId),
+                // The request is the investigation's, so the audit events name its user or
+                // service account, and the space comes from it as for the investigator's tools.
+                session: sandboxStart.getSession(request, conversationId, {
+                  type: 'findings_recorder',
+                }),
                 redactor,
               });
             },
@@ -573,6 +585,7 @@ export class NightshiftInvestigationsPlugin
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
+            getIsomerRuntime: this.getIsomerRuntime,
             getRoutingClient: this.getNotificationRoutingClient,
           })
         );
@@ -581,6 +594,7 @@ export class NightshiftInvestigationsPlugin
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
+            getIsomerRuntime: this.getIsomerRuntime,
             getRoutingClient: this.getNotificationRoutingClient,
             getTriggerEmitter,
             getWorkflowsManagement: () => this.workflowsManagement,
@@ -591,6 +605,7 @@ export class NightshiftInvestigationsPlugin
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
+            getIsomerRuntime: this.getIsomerRuntime,
             getRoutingClient: this.getNotificationRoutingClient,
             getTriggerEmitter,
           })
@@ -599,6 +614,7 @@ export class NightshiftInvestigationsPlugin
           renderSlackMessageStepDefinition({
             investigationLocator,
             getInvestigationsClient: this.getInvestigationsClient,
+            getIsomerRuntime: this.getIsomerRuntime,
           })
         );
         // Registered even when disabled: the combined workflow no-ops a writer branch instead
@@ -701,6 +717,10 @@ export class NightshiftInvestigationsPlugin
           getEpisodeLookup: this.getEpisodeLookup,
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
+          getUserProfileService: async () => {
+            const [start] = await core.getStartServices();
+            return start.userProfile;
+          },
           isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
           isWikiEnabled: () => this.wikiEnabled,
           listSandboxConnectors,
@@ -803,6 +823,8 @@ export class NightshiftInvestigationsPlugin
     this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;
+    this.nightshiftSources = plugins.nightshiftSources;
+    this.isomerStart = plugins.isomer;
     this.securityStart = plugins.security;
     this.security = coreStart.security;
     this.coreStart = coreStart;
@@ -864,6 +886,13 @@ export class NightshiftInvestigationsPlugin
       isAssistantEnabled: () => this.assistantEnabled,
     };
   }
+
+  private getNightshiftSources = () => {
+    if (!this.nightshiftSources) {
+      throw new Error('nightshiftSources is not available — plugin start() has not been called');
+    }
+    return this.nightshiftSources;
+  };
 
   /** Created once so every `agents.ensure` call registers the same gate; deps read lazily. */
   private getInvestigationAvailability = (): AvailabilityConfig => {
@@ -965,8 +994,10 @@ export class NightshiftInvestigationsPlugin
     if (this.investigatorServiceAccountService) {
       return this.investigatorServiceAccountService;
     }
-    if (!this.coreStart || !this.workflowsExtensionsStart) {
-      throw new Error('workflowsExtensions is not available — plugin start() has not been called');
+    if (!this.coreStart || !this.workflowsExtensionsStart || !this.lockManager) {
+      throw new Error(
+        'Required start services are unavailable — plugin start() has not been called'
+      );
     }
     this.investigatorServiceAccountService = createInvestigatorServiceAccountService({
       core: this.coreStart,
@@ -981,6 +1012,14 @@ export class NightshiftInvestigationsPlugin
       getAgentAvailability: () => this.getInvestigationAvailability(),
       isAssistantEnabled: () => this.assistantEnabled,
       getAutomationsSoClient: this.getAutomationsSoClient,
+      lockManager: this.lockManager,
+      listInstalledWorkflowStates: async () => {
+        const client = await this.managedWorkflowsClient;
+        return client ? client.listInstalledWorkflowStates() : [];
+      },
+      scheduleSourceVolumeTask: (request) =>
+        this.getNightshiftSources().scheduleSourceVolumeTask(request),
+      removeSourceVolumeTask: () => this.getNightshiftSources().removeSourceVolumeTask(),
       isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),
@@ -995,6 +1034,13 @@ export class NightshiftInvestigationsPlugin
       }
       return this.notificationRoutingService;
     };
+
+  private getIsomerRuntime: IsomerPluginStart['getRuntime'] = () => {
+    if (!this.isomerStart) {
+      throw new Error('isomer is not available');
+    }
+    return this.isomerStart.getRuntime();
+  };
 
   private getNotificationRoutingClient = async (
     request: KibanaRequest,
