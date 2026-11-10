@@ -168,6 +168,12 @@ const statsLogLines = ({ workerLogLines }: HarnessResult) =>
 const blockOf = ({ kibana }: WorkerLogLine) => kibana?.event_loop_watchdog;
 const profileLogLines = ({ workerLogLines }: HarnessResult) =>
   workerLogLines.filter(({ kibana }) => kibana?.event_loop_watchdog?.profile);
+/** The profiler's thread only shows in /proc, so the check runs on Linux. */
+const expectProfilerStopped = ({ mainLogLines }: HarnessResult) => {
+  if (process.platform === 'linux') {
+    expect(mainLogLines.map(({ message }) => message)).toContain('profiler thread stopped');
+  }
+};
 const restarts = ({ mainLogLines }: HarnessResult) =>
   mainLogLines.filter(({ message }) => message.includes('exited unexpectedly'));
 
@@ -362,10 +368,7 @@ describe('event loop watchdog in a child process', () => {
       const result = await runHarness('profile_crash');
       expectCleanExit(result);
       expect(result.workerLogLines.map(({ message }) => message)).toContain('profiling started');
-      const idle = result.mainLogLines.find(({ message }) =>
-        message.startsWith('idle utilization')
-      );
-      expect(Number(idle?.message.split(' ').pop())).toBeLessThan(0.2);
+      expectProfilerStopped(result);
     }, 120_000);
 
     it("ends the main thread's profile when the watchdog stops while a capture's stop is in flight", async () => {
@@ -375,10 +378,7 @@ describe('event loop watchdog in a child process', () => {
         'Event loop watchdog stopped'
       );
       expect(restarts(result)).toEqual([]);
-      const idle = result.mainLogLines.find(({ message }) =>
-        message.startsWith('idle utilization')
-      );
-      expect(Number(idle?.message.split(' ').pop())).toBeLessThan(0.2);
+      expectProfilerStopped(result);
     }, 120_000);
 
     it('logs the running capture when profiling is turned off, and profiles no later block', async () => {

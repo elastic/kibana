@@ -13,10 +13,9 @@
  * stderr, which also carries whatever Node and the require hook print.
  */
 
-import { mkdtempSync, rmSync, writeFileSync, writeSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync, writeSync } from 'node:fs';
 import Os from 'node:os';
 import Path from 'node:path';
-import { performance } from 'node:perf_hooks';
 import type { Logger } from '@kbn/logging';
 import { EventLoopWatchdog } from '@kbn/core-metrics-server-internal';
 import type { WatchdogProfilingData } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/types';
@@ -55,6 +54,21 @@ const blockFor = (ms: number) => {
   const end = Date.now() + ms;
   while (Date.now() < end) {
     // blocks the main thread
+  }
+};
+// V8 runs the CPU profiler's sampler on a thread of its own, which exists only while a profile runs.
+const V8_PROFILER_THREAD = 'v8:ProfEvntProc';
+const profilerThreadExists = () =>
+  readdirSync('/proc/self/task').some((tid) => {
+    try {
+      return readFileSync(`/proc/self/task/${tid}/comm`, 'utf8').trim() === V8_PROFILER_THREAD;
+    } catch {
+      return false;
+    }
+  });
+const writeProfilerThreadLine = () => {
+  if (process.platform === 'linux') {
+    writeMainLogLine('info', `profiler thread ${profilerThreadExists() ? 'running' : 'stopped'}`);
   }
 };
 const waitForLogLine = async (text: string, timeoutMs: number) => {
@@ -201,10 +215,8 @@ const scenarios: Record<string, () => Promise<void>> = {
     watchdog.setProfiling(true);
     blockFor(3_000);
     await watchdog.stop();
-    const before = performance.eventLoopUtilization();
     await sleep(1_000);
-    const { utilization } = performance.eventLoopUtilization(before);
-    writeMainLogLine('info', `idle utilization ${utilization.toFixed(3)}`);
+    writeProfilerThreadLine();
   },
   // Profiling off right after a profiled block ends: that capture still logs, the next block isn't
   // profiled.
@@ -229,17 +241,15 @@ const scenarios: Record<string, () => Promise<void>> = {
     await sleep(STATS_INTERVAL_MS * 3);
     await watchdog.stop();
   },
-  // The worker crashes while it profiles the main thread; the main thread's event loop
-  // utilization afterwards shows whether the profiler is still sampling.
+  // The worker crashes while it profiles the main thread; the profiler's thread afterwards shows
+  // whether the profiler is still sampling.
   profile_crash: async () => {
     const watchdog = create(Path.resolve(__dirname, 'crash_while_profiling_entry.ts'));
     watchdog.start();
     await waitForLogLine('exited unexpectedly', 30_000);
     await watchdog.stop();
-    const before = performance.eventLoopUtilization();
     await sleep(1_000);
-    const { utilization } = performance.eventLoopUtilization(before);
-    writeMainLogLine('info', `idle utilization ${utilization.toFixed(3)}`);
+    writeProfilerThreadLine();
   },
   // Short blocks use up the warning burst, with one more whose warning is suppressed, then a block
   // that never ends: the test kills the process once the worker reports it.
