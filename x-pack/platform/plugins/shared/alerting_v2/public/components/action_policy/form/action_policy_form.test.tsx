@@ -26,7 +26,6 @@ let mockWorkflowResults: Array<{
   description?: string;
   enabled?: boolean;
   managed?: boolean;
-  definition?: { tags: string[] } | null;
 }> = [];
 let mockSelectedWorkflowDetails: Array<{ id: string; name: string; enabled: boolean }> = [];
 
@@ -518,27 +517,6 @@ describe('ActionPolicyForm', () => {
       await user.click(disabledOption);
 
       expect(screen.queryByTestId('actionPolicyFormDestinationCards')).not.toBeInTheDocument();
-    });
-
-    it('lists the workflow tags as text in the option', async () => {
-      mockWorkflowResults = [
-        {
-          id: 'workflow-1',
-          name: 'Workflow 1',
-          description: 'Sends alerts to Slack',
-          enabled: true,
-          definition: { tags: ['slack', 'alerts'] },
-        },
-      ];
-      const user = userEvent.setup({ delay: null });
-      renderForm();
-
-      await user.click(within(screen.getByTestId('destinationsInput')).getByRole('combobox'));
-      const option = await screen.findByRole('option', { name: /Workflow 1/ });
-
-      expect(within(option).getByTestId('workflowOptionDetails')).toHaveTextContent(
-        'Sends alerts to Slack · Tags: slack, alerts'
-      );
     });
 
     it('does not add a selected workflow twice when its pill label differs from the option', async () => {

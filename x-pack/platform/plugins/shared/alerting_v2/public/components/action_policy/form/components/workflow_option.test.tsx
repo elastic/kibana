@@ -73,48 +73,8 @@ describe('renderWorkflowOption', () => {
     expect(screen.queryByText('Managed')).not.toBeInTheDocument();
   });
 
-  it('lists the tags as text after the description', () => {
-    renderOption(
-      createWorkflow({
-        definition: {
-          version: '1',
-          name: 'Slack notification workflow',
-          enabled: true,
-          triggers: [],
-          steps: [],
-          tags: ['slack', 'alerts'],
-        },
-      })
-    );
-
-    expect(screen.getByTestId('workflowOptionDetails')).toHaveTextContent(
-      'Sends alerts to Slack · Tags: slack, alerts'
-    );
-  });
-
-  it('omits the tags when the workflow has none', () => {
-    renderOption(createWorkflow());
-
-    expect(screen.getByTestId('workflowOptionDetails')).toHaveTextContent(
-      /^Sends alerts to Slack$/
-    );
-  });
-
   it('renders no focusable elements inside the option', () => {
-    const { container } = renderOption(
-      createWorkflow({
-        managed: true,
-        enabled: false,
-        definition: {
-          version: '1',
-          name: 'Slack notification workflow',
-          enabled: false,
-          triggers: [],
-          steps: [],
-          tags: ['slack'],
-        },
-      })
-    );
+    const { container } = renderOption(createWorkflow({ managed: true, enabled: false }));
 
     expect(container.querySelector('[tabindex], button, a')).toBeNull();
   });
