@@ -13,6 +13,7 @@ import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
 } from '@kbn/core/server/mocks';
+import { isUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { NightshiftSourceAttributes } from '../../saved_objects/nightshift_source_saved_object';
 import { measureSourceVolume } from './measure_source_volume';
@@ -166,6 +167,28 @@ describe('reportSourceVolumes', () => {
 });
 
 describe('source volume task credentials', () => {
+  it('keeps the recurring task recoverable when its credentials are unavailable', async () => {
+    const taskManager = taskManagerMock.createSetup();
+    registerSourceVolumeTask({ taskManager, getDeps: jest.fn() });
+    const definition =
+      taskManager.registerTaskDefinitions.mock.calls[0][0][SOURCE_VOLUME_TASK_TYPE];
+
+    const error = await definition
+      .createTaskRunner(taskManagerMock.createRunContext({ fakeRequest: undefined }))
+      .run()
+      .then(
+        () => undefined,
+        (runError: Error) => runError
+      );
+
+    expect(error).toEqual(
+      expect.objectContaining({
+        message: 'Source volume telemetry task has no user credentials',
+      })
+    );
+    expect(error && isUnrecoverableError(error)).toBe(false);
+  });
+
   it("uses the task's captured credentials", async () => {
     const taskManager = taskManagerMock.createSetup();
     const request = httpServerMock.createKibanaRequest();
@@ -188,6 +211,7 @@ describe('source volume task credentials', () => {
 
     await scheduleSourceVolumeTask(taskManager, request);
 
+    expect(SOURCE_VOLUME_TASK_ID).toBe('nightshift-sources:source-volume-telemetry');
     expect(taskManager.ensureScheduled).toHaveBeenCalledWith(
       expect.objectContaining({ id: SOURCE_VOLUME_TASK_ID }),
       { request, regenerateApiKey: true }
