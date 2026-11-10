@@ -813,6 +813,20 @@ describe('ActionRunner', () => {
       );
     });
 
+    it('does not dedupe rollback, whose documents are written under ids of their own', async () => {
+      mockAgentPages(1, 2);
+      mockActionedAgentIds(['agent-0', 'agent-1']);
+
+      const runner = createRunner({ total: 2 });
+      runner.taskType = BulkActionTaskType.ROLLBACK_RETRY;
+      await runner.runActionAsyncWithRetry();
+
+      // rollback writes nothing under the action's own id, so a read keyed on it can never match;
+      // it is exempt rather than paying for a search per batch that cannot find anything
+      expect(runner.processedBatches).toEqual([['agent-0', 'agent-1']]);
+      expect(mockedCollectAgentIdsFromActions).not.toHaveBeenCalled();
+    });
+
     it('does not dedupe update tags, whose retries re-action agents whose write did not land', async () => {
       mockAgentPages(1, 2);
       mockActionedAgentIds(['agent-0', 'agent-1']);

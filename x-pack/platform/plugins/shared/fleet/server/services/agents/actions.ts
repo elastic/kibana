@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   QueryDslQueryContainer,
@@ -277,12 +278,24 @@ const MAX_RESULT_WRITE_ATTEMPTS = 3;
 /** Multiplied by the attempt number for the wait between those attempts. */
 const RESULT_WRITE_RETRY_DELAY_MS = 2_000;
 
+// Deliberately the global timer rather than `timers/promises`, which `retry.ts` uses for the same
+// job: Jest's fake timers do not advance that one, and the tests for this would have to sleep.
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Per item statuses another attempt could get past. */
-const RETRYABLE_RESULT_STATUS_CODES = [
-  429, // the write queue is full
-  503, // unavailable
+/**
+ * Per item statuses no further attempt can get past, so the only ones given up on.
+ *
+ * A deny list rather than an allow list, because the two mistakes do not cost the same. Rewriting
+ * an item Elasticsearch will refuse again costs two requests and a few seconds; not rewriting one
+ * it would have accepted leaves an action a result short of its total, waiting for it forever,
+ * which is the hang this whole module exists to close. Defaulting to the cheap mistake means
+ * retrying anything not known to be hopeless.
+ */
+const PERMANENT_RESULT_STATUS_CODES = [
+  400, // malformed, or a mapping failure
+  403, // forbidden
+  404, // no such index
+  409, // already written, which a fresh id makes impossible but is not a reason to write another
 ];
 
 export async function bulkCreateAgentActionResults(
@@ -309,16 +322,49 @@ export async function bulkCreateAgentActionResults(
   const permanentlyRefused: typeof results = [];
 
   /**
+   * Sends one bulk, retrying only the failure that says for certain nothing was sent.
+   *
+   * `NoLivingConnectionsError` comes from the connection pool before a request is serialized, so a
+   * second attempt cannot write what the first one did not. Every other transport failure — a
+   * timeout, a dropped connection — may have landed, and each item carries a freshly generated
+   * `_id`, so retrying one of those would write a second result for every agent in the batch.
+   * `action_status` counts result documents rather than agents, so that inflates failures, drives
+   * the acknowledged count negative and can complete an action early.
+   *
+   * Letting the rest throw replays the batch under a new action id, where its results cannot
+   * collide with these — except for update tags, whose retry re-queries with a kuery that excludes
+   * the agents it already tagged, so a batch replayed there cannot rewrite their results. That is
+   * what makes even this narrow retry worth having.
+   */
+  const writeBulk = async (operations: object[]) => {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await esClient.bulk({
+          index: AGENT_ACTIONS_RESULTS_INDEX,
+          operations,
+          refresh: 'wait_for',
+        });
+      } catch (error) {
+        if (
+          !(error instanceof EsErrors.NoLivingConnectionsError) ||
+          attempt >= MAX_RESULT_WRITE_ATTEMPTS
+        ) {
+          throw error;
+        }
+        logger.warn(
+          `Could not reach Elasticsearch to write ${results.length} agent action results, retrying: ${error.message}`
+        );
+        await delay(RESULT_WRITE_RETRY_DELAY_MS * attempt);
+      }
+    }
+  };
+
+  /**
    * Writes the given results and hands back the ones Elasticsearch refused and might yet accept,
    * in request order.
    *
-   * Deliberately not wrapped in `retryTransientEsErrors`: every item carries a freshly generated
-   * `_id`, so this write is not idempotent, and the failures that wrapper retries — a timeout, a
-   * dropped connection — are exactly the ones that reach it with the bulk already indexed. Retrying
-   * those would write a second result for every agent in the batch, and `action_status` counts
-   * result documents rather than agents, so that inflates failures, drives the acknowledged count
-   * negative and can complete an action early. Letting it throw replays the batch under a new
-   * action id instead, where its results cannot collide with these.
+   * Deliberately not wrapped in `retryTransientEsErrors`, which is for idempotent operations and
+   * this is not; see `writeBulk` for what is retried instead.
    */
   const writeResults = async (toWrite: typeof results) => {
     const operations = toWrite.flatMap((result) => [
@@ -332,29 +378,24 @@ export async function bulkCreateAgentActionResults(
       },
     ]);
 
-    const res = await esClient.bulk({
-      index: AGENT_ACTIONS_RESULTS_INDEX,
-      operations,
-      refresh: 'wait_for',
-    });
+    const res = await writeBulk(operations);
     if (!res.errors) {
       return [];
     }
-    // Items come back in request order, so this is which of `toWrite` did not land. Only the
-    // statuses that another attempt could get past are handed back for one: a refused item indexed
-    // nothing, so rewriting it cannot produce a second result for that agent, but rewriting one
-    // Elasticsearch will refuse again — a mapping failure, say — only adds load. The rest are set
-    // aside so that they are still reported.
+    // Items come back in request order, so this is which of `toWrite` did not land. A refused item
+    // indexed nothing, so rewriting it cannot produce a second result for that agent; the ones
+    // Elasticsearch can only refuse again are set aside instead, to be reported rather than
+    // rewritten.
     const retryable: typeof results = [];
     toWrite.forEach((result, index) => {
       const item = res.items[index]?.create ?? res.items[index]?.index;
       if (!item?.error) {
         return;
       }
-      if (RETRYABLE_RESULT_STATUS_CODES.includes(item.status)) {
-        retryable.push(result);
-      } else {
+      if (PERMANENT_RESULT_STATUS_CODES.includes(item.status)) {
         permanentlyRefused.push(result);
+      } else {
+        retryable.push(result);
       }
     });
     return retryable;

@@ -62,6 +62,24 @@ export const ACTION_SORT_FIELD = 'agent.id';
 export const ACTION_SORT_ORDER = 'asc' as const;
 
 /**
+ * Action types whose batches are never filtered against the agents earlier runs actioned.
+ *
+ * Update tags restarts from scratch behind a kuery that already excludes the agents whose tags
+ * were written, so an agent still matching it is one whose write did not land and has to run
+ * again. Reading the documents would pay for a search per batch only to discard every id it found.
+ *
+ * Rollback writes one action per rollback version under a generated id of its own and nothing
+ * under the action's own id, so a read keyed on that id can never match. Deduplicating it needs a
+ * way to link those documents back to the action that created them, which is tracked separately;
+ * until then it is exempt rather than paying for a read that cannot find anything, and a restarted
+ * rollback re-sends to agents an earlier run already handled, as it does today.
+ */
+const DEDUPLICATION_EXEMPT_TASK_TYPES: readonly BulkActionTaskType[] = [
+  BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY,
+  BulkActionTaskType.ROLLBACK_RETRY,
+];
+
+/**
  * How far back the per-batch top-up of the deduplication set reaches, beyond the start of the
  * previous read. Re-reading a document costs nothing but bandwidth — the ids go into a set — while
  * missing one costs a duplicated agent, so the window has to cover any clock skew between the
@@ -491,16 +509,13 @@ export abstract class ActionRunner {
    * Whether a batch has to be filtered against the agents earlier runs of this action already
    * actioned.
    *
-   * A first attempt has no earlier run to deduplicate against. Update tags is exempt whatever the
-   * attempt: its retries restart from scratch behind a kuery that already excludes the agents whose
-   * tags were written, so an agent still matching that kuery while appearing in one of the action's
-   * documents is one whose write did not land and has to run again. Reading those documents would
-   * pay for a search per batch only to discard every id it found.
+   * A first attempt has no earlier run to deduplicate against, and two action types are exempt
+   * whatever the attempt — see `DEDUPLICATION_EXEMPT_TASK_TYPES`.
    */
   private shouldDeduplicate(): boolean {
     return (
       !!this.retryParams.retryCount &&
-      this.getTaskType() !== BulkActionTaskType.UPDATE_AGENT_TAGS_RETRY
+      !DEDUPLICATION_EXEMPT_TASK_TYPES.includes(this.getTaskType() as BulkActionTaskType)
     );
   }
 

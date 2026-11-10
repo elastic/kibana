@@ -939,24 +939,76 @@ describe('Agent actions', () => {
     });
 
     it('writes the refused items again rather than only logging them', async () => {
-      // an action counting an agent whose result never arrived waits for it forever, and a refused
-      // item indexed nothing, so rewriting it cannot produce a second result for that agent
-      const esClientMock = elasticsearchServiceMock.createInternalClient();
-      esClientMock.bulk
-        .mockResolvedValueOnce({
-          errors: true,
-          items: [{ create: {} }, { create: { status: 429, error: { reason: 'rejected' } } }],
-        } as any)
-        .mockResolvedValueOnce(okResponse as any);
+      jest.useFakeTimers();
+      try {
+        // an action counting an agent whose result never arrived waits for it forever, and a
+        // refused item indexed nothing, so rewriting it cannot produce a second result for it
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk
+          .mockResolvedValueOnce({
+            errors: true,
+            items: [{ create: {} }, { create: { status: 429, error: { reason: 'rejected' } } }],
+          } as any)
+          .mockResolvedValueOnce(okResponse as any);
 
-      await bulkCreateAgentActionResults(esClientMock, results);
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
 
-      expect(esClientMock.bulk).toHaveBeenCalledTimes(2);
-      // only the one that did not land
-      const retried = (esClientMock.bulk.mock.calls[1][0] as any).operations;
-      expect(retried).toHaveLength(2);
-      expect(retried[1].agent_id).toEqual('agent2');
-      expect(mockContext.logger.error).not.toHaveBeenCalled();
+        expect(esClientMock.bulk).toHaveBeenCalledTimes(2);
+        // only the one that did not land
+        const retried = (esClientMock.bulk.mock.calls[1][0] as any).operations;
+        expect(retried).toHaveLength(2);
+        expect(retried[1].agent_id).toEqual('agent2');
+        expect(mockContext.logger.error).not.toHaveBeenCalled();
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('writes an item again when Elasticsearch gives no reason it cannot succeed', async () => {
+      jest.useFakeTimers();
+      try {
+        // not rewriting one Elasticsearch would have accepted leaves an action a result short of
+        // its total, waiting forever, which costs more than two wasted requests
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk
+          .mockResolvedValueOnce({
+            errors: true,
+            items: [{ create: {} }, { create: { status: 500, error: { reason: 'unexpected' } } }],
+          } as any)
+          .mockResolvedValueOnce(okResponse as any);
+
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
+
+        expect(esClientMock.bulk).toHaveBeenCalledTimes(2);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
+    it('retries the request itself only when nothing can have been sent', async () => {
+      jest.useFakeTimers();
+      try {
+        // the connection pool raises this before a request is serialized, so a second attempt
+        // cannot write what the first one did not
+        const esClientMock = elasticsearchServiceMock.createInternalClient();
+        esClientMock.bulk
+          .mockRejectedValueOnce(
+            new EsErrors.NoLivingConnectionsError('No living connections', {} as any)
+          )
+          .mockResolvedValueOnce(okResponse as any);
+
+        const written = bulkCreateAgentActionResults(esClientMock, results);
+        await jest.advanceTimersByTimeAsync(60_000);
+        await written;
+
+        expect(esClientMock.bulk).toHaveBeenCalledTimes(2);
+      } finally {
+        jest.useRealTimers();
+      }
     });
 
     it('gives up after a bounded number of attempts, waiting in between', async () => {
