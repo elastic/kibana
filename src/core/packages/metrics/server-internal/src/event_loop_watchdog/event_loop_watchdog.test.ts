@@ -208,6 +208,29 @@ describe('EventLoopWatchdog', () => {
     expect(slots()[Slot.profiling]).toBe(0n);
   });
 
+  it('keeps profiling off after running out of memory once the flag turned off mid-capture', () => {
+    const watchdog = create();
+    watchdog.setProfiling(true);
+    watchdog.start();
+    watchdog.setProfiling(false);
+    options().onExit!({ reason: 'oom', exitCode: 1 });
+    watchdog.setProfiling(true);
+    expect(slots()[Slot.profiling]).toBe(0n);
+    expect(logger.error).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps profiling available after running out of memory in a worker that never could profile', () => {
+    const watchdog = create();
+    watchdog.setProfiling(true);
+    watchdog.start();
+    watchdog.setProfiling(false);
+    options().onExit!({ reason: 'error', exitCode: 1 });
+    options().onExit!({ reason: 'oom', exitCode: 1 });
+    watchdog.setProfiling(true);
+    expect(slots()[Slot.profiling]).toBe(1n);
+    expect(logger.error).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['another exit while profiling', 'error', true],
     ['running out of memory while not profiling', 'oom', false],

@@ -44,6 +44,8 @@ export class EventLoopWatchdog {
   private profilingEnabled = false;
   /** Set when the worker ran out of memory while profiling was on. */
   private profilingStoppedByOom = false;
+  /** Whether the current worker could profile at any point: a capture outlives the flag turning off. */
+  private workerCouldProfile = false;
   private profilingLoggedOn = false;
 
   constructor(private readonly params: EventLoopWatchdogParams) {}
@@ -65,6 +67,7 @@ export class EventLoopWatchdog {
     Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs()));
     Atomics.store(shared, Slot.runningSince, BigInt(this.runningSinceUs));
     this.shared = shared;
+    this.workerCouldProfile = false;
     this.writeProfilingSlot();
     this.heartbeatTimer = setInterval(
       () => Atomics.store(shared, Slot.heartbeat, BigInt(monotonicUs())),
@@ -92,7 +95,9 @@ export class EventLoopWatchdog {
       // Never stays off while the flag is on: restarts back off to ManagedWorker's 1 minute cap.
       restart: { maxAttempts: Infinity },
       onExit: ({ reason }) => {
-        if (reason === 'oom' && this.profilingEnabled && !this.profilingStoppedByOom) {
+        const couldProfile = this.workerCouldProfile;
+        this.workerCouldProfile = this.profilingEnabled && !this.profilingStoppedByOom;
+        if (reason === 'oom' && couldProfile && !this.profilingStoppedByOom) {
           this.profilingStoppedByOom = true;
           this.writeProfilingSlot();
           logger.error(
@@ -161,6 +166,7 @@ export class EventLoopWatchdog {
     const on = this.profilingEnabled && !this.profilingStoppedByOom;
     if (this.shared) {
       Atomics.store(this.shared, Slot.profiling, on ? 1n : 0n);
+      this.workerCouldProfile ||= on;
     }
   }
 
