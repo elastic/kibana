@@ -7,6 +7,7 @@
 
 import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ValidationError } from '@kbn/isomer';
+import { createTestKitServices } from './kit/kit_services.mock';
 import { createScopedMaterializeClient } from './materialize_client';
 import { MaterializerRegistry } from './registry';
 import type { MaterializedNode, UnsupportedNode } from './nodes';
@@ -61,6 +62,7 @@ const setup = ({
     logger,
     search,
     validate,
+    getKitServices: createTestKitServices,
     kibanaVersion: '9.5.0',
     limits: { maxDepth: 1 },
   });
@@ -81,7 +83,11 @@ describe('createScopedMaterializeClient', () => {
         text: note.text,
       });
       expect(materializer.plan).toHaveBeenCalledWith(note, context);
-      expect(materializer.map).toHaveBeenCalledWith(note, { tables: [], nodes: [] }, { context });
+      expect(materializer.map).toHaveBeenCalledWith(
+        note,
+        { tables: [], nodes: [] },
+        expect.objectContaining({ context })
+      );
     });
 
     it('loads a by-reference config as the scoped user', async () => {

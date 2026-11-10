@@ -7,6 +7,7 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { metricExamples } from '@kbn/isomer';
 import { IsomerPlugin } from './plugin';
 import type { IsomerPluginSetup, IsomerPluginStart } from './plugin';
@@ -34,6 +35,7 @@ const createStartContract = (): jest.Mocked<IsomerPluginStart> => {
   plugin.setup(coreMock.createSetup());
   const { getRuntime } = plugin.start(coreMock.createStart(), {
     data: dataPluginMock.createStartContract(),
+    fieldFormats: createFieldFormatsStartMock(),
   });
   const scopedClient = createScopedClient();
   return {

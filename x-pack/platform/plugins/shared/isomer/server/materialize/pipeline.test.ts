@@ -11,7 +11,8 @@ import { metricExamples } from '@kbn/isomer';
 import type { MaterializedChartNode, MaterializedNode, UnsupportedNode } from './nodes';
 import type { PipelineDeps } from './pipeline';
 import { runPipeline } from './pipeline';
-import type { DataRequest, Materializer } from './types';
+import type { MaterializeContext } from '../../common';
+import type { DataRequest, MaterializeKit, Materializer } from './types';
 
 interface ChartConfig {
   title: string;
@@ -57,6 +58,10 @@ const createDeps = (overrides: Partial<PipelineDeps> = {}) => ({
     ReturnType<PipelineDeps['materialize']>,
     Parameters<PipelineDeps['materialize']>
   >(async (input) => ({ type: 'markdown', text: input.type })),
+  getTimeZone: jest.fn(async () => 'UTC'),
+  createKit: jest.fn(
+    async (kitContext: MaterializeContext) => ({ context: kitContext } as MaterializeKit)
+  ),
   validate: jest.fn<ReturnType<PipelineDeps['validate']>, Parameters<PipelineDeps['validate']>>(
     async () => []
   ),
@@ -107,7 +112,7 @@ describe('runPipeline', () => {
     expect(materializer.map).toHaveBeenCalledWith(
       config,
       { tables: [table('FROM a'), table('FROM b')], nodes: [] },
-      { context: absoluteContext }
+      expect.objectContaining({ context: absoluteContext })
     );
     expect(node).toEqual({
       ...metricNode,
@@ -325,5 +330,28 @@ describe('runPipeline', () => {
         createDeps()
       )
     ).resolves.toEqual({ type: 'markdown', text: 'Hello' });
+  });
+
+  it("resolves relative times in the context's time zone, then the user's", async () => {
+    const materializer = chart();
+    const config: ChartConfig = { title: 'Requests', requests: [] };
+    const today = { timeRange: { from: 'now/d', to: 'now/d' } };
+
+    await runPipeline(
+      { type: 'lens', materializer, config, context: { ...today, timeZone: 'America/New_York' } },
+      createDeps()
+    );
+    expect(materializer.plan).toHaveBeenLastCalledWith(config, {
+      timeZone: 'America/New_York',
+      timeRange: { from: '2026-11-04T05:00:00.000Z', to: '2026-11-05T04:59:59.999Z' },
+    });
+
+    await runPipeline(
+      { type: 'lens', materializer, config, context: today },
+      createDeps({ getTimeZone: async () => 'Asia/Tokyo' })
+    );
+    expect(materializer.plan).toHaveBeenLastCalledWith(config, {
+      timeRange: { from: '2026-11-03T15:00:00.000Z', to: '2026-11-04T14:59:59.999Z' },
+    });
   });
 });

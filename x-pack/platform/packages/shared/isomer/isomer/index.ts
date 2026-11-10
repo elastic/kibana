@@ -26,6 +26,7 @@ export type {
   ChartEvent,
   ChartSelectEvent,
   ColorValue,
+  DurationUnit,
   GridNode,
   Loss,
   MetricNode,
@@ -54,6 +55,8 @@ export {
   xyChartExamples,
   xyChartSchema,
 } from '@elastic/isomer-primitives-charts/schema';
+export type { ChartNode } from '@elastic/isomer-primitives-charts/resolve';
+export { resolveChart } from '@elastic/isomer-primitives-charts/resolve';
 export { createKibanaIsomerRuntime } from './src/create_kibana_isomer_runtime';
 export type {
   KibanaIsomerRuntime,

@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { ValidationError } from '@kbn/isomer';
 import type { MaterializeContext, MaterializeInput } from '../../common';
 import { executeEsql } from './executors/esql';
+import type { KitServices } from './kit/create_kit';
+import { createMaterializeKit } from './kit/create_kit';
 import { DATA_REQUEST_TIMEOUT_MS, MAX_MATERIALIZE_DEPTH, MAX_ROWS_PER_REQUEST } from './limits';
 import type { MaterializedNode, MaterializedNodeSource } from './nodes';
 import { isUnsupportedNode } from './nodes';
@@ -39,6 +41,8 @@ export interface ScopedMaterializeClientDeps {
   search: Pick<IScopedSearchClient, 'esql'>;
   /** The node's validation errors against the runtime's packs, with paths relative to the node. */
   validate: (node: MaterializedNode) => Promise<ValidationError[]>;
+  /** The user's field formats and settings, read on first use. */
+  getKitServices: () => Promise<KitServices>;
   kibanaVersion: string;
   now?: () => Date;
   limits?: Partial<MaterializeLimits>;
@@ -81,6 +85,7 @@ export const createScopedMaterializeClient = ({
   logger,
   search,
   validate,
+  getKitServices,
   kibanaVersion,
   now = () => new Date(),
   limits: {
@@ -95,6 +100,15 @@ export const createScopedMaterializeClient = ({
     if (errors.length > 0) {
       throw new Error(errors.map(({ path, message }) => `${path}: ${message}`).join('\n'));
     }
+  };
+
+  let services: Promise<KitServices> | undefined;
+  const kitServices = () => {
+    services ??= getKitServices().catch((error) => {
+      services = undefined;
+      throw error;
+    });
+    return services;
   };
 
   /** A validated `unsupported` node, dropping a description that does not validate. */
@@ -193,6 +207,8 @@ export const createScopedMaterializeClient = ({
           materialize: (nestedInput, nestedContext) =>
             materializeAt(nestedInput, nestedContext, depth + 1),
           validate,
+          getTimeZone: async () => (await kitServices()).settings.dateFormatTz,
+          createKit: async (kitContext) => createMaterializeKit(await kitServices(), kitContext),
           kibanaVersion,
           now,
         }

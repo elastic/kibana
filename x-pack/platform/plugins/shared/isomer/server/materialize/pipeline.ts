@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { ValidationError } from '@kbn/isomer';
 import type { MaterializeContext, MaterializeInput } from '../../common';
 import { mergeContext } from './context';
+import { resolveTimeRange } from './time_range';
 import type { ExecutedTable } from './executors/esql';
 import type {
   MaterializedNode,
@@ -22,6 +22,7 @@ import type {
   DataRequest,
   EsqlDataRequest,
   MaterializeDescription,
+  MaterializeKit,
   Materializer,
   MaterializeResults,
 } from './types';
@@ -36,6 +37,10 @@ export interface PipelineDeps {
   ) => Promise<ExecutedTable>;
   /** Materializes a nested input, one level deeper. */
   materialize: (input: MaterializeInput, context: MaterializeContext) => Promise<MaterializedNode>;
+  /** The user's `dateFormat:tz`, which relative time ranges resolve in without a context time zone. */
+  getTimeZone: () => Promise<string>;
+  /** The kit a materializer maps with, for the context its plan ran in. */
+  createKit: (context: MaterializeContext) => Promise<MaterializeKit>;
   /** The node's validation errors against the runtime's packs, with paths relative to the node. */
   validate: (node: MaterializedNode) => Promise<ValidationError[]>;
   kibanaVersion: string;
@@ -107,10 +112,23 @@ const executePlan = async (
   };
 };
 
-/** The context with its time range resolved against `now`, so the queries and provenance agree. */
-const withAbsoluteTimeRange = (context: MaterializeContext, now: Date): MaterializeContext =>
+/**
+ * The context with its time range resolved against `now`, in the context's time zone or the
+ * user's `dateFormat:tz`, so the queries and provenance agree.
+ */
+const withAbsoluteTimeRange = async (
+  context: MaterializeContext,
+  now: Date,
+  getTimeZone: () => Promise<string>
+): Promise<MaterializeContext> =>
   context.timeRange
-    ? { ...context, timeRange: getAbsoluteTimeRange(context.timeRange, { forceNow: now }) }
+    ? {
+        ...context,
+        timeRange: resolveTimeRange(context.timeRange, {
+          now,
+          timeZone: context.timeZone ?? (await getTimeZone()),
+        }),
+      }
     : context;
 
 const withProvenance = (
@@ -154,7 +172,7 @@ export const runPipeline = async <TConfig>(
   deps: PipelineDeps
 ): Promise<MaterializedNode> => {
   const now = deps.now();
-  const context = withAbsoluteTimeRange(callerContext, now);
+  const context = await withAbsoluteTimeRange(callerContext, now, deps.getTimeZone);
   const source: MaterializedNodeSource = {
     host: 'kibana',
     hostVersion: deps.kibanaVersion,
@@ -189,7 +207,7 @@ export const runPipeline = async <TConfig>(
     );
   }
 
-  const mapped = materializer.map(config, executed.results, { context });
+  const mapped = materializer.map(config, executed.results, await deps.createKit(context));
   if (isUnsupportedNode(mapped)) {
     return rebuildUnsupported(mapped, description, source);
   }

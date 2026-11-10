@@ -7,6 +7,7 @@
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { createKibanaIsomerRuntime, unsupportedSchema } from '@kbn/isomer';
 import type { MarkdownNode } from '@kbn/isomer-components';
 import { Observable, of } from 'rxjs';
@@ -27,7 +28,13 @@ const startPlugin = ({ enabled = true }: { enabled?: boolean } = {}) => {
     of(flag === MATERIALIZE_FEATURE_FLAG ? enabled : fallback)
   );
   const data = dataPluginMock.createStartContract();
-  return { ...plugin.start(coreStart, { data }), registerMaterializer, coreSetup, coreStart, data };
+  return {
+    ...plugin.start(coreStart, { data, fieldFormats: createFieldFormatsStartMock() }),
+    registerMaterializer,
+    coreSetup,
+    coreStart,
+    data,
+  };
 };
 
 const markdown: MarkdownNode = { type: 'markdown', text: 'There are **3** open alerts.' };

@@ -32,3 +32,12 @@ export type {
   Materializer,
   ScopedMaterializeClient,
 } from './materialize/types';
+export type { ChartDataResult, ToChartDataOptions } from './materialize/kit/chart_data';
+export type { ConcreteColor } from './materialize/kit/colors';
+export type { FormatMapping } from './materialize/kit/formats';
+export type {
+  ChartColumnRole,
+  ChartColumnType,
+  KibanaColumnSource,
+  KibanaTableSource,
+} from './materialize/kit/types';
