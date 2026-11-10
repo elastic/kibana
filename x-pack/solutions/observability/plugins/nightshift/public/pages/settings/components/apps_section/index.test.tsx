@@ -332,7 +332,9 @@ describe('SlackChannelsSection', () => {
     fireEvent.click(disconnectBtn);
 
     const modal = await screen.findByTestId('streamsSlackAppDisconnectConfirmModal');
-    expect(modal).toBeInTheDocument();
+    expect(modal).toHaveTextContent(
+      'If the Elastic app asks for new permissions, such as private channel access, a Slack workspace admin may need to approve it.'
+    );
 
     const confirmBtn = within(modal).getByRole('button', { name: /disconnect workspace/i });
     fireEvent.click(confirmBtn);
@@ -388,7 +390,7 @@ describe('SlackChannelsSection', () => {
     );
   });
 
-  it('offers to reconnect Slack when private channel access is missing', async () => {
+  it('does not offer a one-click reconnect when private channel access is missing', async () => {
     mockUseBindChannel.mockReturnValue({
       bind: bindChannel,
       isLoading: false,
@@ -398,9 +400,9 @@ describe('SlackChannelsSection', () => {
     setup();
 
     expect(await screen.findByTestId('streamsSlackAppBindFailure')).toHaveTextContent(
-      'Reconnect Slack and allow it'
+      'disconnect the workspace and connect it again'
     );
-    expect(screen.getByTestId('streamsSlackAppBindFailureReconnect')).toBeInTheDocument();
+    expect(screen.queryByTestId('streamsSlackAppBindFailureReconnect')).not.toBeInTheDocument();
     expect(screen.getByTestId('streamsSlackAppBindFailureRetry')).toBeInTheDocument();
   });
 

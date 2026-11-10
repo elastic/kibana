@@ -155,6 +155,21 @@ describe('enhance evaluators', () => {
       ).toContain('panel queries');
     });
 
+    it('fails appearance mode when a Vega spec changes its ES|QL query', async () => {
+      const requeried = clone();
+      const vega = findPanel(requeried, 'requests-by-os-vega');
+      const spec = String(vega.config.spec);
+      const query = spec.match(/FROM [^"\\]+/)?.[0];
+      if (!query) {
+        throw new Error('no ES|QL query in the Vega spec');
+      }
+      vega.config.spec = spec.replace(query, 'FROM other | STATS COUNT(*)');
+      expect(
+        (await run(enhanceModeComplianceEvaluator, gold(), output({ dashboard: requeried })))
+          .explanation
+      ).toContain('panel queries');
+    });
+
     it('lets content mode drop one copy of a duplicate but not another panel', async () => {
       const dropped = clone();
       dropped.panels = dropped.panels.filter((widget) => widget.id !== 'response-breakdown');
@@ -230,7 +245,10 @@ describe('enhance evaluators', () => {
 
   describe('no regression', () => {
     it('passes when nothing the seed met is broken, and abstains without a write', async () => {
-      expect((await run(enhanceNoRegressionEvaluator, gold(), output({}))).score).toBe(1);
+      const retitled = { ...clone(), title: 'Web logs' };
+      expect(
+        (await run(enhanceNoRegressionEvaluator, gold(), output({ dashboard: retitled }))).score
+      ).toBe(1);
       expect(
         (await run(enhanceNoRegressionEvaluator, gold(), output({ steps: [] }))).score
       ).toBeNull();
