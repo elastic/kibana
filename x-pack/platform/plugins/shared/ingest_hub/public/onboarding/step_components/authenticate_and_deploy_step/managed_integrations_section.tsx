@@ -18,7 +18,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiRadioGroup,
+  EuiSelect,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -202,19 +202,19 @@ export function ManagedIntegrationsSection({
     [awsPackageResponse]
   );
 
-  const radioOptions = [
+  const preferredMethodOptions = [
     {
-      id: 'identity_federation',
+      value: 'identity_federation',
       disabled: isStaticKeysEditMode,
-      label: i18n.translate(
+      text: i18n.translate(
         'xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.preferredMethod.identityFederation',
         { defaultMessage: 'Identity Federation' }
       ),
     },
     {
-      id: 'access_keys',
+      value: 'access_keys',
       disabled: isIfEditMode,
-      label: i18n.translate(
+      text: i18n.translate(
         'xpack.ingestHub.authenticateAndDeployStep.managedIntegrationsSection.preferredMethod.accessKeys',
         { defaultMessage: 'Access Keys' }
       ),
@@ -329,11 +329,11 @@ export function ManagedIntegrationsSection({
                     />
                   }
                 >
-                  <EuiRadioGroup
-                    name="managedIntegrationsPreferredMethod"
-                    options={radioOptions}
-                    idSelected={preferredMethod}
-                    onChange={(id) => {
+                  <EuiSelect
+                    options={preferredMethodOptions}
+                    value={preferredMethod}
+                    onChange={(e) => {
+                      const id = e.target.value;
                       setPreferredMethod(id as PreferredMethod);
                       setIsDeployReady(false);
                       if (id === 'access_keys') {
