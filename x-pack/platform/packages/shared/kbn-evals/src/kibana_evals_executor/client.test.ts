@@ -911,9 +911,7 @@ describe('KibanaEvalsClient', () => {
       expect(onEvaluationComplete).toHaveBeenCalledTimes(2);
 
       expect(mockLog.error).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: expect.stringContaining('recording the cell as unscored'),
-        })
+        expect.stringContaining('recording the cell as unscored')
       );
 
       // A second experiment on a fresh client also completes rather than rejecting.

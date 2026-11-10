@@ -300,10 +300,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                     // cell as unscored instead.
                     const message = err instanceof Error ? err.message : String(err);
                     this.options.log.error(
-                      new Error(
-                        `Evaluator "${evaluator.name}" failed on run (exampleIndex=${exampleIndex}, repetition=${rep}); recording the cell as unscored`,
-                        { cause: err }
-                      )
+                      `Evaluator "${evaluator.name}" failed on run (exampleIndex=${exampleIndex}, repetition=${rep}); recording the cell as unscored: ${message}`
                     );
                     result = {
                       score: null,
