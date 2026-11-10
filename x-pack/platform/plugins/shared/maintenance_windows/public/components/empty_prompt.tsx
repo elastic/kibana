@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiLink, EuiPageTemplate, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiIllustration, EuiLink, EuiPageTemplate, EuiTitle } from '@elastic/eui';
+import { powerfulHourGlass } from '@elastic/eui-illustrations';
 import type { DocLinks } from '@kbn/doc-links';
 import * as i18n from '../translations';
 
@@ -24,6 +25,18 @@ export const EmptyPrompt = React.memo<EmptyPromptProps>(
     return (
       <EuiPageTemplate.EmptyPrompt
         data-test-subj="mw-empty-prompt"
+        // POC: horizontal illustrated card that lifts off the recessed glass surface.
+        layout="horizontal"
+        color="plain"
+        hasShadow
+        hasBorder={false}
+        icon={
+          <EuiIllustration
+            type={powerfulHourGlass}
+            alt=""
+            style={{ maxInlineSize: 180, marginInline: 'auto' }}
+          />
+        }
         title={emptyTitle}
         body={emptyBody}
         actions={
