@@ -48,15 +48,16 @@ export function CompositeSloList() {
     setPage(0);
   };
 
-  const { data, isInitialLoading, isLoading, isError, refetch } = useFetchCompositeSloList({
-    page: page + 1,
-    perPage,
-    search: search || undefined,
-    tags: selectedTags,
-    status: selectedStatuses,
-    sortBy,
-    sortDirection,
-  });
+  const { data, isInitialLoading, isLoading, isRefetching, isError, refetch } =
+    useFetchCompositeSloList({
+      page: page + 1,
+      perPage,
+      search: search || undefined,
+      tags: selectedTags,
+      status: selectedStatuses,
+      sortBy,
+      sortDirection,
+    });
 
   const results = data?.results ?? [];
   const total = data?.total ?? 0;
@@ -92,7 +93,7 @@ export function CompositeSloList() {
     <>
       <CompositeSloToolbar
         search={search}
-        isLoading={isLoading}
+        isLoading={isLoading || isRefetching}
         selectedTags={selectedTags}
         selectedStatuses={selectedStatuses}
         onSearchSubmit={handleSearchSubmit}
