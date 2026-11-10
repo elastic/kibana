@@ -10,7 +10,7 @@ import type { ProjectType, ServerlessCloud } from './resolve_serverless';
 import { resolveServerlessStatus } from './resolve_serverless';
 
 const BASE_URL = 'https://cloud.elastic.co';
-const BILLING_URL = `${BASE_URL}/billing`;
+const BILLING_URL = `${BASE_URL}/billing/overview#uTargetOrganizationId=org-1`;
 const PRICING_URL = `${BASE_URL}/cloud-pricing-table`;
 
 interface ResolveOptions {
@@ -80,7 +80,12 @@ describe('resolveServerlessStatus', () => {
       title: 'Elasticsearch Serverless',
       subtitle: 'AWS (us-east-1)',
       description: "You're on an Elastic Cloud trial.",
-      primaryAction: { id: 'subscribe', label: 'Subscribe', href: BILLING_URL, external: true },
+      primaryAction: {
+        id: 'subscribe',
+        label: 'Subscribe',
+        href: `${BASE_URL}/billing/overview?intent=subscribe#uTargetOrganizationId=org-1`,
+        external: true,
+      },
       secondaryAction: {
         id: 'view_pricing',
         label: 'View pricing',

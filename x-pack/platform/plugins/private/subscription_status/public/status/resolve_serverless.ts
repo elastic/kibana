@@ -126,6 +126,10 @@ export const resolveServerlessStatus = async ({
     };
   }
 
+  // Cloud UI opens the subscribe dialog when the org can subscribe, and stays on the billing overview otherwise.
+  const subscribeUrl = new URL(billingUrl);
+  subscribeUrl.searchParams.set('intent', 'subscribe');
+
   const pricingUrl = getPricingUrl({
     baseUrl: cloud.getUrls().baseUrl,
     solution: getPricingSolution(projectType),
@@ -146,7 +150,7 @@ export const resolveServerlessStatus = async ({
       label: i18n.translate('xpack.subscriptionStatus.serverless.subscribeLabel', {
         defaultMessage: 'Subscribe',
       }),
-      href: billingUrl,
+      href: subscribeUrl.toString(),
       external: true,
     },
     secondaryAction: pricingUrl
