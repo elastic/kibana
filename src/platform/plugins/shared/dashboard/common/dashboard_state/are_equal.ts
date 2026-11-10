@@ -7,100 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import deepEqual from 'fast-deep-equal';
-import { asyncMap } from '@kbn/std';
-import type {
-  DashboardPanel,
-  DashboardPinnedPanel,
-  DashboardSection,
-  DashboardState,
-} from '@kbn/as-code-dashboard-schema';
-import { areComparatorsEqual, type StateComparators } from '@kbn/presentation-publishing';
-import { isDashboardPanel } from '../is_dashboard_panel';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
+import { areComparatorsEqual } from '@kbn/presentation-publishing';
 import { DASHBOARD_COMPARATOR_DEFAULTS, getDashboardComparators } from './comparators';
-
-type PanelOrSection = DashboardPanel | DashboardSection;
-type GetComparators = (
-  type: string,
-  embeddableState: object
-) => Promise<StateComparators<object> | undefined>;
-
-async function areConfigsEqual(
-  getComparators: GetComparators,
-  type: string,
-  configA: object,
-  configB: object
-) {
-  const comparators = await getComparators(type, configB);
-  return comparators
-    ? areComparatorsEqual(comparators, configA, configB)
-    : deepEqual(configA, configB);
-}
-
-async function arePanelsEqual(
-  a: DashboardPanel,
-  b: DashboardPanel,
-  getComparators: GetComparators
-): Promise<boolean> {
-  const { config: configA, ...restA } = a;
-  const { config: configB, ...restB } = b;
-  if (!deepEqual(restA, restB)) return false;
-  return areConfigsEqual(getComparators, b.type, configA as object, configB as object);
-}
-
-async function areWidgetsEqual(
-  a: PanelOrSection,
-  b: PanelOrSection,
-  getComparators: GetComparators
-): Promise<boolean> {
-  if (isDashboardPanel(a) && isDashboardPanel(b)) return arePanelsEqual(a, b, getComparators);
-  if (isDashboardPanel(a) !== isDashboardPanel(b)) return false;
-
-  const { panels: panelsA, ...sectionA } = a as DashboardSection;
-  const { panels: panelsB, ...sectionB } = b as DashboardSection;
-  return (
-    deepEqual(sectionA, sectionB) && (await arePanelsListEqual(panelsA, panelsB, getComparators))
-  );
-}
-
-async function arePanelsListEqual(
-  a: PanelOrSection[] | undefined,
-  b: PanelOrSection[] | undefined,
-  getComparators: GetComparators
-): Promise<boolean> {
-  if (a === b) return true;
-  if (!a || !b || a.length !== b.length) return false;
-
-  const bById = new Map<string, PanelOrSection>();
-  b.forEach((widget) => {
-    if (widget.id) bById.set(widget.id, widget);
-  });
-
-  const results = await asyncMap(a, async (widgetA, index) => {
-    const widgetB = widgetA.id ? bById.get(widgetA.id) : b[index];
-    return widgetB !== undefined ? areWidgetsEqual(widgetA, widgetB, getComparators) : false;
-  });
-  return results.every(Boolean);
-}
-
-/** Pinned panel order is meaningful, so pinned panels are compared by index. */
-async function arePinnedPanelsEqual(
-  a: DashboardPinnedPanel[] | undefined,
-  b: DashboardPinnedPanel[] | undefined,
-  getComparators: GetComparators
-): Promise<boolean> {
-  if (a === b) return true;
-  if (!a || !b || a.length !== b.length) return false;
-
-  const results = await asyncMap(a, async (pinnedA, index) => {
-    const pinnedB = b[index];
-    const { config: configA, ...restA } = pinnedA;
-    const { config: configB, ...restB } = pinnedB;
-    if (!deepEqual(restA, restB)) return false;
-    return areConfigsEqual(getComparators, pinnedB.type, configA as object, configB as object);
-  });
-  return results.every(Boolean);
-}
+import { areEqual as areLayoutsEqual, type GetComparators } from './layout/are_equal';
 
 /**
  * Checks whether two dashboard states are equal.
@@ -113,25 +23,11 @@ export async function areEqual(
   b: DashboardState,
   getComparators: GetComparators
 ): Promise<boolean> {
-  const { panels: panelsA, pinned_panels: pinnedPanelsA } = a;
-  const { panels: panelsB, pinned_panels: pinnedPanelsB } = b;
-
   const comparators = getDashboardComparators({
     // Restored when either state restores it, so adding or removing time or project routing is a change.
     isTimeRestored: () => Boolean(a.time_range) || Boolean(b.time_range),
     isProjectRoutingRestored: () => Boolean(a.project_routing) || Boolean(b.project_routing),
   });
   if (!areComparatorsEqual(comparators, a, b, DASHBOARD_COMPARATOR_DEFAULTS)) return false;
-  return (
-    (await arePinnedPanelsEqual(
-      pinnedPanelsA as DashboardPinnedPanel[] | undefined,
-      pinnedPanelsB as DashboardPinnedPanel[] | undefined,
-      getComparators
-    )) &&
-    (await arePanelsListEqual(
-      panelsA as PanelOrSection[],
-      panelsB as PanelOrSection[],
-      getComparators
-    ))
-  );
+  return areLayoutsEqual(a, b, getComparators);
 }

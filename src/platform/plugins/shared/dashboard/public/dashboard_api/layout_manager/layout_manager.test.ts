@@ -28,7 +28,7 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getSampleDashboardState } from '../../mocks';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
-import { deserializeLayout } from './deserialize_layout';
+import { deserializeLayout } from '../../../common/dashboard_state/layout/deserialize_layout';
 import { initializeLayoutManager } from './layout_manager';
 
 jest.mock('uuid', () => ({
