@@ -278,10 +278,10 @@ the agent in `connectors.md`. There is no eval-only telemetry setting, start par
 hint; the agent finds the data through the connectors, as it must for a customer. A connector set
 is the group of preconfigured connectors one Scout stack starts with:
 
-| Set         | Kibana config                                                          | Connectors                                                           | Credentials (Vault / profile JSON)         |
-| ----------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------ |
-| `default`   | [`scout/connector_sets/default.yml`](scout/connector_sets/default.yml) | `elasticsearch` (`.elasticsearch`)                                   | `nightshift.telemetry.{url,apiKey}`        |
-| `orcabench` | none                                                                   | one `orcabench-es-<hash>` (`.elasticsearch`) per cutoff, by the eval | `nightshiftOrcaEs.{url,username,password}` |
+| Set         | Kibana config                                                          | Connectors                                     | Credentials (Vault / profile JSON)         |
+| ----------- | ---------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------ |
+| `default`   | [`scout/connector_sets/default.yml`](scout/connector_sets/default.yml) | `elasticsearch` (`.elasticsearch`)             | `nightshift.telemetry.{url,apiKey}`        |
+| `orcabench` | none                                                                   | `orcabench-es` (`.elasticsearch`), by the eval | `nightshiftOrcaEs.{url,username,password}` |
 
 To add a connector to a set, declare it in the set's YAML and add its id to `CONNECTOR_SETS`. The
 hook selects `orcabench` on the ORCA shard (or `NIGHTSHIFT_DATASETS=orcabench`), and `default`
@@ -290,8 +290,8 @@ Scout config set at the set's YAML; the eval then saves every connector in the s
 investigator through the Agent Builder agents API (`saveConnectorSetOnInvestigator` in
 [`connector_sets.ts`](evals/investigation/connector_sets.ts)), as a user would in the agent's
 settings. Without a connector set, nothing is saved. One stack runs one set; the eval does not
-switch connectors per example. `orcabench` preconfigures nothing: the eval creates one connector
-per task cutoff, each in its own space (see [telemetry cutoff](#telemetry-cutoff)).
+switch connectors per example. `orcabench` preconfigures nothing: the eval creates its one
+connector and puts each cutoff's key on it in turn (see [telemetry cutoff](#telemetry-cutoff)).
 
 The `default` set's credentials keep the Vault field name `nightshift.telemetry`:
 
@@ -357,8 +357,7 @@ NIGHTSHIFT_KNOWLEDGE=memory,decision-trees NIGHTSHIFT_DATASETS=trace-only \
   [Knowledge source key](#knowledge-source-key).
 - Before the first example, the eval clears all three knowledge indices in its space, then copies
   every selected system's documents from the source space, moving their ids and `space_id` into its
-  own space. An ORCA run does this for each of its cutoff spaces. Embeddings are recomputed by the
-  eval cluster on write. A source space with no
+  own space. Embeddings are recomputed by the eval cluster on write. A source space with no
   documents for a selected system fails the run.
 - The Scout config set turns on each selected system and turns learning off
   (`xpack.nightshift_investigations.learning.enabled=false`), so the post-run optimize hook doesn't
@@ -676,10 +675,10 @@ controls. Each question uses ORCA's own wording: a stated current time, a vague 
 time and the user-facing symptom, without the incident onset or an analysis window. CI runs it as
 its own shard under the `evals:nightshift-investigations` label, next to the `customer0` shard that
 runs the smoke and trace-only evals, so each Scout server runs one [connector set](#connector-sets).
-The ORCA shard runs the `orcabench` set: each task's investigator has one Elasticsearch connector,
-named `orcabench_es`. The question names that connector, as ORCA's names its Grafana API, but no
-index, so the agent discovers the ORCA indices the way it would on any cluster. Each cutoff's space
-carries one custom context snippet (`ORCA_CUSTOM_CONTEXT` in
+The ORCA shard runs the `orcabench` set: the investigator has one Elasticsearch connector, named
+`orcabench_es`. The question names that connector, as ORCA's names its Grafana API, but no
+index, so the agent discovers the ORCA indices the way it would on any cluster. The space carries
+one custom context snippet (`ORCA_CUSTOM_CONTEXT` in
 [`custom_context.ts`](evals/investigation/custom_context.ts)) pointing at the demo's public source,
 `github.com/open-telemetry/opentelemetry-demo` at commit `fc77a6cbc0bf36ff52f21e4d59fa7b8a0f5d6733`,
 the commit the paper's environment is built on. The paper's agents find that checkout at
@@ -711,24 +710,22 @@ read. The agent investigates unchanged and no query it writes can see past its t
   document-level security query `{"range": {"@timestamp": {"lte": "<cutoff>"}}}`. A key expires
   when the test's own timeout would, so it outlives every investigation that reads with it, and is
   invalidated as soon as the experiment ends. A key can read its own record, so the agent could see
-  its name, metadata and role. The name is `nightshift-orcabench-eval-<hash>`, the same hash as its
-  space, and the metadata holds only the purpose and a run id. The role's query still shows the
+  its name, metadata and role. The name is `nightshift-orcabench-eval-<hash>`, a hash of the cutoff
+  and the variant, and the metadata holds only the purpose and a run id. The role's query still shows the
   cutoff and, for `no-flags`, the demo's flag keys, but neither is new to the agent: it can find
   the cutoff with a `max` on `@timestamp`, and the flag keys are in the demo source it is pointed
   at (`src/flagd/demo.flagd.json`). No key is logged, stored in a start input
-  or written to experiment metadata; each lives only in its connector's secrets, and the eval writes
-  the connector without letting `kbnClient` log a failed response.
-- **Spaces.** Connectors are saved on the investigator as a whole, so each cutoff gets its own
-  Kibana space, `orca-<hash>`, with its own investigator, service-account binding and connector
-  `orcabench-es-<hash>`. The hash of the cutoff and the variant keeps ids stable across runs without
-  showing the agent its snapshot time, and keeps a `full` and a `no-flags` run on one stack from
-  overwriting each other's keys. Run one ORCA eval of a variant on a stack at a time: a second one
-  would replace the first one's keys, and revoke them when it ends. A task starts and is read in
-  its cutoff's space, so eight investigations still run at a time. Spaces stay after a run, so slices that reuse one stack add up. Serverless
-  allows 100 spaces, and the eval fails before minting keys when this run's cutoffs and the stack's
-  existing spaces would exceed that; start a fresh stack (`node scripts/evals stop`) between slices
-  there. A model connector must be visible in every space: a preconfigured connector or an
-  inference endpoint, not a stack connector the eval created in the default space.
+  or written to experiment metadata; each lives only in the connector's secrets while its cutoff
+  runs, and the eval writes the connector without letting `kbnClient` log a failed response.
+- **One cutoff at a time.** Nightshift runs only in the default space, and connectors are saved on
+  its one investigator as a whole, so the eval runs one cutoff's tasks at a time
+  ([`orca_cutoff_gate.ts`](evals/investigation/orca_cutoff_gate.ts)). Before a cutoff's tasks start,
+  the `orcabench-es` connector gets that cutoff's key; up to eight of them run together, and the
+  next cutoff waits until all have ended. An investigation that outlives its poll gets two more
+  minutes to end before the run fails, so no key is swapped under a running investigation. Cutoffs
+  take turns in dataset order, and the test's timeout counts one batch per cutoff. A run is
+  therefore close to serial: the sampled 50 has 41 cutoffs. Run one ORCA eval on a stack at a time,
+  since both would write the one connector.
 - **Preflight.** Before any investigation, a reference key bounded at ORCA's last snapshot must
   return the document counts pinned in [`orca_dataset.ts`](evals/investigation/orca_dataset.ts) for
   the run's variant. Then every cutoff key must count no document after its cutoff and some document

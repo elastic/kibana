@@ -10,7 +10,7 @@ import assert from 'assert';
 import { createHash, randomBytes } from 'crypto';
 import pMap from 'p-map';
 import { z, lazySchema } from '@kbn/zod/v4';
-import { ORCABENCH_ES_CONNECTOR_PREFIX, getConnectorSet } from './connector_sets';
+import { getConnectorSet } from './connector_sets';
 import { assertOrcaSource } from './orca_dataset';
 import type { OrcaTelemetryVariant } from './orca_dataset';
 import type { InvestigationExample } from './types';
@@ -60,47 +60,20 @@ export const getOrcaCutoff = ({ metadata }: Pick<InvestigationExample, 'metadata
   return new Date(snapshotMs).toISOString();
 };
 
-/** The tasks sharing one cutoff, and the Kibana space and connector that read up to it. */
-export interface OrcaCutoffGroup {
-  cutoff: string;
-  spaceId: string;
-  connectorId: string;
-  caseIds: readonly string[];
-}
-
 /**
- * The id suffix of a cutoff's space, connector and key. A hash, so neither the ids nor the key's
- * name show the investigator its snapshot time or the variant.
+ * The name of a cutoff's key. The investigator can read its key's record, so the name is a hash of
+ * the cutoff and the variant: stable across runs, without the snapshot time or the variant in it.
  */
-const orcaCutoffSuffix = (cutoff: string, variant: OrcaTelemetryVariant): string =>
-  createHash('sha256').update(`${variant}:${cutoff}`).digest('hex').slice(0, 12);
+export const orcaCutoffKeyName = (cutoff: string, variant: OrcaTelemetryVariant): string =>
+  `nightshift-orcabench-eval-${createHash('sha256')
+    .update(`${variant}:${cutoff}`)
+    .digest('hex')
+    .slice(0, 12)}`;
 
-/**
- * Groups tasks by cutoff, in cutoff order. Space and connector ids derive from a hash of the
- * cutoff and the variant: stable across runs, and never shared by a `full` and a `no-flags` run on
- * one stack, which would otherwise overwrite each other's keys.
- */
-export const groupOrcaCasesByCutoff = (
-  examples: ReadonlyArray<Pick<InvestigationExample, 'metadata'>>,
-  variant: OrcaTelemetryVariant
-): OrcaCutoffGroup[] => {
-  const caseIdsByCutoff = new Map<string, string[]>();
-  for (const example of examples) {
-    const cutoff = getOrcaCutoff(example);
-    caseIdsByCutoff.set(cutoff, [...(caseIdsByCutoff.get(cutoff) ?? []), example.metadata.case_id]);
-  }
-  return [...caseIdsByCutoff.entries()]
-    .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
-    .map(([cutoff, caseIds]) => {
-      const suffix = orcaCutoffSuffix(cutoff, variant);
-      return {
-        cutoff,
-        spaceId: `orca-${suffix}`,
-        connectorId: `${ORCABENCH_ES_CONNECTOR_PREFIX}${suffix}`,
-        caseIds,
-      };
-    });
-};
+/** The distinct cutoffs of these tasks, in cutoff order. */
+export const getOrcaCutoffs = (
+  examples: ReadonlyArray<Pick<InvestigationExample, 'metadata'>>
+): string[] => [...new Set(examples.map(getOrcaCutoff))].sort();
 
 /** The document-level security query of a key that reads ORCA up to `cutoff`, inclusive. */
 export const orcaCutoffQuery = (cutoff: string, variant: OrcaTelemetryVariant) => {
@@ -260,7 +233,7 @@ export const mintOrcaCutoffKeys = async ({
     const { id, encoded } = apiKeySchema.parse(
       await asEvalUser('POST', '/_security/api_key', {
         // A key can read its own record, so its name and metadata leave out the cutoff and variant.
-        name: `nightshift-orcabench-eval-${orcaCutoffSuffix(cutoff, variant)}`,
+        name: orcaCutoffKeyName(cutoff, variant),
         expiration: `${Math.ceil(expiresInMs / 60_000)}m`,
         role_descriptors: {
           orca_cutoff: {

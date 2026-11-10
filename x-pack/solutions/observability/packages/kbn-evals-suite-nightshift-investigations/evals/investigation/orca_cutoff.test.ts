@@ -9,7 +9,8 @@ import {
   ORCA_FLAG_DOCUMENTS_QUERY,
   ORCA_REFERENCE_CUTOFF,
   getOrcaCutoff,
-  groupOrcaCasesByCutoff,
+  getOrcaCutoffs,
+  orcaCutoffKeyName,
   mintOrcaCutoffKeys,
   orcaCutoffQuery,
   resolveOrcaEsCredentials,
@@ -42,41 +43,24 @@ describe('getOrcaCutoff', () => {
   });
 });
 
-describe('groupOrcaCasesByCutoff', () => {
-  const tasks = [
-    task('late', { telemetry_snapshot_time: '2026-04-24T19:25:42Z' }),
-    task('early-1'),
-    task('early-2', { telemetry_snapshot_time: '2026-04-19T16:27:11.000Z' }),
-  ];
-  it('puts tasks sharing a cutoff in one space with one connector, in cutoff order', () => {
-    const groups = groupOrcaCasesByCutoff(tasks, 'full');
-    expect(groups.map(({ cutoff, caseIds }) => [cutoff, caseIds])).toEqual([
-      ['2026-04-19T16:27:11.000Z', ['early-1', 'early-2']],
-      ['2026-04-24T19:25:42.000Z', ['late']],
-    ]);
-    expect(new Set(groups.map(({ spaceId }) => spaceId)).size).toBe(2);
-    for (const { spaceId, connectorId } of groups) {
-      expect(spaceId).toMatch(/^orca-[0-9a-f]{12}$/);
-      expect(connectorId).toBe(`orcabench-es-${spaceId.slice('orca-'.length)}`);
-    }
+describe('getOrcaCutoffs', () => {
+  it('lists each cutoff once, in cutoff order', () => {
+    const tasks = [
+      task('late', { telemetry_snapshot_time: '2026-04-24T19:25:42Z' }),
+      task('early-1'),
+      task('early-2', { telemetry_snapshot_time: '2026-04-19T16:27:11.000Z' }),
+    ];
+    expect(getOrcaCutoffs(tasks)).toEqual(['2026-04-19T16:27:11.000Z', '2026-04-24T19:25:42.000Z']);
   });
-  it('keeps ids stable across runs without showing the investigator its snapshot time', () => {
-    const ids = (examples: typeof tasks) =>
-      groupOrcaCasesByCutoff(examples, 'full').map(({ cutoff, spaceId, connectorId }) => ({
-        cutoff,
-        spaceId,
-        connectorId,
-      }));
-    expect(ids([...tasks].reverse())).toEqual(ids(tasks));
-    for (const { connectorId } of ids(tasks)) {
-      expect(connectorId).not.toMatch(/2026|1627|1925/);
-    }
-  });
-  it('never gives a full and a no-flags run the same space, so neither overwrites the other’s key', () => {
-    const spaces = (variant: OrcaTelemetryVariant) =>
-      groupOrcaCasesByCutoff(tasks, variant).map(({ spaceId }) => spaceId);
-    expect(spaces('no-flags')).toHaveLength(2);
-    expect(spaces('no-flags').filter((spaceId) => spaces('full').includes(spaceId))).toEqual([]);
+});
+
+describe('orcaCutoffKeyName', () => {
+  it('names a key by a stable hash that shows neither the snapshot time nor the variant', () => {
+    const name = orcaCutoffKeyName('2026-04-19T16:27:11.000Z', 'no-flags');
+    expect(name).toMatch(/^nightshift-orcabench-eval-[0-9a-f]{12}$/);
+    expect(name).toBe(orcaCutoffKeyName('2026-04-19T16:27:11.000Z', 'no-flags'));
+    expect(name).not.toBe(orcaCutoffKeyName('2026-04-19T16:27:11.000Z', 'full'));
+    expect(name).not.toMatch(/2026|1627|flags/);
   });
 });
 
@@ -210,14 +194,8 @@ describe('mintOrcaCutoffKeys', () => {
       [cutoffs[0], 'encoded-key-2'],
       [cutoffs[1], 'encoded-key-3'],
     ]);
-    // Named by its space's hash alone, since the investigator can read its key's record.
-    const keyName = (cutoff: string) =>
-      `nightshift-orcabench-eval-${groupOrcaCasesByCutoff(
-        [task('a', { telemetry_snapshot_time: cutoff })],
-        'no-flags'
-      )[0].spaceId.slice('orca-'.length)}`;
     expect(orca.minted.map(({ body }) => body.name)).toEqual(
-      [ORCA_REFERENCE_CUTOFF, ...cutoffs].map(keyName)
+      [ORCA_REFERENCE_CUTOFF, ...cutoffs].map((cutoff) => orcaCutoffKeyName(cutoff, 'no-flags'))
     );
     expect(orca.minted.map(({ body }) => body.metadata)).toEqual(
       Array(3).fill({ purpose: 'nightshift-orcabench-eval', run: expect.any(String) })

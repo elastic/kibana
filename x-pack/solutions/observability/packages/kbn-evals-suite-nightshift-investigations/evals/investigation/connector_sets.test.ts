@@ -53,8 +53,8 @@ describe('saveConnectorSetOnInvestigator', () => {
     });
   });
 
-  // ORCA's default space must not keep a connector that reads past any task's cutoff.
-  it('saves no connector in the default space for the orcabench set', async () => {
+  // The ORCA connector is saved by the eval once it holds a cutoff's key, never before.
+  it('saves no connector for the orcabench set', async () => {
     const fetch = fetchAgent();
 
     await saveConnectorSetOnInvestigator(fetch, { env: { NIGHTSHIFT_CONNECTOR_SET: 'orcabench' } });
@@ -87,25 +87,21 @@ describe('saveConnectorSetOnInvestigator', () => {
 });
 
 describe('saveConnectorsOnInvestigator', () => {
-  it('saves the connectors on the investigator of the space the base path names', async () => {
+  it('saves exactly these connectors on the investigator', async () => {
     const fetch = fetchAgent();
 
-    await saveConnectorsOnInvestigator(fetch, ['orcabench-es-abc'], '/s/orca-abc');
+    await saveConnectorsOnInvestigator(fetch, ['orcabench-es']);
 
-    expect(fetch.mock.calls.map(([path]) => path)).toEqual([
-      '/s/orca-abc/api/agent_builder/agents/nightshift.investigation',
-      '/s/orca-abc/api/agent_builder/agents/nightshift.investigation',
-    ]);
     expect(putBody(fetch as unknown as jest.Mock)).toEqual({
-      configuration: { ...savedAgent.configuration, connector_ids: ['orcabench-es-abc'] },
+      configuration: { ...savedAgent.configuration, connector_ids: ['orcabench-es'] },
     });
   });
 });
 
 describe('isOrcaConnectorId', () => {
-  it('matches only the per-cutoff ORCA connectors', () => {
-    expect(isOrcaConnectorId('orcabench-es-0123456789ab')).toBe(true);
-    expect(isOrcaConnectorId('orcabench-es')).toBe(false);
+  it('matches only the ORCA connector', () => {
+    expect(isOrcaConnectorId('orcabench-es')).toBe(true);
+    expect(isOrcaConnectorId('orcabench-es-0123456789ab')).toBe(false);
     expect(isOrcaConnectorId('elasticsearch')).toBe(false);
     expect(isOrcaConnectorId(undefined)).toBe(false);
   });

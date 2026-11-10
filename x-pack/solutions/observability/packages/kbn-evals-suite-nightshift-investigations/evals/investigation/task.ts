@@ -35,8 +35,8 @@ const POLL_INTERVAL_MS = 1000;
 const CONVERSATION_PERSIST_ATTEMPTS = 60;
 
 /** The shared investigations API; the investigation id is its Agent Builder conversation id. */
-const investigationPath = (basePath: string, id: string) =>
-  `${basePath}/internal/investigations/investigations/${encodeURIComponent(id)}`;
+const investigationPath = (id: string) =>
+  `/internal/investigations/investigations/${encodeURIComponent(id)}`;
 const INVESTIGATIONS_API_HEADERS = { 'elastic-api-version': '1' };
 
 /** Keeps as many (already per-field-bounded) trajectory steps, in order, as fit the byte budget. */
@@ -69,7 +69,7 @@ const boundOutput = (output: InvestigationTaskOutput): InvestigationTaskOutput =
   return output;
 };
 
-export const isNotFound = (error: unknown): boolean => {
+const isNotFound = (error: unknown): boolean => {
   const { status, response, body } = (error ?? {}) as {
     status?: number;
     response?: { status?: number };
@@ -84,11 +84,10 @@ export const isNotFound = (error: unknown): boolean => {
  */
 const readInvestigation = async (
   fetch: HttpHandler,
-  id: string,
-  basePath: string
+  id: string
 ): Promise<Investigation | undefined> => {
   try {
-    return await fetch<Investigation>(investigationPath(basePath, id), {
+    return await fetch<Investigation>(investigationPath(id), {
       headers: INVESTIGATIONS_API_HEADERS,
     });
   } catch (error) {
@@ -99,12 +98,11 @@ const readInvestigation = async (
 
 const readConversation = async (
   fetch: HttpHandler,
-  id: string,
-  basePath: string
+  id: string
 ): Promise<{ rounds: ConversationRound[] } | undefined> => {
   try {
     return await fetch<{ rounds: ConversationRound[] }>(
-      `${basePath}/api/agent_builder/conversations/${encodeURIComponent(id)}`,
+      `/api/agent_builder/conversations/${encodeURIComponent(id)}`,
       { headers: { 'elastic-api-version': '2023-10-31' } }
     );
   } catch (error) {
@@ -141,17 +139,16 @@ const isPersisted = (conversation: { rounds: ConversationRound[] } | undefined):
 const readFinishedConversation = async (
   fetch: HttpHandler,
   id: string,
-  waitForRounds: boolean,
-  basePath: string
+  waitForRounds: boolean
 ): Promise<{ rounds: ConversationRound[] }> => {
-  let conversation = await readConversation(fetch, id, basePath);
+  let conversation = await readConversation(fetch, id);
   for (
     let attempt = 1;
     waitForRounds && !isPersisted(conversation) && attempt < CONVERSATION_PERSIST_ATTEMPTS;
     attempt++
   ) {
     await setTimeout(POLL_INTERVAL_MS);
-    conversation = await readConversation(fetch, id, basePath);
+    conversation = await readConversation(fetch, id);
   }
   if (!conversation || conversation.rounds.length === 0) {
     throw new Error('Investigation conversation has no persisted rounds');
@@ -175,14 +172,29 @@ export const toInvestigationReport = ({
 });
 
 /**
- * Runs a manual investigation and retains a bounded report with references to its full evidence.
- * `basePath` is the space's `/s/<id>`, or empty for the default space.
+ * Waits up to `timeoutMs` for an investigation, its last round included, to end, and says whether
+ * it did. One that was never created has nothing left to run.
  */
+export const waitForInvestigationToEnd = async (
+  fetch: HttpHandler,
+  id: string,
+  timeoutMs: number
+): Promise<boolean> => {
+  const started = Date.now();
+  for (;;) {
+    const investigation = await readInvestigation(fetch, id);
+    if (!investigation) return true;
+    if (!investigation.in_progress && isPersisted(await readConversation(fetch, id))) return true;
+    if (Date.now() - started >= timeoutMs) return false;
+    await setTimeout(POLL_INTERVAL_MS);
+  }
+};
+
+/** Runs a manual investigation and retains a bounded report with references to its full evidence. */
 export const runInvestigation = async (
   fetch: HttpHandler,
   example: InvestigationExample,
-  connector: Pick<EvalConnector, 'id'>,
-  { basePath = '' }: { basePath?: string } = {}
+  connector: Pick<EvalConnector, 'id'>
 ): Promise<InvestigationTaskOutput> => {
   const started = Date.now();
   const output: InvestigationTaskOutput = {
@@ -193,7 +205,7 @@ export const runInvestigation = async (
   let conversation: { rounds: ConversationRound[] } | undefined;
   try {
     const { investigation_id: investigationId } = await fetch<StartInvestigationResponse>(
-      `${basePath}/internal/nightshift/investigations`,
+      '/internal/nightshift/investigations',
       {
         method: 'POST',
         body: JSON.stringify({
@@ -205,13 +217,13 @@ export const runInvestigation = async (
     );
     output.investigation_id = investigationId;
     output.conversation_id = investigationId;
-    investigation = await readInvestigation(fetch, investigationId, basePath);
+    investigation = await readInvestigation(fetch, investigationId);
     // A pending proposal ends `in_progress` while the agent's round is still running, so the run is
     // only over once that round has finished too.
     while (
       !investigation ||
       investigation.in_progress ||
-      !isPersisted((conversation = await readConversation(fetch, investigation.id, basePath)))
+      !isPersisted((conversation = await readConversation(fetch, investigation.id)))
     ) {
       output.workflow_status = 'running';
       if (Date.now() - started > INVESTIGATION_TIMEOUT_MS) {
@@ -223,10 +235,10 @@ export const runInvestigation = async (
         );
       }
       await setTimeout(POLL_INTERVAL_MS);
-      investigation = (await readInvestigation(fetch, investigationId, basePath)) ?? investigation;
+      investigation = (await readInvestigation(fetch, investigationId)) ?? investigation;
     }
     // The verdict may have been written after the last read, while the round was finishing.
-    investigation = (await readInvestigation(fetch, investigationId, basePath)) ?? investigation;
+    investigation = (await readInvestigation(fetch, investigationId)) ?? investigation;
   } catch (error) {
     output.execution_error = error instanceof Error ? error.message : String(error);
   }
@@ -240,8 +252,7 @@ export const runInvestigation = async (
       conversation = await readFinishedConversation(
         fetch,
         investigation.id,
-        !investigation.in_progress,
-        basePath
+        !investigation.in_progress
       );
     }
     if (!conversation) throw new Error('Investigation conversation has no persisted rounds');

@@ -11,7 +11,12 @@ import {
   ToolResultType,
 } from '@kbn/agent-builder-common';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
-import { INVESTIGATION_TIMEOUT_MS, UNPERSISTED_CONVERSATION_ERROR, runInvestigation } from './task';
+import {
+  INVESTIGATION_TIMEOUT_MS,
+  UNPERSISTED_CONVERSATION_ERROR,
+  runInvestigation,
+  waitForInvestigationToEnd,
+} from './task';
 import { ungradedPlaceholder } from './placeholder';
 
 jest.mock('timers/promises', () => ({ setTimeout: jest.fn().mockResolvedValue(undefined) }));
@@ -37,24 +42,6 @@ const investigation = (overrides: Partial<Investigation> = {}): Investigation =>
 });
 
 const notFound = () => Object.assign(new Error('Not Found'), { status: 404 });
-
-it('starts and reads the investigation in the space the base path names', async () => {
-  const fetch = jest
-    .fn()
-    .mockResolvedValueOnce({ investigation_id: 'investigation' })
-    .mockResolvedValueOnce(investigation())
-    .mockResolvedValueOnce({ rounds: [{ steps: [] }] })
-    .mockResolvedValueOnce(investigation());
-
-  await runInvestigation(fetch, example, connector, { basePath: '/s/orca-abc' });
-
-  expect(fetch.mock.calls.map(([path]) => path)).toEqual([
-    '/s/orca-abc/internal/nightshift/investigations',
-    '/s/orca-abc/internal/investigations/investigations/investigation',
-    '/s/orca-abc/api/agent_builder/conversations/investigation',
-    '/s/orca-abc/internal/investigations/investigations/investigation',
-  ]);
-});
 
 it('executes the manual investigation and reads what it recorded from the shared API', async () => {
   const conversation = {
@@ -432,4 +419,31 @@ it('reports an investigation that never appeared', async () => {
   } finally {
     clock.mockRestore();
   }
+});
+
+describe('waitForInvestigationToEnd', () => {
+  const finished = { rounds: [{ status: ConversationRoundStatus.completed, steps: [] }] };
+
+  it('waits until the investigation and its last round have ended', async () => {
+    const fetch = jest
+      .fn()
+      .mockResolvedValueOnce(investigation({ in_progress: true }))
+      .mockResolvedValueOnce(investigation())
+      .mockResolvedValueOnce(finished);
+
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 60_000)).resolves.toBe(true);
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it('gives up once the investigation is still running at the deadline', async () => {
+    const fetch = jest.fn().mockResolvedValue(investigation({ in_progress: true }));
+
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 0)).resolves.toBe(false);
+  });
+
+  it('treats an investigation that was never created as ended', async () => {
+    const fetch = jest.fn().mockRejectedValue(notFound());
+
+    await expect(waitForInvestigationToEnd(fetch, 'investigation', 60_000)).resolves.toBe(true);
+  });
 });

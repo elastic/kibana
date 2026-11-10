@@ -210,7 +210,7 @@ const call = {
   type: ConversationRoundStepType.toolCall,
   tool_call_id: 'call',
   tool_id: 'nightshift_sandbox_bash',
-  params: { connector_id: 'orcabench-es-0123456789ab', command: 'curl ...' },
+  params: { connector_id: 'orcabench-es', command: 'curl ...' },
   results: [
     {
       tool_result_id: 'result',
@@ -240,7 +240,7 @@ describe('ORCA telemetry evidence', () => {
   it.each([
     { ...call, tool_id: 'execute_api' },
     { ...call, params: { ...call.params, connector_id: 'another-cluster' } },
-    { ...call, params: { ...call.params, connector_id: 'orcabench-es' } },
+    { ...call, params: { ...call.params, connector_id: 'orcabench-es-0123456789ab' } },
     {
       ...call,
       results: [{ ...call.results[0], data: { stdout: '{"values":[[0]]}', exit_code: 0 } }],

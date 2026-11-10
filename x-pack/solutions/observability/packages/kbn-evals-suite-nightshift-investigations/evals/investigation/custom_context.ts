@@ -57,18 +57,16 @@ export const getDatasetCustomContext = ({
   return name.startsWith('nightshift/orca-') ? ORCA_CUSTOM_CONTEXT : [];
 };
 
-/** Replaces the space's custom context with exactly these snippets; `basePath` selects the space. */
+/** Replaces the space's custom context with exactly these snippets. */
 export const replaceCustomContext = async (
   fetch: HttpHandler,
-  snippets: readonly string[],
-  basePath = ''
+  snippets: readonly string[]
 ): Promise<void> => {
-  const path = `${basePath}${CUSTOM_CONTEXT_API_PATH}`;
-  const current = await fetch<GetCustomContextResponse>(path);
+  const current = await fetch<GetCustomContextResponse>(CUSTOM_CONTEXT_API_PATH);
   if (snippets.length === 0 && current.snippets.length === 0) return;
   const body: PutCustomContextRequest = {
     snippets: snippets.map((text) => ({ text })),
     version: current.version,
   };
-  await fetch(path, { method: 'PUT', body: JSON.stringify(body) });
+  await fetch(CUSTOM_CONTEXT_API_PATH, { method: 'PUT', body: JSON.stringify(body) });
 };

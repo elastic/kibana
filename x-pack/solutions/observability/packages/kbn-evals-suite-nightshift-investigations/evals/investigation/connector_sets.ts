@@ -8,16 +8,16 @@
 import type { HttpHandler } from '@kbn/core/public';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
 
-/** Prefix of the Elasticsearch connectors, one per cutoff space, to the cluster holding ORCA. */
-export const ORCABENCH_ES_CONNECTOR_PREFIX = 'orcabench-es-';
+/** The Elasticsearch connector to the cluster holding ORCA, whose key the eval swaps per cutoff. */
+export const ORCABENCH_ES_CONNECTOR_ID = 'orcabench-es';
 
-/** Whether a sandbox call went through one of the ORCA connectors. */
+/** Whether a sandbox call went through the ORCA connector. */
 export const isOrcaConnectorId = (connectorId: unknown): boolean =>
-  typeof connectorId === 'string' && connectorId.startsWith(ORCABENCH_ES_CONNECTOR_PREFIX);
+  connectorId === ORCABENCH_ES_CONNECTOR_ID;
 
 /**
  * Connector ids each Scout connector set preconfigures, in `scout/connector_sets/<set>.yml`. ORCA
- * preconfigures none: the eval creates a time-bounded connector in each cutoff's space.
+ * preconfigures none: the eval creates its connector and puts each cutoff's key on it in turn.
  */
 export const CONNECTOR_SETS = {
   default: ['elasticsearch'],
@@ -50,18 +50,15 @@ interface InvestigatorAgentResponse {
 }
 
 /**
- * Saves these connectors on the space's investigator the way a user would in the agent's settings.
- * The update merges `connector_ids` into the saved configuration, so tools and instructions already
- * stored on the agent stay. `basePath` is the space's `/s/<id>`, or empty for the default space.
+ * Saves these connectors on the investigator the way a user would in the agent's settings. The
+ * update merges `connector_ids` into the saved configuration, so tools and instructions already
+ * stored on the agent stay.
  */
 export const saveConnectorsOnInvestigator = async (
   fetch: HttpHandler,
-  connectorIds: readonly string[],
-  basePath = ''
+  connectorIds: readonly string[]
 ): Promise<void> => {
-  const path = `${basePath}/api/agent_builder/agents/${encodeURIComponent(
-    NIGHTSHIFT_INVESTIGATION_AGENT_ID
-  )}`;
+  const path = `/api/agent_builder/agents/${encodeURIComponent(NIGHTSHIFT_INVESTIGATION_AGENT_ID)}`;
   const headers = { 'elastic-api-version': '2023-10-31' };
   const current = await fetch<InvestigatorAgentResponse>(path, { method: 'GET', headers });
   await fetch(path, {
@@ -74,8 +71,7 @@ export const saveConnectorsOnInvestigator = async (
 };
 
 /**
- * Saves the stack's connector set on the default space's investigator. It is a no-op without a
- * connector set. `withoutConnectors` saves none, for datasets that must not reach the stack's clusters.
+ * Saves the stack's connector set on the investigator. It is a no-op without a connector set. `withoutConnectors` saves none, for datasets that must not reach the stack's clusters.
  */
 export const saveConnectorSetOnInvestigator = async (
   fetch: HttpHandler,
