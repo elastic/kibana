@@ -13,7 +13,7 @@ import { DestinationCard } from '../details_flyout/destination_card';
 import { useActionPolicySummary } from './action_policy_summary_context';
 
 export const ActionPolicySummaryDestinationsSection = () => {
-  const { destinations } = useActionPolicySummary();
+  const { destinations = [] } = useActionPolicySummary();
 
   return (
     <FlyoutSection
