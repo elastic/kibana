@@ -8,6 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EvidenceRound } from '@kbn/evals-plugin/server';
+import type { ReportHypothesis } from '../report';
 import type { InvestigationProcessOutput } from './prompt';
 import { investigationProcessJudge } from '.';
 
@@ -37,12 +38,13 @@ const judgeOutput = (
   ...overrides,
 });
 
-const evaluate = (output: unknown) => {
+const evaluate = (output: unknown, hypotheses?: ReportHypothesis[]) => {
   const prompt = jest.fn().mockResolvedValue({ toolCalls: [{ function: { arguments: output } }] });
   return {
     prompt,
     result: investigationProcessJudge.evaluate({
       round,
+      referenceData: { hypotheses },
       inferenceClient: { prompt } as unknown as BoundInferenceClient,
       log: loggingSystemMock.createLogger(),
     }),
@@ -96,6 +98,18 @@ describe('nightshift_investigation_process', () => {
         explanation: 'Repeated the same search several times.',
       },
     ]);
+  });
+
+  it('renders the hypotheses panel in the transcript', async () => {
+    const { prompt, result } = evaluate(judgeOutput(), [
+      { candidate: 'The 14:02 deploy', status: 'confirmed', confidence: 0.9 },
+    ]);
+
+    await result;
+
+    expect(prompt.mock.calls[0][0].input.transcript).toContain(
+      '## Agent final answer\nThe 14:02 deploy of checkout caused the latency.\n\n## Hypotheses panel (shown to the user)\n- [confirmed] The 14:02 deploy (confidence 0.9)'
+    );
   });
 
   it('drops decision tree usage and hypothesis coverage when they do not apply', async () => {

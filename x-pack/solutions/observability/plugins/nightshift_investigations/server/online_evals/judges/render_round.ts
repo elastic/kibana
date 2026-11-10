@@ -10,6 +10,11 @@ import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { MessageRole, type Message, type ToolCallArguments } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { keepHeadAndTail } from '../keep_head_and_tail';
+import type { ReportHypothesis } from './report';
+import { renderReport } from './report';
+import { truncate } from './truncate';
+
+export { truncate };
 
 /** Tool arguments and results can be large; each one is cut to this many characters. */
 export const MAX_TOOL_FIELD_CHARS = 10_000;
@@ -28,12 +33,6 @@ export const roundEvidenceSchema = lazySchema(() =>
   })
 );
 
-/** Cuts text to `maxChars` and appends a marker with the number of characters cut. */
-export const truncate = (text: string, maxChars: number): string =>
-  text.length > maxChars
-    ? `${text.slice(0, maxChars)}\n[truncated ${text.length - maxChars} characters]`
-    : text;
-
 const stringify = (value: unknown): string => {
   if (value === undefined) {
     return '';
@@ -43,9 +42,9 @@ const stringify = (value: unknown): string => {
 
 /**
  * Renders the round as the transcript reference-free judges read: the user input, every tool
- * call with its arguments and result, and the agent's final answer.
+ * call with its arguments and result, and the report (the final answer plus any hypotheses panel).
  */
-export const renderRound = (round: EvidenceRound): string => {
+export const renderRound = (round: EvidenceRound, hypotheses?: ReportHypothesis[]): string => {
   const renderedSteps = round.steps.map((step, index) =>
     [
       `## Tool call ${index + 1}: ${step.tool_id ?? 'unknown tool'}`,
@@ -65,7 +64,7 @@ export const renderRound = (round: EvidenceRound): string => {
     ...renderedSteps.slice(0, headEnd),
     ...omittedMarker,
     ...renderedSteps.slice(tailStart),
-    `## Agent final answer\n${round.response.message}`,
+    `## Agent final answer\n${renderReport({ answer: round.response.message, hypotheses })}`,
   ].join('\n\n');
 };
 

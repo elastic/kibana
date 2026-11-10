@@ -7,6 +7,8 @@
 
 import type { EvaluatorResult, RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
 import { renderRound, roundEvidenceSchema } from '../render_round';
+import type { ReportReferenceData } from '../report';
+import { reportReferenceDataSchema } from '../report';
 import { capExplanation, runJudge } from '../run_judge';
 import { RCA_REWARD_TOOL_NAME, rcaRewardOutputSchema, rcaRewardPrompt } from './prompt';
 
@@ -37,7 +39,7 @@ export const temporalProximityScore = (minutes: number | null | undefined): numb
   return 0.1;
 };
 
-export const rcaRewardJudge: RegisteredEvaluatorDefinition = {
+const definition: RegisteredEvaluatorDefinition<ReportReferenceData> = {
   name: 'nightshift_rca_reward',
   version: '1.0.0',
   kind: 'llm',
@@ -45,7 +47,8 @@ export const rcaRewardJudge: RegisteredEvaluatorDefinition = {
   description:
     'Reference-free: whether a Nightshift investigation found evidence, how close its cause is to the alert onset, and whether its timeline, sources and stated confidence hold up.',
   evidenceSchema: roundEvidenceSchema,
-  async evaluate({ round, inferenceClient }) {
+  referenceDataSchema: reportReferenceDataSchema,
+  async evaluate({ round, referenceData, inferenceClient }) {
     if (!inferenceClient) {
       throw new Error('Inference client is required for the nightshift_rca_reward judge');
     }
@@ -53,7 +56,7 @@ export const rcaRewardJudge: RegisteredEvaluatorDefinition = {
     const output = await runJudge({
       inferenceClient,
       prompt: rcaRewardPrompt,
-      input: { transcript: renderRound(round) },
+      input: { transcript: renderRound(round, referenceData?.hypotheses) },
       toolName: RCA_REWARD_TOOL_NAME,
       outputSchema: rcaRewardOutputSchema,
     });
@@ -112,3 +115,5 @@ export const rcaRewardJudge: RegisteredEvaluatorDefinition = {
     return { scores };
   },
 };
+
+export const rcaRewardJudge: RegisteredEvaluatorDefinition = definition;

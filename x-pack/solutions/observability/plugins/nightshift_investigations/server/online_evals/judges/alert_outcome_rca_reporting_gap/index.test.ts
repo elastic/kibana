@@ -11,6 +11,7 @@ import type { EvidenceRound } from '@kbn/evals-plugin/server';
 import { SET_HYPOTHESES_TOOL_ID } from '@kbn/agentic-investigations-plugin/common';
 import { MAX_EXPLANATION_LENGTH } from '../run_judge';
 import { MAX_JUDGE_INPUT_CHARS } from '../alert_outcome_shared';
+import type { ReportHypothesis } from '../report';
 import type { AlertOutcomeRcaReportingGapOutput } from './prompt';
 import { ALERT_OUTCOME_RCA_REPORTING_GAP_SYSTEM_PROMPT } from './prompt';
 import { alertOutcomeRcaReportingGapFixtures } from './fixtures';
@@ -62,17 +63,19 @@ const evaluate = (
     report = REPORT,
     extraSteps = [],
     closingReasoning,
+    hypotheses,
   }: {
     cause?: string;
     transcript?: string | null;
     report?: string;
     extraSteps?: EvidenceRound['steps'];
     closingReasoning?: string;
+    hypotheses?: ReportHypothesis[];
   } = {}
 ) =>
   alertOutcomeRcaReportingGapJudge.evaluate({
     round: roundFor(report, transcript, extraSteps),
-    referenceData: { alert_outcome: cause, closing_reasoning: closingReasoning },
+    referenceData: { alert_outcome: cause, closing_reasoning: closingReasoning, hypotheses },
     inferenceClient,
     log: loggingSystemMock.createLogger(),
   });
@@ -105,6 +108,23 @@ describe('nightshift_alert_outcome_rca_reporting_gap', () => {
     const scoringRequest = messages[3].content;
     expect(scoringRequest).toContain(CAUSE);
     expect(scoringRequest).toContain(REPORT);
+  });
+
+  it('puts a cause stated only in the hypotheses panel into the report, not the transcript', async () => {
+    const { chatComplete, inferenceClient } = createInferenceClient(judgeOutput());
+    const candidate = 'payments v3.2.1 leaks Postgres connections';
+
+    await evaluate(inferenceClient, {
+      hypotheses: [
+        { candidate, status: 'confirmed', confidence: 0.9, reason: 'pool hit max_connections' },
+      ],
+    });
+
+    const { messages } = chatComplete.mock.calls[0][0];
+    expect(JSON.stringify(messages.slice(0, -1))).not.toContain(candidate);
+    expect(messages.at(-1).content).toContain(
+      `${REPORT}\n\n## Hypotheses panel (shown to the user)\n- [confirmed] ${candidate} (confidence 0.9)\n  Reason: pool hit max_connections`
+    );
   });
 
   it("ends the transcript with the agent's closing notes, before the scoring request", async () => {

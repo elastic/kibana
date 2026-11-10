@@ -7,6 +7,8 @@
 
 import type { EvaluatorResult, RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
 import { renderRound, roundEvidenceSchema } from '../render_round';
+import type { ReportReferenceData } from '../report';
+import { reportReferenceDataSchema } from '../report';
 import { capExplanation, gradeToScore, runJudge } from '../run_judge';
 import {
   INVESTIGATION_PROCESS_TOOL_NAME,
@@ -23,7 +25,7 @@ const gradedScore = (name: string, grade: number, reasoning: string): Score => (
   explanation: capExplanation(reasoning),
 });
 
-export const investigationProcessJudge: RegisteredEvaluatorDefinition = {
+const definition: RegisteredEvaluatorDefinition<ReportReferenceData> = {
   name: 'nightshift_investigation_process',
   version: '1.0.0',
   kind: 'llm',
@@ -31,7 +33,8 @@ export const investigationProcessJudge: RegisteredEvaluatorDefinition = {
   description:
     'Reference-free: how a Nightshift investigation was carried out, from alert semantics and decision tree use to causal validation, hypothesis coverage, evidence grounding and when it stopped.',
   evidenceSchema: roundEvidenceSchema,
-  async evaluate({ round, inferenceClient }) {
+  referenceDataSchema: reportReferenceDataSchema,
+  async evaluate({ round, referenceData, inferenceClient }) {
     if (!inferenceClient) {
       throw new Error(
         'Inference client is required for the nightshift_investigation_process judge'
@@ -41,7 +44,7 @@ export const investigationProcessJudge: RegisteredEvaluatorDefinition = {
     const output = await runJudge({
       inferenceClient,
       prompt: investigationProcessPrompt,
-      input: { transcript: renderRound(round) },
+      input: { transcript: renderRound(round, referenceData?.hypotheses) },
       toolName: INVESTIGATION_PROCESS_TOOL_NAME,
       outputSchema: investigationProcessOutputSchema,
     });
@@ -90,3 +93,5 @@ export const investigationProcessJudge: RegisteredEvaluatorDefinition = {
     };
   },
 };
+
+export const investigationProcessJudge: RegisteredEvaluatorDefinition = definition;

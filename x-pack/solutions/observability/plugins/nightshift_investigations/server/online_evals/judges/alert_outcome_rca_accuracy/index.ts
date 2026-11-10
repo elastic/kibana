@@ -9,6 +9,7 @@ import type { EvaluatorResult, RegisteredEvaluatorDefinition } from '@kbn/evals-
 import type { AlertOutcomeReferenceData } from '../alert_outcome_shared';
 import { MAX_JUDGE_INPUT_CHARS, alertOutcomeReferenceDataSchema } from '../alert_outcome_shared';
 import { roundEvidenceSchema, truncate } from '../render_round';
+import { renderReport } from '../report';
 import { capExplanation, gradeToScore, runJudge } from '../run_judge';
 import type { AlertOutcomeRcaAccuracyOutput } from './prompt';
 import {
@@ -101,7 +102,10 @@ const definition: RegisteredEvaluatorDefinition<AlertOutcomeReferenceData> = {
       prompt: alertOutcomeRcaAccuracyPrompt,
       input: {
         confirmed_root_cause: truncate(confirmedRootCause, MAX_JUDGE_INPUT_CHARS),
-        investigation_report: truncate(round.response.message, MAX_JUDGE_INPUT_CHARS),
+        investigation_report: truncate(
+          renderReport({ answer: round.response.message, hypotheses: referenceData?.hypotheses }),
+          MAX_JUDGE_INPUT_CHARS
+        ),
       },
       toolName: ALERT_OUTCOME_RCA_ACCURACY_TOOL_NAME,
       outputSchema: alertOutcomeRcaAccuracyOutputSchema,

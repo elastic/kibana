@@ -38,6 +38,19 @@ describe('renderRound', () => {
     );
   });
 
+  it('renders the hypotheses panel under the final answer', () => {
+    const transcript = renderRound(
+      { input: { message: 'q' }, steps: [], response: { message: 'final answer' } },
+      [{ candidate: 'Bad deploy', status: 'confirmed', confidence: 0.9 }]
+    );
+
+    expect(
+      transcript.endsWith(
+        '## Agent final answer\nfinal answer\n\n## Hypotheses panel (shown to the user)\n- [confirmed] Bad deploy (confidence 0.9)'
+      )
+    ).toBe(true);
+  });
+
   it('truncates long tool results', () => {
     const transcript = renderRound({
       input: { message: 'q' },

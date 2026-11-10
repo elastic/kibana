@@ -12,9 +12,10 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { EvaluateEvidence, EvaluateFn } from '@kbn/evals-plugin/server';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { buildOnlineEvalsEvidence } from '../online_evals/build_evidence';
+import { buildOnlineEvalsEvidence, extractHypotheses } from '../online_evals/build_evidence';
 import { buildOnlineEvalScoreEvent, type EvaluateResult } from '../online_evals/build_score_event';
 import { OnlineEvalsStepError, reportOnlineEvalsStepFailure } from '../online_evals/step_failure';
+import type { ReportHypothesis } from '../online_evals/judges/report';
 import type { NightshiftTelemetryClient } from '../telemetry';
 
 /** Judges run in parallel within one evaluation, so this bounds concurrent judge calls. */
@@ -36,7 +37,7 @@ const inputSchema = lazySchema(() =>
     graded_report: z
       .enum(['first_round', 'pre_recovery', 'current'])
       .describe(
-        "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored. `pre_recovery`, the report just before an alert recovery, isn't supported yet."
+        "Which report the judges grade: `first_round` is the investigation's first round, `current` the round being scored, and `pre_recovery`, only for an alert recovery, the last round before it."
       ),
     evaluator_set: z
       .string()
@@ -86,7 +87,7 @@ const inputSchema = lazySchema(() =>
 type ScoreInput = z.infer<typeof inputSchema>;
 
 const skipReasonSchema = lazySchema(() =>
-  z.enum(['evals_unavailable', 'paused', 'scoring_failed'])
+  z.enum(['evals_unavailable', 'paused', 'scoring_failed', 'same_as_first_round'])
 );
 type SkipReason = z.infer<typeof skipReasonSchema>;
 
@@ -98,36 +99,50 @@ const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
 
 /**
- * The round the judges grade. `first_round` is the investigation's first round, whatever round is
- * being scored; an alert recovery is the ground truth, so it is never graded itself.
+ * The index of the round the judges grade, or `same_as_first_round` when the pre-recovery report
+ * is the first round's. `first_round` is the investigation's first round, whatever round is being
+ * scored, and `pre_recovery` the last round before an alert recovery. An alert recovery is the
+ * ground truth, so it is never graded itself.
  */
-const getGradedRound = (
+const getGradedRoundIndex = (
   input: ScoreInput,
   rounds: ConversationRound[],
   round: ConversationRound
-): ConversationRound => {
+): number | 'same_as_first_round' => {
+  const roundIndex = rounds.indexOf(round);
+  const isRecovery = input.round_kind === 'alert_recovery';
+  if (input.graded_report === 'current' && !isRecovery) {
+    return roundIndex;
+  }
+  if (input.graded_report === 'pre_recovery' && !isRecovery) {
+    throw new OnlineEvalsStepError(
+      'invalid_input',
+      `Cannot grade the pre_recovery report of a ${input.round_kind} round`
+    );
+  }
+  if (input.graded_report === 'current') {
+    throw new OnlineEvalsStepError(
+      'invalid_input',
+      'Cannot grade the current report of an alert_recovery round'
+    );
+  }
+  // A recovery that is the first round, or read before it was saved, would grade itself.
+  if (isRecovery && roundIndex <= 0) {
+    throw new OnlineEvalsStepError(
+      'invalid_input',
+      'Cannot grade an alert recovery against itself: it is the first round'
+    );
+  }
   if (input.graded_report === 'first_round') {
-    // A recovery that is the first round, or read before it was saved, would grade itself.
-    if (input.round_kind === 'alert_recovery' && rounds[0].id === round.id) {
-      throw new OnlineEvalsStepError(
-        'invalid_input',
-        'Cannot grade an alert recovery against itself: it is the first round'
-      );
-    }
-    return rounds[0];
+    return 0;
   }
-  if (input.graded_report === 'current' && input.round_kind !== 'alert_recovery') {
-    return round;
-  }
-  throw new OnlineEvalsStepError(
-    'invalid_input',
-    `Cannot grade the ${input.graded_report} report of a ${input.round_kind} round`
-  );
+  return roundIndex === 1 ? 'same_as_first_round' : roundIndex - 1;
 };
 
 /**
- * Reads the round to score and the round the judges grade. Throws a coded error, reported as a
- * step failure, when it can't.
+ * Reads the round to score, the round the judges grade and the hypotheses panel as it stood at the
+ * end of the graded round, or the reason to skip scoring. Throws a coded error, reported as a step
+ * failure, when it can't read them.
  */
 const readRound = async ({
   input,
@@ -137,7 +152,15 @@ const readRound = async ({
   input: ScoreInput;
   getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   request: KibanaRequest;
-}): Promise<{ agentId: string; round: ConversationRound; gradedRound: ConversationRound }> => {
+}): Promise<
+  | {
+      agentId: string;
+      round: ConversationRound;
+      gradedRound: ConversationRound;
+      hypotheses: ReportHypothesis[] | undefined;
+    }
+  | { skipReason: 'same_as_first_round' }
+> => {
   const agentBuilder = getAgentBuilder();
   if (!agentBuilder) {
     throw new OnlineEvalsStepError(
@@ -158,10 +181,15 @@ const readRound = async ({
       `Round "${input.round_id}" not found in the investigation`
     );
   }
+  const gradedIndex = getGradedRoundIndex(input, conversation.rounds, round);
+  if (gradedIndex === 'same_as_first_round') {
+    return { skipReason: gradedIndex };
+  }
   return {
     agentId: conversation.agent_id,
     round,
-    gradedRound: getGradedRound(input, conversation.rounds, round),
+    gradedRound: conversation.rounds[gradedIndex],
+    hypotheses: extractHypotheses(conversation.rounds.slice(0, gradedIndex + 1)),
   };
 };
 
@@ -271,11 +299,11 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
 
         const request = context.contextManager.getFakeRequest();
 
-        const { agentId, round, gradedRound } = await readRound({
-          input,
-          getAgentBuilder,
-          request,
-        });
+        const readResult = await readRound({ input, getAgentBuilder, request });
+        if ('skipReason' in readResult) {
+          return skip(readResult.skipReason);
+        }
+        const { agentId, round, gradedRound, hypotheses } = readResult;
         const roundTraceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
         const judgeConnectorId = await resolveJudge(resolveJudgeConnectorId, request);
         const { results, failedEvaluators } = await runJudges({
@@ -284,6 +312,7 @@ export const scoreOnlineEvalsRoundStepDefinition = ({
             round: gradedRound,
             alertOutcome:
               input.round_kind === 'alert_recovery' ? round.response.message : undefined,
+            hypotheses,
           }),
           judgeConnectorId,
           evaluate,

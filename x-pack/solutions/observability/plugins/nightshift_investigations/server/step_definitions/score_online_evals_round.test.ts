@@ -10,6 +10,14 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { EvaluateFn } from '@kbn/evals-plugin/server';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import type { EvaluateResult } from '../online_evals/build_score_event';
+import {
+  ANSWER_PLUS_PANEL,
+  CONFIRMED_A,
+  CONFIRMED_B,
+  DISMISSED_A,
+  FOLLOW_UP_CHANGES_CAUSE,
+  NO_PANEL,
+} from '../online_evals/fixtures/conversations';
 import { scoreOnlineEvalsRoundStepDefinition } from './score_online_evals_round';
 
 jest.mock('@kbn/workflows-extensions/server', () => ({
@@ -227,23 +235,78 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
       );
     });
 
-    it.each(['current', 'pre_recovery'])(
-      'never grades the recovery itself: rejects the %s report as invalid input',
-      async (gradedReport) => {
-        const { run, evaluate, reportOnlineEvalScore, reportOnlineEvalsStepFailed } = setup({
-          rounds: [ROUND, RECOVERY],
-        });
+    it("passes the panel as the first round left it, without a later follow-up's changes", async () => {
+      const { run, evaluate } = setup({
+        evaluate: jest
+          .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
+          .mockResolvedValue([okResult('conclusion_quality')]),
+        rounds: FOLLOW_UP_CHANGES_CAUSE,
+      });
 
-        await expect(run({ ...RECOVERY_INPUT, graded_report: gradedReport })).resolves.toEqual({
-          output: { scored: false, skip_reason: 'scoring_failed' },
-        });
-        expect(evaluate).not.toHaveBeenCalled();
-        expect(reportOnlineEvalScore).not.toHaveBeenCalled();
-        expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
-          expect.objectContaining({ step: 'score', code: 'invalid_input' })
-        );
-      }
-    );
+      await run(RECOVERY_INPUT);
+
+      expect(evaluate.mock.calls[0][0].evidence).toHaveProperty('reference_data', {
+        alert_outcome: 'Confirmed: restoring the cache cleared the alert.',
+        hypotheses: [CONFIRMED_A],
+      });
+    });
+
+    it('never grades the recovery itself: rejects the current report as invalid input', async () => {
+      const { run, evaluate, reportOnlineEvalScore, reportOnlineEvalsStepFailed } = setup({
+        rounds: [ROUND, RECOVERY],
+      });
+
+      await expect(run({ ...RECOVERY_INPUT, graded_report: 'current' })).resolves.toEqual({
+        output: { scored: false, skip_reason: 'scoring_failed' },
+      });
+      expect(evaluate).not.toHaveBeenCalled();
+      expect(reportOnlineEvalScore).not.toHaveBeenCalled();
+      expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+        expect.objectContaining({ step: 'score', code: 'invalid_input' })
+      );
+    });
+
+    it('skips the pre-recovery report when it is the first round, sending no events', async () => {
+      const { run, evaluate, reportOnlineEvalScore, reportOnlineEvalsStepFailed } = setup({
+        rounds: [ROUND, RECOVERY],
+      });
+
+      await expect(run({ ...RECOVERY_INPUT, graded_report: 'pre_recovery' })).resolves.toEqual({
+        output: { scored: false, skip_reason: 'same_as_first_round' },
+      });
+      expect(evaluate).not.toHaveBeenCalled();
+      expect(reportOnlineEvalScore).not.toHaveBeenCalled();
+      expect(reportOnlineEvalsStepFailed).not.toHaveBeenCalled();
+    });
+
+    it('grades the last round before the recovery against the recovery conclusion', async () => {
+      const { run, evaluate, reportOnlineEvalScore } = setup({
+        evaluate: jest
+          .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
+          .mockResolvedValue([okResult('conclusion_quality')]),
+        rounds: FOLLOW_UP_CHANGES_CAUSE,
+      });
+
+      await run({ ...RECOVERY_INPUT, graded_report: 'pre_recovery' });
+
+      expect(evaluate.mock.calls[0][0].evidence).toEqual({
+        round: {
+          input: { message: 'Could it be the cache instead?' },
+          steps: [
+            expect.objectContaining({ tool_call_id: 'call-cache' }),
+            expect.objectContaining({ tool_call_id: 'call-panel-b' }),
+          ],
+          response: { message: 'Yes: cache eviction, not the deploy.' },
+        },
+        reference_data: {
+          alert_outcome: 'Confirmed: restoring the cache cleared the alert.',
+          hypotheses: [DISMISSED_A, CONFIRMED_B],
+        },
+      });
+      expect(reportOnlineEvalScore).toHaveBeenCalledWith(
+        expect.objectContaining({ round_id: 'round-recovery', graded_report: 'pre_recovery' })
+      );
+    });
 
     it('never grades a recovery that is the first round against itself', async () => {
       const { run, evaluate, reportOnlineEvalsStepFailed } = setup({ rounds: [RECOVERY] });
@@ -258,13 +321,38 @@ describe('scoreOnlineEvalsRoundStepDefinition', () => {
     });
   });
 
+  it("passes the current round's panel when grading the current report", async () => {
+    const evaluate = jest
+      .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
+      .mockResolvedValue([okResult('conclusion_quality')]);
+    const { run } = setup({ evaluate, rounds: ANSWER_PLUS_PANEL });
+
+    await run({ round_id: 'round-initial', graded_report: 'current' });
+
+    expect(evaluate.mock.calls[0][0].evidence).toHaveProperty('reference_data', {
+      hypotheses: [CONFIRMED_A],
+    });
+  });
+
+  it('rejects the pre-recovery report of a round that is not a recovery as invalid input', async () => {
+    const { run, evaluate, reportOnlineEvalsStepFailed } = setup();
+
+    await expect(run({ graded_report: 'pre_recovery' })).resolves.toEqual({
+      output: { scored: false, skip_reason: 'scoring_failed' },
+    });
+    expect(evaluate).not.toHaveBeenCalled();
+    expect(reportOnlineEvalsStepFailed).toHaveBeenCalledWith(
+      expect.objectContaining({ step: 'score', code: 'invalid_input' })
+    );
+  });
+
   it('passes no ground truth for an initial round', async () => {
     const evaluate = jest
       .fn<ReturnType<EvaluateFn>, Parameters<EvaluateFn>>()
       .mockResolvedValue([okResult('conclusion_quality')]);
-    const { run } = setup({ evaluate });
+    const { run } = setup({ evaluate, rounds: NO_PANEL });
 
-    await run({ evaluators: [{ name: 'conclusion_quality' }] });
+    await run({ round_id: 'round-initial', evaluators: [{ name: 'conclusion_quality' }] });
 
     expect(evaluate.mock.calls[0][0].evidence).not.toHaveProperty('reference_data');
   });

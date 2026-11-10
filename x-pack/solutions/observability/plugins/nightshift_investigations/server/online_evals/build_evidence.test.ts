@@ -6,7 +6,12 @@
  */
 
 import type { ConversationRound } from '@kbn/agent-builder-common';
-import { buildOnlineEvalsEvidence, MAX_EVIDENCE_TOOL_CALLS } from './build_evidence';
+import { SET_HYPOTHESES_TOOL_ID } from '@kbn/agentic-investigations-plugin/common';
+import {
+  buildOnlineEvalsEvidence,
+  extractHypotheses,
+  MAX_EVIDENCE_TOOL_CALLS,
+} from './build_evidence';
 
 const toolCall = (id: string) => ({
   type: 'tool_call',
@@ -118,5 +123,85 @@ describe('buildOnlineEvalsEvidence', () => {
     expect(ids[0]).toBe('call-0');
     expect(ids[ids.length - 1]).toBe(`call-${MAX_EVIDENCE_TOOL_CALLS + 4}`);
     expect(response.message).toBe('A bad deploy of the payments service.');
+  });
+});
+
+const setHypotheses = (hypotheses: unknown[], extra: Record<string, unknown> = {}) => ({
+  type: 'tool_call',
+  tool_call_id: 'set-hypotheses',
+  tool_id: SET_HYPOTHESES_TOOL_ID,
+  params: { hypotheses },
+  results: [{ type: 'other', data: {} }],
+  ...extra,
+});
+
+const deployConfirmed = {
+  candidate: 'Bad payments deploy',
+  status: 'confirmed',
+  confidence: 0.9,
+  reason: 'Errors start with the rollout',
+};
+const dnsDismissed = { candidate: 'DNS outage', status: 'dismissed', confidence: 0.1 };
+
+describe('extractHypotheses', () => {
+  it('takes the last call across rounds', () => {
+    expect(
+      extractHypotheses([
+        round([setHypotheses([dnsDismissed])]),
+        round([setHypotheses([deployConfirmed, dnsDismissed]), toolCall('call-1')]),
+      ])
+    ).toEqual([deployConfirmed, dnsDismissed]);
+  });
+
+  it('counts a call beyond the tool calls the evidence keeps', () => {
+    const calls = Array.from({ length: MAX_EVIDENCE_TOOL_CALLS + 5 }, (_, index) =>
+      index === 52 ? setHypotheses([deployConfirmed]) : toolCall(`c${index}`)
+    );
+    const { steps } = buildOnlineEvalsEvidence({ round: round(calls) }).round;
+
+    expect(steps.some(({ tool_id: toolId }) => toolId === SET_HYPOTHESES_TOOL_ID)).toBe(false);
+    expect(extractHypotheses([round(calls)])).toEqual([deployConfirmed]);
+  });
+
+  it('skips interrupted and failed calls', () => {
+    expect(
+      extractHypotheses([
+        round([
+          setHypotheses([deployConfirmed]),
+          setHypotheses([dnsDismissed], { interrupted: true, results: [] }),
+          setHypotheses([dnsDismissed], { results: [{ type: 'error', data: { message: 'x' } }] }),
+        ]),
+      ])
+    ).toEqual([deployConfirmed]);
+  });
+
+  it('drops malformed entries and the evidence charts', () => {
+    expect(
+      extractHypotheses([
+        round([
+          setHypotheses([
+            { ...dnsDismissed, evidence: [{ chart: 'latency' }] },
+            { candidate: 'No status', confidence: 0.5 },
+            { candidate: 'Infinite', status: 'open', confidence: Infinity },
+            'not an object',
+          ]),
+        ]),
+      ])
+    ).toEqual([dnsDismissed]);
+  });
+
+  it('returns undefined without a call or with an empty panel', () => {
+    expect(extractHypotheses([round([toolCall('call-1')])])).toBeUndefined();
+    expect(extractHypotheses([round([setHypotheses([])])])).toBeUndefined();
+  });
+
+  it('passes the hypotheses next to the alert outcome on a recovery', () => {
+    expect(
+      buildOnlineEvalsEvidence({
+        round: round([toolCall('call-1')]),
+        alertOutcome: 'Recovered after the rollback.',
+        hypotheses: [deployConfirmed],
+      }).reference_data
+    ).toEqual({ alert_outcome: 'Recovered after the rollback.', hypotheses: [deployConfirmed] });
   });
 });

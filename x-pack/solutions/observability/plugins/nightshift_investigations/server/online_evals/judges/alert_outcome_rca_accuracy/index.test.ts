@@ -11,6 +11,7 @@ import type { EvidenceRound } from '@kbn/evals-plugin/server';
 import { MAX_EXPLANATION_LENGTH } from '../run_judge';
 import type { AlertOutcomeRcaAccuracyOutput } from './prompt';
 import { MAX_JUDGE_INPUT_CHARS } from '../alert_outcome_shared';
+import type { ReportHypothesis } from '../report';
 import { alertOutcomeRcaAccuracyPrompt } from './prompt';
 import { alertOutcomeRcaFixtures } from './fixtures';
 import { alertOutcomeRcaAccuracyJudge, applyPenalty } from '.';
@@ -49,11 +50,15 @@ const createInferenceClient = (...outputs: unknown[]) => {
 
 const evaluate = (
   inferenceClient: BoundInferenceClient,
-  { cause = CAUSE, report = REPORT }: { cause?: string; report?: string } = {}
+  {
+    cause = CAUSE,
+    report = REPORT,
+    hypotheses,
+  }: { cause?: string; report?: string; hypotheses?: ReportHypothesis[] } = {}
 ) =>
   alertOutcomeRcaAccuracyJudge.evaluate({
     round: roundFor(report),
-    referenceData: { alert_outcome: cause },
+    referenceData: { alert_outcome: cause, hypotheses },
     inferenceClient,
     log: loggingSystemMock.createLogger(),
   });
@@ -71,6 +76,19 @@ describe('nightshift_alert_outcome_rca_accuracy', () => {
     const { input, toolChoice } = prompt.mock.calls[0][0];
     expect(toolChoice).toEqual({ function: 'score_alert_outcome_rca' });
     expect(input).toEqual({ confirmed_root_cause: CAUSE, investigation_report: REPORT });
+  });
+
+  it('grades the hypotheses panel as part of the report', async () => {
+    const { prompt, inferenceClient } = createInferenceClient(judgeOutput());
+
+    await evaluate(inferenceClient, {
+      hypotheses: [{ candidate: CAUSE, status: 'confirmed', confidence: 0.9 }],
+    });
+
+    const { input } = prompt.mock.calls[0][0];
+    expect(input.investigation_report).toBe(
+      `${REPORT}\n\n## Hypotheses panel (shown to the user)\n- [confirmed] ${CAUSE} (confidence 0.9)`
+    );
   });
 
   describe.each(alertOutcomeRcaFixtures.map((fixture) => [fixture.description, fixture] as const))(

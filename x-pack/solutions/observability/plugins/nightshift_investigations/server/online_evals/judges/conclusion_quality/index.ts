@@ -7,6 +7,8 @@
 
 import type { RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
 import { z, lazySchema } from '@kbn/zod/v4';
+import type { ReportReferenceData } from '../report';
+import { renderReport, reportReferenceDataSchema } from '../report';
 import { capExplanation, gradeToScore, runJudge } from '../run_judge';
 import {
   CONCLUSION_QUALITY_TOOL_NAME,
@@ -20,15 +22,16 @@ const conclusionEvidenceSchema = lazySchema(() =>
   })
 );
 
-export const conclusionQualityJudge: RegisteredEvaluatorDefinition = {
+const definition: RegisteredEvaluatorDefinition<ReportReferenceData> = {
   name: 'nightshift_conclusion_quality',
   version: '1.0.0',
   kind: 'llm',
   direction: 'maximize',
   description:
-    "Reference-free: grades the root cause conclusion of a Nightshift investigation from the agent's final answer alone, without its tool calls.",
+    "Reference-free: grades the root cause conclusion of a Nightshift investigation from the agent's final answer and hypotheses panel alone, without its tool calls.",
   evidenceSchema: conclusionEvidenceSchema,
-  async evaluate({ round, inferenceClient }) {
+  referenceDataSchema: reportReferenceDataSchema,
+  async evaluate({ round, referenceData, inferenceClient }) {
     if (!inferenceClient) {
       throw new Error('Inference client is required for the nightshift_conclusion_quality judge');
     }
@@ -36,7 +39,12 @@ export const conclusionQualityJudge: RegisteredEvaluatorDefinition = {
     const output = await runJudge({
       inferenceClient,
       prompt: conclusionQualityPrompt,
-      input: { answer: round.response.message },
+      input: {
+        answer: renderReport({
+          answer: round.response.message,
+          hypotheses: referenceData?.hypotheses,
+        }),
+      },
       toolName: CONCLUSION_QUALITY_TOOL_NAME,
       outputSchema: conclusionQualityOutputSchema,
     });
@@ -53,3 +61,5 @@ export const conclusionQualityJudge: RegisteredEvaluatorDefinition = {
     };
   },
 };
+
+export const conclusionQualityJudge: RegisteredEvaluatorDefinition = definition;

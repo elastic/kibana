@@ -8,6 +8,7 @@
 // Shared by the reference-based judges that grade a round against its alert's recovery outcome.
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { reportHypothesisSchema } from './report';
 
 /** Generous bound on judge text; explanations are capped separately before persisting. */
 export const MAX_JUDGE_TEXT_LENGTH = 100_000;
@@ -18,7 +19,10 @@ export const MAX_JUDGE_INPUT_CHARS = 90_000;
 // Unbounded on purpose: the schema is checked for the whole evaluation, so a rejection here would
 // fail every evaluator in the set. `evaluate` truncates instead.
 export const alertOutcomeReferenceDataSchema = lazySchema(() =>
-  z.object({ alert_outcome: z.string() })
+  z.object({
+    alert_outcome: z.string(),
+    hypotheses: z.array(reportHypothesisSchema).optional(),
+  })
 );
 
 export type AlertOutcomeReferenceData = z.infer<typeof alertOutcomeReferenceDataSchema>;

@@ -5,12 +5,65 @@
  * 2.0.
  */
 
-import { ConversationRoundStepType, type ConversationRound } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStepType,
+  ToolResultType,
+  type ConversationRound,
+} from '@kbn/agent-builder-common';
+import { SET_HYPOTHESES_TOOL_ID } from '@kbn/agentic-investigations-plugin/common';
 import type { EvaluateEvidence, ToolCallEvidence } from '@kbn/evals-plugin/server';
 import { keepHeadAndTail } from './keep_head_and_tail';
+import type { ReportHypothesis } from './judges/report';
 
 /** The most tool calls `evaluate()` accepts for one round. */
 export const MAX_EVIDENCE_TOOL_CALLS = 200;
+
+const toReportHypothesis = (entry: unknown): ReportHypothesis | undefined => {
+  if (typeof entry !== 'object' || entry === null) {
+    return undefined;
+  }
+  const { candidate, status, confidence, reason } = entry as Record<string, unknown>;
+  if (
+    typeof candidate !== 'string' ||
+    typeof status !== 'string' ||
+    typeof confidence !== 'number' ||
+    !Number.isFinite(confidence)
+  ) {
+    return undefined;
+  }
+  return { candidate, status, confidence, ...(typeof reason === 'string' ? { reason } : {}) };
+};
+
+/**
+ * The hypotheses panel as the last successful `set_hypotheses` call across `rounds` left it. Each
+ * call is a full snapshot, so the last one is the whole panel. Skips interrupted and failed calls
+ * and malformed entries; returns `undefined` when no call qualifies or the panel is empty.
+ */
+export const extractHypotheses = (rounds: ConversationRound[]): ReportHypothesis[] | undefined => {
+  let lastParams: Record<string, unknown> | undefined;
+  for (const { steps } of rounds) {
+    for (const step of steps) {
+      if (
+        step.type === ConversationRoundStepType.toolCall &&
+        step.tool_id === SET_HYPOTHESES_TOOL_ID &&
+        !step.interrupted &&
+        !step.results.some(({ type }) => type === ToolResultType.error)
+      ) {
+        lastParams = step.params;
+      }
+    }
+  }
+
+  const entries = lastParams?.hypotheses;
+  if (!Array.isArray(entries)) {
+    return undefined;
+  }
+  const hypotheses = entries.flatMap((entry) => {
+    const hypothesis = toReportHypothesis(entry);
+    return hypothesis ? [hypothesis] : [];
+  });
+  return hypotheses.length > 0 ? hypotheses : undefined;
+};
 
 /**
  * The evidence judges grade for one round: its user input, tool calls and final response. When
@@ -19,13 +72,16 @@ export const MAX_EVIDENCE_TOOL_CALLS = 200;
  * alert outcome, the recovery round's conclusion, is the ground truth the round is graded against.
  * The agent's notes after its last tool call, where it draws its conclusion before answering,
  * have no tool call to sit on, so they travel as `closing_reasoning` for the judges that read them.
+ * The hypotheses panel the user saw travels as `hypotheses`, for the judges that grade the report.
  */
 export const buildOnlineEvalsEvidence = ({
   round,
   alertOutcome,
+  hypotheses,
 }: {
   round: ConversationRound;
   alertOutcome?: string;
+  hypotheses?: ReportHypothesis[];
 }): EvaluateEvidence => {
   const boundNotes = new Map<string, string[]>();
   for (const step of round.steps) {
@@ -66,6 +122,7 @@ export const buildOnlineEvalsEvidence = ({
   const referenceData = {
     ...(alertOutcome === undefined ? {} : { alert_outcome: alertOutcome }),
     ...(closingReasoning ? { closing_reasoning: closingReasoning } : {}),
+    ...(hypotheses && hypotheses.length > 0 ? { hypotheses } : {}),
   };
 
   return {

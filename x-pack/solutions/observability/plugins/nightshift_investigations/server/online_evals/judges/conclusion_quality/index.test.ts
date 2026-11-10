@@ -55,6 +55,27 @@ describe('nightshift_conclusion_quality', () => {
     ]);
   });
 
+  it('grades the hypotheses panel as part of the answer', async () => {
+    const prompt = jest.fn().mockResolvedValue({
+      toolCalls: [
+        { function: { arguments: { conclusion_quality: 3, conclusion_reasoning: 'ok' } } },
+      ],
+    });
+
+    await conclusionQualityJudge.evaluate({
+      round: { input: { message: 'q' }, steps: [], response: { message: 'See the panel.' } },
+      referenceData: {
+        hypotheses: [{ candidate: 'The 14:02 deploy', status: 'confirmed', confidence: 0.9 }],
+      },
+      inferenceClient: { prompt } as unknown as BoundInferenceClient,
+      log: loggingSystemMock.createLogger(),
+    });
+
+    expect(prompt.mock.calls[0][0].input.answer).toBe(
+      'See the panel.\n\n## Hypotheses panel (shown to the user)\n- [confirmed] The 14:02 deploy (confidence 0.9)'
+    );
+  });
+
   it('requires a final answer', () => {
     const { evidenceSchema } = conclusionQualityJudge;
 

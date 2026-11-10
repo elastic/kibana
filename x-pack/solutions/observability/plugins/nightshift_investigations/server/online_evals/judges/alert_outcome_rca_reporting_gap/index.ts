@@ -16,6 +16,7 @@ import {
   roundEvidenceSchema,
   truncate,
 } from '../render_round';
+import { renderReport } from '../report';
 import { capExplanation, gradeToScore, runConversationJudge } from '../run_judge';
 import type { AlertOutcomeRcaReportingGapOutput } from './prompt';
 import {
@@ -128,7 +129,13 @@ const definition: RegisteredEvaluatorDefinition<ReferenceData> = {
           role: MessageRole.User,
           content: buildScoringRequest({
             confirmedRootCause: truncate(confirmedRootCause, MAX_JUDGE_INPUT_CHARS),
-            investigationReport: truncate(round.response.message, MAX_JUDGE_INPUT_CHARS),
+            investigationReport: truncate(
+              renderReport({
+                answer: round.response.message,
+                hypotheses: referenceData?.hypotheses,
+              }),
+              MAX_JUDGE_INPUT_CHARS
+            ),
             omittedToolCalls,
           }),
         },

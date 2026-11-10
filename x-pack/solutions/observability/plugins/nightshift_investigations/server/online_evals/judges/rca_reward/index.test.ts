@@ -9,6 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EvidenceRound } from '@kbn/evals-plugin/server';
 import { MAX_EXPLANATION_LENGTH } from '../run_judge';
+import type { ReportHypothesis } from '../report';
 import type { RcaRewardOutput } from './prompt';
 import { extractMaxConfidence, rcaRewardJudge, temporalProximityScore } from '.';
 
@@ -39,9 +40,14 @@ const createInferenceClient = (...outputs: unknown[]) => {
   return { prompt, inferenceClient: { prompt } as unknown as BoundInferenceClient };
 };
 
-const evaluate = (inferenceClient: BoundInferenceClient, evidence: EvidenceRound = round) =>
+const evaluate = (
+  inferenceClient: BoundInferenceClient,
+  evidence: EvidenceRound = round,
+  hypotheses?: ReportHypothesis[]
+) =>
   rcaRewardJudge.evaluate({
     round: evidence,
+    referenceData: { hypotheses },
     inferenceClient,
     log: loggingSystemMock.createLogger(),
   });
@@ -154,6 +160,21 @@ describe('nightshift_rca_reward', () => {
       response: { message: 'The 14:02 deploy of checkout caused the latency.' },
     });
 
+    expect(scores.map(({ name }) => name)).not.toContain('rca_confidence_ok');
+  });
+
+  it('renders the hypotheses panel but reads the stated confidence from the answer alone', async () => {
+    const { prompt, inferenceClient } = createInferenceClient(judgeOutput());
+
+    const { scores } = await evaluate(
+      inferenceClient,
+      { ...round, response: { message: 'The 14:02 deploy of checkout caused the latency.' } },
+      [{ candidate: 'The 14:02 deploy', status: 'confirmed', confidence: 0.95 }]
+    );
+
+    expect(prompt.mock.calls[0][0].input.transcript).toContain(
+      '## Hypotheses panel (shown to the user)\n- [confirmed] The 14:02 deploy (confidence 0.95)'
+    );
     expect(scores.map(({ name }) => name)).not.toContain('rca_confidence_ok');
   });
 
