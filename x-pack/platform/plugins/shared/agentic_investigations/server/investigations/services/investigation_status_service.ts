@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import { isTodoProposal, type DismissReason } from '@kbn/proposals-common';
+import type { DismissReason } from '@kbn/proposals-common';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
 import { WrongTemplateError } from '../../assignments/assignments_service';
 import type {
@@ -179,7 +179,7 @@ export class InvestigationStatusService {
           id: p.id,
           // Mirrors the fallback order in proposal_approval_card.tsx:196
           action_name: p.action?.name ?? p.actionWorkflowId ?? null,
-          requiresDiscardReason: !isTodoProposal(p),
+          requiresDiscardReason: !p.skipDiscardReason,
         }))
       );
       if (allProposals.length >= page.total || page.proposals.length < size) break;

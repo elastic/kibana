@@ -135,25 +135,4 @@ describe('ConnectedCloseInvestigationModal', () => {
       })
     );
   });
-
-  it('falls back to the modal when a skipped close is rejected', async () => {
-    previewData.requires_discard_reason = false;
-    mockMutateAsync.mockRejectedValue(
-      Object.assign(new Error('Conflict'), {
-        request: {},
-        response: { status: 409 },
-        body: { attributes: { code: 'close_targets_changed' } },
-      })
-    );
-    const onClose = jest.fn();
-
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <ConnectedCloseInvestigationModal investigation={investigation} onClose={onClose} />
-      </QueryClientProvider>
-    );
-
-    expect(await screen.findByText('confirm close')).toBeInTheDocument();
-    expect(onClose).not.toHaveBeenCalled();
-  });
 });

@@ -261,6 +261,10 @@ export class ProposalsService {
       impact,
       confidence,
       category,
+      // Resolved once, at creation: a to-do is carried out by the analyst, so declining it is
+      // not a judgement about an action and needs no reason. A caller can say so for a category
+      // this rule does not know about.
+      skipDiscardReason: params.skipDiscardReason ?? category === PROPOSAL_CATEGORY_TODO,
       origin: params.origin,
       gate,
       ...toSortRanks({ impact, confidence }),

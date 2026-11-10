@@ -39,9 +39,8 @@ export interface ConnectedCloseInvestigationModalProps {
  * and `onClose`. It fetches the close preview, calls the status mutation on confirm, invalidates
  * queries and toasts on completion.
  *
- * The modal only appears when the close needs something from the user: an investigation whose
- * pending proposals all waive the discard reason closes straight away (see
- * `useSkipCloseConfirmation`).
+ * The modal only appears when the close needs a dismiss reason: an investigation whose pending
+ * proposals all waived it closes straight away (see `useSkipCloseConfirmation`).
  *
  * The preview is always fresh (staleTime: 0, refetchInterval: 10 000) and the modal shows a
  * spinner while the first fetch is in-flight. After a successful close the dismissed proposals read
@@ -84,13 +83,7 @@ export const ConnectedCloseInvestigationModal: React.FC<
   const settleDeclinedProposals = useSettleDeclinedProposals(dropDecidedProposal);
 
   const handleConfirm = useCallback(
-    async ({
-      dismissReason,
-      rationale,
-    }: {
-      dismissReason?: DismissReason;
-      rationale?: string;
-    }): Promise<boolean> => {
+    async ({ dismissReason, rationale }: { dismissReason?: DismissReason; rationale?: string }) => {
       try {
         const result = await setStatus.mutateAsync({
           investigationId: conversationId,
@@ -110,7 +103,6 @@ export const ConnectedCloseInvestigationModal: React.FC<
         const settled = settleDeclinedProposals(result.dismissed_proposal_ids);
         onClose();
         await settled;
-        return true;
       } catch (err) {
         const code = getCloseErrorCode(err);
         if (code === 'close_targets_changed') {
@@ -127,12 +119,9 @@ export const ConnectedCloseInvestigationModal: React.FC<
           setCloseError({ kind: 'dismiss_failed', count: ids.length });
           refetchPreview();
         } else {
-          // Already reported and the modal is gone, so there is nothing left to confirm.
           services.notifications?.toasts.addDanger(i18n.STATUS_CHANGE_ERROR);
           onClose();
-          return true;
         }
-        return false;
       }
     },
     [
@@ -148,7 +137,7 @@ export const ConnectedCloseInvestigationModal: React.FC<
     ]
   );
 
-  const confirmWithoutReason = useCallback(() => handleConfirm({}), [handleConfirm]);
+  const confirmWithoutReason = useCallback(() => void handleConfirm({}), [handleConfirm]);
   const { isSkipped } = useSkipCloseConfirmation({
     preview: previewData,
     loadError: isError && !previewData,

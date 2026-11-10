@@ -81,12 +81,11 @@ const InvestigationCloseContainer: React.FC<InvestigationCloseContainerProps> = 
   });
 
   const handleConfirm = useCallback(
-    async (params: { dismissReason?: DismissReason; rationale?: string }): Promise<boolean> => {
-      if (!previewData) return false;
+    async (params: { dismissReason?: DismissReason; rationale?: string }) => {
+      if (!previewData) return;
       setCloseError(null);
       try {
         await onConfirm({ ...params, preview: previewData });
-        return true;
       } catch (err) {
         const code = getCloseErrorCode(err);
         if (code === 'close_targets_changed') {
@@ -102,13 +101,12 @@ const InvestigationCloseContainer: React.FC<InvestigationCloseContainerProps> = 
         // Other known codes (escalation_close_incomplete, linked_investigation_unavailable)
         // are not expected here (investigation-only container), but we still re-throw so
         // the outer onError in executeCloseInvestigation can handle them.
-        return false;
       }
     },
     [onConfirm, previewData, refetch]
   );
 
-  const confirmWithoutReason = useCallback(() => handleConfirm({}), [handleConfirm]);
+  const confirmWithoutReason = useCallback(() => void handleConfirm({}), [handleConfirm]);
   const { isSkipped } = useSkipCloseConfirmation({
     preview: previewData,
     loadError: isError && !previewData,

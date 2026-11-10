@@ -7,7 +7,6 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { PROPOSAL_CATEGORY_TODO } from '@kbn/proposals-common';
 import {
   InvestigationStatusService,
   assertNoUnexpectedProposals,
@@ -239,7 +238,7 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
 // ---------------------------------------------------------------------------
 
 describe('InvestigationStatusService.setStatus — dismiss reason requirement', () => {
-  const makeService = (pending: Array<{ id: string; category?: string }>) => {
+  const makeService = (pending: Array<{ id: string; skipDiscardReason?: boolean }>) => {
     const proposalsService = {
       list: jest.fn().mockResolvedValue({ proposals: pending, total: pending.length }),
       releaseGate: jest.fn().mockResolvedValue({}),
@@ -262,17 +261,15 @@ describe('InvestigationStatusService.setStatus — dismiss reason requirement', 
     return { service, proposalsService };
   };
 
-  it('rejects a close without a reason while an action proposal is pending', async () => {
+  it('rejects a close without a reason while a proposal that needs one is pending', async () => {
     const { service } = makeService([{ id: 'p-1' }]);
     await expect(service.setStatus(request, 'conv-1', { status: 'closed' })).rejects.toBeInstanceOf(
       MissingDismissReasonError
     );
   });
 
-  it('closes without a reason when only to-dos are pending, dismissing them as no_reason', async () => {
-    const { service, proposalsService } = makeService([
-      { id: 'p-1', category: PROPOSAL_CATEGORY_TODO },
-    ]);
+  it('closes without a reason when every pending proposal waived it, dismissing them as no_reason', async () => {
+    const { service, proposalsService } = makeService([{ id: 'p-1', skipDiscardReason: true }]);
 
     const result = await service.setStatus(request, 'conv-1', { status: 'closed' });
 
@@ -284,10 +281,7 @@ describe('InvestigationStatusService.setStatus — dismiss reason requirement', 
   });
 
   it('still requires a reason when a to-do and an action proposal are pending together', async () => {
-    const { service } = makeService([
-      { id: 'p-1', category: PROPOSAL_CATEGORY_TODO },
-      { id: 'p-2' },
-    ]);
+    const { service } = makeService([{ id: 'p-1', skipDiscardReason: true }, { id: 'p-2' }]);
     await expect(service.setStatus(request, 'conv-1', { status: 'closed' })).rejects.toBeInstanceOf(
       MissingDismissReasonError
     );

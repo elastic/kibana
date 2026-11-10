@@ -21,7 +21,7 @@ const preview = (
 
 describe('useSkipCloseConfirmation', () => {
   it('shows nothing, and closes nothing, while the preview is loading', () => {
-    const confirm = jest.fn().mockResolvedValue(true);
+    const confirm = jest.fn();
     const { result } = renderHook(() => useSkipCloseConfirmation({ preview: undefined, confirm }));
 
     expect(result.current.isSkipped).toBe(true);
@@ -29,7 +29,7 @@ describe('useSkipCloseConfirmation', () => {
   });
 
   it('falls back to the modal when the preview could not be loaded', () => {
-    const confirm = jest.fn().mockResolvedValue(true);
+    const confirm = jest.fn();
     const { result } = renderHook(() =>
       useSkipCloseConfirmation({ preview: undefined, loadError: true, confirm })
     );
@@ -39,7 +39,7 @@ describe('useSkipCloseConfirmation', () => {
   });
 
   it('confirms the close itself when no pending proposal needs a reason', async () => {
-    const confirm = jest.fn().mockResolvedValue(true);
+    const confirm = jest.fn();
     const { result } = renderHook(() => useSkipCloseConfirmation({ preview: preview(), confirm }));
 
     await waitFor(() => expect(confirm).toHaveBeenCalledTimes(1));
@@ -47,7 +47,7 @@ describe('useSkipCloseConfirmation', () => {
   });
 
   it('leaves the confirmation to the user when a pending proposal needs a reason', () => {
-    const confirm = jest.fn().mockResolvedValue(true);
+    const confirm = jest.fn();
     const { result } = renderHook(() =>
       useSkipCloseConfirmation({
         preview: preview({ requires_discard_reason: true, pending_proposal_count: 1 }),
@@ -59,16 +59,8 @@ describe('useSkipCloseConfirmation', () => {
     expect(confirm).not.toHaveBeenCalled();
   });
 
-  it('reveals the confirmation when the close it tried was rejected', async () => {
-    const confirm = jest.fn().mockResolvedValue(false);
-    const { result } = renderHook(() => useSkipCloseConfirmation({ preview: preview(), confirm }));
-
-    await waitFor(() => expect(result.current.isSkipped).toBe(false));
-    expect(confirm).toHaveBeenCalledTimes(1);
-  });
-
   it('closes once even though the preview keeps refetching', async () => {
-    const confirm = jest.fn().mockResolvedValue(true);
+    const confirm = jest.fn();
     const { rerender } = renderHook(
       ({ data }) => useSkipCloseConfirmation({ preview: data, confirm }),
       { initialProps: { data: preview() } }

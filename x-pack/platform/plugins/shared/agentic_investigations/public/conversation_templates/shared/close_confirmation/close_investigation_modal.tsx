@@ -56,11 +56,9 @@ export interface CloseInvestigationModalProps {
 /**
  * Confirmation modal shown before closing an investigation.
  *
- * When there are pending proposals that require a justification, prompts for a dismiss reason
- * and an optional rationale so they can be bulk-dismissed server-side. Proposals that do not —
- * to-dos, which the analyst carries out themselves — are listed but dismissed without a prompt.
- * When there are no pending proposals, it is a simple confirm that the investigation (and its
- * chat) will be closed.
+ * When there are pending proposals, prompts for a dismiss reason and an optional
+ * rationale so they can be bulk-dismissed server-side. When there are none, it is a
+ * simple confirm that the investigation (and its chat) will be closed.
  *
  * While the preview is loading, a spinner is shown and confirm is disabled so the
  * user can see what they are about to dismiss before committing.
@@ -81,7 +79,6 @@ export const CloseInvestigationModal: React.FC<CloseInvestigationModalProps> = (
   const [rationale, setRationale] = useState('');
 
   const hasProposals = (preview?.pending_proposal_count ?? 0) > 0;
-  const needsDismissReason = hasProposals && (preview?.requires_discard_reason ?? false);
   const runningCount = preview?.running_proposal_count ?? 0;
   const isConfirmDisabled = isLoading || isRefreshing || preview === undefined;
 
@@ -91,7 +88,7 @@ export const CloseInvestigationModal: React.FC<CloseInvestigationModalProps> = (
       aria-label={i18n.CLOSE_INVESTIGATION_TITLE}
       onCancel={onClose}
       onConfirm={() =>
-        onConfirm(needsDismissReason ? { dismissReason, rationale: rationale || undefined } : {})
+        onConfirm(hasProposals ? { dismissReason, rationale: rationale || undefined } : {})
       }
       cancelButtonText={i18n.CANCEL_BUTTON}
       confirmButtonText={i18n.CLOSE_INVESTIGATION_BUTTON}
@@ -155,31 +152,27 @@ export const CloseInvestigationModal: React.FC<CloseInvestigationModalProps> = (
                 totalCount={preview.pending_proposal_count}
                 data-test-subj="closeInvestigationProposalsList"
               />
-              {needsDismissReason && (
-                <>
-                  <EuiSpacer size="m" />
-                  <EuiFormRow fullWidth label={i18n.DISMISS_REASON_LABEL}>
-                    <EuiSelect
-                      fullWidth
-                      data-test-subj="closeInvestigationDismissReasonSelect"
-                      value={dismissReason}
-                      options={DISMISS_REASON_OPTIONS}
-                      onChange={(event) => setDismissReason(event.target.value as DismissReason)}
-                    />
-                  </EuiFormRow>
-                  <EuiSpacer size="s" />
-                  <EuiFormRow fullWidth label={i18n.RATIONALE_LABEL}>
-                    <EuiTextArea
-                      fullWidth
-                      data-test-subj="closeInvestigationRationaleInput"
-                      placeholder={i18n.RATIONALE_PLACEHOLDER}
-                      value={rationale}
-                      onChange={(e) => setRationale(e.target.value)}
-                      rows={3}
-                    />
-                  </EuiFormRow>
-                </>
-              )}
+              <EuiSpacer size="m" />
+              <EuiFormRow fullWidth label={i18n.DISMISS_REASON_LABEL}>
+                <EuiSelect
+                  fullWidth
+                  data-test-subj="closeInvestigationDismissReasonSelect"
+                  value={dismissReason}
+                  options={DISMISS_REASON_OPTIONS}
+                  onChange={(event) => setDismissReason(event.target.value as DismissReason)}
+                />
+              </EuiFormRow>
+              <EuiSpacer size="s" />
+              <EuiFormRow fullWidth label={i18n.RATIONALE_LABEL}>
+                <EuiTextArea
+                  fullWidth
+                  data-test-subj="closeInvestigationRationaleInput"
+                  placeholder={i18n.RATIONALE_PLACEHOLDER}
+                  value={rationale}
+                  onChange={(e) => setRationale(e.target.value)}
+                  rows={3}
+                />
+              </EuiFormRow>
             </>
           ) : null}
           {runningCount > 0 && (
