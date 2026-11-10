@@ -1398,7 +1398,7 @@ describe('RuleEventsClient', () => {
       const emitTrigger = jest.fn();
       const client = clientWith({ writer, emitTrigger });
 
-      const result = await client.createEvent({ event: version() });
+      const result = await client.createEvent({ event: version(), origin: { actor: 'agent_tool' } });
 
       expect(result).toEqual({ groupHash: 'hash-1', alertId: 'alert-1' });
       expect(writer.createAlertEvent).toHaveBeenCalledWith(
@@ -1418,6 +1418,7 @@ describe('RuleEventsClient', () => {
       const result = await clientWith({ head: prior, writer }).updateEvent({
         event: version({ '@timestamp': '2026-01-02T00:00:00.000Z', status: 'inactive' }),
         prior,
+        origin: { actor: 'agent_tool' },
       });
 
       expect(result).toEqual({ updated: true });
@@ -1435,6 +1436,7 @@ describe('RuleEventsClient', () => {
       const result = await clientWith({ head, writer, emitTrigger }).updateEvent({
         event: version({ status: 'inactive' }),
         prior,
+        origin: { actor: 'agent_tool' },
       });
 
       expect(result).toEqual({ updated: false, head });
@@ -1448,6 +1450,7 @@ describe('RuleEventsClient', () => {
       const result = await clientWith({ writer }).updateEvent({
         event: version({ status: 'inactive' }),
         prior: version(),
+        origin: { actor: 'agent_tool' },
       });
 
       expect(result).toEqual({ updated: false, head: undefined });
@@ -1461,6 +1464,7 @@ describe('RuleEventsClient', () => {
       await clientWith({ head: prior, writer: makeWriter(), emitTrigger }).updateEvent({
         event: version({ '@timestamp': '2026-01-02T00:00:00.000Z', status: 'inactive' }),
         prior,
+        origin: { actor: 'agent_tool' },
       });
 
       expect(emitTrigger).toHaveBeenCalledWith(
@@ -1481,8 +1485,8 @@ describe('RuleEventsClient', () => {
 
         await expect(
           method === 'createEvent'
-            ? client.createEvent({ event: version() })
-            : client.updateEvent({ event: version(), prior })
+            ? client.createEvent({ event: version(), origin: { actor: 'agent_tool' } })
+            : client.updateEvent({ event: version(), prior, origin: { actor: 'agent_tool' } })
         ).rejects.toThrow('index unavailable');
         expect(emitTrigger).not.toHaveBeenCalled();
       }
@@ -1491,7 +1495,7 @@ describe('RuleEventsClient', () => {
     it('refuses to write when the client was created without a writer', async () => {
       const client = asRuleEventsClient({ findLatestByEventId: jest.fn() });
 
-      await expect(client.createEvent({ event: version() })).rejects.toThrow('without a writer');
+      await expect(client.createEvent({ event: version(), origin: { actor: 'agent_tool' } })).rejects.toThrow('without a writer');
     });
   });
 });
