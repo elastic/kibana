@@ -36,9 +36,13 @@ import type {
   GetInvestigationsClient,
 } from '../routes/types';
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
+import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
+import {
+  isScheduleOnlyAutomation,
+  MANUAL_AUTOMATION_TRIGGER_SOURCE,
+} from '../../common/automation_run';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../lib/automations/types';
-import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
@@ -220,6 +224,7 @@ export const triggerInvestigationStepDefinition = (
       'Start an investigation for a given subject (significant event, alert, or other entity). When the subject, or any alert in context.alerts, is already part of an open investigation, that investigation continues instead. Returns investigation_id for tracking, or skip_reason when the automation daily limit or the deployment-wide investigation limit is reached.',
     inputSchema,
     outputSchema: z.object({
+      execution_id: z.string().optional(),
       investigation_id: z
         .string()
         .optional()
@@ -239,27 +244,39 @@ export const triggerInvestigationStepDefinition = (
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
-      const { workflow, kibanaUrl } = context.contextManager.getContext();
+      const { workflow, kibanaUrl, execution } = context.contextManager.getContext();
       const spaceId = workflow.spaceId;
       const input = inputSchema.parse(context.input);
-      const subjectId = toSubjectId(input);
       let automationBudget: AutomationBudget | undefined;
+      let isManualAutomationRun = false;
       if (input.automation_id) {
         const soClient = getAutomationsSoClient(request, spaceId);
-        const automationId = input.automation_id;
-        const automation = await soClient.get<NightshiftAutomationAttributes>(
+        const { attributes: automation } = await soClient.get<NightshiftAutomationAttributes>(
           NIGHTSHIFT_AUTOMATION_SO_TYPE,
-          automationId
+          input.automation_id
         );
-        if (automation.attributes.workflowId !== workflow.id) {
+        if (automation.workflowId !== workflow.id) {
           throw new Error('The automation does not belong to this workflow.');
         }
-        automationBudget = createAutomationBudget(
-          soClient,
-          automationId,
-          automation.attributes.runtime.dailyDispatchLimit
-        );
+        // Public workflow inputs and metadata cannot grant manual accounting.
+        isManualAutomationRun = execution.triggeredBy === MANUAL_AUTOMATION_TRIGGER_SOURCE;
+        if (isManualAutomationRun && !isScheduleOnlyAutomation(automation)) {
+          throw new Error(
+            'Only automations with a schedule trigger and no other triggers can be run manually.'
+          );
+        }
+        if (!isManualAutomationRun) {
+          automationBudget = createAutomationBudget(
+            soClient,
+            input.automation_id,
+            automation.runtime.dailyDispatchLimit
+          );
+        }
       }
+      if (isManualAutomationRun && input.subject_type !== 'manual') {
+        throw new Error('Manual automation runs require a manual question subject.');
+      }
+      const subjectId = toSubjectId(input);
       const client = getInvestigationsClient(request, spaceId);
       const alerts =
         input.subject_type === 'alert' && !input.context?.alerts
@@ -287,11 +304,11 @@ export const triggerInvestigationStepDefinition = (
           {
             subject: {
               type: input.subject_type,
-              id: subjectId,
+              id: isManualAutomationRun ? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID : subjectId,
               summary: input.summary,
             },
             title,
-            trigger_type: input.trigger_type ?? 'automatic',
+            trigger_type: isManualAutomationRun ? 'manual' : input.trigger_type ?? 'automatic',
             message: input.message,
             instructions:
               input.instructions ??
