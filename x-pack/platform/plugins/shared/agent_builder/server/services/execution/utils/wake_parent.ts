@@ -125,8 +125,9 @@ export const wakeParent = async ({
     return 'skipped';
   }
 
-  // A running parent has not stored its state yet, so it is tried and answers busy; an idle one
-  // is skipped when it already reported the result or is waiting on a prompt.
+  // A running parent has not stored its state yet, so it is tried and answers busy. An idle one
+  // is skipped when it already reported the result, or when it waits on a prompt: a run on a
+  // paused conversation is its resume, and the resume's first pass reports the finished child.
   if (
     !conversation.active_execution &&
     (!conversation.state?.background_executions?.[childExecutionId] ||

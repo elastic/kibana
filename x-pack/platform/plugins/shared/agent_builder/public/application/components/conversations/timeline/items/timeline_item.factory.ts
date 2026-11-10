@@ -9,7 +9,6 @@ import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents';
 import type { AgentTurnItem, AttachmentItem, CustomEventItem, TimelineItem } from '../types';
 import { createUserMessageEvent } from './user_message_event.factory';
-import { createAgentMessageEvent } from './agent_message_event.factory';
 import { createAttachmentAddedEvent } from './attachment_added_event.factory';
 import { CUSTOM_EVENT_TYPE, createCustomEvent } from './custom_event.factory';
 import { createVersionedAttachment } from './versioned_attachment.factory';
@@ -18,21 +17,11 @@ import { createExecutionFailedEvent } from './execution_failed_event.factory';
 import { createExecutionAbortedEvent } from './execution_aborted_event.factory';
 
 type UserMessageItem = Extract<TimelineItem, { kind: 'userMessage' }>;
-type AgentMessageItem = Extract<TimelineItem, { kind: 'agentMessage' }>;
 
 export const createUserMessageItem = (overrides?: Partial<UserMessageItem>): UserMessageItem => ({
   kind: 'userMessage',
   key: 'event-1',
   event: createUserMessageEvent(),
-  ...overrides,
-});
-
-export const createAgentMessageItem = (
-  overrides?: Partial<AgentMessageItem>
-): AgentMessageItem => ({
-  kind: 'agentMessage',
-  key: 'agent-message-1',
-  event: createAgentMessageEvent(),
   ...overrides,
 });
 

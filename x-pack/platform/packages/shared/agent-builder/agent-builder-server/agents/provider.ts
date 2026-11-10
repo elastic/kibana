@@ -102,14 +102,19 @@ export interface SubAgentExecutionResult {
   events$: Observable<ChatEvent>;
 }
 
+/** Options of a sub-agent run as its own task, outliving the run that spawned it. */
+export interface SubAgentBackgroundOptions {
+  /** How the parent gets the result; defaults to `always`. */
+  parentTriggerMode?: ChatTriggerMode;
+}
+
 /** Parameters for a one-shot standalone sub-agent execution. */
 export interface ExecuteSubAgentParams {
   agentId: string;
   parentExecutionId: string;
   prompt: string;
-  runInBackground?: boolean;
-  /** How the parent gets the result of a background sub-agent; defaults to `always`. */
-  parentTriggerMode?: ChatTriggerMode;
+  /** Set to run the sub-agent in the background. */
+  background?: SubAgentBackgroundOptions;
   connectorId?: string;
   autoApprovedApis?: AutoApprovedApi[];
   abortSignal?: AbortSignal;
@@ -120,9 +125,8 @@ export interface CreateSubAgentParams {
   agentId: string;
   parentConversationId: string;
   parentExecutionId: string;
-  runInBackground?: boolean;
-  /** How the parent gets the result of a background sub-agent; defaults to `always`. */
-  parentTriggerMode?: ChatTriggerMode;
+  /** Set to run the sub-agent in the background. */
+  background?: SubAgentBackgroundOptions;
   subagentName: string;
   subagentPurpose?: string;
   /** Pre-allocated id for the child conversation (assigned by the caller). */

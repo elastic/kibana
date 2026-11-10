@@ -217,7 +217,7 @@ describe('createSubAgentExecutor and background sub-agents', () => {
       agentId: 'child',
       prompt: 'go',
       parentExecutionId: 'parent-execution-id',
-      runInBackground: true,
+      background: {},
     });
     await executor.createSubAgent({
       agentId: 'child',
@@ -226,7 +226,7 @@ describe('createSubAgentExecutor and background sub-agents', () => {
       conversationId: 'conversation-id',
       parentConversationId: 'parent-conversation-id',
       subagentName: 'child',
-      runInBackground: true,
+      background: {},
     });
 
     for (const [params] of executeAgentMock.mock.calls) {
@@ -239,8 +239,7 @@ describe('createSubAgentExecutor and background sub-agents', () => {
       agentId: 'child',
       prompt: 'go',
       parentExecutionId: 'parent-execution-id',
-      runInBackground: true,
-      parentTriggerMode: ChatTriggerMode.Never,
+      background: { parentTriggerMode: ChatTriggerMode.Never },
     });
     expect(executeAgentMock.mock.calls[2][0].params.parentTriggerMode).toBe(ChatTriggerMode.Never);
   });

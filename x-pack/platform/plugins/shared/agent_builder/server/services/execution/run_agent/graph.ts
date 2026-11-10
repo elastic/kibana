@@ -121,13 +121,14 @@ export const createAgentGraph = ({
     return {};
   };
 
+  // The first pass of a run checks whatever its cycle, then every BACKGROUND_CHECK_CYCLE_INTERVAL
+  // cycles: a resume starts at the paused cycle, and a sub-agent that finished while the round
+  // waited on a prompt is reported by the run that answers it.
+  let firstPass = true;
   const checkBackgroundWork = async (state: StateType): Promise<StateUpdate> => {
-    // Only check at the beginning (cycle 0) and every BACKGROUND_CHECK_CYCLE_INTERVAL cycles
-    if (
-      !backgroundExecutionService ||
-      !backgroundExecutionService.hasPending() ||
-      (state.currentCycle > 0 && state.currentCycle % BACKGROUND_CHECK_CYCLE_INTERVAL !== 0)
-    ) {
+    const due = firstPass || state.currentCycle % BACKGROUND_CHECK_CYCLE_INTERVAL === 0;
+    firstPass = false;
+    if (!backgroundExecutionService?.hasPending() || !due) {
       return {};
     }
 

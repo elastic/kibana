@@ -13,6 +13,7 @@ import type {
   ConversationRoundStep,
 } from '@kbn/agent-builder-common';
 import {
+  EventActorType,
   getConversationRoundAuthorDisplayName,
   isAskUserQuestionStep,
   isAttachmentEvent,
@@ -25,6 +26,7 @@ import {
   formatAwaitingPromptNotice,
   formatInterruptionNotice,
   formatSubagentRosterNotice,
+  formatAgentMessageNotice,
 } from '../prompts/utils/notices';
 import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation } from './prepare_conversation';
@@ -300,7 +302,13 @@ export const formatUserInput = ({
     attachment_refs,
     attachment_events: inputEvents = [],
     author,
+    actor,
   } = input;
+
+  // An agent's message is a notice to the model, in the shape a running parent gets, never a user turn.
+  if (actor?.type === EventActorType.agent) {
+    return createUserMessage(formatAgentMessageNotice({ agentId: actor.id, message }));
+  }
 
   let content = message;
 

@@ -251,6 +251,7 @@ export {
   type UserMessageEventData,
   type UserMessageEvent,
   type AgentMessageEvent,
+  type AgentMessageEventData,
   type MessageEvent,
   type PromptResponseEventData,
   type PromptResponseEvent,

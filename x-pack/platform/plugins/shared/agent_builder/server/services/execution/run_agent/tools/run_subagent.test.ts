@@ -409,9 +409,7 @@ describe('createSubagentTool', () => {
       trigger_mode: 'always',
     });
     expect(registerExecution).toHaveBeenCalledWith('bg-exec-id');
-    expect(executeSubAgent).toHaveBeenCalledWith(
-      expect.objectContaining({ runInBackground: true })
-    );
+    expect(executeSubAgent).toHaveBeenCalledWith(expect.objectContaining({ background: {} }));
     expect(executeSubAgent.mock.calls[0][0]).not.toHaveProperty('abortSignal');
 
     const queued = await callHandler(
@@ -426,7 +424,7 @@ describe('createSubagentTool', () => {
     );
     expect(queued.results[0].data).toEqual(expect.objectContaining({ trigger_mode: 'never' }));
     expect(executeSubAgent).toHaveBeenLastCalledWith(
-      expect.objectContaining({ parentTriggerMode: 'never' })
+      expect.objectContaining({ background: { parentTriggerMode: 'never' } })
     );
 
     // Clean up — complete the observable (it's still running in the background)
@@ -669,9 +667,7 @@ describe('createSubagentTool', () => {
         trigger_mode: 'always',
       });
       expect(registerExecution).toHaveBeenCalledWith('bg-child');
-      expect(createSubAgent).toHaveBeenCalledWith(
-        expect.objectContaining({ runInBackground: true })
-      );
+      expect(createSubAgent).toHaveBeenCalledWith(expect.objectContaining({ background: {} }));
       expect(subagentTracker.get('bg-agent')).toBeDefined();
 
       events$.complete();

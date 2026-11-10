@@ -570,6 +570,39 @@ const hasResumeExecution = (block: ConversationEvent[]): boolean =>
  *   progress, never returned) it is kept.
  * - Submitted rounds with no stored block are appended in order.
  */
+/**
+ * A round records no agent author, so a regenerated block takes the stored `agent_message` (a
+ * background sub-agent's report, written by Agent Builder) as is, and its run keeps that trigger
+ * type. Mirrors Agent Builder's `keepStoredAgentMessages` in `round_writes.ts`.
+ */
+const keepStoredAgentMessages = (
+  stored: ConversationEvent[],
+  events: ConversationEvent[]
+): ConversationEvent[] => {
+  const agentMessages = new Map(
+    stored
+      .filter((event) => event.type === TimelineEventType.agentMessage)
+      .map((event) => [event.id, event])
+  );
+  if (agentMessages.size === 0) {
+    return events;
+  }
+  return events.map((event) => {
+    const storedMessage = agentMessages.get(event.id);
+    if (storedMessage) {
+      return storedMessage;
+    }
+    if (
+      event.type === TimelineEventType.executionStarted &&
+      event.trigger_event_id &&
+      agentMessages.has(event.trigger_event_id)
+    ) {
+      return { ...event, data: { ...event.data, trigger_type: TimelineTriggerType.agentMessage } };
+    }
+    return event;
+  });
+};
+
 export const reconcileEvents = ({
   storedEvents,
   rounds,
@@ -605,7 +638,9 @@ export const reconcileEvents = ({
     if (round) {
       const wouldRegress = terminal !== undefined && outcomeForRound(round) === undefined;
       const keepStored = hasResumeExecution(block) || (wouldRegress && !round.interruption);
-      events.push(...(keepStored ? block : roundToEvents(round, ctx)));
+      events.push(
+        ...(keepStored ? block : keepStoredAgentMessages(block, roundToEvents(round, ctx)))
+      );
     } else if (!visibleRoundIds.has(roundId) && terminal === undefined) {
       events.push(...block);
     }

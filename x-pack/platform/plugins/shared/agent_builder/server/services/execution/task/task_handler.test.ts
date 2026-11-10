@@ -388,6 +388,17 @@ describe('TaskHandler event streaming and finalization', () => {
       );
     });
 
+    it('reports the aborted execution to its parent, so a pending entry does not wait for the next message', async () => {
+      await runAborted();
+
+      expect(reportToParentMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          execution: expect.objectContaining({ status: ExecutionStatus.aborted }),
+          request: fakeRequest,
+        })
+      );
+    });
+
     it('releases nothing when the execution stores no conversation', async () => {
       await runAborted({
         agentParams: { ...execution.agentParams, storeConversation: false },

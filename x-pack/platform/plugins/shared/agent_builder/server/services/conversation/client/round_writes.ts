@@ -61,10 +61,10 @@ const eventsForKnownRound = (
     : keepStoredAgentMessages(storedForRound, roundToEvents(round, conversation));
 
 /** A round records no agent author, so its regenerated events take the stored agent message as is. */
-export const keepStoredAgentMessages = (
-  stored: ConversationEvent[],
-  events: ConversationEvent[]
-): ConversationEvent[] => {
+export const keepStoredAgentMessages = <E extends ConversationEvent>(
+  stored: ReadonlyArray<ConversationEvent>,
+  events: E[]
+): E[] => {
   const agentMessages = new Map(
     stored
       .filter((event) => event.type === TimelineEventType.agentMessage)
@@ -76,14 +76,17 @@ export const keepStoredAgentMessages = (
   return events.map((event) => {
     const storedMessage = agentMessages.get(event.id);
     if (storedMessage) {
-      return storedMessage;
+      return storedMessage as E;
     }
     if (
       event.type === TimelineEventType.executionStarted &&
       event.trigger_event_id &&
       agentMessages.has(event.trigger_event_id)
     ) {
-      return { ...event, data: { ...event.data, trigger_type: TimelineTriggerType.agentMessage } };
+      return {
+        ...event,
+        data: { ...event.data, trigger_type: TimelineTriggerType.agentMessage },
+      } as E;
     }
     return event;
   });

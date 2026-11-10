@@ -108,6 +108,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     conversation,
     origin,
     author,
+    actor,
     agentConfiguration,
     runId = uuidv4(),
     agentId,
@@ -233,6 +234,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     nextInput,
     timeline,
     nextInputAuthor: pendingTurn?.compatRound.author ?? author,
+    nextInputActor: actor,
     context,
     metadata: conversation?.metadata,
     templateId: conversation?.template_id,
@@ -743,9 +745,9 @@ const createInitializerCommand = ({
       ? { lastCallUsage: { inputTokens: lastCallInputTokens } }
       : {}),
   };
-  // A pending tool call must be (re-)executed; an ask-only pause goes back to the agent loop,
-  // through context management.
-  const goto = init.pendingToolCallIds.length > 0 ? steps.executeTool : steps.contextManagement;
+  // A pending tool call must be (re-)executed; an ask-only pause goes back to the agent loop
+  // through the background check, so a sub-agent that finished during the pause is reported.
+  const goto = init.pendingToolCallIds.length > 0 ? steps.executeTool : steps.checkBackgroundWork;
   return new Command({ update, goto });
 };
 

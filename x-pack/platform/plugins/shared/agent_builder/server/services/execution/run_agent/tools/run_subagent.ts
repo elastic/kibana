@@ -552,8 +552,7 @@ export const createSubagentTool = ({
             ...(autoApprovedApis ? { autoApprovedApis } : {}),
             ...(run_in_background
               ? {
-                  runInBackground: true,
-                  ...(trigger_mode ? { parentTriggerMode: trigger_mode } : {}),
+                  background: { ...(trigger_mode ? { parentTriggerMode: trigger_mode } : {}) },
                 }
               : { abortSignal }),
           });
@@ -617,8 +616,7 @@ export const createSubagentTool = ({
           // background agents should continue running even if main execution completes
           ...(run_in_background
             ? {
-                runInBackground: true,
-                ...(trigger_mode ? { parentTriggerMode: trigger_mode } : {}),
+                background: { ...(trigger_mode ? { parentTriggerMode: trigger_mode } : {}) },
               }
             : { abortSignal }),
         });

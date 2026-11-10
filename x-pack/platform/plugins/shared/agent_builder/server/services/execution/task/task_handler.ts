@@ -112,6 +112,7 @@ class TaskHandlerImpl implements TaskHandler {
     if (execution.status === ExecutionStatus.aborted) {
       this.logger.info(`Execution ${executionId} was aborted before it started; skipping`);
       await this.releaseAbortedExecution({ execution, fakeRequest, runAs });
+      await this.reportSettledToParent({ execution, executionClient, fakeRequest });
       return;
     }
 
@@ -222,19 +223,35 @@ class TaskHandlerImpl implements TaskHandler {
       heartbeatReporter.stop();
     }
 
-    // A bound execution has no caller credential to wake its parent with; the execution service
-    // refuses a background run of a bound agent, so none has a parent to report to.
-    if (fakeRequest) {
-      await reportToParent({
-        execution,
-        request: fakeRequest,
-        executionClient,
-        conversationService: this.deps.conversationService,
-        executionService: this.deps.getExecutionService(),
-        taskManager: this.deps.taskManager,
-        logger: this.logger,
-      });
+    await this.reportSettledToParent({ execution, executionClient, fakeRequest });
+  }
+
+  /**
+   * Reports a settled background sub-agent to its parent. A bound execution has no caller
+   * credential to wake its parent with; the execution service refuses a background run of a bound
+   * agent, so none has a parent to report to.
+   */
+  private async reportSettledToParent({
+    execution,
+    executionClient,
+    fakeRequest,
+  }: {
+    execution: AgentExecution;
+    executionClient: AgentExecutionClient;
+    fakeRequest?: KibanaRequest;
+  }): Promise<void> {
+    if (!fakeRequest) {
+      return;
     }
+    await reportToParent({
+      execution,
+      request: fakeRequest,
+      executionClient,
+      conversationService: this.deps.conversationService,
+      executionService: this.deps.getExecutionService(),
+      taskManager: this.deps.taskManager,
+      logger: this.logger,
+    });
   }
 
   /** Records the execution's failed or aborted status. */

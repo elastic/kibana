@@ -188,13 +188,16 @@ export const isUserMessageEvent = <E extends { type: string }>(
 ): event is Extract<E, { type: TimelineEventType.userMessage }> =>
   event.type === TimelineEventType.userMessage;
 
+export interface AgentMessageEventData {
+  message: string;
+}
 /**
  * A message posted by an agent that is not this conversation's run, such as a background
- * sub-agent reporting back. Shaped like a user message: a run starts from it or reads it later.
+ * sub-agent reporting back. Text only; a run starts from it or reads it later.
  */
 export type AgentMessageEvent = BaseTimelineEvent<
   TimelineEventType.agentMessage,
-  UserMessageEventData
+  AgentMessageEventData
 >;
 
 /** A message that starts a run or is read by the next one, whoever posted it. */

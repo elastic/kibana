@@ -39,6 +39,7 @@ import {
   isRoundDerivedEventId,
   roundsToEvents,
 } from '../../../conversation/client/rounds_to_events';
+import { keepStoredAgentMessages } from '../../../conversation/client/round_writes';
 
 export type {
   ProcessedStandaloneEvent,
@@ -126,14 +127,10 @@ export const eventsForContext = (conversation: Conversation): ContextTimelineEve
   const custom = conversation.events.filter(isCustomConversationEvent);
   const attachmentEvents = timelineEvents.filter(isAttachmentEvent).map(foldedExecution);
   // A round carries no agent authorship, so folding rebuilds an agent's message as the owner's
-  // `user_message`; the stored message stands in for it under the same id.
-  const agentMessages = new Map(
-    timelineEvents
-      .filter((event) => event.type === TimelineEventType.agentMessage)
-      .map((event) => [event.id, event])
-  );
-  const folded = roundsToEvents({ ...conversation, rounds: eventsToRounds(timelineEvents) }).map(
-    (event) => agentMessages.get(event.id) ?? event
+  // `user_message`; the stored message, and its run's trigger type, stand in for the rebuilt ones.
+  const folded = keepStoredAgentMessages(
+    timelineEvents,
+    roundsToEvents({ ...conversation, rounds: eventsToRounds(timelineEvents) })
   );
   const positions = new Map(conversation.events.map((event, index) => [event.id, index]));
   const position = (id: string) => positions.get(id) ?? Number.MAX_SAFE_INTEGER;

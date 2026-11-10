@@ -55,13 +55,13 @@ export const createSubAgentExecutor = ({
         mode: AgentExecutionMode.standalone,
         interactive: interactivityWith(params.autoApprovedApis),
         request,
-        ...(params.runInBackground ? backgroundDispatch : {}),
+        ...(params.background ? backgroundDispatch : {}),
         params: {
           agentId: params.agentId,
           connectorId: params.connectorId,
           parentExecutionId: params.parentExecutionId,
-          ...(params.runInBackground
-            ? { parentTriggerMode: params.parentTriggerMode ?? ChatTriggerMode.Always }
+          ...(params.background
+            ? { parentTriggerMode: params.background.parentTriggerMode ?? ChatTriggerMode.Always }
             : {}),
           nextInput: { message: params.prompt },
           projectRouting,
@@ -78,13 +78,13 @@ export const createSubAgentExecutor = ({
         mode: AgentExecutionMode.conversation,
         interactive: interactivityWith(params.autoApprovedApis),
         request,
-        ...(params.runInBackground ? backgroundDispatch : {}),
+        ...(params.background ? backgroundDispatch : {}),
         params: {
           agentId: params.agentId,
           connectorId: params.connectorId,
           parentExecutionId: params.parentExecutionId,
-          ...(params.runInBackground
-            ? { parentTriggerMode: params.parentTriggerMode ?? ChatTriggerMode.Always }
+          ...(params.background
+            ? { parentTriggerMode: params.background.parentTriggerMode ?? ChatTriggerMode.Always }
             : {}),
           conversationId: params.conversationId,
           autoCreateConversationWithId: true,

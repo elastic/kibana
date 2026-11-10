@@ -8,12 +8,18 @@
 import type {
   ConversationEvent,
   ConversationRoundAuthor,
+  EventActor,
   ConverseInput,
   MetadataFieldValue,
   SubagentEntry,
   UserMessageEventData,
 } from '@kbn/agent-builder-common';
-import { isAttachmentEvent, isTimelineEvent, isMessageEvent } from '@kbn/agent-builder-common';
+import {
+  EventActorType,
+  isAttachmentEvent,
+  isTimelineEvent,
+  isMessageEvent,
+} from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { ProcessedAttachmentType, ProcessedRoundInput } from '@kbn/agent-builder-server';
@@ -77,6 +83,7 @@ export const prepareConversation = async ({
   timeline,
   nextInput,
   nextInputAuthor,
+  nextInputActor,
   context,
   metadata,
   templateId,
@@ -86,6 +93,8 @@ export const prepareConversation = async ({
   timeline: ContextTimelineEvent[];
   nextInput: ConverseInput;
   nextInputAuthor?: ConversationRoundAuthor;
+  /** The agent that posted the next input, when it is a sub-agent's report rather than a user's message. */
+  nextInputActor?: EventActor;
   context: AgentHandlerContext;
   metadata?: Record<string, MetadataFieldValue>;
   templateId?: string;
@@ -137,6 +146,7 @@ export const prepareConversation = async ({
     const processedInput = prepareRoundInput({
       input: { ...input, attachments: [] },
       author: authorAndOrigin(round.userMessage).author,
+      actor: round.userMessage.actor,
       attachmentStateManager,
     });
     processedInputs.push(processedInput);
@@ -176,6 +186,7 @@ export const prepareConversation = async ({
   const processedNextInput = prepareRoundInput({
     input: { message: effectiveNextInput.message ?? '' },
     author: nextInputAuthor,
+    actor: nextInputActor,
     attachmentStateManager,
   });
 
@@ -256,12 +267,16 @@ const processCustomEvent = async ({
 const prepareRoundInput = ({
   input,
   author,
+  actor,
   attachmentStateManager,
 }: {
   input: UserMessageEventData;
   author?: ConversationRoundAuthor;
+  actor?: EventActor;
   attachmentStateManager: AttachmentStateManager;
 }): ProcessedRoundInput => {
+  // An agent's input is attributed to the agent, never to a user author.
+  const agentActor = actor?.type === EventActorType.agent ? actor : undefined;
   const inputAttachments: Partial<ProcessedRoundInput> = {};
   if (input.attachment_refs) {
     inputAttachments.attachment_refs = input.attachment_refs.map((ref) => ({
@@ -283,7 +298,8 @@ const prepareRoundInput = ({
     // attachments are always stripped before this function. this is here to satisfy the type
     // for legacy compatibility
     attachments: [],
-    ...(author !== undefined ? { author } : {}),
+    ...(author !== undefined && agentActor === undefined ? { author } : {}),
+    ...(agentActor ? { actor: agentActor } : {}),
     ...inputAttachments,
   };
 };

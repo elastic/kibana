@@ -10,6 +10,7 @@ import {
   ConversationRoundStepType,
   EventActorType,
   TimelineEventType,
+  TimelineTriggerType,
   isAttachmentEvent,
 } from '@kbn/agent-builder-common';
 import {
@@ -227,6 +228,9 @@ describe('groupTimelineRounds', () => {
     const [round] = groupTimelineRounds(normalized);
 
     expect(round.userMessage).toEqual(agentMessage);
+    expect(normalized.find((event) => event.id === 'r1::execution_started')).toMatchObject({
+      data: { trigger_type: TimelineTriggerType.agentMessage },
+    });
     expect(normalized.filter((event) => event.id === agentMessage.id)).toHaveLength(1);
     expect(standaloneUserMessages(normalized)).toEqual([]);
   });

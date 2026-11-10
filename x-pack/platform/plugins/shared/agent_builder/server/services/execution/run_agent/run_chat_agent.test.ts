@@ -1371,7 +1371,7 @@ describe('runDefaultAgentMode', () => {
       ]);
     });
 
-    it('resumes at contextManagement when the turn only paused on an ask_user_question', async () => {
+    it('resumes through the background check when the turn only paused on an ask_user_question', async () => {
       const { context, streamEvents } = setup();
       const question = { question: 'Pick', options: [{ label: 'a' }], multi_select: false };
       const conversation = createEmptyConversation({
@@ -1405,7 +1405,7 @@ describe('runDefaultAgentMode', () => {
       );
 
       const command = initialCommand(streamEvents);
-      expect(command.goto).toEqual([nodeNames.contextManagement]);
+      expect(command.goto).toEqual([nodeNames.checkBackgroundWork]);
       expect(command.update).toMatchObject({ pendingToolCallIds: [], researchOutcome: undefined });
       // the consumed answer is removed from the prompt manager and replayed as an event
       expect(context.promptManager.delete).toHaveBeenCalledWith('q1');

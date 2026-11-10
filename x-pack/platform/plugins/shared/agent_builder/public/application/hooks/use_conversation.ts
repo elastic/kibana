@@ -18,10 +18,24 @@ import { useLastAgentId } from './use_last_agent_id';
 import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
 
 const POLL_INTERVAL_MS = 5_000;
+// The longest a background sub-agent can still report after the conversation was last written: the
+// run task's 20 minute timeout (`agent-builder:run-agent` in the server's task definitions) plus a
+// margin for claim delays and wake retries. Past that, a leftover entry or lock never clears by itself.
+const BACKGROUND_WORK_POLL_WINDOW_MS = 30 * 60 * 1000;
 
-const hasBackgroundWork = (conversation?: Conversation): boolean =>
-  Boolean(conversation?.active_execution) ||
-  Object.keys(conversation?.state?.background_executions ?? {}).length > 0;
+const hasBackgroundWork = (conversation?: Conversation): boolean => {
+  if (!conversation) {
+    return false;
+  }
+  const pending =
+    Boolean(conversation.active_execution) ||
+    Object.keys(conversation.state?.background_executions ?? {}).length > 0;
+  if (!pending) {
+    return false;
+  }
+  const updatedAt = Date.parse(conversation.updated_at);
+  return Number.isNaN(updatedAt) || Date.now() - updatedAt < BACKGROUND_WORK_POLL_WINDOW_MS;
+};
 
 export const useConversation = () => {
   const conversationId = useConversationId();

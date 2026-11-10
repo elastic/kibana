@@ -235,6 +235,26 @@ export const formatSystemNotice = (execution: BackgroundExecutionState): string 
 };
 
 /**
+ * A message posted by an agent, such as a background sub-agent's report, in the shape a running
+ * parent gets its results: a notice to the model, not a user turn.
+ */
+export const formatAgentMessageNotice = ({
+  agentId,
+  message,
+}: {
+  agentId: string;
+  message: string;
+}): string =>
+  generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      { tagName: 'message', children: ['A background agent has reported back.'] },
+      { tagName: 'agent-id', children: [agentId] },
+      { tagName: 'report', children: [message] },
+    ],
+  });
+
+/**
  * Render the active persistent sub-agent roster as a system notice.
  */
 export const formatSubagentRosterNotice = (roster: SubagentRosterEntry[]): string => {

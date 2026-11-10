@@ -24,6 +24,7 @@ import type {
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  EventActorType,
   ExecutionStatus,
   TimelineEventType,
   isTimelineEvent,
@@ -528,6 +529,66 @@ describe('prepareMessages', () => {
     expect(isAIMessage(toolCallAIMessage)).toBe(true);
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
     expect((toolCallAIMessage as AIMessage).tool_calls![0].name).toBe(sanitizeToolId('.search'));
+  });
+
+  describe('agent messages', () => {
+    const reportActor = { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' };
+    const report = 'Background sub-agent execution child-1 finished.\n\nResult:\nPEAR';
+    const expectNotice = (message: { content: unknown }) => {
+      const content = String(message.content);
+      expect(isHumanMessage(message as HumanMessage)).toBe(true);
+      expect(content).toContain('<system_notice>');
+      expect(content).toContain('<agent-id>child-agent</agent-id>');
+      expect(content).toContain(report);
+      expect(content).not.toContain('[User:');
+    };
+
+    it('renders the input of a wake run as a notice, not as a user turn of the owner', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({
+          nextInput: {
+            ...makeRoundInput(report),
+            author: { id: 'owner', username: 'owner' },
+            actor: reportActor,
+          },
+        }),
+      });
+
+      expect(result).toHaveLength(1);
+      expectNotice(result[0]);
+    });
+
+    it('renders a completed wake round in history as a notice', async () => {
+      const result = await prepareMessages({
+        conversation: createConversation({
+          previousRounds: [
+            createRound({ input: { ...makeRoundInput(report), actor: reportActor } }),
+          ],
+          nextInput: makeRoundInput('what did it say?'),
+        }),
+      });
+
+      expectNotice(result[0]);
+      expect(result[result.length - 1].content).toBe('what did it say?');
+    });
+
+    it('renders a standalone agent message as a notice', async () => {
+      const conversation = createConversation({ nextInput: makeRoundInput('next') });
+      conversation.timeline = [
+        {
+          id: 'report-1',
+          type: TimelineEventType.agentMessage,
+          created_at: now,
+          actor: reportActor,
+          data: { message: report, attachments: [], actor: reportActor },
+        } as unknown as ProcessedTimelineEvent,
+      ];
+
+      const result = await prepareMessages({ conversation });
+
+      expect(result).toHaveLength(2);
+      expectNotice(result[0]);
+    });
   });
 
   describe('with attachments', () => {
