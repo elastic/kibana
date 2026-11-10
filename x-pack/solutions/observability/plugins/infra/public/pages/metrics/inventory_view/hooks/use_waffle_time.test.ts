@@ -28,6 +28,7 @@ jest.mock('./use_inventory_views', () => ({
 
 const mockUseUrlState = useUrlState as jest.MockedFunction<typeof useUrlState>;
 
+const NOW = new Date('2026-11-10T21:59:39.000Z').getTime();
 const SELECTED_TIME = new Date('2023-03-28T18:20:59.000Z').getTime();
 const SAVED_VIEW_TIME = new Date('2021-01-01T00:00:00.000Z').getTime();
 
@@ -40,6 +41,7 @@ describe('useWaffleTime', () => {
   let setUrlState: jest.Mock;
 
   beforeEach(() => {
+    jest.spyOn(Date, 'now').mockReturnValue(NOW);
     mockCurrentView = null;
     setUrlState = jest.fn();
     mockUseUrlState.mockReturnValue([
@@ -48,10 +50,11 @@ describe('useWaffleTime', () => {
     ]);
   });
 
-  const applyUpdater = (): WaffleTimeState => {
-    const [updater] = setUrlState.mock.calls[0];
-    return updater({ currentTime: SELECTED_TIME, isAutoReloading: false });
-  };
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const appliedState = (): WaffleTimeState => setUrlState.mock.calls[0][0];
 
   it('does not overwrite the selected time when the default view resolves after mount', () => {
     const { rerender } = renderHook(() => useWaffleTime());
@@ -63,14 +66,14 @@ describe('useWaffleTime', () => {
     expect(setUrlState).not.toHaveBeenCalled();
   });
 
-  it('keeps the selected time when switching to a saved view that has no time', () => {
+  it('resets to the current time when switching to a saved view that has no time', () => {
     mockCurrentView = createView(staticInventoryViewId);
     const { rerender } = renderHook(() => useWaffleTime());
 
     mockCurrentView = createView('saved-view-without-time');
     rerender();
 
-    expect(applyUpdater()).toEqual({ currentTime: SELECTED_TIME, isAutoReloading: false });
+    expect(appliedState()).toEqual({ currentTime: NOW, isAutoReloading: false });
   });
 
   it('applies the time of a saved view that has one', () => {
@@ -80,6 +83,6 @@ describe('useWaffleTime', () => {
     mockCurrentView = createView('saved-view-with-time', SAVED_VIEW_TIME);
     rerender();
 
-    expect(applyUpdater()).toEqual({ currentTime: SAVED_VIEW_TIME, isAutoReloading: false });
+    expect(appliedState()).toEqual({ currentTime: SAVED_VIEW_TIME, isAutoReloading: false });
   });
 });

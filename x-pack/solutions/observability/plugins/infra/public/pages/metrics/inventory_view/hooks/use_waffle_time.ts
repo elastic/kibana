@@ -13,6 +13,7 @@ import DateMath from '@kbn/datemath';
 import { constant, identity } from 'fp-ts/function';
 import createContainer from 'constate';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
+import type { Moment } from 'moment';
 import type { InventoryView } from '../../../../../common/inventory_views';
 import { staticInventoryViewId } from '../../../../../common/inventory_views';
 import { useKibanaTimefilterTime } from '../../../../hooks/use_kibana_timefilter_time';
@@ -22,11 +23,11 @@ export const DEFAULT_WAFFLE_TIME_STATE: WaffleTimeState = {
   isAutoReloading: false,
 };
 
-function mapInventoryViewToState(savedView: InventoryView, defaultTime?: number): WaffleTimeState {
+function mapInventoryViewToState(savedView: InventoryView, defaultTime?: Moment): WaffleTimeState {
   const { time, autoReload } = savedView.attributes;
 
   return {
-    currentTime: time ?? defaultTime ?? Date.now(),
+    currentTime: time ?? defaultTime?.toDate().getTime() ?? Date.now(),
     isAutoReloading: autoReload,
   };
 }
@@ -38,7 +39,7 @@ export const useWaffleTime = () => {
   const kibanaTime = DateMath.parse(getTime().to);
   const [urlState, setUrlState] = useUrlState<WaffleTimeState>({
     defaultState: currentView
-      ? mapInventoryViewToState(currentView, kibanaTime?.valueOf())
+      ? mapInventoryViewToState(currentView, kibanaTime)
       : {
           ...DEFAULT_WAFFLE_TIME_STATE,
           currentTime: kibanaTime ? kibanaTime.toDate().getTime() : Date.now(),
@@ -52,7 +53,7 @@ export const useWaffleTime = () => {
   const previousViewId = useRef<string>(currentView?.id ?? staticInventoryViewId);
   useEffect(() => {
     if (currentView && currentView.id !== previousViewId.current) {
-      setUrlState((previous) => mapInventoryViewToState(currentView, previous.currentTime));
+      setUrlState(mapInventoryViewToState(currentView));
       previousViewId.current = currentView.id;
     }
   }, [currentView, setUrlState]);
