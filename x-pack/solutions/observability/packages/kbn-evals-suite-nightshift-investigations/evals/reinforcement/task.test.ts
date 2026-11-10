@@ -148,6 +148,9 @@ const fakeFetch = (
   return fetch;
 };
 
+/** The conversation id the replay was started with, which stamps every tree it writes. */
+const replayIdOf = (fetch: jest.Mock): string => String(runInputs(fetch).conversation_id);
+
 const runInputs = (fetch: jest.Mock): Record<string, unknown> => {
   const [, options] = fetch.mock.calls.find(([path]) => path === RUN_PATH) ?? [];
   return (JSON.parse((options as FetchOptions).body ?? '{}') as { inputs: Record<string, unknown> })
@@ -298,9 +301,13 @@ describe('runReinforcementExample', () => {
     ].join('\n');
     const events: string[] = [];
     const { esClient, docs } = fakeEsClient(events, { [OTHER_HEAD_ID]: otherTree });
-    const fetch = fakeFetch(events, {
+    const fetch: jest.Mock = fakeFetch(events, {
       readExecution: async () => {
-        docs.set(OTHER_HEAD_ID, { ...otherTree, content: editedCheckout });
+        docs.set(OTHER_HEAD_ID, {
+          ...otherTree,
+          content: editedCheckout,
+          attributes: { ...otherTree.attributes, conversation_id: replayIdOf(fetch) },
+        });
         // The seeded tree has a valid traversal. The other tree is edited without one.
         return completedWith([
           {
@@ -394,14 +401,21 @@ describe('runReinforcementExample', () => {
       expect(docs.get(OTHER_HEAD_ID)?.content).toBe('updated by another investigation');
     });
 
-    it('restores a pre-existing tree its submissions name and deletes one they created', async () => {
+    it('restores a pre-existing tree it committed and deletes one it created', async () => {
       const events: string[] = [];
       const { esClient, docs } = fakeEsClient(events, { [OTHER_HEAD_ID]: otherTree });
-      const fetch = fakeFetch(events, {
+      const fetch: jest.Mock = fakeFetch(events, {
         readExecution: async () => {
-          docs.set(OTHER_HEAD_ID, { ...otherTree, content: 'replay edit' });
-          docs.set(`${OTHER_HEAD_ID}_v2`, version('checkout-high-latency', 'replay edit'));
-          docs.set('default:dtree_created-by-replay', head('created-by-replay', 'new tree'));
+          const replayId = replayIdOf(fetch);
+          docs.set(OTHER_HEAD_ID, head('checkout-high-latency', 'replay edit', replayId));
+          docs.set(
+            `${OTHER_HEAD_ID}_v2`,
+            version('checkout-high-latency', 'replay edit', replayId)
+          );
+          docs.set(
+            'default:dtree_created-by-replay',
+            head('created-by-replay', 'new tree', replayId)
+          );
           return completedWith([
             // A bare slug names the same tree as its `symptom:` id.
             { symptom_trees: [{ tree_id: 'checkout-high-latency' }] },
@@ -419,6 +433,28 @@ describe('runReinforcementExample', () => {
 
       expect([...docs.keys()]).toEqual([OTHER_HEAD_ID]);
       expect(docs.get(OTHER_HEAD_ID)).toEqual(otherTree);
+    });
+
+    // A rejected submit can name a tree it never wrote; that tree is someone else's.
+    it('leaves alone a tree a submit named but another investigation wrote', async () => {
+      const events: string[] = [];
+      const { esClient, docs } = fakeEsClient(events, { [OTHER_HEAD_ID]: otherTree });
+      const foreign = head('checkout-high-latency', 'other investigation', 'other-investigation');
+      const fetch = fakeFetch(events, {
+        readExecution: async () => {
+          docs.set(OTHER_HEAD_ID, foreign);
+          return completedWith([{ symptom_trees: [{ tree_id: 'checkout-high-latency' }] }]);
+        },
+      });
+
+      await runReinforcementExample({
+        esClient,
+        fetch: fetch as unknown as HttpHandler,
+        connectorId: 'connector',
+        example,
+      });
+
+      expect(docs.get(OTHER_HEAD_ID)).toEqual(foreign);
     });
 
     it('restores a tree it only knows about from its conversation id provenance', async () => {

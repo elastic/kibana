@@ -367,20 +367,11 @@ export const seedPriorTree = async (
   });
 };
 
+/** The tree's head after the run, or undefined when it has none. Any other read failure throws. */
 const readSubmittedMarkdown = async (
   esClient: Client,
   treeId: string
-): Promise<string | undefined> => {
-  try {
-    const response = await esClient.get<{ content?: string }>({
-      index: DECISION_TREE_AI_INDEX_DEST,
-      id: headId(treeId),
-    });
-    return response._source?.content;
-  } catch {
-    return undefined;
-  }
-};
+): Promise<string | undefined> => (await readTreeDoc(esClient, headId(treeId)))?.content;
 
 const isTerminal = (status: ExecutionStatus): boolean => TerminalExecutionStatuses.includes(status);
 
@@ -487,9 +478,9 @@ const replayTreesAfterRun = async (
 /**
  * Replays one investigation round through the agent-optimize workflow as a `replay` run, so the
  * reinforcement agent builds the round from the supplied tool calls instead of reading a
- * conversation. Returns the submit arguments plus the seeded tree and every tree the submissions
- * name as the replay left them, then rolls back only the trees the replay owns: the seeded tree,
- * every tree its submissions name, and every tree committed under its conversation id.
+ * conversation. Returns the submit arguments plus the trees it graded as the replay left them, then
+ * rolls back only the trees the replay owns: the seeded tree and every tree whose commit or counts
+ * carry its conversation id.
  */
 export const runReinforcementExample = async ({
   esClient,
@@ -595,10 +586,9 @@ export const runReinforcementExample = async ({
     if (executionId && !sawTerminal) {
       await cancelExecution(fetch, executionId, log);
     }
-    await restoreDecisionTrees(esClient, snapshots, {
-      treeIds: [treeId, ...submittedTreeIds(submissions)],
-      conversationId,
-    });
+    // A submit names trees it may never have written, so only the seeded tree and the trees the
+    // replay's writes are stamped with count as its own.
+    await restoreDecisionTrees(esClient, snapshots, { treeIds: [treeId], conversationId });
   }
 };
 

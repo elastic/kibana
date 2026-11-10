@@ -344,9 +344,9 @@ agent (`system-nightshift-agent-optimize`). Each round seeds its prior tree and 
 investigator's view of that file, so the agent merges into an existing tree instead of creating one.
 The run is started with `replay: true` under a fresh synthetic conversation id, so the reinforcement
 step builds the round from the supplied tool calls and results instead of reading a conversation.
-Afterward the eval rolls back only the trees that replay owns: the seeded tree, every tree its
-submissions name, and every tree committed under its conversation id. A tree another investigation
-writes in the same space meanwhile is left alone.
+Afterward the eval rolls back only the trees that replay owns: the seeded tree and every tree whose
+commit or counts carry its conversation id. A tree another investigation writes in the same space
+meanwhile is left alone, even when a submit named it.
 The first prior tree has both "Pod restarted" and "Pod deleted" for one pod-loss event, and that
 round's `metadata.require_merge` makes an empty `merged_nodes` list score 0. The other three rounds
 may submit an empty list. The question and conclusion are the published
