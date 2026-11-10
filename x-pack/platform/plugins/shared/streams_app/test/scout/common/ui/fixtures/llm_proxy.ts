@@ -6,6 +6,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
+import { withTimeout } from '@kbn/std';
 import getPort from 'get-port';
 import { v4 as uuidv4 } from 'uuid';
 import http, { type Server } from 'http';
@@ -282,8 +283,8 @@ export class LlmProxy {
     waitForIntercept: () => Promise<LlmResponseSimulator>;
     completeAfterIntercept: () => Promise<LlmResponseSimulator>;
   } {
-    const waitForInterceptPromise = Promise.race([
-      new Promise<LlmResponseSimulator>((outerResolve) => {
+    const waitForInterceptPromise = withTimeout({
+      promise: new Promise<LlmResponseSimulator>((outerResolve) => {
         this.interceptors.push({
           name,
           when,
@@ -339,10 +340,13 @@ export class LlmProxy {
           },
         });
       }),
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(`Interceptor "${name}" was not called`)), 30000)
-      ),
-    ]);
+      timeoutMs: 30000,
+    }).then((outcome) => {
+      if (outcome.timedout) {
+        throw new Error(`Interceptor "${name}" was not called`);
+      }
+      return outcome.value;
+    });
 
     return {
       waitForIntercept: () => waitForInterceptPromise,

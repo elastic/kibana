@@ -104,6 +104,26 @@ describe('getSchemaForAuthType()', () => {
     expect(schema.meta()).not.toHaveProperty('isKibanaManaged');
   });
 
+  test('surfaces supportsSandbox in schema meta when set on the auth type def', () => {
+    const { schema } = getSchemaForAuthType({
+      type: 'bearer',
+      supportsSandbox: true,
+      defaults: {},
+    });
+
+    expect(schema.meta()).toEqual(
+      expect.objectContaining({
+        supportsSandbox: true,
+      })
+    );
+  });
+
+  test('omits supportsSandbox from schema meta when unset on the auth type def', () => {
+    const { schema } = getSchemaForAuthType({ type: 'bearer', defaults: {} });
+
+    expect(schema.meta()).not.toHaveProperty('supportsSandbox');
+  });
+
   test('ignores defaults for key that is not in auth type schema', () => {
     const { schema } = getSchemaForAuthType({
       type: 'api_key_header',

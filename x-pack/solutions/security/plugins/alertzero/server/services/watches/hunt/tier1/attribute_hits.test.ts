@@ -28,12 +28,21 @@ describe('attributeHits', () => {
     expect(hit.matched).toEqual({
       ioc: { type: 'ip', value: '198.51.100.40' },
       field: 'source.ip',
+      iocs: [{ type: 'ip', value: '198.51.100.40', field: 'source.ip' }],
     });
   });
 
-  it('returns a slim wire hit without source fields', () => {
+  it('copies host, user and allowlisted fields onto the wire hit', () => {
     const [hit] = attributeHits(
-      [baseDoc({ 'source.ip': '198.51.100.40', 'host.name': 'WIN-1' })],
+      [
+        baseDoc({
+          'source.ip': '198.51.100.40',
+          'host.name': 'WIN-1',
+          'user.name': 'alice',
+          'process.name': 'cmd.exe',
+          'event.action': 'network_connection',
+        }),
+      ],
       [{ type: 'ip', value: '198.51.100.40' }],
       []
     );
@@ -41,11 +50,108 @@ describe('attributeHits', () => {
       id: 'evt-1',
       index: 'logs-aws.cloudtrail-default',
       timestamp: '2026-09-01T00:00:00.000Z',
+      host: 'WIN-1',
+      user: 'alice',
+      fields: {
+        'process.name': 'cmd.exe',
+        'event.action': 'network_connection',
+        'source.ip': '198.51.100.40',
+      },
       matched: {
         ioc: { type: 'ip', value: '198.51.100.40' },
         field: 'source.ip',
+        iocs: [{ type: 'ip', value: '198.51.100.40', field: 'source.ip' }],
       },
     });
+  });
+
+  it('attributes from matched_queries when present and keeps the primary match first', () => {
+    const iocs = [
+      { type: 'ip' as const, value: '198.51.100.40' },
+      { type: 'domain' as const, value: 'evil.example' },
+    ];
+    const [hit] = attributeHits(
+      [
+        baseDoc(
+          {
+            'destination.ip': '198.51.100.40',
+            'dns.question.name': 'evil.example',
+          },
+          {
+            matched_queries: ['ioc_1|dns.question.name', 'ioc_0|destination.ip'],
+          }
+        ),
+      ],
+      iocs,
+      []
+    );
+    expect(hit.matched).toEqual({
+      ioc: { type: 'domain', value: 'evil.example' },
+      field: 'dns.question.name',
+      iocs: [
+        { type: 'domain', value: 'evil.example', field: 'dns.question.name' },
+        { type: 'ip', value: '198.51.100.40', field: 'destination.ip' },
+      ],
+    });
+  });
+
+  it('falls back to matchIoc over _source when matched_queries is absent', () => {
+    const [hit] = attributeHits(
+      [baseDoc({ 'destination.ip': '198.51.100.40', 'source.ip': '198.51.100.40' })],
+      [{ type: 'ip', value: '198.51.100.40' }],
+      []
+    );
+    expect(hit.matched?.iocs).toEqual([
+      { type: 'ip', value: '198.51.100.40', field: 'source.ip' },
+      { type: 'ip', value: '198.51.100.40', field: 'destination.ip' },
+    ]);
+    expect(hit.matched?.ioc).toEqual({ type: 'ip', value: '198.51.100.40' });
+    expect(hit.matched?.field).toBe('source.ip');
+  });
+
+  it('returns every matching IOC from the fallback path, primary stays first', () => {
+    const [hit] = attributeHits(
+      [
+        baseDoc({
+          'source.ip': '10.0.0.1',
+          'dns.question.name': 'evil.example',
+        }),
+      ],
+      [
+        { type: 'ip', value: '10.0.0.1' },
+        { type: 'domain', value: 'evil.example' },
+      ],
+      []
+    );
+    expect(hit.matched?.iocs).toEqual([
+      { type: 'ip', value: '10.0.0.1', field: 'source.ip' },
+      { type: 'domain', value: 'evil.example', field: 'dns.question.name' },
+    ]);
+  });
+
+  it('caps fields at 8 allowlisted keys, truncates values to 256, takes the first array value, and stringifies non-strings', () => {
+    const long = 'x'.repeat(300);
+    const source: Record<string, unknown> = {
+      'source.ip': '10.0.0.1',
+      'process.name': ['cmd.exe', 'ignored.exe'],
+      'process.command_line': long,
+      'process.parent.name': 42,
+      'process.executable': true,
+      'file.path': '/tmp/a',
+      'file.hash.sha256': 'abc',
+      'dns.question.name': 'q.example',
+      'destination.ip': '1.2.3.4',
+      'destination.domain': 'should-be-dropped-as-9th',
+      'url.full': 'https://example',
+      'event.action': 'exec',
+    };
+    const [hit] = attributeHits([baseDoc(source)], [{ type: 'ip', value: '10.0.0.1' }], []);
+    expect(Object.keys(hit.fields ?? {})).toHaveLength(8);
+    expect(hit.fields?.['process.name']).toBe('cmd.exe');
+    expect(hit.fields?.['process.command_line']).toHaveLength(256);
+    expect(hit.fields?.['process.parent.name']).toBe('42');
+    expect(hit.fields?.['process.executable']).toBe('true');
+    expect(hit.fields?.['destination.domain']).toBeUndefined();
   });
 
   // The shape a security alert's `_source` actually has: `kibana.alert.rule.threat`
@@ -133,6 +239,7 @@ describe('attributeHits', () => {
       ioc: { type: 'ip', value: '203.0.113.10' },
       technique_id: 'T1078.004',
       field: 'source.ip',
+      iocs: [{ type: 'ip', value: '203.0.113.10', field: 'source.ip' }],
     });
   });
 
@@ -175,4 +282,35 @@ describe('isTier1SearchableIoc', () => {
       expect(isTier1SearchableIoc({ type, value: 'anything' })).toBe(true);
     }
   );
+});
+
+describe('attributeHits matched.iocs cap', () => {
+  it('caps matched.iocs at 10 on the matched_queries path, primary first', () => {
+    const iocs = Array.from({ length: 6 }, (_, i) => ({
+      type: 'ip' as const,
+      value: `198.51.100.${i}`,
+    }));
+    const matchedQueries = iocs.flatMap((_, i) => [
+      `ioc_${i}|source.ip`,
+      `ioc_${i}|destination.ip`,
+    ]);
+    const [hit] = attributeHits([baseDoc({}, { matched_queries: matchedQueries })], iocs, []);
+    expect(hit.matched?.iocs).toHaveLength(10);
+    expect(hit.matched?.iocs?.[0]).toEqual({
+      type: 'ip',
+      value: '198.51.100.0',
+      field: 'source.ip',
+    });
+    expect(hit.matched?.ioc).toEqual({ type: 'ip', value: '198.51.100.0' });
+  });
+
+  it('caps matched.iocs at 10 on the _source fallback path', () => {
+    const values = Array.from({ length: 12 }, (_, i) => `198.51.100.${i}`);
+    const [hit] = attributeHits(
+      [baseDoc({ 'source.ip': values })],
+      values.map((value) => ({ type: 'ip' as const, value })),
+      []
+    );
+    expect(hit.matched?.iocs).toHaveLength(10);
+  });
 });

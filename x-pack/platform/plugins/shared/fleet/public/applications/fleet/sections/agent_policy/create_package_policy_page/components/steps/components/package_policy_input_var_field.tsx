@@ -173,7 +173,10 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
           pkgName={packageName}
           datastreams={datastreams}
           value={value}
-          onChange={onChange}
+          onChange={(newValue) => {
+            setIsDirty(true);
+            onChange(newValue);
+          }}
           errors={errors}
           isInvalid={isInvalid}
           isDisabled={isEditPage}

@@ -120,6 +120,7 @@ evaluate.describe(
                     'Explains the overall architecture: frontend as an entry point calling checkout, checkout fanning out to payment and other downstream services',
                     'Provides at least one concrete `/app/apm/` deep link to the payment or checkout service',
                     'Renders a service map attachment of the topology (not only a prose description)',
+                    'Sets `serviceName` in the service map attachment to the chosen focal service (present in its connections), sets `timeRange` to the context time range, and does not set `view` to `full`',
                     'Orders issues by severity — problem services appear before structural observations',
                     'Does not invent services, alerts, or anomalies that are not present in the data',
                   ],

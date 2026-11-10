@@ -18,6 +18,7 @@ const ENTITY_RESOLUTION_CONCURRENCY = 10;
 export interface ResolvedEntityResult {
   euid: string;
   resolvedTo?: string;
+  namespace?: string;
 }
 
 /** `resolveSingleEntity` statuses that do not yield a canonical entity id. */
@@ -35,7 +36,8 @@ export type UnresolvedEntityResult =
  * names) to canonical `entity.id` values.
  *
  * High-confidence matches that have an `entity.id` are returned in `resolved`, each with
- * the group target it is currently an alias of when one exists. Everything else is
+ * the group target it is currently an alias of when one exists, deduplicated by canonical
+ * id so that two references to the same entity yield one result. Everything else is
  * reported in `unresolved`: `not_found`, `ambiguous` (with candidates), or `no_identity`
  * when a match has no canonical id.
  */
@@ -53,9 +55,10 @@ export const resolveEntityIds = async ({
     async (entityId) => {
       const result = await resolveSingleEntity({ esClient, spaceId, entityId });
       if (result.status === 'resolved' && result.identity.entityStoreId) {
+        const { entityStoreId, resolvedTo, namespace } = result.identity;
         return {
           kind: 'resolved' as const,
-          value: { euid: result.identity.entityStoreId, resolvedTo: result.identity.resolvedTo },
+          value: { euid: entityStoreId, resolvedTo, ...(namespace ? { namespace } : {}) },
         };
       }
       if (result.status === 'ambiguous') {
@@ -80,8 +83,17 @@ export const resolveEntityIds = async ({
     { concurrency: ENTITY_RESOLUTION_CONCURRENCY }
   );
 
+  // Several references can name the same entity (an EUID and a name, say), so keep one
+  // result per canonical id: callers count and act on these as distinct entities.
+  const resolvedByEuid = new Map<string, ResolvedEntityResult>();
+  for (const outcome of outcomes) {
+    if (outcome.kind === 'resolved' && !resolvedByEuid.has(outcome.value.euid)) {
+      resolvedByEuid.set(outcome.value.euid, outcome.value);
+    }
+  }
+
   return {
-    resolved: outcomes.flatMap((outcome) => (outcome.kind === 'resolved' ? [outcome.value] : [])),
+    resolved: [...resolvedByEuid.values()],
     unresolved: outcomes.flatMap((outcome) =>
       outcome.kind === 'unresolved' ? [outcome.value] : []
     ),

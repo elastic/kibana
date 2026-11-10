@@ -8,14 +8,17 @@
 import {
   EuiCard,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiIconTip,
   euiPaletteForStatus,
+  EuiSkeletonRectangle,
   EuiSpacer,
   EuiStat,
-  useEuiTheme,
 } from '@elastic/eui';
+import type { EuiStatProps } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { VitalRating } from '../../../../../../../common/core_web_vitals';
 import { PaletteLegends } from './palette_legends';
 import { ColorPaletteFlexItem } from './color_palette_flex_item';
 
@@ -38,6 +41,7 @@ export interface Thresholds {
 interface Props {
   title: string;
   value?: string | null;
+  rating?: VitalRating;
   ranks?: number[];
   loading: boolean;
   thresholds: Thresholds;
@@ -45,6 +49,12 @@ interface Props {
   helpLabel: string;
   dataTestSubj?: string;
 }
+
+const RATING_COLORS: Record<VitalRating, EuiStatProps['titleColor']> = {
+  good: 'success',
+  needsImprovement: 'warning',
+  poor: 'danger',
+};
 
 export function getCoreVitalTooltipMessage(
   thresholds: Thresholds,
@@ -81,20 +91,19 @@ export function CoreVitalItem({
   loading,
   title,
   value,
+  rating,
   thresholds,
-  ranks = [100, 0, 0],
+  ranks,
   isCls,
   helpLabel,
   dataTestSubj,
 }: Props) {
   const palette = euiPaletteForStatus(3);
   const [inFocusInd, setInFocusInd] = useState<number | null>(null);
-  const biggestValIndex = ranks.indexOf(Math.max(...ranks));
-  const {
-    euiTheme: { colors },
-  } = useEuiTheme();
+  // While refreshing, the previous rating and ranks are hidden so they never read as the new data.
+  const visibleRating = loading ? undefined : rating;
+  const visibleRanks = loading ? undefined : ranks;
 
-  const colorsStatus = [colors.textSuccess, colors.textWarning, colors.textDanger];
   if (!value && !loading) {
     return <EuiCard title={title} isDisabled={true} description={NO_DATA} />;
   }
@@ -113,7 +122,7 @@ export function CoreVitalItem({
           </>
         }
         isLoading={loading}
-        titleColor={colorsStatus[biggestValIndex]}
+        titleColor={visibleRating ? RATING_COLORS[visibleRating] : 'default'}
       />
       <EuiSpacer size="s" />
       <EuiFlexGroup
@@ -122,20 +131,26 @@ export function CoreVitalItem({
         style={{ maxWidth: 350 }}
         responsive={false}
       >
-        {palette.map((hexCode, ind) => (
-          <ColorPaletteFlexItem
-            hexCode={hexCode}
-            key={hexCode}
-            position={ind}
-            inFocus={inFocusInd !== ind && inFocusInd !== null}
-            percentage={ranks[ind]}
-            tooltip={getCoreVitalTooltipMessage(thresholds, ind, title, ranks[ind], isCls)}
-          />
-        ))}
+        {visibleRanks ? (
+          palette.map((hexCode, ind) => (
+            <ColorPaletteFlexItem
+              hexCode={hexCode}
+              key={hexCode}
+              position={ind}
+              inFocus={inFocusInd !== ind && inFocusInd !== null}
+              percentage={visibleRanks[ind]}
+              tooltip={getCoreVitalTooltipMessage(thresholds, ind, title, visibleRanks[ind], isCls)}
+            />
+          ))
+        ) : (
+          <EuiFlexItem>
+            <EuiSkeletonRectangle width="100%" height={16} />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <PaletteLegends
-        ranks={ranks}
+        ranks={visibleRanks}
         thresholds={thresholds}
         title={title}
         onItemHover={(ind) => {

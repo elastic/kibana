@@ -35,6 +35,7 @@ export interface DataViewsServicePublicDeps extends DataViewsServiceDeps {
     showAllIndices?: boolean;
     isRollupIndex: (indexName: string) => boolean;
     projectRouting?: string;
+    throwOnError?: boolean;
   }) => Promise<MatchedItem[]>;
 
   getRollupsEnabled: () => boolean;
@@ -54,6 +55,8 @@ export class DataViewsServicePublic extends DataViewsService {
     showAllIndices?: boolean;
     isRollupIndex: (indexName: string) => boolean;
     projectRouting?: string;
+    /** Rethrow request failures instead of resolving with an empty list */
+    throwOnError?: boolean;
   }) => Promise<MatchedItem[]>;
   public hasData: HasDataService;
   private rollupsEnabled: boolean = false;

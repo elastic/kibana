@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Suspense, lazy, useState } from 'react';
-import type { MouseEvent } from 'react';
-import { EuiButtonIcon, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
+import React, { Suspense, lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
 import { isMeasureShortcut } from '../lib/keyboard_shortcuts';
+import { useShortcutToggle } from '../hooks/use_shortcut_toggle';
+import { ToolToggleButton } from './tool_toggle_button';
 
 const LazyMeasureOverlay = lazy(() =>
   import('./measure/measure_overlay').then(({ MeasureOverlay }) => ({ default: MeasureOverlay }))
@@ -24,45 +24,28 @@ const LazyMeasureOverlay = lazy(() =>
  * @returns A toolbar button that activates the measure overlay.
  */
 export const MeasureButton = () => {
-  const [isMeasuring, setIsMeasuring] = useState(false);
-
-  const handleKeydown = (event: KeyboardEvent) => {
-    if (isMeasureShortcut(event)) {
-      event.preventDefault();
-      setIsMeasuring((prev) => !prev);
-    }
-  };
-
-  const preventTargetFromLosingFocus = (event: MouseEvent) => {
-    event.preventDefault();
-  };
+  const {
+    isActive: isMeasuring,
+    setIsActive: setIsMeasuring,
+    handleKeydown,
+  } = useShortcutToggle(isMeasureShortcut);
 
   return (
     <>
-      <EuiWindowEvent event="keydown" handler={handleKeydown} />
-      <EuiToolTip
-        content={
-          isMeasuring
-            ? ''
-            : i18n.translate('kbnDesignTools.measure.button.tooltip', {
-                values: { keyboardShortcut: isMac ? '⌘ .' : 'Ctrl .' },
-                defaultMessage: 'Measure spacing {keyboardShortcut}',
-              })
-        }
-      >
-        <EuiButtonIcon
-          onClick={() => setIsMeasuring((prev) => !prev)}
-          onMouseDown={preventTargetFromLosingFocus}
-          iconType="alignCenterHorizontal"
-          isSelected={isMeasuring}
-          aria-pressed={isMeasuring}
-          aria-label={i18n.translate('kbnDesignTools.measure.button.ariaLabel', {
-            defaultMessage: 'Measure spacing',
-          })}
-          color="text"
-          data-test-subj="measureSpacingButton"
-        />
-      </EuiToolTip>
+      <ToolToggleButton
+        isActive={isMeasuring}
+        onToggle={() => setIsMeasuring((prev) => !prev)}
+        handleKeydown={handleKeydown}
+        iconType="alignCenterHorizontal"
+        inactiveTooltip={i18n.translate('kbnDesignTools.measure.button.tooltip', {
+          values: { keyboardShortcut: isMac ? '⌘ .' : 'Ctrl .' },
+          defaultMessage: 'Measure spacing {keyboardShortcut}',
+        })}
+        ariaLabel={i18n.translate('kbnDesignTools.measure.button.ariaLabel', {
+          defaultMessage: 'Measure spacing',
+        })}
+        testSubj="measureSpacingButton"
+      />
       {isMeasuring && (
         <Suspense fallback={null}>
           <LazyMeasureOverlay setIsMeasuring={setIsMeasuring} />

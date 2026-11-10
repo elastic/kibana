@@ -175,6 +175,18 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
           z-index: ${euiTheme.levels.toast};
         }
       }
+
+      // select checkbox: only rendered in selection mode, pinned inside the panel's top right corner
+      // and vertically centered on the title bar (same height and side padding as .embPanel__header)
+      .embPanel__selectPanel {
+        position: absolute;
+        top: 0;
+        right: ${euiTheme.size.s};
+        height: ${euiTheme.size.xl};
+        display: flex;
+        align-items: center;
+        z-index: ${euiTheme.levels.menu};
+      }
     `;
   }, [euiTheme, showBorder, isEditMode, euiThemeContext, hoverActionStyles]);
 

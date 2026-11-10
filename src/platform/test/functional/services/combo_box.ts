@@ -351,7 +351,9 @@ export class ComboBoxService extends FtrService {
     const isOptionListClosed = await this.retry.tryForTime(
       5000,
       async () => {
-        const isOpen = await this.testSubjects.exists('~comboBoxOptionsList');
+        // Unlike the options list panel, the input is not remounted while the list re-renders.
+        const input = await comboBoxElement.findByTagName('input');
+        const isOpen = (await input.getAttribute('aria-expanded')) === 'true';
 
         return !isOpen;
       },

@@ -38,13 +38,13 @@ export const EmptyPrompt = ({
 
   return (
     <EuiPageTemplate.EmptyPrompt
-      iconType="watchesApp"
+      iconType="if"
       data-test-subj="createFirstRuleEmptyPrompt"
       title={
         <h2>
           <FormattedMessage
             id="xpack.triggersActionsUI.components.emptyPrompt.emptyTitle"
-            defaultMessage="Create your first Classic rule"
+            defaultMessage="Create your first rule"
           />
         </h2>
       }

@@ -1,0 +1,5 @@
+{
+  "searchIssuesWithJql": {
+    "queries": [{ "source": "v3", "method": "POST", "path": "/rest/api/3/search/jql" }]
+  }
+}

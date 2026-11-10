@@ -64,3 +64,46 @@ describe.skip('MultipleAgentPolicySummaryLine', () => {
     expect(results.queryByTestId('manageAgentPoliciesModal')).toBeInTheDocument();
   });
 });
+
+describe('MultipleAgentPolicySummaryLine of a package policy managed by a cloud onboarding instance', () => {
+  const policies = [
+    { name: 'Test policy 1', id: '0001' },
+    { name: 'Test policy 2', id: '0002' },
+  ] as AgentPolicy[];
+
+  const renderAndOpenPopover = async ({ onboardingEnabled }: { onboardingEnabled: boolean }) => {
+    const testRenderer = createFleetTestRendererMock();
+    testRenderer.startServices.featureFlags.useBooleanValue.mockReturnValue(onboardingEnabled);
+    testRenderer.startServices.application.getUrlForApp.mockImplementation(
+      (appId, { path = '' } = {}) => `/app/${appId}${path}`
+    );
+    const results = testRenderer.render(
+      <MultipleAgentPoliciesSummaryLine
+        policies={policies}
+        packagePolicyId="policy1"
+        onAgentPoliciesChange={jest.fn()}
+        onboardingDeploymentId="deploy-1"
+      />
+    );
+    fireEvent.click(results.getByTestId('agentPoliciesNumberBadge'));
+    await waitFor(() => expect(results.getByTestId('agentPoliciesPopover')).toBeInTheDocument());
+    return results;
+  };
+
+  it('links to the onboarding instance instead of managing the agent policies here', async () => {
+    const results = await renderAndOpenPopover({ onboardingEnabled: true });
+
+    expect(results.getByTestId('agentPoliciesPopoverManageInOnboardingButton')).toHaveAttribute(
+      'href',
+      '/app/onboarding/aws?deploymentId=deploy-1'
+    );
+    expect(results.queryByTestId('agentPoliciesPopoverButton')).not.toBeInTheDocument();
+  });
+
+  it('disables the link while the onboarding flow is turned off', async () => {
+    const results = await renderAndOpenPopover({ onboardingEnabled: false });
+
+    expect(results.getByTestId('agentPoliciesPopoverManageInOnboardingButton')).toBeDisabled();
+    expect(results.queryByTestId('agentPoliciesPopoverButton')).not.toBeInTheDocument();
+  });
+});

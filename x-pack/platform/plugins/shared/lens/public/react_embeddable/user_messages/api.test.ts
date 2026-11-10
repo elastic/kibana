@@ -21,7 +21,12 @@ import type {
   UserMessagesDisplayLocationId,
 } from '@kbn/lens-common';
 import { BehaviorSubject } from 'rxjs';
-import { EDITOR_MISSING_VIS_TYPE, EDITOR_UNKNOWN_DATASOURCE_TYPE } from '../../user_messages_ids';
+import { LENS_ERROR_CODES, LENS_ERROR_TYPE } from '@kbn/lens-embeddable-utils';
+import {
+  EDITOR_LOAD_ERROR,
+  EDITOR_MISSING_VIS_TYPE,
+  EDITOR_UNKNOWN_DATASOURCE_TYPE,
+} from '../../user_messages_ids';
 
 const ALL_LOCATIONS: UserMessagesDisplayLocationId[] = [
   'toolbar',
@@ -223,6 +228,40 @@ describe('User Messages API', () => {
           [EDITOR_MISSING_VIS_TYPE, EDITOR_UNKNOWN_DATASOURCE_TYPE]
         );
       }
+    });
+
+    describe('when the document failed to load', () => {
+      const loadError = Object.assign(new Error('Internal Server Error'), {
+        body: {
+          attributes: { type: LENS_ERROR_TYPE, code: LENS_ERROR_CODES.DATASOURCE_NOT_FOUND },
+        },
+      });
+
+      it('should only return the load error, ignoring messages about the fallback document', () => {
+        const { userMessagesApi, internalApi } = buildUserMessagesApi();
+        internalApi.updateVisualizationContext({
+          ...internalApi.getVisualizationContext(),
+          activeAttributes: undefined,
+        });
+        internalApi.updateLoadError(loadError);
+
+        expect(
+          userMessagesApi
+            .getUserMessages('visualizationOnEmbeddable')
+            .map(({ uniqueId }) => uniqueId)
+        ).toEqual([EDITOR_LOAD_ERROR]);
+        expect(userMessagesApi.getUserMessages('visualizationOnEmbeddable')[0].longMessage).toBe(
+          'Could not find datasource for the visualization'
+        );
+      });
+
+      it('should stop returning the load error once it is cleared', () => {
+        const { userMessagesApi, internalApi } = buildUserMessagesApi();
+        internalApi.updateLoadError(loadError);
+        internalApi.updateLoadError(undefined);
+
+        expect(userMessagesApi.getUserMessages('visualizationOnEmbeddable')).toEqual([]);
+      });
     });
 
     it('should detect a URL conflict', () => {

@@ -6,6 +6,24 @@ description: >
 enabled: true
 settings:
   timeout: '60m'
+  # Fallbacks run after ordinary step errors, not after workflow timeout or cancellation.
+  on-failure:
+    fallback:
+      - name: handle_investigation_failure
+        type: nightshift.handleInvestigationFailure
+        with:
+          investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+          # The failed steps remain available even when the engine omits the fallback's error binding.
+          reason: >-
+            ${{ error.message
+            | default: steps.resolve_model.error.message
+            | default: steps.ensure_investigation_agent.error.message
+            | default: steps.persist_investigation_started.error.message
+            | default: steps.resolve_investigation_sources.error.message
+            | default: steps.investigate.error.message
+            | default: 'Investigation failed' | truncate: 10000 }}
+        on-failure:
+          continue: true
   # One run per investigation at a time, in arrival order, so a follow-up builds on the run
   # before it.
   concurrency:
@@ -91,6 +109,11 @@ triggers:
           description: >
             The investigation (Agent Builder conversation) to run in. The start API always sets
             it; a run without it starts a new investigation whose id is the workflow execution ID.
+        timeout_seconds:
+          type: number
+          description: >
+            Upper bound the caller asked for. The space's entry point caps its investigation step
+            with it and hands the inputs on unchanged, so this run accepts it and ignores it.
       required:
         - message
       additionalProperties: false
@@ -131,6 +154,15 @@ steps:
         max-attempts: 3
         delay: 5s
         strategy: exponential
+      # Step-level retries override the workflow-level fallback.
+      fallback:
+        - name: handle_persistence_failure
+          type: nightshift.handleInvestigationFailure
+          with:
+            investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+            reason: "${{ steps.persist_investigation_started.error.message | default: 'Investigation failed' | truncate: 10000 }}"
+          on-failure:
+            continue: true
 
   - name: emit_investigation_started
     type: kibana.request
@@ -197,12 +229,9 @@ steps:
         {% if inputs.context and inputs.context.size > 0 and inputs.context.source != 'alert' %}
         Additional context: {{ inputs.context | json }}
         {% endif %}
-    on-failure:
-      continue: true
 
   - name: emit_investigation_completed
     type: kibana.request
-    if: '${{ steps.investigate.error == null }}'
     with:
       method: POST
       path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/lifecycle_events'
@@ -213,38 +242,42 @@ steps:
     on-failure:
       continue: true
 
-  - name: emit_investigation_failed
-    type: kibana.request
-    if: '${{ steps.investigate.error != null }}'
-    with:
-      method: POST
-      path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/{{ inputs.investigation_id | default: execution.id }}/lifecycle_events'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-      body:
-        status: 'failed'
-    on-failure:
-      continue: true
-
   - name: notify_completed
     type: nightshift.sendNotifications
-    if: '${{ steps.investigate.error == null }}'
     with:
       investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
       phase: completed
     on-failure:
       continue: true
 
-  - name: notify_failed
-    type: nightshift.sendNotifications
-    if: '${{ steps.investigate.error != null }}'
+  # Online evals: decides whether this run's round gets scored. The step reports its own failures
+  # and never throws; `continue` covers failures in the engine itself.
+  - name: classify_for_online_evals
+    type: nightshift.onlineEvals.classifyRound
     with:
       investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
-      phase: failed
-      reason: "${{ steps.investigate.error.message | default: 'Investigation failed' | truncate: 10000 }}"
+      investigation_started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}'
+      follow_up: '{{ inputs.context.follow_up }}'
     on-failure:
       continue: true
 
-  - name: fail_investigation
-    type: workflow.fail
-    if: '${{ steps.investigate.error != null }}'
+  # Started without waiting, so this run ends, and the next one for the investigation starts,
+  # while the judges run. The scoring workflow has no account of its own and runs as this run's.
+  - name: start_online_evals
+    type: workflow.executeAsync
+    if: '${{ steps.classify_for_online_evals.output.should_score == true }}'
+    with:
+      workflow-id: system-nightshift-online-evals
+      run-as-mode: inherit
+      inputs:
+        investigation_id: '{{ inputs.investigation_id | default: execution.id }}'
+        round_id: '{{ steps.classify_for_online_evals.output.round_id }}'
+        round_kind: '{{ steps.classify_for_online_evals.output.round_kind }}'
+        investigation_started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}'
+        investigation_ended_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}'
+        investigation_execution_id: '{{ execution.id }}'
+        # `${{ }}` passes a missing optional value as undefined; `{{ }}` would pass an empty string.
+        entry_point: '${{ inputs.context.entry_point }}'
+        alert_rule_type: '${{ inputs.context.alerts[0].rule_type_id }}'
+    on-failure:
+      continue: true

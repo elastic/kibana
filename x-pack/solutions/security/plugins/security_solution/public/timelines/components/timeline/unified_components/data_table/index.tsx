@@ -8,6 +8,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import type {
   UnifiedDataTableProps,
   UnifiedDataTableSettingsColumn,
@@ -28,15 +29,12 @@ import { createCellActionRenderer } from '../../../../../flyout_v2/shared/compon
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { JEST_ENVIRONMENT } from '../../../../../../common/constants';
 import { useOnExpandableFlyoutClose } from '../../../../../flyout/shared/hooks/use_on_expandable_flyout_close';
-import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
-import { AttackDetailsRightPanelKey } from '../../../../../flyout/attack_details/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
 import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import type {
   ColumnHeaderOptions,
   OnFetchMoreRecords,
@@ -56,7 +54,7 @@ import { transformTimelineItemToUnifiedRows } from '../utils';
 import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
-import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry/types';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry/types';
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { getAttackTitleValue } from '../../../../../flyout_v2/attack/utils/get_attack_title';
@@ -82,7 +80,7 @@ type CommonDataTableProps = {
   dataLoadingState: DataLoadingState;
   updatedAt: number;
   isTextBasedQuery?: boolean;
-  leadingControlColumns: EuiDataGridProps['leadingControlColumns'];
+  rowAdditionalLeadingControls?: RowControlColumn[];
 } & Pick<
   UnifiedDataTableProps,
   | 'onSort'
@@ -122,7 +120,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     onSetColumns,
     onSort,
     onFilter,
-    leadingControlColumns,
+    rowAdditionalLeadingControls,
     onUpdatePageIndex,
   }) {
     const dispatch = useDispatch();
@@ -142,18 +140,16 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       storage,
       dataViewFieldEditor,
       notifications: { toasts: toastsService },
-      telemetry,
       theme,
       data: dataPluginContract,
     } = services;
 
-    const enableNewFlyout = useIsNewFlyoutEnabled();
     const { openAttackFlyout } = useFlyoutApi();
     const { historyKey: ambientFlyoutHistoryKey } = useFlyoutSessionContext();
 
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
 
-    const { closeFlyout, openFlyout } = useExpandableFlyoutApi();
+    const { closeFlyout } = useExpandableFlyoutApi();
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
 
@@ -268,7 +264,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     // pagination is driven by the external pagination store. Keep the two in
     // sync so the icon follows the document currently displayed in the flyout.
     useEffect(() => {
-      if (!enableNewFlyout) return;
       if (flyoutDocumentIndex == null) {
         setExpandedDoc((prev) => (prev ? undefined : prev));
         return;
@@ -277,7 +272,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       if (paginatedDocument) {
         setExpandedDoc(paginatedDocument);
       }
-    }, [enableNewFlyout, flyoutDocumentIndex, tableRows]);
+    }, [flyoutDocumentIndex, tableRows]);
 
     const onCloseExpandableFlyout = useCallback(
       (id: string) => {
@@ -291,64 +286,22 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
-        const isAttackRow = isAttackDiscoveryRow(eventData);
-        const eventIndexName = eventData.ecs._index ?? '';
-
-        if (enableNewFlyout) {
-          if (isAttackRow) {
-            openAttackFlyout({
-              attackId: eventData._id,
-              indexName: eventIndexName,
-              onAttackUpdated: refetch,
-              origin: FLYOUT_ORIGIN.TIMELINE,
-              attackTitle: getAttackTitleValue(eventData),
-            });
-            return;
-          }
-
-          const newIndex = tableRows.findIndex((r) => r.id === eventData.id);
-          const eventIndex = newIndex >= 0 ? newIndex : 0;
-          openDocumentFlyout(eventIndex);
+        if (isAttackDiscoveryRow(eventData)) {
+          openAttackFlyout({
+            attackId: eventData._id,
+            indexName: eventData.ecs._index ?? '',
+            onAttackUpdated: refetch,
+            origin: FLYOUT_ORIGIN.TIMELINE,
+            attackTitle: getAttackTitleValue(eventData),
+          });
           return;
         }
 
-        if (isAttackRow) {
-          openFlyout({
-            right: {
-              id: AttackDetailsRightPanelKey,
-              params: {
-                attackId: eventData._id,
-                indexName: eventIndexName,
-              },
-            },
-          });
-        } else {
-          openFlyout({
-            right: {
-              id: DocumentDetailsRightPanelKey,
-              params: {
-                id: eventData._id,
-                indexName: eventIndexName,
-                scopeId: timelineId,
-              },
-            },
-          });
-        }
-        telemetry.reportEvent(DocumentEventTypes.DetailsFlyoutOpened, {
-          location: timelineId,
-          panel: 'right',
-        });
+        const newIndex = tableRows.findIndex((r) => r.id === eventData.id);
+        const eventIndex = newIndex >= 0 ? newIndex : 0;
+        openDocumentFlyout(eventIndex);
       },
-      [
-        enableNewFlyout,
-        openAttackFlyout,
-        refetch,
-        tableRows,
-        openDocumentFlyout,
-        openFlyout,
-        timelineId,
-        telemetry,
-      ]
+      [openAttackFlyout, refetch, tableRows, openDocumentFlyout]
     );
 
     const onSetExpandedDoc = useCallback(
@@ -592,7 +545,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             externalAdditionalControls={additionalControls}
             renderCustomGridBody={finalRenderCustomBodyCallback}
             trailingControlColumns={finalTrailControlColumns}
-            externalControlColumns={leadingControlColumns}
+            rowAdditionalLeadingControls={rowAdditionalLeadingControls}
             onUpdatePageIndex={onUpdatePageIndex}
             getRowIndicator={getTimelineRowTypeIndicator}
             settings={settings}

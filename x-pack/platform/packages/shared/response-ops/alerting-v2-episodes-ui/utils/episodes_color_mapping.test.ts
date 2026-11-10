@@ -6,13 +6,17 @@
  */
 
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import { getColorFactory } from '@kbn/coloring';
+import { getKbnPalettes } from '@kbn/palettes';
 import { buildModifiedVisAttributes } from './episodes_color_mapping';
+import { HISTOGRAM_OTHER_BREAKDOWN } from '../constants';
 
 const mockColors = {
   danger: '#ff0000',
   success: '#00ff00',
   primary: '#0000ff',
   warning: '#ff8800',
+  mediumShade: '#999999',
 };
 
 const mockLensAttributes = {
@@ -72,7 +76,7 @@ describe('buildModifiedVisAttributes', () => {
     expect(layer.yConfig[0]).toMatchObject({ forAccessor: 'col_count', color: mockColors.danger });
   });
 
-  it('does not set yConfig color when a breakdown field other than episode.status is set', () => {
+  it('colors only the folded Other series when a breakdown other than episode.status is set', () => {
     const result = buildModifiedVisAttributes(
       mockLensAttributes,
       'rule.id',
@@ -80,8 +84,24 @@ describe('buildModifiedVisAttributes', () => {
       mockColors
     );
     const layer = (result.state?.visualization as any).layers[0];
-    expect(layer.colorMapping).toBeUndefined();
     expect(layer.yConfig).toEqual([]);
+    expect(layer.colorMapping.assignments).toEqual([
+      {
+        rules: [
+          {
+            type: 'match',
+            pattern: HISTOGRAM_OTHER_BREAKDOWN,
+            matchEntireWord: true,
+            matchCase: true,
+          },
+        ],
+        color: { type: 'colorCode', colorCode: mockColors.mediumShade },
+        touched: true,
+      },
+    ]);
+    expect(layer.colorMapping.specialAssignments).toEqual([
+      { rules: [{ type: 'other' }], color: { type: 'loop' }, touched: false },
+    ]);
   });
 
   it('applies per-status colorMapping when breakdown is episode.status', () => {
@@ -94,5 +114,19 @@ describe('buildModifiedVisAttributes', () => {
     expect(patterns).toEqual(
       expect.arrayContaining(['active', 'inactive', 'recovering', 'pending'])
     );
+  });
+
+  it('resolves the Other series to the neutral color and other values to the palette', () => {
+    const result = buildModifiedVisAttributes(mockLensAttributes, 'rule.id', {}, mockColors);
+    const { colorMapping } = (result.state?.visualization as any).layers[0];
+    const colorFor = getColorFactory(
+      colorMapping,
+      getKbnPalettes({ name: 'amsterdam', darkMode: false }),
+      false,
+      { type: 'categories', categories: ['rule-a', HISTOGRAM_OTHER_BREAKDOWN] }
+    );
+
+    expect(colorFor(HISTOGRAM_OTHER_BREAKDOWN)).toBe(mockColors.mediumShade);
+    expect(colorFor('rule-a')).not.toBe(mockColors.mediumShade);
   });
 });

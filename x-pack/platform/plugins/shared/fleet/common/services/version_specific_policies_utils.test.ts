@@ -12,6 +12,7 @@ import {
   hasAgentVersionSuffix,
   hasSentinelVersionSuffix,
   getSentinelVersionPolicyId,
+  hasSentinelVersionPolicy,
   removeVersionSuffixFromPolicyId,
   splitVersionSuffixFromPolicyId,
   buildVersionVariantsKueryFragment,
@@ -489,5 +490,16 @@ describe('buildPolicyBaseIdsWithFallbackKuery', () => {
     expect(buildPolicyBaseIdsWithFallbackKuery(['my policy:1'])).toContain(
       'policy_base_id:(my policy\\:1)'
     );
+  });
+});
+
+describe('hasSentinelVersionPolicy', () => {
+  it.each([
+    [{ is_managed: false, supports_agentless: false }, true],
+    [{ is_managed: false }, true],
+    [{ is_managed: true, supports_agentless: false }, false],
+    [{ is_managed: false, supports_agentless: true }, false],
+  ])('%j -> %s', (policy, expected) => {
+    expect(hasSentinelVersionPolicy(policy)).toBe(expected);
   });
 });

@@ -27,8 +27,10 @@ interface EsqlContext {
 
 /**
  * The DataView of an ES|QL layer is the one registered for its dataset, so the panel publishes the
- * same DataView, with the filterable fields of the FROM target, as the rest of the ES|QL code.
- * The persisted spec is used when the dataset resolves to another id than the layer's.
+ * same DataView, with the filterable fields of the FROM target, as the rest of the ES|QL code, and
+ * the filters created from it match the DataViews of the panel.
+ * A layer that was not saved with the dataset id (e.g. created as code) has no persisted time
+ * field to rely on, so it is resolved like the click path does, in parallel with the schema.
  */
 const getEsqlDataView = async (
   spec: DataViewSpec,
@@ -37,15 +39,23 @@ const getEsqlDataView = async (
   dataViews: DataViewsService,
   { http, projectRouting }: EsqlContext
 ) => {
-  const source = await EsqlSource.create({
-    query: getSourceCommandQueryFromESQLQuery(esqlQuery) || esqlQuery,
-    http,
-    projectRouting: getProjectRoutingFromEsqlQuery(esqlQuery) ?? projectRouting,
-    timeFieldName: timeField ?? spec.timeFieldName,
-    resolveTimeField: false,
+  const query = getSourceCommandQueryFromESQLQuery(esqlQuery) || esqlQuery;
+  const routing = getProjectRoutingFromEsqlQuery(esqlQuery) ?? projectRouting;
+  const persistedTimeField = timeField ?? spec.timeFieldName;
+  const { datasetId } = await EsqlSource.resolveDataset({
+    query,
+    projectRouting: routing,
+    timeFieldName: persistedTimeField,
   });
-  const dataView = await registerEsqlSourceInDataViewsCache(dataViews, source);
-  return dataView.id === spec.id ? dataView : dataViews.create(spec);
+
+  const source = await EsqlSource.create({
+    query,
+    http,
+    projectRouting: routing,
+    timeFieldName: persistedTimeField,
+    resolveTimeField: persistedTimeField === undefined && datasetId !== spec.id,
+  });
+  return registerEsqlSourceInDataViewsCache(dataViews, source);
 };
 
 export async function getUsedDataViews(

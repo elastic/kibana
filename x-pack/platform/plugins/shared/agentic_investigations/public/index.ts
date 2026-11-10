@@ -19,6 +19,8 @@ export type {
   AgenticInvestigationsPublicConfig,
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
+  AlertFlyoutProps,
+  AlertFlyoutRegistration,
 } from './types';
 
 export {
@@ -37,8 +39,15 @@ export {
   useSetInvestigationStatus,
   useInvestigationClosePreview,
 } from './investigations/hooks/use_investigations_api';
+export { useCanManageInvestigations } from './investigations/hooks/use_can_manage_investigations';
 
 export { escalationQueryKeys } from './escalations/query_keys';
+export { impactPillsQueryKeys } from './impact/query_keys';
+
+export {
+  useEscalationImpactPills,
+  useProposalImpactPills,
+} from './impact/hooks/use_impact_pills_api';
 
 export {
   useCurrentUserProfile,
@@ -68,7 +77,10 @@ export {
 } from './conversation_templates/shared/lazy_connected_components';
 
 export { LazyEvidenceView, type EvidenceViewProps } from './evidence';
-export type { InvestigationCardProps } from './conversation_templates/templates/investigation/card';
+export {
+  InvestigationCard,
+  type InvestigationCardProps,
+} from './conversation_templates/templates/investigation/card';
 export {
   registerInvestigationAttachmentRenderer,
   type InvestigationAttachmentContentProps,

@@ -50,7 +50,7 @@ describe('useWorkflowYamlValidationContext', () => {
     const { result, rerender } = renderHook(() => useWorkflowYamlValidationContext());
 
     expect(getBooleanValue).not.toHaveBeenCalled();
-    expect(useBooleanValue).toHaveBeenCalledWith(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false);
+    expect(useBooleanValue).toHaveBeenCalledWith(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, true);
     expect(result.current.warnIgnoredKibanaFetcher).toBe(true);
 
     useBooleanValue.mockReturnValue(false);

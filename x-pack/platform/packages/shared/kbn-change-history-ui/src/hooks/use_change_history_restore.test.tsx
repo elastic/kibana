@@ -13,6 +13,7 @@ import { useChangeHistoryRestore } from './use_change_history_restore';
 import { ChangeHistoryTelemetryEventTypes } from '../telemetry/types';
 import {
   TEST_CHANGE_HISTORY_SCOPE,
+  TEST_CHANGE_HISTORY_SUPPORTS,
   TEST_OBJECT_ID,
   TEST_OBJECT_TITLE,
 } from '../test_utils/change_history_test_fixtures';
@@ -89,7 +90,10 @@ describe('useChangeHistoryRestore', () => {
     });
     expect(invalidateSpy).toHaveBeenCalledTimes(1);
     expect(invalidateSpy).toHaveBeenCalledWith({
-      queryKey: changeHistoryObjectQueryKeyPrefix(TEST_OBJECT_ID, TEST_CHANGE_HISTORY_SCOPE),
+      queryKey: changeHistoryObjectQueryKeyPrefix(TEST_OBJECT_ID, TEST_CHANGE_HISTORY_SCOPE, {
+        ...TEST_CHANGE_HISTORY_SUPPORTS,
+        restore: true,
+      }),
       refetchType: 'active',
     });
     expect(onRestored).toHaveBeenCalledTimes(1);

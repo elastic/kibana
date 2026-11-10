@@ -81,6 +81,7 @@ describe('ServiceAccountsManagement', () => {
       .backend as jest.Mocked<ServiceAccountsBackend>;
     store = {
       findByServiceAccountId: jest.fn().mockResolvedValue([]),
+      countByServiceAccountIds: jest.fn().mockResolvedValue(new Map()),
       getVerified: jest.fn(),
     } as unknown as jest.Mocked<WorkloadBindingStore>;
     mockCheckPrivileges = { globally: jest.fn() } as unknown as jest.Mocked<CheckPrivileges>;
@@ -123,8 +124,12 @@ describe('ServiceAccountsManagement', () => {
       workloadTypes.resolveBoundWorkloads.mockImplementation(async (bindings) =>
         bindings.map(({ workloadId }) =>
           workloadId === 'verified'
-            ? { title: 'Nightly report', href: '/s/marketing/app/workflows/verified' }
-            : {}
+            ? {
+                status: 'present' as const,
+                title: 'Nightly report',
+                href: '/s/marketing/app/workflows/verified',
+              }
+            : { status: 'unknown' as const }
         )
       );
     });
@@ -299,6 +304,18 @@ describe('ServiceAccountsManagement', () => {
         output: { statusCode: 403 },
       });
       expect(mockCheckPrivileges.globally).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('#countBoundWorkloads', () => {
+    it('counts through the store, without checking privileges or verifying bindings', async () => {
+      const counts = new Map([['service-account-id', 2]]);
+      store.countByServiceAccountIds.mockResolvedValue(counts);
+
+      await expect(management.countBoundWorkloads(['service-account-id'])).resolves.toBe(counts);
+      expect(store.countByServiceAccountIds).toHaveBeenCalledWith(['service-account-id']);
+      expect(mockCheckPrivileges.globally).not.toHaveBeenCalled();
+      expect(store.getVerified).not.toHaveBeenCalled();
     });
   });
 

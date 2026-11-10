@@ -117,8 +117,6 @@ export const ADD_ELASTIC_RULES_TABLE = '[data-test-subj="add-prebuilt-rules-tabl
 
 export const RULES_ROW = '.euiTableRow';
 
-export const SEVERITY = '[data-test-subj="severity"]';
-
 export const CREATE_NEW_RULE_BTN = '[data-test-subj="create-new-rule"]';
 
 export const ENABLE_RULE_TOGGLE = '[data-test-subj="ruleSwitch"]';
@@ -141,8 +139,7 @@ export const RULE_DETAILS_MANUAL_RULE_RUN_BTN = '[data-test-subj="rules-details-
 
 export const RULE_DETAILS_REVERT_RULE_BTN = '[data-test-subj="rules-details-revert-rule"]';
 
-export const RULE_DETAILS_REVERT_RULE_TOOLTIP =
-  '[data-test-subj="rules-details-revert-rule-tooltip"]';
+export const RULE_DETAILS_REVERT_RULE_TOOLTIP_TITLE = 'Unable to revert rule';
 
 export const SELECT_ALL_RULES_ON_PAGE_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';
 

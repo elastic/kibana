@@ -31,7 +31,7 @@ const formatChart = (chart: EvidenceChart): string => {
 
 /**
  * Compact text of a piece of evidence for the LLM: the Markdown description and a one-line
- * summary of the chart, not its raw points.
+ * summary of the chart (not its raw points).
  */
 export const formatEvidenceForAgent = ({ description, chart }: InvestigationEvidence): string =>
   [description?.trim() || undefined, chart ? formatChart(chart) : undefined]

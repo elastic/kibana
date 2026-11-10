@@ -803,6 +803,198 @@ export default function (providerContext: FtrProviderContext) {
         }
       });
 
+      // A credential an output keeps as a secret must survive an update that does not touch it,
+      // and a plain text value sent for it must be stored as a secret too. Getting either wrong
+      // leaves the output pointing at a secret that no longer exists, and every agent using it
+      // fails with `key file not configured accessing 'logstash.ssl'`.
+      describe('updating an output that keeps a credential as a secret', () => {
+        const expectSecretDeleted = async (id: string) => {
+          // the error is read outside of any `try`, so that a secret that still exists fails the
+          // test, and an error other than a not found does too
+          const error = await getSecretById(id).then(
+            () => undefined,
+            (e) => e
+          );
+          expect(error?.meta?.statusCode).to.be(404);
+        };
+
+        const createLogstashOutputWithSecretKey = async () => {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Logstash Output ${uuidV4()}`,
+              type: 'logstash',
+              hosts: ['test.fr:443'],
+              ssl: {
+                certificate: 'CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+              },
+              secrets: { ssl: { key: 'KEY' } },
+            })
+            .expect(200);
+
+          return { id: res.body.item.id, secretId: res.body.item.secrets.ssl.key.id };
+        };
+
+        it('keeps the ssl key when only the name is updated', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Logstash Output renamed ${uuidV4()}` })
+            .expect(200);
+
+          // the secret is still stored, so the reference the output keeps resolves
+          const secret = await getSecretById(secretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('KEY');
+
+          const { body } = await supertest.get(`/api/fleet/outputs/${id}`).expect(200);
+          expect(body.item.secrets.ssl.key.id).to.equal(secretId);
+          expect(body.item.ssl.certificate).to.equal('CERTIFICATE');
+        });
+
+        it('stores a plain text ssl key as a secret and removes the previous one', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              ssl: {
+                certificate: 'NEW_CERTIFICATE',
+                certificate_authorities: ['CA1', 'CA2'],
+                key: 'PLAIN_KEY',
+              },
+            })
+            .expect(200);
+
+          const newSecretId = updateRes.body.item.secrets.ssl.key.id;
+          expect(newSecretId).not.to.equal(secretId);
+          // the plain text value is not stored next to the secret
+          expect(updateRes.body.item.ssl.key).to.equal(undefined);
+          expect(updateRes.body.item.ssl.certificate).to.equal('NEW_CERTIFICATE');
+
+          const secret = await getSecretById(newSecretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('PLAIN_KEY');
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes the ssl key when ssl is explicitly cleared', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ ssl: null })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.ssl?.key).to.equal(undefined);
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes only the ssl key when it is cleared with an explicit null', async function () {
+          const { id, secretId } = await createLogstashOutputWithSecretKey();
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              ssl: { certificate: 'CERTIFICATE', certificate_authorities: ['CA1', 'CA2'] },
+              secrets: { ssl: { key: null } },
+            })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.ssl?.key).to.equal(undefined);
+          expect(updateRes.body.item.ssl.certificate).to.equal('CERTIFICATE');
+          await expectSecretDeleted(secretId);
+        });
+
+        it('removes the password of a kafka output when the authentication type changes', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Kafka Output ${uuidV4()}`,
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'user_pass',
+              username: 'user',
+              topic: 'topic1',
+              secrets: { password: 'pass' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.password.id;
+
+          const updateRes = await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            // the Kafka update payload requires a name
+            .send({ name: `Kafka Output renamed ${uuidV4()}`, auth_type: 'none' })
+            .expect(200);
+
+          expect(updateRes.body.item.secrets?.password).to.equal(undefined);
+          await expectSecretDeleted(secretId);
+        });
+
+        it('keeps the password of a kafka output when only the name is updated', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Kafka Output ${uuidV4()}`,
+              type: 'kafka',
+              hosts: ['test.fr:2000'],
+              auth_type: 'user_pass',
+              username: 'user',
+              topic: 'topic1',
+              secrets: { password: 'pass' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.password.id;
+
+          await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Kafka Output renamed ${uuidV4()}` })
+            .expect(200);
+
+          const secret = await getSecretById(secretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('pass');
+        });
+
+        it('keeps the service token of a remote elasticsearch output when only the name is updated', async function () {
+          const res = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `Remote Elasticsearch Output ${uuidV4()}`,
+              type: 'remote_elasticsearch',
+              hosts: ['https://remote-es:9200'],
+              secrets: { service_token: 'token' },
+            })
+            .expect(200);
+          const outputId = res.body.item.id;
+          const secretId = res.body.item.secrets.service_token.id;
+
+          await supertest
+            .put(`/api/fleet/outputs/${outputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ name: `Remote Elasticsearch Output renamed ${uuidV4()}` })
+            .expect(200);
+
+          const secret = await getSecretById(secretId);
+          // @ts-ignore _source unknown type
+          expect(secret._source.value).to.equal('token');
+        });
+      });
+
       it('should allow to update kibana_api_key on an existing remote_elasticsearch output', async function () {
         const res = await supertest
           .post(`/api/fleet/outputs`)
@@ -2825,6 +3017,254 @@ export default function (providerContext: FtrProviderContext) {
 
         await supertest
           .delete(`/api/fleet/outputs/${created.item.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        await expectSecretToBeDeleted(secretId);
+      });
+    });
+
+    describe('Kafka output with Kerberos authentication', () => {
+      const createdOutputIds: string[] = [];
+      const createdAgentPolicyIds: string[] = [];
+
+      const keytabKerberos = {
+        auth_type: 'keytab',
+        config_path: '/etc/krb5.conf',
+        keytab: '/etc/kafka.keytab',
+        realm: 'EXAMPLE.COM',
+      };
+      const passwordKerberos = {
+        auth_type: 'password',
+        config_path: '/etc/krb5.conf',
+        username: 'kafka',
+        service_name: 'kafka',
+        realm: 'EXAMPLE.COM',
+        enable_krb5_fast: true,
+      };
+
+      const kerberosOutput = (fields: Record<string, unknown> = {}) => ({
+        name: `Kafka Kerberos output ${uuidV4()}`,
+        type: 'kafka',
+        hosts: ['test.fr:2000'],
+        auth_type: 'kerberos',
+        topic: 'topic1',
+        kerberos: keytabKerberos,
+        ...fields,
+      });
+
+      const createOutput = async (body: Record<string, unknown>, expectedStatus = 200) => {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(body)
+          .expect(expectedStatus);
+        if (res.body.item?.id) {
+          createdOutputIds.push(res.body.item.id);
+        }
+        return res.body;
+      };
+
+      const updateOutput = async (
+        id: string,
+        body: Record<string, unknown>,
+        expectedStatus = 200
+      ) => {
+        const res = await supertest
+          .put(`/api/fleet/outputs/${id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send(body)
+          .expect(expectedStatus);
+        return res.body;
+      };
+
+      const getFullAgentPolicy = async (dataOutputId: string) => {
+        const { item: agentPolicy } = await createAgentPolicy(undefined, dataOutputId);
+        createdAgentPolicyIds.push(agentPolicy.id);
+        const { body } = await supertest
+          .get(`/api/fleet/agent_policies/${agentPolicy.id}/full`)
+          .expect(200);
+        return body.item;
+      };
+
+      const expectSecretToBeDeleted = async (secretId: string) => {
+        let secretExists = true;
+        try {
+          await getSecretById(secretId);
+        } catch (e) {
+          // not found
+          secretExists = false;
+        }
+        expect(secretExists).to.be(false);
+      };
+
+      beforeEach(async () => {
+        // The password is a secret, so the output secrets storage is needed.
+        await enableOutputSecrets();
+        await clearAgents();
+        await createFleetServerAgent(fleetServerPolicyId, 'server_1', '9.6.0');
+      });
+
+      afterEach(async () => {
+        for (const id of createdAgentPolicyIds.splice(0)) {
+          await deleteAgentPolicy(id);
+        }
+        for (const id of createdOutputIds.splice(0)) {
+          await supertest.delete(`/api/fleet/outputs/${id}`).set('kbn-xsrf', 'xxxx');
+        }
+      });
+
+      after(async () => {
+        await clearAgents();
+      });
+
+      it('should create an output with the keytab authentication', async () => {
+        const body = await createOutput(kerberosOutput());
+
+        expect(body.item.auth_type).to.eql('kerberos');
+        expect(body.item.kerberos).to.eql(keytabKerberos);
+        expect(body.item.username).to.be(undefined);
+        expect(body.item.sasl).to.be(undefined);
+        expect(body.item.secrets).to.be(undefined);
+      });
+
+      it('should create an output with the password authentication, storing the password as a secret', async () => {
+        const body = await createOutput(
+          kerberosOutput({
+            kerberos: passwordKerberos,
+            secrets: { kerberos: { password: 'my-password' } },
+          })
+        );
+
+        expect(body.item.kerberos).to.eql(passwordKerberos);
+        // the value of the secret is never returned
+        expect(Object.keys(body.item.secrets.kerberos)).to.eql(['password']);
+        const secret = await getSecretById(body.item.secrets.kerberos.password.id);
+        expect((secret._source as any).value).to.equal('my-password');
+      });
+
+      it('should give the agent the kerberos settings, and the timeout, in the agent policy', async () => {
+        const body = await createOutput(
+          kerberosOutput({
+            kerberos: passwordKerberos,
+            secrets: { kerberos: { password: 'my-password' } },
+          })
+        );
+        const secretId = body.item.secrets.kerberos.password.id;
+
+        const fullPolicy = await getFullAgentPolicy(body.item.id);
+        const output = fullPolicy.outputs[body.item.id];
+
+        expect(output.type).to.eql('kafka');
+        expect(output.kerberos).to.eql({ enabled: true, ...passwordKerberos });
+        // Kerberos also runs on the Beats runtime, so the timeout is kept
+        expect(output.timeout).to.be(30);
+        expect(output.sasl).to.be(undefined);
+        expect(output.username).to.be(undefined);
+        // Fleet Server writes the value of the secret at kerberos.password
+        expect(output.secrets).to.eql({ kerberos: { password: { id: secretId } } });
+        expect(fullPolicy.secret_references).to.eql([{ id: secretId }]);
+      });
+
+      it('should not accept an output without its required settings', async () => {
+        await createOutput(kerberosOutput({ kerberos: undefined }), 400);
+        await createOutput(kerberosOutput({ kerberos: { ...keytabKerberos, realm: '' } }), 400);
+        await createOutput(
+          kerberosOutput({ kerberos: { ...keytabKerberos, keytab: undefined } }),
+          400
+        );
+        // the password authentication needs a username and a password
+        await createOutput(kerberosOutput({ kerberos: passwordKerberos }), 400);
+        await createOutput(
+          kerberosOutput({
+            kerberos: { ...passwordKerberos, username: undefined },
+            secrets: { kerberos: { password: 'my-password' } },
+          }),
+          400
+        );
+      });
+
+      it('should keep the settings and the secret when an update does not name the auth type', async () => {
+        const body = await createOutput(
+          kerberosOutput({
+            kerberos: passwordKerberos,
+            secrets: { kerberos: { password: 'my-password' } },
+          })
+        );
+
+        const updated = await updateOutput(body.item.id, { name: 'renamed', type: 'kafka' });
+
+        expect(updated.item.name).to.eql('renamed');
+        expect(updated.item.auth_type).to.eql('kerberos');
+        expect(updated.item.kerberos).to.eql(passwordKerberos);
+        expect(updated.item.secrets.kerberos.password.id).to.eql(
+          body.item.secrets.kerberos.password.id
+        );
+      });
+
+      it('should remove the settings that are no longer sent when the authentication changes within Kerberos', async () => {
+        const body = await createOutput(kerberosOutput());
+
+        const updated = await updateOutput(body.item.id, {
+          name: body.item.name,
+          type: 'kafka',
+          hosts: ['test.fr:2000'],
+          topic: 'topic1',
+          auth_type: 'kerberos',
+          kerberos: {
+            auth_type: 'password',
+            config_path: '/etc/krb5.conf',
+            username: 'kafka',
+            realm: 'EXAMPLE.COM',
+          },
+          secrets: { kerberos: { password: 'my-password' } },
+        });
+
+        // the keytab of the previous authentication is gone
+        expect(updated.item.kerberos).to.eql({
+          auth_type: 'password',
+          config_path: '/etc/krb5.conf',
+          username: 'kafka',
+          realm: 'EXAMPLE.COM',
+        });
+      });
+
+      it('should clear the settings and delete the secret when the output switches to another authentication', async () => {
+        const body = await createOutput(
+          kerberosOutput({
+            kerberos: passwordKerberos,
+            secrets: { kerberos: { password: 'my-password' } },
+          })
+        );
+        const secretId = body.item.secrets.kerberos.password.id;
+
+        const updated = await updateOutput(body.item.id, {
+          name: body.item.name,
+          type: 'kafka',
+          hosts: ['test.fr:2000'],
+          topic: 'topic1',
+          auth_type: 'user_pass',
+          username: 'user',
+          secrets: { password: 'pass' },
+        });
+
+        expect(updated.item.auth_type).to.eql('user_pass');
+        expect(updated.item.kerberos ?? null).to.eql(null);
+        expect(updated.item.secrets?.kerberos).to.be(undefined);
+        await expectSecretToBeDeleted(secretId);
+      });
+
+      it('should delete the secret when the output is deleted', async () => {
+        const body = await createOutput(
+          kerberosOutput({
+            kerberos: passwordKerberos,
+            secrets: { kerberos: { password: 'my-password' } },
+          })
+        );
+        const secretId = body.item.secrets.kerberos.password.id;
+
+        await supertest
+          .delete(`/api/fleet/outputs/${body.item.id}`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
