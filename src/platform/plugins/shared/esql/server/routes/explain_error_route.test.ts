@@ -181,7 +181,7 @@ describe('registerExplainErrorRoute', () => {
 
   it('tells the model where Elasticsearch runs, when it is known', async () => {
     const { handler, requestHandlerContext, request, response } = buildMocks({
-      deployment: { type: 'ech', version: '9.7.0' },
+      deployment: { environment: 'ech', version: '9.7.0' },
     });
     resolveConnectorId.mockResolvedValue('connector-1');
     const invoke = modelReturning({ cause: 'resources', summary: 'x', suggestions: [], query: '' });

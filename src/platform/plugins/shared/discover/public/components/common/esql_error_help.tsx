@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -56,17 +56,17 @@ export function EsqlErrorHelp({
   const [stage, setStage] = useState<Stage>({ kind: 'idle' });
   const controller = useRef<AbortController | undefined>();
 
-  const cancel = () => {
+  const cancel = useCallback(() => {
     controller.current?.abort();
     controller.current = undefined;
-  };
+  }, []);
 
   // A different query or error makes an earlier explanation stale.
   useEffect(() => {
     cancel();
     setStage({ kind: 'idle' });
-  }, [query, errorMessage]);
-  useEffect(() => cancel, []);
+  }, [query, errorMessage, cancel]);
+  useEffect(() => cancel, [cancel]);
 
   const explain = async () => {
     cancel();
@@ -175,8 +175,9 @@ export function EsqlErrorHelp({
             <p data-test-subj="discoverErrorExplanationSummary">{stage.explanation.summary}</p>
             {stage.explanation.suggestions.length > 0 ? (
               <ul data-test-subj="discoverErrorExplanationSuggestions">
-                {stage.explanation.suggestions.map((suggestion) => (
-                  <li key={suggestion}>{suggestion}</li>
+                {stage.explanation.suggestions.map((suggestion, index) => (
+                  // The model can repeat a suggestion, so the text alone is not a unique key.
+                  <li key={`${index}-${suggestion}`}>{suggestion}</li>
                 ))}
               </ul>
             ) : null}

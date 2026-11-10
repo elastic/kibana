@@ -27,22 +27,25 @@ const cloud = (overrides: Record<string, unknown> = {}) =>
 describe('getDeploymentInfo', () => {
   it('is self-managed without the cloud plugin', () => {
     expect(getDeploymentInfo(env('traditional'))).toEqual({
-      type: 'self-managed',
+      environment: 'self_managed',
       version: '9.7.0',
     });
   });
 
   it('is self-managed when the cloud plugin says it is not on cloud', () => {
-    expect(getDeploymentInfo(env('traditional'), cloud()).type).toBe('self-managed');
+    expect(getDeploymentInfo(env('traditional'), cloud()).environment).toBe('self_managed');
   });
 
   it('is ECH on cloud when it is neither serverless nor ECE', () => {
-    expect(getDeploymentInfo(env('traditional'), cloud({ isCloudEnabled: true })).type).toBe('ech');
+    expect(getDeploymentInfo(env('traditional'), cloud({ isCloudEnabled: true })).environment).toBe(
+      'ech'
+    );
   });
 
   it('is ECE on cloud when the cloud plugin says so', () => {
     expect(
-      getDeploymentInfo(env('traditional'), cloud({ isCloudEnabled: true, isEce: true })).type
+      getDeploymentInfo(env('traditional'), cloud({ isCloudEnabled: true, isEce: true }))
+        .environment
     ).toBe('ece');
   });
 
@@ -56,20 +59,20 @@ describe('getDeploymentInfo', () => {
           serverless: { projectType: 'observability' },
         })
       )
-    ).toEqual({ type: 'serverless', version: '9.7.0', projectType: 'observability' });
+    ).toEqual({ environment: 'serverless', serverless: { projectType: 'observability' } });
   });
 
   it('is serverless from the build flavor even without the cloud plugin', () => {
-    expect(getDeploymentInfo(env('serverless')).type).toBe('serverless');
+    expect(getDeploymentInfo(env('serverless')).environment).toBe('serverless');
   });
 });
 
 describe('describeDeployment', () => {
   it('names the deployment, the project and the version', () => {
-    expect(describeDeployment({ type: 'serverless', version: '9.7.0', projectType: 'es' })).toBe(
-      'Elastic Cloud Serverless, es project, version 9.7.0'
-    );
-    expect(describeDeployment({ type: 'ech', version: '9.7.0' })).toBe(
+    expect(
+      describeDeployment({ environment: 'serverless', serverless: { projectType: 'es' } })
+    ).toBe('Elastic Cloud Serverless, es project');
+    expect(describeDeployment({ environment: 'ech', version: '9.7.0' })).toBe(
       'Elastic Cloud Hosted (ECH), version 9.7.0'
     );
   });
