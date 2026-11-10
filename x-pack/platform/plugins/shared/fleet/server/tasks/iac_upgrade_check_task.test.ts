@@ -126,33 +126,6 @@ describe('iac_upgrade_check_task', () => {
     });
   });
 
-  it('clears upgrade_available on a keyless connector that cannot be checked and counts it as skipped', async () => {
-    mockSoClient.createPointInTimeFinder.mockReturnValue(
-      finderFor([
-        [
-          makeConnector('flagged', { iac_upgrade_status: 'upgrade_available' }),
-          makeConnector('never-flagged', {}),
-          makeConnector('keyed', { iac_key: 'sha256:a', iac_upgrade_status: 'upgrade_available' }),
-        ],
-      ])
-    );
-    mockedGetIacKeyOutcome.mockResolvedValue('key_unavailable');
-    mockSoClient.update.mockResolvedValue({});
-
-    const counts = await runIacUpgradeCheckTask(signal);
-
-    // Only the keyless connector that was flagged is written: there is no update to offer, so the
-    // callout must go. A keyed one keeps its real verdict, and an unflagged one has nothing to clear.
-    expect(mockSoClient.update).toHaveBeenCalledTimes(1);
-    expect(mockSoClient.update).toHaveBeenCalledWith(
-      CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-      'flagged',
-      expect.objectContaining({ iac_upgrade_status: 'up_to_date' })
-    );
-    // Not a verdict about the template, so the totals do not report them as up to date.
-    expect(counts).toEqual({ upToDate: 0, upgradeAvailable: 0, skipped: 3 });
-  });
-
   it('skips a connector whose integration set exceeds the render limit without comparing', async () => {
     mockSoClient.createPointInTimeFinder.mockReturnValue(finderFor([[makeConnector('huge', {})]]));
     mockedSelections.mockResolvedValue({ integrations: [], exceedsCap: true });

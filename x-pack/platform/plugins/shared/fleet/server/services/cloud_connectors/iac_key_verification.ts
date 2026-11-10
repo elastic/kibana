@@ -78,9 +78,8 @@ export interface IacKeyOutcomeOptions {
  * - `unsupported_provider`: not an AWS connector, or IaCP is not enabled.
  * - `no_integrations`: the connector has no integrations attached.
  * - `key_unavailable`: no verdict. The saved integrations reference a package, policy template or
- *   input that no longer exists, or IaCP could not be reached. Callers fail open: the flyout and
- *   onboarding do not block, and the stored status is kept, except that a keyless connector stored
- *   as `upgrade_available` is set to `up_to_date` (see `toUpgradeStatus`).
+ *   input that no longer exists, or IaCP could not be reached. Callers fail open: the daily task
+ *   keeps the stored status, and the flyout and onboarding do not block.
  * - `no_key`: the connector has no `iac_key`, so the static template is deployed and an upgrade to
  *   the generated one is available. This is only reported after the saved integrations have
  *   resolved, because the Update button the callout then shows renders that same set through the
@@ -211,29 +210,13 @@ export const getIacKeyOutcome = async (
   }
 };
 
-export interface StoredIacUpgradeState {
-  /** The connector has no `iac_key`: the static template is deployed. */
-  keyless: boolean;
-  /** The status stored before this check. */
-  status?: IacUpgradeStatus;
-}
-
 /**
  * The stored `iac_upgrade_status` for a verification outcome, or undefined when the outcome says
  * nothing about the connector (provider unreachable, unsupported, nothing attached) and the last
  * known status must stay as it is.
- *
- * One exception: a keyless connector stored as `upgrade_available` whose check is
- * `key_unavailable` is set to `up_to_date`. Such a flag can only come from a check that did not ask
- * IaCP (before it was asked, `no_key` was reported without a render), and the Update it offers
- * cannot run now, so the flyout callout would stay forever. `up_to_date` here means there is
- * nothing for the user to act on; the next check that can render sets `upgrade_available` again.
- * A keyed connector keeps its stored status, since its `key_mismatch` was a real verdict and a
- * provisioner error is transient.
  */
 export const toUpgradeStatus = (
-  outcome: IacKeyVerificationOutcome,
-  stored?: StoredIacUpgradeState
+  outcome: IacKeyVerificationOutcome
 ): IacUpgradeStatus | undefined => {
   switch (outcome) {
     case 'matches':
@@ -241,8 +224,6 @@ export const toUpgradeStatus = (
     case 'no_key':
     case 'key_mismatch':
       return 'upgrade_available';
-    case 'key_unavailable':
-      return stored?.keyless && stored.status === 'upgrade_available' ? 'up_to_date' : undefined;
     default:
       return undefined;
   }
@@ -260,17 +241,15 @@ const persistUpgradeStatus = async (
   soClient: SavedObjectsClientContract,
   cloudConnectorId: string,
   /**
-   * Read before the render. It is logged, and it decides whether a `key_unavailable` clears a
-   * keyless connector's `upgrade_available`; an upgrade-task write landing in between can only make
-   * that decision one check late.
+   * Read before the render and used only for the log line, so an upgrade-task write landing in
+   * between makes the logged "from" value stale — never the stored one, which is this outcome.
    */
   previousStatus: IacUpgradeStatus | undefined,
-  keyless: boolean,
   outcome: IacKeyVerificationOutcome,
   surface: IacKeySurface,
   logger: Logger
 ): Promise<void> => {
-  const status = toUpgradeStatus(outcome, { keyless, status: previousStatus });
+  const status = toUpgradeStatus(outcome);
   if (status === undefined) {
     return;
   }
@@ -391,7 +370,6 @@ export const verifyCloudConnectorIacKey = async (
       soClient,
       cloudConnectorId,
       attributes.iac_upgrade_status,
-      !attributes.iac_key?.trim(),
       outcome,
       surface,
       logger
