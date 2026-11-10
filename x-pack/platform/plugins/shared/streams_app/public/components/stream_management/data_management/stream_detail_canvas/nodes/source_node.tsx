@@ -93,6 +93,7 @@ export function SourceNode({ data, selected, dragging }: NodeProps<SourceNodeTyp
         </EuiFlexGroup>
       </EuiPanel>
       <ConnectionHandle
+        id={data.sourceId}
         type="source"
         position={Position.Right}
         isConnectable={Boolean(data.sourceId)}

@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 import { skipIfNoDockerRegistry } from '../../helpers';
+import { testUsers } from '../test_users';
+import { createAgentDoc } from '../agent_policy/cleanup_agent_policy_revisions';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 const BASE_URL = '/api/fleet/cloud_onboarding_deployments';
@@ -15,6 +17,8 @@ const SO_API = '/api/saved_objects';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
@@ -536,6 +540,322 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
+    describe('GET /api/fleet/cloud_onboarding_deployments', () => {
+      const createdIds: string[] = [];
+      const packageA = 'list-test-package-a';
+      const packageB = 'list-test-package-b';
+
+      const create = async (body: Record<string, unknown>) => {
+        const { body: created } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ mechanisms: ['ecf'], services: ['cloudtrail'], ...body })
+          .expect(200);
+        createdIds.push(created.item.id);
+        return created.item.id as string;
+      };
+
+      before(async () => {
+        await create({ provider: 'aws', packageNames: [packageA], integrationName: 'only-a' });
+        await create({
+          provider: 'aws',
+          packageNames: [packageA, packageB],
+          integrationName: 'a-and-b',
+        });
+        await create({ provider: 'azure', packageNames: [packageA], integrationName: 'azure-a' });
+        // Saved before packageNames existed: has no packageNames.
+        await create({ provider: 'aws', integrationName: 'no-packages' });
+      });
+
+      after(async () => {
+        for (const id of createdIds) {
+          try {
+            await supertest.delete(`${BASE_URL}/${id}`).set('kbn-xsrf', 'xxxx');
+          } catch (_) {
+            // ignore
+          }
+        }
+      });
+
+      it('should filter by packageName, listing a session under every package it covers', async () => {
+        const { body: a } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: packageA })
+          .expect(200);
+        const { body: b } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: packageB })
+          .expect(200);
+
+        expect(a.items.map((i: any) => i.integrationName).sort()).to.eql([
+          'a-and-b',
+          'azure-a',
+          'only-a',
+        ]);
+        expect(a.total).to.equal(3);
+        expect(b.items.map((i: any) => i.integrationName)).to.eql(['a-and-b']);
+      });
+
+      it('should filter by provider', async () => {
+        const { body } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: packageA, provider: 'aws' })
+          .expect(200);
+
+        expect(body.items.map((i: any) => i.integrationName).sort()).to.eql(['a-and-b', 'only-a']);
+      });
+
+      it('should return the packages, services by method, agents, user and update time', async () => {
+        const { body } = await supertest.get(BASE_URL).query({ packageName: packageB }).expect(200);
+
+        const [item] = body.items;
+        expect(item.packageNames).to.eql([packageA, packageB]);
+        expect(item.packages).to.eql([]);
+        expect(item.servicesByMethod).to.eql({ ecf: ['cloudtrail'] });
+        expect(item.agentCount).to.equal(0);
+        expect(item.updatedAt).to.be.a('string');
+        expect(item.updatedBy).to.be.a('string');
+      });
+
+      it('should paginate, newest first', async () => {
+        const { body: first } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: packageA, perPage: 2, page: 1 })
+          .expect(200);
+        const { body: second } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: packageA, perPage: 2, page: 2 })
+          .expect(200);
+
+        expect(first.items).to.have.length(2);
+        expect(second.items).to.have.length(1);
+        expect(first.total).to.equal(3);
+        expect(second.page).to.equal(2);
+        expect(first.perPage).to.equal(2);
+        expect(first.items[0].updatedAt >= first.items[1].updatedAt).to.be(true);
+      });
+
+      it('should return an empty result for an unknown package', async () => {
+        const { body } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: 'no-such-package' })
+          .expect(200);
+
+        expect(body).to.eql({ items: [], total: 0, page: 1, perPage: 20 });
+      });
+
+      it('should list a session saved without packageNames when not filtering by package', async () => {
+        const { body } = await supertest.get(BASE_URL).query({ perPage: 100 }).expect(200);
+
+        const item = body.items.find((i: any) => i.integrationName === 'no-packages');
+        expect(item).to.be.ok();
+        expect(item.packageNames).to.be(undefined);
+      });
+
+      it('should return 400 for an invalid perPage', async () => {
+        await supertest.get(BASE_URL).query({ perPage: 1000 }).expect(400);
+      });
+    });
+
+    describe('GET /internal/fleet/cloud_onboarding_deployments/counts', () => {
+      const COUNTS_URL = '/internal/fleet/cloud_onboarding_deployments/counts';
+      const TEST_SPACE = 'test-cloud-onboarding-counts-space';
+      const packageA = 'counts-test-package-a';
+      const packageB = 'counts-test-package-b';
+      const createdIds: Array<{ id: string; urlPrefix: string }> = [];
+
+      const getCounts = (query: Record<string, string> = {}, urlPrefix = '') =>
+        supertest
+          .get(`${urlPrefix}${COUNTS_URL}`)
+          .set('elastic-api-version', '1')
+          .set('x-elastic-internal-origin', 'kibana')
+          .query(query);
+
+      const create = async (body: Record<string, unknown>, urlPrefix = '') => {
+        const { body: created } = await supertest
+          .post(`${urlPrefix}${BASE_URL}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ mechanisms: ['ecf'], services: ['cloudtrail'], ...body })
+          .expect(200);
+        createdIds.push({ id: created.item.id, urlPrefix });
+      };
+
+      before(async () => {
+        await kibanaServer.spaces.create({ id: TEST_SPACE, name: TEST_SPACE }).catch(() => {});
+        await create({ provider: 'aws', packageNames: [packageA] });
+        await create({ provider: 'aws', packageNames: [packageA, packageB] });
+        await create({ provider: 'azure', packageNames: [packageA] });
+        await create({ provider: 'aws', packageNames: [packageB] }, `/s/${TEST_SPACE}`);
+      });
+
+      after(async () => {
+        for (const { id, urlPrefix } of createdIds) {
+          await supertest
+            .delete(`${urlPrefix}${BASE_URL}/${id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .catch(() => {});
+        }
+        await kibanaServer.spaces.delete(TEST_SPACE).catch(() => {});
+      });
+
+      it('counts the deployments of every package they cover', async () => {
+        const { body } = await getCounts().expect(200);
+
+        expect(body.counts[packageA]).to.equal(3);
+        expect(body.counts[packageB]).to.equal(1);
+      });
+
+      it('filters by provider', async () => {
+        const { body } = await getCounts({ provider: 'aws' }).expect(200);
+
+        expect(body.counts[packageA]).to.equal(2);
+        expect(body.counts[packageB]).to.equal(1);
+      });
+
+      it('only counts the deployments of the space', async () => {
+        const { body } = await getCounts({}, `/s/${TEST_SPACE}`).expect(200);
+
+        expect(body.counts[packageA]).to.be(undefined);
+        expect(body.counts[packageB]).to.equal(1);
+      });
+
+      it('forbids a user without Fleet access', async () => {
+        await supertestWithoutAuth
+          .get(COUNTS_URL)
+          .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
+          .set('elastic-api-version', '1')
+          .set('x-elastic-internal-origin', 'kibana')
+          .expect(403);
+      });
+    });
+
+    describe('GET /api/fleet/cloud_onboarding_deployments agent counts', () => {
+      const PACKAGE_NAME = 'agent-count-test-package';
+      // Stored agent policy ids are client-supplied: one the request's saved objects client cannot
+      // resolve (e.g. a policy of another space) must not have its agents counted.
+      const UNRESOLVABLE_POLICY_ID = 'agent-count-test-unresolvable-policy';
+      const agentIds = ['agent-count-test-agent-1', 'agent-count-test-agent-2'];
+      let agentPolicyId: string;
+      let deploymentId: string;
+
+      before(async () => {
+        const { body: policyBody } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: `agent-count-test-policy-${Date.now()}`, namespace: 'default' })
+          .expect(200);
+        agentPolicyId = policyBody.item.id;
+
+        await createAgentDoc(providerContext, agentIds[0], agentPolicyId);
+        await createAgentDoc(providerContext, agentIds[1], UNRESOLVABLE_POLICY_ID);
+
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            mechanisms: ['agent_based'],
+            services: ['cloudtrail'],
+            packageNames: [PACKAGE_NAME],
+            agentPolicyIds: [agentPolicyId, UNRESOLVABLE_POLICY_ID],
+          })
+          .expect(200);
+        deploymentId = body.item.id;
+      });
+
+      after(async () => {
+        for (const id of agentIds) {
+          await es.delete({ index: '.fleet-agents', id, refresh: 'wait_for' }).catch(() => {});
+        }
+        await supertest
+          .delete(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .catch(() => {});
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .catch(() => {});
+      });
+
+      it('counts only the agents of agent policies the request can resolve', async () => {
+        const { body } = await supertest
+          .get(BASE_URL)
+          .query({ packageName: PACKAGE_NAME })
+          .expect(200);
+
+        expect(body.items).to.have.length(1);
+        expect(body.items[0].id).to.equal(deploymentId);
+        expect(body.items[0].agentCount).to.equal(1);
+        expect(body.items[0].servicesByMethod).to.eql({ agent_based: ['cloudtrail'] });
+      });
+
+      it('leaves out the agent count for users who cannot read agents', async () => {
+        const user = testUsers.fleet_agent_policies_read_only;
+        const { body } = await supertestWithoutAuth
+          .get(BASE_URL)
+          .auth(user.username, user.password)
+          .query({ packageName: PACKAGE_NAME })
+          .expect(200);
+
+        expect(body.items).to.have.length(1);
+        expect(body.items[0]).not.to.have.property('agentCount');
+      });
+    });
+
+    describe('authorization', () => {
+      let deploymentId: string;
+
+      before(async () => {
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ provider: 'aws', mechanisms: ['ecf'], services: ['cloudtrail'] })
+          .expect(200);
+        deploymentId = body.item.id;
+      });
+
+      after(async () => {
+        await supertest
+          .delete(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .catch(() => {});
+      });
+
+      const asUser = (user: { username: string; password: string }) => ({
+        get: (url: string) => supertestWithoutAuth.get(url).auth(user.username, user.password),
+        post: (url: string) =>
+          supertestWithoutAuth.post(url).auth(user.username, user.password).set('kbn-xsrf', 'xxxx'),
+        put: (url: string) =>
+          supertestWithoutAuth.put(url).auth(user.username, user.password).set('kbn-xsrf', 'xxxx'),
+        delete: (url: string) =>
+          supertestWithoutAuth
+            .delete(url)
+            .auth(user.username, user.password)
+            .set('kbn-xsrf', 'xxxx'),
+      });
+
+      it('lets a read-only Fleet user list and get deployments', async () => {
+        const readOnly = asUser(testUsers.fleet_read_only);
+        await readOnly.get(BASE_URL).expect(200);
+        await readOnly.get(`${BASE_URL}/${deploymentId}`).expect(200);
+      });
+
+      it('forbids a read-only Fleet user to create, update or delete deployments', async () => {
+        const readOnly = asUser(testUsers.fleet_read_only);
+        await readOnly
+          .post(BASE_URL)
+          .send({ provider: 'aws', mechanisms: ['ecf'], services: ['cloudtrail'] })
+          .expect(403);
+        await readOnly.put(`${BASE_URL}/${deploymentId}`).send({ status: 'failed' }).expect(403);
+        await readOnly.delete(`${BASE_URL}/${deploymentId}`).expect(403);
+      });
+
+      it('forbids a user without Fleet access to list deployments', async () => {
+        await asUser(testUsers.fleet_no_access).get(BASE_URL).expect(403);
+      });
+    });
+
     describe('PUT /api/fleet/cloud_onboarding_deployments/{id}', () => {
       let deploymentId: string;
 
@@ -627,6 +947,29 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(body.item.serviceVars).to.eql(serviceVars);
+      });
+
+      it('should not lose concurrent updates to different fields', async () => {
+        const updates = [
+          { deploymentName: 'concurrent-stack' },
+          { statusMessage: 'concurrent-message' },
+          { description: 'concurrent-description' },
+        ];
+
+        await Promise.all(
+          updates.map((update) =>
+            supertest
+              .put(`${BASE_URL}/${deploymentId}`)
+              .set('kbn-xsrf', 'xxxx')
+              .send(update)
+              .expect(200)
+          )
+        );
+
+        const { body } = await supertest.get(`${BASE_URL}/${deploymentId}`).expect(200);
+        expect(body.item.deploymentName).to.be('concurrent-stack');
+        expect(body.item.statusMessage).to.be('concurrent-message');
+        expect(body.item.description).to.be('concurrent-description');
       });
 
       describe('instances', () => {
@@ -869,6 +1212,24 @@ export default function (providerContext: FtrProviderContext) {
         }
       });
 
+      it('GET list returns only the deployments of the space', async () => {
+        const { body: spaceList } = await supertest
+          .get(spaceUrl(BASE_URL))
+          .query({ perPage: 100 })
+          .expect(200);
+        const spaceIds = spaceList.items.map((item: { id: string }) => item.id);
+        expect(spaceIds).to.contain(testSpaceDeploymentId);
+        expect(spaceIds).not.to.contain(defaultSpaceDeploymentId);
+
+        const { body: defaultList } = await supertest
+          .get(BASE_URL)
+          .query({ perPage: 100 })
+          .expect(200);
+        const defaultIds = defaultList.items.map((item: { id: string }) => item.id);
+        expect(defaultIds).to.contain(defaultSpaceDeploymentId);
+        expect(defaultIds).not.to.contain(testSpaceDeploymentId);
+      });
+
       it('GET by ID returns a deployment from the same space', async () => {
         const { body } = await supertest
           .get(spaceUrl(`${BASE_URL}/${testSpaceDeploymentId}`))
@@ -943,6 +1304,435 @@ export default function (providerContext: FtrProviderContext) {
           .delete(`${BASE_URL}/00000000-0000-0000-0000-000000000000`)
           .set('kbn-xsrf', 'xxxx')
           .expect(404);
+      });
+    });
+
+    describe('package policy ownership', () => {
+      const PACKAGE = { name: 'filetest', title: 'For File Tests', version: '0.1.0' };
+      let agentPolicyId: string;
+      let packagePolicyIds: string[];
+      const deploymentIds: string[] = [];
+
+      const createPackagePolicy = async (name: string) => {
+        const { body } = await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name,
+            namespace: 'default',
+            policy_ids: [agentPolicyId],
+            enabled: true,
+            inputs: [],
+            package: PACKAGE,
+          })
+          .expect(200);
+        return body.item.id as string;
+      };
+
+      let packagePolicySoType: string;
+      let seededPolicyIds: string[];
+
+      // The saved object type of the package policies depends on space awareness.
+      const resolvePackagePolicySoType = async (packagePolicyId: string) => {
+        for (const type of ['ingest-package-policies', 'fleet-package-policies']) {
+          const { status } = await supertest.get(`${SO_API}/${type}/${packagePolicyId}`);
+          if (status === 200) return type;
+        }
+        throw new Error(`Saved object of package policy ${packagePolicyId} not found`);
+      };
+
+      // A package policy of an onboarding package, saved directly: only policies of those packages
+      // are stamped, and the test registry has none of them.
+      const seedOnboardingPackagePolicy = async (name: string) => {
+        const now = new Date().toISOString();
+        const { body } = await supertest
+          .post(`${SO_API}/${packagePolicySoType}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            attributes: {
+              name,
+              namespace: 'default',
+              enabled: true,
+              policy_ids: [agentPolicyId],
+              inputs: [],
+              package: { name: 'aws', title: 'AWS', version: '1.0.0' },
+              revision: 1,
+              latest_revision: true,
+              created_at: now,
+              created_by: 'test',
+              updated_at: now,
+              updated_by: 'test',
+            },
+          })
+          .expect(200);
+        return body.id as string;
+      };
+
+      const getOnboardingDeploymentId = async (packagePolicyId: string) => {
+        const { body } = await supertest
+          .get(`${SO_API}/${packagePolicySoType}/${packagePolicyId}`)
+          .expect(200);
+        return body.attributes.onboarding_deployment_id ?? null;
+      };
+
+      // Sets the stamp without the deployment recording the policy, for the tests of what the stamp
+      // does to a package policy of a registry package.
+      const stampPackagePolicy = async (packagePolicyId: string, deploymentId: string) => {
+        await supertest
+          .put(`${SO_API}/${packagePolicySoType}/${packagePolicyId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ attributes: { onboarding_deployment_id: deploymentId } })
+          .expect(200);
+      };
+
+      // Like the onboarding flow: the deployment is created first, and records its package
+      // policies once they are deployed.
+      const createDeployment = async (policyIdsByInstance: Record<string, string> = {}) => {
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            mechanisms: ['agent_based'],
+            services: ['cloudtrail'],
+            agentPolicyIds: [agentPolicyId],
+          })
+          .expect(200);
+        deploymentIds.push(body.item.id);
+        if (Object.keys(policyIdsByInstance).length) {
+          await supertest
+            .put(`${BASE_URL}/${body.item.id}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ policyIdsByInstance })
+            .expect(200);
+        }
+        return body.item.id as string;
+      };
+
+      const createStampedDeployment = async (packagePolicyId: string) => {
+        const deploymentId = await createDeployment();
+        await stampPackagePolicy(packagePolicyId, deploymentId);
+        return deploymentId;
+      };
+
+      before(async () => {
+        const { body } = await supertest
+          .post('/api/fleet/agent_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ name: `ownership-test-policy-${Date.now()}`, namespace: 'default' })
+          .expect(200);
+        agentPolicyId = body.item.id;
+
+        const probeId = await createPackagePolicy(`ownership-test-probe-${Date.now()}`);
+        packagePolicySoType = await resolvePackagePolicySoType(probeId);
+        await supertest
+          .delete(`/api/fleet/package_policies/${probeId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+      });
+
+      beforeEach(async () => {
+        packagePolicyIds = [
+          await createPackagePolicy(`ownership-test-1-${Date.now()}`),
+          await createPackagePolicy(`ownership-test-2-${Date.now()}`),
+        ];
+        seededPolicyIds = [
+          await seedOnboardingPackagePolicy(`ownership-test-aws-1-${Date.now()}`),
+          await seedOnboardingPackagePolicy(`ownership-test-aws-2-${Date.now()}`),
+        ];
+      });
+
+      afterEach(async () => {
+        while (deploymentIds.length) {
+          await supertest
+            .delete(`${BASE_URL}/${deploymentIds.pop()}`)
+            .set('kbn-xsrf', 'xxxx')
+            .catch(() => {});
+        }
+        // Stamped policies can only be deleted with the id of the deployment that manages them.
+        for (const packagePolicyId of packagePolicyIds) {
+          const onboardingDeploymentId = await getOnboardingDeploymentId(packagePolicyId).catch(
+            () => null
+          );
+          await supertest
+            .delete(`/api/fleet/package_policies/${packagePolicyId}`)
+            .query(
+              onboardingDeploymentId ? { onboarding_deployment_id: onboardingDeploymentId } : {}
+            )
+            .set('kbn-xsrf', 'xxxx')
+            .catch(() => {});
+        }
+        for (const seededPolicyId of seededPolicyIds) {
+          await supertest
+            .delete(`${SO_API}/${packagePolicySoType}/${seededPolicyId}`)
+            .query({ force: true })
+            .set('kbn-xsrf', 'xxxx')
+            .catch(() => {});
+        }
+      });
+
+      after(async () => {
+        await supertest
+          .post('/api/fleet/agent_policies/delete')
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId })
+          .catch(() => {});
+      });
+
+      it('stamps the package policies of the onboarding flow a new deployment owns', async () => {
+        const deploymentId = await createDeployment({ cloudtrail: seededPolicyIds[0] });
+
+        expect(await getOnboardingDeploymentId(seededPolicyIds[0])).to.equal(deploymentId);
+        expect(await getOnboardingDeploymentId(seededPolicyIds[1])).to.equal(null);
+      });
+
+      it('stamps added policies and clears the stamp of removed ones on update', async () => {
+        const deploymentId = await createDeployment({ cloudtrail: seededPolicyIds[0] });
+
+        await supertest
+          .put(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ policyIdsByInstance: { cloudtrail: seededPolicyIds[1] } })
+          .expect(200);
+
+        expect(await getOnboardingDeploymentId(seededPolicyIds[0])).to.equal(null);
+        expect(await getOnboardingDeploymentId(seededPolicyIds[1])).to.equal(deploymentId);
+      });
+
+      it('does not take over a package policy owned by another deployment', async () => {
+        const firstDeploymentId = await createDeployment({ cloudtrail: seededPolicyIds[0] });
+        await createDeployment({ cloudtrail: seededPolicyIds[0] });
+
+        expect(await getOnboardingDeploymentId(seededPolicyIds[0])).to.equal(firstDeploymentId);
+      });
+
+      it('does not stamp package policies of other packages than those of the onboarding flow', async () => {
+        await createDeployment({ cloudtrail: packagePolicyIds[0] });
+
+        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(null);
+      });
+
+      it('keeps the stamp when the deployment is deleted', async () => {
+        const deploymentId = await createDeployment({ cloudtrail: seededPolicyIds[0] });
+
+        await supertest.delete(`${BASE_URL}/${deploymentId}`).set('kbn-xsrf', 'xxxx').expect(200);
+
+        expect(await getOnboardingDeploymentId(seededPolicyIds[0])).to.equal(deploymentId);
+      });
+
+      it('keeps the stamp across package policy updates that do not mention it', async () => {
+        const deploymentId = await createStampedDeployment(packagePolicyIds[0]);
+
+        // Partial update
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+          .query({ onboarding_deployment_id: deploymentId })
+          .set('kbn-xsrf', 'xxxx')
+          .send({ description: 'updated description' })
+          .expect(200);
+        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(deploymentId);
+
+        // Full update
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+          .query({ onboarding_deployment_id: deploymentId })
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `ownership-test-renamed-${Date.now()}`,
+            namespace: 'default',
+            policy_ids: [agentPolicyId],
+            enabled: true,
+            inputs: [],
+            package: PACKAGE,
+          })
+          .expect(200);
+        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(deploymentId);
+      });
+
+      it('does not accept the stamp in package policy requests', async () => {
+        await supertest
+          .post('/api/fleet/package_policies')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `ownership-test-stamped-${Date.now()}`,
+            namespace: 'default',
+            policy_ids: [agentPolicyId],
+            enabled: true,
+            inputs: [],
+            package: PACKAGE,
+            onboarding_deployment_id: 'some-deployment',
+          })
+          .expect(400);
+
+        await supertest
+          .put(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ onboarding_deployment_id: 'some-deployment' })
+          .expect(400);
+        expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(null);
+      });
+
+      describe('changes from outside the onboarding flow', () => {
+        const ONBOARDING_ONLY = /can only be changed from the onboarding flow/;
+        let deploymentId: string;
+
+        beforeEach(async () => {
+          deploymentId = await createStampedDeployment(packagePolicyIds[0]);
+        });
+
+        it('rejects an update without the id of the deployment that manages the policy', async () => {
+          for (const query of [{}, { onboarding_deployment_id: 'another-deployment' }]) {
+            const { body } = await supertest
+              .put(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+              .query(query)
+              .set('kbn-xsrf', 'xxxx')
+              .send({ description: 'updated outside onboarding' })
+              .expect(400);
+            expect(body.message).to.match(ONBOARDING_ONLY);
+          }
+        });
+
+        it('accepts an update with the id of the deployment that manages the policy', async () => {
+          await supertest
+            .put(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+            .query({ onboarding_deployment_id: deploymentId })
+            .set('kbn-xsrf', 'xxxx')
+            .send({ description: 'updated by onboarding' })
+            .expect(200);
+        });
+
+        it('does not restrict policies the deployment does not manage', async () => {
+          await supertest
+            .put(`/api/fleet/package_policies/${packagePolicyIds[1]}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ description: 'updated outside onboarding' })
+            .expect(200);
+        });
+
+        it('rejects deleting the policy without the id of the deployment that manages it', async () => {
+          const { body: deleteOneBody } = await supertest
+            .delete(`/api/fleet/package_policies/${packagePolicyIds[0]}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(400);
+          expect(deleteOneBody.message).to.match(ONBOARDING_ONLY);
+
+          // The whole batch is rejected, including the policy the deployment does not manage.
+          const { body: bulkDeleteBody } = await supertest
+            .post('/api/fleet/package_policies/delete')
+            .set('kbn-xsrf', 'xxxx')
+            .send({ packagePolicyIds, force: true })
+            .expect(400);
+          expect(bulkDeleteBody.message).to.match(ONBOARDING_ONLY);
+
+          expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(deploymentId);
+          expect(await getOnboardingDeploymentId(packagePolicyIds[1])).to.equal(null);
+        });
+
+        it('deletes the policy with the id of the deployment that manages it', async () => {
+          await supertest
+            .post('/api/fleet/package_policies/delete')
+            .query({ onboarding_deployment_id: deploymentId })
+            .set('kbn-xsrf', 'xxxx')
+            .send({ packagePolicyIds: [packagePolicyIds[0]] })
+            .expect(200);
+
+          await supertest.get(`/api/fleet/package_policies/${packagePolicyIds[0]}`).expect(404);
+        });
+
+        it('rejects deleting the agent policy of the policy', async () => {
+          // Deleting the agent policy would delete the policy along with it.
+          const { body } = await supertest
+            .post('/api/fleet/agent_policies/delete')
+            .set('kbn-xsrf', 'xxxx')
+            .send({ agentPolicyId, force: true })
+            .expect(400);
+          expect(body.message).to.match(ONBOARDING_ONLY);
+
+          await supertest.get(`/api/fleet/agent_policies/${agentPolicyId}`).expect(200);
+          expect(await getOnboardingDeploymentId(packagePolicyIds[0])).to.equal(deploymentId);
+        });
+      });
+
+      describe('package upgrades', () => {
+        const UPGRADE_PACKAGE = 'package_policy_upgrade';
+        const INSTALLED_VERSION = '0.2.5-non-breaking-change';
+        let upgradablePolicyId: string;
+        let deploymentId: string;
+
+        before(async () => {
+          await supertest
+            .post(`/api/fleet/epm/packages/${UPGRADE_PACKAGE}/${INSTALLED_VERSION}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ force: true })
+            .expect(200);
+        });
+
+        after(async () => {
+          await supertest
+            .delete(`/api/fleet/epm/packages/${UPGRADE_PACKAGE}/${INSTALLED_VERSION}`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ force: true })
+            .catch(() => {});
+        });
+
+        beforeEach(async () => {
+          // A policy on an older version than the installed one, so it can be upgraded.
+          const { body } = await supertest
+            .post('/api/fleet/package_policies')
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: `ownership-test-upgrade-${Date.now()}`,
+              namespace: 'default',
+              policy_ids: [agentPolicyId],
+              enabled: true,
+              inputs: [
+                {
+                  policy_template: 'package_policy_upgrade',
+                  type: 'test_input',
+                  enabled: true,
+                  streams: [
+                    {
+                      id: 'test-package_policy_upgrade-xxxx',
+                      enabled: true,
+                      data_stream: {
+                        type: 'test_stream',
+                        dataset: 'package_policy_upgrade.test_stream',
+                      },
+                      vars: { test_var: { value: 'My custom test value' } },
+                    },
+                  ],
+                },
+              ],
+              package: {
+                name: UPGRADE_PACKAGE,
+                title: 'This is a test package for upgrading package policies',
+                version: '0.2.0-add-non-required-test-var',
+              },
+            })
+            .expect(200);
+          upgradablePolicyId = body.item.id;
+          // Deleted by the suite's afterEach.
+          packagePolicyIds.push(upgradablePolicyId);
+          deploymentId = await createStampedDeployment(upgradablePolicyId);
+        });
+
+        it('upgrades a managed policy without the id of the onboarding instance and keeps the stamp', async () => {
+          const { body } = await supertest
+            .post('/api/fleet/package_policies/upgrade')
+            .set('kbn-xsrf', 'xxxx')
+            .send({ packagePolicyIds: [upgradablePolicyId] })
+            .expect(200);
+
+          expect(body).to.have.length(1);
+          expect(body[0]).to.have.property('id', upgradablePolicyId);
+          expect(body[0]).to.have.property('success', true);
+
+          const { body: upgraded } = await supertest
+            .get(`/api/fleet/package_policies/${upgradablePolicyId}`)
+            .expect(200);
+          expect(upgraded.item.package.version).to.equal(INSTALLED_VERSION);
+          expect(await getOnboardingDeploymentId(upgradablePolicyId)).to.equal(deploymentId);
+        });
       });
     });
   });

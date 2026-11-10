@@ -362,15 +362,20 @@ export interface DocLinks {
     readonly avcResults: string;
     readonly bidirectionalIntegrations: string;
     readonly thirdPartyLlmProviders: string;
+    readonly endpoints: string;
     readonly endpointExceptions: string;
     readonly trustedApps: string;
     readonly trustedDevices: string;
     readonly elasticAiFeatures: string;
     readonly eventFilters: string;
+    readonly kubernetesDashboard: string;
     readonly eventMerging: string;
     readonly blocklist: string;
+    readonly hostIsolationExceptions: string;
     readonly endpointArtifacts: string;
     readonly endpointArtifactsNoEscaping: string;
+    readonly policies: string;
+    readonly responseActionsHistory: string;
     readonly scriptLibrary: string;
     readonly policyResponseTroubleshooting: {
       full_disk_access: string;
@@ -412,6 +417,9 @@ export interface DocLinks {
     readonly signalsMigrationApi: string;
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
+    readonly alertZero: {
+      readonly continuousThreatHunt: string;
+    };
   };
   readonly query: {
     readonly eql: string;
@@ -704,6 +712,9 @@ export interface DocLinks {
   };
   readonly endpoints: {
     readonly troubleshooting: string;
+  };
+  readonly osquery: {
+    readonly guide: string;
   };
   readonly legal: {
     readonly privacyStatement: string;

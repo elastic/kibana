@@ -36,6 +36,8 @@ export interface EvaluatorResult {
     /** Overrides the evaluator's `direction` for this score alone. */
     direction?: Direction;
   }>;
+  /** Set when the evaluator does not apply to this round; the result is skipped and its scores dropped. */
+  notApplicable?: { reason: string };
 }
 
 /**

@@ -12,6 +12,7 @@ import {
   CRITICAL_FILES_JEST_INTEGRATION_TESTS,
   CRITICAL_FILES_JEST_UNIT_TESTS,
   filterFilesByPackages,
+  filterIgnoredFiles,
   getAffectedPackages,
   createScopeMatcher,
 } from '../../affected-packages/index.ts';
@@ -21,6 +22,9 @@ import { SHARD_ANNOTATION_SEP } from './jest_configs.ts';
 import type { MoonTestSelection } from '../../affected-packages/moon_test_tasks.ts';
 
 const MAX_LOGGED_CRITICAL_FILES = 20;
+
+// Documentation files (README, *.md, CHANGELOG*) can't affect runtime behaviour.
+const DOCUMENTATION_IGNORE_PATTERNS = ['**/README*', '**/*.md', '**/CHANGELOG*'] as const;
 
 /** Inputs shared by Jest package filtering and critical-file checks. */
 export interface SelectiveTestingContext {
@@ -36,8 +40,7 @@ export async function resolveSelectiveTestingContext(
     changedFiles,
     strategy: 'git',
     includeDownstream: true,
-    // Documentation files (README, *.md, CHANGELOG*) can't affect runtime behaviour.
-    ignorePatterns: ['**/README*', '**/*.md', '**/CHANGELOG*'],
+    ignorePatterns: DOCUMENTATION_IGNORE_PATTERNS,
     ignoreUncategorizedChanges: true,
   }).catch((error) => {
     console.error('Error getting affected packages', error);
@@ -98,7 +101,11 @@ function filterByAffected(args: {
 }): string[] {
   const { label, configs, criticalFiles, alwaysRun = [], context, moonSelection } = args;
 
-  const matchedCriticalFiles = context.changedFiles.filter(createScopeMatcher(criticalFiles));
+  // Docs are ignored here too, so a docs-only change in a critical package doesn't run everything.
+  const matchedCriticalFiles = filterIgnoredFiles(
+    context.changedFiles,
+    DOCUMENTATION_IGNORE_PATTERNS
+  ).filter(createScopeMatcher(criticalFiles));
   if (matchedCriticalFiles.length > 0) {
     const displayedFiles = matchedCriticalFiles.slice(0, MAX_LOGGED_CRITICAL_FILES);
     const omittedCount = matchedCriticalFiles.length - displayedFiles.length;

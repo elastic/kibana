@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { DEFAULT_RUN_LIMITS } from '../../../common/run_quotas';
 import type { RunQuotaSettingsAttributes } from './saved_objects';
 import {
   patchRunQuotaSettings,
@@ -40,11 +41,8 @@ describe('run quota settings repository', () => {
 
     await expect(readRunQuotaSettings(repository)).resolves.toEqual({
       enabled: true,
-      limits: {
-        detection: 15,
-        investigation: 3,
-        ki_extraction: 3,
-      },
+      investigationLimitsEnabled: true,
+      limits: DEFAULT_RUN_LIMITS,
     });
   });
 
@@ -52,9 +50,12 @@ describe('run quota settings repository', () => {
     const repository = makeRepository();
     const first: RunQuotaSettingsAttributes = {
       enabled: false,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 100,
         investigation: 30,
+        manual_investigation: 5,
+        total_investigation: 10,
         ki_extraction: 20,
         future_group: 9,
       },
@@ -66,6 +67,8 @@ describe('run quota settings repository', () => {
       limits: {
         ...first.limits,
         investigation: 40,
+        manual_investigation: 5,
+        total_investigation: 10,
       },
       futureTopLevel: { retained: 'winner' },
     };
@@ -84,10 +87,13 @@ describe('run quota settings repository', () => {
       })
     ).resolves.toEqual({
       enabled: true,
+      investigationLimitsEnabled: true,
       futureTopLevel: { retained: 'winner' },
       limits: {
         detection: 120,
         investigation: 40,
+        manual_investigation: 5,
+        total_investigation: 10,
         ki_extraction: 20,
         future_group: 9,
       },
@@ -98,18 +104,24 @@ describe('run quota settings repository', () => {
     const repository = makeRepository();
     const legacy: RunQuotaSettingsAttributes = {
       enabled: false,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 100,
         investigation: 30,
+        manual_investigation: 5,
+        total_investigation: 10,
         ki_extraction: 20,
         future_group: 9,
       },
     };
     const concurrentWinner: RunQuotaSettingsAttributes = {
       enabled: true,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 15,
         investigation: 0,
+        manual_investigation: 5,
+        total_investigation: 10,
         ki_extraction: 0,
         future_group: 9,
       },
@@ -125,24 +137,30 @@ describe('run quota settings repository', () => {
 
     await expect(
       patchRunQuotaSettings(repository, {
-        activateLimits: { investigation: 3 },
+        activateLimits: { ki_extraction: 3 },
       })
     ).resolves.toEqual({
       enabled: true,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 15,
-        investigation: 3,
-        ki_extraction: 0,
+        investigation: 0,
+        manual_investigation: 5,
+        total_investigation: 10,
+        ki_extraction: 3,
         future_group: 9,
       },
     });
 
     expect(repository.update.mock.calls[0][2]).toEqual({
       enabled: true,
+      investigationLimitsEnabled: true,
       limits: {
         detection: 0,
-        investigation: 3,
-        ki_extraction: 0,
+        investigation: 30,
+        manual_investigation: 5,
+        total_investigation: 10,
+        ki_extraction: 3,
         future_group: 9,
       },
     });

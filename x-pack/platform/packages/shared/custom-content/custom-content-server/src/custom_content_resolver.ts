@@ -6,11 +6,12 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { MessageRole } from '@kbn/inference-common';
+import { MessageRole, type Message } from '@kbn/inference-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { appendLimitToQuery, getStartEndParams } from '@kbn/esql-utils';
+import { appendLimitToQuery, getNamedParams } from '@kbn/esql-utils';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
@@ -19,6 +20,7 @@ import {
   stripMarkdownFences,
 } from '@kbn/custom-content-common';
 import { extractDeclaredHeight } from './extract_declared_height';
+import { getLiquidSyntaxError } from './liquid_syntax';
 
 const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the host application's real design tokens for both light and dark themes at render time. Use them for EVERY space, radius and font declaration and for every UI color — surfaces, text, borders, chrome and data marks. Never hardcode a pixel spacing value or a font stack, and never hardcode one of those colors, or the panel will look foreign next to the charts beside it. (Illustrations are the exception; see below.)
 - Required body reset: body { margin: 0; padding: var(--cc-space-l); box-sizing: border-box; font-family: var(--cc-font-family); color: var(--cc-color-text); background: var(--cc-color-background); }
@@ -203,6 +205,8 @@ export type CustomContentTemplateResolver = (params: {
   existingTemplate?: string;
   /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
   hasExistingQuery?: boolean;
+  /** The values of the dashboard controls a query may refer to (`?name`), bound when it is sampled. */
+  esqlVariables?: ESQLControlVariable[];
 }) => Promise<ResolvedCustomContentTemplate>;
 
 export const createCustomContentTemplateResolver = ({
@@ -210,14 +214,14 @@ export const createCustomContentTemplateResolver = ({
   esClient,
   logger,
 }: CustomContentTemplateResolverDeps): CustomContentTemplateResolver => {
-  return async ({ prompt, esqlQuery, existingTemplate, hasExistingQuery }) => {
+  return async ({ prompt, esqlQuery, existingTemplate, hasExistingQuery, esqlVariables }) => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
 
     if (esqlQuery) {
       try {
         const sampledQuery = appendLimitToQuery(esqlQuery, SAMPLE_ROW_COUNT);
-        const params = getStartEndParams(sampledQuery, SAMPLE_TIME_RANGE);
+        const params = getNamedParams(sampledQuery, SAMPLE_TIME_RANGE, esqlVariables);
         const result = await esClient.asCurrentUser.esql.query({
           query: sampledQuery,
           ...(params.length ? { params } : {}),
@@ -265,13 +269,39 @@ export const createCustomContentTemplateResolver = ({
     }
 
     const { inferenceClient } = await modelProvider.getDefaultModel();
-    const response = await inferenceClient.chatComplete({
-      system: systemPrompt,
-      messages: [{ role: MessageRole.User, content: userContent }],
-      stream: false,
-    });
+    const messages: Message[] = [{ role: MessageRole.User, content: userContent }];
+    const generate = async () => {
+      const response = await inferenceClient.chatComplete({
+        system: systemPrompt,
+        messages,
+        stream: false,
+      });
+      return {
+        content: response.content,
+        ...extractDeclaredHeight(stripMarkdownFences(response.content)),
+      };
+    };
 
-    const { template, height } = extractDeclaredHeight(stripMarkdownFences(response.content));
+    let generated = await generate();
+    const syntaxError = getLiquidSyntaxError(generated.template);
+    if (syntaxError) {
+      logger.warn(
+        `custom_content template resolver: invalid Liquid, retrying once — ${syntaxError}`
+      );
+      messages.push(
+        { role: MessageRole.Assistant, content: generated.content },
+        {
+          role: MessageRole.User,
+          content: `That template is not valid Liquid: ${syntaxError}\n\nReturn the complete corrected template.`,
+        }
+      );
+      generated = await generate();
+      const retryError = getLiquidSyntaxError(generated.template);
+      if (retryError) {
+        throw new Error(`Generated template was rejected: invalid Liquid syntax (${retryError}).`);
+      }
+    }
+    const { template, height } = generated;
 
     if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(template)) {
       throw new Error('Generated template was rejected: contains a <script> tag.');

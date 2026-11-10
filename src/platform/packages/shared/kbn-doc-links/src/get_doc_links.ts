@@ -502,12 +502,15 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       installElasticDefend: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/install-elastic-defend`,
       avcResults: `https://www.elastic.co/blog/elastic-security-av-comparatives-business-test`,
       bidirectionalIntegrations: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions/third-party-response-actions`,
+      endpoints: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/endpoints`,
       endpointExceptions: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/elastic-endpoint-exceptions`,
       trustedApps: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/trusted-applications`,
       trustedDevices: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/trusted-devices`,
       elasticAiFeatures: `${ELASTIC_DOCS}solutions/security/ai`,
       eventFilters: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/event-filters`,
+      kubernetesDashboard: `${ELASTIC_DOCS}solutions/security/dashboards/kubernetes-dashboard`,
       blocklist: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/blocklist`,
+      hostIsolationExceptions: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/host-isolation-exceptions`,
       threatIntelInt: `${ELASTIC_DOCS}solutions/security/get-started/enable-threat-intelligence-integrations`,
       endpointArtifacts: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/optimize-elastic-defend`,
       endpointArtifactsNoEscaping: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/exception-types-and-syntax#endpoint-no-escaping`,
@@ -520,7 +523,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       packageActionTroubleshooting: {
         es_connection: `${ELASTIC_DOCS}troubleshoot/security/elastic-defend`,
       },
+      policies: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/policies`,
       responseActions: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions`,
+      responseActionsHistory: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions/response-actions-history`,
       scriptLibrary: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions/script-library`,
       configureEndpointIntegrationPolicy: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-an-integration-policy-for-elastic-defend`,
       exceptions: {
@@ -562,6 +567,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,
       siemMigrations: `${ELASTIC_DOCS}solutions/security/get-started/automatic-migration`,
       llmPerformanceMatrix: `${ELASTIC_DOCS}solutions/security/ai/large-language-model-performance-matrix`,
+      alertZero: {
+        continuousThreatHunt: `${ELASTIC_DOCS}solutions/security/alertzero/configure-worker-settings#configure-worker-settings-continuous-threat-hunt`,
+      },
     },
     query: {
       eql: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/eql`,
@@ -1078,6 +1086,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     endpoints: {
       troubleshooting: `${ELASTIC_DOCS}troubleshoot/security/elastic-defend#ts-transform-failed`,
+    },
+    osquery: {
+      guide: `${ELASTIC_DOCS}solutions/security/investigate/osquery`,
     },
     legal: {
       privacyStatement: `${ELASTIC_WEBSITE_URL}legal/product-privacy-statement`,

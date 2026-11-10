@@ -19,7 +19,7 @@ import React, {
 } from 'react';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../hooks/use_kibana';
-import { NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY } from '../../hooks/use_fetch_significant_events';
+import { NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY } from '../significant_events/use_fetch_significant_events';
 import { useSignificantEventsDiscoveryApi } from './use_significant_events_discovery_api';
 import { getFormattedError } from '../../common/errors';
 import { RUNNING_POLL_INTERVAL_MS } from '../../common/constants';

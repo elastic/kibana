@@ -25,6 +25,10 @@ dependsOn:
   - '@kbn/evals-common'
   - '@kbn/config-schema'
   - '@kbn/some-dev-log'
+  - '@kbn/inference-common'
+  - '@kbn/inference-plugin'
+  - '@kbn/core'
+  - '@kbn/repo-info'
 tags:
   - functional-tests
   - package

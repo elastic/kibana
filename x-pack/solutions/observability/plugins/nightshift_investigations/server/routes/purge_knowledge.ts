@@ -40,7 +40,7 @@ export const previewKnowledgePurgeRoute = createNightshiftInvestigationsServerRo
     access: 'internal',
     summary: 'Preview what a knowledge purge would delete',
     description:
-      'Counts the Semantic Memory pages, Cortex pages, decision-tree documents and investigation ' +
+      'Counts the Semantic Memory pages, Wiki pages, decision-tree documents and investigation ' +
       'conversations in this space that were written at or after the cutoff. Reads only.',
   },
   security: { authz: { requiredPrivileges: purgePrivileges } },
@@ -63,7 +63,7 @@ export const purgeKnowledgeRoute = createNightshiftInvestigationsServerRoute({
     access: 'internal',
     summary: 'Delete everything Nightshift learned after a point in time',
     description:
-      'Permanently removes the Semantic Memory pages, Cortex pages, decision-tree documents and ' +
+      'Permanently removes the Semantic Memory pages, Wiki pages, decision-tree documents and ' +
       'investigation conversations in this space that were written at or after the cutoff. ' +
       'Irreversible; intended as the recovery path after a suspected prompt-injection run.',
   },

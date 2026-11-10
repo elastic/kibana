@@ -60,6 +60,16 @@ interface BucketAggsSchemas {
   nested?: {
     path: string;
   };
+  range?: {
+    field?: string;
+    missing?: number | string;
+    keyed?: boolean;
+    ranges?: Array<{
+      from?: number | string;
+      to?: number | string;
+      key?: string;
+    }>;
+  };
   terms?: {
     field?: string;
     collect_mode?: string;
@@ -86,6 +96,7 @@ interface BucketAggsSchemas {
  * - filter
  * - histogram
  * - nested
+ * - range
  * - terms
  *
  * Not implemented:
@@ -105,7 +116,6 @@ interface BucketAggsSchemas {
  * - missing
  * - multi_terms
  * - parent
- * - range
  * - rare_terms
  * - reverse_nested
  * - sampler
@@ -161,6 +171,22 @@ const bucketAggsTempsSchemas: t.Type<BucketAggsSchemas> = t.exact(
     nested: t.type({
       path: t.string,
     }),
+    range: t.exact(
+      t.partial({
+        field: t.string,
+        missing: t.union([t.number, t.string]),
+        keyed: t.boolean,
+        ranges: t.array(
+          t.exact(
+            t.partial({
+              from: t.union([t.number, t.string]),
+              to: t.union([t.number, t.string]),
+              key: t.string,
+            })
+          )
+        ),
+      })
+    ),
     multi_terms: t.exact(
       t.partial({
         terms: t.array(t.type({ field: t.string })),
