@@ -57,6 +57,7 @@ import { ImpactMapEventsStore } from './impact_map/services/impact_map_events_st
 import { registerTimelineAttachment } from './impact_map/attachments/timeline_attachment_type';
 import { createShowTimelineTool } from './impact_map/tools/show_timeline_tool';
 import { createSetImpactMapTool } from './impact_map/tools/set_impact_map_tool';
+import { createParseMermaidTool } from './impact_map/tools/parse_mermaid_tool';
 import { createUpsertImpactMapCatalogTool } from './impact_map/tools/upsert_impact_map_catalog_tool';
 import { EscalationsService } from './escalations/services/escalations_service';
 import { registerEscalationConversationEvents } from './escalations/conversation_events';
@@ -194,6 +195,9 @@ export class AgenticInvestigationsPlugin
         privileges: investigationsPrivileges,
         logger: this.logger,
       })
+    );
+    agentBuilder.tools.register(
+      createParseMermaidTool({ privileges: investigationsPrivileges, logger: this.logger })
     );
     registerTimelineAttachment(agentBuilder);
     agentBuilder.tools.register(

@@ -51,7 +51,7 @@ describe('normalizeEntityType', () => {
       normalizeEntityType({
         id: 'thing',
         label: 'Thing',
-        kind: 'dependency',
+        kind: 'infrastructure',
         icon: { eui_icon: 'logoGolang', span_type: 'db' },
       }).icon
     ).toEqual({ span_type: 'db' });

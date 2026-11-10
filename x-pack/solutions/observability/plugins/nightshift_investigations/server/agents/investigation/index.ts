@@ -13,6 +13,7 @@ import type {
 } from '@kbn/agent-builder-server/agents';
 import type { Logger } from '@kbn/core/server';
 import {
+  PARSE_MERMAID_TOOL_ID,
   SET_HYPOTHESES_TOOL_ID,
   SET_IMPACT_MAP_TOOL_ID,
   SET_IMPACT_TOOL_ID,
@@ -50,6 +51,7 @@ export const SANDBOX_TOOL_IDS = [
 export const IMPACT_MAP_TOOL_IDS = [
   SET_IMPACT_MAP_TOOL_ID,
   UPSERT_IMPACT_MAP_CATALOG_TOOL_ID,
+  PARSE_MERMAID_TOOL_ID,
   SHOW_TIMELINE_TOOL_ID,
 ] as const;
 

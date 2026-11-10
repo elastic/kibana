@@ -9,10 +9,10 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { InvestigationImpactMapResponse } from '@kbn/agentic-investigations-plugin/common';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from '../../components/shared/service_map/test_helpers';
-import { DEFAULT_EDGE_STYLE } from '../../../common/service_map/constants';
 import { ImpactServiceMap } from './impact_service_map';
 import {
   IMPACT_SEVERITY_SCORES,
+  getEntityTypeTooltip,
   getImpactSeverityScore,
   getEuiIcon,
   getImpactState,
@@ -78,8 +78,8 @@ const impactMap: InvestigationImpactMapResponse = {
     {
       id: 'postgres',
       label: 'PostgreSQL',
-      kind: 'dependency',
-      icon: { span_type: 'db', span_subtype: 'postgresql' },
+      kind: 'infrastructure',
+      icon: { eui_icon: 'logoPostgres' },
     },
   ],
   relationship_types: [
@@ -104,17 +104,49 @@ describe('getImpactSeverityScore', () => {
   });
 });
 
+describe('getEntityTypeTooltip', () => {
+  it('uses kind and catalog label, or span type and subtype when present', () => {
+    expect(
+      getEntityTypeTooltip(
+        { id: 'service', label: 'Service', kind: 'service' },
+        'service',
+        'nodejs'
+      )
+    ).toEqual({ typeKindLabel: 'Service', subtypeLabel: 'nodejs' });
+    expect(
+      getEntityTypeTooltip(
+        { id: 'host', label: 'Host', kind: 'infrastructure' },
+        'host'
+      )
+    ).toEqual({ typeKindLabel: 'Infrastructure', subtypeLabel: 'Host' });
+    expect(
+      getEntityTypeTooltip(
+        {
+          id: 'postgres',
+          label: 'PostgreSQL',
+          kind: 'dependency',
+          icon: { span_type: 'db', span_subtype: 'postgresql' },
+        },
+        'postgres'
+      )
+    ).toEqual({ typeKindLabel: 'db', subtypeLabel: 'postgresql' });
+  });
+});
+
 describe('getEuiIcon', () => {
-  it('uses the named icon, and the Kubernetes logo for Kubernetes types the model left bare', () => {
+  it('uses the named icon, guesses from labels, and never leaves a service empty', () => {
     expect(
       getEuiIcon({ id: 'x', label: 'X', kind: 'service', icon: { eui_icon: 'logoAWS' } })
     ).toBe('logoAWS');
     expect(getEuiIcon({ id: 'k8s_deployment', label: 'K8s deployment', kind: 'service' })).toBe(
       'logoKubernetes'
     );
+    expect(getEuiIcon({ id: 'java_service', label: 'Java service', kind: 'service' })).toBe(
+      'apps'
+    );
     expect(
-      getEuiIcon({ id: 'java_service', label: 'Java service', kind: 'service' })
-    ).toBeUndefined();
+      getEuiIcon({ id: 'service', label: 'Service', kind: 'service' }, 'Constructor')
+    ).toBe('gear');
   });
 });
 
@@ -154,37 +186,113 @@ describe('getImpactState', () => {
 describe('transformImpactMap', () => {
   const { nodes, edges } = transformImpactMap(impactMap, { criticalPath: 'red' });
 
-  it('draws services as service nodes and dependencies as diamonds, with their icons', () => {
+  it('draws only services as circles; a database is a rounded square with its logo', () => {
     expect(nodes.find(({ id }) => id === 'frontend')).toMatchObject({
       type: 'service',
       data: {
         agentName: 'nodejs',
         alertsCount: 3,
         serviceAnomalyStats: { anomalyScore: IMPACT_SEVERITY_SCORES.impacted },
+        typeKindLabel: 'Service',
+        subtypeLabel: 'nodejs',
       },
     });
     expect(nodes.find(({ id }) => id === 'payments-db')).toMatchObject({
-      type: 'impactDependency',
+      type: 'impactInfrastructure',
       data: {
-        spanType: 'db',
-        spanSubtype: 'postgresql',
+        euiIcon: 'logoPostgres',
         severityScore: IMPACT_SEVERITY_SCORES.rootCause,
+        typeKindLabel: 'Infrastructure',
+        subtypeLabel: 'PostgreSQL',
       },
     });
     expect(nodes.find(({ id }) => id === 'cart')?.data).not.toHaveProperty('serviceAnomalyStats');
   });
 
-  it('draws the critical path thicker in its colour and labels edges with the relationship', () => {
+  it('reads a stored dependency type as a rounded square with an icon from its span type', () => {
+    const stored = transformImpactMap(
+      {
+        ...impactMap,
+        entity_types: impactMap.entity_types.map((type) =>
+          type.id === 'postgres'
+            ? { ...type, kind: 'dependency', icon: { span_type: 'db', span_subtype: 'postgresql' } }
+            : type
+        ),
+      },
+      { criticalPath: 'red' }
+    );
+
+    expect(stored.nodes.find(({ id }) => id === 'payments-db')).toMatchObject({
+      type: 'impactInfrastructure',
+      data: { euiIcon: 'logoPostgres' },
+    });
+  });
+
+  it('draws the critical path thicker and leaves generic type verbs off the canvas', () => {
     const critical = edges.find(({ id }) => id === 'checkout->payments-db:reads');
+    // "reads from" is the type — repeating it on every trunk edge is noise; aria keeps it.
     expect(critical).toMatchObject({
-      label: 'reads from',
-      animated: true,
+      type: 'impact',
+      animated: false,
+      ariaLabel: 'reads from',
       style: { stroke: 'red', strokeWidth: 3 },
       markerEnd: { color: 'red' },
       data: { onCriticalPath: true },
     });
+    expect(critical).not.toHaveProperty('label');
     const plain = edges.find(({ id }) => id === 'frontend->cart:calls');
-    expect(plain).toMatchObject({ label: 'calls', animated: false, style: DEFAULT_EDGE_STYLE });
+    // Context links stay unlabelled and quiet so the critical path is readable.
+    expect(plain).toMatchObject({
+      animated: false,
+      style: expect.objectContaining({ opacity: 0.35 }),
+    });
+    expect(plain).not.toHaveProperty('label');
+  });
+
+  it('paints only custom critical-path labels, and shortens opaque entity ids', () => {
+    const { nodes: labelledNodes, edges: labelledEdges } = transformImpactMap(
+      {
+        ...impactMap,
+        entities: [
+          ...impactMap.entities,
+          {
+            id: 'cluster-hex',
+            type_id: 'service',
+            label: '1656aec22450428391c6fe912bfd463',
+          },
+        ],
+        relationships: [
+          {
+            id: 'frontend->checkout:calls',
+            type_id: 'calls',
+            source_id: 'frontend',
+            target_id: 'checkout',
+            on_critical_path: true,
+            label: 'checkout timeout',
+          },
+          {
+            id: 'checkout->payments-db:reads',
+            type_id: 'reads',
+            source_id: 'checkout',
+            target_id: 'payments-db',
+            on_critical_path: true,
+          },
+          { id: 'frontend->cart:calls', type_id: 'calls', source_id: 'frontend', target_id: 'cart' },
+        ],
+      },
+      { criticalPath: 'red' }
+    );
+
+    expect(labelledEdges.find(({ id }) => id === 'frontend->checkout:calls')).toMatchObject({
+      type: 'impact',
+      label: 'checkout timeout',
+    });
+    expect(labelledEdges.find(({ id }) => id === 'checkout->payments-db:reads')).not.toHaveProperty(
+      'label'
+    );
+    expect(labelledNodes.find(({ id }) => id === 'cluster-hex')?.data.label).toBe(
+      '1656aec2…bfd463'
+    );
   });
 });
 
@@ -213,7 +321,8 @@ describe('event counts', () => {
     expect(nodes.find(({ id }) => id === 'payments-db')?.data.eventCount).toBe(2);
     expect(nodes.find(({ id }) => id === 'cart')?.data.eventCount).toBe(0);
     expect(edges.find(({ id }) => id === 'checkout->payments-db:reads')).toMatchObject({
-      label: 'reads from · 1 event',
+      // No custom label — show the event count alone, not the generic type verb.
+      label: '1 event',
       data: { eventCount: 1 },
     });
   });

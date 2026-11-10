@@ -146,3 +146,41 @@ describe('mergeImpactMapCatalog', () => {
     });
   });
 });
+
+describe('resolveImpactMapGraph parents', () => {
+  const entity = (id: string, parent_id?: string) => ({
+    id,
+    type_id: 'service',
+    label: id,
+    ...(parent_id ? { parent_id } : {}),
+  });
+
+  it('keeps a parent that is in the map, however deep', () => {
+    const graph = resolveImpactMapGraph({
+      entities: [entity('region'), entity('zone', 'region'), entity('node', 'zone')],
+      relationships: [],
+      catalog,
+    });
+
+    expect(graph.warnings).toEqual([]);
+    expect(graph.entities.map(({ parent_id: parent }) => parent)).toEqual([
+      undefined,
+      'region',
+      'zone',
+    ]);
+  });
+
+  it('drops a parent that is missing, is the entity itself, or closes a loop, and keeps the entity', () => {
+    const graph = resolveImpactMapGraph({
+      entities: [entity('a', 'ghost'), entity('b', 'b'), entity('c', 'd'), entity('d', 'c')],
+      relationships: [],
+      catalog,
+    });
+
+    expect(graph.entities).toHaveLength(4);
+    expect(graph.warnings).toHaveLength(3);
+    // The loop is cut once: one of the pair keeps its parent, so the other is inside it.
+    const parents = graph.entities.filter(({ parent_id: parent }) => parent);
+    expect(parents).toHaveLength(1);
+  });
+});

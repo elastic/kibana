@@ -168,6 +168,37 @@ describe('getEntityKind', () => {
 });
 
 describe('ImpactMapTab', () => {
+  it('says what an entity is under its title, from the entity or else its type', async () => {
+    mockUseIsInAgentBuilder.mockReturnValue(false);
+    mockUseInvestigation.mockReturnValue({
+      data: {
+        in_progress: false,
+        impact_map: {
+          ...impactMap,
+          entities: [
+            { id: 'checkout', type_id: 'service', label: 'checkout' },
+            {
+              id: 'payment',
+              type_id: 'service',
+              label: 'payment',
+              description: 'Takes card payments for checkout.',
+            },
+          ],
+          entity_types: [
+            { id: 'service', label: 'Service', kind: 'service', description: 'Application code.' },
+          ],
+        },
+      },
+    });
+
+    renderTab();
+    fireEvent.click(screen.getByTestId('fakeEntity'));
+
+    expect(
+      await screen.findByTestId('agenticInvestigationsImpactMapEntityDescription')
+    ).toHaveTextContent('Takes card payments for checkout.');
+  });
+
   it('shows key metadata first and the rest in a filterable Metadata tab', async () => {
     mockUseIsInAgentBuilder.mockReturnValue(false);
     mockUseInvestigation.mockReturnValue({
@@ -411,16 +442,18 @@ describe('ImpactMapTab', () => {
     });
   });
 
-  it('opens nothing for an entity or a relationship that has no events', () => {
+  it('still opens an entity or relationship that has no events, so its details show', async () => {
     mockUseInvestigation.mockReturnValue({
       data: { in_progress: false, impact_map: { ...impactMap, events: [] } },
     });
 
     renderTab();
     fireEvent.click(screen.getByTestId('fakeEntity'));
-    fireEvent.click(screen.getByTestId('fakeRelationship'));
 
-    expect(screen.queryByTestId('agenticInvestigationsImpactMapEventsFlyout')).toBeNull();
+    expect(
+      await screen.findByTestId('agenticInvestigationsImpactMapEventsFlyout')
+    ).toHaveTextContent('payment');
+    expect(screen.getByTestId('agenticInvestigationsImpactMapTimelineTab')).toHaveTextContent('0');
   });
 
   it('lists the events of a relationship', () => {

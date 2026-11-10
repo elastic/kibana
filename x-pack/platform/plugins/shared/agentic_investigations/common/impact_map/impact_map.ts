@@ -18,7 +18,9 @@ import {
 import { userSchema } from '../user';
 import { investigationEvidenceSchema } from '../evidence/evidence';
 import {
-  IMPACT_MAP_ENTITY_KINDS,
+  IMPACT_MAP_STORED_ENTITY_KINDS,
+  IMPACT_MAP_CONFIDENCES,
+  IMPACT_MAP_SOURCES,
   IMPACT_MAP_EVENT_KINDS,
   IMPACT_MAP_HEALTH_STATES,
   IMPACT_MAP_ROLES,
@@ -87,8 +89,14 @@ const typeIdSchema = lazySchema(() =>
     .regex(/^[a-z0-9][a-z0-9_.-]*$/, 'Use lowercase letters, digits, "_", "." or "-".')
 );
 
-export const impactMapEntityKindSchema = lazySchema(() => z.enum(IMPACT_MAP_ENTITY_KINDS));
+export const impactMapEntityKindSchema = lazySchema(() => z.enum(IMPACT_MAP_STORED_ENTITY_KINDS));
 export type ImpactMapEntityKind = z.infer<typeof impactMapEntityKindSchema>;
+
+export const impactMapSourceSchema = lazySchema(() => z.enum(IMPACT_MAP_SOURCES));
+export type ImpactMapSource = z.infer<typeof impactMapSourceSchema>;
+
+export const impactMapConfidenceSchema = lazySchema(() => z.enum(IMPACT_MAP_CONFIDENCES));
+export type ImpactMapConfidence = z.infer<typeof impactMapConfidenceSchema>;
 
 export const impactMapRoleSchema = lazySchema(() => z.enum(IMPACT_MAP_ROLES));
 export type ImpactMapRole = z.infer<typeof impactMapRoleSchema>;
@@ -164,6 +172,15 @@ export const impactMapEntitySchema = lazySchema(() =>
     label: z.string().min(1).max(MAX_LABEL_LENGTH),
     description: z.string().max(MAX_DESCRIPTION_LENGTH).optional(),
     annotations: impactMapAnnotationsSchema.optional(),
+    /**
+     * The entity this one is part of or sits inside: a pod inside a node, a node inside a zone,
+     * a zone inside a region. The map draws it as a box around its members, like a Mermaid
+     * subgraph. Must name another entity in the map; a cycle is dropped.
+     */
+    parent_id: z.string().min(1).max(MAX_ID_LENGTH).optional(),
+    /** How the agent learned the entity exists. */
+    source: impactMapSourceSchema.optional(),
+    confidence: impactMapConfidenceSchema.optional(),
     /** Facts that help a person understand and find the entity: its cloud, zone, cluster, namespace. */
     metadata: z.array(impactMapMetadataEntrySchema).max(MAX_IMPACT_MAP_ENTITY_METADATA).optional(),
   })
@@ -179,6 +196,11 @@ export const impactMapRelationshipSchema = lazySchema(() =>
     target_id: z.string().min(1).max(MAX_ID_LENGTH),
     /** Part of the chain from the root cause to the impact. */
     on_critical_path: z.boolean().optional(),
+    /** Overrides the type's label on this edge only, like a Mermaid edge label ("HTTPS :443"). */
+    label: z.string().min(1).max(MAX_LABEL_LENGTH).optional(),
+    /** How the agent learned of the link; `inferred` links draw dashed. */
+    source: impactMapSourceSchema.optional(),
+    confidence: impactMapConfidenceSchema.optional(),
   })
 );
 export type ImpactMapRelationship = z.infer<typeof impactMapRelationshipSchema>;

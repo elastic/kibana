@@ -54,11 +54,38 @@ export const IMPACT_MAP_EVENT_KINDS = [
 ] as const;
 
 /**
- * How an entity type draws, using the service map's own nodes: a circle for something that runs
- * code (a service, a pod, a function), a diamond for something it depends on (a database, a
- * queue, an external host).
+ * How an entity type draws: a circle for a service (application code you run, with its APM agent
+ * logo), and a rounded square, with the icon that suits the type, for everything else: a database,
+ * a queue, a Kubernetes object, a host, a cloud resource, an external API.
  */
-export const IMPACT_MAP_ENTITY_KINDS = ['service', 'dependency', 'infrastructure'] as const;
+export const IMPACT_MAP_ENTITY_KINDS = ['service', 'infrastructure'] as const;
+
+/**
+ * The kinds a stored map can still carry. `dependency` (a diamond) is gone: it is read as
+ * `infrastructure`, with an icon chosen from its span type, and never written.
+ */
+export const IMPACT_MAP_STORED_ENTITY_KINDS = [...IMPACT_MAP_ENTITY_KINDS, 'dependency'] as const;
+
+/**
+ * Where a fact on the map came from. Telemetry and code are first-hand; `diagram`, `doc` and
+ * `catalog` are what people wrote down and may be stale; `inferred` is the agent's hypothesis, so
+ * the map draws it dashed and says so.
+ */
+export const IMPACT_MAP_SOURCES = [
+  'log',
+  'trace',
+  'metric',
+  'config',
+  'code',
+  'catalog',
+  'diagram',
+  'doc',
+  'chat',
+  'inferred',
+] as const;
+
+/** How sure the agent is that an entity or a link is real. */
+export const IMPACT_MAP_CONFIDENCES = ['high', 'medium', 'low'] as const;
 
 /** Where an entity sits in the story of the problem. */
 export const IMPACT_MAP_ROLES = ['root_cause', 'symptom', 'contributor', 'context'] as const;
@@ -77,6 +104,9 @@ export const SHOW_TIMELINE_TOOL_ID = 'agentic_investigations.show_timeline' as c
 /** Agent Builder builtin tool that reads and extends the space's impact map catalog. */
 export const UPSERT_IMPACT_MAP_CATALOG_TOOL_ID =
   'agentic_investigations.upsert_impact_map_catalog' as const;
+
+/** Agent Builder builtin tool that reads a Mermaid diagram into impact map entities and links. */
+export const PARSE_MERMAID_TOOL_ID = 'agentic_investigations.parse_mermaid' as const;
 
 /** Internal route that replaces an investigation's impact map. */
 export const INVESTIGATION_IMPACT_MAP_URL =

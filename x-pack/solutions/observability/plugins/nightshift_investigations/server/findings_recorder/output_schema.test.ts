@@ -280,9 +280,19 @@ describe('entity evidence', () => {
 });
 
 describe('classifyEntityType', () => {
-  it('draws what services rely on as a dependency and Kubernetes objects with their logo', () => {
-    expect(classifyEntityType('postgres_database')).toEqual({ kind: 'dependency' });
-    expect(classifyEntityType('message_queue')).toEqual({ kind: 'dependency' });
+  it('draws only services as circles; databases and queues are rounded squares with an icon', () => {
+    expect(classifyEntityType('postgres_database')).toEqual({
+      kind: 'infrastructure',
+      euiIcon: 'logoPostgres',
+    });
+    expect(classifyEntityType('elasticsearch_cluster')).toEqual({
+      kind: 'infrastructure',
+      euiIcon: 'logoElasticsearch',
+    });
+    expect(classifyEntityType('message_queue')).toEqual({
+      kind: 'infrastructure',
+      euiIcon: 'package',
+    });
     expect(classifyEntityType('host')).toEqual({ kind: 'infrastructure' });
     expect(classifyEntityType('k8s.deployment')).toEqual({
       kind: 'infrastructure',
@@ -400,6 +410,58 @@ describe('impact map metadata', () => {
 });
 
 describe('impact map', () => {
+  it('carries where an entity sits, where it was learned from and how sure the agent is', () => {
+    const map = limitImpactMap({
+      entities: [
+        { id: 'zone-b', type: 'cloud.availability_zone' },
+        {
+          id: 'allocator',
+          type: 'controller',
+          parent: 'zone-b',
+          found_in: 'config',
+          confidence: 'high',
+        },
+        { id: 'self', type: 'controller', parent: 'self' },
+      ],
+      relationships: [
+        {
+          source: 'allocator',
+          target: 'zone-b',
+          type: 'runs_on',
+          label: 'pinned',
+          found_in: 'inferred',
+          confidence: 'low',
+        },
+      ],
+    });
+
+    const [zone, allocator, self] = map?.entities ?? [];
+    expect(zone).not.toHaveProperty('parent_id');
+    expect(allocator).toMatchObject({ parent_id: 'zone-b', source: 'config', confidence: 'high' });
+    expect(self).not.toHaveProperty('parent_id');
+    expect(map?.relationships[0]).toMatchObject({
+      label: 'pinned',
+      source: 'inferred',
+      confidence: 'low',
+    });
+  });
+
+  it('keeps a trimmed entity description and cuts a long one', () => {
+    const map = limitImpactMap({
+      entities: [
+        { id: 'checkout', type: 'java_service', description: '  Places customer orders.  ' },
+        { id: 'cart', type: 'java_service', description: 'x'.repeat(500) },
+        { id: 'quote', type: 'java_service', description: '   ' },
+      ],
+      relationships: [],
+    });
+
+    const [checkout, cart, quote] = map?.entities ?? [];
+    expect(checkout.description).toBe('Places customer orders.');
+    expect(cart.description).toHaveLength(400);
+    expect(quote).not.toHaveProperty('description');
+  });
+
   it('builds the store shape: types from the icon fields, normalised ids, no dangling edges', () => {
     const map = limitImpactMap({
       title: ' Checkout failures ',
@@ -458,8 +520,8 @@ describe('impact map', () => {
         {
           id: 'db.postgresql',
           label: 'Db postgresql',
-          kind: 'dependency',
-          icon: { span_type: 'db', span_subtype: 'postgresql' },
+          kind: 'infrastructure',
+          icon: { eui_icon: 'logoPostgres' },
         },
       ],
       relationship_types: [

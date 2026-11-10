@@ -24,6 +24,7 @@ describe('isAllowedBuiltinTool', () => {
     expect(isAllowedBuiltinTool('agentic_investigations.set_hypotheses')).toBe(true);
     expect(isAllowedBuiltinTool('agentic_investigations.set_impact_map')).toBe(true);
     expect(isAllowedBuiltinTool('agentic_investigations.upsert_impact_map_catalog')).toBe(true);
+    expect(isAllowedBuiltinTool('agentic_investigations.parse_mermaid')).toBe(true);
   });
 
   it('allows the proposals tools', () => {

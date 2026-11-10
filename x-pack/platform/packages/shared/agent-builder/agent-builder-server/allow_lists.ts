@@ -159,6 +159,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.agenticInvestigations}.set_hypotheses`,
   `${internalNamespaces.agenticInvestigations}.set_impact_map`,
   `${internalNamespaces.agenticInvestigations}.upsert_impact_map_catalog`,
+  `${internalNamespaces.agenticInvestigations}.parse_mermaid`,
   `${internalNamespaces.agenticInvestigations}.show_timeline`,
 
   // Platform – Proposals
