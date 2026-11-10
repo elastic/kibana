@@ -91,8 +91,13 @@ describe('resolveArtifactRepositoryUrl', () => {
     });
 
     expect(artifactRepositoryUrl).toContain('Kibana%20Test%2520dir');
-    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).resolves.toMatchObject({
-      kibana: ['latest-2026-10-12T20:25:34.000Z'],
+    await expect(
+      fetchArtifactVersions({
+        artifactRepositoryUrl,
+        inferenceId: '.jina-embeddings-v5-text-small',
+      })
+    ).resolves.toMatchObject({
+      versions: { kibana: ['latest-2026-10-12T20:25:34.000Z'] },
     });
     await expect(fetchLocalRepositoryVersion({ artifactRepositoryUrl })).resolves.toBe(
       '2026-10-12T20:25:34.000Z'

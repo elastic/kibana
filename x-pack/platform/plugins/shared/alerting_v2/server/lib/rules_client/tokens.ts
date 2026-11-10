@@ -6,9 +6,18 @@
  */
 
 import { createToken } from '@kbn/core-di';
-import type { CreateRulesClientOptions } from './types';
+import type { CreateRulesClientOptions, RulesClientEventOrigin } from './types';
 
 /** Options the calling plugin passed when it asked for a rules client. Defaults to none. */
 export const RulesClientOptionsToken = createToken<CreateRulesClientOptions>(
   'alerting_v2.RulesClientOptions'
+);
+
+/**
+ * The acting principal folded together with the client options, composed from
+ * {@link RulesClientOptionsToken} and the request-scope actor so the rules
+ * client resolves its event origin as a single dependency.
+ */
+export const RulesClientEventOriginToken = createToken<RulesClientEventOrigin>(
+  'alerting_v2.RulesClientEventOrigin'
 );

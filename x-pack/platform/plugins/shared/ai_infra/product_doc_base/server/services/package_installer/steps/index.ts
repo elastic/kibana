@@ -15,4 +15,5 @@ export {
   fetchArtifactVersions,
   fetchSecurityLabsVersions,
   fetchLocalRepositoryVersion,
+  type ArtifactRepositoryVersions,
 } from './fetch_artifact_versions';

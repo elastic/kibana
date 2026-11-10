@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from './use_fetch_investigations';
+import { getFormattedError } from '../../common/errors';
 import { useKibana } from '../../hooks/use_kibana';
 
 const START_SUCCESS_TOAST_TITLE = i18n.translate(
@@ -19,9 +20,6 @@ const START_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.nightshift.startInvestigation.errorToastTitle',
   { defaultMessage: 'Failed to start investigation' }
 );
-
-const toError = (error: unknown): Error =>
-  error instanceof Error ? error : new Error(String(error));
 
 interface UseStartInvestigationResult {
   startInvestigation: (message: string, title?: string) => void;
@@ -55,7 +53,7 @@ export const useStartInvestigation = ({
       await queryClient.invalidateQueries({ queryKey: NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY });
     },
     onError: (error: unknown) => {
-      notifications.toasts.addError(toError(error), { title: START_ERROR_TOAST_TITLE });
+      notifications.toasts.addError(getFormattedError(error), { title: START_ERROR_TOAST_TITLE });
     },
   });
 
