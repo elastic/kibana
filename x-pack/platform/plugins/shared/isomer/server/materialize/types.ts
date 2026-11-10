@@ -6,8 +6,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { ColorMapping } from '@kbn/coloring';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import type { AggConfigSerialized } from '@kbn/data-plugin/common';
+import type { AggConfigSerialized, SerializedValue } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
@@ -111,6 +112,11 @@ export interface MaterializeKit {
   toChartData(table: Datatable, options?: ToChartDataOptions): ChartDataResult;
   /** The first `count` colors of a Kibana palette, for light and dark. Defaults to Kibana's default palette. */
   paletteColors(count: number, paletteId?: string): ConcreteColor[];
+  /** The color a Kibana color mapping gives each category, for light and dark, in order. */
+  colorMappingColors(
+    categories: SerializedValue[],
+    colorMapping: ColorMapping.Config
+  ): ConcreteColor[];
 }
 
 /** The user-scoped services a by-reference load runs with. */

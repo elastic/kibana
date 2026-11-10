@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { EMPTY_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import type { Cell, ChartData, Loss } from '@kbn/isomer';
 import type { FormatMapper } from './formats';
 import type {
@@ -75,6 +76,18 @@ const asString = (value: unknown): string | null => {
 };
 
 const flatten = (value: unknown): unknown[] => (Array.isArray(value) ? value : [value]);
+
+/**
+ * Kibana's text for a missing or empty value, where its translation differs from Isomer's
+ * defaults, `(null)` and `(blank)`, which are Kibana's English labels.
+ */
+export const kibanaMissingText = (): ChartData['missing'] => {
+  const missing = {
+    ...(NULL_LABEL !== '(null)' ? { null: NULL_LABEL } : {}),
+    ...(EMPTY_LABEL !== '(blank)' ? { empty: EMPTY_LABEL } : {}),
+  };
+  return Object.keys(missing).length > 0 ? missing : undefined;
+};
 
 /**
  * Turns a Kibana `Datatable` into a chart's columnar `data`, unreordered: rows and columns keep
@@ -174,6 +187,7 @@ export const toChartData = (
     kind: 'kibana-datatable',
     ...(table.meta ? { meta: table.meta } : {}),
   };
+  const missing = kibanaMissingText();
   return {
     data: {
       columns,
@@ -181,6 +195,7 @@ export const toChartData = (
         values.map((columnValues) => columnValues[rowIndex] as Cell)
       ),
       ...(Object.keys(display).length > 0 ? { display } : {}),
+      ...(missing ? { missing } : {}),
       source: tableSource,
     },
     losses,

@@ -22,6 +22,7 @@ export {
 export type {
   Cell,
   ChartBrushEvent,
+  ChartGlyph,
   ChartData,
   ChartEvent,
   ChartSelectEvent,
@@ -38,6 +39,7 @@ export type {
 } from '@elastic/isomer-primitives-charts/schema';
 export {
   CHART_EVENT_NAMES,
+  CHART_GLYPHS,
   chartEventSchema,
   gridCatalog,
   gridExamples,

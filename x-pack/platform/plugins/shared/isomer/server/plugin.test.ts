@@ -152,6 +152,22 @@ describe('IsomerPlugin', () => {
     );
   });
 
+  it('registers the Lens materializer, which loads saved charts through Lens', async () => {
+    const { registerMaterializer, asScoped } = startPlugin();
+    expect(() => registerMaterializer('lens', { version: 1 } as never)).toThrow(
+      'A materializer for saved object type "lens" is already registered.'
+    );
+    // Without the embeddable plugin there is no Lens transform to load with.
+    await expect(
+      asScoped(httpServerMock.createKibanaRequest()).materialize({ type: 'lens', id: 'abc' })
+    ).resolves.toEqual(
+      expect.objectContaining({
+        type: 'unsupported',
+        reason: 'The lens config could not be read: Lens is not available in this Kibana.',
+      })
+    );
+  });
+
   it('returns unsupported while materialization is off', async () => {
     const { asScoped, isMaterializeEnabled } = startPlugin({ enabled: false });
     expect(await isMaterializeEnabled()).toBe(false);

@@ -14,12 +14,15 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { KibanaIsomerRuntime } from '@kbn/isomer';
 import { firstValueFrom } from 'rxjs';
 import { MATERIALIZE_FEATURE_FLAG } from '../common/constants';
 import { createScopedMaterializeClient } from './materialize/materialize_client';
 import { createKitServices } from './materialize/kit/create_kit';
+import type { LensTransformOut } from './materialize/lens/materializer';
+import { LENS_TYPE, createLensMaterializer } from './materialize/lens/materializer';
 import { MaterializerRegistry } from './materialize/registry';
 import { createNodeValidator } from './materialize/validate_node';
 import type { MaterializeScope, Materializer, ScopedMaterializeClient } from './materialize/types';
@@ -47,6 +50,7 @@ export interface AsScopedOptions {
 export interface IsomerPluginStartDependencies {
   data: DataPluginStart;
   fieldFormats: FieldFormatsStart;
+  embeddable?: EmbeddableStart;
 }
 
 /** Start contract for the Isomer runtime and user-scoped materialization. */
@@ -80,6 +84,7 @@ export class IsomerPlugin
   private readonly kibanaVersion: string;
   private data?: DataPluginStart;
   private fieldFormats?: FieldFormatsStart;
+  private embeddable?: EmbeddableStart;
   private uiSettings?: CoreStart['uiSettings'];
   private readonly registry = new MaterializerRegistry();
   private runtime?: Promise<KibanaIsomerRuntime>;
@@ -95,14 +100,26 @@ export class IsomerPlugin
       router: core.http.createRouter(),
       createClient: this.createClient,
     });
+    this.registry.register(
+      LENS_TYPE,
+      createLensMaterializer({
+        getTransformOut: () =>
+          this.embeddable?.getTransforms(LENS_TYPE)?.transformOut as LensTransformOut | undefined,
+        basePath: core.http.basePath,
+      })
+    );
     return {
       registerMaterializer: (type, materializer) => this.registry.register(type, materializer),
     };
   }
 
-  start(core: CoreStart, { data, fieldFormats }: IsomerPluginStartDependencies): IsomerPluginStart {
+  start(
+    core: CoreStart,
+    { data, fieldFormats, embeddable }: IsomerPluginStartDependencies
+  ): IsomerPluginStart {
     this.data = data;
     this.fieldFormats = fieldFormats;
+    this.embeddable = embeddable;
     this.uiSettings = core.uiSettings;
     this.featureFlags = core.featureFlags;
     return {

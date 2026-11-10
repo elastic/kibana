@@ -9,6 +9,7 @@
     "id": "isomer",
     "browser": false,
     "server": true,
-    "requiredPlugins": ["data", "fieldFormats"]
+    "requiredPlugins": ["data", "fieldFormats"],
+    "optionalPlugins": ["embeddable"]
   }
 }
