@@ -47,9 +47,11 @@ export function StreamsLayout() {
     rememberClassicTabOrigin(tab === 'classic');
   }, [tab]);
 
+  // Classic stays reachable by URL, so an empty cluster keeps the V1 create and settings controls.
+  const classicOpen = tab === 'classic' && access.legacy;
   const visibleTabs = useMemo(
-    () => STREAMS_LAYOUT_TABS.filter((tabId) => showClassic || tabId !== 'classic'),
-    [showClassic]
+    () => STREAMS_LAYOUT_TABS.filter((tabId) => showClassic || classicOpen || tabId !== 'classic'),
+    [showClassic, classicOpen]
   );
 
   const appHeaderTabs = useMemo<AppHeaderTab[]>(

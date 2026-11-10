@@ -53,7 +53,7 @@ Settings marked UI-readonly can only be turned on through `uiSettings.overrides`
 
 ## Access via URL
 
-With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/default/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges"). A user who also has Streams access gets a Classic Streams tab with the V1 list when classic or non-root wired streams exist. `metrics-streams.otel-default`, where the V2 backend writes unit telemetry, doesn't count.
+With the feature flags enabled you can then access V2 via `/app/streams/v2/unit/default/map`. `/app/streams` redirects there for a user with V2 access (see "Privileges"). A user who also has Streams access gets a Classic Streams tab with the V1 list when classic or non-root wired streams exist. `metrics-streams.otel-default`, where the V2 backend writes unit telemetry, doesn't count. Without them the tab is hidden, but `/app/streams/v2/unit/default/classic` still opens the list.
 
 ## Privileges
 

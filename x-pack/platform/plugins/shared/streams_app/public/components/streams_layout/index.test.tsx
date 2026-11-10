@@ -87,6 +87,7 @@ const setup = ({
   tab = 'sources',
   check = 'ready',
   v2 = true,
+  legacy = true,
   showClassic = true,
   loading = false,
 }: {
@@ -94,6 +95,7 @@ const setup = ({
   tab?: string;
   check?: UnitCheck;
   v2?: boolean;
+  legacy?: boolean;
   showClassic?: boolean;
   loading?: boolean;
 }) => {
@@ -107,7 +109,7 @@ const setup = ({
     .mocked(useTimeRange)
     .mockReturnValue({ rangeFrom: 'now-15m', rangeTo: 'now' } as ReturnType<typeof useTimeRange>);
   jest.mocked(useStreamsPrivileges).mockReturnValue({
-    access: { v2 },
+    access: { v2, legacy },
   } as unknown as ReturnType<typeof useStreamsPrivileges>);
   jest.mocked(useUnitCheck).mockReturnValue(check);
   jest.mocked(useShowClassicTab).mockReturnValue({ loading, showClassic });
@@ -170,8 +172,16 @@ describe('StreamsLayout', () => {
     expect(screen.getByTestId('streamsLayoutHeader')).toHaveTextContent('3');
   });
 
-  it('redirects the classic tab to the map when the stream check finds none', () => {
+  it('keeps the classic tab reachable by URL when the stream check finds none', () => {
     setup({ tab: 'classic', showClassic: false });
+    render(<StreamsLayout />);
+
+    expect(screen.getByTestId('streamsLayoutTabContent-classic')).toHaveTextContent('4');
+    expect(screen.queryByTestId('redirectTo')).not.toBeInTheDocument();
+  });
+
+  it('redirects the classic tab to the map without Streams access', () => {
+    setup({ tab: 'classic', showClassic: false, legacy: false });
     render(<StreamsLayout />);
 
     expect(screen.getByTestId('redirectTo')).toHaveAttribute(
