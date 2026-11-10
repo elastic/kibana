@@ -19,7 +19,7 @@ const refetch = jest.fn();
 
 const preview: KnowledgePurgePreview = {
   since: '2026-01-10T00:00:00.000Z',
-  counts: { memory_pages: 2, cortex_pages: 1, decision_trees: 4, investigations: 1 },
+  counts: { memory_pages: 2, wiki_pages: 1, decision_trees: 4, investigations: 1 },
   investigations: [
     { id: 'inv-1', title: 'Poisoned checkout run', updated_at: '2026-01-11T00:00:00.000Z' },
   ],
@@ -61,7 +61,7 @@ describe('KnowledgePurgeSection', () => {
 
     const shown = screen.getAllByTestId('nightshiftPurgePreview')[0];
     expect(shown).toHaveTextContent('2 Semantic Memory pages');
-    expect(shown).toHaveTextContent('1 Cortex page');
+    expect(shown).toHaveTextContent('1 Wiki page');
     expect(shown).toHaveTextContent('4 decision tree documents');
     expect(shown).toHaveTextContent('1 investigation');
     expect(shown).toHaveTextContent('Poisoned checkout run');
@@ -93,7 +93,7 @@ describe('KnowledgePurgeSection', () => {
   it('says so when nothing was learned after the cutoff', () => {
     mockPreview({
       ...preview,
-      counts: { memory_pages: 0, cortex_pages: 0, decision_trees: 0, investigations: 0 },
+      counts: { memory_pages: 0, wiki_pages: 0, decision_trees: 0, investigations: 0 },
       investigations: [],
     });
     renderSection();

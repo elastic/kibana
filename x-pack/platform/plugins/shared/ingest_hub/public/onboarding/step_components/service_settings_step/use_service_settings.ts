@@ -38,10 +38,11 @@ import {
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { getNamespaceError } from './instance_namespace_field';
-import type { PolicySettings } from '../../common/policy_settings';
+import { supportsPolicySetting, type PolicySettings } from '../../common/policy_settings';
 import {
   getDescriptionError,
   getIntegrationNameError,
+  getProxyUrlError,
   supportsIntegrationSettings,
 } from './integration_settings';
 
@@ -106,6 +107,11 @@ export interface ServiceSettingsPersistedState {
    * its own (`ServiceVars.namespace`). Empty or absent inherits the agent policy's.
    */
   namespace?: string;
+  /**
+   * Whether the global namespace uses dedicated index templates. Applied to the installed
+   * packages after a deploy; never applies to a duplicate's own namespace.
+   */
+  dedicatedNamespaceTemplates?: boolean;
   /**
    * Package policy fields every policy of the onboarding gets (e.g. the output), keyed by Fleet
    * field name. Each deployment method applies only the ones it supports. An empty value is the
@@ -268,6 +274,27 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       });
     },
     [persisted, setPersisted]
+  );
+
+  // The switch means nothing without a namespace, so it reads as off while there is none.
+  const dedicatedNamespaceTemplates =
+    !!persisted?.dedicatedNamespaceTemplates && !!namespace.trim();
+
+  const setDedicatedNamespaceTemplates = useCallback(
+    (value: boolean) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        dedicatedNamespaceTemplates: value,
+      });
+      // Turning it off changes nothing on the package, so nothing else would save it, and a saved
+      // "on" would come back when the deployment is reopened. Turning it on is saved once it was
+      // applied, so that it stays paired with the namespace it was applied for.
+      const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
+      if (!value && deploymentId) {
+        updateDeployment(deploymentId, { dedicatedNamespaceTemplates: false });
+      }
+    },
+    [persisted, setPersisted, detectAndReviewStep?.onboardingDeploymentId, updateDeployment]
   );
 
   const policySettings = useMemo(
@@ -578,14 +605,41 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const descriptionError = getDescriptionError(description);
   const namespaceError = getNamespaceError(namespace);
 
+  // The proxy URL reaches only the policies of services whose package declares the var, and only
+  // for the deployment methods that send it. Elsewhere the field is hidden, so a value left over
+  // from another method or selection must not block Continue.
+  const isProxyUrlSupported = useMemo(
+    () =>
+      supportsPolicySetting('proxy_url', deploymentMethod) &&
+      instances.some((inst) => {
+        const service = awsServicesMap?.get(inst.serviceId);
+        return (
+          !!service &&
+          supportsIntegrationSettings(service, deploymentMethod) &&
+          !!service.declaresProxyUrl
+        );
+      }),
+    [instances, awsServicesMap, deploymentMethod]
+  );
+  const proxyUrl = policySettings.proxy_url ?? '';
+  const proxyUrlError = isProxyUrlSupported ? getProxyUrlError(proxyUrl) : undefined;
+
   const isReady = useMemo(
     () =>
       !!globalRegion.trim() &&
       incompleteInstances.length === 0 &&
       !integrationNameError &&
       !descriptionError &&
-      !namespaceError,
-    [globalRegion, incompleteInstances, integrationNameError, descriptionError, namespaceError]
+      !namespaceError &&
+      !proxyUrlError,
+    [
+      globalRegion,
+      incompleteInstances,
+      integrationNameError,
+      descriptionError,
+      namespaceError,
+      proxyUrlError,
+    ]
   );
 
   const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
@@ -625,8 +679,12 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     namespace,
     setNamespace,
     namespaceError,
+    dedicatedNamespaceTemplates,
+    setDedicatedNamespaceTemplates,
     policySettings,
     setPolicySetting,
+    isProxyUrlSupported,
+    proxyUrlError,
     bareNamePackage,
     instances,
     filteredInstances,
