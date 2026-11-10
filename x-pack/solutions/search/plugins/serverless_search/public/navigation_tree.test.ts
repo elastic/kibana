@@ -196,6 +196,7 @@ describe('Navigation Tree', () => {
         title: 'Monitor performance',
       }),
       expect.objectContaining({ link: 'management:queryActivity' }),
+      expect.objectContaining({ link: 'management:taskManager' }),
     ]);
   });
 

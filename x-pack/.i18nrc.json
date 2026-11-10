@@ -204,6 +204,7 @@
     "xpack.subscriptionStatus": "platform/plugins/private/subscription_status",
     "xpack.savedObjectsTagging": ["platform/plugins/shared/saved_objects_tagging"],
     "xpack.taskManager": "legacy/platform/plugins/shared/task_manager",
+    "xpack.taskManagerUi": "platform/plugins/private/task_manager_ui",
     "xpack.threatIntelligence": "solutions/security/plugins/threat_intelligence",
     "xpack.timelines": "solutions/security/plugins/timelines",
     "xpack.transform": "platform/plugins/private/transform",
