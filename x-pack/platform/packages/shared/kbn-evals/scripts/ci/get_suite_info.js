@@ -48,5 +48,8 @@ process.stdout.write(
     weeklyEisModelGroups: Array.isArray(suite.weeklyEisModelGroups)
       ? suite.weeklyEisModelGroups
       : [],
+    // Models the suite must always cover regardless of the request (e.g. the AZ tier models the
+    // Attack Discovery Worker uses); `get_fanout_matrix.js` unions them into EVAL_MODEL_GROUPS.
+    requiredModelGroups: Array.isArray(suite.requiredModelGroups) ? suite.requiredModelGroups : [],
   })
 );

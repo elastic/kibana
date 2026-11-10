@@ -167,6 +167,105 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
   });
 });
 
+describe('evals.suites.json requiredModelGroups (AZ tier coverage)', () => {
+  // The Attack Discovery Worker suite must always run the AZ tier models the worker itself uses:
+  // its `requiredModelGroups` is unioned into every request (PR labels and on-demand fanout), so
+  // worker eval scores always cover the current tier model set. The worker resolves
+  // `alertzero_template_models` then `alertzero_frontier` for generation and review, so the
+  // Frontier tier is the set to cover (an unset cyber-domain row falls through to it).
+  const WORKER_SUITE_ID = 'security-attack-discovery-worker';
+  const workerSuite = suites.find(({ id }) => id === WORKER_SUITE_ID);
+  if (!workerSuite) throw new Error(`${WORKER_SUITE_ID} is missing from evals.suites.json`);
+
+  // `.openai-gpt-6-sol-chat_completion` -> `eis/openai-gpt-6-sol` (generate_eis_connectors.js keys
+  // connectors by slugified model id; `connectorMatchesModelGroup` matches the `eis/<modelId>` form).
+  const endpointToModelGroup = (endpoint: string): string | null => {
+    const match = /^\.[a-z0-9.-]+-chat_completion$/.exec(endpoint);
+    if (!match) return null;
+    return `eis/${endpoint.slice(1, -'_chat_completion'.length)}`;
+  };
+
+  it('pins a non-empty requiredModelGroups list', () => {
+    expect(workerSuite.requiredModelGroups?.length ?? 0).toBeGreaterThan(0);
+  });
+
+  it('covers every FRONTIER_RECOMMENDED_ENDPOINTS model the worker generation/review resolve to', () => {
+    // The tier lists in inference_features.ts are not exported, so parse the source. Any edit to
+    // the Frontier tier (a model added, swapped or dropped) must update the pin in the same PR.
+    const source = Fs.readFileSync(
+      Path.join(
+        __dirname,
+        '../../../x-pack/solutions/security/plugins/alertzero/server/inference_features.ts'
+      ),
+      'utf-8'
+    );
+    const frontierMatch = /const FRONTIER_RECOMMENDED_ENDPOINTS = \[([\s\S]*?)\];/.exec(source);
+    if (!frontierMatch) {
+      throw new Error('FRONTIER_RECOMMENDED_ENDPOINTS not found in inference_features.ts');
+    }
+    const frontierEndpoints = [...frontierMatch[1].matchAll(/'(\.[^']+)'/g)].map((m) => m[1]);
+    if (frontierEndpoints.length === 0) {
+      throw new Error('FRONTIER_RECOMMENDED_ENDPOINTS parsed as empty');
+    }
+
+    const pinned = new Set(workerSuite.requiredModelGroups ?? []);
+    const problems = frontierEndpoints.flatMap((endpoint) => {
+      const group = endpointToModelGroup(endpoint);
+      if (!group) {
+        return [`could not map Frontier endpoint "${endpoint}" to an eis/ model group`];
+      }
+      return pinned.has(group)
+        ? []
+        : [`"${group}" is Frontier but not pinned in requiredModelGroups`];
+    });
+
+    expect(problems).toEqual([]);
+  });
+
+  it('stays aligned when the worker workflows change tier feature ids', () => {
+    // The pin tracks what the worker actually calls. If a workflow switches tier (e.g. the FP/TP
+    // review moves to balanced) or adds another tier feature, the required list must be re-reviewed.
+    const DEFINITIONS = Path.join(
+      __dirname,
+      '../../../src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero'
+    );
+    const WORKER_YAMLS = [
+      'attack_discovery_batched_generation.yaml',
+      'attack_discovery_fp_tp_analysis.yaml',
+    ];
+    const problems: string[] = [];
+    for (const file of WORKER_YAMLS) {
+      const parsed = parseYaml(Fs.readFileSync(Path.join(DEFINITIONS, file), 'utf-8')) as {
+        steps?: Array<Record<string, any>>;
+      };
+      const walk = (steps: Array<Record<string, any>>): void => {
+        for (const step of steps) {
+          const withBlock = step.with as Record<string, any> | undefined;
+          const featureIds: string[] = Array.isArray(withBlock?.feature_id)
+            ? withBlock.feature_id
+            : typeof withBlock?.feature_id === 'string'
+            ? [withBlock.feature_id]
+            : Array.isArray(step['connector-id-by-feature'])
+            ? step['connector-id-by-feature']
+            : [];
+          for (const featureId of featureIds) {
+            if (featureId === 'alertzero_efficient' || featureId === 'alertzero_balanced') {
+              problems.push(
+                `${file}: step "${step.name ?? '?'}" uses tier feature "${featureId}", which the ` +
+                  `requiredModelGroups pin (Frontier) does not cover. Update the pin in the same PR.`
+              );
+            }
+          }
+          walk(Array.isArray(step.steps) ? step.steps : []);
+        }
+      };
+      walk(parsed.steps ?? []);
+    }
+
+    expect(problems).toEqual([]);
+  });
+});
+
 describe('Nightshift CI coverage', () => {
   it('keeps the existing label and Customer-0 specs alongside an isolated ORCA spec', () => {
     const suite = suites.find(({ id }) => id === 'nightshift-investigations');

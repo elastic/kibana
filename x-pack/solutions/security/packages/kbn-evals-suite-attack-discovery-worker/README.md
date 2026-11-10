@@ -189,6 +189,16 @@ document carries the cohort, generation model, review model and stage in its met
 The `alertzero_frontier` and `alertzero_template_models` inference features are routed for the
 duration of the run and restored afterwards.
 
+## Model coverage
+
+The suite's `requiredModelGroups` in `.buildkite/pipelines/evals/evals.suites.json` pins the
+Frontier tier models the worker itself resolves (`alertzero_template_models` →
+`alertzero_frontier` for generation and the FP/TP review). Those models are unioned into **every**
+run — PR-label (`models:*`) and on-demand (`EVAL_MODEL_GROUPS`) alike — so the worker's scores
+always cover the current tier model set even when a requester asks for one specific model. A test
+in `.buildkite/pipelines/evals/evals_suites_config.test.ts` fails when the Frontier tier in
+`inference_features.ts` drifts from the pin; update both in the same PR when the tier changes.
+
 ```bash
 # whole pipeline on one model
 AD_WORKER_EVAL_COHORT=whole \

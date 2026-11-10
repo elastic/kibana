@@ -110,7 +110,7 @@ function buildConnectorShardMatrix({ connectors, shards, requestedModelGroups })
  *
  * @param {object} params
  * @param {object} params.connectors           parsed KIBANA_TESTING_INFERENCE_ENDPOINTS map
- * @param {object} params.suiteInfo            get_suite_info.js output (shards, specModelGroups, weeklyEisModelGroups)
+ * @param {object} params.suiteInfo            get_suite_info.js output (shards, specModelGroups, weeklyEisModelGroups, requiredModelGroups)
  * @param {string[]} params.requestedModelGroups  EVAL_MODEL_GROUPS (the provisioned universe)
  * @param {boolean} params.perSpec            weekly run (`KBN_EVALS_WEEKLY`); apply `specModelGroups` overrides
  * @param {boolean} params.grepOverride       whether EVAL_GREP / EVAL_GREP_INVERT is set
@@ -127,6 +127,13 @@ function buildFanoutMatrix({
   const suiteWeeklyModelGroups = Array.isArray(suiteInfo.weeklyEisModelGroups)
     ? suiteInfo.weeklyEisModelGroups
     : [];
+  // `requiredModelGroups` is always unioned into the request (deduped), whatever the caller asked
+  // for: a suite that must always cover its AZ tier models keeps that coverage even when an
+  // on-demand run names one specific model via EVAL_MODEL_GROUPS.
+  const requiredModelGroups = Array.isArray(suiteInfo.requiredModelGroups)
+    ? suiteInfo.requiredModelGroups
+    : [];
+  const requested = [...new Set([...requestedModelGroups, ...requiredModelGroups])];
   const configuredShards = Array.isArray(suiteInfo.shards) ? suiteInfo.shards : [];
 
   const overrides = modelsByFileFromSpecs(specModelGroups);
@@ -134,10 +141,10 @@ function buildFanoutMatrix({
 
   if (!perSpec) {
     const shards = grepOverride ? [] : configuredShards;
-    return buildConnectorShardMatrix({ connectors, shards, requestedModelGroups });
+    return buildConnectorShardMatrix({ connectors, shards, requestedModelGroups: requested });
   }
 
-  const connectorIds = assertRequestedConnectors(connectors, requestedModelGroups);
+  const connectorIds = assertRequestedConnectors(connectors, requested);
   const batches =
     configuredShards.length > 0
       ? configuredShards
