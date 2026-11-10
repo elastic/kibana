@@ -808,6 +808,7 @@ packages:
   - 'src/platform/packages/shared/kbn-dev-validation-runner'
   - 'src/platform/packages/shared/kbn-developer-toolbar'
   - 'src/platform/packages/shared/kbn-discover-contextual-components'
+  - 'src/platform/packages/shared/kbn-discover-data-grid'
   - 'src/platform/packages/shared/kbn-discover-utils'
   - 'src/platform/packages/shared/kbn-doc-links'
   - 'src/platform/packages/shared/kbn-dom-drag-drop'

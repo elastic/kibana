@@ -683,6 +683,7 @@
     "@kbn/digital-experience-plugin": "workspace:*",
     "@kbn/discover-contextual-components": "workspace:*",
     "@kbn/discover-customization-examples-plugin": "workspace:*",
+    "@kbn/discover-data-grid": "workspace:*",
     "@kbn/discover-enhanced-plugin": "workspace:*",
     "@kbn/discover-plugin": "workspace:*",
     "@kbn/discover-session-constants": "workspace:*",
