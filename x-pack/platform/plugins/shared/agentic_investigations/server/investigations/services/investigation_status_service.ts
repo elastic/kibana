@@ -8,7 +8,7 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
-import type { DismissReason } from '@kbn/proposals-common';
+import { isTodoProposal, type DismissReason } from '@kbn/proposals-common';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
 import { WrongTemplateError } from '../../assignments/assignments_service';
 import type {
@@ -173,6 +173,7 @@ export class InvestigationStatusService {
           id: p.id,
           // Mirrors the fallback order in proposal_approval_card.tsx:196
           action_name: p.action?.name ?? p.actionWorkflowId ?? null,
+          requires_discard_reason: !isTodoProposal(p),
         }))
       );
       if (allProposals.length >= page.total || page.proposals.length < size) break;
@@ -248,6 +249,7 @@ export class InvestigationStatusService {
     return {
       pending_proposal_count: pending.length,
       pending_proposals: pending,
+      requires_discard_reason: pending.some((p) => p.requires_discard_reason),
       running_proposal_count: running,
     };
   }
@@ -320,9 +322,13 @@ export class InvestigationStatusService {
       assertNoUnexpectedProposals(pending, body.expected_proposal_ids);
 
       if (pending.length > 0) {
-        if (!body.dismiss_reason) {
+        // Only proposals that stand for an action the agent would have taken need a justification;
+        // a close that drops to-dos alone records `no_reason` without prompting the user.
+        const requiresDismissReason = pending.some((p) => p.requires_discard_reason);
+        if (requiresDismissReason && !body.dismiss_reason) {
           throw new MissingDismissReasonError();
         }
+        const dismissReason: DismissReason = body.dismiss_reason ?? 'no_reason';
 
         const proposals = this.getProposals();
         if (proposals) {
@@ -332,7 +338,7 @@ export class InvestigationStatusService {
           const proposalsService = proposals.getProposalsService();
           const releaseParams = {
             approved: false as const,
-            dismissReason: body.dismiss_reason as DismissReason,
+            dismissReason,
             rationale: body.rationale,
             spaceId,
             request,

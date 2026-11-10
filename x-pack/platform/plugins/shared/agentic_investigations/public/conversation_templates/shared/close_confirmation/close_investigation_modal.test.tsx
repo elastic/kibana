@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { InvestigationClosePreviewResponse } from '../../../../common';
@@ -23,13 +23,17 @@ const preview = (
 ): InvestigationClosePreviewResponse => ({
   pending_proposal_count: 0,
   pending_proposals: [],
+  requires_discard_reason: false,
   running_proposal_count: 0,
   ...overrides,
 });
 
-const renderModal = (previewData: InvestigationClosePreviewResponse | undefined) =>
+const renderModal = (
+  previewData: InvestigationClosePreviewResponse | undefined,
+  onConfirm: jest.Mock = jest.fn()
+) =>
   render(
-    <CloseInvestigationModal preview={previewData} onClose={jest.fn()} onConfirm={jest.fn()} />,
+    <CloseInvestigationModal preview={previewData} onClose={jest.fn()} onConfirm={onConfirm} />,
     {
       wrapper,
     }
@@ -58,7 +62,8 @@ describe('CloseInvestigationModal: running actions', () => {
     renderModal(
       preview({
         pending_proposal_count: 1,
-        pending_proposals: [{ id: 'p-1', action_name: 'Block IP' }],
+        pending_proposals: [{ id: 'p-1', action_name: 'Block IP', requires_discard_reason: true }],
+        requires_discard_reason: true,
         running_proposal_count: 2,
       })
     );
@@ -69,7 +74,11 @@ describe('CloseInvestigationModal: running actions', () => {
 
   it('shows no warning when no action is running', () => {
     renderModal(
-      preview({ pending_proposal_count: 1, pending_proposals: [{ id: 'p-1', action_name: null }] })
+      preview({
+        pending_proposal_count: 1,
+        pending_proposals: [{ id: 'p-1', action_name: null, requires_discard_reason: true }],
+        requires_discard_reason: true,
+      })
     );
 
     expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
@@ -79,5 +88,45 @@ describe('CloseInvestigationModal: running actions', () => {
     renderModal(undefined);
 
     expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+  });
+});
+
+describe('CloseInvestigationModal: discard reason', () => {
+  const todoPreview = preview({
+    pending_proposal_count: 1,
+    pending_proposals: [
+      { id: 'p-1', action_name: 'Restart the pod', requires_discard_reason: false },
+    ],
+    requires_discard_reason: false,
+  });
+
+  it('asks for a reason when a pending proposal requires one', () => {
+    renderModal(
+      preview({
+        pending_proposal_count: 1,
+        pending_proposals: [{ id: 'p-1', action_name: 'Block IP', requires_discard_reason: true }],
+        requires_discard_reason: true,
+      })
+    );
+
+    expect(screen.getByTestId('closeInvestigationDismissReasonSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('closeInvestigationRationaleInput')).toBeInTheDocument();
+  });
+
+  it('skips the reason inputs when no pending proposal requires one', () => {
+    renderModal(todoPreview);
+
+    expect(screen.getByTestId('closeInvestigationProposalsList')).toBeInTheDocument();
+    expect(screen.queryByTestId('closeInvestigationDismissReasonSelect')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('closeInvestigationRationaleInput')).not.toBeInTheDocument();
+  });
+
+  it('confirms without a reason when none is required', () => {
+    const onConfirm = jest.fn();
+    renderModal(todoPreview, onConfirm);
+
+    fireEvent.click(screen.getByText('Close investigation'));
+
+    expect(onConfirm).toHaveBeenCalledWith({});
   });
 });

@@ -38,11 +38,23 @@ export interface ClosePreviewProposal {
   id: string;
   /** Human-readable name, derived from the action's name, then the workflow ID, or null. */
   action_name: string | null;
+  /**
+   * Whether declining this proposal has to be justified. False for to-do proposals, which are
+   * reminders the analyst carries out themselves: dropping one is not a decision about an action
+   * the agent would have taken, so the close flow does not ask why.
+   */
+  requires_discard_reason: boolean;
 }
 
 export interface InvestigationClosePreviewResponse {
   pending_proposal_count: number;
   pending_proposals: ClosePreviewProposal[];
+  /**
+   * True when at least one pending proposal requires a discard reason. When false the close
+   * confirmation skips the reason and rationale inputs, and the server accepts a close without
+   * `dismiss_reason`.
+   */
+  requires_discard_reason: boolean;
   /**
    * Approved proposals whose action is still running. Closing does not change them: they
    * finish on their own.

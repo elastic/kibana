@@ -7,9 +7,11 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { PROPOSAL_CATEGORY_TODO } from '@kbn/proposals-common';
 import {
   InvestigationStatusService,
   assertNoUnexpectedProposals,
+  MissingDismissReasonError,
   ProposalDismissFailedError,
 } from './investigation_status_service';
 import { CloseTargetsChangedError } from './close_targets_changed_error';
@@ -105,7 +107,9 @@ describe('InvestigationStatusService.getPreview', () => {
   it('maps action name from action.name', async () => {
     const { service, proposalsService } = makeDeps([{ id: 'p-1', action: { name: 'Block IP' } }]);
     const result = await service.getPreview(request, 'conv-1');
-    expect(result.pending_proposals).toEqual([{ id: 'p-1', action_name: 'Block IP' }]);
+    expect(result.pending_proposals).toEqual([
+      { id: 'p-1', action_name: 'Block IP', requires_discard_reason: true },
+    ]);
     expect(proposalsService.list).toHaveBeenCalledWith(
       expect.objectContaining({ conversationId: 'conv-1', status: 'pending' }),
       SPACE_ID,
@@ -144,13 +148,17 @@ describe('InvestigationStatusService.getPreview', () => {
   it('falls back to actionWorkflowId when action is absent', async () => {
     const { service } = makeDeps([{ id: 'p-2', actionWorkflowId: 'wf-123' }]);
     const result = await service.getPreview(request, 'conv-1');
-    expect(result.pending_proposals).toEqual([{ id: 'p-2', action_name: 'wf-123' }]);
+    expect(result.pending_proposals).toEqual([
+      { id: 'p-2', action_name: 'wf-123', requires_discard_reason: true },
+    ]);
   });
 
   it('sets action_name to null when neither action nor actionWorkflowId is present', async () => {
     const { service } = makeDeps([{ id: 'p-3' }]);
     const result = await service.getPreview(request, 'conv-1');
-    expect(result.pending_proposals).toEqual([{ id: 'p-3', action_name: null }]);
+    expect(result.pending_proposals).toEqual([
+      { id: 'p-3', action_name: null, requires_discard_reason: true },
+    ]);
   });
 
   it('includes pending_proposal_count matching the list length', async () => {
@@ -229,6 +237,66 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
         dismiss_reason: 'no_reason',
       })
     ).resolves.not.toThrow();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// InvestigationStatusService.setStatus — when a dismiss reason is required
+// ---------------------------------------------------------------------------
+
+describe('InvestigationStatusService.setStatus — dismiss reason requirement', () => {
+  const makeService = (pending: Array<{ id: string; category?: string }>) => {
+    const proposalsService = {
+      list: jest.fn().mockResolvedValue({ proposals: pending, total: pending.length }),
+      releaseGate: jest.fn().mockResolvedValue({}),
+    };
+    const service = new InvestigationStatusService({
+      getConversationClient: jest.fn().mockResolvedValue({
+        get: jest.fn().mockResolvedValue(MOCK_CONVERSATION),
+        patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION }),
+      }),
+      getProposals: jest.fn().mockReturnValue({
+        getProposalsService: () => proposalsService,
+        getProposalPrivileges: () => ({
+          assertCanRead: jest.fn().mockResolvedValue(undefined),
+          assertCanManage: jest.fn().mockResolvedValue(undefined),
+        }),
+      }),
+      getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
+      logger,
+    });
+    return { service, proposalsService };
+  };
+
+  it('rejects a close without a reason while an action proposal is pending', async () => {
+    const { service } = makeService([{ id: 'p-1' }]);
+    await expect(service.setStatus(request, 'conv-1', { status: 'closed' })).rejects.toBeInstanceOf(
+      MissingDismissReasonError
+    );
+  });
+
+  it('closes without a reason when only to-dos are pending, dismissing them as no_reason', async () => {
+    const { service, proposalsService } = makeService([
+      { id: 'p-1', category: PROPOSAL_CATEGORY_TODO },
+    ]);
+
+    const result = await service.setStatus(request, 'conv-1', { status: 'closed' });
+
+    expect(result.dismissed_proposal_ids).toEqual(['p-1']);
+    expect(proposalsService.releaseGate).toHaveBeenCalledWith(
+      'p-1',
+      expect.objectContaining({ approved: false, dismissReason: 'no_reason' })
+    );
+  });
+
+  it('still requires a reason when a to-do and an action proposal are pending together', async () => {
+    const { service } = makeService([
+      { id: 'p-1', category: PROPOSAL_CATEGORY_TODO },
+      { id: 'p-2' },
+    ]);
+    await expect(service.setStatus(request, 'conv-1', { status: 'closed' })).rejects.toBeInstanceOf(
+      MissingDismissReasonError
+    );
   });
 });
 
