@@ -16,3 +16,5 @@ export { type LinkNode, link } from './link';
 export { type FieldsNode, fields } from './fields';
 export { type CodeNode, code } from './code';
 export { type TableNode, table } from './table';
+/** A renderable explanation when the host cannot materialize content. */
+export { type UnsupportedNode, unsupported } from './unsupported';
