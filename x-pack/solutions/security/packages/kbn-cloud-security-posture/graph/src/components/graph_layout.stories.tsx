@@ -16,7 +16,7 @@ import type {
   EventNodeViewModel,
   NodeViewModel,
   EntityNodeViewModel,
-  GroupNodeViewModel,
+  ConnectorGroupNodeViewModel,
   RelationshipNodeViewModel,
 } from '.';
 import { Graph } from '.';
@@ -67,7 +67,7 @@ type Story = StoryObj<typeof Graph>;
 
 type EnhancedNodeViewModel =
   | EntityNodeViewModel
-  | GroupNodeViewModel
+  | ConnectorGroupNodeViewModel
   | (EventNodeViewModel & { source: string; target: string })
   | (RelationshipNodeViewModel & { source: string; target: string });
 
@@ -136,7 +136,7 @@ const extractEdges = (
     if (connector.connectorNodes.length > 1) {
       const groupNode: NodeViewModel = {
         id: `grp(a(${connector.source})-b(${connector.target}))`,
-        kind: 'group',
+        kind: 'connectorGroup',
       };
 
       const firstConnectorColor = getConnectorEdgeColor(connector.connectorNodes[0]);
@@ -268,7 +268,7 @@ export const GroupWithWarningAPIMock: Story = {
     nodes: [
       {
         id: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        kind: 'group',
+        kind: 'connectorGroup',
       },
       {
         id: 'admin3@example.com',
@@ -311,13 +311,13 @@ export const GroupWithWarningAPIMock: Story = {
         source: 'admin3@example.com',
         sourceKind: 'entity',
         target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        targetKind: 'group',
+        targetKind: 'connectorGroup',
         color: 'primary',
       },
       {
         id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(projects/your-project-id/roles/customRole)',
         source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        sourceKind: 'group',
+        sourceKind: 'connectorGroup',
         target: 'projects/your-project-id/roles/customRole',
         targetKind: 'entity',
         color: 'primary',
@@ -325,7 +325,7 @@ export const GroupWithWarningAPIMock: Story = {
       {
         id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed))',
         source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        sourceKind: 'group',
+        sourceKind: 'connectorGroup',
         target:
           'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
         targetKind: 'event',
@@ -337,13 +337,13 @@ export const GroupWithWarningAPIMock: Story = {
           'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(failed)',
         sourceKind: 'event',
         target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        targetKind: 'group',
+        targetKind: 'connectorGroup',
         color: 'warning',
       },
       {
         id: 'a(grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)))-b(a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success))',
         source: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        sourceKind: 'group',
+        sourceKind: 'connectorGroup',
         target:
           'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
         targetKind: 'event',
@@ -355,7 +355,7 @@ export const GroupWithWarningAPIMock: Story = {
           'a(admin3@example.com)-b(projects/your-project-id/roles/customRole)label(google.iam.admin.v1.CreateRole)outcome(success)',
         sourceKind: 'event',
         target: 'grp(a(admin3@example.com)-b(projects/your-project-id/roles/customRole))',
-        targetKind: 'group',
+        targetKind: 'connectorGroup',
         color: 'primary',
       },
     ],
@@ -368,7 +368,7 @@ export const GroupWithAlertAPIMock: Story = {
     nodes: [
       {
         id: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
-        kind: 'group',
+        kind: 'connectorGroup',
       },
       {
         id: 'admin@example.com',

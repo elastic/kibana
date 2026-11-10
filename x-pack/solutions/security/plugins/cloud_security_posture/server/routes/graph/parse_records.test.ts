@@ -9,7 +9,7 @@ import {
   ApiMessageCode,
   type EntityNodeDataModel,
   type EventNodeDataModel,
-  type GroupNodeDataModel,
+  type ConnectorGroupNodeDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/latest';
 import { parseRecords } from './parse_records';
 import type { EventEdge, RelationshipEdge } from './types';
@@ -219,7 +219,9 @@ describe('parseRecords', () => {
     // Since both events reference the same actor/target groups, a group node IS created
 
     // Should have a group node since same actor and target have multiple connections
-    const groupNode = result.nodes.find((n) => n.kind === 'group') as GroupNodeDataModel;
+    const groupNode = result.nodes.find(
+      (n) => n.kind === 'connectorGroup'
+    ) as ConnectorGroupNodeDataModel;
     expect(groupNode).toBeDefined();
 
     // Should have 2 entity nodes (1 actor + 1 target), 2 event nodes, and 1 group node = 5 nodes
@@ -1835,7 +1837,9 @@ describe('parseRecords', () => {
       expect(result.nodes.length).toBe(5);
 
       // Should have a group node
-      const groupNode = result.nodes.find((n) => n.kind === 'group') as GroupNodeDataModel;
+      const groupNode = result.nodes.find(
+        (n) => n.kind === 'connectorGroup'
+      ) as ConnectorGroupNodeDataModel;
       expect(groupNode).toBeDefined();
 
       // Both event nodes should have the group as parent
@@ -1909,7 +1913,7 @@ describe('parseRecords', () => {
       expect(result.nodes.length).toBe(6);
 
       // Should NOT have a group node
-      const groupNode = result.nodes.find((n) => n.kind === 'group');
+      const groupNode = result.nodes.find((n) => n.kind === 'connectorGroup');
       expect(groupNode).toBeUndefined();
 
       // Event nodes should NOT have parentId

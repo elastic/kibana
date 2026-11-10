@@ -20,7 +20,7 @@ export const groupedActorMockData = {
   nodes: [
     {
       id: 'grp(a(mixed-entities)-b(target-role))',
-      kind: 'group',
+      kind: 'connectorGroup',
     },
     {
       id: 'mixed-entities',
@@ -151,7 +151,7 @@ export const groupedTargetMockData = {
   nodes: [
     {
       id: 'grp(a(single-actor)-b(mixed-targets))',
-      kind: 'group',
+      kind: 'connectorGroup',
     },
     {
       id: 'single-actor',
@@ -277,7 +277,7 @@ export const singleActorMockData = {
   nodes: [
     {
       id: 'grp(a(admin@example.com)-b(projects/your-project-id/roles/customRole))',
-      kind: 'group',
+      kind: 'connectorGroup',
     },
     {
       id: 'admin@example.com',

@@ -20,7 +20,7 @@ import type {
   NodeDocumentDataViewModel,
   EntityNodeViewModel,
   EventNodeViewModel,
-  GroupNodeViewModel,
+  ConnectorGroupNodeViewModel,
   RelationshipNodeViewModel,
   EdgeViewModel,
 } from './types';
@@ -49,8 +49,8 @@ export const isConnectorNode = (
   node: NodeViewModel
 ): node is EventNodeViewModel | RelationshipNodeViewModel => isConnectorKind(node.kind);
 
-export const isStackNode = (node: NodeViewModel): node is GroupNodeViewModel =>
-  node.kind === 'group';
+export const isStackNode = (node: NodeViewModel): node is ConnectorGroupNodeViewModel =>
+  node.kind === 'connectorGroup';
 
 export const isStackedLabel = (node: NodeViewModel): boolean =>
   !((node.kind === 'event' || node.kind === 'relationship') && Boolean(node.parentId));
@@ -210,7 +210,7 @@ export const buildGraphFromViewModels = (
       position: { x: 0, y: 0 }, // Default position, should be updated later
     };
 
-    if (node.type === 'group' && nodeData.kind === 'group') {
+    if (node.type === 'connectorGroup' && nodeData.kind === 'connectorGroup') {
       node.sourcePosition = Position.Right;
       node.targetPosition = Position.Left;
       node.resizing = false;
@@ -234,10 +234,10 @@ export const buildGraphFromViewModels = (
       const sourceKind = nodesById[edgeData.source].kind;
       const targetKind = nodesById[edgeData.target].kind;
 
-      const isIn = !isConnectorKind(sourceKind) && targetKind === 'group';
-      const isInside = sourceKind === 'group' && isConnectorKind(targetKind);
-      const isOut = isConnectorKind(sourceKind) && targetKind === 'group';
-      const isOutside = sourceKind === 'group' && !isConnectorKind(targetKind);
+      const isIn = !isConnectorKind(sourceKind) && targetKind === 'connectorGroup';
+      const isInside = sourceKind === 'connectorGroup' && isConnectorKind(targetKind);
+      const isOut = isConnectorKind(sourceKind) && targetKind === 'connectorGroup';
+      const isOutside = sourceKind === 'connectorGroup' && !isConnectorKind(targetKind);
 
       return {
         id: edgeData.id,

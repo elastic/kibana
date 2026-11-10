@@ -21,7 +21,7 @@ const dashedStyle = {
   strokeDasharray: '2 2',
 };
 
-const NODES_WITHOUT_MARKER = ['event', 'group', 'relationship'];
+const NODES_WITHOUT_MARKER = ['event', 'connectorGroup', 'relationship'];
 
 export const DefaultEdge = memo(
   ({
@@ -36,8 +36,10 @@ export const DefaultEdge = memo(
     data,
   }: EdgeProps) => {
     const color: EdgeColor = 'subdued';
-    const entityToConnector = data?.sourceKind !== 'group' && isConnectorKind(data?.targetKind);
-    const connectorToEntity = isConnectorKind(data?.sourceKind) && data?.targetKind !== 'group';
+    const entityToConnector =
+      data?.sourceKind !== 'connectorGroup' && isConnectorKind(data?.targetKind);
+    const connectorToEntity =
+      isConnectorKind(data?.sourceKind) && data?.targetKind !== 'connectorGroup';
     const isExtraAlignment = entityToConnector || connectorToEntity;
     const sourceMargin = getHandlePositionByKind(data?.sourceKind);
     const targetMargin = getHandlePositionByKind(data?.targetKind);

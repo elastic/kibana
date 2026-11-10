@@ -30,7 +30,7 @@ import type { NodeViewModel, EdgeViewModel } from '../types';
 const nodeTypes = {
   entity: EntityCardNode,
   event: EventNode,
-  group: EdgeGroupNode,
+  connectorGroup: EdgeGroupNode,
 };
 
 const edgeTypes = {

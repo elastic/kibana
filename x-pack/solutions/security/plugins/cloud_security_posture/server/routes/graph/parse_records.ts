@@ -16,7 +16,7 @@ import type {
   EdgeDataModel,
   EntityNodeDataModel,
   GraphResponse,
-  GroupNodeDataModel,
+  ConnectorGroupNodeDataModel,
   EventNodeDataModel,
   NodeDataModel,
   NodeDocumentDataModel,
@@ -535,7 +535,7 @@ const sortNodes = (nodesMap: Record<string, NodeDataModel>) => {
   const otherNodes: NodeDataModel[] = [];
 
   for (const node of Object.values(nodesMap)) {
-    if (node.kind === 'group') {
+    if (node.kind === 'connectorGroup') {
       groupNodes.push(node);
     } else if (node.kind === 'relationship' || node.kind === 'event') {
       connectorNodes.push(node);
@@ -621,9 +621,9 @@ const processConnectorGroup = (
     });
   } else {
     // Create group node for multiple connectors
-    const groupNode: GroupNodeDataModel = {
+    const groupNode: ConnectorGroupNodeDataModel = {
       id: `grp(${groupingKey})`,
-      kind: 'group',
+      kind: 'connectorGroup',
     };
     nodesMap[groupNode.id] = groupNode;
 

@@ -15,7 +15,7 @@ export function getHandlePositionByKind(kind?: NodeKind) {
     case 'event':
     case 'relationship':
       return 3;
-    case 'group':
+    case 'connectorGroup':
       return 0;
     default:
       return 0;

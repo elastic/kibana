@@ -99,7 +99,7 @@ export const graphSample = {
     },
     {
       id: 'grp(a(B)-b(C))',
-      kind: 'group',
+      kind: 'connectorGroup',
     },
     {
       id: 'a(B)-b(C)label(StackedLabel1)',
@@ -152,13 +152,13 @@ export const graphSample = {
       source: 'B',
       sourceKind: 'entity',
       target: 'grp(a(B)-b(C))',
-      targetKind: 'group',
+      targetKind: 'connectorGroup',
       color: 'primary',
     },
     {
       id: 'a(grp(a(B)-b(C)))-b(C)',
       source: 'grp(a(B)-b(C))',
-      sourceKind: 'group',
+      sourceKind: 'connectorGroup',
       target: 'C',
       targetKind: 'entity',
       color: 'primary',
@@ -166,7 +166,7 @@ export const graphSample = {
     {
       id: 'a(grp(a(B)-b(C)))-b(a(B)-b(C)label(StackedLabel1))',
       source: 'grp(a(B)-b(C))',
-      sourceKind: 'group',
+      sourceKind: 'connectorGroup',
       target: 'a(B)-b(C)label(StackedLabel1)',
       targetKind: 'event',
       color: 'primary',
@@ -176,13 +176,13 @@ export const graphSample = {
       source: 'a(B)-b(C)label(StackedLabel1)',
       sourceKind: 'event',
       target: 'grp(a(B)-b(C))',
-      targetKind: 'group',
+      targetKind: 'connectorGroup',
       color: 'primary',
     },
     {
       id: 'a(grp(a(B)-b(C)))-b(a(B)-b(C)label(StackedLabel2))',
       source: 'grp(a(B)-b(C))',
-      sourceKind: 'group',
+      sourceKind: 'connectorGroup',
       target: 'a(B)-b(C)label(StackedLabel2)',
       targetKind: 'event',
       color: 'primary',
@@ -192,7 +192,7 @@ export const graphSample = {
       source: 'a(B)-b(C)label(StackedLabel2)',
       sourceKind: 'event',
       target: 'grp(a(B)-b(C))',
-      targetKind: 'group',
+      targetKind: 'connectorGroup',
       color: 'primary',
     },
     {

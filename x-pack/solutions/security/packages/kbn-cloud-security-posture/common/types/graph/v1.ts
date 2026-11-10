@@ -13,7 +13,7 @@ import type {
   entityNodeDataSchema,
   graphRequestSchema,
   graphResponseSchema,
-  groupNodeDataSchema,
+  connectorGroupNodeDataSchema,
   eventNodeDataSchema,
   relationshipNodeDataSchema,
   nodeColorSchema,
@@ -50,7 +50,7 @@ export type EntityNodeDataModel = TypeOf<typeof entityNodeDataSchema>;
 
 export type EntityDetailsModel = TypeOf<typeof entitySchema>;
 
-export type GroupNodeDataModel = TypeOf<typeof groupNodeDataSchema>;
+export type ConnectorGroupNodeDataModel = TypeOf<typeof connectorGroupNodeDataSchema>;
 
 export type EventNodeDataModel = TypeOf<typeof eventNodeDataSchema>;
 
@@ -62,7 +62,7 @@ export type ConnectorNodeType = 'event' | 'relationship';
 
 export type NodeDataModel =
   | EntityNodeDataModel
-  | GroupNodeDataModel
+  | ConnectorGroupNodeDataModel
   | EventNodeDataModel
   | RelationshipNodeDataModel;
 

@@ -1022,12 +1022,14 @@ export default function (providerContext: FtrProviderContext) {
         expect(response.body).not.to.have.property('messages');
 
         const groupNodes = response.body.nodes.filter(
-          (node: NodeDataModel) => node.kind === 'group'
+          (node: NodeDataModel) => node.kind === 'connectorGroup'
         );
         expect(groupNodes).to.have.length(1);
 
         // Find the group node
-        const groupNode = response.body.nodes.find((node: NodeDataModel) => node.kind === 'group');
+        const groupNode = response.body.nodes.find(
+          (node: NodeDataModel) => node.kind === 'connectorGroup'
+        );
         expect(groupNode).to.be.ok();
 
         // Find event nodes and verify they have parentId pointing to group
@@ -1041,7 +1043,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         response.body.nodes.forEach((node: NodeDataModel) => {
-          if (node.kind !== 'group' && node.kind !== 'relationship') {
+          if (node.kind !== 'connectorGroup' && node.kind !== 'relationship') {
             expect(node).to.have.property('color');
             expect(node.color).equal(
               'primary',
@@ -3104,7 +3106,7 @@ export default function (providerContext: FtrProviderContext) {
 
                 // Find the group node (stacking Owns and Communicates_with relationships from same source)
                 const groupNode = response.body.nodes.find(
-                  (node: NodeDataModel) => node.kind === 'group'
+                  (node: NodeDataModel) => node.kind === 'connectorGroup'
                 );
                 expect(groupNode).to.be.ok();
 
@@ -3489,7 +3491,7 @@ export default function (providerContext: FtrProviderContext) {
 
                 // Verify group node exists (stacking 2 relationships + 2 labels with same source-target pair: identity-1 → delegate-1)
                 const groupNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) => node.kind === 'group'
+                  (node: NodeDataModel) => node.kind === 'connectorGroup'
                 );
                 expect(groupNodes.length).to.equal(1);
                 const groupNode = groupNodes[0];

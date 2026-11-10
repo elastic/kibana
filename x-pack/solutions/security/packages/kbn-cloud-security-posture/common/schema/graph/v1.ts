@@ -270,7 +270,7 @@ export const graphResponseSchema = () =>
     nodes: schema.arrayOf(
       schema.oneOf([
         entityNodeDataSchema,
-        groupNodeDataSchema,
+        connectorGroupNodeDataSchema,
         eventNodeDataSchema,
         relationshipNodeDataSchema,
       ]),
@@ -300,7 +300,7 @@ export const edgeColorSchema = schema.oneOf([
 export const nodeKindSchema = schema.oneOf([
   schema.literal('entity'),
   schema.literal('event'),
-  schema.literal('group'),
+  schema.literal('connectorGroup'),
   schema.literal('relationship'),
 ]);
 
@@ -352,10 +352,10 @@ export const entityNodeDataSchema = schema.allOf([
   }),
 ]);
 
-export const groupNodeDataSchema = schema.allOf([
+export const connectorGroupNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
-    kind: schema.literal('group'),
+    kind: schema.literal('connectorGroup'),
   }),
 ]);
 

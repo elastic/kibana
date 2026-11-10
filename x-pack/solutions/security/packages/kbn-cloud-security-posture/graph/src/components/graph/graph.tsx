@@ -92,7 +92,7 @@ export interface GraphProps extends CommonProps {
 const nodeTypes = {
   entity: EntityCardNode,
   event: EventNode,
-  group: EdgeGroupNode,
+  connectorGroup: EdgeGroupNode,
   relationship: RelationshipNode,
 };
 
@@ -420,7 +420,7 @@ const processGraph = (
       className: interactive ? undefined : 'non-interactive',
     };
 
-    if (node.type === 'group' && nodeData.kind === 'group') {
+    if (node.type === 'connectorGroup' && nodeData.kind === 'connectorGroup') {
       node.sourcePosition = Position.Right;
       node.targetPosition = Position.Left;
       node.resizing = false;
@@ -444,10 +444,10 @@ const processGraph = (
       const sourceKind = nodesById[edgeData.source].kind;
       const targetKind = nodesById[edgeData.target].kind;
 
-      const isIn = !isConnectorKind(sourceKind) && targetKind === 'group';
-      const isInside = sourceKind === 'group' && isConnectorKind(targetKind);
-      const isOut = isConnectorKind(sourceKind) && targetKind === 'group';
-      const isOutside = sourceKind === 'group' && !isConnectorKind(targetKind);
+      const isIn = !isConnectorKind(sourceKind) && targetKind === 'connectorGroup';
+      const isInside = sourceKind === 'connectorGroup' && isConnectorKind(targetKind);
+      const isOut = isConnectorKind(sourceKind) && targetKind === 'connectorGroup';
+      const isOutside = sourceKind === 'connectorGroup' && !isConnectorKind(targetKind);
 
       return {
         id: edgeData.id,

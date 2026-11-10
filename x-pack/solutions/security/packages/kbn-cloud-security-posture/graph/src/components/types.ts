@@ -8,7 +8,7 @@
 import type React from 'react';
 import type {
   EntityNodeDataModel,
-  GroupNodeDataModel,
+  ConnectorGroupNodeDataModel,
   EventNodeDataModel,
   RelationshipNodeDataModel,
   EdgeDataModel,
@@ -71,9 +71,9 @@ export interface EntityNodeViewModel
   countryClickHandler?: CountryClickCallback;
 }
 
-export interface GroupNodeViewModel
+export interface ConnectorGroupNodeViewModel
   extends Record<string, unknown>,
-    GroupNodeDataModel,
+    ConnectorGroupNodeDataModel,
     BaseNodeDataViewModel {}
 
 export type NodeDocumentDataViewModel = NodeDocumentDataModel;
@@ -102,7 +102,7 @@ export interface RelationshipNodeViewModel
 
 export type NodeViewModel =
   | EntityNodeViewModel
-  | GroupNodeViewModel
+  | ConnectorGroupNodeViewModel
   | EventNodeViewModel
   | RelationshipNodeViewModel;
 

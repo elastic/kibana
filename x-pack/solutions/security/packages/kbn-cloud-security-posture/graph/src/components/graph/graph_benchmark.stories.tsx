@@ -181,7 +181,7 @@ const Template = ({ nodes, edges }: GraphResponse) => {
   const nodesWithHandlers = useMemo(() => {
     return nodes.map((node) => {
       const nodeViewModel: NodeViewModel = { ...node };
-      if (nodeViewModel.kind !== 'group') {
+      if (nodeViewModel.kind !== 'connectorGroup') {
         nodeViewModel.nodeClick = nodeClickHandler;
         nodeViewModel.expandButtonClick = expandButtonClickHandler;
       }
