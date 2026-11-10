@@ -13,6 +13,10 @@ import { ModelDetailFlyout } from './model_detail_flyout';
 import { useKibana } from '../../hooks/use_kibana';
 
 jest.mock('../../hooks/use_kibana');
+jest.mock('@kbn/inference-endpoint-ui-common', () => ({
+  ...jest.requireActual('@kbn/inference-endpoint-ui-common'),
+  useInferenceEndpointMutation: () => ({ mutate: jest.fn(), isLoading: false }),
+}));
 
 const mockUseKibana = useKibana as jest.Mock;
 
@@ -34,7 +38,12 @@ describe('ModelDetailFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseKibana.mockReturnValue({ services: {} });
+    mockUseKibana.mockReturnValue({
+      services: {
+        http: {},
+        notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
+      },
+    });
   });
 
   const renderFlyout = (
