@@ -34,6 +34,7 @@ export type {
   FlyoutFooterPrimaryActionColor,
   FlyoutFooterPrimaryActionProps,
   FlyoutFooterSecondaryActionProps,
+  FlyoutFooterAiActionIconType,
   FlyoutFooterPrimaryActionMenuProps,
   FlyoutFooterMenuPanel,
   FlyoutFooterMenuItem,

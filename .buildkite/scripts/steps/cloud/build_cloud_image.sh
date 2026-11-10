@@ -4,10 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-# Skip building shared webpack bundles during bootstrap because
-# node scripts/build rebuilds them in production mode with --dist
-export KBN_BOOTSTRAP_NO_PREBUILT=true
-
 .buildkite/scripts/bootstrap.sh
 
 export KBN_NP_PLUGINS_BUILT=true

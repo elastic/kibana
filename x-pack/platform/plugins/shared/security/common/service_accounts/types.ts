@@ -14,7 +14,10 @@ import type {
  * The principal that created an account.
  */
 export type ServiceAccountDirectoryCreator = ServiceAccountWorkloadBinder & {
+  /** The name of the person behind the principal, for display. For an API key, the key's owner. */
   displayName?: string;
+  /** The API key's name, when the account was created with a named API key. */
+  apiKeyName?: string;
 };
 
 /**
@@ -49,8 +52,8 @@ export interface ServiceAccountDirectoryEntry {
    */
   assumable: boolean;
   /**
-   * The principal that created the account. Reported on UIAM, which records a creator of its
-   * own, and absent on Elasticsearch until Elasticsearch stores one too.
+   * The principal that created the account, as the backend recorded it. It is absent when the
+   * backend recorded no creator, or reported one Kibana cannot read.
    */
   createdBy?: ServiceAccountDirectoryCreator;
   /**
@@ -58,9 +61,8 @@ export interface ServiceAccountDirectoryEntry {
    * and it's absent when the count failed. The count isn't verified, so it's for display only.
    */
   workloadCount?: number;
-  // No creation time. UIAM reports no timestamp of any kind, and the only one Elasticsearch could
-  // offer is on the credential Kibana stored, which dates Kibana's record rather than the
-  // account. It arrives with the same followup that brings the Elasticsearch creator.
+  // No creation time. Elasticsearch reports `created_at`, but UIAM reports no timestamp of any
+  // kind, so the field would be missing on every UIAM account.
 }
 
 /**

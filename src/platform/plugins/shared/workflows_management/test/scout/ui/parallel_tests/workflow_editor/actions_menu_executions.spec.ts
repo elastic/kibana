@@ -42,6 +42,7 @@ test.describe(
     });
 
     test('shows the actions menu only while the workflow is editable', async ({
+      page,
       pageObjects,
       apiServices,
     }) => {
@@ -60,8 +61,19 @@ test.describe(
         await expect(pageObjects.workflowEditor.actionsMenuSearch).toBeVisible();
       });
 
-      await test.step('hides the actions menu on the read-only executions tab', async () => {
+      await test.step('keeps the actions menu while only the execution list is open', async () => {
         await pageObjects.workflowEditor.gotoWorkflowExecutions(workflowId);
+        await expect(pageObjects.workflowEditor.readOnlyBadge).toBeHidden();
+        await pageObjects.workflowEditor.openActionsMenu();
+        await expect(pageObjects.workflowEditor.actionsMenuSearch).toBeVisible();
+      });
+
+      await test.step('hides the actions menu while a run is selected', async () => {
+        await apiServices.workflows.run(workflowId, {});
+        await pageObjects.workflowEditor.gotoWorkflowExecutions(workflowId);
+        const runs = page.testSubj.locator('workflowExecutionListItem');
+        await expect(runs).toHaveCount(1);
+        await runs.click();
         await expect(pageObjects.workflowEditor.readOnlyBadge).toBeVisible();
 
         await pageObjects.workflowEditor.expandBottomBar();

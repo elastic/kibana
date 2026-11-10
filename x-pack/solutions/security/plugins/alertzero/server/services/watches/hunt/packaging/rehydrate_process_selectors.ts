@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { splitRemoteCluster } from '../../../../../common/remote_cluster';
+import { STALE_PROCESS_AGE_MS } from './select_process_actions';
 import type { ProcessSelector } from './types';
 
 /**
@@ -28,6 +29,15 @@ export type RehydrateProcessSelectors = (args: {
 const MAX_REHYDRATE_DOCS = 100;
 /** Bounds fan-out; an isolate-host-sized proposal count per host was already a lot. */
 const MAX_PROCESS_SELECTORS_PER_HOST = 5;
+/** Only Defend's own entity_id works in a Defend response action. */
+const DEFEND_PROCESS_EVENTS_INDEX = 'logs-endpoint.events.process-*';
+/**
+ * Defend data loaded outside a data stream, e.g. `logs-endpoint.events.00e5ea78.2026.10.08`. Such
+ * a name does not say which event types it holds, so the `event.category` filter keeps only process.
+ */
+const DEFEND_PLAIN_EVENTS_INDEX_PREFIX = 'logs-endpoint.events.';
+/** Stands in for a document without `@timestamp`: sorts oldest and is never used to bound a search. */
+const MISSING_TIMESTAMP = new Date(0).toISOString();
 
 const REHYDRATE_SOURCE_FIELDS = [
   '@timestamp',
@@ -80,6 +90,10 @@ interface Candidate {
   iocMatched: boolean;
 }
 
+interface ExitedAggregations {
+  exited: { buckets: Array<{ key: string; exited_at: { value_as_string: string } }> };
+}
+
 const asTypeList = (value: string | string[] | undefined): string[] =>
   value === undefined ? [] : Array.isArray(value) ? value : [value];
 
@@ -103,10 +117,10 @@ const extractCandidate = (source: RehydrateSource, ref: RehydrateRef): Candidate
     entityId,
     processName: source.process?.name ?? source.process?.executable ?? 'unknown process',
     processExecutable: source.process?.executable,
-    timestamp: source['@timestamp'] ?? new Date(0).toISOString(),
+    timestamp: source['@timestamp'] ?? MISSING_TIMESTAMP,
     techniqueId: ref.matched?.technique_id,
     techniqueIds: ref.matched?.technique_id ? [ref.matched.technique_id] : [],
-    rankTimestamp: source['@timestamp'] ?? new Date(0).toISOString(),
+    rankTimestamp: source['@timestamp'] ?? MISSING_TIMESTAMP,
     iocMatched: ref.matched?.ioc === true,
   };
 };
@@ -117,6 +131,85 @@ const isBetterCandidate = (next: Candidate, current: Candidate): boolean =>
   Boolean(next.techniqueId) !== Boolean(current.techniqueId)
     ? Boolean(next.techniqueId)
     : next.rankTimestamp > current.rankTimestamp;
+
+/** Maps entity_id to exit time for processes that have exited. On error, treats all as live. */
+const findExitedAt = async (
+  esClient: ElasticsearchClient,
+  candidates: Candidate[],
+  refIndices: string[],
+  logger?: Logger
+): Promise<Map<string, string>> => {
+  // A candidate without an entity_id or a usable timestamp cannot be looked up and stays live.
+  const lookups = candidates.flatMap(({ entityId, timestamp }) => {
+    const observedAt = Date.parse(timestamp);
+    return entityId && timestamp !== MISSING_TIMESTAMP && !Number.isNaN(observedAt)
+      ? [{ entityId, observedAt }]
+      : [];
+  });
+  if (lookups.length === 0) {
+    return new Map();
+  }
+  const entityIds = lookups.map(({ entityId }) => entityId);
+  try {
+    // An alert can be created after its process ended, so search from well before it.
+    const earliestObservedAt = Math.min(...lookups.map(({ observedAt }) => observedAt));
+    const response = await esClient.search<unknown, ExitedAggregations>({
+      index: [
+        DEFEND_PROCESS_EVENTS_INDEX,
+        ...new Set(
+          refIndices.filter((index) => index.startsWith(DEFEND_PLAIN_EVENTS_INDEX_PREFIX))
+        ),
+      ],
+      // A missing plain index should not fail the whole lookup.
+      ignore_unavailable: true,
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            { terms: { 'process.entity_id': entityIds } },
+            // Network disconnects are `end` events too.
+            { term: { 'event.category': 'process' } },
+            { term: { 'event.type': 'end' } },
+            {
+              range: {
+                '@timestamp': {
+                  gte: new Date(earliestObservedAt - STALE_PROCESS_AGE_MS).toISOString(),
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        exited: {
+          terms: { field: 'process.entity_id', size: entityIds.length },
+          aggs: { exited_at: { min: { field: '@timestamp' } } },
+        },
+      },
+    });
+    // Unreadable indices are skipped silently, so no shards means no answer.
+    if (response._shards.total === 0) {
+      logger?.warn(
+        'rehydrateProcessSelectors: no readable Defend process events index, treating processes as live'
+      );
+      return new Map();
+    }
+    return new Map(
+      (response.aggregations?.exited.buckets ?? []).map(({ key, exited_at: exitedAt }) => [
+        key,
+        exitedAt.value_as_string,
+      ])
+    );
+  } catch (err) {
+    logger?.warn(
+      `rehydrateProcessSelectors: exit lookup failed, treating processes as live — ${
+        err instanceof Error ? err.message : String(err)
+      }`
+    );
+    return new Map();
+  }
+};
 
 /**
  * Builds process selectors from the SSE's own event/alert refs via one `mget`, so kill-process
@@ -207,6 +300,15 @@ export const makeRehydrateProcessSelectors = (
       });
     }
 
+    const exitedAtByEntityId = await findExitedAt(
+      esClient,
+      [...byKey.values()],
+      refs.map(({ index }) => index),
+      logger
+    );
+    const exitedAtOf = ({ entityId }: Candidate): string | undefined =>
+      entityId === undefined ? undefined : exitedAtByEntityId.get(entityId);
+
     const byHost = new Map<string, Candidate[]>();
     for (const candidate of byKey.values()) {
       const list = byHost.get(candidate.hostName) ?? [];
@@ -216,10 +318,16 @@ export const makeRehydrateProcessSelectors = (
 
     const selectors: ProcessSelector[] = [];
     for (const list of byHost.values()) {
+      // Live first, so exited processes never push a live one out of the cap.
       const capped = list
-        .sort((a, b) => (a.timestamp < b.timestamp ? 1 : a.timestamp > b.timestamp ? -1 : 0))
+        .sort(
+          (a, b) =>
+            Number(exitedAtOf(a) !== undefined) - Number(exitedAtOf(b) !== undefined) ||
+            (a.timestamp < b.timestamp ? 1 : a.timestamp > b.timestamp ? -1 : 0)
+        )
         .slice(0, MAX_PROCESS_SELECTORS_PER_HOST);
       for (const candidate of capped) {
+        const exitedAt = exitedAtOf(candidate);
         selectors.push({
           pid: candidate.pid,
           entityId: candidate.entityId,
@@ -233,6 +341,7 @@ export const makeRehydrateProcessSelectors = (
           techniqueId: candidate.techniqueId,
           ...(candidate.techniqueIds.length > 0 ? { techniqueIds: candidate.techniqueIds } : {}),
           iocMatched: candidate.iocMatched,
+          ...(exitedAt ? { exitedAt } : {}),
         });
       }
     }

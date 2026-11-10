@@ -15,7 +15,6 @@ export const CONNECTORS_VERSION = 1;
 export const CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX = '.search-acl-filter-';
 export const CRAWLER_SERVICE_TYPE = 'elastic-crawler';
 
-export * from './components';
 export * from './constants';
 export * from './lib';
 export * from './types';

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -15,9 +16,21 @@ import {
 } from '@kbn/core/server/mocks';
 import { hasWorkflowAccess } from './lib/has_workflow_access';
 import {
+  ensureWorkflowCallerAvailable,
+  getServiceAccountCallerTaskRunAs,
   getWorkflowOriginalRequest,
+  getWorkflowTaskRunAs,
+  isPermanentMintFailure,
+  withWorkflowBindingRequest,
   withWorkflowExecutionIdentity,
+  withWorkflowTaskRunAs,
 } from './service_account_execution';
+
+const tokenExchangeError = (retryable: boolean) =>
+  Object.assign(new Error('token exchange failed'), {
+    name: 'ServiceAccountTokenExchangeError',
+    retryable,
+  });
 
 describe('workflow service account execution', () => {
   const execution = (accountId?: string) => ({
@@ -79,6 +92,194 @@ describe('workflow service account execution', () => {
       expect.any(Function)
     );
     expect(getWorkflowOriginalRequest(scoped)).toBe(scoped);
+  });
+
+  describe('task runAs for service account callers', () => {
+    const serviceAccountPrincipal = {
+      type: 'service_account' as const,
+      serviceAccountId: 'agent-account',
+      variant: 'uiam' as const,
+    };
+
+    it('runs a bound execution started by a service account as the workflow binding', () => {
+      const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
+      const request = httpServerMock.createKibanaRequest();
+      core.security.authc.getPrincipal.mockReturnValue(serviceAccountPrincipal);
+
+      expect(getServiceAccountCallerTaskRunAs(core, request, execution('account-a'))).toEqual({
+        workloadType: 'workflow',
+        workloadId: 'workflow',
+        spaceId: 'space',
+        expectedServiceAccountId: 'account-a',
+      });
+      expect(core.security.authc.getPrincipal).toHaveBeenCalledWith(request);
+    });
+
+    it('runs an inherited execution as the binding it inherited', () => {
+      const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
+      core.security.authc.getPrincipal.mockReturnValue(serviceAccountPrincipal);
+
+      expect(
+        getServiceAccountCallerTaskRunAs(core, httpServerMock.createKibanaRequest(), {
+          ...execution(),
+          effectiveIdentity: {
+            type: 'service_account',
+            id: 'parent-account',
+            inheritedFrom: { workloadId: 'parent-workflow' },
+          },
+        })
+      ).toEqual(
+        expect.objectContaining({
+          workloadId: 'parent-workflow',
+          expectedServiceAccountId: 'parent-account',
+        })
+      );
+    });
+
+    it('keeps cloning for users and for unbound executions', () => {
+      const core = { ...coreMock.createStart(), security: securityServiceMock.createStart() };
+      const request = httpServerMock.createKibanaRequest();
+      core.security.authc.getPrincipal.mockReturnValue({ type: 'user', username: 'elastic' });
+      expect(getServiceAccountCallerTaskRunAs(core, request, execution('account-a'))).toBe(
+        undefined
+      );
+
+      core.security.authc.getPrincipal.mockReturnValue(serviceAccountPrincipal);
+      expect(getServiceAccountCallerTaskRunAs(core, request, execution())).toBe(undefined);
+    });
+
+    it('scopes the runAs to the request while the execution runs', async () => {
+      const core = {
+        ...coreMock.createStart(),
+        security: securityServiceMock.createStart(),
+        elasticsearch: elasticsearchServiceMock.createStart(),
+      };
+      core.security.serviceAccounts.isEnabled.mockReturnValue(true);
+      core.security.authc.getPrincipal.mockReturnValue(serviceAccountPrincipal);
+      const request = httpServerMock.createKibanaRequest();
+      const scoped = httpServerMock.createKibanaRequest();
+      core.security.serviceAccounts.withScopedRequestForWorkload.mockImplementation(
+        async (_params, fn) => fn(scoped)
+      );
+
+      await withWorkflowExecutionIdentity(core, execution('account-a'), request, async (actual) => {
+        expect(getWorkflowTaskRunAs(actual)).toEqual(
+          expect.objectContaining({ expectedServiceAccountId: 'account-a' })
+        );
+      });
+      expect(getWorkflowTaskRunAs(scoped)).toBeUndefined();
+      expect(getWorkflowTaskRunAs(request)).toBeUndefined();
+    });
+
+    it('releases the runAs when the work throws', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const runAs = {
+        workloadType: 'workflow',
+        workloadId: 'workflow',
+        spaceId: 'space',
+        expectedServiceAccountId: 'account-a',
+      };
+
+      await expect(
+        withWorkflowTaskRunAs(request, runAs, async () => {
+          expect(getWorkflowTaskRunAs(request)).toBe(runAs);
+          throw new Error('boom');
+        })
+      ).rejects.toThrow('boom');
+      expect(getWorkflowTaskRunAs(request)).toBeUndefined();
+    });
+  });
+
+  describe('runs resumed by Task Manager as their binding', () => {
+    const bindingRunAs = {
+      workloadType: 'workflow',
+      workloadId: 'workflow',
+      spaceId: 'space',
+      expectedServiceAccountId: 'account-a',
+    };
+    const createCore = () => {
+      const core = {
+        ...coreMock.createStart(),
+        security: securityServiceMock.createStart(),
+        elasticsearch: elasticsearchServiceMock.createStart(),
+      };
+      core.security.serviceAccounts.isEnabled.mockReturnValue(true);
+      return core;
+    };
+
+    it('runs the execution with the minted request instead of minting again', async () => {
+      const core = createCore();
+      const minted = httpServerMock.createKibanaRequest();
+      const run = jest.fn().mockResolvedValue('done');
+
+      await expect(
+        withWorkflowBindingRequest(minted, 'parent-execution', bindingRunAs, () =>
+          withWorkflowExecutionIdentity(core, execution('account-a'), minted, run)
+        )
+      ).resolves.toBe('done');
+      expect(run).toHaveBeenCalledWith(minted);
+      expect(core.security.serviceAccounts.withScopedRequestForWorkload).not.toHaveBeenCalled();
+    });
+
+    it('rejects an unbound execution started from the run, since it has no caller', async () => {
+      const core = createCore();
+      const minted = httpServerMock.createKibanaRequest();
+      const child = jest.fn();
+
+      await withWorkflowBindingRequest(minted, 'parent-execution', bindingRunAs, async () => {
+        expect(() => ensureWorkflowCallerAvailable(minted, { workflowId: 'child' })).toThrow(
+          'Workflow "child" has no service account'
+        );
+        await withWorkflowExecutionIdentity(
+          core,
+          execution('account-a'),
+          minted,
+          async (actual) => {
+            await expect(
+              withWorkflowExecutionIdentity(core, execution(), actual, child)
+            ).rejects.toThrow('there is no caller to run it as');
+          }
+        );
+      });
+      expect(child).not.toHaveBeenCalled();
+      expect(() => ensureWorkflowCallerAvailable(minted, { workflowId: 'child' })).not.toThrow();
+    });
+
+    it('lets the run start bound and inherited executions', async () => {
+      const minted = httpServerMock.createKibanaRequest();
+
+      await withWorkflowBindingRequest(minted, 'parent-execution', bindingRunAs, async () => {
+        expect(() => ensureWorkflowCallerAvailable(minted, execution('account-b'))).not.toThrow();
+        expect(() =>
+          ensureWorkflowCallerAvailable(minted, {
+            workflowId: 'child',
+            effectiveIdentity: {
+              type: 'service_account',
+              id: 'account-a',
+              inheritedFrom: { workloadId: 'workflow' },
+            },
+          })
+        ).not.toThrow();
+      });
+    });
+
+    it('lets a caller-started run start unbound executions as the caller', () => {
+      expect(() =>
+        ensureWorkflowCallerAvailable(httpServerMock.createKibanaRequest(), { workflowId: 'child' })
+      ).not.toThrow();
+    });
+  });
+
+  it.each([
+    ['a missing binding', Boom.notFound('missing'), true],
+    ['a changed binding', Boom.forbidden('changed'), true],
+    ['a refused token exchange', tokenExchangeError(false), true],
+    ['a token exchange that can be retried', tokenExchangeError(true), false],
+    ['an unavailable dependency', Boom.serverUnavailable('down'), false],
+    ['rate limiting', Boom.tooManyRequests('slow down'), false],
+    ['a connection error', new Error('connect ECONNREFUSED'), false],
+  ])('tells whether %s is a permanent mint failure', (_, error, permanent) => {
+    expect(isPermanentMintFailure(error)).toBe(permanent);
   });
 
   it('does not fall back when the binding changed or the feature is disabled', async () => {

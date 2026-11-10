@@ -29,6 +29,7 @@ import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_c
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { toDocumentSelections } from '../../../../detections/components/alerts_table/timeline_actions/to_document_selections';
+import type { RunWorkflowSelectionScope } from '../../../../detections/components/alerts_table/timeline_actions/use_run_workflow_selection';
 import { ALERT_STATUS_ACTION_IDS } from '../../../constants/action_ids';
 
 export type BulkActionMenuItem = AlertTableContextMenuItem;
@@ -60,6 +61,15 @@ export interface BulkActionsProps {
   data?: TimelineItem[];
   closePopover?: () => void;
   showRunWorkflowActions?: boolean;
+  /** True when the user chose "select all N", so the selection exceeds the loaded rows. */
+  isAllSelected?: boolean;
+  /**
+   * Query context used to resolve a select-all beyond the loaded rows for the run-workflow
+   * action. Omit it and a run stays scoped to the loaded rows, as it always has.
+   */
+  selectionScope?: RunWorkflowSelectionScope;
+  /** Number of items a select-all covers, so the run-workflow action can refuse too many. */
+  totalItems?: number;
 }
 
 type CustomActionGroups = Pick<BulkActionGroups, 'casesItems' | 'timelineItems' | 'customItems'>;
@@ -121,6 +131,9 @@ export const useBulkActionItems = ({
   data,
   closePopover,
   showRunWorkflowActions = true,
+  isAllSelected,
+  selectionScope,
+  totalItems,
 }: BulkActionsProps) => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
@@ -245,6 +258,9 @@ export const useBulkActionItems = ({
     documentIds: workflowDocumentIds,
     closePopover: closePopover ?? noop,
     isBulk: true,
+    isAllSelected,
+    selectionScope,
+    totalItems,
   });
 
   const statusItems = useMemo<BulkActionMenuItem[]>(() => {

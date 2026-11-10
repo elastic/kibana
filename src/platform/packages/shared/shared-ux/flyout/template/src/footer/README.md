@@ -10,7 +10,7 @@
 ```
 
 - `FlyoutTemplate.Footer.PrimaryAction` — rendered as a filled `EuiButton`, `primary` or `danger` colored.
-- `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`.
+- `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`, or as an `AiButtonEmpty` with `variant="ai"`. See [AI-styled secondary action](#ai-styled-secondary-action) below.
 - `FlyoutTemplate.Footer.PrimaryActionMenu` — rendered as a filled `EuiButton` that opens an `EuiContextMenu` in a popover above the footer. See [Primary action menu](#primary-action-menu) below.
 
 Only the first instance of each action renders. For `PrimaryActionMenu`, the first instance that has panels wins. Use either `PrimaryAction` or `PrimaryActionMenu`, not both. A `PrimaryActionMenu` with an empty `panels` array counts as absent, so a footer whose only action is an empty menu is not rendered, and nothing warns.
@@ -30,6 +30,24 @@ Both are typed from EUI's button-only props, so an action always renders a butto
 ```
 
 An optional `tooltip` wraps the button in an `EuiToolTip`, for example to explain why the button is disabled. A natively disabled button fires no pointer events, so its tooltip could never open. For that reason, a disabled action with a tooltip sets `hasAriaDisabled` to true by default.
+
+## AI-styled secondary action
+
+Set `variant="ai"` on `SecondaryAction` for an action that hands off to an AI agent or chat, such as "Open chat". It renders an `AiButtonEmpty` from `@kbn/ui-ai-components`, with the same size as the other footer actions. A footer can have it as its only action.
+
+```tsx
+<FlyoutTemplate.Footer>
+  <FlyoutTemplate.Footer.SecondaryAction
+    variant="ai"
+    iconType="productAgent"
+    label="Open chat"
+    onClick={onOpenChat}
+  />
+  <FlyoutTemplate.Footer.PrimaryAction label="Open an escalation" onClick={onEscalate} />
+</FlyoutTemplate.Footer>
+```
+
+It takes the same props as the default variant, except that `iconType` is limited to the AI icons: `productAgent`, `sparkles`, `aiAssistantLogo`, and `inspect`. `addToChat` is not accepted, because `AiButtonEmpty` replaces the button's text with its own label for that icon, which would override `label`.
 
 ## Primary action menu
 

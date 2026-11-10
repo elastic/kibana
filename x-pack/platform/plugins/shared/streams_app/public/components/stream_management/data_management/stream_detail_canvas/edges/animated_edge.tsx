@@ -19,7 +19,16 @@ import {
 import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from '@xyflow/react';
 import { useBoolean, useDebounceFn } from '@kbn/react-hooks';
 import { useCanvasEvents } from '../state_management';
+import { useCanvasReadOnly } from '../canvas_read_only_context';
 import type { ClassicCanvasEdge } from '../types';
+
+const addRoutingUnavailableLabel = i18n.translate(
+  'xpack.streams.animatedEdge.addRoutingUnavailableTooltip',
+  {
+    defaultMessage:
+      'Routing cannot be added to this line yet. Add it to a line that ends at a destination.',
+  }
+);
 
 const addProcessingUnavailableLabel = i18n.translate(
   'xpack.streams.animatedEdge.addProcessingUnavailableTooltip',
@@ -71,12 +80,14 @@ export function AnimatedEdge({
   data,
 }: EdgeProps<ClassicCanvasEdge>) {
   const { openRoutingFlyout, openProcessingFlyout, openLineProcessingFlyout } = useCanvasEvents();
+  const readOnly = useCanvasReadOnly();
   const edgeMenuId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
   const [isHovered, hover] = useBoolean();
   const [showMenu, menu] = useBoolean();
-  const canUnhook = Boolean(data?.unitConnection);
+  const canUnhook = Boolean(data?.editable) && !readOnly;
   const processingTarget = data?.processingTarget;
+  const routingLine = data?.routingLine;
 
   // The built-in unhook circles sit on the line just outside each handle and are
   // easy to miss. Pressing the line itself starts that same drag from the
@@ -156,11 +167,14 @@ export function AnimatedEdge({
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      openRoutingFlyout(id, 'routing');
+      if (!routingLine) {
+        return;
+      }
+      openRoutingFlyout({ kind: 'line', line: routingLine });
       menu.off();
       hover.off();
     },
-    [id, openRoutingFlyout, menu, hover]
+    [routingLine, openRoutingFlyout, menu, hover]
   );
 
   const openEdgeProcessingFlyout = useCallback(
@@ -251,7 +265,7 @@ export function AnimatedEdge({
           style={PATH_OPACITY}
         />
       ) : null}
-      {isActive ? (
+      {isActive && !readOnly ? (
         <EdgeLabelRenderer>
           <div className="nopan nodrag" style={labelPositionStyle}>
             <EuiPopover
@@ -278,6 +292,8 @@ export function AnimatedEdge({
                 </EuiContextMenuItem>
                 <EuiContextMenuItem
                   data-test-subj="streamsCanvasEdgeMenu-addRouting"
+                  disabled={!routingLine}
+                  toolTipContent={routingLine ? undefined : addRoutingUnavailableLabel}
                   onClick={openEdgeRoutingFlyout}
                 >
                   {i18n.translate('xpack.streams.animatedEdge.addRoutingContextMenuItemLabel', {

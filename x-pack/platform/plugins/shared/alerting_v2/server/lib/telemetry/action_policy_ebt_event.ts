@@ -129,7 +129,7 @@ export const actionPolicyChangeTelemetryEvents: Array<EventTypeOpts<ActionPolicy
     schema: actionPolicyChangedEventSchema,
   }));
 
-const getMatcherType = ({ matcher }: ActionPolicyResponse): ActionPolicyEbtMatcherType => {
+export const getMatcherType = ({ matcher }: ActionPolicyResponse): ActionPolicyEbtMatcherType => {
   const policyMatcher = PolicyMatcher.of(matcher);
   const hasTags = policyMatcher.hasTags();
   const hasExpression = policyMatcher.expressionKql() !== null;
