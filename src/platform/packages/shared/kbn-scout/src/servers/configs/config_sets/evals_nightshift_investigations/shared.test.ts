@@ -163,7 +163,8 @@ describe.each([
 
   const knowledgeArgsFor = (env: Record<string, string> = {}) =>
     loadServers(configPath, { SANDBOX_KIBANA_CONFIG, ...env }).kbnTestServer.serverArgs.filter(
-      (arg: string) => /nightshift_investigations\.(wiki|memory|decision_trees|learning)\./.test(arg)
+      (arg: string) =>
+        /nightshift_investigations\.(wiki|memory|decision_trees|learning)\./.test(arg)
     );
 
   // Decision trees default on and do not require Wiki, so leaving their flag out would turn them on.
