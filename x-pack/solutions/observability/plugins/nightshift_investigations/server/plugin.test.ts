@@ -22,6 +22,7 @@ const createPlugin = (memoryEnabled = false) =>
       wiki: { enabled: false },
       decision_trees: { enabled: true },
       memory: { enabled: memoryEnabled },
+      learning: { enabled: true },
       findings_recorder: { enabled: true },
     })
   );
@@ -40,6 +41,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         wiki: { enabled: false },
         decision_trees: { enabled: false },
         memory: { enabled: false },
+        learning: { enabled: true },
       })
     );
     plugin.setup(coreMock.createSetup(), {

@@ -11,7 +11,10 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { brandSpaceId } from '@kbn/core-spaces-common';
 import { decompressFromBase64 } from 'lz-string';
 import { InvestigationLocatorDefinition } from '../../common/locators';
-import { createRoutingTestContext } from '../lib/notifications/notification_routing.mock';
+import {
+  createRoutingTestContext,
+  getTestIsomerRuntime,
+} from '../lib/notifications/notification_routing.mock';
 import type { NotificationExecution } from '../lib/notifications/notification_delivery';
 import { handleInvestigationFailureStepDefinition } from './handle_investigation_failure';
 import { sendNotificationsStepDefinition } from './send_notifications';
@@ -72,12 +75,14 @@ const setup = (
     investigationLocator,
     getInvestigationsClient,
     getActions: () => ({ getActionsClientWithRequestInSpace } as never),
+    getIsomerRuntime: getTestIsomerRuntime,
     getRoutingClient,
   });
   const failureDefinition = handleInvestigationFailureStepDefinition({
     investigationLocator,
     getInvestigationsClient,
     getActions: () => ({ getActionsClientWithRequestInSpace } as never),
+    getIsomerRuntime: getTestIsomerRuntime,
     getRoutingClient,
     getTriggerEmitter: () => emitter,
   });
@@ -134,13 +139,15 @@ describe('nightshift.sendNotifications step', () => {
       expect(getInvestigationExecutionContext).toHaveBeenCalledWith('inv-1', 'exec-follow-up');
       expect(getActionsClientWithRequestInSpace).toHaveBeenCalledWith(request, spaceId);
       expect(execute).toHaveBeenCalledWith(expect.objectContaining({ actionId: 'saved-slack' }));
-      const params = execute.mock.calls[0][0].params.subActionParams as { text: string };
+      const { blocks } = execute.mock.calls[0][0].params.subActionParams as {
+        blocks: Array<{ type: string; elements?: Array<{ url?: string }> }>;
+      };
       const prefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-      expect(params.text).toContain(`https://kibana.example${prefix}/app/r?`);
-      const locatorUrl = params.text.match(/<(https:\/\/[^|]+)\|/)?.[1];
+      const locatorUrl = blocks.find(({ type }) => type === 'actions')?.elements?.[0]?.url;
       if (!locatorUrl) {
         throw new Error('Missing locator URL');
       }
+      expect(locatorUrl).toContain(`https://kibana.example${prefix}/app/r?`);
       const redirect = new URL(locatorUrl);
       const state = JSON.parse(
         redirect.searchParams.get('p') ??
@@ -396,9 +403,9 @@ describe('nightshift.handleInvestigationFailure step', () => {
         source_workflow_execution_id: 'discovery-execution-1',
       })
     );
-    expect(execute.mock.calls[0][0].params.subActionParams).toMatchObject({
-      text: expect.stringContaining('Investigation failed: Model unavailable'),
-    });
+    expect(JSON.stringify(execute.mock.calls[0][0].params.subActionParams)).toContain(
+      'Model unavailable'
+    );
     expect((await routing.client.get())?.destinations[0].thread?.thread_ts).toBe('1.2');
   });
 

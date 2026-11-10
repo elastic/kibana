@@ -16,7 +16,7 @@ browser / curl  →  motel ingest (:14318)
                  →  local serverless ES
                       logs-application.otel-dev / .otel-prod
 
-unit collector telemetry
+unit collector telemetry, motel ingest source metrics
                  →  Kafka motel.events.metrics.dev
                  →  motel-index-collector
                  →  metrics-streams.otel-default
@@ -56,7 +56,7 @@ in this repo. `reset` deletes the key. Do not copy those files into git.
 ## 0. One-time prerequisites
 
 ```sh
-brew install kind tilt kubectl helm gh go ko jq
+brew install kind tilt kubectl helm gh go ko jq yq
 gh auth login
 gh auth setup-git
 docker login docker.elastic.co    # https://docker-auth.elastic.co/
@@ -257,6 +257,45 @@ POST kbn:/internal/streams/unit/default/_stats
 {}
 ```
 
+## Source metrics
+
+The motel ingest collector reports what each source accepts as `streams.source.*`
+metrics, like the ingest fleet does. They land in `metrics-streams.otel-default` next to
+the unit metrics. `setup` turns them on in two parts:
+
+- **Source validation.** The collector asks the distributor which sources the target
+  has, and admits a request only for one of them. An unregistered source gets `403`.
+  The registry answers `503` until every StreamUnit in `project-dev` has a
+  `streams.k8s.elastic.co/sources` annotation, and then every ingest request fails.
+  `status` names the units that lack it.
+- **Curation.** `setup` renders the ingest collector's Helm chart at the commit of the
+  motel image tag, and loads its `streams-telemetry` pipeline as a second collector
+  config (the `streams-telemetry.yaml` key of the motel ConfigMap). Nothing from the
+  chart is copied into this directory, so the pipeline always matches the image. It
+  needs `yq`, `helm`, and the commit in your `hosted-otel-collector` checkout (run
+  `git fetch` there). Without them `setup` warns, and the collector still validates
+  sources but reports no source metrics.
+
+The collector reports every 10 seconds. Set `STREAMS_SOURCE_METRICS_INTERVAL_MS` to
+change that (the chart uses 30000).
+
+| Field | Meaning |
+| --- | --- |
+| `metrics.streams.source.items` | Items in the interval (a delta) |
+| `attributes.outcome` | `success` for accepted items, `failure` for refused and failed ones |
+| `attributes.source.id`, `attributes.streams.source.type`, `attributes.streams.signal` | The source, its type and the signal |
+| `resource.attributes.unit.id`, `resource.attributes.target.id` | The unit and target the source belongs to |
+
+`streams.source.requests`, `.duration` and `.bytes` use the same attributes. Only
+sources served by the ingest collector report. Sources that post straight to
+Elasticsearch never reach it. An idle collector reports nothing, so run `traffic` first:
+
+```
+FROM metrics-streams.otel-default
+| WHERE metrics.streams.source.items IS NOT NULL
+| STATS items = SUM(TO_DOUBLE(metrics.streams.source.items)) BY attributes.source.id, attributes.outcome
+```
+
 ## Try a different unit
 
 Edit `unit.yaml` in this directory, then re-run the script. `seed` / the default
@@ -333,5 +372,9 @@ make kind-delete    # from either repo
 | Stats are `null` / no new documents in `metrics-streams.otel-default` | An idle collector writes no documents. Run `streams_full_dev.sh traffic`. |
 | No `telemetry.yaml` on the unit ConfigMap | Controller patch did not land; check `STREAMS_CONTROLLER` and Tilt rebuild. |
 | Motel `502` / TLS handshake | Motel ingress must stay `scheme: http`. |
+| Ingest answers `403 source not permitted` | The source id is not in the registry for the target. `seed` publishes `input`. A source you add in Map is known after the registry refreshes, about 10 seconds. |
+| Every ingest request answers `503` | A StreamUnit in `project-dev` has no `streams.k8s.elastic.co/sources` annotation, so the registry has no answer. `status` names it. Annotate it with an empty value, or delete it. |
+| No `streams.source.*` documents | Check `status`, then the `setup` output for a `source metrics off` warning (`yq`, `helm`, a commit missing from `hosted-otel-collector`, or a motel image older than the curation). Run `traffic`, since an idle collector reports nothing. |
+| `UNKNOWN_TOPIC_ID` in collector logs | WarpStream was killed for memory (a laptop sleep can do it) and lost its topics. Restart the unit collectors (`kubectl --context kind-streams -n project-dev rollout restart deploy/streams-<unit>`), then `motel-index-collector`, then run `traffic`. |
 | Empty data after ~2 minutes | `kubectl --context kind-streams -n project-dev logs -l app.kubernetes.io/instance=default --since=10m` |
 | Logs in, `metrics-streams.otel-default` empty | Index collector is missing or cannot reach ES. Re-run `setup` / `seed`. Logs: `kubectl --context kind-streams -n motel-index-collector logs deploy/motel-index-collector --since=10m` |
