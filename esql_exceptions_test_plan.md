@@ -71,7 +71,7 @@ No GitHub issue exists for this work. The criteria below are inferred from `esql
 12. If the probe fails, the rule fails before the query runs, with the message `The rule did not run because the output columns of its query could not be read to apply its exceptions on them: <reason of the failed request>`, and no alerts are created. It is a user error only when the failed request is one. Nothing of this runs for a rule with no item on the output columns.
 13. Expired items are not applied in either position, and a rule whose only items on the output columns expired sends no probe.
 14. An item on the output columns with `os_types` is refused by the API, and the executor skips one that is stored anyway with the code `os_types_not_supported`. A source item keeps its `os_types` in the DSL filter. A column named with a word that ES|QL reserves (`first`, `by`) is quoted, and a comment at the end of the rule query does not swallow the appended stages.
-15. The flyout offers both options to close alerts for an item on computed columns. "Close this alert" closes the alert by its id. "Close all alerts that match this exception" finds the alerts by the entries: an alert stores the computed columns in its `_source`, the alerts index does not map them, and the close request gives each column as a runtime field that reads the value from `_source`, with the `column_type` of the entry as its type (`ip` as `ip`, `integer` and `long` as `long`, `double` as `double`, `boolean` as `boolean`, and `keyword`, `text`, `version`, `unsigned_long`, `date` and `date_nanos` as `keyword`). The close touches only the open, acknowledged and in-progress alerts of the rules that the item is added to.
+15. The flyout offers both options to close alerts for an item on computed columns. "Close this alert" closes the alert by its id. "Close all alerts that match this exception" finds the alerts by the entries: an alert stores the computed columns in its `_source`, the alerts index does not map them, and the close request gives each column as a runtime field that reads the value from `_source`, with a type that follows the `column_type` of the entry (`ip` as `ip`, `integer` and `long` as `long`, `double` as `double`, `boolean` as `boolean`, `date` and `date_nanos` as `date`, and `keyword`, `text`, `version` and `unsigned_long` as `keyword`). An entry on a `date` or `date_nanos` column is tested as a range from its value to itself. A value that names a unit then covers the unit. A `date_nanos` value with nanoseconds also matches the alerts in the same millisecond, and an `unsigned_long` above 2^53 matches nothing, because the alert stores the rounded number. The close touches only the open, acknowledged and in-progress alerts of the rules that the item is added to.
 
 ## Known Limitations
 
@@ -2375,11 +2375,11 @@ Then the three alerts are closed
 
 _If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
 
-#### Scenario: Bulk close finds the alerts by an ip, a numeric or an aggregated computed column with the declared column type
+#### Scenario: Bulk close finds the alerts by an ip, a numeric, an aggregated, a date or an unsigned_long computed column with the declared column type
 
 **Priority:** P1
 
-**Automation coverage**: 4 unit tests (`x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts`: "#mapColumnTypeToRuntimeType › maps %s to %s", "#mapColumnTypeToRuntimeType › has a runtime type for every column type that an exception can declare", "#collectRuntimeFieldTypes › uses the column type that an entry on a computed column declares, and does not count the field as untyped", "#collectRuntimeFieldTypes › prefers the declared column type to the type of a source field that has the same name"), partial: they cover the runtime type, not the close. By hand, against a local stack, with the runtime type `keyword` (what the flyout sent before) the close matched no alert for an ip CIDR, for a number and for a `STATS` column, and with the declared type it matched the alert, not through the flyout.
+**Automation coverage**: 10 unit tests (`x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts`: "#mapColumnTypeToRuntimeType › maps %s to %s", "#mapColumnTypeToRuntimeType › has a runtime type for every column type that an exception can declare", "#collectRuntimeFieldTypes › uses the column type that an entry on a computed column declares, and does not count the field as untyped", "#collectRuntimeFieldTypes › prefers the declared column type to the type of a source field that has the same name"; `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/routes/signals/bulk_close_runtime_mappings.test.ts`: "writes each value of a keyword field as text, because _source can hold a number there", "parses each value of a date field from its ISO-8601 text into epoch milliseconds"; `x-pack/solutions/security/plugins/lists/server/services/exception_lists/build_exception_filter.test.ts`: "buildMatchClause › it should test a value on a %s column as a range from the value to itself", "buildMatchClause › it should keep match_phrase for a column type that is not a date", "buildMatchClause › it should negate the range when operator is \"excluded\"", "buildMatchAnyClause › it should test each value on a date column as a range from the value to itself"), partial: they cover the runtime type, the script and the filter, not the close. By hand, against a local stack, the request of the flyout was also sent for these columns, not through the flyout. With the runtime type `keyword` (what the flyout sent before) the close matched no alert for an ip CIDR, for a number and for a `STATS` column, and with the declared type it matched the alert. For a date column, a day, an hour, a minute, a second, a month, a year, a value with an offset, an exact instant and a list closed the alerts that the unit ranges of "Date values" exclude. `unsigned_long` values up to 2^53 and `version` values closed the right alerts. A `date_nanos` value with nanoseconds also closed the alert in the same millisecond, and `unsigned_long` values above 2^53 closed nothing, because the alert holds the rounded number.
 ```gherkin
 Given an ES|QL rule with EVAL c_ip = TO_IP(ip_s), c_n = n * 2 that created three alerts, with c_ip 10.0.0.5, 10.0.1.9 and 192.168.1.1, and c_n 4, 6 and 8
 When the user adds the exception c_ip is one of 10.0.0.0/24 with the column type ip
@@ -2394,6 +2394,20 @@ Given an ES|QL rule with STATS c_total = SUM(n) BY t that created three alerts, 
 And the exception c_total is 3 with the column type long
 When the user closes all the alerts that match it
 Then only the alert with c_total 3 is closed
+
+Given an ES|QL rule with EVAL c_date = ts that created three alerts, with c_date 2026-09-30T14:25:07.000Z, 2026-09-30T23:59:59.999Z and 2026-10-01T00:00:00.000Z
+And the exception c_date is 2026-09-30 with the column type date
+When the user closes all the alerts that match it
+Then the first two alerts are closed and the third stays open
+
+Given the exception c_date is 2026-09-30T14:25 with the column type date
+When the user closes all the alerts that match it
+Then only the first alert is closed
+
+Given an ES|QL rule with EVAL c_big = big that created two alerts, with c_big 1000 and 5
+And the exception c_big is 1000 with the column type unsigned_long
+When the user closes all the alerts that match it
+Then only the alert with c_big 1000 is closed
 ```
 
 **Execution:**
@@ -2445,20 +2459,16 @@ And it does not show the warning that some fields could not be resolved against 
 
 _If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
 
-#### Scenario: Closing alerts by an exclusive operator, a date column or a multi-valued column is checked before release (not verified yet)
+#### Scenario: Closing alerts by an exclusive operator or a multi-valued column is checked before release (not verified yet)
 
 **Priority:** P2
 
-**Automation coverage**: No existing tests found covering this scenario. No run of these cases exists: the runtime field reads each value from the `_source` of the alert, and a date column is written as a `keyword` of its text.
+**Automation coverage**: No existing tests found covering this scenario. No run of these cases exists: the runtime field reads each value from the `_source` of the alert.
 ```gherkin
 Given an ES|QL rule with EVAL c_kw = CONCAT(t, "-z") that created three alerts
 When the user adds the exception c_kw is not a-z with the column type keyword
 And closes all the alerts that match it
 Then the alerts whose c_kw is not a-z are closed, as for an exception on a source field (to confirm)
-
-Given an ES|QL rule with a computed date column and an exception "is" with the full date text of one alert
-When the user closes all the alerts that match it
-Then that alert is closed (to confirm)
 
 Given an ES|QL rule with a multi-valued computed column and an exception "is" with one of the values
 When the user closes all the alerts that match it
@@ -2622,7 +2632,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 - An edited exception value applies on the next run
 - "Close this alert" closes the alert that the user started from, for an item on computed columns
 - "Close all alerts that match this exception" closes the alerts that hold the value of a keyword computed column
-- Bulk close finds the alerts by an ip, a numeric or an aggregated computed column with the declared column type
+- Bulk close finds the alerts by an ip, a numeric, an aggregated, a date or an unsigned_long computed column with the declared column type
 - Bulk close closes only the open alerts of the rules that the item is added to
 
 **P2: run as capacity allows, limited blast radius:**
@@ -2647,7 +2657,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 - Exceptions on a computed column apply for a rule in a non-default space
 - Exceptions apply for a rule that reads a remote cluster
 - The flyout warns that the exception uses runtime or non-ECS fields, and does not warn that a computed column cannot be resolved
-- Closing alerts by an exclusive operator, a date column or a multi-valued column is checked before release (not verified yet)
+- Closing alerts by an exclusive operator or a multi-valued column is checked before release (not verified yet)
 
 ---
 

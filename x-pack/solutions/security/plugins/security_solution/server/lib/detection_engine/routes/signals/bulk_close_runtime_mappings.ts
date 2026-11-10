@@ -31,10 +31,29 @@ export type BulkCloseRuntimeMappings = Record<string, RuntimeFieldMapping>;
 export const MAX_RUNTIME_FIELDS_PER_REQUEST = 100;
 
 /**
+ * What the script emits for each value that it reads from `_source`. A `keyword` runtime field takes a string, and
+ * `_source` can hold a number there (an `unsigned_long` column of an ES|QL rule alert). The value is written as text. A
+ * `date` runtime field takes epoch milliseconds, and `_source` holds a date as ISO-8601 text (or as epoch milliseconds). The
+ * text is parsed. The other types take the value as it is.
+ */
+const getEmittedValue = (type: estypes.MappingRuntimeFieldType, variable: string): string => {
+  switch (type) {
+    case 'keyword':
+      return `String.valueOf(${variable})`;
+    case 'date':
+      return `(${variable} instanceof String ? Instant.parse(${variable}).toEpochMilli() : ((Number) ${variable}).longValue())`;
+    default:
+      return variable;
+  }
+};
+
+/**
  * A constant Painless source that reads the value of `fieldName` from
  * `_source`. Handles both nested-object storage (`{source: {ip_ecs: ...}}`)
  * and the flat-dotted-key fallback (`{"source.ip_ecs": ...}`), and emits
- * each element if the stored value is an array.
+ * each element if the stored value is an array. A `keyword` field emits
+ * each value as text, and a `date` field emits it as epoch milliseconds
+ * (see `getEmittedValue`).
  *
  * `on_script_error: 'continue'` tells ES that if the emit throws (typically
  * because the value in `_source` doesn't match the declared runtime type —
@@ -67,9 +86,9 @@ export const buildSourceReadingRuntimeField = (
       }
       if (v != null) {
         if (v instanceof List) {
-          for (def item : v) { if (item != null) emit(item); }
+          for (def item : v) { if (item != null) emit(${getEmittedValue(type, 'item')}); }
         } else {
-          emit(v);
+          emit(${getEmittedValue(type, 'v')});
         }
       }
     `,

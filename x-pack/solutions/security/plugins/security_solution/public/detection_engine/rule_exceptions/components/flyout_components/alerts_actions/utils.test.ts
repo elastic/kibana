@@ -241,8 +241,8 @@ describe('alerts_actions#utils', () => {
       ['text', RuntimeFieldTypeEnum.keyword],
       ['version', RuntimeFieldTypeEnum.keyword],
       ['unsigned_long', RuntimeFieldTypeEnum.keyword],
-      ['date', RuntimeFieldTypeEnum.keyword],
-      ['date_nanos', RuntimeFieldTypeEnum.keyword],
+      ['date', RuntimeFieldTypeEnum.date],
+      ['date_nanos', RuntimeFieldTypeEnum.date],
     ] as const)('maps %s to %s', (columnType, expected) => {
       expect(mapColumnTypeToRuntimeType(columnType)).toBe(expected);
     });

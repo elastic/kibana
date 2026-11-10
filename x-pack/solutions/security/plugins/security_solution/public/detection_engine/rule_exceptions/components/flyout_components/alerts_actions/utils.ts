@@ -170,8 +170,12 @@ export const mapDataViewFieldToRuntimeType = (field: DataViewFieldBase): Runtime
 /**
  * Map the ES|QL type that an entry on a computed column declares to the runtime field type that bulk-close
  * accepts. The alerts index does not map a computed column, and the source data view does not have it, so the
- * type that the entry declares is the only type that is known. The cases that fall back to `keyword` are the
- * ones of `mapDataViewFieldToRuntimeType`: the runtime field reads the value from the `_source` of the alert.
+ * type that the entry declares is the only type that is known. The runtime field reads the value from the
+ * `_source` of the alert. A `date` or `date_nanos` column is a `date` runtime field. A value such as `2026-09-30`
+ * then matches the whole day, as it does in the DSL filter and at the end of the query (the server parses the
+ * ISO-8601 text of `_source`, and a `date` runtime field keeps milliseconds, which makes `date_nanos` lose its
+ * last digits). An `unsigned_long` column is a `keyword` runtime field, because `long` cannot hold the whole
+ * range and `double` loses digits, and the server writes its number as text.
  */
 export const mapColumnTypeToRuntimeType = (columnType: EsqlOutputColumnType): RuntimeFieldType => {
   switch (columnType) {
@@ -184,12 +188,13 @@ export const mapColumnTypeToRuntimeType = (columnType: EsqlOutputColumnType): Ru
       return RuntimeFieldTypeEnum.long;
     case 'double':
       return RuntimeFieldTypeEnum.double;
+    case 'date':
+    case 'date_nanos':
+      return RuntimeFieldTypeEnum.date;
     case 'keyword':
     case 'text':
     case 'version':
     case 'unsigned_long':
-    case 'date':
-    case 'date_nanos':
       return RuntimeFieldTypeEnum.keyword;
   }
 };

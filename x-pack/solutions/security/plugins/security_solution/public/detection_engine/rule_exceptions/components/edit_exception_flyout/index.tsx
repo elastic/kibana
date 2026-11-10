@@ -42,7 +42,6 @@ import {
 
 import type { Moment } from 'moment';
 import moment from 'moment';
-import { isEsqlOutputColumnsItem } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import {
   isEqlRule,
@@ -550,7 +549,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
             />
           </>
         )}
-        {hasAlertsUpdate && showAlertCloseOptions && !isEsqlOutputColumnsItem(itemToEdit) && (
+        {hasAlertsUpdate && showAlertCloseOptions && (
           <>
             <EuiHorizontalRule />
             <ExceptionItemsFlyoutAlertsActions

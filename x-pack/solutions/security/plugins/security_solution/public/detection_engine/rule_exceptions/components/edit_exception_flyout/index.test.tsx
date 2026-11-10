@@ -976,14 +976,14 @@ describe('When the edit exception modal is opened', () => {
       );
     });
 
-    it('does not offer to close alerts', async () => {
+    it('offers to close alerts, as for any other item', async () => {
       renderFlyout();
       const callProps = mockGetExceptionBuilderComponentLazy.mock.calls[0][0];
       await waitFor(() =>
         callProps.onChange({ exceptionItems: [...callProps.exceptionListItems] })
       );
 
-      expect(screen.queryByTestId('bulkCloseAlertOnAddExceptionCheckbox')).toBeNull();
+      expect(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox')).toBeInTheDocument();
     });
 
     it('shows nothing about it for an item that does not say what it applies to', () => {

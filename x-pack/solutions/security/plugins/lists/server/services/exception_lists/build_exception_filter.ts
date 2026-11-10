@@ -376,20 +376,33 @@ export const buildExclusionClause = (booleanFilter: BooleanFilter): BooleanFilte
   };
 };
 
+/** Whether an entry on the output columns of an ES|QL rule declares a date column, which `match_phrase` cannot match by unit. */
+const hasDateColumnType = (entry: EntryMatch | EntryMatchAny): boolean =>
+  'column_type' in entry && (entry.column_type === 'date' || entry.column_type === 'date_nanos');
+
+/**
+ * The clause that tests one value of an entry. A value on a date column that the entry declares is a range from the value to
+ * itself. A date that names a unit (`2026-09-30`) then covers the unit, as a term query on a mapped date field does. The
+ * values of the other entries use `match_phrase`.
+ */
+const buildValueClause = (
+  entry: EntryMatch | EntryMatchAny,
+  field: string,
+  value: string
+): BooleanFilter => ({
+  bool: {
+    minimum_should_match: 1,
+    should: [
+      hasDateColumnType(entry)
+        ? { range: { [field]: { gte: value, lte: value } } }
+        : { match_phrase: { [field]: value } },
+    ],
+  },
+});
+
 export const buildMatchClause = (entry: EntryMatch): BooleanFilter => {
   const { field, operator, value } = entry;
-  const matchClause = {
-    bool: {
-      minimum_should_match: 1,
-      should: [
-        {
-          match_phrase: {
-            [field]: value,
-          },
-        },
-      ],
-    },
-  };
+  const matchClause = buildValueClause(entry, field, value);
 
   if (operator === 'excluded') {
     return buildExclusionClause(matchClause);
@@ -402,37 +415,13 @@ export const getBaseMatchAnyClause = (entry: EntryMatchAny): BooleanFilter => {
   const { field, value } = entry;
 
   if (value.length === 1) {
-    return {
-      bool: {
-        minimum_should_match: 1,
-        should: [
-          {
-            match_phrase: {
-              [field]: value[0],
-            },
-          },
-        ],
-      },
-    };
+    return buildValueClause(entry, field, value[0]);
   }
 
   return {
     bool: {
       minimum_should_match: 1,
-      should: value.map((val) => {
-        return {
-          bool: {
-            minimum_should_match: 1,
-            should: [
-              {
-                match_phrase: {
-                  [field]: val,
-                },
-              },
-            ],
-          },
-        };
-      }),
+      should: value.map((val) => buildValueClause(entry, field, val)),
     },
   };
 };
