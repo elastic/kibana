@@ -203,7 +203,11 @@ describe('streams unit stats response schema', () => {
         rate: { value: null, unit: '{item}', time_unit: 's' },
         series: { bucket_ms: 10000, points: [] },
       },
-      failed: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+      failed: {
+        rate: { value: null, unit: '{item}', time_unit: 's' },
+        authentication: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+        authorization: { rate: { value: null, unit: '{item}', time_unit: 's' } },
+      },
     },
   };
   const meta = { window: { start: '2026-10-16T12:00:00.000Z', end: '2026-10-16T12:15:00.000Z' } };
@@ -242,10 +246,47 @@ describe('streams unit stats response schema', () => {
         ...noDataDestination,
         events: {
           ...noDataDestination.events,
-          failed: { rate: { value: null, unit: '{item}', time_unit: null } },
+          failed: {
+            ...noDataDestination.events.failed,
+            rate: { value: null, unit: '{item}', time_unit: null },
+          },
         },
       })
     ).toBe(false);
+  });
+
+  it('parses authentication and authorization failure rates', () => {
+    const rate = (value: number | null) => ({ value, unit: '{item}', time_unit: 's' });
+    const parse = (failed: object) =>
+      streamsUnitStatsResponseSchema.safeParse({
+        components: {
+          destinations: {
+            'es-prod': {
+              ...noDataDestination,
+              events: { ...noDataDestination.events, failed },
+            },
+          },
+          processors: {},
+          sources: {},
+        },
+        meta,
+      }).success;
+
+    expect(
+      parse({
+        rate: rate(1.9),
+        authentication: { rate: rate(0) },
+        authorization: { rate: rate(1.9), signals: { logs: { rate: rate(1.9) } } },
+      })
+    ).toBe(true);
+    expect(
+      parse({
+        rate: rate(1.9),
+        authentication: { rate: rate(0) },
+        authorization: { rate: rate(1.9), signals: { events: { rate: rate(1.9) } } },
+      })
+    ).toBe(false);
+    expect(parse({ rate: rate(0), authentication: { rate: rate(0) } })).toBe(false);
   });
 
   it('parses processor instances with a route position or none, and none when it has no data', () => {

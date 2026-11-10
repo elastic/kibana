@@ -260,27 +260,45 @@ const statsValueSchema = z.object({ value: z.number().nullable(), unit: z.string
 /** A rate is always per unit of time. `time_unit` is always set: the UCUM time unit, for example `s`. */
 const statsRateSchema = statsValueSchema.extend({ time_unit: z.string() });
 
+/**
+ * Items rejected for one reason, per second. `signals` has the same rate per signal and leaves out
+ * a signal with no failures of this type, so it is missing when no signal had any.
+ */
+const statsFailureRateSchema = lazySchema(() =>
+  z.object({
+    rate: statsRateSchema,
+    signals: z.partialRecord(streamsSignalSchema, z.object({ rate: statsRateSchema })).optional(),
+  })
+);
+
 export const streamsUnitStatsSeriesSchema = z.object({
   bucket_ms: z.number(),
   points: z.array(z.object({ start: z.string(), value: z.number() })),
 });
 
-export const streamsUnitStatsDestinationResultSchema = z.object({
-  error: streamsUnitStatsErrorSchema.optional(),
-  latency: z.object({ average: statsValueSchema }),
-  events: z.object({
-    incoming: z.object({
-      total: statsValueSchema,
-      rate: statsRateSchema,
-      series: streamsUnitStatsSeriesSchema,
+export const streamsUnitStatsDestinationResultSchema = lazySchema(() =>
+  z.object({
+    error: streamsUnitStatsErrorSchema.optional(),
+    latency: z.object({ average: statsValueSchema }),
+    events: z.object({
+      incoming: z.object({
+        total: statsValueSchema,
+        rate: statsRateSchema,
+        series: streamsUnitStatsSeriesSchema,
+      }),
+      /**
+       * Items that failed in this destination, per second: every outcome other than "success".
+       * The destination is the last hop, so each of them is its own failure. `authentication` (HTTP
+       * 401) and `authorization` (HTTP 403) are parts of it, picked by status code, not by outcome.
+       */
+      failed: z.object({
+        rate: statsRateSchema,
+        authentication: statsFailureRateSchema,
+        authorization: statsFailureRateSchema,
+      }),
     }),
-    /**
-     * Items that failed in this destination, per second: every outcome other than "success".
-     * The destination is the last hop, so each of them is its own failure.
-     */
-    failed: z.object({ rate: statsRateSchema }),
-  }),
-});
+  })
+);
 
 export const streamsUnitStatsProcessorInstanceSchema = z.object({
   pipeline_id: z.string(),
