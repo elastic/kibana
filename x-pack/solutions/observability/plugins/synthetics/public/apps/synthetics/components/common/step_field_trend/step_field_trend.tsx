@@ -16,11 +16,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import type { JourneyStep } from '../../../../../../common/runtime_types';
+import { getTimespanEnd } from '../../../../../../common/utils/get_timespan_end';
 
 export const getLast48Intervals = (activeStep: JourneyStep) => {
   const timestamp = activeStep['@timestamp'];
-  const { lt, gte } = activeStep.monitor.timespan!;
-  const difference = moment(lt).diff(moment(gte), 'millisecond') * 48;
+  const timespan = activeStep.monitor.timespan!;
+  const difference =
+    moment(getTimespanEnd(timespan)).diff(moment(timespan.gte), 'millisecond') * 48;
 
   return {
     to: timestamp,

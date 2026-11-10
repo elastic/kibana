@@ -33,6 +33,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   DESTINATION_SIGNALS,
+  PREFIXED_DESTINATION_SIGNALS,
   composeStaticIndex,
   composeStaticIndexesForAll,
   getStaticIndexRemainder,
@@ -43,30 +44,29 @@ import {
   DESTINATION_FIXED_INDEX_MODE_LABEL,
   DESTINATION_SIGNAL_LABELS,
 } from './destination_type_config';
+import { DocsIndexField, DocsWritePatternsField } from './docs_target_fields';
 import type {
-  AutoWritePatternValidationError,
   DestinationCreationFormData,
   DestinationCreationFormErrors,
   DestinationSignal,
   ElasticsearchDestinationFormData,
+  PrefixedDestinationSignal,
   StaticIndexNaming,
-  StaticIndexValidationError,
 } from './types';
-
-type WriteTargetError = StaticIndexValidationError | AutoWritePatternValidationError | undefined;
+import { writeTargetErrorText, type WriteTargetError } from './write_target_error_text';
 
 interface LocalElasticsearchFieldsProps {
   errors: DestinationCreationFormErrors;
   disabled: boolean;
 }
 
-type IndexFieldPath = `elasticsearch.${(typeof SIGNAL_INDEX_FIELDS)[DestinationSignal]}`;
+type IndexFieldPath = `elasticsearch.${(typeof SIGNAL_INDEX_FIELDS)[PrefixedDestinationSignal]}`;
 
-const getIndexFieldPath = (signal: DestinationSignal): IndexFieldPath =>
+const getIndexFieldPath = (signal: PrefixedDestinationSignal): IndexFieldPath =>
   `elasticsearch.${SIGNAL_INDEX_FIELDS[signal]}`;
 
 type IndexFields = Record<
-  DestinationSignal,
+  PrefixedDestinationSignal,
   ControllerRenderProps<DestinationCreationFormData, IndexFieldPath>
 >;
 
@@ -76,6 +76,11 @@ interface WriteTargetFieldsProps extends LocalElasticsearchFieldsProps {
   customSignalsField: ControllerRenderProps<
     DestinationCreationFormData,
     'elasticsearch.customSignals'
+  >;
+  docsIndexField: ControllerRenderProps<DestinationCreationFormData, 'elasticsearch.docsIndex'>;
+  docsWritePatternsField: ControllerRenderProps<
+    DestinationCreationFormData,
+    'elasticsearch.docsWritePatterns'
   >;
   /** Empties the signals and indices of the previous choice, and forgets they were touched. */
   resetWriteTargets: () => void;
@@ -94,54 +99,6 @@ const WRITE_PATTERN_PLACEHOLDER = i18n.translate(
   { defaultMessage: 'dataset-*' }
 );
 
-const writeTargetErrorText = (
-  signal: DestinationSignal,
-  error: WriteTargetError,
-  allowWildcard: boolean
-): string | undefined => {
-  if (error === 'required') {
-    return i18n.translate('xpack.streams.destinations.writePatternRequiredErrorMessage', {
-      defaultMessage: 'Enter a write pattern for {signal}.',
-      values: { signal: DESTINATION_SIGNAL_LABELS[signal].toLowerCase() },
-    });
-  }
-  if (error === 'template') {
-    return i18n.translate('xpack.streams.destinations.indexTemplateNotSupportedErrorMessage', {
-      defaultMessage: 'Templated index names are not supported yet.',
-    });
-  }
-  if (error === 'uppercase') {
-    return allowWildcard
-      ? i18n.translate('xpack.streams.destinations.writePatternUppercaseErrorMessage', {
-          defaultMessage: 'Write patterns must be lowercase.',
-        })
-      : i18n.translate('xpack.streams.destinations.indexUppercaseErrorMessage', {
-          defaultMessage: 'Index names must be lowercase.',
-        });
-  }
-  if (error === 'invalidCharacter') {
-    return allowWildcard
-      ? i18n.translate('xpack.streams.destinations.writePatternInvalidCharacterErrorMessage', {
-          defaultMessage: 'Write patterns cannot contain \\ / ? " < > | , # : or spaces.',
-        })
-      : i18n.translate('xpack.streams.destinations.indexInvalidCharacterErrorMessage', {
-          defaultMessage: 'Index names cannot contain \\ / * ? " < > | , # : or spaces.',
-        });
-  }
-  if (error === 'signalPattern') {
-    return i18n.translate('xpack.streams.destinations.indexSignalPatternErrorMessage', {
-      defaultMessage: 'Must follow {pattern}. The dataset and namespace cannot contain "-".',
-      values: { pattern: `${signal}-<dataset>-<namespace>` },
-    });
-  }
-  if (error === 'invalidName') {
-    return i18n.translate('xpack.streams.destinations.indexInvalidNameErrorMessage', {
-      defaultMessage: 'Enter a valid data stream name.',
-    });
-  }
-  return undefined;
-};
-
 const SignalIndexField = ({
   signal,
   value,
@@ -151,7 +108,7 @@ const SignalIndexField = ({
   onChange,
   onBlur,
 }: {
-  signal: DestinationSignal;
+  signal: PrefixedDestinationSignal;
   value: string;
   error: WriteTargetError;
   allowWildcard: boolean;
@@ -199,14 +156,15 @@ const AutoFields = ({
   disabled,
   indexFields,
   customSignalsField,
+  docsWritePatternsField,
   resetWriteTargets,
 }: WriteTargetFieldsProps) => {
-  const { setValue, resetField } = useFormContext<DestinationCreationFormData>();
+  const { setValue, resetField, getValues } = useFormContext<DestinationCreationFormData>();
   const { useCustomWritePatterns, customSignals } = elasticsearch;
 
   const toggleSignal = (signal: DestinationSignal) => {
     if (customSignals.includes(signal)) {
-      resetField(getIndexFieldPath(signal));
+      resetField(signal !== 'docs' ? getIndexFieldPath(signal) : 'elasticsearch.docsWritePatterns');
       customSignalsField.onChange(customSignals.filter((candidate) => candidate !== signal));
     } else {
       customSignalsField.onChange([...customSignals, signal]);
@@ -231,6 +189,19 @@ const AutoFields = ({
         }}
         data-test-subj="streamsCreateDestinationCustomWritePatterns"
       />
+      {!useCustomWritePatterns && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            <p>
+              {i18n.translate('xpack.streams.destinations.autoDocsHelpDescription', {
+                defaultMessage:
+                  "Documents from _bulk sources go to the index in each request's _index, which must start with logs-, metrics- or traces-.",
+              })}
+            </p>
+          </EuiText>
+        </>
+      )}
       {useCustomWritePatterns && (
         <>
           <EuiSpacer size="s" />
@@ -284,27 +255,48 @@ const AutoFields = ({
               </p>
             </EuiText>
           )}
-          {DESTINATION_SIGNALS.filter((signal) => customSignals.includes(signal)).map((signal) => (
-            <React.Fragment key={signal}>
+          {PREFIXED_DESTINATION_SIGNALS.filter((signal) => customSignals.includes(signal)).map(
+            (signal) => (
+              <React.Fragment key={signal}>
+                <EuiSpacer size="s" />
+                <SignalIndexField
+                  signal={signal}
+                  value={elasticsearch[SIGNAL_INDEX_FIELDS[signal]]}
+                  error={errors[SIGNAL_INDEX_FIELDS[signal]]}
+                  allowWildcard
+                  disabled={disabled}
+                  onChange={indexFields[signal].onChange}
+                  onBlur={indexFields[signal].onBlur}
+                />
+              </React.Fragment>
+            )
+          )}
+          {customSignals.includes('docs') && (
+            <>
               <EuiSpacer size="s" />
-              <SignalIndexField
-                signal={signal}
-                value={elasticsearch[SIGNAL_INDEX_FIELDS[signal]]}
-                error={errors[SIGNAL_INDEX_FIELDS[signal]]}
-                allowWildcard
+              <DocsWritePatternsField
+                value={elasticsearch.docsWritePatterns}
+                getValue={() => getValues('elasticsearch.docsWritePatterns')}
+                error={errors.docsWritePatterns}
                 disabled={disabled}
-                onChange={indexFields[signal].onChange}
-                onBlur={indexFields[signal].onBlur}
+                onChange={docsWritePatternsField.onChange}
+                onBlur={docsWritePatternsField.onBlur}
               />
-            </React.Fragment>
-          ))}
+            </>
+          )}
         </>
       )}
     </>
   );
 };
 
-const StaticFields = ({ elasticsearch, errors, disabled, indexFields }: WriteTargetFieldsProps) => {
+const StaticFields = ({
+  elasticsearch,
+  errors,
+  disabled,
+  indexFields,
+  docsIndexField,
+}: WriteTargetFieldsProps) => {
   const { setValue } = useFormContext<DestinationCreationFormData>();
   const { staticNaming } = elasticsearch;
   const requiredError =
@@ -318,7 +310,7 @@ const StaticFields = ({ elasticsearch, errors, disabled, indexFields }: WriteTar
     {
       id: 'shared',
       label: i18n.translate('xpack.streams.destinations.sharedIndexNamingLabel', {
-        defaultMessage: 'Enter a name for all signals',
+        defaultMessage: 'Name all OTel signals',
       }),
       'data-test-subj': 'streamsCreateDestinationIndexNaming-shared',
     },
@@ -333,7 +325,7 @@ const StaticFields = ({ elasticsearch, errors, disabled, indexFields }: WriteTar
 
   const setSharedIndex = (remainder: string) => {
     const indexes = composeStaticIndexesForAll(remainder);
-    for (const signal of DESTINATION_SIGNALS) {
+    for (const signal of PREFIXED_DESTINATION_SIGNALS) {
       indexFields[signal].onChange(indexes[SIGNAL_INDEX_FIELDS[signal]]);
     }
   };
@@ -343,7 +335,7 @@ const StaticFields = ({ elasticsearch, errors, disabled, indexFields }: WriteTar
     setValue('elasticsearch.staticNaming', naming, { shouldDirty: true });
     if (naming === 'shared') {
       setSharedIndex(
-        DESTINATION_SIGNALS.map((signal) =>
+        PREFIXED_DESTINATION_SIGNALS.map((signal) =>
           getStaticIndexRemainder(signal, elasticsearch[SIGNAL_INDEX_FIELDS[signal]])
         ).find(Boolean) ?? ''
       );
@@ -384,7 +376,7 @@ const StaticFields = ({ elasticsearch, errors, disabled, indexFields }: WriteTar
           fullWidth
           helpText={i18n.translate('xpack.streams.destinations.allSignalsIndexHelpDescription', {
             defaultMessage:
-              'The same name is applied to logs, metrics, and traces as type-dataset-namespace.',
+              'The same name is applied to logs, metrics, and traces as type-dataset-namespace. Documents use their own index below.',
           })}
           isInvalid={Boolean(sharedError)}
           error={sharedError}
@@ -397,20 +389,20 @@ const StaticFields = ({ elasticsearch, errors, disabled, indexFields }: WriteTar
             prepend={<EuiFormPrepend label={ALL_PREPEND} />}
             onChange={(event) => setSharedIndex(event.target.value)}
             onBlur={() => {
-              for (const signal of DESTINATION_SIGNALS) {
+              for (const signal of PREFIXED_DESTINATION_SIGNALS) {
                 indexFields[signal].onBlur();
               }
             }}
             placeholder={INDEX_PLACEHOLDER}
             aria-label={i18n.translate('xpack.streams.destinations.sharedIndexAriaLabel', {
-              defaultMessage: 'Index name for all signals',
+              defaultMessage: 'Index name for all OTel signals',
             })}
             data-test-subj="streamsCreateDestinationIndex"
           />
         </EuiFormRow>
       ) : (
         <>
-          {DESTINATION_SIGNALS.map((signal, position) => (
+          {PREFIXED_DESTINATION_SIGNALS.map((signal, position) => (
             <React.Fragment key={signal}>
               {position > 0 && <EuiSpacer size="s" />}
               <SignalIndexField
@@ -434,6 +426,14 @@ const StaticFields = ({ elasticsearch, errors, disabled, indexFields }: WriteTar
           </EuiText>
         </>
       )}
+      <EuiSpacer size="s" />
+      <DocsIndexField
+        value={elasticsearch.docsIndex}
+        error={errors.docsIndex}
+        disabled={disabled}
+        onChange={docsIndexField.onChange}
+        onBlur={docsIndexField.onBlur}
+      />
     </>
   );
 };
@@ -453,14 +453,21 @@ export const LocalElasticsearchFields = (props: LocalElasticsearchFieldsProps) =
     control,
     name: 'elasticsearch.customSignals',
   });
+  const { field: docsIndexField } = useController({ control, name: 'elasticsearch.docsIndex' });
+  const { field: docsWritePatternsField } = useController({
+    control,
+    name: 'elasticsearch.docsWritePatterns',
+  });
   const autoRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRoutingAuto' });
   const staticRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRoutingStatic' });
 
   const resetWriteTargets = () => {
     resetField('elasticsearch.customSignals');
-    for (const signal of DESTINATION_SIGNALS) {
+    for (const signal of PREFIXED_DESTINATION_SIGNALS) {
       resetField(getIndexFieldPath(signal));
     }
+    resetField('elasticsearch.docsIndex');
+    resetField('elasticsearch.docsWritePatterns');
   };
 
   const onModeChange = (auto: boolean) => {
@@ -478,6 +485,8 @@ export const LocalElasticsearchFields = (props: LocalElasticsearchFieldsProps) =
     elasticsearch,
     indexFields,
     customSignalsField,
+    docsIndexField,
+    docsWritePatternsField,
     resetWriteTargets,
   };
 

@@ -8,16 +8,15 @@ import React from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
 import moment from 'moment';
 import type { Ping } from '../../../../../../common/runtime_types';
+import { getTimespanEnd } from '../../../../../../common/utils/get_timespan_end';
 import { MonitorFailedTests } from '../../monitor_details/monitor_errors/failed_tests';
 
 export const ErrorTimeline = ({ lastTestRun }: { lastTestRun?: Ping }) => {
   if (!lastTestRun) {
     return <EuiSkeletonText lines={3} />;
   }
-  const diff = moment(lastTestRun.monitor.timespan?.lt).diff(
-    moment(lastTestRun.monitor.timespan?.gte),
-    'minutes'
-  );
+  const { timespan } = lastTestRun.monitor;
+  const diff = moment(getTimespanEnd(timespan)).diff(moment(timespan?.gte), 'minutes');
   const startedAt = lastTestRun?.state?.started_at;
 
   return (

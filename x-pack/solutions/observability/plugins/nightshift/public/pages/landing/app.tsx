@@ -125,7 +125,9 @@ export function NightshiftApp({
     [search]
   );
 
-  const showAllEventsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
+  // The detection setup banner's "Configure detection" button; the header's "Show all events"
+  // link is gone, the detections page stays reachable from here and from the header's Detections.
+  const detectionsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/detections/events',
   });
   const detectionSetupBanner = useDetectionSetupBanner({
@@ -351,7 +353,6 @@ export function NightshiftApp({
       <NightshiftHeader
         isLoading={isInitialLoading}
         hasActiveInvestigations={hasActiveInvestigations}
-        showAllEventsHref={showAllEventsHref}
       />
 
       <EuiSpacer size="l" />
@@ -359,7 +360,7 @@ export function NightshiftApp({
       {detectionSetupBanner.isVisible && (
         <>
           <DetectionSetupBanner
-            detectionsHref={showAllEventsHref}
+            detectionsHref={detectionsHref}
             onDismiss={detectionSetupBanner.dismiss}
           />
           <EuiSpacer size="l" />
