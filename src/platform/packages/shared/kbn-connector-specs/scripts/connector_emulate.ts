@@ -212,45 +212,56 @@ run(
     const port = flagsReader.number('port') ?? DEFAULT_PORT;
     const host = flagsReader.string('host') ?? '127.0.0.1';
     const caDirectory = flagsReader.path('ca-dir') ?? DEFAULT_CA_DIRECTORY;
+
     if (!Number.isInteger(port) || port < 0 || port > 65535) {
       throw createFlagError(`--port must be a port number, got ${port}`);
     }
 
     const found = await findConnectors(ids, all);
+    const single = found.length === 1;
+
     const names = found.map(connectorName);
+
     const fixturesFiles = pathsByConnector(
       'fixtures',
       flagsReader.arrayOfStrings('fixtures') ?? [],
       names
     );
+
     const recordingsPaths = pathsByConnector(
       'recordings',
       flagsReader.arrayOfStrings('recordings') ?? [],
       names
     );
-    const single = found.length === 1;
 
     const emulators: Record<string, Emulator> = {};
     const originsByConnector = new Map<string, string[]>();
     const sources: string[] = [];
+
     let fixtureCount = 0;
     let recordingCount = 0;
+
     for (const [index, { directory }] of found.entries()) {
       const name = names[index];
+
       const { specs, pagination } = await loadVendorSpecs({
         directory,
         latest: spec === 'latest',
         fetchText,
         log,
       });
+
       // Recordings given for this run come first, so they win over the committed ones.
       const runRecordings = recordingsPaths.get(name);
+
       const recordings = [
         ...(runRecordings ? await readRecordings(runRecordings) : []),
         ...(await readRecordings(path.join(directory, RECORDINGS), { optional: true })),
       ];
+
       const fixturesFile = fixturesFiles.get(name);
       const fixtures = fixturesFile ? await readResponseFixtures(fixturesFile) : [];
+
       emulators[name] = createEmulatorFetch({
         specs,
         pagination,
@@ -258,14 +269,19 @@ run(
         recordings,
         onCall: (call) => logCall(log, call, single ? '' : `[${name}] `),
       });
+
       originsByConnector.set(name, fixedHttpsOrigins(specs));
+
       const specNames = Object.keys(specs).join(', ');
-      sources.push(single ? specNames : `${name} (${specNames})`);
+
+      sources.push(`${name} (${specNames})`);
+
       fixtureCount += fixtures.length;
       recordingCount += recordings.length;
     }
     // Each emulator logs its own calls; this logs requests none of them matches.
     const mock = combineEmulators(emulators, { onCall: (call) => logCall(log, call) });
+
     for (const { connector, source, operation, violations } of mock.rejectedResponses) {
       log.warning(
         [
@@ -278,6 +294,7 @@ run(
     }
 
     const { certificateAuthority, certFile } = await loadCertificateAuthority(caDirectory);
+
     const proxy = createEmulatorProxy({
       fetch: mock.fetch,
       certificateAuthority,
@@ -288,35 +305,55 @@ run(
     const proxyUrl = await proxy.listen(port, host);
     const controlUrl = (endpoint: string) => new URL(`${CONTROL_PATH}/${endpoint}`, proxyUrl).href;
 
-    log.success(
-      `Contract mock of ${
-        single ? found[0].connector.metadata.id : `${found.length} connectors`
-      } (${spec} specs: ${sources.join(', ')}) is listening at ${
-        proxyUrl.href
-      }, with ${fixtureCount} fixtures and ${recordingCount} recordings loaded${
+    log.success(`🏃‍♂️ Connector Emulator is now running at ${proxyUrl.href}\n`);
+
+    log.info(
+      [
+        '🪞 Emulating the following third party services:',
+        ...[...sources].sort().map((source) => `- ${source}`),
+        '',
+      ].join('\n')
+    );
+
+    log.info(
+      `${fixtureCount} fixtures and ${recordingCount} recordings loaded${
         mock.rejectedResponses.length > 0
           ? ` (${mock.rejectedResponses.length} not served, listed above)`
-          : ''
-      }`
+          : '. Run with --help to find out how to pass fixtures or use recordings.'
+      }\n`
     );
+
     log.info(
-      `Control endpoints: GET ${controlUrl('calls')}, POST ${controlUrl('reset')}, GET ${controlUrl(
-        'operations'
-      )}${single ? '' : '; add ?connector=<id> to scope them to one connector'}`
+      [
+        'Emulator control endpoints:',
+        `- GET ${controlUrl('calls')}`,
+        `- POST ${controlUrl('reset')}`,
+        `- GET ${controlUrl('operations')}`,
+        ...(single ? [] : ['Add ?connector=<id> to scope them to one connector.']),
+        '',
+      ].join('\n')
     );
+
     log.info(
-      `MCP server for agents: ${controlUrl(
-        'mcp'
-      )} (claude mcp add --transport http emulator ${controlUrl('mcp')})`
+      [
+        'MCP server for agents:',
+        controlUrl('mcp'),
+        `Add it to Claude Code with: claude mcp add --transport http emulator ${controlUrl('mcp')}`,
+        '',
+      ].join('\n')
     );
+
     log.info('Start Kibana with these settings in config/kibana.dev.yml:');
+
     const origins = [...new Set([...originsByConnector.values()].flat())].sort();
     // Written without the log prefix, which indents every line after the first, so the YAML
     // can be pasted as printed.
     log.write(`\n${kibanaSettings(proxyUrl, certFile, origins)}\n`);
+
     log.info(
       `For vendor hosts that come from connector config, start Kibana with NODE_EXTRA_CA_CERTS=${certFile} instead of the customHostSettings; it trusts the CA for every host. If config/kibana.dev.yml already sets xpack.actions.customHostSettings, add these entries to that list.`
     );
+
     if (!single) {
       const shared = sharedOrigins(originsByConnector);
       log.info(
@@ -337,15 +374,28 @@ run(
     await new Promise<never>(() => {});
   },
   {
-    description: `Serves the contract mocks of one or more connectors as an HTTP forward proxy, so a running Kibana can execute the connectors against them.
+    description: `Runs a local emulator of the vendor APIs that connectors call, so you can develop and test connectors
+      in a running Kibana without vendor accounts or network access.
 
-      Requests are answered from the vendor specs in the connector's vendor_api folder, with the overlay applied, and HTTPS
-      is intercepted with certificates from a local CA that Kibana must trust. Fixtures, then recordings, are served ahead
-      of the spec's examples and samples. Tests read and reset the calls through the control endpoints under ${CONTROL_PATH}.
+      One emulator can serve several connectors, each with its own specs, overlay, fixtures and recordings. Each
+      request goes to the connector named by its credential (emulate-<id>, e.g. emulate-outlook); without one, to the
+      first connector whose specs list the request's host, else the first whose relative server URL matches.
 
-      Several connectors are served by one proxy, each from its own specs, overlay, fixtures and recordings. A request goes
-      to the connector whose credential (emulate-<id>, e.g. emulate-outlook) it carries, otherwise to the first connector
-      whose specs name the URL's host, else the first with a relative server that matches it.`,
+      The contracts come from each connector's vendor_api folder, in
+      src/platform/packages/shared/kbn-connector-specs/src/specs/<connector>/vendor_api: the vendor's OpenAPI specs in
+      snapshots/, an optional overlay.yaml that corrects them, and responses recorded from the vendor in recordings/.
+
+      Responses come from fixtures passed with --fixtures first, then the connector's recordings, then the examples in
+      its specs, with the overlay applied.
+
+      Write fixtures to set up a scenario, such as an empty list, an error or a response that breaks the spec; they are
+      always served.
+
+      Recordings are responses captured from the real vendor API, which show how it really responds. A recording is
+      served only while it fits the spec, so one that stops fitting shows the vendor's API has drifted.
+
+      HTTPS traffic is decrypted with certificates from a local CA, so Kibana must trust that CA. Tests read and reset
+      the logged calls through the endpoints under ${CONTROL_PATH}.`,
     flags: {
       string: ['connector', 'spec', 'port', 'host', 'ca-dir', 'fixtures', 'recordings'],
       boolean: ['all'],
