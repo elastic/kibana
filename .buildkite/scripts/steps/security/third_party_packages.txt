@@ -1,5 +1,5 @@
+@openfeature/ofrep-web-provider
 cbor2
-@launchdarkly/js-client-sdk
 @eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
 @xterm/xterm

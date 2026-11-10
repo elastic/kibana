@@ -21,6 +21,7 @@ describe('resolveEvalSelection', () => {
         runSmoke: true,
         runInvestigations: true,
         runConnectorProbes: false,
+        runWikiOptimize: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: false,
       });
@@ -32,6 +33,7 @@ describe('resolveEvalSelection', () => {
         runSmoke: true,
         runInvestigations: false,
         runConnectorProbes: false,
+        runWikiOptimize: false,
         smokeDatasetsRequest: undefined,
         fellBackToSmoke: true,
       });
@@ -55,6 +57,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: false,
       runInvestigations: true,
       runConnectorProbes: false,
+      runWikiOptimize: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
@@ -66,6 +69,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: true,
       runInvestigations: false,
       runConnectorProbes: false,
+      runWikiOptimize: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -79,6 +83,7 @@ describe('resolveEvalSelection', () => {
       runSmoke: true,
       runInvestigations: true,
       runConnectorProbes: false,
+      runWikiOptimize: false,
       smokeDatasetsRequest: 'synthetic-smoke',
       fellBackToSmoke: false,
     });
@@ -92,14 +97,50 @@ describe('resolveEvalSelection', () => {
       runSmoke: false,
       runInvestigations: false,
       runConnectorProbes: true,
+      runWikiOptimize: false,
       smokeDatasetsRequest: undefined,
       fellBackToSmoke: false,
     });
   });
 
+  it('runs only the Wiki optimizer replay for wiki-optimize, without credentials', () => {
+    expect(resolveEvalSelection({ NIGHTSHIFT_DATASETS: 'wiki-optimize' })).toEqual({
+      runOrca: false,
+      runSmoke: false,
+      runInvestigations: false,
+      runConnectorProbes: false,
+      runWikiOptimize: true,
+      smokeDatasetsRequest: undefined,
+      fellBackToSmoke: false,
+    });
+  });
+
+  it('combines wiki-optimize with other evals', () => {
+    expect(
+      resolveEvalSelection({
+        ...WITH_SANDBOX,
+        NIGHTSHIFT_DATASETS: 'synthetic-smoke,wiki-optimize',
+      })
+    ).toMatchObject({
+      runSmoke: true,
+      runWikiOptimize: true,
+      runInvestigations: false,
+      smokeDatasetsRequest: 'synthetic-smoke',
+    });
+  });
+
+  it('never selects the Wiki optimizer replay for all or unset', () => {
+    for (const value of [undefined, 'all']) {
+      expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toMatchObject({
+        runWikiOptimize: false,
+      });
+    }
+  });
+
   it('never selects the connector probes for all', () => {
     expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: 'all' })).toMatchObject({
       runConnectorProbes: false,
+      runWikiOptimize: false,
     });
   });
 
@@ -159,6 +200,7 @@ describe('ORCA selection', () => {
         runSmoke: false,
         runInvestigations: false,
         runConnectorProbes: false,
+        runWikiOptimize: false,
       });
     }
   );

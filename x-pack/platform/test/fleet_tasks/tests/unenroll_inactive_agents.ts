@@ -33,7 +33,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
     await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL_MS));
   }
 
-  describe('Unenroll inactive agents task', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/303892
+  describe.skip('Unenroll inactive agents task', () => {
     const apiClient = new SpaceTestApiClient(supertest);
     before(async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);

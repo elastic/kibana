@@ -8,7 +8,6 @@
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 
@@ -31,7 +30,6 @@ describe('ApiKeyInvalidationTaskRunner', () => {
   const coreLogger = loggingSystemMock.createLogger();
   const { loggerService, mockLogger } = createLoggerService();
   const savedObjectsClient = savedObjectsClientMock.create();
-  const securityStart = securityMock.createStart();
   const securityCore = securityServiceMock.createStart();
 
   let runner: ApiKeyInvalidationTaskRunner;
@@ -44,7 +42,6 @@ describe('ApiKeyInvalidationTaskRunner', () => {
       loggerService,
       savedObjectsClient,
       securityCore,
-      securityStart,
       createConfigServiceMock(config)
     );
   });
@@ -62,7 +59,7 @@ describe('ApiKeyInvalidationTaskRunner', () => {
         savedObjectTypesToQuery: [],
         removalDelay: '1h',
         logger: coreLogger,
-        invalidateApiKeyFn: securityStart.authc.apiKeys.invalidateAsInternalUser,
+        invalidateApiKeyFn: securityCore.authc.apiKeys.invalidateAsInternalUser,
         invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
       })
     );
