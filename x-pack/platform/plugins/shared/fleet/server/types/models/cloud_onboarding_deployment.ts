@@ -180,22 +180,18 @@ export const CloudOnboardingDeploymentSchemaV7 = CloudOnboardingDeploymentSchema
   policySettings: schema.maybe(policySettingsRecordSchema(1024)),
 });
 
-// ── V8: dedicatedNamespaceTemplates ──────────────────────────────────────────
+// ── V8: dedicatedNamespaceTemplates + longer policySettings values ───────────
 // Whether the global namespace uses dedicated index templates. Not in mappings.properties
 // (dynamic: false), so no mapping change is needed.
-export const CloudOnboardingDeploymentSchemaV8 = CloudOnboardingDeploymentSchemaV7.extends({
-  dedicatedNamespaceTemplates: schema.maybe(schema.boolean()),
-});
-
-// ── V9: longer policySettings values ─────────────────────────────────────────
-// A value may be as long as the longest package policy field kept here: the condition, which Fleet
-// allows up to 10000 characters.
+// A policySettings value may be as long as the longest package policy field kept there: the
+// condition, which Fleet allows up to 10000 characters. V7 keeps 1024.
 const POLICY_SETTINGS_MAX_VALUE_LENGTH = PACKAGE_POLICY_CONDITION_MAX_LENGTH;
 
 export const PolicySettingsRecordSchema = (meta?: { description: string; availability: object }) =>
   policySettingsRecordSchema(POLICY_SETTINGS_MAX_VALUE_LENGTH, meta);
 
-export const CloudOnboardingDeploymentSchemaV9 = CloudOnboardingDeploymentSchemaV8.extends({
+export const CloudOnboardingDeploymentSchemaV8 = CloudOnboardingDeploymentSchemaV7.extends({
+  dedicatedNamespaceTemplates: schema.maybe(schema.boolean()),
   policySettings: schema.maybe(PolicySettingsRecordSchema()),
 });
 

@@ -10,7 +10,7 @@ import {
   CloudOnboardingDeploymentSchemaV5,
   CloudOnboardingDeploymentSchemaV6,
   CloudOnboardingDeploymentSchemaV7,
-  CloudOnboardingDeploymentSchemaV9,
+  CloudOnboardingDeploymentSchemaV8,
 } from '../models';
 
 import {
@@ -217,13 +217,13 @@ describe('saved object model versions', () => {
     ).not.toThrow();
   });
 
-  it('V9 stores a package policy setting as long as a condition', () => {
+  it('V8 stores a package policy setting as long as a condition', () => {
     const policySettings = { condition: 'x'.repeat(10000) };
-    expect(CloudOnboardingDeploymentSchemaV9.validate({ ...record, policySettings })).toEqual(
+    expect(CloudOnboardingDeploymentSchemaV8.validate({ ...record, policySettings })).toEqual(
       expect.objectContaining({ policySettings })
     );
     expect(() =>
-      CloudOnboardingDeploymentSchemaV9.validate({
+      CloudOnboardingDeploymentSchemaV8.validate({
         ...record,
         policySettings: { condition: 'x'.repeat(10001) },
       })
