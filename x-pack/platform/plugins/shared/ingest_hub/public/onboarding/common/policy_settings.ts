@@ -15,6 +15,8 @@ import type { DeploymentMethod } from '@kbn/fleet-plugin/public';
  */
 export interface PolicySettings {
   output_id?: string;
+  /** Agent condition expression that decides whether the integration applies to an agent. */
+  condition?: string;
   /** A package var (`vars.proxy_url`), not a top-level package policy field. */
   proxy_url?: string;
 }
@@ -41,6 +43,7 @@ const POLICY_SETTINGS: Record<
   { methods: DeploymentMethod[]; target: 'field' | 'var'; isValid: (value: unknown) => boolean }
 > = {
   output_id: { methods: ['agent_based'], target: 'field', isValid: isString },
+  condition: { methods: ['agent_based'], target: 'field', isValid: isString },
   proxy_url: { methods: ['agent_based', 'managed_integration'], target: 'var', isValid: isString },
 };
 
@@ -86,7 +89,8 @@ const pickSettings = (settings: PolicySettingsSource, keys: PolicySettingKey[]):
 export const getPolicySettings = (
   settings: PolicySettingsSource,
   method: DeploymentMethod
-): Pick<PolicySettings, 'output_id'> => pickSettings(settings, getKeys(method, 'field'));
+): Pick<PolicySettings, 'output_id' | 'condition'> =>
+  pickSettings(settings, getKeys(method, 'field'));
 
 /**
  * The var settings a new policy gets, only for the vars the package declares: Fleet rejects a var
@@ -102,6 +106,15 @@ export const getPolicyVarSettings = (
     settings,
     getKeys(method, 'var').filter((key) => !pkgVarNames || pkgVarNames.has(key))
   ) as Record<string, string>;
+
+/**
+ * Every setting of the deployment method, fields and vars alike, as the onboarding record saves
+ * them. One left over from another method is hidden in Step 2, so it is neither validated nor kept.
+ */
+export const getSavedPolicySettings = (
+  settings: PolicySettingsSource,
+  method: DeploymentMethod
+): PolicySettings => pickSettings(settings, getKeys(method));
 
 /**
  * The settings an update of a deployed policy sends. A setting set back to empty is sent as `null`,
