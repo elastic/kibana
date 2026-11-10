@@ -20,7 +20,7 @@ import { pruneLookupIndex } from './lookup/prune_lookup_index';
 
 jest.mock('../risk_score_data_client');
 jest.mock('../../risk_engine/utils/saved_object_configuration');
-jest.mock('../tasks/helpers');
+jest.mock('../../utils/internal_saved_objects_client');
 jest.mock('./steps/score_base_entities');
 jest.mock('./steps/run_resolution_scoring_step');
 jest.mock('./steps/reset_to_zero');

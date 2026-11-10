@@ -166,9 +166,13 @@ describe('logsSearch', () => {
 });
 
 describe('logsSearch and spansSearch with filters', () => {
-  const FILTERS = { browser: 'Chrome', country: 'DE', pageUrl: 'https://shop.example.com/' };
-  const BROWSER_TERM = { term: { digital_experience_filter_browser: 'Chrome' } };
-  const COUNTRY_TERM = { term: { digital_experience_filter_country: 'DE' } };
+  const FILTERS = {
+    browser: [{ value: 'Chrome', exclude: false }],
+    country: [{ value: 'DE', exclude: false }],
+    pageUrl: [{ value: 'https://shop.example.com/', exclude: false }],
+  };
+  const BROWSER_TERM = { terms: { digital_experience_filter_browser: ['Chrome'] } };
+  const COUNTRY_TERM = { terms: { digital_experience_filter_country: ['DE'] } };
 
   it('define the runtime fields the filters read', () => {
     [logsSearch(PARAMS), spansSearch(PARAMS)].forEach((request) => {
@@ -177,6 +181,7 @@ describe('logsSearch and spansSearch with filters', () => {
         'digital_experience_filter_os',
         'digital_experience_filter_device',
         'digital_experience_filter_country',
+        'digital_experience_filter_appVersion',
       ]);
     });
   });
@@ -206,7 +211,7 @@ describe('logsSearch and spansSearch with filters', () => {
       bool: {
         filter: [
           { term: { event_name: 'browser.navigation_timing' } },
-          { term: { 'attributes.url.full': 'https://shop.example.com/' } },
+          { terms: { 'attributes.url.full': ['https://shop.example.com/'] } },
         ],
       },
     });
@@ -216,9 +221,27 @@ describe('logsSearch and spansSearch with filters', () => {
   });
 
   it('leave the HTTP requests whole when only a page is selected', () => {
-    const request = spansSearch({ ...PARAMS, filters: { pageUrl: 'https://shop.example.com/' } });
+    const request = spansSearch({
+      ...PARAMS,
+      filters: { pageUrl: [{ value: 'https://shop.example.com/', exclude: false }] },
+    });
 
     expect(inEnvironmentOf(request).filter).toEqual({ match_all: {} });
+  });
+
+  it('leave out the documents of an excluded value', () => {
+    const filters = { browser: [{ value: 'Chrome', exclude: true }] };
+
+    [logsSearch({ ...PARAMS, filters }), spansSearch({ ...PARAMS, filters })].forEach((request) => {
+      expect(inEnvironmentOf(request).filter).toEqual({
+        bool: {
+          filter: [
+            { match_all: {} },
+            { bool: { must_not: [{ terms: { digital_experience_filter_browser: ['Chrome'] } }] } },
+          ],
+        },
+      });
+    });
   });
 
   it('are unchanged without a selection', () => {
@@ -263,5 +286,57 @@ describe('spansSearch', () => {
         },
       },
     });
+  });
+});
+
+describe('logsSearch and spansSearch with a KQL query', () => {
+  const KUERY = { match: { 'user_agent.name': 'Chrome' } };
+
+  it('keep only the documents the query matches, in both searches', () => {
+    [logsSearch({ ...PARAMS, kuery: KUERY }), spansSearch({ ...PARAMS, kuery: KUERY })].forEach(
+      (request) => {
+        expect(request.query?.bool?.filter).toContainEqual(KUERY);
+      }
+    );
+  });
+
+  it('read the same documents without it', () => {
+    expect(logsSearch(PARAMS).query?.bool?.filter).not.toContainEqual(KUERY);
+  });
+});
+
+describe('logsSearch percentile', () => {
+  const loadTimeOf = (request: ReturnType<typeof logsSearch>) => ({
+    kpi: pageLoadsOf(request).aggs.loadTime,
+    trend: (pageLoadsOf(request).aggs.trend as { aggs: { loadTime: unknown } }).aggs.loadTime,
+  });
+  const percentileAgg = (percent: number) => ({
+    percentiles: {
+      field: 'browser.navigation_timing.load_event_end',
+      percents: [percent],
+      keyed: false,
+    },
+  });
+
+  it('takes the 75th percentile of the load time by default', () => {
+    expect(loadTimeOf(logsSearch(PARAMS))).toEqual({
+      kpi: percentileAgg(75),
+      trend: percentileAgg(75),
+    });
+  });
+
+  it('takes the requested percentile for the load time and its trend', () => {
+    expect(loadTimeOf(logsSearch({ ...PARAMS, percentile: 95 }))).toEqual({
+      kpi: percentileAgg(95),
+      trend: percentileAgg(95),
+    });
+  });
+
+  it('leaves the percentile of the web vitals at 75', () => {
+    const { lcp } = inEnvironmentOf(logsSearch({ ...PARAMS, percentile: 99 })).aggs as unknown as {
+      lcp: { aggs: { p75: unknown } };
+    };
+
+    expect(lcp.aggs.p75).toMatchObject({ percentiles: { percents: [75] } });
   });
 });

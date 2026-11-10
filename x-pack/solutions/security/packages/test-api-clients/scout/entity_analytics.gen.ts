@@ -174,6 +174,10 @@ import type {
   UpdateWatchlistEntitySourceResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/update.gen';
 import type {
+  UpdateWatchlistEntitySourceApiKeyRequestParamsInput,
+  UpdateWatchlistEntitySourceApiKeyResponse,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/data_source/update_api_key.gen';
+import type {
   UploadWatchlistCsvRequestParamsInput,
   UploadWatchlistCsvResponse,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
@@ -1495,6 +1499,35 @@ Updates the details of an existing monitored privileged user by their document I
     );
   },
   /**
+   * Replace the API key of an index entity source with a new one owned by the user making this request, for example after the user who created the source is removed or loses access to the index. The new key is created and saved first; the previous key is invalidated only afterwards, so a failure leaves the source with its previous key. The user must be able to read the source's index pattern.
+   */
+  async updateWatchlistEntitySourceApiKey<TResponseType extends ScoutResponseType = 'json'>(
+    props: UpdateWatchlistEntitySourceApiKeyProps,
+    options: ScoutApiRequestOptions<TResponseType> = {}
+  ): Promise<
+    ApiClientResponse<ScoutResponseBody<TResponseType, UpdateWatchlistEntitySourceApiKeyResponse>>
+  > {
+    const basePath =
+      options.kibanaSpace && options.kibanaSpace !== 'default' ? `/s/${options.kibanaSpace}` : '';
+    const path = `${basePath}${replaceParams(
+      '/api/entity_analytics/watchlists/{watchlist_id}/entity_source/{id}/_update_api_key',
+      encodePathParams(props.params)
+    )}`;
+
+    return apiClient.post<
+      ScoutResponseBody<TResponseType, UpdateWatchlistEntitySourceApiKeyResponse>
+    >(path, {
+      headers: {
+        'kbn-xsrf': 'true',
+        [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+        ...options.headers,
+      },
+      body: options.body,
+      responseType: options.responseType ?? 'json',
+    });
+  },
+  /**
       * **Deprecated in 9.4.0.** Use `POST /internal/asset_criticality/upload_csv_v2` instead.
 
       */
@@ -1671,6 +1704,9 @@ export interface UpdateWatchlistProps {
 export interface UpdateWatchlistEntitySourceProps {
   params: UpdateWatchlistEntitySourceRequestParamsInput;
   body: UpdateWatchlistEntitySourceRequestBodyInput;
+}
+export interface UpdateWatchlistEntitySourceApiKeyProps {
+  params: UpdateWatchlistEntitySourceApiKeyRequestParamsInput;
 }
 export interface UploadWatchlistCsvProps {
   params: UploadWatchlistCsvRequestParamsInput;

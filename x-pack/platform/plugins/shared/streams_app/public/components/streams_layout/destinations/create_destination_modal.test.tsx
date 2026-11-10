@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createDefaultUnit } from '../../../services/unit_repository';
 import { CreateDestinationModal } from './create_destination_modal';
@@ -34,9 +33,11 @@ const renderModal = () => {
   return { createDestination };
 };
 
-const docsPatternsInput = async () => {
-  await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomWritePatterns'));
-  await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomSignal-docs'));
+const click = (testSubject: string) => fireEvent.click(screen.getByTestId(testSubject));
+
+const docsPatternsInput = () => {
+  click('streamsCreateDestinationCustomWritePatterns');
+  click('streamsCreateDestinationCustomSignal-docs');
   return within(screen.getByTestId('streamsCreateDestination-docs-writePatterns')).getByTestId(
     'comboBoxSearchInput'
   );
@@ -50,24 +51,22 @@ const docsPills = () =>
 const setFieldValue = (testSubject: string, value: string) =>
   fireEvent.change(screen.getByTestId(testSubject), { target: { value } });
 
-const addDocsPattern = async (input: HTMLElement, value: string) => {
-  await userEvent.click(input);
-  await userEvent.paste(value);
-  await userEvent.keyboard('{Enter}');
+const addDocsPattern = (input: HTMLElement, value: string) => {
+  fireEvent.change(input, { target: { value } });
+  fireEvent.keyDown(input, { key: 'Enter' });
 };
 
 describe('CreateDestinationModal', () => {
-  it('only shows the errors of fields the user has left', async () => {
+  it('only shows the errors of fields the user has left', () => {
     renderModal();
 
-    await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomWritePatterns'));
-    await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomSignal-logs'));
+    click('streamsCreateDestinationCustomWritePatterns');
+    click('streamsCreateDestinationCustomSignal-logs');
 
     expect(screen.queryByText(LOGS_PATTERN_REQUIRED)).not.toBeInTheDocument();
     expect(screen.queryByText(NAME_REQUIRED)).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('streamsCreateDestination-logs-index'));
-    await userEvent.tab();
+    fireEvent.blur(screen.getByTestId('streamsCreateDestination-logs-index'));
 
     expect(screen.getByText(LOGS_PATTERN_REQUIRED)).toBeInTheDocument();
     expect(screen.queryByText(NAME_REQUIRED)).not.toBeInTheDocument();
@@ -76,8 +75,8 @@ describe('CreateDestinationModal', () => {
   it('submits the form values', async () => {
     const { createDestination } = renderModal();
 
-    await userEvent.type(screen.getByTestId('streamsCreateDestinationName'), 'Prod logs');
-    await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
+    setFieldValue('streamsCreateDestinationName', 'Prod logs');
+    click('streamsCreateDestinationSubmit');
 
     await waitFor(() =>
       expect(createDestination).toHaveBeenCalledWith(
@@ -92,13 +91,10 @@ describe('CreateDestinationModal', () => {
   });
 
   describe('Documents', () => {
-    it('splits a pasted list into one entry per pattern and marks only the invalid one', async () => {
+    it('splits a pasted list into one entry per pattern and marks only the invalid one', () => {
       renderModal();
-      const input = await docsPatternsInput();
 
-      await userEvent.click(input);
-      await userEvent.paste('logs-a-*, Metrics-b-*');
-      await userEvent.keyboard('{Enter}');
+      addDocsPattern(docsPatternsInput(), 'logs-a-*, Metrics-b-*');
 
       expect(docsPills()).toEqual(['logs-a-*', 'Metrics-b-*']);
       expect(
@@ -107,28 +103,26 @@ describe('CreateDestinationModal', () => {
       expect(screen.queryByText('logs-a-*:', { exact: false })).not.toBeInTheDocument();
     });
 
-    it('says how many write patterns a destination can have', async () => {
+    it('says how many write patterns a destination can have', () => {
       renderModal();
-      const input = await docsPatternsInput();
 
-      await userEvent.click(input);
-      await userEvent.paste(
+      addDocsPattern(
+        docsPatternsInput(),
         Array.from({ length: 33 }, (_, index) => `logs-orders${index}-*`).join(',')
       );
-      await userEvent.keyboard('{Enter}');
 
       expect(
         screen.getByText('A destination can have at most 32 write patterns across all signals.')
       ).toBeInTheDocument();
     });
 
-    it('adds each docs write pattern once, keeping the lowercase fix of an uppercase one', async () => {
+    it('adds each docs write pattern once, keeping the lowercase fix of an uppercase one', () => {
       renderModal();
-      const input = await docsPatternsInput();
+      const input = docsPatternsInput();
 
-      await addDocsPattern(input, 'Logs-a-*');
-      await addDocsPattern(input, 'logs-a-*');
-      await addDocsPattern(input, 'logs-a-*');
+      addDocsPattern(input, 'Logs-a-*');
+      addDocsPattern(input, 'logs-a-*');
+      addDocsPattern(input, 'logs-a-*');
 
       expect(docsPills()).toEqual(['Logs-a-*', 'logs-a-*']);
     });
@@ -136,14 +130,14 @@ describe('CreateDestinationModal', () => {
     it('keeps the docs index out of the shared Fixed name', async () => {
       const { createDestination } = renderModal();
 
-      await userEvent.click(screen.getByLabelText('Fixed index per signal'));
+      fireEvent.click(screen.getByLabelText('Fixed index per signal'));
       expect(screen.getByText('Name all OTel signals')).toBeInTheDocument();
       setFieldValue('streamsCreateDestination-docs-index', 'accounting-2026');
       setFieldValue('streamsCreateDestinationIndex', 'billing-default');
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-shared'));
+      click('streamsCreateDestinationIndexNaming-perSignal');
+      click('streamsCreateDestinationIndexNaming-shared');
       setFieldValue('streamsCreateDestinationName', 'Central');
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
+      click('streamsCreateDestinationSubmit');
 
       await waitFor(() =>
         expect(createDestination).toHaveBeenCalledWith(
@@ -158,35 +152,35 @@ describe('CreateDestinationModal', () => {
       );
     });
 
-    it('clears the docs write patterns when the docs badge is turned off', async () => {
+    it('clears the docs write patterns when the docs badge is turned off', () => {
       renderModal();
-      await addDocsPattern(await docsPatternsInput(), 'logs-a-*');
+      addDocsPattern(docsPatternsInput(), 'logs-a-*');
       expect(docsPills()).toEqual(['logs-a-*']);
 
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomSignal-docs'));
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomSignal-docs'));
+      click('streamsCreateDestinationCustomSignal-docs');
+      click('streamsCreateDestinationCustomSignal-docs');
 
       expect(docsPills()).toEqual([]);
     });
 
-    it('clears the docs write patterns when the custom switch is turned off', async () => {
+    it('clears the docs write patterns when the custom switch is turned off', () => {
       renderModal();
-      await addDocsPattern(await docsPatternsInput(), 'logs-a-*');
+      addDocsPattern(docsPatternsInput(), 'logs-a-*');
 
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomWritePatterns'));
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomWritePatterns'));
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationCustomSignal-docs'));
+      click('streamsCreateDestinationCustomWritePatterns');
+      click('streamsCreateDestinationCustomWritePatterns');
+      click('streamsCreateDestinationCustomSignal-docs');
 
       expect(docsPills()).toEqual([]);
     });
 
-    it('clears the docs index when the mode changes', async () => {
+    it('clears the docs index when the mode changes', () => {
       renderModal();
-      await userEvent.click(screen.getByLabelText('Fixed index per signal'));
+      fireEvent.click(screen.getByLabelText('Fixed index per signal'));
       setFieldValue('streamsCreateDestination-docs-index', 'accounting-2026');
 
-      await userEvent.click(screen.getByLabelText('Auto (default)'));
-      await userEvent.click(screen.getByLabelText('Fixed index per signal'));
+      fireEvent.click(screen.getByLabelText('Auto (default)'));
+      fireEvent.click(screen.getByLabelText('Fixed index per signal'));
 
       expect(screen.getByTestId('streamsCreateDestination-docs-index')).toHaveValue('');
     });
@@ -196,16 +190,13 @@ describe('CreateDestinationModal', () => {
     const ENDPOINT_REQUIRED = 'Enter the endpoint of the remote cluster.';
     const API_KEY_REQUIRED = 'Enter an API key.';
 
-    it('only shows connection errors after their input is left', async () => {
+    it('only shows connection errors after their input is left', () => {
       renderModal();
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationRemoteElasticsearch'));
+      click('streamsCreateDestinationRemoteElasticsearch');
 
       expect(screen.queryByText(ENDPOINT_REQUIRED)).not.toBeInTheDocument();
 
-      await userEvent.click(
-        screen.getByTestId('streamsCreateDestinationRemoteElasticsearchEndpoint')
-      );
-      await userEvent.tab();
+      fireEvent.blur(screen.getByTestId('streamsCreateDestinationRemoteElasticsearchEndpoint'));
 
       expect(screen.getByText(ENDPOINT_REQUIRED)).toBeInTheDocument();
       expect(screen.queryByText(API_KEY_REQUIRED)).not.toBeInTheDocument();
@@ -213,8 +204,8 @@ describe('CreateDestinationModal', () => {
 
     it('submits the remote form values', async () => {
       const { createDestination } = renderModal();
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationRemoteElasticsearch'));
-      await userEvent.click(
+      click('streamsCreateDestinationRemoteElasticsearch');
+      fireEvent.click(
         within(screen.getByTestId('streamsCreateDestinationFixedIndex')).getByRole('radio')
       );
       setFieldValue('streamsCreateDestinationIndex', 'shared-idx');
@@ -224,7 +215,7 @@ describe('CreateDestinationModal', () => {
       );
       setFieldValue('streamsCreateDestinationRemoteElasticsearchApiKey', 'remote-key');
       setFieldValue('streamsCreateDestinationName', 'Central');
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
+      click('streamsCreateDestinationSubmit');
 
       await waitFor(() =>
         expect(createDestination).toHaveBeenCalledWith(

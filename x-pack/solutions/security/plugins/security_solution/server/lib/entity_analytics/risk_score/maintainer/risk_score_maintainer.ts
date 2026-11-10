@@ -30,9 +30,9 @@ import {
   getDefaultRiskEngineConfiguration,
 } from '../../risk_engine/utils/saved_object_configuration';
 import {
-  buildScopedInternalSavedObjectsClientUnsafe,
-  buildInternalSavedObjectsClientUnsafe,
-} from '../tasks/helpers';
+  buildNamespacedInternalSavedObjectsClientUnsafe,
+  buildInternalSavedObjectsClientWithoutSpacesUnsafe,
+} from '../../utils/internal_saved_objects_client';
 import { getIndexPatternDataStream } from '../configurations';
 import { resetToZero } from './steps/reset_to_zero';
 import { buildAlertFilters } from './steps/build_alert_filters';
@@ -94,8 +94,8 @@ interface InitializedRunContext {
   coreStart: CoreStart;
   pluginsStart: PluginsStart;
   esClient: CoreStart['elasticsearch']['client']['asInternalUser'];
-  soClient: ReturnType<typeof buildScopedInternalSavedObjectsClientUnsafe>;
-  internalSoClient: ReturnType<typeof buildInternalSavedObjectsClientUnsafe>;
+  namespacedSoClient: ReturnType<typeof buildNamespacedInternalSavedObjectsClientUnsafe>;
+  watchlistSoClient: ReturnType<typeof buildInternalSavedObjectsClientWithoutSpacesUnsafe>;
   riskScoreDataClient: RiskScoreDataClient;
   lookupIndex: string;
 }
@@ -134,19 +134,22 @@ export const createRiskScoreMaintainer = ({
       const namespace = status.metadata.namespace;
       const [coreStart] = await getStartServices();
       const esClient = coreStart.elasticsearch.client.asInternalUser;
-      const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+      const namespacedSoClient = buildNamespacedInternalSavedObjectsClientUnsafe({
+        coreStart,
+        namespace,
+      });
 
       const riskScoreDataClient = new RiskScoreDataClient({
         logger,
         kibanaVersion,
         esClient,
         namespace,
-        soClient,
+        soClient: namespacedSoClient,
         auditLogger,
       });
 
       logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
-      await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
+      await initSavedObjects({ savedObjectsClient: namespacedSoClient, logger, namespace });
       await riskScoreDataClient.init();
       await ensureLookupIndexReady({
         esClient,
@@ -188,8 +191,8 @@ export const createRiskScoreMaintainer = ({
           }
 
           const runConfig = await loadRunConfiguration({
-            soClient: runContext.soClient,
-            internalSoClient: runContext.internalSoClient,
+            namespacedSoClient: runContext.namespacedSoClient,
+            watchlistSoClient: runContext.watchlistSoClient,
             esClient: runContext.esClient,
             riskScoreDataClient: runContext.riskScoreDataClient,
             namespace: runContext.namespace,
@@ -375,19 +378,22 @@ const initializeRunContext = async ({
 }): Promise<InitializedRunContext> => {
   const [coreStart, pluginsStart] = await getStartServices();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
-  const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
-  const internalSoClient = buildInternalSavedObjectsClientUnsafe({ coreStart });
+  const namespacedSoClient = buildNamespacedInternalSavedObjectsClientUnsafe({
+    coreStart,
+    namespace,
+  });
+  const watchlistSoClient = buildInternalSavedObjectsClientWithoutSpacesUnsafe({ coreStart });
   const riskScoreDataClient = new RiskScoreDataClient({
     logger,
     kibanaVersion,
     esClient,
     namespace,
-    soClient,
+    soClient: namespacedSoClient,
     auditLogger,
   });
 
   logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
-  await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
+  await initSavedObjects({ savedObjectsClient: namespacedSoClient, logger, namespace });
   await riskScoreDataClient.init();
   const { lookupIndex } = await ensureLookupIndexReady({
     esClient,
@@ -401,8 +407,8 @@ const initializeRunContext = async ({
     coreStart,
     pluginsStart,
     esClient,
-    soClient,
-    internalSoClient,
+    namespacedSoClient,
+    watchlistSoClient,
     riskScoreDataClient,
     lookupIndex,
   };
@@ -476,8 +482,8 @@ const checkRunPrerequisites = async ({
 };
 
 const loadRunConfiguration = async ({
-  soClient,
-  internalSoClient,
+  namespacedSoClient,
+  watchlistSoClient,
   esClient,
   riskScoreDataClient,
   namespace,
@@ -485,8 +491,8 @@ const loadRunConfiguration = async ({
   entityAnalyticsConfig,
   experimentalFeatures,
 }: {
-  soClient: ReturnType<typeof buildScopedInternalSavedObjectsClientUnsafe>;
-  internalSoClient: ReturnType<typeof buildInternalSavedObjectsClientUnsafe>;
+  namespacedSoClient: ReturnType<typeof buildNamespacedInternalSavedObjectsClientUnsafe>;
+  watchlistSoClient: ReturnType<typeof buildInternalSavedObjectsClientWithoutSpacesUnsafe>;
   esClient: CoreStart['elasticsearch']['client']['asInternalUser'];
   riskScoreDataClient: RiskScoreDataClient;
   namespace: string;
@@ -495,13 +501,13 @@ const loadRunConfiguration = async ({
   experimentalFeatures: ExperimentalFeatures;
 }): Promise<LoadedRunConfig> => {
   const configuration: RiskEngineConfiguration =
-    (await getConfiguration({ savedObjectsClient: soClient, logger, namespace })) ??
+    (await getConfiguration({ savedObjectsClient: namespacedSoClient, logger, namespace })) ??
     getDefaultRiskEngineConfiguration({ namespace });
   const dataViewId = configuration.dataViewId ?? getAlertsIndex(namespace);
   const { index: alertsIndex } = await riskScoreDataClient.getRiskInputsIndex({ dataViewId });
   const createMissingEntitiesEnabled = experimentalFeatures.riskScoreCreateMissingEntitiesEnabled;
   const watchlistConfigs = await fetchWatchlistConfigs({
-    soClient: internalSoClient,
+    soClient: watchlistSoClient,
     esClient,
     namespace,
     logger,
