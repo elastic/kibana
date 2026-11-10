@@ -6,7 +6,6 @@
  */
 
 import { parse } from 'yaml';
-import { of } from 'rxjs';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -66,7 +65,7 @@ const createClient = (
   }));
   const getSourcesClient = jest.fn().mockResolvedValue({ get: sourcesClientGet });
   const featureFlags = {
-    getBooleanValue$: jest.fn().mockReturnValue(of(metricsEntitiesEnabled)),
+    getBooleanValue: jest.fn(async () => metricsEntitiesEnabled),
   } as never;
   const client = new SignificantEventsKIsOnboardingClient({
     managementApi: managementApi as never,

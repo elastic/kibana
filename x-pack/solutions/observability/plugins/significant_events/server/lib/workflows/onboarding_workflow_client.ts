@@ -26,8 +26,9 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SourcesClient } from '@kbn/nightshift-sources-plugin/server';
-import { NIGHTSHIFT_METRICS_ENTITIES_FLAG, type SourceType } from '@kbn/nightshift-shared';
+import type { SourceType } from '@kbn/nightshift-shared';
 import { StatusError } from '../errors/status_error';
+import { isMetricsEntitiesEnabled } from '../feature_flags/is_metrics_entities_enabled';
 import { isStartedBefore, WorkflowExecutionService } from './workflow_execution_service';
 import type { EbtTelemetryClient } from '../telemetry/ebt/client';
 
@@ -282,8 +283,7 @@ export class SignificantEventsKIsOnboardingClient {
   }>;
   private readonly telemetry: EbtTelemetryClient;
   private readonly getSourcesClient: (request: KibanaRequest) => Promise<SourcesClient>;
-  private readonly featureFlagsReady: Promise<void>;
-  private metricsEntitiesEnabled = false;
+  private readonly featureFlags: Promise<FeatureFlagsStart | undefined>;
 
   constructor({
     managementApi,
@@ -320,13 +320,7 @@ export class SignificantEventsKIsOnboardingClient {
     }));
     this.telemetry = telemetry;
     this.getSourcesClient = getSourcesClient;
-    this.featureFlagsReady = featureFlags
-      ? Promise.resolve(featureFlags).then((service) => {
-          service.getBooleanValue$(NIGHTSHIFT_METRICS_ENTITIES_FLAG, false).subscribe((enabled) => {
-            this.metricsEntitiesEnabled = enabled;
-          });
-        })
-      : Promise.resolve();
+    this.featureFlags = Promise.resolve(featureFlags);
   }
 
   /**
@@ -348,7 +342,10 @@ export class SignificantEventsKIsOnboardingClient {
       throw new StatusError('Source query changed before onboarding could be scheduled', 409);
     }
     const sourceSlug = source.slug;
-    await this.featureFlagsReady;
+    const featureFlags = await this.featureFlags;
+    const metricsEntitiesEnabled = featureFlags
+      ? await isMetricsEntitiesEnabled(featureFlags)
+      : false;
     const executionId = await this.workflowExecutionService.execute({
       executionSpaceId: request.spaceId,
       inputs: toWorkflowInputPayload({
@@ -356,7 +353,7 @@ export class SignificantEventsKIsOnboardingClient {
         sourceSlug,
         sourceRevision: source.esql_updated_at,
         sourceType: source.type,
-        metricsEntitiesEnabled: this.metricsEntitiesEnabled,
+        metricsEntitiesEnabled,
       }),
       request,
     });
