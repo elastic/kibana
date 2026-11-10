@@ -2789,6 +2789,9 @@ src/platform/packages/shared/kbn-connector-specs/src/specs/dynatrace/** @elastic
 src/platform/packages/shared/kbn-connector-specs/src/specs/zabbix/** @elastic/nightshift
 src/platform/packages/shared/kbn-connector-specs/src/specs/datadog/** @elastic/workflows-eng
 
+# Connector vendor API contracts (must stay after the per-connector rules above)
+src/platform/packages/shared/kbn-connector-specs/src/specs/**/vendor_api/ @elastic/workflows-eng
+
 
 # Connector Workflow Tests
 
