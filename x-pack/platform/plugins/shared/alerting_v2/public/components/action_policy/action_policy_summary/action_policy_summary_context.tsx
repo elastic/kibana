@@ -13,10 +13,7 @@ import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
  * Agent Builder attachment drafts are built incrementally and may omit any of them.
  */
 export type ActionPolicySummaryData = Partial<
-  Pick<
-    ActionPolicyResponse,
-    'description' | 'matcher' | 'grouping' | 'throttle' | 'destinations'
-  >
+  Pick<ActionPolicyResponse, 'description' | 'matcher' | 'grouping' | 'throttle' | 'destinations'>
 >;
 
 export const ActionPolicySummaryContext = createContext<ActionPolicySummaryData | undefined>(
