@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DedupedCoverageGaps } from './dedupe_coverage_gaps';
 import type { CoverageSubjectState } from './derive_coverage_subjects';
 import { deriveCoverageSubjects } from './derive_coverage_subjects';
 import type { ReportHuntContext } from './load_report_hunt_context';
@@ -14,7 +15,7 @@ import type { CoordinatorInputs, CoverageSubject } from './types';
 /**
  * Coverage subjects for a run that cleared no hit and so left no SSE: the report-scoped
  * subject plus one per technique Tier 2 executed a query for, each carrying that technique's
- * own `validated_esql`. Report techniques Tier 2 never executed are named inside the
+ * own `validated_esql`. A retired run's gaps go on the report-scoped subject only. Report techniques Tier 2 never executed are named inside the
  * report-scoped `threat_summary` rather than minted as subjects.
  */
 export const deriveCleanCoverageSubjects = ({
@@ -25,6 +26,7 @@ export const deriveCleanCoverageSubjects = ({
   severity,
   investigationSummary,
   investigationConversationId,
+  unsearched,
 }: {
   spaceId: string;
   reportId: string;
@@ -33,6 +35,8 @@ export const deriveCleanCoverageSubjects = ({
   severity?: string;
   investigationSummary?: string;
   investigationConversationId: string;
+  /** Deduped gaps of a retired run; only the report-scoped subject names them. */
+  unsearched?: DedupedCoverageGaps;
 }): CoverageSubject[] => {
   const executedTechniques = [
     ...new Set(toCoverageBehaviors(inputs.behaviors ?? []).map((behavior) => behavior.techniqueId)),
@@ -49,7 +53,7 @@ export const deriveCleanCoverageSubjects = ({
   const derive = (techniques: string[]) =>
     deriveCoverageSubjects({
       spaceId,
-      state: { ...base, techniques },
+      state: { ...base, techniques, ...(techniques.length === 0 ? { unsearched } : {}) },
       investigationConversationId,
     });
 

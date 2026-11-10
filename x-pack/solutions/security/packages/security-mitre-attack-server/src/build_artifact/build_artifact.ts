@@ -39,7 +39,7 @@ export const MITRE_CONTENT_VERSIONS: readonly string[] = ['ATT&CK-v19.2'];
 // Tags are published at https://github.com/mitre-atlas/atlas-data/releases and must
 // match the ATLAS version used by prebuilt rules in https://github.com/elastic/detection-rules
 // (see detection_rules/etc/atlas-v*.json.gz).
-export const ATLAS_CONTENT_VERSIONS: readonly string[] = ['v2026.08'];
+export const ATLAS_CONTENT_VERSIONS: readonly string[] = ['v2026.08', 'v2026.09'];
 
 /** Strips the 'ATT&CK-v' prefix, e.g. 'ATT&CK-v19.1' -> '19.1'. */
 const toAttackFrameworkVersion = (tag: string): string => tag.replace(/^ATT&CK-v/, '');

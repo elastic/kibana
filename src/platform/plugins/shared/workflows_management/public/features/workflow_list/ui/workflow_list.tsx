@@ -42,6 +42,8 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useTelemetry } from '../../../hooks/use_telemetry';
 import { getWorkflowDetailRouteState } from '../../../shared/utils/workflow_navigation';
 import { shouldShowWorkflowsEmptyState } from '../../../shared/utils/workflow_utils';
+import { useDisableWorkflowsConfirmation } from '../../linked_rules/model/use_disable_workflows_confirmation';
+import { LinkedRulesWarning } from '../../linked_rules/ui/linked_rules_warning';
 import type { WorkflowTriggerTab } from '../../run_workflow/ui/types';
 import { WorkflowExecuteModal } from '../../run_workflow/ui/workflow_execute_modal';
 import { hasCustomEventTrigger } from '../../run_workflow/ui/workflow_execute_modal_helpers';
@@ -98,6 +100,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
   const modalTitleId = useGeneratedHtmlId();
   const telemetry = useTelemetry();
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
+  const { confirmDisable, confirmModal: disableConfirmModal } = useDisableWorkflowsConfirmation();
   const workflowDetailRouteState = useMemo(
     () => getWorkflowDetailRouteState(location.search),
     [location.search]
@@ -248,7 +251,10 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
   );
 
   const handleToggleWorkflow = useCallback(
-    (item: WorkflowListItemDto) => {
+    async (item: WorkflowListItemDto) => {
+      if (item.enabled && !(await confirmDisable([item.id]))) {
+        return;
+      }
       updateWorkflow.mutate(
         {
           id: item.id,
@@ -268,7 +274,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         }
       );
     },
-    [notifications?.toasts, updateWorkflow]
+    [confirmDisable, notifications?.toasts, updateWorkflow]
   );
 
   const handleEditWorkflow = useCallback(
@@ -465,8 +471,10 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
               values: { name: workflowToDelete.name },
             })}
           </p>
+          <LinkedRulesWarning workflowIds={[workflowToDelete.id]} />
         </EuiConfirmModal>
       )}
+      {disableConfirmModal}
     </>
   );
 }

@@ -15,11 +15,8 @@ import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
-import {
-  formatFieldValueReact,
-  tryPrettyPrintJsonBlocks,
-  MAX_RENDERED_FIELD_VALUE_LENGTH,
-} from '@kbn/discover-utils';
+import { tryPrettyPrintJsonBlocks, MAX_RENDERED_FIELD_VALUE_LENGTH } from '@kbn/discover-utils';
+import { formatFieldValueReact } from '@kbn/discover-utils/components';
 import { css } from '@emotion/react';
 import type { DataSource } from '@kbn/data-source';
 import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
