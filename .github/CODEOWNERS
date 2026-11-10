@@ -1097,7 +1097,7 @@ x-pack/platform/packages/shared/ingest-pipelines @elastic/kibana-management
 x-pack/platform/packages/shared/isomer/isomer @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-components @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-theme @elastic/appex-sharedux
-x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/security-solution @elastic/nightshift
+x-pack/platform/packages/shared/kbn-agentic-investigations-common @elastic/alertzero-common-layer @elastic/nightshift
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-ml-ux @elastic/nightshift-context-and-research-team
 x-pack/platform/packages/shared/kbn-ai-tools @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
@@ -3618,6 +3618,7 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_nightshift_investigations @elastic/nightshift
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/nightshift_investigations @elastic/nightshift
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/discover_telemetry @elastic/observability-ui
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/entity_inventory @elastic/obs-signals-metrics-team
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/cloud_trial @elastic/appex-sharedux
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/streams_v2 @elastic/streams-ui
 # /security_solution/common/endpoint/ and /security_solution/server/endpoint/ children overrides
