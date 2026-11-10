@@ -82,9 +82,9 @@ export const SelectedPanelsToolbar = () => {
   return (
     <EuiPanel
       css={styles.toolbar}
-      paddingSize="s"
+      paddingSize="none"
       hasShadow
-      hasBorder
+      hasBorder={false}
       data-test-subj="dashboardSelectedPanelsToolbar"
     >
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
@@ -163,10 +163,12 @@ const selectedPanelsToolbarStyles = {
   toolbar: ({ euiTheme, colorMode }: UseEuiTheme) =>
     css({
       position: 'fixed',
-      bottom: euiTheme.size.l,
+      bottom: euiTheme.size.xxl,
       left: '50%',
       transform: 'translateX(-50%)',
       zIndex: euiTheme.levels.toast,
+      // EuiPanel's `paddingSize` jumps from 8px (`s`) to 16px (`m`): 8px is too short and 16px too tall
+      padding: euiTheme.size.m,
       [euiCanAnimate]: {
         animation: `${enter} ${euiTheme.animation.normal} ${euiTheme.animation.bounce}`,
       },
@@ -183,12 +185,14 @@ const selectedPanelsToolbarStyles = {
     // equal-width digits, so the badge doesn't change width as the count changes
     fontVariantNumeric: 'tabular-nums',
   }),
-  // stretches with the row, trimmed at both ends, with room on either side for the groups it splits
+  // stretches with the row, with room on either side for the groups it splits
   divider: ({ euiTheme, colorMode }: UseEuiTheme) =>
     css({
       width: euiTheme.border.width.thin,
       alignSelf: 'stretch',
-      margin: `${euiTheme.size.xs} ${euiTheme.size.m}`,
+      // the badge's pill sits at its box edge, but the next icon sits 8px inside its button,
+      // so the right margin is smaller to make the visible space equal on both sides
+      margin: `0 ${euiTheme.size.xs} 0 ${euiTheme.size.m}`,
       // the dark surface is lighter than the default border, which would disappear against it
       backgroundColor:
         colorMode === 'DARK' ? euiTheme.colors.borderBasePlain : euiTheme.colors.borderBaseSubdued,
