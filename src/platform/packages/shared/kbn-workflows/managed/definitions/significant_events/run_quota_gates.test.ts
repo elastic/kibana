@@ -32,6 +32,7 @@ interface WorkflowStep {
     retry?: unknown;
   };
   steps?: WorkflowStep[];
+  else?: WorkflowStep[];
 }
 
 interface WorkflowDefinition {
@@ -52,7 +53,11 @@ const definitions = {
 };
 
 const flattenSteps = (steps: WorkflowStep[]): WorkflowStep[] =>
-  steps.flatMap((step) => [step, ...(step.steps ? flattenSteps(step.steps) : [])]);
+  steps.flatMap((step) => [
+    step,
+    ...(step.steps ? flattenSteps(step.steps) : []),
+    ...(step.else ? flattenSteps(step.else) : []),
+  ]);
 
 const quotaSteps = Object.values(definitions).flatMap((definition) =>
   flattenSteps(definition.steps).filter(
@@ -211,6 +216,7 @@ describe('Significant Events run quota workflow contracts', () => {
           queriesConnectorUsed: '',
           persistedQueries: [],
           queriesTokensUsed: { prompt: 0, completion: 0, total: 0 },
+          metricsEntitiesCount: 0,
           keepAliveRefreshed: 0,
         },
       })
