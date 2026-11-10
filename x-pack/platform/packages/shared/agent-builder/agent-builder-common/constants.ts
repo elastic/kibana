@@ -15,7 +15,12 @@ export const AGENT_BUILDER_RECOMMENDED_ENDPOINTS = [
   '.openai-gpt-6-sol-chat_completion', // GPT-6 Sol, GA 2026-09-28
 ];
 
+// Order matters: the first endpoint a deployment actually has is the fast model, so this list
+// is a preference ranking, not a set. Claude Haiku 5.5 leads because it is the only entry
+// measured against the others on a held-out ES|QL generation benchmark: +0.097 reward (95% CI
+// [0.025, 0.181]) at 0.63x the cost of Gemini 3.5 Flash Lite, which previously led this list.
 export const AGENT_BUILDER_FAST_RECOMMENDED_ENDPOINTS = [
+  '.anthropic-claude-5.5-haiku-chat_completion', // Claude Haiku 5.5
   '.google-gemini-3.5-flash-lite-chat_completion', // Gemini 3.5 Flash Lite, GA 2026-07-21
   '.anthropic-claude-4.5-haiku-chat_completion', // Claude Haiku 4.5, GA 2025-10-01
   '.openai-gpt-6-luna-chat_completion', // Luna-6 2026-09-28
