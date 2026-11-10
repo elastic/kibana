@@ -12,19 +12,8 @@ import {
 } from './ui_navigation';
 
 /**
- * Contract checks for the "redirect first" rules of the UI-guided navigation sections.
- *
- * Build 01a14b73 (entity-analytics-v2 UI-navigation datasets) had the redirect lose to the
- * model's defaults in almost every family: on "Upload this CSV of asset criticalities." agents
- * asked the user for the missing file instead of linking, on "Clear all entity data." they asked
- * for confirmation first, on the engine-status and risk-engine examples they answered from tool
- * data, and the resolution-flyout reply arrived without the `flyout=` deep-link.
- *
- * The per-intent calls and paths were already in the content and were not enough. What was
- * missing is the meta-rule: the redirect is the first action of the turn, a missing input does
- * not change the destination, and a confirmation prompt is not a substitute for the link. These
- * assertions pin those sentences, so deleting one goes red here instead of silently in an eval
- * run. They fail against the pre-fix skill text (see the PR description for the red run).
+ * Pins the "redirect first" meta-rules of the UI-guided navigation sections, so deleting one goes
+ * red here instead of silently in an eval run.
  */
 const LINK_TOOL = 'security.build_redirect_url';
 
