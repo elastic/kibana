@@ -171,6 +171,30 @@ export const toInvestigationReport = ({
   proposals: proposals.map(({ title, comment, status }) => ({ title, comment, status })),
 });
 
+/**
+ * Waits up to `timeoutMs` for an investigation, its last round included, to end, and says whether
+ * it did. One not found yet may still be created by its workflow, so it does not count as ended.
+ */
+export const waitForInvestigationToEnd = async (
+  fetch: HttpHandler,
+  id: string,
+  timeoutMs: number
+): Promise<boolean> => {
+  const started = Date.now();
+  for (;;) {
+    const investigation = await readInvestigation(fetch, id);
+    if (
+      investigation &&
+      !investigation.in_progress &&
+      isPersisted(await readConversation(fetch, id))
+    ) {
+      return true;
+    }
+    if (Date.now() - started >= timeoutMs) return false;
+    await setTimeout(POLL_INTERVAL_MS);
+  }
+};
+
 /** Runs a manual investigation and retains a bounded report with references to its full evidence. */
 export const runInvestigation = async (
   fetch: HttpHandler,

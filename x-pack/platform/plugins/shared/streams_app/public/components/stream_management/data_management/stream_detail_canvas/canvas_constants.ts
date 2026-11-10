@@ -63,7 +63,9 @@ export const PROCESSING_NODE_WIDTH = 130;
 /**
  * Revisit whenever a card gains or loses a content row.
  */
-export const SOURCE_NODE_HEIGHT = 74;
+// The stats footer of a source that reports metrics adds 28 (a 24 row and a 4 margin). A direct
+// source has no footer, so its card is shorter than the height the layout reserves.
+export const SOURCE_NODE_HEIGHT = 102;
 // The stats footer of an Elasticsearch destination adds 28 (a 24 row and a 4 margin). An S3
 // destination has no footer, so its card is shorter than the height the layout reserves.
 export const DESTINATION_NODE_HEIGHT = 106;
