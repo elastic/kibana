@@ -14,6 +14,7 @@ import {
   unsetAlertingV2EnabledSetting,
 } from '../fixtures/alerting_v2_setting';
 import {
+  APM_ALL_OBSERVABILITY_ALERTS_READ_ROLE,
   CLASSIC_WRITE_UNIVERSAL_READ_ROLE,
   createV1PrivilegeRule,
   deleteV1PrivilegeRuleData,
@@ -70,6 +71,15 @@ test.describe(
       pageObjects,
     }) => {
       await browserAuth.loginWithCustomRole(OBSERVABILITY_ALERTS_ALL_ROLE);
+      await gotoSeededClassicAlert(pageObjects.observabilityAlerting, v1RuleId, V1_RULE_NAME);
+      await expectEpisodeWriteActions(pageObjects.observabilityAlerting, V1_RULE_NAME);
+    });
+
+    test('rule privileges on any rule type grant the classic write actions', async ({
+      browserAuth,
+      pageObjects,
+    }) => {
+      await browserAuth.loginWithCustomRole(APM_ALL_OBSERVABILITY_ALERTS_READ_ROLE);
       await gotoSeededClassicAlert(pageObjects.observabilityAlerting, v1RuleId, V1_RULE_NAME);
       await expectEpisodeWriteActions(pageObjects.observabilityAlerting, V1_RULE_NAME);
     });

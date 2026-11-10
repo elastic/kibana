@@ -208,6 +208,7 @@ export const seedV2PrivilegeRule = async (
 
   const ruleId = rule.id;
   const groupHash = `${ruleId}-group`;
+  const episodeId = `${ruleId}-episode`;
   const now = new Date().toISOString();
 
   try {
@@ -231,7 +232,7 @@ export const seedV2PrivilegeRule = async (
           source: 'scout-test',
           type: 'alert',
           space_id: 'default',
-          alert: { id: `${ruleId}-episode`, status: 'active' },
+          alert: { id: episodeId, status: 'active' },
         },
         { create: { _index: ALERT_ACTIONS_DATA_STREAM } },
         {
@@ -239,6 +240,7 @@ export const seedV2PrivilegeRule = async (
           last_series_event_timestamp: now,
           actor: null,
           action_type: 'tag',
+          alert_id: episodeId,
           group_hash: groupHash,
           rule_id: ruleId,
           tags: [V2_EPISODE_TAG],

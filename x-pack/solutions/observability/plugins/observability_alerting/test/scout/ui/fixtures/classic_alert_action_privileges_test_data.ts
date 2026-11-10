@@ -52,6 +52,12 @@ export const OBSERVABILITY_READ_STACK_WRITE_ROLE = buildRole({
   stackAlertsOnly: ['all'],
 });
 
+/** Rule privileges on APM rule types only, which do not cover the seeded custom threshold rule. */
+export const APM_ALL_OBSERVABILITY_ALERTS_READ_ROLE = buildRole({
+  apm: ['all'],
+  observabilityAlerts: ['read'],
+});
+
 export const UNIVERSAL_WRITE_CLASSIC_READ_ROLE = buildRole({
   alerting_v2_alerts: ['all'],
   alerting_v2_rules: ['read'],
