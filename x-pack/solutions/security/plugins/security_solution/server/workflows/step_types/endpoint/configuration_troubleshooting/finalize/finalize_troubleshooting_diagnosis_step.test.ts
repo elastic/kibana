@@ -98,6 +98,49 @@ const endpointComponent = (units: HealthComponent['units']): HealthComponent => 
 });
 
 describe('createFinalizeTroubleshootingDiagnosisStepDefinition', () => {
+  it('keeps applied artifact names and cut markers without hashes or a further cut', async () => {
+    const identifiers = Array.from({ length: 32 }, (_, index) => ({
+      name: `endpoint-yararules-linux-v${index}`,
+      ...(index === 0 ? { name_truncated: true } : {}),
+      sha256: 'a'.repeat(64),
+    }));
+    const { output } = await runHandler(
+      baseInput({
+        host_diagnostics: {
+          output: {
+            results: [
+              diagnosticsResult({
+                policy_response: {
+                  agent: { id: 'agent-1', version: '8.0.0' },
+                  Endpoint: {
+                    policy: {
+                      applied: {
+                        id: 'policy-1',
+                        name: 'policy',
+                        status: 'success',
+                        version: 1,
+                        endpoint_policy_version: 1,
+                        actions: [],
+                        artifacts: { user: { identifiers, identifiers_total: 33 } },
+                      },
+                    },
+                  },
+                },
+              }),
+            ],
+          },
+        },
+      })
+    );
+
+    expect(output?.policy_response?.Endpoint.policy.applied.artifacts).toEqual({
+      user: {
+        identifiers: identifiers.map(({ sha256, ...identifier }) => identifier),
+        identifiers_total: 33,
+      },
+    });
+  });
+
   it('adds unavailable:<part> for every part of an expected step that is absent or carries an error', async () => {
     const absent = await runHandler(
       baseInput({

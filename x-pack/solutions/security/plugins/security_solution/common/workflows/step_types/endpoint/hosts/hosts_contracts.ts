@@ -7,6 +7,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { UnhealthyReason } from '@kbn/fleet-plugin/common/types';
+import { truncatedFlagSchema } from '../../common/truncation';
 import { EXCERPT_MAX_CHARS, MAX_INPUT_STRING_CHARS } from '../../common/budget';
 
 export const MAX_HOST_TARGETS = 10;
@@ -15,6 +16,7 @@ export const MAX_HOST_IPS = 5;
 export const MAX_DIAGNOSTIC_COMPONENTS = 10;
 export const MAX_DIAGNOSTIC_UNITS = 10;
 export const MAX_POLICY_ACTIONS = 20;
+export const MAX_USER_ARTIFACT_IDENTIFIERS = 32;
 
 const ELASTIC_DEFEND_COMPONENT_TYPE = 'endpoint';
 
@@ -210,6 +212,21 @@ export const hostPolicyActionSchema = lazySchema(() =>
   })
 );
 
+export const hostPolicyUserArtifactIdentifierSchema = lazySchema(() =>
+  z.object({
+    name: boundedStringSchema,
+    name_truncated: truncatedFlagSchema.optional(),
+    sha256: boundedStringSchema,
+  })
+);
+
+export const hostPolicyUserArtifactsSchema = lazySchema(() =>
+  z.object({
+    identifiers: z.array(hostPolicyUserArtifactIdentifierSchema).max(MAX_USER_ARTIFACT_IDENTIFIERS),
+    identifiers_total: countSchema.optional(),
+  })
+);
+
 export const hostPolicyResponseAppliedSchema = lazySchema(() =>
   z.object({
     id: boundedStringSchema,
@@ -219,6 +236,7 @@ export const hostPolicyResponseAppliedSchema = lazySchema(() =>
     endpoint_policy_version: z.number(),
     actions: z.array(hostPolicyActionSchema).max(MAX_POLICY_ACTIONS),
     actions_total: countSchema.optional(),
+    artifacts: z.object({ user: hostPolicyUserArtifactsSchema }).optional(),
   })
 );
 

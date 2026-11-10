@@ -95,7 +95,7 @@ const projectAgent = (agent: DiagnosticAgent): DiagnosticAgent => ({
 
 const projectPolicyResponse = (
   policyResponse: DiagnosticPolicyResponse
-): DiagnosticPolicyResponse => {
+): NonNullable<TroubleshootingDiagnosis['policy_response']> => {
   const applied = policyResponse.Endpoint.policy.applied;
   const actions = applied.actions
     .filter((action) => action.status !== SUCCESS)
@@ -103,7 +103,29 @@ const projectPolicyResponse = (
     .map((action) => ({ ...action, message: boundText(action.message, AT_MESSAGE_MAX_CHARS) }));
   return {
     ...policyResponse,
-    Endpoint: { policy: { applied: { ...applied, actions } } },
+    Endpoint: {
+      policy: {
+        applied: {
+          ...applied,
+          actions,
+          ...(applied.artifacts !== undefined
+            ? {
+                artifacts: {
+                  user: {
+                    ...applied.artifacts.user,
+                    identifiers: applied.artifacts.user.identifiers.map(
+                      ({ name, name_truncated }) => ({
+                        name,
+                        ...(name_truncated !== undefined ? { name_truncated } : {}),
+                      })
+                    ),
+                  },
+                },
+              }
+            : {}),
+        },
+      },
+    },
   };
 };
 
