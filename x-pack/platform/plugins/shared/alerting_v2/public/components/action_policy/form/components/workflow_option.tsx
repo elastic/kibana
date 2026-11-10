@@ -7,7 +7,6 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiHighlight, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { WorkflowListDto } from '@kbn/workflows';
 import {
   DISABLED_BADGE_LABEL,
@@ -21,7 +20,6 @@ type WorkflowListItem = WorkflowListDto['results'][number];
 export interface WorkflowOptionValue {
   id: string;
   description?: string;
-  tags?: string[];
   managed?: boolean;
 }
 
@@ -35,33 +33,19 @@ export const toWorkflowComboOption = ({
   description,
   enabled,
   managed,
-  definition,
 }: WorkflowListItem): WorkflowComboOption => ({
   key: id,
   label: name,
   disabled: !enabled,
-  value: { id, description, managed, tags: definition?.tags },
+  value: { id, description, managed },
 });
 
 export const renderWorkflowOption = (
   { label, disabled, value }: WorkflowComboOption,
   searchValue: string
 ) => {
-  const tags = value?.tags ?? [];
   // Plain text only: the option is a <button> in a listbox, so nested tooltips or focusable
   // badges are neither reachable by keyboard nor reliably hoverable when the option is disabled.
-  const details = [
-    value?.description || WORKFLOW_EMPTY_DESCRIPTION,
-    ...(tags.length > 0
-      ? [
-          i18n.translate('xpack.alertingV2.actionPolicy.form.destination.workflowTags', {
-            defaultMessage: 'Tags: {tags}',
-            values: { tags: tags.join(', ') },
-          }),
-        ]
-      : []),
-  ].join(' · ');
-
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem css={{ minWidth: 0 }}>
@@ -74,7 +58,7 @@ export const renderWorkflowOption = (
           className="eui-textTruncate"
           data-test-subj="workflowOptionDetails"
         >
-          {details}
+          {value?.description || WORKFLOW_EMPTY_DESCRIPTION}
         </EuiText>
       </EuiFlexItem>
       {disabled && (
