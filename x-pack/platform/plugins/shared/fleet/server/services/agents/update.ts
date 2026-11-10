@@ -7,9 +7,8 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { escapeQuotes } from '@kbn/es-query';
-
 import { AGENTS_PREFIX } from '../../constants';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services/version_specific_policies_utils';
 
 import { getAgentsByKuery, updateAgent } from './crud';
 import { unenrollAgent } from './unenroll';
@@ -22,7 +21,11 @@ export async function unenrollForAgentPolicyId(
 ) {
   const revoke = options?.revoke ?? false;
   const unenrolledReason = options?.unenrolledReason;
-  const policyKuery = `${AGENTS_PREFIX}.policy_id:"${escapeQuotes(policyId)}"`;
+  const policyKuery = buildPolicyBaseIdWithFallbackKuery(
+    policyId,
+    `${AGENTS_PREFIX}.policy_base_id`,
+    `${AGENTS_PREFIX}.policy_id`
+  );
   let hasMore = true;
   let page = 1;
   while (hasMore) {
