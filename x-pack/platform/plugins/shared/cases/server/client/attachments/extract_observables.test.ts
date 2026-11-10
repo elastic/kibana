@@ -421,6 +421,36 @@ describe('extractObservablesFromAlerts', () => {
     expect(caseService.patchCase).not.toHaveBeenCalled();
   });
 
+  it('reports alerts_not_found when getAlerts has nothing to look up', async () => {
+    alertsService.getAlerts.mockResolvedValue(undefined);
+
+    await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).resolves.toEqual({
+      status: 'alerts_not_found',
+      alertsRequested: 1,
+      alertsFound: 0,
+    });
+    expect(caseService.getCase).not.toHaveBeenCalled();
+  });
+
+  it('reports alerts_not_found when every doc comes back with an error', async () => {
+    alertsService.getAlerts.mockResolvedValue({
+      docs: [
+        {
+          _id: 'alert-id-1',
+          _index: 'alert-index-1',
+          error: { type: 'security_exception', reason: 'no read privilege on the index' },
+        },
+      ],
+    });
+
+    await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).resolves.toEqual({
+      status: 'alerts_not_found',
+      alertsRequested: 1,
+      alertsFound: 0,
+    });
+    expect(caseService.patchCase).not.toHaveBeenCalled();
+  });
+
   it('reports no_matching_fields when no ECS field produces an observable', async () => {
     alertsService.getAlerts.mockResolvedValue({
       docs: [makeEcsDoc({ 'unrelated.field': 'value' })],
@@ -518,6 +548,18 @@ describe('extractObservablesFromAlerts', () => {
 
     await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).rejects.toThrow(
       'mget failed'
+    );
+  });
+
+  it('throws when saving the observables to the case fails', async () => {
+    alertsService.getAlerts.mockResolvedValue({
+      docs: [makeEcsDoc({ 'source.ip': '1.2.3.4' })],
+    });
+    caseService.getCase.mockResolvedValue(caseSO);
+    caseService.patchCase.mockRejectedValue(new Error('version conflict'));
+
+    await expect(extractObservablesFromAlerts('case-1', alertInfo, clientArgs)).rejects.toThrow(
+      'version conflict'
     );
   });
 });
