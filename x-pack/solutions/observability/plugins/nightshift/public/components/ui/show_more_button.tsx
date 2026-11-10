@@ -17,6 +17,7 @@ export interface ShowMoreButtonProps
   /** How many items are still hidden. */
   remaining: number;
   isLoading?: boolean;
+  'data-test-subj'?: string;
 }
 
 /** Full-width list footer: “Show N more of M” with a down chevron — shared by home and onboarding. */
