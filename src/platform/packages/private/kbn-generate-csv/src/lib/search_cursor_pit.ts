@@ -104,7 +104,8 @@ export class SearchCursorPit extends SearchCursor {
         strategy,
         abortSignal: this.abortController.signal,
         transport: {
-          maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
+          // A failed page only warns, so no job retry follows; search_after makes it idempotent.
+          maxRetries: 1,
           requestTimeout: scroll.duration(taskInstanceFields),
         },
       })
