@@ -61,17 +61,21 @@ describe('selectCustomer0Examples', () => {
 
 describe('reinforcementExamples', () => {
   it('gives the reinforcement agent one prior tree with two nodes for the same pod loss', () => {
-    const requiring = reinforcementExamples.filter((example) => example.metadata.require_merge);
-    expect(requiring).toHaveLength(1);
-    const markdown = requiring[0].input.prior_tree.markdown;
+    const mergeRound = reinforcementExamples.filter(
+      (example) => example.metadata.case_id === 'customer0-eql-slo-burn-rate-2026-09-14'
+    );
+    expect(mergeRound).toHaveLength(1);
+    // The prompt doesn't ask for merges yet, so no committed round makes an empty merge score 0.
+    expect(reinforcementExamples.some((example) => example.metadata.require_merge)).toBe(false);
+    const markdown = mergeRound[0].input.prior_tree.markdown;
     expect(markdown).toContain('E2[Pod restarted]');
     expect(markdown).toContain('E3[Pod deleted]');
-    expect(requiring[0].input.response).toContain('uiam-58fb87db87-26cfj');
-    expect(requiring[0].input.response).toContain('same pod-loss event');
-    expect(requiring[0].input.response).not.toContain('keep one node');
-    const view = requiring[0].input.tool_results[0].results[0] as { data: { text: string } };
+    expect(mergeRound[0].input.response).toContain('uiam-58fb87db87-26cfj');
+    expect(mergeRound[0].input.response).toContain('same pod-loss event');
+    expect(mergeRound[0].input.response).not.toContain('keep one node');
+    const view = mergeRound[0].input.tool_results[0].results[0] as { data: { text: string } };
     expect(view.data.text).toBe(markdown);
-    const command = String(requiring[0].input.tool_calls[1].params.command);
+    const command = String(mergeRound[0].input.tool_calls[1].params.command);
     expect(command).toContain('FROM logs-*');
     expect(command.startsWith('esql "FROM logs-*')).toBe(true);
   });

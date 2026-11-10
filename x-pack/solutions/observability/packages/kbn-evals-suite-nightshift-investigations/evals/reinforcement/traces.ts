@@ -132,7 +132,8 @@ export const reinforcementExamples: ReinforcementExample[] = [
     metadata: {
       case_id: 'customer0-eql-slo-burn-rate-2026-09-14',
       source: 'customer0-smoke',
-      require_merge: true,
+      // Not `require_merge` yet: the prompt doesn't ask for merges, so the round would miss every
+      // time. The judge still scores whether the agent folds the duplicate pod-loss nodes.
     },
     input: {
       question: [

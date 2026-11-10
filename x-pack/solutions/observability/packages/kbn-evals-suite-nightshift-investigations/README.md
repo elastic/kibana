@@ -347,9 +347,9 @@ step builds the round from the supplied tool calls and results instead of readin
 Afterward the eval rolls back only the trees that replay owns: the seeded tree and every tree whose
 commit or counts carry its conversation id. A tree another investigation writes in the same space
 meanwhile is left alone, even when a submit named it.
-The first prior tree has both "Pod restarted" and "Pod deleted" for one pod-loss event, and that
-round's `metadata.require_merge` makes an empty `merged_nodes` list score 0. The other three rounds
-may submit an empty list. The question and conclusion are the published
+The first prior tree has both "Pod restarted" and "Pod deleted" for one pod-loss event, and the LLM
+judge scores whether the agent folds them. No committed round sets `metadata.require_merge` yet,
+which would make an empty `merged_nodes` list score 0, because the prompt doesn't ask for merges. The question and conclusion are the published
 `customer0-eql-slo-burn-rate-2026-09-14` label. The gateway and proxy rounds are the two symptoms
 that label names. The fourth round is a proxy round that confirms no cause, so a causal path on it
 scores 0. It is not part of the label. Each `view_file` result is the prior tree, and each sandbox
@@ -361,10 +361,12 @@ path is non-empty and resolves on the submitted tree, that a causal path is pres
 investigator response confirms a cause and those edges carry ✅, and that declared `merged_nodes`
 agree with the tree before the run and the tree after it. An LLM judge scores whether those merges
 and paths match the investigation. A run passes when its reinforce step finishes with a code score
-of 1, and the spec fails when fewer than 75% of runs pass: one miss in four replays passes, two fail. It is not part of an unset or `all` run: selecting it exports
+of 1, and the spec fails when fewer than 75% of runs pass: one miss in four replays passes, two
+fail. A replay that throws, or whose rollback fails, is a failed run rather than a failed
+experiment. It is not part of an unset or `all` run: selecting it exports
 `NIGHTSHIFT_DECISION_TREES`, which enables decision trees without turning Wiki on. It cannot be
-combined with other dataset ids. Restart Scout when switching to or from it. Each example's trace is the reinforcement agent's Agent Builder
-trace, which shows the system prompt and the submit tool schema. It is not the eval task span.
+combined with other dataset ids or with `NIGHTSHIFT_KNOWLEDGE`. Restart Scout when switching to or
+from it. Each example's trace is the reinforcement agent's Agent Builder trace, which shows the system prompt and the submit tool schema. It is not the eval task span.
 The system prompt does not yet ask the agent to report traversals; those fields are on the submit
 tool. Asking for them in the prompt is a follow-up.
 
