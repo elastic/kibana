@@ -538,6 +538,67 @@ describe('AWS service matrix', () => {
       expect(result.varDefsByDataStream?.finding?.varDefsByInput?.cel?.proxy_url).toBeDefined();
     });
 
+    it('flags a service whose stream declares proxy_url', () => {
+      const pkg = {
+        policy_templates: [
+          {
+            name: 'aws_securityhub',
+            inputs: [{ type: 'cel', title: 'Security Hub via API' }],
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ],
+        data_streams: [
+          {
+            path: 'finding',
+            type: 'logs',
+            streams: [
+              { input: 'cel', vars: [{ name: 'proxy_url', type: 'text', required: false }] },
+            ],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ aws_securityhub: pkg as any }, [
+        { id: 'aws_securityhub', packageName: 'aws_securityhub' },
+      ]);
+      expect(result.declaresProxyUrl).toBe(true);
+    });
+
+    it('flags a service whose package declares proxy_url as a package var', () => {
+      const pkg = {
+        vars: [{ name: 'proxy_url', type: 'text' }],
+        policy_templates: [
+          {
+            name: 'aws_logs',
+            inputs: [{ type: 'aws-s3', title: 'Logs' }],
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ],
+        data_streams: [{ path: 'generic', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] }],
+      };
+      const [result] = buildAwsServiceMatrix({ aws_logs: pkg as any }, [
+        { id: 'aws_logs', packageName: 'aws_logs' },
+      ]);
+      expect(result.declaresProxyUrl).toBe(true);
+    });
+
+    it('does not flag a service that declares no proxy_url', () => {
+      const pkg = {
+        vars: [{ name: 'default_region', type: 'text' }],
+        policy_templates: [
+          {
+            name: 'aws_logs',
+            inputs: [{ type: 'aws-s3', title: 'Logs' }],
+            deployment_modes: { agentless: { enabled: true } },
+          },
+        ],
+        data_streams: [{ path: 'generic', type: 'logs', streams: [{ input: 'aws-s3', vars: [] }] }],
+      };
+      const [result] = buildAwsServiceMatrix({ aws_logs: pkg as any }, [
+        { id: 'aws_logs', packageName: 'aws_logs' },
+      ]);
+      expect(result.declaresProxyUrl).toBe(false);
+    });
+
     it('uses all package data_streams when PT has an explicit empty data_streams array', () => {
       const pkg = {
         policy_templates: [

@@ -168,7 +168,7 @@ Two invariants worth understanding before you touch this file:
 
 ### Restore (`use_flyout_v2_restore.ts`)
 
-`useFlyoutV2RestoreFromUrl(urlParamKey)` (gated on `useIsNewFlyoutEnabled()`):
+`useFlyoutV2RestoreFromUrl(urlParamKey)`:
 
 1. **Mount:** reads the param once (via a `useState` initializer).
 2. For kinds that need a document/attack `DataTableRecord` or an IOC `Indicator`, resolves it via `useEsDocSearch` (the

@@ -220,7 +220,7 @@ function SlackConnectionBody({
         {workspace && <WorkspaceLabel workspace={workspace} />}
         {createdAt && <ConnectedByLabel createdBy={createdBy} createdAt={createdAt} />}
         {(workspace || createdAt) && <EuiSpacer size="m" />}
-        <SlackConnectionBindings canEdit={canEdit} onReconnect={onConnect} />
+        <SlackConnectionBindings canEdit={canEdit} />
       </>
     );
   }
@@ -465,7 +465,7 @@ function DisconnectWorkspaceButton({
           <EuiText size="s">
             {i18n.translate('xpack.nightshift.settings.apps.slackDisconnectConfirmBody', {
               defaultMessage:
-                'This removes all Slack channel connections for this deployment. You can reconnect later.',
+                'This removes all Slack channel connections for this deployment. If you connect again, you will need to reconnect each channel. If the Elastic app asks for new permissions, such as private channel access, a Slack workspace admin may need to approve it.',
             })}
           </EuiText>
         </EuiConfirmModal>
