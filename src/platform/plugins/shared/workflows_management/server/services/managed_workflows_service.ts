@@ -295,17 +295,6 @@ export class ManagedWorkflowsService {
       existing.managedVersion === definition.version
     ) {
       if (this.areTemplateValuesEqual(existing.managedTemplateValues, managedTemplateValues)) {
-        // The document is kept, but its binding may not be: deleting a space releases the
-        // bindings and leaves the workflows, so reinstalling must restore the missing one.
-        const runAs = existing.definition?.settings?.run_as;
-        if (runAs) {
-          await this.deps.crudService.reconcileWorkflowServiceAccountBinding({
-            id: workflowDocumentId,
-            spaceId,
-            accountId: runAs,
-            request,
-          });
-        }
         return;
       }
     }

@@ -222,7 +222,6 @@ const createCrudServiceMock = () => {
     getWorkflowDocumentWithVersion: jest.fn(),
     getWorkflowDocumentSource: jest.fn(),
     getManagedWorkflowDocumentsAllSpaces: jest.fn().mockResolvedValue([]),
-    reconcileWorkflowServiceAccountBinding: jest.fn().mockResolvedValue(undefined),
     indexWorkflowDocument: jest.fn().mockResolvedValue({ seqNo: 1, primaryTerm: 1 }),
     createWorkflowDocument: jest.fn(
       async (_id, _spaceId, document: WorkflowProperties) => document
@@ -1729,46 +1728,6 @@ describe('ManagedWorkflowsService', () => {
         steps: [],
         settings: { run_as: 'account-a' },
       },
-    });
-
-    it('restores the binding of an unchanged bound workflow when it is installed again', async () => {
-      mockManagedWorkflowDefinitions = [
-        createDefinition({ yaml: `${workflowYaml()}settings:\n  run_as: account-a\n` }),
-      ];
-      const { service, crudService } = createService();
-      const prepare = crudService.prepareWorkflowDocumentForStorage.getMockImplementation();
-      if (!prepare) throw new Error('Missing prepare mock');
-      crudService.prepareWorkflowDocumentForStorage.mockImplementation(async (params) => {
-        const { workflowData } = await prepare(params);
-        return { workflowData: sourceWithAccount(workflowData) };
-      });
-      const installer = httpServerMock.createKibanaRequest();
-      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(null);
-      await service.installManagedWorkflow(
-        WORKFLOW_ID,
-        { spaceId: SPACE_ID },
-        PLUGIN_ID,
-        installer
-      );
-      const installed = crudService.createWorkflowDocument.mock.calls[0][2];
-
-      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
-        createVersionedDocument(installed)
-      );
-      await service.installManagedWorkflow(
-        WORKFLOW_ID,
-        { spaceId: SPACE_ID },
-        PLUGIN_ID,
-        installer
-      );
-
-      expect(crudService.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
-      expect(crudService.reconcileWorkflowServiceAccountBinding).toHaveBeenCalledWith({
-        id: WORKFLOW_ID,
-        spaceId: SPACE_ID,
-        accountId: 'account-a',
-        request: installer,
-      });
     });
 
     it.each(['static', 'dynamic'] as const)(

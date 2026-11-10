@@ -264,46 +264,6 @@ export class WorkflowCrudService {
     }
   }
 
-  /**
-   * Rebinds a workflow to the account its document runs as when the stored binding is missing or
-   * names another account. A binding can be lost while the document stays, for example when its
-   * space was deleted and created again. Does nothing when the binding is already right, so a
-   * caller without `manage_security` keeps working for workflows that need no repair.
-   */
-  async reconcileWorkflowServiceAccountBinding({
-    id,
-    spaceId,
-    accountId,
-    request,
-  }: {
-    id: string;
-    spaceId: string;
-    accountId: string;
-    request?: KibanaRequest;
-  }): Promise<void> {
-    const bindings = this.deps.getServiceAccountBindings?.();
-    if (!bindings || !request) return;
-    const current = await bindings.getWorkloadBinding({
-      workloadType: 'workflow',
-      workloadId: id,
-      spaceId,
-    });
-    if (current?.serviceAccountId === accountId) return;
-    await withWorkflowBindingChange({
-      getSpaceId: this.deps.getSpaceId,
-      bindings,
-      core: this.deps.getCoreStart(),
-      logger: this.deps.logger,
-      workflowId: id,
-      spaceId,
-      request,
-      previousAccountId: accountId,
-      accountId,
-      getWorkflowRevision: () => this.getWorkflowRevision(id, spaceId),
-      write: async () => undefined,
-    });
-  }
-
   async indexWorkflowDocument(
     id: string,
     document: WorkflowProperties,
