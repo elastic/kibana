@@ -10,7 +10,7 @@ See the package README for the tab bar.
 
 ## Props
 
-- `title` — required `ReactNode`. Rendered in the `titleElement` heading with a generated id. That id labels the flyout (see the package README's [Labeling](../../README.md#labeling-and-the-flyout-menu-title)).
+- `title` — required `ReactNode`. Rendered as an `s` heading, in the `titleElement` heading with a generated id. That id labels the flyout (see the package README's [Labeling](../../README.md#labeling-and-the-flyout-menu-title)).
 - `titleElement` — the title's heading element, `h1` to `h6`, so the flyout fits the heading outline of the page it opens over. Defaults to `h3`. It sets the element only. The title's size is fixed by the template.
 - `titleIcon` — EUI icon type rendered after the title, in both the expanded and the compact layout. Without `titleTooltip`, it is decorative (`aria-hidden`).
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip`. It uses `titleIcon` as its type, or `info` if `titleIcon` is not set.

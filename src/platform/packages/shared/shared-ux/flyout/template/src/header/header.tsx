@@ -333,7 +333,7 @@ export const HeaderZone = ({
               </EuiFlexGroup>
             ) : (
               renderTitleWithAdornments(
-                <EuiTitle size="m">
+                <EuiTitle size="s">
                   <TitleElement id={flyoutTitleId} css={titleCss}>
                     {title}
                   </TitleElement>
