@@ -29,6 +29,8 @@ export interface StepErrorHandlingSectionProps {
   readonly fragment: string;
   readonly indent: number;
   readonly onFragmentChange: (next: string) => void;
+  /** The step is a loop: the engine runs retry / continue around the whole loop, not per iteration. */
+  readonly isLoop?: boolean;
 }
 
 const DEFAULT_MAX_ATTEMPTS = 3;
@@ -123,6 +125,7 @@ export function StepErrorHandlingSection({
   fragment,
   indent,
   onFragmentChange,
+  isLoop = false,
 }: StepErrorHandlingSectionProps) {
   const { euiTheme } = useEuiTheme();
   const retrySwitchId = useGeneratedHtmlId({ prefix: 'workflowStepErrorRetry' });
@@ -237,9 +240,13 @@ export function StepErrorHandlingSection({
           />
         </div>
         <EuiText size="xs" color="subdued">
-          {i18n.translate('workflows.stepConfigPanel.errorHandling.retryHelp', {
-            defaultMessage: 'Re-run this step automatically when it fails',
-          })}
+          {isLoop
+            ? i18n.translate('workflows.stepConfigPanel.errorHandling.loopRetryHelp', {
+                defaultMessage: 'Re-run the whole loop automatically when it fails',
+              })
+            : i18n.translate('workflows.stepConfigPanel.errorHandling.retryHelp', {
+                defaultMessage: 'Re-run this step automatically when it fails',
+              })}
         </EuiText>
         {state.retryEnabled ? (
           <div
@@ -319,9 +326,15 @@ export function StepErrorHandlingSection({
           />
         </div>
         <EuiText size="xs" color="subdued">
-          {i18n.translate('workflows.stepConfigPanel.errorHandling.continueHelp', {
-            defaultMessage: 'The workflow keeps running even if this step (and its retries) fail',
-          })}
+          {isLoop
+            ? i18n.translate('workflows.stepConfigPanel.errorHandling.loopContinueHelp', {
+                defaultMessage:
+                  'The workflow keeps running after the loop even if it (and its retries) fail. A failing iteration stops the loop.',
+              })
+            : i18n.translate('workflows.stepConfigPanel.errorHandling.continueHelp', {
+                defaultMessage:
+                  'The workflow keeps running even if this step (and its retries) fail',
+              })}
         </EuiText>
       </div>
     </div>

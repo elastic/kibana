@@ -51,11 +51,11 @@ import { i18n } from '@kbn/i18n';
 import { ESQL_LANG_ID, XJSON_LANG_ID, YAML_LANG_ID } from '@kbn/monaco';
 import type { monaco } from '@kbn/monaco';
 import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
-import { getBuiltInStepDefinition } from '@kbn/workflows';
+import { getBuiltInStepDefinition, LoopStepTypes } from '@kbn/workflows';
 import {
   ensureWorkflowGraphEuiIcons,
   resolveNodeChipStyle,
-  stepSupportsErrorHandling,
+  stepSupportsErrorHandlingSettings,
   workflowsEditorChromeOverrides,
 } from '@kbn/workflows-ui';
 import { isReferenceValue } from '@kbn/workflows-yaml';
@@ -88,6 +88,7 @@ import {
   formatDataReferenceToken,
   formatValueReferenceToken,
 } from '../lib/build_data_reference_catalog';
+import { isInParallelBody } from '../lib/is_in_parallel_body';
 import { fromTags, isTagValue, toTags } from '../lib/list_value';
 import { findReferenceTokens, insertTokenAsJsonText } from '../lib/reference_tokens';
 import type { ReferenceForm } from '../lib/reference_value';
@@ -234,8 +235,8 @@ const writeFragmentValue = (
   const doc = parseDocument(fragment);
   if (!isMap(doc.contents)) return fragment;
   // An empty string is the expression-mode sentinel for boolean/number fields —
-  // don't delete it; keep the key so the UI stays in expression mode. KQL text has no such mode.
-  if (isEmptyFieldValue(value) && (value !== '' || field.language === 'kuery') && !field.required) {
+  // don't delete it; keep the key so the UI stays in expression mode, unless the field opts out (`deleteWhenEmpty`).
+  if (isEmptyFieldValue(value) && (value !== '' || field.deleteWhenEmpty) && !field.required) {
     // Nothing to delete when the key — or an ancestor mapping like `with` —
     // is absent: unlike `setIn`, `deleteIn` throws on a missing intermediate
     // node instead of treating it as a no-op.
@@ -587,8 +588,33 @@ export function StepConfigPanel({
     onClose();
   }, [onClose]);
 
-  const showSettings = !isFallbackStep && stepSupportsErrorHandling(stepType);
-  const stepCondition = schema?.condition;
+  const showSettings = !isFallbackStep && stepSupportsErrorHandlingSettings(stepType);
+  // The engine rejects a step-level `if` / `timeout` on a step directly inside a parallel branch.
+  const inParallelBody = useMemo(
+    () => isInParallelBody(workflowDefinition?.steps, currentStepName),
+    [workflowDefinition, currentStepName]
+  );
+  const stepCondition = inParallelBody ? undefined : schema?.condition;
+  const stepTimeout = inParallelBody ? undefined : schema?.timeout;
+
+  const renderStepSetting = (testSubj: string, title: string, field: StepFormField) => (
+    <div data-test-subj={testSubj} css={{ marginBlockEnd: euiTheme.size.l }}>
+      <EuiTitle size="xxs" css={{ marginBlockEnd: euiTheme.size.s }}>
+        <h5>{title}</h5>
+      </EuiTitle>
+      <StepFieldRow
+        field={field}
+        value={toJs(readFragmentValue(fragment, field.path))}
+        showValidation={showValidation}
+        referenceCatalog={referenceCatalog}
+        showOptionalMarker={false}
+        onChange={(value) => handleFieldChange(field, value)}
+        onDraftErrorChange={(error) => handleDraftErrorChange(fieldId(field), error)}
+        onExpand={() => handleExpandField(field)}
+        renderSubField={renderNoSubFields}
+      />
+    </div>
+  );
 
   const editorModeOptions: Array<{
     id: ParametersMode;
@@ -1010,33 +1036,24 @@ export function StepConfigPanel({
                     data-test-subj="workflowStepConfigPanelSettings"
                     css={{ paddingTop: euiTheme.size.m }}
                   >
-                    {stepCondition ? (
-                      <div
-                        data-test-subj="workflowStepConfigConditionSection"
-                        css={{ marginBlockEnd: euiTheme.size.l }}
-                      >
-                        <EuiTitle size="xxs" css={{ marginBlockEnd: euiTheme.size.s }}>
-                          <h5>
-                            {i18n.translate('workflows.stepConfigPanel.conditionTitle', {
-                              defaultMessage: 'Conditional execution',
-                            })}
-                          </h5>
-                        </EuiTitle>
-                        <StepFieldRow
-                          field={stepCondition}
-                          value={toJs(readFragmentValue(fragment, stepCondition.path))}
-                          showValidation={showValidation}
-                          referenceCatalog={referenceCatalog}
-                          showOptionalMarker={false}
-                          onChange={(value) => handleFieldChange(stepCondition, value)}
-                          onDraftErrorChange={(error) =>
-                            handleDraftErrorChange(fieldId(stepCondition), error)
-                          }
-                          onExpand={() => handleExpandField(stepCondition)}
-                          renderSubField={renderNoSubFields}
-                        />
-                      </div>
-                    ) : null}
+                    {stepCondition
+                      ? renderStepSetting(
+                          'workflowStepConfigConditionSection',
+                          i18n.translate('workflows.stepConfigPanel.conditionTitle', {
+                            defaultMessage: 'Conditional execution',
+                          }),
+                          stepCondition
+                        )
+                      : null}
+                    {stepTimeout
+                      ? renderStepSetting(
+                          'workflowStepConfigTimeoutSection',
+                          i18n.translate('workflows.stepConfigPanel.timeoutTitle', {
+                            defaultMessage: 'Timeout',
+                          }),
+                          stepTimeout
+                        )
+                      : null}
                     {showSettings ? (
                       <div data-test-subj="workflowStepConfigErrorHandlingSection">
                         <EuiTitle size="xxs" css={{ marginBlockEnd: euiTheme.size.s }}>
@@ -1050,6 +1067,7 @@ export function StepConfigPanel({
                           fragment={fragment}
                           indent={indent}
                           onFragmentChange={setFragment}
+                          isLoop={LoopStepTypes.some((type) => type === stepType)}
                         />
                       </div>
                     ) : (

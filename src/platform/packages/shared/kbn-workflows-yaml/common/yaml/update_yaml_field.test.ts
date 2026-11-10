@@ -338,6 +338,32 @@ steps:
       );
     });
 
+    it.each([
+      ['a plain scalar', 'description: old'],
+      ['a double-quoted scalar', 'description: "old"'],
+      ['a single-quoted scalar', "description: 'old'"],
+    ])('indents a multi-line value written over %s', (_name, line) => {
+      const yaml = `name: Test\n${line}\nenabled: true\n`;
+      const result = updateYamlField(yaml, 'description', 'first line\nsecond line');
+
+      expect(result).toContain('description: |-\n  first line\n  second line\n');
+      expect(parse(result)).toEqual({
+        name: 'Test',
+        description: 'first line\nsecond line',
+        enabled: true,
+      });
+    });
+
+    it('indents a multi-line value under a nested key', () => {
+      const yaml = `name: Test\nmetadata:\n  author: old\n  team: core\n`;
+      const result = updateYamlField(yaml, 'metadata.author', 'one\ntwo');
+
+      expect(parse(result)).toEqual({
+        name: 'Test',
+        metadata: { author: 'one\ntwo', team: 'core' },
+      });
+    });
+
     it('updates a block scalar without corrupting the following field', () => {
       const yaml = `name: Test
 description: >

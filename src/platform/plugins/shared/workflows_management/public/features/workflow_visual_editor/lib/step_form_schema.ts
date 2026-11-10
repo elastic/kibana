@@ -9,12 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH,
   getBuiltInStepDefinition,
   getStepDeprecationInfo,
   LoopStepPropsSchema,
   resolveKibanaStepTypeAlias,
 } from '@kbn/workflows';
 import type { ConnectorContractUnion } from '@kbn/workflows';
+import { isValidDuration } from '@kbn/workflows/common/utils/duration/duration';
 import { unwrapSchema } from '@kbn/workflows/common/utils/zod';
 import { isReferenceValue, parseTemplateString } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
@@ -97,6 +99,10 @@ export interface StepFormField {
    * `while`; once the field holds KQL a pick stays the safe text form (`{{ }}`).
    */
   readonly valueFormWhenWhole?: true;
+  /** Clearing the field removes its key, instead of keeping an empty string (a step-level `if`). */
+  readonly deleteWhenEmpty?: true;
+  /** A text field that holds a duration (`30s`, `1h30m`), or a `{{ }}` template where it is templatable. */
+  readonly format?: 'duration';
 }
 
 export interface StepFormSchema {
@@ -104,6 +110,8 @@ export interface StepFormSchema {
   readonly fields: readonly StepFormField[];
   /** The step-level `if`; absent for a step whose own config rules it out (the `if` step). */
   readonly condition?: StepFormField;
+  /** The step-level `timeout`; absent for a step that takes none. */
+  readonly timeout?: StepFormField;
 }
 
 /** Field-label alias for the shared catalog key prettifier. */
@@ -708,6 +716,7 @@ const STEP_CONDITION_FIELD: StepFormField = {
   kind: 'code',
   language: 'kuery',
   valueFormWhenWhole: true,
+  deleteWhenEmpty: true,
 };
 
 /** Every step takes `if`, unless its own config declares it `never` (the `if` step gates on `condition`). */
@@ -715,6 +724,55 @@ const getStepCondition = (configSchema: z.ZodType | undefined): StepFormField | 
   const root = configSchema && unwrapSchema(configSchema);
   const shape = root instanceof z.ZodObject ? (root.shape as Record<string, z.ZodType>) : undefined;
   return shape?.if && isNeverSchema(shape.if) ? undefined : STEP_CONDITION_FIELD;
+};
+
+/**
+ * Step types with no step-level `timeout`: their YAML schema does not take it, except `switch`,
+ * which the schema takes but the engine never applies. Kept in step with the step schemas by a test.
+ */
+const STEP_TYPES_WITHOUT_TIMEOUT: ReadonlySet<string> = new Set([
+  'if',
+  'switch',
+  'merge',
+  'wait',
+  'data.set',
+  'loop.break',
+  'loop.continue',
+  'workflow.execute',
+  'workflow.executeAsync',
+  'workflow.fail',
+  'workflow.output',
+]);
+
+/** Their YAML schema takes a literal duration; every other step also takes Liquid that renders to one. */
+const STATIC_TIMEOUT_STEP_TYPES: ReadonlySet<string> = new Set(['foreach', 'while', 'parallel']);
+
+const STEP_TIMEOUT_FIELD: StepFormField = {
+  key: 'timeout',
+  path: ['timeout'],
+  label: i18n.translate('workflows.stepConfigPanel.timeoutLabel', { defaultMessage: 'Duration' }),
+  description: i18n.translate('workflows.stepConfigPanel.timeoutDescription', {
+    defaultMessage:
+      'Fail the step if it runs longer than this, e.g. 30s, 5m or 1h30m. A {template} template that renders to a duration also works.',
+    values: { template: '{{ }}' },
+  }),
+  required: false,
+  kind: 'text',
+  format: 'duration',
+  deleteWhenEmpty: true,
+};
+
+const STATIC_STEP_TIMEOUT_FIELD: StepFormField = {
+  ...STEP_TIMEOUT_FIELD,
+  description: i18n.translate('workflows.stepConfigPanel.timeoutStaticDescription', {
+    defaultMessage: 'Fail the step if it runs longer than this, e.g. 30s, 5m or 1h30m.',
+  }),
+  templatable: false,
+};
+
+const getStepTimeout = (stepType: string): StepFormField | undefined => {
+  if (STEP_TYPES_WITHOUT_TIMEOUT.has(stepType)) return undefined;
+  return STATIC_TIMEOUT_STEP_TYPES.has(stepType) ? STATIC_STEP_TIMEOUT_FIELD : STEP_TIMEOUT_FIELD;
 };
 
 /**
@@ -739,6 +797,7 @@ export const getStepFormSchema = (
         ...fieldsFromObject(stepType, builtIn.inputSchema, ['with']),
       ],
       condition: getStepCondition(builtIn.configSchema),
+      timeout: getStepTimeout(stepType),
     };
   }
 
@@ -763,7 +822,12 @@ export const getStepFormSchema = (
   // through aliases so deprecated YAML types still get a usable form.
   fields.push(...fieldsFromObject(stepType, connector.configSchema, []));
   fields.push(...fieldsFromObject(stepType, connector.paramsSchema, ['with']));
-  return { stepType, fields, condition: getStepCondition(connector.configSchema) };
+  return {
+    stepType,
+    fields,
+    condition: getStepCondition(connector.configSchema),
+    timeout: getStepTimeout(stepType),
+  };
 };
 
 const readPath = (step: Record<string, unknown>, path: readonly string[]): unknown =>
@@ -828,6 +892,25 @@ const validateJsonLiquid = (text: string): string | undefined => {
   return undefined;
 };
 
+const LIQUID_TEMPLATE_PATTERN = /\{\{[\s\S]*\}\}/;
+
+/** A duration, or (where the step takes Liquid) a `{{ }}` template that renders to one. */
+const validateDuration = (text: string, templatable: boolean): string | undefined => {
+  const isTemplate =
+    templatable &&
+    text.length <= DYNAMIC_TIMEOUT_TEMPLATE_MAX_LENGTH &&
+    LIQUID_TEMPLATE_PATTERN.test(text);
+  if (isTemplate || isValidDuration(text)) return undefined;
+  return templatable
+    ? i18n.translate('workflows.stepConfigPanel.validation.mustBeDurationOrTemplate', {
+        defaultMessage: 'Must be a duration (e.g. 30s or 1h30m) or a {template} template',
+        values: { template: '{{ }}' },
+      })
+    : i18n.translate('workflows.stepConfigPanel.validation.mustBeDuration', {
+        defaultMessage: 'Must be a duration, e.g. 30s or 1h30m',
+      });
+};
+
 /**
  * Advisory field validation for the config panel. Returns a specific message, or
  * undefined when the value is acceptable. Empty optionals are always OK.
@@ -880,6 +963,10 @@ export const validateStepField = (field: StepFormField, value: unknown): string 
 
   if (field.language === 'json-liquid' && typeof value === 'string') {
     return validateJsonLiquid(value);
+  }
+
+  if (field.format === 'duration' && typeof value === 'string') {
+    return validateDuration(value, field.templatable !== false);
   }
 
   if (field.kind === 'boolean' && typeof value !== 'boolean' && !isReference) {

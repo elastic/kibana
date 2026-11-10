@@ -8,6 +8,21 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
+import {
+  BaseConnectorStepSchema,
+  DataSetStepSchema,
+  ForEachStepSchema,
+  IfStepSchema,
+  LoopBreakStepSchema,
+  LoopContinueStepSchema,
+  MergeStepSchema,
+  ParallelStepObjectSchema,
+  WaitStepSchema,
+  WhileStepSchema,
+  WorkflowExecuteAsyncStepSchema,
+  WorkflowExecuteStepSchema,
+  WorkflowOutputStepSchema,
+} from '@kbn/workflows';
 import { INDEX_CONTRACT } from '@kbn/workflows/spec/elasticsearch/overrides/elasticsearch.index';
 import { SET_ALERTS_STATUS_CONTRACT } from '@kbn/workflows/spec/kibana/overrides/kibana.set_alerts_status';
 import { z } from '@kbn/zod/v4';
@@ -155,6 +170,72 @@ describe('step_form_schema', () => {
       it('never adds `if` to the fields of the Inputs form', () => {
         expect(getStepFormSchema('slack', connectors)?.fields.some((f) => f.key === 'if')).toBe(
           false
+        );
+      });
+    });
+
+    describe('the step-level `timeout`', () => {
+      it('is a duration text field for a connector step, which also takes a template', () => {
+        const timeout = getStepFormSchema('slack', connectors)?.timeout;
+        expect(timeout).toMatchObject({
+          path: ['timeout'],
+          kind: 'text',
+          format: 'duration',
+          required: false,
+          deleteWhenEmpty: true,
+        });
+        expect(timeout?.templatable).toBeUndefined();
+        expect(
+          getStepFormSchema('slack', connectors)?.fields.some((f) => f.key === 'timeout')
+        ).toBe(false);
+        expect(getStepFormSchema('waitForApproval', [])?.timeout?.templatable).toBeUndefined();
+      });
+
+      it.each(['foreach', 'while', 'parallel'])('is a literal duration only for %s', (type) => {
+        expect(getStepFormSchema(type, [])?.timeout).toMatchObject({
+          path: ['timeout'],
+          format: 'duration',
+          templatable: false,
+        });
+      });
+
+      it.each([
+        'if',
+        'switch',
+        'merge',
+        'wait',
+        'data.set',
+        'loop.break',
+        'loop.continue',
+        'workflow.execute',
+        'workflow.executeAsync',
+        'workflow.output',
+      ])('is left out for %s', (type) => {
+        expect(getStepFormSchema(type, [])?.timeout).toBeUndefined();
+      });
+
+      // The form's rule is a list, so keep it honest against the step schemas it mirrors.
+      it('follows the step schemas: those without it take no `timeout`, the others do', () => {
+        [
+          WaitStepSchema,
+          DataSetStepSchema,
+          MergeStepSchema,
+          IfStepSchema,
+          LoopBreakStepSchema,
+          LoopContinueStepSchema,
+          WorkflowExecuteStepSchema,
+          WorkflowExecuteAsyncStepSchema,
+          WorkflowOutputStepSchema,
+        ].forEach((stepSchema) => {
+          expect(stepSchema.shape).not.toHaveProperty('timeout');
+        });
+        [ForEachStepSchema, WhileStepSchema, ParallelStepObjectSchema].forEach((stepSchema) => {
+          const { timeout } = stepSchema.shape;
+          expect(timeout.safeParse('30s').success).toBe(true);
+          expect(timeout.safeParse('{{ inputs.limit }}').success).toBe(false);
+        });
+        expect(BaseConnectorStepSchema.shape.timeout.safeParse('{{ inputs.limit }}').success).toBe(
+          true
         );
       });
     });
@@ -927,6 +1008,42 @@ describe('step_form_schema', () => {
       expect(findUnclosedTemplateExpression('Hello {{ inputs.x')).toBe(true);
       expect(findUnclosedTemplateExpression('Hello {{ inputs.x }}')).toBe(false);
       expect(validateStepField(requiredText, 'Hi {{ inputs.user')).toBe('Unclosed {{ expression');
+    });
+
+    describe('duration', () => {
+      const timeout = (templatable: boolean): StepFormField => ({
+        key: 'timeout',
+        path: ['timeout'],
+        label: 'Duration',
+        required: false,
+        kind: 'text',
+        format: 'duration',
+        ...(templatable ? {} : { templatable: false as const }),
+      });
+
+      it.each(['30s', '5m', '1h30m', '1w2d3h4m5s6ms'])('accepts %s', (text) => {
+        expect(validateStepField(timeout(true), text)).toBeUndefined();
+        expect(validateStepField(timeout(false), text)).toBeUndefined();
+      });
+
+      it.each(['5 minutes', '1m1h', '30', '-5s'])('rejects %s', (text) => {
+        expect(validateStepField(timeout(true), text)).toBe(
+          'Must be a duration (e.g. 30s or 1h30m) or a {{ }} template'
+        );
+        expect(validateStepField(timeout(false), text)).toBe(
+          'Must be a duration, e.g. 30s or 1h30m'
+        );
+      });
+
+      it('takes a template where the step takes Liquid, and not where it takes a literal', () => {
+        expect(validateStepField(timeout(true), '{{ inputs.limit }}')).toBeUndefined();
+        expect(
+          validateStepField(timeout(true), "{{ inputs.limit | default: '5m' }}")
+        ).toBeUndefined();
+        expect(validateStepField(timeout(false), '{{ inputs.limit }}')).toBe(
+          'Must be a duration, e.g. 30s or 1h30m'
+        );
+      });
     });
 
     describe('JSON + Liquid', () => {

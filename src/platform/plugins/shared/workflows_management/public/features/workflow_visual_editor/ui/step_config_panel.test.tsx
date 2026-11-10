@@ -169,6 +169,9 @@ jest.mock('@kbn/workflows-ui', () => ({
     Boolean(
       stepType && !['if', 'foreach', 'parallel', 'while', 'merge', 'atomic'].includes(stepType)
     ),
+  // Loops take the panel section, though their canvas node has no fallback port.
+  stepSupportsErrorHandlingSettings: (stepType: string | undefined) =>
+    Boolean(stepType && !['if', 'parallel', 'merge', 'atomic'].includes(stepType)),
 }));
 jest.mock('../model/use_step_output_samples', () => ({
   useStepOutputSamples: () => ({ byStep: {}, isFullRunInProgress: false }),
@@ -776,14 +779,166 @@ with:
     });
 
     it('is offered next to the note when a step has no error handling', () => {
-      renderPanel({
-        stepType: 'while',
-        initialFragment:
-          'name: w\ntype: while\ncondition: "x"\nsteps:\n  - name: a\n    type: console\n    with:\n      message: hi\n',
-        connectors: [],
-      });
+      renderPanel({ initialFragment: baseFragment, isFallbackStep: true });
       expandSettingsAccordion();
       expect(screen.getByTestId('workflowStepConfigConditionSection')).toBeInTheDocument();
+      expect(
+        screen.getByText('Error handling is not available for this step.')
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe('step timeout in Advanced', () => {
+    const baseFragment = 'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n';
+    const lastFragment = (spy: jest.Mock) => spy.mock.calls[spy.mock.calls.length - 1][0] as string;
+
+    it('sits between the Condition and Error handling, with a Duration control', () => {
+      renderPanel({ initialFragment: baseFragment });
+      expandSettingsAccordion();
+      const condition = screen.getByTestId('workflowStepConfigConditionSection');
+      const timeout = screen.getByTestId('workflowStepConfigTimeoutSection');
+      const errorHandling = screen.getByTestId('workflowStepConfigErrorHandlingSection');
+      expect(within(timeout).getByRole('heading', { name: 'Timeout' })).toBeInTheDocument();
+      expect(within(timeout).getByTestId('workflowStepConfigField-timeout')).toBeInTheDocument();
+      expect(within(timeout).getByText('Duration')).toBeInTheDocument();
+      expect(condition.compareDocumentPosition(timeout)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+      expect(timeout.compareDocumentPosition(errorHandling)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    });
+
+    it('writes the duration as the step-level `timeout`, and removes the key when cleared', () => {
+      const { onFragmentChange } = renderPanel({ initialFragment: baseFragment });
+      expandSettingsAccordion();
+      fireEvent.change(activateField('workflowStepConfigField-timeout'), {
+        target: { value: '30s' },
+      });
+      const written = parseDocument(lastFragment(onFragmentChange));
+      expect(written.get('timeout')).toBe('30s');
+      expect(written.getIn(['with', 'timeout'])).toBeUndefined();
+
+      fireEvent.change(activateField('workflowStepConfigField-timeout'), { target: { value: '' } });
+      expect(parseDocument(lastFragment(onFragmentChange)).has('timeout')).toBe(false);
+    });
+
+    it('reports a value that is not a duration once the field is left', () => {
+      renderPanel({ initialFragment: baseFragment });
+      expandSettingsAccordion();
+      const input = activateField('workflowStepConfigField-timeout');
+      fireEvent.change(input, { target: { value: '5 minutes' } });
+      fireEvent.blur(input);
+      expect(
+        screen.getByText('Must be a duration (e.g. 30s or 1h30m) or a {{ }} template')
+      ).toBeInTheDocument();
+    });
+
+    it('is a literal duration, with no picker, for a loop', () => {
+      renderPanel({
+        stepType: 'foreach',
+        connectors: [],
+        initialFragment:
+          'name: loop\ntype: foreach\nforeach: "{{ x }}"\nsteps:\n  - name: a\n    type: console\n    with:\n      message: hi\n',
+      });
+      expandSettingsAccordion();
+      const section = screen.getByTestId('workflowStepConfigTimeoutSection');
+      expect(within(section).getByTestId('workflowStepConfigField-timeout')).toBeInTheDocument();
+      expect(
+        section.querySelector('[data-test-subj="workflowStepConfigDataReference"]')
+      ).toBeNull();
+    });
+
+    it('is not offered by a step that takes none, which still gets the Condition', () => {
+      renderPanel({
+        stepType: 'wait',
+        connectors: [],
+        initialFragment: 'name: w\ntype: wait\nwith:\n  duration: 1s\n',
+      });
+      expandSettingsAccordion();
+      expect(screen.queryByTestId('workflowStepConfigTimeoutSection')).not.toBeInTheDocument();
+      expect(screen.getByTestId('workflowStepConfigConditionSection')).toBeInTheDocument();
+    });
+
+    it('is not offered, nor is the Condition, for a step inside a parallel branch', () => {
+      const definition = {
+        version: '1',
+        name: 'demo',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        steps: [
+          {
+            name: 'fan',
+            type: 'parallel',
+            branches: [
+              { name: 'a', steps: [{ name: 'n', type: 'slack', 'connector-id': 'a', with: {} }] },
+              { name: 'b', steps: [{ name: 'other', type: 'console', with: { message: 'x' } }] },
+            ],
+          },
+        ],
+      } as unknown as WorkflowYaml;
+      renderPanel({ initialFragment: baseFragment, workflowDefinition: definition });
+      expandSettingsAccordion();
+      expect(screen.queryByTestId('workflowStepConfigTimeoutSection')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('workflowStepConfigConditionSection')).not.toBeInTheDocument();
+      expect(screen.getByTestId('workflowStepConfigErrorHandlingSection')).toBeInTheDocument();
+    });
+  });
+
+  describe('error handling for loops', () => {
+    const body = 'steps:\n  - name: a\n    type: console\n    with:\n      message: hi\n';
+    const loopFragments = {
+      foreach: `name: loop\ntype: foreach\nforeach: "{{ x }}"\n${body}`,
+      while: `name: loop\ntype: while\ncondition: "x"\n${body}`,
+    };
+
+    it.each(['foreach', 'while'] as const)(
+      'offers retry and continue on a %s, worded for the whole loop',
+      (stepType) => {
+        renderPanel({ stepType, connectors: [], initialFragment: loopFragments[stepType] });
+        expandSettingsAccordion();
+        const section = screen.getByTestId('workflowStepConfigErrorHandlingSection');
+        expect(within(section).getByTestId('workflowStepConfigErrorRetry')).toBeInTheDocument();
+        expect(within(section).getByTestId('workflowStepConfigErrorContinue')).toBeInTheDocument();
+        expect(
+          within(section).getByText('Re-run the whole loop automatically when it fails')
+        ).toBeInTheDocument();
+        expect(within(section).getByText(/A failing iteration stops the loop/)).toBeInTheDocument();
+        expect(
+          screen.queryByText('Error handling is not available for this step.')
+        ).not.toBeInTheDocument();
+      }
+    );
+
+    it('writes continue as the loop step-level on-failure, not an iteration one', () => {
+      const { onFragmentChange } = renderPanel({
+        stepType: 'foreach',
+        connectors: [],
+        initialFragment: loopFragments.foreach,
+      });
+      expandSettingsAccordion();
+      fireEvent.click(screen.getByTestId('workflowStepConfigErrorContinue'));
+      const written = parseDocument(
+        onFragmentChange.mock.calls[onFragmentChange.mock.calls.length - 1][0] as string
+      ).toJS() as Record<string, unknown>;
+      expect(written['on-failure']).toEqual({ continue: true });
+      expect(written).not.toHaveProperty('iteration-on-failure');
+    });
+
+    it('keeps the plain wording for a step that is not a loop', () => {
+      renderPanel({
+        initialFragment: 'name: n\ntype: slack\nconnector-id: a\nwith:\n  message: hi\n',
+      });
+      expandSettingsAccordion();
+      expect(screen.getByText('Re-run this step automatically when it fails')).toBeInTheDocument();
+    });
+
+    it('still says error handling is not available for an `if` step', () => {
+      renderPanel({
+        stepType: 'if',
+        connectors: [],
+        initialFragment: 'name: branch\ntype: if\ncondition: "true"\n',
+      });
+      expandSettingsAccordion();
+      expect(
+        screen.queryByTestId('workflowStepConfigErrorHandlingSection')
+      ).not.toBeInTheDocument();
       expect(
         screen.getByText('Error handling is not available for this step.')
       ).toBeInTheDocument();
