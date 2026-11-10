@@ -18,6 +18,7 @@ import {
   EuiToolTip,
   euiCanAnimate,
   transparentize,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -56,6 +57,7 @@ const removeLabel = i18n.translate('dashboard.selectedPanelsToolbar.removeButton
 export const SelectedPanelsToolbar = () => {
   const dashboardApi = useDashboardApi();
   const styles = useMemoCss(selectedPanelsToolbarStyles);
+  const { colorMode } = useEuiTheme();
   const [selectedPanelIds, viewMode, children] = useBatchedPublishingSubjects(
     dashboardApi.selectedPanelIds$,
     dashboardApi.viewMode$,
@@ -83,7 +85,7 @@ export const SelectedPanelsToolbar = () => {
     <EuiPanel
       css={styles.toolbar}
       paddingSize="none"
-      hasShadow
+      hasShadow={colorMode !== 'DARK'}
       hasBorder={false}
       data-test-subj="dashboardSelectedPanelsToolbar"
     >
@@ -174,11 +176,13 @@ const selectedPanelsToolbarStyles = {
       },
       // In dark mode the default panel color is too close to the dashboard behind it and a dark
       // shadow is invisible: a lighter neutral surface, a stronger edge and a soft white glow keep
-      // the toolbar visible
+      // the toolbar visible. EUI's shadow is turned off in dark mode, so the edge is drawn here.
       ...(colorMode === 'DARK' && {
         backgroundColor: euiTheme.colors.backgroundBaseFormsPrepend,
-        boxShadow: `0 0 ${euiTheme.size.s} ${transparentize(euiTheme.colors.plainLight, 0.16)}`,
-        '&::after': { borderColor: euiTheme.colors.borderBasePlain },
+        boxShadow: [
+          `inset 0 0 0 ${euiTheme.border.width.thin} ${euiTheme.colors.borderBasePlain}`,
+          `0 0 ${euiTheme.size.s} ${transparentize(euiTheme.colors.plainLight, 0.16)}`,
+        ].join(', '),
       }),
     }),
   count: css({
