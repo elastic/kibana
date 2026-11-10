@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
@@ -14,11 +15,12 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { InternalUiSettingsRouter } from '../internal_types';
 import { CannotOverrideError } from '../ui_settings_errors';
+import { OAS_TAGS, settingsResponseSchema, settingKeyParamSchema } from './oas';
 import type { InternalUiSettingsRequestHandlerContext } from '../internal_types';
 
 const validate = {
   params: schema.object({
-    key: schema.string({ minLength: 1, maxLength: 1024 }),
+    key: settingKeyParamSchema,
   }),
 };
 
@@ -55,7 +57,19 @@ export function registerDeleteRoute(router: InternalUiSettingsRouter) {
   router.delete(
     {
       path: '/api/kibana/settings/{key}',
-      validate,
+      validate: {
+        request: validate,
+        response: {
+          200: { body: () => settingsResponseSchema, description: 'Indicates a successful call.' },
+        },
+      },
+      options: {
+        access: 'public',
+        summary: 'Delete an advanced setting',
+        description: `Reset a single advanced setting in the current space to its default value by removing the user-provided value. Requires the \`manage_advanced_settings\` privilege.`,
+        tags: OAS_TAGS,
+        oasOperationObject: () => path.resolve(__dirname, './delete.examples.yaml'),
+      },
       security: {
         authz: {
           requiredPrivileges: ['manage_advanced_settings'],
@@ -70,7 +84,19 @@ export function registerDeleteRoute(router: InternalUiSettingsRouter) {
   router.delete(
     {
       path: '/api/kibana/global_settings/{key}',
-      validate,
+      validate: {
+        request: validate,
+        response: {
+          200: { body: () => settingsResponseSchema, description: 'Indicates a successful call.' },
+        },
+      },
+      options: {
+        access: 'public',
+        summary: 'Delete a global advanced setting',
+        description: `Reset a single advanced setting that applies globally, across all spaces, to its default value. Requires the \`manage_advanced_settings\` privilege.`,
+        tags: OAS_TAGS,
+        oasOperationObject: () => path.resolve(__dirname, './delete.examples.yaml'),
+      },
       security: {
         authz: {
           requiredPrivileges: ['manage_advanced_settings'],

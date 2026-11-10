@@ -51,6 +51,14 @@ security:
   - apiKeyAuth: []
   - basicAuth: []
 tags:
+  - name: advanced settings
+    x-displayName: Advanced settings
+    description: |
+      Retrieve, update, and reset Kibana advanced settings, including settings that apply to a single space and settings that apply globally across all spaces.
+      Only user-provided values are returned; settings left at their default value are omitted.
+    externalDocs:
+      description: Advanced settings documentation
+      url: https://www.elastic.co/docs/reference/kibana/advanced-settings
   - name: agent builder
     description: |
       Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
@@ -63671,6 +63679,554 @@ paths:
       summary: Get a decrypted uninstall token
       tags:
         - Fleet uninstall tokens
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/kibana/global_settings:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/kibana/global_settings</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve all user-provided advanced settings that apply globally, across all spaces.
+      operationId: get-kibana-global-settings
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSettingsResponse:
+                  summary: User-provided settings
+                  value:
+                    settings:
+                      defaultRoute:
+                        userValue: /app/dashboards
+                      theme:darkMode:
+                        userValue: enabled
+              schema:
+                additionalProperties: false
+                description: The user-provided settings.
+                type: object
+                properties:
+                  settings:
+                    additionalProperties:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        userValue:
+                          description: The value set by the user for this setting.
+                          nullable: true
+                      required:
+                        - userValue
+                    description: All user-provided settings, keyed by setting name.
+                    type: object
+                required:
+                  - settings
+          description: Indicates a successful call.
+      summary: Get all global advanced settings
+      tags:
+        - advanced settings
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/kibana/global_settings</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update the values of multiple advanced settings that apply globally, across all spaces, in one request. Requires the `manage_advanced_settings` privilege.<br/><br/>[Required authorization] Route required privileges: manage_advanced_settings.
+      operationId: post-kibana-global-settings
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              setManySettingsRequest:
+                summary: Change several settings, and reset one to its default with null
+                value:
+                  changes:
+                    defaultRoute: /app/dashboards
+                    theme:darkMode: enabled
+                    timepicker:quickRanges: null
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                changes:
+                  additionalProperties: true
+                  description: An object of setting names to their new values. Set a value to `null` to reset that setting to its default.
+                  type: object
+                  properties: {}
+              required:
+                - changes
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                setManySettingsResponse:
+                  summary: Settings after the changes
+                  value:
+                    settings:
+                      defaultRoute:
+                        userValue: /app/dashboards
+                      theme:darkMode:
+                        userValue: enabled
+              schema:
+                additionalProperties: false
+                description: The user-provided settings.
+                type: object
+                properties:
+                  settings:
+                    additionalProperties:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        userValue:
+                          description: The value set by the user for this setting.
+                          nullable: true
+                      required:
+                        - userValue
+                    description: All user-provided settings, keyed by setting name.
+                    type: object
+                required:
+                  - settings
+          description: Indicates a successful call.
+      summary: Update many global advanced settings
+      tags:
+        - advanced settings
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/kibana/global_settings/{key}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/kibana/global_settings/{key}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Reset a single advanced setting that applies globally, across all spaces, to its default value. Requires the `manage_advanced_settings` privilege.<br/><br/>[Required authorization] Route required privileges: manage_advanced_settings.
+      operationId: delete-kibana-global-settings-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The name of the setting, for example `defaultRoute`. Refer to the [advanced settings reference](https://www.elastic.co/docs/reference/kibana/advanced-settings) for the available settings.
+          in: path
+          name: key
+          required: true
+          schema:
+            maxLength: 1024
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteSettingResponse:
+                  summary: Remaining user-provided settings after the reset
+                  value:
+                    settings:
+                      theme:darkMode:
+                        userValue: enabled
+              schema:
+                additionalProperties: false
+                description: The user-provided settings.
+                type: object
+                properties:
+                  settings:
+                    additionalProperties:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        userValue:
+                          description: The value set by the user for this setting.
+                          nullable: true
+                      required:
+                        - userValue
+                    description: All user-provided settings, keyed by setting name.
+                    type: object
+                required:
+                  - settings
+          description: Indicates a successful call.
+      summary: Delete a global advanced setting
+      tags:
+        - advanced settings
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/kibana/global_settings/{key}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update the value of a single advanced setting that applies globally, across all spaces. Requires the `manage_advanced_settings` privilege.<br/><br/>[Required authorization] Route required privileges: manage_advanced_settings.
+      operationId: post-kibana-global-settings-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The name of the setting, for example `defaultRoute`. Refer to the [advanced settings reference](https://www.elastic.co/docs/reference/kibana/advanced-settings) for the available settings.
+          in: path
+          name: key
+          required: true
+          schema:
+            maxLength: 1024
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              setSettingRequest:
+                summary: Change the default landing page
+                value:
+                  value: /app/dashboards
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                value:
+                  description: The new value for the setting. Its type depends on the setting.
+                  nullable: true
+              required:
+                - value
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                setSettingResponse:
+                  summary: Settings after the change
+                  value:
+                    settings:
+                      defaultRoute:
+                        userValue: /app/dashboards
+              schema:
+                additionalProperties: false
+                description: The user-provided settings.
+                type: object
+                properties:
+                  settings:
+                    additionalProperties:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        userValue:
+                          description: The value set by the user for this setting.
+                          nullable: true
+                      required:
+                        - userValue
+                    description: All user-provided settings, keyed by setting name.
+                    type: object
+                required:
+                  - settings
+          description: Indicates a successful call.
+      summary: Update a global advanced setting
+      tags:
+        - advanced settings
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/kibana/settings:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/kibana/settings</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Retrieve all user-provided advanced settings for the current space. Settings that were not changed from their default value are not returned.
+      operationId: get-kibana-settings
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getSettingsResponse:
+                  summary: User-provided settings
+                  value:
+                    settings:
+                      defaultRoute:
+                        userValue: /app/dashboards
+                      theme:darkMode:
+                        userValue: enabled
+              schema:
+                additionalProperties: false
+                description: The user-provided settings.
+                type: object
+                properties:
+                  settings:
+                    additionalProperties:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        userValue:
+                          description: The value set by the user for this setting.
+                          nullable: true
+                      required:
+                        - userValue
+                    description: All user-provided settings, keyed by setting name.
+                    type: object
+                required:
+                  - settings
+          description: Indicates a successful call.
+      summary: Get all advanced settings
+      tags:
+        - advanced settings
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/kibana/settings</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update the values of multiple advanced settings in the current space in one request. Requires the `manage_advanced_settings` privilege.<br/><br/>[Required authorization] Route required privileges: manage_advanced_settings.
+      operationId: post-kibana-settings
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              setManySettingsRequest:
+                summary: Change several settings, and reset one to its default with null
+                value:
+                  changes:
+                    defaultRoute: /app/dashboards
+                    theme:darkMode: enabled
+                    timepicker:quickRanges: null
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                changes:
+                  additionalProperties: true
+                  description: An object of setting names to their new values. Set a value to `null` to reset that setting to its default.
+                  type: object
+                  properties: {}
+              required:
+                - changes
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                setManySettingsResponse:
+                  summary: Settings after the changes
+                  value:
+                    settings:
+                      defaultRoute:
+                        userValue: /app/dashboards
+                      theme:darkMode:
+                        userValue: enabled
+              schema:
+                additionalProperties: false
+                description: The user-provided settings.
+                type: object
+                properties:
+                  settings:
+                    additionalProperties:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        userValue:
+                          description: The value set by the user for this setting.
+                          nullable: true
+                      required:
+                        - userValue
+                    description: All user-provided settings, keyed by setting name.
+                    type: object
+                required:
+                  - settings
+          description: Indicates a successful call.
+      summary: Update many advanced settings
+      tags:
+        - advanced settings
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/kibana/settings/{key}:
+    delete:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/kibana/settings/{key}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Reset a single advanced setting in the current space to its default value by removing the user-provided value. Requires the `manage_advanced_settings` privilege.<br/><br/>[Required authorization] Route required privileges: manage_advanced_settings.
+      operationId: delete-kibana-settings-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The name of the setting, for example `defaultRoute`. Refer to the [advanced settings reference](https://www.elastic.co/docs/reference/kibana/advanced-settings) for the available settings.
+          in: path
+          name: key
+          required: true
+          schema:
+            maxLength: 1024
+            minLength: 1
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteSettingResponse:
+                  summary: Remaining user-provided settings after the reset
+                  value:
+                    settings:
+                      theme:darkMode:
+                        userValue: enabled
+              schema:
+                additionalProperties: false
+                description: The user-provided settings.
+                type: object
+                properties:
+                  settings:
+                    additionalProperties:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        userValue:
+                          description: The value set by the user for this setting.
+                          nullable: true
+                      required:
+                        - userValue
+                    description: All user-provided settings, keyed by setting name.
+                    type: object
+                required:
+                  - settings
+          description: Indicates a successful call.
+      summary: Delete an advanced setting
+      tags:
+        - advanced settings
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/kibana/settings/{key}</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Update the value of a single advanced setting in the current space. Requires the `manage_advanced_settings` privilege.<br/><br/>[Required authorization] Route required privileges: manage_advanced_settings.
+      operationId: post-kibana-settings-key
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - description: The name of the setting, for example `defaultRoute`. Refer to the [advanced settings reference](https://www.elastic.co/docs/reference/kibana/advanced-settings) for the available settings.
+          in: path
+          name: key
+          required: true
+          schema:
+            maxLength: 1024
+            minLength: 1
+            type: string
+      requestBody:
+        content:
+          application/json:
+            examples:
+              setSettingRequest:
+                summary: Change the default landing page
+                value:
+                  value: /app/dashboards
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                value:
+                  description: The new value for the setting. Its type depends on the setting.
+                  nullable: true
+              required:
+                - value
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                setSettingResponse:
+                  summary: Settings after the change
+                  value:
+                    settings:
+                      defaultRoute:
+                        userValue: /app/dashboards
+              schema:
+                additionalProperties: false
+                description: The user-provided settings.
+                type: object
+                properties:
+                  settings:
+                    additionalProperties:
+                      additionalProperties: true
+                      type: object
+                      properties:
+                        userValue:
+                          description: The value set by the user for this setting.
+                          nullable: true
+                      required:
+                        - userValue
+                    description: All user-provided settings, keyed by setting name.
+                    type: object
+                required:
+                  - settings
+          description: Indicates a successful call.
+      summary: Update an advanced setting
+      tags:
+        - advanced settings
       x-metaTags:
         - content: Kibana
           name: product_name

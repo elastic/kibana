@@ -1,0 +1,12 @@
+responses:
+  '200':
+    description: Indicates a successful call.
+    content:
+      application/json:
+        examples:
+          deleteSettingResponse:
+            summary: Remaining user-provided settings after the reset
+            value:
+              settings:
+                theme:darkMode:
+                  userValue: enabled
