@@ -7,7 +7,12 @@
 
 import { defineCypressConfig } from '@kbn/cypress-config';
 
+// eslint-disable-next-line import/no-default-export
 export default defineCypressConfig({
+  reporter: '../../../../../node_modules/cypress-multi-reporters',
+  reporterOptions: {
+    configFile: './reporter_config.json',
+  },
   defaultCommandTimeout: 60000,
   requestTimeout: 60000,
   responseTimeout: 60000,
@@ -36,9 +41,8 @@ export default defineCypressConfig({
     experimentalRunAllSpecs: true,
     experimentalMemoryManagement: true,
 
-    specPattern: './cypress/e2e/**/*.cy.ts',
-    supportFile: './cypress/support/e2e.ts',
-    excludeSpecPattern: './cypress/e2e/space_awareness/**/*.cy.ts',
+    specPattern: './e2e/space_awareness/**/*.cy.ts',
+    supportFile: './support/e2e.ts',
 
     setupNodeEvents(on, config) {
       // eslint-disable-next-line @typescript-eslint/no-var-requires, @kbn/imports/uniform_imports
