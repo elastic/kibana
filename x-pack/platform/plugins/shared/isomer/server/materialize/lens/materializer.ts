@@ -12,6 +12,7 @@ import type { Materializer } from '../types';
 import { openInLensLabel } from './shared';
 import { mapLensDatatable } from './datatable';
 import { mapLensMetric } from './metric';
+import { mapLensPartition } from './partition';
 import { asMappedChart, planLensChart } from './plan';
 import type { LensApiConfig, LensMaterializeConfig, LensSavedObjectReference } from './types';
 import { mapLensXy } from './xy';
@@ -133,6 +134,11 @@ export const createLensMaterializer = ({
         return mapLensMetric(single, tables, kit, savedObject);
       case 'data_table':
         return mapLensDatatable(single, tables, kit, savedObject);
+      case 'pie':
+      case 'treemap':
+      case 'mosaic':
+      case 'waffle':
+        return mapLensPartition(single, tables, kit, savedObject);
     }
   },
 });

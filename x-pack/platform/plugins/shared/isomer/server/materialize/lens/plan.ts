@@ -17,6 +17,7 @@ import type {
   LensApiConfig,
   LensDatatableConfig,
   LensMetricConfig,
+  LensPartitionConfig,
   LensXyConfig,
   LensXyDataLayer,
   LensXyEsqlReferenceLinesLayer,
@@ -27,12 +28,16 @@ import type {
 const DEFAULT_TIME_FIELD = '@timestamp';
 
 /** A chart that runs one ES|QL query, whose table it maps. */
-export type LensSingleQueryConfig = LensMetricConfig | LensDatatableConfig;
+export type LensSingleQueryConfig = LensMetricConfig | LensDatatableConfig | LensPartitionConfig;
 
 /** The chart types that run one query, which the Lens materializer maps. */
 const SINGLE_QUERY_TYPES: ReadonlySet<string> = new Set<LensSingleQueryConfig['type']>([
   'metric',
   'data_table',
+  'pie',
+  'treemap',
+  'mosaic',
+  'waffle',
 ]);
 
 interface EsqlSource {
