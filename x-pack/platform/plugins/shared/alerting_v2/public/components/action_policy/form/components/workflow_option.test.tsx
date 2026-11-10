@@ -8,7 +8,6 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { WorkflowListDto } from '@kbn/workflows';
 import { renderWorkflowOption, toWorkflowComboOption } from './workflow_option';
@@ -74,7 +73,7 @@ describe('renderWorkflowOption', () => {
     expect(screen.queryByText('Managed')).not.toBeInTheDocument();
   });
 
-  it('renders the tag count badge when the workflow has tags', () => {
+  it('lists the tags as text after the description', () => {
     renderOption(
       createWorkflow({
         definition: {
@@ -88,44 +87,42 @@ describe('renderWorkflowOption', () => {
       })
     );
 
-    expect(screen.getByTestId('workflowOptionTagsBadge')).toHaveTextContent('2');
-    expect(screen.getByLabelText('Tags: slack, alerts')).toBeInTheDocument();
-  });
-
-  it('shows the tags on hover', async () => {
-    const user = userEvent.setup({ delay: null });
-    renderOption(
-      createWorkflow({
-        definition: {
-          version: '1',
-          name: 'Slack notification workflow',
-          enabled: true,
-          triggers: [],
-          steps: [],
-          tags: ['slack', 'alerts'],
-        },
-      })
+    expect(screen.getByTestId('workflowOptionDetails')).toHaveTextContent(
+      'Sends alerts to Slack · Tags: slack, alerts'
     );
-
-    await user.hover(screen.getByTestId('workflowOptionTagsBadge'));
-
-    expect(await screen.findByText('slack, alerts')).toBeInTheDocument();
-    expect(screen.getByTestId('workflowOptionTagsBadge')).toHaveAttribute('title', '');
   });
 
-  it('does not render a tag badge without tags', () => {
+  it('omits the tags when the workflow has none', () => {
     renderOption(createWorkflow());
 
-    expect(screen.queryByTestId('workflowOptionTagsBadge')).not.toBeInTheDocument();
+    expect(screen.getByTestId('workflowOptionDetails')).toHaveTextContent(
+      /^Sends alerts to Slack$/
+    );
   });
 
-  it('marks disabled workflows and explains why on hover', async () => {
+  it('renders no focusable elements inside the option', () => {
+    const { container } = renderOption(
+      createWorkflow({
+        managed: true,
+        enabled: false,
+        definition: {
+          version: '1',
+          name: 'Slack notification workflow',
+          enabled: false,
+          triggers: [],
+          steps: [],
+          tags: ['slack'],
+        },
+      })
+    );
+
+    expect(container.querySelector('[tabindex], button, a')).toBeNull();
+  });
+
+  it('marks disabled workflows with a badge', () => {
     renderOption(createWorkflow({ enabled: false }));
 
-    expect(screen.getByText('Disabled')).toBeInTheDocument();
-
-    await userEvent.hover(screen.getByText('Slack notification workflow'));
-    expect(await screen.findByText('Disabled workflow')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowOptionDisabledBadge')).toHaveTextContent('Disabled');
   });
 
   it('does not mark enabled workflows as disabled', () => {

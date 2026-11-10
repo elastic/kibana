@@ -77,6 +77,9 @@ export const WorkflowSelector = () => {
   const disabledWorkflowNames = selectedWorkflowDetails
     .filter(({ enabled }) => !enabled)
     .map(({ name }) => name);
+  const selectedWorkflowNamesById = new Map(
+    selectedWorkflowDetails.map(({ id, name }) => [id, name])
+  );
 
   useEffect(() => {
     if (selectedWorkflows.length > 0 || destinations.length === 0 || !workflowsData) {
@@ -90,17 +93,18 @@ export const WorkflowSelector = () => {
   }, [destinations, workflowsData, selectedWorkflows.length]);
 
   const workflowOptions = (workflowsData?.results ?? []).map(toWorkflowComboOption);
-  const hasNoWorkflows =
+  const showEmptyState =
     !isLoading &&
     !isError &&
     debouncedQuery === '' &&
     searchQuery === '' &&
-    workflowsData?.total === 0;
+    workflowsData?.total === 0 &&
+    destinations.length === 0;
 
   // The empty state replaces the combo box (and its onFocus refetch), so refetch on window focus
   // to pick up a workflow created in the other tab.
   useEffect(() => {
-    if (!hasNoWorkflows) {
+    if (!showEmptyState) {
       return;
     }
     const handleFocus = () => {
@@ -108,7 +112,7 @@ export const WorkflowSelector = () => {
     };
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, [hasNoWorkflows, refetch]);
+  }, [showEmptyState, refetch]);
 
   if (!isWorkflowsEnabled) {
     const settingsUrl = application.getUrlForApp('management', {
@@ -200,7 +204,7 @@ export const WorkflowSelector = () => {
               </EuiLink>
             }
           >
-            {hasNoWorkflows && destinations.length === 0 ? (
+            {showEmptyState ? (
               <div data-test-subj="workflowsEmptyState">
                 <WorkflowSelectorEmptyState createWorkflowHref={createWorkflowUrl} />
               </div>
@@ -217,15 +221,22 @@ export const WorkflowSelector = () => {
                 )}
                 selectedOptions={selectedWorkflows.map(({ id, name }) => ({
                   key: id,
-                  label: name,
+                  // Prefer the fetched name: the search results may not include every selected workflow.
+                  label: selectedWorkflowNamesById.get(id) ?? name,
                   value: { id },
                 }))}
                 onFocus={() => refetch()}
                 onSearchChange={setSearchQuery}
                 onChange={(options) => {
-                  const nextWorkflows = options.flatMap(({ value, label }) =>
-                    value ? [{ id: value.id, name: label }] : []
-                  );
+                  // Dedupe by id: a selected option whose label drifted from the search results
+                  // is not hidden from the list, so it can be picked a second time.
+                  const nextWorkflows = [
+                    ...new Map(
+                      options.flatMap(({ value, label }) =>
+                        value ? [[value.id, { id: value.id, name: label }] as const] : []
+                      )
+                    ).values(),
+                  ];
                   setSelectedWorkflows(nextWorkflows);
                   field.onChange(
                     nextWorkflows.map(({ id }) => ({ type: 'workflow' as const, id }))
