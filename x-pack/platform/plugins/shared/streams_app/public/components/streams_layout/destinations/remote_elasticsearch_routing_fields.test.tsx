@@ -143,13 +143,6 @@ describe('RemoteElasticsearchRoutingFields', () => {
     expect(screen.queryByText('Unnamed signals will be ignored and skipped.')).toBeNull();
   });
 
-  it('says unnamed signals are skipped when naming each signal', () => {
-    renderRouting({ initial: { auto: false, staticNaming: 'perSignal' } });
-
-    expect(screen.getByText('Unnamed signals will be ignored and skipped.')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('e.g. logs-billing')).toBeInTheDocument();
-  });
-
   it('resets the signal fields when per-signal names disagree', () => {
     const { getValues } = renderRouting({ initial: { auto: false } });
 

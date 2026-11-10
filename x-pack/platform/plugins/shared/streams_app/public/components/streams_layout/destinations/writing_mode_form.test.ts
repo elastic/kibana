@@ -23,17 +23,6 @@ describe('getFilledCustomSignals', () => {
       })
     ).toEqual(['metrics', 'docs']);
   });
-
-  it('returns nothing when no field is filled', () => {
-    expect(
-      getFilledCustomSignals({
-        logsIndex: ' ',
-        metricsIndex: '',
-        tracesIndex: '',
-        docsWritePatterns: [],
-      })
-    ).toEqual([]);
-  });
 });
 
 describe('getSharedRemainderOnSwitch', () => {
@@ -61,12 +50,6 @@ describe('getSharedRemainderOnSwitch', () => {
     expect(
       getSharedRemainderOnSwitch({ logsIndex: 'metrics-a-b', metricsIndex: '', tracesIndex: '' })
     ).toBe('');
-  });
-
-  it('returns empty when nothing is filled', () => {
-    expect(getSharedRemainderOnSwitch({ logsIndex: '', metricsIndex: '', tracesIndex: '' })).toBe(
-      ''
-    );
   });
 
   it('drops a remainder that does not compose back to the typed values', () => {

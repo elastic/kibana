@@ -50,11 +50,7 @@ interface DestinationTypeStepsProps {
   disabled: boolean;
 }
 
-/**
- * Returns the modal steps for the selected destination type.
- * Add a case and its fields when a new type becomes available.
- * Fields read and write their values through the surrounding `FormProvider`.
- */
+/** Modal steps for the selected destination type. Fields bind through the surrounding `FormProvider`. */
 export const getDestinationTypeSteps = ({
   storageKind,
   errors,

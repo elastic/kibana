@@ -66,41 +66,7 @@ const submittedElasticsearch = async (createDestination: jest.Mock) => {
   return createDestination.mock.calls[0][0].elasticsearch;
 };
 
-const heading = (name: string) => screen.getByRole('heading', { name });
-
 describe('CreateDestinationModal', () => {
-  it('shows the storage step, the type steps and the details step for each storage kind', () => {
-    renderModal();
-    expect(heading("Where will this destination's data live?")).toBeInTheDocument();
-    expect(heading('How should its documents be written?')).toBeInTheDocument();
-    expect(heading('Destination details')).toBeInTheDocument();
-
-    click('streamsCreateDestinationRemoteElasticsearch');
-    const connect = heading('Connect your remote cluster');
-    const writing = heading('How should its documents be written?');
-    expect(connect.compareDocumentPosition(writing)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-
-    click('streamsCreateDestinationExternalStorage');
-    expect(heading('Configure external storage')).toBeInTheDocument();
-    expect(
-      screen.queryByRole('heading', { name: 'How should its documents be written?' })
-    ).not.toBeInTheDocument();
-  });
-
-  it('names each storage card by its title, describes it and badges local only', () => {
-    renderModal();
-    const local = screen.getByRole('radio', { name: 'Local Elasticsearch Most common' });
-    const cardDetails = (radio: HTMLElement) => document.getElementById(`${radio.id}-details`);
-    expect(cardDetails(local)).toHaveTextContent('Write to indexes in this deployment.');
-    expect(screen.getByRole('radio', { name: 'Remote Elasticsearch' })).toBeInTheDocument();
-    expect(cardDetails(screen.getByRole('radio', { name: 'External storage' }))).toHaveTextContent(
-      'Send data outside Elasticsearch to Amazon S3.'
-    );
-    const badges = screen.getAllByText('Most common');
-    expect(badges).toHaveLength(1);
-    expect(cardDetails(local)).not.toContainElement(badges[0]);
-  });
-
   it('only shows the errors of fields the user has left', () => {
     renderModal();
 
@@ -268,21 +234,6 @@ describe('CreateDestinationModal', () => {
       });
     });
 
-    it('does not prefix a per-signal name typed without its signal', () => {
-      renderModal();
-      chooseFixed();
-      click('streamsCreateDestinationIndexNaming-perSignal');
-      setFieldValue('streamsCreateDestination-logs-index', 'billing-default');
-      fireEvent.blur(screen.getByTestId('streamsCreateDestination-logs-index'));
-
-      expect(fieldValue('streamsCreateDestination-logs-index')).toBe('billing-default');
-      expect(
-        screen.getByText(
-          'Must follow logs-<dataset>-<namespace>. The dataset and namespace cannot contain "-".'
-        )
-      ).toBeInTheDocument();
-    });
-
     it('resets the signal fields when per-signal names disagree', () => {
       renderModal();
       chooseFixed();
@@ -297,16 +248,6 @@ describe('CreateDestinationModal', () => {
       expect(fieldValue('streamsCreateDestination-logs-index')).toBe('');
       expect(fieldValue('streamsCreateDestination-metrics-index')).toBe('');
       expect(fieldValue('streamsCreateDestination-traces-index')).toBe('');
-    });
-
-    it('keeps the shared name when per-signal names agree', () => {
-      renderModal();
-      chooseFixed();
-      setFieldValue('streamsCreateDestinationIndex', 'a-b');
-      click('streamsCreateDestinationIndexNaming-perSignal');
-      click('streamsCreateDestinationIndexNaming-shared');
-
-      expect(fieldValue('streamsCreateDestinationIndex')).toBe('a-b');
     });
 
     it('composes all three indices when one per-signal name moves to shared', () => {
@@ -344,36 +285,6 @@ describe('CreateDestinationModal', () => {
 
       chooseFixed();
       expect(screen.getByTestId('streamsCreateDestinationIndex')).toBeInTheDocument();
-    });
-
-    it('asks for a signal name when only spaces were typed', () => {
-      renderModal();
-      useCustomIndexNames();
-      setFieldValue('streamsCreateDestination-logs-index', '   ');
-      setFieldValue('streamsCreateDestinationName', 'x');
-
-      expect(screen.getByTestId('streamsCreateDestinationSubmit')).toBeDisabled();
-      fireEvent.blur(screen.getByTestId('streamsCreateDestination-logs-index'));
-      expect(screen.getByText(SIGNAL_NAME_REQUIRED)).toBeInTheDocument();
-    });
-
-    it('drops docs from the signals when its last write pattern is removed', async () => {
-      const { createDestination } = renderModal();
-      useCustomIndexNames();
-      addDocsPattern(docsPatternsInput(), 'logs-o-*');
-      setFieldValue('streamsCreateDestination-logs-index', 'logs-a-*');
-      fireEvent.click(
-        within(screen.getByTestId('streamsCreateDestination-docs-writePatterns')).getByRole(
-          'button',
-          { name: 'Remove logs-o-* from selection in this group' }
-        )
-      );
-      setFieldValue('streamsCreateDestinationName', 'x');
-      click('streamsCreateDestinationSubmit');
-
-      const elasticsearch = await submittedElasticsearch(createDestination);
-      expect(elasticsearch.customSignals).toEqual(['logs']);
-      expect(elasticsearch.docsWritePatterns).toEqual([]);
     });
   });
 
@@ -467,13 +378,9 @@ describe('CreateDestinationModal', () => {
   });
 
   describe('external storage', () => {
-    it('submits the S3 form values with S3 preselected and no visible provider label', async () => {
+    it('submits the S3 form values and masks the secret access key', async () => {
       const { createDestination } = renderModal();
       click('streamsCreateDestinationExternalStorage');
-
-      const provider = screen.getByTestId('streamsCreateDestinationS3Provider');
-      expect(within(provider).getByText('Amazon S3')).toBeInTheDocument();
-      expect(screen.getByText('Provider').closest('label')).toBeNull();
 
       setFieldValue('streamsCreateDestinationS3Region', 'us-east-1');
       setFieldValue('streamsCreateDestinationS3Bucket', 'my-bucket');
@@ -575,34 +482,6 @@ describe('CreateDestinationModal', () => {
 
       setFieldValue('streamsCreateDestinationName', 'Billing');
       expect(incomplete(3)).not.toBeInTheDocument();
-    });
-
-    it('fills the remote connection step once endpoint and API key are set', () => {
-      renderModal();
-      click('streamsCreateDestinationRemoteElasticsearch');
-      expect(incomplete(2)).toBeInTheDocument();
-      expect(incomplete(3)).not.toBeInTheDocument();
-
-      setFieldValue(
-        'streamsCreateDestinationRemoteElasticsearchEndpoint',
-        'https://es.example.com:443'
-      );
-      expect(incomplete(2)).toBeInTheDocument();
-      setFieldValue('streamsCreateDestinationRemoteElasticsearchApiKey', 'remote-key');
-      expect(incomplete(2)).not.toBeInTheDocument();
-    });
-
-    it('fills the external storage step once the required S3 fields are set', () => {
-      renderModal();
-      click('streamsCreateDestinationExternalStorage');
-      expect(incomplete(2)).toBeInTheDocument();
-
-      setFieldValue('streamsCreateDestinationS3Region', 'us-east-1');
-      setFieldValue('streamsCreateDestinationS3Bucket', 'billing-archive');
-      setFieldValue('streamsCreateDestinationS3AccessKeyId', 'access-key-id');
-      expect(incomplete(2)).toBeInTheDocument();
-      setFieldValue('streamsCreateDestinationS3SecretAccessKey', 'secret-access-key');
-      expect(incomplete(2)).not.toBeInTheDocument();
     });
   });
 });

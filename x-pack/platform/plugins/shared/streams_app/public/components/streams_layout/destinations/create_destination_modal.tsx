@@ -52,7 +52,6 @@ const modalStyles = css({
   maxBlockSize: '90vh',
 });
 
-/** Props `EuiFormRow` clones onto its child, so the label and help text reach the input. */
 interface FormRowChildProps {
   id?: string;
   'aria-describedby'?: string;
