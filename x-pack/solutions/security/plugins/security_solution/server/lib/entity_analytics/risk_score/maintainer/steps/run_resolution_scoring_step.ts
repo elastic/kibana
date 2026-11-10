@@ -17,7 +17,9 @@ import {
   calculateResolutionEntityScores,
 } from './score_resolution_entities';
 import { persistScoresToEntityStore, persistScoresToRiskIndex } from './persist_scores';
+import type { EntityStoreRefresh } from '../../persist_risk_scores_to_entity_store';
 import type { ResolutionStepResult } from './pipeline_types';
+import type { PageStepTimings } from '../instrumentation/page_timing_types';
 import type { ScopedLogger } from '../utils/with_log_context';
 
 interface RunResolutionScoringParams {
@@ -38,8 +40,12 @@ interface RunResolutionScoringParams {
   targetEntityIds?: string[];
   alertFilters: QueryDslQueryContainer[];
   refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
+  /** Entity store `refresh` for the per-page writes. Omit to wait, as single-entity runs do. */
+  entityStoreRefresh?: EntityStoreRefresh;
   /** When true, populate `scores` in the result. Omit for full-population runs. */
   collectScores?: boolean;
+  /** Stage-owned collector shared across scoring and persistence, including failed pages. */
+  pageTimings: PageStepTimings;
 }
 
 export const runResolutionScoringStep = async ({
@@ -60,7 +66,9 @@ export const runResolutionScoringStep = async ({
   targetEntityIds,
   alertFilters,
   refresh,
+  entityStoreRefresh,
   collectScores,
+  pageTimings,
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
   runLogger.debug(
     `starting phase 2 resolution scoring: page_size=${pageSize}, sample_size=${sampleSize}`
@@ -80,15 +88,21 @@ export const runResolutionScoringStep = async ({
       scores,
       logger: runLogger,
       refresh,
+      pageTimings,
     });
-    const { docsWritten, errorsCount } = await persistScoresToEntityStore({
-      crudClient,
-      logger: runLogger,
-      entityType,
-      scores,
-      enabled: idBasedRiskScoringEnabled,
-    });
+    const { docsWritten, errorsCount } = await pageTimings.time(['store', 'write'], () =>
+      persistScoresToEntityStore({
+        crudClient,
+        logger: runLogger,
+        entityType,
+        scores,
+        enabled: idBasedRiskScoringEnabled,
+        refresh: entityStoreRefresh,
+      })
+    );
     scoresWrittenRiskIndex += docsWrittenRiskIndex;
+    pageTimings.count('storeDocumentsWritten', docsWritten);
+    pageTimings.count('storeWriteFailures', errorsCount);
     scoresWrittenEntityStore += docsWritten;
     scoresFailed += errorsCount;
 
@@ -116,6 +130,7 @@ export const runResolutionScoringStep = async ({
     abortSignal,
     targetEntityIds,
     alertFilters,
+    pageTimings,
   })) {
     if (abortSignal?.aborted) {
       runLogger.info('Resolution scoring aborted between pages');

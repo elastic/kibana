@@ -29,6 +29,12 @@ import { ID, KI_TYPE_FEATURE, SOURCE_ID, TYPE } from '../fields';
 
 export const REVISION_SIZE_LIMIT = 10_000;
 
+export interface LatestRevisionCursor {
+  sourceId: string;
+  type: string;
+  id: string;
+}
+
 /**
  * Identity of a knowledge indicator revision within a space. The space filter
  * must be applied before this grouping: feature ids are derived from
@@ -95,6 +101,60 @@ export class RevisionReader {
 
     const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
     return hits;
+  }
+
+  async fetchLatestRevisionsPage({
+    where,
+    postGroupingWhere,
+    asOf,
+    after,
+    size,
+  }: {
+    where?: LatestSourceWhereCondition;
+    postGroupingWhere?: LatestSourceWhereCondition;
+    asOf: string;
+    after?: LatestRevisionCursor;
+    size: number;
+  }): Promise<{ hits: StoredKnowledgeIndicator[]; nextCursor?: LatestRevisionCursor }> {
+    if (size < 1 || size >= REVISION_SIZE_LIMIT) {
+      throw new Error(`Revision page size must be between 1 and ${REVISION_SIZE_LIMIT - 1}.`);
+    }
+
+    const atOrBefore = esql.exp`${esql.col('@timestamp')} <= TO_DATETIME(${esql.str(asOf)})`;
+    const afterCursor = after
+      ? esql.exp`${esql.col(SOURCE_ID)} > ${esql.str(after.sourceId)}
+        OR (${esql.col(SOURCE_ID)} == ${esql.str(after.sourceId)}
+          AND ${esql.col(TYPE)} > ${esql.str(after.type)})
+        OR (${esql.col(SOURCE_ID)} == ${esql.str(after.sourceId)}
+          AND ${esql.col(TYPE)} == ${esql.str(after.type)}
+          AND ${esql.col(ID)} > ${esql.str(after.id)})`
+      : undefined;
+    let query = esql.from([KNOWLEDGE_INDICATORS_DATA_STREAM], ['_id', '_source']).where`${inSpace(
+      this.space
+    )}`;
+    query = withWhere(query, combineWhere(where, atOrBefore, afterCursor));
+    query = pickLatestPerGroup(query, REVISION_GROUP_KEY);
+    query = withWhere(query, postGroupingWhere);
+    query = query
+      .sort([SOURCE_ID, 'ASC'], [TYPE, 'ASC'], [ID, 'ASC'])
+      .keep('_source')
+      .limit(size + 1);
+
+    const { hits } = await executeAndDecodeSource<StoredKnowledgeIndicator>(this.esClient, query);
+    if (hits.length <= size) {
+      return { hits };
+    }
+
+    const page = hits.slice(0, size);
+    const last = page[page.length - 1];
+    return {
+      hits: page,
+      nextCursor: {
+        sourceId: last['source.id'],
+        type: last.type,
+        id: last.id,
+      },
+    };
   }
 
   /**

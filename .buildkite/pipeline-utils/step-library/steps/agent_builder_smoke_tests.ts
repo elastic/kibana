@@ -8,7 +8,7 @@
  */
 
 import { commandStep, groupStep } from '../helpers.ts';
-import { retry, spotAgent, spotZones } from '../presets.ts';
+import { pdBalanced, retry, spotAgent, spotZones } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const agentBuilderSmokeTestsSteps = (): readonly Step[] => [
@@ -23,7 +23,7 @@ export const agentBuilderSmokeTestsSteps = (): readonly Step[] => [
         key: 'discover-eis-models',
         timeout_in_minutes: 10,
         env: { FTR_EIS_CCM: '1' },
-        agents: spotAgent('n2-standard-2', spotZones.centralFCBA),
+        agents: spotAgent('n2-standard-2', spotZones.n2),
         artifact_paths: ['target/eis_models.json'],
         retry: retry.agentLossOrAnyOnce,
       }),
@@ -48,7 +48,7 @@ export const agentBuilderSmokeTestsSteps = (): readonly Step[] => [
         depends_on: 'discover-eis-models',
         timeout_in_minutes: 50,
         parallelism: 1,
-        agents: spotAgent('n2-standard-4', spotZones.centralFCA),
+        agents: { ...spotAgent('n2-standard-4', spotZones.n2), ...pdBalanced },
         artifact_paths: ['target/llm_smoke_judgements.jsonl'],
         retry: retry.agentLossOrAnyOnce,
       }),

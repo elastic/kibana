@@ -32,7 +32,7 @@ Web Search
 :   Search the web using Brave Search API.
     - **Query** (required): The search query string.
     - **Count** (optional): Number of results to return (1-20, default: 10).
-    - **Offset** (optional): Result offset for pagination (default: 0).
+    - **Offset** (optional): Zero-based page of results to return, in pages of **Count** results (0-9, default: 0).
 
 ## Connector networking configuration [brave-search-connector-networking-configuration]
 

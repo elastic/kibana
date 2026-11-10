@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { BooleanFromString } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import { sloWithDataResponseSchema } from '../slo';
 
 const sortDirectionSchema = z.union([z.literal('asc'), z.literal('desc')]);
@@ -48,32 +48,63 @@ const searchAfterSchema = z.codec(
   }
 );
 
-const findSLOQuerySchema = z.object({
-  filters: z.string().optional(),
-  kqlQuery: z.string().optional(),
-  // Used for page-based pagination; kept as strings to preserve backward compatibility
-  page: z.string().optional(),
-  perPage: z.string().optional(),
-  sortBy: sortBySchema.optional(),
-  sortDirection: sortDirectionSchema.optional(),
-  hideStale: BooleanFromString.optional(),
-  // Used for cursor-based pagination; searchAfter is a JSON-encoded array
-  searchAfter: searchAfterSchema.optional(),
-  size: z.string().optional(),
-});
+const findSLOQuerySchema = lazySchema(() =>
+  z.object({
+    filters: z
+      .string()
+      .optional()
+      .describe('A JSON-encoded Elasticsearch query DSL filter to apply to the SLO summaries'),
+    kqlQuery: z.string().optional().describe('A valid kql query to filter the SLO with'),
+    // Used for page-based pagination; kept as strings to preserve backward compatibility
+    page: z
+      .string()
+      .optional()
+      .describe('The page to use for pagination, must be greater or equal than 1'),
+    perPage: z.string().optional().describe('Number of SLOs returned by page'),
+    sortBy: sortBySchema.optional().describe('Sort by field'),
+    sortDirection: sortDirectionSchema.optional().describe('Sort order'),
+    hideStale: BooleanFromString.optional().describe(
+      'Hide stale SLOs from the list as defined by stale SLO threshold in SLO settings'
+    ),
+    // Used for cursor-based pagination; searchAfter is a JSON-encoded array
+    searchAfter: searchAfterSchema
+      .optional()
+      .describe(
+        'The cursor to use for fetching the results from, when using a cursor-based pagination.'
+      ),
+    size: z
+      .string()
+      .optional()
+      .describe(
+        'The page size to use for cursor-based pagination, must be greater or equal than 1'
+      ),
+  })
+);
 
 const findSLOParamsSchema = z.object({
   query: findSLOQuerySchema.optional(),
 });
 
-const findSLOResponseSchema = z.object({
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-  results: z.array(sloWithDataResponseSchema),
-  searchAfter: searchAfterArraySchema.optional(),
-  size: z.number().optional(),
-});
+const findSLOResponseSchema = lazySchema(() =>
+  z
+    .object({
+      page: z.number(),
+      perPage: z.number(),
+      total: z.number(),
+      results: z.array(sloWithDataResponseSchema),
+      searchAfter: searchAfterArraySchema
+        .optional()
+        .describe(
+          'The cursor to provide to get the next page of results, when using cursor-based pagination'
+        ),
+      size: z.number().optional().describe('Size provided for cursor based pagination'),
+    })
+    .meta({
+      id: 'SLOFindResponse',
+      description: 'A paginated response of SLOs matching the query.',
+      additionalProperties: true,
+    })
+);
 
 type FindSLOParams = z.output<typeof findSLOQuerySchema>;
 type FindSLOResponse = z.input<typeof findSLOResponseSchema>;

@@ -1,0 +1,173 @@
+{
+  "operations": {
+    "createSnooze": [
+      {
+        "method": "post",
+        "path": "/v3/projects/{projectsId}/snoozes",
+        "source": "v3"
+      }
+    ],
+    "getAlertPolicy": [
+      {
+        "method": "get",
+        "path": "/v3/projects/{projectsId}/alertPolicies/{alertPoliciesId}",
+        "source": "v3"
+      }
+    ],
+    "listAlertPolicies": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "alertPolicies",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/v3/projects/{projectsId}/alertPolicies",
+        "source": "v3"
+      }
+    ],
+    "listNotificationChannels": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "notificationChannels",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/v3/projects/{projectsId}/notificationChannels",
+        "source": "v3"
+      }
+    ],
+    "listServiceLevelObjectives": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "serviceLevelObjectives",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/v3/{v3Id}/{v3Id1}/services/{servicesId}/serviceLevelObjectives",
+        "source": "v3"
+      }
+    ],
+    "listServices": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "services",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/v3/{v3Id}/{v3Id1}/services",
+        "source": "v3"
+      }
+    ],
+    "listSnoozes": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "snoozes",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/v3/projects/{projectsId}/snoozes",
+        "source": "v3"
+      }
+    ],
+    "listTimeSeries": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "timeSeries",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/v3/projects/{projectsId}/timeSeries",
+        "source": "v3"
+      }
+    ],
+    "listUptimeCheckConfigs": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "pageToken",
+            "sizeParam": "pageSize"
+          },
+          "response": {
+            "itemsPath": "uptimeCheckConfigs",
+            "nextPath": "nextPageToken"
+          },
+          "style": "cursor"
+        },
+        "path": "/v3/projects/{projectsId}/uptimeCheckConfigs",
+        "source": "v3"
+      }
+    ],
+    "setAlertPolicyEnabled": [
+      {
+        "method": "patch",
+        "path": "/v3/projects/{projectsId}/alertPolicies/{alertPoliciesId}",
+        "source": "v3"
+      }
+    ],
+    "updateAlertPolicy": [
+      {
+        "method": "patch",
+        "path": "/v3/projects/{projectsId}/alertPolicies/{alertPoliciesId}",
+        "source": "v3"
+      }
+    ],
+    "updateSnooze": [
+      {
+        "method": "patch",
+        "path": "/v3/projects/{projectsId}/snoozes/{snoozesId}",
+        "source": "v3"
+      }
+    ]
+  },
+  "sources": {
+    "v3": {
+      "apiVersion": "v3",
+      "fetchedAt": "2026-10-07T20:19:44.077Z",
+      "format": "discovery",
+      "url": "https://monitoring.googleapis.com/$discovery/rest?version=v3"
+    }
+  }
+}

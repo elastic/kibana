@@ -11,7 +11,7 @@ exports[`refreshing a suite issue comments with the report's numbers for the sui
 
 1 distinct error:
 
-<details>
+<details open>
 <summary><b>100% of failed builds</b> (49 of 49) · <code>Error: Timed out 30000ms waiting for expect(locator).toBeVisible()</code> · 2–9 Sep 2026</summary>
 
 \`\`\`text
@@ -81,7 +81,7 @@ Latest run on \`main\` was skipped (2026-09-09).
 
 2 distinct errors:
 
-<details>
+<details open>
 <summary><b>100% of failed builds</b> (21 of 21) · <code>Error: expect(locator).toBeVisible() failed</code> · 1–9 Sep 2026</summary>
 
 \`\`\`text
@@ -164,7 +164,7 @@ exports[`renderFlakySuiteIssueBody renders a single-test suite 1`] = `
 
 1 distinct error:
 
-<details>
+<details open>
 <summary><b>100% of failed builds</b> (49 of 49) · <code>Error: Timed out 30000ms waiting for expect(locator).toBeVisible()</code> · 2–9 Sep 2026</summary>
 
 \`\`\`text

@@ -328,6 +328,42 @@ describe('run query helpers', () => {
       expect(columns[0].meta.esMeta).toEqual({ approximation: true });
     });
   });
+
+  describe('getESQLQueryColumnsRaw project routing', () => {
+    const mockSearch: jest.MockedFunction<ISearchGeneric> = jest.fn();
+
+    beforeEach(() => {
+      mockSearch.mockReset();
+      mockSearch.mockReturnValue(
+        of({
+          isRunning: false,
+          rawResponse: { columns: [], values: [] },
+        } as unknown as IKibanaSearchResponse<ESQLSearchResponse>)
+      );
+    });
+
+    it('forwards the project routing to the search options', async () => {
+      await getESQLQueryColumnsRaw({
+        esqlQuery: 'FROM foo',
+        search: mockSearch,
+        projectRouting: '_alias:*',
+      });
+
+      expect(mockSearch).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ projectRouting: '_alias:*' })
+      );
+    });
+
+    it('does not set a project routing by default', async () => {
+      await getESQLQueryColumnsRaw({ esqlQuery: 'FROM foo', search: mockSearch });
+
+      expect(mockSearch).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.not.objectContaining({ projectRouting: expect.anything() })
+      );
+    });
+  });
 });
 
 describe('getEsqlSearchParams', () => {

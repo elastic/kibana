@@ -8,12 +8,12 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { EuiCallOut, EuiSplitPanel, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiSplitPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { HeaderBadge } from '@kbn/agent-builder-browser/attachments';
+import type { HeaderBadge, HeaderColor } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
-import { AB_PANEL_RADIUS } from '../../../../../../common.styles';
 import { AttachmentHeader } from './attachment_header';
+import { AttachmentCard, ATTACHMENT_INNER_RADIUS } from './attachment_card';
 import { AttachmentLoadingSkeleton } from './attachment_loading_skeleton';
 import { TimelineRenderErrorBoundary } from '../../timeline_render_error_boundary';
 
@@ -22,55 +22,73 @@ interface ShellArgs {
   title: string;
   subtitle?: string;
   badges?: HeaderBadge[];
+  color?: HeaderColor;
+  isCanvas?: boolean;
   body: React.ReactNode;
   actionButtons?: React.ComponentProps<typeof AttachmentHeader>['actionButtons'];
   previewBadgeState?: React.ComponentProps<typeof AttachmentHeader>['previewBadgeState'];
 }
+
+const FlyoutFrame: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <div
+      css={css`
+        max-width: 820px;
+        overflow: hidden;
+        border: ${euiTheme.border.thin};
+        border-radius: 0 ${euiTheme.border.radius.small} 0 0;
+      `}
+    >
+      {children}
+    </div>
+  );
+};
 
 const Shell: React.FC<ShellArgs> = ({
   icon,
   title,
   subtitle,
   badges,
+  color,
+  isCanvas,
   body,
   actionButtons,
   previewBadgeState,
-}) => (
-  <EuiSplitPanel.Outer
-    grow
-    hasShadow={false}
-    hasBorder={true}
-    css={css`
-      overflow: visible;
-      border-radius: ${AB_PANEL_RADIUS}px;
-      max-width: 820px;
-    `}
-  >
-    <AttachmentHeader
-      icon={icon}
-      title={title}
-      subtitle={subtitle}
-      badges={badges}
-      actionButtons={actionButtons}
-      previewBadgeState={previewBadgeState}
-      onClosePreview={action('close preview')}
-    />
-    <EuiSplitPanel.Inner
-      grow={false}
-      paddingSize="none"
-      css={css`
-        border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
-        overflow: hidden;
+}) => {
+  const Frame = isCanvas ? FlyoutFrame : AttachmentCard;
+  const frameProps = isCanvas ? {} : { color, maxWidth: 820 };
 
-        > .euiPanel {
-          border-radius: 0 0 ${AB_PANEL_RADIUS}px ${AB_PANEL_RADIUS}px;
-        }
-      `}
-    >
-      <TimelineRenderErrorBoundary>{() => body}</TimelineRenderErrorBoundary>
-    </EuiSplitPanel.Inner>
-  </EuiSplitPanel.Outer>
-);
+  return (
+    <Frame {...frameProps}>
+      <AttachmentHeader
+        icon={icon}
+        title={title}
+        subtitle={subtitle}
+        badges={badges}
+        color={color}
+        isCanvas={isCanvas}
+        actionButtons={actionButtons}
+        previewBadgeState={previewBadgeState}
+      />
+      <EuiSplitPanel.Inner
+        grow={false}
+        paddingSize="none"
+        css={css`
+          border-radius: 0 0 ${ATTACHMENT_INNER_RADIUS}px ${ATTACHMENT_INNER_RADIUS}px;
+          overflow: hidden;
+
+          > .euiPanel {
+            border-radius: 0 0 ${ATTACHMENT_INNER_RADIUS}px ${ATTACHMENT_INNER_RADIUS}px;
+          }
+        `}
+      >
+        <TimelineRenderErrorBoundary>{() => body}</TimelineRenderErrorBoundary>
+      </EuiSplitPanel.Inner>
+    </Frame>
+  );
+};
 
 const bodyPlaceholder = (
   <div style={{ padding: 16 }}>
@@ -134,6 +152,16 @@ export const Default: Story = {
   },
 };
 
+export const CanvasHeader: Story = {
+  args: {
+    icon: 'document',
+    title: 'workflow.yaml',
+    actionButtons: defaultActions,
+    isCanvas: true,
+    body: bodyPlaceholder,
+  },
+};
+
 export const WithSubtitle: Story = {
   args: {
     icon: 'document',
@@ -179,6 +207,178 @@ export const WithOverflowActions: Story = {
     ],
     body: bodyPlaceholder,
   },
+};
+
+export const SplitButtonWithSecondaryActions: Story = {
+  args: {
+    icon: 'document',
+    title: 'T1110 MITRE technique for OKTA',
+    actionButtons: [
+      {
+        label: 'Primary',
+        icon: 'play',
+        type: ActionButtonType.PRIMARY,
+        handler: action('primary'),
+      },
+      {
+        label: 'Secondary',
+        icon: 'search',
+        type: ActionButtonType.SECONDARY,
+        handler: action('s1'),
+      },
+      { label: 'Secondary', icon: 'user', type: ActionButtonType.SECONDARY, handler: action('s2') },
+      {
+        label: 'Secondary',
+        icon: 'wrench',
+        type: ActionButtonType.SECONDARY,
+        handler: action('s3'),
+      },
+      {
+        label: 'Delete',
+        icon: 'trash',
+        type: ActionButtonType.OVERFLOW,
+        handler: action('delete'),
+      },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
+export const PrimaryOnly: Story = {
+  args: {
+    icon: 'document',
+    title: 'note.txt',
+    actionButtons: [
+      { label: 'Copy', icon: 'copy', type: ActionButtonType.PRIMARY, handler: action('copy') },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
+export const MenuOnlyWithoutPrimary: Story = {
+  args: {
+    icon: 'document',
+    title: 'note.txt',
+    actionButtons: [
+      {
+        label: 'Archive',
+        icon: 'folderClosed',
+        type: ActionButtonType.OVERFLOW,
+        handler: action('archive'),
+      },
+      {
+        label: 'Delete',
+        icon: 'trash',
+        type: ActionButtonType.OVERFLOW,
+        handler: action('delete'),
+      },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
+export const SecondaryActionsWithoutPrimary: Story = {
+  args: {
+    icon: 'document',
+    title: 'note.txt',
+    actionButtons: [
+      {
+        label: 'Preview',
+        icon: 'eye',
+        type: ActionButtonType.SECONDARY,
+        handler: action('preview'),
+      },
+      {
+        label: 'Open in editor',
+        icon: 'external',
+        type: ActionButtonType.SECONDARY,
+        handler: action('open in editor'),
+      },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
+export const SingleSecondaryAction: Story = {
+  args: {
+    icon: 'document',
+    title: 'skill.md (older version)',
+    actionButtons: [
+      {
+        label: 'Preview',
+        icon: 'eye',
+        type: ActionButtonType.SECONDARY,
+        handler: action('preview'),
+      },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
+export const DisabledPrimary: Story = {
+  args: {
+    icon: 'document',
+    title: 'rule.json',
+    actionButtons: [
+      {
+        label: 'Create rule',
+        icon: 'plusCircle',
+        type: ActionButtonType.PRIMARY,
+        disabled: true,
+        disabledReason: 'You need the manage rules privilege.',
+        handler: action('create'),
+      },
+      { label: 'Copy', icon: 'copy', type: ActionButtonType.SECONDARY, handler: action('copy') },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
+export const CompactWidth: Story = {
+  render: (args) => (
+    <div style={{ maxWidth: 480 }}>
+      <Shell {...args} />
+    </div>
+  ),
+  args: {
+    icon: 'document',
+    title: 'T1110 MITRE technique for OKTA',
+    actionButtons: [
+      {
+        label: 'Primary',
+        icon: 'play',
+        type: ActionButtonType.PRIMARY,
+        handler: action('primary'),
+      },
+      {
+        label: 'Secondary',
+        icon: 'search',
+        type: ActionButtonType.SECONDARY,
+        handler: action('s1'),
+      },
+      { label: 'Secondary', icon: 'user', type: ActionButtonType.SECONDARY, handler: action('s2') },
+    ],
+    body: bodyPlaceholder,
+  },
+};
+
+const COLOR_VARIANTS: HeaderColor[] = ['primary', 'danger', 'warning'];
+
+export const ColorVariants: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {COLOR_VARIANTS.map((color) => (
+        <Shell
+          key={color}
+          icon="document"
+          title={`Color variant: ${color}`}
+          color={color}
+          actionButtons={defaultActions}
+          body={bodyPlaceholder}
+        />
+      ))}
+    </div>
+  ),
 };
 
 export const EmptyState: Story = {
