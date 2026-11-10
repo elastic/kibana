@@ -181,6 +181,16 @@ export class ObservabilityAlertingPage {
     await this.inboxPage.waitFor({ state: 'visible' });
   }
 
+  /** Opens the inbox filtered to episodes carrying any of `tags`, across all episode sources. */
+  async gotoInboxFilteredByTags(tags: readonly string[]): Promise<void> {
+    const tagList = tags.map((tag) => `'${tag}'`).join(',');
+    const search = new URLSearchParams({
+      _a: `(alertsList:(tags:!(${tagList})))`,
+    });
+    await this.goto(`${OBSERVABILITY_ALERTING_ALERTS_PATH}?${search.toString()}`);
+    await this.inboxPage.waitFor({ state: 'visible' });
+  }
+
   async openEpisodeFlyout(): Promise<void> {
     await this.expandRowButton.click();
     await this.episodeFlyout.waitFor({ state: 'visible' });
@@ -252,17 +262,29 @@ export class ObservabilityAlertingPage {
     }).toPass();
   }
 
-  /** Row control for an episode action, whether the row renders it inline or in its overflow menu. */
-  episodeRowAction(actionId: string): Locator {
-    return this.page.testSubj
-      .locator(`unifiedDataTable_rowControl_${actionId}`)
+  /**
+   * Control for an episode action on the row of `ruleName`, rendered inline in that row or in the
+   * open overflow menu.
+   */
+  episodeRowAction(actionId: string, ruleName: string): Locator {
+    return this.episodeRows(ruleName)
+      .locator(this.page.testSubj.locator(`unifiedDataTable_rowControl_${actionId}`))
       .or(this.page.testSubj.locator(`unifiedDataTable_rowMenu_${actionId}`));
+  }
+
+  /** Overflow actions menu button of the row of `ruleName`. */
+  episodeRowActionsMenuButton(ruleName: string): Locator {
+    return this.episodeRows(ruleName).locator(this.rowActionsMenuButton);
   }
 
   /** Opens the row's overflow actions menu, which holds the actions that do not fit inline. */
   async openEpisodeRowActionsMenu(ruleName: string): Promise<void> {
-    const [row] = await this.episodeRows(ruleName).all();
-    await row.locator(this.rowActionsMenuButton).click();
+    await this.episodeRowActionsMenuButton(ruleName).click();
+  }
+
+  /** Closes the open row overflow actions menu. */
+  async closeEpisodeRowActionsMenu(): Promise<void> {
+    await this.page.keyboard.press('Escape');
   }
 
   /** Selects every row on the page and waits until the selection toolbar reports the expected count. */

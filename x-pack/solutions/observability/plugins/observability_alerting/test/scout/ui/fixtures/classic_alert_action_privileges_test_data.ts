@@ -18,6 +18,9 @@ import {
   ES_QUERY_RULE_TYPE_ID,
   THRESHOLD_DATA_VIEW_ID,
   THRESHOLD_TEST_INDEX,
+  V1_EPISODE_TAG,
+  V2_EPISODE_TAG,
+  V2_PRIVILEGE_RULE_NAME,
   waitForStackRuleAlert,
   waitForV1RuleAlert,
 } from './privilege_test_data';
@@ -49,7 +52,21 @@ export const OBSERVABILITY_READ_STACK_WRITE_ROLE = buildRole({
   stackAlertsOnly: ['all'],
 });
 
-const CLASSIC_WRITE_ACTION_IDS = [
+export const UNIVERSAL_WRITE_CLASSIC_READ_ROLE = buildRole({
+  alerting_v2_alerts: ['all'],
+  alerting_v2_rules: ['read'],
+  observabilityAlerts: ['read'],
+});
+
+export const CLASSIC_WRITE_UNIVERSAL_READ_ROLE = buildRole({
+  observabilityAlerts: ['all'],
+  alerting_v2_alerts: ['read'],
+  alerting_v2_rules: ['read'],
+});
+
+export const OPEN_IN_DISCOVER_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
+
+const EPISODE_WRITE_ACTION_IDS = [
   'ALERTING_V2_ACK_EPISODE',
   'ALERTING_V2_RESOLVE_EPISODE',
   'ALERTING_V2_EDIT_EPISODE_TAGS',
@@ -200,30 +217,47 @@ export const gotoSeededClassicAlert = async (
   });
 };
 
-/** Asserts the row's actions menu offers every classic write action. */
-export const expectClassicWriteActions = async (
+/** Opens the alerts inbox filtered to the seeded classic and universal alerts and waits for both rows. */
+export const gotoSeededMixedSourceAlerts = async (
+  observabilityAlerting: ObservabilityAlertingPage
+): Promise<void> => {
+  await observabilityAlerting.gotoInboxFilteredByTags([V1_EPISODE_TAG, V2_EPISODE_TAG]);
+  for (const ruleName of [V1_RULE_NAME, V2_PRIVILEGE_RULE_NAME]) {
+    await expect(observabilityAlerting.episodeRuleCell(ruleName)).toBeVisible({
+      timeout: 60_000,
+    });
+  }
+};
+
+/** Asserts the row of `ruleName` offers every episode write action. */
+export const expectEpisodeWriteActions = async (
   observabilityAlerting: ObservabilityAlertingPage,
   ruleName: string
 ): Promise<void> => {
   await expect(async () => {
+    await observabilityAlerting.closeEpisodeRowActionsMenu();
     await observabilityAlerting.openEpisodeRowActionsMenu(ruleName);
-    for (const actionId of CLASSIC_WRITE_ACTION_IDS) {
-      await expect(observabilityAlerting.episodeRowAction(actionId)).toBeVisible({
+    for (const actionId of EPISODE_WRITE_ACTION_IDS) {
+      await expect(observabilityAlerting.episodeRowAction(actionId, ruleName)).toBeVisible({
         timeout: 2_000,
       });
     }
   }).toPass();
+  await observabilityAlerting.closeEpisodeRowActionsMenu();
 };
 
-/** Asserts no classic write action is rendered, inline or in the row's actions menu. */
-export const expectNoClassicWriteActions = async (
+/**
+ * Asserts the row of `ruleName` renders no episode write action, inline or in its actions menu,
+ * and leaves the menu open so read-safe actions can be asserted on.
+ */
+export const expectNoEpisodeWriteActions = async (
   observabilityAlerting: ObservabilityAlertingPage,
   ruleName: string
 ): Promise<void> => {
-  if (await observabilityAlerting.rowActionsMenuButton.count()) {
+  if (await observabilityAlerting.episodeRowActionsMenuButton(ruleName).count()) {
     await observabilityAlerting.openEpisodeRowActionsMenu(ruleName);
   }
-  for (const actionId of CLASSIC_WRITE_ACTION_IDS) {
-    await expect(observabilityAlerting.episodeRowAction(actionId)).toHaveCount(0);
+  for (const actionId of EPISODE_WRITE_ACTION_IDS) {
+    await expect(observabilityAlerting.episodeRowAction(actionId, ruleName)).toHaveCount(0);
   }
 };

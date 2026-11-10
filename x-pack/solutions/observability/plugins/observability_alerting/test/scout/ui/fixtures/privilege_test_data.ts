@@ -15,6 +15,7 @@ import type { EsClient, KbnClient } from '@kbn/scout-oblt';
 export const V1_EPISODE_TAG = 'scout-obs-priv-v1';
 export const V2_EPISODE_TAG = 'scout-obs-priv-v2';
 export const CUSTOM_THRESHOLD_RULE_TYPE_ID = 'observability.rules.custom_threshold';
+export const V2_PRIVILEGE_RULE_NAME = '[scout] Observability privilege v2 rule';
 
 /** Source index the v1 custom threshold rule queries. */
 export const THRESHOLD_TEST_INDEX = 'scout-obs-priv-threshold';
@@ -197,7 +198,7 @@ export const seedV2PrivilegeRule = async (
     headers: RULE_API_HEADERS,
     body: {
       kind: 'alert',
-      metadata: { name: '[scout] Observability privilege v2 rule', tags: [V2_EPISODE_TAG] },
+      metadata: { name: V2_PRIVILEGE_RULE_NAME, tags: [V2_EPISODE_TAG] },
       schedule: { every: '1h' },
       query: { base: 'FROM logs-* | LIMIT 1' },
       recovery: { strategy: 'no_breach' },

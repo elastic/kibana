@@ -16,7 +16,7 @@ import {
   createV1PrivilegeRule,
   deleteStackPrivilegeRuleData,
   deleteV1PrivilegeRuleData,
-  expectClassicWriteActions,
+  expectEpisodeWriteActions,
   gotoSeededClassicAlert,
   OBSERVABILITY_READ_STACK_WRITE_ROLE,
   STACK_ALERTS_ALL_ROLE,
@@ -51,7 +51,7 @@ test.describe(
     }) => {
       await browserAuth.loginWithCustomRole(STACK_ALERTS_ALL_ROLE);
       await gotoSeededClassicAlert(pageObjects.observabilityAlerting, stackRuleId, STACK_RULE_NAME);
-      await expectClassicWriteActions(pageObjects.observabilityAlerting, STACK_RULE_NAME);
+      await expectEpisodeWriteActions(pageObjects.observabilityAlerting, STACK_RULE_NAME);
     });
 
     test('write capability on any classic alerts feature applies to every classic alert', async ({
@@ -60,7 +60,7 @@ test.describe(
     }) => {
       await browserAuth.loginWithCustomRole(OBSERVABILITY_READ_STACK_WRITE_ROLE);
       await gotoSeededClassicAlert(pageObjects.observabilityAlerting, v1RuleId, V1_RULE_NAME);
-      await expectClassicWriteActions(pageObjects.observabilityAlerting, V1_RULE_NAME);
+      await expectEpisodeWriteActions(pageObjects.observabilityAlerting, V1_RULE_NAME);
     });
   }
 );
