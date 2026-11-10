@@ -109,7 +109,7 @@ const mockUnit = async (page: ScoutPage) => {
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
-        components: { destinations: {}, processors: {} },
+        components: { destinations: {}, processors: {}, sources: {} },
         meta: { window: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-01T00:15:00.000Z' } },
       }),
     });
@@ -137,16 +137,16 @@ test.describe('Streams V2 privileges', { tag: tags.serverless.observability.comp
     await browserAuth.loginWithCustomRole(V2_READ_ROLE);
     await page.gotoApp('streams');
 
-    await expect(page).toHaveURL(/\/app\/streams\/new-experience\/map/);
+    await expect(page).toHaveURL(/\/app\/streams\/v2\/unit\/default\/map/);
     await expect(pageObjects.streams.canvasTab).toBeVisible();
     await expect(pageObjects.collapsibleNav.getNavItemByDeepLinkId('streams')).toBeVisible();
   });
 
   test('a legacy-only read user is sent back from V2', async ({ browserAuth, page }) => {
     await browserAuth.loginWithCustomRole(LEGACY_READ_ROLE);
-    await page.gotoApp('streams/new-experience/map');
+    await page.gotoApp('streams/v2/unit/default/map');
 
-    await expect(page).not.toHaveURL(/new-experience/);
+    await expect(page).not.toHaveURL(/\/app\/streams\/v2/);
     await expect(page.testSubj.locator('streamsCanvasTab')).toHaveCount(0);
   });
 

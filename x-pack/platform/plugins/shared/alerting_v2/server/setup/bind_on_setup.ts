@@ -27,7 +27,7 @@ import { registerAlertingV2UsageCollector } from '../lib/usage/usage_collector';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
-} from '../lib/dispatcher/steps/constants';
+} from '../lib/services/event_log_service/constants';
 import { registerAlertingAdvancedSettings } from '../settings/advanced_settings';
 import { registerTelemetryEvents } from '../lib/telemetry/register_ebt_events';
 
