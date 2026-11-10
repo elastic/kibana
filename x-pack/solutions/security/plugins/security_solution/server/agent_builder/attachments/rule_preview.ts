@@ -7,7 +7,7 @@
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
@@ -19,9 +19,11 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { DEFAULT_PREVIEW_INDEX, SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
 
-export const rulePreviewAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  previewId: z.string().min(1).max(1_000),
-});
+export const rulePreviewAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    previewId: z.string().min(1).max(1_000),
+  })
+);
 
 type RulePreviewAttachmentData = z.infer<typeof rulePreviewAttachmentDataSchema>;
 
@@ -51,22 +53,24 @@ const GET_RULE_PREVIEW_ALERTS_TOOL_ID = 'get_rule_preview_alerts';
 const DEFAULT_ALERTS_SIZE = 25;
 const MAX_ALERTS_SIZE = 100;
 
-const getRulePreviewAlertsToolSchema = z.object({
-  previewId: z
-    .string()
-    .min(1)
-    .max(1_000)
-    .describe(
-      'The preview ID of the security rule preview attachment to fetch alerts for, as shown in the rule preview attachment.'
-    ),
-  size: z
-    .number()
-    .int()
-    .min(1)
-    .max(MAX_ALERTS_SIZE)
-    .optional()
-    .describe(`Maximum number of preview alerts to fetch. Defaults to ${DEFAULT_ALERTS_SIZE}.`),
-});
+const getRulePreviewAlertsToolSchema = lazySchema(() =>
+  z.object({
+    previewId: z
+      .string()
+      .min(1)
+      .max(1_000)
+      .describe(
+        'The preview ID of the security rule preview attachment to fetch alerts for, as shown in the rule preview attachment.'
+      ),
+    size: z
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_ALERTS_SIZE)
+      .optional()
+      .describe(`Maximum number of preview alerts to fetch. Defaults to ${DEFAULT_ALERTS_SIZE}.`),
+  })
+);
 
 const isRulePreviewAttachmentData = (data: unknown): data is RulePreviewAttachmentData => {
   return rulePreviewAttachmentDataSchema.safeParse(data).success;

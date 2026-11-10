@@ -1,5 +1,5 @@
 {
-  "sha1": "680bff9bee6b3d26752e8ceab90066ace2cb8282",
+  "sha1": "85b75af30adacbc668e71b5f554d0a45e89628d3",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -742,7 +742,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 162,
+        "line": 169,
+        "column": 11
+      }
+    },
+    {
+      "id": "01ef9b7d0fce753-8d81a4f3934d1b0",
+      "title": "context engine KI lifecycle filter keeps the filters when a query only displays a lifecycle field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
+        "line": 176,
         "column": 27
       }
     },
@@ -756,8 +770,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 176,
-        "column": 5
+        "line": 203,
+        "column": 4
       }
     },
     {
@@ -770,8 +784,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 197,
-        "column": 12
+        "line": 221,
+        "column": 72
       }
     },
     {
@@ -784,8 +798,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 211,
-        "column": 73
+        "line": 234,
+        "column": 11
       }
     },
     {
@@ -798,8 +812,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 220,
-        "column": 73
+        "line": 338,
+        "column": 27
       }
     },
     {
@@ -812,7 +826,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 341,
+        "line": 355,
         "column": 27
       }
     },
@@ -826,7 +840,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 350,
+        "line": 364,
         "column": 27
       }
     },
@@ -840,8 +854,78 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_lifecycle.spec.ts",
-        "line": 361,
+        "line": 375,
         "column": 27
+      }
+    },
+    {
+      "id": "c207fb36d5236cf-58f1275acfeb96f",
+      "title": "context engine KI search matches title and description, ranks the title match first, and excludes a superseded revision",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_search.spec.ts",
+        "line": 96,
+        "column": 21
+      }
+    },
+    {
+      "id": "c207fb36d5236cf-5b8b5bab821250a",
+      "title": "context engine KI search returns no results for a non-matching query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_search.spec.ts",
+        "line": 105,
+        "column": 18
+      }
+    },
+    {
+      "id": "0e74b606f03d8bb-ce8f2dc737e483e",
+      "title": "context engine KI write API updates, soft-deletes, and restores a KI on an index dest",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_write_api.spec.ts",
+        "line": 100,
+        "column": 11
+      }
+    },
+    {
+      "id": "0e74b606f03d8bb-5c64eda5675ccb5",
+      "title": "context engine KI write API updates a KI on a data stream dest by appending a revision",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_write_api.spec.ts",
+        "line": 193,
+        "column": 98
+      }
+    },
+    {
+      "id": "0e74b606f03d8bb-828dda496c0f0e9",
+      "title": "context engine KI write API rejects KI writes for users without write privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/context_engine/test/scout_agent_builder/api/tests/ki_write_api.spec.ts",
+        "line": 212,
+        "column": 11
       }
     }
   ]

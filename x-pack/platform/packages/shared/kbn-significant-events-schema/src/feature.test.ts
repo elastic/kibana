@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type { BaseFeature } from './feature';
 import {
+  baseFeatureSchema,
   computeFeatureUuid,
   MAX_FEATURE_ARRAY_ITEMS,
   mergeFeature,
@@ -24,7 +26,6 @@ const createFeature = ({
   meta?: Record<string, unknown>;
 } = {}): BaseFeature => ({
   id,
-  stream_name: 'logs.test',
   type: 'technology',
   subtype: 'identity_provider',
   title: 'Okta',
@@ -38,6 +39,22 @@ const createFeature = ({
   evidence_doc_ids: [],
   tags: ['identity'],
   meta,
+});
+
+describe('baseFeatureSchema', () => {
+  it('normalizes the id on parse', () => {
+    expect(baseFeatureSchema.parse(createFeature({ id: ' Svc-Checkout ' })).id).toBe(
+      'svc-checkout'
+    );
+  });
+
+  it('keeps the id a plain string in the JSON schema', () => {
+    const { properties } = z.toJSONSchema(baseFeatureSchema) as {
+      properties: Record<string, { type?: string }>;
+    };
+
+    expect(properties.id).toEqual(expect.objectContaining({ type: 'string' }));
+  });
 });
 
 describe('normalizeFeatureSlugForMatching', () => {
@@ -74,8 +91,8 @@ describe('normalizeFeatureSlugForMatching', () => {
   });
 
   it('keeps matching normalization out of UUID generation', () => {
-    const canonical = { id: 'okta', stream_name: 'logs.test' };
-    const versioned = { id: 'okta-3.15.0', stream_name: 'logs.test' };
+    const canonical = { id: 'okta', source_id: 'logs.test' };
+    const versioned = { id: 'okta-3.15.0', source_id: 'logs.test' };
 
     expect(normalizeFeatureSlugForMatching(versioned.id)).toBe(canonical.id);
     expect(computeFeatureUuid(versioned)).not.toBe(computeFeatureUuid(canonical));

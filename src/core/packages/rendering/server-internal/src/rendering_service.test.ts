@@ -879,6 +879,72 @@ describe('RenderingService', () => {
         mockRenderingSetupDeps.i18n.allowLocaleCookie = true;
       });
     });
+
+    describe('detectBrowserLocale', () => {
+      let uiSettings: {
+        client: ReturnType<typeof uiSettingsServiceMock.createClient>;
+        globalClient: ReturnType<typeof uiSettingsServiceMock.createClient>;
+      };
+
+      beforeEach(() => {
+        uiSettings = {
+          client: uiSettingsServiceMock.createClient(),
+          globalClient: uiSettingsServiceMock.createClient(),
+        };
+        mockRenderingSetupDeps.i18n.getAvailableLocales.mockReturnValueOnce([
+          { id: 'en', label: 'English' },
+          { id: 'fr-FR', label: 'French' },
+        ]);
+        mockRenderingSetupDeps.i18n.getTranslationHashes.mockReturnValueOnce({
+          en: 'MOCK_HASH',
+          'fr-FR': 'MOCK_FR_HASH',
+        });
+        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as jest.Mock).mockReturnValueOnce(
+          false
+        );
+      });
+
+      afterEach(() => {
+        mockRenderingSetupDeps.i18n.detectBrowserLocale = true;
+      });
+
+      it('renders English and ignores Accept-Language when detectBrowserLocale is false', async () => {
+        mockRenderingSetupDeps.i18n.detectBrowserLocale = false;
+        await service.preboot(mockRenderingPrebootDeps);
+        const { render } = await service.setup(mockRenderingSetupDeps);
+
+        const { body: content, headers } = await render(
+          createKibanaRequest({ headers: { 'accept-language': 'fr-FR,en;q=0.5' } }),
+          uiSettings
+        );
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+        expect(data.i18n.translationsUrl).toBeNull();
+        expect(headers['set-cookie']).toContain('KBN_LOCALE=en;');
+      });
+
+      it('still renders the user profile locale when detectBrowserLocale is false', async () => {
+        mockRenderingSetupDeps.i18n.detectBrowserLocale = false;
+        await service.preboot(mockRenderingPrebootDeps);
+        const { render } = await service.setup(mockRenderingSetupDeps);
+
+        mockRenderingSetupDeps.userSettings.getUserSettings.mockResolvedValueOnce({
+          locale: 'fr-FR',
+        } as UserSettings);
+
+        const { body: content } = await render(
+          createKibanaRequest({ headers: { 'accept-language': 'ja-JP' } }),
+          uiSettings
+        );
+        const dom = load(content);
+        const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+
+        expect(data.i18n.translationsUrl).toEqual(
+          '/mock-server-basepath/translations/MOCK_FR_HASH/fr-FR.json'
+        );
+      });
+    });
   });
 
   describe('start()', () => {

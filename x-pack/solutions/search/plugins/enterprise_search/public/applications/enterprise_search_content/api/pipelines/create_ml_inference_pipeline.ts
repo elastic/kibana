@@ -28,7 +28,9 @@ export interface CreateMlInferencePipelineResponse {
 export const createMlInferencePipeline = async (
   args: CreateMlInferencePipelineApiLogicArgs
 ): Promise<CreateMlInferencePipelineResponse> => {
-  const route = `/internal/enterprise_search/indices/${args.indexName}/ml_inference/pipeline_processors`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(
+    args.indexName
+  )}/ml_inference/pipeline_processors`;
   const params: CreateMLInferencePipeline = {
     field_mappings: args.fieldMappings,
     model_id: args.modelId,

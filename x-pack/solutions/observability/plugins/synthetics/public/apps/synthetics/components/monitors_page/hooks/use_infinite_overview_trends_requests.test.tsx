@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useInfiniteOverviewTrendsRequests } from './use_infinite_overview_trends_requests';
-import { WrappedHelper } from '../../../utils/testing';
+import { HookWrapper } from '../../../utils/testing/hook_helpers';
 import type { OverviewStatusMetaData } from '../overview/types';
 import * as reduxHooks from 'react-redux-v7';
 
@@ -64,7 +64,7 @@ describe('useInfiniteOverviewTrendsRequests', () => {
           sliceToFetch: null,
           numOfColumns: 3,
         }),
-      { wrapper: WrappedHelper }
+      { wrapper: HookWrapper }
     );
 
     expect(mockUseOverviewTrendsRequests).toHaveBeenCalledWith([]);
@@ -83,7 +83,7 @@ describe('useInfiniteOverviewTrendsRequests', () => {
           },
           numOfColumns: 3,
         }),
-      { wrapper: WrappedHelper }
+      { wrapper: HookWrapper }
     );
 
     // visibleStartIndex: 1, visibleEndIndex: 3, numOfColumns: 3
@@ -107,7 +107,7 @@ describe('useInfiniteOverviewTrendsRequests', () => {
           },
           numOfColumns: 4,
         }),
-      { wrapper: WrappedHelper }
+      { wrapper: HookWrapper }
     );
 
     // slice(0 * 4, (2 + 1) * 4) = slice(0, 12)
@@ -128,7 +128,7 @@ describe('useInfiniteOverviewTrendsRequests', () => {
           },
           numOfColumns: 5,
         }),
-      { wrapper: WrappedHelper }
+      { wrapper: HookWrapper }
     );
 
     // slice(2 * 5, (2 + 1) * 5) = slice(10, 15)
@@ -151,7 +151,7 @@ describe('useInfiniteOverviewTrendsRequests', () => {
           },
           numOfColumns: 2,
         }),
-      { wrapper: WrappedHelper }
+      { wrapper: HookWrapper }
     );
 
     // slice(2 * 2, (10 + 1) * 2) = slice(4, 22)
@@ -171,7 +171,7 @@ describe('useInfiniteOverviewTrendsRequests', () => {
           },
           numOfColumns: 3,
         }),
-      { wrapper: WrappedHelper }
+      { wrapper: HookWrapper }
     );
 
     expect(mockUseOverviewTrendsRequests).toHaveBeenCalledWith([]);
@@ -190,7 +190,7 @@ describe('useInfiniteOverviewTrendsRequests', () => {
           },
           numOfColumns: 1,
         }),
-      { wrapper: WrappedHelper }
+      { wrapper: HookWrapper }
     );
 
     // slice(3 * 1, (5 + 1) * 1) = slice(3, 6)
@@ -211,7 +211,7 @@ describe('useInfiniteOverviewTrendsRequests', () => {
           },
           numOfColumns: 10,
         }),
-      { wrapper: WrappedHelper }
+      { wrapper: HookWrapper }
     );
 
     // slice(0 * 10, (1 + 1) * 10) = slice(0, 20)
@@ -232,7 +232,7 @@ describe('useInfiniteOverviewTrendsRequests', () => {
           },
           numOfColumns: 2,
         }),
-      { wrapper: WrappedHelper }
+      { wrapper: HookWrapper }
     );
 
     // slice(20 * 2, (25 + 1) * 2) = slice(40, 52)

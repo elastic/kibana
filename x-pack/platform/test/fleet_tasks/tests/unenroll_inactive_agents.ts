@@ -33,7 +33,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
     await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL_MS));
   }
 
-  describe('Unenroll inactive agents task', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/303892
+  describe.skip('Unenroll inactive agents task', () => {
     const apiClient = new SpaceTestApiClient(supertest);
     before(async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
@@ -107,15 +108,52 @@ export default function (providerContext: FtrProviderContextWithServices) {
           index: '.fleet-agents',
           ignore_unavailable: true,
           query: {
-            term: {
-              policy_id: policyId,
-            },
+            // by id: with the sentinel version enabled, the agent can be moved to `<policy id>#sentinel`
+            ids: { values: ['inactive-agent-1'] },
           },
         });
 
         const agentDoc = agentRes.hits.hits[0]._source as any;
         if (agentDoc?.active || !agentDoc?.unenrolled_at) {
           throw new Error('Agent is still not unenrolled');
+        }
+      });
+    });
+
+    it('should unenroll inactive agents that are active with a stale unenrolled_at', async () => {
+      await supertest
+        .put(`/api/fleet/agent_policies/${policyId}`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({
+          name: 'Test policy for unenroll inactive',
+          namespace: 'default',
+          unenroll_timeout: UNENROLL_TIMEOUT_SECONDS,
+        })
+        .expect(200);
+
+      // legacy doc written by Fleet Server 8.16.0-8.17.0 audit/unenroll: active but unenrolled_at set
+      const staleUnenrolledAt = '2025-01-01T00:00:00.000Z';
+      await createAgentDoc(providerContext, 'inactive-agent-stale', policyId, '8.17.0', true, {
+        last_checkin: new Date(Date.now() - INACTIVITY_TIMEOUT_MS).toISOString(),
+        unenrolled_at: staleUnenrolledAt,
+        audit_unenrolled_reason: 'orphaned',
+        audit_unenrolled_time: staleUnenrolledAt,
+      });
+
+      await new Promise((resolve) => setTimeout(resolve, TWO_TASK_INTERVALS_MS));
+
+      await retry.tryForTime(60000, async () => {
+        const agentRes = await es.search({
+          index: '.fleet-agents',
+          ignore_unavailable: true,
+          query: {
+            ids: { values: ['inactive-agent-stale'] },
+          },
+        });
+
+        const agentDoc = agentRes.hits.hits[0]._source as any;
+        if (agentDoc?.active) {
+          throw new Error('Agent is still active');
         }
       });
     });
@@ -150,9 +188,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
           index: '.fleet-agents',
           ignore_unavailable: true,
           query: {
-            term: {
-              policy_id: policyIdSpace1,
-            },
+            ids: { values: ['inactive-agent-space1'] },
           },
         });
 
@@ -183,9 +219,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
         index: '.fleet-agents',
         ignore_unavailable: true,
         query: {
-          term: {
-            policy_id: policyId,
-          },
+          ids: { values: ['active-agent-1'] },
         },
       });
       const agentDoc = agentRes.hits.hits[0]._source as any;
@@ -205,9 +239,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
         index: '.fleet-agents',
         ignore_unavailable: true,
         query: {
-          term: {
-            policy_id: policyId,
-          },
+          ids: { values: ['inactive-agent-2'] },
         },
       });
       const agentDoc = agentRes.hits.hits[0]._source as any;

@@ -6,6 +6,7 @@
  */
 
 import type {
+  CompactionTrigger,
   SkillInvocationOrigin,
   SkillSolutionArea,
 } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
@@ -25,12 +26,23 @@ export interface SkillInvokedEvent {
   toolCount: number;
 }
 
+export interface CompactionTriggeredEvent {
+  agentId?: string;
+  executionId?: string;
+  trigger: CompactionTrigger;
+  tokenCountBefore: number;
+  tokenCountAfter: number;
+  summarizedCycleCount: number;
+  modelId: string;
+}
+
 /**
- * Minimal analytics surface needed by skill loading. The plugin's
+ * Minimal analytics surface needed by agent-runtime telemetry. The plugin's
  * `AnalyticsService` class structurally satisfies this interface.
  */
 export interface AgentBuilderAnalytics {
   reportSkillInvoked(event: SkillInvokedEvent): void;
+  reportCompactionTriggered(event: CompactionTriggeredEvent): void;
 }
 
 /**

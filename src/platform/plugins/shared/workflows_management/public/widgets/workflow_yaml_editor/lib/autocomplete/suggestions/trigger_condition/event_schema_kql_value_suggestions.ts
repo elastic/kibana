@@ -27,7 +27,7 @@ const MAX_ZOD_LEAF_UNWRAP_ITERATIONS = 16;
 const MAX_ENUM_COLLECT_DEPTH = 14;
 
 const SCHEMA_VALUE_DESCRIPTION = i18n.translate(
-  'workflowsManagement.triggerConditionKql.schemaValueSuggestionDescription',
+  'workflows.triggerConditionKql.schemaValueSuggestionDescription',
   {
     defaultMessage: 'From trigger event schema',
   }

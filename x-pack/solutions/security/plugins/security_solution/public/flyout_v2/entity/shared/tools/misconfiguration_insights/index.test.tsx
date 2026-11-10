@@ -46,12 +46,14 @@ jest.mock(
       value,
       entityId,
       entityType,
+      mode,
       onShowFinding,
     }: {
       field: string;
       value: string;
       entityId?: string;
       entityType?: string;
+      mode?: string;
       onShowFinding?: (resourceId: string, ruleId: string, ruleName?: string) => void;
     }) => (
       <button
@@ -61,6 +63,7 @@ jest.mock(
         data-value={value}
         data-entity-id={entityId ?? ''}
         data-entity-type={entityType ?? ''}
+        data-mode={mode ?? ''}
         onClick={() => onShowFinding?.('resource-1', 'rule-1', 'My Rule')}
       >
         {'misconfiguration-table'}
@@ -107,6 +110,22 @@ describe('<MisconfigurationInsights /> host', () => {
     expect(table).toHaveAttribute('data-value', 'my-host');
     expect(table).toHaveAttribute('data-entity-id', 'euid-123');
     expect(table).toHaveAttribute('data-entity-type', 'host');
+    expect(table).toHaveAttribute('data-mode', '');
+  });
+
+  it('forwards the resolved mode to the findings table', () => {
+    const { getByTestId } = render(
+      <MisconfigurationInsights
+        entityType={EntityType.host}
+        value="my-host"
+        entityId="euid-123"
+        mode="resolved"
+      />
+    );
+    expect(getByTestId('mockMisconfigurationFindingsDetailsTable')).toHaveAttribute(
+      'data-mode',
+      'resolved'
+    );
   });
 
   it('forwards onShowEntity to the header click handler', () => {

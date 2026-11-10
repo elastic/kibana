@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FINALIZE_FEATURES_TOOL_ID } from '@kbn/significant-events-plugin/server';
+import { FINALIZE_FEATURES_TOOL_ID } from '@kbn/significant-events-plugin/common';
 import { getSuccessfulFinalizeFeaturesParams } from './run_feature_identification_agent';
 
 describe('getSuccessfulFinalizeFeaturesParams', () => {

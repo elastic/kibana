@@ -175,6 +175,7 @@ export function BaseVisualization({
           initialInput={lensInputWithTimeRange}
           onClose={onCloseSave}
           isSaveable={false}
+          telemetrySource="chat"
         />
       )}
     </>

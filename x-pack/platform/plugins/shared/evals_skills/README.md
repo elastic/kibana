@@ -6,7 +6,7 @@ It is a server-only "glue" plugin: it depends on both `agentBuilder` and `evals`
 
 ## Gating
 
-The plugin has no `enabled` flag of its own. It follows the evals feature flag (`xpack.evals.enabled`, off by default): during `setup` it checks the `evals` plugin contract and skips registering its skills when the feature is disabled.
+The plugin has no `enabled` flag of its own. It follows the evals plugin's configuration: during `setup` it checks the `evals` setup contract and registers its skills only when `xpack.evals.enabled` is set and `xpack.evals.mode` is `full`. The skills call the evals routes, which runtime mode does not load.
 
 ## Skills
 

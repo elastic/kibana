@@ -18,6 +18,8 @@ interface InlineFilterPopoverProps {
   selectedValues: string[];
   singleSelect: boolean;
   onSelectionChange: (values: string[]) => void;
+  /** Custom row content (Cases-style badges). Label stays for a11y and search. */
+  renderOption?: (option: EuiSelectableOption) => React.ReactNode;
   searchable?: boolean;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
@@ -32,6 +34,7 @@ export function InlineFilterPopover({
   selectedValues,
   singleSelect,
   onSelectionChange,
+  renderOption,
   searchable = false,
   searchValue = '',
   onSearchChange,
@@ -84,6 +87,7 @@ export function InlineFilterPopover({
       options={selectableOptions}
       singleSelection={singleSelect}
       isPreFiltered
+      renderOption={renderOption}
       {...(searchable &&
         onSearchChange && {
           searchable,

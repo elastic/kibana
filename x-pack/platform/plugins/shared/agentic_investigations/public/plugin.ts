@@ -5,10 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
+import { registerEscalationConversationEventUiDefinitions } from './escalations/conversation_events';
+import { registerInvestigationConversationEventUiDefinitions } from './investigations/conversation_events';
 import { registerImpactAttachmentTypes } from './impact/attachments';
+import type { AlertSubjectSnapshot } from '../common/subjects/subject';
+import { registerSubjectAttachmentTypes } from './subjects/attachments';
+import { registerHypothesesAttachmentTypes } from './hypotheses/attachments';
 import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import { registerInvestigationPublicStepDefinitions } from './investigations/step_types';
+import { registerWorkflowExecutionPublicStepDefinitions } from './workflow_execution/step_types';
 import { registerTemplate } from './conversation_templates/registry/register_template';
 import { escalationTemplate } from './conversation_templates/templates/escalation/register';
 import { investigationTemplate } from './conversation_templates/templates/investigation/register';
@@ -18,12 +26,31 @@ import type {
   AgenticInvestigationsPublicPluginStart,
   AgenticInvestigationsPublicSetupDependencies,
   AgenticInvestigationsPublicStartDependencies,
+  ImpactEntityOpener,
+  AlertFlyoutRegistration,
 } from './types';
 
+const LazyInvestigationCardComponent = React.lazy(async () => {
+  const { InvestigationCard } = await import(
+    './conversation_templates/templates/investigation/card'
+  );
+  return { default: InvestigationCard };
+});
+
+const LazyInvestigationCard: AgenticInvestigationsPublicPluginStart['InvestigationCard'] = (
+  props
+) =>
+  React.createElement(
+    React.Suspense,
+    { fallback: null },
+    React.createElement(LazyInvestigationCardComponent, props)
+  );
+
 /**
- * Registers Impact workflow steps, the Impact attachment UI, and the conversation details flyout
- * UI of the `investigation` and `escalation` templates. Escalations, user profiles and the
- * connected investigation components are also consumed directly by a solution's UI.
+ * Registers Impact workflow steps, the impact, subject, and hypotheses attachment UI, and the
+ * conversation details flyout UI of the `investigation` and `escalation` templates. Escalations,
+ * user profiles and the connected investigation components are also consumed directly by a
+ * solution's UI.
  */
 export class AgenticInvestigationsPublicPlugin
   implements
@@ -35,6 +62,9 @@ export class AgenticInvestigationsPublicPlugin
     >
 {
   private readonly escalationsEnabled: boolean;
+  private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
+  private impactEntityOpener: ImpactEntityOpener | undefined;
+  private readonly alertFlyouts = new Map<string, AlertFlyoutRegistration>();
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -46,7 +76,13 @@ export class AgenticInvestigationsPublicPlugin
   ): AgenticInvestigationsPublicPluginSetup {
     registerImpactPublicStepDefinitions(workflowsExtensions);
     registerInvestigationPublicStepDefinitions(workflowsExtensions);
-    return {};
+    registerWorkflowExecutionPublicStepDefinitions(workflowsExtensions);
+    return {
+      registerFlyoutGroupedAttachment: this.groupedAttachments.register,
+      registerAlertFlyout: (source, registration) => {
+        this.alertFlyouts.set(source, registration);
+      },
+    };
   }
 
   start(
@@ -54,21 +90,59 @@ export class AgenticInvestigationsPublicPlugin
     startDeps: AgenticInvestigationsPublicStartDependencies
   ): AgenticInvestigationsPublicPluginStart {
     const { agentBuilder } = startDeps;
+    // Read where a subject renders, so a solution can register after this plugin starts.
+    const getAlertFlyout = (source?: string, snapshot?: AlertSubjectSnapshot) => {
+      const registration = source ? this.alertFlyouts.get(source) : undefined;
+      return registration && (registration.canOpen?.(snapshot) ?? true)
+        ? registration.Component
+        : undefined;
+    };
     if (agentBuilder) {
-      registerImpactAttachmentTypes(agentBuilder);
+      registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
+      registerInvestigationConversationEventUiDefinitions(agentBuilder.conversationEvents);
+      if (this.escalationsEnabled) {
+        registerEscalationConversationEventUiDefinitions({
+          conversationEvents: agentBuilder.conversationEvents,
+          application: core.application,
+        });
+      }
+      registerSubjectAttachmentTypes(agentBuilder, {
+        // The alert flyout renders shared alerting components that read core and their plugins
+        // from this context, so core is passed whole.
+        ...core,
+        share: startDeps.share,
+        data: startDeps.data,
+        dataViews: startDeps.dataViews,
+        expressions: startDeps.expressions,
+        spaces: startDeps.spaces,
+        unifiedDocViewer: startDeps.unifiedDocViewer,
+        charts: startDeps.charts,
+        getAlertFlyout,
+      });
+      registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({
         core,
-        startDeps: { ...startDeps, agentBuilder },
+        startDeps: { ...startDeps, agentBuilder, getAlertFlyout },
         // Escalations are AlertZero-only for now: without them there is no escalation template,
         // and the investigation template has no escalate action.
         escalationsEnabled: this.escalationsEnabled,
+        groupedAttachments: this.groupedAttachments,
+        getImpactEntityOpener: () => this.impactEntityOpener,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
       });
     }
-    return {};
+    return {
+      registerImpactEntityOpener: (opener) => {
+        this.impactEntityOpener = opener;
+      },
+      InvestigationCard: LazyInvestigationCard,
+    };
   }
 
-  stop() {}
+  stop() {
+    this.impactEntityOpener = undefined;
+    this.alertFlyouts.clear();
+  }
 }

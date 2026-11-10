@@ -26,7 +26,7 @@ export const createSearchApplication = async ({
   name,
   indices,
 }: CreateSearchApplicationApiParams): Promise<CreateSearchApplicationApiResponse> => {
-  const route = `/internal/enterprise_search/search_applications/${name}`;
+  const route = `/internal/enterprise_search/search_applications/${encodeURIComponent(name)}`;
 
   return await HttpLogic.values.http.put<EnterpriseSearchApplicationUpsertResponse>(route, {
     body: JSON.stringify({ indices, name }),

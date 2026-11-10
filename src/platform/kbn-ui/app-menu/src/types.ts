@@ -54,14 +54,20 @@ export type AppMenuRunAction = (params?: AppMenuRunActionParams) => void;
 type BaseSplitProps = Pick<
   SplitButtonWithNotificationProps,
   | 'isMainButtonLoading'
+  | 'isMainButtonDisabled'
   | 'isSecondaryButtonDisabled'
   | 'secondaryButtonAriaLabel'
+  | 'secondaryButtonTooltipContent'
   | 'iconType'
   | 'showNotificationIndicator'
   | 'notificationIndicatorTooltipContent'
 >;
 
 type AppMenuSecondarySplitButton = BaseSplitProps & {
+  /**
+   * Icon for the secondary button. Defaults to a chevron.
+   */
+  secondaryButtonIconType?: IconType;
   /**
    * Sub-items to show in a popover when the item is clicked. Only used if `run` is not provided.
    */
@@ -73,6 +79,10 @@ type AppMenuSecondarySplitButton = BaseSplitProps & {
 };
 
 type AppMenuSecondarySplitButtonWithPopover = BaseSplitProps & {
+  /**
+   * The secondary button always shows a chevron when it opens a popover.
+   */
+  secondaryButtonIconType?: never;
   /**
    * Sub-items to show in a popover when the item is clicked. Only used if `run` is not provided.
    */

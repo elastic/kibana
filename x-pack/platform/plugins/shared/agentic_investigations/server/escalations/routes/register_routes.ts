@@ -13,6 +13,7 @@ import { registerListLinkedInvestigationsRoute } from './list_linked_investigati
 import { registerSuggestUsersRoute } from './suggest_users';
 import { registerLinkEscalationRoute } from './link_escalation';
 import { registerSetEscalationStatusRoute } from './set_escalation_status';
+import { registerSyncEscalationRoute } from './sync_escalation';
 import { registerGetEscalationClosePreviewRoute } from './get_escalation_close_preview';
 
 export const registerEscalationRoutes = (deps: EscalationRouteDependencies) => {
@@ -28,4 +29,5 @@ export const registerEscalationRoutes = (deps: EscalationRouteDependencies) => {
   registerAssignEscalationRoute(deps);
   registerSetEscalationStatusRoute(deps);
   registerGetEscalationClosePreviewRoute(deps);
+  registerSyncEscalationRoute(deps);
 };

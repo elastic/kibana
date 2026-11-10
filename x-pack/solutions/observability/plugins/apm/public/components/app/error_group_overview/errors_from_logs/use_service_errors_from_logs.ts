@@ -50,12 +50,17 @@ export function useServiceErrorsFromLogs({
   kuery,
   rangeFrom,
   rangeTo,
+  maxRows,
+  showToastOnError,
 }: {
   serviceName: string;
   environment: string;
   kuery: string;
   rangeFrom: string;
   rangeTo: string;
+  maxRows?: number;
+  /** Hosts that render their own error state (e.g. the request flyout) opt out of the toast. */
+  showToastOnError?: boolean;
 }) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -65,12 +70,12 @@ export function useServiceErrorsFromLogs({
       return callApmApi('GET /internal/apm/services/{serviceName}/errors/unprocessed_otel', {
         params: {
           path: { serviceName },
-          query: { start, end, environment, kuery },
+          query: { start, end, environment, kuery, maxRows },
         },
       });
     },
-    [serviceName, start, end, environment, kuery],
-    { operationId: FETCHER_OPERATION_IDS.FETCH_SERVICE_ERRORS_FROM_LOGS }
+    [serviceName, start, end, environment, kuery, maxRows],
+    { operationId: FETCHER_OPERATION_IDS.FETCH_SERVICE_ERRORS_FROM_LOGS, showToastOnError }
   );
 
   const rows = useMemo<ErrorFromLogsRow[]>(

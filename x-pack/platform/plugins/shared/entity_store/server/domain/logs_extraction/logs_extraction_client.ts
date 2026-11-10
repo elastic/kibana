@@ -65,6 +65,8 @@ import {
   type EngineError,
   type EngineLogExtractionState,
   type EntityStoreGlobalStateClient,
+  type LogExtractionTypeOverride,
+  type NonPriorityLogExtractionTypeOverride,
 } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import { EntityStoreNotRunningError, NonPriorityExtractionDisabledError } from '../errors';
@@ -79,6 +81,9 @@ const FRESH_ENGINE_LOG_EXTRACTION_STATE: EngineLogExtractionState = {
   sliceEndTimestamp: null,
   sliceSamplingRate: null,
 };
+
+const hasKeys = (value: object | undefined): boolean =>
+  value !== undefined && Object.keys(value).length > 0;
 
 interface LogsExtractionOptions {
   specificWindow?: {
@@ -292,7 +297,6 @@ export class LogsExtractionClient {
         onCheckpointPersisted: (ts) => {
           lastPersistedCheckpointISO = ts;
         },
-        entityDefinitionOptions,
       });
 
       const operationResult = {
@@ -380,6 +384,59 @@ export class LogsExtractionClient {
     return state.logsExtraction;
   }
 
+  /**
+   * Writes the two per entity-type override layers. `logExtraction` reaches both processes (minus
+   * the non-priority-exclusive fields), `nonPriorityOverride` only the non-priority one.
+   *
+   * Each block is handed to the saved object update as-is. `mergeForUpdate` recurses into nested
+   * plain objects, so an omitted field keeps its stored value and an incoming `null` overwrites it
+   * with `null`, which every reader treats as unset. An empty block is skipped: `{}` does not
+   * recurse, so it would replace the whole stored object instead of merging into it.
+   */
+  public async updateTypeConfig(
+    type: EntityType,
+    {
+      logExtraction,
+      nonPriorityOverride,
+    }: {
+      logExtraction?: LogExtractionTypeOverride;
+      nonPriorityOverride?: NonPriorityLogExtractionTypeOverride;
+    }
+  ): Promise<{
+    logExtractionConfig: LogExtractionTypeOverride;
+    nonPriorityLogExtractionConfig: NonPriorityLogExtractionTypeOverride;
+  }> {
+    const patch = {
+      ...(hasKeys(logExtraction) ? { logExtractionConfig: logExtraction } : {}),
+      ...(hasKeys(nonPriorityOverride)
+        ? { nonPriorityLogExtractionConfig: nonPriorityOverride }
+        : {}),
+    };
+
+    if (Object.keys(patch).length > 0) {
+      await this.engineDescriptorClient.update(type, patch);
+    }
+
+    const descriptor = await this.engineDescriptorClient.findOrThrow(type);
+    return {
+      logExtractionConfig: descriptor.logExtractionConfig ?? {},
+      nonPriorityLogExtractionConfig: descriptor.nonPriorityLogExtractionConfig ?? {},
+    };
+  }
+
+  /** Same dependencies, different extraction process. */
+  public withExtractionMode(extractionMode: ExtractionMode): LogsExtractionClient {
+    return new LogsExtractionClient({
+      logger: this.logger,
+      namespace: this.namespace,
+      esClient: this.esClient,
+      dataViewsService: this.dataViewsService,
+      engineDescriptorClient: this.engineDescriptorClient,
+      globalStateClient: this.globalStateClient,
+      extractionMode,
+    });
+  }
+
   private async runQueryAndIngestDocs({
     type,
     config,
@@ -388,7 +445,6 @@ export class LogsExtractionClient {
     entityDefinition,
     onRemoteResolved,
     onCheckpointPersisted,
-    entityDefinitionOptions,
   }: {
     type: EntityType;
     config: MergedLogExtractionConfig;
@@ -400,7 +456,6 @@ export class LogsExtractionClient {
     onRemoteResolved?: (isRemote: boolean) => void;
     // Called after each checkpoint write so the caller tracks partial progress for lag reporting.
     onCheckpointPersisted?: (ts: string) => void;
-    entityDefinitionOptions?: EntityDefinitionOptions;
   }): Promise<{
     isRemote: boolean;
     count: number;
@@ -432,7 +487,6 @@ export class LogsExtractionClient {
       engineState,
       opts,
       entityDefinition,
-      entityDefinitionOptions,
       latestIndex: await resolveLatestEntitiesIndexName(this.esClient, this.namespace),
       indexPatterns: allIndexPatterns,
       metricAttributes: this.getExtractionAttributes(type, isRemote),
@@ -461,7 +515,6 @@ export class LogsExtractionClient {
     engineState,
     opts,
     entityDefinition,
-    entityDefinitionOptions,
     indexPatterns,
     latestIndex,
     metricAttributes,
@@ -472,7 +525,6 @@ export class LogsExtractionClient {
     engineState: EngineLogExtractionState;
     opts?: LogsExtractionOptions;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
-    entityDefinitionOptions?: EntityDefinitionOptions;
     indexPatterns: string[];
     latestIndex: string;
     metricAttributes: ExtractionAttributes;
@@ -509,7 +561,6 @@ export class LogsExtractionClient {
         samplingRateOverride,
         metricAttributes,
         onCheckpointPersisted,
-        entityDefinitionOptions,
       });
       let { lastSearchTimestamp } = result;
       if (result.logsCapApplied) {
@@ -598,7 +649,6 @@ export class LogsExtractionClient {
         samplingRateOverride,
         metricAttributes,
         onCheckpointPersisted,
-        entityDefinitionOptions,
       });
 
       totalCount += subResult.count;
@@ -713,7 +763,6 @@ export class LogsExtractionClient {
     samplingRateOverride,
     metricAttributes,
     onCheckpointPersisted,
-    entityDefinitionOptions,
   }: {
     type: EntityType;
     engineState: EngineLogExtractionState;
@@ -733,7 +782,6 @@ export class LogsExtractionClient {
     samplingRateOverride?: number | null;
     metricAttributes: ExtractionAttributes;
     onCheckpointPersisted?: (ts: string) => void;
-    entityDefinitionOptions?: EntityDefinitionOptions;
   }) {
     const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
     const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
@@ -849,6 +897,12 @@ export class LogsExtractionClient {
             // before the interruption instead.
             samplingRate = resumeSamplingRate ?? undefined;
           } else if (samplingEligible) {
+            // `maxLogsPerWindow` here is runMainPath's *remaining* budget for this sub-window
+            // (already reduced by logs consumed in earlier sub-windows), while `scannedLogs`
+            // below separately re-adds that same prior consumption via `processedLogsBefore`.
+            // Add it back to `maxLogsPerWindow` first so the two don't double-subtract it.
+            const fullConfiguredCap =
+              maxLogsPerWindow > 0 ? maxLogsPerWindow + processedLogsBefore : 0;
             const rate = resolveSamplingRate(
               {
                 scannedLogs: processedLogsBefore + totalLogs,
@@ -856,6 +910,7 @@ export class LogsExtractionClient {
                 sliceStartISO: logsPageCursorStart?.timestampCursor ?? fromDateISO,
                 sliceEndISO: logsPageCursorEnd.timestampCursor,
                 windowEndISO,
+                maxLogsPerWindow: fullConfiguredCap,
               },
               samplingRateOverride
             );
@@ -879,7 +934,6 @@ export class LogsExtractionClient {
             indexPatterns,
             latestIndex,
             entityDefinition,
-            entityDefinitionOptions,
             docsLimit: effectiveDocsLimit,
             fromDateISO,
             toDateISO,
@@ -1008,7 +1062,6 @@ export class LogsExtractionClient {
     indexPatterns,
     latestIndex,
     entityDefinition,
-    entityDefinitionOptions,
     docsLimit,
     fromDateISO,
     toDateISO,
@@ -1025,7 +1078,6 @@ export class LogsExtractionClient {
     indexPatterns: string[];
     latestIndex: string;
     entityDefinition: GatedEntityDefinition<ManagedEntityDefinition>;
-    entityDefinitionOptions?: EntityDefinitionOptions;
     docsLimit: number;
     fromDateISO: string;
     toDateISO: string;
@@ -1052,7 +1104,6 @@ export class LogsExtractionClient {
         indexPatterns,
         latestIndex,
         entityDefinition,
-        entityDefinitionOptions,
         docsLimit,
         fromDateISO,
         toDateISO,

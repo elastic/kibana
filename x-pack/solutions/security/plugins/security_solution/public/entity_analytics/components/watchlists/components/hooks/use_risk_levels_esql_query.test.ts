@@ -170,4 +170,24 @@ describe('useRiskLevelsEsqlQuery', () => {
       expect.objectContaining({ projectRouting: '_alias:_origin' })
     );
   });
+
+  it('labels the search with the home page risk_level_panel execution context', async () => {
+    renderHook(() => useRiskLevelsEsqlQuery({ spaceId: 'default' }));
+
+    const queryFn = mockUseQuery.mock.calls[0][1];
+
+    await queryFn({ signal: undefined });
+
+    expect(mockSearch.mock.calls[0][1]).toEqual(
+      expect.objectContaining({
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:home_page',
+            id: 'risk_level_panel',
+          },
+        },
+      })
+    );
+  });
 });

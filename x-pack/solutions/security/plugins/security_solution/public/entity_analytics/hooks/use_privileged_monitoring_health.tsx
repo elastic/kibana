@@ -9,6 +9,15 @@ import { useQuery } from '@kbn/react-query';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import type { PrivMonHealthResponse } from '../../../common/api/entity_analytics';
 import { useEntityAnalyticsRoutes } from '../api/api';
+import {
+  buildExecutionContext,
+  EA_EXECUTION_CONTEXT_NAMES,
+} from '../../common/utils/execution_context';
+
+const PUM_HEALTH_CONTEXT = buildExecutionContext(
+  EA_EXECUTION_CONTEXT_NAMES.PRIVILEGED_USER_MONITORING,
+  'pum_health'
+);
 
 /**
  * Helper function to compute user statistics from health data
@@ -38,7 +47,7 @@ export const usePrivilegedMonitoringHealth = (options?: UsePrivilegedMonitoringH
 
   const { data, isLoading, isError, error } = useQuery<PrivMonHealthResponse, SecurityAppError>({
     queryKey: ['GET', 'PRIVILEGED_MONITORING_HEALTH'],
-    queryFn: () => fetchPrivilegeMonitoringEngineStatus(),
+    queryFn: () => fetchPrivilegeMonitoringEngineStatus(PUM_HEALTH_CONTEXT),
     retry: 0,
     enabled: options?.enabled,
     refetchInterval: 30000, // Refresh every 30 seconds to keep user count current
@@ -69,7 +78,7 @@ export const useUserLimitStatus = (options?: UsePrivilegedMonitoringHealthOption
 
   const { data, isLoading, isError, error } = useQuery<PrivMonHealthResponse, SecurityAppError>({
     queryKey: ['GET', 'PRIVILEGED_MONITORING_HEALTH'],
-    queryFn: () => fetchPrivilegeMonitoringEngineStatus(),
+    queryFn: () => fetchPrivilegeMonitoringEngineStatus(PUM_HEALTH_CONTEXT),
     retry: 0,
     enabled: options?.enabled,
     refetchInterval: 30000,

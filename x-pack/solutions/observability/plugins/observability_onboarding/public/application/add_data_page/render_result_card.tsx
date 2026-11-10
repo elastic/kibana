@@ -6,13 +6,23 @@
  */
 
 import React from 'react';
-import { CardIcon } from '@kbn/fleet-plugin/public';
+import { CardIcon, SearchMemberMatchDescription } from '@kbn/fleet-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { CuratedTileCard, VariantCountBadge } from '../add_data_grid';
 import { getCollectionGroupId, isCollectionCard } from './collection_card';
 import type { TrackTileClick } from './use_track_tile_click';
 
 const EXTERNAL_URL_PATTERN = /^https?:\/\//;
+
+const getDescription = (item: IntegrationCardItem): React.ReactNode =>
+  item.searchMemberMatch ? (
+    <SearchMemberMatchDescription
+      memberTitles={item.searchMemberMatch.memberTitles}
+      collectionTitle={item.searchMemberMatch.collectionTitle}
+    />
+  ) : (
+    item.description
+  );
 
 /** Search results reuse the curated grid's tile card, so they look the same. */
 const renderPlainCard = (
@@ -23,7 +33,7 @@ const renderPlainCard = (
     tile={{
       id: item.id,
       title: item.title,
-      description: item.description,
+      description: getDescription(item),
       icon: (
         <CardIcon icons={item.icons} packageName={item.name} version={item.version} size="xl" />
       ),
@@ -59,7 +69,7 @@ export const createRenderResultCard =
         tile={{
           id: item.id,
           title: item.title,
-          description: item.description,
+          description: getDescription(item),
           icon: (
             <CardIcon icons={item.icons} packageName={item.name} version={item.version} size="xl" />
           ),

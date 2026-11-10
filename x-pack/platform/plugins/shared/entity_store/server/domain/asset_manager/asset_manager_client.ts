@@ -29,6 +29,10 @@ import {
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
 import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilience_task';
 import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
+import {
+  regenerateEntityStoreTaskApiKeys,
+  type RegenerateTaskApiKeysResult,
+} from '../../tasks/regenerate_task_api_keys';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
 import { deleteLegacyRemoteStateSavedObjects } from '../saved_objects/remote_log_extraction_state/types';
@@ -288,6 +292,16 @@ export class AssetManagerClient {
     }
   }
 
+  /** Re-grants the API key of every Entity Store task in this namespace as the requesting user. */
+  public async regenerateTaskApiKeys(request: KibanaRequest): Promise<RegenerateTaskApiKeysResult> {
+    return regenerateEntityStoreTaskApiKeys({
+      taskManager: this.taskManager,
+      logger: this.logger,
+      namespace: this.namespace,
+      request,
+    });
+  }
+
   /**
    * Removes both extraction tasks. Runs regardless of the flag: a task scheduled while it was on
    * must not survive a stop issued after it was turned off. `priority` and `single` resolve to the
@@ -333,6 +347,80 @@ export class AssetManagerClient {
         status: ENGINE_STATUS.ERROR,
         ...(hasPriorityExtractionGate(type) ? { nonPriorityStatus: ENGINE_STATUS.ERROR } : {}),
       });
+      throw error;
+    }
+  }
+
+  /**
+   * Starts one extraction process without touching the other. `start()` is deliberately paired -
+   * it schedules both tasks and rolls both back on failure - so per-process control cannot reuse it.
+   *
+   * `priority` and `single` resolve to the same task id and the same status field, so starting
+   * `priority` also covers the single process.
+   */
+  public async startProcess(
+    request: KibanaRequest,
+    type: EntityType,
+    process: Exclude<ExtractionMode, 'single'>
+  ) {
+    const isNonPriority = process === EXTRACTION_MODE.nonPriority;
+    try {
+      const { frequency } = await this.getLogExtractionConfig(type, process);
+
+      await scheduleExtractEntityTask({
+        logger: this.logger,
+        taskManager: this.taskManager,
+        type,
+        frequency,
+        namespace: this.namespace,
+        request,
+        ...(isNonPriority ? { extractionMode: EXTRACTION_MODE.nonPriority } : {}),
+      });
+
+      await this.engineDescriptorClient.update(
+        type,
+        isNonPriority
+          ? { nonPriorityStatus: ENGINE_STATUS.STARTED, nonPriorityError: null }
+          : { status: ENGINE_STATUS.STARTED, error: null }
+      );
+    } catch (error) {
+      this.logger
+        .get(type)
+        .error(`Error starting ${process} extraction for type ${type}: ${getErrorMessage(error)}`);
+      await this.engineDescriptorClient.update(
+        type,
+        isNonPriority ? { nonPriorityStatus: ENGINE_STATUS.ERROR } : { status: ENGINE_STATUS.ERROR }
+      );
+      throw error;
+    }
+  }
+
+  /** Stops one extraction process without touching the other. Counterpart of `startProcess`. */
+  public async stopProcess(type: EntityType, process: Exclude<ExtractionMode, 'single'>) {
+    const isNonPriority = process === EXTRACTION_MODE.nonPriority;
+    try {
+      await stopExtractEntityTask({
+        taskManager: this.taskManager,
+        logger: this.logger,
+        type,
+        namespace: this.namespace,
+        extractionMode: process,
+      });
+
+      await this.engineDescriptorClient.update(
+        type,
+        isNonPriority
+          ? { nonPriorityStatus: ENGINE_STATUS.STOPPED }
+          : { status: ENGINE_STATUS.STOPPED }
+      );
+    } catch (error) {
+      this.logger
+        .get(type)
+        .error(`Error stopping ${process} extraction for type ${type}: ${getErrorMessage(error)}`);
+      await this.engineDescriptorClient.update(
+        type,
+        isNonPriority ? { nonPriorityStatus: ENGINE_STATUS.ERROR } : { status: ENGINE_STATUS.ERROR }
+      );
       throw error;
     }
   }
@@ -430,18 +518,43 @@ export class AssetManagerClient {
         engines,
         { historySnapshot, logsExtraction: logsExtractionConfig, excludedUserNames },
         globalOverrides,
+        dualProcessEnabled,
       ] = await Promise.all([
         this.engineDescriptorClient.getAll(),
         this.globalStateClient.findOrThrow(),
         this.globalStateClient.findLogExtractionOverrides(),
+        this.isDualProcessEnabled(),
       ]);
 
       const status = this.calculateEntityStoreStatus(engines);
+      // Report the config each running process resolves: priority and non-priority for
+      // dual-process types, single for the rest.
+      const isDualProcess = (type: EntityType) =>
+        dualProcessEnabled && hasPriorityExtractionGate(type);
       const logsExtractionConfigByType = Object.fromEntries(
         engines.map((engine) => [
           engine.type,
-          getMergedConfig(engine.type, globalOverrides, engine.logExtractionConfig),
+          getMergedConfig(
+            engine.type,
+            globalOverrides,
+            engine.logExtractionConfig,
+            isDualProcess(engine.type) ? EXTRACTION_MODE.priority : EXTRACTION_MODE.single
+          ),
         ])
+      ) as Partial<Record<EntityType, LogExtractionConfig>>;
+      const nonPriorityLogsExtractionConfigByType = Object.fromEntries(
+        engines
+          .filter(({ type }) => isDualProcess(type))
+          .map((engine) => [
+            engine.type,
+            getMergedConfig(
+              engine.type,
+              globalOverrides,
+              engine.logExtractionConfig,
+              EXTRACTION_MODE.nonPriority,
+              engine.nonPriorityLogExtractionConfig
+            ),
+          ])
       ) as Partial<Record<EntityType, LogExtractionConfig>>;
 
       if (withComponents) {
@@ -454,6 +567,7 @@ export class AssetManagerClient {
           historySnapshot,
           logsExtractionConfig,
           logsExtractionConfigByType,
+          nonPriorityLogsExtractionConfigByType,
           excludedUserNames,
         };
       }
@@ -464,6 +578,7 @@ export class AssetManagerClient {
         historySnapshot,
         logsExtractionConfig,
         logsExtractionConfigByType,
+        nonPriorityLogsExtractionConfigByType,
         excludedUserNames,
       };
     } catch (error) {
@@ -494,6 +609,13 @@ export class AssetManagerClient {
         ? engine.nonPriorityLogExtractionConfig
         : undefined
     );
+  }
+
+  /** Extra source index patterns the installed engines are configured to extract from. */
+  public async getStoredAdditionalIndexPatterns(): Promise<string[]> {
+    const engines = await this.engineDescriptorClient.getAll();
+    const configs = await Promise.all(engines.map(({ type }) => this.getLogExtractionConfig(type)));
+    return [...new Set(configs.flatMap(({ additionalIndexPatterns }) => additionalIndexPatterns))];
   }
 
   private async initEntity(request: KibanaRequest, type: EntityType): Promise<boolean> {
@@ -664,11 +786,13 @@ export class AssetManagerClient {
     };
   }
 
+  // Component probes run as the internal user: the status must describe the cluster, not what the
+  // requesting user is allowed to see (a 403 would otherwise read as "not installed").
   private async getIndexTemplateComponents(): Promise<EngineComponentStatus[]> {
     const resource = 'index_template';
     const latestId = getLatestIndexTemplateId(this.namespace);
-    const latestExists = await this.tryAsBoolean(
-      this.esClient.indices.getIndexTemplate({ name: latestId })
+    const latestExists = await this.existsOrFalseOnNotFound(
+      this.internalEsClient.indices.getIndexTemplate({ name: latestId })
     );
     return [{ id: latestId, installed: latestExists, resource }];
   }
@@ -676,7 +800,7 @@ export class AssetManagerClient {
   private async getIndexComponents(): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
-    const latestExists = await this.esClient.indices.exists({ index: latestIndex });
+    const latestExists = await this.internalEsClient.indices.exists({ index: latestIndex });
     return [{ id: latestIndex, installed: latestExists, resource }];
   }
 
@@ -685,8 +809,8 @@ export class AssetManagerClient {
   ): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'component_template';
     const latestName = getComponentTemplateName(definition.type, this.namespace);
-    const latestExists = await this.tryAsBoolean(
-      this.esClient.cluster.getComponentTemplate({ name: latestName })
+    const latestExists = await this.existsOrFalseOnNotFound(
+      this.internalEsClient.cluster.getComponentTemplate({ name: latestName })
     );
     return [{ id: latestName, installed: latestExists, resource }];
   }
@@ -796,6 +920,19 @@ export class AssetManagerClient {
       allowLegacyMigration: await this.isLegacySecurityAssetsMigrationEnabled(),
     });
     return true;
+  }
+
+  private async existsOrFalseOnNotFound(promise: Promise<unknown>): Promise<boolean> {
+    try {
+      await promise;
+      return true;
+    } catch (error) {
+      const { statusCode, meta } = error as { statusCode?: number; meta?: { statusCode?: number } };
+      if ((meta?.statusCode ?? statusCode) === 404) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   /**

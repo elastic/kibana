@@ -71,6 +71,7 @@ const searchApi: ApiRegistryDefinition = {
     properties: { query: { $ref: './_types.json#/$defs/QueryContainer', 'x-found-in': 'body' } },
   },
   destructive: false,
+  readOnly: true,
 };
 
 describe('createDescribeApiTypeTool', () => {
@@ -228,6 +229,7 @@ describe('createDescribeApiTypeTool', () => {
         method: 'GET',
         path: '/',
         destructive: false,
+        readOnly: true,
       })
     );
 
@@ -255,6 +257,7 @@ describe('createDescribeApiTypeTool', () => {
           properties: { timeout: { $ref: '../outside.json#/$defs/Duration' } },
         },
         destructive: false,
+        readOnly: false,
       })
     );
 
@@ -288,7 +291,7 @@ describe('createDescribeApiTypeTool', () => {
     expect(data.message).toContain(internalTools.discoverApis);
   });
 
-  it('spells out the identifier format on an unknown API when discovery is disabled', async () => {
+  it('never points at the discovery tool on an unknown API when discovery is disabled', async () => {
     loadApi.mockRejectedValue(new UnknownApiError('does.not.exist'));
 
     const tool = createDescribeApiTypeTool({ discoveryEnabled: false });

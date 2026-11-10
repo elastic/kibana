@@ -8,7 +8,6 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { resolveLatestEntitiesIndexName } from '../../../../asset_manager/resolve_entity_store_indices';
 import type { ResolutionClient } from '../../..';
 import { NAMESPACE_PRIORITY } from '../../..';
 import { getFieldValue } from '../../../../../../common/domain/euid/commons';
@@ -42,12 +41,12 @@ const GENERIC_SERVICE_ACCOUNTS = new Set([
 
 export interface RunRelatedUserAliasResolutionDeps {
   state: PerRuleState;
-  namespace: string;
   esClient: ElasticsearchClient;
   logger: Logger;
   resolutionClient: ResolutionClient;
   signal: AbortSignal;
   telemetry: MaintainerTelemetryClient;
+  index: string;
 }
 
 const normalize = (value: string): string => value.trim().toLowerCase();
@@ -225,8 +224,7 @@ const findCandidates = async ({
 export async function runRelatedUserAliasResolution(
   deps: RunRelatedUserAliasResolutionDeps
 ): Promise<PerRuleState> {
-  const { state, namespace, esClient, logger, resolutionClient, signal, telemetry } = deps;
-  const index = await resolveLatestEntitiesIndexName(esClient, namespace);
+  const { state, esClient, logger, resolutionClient, signal, telemetry, index } = deps;
   const seeds = await collectSeeds({ esClient, index, abortSignal: signal });
   const lastRun: RelatedUserAliasResolutionLastRun = {
     seedsScanned: seeds.length,

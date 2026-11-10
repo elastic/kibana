@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 export enum NetworkTopTablesFields {
   bytes_in = 'bytes_in',
@@ -15,10 +15,12 @@ export enum NetworkTopTablesFields {
   source_ips = 'source_ips',
 }
 
-export const topTablesFields = z.enum([
-  NetworkTopTablesFields.bytes_in,
-  NetworkTopTablesFields.bytes_out,
-  NetworkTopTablesFields.flows,
-  NetworkTopTablesFields.destination_ips,
-  NetworkTopTablesFields.source_ips,
-]);
+export const topTablesFields = lazySchema(() =>
+  z.enum([
+    NetworkTopTablesFields.bytes_in,
+    NetworkTopTablesFields.bytes_out,
+    NetworkTopTablesFields.flows,
+    NetworkTopTablesFields.destination_ips,
+    NetworkTopTablesFields.source_ips,
+  ])
+);

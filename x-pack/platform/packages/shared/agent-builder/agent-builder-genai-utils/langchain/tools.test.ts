@@ -7,8 +7,9 @@
 
 import { z } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ToolType } from '@kbn/agent-builder-common';
+import { ChatEventType, ToolType } from '@kbn/agent-builder-common';
 import type { ExecutableTool } from '@kbn/agent-builder-server';
+import { toDynamicToolEvent } from '@kbn/agent-builder-server/runner';
 import { createToolIdMappings, toolToLangchain, sanitizeToolId } from './tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
@@ -48,7 +49,7 @@ describe('toolToLangchain', () => {
     expect(toolKeys.sort()).toEqual(['foo']);
   });
 
-  it('adds reasoning param when specified', async () => {
+  it('adds the intent param when specified', async () => {
     const tool = createTool('toolA', {
       description: 'desc',
       getSchema: () => z.object({ foo: z.string() }),
@@ -58,11 +59,67 @@ describe('toolToLangchain', () => {
       tool,
       toolId: tool.id,
       logger,
-      addReasoningParam: true,
+      addIntentParam: true,
     });
 
-    const toolKeys = Object.keys((langchainTool.schema as any).shape);
-    expect(toolKeys.sort()).toEqual(['_reasoning', 'foo']);
+    const shape = (langchainTool.schema as any).shape;
+    expect(Object.keys(shape).sort()).toEqual(['_intent', 'foo']);
+    expect(shape._intent.description).toBe(
+      'Clear, concise description of what you are doing by calling this tool'
+    );
+    expect(shape._intent.isOptional()).toBe(true);
+  });
+
+  it('keeps the strictness of the tool schema when adding the intent param', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ foo: z.string() }).strict(),
+    });
+
+    const langchainTool = await toolToLangchain({
+      tool,
+      toolId: tool.id,
+      logger,
+      addIntentParam: true,
+    });
+
+    await expect(
+      langchainTool.invoke({ foo: 'a', _intent: 'Doing a', unknown: 'b' })
+    ).rejects.toThrow();
+    expect(tool.execute).not.toHaveBeenCalled();
+  });
+
+  it('does not add the intent param by default', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ foo: z.string() }),
+    });
+
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
+
+    expect(Object.keys((langchainTool.schema as any).shape)).toEqual(['foo']);
+  });
+
+  it('strips _intent before calling the tool handler', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ hello: z.string() }),
+      execute: jest
+        .fn()
+        .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
+    });
+
+    const langchainTool = await toolToLangchain({
+      tool,
+      toolId: tool.id,
+      logger,
+      addIntentParam: true,
+    });
+    await langchainTool.invoke({ hello: 'world', _intent: 'Saying hello' });
+
+    expect(tool.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ toolParams: { hello: 'world' } })
+    );
   });
 
   it('wraps the tool handler', async () => {
@@ -107,6 +164,92 @@ describe('toolToLangchain', () => {
       toolCallId: 'unknown',
     });
     expect(results).toEqual('custom-content');
+  });
+
+  it('stamps emitted events with the tool id and call id', async () => {
+    const tool = createTool('toolA', {
+      execute: jest.fn().mockImplementation(async ({ onEvent }) => {
+        onEvent({ type: ChatEventType.toolUi, data: { custom_event: 'ev', data: { a: 1 } } });
+        onEvent({ type: ChatEventType.toolProgress, data: { message: 'hi' } });
+        return { results: [] };
+      }),
+    });
+    const sendEvent = jest.fn();
+
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, sendEvent });
+    await langchainTool.invoke({});
+
+    expect(sendEvent).toHaveBeenNthCalledWith(1, {
+      type: ChatEventType.toolUi,
+      data: { custom_event: 'ev', data: { a: 1 }, tool_id: 'toolA', tool_call_id: 'unknown' },
+    });
+    expect(sendEvent).toHaveBeenNthCalledWith(2, {
+      type: ChatEventType.toolProgress,
+      data: { message: 'hi', tool_call_id: 'unknown' },
+    });
+  });
+
+  it('attributes a dynamic tool event to the inner tool, on the same call', async () => {
+    const tool = createTool('execute_dynamic_tool', {
+      execute: jest.fn().mockImplementation(async ({ onEvent }) => {
+        onEvent(
+          toDynamicToolEvent('inner.tool', {
+            type: ChatEventType.toolUi,
+            data: { custom_event: 'ev', data: { a: 1 } },
+          })
+        );
+        onEvent(
+          toDynamicToolEvent('inner.tool', {
+            type: ChatEventType.toolProgress,
+            data: { message: 'hi' },
+          })
+        );
+        return { results: [] };
+      }),
+    });
+    const sendEvent = jest.fn();
+
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, sendEvent });
+    await langchainTool.invoke({});
+
+    expect(sendEvent).toHaveBeenNthCalledWith(1, {
+      type: ChatEventType.toolUi,
+      data: { custom_event: 'ev', data: { a: 1 }, tool_id: 'inner.tool', tool_call_id: 'unknown' },
+    });
+    expect(sendEvent).toHaveBeenNthCalledWith(2, {
+      type: ChatEventType.toolProgress,
+      data: { message: 'hi', tool_call_id: 'unknown' },
+    });
+  });
+
+  it('passes the inner tool id of a dynamic tool return to buildContent', async () => {
+    const results = [{ type: ToolResultType.other, data: 'foo' }];
+    const tool = createTool('execute_dynamic_tool', {
+      execute: jest.fn().mockResolvedValue({ results, dynamicToolId: 'inner.tool' }),
+    });
+    const buildContent = jest.fn().mockReturnValue('content');
+
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, buildContent });
+    await langchainTool.invoke({});
+
+    expect(buildContent).toHaveBeenCalledWith({
+      results,
+      toolId: 'execute_dynamic_tool',
+      toolCallId: 'unknown',
+      dynamicToolId: 'inner.tool',
+    });
+  });
+
+  it('passes no dynamic tool id for a plain return', async () => {
+    const tool = createTool('toolA', {
+      execute: jest.fn().mockResolvedValue({ results: [] }),
+    });
+    const buildContent = jest.fn().mockReturnValue('content');
+
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger, buildContent });
+    await langchainTool.invoke({});
+
+    expect(buildContent.mock.calls[0][0].dynamicToolId).toBeUndefined();
   });
 });
 

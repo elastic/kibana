@@ -6,7 +6,7 @@
  */
 
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/common/domain/entity_index';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { RelationshipIntegrationConfig } from '../engine/types';
 import { COMPOSITE_PAGE_SIZE } from '../engine/constants';
 import { ENGINE_COLUMNS } from '../engine/columns';
@@ -222,9 +222,13 @@ function buildWorkdaySupervisesEsqlQuery(
   // The row's own user is the target, so the canonical helper applies directly —
   // it reproduces the full user EUID ranking and emits the entity.namespace
   // evaluation it depends on.
-  const targetEuidEval = euid.esql.getEuidEvaluation('user', 'targetEntityId', {
-    withTypeId: true,
-  });
+  const targetEuidEval = euid.esql.getEuidEvaluation(
+    getBuiltInEntityDefinition('user'),
+    'targetEntityId',
+    {
+      withTypeId: true,
+    }
+  );
   // Presence of a watermark means this is not the first run: narrow to recently
   // re-synced workers. A fixed window (not `> lastProcessedTimestamp`) so a
   // delayed or skipped run cannot open a gap.

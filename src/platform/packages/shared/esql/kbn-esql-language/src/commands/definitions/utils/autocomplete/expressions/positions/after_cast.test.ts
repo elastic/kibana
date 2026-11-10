@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { inlineCastsMapping } from '../../../../generated/inline_casts_mapping';
+import { inlineCasts as inlineCastsMapping } from '@elastic/esql-definitions/inline-cast';
 import { getCastingTypesSuggestions } from './after_cast';
 
 describe('Suggest after cast', () => {

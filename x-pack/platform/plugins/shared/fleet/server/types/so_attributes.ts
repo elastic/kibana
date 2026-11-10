@@ -35,7 +35,12 @@ import type {
   PackagePolicyConfigRecord,
 } from '../../common/types/models/package_policy';
 import type { SecretReference } from '../../common/types/models/secret';
-import type { KafkaAuthType, KafkaCompressionType } from '../../common/types';
+import type {
+  KafkaAuthType,
+  KafkaCompressionType,
+  KafkaKerberosConfig,
+  KafkaOAuth2Config,
+} from '../../common/types';
 import type {
   KafkaPartitionType,
   KafkaSaslMechanism,
@@ -51,6 +56,7 @@ import type {
 } from '../../common/types/models/cloud_connector';
 import type {
   CloudOnboardingDeploymentAuthMethod,
+  CloudOnboardingInstance,
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
@@ -103,6 +109,7 @@ export interface AgentSOAttributes {
   local_metadata: AgentMetadata;
   unenrolled_at?: string;
   unenrollment_started_at?: string;
+  unenrolled_reason?: string;
   upgraded_at?: string | null;
   upgrade_started_at?: string | null;
   upgrade_details?: AgentUpgradeDetails;
@@ -183,6 +190,7 @@ export interface PackagePolicySOAttributes {
   inputs_for_versions?: Record<string, PackagePolicyInput[]>;
   package_agent_version_condition?: string;
   condition?: string | null;
+  onboarding_deployment_id?: string | null;
 }
 
 export interface OutputSoBaseAttributes {
@@ -253,6 +261,8 @@ export interface OutputSoKafkaAttributes extends BeatsSoBaseAttributes {
   sasl?: {
     mechanism?: ValueOf<KafkaSaslMechanism>;
   };
+  oauth2?: KafkaOAuth2Config;
+  kerberos?: KafkaKerberosConfig;
   partition?: ValueOf<KafkaPartitionType>;
   random?: {
     group_events?: number;
@@ -403,6 +413,24 @@ export interface CloudOnboardingDeploymentSOAttributes {
   serviceVars?: Record<string, Record<string, unknown>>;
   /** Global AWS region from the Service Settings step. Used to re-run deploy on retry and to hydrate the onboarding flow on resume. */
   globalRegion?: string;
+  /** Integration name as entered in the Service settings step, before any per-package suffix is applied. Used to identify the onboarding session. */
+  integrationName?: string;
+  /** Integration description as entered in the Service settings step. Set on every package policy created by the deploy. */
+  description?: string;
+  /** Global data stream namespace from the Service settings step. Absent or empty means each policy inherits its agent policy's namespace. */
+  namespace?: string;
+  /** Whether the global namespace uses dedicated index templates (the package's namespace_customization_enabled_for list), as set in the Service settings step. Absent means off. */
+  dedicatedNamespaceTemplates?: boolean;
+  /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. */
+  instances?: CloudOnboardingInstance[];
+  /** Package policy settings from the Service settings step that apply to every package policy of the deployment, keyed by package policy field (e.g. output_id). Each deployment method uses only the settings it supports. */
+  policySettings?: Record<string, unknown>;
+  /** Names of the integration packages this deployment covers. Mapped as keyword so deployments can be listed per package. */
+  packageNames?: string[];
+  /** Display name of each service as shown in the onboarding flow, by service id. */
+  serviceNames?: Record<string, string>;
+  /** Username of the user who last wrote the deployment. */
+  updatedBy?: string;
   /** Data format selected in the Services step: 'ecs' or 'otel'. Used to hydrate the services step on resume so service filtering is consistent. */
   dataFormat?: 'ecs' | 'otel';
   /**

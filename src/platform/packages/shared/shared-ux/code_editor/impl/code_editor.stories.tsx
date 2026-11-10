@@ -10,7 +10,7 @@
 import React, { useState } from 'react';
 
 import { action } from '@storybook/addon-actions';
-import { monaco as monacoEditor } from '@kbn/monaco';
+import { monaco as monacoEditor, jsonDefaults } from '@kbn/monaco';
 
 import type { CodeEditorStorybookParams } from './mocks/storybook';
 import { CodeEditorStorybookMock } from './mocks/storybook';
@@ -97,7 +97,7 @@ export const JSONSupport = () => {
       <CodeEditor
         languageId="json"
         editorDidMount={(editor) => {
-          monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
+          jsonDefaults.setDiagnosticsOptions({
             validate: true,
             schemas: [
               {

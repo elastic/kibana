@@ -108,7 +108,7 @@ export function createCoreEntry(repoRoot: string): PluginEntry {
   return {
     id: 'core',
     pkgId: '@kbn/core',
-    contextDir: Path.resolve(repoRoot, 'src/core'),
+    contextDir: Path.resolve(repoRoot, 'src/core/packages/core'),
     targets: ['public'],
     requiredPlugins: [],
     requiredBundles: [],

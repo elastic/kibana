@@ -21,36 +21,8 @@ import {
   openAddToNewCaseFromFlyout,
   selectExistingCase,
 } from '../../../tasks/threat_intelligence/cases';
-import {
-  CASE_COMMENT_INDICATOR_ATTACHMENT,
-  FLYOUT_ADD_TO_CASE_ITEM,
-  INDICATORS_TABLE_ADD_TO_CASE_ITEM,
-} from '../../../screens/threat_intelligence/cases';
+import { CASE_COMMENT_INDICATOR_ATTACHMENT } from '../../../screens/threat_intelligence/cases';
 import { login } from '../../../tasks/login';
-
-// Failing: See https://github.com/elastic/kibana/issues/244231
-describe.skip('Cases with invalid indicators', { tags: ['@ess'] }, () => {
-  before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_invalid' }));
-
-  after(() => cy.task('esArchiverUnload', { archiveName: 'ti_indicators_data_invalid' }));
-
-  beforeEach(() => {
-    login();
-    visitIndicatorsWithTimeRange();
-  });
-
-  it('should disable the indicators table context menu items and flyout context menu items', () => {
-    const documentsNumber = 22;
-    openIndicatorsTableMoreActions(documentsNumber - 1);
-
-    cy.get(INDICATORS_TABLE_ADD_TO_CASE_ITEM).should('be.disabled');
-
-    openFlyout(documentsNumber - 1);
-    openFlyoutTakeAction();
-
-    cy.get(FLYOUT_ADD_TO_CASE_ITEM).should('be.disabled');
-  });
-});
 
 describe('Cases interactions', { tags: ['@ess'] }, () => {
   before(() => cy.task('esArchiverLoad', { archiveName: 'ti_indicators_data_single' }));

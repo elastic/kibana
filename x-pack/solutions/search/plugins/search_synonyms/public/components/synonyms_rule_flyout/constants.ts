@@ -18,7 +18,7 @@ export const ERROR_MESSAGES = {
     defaultMessage: 'Term already exists.',
   }),
   multiple_explicit_separator: i18n.translate(
-    'xpack.searchSynonyms.synonymsSetRuleFlyout.invalidMapTo',
+    'xpack.searchSynonyms.synonymsSetRuleFlyout.invalidExplicitSeparator',
     { defaultMessage: 'Explicit separator "=>" is not allowed in terms.' }
   ),
 };

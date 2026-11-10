@@ -38,7 +38,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
     activeTab,
     updatedAt,
     trailingControlColumns,
-    leadingControlColumns,
+    rowAdditionalLeadingControls,
     onUpdatePageIndex,
   } = props;
   const columnsHeader = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
@@ -72,7 +72,7 @@ export const UnifiedTimelineBody = (props: UnifiedTimelineBodyProps) => {
               updatedAt={updatedAt}
               isTextBasedQuery={false}
               trailingControlColumns={trailingControlColumns}
-              leadingControlColumns={leadingControlColumns}
+              rowAdditionalLeadingControls={rowAdditionalLeadingControls}
               onUpdatePageIndex={onUpdatePageIndex}
             />
           ) : (

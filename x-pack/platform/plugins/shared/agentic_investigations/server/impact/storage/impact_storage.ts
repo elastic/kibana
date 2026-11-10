@@ -23,8 +23,10 @@ export const impactStorageSettings = {
       conversationId: types.keyword({}),
       summary: types.text({}),
       evidence: types.object({ enabled: false }),
+      // Flat copy of `entities.id`: ES|QL cannot read nested fields.
+      entityIds: types.keyword({}),
       // Nested so a filter can match `entities.id` or `entities.featureId` without
-      // scanning a flattened blob. Pill filtering stays client-side for the MVP.
+      // scanning a flattened blob.
       entities: types.nested({
         properties: {
           id: types.keyword({}),
@@ -52,7 +54,7 @@ export const impactStorageSettings = {
 export type ImpactStorageSettings = typeof impactStorageSettings;
 
 /** Stored shape: the id lives in `_id`, everything else in `_source`. */
-export type ImpactDocument = Omit<Impact, 'id'>;
+export type ImpactDocument = Omit<Impact, 'id'> & { entityIds?: string[] };
 
 export type ImpactStorageClient = IStorageClient<ImpactStorageSettings, ImpactDocument>;
 

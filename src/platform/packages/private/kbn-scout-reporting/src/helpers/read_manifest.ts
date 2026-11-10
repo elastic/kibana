@@ -9,7 +9,8 @@
 
 import path from 'path';
 import fs from 'fs';
-import { Jsonc } from '@kbn/repo-packages';
+import { Jsonc, findPackageForPath } from '@kbn/repo-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 export interface KibanaJsoncMetadata {
   id: string;
@@ -45,6 +46,11 @@ export const getKibanaModulePath = (configPath: string): string => {
       `Invalid path: "scout" or "scout_*" directory not found in ${configPath}.
   Ensure Playwright configuration file is in the plugin directory: '/plugins/<plugin-name>/test/{scout,scout_*}/ui/<config-file>'`
     );
+  }
+
+  const repoPackage = findPackageForPath(REPO_ROOT, configPath);
+  if (repoPackage) {
+    return path.resolve(REPO_ROOT, repoPackage.directory, 'kibana.jsonc');
   }
 
   const manifestSegments = pathSegments.slice(0, testDirIndex - 1).concat('kibana.jsonc');

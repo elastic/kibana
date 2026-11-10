@@ -204,7 +204,7 @@ export const fromStoredTableSettings = (
   storedState: Partial<DiscoverSessionTabAttributes>
 ): DiscoverSessionApiEmbeddableOverrides => ({
   ...fromStoredCommonTableSettings(storedState),
-  ...(storedState.sampleSize && { sample_size: storedState.sampleSize }),
+  ...(storedState.sampleSize && { sample_size: Math.max(10, storedState.sampleSize) }),
 });
 
 function fromStoredTab(

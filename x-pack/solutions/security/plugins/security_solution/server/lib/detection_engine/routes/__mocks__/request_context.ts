@@ -89,6 +89,7 @@ export const createMockClients = () => {
     },
     siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
     siemDashboardMigrationsClient: siemMigrationsServiceMock.createDashboardsClient(),
+    siemWorkflowMigrationsClient: siemMigrationsServiceMock.createWorkflowsClient(),
     getInferenceClient: jest.fn(),
     productFeaturesService: createProductFeaturesServiceMock(),
     logger: loggerMock.create(),
@@ -204,6 +205,7 @@ const createSecuritySolutionRequestContextMock = (
     siemMigrations: {
       getRulesClient: jest.fn(() => clients.siemRuleMigrationsClient),
       getDashboardsClient: jest.fn(() => clients.siemDashboardMigrationsClient),
+      getWorkflowsClient: jest.fn(() => clients.siemWorkflowMigrationsClient),
     },
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
     getProductFeatureService: jest.fn(() => clients.productFeaturesService),

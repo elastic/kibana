@@ -16,7 +16,6 @@ export { enrichTaxonomy } from './enrich_taxonomy';
 export { classifySeverity } from './classify_severity';
 export { assessRelevance } from './assess_relevance';
 export { findThreatReports, buildFindReportFilters } from './find_threat_reports';
-export { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
 export { getThreatReport, ThreatReportNotFoundError } from './get_threat_report';
 export { isReportVisibleInSpace } from './report_visibility';
 export { getThreatIntelReadiness } from './readiness';

@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293685
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-areas:
-- AI and machine Learning
-title: "Add support for ES|QL views in chat"

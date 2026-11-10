@@ -10,7 +10,7 @@ import type { AttachmentPublicClient, ConversationPublicClient } from '@kbn/agen
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { ResolveUser } from '../../services/resolve_user';
 import type { ImpactService } from '../services/impact_service';
-import type { ImpactPrivilegesChecker } from '../services/check_impact_privileges';
+import type { InvestigationsPrivilegesChecker } from '../../investigations/services/check_investigations_privileges';
 import { getAttachImpactStepDefinition } from './attach_impact_step';
 import { getGetImpactStepDefinition } from './get_impact_step';
 
@@ -26,7 +26,7 @@ export const registerImpactStepDefinitions = ({
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
   getImpactService: () => ImpactService;
   resolveUser: ResolveUser;
-  privileges: ImpactPrivilegesChecker;
+  privileges: InvestigationsPrivilegesChecker;
   getAttachmentClient: (request: KibanaRequest) => Promise<AttachmentPublicClient>;
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
 }) => {
@@ -40,6 +40,6 @@ export const registerImpactStepDefinitions = ({
     })
   );
   workflowsExtensions.registerStepDefinition(
-    getGetImpactStepDefinition({ getImpactService, privileges })
+    getGetImpactStepDefinition({ getImpactService, privileges, getConversationClient })
   );
 };

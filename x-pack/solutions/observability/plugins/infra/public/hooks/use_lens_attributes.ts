@@ -38,7 +38,9 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
 
     const builder = new LensConfigBuilder(dataViews);
 
-    return builder.build(params) as Promise<LensAttributes>;
+    return builder.build(
+      params.chartType === 'xy' ? { areaFill: 'solid', ...params } : params
+    ) as Promise<LensAttributes>;
   }, [params, dataViews]);
 
   const injectFilters = useCallback(

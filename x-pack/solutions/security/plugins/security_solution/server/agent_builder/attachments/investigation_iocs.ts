@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
 import { securityAttachmentDataSchema } from './security_attachment_data_schema';
@@ -12,32 +12,38 @@ import { securityAttachmentDataSchema } from './security_attachment_data_schema'
 /** Caps one category so a noisy host cannot flood the investigation. */
 export const MAX_IOCS_PER_CATEGORY = 50;
 
-const investigationIocSchema = z.object({
-  /** The indicator itself: a hash, an address, a path, a command line, an account, a host name. */
-  value: z.string().min(1).max(2048),
-  /**
-   * What makes this indicator meaningful — the role it played in the attack, what it was
-   * identified as, where it was seen. A bare hash or address is not actionable on its own.
-   */
-  comment: z.string().max(1000).optional(),
-});
+const investigationIocSchema = lazySchema(() =>
+  z.object({
+    /** The indicator itself: a hash, an address, a path, a command line, an account, a host name. */
+    value: z.string().min(1).max(2048),
+    /**
+     * What makes this indicator meaningful — the role it played in the attack, what it was
+     * identified as, where it was seen. A bare hash or address is not actionable on its own.
+     */
+    comment: z.string().max(1000).optional(),
+  })
+);
 
-const iocCategory = z.array(investigationIocSchema).max(MAX_IOCS_PER_CATEGORY).optional();
+const iocCategory = lazySchema(() =>
+  z.array(investigationIocSchema).max(MAX_IOCS_PER_CATEGORY).optional()
+);
 
 /**
  * Indicator categories, keyed so each one can be presented as its own labelled group. Every
  * category is optional: a reconstruction that found no ransom note simply omits `ransom_note`.
  */
-export const investigationIocsAttachmentDataSchema = securityAttachmentDataSchema.extend({
-  shas: iocCategory,
-  ips: iocCategory,
-  file_paths: iocCategory,
-  ransom_note: iocCategory,
-  encryption_marker: iocCategory,
-  malicious_commands: iocCategory,
-  compromised_identities: iocCategory,
-  affected_hosts: iocCategory,
-});
+export const investigationIocsAttachmentDataSchema = lazySchema(() =>
+  securityAttachmentDataSchema.extend({
+    shas: iocCategory,
+    ips: iocCategory,
+    file_paths: iocCategory,
+    ransom_note: iocCategory,
+    encryption_marker: iocCategory,
+    malicious_commands: iocCategory,
+    compromised_identities: iocCategory,
+    affected_hosts: iocCategory,
+  })
+);
 
 export type InvestigationIocsAttachmentData = z.infer<typeof investigationIocsAttachmentDataSchema>;
 

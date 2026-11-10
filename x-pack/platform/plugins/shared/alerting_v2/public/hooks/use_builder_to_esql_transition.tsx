@@ -49,17 +49,16 @@ export const useBuilderToEsqlTransition = ({
 
   const resolveBuilderMode = useCallback(
     (rule: RuleApiResponse): ResolvedBuilderMode | 'esql-fallback' | 'esql' => {
-      if (!rule.metadata.builder_type) {
+      if (!rule.metadata.builder) {
         return 'esql';
       }
+      const builderType = rule.metadata.builder.type;
       const query = rule.query ? getBreachEsqlQuery(rule.query) : '';
       const recoveryQuery = rule.query ? getRecoverEsqlQuery(rule.query, rule.recovery) : undefined;
-      const state = query
-        ? tryParseBuilderState(rule.metadata.builder_type, query, recoveryQuery)
-        : null;
+      const state = query ? tryParseBuilderState(builderType, query, recoveryQuery) : null;
       if (state && typeof state === 'object') {
         return {
-          builderType: rule.metadata.builder_type,
+          builderType,
           initialBuilderState: { ...state, timeField: rule.time_field ?? '@timestamp' },
         };
       }

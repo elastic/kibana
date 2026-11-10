@@ -110,5 +110,6 @@ Both buttons fill into a stronger color on hover. They sit ~8 px below the inser
 
 ### Actions
 
-- **Keep / Replace** (⌘⇧↵ / Ctrl+Shift+Enter): keeps the generated code. In replace mode, also removes the original pipe. The comment stays in place so the user can iterate — tweak the instruction and press ⌘+J again.
+- **Keep / Replace** (⌘↵ / Ctrl+Enter, i.e. the editor's run shortcut, or the Run / Search button): keeps the generated code and runs the query. In replace mode, also removes the original pipe. The comment stays in place so the user can iterate — tweak the instruction and press ⌘+J again.
 - **Undo** (⌘⇧⌫ / Ctrl+Shift+Backspace): removes the generated code and restores the original state.
+- Picking another query (history, starred, quick search) discards the pending review without running it.

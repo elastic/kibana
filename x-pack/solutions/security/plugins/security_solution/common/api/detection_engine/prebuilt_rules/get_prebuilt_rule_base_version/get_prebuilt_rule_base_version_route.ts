@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { RuleResponse } from '../../model/rule_schema/rule_schemas.gen';
 import type { PartialThreeWayRuleDiff } from '../model';
 
 export type GetPrebuiltRuleBaseVersionRequest = z.infer<typeof GetPrebuiltRuleBaseVersionRequest>;
-export const GetPrebuiltRuleBaseVersionRequest = z.object({
-  id: z.string(),
-});
+export const GetPrebuiltRuleBaseVersionRequest = lazySchema(() =>
+  z.object({
+    id: z.string(),
+  })
+);
 
 export interface GetPrebuiltRuleBaseVersionResponseBody {
   /** The base version of the rule */

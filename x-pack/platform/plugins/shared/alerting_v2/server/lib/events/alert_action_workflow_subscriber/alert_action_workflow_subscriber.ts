@@ -20,6 +20,7 @@ import {
   type AlertingPublisherContext,
 } from '../domain_events';
 import type { EventBus, Subscription } from '../event_bus';
+import { BaseEventBusSubscriber } from '../base_event_bus_subscriber';
 import { ALERT_ACTION_WORKFLOW_TRIGGERS, type AlertActionWorkflowTriggerBinding } from './triggers';
 
 /**
@@ -53,45 +54,23 @@ import { ALERT_ACTION_WORKFLOW_TRIGGERS, type AlertActionWorkflowTriggerBinding 
  *    auth implications.
  */
 @injectable()
-export class AlertActionWorkflowSubscriber {
-  #subscriptions: Subscription[] = [];
-
-  private readonly logger: LoggerServiceContract;
-
+export class AlertActionWorkflowSubscriber extends BaseEventBusSubscriber {
   constructor(
     @inject(AlertingDomainEventBusToken)
-    private readonly bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>,
     @inject(WorkflowServiceToken)
     private readonly workflows: WorkflowServiceContract,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract
   ) {
-    this.logger = loggerService.forSubsystem('events');
+    super(bus, loggerService.forSubsystem('events'));
   }
 
-  public start(): void {
-    if (this.#subscriptions.length > 0) {
-      this.logger.debug({
-        message: () => 'Subscriber start called more than once; ignoring',
-      });
-
-      return;
-    }
-
-    for (const trigger of ALERT_ACTION_WORKFLOW_TRIGGERS) {
-      const subscription = this.bus.subscribe(trigger.eventType, (event, context) =>
-        this.#dispatch(trigger, event as AlertActionEvent, context)
-      );
-
-      this.#subscriptions.push(subscription);
-    }
-  }
-
-  public stop(): void {
-    for (const subscription of this.#subscriptions) {
-      subscription.unsubscribe();
-    }
-
-    this.#subscriptions = [];
+  protected createSubscriptions(
+    bus: EventBus<AlertingDomainEvent, AlertingPublisherContext>
+  ): Subscription[] {
+    return ALERT_ACTION_WORKFLOW_TRIGGERS.map((trigger) =>
+      bus.subscribe(trigger.eventType, (event, context) => this.#dispatch(trigger, event, context))
+    );
   }
 
   async #dispatch(
@@ -109,7 +88,7 @@ export class AlertActionWorkflowSubscriber {
         labels: {
           event_type: trigger.eventType,
           space_id: event.spaceId,
-          episode_id: event.episodeId ?? undefined,
+          alert_id: event.episodeId ?? undefined,
           ...(event.ruleId != null ? { rule_id: event.ruleId } : {}),
         },
       });

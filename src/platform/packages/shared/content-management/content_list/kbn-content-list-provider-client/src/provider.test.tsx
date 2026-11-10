@@ -678,5 +678,42 @@ describe('ContentListClientProvider', () => {
       const params = openContentEditor.mock.calls[0]?.[0];
       expect(params?.onSave).toBeUndefined();
     });
+
+    it('forwards the configured edit restriction to the content editor', () => {
+      const restrictionReason = 'You cannot edit this dashboard.';
+      const editRestriction = jest.fn(() => restrictionReason);
+      const openContentEditor = stubOpenContentEditor();
+
+      const { open } = captureOpen({
+        features: {
+          contentEditor: {
+            isReadonly: false,
+            onSave: jest.fn(async () => {}),
+          },
+        },
+        item: {
+          actions: {
+            edit: {
+              onItemAction: jest.fn(),
+              restriction: editRestriction,
+            },
+          },
+        },
+      });
+      const item = { id: '1', title: 'Dashboard 1' };
+
+      act(() => {
+        open(item);
+      });
+
+      expect(editRestriction).toHaveBeenCalledWith(item);
+      expect(openContentEditor).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isReadonly: true,
+          readonlyReason: restrictionReason,
+          onSave: undefined,
+        })
+      );
+    });
   });
 });

@@ -79,7 +79,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const anchorDomElementRef = useRef<HTMLElement | null>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
-    if (isDisabled(disableButton)) return;
+    if (isDisabled(disableButton) || splitButtonProps?.isMainButtonDisabled) return;
 
     if (hasItems) {
       onPopoverToggle();
@@ -141,6 +141,8 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       <SplitButtonWithNotification
         {...otherSplitButtonProps}
         {...commonProps}
+        mainButtonTooltipContent={content}
+        mainButtonTooltipTitle={title}
         label={itemText}
         onSecondaryButtonClick={handleSecondaryButtonClick}
         isSelected={isPopoverOpen}
@@ -168,7 +170,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
    * So we only wrap in tooltip if there are no items (no popover).
    */
   const button =
-    showTooltip && !hasPopover ? (
+    showTooltip && !hasPopover && !splitButtonProps ? (
       <EuiToolTip content={content} title={title}>
         {buttonComponent}
       </EuiToolTip>
@@ -198,8 +200,6 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     return (
       <AppMenuPopover
         items={splitButtonItems}
-        tooltipContent={content}
-        tooltipTitle={title}
         anchorElement={button}
         anchorDomElement={anchorDomElementRef.current ?? undefined}
         isOpen={isPopoverOpen}

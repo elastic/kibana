@@ -12,6 +12,34 @@ import { resolveTimeField } from '@kbn/alerting-v2-utils';
 const DATE_FIELD_TYPES = ['date', 'date_nanos'];
 
 /**
+ * Lists the `date`/`date_nanos` fields on the query's source index. Returns
+ * `undefined` when the index can't be looked up (non-FROM query, or fieldCaps
+ * failed, e.g. federated sources).
+ */
+export const getDateFieldsForQuery = async (
+  esClient: IScopedClusterClient,
+  rootQuery: string
+): Promise<string[] | undefined> => {
+  const index = getIndexPatternFromESQLQuery(rootQuery);
+  if (!index) {
+    return undefined;
+  }
+
+  try {
+    const response = await esClient.asCurrentUser.fieldCaps({
+      index,
+      fields: '*',
+      types: DATE_FIELD_TYPES,
+      ignore_unavailable: true,
+      allow_no_indices: true,
+    });
+    return Object.keys(response.fields ?? {});
+  } catch {
+    return undefined;
+  }
+};
+
+/**
  * Resolves the time field for an ES|QL rule from its source index.
  * Returns `null` when the index has no usable date field at all (caller should
  * fail), or `undefined` when it can't be looked up (caller keeps the existing
@@ -28,32 +56,19 @@ export const resolveTimeFieldForQuery = async (
   rootQuery: string,
   currentTimeField?: string
 ): Promise<string | null | undefined> => {
-  const index = getIndexPatternFromESQLQuery(rootQuery);
-  if (!index) {
+  const dateFields = await getDateFieldsForQuery(esClient, rootQuery);
+  if (!dateFields) {
     return undefined;
   }
 
-  try {
-    const response = await esClient.asCurrentUser.fieldCaps({
-      index,
-      fields: '*',
-      types: DATE_FIELD_TYPES,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-    });
-
-    const dateFields = Object.keys(response.fields ?? {});
-    const resolved = resolveTimeField({ dateFields, currentTimeField });
-    /**
-     * A `null` result with a `currentTimeField` set means the stored field is
-     * stale (not on this index). Re-resolve without it to auto-pick an available
-     * date field; this still yields `null` when the index has no date field.
-     */
-    if (resolved === null && currentTimeField) {
-      return resolveTimeField({ dateFields });
-    }
-    return resolved;
-  } catch {
-    return undefined;
+  const resolved = resolveTimeField({ dateFields, currentTimeField });
+  /**
+   * A `null` result with a `currentTimeField` set means the stored field is
+   * stale (not on this index). Re-resolve without it to auto-pick an available
+   * date field; this still yields `null` when the index has no date field.
+   */
+  if (resolved === null && currentTimeField) {
+    return resolveTimeField({ dateFields });
   }
+  return resolved;
 };

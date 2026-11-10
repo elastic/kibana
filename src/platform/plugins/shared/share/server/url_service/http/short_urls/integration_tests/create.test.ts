@@ -13,6 +13,7 @@ import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { registerCreateRoute } from '../register_create_route';
 import { MockUrlService } from '../../../../../common/mocks';
 import { httpServiceMock } from '@kbn/core/server/mocks';
+import { UrlServiceError } from '../../../error';
 
 const url = new MockUrlService();
 const http = httpServiceMock.createSetupContract();
@@ -100,6 +101,54 @@ describe('POST /api/short_url', () => {
       .expect(409)
       .expect((res) => {
         expect(res.text).toContain('Locator not found.');
+      });
+  });
+
+  it('returns 400 when no request body is provided', async () => {
+    await supertest(server.listener)
+      .post('/api/short_url')
+      .expect(400)
+      .expect((res) => {
+        expect(res.body.message).toBe(
+          '[request body]: expected a plain object value, but found [null] instead.'
+        );
+      });
+  });
+
+  it('returns 400 when the locator ID is not provided', async () => {
+    await supertest(server.listener).post('/api/short_url').send({ params: {} }).expect(400);
+  });
+
+  it('returns 400 when the slug is too short', async () => {
+    await supertest(server.listener)
+      .post('/api/short_url')
+      .send({
+        locatorId: 'LEGACY_SHORT_URL_LOCATOR',
+        params: {},
+        slug: 'a',
+      })
+      .expect(400);
+  });
+
+  it('returns 400 when the slug contains invalid characters', async () => {
+    url.shortUrls.get = jest.fn().mockReturnValue({
+      create: jest
+        .fn()
+        .mockRejectedValue(
+          new UrlServiceError('Invalid [slug = pipe|is-not-allowed].', 'INVALID_SLUG')
+        ),
+    });
+
+    await supertest(server.listener)
+      .post('/api/short_url')
+      .send({
+        locatorId: 'LEGACY_SHORT_URL_LOCATOR',
+        params: {},
+        slug: 'pipe|is-not-allowed',
+      })
+      .expect(400)
+      .expect((res) => {
+        expect(res.text).toContain('Invalid [slug = pipe|is-not-allowed].');
       });
   });
 });

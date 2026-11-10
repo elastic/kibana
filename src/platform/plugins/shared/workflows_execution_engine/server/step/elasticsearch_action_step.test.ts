@@ -52,6 +52,7 @@ describe('ElasticsearchActionStepImpl', () => {
         config: { maxResponseSize: new ByteSizeValue(10 * 1024 * 1024) },
       }),
       renderValueAccordingToContext: jest.fn((value) => value),
+      renderObjectAccordingToContextAsync: jest.fn(async (value) => value),
       getEsClientAsUser: jest.fn().mockReturnValue(mockEsClient),
     } as any;
 
@@ -63,6 +64,8 @@ describe('ElasticsearchActionStepImpl', () => {
       setInput: jest.fn().mockResolvedValue(undefined),
       stepExecutionId: 'test-step-exec-id',
       node: {},
+      abortController: new AbortController(),
+      getStepTimeoutMs: jest.fn(),
     } as unknown as jest.Mocked<StepExecutionRuntime>;
 
     mockWorkflowRuntime = {
@@ -312,6 +315,54 @@ describe('ElasticsearchActionStepImpl', () => {
     });
   });
 
+  describe('transport options', () => {
+    const stepWith = {
+      method: 'GET',
+      path: '/my-index/_search',
+      headers: { 'X-Custom-Header': 'value' },
+    };
+
+    const runRawStep = async (stepTimeoutMs?: number) => {
+      mockStepExecutionRuntime.getStepTimeoutMs.mockReturnValue(stepTimeoutMs);
+      const step = {
+        id: 'raw_step',
+        type: 'elasticsearch.request',
+        stepId: 'raw_step',
+        stepType: 'elasticsearch.request',
+        configuration: { name: 'raw_step', type: 'elasticsearch.request', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await (esStep as any)._run(stepWith);
+      return (mockEsClient.transport.request as jest.Mock).mock.calls[0][1];
+    };
+
+    it('should use the step timeout as the request timeout, with the abort signal and headers', async () => {
+      const options = await runRawStep(600_000);
+
+      expect(options).toEqual(
+        expect.objectContaining({
+          requestTimeout: 600_000,
+          signal: mockStepExecutionRuntime.abortController.signal,
+          headers: { 'X-Custom-Header': 'value' },
+        })
+      );
+    });
+
+    it('should keep the client request timeout when the step has no timeout', async () => {
+      const options = await runRawStep();
+
+      expect(options).not.toHaveProperty('requestTimeout');
+      expect(options.signal).toBe(mockStepExecutionRuntime.abortController.signal);
+    });
+  });
+
   describe('output normalization', () => {
     const buildStep = (stepType: string, stepWith: Record<string, unknown>) => {
       const step = {
@@ -449,6 +500,29 @@ describe('ElasticsearchActionStepImpl', () => {
       expect(result.error).toBeDefined();
       // Should be a generic error, not StepSizeLimitExceeded
       expect(result.error.type).not.toBe('StepSizeLimitExceeded');
+    });
+  });
+
+  describe('getInput', () => {
+    it('renders `with` with the async renderer', async () => {
+      const stepWith = { index: '{{ inputs.index }}' };
+      mockContextManager.renderObjectAccordingToContextAsync.mockResolvedValue({ index: 'logs' });
+      const step = {
+        id: 'search_step',
+        type: 'elasticsearch.search',
+        stepId: 'search_step',
+        stepType: 'elasticsearch.search',
+        configuration: { name: 'search_step', type: 'elasticsearch.search', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      await expect(esStep.getInput()).resolves.toEqual({ index: 'logs' });
+      expect(mockContextManager.renderObjectAccordingToContextAsync).toHaveBeenCalledWith(stepWith);
     });
   });
 });

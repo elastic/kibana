@@ -14,7 +14,6 @@ describe('attachmentDataToActionPolicyPayload', () => {
 
     expect(result).toEqual({
       name: '',
-      description: '',
       destinations: [],
     });
   });
@@ -25,8 +24,7 @@ describe('attachmentDataToActionPolicyPayload', () => {
       description: 'desc',
       destinations: [{ type: 'workflow', id: 'wf-1' }],
       matcher: { tags: ['prod'] },
-      group_by: ['host.name'],
-      grouping_mode: 'per_field',
+      grouping: { mode: 'per_field', fields: ['host.name'] },
       throttle: { strategy: 'time_interval', interval: '5m' },
     };
 
@@ -37,8 +35,7 @@ describe('attachmentDataToActionPolicyPayload', () => {
       description: 'desc',
       destinations: [{ type: 'workflow', id: 'wf-1' }],
       matcher: { tags: ['prod'] },
-      group_by: ['host.name'],
-      grouping_mode: 'per_field',
+      grouping: { mode: 'per_field', fields: ['host.name'] },
       throttle: { strategy: 'time_interval', interval: '5m' },
     });
   });
@@ -54,5 +51,15 @@ describe('attachmentDataToActionPolicyPayload', () => {
     const result = attachmentDataToActionPolicyPayload(data);
 
     expect(result.matcher).toEqual({ tags: ['critical'] });
+  });
+
+  it.each([{}, { tags: [] }, { expression: '' }])('omits a matcher set to %p', (matcher) => {
+    const result = attachmentDataToActionPolicyPayload({
+      name: 'Catch-all Policy',
+      destinations: [{ type: 'workflow', id: 'wf-1' }],
+      matcher,
+    });
+
+    expect(result).not.toHaveProperty('matcher');
   });
 });

@@ -150,7 +150,7 @@ create_pull_request() {
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
   # Check if a PR already exists
-  pr_search_result=$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 1 --json title -q ".[].title")
+  pr_search_result=$(gh pr list --search "$PR_TITLE (author:$KIBANA_MACHINE_USERNAME OR author:app/elastic-vault-github-plugin-prod)" --state open --limit 1 --json title -q ".[].title")
 
   if [ "$pr_search_result" == "$PR_TITLE" ]; then
     echo "PR already exists. Exiting."
