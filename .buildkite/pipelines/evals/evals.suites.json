@@ -177,6 +177,7 @@
         },
         {
           "id": "reinforcement",
+          "judge": "eis-openai-gpt-6-sol",
           "specFiles": ["evals/reinforcement/reinforcement.spec.ts"]
         }
       ]

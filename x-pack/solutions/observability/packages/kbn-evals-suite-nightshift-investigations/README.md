@@ -356,8 +356,8 @@ A code evaluator checks that the submit includes a traversal for each tree it na
 path is non-empty and resolves on the submitted tree, that a causal path is present only when the
 investigator response confirms a cause and those edges carry ✅, and that declared `merged_nodes`
 agree with the tree before the run and the tree after it. An LLM judge scores whether those merges
-and paths match the investigation. The spec fails when that reinforce step does not finish or when
-the code score is below 1. It is not part of an unset or `all` run: selecting it exports
+and paths match the investigation. A run passes when its reinforce step finishes with a code score
+of 1, and the spec fails when fewer than 75% of runs pass: one miss in four replays passes, two fail. It is not part of an unset or `all` run: selecting it exports
 `NIGHTSHIFT_DECISION_TREES`, which enables decision trees without turning Wiki on. It cannot be
 combined with other dataset ids. Restart Scout when switching to or from it. Each example's trace is the reinforcement agent's Agent Builder
 trace, which shows the system prompt and the submit tool schema. It is not the eval task span.
@@ -373,7 +373,9 @@ NIGHTSHIFT_DATASETS=reinforcement \
 
 CI runs the micro-eval as its own `reinforcement` shard under the `evals:nightshift-investigations`
 label, on a Scout server whose hook turns decision trees on for `EVAL_SHARD_ID=reinforcement`. That
-shard runs only the committed replay rounds, and the `customer0` shard never includes them.
+shard runs only the committed replay rounds, judged by the pinned `eis-openai-gpt-6-sol`, and the
+`customer0` shard never includes them. The committed rounds, a traces file and a live run each
+upsert their own dataset, so one mode never deletes another's examples.
 
 A first investigation of `nightshift/customer0-manual-v2` creates a new tree. `merged_nodes` is
 rejected on a new tree, so that path cannot show a merge. Set `NIGHTSHIFT_REINFORCEMENT_DATASET`

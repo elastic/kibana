@@ -49,11 +49,20 @@ export const selectCustomer0Examples = <Example>(
   return examples.slice(0, count);
 };
 
-/** Private full-round replay. The default micro-eval does not use this. */
+/**
+ * Each mode upserts its own dataset: an upsert deletes the examples it does not post, so a shared
+ * name would let one mode wipe another's examples and mix their experiments.
+ */
+const REPLAY_DATASET_NAME = 'nightshift/reinforcement-customer0';
+export const TRACES_FILE_DATASET_NAME = 'nightshift/reinforcement-customer0-traces-file';
+const LIVE_DATASET_NAME = 'nightshift/reinforcement-customer0-live';
+
+/** Replayed rounds: the committed ones, or a private export under its own dataset name. */
 export const reinforcementDataset = (
-  examples: ReinforcementExample[]
+  examples: ReinforcementExample[],
+  name = REPLAY_DATASET_NAME
 ): EvaluationDataset<ReinforcementExample> => ({
-  name: 'nightshift/reinforcement-customer0',
+  name,
   description:
     'Recorded investigation rounds replayed through the decision-tree reinforcement agent.',
   tags: ['nightshift', 'reinforcement', 'customer0'],
@@ -67,7 +76,7 @@ export const reinforcementDataset = (
 export const customer0ReinforcementDataset = (
   examples: InvestigationExample[]
 ): EvaluationDataset<InvestigationExample> => ({
-  name: 'nightshift/reinforcement-customer0',
+  name: LIVE_DATASET_NAME,
   description:
     'Customer-0 investigations whose post-execution decision-tree reinforcement submit is graded.',
   tags: ['nightshift', 'reinforcement', 'customer0'],
