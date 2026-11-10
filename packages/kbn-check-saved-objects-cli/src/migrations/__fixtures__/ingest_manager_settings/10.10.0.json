@@ -3,9 +3,6 @@
     {
       "has_seen_add_data_notice": true,
       "prerelease_integrations_enabled": false,
-      "id": "id",
-      "version": "1",
-      "preconfigured_fields": ["fleet_server_hosts"],
       "secret_storage_requirements_met": true,
       "output_secret_storage_requirements_met": true,
       "action_secret_storage_requirements_met": true,
@@ -30,9 +27,6 @@
     {
       "has_seen_add_data_notice": true,
       "prerelease_integrations_enabled": false,
-      "id": "id",
-      "version": "1",
-      "preconfigured_fields": ["fleet_server_hosts"],
       "secret_storage_requirements_met": true,
       "output_secret_storage_requirements_met": true,
       "action_secret_storage_requirements_met": true,
@@ -50,8 +44,7 @@
       "ssl_secret_storage_requirements_met": true,
       "integration_knowledge_enabled": true,
       "download_source_auth_secret_storage_requirements_met": true,
-      "otlp_output_requirements_met": true,
-      "response_actions_export_secret_storage_requirements_met": true
+      "otlp_output_requirements_met": true
     }
   ]
 }
