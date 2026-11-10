@@ -55,6 +55,7 @@ export const planBatch = (
   const due = [
     ...collectDueRefs(components.destination, 'destination', options),
     ...collectDueRefs(components.processor, 'processor', options),
+    ...collectDueRefs(components.source, 'source', options),
   ];
   return due.length > 0 ? { window, components: due } : undefined;
 };

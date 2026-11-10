@@ -421,4 +421,116 @@ describe('chunksIntoMessage', () => {
       type: ChatCompletionEventType.ChatCompletionMessage,
     });
   });
+
+  it('emits unique tool call indexes on chunks when the provider reuses the same index', async () => {
+    const toolCallChunk = (
+      toolCallId: string,
+      name: string,
+      args: string
+    ): ChatCompletionChunkEvent => ({
+      content: '',
+      type: ChatCompletionEventType.ChatCompletionChunk,
+      tool_calls: [{ index: 0, toolCallId, function: { name, arguments: args } }],
+    });
+
+    const events = await lastValueFrom(
+      chunksIntoMessage({
+        logger,
+        toolOptions: {
+          toolChoice: ToolChoiceType.auto,
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+              schema: { type: 'object', properties: { foo: { type: 'string' } } },
+            },
+          },
+        },
+      })(
+        fromEvents(
+          toolCallChunk('001', 'myFunction', ''),
+          toolCallChunk('', '', '{"foo":"bar"}'),
+          toolCallChunk('002', 'myFunction', ''),
+          toolCallChunk('', '', '{"foo":"baz"}')
+        )
+      ).pipe(toArray())
+    );
+
+    const chunkIndexes = events.flatMap((event) =>
+      event.type === ChatCompletionEventType.ChatCompletionChunk
+        ? event.tool_calls.map((toolCall) => toolCall.index)
+        : []
+    );
+    expect(chunkIndexes).toEqual([0, 0, 1, 1]);
+
+    expect(events[events.length - 1]).toEqual({
+      content: '',
+      toolCalls: [
+        { function: { name: 'myFunction', arguments: { foo: 'bar' } }, toolCallId: '001' },
+        { function: { name: 'myFunction', arguments: { foo: 'baz' } }, toolCallId: '002' },
+      ],
+      type: ChatCompletionEventType.ChatCompletionMessage,
+    });
+  });
+
+  it('gives an id-less tool call an id on its chunks and in the message, next to a call that has one', async () => {
+    const events = await lastValueFrom(
+      chunksIntoMessage({
+        logger,
+        toolOptions: {
+          toolChoice: ToolChoiceType.auto,
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+              schema: { type: 'object', properties: { foo: { type: 'string' } } },
+            },
+          },
+        },
+      })(
+        fromEvents(
+          {
+            content: '',
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            tool_calls: [
+              {
+                index: 0,
+                toolCallId: '',
+                function: { name: 'myFunction', arguments: '{"foo":"bar"}' },
+              },
+            ],
+          },
+          {
+            content: '',
+            type: ChatCompletionEventType.ChatCompletionChunk,
+            tool_calls: [
+              {
+                index: 1,
+                toolCallId: '002',
+                function: { name: 'myFunction', arguments: '{"foo":"baz"}' },
+              },
+            ],
+          }
+        ).pipe(delay(0))
+      ).pipe(toArray())
+    );
+
+    const chunkToolCalls = events.flatMap((event) =>
+      event.type === ChatCompletionEventType.ChatCompletionChunk ? event.tool_calls : []
+    );
+    const [generated, provided] = chunkToolCalls;
+    expect(chunkToolCalls.map(({ index }) => index)).toEqual([0, 1]);
+    expect(generated.toolCallId).not.toBe('');
+    expect(provided.toolCallId).toBe('002');
+
+    expect(events[events.length - 1]).toEqual({
+      content: '',
+      toolCalls: [
+        {
+          function: { name: 'myFunction', arguments: { foo: 'bar' } },
+          toolCallId: generated.toolCallId,
+        },
+        { function: { name: 'myFunction', arguments: { foo: 'baz' } }, toolCallId: '002' },
+      ],
+      type: ChatCompletionEventType.ChatCompletionMessage,
+    });
+  });
 });

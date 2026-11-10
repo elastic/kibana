@@ -79,7 +79,7 @@ describe('toUsage', () => {
     ]);
   });
 
-  it('maps the breakdowns, devices from the boolean terms keys, with every page load', () => {
+  it('maps the breakdowns with every page load', () => {
     const usage = toUsage(
       logs({
         doc_count: 8,
@@ -89,8 +89,8 @@ describe('toUsage', () => {
         ]),
         operatingSystems: termsAggregate([{ key: 'macOS', doc_count: 5 }]),
         devices: termsAggregate([
-          { key: 0, key_as_string: 'false', doc_count: 3 },
-          { key: 1, key_as_string: 'true', doc_count: 2 },
+          { key: 'iPhone', doc_count: 3 },
+          { key: 'desktop', doc_count: 2 },
         ]),
       })
     );
@@ -103,8 +103,8 @@ describe('toUsage', () => {
       ],
       operatingSystems: [{ name: 'macOS', pageLoads: 5 }],
       devices: [
-        { name: 'desktop', pageLoads: 3 },
-        { name: 'mobile', pageLoads: 2 },
+        { name: 'iPhone', pageLoads: 3 },
+        { name: 'desktop', pageLoads: 2 },
       ],
     });
   });

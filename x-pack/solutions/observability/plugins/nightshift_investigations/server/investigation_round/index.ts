@@ -15,6 +15,7 @@ export {
   sliceConversationRounds,
   stepsFromRound,
   stepsFromToolCalls,
+  toolCallsFromRoundSteps,
   withToolResults,
   type InvestigationTranscriptStep,
   type LoadedInvestigationRound,

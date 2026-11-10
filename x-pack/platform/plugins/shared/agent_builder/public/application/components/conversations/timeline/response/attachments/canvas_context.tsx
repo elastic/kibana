@@ -22,7 +22,6 @@ interface CanvasContextValue {
   openCanvas: (attachment: UnknownAttachment, isSidebar: boolean) => void;
   closeCanvas: () => void;
   setCanvasAttachmentOrigin: (origin: string) => void;
-  setPreviewedAttachmentKey: (attachmentKey: string | null) => void;
 }
 
 const CanvasContext = createContext<CanvasContextValue | null>(null);
@@ -72,7 +71,6 @@ export const CanvasProvider: React.FC<CanvasProviderProps> = ({ children }) => {
       closeCanvas,
       setCanvasAttachmentOrigin,
       previewedAttachmentKey,
-      setPreviewedAttachmentKey,
     }),
     [canvasState, previewedAttachmentKey, openCanvas, closeCanvas, setCanvasAttachmentOrigin]
   );

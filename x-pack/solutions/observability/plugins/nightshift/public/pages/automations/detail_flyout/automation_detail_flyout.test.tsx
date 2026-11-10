@@ -25,6 +25,9 @@ jest.mock('../../../data/automations/use_automations', () => ({
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../hooks/use_global_limit', () => ({
+  useGlobalLimit: () => ({ isReached: false }),
+}));
 jest.mock('../../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
 jest.mock('../../../data/relay_apps/use_relay_app_bindings', () => ({
   ...jest.requireActual('../../../data/relay_apps/use_relay_app_bindings'),
@@ -80,14 +83,20 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     canManage = true,
     usedToday = 0,
     editDisabledReason,
-  }: { canManage?: boolean; usedToday?: number; editDisabledReason?: string } = {}) => {
+    selectedAutomation = automation,
+  }: {
+    canManage?: boolean;
+    usedToday?: number;
+    editDisabledReason?: string;
+    selectedAutomation?: Automation;
+  } = {}) => {
     const history = createMemoryHistory({ initialEntries: ['/automations/automation-1'] });
     render(
       <I18nProvider>
         <Router history={history}>
           <AutomationDetailFlyout
-            automations={[automation]}
-            automation={automation}
+            automations={[selectedAutomation]}
+            automation={selectedAutomation}
             canManage={canManage}
             editDisabledReason={editDisabledReason}
             usedToday={usedToday}
@@ -106,6 +115,49 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const startEditing = () => fireEvent.click(screen.getByTestId('automationEditButton'));
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
+
+  it('preserves a saved severity and blocks edits while its source becomes incompatible', async () => {
+    renderFlyout({
+      selectedAutomation: {
+        ...automation,
+        trigger: { rows: [{ kind: 'alert', alertSources: ['classic'], severities: ['major'] }] },
+      },
+    });
+    startEditing();
+    renameTo('Renamed triage');
+    const sources = screen.getByTestId('automationAlertSources');
+    fireEvent.click(sources);
+    fireEvent.click(await screen.findByText('All except these'));
+    fireEvent.click(sources);
+    expect(screen.getByTestId('automationAlertSeverity')).toHaveTextContent('Major');
+    expect(screen.getByRole('alert')).toHaveTextContent('Major cannot match');
+    expect(screen.getByTestId('automationSaveButton')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('automationSaveButton'));
+    expect(mutate).not.toHaveBeenCalled();
+
+    fireEvent.click(sources);
+    fireEvent.click(await screen.findByText('Only these sources'));
+    fireEvent.click(sources);
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByTestId('automationSaveButton')).toBeEnabled();
+    fireEvent.click(screen.getByTestId('automationSaveButton'));
+    expect(mutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          trigger: {
+            rows: [
+              {
+                kind: 'alert',
+                alertSources: ['classic'],
+                severities: ['major'],
+              },
+            ],
+          },
+        }),
+      }),
+      expect.any(Object)
+    );
+  });
 
   it('hides the unsaved limit callout when a limited automation is switched to unlimited', () => {
     renderFlyout();

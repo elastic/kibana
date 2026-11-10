@@ -57,10 +57,10 @@ export const usePurgeKnowledge = () => {
       const deleted = result.deleted;
       const summary = i18n.translate('xpack.nightshift.settings.purge.successToastText', {
         defaultMessage:
-          'Deleted {memory, plural, one {# memory page} other {# memory pages}}, {cortex, plural, one {# Cortex page} other {# Cortex pages}}, {trees, plural, one {# decision tree document} other {# decision tree documents}} and {investigations, plural, one {# investigation} other {# investigations}}.',
+          'Deleted {memory, plural, one {# memory page} other {# memory pages}}, {wiki, plural, one {# Wiki page} other {# Wiki pages}}, {trees, plural, one {# decision tree document} other {# decision tree documents}} and {investigations, plural, one {# investigation} other {# investigations}}.',
         values: {
           memory: deleted.memory_pages,
-          cortex: deleted.cortex_pages,
+          wiki: deleted.wiki_pages,
           trees: deleted.decision_trees,
           investigations: deleted.investigations,
         },

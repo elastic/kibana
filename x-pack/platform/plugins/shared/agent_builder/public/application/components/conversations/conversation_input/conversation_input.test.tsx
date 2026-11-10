@@ -745,6 +745,20 @@ describe('ConversationInput', () => {
       expect(editorController.focus).not.toHaveBeenCalled();
       jest.useRealTimers();
     });
+
+    it('does not steal focus from an editable control the user is already in', () => {
+      jest.useFakeTimers();
+      const titleInput = document.createElement('input');
+      document.body.appendChild(titleInput);
+      titleInput.focus();
+      renderInput(<ConversationInput />);
+
+      jest.advanceTimersByTime(200);
+      expect(editorController.focus).not.toHaveBeenCalled();
+
+      titleInput.remove();
+      jest.useRealTimers();
+    });
   });
 
   describe('sending a message without the agent', () => {
