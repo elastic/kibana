@@ -95,6 +95,10 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
           border-radius: unset;
           grid-template-columns: unset;
 
+          &::after {
+            display: none;
+          }
+
           .embPanel--dragHandle {
             padding: var(--paddingAroundAction) !important;
             border-radius: ${euiTheme.border.radius.control} !important;
