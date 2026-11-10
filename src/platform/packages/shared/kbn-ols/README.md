@@ -5,7 +5,8 @@ privileges and spaces that already decide access to the whole feature. The packa
 Core, the Security plugin, and plugins that adopt OLS can all build on the same definitions.
 
 For now, it holds the vocabulary and the rules every later piece relies on: access levels, principals, per-type
-access policies, and the shapes an ACL takes when it is written and when it is read back. Its tests also get a
+access policies, and the shapes an ACL takes when it is written and when it is read back. It also reads the ACL from
+a stored document, and builds the search filter that applies the same rules to a list. Its tests also get a
 hand-written table of stored ACL shapes with the access each one must grant.
 
 ## Access levels
@@ -136,6 +137,65 @@ so an unreadable entry just grants nothing.
   inside `acl`, and an array of `acl` objects all add their values to the same ACL, the way Elasticsearch indexes
   them. A dotted `"acl.entries"` key adds its own entries.
 
+## Reading the ACL from a document
+
+`normalizeAclSource` reads the ACL of one object from its whole document source, and returns a `StoredAcl` with the
+values that Elasticsearch indexes for it. It returns `undefined` when no ACL field holds a value, which is the
+`absent` state. It follows these rules:
+
+- It reads every root key of the source, not only `acl`, because Elasticsearch also indexes dotted keys such as
+  `"acl.owner.id"` at the root.
+- It merges the values of one field from nested objects, dotted keys at any depth, and arrays. It drops `null`.
+- Each object under `acl.entries` is one entry, because Elasticsearch stores each one as a separate nested
+  document. A dotted key under `acl.entries`, such as `"entries.id"` inside `acl`, forms an entry of its own. So the
+  sibling keys `"entries.type"`, `"entries.id"`, and `"entries.access"` make three entries, and each one grants
+  nothing.
+- It ignores keys that the `acl` mapping does not define, such as `foo` in `"acl": { "foo": "bar" }`, because
+  Elasticsearch does not index them. An ACL with only such keys is absent.
+- Every field of an entry counts, `added_at` included. So an entry with only `added_at` makes the ACL present. That
+  ACL is invalid, because it has no version and no owner.
+- Numbers and booleans become text, the way a `keyword` field indexes them. The only exception is `version`, which
+  keeps its stored values.
+
+Numbers have one limit. Elasticsearch indexes a number in a `keyword` field with the text that the document used, so
+`1.0` becomes `"1.0"`, and `1e2` becomes `"1e2"`. Kibana gets the source as parsed JSON, where both are numbers, so
+the reader returns `"1"` and `"100"`. A number in its shortest form, such as `1` or `42`, reads the same both ways.
+User profile UIDs start with `u_`, service account IDs contain `/`, and no level or principal kind is a number. So
+this difference cannot change who gets access.
+
+`toAclSource` does the reverse, for a rewrite of the whole document. It turns a `StoredAcl` back into a value for the
+`acl` field that indexes to the same values, and that has no dotted keys. The caller also removes the dotted `acl.*`
+keys from the document root, so that they cannot keep a grant that a later change removed.
+
+## Filtering a search
+
+`buildAclReadFilter` builds the query clause that keeps the objects of one type that a caller can access at a level,
+usually `view`. A search adds the clause to its filters. The clause applies the rules in
+[Reading a stored ACL](#reading-a-stored-acl), so a list never shows an object that opening it would deny:
+
+- An absent ACL matches only when the type's default general access reaches the level.
+- A valid ACL matches when its general access reaches the level, when the caller is the owner, or when an entry
+  names the caller with a level that reaches it. The owner matches at every level, because the owner acts at
+  `manage`.
+- An invalid ACL never matches. The checks for a valid ACL do not depend on the type's policy.
+- An entry matches only when its own kind, ID, and level match. The clause on `acl.entries` is a `nested` query, so
+  values from different entries never combine.
+- A caller without a principal matches only through general access or an absent ACL.
+
+The filter takes two lists of spaces. In `recoverySpaces`, the caller has recovery authority (the right to repair any
+object of the type), and sees every object, whatever its ACL. In `ordinarySpaces`, only the rules above apply. `['*']`
+stands for every space that the search already covers. The two lists work together in one filter: an object in a
+recovery space always matches, an object in an ordinary space matches only under the rules above, and an object in
+neither list never matches. A space in both lists works as a recovery space. When both lists are empty, the filter
+matches nothing.
+
+The filter contains `nested` queries on `acl.entries` in most cases: the absent-ACL clause uses one whenever the
+type's default general access reaches the level, and the entry clause uses one when the caller has a principal and
+the type allows an entry level that reaches it. Elasticsearch rejects a search that contains a `nested` query when
+`search.allow_expensive_queries` is `false`, so those searches fail. A filter without one, such as a filter for
+recovery spaces only, still works. A search that must always fail when the setting is off therefore checks the
+setting itself, instead of relying on the shape of the filter.
+
 ## The fixture table
 
 `src/__fixtures__` holds test-only data. The package build drops that folder, and the entry point doesn't export it.
@@ -153,3 +213,15 @@ The expectations are written by hand, and that's the point: they are the contrac
 object and the query that filters a search must produce exactly these answers, so a list can never show an object
 that opening it would deny. When you add a shape, decide its expected access from the rules above, not from what any
 implementation returns.
+
+The tests of the reader and the filter use the table:
+
+- The reader tests expect an ACL for every fixture whose state is not `absent`, and expect `toAclSource` to write
+  each one back unchanged.
+- The filter tests index each fixture in memory, with the values that the reader returns. Then they run the filter
+  for every probe at `view`, `use`, `edit`, and `manage`, and expect exactly the levels up to the one in the
+  fixture's `access`. They also expect every fixture to match in a recovery space.
+
+Four shapes are in the reader and filter tests, and not in the table, because they test how the reader reads the
+source: a key that the mapping does not define, an entry with only `added_at`, an empty string, and sibling dotted
+entry keys.
