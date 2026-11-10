@@ -105,7 +105,7 @@ export const buildCreateActionPolicyAttributes = ({
 }): ActionPolicySavedObjectAttributes => {
   return {
     ...toStoredPolicyFields(data),
-    enabled: true,
+    enabled: data.enabled ?? true,
     ...toApiKeyAttributes(auth),
     createdBy,
     createdAt,
@@ -116,7 +116,8 @@ export const buildCreateActionPolicyAttributes = ({
 
 /**
  * Builds the complete next document from the already-merged and validated policy data. Server-owned
- * fields (`enabled`, `tags`, `snoozedUntil`, audit) are never patchable, so they come from storage.
+ * fields (`tags`, `snoozedUntil`, audit) are never patchable, so they come from storage. `enabled`
+ * is only set by a PUT body; a PATCH never carries it, so it falls back to storage.
  */
 export const buildUpdateActionPolicyAttributes = ({
   existing,
@@ -133,7 +134,7 @@ export const buildUpdateActionPolicyAttributes = ({
 }): ActionPolicySavedObjectAttributes => {
   return {
     ...toStoredPolicyFields(data),
-    enabled: existing.enabled,
+    enabled: data.enabled ?? existing.enabled,
     tags: existing.tags ?? undefined,
     snoozedUntil: existing.snoozedUntil ?? undefined,
     ...toApiKeyAttributes(auth),

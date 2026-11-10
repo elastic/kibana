@@ -313,8 +313,21 @@ const createActionPolicyDataBaseSchema = lazySchema(() =>
     .strict()
 );
 
+/**
+ * Optional `enabled` shared by the create and PUT bodies. Left as a plain optional with no default because "omitted" means `true` on create and the stored value on replace.
+ */
+const enabledSchema = lazySchema(() =>
+  z
+    .boolean()
+    .optional()
+    .describe(
+      'Whether the action policy is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.'
+    )
+);
+
 export const createActionPolicyDataSchema = lazySchema(() =>
   createActionPolicyDataBaseSchema
+    .extend({ enabled: enabledSchema })
     .check(validateGroupingModeAndStrategy)
     .meta({ id: 'alerting_new_action_policy' })
 );
@@ -324,11 +337,12 @@ export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataS
 
 /**
  * Request body schema for `PUT /api/alerting/v2/action_policies/{id}`: the create-action-policy
- * data, unchanged. Lifecycle state is not part of any write body — a replace creates the policy
- * enabled and otherwise preserves the stored value, and `_enable`/`_disable` own the transition.
+ * data, including the optional `enabled`. A replace that omits it preserves the stored value; a
+ * supplied value sets the state, like `_enable`/`_disable`. PATCH does not accept it.
  */
 export const putActionPolicyDataSchema = lazySchema(() =>
   createActionPolicyDataBaseSchema
+    .extend({ enabled: enabledSchema })
     .check(validateGroupingModeAndStrategy)
     .meta({ id: 'alerting_put_action_policy' })
 );

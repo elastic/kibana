@@ -1349,10 +1349,21 @@ describe('putRuleDataSchema', () => {
     const result = putRuleDataSchema.safeParse({ ...validCreateData, enabled: 'true' });
     expect(result.success).toBe(false);
   });
+});
 
-  it('does not add enabled to createRuleDataSchema', () => {
-    const result = createRuleDataSchema.safeParse({ ...validCreateData, enabled: true });
-    expect(result.success).toBe(false);
+describe('createRuleDataSchema enabled', () => {
+  it('leaves enabled undefined when omitted', () => {
+    expect(createRuleDataSchema.parse(validCreateData).enabled).toBeUndefined();
+  });
+
+  it.each([true, false])('accepts enabled: %s', (enabled) => {
+    expect(createRuleDataSchema.parse({ ...validCreateData, enabled }).enabled).toBe(enabled);
+  });
+
+  it('rejects a non-boolean enabled', () => {
+    expect(createRuleDataSchema.safeParse({ ...validCreateData, enabled: 'true' }).success).toBe(
+      false
+    );
   });
 });
 
@@ -2113,10 +2124,10 @@ describe('bulkGetRulesResponseSchema', () => {
 describe('bulkCreateRulesRequestSchema', () => {
   const validItem = validCreateData;
 
-  it('accepts a single item and defaults enabled to true', () => {
+  it('accepts a single item and leaves enabled undefined', () => {
     const result = bulkCreateRulesRequestSchema.parse({ items: [validItem] });
     expect(result.items).toHaveLength(1);
-    expect(result.items[0].enabled).toBe(true);
+    expect(result.items[0].enabled).toBeUndefined();
     expect(result.items[0].id).toBeUndefined();
   });
 

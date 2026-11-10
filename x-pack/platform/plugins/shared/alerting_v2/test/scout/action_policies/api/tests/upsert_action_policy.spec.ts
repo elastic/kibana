@@ -65,17 +65,66 @@ apiTest.describe('Upsert action policy API', { tag: testData.API_ENGINE_TAG }, (
     }
   );
 
-  // Lifecycle state is owned by `_enable`/`_disable`, so a replace body may not carry it.
-  apiTest('upsert: rejects a body carrying enabled', async ({ apiClient }) => {
+  apiTest('upsert: rejects a non-boolean enabled', async ({ apiClient }) => {
     const id = 'upsert-reject-enabled-policy';
     const response = await apiClient.put(getActionPolicyUrl(id), {
       headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: { ...buildCreateActionPolicyData({ name: 'carries-enabled' }), enabled: false },
+      body: { ...buildCreateActionPolicyData({ name: 'bad-enabled' }), enabled: 'false' },
     });
 
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
   });
+
+  apiTest(
+    'upsert: creates a disabled policy when the body sets enabled=false',
+    async ({ apiClient, apiServices }) => {
+      const id = 'upsert-create-disabled-policy';
+      const response = await apiClient.put(getActionPolicyUrl(id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { ...buildCreateActionPolicyData({ name: 'created-disabled' }), enabled: false },
+      });
+
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.enabled).toBe(false);
+
+      const persisted = await apiServices.alertingV2.actionPolicies.get(id);
+      expect(persisted.enabled).toBe(false);
+    }
+  );
+
+  apiTest(
+    'upsert: toggles enabled on replace when the body sets it, and keeps it when omitted',
+    async ({ apiClient, apiServices }) => {
+      const id = 'upsert-toggle-enabled-policy';
+      await apiServices.alertingV2.actionPolicies.upsert(
+        id,
+        buildCreateActionPolicyData({ name: 'toggle-me' })
+      );
+
+      const replace = (enabled?: boolean) =>
+        apiClient.put(getActionPolicyUrl(id), {
+          headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+          body: {
+            ...buildCreateActionPolicyData({ name: 'toggle-me' }),
+            ...(enabled === undefined ? {} : { enabled }),
+          },
+        });
+
+      const disabled = await replace(false);
+      expect(disabled).toHaveStatusCode(200);
+      expect(disabled.body.enabled).toBe(false);
+
+      const unchanged = await replace();
+      expect(unchanged).toHaveStatusCode(200);
+      expect(unchanged.body.enabled).toBe(false);
+
+      const enabled = await replace(true);
+      expect(enabled).toHaveStatusCode(200);
+      expect(enabled.body.enabled).toBe(true);
+      expect((await apiServices.alertingV2.actionPolicies.get(id)).enabled).toBe(true);
+    }
+  );
 
   apiTest('upsert: creates an enabled policy', async ({ apiClient, apiServices }) => {
     const id = 'upsert-create-enabled-policy';

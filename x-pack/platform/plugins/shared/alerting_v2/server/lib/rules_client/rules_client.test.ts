@@ -276,6 +276,24 @@ describe('RulesClient', () => {
       expect(res).toEqual(expect.objectContaining({ id: 'rule-id-disabled', enabled: false }));
     });
 
+    it('creates a disabled rule SO and does not schedule a task when the body sets enabled=false', async () => {
+      const client = createClient();
+
+      const res = await client.createRule({
+        data: { ...baseCreateData, enabled: false },
+        options: { id: 'rule-id-body-disabled' },
+      });
+
+      expect(rulesSavedObjectService.bulkCreate).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: 'rule-id-body-disabled',
+          attrs: expect.objectContaining({ enabled: false }),
+        }),
+      ]);
+      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+      expect(res).toEqual(expect.objectContaining({ id: 'rule-id-body-disabled', enabled: false }));
+    });
+
     it('defaults to an enabled rule when options.enabled is omitted', async () => {
       const client = createClient();
 

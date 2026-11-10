@@ -67,6 +67,54 @@ apiTest.describe('Create rule API', { tag: testData.API_ENGINE_TAG }, () => {
     }
   );
 
+  apiTest('create: defaults to an enabled rule when enabled is omitted', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.RULE_API_PATH, {
+      headers: writerHeaders,
+      body: buildCreateRuleData({ metadata: { name: 'created-enabled-by-default' } }),
+    });
+    expect(response).toHaveStatusCode(201);
+    expect(response.body.enabled).toBe(true);
+  });
+
+  apiTest(
+    'create: enabled=false saves the rule without running it until it is enabled',
+    async ({ apiClient, apiServices }) => {
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: {
+          ...buildCreateRuleData({ metadata: { name: 'created-disabled' } }),
+          enabled: false,
+        },
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.enabled).toBe(false);
+
+      const ruleId = response.body.id;
+      expect((await apiServices.alertingV2.rules.get(ruleId)).enabled).toBe(false);
+      expect(
+        await apiServices.alertingV2.ruleExecutorTask.countRuns({
+          ruleId,
+          since: new Date(0),
+        })
+      ).toBe(0);
+
+      const enabled = await apiServices.alertingV2.rules.enable(ruleId);
+      expect(enabled.enabled).toBe(true);
+
+      await apiServices.alertingV2.ruleExecutorTask.waitForTaskScheduled({ ruleId });
+      await apiServices.alertingV2.ruleRunner.waitForExecutions({ ruleId, runs: 1 });
+    }
+  );
+
+  apiTest('validation: rejects a non-boolean enabled', async ({ apiClient }) => {
+    const response = await apiClient.post(testData.RULE_API_PATH, {
+      headers: writerHeaders,
+      body: { ...buildCreateRuleData({ metadata: { name: 'bad-enabled' } }), enabled: 'false' },
+    });
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
+  });
+
   apiTest('validation: rejects body with missing metadata.name', async ({ apiClient }) => {
     const body = buildCreateRuleData();
     // Replace metadata with one that has no name.

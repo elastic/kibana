@@ -908,8 +908,27 @@ const applyCreateRuleRefinements = <T extends z.ZodType<CreateRuleRefinementFiel
       }
     });
 
+/**
+ * Optional `enabled` shared by every create-capable rule body. Left as a plain
+ * optional with no default because the meaning of "omitted" differs by
+ * outcome: on create it defaults to `true`, on replace it preserves the existing
+ * stored value.
+ */
+const enabledSchema = lazySchema(() =>
+  z
+    .boolean()
+    .optional()
+    .describe(
+      'Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state. A rule created with `false` is saved but does not run until you enable it.'
+    )
+);
+
 export const createRuleDataSchema = lazySchema(() =>
-  applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
+  applyCreateRuleRefinements(
+    createRuleDataBaseSchema.extend({
+      enabled: enabledSchema,
+    })
+  ).meta({
     id: 'alerting_new_rule',
   })
 );
@@ -918,20 +937,12 @@ export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
 export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 
 /**
- * Request body schema for `PUT /api/alerting/v2/rules/{id}`. Adds an optional
- * `enabled` on top of the create-rule data. Left as a plain optional (no
- * schema-level default) because the meaning of "omitted" differs by outcome:
- * on create it defaults to `true`, on replace it preserves the existing
- * stored value — both handled in application code, not here.
+ * Request body schema for `PUT /api/alerting/v2/rules/{id}`: the create-rule
+ * data, including the optional `enabled`.
  */
 export const putRuleDataSchema = applyCreateRuleRefinements(
   createRuleDataBaseSchema.extend({
-    enabled: z
-      .boolean()
-      .optional()
-      .describe(
-        'Whether the rule is enabled. On create, defaults to `true` when omitted. On replace, omitting this field preserves the existing enabled state.'
-      ),
+    enabled: enabledSchema,
   })
 ).meta({ id: 'alerting_put_rule' });
 
@@ -1164,8 +1175,8 @@ export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
 
 /**
  * A single item in a bulk-create request: the create-rule body plus optional
- * client-supplied `id` and `enabled` (default true). Disabled rules are saved
- * and do not run until enabled.
+ * client-supplied `id`. `enabled` is the same optional field as on a single
+ * create; disabled rules are saved and do not run until enabled.
  */
 export const bulkCreateRuleItemSchema = lazySchema(() =>
   applyCreateRuleRefinements(
@@ -1175,12 +1186,7 @@ export const bulkCreateRuleItemSchema = lazySchema(() =>
         .describe(
           'Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.'
         ),
-      enabled: z
-        .boolean()
-        .default(true)
-        .describe(
-          'If `true` (default), the rule runs on its schedule after creation. If `false`, the rule is saved but does not run until you enable it.'
-        ),
+      enabled: enabledSchema,
     })
   ).meta({ id: 'alerting_bulk_create_rule_item' })
 );
