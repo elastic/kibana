@@ -148,7 +148,13 @@ export const ServiceNode = memo(
       }
 
       return parts.join('. ');
-    }, [data.label, data.agentName, data.serviceAnomalyStats?.anomalyScore, data.stats, data.isIdle]);
+    }, [
+      data.label,
+      data.agentName,
+      data.serviceAnomalyStats?.anomalyScore,
+      data.stats,
+      data.isIdle,
+    ]);
 
     const containerStyles = css`
       position: relative;

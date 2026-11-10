@@ -84,9 +84,7 @@ export function getFailingServiceMembers(
       id: member.id,
       failedTransactionRate: member.stats?.failedTransactionRate ?? 0,
     }))
-    .sort(
-      (a, b) => b.failedTransactionRate - a.failedTransactionRate || a.id.localeCompare(b.id)
-    );
+    .sort((a, b) => b.failedTransactionRate - a.failedTransactionRate || a.id.localeCompare(b.id));
 
   return {
     failingMembers: failing.slice(0, MAX_FAILING_MEMBERS_SHOWN),

@@ -6,12 +6,11 @@
  */
 
 import type { ServiceMapServiceStats } from '@kbn/apm-types';
-import {
-  aggregateServiceMapStats,
-  getFailingServiceMembers,
-} from './aggregate_service_map_stats';
+import { aggregateServiceMapStats, getFailingServiceMembers } from './aggregate_service_map_stats';
 
-function stats(partial: Partial<ServiceMapServiceStats> & Pick<ServiceMapServiceStats, 'throughput'>): ServiceMapServiceStats {
+function stats(
+  partial: Partial<ServiceMapServiceStats> & Pick<ServiceMapServiceStats, 'throughput'>
+): ServiceMapServiceStats {
   return {
     transactionType: 'request',
     failedTransactionRate: null,
@@ -68,7 +67,9 @@ describe('aggregateServiceMapStats', () => {
 
   it('returns a null failure rate when total throughput is zero', () => {
     expect(
-      aggregateServiceMapStats([stats({ throughput: 0, failedTransactionRate: 0.5, requestCount: 0 })])
+      aggregateServiceMapStats([
+        stats({ throughput: 0, failedTransactionRate: 0.5, requestCount: 0 }),
+      ])
     ).toEqual({
       throughput: 0,
       failedTransactionRate: null,
@@ -98,7 +99,10 @@ describe('getFailingServiceMembers', () => {
 
   it('ignores a high failure rate on fewer than 20 requests', () => {
     const result = getFailingServiceMembers([
-      { id: 'noisy', stats: stats({ throughput: 0.1, failedTransactionRate: 0.5, requestCount: 4 }) },
+      {
+        id: 'noisy',
+        stats: stats({ throughput: 0.1, failedTransactionRate: 0.5, requestCount: 4 }),
+      },
       { id: 'ok', stats: stats({ throughput: 10, failedTransactionRate: 0, requestCount: 100 }) },
     ]);
 
