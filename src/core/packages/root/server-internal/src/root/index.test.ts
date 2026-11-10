@@ -9,13 +9,12 @@
 
 import { rawConfigService, configService, logger, mockServer } from './index.test.mocks';
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Root } from '.';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -154,42 +153,6 @@ test('only shutdowns once', async () => {
 
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockServer.stop).toHaveBeenCalledTimes(1);
-});
-
-test('stops services and calls `onShutdown` when a plugin `initialize()` fails after start', async () => {
-  const mockOnShutdown = jest.fn();
-  const root = new Root(rawConfigService, env, mockOnShutdown);
-  const initializationFailure$ = new Subject<Error>();
-  mockServer.getPluginInitializationFailure$.mockReturnValueOnce(initializationFailure$);
-
-  await root.preboot();
-  await root.setup();
-  await root.start();
-
-  expect(mockOnShutdown).not.toHaveBeenCalled();
-  expect(mockServer.stop).not.toHaveBeenCalled();
-
-  const initializeError = new Error('Plugin "foo" initialize() failed: boom');
-  initializationFailure$.next(initializeError);
-  await new Promise((resolve) => setImmediate(resolve));
-
-  expect(mockOnShutdown).toHaveBeenCalledTimes(1);
-  expect(mockOnShutdown).toHaveBeenCalledWith(initializeError);
-  expect(mockServer.stop).toHaveBeenCalledTimes(1);
-});
-
-test('logs the stack of the shutdown reason and of its cause', async () => {
-  const root = new Root(rawConfigService, env, jest.fn());
-  const cause = new Error('boom');
-  const reason = new Error('Plugin "foo" initialize() failed: boom', { cause });
-
-  await root.preboot();
-  await root.shutdown(reason);
-
-  const [[fatalMessage]] = loggingSystemMock.collect(logger).fatal;
-  expect(fatalMessage).toBe(
-    `Reason: ${reason.message}\n${reason.stack}\nCaused by: ${cause.stack}`
-  );
 });
 
 test('fails and stops services if server preboot fails', async () => {

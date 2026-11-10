@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DeferredInitEngine, SLOW_INITIALIZE_WARNING_MS } from './deferred_init_engine';
-export type { PluginInitRunner } from './deferred_init_engine';
+export { DeferredInitEngine } from './deferred_init_engine';
+export { runPluginInitialize, SLOW_INITIALIZE_WARNING_MS } from './run_plugin_initialize';

@@ -20,7 +20,6 @@ export type {
   ExposedToBrowserDescriptor,
   DynamicConfigDescriptor,
   PluginInitialization,
-  PluginInitStatus,
 } from './src';
 
 export { SharedGlobalConfigKeys } from './src';

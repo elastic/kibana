@@ -310,8 +310,9 @@ export interface Plugin<
    * {@link PluginInitializerContext.initialization}). Do not await that call from inside this
    * method: it would wait for itself and never settle.
    *
-   * A thrown error shuts Kibana down, like a thrown `setup()` or `start()`. Catch the errors the
-   * plugin can recover from.
+   * Core logs a failure but does not otherwise handle it: a rejection nobody awaits behaves like a
+   * rejected promise started from `start()` without awaiting it. Catch the errors the plugin can
+   * recover from.
    *
    * @remarks Runs on every Kibana instance against the same cluster, concurrently and without
    * coordination, so the work must be safe to run more than once.
@@ -464,7 +465,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     get: <T = ConfigSchema>() => T;
   };
   /**
-   * Status of this plugin's {@link Plugin.initialize} work, and the way to wait for it.
+   * The way to wait for this plugin's {@link Plugin.initialize} work.
    *
    * Keep it on the instance and await `initialize()` in the route handlers, task runners and
    * start contract functions that need the initialized state:

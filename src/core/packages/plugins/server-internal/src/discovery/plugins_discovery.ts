@@ -15,7 +15,6 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { PluginWrapper } from '../plugin';
 import { pluginManifestFromPluginPackage } from './plugin_manifest_from_plugin_package';
-import type { DeferredInitEngine } from '../deferred_init';
 import type { InstanceInfo } from '../plugin_context';
 import { createPluginInitializerContext } from '../plugin_context';
 import type { PluginsConfig } from '../plugins_config';
@@ -38,13 +37,11 @@ export function discover({
   coreContext,
   instanceInfo,
   nodeInfo,
-  deferredInitEngine,
 }: {
   config: PluginsConfig;
   coreContext: CoreContext;
   instanceInfo: InstanceInfo;
   nodeInfo: NodeInfo;
-  deferredInitEngine: DeferredInitEngine;
 }) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
@@ -61,14 +58,7 @@ export function discover({
   ).pipe(
     concatMap((pluginPathOrError) => {
       return typeof pluginPathOrError === 'string'
-        ? createPlugin$(
-            pluginPathOrError,
-            log,
-            coreContext,
-            instanceInfo,
-            nodeInfo,
-            deferredInitEngine
-          )
+        ? createPlugin$(pluginPathOrError, log, coreContext, instanceInfo, nodeInfo)
         : [pluginPathOrError];
     })
   );
@@ -90,13 +80,14 @@ export function discover({
         coreContext.env.packageInfo.version,
         pkg.manifest
       );
+      const initialization = Promise.withResolvers<void>();
       const initializerContext = createPluginInitializerContext({
         coreContext,
         opaqueId: Symbol(pkg.id),
         manifest,
         instanceInfo,
         nodeInfo,
-        deferredInitEngine,
+        initialization,
       });
 
       return new PluginWrapper({
@@ -104,6 +95,7 @@ export function discover({
         manifest,
         opaqueId: initializerContext.opaqueId,
         initializerContext,
+        initialization,
       });
     })
   );
@@ -140,20 +132,19 @@ export function discover({
  * @param coreContext Kibana core context.
  * @param instanceInfo Info about the instance running Kibana, including uuid.
  * @param nodeRoles Roles this process has been configured with.
- * @param deferredInitEngine Engine that tracks every plugin's `initialize()` status.
  */
 function createPlugin$(
   path: string,
   log: Logger,
   coreContext: CoreContext,
   instanceInfo: InstanceInfo,
-  nodeInfo: NodeInfo,
-  deferredInitEngine: DeferredInitEngine
+  nodeInfo: NodeInfo
 ) {
   return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
     map((manifest) => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
       const opaqueId = Symbol(manifest.id);
+      const initialization = Promise.withResolvers<void>();
       return new PluginWrapper({
         path,
         manifest,
@@ -164,8 +155,9 @@ function createPlugin$(
           manifest,
           instanceInfo,
           nodeInfo,
-          deferredInitEngine,
+          initialization,
         }),
+        initialization,
       });
     }),
     catchError((err) => [err])

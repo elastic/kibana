@@ -30,7 +30,6 @@ export class Root {
   private readonly server: Server;
   private loggingConfigSubscription?: Subscription;
   private apmConfigSubscription?: Subscription;
-  private pluginInitializationFailureSubscription?: Subscription;
   private shuttingDown: boolean = false;
 
   constructor(
@@ -72,11 +71,6 @@ export class Root {
   public async start() {
     this.log.debug('starting root');
     try {
-      // A failed plugin `initialize()` is as fatal as a thrown `start()`, but it surfaces after
-      // `start()` has returned, so it reaches shutdown through this subscription.
-      this.pluginInitializationFailureSubscription = this.server
-        .getPluginInitializationFailure$()
-        .subscribe((error) => this.shutdown(error));
       return await this.server.start();
     } catch (e) {
       await this.shutdown(e);
@@ -113,10 +107,6 @@ export class Root {
     if (this.apmConfigSubscription !== undefined) {
       this.apmConfigSubscription.unsubscribe();
       this.apmConfigSubscription = undefined;
-    }
-    if (this.pluginInitializationFailureSubscription !== undefined) {
-      this.pluginInitializationFailureSubscription.unsubscribe();
-      this.pluginInitializationFailureSubscription = undefined;
     }
     await this.loggingSystem.stop();
 
@@ -181,12 +171,10 @@ export class Root {
   }
 }
 
-// Prints the `cause` stack too, since a wrapped error's own stack hides where it was thrown.
-const formatShutdownReason = (reason: any): string =>
-  [
-    `Reason: ${reason.message ?? reason}`,
-    reason.stack,
-    reason.cause?.stack && `Caused by: ${reason.cause.stack}`,
-  ]
-    .filter(Boolean)
-    .join('\n');
+const formatShutdownReason = (reason: any): string => {
+  let message = `Reason: ${reason.message ?? reason}`;
+  if (reason.stack) {
+    message = `${message}\n${reason.stack}`;
+  }
+  return message;
+};

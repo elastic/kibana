@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { isPromise } from '@kbn/std';
@@ -26,7 +26,6 @@ import type {
   SharedGlobalConfig,
   PluginInitializerContext,
   PluginInitialization,
-  PluginInitStatus,
 } from '@kbn/core-plugins-server';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
@@ -90,16 +89,12 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
   return mock;
 }
 
-type MockedPluginInitialization = jest.Mocked<Omit<PluginInitialization, 'status$'>> & {
-  status$: BehaviorSubject<PluginInitStatus>;
-};
-
 export type PluginInitializerContextMock<T> = Omit<
   PluginInitializerContext<T>,
   'config' | 'initialization'
 > & {
   config: MockedPluginInitializerConfig<T>;
-  initialization: MockedPluginInitialization;
+  initialization: jest.Mocked<PluginInitialization>;
 };
 
 function pluginInitializerContextMock<T>(config: T = {} as T) {
@@ -130,8 +125,6 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
     node: nodeServiceMock.createInternalPrebootContract(),
     initialization: {
       initialize: jest.fn().mockResolvedValue(undefined),
-      status$: new BehaviorSubject<PluginInitStatus>('available'),
-      getStatus: jest.fn().mockReturnValue('available'),
     },
   };
 
