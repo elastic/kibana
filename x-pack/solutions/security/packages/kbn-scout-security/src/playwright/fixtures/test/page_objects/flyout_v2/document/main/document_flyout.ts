@@ -88,16 +88,19 @@ export class DocumentFlyout {
   }
 
   /**
-   * Open the document flyout for the alert produced by `ruleName`: navigate to the alerts table,
-   * wait for the alert to appear, expand its row, and wait for the flyout to load. The flyout is
-   * always reached from the alerts table in these suites, so this composes AlertsTablePage to give
-   * specs a single entry point instead of repeating the four-step preamble.
+   * Open the document flyout for an alert produced by `ruleName`: navigate to the alerts table,
+   * wait for the rule's first alert to appear, expand its row, and wait for the flyout to load. The
+   * flyout is always reached from the alerts table in these suites, so this composes
+   * AlertsTablePage to give specs a single entry point instead of repeating the preamble.
+   *
+   * The rules these specs create query shared index patterns (e.g. `auditbeat-*`) that other Scout
+   * configs on the same server may also have loaded documents into, so a rule can legitimately
+   * emit more than one alert. Callers only need one alert of their rule, so open the first.
    */
   async openForRule(ruleName: string) {
     const alertsTable = new AlertsTablePage(this.page);
     await alertsTable.navigate();
-    await alertsTable.waitForRuleAlert(ruleName);
-    await alertsTable.expandAlertDetailsFlyout(ruleName);
+    await alertsTable.expandFirstAlertDetailsFlyout(ruleName);
     await this.waitForAlertFlyout();
   }
 
