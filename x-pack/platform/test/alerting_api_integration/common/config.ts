@@ -406,10 +406,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
           ...findTestPluginPaths(
-            path.resolve(
-              __dirname,
-              '../../../test_plugins/response_ops/alerting_api_integration'
-            )
+            path.resolve(__dirname, '../../../test_plugins/response_ops/alerting_api_integration')
           ),
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl

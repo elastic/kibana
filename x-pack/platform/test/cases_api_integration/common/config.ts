@@ -107,10 +107,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               __dirname,
               '../../../test_plugins/security_investigations/cases_api_integration'
             ),
-            path.resolve(
-              __dirname,
-              '../../../test_plugins/response_ops/alerting_api_integration'
-            ),
+            path.resolve(__dirname, '../../../test_plugins/response_ops/alerting_api_integration'),
           ]),
           `--xpack.actions.preconfigured=${JSON.stringify({
             'preconfigured-servicenow': {
