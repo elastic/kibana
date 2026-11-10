@@ -79,6 +79,7 @@ describe('executeEsql', () => {
     expect(params.time_zone).toBe('Europe/Paris');
     expect(params.locale).toBe('fr-FR');
     expect(params.dropNullColumns).toBe(true);
+    expect(params.settings).toEqual({ column_metadata: true });
     const filterJson = JSON.stringify(params.filter);
     expect(filterJson).toContain('web-01');
     expect(filterJson).toContain('checkout');

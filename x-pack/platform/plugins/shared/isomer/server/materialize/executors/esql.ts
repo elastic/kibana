@@ -122,6 +122,9 @@ export const executeEsql = async (
           esqlVariables: context.esqlVariables,
         },
         dropNullColumns: true,
+        // As Kibana's `esql` expression asks: a `BUCKET`ed column's `_meta`, which Lens reads
+        // for its date histograms (`esMeta.bucket`).
+        columnMetadata: true,
       },
       { abortSignal: controller.signal, includeDataTable: true }
     );
