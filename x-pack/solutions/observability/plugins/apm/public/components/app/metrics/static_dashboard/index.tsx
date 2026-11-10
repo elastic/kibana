@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
@@ -59,12 +59,14 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
   const dashboardFileName = getDashboardFileNameFromProps(dashboardProps);
 
+  const onApiCleanup = useCallback(() => setDashboard(undefined), []);
+
   return (
     <DashboardRenderer
       key={dashboardFileName}
       getCreationOptions={() => getCreationOptions(dashboardProps, notifications)}
       onApiAvailable={setDashboard}
-      onApiCleanup={() => setDashboard(undefined)}
+      onApiCleanup={onApiCleanup}
     />
   );
 }

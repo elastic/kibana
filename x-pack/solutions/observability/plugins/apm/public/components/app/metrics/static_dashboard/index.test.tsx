@@ -87,7 +87,7 @@ function renderDashboard() {
     search: fromQuery({ rangeFrom: 'now-15m', rangeTo: 'now' }),
   });
 
-  return render(
+  const result = render(
     <KibanaReactContext.Provider>
       <MockApmPluginContextWrapper
         history={history}
@@ -97,6 +97,8 @@ function renderDashboard() {
       </MockApmPluginContextWrapper>
     </KibanaReactContext.Provider>
   );
+
+  return { ...result, history };
 }
 
 describe('JsonMetricsDashboard', () => {
@@ -120,7 +122,7 @@ describe('JsonMetricsDashboard', () => {
         setTimeRange: jest.fn(),
       };
 
-      renderDashboard();
+      const { history } = renderDashboard();
 
       // Dashboard becomes available, so the effects push the initial state onto it.
       await act(async () => {
@@ -136,6 +138,21 @@ describe('JsonMetricsDashboard', () => {
       // clears the stale reference so later effects cannot operate on a destroyed dashboard.
       await act(async () => {
         capturedOnApiCleanup!();
+      });
+
+      // Change the search inputs (kuery and time range) so the synchronization effects re-run.
+      // If the stale reference had not been cleared, the destroyed API would receive these
+      // setQuery/setTimeRange calls; the `!dashboard` guard must short-circuit instead. This is
+      // what distinguishes the fix from a no-op cleanup.
+      await act(async () => {
+        history.replace({
+          pathname: '/services/test-service/metrics',
+          search: fromQuery({
+            kuery: 'service.node.name: "node-1"',
+            rangeFrom: 'now-1h',
+            rangeTo: 'now',
+          }),
+        });
       });
 
       expect(dashboardApi.setFilters).not.toHaveBeenCalled();
