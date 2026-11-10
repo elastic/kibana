@@ -18,7 +18,7 @@ import {
   readCustomContext,
   replaceCustomContext,
 } from '../investigation/custom_context';
-import { ensureNightshiftSetup } from '../investigation/nightshift_setup';
+import { enableNightshiftSpace } from '../investigation/space_setup';
 import {
   TRACES_FILE_DATASET_NAME,
   loadCustomer0ReinforcementDataset,
@@ -165,14 +165,14 @@ evaluate.describe('Nightshift decision-tree reinforcement', { tag: suiteTags }, 
       const tracesFile = process.env.NIGHTSHIFT_REINFORCEMENT_TRACES_FILE;
       const liveDataset = process.env.NIGHTSHIFT_REINFORCEMENT_DATASET;
       const setup = (workflowIds: readonly string[]) =>
-        ensureNightshiftSetup({
+        enableNightshiftSpace({
+          config,
           esClient,
-          fetch,
-          connector,
-          log,
-          isServerless: config.serverless,
           kbnUrl,
           samlAuth,
+          fetch,
+          log,
+          connectorId: connector.id,
           workflowIds,
         });
       // A first Customer-0 investigation creates a new tree, and merged_nodes is rejected on a

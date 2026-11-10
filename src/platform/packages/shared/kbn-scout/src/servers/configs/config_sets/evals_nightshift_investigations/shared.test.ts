@@ -76,7 +76,7 @@ describe.each([
   });
 
   // The config set must ignore NIGHTSHIFT_DATASETS: Scout is reused when only the selection changes.
-  it.each([undefined, 'synthetic-smoke', 'trace-only', 'all'])(
+  it.each([undefined, 'wiki-optimize', 'trace-only', 'all'])(
     'starts plain evals_tracing without the sandbox Kibana config (NIGHTSHIFT_DATASETS=%s)',
     (selection) => {
       const servers = loadServers(configPath, {
@@ -149,12 +149,12 @@ describe.each([
     expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
   });
 
-  it('keeps exporter headers out of smoke-only process arguments', () => {
+  it('keeps exporter headers out of sandbox-less process arguments', () => {
     const exporters = JSON.stringify([
-      { http: { url: 'https://traces.example.com', headers: { Authorization: 'smoke-key' } } },
+      { http: { url: 'https://traces.example.com', headers: { Authorization: 'tracing-key' } } },
     ]);
     const servers = loadServers(configPath, { TRACING_EXPORTERS: exporters });
-    expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('smoke-key');
+    expect(servers.kbnTestServer.serverArgs.join(' ')).not.toContain('tracing-key');
     expect(servers.kbnTestServer.env?.NIGHTSHIFT_TRACING_EXPORTERS).toBe(exporters);
     expect(servers.kbnTestServer.serverArgs).toContain(
       `--config=${join(__dirname, 'kibana.tracing.yml')}`

@@ -163,12 +163,14 @@
       "stepTimeoutInMinutes": 240,
       "shards": [
         {
-          "id": "customer0",
+          "id": "customer0-golden",
           "judge": "eis-openai-gpt-6-sol",
-          "specFiles": [
-            "evals/smoke/smoke.spec.ts",
-            "evals/investigation/investigation.spec.ts"
-          ]
+          "specFiles": ["evals/investigation/stored.spec.ts"]
+        },
+        {
+          "id": "customer0-connector-probes",
+          "judge": "eis-openai-gpt-6-sol",
+          "specFiles": ["evals/connector_probe/stored.spec.ts"]
         },
         {
           "id": "orcabench",

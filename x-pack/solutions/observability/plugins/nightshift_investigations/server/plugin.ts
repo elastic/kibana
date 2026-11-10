@@ -715,6 +715,10 @@ export class NightshiftInvestigationsPlugin
           getEpisodeLookup: this.getEpisodeLookup,
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
+          getUserProfileService: async () => {
+            const [start] = await core.getStartServices();
+            return start.userProfile;
+          },
           isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
           isWikiEnabled: () => this.wikiEnabled,
           listSandboxConnectors,

@@ -10,7 +10,7 @@
 # and `url`: it authenticates by API key over plain TLS.
 # SANDBOX_KIBANA_CONFIG points the `evals_nightshift_investigations` Scout config set at
 # kibana.sandbox.yml, which reads the credentials from the environment. Without an API key it prints
-# `{}`, so the config set falls back to plain `evals_tracing` and only smoke runs.
+# `{}`, so the config set falls back to plain `evals_tracing`, which only runs `wiki-optimize`.
 
 set -euo pipefail
 
@@ -205,7 +205,7 @@ if [[ -z "$api_key" ]]; then
   done
   if [[ ${#partial[@]} -gt 0 ]]; then
     echo "nightshift-investigations scout hook: sandbox ${partial[*]} set without an API key;" \
-      "set sandbox.apiKey (or SANDBOX_API_KEY), or remove the sandbox settings to run only smoke." >&2
+      "set sandbox.apiKey (or SANDBOX_API_KEY), or remove the sandbox settings." >&2
     exit 1
   fi
   echo '{}'
