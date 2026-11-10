@@ -6,6 +6,7 @@
  */
 
 import React, { type FC, useCallback, useMemo, memo, useState } from 'react';
+import { isEqual } from 'lodash';
 import {
   useForm,
   Form,
@@ -17,12 +18,23 @@ import { EuiButton, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { TextAreaField, SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
-import type { ObservablePatch, ObservablePost } from '../../../common/types/api';
+import type {
+  ObservablePatch,
+  ObservablePost,
+  ObservableWithMetadata,
+} from '../../../common/types/api';
 import type { Observable } from '../../../common/types/domain';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import * as i18n from './translations';
 import { fieldsConfig, normalizeValueType } from './fields_config';
 import { getDynamicValueField } from './builder';
+import type { MetadataPair } from './observable_metadata_fields';
+import {
+  METADATA_PAIRS_PATH,
+  ObservableMetadataFields,
+  metadataToPairs,
+  pairsToMetadata,
+} from './observable_metadata_fields';
 
 export interface ObservableFormFieldsProps {
   observable?: Observable;
@@ -93,9 +105,13 @@ ObservableFormFields.displayName = 'ObservableFormFields';
 export interface ObservableFormProps {
   isLoading: boolean;
   onSubmit: (observable: ObservablePatch | ObservablePost) => Promise<void>;
-  observable?: Observable;
+  observable?: ObservableWithMetadata;
   onCancel: VoidFunction;
 }
+
+type ObservableFormData = Omit<ObservablePost, 'metadata'> & {
+  [METADATA_PAIRS_PATH]?: MetadataPair[];
+};
 
 export const ObservableForm: FC<ObservableFormProps> = ({
   isLoading,
@@ -103,12 +119,18 @@ export const ObservableForm: FC<ObservableFormProps> = ({
   observable,
   onCancel,
 }) => {
-  const { form } = useForm<ObservablePost>({
-    defaultValue: (observable ?? {
-      typeKey: '',
-      value: '',
-      description: '',
-    }) as ObservablePost,
+  // The rows are built once, so editing does not reset them (UseArray keeps its own copy).
+  const initialMetadata = useMemo(() => observable?.metadata ?? {}, [observable?.metadata]);
+  const defaultValue = useMemo(
+    () => ({
+      ...(observable ?? { typeKey: '', value: '', description: '' }),
+      [METADATA_PAIRS_PATH]: metadataToPairs(initialMetadata),
+    }),
+    [initialMetadata, observable]
+  );
+
+  const { form } = useForm<ObservableFormData>({
+    defaultValue: defaultValue as ObservableFormData,
     options: { stripEmptyFields: false },
   });
 
@@ -116,18 +138,31 @@ export const ObservableForm: FC<ObservableFormProps> = ({
     async (e: React.MouseEvent<HTMLButtonElement>) => {
       const { isValid, data } = await form.submit(e);
 
-      if (isValid) {
-        return onSubmit({
-          ...data,
-        });
+      if (!isValid) {
+        return;
       }
+
+      const { [METADATA_PAIRS_PATH]: pairs, ...fields } = data;
+      const metadata = pairsToMetadata(pairs);
+      // An add sends metadata when there is some. An edit sends it only when it changed, so a
+      // value edit does not copy the old value's metadata onto the new value; `{}` clears it.
+      const sendMetadata = observable
+        ? !isEqual(metadata, initialMetadata)
+        : Object.keys(metadata).length > 0;
+
+      return onSubmit({
+        ...fields,
+        ...(sendMetadata && { metadata }),
+      } as ObservablePatch | ObservablePost);
     },
-    [form, onSubmit]
+    [form, initialMetadata, observable, onSubmit]
   );
 
   return (
     <Form form={form}>
       <ObservableFormFields observable={observable} />
+      <EuiSpacer size="m" />
+      <ObservableMetadataFields />
       <EuiSpacer size="m" />
 
       <EuiFlexGroup justifyContent="spaceBetween">

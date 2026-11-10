@@ -301,3 +301,89 @@ export const FILTER_OBSERVABLES_BY_TYPE = i18n.translate(
 export const OBSERVABLES_LOAD_ERROR = i18n.translate('xpack.cases.caseView.observables.loadError', {
   defaultMessage: 'The observables could not be loaded.',
 });
+
+export const OBSERVABLE_METADATA = i18n.translate('xpack.cases.caseView.observables.metadata', {
+  defaultMessage: 'Metadata',
+});
+
+export const METADATA_HELP_TEXT = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.metadataHelpText', {
+    values: { max },
+    defaultMessage:
+      'Metadata is shared by every case in this space that holds this value. Add up to {max} key and value pairs.',
+  });
+
+export const ADD_METADATA = i18n.translate('xpack.cases.caseView.observables.addMetadata', {
+  defaultMessage: 'Add metadata',
+});
+
+export const REMOVE_METADATA = i18n.translate('xpack.cases.caseView.observables.removeMetadata', {
+  defaultMessage: 'Remove metadata',
+});
+
+export const METADATA_KEY_LABEL = i18n.translate(
+  'xpack.cases.caseView.observables.metadataKeyLabel',
+  {
+    defaultMessage: 'Key',
+  }
+);
+
+export const METADATA_VALUE_LABEL = i18n.translate(
+  'xpack.cases.caseView.observables.metadataValueLabel',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const METADATA_KEY_REQUIRED = i18n.translate(
+  'xpack.cases.caseView.observables.metadataKeyRequired',
+  {
+    defaultMessage: 'A key is required.',
+  }
+);
+
+export const METADATA_VALUE_REQUIRED = i18n.translate(
+  'xpack.cases.caseView.observables.metadataValueRequired',
+  {
+    defaultMessage: 'A value is required.',
+  }
+);
+
+export const METADATA_KEY_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.metadataKeyTooLong', {
+    values: { max },
+    defaultMessage: 'The key must be {max} characters or fewer.',
+  });
+
+export const METADATA_VALUE_TOO_LONG = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.metadataValueTooLong', {
+    values: { max },
+    defaultMessage: 'The value must be {max} characters or fewer.',
+  });
+
+export const METADATA_KEY_INVALID = i18n.translate(
+  'xpack.cases.caseView.observables.metadataKeyInvalid',
+  {
+    defaultMessage: 'A key cannot contain *.',
+  }
+);
+
+export const METADATA_KEY_DUPLICATE = i18n.translate(
+  'xpack.cases.caseView.observables.metadataKeyDuplicate',
+  {
+    defaultMessage: 'Each key can be used once.',
+  }
+);
+
+export const METADATA_LIMIT_REACHED = (max: number) =>
+  i18n.translate('xpack.cases.caseView.observables.metadataLimitReached', {
+    values: { max },
+    defaultMessage: 'A value holds up to {max} metadata pairs.',
+  });
+
+export const FILTER_OBSERVABLES_BY_METADATA = i18n.translate(
+  'xpack.cases.caseView.observables.filterByMetadata',
+  {
+    defaultMessage: 'Filter by metadata: key, key:value or key:value*',
+  }
+);

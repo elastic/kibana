@@ -12,7 +12,7 @@ import { mockCase, mockObservables } from '../../containers/mock';
 import { ObservablesTable, type ObservablesTableProps } from './observables_table';
 import { readCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 import { useFindObservables } from '../../containers/use_find_observables';
-import type { Observable } from '../../../common/types/domain';
+import type { ObservableWithMetadata } from '../../../common/types/api';
 import {
   MAX_STORED_OBSERVABLES_PER_CASE,
   OBSERVABLE_TYPE_IPV4,
@@ -30,7 +30,7 @@ jest.mock('../../containers/use_find_observables');
 const useFindObservablesMock = useFindObservables as jest.Mock;
 
 const mockPage = (
-  observables: Observable[],
+  observables: ObservableWithMetadata[],
   { total = observables.length, cursor }: { total?: number; cursor?: string } = {}
 ) =>
   useFindObservablesMock.mockReturnValue({
@@ -104,7 +104,7 @@ describe('ObservablesTable', () => {
 
       await userEvent.click(screen.getByTestId('cases-observables-table-next-page'));
       await userEvent.type(
-        screen.getByTestId('comboBoxSearchInput'),
+        screen.getByRole('combobox', { name: 'Filter by type' }),
         `${OBSERVABLE_TYPE_IPV4.label}{enter}`
       );
 
@@ -172,6 +172,37 @@ describe('ObservablesTable', () => {
         sortOrder: 'asc',
         typeKeys: OBSERVABLE_TYPES_BUILTIN_KEYS,
       });
+    });
+  });
+
+  describe('metadata', () => {
+    it('shows the metadata of each value as key: value badges', () => {
+      mockPage([{ ...mockObservables[0], metadata: { triage: 'confirmed', owner: 'payments' } }]);
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+
+      expect(screen.getAllByTestId('observable-metadata-badge-triage')[0]).toHaveTextContent(
+        'triage: confirmed'
+      );
+      expect(screen.getAllByTestId('observable-metadata-badge-owner')[0]).toHaveTextContent(
+        'owner: payments'
+      );
+    });
+
+    it('filters by a metadata key, value or value prefix', async () => {
+      renderWithTestingProviders(<ObservablesTable {...props} />);
+      const filter = screen.getByRole('combobox', {
+        name: 'Filter by metadata: key, key:value or key:value*',
+      });
+
+      await userEvent.type(filter, 'triage:Confirmed{enter}');
+      await userEvent.type(filter, 'owner:pay*{enter}');
+      await userEvent.type(filter, 'reviewed{enter}');
+
+      expect(lastFindParams().metadata).toEqual([
+        { key: 'triage', value: 'Confirmed' },
+        { key: 'owner', prefix: 'pay' },
+        { key: 'reviewed' },
+      ]);
     });
   });
 
