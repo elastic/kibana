@@ -121,7 +121,7 @@ const setup = ({
 };
 
 /** The card as this run would render it from the fixture. */
-const expectedCard = (proposals = fixtureInputs.proposals) => {
+const expectedCard = (proposals = fixtureInputs.proposals, summary = fixtureInputs.summary) => {
   const viewModel = buildForensicsSummaryViewModel({
     ...fixtureInputs,
     attack: {
@@ -130,6 +130,7 @@ const expectedCard = (proposals = fixtureInputs.proposals) => {
       alertIds: ['a1', 'a2', 'a3'],
     },
     proposals,
+    summary,
   });
   const { html, height } = renderForensicsSummaryHtml(viewModel);
   return {
@@ -189,6 +190,49 @@ describe('runForensicsSummary', () => {
       attachment_id: ids.summary,
     });
     expect(attachmentsClient.create).not.toHaveBeenCalled();
+  });
+
+  // The posted card starts a summary run, whose model text differs every time. Posting again for it
+  // would start another run, and so on for ever.
+  it('leaves the card alone when only the summary was reworded', async () => {
+    const reworded = expectedCard(fixtureInputs.proposals, 'The same story, told another way.');
+    const { run, attachmentsClient } = setup({
+      attachments: [
+        ...evidenceAttachments(),
+        versioned(ids.summary, reworded.data, reworded.description),
+      ],
+    });
+    await expect(run()).resolves.toEqual({
+      skipped: true,
+      reason: 'summary_only',
+      attachment_id: ids.summary,
+    });
+    expect(attachmentsClient.create).not.toHaveBeenCalled();
+    expect(attachmentsClient.delete).not.toHaveBeenCalled();
+  });
+
+  it('posts the card again when the first summary arrives', async () => {
+    const noSummary = expectedCard(fixtureInputs.proposals, '');
+    const { run, attachmentsClient } = setup({
+      attachments: [
+        ...evidenceAttachments(),
+        versioned(ids.summary, noSummary.data, noSummary.description),
+      ],
+    });
+    await expect(run()).resolves.toMatchObject({ action: 'reposted' });
+    expect(attachmentsClient.create).toHaveBeenCalledTimes(1);
+  });
+
+  it('posts the card again when the summary changed along with something else', async () => {
+    const before = expectedCard([], 'The same story, told another way.');
+    const { run, attachmentsClient } = setup({
+      attachments: [
+        ...evidenceAttachments(),
+        versioned(ids.summary, before.data, before.description),
+      ],
+    });
+    await expect(run()).resolves.toMatchObject({ action: 'reposted' });
+    expect(attachmentsClient.create).toHaveBeenCalledTimes(1);
   });
 
   it('posts the card again when what changed is not a decision', async () => {

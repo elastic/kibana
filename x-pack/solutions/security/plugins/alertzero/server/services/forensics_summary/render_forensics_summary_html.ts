@@ -319,6 +319,13 @@ const buildContext = (viewModel: ForensicsSummaryViewModel, css: string) => ({
  * `--cc-*` theme tokens, mixes of them, and `light-dark()` pairs where EUI has no token, so the card
  * follows each viewer's theme. A card taller than its height scrolls.
  */
+const SUMMARY_CALLOUT_PATTERN =
+  /[ \t]*<div class="callout"><p class="clamp2"><strong class="callout-title">What happened · <\/strong>.*?<\/p><\/div>\n?/s;
+
+/** The card's HTML without the summary callout, so two cards can be compared for everything but the summary. */
+export const stripSummaryCallout = (html: string): string =>
+  html.replace(SUMMARY_CALLOUT_PATTERN, '');
+
 export const renderForensicsSummaryHtml = (
   viewModel: ForensicsSummaryViewModel
 ): { html: string; height: number } => {

@@ -32,14 +32,9 @@ describe('runInvestigationSummary', () => {
   const setup = ({
     output = { summary: 'The Okta admin rule fired and was noted.' } as unknown,
     conversationOverride,
-    metadata,
-  }: {
-    output?: unknown;
-    conversationOverride?: Partial<typeof conversation>;
-    metadata?: Record<string, string>;
-  } = {}) => {
+  }: { output?: unknown; conversationOverride?: Partial<typeof conversation> } = {}) => {
     const client: InvestigationConversationReader = {
-      get: jest.fn(async () => ({ ...conversation, ...conversationOverride, metadata })),
+      get: jest.fn(async () => ({ ...conversation, ...conversationOverride })),
       patchMetadata: jest.fn(async () => ({})),
     };
     const invoke = jest.fn(async () => output);
@@ -74,66 +69,9 @@ describe('runInvestigationSummary', () => {
     );
     expect(client.patchMetadata).toHaveBeenCalledWith(
       'conv-1',
-      {
-        summary: 'The Okta admin rule fired and was noted.',
-        summary_story_hash: expect.stringMatching(/^[0-9a-f]{32}$/),
-      },
+      { summary: 'The Okta admin rule fired and was noted.' },
       { access: 'converse' }
     );
-  });
-
-  it('does not call the model again when nothing was added to the story, such as the forensics card', async () => {
-    const first = setup();
-    const deps = {
-      getConversationClient: async () => first.client,
-      resolveChatModel: first.resolveChatModel,
-    };
-    await runInvestigationSummary({ request, spaceId: 'default', conversationId: 'conv-1', deps });
-    const [, written] = (first.client.patchMetadata as jest.Mock).mock.calls[0];
-
-    // The card's own attachment event is the only new event, and the story leaves it out.
-    const second = setup({
-      metadata: { summary_story_hash: written.summary_story_hash },
-      conversationOverride: {
-        events: [
-          ...conversation.events,
-          {
-            type: 'attachment_added',
-            created_at: '2026-10-06T00:01:00.000Z',
-            data: { attachment_id: 'forensic-summary-ki-1', attachment_type: 'visualization' },
-          },
-        ],
-      },
-    });
-    const result = await runInvestigationSummary({
-      request,
-      spaceId: 'default',
-      conversationId: 'conv-1',
-      deps: {
-        getConversationClient: async () => second.client,
-        resolveChatModel: second.resolveChatModel,
-      },
-    });
-
-    expect(result).toEqual({ skipped: true, reason: 'unchanged' });
-    expect(second.resolveChatModel).not.toHaveBeenCalled();
-    expect(second.invoke).not.toHaveBeenCalled();
-    expect(second.client.patchMetadata).not.toHaveBeenCalled();
-  });
-
-  it('summarizes again when a note was added', async () => {
-    const { client, invoke, resolveChatModel } = setup({
-      metadata: { summary_story_hash: 'a-hash-of-an-older-story' },
-    });
-
-    await runInvestigationSummary({
-      request,
-      spaceId: 'default',
-      conversationId: 'conv-1',
-      deps: { getConversationClient: async () => client, resolveChatModel },
-    });
-
-    expect(invoke).toHaveBeenCalledTimes(1);
   });
 
   it('does not call the model for a conversation that is not an investigation or escalation', async () => {

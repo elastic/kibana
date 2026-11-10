@@ -6,9 +6,7 @@ description: >
   waits until the conversation has been quiet for 10 seconds, so a burst of notes gives one
   summary. An investigation is summarized only once a proposal is attached; an escalation always
   is. An agent execution ending, a close, or an attachment edit does not start it. The summary is
-  one direct model call on the efficient tier, so it does not append a chat round. The forensics
-  summary card is not part of what it reads, and a run whose story is the one the stored summary
-  was written from makes no model call, so posting the card does not reword the summary. On an
+  one direct model call on the efficient tier, so it does not append a chat round. On an
   investigation whose Endpoint Analysis has finished, it then re-renders the forensics summary card,
   with no model call, so the card shows the summary this run wrote and any new proposal awaiting
   a decision.

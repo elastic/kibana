@@ -21,7 +21,7 @@ import {
   readAttackAlerts,
   readForensicsAttachments,
 } from './read_forensics_inputs';
-import { renderForensicsSummaryHtml } from './render_forensics_summary_html';
+import { renderForensicsSummaryHtml, stripSummaryCallout } from './render_forensics_summary_html';
 import type { ForensicsProposal } from './types';
 import { buildForensicsSummaryViewModel } from './view_model';
 import type { ForensicsSummaryViewModel } from './view_model';
@@ -81,9 +81,10 @@ const listSummaryCards = (attachments: readonly VersionedAttachment[], kiId: str
  * or posts it again when what it shows changed.
  *
  * The chat draws a posted card at the version it was posted with, and an update can't change that. So when
- * anything the card shows changes (a new summary, proposals raised, decided or settled), the card is posted
+ * anything the card shows changes (proposals raised, decided or settled, new findings), the card is posted
  * again as a new attachment and the cards before it are deleted, which drops them from the chat: it shows
- * one card, the latest.
+ * one card, the latest. A summary that is only reworded does not repost it: the posted card starts a summary
+ * run, whose model text differs every time, so that would repost the card for ever.
  */
 export const runForensicsSummary = async ({
   request,
@@ -164,6 +165,18 @@ export const runForensicsSummary = async ({
       current.description === description;
     if (unchanged) {
       return { skipped: true, reason: 'unchanged', attachment_id: current.id };
+    }
+    // The summary is model text, reworded on every run, and a new card starts a run: posting for a reworded
+    // summary would never settle. The card shows the newer summary the next time something else changes.
+    const previousHtml = previous.success ? previous.data.visualization.template : undefined;
+    const summaryOnly =
+      previousHtml !== undefined &&
+      stripSummaryCallout(previousHtml) !== previousHtml &&
+      viewModel.summary !== undefined &&
+      stripSummaryCallout(previousHtml) === stripSummaryCallout(html) &&
+      current.description === description;
+    if (summaryOnly) {
+      return { skipped: true, reason: 'summary_only', attachment_id: current.id };
     }
   }
 

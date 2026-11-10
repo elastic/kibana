@@ -17,7 +17,7 @@ import {
 } from '@kbn/custom-content-common';
 import { sanitizeHtml } from '@kbn/custom-content-renderer';
 import { falsePositiveInputs, fixtureInputs } from './__fixtures__/forensics_summary_inputs';
-import { renderForensicsSummaryHtml } from './render_forensics_summary_html';
+import { renderForensicsSummaryHtml, stripSummaryCallout } from './render_forensics_summary_html';
 import { buildForensicsSummaryViewModel } from './view_model';
 
 const fixtureViewModel = buildForensicsSummaryViewModel(fixtureInputs);
@@ -124,6 +124,20 @@ describe('renderForensicsSummaryHtml', () => {
     expect(decidedHtml.indexOf('Alerts in this attack')).toBeGreaterThan(
       decidedHtml.indexOf('<h2>Timeline')
     );
+  });
+
+  it('strips exactly the summary callout, whatever the summary says', () => {
+    const without = renderForensicsSummaryHtml(
+      buildForensicsSummaryViewModel({ ...fixtureInputs, summary: undefined })
+    ).html;
+    for (const summary of ['One short sentence.', 'Line one.\n\nA <b>second</b> {{ one }}.']) {
+      const { html } = renderForensicsSummaryHtml(
+        buildForensicsSummaryViewModel({ ...fixtureInputs, summary })
+      );
+      expect(html).not.toBe(without);
+      expect(stripSummaryCallout(html)).toBe(without);
+    }
+    expect(stripSummaryCallout(without)).toBe(without);
   });
 
   it('escapes data, including braces, so neither markup nor a template survives', () => {

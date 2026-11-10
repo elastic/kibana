@@ -27,10 +27,10 @@ const outputSchema = lazySchema(() =>
   z.object({
     skipped: z.boolean().describe('True when the card was not written.'),
     reason: z
-      .enum(['no_analysis', 'unchanged', 'cancelled'])
+      .enum(['no_analysis', 'unchanged', 'summary_only', 'cancelled'])
       .optional()
       .describe(
-        'Why nothing was written: the Investigation has no finished Endpoint Analysis, the card is already current, or a newer run cancelled this one.'
+        'Why nothing was written: the Investigation has no finished Endpoint Analysis, the card is already current, only its summary was reworded, or a newer run cancelled this one.'
       ),
     attachment_id: z.string().optional().describe('Id of the current summary card attachment.'),
     action: z
