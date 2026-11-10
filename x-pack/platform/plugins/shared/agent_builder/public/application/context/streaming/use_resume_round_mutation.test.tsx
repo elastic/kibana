@@ -162,6 +162,31 @@ describe('useResumeRoundMutation', () => {
     await waitFor(() => expect(conversationStreamService.getSnapshot(conversationId)).toEqual([]));
   });
 
+  it('skips the release when the connection is closed locally: no refetch, no server abort', async () => {
+    const { bindings, source, result } = setup();
+
+    act(() => result.current.mutate(vars));
+    await waitFor(() => expect(mockResume).toHaveBeenCalled());
+    act(() => {
+      source.next(
+        createExecutionStartedEvent({
+          id: 'round-1::execution::1::execution_started',
+          execution_id: 'round-1::execution::1',
+          trigger_event_id: 'round-1::prompt_response::1',
+        }) as ChatEvent
+      );
+    });
+    act(() => {
+      result.current.detachAll();
+      // The aborted fetch rejects, as core http does once the signal fires.
+      source.error(Object.assign(new Error('The operation was aborted.'), { name: 'AbortError' }));
+    });
+
+    await waitFor(() => expect(bindings.clearActiveStream).toHaveBeenCalledWith(conversationId));
+    expect(mockGet).not.toHaveBeenCalled();
+    expect(mockAbort).not.toHaveBeenCalled();
+  });
+
   it('ends a stream that errors like a completed one: refetch, then release', async () => {
     const { bindings, source, result } = setup();
     mockGet.mockResolvedValue({ id: conversationId, rounds: [], events: [] });

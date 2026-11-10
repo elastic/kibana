@@ -176,6 +176,22 @@ describe('runManualOrchestration', () => {
     );
   });
 
+  it('forwards telemetryMetadata to runGenerationStep when set', async () => {
+    const telemetryMetadata = { pluginId: 'alertzero', aggregateBy: 'alertzero-run-1' };
+
+    await runManualOrchestration({ ...baseParams, telemetryMetadata });
+
+    expect(mockRunGenerationStep).toHaveBeenCalledWith(
+      expect.objectContaining({ telemetryMetadata })
+    );
+  });
+
+  it('omits telemetryMetadata from runGenerationStep when unset', async () => {
+    await runManualOrchestration(baseParams);
+
+    expect(mockRunGenerationStep.mock.calls[0][0]).not.toHaveProperty('telemetryMetadata');
+  });
+
   it('calls runValidationStep with both retrieval and generation results', async () => {
     await runManualOrchestration(baseParams);
 

@@ -52,7 +52,7 @@ export function usePreferredDataSourceAndBucketSize<
 
   const sources = timeRangeMetadataFetch.data?.sources;
 
-  return useMemo(() => {
+  const preferred = useMemo(() => {
     if (!sources) {
       return null;
     }
@@ -78,9 +78,37 @@ export function usePreferredDataSourceAndBucketSize<
       sources: sources.filter((s) => suitableTypes.includes(s.documentType)),
     });
 
+    return { bucketSizeInSeconds, source };
+  }, [type, start, end, sources, numBuckets]);
+
+  // `sources` is a new array whenever the metadata is refetched, so the selection above returns a
+  // new object even when it picks the same source. Consumers refetch when that object changes, so
+  // it's only replaced when the picked values change.
+  const bucketSizeInSeconds = preferred?.bucketSizeInSeconds;
+  const documentType = preferred?.source.documentType;
+  const rollupInterval = preferred?.source.rollupInterval;
+  const hasDocs = preferred?.source.hasDocs;
+  const hasDurationSummaryField = preferred?.source.hasDurationSummaryField;
+
+  return useMemo(() => {
+    if (
+      bucketSizeInSeconds === undefined ||
+      documentType === undefined ||
+      rollupInterval === undefined ||
+      hasDocs === undefined ||
+      hasDurationSummaryField === undefined
+    ) {
+      return null;
+    }
+
     return {
       bucketSizeInSeconds,
-      source: source as ApmDataSourceWithSummary<any>,
+      source: {
+        documentType,
+        rollupInterval,
+        hasDocs,
+        hasDurationSummaryField,
+      } as ApmDataSourceWithSummary<any>,
     };
-  }, [type, start, end, sources, numBuckets]);
+  }, [bucketSizeInSeconds, documentType, rollupInterval, hasDocs, hasDurationSummaryField]);
 }

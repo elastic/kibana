@@ -24,6 +24,10 @@ import {
 const CACHE_MAX_AGE_SETTING = 'data_views:cache_max_age';
 const SETTINGS_PROPAGATION_TIMEOUT = 30_000;
 
+// `data_views:cache_max_age` and the server-side uiSettings cache holding it are both space-scoped,
+// so writing it in a dedicated space keeps it out of the default space `cache.spec.ts` reads.
+const CACHE_MAX_AGE_SPACE_ID = 'api_data_views_cache_max_age';
+
 // `data_views:cache_max_age` is not registered on serverless, so it can only be configured on classic.
 apiTest.describe(
   `GET /${FIELDS_ROUTE_PATH} - cache headers (configurable max age)`,
@@ -32,36 +36,36 @@ apiTest.describe(
     let viewerApiCredentials: RoleApiCredentials;
 
     const getFields = (apiClient: ApiClientFixture) =>
-      apiClient.get(`${FIELDS_ROUTE_PATH}?pattern=b*&include_unmapped=true`, {
-        headers: {
-          ...INTERNAL_COMMON_HEADERS,
-          ...viewerApiCredentials.apiKeyHeader,
-        },
-        responseType: 'json',
-      });
+      apiClient.get(
+        `s/${CACHE_MAX_AGE_SPACE_ID}/${FIELDS_ROUTE_PATH}?pattern=b*&include_unmapped=true`,
+        {
+          headers: {
+            ...INTERNAL_COMMON_HEADERS,
+            ...viewerApiCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+        }
+      );
 
-    apiTest.beforeAll(async ({ esArchiver, requestAuth }) => {
+    apiTest.beforeAll(async ({ apiServices, esArchiver, requestAuth }) => {
       // Route only reads field metadata, so `viewer` is sufficient.
       viewerApiCredentials = await requestAuth.getApiKey('viewer');
       await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
+      await apiServices.spaces.delete(CACHE_MAX_AGE_SPACE_ID);
+      await apiServices.spaces.create({ id: CACHE_MAX_AGE_SPACE_ID });
     });
 
-    apiTest.afterAll(async ({ apiClient, kbnClient }) => {
-      await kbnClient.uiSettings.unset(CACHE_MAX_AGE_SETTING);
-
-      // `cache.spec.ts` asserts the default `max-age` seconds later, so the revert has to converge too.
-      await expect
-        .poll(async () => (await getFields(apiClient)).headers['cache-control'], {
-          timeout: SETTINGS_PROPAGATION_TIMEOUT,
-          intervals: [1_000],
-        })
-        .toContain('max-age');
+    apiTest.afterAll(async ({ apiServices }) => {
+      await apiServices.spaces.delete(CACHE_MAX_AGE_SPACE_ID);
     });
 
     apiTest(
       'no-cache when data_views:cache_max_age set to zero',
       async ({ apiClient, kbnClient }) => {
-        await kbnClient.uiSettings.update({ [CACHE_MAX_AGE_SETTING]: 0 });
+        await kbnClient.uiSettings.update(
+          { [CACHE_MAX_AGE_SETTING]: 0 },
+          { space: CACHE_MAX_AGE_SPACE_ID }
+        );
 
         let response: ApiClientResponse | undefined;
 
