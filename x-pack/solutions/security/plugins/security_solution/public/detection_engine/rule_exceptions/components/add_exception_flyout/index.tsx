@@ -26,7 +26,6 @@ import {
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListSchema, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { isEsqlOutputColumnsItem } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import type { ExceptionAppliesTo } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import type {
   ExceptionsBuilderExceptionItem,
@@ -189,12 +188,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     selectedRulesToAddTo: rules != null ? rules : [],
   });
 
-  const isEsqlOutputColumns = isEsqlOutputColumnsItem({ applies_to: appliesTo });
   // An item on the computed columns can be created from any place except for Endpoint exceptions. Only the ES|QL rules use it, the rules of other types leave it out when they run.
   const canApplyToComputedColumns = !isEndpointItem;
-  // The alerts that an item on computed columns excludes cannot be found in the alerts index by its entries, so the options to close alerts do not apply to it
-  const effectiveCloseSingleAlert = closeSingleAlert && !isEsqlOutputColumns;
-  const effectiveBulkCloseAlerts = bulkCloseAlerts && !isEsqlOutputColumns;
 
   const hasAlertData = useMemo((): boolean => {
     return alertData != null;
@@ -210,7 +205,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
 
   const runtimeFieldsResolution = useRuntimeFieldsForBulkClose({
     exceptionListItems: exceptionItems,
-    shouldBulkCloseAlert: effectiveBulkCloseAlerts,
+    shouldBulkCloseAlert: bulkCloseAlerts,
     sourceIndexPatterns: indexPatterns,
     isSourceIndexPatternsLoading: isLoading,
     alertsIndexPatterns: signalIndexPatterns,
@@ -477,10 +472,10 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
 
       const { shouldCloseAlerts, alertIdToClose, ruleStaticIds } = prepareToCloseAlerts({
         alertData,
-        closeSingleAlert: effectiveCloseSingleAlert,
+        closeSingleAlert,
         addToRules,
         rules,
-        bulkCloseAlerts: effectiveBulkCloseAlerts,
+        bulkCloseAlerts,
         selectedRulesToAddTo,
       });
 
@@ -498,7 +493,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       invalidateFetchRuleByIdQuery();
       // Rule only would have been updated if we had to create a rule default list
       // to attach to it, all shared lists would already be referenced on the rule
-      onConfirm(true, effectiveCloseSingleAlert, effectiveBulkCloseAlerts);
+      onConfirm(true, closeSingleAlert, bulkCloseAlerts);
     } catch (e) {
       setErrorSubmitting(e);
     }
@@ -513,11 +508,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     osTypesSelection,
     exceptionItems,
     selectedRulesToAddTo,
-    effectiveCloseSingleAlert,
+    closeSingleAlert,
     alertData,
     rules,
     closeAlerts,
-    effectiveBulkCloseAlerts,
+    bulkCloseAlerts,
     onConfirm,
     bulkCloseIndex,
     closeAlertsReason,
@@ -548,7 +543,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     selectedRulesToAddTo,
     listType,
     exceptionListsToAddTo,
-    bulkCloseAlerts: effectiveBulkCloseAlerts,
+    bulkCloseAlerts,
     isRuntimeFieldsResolving: runtimeFieldsResolution.isResolving,
   });
 
@@ -701,7 +696,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             />
           </>
         )}
-        {hasAlertsUpdate && showAlertCloseOptions && !isEsqlOutputColumns && (
+        {hasAlertsUpdate && showAlertCloseOptions && (
           <>
             <EuiHorizontalRule />
             <ExceptionItemsFlyoutAlertsActions

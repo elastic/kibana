@@ -166,7 +166,7 @@ describe('applyEndStageExceptions', () => {
           list_id: ghostItem.list_id,
           item_id: 'ghost',
           name: 'ghost',
-          code: 'field_not_found',
+          code: 'item_never_matches',
           reason: '"process.name" is not in the output of the query',
           fields: ['process.name'],
         },
@@ -279,7 +279,7 @@ describe('applyEndStageExceptions', () => {
 
     expect(result).toBe(query);
     expect(ruleExecutionLogger.info).toHaveBeenCalledWith(
-      expect.stringContaining('"code":"field_not_found"')
+      expect.stringContaining('"code":"item_never_matches"')
     );
   });
 

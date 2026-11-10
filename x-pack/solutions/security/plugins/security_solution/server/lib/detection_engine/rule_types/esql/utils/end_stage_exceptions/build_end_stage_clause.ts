@@ -275,7 +275,7 @@ const compileEntry = (entry: Entry): CompiledEntry => {
   const values = entry.type === ListOperatorTypeEnum.MATCH_ANY ? entry.value : [entry.value];
   if (values.length === 0) {
     return toSkipResult({
-      code: SkipReasonCode.ListSizeNotSupported,
+      code: SkipReasonCode.EntryHasNoValues,
       explanation: 'an "is one of" list must have at least one value',
       fields: [entry.field],
     });

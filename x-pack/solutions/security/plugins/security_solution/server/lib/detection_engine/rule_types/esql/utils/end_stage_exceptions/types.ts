@@ -39,13 +39,13 @@ export interface EndStageItem {
 /** Stable codes for the items that are not applied, so that a UI can group and translate them. */
 export enum SkipReasonCode {
   /** An item with an entry that has an inclusive operator on a column that the query does not output, which never matches. */
-  FieldNotFound = 'field_not_found',
+  ItemNeverMatches = 'item_never_matches',
   EntryTypeNotSupported = 'entry_type_not_supported',
   ColumnTypeNotSupported = 'column_type_not_supported',
   OperatorNotSupportedOnType = 'operator_not_supported_on_type',
   OsTypesNotSupported = 'os_types_not_supported',
   ValueNotSupported = 'value_not_supported',
-  ListSizeNotSupported = 'list_size_not_supported',
+  EntryHasNoValues = 'entry_has_no_values',
   ItemHasNoEntries = 'item_has_no_entries',
 }
 

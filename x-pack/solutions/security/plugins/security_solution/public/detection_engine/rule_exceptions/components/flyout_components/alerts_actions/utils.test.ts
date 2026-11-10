@@ -9,10 +9,12 @@ import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas
 import type { EntriesArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { ESQL_OUTPUT_COLUMN_TYPES } from '@kbn/securitysolution-exceptions-common/esql_output_columns';
 import {
   collectRuntimeFieldTypes,
   entryHasNonEcsType,
   entryHasListType,
+  mapColumnTypeToRuntimeType,
   mapDataViewFieldToRuntimeType,
   shouldDisableBulkClose,
 } from './utils';
@@ -228,6 +230,30 @@ describe('alerts_actions#utils', () => {
     });
   });
 
+  describe('#mapColumnTypeToRuntimeType', () => {
+    it.each([
+      ['ip', RuntimeFieldTypeEnum.ip],
+      ['boolean', RuntimeFieldTypeEnum.boolean],
+      ['integer', RuntimeFieldTypeEnum.long],
+      ['long', RuntimeFieldTypeEnum.long],
+      ['double', RuntimeFieldTypeEnum.double],
+      ['keyword', RuntimeFieldTypeEnum.keyword],
+      ['text', RuntimeFieldTypeEnum.keyword],
+      ['version', RuntimeFieldTypeEnum.keyword],
+      ['unsigned_long', RuntimeFieldTypeEnum.keyword],
+      ['date', RuntimeFieldTypeEnum.keyword],
+      ['date_nanos', RuntimeFieldTypeEnum.keyword],
+    ] as const)('maps %s to %s', (columnType, expected) => {
+      expect(mapColumnTypeToRuntimeType(columnType)).toBe(expected);
+    });
+
+    it('has a runtime type for every column type that an exception can declare', () => {
+      ESQL_OUTPUT_COLUMN_TYPES.forEach((columnType) => {
+        expect(mapColumnTypeToRuntimeType(columnType)).toBeDefined();
+      });
+    });
+  });
+
   describe('#collectRuntimeFieldTypes', () => {
     const getAlertsDataView = (names: string[]): DataViewBase =>
       ({ title: 'alerts', fields: names.map((name) => ({ name })) } as DataViewBase);
@@ -347,6 +373,43 @@ describe('alerts_actions#utils', () => {
         'orphan.field': RuntimeFieldTypeEnum.keyword,
       });
       expect(result.hasUntypedFields).toBe(true);
+    });
+
+    it('uses the column type that an entry on a computed column declares, and does not count the field as untyped', () => {
+      const items = [
+        getExceptionItem([
+          {
+            field: 'c_ip',
+            operator: 'included',
+            type: 'match_any',
+            value: ['10.0.0.0/24'],
+            column_type: 'ip',
+          },
+          { field: 'c_n', operator: 'included', type: 'match', value: '4', column_type: 'long' },
+          { field: 'c_kw', operator: 'included', type: 'exists', column_type: 'keyword' },
+        ] as EntriesArray),
+      ];
+      const result = collectRuntimeFieldTypes(items, getSourceDataView([]), getAlertsDataView([]));
+      expect(result.runtimeFields).toEqual({
+        c_ip: RuntimeFieldTypeEnum.ip,
+        c_n: RuntimeFieldTypeEnum.long,
+        c_kw: RuntimeFieldTypeEnum.keyword,
+      });
+      expect(result.hasUntypedFields).toBe(false);
+    });
+
+    it('prefers the declared column type to the type of a source field that has the same name', () => {
+      const items = [
+        getExceptionItem([
+          { field: 'c_n', operator: 'included', type: 'match', value: '4', column_type: 'long' },
+        ] as EntriesArray),
+      ];
+      const result = collectRuntimeFieldTypes(
+        items,
+        getSourceDataView([{ name: 'c_n', esTypes: [ES_FIELD_TYPES.KEYWORD] }]),
+        getAlertsDataView([])
+      );
+      expect(result.runtimeFields).toEqual({ c_n: RuntimeFieldTypeEnum.long });
     });
   });
 });

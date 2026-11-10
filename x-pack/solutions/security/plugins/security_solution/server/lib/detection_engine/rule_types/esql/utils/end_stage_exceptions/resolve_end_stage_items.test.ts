@@ -60,7 +60,7 @@ describe('resolveEndStageItems', () => {
     expect(result.skippedItems).toEqual([
       {
         item,
-        code: 'field_not_found',
+        code: 'item_never_matches',
         explanation: '"ghost" is not in the output of the query',
         fields: ['ghost'],
       },
@@ -126,7 +126,7 @@ describe('resolveEndStageItems', () => {
       ['a', 'false'],
     ]);
     expect(result.skippedItems.map(({ item, code }) => [item.item_id, code])).toEqual([
-      ['b', 'field_not_found'],
+      ['b', 'item_never_matches'],
     ]);
   });
 
@@ -147,7 +147,7 @@ describe('resolveEndStageItems', () => {
       outputColumns: columns([['risk', 'null']]),
     });
 
-    expect(result.skippedItems).toEqual([expect.objectContaining({ code: 'field_not_found' })]);
+    expect(result.skippedItems).toEqual([expect.objectContaining({ code: 'item_never_matches' })]);
     expect(result.typeMismatches).toEqual([]);
   });
 
@@ -217,7 +217,7 @@ describe('resolveEndStageItems', () => {
     expect(result.typeMismatches).toEqual([]);
     // the entry on the column that the query does not output is not checked: it makes the item skipped
     expect(result.skippedItems.map(({ item, code }) => [item.item_id, code])).toEqual([
-      ['a', 'field_not_found'],
+      ['a', 'item_never_matches'],
       ['b', 'value_not_supported'],
     ]);
   });

@@ -63,7 +63,7 @@ const resolveItem = (
   if (neverMatches.length > 0) {
     const skipped: SkippedItem = {
       item,
-      code: SkipReasonCode.FieldNotFound,
+      code: SkipReasonCode.ItemNeverMatches,
       explanation: `${joinQuotedFields(neverMatches)} is not in the output of the query`,
       fields: neverMatches,
     };

@@ -1321,14 +1321,13 @@ describe('When the add exception modal is opened', () => {
       expect(screen.getByTestId('exceptionItemAddToRuleOrListSection')).toBeInTheDocument();
     });
 
-    it('does not offer to close alerts, which cannot be found by the entries of such an item', () => {
+    it('still offers to close alerts, because the alerts hold the values of the computed columns', () => {
       renderFlyout();
-      expect(screen.getByTestId('closeAlertOnAddExceptionCheckbox')).toBeInTheDocument();
 
       fireEvent.click(screen.getByTestId('exceptionAppliesToComputedColumns'));
 
-      expect(screen.queryByTestId('closeAlertOnAddExceptionCheckbox')).toBeNull();
-      expect(screen.queryByTestId('bulkCloseAlertOnAddExceptionCheckbox')).toBeNull();
+      expect(screen.getByTestId('closeAlertOnAddExceptionCheckbox')).toBeInTheDocument();
+      expect(screen.getByTestId('bulkCloseAlertOnAddExceptionCheckbox')).toBeInTheDocument();
     });
 
     it('goes back to the source fields, with the options of before', () => {

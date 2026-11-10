@@ -18,6 +18,7 @@ An ES|QL rule applies exceptions as a DSL filter that Elasticsearch runs on the 
 - Items on the output columns that are not applied (an entry with an inclusive operator on a column that the query does not output, an item whose entries all have an exclusive operator on such columns) and how they are logged and reported, the items that the exceptions API refuses (unsupported types, operators, values, list and nested entries, `os_types`) with the second check of the executor for an item stored without that validation, and the rule failure when a declared column type is not the type that the query outputs.
 - The limits of the end of the query (200 comparisons in one `WHERE` stage, 1,000,000 characters) and the failure that names them, the single `MV_INTERSECTS` call of an "is one of" list, the one probe request of the output columns (none when the rule has no item on them) and the failure path when the probe fails.
 - Dependency data lifecycle: exception items deleted or edited between runs, mappings that change, rule queries that are edited.
+- Closing alerts from the exception flyout for an item on computed columns: "Close this alert", "Close all alerts that match this exception" with the runtime field type that the entry declares, the rules and statuses that the close touches, and the warning of the flyout.
 
 **Out of scope:**
 - Value lists as lookup indices with `LOOKUP JOIN`: a later iteration; value lists keep running through the DSL filter.
@@ -59,7 +60,7 @@ No GitHub issue exists for this work. The criteria below are inferred from `esql
 1. Every exception on the source documents (`applies_to` absent or `source_documents`) behaves as it does today: the DSL filter is built from the same items and excludes the same documents, for every rule type.
 2. The executor splits the items by `applies_to` and does not read the data to decide where an item goes: no request reads the fields of the source indices. The DSL filter never holds an item on the output columns, and every rule type other than ES|QL drops these items. A source item on a field that the query redefines applies to the source field in the DSL filter, and an item on the output columns with the same name tests the column. A source item on a field that exists nowhere behaves as today: an exclusive operator such as "is not" still matches every document.
 3. A rule with no item on the output columns that has not expired sends no probe request and builds the same request as today. A rule with at least one sends one `_query` request, `<rule query>` followed by a new line and `| LIMIT 0`, with the `filter` of the real request: the time range, the rule filters, the data tiers, the namespaces, the exception filter built from the source items only, and the excluded documents.
-4. An item on the output columns is tested on the columns of the probe. An entry with an inclusive operator (is, is one of, matches, exists) on a column that the query does not output, or outputs with the type `null`, means that the item can never match: the item is skipped with the log code `field_not_found` and the reason `"<field>" is not in the output of the query`. An entry with an exclusive operator (is not, is not one of, does not match, does not exist) on such a column is true for every row and is left out of the stage. An item with no entry left is true for every row and excludes every row of the rule (the executor writes `| WHERE false`), as the DSL filter does for an exclusive operator on a field that exists nowhere. The rule shows a warning (status partial failure) that names the item and says that the rule creates no alerts because of it. Product chose this over a failure and over no warning.
+4. An item on the output columns is tested on the columns of the probe. An entry with an inclusive operator (is, is one of, matches, exists) on a column that the query does not output, or outputs with the type `null`, means that the item can never match: the item is skipped with the log code `item_never_matches` and the reason `"<field>" is not in the output of the query`. An entry with an exclusive operator (is not, is not one of, does not match, does not exist) on such a column is true for every row and is left out of the stage. An item with no entry left is true for every row and excludes every row of the rule (the executor writes `| WHERE false`), as the DSL filter does for an exclusive operator on a field that exists nowhere. The rule shows a warning (status partial failure) that names the item and says that the rule creates no alerts because of it. Product chose this over a failure and over no warning.
 5. A column that the query outputs with another type than the entry declares fails the rule before the query runs, as a user error, with the message `The rule did not run because exception items declare a column type that is not the type that the query outputs: "<item name>" (list "<list_id>", item "<item_id>") declares the column "<field>" as <declared>, and the query outputs it as <actual>. Fix the type in these exception items, or remove them from this rule.` The message names the first 5 and then ` and N more`. The declared type has to be the output type exactly.
 6. The items that apply are appended as one `| WHERE` stage on a new line, placed before the final limit that the executor adds.
 7. The API validates the type, the operator and the value of each entry when the item is saved. `exists` is allowed on all 11 types (`keyword`, `text`, `boolean`, `integer`, `long`, `unsigned_long`, `double`, `ip`, `version`, `date`, `date_nanos`), "is" and "is one of" on all but `double` (a `float` is widened to `double`, and an equality can miss the value), and "matches" on `keyword` and `text` only. An item on the output columns has no `list` or `nested` entry and no `os_types`, and lives only in a `detection` or `rule_default` list. A `text` column is compared as a `keyword` column, on the whole value and respecting case, as the exceptions documentation describes. No full-text function is used, and the commands of the rule query do not matter.
@@ -70,6 +71,7 @@ No GitHub issue exists for this work. The criteria below are inferred from `esql
 12. If the probe fails, the rule fails before the query runs, with the message `The rule did not run because the output columns of its query could not be read to apply its exceptions on them: <reason of the failed request>`, and no alerts are created. It is a user error only when the failed request is one. Nothing of this runs for a rule with no item on the output columns.
 13. Expired items are not applied in either position, and a rule whose only items on the output columns expired sends no probe.
 14. An item on the output columns with `os_types` is refused by the API, and the executor skips one that is stored anyway with the code `os_types_not_supported`. A source item keeps its `os_types` in the DSL filter. A column named with a word that ES|QL reserves (`first`, `by`) is quoted, and a comment at the end of the rule query does not swallow the appended stages.
+15. The flyout offers both options to close alerts for an item on computed columns. "Close this alert" closes the alert by its id. "Close all alerts that match this exception" finds the alerts by the entries: an alert stores the computed columns in its `_source`, the alerts index does not map them, and the close request gives each column as a runtime field that reads the value from `_source`, with the `column_type` of the entry as its type (`ip` as `ip`, `integer` and `long` as `long`, `double` as `double`, `boolean` as `boolean`, and `keyword`, `text`, `version`, `unsigned_long`, `date` and `date_nanos` as `keyword`). The close touches only the open, acknowledged and in-progress alerts of the rules that the item is added to.
 
 ## Known Limitations
 
@@ -1770,7 +1772,7 @@ Scenario: A column that the query does not output
   And an exception item on the output columns with the entries failures is 3 and missing.field is x
   When the rule runs
   Then no warning is shown on the rule
-  And the rule execution log records the item as not applied with the code field_not_found for missing.field
+  And the rule execution log records the item as not applied with the code item_never_matches for missing.field
   And the reason is "missing.field" is not in the output of the query
   And no alert is excluded by that item
 
@@ -1779,14 +1781,14 @@ Scenario: A source field that the query drops
   And an exception item on the output columns with the entries host.name is web-01 and failures is 3
   When the rule runs
   Then no warning is shown on the rule
-  And the rule execution log records the item as not applied with the code field_not_found for host.name
+  And the rule execution log records the item as not applied with the code item_never_matches for host.name
   And no alert is excluded by that item
 
 Scenario: A column of the type null
   Given an ES|QL rule with the query FROM logs | EVAL risk = NULL
   And an exception item on the output columns with the entry risk is low
   When the rule runs
-  Then the item is not applied with the code field_not_found
+  Then the item is not applied with the code item_never_matches
 ```
 
 **Execution:**
@@ -1822,7 +1824,7 @@ Scenario: The entry with an exclusive operator does not hide an entry with an in
   Given an exception item on the output columns with the entries failures is 3, missing.field is not x and other.missing is y
   When the rule runs
   Then no alert is excluded by that item
-  And the rule execution log records the item as not applied with the code field_not_found for other.missing
+  And the rule execution log records the item as not applied with the code item_never_matches for other.missing
 ```
 
 **Execution:**
@@ -1852,7 +1854,7 @@ Then the result is the same, with one warning
 
 Given an exception item on the output columns with the entries missing.field is not x and other.missing is y
 When the rule runs
-Then the item is skipped with the code field_not_found, because the entry with an inclusive operator can never match
+Then the item is skipped with the code item_never_matches, because the entry with an inclusive operator can never match
 And alerts are created for every row
 ```
 
@@ -2298,7 +2300,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 ```gherkin
 Given an ES|QL rule with an exception item on the output columns for the column target_host, of type keyword
 When the user edits the query so that the column is named dest_host and the rule runs
-Then the item is not applied, and the rule execution log records the code field_not_found
+Then the item is not applied, and the rule execution log records the code item_never_matches
 And no warning is shown on the rule
 And no alert is excluded by that item
 
@@ -2306,6 +2308,161 @@ Given the user edits the query again so that target_host is a long
 When the rule runs
 Then the rule fails as a user error before the query runs
 And the message says that the item declares the column "target_host" as keyword and that the query outputs it as long
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
+</details>
+
+---
+
+<details>
+<summary><strong>Closing alerts from the exception flyout</strong>: 6 scenarios (P0: 0, P1: 4, P2: 2)</summary>
+
+#### Scenario: "Close this alert" closes the alert that the user started from, for an item on computed columns
+
+**Priority:** P1
+
+**Automation coverage**: 1 unit test (`x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions/components/add_exception_flyout/index.test.tsx`: "items that apply to the computed columns of an ES|QL rule › still offers to close alerts, because the alerts hold the values of the computed columns"), partial: it checks that the option is offered, not that the alert is closed. Closing by the id of the alert does not use the entries of the item.
+```gherkin
+Given an ES|QL rule with EVAL c_kw = CONCAT(t, "-z") that created three alerts
+When the user opens the exception flyout from the first alert
+And chooses "Computed columns" for what the exception applies to
+And adds the entry c_kw is a-z with the column type keyword
+And checks "Close this alert" and saves
+Then the exception item is saved with applies_to esql_output_columns
+And only the alert that the user started from is closed
+And the other two alerts stay open
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
+#### Scenario: "Close all alerts that match this exception" closes the alerts that hold the value of a keyword computed column
+
+**Priority:** P1
+
+**Automation coverage**: 2 unit tests (`x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts`: "#collectRuntimeFieldTypes › uses the column type that an entry on a computed column declares, and does not count the field as untyped", "#mapColumnTypeToRuntimeType › maps %s to %s"), partial: they cover the runtime type that the flyout sends, not the close. The request of the flyout (the filter that the lists API builds from the item, and the status route with `runtime_fields`) was also sent by hand to a local stack for "is", "matches" and "exists" on a keyword column, one alert each for "is" and "matches" and all three for "exists", not through the flyout.
+```gherkin
+Given an ES|QL rule with EVAL c_kw = CONCAT(t, "-z") that created three alerts, with c_kw a-z, b-z and c-z
+When the user adds the exception c_kw is a-z with the column type keyword
+And checks "Close all alerts that match this exception" and saves
+Then the alert with c_kw a-z is closed
+And the other two alerts stay open
+
+Given the exception c_kw matches a-* with the column type keyword
+When the user closes all the alerts that match it
+Then only the alert with c_kw a-z is closed
+
+Given the exception c_kw exists with the column type keyword
+When the user closes all the alerts that match it
+Then the three alerts are closed
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
+#### Scenario: Bulk close finds the alerts by an ip, a numeric or an aggregated computed column with the declared column type
+
+**Priority:** P1
+
+**Automation coverage**: 4 unit tests (`x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts`: "#mapColumnTypeToRuntimeType › maps %s to %s", "#mapColumnTypeToRuntimeType › has a runtime type for every column type that an exception can declare", "#collectRuntimeFieldTypes › uses the column type that an entry on a computed column declares, and does not count the field as untyped", "#collectRuntimeFieldTypes › prefers the declared column type to the type of a source field that has the same name"), partial: they cover the runtime type, not the close. By hand, against a local stack, with the runtime type `keyword` (what the flyout sent before) the close matched no alert for an ip CIDR, for a number and for a `STATS` column, and with the declared type it matched the alert, not through the flyout.
+```gherkin
+Given an ES|QL rule with EVAL c_ip = TO_IP(ip_s), c_n = n * 2 that created three alerts, with c_ip 10.0.0.5, 10.0.1.9 and 192.168.1.1, and c_n 4, 6 and 8
+When the user adds the exception c_ip is one of 10.0.0.0/24 with the column type ip
+And closes all the alerts that match it
+Then the alert with c_ip 10.0.0.5 is closed and the other two stay open
+
+Given the exception c_n is 4 with the column type long
+When the user closes all the alerts that match it
+Then the alert with c_n 4 is closed and the other two stay open
+
+Given an ES|QL rule with STATS c_total = SUM(n) BY t that created three alerts, with c_total 2, 3 and 4
+And the exception c_total is 3 with the column type long
+When the user closes all the alerts that match it
+Then only the alert with c_total 3 is closed
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
+#### Scenario: Bulk close closes only the open alerts of the rules that the item is added to
+
+**Priority:** P1
+
+**Automation coverage**: No existing tests found covering this scenario.
+```gherkin
+Given two ES|QL rules with the same EVAL c_kw = CONCAT(t, "-z") that created alerts with c_kw a-z
+And one of the alerts of the first rule is already closed
+When the user adds the exception c_kw is a-z with the column type keyword to the first rule only
+And closes all the alerts that match it
+Then the open alerts of the first rule with c_kw a-z are closed
+And the alerts of the second rule stay open
+And the alert that was already closed keeps its status and its reason
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
+#### Scenario: The flyout warns that the exception uses runtime or non-ECS fields, and does not warn that a computed column cannot be resolved
+
+**Priority:** P2
+
+**Automation coverage**: 1 unit test (`x-pack/solutions/security/plugins/security_solution/public/detection_engine/rule_exceptions/components/flyout_components/alerts_actions/utils.test.ts`: "#collectRuntimeFieldTypes › uses the column type that an entry on a computed column declares, and does not count the field as untyped"), partial: it checks that the field is not untyped, not the text that the flyout shows.
+```gherkin
+Given an ES|QL rule with EVAL c_kw = CONCAT(t, "-z")
+When the user adds the exception c_kw is a-z with the column type keyword
+And checks "Close all alerts that match this exception"
+Then the flyout shows the warning "This exception uses runtime or non-ECS fields", because the alerts index does not map c_kw
+And it does not show the warning that some fields could not be resolved against the data view of the rule
+```
+
+**Execution:**
+- [ ] ✅ Pass
+- [ ] ❌ Fail
+- [ ] 🚫 Blocked
+
+_If Fail or Blocked, reply to this comment with details (env, build, repro steps)._
+
+#### Scenario: Closing alerts by an exclusive operator, a date column or a multi-valued column is checked before release (not verified yet)
+
+**Priority:** P2
+
+**Automation coverage**: No existing tests found covering this scenario. No run of these cases exists: the runtime field reads each value from the `_source` of the alert, and a date column is written as a `keyword` of its text.
+```gherkin
+Given an ES|QL rule with EVAL c_kw = CONCAT(t, "-z") that created three alerts
+When the user adds the exception c_kw is not a-z with the column type keyword
+And closes all the alerts that match it
+Then the alerts whose c_kw is not a-z are closed, as for an exception on a source field (to confirm)
+
+Given an ES|QL rule with a computed date column and an exception "is" with the full date text of one alert
+When the user closes all the alerts that match it
+Then that alert is closed (to confirm)
+
+Given an ES|QL rule with a multi-valued computed column and an exception "is" with one of the values
+When the user closes all the alerts that match it
+Then the alerts that hold that value are closed (to confirm)
 ```
 
 **Execution:**
@@ -2366,7 +2523,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 ## Test Coverage Summary
 
-**Total scenarios:** 90
+**Total scenarios:** 96
 
 | Feature area | Scenarios | P0 | P1 | P2 | Automated | Manual only |
 |---|---|---|---|---|---|---|
@@ -2375,8 +2532,9 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 | Items that are not applied or refused, and how they are reported | 14 | 1 | 9 | 4 | 14 | 0 |
 | Failure handling | 4 | 2 | 2 | 0 | 4 | 0 |
 | Dependency data lifecycle | 4 | 0 | 2 | 2 | 1 | 3 |
+| Closing alerts from the exception flyout | 6 | 0 | 4 | 2 | 4 | 2 |
 | Spaces and cross-cluster search (to confirm) | 2 | 0 | 0 | 2 | 0 | 2 |
-| **Total** | **90** | **21** | **49** | **20** | **69** | **21** |
+| **Total** | **96** | **21** | **53** | **22** | **73** | **23** |
 
 **Automated coverage notes:**
 - The Automated column counts scenarios with at least one matching unit or API integration test. Almost all of them are partial: the tests check the generated clause, the compiler, the resolution of the items against the output columns or the split of the items by `applies_to` with mocked clients, not the alerts of a running rule. Only the "is" operator on one source field, and one exception on a column that the query computes with alert suppression, have an API integration test that runs a rule.
@@ -2384,6 +2542,7 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 - Unit tests (Jest) for the new code in `x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/esql/utils/end_stage_exceptions/` (`build_end_stage_clause.test.ts`, `resolve_end_stage_items.test.ts`, `column_type_mismatch_error.test.ts`, `apply_end_stage_exceptions.test.ts`, `invalid_exception_values_error.test.ts`, `build_exceptions_log_entry.test.ts`), in `esql.test.ts` ("exceptions at the end of the query") and in `utils/get_exception_items_for_rule.test.ts`: they cover the compiler, the resolution of the items against the output columns, the split of the items by `applies_to`, the orchestration and the wiring with mocked Elasticsearch clients. The write-time validation has its own tests: `x-pack/solutions/security/plugins/lists/server/services/exception_lists/applies_to.test.ts`, `x-pack/solutions/security/packages/kbn-securitysolution-exceptions-common/api/applies_to.test.ts` and the API integration tests in `x-pack/solutions/security/test/security_solution_api_integration/test_suites/lists_and_exception_lists/exception_lists_items/trial_license_complete_tier/items/applies_to_exception_list_items.ts`. The scenarios that name them cover the refusal when the item is saved, not what the rule does.
 - API integration tests in `x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/detection_engine/rule_execution_logic/esql/trial_license_complete_tier/`: `esql.ts` and `esql_suppression.ts` each have one "with exceptions › should apply exceptions" test with an "is" entry on `client.ip`. `esql_suppression.ts` also has one test for an exception on a column that the query computes ("with exceptions › on a column that the query computes"), which creates its item with `applies_to: esql_output_columns` and a `column_type`. These tests are written but have not been run yet.
 - Four scripts at the root of the repository run against a live stack. `esql_exceptions_try_matrix.mjs` runs `esql_exceptions_try.mjs` for 3,832 combinations of exception kind, field type, operator and invalid value (one item, two items, and lists of two or three exceptions), and every run ended as the script predicts. `esql_exceptions_suppression.mjs` runs a rule with alert suppression and two exceptions (one on a computed column, one on a source field), and then a second run over a 30-minute suppression window, and compares the suppressed document counts of the alerts with what it expects. `esql_exceptions_smoke.mjs` creates lists with several exceptions, each with several items, one target document per exception and one document that no exception excludes, runs the rule through Kibana, and compares the alerts with what it expects. `esql_exceptions_try.mjs` is interactive: you describe an exception (where its field lives, its type, its operator, and whether its value is invalid), and it creates the rule, runs it and compares the alerts and the rule execution log with the expected placement. Two earlier runs, which are not in the repository, excluded the expected rows for 27 operator and type cases against Elasticsearch, and compared `is`, `matches` and their negatives on a computed `text` column with the same exceptions on a `keyword` field, through real rules in Kibana.
+- Closing alerts: the unit tests in `alerts_actions/utils.test.ts` check the runtime type that the flyout sends for an entry on a computed column, and `add_exception_flyout/index.test.tsx` checks that the options are offered. The close itself has no automated test for computed columns. A by-hand request against a local stack (not through the flyout) closed the right alerts for keyword columns, and for ip, numeric and aggregated columns only with the declared type.
 - Not covered: no Scout or Cypress test exercises exceptions on the output columns, and the only API integration test that does (the one on alert suppression) has not been run. No automated test checks, with a running rule, the log message of skipped items, the probe request or the regression matrix of operators and field types for ES|QL rules. Every scenario marked "No existing tests found" needs manual execution or a new automated test.
 
 ## Test Execution Notes
@@ -2461,6 +2620,10 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 - The probe of the output columns sends the filter of the real request
 - A deleted exception item stops excluding on the next run, in both positions
 - An edited exception value applies on the next run
+- "Close this alert" closes the alert that the user started from, for an item on computed columns
+- "Close all alerts that match this exception" closes the alerts that hold the value of a keyword computed column
+- Bulk close finds the alerts by an ip, a numeric or an aggregated computed column with the declared column type
+- Bulk close closes only the open alerts of the rules that the item is added to
 
 **P2: run as capacity allows, limited blast radius:**
 - A field mapped with different types in two indices is matched per index by the DSL filter
@@ -2483,6 +2646,8 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 - Editing the rule query to rename a column or to change its type changes what its exception does
 - Exceptions on a computed column apply for a rule in a non-default space
 - Exceptions apply for a rule that reads a remote cluster
+- The flyout warns that the exception uses runtime or non-ECS fields, and does not warn that a computed column cannot be resolved
+- Closing alerts by an exclusive operator, a date column or a multi-valued column is checked before release (not verified yet)
 
 ---
 

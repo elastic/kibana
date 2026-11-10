@@ -486,7 +486,7 @@ describe('esqlExecutor', () => {
       expect(result.warningMessages).toEqual([]);
       expect(asyncQueryMock().mock.calls[0][0].query).not.toContain('WHERE NOT');
       expect(sharedParams.ruleExecutionLogger.info).toHaveBeenCalledWith(
-        expect.stringContaining('"code":"field_not_found"')
+        expect.stringContaining('"code":"item_never_matches"')
       );
     });
 

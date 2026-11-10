@@ -478,8 +478,8 @@ const planFor = () => {
     if (absentInclusive)
       return {
         status: 'skipped',
-        code: 'field_not_found',
-        text: `not applied (field_not_found): "${absentInclusive.field}" is not in the output of the query`,
+        code: 'item_never_matches',
+        text: `not applied (item_never_matches): "${absentInclusive.field}" is not in the output of the query`,
       };
     const mismatch = ex.items.find(
       (it) => !isMissing(it) && it.declared !== outputTypeOf(it)

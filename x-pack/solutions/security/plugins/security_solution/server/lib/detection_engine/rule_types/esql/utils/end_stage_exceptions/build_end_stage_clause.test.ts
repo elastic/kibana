@@ -380,7 +380,7 @@ describe('compileEndStageItem', () => {
       expect(compile([matchAny('risk', [])], { risk: 'keyword' })).toEqual({
         skipReasons: [
           {
-            code: 'list_size_not_supported',
+            code: 'entry_has_no_values',
             explanation: 'an "is one of" list must have at least one value',
             fields: ['risk'],
           },
