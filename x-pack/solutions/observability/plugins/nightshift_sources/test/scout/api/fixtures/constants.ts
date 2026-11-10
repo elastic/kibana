@@ -68,6 +68,24 @@ export const NIGHTSHIFT_MANAGER_ROLE: KibanaRole = {
 };
 
 /**
+ * A manager whose index read covers only the `readable` part of the test prefix, so it can run
+ * `FROM nightshift-sources-test-*` but does not hold read on the pattern itself.
+ */
+export const NIGHTSHIFT_PARTIAL_READ_MANAGER_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      VIEW_MANAGE_PRIVILEGES,
+      {
+        names: [`${TEST_INDEX_PREFIX}readable-*`],
+        privileges: ['read', 'view_index_metadata'],
+      },
+    ],
+  },
+  kibana: NIGHTSHIFT_MANAGER_ROLE.kibana,
+};
+
+/**
  * Nightshift `all` without the Manage engines sub-feature: manage but not configure. Has every
  * Elasticsearch privilege the manager has, so a 403 can only come from the Kibana privilege.
  */

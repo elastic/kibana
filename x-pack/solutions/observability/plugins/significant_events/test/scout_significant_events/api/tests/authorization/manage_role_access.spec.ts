@@ -23,6 +23,7 @@ import {
   MARK_SCANNED_ENDPOINT,
   POLL_OPTIONS,
   QUERIES_ENDPOINT,
+  SERVICE_ACCOUNT_STATUS_ENDPOINT,
   SOURCES_ENDPOINT,
   SOURCE_CREATE_TOOL_ID,
   SOURCE_DELETE_TOOL_ID,
@@ -129,6 +130,19 @@ for (const { name, label, role, canChangeSources } of ROLES) {
           await deleteAccessSource({ kbnClient, sourceId: createdSourceId });
         }
       });
+
+      apiTest(
+        'reads the service account status and reports who can set the space up',
+        async ({ apiClient }) => {
+          const response = await apiClient.get(SERVICE_ACCOUNT_STATUS_ENDPOINT, {
+            headers,
+            responseType: 'json',
+          });
+          expect(response).toHaveStatusCode(200);
+          // Setting a space up needs manage_security, which only the admin role holds here.
+          expect(response.body.canSetUp).toBe(name === 'admin');
+        }
+      );
 
       if (canChangeSources) {
         apiTest('creates and deletes a source', async ({ apiClient, kbnClient }) => {

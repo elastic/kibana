@@ -93,12 +93,14 @@ this space — another source, or an orphaned view — create walks `-2`, `-3`, 
 both have an `nginx-errors` source; the views are `….default.nginx-errors` and
 `….marketing.nginx-errors`. The saved-object id stays a uuid; it is not in the view name.
 
-Wildcards, several sources and date math are fine. An unscoped `*` is not. Create always runs
-`<esql> | LIMIT 0` as the calling user. Update does too when the normalized query changes. A
-title-only PUT, or a repair that sends the stored query, skips that probe and keeps the stored
-type, so a vanished `WHERE` field cannot block rename or restoring a deleted view; GET reports
-`unresolvable` instead. A pattern that matches no index yet is accepted,
-which means field names in `WHERE` are only checked once data exists.
+Wildcards, several sources and date math are fine. An unscoped `*` is not. Create always checks
+the query as the calling user: it asks Elasticsearch for `read` on the local index patterns (a 403
+when the author lacks it, see the access model) and then runs `<esql> | LIMIT 0`. Update does both
+when the normalized query changes, and `_validate` does both. A title-only PUT, or a repair that
+sends the stored query, skips them and keeps the stored type, so a vanished `WHERE` field cannot
+block rename or restoring a deleted view; GET reports `unresolvable` instead. A pattern that
+matches no index yet is accepted, which means field names in `WHERE` are only checked once data
+exists.
 
 ## Access model
 
@@ -112,15 +114,22 @@ Two switches decide what Nightshift reads, and both belong to the admin:
    Manage engines sub-feature grants and base privileges leave out. The Agent Builder tools that
    create, update and delete sources check the same pair.
 
-Nightshift does not compare the author's index privileges with a source's query. A check made when
-the source is saved would freeze that user's access at that moment and could not see document or
-field level security, nested views, or indices created later. The gate sits on who may change
-sources instead, and it assumes a user holding it could grant themselves read on the data anyway.
-`configure_nightshift` is a Nightshift privilege, not `manage_security`, so it does not guarantee
-that. Admins should hand it out accordingly.
+Saving a source checks that its author can read what the query names, because the engines read
+it as the service account, whose role covers far more than most authors'. Create, a query-changing
+update and `_validate` ask Elasticsearch for `read` on each local index pattern of the query as the
+author and answer 403 otherwise. The check is on the pattern itself: an author who reads only
+`logs-team-a-*` cannot save `FROM logs-*`, even though the `LIMIT 0` probe would pass on the part
+they can read.
 
-Create still runs `<esql> | LIMIT 0` as the calling user, so an author who cannot run the query
-cannot save it. That is a syntax and field check, not an access control.
+It is a point-in-time guard, not an access control. It does not see document or field level
+security, nested views or indices created later, and a source that reads another cluster
+(`cluster:index`) is not checked, because no probe can tell a denied remote index from an absent
+one. Reads of a source's knowledge indicators still check the reader's own privileges (see
+below). The gate that matters stays on who may change sources, and it assumes a user holding it
+could grant themselves read on the data anyway. `configure_nightshift` is a Nightshift privilege,
+not `manage_security`, so it does not guarantee that. Admins should hand it out accordingly.
+
+The `<esql> | LIMIT 0` probe that follows the check is a syntax and field check.
 
 Consequences to plan for:
 

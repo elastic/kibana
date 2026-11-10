@@ -19,6 +19,7 @@ import {
   KI_FEATURE_CREATE_TOOL_ID,
   MARK_SCANNED_ENDPOINT,
   POLL_OPTIONS,
+  SERVICE_ACCOUNT_STATUS_ENDPOINT,
   SOURCE_CREATE_TOOL_ID,
   SOURCE_DELETE_TOOL_ID,
   SOURCE_GET_TOOL_ID,
@@ -92,6 +93,18 @@ apiTest.describe(
         }, POLL_OPTIONS)
         .toStrictEqual({ statusCode: 200, eventIds: [eventId] });
     });
+
+    apiTest(
+      'reads the service account status without being able to set it up',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(SERVICE_ACCOUNT_STATUS_ENDPOINT, {
+          headers,
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.canSetUp).toBe(false);
+      }
+    );
 
     apiTest('lists detections', async ({ apiClient }) => {
       await expect

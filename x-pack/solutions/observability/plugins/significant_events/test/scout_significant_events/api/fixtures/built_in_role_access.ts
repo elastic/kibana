@@ -20,6 +20,7 @@ export const ACCESS_SOURCE_ESQL = 'FROM logs.otel, logs.otel.*';
 export const EVENTS_ENDPOINT = 'internal/significant_events/events';
 export const DETECTIONS_ENDPOINT = 'internal/significant_events/detections';
 export const MARK_SCANNED_ENDPOINT = 'internal/significant_events/detections/_mark_scanned';
+export const SERVICE_ACCOUNT_STATUS_ENDPOINT = 'internal/significant_events/service_account';
 export const SOURCES_ENDPOINT = 'internal/nightshift/sources';
 export const getFeaturesEndpoint = (sourceId: string): string =>
   `internal/streams/${sourceId}/features`;
