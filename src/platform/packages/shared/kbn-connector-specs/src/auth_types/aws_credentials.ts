@@ -39,6 +39,12 @@ const authSchema = lazySchema(() =>
 
 type AuthSchemaType = z.infer<typeof authSchema>;
 
+/** Request config accepted by the SigV4 interceptor. */
+export interface AwsSigningRequestConfig {
+  /** Overrides the signing name parsed from the hostname (e.g. bedrock-runtime signs as bedrock). */
+  awsSigningName?: string;
+}
+
 /**
  * AWS Credentials Authentication (SigV4)
  *
@@ -61,7 +67,9 @@ export const AwsCredentialsAuth: AuthTypeSpec<AuthSchemaType> = {
     const { accessKeyId, secretAccessKey } = secret;
 
     axiosInstance.interceptors.request.use(
-      async (config: InternalAxiosRequestConfig): Promise<InternalAxiosRequestConfig> => {
+      async (
+        config: InternalAxiosRequestConfig & AwsSigningRequestConfig
+      ): Promise<InternalAxiosRequestConfig> => {
         const requestUrl = config.url;
         if (!requestUrl) {
           return config;
@@ -129,7 +137,7 @@ export const AwsCredentialsAuth: AuthTypeSpec<AuthSchemaType> = {
           accessKeyId,
           secretAccessKey,
           awsInfo.region,
-          awsInfo.service,
+          config.awsSigningName ?? awsInfo.service,
           existingHeaders,
           body
         );
@@ -152,6 +160,12 @@ export const AwsCredentialsAuth: AuthTypeSpec<AuthSchemaType> = {
           canonicalQuerystring ? `?${canonicalQuerystring}` : ''
         }`;
         config.params = undefined;
+
+        // Send the exact body we just signed. Axios's default
+        // transformRequest also runs after interceptors and, under a JSON
+        // Content-Type, trims a JSON string and JSON-quotes any other string.
+        config.data = body;
+        config.transformRequest = [];
 
         return config;
       }

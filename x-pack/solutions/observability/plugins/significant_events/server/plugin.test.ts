@@ -8,10 +8,9 @@
 import { coreMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
-  consumeRunQuota,
+  consumeInvestigationRunQuota,
   createRunQuotaInternalRepository,
   dayKey,
-  releaseRunQuota,
 } from './lib/run_quotas';
 import { knowledgeIndicatorsDataStream } from './lib/knowledge_indicators';
 import { detectionsDataStream } from './lib/significant_events/detections';
@@ -19,17 +18,15 @@ import type { SignificantEventsPluginSetupDependencies } from './types';
 import { SignificantEventsPlugin } from './plugin';
 
 jest.mock('./lib/run_quotas', () => ({
-  consumeRunQuota: jest.fn(),
+  consumeInvestigationRunQuota: jest.fn(),
   createRunQuotaInternalRepository: jest.fn(),
-  releaseRunQuota: jest.fn(),
   dayKey: jest.fn(),
   resolveDailyWindow: jest.fn(),
 }));
 
 jest.mock('./routes', () => ({ significantEventsRouteRepository: {} }));
 
-const consumeRunQuotaMock = jest.mocked(consumeRunQuota);
-const releaseRunQuotaMock = jest.mocked(releaseRunQuota);
+const consumeInvestigationRunQuotaMock = jest.mocked(consumeInvestigationRunQuota);
 const createRunQuotaInternalRepositoryMock = jest.mocked(createRunQuotaInternalRepository);
 const dayKeyMock = jest.mocked(dayKey);
 
@@ -65,7 +62,7 @@ const createSetupDeps = ({
 describe('SignificantEventsPlugin setup', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    consumeRunQuotaMock.mockResolvedValue({ allowed: true, limit: 3 });
+    consumeInvestigationRunQuotaMock.mockResolvedValue({ allowed: true, release: jest.fn() });
   });
 
   it('supports the investigations plugin being absent', () => {
@@ -122,40 +119,58 @@ describe('SignificantEventsPlugin setup', () => {
     plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
     const [callback] = registerInvestigationQuota.mock.calls[0];
 
-    await expect(callback()).rejects.toThrow('Significant Events start services are unavailable');
+    await expect(callback('manual')).rejects.toThrow(
+      'Significant Events start services are unavailable'
+    );
     expect(createRunQuotaInternalRepositoryMock).not.toHaveBeenCalled();
   });
 
-  it('consumes the investigation quota with the existing internal repository when invoked', async () => {
-    const registerInvestigationQuota = jest.fn();
+  describe('when invoked', () => {
     const internalRepository = {} as ReturnType<typeof createRunQuotaInternalRepository>;
-    createRunQuotaInternalRepositoryMock.mockReturnValue(internalRepository);
-    dayKeyMock.mockReturnValueOnce('2026-10-29').mockReturnValueOnce('2026-10-30');
-    const plugin = createPlugin();
-    plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
-    const server = plugin.server;
-    if (!server) {
-      throw new Error('Expected Significant Events server');
-    }
-    server.core = coreMock.createStart();
-    const [callback] = registerInvestigationQuota.mock.calls[0];
+    const setupCallback = () => {
+      const registerInvestigationQuota = jest.fn();
+      createRunQuotaInternalRepositoryMock.mockReturnValue(internalRepository);
+      dayKeyMock.mockReturnValue('2026-10-29');
+      const plugin = createPlugin();
+      plugin.setup(createCoreSetup(), createSetupDeps({ registerInvestigationQuota }));
+      const server = plugin.server;
+      if (!server) {
+        throw new Error('Expected Significant Events server');
+      }
+      server.core = coreMock.createStart();
+      return registerInvestigationQuota.mock.calls[0][0];
+    };
 
-    const result = await callback();
+    it.each([
+      ['automatic', 'investigation'],
+      ['manual', 'manual_investigation'],
+    ])('charges a %s start to the %s limit', async (trigger, group) => {
+      const release = jest.fn();
+      consumeInvestigationRunQuotaMock.mockResolvedValue({ allowed: true, release });
 
-    expect(result).toEqual({ allowed: true, limit: 3, release: expect.any(Function) });
-    expect(createRunQuotaInternalRepositoryMock).toHaveBeenCalledWith(server);
-    expect(consumeRunQuotaMock).toHaveBeenCalledWith({
-      internalRepository,
-      group: 'investigation',
-      date: '2026-10-29',
+      await expect(setupCallback()(trigger)).resolves.toEqual({ allowed: true, release });
+      expect(consumeInvestigationRunQuotaMock).toHaveBeenCalledWith({
+        internalRepository,
+        group,
+        date: '2026-10-29',
+      });
     });
 
-    await result.release();
+    it.each([
+      ['manual_investigation', 'manual'],
+      ['total_investigation', 'all'],
+    ] as const)('reports a denial by %s as %s', async (deniedGroup, deniedBy) => {
+      consumeInvestigationRunQuotaMock.mockResolvedValue({
+        allowed: false,
+        deniedBy: deniedGroup,
+        limit: 4,
+      });
 
-    expect(releaseRunQuotaMock).toHaveBeenCalledWith({
-      internalRepository,
-      group: 'investigation',
-      date: '2026-10-29',
+      await expect(setupCallback()('manual')).resolves.toEqual({
+        allowed: false,
+        deniedBy,
+        limit: 4,
+      });
     });
   });
 });

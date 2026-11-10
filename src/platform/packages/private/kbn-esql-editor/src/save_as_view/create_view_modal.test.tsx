@@ -99,6 +99,7 @@ describe('CreateViewModal', () => {
         name: 'sales',
         query,
         description: undefined,
+        validate: true,
       })
     );
   });
@@ -113,6 +114,7 @@ describe('CreateViewModal', () => {
         name: 'sales',
         query,
         description: 'Daily sales',
+        validate: true,
       })
     );
   });
@@ -177,6 +179,28 @@ describe('CreateViewModal', () => {
       expect(onSaved).toHaveBeenCalledWith('sales');
       expect(onClose).toHaveBeenCalled();
     });
+  });
+
+  it('shows validation warnings in the modal after the view is saved', async () => {
+    const warning = 'view [sales] query is not valid: Unknown index [missing]';
+    createView.mockResolvedValue({ acknowledged: true, warnings: [warning] });
+    const { core, onClose, onSaved } = renderModal();
+
+    submitView('sales');
+
+    expect(await screen.findByTestId('saveAsViewValidationWarning')).toHaveTextContent(
+      'View "sales" was created, but its query has validation warnings.'
+    );
+    expect(screen.getByTestId('saveAsViewValidationWarning')).toHaveTextContent(warning);
+    expect(screen.getByTestId('saveAsViewCloseButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('saveAsViewSubmitButton')).not.toBeInTheDocument();
+    expect(onSaved).toHaveBeenCalledWith('sales');
+    expect(onClose).not.toHaveBeenCalled();
+    expect(core.notifications.toasts.addWarning).not.toHaveBeenCalled();
+    expect(core.notifications.toasts.addSuccess).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('saveAsViewCloseButton'));
+    expect(onClose).toHaveBeenCalled();
   });
 
   describe('telemetry', () => {

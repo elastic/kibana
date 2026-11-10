@@ -139,6 +139,7 @@ export class ServiceManager {
     deploymentInfo,
     deductiveRegister,
     isomer,
+    getSmlTypeDefinition,
     cloud,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
@@ -307,6 +308,7 @@ export class ServiceManager {
       agentService: agents,
       runAgent: runner.runAgent,
       attachmentsService: attachments,
+      getSmlTypeDefinition,
       uiSettings,
       savedObjects,
       trackingService,
