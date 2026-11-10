@@ -8,43 +8,27 @@
 import { getNewRule } from '../../../objects/rule';
 import { PROVIDER_BADGE, QUERY_TAB_BUTTON, TIMELINE_TITLE } from '../../../screens/timeline';
 import { closeTimeline } from '../../../tasks/timeline';
-import { investigateFirstAlertInTimeline } from '../../../tasks/alerts';
+import { expandFirstAlert, investigateFirstAlertInTimeline } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
-import { disableNewFlyout } from '../../../tasks/api_calls/kibana_advanced_settings';
-import { expandAlertAtIndexExpandableFlyout } from '../../../tasks/expandable_flyout/common';
 import {
-  clickAnalyzerPreviewTitle,
-  toggleOverviewTabAboutSection,
-  toggleOverviewTabInvestigationSection,
-  toggleOverviewTabVisualizationsSection,
-} from '../../../tasks/expandable_flyout/alert_details_right_panel_overview_tab';
+  openDocumentFlyoutAnalyzerTool,
+  openDocumentFlyoutCorrelationsTool,
+  openDocumentFlyoutPrevalenceTool,
+  selectDocumentFlyoutTakeActionItem,
+} from '../../../tasks/document_flyout';
 import {
-  expandDocumentDetailsExpandableFlyoutLeftSection,
-  openTakeActionButton,
-  selectTakeActionItem,
-} from '../../../tasks/expandable_flyout/alert_details_right_panel';
-import { DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE } from '../../../screens/expandable_flyout/alert_details_right_panel';
-import { DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB } from '../../../screens/expandable_flyout/alert_details_left_panel';
-import {
-  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON,
-  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT,
-} from '../../../screens/expandable_flyout/alert_details_left_panel_analyzer_graph_tab';
-import {
-  openPrevalenceTab,
-  openTimelineFromPrevalenceTableCell,
-} from '../../../tasks/expandable_flyout/alert_details_left_panel_prevalence_tab';
-import {
-  openCorrelationsTab,
-  openTimelineFromRelatedBySession,
-  openTimelineFromRelatedSourceEvent,
-} from '../../../tasks/expandable_flyout/alert_details_left_panel_correlations_tab';
-import { openInsightsTab } from '../../../tasks/expandable_flyout/alert_details_left_panel';
-import { CORRELATIONS_ANCESTRY_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON } from '../../../screens/expandable_flyout/alert_details_left_panel_correlations_tab';
+  DOCUMENT_FLYOUT_ANALYZER_GRAPH,
+  DOCUMENT_FLYOUT_CORRELATIONS_ANCESTRY_INVESTIGATE_IN_TIMELINE,
+  DOCUMENT_FLYOUT_CORRELATIONS_SESSION_INVESTIGATE_IN_TIMELINE,
+  DOCUMENT_FLYOUT_CORRELATIONS_SOURCE_INVESTIGATE_IN_TIMELINE,
+  DOCUMENT_FLYOUT_PREVALENCE_INVESTIGATE_IN_TIMELINE,
+  DOCUMENT_FLYOUT_TAKE_ACTION_INVESTIGATE_IN_TIMELINE,
+} from '../../../screens/document_flyout';
 
 describe(
   'Investigate in timeline',
@@ -53,7 +37,6 @@ describe(
   },
   () => {
     beforeEach(() => {
-      disableNewFlyout();
       deleteAlertsAndRules();
       createRule(getNewRule());
       login();
@@ -75,54 +58,39 @@ describe(
 
     describe('From alerts details flyout', () => {
       beforeEach(() => {
-        expandAlertAtIndexExpandableFlyout();
+        expandFirstAlert();
       });
 
       it('should open a new timeline from take action button', () => {
-        openTakeActionButton();
-        selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE);
+        selectDocumentFlyoutTakeActionItem(DOCUMENT_FLYOUT_TAKE_ACTION_INVESTIGATE_IN_TIMELINE);
 
         cy.get(TIMELINE_TITLE).should('have.text', 'Untitled Timeline');
         cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
       });
 
-      it('should navigate to analyzer graph tab', () => {
-        toggleOverviewTabAboutSection();
-        toggleOverviewTabInvestigationSection();
-        toggleOverviewTabVisualizationsSection();
-        clickAnalyzerPreviewTitle();
+      it('should open the analyzer tool', () => {
+        openDocumentFlyoutAnalyzerTool();
 
-        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB)
-          .should('have.text', 'Visualize')
-          .and('have.class', 'euiTab-isSelected');
-        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON)
-          .should('have.text', 'Analyzer Graph')
-          .and('have.class', 'euiButtonGroupButton-isSelected');
-
-        cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_CONTENT).should('exist');
+        cy.get(DOCUMENT_FLYOUT_ANALYZER_GRAPH).should('exist');
       });
 
       it('should open a new timeline from the prevalence detail table', () => {
-        expandDocumentDetailsExpandableFlyoutLeftSection();
-        openInsightsTab();
-        openPrevalenceTab();
-        openTimelineFromPrevalenceTableCell();
+        openDocumentFlyoutPrevalenceTool();
+        cy.get(DOCUMENT_FLYOUT_PREVALENCE_INVESTIGATE_IN_TIMELINE).first().click();
 
         cy.get(TIMELINE_TITLE).should('have.text', 'Untitled Timeline');
         cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
       });
 
-      it('should open a new timeline from the correlations tab', () => {
-        expandDocumentDetailsExpandableFlyoutLeftSection();
-        openInsightsTab();
-        openCorrelationsTab();
-        openTimelineFromRelatedSourceEvent();
+      it('should open a new timeline from the correlations tool', () => {
+        openDocumentFlyoutCorrelationsTool();
+        cy.get(DOCUMENT_FLYOUT_CORRELATIONS_SOURCE_INVESTIGATE_IN_TIMELINE).click();
 
         cy.get(TIMELINE_TITLE).should('have.text', 'Untitled Timeline');
         cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
 
         closeTimeline();
-        openTimelineFromRelatedBySession();
+        cy.get(DOCUMENT_FLYOUT_CORRELATIONS_SESSION_INVESTIGATE_IN_TIMELINE).click();
 
         cy.get(TIMELINE_TITLE).should('have.text', 'Untitled Timeline');
         cy.get(QUERY_TAB_BUTTON).should('have.class', 'euiTab-isSelected');
@@ -131,7 +99,7 @@ describe(
         // this test's data, so the "Investigate in Timeline" button (a per-row action) doesn't
         // render there; this is covered by unit tests, so we simply confirm its absence here
         // instead of exercising the ancestry investigate-in-timeline flow
-        cy.get(CORRELATIONS_ANCESTRY_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should('not.exist');
+        cy.get(DOCUMENT_FLYOUT_CORRELATIONS_ANCESTRY_INVESTIGATE_IN_TIMELINE).should('not.exist');
       });
     });
   }

@@ -21,7 +21,7 @@ describe('cleanup workflow bootstrap route', () => {
   beforeEach(() => jest.clearAllMocks());
 
   const createHandlerParams = (ensureEnabled = jest.fn().mockResolvedValue(undefined)) => {
-    const request = {};
+    const request = { spaceId: 'default' };
     const licensing = {};
     const server = {};
     const logger = { warn: jest.fn() };
@@ -84,7 +84,7 @@ describe('reset route', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('requires Nightshift manage and configure and delegates with the authenticated user', async () => {
-    const request = {};
+    const request = { spaceId: 'default' };
     const licensing = {};
     const reset = jest.fn().mockResolvedValue({ state: 'enabled' });
     const server = {
@@ -117,7 +117,7 @@ describe('pause, resume, and status routes', () => {
     const licensing = {};
     const server = { core: { security: { authc: { getCurrentUser: jest.fn() } } } };
     const handlerParams = {
-      request: {},
+      request: { spaceId: 'default' },
       server,
       getScopedClients: jest.fn().mockResolvedValue({ licensing }),
       maintenanceService: {

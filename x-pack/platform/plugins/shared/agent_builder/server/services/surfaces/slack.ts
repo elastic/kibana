@@ -11,8 +11,11 @@ import type { SurfaceRenderer } from './types';
 /** Renders the response message as Block Kit, for Slack. */
 export const slackSurface: SurfaceRenderer = {
   id: ConversationOriginType.Slack,
-  render: (composition, runtime) => {
-    const { text, blocks } = runtime.surfaces.slack.render(composition, { heading: false });
+  render: (composition, runtime, { baseUrl }) => {
+    const { text, blocks } = runtime.surfaces.slack.render(composition, {
+      heading: false,
+      ...(baseUrl ? { baseUrl } : {}),
+    });
 
     return { text, blocks };
   },
