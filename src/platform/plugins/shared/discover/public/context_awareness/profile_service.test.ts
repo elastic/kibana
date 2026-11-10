@@ -136,6 +136,19 @@ describe('ProfileService', () => {
     expect(provider3.resolve).not.toHaveBeenCalled();
   });
 
+  it('should include inherited telemetry labels and the profile id', () => {
+    service.registerProvider({
+      ...provider2,
+      telemetryLabels: ['logs-family', 'test-profile-2'],
+    });
+
+    expect(service.resolve({ myParam: 'test' })).toEqual({
+      profileId: 'test-profile-2',
+      myContext: 'test',
+      telemetryLabels: ['logs-family', 'test-profile-2'],
+    });
+  });
+
   it('should resolve to default context if no matching context is found', () => {
     service.registerProvider(provider);
     expect(service.resolve({ myParam: 'test' })).toEqual(defaultContext);

@@ -55,6 +55,11 @@ export interface BaseProfileProvider<TProfile extends PartialProfile, TContext> 
    */
   profileId: string;
   /**
+   * Labels copied into the `discoverProfiles` EBT context. `extendProfileProvider` appends an
+   * extension's labels to its base labels. The profile id is reported even when it is not listed.
+   */
+  telemetryLabels?: string[];
+  /**
    * The composable profile implementation
    */
   profile: ComposableProfile<TProfile, TContext>;
@@ -137,6 +142,32 @@ export type ExtractResolutionMatch<TProvider extends BaseProfileProvider<{}, {}>
 
 const EMPTY_PROFILE = {};
 
+/** Family labels first, then the profile id when it is not already one of them. */
+const getProfileTelemetryLabels = ({
+  profileId,
+  telemetryLabels = [],
+}: Pick<BaseProfileProvider<{}, {}>, 'profileId' | 'telemetryLabels'>): string[] =>
+  telemetryLabels.includes(profileId) ? telemetryLabels : [...telemetryLabels, profileId];
+
+const toContextWithProfileId = <TContext>(
+  provider: Pick<BaseProfileProvider<{}, {}>, 'profileId' | 'telemetryLabels'>,
+  context: TContext
+): ContextWithProfileId<TContext> => {
+  const resolved = {
+    ...context,
+    profileId: provider.profileId,
+  };
+
+  if (!provider.telemetryLabels?.length) {
+    return resolved;
+  }
+
+  return {
+    ...resolved,
+    telemetryLabels: getProfileTelemetryLabels(provider),
+  };
+};
+
 /**
  * The base profile service implementation
  */
@@ -218,10 +249,7 @@ export class ProfileService<
       const result = provider.resolve(params);
 
       if (result.isMatch) {
-        return {
-          ...result.context,
-          profileId: provider.profileId,
-        };
+        return toContextWithProfileId(provider, result.context);
       }
     }
 
@@ -248,10 +276,7 @@ export class AsyncProfileService<
       const result = await provider.resolve(params);
 
       if (result.isMatch) {
-        return {
-          ...result.context,
-          profileId: provider.profileId,
-        };
+        return toContextWithProfileId(provider, result.context);
       }
     }
 

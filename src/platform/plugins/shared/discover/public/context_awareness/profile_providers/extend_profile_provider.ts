@@ -10,6 +10,17 @@
 import type { BaseProfileProvider } from '../profile_service';
 
 /**
+ * Concatenates base and extension telemetry labels, keeping the first occurrence of each label.
+ * @param baseLabels Labels from the base profile provider
+ * @param extensionLabels Labels from the extension
+ * @returns Base labels followed by new extension labels
+ */
+const mergeTelemetryLabels = (baseLabels: string[] = [], extensionLabels: string[] = []) =>
+  [...baseLabels, ...extensionLabels].filter(
+    (label, index, labels) => labels.indexOf(label) === index
+  );
+
+/**
  * Extends a base profile provider with additional properties and profile methods
  * @param baseProvider The base profile provider
  * @param extension The extension to apply to the base profile provider
@@ -18,11 +29,19 @@ import type { BaseProfileProvider } from '../profile_service';
 export const extendProfileProvider = <TProvider extends BaseProfileProvider<{}, {}>>(
   baseProvider: TProvider,
   extension: Partial<TProvider> & Pick<TProvider, 'profileId'>
-): TProvider => ({
-  ...baseProvider,
-  ...extension,
-  profile: {
-    ...baseProvider.profile,
-    ...extension.profile,
-  },
-});
+): TProvider => {
+  const telemetryLabels = mergeTelemetryLabels(
+    baseProvider.telemetryLabels,
+    extension.telemetryLabels
+  );
+
+  return {
+    ...baseProvider,
+    ...extension,
+    ...(telemetryLabels.length ? { telemetryLabels } : {}),
+    profile: {
+      ...baseProvider.profile,
+      ...extension.profile,
+    },
+  };
+};

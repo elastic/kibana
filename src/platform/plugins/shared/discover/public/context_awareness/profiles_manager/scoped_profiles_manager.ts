@@ -65,6 +65,27 @@ export interface ResolveDataSourceProfileResult {
   isFirstResolution: boolean;
 }
 
+const profileLabels = (context: { profileId: string; telemetryLabels?: string[] }) =>
+  context.telemetryLabels ?? [context.profileId];
+
+const dedupeProfiles = (profiles: string[]) =>
+  profiles.filter((profile, index) => profiles.indexOf(profile) === index);
+
+const serializeDataSourceProfileParams = (
+  params: Omit<DataSourceProfileProviderParams, 'rootContext'>
+): SerializedDataSourceProfileParams => {
+  return {
+    dataViewId: isDataSourceType(params.dataSource, DataSourceType.DataView)
+      ? params.dataSource.dataViewId
+      : undefined,
+    esqlQuery:
+      isDataSourceType(params.dataSource, DataSourceType.Esql) &&
+      isOfAggregateQueryType(params.query)
+        ? params.query.esql
+        : undefined,
+  };
+};
+
 export class ScopedProfilesManager {
   private readonly dataSourceContext$: BehaviorSubject<ContextWithProfileId<DataSourceContext>>;
   private cachedRootContext: ContextWithProfileId<RootContext>;
@@ -144,7 +165,7 @@ export class ScopedProfilesManager {
       isFirstResolution || this.dataSourceContext$.getValue().profileId !== context.profileId;
 
     onBeforeChange?.();
-    this.trackActiveProfiles(this.rootContext$.getValue().profileId, context.profileId);
+    this.trackActiveProfiles(this.rootContext$.getValue(), context);
     this.dataSourceContext$.next(context);
     this.prevDataSourceProfileParams = serializedParams;
 
@@ -241,33 +262,24 @@ export class ScopedProfilesManager {
   /**
    * Tracks the active profiles in the EBT context
    */
-  private trackActiveProfiles(rootContextProfileId: string, dataSourceContextProfileId: string) {
-    const dscProfiles = [rootContextProfileId, dataSourceContextProfileId];
+  private trackActiveProfiles(
+    rootContext: ContextWithProfileId<RootContext>,
+    dataSourceContext: ContextWithProfileId<DataSourceContext>
+  ) {
+    const dscProfiles = dedupeProfiles([
+      ...profileLabels(rootContext),
+      ...profileLabels(dataSourceContext),
+    ]);
 
     this.scopedEbtManager.trackContextualProfileResolvedEvent({
       contextLevel: ContextualProfileLevel.rootLevel,
-      profileId: rootContextProfileId,
+      profileId: rootContext.profileId,
     });
     this.scopedEbtManager.trackContextualProfileResolvedEvent({
       contextLevel: ContextualProfileLevel.dataSourceLevel,
-      profileId: dataSourceContextProfileId,
+      profileId: dataSourceContext.profileId,
     });
 
     this.scopedEbtManager.updateProfilesContextWith(dscProfiles);
   }
 }
-
-const serializeDataSourceProfileParams = (
-  params: Omit<DataSourceProfileProviderParams, 'rootContext'>
-): SerializedDataSourceProfileParams => {
-  return {
-    dataViewId: isDataSourceType(params.dataSource, DataSourceType.DataView)
-      ? params.dataSource.dataViewId
-      : undefined,
-    esqlQuery:
-      isDataSourceType(params.dataSource, DataSourceType.Esql) &&
-      isOfAggregateQueryType(params.query)
-        ? params.query.esql
-        : undefined,
-  };
-};
