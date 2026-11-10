@@ -25,7 +25,6 @@ import {
   type TableListTab,
 } from '@kbn/content-management-tabbed-table-list-view';
 import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
-import type { TableListViewProps } from '@kbn/content-management-table-list-view';
 import {
   TableListViewTable,
   type TableListViewTableProps,
@@ -72,7 +71,7 @@ const visualizeListingStyles = {
 };
 
 type CustomTableViewProps = Pick<
-  TableListViewProps<VisualizeUserContent>,
+  TableListViewTableProps<VisualizeUserContent>,
   | 'createItem'
   | 'findItems'
   | 'deleteItems'
@@ -80,8 +79,8 @@ type CustomTableViewProps = Pick<
   | 'contentEditor'
   | 'emptyPrompt'
   | 'rowItemActions'
-> &
-  Pick<TableListViewTableProps<VisualizeUserContent>, 'refreshListBouncer'>;
+  | 'refreshListBouncer'
+>;
 
 const useTableListViewProps = (
   closeNewVisModal: MutableRefObject<() => void>,
