@@ -7,7 +7,7 @@
 
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { ColorMapping } from '@kbn/coloring';
-import { deserializeField } from '@kbn/data-plugin/common';
+import { MultiFieldKey, deserializeField } from '@kbn/data-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { KbnPaletteId } from '@kbn/palettes';
 import { KbnPalette } from '@kbn/palettes';
@@ -116,7 +116,16 @@ export const categoryColorsByKey = (
   columns: string[],
   colorMapping: LensApiColorMapping | undefined,
   kit: MaterializeKit,
-  { exclude, paletteFallback }: { exclude?: unknown[]; paletteFallback?: string } = {}
+  {
+    exclude,
+    paletteFallback,
+    byText,
+  }: {
+    exclude?: unknown[];
+    paletteFallback?: string;
+    /** Look each category up by its text, as Lens's partition charts do (`getCategoryKeys`). */
+    byText?: boolean;
+  } = {}
 ): Record<string, ConcreteColor> => {
   const categories = getColorCategories(
     rows,
@@ -130,11 +139,16 @@ export const categoryColorsByKey = (
       mapping: [],
     }
   );
+  const values = categories.map((category) => deserializeField(category));
   const colors =
     'config' in mapping
-      ? kit.colorMappingColors(categories, mapping.config)
+      ? kit.colorMappingColors(
+          categories,
+          mapping.config,
+          byText
+            ? values.map((value) => (MultiFieldKey.isInstance(value) ? value : `${value}`))
+            : values
+        )
       : kit.paletteColors(categories.length, mapping.legacyPalette);
-  return Object.fromEntries(
-    categories.map((category, index) => [toKeyPart(deserializeField(category)), colors[index]])
-  );
+  return Object.fromEntries(values.map((value, index) => [toKeyPart(value), colors[index]]));
 };

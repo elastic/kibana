@@ -44,16 +44,24 @@ const DONUT_HOLES: Record<'s' | 'm' | 'l', number> = {
 const metricsOf = (chart: LensPartitionConfig): Metric[] =>
   chart.type === 'mosaic' ? [chart.metric] : chart.metrics;
 
-/** Groups outermost first: a mosaic's `group_by` columns, then its `group_breakdown_by` rows. */
-const groupsOf = (chart: LensPartitionConfig): Array<{ group: Group; path: string }> => [
-  ...(chart.group_by ?? []).map((group, index) => ({ group, path: `group_by[${index}]` })),
-  ...(chart.type === 'mosaic'
-    ? (chart.group_breakdown_by ?? []).map((group, index) => ({
-        group,
-        path: `group_breakdown_by[${index}]`,
-      }))
-    : []),
-];
+/**
+ * Groups outermost first. Lens's mosaic flips its buckets (`generateMosaicVisAst`), so its
+ * `group_breakdown_by` is the outer layer and its `group_by` the inner one.
+ */
+const groupsOf = (chart: LensPartitionConfig): Array<{ group: Group; path: string }> => {
+  const groupBy = (chart.group_by ?? []).map((group, index) => ({
+    group,
+    path: `group_by[${index}]`,
+  }));
+  if (chart.type !== 'mosaic') {
+    return groupBy;
+  }
+  const breakdown = (chart.group_breakdown_by ?? []).map((group, index) => ({
+    group,
+    path: `group_breakdown_by[${index}]`,
+  }));
+  return [...breakdown, ...groupBy];
+};
 
 const shapeOf = (chart: LensPartitionConfig): Shape => {
   if (chart.type !== 'pie') {
@@ -127,8 +135,9 @@ const collapseGroups = (table: Datatable, groups: Group[], metrics: string[]): D
 /**
  * The slice colors, keyed as `partitionChart` names them. Lens colors the outermost group (on a
  * two-group mosaic, the second: `getColorCategoriesForChart`) through the first group's color
- * mapping, or Lens's default palette; inner layers derive theirs from it. Without groups, each
- * metric slice takes its static color or its place in the default palette.
+ * mapping, or Lens's default palette; inner layers derive theirs from it. It looks each slice up
+ * by its text (`getCategoryKeys`), so a missing value takes the mapping's unassigned color.
+ * Without groups, each metric slice takes its static color or its place in the default palette.
  */
 const colorsOf = (
   chart: LensPartitionConfig,
@@ -158,7 +167,8 @@ const colorsOf = (
       table.rows,
       [colored.column],
       mapping && !('type' in mapping) ? mapping : undefined,
-      kit
+      kit,
+      { byText: true }
     );
   }
   const palette = kit.paletteColors(metrics.length, KbnPalette.Default);

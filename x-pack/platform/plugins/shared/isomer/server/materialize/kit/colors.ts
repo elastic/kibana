@@ -51,17 +51,19 @@ export const toHexColor = (color: string): HexColor => {
 
 /**
  * The color a Kibana color mapping gives each category, concrete for both color schemes, as
- * Kibana's charts pick them. `categories` are serialized values in the order the chart meets them.
+ * Kibana's charts pick them. `categories` are serialized values in the order the chart meets them;
+ * each is looked up by its value, or by the matching entry of `values`.
  */
 export const colorMappingColors = (
   categories: SerializedValue[],
-  colorMapping: ColorMapping.Config
+  colorMapping: ColorMapping.Config,
+  values: unknown[] = categories.map((category) => deserializeField(category))
 ): ConcreteColor[] => {
   const data = { type: 'categories' as const, categories };
   const light = getColorFactory(colorMapping, getPalettes(false), false, data);
   const dark = getColorFactory(colorMapping, getPalettes(true), true, data);
-  return categories.map((category) => {
-    const value = deserializeField(category);
-    return { light: toHexColor(light(value)), dark: toHexColor(dark(value)) };
-  });
+  return values.map((value) => ({
+    light: toHexColor(light(value as Parameters<typeof light>[0])),
+    dark: toHexColor(dark(value as Parameters<typeof dark>[0])),
+  }));
 };

@@ -91,6 +91,19 @@ const kibanaColors = (table: Datatable, column: string) => {
   return categories.map((category) => [String(category), chroma(getColor(category)).hex()]);
 };
 
+/** The color Kibana's color mapping gives `value` among the column's categories, light mode. */
+const kibanaColor = (table: Datatable, column: string, value: string) => {
+  const { colorMapping } = fromColorMappingAPIToLensState(color as never) as {
+    colorMapping: ColorMapping.Config;
+  };
+  return chroma(
+    getColorFactory(colorMapping, getPalettes(false), false, {
+      type: 'categories',
+      categories: getColorCategories(table.rows, [column]),
+    })(value)
+  ).hex();
+};
+
 const lightColors = (node: PartitionChartNode) =>
   Object.entries(node.colors?.byKey ?? {}).map(([key, value]) => [
     key,
@@ -134,9 +147,12 @@ describe('Lens partition mapping', () => {
       interactions: { select: ['slice'] },
     });
     expect(node.donutHole).toBeUndefined();
-    // The outermost group is colored: the null category is keyed `\null`.
+    // The outermost group is colored. Lens looks slices up by their text, so the null category
+    // (keyed `\null`) takes the unassigned color, as `"null"` does.
     expect(lightColors(node)).toEqual(
-      kibanaColors(table, 'os').map(([key, hex]) => [key === 'null' ? '\\null' : key, hex])
+      kibanaColors(table, 'os').map(([key, hex]) =>
+        key === 'null' ? ['\\null', kibanaColor(table, 'os', 'null')] : [key, hex]
+      )
     );
     const { nodes } = scene(node);
     expect(nodes.map(({ label }) => label).sort()).toEqual(['(null)', 'linux', 'osx']);
@@ -164,7 +180,7 @@ describe('Lens partition mapping', () => {
     expect(node.donutHole).toBe(ratio);
   });
 
-  it("colors a two-group mosaic by its breakdown, through the first group's color mapping", async () => {
+  it("puts a mosaic's breakdown outside, as Lens flips them, and colors by its group_by", async () => {
     const table = osTable();
     const node = asPartition(
       map(
@@ -179,10 +195,8 @@ describe('Lens partition mapping', () => {
       )
     );
     expect(await validate(node)).toEqual([]);
-    expect(node.groups).toEqual([{ column: 'host' }, { column: 'os' }]);
-    expect(lightColors(node)).toEqual(
-      kibanaColors(table, 'os').map(([key, hex]) => [key === 'null' ? '\\null' : key, hex])
-    );
+    expect(node.groups).toEqual([{ column: 'os' }, { column: 'host' }]);
+    expect(lightColors(node)).toEqual(kibanaColors(table, 'host'));
   });
 
   it('maps a treemap and a waffle with Lens’s legend values', async () => {

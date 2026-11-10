@@ -132,10 +132,14 @@ export interface MaterializeKit {
   toChartData(table: Datatable, options?: ToChartDataOptions): ChartDataResult;
   /** The first `count` colors of a Kibana palette, for light and dark. Defaults to Kibana's default palette. */
   paletteColors(count: number, paletteId?: string): ConcreteColor[];
-  /** The color a Kibana color mapping gives each category, for light and dark, in order. */
+  /**
+   * The color a Kibana color mapping gives each category, for light and dark, in order. A chart
+   * that looks colors up by something other than the category's value passes those `values`.
+   */
   colorMappingColors(
     categories: SerializedValue[],
-    colorMapping: ColorMapping.Config
+    colorMapping: ColorMapping.Config,
+    values?: unknown[]
   ): ConcreteColor[];
 }
 
