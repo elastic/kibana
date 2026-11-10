@@ -1569,6 +1569,40 @@ export const esqlCharts: Array<PartitionConfig> = [
     },
   },
   {
+    title: 'ESQL mosaic with breakdown',
+    sampling: 1,
+    ignore_global_filters: false,
+    type: 'mosaic',
+    metric: {
+      column: 'count',
+    },
+    group_by: [
+      {
+        column: 'category.keyword',
+        color: {
+          mode: 'categorical',
+          palette: 'default',
+          mapping: [],
+        },
+      },
+    ],
+    group_breakdown_by: [{ column: 'customer_gender' }],
+    data_source: {
+      type: 'esql',
+      query:
+        'FROM kibana_sample_data_ecommerce | STATS count = COUNT(*) BY category.keyword, customer_gender',
+    },
+    legend: {
+      visibility: 'auto',
+      nested: false,
+    },
+    styling: {
+      values: {
+        mode: 'percentage',
+      },
+    },
+  },
+  {
     title: 'ESQL waffle',
     sampling: 1,
     ignore_global_filters: false,
