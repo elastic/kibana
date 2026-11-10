@@ -121,7 +121,7 @@ const createOrcaEsRequest =
         signal: deadline,
       });
       assert(response.ok, `ORCA ${method} ${path} returned HTTP ${response.status}`);
-      return response.json();
+      return await response.json();
     } finally {
       deadline.dispose();
     }
