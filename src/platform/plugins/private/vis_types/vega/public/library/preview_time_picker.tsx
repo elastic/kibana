@@ -7,80 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { EuiSuperDatePicker, useIsWithinBreakpoints } from '@elastic/eui';
+import React, { useState } from 'react';
+import { useIsWithinBreakpoints } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import {
-  DATE_RANGE_PICKER_FEATURE_FLAG,
-  DateRangePicker,
-  type DateRangePickerSettings,
-} from '@kbn/date-range-picker';
+import { DateRangePicker, type DateRangePickerSettings } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets } from '@kbn/date-range-picker-presets';
 import type { TimeRange } from '@kbn/es-query';
 import { getData } from '../services';
 
-interface QuickRange {
-  from: string;
-  to: string;
-  display: string;
-}
-
 interface PreviewTimePickerProps {
-  core: Pick<CoreStart, 'application' | 'featureFlags' | 'http' | 'notifications' | 'uiSettings'>;
+  core: Pick<CoreStart, 'application' | 'http' | 'notifications' | 'uiSettings'>;
   timeRange: TimeRange;
   onTimeRangeChange: (timeRange: TimeRange) => void;
 }
 
 /**
  * The time range picker the unified search bar shows on dashboards, without auto refresh or
- * recently used ranges, which the preview doesn't have. Like the search bar, it falls back to
- * `EuiSuperDatePicker` while the new picker's feature flag is off.
+ * recently used ranges, which the preview doesn't have.
  */
 export const PreviewTimePicker = ({
   core,
   timeRange,
   onTimeRangeChange,
 }: PreviewTimePickerProps) => {
-  const { application, featureFlags, http, notifications, uiSettings } = core;
-  const isNewPickerEnabled$ = useMemo(
-    () => featureFlags.getBooleanValue$(DATE_RANGE_PICKER_FEATURE_FLAG, true),
-    [featureFlags]
-  );
-  const isNewPickerEnabled = useObservable(isNewPickerEnabled$, true);
+  const { application, http, notifications, uiSettings } = core;
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const [settings, setSettings] = useState<DateRangePickerSettings>({
     roundRelativeTime: false,
     timePrecision: 'none',
   });
-  const { presets } = useDateRangePickerPresets({
+  // Like the search bar, so the user's saved presets show here too.
+  const { presets, onPresetSave, onPresetDelete } = useDateRangePickerPresets({
     service: getData().dateRangePickerPresets,
-    persistenceEnabled: false,
+    persistenceEnabled: true,
     notifications,
   });
-  const quickRanges = useMemo(
-    () =>
-      uiSettings
-        .get<QuickRange[]>(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
-        .map(({ from, to, display }) => ({ start: from, end: to, label: display })),
-    [uiSettings]
-  );
-
-  if (!isNewPickerEnabled) {
-    return (
-      <EuiSuperDatePicker
-        start={timeRange.from}
-        end={timeRange.to}
-        onTimeChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
-        commonlyUsedRanges={quickRanges}
-        showUpdateButton={false}
-        compressed
-        width="auto"
-        data-test-subj="vegaLibraryEditorPreviewTimePicker"
-      />
-    );
-  }
 
   return (
     <DateRangePicker
@@ -93,6 +54,8 @@ export const PreviewTimePicker = ({
       collapsed={isMobile}
       showTimeWindowButtons
       presets={presets}
+      onPresetSave={onPresetSave}
+      onPresetDelete={onPresetDelete}
       settings={settings}
       onSettingsChange={setSettings}
       timeZone={uiSettings.get('dateFormat:tz')}

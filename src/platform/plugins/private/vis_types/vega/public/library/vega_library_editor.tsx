@@ -68,7 +68,7 @@ const savedMessage = (title: string) =>
   });
 
 interface VegaLibraryEditorProps {
-  core: Pick<CoreStart, 'application' | 'featureFlags' | 'http' | 'notifications' | 'uiSettings'>;
+  core: Pick<CoreStart, 'application' | 'http' | 'notifications' | 'uiSettings'>;
   client: VegaLibraryClient;
   SearchBar: VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
