@@ -6,6 +6,7 @@
  */
 
 import {
+  CONTENT_LIST_TEST_SUBJECTS,
   getContentListSelectionBarSubjects,
   getContentListToolbarSubjects,
 } from '@kbn/content-list-common';
@@ -36,6 +37,7 @@ export const journey = new Journey({
   })
   .step('Delete dashboard', async ({ page, kibanaPage }) => {
     const deletedDashboard = page
+      .locator(subj(CONTENT_LIST_TEST_SUBJECTS.table))
       .getByRole('link', {
         name: '[Logs] Web Traffic',
         exact: true,

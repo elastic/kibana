@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { Journey } from '@kbn/journeys';
 import { subj } from '@kbn/test-subj-selector';
 
@@ -42,6 +43,7 @@ export const journey = new Journey({
 
   .step('Go to Promotion Tracking Dashboard', async ({ page }) => {
     await page
+      .locator(subj(CONTENT_LIST_TEST_SUBJECTS.table))
       .getByRole('link', {
         name: 'Promotion Dashboard',
         exact: true,

@@ -1183,8 +1183,14 @@ export class DashboardApp {
   // Dashboard Listing
   // ============================================================
 
+  // Scoped to the listing table because the chrome's "Recently viewed" nav renders links with the
+  // same accessible name. The subject mirrors `CONTENT_LIST_TEST_SUBJECTS.table` from `@kbn/content-list-common` but
+  // isn't imported because `@kbn/scout` is on the Scout selective-testing critical path and must
+  // not depend on that package (see `content_list.ts` for the same treatment).
   getDashboardListingLink(title: string) {
-    return this.page.getByRole('link', { name: title, exact: true });
+    return this.page.testSubj
+      .locator('content-list-table')
+      .getByRole('link', { name: title, exact: true });
   }
 
   // Project (chrome-next) shows the dashboard title in the app header; classic chrome shows it as
