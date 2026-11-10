@@ -6,7 +6,7 @@
  */
 
 import type { FormEvent } from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiText,
@@ -132,12 +132,19 @@ export function FieldValueSelection({
   const valuesKey = JSON.stringify(values);
   const selectedValueKey = JSON.stringify(selectedValue);
 
+  const previousSelectedValueKey = useRef(selectedValueKey);
+
   useEffect(() => {
+    const selectionChanged = previousSelectedValueKey.current !== selectedValueKey;
+    previousSelectedValueKey.current = selectedValueKey;
+
     setOptions((current) => {
       // A suggestions refetch while the popover is open would otherwise rebuild
       // `options` from props and wipe in-progress checks (and, without the
-      // selectedValue union above, drop tags missing from the new list).
-      if ((isPopoverOpen || forceOpen) && current.length > 0) {
+      // selectedValue union above, drop tags missing from the new list). A changed
+      // applied selection must still win, otherwise a selection that lands after
+      // the popover opened leaves the list stuck on the old checks.
+      if ((isPopoverOpen || forceOpen) && current.length > 0 && !selectionChanged) {
         return current;
       }
       return formatOptions(values, selectedValue, excludedValue, showCount);

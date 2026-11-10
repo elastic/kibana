@@ -105,4 +105,36 @@ describe('FieldValueSelection', () => {
       { label: 'a', checked: 'on' },
     ]);
   });
+
+  it('checks newly applied selections that arrive while the popover is open', () => {
+    const renderSelection = (selectedValue: string[]) => (
+      <FieldValueSelection
+        label="Tags"
+        values={[
+          { label: 'a', count: 1 },
+          { label: 'b', count: 1 },
+        ]}
+        onChange={() => {}}
+        selectedValue={selectedValue}
+        loading={false}
+        setQuery={() => {}}
+      />
+    );
+    const wrapper = mount(<EuiThemeProvider>{renderSelection([])}</EuiThemeProvider>);
+
+    wrapper.find('button[data-test-subj="fieldValueSelectionBtn"]').simulate('click');
+    wrapper.setProps({ children: renderSelection(['a', 'b']) });
+    wrapper.update();
+
+    const visibleOptions = (wrapper.find(EuiSelectableList).props() as any)
+      .visibleOptions as Array<{
+      label: string;
+      checked?: string;
+    }>;
+
+    expect(visibleOptions.map(({ label, checked }) => ({ label, checked }))).toEqual([
+      { label: 'a', checked: 'on' },
+      { label: 'b', checked: 'on' },
+    ]);
+  });
 });
