@@ -37,7 +37,12 @@ import { IconSelect } from './icon_select';
 
 test('Should render icon select', () => {
   const component = shallow(
-    <IconSelect customIcons={[]} icon={{ value: 'symbol1' }} onChange={() => {}} />
+    <IconSelect
+      customIcons={[]}
+      icon={{ value: 'symbol1' }}
+      onChange={() => {}}
+      onCustomIconsChange={() => {}}
+    />
   );
 
   expect(component).toMatchSnapshot();
@@ -62,6 +67,8 @@ test('Should render icon select with custom icons', () => {
           radius: 0.15,
         },
       ]}
+      onChange={() => {}}
+      onCustomIconsChange={() => {}}
       icon={{
         value: '__kbn__custom_icon_sdf__foobar',
         svg: '<svg width="200" height="250" xmlns="http://www.w3.org/2000/svg"><path stroke="#000" fill="transparent" stroke-width="5" d="M10 10h30v30H10z"/></svg>',

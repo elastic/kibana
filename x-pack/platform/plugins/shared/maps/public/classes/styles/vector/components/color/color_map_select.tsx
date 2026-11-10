@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ChangeEvent } from 'react';
+import type { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
 import {
@@ -14,18 +16,47 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ColorStopsOrdinal } from './color_stops_ordinal';
 import { COLOR_MAP_TYPE } from '../../../../../../common/constants';
+import type {
+  CategoryColorStop,
+  OrdinalColorStop,
+} from '../../../../../../common/descriptor_types';
+import type { DynamicColorProperty } from '../../properties/dynamic_color_property';
 import { ColorStopsCategorical } from './color_stops_categorical';
 import { CATEGORICAL_COLOR_PALETTES, NUMERICAL_COLOR_PALETTES } from '../../../color_palettes';
-import { i18n } from '@kbn/i18n';
 
 const CUSTOM_COLOR_MAP = 'CUSTOM_COLOR_MAP';
 
-export class ColorMapSelect extends Component {
-  state = {};
+interface Props {
+  colorMapType: COLOR_MAP_TYPE;
+  colorPaletteId?: string;
+  customColorMap?: OrdinalColorStop[] | CategoryColorStop[];
+  invert: boolean;
+  isCustomOnly: boolean;
+  onChange: (params: {
+    color?: string | null;
+    customColorMap?: OrdinalColorStop[] | CategoryColorStop[];
+    type: COLOR_MAP_TYPE;
+    useCustomColorMap: boolean;
+  }) => void;
+  onColorMapTypeChange: (event: ChangeEvent<HTMLSelectElement>) => void;
+  showColorMapTypeToggle: boolean;
+  styleProperty: DynamicColorProperty;
+  swatches: string[];
+  useCustomColorMap: boolean;
+}
 
-  static getDerivedStateFromProps(nextProps, prevState) {
+interface State {
+  customColorMap?: OrdinalColorStop[] | CategoryColorStop[];
+  prevPropsCustomColorMap?: OrdinalColorStop[] | CategoryColorStop[];
+}
+
+export class ColorMapSelect extends Component<Props, State> {
+  state: State = {};
+
+  static getDerivedStateFromProps(nextProps: Props, prevState: State) {
     if (nextProps.customColorMap === prevState.prevPropsCustomColorMap) {
       return null;
     }
@@ -73,7 +104,7 @@ export class ColorMapSelect extends Component {
     );
   }
 
-  _onColorPaletteSelect = (selectedPaletteId) => {
+  _onColorPaletteSelect = (selectedPaletteId: string) => {
     const useCustomColorMap = selectedPaletteId === CUSTOM_COLOR_MAP;
     this.props.onChange({
       color: useCustomColorMap ? null : selectedPaletteId,
@@ -82,7 +113,13 @@ export class ColorMapSelect extends Component {
     });
   };
 
-  _onCustomColorMapChange = ({ colorStops, isInvalid }) => {
+  _onCustomColorMapChange = ({
+    colorStops,
+    isInvalid,
+  }: {
+    colorStops: OrdinalColorStop[] | CategoryColorStop[];
+    isInvalid: boolean;
+  }) => {
     // Manage invalid custom color map in local state
     if (isInvalid) {
       this.setState({ customColorMap: colorStops });
@@ -91,7 +128,7 @@ export class ColorMapSelect extends Component {
 
     this.props.onChange({
       useCustomColorMap: true,
-      customColorMap: colorStops,
+      customColorMap: colorStops as OrdinalColorStop[] | CategoryColorStop[],
       type: this.props.colorMapType,
     });
   };
@@ -101,20 +138,21 @@ export class ColorMapSelect extends Component {
       return null;
     }
 
+    const field = this.props.styleProperty.getField();
     let colorStopEditor;
     if (this.props.colorMapType === COLOR_MAP_TYPE.ORDINAL) {
       colorStopEditor = (
         <ColorStopsOrdinal
-          colorStops={this.state.customColorMap}
+          colorStops={this.state.customColorMap as OrdinalColorStop[] | undefined}
           onChange={this._onCustomColorMapChange}
           swatches={this.props.swatches}
         />
       );
-    } else {
+    } else if (field) {
       colorStopEditor = (
         <ColorStopsCategorical
-          colorStops={this.state.customColorMap}
-          field={this.props.styleProperty.getField()}
+          colorStops={this.state.customColorMap as CategoryColorStop[] | undefined}
+          field={field}
           getValueSuggestions={this.props.styleProperty.getValueSuggestions}
           onChange={this._onCustomColorMapChange}
           swatches={this.props.swatches}
@@ -176,7 +214,7 @@ export class ColorMapSelect extends Component {
           {toggle}
           <EuiFlexItem>
             <EuiColorPalettePicker
-              palettes={palettesWithCustom}
+              palettes={palettesWithCustom as EuiColorPalettePickerPaletteProps[]}
               onChange={this._onColorPaletteSelect}
               valueOfSelected={
                 this.props.useCustomColorMap ? CUSTOM_COLOR_MAP : this.props.colorPaletteId

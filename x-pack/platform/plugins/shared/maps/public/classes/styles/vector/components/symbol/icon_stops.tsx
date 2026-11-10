@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import type { ReactElement } from 'react';
 import React from 'react';
-import { DEFAULT_ICON, ICON_SOURCE } from '../../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
-import { OTHER_CATEGORY_LABEL } from '../../style_util';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -17,20 +16,24 @@ import {
   EuiFieldText,
   EuiToolTip,
 } from '@elastic/eui';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { DEFAULT_ICON, ICON_SOURCE } from '../../../../../../common/constants';
+import { OTHER_CATEGORY_LABEL } from '../../style_util';
 import { IconSelect } from './icon_select';
 import { StopInput } from '../stop_input';
 import { getMakiSymbol, PREFERRED_ICONS, SYMBOL_OPTIONS } from '../../symbol_utils';
+import type { IconStop, CustomIcon } from '../../../../../../common/descriptor_types';
+import type { IField } from '../../../../fields/field';
 import { mapColorStopsStyles } from '../map_color_stops.styles';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
-function isDuplicateStop(targetStop, iconStops) {
+function isDuplicateStop(targetStop: string | null, iconStops: IconStop[]) {
   const stops = iconStops.filter(({ stop }) => {
     return targetStop === stop;
   });
   return stops.length > 1;
 }
 
-export function getFirstUnusedSymbol(iconStops) {
+export function getFirstUnusedSymbol(iconStops: IconStop[]) {
   const firstUnusedPreferredIconId = PREFERRED_ICONS.find((iconId) => {
     const isSymbolBeingUsed = iconStops.some(({ icon }) => {
       return icon === iconId;
@@ -52,6 +55,15 @@ export function getFirstUnusedSymbol(iconStops) {
   return firstUnusedSymbol ? firstUnusedSymbol.value : DEFAULT_ICON;
 }
 
+interface Props {
+  field: IField;
+  getValueSuggestions: (query: string) => Promise<string[]>;
+  iconStops: IconStop[];
+  onChange: (params: { customStops: IconStop[]; isInvalid?: boolean }) => void;
+  onCustomIconsChange: (customIcons: CustomIcon[]) => void;
+  customIcons: CustomIcon[];
+}
+
 export function IconStops({
   field,
   getValueSuggestions,
@@ -59,17 +71,17 @@ export function IconStops({
   onChange,
   onCustomIconsChange,
   customIcons,
-}) {
+}: Props) {
   const styles = useMemoCss(mapColorStopsStyles);
   return iconStops
-    .map(({ stop, icon, iconSource }, index) => {
+    .map(({ stop, icon, iconSource }, index): ReactElement | undefined => {
       const iconInfo =
         iconSource === ICON_SOURCE.CUSTOM
           ? customIcons.find(({ symbolId }) => symbolId === icon)
           : getMakiSymbol(icon);
       if (iconInfo === undefined) return;
       const { svg, label } = iconInfo;
-      const onIconSelect = ({ selectedIconId }) => {
+      const onIconSelect = ({ selectedIconId }: { selectedIconId: string }) => {
         const newIconStops = [...iconStops];
         newIconStops[index] = {
           ...iconStops[index],
@@ -77,7 +89,7 @@ export function IconStops({
         };
         onChange({ customStops: newIconStops });
       };
-      const onStopChange = (newStopValue) => {
+      const onStopChange = (newStopValue: string) => {
         const newIconStops = [...iconStops];
         newIconStops[index] = {
           ...iconStops[index],
@@ -140,7 +152,7 @@ export function IconStops({
         </div>
       );
 
-      const errors = [];
+      const errors: string[] = [];
       // TODO check for duplicate values and add error messages here
 
       const stopInput =
@@ -156,7 +168,7 @@ export function IconStops({
             key={field.getName()} // force new component instance when field changes
             field={field}
             getValueSuggestions={getValueSuggestions}
-            value={stop}
+            value={stop ?? ''}
             onChange={onStopChange}
           />
         );
@@ -186,7 +198,7 @@ export function IconStops({
         </EuiFormRow>
       );
     })
-    .filter((stop) => {
+    .filter((stop): stop is ReactElement => {
       return stop !== undefined;
     });
 }

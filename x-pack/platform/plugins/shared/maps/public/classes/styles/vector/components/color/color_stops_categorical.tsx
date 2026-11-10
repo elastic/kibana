@@ -6,16 +6,37 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
+import { i18n } from '@kbn/i18n';
+import type { CategoryColorStop } from '../../../../../../common/descriptor_types';
 import {
   addCategoricalRow,
   isCategoricalStopsInvalid,
   DEFAULT_CUSTOM_COLOR,
 } from './color_stops_utils';
-import { i18n } from '@kbn/i18n';
 import { ColorStops } from './color_stops';
 import { StopInput } from '../stop_input';
+import type { IField } from '../../../../fields/field';
+
+interface Props {
+  /**
+   * Array of { stop, color }.
+   * Stops are any strings
+   * Stops cannot include duplicates
+   * Colors are color hex strings (3 or 6 character).
+   */
+  colorStops?: CategoryColorStop[];
+  field: IField;
+  /**
+   * Callback for when the color stops changes. Called with { colorStops, isInvalid }
+   */
+  onChange: (params: { colorStops: CategoryColorStop[]; isInvalid: boolean }) => void;
+  /**
+   * Callback for fetching stop value suggestions. Called with query.
+   */
+  getValueSuggestions: (query: string) => Promise<string[]>;
+  swatches?: string[];
+}
 
 export const ColorStopsCategorical = ({
   colorStops = [{ stop: '', color: DEFAULT_CUSTOM_COLOR }],
@@ -23,8 +44,8 @@ export const ColorStopsCategorical = ({
   onChange,
   getValueSuggestions,
   swatches,
-}) => {
-  const getStopError = (stop, index) => {
+}: Props) => {
+  const getStopError = (stop: CategoryColorStop['stop'], index: number) => {
     let count = 0;
     for (let i = 1; i < colorStops.length; i++) {
       if (colorStops[i].stop === stop && i !== index) {
@@ -39,7 +60,11 @@ export const ColorStopsCategorical = ({
       : null;
   };
 
-  const renderStopInput = (stop, onStopChange, index) => {
+  const renderStopInput = (
+    stop: CategoryColorStop['stop'],
+    onStopChange: (newStopValue: CategoryColorStop['stop']) => void,
+    index: number
+  ) => {
     const stopValue = typeof stop === 'string' ? stop : '';
     return (
       <StopInput
@@ -54,7 +79,7 @@ export const ColorStopsCategorical = ({
   };
 
   return (
-    <ColorStops
+    <ColorStops<CategoryColorStop>
       onChange={onChange}
       colorStops={colorStops}
       isStopsInvalid={isCategoricalStopsInvalid}
@@ -64,27 +89,4 @@ export const ColorStopsCategorical = ({
       swatches={swatches}
     />
   );
-};
-
-ColorStopsCategorical.propTypes = {
-  /**
-   * Array of { stop, color }.
-   * Stops are any strings
-   * Stops cannot include duplicates
-   * Colors are color hex strings (3 or 6 character).
-   */
-  colorStops: PropTypes.arrayOf(
-    PropTypes.shape({
-      stopKey: PropTypes.number,
-      color: PropTypes.string,
-    })
-  ),
-  /**
-   * Callback for when the color stops changes. Called with { colorStops, isInvalid }
-   */
-  onChange: PropTypes.func.isRequired,
-  /**
-   * Callback for fetching stop value suggestions. Called with query.
-   */
-  getValueSuggestions: PropTypes.func.isRequired,
 };
