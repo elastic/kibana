@@ -114,6 +114,7 @@ describe('useFetchInvestigations', () => {
           sort_field: 'created_at',
           sort_order: 'desc',
           in_progress: false,
+          status: 'open',
           page: 1,
           per_page: INVESTIGATIONS_PAGE_SIZE,
           severity: ['high'],

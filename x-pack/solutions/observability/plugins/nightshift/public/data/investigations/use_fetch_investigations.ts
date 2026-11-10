@@ -117,8 +117,10 @@ export const useFetchInvestigations = ({
           sort_field: 'created_at',
           sort_order: 'desc',
           in_progress: inProgress,
+          // Home sections and tiles are open-only; closed finished work is out of scope here.
+          status: 'open',
           ...(inProgress
-            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES, status: 'open' }
+            ? { page: 1, per_page: IN_PROGRESS_CANDIDATES }
             : {
                 page: typeof pageParam === 'number' ? pageParam : 1,
                 per_page: INVESTIGATIONS_PAGE_SIZE,

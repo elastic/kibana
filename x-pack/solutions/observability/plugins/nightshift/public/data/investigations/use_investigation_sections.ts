@@ -107,8 +107,8 @@ export const useInvestigationSections = ({
   const notRated = useFetchInvestigations({ inProgress: false, severities: ['none'], query });
 
   // A running investigation starts at medium and its severity can still change, so it is not
-  // counted under a tier until it finishes — same as the sections below. Open-only so closed
-  // finished work does not drive the hero "needs you" count or the status dot.
+  // counted under a tier until it finishes — same as the sections below. Open-only so tiles,
+  // section lists, and the hero "needs you" / status dot stay aligned.
   const severityCountsQuery = useQuery({
     queryKey: [...NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY, 'severityCounts', query],
     enabled: agenticInvestigations != null,

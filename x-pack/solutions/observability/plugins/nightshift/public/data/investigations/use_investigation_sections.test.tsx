@@ -68,16 +68,20 @@ const isCritical = ({ severities }: FetchInvestigationsParams) => severities?.[0
 const withInProgress =
   ({
     ids,
+    total,
+    matchTotal,
     isPreviousData,
     refetchCritical,
   }: {
     ids: string[];
+    total?: number;
+    matchTotal?: number;
     isPreviousData?: boolean;
     refetchCritical: jest.Mock;
   }) =>
   (params: FetchInvestigationsParams) => {
     if (params.inProgress) {
-      return sectionResult({ ids, isPreviousData });
+      return sectionResult({ ids, total, matchTotal, isPreviousData });
     }
     if (isCritical(params)) {
       return sectionResult({ total: 3, refetch: refetchCritical });
@@ -200,6 +204,34 @@ describe('useInvestigationSections', () => {
     // One finished as another started: the total stays flat, but an id left.
     mockUseFetchInvestigations.mockImplementation(
       withInProgress({ ids: ['running-b', 'running-c'], refetchCritical })
+    );
+    rerender({ query: undefined });
+
+    expect(refetchCritical).toHaveBeenCalledTimes(1);
+  });
+
+  it('refetches when the API total drops even if the capped loaded rows stay the same', () => {
+    const refetchCritical = jest.fn();
+    const cappedIds = Array.from({ length: 20 }, (_, index) => `running-${index}`);
+    mockUseFetchInvestigations.mockImplementation(
+      withInProgress({
+        ids: cappedIds,
+        total: cappedIds.length,
+        matchTotal: 21,
+        refetchCritical,
+      })
+    );
+    const { rerender } = renderSections();
+    expect(refetchCritical).not.toHaveBeenCalled();
+
+    // A finish past the loaded window shrinks matchTotal without changing the capped page.
+    mockUseFetchInvestigations.mockImplementation(
+      withInProgress({
+        ids: cappedIds,
+        total: cappedIds.length,
+        matchTotal: 20,
+        refetchCritical,
+      })
     );
     rerender({ query: undefined });
 
