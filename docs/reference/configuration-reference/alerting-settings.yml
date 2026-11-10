@@ -260,7 +260,8 @@ groups:
         default: true
         applies_to:
           stack: preview 9.6+
-          self: preview 9.6+
+          self: preview
+          serverless: unavailable
 
       - setting: xpack.actions.microsoftExchangeUrl
         description: |
