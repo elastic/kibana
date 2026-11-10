@@ -15,11 +15,7 @@ import type {
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
-import {
-  VEGA_API_ENABLED_FLAG,
-  VEGA_EMBEDDABLE_TYPE,
-  VEGA_STANDALONE_EMBEDDABLE_FLAG,
-} from '../common/constants';
+import { VEGA_AS_CODE_ENABLED_FLAG, VEGA_EMBEDDABLE_TYPE } from '../common/constants';
 import { getVegaEmbeddableSchema } from './embeddable/schema';
 import { getTransforms } from './embeddable/transforms';
 import { vegaLibraryItemSavedObjectType } from './vega_saved_object';
@@ -43,17 +39,14 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
     void core
       .getStartServices()
       .then(async ([{ featureFlags }]) => {
-        const [standaloneEmbeddableEnabled, apiEnabled] = await Promise.all([
-          firstValueFrom(featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)),
-          firstValueFrom(featureFlags.getBooleanValue$(VEGA_API_ENABLED_FLAG, false)),
-        ]);
+        const asCodeEnabled = await firstValueFrom(
+          featureFlags.getBooleanValue$(VEGA_AS_CODE_ENABLED_FLAG, false)
+        );
         embeddable.registerEmbeddableServerDefinition(VEGA_EMBEDDABLE_TYPE, {
           title: 'Vega',
           getTransforms: (drilldownTransforms) => getTransforms(drilldownTransforms, this.logger),
           getSchema: (getDrilldownsSchema) =>
-            standaloneEmbeddableEnabled
-              ? getVegaEmbeddableSchema(getDrilldownsSchema, apiEnabled)
-              : undefined,
+            asCodeEnabled ? getVegaEmbeddableSchema(getDrilldownsSchema) : undefined,
         });
       })
       .catch((error) => {

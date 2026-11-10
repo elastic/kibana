@@ -29,7 +29,7 @@ import { getMockPresentationContainer } from '@kbn/presentation-publishing/inter
 import { ON_APPLY_FILTER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { VegaRenderDescriptor } from '../data_model/types';
 import type { VegaPluginStartDependencies, VegaVisualizationDependencies } from '../plugin';
-import { VEGA_EMBEDDABLE_TYPE, VEGA_STANDALONE_EMBEDDABLE_FLAG } from '../../common/constants';
+import { VEGA_AS_CODE_ENABLED_FLAG, VEGA_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaEvent, VegaEventHandler } from '../types';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
@@ -149,27 +149,24 @@ describe('vegaEmbeddableFactory', () => {
   let coreStart = coreMock.createStart();
 
   const buildEmbeddable = async ({
-    standaloneEmbeddableEnabled = false,
-    isLibraryEnabled = false,
+    asCodeEnabled = false,
     spec = { format: 'hjson' as const, value: '{ mark: point }' },
     filters,
     initialState = { spec, filters, title: 'Initial title' },
   }: {
-    standaloneEmbeddableEnabled?: boolean;
-    isLibraryEnabled?: boolean;
+    asCodeEnabled?: boolean;
     spec?: VegaByValueState['spec'];
     filters?: VegaByValueState['filters'];
     initialState?: VegaEmbeddableState;
   } = {}) => {
     coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
-      of(key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? standaloneEmbeddableEnabled : fallback)
+      of(key === VEGA_AS_CODE_ENABLED_FLAG ? asCodeEnabled : fallback)
     );
     const factory = vegaEmbeddableFactory(coreStart, {
       uiActions: { executeTriggerActions },
       SearchBar: (() => null) as VegaPluginStartDependencies['unifiedSearch']['ui']['SearchBar'],
       visualizationDependencies,
       libraryEditorDependencies: {} as VegaPluginStartDependencies,
-      isLibraryEnabled,
     });
     const uuid = 'vega-panel';
 
@@ -291,9 +288,9 @@ describe('vegaEmbeddableFactory', () => {
     [true, true],
     [false, false],
   ] as const)(
-    'gates JSON export on the standalone embeddable flag (enabled=%s)',
-    async (standaloneEmbeddableEnabled, supportsJsonExport) => {
-      const { api } = await buildEmbeddable({ standaloneEmbeddableEnabled });
+    'gates JSON export on the as code flag (enabled=%s)',
+    async (asCodeEnabled, supportsJsonExport) => {
+      const { api } = await buildEmbeddable({ asCodeEnabled });
       expect(api.supportsJsonExport).toBe(supportsJsonExport);
     }
   );
@@ -750,7 +747,7 @@ describe('vegaEmbeddableFactory', () => {
     const buildByReference = (initialState: Partial<VegaByReferenceState> = {}) => {
       coreStart.http.get.mockResolvedValue({ id: 'library-item', data: libraryItem, meta: {} });
       return buildEmbeddable({
-        isLibraryEnabled: true,
+        asCodeEnabled: true,
         initialState: { ref_id: 'library-item', ...initialState },
       });
     };
@@ -785,7 +782,7 @@ describe('vegaEmbeddableFactory', () => {
       coreStart.http.get.mockRejectedValue({ response: { status: 404 } });
 
       await expect(
-        buildEmbeddable({ isLibraryEnabled: true, initialState: { ref_id: 'missing' } })
+        buildEmbeddable({ asCodeEnabled: true, initialState: { ref_id: 'missing' } })
       ).rejects.toThrow(SavedObjectNotFound);
     });
 
@@ -799,7 +796,7 @@ describe('vegaEmbeddableFactory', () => {
       coreStart.http.post.mockResolvedValue({ id: 'new-item' });
       const query = { language: 'kql' as const, expression: 'response : 404' };
       const { api } = await buildEmbeddable({
-        isLibraryEnabled: true,
+        asCodeEnabled: true,
         initialState: { spec: libraryItem.spec, query, filters: [panelFilter], title: 'Panel' },
       });
 

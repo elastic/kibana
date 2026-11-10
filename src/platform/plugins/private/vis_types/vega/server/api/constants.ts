@@ -25,7 +25,7 @@ export const commonRouteConfig = {
       stability: 'experimental',
       since: '9.6.0',
     },
-    // Remove when the VEGA_API_ENABLED_FLAG feature flag is removed.
+    // Remove when the VEGA_AS_CODE_ENABLED_FLAG feature flag is removed.
     excludeFromOAS: true,
   },
   security: {

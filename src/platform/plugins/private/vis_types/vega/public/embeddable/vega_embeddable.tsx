@@ -68,7 +68,7 @@ import {
 } from '@kbn/presentation-publishing';
 import {
   VEGA_EMBEDDABLE_TYPE,
-  VEGA_STANDALONE_EMBEDDABLE_FLAG,
+  VEGA_AS_CODE_ENABLED_FLAG,
   VEGA_SUPPORTED_TRIGGERS,
 } from '../../common/constants';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
@@ -117,7 +117,7 @@ interface VegaRenderInput {
  * API of the dedicated Dashboard Vega panel. The panel stores its spec by value, or references a
  * Vega library item.
  *
- * When `vega.standaloneEmbeddable` is enabled, the server registers a schema for this type so it
+ * When `vega.asCodeEnabled` is enabled, the server registers a schema for this type so it
  * participates in public dashboards-as-code validation and OpenAPI generation.
  */
 export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaEmbeddableState> &
@@ -162,8 +162,6 @@ interface VegaEmbeddableDependencies {
     VegaPluginStartDependencies,
     'dataViews' | 'unifiedSearch' | 'savedObjectsTaggingOss'
   >;
-  /** Whether panels can be linked to and unlinked from the library. */
-  isLibraryEnabled: boolean;
 }
 
 export const vegaEmbeddableFactory = (
@@ -178,6 +176,10 @@ export const vegaEmbeddableFactory = (
     parentApi,
     uuid,
   }) => {
+    // Read once per panel, so its library actions and JSON export match the server schema.
+    const asCodeEnabled = await firstValueFrom(
+      core.featureFlags.getBooleanValue$(VEGA_AS_CODE_ENABLED_FLAG, false)
+    );
     const libraryClient = createVegaLibraryClient(core.http);
     // Linking and unlinking replace the panel, so a panel stays by value or by reference.
     const libraryId = isVegaByReferenceState(initialState) ? initialState.ref_id : undefined;
@@ -401,7 +403,7 @@ export const vegaEmbeddableFactory = (
       isEditingEnabled: () => true,
       defaultTitle$,
       defaultDescription$,
-      ...(deps.isLibraryEnabled && libraryTransforms),
+      ...(asCodeEnabled && libraryTransforms),
       getEditPanel,
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         if (isByReference) {
@@ -437,9 +439,7 @@ export const vegaEmbeddableFactory = (
       getInspectorAdapters: () => inspectorAdapters,
       // Only when the flag is on: the public dashboards-as-code schema is registered then, so
       // exported JSON can be round-tripped through the REST API.
-      supportsJsonExport: await firstValueFrom(
-        core.featureFlags.getBooleanValue$(VEGA_STANDALONE_EMBEDDABLE_FLAG, false)
-      ),
+      supportsJsonExport: asCodeEnabled,
     });
 
     // Identities must be stable: `VegaVisComponent` rebuilds its Vega view whenever `fireEvent`
