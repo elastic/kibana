@@ -1,0 +1,288 @@
+{
+  "sha1": "db126febd4a306befbbc1fba297150c290813232",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "7d76a4965515cc3-6c2066aacf208d3",
+      "title": "POST /api/short_url creates a short URL with locator data only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/create_short_url.spec.ts",
+        "line": 36,
+        "column": 11
+      }
+    },
+    {
+      "id": "7d76a4965515cc3-12c5e425ec1855c",
+      "title": "POST /api/short_url creates a short URL with locator params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/create_short_url.spec.ts",
+        "line": 42,
+        "column": 22
+      }
+    },
+    {
+      "id": "7d76a4965515cc3-c2077abc1c1aa2a",
+      "title": "POST /api/short_url creates a short URL with a custom slug",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/create_short_url.spec.ts",
+        "line": 58,
+        "column": 96
+      }
+    },
+    {
+      "id": "7d76a4965515cc3-2933e212577c3d8",
+      "title": "POST /api/short_url returns 400 when the slug contains invalid characters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/create_short_url.spec.ts",
+        "line": 75,
+        "column": 95
+      }
+    },
+    {
+      "id": "7d76a4965515cc3-1de36d210eb0be6",
+      "title": "POST /api/short_url returns 409 when the slug already exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/create_short_url.spec.ts",
+        "line": 86,
+        "column": 7
+      }
+    },
+    {
+      "id": "6b915a6ea2ef7b1-abe0bec30cfe9e3",
+      "title": "DELETE /api/short_url/{id} deletes a short URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/delete_short_url.spec.ts",
+        "line": 20,
+        "column": 30
+      }
+    },
+    {
+      "id": "6b915a6ea2ef7b1-1eb6b5feed0e02a",
+      "title": "DELETE /api/short_url/{id} returns 404 when deleting an already deleted short URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/delete_short_url.spec.ts",
+        "line": 38,
+        "column": 12
+      }
+    },
+    {
+      "id": "6b915a6ea2ef7b1-d8a88a015ccadd0",
+      "title": "DELETE /api/short_url/{id} returns 404 when deleting a short URL that does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/delete_short_url.spec.ts",
+        "line": 58,
+        "column": 18
+      }
+    },
+    {
+      "id": "4399361c9bc3128-245cebcb22b5fa8",
+      "title": "GET /api/short_url/{id} fetches a newly created short URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/get_short_url.spec.ts",
+        "line": 20,
+        "column": 11
+      }
+    },
+    {
+      "id": "4399361c9bc3128-5dacd797fba44c0",
+      "title": "GET /api/short_url/{id} returns 404 when the short URL does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/get_short_url.spec.ts",
+        "line": 25,
+        "column": 90
+      }
+    },
+    {
+      "id": "4399361c9bc3128-d1f3b7dd6281256",
+      "title": "GET /api/short_url/{id} converts a legacy short URL saved object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/get_short_url.spec.ts",
+        "line": 33,
+        "column": 22
+      }
+    },
+    {
+      "id": "366db44d3c2ba82-6e32cf9074142e4",
+      "title": "GET /api/short_url/_slug/{slug} resolves a short URL by its slug",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/resolve_short_url.spec.ts",
+        "line": 20,
+        "column": 30
+      }
+    },
+    {
+      "id": "366db44d3c2ba82-38af666584dbd4c",
+      "title": "GET /api/short_url/_slug/{slug} returns 404 when the slug does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/resolve_short_url.spec.ts",
+        "line": 28,
+        "column": 16
+      }
+    },
+    {
+      "id": "366db44d3c2ba82-0243c9a1426f6a0",
+      "title": "GET /api/short_url/_slug/{slug} resolves similar slugs exactly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/share/test/scout/api/tests/resolve_short_url.spec.ts",
+        "line": 36,
+        "column": 14
+      }
+    }
+  ]
+}

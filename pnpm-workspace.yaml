@@ -32,8 +32,6 @@ allowBuilds:
   'core-js': false # donation banner
   'core-js-pure': false # donation banner
   'es5-ext': false # prints an informational message
-  'lmdb': false # native bindings; prebuilds are sufficient
-  'msgpackr-extract': false # native bindings; prebuilds are sufficient
   'msw': false # copies a worker script if configured; unused
   'nice-napi': false # optional piscina nice-value helper
   'node-liblzma': false # optional native dep of just-bash; lazy-loads with fallback
@@ -45,11 +43,11 @@ allowBuilds:
 # deprecated `$@elastic/esql` override syntax). Must match `@elastic/esql` in
 # package.json; the renovate `esql-js` group bumps them together.
 catalog:
-  '@elastic/esql-definitions': '4.36.0'
-  '@elastic/esql-grammar': '4.36.0'
-  '@elastic/esql-promql-grammar': '4.36.0'
-  '@elastic/esql-types': '4.36.0'
-  '@elastic/pretty-printer': '4.36.0'
+  '@elastic/esql-definitions': '4.38.0'
+  '@elastic/esql-grammar': '4.38.0'
+  '@elastic/esql-promql-grammar': '4.38.0'
+  '@elastic/esql-types': '4.38.0'
+  '@elastic/pretty-printer': '4.38.0'
 overrides:
   # Generated from package.json#resolutions by `kbn bootstrap` — edit
   # resolutions, not this block (yarn keys are mapped: `**/a` -> `a`, `a/b` -> `a>b`).
@@ -871,6 +869,7 @@ packages:
   - 'src/platform/packages/shared/kbn-management/settings/components/field_row'
   - 'src/platform/packages/shared/kbn-management/settings/components/form'
   - 'src/platform/packages/shared/kbn-management/settings/field_definition'
+  - 'src/platform/packages/shared/kbn-management/settings/hooks'
   - 'src/platform/packages/shared/kbn-management/settings/section_registry'
   - 'src/platform/packages/shared/kbn-management/settings/setting_ids'
   - 'src/platform/packages/shared/kbn-management/settings/types'
@@ -881,6 +880,7 @@ packages:
   - 'src/platform/packages/shared/kbn-object-versioning'
   - 'src/platform/packages/shared/kbn-object-versioning-utils'
   - 'src/platform/packages/shared/kbn-occ'
+  - 'src/platform/packages/shared/kbn-ols'
   - 'src/platform/packages/shared/kbn-openapi-bundler'
   - 'src/platform/packages/shared/kbn-openapi-common'
   - 'src/platform/packages/shared/kbn-openapi-generator'
@@ -1309,6 +1309,7 @@ packages:
   - 'x-pack/platform/packages/shared/kbn-change-history-ui'
   - 'x-pack/platform/packages/shared/kbn-classic-stream-flyout'
   - 'x-pack/platform/packages/shared/kbn-content-packs-schema'
+  - 'x-pack/platform/packages/shared/kbn-content-sanitization'
   - 'x-pack/platform/packages/shared/kbn-data-forge'
   - 'x-pack/platform/packages/shared/kbn-data-lifecycle-phases'
   - 'x-pack/platform/packages/shared/kbn-dissect-heuristics'
@@ -1536,23 +1537,18 @@ packages:
   - 'x-pack/platform/plugins/shared/triggers_actions_ui'
   - 'x-pack/platform/plugins/shared/usage_api'
   - 'x-pack/platform/test'
-  - 'x-pack/platform/test/agent_builder_sml/plugins/sml_test_types'
   - 'x-pack/platform/test/alerting_api_integration/common/plugins/aad'
   - 'x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators'
   - 'x-pack/platform/test/alerting_api_integration/common/plugins/alerts'
   - 'x-pack/platform/test/alerting_api_integration/common/plugins/alerts_restricted'
   - 'x-pack/platform/test/alerting_api_integration/common/plugins/task_manager_fixture'
   - 'x-pack/platform/test/alerting_api_integration/packages/helpers'
-  - 'x-pack/platform/test/cases_api_integration/common/plugins/cases'
-  - 'x-pack/platform/test/cases_api_integration/common/plugins/observability'
-  - 'x-pack/platform/test/cases_api_integration/common/plugins/security_solution'
   - 'x-pack/platform/test/cloud_integration/plugins/saml_provider'
   - 'x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin'
   - 'x-pack/platform/test/functional_cors/plugins/kibana_cors_test'
   - 'x-pack/platform/test/functional_embedded/plugins/iframe_embedded'
   - 'x-pack/platform/test/functional_execution_context/plugins/alerts'
   - 'x-pack/platform/test/functional_with_es_ssl/plugins/alerts'
-  - 'x-pack/platform/test/functional_with_es_ssl/plugins/cases'
   - 'x-pack/platform/test/licensing_plugin/plugins/test_feature_usage'
   - 'x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client'
   - 'x-pack/platform/test/plugin_api_integration/plugins/event_log'
@@ -1577,6 +1573,11 @@ packages:
   - 'x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin'
   - 'x-pack/platform/test/usage_collection/plugins/application_usage_test'
   - 'x-pack/platform/test/usage_collection/plugins/stack_management_usage_test'
+  - 'x-pack/platform/test_plugins/agent_builder_sml_test_types'
+  - 'x-pack/platform/test_plugins/security_investigations/cases_api_integration/cases'
+  - 'x-pack/platform/test_plugins/security_investigations/cases_api_integration/observability'
+  - 'x-pack/platform/test_plugins/security_investigations/cases_api_integration/security_solution'
+  - 'x-pack/platform/test_plugins/security_investigations/functional_with_es_ssl/cases'
   - 'x-pack/solutions/observability/packages/alert-details'
   - 'x-pack/solutions/observability/packages/alerting-test-data'
   - 'x-pack/solutions/observability/packages/get-padded-alert-time-range-util'
@@ -1723,9 +1724,9 @@ packages:
   - 'x-pack/solutions/security/plugins/session_view'
   - 'x-pack/solutions/security/plugins/timelines'
   - 'x-pack/solutions/security/test'
-  - 'x-pack/solutions/security/test/plugin_functional/plugins/resolver_test'
   - 'x-pack/solutions/security/test/security_solution_endpoint'
   - 'x-pack/solutions/security/test_helpers/detections-response-ftr-services'
+  - 'x-pack/solutions/security/test_plugins/resolver_test'
   - 'x-pack/solutions/security/test_suites/test-suites-security-solution-apis'
   - 'x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding'
   - 'x-pack/solutions/vectordb/plugins/serverless_vectordb'

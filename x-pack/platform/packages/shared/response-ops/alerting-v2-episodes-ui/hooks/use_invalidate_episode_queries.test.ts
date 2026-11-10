@@ -38,6 +38,7 @@ describe('useInvalidateEpisodeQueries', () => {
         queryKeys.episodeDataAll(),
         queryKeys.tagSuggestionsAll(),
         queryKeys.tagOptionsAll(),
+        queryKeys.connectorSourcesAll(),
         queryKeys.histogramAll(),
         queryKeys.kpisAll(),
       ])

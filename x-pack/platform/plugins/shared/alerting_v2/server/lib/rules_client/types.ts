@@ -22,6 +22,7 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
+import type { EventOriginActor } from '../event_origin/origin_schemas';
 
 /** Options an in-process caller passes when it asks for a rules client. */
 export interface CreateRulesClientOptions {
@@ -30,6 +31,16 @@ export interface CreateRulesClientOptions {
    * Takes precedence over the app derived from the request.
    */
   app?: string;
+}
+
+/**
+ * The event-origin inputs the rules client resolves as a single dependency: the
+ * acting principal (`user` / `internal`, from the request scope) folded together
+ * with the caller's client options.
+ */
+export interface RulesClientEventOrigin {
+  actor: EventOriginActor;
+  options: CreateRulesClientOptions;
 }
 /** Re-exported from the shared schemas package. */
 export type {

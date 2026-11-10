@@ -5,6 +5,8 @@ set -euo pipefail
 source .buildkite/scripts/steps/functional/common.sh
 source .buildkite/scripts/steps/test/ftr_smart_retry.sh
 
+trap scout_await_event_uploads EXIT
+
 BUILDKITE_PARALLEL_JOB=${BUILDKITE_PARALLEL_JOB:-}
 FTR_CONFIG_GROUP_KEY=${FTR_CONFIG_GROUP_KEY:-}
 if [ "$FTR_CONFIG_GROUP_KEY" == "" ] && [ "$BUILDKITE_PARALLEL_JOB" == "" ]; then
@@ -59,6 +61,13 @@ fi
 failedConfigs=""
 results=()
 
+# Configs this build already passed (e.g. in an earlier attempt of this job), read with one meta-data
+# call instead of one per config. Flaky test runs always run every config.
+executedConfigKeys=""
+if [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" ]]; then
+  executedConfigKeys=$(buildkite-agent meta-data keys --log-level error) || true
+fi
+
 while read -r config; do
   if [[ ! "$config" ]]; then
     continue;
@@ -69,11 +78,8 @@ while read -r config; do
   # see if this config has already been executed successfully
   # Buildkite metadata keys must be shorter than 255 bytes, even for deeply nested config paths.
   CONFIG_EXECUTION_KEY="ftr_config_$(printf '%s' "$config" | sha256sum | cut -d' ' -f1)_executed"
-  IS_CONFIG_EXECUTION=$(buildkite-agent meta-data get "$CONFIG_EXECUTION_KEY" --default "false" --log-level error)
-  # we don't want this optimization for flaky test runs
-  IS_FLAKY_TEST_RUN=$(test -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" && echo "false" || echo "true")
 
-  if [[ "$IS_CONFIG_EXECUTION" == "true" && "$IS_FLAKY_TEST_RUN" == "false" ]]; then
+  if grep -Fxq -- "$CONFIG_EXECUTION_KEY" <<< "$executedConfigKeys"; then
     echo "--- [ already-tested ] $FULL_COMMAND"
     continue
   else
@@ -115,9 +121,7 @@ while read -r config; do
   if [[ "${SCOUT_REPORTER_ENABLED:-}" =~ ^(1|true)$ ]]; then
     # Upload events after running each config
     echo "Upload Scout reporter events to AppEx QA's team cluster for config $config"
-    node scripts/scout upload-events --dontFailOnError
-    echo "Upload successful, removing local events at .scout/reports"
-    rm -rf .scout/reports
+    scout_upload_events_in_background .scout/reports
   else
     echo "SCOUT_REPORTER_ENABLED=$SCOUT_REPORTER_ENABLED, skipping event upload."
   fi
@@ -136,8 +140,8 @@ while read -r config; do
     result: ${lastCode}")
 
   if [ $lastCode -eq 0 ]; then
-    # Test was successful, so mark it as executed
-    buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
+    # Test was successful, so mark it as executed (in the background, so the next config doesn't wait)
+    buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true" &
   else
     exitCode=10
     echo "FTR exited with code $lastCode"
@@ -150,6 +154,9 @@ while read -r config; do
     fi
   fi
 done <<< "$configs"
+
+# Let the background meta-data writes finish
+wait
 
 if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"

@@ -16,7 +16,7 @@ import { getTrackedBranch } from '../../utils.ts';
 import { CiStatsClient } from '../client.ts';
 
 import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources.ts';
-import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const.ts';
+import { AGENT_DISK_GIB, DURATION_PERCENTILE, JEST_AGENTS, STEP_KEYS } from './const.ts';
 import { loadRunOrderConfig } from './env_config.ts';
 import { ftrManifest } from './ftr_manifests.ts';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs.ts';
@@ -227,6 +227,7 @@ export async function pickTestGroupRunOrder() {
         label: 'Jest Tests',
         parallelism: unit.count,
         key: STEP_KEYS.JEST_UNIT,
+        agent: JEST_AGENTS.UNIT,
         agentDiskSize: AGENT_DISK_GIB.JEST_UNIT,
         envFromLabels: config.envFromLabels,
         dependsOn: config.jestConfigsDeps,
@@ -238,6 +239,7 @@ export async function pickTestGroupRunOrder() {
         label: 'Jest Integration Tests',
         parallelism: integration.count,
         key: STEP_KEYS.JEST_INTEGRATION,
+        agent: JEST_AGENTS.INTEGRATION,
         agentDiskSize: AGENT_DISK_GIB.JEST_INTEGRATION,
         envFromLabels: config.envFromLabels,
         dependsOn: config.jestConfigsDeps,
