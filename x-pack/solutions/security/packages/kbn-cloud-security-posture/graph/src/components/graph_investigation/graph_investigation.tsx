@@ -446,6 +446,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     const wasLoadedAndEmptyRef = useRef(false);
     const pendingExpansionRef = useRef<PendingExpansion | undefined>();
     const latestNodeCountRef = useRef(0);
+    const isFetchingRef = useRef(false);
 
     const onFiltersUpdated = useCallback(
       (filters: Filter[]) => {
@@ -580,6 +581,10 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
     }, [data?.nodes]);
 
     useEffect(() => {
+      isFetchingRef.current = isFetching;
+    }, [isFetching]);
+
+    useEffect(() => {
       const pending = pendingExpansionRef.current;
       if (!pending) return;
       if (isFetching) {
@@ -613,7 +618,9 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               nodeType,
               state,
               previousNodeCount: pending?.previousNodeCount ?? latestNodeCountRef.current,
-              fetchObserved: pending?.fetchObserved ?? false,
+              // A fetch already in flight stays `isFetching` through the query key change, so the
+              // effect below would never see it start.
+              fetchObserved: pending?.fetchObserved ?? isFetchingRef.current,
             };
           }
         }

@@ -159,16 +159,24 @@ export const GraphGroupedNodePreviewPanel: FC<GraphGroupedNodePreviewPanelProps>
     const onTelemetryEventRef = useRef(onTelemetryEvent);
     onTelemetryEventRef.current = onTelemetryEvent;
 
-    // Fires once per mount: the ref guard holds even though the effect depends on `docMode`
-    const hasReportedOpenRef = useRef(false);
+    // Keyed by panel identity, not by mount: the legacy flyout reuses this instance (updating its
+    // props) when a second grouped preview is pushed, so a once-per-mount guard would miss it
+    const panelIdentity = useMemo(
+      () =>
+        docMode === 'grouped-entities'
+          ? `${docMode}:${entityItems.map(({ id }) => id).join(',')}`
+          : `${docMode}:${documentIds.join(',')}`,
+      [docMode, entityItems, documentIds]
+    );
+    const lastReportedIdentityRef = useRef<string>();
     useEffect(() => {
-      if (hasReportedOpenRef.current) return;
-      hasReportedOpenRef.current = true;
+      if (lastReportedIdentityRef.current === panelIdentity) return;
+      lastReportedIdentityRef.current = panelIdentity;
       onTelemetryEventRef.current?.({
         type: 'grouped_panel_opened',
         nodeType: docMode === 'grouped-entities' ? 'grouped_entity' : 'grouped_event',
       });
-    }, [docMode]);
+    }, [panelIdentity, docMode]);
 
     // Wrapped once here so the row title link and the actions popover both report
     const handleShowEntity = useCallback<typeof onShowEntity>(

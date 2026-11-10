@@ -965,8 +965,28 @@ describe('GraphGroupedNodePreviewPanel', () => {
         });
       });
 
-      it('reports once and not again on re-render', () => {
-        const entityItems = [createEntityItem()];
+      it('does not report again when re-rendered with the same ids in new arrays', () => {
+        const { rerender } = render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            entityItems={[createEntityItem({ id: 'entity-a' })]}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        rerender(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            entityItems={[createEntityItem({ id: 'entity-a', label: 'Renamed' })]}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        expect(mockOnTelemetryEvent).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not report again when only the telemetry handler identity changes', () => {
+        const entityItems = [createEntityItem({ id: 'entity-a' })];
         const { rerender } = render(
           <GraphGroupedNodePreviewPanel
             {...defaultProps}
@@ -975,22 +995,130 @@ describe('GraphGroupedNodePreviewPanel', () => {
           />
         );
 
-        rerender(
-          <GraphGroupedNodePreviewPanel
-            {...defaultProps}
-            entityItems={[...entityItems, createEntityItem()]}
-            onTelemetryEvent={jest.fn()}
-          />
-        );
+        const otherHandler = jest.fn();
         rerender(
           <GraphGroupedNodePreviewPanel
             {...defaultProps}
             entityItems={entityItems}
-            onTelemetryEvent={mockOnTelemetryEvent}
+            onTelemetryEvent={otherHandler}
           />
         );
 
         expect(mockOnTelemetryEvent).toHaveBeenCalledTimes(1);
+        expect(otherHandler).not.toHaveBeenCalled();
+      });
+
+      it('reports again when the same instance is updated with different document ids', () => {
+        mockFetchedItems([{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT, docId: 'doc-1' }]);
+        const { rerender } = render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            docMode="grouped-events"
+            documentIds={['doc-1']}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        rerender(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            docMode="grouped-events"
+            documentIds={['doc-2', 'doc-3']}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        expect(mockOnTelemetryEvent).toHaveBeenCalledTimes(2);
+        expect(mockOnTelemetryEvent).toHaveBeenLastCalledWith({
+          type: 'grouped_panel_opened',
+          nodeType: 'grouped_event',
+        });
+      });
+
+      it('reports again when the same instance is updated with different entity items', () => {
+        const { rerender } = render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            entityItems={[createEntityItem({ id: 'entity-a' })]}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        rerender(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            entityItems={[createEntityItem({ id: 'entity-b' })]}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        expect(mockOnTelemetryEvent).toHaveBeenCalledTimes(2);
+        expect(mockOnTelemetryEvent).toHaveBeenLastCalledWith({
+          type: 'grouped_panel_opened',
+          nodeType: 'grouped_entity',
+        });
+      });
+
+      it('reports again with the new node type when switching from grouped entities to grouped events with the same ids', () => {
+        mockFetchedItems([{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT, docId: 'doc-1' }]);
+        const { rerender } = render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            docMode="grouped-entities"
+            entityItems={[createEntityItem({ id: 'shared-id' })]}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        rerender(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            docMode="grouped-events"
+            documentIds={['shared-id']}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        expect(mockOnTelemetryEvent).toHaveBeenCalledTimes(2);
+        expect(mockOnTelemetryEvent).toHaveBeenNthCalledWith(1, {
+          type: 'grouped_panel_opened',
+          nodeType: 'grouped_entity',
+        });
+        expect(mockOnTelemetryEvent).toHaveBeenNthCalledWith(2, {
+          type: 'grouped_panel_opened',
+          nodeType: 'grouped_event',
+        });
+      });
+
+      it('reports again with the new node type when switching from grouped events to grouped entities with the same ids', () => {
+        mockFetchedItems([{ id: 'event-1', itemType: DOCUMENT_TYPE_EVENT, docId: 'doc-1' }]);
+        const { rerender } = render(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            docMode="grouped-events"
+            documentIds={['shared-id']}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        rerender(
+          <GraphGroupedNodePreviewPanel
+            {...defaultProps}
+            docMode="grouped-entities"
+            entityItems={[createEntityItem({ id: 'shared-id' })]}
+            onTelemetryEvent={mockOnTelemetryEvent}
+          />
+        );
+
+        expect(mockOnTelemetryEvent).toHaveBeenCalledTimes(2);
+        expect(mockOnTelemetryEvent).toHaveBeenNthCalledWith(1, {
+          type: 'grouped_panel_opened',
+          nodeType: 'grouped_event',
+        });
+        expect(mockOnTelemetryEvent).toHaveBeenNthCalledWith(2, {
+          type: 'grouped_panel_opened',
+          nodeType: 'grouped_entity',
+        });
       });
 
       it('reports for an empty panel', () => {

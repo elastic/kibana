@@ -498,6 +498,62 @@ describe('GraphInvestigation telemetry', () => {
       expect(getExpansionResults(onTelemetryEvent)).toHaveLength(1);
     });
 
+    it('reports an expansion clicked while a refetch is already in flight', async () => {
+      const onTelemetryEvent = jest.fn();
+      const { container, setFetchState } = renderGraph(
+        { isFetching: true, data: singleActorMockData },
+        { onTelemetryEvent }
+      );
+
+      await clickNodeAction(container, ACTOR_NODE_ID, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      // The fetch keeps running through the query key change, so no idle-to-fetching transition.
+      act(() => setFetchState({ isFetching: true, data: singleActorMockData }));
+      act(() => setFetchState({ isFetching: false, data: withExtraNodes(['extra-1', 'extra-2']) }));
+
+      expect(getExpansionResults(onTelemetryEvent)).toEqual([
+        {
+          type: 'expansion_result',
+          action: 'show_actions_by',
+          nodeType: 'entity',
+          state: 'show',
+          nodesAdded: true,
+          nodesLimitReached: false,
+        },
+      ]);
+    });
+
+    it('reports no added nodes when the in-flight refetch returns the same number of nodes', async () => {
+      const onTelemetryEvent = jest.fn();
+      const { container, setFetchState } = renderGraph(
+        { isFetching: true, data: singleActorMockData },
+        { onTelemetryEvent }
+      );
+
+      await clickNodeAction(container, ACTOR_NODE_ID, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      act(() => setFetchState({ isFetching: false, data: { ...singleActorMockData } }));
+
+      expect(getExpansionResults(onTelemetryEvent)).toEqual([
+        expect.objectContaining({ nodesAdded: false, nodesLimitReached: false }),
+      ]);
+    });
+
+    it('does not attribute a later refetch to an expansion clicked during an in-flight refetch', async () => {
+      const onTelemetryEvent = jest.fn();
+      const { container, setFetchState } = renderGraph(
+        { isFetching: true, data: singleActorMockData },
+        { onTelemetryEvent }
+      );
+
+      await clickNodeAction(container, ACTOR_NODE_ID, GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID);
+      act(() => setFetchState({ isFetching: false, data: withExtraNodes(['extra-1']) }));
+      expect(getExpansionResults(onTelemetryEvent)).toHaveLength(1);
+
+      act(() => setFetchState({ isFetching: true, data: withExtraNodes(['extra-1']) }));
+      act(() => setFetchState({ isFetching: false, data: withExtraNodes(['extra-1', 'extra-2']) }));
+
+      expect(getExpansionResults(onTelemetryEvent)).toHaveLength(1);
+    });
+
     it('reports nothing for the show details action', async () => {
       const onTelemetryEvent = jest.fn();
       const { container, setFetchState } = renderGraph(
