@@ -46,6 +46,9 @@ const collect = (
     includeRawAttribution,
     environments: false,
     edgeCases: false,
+    replayRate: 0,
+    errorReplayRate: 0,
+    replaySize: 'typical',
     scale,
     // Pin the seed so the minimums the tests rely on don't depend on the range's start
     seed: 'digital-experience-test',
@@ -62,6 +65,9 @@ describe.skip('digital experience apps', () => {
         includeRawAttribution: false,
         environments: false,
         edgeCases: false,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
         scale: 1,
         seed: getDefaultSeed(FROM),
       });
@@ -75,6 +81,9 @@ describe.skip('digital experience apps', () => {
             includeRawAttribution: true,
             environments: true,
             edgeCases: true,
+            replayRate: 0,
+            errorReplayRate: 0,
+            replaySize: 'typical',
             scale: 3,
           },
           FROM
@@ -84,6 +93,9 @@ describe.skip('digital experience apps', () => {
         includeRawAttribution: true,
         environments: true,
         edgeCases: true,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
         scale: 3,
         seed: getDefaultSeed(FROM),
       });
@@ -106,6 +118,9 @@ describe.skip('digital experience apps', () => {
         includeRawAttribution: true,
         environments: true,
         edgeCases: true,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
         scale: 2.5,
         seed: getDefaultSeed(FROM),
       });
@@ -219,6 +234,9 @@ describe.skip('digital experience apps', () => {
           includeRawAttribution: false,
           environments: false,
           edgeCases: false,
+          replayRate: 0,
+          errorReplayRate: 0,
+          replaySize: 'typical',
           scale,
           // Like the scenarios, without a seed option the parser defaults it to the run's start
           seed: parseDigitalExperienceScenarioOpts(seed === undefined ? {} : { seed }, from).seed,
@@ -522,6 +540,9 @@ describe.skip('digital experience apps', () => {
         includeRawAttribution: false,
         environments,
         edgeCases,
+        replayRate: 0,
+        errorReplayRate: 0,
+        replaySize: 'typical',
         scale: 2,
         seed: 'digital-experience-test',
       }).flatMap((generator) =>
@@ -754,6 +775,9 @@ describe.skip('digital experience apps', () => {
           includeRawAttribution: false,
           environments: false,
           edgeCases: true,
+          replayRate: 0,
+          errorReplayRate: 0,
+          replaySize: 'typical',
           scale: 1,
           seed: 'digital-experience-test',
         }).flatMap((generator) =>

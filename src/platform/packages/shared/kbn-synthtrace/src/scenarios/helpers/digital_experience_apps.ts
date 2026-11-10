@@ -16,9 +16,11 @@ import {
   type EdotBrowserClientOptions,
   type EdotBrowserEvent,
   type EdotBrowserExceptionTemplate,
+  type EdotBrowserReplayVisit,
   type EdotBrowserSite,
   type Fields,
   type HealthProfileName,
+  type ReplaySize,
   type Serializable,
   type SynthtraceGenerator,
   type Timerange,
@@ -77,6 +79,18 @@ export interface DigitalExperienceScenarioOpts {
    */
   edgeCases: boolean;
   /**
+   * Share of sessions (0 to 1) recorded for session replay from the start of every page load, like
+   * `replay.sampleRate` of EDOT Browser. A session's replay records carry its `session.id`.
+   */
+  replayRate: number;
+  /**
+   * Share of the other sessions (0 to 1) that start recording when they hit their first uncaught
+   * exception, like `replay.errorSampleRate`. The ones that never hit one have no replay.
+   */
+  errorReplayRate: number;
+  /** How much a recorded session weighs: `light` (~50 KB), `typical` (~0.5 MB) or `heavy` (4 to 5 MB). */
+  replaySize: ReplaySize;
+  /**
    * Multiplies the number of sessions per minute of every app. Fractions of a session add up over
    * time, so a scale below 1 thins out every app in proportion.
    */
@@ -94,6 +108,9 @@ const DEFAULT_SCENARIO_OPTS: Omit<DigitalExperienceScenarioOpts, 'seed'> = {
   includeRawAttribution: false,
   environments: false,
   edgeCases: false,
+  replayRate: 0,
+  errorReplayRate: 0,
+  replaySize: 'typical',
   scale: 1,
 };
 
@@ -917,6 +934,30 @@ export const parseBooleanOption = (key: string, value: unknown, defaultValue: bo
 const parseBooleanOpt = (opts: Record<string, unknown> | undefined, key: BooleanOptKey): boolean =>
   parseBooleanOption(key, opts?.[key], DEFAULT_SCENARIO_OPTS[key]);
 
+/** Parses a rate scenario option, a number from 0 to 1 given as a number or a numeric string. */
+export const parseRate = (key: string, value: unknown, defaultValue: number): number => {
+  if (value === undefined) {
+    return defaultValue;
+  }
+  const rate = typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+  if (typeof rate !== 'number' || !Number.isFinite(rate) || rate < 0 || rate > 1) {
+    throw new Error(`${key} must be a number from 0 to 1`);
+  }
+  return rate;
+};
+
+/** Parses the `replaySize` scenario option. */
+export const parseReplaySize = (value: unknown, defaultValue: ReplaySize): ReplaySize => {
+  if (value === undefined) {
+    return defaultValue;
+  }
+  const size = edotBrowser.replaySizes.find((replaySize) => replaySize === value);
+  if (size === undefined) {
+    throw new Error(`replaySize must be one of ${edotBrowser.replaySizes.join(', ')}`);
+  }
+  return size;
+};
+
 /** Parses the `scale` scenario option, a positive number. */
 export const parseScale = (value: unknown, defaultValue: number): number => {
   if (value === undefined) {
@@ -967,6 +1008,13 @@ export const parseDigitalExperienceScenarioOpts = (
     includeRawAttribution: parseBooleanOpt(opts, 'includeRawAttribution'),
     environments: parseBooleanOpt(opts, 'environments'),
     edgeCases: parseBooleanOpt(opts, 'edgeCases'),
+    replayRate: parseRate('replayRate', opts?.replayRate, DEFAULT_SCENARIO_OPTS.replayRate),
+    errorReplayRate: parseRate(
+      'errorReplayRate',
+      opts?.errorReplayRate,
+      DEFAULT_SCENARIO_OPTS.errorReplayRate
+    ),
+    replaySize: parseReplaySize(opts?.replaySize, DEFAULT_SCENARIO_OPTS.replaySize),
     scale: parseScale(opts?.scale, DEFAULT_SCENARIO_OPTS.scale),
     seed: parseSeed(opts?.seed, getDefaultSeed(from)),
   };
@@ -1035,6 +1083,30 @@ const FOLLOW_UP_SESSION_RATE = 0.1;
 const SAME_TAB_RATE = 0.5;
 const EARLIER_VISIT_PAGE_VIEWS = 2;
 const IDLE_REQUEST_COUNT = 3;
+// Share of the recorded sessions that run with `replay.quality.packEvents`
+const PACKED_SESSION_RATE = 0.15;
+// Shares of the recorded sessions that get each replay edge case, with `edgeCases`
+const MISSING_CHUNK_SESSION_RATE = 0.15;
+const LATE_REPLAY_SESSION_RATE = 0.15;
+
+/**
+ * How a session records, decided once per session as EDOT Browser does: a value from 0 to 1 taken
+ * from the last 8 hex digits of the session ID is under `replayRate` for sessions recorded from the
+ * start, and in the next `errorReplayRate` share of what is left for those recorded from their error.
+ */
+const getReplayTrigger = (
+  sessionId: string,
+  replayRate: number,
+  errorReplayRate: number
+): 'sampled' | 'error' | undefined => {
+  const value = Number.parseInt(sessionId.slice(-8), 16) / 0x100000000;
+  if (value < replayRate) {
+    return 'sampled';
+  }
+  return replayRate < 1 && (value - replayRate) / (1 - replayRate) < errorReplayRate
+    ? 'error'
+    : undefined;
+};
 
 /**
  * One generator per app, and environment of the app, in the catalogue, each producing EDOT Browser
@@ -1060,6 +1132,9 @@ export const generateEdotBrowserSessions = (
     includeRawAttribution,
     environments: withEnvironments,
     edgeCases: withEdgeCases,
+    replayRate,
+    errorReplayRate,
+    replaySize,
     scale,
     seed,
   }: DigitalExperienceScenarioOpts & { environment: string; from: number }
@@ -1140,26 +1215,67 @@ export const generateEdotBrowserSessions = (
 
             const client = (options: EdotBrowserClientOptions = {}) =>
               app.client(profile, { includeRawAttribution, ...options });
+            // The visits of every session, in the tab each happened in: what replay records. A session
+            // that expired has its own ID, so it records, or not, on its own.
+            const visitsBySession = new Map<string, EdotBrowserReplayVisit[]>();
             const simulate = (
               options: EdotBrowserClientOptions,
               anchor: { end: number },
               views: number,
               resumed: boolean = false
-            ) =>
-              edotBrowser.session({
+            ) => {
+              const visitClient = client(options);
+              const { events, documents } = edotBrowser.sessionWithDocuments({
                 site,
                 health: healthProfile,
                 random,
-                client: client(options),
+                client: visitClient,
                 pageViews: views,
                 resumed,
                 ...reporting,
                 ...anchor,
               });
+              if (options.sessionId) {
+                visitsBySession.set(options.sessionId, [
+                  ...(visitsBySession.get(options.sessionId) ?? []),
+                  { client: visitClient, documents },
+                ]);
+              }
+              return events;
+            };
             const keep = (events: EdotBrowserEvent[]) =>
               events.filter((event) => getTimestamp(event) >= from);
+            // Replay has a random source of its own per session, so that it never changes the rest of
+            // the data. Called after the visits are simulated. Segments that start before `from` are
+            // left out whole, since a segment without its first FullSnapshot can't play.
+            const withReplay = (events: EdotBrowserEvent[]): EdotBrowserEvent[] => [
+              ...events,
+              ...Array.from(visitsBySession).flatMap(([replaySessionId, visits]) => {
+                const trigger = getReplayTrigger(replaySessionId, replayRate, errorReplayRate);
+                if (!trigger) {
+                  return [];
+                }
+                const replayRandom = createSeededRandom(`${seed}:${replaySessionId}:replay`);
+                const [packDraw, missingChunkDraw, lateDraw] = [
+                  replayRandom(),
+                  replayRandom(),
+                  replayRandom(),
+                ];
+                return edotBrowser.replaySession({
+                  visits,
+                  trigger,
+                  size: replaySize,
+                  random: replayRandom,
+                  packEvents: packDraw < PACKED_SESSION_RATE,
+                  missingChunk: withEdgeCases && missingChunkDraw < MISSING_CHUNK_SESSION_RATE,
+                  startsAfterFirstPage: withEdgeCases && lateDraw < LATE_REPLAY_SESSION_RATE,
+                  notBefore: from,
+                });
+              }),
+            ];
 
             if (!withSessionId) {
+              // Replay records carry the session ID, so there is no replay without one
               return keep(simulate({}, { end: time }, pageViews));
             }
 
@@ -1181,7 +1297,7 @@ export const generateEdotBrowserSessions = (
                 { end: firstVisitEnd },
                 EARLIER_VISIT_PAGE_VIEWS
               );
-              return keep([...firstVisit, ...visit]);
+              return withReplay(keep([...firstVisit, ...visit]));
             }
 
             if (visitKind < RESUMED_SESSION_RATE + EXPIRED_SESSION_RATE) {
@@ -1212,11 +1328,17 @@ export const generateEdotBrowserSessions = (
                 intervalMs: requestInterval,
                 ...reporting,
               });
-              return keep([...expiredVisit, ...idleRequests, ...visit]);
+              return withReplay(keep([...expiredVisit, ...idleRequests, ...visit]));
             }
 
-            return keep(
-              simulate({ sessionId, previousSessionId: previous, tabId }, { end: time }, pageViews)
+            return withReplay(
+              keep(
+                simulate(
+                  { sessionId, previousSessionId: previous, tabId },
+                  { end: time },
+                  pageViews
+                )
+              )
             );
           }
         );

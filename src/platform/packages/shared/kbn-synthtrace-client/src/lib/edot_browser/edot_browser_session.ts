@@ -795,10 +795,11 @@ const interactWithPage = (
   ctx: SessionContext,
   document: DocumentState,
   { page, from, end: slotEnd }: PageView
-): { events: EdotBrowserEvent[]; clickTimes: number[] } => {
+): { events: EdotBrowserEvent[]; clickTimes: number[]; exceptionTimes: number[] } => {
   const { client, site, health, random, reportExceptions } = ctx;
   const events: EdotBrowserEvent[] = [];
   const clickTimes: number[] = [];
+  const exceptionTimes: number[] = [];
 
   (page.requests ?? []).forEach((request) => {
     const time = Math.min(from + Math.floor(between(random, 5, 50)), slotEnd);
@@ -834,12 +835,12 @@ const interactWithPage = (
       ),
       ({ weight = 1 }) => weight
     );
-    events.push(
-      exceptionEvent(ctx, exception).timestamp(Math.floor(between(random, from, slotEnd)))
-    );
+    const exceptionTime = Math.floor(between(random, from, slotEnd));
+    exceptionTimes.push(exceptionTime);
+    events.push(exceptionEvent(ctx, exception).timestamp(exceptionTime));
   }
 
-  return { events, clickTimes };
+  return { events, clickTimes, exceptionTimes };
 };
 
 /** An SPA route change, which the navigation instrumentation reports as a soft navigation. */
@@ -922,26 +923,54 @@ const shiftDocument = (
 const simulateDocument = (
   ctx: SessionContext,
   { navigationType, load, pageViews, hiddenAt }: DocumentPlan
-): EdotBrowserEvent[] => {
+): { events: EdotBrowserEvent[]; info: EdotBrowserSessionDocument } => {
   const [loadView, ...routeChanges] = pageViews;
   const { events, document } = loadDocument(ctx, loadView, navigationType, load);
   const visits = pageViews.map((view) => interactWithPage(ctx, document, view));
+  const clickTimes = visits.flatMap((visit) => visit.clickTimes);
 
-  return [
-    ...events,
-    ...routeChanges.map((view) => routeChange(ctx, view)),
-    ...visits.flatMap((visit) => visit.events),
-    ...hideDocument(
-      ctx,
-      document,
-      visits.flatMap(({ clickTimes }) => clickTimes),
-      hiddenAt
-    ),
-  ];
+  return {
+    events: [
+      ...events,
+      ...routeChanges.map((view) => routeChange(ctx, view)),
+      ...visits.flatMap((visit) => visit.events),
+      ...hideDocument(ctx, document, clickTimes, hiddenAt),
+    ],
+    info: {
+      url: toUrl(ctx.site, loadView.page.path),
+      path: loadView.page.path,
+      start: loadView.start,
+      end: hiddenAt,
+      clickTimes,
+      exceptionTimes: visits.flatMap((visit) => visit.exceptionTimes),
+    },
+  };
 };
 
+/**
+ * A document of a session as it ran in the browser: the span of a page load, which is also the span
+ * of a replay segment, with the times of the clicks and uncaught exceptions that happened in it.
+ */
+export interface EdotBrowserSessionDocument {
+  url: string;
+  /** Path of the page the document loaded, route changes aside. */
+  path: string;
+  /** When the navigation started. */
+  start: number;
+  /** When the document was hidden, right before the next one loaded. */
+  end: number;
+  clickTimes: number[];
+  exceptionTimes: number[];
+}
+
 /** Builds a realistic EDOT Browser session: page loads, SPA navigations, interactions and requests. */
-export const session = (options: EdotBrowserSessionOptions): EdotBrowserEvent[] => {
+export const session = (options: EdotBrowserSessionOptions): EdotBrowserEvent[] =>
+  sessionWithDocuments(options).events;
+
+/** Like {@link session}, and tells which documents the session loaded, for what runs in them. */
+export const sessionWithDocuments = (
+  options: EdotBrowserSessionOptions
+): { events: EdotBrowserEvent[]; documents: EdotBrowserSessionDocument[] } => {
   const {
     client,
     site,
@@ -970,15 +999,20 @@ export const session = (options: EdotBrowserSessionOptions): EdotBrowserEvent[] 
   const duration = documents.length ? documents[documents.length - 1].hiddenAt : 0;
   const start = options.start !== undefined ? options.start : options.end - duration;
 
-  return [
-    // The distro announces a new session when the page loads
-    ...(client.hasSession && !resumed && documents.length > 0
-      ? [client.sessionStart().timestamp(start)]
-      : []),
-    ...documents
-      .map((document) => shiftDocument(document, start))
-      .flatMap((document) => simulateDocument(ctx, document)),
-  ];
+  const simulated = documents
+    .map((document) => shiftDocument(document, start))
+    .map((document) => simulateDocument(ctx, document));
+
+  return {
+    events: [
+      // The distro announces a new session when the page loads
+      ...(client.hasSession && !resumed && documents.length > 0
+        ? [client.sessionStart().timestamp(start)]
+        : []),
+      ...simulated.flatMap(({ events }) => events),
+    ],
+    documents: simulated.map(({ info }) => info),
+  };
 };
 
 const IDLE_REQUEST_INTERVAL_MS = 30_000;

@@ -16,6 +16,8 @@
  *   `browser.resource_timing`, `browser.web_vital`, `browser.user_action.click` and
  *   `exception` events
  * - `traces-generic.otel-default`: fetch/XHR CLIENT spans
+ * - `logs-rum.replay.otel-default`: session replay, with the `replayRate` and `errorReplayRate`
+ *   options only (see Session replay below)
  * - non-zero timings and web vital values always carry a fractional part, so they map as `float`;
  *   like EDOT Browser, phases that didn't happen are written as 0
  * - uncaught exceptions repeat: an exception thrown from one call stack always has the same stack
@@ -53,6 +55,21 @@
  * - browsers that EDOT Browser can't identify (no name, platform and mobile flag), and clicks on
  *   elements with no CSS selector
  *
+ * Session replay (`replayRate` or `errorReplayRate` above 0) follows the wire format of the EDOT
+ * Browser session replay design (elastic/elastic-otel-rum-js, `design/session-replay.md`), with the
+ * same `session.id` and `browser.tab.id` as the session's other signals:
+ * - one segment for every page load that records, from the page load, or from a few seconds before
+ *   the first uncaught exception in `error` mode. A segment has an `elastic.replay.start` record
+ *   and a record for every rrweb event, numbered from 0 with a Meta and a FullSnapshot first
+ * - events over 256 KiB are split in chunks (`elastic.replay.chunk.index` and `.count`), and some
+ *   sessions pack their events with `@rrweb/packer` (`elastic.replay.packed`)
+ * - the rrweb events are built from full snapshots of the synthetic pages of the
+ *   `@kbn/session-replay-player` fixtures, so they play in the player. Clicks and exceptions of the
+ *   OTel data show up in the recording at the same time
+ * - with `edgeCases=true`, a share of the recorded sessions has a segment that lost a chunk of its
+ *   first FullSnapshot (the player drops it and carries on from the next one), and a share starts
+ *   recording with its second page
+ *
  * Scenario options:
  * - withSessionId (boolean, default: true): write `attributes.session.id`, with the tab ID
  *   and `session.start` that come with sessions. Set to false to match EDOT Browser 0.3.0 and
@@ -65,6 +82,14 @@
  *   range for more data in them.
  * - edgeCases (boolean, default: false): add the edge cases listed above. Use a `scale` of 3 for an
  *   hour, or run for several hours, to see all the stack traces of support-center-web.
+ * - replayRate (number from 0 to 1, default: 0): share of sessions recorded from the start. Which
+ *   sessions record is decided by their `session.id`, as EDOT Browser does
+ * - errorReplayRate (number from 0 to 1, default: 0): share of the other sessions that start
+ *   recording at their first uncaught exception, with trigger `error`. Those with no exception
+ *   have no replay
+ * - replaySize (`light`, `typical` or `heavy`, default: `typical`): about 50 KB, 0.5 MB and 4 to 5 MB
+ *   of uncompressed rrweb events per recorded session. Replay is about 10 times the bytes of the
+ *   rest of the data: use `--workers` and a lower `replayRate` for volume runs
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
  * - seed (string or number, default: the run's `from` in milliseconds): makes the data
  *   reproducible
@@ -74,6 +99,7 @@
  *   node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=false
  *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts environments=true
  *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts edgeCases=true,scale=3
+ *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts replayRate=0.3,errorReplayRate=0.5
  */
 
 import type { Scenario } from '../cli/scenario';
