@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-server';
 import { NIGHTSHIFT_METRICS_ENTITIES_FLAG } from '@kbn/nightshift-shared';
+
+interface BooleanFeatureFlagReader {
+  getBooleanValue: (flagName: string, fallback: boolean) => Promise<boolean>;
+}
 
 /** Returns whether deterministic entity extraction is enabled for metrics sources. */
 export const isMetricsEntitiesEnabled = (
-  featureFlags: FeatureFlagsRequestHandlerContext
+  featureFlags: BooleanFeatureFlagReader
 ): Promise<boolean> => featureFlags.getBooleanValue(NIGHTSHIFT_METRICS_ENTITIES_FLAG, false);
