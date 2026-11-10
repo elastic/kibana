@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { isEqual, omit } from 'lodash';
 import type { Unit } from './unit_repository';
 import {
   PROCESSING_SLOT_KIND,
+  getSlotProcessorIds,
   isProcessingSlotEditable,
   type ProcessingNodeRef,
 } from './unit_graph';
@@ -15,8 +17,10 @@ import {
   PIPELINE_ENTRY,
   allocateComponentId,
   intersectSignals,
+  mapRouteAt,
   pipelineForwards,
   readEntryIds,
+  readRouteAt,
   readRoutes,
   pruneUnit,
   replaceUnit,
@@ -54,29 +58,6 @@ export type ProcessingDraftResult =
 const findPipeline = (unit: Unit, pipelineId: string): UnitPipeline | undefined =>
   unit.unit.pipelines.find((pipeline) => pipeline.id === pipelineId);
 
-const slotProcessorIds = (pipeline: UnitPipeline, ref: ProcessingNodeRef): string[] =>
-  ref.kind === PROCESSING_SLOT_KIND.pipeline
-    ? readEntryIds(pipeline.config, PIPELINE_ENTRY.processors)
-    : readRoutes(pipeline.config)[ref.routeIndex]?.processors ?? [];
-
-/** The route at a slot's `routeIndex`, with the selector of the `routes` entry it sits in. */
-const findRoute = (
-  pipeline: UnitPipeline,
-  routeIndex: number
-): { route: RouteRule; entryTelemetry?: UnitSignal[] } | undefined => {
-  let offset = 0;
-  for (const entry of pipeline.config) {
-    if (entry.name !== PIPELINE_ENTRY.routes) {
-      continue;
-    }
-    if (routeIndex < offset + entry.value.length) {
-      return { route: entry.value[routeIndex - offset], entryTelemetry: entry.telemetry };
-    }
-    offset += entry.value.length;
-  }
-  return undefined;
-};
-
 /** Signals the processors of a slot run on. */
 export const getProcessingSlotTelemetry = (unit: Unit, ref: ProcessingNodeRef): UnitSignal[] => {
   const pipeline = findPipeline(unit, ref.pipelineId);
@@ -86,7 +67,7 @@ export const getProcessingSlotTelemetry = (unit: Unit, ref: ProcessingNodeRef): 
   if (ref.kind === PROCESSING_SLOT_KIND.pipeline) {
     return [...pipeline.supported_telemetry];
   }
-  const found = findRoute(pipeline, ref.routeIndex);
+  const found = readRouteAt(pipeline.config, ref.routeIndex);
   if (!found) {
     return [];
   }
@@ -106,7 +87,7 @@ export const getProcessingNodeProcessors = (
     return [];
   }
   const byId = new Map((unit.unit.processors ?? []).map((processor) => [processor.id, processor]));
-  return slotProcessorIds(pipeline, ref).flatMap((id) => {
+  return getSlotProcessorIds(unit, ref).flatMap((id) => {
     const processor = byId.get(id);
     return processor ? [processor] : [];
   });
@@ -118,7 +99,7 @@ export const getSharedProcessorIds = (unit: Unit, ref: ProcessingNodeRef): Set<s
   if (!pipeline) {
     return new Set();
   }
-  const own = new Set(slotProcessorIds(pipeline, ref));
+  const own = new Set(getSlotProcessorIds(unit, ref));
   const isOwnSlot = (pipelineId: string, routeIndex?: number) =>
     pipelineId === ref.pipelineId &&
     (ref.kind === PROCESSING_SLOT_KIND.pipeline
@@ -131,6 +112,30 @@ export const getSharedProcessorIds = (unit: Unit, ref: ProcessingNodeRef): Set<s
     ),
   ]);
   return new Set(elsewhere.filter((id) => own.has(id)));
+};
+
+/**
+ * Whether a slot of the staged graph is the same slot in the saved unit. Stats describe the saved
+ * unit by position, so a route that unsaved edits moved to another position would show the stats
+ * of the route that is saved there. Routes have no ids, so a route is what it matches and where it
+ * sends records. Its processors are left out, because those are read from the saved unit.
+ * A pipeline slot has no position, so it is always the same slot.
+ */
+export const isSlotSaved = (saved: Unit, staged: Unit, ref: ProcessingNodeRef): boolean => {
+  if (ref.kind === PROCESSING_SLOT_KIND.pipeline) {
+    return true;
+  }
+  const routeIn = (unit: Unit) => {
+    const pipeline = findPipeline(unit, ref.pipelineId);
+    return pipeline ? readRouteAt(pipeline.config, ref.routeIndex)?.route : undefined;
+  };
+  const savedRoute = routeIn(saved);
+  const stagedRoute = routeIn(staged);
+  return (
+    savedRoute !== undefined &&
+    stagedRoute !== undefined &&
+    isEqual(omit(savedRoute, 'processors'), omit(stagedRoute, 'processors'))
+  );
 };
 
 const updatePipeline = (
@@ -183,32 +188,6 @@ const setPipelineProcessors = (pipeline: UnitPipeline, ids: readonly string[]): 
   return {
     ...pipeline,
     config: [...others.slice(0, insertAt), entry, ...others.slice(insertAt)],
-  };
-};
-
-/** Rewrites the route at a slot's `routeIndex`, which counts across all `routes` entries. */
-const mapRouteAt = (
-  pipeline: UnitPipeline,
-  routeIndex: number,
-  update: (route: RouteRule) => RouteRule
-): UnitPipeline => {
-  let offset = 0;
-  return {
-    ...pipeline,
-    config: pipeline.config.map((entry): PipelineConfigEntry => {
-      if (entry.name !== PIPELINE_ENTRY.routes) {
-        return entry;
-      }
-      const local = routeIndex - offset;
-      offset += entry.value.length;
-      if (local < 0 || local >= entry.value.length) {
-        return entry;
-      }
-      return {
-        ...entry,
-        value: entry.value.map((route, index) => (index === local ? update(route) : route)),
-      };
-    }),
   };
 };
 

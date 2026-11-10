@@ -35,6 +35,7 @@ import {
   useMultipleAgentPolicies,
   useGetOutputs,
   useDefaultOutput,
+  useOnboardingInstanceUrl,
 } from '../../../../../hooks';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../../services';
 
@@ -81,6 +82,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     getUpgradeVersion,
   } = useIsPackagePolicyUpgradable();
   const { getHref } = useLink();
+  const getOnboardingInstanceUrl = useOnboardingInstanceUrl();
   const { canUseMultipleAgentPolicies } = useMultipleAgentPolicies();
   const [showAddIntegrationFlyout, setShowAddIntegrationFlyout] = React.useState(false);
   const { enableOtelIntegrations } = ExperimentalFeaturesService.get();
@@ -157,10 +159,14 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                 title={value}
                 {...(canReadIntegrationPolicies
                   ? {
-                      href: getHref('edit_integration', {
-                        policyId: agentPolicy.id,
-                        packagePolicyId: packagePolicy.id,
-                      }),
+                      // A policy managed by a cloud onboarding instance is edited in the onboarding flow.
+                      href:
+                        (packagePolicy.onboarding_deployment_id &&
+                          getOnboardingInstanceUrl(packagePolicy.onboarding_deployment_id)) ||
+                        getHref('edit_integration', {
+                          policyId: agentPolicy.id,
+                          packagePolicyId: packagePolicy.id,
+                        }),
                     }
                   : { disabled: true })}
               >
@@ -389,6 +395,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     [
       canReadIntegrationPolicies,
       getHref,
+      getOnboardingInstanceUrl,
       agentPolicy,
       enableOtelIntegrations,
       canUseMultipleAgentPolicies,

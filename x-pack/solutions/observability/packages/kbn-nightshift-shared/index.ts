@@ -30,6 +30,14 @@ export const NIGHTSHIFT_ENABLED_FLAG = 'nightshift.enabled';
  */
 export const NIGHTSHIFT_ONLINE_EVALS_PAUSED_FLAG = 'nightshift.onlineEvals.paused';
 
+/**
+ * When `true`, online eval score events include the judges' explanations, which may quote customer
+ * data. Read with a `false` fallback, so explanations are left out wherever LaunchDarkly is
+ * unreachable. Turning it on for a project needs legal approval.
+ */
+export const NIGHTSHIFT_ONLINE_EVALS_INCLUDE_EXPLANATIONS_FLAG =
+  'nightshift.onlineEvals.includeExplanations';
+
 /** Saved object type registered by `nightshiftSources` and granted by the Nightshift feature. */
 export const NIGHTSHIFT_SOURCE_SO_TYPE = 'nightshift-source';
 
@@ -118,6 +126,7 @@ export { SOURCE_TYPES, sourceTypeSchema, type SourceType } from './src/sources/s
 export {
   analyzeSourceQuery,
   getSourceCommandQuery,
+  getSourceLocalIndexExpressions,
   getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,
@@ -134,12 +143,44 @@ export {
   NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
   NIGHTSHIFT_KI_EXTRACTION_USAGE_ID,
   NIGHTSHIFT_KI_QUERY_GENERATION_USAGE_ID,
+  NIGHTSHIFT_ONLINE_EVALS_USAGE_ID,
 } from './src/nightshift_usage_ids';
 
 export { conditionToESQLFilterAst } from './src/condition_to_esql_filter';
+
+export {
+  isNightshiftSpaceGatedEndpoint,
+  isNightshiftSupportedSpace,
+  NIGHTSHIFT_SUPPORTED_SPACE_ID,
+  NIGHTSHIFT_UNSUPPORTED_SPACE_MESSAGE,
+} from './src/spaces';
 
 export {
   SETTINGS_TAB_IDS,
   type NightshiftSettingsLocatorParams,
   type SettingsTabId,
 } from './src/settings';
+
+export {
+  createHttpServiceAccountsApi,
+  ensureNightshiftServiceAccounts,
+  getSecurityRoleUrl,
+  NightshiftServiceAccountSetupError,
+  SECURITY_ROLE_API_VERSION,
+  SECURITY_SERVICE_ACCOUNT_URL,
+  type ListedServiceAccount,
+  type ListedServiceAccountsPage,
+  type NightshiftServiceAccountsApi,
+  type NightshiftServiceAccountSetupErrorCode,
+} from './src/service_accounts/ensure_service_accounts';
+export {
+  ensureNightshiftServiceAccountRoles,
+  NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES,
+} from './src/service_accounts/service_account_roles';
+export {
+  getNightshiftRoleName,
+  getNightshiftServiceAccountName,
+  NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
+  type NightshiftServiceAccountIds,
+  type NightshiftServiceAccountKind,
+} from './src/service_accounts/service_account';

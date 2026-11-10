@@ -37,6 +37,8 @@ const SKIP_DIRS = new Set([
 export interface EvalSuiteShard {
   id: string;
   specFiles: string[];
+  /** Evaluation connector for this shard's steps, overriding the suite-wide judge. */
+  judge?: string;
 }
 
 export interface EvalSuiteMetadata {

@@ -1,0 +1,187 @@
+{
+  "operations": {
+    "createChat": [
+      {
+        "method": "post",
+        "path": "/chats",
+        "source": "v1"
+      }
+    ],
+    "getUser": [
+      {
+        "method": "get",
+        "path": "/users/{user-id}",
+        "source": "v1"
+      }
+    ],
+    "listChannelMessages": [
+      {
+        "method": "get",
+        "pagination": {
+          "defaultSize": 20,
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/teams/{team-id}/channels/{channel-id}/messages",
+        "source": "v1"
+      }
+    ],
+    "listChannels": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/teams/{team-id}/channels",
+        "source": "v1"
+      }
+    ],
+    "listChatMessages": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/chats/{chat-id}/messages",
+        "source": "v1"
+      }
+    ],
+    "listChats": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/me/chats",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken",
+            "sizeParam": "$top"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/users/{user-id}/chats",
+        "source": "v1"
+      }
+    ],
+    "listJoinedTeams": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/me/joinedTeams",
+        "source": "v1"
+      },
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "cursorParam": "$skiptoken"
+          },
+          "response": {
+            "itemsPath": "value",
+            "nextPath": "[\"@odata.nextLink\"]"
+          },
+          "style": "next_url"
+        },
+        "path": "/users/{user-id}/joinedTeams",
+        "source": "v1"
+      }
+    ],
+    "searchMessages": [
+      {
+        "method": "post",
+        "pagination": {
+          "defaultSize": 25,
+          "request": {
+            "in": "body",
+            "offsetParam": "requests[0].from",
+            "sizeParam": "requests[0].size"
+          },
+          "response": {
+            "itemsPath": "value[0].hitsContainers[0].hits",
+            "totalPath": "value[0].hitsContainers[0].total"
+          },
+          "style": "offset"
+        },
+        "path": "/search/query",
+        "source": "v1"
+      }
+    ],
+    "sendChannelMessage": [
+      {
+        "method": "post",
+        "path": "/teams/{team-id}/channels/{channel-id}/messages",
+        "source": "v1"
+      }
+    ],
+    "sendChatMessage": [
+      {
+        "method": "post",
+        "path": "/chats/{chat-id}/messages",
+        "source": "v1"
+      }
+    ],
+    "updateMessage": [
+      {
+        "method": "patch",
+        "path": "/teams/{team-id}/channels/{channel-id}/messages/{chatMessage-id}",
+        "source": "v1"
+      }
+    ]
+  },
+  "sources": {
+    "v1": {
+      "apiVersion": "v1.0",
+      "fetchedAt": "2026-10-07T20:21:05.252Z",
+      "format": "openapi",
+      "url": "https://raw.githubusercontent.com/microsoftgraph/msgraph-metadata/master/openapi/v1.0/openapi.yaml"
+    }
+  }
+}

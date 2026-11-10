@@ -26,7 +26,7 @@ const expectedAccessForPath = (path: string): RouteAccess => {
 };
 
 const collectBoundRoutes = () => {
-  const container = new Container();
+  const container = new Container({ defaultScope: 'Singleton' });
   container.load(new ContainerModule((options) => bindRoutes(options)));
   return container.getAll(Route);
 };

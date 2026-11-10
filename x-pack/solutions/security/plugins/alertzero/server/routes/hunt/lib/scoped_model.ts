@@ -25,7 +25,14 @@ const buildScopedModel = async ({
   chatModelOptions: ChatModelOptions;
 }): Promise<ScopedModel> => {
   const chatModel = await inference.getChatModel({ request, connectorId, chatModelOptions });
-  const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+  const telemetryMetadata = chatModelOptions?.telemetryMetadata;
+  const inferenceClient = inference.getClient({
+    request,
+    bindTo: {
+      connectorId,
+      ...(telemetryMetadata ? { metadata: { connectorTelemetry: telemetryMetadata } } : {}),
+    },
+  });
   const connector = await inference.getConnectorById(connectorId, request);
   return { connector, chatModel, inferenceClient };
 };
@@ -70,7 +77,10 @@ export const resolveScopedModel = async ({
   request: KibanaRequest;
   uiSettingsClient: IUiSettingsClient;
   logger: Logger;
-  /** Passed to the chat model, e.g. telemetry metadata that attributes its token usage. */
+  /**
+   * Passed to the chat model, e.g. telemetry metadata that attributes its token usage. The same
+   * metadata also attributes the bound inference client.
+   */
   chatModelOptions?: ChatModelOptions;
 }): Promise<ResolveScopedModelOutcome> => {
   if (!inference) {
@@ -123,7 +133,10 @@ export const resolveConfiguredScopedModel = async ({
   featureId: string;
   request: KibanaRequest;
   logger: Logger;
-  /** Passed to the chat model, e.g. telemetry metadata that attributes its token usage. */
+  /**
+   * Passed to the chat model, e.g. telemetry metadata that attributes its token usage. The same
+   * metadata also attributes the bound inference client.
+   */
   chatModelOptions?: ChatModelOptions;
 }): Promise<ScopedModel | undefined> => {
   if (!inference || !searchInferenceEndpoints) return undefined;
