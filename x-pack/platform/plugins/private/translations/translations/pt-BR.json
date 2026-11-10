@@ -64467,7 +64467,6 @@
     "xpack.slo.compositeSloList.activeAlerts.ariaLabel": "Ver alertas ativos em uma nova aba do navegador",
     "xpack.slo.compositeSloList.activeAlerts.tooltip": "{count, plural, one {# burn rate alert} other {# alertas de taxa de consumo}} em SLOs membros. Abre em uma nova aba do navegador.",
     "xpack.slo.compositeSloList.burnRate.windowSelectorAriaLabel": "Selecionar janela da taxa de consumo",
-    "xpack.slo.compositeSloList.clearFilters": "Limpar filtros",
     "xpack.slo.compositeSloList.collapseRowFor": "Recolher linha: {name}",
     "xpack.slo.compositeSloList.columns.actions": "Ações",
     "xpack.slo.compositeSloList.columns.activeAlerts": "Alertas ativos",

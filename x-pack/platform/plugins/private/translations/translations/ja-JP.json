@@ -64459,7 +64459,6 @@
     "xpack.slo.compositeSloList.activeAlerts.ariaLabel": "新しいブラウザタブでアクティブなアラートを表示",
     "xpack.slo.compositeSloList.activeAlerts.tooltip": "{count, plural, one {# burn rate alert} other {#件のバーンレートアラート}}がメンバーのSLO全体で発生しています。新しいブラウザタブで開きます。",
     "xpack.slo.compositeSloList.burnRate.windowSelectorAriaLabel": "バーンレートの時間枠を選択",
-    "xpack.slo.compositeSloList.clearFilters": "フィルターをクリア",
     "xpack.slo.compositeSloList.collapseRowFor": "行を折りたたむ：{name}",
     "xpack.slo.compositeSloList.columns.actions": "アクション",
     "xpack.slo.compositeSloList.columns.activeAlerts": "アクティブなアラート",

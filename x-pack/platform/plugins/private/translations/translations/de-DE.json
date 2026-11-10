@@ -64290,7 +64290,6 @@
     "xpack.slo.compositeSloList.activeAlerts.ariaLabel": "Aktive Alerts in einem neuen Browser-Tab anzeigen",
     "xpack.slo.compositeSloList.activeAlerts.tooltip": "{count, plural, one {# burn rate alert} other {# Burn Rate-Alerts}} über Mitglieds-SLOs. Wird in einem neuen Browser-Tab geöffnet.",
     "xpack.slo.compositeSloList.burnRate.windowSelectorAriaLabel": "Burn Rate-Fenster wählen",
-    "xpack.slo.compositeSloList.clearFilters": "Filter löschen",
     "xpack.slo.compositeSloList.collapseRowFor": "Zeile zusammenklappen: {name}",
     "xpack.slo.compositeSloList.columns.actions": "Aktionen",
     "xpack.slo.compositeSloList.columns.activeAlerts": "Aktive Alerts",
