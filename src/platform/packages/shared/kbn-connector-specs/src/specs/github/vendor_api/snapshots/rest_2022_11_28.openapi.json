@@ -1,0 +1,4714 @@
+{
+  "components": {
+    "parameters": {
+      "issue-number": {
+        "in": "path",
+        "name": "issue_number",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "owner": {
+        "in": "path",
+        "name": "owner",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "pull-number": {
+        "in": "path",
+        "name": "pull_number",
+        "required": true,
+        "schema": {
+          "type": "integer"
+        }
+      },
+      "repo": {
+        "in": "path",
+        "name": "repo",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "workflow-id": {
+        "in": "path",
+        "name": "workflow_id",
+        "required": true,
+        "schema": {
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    "responses": {
+      "bad_request": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/basic-error"
+            }
+          },
+          "application/scim+json": {
+            "schema": {
+              "$ref": "#/components/schemas/scim-error"
+            }
+          }
+        }
+      },
+      "conflict": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/basic-error"
+            }
+          }
+        }
+      },
+      "forbidden": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/basic-error"
+            }
+          }
+        }
+      },
+      "gone": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/basic-error"
+            }
+          }
+        }
+      },
+      "moved_permanently": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/basic-error"
+            }
+          }
+        }
+      },
+      "not_found": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/basic-error"
+            }
+          }
+        }
+      },
+      "service_unavailable": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "documentation_url": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            }
+          }
+        }
+      },
+      "validation_failed": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/validation-error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "author-association": {
+        "enum": [
+          "COLLABORATOR",
+          "CONTRIBUTOR",
+          "FIRST_TIMER",
+          "FIRST_TIME_CONTRIBUTOR",
+          "MANNEQUIN",
+          "MEMBER",
+          "NONE",
+          "OWNER"
+        ],
+        "title": "author_association",
+        "type": "string"
+      },
+      "auto-merge": {
+        "nullable": true,
+        "properties": {
+          "commit_message": {
+            "type": "string"
+          },
+          "commit_title": {
+            "type": "string"
+          },
+          "enabled_by": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "merge_method": {
+            "enum": [
+              "merge",
+              "squash",
+              "rebase"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "enabled_by",
+          "merge_method",
+          "commit_title",
+          "commit_message"
+        ],
+        "title": "Auto merge",
+        "type": "object"
+      },
+      "basic-error": {
+        "properties": {
+          "documentation_url": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "title": "Basic Error",
+        "type": "object"
+      },
+      "enterprise": {
+        "properties": {
+          "avatar_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "website_url": {
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "name",
+          "slug",
+          "html_url",
+          "created_at",
+          "updated_at",
+          "avatar_url"
+        ],
+        "title": "Enterprise",
+        "type": "object"
+      },
+      "file-commit": {
+        "properties": {
+          "commit": {
+            "properties": {
+              "author": {
+                "properties": {
+                  "date": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "committer": {
+                "properties": {
+                  "date": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "html_url": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "node_id": {
+                "type": "string"
+              },
+              "parents": {
+                "items": {
+                  "properties": {
+                    "html_url": {
+                      "type": "string"
+                    },
+                    "sha": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "sha": {
+                "type": "string"
+              },
+              "tree": {
+                "properties": {
+                  "sha": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "url": {
+                "type": "string"
+              },
+              "verification": {
+                "properties": {
+                  "payload": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  },
+                  "signature": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "verified": {
+                    "type": "boolean"
+                  },
+                  "verified_at": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "content": {
+            "nullable": true,
+            "properties": {
+              "_links": {
+                "properties": {
+                  "git": {
+                    "type": "string"
+                  },
+                  "html": {
+                    "type": "string"
+                  },
+                  "self": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "download_url": {
+                "type": "string"
+              },
+              "git_url": {
+                "type": "string"
+              },
+              "html_url": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "sha": {
+                "type": "string"
+              },
+              "size": {
+                "type": "integer"
+              },
+              "type": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "content",
+          "commit"
+        ],
+        "title": "File Commit",
+        "type": "object"
+      },
+      "git-ref": {
+        "properties": {
+          "node_id": {
+            "type": "string"
+          },
+          "object": {
+            "properties": {
+              "sha": {
+                "maxLength": 40,
+                "minLength": 40,
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "url": {
+                "format": "uri",
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "sha",
+              "url"
+            ],
+            "type": "object"
+          },
+          "ref": {
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref",
+          "node_id",
+          "url",
+          "object"
+        ],
+        "title": "Git Reference",
+        "type": "object"
+      },
+      "issue": {
+        "properties": {
+          "active_lock_reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "assignee": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          },
+          "assignees": {
+            "items": {
+              "$ref": "#/components/schemas/simple-user"
+            },
+            "type": "array"
+          },
+          "author_association": {
+            "$ref": "#/components/schemas/author-association"
+          },
+          "body": {
+            "nullable": true,
+            "type": "string"
+          },
+          "body_html": {
+            "type": "string"
+          },
+          "body_text": {
+            "type": "string"
+          },
+          "closed_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "closed_by": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          },
+          "comments": {
+            "type": "integer"
+          },
+          "comments_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "draft": {
+            "type": "boolean"
+          },
+          "events_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "issue_dependencies_summary": {
+            "$ref": "#/components/schemas/issue-dependencies-summary"
+          },
+          "issue_field_values": {
+            "items": {
+              "$ref": "#/components/schemas/issue-field-value"
+            },
+            "type": "array"
+          },
+          "labels": {
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "properties": {
+                    "archived_by": {
+                      "allOf": [
+                        {
+                          "$ref": "#/components/schemas/simple-user"
+                        }
+                      ],
+                      "nullable": true
+                    },
+                    "color": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "default": {
+                      "type": "boolean"
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "int64",
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "node_id": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "format": "uri",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              ]
+            },
+            "type": "array"
+          },
+          "labels_url": {
+            "type": "string"
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "milestone": {
+            "$ref": "#/components/schemas/nullable-milestone"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "integer"
+          },
+          "parent_issue_url": {
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "pinned_comment": {
+            "$ref": "#/components/schemas/nullable-issue-comment"
+          },
+          "pull_request": {
+            "properties": {
+              "diff_url": {
+                "format": "uri",
+                "nullable": true,
+                "type": "string"
+              },
+              "html_url": {
+                "format": "uri",
+                "nullable": true,
+                "type": "string"
+              },
+              "merged_at": {
+                "format": "date-time",
+                "nullable": true,
+                "type": "string"
+              },
+              "patch_url": {
+                "format": "uri",
+                "nullable": true,
+                "type": "string"
+              },
+              "url": {
+                "format": "uri",
+                "nullable": true,
+                "type": "string"
+              }
+            },
+            "required": [
+              "diff_url",
+              "html_url",
+              "patch_url",
+              "url"
+            ],
+            "type": "object"
+          },
+          "reactions": {
+            "$ref": "#/components/schemas/reaction-rollup"
+          },
+          "repository": {
+            "$ref": "#/components/schemas/repository"
+          },
+          "repository_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "state_reason": {
+            "enum": [
+              "completed",
+              "reopened",
+              "not_planned",
+              "duplicate"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "sub_issues_summary": {
+            "$ref": "#/components/schemas/sub-issues-summary"
+          },
+          "timeline_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/issue-type"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          }
+        },
+        "required": [
+          "assignee",
+          "closed_at",
+          "comments",
+          "comments_url",
+          "events_url",
+          "html_url",
+          "id",
+          "node_id",
+          "labels",
+          "labels_url",
+          "milestone",
+          "number",
+          "repository_url",
+          "state",
+          "locked",
+          "title",
+          "url",
+          "user",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Issue",
+        "type": "object"
+      },
+      "issue-comment": {
+        "properties": {
+          "author_association": {
+            "$ref": "#/components/schemas/author-association"
+          },
+          "body": {
+            "type": "string"
+          },
+          "body_html": {
+            "type": "string"
+          },
+          "body_text": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "issue_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "minimized": {
+            "$ref": "#/components/schemas/nullable-issue-comment-minimized"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "pin": {
+            "$ref": "#/components/schemas/nullable-pinned-issue-comment"
+          },
+          "reactions": {
+            "$ref": "#/components/schemas/reaction-rollup"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "html_url",
+          "issue_url",
+          "user",
+          "url",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Issue Comment",
+        "type": "object"
+      },
+      "issue-dependencies-summary": {
+        "properties": {
+          "blocked_by": {
+            "type": "integer"
+          },
+          "blocking": {
+            "type": "integer"
+          },
+          "total_blocked_by": {
+            "type": "integer"
+          },
+          "total_blocking": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "blocked_by",
+          "blocking",
+          "total_blocked_by",
+          "total_blocking"
+        ],
+        "title": "Issue Dependencies Summary",
+        "type": "object"
+      },
+      "issue-field-value": {
+        "properties": {
+          "data_type": {
+            "enum": [
+              "text",
+              "single_select",
+              "multi_select",
+              "number",
+              "date"
+            ],
+            "type": "string"
+          },
+          "issue_field_id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "issue_field_name": {
+            "type": "string"
+          },
+          "multi_select_options": {
+            "items": {
+              "properties": {
+                "color": {
+                  "type": "string"
+                },
+                "id": {
+                  "format": "int64",
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "color"
+              ],
+              "type": "object"
+            },
+            "nullable": true,
+            "type": "array"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "single_select_option": {
+            "nullable": true,
+            "properties": {
+              "color": {
+                "type": "string"
+              },
+              "id": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "color"
+            ],
+            "type": "object"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "issue_field_id",
+          "node_id",
+          "data_type",
+          "value"
+        ],
+        "title": "Issue Field Value",
+        "type": "object"
+      },
+      "issue-type": {
+        "nullable": true,
+        "properties": {
+          "color": {
+            "enum": [
+              "gray",
+              "blue",
+              "green",
+              "yellow",
+              "orange",
+              "red",
+              "pink",
+              "purple"
+            ],
+            "nullable": true,
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "is_enabled": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "name",
+          "description"
+        ],
+        "title": "Issue Type",
+        "type": "object"
+      },
+      "label": {
+        "properties": {
+          "archived_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "archived_by": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/simple-user"
+              }
+            ],
+            "nullable": true
+          },
+          "color": {
+            "type": "string"
+          },
+          "default": {
+            "type": "boolean"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "name",
+          "description",
+          "color",
+          "default",
+          "archived_at",
+          "archived_by"
+        ],
+        "title": "Label",
+        "type": "object"
+      },
+      "link": {
+        "properties": {
+          "href": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "href"
+        ],
+        "title": "Link",
+        "type": "object"
+      },
+      "nullable-integration": {
+        "nullable": true,
+        "properties": {
+          "client_id": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "events": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "external_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "installations_count": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "owner": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/simple-user"
+              },
+              {
+                "$ref": "#/components/schemas/enterprise"
+              }
+            ]
+          },
+          "permissions": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "properties": {
+              "checks": {
+                "type": "string"
+              },
+              "contents": {
+                "type": "string"
+              },
+              "deployments": {
+                "type": "string"
+              },
+              "issues": {
+                "type": "string"
+              },
+              "metadata": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "owner",
+          "name",
+          "description",
+          "external_url",
+          "html_url",
+          "created_at",
+          "updated_at",
+          "permissions",
+          "events"
+        ],
+        "title": "GitHub app",
+        "type": "object"
+      },
+      "nullable-issue-comment": {
+        "nullable": true,
+        "properties": {
+          "author_association": {
+            "$ref": "#/components/schemas/author-association"
+          },
+          "body": {
+            "type": "string"
+          },
+          "body_html": {
+            "type": "string"
+          },
+          "body_text": {
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "issue_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "minimized": {
+            "$ref": "#/components/schemas/nullable-issue-comment-minimized"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "performed_via_github_app": {
+            "$ref": "#/components/schemas/nullable-integration"
+          },
+          "pin": {
+            "$ref": "#/components/schemas/nullable-pinned-issue-comment"
+          },
+          "reactions": {
+            "$ref": "#/components/schemas/reaction-rollup"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "html_url",
+          "issue_url",
+          "user",
+          "url",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Issue Comment",
+        "type": "object"
+      },
+      "nullable-issue-comment-minimized": {
+        "nullable": true,
+        "properties": {
+          "reason": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "Minimized Issue Comment",
+        "type": "object"
+      },
+      "nullable-license-simple": {
+        "nullable": true,
+        "properties": {
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "spdx_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "name",
+          "url",
+          "spdx_id",
+          "node_id"
+        ],
+        "title": "License Simple",
+        "type": "object"
+      },
+      "nullable-milestone": {
+        "nullable": true,
+        "properties": {
+          "closed_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "closed_issues": {
+            "type": "integer"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "creator": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "due_on": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "labels_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "integer"
+          },
+          "open_issues": {
+            "type": "integer"
+          },
+          "state": {
+            "default": "open",
+            "enum": [
+              "open",
+              "closed"
+            ],
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "closed_issues",
+          "creator",
+          "description",
+          "due_on",
+          "closed_at",
+          "id",
+          "node_id",
+          "labels_url",
+          "html_url",
+          "number",
+          "open_issues",
+          "state",
+          "title",
+          "url",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Milestone",
+        "type": "object"
+      },
+      "nullable-pinned-issue-comment": {
+        "nullable": true,
+        "properties": {
+          "pinned_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pinned_by": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          }
+        },
+        "required": [
+          "pinned_at",
+          "pinned_by"
+        ],
+        "title": "Pinned Issue Comment",
+        "type": "object"
+      },
+      "nullable-simple-user": {
+        "nullable": true,
+        "properties": {
+          "avatar_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "email": {
+            "nullable": true,
+            "type": "string"
+          },
+          "events_url": {
+            "type": "string"
+          },
+          "followers_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "following_url": {
+            "type": "string"
+          },
+          "gists_url": {
+            "type": "string"
+          },
+          "gravatar_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "login": {
+            "type": "string"
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "organizations_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "received_events_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "repos_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "site_admin": {
+            "type": "boolean"
+          },
+          "starred_at": {
+            "type": "string"
+          },
+          "starred_url": {
+            "type": "string"
+          },
+          "subscriptions_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "user_view_type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "avatar_url",
+          "events_url",
+          "followers_url",
+          "following_url",
+          "gists_url",
+          "gravatar_id",
+          "html_url",
+          "id",
+          "node_id",
+          "login",
+          "organizations_url",
+          "received_events_url",
+          "repos_url",
+          "site_admin",
+          "starred_url",
+          "subscriptions_url",
+          "type",
+          "url"
+        ],
+        "title": "Simple User",
+        "type": "object"
+      },
+      "nullable-team-simple": {
+        "nullable": true,
+        "properties": {
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enterprise_id": {
+            "type": "integer"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "ldap_dn": {
+            "type": "string"
+          },
+          "members_url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "notification_setting": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "integer"
+          },
+          "permission": {
+            "type": "string"
+          },
+          "privacy": {
+            "type": "string"
+          },
+          "repositories_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "enterprise",
+              "organization"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "members_url",
+          "name",
+          "description",
+          "permission",
+          "html_url",
+          "repositories_url",
+          "slug",
+          "type"
+        ],
+        "title": "Team Simple",
+        "type": "object"
+      },
+      "pull-request": {
+        "properties": {
+          "_links": {
+            "properties": {
+              "comments": {
+                "$ref": "#/components/schemas/link"
+              },
+              "commits": {
+                "$ref": "#/components/schemas/link"
+              },
+              "html": {
+                "$ref": "#/components/schemas/link"
+              },
+              "issue": {
+                "$ref": "#/components/schemas/link"
+              },
+              "review_comment": {
+                "$ref": "#/components/schemas/link"
+              },
+              "review_comments": {
+                "$ref": "#/components/schemas/link"
+              },
+              "self": {
+                "$ref": "#/components/schemas/link"
+              },
+              "statuses": {
+                "$ref": "#/components/schemas/link"
+              }
+            },
+            "required": [
+              "comments",
+              "commits",
+              "statuses",
+              "html",
+              "issue",
+              "review_comments",
+              "review_comment",
+              "self"
+            ],
+            "type": "object"
+          },
+          "active_lock_reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "additions": {
+            "type": "integer"
+          },
+          "assignee": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          },
+          "assignees": {
+            "items": {
+              "$ref": "#/components/schemas/simple-user"
+            },
+            "type": "array"
+          },
+          "author_association": {
+            "$ref": "#/components/schemas/author-association"
+          },
+          "auto_merge": {
+            "$ref": "#/components/schemas/auto-merge"
+          },
+          "base": {
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "ref": {
+                "type": "string"
+              },
+              "repo": {
+                "$ref": "#/components/schemas/repository"
+              },
+              "sha": {
+                "type": "string"
+              },
+              "user": {
+                "$ref": "#/components/schemas/simple-user"
+              }
+            },
+            "required": [
+              "label",
+              "ref",
+              "repo",
+              "sha",
+              "user"
+            ],
+            "type": "object"
+          },
+          "body": {
+            "nullable": true,
+            "type": "string"
+          },
+          "changed_files": {
+            "type": "integer"
+          },
+          "closed_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "comments": {
+            "type": "integer"
+          },
+          "comments_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "commits": {
+            "type": "integer"
+          },
+          "commits_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "deletions": {
+            "type": "integer"
+          },
+          "diff_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "draft": {
+            "type": "boolean"
+          },
+          "head": {
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "ref": {
+                "type": "string"
+              },
+              "repo": {
+                "$ref": "#/components/schemas/repository"
+              },
+              "sha": {
+                "type": "string"
+              },
+              "user": {
+                "$ref": "#/components/schemas/simple-user"
+              }
+            },
+            "required": [
+              "label",
+              "ref",
+              "repo",
+              "sha",
+              "user"
+            ],
+            "type": "object"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "issue_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "labels": {
+            "items": {
+              "properties": {
+                "archived_by": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/simple-user"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "color": {
+                  "type": "string"
+                },
+                "default": {
+                  "type": "boolean"
+                },
+                "description": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "id": {
+                  "format": "int64",
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "node_id": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "node_id",
+                "url",
+                "name",
+                "description",
+                "color",
+                "default",
+                "archived_at",
+                "archived_by"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "maintainer_can_modify": {
+            "type": "boolean"
+          },
+          "merge_commit_sha": {
+            "nullable": true,
+            "type": "string"
+          },
+          "mergeable": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "mergeable_state": {
+            "type": "string"
+          },
+          "merged": {
+            "type": "boolean"
+          },
+          "merged_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "merged_by": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          },
+          "milestone": {
+            "$ref": "#/components/schemas/nullable-milestone"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "integer"
+          },
+          "patch_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "rebaseable": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "requested_reviewers": {
+            "items": {
+              "$ref": "#/components/schemas/simple-user"
+            },
+            "type": "array"
+          },
+          "requested_teams": {
+            "items": {
+              "$ref": "#/components/schemas/team-simple"
+            },
+            "type": "array"
+          },
+          "review_comment_url": {
+            "type": "string"
+          },
+          "review_comments": {
+            "type": "integer"
+          },
+          "review_comments_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "stack": {
+            "$ref": "#/components/schemas/pull-request-stack"
+          },
+          "state": {
+            "enum": [
+              "open",
+              "closed"
+            ],
+            "type": "string"
+          },
+          "statuses_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/simple-user"
+          }
+        },
+        "required": [
+          "_links",
+          "assignee",
+          "labels",
+          "base",
+          "body",
+          "closed_at",
+          "comments_url",
+          "commits_url",
+          "created_at",
+          "diff_url",
+          "head",
+          "html_url",
+          "id",
+          "node_id",
+          "issue_url",
+          "merge_commit_sha",
+          "merged_at",
+          "milestone",
+          "number",
+          "patch_url",
+          "review_comment_url",
+          "review_comments_url",
+          "statuses_url",
+          "state",
+          "locked",
+          "title",
+          "updated_at",
+          "url",
+          "user",
+          "author_association",
+          "auto_merge",
+          "additions",
+          "changed_files",
+          "comments",
+          "commits",
+          "deletions",
+          "mergeable",
+          "mergeable_state",
+          "merged",
+          "maintainer_can_modify",
+          "merged_by",
+          "review_comments"
+        ],
+        "title": "Pull Request",
+        "type": "object"
+      },
+      "pull-request-merge-result": {
+        "properties": {
+          "merged": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "sha": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "merged",
+          "message",
+          "sha"
+        ],
+        "title": "Pull Request Merge Result",
+        "type": "object"
+      },
+      "pull-request-simple": {
+        "properties": {
+          "_links": {
+            "properties": {
+              "comments": {
+                "$ref": "#/components/schemas/link"
+              },
+              "commits": {
+                "$ref": "#/components/schemas/link"
+              },
+              "html": {
+                "$ref": "#/components/schemas/link"
+              },
+              "issue": {
+                "$ref": "#/components/schemas/link"
+              },
+              "review_comment": {
+                "$ref": "#/components/schemas/link"
+              },
+              "review_comments": {
+                "$ref": "#/components/schemas/link"
+              },
+              "self": {
+                "$ref": "#/components/schemas/link"
+              },
+              "statuses": {
+                "$ref": "#/components/schemas/link"
+              }
+            },
+            "required": [
+              "comments",
+              "commits",
+              "statuses",
+              "html",
+              "issue",
+              "review_comments",
+              "review_comment",
+              "self"
+            ],
+            "type": "object"
+          },
+          "active_lock_reason": {
+            "nullable": true,
+            "type": "string"
+          },
+          "assignee": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          },
+          "assignees": {
+            "items": {
+              "$ref": "#/components/schemas/simple-user"
+            },
+            "type": "array"
+          },
+          "author_association": {
+            "$ref": "#/components/schemas/author-association"
+          },
+          "auto_merge": {
+            "$ref": "#/components/schemas/auto-merge"
+          },
+          "base": {
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "ref": {
+                "type": "string"
+              },
+              "repo": {
+                "$ref": "#/components/schemas/repository"
+              },
+              "sha": {
+                "type": "string"
+              },
+              "user": {
+                "$ref": "#/components/schemas/nullable-simple-user"
+              }
+            },
+            "required": [
+              "label",
+              "ref",
+              "repo",
+              "sha",
+              "user"
+            ],
+            "type": "object"
+          },
+          "body": {
+            "nullable": true,
+            "type": "string"
+          },
+          "closed_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "comments_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "commits_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "diff_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "draft": {
+            "type": "boolean"
+          },
+          "head": {
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "ref": {
+                "type": "string"
+              },
+              "repo": {
+                "$ref": "#/components/schemas/repository"
+              },
+              "sha": {
+                "type": "string"
+              },
+              "user": {
+                "$ref": "#/components/schemas/nullable-simple-user"
+              }
+            },
+            "required": [
+              "label",
+              "ref",
+              "repo",
+              "sha",
+              "user"
+            ],
+            "type": "object"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "issue_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "labels": {
+            "items": {
+              "properties": {
+                "archived_by": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/simple-user"
+                    }
+                  ],
+                  "nullable": true
+                },
+                "color": {
+                  "type": "string"
+                },
+                "default": {
+                  "type": "boolean"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "id": {
+                  "format": "int64",
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "node_id": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "node_id",
+                "url",
+                "name",
+                "description",
+                "color",
+                "default",
+                "archived_at",
+                "archived_by"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "locked": {
+            "type": "boolean"
+          },
+          "merge_commit_sha": {
+            "nullable": true,
+            "type": "string"
+          },
+          "merged_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "milestone": {
+            "$ref": "#/components/schemas/nullable-milestone"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "integer"
+          },
+          "patch_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "requested_reviewers": {
+            "items": {
+              "$ref": "#/components/schemas/simple-user"
+            },
+            "type": "array"
+          },
+          "requested_teams": {
+            "items": {
+              "$ref": "#/components/schemas/team"
+            },
+            "type": "array"
+          },
+          "review_comment_url": {
+            "type": "string"
+          },
+          "review_comments_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "stack": {
+            "$ref": "#/components/schemas/pull-request-stack"
+          },
+          "state": {
+            "type": "string"
+          },
+          "statuses_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/nullable-simple-user"
+          }
+        },
+        "required": [
+          "_links",
+          "assignee",
+          "labels",
+          "base",
+          "body",
+          "closed_at",
+          "comments_url",
+          "commits_url",
+          "created_at",
+          "diff_url",
+          "head",
+          "html_url",
+          "id",
+          "node_id",
+          "issue_url",
+          "merge_commit_sha",
+          "merged_at",
+          "milestone",
+          "number",
+          "patch_url",
+          "review_comment_url",
+          "review_comments_url",
+          "statuses_url",
+          "state",
+          "locked",
+          "title",
+          "updated_at",
+          "url",
+          "user",
+          "author_association",
+          "auto_merge"
+        ],
+        "title": "Pull Request Simple",
+        "type": "object"
+      },
+      "pull-request-stack": {
+        "nullable": true,
+        "properties": {
+          "base": {
+            "properties": {
+              "ref": {
+                "type": "string"
+              },
+              "sha": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ref",
+              "sha"
+            ],
+            "type": "object"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "number": {
+            "type": "integer"
+          },
+          "position": {
+            "type": "integer"
+          },
+          "size": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "base"
+        ],
+        "title": "Pull Request Stack",
+        "type": "object"
+      },
+      "reaction-rollup": {
+        "properties": {
+          "+1": {
+            "type": "integer"
+          },
+          "-1": {
+            "type": "integer"
+          },
+          "confused": {
+            "type": "integer"
+          },
+          "eyes": {
+            "type": "integer"
+          },
+          "heart": {
+            "type": "integer"
+          },
+          "hooray": {
+            "type": "integer"
+          },
+          "laugh": {
+            "type": "integer"
+          },
+          "rocket": {
+            "type": "integer"
+          },
+          "total_count": {
+            "type": "integer"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "total_count",
+          "+1",
+          "-1",
+          "laugh",
+          "confused",
+          "heart",
+          "hooray",
+          "eyes",
+          "rocket"
+        ],
+        "title": "Reaction Rollup",
+        "type": "object"
+      },
+      "repository": {
+        "properties": {
+          "allow_auto_merge": {
+            "default": false,
+            "type": "boolean"
+          },
+          "allow_forking": {
+            "type": "boolean"
+          },
+          "allow_merge_commit": {
+            "default": true,
+            "type": "boolean"
+          },
+          "allow_rebase_merge": {
+            "default": true,
+            "type": "boolean"
+          },
+          "allow_squash_merge": {
+            "default": true,
+            "type": "boolean"
+          },
+          "allow_update_branch": {
+            "default": false,
+            "type": "boolean"
+          },
+          "anonymous_access_enabled": {
+            "type": "boolean"
+          },
+          "archive_url": {
+            "type": "string"
+          },
+          "archived": {
+            "default": false,
+            "type": "boolean"
+          },
+          "assignees_url": {
+            "type": "string"
+          },
+          "blobs_url": {
+            "type": "string"
+          },
+          "branches_url": {
+            "type": "string"
+          },
+          "clone_url": {
+            "type": "string"
+          },
+          "code_search_index_status": {
+            "properties": {
+              "lexical_commit_sha": {
+                "type": "string"
+              },
+              "lexical_search_ok": {
+                "type": "boolean"
+              }
+            },
+            "type": "object"
+          },
+          "collaborators_url": {
+            "type": "string"
+          },
+          "comments_url": {
+            "type": "string"
+          },
+          "commits_url": {
+            "type": "string"
+          },
+          "compare_url": {
+            "type": "string"
+          },
+          "contents_url": {
+            "type": "string"
+          },
+          "contributors_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "default_branch": {
+            "type": "string"
+          },
+          "delete_branch_on_merge": {
+            "default": false,
+            "type": "boolean"
+          },
+          "deployments_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "downloads_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "events_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "fork": {
+            "type": "boolean"
+          },
+          "forks": {
+            "type": "integer"
+          },
+          "forks_count": {
+            "type": "integer"
+          },
+          "forks_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "full_name": {
+            "type": "string"
+          },
+          "git_commits_url": {
+            "type": "string"
+          },
+          "git_refs_url": {
+            "type": "string"
+          },
+          "git_tags_url": {
+            "type": "string"
+          },
+          "git_url": {
+            "type": "string"
+          },
+          "has_discussions": {
+            "default": false,
+            "type": "boolean"
+          },
+          "has_downloads": {
+            "default": true,
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "has_issues": {
+            "default": true,
+            "type": "boolean"
+          },
+          "has_pages": {
+            "type": "boolean"
+          },
+          "has_projects": {
+            "default": true,
+            "type": "boolean"
+          },
+          "has_pull_requests": {
+            "default": true,
+            "type": "boolean"
+          },
+          "has_wiki": {
+            "default": true,
+            "type": "boolean"
+          },
+          "homepage": {
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "hooks_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "is_template": {
+            "default": false,
+            "type": "boolean"
+          },
+          "issue_comment_url": {
+            "type": "string"
+          },
+          "issue_events_url": {
+            "type": "string"
+          },
+          "issues_url": {
+            "type": "string"
+          },
+          "keys_url": {
+            "type": "string"
+          },
+          "labels_url": {
+            "type": "string"
+          },
+          "language": {
+            "nullable": true,
+            "type": "string"
+          },
+          "languages_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "license": {
+            "$ref": "#/components/schemas/nullable-license-simple"
+          },
+          "master_branch": {
+            "type": "string"
+          },
+          "merge_commit_message": {
+            "enum": [
+              "PR_BODY",
+              "PR_TITLE",
+              "BLANK"
+            ],
+            "type": "string"
+          },
+          "merge_commit_title": {
+            "enum": [
+              "PR_TITLE",
+              "MERGE_MESSAGE"
+            ],
+            "type": "string"
+          },
+          "merges_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "milestones_url": {
+            "type": "string"
+          },
+          "mirror_url": {
+            "format": "uri",
+            "nullable": true,
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "notifications_url": {
+            "type": "string"
+          },
+          "open_issues": {
+            "type": "integer"
+          },
+          "open_issues_count": {
+            "type": "integer"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/simple-user"
+          },
+          "permissions": {
+            "properties": {
+              "admin": {
+                "type": "boolean"
+              },
+              "maintain": {
+                "type": "boolean"
+              },
+              "pull": {
+                "type": "boolean"
+              },
+              "push": {
+                "type": "boolean"
+              },
+              "triage": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "admin",
+              "pull",
+              "push"
+            ],
+            "type": "object"
+          },
+          "private": {
+            "default": false,
+            "type": "boolean"
+          },
+          "pull_request_creation_policy": {
+            "enum": [
+              "all",
+              "collaborators_only"
+            ],
+            "type": "string"
+          },
+          "pulls_url": {
+            "type": "string"
+          },
+          "pushed_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "releases_url": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer"
+          },
+          "squash_merge_commit_message": {
+            "enum": [
+              "PR_BODY",
+              "COMMIT_MESSAGES",
+              "BLANK"
+            ],
+            "type": "string"
+          },
+          "squash_merge_commit_title": {
+            "enum": [
+              "PR_TITLE",
+              "COMMIT_OR_PR_TITLE"
+            ],
+            "type": "string"
+          },
+          "ssh_url": {
+            "type": "string"
+          },
+          "stargazers_count": {
+            "type": "integer"
+          },
+          "stargazers_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "starred_at": {
+            "type": "string"
+          },
+          "statuses_url": {
+            "type": "string"
+          },
+          "subscribers_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "subscription_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "svn_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "tags_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "teams_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "temp_clone_token": {
+            "type": "string"
+          },
+          "topics": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "trees_url": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "use_squash_pr_title_as_default": {
+            "default": false,
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "visibility": {
+            "default": "public",
+            "type": "string"
+          },
+          "watchers": {
+            "type": "integer"
+          },
+          "watchers_count": {
+            "type": "integer"
+          },
+          "web_commit_signoff_required": {
+            "default": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "archive_url",
+          "assignees_url",
+          "blobs_url",
+          "branches_url",
+          "collaborators_url",
+          "comments_url",
+          "commits_url",
+          "compare_url",
+          "contents_url",
+          "contributors_url",
+          "deployments_url",
+          "description",
+          "downloads_url",
+          "events_url",
+          "fork",
+          "forks_url",
+          "full_name",
+          "git_commits_url",
+          "git_refs_url",
+          "git_tags_url",
+          "hooks_url",
+          "html_url",
+          "id",
+          "node_id",
+          "issue_comment_url",
+          "issue_events_url",
+          "issues_url",
+          "keys_url",
+          "labels_url",
+          "languages_url",
+          "merges_url",
+          "milestones_url",
+          "name",
+          "notifications_url",
+          "owner",
+          "private",
+          "pulls_url",
+          "releases_url",
+          "stargazers_url",
+          "statuses_url",
+          "subscribers_url",
+          "subscription_url",
+          "tags_url",
+          "teams_url",
+          "trees_url",
+          "url",
+          "clone_url",
+          "default_branch",
+          "forks",
+          "forks_count",
+          "git_url",
+          "has_downloads",
+          "has_issues",
+          "has_projects",
+          "has_wiki",
+          "has_pages",
+          "homepage",
+          "language",
+          "archived",
+          "disabled",
+          "mirror_url",
+          "open_issues",
+          "open_issues_count",
+          "license",
+          "pushed_at",
+          "size",
+          "ssh_url",
+          "stargazers_count",
+          "svn_url",
+          "watchers",
+          "watchers_count",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Repository",
+        "type": "object"
+      },
+      "repository-rule-violation-error": {
+        "properties": {
+          "documentation_url": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "metadata": {
+            "properties": {
+              "secret_scanning": {
+                "properties": {
+                  "bypass_placeholders": {
+                    "items": {
+                      "properties": {
+                        "placeholder_id": {
+                          "$ref": "#/components/schemas/secret-scanning-push-protection-bypass-placeholder-id"
+                        },
+                        "token_type": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "scim-error": {
+        "properties": {
+          "detail": {
+            "nullable": true,
+            "type": "string"
+          },
+          "documentation_url": {
+            "nullable": true,
+            "type": "string"
+          },
+          "message": {
+            "nullable": true,
+            "type": "string"
+          },
+          "schemas": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scimType": {
+            "nullable": true,
+            "type": "string"
+          },
+          "status": {
+            "type": "integer"
+          }
+        },
+        "title": "Scim Error",
+        "type": "object"
+      },
+      "secret-scanning-push-protection-bypass-placeholder-id": {
+        "type": "string"
+      },
+      "simple-user": {
+        "properties": {
+          "avatar_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "email": {
+            "nullable": true,
+            "type": "string"
+          },
+          "events_url": {
+            "type": "string"
+          },
+          "followers_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "following_url": {
+            "type": "string"
+          },
+          "gists_url": {
+            "type": "string"
+          },
+          "gravatar_id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "login": {
+            "type": "string"
+          },
+          "name": {
+            "nullable": true,
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "organizations_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "received_events_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "repos_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "site_admin": {
+            "type": "boolean"
+          },
+          "starred_at": {
+            "type": "string"
+          },
+          "starred_url": {
+            "type": "string"
+          },
+          "subscriptions_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "user_view_type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "avatar_url",
+          "events_url",
+          "followers_url",
+          "following_url",
+          "gists_url",
+          "gravatar_id",
+          "html_url",
+          "id",
+          "node_id",
+          "login",
+          "organizations_url",
+          "received_events_url",
+          "repos_url",
+          "site_admin",
+          "starred_url",
+          "subscriptions_url",
+          "type",
+          "url"
+        ],
+        "title": "Simple User",
+        "type": "object"
+      },
+      "sub-issues-summary": {
+        "properties": {
+          "completed": {
+            "type": "integer"
+          },
+          "percent_completed": {
+            "type": "integer"
+          },
+          "total": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "completed",
+          "percent_completed"
+        ],
+        "title": "Sub-issues Summary",
+        "type": "object"
+      },
+      "team": {
+        "properties": {
+          "access_source": {
+            "enum": [
+              "direct",
+              "organization",
+              "enterprise"
+            ],
+            "type": "string"
+          },
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enterprise_id": {
+            "type": "integer"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "members_url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "notification_setting": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "integer"
+          },
+          "parent": {
+            "$ref": "#/components/schemas/nullable-team-simple"
+          },
+          "permission": {
+            "type": "string"
+          },
+          "permissions": {
+            "properties": {
+              "admin": {
+                "type": "boolean"
+              },
+              "maintain": {
+                "type": "boolean"
+              },
+              "pull": {
+                "type": "boolean"
+              },
+              "push": {
+                "type": "boolean"
+              },
+              "triage": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "pull",
+              "triage",
+              "push",
+              "maintain",
+              "admin"
+            ],
+            "type": "object"
+          },
+          "privacy": {
+            "type": "string"
+          },
+          "repositories_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "enterprise",
+              "organization"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "members_url",
+          "name",
+          "description",
+          "permission",
+          "html_url",
+          "repositories_url",
+          "slug",
+          "parent",
+          "type"
+        ],
+        "title": "Team",
+        "type": "object"
+      },
+      "team-simple": {
+        "properties": {
+          "description": {
+            "nullable": true,
+            "type": "string"
+          },
+          "enterprise_id": {
+            "type": "integer"
+          },
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "ldap_dn": {
+            "type": "string"
+          },
+          "members_url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "node_id": {
+            "type": "string"
+          },
+          "notification_setting": {
+            "type": "string"
+          },
+          "organization_id": {
+            "type": "integer"
+          },
+          "permission": {
+            "type": "string"
+          },
+          "privacy": {
+            "type": "string"
+          },
+          "repositories_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "enterprise",
+              "organization"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "node_id",
+          "url",
+          "members_url",
+          "name",
+          "description",
+          "permission",
+          "html_url",
+          "repositories_url",
+          "slug",
+          "type"
+        ],
+        "title": "Team Simple",
+        "type": "object"
+      },
+      "validation-error": {
+        "properties": {
+          "documentation_url": {
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "field": {
+                  "type": "string"
+                },
+                "index": {
+                  "type": "integer"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "resource": {
+                  "type": "string"
+                },
+                "value": {
+                  "oneOf": [
+                    {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "nullable": true,
+                      "type": "integer"
+                    },
+                    {
+                      "items": {
+                        "type": "string"
+                      },
+                      "nullable": true,
+                      "type": "array"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "code"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message",
+          "documentation_url"
+        ],
+        "title": "Validation Error",
+        "type": "object"
+      },
+      "workflow-dispatch-response": {
+        "properties": {
+          "html_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "run_url": {
+            "format": "uri",
+            "type": "string"
+          },
+          "workflow_run_id": {
+            "$ref": "#/components/schemas/workflow-run-id"
+          }
+        },
+        "required": [
+          "workflow_run_id",
+          "run_url",
+          "html_url"
+        ],
+        "title": "Workflow Dispatch Response",
+        "type": "object"
+      },
+      "workflow-run-id": {
+        "format": "int64",
+        "title": "Workflow Run ID",
+        "type": "integer"
+      }
+    }
+  },
+  "info": {
+    "title": "GitHub v3 REST API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches": {
+      "post": {
+        "operationId": "actions/create-workflow-dispatch",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/workflow-id"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "inputs": {
+                    "additionalProperties": true,
+                    "maxProperties": 25,
+                    "type": "object"
+                  },
+                  "ref": {
+                    "type": "string"
+                  },
+                  "return_run_details": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "ref"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/workflow-dispatch-response"
+                }
+              }
+            }
+          },
+          "204": {}
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/contents/{path}": {
+      "put": {
+        "operationId": "repos/create-or-update-file-contents",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "in": "path",
+            "name": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "author": {
+                    "properties": {
+                      "date": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "email"
+                    ],
+                    "type": "object"
+                  },
+                  "branch": {
+                    "type": "string"
+                  },
+                  "committer": {
+                    "properties": {
+                      "date": {
+                        "type": "string"
+                      },
+                      "email": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "email"
+                    ],
+                    "type": "object"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "message": {
+                    "type": "string"
+                  },
+                  "sha": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "message",
+                  "content"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/file-commit"
+                }
+              }
+            }
+          },
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/file-commit"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/basic-error"
+                    },
+                    {
+                      "$ref": "#/components/schemas/repository-rule-violation-error"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/validation_failed"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/git/refs": {
+      "post": {
+        "operationId": "git/create-ref",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "ref": {
+                    "type": "string"
+                  },
+                  "sha": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "ref",
+                  "sha"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/git-ref"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "$ref": "#/components/responses/conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/validation_failed"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/issues": {
+      "post": {
+        "operationId": "issues/create",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "assignee": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "assignees": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "body": {
+                    "type": "string"
+                  },
+                  "issue_field_values": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "field_id": {
+                          "type": "integer"
+                        },
+                        "value": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "field_id",
+                        "value"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "labels": {
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "properties": {
+                            "color": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "description": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "id": {
+                              "type": "integer"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "type": "array"
+                  },
+                  "milestone": {
+                    "nullable": true,
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  },
+                  "parent_issue_id": {
+                    "type": "integer"
+                  },
+                  "title": {
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  },
+                  "type": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "title"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/issue"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/bad_request"
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "410": {
+            "$ref": "#/components/responses/gone"
+          },
+          "422": {
+            "$ref": "#/components/responses/validation_failed"
+          },
+          "503": {
+            "$ref": "#/components/responses/service_unavailable"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/issues/{issue_number}": {
+      "patch": {
+        "operationId": "issues/update",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/issue-number"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "assignee": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "assignees": {
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "properties": {
+                            "confidence": {
+                              "enum": [
+                                "low",
+                                "medium",
+                                "high"
+                              ],
+                              "type": "string"
+                            },
+                            "login": {
+                              "type": "string"
+                            },
+                            "rationale": {
+                              "type": "string"
+                            },
+                            "suggest": {
+                              "type": "boolean"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "type": "array"
+                  },
+                  "body": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "duplicate_issue_id": {
+                    "type": "integer"
+                  },
+                  "issue_field_values": {
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "confidence": {
+                          "enum": [
+                            "low",
+                            "medium",
+                            "high"
+                          ],
+                          "type": "string"
+                        },
+                        "field_id": {
+                          "type": "integer"
+                        },
+                        "rationale": {
+                          "type": "string"
+                        },
+                        "suggest": {
+                          "type": "boolean"
+                        },
+                        "value": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "items": {
+                                "type": "string"
+                              },
+                              "type": "array"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "field_id",
+                        "value"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "labels": {
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "properties": {
+                            "color": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "confidence": {
+                              "enum": [
+                                "low",
+                                "medium",
+                                "high"
+                              ],
+                              "type": "string"
+                            },
+                            "description": {
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            "id": {
+                              "type": "integer"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "rationale": {
+                              "type": "string"
+                            },
+                            "suggest": {
+                              "type": "boolean"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "type": "array"
+                  },
+                  "milestone": {
+                    "nullable": true,
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  },
+                  "state": {
+                    "enum": [
+                      "open",
+                      "closed"
+                    ],
+                    "type": "string"
+                  },
+                  "state_reason": {
+                    "enum": [
+                      "completed",
+                      "not_planned",
+                      "duplicate",
+                      "reopened"
+                    ],
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "title": {
+                    "nullable": true,
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  },
+                  "type": {
+                    "nullable": true,
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "properties": {
+                          "confidence": {
+                            "enum": [
+                              "low",
+                              "medium",
+                              "high"
+                            ],
+                            "type": "string"
+                          },
+                          "rationale": {
+                            "type": "string"
+                          },
+                          "suggest": {
+                            "type": "boolean"
+                          },
+                          "value": {
+                            "nullable": true,
+                            "type": "string"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/issue"
+                    },
+                    {
+                      "properties": {
+                        "suggestions": {
+                          "properties": {
+                            "assignees": {
+                              "items": {
+                                "properties": {
+                                  "confidence": {
+                                    "enum": [
+                                      "low",
+                                      "medium",
+                                      "high"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "ignored": {
+                                    "type": "boolean"
+                                  },
+                                  "ignored_reason": {
+                                    "enum": [
+                                      "already_applied",
+                                      "issue_already_closed"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "login": {
+                                    "type": "string"
+                                  },
+                                  "rationale": {
+                                    "type": "string"
+                                  },
+                                  "suggest": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "issue_field_values": {
+                              "items": {
+                                "properties": {
+                                  "confidence": {
+                                    "enum": [
+                                      "low",
+                                      "medium",
+                                      "high"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "field_id": {
+                                    "type": "integer"
+                                  },
+                                  "ignored": {
+                                    "type": "boolean"
+                                  },
+                                  "ignored_reason": {
+                                    "enum": [
+                                      "already_applied",
+                                      "issue_already_closed"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "rationale": {
+                                    "type": "string"
+                                  },
+                                  "suggest": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "oneOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "labels": {
+                              "items": {
+                                "properties": {
+                                  "confidence": {
+                                    "enum": [
+                                      "low",
+                                      "medium",
+                                      "high"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "ignored": {
+                                    "type": "boolean"
+                                  },
+                                  "ignored_reason": {
+                                    "enum": [
+                                      "already_applied",
+                                      "issue_already_closed"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "rationale": {
+                                    "type": "string"
+                                  },
+                                  "suggest": {
+                                    "type": "boolean"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "state": {
+                              "items": {
+                                "properties": {
+                                  "confidence": {
+                                    "enum": [
+                                      "low",
+                                      "medium",
+                                      "high"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "duplicate_issue_id": {
+                                    "type": "integer"
+                                  },
+                                  "ignored": {
+                                    "type": "boolean"
+                                  },
+                                  "ignored_reason": {
+                                    "enum": [
+                                      "already_applied",
+                                      "issue_already_closed"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "rationale": {
+                                    "type": "string"
+                                  },
+                                  "state_reason": {
+                                    "type": "string"
+                                  },
+                                  "suggest": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            },
+                            "type": {
+                              "items": {
+                                "properties": {
+                                  "confidence": {
+                                    "enum": [
+                                      "low",
+                                      "medium",
+                                      "high"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "ignored": {
+                                    "type": "boolean"
+                                  },
+                                  "ignored_reason": {
+                                    "enum": [
+                                      "already_applied",
+                                      "issue_already_closed"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  "rationale": {
+                                    "type": "string"
+                                  },
+                                  "suggest": {
+                                    "type": "boolean"
+                                  },
+                                  "value": {
+                                    "type": "string"
+                                  }
+                                },
+                                "type": "object"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "301": {
+            "$ref": "#/components/responses/moved_permanently"
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "410": {
+            "$ref": "#/components/responses/gone"
+          },
+          "422": {
+            "$ref": "#/components/responses/validation_failed"
+          },
+          "503": {
+            "$ref": "#/components/responses/service_unavailable"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/issues/{issue_number}/assignees": {
+      "post": {
+        "operationId": "issues/add-assignees",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/issue-number"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "assignees": {
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "properties": {
+                            "confidence": {
+                              "enum": [
+                                "low",
+                                "medium",
+                                "high"
+                              ],
+                              "type": "string"
+                            },
+                            "login": {
+                              "type": "string"
+                            },
+                            "rationale": {
+                              "type": "string"
+                            },
+                            "suggest": {
+                              "type": "boolean"
+                            }
+                          },
+                          "required": [
+                            "login"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/issue"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/issues/{issue_number}/comments": {
+      "post": {
+        "operationId": "issues/create-comment",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/issue-number"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "body": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "body"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/issue-comment"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "410": {
+            "$ref": "#/components/responses/gone"
+          },
+          "422": {
+            "$ref": "#/components/responses/validation_failed"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/issues/{issue_number}/labels": {
+      "post": {
+        "operationId": "issues/add-labels",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/issue-number"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "properties": {
+                      "labels": {
+                        "items": {
+                          "oneOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "properties": {
+                                "confidence": {
+                                  "enum": [
+                                    "low",
+                                    "medium",
+                                    "high"
+                                  ],
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "rationale": {
+                                  "type": "string"
+                                },
+                                "suggest": {
+                                  "type": "boolean"
+                                }
+                              },
+                              "required": [
+                                "name"
+                              ],
+                              "type": "object"
+                            }
+                          ]
+                        },
+                        "minItems": 1,
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  {
+                    "items": {
+                      "properties": {
+                        "confidence": {
+                          "enum": [
+                            "low",
+                            "medium",
+                            "high"
+                          ],
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "rationale": {
+                          "type": "string"
+                        },
+                        "suggest": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "name"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  }
+                ]
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/label"
+                  },
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "301": {
+            "$ref": "#/components/responses/moved_permanently"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "410": {
+            "$ref": "#/components/responses/gone"
+          },
+          "422": {
+            "$ref": "#/components/responses/validation_failed"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/pulls": {
+      "post": {
+        "operationId": "pulls/create",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "base": {
+                    "type": "string"
+                  },
+                  "body": {
+                    "type": "string"
+                  },
+                  "draft": {
+                    "type": "boolean"
+                  },
+                  "head": {
+                    "type": "string"
+                  },
+                  "head_repo": {
+                    "format": "repo.nwo",
+                    "type": "string"
+                  },
+                  "issue": {
+                    "format": "int64",
+                    "type": "integer"
+                  },
+                  "maintainer_can_modify": {
+                    "type": "boolean"
+                  },
+                  "title": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "head",
+                  "base"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pull-request"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/validation_failed"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/pulls/{pull_number}": {
+      "patch": {
+        "operationId": "pulls/update",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/pull-number"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "base": {
+                    "type": "string"
+                  },
+                  "body": {
+                    "type": "string"
+                  },
+                  "maintainer_can_modify": {
+                    "type": "boolean"
+                  },
+                  "state": {
+                    "enum": [
+                      "open",
+                      "closed"
+                    ],
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pull-request"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "422": {
+            "$ref": "#/components/responses/validation_failed"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/pulls/{pull_number}/merge": {
+      "put": {
+        "operationId": "pulls/merge",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/pull-number"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "nullable": true,
+                "properties": {
+                  "commit_message": {
+                    "type": "string"
+                  },
+                  "commit_title": {
+                    "type": "string"
+                  },
+                  "merge_method": {
+                    "enum": [
+                      "merge",
+                      "squash",
+                      "rebase"
+                    ],
+                    "type": "string"
+                  },
+                  "sha": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pull-request-merge-result"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/not_found"
+          },
+          "405": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "documentation_url": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "documentation_url": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "422": {
+            "$ref": "#/components/responses/validation_failed"
+          }
+        }
+      }
+    },
+    "/repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers": {
+      "post": {
+        "operationId": "pulls/request-reviewers",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/owner"
+          },
+          {
+            "$ref": "#/components/parameters/repo"
+          },
+          {
+            "$ref": "#/components/parameters/pull-number"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "reviewers"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "team_reviewers"
+                    ]
+                  }
+                ],
+                "properties": {
+                  "reviewers": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "team_reviewers": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/pull-request-simple"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/forbidden"
+          },
+          "422": {},
+          "503": {
+            "$ref": "#/components/responses/service_unavailable"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.github.com"
+    }
+  ]
+}

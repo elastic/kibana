@@ -19,7 +19,7 @@ export function ProfilingNotEnabledView() {
         title={
           <h2>
             {i18n.translate('xpack.profiling.profilingNotEnabled.title', {
-              defaultMessage: 'Universal Profiling is not enabled in Elasticsearch',
+              defaultMessage: 'Profiling is not enabled in Elasticsearch',
             })}
           </h2>
         }
@@ -27,7 +27,7 @@ export function ProfilingNotEnabledView() {
           <p>
             {i18n.translate('xpack.profiling.profilingNotEnabled.description', {
               defaultMessage:
-                'The current Elasticsearch cluster has Universal Profiling disabled. Contact your administrator to enable profiling resources and try again.',
+                'The current Elasticsearch cluster has Profiling disabled. Contact your administrator to enable profiling resources and try again.',
             })}
           </p>
         }

@@ -46,7 +46,7 @@ export function TransactionDetailLink({ transactionName, href, ...rest }: Props)
           iconType="warning"
         >
           <EuiText style={{ width: `${unit * 28}px` }} size="s">
-            <MaxGroupsMessage />
+            <MaxGroupsMessage type="transactions" />
           </EuiText>
         </PopoverTooltip>
       </EuiFlexItem>

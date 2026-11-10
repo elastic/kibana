@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { NIGHTSHIFT_FEATURE_ID, NIGHTSHIFT_SOURCE_VIEW_PREFIX } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_FEATURE_ID,
+  NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID,
+  NIGHTSHIFT_SOURCE_VIEW_PREFIX,
+} from '@kbn/nightshift-shared';
 import type { KibanaRole } from '@kbn/scout-oblt';
 
 export const COMMON_HEADERS = {
@@ -18,9 +22,10 @@ export const SOURCES_PATH = 'internal/nightshift/sources';
 
 /**
  * Test data indices are created under this prefix so roles can be scoped to them. It avoids
- * `logs-*` on purpose: that template only allows data streams.
+ * `logs-*` on purpose because that template only allows data streams.
  */
 export const TEST_INDEX_PREFIX = 'nightshift-sources-test-';
+export const RECOMMENDED_SOURCE_TEST_INDEX_PREFIX = 'logsnightshift-sources-recommendation-test-';
 
 const VIEW_NAME_PATTERN = `${NIGHTSHIFT_SOURCE_VIEW_PREFIX}*`;
 
@@ -32,7 +37,7 @@ const VIEW_READ_PRIVILEGES = {
   privileges: ['read', 'read_view_metadata'],
 };
 const TEST_DATA_READ_PRIVILEGES = {
-  names: [`${TEST_INDEX_PREFIX}*`],
+  names: [`${TEST_INDEX_PREFIX}*`, `${RECOMMENDED_SOURCE_TEST_INDEX_PREFIX}*`],
   privileges: ['read', 'view_index_metadata'],
 };
 
@@ -41,6 +46,21 @@ export const NIGHTSHIFT_MANAGER_ROLE: KibanaRole = {
     cluster: [],
     indices: [VIEW_MANAGE_PRIVILEGES, TEST_DATA_READ_PRIVILEGES],
   },
+  kibana: [
+    {
+      base: [],
+      feature: { [NIGHTSHIFT_FEATURE_ID]: ['all', NIGHTSHIFT_MANAGE_ENGINES_SUB_FEATURE_ID] },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/**
+ * Nightshift `all` without the Manage engines sub-feature: manage but not configure. Has every
+ * Elasticsearch privilege the manager has, so a 403 can only come from the Kibana privilege.
+ */
+export const NIGHTSHIFT_MANAGE_ONLY_ROLE: KibanaRole = {
+  elasticsearch: NIGHTSHIFT_MANAGER_ROLE.elasticsearch,
   kibana: [{ base: [], feature: { [NIGHTSHIFT_FEATURE_ID]: ['all'] }, spaces: ['*'] }],
 };
 

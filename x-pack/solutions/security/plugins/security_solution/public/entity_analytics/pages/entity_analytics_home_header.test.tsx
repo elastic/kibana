@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
@@ -14,6 +14,7 @@ import { ADD_INTEGRATIONS_MENU_ITEM_TEST_ID } from '../../common/components/app_
 import { TestProviders } from '../../common/mock';
 import {
   ENTITY_ANALYTICS_HOME_MANAGEMENT_MENU_ITEM_TEST_ID,
+  ENTITY_ANALYTICS_HOME_PRODUCT_TOUR_MENU_ITEM_TEST_ID,
   EntityAnalyticsHomeHeader,
 } from './entity_analytics_home_header';
 
@@ -53,5 +54,25 @@ describe('EntityAnalyticsHomeHeader', () => {
     expect(settingsItem.compareDocumentPosition(documentationItem)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     );
+  });
+
+  it('does not render the product tour menu item without onStartTour', async () => {
+    render(<EntityAnalyticsHomeHeader />, { wrapper: Wrapper });
+
+    await openAppMenuOverflow();
+
+    expect(
+      screen.queryByTestId(ENTITY_ANALYTICS_HOME_PRODUCT_TOUR_MENU_ITEM_TEST_ID)
+    ).not.toBeInTheDocument();
+  });
+
+  it('starts the product tour from the menu', async () => {
+    const onStartTour = jest.fn();
+    render(<EntityAnalyticsHomeHeader onStartTour={onStartTour} />, { wrapper: Wrapper });
+
+    await openAppMenuOverflow();
+    fireEvent.click(screen.getByTestId(ENTITY_ANALYTICS_HOME_PRODUCT_TOUR_MENU_ITEM_TEST_ID));
+
+    expect(onStartTour).toHaveBeenCalledTimes(1);
   });
 });

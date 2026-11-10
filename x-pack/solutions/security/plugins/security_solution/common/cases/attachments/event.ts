@@ -14,7 +14,7 @@ import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
  *
  * Named `SecurityEventAttachmentMetadataSchema` to disambiguate from the
  * legacy non-unified `EventAttachmentPayload` defined in
- * `@kbn/cases-plugin/common/types/domain_zod/attachment/v1`.
+ * `@kbn/cases-plugin/common/types/domain/attachment/v1`.
  */
 export const SecurityEventAttachmentMetadataSchema = z
   .object({

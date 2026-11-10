@@ -6,7 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 
 export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
 

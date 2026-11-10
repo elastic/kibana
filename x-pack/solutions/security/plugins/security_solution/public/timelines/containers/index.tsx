@@ -87,7 +87,16 @@ export interface EqlShardFailure {
 
 type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
 
-type TimelineEventsSearchHandler = (onNextResponse?: OnNextResponseHandler) => void;
+/**
+ * Called when a search requested through the handler fails, or cannot start because no request
+ * has been built yet (e.g. no index names or no filter query).
+ */
+type OnSearchErrorHandler = (error: unknown) => void;
+
+type TimelineEventsSearchHandler = (
+  onNextResponse?: OnNextResponseHandler,
+  onError?: OnSearchErrorHandler
+) => void;
 
 type LoadPage = () => void;
 
@@ -302,9 +311,11 @@ export const useTimelineEventsHandler = ({
   const timelineSearch = useCallback(
     async (
       request: TimelineRequest<typeof language> | null,
-      onNextHandler?: OnNextResponseHandler
+      onNextHandler?: OnNextResponseHandler,
+      onErrorHandler?: OnSearchErrorHandler
     ) => {
       if (request == null || pageName === '' || skip) {
+        onErrorHandler?.(new Error('The timeline events search could not start.'));
         return;
       }
 
@@ -372,6 +383,7 @@ export const useTimelineEventsHandler = ({
 
               setLoading(DataLoadingState.loaded);
               data.search.showError(msg);
+              onErrorHandler?.(msg);
               searchSubscription$.current.unsubscribe();
             },
           });
@@ -573,13 +585,13 @@ export const useTimelineEventsHandler = ({
   }, [defaultTimelineResponse, filterQuery]);
 
   const timelineSearchHandler = useCallback(
-    async (onNextHandler?: OnNextResponseHandler) => {
+    async (onNextHandler?: OnNextResponseHandler, onErrorHandler?: OnSearchErrorHandler) => {
       if (
         id !== TimelineId.active ||
         timerangeKind === 'absolute' ||
         !deepEqual(prevTimelineRequest.current, timelineRequest)
       ) {
-        await timelineSearch(timelineRequest, onNextHandler);
+        await timelineSearch(timelineRequest, onNextHandler, onErrorHandler);
       }
     },
     [id, timelineRequest, timelineSearch, timerangeKind]

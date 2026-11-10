@@ -12,8 +12,13 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
+import type { RelatedEpisodesScope } from '../../../queries/related_episodes_query';
 import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '../../../constants';
 import { useFetchEpisodeActions } from '../../../hooks/use_fetch_episode_actions';
+import {
+  useFetchEpisodesDataQuery,
+  withEpisodesData,
+} from '../../../hooks/use_fetch_episodes_data_query';
 import { getGroupAction, useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
 import { useFetchSameRuleEpisodesQuery } from '../../../hooks/use_fetch_same_rule_episodes_query';
 import { AlertEpisodeCardListSkeleton } from '../section_skeletons';
@@ -30,6 +35,7 @@ export interface RelatedEpisodesRuleSubsectionProps {
   currentEpisodeId: string | undefined;
   currentGroupHash: string | undefined;
   ruleState: RuleState;
+  scope: RelatedEpisodesScope;
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**
    * When `true`, drop the inner horizontal padding so the subsection sits
@@ -39,13 +45,34 @@ export interface RelatedEpisodesRuleSubsectionProps {
   compressed?: boolean;
 }
 
+const getTitle = (scope: RelatedEpisodesScope, currentGroupHash: string | undefined) => {
+  if (scope.type === 'source') {
+    return currentGroupHash
+      ? i18n.RELATED_OTHER_GROUPS_SOURCE_TITLE
+      : i18n.RELATED_SOURCE_ONLY_LIST_TITLE;
+  }
+  return currentGroupHash ? i18n.RELATED_OTHER_GROUPS_TITLE : i18n.RELATED_RULE_ONLY_LIST_TITLE;
+};
+
+const getDescription = (scope: RelatedEpisodesScope, currentGroupHash: string | undefined) => {
+  if (scope.type === 'source') {
+    return currentGroupHash
+      ? i18n.RELATED_OTHER_GROUPS_SOURCE_DESCRIPTION
+      : i18n.RELATED_SOURCE_ONLY_LIST_DESCRIPTION;
+  }
+  return currentGroupHash
+    ? i18n.RELATED_OTHER_GROUPS_DESCRIPTION
+    : i18n.RELATED_RULE_ONLY_LIST_DESCRIPTION;
+};
+
 /**
- * Related episodes for the same rule: other group_hash values, or all other rule episodes if there is no group.
+ * Related episodes for the same rule (or the same source when there is no rule): other group_hash values, or all other rule episodes if there is no group.
  */
 export function RelatedEpisodesRuleSubsection({
   currentEpisodeId,
   currentGroupHash,
   ruleState,
+  scope,
   getEpisodeDetailsHref,
   compressed = false,
 }: RelatedEpisodesRuleSubsectionProps) {
@@ -64,7 +91,7 @@ export function RelatedEpisodesRuleSubsection({
 
   const { data: otherGroupRows = [], isLoading: isLoadingOtherGroupRows } =
     useFetchSameRuleEpisodesQuery({
-      ruleId,
+      scope,
       excludeEpisodeId: currentEpisodeId,
       pageSize: RELATED_ALERT_EPISODES_PAGE_SIZE,
       currentGroupHash,
@@ -86,6 +113,17 @@ export function RelatedEpisodesRuleSubsection({
     [otherGroupRows]
   );
 
+  // Loaded on its own, so the rows show up without waiting for it. Without the
+  // data the rows just miss the grouping badges.
+  const { data: otherEpisodesData } = useFetchEpisodesDataQuery({
+    episodeIds: otherEpisodeIds,
+    services: { expressions, spaces },
+  });
+  const otherGroupRowsWithData = useMemo(
+    () => withEpisodesData(otherGroupRows, otherEpisodesData),
+    [otherGroupRows, otherEpisodesData]
+  );
+
   const { data: otherEpisodeActionsMap } = useFetchEpisodeActions({
     episodeIds: otherEpisodeIds,
     services: { expressions, spaces },
@@ -96,25 +134,17 @@ export function RelatedEpisodesRuleSubsection({
     services: { expressions, spaces },
   });
 
-  if (!ruleId) {
-    return null;
-  }
-
   return (
     <div data-test-subj="alertingV2RelatedEpisodesRuleSubsection">
       <EuiTitle size={compressed ? 'xxs' : 'xs'}>
-        <h4>
-          {currentGroupHash ? i18n.RELATED_OTHER_GROUPS_TITLE : i18n.RELATED_RULE_ONLY_LIST_TITLE}
-        </h4>
+        <h4>{getTitle(scope, currentGroupHash)}</h4>
       </EuiTitle>
       <EuiText
         size={compressed ? 'xs' : 's'}
         color="subdued"
         css={{ marginBlockStart: euiTheme.size.xs }}
       >
-        {currentGroupHash
-          ? i18n.RELATED_OTHER_GROUPS_DESCRIPTION
-          : i18n.RELATED_RULE_ONLY_LIST_DESCRIPTION}
+        {getDescription(scope, currentGroupHash)}
       </EuiText>
       <EuiSpacer size="s" />
       {isLoadingOtherGroupRows ? (
@@ -132,7 +162,7 @@ export function RelatedEpisodesRuleSubsection({
         </EuiPanel>
       ) : (
         <RelatedAlertEpisodesList
-          rows={otherGroupRows}
+          rows={otherGroupRowsWithData}
           ruleState={ruleState}
           getEpisodeAction={(id) => otherEpisodeActionsMap?.get(id)}
           getGroupAction={(gh) => getGroupAction(otherGroupActionsMap, ruleId, gh)}

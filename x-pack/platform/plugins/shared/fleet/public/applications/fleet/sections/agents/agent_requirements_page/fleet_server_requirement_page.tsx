@@ -43,7 +43,7 @@ export const FleetServerRequirementPage: React.FunctionComponent<
     }
 > = ({ showStandaloneTab = () => {}, showEnrollmentRecommendation = true }) => {
   const startService = useStartServices();
-  const deploymentUrl = startService.cloud?.deploymentUrl;
+  const deploymentEditUrl = startService.cloud?.deploymentEditUrl;
   const authz = useAuthz();
 
   const { permissionsError, isPermissionsLoading } = useCheckPermissions();
@@ -52,8 +52,8 @@ export const FleetServerRequirementPage: React.FunctionComponent<
     <>
       <ContentWrapper gutterSize="none" justifyContent="center" direction="column">
         <FlexItemWithMinWidth grow={false}>
-          {deploymentUrl ? (
-            <CloudInstructions deploymentUrl={deploymentUrl} />
+          {deploymentEditUrl ? (
+            <CloudInstructions deploymentEditUrl={deploymentEditUrl} />
           ) : !authz.fleet.addFleetServers ? (
             <FleetServerMissingKbnPrivileges />
           ) : isPermissionsLoading ? (

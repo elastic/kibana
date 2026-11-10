@@ -16,7 +16,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 
 import { AttackDiscoveryRoutes } from './routes';
-import { useIsAlertsAndAttacksAlignmentEnabled } from '../common/hooks/use_is_alerts_and_attacks_alignment_enabled';
+import { useIsExperimentalFeatureEnabled } from '../common/hooks/use_experimental_features';
 import { useSpaceId } from '../common/hooks/use_space_id';
 import { useIdsFromUrl } from './pages/results/history/use_ids_from_url';
 import { buildAttackDetailPath } from '../../common/utils/attack_detail_path';
@@ -30,9 +30,15 @@ jest.mock('@kbn/shared-ux-router', () => ({
   useSearchParams: jest.fn(),
 }));
 
-jest.mock('../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => ({
-  useIsAlertsAndAttacksAlignmentEnabled: jest.fn(),
+jest.mock('../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn(),
 }));
+
+const mockAlignmentEnabled = (enabled: boolean) => {
+  (useIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(
+    (feature: string) => feature === 'enableAlertsAndAttacksAlignment' && enabled
+  );
+};
 
 jest.mock('../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn(),
@@ -74,7 +80,7 @@ describe('AttackDiscoveryRoutes', () => {
   });
 
   it('renders the legacy AttackDiscoveryPage when alignment is disabled', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(false);
+    mockAlignmentEnabled(false);
 
     render(<AttackDiscoveryRoutes {...mockRouteProps} />);
 
@@ -83,7 +89,7 @@ describe('AttackDiscoveryRoutes', () => {
   });
 
   it('redirects to the Attacks page when alignment is enabled and the URL has no attack id', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
+    mockAlignmentEnabled(true);
 
     render(<AttackDiscoveryRoutes {...mockRouteProps} />);
 
@@ -96,7 +102,7 @@ describe('AttackDiscoveryRoutes', () => {
   // Legacy `/attack_discovery?id=<id>` deep links (e.g. the generated `kibana.alert.url`) must
   // redirect to the new Attacks page with the attack flyout open when alignment is enabled.
   it('redirects to the attack flyout when alignment is enabled and the URL contains an attack id', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
+    mockAlignmentEnabled(true);
     (useSpaceId as jest.Mock).mockReturnValue('default');
     (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: ['attack-id-1', 'attack-id-2'] });
     (buildAttackDetailPath as jest.Mock).mockReturnValue('/attacks/attack-id-1');
@@ -114,7 +120,7 @@ describe('AttackDiscoveryRoutes', () => {
   });
 
   it('waits for the space id to resolve before redirecting', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(true);
+    mockAlignmentEnabled(true);
     (useSpaceId as jest.Mock).mockReturnValue(undefined);
     (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: ['attack-id-1'] });
 
@@ -125,7 +131,7 @@ describe('AttackDiscoveryRoutes', () => {
   });
 
   it('does not redirect when alignment is disabled even if the URL contains an attack id', () => {
-    (useIsAlertsAndAttacksAlignmentEnabled as jest.Mock).mockReturnValue(false);
+    mockAlignmentEnabled(false);
     (useIdsFromUrl as jest.Mock).mockReturnValue({ ids: ['attack-id-1'] });
 
     render(<AttackDiscoveryRoutes {...mockRouteProps} />);

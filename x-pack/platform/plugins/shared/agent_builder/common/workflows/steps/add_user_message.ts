@@ -10,6 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { i18n } from '@kbn/i18n';
 import { CONVERSATION_ID_MAX_LENGTH } from '@kbn/agent-builder-common';
+import { authorNameSchema } from '../author_name_schema';
 
 export const AddUserMessageStepTypeId = 'ai.conversation.add_user_message';
 
@@ -21,6 +22,7 @@ const InputSchema = z.object({
     .string()
     .refine((value) => value.trim().length > 0, { message: 'message must not be blank' })
     .meta({ description: 'The user message text.' }),
+  author_name: authorNameSchema,
 });
 
 const OutputSchema = z.object({
@@ -79,6 +81,16 @@ export const addUserMessageStepCommonDefinition: CommonStepDefinition<
   with:
     conversation_id: "{{ steps.create_conversation.output.conversation_id }}"
     message: "Triage the alert above"
+\`\`\``,
+      `## Record the workflow name as the writer of the message
+A workflow running as a service account has no display name, so the message would show the raw account id. \`author_name\` is recorded as the display name; it is ignored when an interactive user runs the workflow.
+\`\`\`yaml
+- name: add_note
+  type: ${AddUserMessageStepTypeId}
+  with:
+    conversation_id: "{{ inputs.conversation_id }}"
+    author_name: "{{ workflow.name }}"
+    message: "Journal note: {{ inputs.note }}"
 \`\`\``,
     ],
   },

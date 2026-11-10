@@ -6,7 +6,7 @@
  */
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { calendarAlignedTimeWindowSchema, DurationUnit } from '@kbn/slo-schema';
+import { DurationUnit } from '@kbn/slo-schema';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
@@ -21,7 +21,7 @@ import { buildBurnRateAgg } from './utils';
 export function generateSummaryTransformForOccurrences(
   slo: SLODefinition
 ): TransformPutTransformRequest {
-  const isCalendarAligned = calendarAlignedTimeWindowSchema.is(slo.timeWindow);
+  const isCalendarAligned = slo.timeWindow.type === 'calendarAligned';
   let isWeeklyAligned = false;
   if (isCalendarAligned) {
     isWeeklyAligned = slo.timeWindow.duration.unit === DurationUnit.Week;

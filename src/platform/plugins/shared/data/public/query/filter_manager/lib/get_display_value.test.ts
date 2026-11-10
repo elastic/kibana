@@ -67,6 +67,26 @@ describe('getDisplayValueFromFilter', () => {
     expect(displayValue).toBe('0');
   });
 
+  it('throws if the data view is found but the field is missing', () => {
+    const filter = {
+      ...phraseFilter,
+      meta: { ...phraseFilter.meta, key: 'unknownField' },
+      query: { match_phrase: { unknownField: 'ios' } },
+    };
+    expect(() => getDisplayValueFromFilter(filter, [stubIndexPattern])).toThrow(
+      `Field unknownField not found in data view ${stubIndexPattern.title}`
+    );
+  });
+
+  it('does not throw if the data view is not found', () => {
+    const filter = {
+      ...phraseFilter,
+      meta: { ...phraseFilter.meta, key: 'unknownField' },
+      query: { match_phrase: { unknownField: 'ios' } },
+    };
+    expect(() => getDisplayValueFromFilter(filter, [])).not.toThrow();
+  });
+
   it('phrase filters without formatter', () => {
     jest.spyOn(stubIndexPattern, 'getFormatterForField').mockImplementation(() => undefined!);
     const displayValue = getDisplayValueFromFilter(phraseFilter, [stubIndexPattern]);

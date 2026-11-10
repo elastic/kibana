@@ -53,16 +53,22 @@ describe('chart rules', () => {
     expect(shown[0]?.path).toBe('axis.x.title');
   });
 
-  it('requires a gradient fill only on area layers', () => {
+  it('flags only an explicit solid fill on area layers', () => {
     expect(
       findViolations(dashboard([xy('x', grid, {}, { type: 'area' })]), ['area_solid_fill'])
-    ).toHaveLength(1);
+    ).toEqual([]);
     expect(
       findViolations(
         dashboard([xy('x', grid, { styling: { areas: { fill: 'gradient' } } }, { type: 'area' })]),
         ['area_solid_fill']
       )
     ).toEqual([]);
+    expect(
+      findViolations(
+        dashboard([xy('x', grid, { styling: { areas: { fill: 'solid' } } }, { type: 'area' })]),
+        ['area_solid_fill']
+      )
+    ).toHaveLength(1);
     expect(findViolations(dashboard([xy('x', grid)]), ['area_solid_fill'])).toEqual([]);
   });
 

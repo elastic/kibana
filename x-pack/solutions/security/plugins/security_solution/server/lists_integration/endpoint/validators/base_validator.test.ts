@@ -660,6 +660,122 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
         expect(validateFn).toHaveBeenCalledTimes(1);
         expect(importItems).toEqual(expectedItems);
       });
+
+      it('should release the event loop between items', async () => {
+        const events: string[] = [];
+        const validateFn = jest.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
+          events.push(`validate ${item.name}`);
+          setImmediate(() => events.push(`event loop after ${item.name}`));
+        });
+
+        await validator._validatePreImportItems(
+          { items: [item1Mock(), item2Mock()], lists: [] },
+          validateFn
+        );
+
+        expect(events).toEqual(['validate name 1', 'event loop after name 1', 'validate name 2']);
+      });
+
+      describe('validation summary log', () => {
+        let now: number;
+        let nowSpy: jest.SpyInstance;
+
+        const createValidateFn = (
+          durationsMsByName: Record<string, number>,
+          invalidName?: string
+        ) =>
+          jest.fn().mockImplementation(async (item: ExceptionItemLikeOptions) => {
+            now += durationsMsByName[item.name];
+            if (item.name === invalidName) {
+              throw new Error('invalid item');
+            }
+          });
+
+        beforeEach(() => {
+          now = 0;
+          nowSpy = jest.spyOn(performance, 'now').mockImplementation(() => now);
+        });
+
+        afterEach(() => {
+          nowSpy.mockRestore();
+        });
+
+        it('should log a debug summary with the slowest items', async () => {
+          const logger = jest.mocked(validator._getLogger());
+
+          await validator._validatePreImportItems(
+            { items: [item1Mock(), item2Mock()], lists: [] },
+            createValidateFn({ 'name 1': 200, 'name 2': 300 })
+          );
+
+          expect(logger.warn).not.toHaveBeenCalled();
+          expect(logger.debug).toHaveBeenCalledTimes(1);
+          const debugArg = logger.debug.mock.calls[0][0];
+          expect(typeof debugArg === 'function' ? debugArg() : debugArg).toEqual(
+            'Validated 2 items of [list%20id%201, list%20id%202] for import in 0.5s (0 invalid). Slowest: itemId2 (300ms), itemId1 (200ms)'
+          );
+        });
+
+        it('should log a warning when validation takes more than 10s', async () => {
+          const logger = jest.mocked(validator._getLogger());
+
+          await validator._validatePreImportItems(
+            { items: [item1Mock(), item2Mock()], lists: [] },
+            createValidateFn({ 'name 1': 4000, 'name 2': 7000 }, 'name 1')
+          );
+
+          expect(logger.debug).not.toHaveBeenCalled();
+          expect(logger.warn).toHaveBeenCalledWith(
+            'Validated 2 items of [list%20id%201, list%20id%202] for import in 11.0s (1 invalid). Slowest: itemId2 (7000ms), itemId1 (4000ms)'
+          );
+        });
+
+        it('should log item IDs URI-encoded, as they come from the import file', async () => {
+          const logger = jest.mocked(validator._getLogger());
+
+          await validator._validatePreImportItems(
+            {
+              items: [{ ...item1Mock(), item_id: 'forged\n[ERROR] %date{invalid}' }],
+              lists: [],
+            },
+            createValidateFn({ 'name 1': 100 })
+          );
+
+          const debugArg = logger.debug.mock.calls[0][0];
+          expect(typeof debugArg === 'function' ? debugArg() : debugArg).toEqual(
+            'Validated 1 items of [list%20id%201] for import in 0.1s (0 invalid). Slowest: forged%0A%5BERROR%5D%20%25date%7Binvalid%7D (100ms)'
+          );
+        });
+
+        it('should log item IDs with lone surrogates without throwing', async () => {
+          const logger = jest.mocked(validator._getLogger());
+          const importItems: PromiseFromStreams = {
+            items: [{ ...item1Mock(), item_id: 'lone\ud800surrogate' }],
+            lists: [],
+          };
+
+          await expect(
+            validator._validatePreImportItems(importItems, createValidateFn({ 'name 1': 100 }))
+          ).resolves.toBeUndefined();
+
+          const debugArg = logger.debug.mock.calls[0][0];
+          expect(typeof debugArg === 'function' ? debugArg() : debugArg).toEqual(
+            'Validated 1 items of [list%20id%201] for import in 0.1s (0 invalid). Slowest: lone%EF%BF%BDsurrogate (100ms)'
+          );
+        });
+
+        it('should not log when there are no items to validate', async () => {
+          const logger = jest.mocked(validator._getLogger());
+
+          await validator._validatePreImportItems(
+            { items: [new Error('decode error')], lists: [] },
+            jest.fn()
+          );
+
+          expect(logger.debug).not.toHaveBeenCalled();
+          expect(logger.warn).not.toHaveBeenCalled();
+        });
+      });
     });
 
     describe('#validateCanImportGlobalArtifacts()', () => {
@@ -700,6 +816,31 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
           await expect(
             validator._validateImportOwnerSpaceIds(exceptionLikeItem)
           ).resolves.toBeUndefined();
+        });
+
+        it('should retrieve accessible spaces only once per validator instance', async () => {
+          setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+
+          await validator._validateImportOwnerSpaceIds(exceptionLikeItem);
+          await validator._validateImportOwnerSpaceIds(exceptionLikeItem);
+
+          expect(endpointAppContextServices.getAccessibleSpaces).toHaveBeenCalledTimes(1);
+        });
+
+        it('should retrieve accessible spaces again after a failed attempt', async () => {
+          setArtifactOwnerSpaceId(exceptionLikeItem, DEFAULT_SPACE_ID);
+          (endpointAppContextServices.getAccessibleSpaces as jest.Mock).mockRejectedValueOnce(
+            new Error('spaces unavailable')
+          );
+
+          await expect(validator._validateImportOwnerSpaceIds(exceptionLikeItem)).rejects.toThrow(
+            'spaces unavailable'
+          );
+          await expect(
+            validator._validateImportOwnerSpaceIds(exceptionLikeItem)
+          ).resolves.toBeUndefined();
+
+          expect(endpointAppContextServices.getAccessibleSpaces).toHaveBeenCalledTimes(2);
         });
 
         it('should error when owner space is not accessible', async () => {

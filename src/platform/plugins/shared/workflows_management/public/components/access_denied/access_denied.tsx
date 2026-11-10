@@ -65,10 +65,9 @@ export const AccessDenied = ({
             <EuiImage
               size="s"
               src={colorMode === 'LIGHT' ? lockLight : lockDark}
-              alt={i18n.translate(
-                'platform.plugins.shared.workflows_management.ui.accessDenied.illustrationAlt',
-                { defaultMessage: 'Restricted access' }
-              )}
+              alt={i18n.translate('workflows.ui.accessDenied.illustrationAlt', {
+                defaultMessage: 'Restricted access',
+              })}
             />
           }
           title={<h2>{title}</h2>}

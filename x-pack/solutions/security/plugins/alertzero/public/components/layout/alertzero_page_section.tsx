@@ -32,7 +32,7 @@ export const AlertZeroPageSection: React.FC<AlertZeroPageSectionProps> = ({
 
   return (
     <EuiPageSection
-      paddingSize="none"
+      paddingSize="l"
       grow
       contentProps={{
         ...restContentProps,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 
 import { runManualOrchestration } from '.';
@@ -176,6 +176,22 @@ describe('runManualOrchestration', () => {
     );
   });
 
+  it('forwards telemetryMetadata to runGenerationStep when set', async () => {
+    const telemetryMetadata = { pluginId: 'alertzero', aggregateBy: 'alertzero-run-1' };
+
+    await runManualOrchestration({ ...baseParams, telemetryMetadata });
+
+    expect(mockRunGenerationStep).toHaveBeenCalledWith(
+      expect.objectContaining({ telemetryMetadata })
+    );
+  });
+
+  it('omits telemetryMetadata from runGenerationStep when unset', async () => {
+    await runManualOrchestration(baseParams);
+
+    expect(mockRunGenerationStep.mock.calls[0][0]).not.toHaveProperty('telemetryMetadata');
+  });
+
   it('calls runValidationStep with both retrieval and generation results', async () => {
     await runManualOrchestration(baseParams);
 
@@ -320,6 +336,50 @@ describe('runManualOrchestration', () => {
           alertRetrievalResult: postGateResult,
         })
       );
+    });
+
+    describe('when the caller disables the gate', () => {
+      const gateDisabledParams = {
+        ...baseParams,
+        trigger: 'workflow',
+        workflowConfig: {
+          ...baseParams.workflowConfig,
+          ground_truth_gate_enabled: false,
+          skill_enabled: false,
+        },
+      };
+
+      it('does not run the gate', async () => {
+        await runManualOrchestration(gateDisabledParams);
+
+        expect(mockRunGatePhase).not.toHaveBeenCalled();
+      });
+
+      it('forwards the retrieval result to the generation step unchanged', async () => {
+        await runManualOrchestration(gateDisabledParams);
+
+        expect(mockRunGenerationStep).toHaveBeenCalledWith(
+          expect.objectContaining({
+            alertRetrievalResult: mockAlertRetrievalResult,
+          })
+        );
+      });
+
+      it('does not resume the skill report workflow', async () => {
+        await runManualOrchestration(gateDisabledParams);
+
+        expect(mockInvokeSkillReportWorkflow).not.toHaveBeenCalled();
+      });
+    });
+
+    it('runs the gate when the caller enables it explicitly', async () => {
+      await runManualOrchestration({
+        ...baseParams,
+        trigger: 'workflow',
+        workflowConfig: { ...baseParams.workflowConfig, ground_truth_gate_enabled: true },
+      });
+
+      expect(mockRunGatePhase).toHaveBeenCalled();
     });
 
     it('fails closed and skips generation when the gate throws', async () => {
@@ -474,6 +534,107 @@ describe('runManualOrchestration', () => {
       });
 
       expect(result).toEqual(expect.objectContaining({ outcome: 'no_alerts' }));
+    });
+  });
+
+  describe('pre-gate zero-alert short-circuit', () => {
+    const zeroAlertResult = {
+      ...mockAlertRetrievalResult,
+      alerts: [],
+      alertsContextCount: 0,
+    };
+
+    const mockCount = jest.fn();
+    const esClient = { count: mockCount } as unknown as ElasticsearchClient;
+
+    beforeEach(() => {
+      mockRunRetrievalStep.mockResolvedValue(zeroAlertResult);
+      mockRunGatePhase.mockResolvedValue(zeroAlertResult);
+      mockCount.mockResolvedValue({ _shards: { failed: 0, total: 1 }, count: 0 });
+    });
+
+    describe('when no alerts are in scope', () => {
+      it('does not run the gate', async () => {
+        await runManualOrchestration({ ...baseParams, esClient });
+
+        expect(mockRunGatePhase).not.toHaveBeenCalled();
+      });
+
+      it('returns the no_alerts outcome instead of failing', async () => {
+        const result = await runManualOrchestration({ ...baseParams, esClient });
+
+        expect(result).toEqual(expect.objectContaining({ outcome: 'no_alerts' }));
+      });
+
+      it('delegates to handleNoAlerts', async () => {
+        await runManualOrchestration({ ...baseParams, esClient });
+
+        expect(mockHandleNoAlerts).toHaveBeenCalledWith(
+          expect.objectContaining({ alertRetrievalResult: zeroAlertResult })
+        );
+      });
+
+      it('counts alerts in the run alerts index', async () => {
+        await runManualOrchestration({ ...baseParams, esClient });
+
+        expect(mockCount).toHaveBeenCalledWith(expect.objectContaining({ index: '.alerts' }));
+      });
+    });
+
+    it('still runs the gate and fails closed when alerts are in scope but the gate returns none', async () => {
+      mockCount.mockResolvedValue({ _shards: { failed: 0, total: 1 }, count: 5 });
+
+      await expect(runManualOrchestration({ ...baseParams, esClient })).rejects.toThrow(
+        /No alerts were available to analyze for the selected time range/i
+      );
+      expect(mockRunGatePhase).toHaveBeenCalled();
+    });
+
+    describe('when the skill is disabled and there are no candidates', () => {
+      const skillDisabledParams = {
+        ...baseParams,
+        esClient,
+        workflowConfig: { ...baseParams.workflowConfig, skill_enabled: false },
+      };
+
+      it('does not run the gate', async () => {
+        await runManualOrchestration(skillDisabledParams);
+
+        expect(mockRunGatePhase).not.toHaveBeenCalled();
+      });
+
+      it('does not count alerts', async () => {
+        await runManualOrchestration(skillDisabledParams);
+
+        expect(mockCount).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when retrieval returned candidates', () => {
+      beforeEach(() => {
+        mockRunRetrievalStep.mockResolvedValue(mockAlertRetrievalResult);
+        mockRunGatePhase.mockImplementation(async ({ candidateResult }) => candidateResult);
+      });
+
+      it('runs the gate', async () => {
+        await runManualOrchestration({ ...baseParams, esClient });
+
+        expect(mockRunGatePhase).toHaveBeenCalled();
+      });
+
+      it('does not count alerts', async () => {
+        await runManualOrchestration({ ...baseParams, esClient });
+
+        expect(mockCount).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when the gate is skipped for the trigger', () => {
+      it('does not count alerts', async () => {
+        await runManualOrchestration({ ...baseParams, esClient, trigger: 'agent_builder' });
+
+        expect(mockCount).not.toHaveBeenCalled();
+      });
     });
   });
 
