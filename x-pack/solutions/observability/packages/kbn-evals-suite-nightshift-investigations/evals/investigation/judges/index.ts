@@ -18,7 +18,7 @@ import { composeRecallReadsText, extractRecallReads } from '../recall_evidence';
 import {
   AntiLeakageJudgePrompt,
   CauseCompletenessJudgePrompt,
-  CORTEX_INFLUENCE_TYPES,
+  WIKI_INFLUENCE_TYPES,
   DecisionTreeHelpfulnessJudgePrompt,
   GoalPassJudgePrompt,
   OrcaControlJudgePrompt,
@@ -56,7 +56,7 @@ export const ORCA_CONTROL_EVALUATOR = 'orca_control';
 const ORCA_FLAGS_JUDGE = 'orca_flags';
 export const TOOL_CALLS_FAILED_EVALUATOR = 'tool_calls_failed';
 export const TOOL_CALLS_EMPTY_EVALUATOR = 'tool_calls_empty';
-export const CORTEX_CHANGED_DIRECTION_EVALUATOR = 'cortex_changed_direction';
+export const WIKI_CHANGED_DIRECTION_EVALUATOR = 'wiki_changed_direction';
 export const MEMORIES_CITED_EVALUATOR = 'memories_cited_in_answer';
 
 type InvestigationEvaluator = Evaluator<InvestigationExample, InvestigationTaskOutput>;
@@ -467,8 +467,8 @@ export const createToolCallHealthEvaluators = (deps: JudgeDeps): InvestigationEv
 };
 
 interface RecallUsage {
-  cortexInfluence: (typeof CORTEX_INFLUENCE_TYPES)[number];
-  cortexReasoning: string;
+  wikiInfluence: (typeof WIKI_INFLUENCE_TYPES)[number];
+  wikiReasoning: string;
   citedMemories: string[];
   memoriesReasoning: string;
 }
@@ -478,7 +478,7 @@ const isSamePath = (cited: string, read: string): boolean =>
   cited === read || read.endsWith(cited) || cited.endsWith(read);
 
 /**
- * `cortex_changed_direction` and `memories_cited_in_answer`, from one LLM read of the trajectory
+ * `wiki_changed_direction` and `memories_cited_in_answer`, from one LLM read of the trajectory
  * and the final report. Both are n/a when the agent never opened the matching kind of file.
  */
 export const createRecallUsageEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] => {
@@ -490,24 +490,24 @@ export const createRecallUsageEvaluators = (deps: JudgeDeps): InvestigationEvalu
   ): Promise<RecallUsage> =>
     memo(output, async () => {
       const result = await invokeJudge<{
-        cortex_influence?: string;
-        cortex_reasoning?: string;
+        wiki_influence?: string;
+        wiki_reasoning?: string;
         memories_cited?: string[];
         memories_reasoning?: string;
       }>(deps, 'recall_usage', RecallUsageJudgePrompt, {
         question: judge.question,
-        cortexReads: composeRecallReadsText(reads, 'cortex') || '(none)',
+        wikiReads: composeRecallReadsText(reads, 'wiki') || '(none)',
         memoryReads: composeRecallReadsText(reads, 'memories') || '(none)',
         answer: judge.answer,
         evidence: judge.evidence,
         trajectory: judge.trajectory,
       });
-      const influence = CORTEX_INFLUENCE_TYPES.find((type) => type === result.cortex_influence);
+      const influence = WIKI_INFLUENCE_TYPES.find((type) => type === result.wiki_influence);
       const memoryPaths = reads.filter(({ kind }) => kind === 'memories').map(({ path }) => path);
       const cited = Array.isArray(result.memories_cited) ? result.memories_cited : [];
       return {
-        cortexInfluence: influence ?? 'none',
-        cortexReasoning: result.cortex_reasoning ?? '',
+        wikiInfluence: influence ?? 'none',
+        wikiReasoning: result.wiki_reasoning ?? '',
         citedMemories: memoryPaths.filter((path) =>
           cited.some((each) => typeof each === 'string' && isSamePath(each, path))
         ),
@@ -515,30 +515,30 @@ export const createRecallUsageEvaluators = (deps: JudgeDeps): InvestigationEvalu
       };
     });
 
-  const cortexChangedDirection: InvestigationEvaluator = {
-    name: CORTEX_CHANGED_DIRECTION_EVALUATOR,
+  const wikiChangedDirection: InvestigationEvaluator = {
+    name: WIKI_CHANGED_DIRECTION_EVALUATOR,
     kind: 'LLM',
     direction: 'neutral',
     getModel: getModelFactory(deps.evaluationConnector),
     evaluate: async ({ input, output, expected, metadata }) => {
       const judge = buildJudgeInputs(input, output, expected, metadata);
       const reads = extractRecallReads(output.tool_call_trajectory);
-      const cortexFiles = reads.filter(({ kind }) => kind === 'cortex').map(({ path }) => path);
-      if (!judge.trajectory || cortexFiles.length === 0) {
+      const wikiFiles = reads.filter(({ kind }) => kind === 'wiki').map(({ path }) => path);
+      if (!judge.trajectory || wikiFiles.length === 0) {
         return {
           score: null,
           label: 'n/a',
           explanation: judge.trajectory
-            ? 'Investigation did not open any cortex file.'
+            ? 'Investigation did not open any wiki file.'
             : NO_TRAJECTORY_EXPLANATION,
         };
       }
       const usage = await assess(output, judge, reads);
       return {
-        score: usage.cortexInfluence === 'redirected' ? 1 : 0,
-        label: usage.cortexInfluence,
-        explanation: usage.cortexReasoning,
-        metadata: { cortex_files: cortexFiles },
+        score: usage.wikiInfluence === 'redirected' ? 1 : 0,
+        label: usage.wikiInfluence,
+        explanation: usage.wikiReasoning,
+        metadata: { wiki_files: wikiFiles },
       };
     },
   };
@@ -573,7 +573,7 @@ export const createRecallUsageEvaluators = (deps: JudgeDeps): InvestigationEvalu
     },
   };
 
-  return [cortexChangedDirection, memoriesCited];
+  return [wikiChangedDirection, memoriesCited];
 };
 
 /** The ported RCA judges plus truthfulness, decision-tree helpfulness, tool-call health and recall usage, in stable order for the investigation spec. */

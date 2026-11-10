@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 import { RedirectTo } from '../redirect_to';
 import { StreamListView } from '../stream_list_view';
@@ -22,8 +23,8 @@ export function StreamsRootRedirect() {
   if (access.v2) {
     return (
       <RedirectTo
-        path="/new-experience/{tab}"
-        params={{ path: { tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
+        path="/v2/unit/{unitId}/{tab}"
+        params={{ path: { unitId: STREAMS_DEFAULT_UNIT_ID, tab: DEFAULT_STREAMS_LAYOUT_TAB } }}
       />
     );
   }
