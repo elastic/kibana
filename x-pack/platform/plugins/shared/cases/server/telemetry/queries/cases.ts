@@ -9,14 +9,15 @@ import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-api-server';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { fromKueryExpression } from '@kbn/es-query';
-import type { SortOrder } from '../../../common/ui/types';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  MAX_OBSERVABLES_PER_CASE,
   OWNERS,
 } from '../../../common/constants';
+import { OBSERVABLE_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { Owner } from '../../../common/constants/types';
 import type {
   CollectTelemetryDataParams,
@@ -26,6 +27,7 @@ import type {
   CaseAggregationResult,
   FileAttachmentAggregationResults,
   CasesWithAlertsAggs,
+  ObservablesTelemetryAggregationResult,
 } from '../types';
 import {
   bucketsToOwnerRecord,
@@ -83,6 +85,7 @@ export const getCasesTelemetryData = async ({
       latestDates,
       filesRes,
       totalParticipants,
+      observablesRes,
     ] = await Promise.all([
       getCasesSavedObjectTelemetry(savedObjectsClient),
       getCasesWithAlertsByOwner(savedObjectsClient),
@@ -91,6 +94,7 @@ export const getCasesTelemetryData = async ({
       getLatestCasesDates({ savedObjectsClient, logger }),
       getFilesTelemetry(savedObjectsClient),
       getTotalParticipants(savedObjectsClient),
+      getObservablesSavedObjectTelemetry(savedObjectsClient),
     ]);
 
     const aggregationsBuckets = getAggregationsBuckets({
@@ -146,9 +150,9 @@ export const getCasesTelemetryData = async ({
           aggregationsBuckets.extractObservablesSource,
           'rule'
         ),
-        observables: getObservablesTotalsByType(casesRes.aggregations?.observables),
+        observables: getObservablesTotalsByType(observablesRes.aggregations?.observables),
         totalWithMaxObservables: getTotalWithMaxObservables(
-          casesRes.aggregations?.totalWithMaxObservables?.buckets ?? []
+          observablesRes.aggregations?.casesWithMaxObservables
         ),
         totalUsers: casesRes.aggregations?.users?.value ?? 0,
         totalParticipants,
@@ -167,6 +171,7 @@ export const getCasesTelemetryData = async ({
       },
       sec: getSolutionValues({
         caseAggregations: casesRes.aggregations,
+        observablesAggregations: observablesRes.aggregations,
         attachmentsByType,
         filesAggregations: filesRes.aggregations,
         totalWithAlertsByOwner,
@@ -174,6 +179,7 @@ export const getCasesTelemetryData = async ({
       }),
       obs: getSolutionValues({
         caseAggregations: casesRes.aggregations,
+        observablesAggregations: observablesRes.aggregations,
         attachmentsByType,
         filesAggregations: filesRes.aggregations,
         totalWithAlertsByOwner,
@@ -181,6 +187,7 @@ export const getCasesTelemetryData = async ({
       }),
       main: getSolutionValues({
         caseAggregations: casesRes.aggregations,
+        observablesAggregations: observablesRes.aggregations,
         attachmentsByType,
         filesAggregations: filesRes.aggregations,
         totalWithAlertsByOwner,
@@ -208,7 +215,6 @@ const getCasesSavedObjectTelemetry = async (
         aggs: {
           ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
           ...getAssigneesAggregations(),
-          ...getObservablesAggregations(),
           ...getStatusAggregation(),
         },
       },
@@ -226,7 +232,6 @@ const getCasesSavedObjectTelemetry = async (
       ...getCountsAggregationQuery(CASE_SAVED_OBJECT),
       ...getAssigneesAggregations(),
       ...getStatusAggregation(),
-      ...getObservablesAggregations(),
       totalsByOwner: {
         terms: { field: `${CASE_SAVED_OBJECT}.attributes.owner` },
       },
@@ -295,32 +300,65 @@ const getStatusAggregation = () => ({
 
 const getObservablesAggregations = () => ({
   observables: {
-    nested: {
-      path: `${CASE_SAVED_OBJECT}.attributes.observables`,
+    filter: {
+      term: { [`${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.type`]: OBSERVABLE_ATTACHMENT_TYPE },
     },
     aggs: {
       byDescription: {
         terms: {
-          field: `${CASE_SAVED_OBJECT}.attributes.observables.description`,
+          field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.data.description`,
+          size: 100,
+          missing: '',
         },
         aggs: {
           byType: {
             terms: {
-              field: `${CASE_SAVED_OBJECT}.attributes.observables.typeKey`,
+              field: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.data.typeKey`,
+              size: 100,
             },
           },
         },
       },
     },
   },
-  totalWithMaxObservables: {
-    terms: {
-      field: `${CASE_SAVED_OBJECT}.attributes.total_observables`,
-      size: 100,
-      order: { _key: 'desc' as SortOrder },
+  casesWithMaxObservables: {
+    nested: { path: `${CASE_ATTACHMENT_SAVED_OBJECT}.references` },
+    aggs: {
+      byCase: {
+        terms: {
+          field: `${CASE_ATTACHMENT_SAVED_OBJECT}.references.id`,
+          min_doc_count: MAX_OBSERVABLES_PER_CASE,
+          size: 10_000,
+        },
+      },
     },
   },
 });
+
+/** Observables are attachments, so their counts come from `cases-attachments`, overall and per owner. */
+const getObservablesSavedObjectTelemetry = (
+  savedObjectsClient: TelemetrySavedObjectsClient
+): Promise<SavedObjectsFindResponse<unknown, ObservablesTelemetryAggregationResult>> =>
+  savedObjectsClient.find<unknown, ObservablesTelemetryAggregationResult>({
+    page: 0,
+    perPage: 0,
+    type: CASE_ATTACHMENT_SAVED_OBJECT,
+    namespaces: ['*'],
+    filter: `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.type: ${OBSERVABLE_ATTACHMENT_TYPE}`,
+    aggs: {
+      ...getObservablesAggregations(),
+      ...OWNERS.reduce(
+        (aggQuery, owner) => ({
+          ...aggQuery,
+          [owner]: {
+            filter: { term: { [`${CASE_ATTACHMENT_SAVED_OBJECT}.attributes.owner`]: owner } },
+            aggs: getObservablesAggregations(),
+          },
+        }),
+        {}
+      ),
+    },
+  });
 
 const getFilesTelemetry = async (
   savedObjectsClient: TelemetrySavedObjectsClient

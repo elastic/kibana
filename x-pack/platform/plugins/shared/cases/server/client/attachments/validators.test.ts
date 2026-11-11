@@ -6,7 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  OBSERVABLE_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
 import {
   MAX_ATTACHMENT_ID_LENGTH,
   MAX_ATTACHMENT_JSON_LENGTH,
@@ -24,6 +27,21 @@ describe('validateUnifiedAttachments', () => {
     owner: 'cases',
     data: { content: 'hello world' },
   } as const;
+
+  it('refuses observables, which are written only through the observables API', () => {
+    const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
+
+    expect(() =>
+      validateUnifiedAttachments({
+        query: {
+          type: OBSERVABLE_ATTACHMENT_TYPE,
+          owner: 'cases',
+          data: { typeKey: 'observable-type-ipv4', value: '10.0.0.1', description: null },
+        },
+        unifiedAttachmentTypeRegistry,
+      })
+    ).toThrow(/must be written through the observables API/);
+  });
 
   it('throws when the type is not registered', () => {
     const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();

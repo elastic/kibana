@@ -29,6 +29,8 @@ import { similarCaseRoute } from './cases/similar';
 import { patchObservableRoute } from './observables/patch_observable';
 import { bulkDeleteObservablesRoute } from './observables/bulk_delete_observables';
 import { deleteObservableRoute } from './observables/delete_observable';
+import { findObservablesRoute } from './observables/find_observables';
+import { bulkCreateObservablesRoute } from './observables/bulk_create_observables';
 import { findUserActionsRoute } from './internal/find_user_actions';
 import { findCasesContainingAllDocumentsRoute } from './internal/find_cases_containing_all_documents';
 import type { ConfigType } from '../../config';
@@ -64,6 +66,8 @@ export const getInternalRoutes = (
     bulkDeleteObservablesRoute,
     patchObservableRoute,
     deleteObservableRoute,
+    findObservablesRoute,
+    bulkCreateObservablesRoute,
     similarCaseRoute,
     findUserActionsRoute,
     findCasesContainingAllDocumentsRoute,

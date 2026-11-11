@@ -8,44 +8,59 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import Boom from '@hapi/boom';
 
-import { MAX_OBSERVABLES_PER_CASE } from '../../../common/constants';
-import type { Observable } from '../../../common/types/domain';
+import { MAX_STORED_OBSERVABLES_PER_CASE } from '../../../common/constants';
+import type { Case, Observable } from '../../../common/types/domain';
 import { UserActionTypes, CaseSchema } from '../../../common/types/domain';
 import {
   type AddObservableRequest,
   type UpdateObservableRequest,
   type BulkAddObservablesRequest,
+  type BulkCreateObservablesRequest,
+  type BulkCreateObservablesResponse,
   type BulkDeleteObservablesRequest,
+  type FindObservablesRequest,
+  type FindObservablesResponse,
   type ObservablePost,
 } from '../../../common/types/api';
 import {
   AddObservableRequestSchema,
   UpdateObservableRequestSchema,
   BulkAddObservablesRequestSchema,
+  BulkCreateObservablesRequestSchema,
   BulkDeleteObservablesRequestSchema,
+  FindObservablesRequestSchema,
 } from '../../../common/types/api';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';
 import { decodeOrThrowZod, decodeWithExcessOrThrowZod } from '../../common/runtime_types';
 import type { Authorization } from '../../authorization';
 import { Operations } from '../../authorization';
+import type { OperationDetails } from '../../authorization/types';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { LICENSING_CASE_OBSERVABLES_FEATURE } from '../../common/constants';
-import {
-  validateDuplicatedObservablesInRequest,
-  validateObservableTypeKeyExists,
-  validateObservableValue,
-} from '../validators';
-import { processObservables } from './utils';
+import { validateObservableTypeKeyExists, validateObservableValue } from '../validators';
 import { emitObservablesAddedEvent } from './trigger_utils';
+import {
+  countCaseObservables,
+  createCaseObservables,
+  deleteCaseObservables,
+  findCaseObservables,
+  getCaseObservable,
+  getCaseObservables,
+  getObservablesSummary,
+  observableKey,
+  updateCaseObservableDescription,
+  withObservablesSummary,
+} from './observables_storage';
 
-const ensureUpdateAuthorized = async (
+const ensureAuthorized = async (
   authorization: PublicMethodsOf<Authorization>,
-  theCase: CaseSavedObjectTransformed
+  theCase: CaseSavedObjectTransformed,
+  operation: OperationDetails = Operations.updateCase
 ) => {
   return authorization.ensureAuthorized({
-    operation: Operations.updateCase,
+    operation,
     entities: [
       {
         id: theCase.id,
@@ -55,100 +70,127 @@ const ensureUpdateAuthorized = async (
   });
 };
 
+const ensurePlatinumLicense = async (
+  { services: { licensingService } }: CasesClientArgs,
+  message: string
+) => {
+  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
+
+  if (!hasPlatinumLicenseOrGreater) {
+    throw Boom.forbidden(message);
+  }
+
+  licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
+};
+
+const ADD_LICENSE_MESSAGE =
+  'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license';
+const UPDATE_LICENSE_MESSAGE =
+  'In order to update observables in cases, you must be subscribed to an Elastic Platinum license';
+const DELETE_LICENSE_MESSAGE =
+  'In order to delete observables from cases, you must be subscribed to an Elastic Platinum license';
+
+const recordObservablesUserAction = async (
+  clientArgs: CasesClientArgs,
+  theCase: CaseSavedObjectTransformed,
+  count: number,
+  actionType: 'add' | 'update' | 'delete'
+) => {
+  await clientArgs.services.userActionService.creator.createUserAction({
+    userAction: {
+      type: UserActionTypes.observables,
+      caseId: theCase.id,
+      owner: theCase.attributes.owner,
+      user: clientArgs.user,
+      payload: { observables: { count, actionType } },
+    },
+  });
+};
+
+/** Builds a case response whose `observables` preview and total come from the stored observables. */
+const buildCaseResponse = async (
+  theCase: CaseSavedObjectTransformed,
+  clientArgs: CasesClientArgs
+): Promise<Case> => {
+  const summaries = await getObservablesSummary([theCase.id], clientArgs);
+  const res = withObservablesSummary(flattenCaseSavedObject({ savedObject: theCase }), summaries);
+  return decodeOrThrowZod(CaseSchema)(res);
+};
+
+export interface ApplyObservablesResult {
+  theCase: CaseSavedObjectTransformed;
+  newlyAddedObservables: Observable[];
+  duplicates: number;
+  overCap: number;
+  totalObservables: number;
+}
+
 /**
  * License-agnostic core that dedupes, caps, persists, and records a user action
  * for a set of observables on a case. Callers MUST enforce the Platinum license
  * gate and call notifyUsage themselves.
  *
- * Skips both the patchCase write and the user action write when no new
- * observables were added (idempotency — avoids a no-op SO write on every
- * re-extraction of the same alert).
- *
- * @param prefetchedCase - Optional already-fetched SO to avoid an extra getCase
- *   round-trip. When provided, `caseId` is ignored for the initial fetch.
+ * Each observable is its own attachment with an id derived from the case, type key and value,
+ * so an observable the case already holds is reported as a duplicate without reading the case's
+ * observables. The case document is never written. The cap is checked with a count before the
+ * write, so concurrent writers can pass it by their request sizes.
  */
 export const applyObservablesToCase = async (
   caseId: string,
   observables: ObservablePost[],
   clientArgs: CasesClientArgs,
   prefetchedCase?: CaseSavedObjectTransformed
-) => {
-  const {
-    services: { caseService, userActionService },
-    user,
-  } = clientArgs;
+): Promise<ApplyObservablesResult> => {
+  const theCase = prefetchedCase ?? (await clientArgs.services.caseService.getCase({ id: caseId }));
 
-  if (observables.length === 0) {
-    return;
-  }
-
-  const retrievedCase = prefetchedCase ?? (await caseService.getCase({ id: caseId }));
-
-  const currentObservables = retrievedCase.attributes.observables ?? [];
-  // Build a key-set from existing observables so we never overwrite or collapse
-  // them — even when two stored rows share the same typeKey+value (reachable
-  // via SO import or data written before the dedupe path was added).
-  const existingKeys = new Set(
-    currentObservables.map(({ typeKey, value }) => `${typeKey}-${value}`)
-  );
-
-  // Dedupe incoming entries against existing ones and against each other.
-  // processObservables mints ids/timestamps for ObservablePost entries and
-  // skips repeats, so it is safe to call for every incoming entry.
-  const incomingMap = new Map<string, Observable>();
+  const unique = new Map<string, ObservablePost>();
   observables.forEach((observable) => {
-    if (existingKeys.has(`${observable.typeKey}-${observable.value}`)) {
-      return;
+    const key = observableKey(observable);
+    if (!unique.has(key)) {
+      unique.set(key, observable);
     }
-    processObservables(incomingMap, observable);
+  });
+  const requested = [...unique.values()];
+  const duplicatesInRequest = observables.length - requested.length;
+
+  const existingCount = await countCaseObservables(theCase.id, clientArgs);
+  const room = Math.max(0, MAX_STORED_OBSERVABLES_PER_CASE - existingCount);
+  const toCreate = requested.slice(0, room);
+
+  const { added, duplicates } = await createCaseObservables({
+    caseId: theCase.id,
+    owner: theCase.attributes.owner,
+    observables: toCreate,
+    clientArgs,
   });
 
-  // Respect the per-case cap: add as many new observables as fit.
-  const remainingCapacity = Math.max(0, MAX_OBSERVABLES_PER_CASE - currentObservables.length);
-  const newlyAddedObservables = Array.from(incomingMap.values()).slice(0, remainingCapacity);
-
-  // Nothing new was added — skip both the patch write and the user action to
-  // avoid a no-op SO write on every idempotent re-extraction (e.g. the same
-  // alert being attached multiple times).
-  if (newlyAddedObservables.length === 0) {
-    return;
+  if (added.length > 0) {
+    await recordObservablesUserAction(clientArgs, theCase, added.length, 'add');
   }
 
-  const finalObservables = [...currentObservables, ...newlyAddedObservables];
-
-  const patchedCase = await caseService.patchCase({
-    caseId: retrievedCase.id,
-    originalCase: retrievedCase,
-    updatedAttributes: {
-      observables: finalObservables,
-      total_observables: finalObservables.length,
-    },
-  });
-
-  await userActionService.creator.createUserAction({
-    userAction: {
-      type: UserActionTypes.observables,
-      caseId: retrievedCase.id,
-      owner: retrievedCase.attributes.owner,
-      user,
-      payload: {
-        observables: { count: newlyAddedObservables.length, actionType: 'add' },
-      },
-    },
-  });
-
-  // Return the merged case and the new observables so the caller can emit the
-  // trigger after a successful decode — never emit from inside this function
-  // because bulk callers decode *after* calling applyObservablesToCase.
   return {
-    caseWithPatch: {
-      ...retrievedCase,
-      ...patchedCase,
-      attributes: { ...retrievedCase.attributes, ...patchedCase?.attributes },
-      references: retrievedCase.references,
-    },
-    newlyAddedObservables,
+    theCase,
+    newlyAddedObservables: added,
+    duplicates: duplicates + duplicatesInRequest,
+    overCap: requested.length - toCreate.length,
+    totalObservables: existingCount + added.length,
   };
+};
+
+const validateTypeKeys = async (
+  casesClient: CasesClient,
+  theCase: CaseSavedObjectTransformed,
+  observables: ObservablePost[]
+) => {
+  const typeKeys = new Set(observables.map(({ typeKey }) => typeKey));
+  await Promise.all(
+    [...typeKeys].map((observableTypeKey) =>
+      validateObservableTypeKeyExists(casesClient, {
+        caseOwner: theCase.attributes.owner,
+        observableTypeKey,
+      })
+    )
+  );
 };
 
 export const addObservable = async (
@@ -157,75 +199,47 @@ export const addObservable = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ) => {
-  const {
-    services: { caseService, licensingService },
-    authorization,
-  } = clientArgs;
-
-  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
-
-  if (!hasPlatinumLicenseOrGreater) {
-    throw Boom.forbidden(
-      'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license'
-    );
-  }
-
-  licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
+  await ensurePlatinumLicense(clientArgs, ADD_LICENSE_MESSAGE);
 
   // Extract into an inner function so the emit can run outside the error-wrapping
   // boundary. A throw from the event bus must not turn a fully-committed write into
   // a 400 — and a decode failure (CaseSchema) must not silently skip the emit for a
-  // write that the API reports as failed. Both invariants require the emit to sit
-  // after the try/catch, which `.catch` makes possible without `let` variables.
-  const {
-    result: decodedCase,
-    caseForEmit,
-    observablesForEmit,
-  } = await (async () => {
+  // write that the API reports as failed.
+  const { result, applied } = await (async () => {
     const paramArgs = decodeWithExcessOrThrowZod(AddObservableRequestSchema)(params);
-    const retrievedCase = await caseService.getCase({ id: caseId });
-    await ensureUpdateAuthorized(authorization, retrievedCase);
+    const retrievedCase = await clientArgs.services.caseService.getCase({ id: caseId });
+    await ensureAuthorized(clientArgs.authorization, retrievedCase);
 
-    await validateObservableTypeKeyExists(casesClient, {
-      caseOwner: retrievedCase.attributes.owner,
-      observableTypeKey: params.observable.typeKey,
-    });
-
+    await validateTypeKeys(casesClient, retrievedCase, [paramArgs.observable]);
     validateObservableValue(paramArgs.observable.typeKey, paramArgs.observable.value);
 
-    const currentObservables = retrievedCase.attributes.observables ?? [];
-
-    if (currentObservables.length === MAX_OBSERVABLES_PER_CASE) {
-      throw Boom.forbidden(`Max ${MAX_OBSERVABLES_PER_CASE} observables per case is allowed.`);
-    }
-
-    const applied = await applyObservablesToCase(
+    const appliedResult = await applyObservablesToCase(
       caseId,
       [paramArgs.observable],
       clientArgs,
       retrievedCase
     );
-    if (!applied) {
+
+    if (appliedResult.overCap > 0) {
+      throw Boom.forbidden(
+        `Max ${MAX_STORED_OBSERVABLES_PER_CASE} observables per case is allowed.`
+      );
+    }
+
+    if (appliedResult.newlyAddedObservables.length === 0) {
       throw Boom.badRequest('Invalid duplicated observables in request.');
     }
 
-    const res = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });
-
-    // Decode before emitting — if the SO fails CaseSchema validation, we must not fire
-    // the trigger for a request the API will report as failed. Matches the precedent
-    // in create.ts where decodeOrThrow runs before the emit.
-    const result = decodeOrThrowZod(CaseSchema)(res);
     return {
-      result,
-      caseForEmit: applied.caseWithPatch,
-      observablesForEmit: applied.newlyAddedObservables,
+      result: await buildCaseResponse(retrievedCase, clientArgs),
+      applied: appliedResult,
     };
   })().catch((error) => {
     throw Boom.badRequest(`Failed to add observable: ${error}`);
   });
 
-  emitObservablesAddedEvent(clientArgs, caseForEmit, observablesForEmit);
-  return decodedCase;
+  emitObservablesAddedEvent(clientArgs, applied.theCase, applied.newlyAddedObservables);
+  return result;
 };
 
 export const updateObservable = async (
@@ -235,84 +249,50 @@ export const updateObservable = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ) => {
+  await ensurePlatinumLicense(clientArgs, UPDATE_LICENSE_MESSAGE);
+
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService },
     authorization,
-    user,
   } = clientArgs;
-
-  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
-
-  if (!hasPlatinumLicenseOrGreater) {
-    throw Boom.forbidden(
-      'In order to update observables in cases, you must be subscribed to an Elastic Platinum license'
-    );
-  }
-
-  licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   try {
     const paramArgs = decodeWithExcessOrThrowZod(UpdateObservableRequestSchema)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
-    await ensureUpdateAuthorized(authorization, retrievedCase);
+    await ensureAuthorized(authorization, retrievedCase);
 
-    const currentObservables = retrievedCase.attributes.observables ?? [];
+    const existing = await getCaseObservable(retrievedCase.id, observableId, clientArgs);
+    const { typeKey, value: currentValue } = existing.attributes.data;
+    const { value, description } = paramArgs.observable;
 
-    const observableIndex = currentObservables.findIndex(
-      (observable) => observable.id === observableId
-    );
+    validateObservableValue(typeKey, value);
 
-    if (observableIndex === -1) {
-      throw Boom.notFound(`Failed to update observable: observable id ${observableId} not found`);
-    }
-
-    validateObservableValue(
-      currentObservables[observableIndex].typeKey,
-      paramArgs.observable.value
-    );
-
-    const updatedObservables = [...currentObservables];
-    updatedObservables[observableIndex] = {
-      ...updatedObservables[observableIndex],
-      ...paramArgs.observable,
-      updatedAt: new Date().toISOString(),
-    };
-
-    validateDuplicatedObservablesInRequest({
-      requestFields: updatedObservables,
-    });
-
-    const updatedCase = await caseService.patchCase({
-      caseId: retrievedCase.id,
-      originalCase: retrievedCase,
-      updatedAttributes: {
-        observables: updatedObservables,
-        total_observables: updatedObservables.length,
-      },
-    });
-
-    await userActionService.creator.createUserAction({
-      userAction: {
-        type: UserActionTypes.observables,
+    if (value === currentValue) {
+      await updateCaseObservableDescription(
+        observableId,
+        { typeKey, value, description },
+        clientArgs
+      );
+    } else {
+      // The id is derived from the value, so a new value is a new observable. Create first so a
+      // duplicate value fails the request before the original is removed.
+      const { added } = await createCaseObservables({
         caseId: retrievedCase.id,
         owner: retrievedCase.attributes.owner,
-        user,
-        payload: {
-          observables: { count: 1, actionType: 'update' },
-        },
-      },
-    });
+        observables: [{ typeKey, value, description }],
+        clientArgs,
+      });
 
-    const res = flattenCaseSavedObject({
-      savedObject: {
-        ...retrievedCase,
-        ...updatedCase,
-        attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
-        references: retrievedCase.references,
-      },
-    });
+      if (added.length === 0) {
+        throw Boom.badRequest('Invalid duplicated observables in request.');
+      }
 
-    return decodeOrThrowZod(CaseSchema)(res);
+      await deleteCaseObservables([observableId], clientArgs);
+    }
+
+    await recordObservablesUserAction(clientArgs, retrievedCase, 1, 'update');
+
+    return await buildCaseResponse(retrievedCase, clientArgs);
   } catch (error) {
     throw Boom.badRequest(`Failed to update observable: ${error}`);
   }
@@ -324,57 +304,74 @@ export const deleteObservable = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ) => {
+  await ensurePlatinumLicense(clientArgs, DELETE_LICENSE_MESSAGE);
+
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService },
     authorization,
-    user,
   } = clientArgs;
-
-  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
-
-  if (!hasPlatinumLicenseOrGreater) {
-    throw Boom.forbidden(
-      'In order to delete observables from cases, you must be subscribed to an Elastic Platinum license'
-    );
-  }
-
-  licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   try {
     const retrievedCase = await caseService.getCase({ id: caseId });
-    await ensureUpdateAuthorized(authorization, retrievedCase);
+    await ensureAuthorized(authorization, retrievedCase);
 
-    const updatedObservables = retrievedCase.attributes.observables.filter(
-      (observable) => observable.id !== observableId
-    );
+    await getCaseObservable(retrievedCase.id, observableId, clientArgs);
+    await deleteCaseObservables([observableId], clientArgs);
 
-    // NOTE: same length of observables pre and post filter means that the observable id has not been found
-    if (updatedObservables.length === retrievedCase.attributes.observables.length) {
-      throw Boom.notFound(`Failed to delete observable: observable id ${observableId} not found`);
-    }
-
-    await caseService.patchCase({
-      caseId: retrievedCase.id,
-      originalCase: retrievedCase,
-      updatedAttributes: {
-        observables: updatedObservables,
-        total_observables: updatedObservables.length,
-      },
-    });
-    await userActionService.creator.createUserAction({
-      userAction: {
-        type: UserActionTypes.observables,
-        caseId: retrievedCase.id,
-        owner: retrievedCase.attributes.owner,
-        user,
-        payload: {
-          observables: { count: 1, actionType: 'delete' },
-        },
-      },
-    });
+    await recordObservablesUserAction(clientArgs, retrievedCase, 1, 'delete');
   } catch (error) {
     throw Boom.badRequest(`Failed to delete observable id: ${observableId}: ${error}`);
   }
+};
+
+/**
+ * Adds up to `MAX_OBSERVABLES_BULK_CREATE` observables and reports how many were added, were
+ * already on the case, or did not fit under the per-case cap.
+ */
+export const bulkCreateObservables = async (
+  params: BulkCreateObservablesRequest & { caseId: string },
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
+): Promise<BulkCreateObservablesResponse> => {
+  await ensurePlatinumLicense(clientArgs, ADD_LICENSE_MESSAGE);
+
+  const { caseId, ...body } = params;
+  const { applied, response } = await (async () => {
+    const { observables } = decodeWithExcessOrThrowZod(BulkCreateObservablesRequestSchema)(body);
+    const retrievedCase = await clientArgs.services.caseService.getCase({ id: caseId });
+    await ensureAuthorized(clientArgs.authorization, retrievedCase);
+
+    await validateTypeKeys(casesClient, retrievedCase, observables);
+    observables.forEach(({ typeKey, value }) => validateObservableValue(typeKey, value));
+
+    const appliedResult = await applyObservablesToCase(
+      caseId,
+      observables,
+      clientArgs,
+      retrievedCase
+    );
+
+    return {
+      applied: appliedResult,
+      response: {
+        added: appliedResult.newlyAddedObservables.length,
+        duplicates: appliedResult.duplicates,
+        over_cap: appliedResult.overCap,
+        total_observables: appliedResult.totalObservables,
+      },
+    };
+  })().catch((error) => {
+    throw Boom.boomify(error, {
+      statusCode: Boom.isBoom(error) ? error.output.statusCode : 400,
+      message: 'Failed to bulk create observables',
+    });
+  });
+
+  if (applied.newlyAddedObservables.length > 0) {
+    emitObservablesAddedEvent(clientArgs, applied.theCase, applied.newlyAddedObservables);
+  }
+
+  return response;
 };
 
 export const bulkAddObservables = async (
@@ -382,141 +379,101 @@ export const bulkAddObservables = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ) => {
-  const {
-    services: { caseService, licensingService },
-    authorization,
-  } = clientArgs;
-
-  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
-
-  if (!hasPlatinumLicenseOrGreater) {
-    throw Boom.forbidden(
-      'In order to assign observables to cases, you must be subscribed to an Elastic Platinum license'
-    );
-  }
-
-  licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
+  await ensurePlatinumLicense(clientArgs, ADD_LICENSE_MESSAGE);
 
   // Same inner-function pattern as addObservable: emit must run outside the
-  // error-wrapping boundary so bus errors cannot turn a committed write into a 400,
-  // and the decode must precede the emit so a CaseSchema failure does not fire the
-  // trigger for a request the API will report as failed.
-  const {
-    result: decodedCase,
-    caseForEmit,
-    observablesForEmit,
-  } = await (async () => {
+  // error-wrapping boundary so bus errors cannot turn a committed write into a 400.
+  const { result, applied } = await (async () => {
     const paramArgs = decodeWithExcessOrThrowZod(BulkAddObservablesRequestSchema)(params);
-    const retrievedCase = await caseService.getCase({ id: paramArgs.caseId });
-    await ensureUpdateAuthorized(authorization, retrievedCase);
+    const retrievedCase = await clientArgs.services.caseService.getCase({ id: paramArgs.caseId });
+    await ensureAuthorized(clientArgs.authorization, retrievedCase);
 
-    await Promise.all(
-      params.observables.map((observable: ObservablePost) =>
-        validateObservableTypeKeyExists(casesClient, {
-          caseOwner: retrievedCase.attributes.owner,
-          observableTypeKey: observable.typeKey,
-        })
-      )
-    );
+    await validateTypeKeys(casesClient, retrievedCase, paramArgs.observables);
 
-    const applied = await applyObservablesToCase(
+    const appliedResult = await applyObservablesToCase(
       paramArgs.caseId,
       paramArgs.observables,
       clientArgs,
       retrievedCase
     );
-    if (!applied) {
+
+    if (appliedResult.newlyAddedObservables.length === 0) {
       throw Boom.badRequest(`Failed to add observable`);
     }
-    const res = flattenCaseSavedObject({ savedObject: applied.caseWithPatch });
-    const result = decodeOrThrowZod(CaseSchema)(res);
+
     return {
-      result,
-      caseForEmit: applied.caseWithPatch,
-      observablesForEmit: applied.newlyAddedObservables,
+      result: await buildCaseResponse(retrievedCase, clientArgs),
+      applied: appliedResult,
     };
   })().catch((error) => {
     throw Boom.badRequest(`Failed to add observable: ${error}`);
   });
 
-  emitObservablesAddedEvent(clientArgs, caseForEmit, observablesForEmit);
-  return decodedCase;
+  emitObservablesAddedEvent(clientArgs, applied.theCase, applied.newlyAddedObservables);
+  return result;
 };
 
 export const bulkDeleteObservables = async (
   params: BulkDeleteObservablesRequest,
   clientArgs: CasesClientArgs
 ) => {
+  await ensurePlatinumLicense(clientArgs, DELETE_LICENSE_MESSAGE);
+
   const {
-    services: { caseService, licensingService, userActionService },
+    services: { caseService },
     authorization,
-    user,
   } = clientArgs;
-
-  const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
-
-  if (!hasPlatinumLicenseOrGreater) {
-    throw Boom.forbidden(
-      'In order to delete observables from cases, you must be subscribed to an Elastic Platinum license'
-    );
-  }
-
-  licensingService.notifyUsage(LICENSING_CASE_OBSERVABLES_FEATURE);
 
   const paramArgs = decodeWithExcessOrThrowZod(BulkDeleteObservablesRequestSchema)(params);
   const retrievedCase = await caseService.getCase({ id: paramArgs.caseId });
-  await ensureUpdateAuthorized(authorization, retrievedCase);
+  await ensureAuthorized(authorization, retrievedCase);
 
-  const idsToDelete = new Set(paramArgs.observableIds);
-  const currentObservables = retrievedCase.attributes.observables ?? [];
-  const currentIdSet = new Set(currentObservables.map(({ id }) => id));
+  const observableIds = [...new Set(paramArgs.observableIds)];
+  const { found, missingIds } = await getCaseObservables(
+    retrievedCase.id,
+    observableIds,
+    clientArgs
+  );
 
-  const missingIds = [...idsToDelete].filter((id) => !currentIdSet.has(id));
   if (missingIds.length > 0) {
     throw Boom.notFound(
       `Failed to bulk delete observables: observable ids not found: ${missingIds.join(', ')}`
     );
   }
 
-  const removedObservables = currentObservables.filter((observable) =>
-    idsToDelete.has(observable.id)
+  await deleteCaseObservables(
+    found.map(({ id }) => id),
+    clientArgs
   );
-  const updatedObservables = currentObservables.filter(
-    (observable) => !idsToDelete.has(observable.id)
-  );
-  const removedCount = removedObservables.length;
 
-  const updatedCase = await caseService.patchCase({
-    caseId: retrievedCase.id,
-    originalCase: retrievedCase,
-    version: retrievedCase.version,
-    updatedAttributes: {
-      observables: updatedObservables,
-      total_observables: updatedObservables.length,
-    },
-  });
+  await recordObservablesUserAction(clientArgs, retrievedCase, found.length, 'delete');
 
-  await userActionService.creator.createUserAction({
-    userAction: {
-      type: UserActionTypes.observables,
-      caseId: retrievedCase.id,
-      owner: retrievedCase.attributes.owner,
-      user,
-      payload: {
-        observables: { count: removedCount, actionType: 'delete' },
-      },
-    },
-  });
+  return buildCaseResponse(retrievedCase, clientArgs);
+};
 
-  const res = flattenCaseSavedObject({
-    savedObject: {
-      ...retrievedCase,
-      ...updatedCase,
-      attributes: { ...retrievedCase.attributes, ...updatedCase?.attributes },
-      references: retrievedCase.references,
-    },
-  });
+/** Pages a case's observables with server-side sorting and filtering. */
+export const findObservables = async (
+  params: FindObservablesRequest & { caseId: string },
+  clientArgs: CasesClientArgs
+): Promise<FindObservablesResponse> => {
+  const { caseId, ...body } = params;
 
-  const result = decodeOrThrowZod(CaseSchema)(res);
-  return result;
+  try {
+    const { perPage, cursor, sortField, sortOrder, typeKeys, search } = decodeWithExcessOrThrowZod(
+      FindObservablesRequestSchema
+    )(body);
+
+    const retrievedCase = await clientArgs.services.caseService.getCase({ id: caseId });
+    await ensureAuthorized(clientArgs.authorization, retrievedCase, Operations.getCase);
+
+    return await findCaseObservables(
+      { caseId: retrievedCase.id, perPage, cursor, sortField, sortOrder, typeKeys, search },
+      clientArgs
+    );
+  } catch (error) {
+    throw Boom.boomify(error, {
+      statusCode: Boom.isBoom(error) ? error.output.statusCode : 400,
+      message: `Failed to find observables of case ${caseId}`,
+    });
+  }
 };

@@ -137,7 +137,7 @@ export const getAllDocumentsAttachedToCase = async (
 
 /**
  * Retrieves the attachments for a case entity, optionally filtered by `type`.
- * Omitting `type` returns every attachment type across both storage models.
+ * Omitting `type` returns every attachment type across both storage models except observables.
  */
 export async function find(
   { caseID, findQueryParams }: FindAttachmentsArgs,

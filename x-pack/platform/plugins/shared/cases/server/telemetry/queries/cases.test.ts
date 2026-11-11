@@ -102,23 +102,22 @@ describe('getCasesTelemetryData', () => {
             ],
           },
         },
-        totalWithMaxObservables: {
-          buckets: [
-            {
-              key: 50,
-              doc_count: 1,
-            },
-            {
-              key: 3,
-              doc_count: 1,
-            },
-          ],
+        casesWithMaxObservables: {
+          byCase: {
+            buckets: [{ key: 'case-1', doc_count: 50 }],
+          },
         },
+      };
+
+      const observablesAggsResult = {
+        ...observables,
+        securitySolution: observables,
+        observability: observables,
+        cases: observables,
       };
 
       const solutionValues = {
         counts,
-        ...observables,
         ...assignees,
       };
 
@@ -130,7 +129,6 @@ describe('getCasesTelemetryData', () => {
         securitySolution: { ...solutionValues },
         observability: { ...solutionValues },
         cases: { ...solutionValues },
-        ...observables,
         syncAlerts: {
           buckets: [
             {
@@ -315,6 +313,7 @@ describe('getCasesTelemetryData', () => {
         closed_at: '2022-03-08T12:24:11.429Z',
       }); // find[6]
       mockFind(filesRes); // find[7]
+      mockFind(observablesAggsResult); // find[8] observable attachments
 
       mockSearch(casesWithAlertsResult); // search[0] cases with alerts
       mockSearch({ participants: { value: 7 } }); // search[1] participants
@@ -486,6 +485,36 @@ describe('getCasesTelemetryData', () => {
       });
     });
 
+    it('counts observables from the observable attachments, overall and per owner', async () => {
+      mockResponse();
+
+      await getCasesTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
+
+      const observablesQuery = savedObjectsClient.find.mock.calls
+        .map(([options]) => options)
+        .find(({ filter }) => filter === 'cases-attachments.attributes.type: observable');
+      expect(observablesQuery).toMatchObject({
+        type: 'cases-attachments',
+        namespaces: ['*'],
+        perPage: 0,
+      });
+      expect(Object.keys(observablesQuery?.aggs ?? {}).sort()).toEqual([
+        'cases',
+        'casesWithMaxObservables',
+        'observability',
+        'observables',
+        'securitySolution',
+      ]);
+      expect(observablesQuery?.aggs?.casesWithMaxObservables).toEqual({
+        nested: { path: 'cases-attachments.references' },
+        aggs: {
+          byCase: {
+            terms: { field: 'cases-attachments.references.id', min_doc_count: 50, size: 10_000 },
+          },
+        },
+      });
+    });
+
     it('should call find with correct arguments', async () => {
       mockResponse();
 
@@ -564,25 +593,6 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
-                "observables": Object {
-                  "aggs": Object {
-                    "byDescription": Object {
-                      "aggs": Object {
-                        "byType": Object {
-                          "terms": Object {
-                            "field": "cases.attributes.observables.typeKey",
-                          },
-                        },
-                      },
-                      "terms": Object {
-                        "field": "cases.attributes.observables.description",
-                      },
-                    },
-                  },
-                  "nested": Object {
-                    "path": "cases.attributes.observables",
-                  },
-                },
                 "status": Object {
                   "terms": Object {
                     "field": "cases.attributes.status",
@@ -591,15 +601,6 @@ describe('getCasesTelemetryData', () => {
                 "totalAssignees": Object {
                   "value_count": Object {
                     "field": "cases.attributes.assignees.uid",
-                  },
-                },
-                "totalWithMaxObservables": Object {
-                  "terms": Object {
-                    "field": "cases.attributes.total_observables",
-                    "order": Object {
-                      "_key": "desc",
-                    },
-                    "size": 100,
                   },
                 },
               },
@@ -685,25 +686,6 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
-                "observables": Object {
-                  "aggs": Object {
-                    "byDescription": Object {
-                      "aggs": Object {
-                        "byType": Object {
-                          "terms": Object {
-                            "field": "cases.attributes.observables.typeKey",
-                          },
-                        },
-                      },
-                      "terms": Object {
-                        "field": "cases.attributes.observables.description",
-                      },
-                    },
-                  },
-                  "nested": Object {
-                    "path": "cases.attributes.observables",
-                  },
-                },
                 "status": Object {
                   "terms": Object {
                     "field": "cases.attributes.status",
@@ -714,39 +696,11 @@ describe('getCasesTelemetryData', () => {
                     "field": "cases.attributes.assignees.uid",
                   },
                 },
-                "totalWithMaxObservables": Object {
-                  "terms": Object {
-                    "field": "cases.attributes.total_observables",
-                    "order": Object {
-                      "_key": "desc",
-                    },
-                    "size": 100,
-                  },
-                },
               },
               "filter": Object {
                 "term": Object {
                   "cases.attributes.owner": "observability",
                 },
-              },
-            },
-            "observables": Object {
-              "aggs": Object {
-                "byDescription": Object {
-                  "aggs": Object {
-                    "byType": Object {
-                      "terms": Object {
-                        "field": "cases.attributes.observables.typeKey",
-                      },
-                    },
-                  },
-                  "terms": Object {
-                    "field": "cases.attributes.observables.description",
-                  },
-                },
-              },
-              "nested": Object {
-                "path": "cases.attributes.observables",
               },
             },
             "securitySolution": Object {
@@ -795,25 +749,6 @@ describe('getCasesTelemetryData', () => {
                     ],
                   },
                 },
-                "observables": Object {
-                  "aggs": Object {
-                    "byDescription": Object {
-                      "aggs": Object {
-                        "byType": Object {
-                          "terms": Object {
-                            "field": "cases.attributes.observables.typeKey",
-                          },
-                        },
-                      },
-                      "terms": Object {
-                        "field": "cases.attributes.observables.description",
-                      },
-                    },
-                  },
-                  "nested": Object {
-                    "path": "cases.attributes.observables",
-                  },
-                },
                 "status": Object {
                   "terms": Object {
                     "field": "cases.attributes.status",
@@ -822,15 +757,6 @@ describe('getCasesTelemetryData', () => {
                 "totalAssignees": Object {
                   "value_count": Object {
                     "field": "cases.attributes.assignees.uid",
-                  },
-                },
-                "totalWithMaxObservables": Object {
-                  "terms": Object {
-                    "field": "cases.attributes.total_observables",
-                    "order": Object {
-                      "_key": "desc",
-                    },
-                    "size": 100,
                   },
                 },
               },
@@ -858,15 +784,6 @@ describe('getCasesTelemetryData', () => {
             "totalAssignees": Object {
               "value_count": Object {
                 "field": "cases.attributes.assignees.uid",
-              },
-            },
-            "totalWithMaxObservables": Object {
-              "terms": Object {
-                "field": "cases.attributes.total_observables",
-                "order": Object {
-                  "_key": "desc",
-                },
-                "size": 100,
               },
             },
             "totalsByOwner": Object {

@@ -8,10 +8,15 @@
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+} from '../../../common/constants';
 import { ATTACHMENTS_INDEX_NAME } from '../constants';
 import type { AttachmentPersistedAttributes } from '../../common/types/attachments_v2';
 import { CasesAttachmentsV2Writer } from './attachments';
+import type { AttachmentSource } from './attachments';
 
 /**
  * Tests for the attachments writer focused on:
@@ -63,6 +68,22 @@ const makeLegacyAttachmentSO = (
     } as unknown as AttachmentPersistedAttributes,
   } as SavedObject<AttachmentPersistedAttributes>);
 
+const makeObservableSO = (id: string): AttachmentSource =>
+  ({
+    type: CASE_ATTACHMENT_SAVED_OBJECT,
+    id,
+    namespaces: ['default'],
+    references: [
+      { id: 'case-1', type: CASE_SAVED_OBJECT, name: 'associated-cases' } as SavedObjectReference,
+    ],
+    attributes: {
+      type: 'observable',
+      owner: 'securitySolution',
+      data: { typeKey: 'observable-type-ipv4', value: '10.0.0.1', description: null },
+      created_at: '2026-11-04T00:00:00.000Z',
+    },
+  } as unknown as AttachmentSource);
+
 describe('CasesAttachmentsV2Writer', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -91,6 +112,23 @@ describe('CasesAttachmentsV2Writer', () => {
       writer.bulkUpsertAttachments([]);
       await new Promise((r) => setImmediate(r));
       expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('does not mirror observables', async () => {
+      const { writer, esClient } = buildWriterUnderTest();
+      (esClient.bulk as unknown as jest.Mock).mockResolvedValue({ errors: false, items: [] });
+      const observable = makeObservableSO('obs-1');
+
+      writer.bulkUpsertAttachments([makeLegacyAttachmentSO('att-1'), observable]);
+      writer.upsertAttachment(observable);
+      await writer.bulkUpsertAttachmentsAwait([observable]);
+      await new Promise((r) => setImmediate(r));
+
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+      const operations = (esClient.bulk as unknown as jest.Mock).mock.calls[0][0].operations;
+      expect(operations).toHaveLength(2);
+      expect(operations[0]).toEqual({ index: { _index: ATTACHMENTS_INDEX_NAME, _id: 'att-1' } });
+      expect(esClient.index).not.toHaveBeenCalled();
     });
   });
 

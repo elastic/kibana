@@ -21,6 +21,8 @@ import type {
   CustomFieldPutRequest,
   CasesSimilarResponse,
   AddObservableRequest,
+  FindObservablesRequest,
+  FindObservablesResponse,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
   UserActionFindRequestSources,
@@ -59,6 +61,7 @@ import {
   getCaseUserActionStatsUrl,
   getCustomFieldReplaceUrl,
   getCaseCreateObservableUrl,
+  getCaseFindObservablesUrl,
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseBulkDeleteObservablesUrl,
@@ -690,6 +693,17 @@ export const postObservable = async (
   });
   return convertCaseToCamelCase(decodeCaseResponse(response));
 };
+
+export const findObservables = async (
+  caseId: string,
+  params: FindObservablesRequest,
+  signal?: AbortSignal
+): Promise<FindObservablesResponse> =>
+  KibanaServices.get().http.fetch<FindObservablesResponse>(getCaseFindObservablesUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify(params),
+    signal,
+  });
 
 export const patchObservable = async (
   request: UpdateObservableRequest,

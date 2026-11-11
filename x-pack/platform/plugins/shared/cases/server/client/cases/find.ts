@@ -27,6 +27,7 @@ import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { CasesSearchParams } from '../types';
 import { validateSearchCasesCustomFields } from './validators';
+import { getObservablesSummary, withObservablesSummary } from './observables_storage';
 
 /**
  * Retrieves a case and optionally its comments via saved objects find.
@@ -149,6 +150,12 @@ export const find = async (
       countInProgressCases: statusStats['in-progress'],
       countClosedCases: statusStats.closed,
     });
+
+    const observablesSummaries = await getObservablesSummary(
+      res.cases.map(({ id }) => id),
+      clientArgs
+    );
+    res.cases = res.cases.map((theCase) => withObservablesSummary(theCase, observablesSummaries));
 
     return decodeOrThrowZod(CasesFindResponseSchema)(res);
   } catch (error) {
