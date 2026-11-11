@@ -38,7 +38,7 @@ async function areConfigsEqual(
 
 /**
  * Checks whether the config of every panel is equal.
- * 
+ *
  * @returns `true` when every panel has the same type and an equal config.
  */
 export async function arePanelConfigsEqual(
