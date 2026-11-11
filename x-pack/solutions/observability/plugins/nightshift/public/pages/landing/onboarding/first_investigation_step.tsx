@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
-  EuiIcon,
   EuiIllustration,
   EuiPanel,
   EuiProgress,
