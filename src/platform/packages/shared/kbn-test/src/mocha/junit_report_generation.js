@@ -30,6 +30,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
     rootDirectory = REPO_ROOT,
     getTestMetadata = () => ({}),
     metadata,
+    target,
     log = new ToolingLog({ level: 'error', writeTo: process.stderr }),
   } = options;
 
@@ -124,6 +125,7 @@ export function setupJUnitReportGeneration(runner, options = {}) {
 
     root.att({
       name: 'ftr',
+      target,
       time: getDuration(stats),
       tests: allTests.length + failedHooks.length,
       failures: failures.length,
