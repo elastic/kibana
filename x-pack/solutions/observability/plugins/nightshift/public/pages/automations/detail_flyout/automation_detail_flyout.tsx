@@ -227,40 +227,42 @@ export const AutomationDetailFlyout = ({
     [automation.id],
     runRange.startedAfter,
     runRange.startedBefore
-  )?.[automation.id] ?? { succeeded: 0, running: 0, failed: 0, skipped: 0 };
-  const startedRuns = runCounts.succeeded + runCounts.running + runCounts.failed;
+  )?.[automation.id];
+  const startedRuns = runCounts && runCounts.succeeded + runCounts.running + runCounts.failed;
   const dailyLimit = automation.runtime.dailyDispatchLimit;
   const currentIndex = automations.findIndex(({ id: rowId }) => rowId === automation.id);
   const isInList = currentIndex !== -1;
   const previous = isInList ? automations[currentIndex - 1] : undefined;
   const next = isInList ? automations[currentIndex + 1] : undefined;
-  const runCount = (status: Run['status']) => runCounts[status];
-  const runsTooltip = i18n.translate('xpack.nightshift.automations.detail.runsTooltip', {
-    defaultMessage: '{counts} in {range}',
-    values: {
-      counts:
-        [
-          runCount('succeeded') > 0 &&
-            i18n.translate('xpack.nightshift.automations.detail.successfulCount', {
-              defaultMessage: '{count} successful',
-              values: { count: runCount('succeeded') },
-            }),
-          runCount('running') > 0 &&
-            i18n.translate('xpack.nightshift.automations.detail.runningCount', {
-              defaultMessage: '{count} running',
-              values: { count: runCount('running') },
-            }),
-          runCount('failed') > 0 &&
-            i18n.translate('xpack.nightshift.automations.detail.failedCount', {
-              defaultMessage: '{count} failed',
-              values: { count: runCount('failed') },
-            }),
-        ]
-          .filter(Boolean)
-          .join(' · ') || '0',
-      range: rangeLabel,
-    },
-  });
+  const runCount = (status: Run['status']) => runCounts?.[status] ?? 0;
+  const runsTooltip = !runCounts
+    ? undefined
+    : i18n.translate('xpack.nightshift.automations.detail.runsTooltip', {
+        defaultMessage: '{counts} in {range}',
+        values: {
+          counts:
+            [
+              runCount('succeeded') > 0 &&
+                i18n.translate('xpack.nightshift.automations.detail.successfulCount', {
+                  defaultMessage: '{count} successful',
+                  values: { count: runCount('succeeded') },
+                }),
+              runCount('running') > 0 &&
+                i18n.translate('xpack.nightshift.automations.detail.runningCount', {
+                  defaultMessage: '{count} running',
+                  values: { count: runCount('running') },
+                }),
+              runCount('failed') > 0 &&
+                i18n.translate('xpack.nightshift.automations.detail.failedCount', {
+                  defaultMessage: '{count} failed',
+                  values: { count: runCount('failed') },
+                }),
+            ]
+              .filter(Boolean)
+              .join(' · ') || '0',
+          range: rangeLabel,
+        },
+      });
 
   const navigate = (path: string) => {
     if (embedded) {
@@ -518,7 +520,7 @@ export const AutomationDetailFlyout = ({
                         value: (
                           <div css={{ inlineSize: '100%' }}>
                             {startedRuns}
-                            {startedRuns > 0 && (
+                            {startedRuns !== undefined && startedRuns > 0 && (
                               <RunsSparkline
                                 runs={runs}
                                 startedAfter={runRange.startedAfter}

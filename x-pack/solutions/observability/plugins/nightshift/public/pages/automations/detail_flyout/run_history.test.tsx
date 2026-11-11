@@ -47,6 +47,25 @@ describe('RunHistory skipped run summary', () => {
       </I18nProvider>
     );
 
+  it('hides status pills and the run total when run counts are unavailable', () => {
+    render(
+      <I18nProvider>
+        <RunHistory
+          runs={[skippedRun('daily_limit', 20)]}
+          isLoading={false}
+          startedAfter="2026-01-01T00:00:00.000Z"
+          startedBefore="2026-01-02T00:00:00.000Z"
+          rangeLabel="Last 24 hours"
+          automationName="Alert triage"
+          onSelect={jest.fn()}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText(/0 runs/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/ runs? ·/)).not.toBeInTheDocument();
+  });
+
   it('explains a no_open_investigation skip instead of the daily limit', () => {
     renderRunHistory(skippedRun('no_open_investigation'));
 

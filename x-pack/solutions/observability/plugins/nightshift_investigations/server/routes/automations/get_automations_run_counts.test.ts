@@ -145,6 +145,33 @@ describe('POST /internal/nightshift/automations/run_counts', () => {
     );
   });
 
+  it('does not scan skipped runs for a workflow missing from the access-filtered counts', async () => {
+    mockBulkGet.mockResolvedValue({
+      saved_objects: [
+        { id: 'readable', attributes: { workflowId: 'wf-ok' } },
+        { id: 'private', attributes: { workflowId: 'wf-private' } },
+      ],
+    });
+    mockGetStatusCounts.mockResolvedValue({ 'wf-ok': { completed: 3 } });
+    mockSearchSteps.mockImplementation(async ({ workflowId }) => {
+      if (workflowId === 'wf-private') throw new Error('forbidden');
+      return { results: [], total: 0 };
+    });
+
+    const result = await call({ ids: ['readable', 'private'] });
+
+    expect(result).toEqual({
+      counts: {
+        readable: { succeeded: 3, skipped: 0, running: 0, failed: 0 },
+        private: { succeeded: 0, skipped: 0, running: 0, failed: 0 },
+      },
+    });
+    expect(mockSearchSteps).not.toHaveBeenCalledWith(
+      expect.objectContaining({ workflowId: 'wf-private' }),
+      expect.anything()
+    );
+  });
+
   it('throws 503 when workflows management is unavailable', async () => {
     getWorkflowsManagement.mockReturnValue(undefined);
 

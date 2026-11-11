@@ -161,6 +161,33 @@ describe('use_automations', () => {
     expect(result.current.total).toBe(101);
   });
 
+  it('stops fetching runs after a page fails and keeps the runs already loaded', async () => {
+    investigationsFetch.mockImplementation((_endpoint, { params }) =>
+      params.query.page === 1
+        ? Promise.resolve({
+            runs: Array.from({ length: 100 }, (_, i) => ({
+              id: `r${i}`,
+              status: 'succeeded',
+              startedAt: '2026-10-01T00:00:00.000Z',
+            })),
+            total: 250,
+            usedToday: 0,
+          })
+        : Promise.reject(new Error('boom'))
+    );
+    const { result } = renderWithClient(() =>
+      useAutomationRunsInRange('a', '2026-10-01T00:00:00.000Z', '2026-10-02T00:00:00.000Z')
+    );
+
+    await waitFor(() => expect(investigationsFetch).toHaveBeenCalledTimes(2));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+
+    expect(investigationsFetch).toHaveBeenCalledTimes(2);
+    expect(result.current.runs).toHaveLength(100);
+  });
+
   it('creates an automation, shows a toast, and refreshes the list', async () => {
     investigationsFetch.mockResolvedValue({ id: 'automation-1' });
     const { result, invalidateQueries } = renderWithClient(() => useCreateAutomation());

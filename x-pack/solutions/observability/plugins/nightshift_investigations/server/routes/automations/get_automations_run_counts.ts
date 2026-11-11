@@ -83,6 +83,7 @@ export const getAutomationsRunCountsRoute = createNightshiftInvestigationsServer
           for (const status of Object.values(ExecutionStatus)) {
             runCounts[mapRunStatus(status)] += statusCounts[status] ?? 0;
           }
+          if (runCounts.succeeded === 0) return [id, runCounts];
           const skipped = Math.min(
             await countSkippedRuns({
               management: workflowsManagement.management,
