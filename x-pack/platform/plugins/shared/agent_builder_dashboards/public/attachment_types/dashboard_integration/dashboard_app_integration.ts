@@ -184,16 +184,20 @@ export const registerDashboardAppIntegration = ({
     return undefined;
   };
 
-  const applyToOpenDashboard = (attachment: DashboardAttachment) =>
-    applyAgentChangesToDashboard({
-      api,
-      dashboardState: attachmentDataToDashboardState(attachment.data),
-      dashboardLocator,
-      toasts,
-    }).catch((error: Error) => {
+  // never throws, since a throw would end the live updates subscription
+  const applyToOpenDashboard = async (attachment: DashboardAttachment) => {
+    try {
+      return await applyAgentChangesToDashboard({
+        api,
+        dashboardState: attachmentDataToDashboardState(attachment.data),
+        dashboardLocator,
+        toasts,
+      });
+    } catch (error) {
       toasts.addError(error, { title: APPLY_AGENT_CHANGES_ERROR_TITLE });
       return undefined;
-    });
+    }
+  };
 
   const agentLiveUpdatesSubscription = createAgentLiveUpdatesSubscription({
     agentBuilder,
