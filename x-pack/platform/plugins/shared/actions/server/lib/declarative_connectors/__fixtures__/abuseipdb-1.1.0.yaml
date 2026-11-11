@@ -105,7 +105,7 @@ actions:
       body:
         ip: "{{ input.ip }}"
         categories: "{{ input.categories }}"
-        comment: "{{ input.comment }}"
+        comment: "{{ input.comment? }}"
 test:
   description: Verify the API key with a bounded IP check.
   request:

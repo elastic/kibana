@@ -73,6 +73,17 @@ describe('executeDeclarativeRequest', () => {
 
     await executeDeclarativeRequest({
       client,
+      request: connector.actions.reportIp.request,
+      input: { ip: '1.2.3.4', categories: [18, 22] },
+      config,
+    });
+    const formBodyWithoutComment = requestSpy.mock.calls[1][0]?.data as URLSearchParams;
+    expect(formBodyWithoutComment.get('ip')).toBe('1.2.3.4');
+    expect(formBodyWithoutComment.get('categories')).toBe('18,22');
+    expect(formBodyWithoutComment.has('comment')).toBe(false);
+
+    await executeDeclarativeRequest({
+      client,
       request: {
         method: 'POST',
         url: 'https://api.example/json',
@@ -81,7 +92,7 @@ describe('executeDeclarativeRequest', () => {
       input: { note: 'hello' },
       config: {},
     });
-    expect(requestSpy.mock.calls[1][0]).toEqual(
+    expect(requestSpy.mock.calls[2][0]).toEqual(
       expect.objectContaining({
         data: { note: 'hello' },
         headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
@@ -215,9 +226,12 @@ describe('executeDeclarativeRequest', () => {
       })
     ).rejects.toThrow(/cannot control the URL origin/);
     for (const url of [
+      'https:{{ input.host }}/check',
+      ' https://{{ input.host }}/check',
       'https://api.{{ input.host }}.example/check',
       'https://api.example@{{ input.host }}/check',
       'https://{{ input.host }}.example@api.example/check',
+      'https:\\\\api.{{ input.host }}.example/check',
     ]) {
       await expect(
         executeDeclarativeRequest({

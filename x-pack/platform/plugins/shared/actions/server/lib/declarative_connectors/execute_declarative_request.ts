@@ -51,6 +51,52 @@ const assertHttpUrl = (value: string): string => {
   return url.toString();
 };
 
+const getUrlOrigin = (value: string): string => {
+  try {
+    return new URL(value).origin;
+  } catch (error) {
+    throw new Error(
+      `Declarative request URL is not valid: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+};
+
+const assertTemplateDoesNotControlOrigin = (value: string): string => {
+  const marker = 'declarative-template-marker';
+  const templatePattern = /\{\{\s*[^{}]+\s*\}\}/g;
+  const urlWithMarkers = value.replace(templatePattern, marker);
+  if (urlWithMarkers === value) {
+    return getUrlOrigin(value);
+  }
+
+  let url: URL;
+  try {
+    url = new URL(urlWithMarkers);
+  } catch {
+    throw new Error('Declarative request URL templates cannot control the URL origin.');
+  }
+  if (
+    url.protocol.includes(marker) ||
+    url.username.includes(marker) ||
+    url.password.includes(marker) ||
+    url.hostname.includes(marker) ||
+    url.port.includes(marker)
+  ) {
+    throw new Error('Declarative request URL templates cannot control the URL origin.');
+  }
+  return url.origin;
+};
+
+const assertUrlOrigin = (value: string, expectedOrigin: string): string => {
+  const renderedOrigin = getUrlOrigin(value);
+  if (renderedOrigin !== expectedOrigin) {
+    throw new Error('Declarative request URL templates cannot control the URL origin.');
+  }
+  return assertHttpUrl(value);
+};
+
 const buildUrl = (request: DeclarativeRequest, context: TemplateContext): string => {
   if (request.url !== undefined) {
     const configPrefix = request.url.match(/^\{\{\s*config\.baseUrl\s*\}\}(.*)$/);
@@ -70,17 +116,18 @@ const buildUrl = (request: DeclarativeRequest, context: TemplateContext): string
           'Declarative request config.baseUrl must be followed by a URL path separator.'
         );
       }
-      return assertHttpUrl(`${baseUrl.replace(/\/+$/, '')}${renderUrlTemplate(suffix, context)}`);
+      const baseOrigin = getUrlOrigin(baseUrl);
+      return assertUrlOrigin(
+        `${baseUrl.replace(/\/+$/, '')}${renderUrlTemplate(suffix, context)}`,
+        baseOrigin
+      );
     }
-    const authority = request.url.match(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\/[^/?#]*/)?.[0];
-    if (authority?.includes('{{') || (request.url.startsWith('{{') && request.url.includes('}}'))) {
-      throw new Error('Declarative request URL templates cannot control the URL origin.');
-    }
+    const expectedOrigin = assertTemplateDoesNotControlOrigin(request.url);
     const renderedUrl = renderUrlTemplate(request.url, context);
     if (typeof renderedUrl !== 'string' || renderedUrl.length === 0) {
       throw new Error('Declarative request url must render to a string.');
     }
-    return assertHttpUrl(renderedUrl);
+    return assertUrlOrigin(renderedUrl, expectedOrigin);
   }
 
   if (request.baseUrl?.includes('{{') && request.baseUrl.trim() !== '{{ config.baseUrl }}') {
@@ -94,8 +141,9 @@ const buildUrl = (request: DeclarativeRequest, context: TemplateContext): string
   if (typeof renderedBaseUrl !== 'string' || typeof renderedPath !== 'string') {
     throw new Error('Declarative requests require a rendered URL or base URL and path.');
   }
-  return assertHttpUrl(
-    `${renderedBaseUrl.replace(/\/+$/, '')}/${renderedPath.replace(/^\/+/, '')}`
+  return assertUrlOrigin(
+    `${renderedBaseUrl.replace(/\/+$/, '')}/${renderedPath.replace(/^\/+/, '')}`,
+    getUrlOrigin(renderedBaseUrl)
   );
 };
 
