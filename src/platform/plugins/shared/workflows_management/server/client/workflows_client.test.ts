@@ -57,7 +57,7 @@ const createMockWorkflowsService = (
     }),
     getManagedWorkflowStatus,
     installManagedWorkflow: jest.fn().mockResolvedValue(undefined),
-    installManagedWorkflows: jest.fn().mockResolvedValue({ failed: [] }),
+    bulkInstallManagedWorkflows: jest.fn().mockResolvedValue({ failed: [] }),
     uninstallManagedWorkflow: jest.fn().mockResolvedValue(undefined),
     disableManagedWorkflow: overrides.disableManagedWorkflow ?? jest.fn().mockResolvedValue(true),
     getInstalledManagedWorkflowState:
@@ -323,7 +323,7 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
     const client = await provider('testPlugin');
 
     await expect(client.installMany([item])).resolves.toEqual({ failed: [] });
-    expect(service.installManagedWorkflows).toHaveBeenCalledWith([item], 'testPlugin');
+    expect(service.bulkInstallManagedWorkflows).toHaveBeenCalledWith([item], 'testPlugin');
   });
 
   it('should skip requestless batch installs when unavailable', async () => {
@@ -338,7 +338,7 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
         { id: EXAMPLE_MANAGED_WORKFLOW_ID, spaceId: 'default', values: { recipient: 'World' } },
       ])
     ).resolves.toEqual({ failed: [] });
-    expect(service.installManagedWorkflows).not.toHaveBeenCalled();
+    expect(service.bulkInstallManagedWorkflows).not.toHaveBeenCalled();
   });
 
   it('should delegate requestless managed workflow disable as the owner plugin when available', async () => {

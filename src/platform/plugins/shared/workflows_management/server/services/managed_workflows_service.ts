@@ -56,7 +56,7 @@ const MANAGED_WORKFLOW_SYSTEM_USER = 'elastic/kibana';
 const MAX_MANAGED_INSTALL_RETRIES = 2;
 const ORPHAN_DELETE_CONCURRENCY = 10;
 /**
- * Bounds of one `_bulk` request in `installManagedWorkflows`. Each request goes to the index's one
+ * Bounds of one `_bulk` request in `bulkInstallManagedWorkflows`. Each request goes to the index's one
  * shard and holds one `system_write` thread until its refresh, so a pass never holds more than one.
  */
 export const MANAGED_INSTALL_BULK_MAX_DOCUMENTS = 50;
@@ -416,7 +416,7 @@ export class ManagedWorkflowsService {
    * {@link installManagedWorkflow}. A failed item is reported and does not stop the others; the
    * call rejects only when the first read fails.
    */
-  public async installManagedWorkflows(
+  public async bulkInstallManagedWorkflows(
     items: readonly ManagedWorkflowServiceInstallManyItem[],
     registeredPluginId: string
   ): Promise<ManagedWorkflowInstallManyResult> {

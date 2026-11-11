@@ -1325,7 +1325,7 @@ describe('ManagedWorkflowsService', () => {
     });
   });
 
-  describe('installManagedWorkflows', () => {
+  describe('bulkInstallManagedWorkflows', () => {
     const createDefinitions = (count: number): YamlManagedWorkflowDefinition[] =>
       Array.from({ length: count }, (_, index) =>
         createDefinition({ id: `system-batch-${index}` })
@@ -1359,7 +1359,7 @@ describe('ManagedWorkflowsService', () => {
       mockManagedWorkflowDefinitions = definitions;
       const { audit, crudService, service } = createService();
 
-      const result = await service.installManagedWorkflows(toItems(definitions), PLUGIN_ID);
+      const result = await service.bulkInstallManagedWorkflows(toItems(definitions), PLUGIN_ID);
 
       expect(result).toEqual({ failed: [] });
       expect(crudService.getWorkflowDocumentsWithVersionByIds).toHaveBeenCalledTimes(1);
@@ -1417,7 +1417,7 @@ describe('ManagedWorkflowsService', () => {
         new Map([[unchanged.id, createVersionedDocument(createInstalledSource(unchanged))]])
       );
 
-      await service.installManagedWorkflows(toItems([unchanged, missing, dynamic]), PLUGIN_ID);
+      await service.bulkInstallManagedWorkflows(toItems([unchanged, missing, dynamic]), PLUGIN_ID);
 
       expect(logger.debug).toHaveBeenCalledWith(
         expect.stringMatching(
@@ -1443,7 +1443,7 @@ describe('ManagedWorkflowsService', () => {
         )
       );
 
-      const result = await service.installManagedWorkflows(toItems(definitions), PLUGIN_ID);
+      const result = await service.bulkInstallManagedWorkflows(toItems(definitions), PLUGIN_ID);
 
       expect(result).toEqual({ failed: [] });
       expect(crudService.getWorkflowDocumentsWithVersionByIds).toHaveBeenCalledTimes(1);
@@ -1471,7 +1471,10 @@ describe('ManagedWorkflowsService', () => {
         new Map([[WORKFLOW_ID, stored]])
       );
 
-      await service.installManagedWorkflows([{ id: WORKFLOW_ID, spaceId: SPACE_ID }], PLUGIN_ID);
+      await service.bulkInstallManagedWorkflows(
+        [{ id: WORKFLOW_ID, spaceId: SPACE_ID }],
+        PLUGIN_ID
+      );
 
       const [[write]] = crudService.bulkWriteWorkflowDocuments.mock.calls[0];
       expect(write.previous).toBe(stored);
@@ -1518,7 +1521,7 @@ describe('ManagedWorkflowsService', () => {
         ])
       );
 
-      const { failed } = await service.installManagedWorkflows(
+      const { failed } = await service.bulkInstallManagedWorkflows(
         [
           ...toItems([installable, dynamic, otherPlugin, userWorkflow, otherSpace]),
           { id: 'system-unknown' as ManagedWorkflowId, spaceId: SPACE_ID },
@@ -1569,7 +1572,7 @@ describe('ManagedWorkflowsService', () => {
       const { crudService, service } = createService();
       setUp(crudService);
 
-      const { failed } = await service.installManagedWorkflows(
+      const { failed } = await service.bulkInstallManagedWorkflows(
         [{ id: WORKFLOW_ID, spaceId: SPACE_ID }],
         PLUGIN_ID
       );
@@ -1592,7 +1595,7 @@ describe('ManagedWorkflowsService', () => {
       mockManagedWorkflowDefinitions = definitions;
       const { crudService, service } = createService();
 
-      await service.installManagedWorkflows(toItems(definitions), PLUGIN_ID);
+      await service.bulkInstallManagedWorkflows(toItems(definitions), PLUGIN_ID);
 
       expect(getBulkWriteSizes(crudService)).toEqual([MANAGED_INSTALL_BULK_MAX_DOCUMENTS, 1]);
       expect(crudService.logWorkflowChangesAfterWrite).toHaveBeenCalledTimes(2);
@@ -1609,7 +1612,7 @@ describe('ManagedWorkflowsService', () => {
       mockManagedWorkflowDefinitions = definitions;
       const { crudService, service } = createService();
 
-      await service.installManagedWorkflows(toItems(definitions), PLUGIN_ID);
+      await service.bulkInstallManagedWorkflows(toItems(definitions), PLUGIN_ID);
 
       expect(getBulkWriteSizes(crudService)).toEqual([1, 1]);
     });
@@ -1625,7 +1628,7 @@ describe('ManagedWorkflowsService', () => {
         );
       crudService.bulkWriteWorkflowDocuments.mockResolvedValueOnce([{ status: 'conflict' }]);
 
-      const result = await service.installManagedWorkflows(
+      const result = await service.bulkInstallManagedWorkflows(
         [{ id: WORKFLOW_ID, spaceId: SPACE_ID }],
         PLUGIN_ID
       );
@@ -1642,7 +1645,7 @@ describe('ManagedWorkflowsService', () => {
         writes.map(() => ({ status: 'conflict' as const }))
       );
 
-      const { failed } = await service.installManagedWorkflows(
+      const { failed } = await service.bulkInstallManagedWorkflows(
         [{ id: WORKFLOW_ID, spaceId: SPACE_ID }],
         PLUGIN_ID
       );
@@ -1665,7 +1668,7 @@ describe('ManagedWorkflowsService', () => {
       );
 
       await expect(
-        service.installManagedWorkflows([{ id: WORKFLOW_ID, spaceId: SPACE_ID }], PLUGIN_ID)
+        service.bulkInstallManagedWorkflows([{ id: WORKFLOW_ID, spaceId: SPACE_ID }], PLUGIN_ID)
       ).rejects.toThrow('search failed');
       expect(crudService.bulkWriteWorkflowDocuments).not.toHaveBeenCalled();
     });
@@ -1676,7 +1679,7 @@ describe('ManagedWorkflowsService', () => {
       const { crudService, service } = createService();
       crudService.bulkWriteWorkflowDocuments.mockRejectedValueOnce(new Error('bulk failed'));
 
-      const { failed } = await service.installManagedWorkflows(toItems(definitions), PLUGIN_ID);
+      const { failed } = await service.bulkInstallManagedWorkflows(toItems(definitions), PLUGIN_ID);
 
       expect(failed).toHaveLength(MANAGED_INSTALL_BULK_MAX_DOCUMENTS);
       expect(failed.every(({ error }) => error.message === 'bulk failed')).toBe(true);
@@ -1702,7 +1705,7 @@ describe('ManagedWorkflowsService', () => {
         return new Map();
       });
 
-      const result = await service.installManagedWorkflows(toItems([installing]), PLUGIN_ID);
+      const result = await service.bulkInstallManagedWorkflows(toItems([installing]), PLUGIN_ID);
 
       expect(result).toEqual({ failed: [] });
       expect(crudService.bulkWriteWorkflowDocuments).not.toHaveBeenCalled();
@@ -1726,7 +1729,7 @@ describe('ManagedWorkflowsService', () => {
       mockManagedWorkflowDefinitions = [installed, orphan];
       const { crudService, service } = createService();
 
-      await service.installManagedWorkflows(toItems([installed]), PLUGIN_ID);
+      await service.bulkInstallManagedWorkflows(toItems([installed]), PLUGIN_ID);
       crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue(
         [installed, orphan].map((definition) => ({
           id: definition.id,

@@ -786,7 +786,7 @@ export class WorkflowsService {
    * whole batch. Best-effort like {@link installManagedWorkflow}: a gated batch resolves with no
    * failures and marks the plugin install pass incomplete.
    */
-  public async installManagedWorkflows(
+  public async bulkInstallManagedWorkflows(
     items: readonly ManagedWorkflowServiceInstallManyItem[],
     registeredPluginId: string
   ): Promise<ManagedWorkflowInstallManyResult> {
@@ -798,7 +798,7 @@ export class WorkflowsService {
       this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
       return { failed: [] };
     }
-    return this.managedWorkflowsService.installManagedWorkflows(items, registeredPluginId);
+    return this.managedWorkflowsService.bulkInstallManagedWorkflows(items, registeredPluginId);
   }
 
   public async uninstallManagedWorkflow(

@@ -192,7 +192,7 @@ describe('WorkflowsService (facade)', () => {
     ]);
     managedSpies = spyPrototype(ManagedWorkflowsService, [
       'installManagedWorkflow',
-      'installManagedWorkflows',
+      'bulkInstallManagedWorkflows',
       'pluginReady',
       'cleanupUnregisteredOrphans',
       'markInstallIncomplete',
@@ -525,10 +525,10 @@ describe('WorkflowsService (facade)', () => {
       const service = await buildService();
 
       await expect(
-        service.installManagedWorkflows([{ id: 'wf.managed' as any, spaceId: '*' }], 'owner')
+        service.bulkInstallManagedWorkflows([{ id: 'wf.managed' as any, spaceId: '*' }], 'owner')
       ).resolves.toEqual({ failed: [] });
 
-      expect(managedSpies.installManagedWorkflows).not.toHaveBeenCalled();
+      expect(managedSpies.bulkInstallManagedWorkflows).not.toHaveBeenCalled();
       expect(managedSpies.markInstallIncomplete).toHaveBeenCalledWith('owner');
     });
 
@@ -541,10 +541,10 @@ describe('WorkflowsService (facade)', () => {
         { id: 'wf.two' as any, spaceId: '*' },
       ];
 
-      await service.installManagedWorkflows(items, 'owner');
+      await service.bulkInstallManagedWorkflows(items, 'owner');
 
       expect(mockedWaitForManagedWorkflowInstallReadiness).toHaveBeenCalledTimes(1);
-      expect(managedSpies.installManagedWorkflows).toHaveBeenCalledWith(items, 'owner');
+      expect(managedSpies.bulkInstallManagedWorkflows).toHaveBeenCalledWith(items, 'owner');
     });
   });
 

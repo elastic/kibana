@@ -138,7 +138,7 @@ export const createManagedWorkflowsSystemApiProvider = (
           );
           return { failed: [] };
         }
-        return workflowsService.installManagedWorkflows(items, pluginId);
+        return workflowsService.bulkInstallManagedWorkflows(items, pluginId);
       },
       uninstall: async (id, options) => {
         if (!isWorkflowsAvailable) {
