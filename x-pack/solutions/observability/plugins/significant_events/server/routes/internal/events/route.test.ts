@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
+import type { KibanaRequest } from '@kbn/core/server';
+import { setWorkflowEventChainContext } from '@kbn/workflows-extensions/server';
 import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_events_client.mock';
 import { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import { internalEventsRoutes } from './route';
@@ -20,8 +21,6 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const investigateRoute =
-  internalEventsRoutes['POST /internal/significant_events/events/{id}/investigate'];
 const eventsSearchRoute = internalEventsRoutes['GET /internal/significant_events/events'];
 const eventsFacetsRoute = internalEventsRoutes['GET /internal/significant_events/events/_facets'];
 const lifecycleRoute =
@@ -29,12 +28,6 @@ const lifecycleRoute =
 const eventsUpdateRoute =
   internalEventsRoutes['POST /internal/significant_events/events/{id}/update'];
 const cleanupRoute = internalEventsRoutes['POST /internal/significant_events/events/_cleanup'];
-
-type HandlerParams = Parameters<typeof investigateRoute.handler>[0];
-
-const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
-  getState: jest.fn().mockResolvedValue(state),
-});
 
 describe('POST /internal/significant_events/events/_cleanup', () => {
   it('runs cleanup with manage-scoped event and rule clients', async () => {
@@ -60,78 +53,6 @@ describe('POST /internal/significant_events/events/_cleanup', () => {
       candidateRuleIds: ['rule-1'],
     });
     expect(result).toEqual({ scanned: 1, closed: 1, kept: 0, skipped: 0 });
-  });
-});
-
-describe('POST /internal/significant_events/events/{id}/investigate', () => {
-  it.each(['completed', 'failed'] as const)(
-    'replaces a %s investigation with a running follow-up',
-    async (outcome) => {
-      const event = {
-        '@timestamp': '2026-01-01T00:00:00.000Z',
-        event_uuid: 'version-1',
-        event_id: 'event-1',
-        status: 'active' as const,
-        source_ids: ['logs.test'],
-        title: 'Test event',
-        summary: 'Test summary',
-        severity: 'medium' as const,
-        confidence: 0.8,
-        investigations: [
-          {
-            workflow_execution_id: 'inv-1',
-            started_at: '2026-01-01T00:00:00.000Z',
-            completed_at: '2026-01-01T00:01:00.000Z',
-            outcome,
-          },
-        ],
-      };
-      const createAlertEvent = jest.fn().mockResolvedValue(undefined);
-      const start = jest.fn().mockResolvedValue({ investigation_id: 'inv-1' });
-      const beforeStart = Date.now();
-
-      const result = await investigateRoute.handler({
-        params: { path: { id: 'event-1' } },
-        request: { spaceId: 'default' },
-        getScopedClients: jest.fn().mockResolvedValue({
-          licensing: {},
-          getEventSearchClient: () => ({ findLatestByEventId: jest.fn().mockResolvedValue(event) }),
-          getAlertEventsClient: () => ({ createAlertEvent }),
-        }),
-        server: { nightshiftInvestigations: { getInvestigationsClient: () => ({ start }) } },
-        logger: { info: jest.fn(), warn: jest.fn() },
-        maintenanceService: makeMaintenanceService(),
-      } as never);
-
-      expect(result).toEqual({ executionId: 'inv-1' });
-      expect(createAlertEvent).toHaveBeenCalledTimes(1);
-      const investigations = createAlertEvent.mock.calls[0][0].data.investigations;
-      expect(investigations).toEqual([
-        { workflow_execution_id: 'inv-1', started_at: expect.any(String) },
-      ]);
-      expect(Date.parse(investigations[0].started_at)).toBeGreaterThanOrEqual(beforeStart);
-      expect(Date.parse(investigations[0].started_at)).toBeLessThanOrEqual(Date.now());
-    }
-  );
-
-  it('rejects with 409 while paused before loading the event', async () => {
-    const findLatestByEventId = jest.fn();
-    const handlerParams = {
-      params: { path: { id: 'event-1' } },
-      request: { spaceId: 'default' },
-      getScopedClients: jest.fn().mockResolvedValue({
-        licensing: {},
-        getEventSearchClient: () => ({ findLatestByEventId }),
-      }),
-      server: { nightshiftInvestigations: {} },
-      logger: { warn: jest.fn(), get: jest.fn().mockReturnValue({ warn: jest.fn() }) },
-      maintenanceService: makeMaintenanceService('paused'),
-    } as unknown as HandlerParams;
-
-    await expect(investigateRoute.handler(handlerParams)).rejects.toMatchObject({
-      output: { statusCode: 409 },
-    });
-    expect(findLatestByEventId).not.toHaveBeenCalled();
   });
 });
 
@@ -707,15 +628,17 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
     createAlertEvent = jest.fn().mockResolvedValue(undefined),
     emitTrigger,
     body = { status: 'inactive' as const },
+    request = { spaceId: 'default' },
   }: {
     findLatestByEventId: jest.Mock;
     createAlertEvent?: jest.Mock;
     emitTrigger?: jest.Mock;
     body?: { status: 'active' | 'inactive'; assessment_note?: string };
+    request?: object;
   }) =>
     eventsUpdateRoute.handler({
       params: { path: { id: 'event-1' }, body },
-      request: { spaceId: 'default' },
+      request,
       getScopedClients: jest.fn().mockResolvedValue({
         licensing: {},
         getEventSearchClient: () =>
@@ -753,6 +676,27 @@ describe('POST /internal/significant_events/events/{id}/update', () => {
       })
     );
     expect(emitTrigger).toHaveBeenCalledTimes(1);
+  });
+
+  it('stamps the calling workflow run on the version it writes', async () => {
+    const createAlertEvent = jest.fn().mockResolvedValue(undefined);
+    const request = { spaceId: 'default' };
+    setWorkflowEventChainContext(request as unknown as KibanaRequest, {
+      depth: 0,
+      sourceExecutionId: 'workflow-run-1',
+    });
+
+    await run({
+      findLatestByEventId: jest.fn().mockResolvedValue(stored),
+      createAlertEvent,
+      request,
+    });
+
+    expect(createAlertEvent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ workflow_execution_id: 'workflow-run-1' }),
+      })
+    );
   });
 });
 

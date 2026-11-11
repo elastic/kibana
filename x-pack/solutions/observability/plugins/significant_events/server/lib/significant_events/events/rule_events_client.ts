@@ -304,8 +304,7 @@ const INVESTIGATION_STATE_COLUMN = 'investigation_state';
 
 /**
  * Derives `not_started` / `in_progress` / `completed` from the flattened `investigations` entries:
- * an entry without `completed_at` means a run is still open. Mirrors the browser's
- * `getInvestigationState` so the filter and the list agree. `FIELD_EXTRACT` drops duplicate
+ * an entry without `completed_at` means a run is still open. `FIELD_EXTRACT` drops duplicate
  * values, so two runs finishing in the same millisecond would read as in progress (verified live).
  */
 const withInvestigationState = (query: ComposerQuery): ComposerQuery => {
@@ -401,7 +400,7 @@ const isLaterAction = (candidate: ActionRow, current: ActionRow): boolean => {
 
 /**
  * `.rule-events` client used by agent-side call sites (`event_search`, `event_write`'s dedup scan,
- * `attach_investigation`, SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
+ * SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
  * write versions. Query strategy (which ES|QL extraction form to use per field) is validated
  * per-shape on nightshift-program#1492 and #1517 before this client's output is trusted in
  * production.
@@ -1025,12 +1024,14 @@ export class RuleEventsClient {
     change,
     assessmentNote,
     expectedTimestamp,
+    workflowExecutionId,
   }: {
     eventId: string;
     change: StatusChange;
     assessmentNote?: string;
     /** Skips the write when the latest version's `@timestamp` differs (the event changed since). */
     expectedTimestamp?: string;
+    workflowExecutionId?: string;
   }): Promise<UpdateEventStatusResult> {
     const latest = await this.findLatestByEventId(eventId);
     if (!latest) {
@@ -1054,7 +1055,10 @@ export class RuleEventsClient {
       return { updated: 0, ignored: 1, status: decision.status, reason: decision.reason };
     }
 
-    const written = await this.updateEvent({ event: decision.event, prior: latest });
+    const written = await this.updateEvent({
+      event: { ...decision.event, workflow_execution_id: workflowExecutionId },
+      prior: latest,
+    });
     if (!written.updated) {
       return {
         updated: 0,
