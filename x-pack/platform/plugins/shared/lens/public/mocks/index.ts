@@ -19,13 +19,11 @@ export { datasourceMap, mockDatasourceMap, createMockDatasource } from './dataso
 export type { DatasourceMock } from './datasource_mock';
 export { createExpressionRendererMock } from './expression_renderer_mock';
 export { defaultDoc, exactMatchDoc, makeDefaultServices } from './services_mock';
-export type { MountStoreProps } from './store_mocks';
 export {
   mockStoreDeps,
   mockDatasourceStates,
   defaultState,
   makeLensStore,
-  mountWithReduxStore,
   renderWithReduxStore,
 } from './store_mocks';
 export { lensPluginMock } from './lens_plugin_mock';
