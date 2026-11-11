@@ -116,7 +116,7 @@ export const ConfigSchema = lazySchema(() =>
 // Maybe we can define specific schema for metadata in the future
 // For now it's a record with string keys and any values
 // Because langchain returns it this format
-export const MetadataSchema = z.record(z.string(), z.any());
+export const MetadataSchema = lazySchema(() => z.record(z.string(), z.any()));
 
 /**
  * Input schema for the AI prompt step.
