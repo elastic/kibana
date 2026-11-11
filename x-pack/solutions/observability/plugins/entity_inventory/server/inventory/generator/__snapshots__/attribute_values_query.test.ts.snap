@@ -1,0 +1,183 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildAttributeValuesQuery inventory_host with time-series indices builds the values query of plan 0 under TS 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+TS metrics-system.*
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\")
+| STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`host.os.name\`)
+| WHERE \`value\` IS NOT NULL
+| KEEP \`value\`
+| SORT \`value\` ASC
+| LIMIT 100",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildAttributeValuesQuery inventory_host with time-series indices builds the values query of plan 1 under FROM 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+FROM metrics-system.* METADATA _index_mode
+| WHERE \`_index_mode\` != \\"time_series\\"
+    AND \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (TO_STRING(host.id) IS NOT NULL AND TO_STRING(host.id) != \\"\\" OR TO_STRING(host.name) IS NOT NULL AND TO_STRING(host.name) != \\"\\")
+| STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`host.os.name\`)
+| WHERE \`value\` IS NOT NULL
+| KEEP \`value\`
+| SORT \`value\` ASC
+| LIMIT 100",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildAttributeValuesQuery k8s.deployment with time-series indices builds the values query of plan 0 under TS 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+TS metrics-kubeletstatsreceiver.otel-default
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
+| STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`orchestrator.cluster.name\`)
+| WHERE \`value\` IS NOT NULL
+| KEEP \`value\`
+| SORT \`value\` ASC
+| LIMIT 100",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildAttributeValuesQuery k8s.deployment with time-series indices builds the values query of plan 1 under FROM 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+FROM metrics-kubeletstatsreceiver.otel-default METADATA _index_mode
+| WHERE \`_index_mode\` != \\"time_series\\"
+    AND \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
+| STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`orchestrator.cluster.name\`)
+| WHERE \`value\` IS NOT NULL
+| KEEP \`value\`
+| SORT \`value\` ASC
+| LIMIT 100",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildAttributeValuesQuery k8s.deployment with time-series indices builds the values query of plan 2 under TS 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+TS metrics-kubernetes.state_deployment-*
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (metricset.name == \\"state_deployment\\")
+    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
+| STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`orchestrator.cluster.name\`)
+| WHERE \`value\` IS NOT NULL
+| KEEP \`value\`
+| SORT \`value\` ASC
+| LIMIT 100",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildAttributeValuesQuery k8s.deployment with time-series indices builds the values query of plan 3 under FROM 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+FROM metrics-kubernetes.state_deployment-* METADATA _index_mode
+| WHERE \`_index_mode\` != \\"time_series\\"
+    AND \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND (metricset.name == \\"state_deployment\\")
+    AND (TO_STRING(kubernetes.namespace) IS NOT NULL AND TO_STRING(kubernetes.namespace) != \\"\\" AND TO_STRING(kubernetes.deployment.name) IS NOT NULL AND TO_STRING(kubernetes.deployment.name) != \\"\\")
+| STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`orchestrator.cluster.name\`)
+| WHERE \`value\` IS NOT NULL
+| KEEP \`value\`
+| SORT \`value\` ASC
+| LIMIT 100",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildAttributeValuesQuery k8s.node with time-series indices builds the values query of plan 0 under TS 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+TS metrics-kubeletstatsreceiver.otel-default
+| WHERE \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND ((TO_STRING(kubernetes.node.name) IS NOT NULL AND TO_STRING(kubernetes.node.name) != \\"\\"))
+| STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`orchestrator.cluster.name\`)
+| WHERE \`value\` IS NOT NULL
+| KEEP \`value\`
+| SORT \`value\` ASC
+| LIMIT 100",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
+
+exports[`buildAttributeValuesQuery k8s.node with time-series indices builds the values query of plan 1 under FROM 1`] = `
+Object {
+  "esql": "SET unmapped_fields=\\"nullify\\";
+FROM metrics-kubeletstatsreceiver.otel-default METADATA _index_mode
+| WHERE \`_index_mode\` != \\"time_series\\"
+    AND \`@timestamp\` >= ?from AND \`@timestamp\` < ?to
+    AND ((TO_STRING(kubernetes.node.name) IS NOT NULL AND TO_STRING(kubernetes.node.name) != \\"\\"))
+| STATS \`last_seen\` = MAX(\`@timestamp\`) BY \`value\` = TO_STRING(\`orchestrator.cluster.name\`)
+| WHERE \`value\` IS NOT NULL
+| KEEP \`value\`
+| SORT \`value\` ASC
+| LIMIT 100",
+  "params": Array [
+    Object {
+      "from": "2026-10-19T10:00:00.000Z",
+    },
+    Object {
+      "to": "2026-10-19T11:00:00.000Z",
+    },
+  ],
+}
+`;
