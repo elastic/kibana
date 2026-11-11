@@ -55,8 +55,9 @@ const SPARE_ROWS = 1;
 const CHROME_ROWS = SPARE_ROWS + 5;
 // How often the top bar re-reads the branch, which can change while the TUI runs.
 const REPO_INFO_INTERVAL_MS = 5000;
-// The lines under a tool's pane title: its description and arguments, and the command that starts it.
-const TOOL_LINE_ROWS = 2;
+// The lines under a tool's pane title: its description and arguments, the command that starts it, and a blank
+// line that separates them from its help and output.
+const TOOL_LINE_ROWS = 3;
 // Plain Unicode, so they show without a patched font.
 const BRANCH_SYMBOL = '⎇';
 const COMMIT_SYMBOL = '◉';
@@ -227,6 +228,7 @@ export const createTuiApp = ({
             {tool.getCommand()}
           </Text>
         ) : null}
+        {tool ? <Text> </Text> : null}
         {notice ? (
           <Text color={notice.isError ? 'red' : 'green'} wrap="truncate-end">
             {notice.text}
