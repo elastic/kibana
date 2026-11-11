@@ -8,7 +8,7 @@
 import { ENTITY_TYPE_PREFIX, FACT_TYPE_PREFIX, OCCURRENCES_ATTRIBUTE } from '../../common/dreaming';
 import type { KiReferenceRelation } from '../../common/step_types/ki';
 import type { StoredKi } from '../ai_indices/ki_revision';
-import { kiIdFromUri } from './ids';
+import { memoryIdFromUri } from './ids';
 import type { KiPermissions } from './permissions';
 
 export type DreamedKiAttributes = Record<string, string | number | boolean | string[]>;
@@ -47,7 +47,7 @@ export const kindOf = (ki: Pick<DreamedKi, 'type'>): DreamedKiKind | undefined =
 /** The memories a fact or entity was derived from. */
 export const citedMemoryIds = (ki: DreamedKi): string[] =>
   (ki.references ?? []).flatMap(({ uri, relation }) => {
-    const memoryId = relation === 'derived_from' ? kiIdFromUri(uri) : undefined;
+    const memoryId = relation === 'derived_from' ? memoryIdFromUri(uri) : undefined;
     return memoryId !== undefined ? [memoryId] : [];
   });
 

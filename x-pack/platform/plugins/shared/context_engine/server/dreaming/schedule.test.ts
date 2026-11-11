@@ -8,12 +8,20 @@
 import { createHash } from 'crypto';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { CONTEXT_ENGINE_DREAMING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import type { AiIndexService } from '../ai_indices/service';
 import type { DreamingWorkflowsApi } from './schedule';
-import { createDreamingScheduleService, dreamingWorkflowIdFor, shouldDream } from './schedule';
+import {
+  createDreamingScheduleService,
+  dreamingWorkflowIdFor,
+  shouldDream,
+  traceDreamingWorkflowIdFor,
+} from './schedule';
 
 const SPACE = 'marketing';
 const suffix = `support-${createHash('sha256').update(SPACE).digest('hex').slice(0, 16)}`;
@@ -183,6 +191,73 @@ describe('createDreamingScheduleService', () => {
     });
   });
 
+  describe('trace dreaming', () => {
+    const traceWorkflowId = `${CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID}-${suffix}`;
+
+    it('installs, enables and attaches its workflow with dreaming, on the same config', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex(),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(traceDreamingWorkflowIdFor('support', SPACE)).toBe(traceWorkflowId);
+      const [[dreamingId, dreamingInstall], [traceId, traceInstall]] = client.install.mock.calls;
+      expect([dreamingId, traceId]).toEqual([
+        CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+      ]);
+      expect(traceInstall).toEqual(dreamingInstall);
+      expect(workflowsManagement.updateWorkflow).toHaveBeenCalledWith(
+        traceWorkflowId,
+        { enabled: true },
+        SPACE,
+        request
+      );
+      expect(aiIndexService.addAutomation).toHaveBeenCalledWith('support', SPACE, {
+        type: 'workflow',
+        value: traceWorkflowId,
+      });
+    });
+
+    it('is installed whether or not the AI index has trace sources yet', async () => {
+      await createService(workflowsManagement).reconcile({
+        aiIndex: aiIndex({ traces: [] }),
+        spaceId: SPACE,
+        request,
+      });
+
+      expect(client.install).toHaveBeenCalledWith(
+        CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+        expect.anything()
+      );
+    });
+
+    it('is removed and detached with dreaming, and with the AI index', async () => {
+      const service = createService(workflowsManagement);
+      await service.reconcile({
+        aiIndex: aiIndex({ dreaming: { ...dreaming, enabled: false } }),
+        spaceId: SPACE,
+        request,
+      });
+      expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID, {
+        spaceId: SPACE,
+        workflowIdSuffix: suffix,
+      });
+      expect(aiIndexService.removeAutomation).toHaveBeenCalledWith('support', SPACE, {
+        type: 'workflow',
+        value: traceWorkflowId,
+      });
+
+      client.uninstall.mockClear();
+      await service.remove({ aiIndexId: 'support', spaceId: SPACE, request });
+      expect(client.uninstall).toHaveBeenCalledWith(CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID, {
+        spaceId: SPACE,
+        workflowIdSuffix: suffix,
+      });
+    });
+  });
+
   it('refuses to install a workflow it could not enable', async () => {
     await expect(
       createService(undefined).reconcile({ aiIndex: aiIndex(), spaceId: SPACE, request })
@@ -225,7 +300,8 @@ describe('createDreamingScheduleService', () => {
       SPACE,
       request
     );
-    expect(client.uninstall).toHaveBeenCalledTimes(3);
+    // Three attempts for dreaming, then one for trace dreaming.
+    expect(client.uninstall).toHaveBeenCalledTimes(4);
   });
 
   it('does not cancel runs when the uninstall fails for another reason', async () => {

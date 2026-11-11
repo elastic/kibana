@@ -8,6 +8,7 @@
  */
 
 import DREAMING_YAML from './dreaming.yaml';
+import TRACE_DREAMING_YAML from './dreaming_traces.yaml';
 import FEEDBACK_ANALYSIS_YAML from './feedback_analysis.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
@@ -103,3 +104,34 @@ export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineDreamingWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID = 'system-context-engine-trace-dreaming';
+
+/** The same config as dreaming, which trace dreaming runs alongside on the same schedule. */
+export type ContextEngineTraceDreamingWorkflowTemplateValues =
+  ContextEngineDreamingWorkflowTemplateValues;
+
+/**
+ * Extracts long-term facts, entities and relationships from the agent conversations the trace
+ * sources of one AI index record.
+ */
+export const CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW = {
+  id: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 2,
+  billable: false,
+  yamlTemplate: (values) =>
+    renderJsonTemplate(TRACE_DREAMING_YAML, {
+      __NAME__: `Trace dreaming: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __CONCURRENCY_KEY__: `context-engine-trace-dreaming-${values.instanceKey}`,
+      __MEMORIES_INDEX__: values.memoriesIndex,
+      __INTERVAL_MINUTES__: values.intervalMinutes,
+      __CONNECTOR_ID__: values.connectorId,
+      __INSTRUCTIONS__: values.instructions,
+      __FACT_TYPES__: values.factTypes,
+      __ENTITY_TYPES__: values.entityTypes,
+      __RELATIONSHIP_TYPES__: values.relationshipTypes,
+    }),
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineTraceDreamingWorkflowTemplateValues>;
