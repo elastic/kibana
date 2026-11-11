@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { Subject } from 'rxjs';
+import { setTimeout } from 'timers/promises';
 import { act, render, waitFor } from '@testing-library/react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -70,7 +71,7 @@ describe('ChartPortalsRenderer', () => {
 
     await waitFor(() => expect(mockRenderChartSection).toHaveBeenCalled());
 
-    const [{ onChartLoaded }] = mockRenderChartSection.mock.lastCall ?? [];
+    const onChartLoaded = mockRenderChartSection.mock.lastCall?.[0].onChartLoaded;
     const { main$ } = dataStateContainer.data$;
 
     return { onChartLoaded, main$ };
