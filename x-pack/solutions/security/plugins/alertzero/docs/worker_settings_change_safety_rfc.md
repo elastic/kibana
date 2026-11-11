@@ -105,8 +105,9 @@ so a breaking change has nowhere safe to go. It must at least fail loudly in CI.
 
 - **A migration flow** that converts old documents. That is
   [security-team#19312](https://github.com/elastic/security-team/issues/19312).
-- **Workflow versioning.** Installed spaces get new YAML when a Worker's definition hash or
-  `version` moves, which the Workflows platform owns. This PR adds nothing there.
+- **Workflow versioning.** Installed spaces get new YAML only when a Worker's definition `version`
+  goes up, and `managed_workflow_definitions.test.ts` already fails a YAML edit until it does. This
+  PR adds nothing there.
 - **Runtime behaviour for customers.** AlertZero is off by default and has no customers yet.
 
 ## What already exists on `main`
@@ -117,8 +118,7 @@ so a breaking change has nowhere safe to go. It must at least fail loudly in CI.
 - **Every Worker runs as a service account**
   ([kibana#295215](https://github.com/elastic/kibana/pull/295215)). The platform rejects a write
   without a user request that changes a bound workflow's stored values.
-- **YAML edits reach installed spaces through the definition hash.** The hash is the Worker's
-  `yamlTemplate` rendered with its `hashValues`, so a YAML edit moves it without a `version` bump.
+- **YAML edits need a definition version bump**, enforced by `managed_workflow_definitions.test.ts`.
 
 ## The solution
 
@@ -155,18 +155,11 @@ This PR makes every Worker's renderer apply the same upgrade the read path appli
 rewrites the stored document:
 
 ```ts
-yamlTemplate: {
-  hashValues: workerHashValues({
-    settingsVersion: 1,
-    scheduleInterval: RULE_TUNING_WORKER_SETTINGS_DEFAULTS.scheduleInterval.defaultValue,
-    extras: RULE_TUNING_WORKER_SETTINGS_DEFAULTS.extras.defaultValue,
-  }),
-  render: (values: RuleTuningWorkerTemplateValues): string =>
-    renderRuleTuningWorkerYaml(
-      DETECTION_RULE_TUNING_YAML,
-      upgradeStoredWorkerSettings(RULE_TUNING_WORKER_SETTINGS_DEFAULTS, values)
-    ),
-},
+yamlTemplate: (values: RuleTuningWorkerTemplateValues): string =>
+  renderRuleTuningWorkerYaml(
+    DETECTION_RULE_TUNING_YAML,
+    upgradeStoredWorkerSettings(RULE_TUNING_WORKER_SETTINGS_DEFAULTS, values)
+  ),
 ```
 
 `upgradeStoredWorkerSettings` fills a missing schedule or `extras` key from the Worker's default,
@@ -182,13 +175,11 @@ so `@kbn/alertzero-common` builds its declarations from it and re-exports the fu
 path, also from the browser. Nothing is defined twice.
 
 Stored values are unchanged, so the platform treats the re-render as a trusted code upgrade, and an
-installed copy picks the change up the next time its definition hash or version moves and
-`ready()` re-renders it. The definition hash covers most of this: each Worker's `hashValues` take
-the schedule and the extras from its defaults and set `autonomyLevel: 'supervised'`, which the
-render lowers to the most autonomous allowed level, so changing a default, the declared extras or
-the most autonomous allowed level moves the hash the same way a YAML edit does. Removing any other
-allowed level needs a definition version bump, which `managed_workflow_version_pins.test.ts` enforces. No new mechanism, and a
-YAML-only edit still touches nothing CWL owns. The page, the rendered workflow and the stored document then agree on what runs, with no
+installed copy picks the change up the next time its definition version moves and `ready()`
+re-renders it. The existing version check in `managed_workflow_definitions.test.ts` enforces that:
+each Worker's fingerprint row now covers its settings defaults as well as its YAML, so changing a
+default, the allowed levels or the declared extras fails the same row a YAML edit does. No new
+mechanism, and a YAML-only edit still touches nothing CWL owns. The page, the rendered workflow and the stored document then agree on what runs, with no
 manual step, no reset and no write without a user request. A re-render does not reschedule the
 Task Manager task, so a trigger that depends on the level changes on the next save or enable.
 
@@ -401,12 +392,10 @@ exists on `main`.
 A hash of each Worker's rendered YAML, per definition version, was tried. For YAML edits it
 duplicated the existing definition-version check, so a prompt edit would have needed two entries
 updated. Its only unique catch was an edit to a render helper made without a version bump: the
-platform then decided whether to update installed copies by hashing the `yamlTemplate` function's
-source text, which did not include the helper it calls. That was a workflow versioning gap, not a
-settings compatibility one, so it was left to the Workflows platform. The platform now hashes the
-template rendered with the definition's `hashValues`, which covers its helpers on the paths those
-values take. `managed_workflow_version_pins.test.ts` covers the other paths: it fingerprints only
-the lines other values render differently, so a prompt edit leaves it unchanged.
+platform decides whether to update installed copies by hashing the `yamlTemplate` function's source
+text, which does not include the helper it calls. That is a workflow versioning gap, not a settings
+compatibility one, so it is left to the Workflows platform. Until it is addressed, the plugin README
+states that a render-helper change needs a definition version bump.
 
 ## How the goals are met
 
@@ -415,7 +404,7 @@ the lines other values render differently, so a prompt edit leaves it unchanged.
 | 1. Breaking changes cannot ship by mistake | The contract test classifies every change. Update mode refuses a breaking one without an accepted issue. Validation the contract cannot compare fails explicitly and cannot be accepted. The base-branch comparison keeps a deleted-and-regenerated snapshot red. CODEOWNERS routes `fixtures/`, `test_helpers/` and `worker_settings_compat.test.ts` to `@elastic/alertzero-common-layer`; once that team has write access to the repository, an accepted breaking change needs its review |
 | 2. Does not depend on documentation | The tests fire on the change itself, and each message names the next command |
 | 3. Customers are never affected | The guard is unit tests only. Test helpers and snapshots live in `test_helpers/`, which the distributable build excludes. The one runtime change renders stored settings through the same upgrade the read path applies, never writes a stored document without a user request, and never raises autonomy |
-| 4. Adding a setting never strands configured Workers | The read path and every renderer fill a missing key from its default, so a Worker bound to a service account runs the new setting after the definition hash change re-renders it. An added field with a default, including a boolean or an array, produces only a `[safe]` line |
+| 4. Adding a setting never strands configured Workers | The read path and every renderer fill a missing key from its default, so a Worker bound to a service account runs the new setting after the version bump re-renders it. An added field with a default, including a boolean or an array, produces only a `[safe]` line |
 | 5. Clear for Watch teams | The plugin README has a "Changing Worker settings safely" section with a change-kind table. Every failure line is labelled `[safe]` or `[breaking]` |
 | 6. Future cases are caught | The snapshot is compared field by field, so any removal, retype, tightened bound or narrowed enum is caught without a hand-kept list. A narrowed autonomy level is reported with the level stored documents are moved to. Unknown schema features fail loudly |
 | 7. No reliance on remembering fixtures | The snapshot is generated from the declarations. A new field needs no fixture. A new Worker without fixtures fails with a message naming the files to add |
@@ -435,24 +424,25 @@ export const RULE_TUNING_WORKER_SETTINGS_DEFAULTS = {
 } as const satisfies WorkerSettingsDefaults;
 ```
 
-Use it in the YAML, which moves the definition hash. CI then reports
+Use it in the YAML and bump the definition version. CI then reports
 `[safe] added …extras.maxGaps with a default`; run update mode and push. After the upgrade,
 `ready()` re-renders every configured space with `maxGaps: 3`, the settings page shows 3, and values
 a space already stores stay as they are. No stored document is rewritten.
 
-**Change a default.** Reported as `[safe]`. The default moves the definition hash; run update
-mode. The new default reaches fresh installs and every space that does not store the field; a stored value
+**Change a default.** Reported as `[safe]`. Bump the definition version, which the fingerprint row
+asks for, and run update mode. The
+new default reaches fresh installs and every space that does not store the field; a stored value
 wins.
 
-**Edit only the YAML (a prompt, a step).** The settings classification does not fire, and the
-definition hash picks the edit up without a version bump. Nothing in the settings guard changes.
+**Edit only the YAML (a prompt, a step).** The settings classification does not fire. Bump the
+definition version, as `main` already requires. Nothing in the settings guard changes.
 
 **Remove an allowed autonomy level.** When a lower allowed level remains, for example Attack
 Discovery moving from `manual`/`supervised` to `manual`/`assisted`, CI reports
-`[safe] removed supervised … A stored supervised is read and rendered as assisted`. Run update mode;
-removing the most autonomous allowed level moves the definition hash, and configured spaces run at
-the lower level once `ready()` re-renders them. Removing any other level needs a definition version
-bump, which `managed_workflow_version_pins.test.ts` enforces. Removing the lowest allowed level is breaking.
+`[safe] removed supervised … A stored supervised is read and rendered as assisted`. Bump the
+definition version (the fingerprint row asks for it) and run update mode; configured spaces run
+at the lower level once `ready()`
+re-renders them. Removing the lowest allowed level is breaking.
 
 **Rename, remove or retype a field, tighten a bound.** Reported as
 `[breaking]`. Prefer keeping the stored key and changing only the label. Otherwise, before
@@ -489,10 +479,7 @@ configured space would store, then run update mode. The contract test reports `[
   and the renderer interpret them. A platform hook that lets a managed definition upgrade its own
   stored values at boot would need the Workflows team and a security review, and would call the same
   upgrade function.
-- **Render-helper edits on paths `hashValues` never take**, such as the render for a Worker without
-  a service account, need a definition version bump. `managed_workflow_version_pins.test.ts`
-  renders each Worker at every autonomy level, without an account and at other intervals, and
-  fails when that output changes at the same version.
+- **Render-helper edits** without a definition version bump are not caught, as described above.
 - **Rollback.** An older Kibana reading a document written by a newer one rejects unknown keys and
   shows the Worker as unavailable, leaving the stored values untouched. That is the MVP behaviour
   recorded on [security-team#19312](https://github.com/elastic/security-team/issues/19312). During a

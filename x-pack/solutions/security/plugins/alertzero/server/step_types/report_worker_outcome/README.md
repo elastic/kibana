@@ -46,7 +46,7 @@ Liquid renders a missing value as `''`, so every count and flag treats `''` and 
 
   `worker_close_reports.test.ts` fails if any close in a workflow with a report step has no close report right after it, or if a status-route close has no status read right before it. Each Worker's `worker_reports.<worker>.test.ts` lists its closes with `describeCloseReports`, which evaluates every report's `if` against closes that changed the status, found it already closed, failed, or were skipped.
 - **Keep comments short.** A close report needs none; another report needs at most one line saying why it sits where it does. These rules live here, not in each YAML file.
-- **No version bump is needed.** The definition hash covers the workflow's YAML, so installed spaces pick up the change.
+- **Bump the workflow's version** in its definition `.ts`, so installed spaces pick up the change. The bump needs no comment.
 - **Document the Worker's reports** in `../../telemetry/workers/<worker>.md`.
 
 Each Worker wires its YAML in its own change, and declares what it wired in its own files, so no shared list changes:

@@ -73,13 +73,14 @@ export const packageReportInputSchema = lazySchema(() =>
      * this count a shortfall is invisible and packaging would read a partial finding set as
      * complete.
      *
-     * Optional, not required: this workflow is a plain `yaml` definition, so its own content hash
-     * propagates to every space on the next reconciliation regardless of version, but the Worker
-     * that calls it (`hunt_continuous_threat_hunt.ts`) is a per-space `yamlTemplate` instance, and
-     * an already-installed Worker keeps running its previous YAML, without the call site that
-     * supplies this field, until it is re-rendered. Making it required here would fail every such
-     * Worker's packaging call in the gap between the two. Omitting it instead skips the shortfall
-     * check below, which is the same as not having this fix yet -- never a hard failure.
+     * Optional, not required: this workflow is a plain `yaml` definition, so its own content
+     * hash propagates to every space on the next reconciliation regardless of version, but the
+     * Worker that calls it (`hunt_continuous_threat_hunt.ts`) is a `yamlTemplate` definition,
+     * whose hash covers only the function source, not the imported YAML it renders -- an
+     * already-installed Worker only picks up the call site that supplies this field once its own
+     * `version` bumps. Making it required here would fail every such Worker's packaging call in
+     * the gap between the two. Omitting it instead skips the shortfall check below, which is the
+     * same as not having this fix yet -- never a hard failure.
      */
     expectedSseCount: z
       .number()
