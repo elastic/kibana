@@ -24,7 +24,7 @@ export type ConclusionQualityOutput = z.infer<typeof conclusionQualityOutputSche
 
 export const conclusionQualityPrompt = createPrompt({
   name: 'nightshift_conclusion_quality',
-  description: "Grades the conclusion of a Nightshift investigation from the agent's final answer",
+  description: "Grades the conclusion of a nightshift investigation from the agent's final answer",
   input: lazySchema(() =>
     z.object({
       answer: z.string(),
