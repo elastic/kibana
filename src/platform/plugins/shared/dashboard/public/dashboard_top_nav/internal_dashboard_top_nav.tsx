@@ -555,8 +555,15 @@ export function InternalDashboardTopNav({
             disabled: viewMode === 'non-interactive' || !hasEsqlPanel,
             additionalText: i18n.translate('dashboard.esqlApproximationToggle.additionalText', {
               defaultMessage:
-                'Fast mode requires at least one ES|QL visualization that uses STATS in the dashboard.',
+                'Fast mode can only apply to panels based on an ES|QL query with a STATS command.',
             }),
+            additionalDisabledText: i18n.translate(
+              'dashboard.esqlApproximationToggle.additionalDisabledText',
+              {
+                defaultMessage:
+                  'Fast mode requires at least one panel based on an ES|QL query with a STATS command.',
+              }
+            ),
           }}
         />
       )}

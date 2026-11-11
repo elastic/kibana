@@ -29,7 +29,7 @@ describe('source_update tool', () => {
   });
 
   const createTool = ({
-    featurePrivilege = 'all',
+    featurePrivilege = 'all_and_manage_engines',
     update = jest.fn(),
     setEnabled = jest.fn(),
     maintenanceState = 'enabled',
@@ -186,11 +186,11 @@ describe('source_update tool', () => {
     });
   });
 
-  it('does not change a source without the Nightshift manage privilege', async () => {
+  it('does not change a source without the Nightshift manage and configure privileges', async () => {
     const update = jest.fn();
     const setEnabled = jest.fn();
 
-    const result = await createTool({ featurePrivilege: 'read', update, setEnabled }).handler(
+    const result = await createTool({ featurePrivilege: 'all', update, setEnabled }).handler(
       { source: 'checkout', title: 'Checkout v2', enabled: false },
       createMockToolContext()
     );
@@ -201,7 +201,11 @@ describe('source_update tool', () => {
       results: [
         {
           type: 'error',
-          data: { message: expect.stringContaining('requires the Nightshift manage privilege') },
+          data: {
+            message: expect.stringContaining(
+              'requires the Nightshift manage and Nightshift configure privileges'
+            ),
+          },
         },
       ],
     });

@@ -9,7 +9,6 @@ import {
   ChatEventType,
   ConversationRoundStepType,
   ToolResultType,
-  TODOS_UPDATED_UI_EVENT,
   type ChatAgentEvent,
   type ConversationRoundStep,
   type ReasoningStep,
@@ -51,12 +50,6 @@ const relevantSkills: ConversationRoundStep = {
   source: 'implicit',
 };
 
-const carriedTodos: ConversationRoundStep = {
-  type: ConversationRoundStepType.updateTodos,
-  todos: [{ content: 'x', status: 'pending' }],
-  carried_over: true,
-};
-
 const modelProvider = (calls: unknown[] = []) =>
   ({ getUsageStats: () => ({ calls }) } as unknown as ModelProvider);
 
@@ -83,7 +76,7 @@ describe('buildInterruptedRound', () => {
   const endTime = new Date('2026-01-01T00:00:02.500Z');
 
   it('builds the steps and the partial summary for a fresh round', () => {
-    const { tracker, ran } = freshTracker([relevantSkills, carriedTodos]);
+    const { tracker, ran } = freshTracker([relevantSkills]);
     ran([stepUpdates.appendToolCall(toolCall('A'))]);
 
     const { steps, summary } = buildInterruptedRound({
@@ -100,7 +93,6 @@ describe('buildInterruptedRound', () => {
     expect(steps.map((step) => step.type)).toEqual([
       ConversationRoundStepType.relevantSkills,
       ConversationRoundStepType.toolCall,
-      ConversationRoundStepType.updateTodos,
     ]);
     expect(steps[1]).toMatchObject({ tool_call_id: 'A', results: [] });
     expect(summary).toEqual({
@@ -146,7 +138,7 @@ describe('buildInterruptedRound', () => {
   });
 
   it('falls back to the seeded steps when the stream failed before any state was streamed', () => {
-    const { tracker } = freshTracker([relevantSkills, carriedTodos]);
+    const { tracker } = freshTracker([relevantSkills]);
 
     const { steps } = buildInterruptedRound({
       tracker,
@@ -156,7 +148,7 @@ describe('buildInterruptedRound', () => {
       mainConnectorId: 'main',
     });
 
-    expect(steps).toEqual([relevantSkills, carriedTodos]);
+    expect(steps).toEqual([relevantSkills]);
   });
 
   it('omits configuration_overrides when absent', () => {
@@ -195,36 +187,6 @@ describe('buildInterruptedRound', () => {
 
     expect(steps).toEqual([
       expect.objectContaining({ tool_call_id: 'A', progression: [{ message: 'halfway' }] }),
-    ]);
-  });
-
-  it('includes a todo_write observed after the last node output', () => {
-    const { tracker, ran } = freshTracker([carriedTodos]);
-    ran([stepUpdates.append(reasoning('planning'))]);
-    tracker.recordEvent({
-      type: ChatEventType.toolUi,
-      data: {
-        tool_call_id: 'todo',
-        tool_id: 'todo_write',
-        custom_event: TODOS_UPDATED_UI_EVENT,
-        data: { todos: [{ content: 'y', status: 'in_progress' }] },
-      },
-    } as ChatAgentEvent);
-
-    const { steps } = buildInterruptedRound({
-      tracker,
-      startTime,
-      endTime,
-      modelProvider: modelProvider(),
-      mainConnectorId: 'main',
-    });
-
-    expect(steps).toEqual([
-      reasoning('planning'),
-      {
-        type: ConversationRoundStepType.updateTodos,
-        todos: [{ content: 'y', status: 'in_progress' }],
-      },
     ]);
   });
 

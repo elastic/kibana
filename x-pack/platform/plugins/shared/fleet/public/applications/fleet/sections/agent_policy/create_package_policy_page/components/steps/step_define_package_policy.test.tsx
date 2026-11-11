@@ -27,6 +27,7 @@ jest.mock('./components/hooks', () => ({
   useOutputs: jest.fn().mockReturnValue({
     isLoading: false,
     canUseOutputPerIntegration: true,
+    isLicenseKnown: true,
     allowedOutputs: [{ id: 'output-1', name: 'Default output', type: 'elasticsearch' }],
   }),
 }));
@@ -352,6 +353,7 @@ describe('StepDefinePackagePolicy', () => {
         mockUseOutputs.mockReturnValue({
           isLoading: false,
           canUseOutputPerIntegration: true,
+          isLicenseKnown: true,
           allowedOutputs: [
             { id: 'output-1', name: 'Default output', type: 'elasticsearch' },
           ] as any,
@@ -375,6 +377,7 @@ describe('StepDefinePackagePolicy', () => {
         mockUseOutputs.mockReturnValue({
           isLoading: false,
           canUseOutputPerIntegration: true,
+          isLicenseKnown: true,
           allowedOutputs: [
             { id: 'output-1', name: 'Default output', type: 'elasticsearch' },
           ] as any,

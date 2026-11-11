@@ -68,8 +68,7 @@ const postChatMessage = (
  * `POST /api/chat/message`: the CLI-friendly, text-only surface. It runs the same execution service
  * as the converse routes, on Task Manager since no `_execution_mode` can be passed, so we assert
  * the delta: a minimal request, an answer-only response, and HITL prompts declined instead of
- * pausing the run. The route is gated on `agentBuilder:experimentalFeatures`, which the Scout
- * server config force-enables.
+ * pausing the run. Like the converse routes, it is not gated on `agentBuilder:experimentalFeatures`.
  */
 apiTest.describe(
   'Agent Builder — chat API message (/api/chat/message)',

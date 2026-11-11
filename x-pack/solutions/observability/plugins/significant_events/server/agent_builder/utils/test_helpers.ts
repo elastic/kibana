@@ -130,13 +130,21 @@ export const createMockToolContext = (): ToolHandlerContext => {
   return toolHandlerContext;
 };
 
-/** Nightshift feature privilege of a role: `all` always includes `read`, so manage never comes without read. */
-export type NightshiftFeaturePrivilege = 'none' | 'read' | 'all';
+/**
+ * Nightshift feature privilege of a role: `all` always includes `read`, so manage never comes
+ * without read. `all_and_manage_engines` adds the Manage engines sub-feature, which grants configure.
+ */
+export type NightshiftFeaturePrivilege = 'none' | 'read' | 'all' | 'all_and_manage_engines';
 
 const API_PRIVILEGES_BY_FEATURE_PRIVILEGE: Record<NightshiftFeaturePrivilege, readonly string[]> = {
   none: [],
   read: [NIGHTSHIFT_API_PRIVILEGES.read],
   all: [NIGHTSHIFT_API_PRIVILEGES.read, NIGHTSHIFT_API_PRIVILEGES.manage],
+  all_and_manage_engines: [
+    NIGHTSHIFT_API_PRIVILEGES.read,
+    NIGHTSHIFT_API_PRIVILEGES.manage,
+    NIGHTSHIFT_API_PRIVILEGES.configure,
+  ],
 };
 
 /**
