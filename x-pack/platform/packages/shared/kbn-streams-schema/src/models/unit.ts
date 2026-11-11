@@ -261,13 +261,15 @@ const statsValueSchema = z.object({ value: z.number().nullable(), unit: z.string
 const statsRateSchema = statsValueSchema.extend({ time_unit: z.string() });
 
 /**
- * Items rejected for one reason, per second. `signals` has the same rate per signal and leaves out
- * a signal with no failures of this type, so it is missing when no signal had any.
+ * Items rejected for one reason, per second. `collections` has the rate per collection that the
+ * destination wrote to (an Elasticsearch data stream or index), keyed by its name. It only has
+ * the collections with failures of this type, and it is missing when none has any. It can cover
+ * less than `rate`, because a failure of a whole request has no collection.
  */
 const statsFailureRateSchema = lazySchema(() =>
   z.object({
     rate: statsRateSchema,
-    signals: z.partialRecord(streamsSignalSchema, z.object({ rate: statsRateSchema })).optional(),
+    collections: z.record(z.string(), z.object({ rate: statsRateSchema })).optional(),
   })
 );
 

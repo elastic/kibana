@@ -7,7 +7,7 @@
 
 import { UNIT_METRICS_STREAM } from '../constants';
 import {
-  buildDestinationFailureSignalsQuery,
+  buildDestinationFailureCollectionsQuery,
   buildDestinationRateQuery,
   buildDestinationSumsQuery,
 } from './build_destination_stats_queries';
@@ -43,25 +43,33 @@ describe('buildDestinationRateQuery', () => {
   });
 });
 
-describe('buildDestinationFailureSignalsQuery', () => {
-  it('divides the 401 and 403 items of each signal by the time of the whole destination', () => {
-    expect(buildDestinationFailureSignalsQuery(params).print('basic')).toBe(
-      `${head} | EVAL delta = TO_DOUBLE(metrics.streams.destination.items) | INLINE STATS covered_from = MIN(start_timestamp) BY scope.attributes.streams.destination.id | WHERE attributes.http.response.status_code IN (401, 403) | STATS authentication_items = SUM(delta) WHERE attributes.http.response.status_code == 401, authorization_items = SUM(delta) WHERE attributes.http.response.status_code == 403, covered_from = MIN(covered_from) BY id = scope.attributes.streams.destination.id, signal = scope.attributes.streams.signal | EVAL window_seconds = DATE_DIFF("milliseconds", covered_from, "${window.end}") / 1000.0 | EVAL authentication_rate = authentication_items / window_seconds, authorization_rate = authorization_items / window_seconds | KEEP id, signal, authentication_rate, authorization_rate`
+describe('buildDestinationFailureCollectionsQuery', () => {
+  it('divides the 401 and 403 items of each collection by the time of the whole destination', () => {
+    expect(buildDestinationFailureCollectionsQuery(params).print('basic')).toBe(
+      `${head} | EVAL delta = TO_DOUBLE(metrics.streams.destination.items) | INLINE STATS covered_from = MIN(start_timestamp) BY scope.attributes.streams.destination.id | WHERE (attributes.http.response.status_code IN (401, 403)) AND attributes.db.collection.name IS NOT NULL | STATS authentication_items = SUM(delta) WHERE attributes.http.response.status_code == 401, authorization_items = SUM(delta) WHERE attributes.http.response.status_code == 403, covered_from = MIN(covered_from) BY id = scope.attributes.streams.destination.id, collection = attributes.db.collection.name | EVAL window_seconds = DATE_DIFF("milliseconds", covered_from, "${window.end}") / 1000.0 | EVAL authentication_rate = authentication_items / window_seconds, authorization_rate = authorization_items / window_seconds | KEEP id, collection, authentication_rate, authorization_rate`
     );
   });
 
   it('finds the start of the destination before it keeps only the rejected items', () => {
-    const query = buildDestinationFailureSignalsQuery(params).print('basic');
+    const query = buildDestinationFailureCollectionsQuery(params).print('basic');
 
     expect(query.indexOf('INLINE STATS')).toBeGreaterThan(-1);
     expect(query.indexOf('INLINE STATS')).toBeLessThan(query.indexOf('status_code IN (401, 403)'));
   });
 
+  it('keeps out the failures of a whole request, which have no collection', () => {
+    const query = buildDestinationFailureCollectionsQuery(params).print('basic');
+
+    expect(query).toContain('AND attributes.db.collection.name IS NOT NULL');
+  });
+
   it('adds the hash filter only when the request pins one', () => {
-    const query = buildDestinationFailureSignalsQuery({ ...params, configHash: 'h1' });
+    const query = buildDestinationFailureCollectionsQuery({ ...params, configHash: 'h1' });
 
     expect(query.print('basic')).toContain('resource.attributes.streams.config.hash == "h1"');
-    expect(buildDestinationFailureSignalsQuery(params).print('basic')).not.toContain('config.hash');
+    expect(buildDestinationFailureCollectionsQuery(params).print('basic')).not.toContain(
+      'config.hash'
+    );
   });
 });
 

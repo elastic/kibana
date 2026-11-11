@@ -9,6 +9,7 @@ import { esql, type ComposerQuery } from '@elastic/esql';
 import type { ESQLSingleAstItem } from '@elastic/esql/types';
 import { normalizeColumn } from '../../streams/helpers/esql';
 import {
+  COLLECTION_NAME_FIELD,
   DESTINATION_DURATION_FIELD,
   DESTINATION_ID_FIELD,
   DESTINATION_ITEMS_FIELD,
@@ -16,7 +17,6 @@ import {
   FAILURE_STORE_OUTCOME,
   HTTP_STATUS_CODE_FIELD,
   OUTCOME_FIELD,
-  SIGNAL_FIELD,
   STATS_COLUMN,
   UNIT_METRICS_STREAM,
 } from '../constants';
@@ -95,38 +95,40 @@ export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): 
 };
 
 /**
- * The authentication and authorization rates of each destination, split by signal, from a plain
- * `FROM`. It is for destinations that the rate query showed have such failures, so one row per
- * destination and signal that has any. The time is the destination's, not the signal's: `INLINE
- * STATS` finds the first delta of the destination over all its documents, before the status filter,
- * so the signal rates add up to the rates of `buildDestinationRateQuery`. A signal with failures of
- * one status only has a null rate for the other.
+ * The authentication and authorization rates of each destination, split by collection (the data
+ * stream or index that the exporter reported), from a plain `FROM`. It is for destinations that the
+ * rate query showed have such failures, so one row per destination and collection that has any. The
+ * time is the destination's, not the collection's: `INLINE STATS` finds the first delta of the
+ * destination over all its documents, before the filters, so each collection rate is a part of the
+ * rates of `buildDestinationRateQuery`. A failure of a whole request has no collection, so its
+ * items are in the rate query and not here. A collection with failures of one status only has a
+ * null rate for the other.
  */
-export const buildDestinationFailureSignalsQuery = (
+export const buildDestinationFailureCollectionsQuery = (
   params: DestinationStatsQueryParams
 ): ComposerQuery => {
   const items = normalizeColumn(DESTINATION_ITEMS_FIELD);
   const statusCode = normalizeColumn(HTTP_STATUS_CODE_FIELD);
   const destinationId = normalizeColumn(DESTINATION_ID_FIELD);
-  const signalField = normalizeColumn(SIGNAL_FIELD);
+  const collectionName = normalizeColumn(COLLECTION_NAME_FIELD);
   const authenticationRate = esql.col(STATS_COLUMN.authenticationRate);
   const authorizationRate = esql.col(STATS_COLUMN.authorizationRate);
   const id = esql.col(STATS_COLUMN.id);
-  const signal = esql.col(STATS_COLUMN.signal);
+  const collection = esql.col(STATS_COLUMN.collection);
   const { end } = params.window;
 
   return filterDestinations(esql.from(UNIT_METRICS_STREAM), params)
     .pipe`EVAL delta = TO_DOUBLE(${items})`
     .pipe`INLINE STATS covered_from = MIN(start_timestamp) BY ${destinationId}`
-    .pipe`WHERE ${statusCode} IN (401, 403)`
+    .pipe`WHERE ${statusCode} IN (401, 403) AND ${collectionName} IS NOT NULL`
     .pipe`STATS authentication_items = SUM(delta) WHERE ${statusCode} == 401,
         authorization_items = SUM(delta) WHERE ${statusCode} == 403,
         covered_from = MIN(covered_from)
-      BY ${id} = ${destinationId}, ${signal} = ${signalField}`
+      BY ${id} = ${destinationId}, ${collection} = ${collectionName}`
     .pipe`EVAL window_seconds = DATE_DIFF("milliseconds", covered_from, ${end}) / 1000.0`
     .pipe`EVAL ${authenticationRate} = authentication_items / window_seconds,
         ${authorizationRate} = authorization_items / window_seconds`
-    .pipe`KEEP ${id}, ${signal}, ${authenticationRate}, ${authorizationRate}`;
+    .pipe`KEEP ${id}, ${collection}, ${authenticationRate}, ${authorizationRate}`;
 };
 
 /**

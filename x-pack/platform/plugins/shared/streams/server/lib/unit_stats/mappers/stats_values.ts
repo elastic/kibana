@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { streamsSignalSchema, type StreamsUnit } from '@kbn/streams-schema';
-import { ITEM_UNIT, RATE_TIME_UNIT, STATS_COLUMN } from '../constants';
+import type { StreamsUnit } from '@kbn/streams-schema';
+import { ITEM_UNIT, MAX_FAILURE_COLLECTIONS, RATE_TIME_UNIT, STATS_COLUMN } from '../constants';
 import { numberOrNull, type EsqlRow } from './esql_rows';
 
 export type StatsValue = StreamsUnit.StatsDestinationResult['latency']['average'];
@@ -25,32 +25,41 @@ export const toItemRate = (value: number | null): StatsRate => ({
 });
 
 /**
- * The failure rate of one status: the total, and the rate of each signal that has failures of it,
- * read from `column` of the signal rows. A signal with a null or zero rate is left out, and so is a
- * signal this API does not know, so it never breaks the response. `signals` is missing when none
- * is left.
+ * The failure rate of one status: the total, and the rate of each collection that has failures of
+ * it, read from `column` of the collection rows. A collection with a null or zero rate is left out.
+ * The ones with the highest rates stay, at most `MAX_FAILURE_COLLECTIONS`, highest first.
+ * `collections` is missing when none is left.
  */
 export const toFailureRate = ({
   rate,
-  signalRows,
+  collectionRows,
   column,
 }: {
   rate: number | null;
-  signalRows: EsqlRow[];
+  collectionRows: EsqlRow[];
   column: string;
 }): StatsFailureRate => {
-  const signals: NonNullable<StatsFailureRate['signals']> = {};
+  const collections = collectionRows
+    .flatMap((row) => {
+      const name = row[STATS_COLUMN.collection];
+      const collectionRate = numberOrNull(row[column]);
+      return typeof name === 'string' && collectionRate !== null && collectionRate > 0
+        ? [{ name, rate: collectionRate }]
+        : [];
+    })
+    .sort((a, b) => b.rate - a.rate)
+    .slice(0, MAX_FAILURE_COLLECTIONS);
 
-  for (const row of signalRows) {
-    const signalRate = numberOrNull(row[column]);
-    const signal = streamsSignalSchema.safeParse(row[STATS_COLUMN.signal]);
-    if (signal.success && signalRate !== null && signalRate > 0) {
-      signals[signal.data] = { rate: toItemRate(signalRate) };
-    }
-  }
-
-  return Object.keys(signals).length > 0
-    ? { rate: toItemRate(rate), signals }
+  return collections.length > 0
+    ? {
+        rate: toItemRate(rate),
+        collections: Object.fromEntries(
+          collections.map(({ name, rate: collectionRate }) => [
+            name,
+            { rate: toItemRate(collectionRate) },
+          ])
+        ),
+      }
     : { rate: toItemRate(rate) };
 };
 

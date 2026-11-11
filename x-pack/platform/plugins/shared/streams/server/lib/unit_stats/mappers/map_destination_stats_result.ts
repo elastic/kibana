@@ -27,8 +27,9 @@ export const noDestinationStats = (bucketMs: number): StreamsUnit.StatsDestinati
 });
 
 /**
- * What the destination queries return for one destination. `failureSignals` has one row per signal
- * with 401 or 403 failures, and is missing when that query did not run for the destination.
+ * What the destination queries return for one destination. `failureCollections` has one row per
+ * collection with 401 or 403 failures, and is missing when that query did not run for the
+ * destination.
  */
 export interface DestinationRow {
   [STATS_COLUMN.incomingRate]?: EsqlValue;
@@ -37,28 +38,28 @@ export interface DestinationRow {
   [STATS_COLUMN.authorizationRate]?: EsqlValue;
   [STATS_COLUMN.avgLatency]?: EsqlValue;
   series: EsqlRow[];
-  failureSignals?: EsqlRow[];
+  failureCollections?: EsqlRow[];
 }
 
 /**
- * Joins the rows of the rate query, of the sums query and of the failure signals query on the
+ * Joins the rows of the rate query, of the sums query and of the failure collections query on the
  * destination id, into one object per destination. A destination is there when the sums query has
  * rows for it (it has items in the window). The series keeps the order of the rows, which the query
- * sorts by bucket. The failure signals rows are only for the destinations that have failures, so
- * a destination without them has no `failureSignals`.
+ * sorts by bucket. The failure collections rows are only for the destinations that have failures,
+ * so a destination without them has no `failureCollections`.
  */
 export const joinDestinationRows = ({
   rateRows,
   sumsRows,
-  failureSignalsRows = [],
+  failureCollectionsRows = [],
 }: {
   rateRows: EsqlRow[];
   sumsRows: EsqlRow[];
-  failureSignalsRows?: EsqlRow[];
+  failureCollectionsRows?: EsqlRow[];
 }): Record<string, DestinationRow> => {
   const ratesById = indexById(rateRows, STATS_COLUMN.id);
   const seriesById = groupById(sumsRows, STATS_COLUMN.id);
-  const failureSignalsById = groupById(failureSignalsRows, STATS_COLUMN.id);
+  const failureCollectionsById = groupById(failureCollectionsRows, STATS_COLUMN.id);
 
   return Object.fromEntries(
     Object.entries(seriesById).map(([id, series]) => [
@@ -66,8 +67,8 @@ export const joinDestinationRows = ({
       {
         ...ratesById[id],
         series,
-        ...(Object.hasOwn(failureSignalsById, id)
-          ? { failureSignals: failureSignalsById[id] }
+        ...(Object.hasOwn(failureCollectionsById, id)
+          ? { failureCollections: failureCollectionsById[id] }
           : {}),
       },
     ])
@@ -105,12 +106,12 @@ export const mapDestinationStatsRows = ({
               rate: toItemRate(numberOrNull(row[STATS_COLUMN.failedRate])),
               authentication: toFailureRate({
                 rate: numberOrNull(row[STATS_COLUMN.authenticationRate]),
-                signalRows: row.failureSignals ?? [],
+                collectionRows: row.failureCollections ?? [],
                 column: STATS_COLUMN.authenticationRate,
               }),
               authorization: toFailureRate({
                 rate: numberOrNull(row[STATS_COLUMN.authorizationRate]),
-                signalRows: row.failureSignals ?? [],
+                collectionRows: row.failureCollections ?? [],
                 column: STATS_COLUMN.authorizationRate,
               }),
             },

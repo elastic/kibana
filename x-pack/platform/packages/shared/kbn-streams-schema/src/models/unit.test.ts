@@ -276,14 +276,17 @@ describe('streams unit stats response schema', () => {
       parse({
         rate: rate(1.9),
         authentication: { rate: rate(0) },
-        authorization: { rate: rate(1.9), signals: { logs: { rate: rate(1.9) } } },
+        authorization: {
+          rate: rate(1.9),
+          collections: { 'logs-generic.otel-default': { rate: rate(1.9) } },
+        },
       })
     ).toBe(true);
     expect(
       parse({
         rate: rate(1.9),
         authentication: { rate: rate(0) },
-        authorization: { rate: rate(1.9), signals: { events: { rate: rate(1.9) } } },
+        authorization: { rate: rate(1.9), collections: { 'logs-generic.otel-default': {} } },
       })
     ).toBe(false);
     expect(parse({ rate: rate(0), authentication: { rate: rate(0) } })).toBe(false);

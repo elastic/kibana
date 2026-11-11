@@ -37,7 +37,11 @@ export const OUTCOME_FIELD = 'attributes.outcome';
 export const FAILURE_STORE_OUTCOME = 'failure_store';
 
 export const DESTINATION_ID_FIELD = 'scope.attributes.streams.destination.id';
-export const SIGNAL_FIELD = 'scope.attributes.streams.signal';
+/**
+ * The collection a destination wrote to, as the exporter reports it: the data stream or index of
+ * an Elasticsearch document. A failure of a whole request has none.
+ */
+export const COLLECTION_NAME_FIELD = 'attributes.db.collection.name';
 /** Set on a rejected item only, so a stream with no failures yet has no such field. */
 export const HTTP_STATUS_CODE_FIELD = 'attributes.http.response.status_code';
 export const DESTINATION_ITEMS_FIELD = 'metrics.streams.destination.items';
@@ -70,12 +74,19 @@ export const STATS_COLUMN = {
   failedRate: 'failed_rate',
   authenticationRate: 'authentication_rate',
   authorizationRate: 'authorization_rate',
-  signal: 'signal',
+  collection: 'collection',
   acceptedRate: 'accepted_rate',
   avgLatency: 'avg_latency',
   sumItems: 'sum_items',
   avgDurationPerItem: 'avg_duration_per_item',
 } as const;
+
+/**
+ * The most collections one failure rate lists, the ones with the highest rates. A destination can
+ * write to many collections, because a pattern built from record values can create many data
+ * streams, and the response must stay small.
+ */
+export const MAX_FAILURE_COLLECTIONS = 25;
 
 /** The bucket count a series aims for, as Discover's auto interval does with a bar target. */
 export const SERIES_TARGET_BUCKETS = 50;

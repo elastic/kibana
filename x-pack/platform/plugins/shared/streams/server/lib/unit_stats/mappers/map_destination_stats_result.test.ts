@@ -6,6 +6,7 @@
  */
 
 import { streamsUnitStatsDestinationResultSchema } from '@kbn/streams-schema';
+import { MAX_FAILURE_COLLECTIONS } from '../constants';
 import {
   joinDestinationRows,
   mapDestinationStatsRows,
@@ -103,69 +104,97 @@ describe('mapDestinationStatsRows failure rates', () => {
     expect(failed.authorization).toEqual({ rate: rate(null) });
   });
 
-  it('has a rate of 0 and no signals for a destination with items and no rejection', () => {
+  it('has a rate of 0 and no collections for a destination with items and no rejection', () => {
     const failed = mapFailed({ authentication_rate: 0, authorization_rate: 0 });
 
     expect(failed.authentication).toEqual({ rate: rate(0) });
     expect(failed.authorization).toEqual({ rate: rate(0) });
   });
 
-  it('reports 401 failures only, with their signals', () => {
-    const failed = mapFailed({
-      authentication_rate: 2,
-      authorization_rate: 0,
-      failureSignals: [{ signal: 'logs', authentication_rate: 2, authorization_rate: null }],
-    });
+  it('reports a 401 total with no collections, because a whole request has none', () => {
+    const failed = mapFailed({ authentication_rate: 2, authorization_rate: 0 });
 
-    expect(failed.authentication).toEqual({ rate: rate(2), signals: { logs: { rate: rate(2) } } });
+    expect(failed.authentication).toEqual({ rate: rate(2) });
     expect(failed.authorization).toEqual({ rate: rate(0) });
   });
 
-  it('reports 403 failures only, with their signals', () => {
+  it('reports 403 failures with their collections', () => {
     const failed = mapFailed({
       authentication_rate: 0,
       authorization_rate: 1.9,
-      failureSignals: [{ signal: 'logs', authentication_rate: null, authorization_rate: 1.9 }],
+      failureCollections: [
+        {
+          collection: 'logs-generic.otel-default',
+          authentication_rate: null,
+          authorization_rate: 1.9,
+        },
+      ],
     });
 
     expect(failed.authentication).toEqual({ rate: rate(0) });
     expect(failed.authorization).toEqual({
       rate: rate(1.9),
-      signals: { logs: { rate: rate(1.9) } },
+      collections: { 'logs-generic.otel-default': { rate: rate(1.9) } },
     });
   });
 
-  it('leaves out a signal with no failures of a type, and the signal rates add up to the total', () => {
+  it('leaves out a collection with no failures of a type, and lists no more than the total', () => {
     const failed = mapFailed({
-      authentication_rate: 2,
+      authentication_rate: 2.5,
       authorization_rate: 1,
-      failureSignals: [
-        { signal: 'logs', authentication_rate: 1.5, authorization_rate: 1 },
-        { signal: 'metrics', authentication_rate: 0.5, authorization_rate: null },
+      failureCollections: [
+        { collection: 'logs-a-default', authentication_rate: 1.5, authorization_rate: 1 },
+        { collection: 'logs-b-default', authentication_rate: 0.5, authorization_rate: null },
       ],
     });
 
-    expect(Object.keys(failed.authentication.signals ?? {})).toEqual(['logs', 'metrics']);
-    expect(Object.keys(failed.authorization.signals ?? {})).toEqual(['logs']);
-    const signalRates = Object.values(failed.authentication.signals ?? {}).map(
+    expect(Object.keys(failed.authentication.collections ?? {})).toEqual([
+      'logs-a-default',
+      'logs-b-default',
+    ]);
+    expect(Object.keys(failed.authorization.collections ?? {})).toEqual(['logs-a-default']);
+    const collectionRates = Object.values(failed.authentication.collections ?? {}).map(
       ({ rate: { value } }) => value ?? 0
     );
-    expect(signalRates.reduce((sum, value) => sum + value, 0)).toBeCloseTo(
+    expect(collectionRates.reduce((sum, value) => sum + value, 0)).toBeLessThanOrEqual(
       failed.authentication.rate.value ?? NaN
     );
   });
 
-  it('leaves out a signal that the API does not know', () => {
+  it('skips a row with no collection name', () => {
     const failed = mapFailed({
       authentication_rate: 2,
       authorization_rate: 0,
-      failureSignals: [
-        { signal: 'logs', authentication_rate: 1, authorization_rate: null },
-        { signal: 'unknown', authentication_rate: 1, authorization_rate: null },
+      failureCollections: [
+        { collection: 'logs-a-default', authentication_rate: 1, authorization_rate: null },
+        { collection: null, authentication_rate: 1, authorization_rate: null },
       ],
     });
 
-    expect(failed.authentication).toEqual({ rate: rate(2), signals: { logs: { rate: rate(1) } } });
+    expect(failed.authentication).toEqual({
+      rate: rate(2),
+      collections: { 'logs-a-default': { rate: rate(1) } },
+    });
+  });
+
+  it('keeps the collections with the highest rates, highest first, up to the cap', () => {
+    const total = MAX_FAILURE_COLLECTIONS + 5;
+    const failureCollections = Array.from({ length: total }, (_, index) => ({
+      collection: `logs-c${index + 1}-default`,
+      authentication_rate: index + 1,
+      authorization_rate: null,
+    }));
+
+    const failed = mapFailed({
+      authentication_rate: 1000,
+      authorization_rate: 0,
+      failureCollections,
+    });
+    const names = Object.keys(failed.authentication.collections ?? {});
+
+    expect(names).toHaveLength(MAX_FAILURE_COLLECTIONS);
+    expect(names[0]).toBe(`logs-c${total}-default`);
+    expect(names[names.length - 1]).toBe(`logs-c${total - MAX_FAILURE_COLLECTIONS + 1}-default`);
   });
 });
 
@@ -218,17 +247,22 @@ describe('joinDestinationRows', () => {
     });
   });
 
-  it('attaches the failure signal rows only to the destination that has them', () => {
-    const failureSignalsRows = [
-      { id: 'es-dev', signal: 'logs', authentication_rate: 0.5, authorization_rate: null },
+  it('attaches the failure collection rows only to the destination that has them', () => {
+    const failureCollectionsRows = [
+      {
+        id: 'es-dev',
+        collection: 'logs-a-default',
+        authentication_rate: 0.5,
+        authorization_rate: null,
+      },
     ];
 
-    const shaped = joinDestinationRows({ rateRows, sumsRows, failureSignalsRows });
+    const shaped = joinDestinationRows({ rateRows, sumsRows, failureCollectionsRows });
 
-    expect(shaped['es-dev'].failureSignals).toEqual([
-      { signal: 'logs', authentication_rate: 0.5, authorization_rate: null },
+    expect(shaped['es-dev'].failureCollections).toEqual([
+      { collection: 'logs-a-default', authentication_rate: 0.5, authorization_rate: null },
     ]);
-    expect(shaped['es-prod']).not.toHaveProperty('failureSignals');
+    expect(shaped['es-prod']).not.toHaveProperty('failureCollections');
   });
 
   it('has no destinations for no rows', () => {
