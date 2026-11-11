@@ -341,7 +341,8 @@ test.describe(
       llmProxy,
       apiServices,
     }) => {
-      const ruleName = 'Canvas edited rule';
+      // afterEach deletes rules by exact name, so a unique name keeps parallel runs from sharing cleanup.
+      const ruleName = `Canvas edited rule ${randomUUID()}`;
       ruleNames.push(ruleName);
       const { id: ruleId } = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({
