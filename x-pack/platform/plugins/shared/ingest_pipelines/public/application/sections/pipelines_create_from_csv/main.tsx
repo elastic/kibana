@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import fileSaver from 'file-saver';
 
 import { PARSE_CSV_MAX_FILE_BYTES } from '../../../../common/constants';
@@ -20,6 +21,8 @@ import { PipelinesCsvUploader } from './pipelines_csv_uploader';
 import { PipelinesPreview } from './pipelines_preview';
 import { Error } from './error_display';
 import { Instructions } from './instructions';
+
+const maxFileSize = numeral(PARSE_CSV_MAX_FILE_BYTES).format('0,0.[0] b');
 
 export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps> = ({
   history,
@@ -180,6 +183,7 @@ export const PipelinesCreateFromCsv: React.FunctionComponent<RouteComponentProps
           isUploaded={isUploaded}
           hasError={hasError}
           hasFile={!!file && file.length > 0}
+          maxFileSize={maxFileSize}
         />
       )}
 

@@ -18,7 +18,6 @@ import {
   EuiRadioGroup,
 } from '@elastic/eui';
 
-import { PARSE_CSV_MAX_FILE_BYTES } from '../../../../common/constants';
 import { FieldCopyAction } from '../../../../common/types';
 
 interface Props {
@@ -29,6 +28,7 @@ interface Props {
   isUploaded: boolean;
   hasError: boolean;
   hasFile: boolean;
+  maxFileSize: string;
 }
 
 function getOptions(actions: FieldCopyAction[]) {
@@ -46,9 +46,9 @@ export const PipelinesCsvUploader: FC<Props> = ({
   isUploaded,
   hasError,
   hasFile,
+  maxFileSize,
 }) => {
   const [action, setAction] = useState<FieldCopyAction>(FieldCopyAction.Copy);
-  const maxFileSize = `${PARSE_CSV_MAX_FILE_BYTES / (1024 * 1024)} MB`;
 
   const options = getOptions(actionOptions);
 
