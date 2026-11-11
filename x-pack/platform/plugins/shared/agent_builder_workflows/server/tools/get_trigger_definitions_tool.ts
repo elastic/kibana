@@ -14,7 +14,7 @@ import { workflowTools } from '../../common/constants';
 
 type GetRegisteredTriggersApi = Pick<
   WorkflowsServerPluginSetup['management'],
-  'getRegisteredTriggers'
+  'getRegisteredTriggers' | 'getTriggerSchemaOptions'
 >;
 
 export function registerGetTriggerDefinitionsTool(
@@ -52,6 +52,7 @@ Returns built-in trigger types (manual, scheduled, alert) plus event-driven trig
           type: 'other' as const,
           data: lookupTriggerDefinitionsForAgent({
             registeredTriggers: await api.getRegisteredTriggers(),
+            triggerSchemaOptions: api.getTriggerSchemaOptions(),
             triggerType,
           }),
         },

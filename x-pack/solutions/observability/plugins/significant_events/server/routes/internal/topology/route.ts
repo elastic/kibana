@@ -7,7 +7,13 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
-import type { TopologySnapshotProperties } from '@kbn/significant-events-schema';
+import {
+  MAX_ID_LENGTH,
+  MAX_TOPOLOGY_PROVENANCE,
+  type Feature,
+  type TopologySnapshotProperties,
+} from '@kbn/significant-events-schema';
+import { TOPOLOGY_INPUT_FEATURE_TYPES } from '../../../lib/knowledge_indicators/topology/build_topology_snapshot';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import {
@@ -62,6 +68,62 @@ const getTopologyRoute = createServerRoute({
   },
 });
 
+const featureUuidSchema = lazySchema(() => z.string().min(1).max(MAX_ID_LENGTH));
+
+const getTopologyFeaturesRoute = createServerRoute({
+  endpoint: 'GET /internal/nightshift/topology/features',
+  options: {
+    access: 'internal',
+    summary: 'Get the knowledge indicators behind topology elements',
+    description:
+      'Fetches the entity and dependency knowledge indicators listed in a topology provenance, from the requested sources the caller can read.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.read],
+    },
+  },
+  params: lazySchema(() =>
+    z.object({
+      query: z.object({
+        sourceIds: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
+          'Source ids the knowledge indicators belong to'
+        ),
+        featureUuids: z
+          .union([
+            featureUuidSchema.transform((uuid) => [uuid]),
+            z.array(featureUuidSchema).min(1).max(MAX_TOPOLOGY_PROVENANCE),
+          ])
+          .describe('Knowledge indicator uuids from a topology provenance'),
+      }),
+    })
+  ),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ features: Feature[] }> => {
+    const { licensing, sourcesClient, getKnowledgeIndicatorClient } = await getScopedClients({
+      request,
+    });
+
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const sourceIds = await filterReadableSourceIds(
+      await requestedOrAllSourceIds(params.query.sourceIds, sourcesClient),
+      sourcesClient
+    );
+    const kiClient = await getKnowledgeIndicatorClient();
+    const { hits } = await kiClient.getFeatures(sourceIds, {
+      id: params.query.featureUuids,
+      type: [...TOPOLOGY_INPUT_FEATURE_TYPES],
+    });
+    return { features: hits };
+  },
+});
+
 export const internalTopologyRoutes = {
   ...getTopologyRoute,
+  ...getTopologyFeaturesRoute,
 };

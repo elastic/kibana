@@ -76,7 +76,7 @@ export class NightshiftPlugin
     coreSetup.application.register({
       id: NIGHTSHIFT_APP_ID,
       title: i18n.translate('xpack.nightshift.appTitle', {
-        defaultMessage: 'Nightshift',
+        defaultMessage: 'nightshift',
       }),
       appRoute: NIGHTSHIFT_APP_ROUTE,
       category: DEFAULT_APP_CATEGORIES.observability,
@@ -168,7 +168,7 @@ export class NightshiftPlugin
         });
       })
       .catch((error) => {
-        this.context.logger.get().error(`Failed to initialize Nightshift: ${error}`);
+        this.context.logger.get().error(`Failed to initialize nightshift: ${error}`);
       });
 
     return {};

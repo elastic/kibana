@@ -105,4 +105,22 @@ export class SignificantEventsDiscoveryClient {
   }): Promise<SignificantEventsWorkflowStatusResult> {
     return this.workflowExecutionService.getStatus({ spaceId, request });
   }
+
+  /** Not limited to the orchestrator: resolves a sub-workflow execution too. */
+  async getExecution({
+    id,
+    spaceId,
+    request,
+  }: {
+    id: string;
+    spaceId: string;
+    request: KibanaRequest;
+  }) {
+    return this.workflowExecutionService.getExecution({
+      id,
+      spaceId,
+      request,
+      options: { omitStepExecutions: true },
+    });
+  }
 }

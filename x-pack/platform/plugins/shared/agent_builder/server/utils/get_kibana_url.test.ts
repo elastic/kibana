@@ -7,7 +7,7 @@
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { IBasePath } from '@kbn/core/server';
-import { getPublicKibanaUrl, toKibanaAppUrl } from './get_kibana_url';
+import { getPublicKibanaUrl } from './get_kibana_url';
 
 const basePath = (publicBaseUrl?: string) => ({ publicBaseUrl } as IBasePath);
 const cloud = { kibanaUrl: 'https://cloud.example.com' } as CloudSetup;
@@ -27,17 +27,6 @@ describe('getPublicKibanaUrl', () => {
   it('adds the space', () => {
     expect(getPublicKibanaUrl(basePath('https://kibana.example.com'), cloud, 'ops')).toBe(
       'https://kibana.example.com/s/ops'
-    );
-  });
-});
-
-describe('toKibanaAppUrl', () => {
-  it('joins the app and path onto the Kibana URL, percent-encoded', () => {
-    expect(
-      toKibanaAppUrl('https://kibana.example.com/s/ops/', 'discover', "#/?_a=(esql:'FROM logs')")
-    ).toBe("https://kibana.example.com/s/ops/app/discover#/?_a=(esql:'FROM%20logs')");
-    expect(toKibanaAppUrl('https://kibana.example.com', 'agent_builder')).toBe(
-      'https://kibana.example.com/app/agent_builder'
     );
   });
 });
