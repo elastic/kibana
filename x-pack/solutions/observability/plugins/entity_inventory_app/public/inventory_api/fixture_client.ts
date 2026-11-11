@@ -20,7 +20,7 @@ export const throwIfAborted = (signal?: AbortSignal) => {
   }
 };
 
-/** Client over static fixtures; it backs the app until the inventory routes exist (#6304). */
+/** Client over static fixtures, for tests only; the app reads the routes through the HTTP client. */
 export const createFixtureEntityInventoryApiClient = (): EntityInventoryApiClient => ({
   getTypes: async ({ signal }) => {
     throwIfAborted(signal);

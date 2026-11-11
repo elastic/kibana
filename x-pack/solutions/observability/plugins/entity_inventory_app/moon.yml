@@ -38,6 +38,8 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/react-hooks'
   - '@kbn/ui-callout'
+  - '@kbn/entity-inventory-plugin'
+  - '@kbn/server-route-repository-client'
 tags:
   - plugin
   - prod

@@ -6,6 +6,4 @@ UI plugin for the Observability entity inventory. Renders an entity-centric view
 
 The Hosts and Kubernetes pages render one results table per entity type (`host` and `k8s.deployment`). All resources keeps a placeholder until grouping lands.
 
-The table reads its data through the `EntityInventoryApiClient` interface in `public/inventory_api/client.ts`. Until the entity inventory routes exist, `renderApp` provides `createFixtureEntityInventoryApiClient()`, which returns static fixture data and ignores the requested time range.
-
-To use the routes, implement `EntityInventoryApiClient` over `core.http` and replace the `inventoryApi` service in `renderApp` (`public/application/index.tsx`). The contract types in `public/inventory_api/types.ts` mirror the route responses; delete them in favour of the types the routes export once those exist.
+The table reads `GET /internal/entity_inventory/types` and `POST /internal/entity_inventory/entities/{type}/_list` of the `entity_inventory` server plugin through the HTTP client in `public/inventory_api/http_client.ts`, typed from that plugin's route repository. The contract types in `public/inventory_api/types.ts` are taken from the server's types. `createFixtureEntityInventoryApiClient()` serves static fixtures and exists for tests only.

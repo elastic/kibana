@@ -5,83 +5,80 @@
  * 2.0.
  */
 
+import type { ClientRequestParamsOf } from '@kbn/server-route-repository-client';
+import type {
+  EntityInventoryRouteRepository,
+  InventoryRow as ServerInventoryRow,
+  InventoryType,
+  InventoryTypeColumn as ServerInventoryTypeColumn,
+  ListResponse,
+  OutputColumnKind,
+  SourceError,
+  UnavailableColumn,
+} from '@kbn/entity-inventory-plugin/server';
+
 /*
- * Mirror of the entity inventory `types` and `_list` route contract (observability-dev#6304).
- * Delete these in favour of a type-only import from `@kbn/entity-inventory-plugin/common`
- * once the routes export them.
+ * The entity inventory `types` and `_list` route contract, taken from the server plugin so a
+ * change on either side is a compile error here.
  */
 
-/** A single value of an entity row cell, as ES|QL returns it. */
-export type InventoryCellScalar = string | number | boolean | null;
-
-/** A cell value; multi-value fields arrive as arrays. Mirrors the executor's `ESQLValue`. */
-export type InventoryCellValue = InventoryCellScalar | InventoryCellScalar[];
-
 /** One entity, keyed by output column name. */
-export type InventoryRow = Readonly<Record<string, InventoryCellValue>>;
+export type InventoryRow = ServerInventoryRow;
+
+/** A cell value; multi-value fields arrive as arrays. */
+export type InventoryCellValue = InventoryRow[string];
+
+/** A single value of an entity row cell, as ES|QL returns it. */
+export type InventoryCellScalar = Exclude<InventoryCellValue, unknown[]>;
 
 /**
- * The role of an output column. A `metric` kind arrives with the metrics phases.
+ * The role of an output column.
  * - `id`: `entity.id`, the key of the entity as a whole. It is always the first column.
  * - `identity`: a field of the definition's identity fields, such as `host.id` or `host.name`.
  *   Several can be null on one row, as an entity may be reported under one naming convention.
  * - `attribute`: any other field of the definition.
  * - `last_seen`: when the entity was last reported.
- * The table only distinguishes `attribute` and `last_seen`.
  */
-export type InventoryOutputColumnKind = 'id' | 'identity' | 'attribute' | 'last_seen';
+export type InventoryOutputColumnKind = OutputColumnKind;
+
+/** An output column of a registered entity type. */
+export type InventoryTypeColumn = ServerInventoryTypeColumn;
 
 /** An output column of a list response: the same shape the `types` route returns. */
-export type InventoryListColumn = InventoryTypeColumn;
+export type InventoryListColumn = ListResponse['columns'][number];
 
 /** A source (index pattern) whose query failed while the others succeeded. */
-export interface InventorySourceError {
-  indexPattern: string;
-  status: number | null;
-  reason: string;
-}
+export type InventorySourceError = SourceError;
 
 /** An output column that a source cannot provide because it lacks the backing field. */
-export interface InventoryUnavailableColumn {
-  indexPattern: string;
-  column: string;
-  field: string;
-}
+export type InventoryUnavailableColumn = UnavailableColumn;
 
-/** Body of a `_list` request; `from` and `to` are absolute ISO instants. */
-export interface InventoryListRequest {
-  from: string;
-  to: string;
-  limit?: number;
-}
+/**
+ * Body of a `_list` request; `from` and `to` are absolute ISO instants. `limit` is left out, so
+ * the route answers with its default, which is also its maximum (9,999 rows).
+ */
+export type InventoryListRequest = Omit<
+  ClientRequestParamsOf<
+    EntityInventoryRouteRepository,
+    'POST /internal/entity_inventory/entities/{type}/_list'
+  >['params']['body'],
+  'limit'
+>;
 
 /**
  * The `_list` response fields the UI reads. The route also returns `provenance`, `took` and
  * `queries`, which the table does not use.
  */
-export interface InventoryListResponse {
-  columns: InventoryListColumn[];
-  rows: InventoryRow[];
-  /** `true` when the row limit left matching entities out; a failed source is in `errors`. */
-  truncated: boolean;
-  errors: InventorySourceError[];
-  unavailableColumns: InventoryUnavailableColumn[];
-}
+export type InventoryListResponse = Pick<
+  ListResponse,
+  'columns' | 'rows' | 'truncated' | 'errors' | 'unavailableColumns'
+>;
 
-/** An output column of a registered entity type. */
-export interface InventoryTypeColumn {
-  name: string;
-  kind: InventoryOutputColumnKind;
-}
-
-/** A registered entity type as the `types` route describes it. */
-export interface InventoryEntityType {
-  type: string;
-  name: string;
-  description?: string;
-  identityFields: string[];
-  columns: InventoryTypeColumn[];
-}
+/** A registered entity type as the `types` route describes it, without its `sources`. */
+export type InventoryEntityType = Pick<
+  InventoryType,
+  'type' | 'name' | 'description' | 'identityFields' | 'columns'
+>;
 
 /** The `types` response. */
 export interface InventoryTypesResponse {

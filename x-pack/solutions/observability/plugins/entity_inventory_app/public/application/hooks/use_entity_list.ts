@@ -6,7 +6,6 @@
  */
 
 import { useAbortableAsync } from '@kbn/react-hooks';
-import { ENTITY_INVENTORY_LIST_LIMIT } from '../../inventory_api/client';
 import type { InventoryEntityType, InventoryListResponse } from '../../inventory_api/types';
 import { useKibana } from '../../hooks/use_kibana';
 import { useEntityInventorySearch } from '../context/search_context';
@@ -48,11 +47,7 @@ export const useEntityList = (entityType: string): UseEntityListResult => {
       // reported even when the list request failed as well.
       const [typesResult, listResult] = await Promise.allSettled([
         inventoryApi.getTypes({ signal }),
-        inventoryApi.getEntities(
-          entityType,
-          { ...range, limit: ENTITY_INVENTORY_LIST_LIMIT },
-          { signal }
-        ),
+        inventoryApi.getEntities(entityType, range, { signal }),
       ]);
       if (typesResult.status === 'rejected') {
         throw typesResult.reason;

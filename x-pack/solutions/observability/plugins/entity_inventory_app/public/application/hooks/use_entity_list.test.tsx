@@ -9,7 +9,6 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { EntityInventoryApiClient } from '../../inventory_api/client';
-import { ENTITY_INVENTORY_LIST_LIMIT } from '../../inventory_api/client';
 import { createFixtureEntityInventoryApiClient } from '../../inventory_api/fixture_client';
 import { createScenarioEntityInventoryApiClient } from '../../inventory_api/fixture_scenarios';
 import { createAppServicesMock } from '../../mocks';
@@ -44,7 +43,6 @@ describe('useEntityList', () => {
     expect(inventoryApi.getEntities).toHaveBeenCalledTimes(1);
     const [[type, request]] = inventoryApi.getEntities.mock.calls;
     expect(type).toBe('host');
-    expect(request.limit).toBe(ENTITY_INVENTORY_LIST_LIMIT);
     expect(Date.parse(request.to) - Date.parse(request.from)).toBe(15 * 60 * 1000);
     expect(new Date(request.from).toISOString()).toBe(request.from);
     expect(result.current.result.entityType?.type).toBe('host');

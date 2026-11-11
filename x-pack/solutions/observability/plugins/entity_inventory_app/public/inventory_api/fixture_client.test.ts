@@ -11,7 +11,6 @@ import type { InventoryListRequest } from './types';
 const REQUEST: InventoryListRequest = {
   from: '2026-10-30T10:00:00.000Z',
   to: '2026-10-30T10:15:00.000Z',
-  limit: 10_000,
 };
 
 describe('createFixtureEntityInventoryApiClient', () => {

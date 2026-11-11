@@ -22,6 +22,16 @@ export type {
   EntityInventorySetupDependencies,
   EntityInventoryStartDependencies,
 } from './types';
+export type { EntityInventoryRouteRepository } from './routes';
+export type {
+  GetTypesResponse,
+  InventoryType,
+  InventoryTypeColumn,
+  ListResponse,
+  UnavailableColumn,
+} from './routes/types';
+export type { InventoryRow, SourceError } from './inventory/executor';
+export type { OutputColumnKind } from './inventory/generator';
 
 export const plugin: PluginInitializer<
   EntityInventoryPluginSetup,
