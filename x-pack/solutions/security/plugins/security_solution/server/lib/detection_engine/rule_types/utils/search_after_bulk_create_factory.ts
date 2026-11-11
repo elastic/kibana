@@ -273,10 +273,10 @@ export const searchAfterAndBulkCreateFactory = async ({
             ? `A single event exceeded the "elasticsearch.maxResponseSize" limit, it is impossible to fetch events for this rule. Error: ${exc.message}`
             : `${exc}`;
 
+          // Log the error message rather than JSON.stringify(exc): an Error serializes to `{}`,
+          // which lost the message and prevented determineExecutionResult from classifying it.
           ruleExecutionLogger.error(
-            `${cycleNum}: Error extracting/processing events or creating alerts\nError: ${JSON.stringify(
-              exc
-            )}`
+            `${cycleNum}: Error extracting/processing events or creating alerts\nError: ${errorMessage}`
           );
           return mergeReturns([
             toReturn,

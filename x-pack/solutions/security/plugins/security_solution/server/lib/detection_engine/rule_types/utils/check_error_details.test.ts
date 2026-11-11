@@ -197,6 +197,66 @@ line 1:45: invalid [test_not_lookup] resolution in lookup mode to an index in [s
     });
   });
 
+  describe('rule timeout errors', () => {
+    // These strings are copied verbatim from the Alerting Framework
+    // (x-pack/platform/plugins/shared/alerting/server/lib/wrap_scoped_cluster_client.ts) and from the
+    // ES|QL executor. They are intentionally exact so that a change to the text upstream fails here.
+    it.each([
+      'ES|QL search has been aborted due to cancelled execution',
+      'EQL search has been aborted due to cancelled execution',
+      'Search has been aborted due to cancelled execution',
+      'Rule execution cancelled due to timeout',
+    ])('should mark "%s" as user error', (errorMessage) => {
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+      expect(checkErrorDetails(errorMessage)).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark the abort error logged by performEsqlRequest with its prefix as user error', () => {
+      const errorMessage =
+        'Error while performing ES|QL search: ES|QL search has been aborted due to cancelled execution';
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark the abort error logged by singleSearchAfter with its prefix as user error', () => {
+      const errorMessage =
+        'Error searching events\nError: Error: Search has been aborted due to cancelled execution';
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark the abort error logged by searchAfterAndBulkCreate with its prefix as user error', () => {
+      const errorMessage =
+        '1: Error extracting/processing events or creating alerts\nError: Error: Search has been aborted due to cancelled execution';
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark an ES client request timeout on an ES|QL rule search as user error', () => {
+      const errorMessage = 'Error while performing ES|QL search: Request timed out';
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    it('should mark an ES client request timeout on a query rule search as user error', () => {
+      const errorMessage = 'Error searching events\nError: TimeoutError: Request timed out';
+      expect(checkErrorDetails(new Error(errorMessage))).toHaveProperty('isUserError', true);
+    });
+
+    // The bare text is what the rule type wrapper logs from the executor result, and the run is only
+    // a user error if every logged entry is, so it has to match without a prefix.
+    it('should mark a bare "Request timed out" as user error', () => {
+      expect(checkErrorDetails(new Error('Request timed out'))).toHaveProperty('isUserError', true);
+      expect(checkErrorDetails('TimeoutError: Request timed out')).toHaveProperty(
+        'isUserError',
+        true
+      );
+    });
+
+    it('should not mark the max alerts error as user error', () => {
+      expect(checkErrorDetails(new Error('Rule reported more than 1000 alerts.'))).toHaveProperty(
+        'isUserError',
+        false
+      );
+    });
+  });
+
   describe('non user errors', () => {
     it('should not mark as user error shard exception', () => {
       const errorResponse = {
