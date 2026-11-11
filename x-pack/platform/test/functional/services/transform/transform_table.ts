@@ -39,6 +39,7 @@ export function TransformTableProvider({ getPageObject, getService }: FtrProvide
       for (const tr of $.findTestSubjects('~transformListRow').toArray()) {
         const $tr = $(tr);
         const $executionCell = $tr.findTestSubject('transformListColumnExecution');
+        const $progressCell = $tr.findTestSubject('transformListColumnProgress');
         const execution = $executionCell.find('.euiTableCellContent').text().trim();
 
         rows.push({
@@ -61,7 +62,7 @@ export function TransformTableProvider({ getPageObject, getService }: FtrProvide
             .trim()
             .toLowerCase(),
           mode: execution === 'Continuous' ? 'continuous' : 'batch',
-          progress: $executionCell.findTestSubject('transformListProgress').attr('value'),
+          progress: $progressCell.findTestSubject('transformListProgress').attr('value'),
           health: $tr
             .findTestSubject('transformListColumnHealth')
             .findTestSubject('transformListHealth')
