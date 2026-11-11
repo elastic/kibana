@@ -9,7 +9,10 @@
 
 import { parse } from 'yaml';
 import { SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW, SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW } from '.';
-import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
+import {
+  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
+  SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW,
+} from './knowledge_indicators';
 
 interface WorkflowJsonSchema {
   type?: string;
@@ -32,7 +35,7 @@ interface WorkflowStep {
   steps?: WorkflowStep[];
   with?: {
     path?: string;
-    body?: Record<string, unknown> & { runId?: string };
+    body?: Record<string, unknown> & { runId?: string; parentWorkflowExecutionId?: string };
     written_rule_uuids?: string;
     inputs?: Record<string, string>;
     schema?: WorkflowJsonSchema;
@@ -67,6 +70,9 @@ const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWor
 const orchestrator = parse(SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW.yaml) as ParsedWorkflow;
 const queriesGeneration = parse(
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
+) as ParsedWorkflow;
+const featuresIdentification = parse(
+  SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW.yaml
 ) as ParsedWorkflow;
 
 describe('significant events persistence workflow contracts', () => {
@@ -147,10 +153,16 @@ describe('significant events persistence workflow contracts', () => {
     });
   });
 
-  it('sends the workflow execution id when generating KI queries', () => {
+  it('sends workflow lineage to the KI child routes', () => {
     expect(requireStep(queriesGeneration, 'generate_queries').with?.body?.runId).toBe(
       '${{ execution.id }}'
     );
+    expect(
+      requireStep(queriesGeneration, 'generate_queries').with?.body?.parentWorkflowExecutionId
+    ).toBe('${{ parent.executionId }}');
+    expect(
+      requireStep(featuresIdentification, 'identify_inferred').with?.body?.parentWorkflowExecutionId
+    ).toBe('${{ parent.executionId }}');
   });
 
   it('stamps discovery detections only from reported completed outcomes', () => {
