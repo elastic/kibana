@@ -136,8 +136,8 @@ describe('buildResumeInitialization', () => {
       steps: [
         doneCall('d1'),
         reasoning('group', { tool_call_group_id: 'g2' }),
-        reasoning('why c1', { tool_call_group_id: 'g2', tool_call_id: 'c1' }),
-        pendingCall('c1', { tool_call_group_id: 'g2' }),
+        reasoning('legacy why c1', { tool_call_group_id: 'g2', tool_call_id: 'c1' }),
+        pendingCall('c1', { tool_call_group_id: 'g2', intent: 'Looking up c1' }),
       ],
       pendingPrompts: [confirmPrompt('confirm')],
       state: roundState([node('c1')]),
@@ -151,7 +151,7 @@ describe('buildResumeInitialization', () => {
       type: 'tool_calls',
       toolCallGroupId: 'g2',
       toolCalls: [
-        { toolCallId: 'c1', toolName: 'my_tool', args: { q: 'c1' }, reasoning: 'why c1' },
+        { toolCallId: 'c1', toolName: 'my_tool', args: { q: 'c1' }, intent: 'Looking up c1' },
       ],
     });
     expect(init.toolRenderState).toEqual({
@@ -177,8 +177,8 @@ describe('buildResumeInitialization', () => {
       type: 'tool_calls',
       toolCallGroupId: expect.any(String),
       toolCalls: [
-        { toolCallId: 'a', toolName: 'my_tool', reasoning: undefined },
-        { toolCallId: 'b', toolName: 'my_tool', reasoning: undefined },
+        { toolCallId: 'a', toolName: 'my_tool' },
+        { toolCallId: 'b', toolName: 'my_tool' },
       ],
     });
   });
@@ -345,7 +345,6 @@ describe('buildResumeInitialization', () => {
           toolCallId: 'c1',
           toolName: internalTools.executeDynamicTool,
           args: { tool_id: 'skill.tool', params: { q: 1 } },
-          reasoning: undefined,
         },
       ],
     });

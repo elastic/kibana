@@ -61,6 +61,7 @@
     "@kbn/core-http-browser-mocks",
     "@kbn/core-application-browser",
     "@kbn/security-solution-distribution-bar",
+    "@kbn/security-solution-navigation",
     "@kbn/test-jest-helpers",
     "@kbn/proposals-common",
     "@kbn/proposals-plugin",
@@ -80,6 +81,7 @@
     "@kbn/telemetry-plugin",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/core-test-helpers-kbn-server"
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/workflows-execution-engine"
   ]
 }

@@ -77,6 +77,50 @@ describe('shipped Continuous Threat Hunt Worker YAML and the reportWorkerOutcome
       });
     });
 
+    it('reports a retired Hunt report that packaging closed as benign', () => {
+      expect(
+        reportOnDevModeClient(
+          reportNamed(
+            reportStepsOf(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID),
+            'report_report_completed'
+          ),
+          {
+            inputs: {
+              hasConfirmedHit: false,
+              huntStatus: 'retired_incomplete',
+              investigationConversationId: '3f1c2b4a-5d6e-5f70-8a9b-0c1d2e3f4a5b',
+              tier2_invoked: true,
+            },
+            steps: {
+              decide_and_package: {
+                output: {
+                  coverage: { skipped: [], written: [{ kiId: 'ki-1' }, { kiId: 'ki-2' }] },
+                  dismiss: true,
+                  mintSuppression: 'none',
+                  proposals: [],
+                  status: 'packaged',
+                },
+              },
+            },
+            variables: {
+              dismiss_close_failed: false,
+              dispatch_failed_count: 0,
+              package_status: 'success',
+            },
+          },
+          SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID
+        )
+      ).toEqual({
+        eventType: 'alertzero_hunt_report_completed',
+        payload: expect.objectContaining({
+          closed_clean: true,
+          hunt_status: 'retired_incomplete',
+          package_status: 'success',
+          coverage_kis_written: 2,
+        }),
+      });
+    });
+
     it('reports a Hunt sweep with one partial and one failed report', () => {
       expect(
         reportOnDevModeClient(

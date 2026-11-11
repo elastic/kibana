@@ -268,6 +268,8 @@ export class AlertZeroPlugin
       isContextEngineEnabled: makeIsContextEngineEnabled(() => this.requireCoreStart()),
       getInternalEsClient: () => this.requireCoreStart().elasticsearch.client.asInternalUser,
       getTaskManager: () => this.requireStarted(this.taskManager, 'Task Manager'),
+      getWorkflowsManagement: () =>
+        this.requireStarted(this.workflowsManagementApi, 'Workflows management'),
       grouping: {
         getProposals: () => this.requireProposals(),
         getWorkflowsManagement: () => this.workflowsManagementApi,

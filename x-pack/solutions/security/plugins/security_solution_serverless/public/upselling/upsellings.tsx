@@ -17,6 +17,7 @@ import {
 } from '@kbn/security-solution-upselling/messages';
 import type {
   UpsellingMessageId,
+  UpsellingPageComponent,
   UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
 import React from 'react';
@@ -55,7 +56,12 @@ interface UpsellingsMessageConfig {
   id: UpsellingMessageId;
 }
 
-type UpsellingPages = Array<UpsellingsConfig & { pageName: SecurityPageName }>;
+type UpsellingPages = Array<
+  Omit<UpsellingsConfig, 'component'> & {
+    pageName: SecurityPageName;
+    component: UpsellingPageComponent;
+  }
+>;
 type UpsellingSections = Array<UpsellingsConfig & { id: UpsellingSectionId }>;
 type UpsellingMessages = UpsellingsMessageConfig[];
 
@@ -65,8 +71,9 @@ export const upsellingPages: UpsellingPages = [
   {
     pageName: SecurityPageName.entityAnalytics,
     pli: ProductFeatureKey.advancedInsights,
-    component: () => (
+    component: ({ appHeader }) => (
       <EntityAnalyticsUpsellingPageLazy
+        appHeader={appHeader}
         upgradeToLabel={entityAnalyticsProductType}
         upgradeMessage={i18n.UPGRADE_PRODUCT_MESSAGE(entityAnalyticsProductType)}
       />
@@ -87,12 +94,12 @@ export const upsellingPages: UpsellingPages = [
   {
     pageName: SecurityPageName.attacks,
     pli: ProductFeatureKey.attackDiscovery,
-    component: () => <AttacksUpsellingPageLazy />,
+    component: AttacksUpsellingPageLazy,
   },
   {
     pageName: SecurityPageName.siemMigrationsRules,
     pli: ProductFeatureKey.siemMigrations,
-    component: () => <SiemMigrationsTranslatedRulesUpsellPageLazy />,
+    component: SiemMigrationsTranslatedRulesUpsellPageLazy,
   },
 ];
 
