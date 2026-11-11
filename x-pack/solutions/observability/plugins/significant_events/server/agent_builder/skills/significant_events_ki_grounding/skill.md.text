@@ -45,7 +45,7 @@ has. Copy each name and its `type` from the sample result's `columns`, and drop 
 - is the field of a condition in `{scope}` or `{failure}` (check each name against both: `{scope}`
   pins it to one value, such as the service, so it would measure nothing).
 
-Rewrite the line after a `re-sample` or an `off_topic` `spread`.
+Rewrite the line after a `re-sample`.
 
 **`profile:` line.** For every rule that runs queries, write `profile: dimensions {state}, examples
 {state}, breakdown {state}`, each state `planned`, `sent`, `failed: reason`, `not sent:
@@ -246,11 +246,9 @@ invalid: the verdict is `not_checked`, not `inconclusive`.
 One sample per rule proves whether its failure is happening now. Apply `<query_rules>`, plus:
 
 - **Definitions.**
-  - `affected`: the failing count of the rule's latest `spread`. An `off_topic` rule's second `spread`
-    replaces its first, whose figure no longer applies.
-  - A rule has no `affected` when its `spread` failed or was never sent: an aggregate KI sends none,
-    and an `off_topic` rule with no isolating observed-error condition keeps its profile not
-    measured. Such a rule never has `affected` above 0. A `spread` of 0 with a sample
+  - `affected`: the failing count of the rule's `spread`.
+  - A rule has no `affected` when its `spread` failed or was never sent (an aggregate KI sends
+    none). Such a rule never has `affected` above 0. A `spread` of 0 with a sample
     that returns rows is not "no failure". A sample that returns 0 rows takes the empty-result path;
     `affected` does not explain it.
   - text field: the plain field that is the first argument of a top-level `AND` `MATCH_PHRASE` or
@@ -276,12 +274,12 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
 
   | Stage | Runs for | Shape and limits |
   |---|---|---|
-  | `spread` | every rule except an aggregate KI | the Profile step's `spread` on the KI's own `{failure}`, in its variant, over the Profile table's window; the rule's only `spread`, except the `off_topic` rule's second one (Definitions) |
+  | `spread` | every rule except an aggregate KI | the Profile step's `spread` on the KI's own `{failure}`, in its variant, over the Profile table's window; the rule's only `spread` |
   | `sample` | every rule | always `LIMIT 1`; an aggregate KI gets `LIMIT 2`; an authored KI limit of 3 or fewer rows stays instead of ours; `time_range.from` is the rule's `sample_from` (`<query_rules>` rule 3) |
   | `re-sample` | once, when the sample row does not show the rule's failure (healthy, or `off_topic`), or the rule has a text field and the sample result has no usable field for it (Definitions), or the `sample` failed with a verification or syntax error in what you added to the KI's query (the time filter, or the sort and limit tail), never one in the KI's own query | `LIMIT 3`, a new query rebuilt from the KI's query under `<query_rules>`, not a re-run; row-level KIs only. Never after an empty sample, a timeout or any other error, or an authored limit of 3 or less, and never just to get a text column that an authored projection omits |
   | `dimensions` | the rule's `affected` is above 0 and it has 2 or more candidates | one query over the candidates |
   | `examples` | the rule's `affected` is above 0, and has a usable text field | up to 5 message categories, one sampled message each |
-  | `trend`, `baseline` | every rule, except an `off_topic` rule with no isolating observed-error condition | |
+  | `trend`, `baseline` | every rule | |
   | `breakdown` | one query per kept field with `f` of 2 or more | up to 3 queries |
 
   After its `sample` a rule sends at most 7 queries (`dimensions`, `examples`, `trend`, `baseline`, up
@@ -346,11 +344,6 @@ second error otherwise: a `dimensions` whose error names a field it cannot use (
 ambiguous column) is sent once more without that field when 2 or more candidates remain; an
 `examples` whose error names CATEGORIZE, its options or an unknown function is sent once more as
 `STATS examples = SAMPLE(`{text}`, 3)`. A timeout or any other error is not retried.
-
-For an `off_topic` signal, `{failure}` measures the observed error, so use a condition that isolates it
-(an exact field value seen in its sample row, its quotes and backslashes escaped, skipped when longer
-than 64 characters or holding a newline or control character). With none, leave its profile
-not measured.
 
 Each profile runs as its `Good (…)` example below, in the variant its scope selects.
 
