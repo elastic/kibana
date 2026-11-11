@@ -2853,6 +2853,8 @@
       "@kbn/tracing-config/*": ["./src/platform/packages/shared/kbn-tracing-config/*"],
       "@kbn/tracing-utils": ["./src/platform/packages/shared/kbn-tracing-utils"],
       "@kbn/tracing-utils/*": ["./src/platform/packages/shared/kbn-tracing-utils/*"],
+      "@kbn/trailblazer-plugin": ["./examples/trailblazer"],
+      "@kbn/trailblazer-plugin/*": ["./examples/trailblazer/*"],
       "@kbn/transform-plugin": ["./x-pack/platform/plugins/private/transform"],
       "@kbn/transform-plugin/*": ["./x-pack/platform/plugins/private/transform/*"],
       "@kbn/translations-plugin": ["./x-pack/platform/plugins/private/translations"],

@@ -246,6 +246,7 @@ packages:
   - 'examples/sidebar_examples'
   - 'examples/sse_example'
   - 'examples/state_containers_examples'
+  - 'examples/trailblazer'
   - 'examples/unified_doc_viewer'
   - 'examples/unified_field_list_examples'
   - 'examples/unified_tabs_examples'

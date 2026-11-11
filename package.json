@@ -1331,6 +1331,7 @@
     "@kbn/tracing": "workspace:*",
     "@kbn/tracing-config": "workspace:*",
     "@kbn/tracing-utils": "workspace:*",
+    "@kbn/trailblazer-plugin": "workspace:*",
     "@kbn/transform-plugin": "workspace:*",
     "@kbn/translations-plugin": "workspace:*",
     "@kbn/transpose-utils": "workspace:*",
