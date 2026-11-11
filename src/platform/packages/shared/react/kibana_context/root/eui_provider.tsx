@@ -164,8 +164,10 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         scrollableInline: true,
         tableLayout: 'auto',
         responsiveBreakpoint: false,
-        // POC: project chrome's frame is the recessed glass surface, so tables are transparent by default.
-        hasBackground: chromeStyle === 'classic',
+      },
+      EuiBasicTable: {
+        // POC: project chrome tables get the panelled treatment by default.
+        panelled: chromeStyle === 'project',
       },
     }),
     [chromeStyle]
