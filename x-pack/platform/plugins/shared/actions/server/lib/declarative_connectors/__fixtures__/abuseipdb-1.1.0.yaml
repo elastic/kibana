@@ -75,7 +75,7 @@ actions:
         ipAddress: "{{ input.ipAddress }}"
         maxAgeInDays: "{{ input.maxAgeInDays }}"
         verbose: "{{ input.verbose }}"
-        someOtherParam: "{{ input.someOtherParam }}"
+        someOtherParam: "{{ input.someOtherParam? }}"
   reportIp:
     description: Report an IPv4 address with one or more abuse categories.
     isTool: true

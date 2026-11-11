@@ -24,8 +24,8 @@ export class TemplateRenderError extends Error {
   }
 }
 
-const EXACT_TEMPLATE = /^\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}$/;
-const EMBEDDED_TEMPLATE = /\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g;
+const EXACT_TEMPLATE = /^\{\{\s*([a-zA-Z0-9_.]+)(\?)?\s*\}\}$/;
+const EMBEDDED_TEMPLATE = /\{\{\s*([a-zA-Z0-9_.]+)(\?)?\s*\}\}/g;
 
 const resolveTemplatePath = (path: string, context: TemplateContext): unknown => {
   const [root, ...segments] = path.split('.');
@@ -47,10 +47,28 @@ const resolveTemplatePath = (path: string, context: TemplateContext): unknown =>
   return current;
 };
 
-const renderString = (value: string, context: TemplateContext): unknown => {
+const renderString = (
+  value: string,
+  context: TemplateContext,
+  allowOptionalObjectValue: boolean
+): unknown => {
   const exactMatch = value.match(EXACT_TEMPLATE);
   if (exactMatch) {
-    return resolveTemplatePath(exactMatch[1], context);
+    const resolved = resolveTemplatePath(exactMatch[1], context);
+    if (resolved === undefined && (exactMatch[2] !== '?' || !allowOptionalObjectValue)) {
+      if (exactMatch[2] === '?') {
+        throw new TemplateRenderError(
+          'Optional templates are only supported as exact object values.'
+        );
+      }
+      throw new TemplateRenderError(
+        `Declarative template "${exactMatch[1]}" did not resolve to a value.`
+      );
+    }
+    return resolved;
+  }
+  if ([...value.matchAll(EMBEDDED_TEMPLATE)].some((match) => match[2] === '?')) {
+    throw new TemplateRenderError('Optional templates are only supported as exact object values.');
   }
   return value.replace(EMBEDDED_TEMPLATE, (_match, path: string) => {
     const resolved = resolveTemplatePath(path, context);
@@ -62,12 +80,11 @@ const renderString = (value: string, context: TemplateContext): unknown => {
 };
 
 /** Encodes interpolated URL values so they cannot change path or query structure. */
-export const renderUrlTemplate = (
-  value: string,
-  context: TemplateContext,
-  allowBaseUrlPrefix = false
-): string =>
-  value.replace(EMBEDDED_TEMPLATE, (_match, path: string, offset: number) => {
+export const renderUrlTemplate = (value: string, context: TemplateContext): string =>
+  value.replace(EMBEDDED_TEMPLATE, (_match, path: string, optional: string, offset: number) => {
+    if (optional === '?') {
+      throw new TemplateRenderError('Optional templates are not supported in URLs.');
+    }
     const resolved = resolveTemplatePath(path, context);
     if (resolved === undefined || resolved === null) {
       throw new TemplateRenderError(`Declarative template "${path}" did not resolve to a value.`);
@@ -83,24 +100,27 @@ export const renderUrlTemplate = (
     if (rendered === '.' || rendered === '..') {
       throw new TemplateRenderError(`Declarative URL template "${path}" is a dot path segment.`);
     }
-    return allowBaseUrlPrefix && offset === 0 && path === 'config.baseUrl'
-      ? rendered
-      : encodeURIComponent(rendered);
+    return encodeURIComponent(rendered);
   });
 
 /** Renders `{{ input.x }}` and `{{ config.x }}` templates. Exact templates keep the raw value. */
-export const renderTemplateValue = (value: unknown, context: TemplateContext): unknown => {
+export const renderTemplateValue = (
+  value: unknown,
+  context: TemplateContext,
+  allowOptionalObjectValue = false
+): unknown => {
   if (typeof value === 'string') {
-    return renderString(value, context);
+    return renderString(value, context, allowOptionalObjectValue);
   }
   if (Array.isArray(value)) {
     return value.map((item) => renderTemplateValue(item, context));
   }
   if (value !== null && typeof value === 'object') {
     return Object.fromEntries(
-      Object.entries(value)
-        .map(([key, nested]) => [key, renderTemplateValue(nested, context)] as const)
-        .filter(([, nested]) => nested !== undefined)
+      Object.entries(value).flatMap(([key, nested]) => {
+        const rendered = renderTemplateValue(nested, context, true);
+        return rendered === undefined ? [] : [[key, rendered]];
+      })
     );
   }
   return value;

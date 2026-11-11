@@ -189,7 +189,7 @@ describe('executeDeclarativeRequest', () => {
         input: {},
         config: {},
       })
-    ).rejects.toThrow(TemplateRenderError);
+    ).rejects.toThrow(/cannot control the URL origin/);
     await expect(
       executeDeclarativeRequest({
         client,
@@ -206,8 +206,79 @@ describe('executeDeclarativeRequest', () => {
         config: {},
       })
     ).rejects.toThrow(/not valid/);
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', url: 'https://{{ input.host }}/check' },
+        input: { host: 'attacker.example' },
+        config: {},
+      })
+    ).rejects.toThrow(/cannot control the URL origin/);
+    for (const url of [
+      'https://api.{{ input.host }}.example/check',
+      'https://api.example@{{ input.host }}/check',
+      'https://{{ input.host }}.example@api.example/check',
+    ]) {
+      await expect(
+        executeDeclarativeRequest({
+          client,
+          request: { method: 'GET', url },
+          input: { host: 'attacker.example' },
+          config: {},
+        })
+      ).rejects.toThrow(/cannot control the URL origin/);
+    }
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'GET', baseUrl: '{{ input.host }}', path: '/check' },
+        input: { host: 'https://attacker.example' },
+        config: {},
+      })
+    ).rejects.toThrow(/exact config.baseUrl/);
 
     expect(requests).toHaveLength(0);
+  });
+
+  it('fails on missing exact templates and omits only explicitly optional object values', async () => {
+    const { client } = createRecordingAxiosClient({});
+    const requestSpy = jest.spyOn(client, 'request');
+
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: {
+          method: 'POST',
+          url: 'https://api.example/items',
+          query: { typo: '{{ input.typo }}' },
+        },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(/input.typo.*did not resolve/);
+    expect(requestSpy).not.toHaveBeenCalled();
+
+    await executeDeclarativeRequest({
+      client,
+      request: {
+        method: 'POST',
+        url: 'https://api.example/items',
+        query: { optional: '{{ input.optional? }}', present: '{{ input.present }}' },
+        headers: { 'X-Optional': '{{ input.optional? }}' },
+        body: { optional: '{{ input.optional? }}', present: '{{ input.present }}' },
+      },
+      input: { present: 'yes' },
+      config: {},
+    });
+
+    expect(requestSpy).toHaveBeenCalledTimes(1);
+    expect(requestSpy.mock.calls[0][0]).toEqual(
+      expect.objectContaining({
+        params: { present: 'yes' },
+        headers: expect.not.objectContaining({ 'X-Optional': expect.anything() }),
+        data: { present: 'yes' },
+      })
+    );
   });
 
   it('encodes URL template values as one path segment', async () => {
@@ -231,11 +302,53 @@ describe('executeDeclarativeRequest', () => {
       input,
       config: {},
     });
+    await executeDeclarativeRequest({
+      client,
+      request: { method: 'GET', url: '{{ config.baseUrl }}/items/{{ input.id }}' },
+      input,
+      config: { baseUrl: 'https://api.example' },
+    });
 
-    expect(requestSpy).toHaveBeenCalledTimes(2);
+    expect(requestSpy).toHaveBeenCalledTimes(3);
     for (const [request] of requestSpy.mock.calls) {
       expect(request.url).toBe('https://api.example/items/a%2Fb%3Fnext%3Dyes%23section');
     }
+  });
+
+  it('rejects optional templates embedded in strings', async () => {
+    const { client, requests } = createRecordingAxiosClient({});
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: {
+          method: 'POST',
+          url: 'https://api.example/items',
+          body: { label: 'prefix {{ input.label? }}' },
+        },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(/only supported as exact object values/);
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: { method: 'POST', url: 'https://api.example/items', body: '{{ input.body? }}' },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(/only supported as exact object values/);
+    await expect(
+      executeDeclarativeRequest({
+        client,
+        request: {
+          method: 'GET',
+          url: 'https://api.example/items/{{ input.id? }}',
+        },
+        input: {},
+        config: {},
+      })
+    ).rejects.toThrow(/Optional templates are not supported in URLs/);
+    expect(requests).toHaveLength(0);
   });
 
   it('rejects dot path segments before sending a request', async () => {

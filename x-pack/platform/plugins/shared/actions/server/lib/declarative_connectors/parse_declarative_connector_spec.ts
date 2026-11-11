@@ -18,7 +18,7 @@ import type {
 } from './types';
 import { declarativeFieldMetaSchema, DeclarativeConnectorSpecError } from './types';
 
-const TEMPLATE_PATTERN = /\{\{\s*([a-zA-Z0-9_.]+)\s*\}\}/g;
+const TEMPLATE_PATTERN = /\{\{\s*([a-zA-Z0-9_.]+)\??\s*\}\}/g;
 const UNSAFE_PATH_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor']);
 const TEMPLATE_ROOTS = new Set<DeclarativeTemplateRoot>(['input', 'config']);
 
