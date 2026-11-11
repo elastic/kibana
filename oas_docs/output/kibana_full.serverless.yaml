@@ -2455,6 +2455,7 @@ paths:
                 agentNotFoundResponseExample:
                   value:
                     attributes:
+                      code: agentNotFound
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
                     error: Not Found
                     message: Agent custom-agent-id not found
@@ -2584,6 +2585,7 @@ paths:
                   description: The built-in Elastic default agent (`elastic-ai-agent`) cannot have custom access control — its access is governed by the platform, not per-agent grants.
                   value:
                     attributes:
+                      code: badRequest
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
                     error: Bad Request
                     message: The default agent (elastic-ai-agent) does not support custom access controls.
@@ -2602,6 +2604,7 @@ paths:
                 agentNotFoundResponseExample:
                   value:
                     attributes:
+                      code: agentNotFound
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
                     error: Not Found
                     message: Agent custom-agent-id not found
@@ -3308,6 +3311,8 @@ paths:
                 duplicateEntryResponseExample:
                   description: Two entries name the same user id.
                   value:
+                    attributes:
+                      code: badRequest
                     error: Bad Request
                     message: Duplicate ACL entry for user "u_kd2Wm6QCf9nBBqGGyfxBcQxIrgLLLLxbPHOTNHOTgWM_0"
                     statusCode: 400
@@ -3331,6 +3336,7 @@ paths:
                 conversationNotFoundResponseExample:
                   value:
                     attributes:
+                      code: conversationNotFound
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
                     error: Not Found
                     message: Conversation my-conversation-id not found
@@ -23385,6 +23391,7 @@ paths:
                   description: The `conversation_id` is unknown, or the `agent_id` is unknown or not usable by the caller
                   value:
                     attributes:
+                      code: conversationNotFound
                       trace_id: 8d4f2a3b-1c5e-4a9b-9f0d-2e6c1a3d4f5e
                     error: Not Found
                     message: Conversation 696ccd6d-4bff-4b26-a62e-522ccf2dcd16 not found
