@@ -18,8 +18,6 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.task_manager.capacity=auto',
-      // Pinned so the persisted-estimate assertion does not depend on the default.
-      '--xpack.task_manager.adaptive_capacity.persist_estimates=true',
       // A short poll so the recurring task runs within the test budget.
       '--xpack.task_manager.poll_interval=1000',
     ],
