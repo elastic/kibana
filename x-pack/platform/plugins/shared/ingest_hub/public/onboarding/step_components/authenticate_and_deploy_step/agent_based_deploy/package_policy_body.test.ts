@@ -219,6 +219,31 @@ describe('buildGroupPackagePolicy — output', () => {
   });
 });
 
+describe('buildGroupPackagePolicy — reroute permissions', () => {
+  const buildWithPermissions = (permissions?: string[]) =>
+    buildGroupPackagePolicy(group, pkgInfo, {
+      namespace: '',
+      globalRegion: 'us-east-1',
+      storedServiceVars: withInputs(['aws-s3']),
+      authenticateAndDeployStep: {},
+      pkgVersion: '1.0.0',
+      policySettings: { additional_datastreams_permissions: permissions },
+    } as BuildPackagePolicyOpts);
+
+  it('sends the chosen permissions as a top-level field', async () => {
+    const body = await buildWithPermissions([' logs-a-default ', 'logs-a-default', 'metrics-b-x']);
+    expect(body.additional_datastreams_permissions).toEqual(['logs-a-default', 'metrics-b-x']);
+    expect(body.vars?.additional_datastreams_permissions).toBeUndefined();
+  });
+
+  it('leaves the field out when none are chosen', async () => {
+    expect(await buildWithPermissions(undefined)).not.toHaveProperty(
+      'additional_datastreams_permissions'
+    );
+    expect(await buildWithPermissions([])).not.toHaveProperty('additional_datastreams_permissions');
+  });
+});
+
 describe('buildGroupPackagePolicy — proxy URL', () => {
   const buildWithProxy = (proxyUrl: string | undefined, declared = true) =>
     buildGroupPackagePolicy(

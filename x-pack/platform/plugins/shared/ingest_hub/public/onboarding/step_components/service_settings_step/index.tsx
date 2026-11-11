@@ -66,6 +66,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     policySettings,
     isProxyUrlSupported,
     proxyUrlError,
+    isReroutePermissionsSupported,
+    reroutePermissionsError,
     setPolicySetting,
     bareNamePackage,
     instances,
@@ -132,6 +134,11 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
 
   const setProxyUrl = useCallback(
     (proxyUrl: string) => setPolicySetting('proxy_url', proxyUrl),
+    [setPolicySetting]
+  );
+
+  const setReroutePermissions = useCallback(
+    (permissions: string[]) => setPolicySetting('additional_datastreams_permissions', permissions),
     [setPolicySetting]
   );
 
@@ -204,7 +211,13 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         })
       );
     }
-    if (integrationNameError || descriptionError || namespaceError || proxyUrlError) {
+    if (
+      integrationNameError ||
+      descriptionError ||
+      namespaceError ||
+      proxyUrlError ||
+      reroutePermissionsError
+    ) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.integrationSettings', {
           defaultMessage: 'Fix the integration settings',
@@ -230,6 +243,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     descriptionError,
     namespaceError,
     proxyUrlError,
+    reroutePermissionsError,
     incompleteInstances,
   ]);
 
@@ -508,6 +522,15 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                 value: policySettings.proxy_url ?? '',
                 onChange: setProxyUrl,
                 error: proxyUrlError,
+              }
+            : undefined
+        }
+        reroutePermissions={
+          isReroutePermissionsSupported
+            ? {
+                value: policySettings.additional_datastreams_permissions ?? [],
+                onChange: setReroutePermissions,
+                error: reroutePermissionsError,
               }
             : undefined
         }

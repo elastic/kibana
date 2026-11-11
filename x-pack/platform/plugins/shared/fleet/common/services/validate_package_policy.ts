@@ -22,7 +22,11 @@ import type {
   RegistryVarGroup,
 } from '../types';
 
-import { DATASET_VAR_NAME, DATA_STREAM_TYPE_VAR_NAME } from '../constants';
+import {
+  DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
+  VALIDATE_DATASTREAMS_PERMISSION_REGEX,
+} from '../constants';
 
 import {
   isValidNamespace,
@@ -294,8 +298,6 @@ const isVarRequiredByVarGroup = (
 
   return false;
 };
-
-const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;
 
 /*
  * Returns validation information for a given package policy and package info

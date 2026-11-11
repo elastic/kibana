@@ -155,22 +155,44 @@ export const CloudOnboardingDeploymentSchemaV6 = CloudOnboardingDeploymentSchema
 // so no mapping change is needed.
 const POLICY_SETTINGS_MAX_KEYS = 20;
 
+const validatePolicySettingsKeyCount = (settings: Record<string, unknown>) =>
+  Object.keys(settings).length > POLICY_SETTINGS_MAX_KEYS
+    ? `must not have more than ${POLICY_SETTINGS_MAX_KEYS} settings`
+    : undefined;
+
 // Bounded so the open record cannot store an arbitrary payload: package policy settings are short
-// strings, or null for one cleared back to its Fleet default.
-export const PolicySettingsRecordSchema = (meta?: { description: string; availability: object }) =>
+// strings, or null for one cleared back to its Fleet default. This is the V7 shape, kept as it was
+// released: V7 must not accept more than it did.
+const PolicySettingsRecordSchemaV7 = () =>
   schema.recordOf(
     schema.string({ maxLength: 256 }),
     schema.nullable(schema.string({ maxLength: 1024 })),
+    { validate: validatePolicySettingsKeyCount }
+  );
+
+export const CloudOnboardingDeploymentSchemaV7 = CloudOnboardingDeploymentSchemaV6.extends({
+  policySettings: schema.maybe(PolicySettingsRecordSchemaV7()),
+});
+
+// ── V8: policySettings values may be string arrays ───────────────────────────
+// A setting can also be a list of short strings (e.g. additional_datastreams_permissions). Same
+// bounds as V7 otherwise. Not in mappings.properties (dynamic: false), so no mapping change.
+export const PolicySettingsRecordSchema = (meta?: { description: string; availability: object }) =>
+  schema.recordOf(
+    schema.string({ maxLength: 256 }),
+    schema.nullable(
+      schema.oneOf([
+        schema.string({ maxLength: 1024 }),
+        schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 100 }),
+      ])
+    ),
     {
-      validate: (settings) =>
-        Object.keys(settings).length > POLICY_SETTINGS_MAX_KEYS
-          ? `must not have more than ${POLICY_SETTINGS_MAX_KEYS} settings`
-          : undefined,
+      validate: validatePolicySettingsKeyCount,
       ...(meta ? { meta } : {}),
     }
   );
 
-export const CloudOnboardingDeploymentSchemaV7 = CloudOnboardingDeploymentSchemaV6.extends({
+export const CloudOnboardingDeploymentSchemaV8 = CloudOnboardingDeploymentSchemaV7.extends({
   policySettings: schema.maybe(PolicySettingsRecordSchema()),
 });
 

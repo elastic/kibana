@@ -12,6 +12,8 @@ import {
   getDescriptionError,
   getIntegrationNameError,
   getProxyUrlError,
+  getReroutePermissionsError,
+  MAX_REROUTE_PERMISSIONS,
   MAX_PROXY_URL_LENGTH,
   supportsIntegrationSettings,
 } from './integration_settings';
@@ -98,5 +100,35 @@ describe('getProxyUrlError', () => {
   it('rejects a value longer than Fleet stores', () => {
     const long = `http://${'a'.repeat(MAX_PROXY_URL_LENGTH)}`;
     expect(getProxyUrlError(long)).toBeDefined();
+  });
+});
+
+describe('getReroutePermissionsError', () => {
+  it('accepts none, or names that start with a data stream type', () => {
+    expect(getReroutePermissionsError([])).toBeUndefined();
+    expect(
+      getReroutePermissionsError([
+        'logs-a-default',
+        'metrics-a-default',
+        'traces-a-default',
+        'synthetics-a-default',
+        'profiles-a-default',
+      ])
+    ).toBeUndefined();
+  });
+
+  it('ignores blank entries', () => {
+    expect(getReroutePermissionsError(['', '  '])).toBeUndefined();
+  });
+
+  it('rejects a name Fleet would reject, and names it', () => {
+    expect(getReroutePermissionsError(['logs-ok', 'foo-bar'])).toContain('foo-bar');
+    expect(getReroutePermissionsError(['logs-'])).toBeDefined();
+  });
+
+  it('rejects an entry or a list longer than Fleet accepts', () => {
+    expect(getReroutePermissionsError([`logs-${'a'.repeat(256)}`])).toBeDefined();
+    const many = Array.from({ length: MAX_REROUTE_PERMISSIONS + 1 }, (_, i) => `logs-a-${i}`);
+    expect(getReroutePermissionsError(many)).toBeDefined();
   });
 });

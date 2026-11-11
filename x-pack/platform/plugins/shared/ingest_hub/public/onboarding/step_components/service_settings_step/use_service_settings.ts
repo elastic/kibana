@@ -43,6 +43,7 @@ import {
   getDescriptionError,
   getIntegrationNameError,
   getProxyUrlError,
+  getReroutePermissionsError,
   supportsIntegrationSettings,
 } from './integration_settings';
 
@@ -598,6 +599,18 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const proxyUrl = policySettings.proxy_url ?? '';
   const proxyUrlError = isProxyUrlSupported ? getProxyUrlError(proxyUrl) : undefined;
 
+  // The reroute permissions apply to every policy of the deployment methods that send them, so
+  // the field is shown for any selection. Elsewhere a value left over from another method must not
+  // block Continue.
+  const isReroutePermissionsSupported = supportsPolicySetting(
+    'additional_datastreams_permissions',
+    deploymentMethod
+  );
+  const reroutePermissions = policySettings.additional_datastreams_permissions ?? [];
+  const reroutePermissionsError = isReroutePermissionsSupported
+    ? getReroutePermissionsError(reroutePermissions)
+    : undefined;
+
   const isReady = useMemo(
     () =>
       !!globalRegion.trim() &&
@@ -605,7 +618,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       !integrationNameError &&
       !descriptionError &&
       !namespaceError &&
-      !proxyUrlError,
+      !proxyUrlError &&
+      !reroutePermissionsError,
     [
       globalRegion,
       incompleteInstances,
@@ -613,6 +627,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       descriptionError,
       namespaceError,
       proxyUrlError,
+      reroutePermissionsError,
     ]
   );
 
@@ -657,6 +672,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     setPolicySetting,
     isProxyUrlSupported,
     proxyUrlError,
+    isReroutePermissionsSupported,
+    reroutePermissionsError,
     bareNamePackage,
     instances,
     filteredInstances,

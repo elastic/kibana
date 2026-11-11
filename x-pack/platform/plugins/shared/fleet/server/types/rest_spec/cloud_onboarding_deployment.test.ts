@@ -10,6 +10,7 @@ import {
   CloudOnboardingDeploymentSchemaV5,
   CloudOnboardingDeploymentSchemaV6,
   CloudOnboardingDeploymentSchemaV7,
+  CloudOnboardingDeploymentSchemaV8,
 } from '../models';
 
 import {
@@ -216,6 +217,32 @@ describe('saved object model versions', () => {
     ).not.toThrow();
   });
 
+  it('V7 keeps rejecting a list setting, which only V8 accepts', () => {
+    const policySettings = { additional_datastreams_permissions: ['logs-a-default'] };
+    expect(() =>
+      CloudOnboardingDeploymentSchemaV7.validate({ ...record, policySettings })
+    ).toThrow();
+    expect(CloudOnboardingDeploymentSchemaV8.validate({ ...record, policySettings })).toEqual(
+      expect.objectContaining({ policySettings })
+    );
+  });
+
+  it('V8 rejects lists that are too long or hold something other than short strings', () => {
+    for (const value of [
+      Array.from({ length: 101 }, (_, i) => `logs-a-${i}`),
+      ['x'.repeat(257)],
+      [1],
+      [['nested']],
+    ]) {
+      expect(() =>
+        CloudOnboardingDeploymentSchemaV8.validate({
+          ...record,
+          policySettings: { additional_datastreams_permissions: value },
+        })
+      ).toThrow();
+    }
+  });
+
   it('V6 does not know the package policy settings, which is why they need their own model version', () => {
     expect(() =>
       CloudOnboardingDeploymentSchemaV6.validate({
@@ -242,7 +269,10 @@ describe('policySettings in requests', () => {
   });
 
   it('accepts package policy settings on create and update', () => {
-    const policySettings = { output_id: 'logstash-1' };
+    const policySettings = {
+      output_id: 'logstash-1',
+      additional_datastreams_permissions: ['logs-a-default'],
+    };
     expect(
       CreateCloudOnboardingDeploymentRequestSchema.body.validate(createBody({ policySettings }))
     ).toEqual(expect.objectContaining({ policySettings }));

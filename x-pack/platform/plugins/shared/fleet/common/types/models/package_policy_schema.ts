@@ -8,7 +8,10 @@
 import { schema } from '@kbn/config-schema';
 
 import { isValidNamespace, validateNoPathTraversalIdSchema } from '../../services';
-import { MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY } from '../../constants/package_policy';
+import {
+  MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY,
+  VALIDATE_DATASTREAMS_PERMISSION_REGEX,
+} from '../../constants/package_policy';
 
 const PACKAGE_POLICY_ID_MAX_LENGTH = 255;
 const PACKAGE_POLICY_NAME_MAX_LENGTH = 255;
@@ -641,8 +644,6 @@ export const SimplifiedPackagePolicyInputRecordSchema = schema.recordOf(
 export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
   SimplifiedPackagePolicyInputRecordSchema
 );
-
-const VALIDATE_DATASTREAMS_PERMISSION_REGEX = /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;
 
 function validateAdditionalDatastreamsPermissions(values: string[]) {
   for (const val of values) {

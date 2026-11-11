@@ -6,7 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '@kbn/fleet-plugin/common';
+import {
+  CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
+  VALIDATE_DATASTREAMS_PERMISSION_REGEX,
+} from '@kbn/fleet-plugin/common';
 
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
 
@@ -56,6 +59,39 @@ export const getDescriptionError = (description: string): string | undefined => 
     return i18n.translate('xpack.ingestHub.integrationSettings.description.tooLongError', {
       defaultMessage: 'The description must be {max} characters or less.',
       values: { max: MAX_DESCRIPTION_LENGTH },
+    });
+  }
+};
+
+/** The limits of Fleet's package policy `additional_datastreams_permissions`. */
+export const MAX_REROUTE_PERMISSIONS = 100;
+export const MAX_REROUTE_PERMISSION_LENGTH = 256;
+
+/**
+ * The reroute permissions are optional. Each entry must be a data stream name Fleet accepts, which
+ * starts with a data stream type (the same rule as Fleet's Add integration and its API).
+ */
+export const getReroutePermissionsError = (permissions: string[]): string | undefined => {
+  const entries = [...new Set(permissions.map((entry) => entry.trim()).filter(Boolean))];
+  if (entries.length > MAX_REROUTE_PERMISSIONS) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.reroutePermissions.tooManyError', {
+      defaultMessage: 'Add at most {max} permissions.',
+      values: { max: MAX_REROUTE_PERMISSIONS },
+    });
+  }
+  const tooLong = entries.find((entry) => entry.length > MAX_REROUTE_PERMISSION_LENGTH);
+  if (tooLong !== undefined) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.reroutePermissions.tooLongError', {
+      defaultMessage: 'Each permission must be {max} characters or less.',
+      values: { max: MAX_REROUTE_PERMISSION_LENGTH },
+    });
+  }
+  const invalid = entries.find((entry) => !VALIDATE_DATASTREAMS_PERMISSION_REGEX.test(entry));
+  if (invalid !== undefined) {
+    return i18n.translate('xpack.ingestHub.integrationSettings.reroutePermissions.invalidError', {
+      defaultMessage:
+        '{entry} is not a valid permission. It must start with logs-, metrics-, traces-, synthetics- or profiles-.',
+      values: { entry: invalid },
     });
   }
 };

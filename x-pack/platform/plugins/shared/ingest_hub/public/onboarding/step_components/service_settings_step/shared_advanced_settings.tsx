@@ -12,6 +12,10 @@ import { i18n } from '@kbn/i18n';
 import { InstanceNamespaceField } from './instance_namespace_field';
 import { OutputField, type OutputFieldProps } from './output_field';
 import { ProxyUrlField, type ProxyUrlFieldProps } from './proxy_url_field';
+import {
+  ReroutePermissionsField,
+  type ReroutePermissionsFieldProps,
+} from './reroute_permissions_field';
 
 interface SharedAdvancedSettingsProps {
   namespace: string;
@@ -26,6 +30,8 @@ interface SharedAdvancedSettingsProps {
   output?: OutputFieldProps;
   /** The proxy URL field. It applies to agent-based and managed integration deploys, not ECF. */
   proxyUrl?: ProxyUrlFieldProps;
+  /** The reroute permissions field. It applies to agent-based and managed integration deploys. */
+  reroutePermissions?: ReroutePermissionsFieldProps;
 }
 
 /**
@@ -40,6 +46,7 @@ export function SharedAdvancedSettings({
   hasServicesIgnoringNamespace = false,
   output,
   proxyUrl,
+  reroutePermissions,
 }: SharedAdvancedSettingsProps) {
   const notes = [
     hasDeployedServices &&
@@ -79,6 +86,11 @@ export function SharedAdvancedSettings({
       {proxyUrl && (
         <EuiFlexItem>
           <ProxyUrlField {...proxyUrl} />
+        </EuiFlexItem>
+      )}
+      {reroutePermissions && (
+        <EuiFlexItem>
+          <ReroutePermissionsField {...reroutePermissions} />
         </EuiFlexItem>
       )}
     </EuiFlexGrid>

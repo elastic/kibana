@@ -19,3 +19,7 @@ export const inputsFormat = {
 export const LICENCE_FOR_MULTIPLE_AGENT_POLICIES = 'enterprise';
 
 export const MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY = 1000;
+
+/** A valid entry of a package policy's `additional_datastreams_permissions` (reroute processor). */
+export const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
+  /^(logs|metrics|traces|synthetics|profiles)-(.+)$/;

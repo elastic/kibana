@@ -177,4 +177,75 @@ describe('policy settings', () => {
       expect(detectPolicySettingsDrift({ proxy_url: 'http://p:1' }, {}, 'ecf')).toBe(false);
     });
   });
+
+  describe('additional_datastreams_permissions (a list)', () => {
+    const key = 'additional_datastreams_permissions';
+
+    it('applies to agent-based and managed integration deploys, not ECF', () => {
+      expect(supportsPolicySetting(key, 'agent_based')).toBe(true);
+      expect(supportsPolicySetting(key, 'managed_integration')).toBe(true);
+      expect(supportsPolicySetting(key, 'ecf')).toBe(false);
+    });
+
+    it('is a top-level package policy field, sent to a new policy of both methods', () => {
+      const settings = { [key]: ['logs-a-default', 'metrics-b-default'] };
+      expect(getPolicySettings(settings, 'agent_based')).toEqual(settings);
+      expect(getPolicySettings(settings, 'managed_integration')).toEqual(settings);
+      expect(getPolicyVarSettings(settings, 'agent_based')).toEqual({});
+      expect(getPolicySettings(settings, 'ecf')).toEqual({});
+    });
+
+    it('trims entries and drops blank and repeated ones', () => {
+      expect(
+        compactPolicySettings({ [key]: [' logs-a-default ', '', 'logs-a-default', '  '] })
+      ).toEqual({ [key]: ['logs-a-default'] });
+    });
+
+    it('treats an empty list as empty', () => {
+      expect(compactPolicySettings({ [key]: [] })).toEqual({});
+      expect(getPolicySettings({ [key]: [] }, 'agent_based')).toEqual({});
+    });
+
+    it('leaves out a value of the wrong type read back from the saved object', () => {
+      expect(getPolicySettings({ [key]: 'logs-a-default' }, 'agent_based')).toEqual({});
+      expect(getPolicySettings({ [key]: ['logs-a-default', 1] }, 'agent_based')).toEqual({});
+    });
+
+    it('clears the list on update with an empty list, which both Fleet APIs accept', () => {
+      expect(getPolicySettingsUpdate({ [key]: [] }, 'agent_based')).toEqual({ [key]: [] });
+      expect(getPolicySettingsUpdate({ [key]: [] }, 'managed_integration')).toEqual({ [key]: [] });
+    });
+
+    it('sends the chosen list on update, and leaves it alone when never set', () => {
+      expect(getPolicySettingsUpdate({ [key]: [' logs-a-default '] }, 'agent_based')).toEqual({
+        [key]: ['logs-a-default'],
+      });
+      expect(getPolicySettingsUpdate({}, 'managed_integration')).toEqual({});
+    });
+
+    it('marks the deployment dirty when only the list changed', () => {
+      expect(detectPolicySettingsDrift({ [key]: ['logs-a-default'] }, {}, 'agent_based')).toBe(
+        true
+      );
+      expect(
+        detectPolicySettingsDrift(
+          { [key]: [] },
+          { [key]: ['logs-a-default'] },
+          'managed_integration'
+        )
+      ).toBe(true);
+    });
+
+    it('is not dirty for the same list entered differently, or an empty list and none', () => {
+      expect(
+        detectPolicySettingsDrift(
+          { [key]: [' logs-a-default ', 'logs-a-default'] },
+          { [key]: ['logs-a-default'] },
+          'agent_based'
+        )
+      ).toBe(false);
+      expect(detectPolicySettingsDrift({ [key]: [] }, {}, 'agent_based')).toBe(false);
+      expect(detectPolicySettingsDrift({ [key]: ['logs-a-default'] }, {}, 'ecf')).toBe(false);
+    });
+  });
 });
