@@ -22,6 +22,7 @@ export const StyledDescriptionList = memo(styled(EuiDescriptionList)`
     overflow-wrap: break-word;
   }
 `);
+StyledDescriptionList.displayName = 'StyledDescriptionList';
 
 /**
  * Used by the nodeDetail view for the label of the node.

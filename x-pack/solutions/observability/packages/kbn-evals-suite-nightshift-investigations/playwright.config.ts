@@ -12,15 +12,25 @@ import { selectStoredDatasets } from './src/datasets/stored_datasets';
 
 // The suite's scout hook exports SANDBOX_API_KEY together with SANDBOX_KIBANA_CONFIG, which is what
 // makes the `evals_nightshift_investigations` config set start the investigation server.
-const { runInvestigations, runOrca, runConnectorProbes, runWikiOptimize, storedDatasetIds } =
-  resolveEvalSelection();
+const {
+  runInvestigations,
+  runOrca,
+  runConnectorProbes,
+  runWikiOptimize,
+  runReinforcement,
+  storedDatasetIds,
+} = resolveEvalSelection();
 const runStoredInvestigations = selectStoredDatasets('investigation', storedDatasetIds).length > 0;
 const runStoredConnectorProbes =
   selectStoredDatasets('connector-probe', storedDatasetIds).length > 0;
 
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
-  timeout: runInvestigations || runStoredInvestigations ? 45 * 60_000 : 10 * 60_000,
+  timeout: runReinforcement
+    ? 70 * 60_000
+    : runInvestigations || runStoredInvestigations
+    ? 45 * 60_000
+    : 10 * 60_000,
   concurrency: 16,
   testIgnore: [
     ...(runInvestigations ? [] : ['**/investigation/investigation.spec.ts']),
@@ -29,5 +39,6 @@ export default createPlaywrightEvalsConfig({
     ...(runConnectorProbes ? [] : ['**/connector_probe/connector_probe.spec.ts']),
     ...(runStoredConnectorProbes ? [] : ['**/connector_probe/stored.spec.ts']),
     ...(runWikiOptimize ? [] : ['**/wiki_optimize/**']),
+    ...(runReinforcement ? [] : ['**/reinforcement/**']),
   ],
 });

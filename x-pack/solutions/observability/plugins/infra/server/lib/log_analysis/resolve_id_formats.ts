@@ -13,23 +13,34 @@ import {
   logEntryRateJobType,
 } from '../../../common/log_analysis';
 
-export async function resolveIdFormats(
-  spaceId: string,
-  logViewId: string,
-  mlAnomalyDetectors: MlAnomalyDetectors
-): Promise<IdFormatByJobType> {
-  const entryRateFormat = await resolveIdFormat(
+interface ResolveIdFormatsParams {
+  spaceId: string;
+  logViewId: string;
+  mlAnomalyDetectors: MlAnomalyDetectors;
+}
+
+interface ResolveIdFormatParams extends ResolveIdFormatsParams {
+  jobType: JobType;
+}
+
+/** Detects whether the log analysis ML jobs of a space and log view use hashed or legacy IDs. */
+export async function resolveIdFormats({
+  spaceId,
+  logViewId,
+  mlAnomalyDetectors,
+}: ResolveIdFormatsParams): Promise<IdFormatByJobType> {
+  const entryRateFormat = await resolveIdFormat({
     spaceId,
     logViewId,
-    logEntryRateJobType,
-    mlAnomalyDetectors
-  );
-  const entryCategoriesCountFormat = await resolveIdFormat(
+    jobType: logEntryRateJobType,
+    mlAnomalyDetectors,
+  });
+  const entryCategoriesCountFormat = await resolveIdFormat({
     spaceId,
     logViewId,
-    logEntryCategoriesJobType,
-    mlAnomalyDetectors
-  );
+    jobType: logEntryCategoriesJobType,
+    mlAnomalyDetectors,
+  });
 
   return {
     [logEntryRateJobType]: entryRateFormat,
@@ -37,12 +48,12 @@ export async function resolveIdFormats(
   };
 }
 
-async function resolveIdFormat(
-  spaceId: string,
-  logViewId: string,
-  jobType: JobType,
-  mlAnomalyDetectors: MlAnomalyDetectors
-): Promise<IdFormat> {
+async function resolveIdFormat({
+  spaceId,
+  logViewId,
+  jobType,
+  mlAnomalyDetectors,
+}: ResolveIdFormatParams): Promise<IdFormat> {
   try {
     const hashedJobId = getJobId(spaceId, logViewId, 'hashed', jobType);
     const hashedJobs = await mlAnomalyDetectors.jobs(hashedJobId);

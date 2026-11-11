@@ -31,7 +31,7 @@ import { getModelId } from './get_model_id';
 /** Filter dimension for the model creator, surfaced as the "Model family" filter. */
 export const EIS_PROVIDER_FILTER_ID = 'provider';
 
-/** Filter dimension for the task-type category (`LLM`, `Embedding`, `Rerank`). */
+/** Filter dimension for the task-type category (`Generative`, `Embedding`, `Rerank`). */
 export const EIS_CATEGORY_FILTER_ID = 'category';
 
 /** Filter dimension for geographies and regions where a model is available. */

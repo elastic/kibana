@@ -80,7 +80,7 @@ export class SurfacesServiceImpl implements SurfacesService {
         round,
         attachments,
         attachmentsService: this.attachmentsService,
-        context: { request, spaceId, agentId, kibanaUrl },
+        context: { request, spaceId, agentId },
         logger: this.logger,
         runtime,
       });

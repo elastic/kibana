@@ -125,6 +125,67 @@ describe('sessions transform spec', () => {
     });
   });
 
+  it('counts page loads, JS errors and HTTP requests as the applications list does', () => {
+    const aggregations = transform.pivot?.aggregations ?? {};
+    // `browser.navigation_timing` and `exception` events only: unlike the page views and errors
+    // above, soft navigations and failed outcomes are not counted.
+    expect(aggregations.page_load_count).toEqual({
+      filter: { bool: { filter: [{ term: { event_name: 'browser.navigation_timing' } }] } },
+    });
+    expect(aggregations.js_error_count).toEqual({
+      filter: { bool: { filter: [{ term: { event_name: 'exception' } }] } },
+    });
+    const requestDocuments = [
+      { term: { kind: 'Client' } },
+      { exists: { field: 'http.request.method' } },
+    ];
+    const noResponse = { term: { 'status.code': 'Error' } };
+    expect(aggregations.http_request_count.filter?.bool?.filter).toEqual([
+      ...requestDocuments,
+      {
+        bool: {
+          should: [{ exists: { field: 'http.response.status_code' } }, noResponse],
+          minimum_should_match: 1,
+        },
+      },
+    ]);
+    expect(aggregations.http_failed_request_count.filter?.bool?.filter).toEqual([
+      ...requestDocuments,
+      {
+        bool: {
+          should: [{ range: { 'http.response.status_code': { gte: 400 } } }, noResponse],
+          minimum_should_match: 1,
+        },
+      },
+    ]);
+  });
+
+  it('counts the samples of each web vital and those up to each rating threshold', () => {
+    const value = 'attributes.browser.web_vital.value';
+    const { lcp, cls } = transform.pivot?.aggregations ?? {};
+    expect(lcp.filter?.bool?.filter).toContainEqual({ exists: { field: value } });
+    expect(lcp.aggs).toEqual({
+      p75: { percentiles: { field: value, percents: [75], keyed: false } },
+      upToGood: { filter: { range: { [value]: { lte: 2500 } } } },
+      upToNeedsImprovement: { filter: { range: { [value]: { lte: 4000 } } } },
+      samples: { value_count: { field: value } },
+    });
+    expect(cls.aggs?.upToGood).toEqual({ filter: { range: { [value]: { lte: 0.1 } } } });
+  });
+
+  it('reads the environment from its own latest event', () => {
+    const { environment_seen: environment } = transform.pivot?.aggregations ?? {};
+    expect(environment.aggs?.latest.top_metrics?.metrics).toEqual(
+      SESSION_ATTRIBUTE_FIELDS.environment.map((field) => ({ field }))
+    );
+    // The new name first, then the deprecated one that `service.environment` aliases.
+    expect(SESSION_ATTRIBUTE_FIELDS.environment).toEqual([
+      'resource.attributes.deployment.environment.name',
+      'attributes.deployment.environment.name',
+      'resource.attributes.deployment.environment',
+    ]);
+  });
+
   it('aggregates timestamps, counts, journey, attributes and every web vital', () => {
     const aggregations = transform.pivot?.aggregations ?? {};
     expect(Object.keys(aggregations)).toEqual(
@@ -133,10 +194,15 @@ describe('sessions transform spec', () => {
         'end_time',
         'event_count',
         'page_view_count',
+        'page_load_count',
+        'js_error_count',
+        'http_request_count',
+        'http_failed_request_count',
         'click_count',
         'error_count',
         'pages',
         'exit',
+        'environment_seen',
         'user_seen',
         'user_agent_seen',
         'geo_seen',
@@ -190,19 +256,38 @@ describe('sessions transform spec', () => {
         'entry_page',
         'exit_page',
         'journey',
+        'environment',
+        'page_load_count',
+        'js_error_count',
+        'http_request_count',
+        'http_failed_request_count',
         'user',
         'user_agent',
         'geo',
         'web_vitals',
+        'web_vital_samples',
       ])
     );
+    for (const vital of CORE_WEB_VITALS) {
+      expect(
+        Object.keys(sessionsIndexMappings.properties.web_vital_samples.properties[vital].properties)
+      ).toEqual(['count', 'good', 'needs_improvement', 'poor']);
+    }
   });
 
   it('indexes the session with the failure message when the dest pipeline fails', () => {
     const [setMessage, removeRaw] = sessionsDestPipeline.on_failure ?? [];
     expect(setMessage?.set?.field).toBe('error.message');
     expect(removeRaw?.remove?.field).toEqual(
-      expect.arrayContaining(['page_view_count', 'pages', 'user_agent_seen', 'lcp'])
+      expect.arrayContaining([
+        'page_view_count',
+        'page_load_count',
+        'http_failed_request_count',
+        'pages',
+        'environment_seen',
+        'user_agent_seen',
+        'lcp',
+      ])
     );
     expect(sessionsIndexMappings.properties.error.properties.message.type).toBe('keyword');
   });
