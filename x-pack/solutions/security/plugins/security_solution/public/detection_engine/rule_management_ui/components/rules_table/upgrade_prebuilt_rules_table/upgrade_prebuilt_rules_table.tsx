@@ -146,6 +146,9 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 data-test-subj="rules-upgrades-table"
                 columns={rulesColumns}
                 onChange={handleTableChange}
+                tableLayout="auto"
+                scrollableInline
+                responsiveBreakpoint={false}
               />
             </>
           )

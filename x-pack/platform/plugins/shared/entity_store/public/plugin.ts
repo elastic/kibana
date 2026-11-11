@@ -12,6 +12,12 @@ import { registerStepDefinitions } from './workflow/steps';
 
 export class EntityStorePlugin implements Plugin {
   public setup(core: CoreSetup, deps: AppPluginSetupDependencies) {
+    // Guard: required plugin can be missing on the browser when plugin bundles fail to
+    // load/compile (incomplete node_modules, optimizer errors). Avoid hard-crashing Kibana.
+    if (!deps.workflowsExtensions) {
+      return;
+    }
+
     registerTriggerDefinitions(deps.workflowsExtensions);
     registerStepDefinitions(deps.workflowsExtensions);
 

@@ -20,6 +20,33 @@ describe('helpers', () => {
       });
       expect(filteredJobs.length).toEqual(mockSecurityJobs.length);
     });
+
+    test('Elastic jobs filter includes Fleet integration jobs', () => {
+      const integrationJob = {
+        ...mockSecurityJobs[0],
+        id: 'pad_okta_rare_region_name_by_user_ea',
+        isElasticJob: false,
+        isIntegrationJob: true,
+        groups: ['security', 'pad', 'okta'],
+      };
+      const customJob = {
+        ...mockSecurityJobs[0],
+        id: 'my_custom_job',
+        isElasticJob: false,
+        isIntegrationJob: false,
+      };
+
+      const filteredJobs = filterJobs({
+        jobs: [...mockSecurityJobs, integrationJob, customJob],
+        selectedGroups: [],
+        showCustomJobs: false,
+        showElasticJobs: true,
+        filterQuery: '',
+      });
+
+      expect(filteredJobs.some((job) => job.id === integrationJob.id)).toBe(true);
+      expect(filteredJobs.some((job) => job.id === customJob.id)).toBe(false);
+    });
   });
 
   describe('searchFilter', () => {
