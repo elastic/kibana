@@ -7,7 +7,10 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
-import { CONTEXT_ENGINE_DREAMING_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 import type { ContextEngineDreamingWorkflowTemplateValues } from '@kbn/workflows/managed';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import {
@@ -39,19 +42,26 @@ const isRunInProgressError = (error: unknown): boolean =>
 import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 
 export interface DreamingScheduleService {
-  /** Installs and enables the dreaming workflow of an AI index, or removes it. */
+  /**
+   * Installs and enables the dreaming and trace dreaming workflows of an AI index that dreams,
+   * and removes them from one that does not.
+   */
   reconcile(params: {
     aiIndex: AiIndexHttpItem;
     spaceId: string;
     request: KibanaRequest;
   }): Promise<void>;
-  /** Removes the dreaming workflow of an AI index. */
+  /** Removes both dreaming workflows of an AI index. */
   remove(params: { aiIndexId: string; spaceId: string; request: KibanaRequest }): Promise<void>;
 }
 
 /** The id of the dreaming workflow of an AI index. */
 export const dreamingWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
   `${CONTEXT_ENGINE_DREAMING_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
+
+/** The id of the trace dreaming workflow of an AI index. */
+export const traceDreamingWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
+  `${CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
 
 /** Whether an AI index has dreaming on and configured to build something. */
 export const shouldDream = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }): boolean =>
@@ -79,6 +89,25 @@ export const dreamingTemplateValuesFor = (
   };
 };
 
+/**
+ * The two workflows of an AI index that dreams. Trace dreaming has no switch of its own: it runs
+ * with dreaming, and each run skips itself while the AI index has no trace sources.
+ */
+const DREAMING_WORKFLOWS = [
+  {
+    definitionId: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+    label: 'dreaming',
+    workflowIdFor: dreamingWorkflowIdFor,
+  },
+  {
+    definitionId: CONTEXT_ENGINE_TRACE_DREAMING_WORKFLOW_ID,
+    label: 'trace dreaming',
+    workflowIdFor: traceDreamingWorkflowIdFor,
+  },
+] as const;
+
+type DreamingWorkflow = (typeof DREAMING_WORKFLOWS)[number];
+
 export const createDreamingScheduleService = ({
   logger,
   getManagedWorkflowsClient,
@@ -93,10 +122,15 @@ export const createDreamingScheduleService = ({
 }): DreamingScheduleService => {
   const log = logger.get('dreaming_schedule');
 
-  const uninstall = async (aiIndexId: string, spaceId: string, request: KibanaRequest) => {
+  const uninstall = async (
+    workflow: DreamingWorkflow,
+    aiIndexId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ) => {
     const client = await getManagedWorkflowsClient();
     const run = () =>
-      client.uninstall(CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, {
+      client.uninstall(workflow.definitionId, {
         spaceId,
         workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),
       });
@@ -109,7 +143,7 @@ export const createDreamingScheduleService = ({
         throw error;
       }
       await workflowsManagement.cancelAllActiveWorkflowExecutions(
-        dreamingWorkflowIdFor(aiIndexId, spaceId),
+        workflow.workflowIdFor(aiIndexId, spaceId),
         spaceId,
         request
       );
@@ -126,20 +160,22 @@ export const createDreamingScheduleService = ({
     });
   };
 
-  const automationFor = (aiIndexId: string, spaceId: string) =>
-    ({ type: 'workflow', value: dreamingWorkflowIdFor(aiIndexId, spaceId) } as const);
+  const automationFor = (workflow: DreamingWorkflow, aiIndexId: string, spaceId: string) =>
+    ({ type: 'workflow', value: workflow.workflowIdFor(aiIndexId, spaceId) } as const);
 
   return {
     async reconcile({ aiIndex, spaceId, request }) {
       const { id: aiIndexId, dreaming } = aiIndex;
       if (!dreaming || !shouldDream(aiIndex)) {
-        await uninstall(aiIndexId, spaceId, request);
-        if (!aiIndex.managed) {
-          await getAiIndexService().removeAutomation(
-            aiIndexId,
-            spaceId,
-            automationFor(aiIndexId, spaceId)
-          );
+        for (const workflow of DREAMING_WORKFLOWS) {
+          await uninstall(workflow, aiIndexId, spaceId, request);
+          if (!aiIndex.managed) {
+            await getAiIndexService().removeAutomation(
+              aiIndexId,
+              spaceId,
+              automationFor(workflow, aiIndexId, spaceId)
+            );
+          }
         }
         log.debug(() => `Removed dreaming for AI index '${aiIndexId}' in space '${spaceId}'`);
         return;
@@ -154,30 +190,34 @@ export const createDreamingScheduleService = ({
 
       const values = dreamingTemplateValuesFor(aiIndex, dreaming, spaceId);
       const client = await getManagedWorkflowsClient();
-      await client.install(CONTEXT_ENGINE_DREAMING_WORKFLOW_ID, {
-        spaceId,
-        workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),
-        values,
-      });
-
-      const workflowId = dreamingWorkflowIdFor(aiIndexId, spaceId);
-      await workflowsManagement.updateWorkflow(workflowId, { enabled: true }, spaceId, request);
-
-      if (!aiIndex.managed) {
-        await getAiIndexService().addAutomation(
-          aiIndexId,
+      for (const workflow of DREAMING_WORKFLOWS) {
+        await client.install(workflow.definitionId, {
           spaceId,
-          automationFor(aiIndexId, spaceId)
+          workflowIdSuffix: managedWorkflowIdSuffixFor(aiIndexId, spaceId),
+          values,
+        });
+
+        const workflowId = workflow.workflowIdFor(aiIndexId, spaceId);
+        await workflowsManagement.updateWorkflow(workflowId, { enabled: true }, spaceId, request);
+
+        if (!aiIndex.managed) {
+          await getAiIndexService().addAutomation(
+            aiIndexId,
+            spaceId,
+            automationFor(workflow, aiIndexId, spaceId)
+          );
+        }
+
+        log.info(
+          `Scheduled ${workflow.label} for AI index '${aiIndexId}' in space '${spaceId}' every ${values.intervalMinutes}m, running as the user who saved its config`
         );
       }
-
-      log.info(
-        `Scheduled dreaming for AI index '${aiIndexId}' in space '${spaceId}' every ${values.intervalMinutes}m, running as the user who saved its config`
-      );
     },
 
     async remove({ aiIndexId, spaceId, request }) {
-      await uninstall(aiIndexId, spaceId, request);
+      for (const workflow of DREAMING_WORKFLOWS) {
+        await uninstall(workflow, aiIndexId, spaceId, request);
+      }
       log.debug(() => `Removed dreaming for deleted AI index '${aiIndexId}' in space '${spaceId}'`);
     },
   };

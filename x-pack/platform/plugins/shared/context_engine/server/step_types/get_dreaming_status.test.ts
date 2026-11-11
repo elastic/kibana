@@ -17,19 +17,26 @@ describe('getDreamingStatusStepDefinition', () => {
     contextEngineEnabled = true,
     memoryEnabled = true,
     canRead = true,
-    get = jest.fn().mockResolvedValue({ id: 'support', dreaming }),
+    get = jest.fn().mockResolvedValue({ id: 'support', dreaming, traces: [] }),
+    source,
   }: {
     contextEngineEnabled?: boolean;
     memoryEnabled?: boolean;
     canRead?: boolean;
     get?: jest.Mock;
+    source?: 'memories' | 'traces';
   } = {}) =>
     getDreamingStatusStepDefinition({
       getAiIndexService: () => ({ get } as unknown as AiIndexService),
       isContextEngineEnabled: async () => contextEngineEnabled,
       isMemoryEnabled: async () => memoryEnabled,
       checkReadPrivilege: async () => canRead,
-    }).handler(createMockStepContext({ input: { ai_index_id: 'support' }, esClient: {} }));
+    }).handler(
+      createMockStepContext({
+        input: { ai_index_id: 'support', ...(source && { source }) },
+        esClient: {},
+      })
+    );
 
   it('dreams when Context Engine and memory are on and the AI index dreams', async () => {
     await expect(run()).resolves.toEqual({ output: { dream: true } });
@@ -71,6 +78,34 @@ describe('getDreamingStatusStepDefinition', () => {
     ).resolves.toEqual({
       output: { dream: false, reason: "AI index 'support' does not exist." },
     });
+  });
+
+  it('dreams on traces only for an AI index that dreams and has trace sources', async () => {
+    const trace = { type: 'elastic_agent', value: 'elastic-ai-agent', query: 'FROM traces' };
+
+    await expect(
+      run({
+        source: 'traces',
+        get: jest.fn().mockResolvedValue({ id: 'support', dreaming, traces: [trace] }),
+      })
+    ).resolves.toEqual({ output: { dream: true } });
+    await expect(run({ source: 'traces' })).resolves.toEqual({
+      output: { dream: false, reason: "AI index 'support' has no trace sources to dream on." },
+    });
+    await expect(
+      run({
+        source: 'traces',
+        get: jest.fn().mockResolvedValue({
+          id: 'support',
+          dreaming: { ...dreaming, enabled: false },
+          traces: [trace],
+        }),
+      })
+    ).resolves.toEqual({
+      output: { dream: false, reason: "Dreaming is not turned on for AI index 'support'." },
+    });
+    // Memory dreaming does not need trace sources.
+    await expect(run()).resolves.toEqual({ output: { dream: true } });
   });
 
   it('fails on any other error reading the AI index', async () => {

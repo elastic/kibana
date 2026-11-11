@@ -60,3 +60,19 @@ export const kiUri = (kiId: string): string => `${KI_URI_PREFIX}${kiId}`;
 
 export const kiIdFromUri = (uri: string): string | undefined =>
   uri.startsWith(KI_URI_PREFIX) ? uri.slice(KI_URI_PREFIX.length) : undefined;
+
+/** Memory ids of agent rounds read from traces: the prefix, then the trace id. */
+export const TRACE_ROUND_ID_PREFIX = 'trace:';
+const TRACE_URI_PREFIX = 'trace://';
+
+/** The URI a dreamed KI cites a memory by: `trace://` for a round, `ki://` for a memory KI. */
+export const memoryUri = (memoryId: string): string =>
+  memoryId.startsWith(TRACE_ROUND_ID_PREFIX)
+    ? `${TRACE_URI_PREFIX}${memoryId.slice(TRACE_ROUND_ID_PREFIX.length)}`
+    : kiUri(memoryId);
+
+/** The memory id a `derived_from` reference cites, the reverse of {@link memoryUri}. */
+export const memoryIdFromUri = (uri: string): string | undefined =>
+  uri.startsWith(TRACE_URI_PREFIX)
+    ? `${TRACE_ROUND_ID_PREFIX}${uri.slice(TRACE_URI_PREFIX.length)}`
+    : kiIdFromUri(uri);

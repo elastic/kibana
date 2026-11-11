@@ -11,12 +11,23 @@ import {
   factId,
   kiIdFromUri,
   kiUri,
+  memoryIdFromUri,
+  memoryUri,
   relationshipId,
   relationshipKey,
   slugify,
 } from './ids';
 
 describe('dreaming ids', () => {
+  it('cites memory KIs as ki:// and rounds read from traces as trace://', () => {
+    expect(memoryUri('m-1')).toBe('ki://m-1');
+    expect(memoryUri('trace:51fff8a2')).toBe('trace://51fff8a2');
+    for (const id of ['m-1', 'trace:51fff8a2']) {
+      expect(memoryIdFromUri(memoryUri(id))).toBe(id);
+    }
+    expect(memoryIdFromUri('https://example.com')).toBeUndefined();
+  });
+
   it('folds case, accents and punctuation out of entity names', () => {
     expect(slugify('Acme Corp.')).toBe('acme-corp');
     expect(slugify('  Montréal, Québec ')).toBe('montreal-quebec');

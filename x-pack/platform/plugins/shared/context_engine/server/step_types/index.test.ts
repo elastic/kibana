@@ -50,6 +50,7 @@ describe('registerStepDefinitions', () => {
       'context-engine.getFeedbackContext',
       'context-engine.recordImprovements',
       'context-engine.getDreamingStatus',
+      'context-engine.readTraceTranscripts',
       'context-engine.applyDreamChanges',
       'context-engine.applyDreamRelationships',
     ]);

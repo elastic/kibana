@@ -61,6 +61,36 @@ describe('applyOperations', () => {
     jest.mocked(putKiRevision).mockResolvedValue(undefined);
   });
 
+  it('cites rounds read from traces as trace://, keeping the permissions of their space', async () => {
+    const roundPermissions = { kibana: { privileges: [{ space: 'team-a' }] } };
+    const counts = await applyOperations(
+      context(undefined, new Map([['trace:51fff8a2', roundPermissions]])),
+      [
+        {
+          op: 'upsert_fact',
+          id: 'fact-1',
+          type: 'preference',
+          title: 'Tom Becker eats vegetarian',
+          content: 'Tom Becker always wants vegetarian meals.',
+          sourceMemoryIds: ['trace:51fff8a2'],
+          lastSeenAt: '2026-11-11T13:12:03.357Z',
+        },
+      ]
+    );
+
+    expect(counts).toEqual(expect.objectContaining({ created: 1, rejected: [] }));
+    expect(written()[0]).toEqual(
+      expect.objectContaining({
+        references: [{ uri: 'trace://51fff8a2', relation: 'derived_from' }],
+        attributes: {
+          'memory.number_of_occurrences': 1,
+          'memory.last_seen_at': '2026-11-11T13:12:03.357Z',
+        },
+        permissions: roundPermissions,
+      })
+    );
+  });
+
   it('creates an entity with its attributes, sighting and the memories it came from', async () => {
     const counts = await applyOperations(context(), [
       {

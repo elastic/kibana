@@ -1,0 +1,608 @@
+version: '1'
+name: __NAME__
+description: 'Extracts long-term facts, entities and the relationships between them from the agent conversations the trace sources of a Context Engine AI index record, as the AI index dreaming config describes.'
+enabled: false
+tags:
+  - context-engine
+  - memory
+  - dreaming
+  - traces
+  - scheduled
+settings:
+  timeout: '30m'
+  concurrency:
+    key: __CONCURRENCY_KEY__
+    strategy: drop
+    max: 1
+consts:
+  ai_index_id: __AI_INDEX_ID__
+  memories_index: __MEMORIES_INDEX__
+  connector_id: __CONNECTOR_ID__
+  instructions: __INSTRUCTIONS__
+  fact_types: __FACT_TYPES__
+  entity_types: __ENTITY_TYPES__
+  relationship_types: __RELATIONSHIP_TYPES__
+outputs:
+  - name: rounds
+    type: number
+  - name: created
+    type: number
+  - name: updated
+    type: number
+  - name: deleted
+    type: number
+  - name: rejected
+    type: number
+  - name: relationships_created
+    type: number
+  - name: relationships_updated
+    type: number
+  - name: relationships_deleted
+    type: number
+  - name: relationships_rejected
+    type: number
+  - name: resume_from
+    type: string
+  - name: resume_after
+    type: string
+triggers:
+  - type: scheduled
+    with:
+      every: '__INTERVAL_MINUTES__m'
+  - type: manual
+    inputs:
+      additionalProperties: false
+      properties:
+        dry_run:
+          type: boolean
+          default: false
+          description: Report what dreaming would write and reject, and write nothing. The run ends cancelled, so the next run reads the same rounds.
+        since:
+          type: string
+          maxLength: 64
+          description: Read the rounds that ended since this ISO 8601 time, instead of since where the last successful run stopped.
+steps:
+  - name: status
+    type: context-engine.getDreamingStatus
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      source: traces
+
+  - name: paused
+    type: if
+    condition: '${{ steps.status.output.dream != true }}'
+    steps:
+      - name: skip
+        type: workflow.output
+        status: cancelled
+        with:
+          rounds: 0
+          reason: '{{ steps.status.output.reason }}'
+
+  - name: last_run
+    type: workflow.getLastRun
+    with:
+      default_hours: 168
+      max_hours: 720
+
+  - name: resume
+    type: if
+    condition: '${{ inputs.since == blank and steps.last_run.output.last_success.execution_id != blank }}'
+    steps:
+      - name: last_output
+        type: kibana.request
+        with:
+          method: GET
+          path: '/s/{{ workflow.spaceId }}/api/workflows/executions/{{ steps.last_run.output.last_success.execution_id }}'
+          query:
+            includeOutput: true
+            omitStepExecutions: true
+
+  - name: read_traces
+    type: context-engine.readTraceTranscripts
+    with:
+      ai_index_id: '{{ consts.ai_index_id }}'
+      since: '{{ inputs.since | default: steps.last_output.output.context.output.resume_from | default: steps.last_run.output.since }}'
+      after: '{% if inputs.since == blank %}{{ steps.last_output.output.context.output.resume_after }}{% endif %}'
+      size: 50
+
+  - name: active
+    type: data.set
+    with:
+      memories: '${{ steps.read_traces.output.memories }}'
+      resume_from: '{{ steps.read_traces.output.resume_from }}'
+      resume_after: '{{ steps.read_traces.output.resume_after }}'
+      created: 0
+      updated: 0
+      deleted: 0
+      rejected: 0
+      relationships_created: 0
+      relationships_updated: 0
+      relationships_deleted: 0
+      relationships_rejected: 0
+      would_write: []
+
+  - name: dream
+    type: if
+    condition: '${{ variables.memories.size > 0 }}'
+    steps:
+      - name: batches
+        type: foreach
+        foreach: >-
+          {%- assign batches = "" | split: "" -%}
+          {%- assign audiences = variables.memories | group_by_exp: "memory", "memory.permissions | json" -%}
+          {%- for audience in audiences -%}
+          {%- assign chunks = audience.items | chunk: 5 -%}
+          {%- assign batches = batches | concat: chunks -%}
+          {%- endfor -%}
+          {{ batches | json }}
+        steps:
+          - name: read_existing
+            type: elasticsearch.search
+            with:
+              index: '{{ consts.memories_index }}'
+              ignore_unavailable: true
+              size: 300
+              sort:
+                - updated_at: desc
+              collapse:
+                field: id
+              _source:
+                - id
+                - type
+                - title
+                - description
+                - content
+                - attributes
+                - references
+                - permissions
+                - governance.lifecycle.status
+              query:
+                bool:
+                  should:
+                    - prefix:
+                        type: 'fact.'
+                    - prefix:
+                        type: 'entity.'
+                  minimum_should_match: 1
+                  filter:
+                    - bool:
+                        should:
+                          - bool:
+                              must_not:
+                                nested:
+                                  path: permissions.kibana.privileges
+                                  query:
+                                    match_all: {}
+                                  ignore_unmapped: true
+                          - nested:
+                              path: permissions.kibana.privileges
+                              ignore_unmapped: true
+                              query:
+                                bool:
+                                  should:
+                                    - term:
+                                        permissions.kibana.privileges.space: '{{ workflow.spaceId }}'
+                                    - term:
+                                        permissions.kibana.privileges.space: '*'
+                                  minimum_should_match: 1
+                        minimum_should_match: 1
+
+          - name: extract
+            type: ai.prompt
+            connector-id: '{{ consts.connector_id }}'
+            connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '30s'
+            with:
+              prompt: |
+                You extract long-term memory from the conversations users had with agents, of the kinds configured below:
+                {%- if consts.fact_types.size > 0 %}
+                - facts: separate pieces of knowledge, each readable on its own.
+                {%- endif %}
+                {%- if consts.entity_types.size > 0 %}
+                - entities: the things the conversations are about, each with a summary of what is known about it.
+                {%- endif %}
+
+                You are given ROUNDS (transcripts of agent rounds rebuilt from traces) and EXISTING long-term items.
+
+                A round is one exchange: a user message, the tools the agent called with what they returned, and the agent's answer. Each line starts with who it is from: User, Assistant, "Assistant called <tool>" or "Tool result". Take from a round only what it states or settles: what the user says about themselves, their work, their preferences and their data, and what the tool results and the answer establish. Do not record what the agent only suggested, guessed or asked, small talk, a one-off request, or a step of a task that does not stay true afterwards. A tool result is evidence; a failed or empty one establishes nothing.
+
+                Return only changes. Update an existing item by repeating its id as ref with the new values; create one with a new key like "new:1"; delete one with delete: true.
+
+                Merge rather than duplicate: if a round restates or refines an existing item, update that item. When a round shows an existing item is no longer true, update or delete it.
+
+                When a round restates or confirms an existing item, return its ref with that round in source_memory_ids even if nothing else changes: that records that it was seen again. Each EXISTING item shows attributes["memory.number_of_occurrences"], how many sources it was seen in, and attributes["memory.last_seen_at"], when it was last seen.
+                {%- if consts.fact_types.size > 0 %}
+
+                Facts are read on their own, without the conversation, so write each one to stand alone: name what it is about in its title and content, keep every name, number, code and date exactly as stated, and give dates in full rather than as "yesterday" or "next week", working them out from when the round ended.
+
+                State the knowledge itself rather than quoting the conversation, and leave out who said it and how it was found. When a round holds several separate pieces of knowledge, write a fact for each.
+                {%- endif %}
+                {%- if consts.entity_types.size > 0 %}
+
+                Give every entity a content summary of what is known about it: its attribute values and the main facts about it.
+                {%- endif %}
+
+                Give an entity or fact access_patterns when the ROUNDS show how to query the raw data about it: up to 5 distinct questions a later agent could answer from that data. Build them only from indices, fields, values and queries that appear in the ROUNDS, such as a query a tool ran that returned rows; return none rather than invent an index or field. Each has:
+                - question_type: a short label for the kind of question.
+                - esql_template: the query with named ?param placeholders, without quotes, where the filters go. Scope an entity's queries to it, for example WHERE customer_id == ?customer.
+                - esql_example: the same query with real values from the ROUNDS in place of the placeholders.
+                - returns: a short description of what the query returns.
+                esql_example is run to verify it, and a pattern that fails is dropped, so it must be valid and runnable:
+                - Start with FROM <index>; use | between commands; use field names exactly as the ROUNDS give them, with backticks around names with spaces.
+                - Quote string literals with double quotes; do not quote numbers or booleans. Write dates in ISO 8601.
+                - Boolean fields take COUNT(*) WHERE field == true, never SUM()/AVG()/MIN()/MAX(). Only use AVG()/SUM() on numeric fields.
+                - Keep it cheap: end it with a small | LIMIT n (n <= 20).
+                An item's existing access_patterns are shown with it. Return access_patterns only to change them; the list you return replaces them.
+
+                Every created or updated item must list the ids of the ROUNDS it is based on in source_memory_ids.
+
+                Ignore rounds that hold nothing worth remembering. An empty change set is a valid answer.
+
+                How to read EXISTING: an item's type is its kind followed by its configured type: fact.<fact type> or entity.<entity type>.
+
+                FACT TYPES:
+                {%- for fact_type in consts.fact_types %}
+                - {{ fact_type.type }}{% if fact_type.description %}: {{ fact_type.description }}{% endif %}
+                {%- else %}
+                none: do not create facts.
+                {%- endfor %}
+                ENTITY TYPES:
+                {%- for entity_type in consts.entity_types %}
+                - {{ entity_type.type }}{% if entity_type.description %}: {{ entity_type.description }}{% endif %}{% if entity_type.attributes.size > 0 %} (attributes: {{ entity_type.attributes | join: ', ' }}){% endif %}
+                {%- else %}
+                none: do not create entities.
+                {%- endfor %}
+
+                INSTRUCTIONS:
+
+                {{ consts.instructions }}
+
+                ROUNDS (one per line; updated_at is when the round ended):
+                {%- for round in foreach.item %}
+                {{ round | json }}
+                {%- endfor %}
+
+                EXISTING (one item per line, none when empty):
+                {%- assign audience = foreach.item.first.permissions | json %}
+                {%- for hit in steps.read_existing.output.hits.hits %}
+                {%- assign item_audience = hit._source.permissions | json %}
+                {%- unless hit._source.governance.lifecycle.status == 'deleted' or hit._source.governance.lifecycle.status == 'verification_failed' or item_audience != audience %}
+                {{ hit._source | json }}
+                {%- endunless %}
+                {%- endfor %}
+              schema:
+                type: object
+                properties:
+                  entities:
+                    type: array
+                    description: Entities to create, update, or delete. Leave out entities that do not change.
+                    items:
+                      type: object
+                      properties:
+                        ref:
+                          type: string
+                          description: An id from EXISTING, or a new key like "new:1" to create something.
+                        delete:
+                          type: boolean
+                          description: True deletes an existing entity.
+                        type:
+                          type: string
+                          description: One of the configured entity types.
+                        title:
+                          type: string
+                          description: The canonical name of the entity.
+                        description:
+                          type: string
+                          description: A one-line description.
+                        content:
+                          type: string
+                          description: A short summary of what is known about the entity, its attribute values and the main facts about it, with exact values.
+                        attributes:
+                          type: array
+                          description: Values for the attribute keys configured for this entity type.
+                          items:
+                            type: object
+                            properties:
+                              key:
+                                type: string
+                              value:
+                                type: string
+                            required:
+                              - key
+                              - value
+                        access_patterns:
+                          type: array
+                          description: Replaces the existing access patterns; leave out to keep them.
+                          items:
+                            type: object
+                            properties:
+                              question_type:
+                                type: string
+                              esql_template:
+                                type: string
+                              esql_example:
+                                type: string
+                              returns:
+                                type: string
+                            required:
+                              - question_type
+                              - esql_template
+                              - esql_example
+                              - returns
+                        source_memory_ids:
+                          type: array
+                          description: Ids of the ROUNDS this is based on. Required unless deleting.
+                          items:
+                            type: string
+                      required:
+                        - ref
+                  facts:
+                    type: array
+                    description: Facts to create, update, or delete. Leave out facts that do not change.
+                    items:
+                      type: object
+                      properties:
+                        ref:
+                          type: string
+                          description: An id from EXISTING, or a new key like "new:1" to create something.
+                        delete:
+                          type: boolean
+                          description: True deletes an existing fact.
+                        type:
+                          type: string
+                          description: One of the configured fact types.
+                        title:
+                          type: string
+                          description: A short label for the fact that names what it is about.
+                        content:
+                          type: string
+                          description: The fact, stated so it can be used on its own, naming what it is about and keeping exact values.
+                        access_patterns:
+                          type: array
+                          description: Replaces the existing access patterns; leave out to keep them.
+                          items:
+                            type: object
+                            properties:
+                              question_type:
+                                type: string
+                              esql_template:
+                                type: string
+                              esql_example:
+                                type: string
+                              returns:
+                                type: string
+                            required:
+                              - question_type
+                              - esql_template
+                              - esql_example
+                              - returns
+                        source_memory_ids:
+                          type: array
+                          description: Ids of the ROUNDS this is based on. Required unless deleting.
+                          items:
+                            type: string
+                      required:
+                        - ref
+                required:
+                  - entities
+                  - facts
+
+          - name: apply_changes
+            type: context-engine.applyDreamChanges
+            with:
+              ai_index_id: '{{ consts.ai_index_id }}'
+              memories: '${{ foreach.item }}'
+              changes: '${{ steps.extract.output.content }}'
+              dry_run: '${{ inputs.dry_run == true }}'
+
+          - name: tally
+            type: data.set
+            with:
+              created: '${{ variables.created | plus: steps.apply_changes.output.created }}'
+              updated: '${{ variables.updated | plus: steps.apply_changes.output.updated }}'
+              deleted: '${{ variables.deleted | plus: steps.apply_changes.output.deleted }}'
+              rejected: '${{ variables.rejected | plus: steps.apply_changes.output.rejected.size }}'
+              would_write: '${{ variables.would_write | concat: steps.apply_changes.output.would_write }}'
+
+          - name: relationships
+            type: if
+            condition: '${{ consts.relationship_types.size > 0 and steps.apply_changes.output.documents.size > 0 }}'
+            steps:
+              - name: read_relationships
+                type: elasticsearch.search
+                on-failure:
+                  continue: true
+                with:
+                  index: '{{ consts.memories_index }}'
+                  ignore_unavailable: true
+                  size: 200
+                  sort:
+                    - updated_at: desc
+                  collapse:
+                    field: id
+                  _source:
+                    - id
+                    - description
+                    - attributes
+                    - permissions
+                    - governance.lifecycle.status
+                  query:
+                    bool:
+                      filter:
+                        - term:
+                            type: memory.relationship
+                        - terms:
+                            references.uri: '${{ steps.apply_changes.output.documents | map: "id" | join: "|ki://" | prepend: "ki://" | split: "|" }}'
+                        - bool:
+                            should:
+                              - bool:
+                                  must_not:
+                                    nested:
+                                      path: permissions.kibana.privileges
+                                      query:
+                                        match_all: {}
+                                      ignore_unmapped: true
+                              - nested:
+                                  path: permissions.kibana.privileges
+                                  ignore_unmapped: true
+                                  query:
+                                    bool:
+                                      should:
+                                        - term:
+                                            permissions.kibana.privileges.space: '{{ workflow.spaceId }}'
+                                        - term:
+                                            permissions.kibana.privileges.space: '*'
+                                      minimum_should_match: 1
+                            minimum_should_match: 1
+
+              - name: relate
+                type: ai.prompt
+                connector-id: '{{ consts.connector_id }}'
+                connector-id-by-feature: '{% if consts.connector_id == blank %}context_engine_prompt{% endif %}'
+                on-failure:
+                  retry:
+                    max-attempts: 2
+                    delay: '30s'
+                  continue: true
+                with:
+                  prompt: |
+                    You link long-term facts and entities with typed relationships.
+
+                    You are given NEW items (facts and entities just written from new memories), EXISTING entities they could link to, and EXISTING relationships of the NEW items.
+
+                    Return only changes. Each relationship has from and to, each an id from NEW or EXISTING ENTITIES, and relation, one of the RELATIONSHIP TYPES. Read it as "from relation to": "Priya manages Alex" has from Priya, relation manages, to Alex.
+                    - Create a relationship with a description: one sentence on why it holds, from what NEW says.
+                    - Update one by repeating its from, relation and to with a new description.
+                    - Delete one with delete: true when NEW says it no longer holds.
+
+                    Rules:
+                    - Link only what NEW states or clearly implies. Every relationship has at least one end in NEW.
+                    - from and to are different items.
+                    - Link a fact only to the entities it is about, with relation about: from is the fact, to is the entity. Never use another type from or to a fact.
+                    - Every other type links two entities. Use one only when its description fits both ends; otherwise leave the pair unlinked.
+                    - Leave out EXISTING relationships that do not change.
+                    - An empty list is a valid answer.
+
+                    RELATIONSHIP TYPES:
+                    - about: A fact is about an entity. Built in; the only type for facts.
+                    {%- for relationship_type in consts.relationship_types %}
+                    - {{ relationship_type.type }}{% if relationship_type.description %}: {{ relationship_type.description }}{% endif %}
+                    {%- endfor %}
+
+                    INSTRUCTIONS:
+
+                    {{ consts.instructions }}
+
+                    NEW (one item per line):
+                    {%- for document in steps.apply_changes.output.documents %}
+                    {{ document | pick: "id", "type", "title", "description", "content" | json }}
+                    {%- endfor %}
+
+                    EXISTING ENTITIES (one per line, none when empty):
+                    {%- assign new_ids = steps.apply_changes.output.documents | map: "id" %}
+                    {%- assign audience = foreach.item.first.permissions | json %}
+                    {%- for hit in steps.read_existing.output.hits.hits %}
+                    {%- assign item_audience = hit._source.permissions | json %}
+                    {%- assign kind = hit._source.type | split: "." | first %}
+                    {%- unless kind != 'entity' or new_ids contains hit._source.id or hit._source.governance.lifecycle.status == 'deleted' or hit._source.governance.lifecycle.status == 'verification_failed' or item_audience != audience %}
+                    {{ hit._source | pick: "id", "type", "title", "description" | json }}
+                    {%- endunless %}
+                    {%- endfor %}
+
+                    EXISTING RELATIONSHIPS (one per line, none when empty):
+                    {%- for hit in steps.read_relationships.output.hits.hits %}
+                    {%- assign item_audience = hit._source.permissions | json %}
+                    {%- unless hit._source.governance.lifecycle.status == 'deleted' or item_audience != audience %}
+                    {%- assign key = hit._source.attributes["memory.key"] | split: "|" %}
+                    {"from": {{ key[0] | json }}, "relation": {{ key[1] | json }}, "to": {{ key[2] | json }}, "description": {{ hit._source.description | json }}}
+                    {%- endunless %}
+                    {%- endfor %}
+                  schema:
+                    type: object
+                    properties:
+                      relationships:
+                        type: array
+                        description: Relationships to create, update, or delete. Leave out relationships that do not change.
+                        items:
+                          type: object
+                          properties:
+                            from:
+                              type: string
+                              description: The id of the item the relationship goes from, from NEW or EXISTING ENTITIES.
+                            relation:
+                              type: string
+                              description: One of the relationship types; about for a fact.
+                            to:
+                              type: string
+                              description: The id of the item the relationship goes to, from NEW or EXISTING ENTITIES.
+                            description:
+                              type: string
+                              description: One sentence on why the relationship holds. Required to create one.
+                            delete:
+                              type: boolean
+                              description: True deletes an existing relationship.
+                          required:
+                            - from
+                            - relation
+                            - to
+                    required:
+                      - relationships
+
+              - name: apply_relationships
+                type: context-engine.applyDreamRelationships
+                on-failure:
+                  continue: true
+                with:
+                  ai_index_id: '{{ consts.ai_index_id }}'
+                  memories: '${{ foreach.item }}'
+                  changes: '${{ steps.relate.output.content }}'
+                  documents: '${{ steps.apply_changes.output.documents }}'
+                  dry_run: '${{ inputs.dry_run == true }}'
+
+              - name: tally_relationships
+                type: data.set
+                with:
+                  relationships_created: '${{ variables.relationships_created | plus: steps.apply_relationships.output.created }}'
+                  relationships_updated: '${{ variables.relationships_updated | plus: steps.apply_relationships.output.updated }}'
+                  relationships_deleted: '${{ variables.relationships_deleted | plus: steps.apply_relationships.output.deleted }}'
+                  relationships_rejected: '${{ variables.relationships_rejected | plus: steps.apply_relationships.output.rejected.size }}'
+                  would_write: '${{ variables.would_write | concat: steps.apply_relationships.output.would_write }}'
+
+  - name: dry_run_result
+    type: if
+    condition: '${{ inputs.dry_run == true }}'
+    steps:
+      - name: dry_run_output
+        type: workflow.output
+        status: cancelled
+        with:
+          rounds: '${{ variables.memories | size | default: 0 }}'
+          created: '${{ variables.created | default: 0 }}'
+          updated: '${{ variables.updated | default: 0 }}'
+          deleted: '${{ variables.deleted | default: 0 }}'
+          rejected: '${{ variables.rejected | default: 0 }}'
+          relationships_created: '${{ variables.relationships_created | default: 0 }}'
+          relationships_updated: '${{ variables.relationships_updated | default: 0 }}'
+          relationships_deleted: '${{ variables.relationships_deleted | default: 0 }}'
+          relationships_rejected: '${{ variables.relationships_rejected | default: 0 }}'
+          would_write: '${{ variables.would_write }}'
+          reason: 'Dry run: nothing was written.'
+
+  - name: output_result
+    type: workflow.output
+    with:
+      rounds: '${{ variables.memories | size | default: 0 }}'
+      created: '${{ variables.created | default: 0 }}'
+      updated: '${{ variables.updated | default: 0 }}'
+      deleted: '${{ variables.deleted | default: 0 }}'
+      rejected: '${{ variables.rejected | default: 0 }}'
+      relationships_created: '${{ variables.relationships_created | default: 0 }}'
+      relationships_updated: '${{ variables.relationships_updated | default: 0 }}'
+      relationships_deleted: '${{ variables.relationships_deleted | default: 0 }}'
+      relationships_rejected: '${{ variables.relationships_rejected | default: 0 }}'
+      resume_from: '{{ variables.resume_from }}'
+      resume_after: '{{ variables.resume_after }}'

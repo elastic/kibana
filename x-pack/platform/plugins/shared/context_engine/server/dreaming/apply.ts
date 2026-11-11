@@ -44,7 +44,7 @@ import {
   type DreamedKiAttributes,
   type DreamedKiReference,
 } from './dreamed_ki';
-import { kiUri } from './ids';
+import { kiUri, memoryUri } from './ids';
 import {
   derivedPermissions,
   isVisibleInSpace,
@@ -120,7 +120,7 @@ export const addReferences = (
 };
 
 const sourceReferences = (sourceMemoryIds: readonly string[]): DreamedKiReference[] =>
-  sourceMemoryIds.map((id) => ({ uri: kiUri(id), relation: 'derived_from' }));
+  sourceMemoryIds.map((id) => ({ uri: memoryUri(id), relation: 'derived_from' }));
 
 /** Builds the KI to store; undefined when it would not change. */
 type BuildDocument = (current: DreamedKi | undefined) => Omit<DreamedKi, 'governance'> | undefined;
