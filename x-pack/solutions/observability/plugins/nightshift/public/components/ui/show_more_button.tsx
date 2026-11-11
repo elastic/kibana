@@ -39,7 +39,7 @@ export function ShowMoreButton({
     <EuiButton
       fullWidth
       color="text"
-      size="m"
+      size="s"
       iconType="chevronSingleDown"
       iconSide="left"
       isLoading={isLoading}
@@ -56,10 +56,10 @@ export function ShowMoreButton({
           background: ${euiTheme.colors.emptyShade};
           box-shadow: none;
           color: ${euiTheme.colors.textParagraph};
-          font-weight: ${euiTheme.font.weight.bold};
+          font-weight: ${euiTheme.font.weight.medium};
           height: auto;
           min-height: 0;
-          padding: ${euiTheme.size.m};
+          padding: ${euiTheme.size.s} ${euiTheme.size.m};
 
           &:hover:not(:disabled),
           &:focus,
