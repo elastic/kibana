@@ -80,8 +80,15 @@ export const EventsFilters = ({
 }: EventsFiltersProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
-      <EuiFlexItem grow={true} css={{ minWidth: 0 }}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+      <EuiFlexItem
+        grow={true}
+        css={{
+          // Prefer wrapping over crushing filters / time picker on narrow widths.
+          flex: `1 1 ${euiTheme.base * 15}px`,
+          minWidth: 0,
+        }}
+      >
         <EuiFieldSearch
           data-test-subj="nightshiftDetectionEventsSearch"
           compressed
