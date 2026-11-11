@@ -247,9 +247,11 @@ export class EsqlGraphTraversalClient {
     }
     if (dropped.size === 0) return plan;
     this.logger.debug(
-      `entity graph traversal (ES|QL) scenario "${plan.id}": the index ${indexPattern} has no ${Array.from(
-        dropped
-      ).join(', ')}; ${hops.length} of ${plan.hops.length} hops keep a field`
+      `entity graph traversal (ES|QL) scenario "${
+        plan.id
+      }": the index ${indexPattern} has no ${Array.from(dropped).join(', ')}; ${hops.length} of ${
+        plan.hops.length
+      } hops keep a field`
     );
     return {
       ...plan,
