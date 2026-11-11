@@ -129,7 +129,7 @@ editor:
         - '*'
   run_as: []
 _nightshift_agent:
-  description: 'Privileges for the service account of the Nightshift agent. Assigned by Kibana; do not assign to users.'
+  description: 'Privileges for the service account of the nightshift agent. Assigned by Kibana; do not assign to users.'
   metadata:
     _public: true
     _reserved: true
@@ -161,7 +161,7 @@ _nightshift_agent:
         - '*'
   run_as: []
 _nightshift_automations:
-  description: 'Privileges for the service account of Nightshift automations. Assigned by Kibana; do not assign to users.'
+  description: 'Privileges for the service account of nightshift automations. Assigned by Kibana; do not assign to users.'
   metadata:
     _public: true
     _reserved: true

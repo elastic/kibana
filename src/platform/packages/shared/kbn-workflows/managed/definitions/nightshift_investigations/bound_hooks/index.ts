@@ -60,7 +60,7 @@ const renderBoundHookYaml = ({
     `version: '1'
 name: ${JSON.stringify(`${name} (space entry point)`)}
 description: >
-  Runs ${hookWorkflowId} in this space as the Nightshift service account. It only hands its
+  Runs ${hookWorkflowId} in this space as the nightshift service account. It only hands its
   inputs to the shared hook workflow, which runs with this workflow's identity.
 enabled: true
 settings:
@@ -83,7 +83,7 @@ steps:
         type: workflow.fail
         with:
           message: >-
-            ${hookWorkflowId} runs as the Nightshift service account and only Agent Builder may
+            ${hookWorkflowId} runs as the nightshift service account and only Agent Builder may
             start it, as an agent hook. This run was started by {{ execution.triggeredBy }}.
 
   - name: run_hook

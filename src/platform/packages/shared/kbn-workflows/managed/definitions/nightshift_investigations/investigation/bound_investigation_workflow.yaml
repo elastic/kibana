@@ -1,7 +1,7 @@
 version: '1'
 name: Nightshift Investigation (space entry point)
 description: >
-  Runs Nightshift investigations in this space as the Nightshift service account. It only hands
+  Runs nightshift investigations in this space as the nightshift service account. It only hands
   its inputs to the shared investigation workflow, which runs with this workflow's identity.
 enabled: true
 settings:
@@ -56,8 +56,8 @@ steps:
         type: workflow.fail
         with:
           message: >-
-            This workflow runs Nightshift investigations as the Nightshift service account. Start
-            investigations from Nightshift instead. This run was started by
+            This workflow runs nightshift investigations as the nightshift service account. Start
+            investigations from nightshift instead. This run was started by
             {{ execution.triggeredBy }}.
 
   - name: investigate

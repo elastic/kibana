@@ -15,7 +15,7 @@ const RUN_AS_TOKEN_LINE = new RegExp(`^( {2}run_as: )${SERVICE_ACCOUNT_ID_TOKEN}
 /** Replaces the `run_as: __SERVICE_ACCOUNT_ID__` placeholder with the quoted service account id. */
 export const renderRunAs = (yaml: string, serviceAccountId: string): string => {
   if (typeof serviceAccountId !== 'string' || serviceAccountId.trim().length === 0) {
-    throw new Error('A bound Nightshift workflow requires a serviceAccountId');
+    throw new Error('A bound nightshift workflow requires a serviceAccountId');
   }
   if (!RUN_AS_TOKEN_LINE.test(yaml)) {
     throw new Error(`The workflow YAML has no "run_as: ${SERVICE_ACCOUNT_ID_TOKEN}" setting`);
