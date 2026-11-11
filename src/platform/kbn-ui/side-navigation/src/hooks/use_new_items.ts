@@ -10,7 +10,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import type { MenuItem } from '../../types';
 
-const MAX_NEW_PRIMARY_ITEMS = 2;
+const MAX_NEW_PRIMARY_ITEMS = 3;
 const MAX_NEW_SECONDARY_ITEMS_PER_PARENT = 2;
 const NEW_ITEMS_STORAGE_KEY = 'core.chrome.sidenav.newItems';
 
@@ -41,8 +41,8 @@ const getNewItemsIds = (item: MenuItem) => {
 };
 
 /**
- * Manages 'new' item status with a max of 2 'new' items per level:
- * - Max 2 new primary items
+ * Manages 'new' item status with a max of 3 new primary items and 2 new secondary items per parent:
+ * - Max 3 new primary items
  * - Max 2 new secondary items per parent
  * @param menuItems - Array of menu items to check
  * @param activeItemId - Currently active item ID for auto-marking as visited

@@ -7,22 +7,22 @@
 
 import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
-import { SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS } from '@kbn/significant-events-schema';
+import {
+  operatorFallbackAssessmentNote,
+  SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
+} from '@kbn/significant-events-schema';
 import type { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import {
   assertValidBulkWriteSize,
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
 } from '../bulk_write';
-import type { CompactBulkError } from '../bulk_write';
 import { assessMembers } from '../../../lib/significant_events/events/event_members';
 import {
   decideLifecycle,
   StatusChange,
 } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
-import type { SeriesHead } from '../../../lib/significant_events/events/rule_events_client';
 import { mergeSignalsLatestPerRule } from './episode_context';
-import type { EventsWriteSource } from './severity_lock';
 import {
   buildWriteCandidates,
   DEFAULT_INACTIVE_LOOKBACK_MS,
@@ -44,6 +44,7 @@ import {
 import {
   alignResults,
   type BulkResults,
+  type ClosedSeries,
   type DedupCandidate,
   type EventsWriteBulkResult,
   type EventsWriteInput,
@@ -51,11 +52,13 @@ import {
   type EventsWriteResult,
   type LoadedCandidate,
   type ResolvedWriteCandidate,
+  type WriteOutcome,
 } from './types';
 
 export type { EventsWriteBulkResult, EventsWriteInput, EventsWriteResult } from './types';
 
 const WRITE_CONCURRENCY = 10;
+const MAX_HELD_NOTE_LENGTH = 1000;
 
 /**
  * Versions a batch of significant events in one request while preserving input order in the
@@ -80,7 +83,6 @@ const WRITE_CONCURRENCY = 10;
 export async function eventsWriteBulkHandler({
   eventSearchClient,
   inputs,
-  source,
   rejectUnknownEventIds,
   inactiveLookbackMs = DEFAULT_INACTIVE_LOOKBACK_MS,
   logger,
@@ -88,7 +90,6 @@ export async function eventsWriteBulkHandler({
   /** Reads prior versions and live events from `.rule-events`, and writes each new version. */
   eventSearchClient: RuleEventsClient;
   inputs: EventsWriteInput[];
-  source?: EventsWriteSource;
   /** Discovery-only guard for explicit IDs that have no canonical event history. */
   rejectUnknownEventIds?: boolean;
   /** How long a closed series stays reusable by a batch it covers (default 48 h). */
@@ -116,7 +117,12 @@ export async function eventsWriteBulkHandler({
   const deactivatedGroupHashes =
     competing.length === 0
       ? new Set<string>()
-      : new Set((await eventSearchClient.findOperatorDeactivations({ heads: competing })).keys());
+      : new Set(
+          [
+            ...(await eventSearchClient.findOperatorDeactivations({ heads: competing }))
+              .deactivations,
+          ].flatMap(([groupHash, { reason }]) => (reason === '' ? [] : [groupHash]))
+        );
   const toWrite = markDuplicateKeys(
     reopenMatchingInactiveSeries({
       candidates: unskipped,
@@ -135,11 +141,9 @@ export async function eventsWriteBulkHandler({
     logger,
   });
 
-  // Facts (merged signals/topology, proposed-then-locked severity) are derived once per candidate,
+  // Facts (merged signals/topology, decided severity) are derived once per candidate,
   // so the no-op check and the final document agree on the same severity.
-  const eventsFacts = held.kept.map((candidate) =>
-    computeEventFacts({ candidate, timestamp, source })
-  );
+  const eventsFacts = held.kept.map((candidate) => computeEventFacts({ candidate, timestamp }));
   const changed = keepChanged({ facts: eventsFacts });
 
   [known, decided, held, changed].forEach(({ skipped }) =>
@@ -152,8 +156,8 @@ export async function eventsWriteBulkHandler({
   }
 
   const pendingWrites = changed.kept.map((fact) => buildPendingWrite({ facts: fact, timestamp }));
-  const errors = await writeVersions({ eventSearchClient, pendingWrites, logger });
-  applyWriteOutcomes({ pendingWrites, errors, results });
+  const outcomes = await writeVersions({ eventSearchClient, pendingWrites, logger });
+  applyWriteOutcomes({ pendingWrites, outcomes, results });
 
   return alignResults(results, 'Event bulk results were not aligned with every input');
 }
@@ -267,7 +271,10 @@ const decideStatuses = ({
   return stage;
 };
 
-type ReopeningCandidate = ResolvedWriteCandidate & { mode: 'snapshot'; reopensSeries: SeriesHead };
+type ReopeningCandidate = ResolvedWriteCandidate & {
+  mode: 'snapshot';
+  reopensSeries: ClosedSeries;
+};
 
 /** A write that would reopen a closed series that the server matched by identity. */
 const isReopeningCandidate = (candidate: ResolvedWriteCandidate): candidate is ReopeningCandidate =>
@@ -276,10 +283,14 @@ const isReopeningCandidate = (candidate: ResolvedWriteCandidate): candidate is R
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS.some((status) => status === candidate.status);
 
 /**
- * Sets aside the writes that would reopen a series an operator deactivated, so the agent can read the
- * operator's reason before the series reopens. A write that carries `reopen_deactivated` has read it
- * and goes through. Only a new-event batch that a closed series covers can be held: an
- * item that names a closed event itself has no series head to look a deactivation up by.
+ * Sets aside the writes that would reopen a closed series, so the agent can read why it was closed
+ * before the series reopens. The reason is the one recorded with an Alerting v2 `deactivate` action
+ * when there is one; a deactivate without a reason is not held, because that close only copies the
+ * agent's last note. With no such action, the note on the closing version is read, but only when
+ * the deactivation lookup succeeded. A write that carries `reopen_deactivated` has read it and goes
+ * through, and so does one with no note to read (blank or the standard no-reason note). Only a
+ * new-event batch that a closed series covers can be held: an item that names a closed event itself
+ * has no series head to look up.
  */
 const holdDeactivatedReopens = async ({
   candidates,
@@ -299,18 +310,34 @@ const holdDeactivatedReopens = async ({
 
   // Looked up even for an item that carries `reopen_deactivated`: the flag cannot be proven to
   // follow a hold, so a reopen it lets through is logged.
-  const deactivations = await eventSearchClient.findOperatorDeactivations({
-    heads: reopening.map(({ reopensSeries }) => reopensSeries),
-  });
+  const { deactivations, failed: lookupFailed } = await eventSearchClient.findOperatorDeactivations(
+    {
+      heads: reopening.map(({ reopensSeries: { groupHash, episodeId } }) => ({
+        groupHash,
+        episodeId,
+      })),
+    }
+  );
   candidates.forEach((candidate) => {
-    const deactivation = isReopeningCandidate(candidate)
-      ? deactivations.get(candidate.reopensSeries.groupHash)
-      : undefined;
-    if (deactivation === undefined) {
+    if (!isReopeningCandidate(candidate)) {
       stage.kept.push(candidate);
       return;
     }
-    const identity = `event_id=${candidate.eventId} group_hash=${deactivation.groupHash}`;
+    const { groupHash, closedAt, closingNote } = candidate.reopensSeries;
+    const action = deactivations.get(groupHash);
+    // A user deactivate decides alone: its reason is the closer's note, and none means nothing to
+    // read, since the closing version only copies the agent's last note. With no user deactivate
+    // and a completed lookup, the closing version's note is the operator's, from the update route.
+    // A failed lookup proves nothing, so it holds nothing.
+    const fullNote = (action ? action.reason : lookupFailed ? '' : closingNote ?? '').trim();
+    const note = fullNote.slice(0, MAX_HELD_NOTE_LENGTH);
+    const truncated = fullNote.length > MAX_HELD_NOTE_LENGTH;
+    // A close that says nothing gives the agent nothing to read.
+    if (note === '' || note === operatorFallbackAssessmentNote('inactive')) {
+      stage.kept.push(candidate);
+      return;
+    }
+    const identity = `event_id=${candidate.eventId} group_hash=${groupHash}`;
     if (candidate.input.reopen_deactivated === true) {
       logger?.info(`reopened_after_deactivation ${identity}`);
       stage.kept.push(candidate);
@@ -325,8 +352,9 @@ const holdDeactivatedReopens = async ({
       skipped: true,
       reason: 'held_by_deactivation',
       existing_event_id: candidate.eventId,
-      deactivation_reason: deactivation.reason,
-      deactivated_at: deactivation.deactivatedAt,
+      assessment_note: note,
+      ...(truncated ? { assessment_note_truncated: true as const } : {}),
+      deactivated_at: action?.deactivatedAt ?? closedAt,
     });
   });
   return stage;
@@ -361,7 +389,7 @@ const keepChanged = ({
   return stage;
 };
 
-/** Writes each document (create for a new event, guarded update otherwise); one error slot per write. */
+/** Writes each document (create for a new event, guarded update otherwise); one outcome per write. */
 const writeVersions = ({
   eventSearchClient,
   pendingWrites,
@@ -370,32 +398,34 @@ const writeVersions = ({
   eventSearchClient: RuleEventsClient;
   pendingWrites: Array<ReturnType<typeof buildPendingWrite>>;
   logger?: Logger;
-}): Promise<Array<CompactBulkError | undefined>> => {
+}): Promise<WriteOutcome[]> => {
   const writeLimit = pLimit(WRITE_CONCURRENCY);
   return Promise.all(
     pendingWrites.map(({ candidate, document }) =>
-      writeLimit(async (): Promise<CompactBulkError | undefined> => {
+      writeLimit(async (): Promise<WriteOutcome> => {
         try {
           if (candidate.latest === undefined) {
-            await eventSearchClient.createEvent({ event: document });
-            return undefined;
+            const { groupHash } = await eventSearchClient.createEvent({ event: document });
+            return { created: true, groupHash };
           }
           const written = await eventSearchClient.updateEvent({
             event: document,
             prior: candidate.latest,
           });
           return written.updated
-            ? undefined
+            ? { created: false }
             : {
-                type: 'superseded_write',
-                reason: `event_id ${JSON.stringify(
-                  candidate.eventId
-                )} changed after it was read, so this write was dropped. Do not retry it in the current run; the next discovery cycle routes it again.`,
+                error: {
+                  type: 'superseded_write',
+                  reason: `event_id ${JSON.stringify(
+                    candidate.eventId
+                  )} changed after it was read, so this write was dropped. Do not retry it in the current run; the next discovery cycle routes it again.`,
+                },
               };
         } catch (err) {
           const reason = err instanceof Error ? err.message : String(err);
           logger?.error(`Failed to write to .rule-events: ${reason}`);
-          return { type: 'rule_events_write_error', reason };
+          return { error: { type: 'rule_events_write_error', reason } };
         }
       })
     )

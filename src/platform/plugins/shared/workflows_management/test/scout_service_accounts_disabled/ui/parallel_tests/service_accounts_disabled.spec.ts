@@ -132,7 +132,7 @@ test.describe(
       await execution.gotoOverview(workflowId, executionId);
       await expect(execution.serviceAccountIdentity).toHaveText(ACCOUNT_ID);
       await expect(execution.serviceAccountBadges).toHaveCount(0);
-      await expect(execution.copyServiceAccountId).toBeHidden();
+      await expect(execution.copyServiceAccountId).toBeVisible();
       expect(directoryRequests).toStrictEqual([]);
     });
   }

@@ -194,4 +194,43 @@ describe(`create`, () => {
       },
     });
   });
+
+  it('tracks create action - skips tags that do not exist', async () => {
+    savedObjectsClient.create.mockResolvedValueOnce({
+      id: 'test-dashboard',
+      type: 'dashboard',
+      attributes: input,
+      references: [
+        { type: 'tag', id: 'tag1', name: 'tag-ref-tag1' },
+        { type: 'tag', id: 'does-not-exist', name: 'tag-ref-does-not-exist' },
+      ],
+    });
+
+    taggingService!.createTagClient = jest.fn().mockReturnValue({
+      get: jest.fn().mockImplementation(async (id) => {
+        if (id === 'does-not-exist') {
+          throw new Error(`Saved object [tag/${id}] not found`);
+        }
+        return { name: id };
+      }),
+    });
+
+    const result = await supertest(server.listener)
+      .post(`/api/dashboards`)
+      .send({ title: 'title' });
+    expect(result.status).toEqual(201);
+    expect(coreServices.userActivity.trackUserAction).toHaveBeenCalledWith({
+      event: {
+        action: 'dashboard_create',
+        type: ['creation'],
+      },
+      message: `User created dashboard "title" (id: test-dashboard).`,
+      object: {
+        id: 'test-dashboard',
+        name: 'title',
+        tags: ['tag1'],
+        type: 'dashboard',
+      },
+    });
+  });
 });

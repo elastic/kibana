@@ -1,0 +1,54 @@
+requestBody:
+  content:
+    application/json:
+      examples: {}
+responses:
+  '200':
+    content:
+      application/json:
+        examples:
+          bulkDeleteStatusComplete:
+            summary: Completed bulk deletion
+            value:
+              isDone: true
+              results:
+                - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                  success: true
+                - id: d077e940-1515-11ee-9c50-9d096392f520
+                  success: true
+          bulkDeleteStatusPartialFailure:
+            summary: Completed with partial failure
+            value:
+              isDone: true
+              results:
+                - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                  success: true
+                - id: d077e940-1515-11ee-9c50-9d096392f520
+                  success: false
+                  error: SLO [d077e940-1515-11ee-9c50-9d096392f520] not found
+  '401':
+    description: Unauthorized response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/401_response
+        examples:
+          unauthorizedExample:
+            summary: Unauthorized
+            value:
+              statusCode: 401
+              error: Unauthorized
+              message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+  '403':
+    description: Forbidden response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/403_response
+        examples:
+          forbiddenExample:
+            summary: Forbidden
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: 'API [GET /api/observability/slos/_bulk_delete/abc] is unauthorized for user, this action is granted by the Kibana privileges [slo_write]'

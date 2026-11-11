@@ -1906,5 +1906,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiKeyboardShortcuts.copyTitle': i18n.translate('core.euiKeyboardShortcuts.copyTitle', {
       defaultMessage: 'C',
     }),
+    'euiFlyoutMenu.maximize': i18n.translate('core.euiFlyoutMenu.maximize', {
+      defaultMessage: 'Maximize',
+    }),
+    'euiFlyoutMenu.restore': i18n.translate('core.euiFlyoutMenu.restore', {
+      defaultMessage: 'Restore',
+    }),
   };
 };

@@ -13,6 +13,8 @@ import { NIGHTSHIFT_ENABLED_FLAG, NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-
 import {
   apiTest,
   COMMON_HEADERS,
+  NIGHTSHIFT_READ_ROLE,
+  NIGHTSHIFT_NO_ACCESS_ROLE,
   cancelWorkflowRuns,
   listSharedInvestigations,
   startUnresponsiveLlm,
@@ -21,8 +23,11 @@ import {
 } from '../fixtures';
 import type { SharedInvestigation } from '../fixtures';
 
+// An automation's workflow is bound to the Nightshift automations service account, and the
+// workflows plugin requires the cluster privilege `manage_security` to write a bound workflow.
+// Creating, changing and deleting automations therefore needs more than Nightshift privileges.
 const ROLE: KibanaRole = {
-  elasticsearch: { cluster: [], indices: [] },
+  elasticsearch: { cluster: ['manage_security'], indices: [] },
   kibana: [
     {
       base: [],
@@ -151,9 +156,8 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
         .toBe(true);
       if (!investigation) throw new Error('Scheduled investigation was not created');
       const investigationId = investigation.id;
-      expect(investigation.subjects).toMatchObject([
-        { type: 'manual', id: investigationId, trigger_type: 'automatic' },
-      ]);
+      expect(investigation.subjects).toMatchObject([{ type: 'manual', trigger_type: 'automatic' }]);
+      expect(investigation.subjects[0].id).toMatch(/^scheduled-.+-\d{4}-\d{2}-\d{2}T/);
 
       const getRuns = () =>
         kbnClient.request<WorkflowExecutionListDto>({
@@ -175,7 +179,7 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
       expect(execution.data.workflowDefinition.settings?.timeout).toBe('60m');
       expect(execution.data.context).toMatchObject({
         inputs: {
-          message: body.execution.promptTemplate,
+          message: `Instructions:\n${body.execution.promptTemplate}`,
           timeout_seconds: body.runtime.timeoutSeconds,
           context: { scope_query: schedule.scopeQuery, source: 'manual' },
         },
@@ -203,6 +207,165 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
       });
       expect(disabledRuns).toHaveStatusCode(200);
       expect(disabledRuns.body).toMatchObject({ total: 0, runs: [] });
+    }
+  );
+
+  apiTest(
+    'runs an enabled scheduled automation manually without changing its configuration or schedule',
+    async ({ apiClient, kbnClient, samlAuth, esClient }) => {
+      const due = new Date(Date.now() + 12 * 60 * 60 * 1000);
+      const created = await apiClient.post(AUTOMATIONS_PATH, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+        body: {
+          name: uniqueId('scout-manual-enabled'),
+          isEnabled: true,
+          trigger: {
+            rows: [
+              {
+                kind: 'schedule',
+                schedulePreset: 'daily',
+                time: due.toISOString().slice(11, 16),
+                timezone: 'UTC',
+                scopeQuery: 'service.name:checkout',
+              },
+            ],
+          },
+          execution: { promptTemplate: 'Review checkout health.' },
+          completions: [],
+          runtime: { timeoutSeconds: 120, dailyDispatchLimit: 1 },
+        },
+      });
+      expect(created).toHaveStatusCode(200);
+      const automation = created.body as { id: string; workflowId: string };
+      automations.push(automation);
+      const getWorkflow = () =>
+        kbnClient.request<{
+          enabled: boolean;
+          yaml: string;
+          lastUpdatedAt: string;
+          definition: { settings: { run_as: string } };
+        }>({
+          method: 'GET',
+          path: `/api/workflows/workflow/${automation.workflowId}`,
+          headers: WORKFLOW_HEADERS,
+        });
+      const getScheduledTime = async () => {
+        const task = await esClient.get<{ task: { runAt: string } }>({
+          index: '.kibana_task_manager',
+          id: `task:workflow:${automation.workflowId}:scheduled`,
+        });
+        return task._source?.task.runAt;
+      };
+      const before = (await getWorkflow()).data;
+      expect(before.enabled).toBe(true);
+      const scheduledTime = await getScheduledTime();
+      expect(scheduledTime).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+      for (const role of [NIGHTSHIFT_READ_ROLE, NIGHTSHIFT_NO_ACCESS_ROLE]) {
+        const auth = await samlAuth.asInteractiveUser(role);
+        const refused = await apiClient.post(`${AUTOMATIONS_PATH}/${automation.id}/run`, {
+          headers: { ...COMMON_HEADERS, ...auth.cookieHeader },
+          responseType: 'json',
+        });
+        expect(refused).toHaveStatusCode(403);
+      }
+      // Custom roles share the worker's role slot, including existing session cookies.
+      ({ cookieHeader } = await samlAuth.asInteractiveUser(ROLE));
+      const requested = await apiClient.post(`${AUTOMATIONS_PATH}/${automation.id}/run`, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      expect(requested).toHaveStatusCode(200);
+      const { workflowExecutionId } = requested.body as { workflowExecutionId: string };
+      const execution = await kbnClient.request<WorkflowExecutionDto>({
+        method: 'GET',
+        path: `/api/workflows/executions/${workflowExecutionId}`,
+        headers: WORKFLOW_HEADERS,
+      });
+      expect(execution.data.effectiveIdentity).toStrictEqual({
+        type: 'service_account',
+        id: before.definition.settings.run_as,
+      });
+      expect(execution.data.executedBy).toMatch(/.+/);
+      expect(execution.data.executedBy).not.toBe(before.definition.settings.run_as);
+      let investigationId: string | undefined;
+      await expect
+        .poll(
+          async () => {
+            const history = await apiClient.get(`${AUTOMATIONS_PATH}/${automation.id}/runs`, {
+              headers: { ...COMMON_HEADERS, ...cookieHeader },
+              responseType: 'json',
+            });
+            expect(history).toHaveStatusCode(200);
+            const { runs, usedToday } = history.body as {
+              runs: Array<{
+                id: string;
+                investigationId?: string;
+                triggeredBy?: string;
+                executedBy?: string;
+                executedByDisplayName?: string;
+              }>;
+              usedToday: number;
+            };
+            expect(usedToday).toBe(0);
+            const run = runs.find(({ id }) => id === workflowExecutionId);
+            if (!run?.investigationId) return false;
+            expect(run).toMatchObject({
+              triggeredBy: 'manual',
+              executedBy: execution.data.executedBy,
+            });
+            expect(run.executedByDisplayName).toMatch(/.+/);
+            expect(run.executedByDisplayName).not.toMatch(/^u_/);
+            investigationId = run.investigationId;
+            return true;
+          },
+          { timeout: 60_000, intervals: [1_000] }
+        )
+        .toBe(true);
+      const createdInvestigationId = investigationId;
+      if (!createdInvestigationId) throw new Error('Manual run did not create an investigation');
+      // Acceptance creates the conversation before its workflow records the subjects.
+      await expect
+        .poll(
+          async () => {
+            const investigation = await getSharedInvestigation(
+              apiClient,
+              cookieHeader,
+              createdInvestigationId
+            );
+            expect(investigation).toHaveStatusCode(200);
+            return (investigation.body as SharedInvestigation).subjects;
+          },
+          { timeout: 30_000, intervals: [1_000] }
+        )
+        .toMatchObject([{ type: 'manual', id: createdInvestigationId, trigger_type: 'manual' }]);
+      const after = (await getWorkflow()).data;
+      expect({ yaml: after.yaml, lastUpdatedAt: after.lastUpdatedAt }).toStrictEqual({
+        yaml: before.yaml,
+        lastUpdatedAt: before.lastUpdatedAt,
+      });
+      expect(await getScheduledTime()).toBe(scheduledTime);
+      const disabled = await apiClient.put(`${AUTOMATIONS_PATH}/${automation.id}`, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        body: { isEnabled: false },
+        responseType: 'json',
+      });
+      expect(disabled).toHaveStatusCode(200);
+      expect((await getWorkflow()).data.enabled).toBe(false);
+      const refused = await apiClient.post(`${AUTOMATIONS_PATH}/${automation.id}/run`, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      expect(refused).toHaveStatusCode(400);
+      expect(refused.body).toMatchObject({
+        message: 'Enable the automation before running it manually.',
+      });
+      const saved = await apiClient.get(`${AUTOMATIONS_PATH}/${automation.id}`, {
+        headers: { ...COMMON_HEADERS, ...cookieHeader },
+        responseType: 'json',
+      });
+      expect(saved).toHaveStatusCode(200);
+      expect(saved.body).toMatchObject({ isEnabled: false, workflowId: automation.workflowId });
     }
   );
 

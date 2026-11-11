@@ -1,5 +1,5 @@
 {
-  "sha1": "67c4dc18de66ff9cbfecb75bfe897cadeea3f3ef",
+  "sha1": "6212d0bc1b88579f9bc8c31b5e0bb7930410f434",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -266,6 +266,38 @@
       }
     },
     {
+      "id": "c7ed30cf4096600-ec737346693fca6",
+      "title": "HITL recorded step input waitForInput keeps its recorded input and accepts one external response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_recorded_step_input.spec.ts",
+        "line": 260,
+        "column": 30
+      }
+    },
+    {
+      "id": "c7ed30cf4096600-e312735ba490efc",
+      "title": "HITL recorded step input waitForApproval keeps its recorded input and accepts one external decision",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-search",
+        "@local-serverless-observability_complete",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/hitl_recorded_step_input.spec.ts",
+        "line": 328,
+        "column": 14
+      }
+    },
+    {
       "id": "852fb4b9089c63d-f656cc23e02e8c9",
       "title": "HITL waitForInput resume pauses for input and completes with the submitted response",
       "expectedStatus": "passed",
@@ -403,6 +435,26 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/kibana_request_step.spec.ts",
         "line": 178,
         "column": 29
+      }
+    },
+    {
+      "id": "ef6366b34705572-ac4c1a8b1cf42d4",
+      "title": "Parked wait timeout times out a parked wait at the workflow deadline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_execution/parked_wait_timeout.spec.ts",
+        "line": 35,
+        "column": 55
       }
     },
     {
@@ -1141,6 +1193,45 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/admin_access_control.spec.ts",
         "line": 322,
         "column": 27
+      }
+    },
+    {
+      "id": "362db501e8862ba-3aa8b9a1c8c090c",
+      "title": "Workflow executor profile resolves the executor name for a user without bulkGetUserProfiles",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/executed_by_profile.spec.ts",
+        "line": 75,
+        "column": 5
+      }
+    },
+    {
+      "id": "362db501e8862ba-c0a159379f64266",
+      "title": "Workflow executor profile resolves the workflow owner name for the access control modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/executed_by_profile.spec.ts",
+        "line": 132,
+        "column": 17
+      }
+    },
+    {
+      "id": "362db501e8862ba-10437f8c12f7904",
+      "title": "Workflow executor profile does not resolve the unvalidated entries of a public ACL for the access control modal",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/api/tests/workflow_management/executed_by_profile.spec.ts",
+        "line": 147,
+        "column": 14
       }
     },
     {

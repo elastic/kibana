@@ -8,6 +8,13 @@
 import { tags } from '@kbn/scout';
 import { restoreAlertsSnapshot } from '@kbn/security-evals-alerts-snapshot';
 import { evaluate } from '@kbn/evals-suite-attack-discovery/src/evaluate';
+import { resolveConcurrency } from '@kbn/evals-suite-attack-discovery/src/evaluate_dataset';
+import { runAttackDiscovery } from '@kbn/evals-suite-attack-discovery/src/task/run_attack_discovery';
+import type { AttackDiscoveryTaskOutput } from '@kbn/evals-suite-attack-discovery/src/types';
+import {
+  CHRYSALIS_AD_DATASET_NAME,
+  createChrysalisAdExperimentEvaluators,
+} from '../src/attack_discovery_experiment';
 
 const CHRYSALIS_95_SNAPSHOT = {
   bucket: 'security-ai-datasets',
@@ -31,33 +38,70 @@ evaluate.describe(
   () => {
     evaluate(
       'generate API (GCS 95-alert snapshot)',
-      async ({ evaluateDataset, connector, esClient, log }) => {
+      async ({
+        connector,
+        esClient,
+        log,
+        attackDiscoveryClient,
+        generateApiClient,
+        inferenceClient,
+        evaluators,
+        evaluationConnector,
+        executorClient,
+      }) => {
         await restoreAlertsSnapshot({ esClient, log, config: CHRYSALIS_95_SNAPSHOT });
         const { count } = await esClient.count({ index: '.alerts-security.alerts-default' });
         log.info(`[attack-discovery] corpus ready: ${count} alerts (reference: 95)`);
 
-        await evaluateDataset({
-          dataset: {
-            name: 'Attack Discovery Chrysalis kill-chains (generate API)',
-            description:
-              'Deduped 95-alert Attack Discovery corpus restored from the shared GCS snapshot ' +
-              '(security-ai-datasets/attack-discovery/oh-my-malware-95-deduped) and evaluated ' +
-              'via the production _generate API.',
-            examples: [
-              {
-                input: {
-                  mode: 'generateApi' as const,
-                  connectorId: connector.id,
-                  alertsIndexPattern: '.alerts-security.alerts-default',
-                  size: 100,
-                  ...CORPUS_WINDOW,
-                },
-                output: { attackDiscoveries: [] },
-                metadata: {},
+        const dataset = {
+          name: CHRYSALIS_AD_DATASET_NAME,
+          description:
+            'Deduped 95-alert Attack Discovery corpus restored from the shared GCS snapshot ' +
+            '(security-ai-datasets/attack-discovery/oh-my-malware-95-deduped) and evaluated ' +
+            'via the production _generate API.',
+          examples: [
+            {
+              input: {
+                mode: 'generateApi' as const,
+                connectorId: connector.id,
+                alertsIndexPattern: '.alerts-security.alerts-default',
+                size: 100,
+                ...CORPUS_WINDOW,
               },
-            ],
-          },
+              output: { attackDiscoveries: [] },
+              metadata: {},
+            },
+          ],
+        };
+
+        const experimentEvaluators = createChrysalisAdExperimentEvaluators({
+          evaluators,
+          evaluationInferenceClient: inferenceClient.bindTo({
+            connectorId: evaluationConnector.id,
+          }),
+          log,
         });
+
+        await executorClient.runExperiment(
+          {
+            datasets: [dataset],
+            task: async ({ input }): Promise<AttackDiscoveryTaskOutput> => {
+              if (!input) {
+                return { insights: null, errors: ['Missing input'] };
+              }
+              return runAttackDiscovery({
+                inferenceClient,
+                attackDiscoveryClient,
+                generateApiClient,
+                input,
+                log,
+              });
+            },
+            concurrency: resolveConcurrency(),
+            trustUpstreamDataset: false,
+          },
+          experimentEvaluators
+        );
       }
     );
   }

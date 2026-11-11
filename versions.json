@@ -12,17 +12,12 @@
       "branchType": "release"
     },
     {
-      "version": "9.5.6",
+      "version": "9.5.7",
       "branch": "9.5",
       "branchType": "release"
     },
     {
-      "version": "9.4.9",
-      "branch": "9.4",
-      "branchType": "release"
-    },
-    {
-      "version": "8.19.24",
+      "version": "8.19.25",
       "branch": "8.19",
       "branchType": "release"
     }

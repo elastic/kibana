@@ -12,6 +12,7 @@ import type { FlakyTestReport, TestFramework } from '@kbn/scout-reporting';
 import { getIssueMetadata, updateIssueMetadata } from '../failed_tests_reporter/issue_metadata';
 import {
   BUILDKITE_ORG_URL,
+  buildkiteJobUrl,
   CATEGORY_LABELS,
   codeBlock,
   collapsed,
@@ -624,10 +625,15 @@ const formatErrorPipelines = (byPipeline: Map<string, Set<string>>): string => {
 };
 
 /**
- * One error, collapsed under its share of the suite's failed builds and its first line; inside,
- * the full message, then where it was seen.
+ * One error, under its share of the suite's failed builds and its first line, collapsed unless
+ * `open`; inside, the full message, then where it was seen.
  */
-const errorSection = (suite: FlakySuite, error: SuiteError, failedBuilds: number): string => {
+const errorSection = (
+  suite: FlakySuite,
+  error: SuiteError,
+  failedBuilds: number,
+  open: boolean
+): string => {
   const builds = errorBuilds(error);
   const share = formatPercent(failedBuilds > 0 ? builds / failedBuilds : 0);
   const summary =
@@ -660,7 +666,8 @@ const errorSection = (suite: FlakySuite, error: SuiteError, failedBuilds: number
     summary,
     [codeBlock(formatFullFailureMessage(error.message)), table(['Field', 'Value'], rows)].join(
       '\n\n'
-    )
+    ),
+    { open }
   );
 };
 
@@ -673,8 +680,9 @@ const isPullRequestOnly = (error: SuiteError): boolean =>
 
 /**
  * The suite's distinct errors over the window, most builds first, at most `MAX_ERRORS` shown.
- * Errors seen only on pull request builds are left out, and the section says so, so that it
- * describes what the suite does on real branches.
+ * The first is open, so the likely cause shows without a click. Errors seen only on pull request
+ * builds are left out, and the section says so, so that it describes what the suite does on real
+ * branches.
  */
 const failuresByErrorMessage = (suite: FlakySuite): string => {
   const all = suiteErrors(suite);
@@ -695,7 +703,7 @@ const failuresByErrorMessage = (suite: FlakySuite): string => {
   ).size;
   const shown = errors
     .slice(0, MAX_ERRORS)
-    .map((error) => errorSection(suite, error, failedBuilds));
+    .map((error, index) => errorSection(suite, error, failedBuilds, index === 0));
   const rest = errors.length - shown.length;
   return [
     '#### Failures by Error Message',
@@ -773,6 +781,11 @@ const failureSections = (suite: FlakySuite, report: FlakyTestReport): Array<stri
 const joinSections = (sections: ReadonlyArray<string | undefined>): string =>
   sections.filter((section) => section !== undefined).join('\n\n');
 
+export const SKIP_TIP =
+  '> [!TIP]\n' +
+  "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
+  'to `/skip` it, or skip the test case manually.';
+
 /** Full issue body for a new suite issue, including the hidden metadata. */
 export const renderFlakySuiteIssueBody = (suite: FlakySuite, ctx: FlakySuiteIssueContext): string =>
   updateIssueMetadata(
@@ -783,6 +796,7 @@ export const renderFlakySuiteIssueBody = (suite: FlakySuite, ctx: FlakySuiteIssu
       suiteDetails(suite),
       '### Failures',
       ...failureSections(suite, ctx.report),
+      SKIP_TIP,
       supersededIssues(ctx),
       relatedIssues(ctx),
     ]),
@@ -807,27 +821,62 @@ export const refreshFlakySuiteIssueMetadata = (
     FLAKY_TEST_SUITE_METADATA_PREFIX
   );
 
-export const SKIP_TIP =
-  '> [!TIP]\n' +
-  "> Review the failures. If you'd like to skip the test, ask the #kibana-operations team " +
-  'to `/skip` it, or skip the test case manually.';
+/** `[6 Nov](…#job)`, the day of the newest failure linked to its job when the build is known. */
+const lastFailedLink = ({
+  lastFailedAt,
+  lastFailedBuildUrl,
+  lastFailedJobId,
+}: BuildCounts): string | undefined => {
+  if (!lastFailedAt) {
+    return undefined;
+  }
+  const day = formatDay(lastFailedAt);
+  return lastFailedBuildUrl
+    ? `[${day}](${buildkiteJobUrl(lastFailedBuildUrl, lastFailedJobId)})`
+    : day;
+};
 
 /**
- * The comment of a refresh that found new failures: this report's numbers for the suite, as the
- * body keeps the ones it was filed with, then how to skip it.
+ * The comment of a refresh that found new failures: where the suite is flaky and not skipped, with
+ * the worst test's numbers and its newest failure on each branch, in one sentence for a single
+ * branch and one line per branch otherwise. The body keeps the full tables.
  */
 export const renderFlakySuiteIssueComment = (
   suite: FlakySuite,
   { report, reopened }: FlakySuiteIssueCommentContext
 ): string => {
-  const lead = reopened
-    ? 'This test suite appears to be flaky again after this issue was closed'
-    : 'This test suite still appears to be flaky';
-  return joinSections([
-    `${lead}, with ${plural(suite.tests.length, 'flaky test')} over ` +
-      `${formatDateRange(report.window.from, report.window.to)}:`,
-    ...reportSections(suite, report),
-    ...failureSections(suite, report),
-    SKIP_TIP,
-  ]);
+  const state = reopened ? 'flaky again after this issue was closed' : 'still flaky';
+  const lead =
+    suite.tests.length > 1
+      ? `${plural(suite.tests.length, 'test')} ${state}`
+      : `${state[0].toUpperCase()}${state.slice(1)}`;
+  const flaky = flakyBranches(suite, report.thresholds);
+  const skipped = branchSkips(suite);
+  const branches = worstPerKey(
+    suite,
+    (test) => test.byBranch,
+    (stats) => stats.branch
+  )
+    .filter(({ worst }) => flaky.has(worst.branch) && !skipped.has(worst.branch))
+    .map(({ worst, latest }) => {
+      const lastFailed = latest ? lastFailedLink(latest) : undefined;
+      return {
+        branch: inlineCode(worst.branch),
+        numbers:
+          `${formatPercent(worst.buildFailRate)} of builds ` +
+          `(${worst.failedBuilds} / ${worst.builds})${
+            lastFailed ? `, last failed ${lastFailed}` : ''
+          }`,
+      };
+    });
+  if (branches.length === 0) {
+    return `${lead}.`;
+  }
+  if (branches.length === 1) {
+    const [{ branch, numbers }] = branches;
+    return `${lead}${reopened ? ',' : ''} on ${branch}: ${numbers}.`;
+  }
+  return `${lead}:\n\n${branches
+    .map(({ branch, numbers }) => `- ${branch}: ${numbers}`)
+    .join('\n')}`;
 };

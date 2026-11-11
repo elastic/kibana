@@ -7,8 +7,12 @@
 
 import { union } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { NightshiftSource } from '@kbn/nightshift-shared';
-import type { SourceChangeListener, SourcesClient } from '@kbn/nightshift-sources-plugin/server';
+import { isNightshiftSupportedSpace, type NightshiftSource } from '@kbn/nightshift-shared';
+import type {
+  SourceChangeEvent,
+  SourceChangeListener,
+  SourcesClient,
+} from '@kbn/nightshift-sources-plugin/server';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
@@ -301,6 +305,7 @@ export const createSourceChangeListener =
   ({
     enqueueReconciliation,
     ensurePeriodicReconciliation,
+    syncContinuousOnboarding,
   }: {
     enqueueReconciliation: (args: {
       sourceId: string;
@@ -308,8 +313,15 @@ export const createSourceChangeListener =
       request: KibanaRequest;
     }) => Promise<void>;
     ensurePeriodicReconciliation: (request: KibanaRequest) => Promise<void>;
+    syncContinuousOnboarding: (event: SourceChangeEvent) => Promise<void>;
   }): SourceChangeListener =>
   async (event) => {
+    // Every branch below installs or enables a workflow in the event's space, and Nightshift only
+    // runs in the default one. The source routes refuse other spaces already; this also covers a
+    // write made through `getSourcesClient()`.
+    if (!isNightshiftSupportedSpace(event.request.spaceId)) {
+      return;
+    }
     if (
       event.type === 'updated' &&
       event.previous.esql_updated_at === event.source.esql_updated_at &&
@@ -324,6 +336,7 @@ export const createSourceChangeListener =
         request: event.request,
       }),
       ensurePeriodicReconciliation(event.request),
+      syncContinuousOnboarding(event),
     ]);
     const failures = results.flatMap((result) =>
       result.status === 'rejected' ? [result.reason] : []

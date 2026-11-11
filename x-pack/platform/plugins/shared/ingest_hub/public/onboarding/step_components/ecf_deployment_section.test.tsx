@@ -27,6 +27,7 @@ jest.mock('../ecf_cloudformation', () => ({
   buildEcfTemplateUrl: jest.fn(
     (_file: string, version: string) => `https://s3.amazonaws.com/ecf/${version}/template.yaml`
   ),
+  normaliseLogGroupArn: (arn: string) => (arn.endsWith(':*') ? arn : `${arn}:*`),
   isEcfStackArnValid: jest.fn((arn: string) =>
     /^arn:aws(?:-us-gov|-cn)?:cloudformation:[a-z0-9-]+:\d+:stack\//.test(arn.trim())
   ),
@@ -36,6 +37,8 @@ jest.mock('../ecf_cloudformation', () => ({
   ECF_UNIFIED_TEMPLATE_FILE: 'unified.yaml',
   ECF_OTEL_TEMPLATE_FILE: 'otel.yaml',
   ECF_CROWDSTRIKE_TEMPLATE_FILE: 'crowdstrike.yaml',
+  ECF_DEFAULT_NAMESPACE: 'default',
+  getEcfTemplateFamily: jest.requireActual('../ecf_cloudformation').getEcfTemplateFamily,
 }));
 
 jest.mock('../core/onboarding_session_storage', () => ({
@@ -88,6 +91,11 @@ function makeSessionStorageMock(
     stackNames?: Record<string, string>;
     stackVersions?: Record<string, string>;
     launchedServiceIds?: Record<string, string[]>;
+    launchedConfigs?: Record<
+      string,
+      Array<{ serviceId: string; bucketArns: string[]; logGroupArns: string[] }>
+    >;
+    launchedNamespaces?: Record<string, string>;
     stackArns?: Record<string, string>;
   } = {}
 ) {
@@ -114,6 +122,11 @@ function renderSection(props: Partial<React.ComponentProps<typeof EcfDeploymentS
       otel: false,
       crowdstrike: false,
     } as React.ComponentProps<typeof EcfDeploymentSection>['isStaleByFamily'],
+    staleReasonByFamily: {
+      unified: undefined,
+      otel: undefined,
+      crowdstrike: undefined,
+    } as React.ComponentProps<typeof EcfDeploymentSection>['staleReasonByFamily'],
     isUpdateOpenedByFamily: {} as React.ComponentProps<
       typeof EcfDeploymentSection
     >['isUpdateOpenedByFamily'],
@@ -475,6 +488,7 @@ describe('EcfDeploymentSection', () => {
             stackVersions={{}}
             stackArns={{}}
             isStaleByFamily={{ unified: false, otel: false, crowdstrike: false }}
+            staleReasonByFamily={{ unified: undefined, otel: undefined, crowdstrike: undefined }}
             isUpdateOpenedByFamily={{}}
             onLaunch={jest.fn()}
             onUpdateOpened={jest.fn()}
@@ -554,6 +568,57 @@ describe('EcfDeploymentSection', () => {
     });
   });
 
+  describe('stale callout wording', () => {
+    it('describes a changed service selection', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+        staleReasonByFamily: { unified: 'services', otel: undefined, crowdstrike: undefined },
+      });
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
+      ).toHaveTextContent('Services changed');
+    });
+
+    it('describes changed service settings', () => {
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+        staleReasonByFamily: { unified: 'settings', otel: undefined, crowdstrike: undefined },
+      });
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-staleCallout')
+      ).toHaveTextContent('Service settings changed');
+    });
+  });
+
+  describe('stale namespace', () => {
+    const renderStale = (staleNamespace?: string) =>
+      renderSection({
+        ecfUnifiedConfigs: [unifiedConfig('cloudtrail')],
+        launchedFamilies: ['unified'],
+        isStaleByFamily: { unified: true, otel: false, crowdstrike: false },
+        staleReasonByFamily: { unified: 'settings', otel: undefined, crowdstrike: undefined },
+        staleNamespaceByFamily: staleNamespace ? { unified: staleNamespace } : {},
+      });
+
+    it('tells which value to enter for DataStreamNamespace', () => {
+      renderStale('prod');
+      expect(
+        screen.getByTestId('ecfDeploymentSection-unifiedLaunchButton-staleNamespace')
+      ).toHaveTextContent('set the DataStreamNamespace parameter to prod');
+    });
+
+    it('does not mention the namespace when it did not change', () => {
+      renderStale();
+      expect(
+        screen.queryByTestId('ecfDeploymentSection-unifiedLaunchButton-staleNamespace')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   describe('stack name field', () => {
     it('is hidden before launch', () => {
       renderSection({ ecfUnifiedConfigs: [unifiedConfig('cloudtrail')], launchedFamilies: [] });
@@ -619,6 +684,7 @@ describe('EcfDeploymentSection', () => {
             stackVersions={{}}
             stackArns={{}}
             isStaleByFamily={{ unified: false, otel: false, crowdstrike: false }}
+            staleReasonByFamily={{ unified: undefined, otel: undefined, crowdstrike: undefined }}
             isUpdateOpenedByFamily={{}}
             onLaunch={jest.fn()}
             onUpdateOpened={jest.fn()}
@@ -662,6 +728,7 @@ describe('EcfDeploymentSection', () => {
             stackVersions={{}}
             stackArns={{}}
             isStaleByFamily={{ unified: false, otel: false, crowdstrike: false }}
+            staleReasonByFamily={{ unified: undefined, otel: undefined, crowdstrike: undefined }}
             isUpdateOpenedByFamily={{}}
             onLaunch={jest.fn()}
             onUpdateOpened={jest.fn()}
@@ -859,6 +926,7 @@ describe('EcfDeploymentSection', () => {
             stackVersions={{}}
             stackArns={{ unified: arn }}
             isStaleByFamily={{ unified: true, otel: false, crowdstrike: false }}
+            staleReasonByFamily={{ unified: 'services', otel: undefined, crowdstrike: undefined }}
             isUpdateOpenedByFamily={isUpdateOpenedByFamily}
             onUpdateOpened={(family) =>
               setIsUpdateOpenedByFamily((prev) => ({ ...prev, [family]: true }))
@@ -1029,6 +1097,316 @@ describe('useEcfDeployment staleness', () => {
     });
     const persisted = setter.mock.calls[setter.mock.calls.length - 1][0];
     expect(persisted.launchedServiceIds?.unified).toEqual(['cloudtrail', 'waf']);
+  });
+
+  describe('settings drift', () => {
+    const arnA = 'arn:aws:s3:::bucket-a';
+    const arnB = 'arn:aws:s3:::bucket-b';
+    const cfg = (bucketArns: string[], logGroupArns: string[] = []) => ({
+      ...unifiedConfig('cloudtrail'),
+      bucketArns,
+      logGroupArns,
+    });
+    const snapshot = (bucketArns: string[], logGroupArns: string[] = []) => ({
+      unified: [{ serviceId: 'cloudtrail', bucketArns, logGroupArns }],
+    });
+    const renderEcfHook = () =>
+      renderHook(() =>
+        useEcfDeployment({
+          instances: [baseInstance('cloudtrail')],
+          serviceVars: {},
+          globalRegion: 'us-east-1',
+          otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
+        })
+      );
+
+    it('is stale with reason "settings" when a bucket ARN changed after launch', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB])]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        launchedConfigs: snapshot([arnA]),
+      });
+      const { result } = renderEcfHook();
+      expect(result.current.sectionProps.isStaleByFamily.unified).toBe(true);
+      expect(result.current.sectionProps.staleReasonByFamily.unified).toBe('settings');
+      expect(result.current.isDone).toBe(false);
+    });
+
+    it('is stale when a log group ARN changed after launch', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([
+        cfg([], ['arn:aws:logs:us-east-1:1:log-group:b:*']),
+      ]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        launchedConfigs: snapshot([], ['arn:aws:logs:us-east-1:1:log-group:a:*']),
+      });
+      const { result } = renderEcfHook();
+      expect(result.current.sectionProps.staleReasonByFamily.unified).toBe('settings');
+    });
+
+    it('is not stale when the same ARNs are listed in a different order', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB, arnA])]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        launchedConfigs: snapshot([arnA, arnB]),
+      });
+      const { result } = renderEcfHook();
+      expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+    });
+
+    it('is not stale when a log group ARN only gains or loses the optional :* suffix', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([], ['arn:aws:logs:us-east-1:1:log-group:a'])]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        launchedConfigs: snapshot([], ['arn:aws:logs:us-east-1:1:log-group:a:*']),
+      });
+      const { result } = renderEcfHook();
+      expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+    });
+
+    it('is not stale when no settings snapshot exists (old session)', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB])]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+      });
+      const { result } = renderEcfHook();
+      expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+    });
+
+    it('is not stale before the family is launched', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB])]);
+      makeSessionStorageMock({ launchedFamilies: [], launchedConfigs: snapshot([arnA]) });
+      const { result } = renderEcfHook();
+      expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+    });
+
+    it('reports "services" when both the service set and settings changed', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB]), unifiedConfig('waf')]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        launchedConfigs: snapshot([arnA]),
+      });
+      const { result } = renderHook(() =>
+        useEcfDeployment({
+          instances: [baseInstance('cloudtrail'), baseInstance('waf')],
+          serviceVars: {},
+          globalRegion: 'us-east-1',
+          otlpEndpoint: undefined,
+          dataFormat: 'ecs' as const,
+        })
+      );
+      expect(result.current.sectionProps.staleReasonByFamily.unified).toBe('services');
+    });
+
+    describe('namespace drift', () => {
+      const renderNamespaceHook = (namespace?: string) =>
+        renderHook(() =>
+          useEcfDeployment({
+            instances: [baseInstance('cloudtrail')],
+            serviceVars: {},
+            globalRegion: 'us-east-1',
+            otlpEndpoint: undefined,
+            dataFormat: 'ecs' as const,
+            namespace,
+          })
+        );
+      const launched = (launchedNamespaces?: Record<string, string>) => {
+        mockGetEcfServiceConfigs.mockReturnValue([cfg([arnA])]);
+        return makeSessionStorageMock({
+          launchedFamilies: ['unified'],
+          launchedServiceIds: { unified: ['cloudtrail'] },
+          launchedConfigs: snapshot([arnA]),
+          launchedNamespaces,
+        });
+      };
+
+      it('is stale with the new namespace when the global namespace changed after launch', () => {
+        launched({ unified: 'default' });
+        const { result } = renderNamespaceHook('prod');
+        expect(result.current.sectionProps.isStaleByFamily.unified).toBe(true);
+        expect(result.current.sectionProps.staleReasonByFamily.unified).toBe('settings');
+        expect(result.current.sectionProps.staleNamespaceByFamily?.unified).toBe('prod');
+        expect(result.current.isDone).toBe(false);
+      });
+
+      it('is not stale when the namespace is unchanged', () => {
+        launched({ unified: 'prod' });
+        const { result } = renderNamespaceHook('prod');
+        expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+        expect(result.current.sectionProps.staleNamespaceByFamily).toEqual({});
+      });
+
+      it('treats an empty namespace as the template default', () => {
+        launched({ unified: 'default' });
+        const { result } = renderNamespaceHook('');
+        expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+      });
+
+      it('is stale with the template default when the namespace is cleared after launch', () => {
+        const setter = launched({ unified: 'prod' });
+        const { result } = renderNamespaceHook('');
+        expect(result.current.sectionProps.staleNamespaceByFamily?.unified).toBe('default');
+        act(() => {
+          result.current.sectionProps.onUpdateOpened('unified');
+        });
+        act(() => {
+          result.current.advanceStaleSnapshots();
+        });
+        expect(setter.mock.calls.at(-1)?.[0].launchedNamespaces).toEqual({ unified: 'default' });
+      });
+
+      it('keeps the launched namespace of a stack while none of its services is selected', () => {
+        mockGetEcfServiceConfigs.mockReturnValue([]);
+        makeSessionStorageMock({
+          launchedFamilies: ['unified'],
+          launchedServiceIds: { unified: ['cloudtrail'] },
+          launchedConfigs: snapshot([arnA]),
+          launchedNamespaces: { unified: 'prod' },
+        });
+        const { result } = renderHook(() =>
+          useEcfDeployment({
+            instances: [],
+            serviceVars: {},
+            globalRegion: 'us-east-1',
+            otlpEndpoint: undefined,
+            dataFormat: 'ecs' as const,
+            namespace: 'staging',
+          })
+        );
+        expect(result.current.currentNamespaceByFamily.unified).toBe('prod');
+      });
+
+      it('treats a stack without a namespace snapshot as launched with the template default', () => {
+        launched(undefined);
+        expect(renderNamespaceHook('').result.current.sectionProps.isStaleByFamily.unified).toBe(
+          false
+        );
+        const { result } = renderNamespaceHook('prod');
+        expect(result.current.sectionProps.staleNamespaceByFamily?.unified).toBe('prod');
+      });
+
+      it('onLaunch stores the namespace the stack is launched with', () => {
+        mockGetEcfServiceConfigs.mockReturnValue([cfg([arnA])]);
+        const setter = makeSessionStorageMock({ launchedFamilies: [] });
+        const { result } = renderNamespaceHook('prod');
+        act(() => {
+          result.current.sectionProps.onLaunch('unified');
+        });
+        expect(setter.mock.calls[0][0].launchedNamespaces).toEqual({ unified: 'prod' });
+      });
+
+      it('advanceStaleSnapshots advances the namespace snapshot once the update was opened', () => {
+        const setter = launched({ unified: 'default' });
+        const { result } = renderNamespaceHook('prod');
+        act(() => {
+          result.current.sectionProps.onUpdateOpened('unified');
+        });
+        act(() => {
+          result.current.advanceStaleSnapshots();
+        });
+        expect(setter.mock.calls.at(-1)?.[0].launchedNamespaces).toEqual({ unified: 'prod' });
+      });
+    });
+
+    it('onLaunch stores the current settings as the launchedConfigs snapshot', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB, arnA])]);
+      const setter = makeSessionStorageMock({ launchedFamilies: [] });
+      const { result } = renderEcfHook();
+      act(() => {
+        result.current.sectionProps.onLaunch('unified');
+      });
+      expect(setter.mock.calls[0][0].launchedConfigs?.unified).toEqual(
+        snapshot([arnA, arnB]).unified
+      );
+    });
+
+    it('advanceStaleSnapshots advances the settings snapshot once the update was opened', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB])]);
+      const setter = makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        launchedConfigs: snapshot([arnA]),
+      });
+      const { result } = renderEcfHook();
+      act(() => {
+        result.current.sectionProps.onUpdateOpened('unified');
+      });
+      act(() => {
+        result.current.advanceStaleSnapshots();
+      });
+      const persisted = setter.mock.calls[setter.mock.calls.length - 1][0];
+      expect(persisted.launchedConfigs?.unified).toEqual(snapshot([arnB]).unified);
+    });
+
+    it('is no longer stale after the snapshot advances and the step is remounted', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB])]);
+      let state: Record<string, unknown> = {
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        launchedConfigs: snapshot([arnA]),
+      };
+      mockUseSessionStorage.mockImplementation(() => [
+        state,
+        (next: Record<string, unknown>) => {
+          state = next;
+        },
+      ]);
+      const first = renderEcfHook();
+      expect(first.result.current.sectionProps.isStaleByFamily.unified).toBe(true);
+      act(() => {
+        first.result.current.sectionProps.onUpdateOpened('unified');
+      });
+      act(() => {
+        first.result.current.advanceStaleSnapshots();
+      });
+      first.unmount();
+
+      // Back from the next step: a fresh mount reads the persisted state.
+      const second = renderEcfHook();
+      expect(second.result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+    });
+
+    it('advanceStaleSnapshots persists to session storage immediately, before any re-render', () => {
+      sessionStorage.clear();
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB])]);
+      makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        launchedConfigs: snapshot([arnA]),
+      });
+      const { result } = renderEcfHook();
+      act(() => {
+        result.current.sectionProps.onUpdateOpened('unified');
+      });
+      act(() => {
+        result.current.advanceStaleSnapshots();
+      });
+      // The mocked hook never writes storage itself, so this proves the direct write.
+      const stored = JSON.parse(sessionStorage.getItem('onboarding.aws.ecfLaunchStep') ?? 'null');
+      expect(stored.launchedConfigs.unified).toEqual(snapshot([arnB]).unified);
+      expect(stored.launchedServiceIds.unified).toEqual(['cloudtrail']);
+    });
+
+    it('advanceStaleSnapshots leaves the settings snapshot alone until the update was opened', () => {
+      mockGetEcfServiceConfigs.mockReturnValue([cfg([arnB])]);
+      const setter = makeSessionStorageMock({
+        launchedFamilies: ['unified'],
+        launchedServiceIds: { unified: ['cloudtrail'] },
+        launchedConfigs: snapshot([arnA]),
+      });
+      const { result } = renderEcfHook();
+      act(() => {
+        result.current.advanceStaleSnapshots();
+      });
+      expect(setter).not.toHaveBeenCalled();
+    });
   });
 
   it('onStackArnChange stores the ARN for the given family', () => {
