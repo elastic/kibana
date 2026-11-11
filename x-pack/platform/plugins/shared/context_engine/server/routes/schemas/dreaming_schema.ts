@@ -14,6 +14,7 @@ import {
   MAX_DREAMING_FACT_TYPES,
   MAX_DREAMING_INSTRUCTIONS_LENGTH,
   MAX_DREAMING_INTERVAL_LENGTH,
+  MAX_DREAMING_RELATIONSHIP_TYPES,
   MAX_DREAMING_TYPE_DESCRIPTION_LENGTH,
   MAX_DREAMING_TYPE_LENGTH,
   MIN_DREAMING_INTERVAL_MINUTES,
@@ -133,11 +134,31 @@ export const dreamingConfigSchema = schema.object(
         )
       )
     ),
+    relationships: schema.maybe(
+      schema.nullable(
+        schema.arrayOf(
+          schema.object({
+            type: typeSchema(
+              'The relationship type, such as `member_of`, stored on the relationship KI as `attributes["relationship.relation"]`.'
+            ),
+            description: typeDescriptionSchema,
+          }),
+          {
+            maxSize: MAX_DREAMING_RELATIONSHIP_TYPES,
+            meta: {
+              description:
+                'Relationship types between the entities dreaming builds, each stored as a `memory.relationship` KI. When set, facts also link to the entities they are about with the built-in `about` type, which cannot be configured. Omitted or empty: no relationships.',
+            },
+          }
+        )
+      )
+    ),
   },
   {
     validate: validateDreamingTypes,
     meta: {
-      description: 'What the AI Index learns from its memories: facts and entities.',
+      description:
+        'What the AI Index learns from its memories: facts, entities, and the relationships between them.',
     },
   }
 );

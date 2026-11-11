@@ -12,6 +12,9 @@ import {
   FACT_TYPE_PREFIX,
   LAST_SEEN_AT_ATTRIBUTE,
   OCCURRENCES_ATTRIBUTE,
+  RELATIONSHIP_KEY_ATTRIBUTE,
+  RELATIONSHIP_KI_TYPE,
+  RELATIONSHIP_RELATION_ATTRIBUTE,
 } from '../../common/dreaming';
 import type { AccessPattern } from '../../common/step_types/apply_dream_changes';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
@@ -25,6 +28,7 @@ import {
   type KiWriter,
   type StoredKi,
 } from '../ai_indices/ki_revision';
+import { findLinkingRelationshipIds } from '../ai_indices/ki_relationships';
 import { softDeleteKi } from '../ai_indices/ki_write';
 import {
   accessPatternAttributes,
@@ -53,6 +57,7 @@ import type {
   UpsertEntityOperation,
   UpsertFactOperation,
 } from './resolve_change_set';
+import type { RelationshipOperation, UpsertRelationshipOperation } from './resolve_relationships';
 
 const WRITE_CONFLICT_RETRIES = 3;
 
@@ -85,6 +90,10 @@ export interface ApplyContext {
   abortSignal?: AbortSignal;
   /** Collects the writes by KI id instead of storing them. */
   dryRun?: Map<string, PlannedWrite>;
+  /** Collects each KI stored, by id. */
+  written?: Map<string, StoredKi>;
+  /** Writes without waiting for a refresh. Each KI must be written at most once. */
+  skipRefresh?: boolean;
 }
 
 const referenceKey = ({ uri, relation, description }: DreamedKiReference): string =>
@@ -113,11 +122,12 @@ export const addReferences = (
 const sourceReferences = (sourceMemoryIds: readonly string[]): DreamedKiReference[] =>
   sourceMemoryIds.map((id) => ({ uri: kiUri(id), relation: 'derived_from' }));
 
-type BuildDocument = (current: DreamedKi | undefined) => Omit<DreamedKi, 'governance'>;
+/** Builds the KI to store; undefined when it would not change. */
+type BuildDocument = (current: DreamedKi | undefined) => Omit<DreamedKi, 'governance'> | undefined;
 
 type BuildPermittedDocument = (
   current: DreamedKi | undefined
-) => Omit<DreamedKi, 'governance'> | 'rejected';
+) => Omit<DreamedKi, 'governance'> | 'rejected' | undefined;
 
 type WriteResult = 'created' | 'updated' | 'skipped' | 'rejected';
 
@@ -181,7 +191,7 @@ const withDerivedPermissions =
       return 'rejected';
     }
     const document = build(current);
-    return permissions ? { ...document, permissions } : document;
+    return document && permissions ? { ...document, permissions } : document;
   };
 
 const planDocument = async (
@@ -203,6 +213,9 @@ const planDocument = async (
   if (document === 'rejected') {
     return document;
   }
+  if (!document) {
+    return 'skipped';
+  }
   planned.set(kiId, {
     change: previous?.change === 'created' || !current ? 'created' : 'updated',
     ki: storedDocument(document, kiId, current, writer),
@@ -216,7 +229,7 @@ const writeDocument = async (
   sourceMemoryIds: readonly string[],
   buildDocument: BuildDocument
 ): Promise<WriteResult> => {
-  const { esClient, aiIndexId, dest, writer, abortSignal, dryRun } = context;
+  const { esClient, aiIndexId, dest, writer, abortSignal, dryRun, written, skipRefresh } = context;
   const build = withDerivedPermissions(context, sourceMemoryIds, buildDocument);
   if (dryRun) {
     return planDocument(context, dryRun, kiId, build);
@@ -239,17 +252,22 @@ const writeDocument = async (
       if (document === 'rejected') {
         return document;
       }
+      if (!document) {
+        return 'skipped' as const;
+      }
+      const stored = storedDocument(document, kiId, current, writer);
       await putKiRevision({
         esClient,
         aiIndexId,
         dest,
         kiId,
-        document: storedDocument(document, kiId, current, writer),
+        document: stored,
         existing: dest.type === 'data_stream' ? undefined : revision,
         failIfExists: revision === undefined,
-        refresh: true,
+        refresh: !skipRefresh,
         abortSignal,
       });
+      written?.set(kiId, stored);
       return current ? ('updated' as const) : ('created' as const);
     },
     {
@@ -332,15 +350,62 @@ const upsertFact = (context: ApplyContext, operation: UpsertFactOperation) =>
     references: addReferences(current?.references, sourceReferences(operation.sourceMemoryIds)),
   }));
 
-const upsert = (
-  context: ApplyContext,
-  operation: Exclude<DreamingOperation, DeleteOperation>
-): Promise<WriteResult> => {
+const relationshipTitle = ({ from, relation, to }: UpsertRelationshipOperation): string =>
+  `${from.title} ${relation.replace(/_/g, ' ')} ${to.title}`;
+
+const upsertRelationship = (context: ApplyContext, operation: UpsertRelationshipOperation) =>
+  writeDocument(context, operation.id, operation.sourceMemoryIds, (current) => {
+    const title = relationshipTitle(operation);
+    const description = operation.description ?? current?.description;
+    const cited = new Set(current ? citedMemoryIds(current) : []);
+    if (
+      current?.title === title &&
+      current.description === description &&
+      operation.sourceMemoryIds.every((id) => cited.has(id))
+    ) {
+      return undefined;
+    }
+    return {
+      ...current,
+      id: operation.id,
+      type: RELATIONSHIP_KI_TYPE,
+      title,
+      ...(description !== undefined && { description }),
+      content: description !== undefined ? `${title}.\n${description}` : `${title}.`,
+      attributes: {
+        ...current?.attributes,
+        [RELATIONSHIP_RELATION_ATTRIBUTE]: operation.relation,
+        [RELATIONSHIP_KEY_ATTRIBUTE]: operation.key,
+      },
+      references: addReferences(current?.references, [
+        { uri: kiUri(operation.from.id), relation: 'relates_to', description: 'from' },
+        { uri: kiUri(operation.to.id), relation: 'relates_to', description: 'to' },
+        ...sourceReferences(operation.sourceMemoryIds),
+      ]),
+    };
+  });
+
+type UpsertOperation = Exclude<DreamingOperation | RelationshipOperation, DeleteOperation>;
+
+const rejectedItemOf = (operation: UpsertOperation): string => {
+  switch (operation.op) {
+    case 'upsert_entity':
+      return `entity ${operation.id}`;
+    case 'upsert_fact':
+      return `fact ${operation.id}`;
+    case 'upsert_relationship':
+      return `relationship ${operation.from.id} ${operation.relation} ${operation.to.id}`;
+  }
+};
+
+const upsert = (context: ApplyContext, operation: UpsertOperation): Promise<WriteResult> => {
   switch (operation.op) {
     case 'upsert_entity':
       return upsertEntity(context, operation);
     case 'upsert_fact':
       return upsertFact(context, operation);
+    case 'upsert_relationship':
+      return upsertRelationship(context, operation);
   }
 };
 
@@ -380,8 +445,8 @@ const planDelete = async (
   return 'deleted';
 };
 
-const deleteKi = async (context: ApplyContext, kiId: string): Promise<DeleteResult> => {
-  const { esClient, aiIndexId, dest, writer, abortSignal, dryRun } = context;
+const deleteDocument = async (context: ApplyContext, kiId: string): Promise<DeleteResult> => {
+  const { esClient, aiIndexId, dest, writer, abortSignal, dryRun, skipRefresh } = context;
   if (dryRun) {
     return planDelete(context, dryRun, kiId);
   }
@@ -390,7 +455,14 @@ const deleteKi = async (context: ApplyContext, kiId: string): Promise<DeleteResu
     return check;
   }
   try {
-    await softDeleteKi(esClient, { aiIndexId, dest, kiId, writer, refresh: true, abortSignal });
+    await softDeleteKi(esClient, {
+      aiIndexId,
+      dest,
+      kiId,
+      writer,
+      refresh: !skipRefresh,
+      abortSignal,
+    });
     return 'deleted';
   } catch (error) {
     if (error instanceof KiNotFoundError) {
@@ -400,10 +472,28 @@ const deleteKi = async (context: ApplyContext, kiId: string): Promise<DeleteResu
   }
 };
 
+/** Deletes a KI, and the relationships that link it. */
+const deleteKi = async (context: ApplyContext, kiId: string): Promise<DeleteResult> => {
+  const { esClient, dest, abortSignal, dryRun } = context;
+  const deleted = await deleteDocument(context, kiId);
+  if (deleted !== 'deleted' || !dryRun) {
+    return deleted;
+  }
+  for (const relationshipId of await findLinkingRelationshipIds({
+    esClient,
+    dest,
+    kiId,
+    abortSignal,
+  })) {
+    dryRun.set(relationshipId, { change: 'deleted' });
+  }
+  return 'deleted';
+};
+
 /** Applies dreaming operations in order. */
 export const applyOperations = async (
   context: ApplyContext,
-  operations: readonly DreamingOperation[]
+  operations: ReadonlyArray<DreamingOperation | RelationshipOperation>
 ): Promise<ApplyResult> => {
   const result: ApplyResult = { created: 0, updated: 0, deleted: 0, rejected: [] };
   for (const operation of operations) {
@@ -422,7 +512,7 @@ export const applyOperations = async (
     const written = await upsert(context, operation);
     if (written === 'rejected') {
       result.rejected.push({
-        item: `${operation.op === 'upsert_entity' ? 'entity' : 'fact'} ${operation.id}`,
+        item: rejectedItemOf(operation),
         reason: 'it has different permissions than its memories',
       });
     } else if (written !== 'skipped') {

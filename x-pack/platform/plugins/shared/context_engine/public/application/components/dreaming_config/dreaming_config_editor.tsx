@@ -26,42 +26,58 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import type {
-  DreamingEntities,
-  DreamingEntityType,
-  DreamingFactType,
-  DreamingTypesConfig,
+import {
+  ABOUT_RELATIONSHIP_TYPE,
+  type DreamingEntities,
+  type DreamingEntityType,
+  type DreamingFactType,
+  type DreamingRelationshipType,
+  type DreamingTypesConfig,
 } from '../../../../common/dreaming';
 import { Eyebrow } from '../dreaming_template/eyebrow';
-import { EntityTypeModal, FactTypeModal } from './type_modals';
+import { EntityTypeModal, FactTypeModal, RelationshipTypeModal } from './type_modals';
 
-/** The fact and entity types being edited, before they are saved. */
+/** The fact, entity and relationship types being edited, before they are saved. */
 export interface DreamingConfigDraft {
   facts: DreamingFactType[];
   /** Kept while entities are off, so turning them back on restores them. */
   entities: { nodes: DreamingEntityType[] };
   entitiesEnabled: boolean;
+  relationships: DreamingRelationshipType[];
 }
 
 /** A draft of a saved or proposed config. Entities are on when it has entity types. */
 export const draftOf = (
-  { facts, entities }: DreamingTypesConfig,
+  { facts, entities, relationships }: DreamingTypesConfig,
   { entitiesEnabled }: { entitiesEnabled?: boolean } = {}
 ): DreamingConfigDraft => ({
   facts: facts ?? [],
   entities: { nodes: entities?.nodes ?? [] },
   entitiesEnabled: entitiesEnabled ?? (entities?.nodes ?? []).length > 0,
+  relationships: relationships ?? [],
 });
 
-/** The draft as the `facts` and `entities` of a dreaming config; entities off is `null`. */
+/**
+ * The draft as the `facts`, `entities` and `relationships` of a dreaming config; entities off is
+ * `null`.
+ */
 export const typesOfDraft = ({
   facts,
   entities,
   entitiesEnabled,
-}: DreamingConfigDraft): { facts: DreamingFactType[]; entities: DreamingEntities | null } => ({
-  facts,
-  entities: entitiesEnabled && entities.nodes.length > 0 ? entities : null,
-});
+  relationships,
+}: DreamingConfigDraft): {
+  facts: DreamingFactType[];
+  entities: DreamingEntities | null;
+  relationships: DreamingRelationshipType[];
+} => {
+  const enabledEntities = entitiesEnabled && entities.nodes.length > 0 ? entities : null;
+  return {
+    facts,
+    entities: enabledEntities,
+    relationships: enabledEntities ? relationships : [],
+  };
+};
 
 /** Whether a draft builds anything: a fact type, or entities that are on. */
 export const draftBuildsAnything = (draft: DreamingConfigDraft): boolean => {
@@ -226,7 +242,10 @@ const Section = ({
   </section>
 );
 
-type Editing = { kind: 'fact'; index?: number } | { kind: 'entity'; index?: number };
+type Editing =
+  | { kind: 'fact'; index?: number }
+  | { kind: 'entity'; index?: number }
+  | { kind: 'relationship'; index?: number };
 
 const without = <T,>(items: readonly T[], index: number): T[] =>
   items.filter((_, i) => i !== index);
@@ -245,8 +264,8 @@ interface DreamingConfigEditorProps {
 }
 
 /**
- * What dreaming learns: fact types, then entity types, which are off until turned on. Each type is
- * added and edited in a modal.
+ * What dreaming learns: fact types, then entity types, which are off until turned on, then
+ * relationship types. Each type is added and edited in a modal.
  */
 export const DreamingConfigEditor = ({
   draft,
@@ -254,7 +273,7 @@ export const DreamingConfigEditor = ({
   suggestedEntities,
 }: DreamingConfigEditorProps) => {
   const [editing, setEditing] = useState<Editing>();
-  const { facts, entities, entitiesEnabled } = draft;
+  const { facts, entities, entitiesEnabled, relationships } = draft;
   const { nodes } = entities;
   const readOnly = onChange === undefined;
   const update = (next: Partial<DreamingConfigDraft>) => onChange?.({ ...draft, ...next });
@@ -373,6 +392,47 @@ export const DreamingConfigEditor = ({
           </Section>
         </>
       )}
+      {entitiesEnabled && (
+        <>
+          <EuiHorizontalRule margin="xl" />
+          <Section
+            icon="link"
+            title={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsTitle', {
+              defaultMessage: 'Relationship types',
+            })}
+            count={relationships.length}
+            description={i18n.translate(
+              'xpack.contextEngine.dreamingConfig.relationshipsDescription',
+              {
+                defaultMessage:
+                  'How the entities dreaming writes are linked, such as member_of or uses. Facts link to the entities they are about with the built-in "about" type. Each relationship is stored as its own knowledge item.',
+              }
+            )}
+            addLabel={i18n.translate('xpack.contextEngine.dreamingConfig.addRelationship', {
+              defaultMessage: 'Add relationship type',
+            })}
+            onAdd={readOnly ? undefined : () => setEditing({ kind: 'relationship' })}
+            emptyMessage={i18n.translate('xpack.contextEngine.dreamingConfig.relationshipsEmpty', {
+              defaultMessage: 'No relationship types yet. Without one, dreaming links nothing.',
+            })}
+            data-test-subj="contextDreamingConfigRelationships"
+          >
+            {relationships.map(({ type, description }, index) => (
+              <EuiFlexItem key={type}>
+                <TypeCard
+                  type={type}
+                  description={description}
+                  {...(!readOnly && {
+                    onEdit: () => setEditing({ kind: 'relationship', index }),
+                    onDelete: () => update({ relationships: without(relationships, index) }),
+                  })}
+                  data-test-subj={`contextDreamingConfigRelationship-${type}`}
+                />
+              </EuiFlexItem>
+            ))}
+          </Section>
+        </>
+      )}
       {editing?.kind === 'fact' && (
         <FactTypeModal
           initial={editing.index !== undefined ? facts[editing.index] : undefined}
@@ -396,6 +456,23 @@ export const DreamingConfigEditor = ({
           )}
           onSave={(entity) => {
             update({ entities: { nodes: replaced(nodes, editing.index, entity) } });
+            close();
+          }}
+          onClose={close}
+        />
+      )}
+      {editing?.kind === 'relationship' && (
+        <RelationshipTypeModal
+          initial={editing.index !== undefined ? relationships[editing.index] : undefined}
+          taken={[
+            ABOUT_RELATIONSHIP_TYPE,
+            ...takenBy(
+              relationships.map(({ type }) => type),
+              editing.index
+            ),
+          ]}
+          onSave={(relationship) => {
+            update({ relationships: replaced(relationships, editing.index, relationship) });
             close();
           }}
           onClose={close}

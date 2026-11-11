@@ -254,7 +254,7 @@ describe('ai indices routes', () => {
     getAgentBuilder = jest.fn().mockResolvedValue(undefined);
     analyticsService = { reportKiWrite: jest.fn() };
     jest.mocked(updateKi).mockResolvedValue({ id: 'ki-1', result: 'updated' });
-    jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1' });
+    jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1', deletedRelationshipIds: [] });
     jest.mocked(restoreKi).mockResolvedValue({ id: 'ki-1' });
     jest.mocked(buildKiApiWriter).mockReturnValue({
       uri: 'api://context_engine.ki.update',
@@ -1616,7 +1616,7 @@ describe('ai indices routes', () => {
   describe('DELETE /internal/context_engine/ai_index/{aiIndexId}/kis/{kiId}', () => {
     it('soft-deletes a Knowledge Indicator', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1' });
+      jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1', deletedRelationshipIds: [] });
       jest.mocked(buildKiApiWriter).mockReturnValue({
         uri: 'api://context_engine.ki.delete',
         metadata: { space_id: defaultSpaceId },
@@ -1655,9 +1655,32 @@ describe('ai indices routes', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { id: 'ki-1' } });
     });
 
+    it('audits each relationship deleted along with the KI', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      jest
+        .mocked(softDeleteKi)
+        .mockResolvedValue({ id: 'ki-1', deletedRelationshipIds: ['rel-1', 'rel-2'] });
+
+      await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
+        params: { aiIndexId: 'customer_support', kiId: 'ki-1' },
+      });
+
+      expect(
+        auditLogger.log.mock.calls.map(([event]) => [
+          event?.event?.action,
+          event?.kibana?.saved_object?.id,
+        ])
+      ).toEqual([
+        ['ki_delete', 'ki-1'],
+        ['ki_delete', 'rel-1'],
+        ['ki_delete', 'rel-2'],
+      ]);
+      expect(response.ok).toHaveBeenCalledWith({ body: { id: 'ki-1' } });
+    });
+
     it('passes the index query param as backingIndex to softDeleteKi', async () => {
       aiIndexService.get.mockResolvedValue(aiIndexItem);
-      jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1' });
+      jest.mocked(softDeleteKi).mockResolvedValue({ id: 'ki-1', deletedRelationshipIds: [] });
 
       await callRoute('DELETE', AI_INDEX_KI_BY_ID_PATH, {
         params: { aiIndexId: 'customer_support', kiId: 'ki-1' },

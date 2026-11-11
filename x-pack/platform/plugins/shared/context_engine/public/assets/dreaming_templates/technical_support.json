@@ -59,6 +59,20 @@
           "description": "A pricing tier with its own limits."
         }
       ]
-    }
+    },
+    "relationships": [
+      {
+        "type": "requires",
+        "description": "An SDK needs a runtime."
+      },
+      {
+        "type": "raises",
+        "description": "An integration or SDK raises an error."
+      },
+      {
+        "type": "limited_by",
+        "description": "An integration is limited by a plan."
+      }
+    ]
   }
 }

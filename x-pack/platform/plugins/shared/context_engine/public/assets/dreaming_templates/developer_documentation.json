@@ -56,6 +56,24 @@
           ]
         }
       ]
-    }
+    },
+    "relationships": [
+      {
+        "type": "operates_on",
+        "description": "An endpoint reads or changes a resource."
+      },
+      {
+        "type": "requires",
+        "description": "An endpoint needs a credential."
+      },
+      {
+        "type": "served_by",
+        "description": "An endpoint is served by a component."
+      },
+      {
+        "type": "depends_on",
+        "description": "A component depends on another component."
+      }
+    ]
   }
 }

@@ -27,6 +27,7 @@ const steps: Step[] = parse(
     instructions: '',
     factTypes: [],
     entityTypes: [],
+    relationshipTypes: [],
   }).replaceAll('{{ workflow.spaceId }}', SPACE)
 ).steps;
 
@@ -36,7 +37,7 @@ const findStep = (candidates: Step[], name: string): Step | undefined =>
     .find(Boolean);
 
 describe('the dreaming workflow', () => {
-  it.each(['read_memories', 'read_existing'])(
+  it.each(['read_memories', 'read_existing', 'read_relationships'])(
     'reads in %s only what the AI index space can see, as every AI index read does',
     (name) => {
       expect(findStep(steps, name)?.with?.query?.bool?.filter).toContainEqual(

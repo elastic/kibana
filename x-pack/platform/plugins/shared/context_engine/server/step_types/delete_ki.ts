@@ -47,7 +47,7 @@ export const getDeleteKiStepDefinition = ({
             const esClient = context.contextManager.getScopedEsClient();
             const writer = kiWriterFromContext(context.contextManager.getContext());
 
-            const result = await softDeleteKi(esClient, {
+            const { id } = await softDeleteKi(esClient, {
               aiIndexId,
               dest,
               kiId,
@@ -56,7 +56,7 @@ export const getDeleteKiStepDefinition = ({
               abortSignal: context.abortSignal,
             });
 
-            return { output: result };
+            return { output: { id } };
           },
         });
       } catch (error) {
