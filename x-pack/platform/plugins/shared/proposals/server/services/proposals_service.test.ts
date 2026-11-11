@@ -1533,7 +1533,7 @@ describe('ProposalsService', () => {
         );
 
         expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-        expect(analytics.reportEvent).toHaveBeenCalledWith('proposal_decided', {
+        expect(analytics.reportEvent).toHaveBeenCalledWith('proposals_proposal_decided', {
           proposal_id: 'proposal-1',
           decision: 'dismissed',
           decision_mode: 'manual',
@@ -1559,7 +1559,7 @@ describe('ProposalsService', () => {
         );
 
         expect(analytics.reportEvent).toHaveBeenCalledWith(
-          'proposal_decided',
+          'proposals_proposal_decided',
           expect.objectContaining({ decision: 'approved', decision_mode: 'auto' })
         );
       });
@@ -4088,7 +4088,7 @@ describe('ProposalsService.reopen', () => {
     const { proposalId } = await service.reopen('proposal-1', SPACE_ID, request);
 
     expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
-    expect(analytics.reportEvent).toHaveBeenCalledWith('proposal_reopened', {
+    expect(analytics.reportEvent).toHaveBeenCalledWith('proposals_proposal_reopened', {
       proposal_id: 'proposal-1',
       successor_id: proposalId,
       origin: 'nightshift',
@@ -4346,7 +4346,7 @@ describe('ProposalsService — gateless proposals', () => {
 
       expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
       expect(analytics.reportEvent).toHaveBeenCalledWith(
-        'proposal_decided',
+        'proposals_proposal_decided',
         expect.objectContaining({
           proposal_id: 'proposal-1',
           decision,

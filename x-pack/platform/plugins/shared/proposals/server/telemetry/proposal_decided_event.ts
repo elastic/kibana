@@ -8,8 +8,8 @@
 import type { AnalyticsServiceSetup, AnalyticsServiceStart, Logger } from '@kbn/core/server';
 import type { Proposal } from '@kbn/proposals-common';
 
-export const PROPOSAL_DECIDED_EVENT_TYPE = 'proposal_decided';
-export const PROPOSAL_REOPENED_EVENT_TYPE = 'proposal_reopened';
+export const PROPOSAL_DECIDED_EVENT_TYPE = 'proposals_proposal_decided';
+export const PROPOSAL_REOPENED_EVENT_TYPE = 'proposals_proposal_reopened';
 
 interface ProposalDecidedEventProps {
   proposal_id: string;
