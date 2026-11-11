@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import { useObservedUserDetails } from '../../../../../explore/users/containers/users/observed_details';
 import { useObservedServiceDetails } from './observed_service_details';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../../../common/mock';
 import { renderHook, act } from '@testing-library/react';
-import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
+import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
 
-jest.mock('../../../../common/containers/use_search_strategy', () => ({
+jest.mock('../../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
 }));
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
