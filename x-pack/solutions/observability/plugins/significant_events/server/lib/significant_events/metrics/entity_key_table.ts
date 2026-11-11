@@ -43,26 +43,28 @@ export const getDataStreamFamily = (dataStream: string): string | undefined => {
   return match?.[1].split('.')[0];
 };
 
-/** Mirrors Entity Inventory entity types; only k8s.deployment is defined there today (#303101). */
+type WorkloadKind = 'deployment' | 'statefulset' | 'daemonset' | 'cronjob' | 'job' | 'replicaset';
+type KubernetesEntityKind = WorkloadKind | 'node';
+
+/** Entity Inventory types: only k8s.deployment is registered today (#303101); observability-dev#6381 proposes the rest except k8s.job. */
 export const KUBERNETES_ENTITY_STORE_TYPES = {
   deployment: 'k8s.deployment',
   statefulset: 'k8s.statefulset',
   daemonset: 'k8s.daemonset',
   cronjob: 'k8s.cronjob',
-  job: 'k8s.job',
   replicaset: 'k8s.replicaset',
   node: 'k8s.node',
-} as const;
-
-type KubernetesEntityKind = keyof typeof KUBERNETES_ENTITY_STORE_TYPES;
-type WorkloadKind = Exclude<KubernetesEntityKind, 'node'>;
+} as const satisfies Record<Exclude<KubernetesEntityKind, 'job'>, string>;
 
 type KubernetesEntityIdentity =
   | { kind: WorkloadKind; namespace: string; name: string }
   | { kind: 'node'; name: string };
 
+const getKubernetesEntityStoreType = (kind: KubernetesEntityKind): string | undefined =>
+  kind === 'job' ? undefined : KUBERNETES_ENTITY_STORE_TYPES[kind];
+
 export const buildKubernetesEntityId = (identity: KubernetesEntityIdentity): string => {
-  const type = KUBERNETES_ENTITY_STORE_TYPES[identity.kind];
+  const type = getKubernetesEntityStoreType(identity.kind) ?? 'k8s.job';
   return identity.kind === 'node'
     ? `${type}:${identity.name}`
     : `${type}:${identity.namespace}/${identity.name}`;
@@ -78,7 +80,7 @@ const workloadOwnerFields: Record<WorkloadKind, string> = {
 };
 
 const isWorkloadKind = (value: EsqlCell): value is WorkloadKind =>
-  typeof value === 'string' && value !== 'node' && value in KUBERNETES_ENTITY_STORE_TYPES;
+  typeof value === 'string' && value in workloadOwnerFields;
 
 interface ClusterMetrics {
   replicas: number;
@@ -259,7 +261,7 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
     }
     const ownerField = workloadOwnerFields[group.kind];
     const { replicas, lastSeen } = entityTotals(group.clusters);
-    const entityStoreType = KUBERNETES_ENTITY_STORE_TYPES[group.kind];
+    const entityStoreType = getKubernetesEntityStoreType(group.kind);
     return [
       {
         type: 'entity',
@@ -274,7 +276,7 @@ export const foldWorkloadRows = (rows: EsqlRow[]): EntityFoldResult => {
             [ownerField]: group.name,
           },
           breakdown: ['orchestrator.cluster.name'],
-          entity_store_type: entityStoreType,
+          ...(entityStoreType ? { entity_store_type: entityStoreType } : {}),
           clusters: group.clusters,
           replicas,
           last_seen: lastSeen,

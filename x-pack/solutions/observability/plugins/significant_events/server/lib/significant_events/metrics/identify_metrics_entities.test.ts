@@ -211,6 +211,10 @@ describe('Kubernetes entity derivation', () => {
         { field: 'kubernetes.job.name', eq: 'migrate-2' },
       ],
     });
+    expect(byId.get('k8s.job:ops/migrate-2')?.properties).not.toHaveProperty('entity_store_type');
+    expect(byId.get('k8s.deployment:apps/api')?.properties.entity_store_type).toBe(
+      'k8s.deployment'
+    );
 
     const workloadQuery =
       ENTITY_KEY_TABLE.find(({ id }) => id === 'ecs.k8s_workload')?.buildQuery('TS metrics') ?? '';
