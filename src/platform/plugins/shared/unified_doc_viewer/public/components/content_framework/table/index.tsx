@@ -17,7 +17,10 @@ import useWindowSize from 'react-use/lib/useWindowSize';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 import { FieldRow } from '../../doc_viewer_table/field_row';
 import { TableGrid } from '../../doc_viewer_table/table_grid';
-import type { TableGridCellContext } from '../../doc_viewer_table/table_grid/model';
+import type {
+  TableGridAppearance,
+  TableGridCellContext,
+} from '../../doc_viewer_table/table_grid/model';
 import { FormattedValue } from './components/formatted_value';
 import { NamePopoverContent } from './components/name_popover_content';
 import { ValuePopoverContent } from './components/value_popover_content';
@@ -48,6 +51,12 @@ export interface ContentFrameworkTableProps
   id: string;
   'data-test-subj'?: string;
 }
+
+const CONTENT_FRAMEWORK_TABLE_APPEARANCE = {
+  stripes: false,
+  rowHover: 'none',
+  header: 'shade',
+} satisfies Partial<TableGridAppearance>;
 
 export function ContentFrameworkTable({
   hit,
@@ -216,7 +225,7 @@ export function ContentFrameworkTable({
         columns={columns}
         renderCell={cellValueRenderer}
         renderCellDetails={cellPopoverRenderer}
-        appearance={{ stripes: false, rowHover: 'none', header: 'shade' }}
+        appearance={CONTENT_FRAMEWORK_TABLE_APPEARANCE}
         headerVisibility={false}
       />
     </div>
