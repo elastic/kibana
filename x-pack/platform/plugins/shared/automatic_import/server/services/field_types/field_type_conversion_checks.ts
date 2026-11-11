@@ -42,33 +42,105 @@ const getErrorText = (
 const failedOnTag = (errorText: string, tag: string): boolean =>
   errorText.includes(`${tag}'`) || errorText.includes(`${tag}\\"`) || errorText.includes(`${tag}"`);
 
+const getProcessorTag = (processor: unknown): unknown => {
+  if (!processor || typeof processor !== 'object') return undefined;
+  const [config] = Object.values(processor);
+  return config && typeof config === 'object' ? (config as Record<string, unknown>).tag : undefined;
+};
+
+interface ConvertedField {
+  name: string;
+  tag: string;
+  expectedValueType: string | undefined;
+}
+
+/**
+ * Picks the edited fields to blame for a sample whose failing processor is unknown. When the
+ * failed document is available, that's the first generated processor, in pipeline order, that left
+ * its value unconverted: `on_failure` stops the pipeline there, so later ones never ran. Otherwise
+ * it's every edited field the sample has a value for.
+ */
+const getFallbackBlame = (
+  fieldsInPipelineOrder: readonly ConvertedField[],
+  baseDocument: SampleDocument,
+  failedDocument: SampleDocument
+): Set<string> => {
+  const candidates = fieldsInPipelineOrder.filter(
+    ({ name }) => getPopulatedValues(baseDocument, name).length > 0
+  );
+  if (!failedDocument) return new Set(candidates.map(({ name }) => name));
+  const culprit = candidates.find(
+    ({ name, expectedValueType }) =>
+      !expectedValueType ||
+      getPopulatedValues(failedDocument, name).some((value) => typeof value !== expectedValueType)
+  );
+  return new Set(culprit ? [culprit.name] : []);
+};
+
 /**
  * Finds edited fields whose generated convert processor failed (`convert_failed`) or left values
  * unconverted, for example because of a user-added condition (`convert_unsupported`).
+ * `failingTags` holds, by sample index, the failing processor tag of each sample that fails only
+ * once the generated processors are added. Those samples always count against an edited field, so
+ * a failure can't pass whatever the pipeline's `on_failure` writes.
  */
 export const collectConversionErrors = ({
   overrides,
   baseDocuments,
   finalResponse,
+  finalPipeline,
+  failingTags,
 }: {
   overrides: FieldTypeOverride[];
   baseDocuments: SampleDocument[];
   finalResponse: estypes.IngestSimulateResponse;
+  finalPipeline: { processors?: readonly unknown[] };
+  failingTags: ReadonlyMap<number, string | undefined>;
 }): FieldTypeError[] => {
   const docs = finalResponse.docs ?? [];
   const errorTexts = docs.map(getErrorText);
-
-  return overrides.flatMap(({ name, type, original_type: originalType }) => {
+  const convertedFields = overrides.flatMap(({ name, type, original_type: originalType }) => {
     const convertType = getConvertType(originalType, type);
     if (!convertType) return [];
+    return [
+      {
+        name,
+        tag: getFieldTypeProcessorTag(name),
+        expectedValueType: EXPECTED_VALUE_TYPES[convertType],
+      },
+    ];
+  });
+  const generatedTags = new Set(convertedFields.map(({ tag }) => tag));
+  const tagOrder = (finalPipeline.processors ?? []).map(getProcessorTag);
+  const getPosition = ({ tag }: ConvertedField) => {
+    const position = tagOrder.indexOf(tag);
+    return position === -1 ? Infinity : position;
+  };
+  const fieldsInPipelineOrder = [...convertedFields].sort(
+    (a, b) => getPosition(a) - getPosition(b)
+  );
+  const fallbackBlame = new Map(
+    [...failingTags]
+      .filter(([, failingTag]) => failingTag === undefined || !generatedTags.has(failingTag))
+      .map(([index]) => [
+        index,
+        getFallbackBlame(
+          fieldsInPipelineOrder,
+          baseDocuments[index],
+          docs[index]?.doc?._source as SampleDocument
+        ),
+      ])
+  );
 
+  return convertedFields.flatMap(({ name, tag, expectedValueType }) => {
     const totalDocuments = baseDocuments.filter(
       (document) => getPopulatedValues(document, name).length > 0
     ).length;
-    const tag = getFieldTypeProcessorTag(name);
-    const convertFailures = errorTexts.filter(
-      (errorText) => errorText !== undefined && failedOnTag(errorText, tag)
-    ).length;
+    const convertFailures = docs.filter((_doc, index) => {
+      const errorText = errorTexts[index];
+      if (errorText !== undefined && failedOnTag(errorText, tag)) return true;
+      return failingTags.get(index) === tag || Boolean(fallbackBlame.get(index)?.has(name));
+    }).length;
     if (convertFailures > 0) {
       return [
         {
@@ -80,7 +152,6 @@ export const collectConversionErrors = ({
       ];
     }
 
-    const expectedValueType = EXPECTED_VALUE_TYPES[convertType];
     if (!expectedValueType) return [];
     const unconverted = docs.filter((doc, index) => {
       if (errorTexts[index] !== undefined) return false;

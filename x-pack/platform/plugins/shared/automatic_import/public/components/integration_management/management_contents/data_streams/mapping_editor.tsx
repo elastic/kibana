@@ -135,6 +135,10 @@ const getIssueDescription = (issue: string | undefined, type: string): string =>
       return i18n.translate('xpack.automaticImport.mappingEditor.issue.notNumeric', {
         defaultMessage: 'Values are not numbers.',
       });
+    case 'not_integer':
+      return i18n.translate('xpack.automaticImport.mappingEditor.issue.notInteger', {
+        defaultMessage: 'Values are not whole numbers.',
+      });
     case 'not_boolean':
       return i18n.translate('xpack.automaticImport.mappingEditor.issue.notBoolean', {
         defaultMessage: 'Values are not true or false.',

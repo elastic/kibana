@@ -48,6 +48,34 @@ describe('getFieldTypeCompatibility', () => {
     );
   });
 
+  it('checks whole numbers the way the convert processor reads them when values are converted', () => {
+    expect(
+      getFieldTypeCompatibility('long', ['0.560', '1.0', '1e3', ' 12 ', 1.5, '42'], {
+        isConverted: true,
+      })
+    ).toEqual({
+      status: 'certain_failure',
+      issue: 'not_integer',
+      failingDocuments: 5,
+      totalDocuments: 6,
+    });
+    expect(getFieldTypeCompatibility('integer', ['2.5'], { isConverted: true }).issue).toBe(
+      'not_integer'
+    );
+    expect(getFieldTypeCompatibility('byte', ['1.0'], { isConverted: true }).issue).toBe(
+      'not_integer'
+    );
+    expect(
+      getFieldTypeCompatibility('long', ['42', '+7', '-7', '0x1A', 3], { isConverted: true }).status
+    ).toBe('compatible');
+    expect(getFieldTypeCompatibility('long', ['abc'], { isConverted: true }).issue).toBe(
+      'not_numeric'
+    );
+    expect(getFieldTypeCompatibility('byte', ['300'], { isConverted: true }).issue).toBe(
+      'out_of_range'
+    );
+  });
+
   it('accepts dates in the default strict_date_optional_time or epoch_millis format', () => {
     expect(
       getFieldTypeCompatibility('date', [

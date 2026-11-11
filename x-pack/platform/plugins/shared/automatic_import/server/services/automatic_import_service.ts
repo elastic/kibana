@@ -947,7 +947,20 @@ export class AutomaticImportService {
     const finalResponse = isEqual(finalPipeline, basePipeline)
       ? baseResponse
       : await this.simulatePipeline(esClient, finalPipeline, samples);
-    const conversionErrors = collectConversionErrors({ overrides, baseDocuments, finalResponse });
+    const failingTags = await this.getGeneratedProcessorFailures({
+      esClient,
+      samples,
+      baseResponse,
+      finalResponse,
+      finalPipeline,
+    });
+    const conversionErrors = collectConversionErrors({
+      overrides,
+      baseDocuments,
+      finalResponse,
+      finalPipeline,
+      failingTags,
+    });
     if (conversionErrors.length > 0) {
       return fail({ status: 'failure', field_errors: conversionErrors });
     }
@@ -1097,6 +1110,43 @@ export class AutomaticImportService {
         };
       }),
     };
+  }
+
+  /**
+   * Finds the samples that fail only once the generated processors are added, whatever the
+   * pipeline's `on_failure` does with the error. Returns the failing processor tag of each, by
+   * sample index.
+   */
+  private async getGeneratedProcessorFailures({
+    esClient,
+    samples,
+    baseResponse,
+    finalResponse,
+    finalPipeline,
+  }: {
+    esClient: ElasticsearchClient;
+    samples: string[];
+    baseResponse: estypes.IngestSimulateResponse;
+    finalResponse: estypes.IngestSimulateResponse;
+    finalPipeline: Pipeline;
+  }): Promise<Map<number, string | undefined>> {
+    if (finalResponse === baseResponse) return new Map();
+    const getFailedIndexes = (response: estypes.IngestSimulateResponse) =>
+      processSimulationResults(response, samples).failedSamples.flatMap(({ sampleIndex }) =>
+        sampleIndex === undefined ? [] : [sampleIndex]
+      );
+    const baseFailedIndexes = new Set(getFailedIndexes(baseResponse));
+    const failedIndexes = getFailedIndexes(finalResponse).filter(
+      (index) => !baseFailedIndexes.has(index)
+    );
+    if (failedIndexes.length === 0) return new Map();
+
+    const tags = await this.getFailingProcessorTags(
+      esClient,
+      finalPipeline,
+      failedIndexes.map((index) => samples[index])
+    );
+    return new Map(failedIndexes.map((index, position) => [index, tags[position]]));
   }
 
   /**

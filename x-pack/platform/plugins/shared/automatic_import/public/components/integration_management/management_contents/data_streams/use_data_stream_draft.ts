@@ -81,6 +81,25 @@ const toChanges = (pendingTypes: PendingTypes): FieldTypeChange[] =>
 const byName = (errors: FieldTypeError[]): Record<string, FieldTypeError> =>
   Object.fromEntries(errors.map((error) => [error.name, error]));
 
+// Field errors that need a fix in the pipeline text rather than another type in the Table.
+const PIPELINE_ONLY_ISSUES: ReadonlySet<string> = new Set([
+  'approved_field_locked',
+  'duplicate_generated_processor',
+  'invalid_convert_type',
+  'unsupported_generated_processor',
+]);
+
+/** Whether picking other field types in the Table can fix every problem of a failed preview. */
+const isFixableInTable = ({
+  field_errors: fieldErrors,
+  pipeline_errors: pipelineErrors,
+  removed_approved_fields: removedApprovedFields,
+}: DataStreamEditsFailure): boolean =>
+  !pipelineErrors &&
+  !removedApprovedFields?.length &&
+  fieldErrors.length > 0 &&
+  fieldErrors.every(({ issue }) => issue !== undefined && !PIPELINE_ONLY_ISSUES.has(issue));
+
 /** Staged types relative to the saved data stream that reproduce the preview. */
 const getPendingFromPreview = (
   preview: DataStreamEditsResult,
@@ -379,7 +398,10 @@ export const useDataStreamDraft = ({
     setPipelineText(text);
   }, [draftDocuments, getDraftEdits, isEditable, pendingTypes, pipelineText]);
 
-  /** Previews pipeline edits on the server. Resolves to true when the Table tab can be shown. */
+  /**
+   * Previews pipeline edits on the server. Resolves to true when the Table tab can be shown, which
+   * includes a failed preview whose field type errors can be fixed there.
+   */
   const syncToTable = useCallback(async (): Promise<boolean> => {
     if (!isEditable || !data || !baseVersion) return true;
     cancelCheck();
@@ -408,7 +430,7 @@ export const useDataStreamDraft = ({
       if (response.status === 'failure') {
         setPendingTypes(pending);
         applyFailure(response);
-        return false;
+        return isFixableInTable(response);
       }
       applyPreview(response, pipelineText, parsed);
       return true;

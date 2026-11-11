@@ -1052,6 +1052,57 @@ describe('EditPipelineFlyout', () => {
       expect(mockSelectPipelineTab).not.toHaveBeenCalled();
     });
 
+    it('switches to the table tab when another field type can fix the preview errors', async () => {
+      mockApplyEdits.mockResolvedValue({
+        status: 'failure',
+        field_errors: [
+          {
+            name: 'test.number',
+            issue: 'convert_failed',
+            failing_documents: 1,
+            total_documents: 1,
+          },
+        ],
+      });
+      mockUIState.selectedPipelineTab = 'pipeline';
+      const { rerender } = render(<EditPipelineFlyout {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('code-editor-change'));
+      await userEvent.click(screen.getByRole('tab', { name: 'Table' }));
+
+      await waitFor(() => expect(mockSelectPipelineTab).toHaveBeenCalledWith('table'));
+      mockUIState.selectedPipelineTab = 'table';
+      rerender(<EditPipelineFlyout {...defaultProps} />);
+      expect(screen.getByTestId('mappingEditorServerErrors')).toHaveTextContent(
+        'Failed for test.number.'
+      );
+    });
+
+    it('stays on the pipeline tab when a preview error needs a pipeline fix', async () => {
+      mockApplyEdits.mockResolvedValue({
+        status: 'failure',
+        field_errors: [
+          {
+            name: 'test.number',
+            issue: 'convert_failed',
+            failing_documents: 1,
+            total_documents: 1,
+          },
+          { name: 'test.text', issue: 'approved_field_locked' },
+        ],
+      });
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('code-editor-change'));
+      await userEvent.click(screen.getByRole('tab', { name: 'Table' }));
+
+      expect(await screen.findByTestId('editPipelineFlyoutFieldErrors')).toHaveTextContent(
+        'test.text'
+      );
+      expect(mockSelectPipelineTab).not.toHaveBeenCalled();
+    });
+
     it('keeps invalid JSON on the pipeline tab without calling the server', async () => {
       mockUIState.selectedPipelineTab = 'pipeline';
       render(<EditPipelineFlyout {...defaultProps} />);

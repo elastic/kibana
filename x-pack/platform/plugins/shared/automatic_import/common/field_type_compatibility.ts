@@ -41,6 +41,7 @@ export type FieldTypeIssue =
   | 'out_of_range'
   | 'negative_value'
   | 'not_numeric'
+  | 'not_integer'
   | 'not_boolean'
   | 'not_ip'
   | 'not_date';
@@ -104,6 +105,15 @@ const toNumber = (value: unknown): number | undefined => {
   return Number.isFinite(parsed) ? parsed : undefined;
 };
 
+// The `convert` processor parses decimal or `0x` hexadecimal whole numbers, without surrounding
+// spaces. The mapping is more lenient: it trims values and truncates decimals.
+const INTEGER_CONVERT_PATTERN = /^([+-]?\d+|-?0x[0-9a-fA-F]+)$/;
+
+const isIntegerConvertValue = (value: unknown): boolean => {
+  if (typeof value === 'number') return Number.isInteger(value);
+  return typeof value === 'string' && INTEGER_CONVERT_PATTERN.test(value);
+};
+
 const BOOLEAN_CONVERT_PATTERN = /^(true|false)$/i;
 
 const isBooleanValue = (value: unknown, isConverted: boolean): boolean => {
@@ -121,6 +131,7 @@ const findValueIssue = (type: string, value: unknown, isConverted: boolean): Val
   }
 
   if (type in INTEGER_RANGES) {
+    if (isConverted && !isIntegerConvertValue(value)) return 'not_integer';
     const integer = toInteger(value);
     if (integer === undefined) return undefined;
     const [minimum, maximum] = INTEGER_RANGES[type];

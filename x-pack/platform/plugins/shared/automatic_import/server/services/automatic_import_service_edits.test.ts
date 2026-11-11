@@ -82,21 +82,37 @@ describe('AutomaticImportService data stream edits', () => {
   let integrationAttributes: Record<string, unknown>;
   let parsedSamples: Doc[];
   let reportEvent: jest.Mock;
+  /** How the simulated pipeline's `on_failure` records a failed convert. */
+  let onFailure: 'standard' | 'tagless' | 'none';
 
   const fieldsMetadataClient = {
     find: jest.fn().mockResolvedValue({ toPlain: () => ({}) }),
   } as unknown as IFieldsMetadataClient;
 
-  /** Reports each processor until the first `fail` processor, like a verbose simulate. */
-  const fakeVerboseResults = (processors: Processor[]) => {
-    const failIndex = processors.findIndex((processor) => processor.fail);
-    const ran = failIndex === -1 ? processors : processors.slice(0, failIndex + 1);
-    return ran.map((processor) => {
+  /** Reports each processor until the first one that fails, like a verbose simulate. */
+  const fakeVerboseResults = (processors: Processor[], source: Doc) => {
+    const results = [];
+    for (const processor of processors) {
       const [[processorType, config]] = Object.entries(processor);
-      return processor.fail
-        ? { processor_type: processorType, status: 'error', tag: config.tag, error: {} }
-        : { processor_type: processorType, status: 'success', tag: config.tag };
-    });
+      const failed = Boolean(
+        processor.fail || (processor.convert && runConvert(source, processor.convert))
+      );
+      results.push({
+        processor_type: processorType,
+        status: failed ? 'error' : 'success',
+        tag: config.tag,
+        ...(failed ? { error: {} } : {}),
+      });
+      if (failed) break;
+    }
+    return results;
+  };
+
+  /** Picks the parsed sample for a simulated sample message such as `s2`. */
+  const getParsedSample = (doc: { _source: Doc }, index: number): Doc => {
+    const match = /^s(\d+)$/.exec(String(doc._source.message));
+    const sampleIndex = match ? Number(match[1]) - 1 : index;
+    return { ...parsedSamples[sampleIndex % parsedSamples.length] };
   };
 
   const fakeSimulate = ({
@@ -108,16 +124,20 @@ describe('AutomaticImportService data stream edits', () => {
     docs: Array<{ _source: Doc }>;
     verbose?: boolean;
   }) => ({
-    docs: docs.map((_doc, index) => {
-      if (verbose) return { processor_results: fakeVerboseResults(pipeline.processors) };
-      const source: Doc = { ...parsedSamples[index % parsedSamples.length] };
+    docs: docs.map((doc, index) => {
+      const source = getParsedSample(doc, index);
+      if (verbose) return { processor_results: fakeVerboseResults(pipeline.processors, source) };
       for (const processor of pipeline.processors) {
         if (processor.fail) {
           return { error: { type: 'fail_processor_exception', reason: 'Failed on purpose' } };
         }
         const failure = processor.convert ? runConvert(source, processor.convert) : undefined;
+        if (failure && onFailure === 'none') {
+          return { error: { type: 'illegal_argument_exception', reason: 'unable to convert' } };
+        }
         if (failure) {
-          return { doc: { _source: { ...source, error: { message: [failure] } } } };
+          const message = onFailure === 'tagless' ? 'Processor convert failed' : failure;
+          return { doc: { _source: { ...source, error: { message: [message] } } } };
         }
       }
       return { doc: { _source: source } };
@@ -166,6 +186,7 @@ describe('AutomaticImportService data stream edits', () => {
 
   beforeEach(() => {
     reportEvent = jest.fn();
+    onFailure = 'standard';
     service = new AutomaticImportService(
       loggerMock.create(),
       savedObjectsServiceMock.createSetupContract(),
@@ -752,7 +773,8 @@ describe('AutomaticImportService data stream edits', () => {
     });
 
     it('reports samples the generated convert fails on', async () => {
-      parsedSamples[1].bytes = '1.5';
+      // Passes the client rules but overflows a long.
+      parsedSamples[1].bytes = '0xFFFFFFFFFFFFFFFFF';
 
       expect(
         await applyEdits({ processors: [USER_PROCESSOR, generatedConvert('bytes', 'long')] })
@@ -762,6 +784,65 @@ describe('AutomaticImportService data stream edits', () => {
           { name: 'bytes', issue: 'convert_failed', failing_documents: 1, total_documents: 2 },
         ],
       });
+    });
+
+    it.each(['tagless', 'none'] as const)(
+      'reports samples the generated convert fails on when on_failure is %s',
+      async (mode) => {
+        onFailure = mode;
+        parsedSamples[1].bytes = '0xFFFFFFFFFFFFFFFFF';
+
+        expect(
+          await applyEdits({ processors: [USER_PROCESSOR, generatedConvert('bytes', 'long')] })
+        ).toEqual({
+          status: 'failure',
+          field_errors: [
+            { name: 'bytes', issue: 'convert_failed', failing_documents: 1, total_documents: 2 },
+          ],
+        });
+        expect(savedObjectService.updateDataStreamSavedObjectAttributes).not.toHaveBeenCalled();
+      }
+    );
+
+    it('blames the edited fields a newly failing sample has unconverted when no processor is found', async () => {
+      onFailure = 'tagless';
+      parsedSamples[0].count = '1';
+      parsedSamples[1].count = '2';
+      parsedSamples[1].bytes = '0xFFFFFFFFFFFFFFFFF';
+      esClient.ingest.simulate.mockImplementation((request) =>
+        request.verbose
+          ? { docs: request.docs.map(() => ({ processor_results: [] })) }
+          : fakeSimulate(request)
+      );
+
+      expect(
+        await applyEdits({
+          processors: [
+            USER_PROCESSOR,
+            generatedConvert('count', 'long'),
+            generatedConvert('bytes', 'long'),
+          ],
+        })
+      ).toEqual({
+        status: 'failure',
+        field_errors: [
+          { name: 'bytes', issue: 'convert_failed', failing_documents: 1, total_documents: 2 },
+        ],
+      });
+    });
+
+    it('does not blame generated processors for samples that already fail', async () => {
+      const failing = { fail: { message: 'nope', tag: 'fail_on_purpose' } };
+      dataStreamAttributes.result = {
+        ...(dataStreamAttributes.result as Record<string, unknown>),
+        ingest_pipeline: { processors: [USER_PROCESSOR, failing] },
+      };
+
+      expect(
+        await applyEdits({
+          processors: [USER_PROCESSOR, failing, generatedConvert('bytes', 'long')],
+        })
+      ).toEqual(expect.objectContaining({ status: 'saved' }));
     });
 
     it('reports values a generated convert left unconverted', async () => {
