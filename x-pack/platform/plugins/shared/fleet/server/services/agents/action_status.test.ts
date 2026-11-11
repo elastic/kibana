@@ -157,7 +157,7 @@ describe('getActionStatuses version specific policy actions', () => {
 
   it('keeps reading action docs until the limit of non-version-specific docs is reached', async () => {
     const sentinelPage = Array.from({ length: 20 }, (_, i) =>
-      actionDoc(`sentinel-${i}`, 1, 'p1#sentinel')
+      actionDoc(`sentinel-${i}`, 1, 'p1#9.3')
     );
     const esClient = makeEsClient([
       sentinelPage,
@@ -179,7 +179,7 @@ describe('getActionStatuses version specific policy actions', () => {
 
   it('uses the latest PIT id returned by a search for the next page and for cleanup', async () => {
     const esClient = makeEsClient([
-      Array.from({ length: 20 }, (_, i) => actionDoc(`sentinel-${i}`, 1, 'p1#sentinel')),
+      Array.from({ length: 20 }, (_, i) => actionDoc(`sentinel-${i}`, 1, 'p1#9.3')),
       [actionDoc('A', 1, 'p1')],
     ]);
     const search = esClient.search as jest.Mock;
@@ -200,7 +200,7 @@ describe('getActionStatuses version specific policy actions', () => {
   it('keeps all the chunks of an action that spans pages', async () => {
     const esClient = makeEsClient([
       [
-        ...Array.from({ length: 9 }, (_, i) => actionDoc(`sentinel-${i}`, 1, 'p1#sentinel')),
+        ...Array.from({ length: 9 }, (_, i) => actionDoc(`sentinel-${i}`, 1, 'p1#9.3')),
         ...Array.from({ length: 10 }, (_, i) => actionDoc(`single-${i}`, 1, 'p1')),
         actionDoc('A', 2, 'p1'),
       ],
@@ -227,7 +227,7 @@ describe('getActionStatuses version specific policy actions', () => {
     const esClient = makeEsClient([
       [
         actionDoc('A', 5, 'p1'),
-        actionDoc('B', 1, 'p1#sentinel'),
+        actionDoc('B', 1, 'p1#9.3'),
         actionDoc('C', 1, 'p1#9.4'),
         actionDoc('D', 3),
       ],

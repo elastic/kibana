@@ -195,6 +195,9 @@ export function getPage(options: ActionStatusOptions) {
   return options.page * options.perPage;
 }
 
+// `index.max_result_window` default: `from + size` cannot go beyond it.
+const MAX_RESULT_WINDOW = 10000;
+
 export function getPerPage(options: ActionStatusOptions) {
   if (options.page === undefined || options.perPage === undefined) {
     return 20;
@@ -236,7 +239,7 @@ async function getActions(
   };
   const limit = getPerPage(options);
   const namespacedQuery = await addNamespaceFilteringToQuery(query, namespace);
-  // Version specific policy actions (reassigns to `<id>#sentinel` or `<id>#<version>`) are skipped
+  // Version specific policy actions (reassigns to `<id>#<version>`) are skipped
   // below, and cannot be excluded in the query without an expensive query, so keep reading pages
   // until the limit of other docs is reached. Otherwise they would crowd the other actions out of the
   // limit, and the actions that are left out would be reported with fewer agents than they have.
