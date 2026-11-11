@@ -52,7 +52,8 @@ export const useTextFileUpload = ({
     });
   }, []);
 
-  // Stops reads that are still running when the user leaves this conversation.
+  // Drops the results of reads still running when the user leaves this conversation.
+  // A read can't be stopped (`file.arrayBuffer()` has no signal), so the controller only marks it as stale.
   useEffect(() => {
     const controllers = readControllers.current;
     return () => {
