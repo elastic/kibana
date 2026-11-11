@@ -7,8 +7,13 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { createTransformIfNotExists, startTransformIfNotStarted } from './create_transforms';
+import {
+  createTransformIfNotExists,
+  startTransformIfNotStarted,
+  createVulnerabilitiesIndexAlias,
+} from './create_transforms';
 import { latestFindingsTransform } from './latest_findings_transform';
+import { latestVulnerabilitiesTransform } from './latest_vulnerabilities_transforms';
 
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
 
@@ -140,5 +145,64 @@ describe('startTransformIfNotStarted', () => {
     expect(mockEsClient.transform.startTransform).toHaveBeenCalledWith({
       transform_id: latestFindingsTransform.transform_id,
     });
+  });
+});
+
+describe('createVulnerabilitiesIndexAlias', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+
+  beforeEach(() => {
+    logger = loggingSystemMock.createLogger();
+    jest.resetAllMocks();
+  });
+
+  it('should skip alias creation if index does not exist', async () => {
+    mockEsClient.indices.exists.mockResolvedValue(false);
+    await createVulnerabilitiesIndexAlias(mockEsClient, logger);
+    expect(mockEsClient.indices.exists).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.indices.exists).toHaveBeenCalledWith({
+      index: latestVulnerabilitiesTransform.dest.index,
+    });
+    expect(mockEsClient.indices.existsAlias).toHaveBeenCalledTimes(0);
+    expect(mockEsClient.indices.updateAliases).toHaveBeenCalledTimes(0);
+  });
+
+  it('should skip alias creation if alias already exists', async () => {
+    mockEsClient.indices.exists.mockResolvedValue(true);
+    mockEsClient.indices.existsAlias.mockResolvedValue(true);
+    await createVulnerabilitiesIndexAlias(mockEsClient, logger);
+    expect(mockEsClient.indices.exists).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.indices.existsAlias).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.indices.existsAlias).toHaveBeenCalledWith({
+      name: 'logs-cloud_security_posture.vulnerabilities_latest-default',
+    });
+    expect(mockEsClient.indices.updateAliases).toHaveBeenCalledTimes(0);
+  });
+
+  it('should create alias when index exists and alias does not exist', async () => {
+    mockEsClient.indices.exists.mockResolvedValue(true);
+    mockEsClient.indices.existsAlias.mockResolvedValue(false);
+    mockEsClient.indices.updateAliases.mockResolvedValue({ acknowledged: true });
+    await createVulnerabilitiesIndexAlias(mockEsClient, logger);
+    expect(mockEsClient.indices.exists).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.indices.existsAlias).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.indices.updateAliases).toHaveBeenCalledTimes(1);
+    expect(mockEsClient.indices.updateAliases).toHaveBeenCalledWith({
+      actions: [
+        {
+          add: {
+            index: latestVulnerabilitiesTransform.dest.index,
+            alias: 'logs-cloud_security_posture.vulnerabilities_latest-default',
+          },
+        },
+      ],
+    });
+  });
+
+  it('should handle errors gracefully', async () => {
+    mockEsClient.indices.exists.mockRejectedValue(new Error('ES error'));
+    await createVulnerabilitiesIndexAlias(mockEsClient, logger);
+    expect(mockEsClient.indices.exists).toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledTimes(1);
   });
 });
