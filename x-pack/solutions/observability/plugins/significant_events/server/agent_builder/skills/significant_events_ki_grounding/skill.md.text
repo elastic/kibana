@@ -45,7 +45,7 @@ has. Copy each name and its `type` from the sample result's `columns`, and drop 
 - is the field of a condition in `{scope}` or `{failure}` (check each name against both: `{scope}`
   pins it to one value, such as the service, so it would measure nothing).
 
-Rewrite the line after a `re-sample` or an `off_topic` `spread`.
+Rewrite the line after a `re-sample`.
 
 **`profile:` line.** For every rule that runs queries, write `profile: dimensions {state}, examples
 {state}, breakdown {state}`, each state `planned`, `sent`, `failed: reason`, `not sent:
@@ -246,20 +246,15 @@ invalid: the verdict is `not_checked`, not `inconclusive`.
 One sample per rule proves whether its failure is happening now. Apply `<query_rules>`, plus:
 
 - **Definitions.**
-  - `affected`: the failing count of the rule's latest `spread`. An `off_topic` rule's second `spread`
-    replaces its first, whose figure no longer applies.
-  - A rule has no `affected` when its `spread` failed or was never sent: an aggregate KI sends none,
-    and an `off_topic` rule with no isolating observed-error condition keeps its profile not
-    measured. Such a rule never has `affected` above 0. A `spread` of 0 with a sample
+  - `affected`: the failing count of the rule's `spread`.
+  - A rule has no `affected` when its `spread` failed or was never sent (an aggregate KI sends
+    none). Such a rule never has `affected` above 0. A `spread` of 0 with a sample
     that returns rows is not "no failure". A sample that returns 0 rows takes the empty-result path;
     `affected` does not explain it.
   - text field: the plain field that is the first argument of a top-level `AND` `MATCH_PHRASE` or
     `MATCH` in `{failure}` (not under `NOT` or `OR`, not inside a function); `:`, `LIKE`, `KQL()`,
     `QSTR()` and multi-field conditions give none. It is decided from `{failure}` alone; examples also
     need it usable: the sample result has a column of that name holding a string with a space.
-  - `off_topic` rule: its final sample's verdict is `off_topic` (`<verdicts>`). The isolating condition
-    built from that row's observed error replaces `{failure}` in its second `spread` and its profile
-    queries.
 - **One table decides every stage.** Per rule, each stage waits for the result of the one before it,
   in this order, one stage per response (Dispatch):
 
@@ -274,16 +269,16 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
 
   | Stage | Runs for | Shape and limits |
   |---|---|---|
-  | `spread` | every rule except an aggregate KI | the Profile step's `spread` on the KI's own `{failure}`, in its variant, over the Profile table's window; the rule's only `spread`, except the `off_topic` rule's second one (Definitions) |
+  | `spread` | every rule except an aggregate KI | the Profile step's `spread` on the KI's own `{failure}`, in its variant, over the Profile table's window; the rule's only `spread` |
   | `sample` | every rule | always `LIMIT 1`; an aggregate KI gets `LIMIT 2`; an authored KI limit of 3 or fewer rows stays instead of ours; `time_range.from` is the rule's `sample_from` (`<query_rules>` rule 3) |
   | `re-sample` | once, when the sample row does not show the rule's failure (healthy, or `off_topic`) or the rule has a text field and the sample result has no usable column for it (Definitions) | `LIMIT 3`, a new query, not a re-run; row-level KIs only. Never after an empty or errored sample or an authored limit of 3 or less, and never just to get a text column that an authored projection omits |
   | `dimensions` | the rule's `affected` is above 0 and it has 2 or more candidates | one query over the candidates |
-  | `examples` | the rule's `affected` is above 0, it is not `off_topic`, and has a usable text field | 3 messages |
-  | `trend`, `baseline` | every rule, except an `off_topic` rule with no isolating observed-error condition | |
+  | `examples` | the rule's `affected` is above 0, and has a usable text field | 3 messages |
+  | `trend`, `baseline` | every rule | |
   | `breakdown` | one query per kept field with `f` of 2 or more | up to 3 queries |
 
   After its `sample` a rule sends at most 7 queries (`dimensions`, `examples`, `trend`, `baseline`, up
-  to 3 `breakdown`); the `re-sample`, the `off_topic` `spread` and the `dimensions` resend are extra.
+  to 3 `breakdown`); the `re-sample` and the `dimensions` resend are extra.
 - **Dispatch, one sample per response.** Each response carries at most one sample query and at most
   10 calls.
   - Rules are pipelined, one response apart: a rule's stages go out in consecutive
@@ -292,9 +287,7 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
     {stage}, ...`; write the fields of each `dimensions` and `breakdown` after its name (`r1
     dimensions(a, b)`), each in the `candidates:` line.
   - Exceptions: a `re-sample` takes the next `sample` slot, shifting later rules' samples by one
-    response. An `off_topic` rule's final `sample` is the `re-sample` when one is sent; once that final
-    `sample` is `off_topic`, its second `spread` goes in the next response and its profile set in the
-    one after. A `dimensions` resend goes in the next response, after any re-sample, and that
+    response. A `dimensions` resend goes in the next response, after any re-sample, and that
     rule's `breakdown` waits for it.
   - A stage that would exceed 10 calls moves to the next response by priority: `re-sample`, resend,
     `sample`, the `spread` a `sample` waits on, profile set, `breakdown`.
@@ -342,11 +335,6 @@ one exception: a `dimensions` whose error names a field it cannot use (an unknow
 is sent once more without that field when 2 or more candidates remain (a different query, not a
 re-run); record `sent` and name nothing after a successful resend, `failed` with the second error
 otherwise.
-
-For an `off_topic` signal, `{failure}` measures the observed error, so use a condition that isolates it
-(an exact field value seen in its sample row, its quotes and backslashes escaped, skipped when longer
-than 64 characters or holding a newline or control character). With none, leave its profile
-not measured.
 
 Each profile runs as its `Good (…)` example below, in the variant its scope selects.
 
