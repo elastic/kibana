@@ -182,17 +182,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       input = resumeInputOverride ?? (await this.getInput());
       this.stepExecutionRuntime.setInput(input);
 
-      if (this.shouldPauseAtBreakpoint()) {
-        this.enterBreakpointPause();
-        suspended = true;
-        if (stepSpan) {
-          stepSpan.setOutcome('unknown');
-        }
-        return;
-      }
-
-      const mockConfig = this.getActiveDebugMock();
-      const result = mockConfig ? this.runStepMock(input, mockConfig) : await this._run(input);
+      const result = await this.executeStepWithDebugger(input);
 
       // Layer 2: Enforce output size limit before storing in execution state.
       // This is the generic catch-all that protects every step type against
@@ -278,6 +268,15 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
   // Subclasses implement this to execute the step logic
   protected abstract _run(input: Record<string, unknown>): Promise<RunStepResult>;
+
+  private async executeStepWithDebugger(input: Record<string, unknown>): Promise<RunStepResult> {
+    if (this.shouldPauseAtBreakpoint()) {
+      this.enterBreakpointPause();
+      return { input, suspended: true };
+    }
+    const mockConfig = this.getActiveDebugMock();
+    return mockConfig ? this.runStepMock(input, mockConfig) : this._run(input);
+  }
 
   /**
    * Resolves the maximum step size in bytes.
