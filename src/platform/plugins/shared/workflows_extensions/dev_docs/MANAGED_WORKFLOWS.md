@@ -190,7 +190,7 @@ for (const { id, error } of failed) {
 }
 ```
 
-An item fails when its definition is dynamic, belongs to another plugin, appears twice in the batch, collides with a user workflow or one in another space, or sets `settings.run_as`. Static workflows install without a user request, and a service-account binding needs one, so a static definition must not set `run_as` (the registry test enforces this). The call rejects only when the whole pass fails, such as its first read. It is best-effort like `install`: it may resolve without writing when Workflows is unavailable, Kibana is stopping, or Elasticsearch is not ready.
+An item fails when its definition is dynamic, belongs to another plugin, appears twice in the batch, collides with a user workflow or one in another space, or sets `settings.run_as`. Static workflows install without a user request, and a service-account binding needs one, so a static definition must not set `run_as` (the registry test enforces this). `install` can still upgrade a bound static workflow, because an automatic upgrade only keeps the binding it already has, but `installMany` fails that item. A plugin that skips `ready()` on any failure would then skip it on every start, so a bound workflow belongs with `install`, not in the batch. The call rejects only when the whole pass fails, such as its first read. It is best-effort like `install`: it may resolve without writing when Workflows is unavailable, Kibana is stopping, or Elasticsearch is not ready.
 
 ## 4) Space-scoped vs global installs
 

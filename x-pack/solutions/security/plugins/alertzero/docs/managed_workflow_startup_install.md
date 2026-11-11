@@ -6,7 +6,7 @@ AlertZero installs its global managed workflows when Kibana starts (`initializeM
 
 - Install the global set with one `installMany` call, not with `install` per workflow, whether in parallel or in a loop. Installing them one request each delays logins on a brand-new project.
 - `installMany` only takes static workflows. Workers and other per-space workflows are dynamic and keep using `install`.
-- A static workflow cannot set `settings.run_as`. A service-account binding needs a user request, and static workflows install without one. The managed workflow registry test fails if a static definition sets it.
+- A static workflow cannot set `settings.run_as`. A service-account binding needs a user request, and static workflows install without one. The managed workflow registry test fails if a static definition sets it. `install` can upgrade a bound static workflow, but `installMany` fails it, and AlertZero then skips `ready()` on every start.
 - Any workflow install made inside a user request is still one write with `refresh: true`.
 
 ## Why it matters
