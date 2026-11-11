@@ -20,6 +20,8 @@ import { delay, sample, summarize, timed } from './stats';
 const TAG = 'observables-load-test';
 const IPV4 = 'observable-type-ipv4';
 const HOSTNAME = 'observable-type-hostname';
+/** A value many cases hold, like a public DNS server. */
+const SHARED_VALUE = '8.8.8.8';
 
 interface LoadTestConfig {
   kibana: string;
@@ -30,6 +32,7 @@ interface LoadTestConfig {
   esPassword: string;
   observables: number;
   cases: number;
+  sharedCases: number;
   batch: number;
   concurrency: number;
   owner: string;
@@ -83,6 +86,11 @@ const parseConfig = (): LoadTestConfig =>
     esPassword: { type: 'string', default: 'changeme' },
     observables: { type: 'number', default: 10_000, describe: 'Observables per case' },
     cases: { type: 'number', default: 1, describe: 'Cases to fill' },
+    sharedCases: {
+      type: 'number',
+      default: 0,
+      describe: `More cases that each hold only ${SHARED_VALUE}, which the first case holds too`,
+    },
     batch: { type: 'number', default: 1_000, describe: 'Observables per bulk create request' },
     concurrency: { type: 'number', default: 4, describe: 'Bulk create requests in flight' },
     owner: { type: 'string', default: 'securitySolution' },
@@ -136,6 +144,50 @@ const getIndexStats = async (es: Client): Promise<IndexStats> => {
     storeBytes: primaries?.store?.size_in_bytes ?? 0,
     observables: count,
   };
+};
+
+interface TotalsResponse {
+  total: number;
+  total_relation?: 'eq' | 'gte';
+  skipped_common_observables?: number;
+}
+
+/**
+ * Creates the cases that each hold only the shared value, and adds it to the first case too, so the
+ * cases-by-observable routes and similar cases meet a common value.
+ */
+const addSharedValueCases = async ({
+  request,
+  config,
+  firstCaseId,
+}: {
+  request: ReturnType<typeof createRequester>;
+  config: LoadTestConfig;
+  firstCaseId: string;
+}): Promise<CaseResponse[]> => {
+  logger.info(`Creating ${config.sharedCases} cases that each hold ${SHARED_VALUE}`);
+  const sharedCases = await pMap(
+    range(0, config.sharedCases),
+    (index) =>
+      request<CaseResponse>('POST', '/api/cases', {
+        title: `${TAG} shared ${index}`,
+        description: `Holds ${SHARED_VALUE} for a load test`,
+        tags: [TAG],
+        owner: config.owner,
+        connector: { id: 'none', name: 'none', type: '.none', fields: null },
+        settings: { syncAlerts: false },
+      }),
+    { concurrency: 10 }
+  );
+  await pMap(
+    [firstCaseId, ...sharedCases.map(({ id }) => id)],
+    (id) =>
+      request('POST', `/internal/cases/${id}/observables/_bulk_create`, {
+        observables: [{ typeKey: IPV4, value: SHARED_VALUE, description: null }],
+      }),
+    { concurrency: 10 }
+  );
+  return sharedCases;
 };
 
 export const runObservablesLoadTest = async (): Promise<void> => {
@@ -221,6 +273,11 @@ export const runObservablesLoadTest = async (): Promise<void> => {
     );
     const ruleWriteDuringBulkAdd = await probe.stop();
 
+    const sharedCases =
+      config.sharedCases > 0
+        ? await addSharedValueCases({ request, config, firstCaseId: cases[0].id })
+        : [];
+
     const sum = (key: 'added' | 'skipped_duplicates' | 'skipped_over_cap') =>
       bulkResults.reduce((total, { result }) => total + result[key].length, 0);
     const bulkAdd = {
@@ -236,6 +293,8 @@ export const runObservablesLoadTest = async (): Promise<void> => {
     const [{ id: caseId }] = cases;
     const find = (body: Record<string, unknown>) =>
       request<FindResponse>('POST', `/internal/cases/${caseId}/observables/_find`, body);
+    const similarCases = (perPage: number) =>
+      request<TotalsResponse>('POST', `/internal/cases/${caseId}/_similar`, { page: 1, perPage });
 
     logger.info(`Timing reads on case ${caseId}`);
     probe.start();
@@ -263,6 +322,9 @@ export const runObservablesLoadTest = async (): Promise<void> => {
           ids: cases.slice(0, 1_000).map(({ id }) => id),
         })
       ),
+      // The similar cases tab, and its count, which every case view loads.
+      similarCases: await sample(config.readSamples, () => similarCases(20)),
+      similarCasesTotal: await sample(config.readSamples, () => similarCases(0)),
     };
 
     const pageLatencies: number[] = [];
@@ -280,25 +342,29 @@ export const runObservablesLoadTest = async (): Promise<void> => {
 
     const theCase = await request<CaseResponse>('GET', `/api/cases/${caseId}`);
     const firstPage = await find({ perPage: 20 });
+    const similar = await similarCases(0);
     const checks = {
       expectedObservables: config.observables,
       caseTotalObservables: theCase.total_observables,
       casePreviewSize: theCase.observables.length,
       findTotal: firstPage.total,
+      similarCases: similar.total,
+      similarSkippedCommon: similar.skipped_common_observables ?? 0,
     };
 
     const indexAfterAdd = await getIndexStats(es);
 
+    const allCases = [...cases, ...sharedCases];
     let deleteCases:
       | { requestSeconds: number; untilObservablesGoneSeconds: number; observablesLeft: number }
       | undefined;
     if (!config.keep) {
-      logger.info(`Deleting ${cases.length} cases`);
+      logger.info(`Deleting ${allCases.length} cases`);
       const startedAt = Date.now();
       // The delete API takes at most 100 case ids per request.
       const { ms } = await timed(async () => {
-        for (let start = 0; start < cases.length; start += 100) {
-          const ids = cases.slice(start, start + 100).map(({ id }) => id);
+        for (let start = 0; start < allCases.length; start += 100) {
+          const ids = allCases.slice(start, start + 100).map(({ id }) => id);
           await request('DELETE', `/api/cases?ids=${encodeURIComponent(JSON.stringify(ids))}`);
         }
       });
@@ -318,6 +384,7 @@ export const runObservablesLoadTest = async (): Promise<void> => {
     const report = {
       config,
       cases: cases.map(({ id }) => id),
+      sharedCases: sharedCases.length,
       ruleWrite: {
         baseline: ruleWriteBaseline,
         duringBulkAdd: ruleWriteDuringBulkAdd,

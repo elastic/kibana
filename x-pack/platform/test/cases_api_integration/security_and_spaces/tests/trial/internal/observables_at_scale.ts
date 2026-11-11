@@ -495,6 +495,8 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(res.total).to.be(2);
+        expect(res.total_relation).to.be('eq');
+        expect(res.skipped_common_observables).to.be(0);
         expect(res.cases.map(({ id }) => id).sort()).to.eql(
           [throughType.id, throughField.id].sort()
         );
