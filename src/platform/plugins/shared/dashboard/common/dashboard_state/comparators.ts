@@ -53,18 +53,15 @@ export const DASHBOARD_COMPARATOR_DEFAULTS = {
  * @param isTimeRestored Time range and refresh interval only count as changes when time is restored with the dashboard.
  * @param isProjectRoutingRestored Project routing only counts as a change when it is restored with the dashboard.
  */
-export function getDashboardComparators({
-  isTimeRestored,
-  isProjectRoutingRestored,
-}: {
-  isTimeRestored: () => boolean;
-  isProjectRoutingRestored: () => boolean;
-}): StateComparators<DashboardState> {
+export function getDashboardComparators(
+  isTimeRestored: () => boolean,
+  isProjectRoutingRestored: () => boolean
+): StateComparators<DashboardState> {
   return {
     ...metadataComparators,
     options: (a, b) => areComparatorsEqual(optionsComparators, a, b, DEFAULT_DASHBOARD_OPTIONS),
-    ...getUnifiedSearchComparators({ isTimeRestored }),
-    ...getProjectRoutingComparators({ isRestored: isProjectRoutingRestored }),
+    ...getUnifiedSearchComparators(isTimeRestored),
+    ...getProjectRoutingComparators(isProjectRoutingRestored),
     ...approximationComparators,
     access_control: 'deepEquality',
     // compared separately by areEqual, see above

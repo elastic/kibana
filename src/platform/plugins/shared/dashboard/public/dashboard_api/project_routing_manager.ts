@@ -53,9 +53,7 @@ export function initializeProjectRoutingManager(
       setProjectRouting(cpsProjectRouting);
     });
 
-  const comparators = getProjectRoutingComparators({
-    isRestored: () => projectRoutingRestore$.value,
-  });
+  const comparators = getProjectRoutingComparators(() => projectRoutingRestore$.value);
 
   const getState = (): Pick<DashboardState, 'project_routing'> => {
     if (!projectRoutingRestore$.value) {

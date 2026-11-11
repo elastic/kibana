@@ -240,10 +240,7 @@ export function initializeUnifiedSearchManager(
     );
   }
 
-  const comparators = getUnifiedSearchComparators({
-    isTimeRestored: () => timeRestore$.value,
-    logger,
-  });
+  const comparators = getUnifiedSearchComparators(() => timeRestore$.value, logger);
 
   const getState = (): Pick<
     DashboardState,

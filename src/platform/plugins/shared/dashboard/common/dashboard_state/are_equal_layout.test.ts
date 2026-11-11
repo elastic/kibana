@@ -10,7 +10,8 @@
 import type { DashboardPanel, DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getControlsSchema } from '@kbn/controls-schemas';
 import type { StateComparators } from '@kbn/presentation-publishing';
-import { areEqual, type GetComparators } from './are_equal';
+import { areEqual } from './are_equal';
+import type { GetComparators } from './layout';
 
 const section = (collapsed: boolean) => ({
   id: 'section-1',
@@ -48,7 +49,7 @@ const pinnedPanel = (title = 'Host', id?: string) =>
 
 const noComparators: GetComparators = async () => undefined;
 
-describe('layout areEqual', () => {
+describe('areEqual layout', () => {
   it('is equal when nothing changed', async () => {
     expect(await areEqual(state(), state({ panels: [section(false)] }), noComparators)).toBe(true);
   });
@@ -151,7 +152,7 @@ describe('layout areEqual', () => {
       [
         'panel',
         (title) => ({
-          panels: [testPanel({ config: { title } }), testPanel({ id: '__comparison:panel:0' })],
+          panels: [testPanel({ config: { title } }), testPanel({ id: '__generated:panel:0' })],
         }),
       ],
       [
@@ -164,7 +165,7 @@ describe('layout areEqual', () => {
               grid: { y: 0 },
               panels: [
                 testPanel({ config: { title } }),
-                testPanel({ id: '__comparison:panel:0:0' }),
+                testPanel({ id: '__generated:panel:0:0' }),
               ],
             },
           ],
@@ -174,7 +175,7 @@ describe('layout areEqual', () => {
         'pinned panel',
         (title) => ({
           panels: [],
-          pinned_panels: [pinnedPanel(title), pinnedPanel('Host', '__comparison:pinned:0')],
+          pinned_panels: [pinnedPanel(title), pinnedPanel('Host', '__generated:pinned:0')],
         }),
       ],
     ];

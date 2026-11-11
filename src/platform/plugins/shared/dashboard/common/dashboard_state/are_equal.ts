@@ -10,24 +10,44 @@
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { areComparatorsEqual } from '@kbn/presentation-publishing';
 import { DASHBOARD_COMPARATOR_DEFAULTS, getDashboardComparators } from './comparators';
-import { areEqual as areLayoutsEqual, type GetComparators } from './layout/are_equal';
+import {
+  areLayoutsEqual,
+  arePanelConfigsEqual,
+  arePinnedPanelConfigsEqual,
+  assignMissingIds,
+  deserializeLayout,
+  getGeneratedIdPrefix,
+  type GetComparators,
+} from './layout';
 
 /**
  * Checks whether two dashboard states are equal.
  *
- * `panels` and `pinned_panels` are compared with the comparators returned by `getComparators`.
- * All other keys are compared with the comparators from `getDashboardComparators`.
+ * @returns `true` when the two dashboard states are equal, `false` when they differ.
  */
 export async function areEqual(
   a: DashboardState,
   b: DashboardState,
   getComparators: GetComparators
 ): Promise<boolean> {
-  const comparators = getDashboardComparators({
+  const comparators = getDashboardComparators(
     // Restored when either state restores it, so adding or removing time or project routing is a change.
-    isTimeRestored: () => Boolean(a.time_range) || Boolean(b.time_range),
-    isProjectRoutingRestored: () => Boolean(a.project_routing) || Boolean(b.project_routing),
-  });
+    () => Boolean(a.time_range) || Boolean(b.time_range),
+    () => Boolean(a.project_routing) || Boolean(b.project_routing)
+  );
   if (!areComparatorsEqual(comparators, a, b, DASHBOARD_COMPARATOR_DEFAULTS)) return false;
-  return areLayoutsEqual(a, b, getComparators);
+  // Panels and sections without an id are matched by position.
+  const prefix = getGeneratedIdPrefix(a, b);
+  const deserialize = (state: DashboardState) =>
+    deserializeLayout(
+      assignMissingIds(state.panels, `${prefix}panel:`),
+      assignMissingIds(state.pinned_panels, `${prefix}pinned:`)
+    );
+  const aLayout = deserialize(a);
+  const bLayout = deserialize(b);
+  if (!areLayoutsEqual(aLayout.layout, bLayout.layout)) return false;
+  return (
+    (await arePinnedPanelConfigsEqual(aLayout, bLayout, getComparators)) &&
+    (await arePanelConfigsEqual(aLayout, bLayout, getComparators))
+  );
 }

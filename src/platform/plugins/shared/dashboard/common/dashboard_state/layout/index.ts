@@ -13,5 +13,10 @@ export {
   arePanelLayoutsEqual,
   arePinnedPanelLayoutsEqual,
 } from './are_layouts_equal';
-export { areEqual, type GetComparators } from './are_equal';
+export {
+  arePanelConfigsEqual,
+  arePinnedPanelConfigsEqual,
+  type GetComparators,
+} from './are_panel_configs_equal';
+export { assignMissingIds, getGeneratedIdPrefix } from './missing_ids';
 export type { DashboardChildState, DashboardLayout, DashboardLayoutPanel } from './layout_types';

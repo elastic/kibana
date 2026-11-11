@@ -42,13 +42,10 @@ export const areTimesEqual = (
  * @param isTimeRestored Time range and refresh interval only count as changes when time is restored with the dashboard.
  * @param logger Optional logger used when converting filters.
  */
-export function getUnifiedSearchComparators({
-  isTimeRestored,
-  logger,
-}: {
-  isTimeRestored: () => boolean;
-  logger?: Logger;
-}): StateComparators<UnifiedSearchState> {
+export function getUnifiedSearchComparators(
+  isTimeRestored: () => boolean,
+  logger?: Logger
+): StateComparators<UnifiedSearchState> {
   return {
     filters: (a, b) =>
       compareFilters(

@@ -15,11 +15,9 @@ export type ProjectRoutingState = Pick<DashboardState, 'project_routing'>;
 /**
  * @param isRestored Project routing only counts as a change when it is restored with the dashboard.
  */
-export function getProjectRoutingComparators({
-  isRestored,
-}: {
-  isRestored: () => boolean;
-}): StateComparators<ProjectRoutingState> {
+export function getProjectRoutingComparators(
+  isRestored: () => boolean
+): StateComparators<ProjectRoutingState> {
   return {
     project_routing: (a, b) => !isRestored() || a === b,
   };
