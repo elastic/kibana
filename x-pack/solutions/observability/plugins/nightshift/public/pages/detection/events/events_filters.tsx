@@ -80,8 +80,8 @@ export const EventsFilters = ({
 }: EventsFiltersProps): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+      <EuiFlexItem grow={true} css={{ minWidth: 0 }}>
         <EuiFieldSearch
           data-test-subj="nightshiftDetectionEventsSearch"
           compressed
@@ -92,15 +92,6 @@ export const EventsFilters = ({
           aria-label={SEARCH_PLACEHOLDER}
           value={searchValue}
           onChange={onSearchChange}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <NightshiftTimeRangePicker
-          start={timeRange.from}
-          end={timeRange.to}
-          onChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
-          showRefreshButton
-          data-test-subj="nightshiftDetectionEventsTimePicker"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -152,6 +143,15 @@ export const EventsFilters = ({
             testSubject="nightshiftDetectionEventsInvestigationFilter"
           />
         </EuiFilterGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <NightshiftTimeRangePicker
+          start={timeRange.from}
+          end={timeRange.to}
+          onChange={({ start, end }) => onTimeRangeChange({ from: start, to: end })}
+          showRefreshButton
+          data-test-subj="nightshiftDetectionEventsTimePicker"
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

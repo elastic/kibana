@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { SignificantEventsMaintenanceStatus } from '@kbn/significant-events-plugin/common';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { DetectionStatusBadge } from './detection_status_badge';
 import { MetricCell, type MetricCellProps } from './metric_cell';
 import {
@@ -22,6 +29,9 @@ import {
   OVERVIEW_ERROR_TITLE,
   OVERVIEW_RETRY_LABEL,
 } from './translations';
+
+/** Hairline before every metric except the first (no leading separator). */
+const METRIC_SEPARATOR_BEFORE_INDEX = 1;
 
 export interface DetectionOverviewCounts {
   entities: number;
@@ -52,6 +62,7 @@ export const DetectionOverview = ({
   onRetry,
   compact = false,
 }: DetectionOverviewProps): React.ReactElement => {
+  const { euiTheme } = useEuiTheme();
   const metrics: Array<Omit<MetricCellProps, 'isLoading'>> = [
     {
       icon: 'chartTagCloud',
@@ -75,7 +86,7 @@ export const DetectionOverview = ({
       testSubject: 'nightshiftDetectionOverviewActiveRules',
     },
     {
-      icon: 'moon',
+      icon: 'productNightshift',
       tone: 'warning',
       value: counts?.detections,
       getLabel: getSignalsLabel,
@@ -135,11 +146,31 @@ export const DetectionOverview = ({
               }}
             />
           ) : (
-            <EuiFlexGroup gutterSize="xl" justifyContent="spaceBetween" wrap>
-              {metrics.map((metric) => (
-                <EuiFlexItem key={metric.testSubject} grow={false}>
-                  <MetricCell {...metric} isLoading={isCountsLoading} />
-                </EuiFlexItem>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="none"
+              responsive={false}
+              css={{ gap: euiTheme.size.base }}
+            >
+              {metrics.map((metric, index) => (
+                <Fragment key={metric.testSubject}>
+                  {index >= METRIC_SEPARATOR_BEFORE_INDEX ? (
+                    <EuiFlexItem grow={false}>
+                      <div
+                        aria-hidden
+                        css={{
+                          width: euiTheme.border.width.thin,
+                          // Match EuiAvatar size="l".
+                          height: euiTheme.size.xxl,
+                          backgroundColor: euiTheme.colors.borderBaseSubdued,
+                        }}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
+                  <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
+                    <MetricCell {...metric} isLoading={isCountsLoading} />
+                  </EuiFlexItem>
+                </Fragment>
               ))}
             </EuiFlexGroup>
           )}

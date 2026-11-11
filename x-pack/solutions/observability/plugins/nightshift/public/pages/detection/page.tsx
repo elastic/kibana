@@ -315,7 +315,7 @@ export const DetectionPage = ({
                       min-height: 0;
                     `}
                   >
-                    <EuiTabs size="s">
+                    <EuiTabs size="m">
                       {getVisibleDetectionTabs(isDeveloperMode).map((id) => (
                         <EuiTab
                           key={id}
@@ -335,6 +335,8 @@ export const DetectionPage = ({
                     <EuiSpacer size="m" />
                     <div
                       css={css`
+                        display: flex;
+                        flex-direction: column;
                         flex: 1 1 auto;
                         min-height: 0;
                         overflow: auto;
