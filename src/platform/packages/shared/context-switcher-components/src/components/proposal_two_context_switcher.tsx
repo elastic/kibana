@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
   EuiSplitPanel,
@@ -51,16 +52,40 @@ const CREATE_NEW_SPACE_LABEL = i18n.translate(
   }
 );
 
-const CLOUD_BUTTON_LABEL = i18n.translate('contextSwitcherComponents.proposalTwo.openCloud', {
-  defaultMessage: 'Open in Cloud',
+const CLOUD_BUTTON_LABEL = i18n.translate('contextSwitcherComponents.proposalTwo.manageCloud', {
+  defaultMessage: 'Manage in Cloud',
 });
 
-const mapSpaceToSelectableItem = (space: SpaceItem, activeId: string): SelectableListItem => ({
+const mapSpaceToSelectableItem = (
+  space: SpaceItem,
+  activeId: string,
+  showSpaceSolutions: boolean
+): SelectableListItem => ({
   id: space.id,
   label: space.name,
   checked: space.id === activeId,
   prepend: space.avatar?.('s') ?? <EuiAvatar type="space" name={space.name} size="s" />,
-  append: space.badge,
+  append:
+    showSpaceSolutions && space.solution && space.solutionIcon ? (
+      <EuiFlexGroup
+        component="span"
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+        aria-label={space.solution}
+      >
+        <EuiFlexItem component="span" grow={false}>
+          <EuiIcon type={space.solutionIcon} size="m" aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem component="span" grow={false}>
+          <EuiText component="span" size="s" color="subdued">
+            {space.solution}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      space.badge
+    ),
   'data-test-subj': `space-${space.id}`,
 });
 
@@ -86,8 +111,15 @@ export const ProposalTwoContextSwitcher = ({
   const closePopover = useCallback(() => setIsOpen(false), []);
 
   const selectableItems = useMemo(
-    () => spaces.items.map((space) => mapSpaceToSelectableItem(space, spaces.active.id)),
-    [spaces.items, spaces.active.id]
+    () =>
+      spaces.items.map((space) =>
+        mapSpaceToSelectableItem(
+          space,
+          spaces.active.id,
+          Boolean(projectSummary?.showSpaceSolutions)
+        )
+      ),
+    [projectSummary?.showSpaceSolutions, spaces.items, spaces.active.id]
   );
 
   const handleSpaceSelect = useCallback<SpacesListViewProps['onSelect']>(
@@ -103,9 +135,10 @@ export const ProposalTwoContextSwitcher = ({
     [spaces, closePopover]
   );
 
-  const footerItems = useMemo((): LinksListItem[] => {
+  const spaceActionItems = useMemo((): LinksListItem[] => {
     const items: LinksListItem[] = [];
     const createSpace = spaces.footerAction;
+    const manageSpaces = spaces.headerAction;
 
     if (createSpace) {
       items.push({
@@ -122,21 +155,37 @@ export const ProposalTwoContextSwitcher = ({
       });
     }
 
-    footerLinks?.forEach((link) => {
-      if (!FOOTER_LINK_IDS.has(link.id)) {
-        return;
-      }
+    if (manageSpaces) {
       items.push({
+        id: manageSpaces.id,
+        label: manageSpaces.label,
+        href: manageSpaces.href,
+        onClick: () => {
+          closePopover();
+          manageSpaces.onClick?.();
+        },
+        iconType: 'gear',
+        disabled: manageSpaces.disabled,
+        'data-test-subj': manageSpaces['data-test-subj'],
+      });
+    }
+
+    return items;
+  }, [closePopover, spaces.footerAction, spaces.headerAction]);
+
+  const secondaryFooterItems = useMemo((): LinksListItem[] => {
+    if (!footerLinks) return [];
+
+    return footerLinks
+      .filter((link) => FOOTER_LINK_IDS.has(link.id))
+      .map((link) => ({
         ...link,
         onClick: () => {
           closePopover();
           link.onClick?.();
         },
-      });
-    });
-
-    return items;
-  }, [closePopover, footerLinks, spaces.footerAction]);
+      }));
+  }, [closePopover, footerLinks]);
 
   return (
     <EuiPopover
@@ -214,9 +263,13 @@ export const ProposalTwoContextSwitcher = ({
             }
           />
         </EuiSplitPanel.Inner>
-        {footerItems.length > 0 && (
+        {(spaceActionItems.length > 0 || secondaryFooterItems.length > 0) && (
           <EuiSplitPanel.Inner color="subdued" paddingSize="s">
-            <LinksList items={footerItems} />
+            {spaceActionItems.length > 0 && <LinksList items={spaceActionItems} />}
+            {spaceActionItems.length > 0 && secondaryFooterItems.length > 0 && (
+              <EuiHorizontalRule margin="xs" />
+            )}
+            {secondaryFooterItems.length > 0 && <LinksList items={secondaryFooterItems} />}
           </EuiSplitPanel.Inner>
         )}
       </EuiSplitPanel.Outer>

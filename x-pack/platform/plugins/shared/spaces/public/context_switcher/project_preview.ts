@@ -33,6 +33,72 @@ const DEPLOYMENT_DESCRIPTION = i18n.translate(
   { defaultMessage: 'Deployment' }
 );
 
+/** Same marks and names as the space solution badge. */
+const HOSTED_SPACE_SOLUTIONS: ReadonlyArray<{ id: string; icon: IconType; label: string }> = [
+  {
+    id: 'security',
+    icon: 'logoSecurity',
+    label: i18n.translate('xpack.spaces.contextSwitcher.projectPreview.solutionSecurity', {
+      defaultMessage: 'Security',
+    }),
+  },
+  {
+    id: 'oblt',
+    icon: 'logoObservability',
+    label: i18n.translate('xpack.spaces.contextSwitcher.projectPreview.solutionObservability', {
+      defaultMessage: 'Observability',
+    }),
+  },
+  {
+    id: 'es',
+    icon: 'logoElasticsearch',
+    label: i18n.translate('xpack.spaces.contextSwitcher.projectPreview.solutionElasticsearch', {
+      defaultMessage: 'Elasticsearch',
+    }),
+  },
+  {
+    id: 'vectordb',
+    icon: 'logoVectorDB',
+    label: i18n.translate('xpack.spaces.contextSwitcher.projectPreview.solutionVector', {
+      defaultMessage: 'VectorDB',
+    }),
+  },
+  {
+    id: 'classic',
+    icon: 'logoElasticStack',
+    label: i18n.translate('xpack.spaces.contextSwitcher.projectPreview.solutionClassic', {
+      defaultMessage: 'Classic',
+    }),
+  },
+];
+
+const HOSTED_SOLUTION_ALIASES: Record<string, string> = {
+  observability: 'oblt',
+  search: 'es',
+};
+
+const HOSTED_SOLUTION_ROTATION = ['security', 'oblt', 'es', 'classic', 'vectordb'] as const;
+
+/**
+ * Solution mark for a space on a hosted deployment.
+ * Uses the space's own solution when it has one. Otherwise cycles the hosted types
+ * so a serverless checkout can still review every logo.
+ */
+export const resolveHostedSpaceSolution = (
+  solution: string | undefined,
+  index: number
+): { icon: IconType; label: string } => {
+  const solutionId = solution ? HOSTED_SOLUTION_ALIASES[solution] ?? solution : undefined;
+  const known = solutionId
+    ? HOSTED_SPACE_SOLUTIONS.find((item) => item.id === solutionId)
+    : undefined;
+  if (known) {
+    return known;
+  }
+  const fallbackId = HOSTED_SOLUTION_ROTATION[index % HOSTED_SOLUTION_ROTATION.length];
+  return HOSTED_SPACE_SOLUTIONS.find((item) => item.id === fallbackId) ?? HOSTED_SPACE_SOLUTIONS[0];
+};
+
 export const PROJECT_PREVIEWS: readonly ProjectPreview[] = [
   {
     id: 'security',

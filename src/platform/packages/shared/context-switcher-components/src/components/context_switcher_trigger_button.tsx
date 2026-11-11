@@ -58,9 +58,9 @@ export const ContextSwitcherTriggerButton = ({
       data-test-subj="contextSwitcherTriggerButton"
       css={css`
         max-inline-size: ${POPOVER_WIDTH_PX}px;
-        color: ${isSelected ? euiTheme.colors.text : euiTheme.colors.textSubdued};
+        color: ${euiTheme.colors.textSubdued};
         background-color: ${isSelected
-          ? euiTheme.colors.backgroundBaseInteractiveSelect
+          ? euiTheme.components.buttons.backgroundEmptyTextHover
           : 'transparent'};
       `}
     >

@@ -27,7 +27,7 @@ import {
   useManagementActions,
   useSpaceItems,
 } from './hooks';
-import { useProjectPreview } from './project_preview';
+import { resolveHostedSpaceSolution, useProjectPreview } from './project_preview';
 import { ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../common';
 import { SPACES_QUERY_KEY, useSpaces } from '../nav_control/hooks/use_spaces';
 import type { SpacesManager } from '../spaces_manager';
@@ -148,16 +148,33 @@ const ContextSwitcherInner = ({
   }
 
   if (variant === 'proposal2') {
+    const showSpaceSolutions = projectPreview.id === 'deployment';
+    const proposalSpaces = showSpaceSolutions
+      ? {
+          ...spacesConfig,
+          items: spacesConfig.items.map((item, index) => {
+            const solution = spaces?.find((space) => space.id === item.id)?.solution;
+            const presentation = resolveHostedSpaceSolution(solution, index);
+            return {
+              ...item,
+              solution: presentation.label,
+              solutionIcon: presentation.icon,
+            };
+          }),
+        }
+      : spacesConfig;
+
     return (
       <ContextSwitcher
         variant="proposal2"
-        spaces={spacesConfig}
+        spaces={proposalSpaces}
         footerLinks={footerLinks}
         projectSummary={{
           icon: projectPreview.icon,
           name: projectPreview.name,
           description: projectPreview.description,
           href: cloud?.deploymentUrl || undefined,
+          showSpaceSolutions,
         }}
         onOpen={handleOpen}
       />

@@ -65,6 +65,8 @@ export interface ContextSwitcherProjectSummary {
   description: string;
   /** Opens this project in Cloud. */
   href?: string;
+  /** Hosted deployments show each space's solution logo at the end of the row. */
+  showSpaceSolutions?: boolean;
 }
 
 export interface ContextSwitcherProps {
