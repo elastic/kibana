@@ -31,9 +31,9 @@ describe('renderTemplateValue', () => {
     expect(renderTemplateValue('n={{ input.count }}', context)).toBe('n=90');
   });
 
-  it('drops undefined object entries', () => {
+  it('drops explicitly optional undefined object entries', () => {
     expect(
-      renderTemplateValue({ keep: '{{ input.keep }}', drop: '{{ input.missing }}' }, context)
+      renderTemplateValue({ keep: '{{ input.keep }}', drop: '{{ input.missing? }}' }, context)
     ).toEqual({ keep: 'yes' });
   });
 
@@ -58,8 +58,14 @@ describe('renderTemplateValue', () => {
     );
   });
 
-  it('drops an exact template that does not resolve', () => {
-    expect(renderTemplateValue({ drop: '{{ input.missing }}', keep: 'yes' }, context)).toEqual({
+  it('throws when a required exact object template does not resolve', () => {
+    expect(() =>
+      renderTemplateValue({ drop: '{{ input.missing }}', keep: 'yes' }, context)
+    ).toThrow(TemplateRenderError);
+  });
+
+  it('drops an exact optional template that does not resolve', () => {
+    expect(renderTemplateValue({ drop: '{{ input.missing? }}', keep: 'yes' }, context)).toEqual({
       keep: 'yes',
     });
   });
