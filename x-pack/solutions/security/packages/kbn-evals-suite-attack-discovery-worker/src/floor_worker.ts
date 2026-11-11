@@ -439,6 +439,13 @@ export const settleEnableTimeRun = async ({
  * so a run starts the way production starts it: the worker dispatches the runner as its
  * `run_as` identity. The enable-time scheduled run is cancelled before this returns (see
  * `settleEnableTimeRun`); the long schedule interval keeps any later tick out of the rows.
+ *
+ * TODO(Workflows/AlertZero owners): the seeded-false-positive row starts the review through the
+ * floor worker's rewritten YAML (see `runViaFloorParent`) because the review inherits its
+ * execution identity and refuses a direct `/run` with 403. What this suite needs is a supported
+ * run-as service-account start API for such workflows — the same `alertzero_attack_discovery`
+ * identity the floor runs as. When that lands, the floor-parent workaround and its restore
+ * machinery can be deleted.
  */
 export const enableFloorWorker = async ({
   fetch,

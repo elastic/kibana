@@ -282,6 +282,13 @@ export class AttackDiscoveryWorkerClient {
    * when started directly, so the floor is the parent: its stored YAML is rewritten to dispatch the
    * target with literal `inputs`, the floor is run, and the YAML is put back.
    *
+   * TODO(Workflows/AlertZero owners): this floor-parent rewrite exists because the review workflow
+   * refuses a direct `/run` with 403 (it inherits its execution identity). The supported answer is
+   * a run-as service-account start API for workflows like the review —
+   * `/api/workflows/workflow/{id}/run` accepting a delegated service-account identity (the same
+   * `alertzero_attack_discovery` account the floor worker runs as). Once that exists, delete this
+   * rewrite and the seeded-false-positive row's floor-parent path and call it directly.
+   *
    * Only call this while no other floor run is active; the floor and the target get
    * `FLOOR_IDLE_WAIT_MS` to go idle (nothing is cancelled for that); after that only the long
    * schedule interval keeps a tick out (a PUT reschedules the task, it does not run it). The

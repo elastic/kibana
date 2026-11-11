@@ -576,9 +576,9 @@ export const CODE_SCORERS: ReadonlyArray<{ name: string; stage: Stage; scorer: C
   { name: 'FingerprintsDispatched', stage: 'pipeline', scorer: scoreFingerprintsDispatched },
   { name: 'ReviewsSettled', stage: 'pipeline', scorer: scoreReviewsSettled },
   { name: 'OneReviewPerAttack', stage: 'pipeline', scorer: scoreOneReviewPerAttack },
-  { name: 'InvestigationOpened', stage: 'review', scorer: scoreInvestigationOpened },
+  { name: 'InvestigationOpened', stage: 'pipeline', scorer: scoreInvestigationOpened },
   { name: 'VerdictMatchesGold', stage: 'review', scorer: scoreVerdictMatchesGold },
   { name: 'BlindReviewAbstained', stage: 'review', scorer: scoreBlindReviewAbstained },
-  { name: 'ParkedAtGate', stage: 'review', scorer: scoreParkedAtGate },
+  { name: 'ParkedAtGate', stage: 'pipeline', scorer: scoreParkedAtGate },
   { name: 'OutcomeReported', stage: 'pipeline', scorer: scoreOutcomeReported },
 ];
