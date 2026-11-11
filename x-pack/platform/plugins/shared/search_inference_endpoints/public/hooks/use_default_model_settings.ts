@@ -20,9 +20,13 @@ export interface DefaultModelSettingsState {
   featureSpecificModels: boolean;
 }
 
+export type DefaultModelSettingsField = keyof DefaultModelSettingsState;
+
 export interface UseDefaultModelSettingsReturn {
   state: DefaultModelSettingsState;
   isDirty: boolean;
+  /** Fields whose current value differs from the persisted one. */
+  dirtyFields: ReadonlySet<DefaultModelSettingsField>;
   setEnableAi: (enabled: boolean) => void;
   setDefaultModelId: (id: string) => void;
   setFeatureSpecificModels: (enabled: boolean) => void;
@@ -95,13 +99,16 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
     return () => subscription.unsubscribe();
   }, [settingsClient, getPersistedState]);
 
-  const isDirty = useMemo(
-    () =>
-      state.enableAi !== savedState.enableAi ||
-      state.defaultModelId !== savedState.defaultModelId ||
-      state.featureSpecificModels !== savedState.featureSpecificModels,
-    [state, savedState]
-  );
+  const dirtyFields = useMemo<ReadonlySet<DefaultModelSettingsField>>(() => {
+    const fields = new Set<DefaultModelSettingsField>();
+    if (state.enableAi !== savedState.enableAi) fields.add('enableAi');
+    if (state.defaultModelId !== savedState.defaultModelId) fields.add('defaultModelId');
+    if (state.featureSpecificModels !== savedState.featureSpecificModels) {
+      fields.add('featureSpecificModels');
+    }
+    return fields;
+  }, [state, savedState]);
+  const isDirty = dirtyFields.size > 0;
 
   const setEnableAi = useCallback((enabled: boolean) => {
     setState((prev) => {
@@ -181,6 +188,7 @@ export const useDefaultModelSettings = (): UseDefaultModelSettingsReturn => {
   return {
     state,
     isDirty,
+    dirtyFields,
     setEnableAi,
     setDefaultModelId,
     setFeatureSpecificModels,

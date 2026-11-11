@@ -5,36 +5,12 @@
  * 2.0.
  */
 
-import { AttackDetailsRightPanelKey } from '../../../flyout/attack_details/constants/panel_keys';
-import {
-  expandableFlyoutStateRightPanelOnly,
-  resolveFlyoutUrlParam,
-} from '../../../flyout/shared/utils/expandable_flyout_url_state';
 import { encodeFlyoutV2UrlParam } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 
 export interface ResolveAttackFlyoutParamsConfig {
   index: string;
   attackId: string;
 }
-
-/**
- * Resolves url parameters for the attack details flyout, serialized as rison.
- * Preserves existing flyout query when present (e.g. user opened a share link that already encoded flyout state).
- */
-export const resolveAttackFlyoutParams = (
-  { index, attackId }: ResolveAttackFlyoutParamsConfig,
-  currentParamsString: string | null
-) =>
-  resolveFlyoutUrlParam(
-    currentParamsString,
-    expandableFlyoutStateRightPanelOnly({
-      id: AttackDetailsRightPanelKey,
-      params: {
-        attackId,
-        indexName: index,
-      },
-    })
-  );
 
 /**
  * Resolves the flyoutV2 URL parameter for the new flyout system.

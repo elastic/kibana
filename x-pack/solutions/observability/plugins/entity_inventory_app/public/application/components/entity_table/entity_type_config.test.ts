@@ -24,7 +24,7 @@ import {
 import { COLUMN_LABELS, getColumnLabel } from './column_labels';
 
 const toListColumns = (names: string[]): InventoryListColumn[] =>
-  names.map((name) => ({ name, kind: 'attribute', type: 'keyword' }));
+  names.map((name) => ({ name, kind: 'attribute' }));
 
 describe('entity type config', () => {
   it('maps the hosts and kubernetes categories to a type and leaves all resources unmapped', () => {
@@ -56,10 +56,10 @@ describe('entity type config', () => {
 
   it('shows Name, the attributes and last seen for a type without display config', () => {
     const columns: InventoryListColumn[] = [
-      { name: 'entity.id', kind: 'id', type: 'keyword' },
-      { name: 'service.name', kind: 'identity', type: 'keyword' },
-      { name: 'service.language', kind: 'attribute', type: 'keyword' },
-      { name: 'last_seen', kind: 'last_seen', type: 'date' },
+      { name: 'entity.id', kind: 'id' },
+      { name: 'service.name', kind: 'identity' },
+      { name: 'service.language', kind: 'attribute' },
+      { name: 'last_seen', kind: 'last_seen' },
     ];
 
     expect(getDisplayConfig('service')).toEqual(
@@ -73,18 +73,9 @@ describe('entity type config', () => {
   });
 
   it('shows the k8s.deployment default columns in the spec order, Name first', () => {
-    expect(
-      getDefaultVisibleColumns(
-        'k8s.deployment',
-        K8S_DEPLOYMENT_TYPE_FIXTURE.columns.map(({ name, kind }) => ({ name, kind, type: null }))
-      )
-    ).toEqual([
-      NAME_COLUMN_ID,
-      NAMESPACE_COLUMN_ID,
-      CLUSTER_COLUMN_ID,
-      'available_replicas',
-      'last_seen',
-    ]);
+    expect(getDefaultVisibleColumns('k8s.deployment', K8S_DEPLOYMENT_TYPE_FIXTURE.columns)).toEqual(
+      [NAME_COLUMN_ID, NAMESPACE_COLUMN_ID, CLUSTER_COLUMN_ID, 'available_replicas', 'last_seen']
+    );
   });
 
   describe('getColumnValue for a deployment', () => {

@@ -13,7 +13,7 @@
  */
 
 import type http from 'http';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import axios from 'axios';
 
 import expect from '@kbn/expect';
@@ -49,7 +49,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       webhookConnector = await createWebhookConnector(webhookSimulatorURL);
 
       slackServer = await getSlackServer();
-      availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      availablePort = await getPort({ port: portNumbers(9000, 9100) });
       if (!slackServer.listening) {
         slackServer.listen(availablePort);
       }
@@ -65,7 +65,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
     describe('escaping', () => {
       it('should handle escapes in webhook', async () => {
-        // from x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+        // from x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/rule_types.ts
         // const EscapableStrings
         const template = '{{context.escapableDoubleQuote}} -- {{context.escapableLineFeed}}';
         const rule = await createRule({
@@ -80,7 +80,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
 
       it('should handle escapes in slack', async () => {
-        // from x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+        // from x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/rule_types.ts
         // const EscapableStrings
         const template =
           '{{context.escapableBacktic}} -- {{context.escapableBold}} -- {{context.escapableBackticBold}} -- {{context.escapableHtml}} -- {{context.escapableLink}}';
@@ -100,7 +100,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
 
       it('should handle context variable object expansion', async () => {
-        // from x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+        // from x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/rule_types.ts
         // const DeepContextVariables
         const template = '{{context.deep}}';
         const rule = await createRule({
@@ -164,7 +164,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
 
       it('should handle asJSON', async () => {
-        // from x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+        // from x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/rule_types.ts
         // const DeepContextVariables
         const template = `{{#context.deep.objectA}}
           {{{arrayC}}} {{{arrayC.asJSON}}}
@@ -184,7 +184,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
 
       it('should handle EvalMath', async () => {
-        // from x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+        // from x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/rule_types.ts
         // const DeepContextVariables
         const template = `{{#context.deep}}avg({{arrayI.0}}, {{arrayI.1}})/100 => {{#EvalMath}}
           round((arrayI[0] + arrayI[1]) / 2 / 100, 2)
@@ -201,7 +201,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       });
 
       it('should handle FormatDate', async () => {
-        // from x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+        // from x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/rule_types.ts
         // const DeepContextVariables
         const template = `{{#context.deep}}{{#FormatDate}}
           {{{dateL}}} ; America/New_York; dddd MMM Do YYYY HH:mm:ss
@@ -219,7 +219,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     });
 
     it('should handle FormatNumber', async () => {
-      // from x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+      // from x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/rule_types.ts
       // const DeepContextVariables
       const template = `{{#context.deep}}{{#FormatNumber}}
         {{{arrayI.1}}}; en-US; style: currency, currency: EUR
@@ -236,7 +236,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     });
 
     it('should handle EncodeURI', async () => {
-      // from x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+      // from x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/rule_types.ts
       // const DeepContextVariables
       const template = `{{#context.deep}}{{#EncodeURI}}{{{encodeableUrl}}}{{/EncodeURI}}{{/context.deep}}`;
       const rule = await createRule({
@@ -251,7 +251,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
     });
 
     it('should handle EncodeURIComponent', async () => {
-      // from x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/rule_types.ts
+      // from x-pack/platform/test_plugins/response_ops/alerting_api_integration/alerts/server/rule_types.ts
       // const DeepContextVariables
       const template = `{{#context.deep}}{{#EncodeURIComponent}}{{{encodeableUrl}}}{{/EncodeURIComponent}}{{/context.deep}}`;
       const rule = await createRule({

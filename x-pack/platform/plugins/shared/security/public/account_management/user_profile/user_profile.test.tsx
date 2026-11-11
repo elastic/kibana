@@ -309,7 +309,7 @@ describe('useUserProfileForm', () => {
       expect(screen.queryByTestId('themeMenu')).not.toBeInTheDocument();
     });
 
-    it('should add special toast after submitting form successfully since darkMode requires a refresh', async () => {
+    it('should not ask for a page reload after changing darkMode', async () => {
       const data: UserProfileData = {};
       const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
 
@@ -333,8 +333,8 @@ describe('useUserProfileForm', () => {
 
       expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
         2,
-        expect.objectContaining({ title: 'Profile updated' }),
-        expect.objectContaining({ toastLifeTimeMs: 300000 })
+        { title: 'Profile updated' },
+        {}
       );
     });
 
@@ -408,7 +408,7 @@ describe('useUserProfileForm', () => {
   });
 
   describe('Contrast Mode Form', () => {
-    it('should add special toast after submitting form successfully since contrast mode change requires a refresh', async () => {
+    it('should not ask for a page reload after changing contrast mode', async () => {
       const data: UserProfileData = {};
       const { result } = renderHook(() => useUserProfileForm({ user, data }), { wrapper });
 
@@ -432,8 +432,8 @@ describe('useUserProfileForm', () => {
 
       expect(coreStart.notifications.toasts.addSuccess).toHaveBeenNthCalledWith(
         2,
-        expect.objectContaining({ title: 'Profile updated' }),
-        expect.objectContaining({ toastLifeTimeMs: 300000 })
+        { title: 'Profile updated' },
+        {}
       );
     });
   });

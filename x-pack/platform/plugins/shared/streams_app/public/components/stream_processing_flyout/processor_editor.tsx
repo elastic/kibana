@@ -18,6 +18,7 @@ import {
   EuiHorizontalRule,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -27,12 +28,13 @@ import { isEqual } from 'lodash';
 import type {
   CatalogueComponentStatus,
   CatalogueComponentSummary,
+  CatalogueMetadata,
   ComponentCatalogue,
   ComponentValidationRequest,
 } from '@kbn/streams-schema';
 import { useDiscardConfirm } from '../../hooks/use_discard_confirm';
 import { BlockDisableOverlay } from '../draggable_steps';
-import type { ComponentChecker } from '../../services/component_catalogue';
+import { describeComponentStatus, type ComponentChecker } from '../../services/component_catalogue';
 import { allocateComponentId, type UnitSignal } from '../../services/unit_pipeline';
 import type { DraftProcessor } from '../../services/unit_processing';
 import {
@@ -66,12 +68,38 @@ const signalsLabel = i18n.translate('xpack.streams.processingFlyout.editor.signa
   defaultMessage: 'Signals',
 });
 
-const toOption = (component: CatalogueComponentSummary): EuiComboBoxOptionOption<string> => ({
+/** A status badge worded by the catalogue when it describes statuses, by its value otherwise. */
+function StatusBadge({
+  status,
+  metadata,
+}: {
+  status: CatalogueComponentStatus;
+  metadata: CatalogueMetadata;
+}) {
+  const described = describeComponentStatus(metadata, status);
+  const badge = (
+    <EuiBadge color={STATUS_COLORS[status]} data-test-subj="streamsProcessingFlyoutStatusBadge">
+      {described?.label ?? status}
+    </EuiBadge>
+  );
+  return described?.description ? (
+    <EuiToolTip content={described.description} position="right">
+      {badge}
+    </EuiToolTip>
+  ) : (
+    badge
+  );
+}
+
+const toOption = (
+  component: CatalogueComponentSummary,
+  metadata: CatalogueMetadata
+): EuiComboBoxOptionOption<string> => ({
   label: component.display_name,
   value: component.type,
   append:
     component.status && component.status !== 'stable' ? (
-      <EuiBadge color={STATUS_COLORS[component.status]}>{component.status}</EuiBadge>
+      <StatusBadge status={component.status} metadata={metadata} />
     ) : undefined,
 });
 
@@ -162,7 +190,10 @@ export function ProcessorEditor({
     confirmDelete();
   };
 
-  const options = useMemo(() => form.processors.map(toOption), [form.processors]);
+  const options = useMemo(
+    () => form.processors.map((processor) => toOption(processor, catalogue.metadata)),
+    [form.processors, catalogue.metadata]
+  );
   const [isSelectionCleared, setIsSelectionCleared] = useState(false);
   const selectedOptions = isSelectionCleared ? [] : options.filter(({ value }) => value === type);
 

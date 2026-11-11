@@ -32,7 +32,7 @@ describe('InvestigationLiveState', () => {
 
     renderLiveState('low');
 
-    expect(screen.getByTestId('investigationRunningState')).toHaveTextContent('Investigating…');
+    expect(screen.getByTestId('investigationRunningState')).toHaveTextContent('Investigating');
     // The severity picker in the header blocks shows it.
     expect(screen.queryByTestId('investigationFlyoutSeverity')).not.toBeInTheDocument();
   });
