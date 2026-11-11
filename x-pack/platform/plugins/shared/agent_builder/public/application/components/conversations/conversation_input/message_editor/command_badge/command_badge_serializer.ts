@@ -11,9 +11,8 @@ import { COMMAND_ID_ATTRIBUTE, COMMAND_METADATA_ATTRIBUTE } from './attributes';
 import { getCommandDefinitionByScheme } from '../command_menu/command_definitions';
 import {
   ATTACHMENT_ID_PARAM,
-  IMAGE_ATTACHMENT_SCHEME,
-  BINARY_ATTACHMENT_SCHEME,
-  TEXT_ATTACHMENT_SCHEME,
+  isPlaceholderKind,
+  type PlaceholderKind,
 } from '../attachment_placeholder';
 
 interface TextSegment {
@@ -24,25 +23,13 @@ interface BadgeSegment {
   type: 'badge';
   data: CommandBadgeData;
 }
-interface ImageSegment {
-  type: 'image';
-  name: string;
-}
-interface BinarySegment {
-  type: 'binary';
+interface AttachmentSegment {
+  type: 'attachment';
+  kind: PlaceholderKind;
   name: string;
   attachmentId?: string;
 }
-interface TextFileSegment {
-  type: 'text_file';
-  name: string;
-}
-export type ContentSegment =
-  | TextSegment
-  | BadgeSegment
-  | ImageSegment
-  | BinarySegment
-  | TextFileSegment;
+export type ContentSegment = TextSegment | BadgeSegment | AttachmentSegment;
 
 export class CommandBadgeSerializationError extends Error {
   constructor(message: string, options?: ErrorOptions) {
@@ -116,15 +103,6 @@ export const serializeCommandBadge = (element: HTMLElement): string => {
 //   Group 4: query string  → optional
 const BADGE_PATTERN = /\[((?:\\.|[^\]\\])+)\]\((\w+):\/\/([^?)]+)(?:\?([^)]*))?\)/g;
 
-const ATTACHMENT_SEGMENT_TYPE_BY_SCHEME: ReadonlyMap<
-  string,
-  ImageSegment['type'] | BinarySegment['type'] | TextFileSegment['type']
-> = new Map([
-  [IMAGE_ATTACHMENT_SCHEME, 'image'],
-  [BINARY_ATTACHMENT_SCHEME, 'binary'],
-  [TEXT_ATTACHMENT_SCHEME, 'text_file'],
-]);
-
 /**
  * Parses text containing serialized badge, image, binary and text file markdown-links into segments.
  * Used to restore badges and attachment chips from serialized content.
@@ -144,17 +122,16 @@ export const deserializeInputSegments = (text: string): ContentSegment[] => {
     const [_, escapedDisplayText, scheme, path, queryString] = match;
     const displayText = unescapeLinkText(escapedDisplayText);
 
-    const attachmentSegmentType = ATTACHMENT_SEGMENT_TYPE_BY_SCHEME.get(scheme);
-    if (attachmentSegmentType) {
+    if (isPlaceholderKind(scheme)) {
       try {
         const name = decodeURIComponent(path);
         const attachmentId = queryString
           ? new URLSearchParams(queryString).get(ATTACHMENT_ID_PARAM) ?? undefined
           : undefined;
         segments.push(
-          attachmentSegmentType === 'binary' && attachmentId
-            ? { type: attachmentSegmentType, name, attachmentId }
-            : { type: attachmentSegmentType, name }
+          scheme === 'binary' && attachmentId
+            ? { type: 'attachment', kind: scheme, name, attachmentId }
+            : { type: 'attachment', kind: scheme, name }
         );
       } catch {
         // Malformed percent-encoding, preserve as text

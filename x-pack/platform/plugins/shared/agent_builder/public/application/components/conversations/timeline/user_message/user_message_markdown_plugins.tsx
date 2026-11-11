@@ -16,9 +16,8 @@ import type { PluggableList } from 'unified';
 import { sortedCommandDefinitions } from '../../conversation_input/message_editor/command_menu';
 import { unescapeLinkText } from '../../conversation_input/message_editor/command_badge/command_badge_serializer';
 import {
-  IMAGE_ATTACHMENT_SCHEME,
-  BINARY_ATTACHMENT_SCHEME,
-  TEXT_ATTACHMENT_SCHEME,
+  ATTACHMENT_KINDS,
+  isPlaceholderKind,
 } from '../../conversation_input/message_editor/attachment_placeholder';
 import {
   createConversationMarkdownComponents,
@@ -42,9 +41,7 @@ export const ALLOWED_LINK_PROTOCOLS = [
   'http:',
   'mailto:',
   ...sortedCommandDefinitions.map((definition) => `${definition.scheme}:`),
-  `${IMAGE_ATTACHMENT_SCHEME}:`,
-  `${BINARY_ATTACHMENT_SCHEME}:`,
-  `${TEXT_ATTACHMENT_SCHEME}:`,
+  ...ATTACHMENT_KINDS.map((kind) => `${kind}:`),
 ];
 
 export const parseSchemeAndPath = (href: string): { scheme: string; path: string } | undefined => {
@@ -114,11 +111,7 @@ export const useUserMessageMarkdownPlugins = ({
         const { href, children } = props;
         const parsed = href ? parseSchemeAndPath(href) : undefined;
 
-        if (
-          parsed?.scheme === IMAGE_ATTACHMENT_SCHEME ||
-          parsed?.scheme === BINARY_ATTACHMENT_SCHEME ||
-          parsed?.scheme === TEXT_ATTACHMENT_SCHEME
-        ) {
+        if (parsed && isPlaceholderKind(parsed.scheme)) {
           const name = decodeBadgeName(parsed.path);
           const badge = (
             <span
@@ -128,7 +121,7 @@ export const useUserMessageMarkdownPlugins = ({
               onMouseLeave={onHoverAttachment ? () => onHoverAttachment(null) : undefined}
             >
               <EuiIcon
-                type={parsed.scheme === IMAGE_ATTACHMENT_SCHEME ? 'image' : 'document'}
+                type={parsed.scheme === 'image' ? 'image' : 'document'}
                 size="s"
                 aria-hidden={true}
               />

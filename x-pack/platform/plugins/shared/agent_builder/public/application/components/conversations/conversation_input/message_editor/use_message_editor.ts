@@ -243,14 +243,10 @@ const useMessageEditorController = ({
             ref.current.appendChild(createTextFragment(segment.value));
           } else if (segment.type === 'badge') {
             ref.current.appendChild(createCommandBadgeElement(segment.data));
-          } else if (segment.type === 'image') {
-            ref.current.appendChild(createAttachmentPlaceholderElement(segment.name));
-          } else if (segment.type === 'binary') {
+          } else if (segment.type === 'attachment') {
             ref.current.appendChild(
-              createAttachmentPlaceholderElement(segment.name, 'binary', segment.attachmentId)
+              createAttachmentPlaceholderElement(segment.name, segment.kind, segment.attachmentId)
             );
-          } else if (segment.type === 'text_file') {
-            ref.current.appendChild(createAttachmentPlaceholderElement(segment.name, 'text'));
           }
         }
 

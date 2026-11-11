@@ -15,14 +15,13 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import {
   ATTACHMENT_ID_PARAM,
-  BINARY_ATTACHMENT_SCHEME,
+  type PlaceholderKind,
 } from '../../conversation_input/message_editor/attachment_placeholder';
 
+const BINARY_KIND: PlaceholderKind = 'binary';
+
 // The query of a binary chip link, e.g. `id=abc` in `[a.pdf](binary://a.pdf?id=abc)`.
-const BINARY_LINK_QUERY_PATTERN = new RegExp(
-  `\\]\\(${BINARY_ATTACHMENT_SCHEME}:\\/\\/[^?)]*\\?([^)]*)\\)`,
-  'g'
-);
+const BINARY_LINK_QUERY_PATTERN = new RegExp(`\\]\\(${BINARY_KIND}:\\/\\/[^?)]*\\?([^)]*)\\)`, 'g');
 
 /** Ids of the attachments the message text links to, in text order. */
 export const getLinkedAttachmentIds = (text: string): string[] =>

@@ -16,6 +16,7 @@ import {
   ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE,
   PLACEHOLDER_KIND_ATTRIBUTE,
   getPlaceholderKind,
+  isPlaceholderKind,
   syncChipsUploadingState,
 } from './attachment_placeholder';
 
@@ -213,5 +214,15 @@ describe('binary and text file placeholders', () => {
       expect(pdf.hasAttribute('data-uploading')).toBe(false);
       expect(otherBinary.getAttribute('data-uploading')).toBe('true');
     });
+  });
+});
+
+describe('isPlaceholderKind', () => {
+  it.each(['image', 'binary', 'text'])('accepts %s', (kind) => {
+    expect(isPlaceholderKind(kind)).toBe(true);
+  });
+
+  it.each(['skill', 'text_file', '', null, undefined])('rejects %p', (value) => {
+    expect(isPlaceholderKind(value)).toBe(false);
   });
 });

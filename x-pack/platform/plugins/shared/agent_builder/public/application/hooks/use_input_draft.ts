@@ -6,8 +6,12 @@
  */
 
 import { useCallback } from 'react';
+import { ATTACHMENT_KINDS } from '../components/conversations/conversation_input/message_editor/attachment_placeholder';
 
-const ATTACHMENT_LINK_RE = /\[[^\]]*\]\((?:image|binary|text):\/\/[^)]*\)/g;
+const ATTACHMENT_LINK_RE = new RegExp(
+  `\\[[^\\]]*\\]\\((?:${ATTACHMENT_KINDS.join('|')}):\\/\\/[^)]*\\)`,
+  'g'
+);
 
 const buildKey = (
   spaceId: string,

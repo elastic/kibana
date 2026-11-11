@@ -356,13 +356,13 @@ describe('deserializeInputSegments', () => {
   it('parses an image segment', () => {
     const segments = deserializeInputSegments('[photo.png](image://photo.png)');
 
-    expect(segments).toEqual([{ type: 'image', name: 'photo.png' }]);
+    expect(segments).toEqual([{ type: 'attachment', kind: 'image', name: 'photo.png' }]);
   });
 
   it('parses a text file segment', () => {
     const segments = deserializeInputSegments('[my notes.md](text://my%20notes.md)');
 
-    expect(segments).toEqual([{ type: 'text_file', name: 'my notes.md' }]);
+    expect(segments).toEqual([{ type: 'attachment', kind: 'text', name: 'my notes.md' }]);
   });
 
   it('preserves a text file link with malformed percent-encoding as text', () => {
@@ -374,13 +374,15 @@ describe('deserializeInputSegments', () => {
   it('parses a binary segment', () => {
     const segments = deserializeInputSegments('[My invoice.pdf](binary://My%20invoice.pdf)');
 
-    expect(segments).toEqual([{ type: 'binary', name: 'My invoice.pdf' }]);
+    expect(segments).toEqual([{ type: 'attachment', kind: 'binary', name: 'My invoice.pdf' }]);
   });
 
   it('parses the attachment id of a binary segment', () => {
     const segments = deserializeInputSegments('[invoice.pdf](binary://invoice.pdf?id=att%201)');
 
-    expect(segments).toEqual([{ type: 'binary', name: 'invoice.pdf', attachmentId: 'att 1' }]);
+    expect(segments).toEqual([
+      { type: 'attachment', kind: 'binary', name: 'invoice.pdf', attachmentId: 'att 1' },
+    ]);
   });
 
   it('preserves a binary link with malformed percent-encoding as text', () => {
@@ -394,7 +396,7 @@ describe('deserializeInputSegments', () => {
       '[Screenshot (1).png](image://Screenshot%20%281%29.png)'
     );
 
-    expect(segments).toEqual([{ type: 'image', name: 'Screenshot (1).png' }]);
+    expect(segments).toEqual([{ type: 'attachment', kind: 'image', name: 'Screenshot (1).png' }]);
   });
 
   it('preserves an image link with malformed percent-encoding as text', () => {
@@ -408,7 +410,7 @@ describe('deserializeInputSegments', () => {
 
     expect(segments).toEqual([
       { type: 'text', value: 'See ' },
-      { type: 'image', name: 'photo.png' },
+      { type: 'attachment', kind: 'image', name: 'photo.png' },
       { type: 'text', value: ' here' },
     ]);
   });

@@ -13,16 +13,12 @@ export const ATTACHMENT_PLACEHOLDER_REMOVE_ATTRIBUTE = 'data-attachment-placehol
 
 export const PLACEHOLDER_KIND_ATTRIBUTE = 'data-placeholder-kind';
 
-export type PlaceholderKind = 'image' | 'binary' | 'text';
+/** Kinds of attachment chips. Each kind is also the scheme of its serialized link, e.g. `binary://a.pdf`. */
+export const ATTACHMENT_KINDS = ['image', 'binary', 'text'] as const;
+export type PlaceholderKind = (typeof ATTACHMENT_KINDS)[number];
 
-/** Scheme used in serialized image attachment markdown links. */
-export const IMAGE_ATTACHMENT_SCHEME = 'image';
-
-/** Scheme used in serialized binary file (PDF) attachment markdown links. */
-export const BINARY_ATTACHMENT_SCHEME = 'binary';
-
-/** Scheme used in serialized text file attachment markdown links. */
-export const TEXT_ATTACHMENT_SCHEME = 'text';
+export const isPlaceholderKind = (value: string | null | undefined): value is PlaceholderKind =>
+  ATTACHMENT_KINDS.some((kind) => kind === value);
 
 /** Query parameter of a serialized attachment link that holds the attachment id, e.g. `binary://a.pdf?id=<id>`. */
 export const ATTACHMENT_ID_PARAM = 'id';
@@ -139,7 +135,7 @@ export const isElementAttachmentPlaceholder = (element: HTMLElement): boolean =>
 
 export const getPlaceholderKind = (element: HTMLElement): PlaceholderKind => {
   const kind = element.getAttribute(PLACEHOLDER_KIND_ATTRIBUTE);
-  return kind === 'binary' || kind === 'text' ? kind : 'image';
+  return isPlaceholderKind(kind) ? kind : 'image';
 };
 
 const getChipsOfKind = (el: HTMLElement, kind: PlaceholderKind): HTMLElement[] =>

@@ -9,19 +9,9 @@ import { isElementCommandBadge, serializeCommandBadge } from './command_badge';
 import {
   ATTACHMENT_ID_PARAM,
   getPlaceholderKind,
-  IMAGE_ATTACHMENT_SCHEME,
   isElementAttachmentPlaceholder,
-  BINARY_ATTACHMENT_SCHEME,
-  TEXT_ATTACHMENT_SCHEME,
-  type PlaceholderKind,
 } from './attachment_placeholder';
 import { stripZeroWidthSpaces } from './utils';
-
-const SCHEME_BY_KIND: Readonly<Record<PlaceholderKind, string>> = {
-  image: IMAGE_ATTACHMENT_SCHEME,
-  binary: BINARY_ATTACHMENT_SCHEME,
-  text: TEXT_ATTACHMENT_SCHEME,
-};
 
 /**
  * Encodes an attachment file name for use as the path in a serialized attachment link.
@@ -66,7 +56,7 @@ export const serializeEditorContent = (editorElement: HTMLElement): string => {
     if (isElementAttachmentPlaceholder(element)) {
       const name = element.getAttribute('aria-label') ?? '';
       const displayName = name.replace(/[\[\]]/g, '');
-      const scheme = SCHEME_BY_KIND[getPlaceholderKind(element)];
+      const scheme = getPlaceholderKind(element);
       const { attachmentId } = element.dataset;
       const query = attachmentId
         ? `?${ATTACHMENT_ID_PARAM}=${encodeAttachmentName(attachmentId)}`
