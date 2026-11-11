@@ -223,6 +223,9 @@ export const runHoldoutWorkOnLane = ({
     return runs;
   });
 
+/** Two-sided coverage of the holdout's interval: its low end must stay above `-margin`. */
+const HOLDOUT_CONFIDENCE = 0.8;
+
 export interface HoldoutResult {
   passed: boolean;
   incidents: number;
@@ -259,7 +262,8 @@ export const checkHoldout = ({
     new Set(runs.filter((r) => r.leaked).map((r) => r.seedId));
   const incumbentLeaked = leaks(incumbent).size;
   const candidateLeaked = leaks(candidate).size;
-  const paired = gateCandidate({ incumbent, candidate });
+  // Pinned, not the gate's default: loosening the gate must not loosen the production backstop.
+  const paired = gateCandidate({ incumbent, candidate, confidence: HOLDOUT_CONFIDENCE });
   const incidents = paired.seeds || 1;
   const reasons: string[] = [];
   if (paired.seeds === 0) reasons.push('no holdout incident was scored on both lanes');
