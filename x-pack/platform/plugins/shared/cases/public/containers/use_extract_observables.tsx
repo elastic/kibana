@@ -43,7 +43,14 @@ export const useExtractObservables = (
           showInfoToast(i18n.OBSERVABLES_LIMIT_REACHED(MAX_OBSERVABLES_PER_CASE));
           break;
         case 'alerts_not_found':
-          showInfoToast(i18n.NO_ALERTS_FOUND_TO_EXTRACT);
+          if (result.alertsRequested > 0) {
+            showInfoToast(
+              i18n.ATTACHED_ALERTS_NOT_READABLE,
+              i18n.ATTACHED_ALERTS_NOT_READABLE_DESCRIPTION
+            );
+          } else {
+            showInfoToast(i18n.NO_ALERTS_FOUND_TO_EXTRACT);
+          }
           break;
         case 'no_new_observables':
           showInfoToast(i18n.NO_NEW_OBSERVABLES_FOUND);
