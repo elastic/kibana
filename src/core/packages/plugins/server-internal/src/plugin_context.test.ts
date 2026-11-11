@@ -29,7 +29,6 @@ import type { PluginManifest } from '@kbn/core-plugins-server';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { ConfigService, Env } from '@kbn/config';
 import { PluginWrapper } from './plugin';
-import { DeferredInitEngine } from './deferred_init';
 
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
@@ -38,7 +37,7 @@ import {
   createRuntimePluginContractResolverMock,
 } from './test_helpers';
 
-const deferredInitEngine = new DeferredInitEngine(loggingSystemMock.createLogger());
+const initialization = Promise.withResolvers<void>();
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
@@ -120,7 +119,7 @@ describe('createPluginInitializerContext', () => {
         manifest,
         instanceInfo,
         nodeInfo,
-        deferredInitEngine,
+        initialization,
       });
 
       expect(pluginInitializerContext.config.get()).toEqual({
@@ -142,7 +141,7 @@ describe('createPluginInitializerContext', () => {
         manifest,
         instanceInfo,
         nodeInfo,
-        deferredInitEngine,
+        initialization,
       });
 
       expect(pluginInitializerContext.config.legacy.globalConfig$).toBeDefined();
@@ -174,7 +173,7 @@ describe('createPluginInitializerContext', () => {
         manifest,
         instanceInfo,
         nodeInfo,
-        deferredInitEngine,
+        initialization,
       });
       expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
     });
@@ -195,7 +194,7 @@ describe('createPluginInitializerContext', () => {
         manifest: createPluginManifest(),
         instanceInfo,
         nodeInfo,
-        deferredInitEngine,
+        initialization,
       });
       expect(pluginInitializerContext.env.configs).toEqual([
         '/home/kibana/config/kibana.yml',
@@ -212,7 +211,7 @@ describe('createPluginInitializerContext', () => {
         manifest: createPluginManifest(),
         instanceInfo,
         nodeInfo: { roles: { backgroundTasks: false, ui: true, migrator: false } },
-        deferredInitEngine,
+        initialization,
       });
       expect(pluginInitializerContext.node.roles.backgroundTasks).toBe(false);
       expect(pluginInitializerContext.node.roles.ui).toBe(true);
@@ -220,38 +219,37 @@ describe('createPluginInitializerContext', () => {
   });
 
   describe('context.initialization', () => {
-    const createContext = (engine: DeferredInitEngine) =>
+    const createContext = (pluginInitialization: PromiseWithResolvers<void>) =>
       createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest: createPluginManifest(),
         instanceInfo,
         nodeInfo,
-        deferredInitEngine: engine,
+        initialization: pluginInitialization,
       });
 
-    it("reads the plugin's own status from the engine", async () => {
-      const engine = new DeferredInitEngine(loggingSystemMock.createLogger());
-      const { initialization } = createContext(engine);
-      const statuses: string[] = [];
-      initialization.status$.subscribe((status) => statuses.push(status));
+    it('waits for the initialization when called before it settles', async () => {
+      const pluginInitialization = Promise.withResolvers<void>();
+      const onSettled = jest.fn();
+      const { initialization: contextInitialization } = createContext(pluginInitialization);
 
-      engine.markAvailable('some-plugin-id');
+      const waiting = contextInitialization.initialize().then(onSettled);
+      await Promise.resolve();
+      expect(onSettled).not.toHaveBeenCalled();
 
-      expect(statuses).toEqual(['idle', 'available']);
-      expect(initialization.getStatus()).toBe('available');
+      pluginInitialization.resolve();
+      await waiting;
+      expect(onSettled).toHaveBeenCalledTimes(1);
     });
 
-    it("waits for the plugin's own initialize() through the engine", async () => {
-      const engine = new DeferredInitEngine(loggingSystemMock.createLogger());
-      const { initialization } = createContext(engine);
-      const runner = jest.fn().mockResolvedValue(undefined);
+    it('rejects when the initialization fails', async () => {
+      const pluginInitialization = Promise.withResolvers<void>();
+      const { initialization: contextInitialization } = createContext(pluginInitialization);
 
-      engine.startInitialization(new Map([['some-plugin-id', runner]]));
+      pluginInitialization.reject(new Error('boom'));
 
-      await expect(initialization.initialize()).resolves.toBeUndefined();
-      expect(runner).toHaveBeenCalledTimes(1);
-      expect(initialization.getStatus()).toBe('available');
+      await expect(contextInitialization.initialize()).rejects.toThrow('boom');
     });
   });
 });
@@ -287,8 +285,9 @@ describe('createPluginPrebootSetupContext', () => {
           airgapped: false,
         },
         nodeInfo,
-        deferredInitEngine,
+        initialization,
       }),
+      initialization,
     });
 
     const corePreboot = coreInternalLifecycleMock.createInternalPreboot();
@@ -323,8 +322,9 @@ describe('plugin context service accounts', () => {
         manifest,
         instanceInfo: { uuid: 'instance-uuid', airgapped: false },
         nodeInfo: nodeServiceMock.createInternalPrebootContract(),
-        deferredInitEngine,
+        initialization,
       }),
+      initialization,
     });
     runtimeResolver = createRuntimePluginContractResolverMock();
   });

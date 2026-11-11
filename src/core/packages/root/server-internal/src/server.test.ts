@@ -34,7 +34,7 @@ import {
   mockInjectionService,
 } from './server.test.mocks';
 
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
@@ -323,14 +323,6 @@ test('does not fail on "setup" if there are unused paths detected', async () => 
 
   await expect(server.preboot()).resolves.toBeDefined();
   await expect(server.setup()).resolves.toBeDefined();
-});
-
-test('exposes plugin `initialize()` failures from the plugins service', () => {
-  const server = new Server(rawConfigService, env, logger);
-  const initializationFailure$ = new Subject<Error>();
-  mockPluginsService.getInitializationFailure$.mockReturnValue(initializationFailure$);
-
-  expect(server.getPluginInitializationFailure$()).toBe(initializationFailure$);
 });
 
 test('stops services on "stop"', async () => {

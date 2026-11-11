@@ -16,6 +16,7 @@ import {
 } from './format_configs';
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { SCHEDULE_INTERVAL_FIELD } from '../../../../common/lib/schedule_to_time';
 import type {
   CodeEditorMode,
   MonitorFields,
@@ -764,6 +765,23 @@ describe('formatMonitorConfigs', () => {
     expect(formatMonitorConfigs({ configs: config, maintenanceWindows: [], logger })).toEqual(
       formatMonitorConfigs({ configs: [config], maintenanceWindows: [], logger })
     );
+  });
+
+  it('does not send the derived schedule interval to the service', () => {
+    const [formatted] = formatMonitorConfigs({
+      configs: {
+        ...config,
+        monitor: {
+          ...testHTTPConfig,
+          [SCHEDULE_INTERVAL_FIELD]: 180,
+        } as unknown as SyntheticsMonitor,
+      },
+      maintenanceWindows: [],
+      logger,
+    });
+
+    expect(formatted).not.toHaveProperty(SCHEDULE_INTERVAL_FIELD);
+    expect(formatted.schedule).toEqual('@every 3m');
   });
 });
 

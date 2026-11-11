@@ -13,9 +13,16 @@ export const findChoiceGroup = (
   fieldName: string
 ): CatalogueChoiceGroup | undefined => groups?.find((group) => group.fields.includes(fieldName));
 
+/** Whether the group must have a member chosen at all times. */
+export const isMandatoryChoiceGroup = (group: CatalogueChoiceGroup): boolean =>
+  group.min_selected === 1;
+
+export const getDefaultChoice = (group: CatalogueChoiceGroup): string | undefined =>
+  isMandatoryChoiceGroup(group) ? group.default_field ?? group.fields[0] : group.default_field;
+
 /**
- * The member present in the object is the selected one, even while it is still
- * blank; otherwise a mandatory group falls back to its default.
+ * The member present in the object is the selected one, even while it is still blank;
+ * otherwise only a mandatory group counts its default as chosen.
  */
 export const getSelectedChoice = (
   group: CatalogueChoiceGroup,
@@ -25,7 +32,7 @@ export const getSelectedChoice = (
   if (present) {
     return present;
   }
-  return group.min_selected === 1 ? group.default_field ?? group.fields[0] : undefined;
+  return isMandatoryChoiceGroup(group) ? getDefaultChoice(group) : undefined;
 };
 
 /** Whether the field is a member of a choice group that has another member selected. */

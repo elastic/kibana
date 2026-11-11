@@ -270,6 +270,7 @@ describe('AgenticInvestigationsPlugin', () => {
       ).toEqual([
         'investigation_severity_changed',
         'investigation_run_failed',
+        'investigation_run_timed_out',
         'escalation_created_from_investigation',
         'escalation_investigation_linked',
         'escalation_attachments_synced',
@@ -281,7 +282,11 @@ describe('AgenticInvestigationsPlugin', () => {
 
       expect(
         agentBuilder.conversationEvents.register.mock.calls.map(([definition]) => definition.type)
-      ).toEqual(['investigation_severity_changed', 'investigation_run_failed']);
+      ).toEqual([
+        'investigation_severity_changed',
+        'investigation_run_failed',
+        'investigation_run_timed_out',
+      ]);
     });
 
     it('registers the HTTP routes for every entity', () => {

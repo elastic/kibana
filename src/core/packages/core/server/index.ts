@@ -262,6 +262,15 @@ export type {
   HttpSelfResponse,
   HttpSelfScopedClient,
   HttpSelfService,
+  HttpSelfCredentialRefresher,
+  HttpSelfCredentialRefresherNotHandledResult,
+  HttpSelfCredentialRefresherOptions,
+  HttpSelfCredentialRefresherRejectParams,
+  HttpSelfCredentialRefresherRejectResult,
+  HttpSelfCredentialRefresherReplaceParams,
+  HttpSelfCredentialRefresherReplaceResult,
+  HttpSelfCredentialRefresherResult,
+  HttpSelfCredentialRefresherToolkit,
   HttpSelfUnauthorizedErrorHandler,
   HttpSelfUnauthorizedErrorHandlerNotHandledResult,
   HttpSelfUnauthorizedErrorHandlerOptions,
@@ -320,7 +329,6 @@ export type {
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
   PluginInitialization,
-  PluginInitStatus,
 } from '@kbn/core-plugins-server';
 export type {
   PluginsServiceSetup,

@@ -8,14 +8,11 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { isString } from 'lodash/fp';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { HostDetailsLink } from '../../../../../common/components/links';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 import { useIsInSecurityApp } from '../../../../../common/hooks/is_in_security_app';
-import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 
 interface Props {
@@ -30,16 +27,13 @@ interface Props {
 
 const HostNameComponent: React.FC<Props> = ({
   Component,
-  contextId,
   isButton,
   onClick,
   title,
   value,
   entityId,
 }) => {
-  const { openFlyout } = useExpandableFlyoutApi();
   const { openHostFlyout } = useFlyoutApi();
-  const newFlyoutSystemEnabled = useIsNewFlyoutEnabled();
 
   const isInSecurityApp = useIsInSecurityApp();
 
@@ -59,34 +53,9 @@ const HostNameComponent: React.FC<Props> = ({
         return;
       }
 
-      if (newFlyoutSystemEnabled) {
-        openHostFlyout({ hostName, entityId });
-      } else {
-        const { timelineID } = eventContext;
-        openFlyout({
-          right: {
-            id: HostPanelKey,
-            params: {
-              hostName,
-              entityId,
-              contextID: contextId,
-              scopeId: timelineID,
-            },
-          },
-        });
-      }
+      openHostFlyout({ hostName, entityId });
     },
-    [
-      onClick,
-      eventContext,
-      isInTimelineContext,
-      hostName,
-      entityId,
-      openFlyout,
-      contextId,
-      newFlyoutSystemEnabled,
-      openHostFlyout,
-    ]
+    [onClick, eventContext, isInTimelineContext, hostName, entityId, openHostFlyout]
   );
 
   // The below is explicitly defined this way as the onClick takes precedence when it and the href are both defined

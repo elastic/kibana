@@ -137,6 +137,7 @@ export const deliverCallbackEvents = ({
             // The response message ready to post on the round's surface, such as Slack.
             const surfacePayload = surfacesService.renderPayload(completedEvent, {
               originType: execution.agentParams.origin?.type,
+              agentId: execution.agentId,
               request,
               spaceId: execution.spaceId,
             });

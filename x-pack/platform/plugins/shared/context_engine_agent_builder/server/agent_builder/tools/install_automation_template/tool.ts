@@ -378,7 +378,7 @@ export const createInstallAutomationTemplateTool = ({
   },
   description: dedent`
     Install an automation template on the Context Engine AI index attached to this conversation.
-    Do not pass an AI index id; do not write the YAML yourself; do not start a subagent.
+    Do not pass an AI index id; do not write the YAML yourself.
 
     IMPORTANT: install templates one at a time — never call this tool in parallel for the same AI
     index. Concurrent calls cause a "modified concurrently" error; always wait for each call to
@@ -416,6 +416,24 @@ export const createInstallAutomationTemplateTool = ({
         getSecurityStart,
         getWorkflowsManagement,
       });
+
+      if (result.valid === false) {
+        const details = result.validationErrors?.length
+          ? ` ${result.validationErrors.join('; ')}`
+          : '';
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: {
+                message:
+                  `Automation template was saved as workflow "${result.workflowId}" but its ` +
+                  `definition is invalid, so it cannot be enabled or run.${details}`,
+              },
+            },
+          ],
+        };
+      }
 
       return {
         results: [
