@@ -16,6 +16,7 @@ import { harnessPaths } from './paths';
 import { reportTemplate } from './report_template';
 import type { RunSummary, TaskRun } from './runner';
 import type { GateResult } from './gate';
+import type { HoldoutResult } from './holdout';
 import { assignSplits, loadTasks } from './dataset';
 
 interface StoredRun {
@@ -36,6 +37,8 @@ interface LedgerEntry {
   };
   review?: { verdict: string; reasons: string[]; unavailable?: boolean };
   gate?: GateResult;
+  holdout?: HoldoutResult;
+  promoted?: boolean;
   failures?: string[];
   error?: string;
   filesChanged?: string[];
@@ -156,7 +159,7 @@ export const buildReportPayload = (ledgerFile = 'ledger.json') => {
   let runningVariant = ledger.find((entry) => entry.parentHash)?.parentHash ?? 'base';
   const rounds = ledger.map((entry) => {
     const parentHash = entry.parentHash ?? runningVariant;
-    const promoted = Boolean(entry.gate?.accepted || entry.forcedPromotion);
+    const promoted = Boolean((entry.promoted ?? entry.gate?.accepted) || entry.forcedPromotion);
     if (promoted && entry.variantHash) runningVariant = entry.variantHash;
 
     const incumbentGate = runFor(entry, 'incumbent-gate');
@@ -215,6 +218,7 @@ export const buildReportPayload = (ledgerFile = 'ledger.json') => {
       predictionCheck: entry.predictionCheck,
       review: entry.review,
       gate: entry.gate,
+      holdout: entry.holdout,
       telemetryVariant: entry.telemetryVariant,
       agentConnectorId: entry.agentConnectorId,
       gateCases: pairCases(incumbentGate, candidateGate),

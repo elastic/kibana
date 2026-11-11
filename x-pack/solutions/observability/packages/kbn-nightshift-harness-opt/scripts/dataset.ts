@@ -102,6 +102,68 @@ export const loadTasks = (): OrcaTask[] => {
   });
 };
 
+/**
+ * The customer0 holdout: graded Elastic Cloud production incidents, never shown to the proposer.
+ * The two newest curated releases; earlier ones are mostly the same incidents under other names.
+ */
+export const CUSTOMER0_HOLDOUT = [
+  { id: '9b9e96e4-7cea-5dae-a706-476c4627dce2', name: 'ns-investigation-golden-2710' },
+  { id: '3d2e3f66-e750-5db1-81b4-3364ca862ca6', name: 'ns-investigation-golden-0911' },
+] as const;
+
+const holdoutPath = () => Path.join(harnessPaths().datasetsDir, 'customer0-holdout.json');
+
+/** Downloads the holdout once (owner-readable only: these are real incidents). */
+export const ensureCustomer0Holdout = async (): Promise<string> => {
+  const path = holdoutPath();
+  if (Fs.existsSync(path)) return path;
+  const { url, apiKey } = readEvaluationsKibana();
+  const byCase = new Map<string, StoredExample & { dataset: string }>();
+  for (const { id, name } of CUSTOMER0_HOLDOUT) {
+    const response = await fetch(`${url}/internal/evals/datasets/${id}?per_page=1000`, {
+      headers: {
+        Authorization: `ApiKey ${apiKey}`,
+        'elastic-api-version': '1',
+        'x-elastic-internal-origin': 'kibana',
+        'kbn-xsrf': 'harness-opt',
+      },
+    });
+    if (!response.ok) throw new Error(`Downloading ${name} returned HTTP ${response.status}`);
+    const { examples = [] } = (await response.json()) as { examples?: StoredExample[] };
+    if (examples.length === 0) throw new Error(`${name} has no examples`);
+    for (const example of examples) {
+      const reference = (example.output as { reference_answer?: unknown } | undefined)
+        ?.reference_answer;
+      if (typeof reference !== 'string' || !reference.trim()) {
+        throw new Error(`${name} example ${example.metadata.case_id} has no reference answer`);
+      }
+      // The later release wins: it is the corrected version of a case both carry.
+      byCase.set(example.metadata.case_id, { ...example, dataset: name });
+    }
+  }
+  Fs.mkdirSync(Path.dirname(path), { recursive: true });
+  Fs.writeFileSync(path, JSON.stringify({ examples: [...byCase.values()] }), { mode: 0o600 });
+  return path;
+};
+
+export const loadCustomer0Tasks = ({ limit }: { limit?: number } = {}): OrcaTask[] => {
+  const { examples } = JSON.parse(Fs.readFileSync(holdoutPath(), 'utf8')) as {
+    examples: Array<StoredExample & { dataset: string }>;
+  };
+  const tasks = examples
+    .map(({ id, input, output, metadata, dataset }) => ({
+      id,
+      caseId: metadata.case_id,
+      incident: metadata.case_id,
+      control: false,
+      cutoff: '',
+      tier: dataset,
+      example: { input, output, metadata } as InvestigationExample,
+    }))
+    .sort((a, b) => sha(a.caseId).localeCompare(sha(b.caseId)));
+  return limit ? tasks.slice(0, limit) : tasks;
+};
+
 /** Share of incidents per split, in rank order of their hash. */
 const SPLIT_SHARES: ReadonlyArray<[Split, number]> = [
   ['search', 0.4],

@@ -9,7 +9,14 @@ import Fs from 'fs';
 import Path from 'path';
 import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import { describeSplits, ensureDataset, tasksForSplit } from './dataset';
+import {
+  describeSplits,
+  ensureCustomer0Holdout,
+  ensureDataset,
+  loadCustomer0Tasks,
+  tasksForSplit,
+} from './dataset';
+import { holdoutDir, runHoldoutVariant } from './holdout';
 import type { Split } from './dataset';
 import { defaultLanes, harnessPaths, laneAuth, restartCommandFor } from './paths';
 import type { Lane } from './paths';
@@ -28,7 +35,7 @@ const DEFAULT_JUDGE = '.openai-gpt-5.4-chat_completion';
 
 const asSplit = (value: unknown): Split => {
   if (value === 'search' || value === 'gate' || value === 'sealed') return value;
-  throw createFlagError(`--split must be search, gate or sealed (got ${String(value)})`);
+  throw createFlagError(`--split must be search, gate, sealed or customer0 (got ${String(value)})`);
 };
 const asLane = (value: unknown): Lane => {
   if (value === 'incumbent' || value === 'candidate') return value;
@@ -61,6 +68,7 @@ export const cli = () =>
         process.once(signal, () => process.exit(130));
       }
       await ensureDataset();
+      await ensureCustomer0Holdout();
       const lanes = defaultLanes();
       const agentConnectorId = str(flags.agent) ?? DEFAULT_AGENT;
       const judgeConnectorId = str(flags.judge) ?? DEFAULT_JUDGE;
@@ -102,6 +110,31 @@ export const cli = () =>
         case 'run': {
           exportOrcaUserForSuite(readOrcaUser());
           const lane = lanes[asLane(str(flags.lane) ?? 'incumbent')];
+          if (str(flags.split) === 'customer0') {
+            await prepareLane({ lane, agentConnectorId, log });
+            const cases = str(flags.case)?.split(',');
+            const holdoutTasks = loadCustomer0Tasks().filter(
+              ({ caseId }) => !cases || cases.includes(caseId)
+            );
+            const limited = cases
+              ? holdoutTasks
+              : holdoutTasks.slice(0, asNumber(flags.limit) ?? holdoutTasks.length);
+            if (limited.length === 0) throw createFlagError('no customer0 tasks selected');
+            const outputDir = Path.join(holdoutDir(), `run-${Date.now()}`);
+            await runHoldoutVariant({
+              label: `${lane.lane}-customer0`,
+              variant: { hash: treeHash(lane.worktree) },
+              lane,
+              tasks: limited,
+              concurrency: asNumber(flags.concurrency, 8),
+              agentConnectorId,
+              judgeConnectorId,
+              outputDir,
+              log,
+            });
+            log.info(`[harness-opt] output: ${outputDir}`);
+            return;
+          }
           const split = asSplit(str(flags.split) ?? 'search');
           const cases = str(flags.case)?.split(',');
           const tasks = cases
@@ -186,6 +219,10 @@ export const cli = () =>
             skipCandidateSearch: Boolean(flags['skip-candidate-search']),
             acceptAny: Boolean(flags['accept-any']),
             freshSearch: Boolean(flags['fresh-search']),
+            holdoutTasks: flags['skip-holdout']
+              ? []
+              : loadCustomer0Tasks({ limit: asNumber(flags['holdout-limit']) }),
+            holdoutAlways: Boolean(flags['holdout-always']),
             log,
           });
           return;
@@ -199,10 +236,11 @@ export const cli = () =>
 
   splits [--split search --limit 4]     print the incident splits / a selection
   prepare --lane incumbent              set up a lane's space for ORCA runs
-  run --lane incumbent --split search --limit 2 [--case <id,...>]
+  run --lane incumbent --split search|gate|sealed|customer0 --limit 2 [--case <id,...>]
   dry-round --from <runs/.../label.json>  propose, review and validate only
   report [--serve --port 7712] [--ledger ledger.json]   HTML report of runs and rounds
-  campaign --rounds 1 --search-limit 3 --gate-limit 3 --gate-rollouts 1`,
+  campaign --rounds 1 --search-limit 3 --gate-limit 3 --gate-rollouts 1
+      [--holdout-limit N] [--skip-holdout] [--holdout-always (debug)]`,
       flags: {
         string: [
           'lane',
@@ -224,8 +262,16 @@ export const cli = () =>
           'traces',
           'host',
           'port',
+          'holdout-limit',
         ],
-        boolean: ['skip-candidate-search', 'accept-any', 'fresh-search', 'serve'],
+        boolean: [
+          'skip-candidate-search',
+          'accept-any',
+          'fresh-search',
+          'serve',
+          'skip-holdout',
+          'holdout-always',
+        ],
       },
     }
   );

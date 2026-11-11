@@ -29,7 +29,7 @@ import {
 } from '@kbn/evals-suite-nightshift-investigations/evals/investigation/connector_sets';
 import type { OrcaTask } from './dataset';
 import type { LaneSettings } from './paths';
-import { createLaneFetch, createLaneKbnClient } from './kibana';
+import { createLaneFetch, createLaneKbnClient, applyOrcaSpace } from './kibana';
 import { costUsd } from './pricing';
 
 export type TelemetryVariant = 'full' | 'no-flags';
@@ -107,17 +107,82 @@ const ORCA_SETTLE_MS = 2 * 60_000;
  */
 const busyLanes = new Set<string>();
 
-export const runVariant = async (options: RunVariantOptions): Promise<RunSummary> => {
-  const { lane } = options;
+/** Runs \`fn\` holding the lane: its investigator's connectors and custom context are ours. */
+export const withLane = async <T>(lane: LaneSettings, fn: () => Promise<T>): Promise<T> => {
   if (busyLanes.has(lane.kibanaUrl)) {
     throw new Error(`${lane.lane} (${lane.kibanaUrl}) already has a run in flight`);
   }
   busyLanes.add(lane.kibanaUrl);
   try {
-    return await runVariantOnLane(options);
+    return await fn();
   } finally {
     busyLanes.delete(lane.kibanaUrl);
   }
+};
+
+export const runVariant = (options: RunVariantOptions): Promise<RunSummary> =>
+  withLane(options.lane, () => runVariantOnLane(options));
+
+/** The judge connector in the shape \`@kbn/evals\` evaluators expect. */
+export const judgeConnector = (judgeConnectorId: string): EvalConnector =>
+  ({
+    type: 'inference_endpoint',
+    id: judgeConnectorId,
+    name: judgeConnectorId,
+    inferenceId: judgeConnectorId,
+    provider: 'elastic',
+    taskType: 'chat_completion',
+  } as unknown as EvalConnector);
+
+/** Aggregates scored runs and writes \`<label>.json\` next to the traces. */
+export const summarize = ({
+  label,
+  variant,
+  telemetryVariant,
+  agentConnectorId,
+  runs: scored,
+  outputDir,
+  log,
+}: {
+  label: string;
+  variant: { hash: string; diff?: string };
+  telemetryVariant: TelemetryVariant;
+  agentConnectorId: string;
+  runs: TaskRun[];
+  outputDir: string;
+  log: ToolingLog;
+}): RunSummary => {
+  const scoredRuns = scored.filter((run) => run.reward !== null);
+  const summary: RunSummary = {
+    label,
+    configHash: variant.hash,
+    telemetryVariant,
+    agentConnectorId,
+    runs: scored,
+    meanReward: mean(scoredRuns.map((run) => run.reward as number)),
+    scoredRuns: scoredRuns.length,
+    executionSuccessRate: mean(scored.map((run) => (run.executionSuccess ? 1 : 0))),
+    meanRcaAccuracy: meanOrNull(scored.filter((run) => !run.control).map((r) => r.rcaAccuracy)),
+    meanHallucination: meanOrNull(scored.filter((run) => !run.control).map((r) => r.hallucination)),
+    meanControl: meanOrNull(scored.filter((run) => run.control).map((r) => r.control_score)),
+    totalCostUsd: scored.reduce((total, run) => total + run.costUsd, 0),
+    meanToolCalls: mean(scored.map((run) => run.toolCalls)),
+    meanLatencyMs: mean(scored.map((run) => run.latencyMs)),
+  };
+  Fs.writeFileSync(
+    Path.join(outputDir, `${label}.json`),
+    JSON.stringify({ summary: { ...summary, runs: undefined }, variant, runs: scored }, null, 2)
+  );
+  log.info(
+    `[harness-opt] "${label}": reward ${summary.meanReward.toFixed(3)} (n=${summary.scoredRuns}/${
+      scored.length
+    }), execution ${summary.executionSuccessRate.toFixed(2)}, accuracy ${
+      summary.meanRcaAccuracy?.toFixed(2) ?? 'n/a'
+    }, hallucination ${summary.meanHallucination?.toFixed(2) ?? 'n/a'}, control ${
+      summary.meanControl?.toFixed(2) ?? 'n/a'
+    }, $${summary.totalCostUsd.toFixed(2)}, ${summary.meanToolCalls.toFixed(1)} tool calls`
+  );
+  return summary;
 };
 
 interface RunVariantOptions {
@@ -167,17 +232,9 @@ const runVariantOnLane = async ({
     `[harness-opt] "${label}" on ${lane.lane} (variant ${variant.hash}, ${telemetryVariant}): ${tasks.length} tasks × ${rollouts} over ${cutoffs.length} cutoffs, ~${batches} batches`
   );
 
-  const evaluationConnector = {
-    type: 'inference_endpoint',
-    id: judgeConnectorId,
-    name: judgeConnectorId,
-    inferenceId: judgeConnectorId,
-    provider: 'elastic',
-    taskType: 'chat_completion',
-  } as unknown as EvalConnector;
   const evaluators = createOrcaEvaluators({
     inferenceClient: createRestClient({ fetch, bindTo: { connectorId: judgeConnectorId } }),
-    evaluationConnector,
+    evaluationConnector: judgeConnector(judgeConnectorId),
     log,
   });
 
@@ -300,6 +357,8 @@ const runVariantOnLane = async ({
   };
 
   const runs = await withOrcaKeysInvalidated(invalidate, async () => {
+    // A holdout run on this lane leaves the customer0 context and connector behind.
+    await applyOrcaSpace(fetch);
     await saveOrcaConnector(kbnClient, { url: credentials.url, apiKey: keyFor(cutoffs[0]) });
     await saveConnectorsOnInvestigator(fetch, [ORCABENCH_ES_CONNECTOR_ID]);
     const inCutoff = createOrcaCutoffGate({
@@ -330,36 +389,13 @@ const runVariantOnLane = async ({
     runs.map(({ task, rollout, output }) => scoreRun(task, rollout, output))
   );
 
-  const scoredRuns = scored.filter((run) => run.reward !== null);
-  const summary: RunSummary = {
+  return summarize({
     label,
-    configHash: variant.hash,
+    variant,
     telemetryVariant,
     agentConnectorId,
     runs: scored,
-    meanReward: mean(scoredRuns.map((run) => run.reward as number)),
-    scoredRuns: scoredRuns.length,
-    executionSuccessRate: mean(scored.map((run) => (run.executionSuccess ? 1 : 0))),
-    meanRcaAccuracy: meanOrNull(scored.filter((run) => !run.control).map((r) => r.rcaAccuracy)),
-    meanHallucination: meanOrNull(scored.filter((run) => !run.control).map((r) => r.hallucination)),
-    meanControl: meanOrNull(scored.filter((run) => run.control).map((r) => r.control_score)),
-    totalCostUsd: scored.reduce((total, run) => total + run.costUsd, 0),
-    meanToolCalls: mean(scored.map((run) => run.toolCalls)),
-    meanLatencyMs: mean(scored.map((run) => run.latencyMs)),
-  };
-
-  Fs.writeFileSync(
-    Path.join(outputDir, `${label}.json`),
-    JSON.stringify({ summary: { ...summary, runs: undefined }, variant, runs: scored }, null, 2)
-  );
-  log.info(
-    `[harness-opt] "${label}": reward ${summary.meanReward.toFixed(3)} (n=${summary.scoredRuns}/${
-      scored.length
-    }), execution ${summary.executionSuccessRate.toFixed(2)}, accuracy ${
-      summary.meanRcaAccuracy?.toFixed(2) ?? 'n/a'
-    }, hallucination ${summary.meanHallucination?.toFixed(2) ?? 'n/a'}, control ${
-      summary.meanControl?.toFixed(2) ?? 'n/a'
-    }, $${summary.totalCostUsd.toFixed(2)}, ${summary.meanToolCalls.toFixed(1)} tool calls`
-  );
-  return summary;
+    outputDir,
+    log,
+  });
 };

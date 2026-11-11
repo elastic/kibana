@@ -17,9 +17,15 @@ import {
 } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
+  CUSTOMER0_CUSTOM_CONTEXT,
   ORCA_CUSTOM_CONTEXT,
+  RETROSPECTIVE_GUARDRAIL_CONTEXT,
   replaceCustomContext,
 } from '@kbn/evals-suite-nightshift-investigations/evals/investigation/custom_context';
+import {
+  CONNECTOR_SETS,
+  saveConnectorsOnInvestigator,
+} from '@kbn/evals-suite-nightshift-investigations/evals/investigation/connector_sets';
 import {
   ensureSandboxHosts,
   getDatasetSandboxHosts,
@@ -200,7 +206,71 @@ export const prepareLane = async ({
     method: 'PUT',
     body: JSON.stringify({ investigationLimitsEnabled: false }),
   });
+  await applyOrcaSpace(fetch);
+  log.info(`[${lane.lane}] lane prepared at ${lane.kibanaUrl}`);
+};
+
+/** The ORCA space: its custom context (demo source on GitHub) and the hosts that clone needs. */
+export const applyOrcaSpace = async (fetch: HttpHandler): Promise<void> => {
   await replaceCustomContext(fetch, ORCA_CUSTOM_CONTEXT);
   await ensureSandboxHosts(fetch, getDatasetSandboxHosts(ORCA_CUSTOM_CONTEXT));
-  log.info(`[${lane.lane}] lane prepared at ${lane.kibanaUrl}`);
+};
+
+/** The customer0 eval's snippets: production's source-code nudge plus the retrospective guardrail. */
+export const CUSTOMER0_EVAL_CONTEXT = [
+  ...CUSTOMER0_CUSTOM_CONTEXT,
+  RETROSPECTIVE_GUARDRAIL_CONTEXT,
+];
+
+// Every error status, so `kbnClient` returns a failed response instead of throwing with its body.
+const ERROR_STATUSES = Array.from({ length: 200 }, (_, index) => 400 + index);
+
+/**
+ * The customer0 space, as the suite's \`default\` connector set: one External Elasticsearch
+ * connector named \`elasticsearch\` to the customer0 overview cluster, saved on the investigator
+ * instead of the ORCA connector, and the customer0 custom context.
+ */
+export const applyCustomer0Space = async ({
+  fetch,
+  kbnClient,
+  telemetry: { url, apiKey },
+}: {
+  fetch: HttpHandler;
+  kbnClient: KbnClient;
+  telemetry: { url: string; apiKey: string };
+}): Promise<void> => {
+  const [connectorId] = CONNECTOR_SETS.default;
+  const path = `/api/actions/connector/${connectorId}`;
+  const connector = {
+    name: connectorId,
+    config: { url, selectedActions: ['_test'] },
+    secrets: { authType: 'api_key_header', Authorization: `ApiKey ${apiKey}` },
+  };
+  const request = (method: 'GET' | 'POST' | 'PUT', body?: object) =>
+    kbnClient.request<string>({
+      method,
+      path,
+      body,
+      retries: 0,
+      ignoreErrors: ERROR_STATUSES,
+      responseType: 'text',
+    });
+  const found = await request('GET');
+  if (found.status !== 200 && found.status !== 404) {
+    throw new Error(`Reading connector ${connectorId} returned HTTP ${found.status}`);
+  }
+  const saved =
+    found.status === 200
+      ? await request('PUT', connector)
+      : await request('POST', { ...connector, connector_type_id: '.elasticsearch' });
+  if (saved.status >= 400) {
+    throw new Error(
+      `Saving connector ${connectorId} returned HTTP ${saved.status}: ${String(saved.data)
+        .split(apiKey)
+        .join('[redacted]')}`
+    );
+  }
+  await saveConnectorsOnInvestigator(fetch, [connectorId]);
+  await replaceCustomContext(fetch, CUSTOMER0_EVAL_CONTEXT);
+  await ensureSandboxHosts(fetch, getDatasetSandboxHosts(CUSTOMER0_EVAL_CONTEXT));
 };

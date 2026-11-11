@@ -134,7 +134,9 @@ const cards = (entries) => '<div class="cards">' + entries
 const verdict = (round) => round.rejectedReason
   ? '<span class="pill bad">' + esc(round.rejectedReason) + '</span>'
   : round.gate
-    ? (round.gate.accepted
+    ? (round.gate.accepted && round.holdout && !round.holdout.passed
+        ? '<span class="pill bad">won gate · failed holdout</span>'
+        : round.gate.accepted
         ? '<span class="pill good">accepted · ' + esc(round.gate.acceptedVia) + '</span>'
         : round.forcedPromotion ? '<span class="pill warn">rejected · force-promoted</span>'
         : '<span class="pill bad">rejected</span>')
@@ -184,7 +186,7 @@ function lineageGraph() {
     nodes.set(round.configHash + '-' + round.round, { id: round.configHash + '-' + round.round,
       label: 'round ' + round.round, sub: (round.filesChanged || []).map(shortPath).join(', ') || 'edit',
       parent: round.parentHash,
-      state: round.gate && round.gate.accepted ? 'accepted' : round.promoted ? 'forced' : 'rejected',
+      state: round.promoted && !round.forcedPromotion ? 'accepted' : round.promoted ? 'forced' : 'rejected',
       round: round.round, delta: round.gate ? round.gate.meanDelta : null, cost: round.gate ? round.gate.costRatio : null });
   });
   // Only promoted candidates can be parents.
@@ -247,7 +249,7 @@ function lineageGraph() {
 
 /* ------------------------------------------------------------- campaign */
 function viewCampaign() {
-  const accepted = DATA.rounds.filter((r) => r.gate && r.gate.accepted).length;
+  const accepted = DATA.rounds.filter((r) => r.promoted && !r.forcedPromotion).length;
   const gated = DATA.rounds.filter((r) => r.gate).length;
   return '<h2>Campaign</h2>' +
     cards([
@@ -326,6 +328,14 @@ function viewRounds() {
       ['regressed', (g.regressions || []).length, (g.regressions || []).length ? 'bad' : 'muted'],
     ]) : '') +
     (g && !g.accepted ? '<p class="bad">' + esc((g.reasons || []).join(' · ')) + '</p>' : '') +
+    (round.holdout ? '<h3>customer0 holdout</h3>' + cards([
+      ['result', round.holdout.passed ? 'passed' : 'failed', round.holdout.passed ? 'good' : 'bad'],
+      ['Δ reward', sign(round.holdout.meanDelta), cls(round.holdout.meanDelta)],
+      ['95% CI', '[' + n(round.holdout.ciLow) + ', ' + n(round.holdout.ciHigh) + ']'],
+      ['incidents', round.holdout.incidents],
+      ['reward', n(round.holdout.incumbentReward) + ' → ' + n(round.holdout.candidateReward)],
+      ['execution', pct(round.holdout.incumbentExecutionSuccess) + ' → ' + pct(round.holdout.candidateExecutionSuccess)],
+    ]) + (round.holdout.reasons.length ? '<p class="bad">' + esc(round.holdout.reasons.join(' · ')) + '</p>' : '') : '') +
     '<h3>What changed</h3>' + renderDiff(round.diff, round.filesChanged) +
     '<h3>Why (proposer rationale)</h3><pre>' + esc(round.rationale || '—') + '</pre>' +
     reviewBlock +

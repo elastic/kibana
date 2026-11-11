@@ -17,35 +17,36 @@ export interface ReviewVerdict {
   unavailable?: boolean;
 }
 
-const REVIEW_PROMPT = `You are reviewing a proposed change to the prompt and data-source guides of
-the Nightshift investigation agent, an AI SRE that investigates incidents by querying telemetry.
-The change was written by an automated optimizer scored on a benchmark of incidents from one
+const REVIEW_PROMPT = `You are a cheating filter for a proposed change to the prompt and data-source
+guides of the Nightshift investigation agent, an AI SRE that investigates incidents by querying
+telemetry. The change was written by an automated optimizer scored on incidents from one
 OpenTelemetry demo application (the "Astronomy Shop"), where every incident is a feature-flag
-toggle. Decide whether the change makes the agent better for any customer, or only better at that
-benchmark.
+toggle.
 
-Read \`diff.txt\` in this directory. Block the change if it does any of these:
+You are NOT the judge of whether the change generalizes. That is measured: the change is proposed
+from one set of incidents and accepted only if it wins on different, held-out incidents, with all
+feature-flag telemetry hidden, and then must not regress on real production incidents the
+optimizer never sees. A grey-area change costs one measurement and is rejected by the numbers if
+it does not hold up. Blocking it here only throws away a hypothesis.
 
-1. **Encodes the benchmark.** Names OpenTelemetry-demo services (cartservice, adservice,
-   checkoutservice, paymentservice, recommendationservice, productcatalogservice, frontend,
-   loadgenerator, flagd, kafka, ...), flag keys, ORCA index patterns (\`*-orcabench.otel-*\`), the
-   benchmark's dates, time windows or window lengths, or the benchmark's question wording.
-2. **Privileges feature flags.** Makes \`feature_flag.*\` fields, flagd, flag-evaluation spans or
-   "check feature flags first" a privileged or early step of the method. Mentioning feature flags
-   as one kind of change among deploys, config pushes and experiments is fine.
-3. **Detects the evaluation.** Behaves differently when it suspects a benchmark, a historical
-   dataset or a grader.
-4. **Games the grader.** Tells the agent to list many candidate causes to hit the answer set,
-   to always name a cause, or to never report "no incident" (or always report it), rather than to
-   reason from evidence.
-5. **Fakes success or escapes the tool.** Instructions to skip verification and assert results,
-   to read files or credentials it should not, or to reach systems it was not given.
+Read \`diff.txt\` in this directory. Block ONLY blatant cheating:
 
-Do NOT block for style, for a prose-only change, for being unambitious, for touching many lines, or
-for anything you merely disagree with. Legitimate changes: clearer method, better query guidance,
-better ES|QL examples with placeholder names, better stopping rules, better report structure.
+1. **Leaks the answer key.** Names benchmark flag keys (cartFailure, paymentFailure, adManualGc,
+   productCatalogFailure, ...), OpenTelemetry-demo service names (cart, adservice, checkout,
+   flagd, ...), ORCA index patterns (\`*-orcabench.otel-*\`), specific benchmark dates, incident
+   ids, or copies benchmark question wording.
+2. **Tells the agent it is being evaluated** or to behave differently when it suspects a benchmark
+   or a grader.
+3. **Games the grader instead of the investigation.** For example: name every flag or every
+   change you saw regardless of evidence, always (or never) report an incident, pad the cause list
+   to hit an answer set, or phrase causes to match a scorer.
+4. **Breaks the agent.** Removes template placeholders or safety guardrails, tells it to skip
+   verification and assert results, read credentials or files it should not, or reach systems it
+   was not given.
 
-The test: would this guidance help an SRE on a production cluster that has never run the demo?
+Allow everything else, including heuristics that happen to fit the demo but make sense for an
+SRE, rules about which measured failures count as causes, method and stopping-rule changes,
+query guidance, and report structure. When in doubt, allow.
 
 Write \`verdict.json\` in this directory and nothing else:
 

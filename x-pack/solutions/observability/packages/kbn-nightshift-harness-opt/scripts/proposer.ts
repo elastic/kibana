@@ -198,10 +198,12 @@ discarded and the round is wasted.
    metrics, every \`feature_flag\` field, log lines that name a flag). The agent has to get from
    symptoms to the trigger through the telemetry and the source code, as on a customer cluster.
    Do not teach it to look for feature flags first: there is nothing to find.
-4. **An unseen production corpus decides promotion.** Real Elastic Cloud incidents whose causes are
-   deploys, config pushes, resource exhaustion, networking and long-standing defects — not flag
-   toggles — on different telemetry layouts with different service names. You will never see
-   them. Guidance that only makes sense for an OpenTelemetry demo shop will not survive them.
+4. **An unseen production holdout must not regress.** A candidate that wins the gate is also run on
+   real Elastic Cloud incidents whose causes are deploys, config pushes, resource exhaustion,
+   networking and long-standing defects — not flag toggles — on different telemetry layouts with
+   different service names, and is not promoted if it is worse there. You will never see those
+   cases or their scores, only whether the holdout passed. Guidance that only makes sense for an
+   OpenTelemetry demo shop will not survive it.
 5. **Cost counts.** A candidate that costs more than 1.1× the incumbent must be clearly better; one
    that is significantly cheaper per solved incident at equal quality is also accepted.
 6. **Regressions are capped, and giving up is worse.** Improved incidents must outnumber regressed
@@ -214,10 +216,11 @@ services, flags, index patterns, time ranges or question wording you see in \`ca
 
 ## What gets your change thrown out
 
-A reviewer reads the diff before anything is measured and blocks: benchmark values written into the
-prompt (service, flag or index names, timestamps, window lengths, question phrasings); making
-feature flags or flag-evaluation data a privileged first step; instructions that detect the
-evaluation; or wording that makes a failure look like a success.
+A reviewer reads the diff before anything is measured and blocks only blatant cheating: benchmark
+values written into the prompt (flag, service or index names, incident dates, question phrasings);
+instructions that detect the evaluation; grader-gaming such as naming every change you saw
+regardless of evidence; or removing placeholders and guardrails. Grey-area ideas go to the
+measurement, so test the hypothesis you believe in.
 
 ## Finish
 
@@ -277,8 +280,10 @@ export const writeBundle = ({
       rationale: ((entry.manifest ?? {}) as { rationale?: string }).rationale,
       outcome: entry.rejected
         ? `rejected before measurement (${entry.rejected})`
-        : gate.accepted
+        : entry.promoted ?? gate.accepted
         ? 'ACCEPTED'
+        : gate.accepted
+        ? 'won the gate, failed the unseen production holdout'
         : 'rejected at the gate',
       why: entry.rejected
         ? ((entry.failures as string[]) ?? []).join(' ').slice(0, 400)
@@ -288,7 +293,14 @@ export const writeBundle = ({
     };
   });
   Fs.writeFileSync(Path.join(scratchDir, 'history.json'), JSON.stringify(digest, null, 2));
-  Fs.writeFileSync(Path.join(scratchDir, 'history_full.json'), JSON.stringify(history, null, 2));
+  // The holdout is unseen: the proposer learns whether it passed, nothing about its incidents.
+  const fullHistory = (history as Array<Record<string, unknown>>).map(({ holdout, ...entry }) =>
+    holdout ? { ...entry, holdoutPassed: (holdout as { passed?: boolean }).passed } : entry
+  );
+  Fs.writeFileSync(
+    Path.join(scratchDir, 'history_full.json'),
+    JSON.stringify(fullHistory, null, 2)
+  );
   Fs.writeFileSync(Path.join(scratchDir, 'feedback.md'), feedback);
 };
 

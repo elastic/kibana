@@ -45,6 +45,20 @@ export const readOrcaUser = (): OrcaUser => {
 };
 
 /** The Golden evals Kibana, which stores the ORCA releases. */
+/** The customer0 telemetry cluster's read key, the suite's \`nightshift.telemetry\` block. */
+export const readCustomer0Telemetry = (): { url: string; apiKey: string } => {
+  const config = readJson(
+    SUITE_VAULT_CONFIG,
+    '`node x-pack/platform/packages/shared/kbn-evals/scripts/vault/retrieve_secrets.js --vault dev --suite nightshift-investigations`'
+  );
+  const telemetry = (config.nightshift as { telemetry?: { url?: string; apiKey?: string } })
+    ?.telemetry;
+  if (!telemetry?.url || !telemetry.apiKey) {
+    throw new Error(`${SUITE_VAULT_CONFIG} has no nightshift.telemetry.{url,apiKey}`);
+  }
+  return { url: telemetry.url.replace(/\/$/, ''), apiKey: telemetry.apiKey };
+};
+
 export const readEvaluationsKibana = (): { url: string; apiKey: string } => {
   const config = readJson(
     EVALS_VAULT_CONFIG,

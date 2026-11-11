@@ -15,6 +15,8 @@ import { prepareLane } from './kibana';
 import { runVariant } from './runner';
 import type { RunSummary, TelemetryVariant } from './runner';
 import { gateCandidate } from './gate';
+import { checkHoldout, holdoutDir, runHoldoutVariant } from './holdout';
+import type { HoldoutResult } from './holdout';
 import { proposeCandidate, SCRATCH_DIR } from './proposer';
 import { reviewEdits } from './review';
 import {
@@ -48,6 +50,10 @@ export interface CampaignOptions {
   freshSearch?: boolean;
   /** Debug only: promote every measured candidate, to exercise promotion and lineage. */
   acceptAny?: boolean;
+  /** customer0 incidents a gate winner must not regress on; empty skips the holdout. */
+  holdoutTasks: OrcaTask[];
+  /** Debug only: run the holdout after every measured candidate, not only gate winners. */
+  holdoutAlways?: boolean;
   log: ToolingLog;
 }
 
@@ -135,6 +141,8 @@ export const runCampaign = async ({
   skipCandidateSearch = false,
   acceptAny = false,
   freshSearch = false,
+  holdoutTasks,
+  holdoutAlways = false,
   log,
 }: CampaignOptions): Promise<void> => {
   const { runsDir, lineageDir } = harnessPaths();
@@ -159,6 +167,8 @@ export const runCampaign = async ({
   let incumbentDiff = await workspaceDiff({ path: incumbent.worktree });
   let lastFeedback = '';
   let lastSearch: RunSummary | undefined;
+  // The incumbent's holdout run, reused while the incumbent is unchanged.
+  let lastIncumbentHoldout: RunSummary | undefined;
 
   const common = {
     concurrency,
@@ -354,6 +364,46 @@ export const runCampaign = async ({
           rollouts: searchRollouts,
           outputDir,
         });
+    // The holdout: only a gate winner is worth the spend, and it must not be worse on production
+    // incidents. Its runs live outside runs/, and the proposer only ever learns pass or fail.
+    let holdout: HoldoutResult | undefined;
+    if (holdoutTasks.length > 0 && (gate.accepted || holdoutAlways)) {
+      const holdoutOutput = Path.join(holdoutDir(), Path.basename(outputDir));
+      const reuse = lastIncumbentHoldout?.configHash === incumbentVariant.hash;
+      const [incumbentHoldout, candidateHoldout] = await Promise.all([
+        reuse && lastIncumbentHoldout
+          ? lastIncumbentHoldout
+          : runHoldoutVariant({
+              ...common,
+              label: `round${round}-incumbent-holdout`,
+              variant: incumbentVariant,
+              lane: incumbent,
+              tasks: holdoutTasks,
+              outputDir: holdoutOutput,
+            }),
+        runHoldoutVariant({
+          ...common,
+          label: `round${round}-candidate-holdout`,
+          variant: candidateVariant,
+          lane: candidate,
+          tasks: holdoutTasks,
+          outputDir: holdoutOutput,
+        }),
+      ]);
+      lastIncumbentHoldout = incumbentHoldout;
+      holdout = checkHoldout({ incumbent: incumbentHoldout, candidate: candidateHoldout });
+      log.info(
+        `[harness-opt] round ${round} holdout: ${
+          holdout.passed ? 'passed' : 'FAILED'
+        } — Δ ${holdout.meanDelta.toFixed(3)} [${holdout.ciLow.toFixed(
+          3
+        )}, ${holdout.ciHigh.toFixed(3)}] over ${holdout.incidents} incidents${
+          holdout.reasons.length ? ` (${holdout.reasons.join('; ')})` : ''
+        }`
+      );
+    }
+    const promoted = gate.accepted && (holdout?.passed ?? true);
+
     const searchDeltas = candidateSearch ? perCaseDeltas(searchRun, candidateSearch) : [];
     const predictionCheck = candidateSearch
       ? checkPredictions(
@@ -369,7 +419,11 @@ export const runCampaign = async ({
     )} (CI ${gate.ciLow.toFixed(3)}..${gate.ciHigh.toFixed(3)}, ${
       gate.seeds
     } incidents) at ${gate.costRatio.toFixed(2)}× cost and was ${
-      gate.accepted ? 'ACCEPTED' : `rejected: ${gate.reasons.join('; ')}`
+      !gate.accepted
+        ? `rejected: ${gate.reasons.join('; ')}`
+        : promoted
+        ? 'ACCEPTED'
+        : 'rejected: it won the gate but did worse on the unseen production holdout'
     }.`;
 
     log.info(
@@ -380,8 +434,10 @@ export const runCampaign = async ({
       )}, execution ${gate.incumbentExecutionSuccess.toFixed(
         2
       )} → ${gate.candidateExecutionSuccess.toFixed(2)} → ${
-        gate.accepted ? `ACCEPTED via ${gate.acceptedVia}` : `rejected (${gate.reasons.join('; ')})`
-      }`
+        gate.accepted
+          ? `gate passed via ${gate.acceptedVia}`
+          : `rejected (${gate.reasons.join('; ')})`
+      }${promoted ? ' → PROMOTED' : ''}`
     );
 
     ledger.push({
@@ -394,18 +450,20 @@ export const runCampaign = async ({
       telemetryVariant,
       agentConnectorId,
       gate,
+      holdout,
+      promoted,
       gateDeltas: perCaseDeltas(incumbentGate, candidateGate),
       searchReward: searchRun.meanReward,
       candidateSearchReward: candidateSearch?.meanReward,
       searchDeltas,
       predictionCheck,
       outputDir,
-      ...(acceptAny ? { forcedPromotion: !gate.accepted } : {}),
+      ...(acceptAny ? { forcedPromotion: !promoted } : {}),
     });
     saveLedger();
 
-    if (gate.accepted || acceptAny) {
-      if (!gate.accepted) log.warning(`[harness-opt] --accept-any: promoting a rejected candidate`);
+    if (promoted || acceptAny) {
+      if (!promoted) log.warning(`[harness-opt] --accept-any: promoting a rejected candidate`);
       incumbentEdits = allEdits;
       incumbentDiff = attemptedDiff;
       const acceptedDir = Path.join(lineageDir, `accepted-${round}-${candidateVariant.hash}`);
