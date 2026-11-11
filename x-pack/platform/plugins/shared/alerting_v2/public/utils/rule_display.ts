@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { formatDuration } from '@kbn/alerting-plugin/common';
 import type {
   NoDataStrategy,
   Recovery,
@@ -14,6 +13,7 @@ import type {
 } from '@kbn/alerting-v2-schemas';
 import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { i18n } from '@kbn/i18n';
+import { formatDuration } from './format_duration';
 
 export const EMPTY_VALUE = '-';
 

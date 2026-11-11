@@ -24,5 +24,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./lens'));
     loadTestFile(require.resolve('./legacy_route_compat'));
     loadTestFile(require.resolve('./cases_by_attachment_ids'));
+    loadTestFile(require.resolve('./search'));
   });
 };

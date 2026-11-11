@@ -23,8 +23,8 @@ jest.mock('../../components/app_header', () => ({
     return <div data-test-subj="knowledgeHeader" />;
   },
 }));
-jest.mock('./cortex/tab', () => ({
-  CortexTab: () => <div data-test-subj="cortexTab" />,
+jest.mock('./wiki/tab', () => ({
+  WikiTab: () => <div data-test-subj="wikiTab" />,
 }));
 jest.mock('./memory/tab', () => ({
   MemoryTab: () => <div data-test-subj="memoryTab" />,
@@ -90,7 +90,7 @@ beforeEach(() => {
 it('renders an enabled deep link without waiting for unrelated gates', async () => {
   renderPage('/knowledge/memory', {
     knowledge_indicators: knowledgeIndicatorsEnabled,
-    cortex: { isEnabled: false, isLoading: true },
+    wiki: { isEnabled: false, isLoading: true },
     memory: { isEnabled: true, isLoading: false },
     decision_trees: { isEnabled: false, isLoading: true },
     topology: settledOff,
@@ -103,7 +103,7 @@ it('renders an enabled deep link without waiting for unrelated gates', async () 
 it('renders Topology and marks developer-only tabs with the developer mode badge', async () => {
   renderPage('/knowledge/topology', {
     knowledge_indicators: knowledgeIndicatorsEnabled,
-    cortex: settledOff,
+    wiki: settledOff,
     memory: { isEnabled: true, isLoading: false },
     decision_trees: { isEnabled: true, isLoading: false },
     topology: { isEnabled: true, isLoading: false },
@@ -122,7 +122,7 @@ it('renders Topology and marks developer-only tabs with the developer mode badge
 it('redirects a Topology deep link when the tab is hidden', async () => {
   const { history } = renderPage('/knowledge/topology', {
     knowledge_indicators: knowledgeIndicatorsEnabled,
-    cortex: settledOff,
+    wiki: settledOff,
     memory: settledOff,
     decision_trees: settledOff,
     topology: settledOff,
@@ -135,7 +135,7 @@ it('redirects a Topology deep link when the tab is hidden', async () => {
 it('opens Knowledge Indicators immediately for a disabled deep link', async () => {
   const page = renderPage('/knowledge/memory', {
     knowledge_indicators: knowledgeIndicatorsEnabled,
-    cortex: { isEnabled: false, isLoading: true },
+    wiki: { isEnabled: false, isLoading: true },
     memory: settledOff,
     decision_trees: settledOff,
     topology: settledOff,
@@ -146,7 +146,7 @@ it('opens Knowledge Indicators immediately for a disabled deep link', async () =
 
   page.setAvailability({
     knowledge_indicators: knowledgeIndicatorsEnabled,
-    cortex: { isEnabled: true, isLoading: false },
+    wiki: { isEnabled: true, isLoading: false },
     memory: settledOff,
     decision_trees: settledOff,
     topology: settledOff,
@@ -159,7 +159,7 @@ it('opens Knowledge Indicators immediately for a disabled deep link', async () =
 it('defaults to Knowledge Indicators while optional tabs are loading', async () => {
   const { history } = renderPage('/knowledge', {
     knowledge_indicators: knowledgeIndicatorsEnabled,
-    cortex: { isEnabled: false, isLoading: true },
+    wiki: { isEnabled: false, isLoading: true },
     memory: { isEnabled: false, isLoading: true },
     decision_trees: { isEnabled: false, isLoading: true },
     topology: settledOff,
@@ -174,7 +174,7 @@ describe('getDefaultKnowledgeTab', () => {
     expect(
       getDefaultKnowledgeTab({
         knowledge_indicators: knowledgeIndicatorsEnabled,
-        cortex: { isEnabled: false, isLoading: true },
+        wiki: { isEnabled: false, isLoading: true },
         memory: { isEnabled: true, isLoading: false },
         decision_trees: settledOff,
         topology: settledOff,
@@ -186,7 +186,7 @@ describe('getDefaultKnowledgeTab', () => {
     expect(
       getDefaultKnowledgeTab({
         knowledge_indicators: settledOff,
-        cortex: { isEnabled: false, isLoading: true },
+        wiki: { isEnabled: false, isLoading: true },
         memory: { isEnabled: true, isLoading: false },
         decision_trees: settledOff,
         topology: settledOff,
@@ -198,7 +198,7 @@ describe('getDefaultKnowledgeTab', () => {
     expect(
       getDefaultKnowledgeTab({
         knowledge_indicators: settledOff,
-        cortex: settledOff,
+        wiki: settledOff,
         memory: settledOff,
         decision_trees: settledOff,
         topology: settledOff,

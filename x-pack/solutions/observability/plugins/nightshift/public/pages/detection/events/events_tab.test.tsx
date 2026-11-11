@@ -8,7 +8,7 @@
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SignificantEvent, SignificantEventResponse } from '@kbn/significant-events-schema';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
@@ -137,27 +137,30 @@ describe('EventsTab', () => {
     expect(screen.getByTestId('eventFlyoutStub')).toHaveTextContent('Payment errors');
   });
 
-  it('sorts by a column header and keeps the choice in the URL', async () => {
+  it('sorts by a column header and keeps the choice in the URL', () => {
+    // EUI's sticky header renders an aria-hidden clone of every header cell; click the real one.
+    const sortButton = (field: string) => {
+      const [header] = screen
+        .getAllByTestId(new RegExp(`^tableHeaderCell_${field}_`))
+        .filter((cell) => !cell.closest('[aria-hidden="true"]'));
+      return within(header).getByTestId('tableHeaderSortButton');
+    };
     const history = renderTab();
 
     expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
       expect.objectContaining({ sortField: 'updated_at', sortOrder: 'desc' })
     );
-    fireEvent.click(screen.getByRole('button', { name: /^Created at/ }));
+    fireEvent.click(sortButton('created_at'));
 
-    await waitFor(() =>
-      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
-        expect.objectContaining({ sortField: 'created_at', page: 1 })
-      )
+    expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortField: 'created_at', page: 1 })
     );
     expect(new URLSearchParams(history.location.search).get('sortField')).toBe('created_at');
 
-    fireEvent.click(screen.getByRole('button', { name: /^Updated at/ }));
+    fireEvent.click(sortButton('@timestamp'));
 
-    await waitFor(() =>
-      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
-        expect.objectContaining({ sortField: 'updated_at', page: 1 })
-      )
+    expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortField: 'updated_at', page: 1 })
     );
     expect(new URLSearchParams(history.location.search).get('sortField')).toBe('updated_at');
   });

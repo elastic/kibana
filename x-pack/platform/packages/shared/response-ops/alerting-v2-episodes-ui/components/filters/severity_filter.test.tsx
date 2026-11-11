@@ -59,6 +59,16 @@ describe('AlertEpisodesSeverityFilter', () => {
     expect(screen.getByTestId('test-severity-filter-popover-option-major')).toBeInTheDocument();
   });
 
+  it('renders severity options as soft badges', () => {
+    renderFilter();
+    fireEvent.click(screen.getByTestId('test-severity-filter-button'));
+
+    expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-critical')).toHaveTextContent(
+      'Critical'
+    );
+    expect(screen.getByTestId('alertingV2EpisodeSeverityBadge-high')).toHaveTextContent('High');
+  });
+
   it('emits extension severity values when selected', () => {
     const onSeveritiesChange = jest.fn();
     renderFilter({ onSeveritiesChange }, true);
