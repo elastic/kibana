@@ -299,10 +299,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             handleOnEventDetailPanelOpened(timelineDoc);
           }
         } else {
+          closePaginatedFlyout();
           setExpandedDoc(undefined);
         }
       },
-      [tableRows, handleOnEventDetailPanelOpened]
+      [tableRows, handleOnEventDetailPanelOpened, closePaginatedFlyout]
     );
 
     const onResizeDataGrid = useCallback<NonNullable<UnifiedDataTableProps['onResize']>>(

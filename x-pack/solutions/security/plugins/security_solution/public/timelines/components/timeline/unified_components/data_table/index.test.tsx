@@ -42,6 +42,7 @@ const refetchMock = jest.fn();
 const onFetchMoreRecordsMock = jest.fn();
 
 const mockOpenSystemFlyout = jest.fn();
+const mockCloseSystemFlyout = jest.fn();
 const mockUiSettingsGet = jest.fn().mockReturnValue(false);
 const mockPaginatedDocumentFlyout = jest.fn((_props?: unknown) => (
   <div>{'MockPaginatedDocumentFlyout'}</div>
@@ -155,7 +156,7 @@ describe('unified data table', () => {
     jest.mocked(useFlyoutApi).mockReturnValue(flyoutApi);
     jest
       .mocked(useOpenFlyout)
-      .mockReturnValue(mockOpenSystemFlyout.mockReturnValue({ close: jest.fn() }));
+      .mockReturnValue(mockOpenSystemFlyout.mockReturnValue({ close: mockCloseSystemFlyout }));
   });
   afterEach(() => {
     updateSampleSizeSpy.mockClear();
@@ -254,6 +255,31 @@ describe('unified data table', () => {
       await waitFor(() => {
         expect(expandButtons[0].firstChild).toHaveAttribute('data-euiicon-type', 'maximize');
         expect(expandButtons[1].firstChild).toHaveAttribute('data-euiicon-type', 'minimize');
+      });
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
+    'closes the document flyout when the expanded row is collapsed',
+    async () => {
+      render(<TestComponent />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      const expandButtons = screen.getAllByTestId('docTableExpandToggleColumn');
+      fireEvent.click(expandButtons[0]);
+
+      await waitFor(() => {
+        expect(expandButtons[0].firstChild).toHaveAttribute('data-euiicon-type', 'minimize');
+      });
+      // The previous test's flyout closes when it unmounts, so start counting from here.
+      mockCloseSystemFlyout.mockClear();
+
+      fireEvent.click(expandButtons[0]);
+
+      await waitFor(() => {
+        expect(mockCloseSystemFlyout).toHaveBeenCalledTimes(1);
+        expect(expandButtons[0].firstChild).toHaveAttribute('data-euiicon-type', 'maximize');
       });
     },
     SPECIAL_TEST_TIMEOUT
