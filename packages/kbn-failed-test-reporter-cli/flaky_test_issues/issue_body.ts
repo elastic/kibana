@@ -70,6 +70,8 @@ export interface FlakySuiteIssueCommentContext {
   report: FlakyTestReport;
   /** The issue is being reopened: the suite failed again after it was closed. */
   reopened: boolean;
+  /** Metadata of the issue before this refresh, for the flaky tests it has not shown yet. */
+  previous?: RecordedFlakySuiteIssueMetadata;
 }
 
 /** One report's numbers for the suite's worst test, kept in the body so the history survives. */
@@ -107,6 +109,12 @@ export interface FlakySuiteIssueMetadata {
    * it.
    */
   'report.commentedAt'?: string;
+  /**
+   * Tests the owners have seen flaky on the issue: those of the body as filed and of every comment
+   * since. The next comment names the flaky tests missing from it; absent on issues filed before
+   * it was recorded, until their next comment.
+   */
+  'report.shownTestIds'?: string[];
 }
 
 /** What an issue body records; older issues lack some of it. */
@@ -156,6 +164,7 @@ export const readFlakySuiteIssueMetadata = (
     'report.count': typeof count === 'number' ? count : undefined,
     'report.history': Array.isArray(history) ? history.filter(isSnapshot) : [],
     'report.commentedAt': typeof commentedAt === 'string' ? commentedAt : undefined,
+    'report.shownTestIds': stringsOf(metadataValue(body, 'report.shownTestIds')),
   };
 };
 
@@ -223,14 +232,16 @@ export const flakySuiteIssueMetadata = (
   const pipelines = failedPipelines(suite, report);
   const history = [...(previous?.['report.history'] ?? []), snapshot(suite, report)];
   const commentedAt = comment ? report.generatedAt.toISOString() : previous?.['report.commentedAt'];
+  const testIds = suite.tests.map((test) => test.testId);
+  const shownTestIds =
+    !previous || comment
+      ? union(testIds, previous?.['report.shownTestIds'])
+      : previous['report.shownTestIds'];
   return {
     'suite.filePath': suite.filePath,
     ...(suite.suiteTitle ? { 'suite.title': suite.suiteTitle } : {}),
     'suite.framework': suite.framework,
-    'suite.testIds': union(
-      suite.tests.map((test) => test.testId),
-      previous?.['suite.testIds']
-    ),
+    'suite.testIds': union(testIds, previous?.['suite.testIds']),
     'suite.branches': union(failedBranches(suite), previous?.['suite.branches']),
     'suite.pipelines': [
       ...(previous?.['suite.pipelines'] ?? []).filter((pipeline) => !pipelines.includes(pipeline)),
@@ -243,6 +254,7 @@ export const flakySuiteIssueMetadata = (
       : 1,
     'report.history': history.slice(-MAX_REPORT_HISTORY),
     ...(commentedAt ? { 'report.commentedAt': commentedAt } : {}),
+    ...(shownTestIds ? { 'report.shownTestIds': shownTestIds } : {}),
   };
 };
 
@@ -836,12 +848,35 @@ const lastFailedLink = ({
     : day;
 };
 
-/**
- * The comment of a refresh that found new failures: where the suite is flaky and not skipped, with
- * the worst test's numbers and its newest failure on each branch, in one sentence for a single
- * branch and one line per branch otherwise. The body keeps the full tables.
- */
-export const renderFlakySuiteIssueComment = (
+const MAX_NAMED_TESTS = 3;
+
+/** `` `a` ``, `` `a` and `b` ``, or `` `a`, `b`, `c` and 2 more ``. */
+const listOfNames = (names: readonly string[]): string => {
+  const shown = names.slice(0, MAX_NAMED_TESTS);
+  const rest = names.length - shown.length;
+  const items = rest > 0 ? [...shown, `${rest} more`] : shown;
+  return items.length === 1
+    ? items[0]
+    : `${items.slice(0, -1).join(', ')} and ${items[items.length - 1]}`;
+};
+
+/** `Newly flaky: …`, for the flaky tests the issue has not shown, when it records the ones it has. */
+const newlyFlakySentence = (
+  suite: FlakySuite,
+  previous: RecordedFlakySuiteIssueMetadata | undefined
+): string | undefined => {
+  const shown = previous?.['report.shownTestIds'];
+  if (!shown) {
+    return undefined;
+  }
+  const newTests = suite.tests.filter(({ testId }) => !shown.includes(testId));
+  return newTests.length > 0
+    ? `Newly flaky: ${listOfNames(newTests.map(({ title }) => inlineCode(title)))}.`
+    : undefined;
+};
+
+/** Where the suite is still flaky, with the worst test's numbers on each branch. */
+const whereStillFlaky = (
   suite: FlakySuite,
   { report, reopened }: FlakySuiteIssueCommentContext
 ): string => {
@@ -879,4 +914,22 @@ export const renderFlakySuiteIssueComment = (
   return `${lead}:\n\n${branches
     .map(({ branch, numbers }) => `- ${branch}: ${numbers}`)
     .join('\n')}`;
+};
+
+/**
+ * The comment of a refresh that found new failures: where the suite is flaky and not skipped, with
+ * the worst test's numbers and its newest failure on each branch, in one sentence for a single
+ * branch and one line per branch otherwise, then the flaky tests the issue has not shown yet. The
+ * body keeps the full tables.
+ */
+export const renderFlakySuiteIssueComment = (
+  suite: FlakySuite,
+  context: FlakySuiteIssueCommentContext
+): string => {
+  const newlyFlaky = newlyFlakySentence(suite, context.previous);
+  const where = whereStillFlaky(suite, context);
+  if (!newlyFlaky) {
+    return where;
+  }
+  return where.includes('\n') ? `${where}\n\n${newlyFlaky}` : `${where} ${newlyFlaky}`;
 };

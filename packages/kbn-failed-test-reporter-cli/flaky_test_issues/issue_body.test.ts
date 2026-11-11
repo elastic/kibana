@@ -577,6 +577,7 @@ describe('renderFlakySuiteIssueBody', () => {
       'report.history': [
         { generatedAt: '2026-09-09T09:04:41.000Z', builds: 509, failedBuilds: 49 },
       ],
+      'report.shownTestIds': [suite.tests[0].testId],
     });
     expect(readFlakySuiteIssueMetadata('no metadata here')).toBeUndefined();
   });
@@ -730,6 +731,25 @@ describe('refreshing a suite issue', () => {
     expect(silent?.['report.commentedAt']).toBe('2026-09-08T09:04:41.000Z');
   });
 
+  it('adds the tests a comment shows to those the issue has shown, else keeps them as they are', () => {
+    const { suite, report } = multiTestReport();
+    const shown = { ...previous, 'report.shownTestIds': ['a', 'no-longer-flaky'] };
+    const refresh = (metadata: RecordedFlakySuiteIssueMetadata, comment: boolean) =>
+      readFlakySuiteIssueMetadata(
+        refreshFlakySuiteIssueMetadata(filedBody(metadata), suite, {
+          report,
+          previous: metadata,
+          comment,
+        })
+      )?.['report.shownTestIds'];
+
+    expect(refresh(shown, true)).toEqual(['a', 'b', 'c', 'no-longer-flaky']);
+    expect(refresh(shown, false)).toEqual(['a', 'no-longer-flaky']);
+    // an issue filed before they were recorded starts with the tests of its next comment
+    expect(refresh(previous, true)).toEqual(['a', 'b', 'c']);
+    expect(refresh(previous, false)).toBeUndefined();
+  });
+
   it('takes the report that filed the issue as the last one posted until a comment is recorded', () => {
     expect(lastPostedAt(previous)).toBe('2026-09-07T09:04:41.000Z');
     expect(lastPostedAt({ ...previous, 'report.commentedAt': '2026-09-08T09:04:41.000Z' })).toBe(
@@ -801,5 +821,45 @@ describe('refreshing a suite issue', () => {
         '- `9.2`: 5% of builds (3 / 64), last failed [7 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12290#0199-9200)',
       ].join('\n')
     );
+  });
+
+  it('names the flaky tests the issue has not shown yet', () => {
+    const single = singleTestReport();
+    const multi = multiTestReport();
+    const shown = (ids: string[]) => ({ ...previous, 'report.shownTestIds': ids });
+
+    expect(
+      renderFlakySuiteIssueComment(single.suite, {
+        report: single.report,
+        reopened: false,
+        previous: shown(['an-older-test']),
+      })
+    ).toBe(
+      'Still flaky on `main`: 10% of builds (49 / 509), last failed [9 Sep](https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd). ' +
+        'Newly flaky: `creates default alert, triggers on down status, and recovers`.'
+    );
+    expect(
+      renderFlakySuiteIssueComment(multi.suite, {
+        report: multi.report,
+        reopened: false,
+        previous: shown(['a']),
+      })
+    ).toMatch(
+      /\n- `9\.2`: [^\n]+\n\nNewly flaky: `reverts breakdown, interval, and visibility on a saved session` and `persists hide\/show of the histogram on a saved session`\.$/
+    );
+  });
+
+  it('names no test when the issue has shown them all, or does not record which it has shown', () => {
+    const { suite, report } = multiTestReport();
+
+    for (const shownTestIds of [['a', 'b', 'c'], undefined]) {
+      expect(
+        renderFlakySuiteIssueComment(suite, {
+          report,
+          reopened: false,
+          previous: { ...previous, 'report.shownTestIds': shownTestIds },
+        })
+      ).not.toContain('Newly flaky');
+    }
   });
 });
