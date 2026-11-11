@@ -26,6 +26,7 @@ tasks:
   # defaults to the location of jest.config.cjs. We invoke `.buildkite`'s own jest
   # binary (its isolated npm workspace), not the repo-root scripts/jest.
   jest:
+    tags: [jest-unit-tests]
     command: .buildkite/node_modules/.bin/jest
     args:
       - '--config'

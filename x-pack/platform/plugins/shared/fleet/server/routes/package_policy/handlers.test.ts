@@ -45,9 +45,15 @@ import {
   CreatePackagePolicyResponseSchema,
 } from '../../types';
 import type { PackagePolicy } from '../../types';
+import { PackageBreakingChangesNotAcknowledgedError } from '../../errors';
 
 import { ListResponseSchema } from '../schema/utils';
-import { getInstallation, getPackageInfo, removeInstallation } from '../../services/epm/packages';
+import {
+  assertPackagePoliciesUpgradeAcknowledged,
+  getInstallation,
+  getPackageInfo,
+  removeInstallation,
+} from '../../services/epm/packages';
 
 import {
   bulkGetPackagePoliciesHandler,
@@ -147,6 +153,7 @@ jest.mock('../../services/agent_policy', () => {
 
 jest.mock('../../services/epm/packages', () => {
   return {
+    assertPackagePoliciesUpgradeAcknowledged: jest.fn(),
     ensureInstalledPackage: jest.fn(() => Promise.resolve()),
     getPackageInfo: jest.fn(() => Promise.resolve()),
     getInstallation: jest.fn(),
@@ -1201,11 +1208,12 @@ describe('When calling package policy', () => {
       });
     });
 
-    it('should not look up target policies when disableAgentlessLegacyAPI is disabled', async () => {
+    it('should not look up target policies when disableAgentlessLegacyAPI is disabled and breaking changes are acknowledged', async () => {
       packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
       const request = httpServerMock.createKibanaRequest({
         body: {
           packagePolicyIds: ['1'],
+          acknowledge_breaking_changes: true,
         },
       });
       await upgradePackagePolicyHandler(context, request, response);
@@ -1213,6 +1221,49 @@ describe('When calling package policy', () => {
         body: responseBody,
       });
       expect(packagePolicyServiceMock.getByIDs).not.toHaveBeenCalled();
+    });
+
+    describe('breaking changes', () => {
+      const packagePolicies = [
+        { id: '1', policy_ids: [], package: { name: 'test', version: '1.0.0' } },
+      ] as unknown as PackagePolicy[];
+
+      beforeEach(() => {
+        jest.mocked(assertPackagePoliciesUpgradeAcknowledged).mockReset();
+        packagePolicyServiceMock.getByIDs.mockResolvedValue(packagePolicies);
+        packagePolicyServiceMock.bulkUpgrade.mockResolvedValue(responseBody);
+      });
+
+      it('should reject the whole request when an upgrade includes unacknowledged breaking changes', async () => {
+        jest
+          .mocked(assertPackagePoliciesUpgradeAcknowledged)
+          .mockRejectedValue(new PackageBreakingChangesNotAcknowledgedError('breaking', []));
+        const request = httpServerMock.createKibanaRequest({
+          body: {
+            packagePolicyIds: ['1'],
+          },
+        });
+
+        await expect(upgradePackagePolicyHandler(context, request, response)).rejects.toThrow(
+          PackageBreakingChangesNotAcknowledgedError
+        );
+        expect(assertPackagePoliciesUpgradeAcknowledged).toHaveBeenCalledWith(packagePolicies);
+        expect(packagePolicyServiceMock.bulkUpgrade).not.toHaveBeenCalled();
+      });
+
+      it('should upgrade without checking breaking changes when acknowledged', async () => {
+        const request = httpServerMock.createKibanaRequest({
+          body: {
+            packagePolicyIds: ['1'],
+            acknowledge_breaking_changes: true,
+          },
+        });
+
+        await upgradePackagePolicyHandler(context, request, response);
+
+        expect(assertPackagePoliciesUpgradeAcknowledged).not.toHaveBeenCalled();
+        expect(response.ok).toHaveBeenCalledWith({ body: responseBody });
+      });
     });
 
     describe('when disableAgentlessLegacyAPI is enabled', () => {

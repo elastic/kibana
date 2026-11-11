@@ -32,6 +32,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./entity_sub_privilege'));
     loadTestFile(require.resolve('./legacy_route_compat'));
     loadTestFile(require.resolve('./import_export'));
+    loadTestFile(require.resolve('./search'));
 
     // Reference saved-object types that only exist as unified attachments
     loadTestFile(require.resolve('./saved_object_attachments'));

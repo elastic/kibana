@@ -51,12 +51,14 @@ dependsOn:
   - '@kbn/workflows-extensions'
   - '@kbn/i18n'
   - '@kbn/workflows'
+  - '@kbn/core-saved-objects-common'
 tags:
   - plugin
   - prod
   - group-security
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - index.ts
@@ -66,6 +68,4 @@ fileGroups:
     - server/**/*.ts
     - test/**/*.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

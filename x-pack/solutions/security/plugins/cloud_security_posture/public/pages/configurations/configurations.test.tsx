@@ -384,7 +384,7 @@ describe('<Findings />', () => {
       // Assert that the distribution bar has the correct percentages rendered
       expect(screen.getByTestId('distribution_bar_passed')).toHaveStyle('flex: 1');
       expect(screen.getByTestId('distribution_bar_failed')).toHaveStyle('flex: 0');
-    }, 10000);
+    });
     it('filters by failed findings when clicking on the failed findings button', async () => {
       server.use(statusHandlers.indexedHandler);
       server.use(
@@ -420,6 +420,6 @@ describe('<Findings />', () => {
       // Assert that the distribution bar has the correct percentages rendered
       expect(screen.getByTestId('distribution_bar_passed')).toHaveStyle('flex: 0');
       expect(screen.getByTestId('distribution_bar_failed')).toHaveStyle('flex: 1');
-    }, 10000);
+    });
   });
 });

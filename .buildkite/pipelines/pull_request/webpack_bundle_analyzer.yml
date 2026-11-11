@@ -4,7 +4,7 @@ steps:
     agents:
       machineType: n2-standard-8
       preemptible: true
-      spotZones: us-central1-f,us-central1-c,us-central1-a
+      spotZones: asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c
     key: webpack_bundle_analyzer
     timeout_in_minutes: 60
     retry:
