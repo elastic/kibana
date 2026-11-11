@@ -18,6 +18,10 @@ export class OnboardingPage {
   public readonly skipSetupButton;
   public readonly documentationLink;
   public readonly copyEndpointUrlButton;
+  public readonly viewPromptButton;
+  public readonly installCliButton;
+  public readonly openElasticAgentButton;
+  public readonly agentBuilderSidebar;
 
   // Wizard steps
   public readonly stepRail;
@@ -28,18 +32,22 @@ export class OnboardingPage {
   public readonly languagePicker;
 
   constructor(private readonly page: ScoutPage) {
-    this.generatePathCard = this.page.testSubj.locator('vectordbPathSelectionGenerate');
-    this.storePathCard = this.page.testSubj.locator('vectordbPathSelectionStore');
-    this.skipSetupButton = this.page.testSubj.locator('vectordbPathSelectionSkip');
-    this.documentationLink = this.page.testSubj.locator('vectordbPathSelectionDocumentation');
-    this.copyEndpointUrlButton = this.page.testSubj.locator('vectordbConnectToProjectCopyUrl');
+    this.generatePathCard = this.page.getByTestId('vectordbPathSelectionGenerate');
+    this.storePathCard = this.page.getByTestId('vectordbPathSelectionStore');
+    this.skipSetupButton = this.page.getByTestId('vectordbPathSelectionSkip');
+    this.documentationLink = this.page.getByTestId('vectordbPathSelectionDocumentation');
+    this.copyEndpointUrlButton = this.page.getByTestId('vectordbConnectToProjectCopyUrl');
+    this.viewPromptButton = this.page.getByTestId('vectordbOnboardingViewPrompt');
+    this.installCliButton = this.page.getByTestId('vectordbOnboardingInstallCli');
+    this.openElasticAgentButton = this.page.getByTestId('vectordbOnboardingOpenElasticAgent');
+    this.agentBuilderSidebar = this.page.getByTestId('sidebarPanel');
 
-    this.stepRail = this.page.testSubj.locator('vectordbWizardSteps');
-    this.snippet = this.page.testSubj.locator('vectordbWizardSnippet');
-    this.backButton = this.page.testSubj.locator('stepLayoutBackToOnboarding');
-    this.continueButton = this.page.testSubj.locator('vectordbWizardContinueToSearch');
-    this.completeSetupButton = this.page.testSubj.locator('vectordbWizardCompleteSetup');
-    this.languagePicker = this.page.testSubj.locator('vectordbWizardLanguagePicker');
+    this.stepRail = this.page.getByTestId('vectordbWizardSteps');
+    this.snippet = this.page.getByTestId('vectordbWizardSnippet');
+    this.backButton = this.page.getByTestId('stepLayoutBackToOnboarding');
+    this.continueButton = this.page.getByTestId('vectordbWizardContinueToSearch');
+    this.completeSetupButton = this.page.getByTestId('vectordbWizardCompleteSetup');
+    this.languagePicker = this.page.getByTestId('vectordbWizardLanguagePicker');
   }
 
   /** Navigates to the app root, which redirects a first-time user into the setup guide. */
@@ -61,15 +69,15 @@ export class OnboardingPage {
   }
 
   stepTitle(path: VectorPath, step: WizardStep) {
-    return this.page.testSubj.locator(`vectordbWizardStepTitle-${path}-${step}`);
+    return this.page.getByTestId(`vectordbWizardStepTitle-${path}-${step}`);
   }
 
   snippetTab(tabId: string) {
-    return this.page.testSubj.locator(`vectordbWizardSnippetTab-${tabId}`);
+    return this.page.getByTestId(`vectordbWizardSnippetTab-${tabId}`);
   }
 
   pill(pillId: string) {
-    return this.page.testSubj.locator(`vectordbWizardPill-${pillId}`);
+    return this.page.getByTestId(`vectordbWizardPill-${pillId}`);
   }
 
   async choosePath(path: VectorPath) {
@@ -84,12 +92,12 @@ export class OnboardingPage {
 
   async selectLanguage(languageId: string) {
     await this.languagePicker.click();
-    await this.page.testSubj.locator(`vectordbWizardLanguageOption-${languageId}`).click();
+    await this.page.getByTestId(`vectordbWizardLanguageOption-${languageId}`).click();
   }
 
   /** Opens a pill's popover and returns the panel holding its explanation. */
   async openPill(pillId: string) {
     await this.pill(pillId).click();
-    return this.page.testSubj.locator(`vectordbWizardPillPanel-${pillId}`);
+    return this.page.getByTestId(`vectordbWizardPillPanel-${pillId}`);
   }
 }

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { SimplifiedPackagePolicyBaseSchema, SimplifiedVarsSchema } from './package_policy_schema';
+import {
+  CreatePackagePolicyRequestBodySchema,
+  SimplifiedPackagePolicyBaseSchema,
+  SimplifiedVarsSchema,
+  UpdatePackagePolicyRequestBodySchema,
+} from './package_policy_schema';
 
 describe('SimplifiedVarsSchema', () => {
   it('should validate a string "true" as a string and not coerce it to boolean', () => {
@@ -26,12 +31,24 @@ describe('SimplifiedVarsSchema', () => {
     expect(typeof result.myVar).toBe('boolean');
   });
 
-  it('should reject oversized string values', () => {
-    expect(() => SimplifiedVarsSchema.validate({ myVar: 'a'.repeat(10001) })).toThrow();
+  it('should accept string values longer than 10,000 characters', () => {
+    const value = 'a'.repeat(26500);
+    expect(SimplifiedVarsSchema.validate({ myVar: value }).myVar).toBe(value);
   });
 
-  it('should reject oversized string values inside arrays', () => {
-    expect(() => SimplifiedVarsSchema.validate({ myVar: ['a'.repeat(10001)] })).toThrow();
+  it('should accept string values longer than 10,000 characters inside arrays', () => {
+    const value = 'a'.repeat(26500);
+    expect(SimplifiedVarsSchema.validate({ myVar: [value] }).myVar).toEqual([value]);
+  });
+
+  it('should still reject oversized variable names', () => {
+    expect(() => SimplifiedVarsSchema.validate({ ['a'.repeat(1025)]: 'value' })).toThrow();
+  });
+
+  it('should still reject oversized secret reference ids', () => {
+    expect(() =>
+      SimplifiedVarsSchema.validate({ myVar: { id: 'a'.repeat(256), isSecretRef: true } })
+    ).toThrow();
   });
 });
 
@@ -52,5 +69,61 @@ describe('SimplifiedPackagePolicyBaseSchema', () => {
         additional_datastreams_permissions: ['profiling-events-default'],
       })
     ).toThrow(/profiling-events-default/);
+  });
+});
+
+describe('package policy REST request bodies in reporting mode', () => {
+  // These fields use the string helpers' warn() mode: overlong input is recorded in the
+  // kibana.schema.string_length_violation.length histogram instead of being rejected.
+  const overlong = {
+    name: 'a'.repeat(1000),
+    description: 'a'.repeat(5000),
+    policy_ids: ['a'.repeat(1000)],
+    output_id: 'a'.repeat(1000),
+    global_data_tags: [{ name: 'a'.repeat(1000), value: 'value' }],
+    inputs: [],
+  };
+
+  it('accepts overlong strings on create', () => {
+    expect(() =>
+      CreatePackagePolicyRequestBodySchema.validate({ ...overlong, id: 'a'.repeat(1000) })
+    ).not.toThrow();
+  });
+
+  it('accepts overlong input and stream IDs', () => {
+    const inputs = [
+      {
+        id: 'a'.repeat(1000),
+        type: 'logfile',
+        enabled: true,
+        streams: [
+          {
+            id: 'b'.repeat(1000),
+            enabled: true,
+            data_stream: { type: 'logs', dataset: 'system.syslog' },
+          },
+        ],
+      },
+    ];
+    expect(() =>
+      CreatePackagePolicyRequestBodySchema.validate({ name: 'policy', inputs })
+    ).not.toThrow();
+    expect(() => UpdatePackagePolicyRequestBodySchema.validate({ inputs })).not.toThrow();
+  });
+
+  it('accepts overlong strings on update', () => {
+    expect(() => UpdatePackagePolicyRequestBodySchema.validate(overlong)).not.toThrow();
+  });
+
+  it('still accepts null for nullable IDs', () => {
+    expect(() =>
+      CreatePackagePolicyRequestBodySchema.validate({
+        name: 'policy',
+        inputs: [],
+        policy_id: null,
+        output_id: null,
+        cloud_connector_id: null,
+      })
+    ).not.toThrow();
   });
 });

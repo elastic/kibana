@@ -63,7 +63,9 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
   // floating controls (toolbar, zoom, minimap) stay put when the window resizes.
   flex: 1 1 auto;
   min-height: 0;
-  width: 100%;
+  width: auto;
+  margin-inline: ${euiTheme.size.m};
+  margin-bottom: ${euiTheme.size.m};
   background: ${euiTheme.colors.backgroundBaseSubdued};
 
   // Communicate pannable space: open hand at rest, grabbing while dragging.
@@ -81,9 +83,8 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
     border-color: ${euiTheme.colors.borderBaseProminent};
   }
 
-  // Configured unit nodes: a plus while hovering a handle you can drag from,
-  // and a blue ring around every handle that can receive the line.
-  .react-flow__handle.streamsConnectionHandle {
+  // Configured unit nodes and processing nodes: an open circle at each side.
+  .react-flow__handle.streamsNodeHandle {
     width: 16px;
     height: 16px;
     background: ${euiTheme.colors.backgroundBasePlain};
@@ -96,6 +97,8 @@ export const getCanvasContainerStyles = (euiTheme: UseEuiTheme['euiTheme']) => c
     line-height: 1;
   }
 
+  // A plus while hovering a handle you can drag from, and a blue ring around
+  // every handle that can receive the line.
   .react-flow__handle.streamsConnectionHandle.connectablestart.connectionindicator:hover::after {
     content: '+';
   }
@@ -182,6 +185,7 @@ interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   onConnectStart?: OnConnectStart;
   onConnectEnd?: OnConnectEnd;
   onReconnect?: OnReconnect<EdgeType>;
+  onReconnectStart?: (event: React.MouseEvent, edge: EdgeType, handleType: HandleType) => void;
   onReconnectEnd?: (
     event: MouseEvent | TouchEvent,
     edge: EdgeType,
@@ -212,6 +216,8 @@ interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   nodesFocusable?: boolean;
   /** Whether edges are keyboard-focusable (Tab). Defaults to `false` (edges are non-actionable). */
   edgesFocusable?: boolean;
+  /** Disables the zoom and fit-to-screen buttons, e.g. while the canvas saves. */
+  zoomControlsDisabled?: boolean;
   /** Accessible name for the interactive canvas region. */
   ariaLabel?: string;
   /** Id of an element describing the canvas keyboard controls. */
@@ -239,6 +245,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   onConnectStart,
   onConnectEnd,
   onReconnect,
+  onReconnectStart,
   onReconnectEnd,
   isValidConnection,
   connectionLineType = ConnectionLineType.SmoothStep,
@@ -256,6 +263,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   elementsSelectable,
   nodesFocusable = true,
   edgesFocusable = false,
+  zoomControlsDisabled = false,
   ariaLabel,
   ariaDescribedById,
   children,
@@ -322,6 +330,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           onConnectStart={onConnectStart}
           onConnectEnd={onConnectEnd}
           onReconnect={onReconnect}
+          onReconnectStart={onReconnectStart}
           onReconnectEnd={onReconnectEnd}
           isValidConnection={isValidConnection}
           connectionLineType={connectionLineType}
@@ -329,6 +338,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           connectionRadius={connectionRadius}
           reconnectRadius={reconnectRadius}
           edgesReconnectable={edgesReconnectable}
+          connectOnClick={false}
           onEdgeClick={noop}
           onNodeClick={onNodeClick}
           onNodeContextMenu={onNodeContextMenu}
@@ -357,7 +367,7 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           proOptions={{ hideAttribution: true }}
         >
           <Background gap={GRID_SIZE} color={euiTheme.colors.borderBasePlain} />
-          <CanvasZoomControls />
+          <CanvasZoomControls isDisabled={zoomControlsDisabled} />
           <CanvasMinimap />
         </ReactFlow>
         {children}

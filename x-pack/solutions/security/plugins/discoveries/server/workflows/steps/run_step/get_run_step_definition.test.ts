@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { WorkflowExecutionAuthorizationError } from '@kbn/discoveries/impl/attack_discovery/generation/assert_authorized_to_execute_workflows';
 
+import { RunStepInputSchema } from '../../../../common/step_types/run_step';
 import { resolveConnectorDetails } from '../../helpers/resolve_connector_details';
 import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connector_id';
 
@@ -317,6 +318,29 @@ describe('getRunStepDefinition', () => {
       );
     });
 
+    it('forwards a feature_id list in order', async () => {
+      const contextWithFeatureList = {
+        ...baseMockContext,
+        input: {
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflow_ids: [],
+          feature_id: ['alertzero_template_models', 'alertzero_frontier'],
+          mode: 'sync' as const,
+          validation_workflow_id: '',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithFeatureList as never);
+
+      expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith(
+        expect.objectContaining({
+          featureId: ['alertzero_template_models', 'alertzero_frontier'],
+        })
+      );
+    });
+
     // `connector_id` stays the top of the resolution order, so a caller that names
     // an endpoint outright is never overridden by a tier.
     it('does not resolve a tier when connector_id and feature_id are both provided', async () => {
@@ -381,6 +405,56 @@ describe('getRunStepDefinition', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('telemetry attribution', () => {
+    const contextWith = (extra: Record<string, unknown>) => ({
+      ...baseMockContext,
+      input: {
+        alert_retrieval_mode: 'custom_query' as const,
+        alert_retrieval_workflow_ids: [],
+        mode: 'sync' as const,
+        validation_workflow_id: '',
+        ...extra,
+      },
+    });
+
+    it('forwards plugin_id and aggregate_by to the pipeline as telemetryMetadata', async () => {
+      await getStepDefinition().handler(
+        contextWith({ aggregate_by: 'rollup_parent', plugin_id: 'some_plugin' }) as never
+      );
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          telemetryMetadata: { aggregateBy: 'rollup_parent', pluginId: 'some_plugin' },
+        })
+      );
+    });
+
+    it('passes no telemetryMetadata when neither input is set', async () => {
+      await getStepDefinition().handler(contextWith({}) as never);
+
+      expect(mockExecuteGenerationWorkflow.mock.calls[0][0]).not.toHaveProperty(
+        'telemetryMetadata'
+      );
+    });
+
+    it('treats an empty plugin_id as unset', async () => {
+      await getStepDefinition().handler(contextWith({ aggregate_by: '', plugin_id: '' }) as never);
+
+      expect(mockExecuteGenerationWorkflow.mock.calls[0][0]).not.toHaveProperty(
+        'telemetryMetadata'
+      );
+    });
+
+    it('bounds plugin_id and aggregate_by in the input schema', () => {
+      const schema = RunStepInputSchema;
+      const tooLong = 'x'.repeat(257);
+
+      expect(schema.safeParse({ plugin_id: tooLong }).success).toBe(false);
+      expect(schema.safeParse({ aggregate_by: tooLong }).success).toBe(false);
+      expect(schema.safeParse({ aggregate_by: 'a', plugin_id: 'b' }).success).toBe(true);
     });
   });
 
@@ -781,6 +855,33 @@ describe('getRunStepDefinition', () => {
             skill_enabled: false,
           }),
         })
+      );
+    });
+  });
+
+  describe('generation_source', () => {
+    it('forwards the input to the workflow config', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler({
+        ...baseMockContext,
+        input: { ...syncMockContext.input, generation_source: 'watch_floor_ad_worker' },
+      } as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({ generation_source: 'watch_floor_ad_worker' }),
+        })
+      );
+    });
+
+    it('leaves it out of the workflow config when omitted', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(syncMockContext as never);
+
+      expect(mockExecuteGenerationWorkflow.mock.calls[0][0].workflowConfig).not.toHaveProperty(
+        'generation_source'
       );
     });
   });

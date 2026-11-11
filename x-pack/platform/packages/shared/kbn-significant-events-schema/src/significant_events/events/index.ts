@@ -9,14 +9,30 @@ import { lazySchema, z, isoDateTime } from '@kbn/zod/v4';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import dedent from 'dedent';
+import { i18n } from '@kbn/i18n';
 import { significantEventBaseSchema } from '../common_schemas';
 import {
-  ASSESSMENT_NOTE_ROLE_RULE,
-  MAX_ASSESSMENT_NOTE_LENGTH,
-  MAX_ID_LENGTH,
   MAX_TEXT_LENGTH,
+  ASSESSMENT_NOTE_ROLE_RULE,
   NO_RAW_SENSITIVE_VALUES_RULE,
 } from '../constants';
+
+/** Alerting v2 `deactivate` accepts a reason of 1 to 1024 characters. */
+export const MAX_DEACTIVATION_REASON_LENGTH = 1024;
+
+/**
+ * How long a closed series stays reusable by an exact-identity batch. The server reads it as its
+ * default lookback; the operator UI quotes it, so the two cannot drift.
+ */
+// TODO: Move this to detection settings when the recurrence lookback becomes configurable.
+export const INACTIVE_SERIES_LOOKBACK_HOURS = 48;
+
+/** Note recorded when an operator changes status without giving a reason. */
+export const operatorFallbackAssessmentNote = (status: 'active' | 'inactive'): string =>
+  i18n.translate('xpack.significantEvents.events.operatorFallbackAssessmentNote', {
+    defaultMessage: 'Manually set to {status} by an operator. No reason was given.',
+    values: { status },
+  });
 
 export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
   ALERT_EPISODE_STATUS.ACTIVE,
@@ -27,8 +43,8 @@ export const SIGNIFICANT_EVENT_STATUS_OPTIONS = [
 export const significantEventStatusSchema = lazySchema(() =>
   z.enum(SIGNIFICANT_EVENT_STATUS_OPTIONS).describe(dedent`
       "${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure, material degradation, or sensitive-data exposure is confirmed or remains plausibly unverified. A mechanism found at an unchanged background rate (rate-flat inconclusive) is verified as not newly elevated — it is not "plausibly unverified" and must not create a new event;
-      "${ALERT_EPISODE_STATUS.RECOVERING}" = derived, never set by a caller: entered when every member rule was last judged healthy. It stays until a breach in any member returns it to "${ALERT_EPISODE_STATUS.ACTIVE}" in the same episode, an operator deactivates it, or its rule is deleted;
-      "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active: every confirming signal on it has been re-checked and cleared. A healthy result from one rule never closes signals it did not check; while any confirming signal on the event is unresolved, it stays "${ALERT_EPISODE_STATUS.ACTIVE}". Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
+      "${ALERT_EPISODE_STATUS.RECOVERING}" = derived, never set by a caller: entered when every member rule was last judged healthy, from "active" only: an event is never opened "recovering". It stays until a breach in any member returns it to "${ALERT_EPISODE_STATUS.ACTIVE}" in the same episode, an operator deactivates it, or its rule is deleted;
+      "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active: every confirming signal on it has been re-checked and cleared; an event is never opened "${ALERT_EPISODE_STATUS.INACTIVE}" or "${ALERT_EPISODE_STATUS.RECOVERING}". A healthy result from one rule never closes signals it did not check; while any confirming signal on the event is unresolved, it stays "${ALERT_EPISODE_STATUS.ACTIVE}". Record the recovery, false-alarm, benign-change, or other assessment rationale in "assessment_note".
     `)
 );
 
@@ -52,44 +68,27 @@ export const significantEventManualStatusSchema = z
     `"${ALERT_EPISODE_STATUS.ACTIVE}" = a current failure is confirmed or remains plausibly unverified; "${ALERT_EPISODE_STATUS.INACTIVE}" = the event is no longer active (record the rationale in "assessment_note").`
   );
 
+export const significantEventCloseReasonSchema = lazySchema(() =>
+  z
+    .enum(['resolved', 'dismissed'])
+    .describe(
+      `Why the event is set to "${ALERT_EPISODE_STATUS.INACTIVE}": "resolved" = it was a real problem that is over; "dismissed" = it was noise or not worth surfacing. Ignored for "${ALERT_EPISODE_STATUS.ACTIVE}".`
+    )
+);
+
+export type SignificantEventCloseReason = z.infer<typeof significantEventCloseReasonSchema>;
+
 /**
  * Statuses that represent an unresolved / ongoing event. Deduplication uses this set to find a
  * prior event for the same issue so successive write cycles dedup against it — a recovering event
  * is still the live episode, so a re-firing rule continues it instead of creating a duplicate. An
- * inactive issue that recurs should create a fresh event.
+ * inactive series is not live: it is reopened only when a batch matches its identity exactly, which
+ * starts a new episode under the same event_id.
  */
 export const SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS = [
   ALERT_EPISODE_STATUS.ACTIVE,
   ALERT_EPISODE_STATUS.RECOVERING,
 ] as const;
-
-/**
- * One investigation run attached to this significant event.
- * `workflow_execution_id` holds the investigation id, which is its Agent Builder conversation id;
- * the shared investigations API (`GET /internal/investigations/investigations/{id}`) is the
- * single source of truth for the investigation's content, so this entry intentionally carries no
- * status of its own. Entries written before investigations were conversations hold a workflow
- * execution id, which that API does not know. The field keeps its name so stored events stay
- * valid.
- */
-export const significantEventInvestigationSchema = lazySchema(() =>
-  z.object({
-    workflow_execution_id: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .describe('ID of the investigation (its Agent Builder conversation id).'),
-    started_at: isoDateTime({ offset: true }).describe('When this investigation run started.'),
-    completed_at: isoDateTime({ offset: true })
-      .optional()
-      .describe(
-        'When this investigation run finished. Absent while the investigation is still running.'
-      ),
-  })
-);
-export type SignificantEventInvestigation = z.infer<typeof significantEventInvestigationSchema>;
-
-/** Status of a significant event's investigation, as the significant events API reports it. */
-export type InvestigationRunStatus = 'pending' | 'complete' | 'failed' | 'unavailable';
 
 export const significantEventSchema = lazySchema(() =>
   significantEventBaseSchema.extend({
@@ -101,14 +100,13 @@ export const significantEventSchema = lazySchema(() =>
       .optional()
       .describe(
         dedent`
-        Concise rationale for this assessment. Max ${MAX_ASSESSMENT_NOTE_LENGTH} chars.
+        Rationale for this assessment: why this severity, what was ruled out, and why this confidence.
         ${ASSESSMENT_NOTE_ROLE_RULE}
-        Record the reasoning, ambiguity, or caveat that is not already in the title, symptom_hypothesis, summary, or signal descriptions. Do not restate the observed condition, error signature, impact, query steps, or detection artifacts.
+        Good: "High: checkout fails 18.5% of attempts and the ledger write path is blocked, meeting the high condition. Payment retries were ruled out; breadth across regions is unmeasured. Confidence is 70.0% because the mechanism is corroborated by one source." Bad: "Draft: the error shows connection refused... let me revise: summarizing the logs again."
 
         ${NO_RAW_SENSITIVE_VALUES_RULE}
         `
       ),
-    investigations: z.array(significantEventInvestigationSchema).max(100).optional(),
   })
 );
 
@@ -121,4 +119,13 @@ export type SignificantEvent = z.infer<typeof significantEventSchema>;
  */
 export interface SignificantEventResponse extends SignificantEvent {
   created_at: string;
+  /** The `alert.id` of the series' latest version: the episode an operator deactivation addresses. */
+  episode_id?: string;
+  /**
+   * Where the investigation of this event's alert stands, set by the events list. `unknown` means
+   * the lookup failed, not that there is no investigation.
+   */
+  investigation_state?: 'not_started' | 'in_progress' | 'completed' | 'unknown';
+  /** The investigation `investigation_state` refers to, when the list resolved one. */
+  investigation_id?: string;
 }

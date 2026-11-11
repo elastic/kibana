@@ -21,7 +21,7 @@ const checkLicense: CheckLicense = (license) => {
   if (!license.isAvailable) {
     return {
       valid: false,
-      message: i18n.translate('plugins.workflowsManagement.checkLicense.unavailable', {
+      message: i18n.translate('workflows.checkLicense.unavailable', {
         defaultMessage: 'License information is not available.',
       }),
     };
@@ -29,7 +29,7 @@ const checkLicense: CheckLicense = (license) => {
   if (!license.isActive) {
     return {
       valid: false,
-      message: i18n.translate('plugins.workflowsManagement.checkLicense.inactive', {
+      message: i18n.translate('workflows.checkLicense.inactive', {
         defaultMessage: 'License is expired. Please renew your license.',
       }),
     };
@@ -38,7 +38,7 @@ const checkLicense: CheckLicense = (license) => {
   if (!isLicenseValid(license)) {
     return {
       valid: false,
-      message: i18n.translate('plugins.workflowsManagement.checkLicense.invalidLicense', {
+      message: i18n.translate('workflows.checkLicense.invalidLicense', {
         defaultMessage:
           'Your {licenseType} license does not support Workflows. Please upgrade to an {requiredLicenseType} license.',
         values: { licenseType: license.type, requiredLicenseType: REQUIRED_LICENSE_TYPE },

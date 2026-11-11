@@ -8,6 +8,7 @@
 import {
   ALERT_ACTION_NO_OP_CODE,
   INVALID_ALERT_STATE_TRANSITION_CODE,
+  RULE_NOT_FOUND_CODE,
 } from '@kbn/alerting-v2-schemas';
 
 /**
@@ -29,7 +30,7 @@ import {
 export const ALERTING_ERROR_CODES = {
   // ────────────────────────── Rules ──────────────────────────
   /** A rule with the given identifier does not exist. */
-  RULE_NOT_FOUND: 'RULE_NOT_FOUND',
+  RULE_NOT_FOUND: RULE_NOT_FOUND_CODE,
   /** A rule with the given identifier already exists. */
   RULE_ALREADY_EXISTS: 'RULE_ALREADY_EXISTS',
   /** A rule was modified by another writer since it was loaded. */
@@ -136,14 +137,25 @@ export const ALERTING_ERROR_CODES = {
    * dispatcher, so create / update / upsert / API key rotation are rejected.
    */
   ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED: 'ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED',
+  /** A test notification targeted workflows that are not destinations of the action policy. */
+  ACTION_POLICY_TEST_INVALID_DESTINATIONS: 'ACTION_POLICY_TEST_INVALID_DESTINATIONS',
 
   // ──────────────────────── Alert actions ────────────────────
-  /** No alert event matched the supplied `group_hash` (and `alert_id`). */
+  /**
+   * The supplied `series_id` is not a well-formed series identifier: not
+   * base64url, an unsupported version or an unparseable payload.
+   */
+  INVALID_SERIES_ID: 'INVALID_SERIES_ID',
+  /**
+   * No alert event matched the supplied `series_id` in the request's space
+   * (this includes a series id minted for another space).
+   */
   ALERT_EVENT_NOT_FOUND: 'ALERT_EVENT_NOT_FOUND',
   /**
-   * No alert event matched the supplied `group_hash`. Bulk-only refinement of
-   * `ALERT_EVENT_NOT_FOUND` that pins the miss to the group (rather than a
-   * superseded episode) so a client can tell the two apart per item.
+   * No alert event matched the supplied `series_id` in the request's space.
+   * Bulk-only refinement of `ALERT_EVENT_NOT_FOUND` that pins the miss to the
+   * series (rather than a superseded episode) so a client can tell the two
+   * apart per item.
    */
   ALERT_GROUP_NOT_FOUND: 'ALERT_GROUP_NOT_FOUND',
   /**
@@ -202,10 +214,11 @@ export type AlertingV2ErrorCode = (typeof ALERTING_ERROR_CODES)[keyof typeof ALE
  * Naming convention: `<DOMAIN>_<WHAT_HAPPENED>`.
  *
  * The domain matches the subsystem that owns the failure, so an operator can
- * filter a whole area with a prefix: `RULE_*` (rule executor / rules client),
- * `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*`, `EXECUTION_HISTORY_*`, `EVENTS_*`,
- * `STORAGE_*`, `QUERY_*`, `RESOURCES_*`, `MAINTENANCE_WINDOW_*`,
- * `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`, `TASKS_*`.
+ * filter a whole area with a prefix: `ROUTES_*`, `RULE_*` (rule executor /
+ * rules client), `DIRECTOR_*`, `DISPATCH_*`, `POLICY_*` / `ACTION_POLICY_*`,
+ * `EXECUTION_HISTORY_*`, `EVENTS_*`, `STORAGE_*`, `QUERY_*`, `RESOURCES_*`,
+ * `RETRY_*`, `MAINTENANCE_WINDOW_*`, `SAVED_OBJECTS_*`, `AGENT_BUILDER_*`,
+ * `TASKS_*`, `TELEMETRY_*`.
  *
  * The suffix encodes the outcome, from a closed vocabulary:
  * - `warn` (degraded but continued): `_FAILED`, `_SKIPPED`, `_TIMED_OUT`,
@@ -324,6 +337,19 @@ export const ALERTING_LOG_CODES = {
   EVENTS_RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILED:
     'EVENTS_RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILED',
   /**
+   * The alert-status-changed → workflow subscriber failed to emit the
+   * `alerting.alertStatusChanged` workflow event. The status change is already
+   * persisted; only the workflow fan-out for this change was lost.
+   */
+  EVENTS_ALERT_STATUS_CHANGED_WORKFLOW_SUBSCRIBER_FAILED:
+    'EVENTS_ALERT_STATUS_CHANGED_WORKFLOW_SUBSCRIBER_FAILED',
+  /**
+   * The alert events client stored an alert event but failed to publish its
+   * status change. The write already succeeded; only the workflow fan-out for
+   * this change was lost.
+   */
+  EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED: 'EVENTS_ALERT_STATUS_CHANGED_PUBLISH_FAILED',
+  /**
    * The rule-changes-history subscriber failed to record a change entry for a
    * rule domain event. The rule operation itself already succeeded; only the
    * audit entry for this change was lost.
@@ -341,6 +367,26 @@ export const ALERTING_LOG_CODES = {
    * the action-type vocabulary grows ahead of the publisher's mapping.
    */
   EVENTS_ALERT_ACTION_TYPE_UNMAPPED: 'EVENTS_ALERT_ACTION_TYPE_UNMAPPED',
+  /**
+   * An integration's `alerting.alertStatusChanged` opt-in check threw. It is
+   * treated as disabled and the remaining opt-ins are still asked; the rule
+   * run or alert write is unaffected.
+   */
+  EVENTS_ALERT_STATUS_CHANGED_OPT_IN_FAILED: 'EVENTS_ALERT_STATUS_CHANGED_OPT_IN_FAILED',
+  /**
+   * The action policy client could not read the policies around a bulk write
+   * or a bulk delete. The write already succeeded; its domain events are
+   * published with the policy ids only, so subscribers receive no policy fields.
+   */
+  EVENTS_ACTION_POLICY_READ_FAILED: 'EVENTS_ACTION_POLICY_READ_FAILED',
+
+  // ───────────────────── Event-based telemetry (EBT) ─────────────────────
+  /**
+   * Core analytics refused an EBT event: the event type was not registered or,
+   * in dev mode, the payload did not match its schema. The operation that
+   * produced the event already succeeded; only the telemetry event was lost.
+   */
+  TELEMETRY_EBT_REPORT_FAILED: 'TELEMETRY_EBT_REPORT_FAILED',
 
   // ──────────────────────────── Dispatcher ───────────────────────────
   /**
@@ -361,6 +407,21 @@ export const ALERTING_LOG_CODES = {
   DISPATCH_WORKFLOW_DISABLED: 'DISPATCH_WORKFLOW_DISABLED',
   /** Scheduling a workflow execution for a dispatch group failed. */
   DISPATCH_WORKFLOW_SCHEDULE_FAILED: 'DISPATCH_WORKFLOW_SCHEDULE_FAILED',
+  /**
+   * Writing the `.alert-actions` records of a dispatch commit failed (the
+   * request threw, or Elasticsearch rejected every record), so scheduling
+   * stopped and the tick halts `commit_failed` with the watermark held. The
+   * groups of that commit were dispatched but not recorded, and the next tick
+   * dispatches them again.
+   */
+  DISPATCH_COMMIT_FAILED: 'DISPATCH_COMMIT_FAILED',
+  /**
+   * Elasticsearch rejected some, but not all, records of a dispatch commit;
+   * scheduling continues. Their series are
+   * fetched again on the next tick, and a group whose `notified` record was
+   * rejected can be dispatched again.
+   */
+  DISPATCH_COMMIT_DEGRADED: 'DISPATCH_COMMIT_DEGRADED',
   /**
    * The cluster license does not allow action policies. Alert actions are still
    * recorded, but no workflow is scheduled until the license is upgraded.
@@ -390,15 +451,10 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCH_POLICY_LOOKUP_FAILED: 'DISPATCH_POLICY_LOOKUP_FAILED',
   /**
-   * The dispatcher has no persisted event watermark (cold start or wiped task
-   * state). The first scan starts from `startedAt − OVERLAP_WINDOW_MINUTES`.
-   * Rule events older than that will not be dispatched.
-   */
-  DISPATCHER_COLD_START: 'DISPATCHER_COLD_START',
-  /**
-   * The self-imposed tick deadline (TICK_DEADLINE_MS) fired before the pipeline
-   * completed. The pipeline was aborted cooperatively; the returned watermark is
-   * safe. This is expected under sustained high load — it is not an error.
+   * The self-imposed tick deadline (15s before
+   * `xpack.alerting_v2.dispatcher.run.timeout`) fired before the pipeline
+   * completed. The pipeline was aborted cooperatively; the returned watermark
+   * is safe. This is expected under sustained high load — it is not an error.
    */
   DISPATCHER_TICK_DEADLINE_EXCEEDED: 'DISPATCHER_TICK_DEADLINE_EXCEEDED',
   /**
@@ -444,6 +500,14 @@ export const ALERTING_LOG_CODES = {
    * the dispatcher README for the recovery timeline.
    */
   DISPATCHER_INLINE_STATS_TOO_LARGE: 'DISPATCHER_INLINE_STATS_TOO_LARGE',
+  /**
+   * `xpack.alerting_v2.dispatcher.paused` is true: every dispatcher tick is a
+   * no-op and the watermark is held, so no alerting v2 notification is sent.
+   * The backlog is dispatched late once the setting is removed, except events
+   * older than the cold-start seed when no watermark was persisted yet.
+   * Logged once per Kibana start; remove the override after the incident.
+   */
+  DISPATCHER_PAUSED: 'DISPATCHER_PAUSED',
 
   // ────────────────────────────── Director ───────────────────────────
   /**
@@ -477,6 +541,11 @@ export const ALERTING_LOG_CODES = {
    * valid until an operator revokes it.
    */
   POLICY_API_KEY_LOOKUP_FAILED: 'POLICY_API_KEY_LOOKUP_FAILED',
+  /**
+   * A workflow test run of a test notification could not be started. The error is returned to the
+   * caller for that destination; the other destinations still run.
+   */
+  ACTION_POLICY_TEST_RUN_FAILED: 'ACTION_POLICY_TEST_RUN_FAILED',
 
   // ─────────────────────────── Rule executor ─────────────────────────
   /**
@@ -500,6 +569,13 @@ export const ALERTING_LOG_CODES = {
    * failed. The rule run itself already completed.
    */
   RULE_EXECUTION_EVENT_PUBLISH_FAILED: 'RULE_EXECUTION_EVENT_PUBLISH_FAILED',
+  /**
+   * Publishing the alert status changes of a stored batch failed. The batch
+   * is already stored and the run continues; only the workflow fan-out for
+   * those changes was lost.
+   */
+  RULE_EXECUTION_ALERT_STATUS_CHANGES_PUBLISH_FAILED:
+    'RULE_EXECUTION_ALERT_STATUS_CHANGES_PUBLISH_FAILED',
   /** A run hit `maxGroupsPerExecution`; groups past the cap were dropped. */
   RULE_EXECUTION_MAX_GROUPS_EXCEEDED: 'RULE_EXECUTION_MAX_GROUPS_EXCEEDED',
   /**
@@ -514,10 +590,20 @@ export const ALERTING_LOG_CODES = {
 
   // ──────────────────────────── Rules client ─────────────────────────
   /**
-   * A rule saved object was persisted but its paired Task Manager call
-   * failed, leaving the rule's task state diverged from its saved object.
+   * A rule's Task Manager task state diverged from its saved object and was
+   * not repaired: removing an executor task failed, so the task may outlive
+   * its rule or its disabled state. The executor halts such a task on each run,
+   * and the caller is not told. Failed schedule attempts are not drift: see
+   * `RULE_TASK_SCHEDULE_FAILED`.
    */
   RULE_TASK_MANAGER_DRIFT: 'RULE_TASK_MANAGER_DRIFT',
+  /**
+   * Scheduling the executor task of a rule failed during a bulk create or a
+   * bulk enable. The change was backed out (a created rule is rolled back, an
+   * enabled rule stays disabled) and the caller gets a per-rule error, so rule
+   * and task state stay consistent. This is a failed operation, not drift.
+   */
+  RULE_TASK_SCHEDULE_FAILED: 'RULE_TASK_SCHEDULE_FAILED',
   /**
    * A bulk executor-task API key rotation call (`bulkUpdateSchedules`) failed
    * for one or more rules — e.g. the per-task-type key grant was rejected. The
@@ -554,6 +640,15 @@ export const ALERTING_LOG_CODES = {
    */
   RESOURCES_BOOTSTRAP_FAILED: 'RESOURCES_BOOTSTRAP_FAILED',
 
+  // ──────────────────────────────── Retries ──────────────────────────
+  /**
+   * An Elasticsearch call failed with a transient error (connection, timeout,
+   * retryable status, unacknowledged mutation, concurrent modification) and is
+   * about to be retried. Emitted under the calling subsystem's `log.logger`;
+   * the final failure, if any, is logged by the caller with its own code.
+   */
+  RETRY_ATTEMPT_FAILED: 'RETRY_ATTEMPT_FAILED',
+
   // ─────────────────────────── Saved objects ─────────────────────────
   /**
    * A saved object (or encrypted saved object) type failed to register at
@@ -582,6 +677,11 @@ export const ALERTING_LOG_CODES = {
    * page; get maps it to not-found. Operator should investigate package drift.
    */
   RULE_TEMPLATE_VALIDATION_FAILED: 'RULE_TEMPLATE_VALIDATION_FAILED',
+  /**
+   * Counting the rules created from each listed template failed. Find returns the
+   * templates without `rule_count` instead of failing the whole listing.
+   */
+  RULE_TEMPLATE_RULE_COUNT_FAILED: 'RULE_TEMPLATE_RULE_COUNT_FAILED',
 
   // ─────────────────────────── Agent Builder ─────────────────────────
   /** `refresh_alert` failed; tool returns an error result. */
@@ -607,6 +707,10 @@ export const ALERTING_LOG_CODES = {
     'AGENT_BUILDER_ACTION_POLICY_STALENESS_CHECK_FAILED',
   /** `manage_rule` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
+  /** `attach_rule` tool failed; returns an error result. */
+  AGENT_BUILDER_ATTACH_RULE_FAILED: 'AGENT_BUILDER_ATTACH_RULE_FAILED',
+  /** `attach_action_policy` tool failed; returns an error result. */
+  AGENT_BUILDER_ATTACH_ACTION_POLICY_FAILED: 'AGENT_BUILDER_ATTACH_ACTION_POLICY_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
   /** Workflow validation service call failed while checking a destination workflow; diagnostics for that destination are skipped. */
@@ -626,6 +730,13 @@ export const ALERTING_LOG_CODES = {
    * until the next restart. The task type is carried in `labels.task_id`.
    */
   TASKS_SCHEDULE_FAILED: 'TASKS_SCHEDULE_FAILED',
+  /**
+   * A background task that could not be removed.
+   * if the task exists from an earlier start it
+   * keeps running until the next removal attempt.
+   * The task type is carried in `labels.task_id`.
+   */
+  TASKS_REMOVE_FAILED: 'TASKS_REMOVE_FAILED',
   /**
    * The pending API-key invalidation background task run failed. Keys queued
    * for invalidation remain until the next scheduled run.

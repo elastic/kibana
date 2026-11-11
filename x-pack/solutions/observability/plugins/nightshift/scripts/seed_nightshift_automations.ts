@@ -96,7 +96,7 @@ const AUTOMATIONS: SeedAutomation[] = [
     trigger: { kind: 'slack', event: 'message', channels: ['#nightshift'] },
     completions: [THREAD_REPLY],
     tags: [],
-    author: 'Nightshift',
+    author: 'nightshift',
     enabled: true,
     limit: 50,
     runs48h: 2,
@@ -107,7 +107,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   },
   {
     name: 'Daily Report - Active Usage',
-    trigger: { kind: 'schedule', schedulePreset: 'daily', cronExpression: '0 9 * * *' },
+    trigger: { kind: 'schedule', schedulePreset: 'daily', time: '09:00' },
     completions: [{ action: 'post_to_slack', targetMode: 'self', destination: '@emily.clarke' }],
     tags: ['reporting', 'leadership'],
     author: 'Emily Clarke',
@@ -121,7 +121,7 @@ const AUTOMATIONS: SeedAutomation[] = [
   },
   {
     name: 'Product usage by channel and customers',
-    trigger: { kind: 'schedule', schedulePreset: 'daily', cronExpression: '0 9 * * *' },
+    trigger: { kind: 'schedule', schedulePreset: 'daily', time: '09:00' },
     tags: ['reporting', 'product'],
     author: 'Daniel Hughes',
     enabled: false,
@@ -274,7 +274,13 @@ run(
             tags: automation.tags,
             isEnabled: enabled,
             trigger: { rows: [automation.trigger] },
-            execution: {},
+            execution:
+              automation.trigger.kind === 'schedule'
+                ? {
+                    promptTemplate:
+                      'Review the last 24 hours of telemetry and summarize errors, latency changes and affected services.',
+                  }
+                : {},
             completions: automation.completions ?? [],
             runtime: { dailyDispatchLimit: limit },
           },

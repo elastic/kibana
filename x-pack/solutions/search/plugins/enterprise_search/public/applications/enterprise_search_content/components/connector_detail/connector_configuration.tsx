@@ -22,7 +22,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorConfigurationComponent } from '@kbn/search-connectors/components';
 
 import { Status } from '../../../../../common/types/api';
 import { docLinks } from '../../../shared/doc_links';

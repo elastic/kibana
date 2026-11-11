@@ -7,7 +7,7 @@
 
 import { LENS_DATASOURCE_ID, getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
 
-import type { MiddlewareAPI } from 'redux-toolkit-v1';
+import type { MiddlewareAPI } from '@reduxjs/toolkit';
 import { i18n } from '@kbn/i18n';
 import type { History } from 'history';
 import type { ProjectRouting } from '@kbn/es-query';
@@ -295,7 +295,8 @@ async function loadFromSavedObject(
     {
       visualizationState: docVisualizationState,
       datasourceStates: docDatasourceStates,
-      references: [...doc.references, ...(doc.state.internalReferences || [])],
+      references: doc.references,
+      internalReferences: doc.state.internalReferences,
       adHocDataViews: doc.state.adHocDataViews,
       ...loaderSharedArgs,
       projectRouting,

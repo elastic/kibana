@@ -9,7 +9,8 @@ import { getCredentialWithAuth } from '../../../../lib/get_axios_instance';
 import { isSystemAction } from '../../../../lib/is_system_action';
 import type { ActionsClientContext } from '../../../../actions_client';
 import { getConnectorAuth } from '../../lib/get_connector_auth';
-import { isSandboxCapableConnector } from '../../lib/is_sandbox_capable_connector';
+import { hasSandboxCapableAuth } from '../../lib/is_sandbox_capable_connector';
+import { getConnectorSandboxHosts } from '../../lib/get_connector_sandbox_hosts';
 import type { GetSandboxCredentialsOptions, ResolvedSandboxCredentials } from './types';
 
 const getSelectedAuthTypeId = (secrets: Record<string, unknown>): string | undefined => {
@@ -47,7 +48,7 @@ export async function getSandboxCredentials(
   }
 
   if (
-    !isSandboxCapableConnector({
+    !hasSandboxCapableAuth({
       actionTypeId,
       config,
       secrets: validatedSecrets,
@@ -62,6 +63,20 @@ export async function getSandboxCredentials(
     );
   }
 
+  // Fail closed: the credential proxy sends a secret with no hosts to any host.
+  const hosts = getConnectorSandboxHosts({
+    actionType,
+    config,
+    connectorId,
+    logger: context.logger,
+  });
+  if (hosts.length === 0) {
+    throw new Error(
+      `Unable to get sandbox credentials for connector "${connectorId}" (${actionTypeId}): it has no valid sandbox hosts. ` +
+        `Sandbox hosts must be hostnames made of lowercase letters, digits, "." and "-"; IPv6 addresses and names with "_" are not supported.`
+    );
+  }
+
   const configurationUtilities = context.actionTypeRegistry.getUtils();
   const getCredential = getCredentialWithAuth({
     authTypeRegistry: context.authTypeRegistry,
@@ -73,6 +88,7 @@ export async function getSandboxCredentials(
   // headers through the optional getSandboxAuthHeaders hook, which wins on conflict.
   const authHeaders = await getCredential({
     connectorId,
+    connectorTypeId: actionTypeId,
     secrets: validatedSecrets,
     connectorTokenClient: context.connectorTokenClient,
     authMode,
@@ -96,5 +112,6 @@ export async function getSandboxCredentials(
     actionTypeId,
     config,
     headers,
+    hosts,
   };
 }

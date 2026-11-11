@@ -7,14 +7,19 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiSelectableProps, FilterChecked } from '@elastic/eui';
-import { EuiButton, EuiFilterButton, EuiPopover, EuiSelectable, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFilterButton,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiSelectable,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useBoolState } from '../../../common/hooks/use_bool_state';
-import { WatchlistsFlyoutKey } from '../../../flyout/entity_details/shared/constants';
 import { useWatchlistsPrivileges } from '../../api/hooks/use_watchlists_privileges';
+import { useWatchlistFlyout } from '../watchlists/flyout/use_watchlist_flyout';
 
 const LIST_MAX_HEIGHT = 128;
 const POPOVER_WIDTH = 220;
@@ -50,7 +55,7 @@ export const EntityFiltersBarWatchlist: React.FC<EntityFiltersBarWatchlistProps>
   spaceId,
 }) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
-  const { openFlyout } = useExpandableFlyoutApi();
+  const { openCreate, flyout } = useWatchlistFlyout(spaceId);
   const {
     data: watchlistPrivileges,
     error: watchlistPrivilegesError,
@@ -81,76 +86,70 @@ export const EntityFiltersBarWatchlist: React.FC<EntityFiltersBarWatchlistProps>
 
   const openCreateWatchlistFlyout = useCallback(() => {
     closePopover();
-    openFlyout({
-      right: {
-        id: WatchlistsFlyoutKey,
-        params: {
-          mode: 'create',
-          spaceId,
-        },
-      },
-    });
-  }, [closePopover, openFlyout, spaceId]);
+    openCreate();
+  }, [closePopover, openCreate]);
 
   return (
-    <EuiPopover
-      aria-label={title}
-      data-test-subj="entityFiltersBarWatchlist"
-      button={
-        <EuiFilterButton
-          data-test-subj="entityFiltersBarWatchlist-popoverButton"
-          iconType="chevronSingleDown"
-          grow={false}
-          numFilters={items.length}
-          numActiveFilters={selectedItems.length}
-          hasActiveFilters={selectedItems.length > 0}
-          isSelected={isPopoverOpen}
-          disabled={disabled}
-          onClick={togglePopover}
-        >
-          {title}
-        </EuiFilterButton>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="s"
-      repositionOnScroll
-    >
-      <EuiSelectable
-        data-test-subj="entityFiltersBarWatchlist-item"
-        onChange={onChange}
-        options={options}
-        renderOption={({ originalItem }) => renderItem(originalItem)}
-        listProps={{ isVirtualized: false }}
+    <>
+      <EuiPopover
+        aria-label={title}
+        data-test-subj="entityFiltersBarWatchlist"
+        button={
+          <EuiFilterButton
+            data-test-subj="entityFiltersBarWatchlist-popoverButton"
+            iconType="chevronSingleDown"
+            grow={false}
+            numFilters={items.length}
+            numActiveFilters={selectedItems.length}
+            hasActiveFilters={selectedItems.length > 0}
+            isSelected={isPopoverOpen}
+            disabled={disabled}
+            onClick={togglePopover}
+          >
+            {title}
+          </EuiFilterButton>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="s"
+        repositionOnScroll
       >
-        {(list) => (
-          <div style={{ width: POPOVER_WIDTH }}>
-            <div
-              css={css`
-                max-block-size: ${LIST_MAX_HEIGHT}px;
-                overflow-y: auto;
-              `}
-            >
-              {list}
+        <EuiSelectable
+          data-test-subj="entityFiltersBarWatchlist-item"
+          onChange={onChange}
+          options={options}
+          renderOption={({ originalItem }) => renderItem(originalItem)}
+          listProps={{ isVirtualized: false }}
+        >
+          {(list) => (
+            <div style={{ width: POPOVER_WIDTH }}>
+              <div
+                css={css`
+                  max-block-size: ${LIST_MAX_HEIGHT}px;
+                  overflow-y: auto;
+                `}
+              >
+                {list}
+              </div>
+              <EuiHorizontalRule margin="s" />
+              <EuiButton
+                fullWidth
+                iconType="plusCircle"
+                aria-label={CREATE_WATCHLIST_LABEL}
+                data-test-subj="entityFiltersBarCreateWatchlist"
+                isDisabled={!canCreateWatchlist}
+                onClick={openCreateWatchlistFlyout}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.entityAnalytics.home.filter.watchlist.createButtonLabel"
+                  defaultMessage="Create watchlist"
+                />
+              </EuiButton>
             </div>
-            <EuiSpacer size="s" />
-            <EuiButton
-              fill
-              fullWidth
-              iconType="plusInCircle"
-              aria-label={CREATE_WATCHLIST_LABEL}
-              data-test-subj="entityFiltersBarCreateWatchlist"
-              isDisabled={!canCreateWatchlist}
-              onClick={openCreateWatchlistFlyout}
-            >
-              <FormattedMessage
-                id="xpack.securitySolution.entityAnalytics.home.filter.watchlist.createButtonLabel"
-                defaultMessage="Create watchlist"
-              />
-            </EuiButton>
-          </div>
-        )}
-      </EuiSelectable>
-    </EuiPopover>
+          )}
+        </EuiSelectable>
+      </EuiPopover>
+      {flyout}
+    </>
   );
 };

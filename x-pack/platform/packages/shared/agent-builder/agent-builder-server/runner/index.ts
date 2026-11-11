@@ -23,13 +23,18 @@ export type {
   RunToolParams,
   RequestBoundRunToolParams,
   RunToolReturn,
+  DynamicToolRunReturn,
 } from './runner';
+export { isDynamicToolRunReturn } from './runner';
 export { getAgentFromRunContext } from './run_context_utils';
 export {
   type AgentBuilderToolEvent,
   type ToolEventHandlerFn,
   type ToolEventEmitter,
   type InternalToolProgressEvent,
+  type DynamicToolEvent,
+  isDynamicToolEvent,
+  toDynamicToolEvent,
 } from './events';
 export type {
   ToolProvider,
@@ -66,8 +71,6 @@ export type {
   AuthorizationInfo,
 } from './prompt_manager';
 export type { ConversationStateManager, ToolStateManager } from './state_manager';
-export type { TodoStateManager } from './todo_state_manager';
-export { createTodoStateManager } from './todo_state_manager';
 export { FileEntryType } from './filestore';
 export type {
   FsEntry,

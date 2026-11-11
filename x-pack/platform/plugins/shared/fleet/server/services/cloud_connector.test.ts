@@ -107,6 +107,28 @@ describe('CloudConnectorService', () => {
       },
     };
 
+    it('creates the saved object under the given id when one is passed', async () => {
+      jest
+        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
+        .mockResolvedValue(true);
+      mockSoClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 10000,
+      });
+      mockSoClient.create.mockResolvedValue({ ...mockSavedObject, id: 'given-id' });
+
+      const result = await service.create(mockSoClient, mockCreateRequest, { id: 'given-id' });
+
+      expect(mockSoClient.create).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        expect.objectContaining({ name: 'test-connector' }),
+        { id: 'given-id' }
+      );
+      expect(result.id).toBe('given-id');
+    });
+
     it('should create a cloud connector successfully with space awareness enabled', async () => {
       jest
         .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
@@ -1318,6 +1340,18 @@ describe('CloudConnectorService', () => {
       expect(mockSoClient.update).toHaveBeenCalled();
     });
 
+    it('should reject updating vars with a role_arn that is not an IAM role ARN', async () => {
+      mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
+
+      await expect(
+        service.update(mockSoClient, 'cloud-connector-123', {
+          vars: { role_arn: { value: '123456', type: 'text' as const } },
+        })
+      ).rejects.toThrow('role_arn must be an IAM role ARN');
+
+      expect(mockSoClient.update).not.toHaveBeenCalled();
+    });
+
     it('should throw error when cloud connector not found', async () => {
       const error = new Error('Saved object not found');
       mockSoClient.get.mockRejectedValue(error);
@@ -1911,6 +1945,26 @@ describe('CloudConnectorService', () => {
 
         expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
           'Package policy must contain role_arn variable'
+        );
+      });
+
+      it.each([
+        ['123456', 'not an ARN'],
+        ['arn:aws:iam::123:role/TestRole', 'a short account id'],
+        ['arn:aws:cloudformation:us-east-1:123456789012:stack/s/u', 'a stack ARN'],
+        [' arn:aws:iam::123456789012:role/TestRole', 'surrounding whitespace'],
+        ['   ', 'whitespace only'],
+      ])('should throw error when role_arn is %p (%s)', (roleArn) => {
+        const invalidRequest: CreateCloudConnectorRequest = {
+          name: 'test-connector',
+          cloudProvider: 'aws',
+          vars: {
+            role_arn: { value: roleArn, type: 'text' },
+          },
+        };
+
+        expect(() => (service as any).validateCloudConnectorDetails(invalidRequest)).toThrow(
+          'role_arn must be an IAM role ARN (arn:<partition>:iam::<account>:role/<name>)'
         );
       });
 

@@ -7,7 +7,7 @@
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../../sandbox_audit';
 import type { SandboxCallContext } from './tool_utils';
 import { writeConnectorManifest } from './connector_manifest';
 
@@ -43,14 +43,20 @@ const createRawConnector = (overrides: Record<string, unknown> = {}) => ({
   ...overrides,
 });
 
-const createSessionMock = (): jest.Mocked<Pick<SandboxSession, 'writeFiles' | 'isReset'>> => ({
+const createSessionMock = (): jest.Mocked<
+  Pick<AuditedSandboxSession, 'writeFiles' | 'mkdirs' | 'isReset'>
+> => ({
   isReset: false,
-  writeFiles: jest.fn().mockResolvedValue([{ path: '/workspace/connectors.md', success: true }]),
+  writeFiles: jest.fn(async (files: Parameters<AuditedSandboxSession['writeFiles']>[0]) =>
+    files.map(() => ({ bytes_written: 0, success: true }))
+  ),
+  mkdirs: jest.fn().mockResolvedValue([true]),
 });
 
 const createCallContext = (allowedConnectorIds: readonly string[]): SandboxCallContext => ({
   request: httpServerMock.createKibanaRequest(),
   allowedConnectorIds,
+  resolvedCredentials: new Map(),
 });
 
 const createGetActionsClient = (connectors: Array<Record<string, unknown>>) => {
@@ -63,22 +69,19 @@ const renderManifest = async ({
   allowedConnectorIds = ['connector-1'],
   connectors = [createRawConnector()],
   withActionsClient = true,
-  secretKeys = [],
 }: {
   allowedConnectorIds?: readonly string[];
   connectors?: Array<Record<string, unknown>>;
   withActionsClient?: boolean;
-  secretKeys?: readonly string[];
 } = {}) => {
   const session = createSessionMock();
   const { getActionsClient } = createGetActionsClient(connectors);
   const logger = loggingSystemMock.createLogger();
 
   await writeConnectorManifest({
-    session: session as unknown as SandboxSession,
+    session: session as unknown as AuditedSandboxSession,
     callContext: createCallContext(allowedConnectorIds),
     getActionsClient: withActionsClient ? (getActionsClient as any) : undefined,
-    secretKeys,
     logger,
   });
 
@@ -98,11 +101,57 @@ describe('writeConnectorManifest', () => {
 
   describe('file writing', () => {
     it('writes the manifest to /workspace/connectors.md', async () => {
-      const { files } = await renderManifest();
+      const { files } = await renderManifest({
+        connectors: [createRawConnector({ actionTypeId: '.webhook' })],
+      });
 
-      expect(files).toHaveLength(1);
       expect(files[0].path).toBe('/workspace/connectors.md');
       expect(files[0].content).toBeInstanceOf(Buffer);
+    });
+
+    it('writes every service guide under .connector-docs, even without connectors', async () => {
+      const { files, session } = await renderManifest({ allowedConnectorIds: [], connectors: [] });
+
+      expect(session.mkdirs).toHaveBeenCalledWith(['/workspace/.connector-docs']);
+      expect(files.map(({ path }) => path)).toEqual([
+        '/workspace/connectors.md',
+        '/workspace/.connector-docs/elastic.md',
+        '/workspace/.connector-docs/github.md',
+        '/workspace/.connector-docs/newrelic.md',
+      ]);
+      expect(files[1].content.toString('utf8')).toContain('# Elasticsearch');
+      expect(files[1].content.toString('utf8')).toContain('CONNECTOR_CONFIG_URL');
+      expect(files[2].content.toString('utf8')).toContain('# GitHub');
+      expect(files[3].content.toString('utf8')).toContain('CONNECTOR_HEADER_API_KEY');
+    });
+
+    it('throws when a guide fails to write, so the workspace is not cached as ready', async () => {
+      const session = createSessionMock();
+      session.writeFiles.mockImplementation(async (files) =>
+        files.map(({ path }) => ({ bytes_written: 0, success: !path.endsWith('/elastic.md') }))
+      );
+      const { getActionsClient } = createGetActionsClient([]);
+
+      await expect(
+        writeConnectorManifest({
+          session: session as unknown as AuditedSandboxSession,
+          callContext: createCallContext([]),
+          getActionsClient: getActionsClient as any,
+          logger: loggingSystemMock.createLogger(),
+        })
+      ).rejects.toThrow(
+        'Failed to write sandbox connector guidance: /workspace/.connector-docs/elastic.md'
+      );
+    });
+
+    it('lists every service guide, including Elasticsearch', async () => {
+      const { content } = await renderManifest();
+
+      expect(content).toContain('# Service guides');
+      expect(content).toContain('- Elasticsearch: `/workspace/.connector-docs/elastic.md`');
+      expect(content).toContain('- GitHub: `/workspace/.connector-docs/github.md`');
+      expect(content).toContain('- New Relic: `/workspace/.connector-docs/newrelic.md`');
+      expect(content).not.toContain('sentry.md');
     });
 
     it('documents the per-command credential injection contract', async () => {
@@ -111,8 +160,10 @@ describe('writeConnectorManifest', () => {
       expect(content).toContain('# Sandbox Connectors');
       expect(content).toContain('`connector_id` parameter of the bash tool');
       expect(content).toContain('CONNECTOR_CONFIG_<KEY>');
-      expect(content).toContain('CONNECTOR_SECRET_<KEY>');
+      expect(content).toContain('CONNECTOR_HEADER_<NAME>');
+      expect(content).toContain('CONNECTOR_HEADER_AUTHORIZATION');
       expect(content).toContain('env | grep ^CONNECTOR_ | cut -d= -f1');
+      expect(content).toContain('Authorization: $CONNECTOR_HEADER_AUTHORIZATION');
     });
 
     it('does not advertise an in-sandbox connector callback CLI', async () => {
@@ -154,24 +205,6 @@ describe('writeConnectorManifest', () => {
       const { content } = await renderManifest({ withActionsClient: false });
 
       expect(content).toContain('*(No connectors are assigned to this agent.)*');
-    });
-  });
-
-  describe('sandbox secrets', () => {
-    it('documents the secret_keys contract and lists every available key', async () => {
-      const { content } = await renderManifest({ secretKeys: ['GITHUB_TOKEN', 'PAGERDUTY_KEY'] });
-
-      expect(content).toContain('# Sandbox Secrets');
-      expect(content).toContain('`secret_keys` parameter of the bash tool');
-      expect(content).toContain('- `GITHUB_TOKEN`');
-      expect(content).toContain('- `PAGERDUTY_KEY`');
-    });
-
-    it('notes when no secrets are configured', async () => {
-      const { content } = await renderManifest({ secretKeys: [] });
-
-      expect(content).toContain('# Sandbox Secrets');
-      expect(content).toContain('*(No secrets are configured in this space.)*');
     });
   });
 

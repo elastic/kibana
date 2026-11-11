@@ -123,16 +123,32 @@ export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT = `${API_ROOT}/cloud_onboardin
 
 export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES = {
   CREATE_PATTERN: CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
+  LIST_PATTERN: CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT,
   INFO_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
   BY_CONNECTOR_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/connector/{connectorId}`,
   UPDATE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
   DELETE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
+  COUNTS_PATTERN: `${INTERNAL_ROOT}/cloud_onboarding_deployments/counts`,
 };
 
 // IaC Provisioner API routes
 export const IAC_PROVISIONER_API_ROUTES = {
   RENDER_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/render_template`,
+  // One-time callback records that let a launched CloudFormation stack report its role back.
+  CALLBACK_CREATE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks`,
+  // Whether a launched stack could report back to this Kibana, and why not.
+  CALLBACK_AVAILABILITY_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callback_availability`,
+  CALLBACK_INFO_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks/{callbackId}`,
+  CALLBACK_DELETE_PATTERN: `${INTERNAL_ROOT}/iac_provisioner/callbacks/{callbackId}`,
+  // Public: called by the stack's Lambda with the record's token, not by the browser.
+  CALLBACK_RECEIVE_PATTERN: `${API_ROOT}/iac_provisioner/callbacks/{callbackId}`,
 };
+
+/**
+ * Header the stack's Lambda sends the callback token in. A header rather than a query parameter,
+ * so the token never lands in a URL, and not `Authorization`, since the token is no credential.
+ */
+export const PROVISIONING_CALLBACK_TOKEN_HEADER = 'x-elastic-callback-token';
 
 // Kubernetes Manifest API routes
 export const K8S_API_ROUTES = {

@@ -29,6 +29,10 @@ export interface Investigation {
   proposalCreatedAt?: string;
   /** ISO 8601 timestamp. Set once a proposal is decided; dates the closed rows. */
   proposalDecidedAt?: string;
+  /** True when the proposal is approved and its action has not finished. Set only for a proposal. */
+  isProposalSettling?: boolean;
+  /** True when this read of the proposal shows its decision, or no decision can follow. Set only for a proposal. */
+  isDecisionShown?: boolean;
   worker_execution_ids: string[];
   watch_tier?: string;
   severity?: string;
@@ -36,6 +40,11 @@ export interface Investigation {
   /** Full list of assignee user-profile uids. Used by the interactive assignee picker in the flyout. */
   assignees: string[];
   status?: string;
+  /**
+   * The investigation's own status, on a card built from a proposal. Never the proposal's status,
+   * which `status` must not carry.
+   */
+  conversationStatus?: 'open' | 'closed';
   pendingProposalCount: number;
   recommendedAction?: RecommendedAction;
   /**

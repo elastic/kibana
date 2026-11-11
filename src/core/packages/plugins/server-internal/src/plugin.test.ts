@@ -10,6 +10,7 @@
 import { ContainerModule } from 'inversify';
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
+import { runInThisContext } from 'vm';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
@@ -26,6 +27,7 @@ import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
 import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-server';
 import { createRuntimePluginContractResolverMock } from './test_helpers';
 import { PluginWrapper } from './plugin';
+import { PluginsTelemetry } from './plugins_telemetry';
 
 import type { InstanceInfo } from './plugin_context';
 import {
@@ -87,6 +89,7 @@ let coreContext: CoreContext;
 let instanceInfo: InstanceInfo;
 let nodeInfo: NodeInfo;
 let runtimeResolver: ReturnType<typeof createRuntimePluginContractResolverMock>;
+let initialization: PromiseWithResolvers<void>;
 
 const setupDeps = coreInternalLifecycleMock.createInternalSetup();
 
@@ -99,6 +102,7 @@ beforeEach(() => {
   };
   nodeInfo = nodeServiceMock.createInternalPrebootContract();
   runtimeResolver = createRuntimePluginContractResolverMock();
+  initialization = Promise.withResolvers<void>();
   coreContext = { coreId, env, logger, configService: configService as any };
 });
 
@@ -119,7 +123,9 @@ test('`constructor` correctly initializes plugin instance', () => {
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   expect(plugin.name).toBe('some-plugin-id');
@@ -145,7 +151,9 @@ describe('`constructor` correctly sets non-external source', () => {
         manifest,
         instanceInfo,
         nodeInfo,
+        initialization,
       }),
+      initialization,
     });
   }
 
@@ -183,7 +191,9 @@ test('`setup` fails if the plugin has not been initialized', () => {
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   expect(() =>
@@ -206,7 +216,9 @@ test('`init` fails if no `plugin` initializer nor `module` is exported', async (
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -227,7 +239,9 @@ test('`init` fails if plugin initializer is not a function', async () => {
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -248,7 +262,9 @@ test('`init` fails if initializer does not return object', async () => {
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   mockPluginInitializer.mockResolvedValue(null);
@@ -271,7 +287,9 @@ test('`init` fails if object returned from initializer does not define `setup` f
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   const mockPluginInstance = { run: jest.fn() };
@@ -280,6 +298,159 @@ test('`init` fails if object returned from initializer does not define `setup` f
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Instance of plugin \\"some-plugin-id\\" does not define \\"setup\\" function."`
   );
+});
+
+describe('initialize', () => {
+  const createPlugin = () => {
+    const manifest = createPluginManifest();
+    const opaqueId = Symbol();
+    return new PluginWrapper({
+      path: 'plugin-with-initializer-path',
+      manifest,
+      opaqueId,
+      initializerContext: createPluginInitializerContext({
+        coreContext,
+        opaqueId,
+        manifest,
+        instanceInfo,
+        nodeInfo,
+        initialization,
+      }),
+      initialization,
+    });
+  };
+
+  test('`runInitialize` calls `initialize` with the start arguments and resolves the initialization', async () => {
+    const plugin = createPlugin();
+    const context = { any: 'thing' } as any;
+    const deps = { otherDep: 'value' };
+    class PluginWithInitializeMethod {
+      public readonly initializeCalls: unknown[][] = [];
+
+      setup() {
+        return {};
+      }
+
+      start() {
+        return {};
+      }
+
+      async initialize(...args: unknown[]) {
+        this.initializeCalls.push(args);
+      }
+    }
+    const instance = new PluginWithInitializeMethod();
+    mockPluginInitializer.mockResolvedValue(instance);
+
+    await plugin.init();
+    plugin.runInitialize(context, deps);
+
+    await expect(initialization.promise).resolves.toBeUndefined();
+    expect(instance.initializeCalls).toEqual([[context, deps]]);
+  });
+
+  describe('`runInitialize` when `initialize` fails', () => {
+    const cause = new Error('boom');
+
+    /**
+     * Returns the unhandled rejections Node reports while `run` executes. Jest gives tests a copy of
+     * `process` whose listeners never fire, and fails any test that leaves a rejection unhandled, so
+     * this replaces the real process's listeners with its own until `run` has finished.
+     */
+    const collectUnhandledRejections = async (run: () => Promise<void>): Promise<unknown[]> => {
+      const realProcess: NodeJS.Process = runInThisContext('process');
+      const jestListeners = realProcess.listeners('unhandledRejection');
+      const rejections: unknown[] = [];
+      realProcess.removeAllListeners('unhandledRejection');
+      realProcess.on('unhandledRejection', (reason) => rejections.push(reason));
+      try {
+        await run();
+        // Node reports unhandled rejections once the microtask queue drains, before `setImmediate` runs.
+        await new Promise((resolve) => setImmediate(resolve));
+      } finally {
+        realProcess.removeAllListeners('unhandledRejection');
+        jestListeners.forEach((listener) => realProcess.on('unhandledRejection', listener));
+      }
+      return rejections;
+    };
+
+    beforeEach(() => {
+      mockPluginInitializer.mockResolvedValue({
+        setup: jest.fn(),
+        start: jest.fn(),
+        initialize: jest.fn().mockRejectedValue(cause),
+      });
+    });
+
+    test('rejects the initialization with the original error and reports no unhandled rejection when awaited', async () => {
+      const plugin = createPlugin();
+      await plugin.init();
+
+      const rejections = await collectUnhandledRejections(async () => {
+        plugin.runInitialize({} as any, {});
+        await expect(initialization.promise).rejects.toBe(cause);
+      });
+
+      expect(rejections).toEqual([]);
+    });
+
+    test('reports exactly one unhandled rejection with the original error when nobody awaits the initialization', async () => {
+      const plugin = createPlugin();
+      await plugin.init();
+
+      const rejections = await collectUnhandledRejections(async () => {
+        plugin.runInitialize({} as any, {});
+      });
+
+      expect(rejections).toHaveLength(1);
+      expect(rejections[0]).toBe(cause);
+    });
+
+    test('reports exactly one unhandled rejection with the original error when telemetry measures the run', async () => {
+      const plugin = createPlugin();
+      const telemetry = new PluginsTelemetry();
+      await plugin.init();
+
+      const rejections = await collectUnhandledRejections(async () => {
+        plugin.runInitialize({} as any, {}, (run) => telemetry.measureInitialize(plugin, run));
+      });
+
+      expect(rejections).toHaveLength(1);
+      expect(rejections[0]).toBe(cause);
+    });
+  });
+
+  test('`runInitialize` calls `initialize` inside `wrapInitialize`', async () => {
+    const plugin = createPlugin();
+    const calls: string[] = [];
+    mockPluginInitializer.mockResolvedValue({
+      setup: jest.fn(),
+      start: jest.fn(),
+      initialize: jest.fn(async () => {
+        calls.push('initialize');
+      }),
+    });
+
+    await plugin.init();
+    plugin.runInitialize({} as any, {}, async (run) => {
+      calls.push('before');
+      await run();
+      calls.push('after');
+    });
+
+    await expect(initialization.promise).resolves.toBeUndefined();
+    expect(calls).toEqual(['before', 'initialize', 'after']);
+  });
+
+  test('`runInitialize` resolves the initialization when the plugin does not define `initialize`', async () => {
+    const plugin = createPlugin();
+    mockPluginInitializer.mockResolvedValue({ setup: jest.fn(), start: jest.fn() });
+
+    await plugin.init();
+    plugin.runInitialize({} as any, {});
+
+    await expect(initialization.promise).resolves.toBeUndefined();
+  });
 });
 
 test('`setup` initializes plugin and calls appropriate lifecycle hook', async () => {
@@ -291,12 +462,14 @@ test('`setup` initializes plugin and calls appropriate lifecycle hook', async ()
     manifest,
     instanceInfo,
     nodeInfo,
+    initialization,
   });
   const plugin = new PluginWrapper({
     path: 'plugin-with-initializer-path',
     manifest,
     opaqueId,
     initializerContext,
+    initialization,
   });
 
   const mockPluginInstance = { setup: jest.fn().mockResolvedValue({ contract: 'yes' }) };
@@ -328,7 +501,9 @@ test('`setup` initializes the plugin container module', async () => {
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   await plugin.init();
@@ -365,7 +540,9 @@ test('`start` fails if setup is not called first', () => {
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   expect(() => plugin.start({} as any, {} as any)).toThrowErrorMatchingInlineSnapshot(
@@ -386,7 +563,9 @@ test('`start` fails invoked for the `preboot` plugin', async () => {
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   const mockPluginInstance = { setup: jest.fn() };
@@ -413,7 +592,9 @@ test('`start` calls plugin.start with context and dependencies', async () => {
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
   const context = { any: 'thing' } as any;
   const deps = { otherDep: 'value' };
@@ -449,7 +630,9 @@ test("`start` resolves `startDependencies` Promise after plugin's start", async 
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
   const startContext = { any: 'thing' } as any;
   const pluginDeps = { someDep: 'value' };
@@ -495,7 +678,9 @@ test('`start` loads start dependencies into the plugin container', async () => {
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
   const setupContext = createPluginSetupContext({
     deps: coreInternalLifecycleMock.createInternalSetup(),
@@ -538,7 +723,9 @@ test('`stop` fails if plugin is not set up', async () => {
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   const mockPluginInstance = { setup: jest.fn(), stop: jest.fn() };
@@ -563,7 +750,9 @@ test('`stop` does nothing if plugin does not define `stop` function', async () =
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   mockPluginInitializer.mockResolvedValue({ setup: jest.fn() });
@@ -586,7 +775,9 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   const mockPluginInstance = { setup: jest.fn(), stop: jest.fn() };
@@ -611,7 +802,9 @@ test('`stop` cleans up the plugin container', async () => {
       manifest,
       instanceInfo,
       nodeInfo,
+      initialization,
     }),
+    initialization,
   });
 
   await plugin.init();
@@ -658,7 +851,9 @@ describe('#getConfigSchema()', () => {
         manifest,
         instanceInfo,
         nodeInfo,
+        initialization,
       }),
+      initialization,
     });
 
     expect(await plugin.getConfigDescriptor()).toBe(configDescriptor);
@@ -678,7 +873,9 @@ describe('#getConfigSchema()', () => {
         manifest,
         instanceInfo,
         nodeInfo,
+        initialization,
       }),
+      initialization,
     });
     expect(await plugin.getConfigDescriptor()).toBe(null);
   });
@@ -696,7 +893,9 @@ describe('#getConfigSchema()', () => {
         manifest,
         instanceInfo,
         nodeInfo,
+        initialization,
       }),
+      initialization,
     });
     expect(await plugin.getConfigDescriptor()).toBe(null);
   });
@@ -725,7 +924,9 @@ describe('#getConfigSchema()', () => {
         manifest,
         instanceInfo,
         nodeInfo,
+        initialization,
       }),
+      initialization,
     });
     await expect(() => plugin.getConfigDescriptor()).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Configuration schema expected to be an instance of Type"`

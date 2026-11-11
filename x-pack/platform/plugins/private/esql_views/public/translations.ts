@@ -55,6 +55,12 @@ export const translations = {
       defaultMessage: 'Actions for {viewName}',
       values: { viewName },
     }),
+  individualItemActionsDisabled: i18n.translate(
+    'xpack.esqlViews.managementPage.individualItemActionsDisabled',
+    {
+      defaultMessage: 'Individual item actions are disabled when rows are being selected.',
+    }
+  ),
   editViewButtonLabel: i18n.translate('xpack.esqlViews.managementPage.editViewButtonLabel', {
     defaultMessage: 'Edit',
   }),
@@ -138,7 +144,7 @@ export const translations = {
     defaultMessage: 'ES|QL query',
   }),
   viewQueryDescription: i18n.translate('xpack.esqlViews.managementPage.viewQueryDescription', {
-    defaultMessage: 'Write a new query, or select a recently or starred query.',
+    defaultMessage: 'Write a new query, or select a recent or starred query.',
   }),
   previewResultsTitle: i18n.translate('xpack.esqlViews.managementPage.previewResultsTitle', {
     defaultMessage: 'ES|QL query results',

@@ -19,14 +19,9 @@ import { useInvestigateAlert } from '@kbn/observability-plugin/public';
 
 export const INVESTIGATE_EPISODE_ACTION_ID = 'OBSERVABILITY_ALERTING_INVESTIGATE_EPISODE';
 
-export const isClassicAlertEpisode = (episode: AlertEpisode): boolean => {
-  const ctx = episode.source_action_context as ClassicAlertActionContext | undefined;
-  return Boolean(ctx?.alertUuid);
-};
-
 export const getAlertIdFromEpisode = (episode: AlertEpisode): string | undefined => {
   const ctx = episode.source_action_context as ClassicAlertActionContext | undefined;
-  return ctx?.alertUuid;
+  return ctx?.alertUuid ?? episode['episode.id'];
 };
 
 interface InvestigateEpisodeMenuItemProps {
@@ -116,20 +111,15 @@ export const InvestigateEpisodeMenuItem = ({
 export const createInvestigateEpisodeAction = (): EpisodeAction => ({
   id: INVESTIGATE_EPISODE_ACTION_ID,
   order: 35,
+  enforcesOwnPrivileges: false,
   isWorkflowAction: true,
   displayName: i18n.translate('xpack.observabilityAlerting.actions.investigateDisplayName', {
     defaultMessage: 'Investigate',
   }),
   iconType: 'inspect',
   supportsBulk: false,
-  isCompatible: ({ episodes }: EpisodeActionContext) => {
-    if (episodes.length !== 1) return false;
-    return isClassicAlertEpisode(episodes[0]);
-  },
-  showWhenDisabled: ({ episodes }: EpisodeActionContext) => {
-    if (episodes.length !== 1) return false;
-    return isClassicAlertEpisode(episodes[0]);
-  },
+  isCompatible: ({ episodes }: EpisodeActionContext) => episodes.length === 1,
+  showWhenDisabled: ({ episodes }: EpisodeActionContext) => episodes.length === 1,
   renderMenuItem: ({ episodes, onSuccess, closeMenu, surface }: EpisodeActionMenuItemContext) => {
     if (episodes.length !== 1) return null;
     return (

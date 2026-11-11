@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
@@ -14,7 +15,7 @@ import type {
   HasSupportedTriggers,
   HasType,
   PublishesDataLoading,
-  PublishesDataViews,
+  PublishesDataSources,
   PublishesEsql,
   PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
@@ -38,7 +39,7 @@ export type MapApi = DefaultEmbeddableApi<MapEmbeddableState> &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesDataLoading &
-  PublishesDataViews &
+  PublishesDataSources<DataView> &
   PublishesEsql &
   PublishesProjectRoutingOverrides &
   PublishesWritableTitle &

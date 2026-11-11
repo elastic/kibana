@@ -86,6 +86,8 @@ import { getDashboardPageTitle } from './dashboard_app/_dashboard_app_strings';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
 import type { FindDashboardsService } from './dashboard_client';
 import { DASHBOARD_DURATION_START_MARK } from './dashboard_api/telemetry/dashboard_duration_start_mark';
+import { dashboardSavedEventSchema } from './dashboard_api/telemetry/report_dashboard_saved';
+import { DASHBOARD_SAVED_EVENT } from './utils/telemetry_constants';
 import type { DashboardApi } from './dashboard_api/types';
 
 export interface DashboardSetupDependencies {
@@ -175,6 +177,19 @@ export class DashboardPlugin
       eventType: 'dashboard_loaded_with_data',
       schema: {},
     });
+    core.analytics.registerEventType({
+      eventType: DASHBOARD_SAVED_EVENT,
+      schema: dashboardSavedEventSchema,
+    });
+
+    // Lazy-load via @kbn/change-history-ui/telemetry to avoid pulling React UI into page-load bundle.
+    void import('@kbn/change-history-ui/telemetry')
+      .then(({ registerChangeHistoryTelemetryEvents }) => {
+        registerChangeHistoryTelemetryEvents(core.analytics);
+      })
+      .catch(() => {
+        // Telemetry registration must not break plugin setup.
+      });
 
     if (share) {
       share.url.locators.create(

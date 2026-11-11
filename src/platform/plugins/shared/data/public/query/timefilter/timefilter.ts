@@ -13,11 +13,11 @@ import moment from 'moment';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { TimeRange } from '@kbn/es-query';
 import type { RefreshInterval } from '@kbn/data-service-server';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
 import type { NowProviderInternalContract } from '../../now_provider';
 import { calculateBounds, getAbsoluteTimeRange, getTime, getRelativeTime } from '../../../common';
+import type { TimeFilterable } from '../../../common/query/timefilter/get_time';
 import type { TimeHistoryContract } from './time_history';
 import type { AutoRefreshDoneFn } from './lib/auto_refresh_loop';
 import { createAutoRefreshLoop } from './lib/auto_refresh_loop';
@@ -221,7 +221,7 @@ export class Timefilter {
    *
    * One use case is keeping different elements embedded in the same UI in sync.
    */
-  public createFilter = (indexPattern: DataView, timeRange?: TimeRange) => {
+  public createFilter = (indexPattern: TimeFilterable, timeRange?: TimeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, {
       forceNow: this.nowProvider.get(),
     });
@@ -235,7 +235,7 @@ export class Timefilter {
    *
    * @note Consumers of this function need to ensure that the ES endpoint supports datemath.
    */
-  public createRelativeFilter = (indexPattern: DataView, timeRange?: TimeRange) => {
+  public createRelativeFilter = (indexPattern: TimeFilterable, timeRange?: TimeRange) => {
     return getRelativeTime(indexPattern, timeRange ? timeRange : this._time, {
       forceNow: this.nowProvider.get(),
     });

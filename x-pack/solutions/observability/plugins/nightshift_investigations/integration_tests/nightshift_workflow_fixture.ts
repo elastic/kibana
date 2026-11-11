@@ -11,7 +11,7 @@
  * Three layers are real, which is the point: the managed YAML as shipped (read from
  * `@kbn/workflows/managed`, not a hand-written copy), the engine that compiles and drives
  * it, and every `nightshift.*` step handler with its real input/output Zod schemas. Only
- * the outermost boundary is faked — the ES/sandbox work behind `hydrateCortexWorkspace` /
+ * the outermost boundary is faked — the ES/sandbox work behind `hydrateWikiWorkspace` /
  * `hydrateMemoryWorkspace` / `hydrateDecisionTreeWorkspace`, the optimizer and
  * reinforcement-turn builders, and the agent run itself. A YAML-shape assertion cannot tell
  * whether a `${{ }}` array survives rendering, whether a settled parallel really lets the
@@ -24,6 +24,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { NIGHTSHIFT_SUPPORTED_SPACE_ID } from '@kbn/nightshift-shared';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ExecutionStatus, StepCategory } from '@kbn/workflows';
@@ -46,18 +47,18 @@ import { z } from '@kbn/zod/v4';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { AgentBuilderPluginStart, RunAgentParams } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../server/sandbox_audit';
 import type { NightshiftTelemetryClient } from '../server/telemetry';
 
-import { hydrateCortexWorkspace, runCortexOptimize } from '../server/cortex/register_cortex';
+import { hydrateWikiWorkspace, runWikiOptimize } from '../server/wiki/register_wiki';
 import { hydrateMemoryWorkspace, runMemoryOptimize } from '../server/memory/register_memory';
 import {
   hydrateDecisionTreeWorkspace,
   prepareReinforcementTurn,
 } from '../server/decision_trees/register_decision_trees';
 import { composeHydrateNotificationsStepDefinition } from '../server/step_definitions/compose_hydrate_notifications';
-import { cortexHydrateStepDefinition } from '../server/step_definitions/cortex_hydrate';
-import { cortexOptimizeStepDefinition } from '../server/step_definitions/cortex_optimize';
+import { wikiHydrateStepDefinition } from '../server/step_definitions/wiki_hydrate';
+import { wikiOptimizeStepDefinition } from '../server/step_definitions/wiki_optimize';
 import { decisionTreeHydrateStepDefinition } from '../server/step_definitions/decision_tree_hydrate';
 import { decisionTreePrepareStepDefinition } from '../server/step_definitions/decision_tree_prepare';
 import { decisionTreeReinforceStepDefinition } from '../server/step_definitions/decision_tree_reinforce';
@@ -67,13 +68,15 @@ import { memoryOptimizeStepDefinition } from '../server/step_definitions/memory_
 import { obtainSandboxStepDefinition } from '../server/step_definitions/obtain_sandbox';
 import { resolveModelStepDefinition } from '../server/step_definitions/resolve_model';
 
-jest.mock('../server/cortex/register_cortex', () => ({
-  hydrateCortexWorkspace: jest.fn(),
-  runCortexOptimize: jest.fn(),
+jest.mock('../server/wiki/register_wiki', () => ({
+  hydrateWikiWorkspace: jest.fn(),
+  runWikiOptimize: jest.fn(),
 }));
 
 jest.mock('../server/memory/register_memory', () => ({
   hydrateMemoryWorkspace: jest.fn(),
+  isMemoryOptimizeSkipped: jest.requireActual('../server/memory/register_memory')
+    .isMemoryOptimizeSkipped,
   runMemoryOptimize: jest.fn(),
 }));
 
@@ -105,8 +108,8 @@ jest.mock('@kbn/nightshift-ai', () => ({
 // from the source module in the test file would resolve the real ones instead: the `jest.mock`
 // calls above only register when this module is first loaded.
 export {
-  hydrateCortexWorkspace,
-  runCortexOptimize,
+  hydrateWikiWorkspace,
+  runWikiOptimize,
   hydrateMemoryWorkspace,
   runMemoryOptimize,
   hydrateDecisionTreeWorkspace,
@@ -124,7 +127,7 @@ export const managedYaml = (id: string): string => {
 };
 
 export interface NightshiftWorkflowFixtureOptions {
-  cortexEnabled?: boolean;
+  wikiEnabled?: boolean;
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
 }
@@ -134,8 +137,10 @@ export type AgentRun = RunAgentParams;
 
 export interface NightshiftWorkflowFixture {
   engine: WorkflowRunFixtureType;
-  sandboxStart: jest.Mocked<SandboxPluginStart>;
+  sandboxStart: jest.Mocked<NightshiftSandboxStart>;
   agentBuilder: { ensure: jest.Mock };
+  /** The saved rounds `prepare_turn` reads; none by default, so a round is a first round. */
+  setSavedRounds: (rounds: Array<{ id: string; steps: unknown[] }>) => void;
   agentRuns: AgentRun[];
   /** Makes the next agent run throw, as a broken reinforcement round would. */
   failAgentRun: (error: Error) => void;
@@ -184,8 +189,8 @@ export const memoryOptimizeSummary = {
 
 /** Defaults for the faked ES/sandbox boundary: a healthy round every test starts from. */
 const setHealthyBoundary = (): void => {
-  jest.mocked(hydrateCortexWorkspace).mockResolvedValue(undefined);
-  jest.mocked(runCortexOptimize).mockResolvedValue(undefined);
+  jest.mocked(hydrateWikiWorkspace).mockResolvedValue(undefined);
+  jest.mocked(runWikiOptimize).mockResolvedValue(undefined);
   jest.mocked(hydrateDecisionTreeWorkspace).mockResolvedValue(3);
   jest.mocked(hydrateMemoryWorkspace).mockResolvedValue({
     summary: MEMORY_SUMMARY,
@@ -194,20 +199,24 @@ const setHealthyBoundary = (): void => {
   });
   jest.mocked(runMemoryOptimize).mockResolvedValue(memoryOptimizeSummary);
   jest.mocked(prepareReinforcementTurn).mockResolvedValue({
+    skipped: false,
     message: 'reinforcement turn prompt',
     treeCount: 3,
     turnKind: 'initial_investigation',
+    openedTreeIds: [],
   });
 };
 
 export const createNightshiftWorkflowFixture = ({
-  cortexEnabled = true,
+  wikiEnabled = true,
   memoryEnabled = true,
   decisionTreesEnabled = true,
 }: NightshiftWorkflowFixtureOptions = {}): NightshiftWorkflowFixture => {
   setHealthyBoundary();
 
-  const engine = new WorkflowRunFixture();
+  // Nightshift runs in the default space only, and its step definitions and client now refuse
+  // any other one, so the harness has to drive its executions there as production does.
+  const engine = new WorkflowRunFixture({ spaceId: NIGHTSHIFT_SUPPORTED_SPACE_ID });
   const logger = loggerMock.create();
   const analytics: AnalyticsServiceSetup = coreMock.createSetup().analytics;
 
@@ -236,11 +245,11 @@ export const createNightshiftWorkflowFixture = ({
     writeFiles: jest.fn().mockResolvedValue(undefined),
     mkdirs: jest.fn().mockResolvedValue(undefined),
     readFile: jest.fn().mockResolvedValue(''),
-  } as unknown as jest.Mocked<SandboxSession>;
+  } as unknown as jest.Mocked<AuditedSandboxSession>;
   const sandboxStart = {
     getSession: jest.fn(),
     getSessionForSpace: jest.fn().mockReturnValue(sandboxSession),
-  } as unknown as jest.Mocked<SandboxPluginStart>;
+  } as unknown as jest.Mocked<NightshiftSandboxStart>;
 
   const agentRuns: AgentRun[] = [];
   let agentFailure: Error | undefined;
@@ -253,6 +262,16 @@ export const createNightshiftWorkflowFixture = ({
   });
   const ensureAgent = jest.fn().mockResolvedValue(undefined);
   const agentBuilder = { agents: { ensure: ensureAgent, runAgent } };
+  // Only `prepare_turn` gets a conversation client: the reinforce step's round loader would
+  // otherwise read these rounds instead of the hook's tool calls the assertions replay.
+  let savedRounds: Array<{ id: string; steps: unknown[] }> = [];
+  const conversationsAgentBuilder = {
+    conversations: {
+      getScopedClient: jest.fn(async () => ({
+        get: jest.fn(async (id: string) => ({ id, rounds: savedRounds })),
+      })),
+    },
+  };
   const telemetry = {
     reportSemanticMemoryMaterialized: jest.fn(),
     reportSemanticMemoryOptimized: jest.fn(),
@@ -263,11 +282,11 @@ export const createNightshiftWorkflowFixture = ({
   // the combined workflows.
   const definitions: ServerStepDefinition[] = [
     obtainSandboxStepDefinition({ getSandboxStart: () => sandboxStart, logger }),
-    cortexHydrateStepDefinition({
+    wikiHydrateStepDefinition({
       getSandboxStart: () => sandboxStart,
       analytics,
       logger,
-      isEnabled: () => cortexEnabled,
+      isEnabled: () => wikiEnabled,
     }),
     memoryMaterializeToSandboxStepDefinition({
       getSandboxStart: () => sandboxStart,
@@ -277,18 +296,19 @@ export const createNightshiftWorkflowFixture = ({
     }),
     decisionTreeHydrateStepDefinition({
       getSandboxStart: () => sandboxStart,
+      analytics,
       logger,
       isEnabled: () => decisionTreesEnabled,
     }),
     composeHydrateNotificationsStepDefinition(),
-    cortexOptimizeStepDefinition({
+    wikiOptimizeStepDefinition({
       getAgentBuilder: () => undefined,
       getInference: () => undefined,
       getSavedObjects: () => undefined,
       getUiSettings: () => undefined,
       analytics,
       logger,
-      isEnabled: () => cortexEnabled,
+      isEnabled: () => wikiEnabled,
     }),
     memoryOptimizeStepDefinition({
       getAgentBuilder: () => undefined,
@@ -300,7 +320,7 @@ export const createNightshiftWorkflowFixture = ({
       telemetry,
     }),
     decisionTreePrepareStepDefinition({
-      getTelemetryConnectorId: () => undefined,
+      getAgentBuilder: () => conversationsAgentBuilder as unknown as AgentBuilderPluginStart,
       logger,
       isEnabled: () => decisionTreesEnabled,
     }),
@@ -380,6 +400,9 @@ export const createNightshiftWorkflowFixture = ({
     engine,
     sandboxStart,
     agentBuilder: { ensure: ensureAgent },
+    setSavedRounds: (rounds) => {
+      savedRounds = rounds;
+    },
     agentRuns,
     failAgentRun: (error: Error) => {
       agentFailure = error;

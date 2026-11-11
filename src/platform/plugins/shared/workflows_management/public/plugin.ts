@@ -46,6 +46,11 @@ import type {
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
 
+/** The server config the browser gets (`exposeToBrowser`). */
+interface WorkflowsManagementPublicConfig {
+  pages: { enabled: boolean };
+}
+
 export class WorkflowsPlugin
   implements
     Plugin<
@@ -63,9 +68,11 @@ export class WorkflowsPlugin
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
+  private readonly pagesEnabled: boolean;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<WorkflowsManagementPublicConfig>) {
     this.logger = initializerContext.logger.get('WorkflowsManagement');
+    this.pagesEnabled = initializerContext.config.get().pages.enabled;
     this.appUpdater$ = new Subject<AppUpdater>();
     this.telemetryService = new TelemetryService();
     this.availabilityService = new AvailabilityService();
@@ -134,7 +141,7 @@ export class WorkflowsPlugin
   ): WorkflowsPublicPluginStart {
     // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
-    triggerSchemas.initialize(plugins.workflowsExtensions);
+    triggerSchemas.initialize(plugins.workflowsExtensions, { pagesEnabled: this.pagesEnabled });
 
     this.subscribeToWorkflowsSettingChange(core);
 
@@ -187,10 +194,10 @@ export class WorkflowsPlugin
           .then(({ failures }) => {
             if (failures.length > 0) {
               core.notifications.toasts.addWarning({
-                title: i18n.translate('workflowsManagement.disableAll.partialFailureTitle', {
+                title: i18n.translate('workflows.disableAll.partialFailureTitle', {
                   defaultMessage: 'Some workflows could not be disabled',
                 }),
-                text: i18n.translate('workflowsManagement.disableAll.partialFailureDescription', {
+                text: i18n.translate('workflows.disableAll.partialFailureDescription', {
                   defaultMessage:
                     '{count, plural, one {# workflow could} other {# workflows could}} not be disabled and may still run.',
                   values: { count: failures.length },
@@ -201,10 +208,10 @@ export class WorkflowsPlugin
           .catch((err) => {
             this.logger.error('Failed to disable all workflows on opt-out', { error: err });
             core.notifications.toasts.addDanger({
-              title: i18n.translate('workflowsManagement.disableAll.failureTitle', {
+              title: i18n.translate('workflows.disableAll.failureTitle', {
                 defaultMessage: 'Could not disable workflows',
               }),
-              text: i18n.translate('workflowsManagement.disableAll.failureDescription', {
+              text: i18n.translate('workflows.disableAll.failureDescription', {
                 defaultMessage: 'Workflows may still run. Try again.',
               }),
             });

@@ -26,8 +26,15 @@ import { sendPostAgentAction, useAuthz, useStartServices } from '../../../../../
 
 import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../../../../../../../../common/constants';
 
-export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: string }> = memo(
-  ({ agent, agentPolicyLogLevel = DEFAULT_LOG_LEVEL }) => {
+interface SelectLogLevelProps {
+  agent: Agent;
+  agentPolicyLogLevel?: string;
+  /** The log level can't be changed, for example for agentless agents */
+  isReadOnly?: boolean;
+}
+
+export const SelectLogLevel: React.FC<SelectLogLevelProps> = memo(
+  ({ agent, agentPolicyLogLevel = DEFAULT_LOG_LEVEL, isReadOnly = false }) => {
     const authz = useAuthz();
     const { notifications, docLinks } = useStartServices();
     const [isSetLevelLoading, setIsSetLevelLoading] = useState(false);
@@ -185,7 +192,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSelect
-              disabled={isSetLevelLoading || !authz.fleet.allAgents}
+              disabled={isSetLevelLoading || isReadOnly || !authz.fleet.allAgents}
               compressed={true}
               fullWidth={true}
               id="selectAgentLogLevel"
@@ -208,7 +215,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
               <EuiButtonEmpty
                 flush="both"
                 size="xs"
-                disabled={!authz.fleet.allAgents}
+                disabled={isReadOnly || !authz.fleet.allAgents}
                 isLoading={isSetLevelLoading || isResetLevelLoading}
                 iconType="cross"
                 onClick={resetLogLevel}

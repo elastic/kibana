@@ -8,24 +8,37 @@
 import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
 import { resolveEvalSelection } from './src/datasets/eval_selection';
+import { selectStoredDatasets } from './src/datasets/stored_datasets';
 
 // The suite's scout hook exports SANDBOX_API_KEY together with SANDBOX_KIBANA_CONFIG, which is what
 // makes the `evals_nightshift_investigations` config set start the investigation server.
-const { runSmoke, runInvestigations, fellBackToSmoke } = resolveEvalSelection();
-// Workers re-evaluate this config; only the main process (no TEST_WORKER_INDEX) warns.
-if (fellBackToSmoke && process.env.TEST_WORKER_INDEX === undefined) {
-  process.stderr.write(
-    '[nightshift-investigations] No sandbox credentials (SANDBOX_API_KEY); running only the smoke eval. ' +
-      'Use --profile dev-vault or set NIGHTSHIFT_DATASETS to choose explicitly.\n'
-  );
-}
+const {
+  runInvestigations,
+  runOrca,
+  runConnectorProbes,
+  runWikiOptimize,
+  runReinforcement,
+  storedDatasetIds,
+} = resolveEvalSelection();
+const runStoredInvestigations = selectStoredDatasets('investigation', storedDatasetIds).length > 0;
+const runStoredConnectorProbes =
+  selectStoredDatasets('connector-probe', storedDatasetIds).length > 0;
 
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
-  timeout: runInvestigations ? 45 * 60_000 : 10 * 60_000,
+  timeout: runReinforcement
+    ? 70 * 60_000
+    : runInvestigations || runStoredInvestigations
+    ? 45 * 60_000
+    : 10 * 60_000,
   concurrency: 16,
   testIgnore: [
-    ...(runSmoke ? [] : ['**/smoke/**']),
-    ...(runInvestigations ? [] : ['**/investigation/**']),
+    ...(runInvestigations ? [] : ['**/investigation/investigation.spec.ts']),
+    ...(runOrca ? [] : ['**/investigation/orcabench.spec.ts']),
+    ...(runStoredInvestigations ? [] : ['**/investigation/stored.spec.ts']),
+    ...(runConnectorProbes ? [] : ['**/connector_probe/connector_probe.spec.ts']),
+    ...(runStoredConnectorProbes ? [] : ['**/connector_probe/stored.spec.ts']),
+    ...(runWikiOptimize ? [] : ['**/wiki_optimize/**']),
+    ...(runReinforcement ? [] : ['**/reinforcement/**']),
   ],
 });
