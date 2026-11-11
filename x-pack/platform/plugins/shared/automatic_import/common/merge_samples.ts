@@ -20,44 +20,68 @@ const isEmptyValue = (value: unknown): boolean => {
 export const isUnsafeProperty = (key: string): boolean =>
   key === '__proto__' || key === 'constructor' || key === 'prototype';
 
-const merge = (target: SampleObject, source: SampleObject): SampleObject => {
-  const result = Object.create(null) as SampleObject;
-
-  for (const [key, value] of Object.entries(target)) {
-    if (!isUnsafeProperty(key)) {
-      result[key] = value;
+/**
+ * Merges `source` into `target` in place. `target` and the objects and arrays in it are always
+ * created here, never taken from a sample, so appending to them leaves the samples unchanged.
+ */
+const mergeInto = (target: SampleObject, source: SampleObject): SampleObject => {
+  const mergeObjectElementsInto = (into: SampleObject, values: readonly unknown[]): void => {
+    for (const value of values) {
+      if (isObject(value)) {
+        mergeInto(into, value);
+      }
     }
-  }
+  };
 
   for (const [key, sourceValue] of Object.entries(source)) {
     if (!isUnsafeProperty(key)) {
-      const targetValue = result[key];
+      const targetValue = target[key];
 
       if (Array.isArray(sourceValue)) {
-        result[key] = Array.isArray(targetValue)
-          ? [...targetValue, ...sourceValue]
-          : [...sourceValue];
-      } else if (isObject(sourceValue)) {
-        if (!isObject(targetValue) || isEmptyValue(targetValue)) {
-          result[key] = merge(Object.create(null), sourceValue);
+        if (sourceValue.length === 0) {
+          if (isEmptyValue(targetValue)) {
+            target[key] = [];
+          }
+        } else if (Array.isArray(targetValue)) {
+          for (const element of sourceValue) {
+            targetValue.push(element);
+          }
+        } else if (isObject(targetValue) && !isEmptyValue(targetValue)) {
+          mergeObjectElementsInto(targetValue, sourceValue);
         } else {
-          result[key] = merge(targetValue, sourceValue);
+          target[key] = [...sourceValue];
         }
-      } else if (!(key in result) || (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))) {
-        result[key] = sourceValue;
+      } else if (isObject(sourceValue)) {
+        if (isObject(targetValue)) {
+          mergeInto(targetValue, sourceValue);
+        } else {
+          const merged = Object.create(null) as SampleObject;
+          if (Array.isArray(targetValue)) {
+            mergeObjectElementsInto(merged, targetValue);
+          }
+          target[key] = mergeInto(merged, sourceValue);
+        }
+      } else if (!(key in target) || (isEmptyValue(targetValue) && !isEmptyValue(sourceValue))) {
+        target[key] = sourceValue;
       }
     }
   }
 
-  return result;
+  return target;
 };
 
 /**
- * Deep-merges sample objects into one representative object: arrays are concatenated, objects
- * win over scalars, and the first non-empty scalar wins.
+ * Deep-merges sample objects into one representative object without changing them: arrays are
+ * concatenated, an object and an array of objects under the same key are merged together, objects
+ * win over scalars, and the first non-empty value wins.
  */
-export const mergeSamples = (samples: readonly SampleObject[]): SampleObject =>
-  samples.reduce<SampleObject>((result, sample) => merge(result, sample), {});
+export const mergeSamples = (samples: readonly SampleObject[]): SampleObject => {
+  const result = Object.create(null) as SampleObject;
+  for (const sample of samples) {
+    mergeInto(result, sample);
+  }
+  return result;
+};
 
 /** Merges the object elements of an array, or returns undefined when it has none. */
 export const mergeObjectElements = (values: readonly unknown[]): SampleObject | undefined => {

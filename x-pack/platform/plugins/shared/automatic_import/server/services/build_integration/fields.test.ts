@@ -222,6 +222,18 @@ describe('fields', () => {
       expect(fields).toEqual([{ name: 'rules.value.a', type: 'long', is_ecs: false }]);
     });
 
+    it('keeps the fields of an object when other array elements have an array there', async () => {
+      const docs = [
+        { rules: [{ owner: { name: 'secops' } }, { owner: [] }, { owner: [{ team: 'red' }] }] },
+      ];
+      const fields = await generateFieldMappings(docs, fieldsMetadataClient);
+
+      expect(fields).toEqual([
+        { name: 'rules.owner.name', type: 'keyword', is_ecs: false },
+        { name: 'rules.owner.team', type: 'keyword', is_ecs: false },
+      ]);
+    });
+
     it('maps non-integer numbers as double', async () => {
       const docs = [{ my_app: { ratio: 3.14, count: 3 } }];
       const fields = await generateFieldMappings(docs, fieldsMetadataClient);

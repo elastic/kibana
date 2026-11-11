@@ -62,6 +62,36 @@ describe('mergeSamples', () => {
     expect(result.tags).toEqual(['staging']);
   });
 
+  it('keeps a value when a later doc has an empty array', () => {
+    expect(mergeSamples([{ owner: { name: 'a' } }, { owner: [] }])).toEqual({
+      owner: { name: 'a' },
+    });
+    expect(mergeSamples([{ tags: ['web'] }, { tags: [] }])).toEqual({ tags: ['web'] });
+    expect(mergeSamples([{ owner: [] }, { owner: { name: 'a' } }])).toEqual({
+      owner: { name: 'a' },
+    });
+  });
+
+  it('merges an object with an array of objects under the same key', () => {
+    expect(mergeSamples([{ owner: { name: 'a' } }, { owner: [{ team: 'x' }, 'ignored'] }])).toEqual(
+      { owner: { name: 'a', team: 'x' } }
+    );
+    expect(mergeSamples([{ owner: [{ team: 'x' }] }, { owner: { name: 'a' } }])).toEqual({
+      owner: { team: 'x', name: 'a' },
+    });
+  });
+
+  it('does not change the docs it merges', () => {
+    const docs = [
+      { tags: ['web'], server: { ip: '1.2.3.4' } },
+      { tags: ['prod'], server: [{ port: 443 }] },
+    ];
+    const copy = JSON.parse(JSON.stringify(docs));
+
+    mergeSamples(docs);
+
+    expect(docs).toEqual(copy);
+  });
   it('skips unsafe property names', () => {
     const docs = [{ __proto__: { polluted: true }, safe_field: 'ok' }];
     const result = mergeSamples(docs);
