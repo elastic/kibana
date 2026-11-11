@@ -336,9 +336,12 @@ run(
     log.info(
       [
         'Emulator control endpoints:',
-        `- GET ${controlUrl('calls')}`,
+        `- GET ${controlUrl('calls')}?since=<n>`,
         `- POST ${controlUrl('reset')}`,
         `- GET ${controlUrl('operations')}`,
+        `- GET ${controlUrl('operations')}/<id>[?source=<name>]`,
+        `- GET, PUT ${controlUrl('fixtures')}`,
+        `- DELETE ${controlUrl('fixtures')}[?operation=<id>&source=<name>]`,
         ...(single ? [] : ['Add ?connector=<id> to scope them to one connector.']),
         '',
       ].join('\n')
