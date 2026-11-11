@@ -36,6 +36,16 @@ const workloadColumns = [
   { name: 'owner_derived', type: 'long' },
 ];
 
+const multiNamespaceWorkloadColumns = [
+  { name: 'kind', type: 'keyword' },
+  { name: 'workload', type: 'keyword' },
+  { name: 'namespaces', type: 'long' },
+  { name: 'replicas', type: 'long' },
+  { name: 'last_seen', type: 'date' },
+  { name: 'clusters', type: 'keyword' },
+  { name: 'owner_derived', type: 'long' },
+];
+
 const nodeColumns = [
   { name: 'kubernetes.node.name', type: 'keyword' },
   { name: 'replicas', type: 'long' },
@@ -48,6 +58,8 @@ const namespaceColumns = [
   { name: 'replicas', type: 'long' },
   { name: 'last_seen', type: 'date' },
   { name: 'clusters', type: 'keyword' },
+  { name: 'local_pods', type: 'long' },
+  { name: 'namespaces_skipped', type: 'long' },
 ];
 
 const clusterColumns = [
@@ -249,7 +261,7 @@ describe('Kubernetes entity derivation', () => {
         buildQuery('SET unmapped_fields = "NULLIFY"; FROM metrics-*'),
       ])
     );
-    expect([...kubernetesQueries.values()]).toHaveLength(4);
+    expect([...kubernetesQueries.values()]).toHaveLength(5);
     kubernetesQueries.forEach((query) => {
       expect(query).toContain('data_stream.dataset IN (');
       expect(query).toContain('"kubeletstatsreceiver.otel"');
@@ -268,6 +280,19 @@ describe('Kubernetes entity derivation', () => {
     expect(kubernetesQueries.get('ecs.k8s_namespace')).toContain('kubernetes.pod.uid IS NOT NULL');
     expect(kubernetesQueries.get('ecs.k8s_cluster')).toContain(
       'data_stream.dataset IN ("kubernetes.pod", "kubernetes.node", "kubeletstatsreceiver.otel")'
+    );
+    expect(kubernetesQueries.get('ecs.k8s_multi_namespace_workload')).toContain(
+      '| WHERE namespaces >= 10'
+    );
+    const filteredWorkloadQuery =
+      ENTITY_KEY_TABLE.find(({ id }) => id === 'ecs.k8s_workload')?.buildQuery(
+        'SET unmapped_fields = "NULLIFY"; FROM metrics-*',
+        {
+          multiNamespaceWorkloadKeys: ['deployment/kb-ui-kb', 'deployment/kb-"quoted'],
+        }
+      ) ?? '';
+    expect(filteredWorkloadQuery).toContain(
+      '| WHERE workload_key NOT IN ("deployment/kb-ui-kb", "deployment/kb-\\"quoted")'
     );
     ENTITY_KEY_TABLE.forEach(({ buildQuery }) => {
       const query = buildQuery('SET unmapped_fields = "NULLIFY"; FROM metrics-*');
@@ -424,6 +449,97 @@ describe('host entity merging', () => {
 });
 
 describe('identifyMetricsEntities', () => {
+  it('merges copied workloads while keeping local workloads and namespaces separate', async () => {
+    const lastSeen = '2026-11-10T12:00:00.000Z';
+    const harness = createHarness([
+      {
+        columns: datasetColumns,
+        values: datasetRows('kubernetes.pod'),
+      },
+      {
+        columns: multiNamespaceWorkloadColumns,
+        values: [['deployment', 'kb-ui-kb', 10, 10, lastSeen, ['cluster-a'], 0]],
+      },
+      {
+        columns: workloadColumns,
+        values: Array.from({ length: 4 }, (_, index) => [
+          `team-${index + 1}`,
+          'deployment',
+          'redis',
+          1,
+          lastSeen,
+          ['cluster-a'],
+          0,
+        ]),
+      },
+      {
+        columns: namespaceColumns,
+        values: [
+          ['tenant-only', 10, lastSeen, ['cluster-a'], 0, 1],
+          ['team-local', 1, lastSeen, ['cluster-a'], 1, 1],
+        ],
+      },
+      { columns: clusterColumns, values: [] },
+    ]);
+
+    const result = await identifyMetricsEntities({
+      esClient: harness.esClient,
+      esql: sourceEsql,
+      sourceId: 'multi-tenant-source',
+      kiClient: harness.kiClient,
+      logger: harness.logger,
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        handled: true,
+        metricsEntitiesCount: 6,
+        matchedEntityKeyRowsCount: 4,
+        multiNamespaceWorkloadsCount: 1,
+        namespacesSkippedCount: 1,
+      })
+    );
+    const operations = harness.bulk.mock.calls[0][1];
+    expect(
+      operations.map(({ index }: { index: { feature: { id: string } } }) => index.feature.id)
+    ).toEqual([
+      'k8s.deployment:*/kb-ui-kb',
+      'k8s.deployment:team-1/redis',
+      'k8s.deployment:team-2/redis',
+      'k8s.deployment:team-3/redis',
+      'k8s.deployment:team-4/redis',
+      'k8s.namespace:team-local',
+    ]);
+    expect(operations[0].index.feature).toEqual(
+      expect.objectContaining({
+        title: 'kb-ui-kb',
+        description: 'Kubernetes deployment kb-ui-kb in 10 namespaces.',
+        filter: { field: 'kubernetes.deployment.name', eq: 'kb-ui-kb' },
+        properties: expect.objectContaining({
+          grain: 'multi_namespace',
+          namespace_count: 10,
+          breakdown: ['kubernetes.namespace', 'orchestrator.cluster.name'],
+        }),
+      })
+    );
+    expect(operations[0].index.feature.properties).not.toHaveProperty('entity_store_type');
+    expect(isConditionComplete(operations[0].index.feature.filter)).toBe(true);
+    const queries = harness.query.mock.calls.map(([request]: [{ query: string }]) => request.query);
+    expect(queries[2]).toContain('| WHERE workload_key NOT IN ("deployment/kb-ui-kb")');
+    expect(queries[3]).toContain(
+      'CASE(workload_key IS NULL OR workload_key NOT IN ("deployment/kb-ui-kb"), kubernetes.pod.uid, NULL)'
+    );
+    expect(queries[3]).toContain('| WHERE local_pods > 0');
+    expect(harness.info).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'source [multi-tenant-source] merged [1] workload names across namespaces'
+      )
+    );
+    expect(harness.info).toHaveBeenCalledWith(
+      expect.stringContaining('largest spans [10] namespaces')
+    );
+  });
+
   it('folds clusters while keeping equal deployment and daemonset names separate', async () => {
     const datasetList = {
       columns: datasetColumns,
@@ -468,7 +584,14 @@ describe('identifyMetricsEntities', () => {
         [null, 0, 1, '2026-11-10T12:01:00.000Z'],
       ],
     };
-    const harness = createHarness([datasetList, workloads, nodes, namespaces, clusters]);
+    const harness = createHarness([
+      datasetList,
+      { columns: multiNamespaceWorkloadColumns, values: [] },
+      workloads,
+      nodes,
+      namespaces,
+      clusters,
+    ]);
 
     const result = await identifyMetricsEntities({
       esClient: harness.esClient,
@@ -482,7 +605,7 @@ describe('identifyMetricsEntities', () => {
       expect.objectContaining({
         metricsEntitiesCount: 6,
         metricsCatalogueRowsCount: 2,
-        matchedEntityKeyRowsCount: 4,
+        matchedEntityKeyRowsCount: 5,
         uncoveredDatasetsCount: 0,
         metricsEntityRowsCount: 11,
         droppedIncompleteRowsCount: 5,
@@ -500,7 +623,7 @@ describe('identifyMetricsEntities', () => {
       })
     );
     const queries = harness.query.mock.calls.map(([request]: [{ query: string }]) => request.query);
-    expect(queries).toHaveLength(5);
+    expect(queries).toHaveLength(6);
     queries.forEach((query) => {
       expect(query).toMatch(/^SET unmapped_fields = "NULLIFY"; FROM/);
       expect(query).not.toContain('$.nightshift');
@@ -545,6 +668,7 @@ describe('identifyMetricsEntities', () => {
           'kubernetes.namespace': 'payments',
           'kubernetes.deployment.name': 'checkout',
         },
+        grain: 'namespace',
         breakdown: ['orchestrator.cluster.name'],
         entity_store_type: 'k8s.deployment',
         clusters: ['cluster-a', 'cluster-b'],
@@ -629,6 +753,7 @@ describe('identifyMetricsEntities', () => {
         columns: datasetColumns,
         values: datasetRows('kubernetes.pod', 'hostmetricsreceiver.otel', 'generic.otel'),
       },
+      { columns: multiNamespaceWorkloadColumns, values: [] },
       {
         columns: workloadColumns,
         values: [
@@ -659,7 +784,7 @@ describe('identifyMetricsEntities', () => {
       expect.objectContaining({
         handled: true,
         metricsEntitiesCount: 3,
-        matchedEntityKeyRowsCount: 5,
+        matchedEntityKeyRowsCount: 6,
         uncoveredDatasetsCount: 0,
       })
     );
@@ -688,6 +813,7 @@ describe('identifyMetricsEntities', () => {
           'hostmetricsreceiver.otel'
         ),
       },
+      { columns: multiNamespaceWorkloadColumns, values: [] },
       {
         columns: workloadColumns,
         values: [['apps', 'deployment', 'api', 3, '2026-11-10T12:00:00.000Z', ['edge-edot'], 0]],
@@ -722,7 +848,7 @@ describe('identifyMetricsEntities', () => {
       expect.objectContaining({
         handled: true,
         metricsEntitiesCount: 5,
-        matchedEntityKeyRowsCount: 5,
+        matchedEntityKeyRowsCount: 6,
         uncoveredDatasetsCount: 0,
       })
     );
@@ -765,6 +891,7 @@ describe('identifyMetricsEntities', () => {
     };
     const harness = createHarness([
       datasetList,
+      { columns: multiNamespaceWorkloadColumns, values: [] },
       workloads,
       nodes,
       { columns: namespaceColumns, values: [] },

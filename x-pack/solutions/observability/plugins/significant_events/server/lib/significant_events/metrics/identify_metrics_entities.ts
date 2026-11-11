@@ -16,6 +16,7 @@ import {
   ENTITY_QUERY_LIMIT,
   ENTITY_KEY_TABLE,
   getDatasetFamily,
+  getMultiNamespaceWorkloadKeys,
   mergeHostFeatures,
   type DroppedMetricsEntityRows,
   type EsqlCell,
@@ -49,6 +50,8 @@ export interface IdentifyMetricsEntitiesResult {
   droppedOverflowRowsCount: number;
   droppedRows: DroppedMetricsEntityRows;
   unknownClusterRows: number;
+  multiNamespaceWorkloadsCount: number;
+  namespacesSkippedCount: number;
   timings: {
     catalogueMs: number;
     inventoryMs: number;
@@ -178,6 +181,8 @@ export const identifyMetricsEntities = async ({
       droppedOverflowRowsCount: 0,
       droppedRows: createDroppedRows(),
       unknownClusterRows: 0,
+      multiNamespaceWorkloadsCount: 0,
+      namespacesSkippedCount: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: catalogueMs },
       errors: [{ stage: 'catalogue', message }],
     };
@@ -199,6 +204,8 @@ export const identifyMetricsEntities = async ({
       droppedOverflowRowsCount: 0,
       droppedRows: createDroppedRows(),
       unknownClusterRows: 0,
+      multiNamespaceWorkloadsCount: 0,
+      namespacesSkippedCount: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: Date.now() - startedAt },
       errors: [],
     };
@@ -238,6 +245,8 @@ export const identifyMetricsEntities = async ({
       droppedOverflowRowsCount: 0,
       droppedRows: createDroppedRows(),
       unknownClusterRows: 0,
+      multiNamespaceWorkloadsCount: 0,
+      namespacesSkippedCount: 0,
       timings: { catalogueMs, inventoryMs: 0, totalMs: Date.now() - startedAt },
       errors: [],
     };
@@ -255,16 +264,32 @@ export const identifyMetricsEntities = async ({
   let droppedIncompleteRowsCount = 0;
   const droppedRows = createDroppedRows();
   let unknownClusterRows = 0;
+  let multiNamespaceWorkloadKeys: string[] = [];
+  let multiNamespaceWorkloadsCount = 0;
+  let largestNamespaceCount = 0;
+  let namespacesSkippedCount = 0;
 
   for (const keyRow of matchedKeyRows) {
     const response = (await esClient.esql.query(
-      { query: keyRow.buildQuery(sourceQuery) },
+      {
+        query: keyRow.buildQuery(sourceQuery, {
+          multiNamespaceWorkloadKeys,
+        }),
+      },
       { signal }
     )) as ESQLSearchResponse;
     const rows = rowsFromResponse(response);
     if (rows.length === ENTITY_QUERY_LIMIT) {
       logger.info(
         `Metrics entity query for source [${sourceId}] row [${keyRow.id}] reached the ${ENTITY_QUERY_LIMIT} row limit.`
+      );
+    }
+    if (keyRow.id === 'ecs.k8s_multi_namespace_workload') {
+      multiNamespaceWorkloadKeys = getMultiNamespaceWorkloadKeys(rows);
+      largestNamespaceCount = rows.reduce(
+        (largest, row) =>
+          typeof row.namespaces === 'number' ? Math.max(largest, row.namespaces) : largest,
+        0
       );
     }
     metricsEntityRowsCount += rows.length;
@@ -277,6 +302,14 @@ export const identifyMetricsEntities = async ({
     droppedRows.nullCluster += folded.droppedRows.nullCluster;
     droppedRows.idTooLong += folded.droppedRows.idTooLong;
     unknownClusterRows += folded.unknownClusterRows;
+    multiNamespaceWorkloadsCount += folded.multiNamespaceWorkloadsCount;
+    namespacesSkippedCount += folded.namespacesSkippedCount;
+  }
+
+  if (multiNamespaceWorkloadsCount > 0) {
+    logger.info(
+      `Metrics source [${sourceId}] merged [${multiNamespaceWorkloadsCount}] workload names across namespaces; the largest spans [${largestNamespaceCount}] namespaces.`
+    );
   }
 
   const selectedFeatures = mergeHostFeatures(features).sort((left, right) => {
@@ -316,6 +349,8 @@ export const identifyMetricsEntities = async ({
     droppedOverflowRowsCount,
     droppedRows,
     unknownClusterRows,
+    multiNamespaceWorkloadsCount,
+    namespacesSkippedCount,
     timings: { catalogueMs, inventoryMs, totalMs: Date.now() - startedAt },
     errors: [],
   };
