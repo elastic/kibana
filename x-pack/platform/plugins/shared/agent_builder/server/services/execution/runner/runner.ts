@@ -379,6 +379,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       aiIndices: contextEngineEnabled,
       sml: experimentalEnabled,
       relevantSkills: experimentalEnabled,
+      backgroundWake: experimentalEnabled,
       // forcefully disabled until the UI is implemented
       bash: bashEnabled,
       apiDiscovery: apiDiscoveryEnabled,

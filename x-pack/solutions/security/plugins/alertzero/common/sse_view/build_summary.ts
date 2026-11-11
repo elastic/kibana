@@ -34,6 +34,19 @@ const summarizeBehavior = (detection: SseDetection): string => {
       values: { techniqueId, techniqueName: detection.technique_name, count: detection.total },
     });
   }
+  if (detection.hosts_truncated) {
+    // The producer kept only the first hosts it saw, so the count is a floor.
+    return i18n.translate('xpack.alertzero.sseView.summary.behaviorOnAtLeastHosts', {
+      defaultMessage:
+        '{techniqueId} {techniqueName}: {count, plural, one {# event} other {# events}} on {hostCount}+ hosts',
+      values: {
+        techniqueId,
+        techniqueName: detection.technique_name,
+        count: detection.total,
+        hostCount: detection.host_count,
+      },
+    });
+  }
   return i18n.translate('xpack.alertzero.sseView.summary.behaviorOnHosts', {
     defaultMessage:
       '{techniqueId} {techniqueName}: {count, plural, one {# event} other {# events}} on {hostCount, plural, one {# host} other {# hosts}}',
@@ -58,6 +71,12 @@ const summarizeIoc = (detection: SseDetection): string => {
     return i18n.translate('xpack.alertzero.sseView.summary.ioc', {
       defaultMessage: '{type} {value} seen {count}x',
       values: { type, value, count: detection.total },
+    });
+  }
+  if (detection.hosts_truncated) {
+    return i18n.translate('xpack.alertzero.sseView.summary.iocOnAtLeastHosts', {
+      defaultMessage: '{type} {value} seen {count}x on {hostCount}+ hosts',
+      values: { type, value, count: detection.total, hostCount: detection.host_count },
     });
   }
   return i18n.translate('xpack.alertzero.sseView.summary.iocOnHosts', {

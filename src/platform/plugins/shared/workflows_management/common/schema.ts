@@ -15,6 +15,7 @@ import type {
   CustomTriggerSchemaInput,
   StepDeprecationInfo,
   StepPropertyHandler,
+  TriggerSchemaOptions,
 } from '@kbn/workflows';
 import {
   builtInStepDefinitions,
@@ -288,7 +289,7 @@ function convertDynamicConnectorsToContractsInternal(
 export type WorkflowZodSchemaType = z.infer<ReturnType<typeof getWorkflowZodSchema>>;
 export type WorkflowZodSchemaLooseType = z.infer<ReturnType<typeof getWorkflowZodSchemaLoose>>;
 
-export interface WorkflowZodSchemaOptions {
+export interface WorkflowZodSchemaOptions extends TriggerSchemaOptions {
   lightweight?: boolean;
 }
 
@@ -492,21 +493,27 @@ export function getAllConnectorsWithDynamic(
 export const getWorkflowZodSchema = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo>,
   registeredTriggers: CustomTriggerSchemaInput[] = [],
-  options: WorkflowZodSchemaOptions = {}
+  { lightweight, ...triggerSchemaOptions }: WorkflowZodSchemaOptions = {}
 ): z.ZodType => {
-  if (options.lightweight) {
-    return generateLightweightYamlSchema(registeredTriggers);
+  if (lightweight) {
+    return generateLightweightYamlSchema(registeredTriggers, triggerSchemaOptions);
   }
 
   const allConnectors = getAllConnectorsWithDynamicInternal(dynamicConnectorTypes);
-  return getWorkflowZodSchemaFromConnectors(allConnectors, registeredTriggers);
+  return getWorkflowZodSchemaFromConnectors(
+    allConnectors,
+    registeredTriggers,
+    triggerSchemaOptions
+  );
 };
 
 /** Same schema from an already-resolved list, for callers that need the list too. */
 export const getWorkflowZodSchemaFromConnectors = (
   allConnectors: ConnectorContractUnion[],
-  registeredTriggers: CustomTriggerSchemaInput[] = []
-): z.ZodType => generateYamlSchemaFromConnectors(allConnectors, registeredTriggers);
+  registeredTriggers: CustomTriggerSchemaInput[] = [],
+  triggerSchemaOptions: TriggerSchemaOptions = {}
+): z.ZodType =>
+  generateYamlSchemaFromConnectors(allConnectors, registeredTriggers, false, triggerSchemaOptions);
 
 export const getWorkflowZodSchemaLoose = (
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> = {}

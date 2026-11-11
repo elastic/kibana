@@ -30,6 +30,10 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import {
+  useNavigateToStreamsHome,
+  useStreamsHomeLink,
+} from '../../../../hooks/use_streams_home_link';
+import {
   STREAMS_HISTOGRAM_NUM_DATA_POINTS,
   useStreamDocCountsFetch,
 } from '../../../../hooks/use_streams_doc_counts_fetch';
@@ -71,11 +75,10 @@ export function Wrapper({
   topContent?: ReactNode;
 }) {
   const router = useStreamsAppRouter();
+  const streamsHomeLink = useStreamsHomeLink();
+  const navigateToStreamsHome = useNavigateToStreamsHome();
   const { definition } = useStreamDetail();
   const {
-    core: {
-      application: { navigateToApp },
-    },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -277,8 +280,8 @@ export function Wrapper({
       params: { path: { name: definition.stream.name } },
       signal: abortController.signal,
     });
-    navigateToApp('/streams');
-  }, [definition, abortController.signal, navigateToApp, streamsRepositoryClient]);
+    navigateToStreamsHome();
+  }, [definition, abortController.signal, navigateToStreamsHome, streamsRepositoryClient]);
 
   const backToStreamsLabel = i18n.translate('xpack.streams.streamDetailView.backToStreamsLabel', {
     defaultMessage: 'Streams',
@@ -347,7 +350,7 @@ export function Wrapper({
     <>
       <StreamsAppHeader
         title={streamId}
-        back={{ href: router.link('/'), label: backToStreamsLabel }}
+        back={{ href: streamsHomeLink, label: backToStreamsLabel }}
         badges={appHeaderBadges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}

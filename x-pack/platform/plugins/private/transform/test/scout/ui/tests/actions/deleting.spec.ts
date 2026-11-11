@@ -21,12 +21,12 @@ const batchTestDataList = [
   {
     title: 'batch transform with pivot configuration',
     config: getPivotTransformConfig(PREFIX, false),
-    type: 'pivot',
+    type: 'Pivot',
   },
   {
     title: 'batch transform with latest configuration',
     config: getLatestTransformConfig(PREFIX),
-    type: 'latest',
+    type: 'Latest',
   },
 ];
 const continuousConfig = getPivotTransformConfig(PREFIX, true);
@@ -75,8 +75,8 @@ test.describe('Delete transform', { tag: tags.deploymentAgnostic }, () => {
         await assertTransformRow(transformManagement, transformId, {
           description: config.description,
           type,
-          status: 'stopped',
-          mode: 'batch',
+          status: 'Stopped',
+          execution: '100%',
           progress: 100,
           health: 'Healthy',
         });
@@ -106,9 +106,9 @@ test.describe('Delete transform', { tag: tags.deploymentAgnostic }, () => {
     await test.step('shows the stopped transform', async () => {
       await assertTransformRow(transformManagement, transformId, {
         description: continuousConfig.description,
-        type: 'pivot',
-        status: 'stopped',
-        mode: 'continuous',
+        type: 'Pivot',
+        status: 'Stopped',
+        execution: 'Continuous',
         progress: null,
         health: 'Healthy',
       });

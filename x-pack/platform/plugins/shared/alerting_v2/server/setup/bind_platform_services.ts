@@ -15,6 +15,7 @@ import { KibanaBaseUrlToken } from '../lib/dispatcher/tokens';
 import { ACTION_POLICY_EVENT_PROVIDER } from '../lib/services/event_log_service/constants';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
+import { AuthService } from '../lib/services/auth_service/auth_service';
 import { ConfigService } from '../lib/services/config_service/config_service';
 import { EbtService } from '../lib/services/ebt_service/ebt_service';
 import { EbtServiceToken } from '../lib/services/ebt_service/tokens';
@@ -122,4 +123,5 @@ export function bindPlatformServices({ bind }: ContainerModuleLoadOptions) {
 
   bind(MatcherSuggestionsService).toSelf().inRequestScope();
   bind(PrivilegeChecker).toSelf().inRequestScope();
+  bind(AuthService).toSelf().inRequestScope();
 }

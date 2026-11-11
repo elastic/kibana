@@ -296,6 +296,7 @@ export const createNightshiftWorkflowFixture = ({
     }),
     decisionTreeHydrateStepDefinition({
       getSandboxStart: () => sandboxStart,
+      analytics,
       logger,
       isEnabled: () => decisionTreesEnabled,
     }),
