@@ -38,6 +38,10 @@ export const casesQueriesKeys = {
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
   casesStatuses: () => [...casesQueriesKeys.casesList(), 'statuses'] as const,
   cases: (params: unknown) => [...casesQueriesKeys.casesList(), 'all-cases', params] as const,
+  casesByObservable: (params: unknown) =>
+    [...casesQueriesKeys.casesList(), 'by-observable', params] as const,
+  casesByObservableCounts: (params: unknown) =>
+    [...casesQueriesKeys.casesList(), 'by-observable-counts', params] as const,
   similarCases: (id: string, params: unknown) =>
     [...casesQueriesKeys.caseView(), id, 'similar', params] as const,
   caseView: () => [...casesQueriesKeys.all, 'case'] as const,

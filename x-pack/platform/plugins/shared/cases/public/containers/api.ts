@@ -23,6 +23,10 @@ import type {
   AddObservableRequest,
   FindObservablesRequest,
   FindObservablesResponse,
+  FindCasesByObservableRequest,
+  FindCasesByObservableResponse,
+  CountCasesByObservablesRequest,
+  CountCasesByObservablesResponse,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
   UserActionFindRequestSources,
@@ -46,6 +50,7 @@ import type {
   CaseUICustomField,
   SimilarCasesProps,
   CasesSimilarResponseUI,
+  CasesByObservableResponseUI,
   InternalFindCaseUserActions,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
@@ -77,6 +82,8 @@ import {
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
   INTERNAL_CASE_GET_CASES_BY_ATTACHMENT_URL,
+  INTERNAL_FIND_CASES_BY_OBSERVABLE_URL,
+  INTERNAL_COUNT_CASES_BY_OBSERVABLES_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -118,7 +125,11 @@ import {
   decodeFindAllAttachedAlertsResponse,
   decodeUnifiedAttachmentsResponse,
 } from './utils';
-import { decodeCasesSearchResponse, decodeCasesSimilarResponse } from '../api/decoders';
+import {
+  decodeCasesByObservableResponse,
+  decodeCasesSearchResponse,
+  decodeCasesSimilarResponse,
+} from '../api/decoders';
 import { DEFAULT_FROM_DATE, DEFAULT_TO_DATE } from './constants';
 
 export const resolveCase = async ({
@@ -704,6 +715,36 @@ export const findObservables = async (
     body: JSON.stringify(params),
     signal,
   });
+
+export const findCasesByObservable = async (
+  params: FindCasesByObservableRequest,
+  signal?: AbortSignal
+): Promise<CasesByObservableResponseUI> => {
+  const response = await KibanaServices.get().http.fetch<FindCasesByObservableResponse>(
+    INTERNAL_FIND_CASES_BY_OBSERVABLE_URL,
+    {
+      method: 'POST',
+      body: JSON.stringify(params),
+      signal,
+    }
+  );
+  const { cases, page, per_page: perPage, total } = decodeCasesByObservableResponse(response);
+
+  return { cases: convertCasesToCamelCase(cases), page, perPage, total };
+};
+
+export const countCasesByObservables = async (
+  params: CountCasesByObservablesRequest,
+  signal?: AbortSignal
+): Promise<CountCasesByObservablesResponse> =>
+  KibanaServices.get().http.fetch<CountCasesByObservablesResponse>(
+    INTERNAL_COUNT_CASES_BY_OBSERVABLES_URL,
+    {
+      method: 'POST',
+      body: JSON.stringify(params),
+      signal,
+    }
+  );
 
 export const patchObservable = async (
   request: UpdateObservableRequest,
