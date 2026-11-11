@@ -38,8 +38,9 @@ import {
   resolveIdentityPlan,
 } from '../inventory/generator';
 import type { GeneratedQuery, IdentityPlan, OutputColumn, QueryPlan } from '../inventory/generator';
-import type { ListRequest } from '../inventory/types';
+import type { ListAttributeValuesRequest, ListRequest } from '../inventory/types';
 import type {
+  AttributeValuesResponse,
   GetTypesResponse,
   InventoryType,
   InventoryTypeColumn,
@@ -47,6 +48,7 @@ import type {
   ListResponse,
   UnavailableColumn,
 } from '../routes/types';
+import { listAttributeValues } from './list_attribute_values';
 
 /** Everything the list queries are generated from. */
 interface ListPlan {
@@ -211,6 +213,17 @@ export class InventoryService {
       unavailableColumns,
     };
   };
+
+  /** Lists the values a dropdown can offer for an attribute; see `listAttributeValues`. */
+  listAttributeValues = (request: ListAttributeValuesRequest): Promise<AttributeValuesResponse> =>
+    listAttributeValues(
+      {
+        getDynamicDefinition: this.getDynamicDefinition,
+        esClient: this.esClient,
+        logger: this.logger,
+      },
+      request
+    );
 
   private hasDynamicDefinition = (definition: RegisteredEntityDefinition): boolean =>
     Boolean(definition.dynamic);

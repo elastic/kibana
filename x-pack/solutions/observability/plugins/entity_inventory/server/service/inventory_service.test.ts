@@ -808,3 +808,50 @@ describe('InventoryService.list diagnostics', () => {
     expect(response.took).toBe(400);
   });
 });
+
+describe('InventoryService.listAttributeValues', () => {
+  const withSuggestedFilters = (suggestedFilters: string[]) => ({
+    ...k8sDeploymentOtelAndAgentFixture,
+    dynamic: {
+      sources: k8sDeploymentOtelAndAgentFixture.dynamic?.sources ?? [],
+      suggestedFilters,
+    },
+  });
+
+  const request = {
+    attribute: 'paused',
+    types: ['k8s.deployment'],
+    selections: {},
+    selected: [],
+    window: WINDOW,
+    limit: 10,
+  };
+
+  it('lists the values of a suggested filter through the service clients', async () => {
+    const { service, esClient } = createService([withSuggestedFilters(['paused'])]);
+    esClient.esql.query.mockImplementation(async ({ query }) => {
+      if (isProbe(query)) {
+        return probeResponse(false);
+      }
+      return {
+        columns: [{ name: 'value', type: 'keyword' }],
+        values: [['false'], ['true']],
+        is_partial: false,
+        took: 3,
+        documents_found: 2,
+      };
+    });
+
+    const response = await service.listAttributeValues(request);
+
+    expect(response.values).toEqual(['false', 'true']);
+    expect(response.errors).toEqual([]);
+  });
+
+  it('rejects an attribute that the type does not suggest', async () => {
+    const { service, esClient } = createService([withSuggestedFilters([])]);
+
+    await expect(service.listAttributeValues(request)).rejects.toThrow('not a suggested filter');
+    expect(esClient.esql.query).not.toHaveBeenCalled();
+  });
+});
