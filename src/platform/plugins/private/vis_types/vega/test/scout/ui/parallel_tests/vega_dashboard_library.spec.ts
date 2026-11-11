@@ -10,6 +10,7 @@
 import type { KbnClient } from '@kbn/scout';
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { VEGA_TEST_DATA_VIEW_ARCHIVE, VEGA_TEST_INDEX } from '../fixtures/constants';
 
 const VEGA_API_VERSION = '2023-10-31';
 
@@ -54,8 +55,15 @@ spaceTest.describe('Vega panels linked to the library', { tag: '@local-stateful-
   let counter = 0;
   const getTitle = (name: string) => `Vega panel ${name} ${Date.now()}-${counter++}`;
 
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
+    await scoutSpace.savedObjects.load(VEGA_TEST_DATA_VIEW_ARCHIVE);
+    await scoutSpace.uiSettings.setDefaultIndex(VEGA_TEST_INDEX);
+  });
+
   spaceTest.afterAll(async ({ kbnClient, scoutSpace }) => {
     await kbnClient.savedObjects.clean({ types: ['vega'], space: scoutSpace.id });
+    await scoutSpace.uiSettings.unset('defaultIndex');
+    await scoutSpace.savedObjects.cleanStandardList();
   });
 
   spaceTest(
