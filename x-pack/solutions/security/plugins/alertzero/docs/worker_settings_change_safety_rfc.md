@@ -187,7 +187,7 @@ installed copy picks the change up the next time its definition hash or version 
 the schedule and the extras from its defaults and set `autonomyLevel: 'supervised'`, which the
 render lowers to the most autonomous allowed level, so changing a default, the declared extras or
 the most autonomous allowed level moves the hash the same way a YAML edit does. Removing any other
-allowed level needs a definition version bump, which no test catches. No new mechanism, and a
+allowed level needs a definition version bump, which `managed_workflow_version_pins.test.ts` enforces. No new mechanism, and a
 YAML-only edit still touches nothing CWL owns. The page, the rendered workflow and the stored document then agree on what runs, with no
 manual step, no reset and no write without a user request. A re-render does not reschedule the
 Task Manager task, so a trigger that depends on the level changes on the next save or enable.
@@ -404,7 +404,9 @@ updated. Its only unique catch was an edit to a render helper made without a ver
 platform then decided whether to update installed copies by hashing the `yamlTemplate` function's
 source text, which did not include the helper it calls. That was a workflow versioning gap, not a
 settings compatibility one, so it was left to the Workflows platform. The platform now hashes the
-template rendered with the definition's `hashValues`, which covers its helpers.
+template rendered with the definition's `hashValues`, which covers its helpers on the paths those
+values take. `managed_workflow_version_pins.test.ts` covers the other paths: it fingerprints only
+the lines other values render differently, so a prompt edit leaves it unchanged.
 
 ## How the goals are met
 
@@ -450,7 +452,7 @@ Discovery moving from `manual`/`supervised` to `manual`/`assisted`, CI reports
 `[safe] removed supervised … A stored supervised is read and rendered as assisted`. Run update mode;
 removing the most autonomous allowed level moves the definition hash, and configured spaces run at
 the lower level once `ready()` re-renders them. Removing any other level needs a definition version
-bump, which no test catches. Removing the lowest allowed level is breaking.
+bump, which `managed_workflow_version_pins.test.ts` enforces. Removing the lowest allowed level is breaking.
 
 **Rename, remove or retype a field, tighten a bound.** Reported as
 `[breaking]`. Prefer keeping the stored key and changing only the label. Otherwise, before
@@ -488,7 +490,9 @@ configured space would store, then run update mode. The contract test reports `[
   stored values at boot would need the Workflows team and a security review, and would call the same
   upgrade function.
 - **Render-helper edits on paths `hashValues` never take**, such as the render for a Worker without
-  a service account, need a definition version bump that no test catches.
+  a service account, need a definition version bump. `managed_workflow_version_pins.test.ts`
+  renders each Worker at every autonomy level, without an account and at other intervals, and
+  fails when that output changes at the same version.
 - **Rollback.** An older Kibana reading a document written by a newer one rejects unknown keys and
   shows the Worker as unavailable, leaving the stored values untouched. That is the MVP behaviour
   recorded on [security-team#19312](https://github.com/elastic/security-team/issues/19312). During a

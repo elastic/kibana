@@ -584,6 +584,8 @@ The definition's `version` is persisted as `managedVersion` on the workflow docu
 - **Optional** for `yamlTemplate` changes that alter the output for `hashValues`, including edits to imported YAML, render helpers and defaults.
 - **Required** for `yamlTemplate` changes that `hashValues` do not reach, such as a branch or YAML section rendered only for other values, or a default `render` applies only when a value is missing. The rendered output for `hashValues` is unchanged, so the hash is too.
 
+`src/platform/packages/shared/kbn-workflows/managed/managed_workflow_version_pins.test.ts` catches a missing bump for the **Required** case. Each template whose `render` branches on its values has a `BLIND_SPOTS` entry: values that take the branches `hashValues` skip, and a pin of its `version` with a fingerprint of the lines those values render differently from `hashValues`. A change to those lines at the same `version` fails with the bump to make and the new pin; a bumped `version` fails until its pin is updated. A new `yamlTemplate` definition needs an entry, `null` when `render` does not branch on its values. Nothing checks non-YAML config: bump `version` yourself when you change it.
+
 ### `billable` — execution metering
 
 Every managed definition must declare `billable: boolean`. Set it to `true` only when executions of this managed workflow should be billed; otherwise set it to `false`.
@@ -728,7 +730,7 @@ Because there is a **single persisted document** for a global workflow, any edit
 10. Use `yamlTemplate` only when install-time values are required.
 11. Ask the Workflows team if you are unsure whether the workflow should be billable.
 12. Add `visibility` only when the workflow should appear in a specific selector or product surface.
-13. Bump `version` on the definition when changing non-YAML config or when you want explicit visibility for a YAML change. For minor YAML-only fixes, bumping is optional (the content hash triggers the upgrade).
+13. Bump `version` on the definition when changing non-YAML config or when you want explicit visibility for a YAML change. For minor YAML-only fixes, bumping is optional (the content hash triggers the upgrade). For a `yamlTemplate` definition with a `BLIND_SPOTS` pin in `managed_workflow_version_pins.test.ts`, update the pin whenever `version` moves.
 14. Use `managed.getWorkflowStatus(...)` for read-only pre-flight checks before execution.
 15. Execute via `managed.execute(request, ...)`; for dynamic instances, pass the deterministic `workflowId`.
 16. Prefix every raw request path (`kibana.request`, `with.request`, `with.form_data`) with the executing space — see [Scoping raw request paths at runtime](#scoping-raw-request-paths-at-runtime). A cluster-level route is the deliberate exception.

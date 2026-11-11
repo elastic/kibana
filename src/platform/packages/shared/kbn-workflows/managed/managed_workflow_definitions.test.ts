@@ -276,6 +276,32 @@ describe('managedWorkflowDefinitions', () => {
     }
   );
 
+  // A render that varies between calls (a timestamp, a random or v4 uuid) moves the definition hash
+  // on every reconciliation, so every installed copy reinstalls each time and the hash differs
+  // between instances. Values that are stable in one process but differ per instance, such as the
+  // timezone, locale or environment, are not caught here.
+  describe('deterministic rendering', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it.each(managedTemplateDefinitionsById)(
+      '%s yamlTemplate renders the same YAML for its hashValues at different times',
+      (_id, definition) => {
+        jest.setSystemTime(new Date('2020-01-01T00:00:00.000Z'));
+        const firstRender = getManagedWorkflowHashedYaml(definition);
+        jest.setSystemTime(new Date('2030-06-15T12:34:56.789Z'));
+        const secondRender = getManagedWorkflowHashedYaml(definition);
+
+        expect(secondRender).toBe(firstRender);
+      }
+    );
+  });
+
   // Worker hashValues bind a service account, so the test above never renders a Worker without
   // one. Production does: the Workers list renders defaults for uninstalled Workers, disabled
   // Workers can be saved without an account, and installs from before accounts were required

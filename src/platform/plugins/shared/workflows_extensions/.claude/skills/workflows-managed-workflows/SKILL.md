@@ -156,6 +156,7 @@ When adding a managed workflow:
    - [ ] Explicit `management` policy chosen intentionally
    - [ ] Template defs use `as const satisfies ManagedWorkflowDefinition<TValues>`
    - [ ] Template defs set `yamlTemplate.hashValues` in code, reaching as many branches of `render` as one set of values can; edits to branches they skip need a `version` bump
+   - [ ] Template defs have a `BLIND_SPOTS` entry in `managed_workflow_version_pins.test.ts`: values covering the branches `hashValues` skip plus the pin the test failure prints, or `null` when `render` does not branch; update the pin whenever `version` moves
    - [ ] Added to `managedWorkflowDefinitions` in `definitions/index.ts`
    - [ ] Id re-exported from `definitions/index.ts`
    - [ ] Every raw request path (top-level `path` on `kibana.request`, `with.request.path`,
