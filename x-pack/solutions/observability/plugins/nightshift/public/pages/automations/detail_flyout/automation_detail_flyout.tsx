@@ -75,6 +75,7 @@ import {
   AutomationWorkflowBadge,
   AutomationWorkflowWarning,
   getWorkflowRepairDisabledReason,
+  getAutomationToggleDisabledReason,
 } from '../workflow_recovery';
 import { InfoStrip } from './info_strip';
 import { RunHistory, STATUSES, type Run } from './run_history';
@@ -216,6 +217,7 @@ export const AutomationDetailFlyout = ({
   const updateAutomation = useUpdateAutomation();
   const toggleAutomation = useToggleAutomation();
   const workflowRepairReason = getWorkflowRepairDisabledReason(automation);
+  const toggleDisabledReason = getAutomationToggleDisabledReason(automation);
   const isRunsTab = embedded ? embeddedRunsTab : pathname.endsWith('/runs');
   const isDirty = JSON.stringify(values) !== JSON.stringify(originalValues);
   const { data: catalog, isComplete } = useRuleCatalog();
@@ -486,7 +488,7 @@ export const AutomationDetailFlyout = ({
                       {
                         title: labels.enabled,
                         value: (
-                          <EuiToolTip content={editDisabledReason ?? workflowRepairReason}>
+                          <EuiToolTip content={editDisabledReason ?? toggleDisabledReason}>
                             <EuiSwitch
                               compressed
                               showLabel={false}
@@ -494,7 +496,7 @@ export const AutomationDetailFlyout = ({
                               checked={automation.isEnabled}
                               disabled={
                                 !canManage ||
-                                Boolean(workflowRepairReason) ||
+                                Boolean(toggleDisabledReason) ||
                                 toggleAutomation.isLoading
                               }
                               onChange={(event) =>
@@ -741,8 +743,6 @@ export const AutomationDetailFlyout = ({
                         button={
                           <EuiButton
                             data-test-subj="automationActionsButton"
-                            disabled={Boolean(workflowRepairReason)}
-                            title={workflowRepairReason}
                             size="s"
                             fill
                             iconType="chevronSingleDown"
@@ -800,8 +800,6 @@ export const AutomationDetailFlyout = ({
                                   name: labels.delete,
                                   icon: deleteActionIcon,
                                   color: 'danger',
-                                  disabled: Boolean(workflowRepairReason),
-                                  toolTipContent: workflowRepairReason,
                                   'data-test-subj': 'automationDeleteButton',
                                   ...getEbtProps({
                                     action: NIGHTSHIFT_EBT_ACTIONS.DELETE_AUTOMATION,

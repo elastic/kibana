@@ -64,7 +64,7 @@ their existing accounting; caller-supplied metadata cannot grant manual accounti
 
 The automation's enabled state continues to control its backing workflow and scheduled triggers.
 Run requires the saved workflow to be enabled, valid, and bound to the automation service account.
-Missing backing workflows must be recreated using **Repair** before running or changing the
+Missing backing workflows must be recreated using **Repair** before running or editing the
 automation. A manual run leaves the saved workflow YAML, schedule, and next scheduled time unchanged.
 
 ### Recovering a deleted backing workflow (Tech Preview)
@@ -72,14 +72,18 @@ automation. A manual run leaves the saved workflow YAML, schedule, and next sche
 Generated workflows remain editable in Workflows. If one is deleted, Automations shows **Needs
 repair**, with a callout explaining that **Repair** recreates the deleted workflow from the saved
 automation configuration. **Repair and enable** restores an enabled automation; **Repair** keeps
-a paused automation paused. Edit, Run, enable/pause, Clone, and Delete remain unavailable until
-recovery succeeds. Run history remains accessible. Save and enable/pause requests do not implicitly
-repair the workflow; they return an actionable conflict until explicit repair succeeds.
+a paused automation paused. Edit, Run, Enable, and Clone remain unavailable until recovery succeeds.
+Pause and Delete remain available, including when invalid saved configuration prevents Repair.
+Pausing a missing workflow only updates the automation; pausing an enabled-state mismatch disables
+the workflow without regenerating it. Run history remains accessible. Save and Enable do not
+implicitly repair the workflow; they return an actionable conflict until explicit repair succeeds.
+An active distributed mutation is shown as **Updating automation**, rather than a repair warning.
 If availability cannot be verified, use **Retry**; this does not indicate deletion.
 
 Recovery allocates a new workflow ID, preserves the automation ID, investigation links, earlier
-run history and daily usage, and requires the same management and service-account permissions as
-Save. If activation fails, the replacement stays linked and disabled; retry Repair to enable it.
+run history and daily usage after ordinary workflow deletion, and requires the same management
+and service-account permissions as Save. Force deletion in Workflows purges execution history and cannot be undone by Repair.
+If activation fails, the replacement stays linked and disabled; retry Repair to enable it.
 Repair restores the generated definition from the automation, so direct workflow edits are not
 retained when regeneration is required. GET requests only report availability and never repair.
 
@@ -151,10 +155,10 @@ Nightshift runs investigations only as the agent service account, `nightshift_ag
 
 There is one account of each kind per deployment, shared by every space. Each holds a role that Nightshift never creates or changes. On Serverless, where Nightshift ships, the roles are elasticsearch-controller predefined roles, whose names start with `_`. Stateful Elasticsearch has no such roles, so on stateful they are created by whoever sets up the deployment, named like the account. Their definitions are in `common/service_account_roles.ts`. Scout tests and evals create them with `ensureNightshiftServiceAccountRoles`, so they also run against Elastic Cloud Hosted.
 
-| Account name             | Role (stateful / Serverless)                         | Used by                                                     |
-| ------------------------ | ---------------------------------------------------- | ----------------------------------------------------------- |
-| `nightshift_agent`       | `nightshift_agent` / `_nightshift_agent`             | Investigations, their sandbox tools and Agent Builder hooks |
-| `nightshift_automations` | `nightshift_automations` / `_nightshift_automations` | Automation workflows                                        |
+| Account name | Role (stateful / Serverless) | Used by |
+|---|---|---|
+| `nightshift_agent` | `nightshift_agent` / `_nightshift_agent` | Investigations, their sandbox tools and Agent Builder hooks |
+| `nightshift_automations` | `nightshift_automations` / `_nightshift_automations` | Automation workflows |
 
 The roles cover every space. Where an account acts is decided by the workflows bound to it, which are installed per space.
 

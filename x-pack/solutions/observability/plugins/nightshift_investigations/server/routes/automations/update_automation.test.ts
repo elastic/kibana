@@ -51,7 +51,10 @@ const call = (body: Record<string, unknown>) =>
         getWorkflowsManagement,
         getInvestigatorServiceAccountService: () => serviceAccountService,
         isUniversalAlertingAvailable: () => true,
-        lockManager: { withLock: async (_id, callback) => callback() },
+        lockManager: {
+          withLock: async (_id, callback) => callback(),
+          getLock: async () => undefined,
+        },
         logger: loggingSystemMock.createLogger(),
       } as Parameters<typeof createAutomationWorkflowService>[0]),
   } as never);

@@ -163,7 +163,7 @@ describe('AutomationsPage', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 
-  it('blocks the list toggle until the backing workflow is repaired', () => {
+  it('keeps Pause available when the backing workflow needs repair', () => {
     const automation = {
       id: 'broken-1',
       name: 'Health review',
@@ -179,9 +179,13 @@ describe('AutomationsPage', () => {
     const mutate = jest.fn();
     mockUseToggleAutomation.mockReturnValue({ mutate, isLoading: false });
     renderPage();
-    expect(screen.getByTestId('automationToggle-broken-1')).toBeDisabled();
+    expect(screen.getByTestId('automationToggle-broken-1')).toBeEnabled();
     fireEvent.click(screen.getByTestId('automationToggle-broken-1'));
-    expect(mutate).not.toHaveBeenCalled();
+    expect(mutate).toHaveBeenCalledWith({
+      id: 'broken-1',
+      name: 'Health review',
+      isEnabled: false,
+    });
   });
 
   it.each([undefined, 'drop', 'queue', 'cancel_in_progress'] as const)(

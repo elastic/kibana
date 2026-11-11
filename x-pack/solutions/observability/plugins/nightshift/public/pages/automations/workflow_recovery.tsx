@@ -26,18 +26,24 @@ export const workflowRecoveryLabels = {
   }),
   deletedExplanation: i18n.translate('xpack.nightshift.automations.workflow.deletedDescription', {
     defaultMessage:
-      'The workflow used by this automation was deleted. Repair recreates it from the saved automation configuration, preserving run history and the enabled or paused state. Repair the workflow to use this automation or make changes.',
+      'The workflow used by this automation was deleted. Repair recreates it from the saved automation configuration, preserving run history and the enabled or paused state. Repair the workflow to run or edit this automation. You can still pause or delete it.',
   }),
   outOfSyncExplanation: i18n.translate(
     'xpack.nightshift.automations.workflow.outOfSyncDescription',
     {
       defaultMessage:
-        'The workflow’s enabled state no longer matches this automation. Repair regenerates the workflow from the saved automation configuration and restores its enabled or paused state, preserving run history. Repair the workflow to use this automation or make changes.',
+        'The workflow’s enabled state no longer matches this automation. Repair restores the saved automation configuration and enabled or paused state, preserving run history. You can also pause the automation to keep the workflow disabled, or delete it.',
     }
   ),
   actionDisabled: i18n.translate('xpack.nightshift.automations.workflow.actionDisabledTooltip', {
     defaultMessage:
-      'Repair the backing workflow before editing this automation or using other actions.',
+      'Repair the backing workflow before editing, running, enabling, or cloning this automation.',
+  }),
+  updating: i18n.translate('xpack.nightshift.automations.workflow.updatingLabel', {
+    defaultMessage: 'Updating automation',
+  }),
+  updatingExplanation: i18n.translate('xpack.nightshift.automations.workflow.updatingTooltip', {
+    defaultMessage: 'This automation is being updated. Try again shortly.',
   }),
   retry: i18n.translate('xpack.nightshift.automations.workflow.retry', {
     defaultMessage: 'Retry',
@@ -49,7 +55,16 @@ export const needsWorkflowRepair = (automation: Automation): boolean =>
   automation.backingWorkflow?.state === 'out_of_sync';
 
 export const getWorkflowRepairDisabledReason = (automation: Automation): string | undefined =>
-  needsWorkflowRepair(automation) ? workflowRecoveryLabels.actionDisabled : undefined;
+  automation.backingWorkflow?.state === 'updating'
+    ? workflowRecoveryLabels.updatingExplanation
+    : needsWorkflowRepair(automation)
+    ? workflowRecoveryLabels.actionDisabled
+    : undefined;
+
+export const getAutomationToggleDisabledReason = (automation: Automation): string | undefined =>
+  automation.isEnabled && automation.backingWorkflow?.state !== 'updating'
+    ? undefined
+    : getWorkflowRepairDisabledReason(automation);
 
 export const getRepairLabel = (automation: Automation): string =>
   automation.isEnabled
@@ -62,6 +77,13 @@ export const getRepairLabel = (automation: Automation): string =>
 
 export const AutomationWorkflowBadge = ({ automation }: { automation: Automation }) => {
   const refresh = useRefreshAutomations();
+  if (automation.backingWorkflow?.state === 'updating') {
+    return (
+      <EuiBadge color="hollow" data-test-subj="automationWorkflowUpdating">
+        {workflowRecoveryLabels.updating}
+      </EuiBadge>
+    );
+  }
   if (needsWorkflowRepair(automation)) {
     return (
       <EuiBadge color="warning" data-test-subj="automationNeedsRepair">

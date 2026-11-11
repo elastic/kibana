@@ -139,8 +139,6 @@ export const AutomationActions = ({
             key="delete"
             icon={deleteActionIcon}
             color="danger"
-            disabled={Boolean(repairDisabledReason)}
-            toolTipContent={repairDisabledReason}
             onClick={(event: React.MouseEvent) => {
               setIsOpen(false);
               onDelete();

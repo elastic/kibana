@@ -134,12 +134,16 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
 
   it.each(['missing', 'out_of_sync'] as const)(
-    'blocks editing, toggling and other actions until a %s workflow is repaired',
+    'keeps Pause and Delete available while blocking editing for a %s workflow',
     (state) => {
       renderFlyout({ selectedAutomation: { ...automation, backingWorkflow: { state } } });
       expect(screen.getByTestId('automationEditButton')).toBeDisabled();
-      expect(screen.getByRole('switch', { name: 'Enabled' })).toBeDisabled();
-      expect(screen.getByTestId('automationActionsButton')).toBeDisabled();
+      expect(screen.getByRole('switch', { name: 'Enabled' })).toBeEnabled();
+      expect(screen.getByTestId('automationActionsButton')).toBeEnabled();
+      fireEvent.click(screen.getByTestId('automationActionsButton'));
+      expect(screen.getByTestId('automationDeleteButton')).toBeEnabled();
+      expect(screen.getByTestId('automationCloneButton')).toBeDisabled();
+      fireEvent.click(screen.getByTestId('automationActionsButton'));
       expect(screen.getByRole('button', { name: 'Repair and enable' })).toBeEnabled();
       fireEvent.click(screen.getByTestId('automationEditButton'));
       expect(screen.queryByTestId('automationSaveButton')).not.toBeInTheDocument();

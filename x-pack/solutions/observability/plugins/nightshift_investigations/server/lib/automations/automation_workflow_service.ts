@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { badRequest, conflict, serverUnavailable } from '@hapi/boom';
+import { badRequest, boomify, conflict, isBoom, serverUnavailable } from '@hapi/boom';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { isLockAcquisitionError, type LockManagerService } from '@kbn/lock-manager';
 import type { AutomationBackingWorkflow } from '../../../common/automation_workflow';
@@ -26,7 +26,7 @@ interface Dependencies {
     'resolveAutomationRunAs'
   >;
   isUniversalAlertingAvailable: () => boolean;
-  lockManager: Pick<LockManagerService, 'withLock'>;
+  lockManager: Pick<LockManagerService, 'withLock' | 'getLock'>;
   logger: Pick<Logger, 'warn' | 'info'>;
 }
 
@@ -67,6 +67,17 @@ export const createAutomationWorkflowService = ({
       if (isLockAcquisitionError(error)) {
         throw conflict('This automation is being changed. Refresh and try again.');
       }
+      if (
+        error instanceof Error &&
+        !isBoom(error) &&
+        'statusCode' in error &&
+        typeof error.statusCode === 'number' &&
+        Number.isInteger(error.statusCode) &&
+        error.statusCode >= 400 &&
+        error.statusCode <= 599
+      ) {
+        throw boomify(error, { statusCode: error.statusCode });
+      }
       throw error;
     }
   };
@@ -85,19 +96,21 @@ export const createAutomationWorkflowService = ({
       );
       const byId = new Map(states.map((state) => [state.id, state]));
       return new Map(
-        automations.map(({ id, workflowId, isEnabled }) => {
-          const workflow = workflowId ? byId.get(workflowId) : undefined;
-          return [
-            id,
-            {
-              state: !workflow
-                ? 'missing'
-                : workflow.enabled === isEnabled
-                ? 'available'
-                : 'out_of_sync',
-            },
-          ];
-        })
+        await Promise.all(
+          automations.map(async ({ id, workflowId, isEnabled }) => {
+            const workflow = workflowId ? byId.get(workflowId) : undefined;
+            let state: AutomationBackingWorkflow['state'] = !workflow
+              ? 'missing'
+              : workflow.enabled === isEnabled
+              ? 'available'
+              : 'out_of_sync';
+            if (state !== 'available') {
+              const lock = await lockManager.getLock(`nightshift-automation:${spaceId}:${id}`);
+              if (lock) state = 'updating';
+            }
+            return [id, { state }] as const;
+          })
+        )
       );
     } catch (error) {
       logger.warn(`Could not verify automation workflows in space ${spaceId}`);
@@ -107,6 +120,9 @@ export const createAutomationWorkflowService = ({
 
   const assertStateAvailable = (state: AutomationBackingWorkflow['state'] | undefined): void => {
     if (state === 'available') return;
+    if (state === 'updating') {
+      throw conflict('This automation is being changed. Refresh and try again.');
+    }
     if (state === 'unknown' || !state) {
       throw serverUnavailable('Unable to verify the backing workflow. Try again.');
     }
@@ -164,7 +180,7 @@ export const createAutomationWorkflowService = ({
         }
       };
       let workflow = await readWorkflow();
-      if (!repairOnly) {
+      if (!repairOnly && !pauseOnly) {
         assertStateAvailable(
           !workflow
             ? 'missing'
@@ -173,14 +189,17 @@ export const createAutomationWorkflowService = ({
             : 'out_of_sync'
         );
       }
-      if (!pauseOnly) {
-        merged.completions = merged.completions.map((completion) =>
-          automationCompletionSchema.parse(completion)
-        );
-        validateScheduledAutomation(merged);
-      }
       if (repairOnly && workflow?.enabled === merged.isEnabled) {
         return { id, ...existing.attributes, backingWorkflow: { state: 'available' } };
+      }
+      if (!pauseOnly) {
+        const completions = automationCompletionSchema
+          .array()
+          .max(10)
+          .safeParse(merged.completions);
+        if (!completions.success) throw badRequest(completions.error.message);
+        merged.completions = completions.data;
+        validateScheduledAutomation(merged);
       }
       const save = () =>
         soClient.update<NightshiftAutomationAttributes>(NIGHTSHIFT_AUTOMATION_SO_TYPE, id, merged, {
@@ -196,14 +215,20 @@ export const createAutomationWorkflowService = ({
         });
 
       const verifySavedState = async (): Promise<NightshiftAutomationRecord> => {
-        const states = await getStates([{ id, ...merged }], spaceId);
-        const backingWorkflow = states.get(id);
-        if (backingWorkflow?.state !== 'available') {
-          throw badRequest(
+        let savedWorkflow: { id: string; enabled: boolean } | undefined;
+        try {
+          [savedWorkflow] = await readStates(merged.workflowId ? [merged.workflowId] : [], spaceId);
+        } catch {
+          throw serverUnavailable(
+            'The automation was saved, but its backing workflow could not be verified. Refresh and try again.'
+          );
+        }
+        if (!savedWorkflow || savedWorkflow.enabled !== merged.isEnabled) {
+          throw conflict(
             'The automation was saved but its backing workflow could not be synchronized. Use Repair to try again.'
           );
         }
-        return { id, ...merged, backingWorkflow };
+        return { id, ...merged, backingWorkflow: { state: 'available' } };
       };
 
       if (workflow) {
@@ -218,7 +243,7 @@ export const createAutomationWorkflowService = ({
           // An external deletion can race the first lookup. Only confirmed absence permits create.
           workflow = await readWorkflow();
           if (workflow) throw error;
-          if (!repairOnly) assertStateAvailable('missing');
+          if (!repairOnly && !pauseOnly) assertStateAvailable('missing');
         }
         if (workflow) {
           await save();
@@ -229,6 +254,10 @@ export const createAutomationWorkflowService = ({
             );
           return result;
         }
+      }
+      if (pauseOnly) {
+        await save();
+        return { id, ...merged, backingWorkflow: { state: 'missing' } };
       }
       const replacement = await workflows.createWorkflow({ yaml: yaml(false) }, spaceId, request);
       merged.workflowId = replacement.id;

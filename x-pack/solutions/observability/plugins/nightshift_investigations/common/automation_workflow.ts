@@ -6,5 +6,5 @@
  */
 
 export interface AutomationBackingWorkflow {
-  state: 'available' | 'missing' | 'out_of_sync' | 'unknown';
+  state: 'available' | 'missing' | 'out_of_sync' | 'updating' | 'unknown';
 }

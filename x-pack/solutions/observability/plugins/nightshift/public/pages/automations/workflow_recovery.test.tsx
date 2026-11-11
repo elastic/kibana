@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { AutomationWorkflowWarning } from './workflow_recovery';
+import { AutomationWorkflowBadge, AutomationWorkflowWarning } from './workflow_recovery';
 import { AutomationActions } from './list/cells/row_actions';
 import type { Automation } from '../../data/automations/use_automations';
 
@@ -92,7 +92,7 @@ it('explains enabled-state repair without claiming the workflow was deleted', ()
   );
   expect(screen.getByTestId('automationWorkflowWarning')).not.toHaveTextContent('was deleted');
 });
-it('disables other list row actions and offers repair', () => {
+it('keeps Delete available while blocking Run and Clone until repair', () => {
   const onRun = jest.fn();
   const onClone = jest.fn();
   const onDelete = jest.fn();
@@ -110,13 +110,14 @@ it('disables other list row actions and offers repair', () => {
   fireEvent.click(screen.getByTestId('automationActions-automation'));
   expect(screen.getByTestId('runAutomation')).toBeDisabled();
   expect(screen.getByTestId('cloneAutomation')).toBeDisabled();
-  expect(screen.getByTestId('deleteAutomation')).toBeDisabled();
+  expect(screen.getByTestId('deleteAutomation')).toBeEnabled();
   fireEvent.click(screen.getByTestId('cloneAutomation'));
-  fireEvent.click(screen.getByTestId('deleteAutomation'));
   expect(onClone).not.toHaveBeenCalled();
-  expect(onDelete).not.toHaveBeenCalled();
   fireEvent.click(screen.getByTestId('repairAutomation'));
   expect(mockRepair).toHaveBeenCalledWith(automation);
+  fireEvent.click(screen.getByTestId('automationActions-automation'));
+  fireEvent.click(screen.getByTestId('deleteAutomation'));
+  expect(onDelete).toHaveBeenCalledTimes(1);
 });
 it('disables the repair action while recovery is pending', () => {
   mockIsLoading = true;
@@ -126,4 +127,17 @@ it('disables the repair action while recovery is pending', () => {
     </I18nProvider>
   );
   expect(screen.getByRole('button', { name: 'Repair and enable' })).toBeDisabled();
+});
+
+it('shows an update in progress without a repair warning', () => {
+  const updating = { ...automation, backingWorkflow: { state: 'updating' as const } };
+  render(
+    <I18nProvider>
+      <AutomationWorkflowBadge automation={updating} />
+      <AutomationWorkflowWarning automation={updating} canManage />
+    </I18nProvider>
+  );
+  expect(screen.getByText('Updating automation')).toBeInTheDocument();
+  expect(screen.queryByTestId('automationWorkflowWarning')).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Repair and enable' })).not.toBeInTheDocument();
 });

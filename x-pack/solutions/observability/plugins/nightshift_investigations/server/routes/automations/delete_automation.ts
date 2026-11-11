@@ -46,10 +46,6 @@ export const deleteAutomationRoute = createNightshiftInvestigationsServerRoute({
         NIGHTSHIFT_AUTOMATION_SO_TYPE,
         params.path.id
       );
-      await getAutomationWorkflowService().assertAvailable(
-        { id: params.path.id, ...existing.attributes },
-        spaceId
-      );
 
       // Delete the backing workflow first so it cannot fire after the SO is gone.
       if (workflowsManagement && existing.attributes.workflowId) {

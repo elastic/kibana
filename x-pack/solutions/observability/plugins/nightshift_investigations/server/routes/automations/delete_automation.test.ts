@@ -61,14 +61,22 @@ it('also deletes automations which have never dispatched', async () => {
   expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'auto-1');
 });
 
-it('requires repair before deleting an automation whose workflow is missing or out of sync', async () => {
-  workflowService.assertAvailable.mockRejectedValueOnce(conflict('Repair the backing workflow.'));
-  await expect(call()).rejects.toMatchObject({
-    output: { statusCode: 409 },
-    message: expect.stringContaining('Repair'),
+it('deletes an invalid legacy automation with a missing workflow without requiring repair', async () => {
+  soClient.get.mockResolvedValue({
+    id: 'auto-1',
+    type: 'nightshift-automation',
+    references: [],
+    attributes: {
+      workflowId: 'wf-1',
+      execution: {},
+      trigger: { rows: [{ kind: 'schedule', schedulePreset: 'custom' }] },
+    },
   });
-  expect(deleteWorkflows).not.toHaveBeenCalled();
-  expect(soClient.delete).not.toHaveBeenCalled();
+  getWorkflow.mockResolvedValue(null);
+  deleteWorkflows.mockResolvedValue({ total: 1, deleted: 0, failures: [] });
+  workflowService.assertAvailable.mockRejectedValueOnce(conflict('Repair the backing workflow.'));
+  await expect(call()).resolves.toEqual({});
+  expect(soClient.delete).toHaveBeenCalledWith('nightshift-automation', 'auto-1');
 });
 
 it('still deletes the automation when deleting its unbound workflow fails', async () => {

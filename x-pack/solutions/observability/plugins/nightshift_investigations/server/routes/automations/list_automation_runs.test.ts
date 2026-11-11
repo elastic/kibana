@@ -105,7 +105,7 @@ it.each([{ message: 'Investigate the alert' }, { instructions: 'Investigate the 
 
     expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       {
-        workflowId: 'wf-1',
+        workflowIds: ['wf-1'],
         omitStepRuns: true,
         page: 1,
         size: 20,

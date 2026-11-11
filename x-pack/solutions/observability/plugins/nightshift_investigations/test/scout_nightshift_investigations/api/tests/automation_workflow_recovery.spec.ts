@@ -193,7 +193,7 @@ apiTest.describe(
         expect(refusedRepair).toHaveStatusCode(403);
         ({ cookieHeader } = await samlAuth.asInteractiveUser(ROLE));
 
-        for (const body of [{ isEnabled: true }, { isEnabled: false }, { name: 'Changed' }]) {
+        for (const body of [{ isEnabled: true }, { name: 'Changed' }]) {
           const refusedUpdate = await apiClient.put(`${PATH}/${id}`, {
             headers: headers(),
             body,
@@ -202,11 +202,17 @@ apiTest.describe(
           expect(refusedUpdate).toHaveStatusCode(409);
           expect(refusedUpdate.body).toMatchObject({ message: expect.stringContaining('Repair') });
         }
-        const refusedDelete = await apiClient.delete(`${PATH}/${id}`, {
+        const pausedMissing = await apiClient.put(`${PATH}/${id}`, {
           headers: headers(),
+          body: { isEnabled: false },
           responseType: 'json',
         });
-        expect(refusedDelete).toHaveStatusCode(409);
+        expect(pausedMissing).toHaveStatusCode(200);
+        expect(pausedMissing.body).toMatchObject({
+          isEnabled: false,
+          workflowId: originalWorkflowId,
+          backingWorkflow: { state: 'missing' },
+        });
         const repaired = await apiClient.post(`${PATH}/${id}/repair`, {
           headers: headers(),
           responseType: 'json',
@@ -273,6 +279,25 @@ apiTest.describe(
         expect(new Set([firstPage.runs[0].id, secondPage.runs[0].id])).toStrictEqual(
           new Set(after.runs.map((item) => item.id))
         );
+        const cancelledReplacement = await apiClient.post(
+          `api/workflows/workflow/${automation.workflowId}/executions/cancel`,
+          {
+            headers: { ...headers(), 'elastic-api-version': '2023-10-31' },
+          }
+        );
+        expect(cancelledReplacement).toHaveStatusCode(200);
+        const deletedReplacement = await apiClient.delete('api/workflows', {
+          headers: { ...headers(), 'elastic-api-version': '2023-10-31' },
+          body: { ids: [automation.workflowId] },
+          responseType: 'json',
+        });
+        expect(deletedReplacement).toHaveStatusCode(200);
+        const deletedAutomation = await apiClient.delete(`${PATH}/${id}`, {
+          headers: headers(),
+          responseType: 'json',
+        });
+        expect(deletedAutomation).toHaveStatusCode(200);
+        automation = undefined;
       }
     );
   }

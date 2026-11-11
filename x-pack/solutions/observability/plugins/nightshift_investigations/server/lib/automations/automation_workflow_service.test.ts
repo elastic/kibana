@@ -7,7 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { LockAcquisitionError } from '@kbn/lock-manager';
+import { LockAcquisitionError, type LockManagerService } from '@kbn/lock-manager';
 import { parse } from 'yaml';
 import { createAutomationWorkflowService } from './automation_workflow_service';
 import type { NightshiftAutomationAttributes } from './types';
@@ -68,7 +68,11 @@ const setup = (overrides: Partial<NightshiftAutomationAttributes> = {}) => {
   const serviceAccount = createServiceAccountService();
   let pending = Promise.resolve();
   const acquireLock = jest.fn(async () => {});
+  const getLock = jest
+    .fn<ReturnType<LockManagerService['getLock']>, Parameters<LockManagerService['getLock']>>()
+    .mockResolvedValue(undefined);
   const lockManager = {
+    getLock,
     withLock: async <T>(_id: string, callback: () => Promise<T>): Promise<T> => {
       await acquireLock();
       const result = pending.then(callback);
@@ -95,6 +99,7 @@ const setup = (overrides: Partial<NightshiftAutomationAttributes> = {}) => {
     states,
     serviceAccount,
     acquireLock,
+    getLock,
     logger,
     stored: () => stored,
   };
@@ -102,7 +107,6 @@ const setup = (overrides: Partial<NightshiftAutomationAttributes> = {}) => {
 
 it.each([
   { name: 'save', changes: { name: 'Updated health' } },
-  { name: 'pause', changes: { isEnabled: false } },
   { name: 'enable', changes: { isEnabled: true } },
 ])(
   'requires explicit repair before $name when the workflow is deleted or out of sync',
@@ -123,6 +127,88 @@ it.each([
     }
   }
 );
+
+it.each(['missing', 'out_of_sync'] as const)(
+  'pauses a %s workflow without enabling or recreating it, even with invalid saved configuration',
+  async (state) => {
+    const { service, stored, workflows, states } = setup({ execution: {} });
+    if (state === 'out_of_sync') states.set('deleted-workflow', false);
+    const result = await service.update(request, 'default', 'automation', { isEnabled: false });
+    expect(result).toMatchObject({
+      isEnabled: false,
+      backingWorkflow: { state: state === 'missing' ? 'missing' : 'available' },
+    });
+    expect(stored()).toMatchObject({
+      isEnabled: false,
+      workflowId: 'deleted-workflow',
+      runtime: attributes.runtime,
+    });
+    expect(workflows.createWorkflow).not.toHaveBeenCalled();
+    expect(states.get('deleted-workflow')).not.toBe(true);
+  }
+);
+
+it('returns a bad request for invalid saved completions without writing a replacement', async () => {
+  const { service, workflows } = setup({
+    completions: [{ action: 'post_to_slack', targetMode: 'channel' }],
+  });
+  await expect(service.repair(request, 'default', 'automation')).rejects.toMatchObject({
+    output: { statusCode: 400 },
+    message: expect.stringContaining('Slack channel destination is required'),
+  });
+  expect(workflows.createWorkflow).not.toHaveBeenCalled();
+});
+
+it.each([400, 403, 409, 503])(
+  'preserves workflow error status %s instead of returning a generic server error',
+  async (statusCode) => {
+    const { service, workflows, states, stored } = setup();
+    states.set('deleted-workflow', true);
+    workflows.updateWorkflow.mockRejectedValueOnce(
+      Object.assign(new Error('Workflow mutation failed'), { statusCode })
+    );
+    await expect(
+      service.update(request, 'default', 'automation', { name: 'Updated' })
+    ).rejects.toMatchObject({ output: { statusCode } });
+    expect(stored()).toEqual(attributes);
+  }
+);
+
+it('reports a persisted but unverifiable update as unavailable, without claiming a mismatch', async () => {
+  const { service, workflows, states, stored } = setup();
+  states.set('deleted-workflow', true);
+  workflows.getWorkflowStates
+    .mockResolvedValueOnce([{ id: 'deleted-workflow', enabled: true }])
+    .mockRejectedValueOnce(new Error('Search unavailable'));
+  await expect(
+    service.update(request, 'default', 'automation', { name: 'Saved name' })
+  ).rejects.toMatchObject({
+    output: { statusCode: 503 },
+    message:
+      'The automation was saved, but its backing workflow could not be verified. Refresh and try again.',
+  });
+  expect(stored().name).toBe('Saved name');
+  expect(states.get('deleted-workflow')).toBe(true);
+});
+
+it('reports an active distributed mutation instead of a repair warning until the lock is released', async () => {
+  const { service, states, getLock } = setup();
+  states.set('deleted-workflow', false);
+  const automation = { id: 'automation', ...attributes };
+  getLock.mockResolvedValue({
+    createdAt: new Date().toISOString(),
+    expiresAt: new Date(Date.now() + 60_000).toISOString(),
+    token: 'lock',
+    metadata: {},
+  });
+  expect((await service.getStates([automation], 'default')).get('automation')).toEqual({
+    state: 'updating',
+  });
+  getLock.mockResolvedValue(undefined);
+  expect((await service.getStates([automation], 'default')).get('automation')).toEqual({
+    state: 'out_of_sync',
+  });
+});
 
 it.each([true, false])(
   'repairs a missing workflow with desired enabled=%s, preserving its history and identity',
@@ -243,6 +329,38 @@ it('requires Repair after an external deletion races an update and preserves the
   expect(workflows.createWorkflow).not.toHaveBeenCalled();
   const result = await service.repair(request, 'default', 'automation');
   expect(result).toMatchObject({ name: attributes.name, workflowId: 'replacement-1' });
+});
+
+it('still pauses when external deletion races the workflow update, without creating a replacement', async () => {
+  const { service, workflows, states, stored } = setup();
+  states.set('deleted-workflow', true);
+  workflows.updateWorkflow.mockImplementationOnce(async () => {
+    states.delete('deleted-workflow');
+    throw new Error('Not found');
+  });
+  expect(
+    await service.update(request, 'default', 'automation', { isEnabled: false })
+  ).toMatchObject({
+    isEnabled: false,
+    backingWorkflow: { state: 'missing' },
+  });
+  expect(stored().workflowId).toBe('deleted-workflow');
+  expect(workflows.createWorkflow).not.toHaveBeenCalled();
+});
+
+it('reports a confirmed mismatch after saving as a conflict rather than an unavailable verification', async () => {
+  const { service, workflows, states, stored } = setup();
+  states.set('deleted-workflow', true);
+  workflows.updateWorkflow.mockImplementationOnce(async () => {
+    states.set('deleted-workflow', false);
+  });
+  await expect(
+    service.update(request, 'default', 'automation', { name: 'Saved name' })
+  ).rejects.toMatchObject({
+    output: { statusCode: 409 },
+    message: expect.stringContaining('could not be synchronized'),
+  });
+  expect(stored().name).toBe('Saved name');
 });
 
 it('propagates an update failure when the original workflow still exists', async () => {
