@@ -2278,5 +2278,56 @@ describe('EditOutputFlyout', () => {
         );
       });
     });
+
+    it('should link the headers hint to the spec of the protocol', () => {
+      const { utils: grpcUtils } = renderFlyout(otlpOutput);
+      expect(
+        grpcUtils
+          .getByText('Headers (optional)')
+          .closest('.euiFormRow')
+          ?.querySelector('a')
+          ?.getAttribute('href')
+      ).toContain('/config/configgrpc/README.md');
+      grpcUtils.unmount();
+
+      const { utils: httpUtils } = renderFlyout({
+        ...otlpOutput,
+        otlp_exporter: {
+          protocol: 'http/protobuf',
+          endpoint: 'https://collector.example.com:4318',
+        },
+      });
+      expect(
+        httpUtils
+          .getByText('Headers (optional)')
+          .closest('.euiFormRow')
+          ?.querySelector('a')
+          ?.getAttribute('href')
+      ).toContain('/config/confighttp/README.md');
+    });
+
+    it('should not send the exporter of a preconfigured output that only allows renaming', async () => {
+      const { utils } = renderFlyout({
+        ...otlpOutput,
+        is_preconfigured: true,
+        allow_edit: ['name'],
+      });
+
+      expect(utils.getByTestId('settingsOutputsFlyout.otlpEndpointInput')).toBeDisabled();
+
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.nameInput'), {
+        target: { value: 'renamed otlp output' },
+      });
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith('outputOtlp', {
+          name: 'renamed otlp output',
+          type: 'otlp',
+          is_default: false,
+          is_default_monitoring: false,
+        });
+      });
+    });
   });
 });

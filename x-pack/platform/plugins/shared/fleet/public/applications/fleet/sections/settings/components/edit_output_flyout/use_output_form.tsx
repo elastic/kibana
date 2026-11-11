@@ -774,10 +774,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
   const isRemoteElasticsearch = typeInput.value === outputType.RemoteElasticsearch;
   const isOtlp = typeInput.value === outputType.Otlp;
 
+  const isOtlpExporterDisabled = isDisabled('otlp_exporter');
   const otlpInputs = useOtlpInputs(
     output && isOtlpOutput(output) ? output : undefined,
     isOtlp,
-    isDisabled('otlp_exporter')
+    isOtlpExporterDisabled
   );
 
   const inputs: OutputFormInputsType = {
@@ -1079,7 +1080,11 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
               type: outputType.Otlp,
               is_default: false,
               is_default_monitoring: false,
-              otlp_exporter: buildOtlpExporterConfig(otlpInputs),
+              // an update without the exporter keeps it as it is: a preconfigured output that
+              // does not allow editing it must not send it, or the server rejects the update
+              ...(output && isOtlpExporterDisabled
+                ? {}
+                : { otlp_exporter: buildOtlpExporterConfig(otlpInputs) }),
             } as NewOtlpOutput;
           case outputType.Kafka:
             const definedCA = kafkaSslCertificateAuthoritiesInput.value.filter(
@@ -1370,6 +1375,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOutp
     isKafkaKerberosConfigured,
     kafkaOutput,
     otlpInputs,
+    isOtlpExporterDisabled,
     nameInput.value,
     kafkaHostsInput.value,
     defaultOutputInput.value,

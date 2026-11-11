@@ -113,7 +113,13 @@ const Headers: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({ in
         <FormattedMessage
           id="xpack.fleet.settings.editOutputFlyout.otlpHeadersHelpText"
           defaultMessage="Name/value pairs added to every request. Default: none. See the {specLink}."
-          values={{ specLink: <OtlpSpecLink specUrl={OTEL_SPEC_URLS.configGrpc} /> }}
+          values={{
+            specLink: (
+              <OtlpSpecLink
+                specUrl={isOtlpGrpc(inputs) ? OTEL_SPEC_URLS.configGrpc : OTEL_SPEC_URLS.configHttp}
+              />
+            ),
+          }}
         />
       }
     >
