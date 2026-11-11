@@ -52,12 +52,9 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
     const rootQueryStreamName = 'test-query-stream';
     const rootQueryStreamEsqlQuery = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 
-    // create root query stream
+    // create root query stream, which waits on the "created successfully" toast
     await pageObjects.streams.createRootQueryStream(rootQueryStreamName, rootQueryStreamEsqlQuery);
     await expect(pageObjects.streams.queryStreamFlyout).toBeHidden();
-
-    // root query stream created in the UI
-    await expect(pageObjects.streams.queryStreamCreatedSuccessToast).toBeVisible();
 
     // ES|QL view was created
     const viewName = `$.${rootQueryStreamName}`;
@@ -81,14 +78,14 @@ test.describe('Query streams - Create query stream', { tag: tags.stateful.classi
     const childStreamName = 'host-1';
     const esqlQuery = 'FROM $.logs.ecs | WHERE host.name == "host-1"';
 
-    // create child query stream as a child of the parent ingest stream via streams UI
+    // create child query stream as a child of the parent ingest stream via streams UI,
+    // which waits on the "created" toast
     await pageObjects.streams.clickStreamNameLink(parentStreamName);
     await pageObjects.streams.gotoPartitioningTab(parentStreamName);
     await pageObjects.streams.selectChildStreamType('Query');
     await pageObjects.streams.createChildQueryStreamFromPartitioningTab(childStreamName, esqlQuery);
 
-    // child query stream created appears in the UI
-    await expect(pageObjects.streams.childQueryStreamCreatedSuccessToast).toBeVisible();
+    // child query stream appears in the UI
     await pageObjects.streams.selectChildStreamType('Query');
     await expect(
       page.getByTestId(`queryStream-${parentStreamName}.${childStreamName}`)

@@ -30,6 +30,11 @@ interface CellValueExpectation {
 
 const LEGACY_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
+// Saving a query stream waits on the whole server-side create/update round trip, which against a
+// real Cloud deployment is far slower than Scout's 10s actionTimeout (a sibling spec in the same
+// job logged a 23s stream CRUD call). Sized to ~2x that and to stay inside the 60s test timeout.
+const QUERY_STREAM_SAVE_TIMEOUT = 45_000;
+
 export class StreamsApp {
   public readonly processorFieldComboBox;
   public readonly conditionEditorFieldComboBox;
@@ -1650,19 +1655,28 @@ export class StreamsApp {
 
   async saveInlineQueryStreamEdit() {
     await this.clickQueryStreamFormSaveButton();
-    await this.queryStreamUpdatedSuccessToast.waitFor({ state: 'visible' });
+    await this.queryStreamUpdatedSuccessToast.waitFor({
+      state: 'visible',
+      timeout: QUERY_STREAM_SAVE_TIMEOUT,
+    });
   }
 
   async saveFlyoutQueryStreamCreate() {
     await this.waitForEmptyGlobalToastList();
     await this.clickQueryStreamFlyoutSaveButton();
-    await this.queryStreamCreatedSuccessToast.waitFor({ state: 'visible' });
+    await this.queryStreamCreatedSuccessToast.waitFor({
+      state: 'visible',
+      timeout: QUERY_STREAM_SAVE_TIMEOUT,
+    });
   }
 
   async saveFlyoutQueryStreamEdit() {
     await this.waitForEmptyGlobalToastList();
     await this.clickQueryStreamFlyoutSaveButton();
-    await this.queryStreamUpdatedSuccessToast.waitFor({ state: 'visible' });
+    await this.queryStreamUpdatedSuccessToast.waitFor({
+      state: 'visible',
+      timeout: QUERY_STREAM_SAVE_TIMEOUT,
+    });
   }
 
   async clickQueryStreamFormDeleteButton() {
@@ -1688,7 +1702,10 @@ export class StreamsApp {
 
   async saveChildQueryStream() {
     await this.clickQueryStreamFormCreateButton();
-    await this.childQueryStreamCreatedSuccessToast.waitFor({ state: 'visible' });
+    await this.childQueryStreamCreatedSuccessToast.waitFor({
+      state: 'visible',
+      timeout: QUERY_STREAM_SAVE_TIMEOUT,
+    });
   }
 
   async createChildQueryStreamFromPartitioningTab(childName: string, esqlQuery: string) {
