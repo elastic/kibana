@@ -106,7 +106,14 @@ export interface ResponseEngineOptions {
 export type ResponseOrigin = RejectedResponse['source'] | 'runtime-fixture';
 
 /** Fixtures set while the mock runs, which take precedence over the ones it was created with. */
+/** Checked runtime fixtures: what was rejected, or how to set them when none was. */
+export type PreparedFixtures =
+  | { readonly rejected: readonly RejectedResponse[]; readonly apply?: undefined }
+  | { readonly rejected?: undefined; readonly apply: () => void };
+
 export interface RuntimeFixtures {
+  /** Checks the fixtures against the spec without setting them, so a caller can commit later. */
+  readonly prepare: (fixtures: readonly ResponseFixture[]) => PreparedFixtures;
   /**
    * Sets the fixtures for the operations they name, replacing the runtime fixtures those
    * operations had. Returns the fixtures it rejects, and then sets none of them.
@@ -417,31 +424,44 @@ export const createResponseEngine = (
     return { matched, rejected: rejectedHere };
   };
 
-  const runtimeFixtures: RuntimeFixtures = {
-    set: (entries) => {
-      const checked = entries.map((fixture) => ({ fixture, ...checkRuntimeFixture(fixture) }));
-      const rejectedFixtures = checked.flatMap(({ rejected: found }) => found);
-      if (rejectedFixtures.length > 0) {
-        return rejectedFixtures;
+  const prepare = (entries: readonly ResponseFixture[]): PreparedFixtures => {
+    const checked = entries.map((fixture) => ({ fixture, ...checkRuntimeFixture(fixture) }));
+    const rejectedFixtures = checked.flatMap(({ rejected: found }) => found);
+    if (rejectedFixtures.length > 0) {
+      return { rejected: rejectedFixtures };
+    }
+    const byOperation = new Map<ContractOperation, ResponseFixture[]>();
+    for (const { fixture, matched } of checked) {
+      for (const operation of matched) {
+        byOperation.set(operation, [...(byOperation.get(operation) ?? []), fixture]);
       }
-      const byOperation = new Map<ContractOperation, ResponseFixture[]>();
-      for (const { fixture, matched } of checked) {
-        for (const operation of matched) {
-          byOperation.set(operation, [...(byOperation.get(operation) ?? []), fixture]);
+    }
+    return {
+      apply: () => {
+        for (const [operation, operationFixtures] of byOperation) {
+          runtime.set(operation, {
+            fixtures: operationFixtures,
+            candidates: operationFixtures.map((fixture) =>
+              toCandidate(
+                'runtime-fixture',
+                fixture.when,
+                fixtureResponses(fixture).map(toContractResponse)
+              )
+            ),
+          });
         }
+      },
+    };
+  };
+
+  const runtimeFixtures: RuntimeFixtures = {
+    prepare,
+    set: (entries) => {
+      const { rejected: found, apply } = prepare(entries);
+      if (apply === undefined) {
+        return found;
       }
-      for (const [operation, operationFixtures] of byOperation) {
-        runtime.set(operation, {
-          fixtures: operationFixtures,
-          candidates: operationFixtures.map((fixture) =>
-            toCandidate(
-              'runtime-fixture',
-              fixture.when,
-              fixtureResponses(fixture).map(toContractResponse)
-            )
-          ),
-        });
-      }
+      apply();
       return [];
     },
     list: () => [...new Set([...runtime.values()].flatMap((entry) => entry.fixtures))],

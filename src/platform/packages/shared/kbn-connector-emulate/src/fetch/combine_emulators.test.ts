@@ -527,6 +527,23 @@ describe('combineEmulators', () => {
       expect(runtimeFixtures.list()).toEqual([{ ...earlier, connector: 'tenant' }]);
     });
 
+    it('keep where a sequence is when a later update is rejected', async () => {
+      const { runtimeFixtures, fetch } = createCombined();
+      const tickets = 'https://acme.tenant.example/api/tickets';
+      runtimeFixtures.set([
+        { operation: listTickets, responses: [{ status: 503 }, { status: 204 }] },
+      ]);
+      expect((await fetch(tickets)).status).toBe(503);
+
+      const rejected = runtimeFixtures.set([
+        { operation: listTickets, response: { status: 429 } },
+        { operation: getMe, connector: 'outlook', response: { status: 200, body: { name: 1 } } },
+      ]);
+
+      expect(rejected).toHaveLength(1);
+      expect((await fetch(tickets)).status).toBe(204);
+    });
+
     it('reject operations no connector has, and unknown connectors', () => {
       const { runtimeFixtures } = createCombined();
 

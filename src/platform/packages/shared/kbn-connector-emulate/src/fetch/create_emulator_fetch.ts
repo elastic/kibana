@@ -19,6 +19,7 @@ import type {
 } from '../contract/types';
 import type {
   OperationRef,
+  PreparedFixtures,
   Recording,
   RejectedResponse,
   ResponseFixture,
@@ -150,6 +151,8 @@ export interface Emulator {
    * status, such as a 429, is allowed), and are dropped by `reset()`.
    */
   readonly runtimeFixtures: {
+    /** Checks fixtures without setting them; `apply` sets them when none is rejected. */
+    readonly prepare: (fixtures: readonly ResponseFixture[]) => PreparedFixtures;
     /** Replaces the runtime fixtures of the operations they name; sets none if one is rejected. */
     readonly set: (fixtures: readonly ResponseFixture[]) => readonly RejectedResponse[];
     readonly list: () => readonly ResponseFixture[];
@@ -604,6 +607,7 @@ export const createEmulatorFetch = ({
     operations: listOperations(operations, loadedProtocols),
     rejectedResponses,
     runtimeFixtures: {
+      prepare: engine.runtime.prepare,
       set: engine.runtime.set,
       list: engine.runtime.list,
       clear: ({ id, source } = {}) =>

@@ -8,7 +8,11 @@
  */
 
 import type { Violation } from '../contract/types';
-import type { RejectedResponse, ResponseFixture } from '../engine/response_engine';
+import type {
+  PreparedFixtures,
+  RejectedResponse,
+  ResponseFixture,
+} from '../engine/response_engine';
 import { isNamedOperationRef, toOperationKey } from '../engine/response_engine';
 import type { ContractCall, Emulator } from './create_emulator_fetch';
 import type { OperationDescription } from './describe_operation';
@@ -23,6 +27,11 @@ export interface CombinedEmulator extends Emulator {
    */
   readonly reset: (connector?: string) => void;
   readonly runtimeFixtures: {
+    /** Checks fixtures as `set` does without setting them; `apply` sets them. */
+    readonly prepare: (
+      fixtures: readonly ResponseFixture[],
+      options?: { readonly connector?: string }
+    ) => PreparedFixtures;
     /**
      * Sets each fixture on its `connector`'s emulator, else `connector`'s, else on the one
      * connector whose specs have its operation. Fixtures that match no connector or several are
@@ -203,6 +212,38 @@ export const combineEmulators = (
       : reject('connector', `${having.join(', ')} all have ${label}; name the connector`);
   };
 
+  // Checks every connector's fixtures before setting any, so a rejection changes nothing.
+  const prepareFixtures = (
+    fixtures: readonly ResponseFixture[],
+    { connector: given }: { readonly connector?: string } = {}
+  ): PreparedFixtures => {
+    const routed = fixtures.map((fixture) => ({
+      fixture,
+      ...routeFixture(fixture, fixture.connector ?? given),
+    }));
+    const unrouted = routed.flatMap(({ rejected }) => (rejected ? [rejected] : []));
+    if (unrouted.length > 0) {
+      return { rejected: unrouted };
+    }
+    const byConnector = new Map<string, ResponseFixture[]>();
+    for (const { fixture, connector } of routed) {
+      if (connector !== undefined) {
+        byConnector.set(connector, [...(byConnector.get(connector) ?? []), fixture]);
+      }
+    }
+    const prepared = [...byConnector].map(([name, own]) => ({
+      name,
+      ...emulators[name].runtimeFixtures.prepare(own),
+    }));
+    const rejected = prepared.flatMap(({ name, rejected: found = [] }) =>
+      found.map((entry): RejectedResponse => ({ ...entry, connector: name }))
+    );
+    if (rejected.length > 0) {
+      return { rejected };
+    }
+    return { apply: () => prepared.forEach(({ apply }) => apply?.()) };
+  };
+
   const findTagged = async (request: Request): Promise<string | undefined> => {
     for (const text of await credentialTexts(request)) {
       const match = tagPattern.exec(text);
@@ -267,37 +308,14 @@ export const combineEmulators = (
       emulators[connector].rejectedResponses.map((rejected) => ({ ...rejected, connector }))
     ),
     runtimeFixtures: {
-      set: (fixtures, { connector: given } = {}) => {
-        const routed = fixtures.map((fixture) => ({
-          fixture,
-          ...routeFixture(fixture, fixture.connector ?? given),
-        }));
-        const unrouted = routed.flatMap(({ rejected }) => (rejected ? [rejected] : []));
-        if (unrouted.length > 0) {
-          return unrouted;
+      prepare: prepareFixtures,
+      set: (fixtures, options) => {
+        const { rejected, apply } = prepareFixtures(fixtures, options);
+        if (apply === undefined) {
+          return rejected;
         }
-        const byConnector = new Map<string, ResponseFixture[]>();
-        for (const { fixture, connector } of routed) {
-          if (connector !== undefined) {
-            byConnector.set(connector, [...(byConnector.get(connector) ?? []), fixture]);
-          }
-        }
-        // Each emulator sets all or none of its fixtures; undo the others when one rejects.
-        const before = new Map(
-          [...byConnector.keys()].map((name) => [name, emulators[name].runtimeFixtures.list()])
-        );
-        const rejected = [...byConnector].flatMap(([name, own]) =>
-          emulators[name].runtimeFixtures
-            .set(own)
-            .map((entry): RejectedResponse => ({ ...entry, connector: name }))
-        );
-        if (rejected.length > 0) {
-          for (const [name, previous] of before) {
-            emulators[name].runtimeFixtures.clear();
-            emulators[name].runtimeFixtures.set(previous);
-          }
-        }
-        return rejected;
+        apply();
+        return [];
       },
       list: ({ connector } = {}) =>
         (connector === undefined ? connectors : [checkConnector(connector)]).flatMap((name) =>
