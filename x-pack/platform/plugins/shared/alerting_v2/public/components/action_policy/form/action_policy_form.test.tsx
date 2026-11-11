@@ -20,6 +20,14 @@ const mockGetUrlForApp = jest.fn(
 );
 let mockWorkflowsEnabled = true;
 const mockRefetchWorkflows = jest.fn();
+let mockWorkflowResults: Array<{
+  id: string;
+  name: string;
+  description?: string;
+  enabled?: boolean;
+  managed?: boolean;
+}> = [];
+let mockSelectedWorkflowDetails: Array<{ id: string; name: string; enabled: boolean }> = [];
 
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
@@ -96,12 +104,30 @@ jest.mock('../../../hooks/use_fetch_rule_routing_tags', () => ({
   useFetchRuleRoutingTags: () => ({ data: [], isLoading: false }),
 }));
 
+jest.mock('../../../hooks/use_fetch_workflow', () => ({
+  useFetchWorkflow: (id: string) => ({
+    data: {
+      id,
+      name: `Workflow ${id}`,
+      description: `Description ${id}`,
+      definition: { steps: [] },
+    },
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
 jest.mock('../../../hooks/use_fetch_workflows', () => ({
   useFetchWorkflows: () => ({
-    data: { results: [], total: 0, page: 1, size: 100 },
+    data: { results: mockWorkflowResults, total: mockWorkflowResults.length, page: 1, size: 100 },
     isLoading: false,
+    isError: false,
     refetch: mockRefetchWorkflows,
   }),
+}));
+
+jest.mock('../../../hooks/use_fetch_workflows_by_ids', () => ({
+  useFetchWorkflowsByIds: () => mockSelectedWorkflowDetails,
 }));
 
 const renderForm = (
@@ -149,6 +175,8 @@ const TEST_SUBJ = {
 describe('ActionPolicyForm', () => {
   beforeEach(() => {
     mockWorkflowsEnabled = true;
+    mockWorkflowResults = [];
+    mockSelectedWorkflowDetails = [];
     jest.clearAllMocks();
   });
 
@@ -390,6 +418,7 @@ describe('ActionPolicyForm', () => {
   });
 
   it('refetches workflows when the selector receives focus', () => {
+    mockWorkflowResults = [{ id: 'workflow-1', name: 'Workflow 1', enabled: true }];
     renderForm();
 
     fireEvent.focus(within(screen.getByTestId('destinationsInput')).getByRole('combobox'));
@@ -405,5 +434,155 @@ describe('ActionPolicyForm', () => {
     expect(screen.getByText('Workflows are not enabled')).toBeInTheDocument();
     expect(screen.getByTestId('workflowsDisabledSettingsLink')).toBeInTheDocument();
     expect(screen.queryByTestId('destinationsInput')).not.toBeInTheDocument();
+  });
+
+  describe('destination cards', () => {
+    it('renders a card for each saved destination', () => {
+      renderForm(VALID_FORM_STATE);
+
+      const cards = screen.getByTestId('actionPolicyFormDestinationCards');
+      expect(within(cards).getAllByTestId('actionPolicyDestinationCard')).toHaveLength(1);
+      expect(within(cards).getByText('Workflow workflow-1')).toBeInTheDocument();
+      expect(within(cards).getByText('Description workflow-1')).toBeInTheDocument();
+    });
+
+    it('adds a card on select and removes it on deselect', async () => {
+      mockWorkflowResults = [
+        { id: 'workflow-1', name: 'Workflow 1', enabled: true },
+        { id: 'workflow-2', name: 'Workflow 2', enabled: true },
+      ];
+      const user = userEvent.setup({ delay: null });
+      renderForm();
+
+      expect(screen.queryByTestId('actionPolicyFormDestinationCards')).not.toBeInTheDocument();
+
+      const destinationsCombo = screen.getByTestId('destinationsInput');
+      await user.click(within(destinationsCombo).getByRole('combobox'));
+      await user.click(await screen.findByRole('option', { name: /Workflow 2/ }));
+
+      const cards = screen.getByTestId('actionPolicyFormDestinationCards');
+      expect(within(cards).getByText('Workflow workflow-2')).toBeInTheDocument();
+
+      await user.click(within(destinationsCombo).getByTestId('comboBoxClearButton'));
+
+      expect(screen.queryByTestId('actionPolicyFormDestinationCards')).not.toBeInTheDocument();
+    });
+
+    it('does not render cards when workflows are disabled', () => {
+      mockWorkflowsEnabled = false;
+      renderForm(VALID_FORM_STATE);
+
+      expect(screen.queryByTestId('actionPolicyFormDestinationCards')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('workflow selector', () => {
+    it('renders the description and managed badge of each option', async () => {
+      mockWorkflowResults = [
+        {
+          id: 'workflow-1',
+          name: 'Workflow 1',
+          description: 'Sends alerts to Slack',
+          enabled: true,
+          managed: true,
+        },
+        { id: 'workflow-2', name: 'Workflow 2', description: '', enabled: true },
+      ];
+      const user = userEvent.setup({ delay: null });
+      renderForm();
+
+      await user.click(within(screen.getByTestId('destinationsInput')).getByRole('combobox'));
+
+      const managedOption = await screen.findByRole('option', { name: /Workflow 1/ });
+      expect(within(managedOption).getByText('Sends alerts to Slack')).toBeInTheDocument();
+      expect(within(managedOption).getByText('Managed')).toBeInTheDocument();
+
+      const plainOption = screen.getByRole('option', { name: /Workflow 2/ });
+      expect(within(plainOption).getByText('No description')).toBeInTheDocument();
+      expect(within(plainOption).queryByText('Managed')).not.toBeInTheDocument();
+    });
+
+    it('does not select a disabled workflow', async () => {
+      mockWorkflowResults = [
+        { id: 'workflow-1', name: 'Workflow 1', enabled: false },
+        { id: 'workflow-2', name: 'Workflow 2', enabled: true },
+      ];
+      const user = userEvent.setup({ delay: null });
+      renderForm();
+
+      await user.click(within(screen.getByTestId('destinationsInput')).getByRole('combobox'));
+      const disabledOption = await screen.findByRole('option', { name: /Workflow 1/ });
+      expect(disabledOption).toHaveAttribute('aria-disabled', 'true');
+
+      await user.click(disabledOption);
+
+      expect(screen.queryByTestId('actionPolicyFormDestinationCards')).not.toBeInTheDocument();
+    });
+
+    it('does not add a selected workflow twice when its pill label differs from the option', async () => {
+      // The selected workflow is outside the initial search results, so its pill shows the id.
+      mockWorkflowResults = [{ id: 'workflow-2', name: 'Workflow 2', enabled: true }];
+      const user = userEvent.setup({ delay: null });
+      const { onSubmit } = renderForm(VALID_FORM_STATE);
+
+      mockWorkflowResults = [{ id: 'workflow-1', name: 'Workflow 1', enabled: true }];
+      const combobox = within(screen.getByTestId('destinationsInput')).getByRole('combobox');
+      await user.click(combobox);
+      await user.type(combobox, 'Workflow 1');
+      await user.click(await screen.findByRole('option', { name: /Workflow 1/ }));
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+      expect(onSubmit.mock.calls[0][0].destinations).toEqual([
+        { type: 'workflow', id: 'workflow-1' },
+      ]);
+    });
+
+    it('warns about selected workflows that are disabled without blocking submit', async () => {
+      mockWorkflowResults = [{ id: 'workflow-1', name: 'Workflow 1', enabled: false }];
+      mockSelectedWorkflowDetails = [{ id: 'workflow-1', name: 'Workflow 1', enabled: false }];
+      const user = userEvent.setup({ delay: null });
+      const { onSubmit } = renderForm(VALID_FORM_STATE);
+
+      expect(screen.getByTestId('disabledDestinationsWarning')).toHaveTextContent(
+        'Workflow Workflow 1 is disabled and will be skipped when dispatching.'
+      );
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+
+      await waitFor(() => expect(onSubmit).toHaveBeenCalled());
+    });
+
+    it('does not warn when every selected workflow is enabled', () => {
+      mockSelectedWorkflowDetails = [{ id: 'workflow-1', name: 'Workflow 1', enabled: true }];
+      renderForm(VALID_FORM_STATE);
+
+      expect(screen.queryByTestId('disabledDestinationsWarning')).not.toBeInTheDocument();
+    });
+
+    it('shows the empty state instead of the selector when there are no workflows', async () => {
+      const user = userEvent.setup({ delay: null });
+      renderForm(NAMED_FORM_STATE);
+
+      expect(screen.getByTestId('workflowsEmptyState')).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: 'Create workflow' })).toHaveAttribute(
+        'href',
+        '/app/workflows/create'
+      );
+      expect(screen.queryByTestId('destinationsInput')).not.toBeInTheDocument();
+
+      await user.click(screen.getByTestId(TEST_SUBJ.submit));
+
+      expect(await screen.findByText('At least one destination is required')).toBeInTheDocument();
+    });
+
+    it('keeps the selector when workflows exist', () => {
+      mockWorkflowResults = [{ id: 'workflow-1', name: 'Workflow 1', enabled: true }];
+      renderForm();
+
+      expect(screen.queryByTestId('workflowsEmptyState')).not.toBeInTheDocument();
+      expect(screen.getByTestId('destinationsInput')).toBeInTheDocument();
+    });
   });
 });
