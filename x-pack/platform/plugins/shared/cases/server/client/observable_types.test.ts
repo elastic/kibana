@@ -8,7 +8,7 @@
 import type { Configurations } from '../../common/types/domain/configure/v1';
 import { OBSERVABLE_TYPES_BUILTIN } from '../../common/constants';
 import { createCasesClientMock } from './mocks';
-import { getAvailableObservableTypesMap } from './observable_types';
+import { getAvailableObservableTypes, getAvailableObservableTypesMap } from './observable_types';
 import type { ObservableType } from '../../common/types/domain';
 
 const mockCasesClient = createCasesClientMock();
@@ -49,6 +49,24 @@ describe('getAvailableObservableTypesMap', () => {
     const result = await getAvailableObservableTypesMap(mockCasesClient, 'mock-owner');
 
     expect(result).toEqual(arrayToMap(OBSERVABLE_TYPES_BUILTIN));
+  });
+
+  it('should keep the built-in type when the configuration has an override entry for it', async () => {
+    jest.mocked(mockCasesClient.configure.get).mockResolvedValue([
+      {
+        observableTypes: [
+          {
+            key: 'observable-type-agent-id',
+            label: 'Agent id',
+            paths: [{ path: 'agent.id', enabled: false }],
+          },
+        ],
+      },
+    ] as unknown as Configurations);
+
+    const result = await getAvailableObservableTypes(mockCasesClient, 'mock-owner');
+
+    expect(result).toEqual(OBSERVABLE_TYPES_BUILTIN);
   });
 
   it('should handle errors and return an empty map', async () => {
