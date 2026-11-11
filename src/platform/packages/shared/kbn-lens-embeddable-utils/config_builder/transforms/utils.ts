@@ -548,27 +548,25 @@ export const buildDatasourceStates = (
         : `layer_${layerPosition}`;
     const dataSource = 'data_source' in layer ? layer.data_source : mainDataset;
 
-    if ('type' in layer && layer.type === 'annotations') {
-      // Query annotations query an index, so they require a data source. Manual point/range
-      // annotations are placed by timestamp only and the runtime never reads their data view, so
-      // the data source of a manual-only layer is not stored, even if sent; the Lens XY runtime
-      // falls back to the chart's first data view at load time. Either way an annotation layer
-      // produces no datasource state, so there's nothing to build here.
-      const hasQueryEvent =
-        'events' in layer &&
-        Array.isArray(layer.events) &&
-        layer.events.some((event) => event?.type === 'query');
-      if (!hasQueryEvent) {
-        continue;
-      }
-      if (!dataSource) {
-        throw Error('A data source is required for annotation layers with query events');
-      }
-    }
-
     if (!dataSource) {
       if ('type' in layer && layer.type === 'annotation_group' && 'group_id' in layer) {
         // by-ref annotation layers don't require a data_source
+        continue;
+      }
+      if ('type' in layer && layer.type === 'annotations') {
+        // Query annotations actually query an index, so they require a data
+        // source. Manual point/range annotations are positioned purely by
+        // timestamp and may omit their data_source: they share the data view of
+        // the chart's data layers, which the Lens XY runtime resolves at load
+        // time. Either way an annotation layer produces no datasource state, so
+        // there's nothing to build here.
+        const hasQueryEvent =
+          'events' in layer &&
+          Array.isArray(layer.events) &&
+          layer.events.some((event) => event?.type === 'query');
+        if (hasQueryEvent) {
+          throw Error('A data source is required for annotation layers with query events');
+        }
         continue;
       }
       throw Error('DataSource must be defined');
