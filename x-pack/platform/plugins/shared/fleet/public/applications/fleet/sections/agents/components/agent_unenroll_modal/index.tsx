@@ -46,11 +46,13 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
     onClose,
   });
 
-  // The bulk endpoint rejects agents that already have an unenroll pending, so report how many of
-  // the selection that is. Not computable when the selection is a KQL query rather than a list.
-  const pendingUnenrollCount = Array.isArray(agents)
-    ? agents.filter((agent) => hasPendingUnenroll(agent)).length
-    : 0;
+  // The bulk endpoint skips agents that already have an unenroll pending, so report how many of
+  // the selection that is. Single-agent unenrolls go through a different endpoint that re-issues
+  // the request instead, and a KQL query selection has no agents to inspect.
+  const pendingUnenrollCount =
+    !isSingleAgent && Array.isArray(agents)
+      ? agents.filter((agent) => hasPendingUnenroll(agent)).length
+      : 0;
 
   // An offline agent will not act on the unenroll until it checks in again. The status is a
   // snapshot from when the agents were loaded, so this only adapts the advice, never blocks.
@@ -107,24 +109,24 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
       }
       buttonColor="danger"
     >
+      {hasFleetServer && isSingleAgent ? (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            title={i18n.translate('xpack.fleet.unenrollAgents.unenrollFleetServerTitle', {
+              defaultMessage: 'This agent is running Fleet Server',
+            })}
+            text={
+              <FormattedMessage
+                id="xpack.fleet.unenrollAgents.unenrollFleetServerDescription"
+                defaultMessage="Unenrolling this agent will disconnect a Fleet Server and prevent agents from sending data if no other Fleet Servers exist."
+              />
+            }
+          />
+          <EuiSpacer />
+        </>
+      ) : null}
       <p>
-        {hasFleetServer && isSingleAgent ? (
-          <>
-            <KbnWarningCallout
-              announceOnMount
-              title={i18n.translate('xpack.fleet.unenrollAgents.unenrollFleetServerTitle', {
-                defaultMessage: 'This agent is running Fleet Server',
-              })}
-              text={
-                <FormattedMessage
-                  id="xpack.fleet.unenrollAgents.unenrollFleetServerDescription"
-                  defaultMessage="Unenrolling this agent will disconnect a Fleet Server and prevent agents from sending data if no other Fleet Servers exist."
-                />
-              }
-            />
-            <EuiSpacer />
-          </>
-        ) : null}
         {isSingleAgent ? (
           <FormattedMessage
             id="xpack.fleet.unenrollAgents.deleteSingleDescription"
@@ -177,16 +179,16 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
         <KbnInfoCallout
           title={
             isSingleAgent
-              ? i18n.translate('xpack.fleet.unenrollAgents.forceUnenrollSignpostSingleTitle', {
+              ? i18n.translate('xpack.fleet.unenrollAgents.acknowledgeRequestSingleTitle', {
                   defaultMessage: 'The agent must acknowledge this request',
                 })
-              : i18n.translate('xpack.fleet.unenrollAgents.forceUnenrollSignpostMultipleTitle', {
+              : i18n.translate('xpack.fleet.unenrollAgents.acknowledgeRequestMultipleTitle', {
                   defaultMessage: 'Each agent must acknowledge this request',
                 })
           }
           text={
             <FormattedMessage
-              id="xpack.fleet.unenrollAgents.forceUnenrollSignpostText"
+              id="xpack.fleet.unenrollAgents.acknowledgeRequestText"
               defaultMessage="Fleet waits for {count, plural, one {the agent} other {each agent}} to check in before unenrolling it. If {count, plural, one {the agent is} other {any agents are}} stuck offline, use Force unenroll instead. {learnMore}"
               values={{ count: agentCount, learnMore }}
             />

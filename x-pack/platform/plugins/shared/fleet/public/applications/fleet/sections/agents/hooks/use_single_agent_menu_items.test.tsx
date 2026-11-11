@@ -593,8 +593,9 @@ describe('useSingleAgentMenuItems', () => {
     });
 
     it('should stay available for an agent whose policy no longer exists', () => {
-      // A forced unenroll is the only path that works for orphaned agents, so losing the menu
-      // item when `agentPolicy` is undefined would close the escape hatch.
+      // An undefined `agentPolicy` usually means the policy was not joined into the list, not that
+      // it is gone, so the item must not depend on it. A genuinely orphaned agent is a different
+      // case: the modal sends `revoke`, and only `force` tolerates a missing policy server-side.
       const { result } = renderer.renderHook(() =>
         useSingleAgentMenuItems({
           agent: createMockAgent(),

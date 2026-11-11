@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import React from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import {
   LICENSE_FOR_AGENT_MIGRATION,
@@ -74,7 +74,6 @@ export function useSingleAgentMenuItems({
   const { isRestartAgentActionEnabled } = useRestartAgentAction();
 
   const isAgentless = agentPolicy?.supports_agentless === true;
-  const pendingUnenroll = hasPendingUnenroll(agent);
   const isAgentUpdating = isStuckInUpdating(agent);
   const hasFleetAllPrivileges = authz.fleet.allAgents;
   const agentPrivilegeLevelChangeEnabled =
@@ -392,6 +391,7 @@ export function useSingleAgentMenuItems({
 
     // Unenroll and Uninstall agent
     if (hasFleetAllPrivileges && !agentPolicy?.is_managed) {
+      const pendingUnenroll = hasPendingUnenroll(agent);
       const unenrollLabel = (
         <FormattedMessage
           id="xpack.fleet.agentList.unenrollOneButton"
@@ -417,9 +417,9 @@ export function useSingleAgentMenuItems({
         toolTipContent: pendingUnenroll ? (
           <FormattedMessage
             id="xpack.fleet.agentList.pendingUnenrollTooltip"
-            defaultMessage="An unenroll was requested on {date} and the agent has not acknowledged it. Use Force unenroll to remove it immediately."
+            defaultMessage="An unenroll was requested {requestedAt} and the agent has not acknowledged it. Use Force unenroll to remove it immediately."
             values={{
-              date: <FormattedDate value={agent.unenrollment_started_at} />,
+              requestedAt: <FormattedRelative value={agent.unenrollment_started_at} />,
             }}
           />
         ) : undefined,
@@ -500,7 +500,6 @@ export function useSingleAgentMenuItems({
     agentRollbackEnabled,
     agentHasValidRollback,
     licenseService,
-    pendingUnenroll,
     authz.integrations.readIntegrationPolicies,
     isRestartAgentActionEnabled,
   ]);

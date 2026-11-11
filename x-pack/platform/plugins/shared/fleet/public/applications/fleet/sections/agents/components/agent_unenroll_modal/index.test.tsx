@@ -120,6 +120,19 @@ describe('AgentUnenrollAgentModal', () => {
     expect(getByText(/1 of these agents already has an unenroll pending/)).toBeInTheDocument();
   });
 
+  it('should not report a pending unenroll for a single agent, which gets a fresh request', async () => {
+    const renderer = createFleetTestRendererMock();
+    const { queryByText } = renderer.render(
+      <AgentUnenrollAgentModal
+        agents={[createAgent({ unenrollment_started_at: '2026-11-02T14:02:00Z' })]}
+        agentCount={1}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(queryByText(/unenroll pending/)).toBeNull();
+  });
+
   it('should keep the generic signpost for an online agent', async () => {
     const renderer = createFleetTestRendererMock();
     const { getByText, queryByText } = renderer.render(
