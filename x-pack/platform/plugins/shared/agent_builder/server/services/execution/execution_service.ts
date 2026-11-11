@@ -786,6 +786,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           executionClient,
           conversationService: this.deps.conversationService,
           executionService: this,
+          uiSettings: this.deps.uiSettings,
+          savedObjects: this.deps.savedObjects,
           taskManager: this.deps.taskManager,
           logger: this.logger,
         });

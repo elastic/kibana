@@ -249,6 +249,8 @@ class TaskHandlerImpl implements TaskHandler {
       executionClient,
       conversationService: this.deps.conversationService,
       executionService: this.deps.getExecutionService(),
+      uiSettings: this.deps.uiSettings,
+      savedObjects: this.deps.savedObjects,
       taskManager: this.deps.taskManager,
       logger: this.logger,
     });
@@ -344,6 +346,8 @@ class TaskHandlerImpl implements TaskHandler {
       executionClient: this.createExecutionClient(),
       conversationService: this.deps.conversationService,
       executionService: this.deps.getExecutionService(),
+      uiSettings: this.deps.uiSettings,
+      savedObjects: this.deps.savedObjects,
     });
     this.logger.debug(`Wake of the parent of background execution ${childExecutionId}: ${result}`);
     return { done: result !== 'busy' };

@@ -118,8 +118,9 @@ describe('AgentExecutionService', () => {
     runSoon: mockTaskManagerRunSoon,
   } as any;
 
+  // Reports to a parent read the experimental features setting through this client.
   const uiSettings = {
-    asScopedToClient: jest.fn(),
+    asScopedToClient: jest.fn().mockReturnValue({ get: jest.fn().mockResolvedValue(true) }),
   } as any;
 
   const savedObjects = {

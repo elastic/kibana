@@ -7,6 +7,8 @@
 
 import { of } from 'rxjs';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import {
   AgentExecutionMode,
   ChatEventType,
@@ -100,6 +102,13 @@ const parentRun = {
   },
 } as unknown as AgentExecution;
 
+// The Agent Builder experimental features setting, read through a client scoped to the request.
+let experimentalEnabled = true;
+const uiSettings = {
+  asScopedToClient: () => ({ get: async () => experimentalEnabled }),
+} as unknown as UiSettingsServiceStart;
+const savedObjects = { getScopedClient: () => ({}) } as unknown as SavedObjectsServiceStart;
+
 // `null` stands for a missing parent record; `undefined` would select the default.
 const executionById = (parent: AgentExecution | null = parentRun) =>
   jest
@@ -123,10 +132,13 @@ describe('wakeParent', () => {
         getScopedClientAsUser,
       } as unknown as ConversationService,
       executionService: { maybeExecuteAgent } as unknown as AgentExecutionService,
+      uiSettings,
+      savedObjects,
     });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    experimentalEnabled = true;
     isPendingResumeConversationMock.mockReturnValue(false);
     maybeExecuteAgent = jest.fn().mockResolvedValue({ executionId: 'wake-1', events$: of() });
     get = executionById();
@@ -227,6 +239,14 @@ describe('wakeParent', () => {
     expect(maybeExecuteAgent).not.toHaveBeenCalled();
   });
 
+  it('skips the wake when the experimental features setting is off, without reading anything', async () => {
+    experimentalEnabled = false;
+
+    await expect(wake()).resolves.toBe('skipped');
+    expect(get).not.toHaveBeenCalled();
+    expect(maybeExecuteAgent).not.toHaveBeenCalled();
+  });
+
   it('tries a held parent even when its stored state does not list the child yet', async () => {
     conversationClient.get.mockResolvedValue({
       id: 'conversation-1',
@@ -287,6 +307,8 @@ describe('reportToParent', () => {
         getScopedClientAsUser: jest.fn().mockResolvedValue(conversationClient),
       } as unknown as ConversationService,
       executionService: { maybeExecuteAgent } as unknown as AgentExecutionService,
+      uiSettings,
+      savedObjects,
       taskManager: { ensureScheduled, removeIfExists } as unknown as TaskManagerStartContract,
       logger: loggingSystemMock.createLogger(),
     });
@@ -294,6 +316,7 @@ describe('reportToParent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
+    experimentalEnabled = true;
     isPendingResumeConversationMock.mockReturnValue(false);
     maybeExecuteAgent = jest.fn().mockResolvedValue({ executionId: 'wake-1', events$: of() });
     get = executionById();
@@ -323,6 +346,16 @@ describe('reportToParent', () => {
     expect(ensureScheduled).toHaveBeenCalledTimes(1);
     expect(maybeExecuteAgent).not.toHaveBeenCalled();
     expect(removeIfExists).toHaveBeenCalledWith('agent-wake-child-1');
+  });
+
+  it('leaves the child for the next run, with no retry task, when the experimental features setting is off', async () => {
+    experimentalEnabled = false;
+
+    await report();
+
+    expect(ensureScheduled).not.toHaveBeenCalled();
+    expect(maybeExecuteAgent).not.toHaveBeenCalled();
+    expect(removeIfExists).not.toHaveBeenCalled();
   });
 
   it('holds a retry task on its own credential across the wake and removes it once the report settled', async () => {

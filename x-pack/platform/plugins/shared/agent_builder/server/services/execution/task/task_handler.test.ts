@@ -575,12 +575,16 @@ describe('TaskHandler retrying a wake of a busy parent', () => {
   const fakeRequest = httpServerMock.createKibanaRequest();
   const executeAgent = jest.fn();
   const conversationService = { getScopedClient: jest.fn() };
+  const uiSettings = { asScopedToClient: jest.fn() };
+  const savedObjects = { getScopedClient: jest.fn() };
 
   const wake = () =>
     createTaskHandler({
       logger: loggingSystemMock.createLogger(),
       elasticsearch: { client: { asInternalUser: {} } },
       conversationService,
+      uiSettings,
+      savedObjects,
       getExecutionService: () => ({ executeAgent }),
     } as never).wakeParent({ childExecutionId: 'child-1', fakeRequest });
 
@@ -598,6 +602,8 @@ describe('TaskHandler retrying a wake of a busy parent', () => {
       executionClient: expect.anything(),
       conversationService,
       executionService: { executeAgent },
+      uiSettings,
+      savedObjects,
     });
   });
 

@@ -6,7 +6,10 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { Logger } from '@kbn/logging';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   AgentExecutionMode,
@@ -40,7 +43,23 @@ export interface WakeParentParams {
   executionClient: AgentExecutionClient;
   conversationService: ConversationService;
   executionService: AgentExecutionService;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }
+
+/**
+ * Waking a parent is behind the Agent Builder experimental features setting: off, a finished
+ * child is left for the parent's next run to pick up, as before the feature existed.
+ */
+const isWakeParentEnabled = ({
+  request,
+  uiSettings,
+  savedObjects,
+}: Pick<WakeParentParams, 'request' | 'uiSettings' | 'savedObjects'>): Promise<boolean> =>
+  uiSettings
+    .asScopedToClient(savedObjects.getScopedClient(request))
+    .get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
+    .catch(() => false);
 
 /**
  * The settings the user or caller chose for the run that spawned the child, which its wake
@@ -88,7 +107,12 @@ export const wakeParent = async ({
   executionClient,
   conversationService,
   executionService,
+  uiSettings,
+  savedObjects,
 }: WakeParentParams): Promise<WakeParentResult> => {
+  if (!(await isWakeParentEnabled({ request, uiSettings, savedObjects }))) {
+    return 'skipped';
+  }
   const child = await executionClient.get(childExecutionId);
   if (!child?.owner || !child.parentExecutionId) {
     return 'skipped';
@@ -185,6 +209,13 @@ export const reportToParent = async ({
 }: ReportToParentParams): Promise<void> => {
   const { executionId: childExecutionId, parentExecutionId } = execution;
   if (!parentExecutionId || !execution.agentParams.parentTriggerMode) {
+    return;
+  }
+  // Checked before a retry is left behind; the wake checks again for a retry run after a toggle.
+  if (!(await isWakeParentEnabled(wake))) {
+    logger.debug(
+      `Background execution ${childExecutionId} finished but waking its parent is disabled: left for the next run`
+    );
     return;
   }
 
