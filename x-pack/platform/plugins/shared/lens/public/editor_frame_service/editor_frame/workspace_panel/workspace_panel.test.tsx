@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { DatasourceMap, UserMessage, VisualizationMap } from '@kbn/lens-common';
-import { fireEvent, screen, act } from '@testing-library/react';
+import { fireEvent, screen, act, waitFor, within } from '@testing-library/react';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -17,10 +17,10 @@ import {
   renderWithReduxStore,
 } from '../../../mocks';
 
-import { mockDataPlugin, mountWithReduxStore } from '../../../mocks';
+import { mockDataPlugin } from '../../../mocks';
 
 import { WorkspacePanel } from './workspace_panel';
-import type { ReactWrapper } from 'enzyme';
+
 import { ChildDragDropProvider } from '@kbn/dom-drag-drop';
 import { buildExistsFilter } from '@kbn/es-query';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -66,8 +66,6 @@ const trigger = { exec: jest.fn() } as unknown as jest.Mocked<Trigger>;
 const uiActionsMock = uiActionsPluginMock.createStartContract();
 uiActionsMock.getTrigger.mockReturnValue(trigger);
 
-let instance: ReactWrapper;
-
 let defaultDatasourceMap: DatasourceMap;
 let defaultVisualizationMap: VisualizationMap;
 
@@ -98,12 +96,6 @@ const toExpr = (
       { type: 'function', function: fn, arguments: {} },
     ],
   });
-
-const SELECTORS = {
-  applyChangesButton: 'button[data-test-subj="lnsApplyChanges__toolbar"]',
-  dragDropPrompt: '[data-test-subj="workspace-drag-drop-prompt"]',
-  applyChangesPrompt: '[data-test-subj="workspace-apply-changes-prompt"]',
-};
 
 describe('workspace_panel', () => {
   beforeEach(() => {
@@ -383,52 +375,17 @@ describe('workspace_panel', () => {
   });
 
   describe('enzyme tests', () => {
-    afterEach(() => {
-      instance.unmount();
-    });
-
     it('should show proper workspace prompts when auto-apply disabled', async () => {
       const framePublicAPI = createMockFramePublicAPI();
       framePublicAPI.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
       };
 
-      const configureValidVisualization = () => {
-        mockVisualization.toExpression.mockReturnValue('testVis');
-        mockDatasource.toExpression.mockReturnValue('datasource');
-        mockDatasource.getLayers.mockReturnValue(['first']);
-        act(() => {
-          instance.setProps({
-            visualizationMap: {
-              testVis: { ...mockVisualization, toExpression: () => 'new-vis' },
-            },
-          });
-        });
-      };
-
-      const deleteVisualization = () => {
-        act(() => {
-          instance.setProps({
-            visualizationMap: {
-              testVis: { ...mockVisualization, toExpression: () => null },
-            },
-          });
-        });
-      };
-
-      const dragDropPromptShowing = () => instance.exists(SELECTORS.dragDropPrompt);
-
-      const applyChangesPromptShowing = () => instance.exists(SELECTORS.applyChangesPrompt);
-
-      const visualizationShowing = () => instance.exists(expressionRendererMock);
-
-      const mounted = mountWithReduxStore(
+      const renderWorkspace = (visualizationExpression: () => string | null) => (
         <EditorFrameServiceProvider
-          datasourceMap={{
-            formBased: mockDatasource,
-          }}
+          datasourceMap={{ formBased: mockDatasource }}
           visualizationMap={{
-            testVis: { ...mockVisualization, toExpression: () => null },
+            testVis: { ...mockVisualization, toExpression: visualizationExpression },
           }}
         >
           <WorkspacePanel
@@ -436,45 +393,56 @@ describe('workspace_panel', () => {
             framePublicAPI={framePublicAPI}
             ExpressionRenderer={expressionRendererMock}
           />
-        </EditorFrameServiceProvider>,
-        {
-          preloadedState: {
-            autoApplyDisabled: true,
-          },
-        }
+        </EditorFrameServiceProvider>
       );
 
-      instance = mounted.instance;
-      instance.update();
+      const configureValidVisualization = () => {
+        mockVisualization.toExpression.mockReturnValue('testVis');
+        mockDatasource.toExpression.mockReturnValue('datasource');
+        mockDatasource.getLayers.mockReturnValue(['first']);
+        mounted.rerender(renderWorkspace(() => 'new-vis'));
+      };
+
+      const deleteVisualization = () => {
+        mounted.rerender(renderWorkspace(() => null));
+      };
+
+      const dragDropPromptShowing = () => screen.queryByTestId('workspace-drag-drop-prompt');
+      const applyChangesPromptShowing = () =>
+        screen.queryByTestId('workspace-apply-changes-prompt');
+      const visualizationShowing = () => screen.queryByTestId('lnsExpressionRenderer');
+
+      const mounted = renderWithReduxStore(
+        renderWorkspace(() => null),
+        {},
+        {
+          preloadedState: { autoApplyDisabled: true },
+        }
+      );
 
       expect(dragDropPromptShowing()).toBeTruthy();
 
       configureValidVisualization();
-      instance.update();
 
       expect(dragDropPromptShowing()).toBeFalsy();
       expect(applyChangesPromptShowing()).toBeTruthy();
 
-      instance.find(SELECTORS.applyChangesButton).simulate('click');
-      instance.update();
+      fireEvent.click(screen.getByTestId('lnsApplyChanges__toolbar'));
 
       expect(visualizationShowing()).toBeTruthy();
 
       deleteVisualization();
-      instance.update();
 
       expect(visualizationShowing()).toBeTruthy();
 
       act(() => {
-        mounted.lensStore.dispatch(applyChanges());
+        mounted.store.dispatch(applyChanges());
       });
-      instance.update();
 
       expect(visualizationShowing()).toBeFalsy();
       expect(dragDropPromptShowing()).toBeTruthy();
 
       configureValidVisualization();
-      instance.update();
 
       expect(dragDropPromptShowing()).toBeFalsy();
       expect(applyChangesPromptShowing()).toBeTruthy();
@@ -489,7 +457,7 @@ describe('workspace_panel', () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       const props = defaultProps;
 
-      const mounted = mountWithReduxStore(
+      renderWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
             formBased: mockDatasource,
@@ -506,8 +474,8 @@ describe('workspace_panel', () => {
           />
         </EditorFrameServiceProvider>
       );
-      instance = mounted.instance;
 
+      await waitFor(() => expect(expressionRendererMock).toHaveBeenCalled());
       const onEvent = expressionRendererMock.mock.calls[0][0].onEvent!;
 
       const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
@@ -527,7 +495,7 @@ describe('workspace_panel', () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       const props = defaultProps;
 
-      const mounted = mountWithReduxStore(
+      renderWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
             formBased: mockDatasource,
@@ -544,8 +512,8 @@ describe('workspace_panel', () => {
           />
         </EditorFrameServiceProvider>
       );
-      instance = mounted.instance;
 
+      await waitFor(() => expect(expressionRendererMock).toHaveBeenCalled());
       const onEvent = expressionRendererMock.mock.calls[0][0].onEvent!;
 
       const eventData = {
@@ -570,7 +538,7 @@ describe('workspace_panel', () => {
       mockDatasource.getLayers.mockReturnValue(['first']);
       const props = defaultProps;
 
-      const mounted = mountWithReduxStore(
+      renderWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
             formBased: mockDatasource,
@@ -587,8 +555,8 @@ describe('workspace_panel', () => {
           />
         </EditorFrameServiceProvider>
       );
-      instance = mounted.instance;
 
+      await waitFor(() => expect(expressionRendererMock).toHaveBeenCalled());
       const hasCompatibleActions = expressionRendererMock.mock.calls[0][0].hasCompatibleActions!;
 
       const eventData = { myData: true, table: { rows: [], columns: [] }, column: 0 };
@@ -608,7 +576,7 @@ describe('workspace_panel', () => {
       mockDatasource.toExpression.mockReturnValue('datasource');
       mockDatasource.getLayers.mockReturnValue(['table1']);
 
-      const mounted = mountWithReduxStore(
+      const mounted = renderWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
             formBased: mockDatasource,
@@ -625,17 +593,18 @@ describe('workspace_panel', () => {
         </EditorFrameServiceProvider>
       );
 
-      instance = mounted.instance;
-
+      await waitFor(() => expect(expressionRendererMock).toHaveBeenCalled());
       const onData = expressionRendererMock.mock.calls[0][0].onData$!;
 
       const tablesData = {
         table1: { columns: [], rows: [] },
         table2: { columns: [], rows: [] },
       };
-      onData(undefined, { tables: { tables: tablesData } });
+      act(() => {
+        onData(undefined, { tables: { tables: tablesData } });
+      });
 
-      expect(mounted.lensStore.dispatch).toHaveBeenCalledWith({
+      expect(mounted.store.dispatch).toHaveBeenCalledWith({
         type: 'lens/onActiveDataChange',
         payload: {
           activeData: tablesData,
@@ -656,7 +625,7 @@ describe('workspace_panel', () => {
 
       expressionRendererMock = jest.fn((_arg) => <span />);
 
-      const mounted = mountWithReduxStore(
+      const mounted = renderWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
             formBased: mockDatasource,
@@ -672,23 +641,28 @@ describe('workspace_panel', () => {
           />
         </EditorFrameServiceProvider>
       );
-      instance = mounted.instance;
-      instance.update();
 
-      expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+      await waitFor(() => expect(expressionRendererMock).toHaveBeenCalledTimes(2));
 
-      act(() => {
-        instance.setProps({
-          framePublicAPI: {
-            ...framePublicAPI,
-            dateRange: { fromDate: 'now-90d', toDate: 'now-30d' },
-          },
-        });
-      });
+      mounted.rerender(
+        <EditorFrameServiceProvider
+          datasourceMap={{ formBased: mockDatasource }}
+          visualizationMap={{
+            testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+          }}
+        >
+          <WorkspacePanel
+            {...defaultProps}
+            framePublicAPI={{
+              ...framePublicAPI,
+              dateRange: { fromDate: 'now-90d', toDate: 'now-30d' },
+            }}
+            ExpressionRenderer={expressionRendererMock}
+          />
+        </EditorFrameServiceProvider>
+      );
 
-      instance.update();
-
-      expect(expressionRendererMock).toHaveBeenCalledTimes(3);
+      await waitFor(() => expect(expressionRendererMock).toHaveBeenCalledTimes(3));
     });
 
     it('should run the expression again if the filters change', async () => {
@@ -703,7 +677,7 @@ describe('workspace_panel', () => {
         .mockReturnValueOnce('datasource second');
 
       expressionRendererMock = jest.fn((_arg) => <span />);
-      const mounted = mountWithReduxStore(
+      const mounted = renderWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
             formBased: mockDatasource,
@@ -719,27 +693,31 @@ describe('workspace_panel', () => {
           />
         </EditorFrameServiceProvider>
       );
-      instance = mounted.instance;
 
-      instance.update();
-
-      expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+      await waitFor(() => expect(expressionRendererMock).toHaveBeenCalledTimes(2));
 
       const indexPattern = { id: 'index1' } as unknown as DataView;
       const field = { name: 'myfield' } as unknown as FieldSpec;
 
-      act(() => {
-        instance.setProps({
-          framePublicAPI: {
-            ...framePublicAPI,
-            filters: [buildExistsFilter(field, indexPattern)],
-          },
-        });
-      });
+      mounted.rerender(
+        <EditorFrameServiceProvider
+          datasourceMap={{ formBased: mockDatasource }}
+          visualizationMap={{
+            testVis: { ...mockVisualization, toExpression: () => 'testVis' },
+          }}
+        >
+          <WorkspacePanel
+            {...defaultProps}
+            framePublicAPI={{
+              ...framePublicAPI,
+              filters: [buildExistsFilter(field, indexPattern)],
+            }}
+            ExpressionRenderer={expressionRendererMock}
+          />
+        </EditorFrameServiceProvider>
+      );
 
-      instance.update();
-
-      expect(expressionRendererMock).toHaveBeenCalledTimes(3);
+      await waitFor(() => expect(expressionRendererMock).toHaveBeenCalledTimes(3));
     });
 
     it('should show configuration error messages if present', async () => {
@@ -764,7 +742,7 @@ describe('workspace_panel', () => {
 
       const getUserMessages = jest.fn(() => messages);
 
-      const mounted = mountWithReduxStore(
+      renderWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
             formBased: mockDatasource,
@@ -774,14 +752,14 @@ describe('workspace_panel', () => {
           <WorkspacePanel {...defaultProps} getUserMessages={getUserMessages} />
         </EditorFrameServiceProvider>
       );
-      instance = mounted.instance;
-      instance.update();
 
-      // EuiFlexItem duplicates internally the attribute, so we need to filter only the most inner one here
-      expect(instance.find('[data-test-subj="workspace-error-message"]').last().text()).toEqual(
-        `hey there i'm an error`
+      expect(
+        within(screen.getByTestId('workspace-error-message')).getByText("i'm an error")
+      ).toBeInTheDocument();
+      expect(screen.getByTestId('workspace-error-message')).toHaveTextContent(
+        /^hey there i'm an error$/
       );
-      expect(instance.find(expressionRendererMock)).toHaveLength(0);
+      expect(screen.queryByTestId('lnsExpressionRenderer')).not.toBeInTheDocument();
       expect(getUserMessages).toHaveBeenCalledWith(['visualization', 'visualizationInEditor'], {
         severity: 'error',
       });
@@ -795,7 +773,7 @@ describe('workspace_panel', () => {
       let userMessages = [] as UserMessage[];
       const getUserMessageFn = jest.fn(() => userMessages);
 
-      const mounted = mountWithReduxStore(
+      const mounted = renderWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
             formBased: mockDatasource,
@@ -808,17 +786,15 @@ describe('workspace_panel', () => {
         </EditorFrameServiceProvider>
       );
 
-      instance = mounted.instance;
-      const lensStore = mounted.lensStore;
+      const lensStore = mounted.store;
 
-      const showingErrors = () => instance.exists('[data-test-subj="workspace-error-message"]');
+      const showingErrors = () => screen.queryByTestId('workspace-error-message');
 
       expect(showingErrors()).toBeFalsy();
 
       act(() => {
         lensStore.dispatch(disableAutoApply());
       });
-      instance.update();
 
       expect(showingErrors()).toBeFalsy();
 
@@ -845,8 +821,7 @@ describe('workspace_panel', () => {
       expect(showingErrors()).toBeFalsy();
 
       // errors should appear when problem changes are applied
-      instance.find(SELECTORS.applyChangesButton).simulate('click');
-      instance.update();
+      fireEvent.click(screen.getByTestId('lnsApplyChanges__toolbar'));
 
       expect(showingErrors()).toBeTruthy();
     });
@@ -860,11 +835,15 @@ describe('workspace_panel', () => {
         first: mockDatasource.publicAPIMock,
       };
 
+      let userMessages: UserMessage[] = [];
       const mockRemoveUserMessages = jest.fn();
-      const mockAddUserMessages = jest.fn(() => mockRemoveUserMessages);
-      const mockGetUserMessages = jest.fn<UserMessage[], unknown[]>(() => []);
+      const mockAddUserMessages = jest.fn((messages: UserMessage[]) => {
+        userMessages = messages;
+        return mockRemoveUserMessages;
+      });
+      const mockGetUserMessages = jest.fn(() => userMessages);
 
-      const mounted = mountWithReduxStore(
+      renderWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
             formBased: mockDatasource,
@@ -881,10 +860,12 @@ describe('workspace_panel', () => {
           />
         </EditorFrameServiceProvider>
       );
-      instance = mounted.instance;
 
+      expect(await screen.findByTestId('workspace-error-message')).toHaveTextContent(
+        'An unexpected error occurred while preparing the chart'
+      );
       expect(mockAddUserMessages.mock.lastCall).toMatchSnapshot();
-      expect(instance.find(expressionRendererMock)).toHaveLength(0);
+      expect(screen.queryByTestId('lnsExpressionRenderer')).not.toBeInTheDocument();
     });
 
     it('should not attempt to run the expression again if it does not change', async () => {
@@ -895,7 +876,7 @@ describe('workspace_panel', () => {
         first: mockDatasource.publicAPIMock,
       };
 
-      const mounted = mountWithReduxStore(
+      const workspace = (
         <EditorFrameServiceProvider
           datasourceMap={{
             formBased: mockDatasource,
@@ -911,14 +892,13 @@ describe('workspace_panel', () => {
           />
         </EditorFrameServiceProvider>
       );
-      instance = mounted.instance;
-      instance.update();
 
-      expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+      const { rerender } = renderWithReduxStore(workspace);
+      await waitFor(() => expect(expressionRendererMock).toHaveBeenCalledTimes(2));
 
-      instance.update();
+      rerender(workspace);
 
-      expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+      await waitFor(() => expect(expressionRendererMock).toHaveBeenCalledTimes(2));
     });
 
     it('should attempt to run the expression again if it changes', async () => {
@@ -928,7 +908,7 @@ describe('workspace_panel', () => {
       framePublicAPI.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
       };
-      const mounted = mountWithReduxStore(
+      const mounted = renderWithReduxStore(
         <EditorFrameServiceProvider
           datasourceMap={{
             formBased: mockDatasource,
@@ -944,31 +924,29 @@ describe('workspace_panel', () => {
           />
         </EditorFrameServiceProvider>
       );
-      instance = mounted.instance;
-      const lensStore = mounted.lensStore;
+      const lensStore = mounted.store;
 
-      instance.update();
-
-      expect(expressionRendererMock).toHaveBeenCalledTimes(2);
+      await waitFor(() => expect(expressionRendererMock).toHaveBeenCalledTimes(2));
 
       expressionRendererMock.mockImplementation((_) => {
-        return <span />;
+        return <span data-test-subj="lnsExpressionRenderer" />;
       });
 
-      lensStore!.dispatch(
-        setState({
-          visualization: {
-            activeId: 'testVis',
-            state: {},
-            selectedLayerId: null,
-          },
-        })
-      );
-      instance.update();
+      act(() => {
+        lensStore.dispatch(
+          setState({
+            visualization: {
+              activeId: 'testVis',
+              state: {},
+              selectedLayerId: null,
+            },
+          })
+        );
+      });
 
-      expect(expressionRendererMock).toHaveBeenCalledTimes(3);
+      await waitFor(() => expect(expressionRendererMock).toHaveBeenCalledTimes(3));
 
-      expect(instance.find(expressionRendererMock)).toHaveLength(1);
+      expect(screen.getAllByTestId('lnsExpressionRenderer')).toHaveLength(1);
     });
   });
 
