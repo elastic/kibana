@@ -25,7 +25,7 @@ import {
 } from './settings_tabs';
 
 const nightshiftLabel = i18n.translate('xpack.nightshift.settingsPage.backToNightshiftLabel', {
-  defaultMessage: 'Nightshift',
+  defaultMessage: 'nightshift',
 });
 
 const detectionsLabel = i18n.translate('xpack.nightshift.settingsPage.backToDetectionsLabel', {

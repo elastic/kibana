@@ -144,7 +144,7 @@ describe('SettingsPage', () => {
     {
       path: '/settings/detections',
       expectedHref: '/app/nightshift/',
-      expectedLabel: 'Nightshift',
+      expectedLabel: 'nightshift',
     },
   ])(
     'links back to $expectedLabel from Detections settings for the matching origin',
