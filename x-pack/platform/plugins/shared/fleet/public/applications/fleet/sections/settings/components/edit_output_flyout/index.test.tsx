@@ -2166,9 +2166,14 @@ describe('EditOutputFlyout', () => {
       fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpHeaderValue0'), {
         target: { value: 'acme' },
       });
+      fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpKeepaliveTimeInput'), {
+        target: { value: '30s' },
+      });
+      fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpKeepaliveTimeInput'));
       fireEvent.change(utils.getByTestId('settingsOutputsFlyout.otlpWriteBufferSizeInput'), {
         target: { value: '4096' },
       });
+      fireEvent.blur(utils.getByTestId('settingsOutputsFlyout.otlpWriteBufferSizeInput'));
       fireEvent.click(utils.getByText('Save and apply settings'));
 
       await waitFor(() => {
@@ -2184,7 +2189,7 @@ describe('EditOutputFlyout', () => {
             timeout: null,
             headers: { 'x-tenant': 'acme' },
             balancer_name: null,
-            keepalive: null,
+            keepalive: { time: '30s', timeout: null, permit_without_stream: false },
             read_buffer_size: null,
             write_buffer_size: 4096,
             wait_for_ready: false,
