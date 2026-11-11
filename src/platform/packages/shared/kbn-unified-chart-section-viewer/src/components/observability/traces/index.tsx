@@ -12,6 +12,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { UnifiedBreakdownFieldSelector, resolveBreakdownField } from '@kbn/unified-histogram';
 import { TraceMetricsProvider } from './context/trace_metrics_context';
+import { ChartLoadedContext } from '../../../context/chart_loaded_context';
 import { TRACES_BREAKDOWN_RECOMMENDED_FIELDS } from './constants';
 import { useEsqlQueryInfo } from '../../../hooks/use_esql_query_info';
 import { ErrorRateChart } from './error_rate';
@@ -36,6 +37,7 @@ function TraceMetricsGrid({
   isComponentVisible,
   breakdownField,
   onBreakdownFieldChange,
+  onChartLoaded,
 }: UnifiedMetricsGridProps) {
   const { query, dataSource, columns } = fetchParams;
   const esqlQuery = useEsqlQueryInfo({
@@ -136,17 +138,19 @@ function TraceMetricsGrid({
             align-content: center;
           `}
         >
-          <EuiFlexGrid columns={3} gutterSize="s">
-            <EuiFlexItem>
-              <LatencyChart />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ErrorRateChart />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ThroughputChart />
-            </EuiFlexItem>
-          </EuiFlexGrid>
+          <ChartLoadedContext.Provider value={onChartLoaded}>
+            <EuiFlexGrid columns={3} gutterSize="s">
+              <EuiFlexItem>
+                <LatencyChart />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ErrorRateChart />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <ThroughputChart />
+              </EuiFlexItem>
+            </EuiFlexGrid>
+          </ChartLoadedContext.Provider>
         </EuiPanel>
       </TraceMetricsProvider>
     </ChartsGrid>

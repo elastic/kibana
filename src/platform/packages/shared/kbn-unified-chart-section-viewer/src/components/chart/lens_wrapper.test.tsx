@@ -20,6 +20,7 @@ import { LensWrapper } from './lens_wrapper';
 import type { LensWrapperProps } from './lens_wrapper';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
+import { ChartLoadedContext } from '../../context/chart_loaded_context';
 import {
   ACTION_COPY_TO_DASHBOARD,
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -75,6 +76,49 @@ describe('LensWrapper', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('onChartLoaded', () => {
+    const tablesWithRows = { tables: { tables: { layer: { rows: [{ value: 1 }] } } } };
+    const tablesWithoutRows = { tables: { tables: { layer: { rows: [] } } } };
+
+    const renderAndGetOnLoad = (onChartLoaded?: () => void) => {
+      render(
+        <EuiThemeProvider>
+          <ChartLoadedContext.Provider value={onChartLoaded}>
+            <LensWrapper {...defaultProps} />
+          </ChartLoadedContext.Provider>
+        </EuiThemeProvider>
+      );
+
+      return mockEmbeddableComponent.mock.calls[0][0].onLoad;
+    };
+
+    it('reports a chart that finished loading with rows', () => {
+      const onChartLoaded = jest.fn();
+      const onLoad = renderAndGetOnLoad(onChartLoaded);
+
+      onLoad(false, tablesWithRows);
+
+      expect(onChartLoaded).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not report a chart that is loading or has no rows', () => {
+      const onChartLoaded = jest.fn();
+      const onLoad = renderAndGetOnLoad(onChartLoaded);
+
+      onLoad(true, tablesWithRows);
+      onLoad(false, tablesWithoutRows);
+      onLoad(false, undefined);
+
+      expect(onChartLoaded).not.toHaveBeenCalled();
+    });
+
+    it('does not throw without a provider', () => {
+      const onLoad = renderAndGetOnLoad();
+
+      expect(() => onLoad(false, tablesWithRows)).not.toThrow();
+    });
   });
 
   describe('titleHighlight prop', () => {
