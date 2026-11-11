@@ -2,7 +2,8 @@
   "type": "shared-browser",
   "id": "@kbn/cloud-security-posture",
   "owner": [
-    "@elastic/contextual-security-apps"
+    "@elastic/contextual-security-apps",
+    "@elastic/siem-beacon"
   ],
   "group": "security",
   "visibility": "private"

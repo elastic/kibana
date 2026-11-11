@@ -2,7 +2,8 @@
   "type": "plugin",
   "id": "@kbn/cloud-defend-plugin",
   "owner": [
-    "@elastic/contextual-security-apps"
+    "@elastic/contextual-security-apps",
+    "@elastic/siem-beacon"
   ],
   "group": "security",
   "visibility": "private",

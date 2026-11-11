@@ -1446,16 +1446,16 @@ x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-th
 x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting
-x-pack/solutions/security/packages/distribution-bar @elastic/contextual-security-apps
+x-pack/solutions/security/packages/distribution-bar @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-threat-hunting
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting
 x-pack/solutions/security/packages/features @elastic/security-investigations
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-alertzero-common @elastic/alertzero-common-layer
 x-pack/solutions/security/packages/kbn-attack-discovery-schedules-common @elastic/security-threat-hunting
-x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps
-x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps
-x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps
+x-pack/solutions/security/packages/kbn-cloud-security-posture/common @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/packages/kbn-cloud-security-posture/graph @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/packages/kbn-cloud-security-posture/public @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/packages/kbn-discoveries @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-discoveries-schemas @elastic/security-threat-hunting
 x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow @elastic/security-investigations
@@ -1474,7 +1474,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage @elasti
 x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations @elastic/automatic-migrations
 x-pack/solutions/security/packages/kbn-evals-suite-security-esql-generation-regression @elastic/security-generative-ai
 x-pack/solutions/security/packages/kbn-evals-suite-security-persona-matrix @elastic/security-generative-ai
-x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps
+x-pack/solutions/security/packages/kbn-evals-suite-siem-readiness @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/packages/kbn-evals-suite-threat-intel-enrichment @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa @elastic/security-engineering-productivity
 x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot @elastic/security-generative-ai
@@ -1501,26 +1501,26 @@ x-pack/solutions/security/packages/security-mitre-attack-common @elastic/securit
 x-pack/solutions/security/packages/security-mitre-attack-mocks @elastic/security-detection-engineering
 x-pack/solutions/security/packages/security-mitre-attack-server @elastic/security-detection-engineering
 x-pack/solutions/security/packages/side-nav @elastic/security-investigations
-x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps
+x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/packages/storybook/config @elastic/security-investigations
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
 x-pack/solutions/security/packages/timeline-common @elastic/security-threat-hunting
 x-pack/solutions/security/packages/timeline-components @elastic/security-threat-hunting
 x-pack/solutions/security/packages/upselling @elastic/security-investigations
 x-pack/solutions/security/plugins/alertzero @elastic/alertzero-common-layer
-x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/discoveries @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/security-threat-hunting
-x-pack/solutions/security/plugins/kubernetes_security @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/kubernetes_security @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engineering
 x-pack/solutions/security/plugins/mitre_attack @elastic/security-detection-engineering
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_serverless @elastic/security-solution
-x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/session_view @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting
 x-pack/solutions/security/test
 x-pack/solutions/security/test_plugins/resolver_test @elastic/security-solution
@@ -2913,7 +2913,7 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /x-pack/solutions/security/test/serverless/ @elastic/security-solution
 /x-pack/solutions/security/test/serverless/functional/configs/config.ts @elastic/security-solution @elastic/appex-qa
 /x-pack/solutions/security/test/serverless/functional/configs/config.mki_only.ts @elastic/security-solution @elastic/appex-qa
-/x-pack/solutions/security/test/serverless/functional/configs/index.mki_only.ts @elastic/security-solution @elastic/appex-qa @elastic/contextual-security-apps
+/x-pack/solutions/security/test/serverless/functional/configs/index.mki_only.ts @elastic/security-solution @elastic/appex-qa @elastic/contextual-security-apps @elastic/siem-beacon
 /x-pack/solutions/security/test/serverless/functional/configs/config.feature_flags.ts @elastic/security-solution
 
 #CC# /x-pack/solutions/security/plugins/security_solution/ @elastic/security-solution
@@ -3051,8 +3051,8 @@ x-pack/solutions/security/test/serverless/functional/configs/config.trial_compan
 ## Security Solution sub teams - Cloud Security Posture
 
 x-pack/solutions/security/plugins/security_solution/public/asset_inventory @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/public/siem_readiness @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/security_solution/public/cloud_defend @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/security_solution/public/siem_readiness @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/security_solution/public/cloud_defend @elastic/contextual-security-apps @elastic/siem-beacon
 
 ## Security Solution sub teams - Security Entity Store
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/security-entity-analytics
@@ -3676,18 +3676,18 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity @ela
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/home @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_details_flyout @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_store @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/maintainers @elastic/contextual-security-apps @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/maintainers @elastic/contextual-security-apps @elastic/siem-beacon @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/agent_builder/skills/entity_analytics @elastic/security-entity-analytics
 x-pack/solutions/security/plugins/security_solution/server/agent_builder/tools/entity_analytics @elastic/security-entity-analytics
 
 ## Security Solution sub teams - Entity Resolution (contextual-security-apps co-ownership)
-x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_resolution @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_resolution_file_uploader @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_resolution @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/common/entity_analytics/entity_store/resolution_csv_upload.ts @elastic/contextual-security-apps @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_resolution @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_resolution @elastic/contextual-security-apps @elastic/siem-beacon @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/public/entity_analytics/components/entity_resolution_file_uploader @elastic/contextual-security-apps @elastic/siem-beacon @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_resolution @elastic/contextual-security-apps @elastic/siem-beacon @elastic/security-entity-analytics
+x-pack/solutions/security/plugins/security_solution/common/entity_analytics/entity_store/resolution_csv_upload.ts @elastic/contextual-security-apps @elastic/siem-beacon @elastic/security-entity-analytics
+x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_resolution @elastic/contextual-security-apps @elastic/siem-beacon
 
 ## Security Solution sub teams - entity_analytics test tree per-feature overrides
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store @elastic/security-entity-analytics
@@ -3696,7 +3696,7 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_anal
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_analytics_home/entities_table.cy.ts @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/entity_analytics/entity_analytics_home/entities_table_grouping.cy.ts @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_analytics/entity_analytics_home.ts @elastic/security-entity-analytics
-x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_analytics/entity_flyout_resolution.ts @elastic/contextual-security-apps
+x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/entity_analytics/entity_flyout_resolution.ts @elastic/contextual-security-apps @elastic/siem-beacon
 
 ## Security Solution sub teams - GenAI
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/genai @elastic/security-threat-hunting
@@ -3747,44 +3747,44 @@ x-pack/platform/test/automatic_import_api_integration @elastic/siem-conduit
 ## Packages
 ## Plugins
 ## Security Solution sub teams
-x-pack/solutions/security/plugins/security_solution/public/common/components/sessions_viewer @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/security_solution/public/common/components/sessions_viewer @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/security_solution/public/cloud_security_posture @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/security_solution/public/kubernetes @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/plugins/security_solution/server/lib/asset_inventory @elastic/security-entity-analytics
-x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/generic_right @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity/generic @elastic/contextual-security-apps
-/x-pack/solutions/security/plugins/security_solution/public/flyout/csp_details @elastic/contextual-security-apps
-/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/csp @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/graph @elastic/contextual-security-apps
-x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/session_view @elastic/contextual-security-apps
+x-pack/solutions/security/plugins/security_solution/server/lib/siem_readiness @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/security_solution/public/flyout/entity_details/generic_right @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/entity/generic @elastic/contextual-security-apps @elastic/siem-beacon
+/x-pack/solutions/security/plugins/security_solution/public/flyout/csp_details @elastic/contextual-security-apps @elastic/siem-beacon
+/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/csp @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/graph @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/tools/session_view @elastic/contextual-security-apps @elastic/siem-beacon
 
 ## Fleet plugin (co-owned with Fleet team)
-x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/streams-ui @elastic/contextual-security-apps
+x-pack/platform/plugins/shared/fleet/public/components/cloud_security_posture @elastic/streams-ui @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/platform/plugins/shared/fleet/public/components/cloud_connector @elastic/streams-ui @elastic/siem-conduit
 x-pack/platform/plugins/shared/fleet/common/services/cloud_connectors @elastic/streams-ui @elastic/siem-conduit
 x-pack/platform/plugins/shared/fleet/server/routes/cloud_connector @elastic/streams-ui @elastic/siem-conduit
 x-pack/platform/plugins/shared/fleet/server/services/cloud_connectors @elastic/streams-ui @elastic/siem-conduit
-x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/streams-ui @elastic/contextual-security-apps
-x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/streams-ui @elastic/contextual-security-apps
+x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/streams-ui @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/streams-ui @elastic/contextual-security-apps @elastic/siem-beacon
 ## SessionView tests
-x-pack/solutions/security/test/fixtures/es_archives/session_view @elastic/contextual-security-apps
-x-pack/solutions/security/test/fixtures/es_archives/kubernetes_security @elastic/contextual-security-apps
-x-pack/solutions/security/test/session_view @elastic/contextual-security-apps # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
+x-pack/solutions/security/test/fixtures/es_archives/session_view @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/test/fixtures/es_archives/kubernetes_security @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/test/session_view @elastic/contextual-security-apps @elastic/siem-beacon # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
 ## CSP tests
-x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/ @elastic/contextual-security-apps
-x-pack/solutions/security/test/cloud_security_posture_functional/ @elastic/contextual-security-apps
-x-pack/solutions/security/test/cloud_security_posture_api/ @elastic/contextual-security-apps
+x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/ @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/test/cloud_security_posture_functional/ @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/test/cloud_security_posture_api/ @elastic/contextual-security-apps @elastic/siem-beacon
 ## Kubernetes Security tests
-x-pack/solutions/security/test/kubernetes_security/ @elastic/contextual-security-apps
+x-pack/solutions/security/test/kubernetes_security/ @elastic/contextual-security-apps @elastic/siem-beacon
 ## CSP Serverless tests
-x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.* @elastic/contextual-security-apps
-x-pack/solutions/security/test/serverless/functional/test_suites/ftr/cloud_security_posture/ @elastic/contextual-security-apps
-x-pack/solutions/security/test/serverless/api_integration/test_suites/cloud_security_posture/ @elastic/contextual-security-apps
+x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.* @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/test/serverless/functional/test_suites/ftr/cloud_security_posture/ @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/test/serverless/api_integration/test_suites/cloud_security_posture/ @elastic/contextual-security-apps @elastic/siem-beacon
 ## CSP e2e tests
 
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/contextual-security-apps
-x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/contextual-security-apps
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/misconfiguration_contextual_flyout.cy.ts @elastic/contextual-security-apps @elastic/siem-beacon
+x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/cloud_security_posture/vulnerabilities_contextual_flyout.cy.ts @elastic/contextual-security-apps @elastic/siem-beacon
 x-pack/solutions/security/test/security_solution_cypress/cypress/e2e/asset_inventory @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/screens/asset_inventory @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/asset_inventory @elastic/security-entity-analytics

@@ -112,6 +112,16 @@
     }
   },
   {
+    "id": "siem-beacon",
+    "name": "SIEM Beacon",
+    "areas": [
+      "security"
+    ],
+    "github": {
+      "team": "elastic/siem-beacon"
+    }
+  },
+  {
     "id": "security-core-analysis",
     "name": "Core Analysis",
     "areas": [
