@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { md, serializeMarkdown } from '@elastic/isomer-sdk/markdown';
+import { clampSlackText } from '@elastic/isomer-sdk/slack';
 import { i18n } from '@kbn/i18n';
 import type { ComponentsNode } from '@kbn/isomer-components';
 import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
@@ -33,18 +35,9 @@ const SEVERITY_LABELS: Record<Severity, string> = {
   low: 'Low',
 };
 
-const truncate = (value: string, max: number): string =>
-  value.length > max ? `${value.slice(0, max - 1).trimEnd()}…` : value;
-
 const oneLine = (value: string): string => value.replace(/\s+/g, ' ').trim();
 
 const markdown = (text: string): ComponentsNode => ({ type: 'markdown', text });
-
-const quote = (text: string): string =>
-  text
-    .split('\n')
-    .map((line) => (line.trim() ? `> ${line}` : '>'))
-    .join('\n');
 
 const section = (title: string, ...body: ComponentsNode[]): ComponentsNode => ({
   type: 'section',
@@ -59,8 +52,6 @@ const collapsibleSection = (title: string, ...body: ComponentsNode[]): Component
   body,
 });
 
-const codeSpan = (value: string): string => `\`${value.replace(/`/g, "'")}\``;
-
 const capitalize = (value: string): string => value.charAt(0).toUpperCase() + value.slice(1);
 
 const truncateAtSentence = (value: string, max: number): string => {
@@ -73,31 +64,38 @@ const truncateAtSentence = (value: string, max: number): string => {
     fitting.lastIndexOf('! '),
     fitting.lastIndexOf('? ')
   );
-  return end > max / 2 ? fitting.slice(0, end + 1) : truncate(value, max);
+  return end > max / 2 ? fitting.slice(0, end + 1) : clampSlackText(value, max);
 };
 
-const LIST_ITEM = /^\s*([-*+]|\d+\.)\s/;
+const LIST_ITEM = /^\s*(?:[-*+]|\d+[.)])\s+/;
 
 const splitLead = (text: string): { lead: string; rest: string } => {
   const trimmed = text.trim();
-  const [firstLine] = trimmed.split('\n');
-  const sentence = /^(.+?[.!?])(?=\s+[A-Z`*_]|$)/.exec(firstLine)?.[1];
-  const lead = (sentence ?? firstLine).replace(LIST_ITEM, '');
-  const cut = truncate(lead, MAX_LEAD_LENGTH);
+  const unlisted = trimmed.replace(LIST_ITEM, '');
+  const [firstLine] = unlisted.split('\n');
+  const sentence = /^(.+?[.!?])(?=\s+[A-Z`*_]|$)/.exec(firstLine)?.[1] ?? firstLine;
+  const lead = clampSlackText(sentence, MAX_LEAD_LENGTH);
   return {
-    lead: cut,
-    rest: cut === lead ? trimmed.slice(trimmed.indexOf(lead) + lead.length).trim() : trimmed,
+    lead,
+    rest: lead === sentence ? unlisted.slice(sentence.length).trim() : trimmed,
   };
 };
 
 const affectedLine = (impact: NotifiableInvestigation['impact']): string => {
   const names = (impact?.entities ?? []).map(({ name }) => oneLine(name)).filter(Boolean);
+  if (names.length === 0) {
+    return '';
+  }
   const hidden = names.length - MAX_AFFECTED;
-  return names.length > 0
-    ? `Affected: ${names.slice(0, MAX_AFFECTED).map(codeSpan).join(', ')}${
-        hidden > 0 ? ` +${hidden} more` : ''
-      }`
-    : '';
+  return serializeMarkdown(
+    md.paragraph(
+      'Affected: ',
+      ...names
+        .slice(0, MAX_AFFECTED)
+        .flatMap((name, index) => (index > 0 ? [', ', md.code(name)] : [md.code(name)])),
+      ...(hidden > 0 ? [` +${hidden} more`] : [])
+    )
+  );
 };
 
 interface Finding {
@@ -142,22 +140,32 @@ const findingsOf = ({ summary, verdict, impact }: NotifiableInvestigation): Find
     });
 };
 
-// A quote holds only text, so a conclusion with a list stays plain to keep it together.
-const asQuoteOrList = (text: string): string => (LIST_ITEM.test(text) ? text : quote(text));
+const conclusionBody = (text: string) =>
+  LIST_ITEM.test(text) ? md.authored(text) : md.blockquote(md.authored(text));
 
 // One node per finding: Isomer spaces consecutive blocks apart, which a single block would not.
 const leadNodes = (findings: Finding[]): ComponentsNode[] =>
   findings
     .filter(({ lead }) => lead)
     .map(({ label, lead }) =>
-      markdown(`**${label}**\n${label === 'Conclusion' ? quote(lead) : lead}`)
+      markdown(
+        label === 'Conclusion'
+          ? serializeMarkdown([md.paragraph(md.strong(label)), md.blockquote(md.authored(lead))])
+          : `**${label}**\n${lead}`
+      )
     );
 
-const resultOf = (reason: string): string => {
-  const marked = /\*\*Result:?\*\*:?\s*([\s\S]*?)(?=\*\*[^*\n]+:\*\*|\*\*[^*\n]+\*\*:|$)/i.exec(
-    reason
-  )?.[1];
-  return truncateAtSentence((marked ?? reason).trim(), MAX_RESULT_LENGTH);
+const RESULT_SECTION =
+  /\*\*Result:?\*\*:?\s*([\s\S]*?)(?=\s+\*\*[Tt]ested:?\*\*:?|\n\s*\*\*[A-Z][a-z]+(?::\*\*|\*\*:)|$)/i;
+const TESTED_SECTION = /\*\*Tested:?\*\*:?[^\n]*(?:\n|$)/gi;
+
+const hypothesisDetail = (reason: string): string => {
+  const marked = RESULT_SECTION.exec(reason)?.[1];
+  if (marked !== undefined) {
+    const result = truncateAtSentence(marked.trim(), MAX_RESULT_LENGTH);
+    return result ? `**Result:** ${result}` : '';
+  }
+  return truncateAtSentence(reason.replace(TESTED_SECTION, '').trim(), MAX_RESULT_LENGTH);
 };
 
 // Dismissed hypotheses are not findings. Without a confirmed one, the leading open one stands in.
@@ -173,14 +181,16 @@ const hypothesesNodes = (
   if (shown.length === 0) {
     return [];
   }
-  const items = shown.map(({ candidate, confidence, status, reason }) => {
-    const heading = `**${truncate(oneLine(candidate), MAX_CANDIDATE_LENGTH)}** _(${capitalize(
-      status
-    )} · ${Math.round(confidence * 100)}%)_`;
-    const result = resultOf(reason ?? '');
-    return result ? `${heading}\n\n**Result:** ${result}` : heading;
+  const items = shown.flatMap(({ candidate, confidence, status, reason }) => {
+    const heading = md.paragraph(
+      md.strong(clampSlackText(oneLine(candidate), MAX_CANDIDATE_LENGTH)),
+      ' ',
+      md.emphasis(`(${capitalize(status)} · ${Math.round(confidence * 100)}%)`)
+    );
+    const detail = hypothesisDetail(reason ?? '');
+    return detail ? [heading, md.authored(detail)] : [heading];
   });
-  return [markdown(`**Hypotheses**\n\n${items.join('\n\n')}`)];
+  return [markdown(serializeMarkdown([md.paragraph(md.strong('Hypotheses')), ...items]))];
 };
 
 const detailsSection = (
@@ -192,7 +202,14 @@ const detailsSection = (
       .filter(({ detail }) => detail)
       .map(({ label, detail }) => {
         const text = truncateAtSentence(detail, MAX_DETAIL_LENGTH);
-        return [markdown(`**${label}**\n\n${label === 'Conclusion' ? asQuoteOrList(text) : text}`)];
+        return [
+          markdown(
+            serializeMarkdown([
+              md.paragraph(md.strong(label)),
+              label === 'Conclusion' ? conclusionBody(text) : md.authored(text),
+            ])
+          ),
+        ];
       }),
     hypothesesNodes(hypotheses ?? []),
   ].filter((group) => group.length > 0);
@@ -215,7 +232,7 @@ const context = (...items: string[]): ComponentsNode[] => {
         {
           type: 'context',
           items: present.map((text) => ({
-            text: truncate(oneLine(text), MAX_CONTEXT_ITEM_LENGTH),
+            text: clampSlackText(oneLine(text), MAX_CONTEXT_ITEM_LENGTH),
           })),
         },
       ]
@@ -248,16 +265,12 @@ export const buildInvestigationSlackComposition = ({
 }): ComponentsNode[] => {
   const title: ComponentsNode = {
     type: 'header',
-    text: truncate(oneLine(investigation.title) || 'Investigation', MAX_HEADER_LENGTH),
+    text: clampSlackText(oneLine(investigation.title) || 'Investigation', MAX_HEADER_LENGTH),
   };
   const automation = automationName ? `Automation: ${oneLine(automationName)}` : '';
 
   if (phase === 'started') {
-    return [
-      title,
-      ...context(':hourglass_flowing_sand: Investigating…', automation),
-      openInvestigation(url),
-    ];
+    return [title, ...context('⏳ Investigating…', automation), openInvestigation(url)];
   }
 
   if (phase === 'failed' || phase === 'timed_out') {
@@ -265,8 +278,8 @@ export const buildInvestigationSlackComposition = ({
     const failureReason = reason?.trim() || investigation.error?.trim() || outcome;
     return [
       title,
-      ...context(`:warning: ${outcome}`, automation),
-      section('What went wrong', markdown(truncate(failureReason, MAX_SUMMARY_LENGTH))),
+      ...context(`⚠️ ${outcome}`, automation),
+      section('What went wrong', markdown(clampSlackText(failureReason, MAX_SUMMARY_LENGTH))),
       openInvestigation(url),
     ];
   }
@@ -298,10 +311,16 @@ export const renderInvestigationSlackMessage = ({
   );
   return {
     text,
-    // `section` cannot set the container width, and a card shrinks to its content without it.
+    // `section` cannot set the container width or initial collapsed state.
     // https://docs.slack.dev/reference/block-kit/blocks/container-block
     blocks: (blocks as SlackBlock[]).map((block) =>
-      block.type === 'container' ? { ...block, width: 'full' } : block
+      block.type === 'container'
+        ? {
+            ...block,
+            width: 'full',
+            ...(block.is_collapsible ? { default_collapsed: true } : {}),
+          }
+        : block
     ),
   };
 };

@@ -45,7 +45,6 @@ const isSpacer = (block: SlackBlock): boolean =>
 
 const FRAME_TYPES = ['header', 'context', 'container', 'divider', 'actions'];
 
-/** The visible lead blocks, without the spacers between them. */
 const leadsOf = ({ blocks }: ReturnType<typeof render>): string =>
   JSON.stringify(blocks.filter((block) => !FRAME_TYPES.includes(block.type) && !isSpacer(block)));
 
@@ -66,7 +65,11 @@ describe('renderInvestigationSlackMessage', () => {
     ]);
     expect(blocks.slice(2, container).filter(isSpacer)).toHaveLength(2);
     expect(sectionTitles(message)).toEqual(['Investigation details']);
-    expect(blocks[container]).toMatchObject({ is_collapsible: true, width: 'full' });
+    expect(blocks[container]).toMatchObject({
+      is_collapsible: true,
+      default_collapsed: true,
+      width: 'full',
+    });
     expect(blocks[1]).toMatchObject({
       elements: [{ text: 'Severity: High  ·  Automation: Prod critical alerts' }],
     });
@@ -81,11 +84,13 @@ describe('renderInvestigationSlackMessage', () => {
     expect(detailsOf(message)).toContain('It started after the deploy');
   });
 
-  it('keeps only the first sentence of a finding visible', () => {
-    const summary = 'The pool saturated. '.repeat(40).trim();
+  it('keeps only the first sentence of a finding visible, stripping any list marker first', () => {
+    const summary = '1. The pool saturated. '.concat('The pool saturated. '.repeat(39)).trim();
     const message = render({ investigation: completed({ summary }) });
+    const leads = leadsOf(message);
 
-    expect(leadsOf(message).match(/The pool saturated\./g)).toHaveLength(1);
+    expect(leads).not.toContain('"1."');
+    expect(leads.match(/The pool saturated\./g)).toHaveLength(1);
     expect(detailsOf(message)).toContain('The pool saturated.');
   });
 
@@ -101,26 +106,23 @@ describe('renderInvestigationSlackMessage', () => {
     expect(detailsOf(message)).toContain('More detail follows.');
   });
 
-  it('quotes the conclusion lead, keeps a conclusion list together, and renders markdown instead of its syntax', () => {
-    const message = render();
+  it('quotes the conclusion lead, keeps a conclusion list together, and renders markdown in leads and details', () => {
+    const message = render({
+      investigation: completed({
+        verdict:
+          'Connection pool exhausted.\n\n- **Tested:** pool stats.\n- Nothing was ruled out.',
+      }),
+    });
     const { blocks, text } = message;
     const json = JSON.stringify(blocks);
 
     expect(leadsOf(message)).toContain('rich_text_quote');
     expect(detailsOf(message)).not.toContain('rich_text_quote');
     expect(json).toContain('rich_text_list');
-    expect(json).not.toContain('- It started');
+    expect(json).toContain('"text":"Tested:","style":{"bold":true}');
+    expect(json).not.toContain('- **Tested');
     expect(json).not.toContain('**');
     expect(text).toContain('View Full Investigation: ' + URL);
-  });
-
-  it('renders markdown in the details instead of its syntax', () => {
-    const { blocks } = render({
-      investigation: completed({ verdict: 'Pool exhausted.\n\n**Tested:** pool stats.' }),
-    });
-
-    expect(JSON.stringify(blocks)).toContain('"text":"Tested:","style":{"bold":true}');
-    expect(JSON.stringify(blocks)).not.toContain('**Tested');
   });
 
   it('shows each hypothesis with its result under it, without how it was tested', () => {
@@ -134,12 +136,17 @@ describe('renderInvestigationSlackMessage', () => {
             reason: '**Tested:** pool stats. **Result:** pool hit its max at 14:03.',
           },
           {
-            candidate: 'Inline',
+            candidate: 'Inline bold colon',
             confidence: 0.6,
             status: 'confirmed',
-            reason: '**Result:** the **payments-api** leaks connections.',
+            reason: '**Result:** **payments-api**: the pool reached 100 connections.',
           },
-          { candidate: 'Plain', confidence: 0.5, status: 'confirmed', reason: 'No marker here.' },
+          {
+            candidate: 'Plain',
+            confidence: 0.5,
+            status: 'confirmed',
+            reason: '**Tested:** pool stats.\nNo marker here.',
+          },
         ],
       }),
     });
@@ -149,8 +156,9 @@ describe('renderInvestigationSlackMessage', () => {
     expect(details).toContain('Confirmed · 86%');
     expect(details).toContain('pool hit its max at 14:03.');
     expect(details).not.toContain('pool stats');
+    expect(details).toContain('the pool reached 100 connections.');
     expect(details).toContain('No marker here.');
-    expect(details).toContain('leaks connections.');
+    expect(details.match(/"text":"Result:"/g)).toHaveLength(2);
     expect(details).not.toContain('"type":"table"');
   });
 
@@ -223,23 +231,12 @@ describe('renderInvestigationSlackMessage', () => {
     expect(message.blocks.map(({ type }) => type)).toEqual(['header', 'divider', 'actions']);
   });
 
-  it('keeps a long title and long text within what the primitives accept', () => {
-    const message = render({
+  it('clamps overlong inputs and keeps the fallback text under the Slack limit', () => {
+    const long = 'w'.repeat(1500);
+    const { blocks, text } = render({
+      automationName: 'a'.repeat(1000),
       investigation: completed({
         title: 'x'.repeat(500),
-        verdict: 'y'.repeat(10000),
-        summary: 'z'.repeat(10000),
-      }),
-    });
-
-    expect((message.blocks[0].text as { text: string }).text.length).toBeLessThanOrEqual(200);
-    expect(message.blocks.length).toBeLessThanOrEqual(50);
-  });
-
-  it('keeps the fallback text under the Slack text limit with maximum-length findings', () => {
-    const long = 'w'.repeat(1500);
-    const { text } = render({
-      investigation: completed({
         summary: long,
         verdict: long,
         impact: { summary: long, entities: [{ name: 'checkout' }] },
@@ -252,6 +249,9 @@ describe('renderInvestigationSlackMessage', () => {
       }),
     });
 
+    expect((blocks[0].text as { text: string }).text.length).toBeLessThanOrEqual(200);
+    expect((blocks[1].elements as Array<{ text: string }>)[0].text.length).toBeLessThan(600);
+    expect(blocks.length).toBeLessThanOrEqual(50);
     expect(text.length).toBeLessThanOrEqual(4000);
   });
 
@@ -279,12 +279,6 @@ describe('renderInvestigationSlackMessage', () => {
     expect(text).toContain('&lt;!channel&gt;');
   });
 
-  it('clamps a long automation name instead of failing the render', () => {
-    const { blocks } = render({ automationName: 'a'.repeat(1000), phase: 'started' });
-
-    expect((blocks[1].elements as Array<{ text: string }>)[0].text.length).toBeLessThan(600);
-  });
-
   it('announces a started investigation without findings', () => {
     const { blocks } = render({
       investigation: completed({ verdict: 'Not yet' }),
@@ -298,22 +292,18 @@ describe('renderInvestigationSlackMessage', () => {
     expect(JSON.stringify(blocks)).not.toContain('Not yet');
   });
 
-  it('reports a failure with its reason', () => {
-    const message = render({ phase: 'failed', reason: 'Agent timed out' });
-
-    expect(JSON.stringify(message.blocks[1])).toContain(':warning: Investigation failed');
-    expect(sectionTitles(message)).toEqual(['What went wrong']);
-    expect(message.text).toContain('Agent timed out');
-  });
-
-  it('falls back to a generic failure when the reason is blank', () => {
+  it.each([
+    { phase: 'failed' as const, reason: 'Agent timed out', expected: 'Agent timed out' },
+    { phase: 'timed_out' as const, reason: ' \n ', expected: 'Investigation timed out' },
+  ])('reports $phase outcome', ({ phase, reason, expected }) => {
     const message = render({
       investigation: completed({ error: '  ' }),
-      phase: 'timed_out',
-      reason: ' \n ',
+      phase,
+      reason,
     });
 
+    expect(JSON.stringify(message.blocks[1])).toContain('⚠️');
     expect(sectionTitles(message)).toEqual(['What went wrong']);
-    expect(message.text).toContain('Investigation timed out');
+    expect(message.text).toContain(expected);
   });
 });
