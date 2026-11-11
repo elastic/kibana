@@ -21,6 +21,8 @@ import { useObservableFlyoutApi } from '../use_observable_flyout_api';
 import { ObservableCasesOverview } from './observable_cases_overview';
 import { useCurrentObservable } from './use_current_observable';
 import { useObservableFlyoutActions } from './use_observable_flyout_actions';
+import { useAddObservableToChat } from '../../../../agent_builder/use_add_observable_to_chat';
+import { ADD_TO_CHAT } from '../../../../agent_builder/translations';
 import * as i18n from '../translations';
 
 // Descriptions and metadata values are free text, so they wrap instead of truncating.
@@ -52,6 +54,11 @@ export const ObservableFlyout = ({
     observable,
     onObservableUpdated,
   });
+  const chatContext = useMemo(
+    () => ({ observable, caseData, typeLabel }),
+    [caseData, observable, typeLabel]
+  );
+  const { addToChat, isAddToChatAvailable } = useAddObservableToChat(chatContext);
 
   const onShowCases = useCallback(
     () => openObservableCases({ observable, caseData, typeLabel }),
@@ -171,6 +178,15 @@ export const ObservableFlyout = ({
           </FlyoutTemplate.Body.Section>
         </FlyoutTemplate.Body>
         <FlyoutTemplate.Footer>
+          {isAddToChatAvailable && (
+            <FlyoutTemplate.Footer.SecondaryAction
+              variant="ai"
+              iconType="productAgent"
+              label={ADD_TO_CHAT}
+              onClick={addToChat}
+              data-test-subj="cases-observable-flyout-add-to-chat"
+            />
+          )}
           <FlyoutTemplate.Footer.PrimaryActionMenu
             label={i18n.TAKE_ACTION}
             panels={actionPanels}

@@ -19,12 +19,14 @@ import { useCaseConfigureResponse } from '../../../configure_cases/__mock__';
 import { useCanRunCaseWorkflow } from '../../../workflows/use_run_case_workflow';
 import { useObservableFlyoutApi } from '../use_observable_flyout_api';
 import { createObservableFlyoutApiMock } from '../use_observable_flyout_api.mock';
+import { useAddObservableToChat } from '../../../../agent_builder/use_add_observable_to_chat';
 import { ObservableFlyout } from '.';
 
 jest.mock('../../../../containers/use_find_cases_by_observable');
 jest.mock('../../../../containers/use_find_observables');
 jest.mock('../../../../containers/configure/use_get_case_configuration');
 jest.mock('../use_observable_flyout_api');
+jest.mock('../../../../agent_builder/use_add_observable_to_chat');
 jest.mock('../../../workflows/use_run_case_workflow', () => ({
   ...jest.requireActual('../../../workflows/use_run_case_workflow'),
   useCanRunCaseWorkflow: jest.fn(),
@@ -41,6 +43,9 @@ const useFindCasesByObservableMock = jest.mocked(useFindCasesByObservable);
 const useFindObservablesMock = jest.mocked(useFindObservables);
 
 const flyoutApi = createObservableFlyoutApiMock();
+const addToChat = jest.fn();
+const mockChat = (isAddToChatAvailable: boolean) =>
+  jest.mocked(useAddObservableToChat).mockReturnValue({ addToChat, isAddToChatAvailable });
 
 const params = {
   observable: {
@@ -88,6 +93,7 @@ describe('ObservableFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useObservableFlyoutApi).mockReturnValue(flyoutApi);
+    mockChat(true);
     (useGetCaseConfiguration as jest.Mock).mockReturnValue(useCaseConfigureResponse);
     jest.mocked(useCanRunCaseWorkflow).mockReturnValue(true);
     mockStored([]);
@@ -316,6 +322,29 @@ describe('ObservableFlyout', () => {
       );
 
       expect(screen.queryByTestId('cases-observable-flyout-take-action')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('add to chat', () => {
+    it('adds the observable to a chat', async () => {
+      renderPanel();
+
+      expect(useAddObservableToChat).toHaveBeenLastCalledWith({
+        observable: params.observable,
+        caseData: params.caseData,
+        typeLabel: 'IPv4',
+      });
+      await userEvent.click(screen.getByTestId('cases-observable-flyout-add-to-chat'));
+
+      expect(addToChat).toHaveBeenCalledTimes(1);
+    });
+
+    it('is left out when chat is not available', () => {
+      mockChat(false);
+      renderPanel();
+
+      expect(screen.queryByTestId('cases-observable-flyout-add-to-chat')).not.toBeInTheDocument();
+      expect(screen.getByTestId('cases-observable-flyout-take-action')).toBeInTheDocument();
     });
   });
 });
