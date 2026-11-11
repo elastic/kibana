@@ -7,27 +7,32 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { EuiButton, EuiText, useEuiTheme, type EuiButtonProps } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export type ShowMoreButtonProps = {
+export interface ShowMoreButtonProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'type' | 'children'> {
   /** How many items this click will reveal (capped by what remains). */
   count: number;
   /** How many items are still hidden. */
   remaining: number;
   isLoading?: boolean;
-} & Omit<
-  EuiButtonProps,
-  'children' | 'color' | 'size' | 'iconType' | 'iconSide' | 'isLoading' | 'fullWidth' | 'css'
->;
+  'data-test-subj'?: string;
+}
 
-/** Full-width list footer: “Show N more of M” with a down chevron — shared by home and onboarding. */
+/**
+ * Full-width list footer: “Show N more of M” with a down chevron — shared by home and onboarding.
+ *
+ * Native `<button>` on purpose: this is a list-footer strip (top border, flat fill), not button
+ * chrome. Composing EUI for the icon/text keeps us on design tokens without `&&`-overriding
+ * `EuiButton`'s borders, radius, height, and fill.
+ */
 export function ShowMoreButton({
   count,
   remaining,
   onClick,
   isLoading = false,
-  isDisabled,
+  disabled,
   'data-test-subj': dataTestSubj,
   'aria-label': ariaLabel,
   ...rest
@@ -36,60 +41,65 @@ export function ShowMoreButton({
   const revealCount = Math.min(count, remaining);
 
   return (
-    <EuiButton
-      fullWidth
-      color="text"
-      size="s"
-      iconType="chevronSingleDown"
-      iconSide="left"
-      isLoading={isLoading}
-      isDisabled={isDisabled || isLoading}
+    <button
+      type="button"
       onClick={onClick}
+      disabled={disabled || isLoading}
       data-test-subj={dataTestSubj}
       aria-label={ariaLabel}
       css={css`
-        /* Keep the list-footer strip look: flat, full-bleed, top border only. */
-        && {
-          border: none;
-          border-radius: 0;
-          border-top: ${euiTheme.border.thin};
-          background: ${euiTheme.colors.emptyShade};
-          box-shadow: none;
-          color: ${euiTheme.colors.textParagraph};
-          font-weight: ${euiTheme.font.weight.medium};
-          height: auto;
-          min-height: 0;
-          padding: ${euiTheme.size.s} ${euiTheme.size.m};
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: ${euiTheme.size.xs};
+        width: 100%;
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
+        border: none;
+        border-top: ${euiTheme.border.thin};
+        border-radius: 0;
+        background: ${euiTheme.colors.emptyShade};
+        cursor: ${isLoading ? 'default' : 'pointer'};
+        color: ${euiTheme.colors.textParagraph};
 
-          &:hover:not(:disabled),
-          &:focus,
-          &:focus-visible {
-            background: ${euiTheme.colors.backgroundBaseInteractiveHover};
-            text-decoration: none;
-          }
+        &:hover:not(:disabled),
+        &:focus,
+        &:focus-visible {
+          background: ${euiTheme.colors.backgroundBaseInteractiveHover};
         }
       `}
       {...rest}
     >
-      {i18n.translate('xpack.nightshift.showMoreButton.label', {
-        defaultMessage: 'Show {count} more',
-        values: { count: revealCount },
-      })}{' '}
+      {isLoading ? (
+        <EuiLoadingSpinner size="s" />
+      ) : (
+        <EuiIcon type="chevronSingleDown" size="s" aria-hidden={true} />
+      )}
       <EuiText
         component="span"
-        color={euiTheme.colors.textDisabled}
+        size="s"
         css={css`
-          display: inline;
-          font-size: inherit;
-          font-weight: ${euiTheme.font.weight.regular};
-          line-height: inherit;
+          font-weight: ${euiTheme.font.weight.medium};
         `}
       >
-        {i18n.translate('xpack.nightshift.showMoreButton.ofRemaining', {
-          defaultMessage: 'of {count}',
-          values: { count: remaining },
-        })}
+        {i18n.translate('xpack.nightshift.showMoreButton.label', {
+          defaultMessage: 'Show {count} more',
+          values: { count: revealCount },
+        })}{' '}
+        <EuiText
+          component="span"
+          size="s"
+          color={euiTheme.colors.textDisabled}
+          css={css`
+            display: inline;
+            font-weight: ${euiTheme.font.weight.regular};
+          `}
+        >
+          {i18n.translate('xpack.nightshift.showMoreButton.ofRemaining', {
+            defaultMessage: 'of {count}',
+            values: { count: remaining },
+          })}
+        </EuiText>
       </EuiText>
-    </EuiButton>
+    </button>
   );
 }
