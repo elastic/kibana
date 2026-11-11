@@ -97,6 +97,11 @@ it('passes a strict connector override and request-scoped resolver to the discov
     step: 'discovery',
     requestedId: 'model-alias',
   });
+  expect(handlerParams.telemetry.trackSignificantEventsDiscoveryTriggered).toHaveBeenCalledWith({
+    workflow_execution_id: 'execution-1',
+    execution_id: 'execution-1',
+    space_id: 'space-a',
+  });
 });
 
 describe('discovery started report', () => {

@@ -86,6 +86,7 @@ const discoveryExecuteRoute = createServerRoute({
       });
       if (isNew) {
         telemetry.trackSignificantEventsDiscoveryTriggered({
+          workflow_execution_id: executionId,
           execution_id: executionId,
           space_id: spaceId,
         });

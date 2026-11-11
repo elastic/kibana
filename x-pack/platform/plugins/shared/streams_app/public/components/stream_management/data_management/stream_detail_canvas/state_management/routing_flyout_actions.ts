@@ -120,8 +120,10 @@ export const getRoutingStageUpdate = ({
     return {};
   }
   const { target } = event;
+  const nextUnit = getRoutingDraft(context, event);
   return {
-    nextUnit: getRoutingDraft(context, event),
+    nextUnit,
+    routingStagedUnit: nextUnit,
     error: undefined,
     routingDiagnostics:
       target.kind === 'pipeline'

@@ -106,6 +106,39 @@ describe('createConfigurationResolver', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"ghost"'));
   });
 
+  describe('capabilities', () => {
+    const typeRegistry = createTypeRegistryStub([
+      {
+        id: 'investigation',
+        baseConfiguration: { capabilities: { attachment_tools: { enabled: false } } },
+      },
+    ]);
+
+    it("carries the type's capabilities to agents of that type", async () => {
+      const resolver = createConfigurationResolver({ typeRegistry, logger: loggerMock.create() });
+
+      const effective = await resolver.resolveConfig({
+        agentType: 'investigation',
+        configuration: { tools: [] },
+        ctx,
+      });
+
+      expect(effective.capabilities).toEqual({ attachment_tools: { enabled: false } });
+    });
+
+    it('resolves an unknown type with no capabilities, so its attachment tools stay on', async () => {
+      const resolver = createConfigurationResolver({ typeRegistry, logger: loggerMock.create() });
+
+      const effective = await resolver.resolveConfig({
+        agentType: 'ghost',
+        configuration: { tools: [] },
+        ctx,
+      });
+
+      expect(effective.capabilities).toBeUndefined();
+    });
+  });
+
   describe('resolveBase', () => {
     const chatBase = { ai_indices: ['elastic'] };
 
