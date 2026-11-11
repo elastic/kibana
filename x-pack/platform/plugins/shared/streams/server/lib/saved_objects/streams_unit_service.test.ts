@@ -36,6 +36,7 @@ import type {
   StreamsConfigurationSavedObjectAttributes,
   StreamsUiMetadataSavedObjectAttributes,
 } from './streams_configuration';
+import type { InvalidateApiKeysAsInternalUser, UnitApiKey } from '../unit_config/unit_api_keys';
 
 const unit: StreamsUnit.Configuration = {
   sources: [
@@ -232,10 +233,16 @@ describe('StreamsUnitService', () => {
     expect(soClient.create).toHaveBeenNthCalledWith(
       1,
       'streams-configuration',
-      { unit_id: 'default', unit, secrets, sealed_credentials: storedFor(['es-prod']) },
+      {
+        unit_id: 'default',
+        unit,
+        secrets,
+        sealed_credentials: storedFor(['es-prod']),
+        api_keys: [],
+      },
       {
         id: 'default',
-        overwrite: true,
+        overwrite: false,
         initialNamespaces: ['*'],
         references: [
           {
@@ -313,7 +320,13 @@ describe('StreamsUnitService', () => {
 
     expect(soClient.create).toHaveBeenCalledWith(
       'streams-configuration',
-      { unit_id: 'default', unit, secrets, sealed_credentials: storedFor(['es-prod']) },
+      {
+        unit_id: 'default',
+        unit,
+        secrets,
+        sealed_credentials: storedFor(['es-prod']),
+        api_keys: [],
+      },
       expect.anything()
     );
     expect(publishUnit).toHaveBeenCalledWith({
@@ -364,6 +377,7 @@ describe('StreamsUnitService', () => {
         unit: unitWithS3,
         secrets: { 'es-prod': 's3cret', 's3-archive': 'bucket' },
         sealed_credentials: storedFor(['es-prod', 's3-archive']),
+        api_keys: [],
       },
       expect.anything()
     );
@@ -389,7 +403,13 @@ describe('StreamsUnitService', () => {
 
     expect(soClient.create).toHaveBeenCalledWith(
       'streams-configuration',
-      { unit_id: 'default', unit, secrets, sealed_credentials: storedFor(['es-prod']) },
+      {
+        unit_id: 'default',
+        unit,
+        secrets,
+        sealed_credentials: storedFor(['es-prod']),
+        api_keys: [],
+      },
       expect.anything()
     );
     expect(publishUnit).toHaveBeenCalledWith({
@@ -507,6 +527,7 @@ describe('StreamsUnitService', () => {
         unit: sharedUnit,
         secrets: { 'es-shared': 'x' },
         sealed_credentials: storedFor(['es-shared']),
+        api_keys: [],
       },
       expect.anything()
     );
@@ -721,6 +742,7 @@ describe('StreamsUnitService', () => {
         unit,
         secrets,
         sealed_credentials: storedFor(['es-prod']),
+        api_keys: [],
       });
     });
 
@@ -805,7 +827,7 @@ describe('StreamsUnitService', () => {
 
       expect(soClient.create).toHaveBeenLastCalledWith(
         'streams-configuration',
-        stored.attributes,
+        { ...stored.attributes, api_keys: [] },
         expect.objectContaining({ id: 'default', overwrite: true })
       );
     });
@@ -995,7 +1017,13 @@ describe('StreamsUnitService', () => {
       expect(validateUnit).toHaveBeenCalledWith({ unit, credentials: sealedFor(['es-prod']) });
       expect(soClient.create).toHaveBeenCalledWith(
         'streams-configuration',
-        { unit_id: 'default', unit, secrets, sealed_credentials: storedFor(['es-prod']) },
+        {
+          unit_id: 'default',
+          unit,
+          secrets,
+          sealed_credentials: storedFor(['es-prod']),
+          api_keys: [],
+        },
         expect.objectContaining({
           id: 'default',
           overwrite: true,
@@ -1458,11 +1486,13 @@ describe('StreamsUnitService', () => {
     expect(soClient.create).not.toHaveBeenCalled();
   });
 
-  it('rolls back a newly created configuration when publish fails', async () => {
+  it('rolls back a newly created configuration to a version-checked key-only document when publish fails', async () => {
     const soClient = createSoClient();
     soClient.get.mockRejectedValue(notFoundError);
-    soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
-    soClient.delete.mockResolvedValue({});
+    soClient.create.mockResolvedValue({
+      ...asSavedObject('streams-configuration', {}),
+      version: 'v1',
+    });
     const publishUnit = jest.fn().mockRejectedValue(new Error('distributor down'));
 
     const service = createService({ soClient, publishUnit });
@@ -1476,17 +1506,21 @@ describe('StreamsUnitService', () => {
       })
     ).rejects.toThrow('distributor down');
 
-    expect(soClient.delete).toHaveBeenCalledWith('streams-configuration', 'default', {
-      force: true,
-    });
-    expect(soClient.create).toHaveBeenCalledTimes(1);
+    expect(soClient.delete).not.toHaveBeenCalled();
+    expect(soClient.create).toHaveBeenCalledTimes(2);
+    expect(soClient.create).toHaveBeenLastCalledWith(
+      'streams-configuration',
+      expect.objectContaining({ key_only: true, api_keys: [] }),
+      expect.objectContaining({ id: 'default', overwrite: true, version: 'v1' })
+    );
   });
 
   it('still throws the publish error when rollback fails', async () => {
     const soClient = createSoClient();
     soClient.get.mockRejectedValue(notFoundError);
-    soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
-    soClient.delete.mockRejectedValue(new Error('saved object delete failed'));
+    soClient.create
+      .mockResolvedValueOnce(asSavedObject('streams-configuration', {}))
+      .mockRejectedValueOnce(new Error('saved object write failed'));
     const publishUnit = jest.fn().mockRejectedValue(new Error('distributor down'));
 
     const service = createService({ soClient, publishUnit });
@@ -1521,7 +1555,7 @@ describe('StreamsUnitService', () => {
     expect(soClient.delete).not.toHaveBeenCalled();
     expect(soClient.create).toHaveBeenLastCalledWith(
       'streams-configuration',
-      storedConfiguration.attributes,
+      { ...storedConfiguration.attributes, api_keys: [] },
       {
         id: 'default',
         overwrite: true,
@@ -1641,5 +1675,253 @@ describe('StreamsUnitService', () => {
     await service.resetUnit('default');
 
     expect(soClient.delete).not.toHaveBeenCalled();
+  });
+
+  describe('API key registry', () => {
+    const sourceKey: UnitApiKey = {
+      key_id: 'key-1',
+      component_type: 'source',
+      component_id: 'otlp-input',
+      created_at: '2026-11-03T00:00:00.000Z',
+    };
+    const removedDestinationKey: UnitApiKey = {
+      key_id: 'key-2',
+      component_type: 'destination',
+      component_id: 'removed-dest',
+      created_at: '2026-11-03T00:00:00.000Z',
+    };
+    const conflictError = SavedObjectsErrorHelpers.createConflictError(
+      'streams-configuration',
+      'default'
+    );
+    const withApiKeys = (apiKeys: UnitApiKey[], version = 'v1') => ({
+      ...storedConfiguration,
+      version,
+      attributes: { ...storedConfiguration.attributes, api_keys: apiKeys },
+    });
+    const invalidateAll = () =>
+      jest.fn<ReturnType<InvalidateApiKeysAsInternalUser>, [string[]]>(async (ids) => ({
+        invalidated_api_keys: ids,
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      }));
+
+    it('stores a key-only document when the unit has never been saved', async () => {
+      const soClient = createSoClient();
+      soClient.get.mockRejectedValue(notFoundError);
+      soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
+
+      await createService({ soClient }).recordApiKey('default', sourceKey);
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'streams-configuration',
+        {
+          unit_id: 'default',
+          unit: { sources: [], destinations: [], pipelines: [] },
+          secrets: {},
+          sealed_credentials: [],
+          api_keys: [sourceKey],
+          key_only: true,
+        },
+        expect.objectContaining({ id: 'default', overwrite: false, initialNamespaces: ['*'] })
+      );
+    });
+
+    it('rejects recording a key with 503 when the document cannot be encrypted', async () => {
+      const soClient = createSoClient();
+      soClient.get.mockRejectedValue(notFoundError);
+
+      await expect(
+        createService({ soClient, canEncrypt: false }).recordApiKey('default', sourceKey)
+      ).rejects.toMatchObject({ statusCode: 503 });
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('appends to the stored keys with a version-checked partial update', async () => {
+      const soClient = createSoClient();
+      soClient.get.mockResolvedValue(withApiKeys([removedDestinationKey]));
+
+      await createService({ soClient }).recordApiKey('default', sourceKey);
+
+      expect(soClient.update).toHaveBeenCalledWith(
+        'streams-configuration',
+        'default',
+        { api_keys: [removedDestinationKey, sourceKey] },
+        { version: 'v1' }
+      );
+    });
+
+    it('re-reads and retries when the document changed concurrently', async () => {
+      const soClient = createSoClient();
+      soClient.get
+        .mockResolvedValueOnce(withApiKeys([], 'v1'))
+        .mockResolvedValueOnce(withApiKeys([removedDestinationKey], 'v2'));
+      soClient.update.mockRejectedValueOnce(conflictError);
+
+      await createService({ soClient }).recordApiKey('default', sourceKey);
+
+      expect(soClient.update).toHaveBeenLastCalledWith(
+        'streams-configuration',
+        'default',
+        { api_keys: [removedDestinationKey, sourceKey] },
+        { version: 'v2' }
+      );
+    });
+
+    const emptyUnitConfiguration = (keyOnly: boolean) => ({
+      ...withApiKeys([sourceKey]),
+      attributes: {
+        ...withApiKeys([sourceKey]).attributes,
+        unit: { sources: [], destinations: [], pipelines: [] },
+        ...(keyOnly ? { key_only: true } : {}),
+      },
+    });
+
+    it('treats a key-only document as a unit that has not been stored', async () => {
+      const soClient = createSoClient();
+      soClient.get.mockImplementation(async (type: string) => {
+        if (type === 'streams-configuration') {
+          return emptyUnitConfiguration(true);
+        }
+        throw notFoundError;
+      });
+
+      await expect(createService({ soClient }).getUnit('default')).rejects.toMatchObject({
+        statusCode: 404,
+      });
+    });
+
+    it('returns a saved unit with no components', async () => {
+      const soClient = createSoClient();
+      soClient.get.mockImplementation(async (type: string) => {
+        if (type === 'streams-configuration') {
+          return emptyUnitConfiguration(false);
+        }
+        throw notFoundError;
+      });
+
+      await expect(createService({ soClient }).getUnit('default')).resolves.toMatchObject({
+        unit: { sources: [], destinations: [], pipelines: [] },
+      });
+    });
+
+    it('republishes a saved unit with no components', async () => {
+      const soClient = createSoClient();
+      soClient.get.mockResolvedValue(emptyUnitConfiguration(false));
+      const publishUnit = jest.fn().mockResolvedValue(undefined);
+      const encryptedSavedObjectsClient = {
+        getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+          ...emptyUnitConfiguration(false),
+          attributes: { ...emptyUnitConfiguration(false).attributes, secrets: {} },
+        }),
+      } as unknown as EncryptedSavedObjectsClient;
+
+      const outcome = await createService({
+        soClient,
+        publishUnit,
+        encryptedSavedObjectsClient,
+      }).republishUnit('default');
+
+      expect(outcome).toBe('republished');
+      expect(publishUnit).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not republish a key-only document', async () => {
+      const soClient = createSoClient();
+      const publishUnit = jest.fn();
+      const encryptedSavedObjectsClient = {
+        getDecryptedAsInternalUser: jest.fn().mockResolvedValue(emptyUnitConfiguration(true)),
+      } as unknown as EncryptedSavedObjectsClient;
+
+      const outcome = await createService({
+        soClient,
+        publishUnit,
+        encryptedSavedObjectsClient,
+      }).republishUnit('default');
+
+      expect(outcome).toBe('not_found');
+      expect(publishUnit).not.toHaveBeenCalled();
+    });
+
+    it('keeps stored keys when a unit is saved', async () => {
+      const soClient = createSoClient();
+      soClient.create.mockResolvedValue(asSavedObject('streams-configuration', {}));
+      const encryptedSavedObjectsClient = {
+        getDecryptedAsInternalUser: jest.fn().mockResolvedValue(withApiKeys([sourceKey])),
+      } as unknown as EncryptedSavedObjectsClient;
+
+      await createService({ soClient, encryptedSavedObjectsClient }).upsertUnit({
+        unitId: 'default',
+        unit,
+        ui_metadata: {},
+      });
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        'streams-configuration',
+        expect.objectContaining({ api_keys: [sourceKey] }),
+        expect.objectContaining({ overwrite: true, version: 'v1' })
+      );
+    });
+
+    it('invalidates the selected keys as the internal user and removes them', async () => {
+      const soClient = createSoClient();
+      soClient.get.mockResolvedValue(withApiKeys([sourceKey, removedDestinationKey]));
+      const invalidateApiKeys = invalidateAll();
+
+      const result = await new StreamsUnitService({
+        soClient,
+        logger: loggerMock.create(),
+        invalidateApiKeys,
+      }).revokeApiKeys('default', ({ component_type: type }) => type === 'destination');
+
+      expect(invalidateApiKeys).toHaveBeenCalledWith(['key-2']);
+      expect(result).toEqual({ revoked: [removedDestinationKey], apiKeysMayRemain: false });
+      expect(soClient.update).toHaveBeenCalledWith(
+        'streams-configuration',
+        'default',
+        { api_keys: [sourceKey] },
+        { version: 'v1' }
+      );
+    });
+
+    it('keeps keys that could not be invalidated so they can be revoked later', async () => {
+      const soClient = createSoClient();
+      soClient.get.mockResolvedValue(withApiKeys([sourceKey, removedDestinationKey]));
+      const invalidateApiKeys = jest.fn(async () => ({
+        invalidated_api_keys: ['key-1'],
+        previously_invalidated_api_keys: [],
+        error_count: 1,
+      }));
+
+      const result = await new StreamsUnitService({
+        soClient,
+        logger: loggerMock.create(),
+        invalidateApiKeys,
+      }).revokeApiKeys('default', () => true);
+
+      expect(result).toEqual({ revoked: [sourceKey], apiKeysMayRemain: true });
+      expect(soClient.update).toHaveBeenCalledWith(
+        'streams-configuration',
+        'default',
+        { api_keys: [removedDestinationKey] },
+        { version: 'v1' }
+      );
+    });
+
+    it('does nothing when no stored key is selected', async () => {
+      const soClient = createSoClient();
+      soClient.get.mockResolvedValue(withApiKeys([sourceKey]));
+      const invalidateApiKeys = invalidateAll();
+
+      const result = await new StreamsUnitService({
+        soClient,
+        logger: loggerMock.create(),
+        invalidateApiKeys,
+      }).revokeApiKeys('default', () => false);
+
+      expect(result).toEqual({ revoked: [], apiKeysMayRemain: false });
+      expect(invalidateApiKeys).not.toHaveBeenCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
   });
 });

@@ -91,7 +91,7 @@ describe('developer reset controls', () => {
     act(() => screen.getByTestId('significantEventsResetTrigger').focus());
     expect(screen.getByTestId('significantEventsResetTrigger')).toHaveFocus();
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      'Reset requires the Nightshift Manage engines privilege.'
+      'Reset requires the nightshift Manage engines privilege.'
     );
   });
 

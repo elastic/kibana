@@ -7,29 +7,17 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
   EuiCodeBlock,
   EuiDescriptionList,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
   EuiLink,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import moment from 'moment';
 import { escapeQuotes } from '@kbn/es-query';
+import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
@@ -117,7 +105,7 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
 
   const discoverLocator = url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
-  const flyoutAriaLabel = i18n.translate('xpack.queryActivity.flyout.ariaLabel', {
+  const flyoutTitle = i18n.translate('xpack.queryActivity.flyout.title', {
     defaultMessage: 'Query details',
   });
 
@@ -150,35 +138,81 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
       : undefined;
   }, [dataViewExists, discoverLocator, query?.traceId, rangeFrom, rangeTo]);
 
-  return (
-    <EuiFlyout aria-label={flyoutAriaLabel} onClose={onClose} size="m" maxWidth={691}>
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>
-                {i18n.translate('xpack.queryActivity.flyout.taskIdLabel', {
-                  defaultMessage: 'Task ID',
-                })}
-              </strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">{displayedQuery.taskId}</EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{displayedQuery.queryType}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
+  const showStopAction =
+    loadState !== 'notFound' &&
+    (isStopRequested || (canCancelTasks && displayedQuery.cancellable) || displayedQuery.cancelled);
 
-      <EuiFlyoutBody>
-        {loadState === 'loading' && (
-          <EuiFlexGroup justifyContent="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+  const stopActionLabel = displayedQuery.cancelled
+    ? i18n.translate('xpack.queryActivity.flyout.queryStoppedText', {
+        defaultMessage: 'Query cancelled',
+      })
+    : isStopRequested
+    ? i18n.translate('xpack.queryActivity.flyout.stoppingQueryText', {
+        defaultMessage: 'Cancelling the query…',
+      })
+    : i18n.translate('xpack.queryActivity.flyout.stopQueryButton', {
+        defaultMessage: 'Cancel query',
+      });
+
+  return (
+    <FlyoutTemplate onClose={onClose} size="m" maxWidth={691}>
+      <FlyoutTemplate.Header title={flyoutTitle} isLoading={loadState === 'loading'}>
+        <FlyoutTemplate.Header.MetaBlock
+          title={i18n.translate('xpack.queryActivity.flyout.taskIdLabel', {
+            defaultMessage: 'Task ID',
+          })}
+        >
+          {displayedQuery.taskId}
+        </FlyoutTemplate.Header.MetaBlock>
+        <FlyoutTemplate.Header.Badge color="hollow">
+          {displayedQuery.queryType}
+        </FlyoutTemplate.Header.Badge>
+        {loadState === 'loaded' && query && (
+          <>
+            <FlyoutTemplate.Header.InfoBlock
+              title={i18n.translate('xpack.queryActivity.flyout.startTimeLabel', {
+                defaultMessage: 'Start time',
+              })}
+            >
+              {moment(displayedQuery.startTime).format('MMM D YYYY, HH:mm:ss')}
+            </FlyoutTemplate.Header.InfoBlock>
+            <FlyoutTemplate.Header.InfoBlock
+              title={i18n.translate('xpack.queryActivity.flyout.runtimeLabel', {
+                defaultMessage: 'Run time',
+              })}
+            >
+              {formatRuntime(displayedQuery.runningTimeMs)}
+            </FlyoutTemplate.Header.InfoBlock>
+            <FlyoutTemplate.Header.InfoBlock
+              title={i18n.translate('xpack.queryActivity.flyout.indicesLabel', {
+                defaultMessage: 'Indices',
+              })}
+            >
+              {query.indices}
+            </FlyoutTemplate.Header.InfoBlock>
+          </>
+        )}
+      </FlyoutTemplate.Header>
+
+      <FlyoutTemplate.Body>
+        {loadState === 'error' && (
+          <FlyoutTemplate.Body.Callout
+            level="danger"
+            announceOnMount
+            title={i18n.translate('xpack.queryActivity.flyout.loadErrorTitle', {
+              defaultMessage: 'Unable to load query details',
+            })}
+            text={
+              canCancelTasks && displayedQuery.cancellable
+                ? i18n.translate('xpack.queryActivity.flyout.loadErrorWithCancelBody', {
+                    defaultMessage:
+                      'You can still cancel this query below, or close the flyout and try again.',
+                  })
+                : i18n.translate('xpack.queryActivity.flyout.loadErrorBody', {
+                    defaultMessage: 'Close the flyout and try again.',
+                  })
+            }
+          />
         )}
 
         {loadState === 'notFound' && (
@@ -201,78 +235,8 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
           />
         )}
 
-        {loadState === 'error' && (
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            iconType="error"
-            title={i18n.translate('xpack.queryActivity.flyout.loadErrorTitle', {
-              defaultMessage: 'Unable to load query details',
-            })}
-          >
-            <p>
-              {canCancelTasks && displayedQuery.cancellable
-                ? i18n.translate('xpack.queryActivity.flyout.loadErrorWithCancelBody', {
-                    defaultMessage:
-                      'You can still cancel this query below, or close the flyout and try again.',
-                  })
-                : i18n.translate('xpack.queryActivity.flyout.loadErrorBody', {
-                    defaultMessage: 'Close the flyout and try again.',
-                  })}
-            </p>
-          </EuiCallOut>
-        )}
-
         {loadState === 'loaded' && query && (
           <>
-            <EuiPanel hasBorder paddingSize="l">
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiText size="xs" color="subdued">
-                    {i18n.translate('xpack.queryActivity.flyout.startTimeLabel', {
-                      defaultMessage: 'Start time',
-                    })}
-                  </EuiText>
-                  <EuiSpacer size="xs" />
-                  <EuiText>
-                    <h4>
-                      <strong>
-                        {moment(displayedQuery.startTime).format('MMM D YYYY, HH:mm:ss')}
-                      </strong>
-                    </h4>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="xs" color="subdued">
-                    {i18n.translate('xpack.queryActivity.flyout.runtimeLabel', {
-                      defaultMessage: 'Run time',
-                    })}
-                  </EuiText>
-                  <EuiSpacer size="xs" />
-                  <EuiText>
-                    <h4>
-                      <strong>{formatRuntime(displayedQuery.runningTimeMs)}</strong>
-                    </h4>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="xs" color="subdued">
-                    {i18n.translate('xpack.queryActivity.flyout.indicesLabel', {
-                      defaultMessage: 'Indices',
-                    })}
-                  </EuiText>
-                  <EuiSpacer size="xs" />
-                  <EuiText>
-                    <h4>
-                      <strong>{query.indices}</strong>
-                    </h4>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-
-            <EuiSpacer size="l" />
-
             <EuiDescriptionList
               type="column"
               columnWidths={[1, 7]}
@@ -318,19 +282,14 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
               ]}
             />
 
+            {(query.query || query.xOpaqueId) && <EuiSpacer size="l" />}
+
             {query.query && (
-              <>
-                <EuiSpacer size="l" />
-                <EuiTitle size="s">
-                  <h3>
-                    {i18n.translate('xpack.queryActivity.flyout.queryLabel', {
-                      defaultMessage: 'Query',
-                    })}
-                  </h3>
-                </EuiTitle>
-
-                <EuiSpacer size="s" />
-
+              <FlyoutTemplate.Body.Section
+                title={i18n.translate('xpack.queryActivity.flyout.queryLabel', {
+                  defaultMessage: 'Query',
+                })}
+              >
                 <EuiCodeBlock
                   css={css`
                     .euiCodeBlock__pre {
@@ -350,68 +309,41 @@ export const QueryDetailFlyout: React.FC<QueryDetailFlyoutProps> = ({
                 >
                   {prettyPrint(query.query)}
                 </EuiCodeBlock>
-              </>
+              </FlyoutTemplate.Body.Section>
             )}
 
             {query.xOpaqueId && (
-              <>
-                <EuiSpacer size="l" />
-                <EuiTitle size="s">
-                  <h3>
-                    {i18n.translate('xpack.queryActivity.flyout.opaqueIDLabel', {
-                      defaultMessage: 'Opaque ID',
-                    })}
-                  </h3>
-                </EuiTitle>
-
-                <EuiSpacer size="s" />
-
+              <FlyoutTemplate.Body.Section
+                title={i18n.translate('xpack.queryActivity.flyout.opaqueIDLabel', {
+                  defaultMessage: 'Opaque ID',
+                })}
+              >
                 <EuiCodeBlock lineNumbers isCopyable>
                   {query.xOpaqueId}
                 </EuiCodeBlock>
-              </>
+              </FlyoutTemplate.Body.Section>
             )}
           </>
         )}
-      </EuiFlyoutBody>
+      </FlyoutTemplate.Body>
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>
-              {i18n.translate('xpack.queryActivity.flyout.closeButton', {
-                defaultMessage: 'Close',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {loadState !== 'notFound' &&
-              (isStopRequested ||
-                (canCancelTasks && displayedQuery.cancellable) ||
-                displayedQuery.cancelled) && (
-                <EuiButton
-                  color="danger"
-                  fill
-                  onClick={() => onStopQuery(displayedQuery.taskId)}
-                  isDisabled={isStopRequested || displayedQuery.cancelled}
-                  isLoading={isStopRequested}
-                >
-                  {displayedQuery.cancelled
-                    ? i18n.translate('xpack.queryActivity.flyout.queryStoppedText', {
-                        defaultMessage: 'Query cancelled',
-                      })
-                    : isStopRequested
-                    ? i18n.translate('xpack.queryActivity.flyout.stoppingQueryText', {
-                        defaultMessage: 'Cancelling the query…',
-                      })
-                    : i18n.translate('xpack.queryActivity.flyout.stopQueryButton', {
-                        defaultMessage: 'Cancel query',
-                      })}
-                </EuiButton>
-              )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+      <FlyoutTemplate.Footer>
+        <FlyoutTemplate.Footer.SecondaryAction
+          label={i18n.translate('xpack.queryActivity.flyout.closeButton', {
+            defaultMessage: 'Close',
+          })}
+          onClick={onClose}
+        />
+        {showStopAction && (
+          <FlyoutTemplate.Footer.PrimaryAction
+            label={stopActionLabel}
+            color="danger"
+            onClick={() => onStopQuery(displayedQuery.taskId)}
+            isDisabled={isStopRequested || displayedQuery.cancelled}
+            isLoading={isStopRequested}
+          />
+        )}
+      </FlyoutTemplate.Footer>
+    </FlyoutTemplate>
   );
 };

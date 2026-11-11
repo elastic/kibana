@@ -34,6 +34,7 @@
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-workflows",
     "@kbn/spaces-plugin",
+    "@kbn/cps",
     "@kbn/workflows",
     "@kbn/workflows-ui",
     "@kbn/workflows-yaml",
@@ -82,6 +83,8 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-test-helpers-kbn-server",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/discover-plugin",
     "@kbn/workflows-execution-engine"
   ]
 }

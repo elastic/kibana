@@ -120,7 +120,7 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
             data-test-subj={testId('policyNotFoundMsg')}
           >
             <EuiIcon size="m" type="warning" color="warning" aria-hidden={true} />
-            &nbsp;
+            {'\u00a0'}
             {POLICY_NOT_FOUND_MESSAGE}
           </EuiText>
         )) ||

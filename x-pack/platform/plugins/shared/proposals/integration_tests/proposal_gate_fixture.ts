@@ -8,6 +8,7 @@
 import { parse } from 'yaml';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import {
@@ -263,6 +264,7 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
   const service = new ProposalsService({
     storage: client,
     logger: loggerMock.create(),
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     getWorkflowsApi: () => workflowsApi as never,
     // The gate's behaviour does not depend on the conversation card, so the
     // attachment write is stubbed rather than simulated.
@@ -272,6 +274,11 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
           attachedProposalIds.push(origin);
         }),
       } as never),
+    resolveUser: async () => ({
+      username: 'analyst',
+      fullName: null,
+      email: null,
+    }),
   });
 
   const update = service.update.bind(service);
@@ -422,6 +429,8 @@ export const createProposalGateFixture = (): ProposalGateFixture => {
           comment: 'Seeded',
           origin: FIXTURE_ORIGIN,
           confidence: 'medium',
+          // Seeded as a gated proposal, which is what the gate workflow writes.
+          workflowExecutionId: 'seeded-execution',
           id,
         },
         { spaceId: 'fake_space_id', request: httpServerMock.createKibanaRequest() }

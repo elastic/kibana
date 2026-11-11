@@ -133,8 +133,8 @@ const assertRunsContinuousTransform = async (
   await assertTransformRow(transformManagement, transform.transformId, {
     description: transform.description,
     type: transform.type,
-    status: 'started',
-    mode: 'continuous',
+    status: 'Started',
+    execution: 'Continuous',
     health: 'Healthy',
   });
 };
@@ -153,7 +153,7 @@ const assertStopsTransform = async (
   await transformManagement.closeRowActions(transformId);
 
   await transformManagement.clickRowAction(transformId, 'Stop');
-  await assertTransformRow(transformManagement, transformId, { status: 'stopped' });
+  await assertTransformRow(transformManagement, transformId, { status: 'Stopped' });
 };
 
 const assertDiscoverHasResults = async (
@@ -180,12 +180,12 @@ const assertResetsAndRestartsTransform = async (
   expect(await getDocumentsIndexed()).toBeGreaterThan(0);
   await transformManagement.clickRowAction(transformId, 'Reset');
   await transformManagement.confirmModal('Reset');
-  await assertTransformRow(transformManagement, transformId, { status: 'stopped' });
+  await assertTransformRow(transformManagement, transformId, { status: 'Stopped' });
   await expect.poll(getDocumentsIndexed).toBe(0);
 
   await transformManagement.clickRowAction(transformId, 'Start');
   await transformManagement.confirmModal('Start');
-  await assertTransformRow(transformManagement, transformId, { status: 'started' });
+  await assertTransformRow(transformManagement, transformId, { status: 'Started' });
 };
 
 test.describe('Create continuous transform', { tag: tags.deploymentAgnostic }, () => {
@@ -246,7 +246,7 @@ test.describe('Create continuous transform', { tag: tags.deploymentAgnostic }, (
     await test.step('runs and stops the transform', async () => {
       await assertRunsContinuousTransform(transformWizard, transformManagement, {
         ...pivot,
-        type: 'pivot',
+        type: 'Pivot',
       });
       await expect
         .poll(() => fetchDocumentsIndexed(apiServices.transform, pivot.transformId), {
@@ -302,7 +302,7 @@ test.describe('Create continuous transform', { tag: tags.deploymentAgnostic }, (
     await test.step('runs and stops the transform', async () => {
       await assertRunsContinuousTransform(transformWizard, transformManagement, {
         ...latest,
-        type: 'latest',
+        type: 'Latest',
       });
       await expect
         .poll(() => fetchDocumentsIndexed(apiServices.transform, latest.transformId), {

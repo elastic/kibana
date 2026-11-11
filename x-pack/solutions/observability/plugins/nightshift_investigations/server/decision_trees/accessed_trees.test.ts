@@ -9,8 +9,10 @@ import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import {
   embedAccessedTreesMarker,
+  embedRunMarker,
   extractAccessedTreeIds,
   parseAccessedTreesMarker,
+  parseRunMarker,
 } from './accessed_trees';
 
 describe('extractAccessedTreeIds', () => {
@@ -34,7 +36,7 @@ describe('extractAccessedTreeIds', () => {
         },
         {
           tool_id: SANDBOX_VIEW_FILE_TOOL_ID,
-          params: { file_path: '/workspace/cortex/INDEX.md' },
+          params: { file_path: '/workspace/wiki/INDEX.md' },
         },
       ])
     ).toEqual([]);
@@ -64,6 +66,25 @@ describe('extractAccessedTreeIds', () => {
         },
       ])
     ).toEqual(['symptom:checkout-high-latency']);
+  });
+});
+
+describe('run marker', () => {
+  it('round-trips the investigator ids', () => {
+    const marker = embedRunMarker({ conversationId: 'conv-1', roundId: 'round-1' });
+
+    expect(parseRunMarker(`${marker}\nbody`)).toEqual({
+      conversationId: 'conv-1',
+      roundId: 'round-1',
+    });
+  });
+
+  it('omits an absent round and returns undefined without a marker', () => {
+    expect(parseRunMarker(embedRunMarker({ conversationId: 'conv-1' }))).toEqual({
+      conversationId: 'conv-1',
+    });
+    expect(parseRunMarker('plain prompt')).toBeUndefined();
+    expect(parseRunMarker(undefined)).toBeUndefined();
   });
 });
 

@@ -78,7 +78,7 @@ const ENTITIES: readonly EntitySeed[] = [
     sources: ['okta', 'gcp'],
     watchlists: ['wl-3'],
   },
-  { id: 'service:payments', type: 'service', name: 'payments', risk: [20, 'Low'] },
+  { id: 'service:payments', type: 'service', name: 'payments', risk: [20, 'Unknown'] },
   {
     id: 'user:alice@okta',
     type: 'user',

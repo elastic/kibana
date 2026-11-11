@@ -45,20 +45,27 @@ interface CreatedByFilterPopoverProps {
   'data-test-subj'?: string;
 }
 
+const getFallbackAvatarUser = (username: string) => ({ username });
+
 const toSelectableOption = (
   username: string,
   isSelected: boolean,
   usernameToProfile: Map<string, UserProfileWithAvatar>
 ): EuiSelectableOption => {
   const profile = usernameToProfile.get(username);
-  const user = profile?.user ?? { username };
   const displayName = profile?.user.full_name || username;
 
   return {
     label: displayName,
     key: username,
     checked: isSelected ? 'on' : undefined,
-    prepend: <UserAvatar user={user} avatar={profile?.data?.avatar} size="s" />,
+    prepend: (
+      <UserAvatar
+        user={profile?.user ?? getFallbackAvatarUser(username)}
+        avatar={profile?.data?.avatar}
+        size="s"
+      />
+    ),
   };
 };
 
