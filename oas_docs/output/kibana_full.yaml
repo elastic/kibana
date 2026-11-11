@@ -52160,10 +52160,16 @@ paths:
                           type: object
                         policySettings:
                           additionalProperties:
+                            anyOf:
+                              - maxLength: 10000
+                                type: string
+                              - items:
+                                  maxLength: 256
+                                  type: string
+                                maxItems: 100
+                                type: array
                             default: null
-                            maxLength: 10000
                             nullable: true
-                            type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                           type: object
                           x-state: Experimental; added in 9.7.0
@@ -52466,10 +52472,16 @@ paths:
                   type: array
                 policySettings:
                   additionalProperties:
+                    anyOf:
+                      - maxLength: 10000
+                        type: string
+                      - items:
+                          maxLength: 256
+                          type: string
+                        maxItems: 100
+                        type: array
                     default: null
-                    maxLength: 10000
                     nullable: true
-                    type: string
                   description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                   type: object
                   x-state: Experimental; added in 9.7.0
@@ -52780,10 +52792,16 @@ paths:
                         type: object
                       policySettings:
                         additionalProperties:
+                          anyOf:
+                            - maxLength: 10000
+                              type: string
+                            - items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
                           default: null
-                          maxLength: 10000
                           nullable: true
-                          type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                         type: object
                         x-state: Experimental; added in 9.7.0
@@ -53233,10 +53251,16 @@ paths:
                         type: object
                       policySettings:
                         additionalProperties:
+                          anyOf:
+                            - maxLength: 10000
+                              type: string
+                            - items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
                           default: null
-                          maxLength: 10000
                           nullable: true
-                          type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                         type: object
                         x-state: Experimental; added in 9.7.0
@@ -53582,10 +53606,16 @@ paths:
                   type: object
                 policySettings:
                   additionalProperties:
+                    anyOf:
+                      - maxLength: 10000
+                        type: string
+                      - items:
+                          maxLength: 256
+                          type: string
+                        maxItems: 100
+                        type: array
                     default: null
-                    maxLength: 10000
                     nullable: true
-                    type: string
                   description: Integration policy settings that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.
                   type: object
                   x-state: Experimental; added in 9.7.0
@@ -53853,10 +53883,16 @@ paths:
                         type: object
                       policySettings:
                         additionalProperties:
+                          anyOf:
+                            - maxLength: 10000
+                              type: string
+                            - items:
+                                maxLength: 256
+                                type: string
+                              maxItems: 100
+                              type: array
                           default: null
-                          maxLength: 10000
                           nullable: true
-                          type: string
                         description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                         type: object
                         x-state: Experimental; added in 9.7.0
@@ -54233,10 +54269,16 @@ paths:
                           type: object
                         policySettings:
                           additionalProperties:
+                            anyOf:
+                              - maxLength: 10000
+                                type: string
+                              - items:
+                                  maxLength: 256
+                                  type: string
+                                maxItems: 100
+                                type: array
                             default: null
-                            maxLength: 10000
                             nullable: true
-                            type: string
                           description: Integration policy settings from the Service settings step that apply to every integration policy of the deployment, keyed by integration policy field (for example `output_id`).
                           type: object
                           x-state: Experimental; added in 9.7.0
