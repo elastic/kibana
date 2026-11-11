@@ -16,7 +16,6 @@ import type { EntityType } from '../../../../common/entity_analytics/types';
 import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import type { ManagedUserHit } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import type { RiskScoreLeftPanelSubTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { useIsNewFlyoutEnabled } from '../../../common/hooks/use_is_new_flyout_enabled';
 import { FLYOUT_ORIGIN, type FlyoutOrigin } from '../../../common/lib/telemetry';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
@@ -503,6 +502,7 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as unknown as
           | EntityType.host
           | EntityType.user
+          | EntityType.service
           | EntityType.generic,
         value: d.value,
         entityId: d.entityId,
@@ -789,7 +789,7 @@ export const openDescriptorAsChild = (
  *  - unrelated `history.replace` that preserves the initial URL stack is ignored until that
  *    stack has been opened (after any required fetches)
  *
- * Gated on `useIsNewFlyoutEnabled()`. The initial URL stack is opened at most once; same-app opens
+ * The initial URL stack is opened at most once; same-app opens
  * may fire whenever the URL changes to a different descriptor chain.
  *
  * Mount this hook in the Security Solution app shell, analogous to `useUrlState()` in
@@ -797,7 +797,6 @@ export const openDescriptorAsChild = (
  * Kibana services that the app shell provides.
  */
 export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
-  const isNewFlyoutEnabled = useIsNewFlyoutEnabled();
   const history = useHistory();
   const flyoutApi = useFlyoutApi();
   // The deferred restore open must use the latest API: on the first render `useIsInSecurityApp`
@@ -815,7 +814,6 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
   // is reloaded, so attempting to restore them reproduces the "Cannot find document" error.
   // Drop descriptors whose indexName is a preview index before restoring.
   const [descriptors] = useState<FlyoutV2UrlParamValue | null>(() => {
-    if (!isNewFlyoutEnabled) return null;
     const raw = new URLSearchParams(history.location.search).get(urlParamKey);
     const decoded = decodeFlyoutV2UrlParam(raw);
     if (!decoded) return null;
@@ -834,15 +832,12 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
 
   // Detect a malformed param (raw present but decode failed) to strip it.
   const [isMalformed] = useState<boolean>(() => {
-    if (!isNewFlyoutEnabled) return false;
     const raw = new URLSearchParams(history.location.search).get(urlParamKey);
     return raw != null && decodeFlyoutV2UrlParam(raw) === null;
   });
 
   // Same-app opens: react to external flyoutV2 URL writes while Security stays mounted.
   useEffect(() => {
-    if (!isNewFlyoutEnabled) return;
-
     let pendingOpen: ReturnType<typeof setTimeout> | undefined;
 
     const openFromExternalNavigation = (next: FlyoutV2UrlParamValue): void => {
@@ -892,7 +887,7 @@ export const useFlyoutV2RestoreFromUrl = (urlParamKey: string): void => {
       unlistenHistory();
       clearTimeout(pendingOpen);
     };
-  }, [descriptors, flyoutApi, history, isNewFlyoutEnabled, urlParamKey]);
+  }, [descriptors, flyoutApi, history, urlParamKey]);
 
   // Strip malformed param once on mount.
   useEffect(() => {

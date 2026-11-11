@@ -325,7 +325,7 @@ export class SlackAppService {
     //   `manage_nightshift`. `configure_nightshift` stays out. Connectors/LLM go through
     //   `actions` (read) via the internal Kibana client, so no grants on system/dot indices
     //   (unsupported in serverless) are needed.
-    // - The agent's before/after workflows read and write the Cortex, memory and
+    // - The agent's before/after workflows read and write the Wiki, memory and
     //   decision-tree AI indices as the caller.
     const apiKeyResult = await this.server.security.authc.apiKeys.grantAsInternalUser(request, {
       name: 'nightshift-relay-agent-builder',
@@ -341,7 +341,7 @@ export class SlackAppService {
               },
               {
                 names: [
-                  'ai-index-idx-nightshift-cortex',
+                  'ai-index-idx-nightshift-wiki',
                   'ai-index-idx-nightshift-semantic-memory',
                   'ai-index-idx-nightshift-decision-trees',
                 ],
@@ -355,7 +355,9 @@ export class SlackAppService {
               spaces: ['*'],
               feature: {
                 nightshift: ['minimal_all'],
-                agentBuilder: ['minimal_all'],
+                // `minimal_all` leaves out the sub-feature that starts a conversation with an
+                // agent bound to a service account, like the Nightshift assistant.
+                agentBuilder: ['minimal_all', 'invoke_bound_agents'],
                 actions: ['read'],
                 workflowsManagement: ['read'],
               },
@@ -468,10 +470,10 @@ export class SlackAppService {
           return agentId;
         }
       }
-      this.logger.debug('No Nightshift agent is available, Slack turns will use the default agent');
+      this.logger.debug('No nightshift agent is available, Slack turns will use the default agent');
     } catch (error) {
       this.logger.warn(
-        `Failed to look up the Nightshift agents, Slack turns will use the default agent: ${this.toErrorMessage(
+        `Failed to look up the nightshift agents, Slack turns will use the default agent: ${this.toErrorMessage(
           error
         )}`
       );

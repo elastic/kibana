@@ -15,6 +15,7 @@ import type {
   AgentConfigurationOverrides,
   AgentExecutionMode,
   ConversationRoundAuthor,
+  EventActor,
   InteractivityConfigInput,
 } from '@kbn/agent-builder-common';
 import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
@@ -39,6 +40,7 @@ export const executeAgent$ = ({
   nextInput,
   origin,
   author,
+  actor,
   owner,
   runAs,
   abortSignal,
@@ -66,6 +68,8 @@ export const executeAgent$ = ({
   nextInput: ConverseInput;
   origin?: ExecutionConversationOrigin;
   author?: ConversationRoundAuthor;
+  /** The actor that posted the input, when it is an agent rather than the requesting user. */
+  actor?: EventActor;
   /** Identity conversation writes are attributed to; see {@link RunAgentParams.owner}. */
   owner?: UserIdAndName;
   /** Service account the execution runs as; see {@link RunAgentParams.runAs}. */
@@ -108,6 +112,7 @@ export const executeAgent$ = ({
         conversation,
         origin,
         author,
+        actor,
         browserApiTools,
         configurationOverrides,
         structuredOutput,

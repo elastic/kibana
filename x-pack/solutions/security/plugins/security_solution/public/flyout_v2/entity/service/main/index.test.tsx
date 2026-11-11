@@ -7,7 +7,11 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { TestProviders } from '../../../../common/mock';
+import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { useFlyoutApi } from '../../../use_flyout_api';
+import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
 import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../../../flyout/entity_details/shared/components/right/test_ids';
 import {
   mockServiceEntityRiskScores,
@@ -17,10 +21,7 @@ import {
 import { mockObservedService } from '../../../../flyout/entity_details/service_right/mocks';
 import type { ServiceEntity } from '../../../../../common/api/entity_analytics';
 import { RiskSeverity } from '../../../../../common/search_strategy';
-import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { Service } from '.';
-import { useFlyoutApi } from '../../../use_flyout_api';
-import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
 
 const mockProps = {
   serviceName: 'test',
@@ -34,23 +35,94 @@ jest.mock('../../../../common/components/visualization_actions/visualization_emb
 jest.mock('../../../use_flyout_api');
 const mockFlyoutApi = createFlyoutApiMock();
 
-// Wrap the real content with a trigger button so `openDetailsPanel` can be exercised for the tools.
-jest.mock('../../../../flyout/entity_details/service_right/content', () => {
-  const actual = jest.requireActual('../../../../flyout/entity_details/service_right/content');
-  const { EntityDetailsLeftPanelTab } = jest.requireActual(
+const mockedUseGlobalTime = jest.fn();
+jest.mock('../../../../common/containers/use_global_time', () => ({
+  ...jest.requireActual('../../../../common/containers/use_global_time'),
+  useGlobalTime: () => mockedUseGlobalTime(),
+}));
+
+// Entity store v2 is on unless a test turns it off.
+const mockEntityStoreV2Enabled = jest.fn().mockReturnValue(true);
+jest.mock('../../../../common/lib/kibana', () => {
+  const actual = jest.requireActual('../../../../common/lib/kibana');
+  const { FF_ENABLE_ENTITY_STORE_V2 } = jest.requireActual('@kbn/entity-store/public');
+  return {
+    ...actual,
+    // The footer only renders when the asset inventory setting is on.
+    useKibana: () => {
+      const kibana = actual.useKibana();
+      const { uiSettings } = kibana.services;
+      return {
+        ...kibana,
+        services: {
+          ...kibana.services,
+          uiSettings: {
+            ...uiSettings,
+            get: (key: string, defaultValue?: unknown) =>
+              key === 'securitySolution:enableAssetInventory'
+                ? true
+                : uiSettings.get(key, defaultValue),
+          },
+        },
+      };
+    },
+    useUiSetting: (key: string, defaultValue?: unknown) =>
+      key === FF_ENABLE_ENTITY_STORE_V2
+        ? mockEntityStoreV2Enabled()
+        : actual.useUiSetting(key, defaultValue),
+  };
+});
+
+const mockUseEntityStoreEuidApi = jest.fn();
+jest.mock('@kbn/entity-store/public', () => {
+  const actual = jest.requireActual('@kbn/entity-store/public');
+  return {
+    ...actual,
+    useEntityStoreEuidApi: () => mockUseEntityStoreEuidApi() ?? actual.useEntityStoreEuidApi(),
+  };
+});
+
+// Wrap the real content with trigger buttons so `openDetailsPanel` can be exercised for the tools.
+const mockContentProps = jest.fn();
+jest.mock('./content', () => {
+  const actual = jest.requireActual('./content');
+  const { CspInsightLeftPanelSubTab, EntityDetailsLeftPanelTab } = jest.requireActual(
     '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header'
   );
-  const ServicePanelContent = (props: { openDetailsPanel: (path: EntityDetailsPath) => void }) => (
-    <>
-      <button
-        type="button"
-        data-test-subj="openGraphView"
-        onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.GRAPH_VIEW })}
-      />
-      <actual.ServicePanelContent {...props} />
-    </>
-  );
-  return { ...actual, ServicePanelContent };
+  const Content = (props: { openDetailsPanel: (path: EntityDetailsPath) => void }) => {
+    mockContentProps(props);
+    return (
+      <>
+        <button
+          type="button"
+          data-test-subj="openResolutionGroup"
+          onClick={() =>
+            props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.RESOLUTION_GROUP })
+          }
+        />
+        <button
+          type="button"
+          data-test-subj="openGraphView"
+          onClick={() => props.openDetailsPanel({ tab: EntityDetailsLeftPanelTab.GRAPH_VIEW })}
+        />
+        {Object.values(CspInsightLeftPanelSubTab).map((subTab) => (
+          <button
+            key={subTab as string}
+            type="button"
+            data-test-subj={`openCspInsights-${subTab}`}
+            onClick={() =>
+              props.openDetailsPanel({
+                tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+                subTab: subTab as typeof CspInsightLeftPanelSubTab,
+              })
+            }
+          />
+        ))}
+        <actual.Content {...props} />
+      </>
+    );
+  };
+  return { ...actual, Content };
 });
 
 jest.mock('../../../../common/utils/timeline/use_show_timeline', () => ({
@@ -72,8 +144,8 @@ jest.mock('../../../../entity_analytics/api/hooks/use_entity_risk_score_recalcul
 }));
 
 const mockedUseObservedService = jest.fn().mockReturnValue(mockObservedService);
-jest.mock('../../../../flyout/entity_details/service_right/hooks/use_observed_service', () => ({
-  useObservedService: () => mockedUseObservedService(),
+jest.mock('./hooks/use_observed_service', () => ({
+  useObservedService: (...args: unknown[]) => mockedUseObservedService(...args),
 }));
 
 const mockedUseEntityFromStore = jest.fn();
@@ -149,6 +221,15 @@ describe('<Service />', () => {
       data: { has_write_permissions: true },
     });
     mockedUseNewEntityAnalyticsPage.mockReturnValue(false);
+    mockedUseGlobalTime.mockReturnValue({
+      from: '2024-01-01T00:00:00.000Z',
+      to: '2024-01-02T00:00:00.000Z',
+      isInitializing: false,
+      setQuery: jest.fn(),
+      deleteQuery: jest.fn(),
+    });
+    mockUseEntityStoreEuidApi.mockReturnValue(undefined);
+    mockEntityStoreV2Enabled.mockReturnValue(true);
   });
 
   it('renders the header', () => {
@@ -161,12 +242,142 @@ describe('<Service />', () => {
     expect(getByTestId('service-panel-header')).toBeInTheDocument();
   });
 
+  it('skips the entity store lookup while the global time is initializing', () => {
+    mockedUseGlobalTime.mockReturnValue({
+      isInitializing: true,
+      setQuery: jest.fn(),
+      deleteQuery: jest.fn(),
+    });
+
+    render(
+      <TestProviders>
+        <Service {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(mockedUseEntityFromStore).toHaveBeenCalledWith(expect.objectContaining({ skip: true }));
+  });
+
+  it('skips the entity store lookup when entity store v2 is disabled', () => {
+    mockEntityStoreV2Enabled.mockReturnValue(false);
+
+    render(
+      <TestProviders>
+        <Service {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(mockedUseEntityFromStore).toHaveBeenCalledWith(expect.objectContaining({ skip: true }));
+    expect(mockContentProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ noEntityInStore: false, entityStoreV2Enabled: false })
+    );
+  });
+
+  it('renders the footer', () => {
+    const { getByTestId } = render(
+      <TestProviders>
+        <Service {...mockProps} />
+      </TestProviders>
+    );
+
+    expect(getByTestId('take-action-button')).toBeInTheDocument();
+  });
+
+  it('resolves the entity id from the source document when a hit is provided', () => {
+    const getEuidFromObject = jest.fn().mockReturnValue('service:from-hit');
+    // Only the EUID lookup is exercised; observed data and content are driven by mocks.
+    mockUseEntityStoreEuidApi.mockReturnValue({
+      euid: { getEuidFromObject, getEntityIdentifiersFromDocument: () => ({}) },
+      getBuiltInEntityDefinition: () => ({}),
+    });
+    mockedUseEntityFromStore.mockReturnValue({ ...emptyEntityFromStore, isLoading: true });
+    const hit = { flattened: { 'service.name': 'test' } } as unknown as DataTableRecord;
+
+    render(
+      <TestProviders>
+        <Service {...mockProps} hit={hit} />
+      </TestProviders>
+    );
+
+    expect(getEuidFromObject).toHaveBeenCalledWith(expect.anything(), hit.flattened);
+    expect(mockedUseEntityFromStore).toHaveBeenCalledWith(
+      expect.objectContaining({ entityId: 'service:from-hit' })
+    );
+  });
+
+  it('falls back to the entityId prop when the hit yields no EUID', () => {
+    const hit = { flattened: {} } as unknown as DataTableRecord;
+
+    render(
+      <TestProviders>
+        <Service {...mockProps} hit={hit} />
+      </TestProviders>
+    );
+
+    expect(mockedUseEntityFromStore).toHaveBeenCalledWith(
+      expect.objectContaining({ entityId: mockProps.entityId })
+    );
+  });
+
+  describe('entity not in the store', () => {
+    it('tells the content the service is not in the store', () => {
+      render(
+        <TestProviders>
+          <Service {...mockProps} />
+        </TestProviders>
+      );
+
+      expect(mockContentProps).toHaveBeenLastCalledWith(
+        expect.objectContaining({ noEntityInStore: true })
+      );
+    });
+
+    it('does not flag the service as missing while the store lookup is loading', () => {
+      mockedUseEntityFromStore.mockReturnValue({ ...emptyEntityFromStore, isLoading: true });
+
+      render(
+        <TestProviders>
+          <Service {...mockProps} />
+        </TestProviders>
+      );
+
+      expect(mockContentProps).toHaveBeenLastCalledWith(
+        expect.objectContaining({ noEntityInStore: false })
+      );
+    });
+
+    it('falls back to the service name for identity fields', () => {
+      render(
+        <TestProviders>
+          <Service {...mockProps} />
+        </TestProviders>
+      );
+
+      expect(mockContentProps).toHaveBeenLastCalledWith(
+        expect.objectContaining({ identityFields: { 'service.name': 'test' } })
+      );
+    });
+
+    it('does not render the risk summary', () => {
+      const { queryByTestId } = render(
+        <TestProviders>
+          <Service {...mockProps} />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('risk-summary-table')).not.toBeInTheDocument();
+    });
+  });
+
   describe('entity store record present', () => {
     const withStoreRecords = (target: ServiceEntity, aliasRecords: ServiceEntity[] = []) => {
-      mockedUseEntityFromStore.mockReturnValue({
-        ...emptyEntityFromStore,
+      const entityFromStore = { ...emptyEntityFromStore, entityRecord: target, aliasRecords };
+      mockedUseEntityFromStore.mockReturnValue(entityFromStore);
+      // The observed hook surfaces the store record, as the real hook does.
+      mockedUseObservedService.mockReturnValue({
+        ...mockObservedService,
         entityRecord: target,
-        aliasRecords,
+        refetchEntityStore: entityFromStore.refetch,
       });
     };
 
@@ -433,21 +644,102 @@ describe('<Service />', () => {
       });
     });
 
+    it('passes the entity store result to the observed service hook', () => {
+      withStoreRecords(targetRecord);
+
+      render(
+        <TestProviders>
+          <Service {...mockProps} />
+        </TestProviders>
+      );
+
+      expect(mockedUseObservedService).toHaveBeenLastCalledWith(
+        mockProps.serviceName,
+        mockProps.scopeId,
+        expect.objectContaining({ entityRecord: targetRecord })
+      );
+    });
+
+    it('builds the risk score state from the entity store record', () => {
+      withStoreRecords(targetRecord);
+
+      render(
+        <TestProviders>
+          <Service {...mockProps} />
+        </TestProviders>
+      );
+
+      expect(mockContentProps).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          noEntityInStore: false,
+          riskScoreState: expect.objectContaining({
+            data: [expect.objectContaining({ service: expect.any(Object) })],
+          }),
+        })
+      );
+    });
+
+    it('makes asset criticality read-only without write privileges', () => {
+      mockedUseAssetCriticalityPrivileges.mockReturnValue({
+        data: { has_write_permissions: false },
+      });
+      withStoreRecords(targetRecord);
+
+      const { getByTestId, queryByTestId } = render(
+        <TestProviders>
+          <Service {...mockProps} />
+        </TestProviders>
+      );
+
+      expect(getByTestId('asset-criticality-badge')).toHaveTextContent('Low Impact');
+      expect(queryByTestId('asset-criticality-edit-chevron')).not.toBeInTheDocument();
+    });
+
     describe('detail tools', () => {
-      it('opens the graph view from the entity flyout entry point', () => {
-        withStoreRecords(targetRecord);
-        const { getByTestId } = render(
+      const renderResolved = () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        withStoreRecords(targetRecord, [aliasRecord]);
+        return render(
           <TestProviders>
-            <Service {...mockProps} />
+            <Service {...mockProps} mode="resolved" />
           </TestProviders>
         );
+      };
 
-        fireEvent.click(getByTestId('openGraphView'));
+      it('opens the alerts insights tool for the service', () => {
+        fireEvent.click(renderResolved().getByTestId('openCspInsights-alertsTabId'));
+        expect(mockFlyoutApi.openEntityAlertsInsights).toHaveBeenCalledWith(
+          expect.objectContaining({
+            entityType: 'service',
+            value: 'test',
+            entityId: mockProps.entityId,
+            mode: 'resolved',
+            scopeId: mockProps.scopeId,
+          })
+        );
+      });
 
+      it('does not open misconfiguration or vulnerability insights for a service', () => {
+        const { getByTestId } = renderResolved();
+        fireEvent.click(getByTestId('openCspInsights-misconfigurationTabId'));
+        fireEvent.click(getByTestId('openCspInsights-vulnerabilitiesTabId'));
+        expect(mockFlyoutApi.openEntityMisconfigurationInsights).not.toHaveBeenCalled();
+        expect(mockFlyoutApi.openEntityVulnerabilityInsights).not.toHaveBeenCalled();
+      });
+
+      it('passes the panel mode to the resolution tool', () => {
+        fireEvent.click(renderResolved().getByTestId('openResolutionGroup'));
+        expect(mockFlyoutApi.openEntityResolution).toHaveBeenCalledWith(
+          expect.objectContaining({ entityType: 'service', mode: 'resolved' })
+        );
+      });
+
+      it('opens the graph view from the entity flyout entry point', () => {
+        fireEvent.click(renderResolved().getByTestId('openGraphView'));
         expect(mockFlyoutApi.openEntityGraphView).toHaveBeenCalledWith(
           expect.objectContaining({
             entityId: mockProps.entityId,
-            scopeId: 'test-scope-id',
+            scopeId: mockProps.scopeId,
             entryPoint: 'entity_flyout',
           })
         );

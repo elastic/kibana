@@ -26,8 +26,8 @@ GET /api/workflows/executions/{executionId}/steps/{stepId}/resume/external?token
 When the step enters `WAITING_FOR_INPUT`, Kibana:
 
 1. Generates `token = randomBytes(32).toString('hex')`.
-2. Computes `HMAC-SHA-256(key=token, data=executionId|stepExecutionId|expiresAt)` and stores the result on the step execution input as `_hitlTokenHash`. Binding `executionId`, `stepExecutionId`, and `expiresAt` into the HMAC prevents index-level tampering (e.g. extending TTL or moving the token to another step execution).
-3. Stores the token expiry timestamp on the step execution input as `_hitlTokenExpiresAt`.
+2. Computes `HMAC-SHA-256(key=token, data=executionId|stepExecutionId|expiresAt)` and stores the result as `_hitlTokenHash` on the step execution `state` and on the step execution `input`. This version reads `state`. The `input` copy is what a 9.6 node reads, and it is where an older wait stored the token. Binding `executionId`, `stepExecutionId`, and `expiresAt` into the HMAC prevents index-level tampering (e.g. extending TTL or moving the token to another step execution).
+3. Stores the token expiry timestamp as `_hitlTokenExpiresAt` in the same two places.
 4. Builds external links with `executionId`, `stepId`, and the raw `token`.
 5. Discards the raw token after sending notifications.
 
@@ -39,12 +39,12 @@ On resume, Kibana:
 
 1. Loads the addressed step execution by `executionId`, `stepId`, and `spaceId`.
 2. Verifies the step is a waiting HITL step and has not finished or errored.
-3. Verifies `_hitlTokenExpiresAt` is still in the future.
+3. Reads the stored token. `state` wins when both copies are present. Verifies `_hitlTokenExpiresAt` is still in the future.
 4. Recomputes `HMAC-SHA-256(key=token, data=executionId|stepExecutionId|expiresAt)` using the request's `executionId` and `stepId` plus the stored `expiresAt`, and compares the result to `_hitlTokenHash` with `timingSafeEqual`.
-5. Claims the step via `markStepAsResponded`, which removes `_hitlTokenHash` and `_hitlTokenExpiresAt` before scheduling resume.
+5. Claims the step via `markStepAsResponded`, which removes `_hitlTokenHash` and `_hitlTokenExpiresAt` from `state` and from `input` before scheduling resume.
 6. Resumes the workflow with the original workflow runner permissions.
 
-The token is single-use because the atomic step claim removes the stored token metadata and prevents subsequent submissions from winning after the first accepted response. If the claiming response is not applied (the engine could not hand it to Task Manager and reverted it), the claim is released and the removed metadata is restored unchanged, so the link stays valid until it expires. A step whose response was applied never gets its token metadata back. Timeout and cancellation paths also remove the stored token metadata from the step input. Expiry is enforced by the stored timestamp and by the normal HITL timeout behavior.
+The token is single-use because the atomic step claim removes the stored token metadata and prevents subsequent submissions from winning after the first accepted response. If the claiming response is not applied (the engine could not hand it to Task Manager and reverted it), the claim is released and the removed metadata is restored unchanged, so the link stays valid until it expires. A step whose response was applied never gets its token metadata back. Timeout and cancellation paths also remove the stored token metadata from step `state` and from step `input`. Expiry is enforced by the stored timestamp and by the normal HITL timeout behavior.
 
 ## Threat Model
 

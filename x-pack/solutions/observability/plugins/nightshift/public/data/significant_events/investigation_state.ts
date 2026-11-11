@@ -5,31 +5,27 @@
  * 2.0.
  */
 
-import type { SignificantEventInvestigationState } from '@kbn/significant-events-plugin/common';
-import type { SignificantEvent } from '@kbn/significant-events-schema';
+import type { QueryClient } from '@kbn/react-query';
+import type { SignificantEventResponse } from '@kbn/significant-events-schema';
+import { isRecentInvestigationStart } from './recent_investigation_start';
 
-/** Same rule as the events route's `investigation_state` filter, so a row matches its filter. */
+/** `unknown` means the lookup failed, not that there is no investigation. */
+export type EventInvestigationState = NonNullable<SignificantEventResponse['investigation_state']>;
+
+const RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS = 5_000;
+
+/** The investigation state the events list resolved for an event; an event it did not resolve reads `not_started`. */
 export const getInvestigationState = (
-  event: Pick<SignificantEvent, 'investigations'>
-): SignificantEventInvestigationState => {
-  const investigations = event.investigations ?? [];
-  if (investigations.length === 0) {
-    return 'not_started';
-  }
-  return investigations.some(({ completed_at: completedAt }) => completedAt == null)
-    ? 'in_progress'
-    : 'completed';
-};
+  event: Pick<SignificantEventResponse, 'investigation_state'>
+): EventInvestigationState => event.investigation_state ?? 'not_started';
 
-/** Poll for five minutes beyond the investigation workflow's 60-minute timeout. */
-export const hasInvestigationsToPoll = (
-  events: Array<Pick<SignificantEvent, 'investigations'>>
-): boolean => {
-  const cutoff = Date.now() - 65 * 60 * 1000;
-  return events.some(({ investigations }) =>
-    investigations?.some(
-      ({ completed_at: completedAt, started_at: startedAt }) =>
-        completedAt == null && Date.parse(startedAt) > cutoff
-    )
-  );
+/** Polls every 5s while an investigation runs or was just started here, and not otherwise. */
+export const getInvestigationsRefetchInterval = (
+  events: Array<Pick<SignificantEventResponse, 'investigation_state'>>,
+  queryClient: QueryClient
+): number | false => {
+  const isRunning =
+    isRecentInvestigationStart(queryClient) ||
+    events.some((event) => getInvestigationState(event) === 'in_progress');
+  return isRunning ? RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS : false;
 };

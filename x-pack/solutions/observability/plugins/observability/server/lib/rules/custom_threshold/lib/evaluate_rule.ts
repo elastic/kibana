@@ -59,7 +59,8 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
   esQueryConfig: EsQueryConfig,
   runtimeMappings?: estypes.MappingRuntimeFields,
   lastPeriodEnd?: number,
-  missingGroups: MissingGroupsRecord[] = []
+  missingGroups: MissingGroupsRecord[] = [],
+  scheduleInterval?: number
 ): Promise<CriterionEvaluationResult[]> => {
   const { criteria, groupBy, searchConfiguration } = params;
 
@@ -75,7 +76,8 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         intervalAsMS,
         timeframe,
         lastPeriodEnd,
-        isRateAggregation
+        isRateAggregation,
+        scheduleInterval
       );
 
       const currentValues = await getData(

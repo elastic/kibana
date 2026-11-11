@@ -19,6 +19,7 @@ export type {
   MakeUsageFromSchema,
   ExposedToBrowserDescriptor,
   DynamicConfigDescriptor,
+  PluginInitialization,
 } from './src';
 
 export { SharedGlobalConfigKeys } from './src';

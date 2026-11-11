@@ -187,6 +187,10 @@ export interface ToolCallWithResult {
    * re-run on resume. Use `isDynamicToolCall` rather than comparing the value.
    */
   invocation?: ToolCallInvocation;
+  /**
+   * Short description, provided by the model, of what the agent is doing with this call.
+   */
+  intent?: string;
 }
 
 export type ToolCallStep = ConversationRoundStepMixin<
@@ -222,7 +226,10 @@ export interface ReasoningStepData {
   reasoning: string;
   /** if true, will not be displayed in the thinking panel, only used as "current thinking" **/
   transient?: boolean;
-  /** when reasoning is bound to a tool call, the corresponding tool call ID */
+  /**
+   * when reasoning is bound to a tool call, the corresponding tool call ID
+   * @deprecated No longer produced; kept for conversations stored before tool call intent.
+   */
   tool_call_id?: string;
   /** when reasoning is bound to a tool call group, the corresponding tool call group ID */
   tool_call_group_id?: string;
@@ -878,6 +885,8 @@ export interface BackgroundExecutionCompletedAt {
 export interface BackgroundExecutionState {
   /** The execution ID of the background sub-agent. */
   execution_id: string;
+  /** The id of the sub-agent running it, when known. */
+  agent_id?: string;
   /** Current status of the execution. */
   status: ExecutionStatus;
   /** The sub-agent's response, present when status is 'completed'. */

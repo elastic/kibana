@@ -9,17 +9,18 @@ import React, { useMemo, useState } from 'react';
 import { FormattedMessage, FormattedTime } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
-import { EuiIcon, EuiPanel, EuiText, euiTextTruncate, useEuiTheme } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EuiIcon, EuiIconTip, EuiPanel, EuiText, euiTextTruncate, useEuiTheme } from '@elastic/eui';
 import type {
   InvestigationSubject,
   InvestigationSubjectType,
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
-import { getSubjectTitle, type SubjectRowData } from './subject_title';
-import { isModifiedClick, useAlertsListLink, useSubjectLink } from './subject_link';
-import { canOpenSubjectFlyout, type SubjectServices } from './subject_services';
+import { getSubjectDisplayType, getSubjectTitle, type SubjectRowData } from './subject_title';
+import { useAlertsListLink, useSubjectLink } from './subject_link';
+import { useSubjectFlyout } from './use_subject_flyout';
 import {
+  OPEN_IN_FLYOUT,
+  OPEN_NEW_TAB,
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
   alertsCountLabel,
@@ -68,14 +69,14 @@ const SubjectIcon = ({ iconType, tone }: { iconType: IconType; tone: SubjectIcon
         align-items: center;
         justify-content: center;
         box-sizing: border-box;
-        inline-size: ${euiTheme.size.l};
-        block-size: ${euiTheme.size.l};
+        inline-size: ${euiTheme.size.xl};
+        block-size: ${euiTheme.size.xl};
         border-radius: 50%;
         border: ${border};
         background: ${background};
       `}
     >
-      <EuiIcon type={iconType} size="s" color={color} aria-hidden={true} />
+      <EuiIcon type={iconType} size="m" color={color} aria-hidden={true} />
     </span>
   );
 };
@@ -85,11 +86,12 @@ interface CompactRowProps {
   tone: SubjectIconTone;
   title: string;
   description: React.ReactNode;
-  /** Makes the row a link; Slack threads open in a new tab. */
+  /** Makes the row a link; an external link opens in a new tab. */
   href?: string;
   isExternal?: boolean;
-  /** Opens `href` inside Kibana instead of loading the page again. */
+  /** Opens `href` inside Kibana instead of loading the page again, or opens the flyout. */
   onLinkClick?: (event: React.MouseEvent) => void;
+  opensFlyout?: boolean;
   /** Makes the row a button that shows or hides more rows. */
   onToggle?: () => void;
   isExpanded?: boolean;
@@ -110,45 +112,55 @@ const CompactRow = ({
   href,
   isExternal = false,
   onLinkClick,
+  opensFlyout = false,
   onToggle,
   isExpanded,
   isNested = false,
   'data-test-subj': dataTestSubj,
 }: CompactRowProps) => {
   const { euiTheme } = useEuiTheme();
-  const isInteractive = href !== undefined || onToggle !== undefined;
+  const isInteractive = href !== undefined || onToggle !== undefined || opensFlyout;
+  const hasTrailingIcon = onToggle !== undefined || opensFlyout || isExternal;
+  const isTrailingHoverOnly = onToggle === undefined;
   const toggleIcon = isExpanded ? 'chevronSingleUp' : 'chevronSingleDown';
-  const trailingIcon = onToggle ? toggleIcon : 'external';
-  const hasTrailingIcon = onToggle !== undefined || isExternal;
 
   const rowStyles = css`
     display: grid;
-    grid-template-columns: ${euiTheme.size.l} minmax(0, 1fr) ${hasTrailingIcon ? 'auto' : ''};
+    grid-template-columns: ${euiTheme.size.xl} minmax(0, 1fr) ${hasTrailingIcon ? 'auto' : ''};
     column-gap: ${euiTheme.size.m};
     align-items: center;
     box-sizing: border-box;
     inline-size: 100%;
     margin: 0;
-    padding: ${euiTheme.size.s} ${euiTheme.size.m};
-    ${isNested && `padding-inline-start: calc(${euiTheme.size.m} * 2 + ${euiTheme.size.l});`}
+    padding: ${euiTheme.size.m} ${euiTheme.size.base};
+    ${isNested &&
+    `padding-inline-start: calc(${euiTheme.size.base} + ${euiTheme.size.xl} + ${euiTheme.size.m});`}
     border: none;
     background: transparent;
     color: inherit;
     font: inherit;
     text-align: start;
     text-decoration: none;
+    ${isTrailingHoverOnly && `--subject-trailing-opacity: 0;`}
     ${isInteractive &&
     css`
       cursor: pointer;
-      &:hover {
-        background: ${euiTheme.colors.backgroundBaseSubdued};
+      &:hover,
+      &:focus-visible {
+        background: ${euiTheme.colors.backgroundBaseInteractiveHover};
         text-decoration: none;
+        --subject-trailing-opacity: 1;
       }
       &:focus-visible {
         outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
         outline-offset: -${euiTheme.focus.width};
       }
     `}
+  `;
+  const trailingStyles = css`
+    display: inline-flex;
+    opacity: var(--subject-trailing-opacity, 1);
+    transition: opacity ${euiTheme.animation.fast} ease-in;
   `;
   const textStyles = css`
     display: flex;
@@ -183,15 +195,30 @@ const CompactRow = ({
           {description}
         </EuiText>
       </span>
-      {hasTrailingIcon && (
-        <EuiIcon
-          type={trailingIcon}
-          size="s"
-          color="subdued"
-          {...(isExternal
-            ? { 'aria-label': OPENS_IN_NEW_TAB, 'data-test-subj': 'investigationSubjectExternal' }
-            : { 'aria-hidden': true })}
-        />
+      {onToggle !== undefined && <EuiIcon type={toggleIcon} size="m" color="subdued" aria-hidden />}
+      {onToggle === undefined && opensFlyout && (
+        <span css={trailingStyles}>
+          <EuiIconTip
+            type="maximize"
+            size="m"
+            color="subdued"
+            content={OPEN_IN_FLYOUT}
+            aria-label={OPEN_IN_FLYOUT}
+            iconProps={{ tabIndex: -1 }}
+          />
+        </span>
+      )}
+      {onToggle === undefined && !opensFlyout && isExternal && (
+        <span css={trailingStyles}>
+          <EuiIconTip
+            type="external"
+            size="m"
+            color="subdued"
+            content={OPEN_NEW_TAB}
+            aria-label={OPENS_IN_NEW_TAB}
+            iconProps={{ tabIndex: -1, 'data-test-subj': 'investigationSubjectExternal' }}
+          />
+        </span>
       )}
     </>
   );
@@ -222,6 +249,13 @@ const CompactRow = ({
       </button>
     );
   }
+  if (opensFlyout) {
+    return (
+      <button type="button" css={rowStyles} onClick={onLinkClick} data-test-subj={dataTestSubj}>
+        {content}
+      </button>
+    );
+  }
   return (
     <div css={rowStyles} data-test-subj={dataTestSubj}>
       {content}
@@ -233,14 +267,12 @@ const CompactRow = ({
  * The subdued line under a row's title. Alerts listed under an "N alerts" row usually share the
  * rule name, so they also show when each alert started.
  */
-const getSubjectDescription = (
-  { type, snapshot }: SubjectRowData,
-  isNested: boolean
-): React.ReactNode => {
+const getSubjectDescription = (subject: SubjectRowData, isNested: boolean): React.ReactNode => {
+  const { type, snapshot } = subject;
   const start =
     type === 'alert' && isNested && snapshot?.start ? new Date(snapshot.start) : undefined;
   if (start === undefined || Number.isNaN(start.getTime())) {
-    return subjectTriggerLabel(type);
+    return subjectTriggerLabel(getSubjectDisplayType(subject));
   }
   return (
     <FormattedMessage
@@ -273,58 +305,31 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
   isNested = false,
 }) => {
   const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
-  const { services } = useKibana<SubjectServices>();
-  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
-  const source = subject.snapshot?.source;
-  // An alert opens next to the investigation; everything else keeps its link.
-  const opensFlyout = subject.type === 'alert' && canOpenSubjectFlyout(services, source);
-
-  const onRowClick = (event: React.MouseEvent) => {
-    if (!opensFlyout) {
-      onLinkClick?.(event);
-      return;
-    }
-    // A new-tab or new-window click keeps the browser's own behavior, so `href` still matters.
-    if (isModifiedClick(event)) {
-      return;
-    }
-    event.preventDefault();
-    setIsFlyoutOpen(true);
-  };
+  const {
+    onClick: onRowClick,
+    flyout,
+    canOpenFlyout,
+  } = useSubjectFlyout(subject, href, { onLinkClick });
+  const displayType = getSubjectDisplayType(subject);
 
   return (
     <>
       <CompactRow
-        iconType={SUBJECT_ICONS[subject.type]}
-        tone={SUBJECT_ICON_TONES[subject.type]}
+        iconType={SUBJECT_ICONS[displayType]}
+        tone={SUBJECT_ICON_TONES[displayType]}
         title={getSubjectTitle(subject)}
         description={getSubjectDescription(subject, isNested)}
         href={href}
         isExternal={isExternal}
-        onLinkClick={href === undefined ? undefined : onRowClick}
+        onLinkClick={onRowClick}
+        opensFlyout={canOpenFlyout}
         isNested={isNested}
         data-test-subj={`investigationSubject-${subject.type}`}
       />
-      {isFlyoutOpen && (
-        <React.Suspense fallback={null}>
-          <LazySubjectDetailsFlyout
-            alertId={subject.id}
-            source={source}
-            detailsHref={href}
-            onClose={() => setIsFlyoutOpen(false)}
-            services={services}
-          />
-        </React.Suspense>
-      )}
+      {flyout}
     </>
   );
 };
-
-/** The flyout pulls in the alerting v2 episode UI, so it loads when a subject is clicked. */
-const LazySubjectDetailsFlyout = React.lazy(async () => {
-  const { SubjectDetailsFlyout } = await import('./subject_details_flyout');
-  return { default: SubjectDetailsFlyout };
-});
 
 const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
 
@@ -333,7 +338,7 @@ const subjectKey = ({ type, id }: SubjectRowData): string => `${type}:${id}`;
  * to them. Without that list (alerting v2 not available) the row lists the alerts inline instead.
  */
 const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) => {
-  const { href, onClick } = useAlertsListLink(alerts);
+  const { href } = useAlertsListLink(alerts);
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -344,7 +349,7 @@ const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) =
         title={alertsCountLabel(alerts.length)}
         description={TRIGGER_LABEL}
         href={href}
-        onLinkClick={onClick}
+        isExternal={href !== undefined}
         onToggle={href === undefined ? () => setIsExpanded((expanded) => !expanded) : undefined}
         isExpanded={href === undefined ? isExpanded : undefined}
         data-test-subj="investigationSubject-alerts"
