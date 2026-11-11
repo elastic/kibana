@@ -10,6 +10,7 @@ import moment from 'moment';
 import { createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
 import { createSubjectAttachmentRenderer } from './subject_attachment_definition';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -336,16 +337,18 @@ describe('SubjectView alert flyout', () => {
 describe('SubjectView significant event with a registered flyout', () => {
   const event = {
     ...base,
-    subjectType: 'significant_event' as const,
+    subjectType: 'alert' as const,
     subjectId: 'event-1',
     summary: 'Checkout errors spiked',
-    snapshot: { source: 'elastic.example' },
+    snapshot: { source: SIGNIFICANT_EVENTS_ALERT_SOURCE },
   };
 
   it('opens the flyout on click although the event has no link', async () => {
-    renderView(event, { getAlertFlyout: () => () => null });
+    const getAlertFlyout = (source?: string) =>
+      source === SIGNIFICANT_EVENTS_ALERT_SOURCE ? () => null : undefined;
+    renderView(event, { getAlertFlyout });
 
-    const row = screen.getByTestId('investigationSubject-significant_event');
+    const row = screen.getByTestId('investigationSubject-alert');
     expect(row.tagName).toBe('BUTTON');
     fireEvent.click(row);
 

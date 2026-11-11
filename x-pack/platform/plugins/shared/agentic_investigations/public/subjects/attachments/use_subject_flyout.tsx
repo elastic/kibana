@@ -63,9 +63,6 @@ export const useSubjectFlyout = (
       return false;
     }
     const isRegistered = services.getAlertFlyout?.(source, subject.snapshot) !== undefined;
-    if (subject.type === 'significant_event') {
-      return isRegistered;
-    }
     if (subject.type !== 'alert') {
       return false;
     }
