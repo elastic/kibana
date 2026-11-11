@@ -106,6 +106,9 @@ const PANE_TITLES: Readonly<Record<SettingsKind, string>> = {
   flags: 'launch flags',
 };
 
+/** A key and what it does, for the legend at the bottom. */
+type KeyHint = readonly [key: string, label: string];
+
 /** How many settings fit in a settings pane of `height` rows, after its notes and the last notice. */
 const getSettingsRows = (state: TuiState, height: number): number => {
   const entry = getSettingsEntry(state);
@@ -386,6 +389,27 @@ export const createTuiApp = ({
     </Box>
   );
 
+  /** Key hints as nested Text, to go inside another line: keys stand out, separators recede. */
+  const KeyHintList = ({ hints }: { readonly hints: readonly KeyHint[] }) => (
+    <>
+      {hints.map(([key, label], index) => (
+        <React.Fragment key={key}>
+          {index > 0 ? <Text dimColor> · </Text> : null}
+          <Text bold color="cyan">
+            {key}
+          </Text>
+          <Text> {label}</Text>
+        </React.Fragment>
+      ))}
+    </>
+  );
+
+  const KeyHints = ({ hints }: { readonly hints: readonly KeyHint[] }) => (
+    <Text wrap="truncate-end">
+      <KeyHintList hints={hints} />
+    </Text>
+  );
+
   const Footer = ({ state }: { readonly state: TuiState }) => {
     if (state.isQuitting) {
       return <Text color="yellow">stopping every process…</Text>;
@@ -398,9 +422,13 @@ export const createTuiApp = ({
           {valueEdit.target.type === 'setting' ? ' = ' : ': '}
           {valueEdit.text}
           <Text inverse> </Text>
-          <Text dimColor>
-            {valueEdit.target.type === 'setting' ? ' enter save' : ' enter start'} · esc cancel
-          </Text>
+          {'  '}
+          <KeyHintList
+            hints={[
+              ['enter', valueEdit.target.type === 'setting' ? 'save' : 'start'],
+              ['esc', 'cancel'],
+            ]}
+          />
         </Text>
       );
     }
@@ -409,21 +437,40 @@ export const createTuiApp = ({
         <Text wrap="truncate-end">
           /{state.query}
           <Text inverse> </Text>
-          <Text dimColor> enter keep filter · esc clear</Text>
+          {'  '}
+          <KeyHintList
+            hints={[
+              ['enter', 'keep filter'],
+              ['esc', 'clear'],
+            ]}
+          />
         </Text>
       );
     }
-    const processKeys =
-      state.selected === ALL ? '' : ' · tab logs/settings · r restart · s start · x stop';
-    const paneKeys =
+    const paneKeys: KeyHint[] =
       state.pane === 'logs'
-        ? '↑↓/←→ select process · PgUp/PgDn scroll · G follow'
-        : '↑↓ move · ←→ process · space toggle · e edit · u unset';
-    return (
-      <Text dimColor wrap="truncate-end">
-        {paneKeys} · / filter{processKeys} · q quit
-      </Text>
-    );
+        ? [
+            ['↑↓/←→', 'select process'],
+            ['PgUp/PgDn', 'scroll'],
+            ['G', 'follow'],
+          ]
+        : [
+            ['↑↓', 'move'],
+            ['←→', 'process'],
+            ['space', 'toggle'],
+            ['e', 'edit'],
+            ['u', 'unset'],
+          ];
+    const processKeys: KeyHint[] =
+      state.selected === ALL
+        ? []
+        : [
+            ['tab', 'logs/settings'],
+            ['r', 'restart'],
+            ['s', 'start'],
+            ['x', 'stop'],
+          ];
+    return <KeyHints hints={[...paneKeys, ['/', 'filter'], ...processKeys, ['q', 'quit']]} />;
   };
 
   const TuiApp = ({ supervisor, onSubscribed, onQuit, readRepoInfo }: TuiAppProps) => {
