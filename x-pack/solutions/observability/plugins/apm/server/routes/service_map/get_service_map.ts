@@ -92,14 +92,14 @@ async function getConnectionData({
 }
 
 /** Service map grouping features, only available when service map grouping is enabled */
-export type ServiceMapGrouping =
+export type ServiceMapGroupingOptions =
   | { enabled: false }
   | ({ enabled: true } & Pick<EnhancedServiceStatsOptions, 'source'>);
 
 export function getServiceMap(
   options: IEnvOptions & {
     maxNumberOfServices: number;
-    grouping: ServiceMapGrouping;
+    grouping: ServiceMapGroupingOptions;
   }
 ): Promise<ServiceMapResponse> {
   return withApmSpan('get_service_map', async () => {

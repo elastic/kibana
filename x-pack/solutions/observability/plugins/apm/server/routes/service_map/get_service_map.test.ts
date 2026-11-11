@@ -13,7 +13,7 @@ import { getServiceCallGraph } from './get_service_call_graph';
 import { getServiceGroupingAttributes } from './get_service_grouping_attributes';
 import { matchCallGraphToServices } from './match_service_call_graph';
 import { getServiceMap } from './get_service_map';
-import type { IEnvOptions, ServiceMapGrouping } from './get_service_map';
+import type { IEnvOptions, ServiceMapGroupingOptions } from './get_service_map';
 import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
 import { getServiceStats } from './get_service_stats';
 import { getEnhancedServiceStats } from './get_enhanced_service_stats';
@@ -55,9 +55,9 @@ const spans: ServiceMapSpan[] = [
   },
 ];
 
-const disabledGrouping: ServiceMapGrouping = { enabled: false };
+const disabledGrouping: ServiceMapGroupingOptions = { enabled: false };
 
-const enabledGrouping: ServiceMapGrouping = {
+const enabledGrouping: ServiceMapGroupingOptions = {
   enabled: true,
   source: {
     documentType: ApmDocumentType.ServiceTransactionMetric,

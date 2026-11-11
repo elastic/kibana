@@ -56,6 +56,77 @@ export interface ServiceMapRawResponse {
   spans: ServiceMapSpan[];
   servicesData: ServicesResponse[];
   anomalies: ServiceAnomaliesResponse;
+  /** Absent when grouping is off, the map has fewer than 100 services, or grouping failed. */
+  serviceGrouping?: ServiceMapGrouping;
+}
+
+/** What a service map grouping strategy groups services by. */
+export type ServiceGroupingSource =
+  | 'serviceGroups'
+  | 'service.namespace'
+  | 'kubernetes.namespace'
+  | 'namePrefix'
+  | 'calls';
+
+/** A saved service group the service matches. */
+export interface ServiceGroupMapGroup {
+  id: string;
+  kind: 'savedGroup';
+  name: string;
+}
+
+/** Services sharing the value of an attribute. */
+export interface AttributeServiceMapGroup {
+  id: string;
+  kind: 'attribute';
+  attribute: Exclude<ServiceGroupingSource, 'serviceGroups' | 'calls'>;
+  value: string;
+}
+
+/** Services that call each other a lot, named after the busiest of them. */
+export interface CallsServiceMapGroup {
+  id: string;
+  kind: 'calls';
+  busiestService: string;
+}
+
+/** Services called by a large share of the estate, or connected to far more services than most. */
+export interface SharedServiceMapGroup {
+  id: string;
+  kind: 'shared';
+}
+
+/** Services with no calls, or in a small piece of the call graph cut off from the rest. */
+export interface NotConnectedServiceMapGroup {
+  id: string;
+  kind: 'notConnected';
+}
+
+export type ServiceMapGroup =
+  | ServiceGroupMapGroup
+  | AttributeServiceMapGroup
+  | CallsServiceMapGroup
+  | SharedServiceMapGroup
+  | NotConnectedServiceMapGroup;
+
+/** One way of grouping the map's services. */
+export interface ServiceGroupingStrategy {
+  source: ServiceGroupingSource;
+  /** Whether this grouping passed the readability checks. */
+  passes: boolean;
+  /** This strategy's own groups. The same id can hold different services in another strategy. */
+  groups: ServiceMapGroup[];
+  /** `assignment[i]` is the index in `groups` of `services[i]`. */
+  assignment: number[];
+}
+
+/** Every grouping the map can show, and the one shown automatically. */
+export interface ServiceMapGrouping {
+  /** Every service on the map, sorted. */
+  services: string[];
+  /** The strategy shown automatically. Always one of `strategies`. */
+  automatic: ServiceGroupingSource;
+  strategies: ServiceGroupingStrategy[];
 }
 
 export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & ServiceMapRawResponse;
