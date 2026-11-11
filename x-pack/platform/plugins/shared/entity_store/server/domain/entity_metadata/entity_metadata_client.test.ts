@@ -233,6 +233,22 @@ describe('EntityMetadataClient', () => {
       ]);
     });
 
+    it('appends caller-supplied filter clauses after the event.action and entity.id terms', async () => {
+      mockSearchHits([makeDoc()]);
+      await client.getLatestByEntityId({
+        entityId: 'user:alice@corp',
+        eventAction: 'relationship_observed',
+        filter: [{ term: { 'Ai_summary.variant_id': 'resolved' } }],
+      });
+
+      const [params] = esClient.search.mock.calls[0] as [{ query: Record<string, any> }];
+      expect(params.query.bool.filter).toEqual([
+        { term: { 'event.action': 'relationship_observed' } },
+        { term: { 'entity.id': 'user:alice@corp' } },
+        { term: { 'Ai_summary.variant_id': 'resolved' } },
+      ]);
+    });
+
     it('returns the first (latest) hit _source', async () => {
       const latest = makeDoc({ '@timestamp': '2026-06-01T00:00:00.000Z' });
       mockSearchHits([latest]);

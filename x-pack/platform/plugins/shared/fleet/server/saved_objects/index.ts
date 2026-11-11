@@ -15,6 +15,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+  PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 
 import {
@@ -57,10 +58,18 @@ import {
   PackagePolicySchemaV22,
   PackagePolicySchemaV24,
   PackagePolicySchemaV25,
+  PackagePolicySchemaV26,
   CloudConnectorSchemaV4,
   CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
   CloudOnboardingDeploymentSchemaV2,
+  CloudOnboardingDeploymentSchemaV3,
+  CloudOnboardingDeploymentSchemaV4,
+  CloudOnboardingDeploymentSchemaV5,
+  CloudOnboardingDeploymentSchemaV6,
+  ProvisioningCallbackSchemaV1,
+  CloudOnboardingDeploymentSchemaV7,
+  CloudOnboardingDeploymentSchemaV8,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -1110,6 +1119,7 @@ export const getSavedObjectTypes = (
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
           package_agent_version_condition: { type: 'keyword' },
+          onboarding_deployment_id: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -1363,6 +1373,20 @@ export const getSavedObjectTypes = (
             create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '26': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                onboarding_deployment_id: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV26.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV26.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -1430,6 +1454,7 @@ export const getSavedObjectTypes = (
           bump_agent_policy_revision: { type: 'boolean' },
           latest_revision: { type: 'boolean' },
           package_agent_version_condition: { type: 'keyword' },
+          onboarding_deployment_id: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -1545,6 +1570,20 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
             create: PackagePolicySchemaV25.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '12': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                onboarding_deployment_id: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV26.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV26.extends({}, { unknowns: 'ignore' }),
           },
         },
       },
@@ -2157,6 +2196,8 @@ export const getSavedObjectTypes = (
         dynamic: false,
         properties: {
           connectorId: { type: 'keyword', ignore_above: 1024 },
+          provider: { type: 'keyword', ignore_above: 1024 },
+          packageNames: { type: 'keyword', ignore_above: 1024 },
         },
       },
       modelVersions: {
@@ -2181,6 +2222,116 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV2,
+          },
+        },
+        3: {
+          // Added integrationName + description. No mappings_addition — neither field is
+          // indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV3.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV3,
+          },
+        },
+        4: {
+          // Added namespace. No mappings_addition — it is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV4.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV4,
+          },
+        },
+        5: {
+          // Added instances. No mappings_addition — it is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV5.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV5,
+          },
+        },
+        6: {
+          // Added packageNames + serviceNames + updatedBy. packageNames and provider become queryable
+          // keywords so the list API can filter deployments per package. Existing documents have no
+          // packageNames and are treated as empty — no data_backfill.
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                provider: { type: 'keyword', ignore_above: 1024 },
+                packageNames: { type: 'keyword', ignore_above: 1024 },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV6.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV6,
+          },
+        },
+        7: {
+          // Added policySettings. No mappings_addition — it is not indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV7.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV7,
+          },
+        },
+        8: {
+          // Added dedicatedNamespaceTemplates and raised the policySettings value limit so a condition
+          // fits. No mappings_addition — neither is indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV8.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV8,
+          },
+        },
+      },
+    },
+    [PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE]: {
+      name: PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      // Only Fleet's own routes may make or change a record: a record written through the
+      // generic saved objects APIs could name any space and carry a hash of a token its author
+      // chose, and the unauthenticated receive route would honour it.
+      hiddenFromHttpApis: true,
+      // The stack's Lambda calls the receive route without a space prefix, so the record must be
+      // reachable from any space; the space the launch happened in is kept in `space_id`.
+      namespaceType: 'agnostic',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        dynamic: false,
+        // The token hash is deliberately not mapped: nothing searches it.
+        properties: {
+          status: { type: 'keyword', ignore_above: 1024 },
+          expires_at: { type: 'date' },
+        },
+      },
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: {
+            forwardCompatibility: ProvisioningCallbackSchemaV1.extends({}, { unknowns: 'ignore' }),
+            create: ProvisioningCallbackSchemaV1,
           },
         },
       },

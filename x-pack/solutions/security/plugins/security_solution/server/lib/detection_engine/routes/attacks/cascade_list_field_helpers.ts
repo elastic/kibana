@@ -17,6 +17,7 @@ import {
   wouldChange,
 } from '../common/operations/prefetch_previous_statuses';
 import { isAttackDiscoveryIndex } from '../common/operations/is_attack_discovery_index';
+import { auditAlertUpdatePreOperationFailure } from '../common/operations/audit_alert_updates';
 import { getUnifiedAlertsIndex } from '../common/index_patterns/get_unified_alerts_index';
 
 type EmitFn = (
@@ -62,10 +63,23 @@ export const executeCascadeListField = async <T>({
   logger?: Logger;
 }): Promise<T> => {
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-  const attackHits = await fetchAllAlertIdIndexWithSource(esClient, attackIndex, ids, [
-    ALERT_ATTACK_DISCOVERY_ALERT_IDS,
-    field,
-  ]);
+  // Lookups run before the shared update helper, which only audits its own failures.
+  const auditLookupFailure = async (error: unknown): Promise<void> => {
+    auditAlertUpdatePreOperationFailure(
+      (await context.securitySolution)?.getAuditLogger(),
+      error instanceof Error ? error : new Error(String(error))
+    );
+  };
+  let attackHits: Awaited<ReturnType<typeof fetchAllAlertIdIndexWithSource>>;
+  try {
+    attackHits = await fetchAllAlertIdIndexWithSource(esClient, attackIndex, ids, [
+      ALERT_ATTACK_DISCOVERY_ALERT_IDS,
+      field,
+    ]);
+  } catch (error) {
+    await auditLookupFailure(error);
+    throw error;
+  }
 
   // All found attack IDs drive the mutation; deduplicated across index families.
   const allFoundAttackIds = Array.from(new Set(attackHits.map((h) => h.id)));
@@ -89,7 +103,13 @@ export const executeCascadeListField = async <T>({
   );
 
   const combinedIds = Array.from(new Set([...allFoundAttackIds, ...relatedAlertIds]));
-  const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
+  let index: string[];
+  try {
+    index = await getUnifiedAlertsIndex({ context, ruleDataClient });
+  } catch (error) {
+    await auditLookupFailure(error);
+    throw error;
+  }
 
   let verifiedRelatedAlertIds: string[] = [];
   let relatedDelta = { actualAdded: validToAdd, actualRemoved: validToRemove };

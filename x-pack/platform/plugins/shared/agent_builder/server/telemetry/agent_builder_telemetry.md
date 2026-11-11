@@ -235,6 +235,9 @@ execution. For per-execution figures, and for pauses that were never resumed, se
 | `origin` | keyword | no | External system the conversation came from. See [Conversation origin](#conversation-origin). |
 | `input_tokens` | integer | yes | Input tokens consumed in this round. |
 | `cached_input_tokens` | integer | no | Input tokens served from cache in this round (subset of `input_tokens`), when reported by the provider. |
+| `reasoning_tokens` | integer | no | Reasoning (thinking) tokens in this round (subset of `output_tokens`), when reported by the provider. |
+| `models` | keyword[] | no | Distinct models that served the LLM calls of this round, when the per-model breakdown is available. |
+| `models_count` | integer | no | Number of distinct models in `models`, not of connectors: connectors serving the same model count once. |
 | `llm_calls` | integer | yes | Number of LLM calls made during the round. |
 | `message_length` | integer | yes | Character length of the user's input message. |
 | `model` | keyword | no | LLM model identifier. |
@@ -278,6 +281,9 @@ An execution with `outcome: prompt_requested` and no `agent_builder_round_comple
 | `outcome` | keyword | yes | `responded` if it ended the round, `prompt_requested` if it paused. |
 | `input_tokens` | integer | yes | Input tokens consumed by this execution alone. |
 | `cached_input_tokens` | integer | no | Cache reads, a subset of `input_tokens`. |
+| `reasoning_tokens` | integer | no | Reasoning (thinking) tokens, a subset of `output_tokens`. |
+| `models` | keyword[] | no | Distinct models that served this execution's LLM calls. |
+| `models_count` | integer | no | Number of distinct models in `models`, not of connectors: connectors serving the same model count once. |
 | `output_tokens` | integer | yes | Output tokens produced by this execution alone. |
 | `llm_calls` | integer | yes | LLM calls made by this execution alone. |
 | `model` | keyword | no | LLM model identifier. |

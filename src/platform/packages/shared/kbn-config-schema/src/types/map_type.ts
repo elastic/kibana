@@ -23,27 +23,31 @@ export class MapOfType<K, V> extends Type<Map<K, V>> {
 
   constructor(keyType: Type<K>, valueType: Type<V>, options: MapOfOptions<K, V> = {}) {
     const defaultValue = options.defaultValue;
-    let schema = internals
-      .map()
-      .entries(keyType.getSchema(), valueType.getSchema())
-      .meta({
-        [META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]: () => valueType.getSchema(),
-      });
+    super(
+      () => {
+        let schema = internals
+          .map()
+          .entries(keyType.getSchema(), valueType.getSchema())
+          .meta({
+            [META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES]: () => valueType.getSchema(),
+          });
 
-    // Only set stripUnknown if we have an explicit value of unknowns
-    const { unknowns } = options;
-    if (unknowns) {
-      schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
-    }
-
-    super(schema, {
-      ...options,
-      // Joi clones default values with `Hoek.clone`, and there is bug in cloning
-      // of Map/Set/Promise/Error: https://github.com/hapijs/hoek/issues/228.
-      // The only way to avoid cloning and hence the bug is to use function for
-      // default value instead.
-      defaultValue: defaultValue instanceof Map ? () => defaultValue : defaultValue,
-    });
+        // Only set stripUnknown if we have an explicit value of unknowns
+        const { unknowns } = options;
+        if (unknowns) {
+          schema = schema.options({ stripUnknown: { objects: unknowns === 'ignore' } });
+        }
+        return schema;
+      },
+      {
+        ...options,
+        // Joi clones default values with `Hoek.clone`, and there is bug in cloning
+        // of Map/Set/Promise/Error: https://github.com/hapijs/hoek/issues/228.
+        // The only way to avoid cloning and hence the bug is to use function for
+        // default value instead.
+        defaultValue: defaultValue instanceof Map ? () => defaultValue : defaultValue,
+      }
+    );
     this.keyType = keyType;
     this.valueType = valueType;
     this.mapOptions = options;

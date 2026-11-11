@@ -1,5 +1,5 @@
 {
-  "sha1": "189c8b0c35cdca7f740baa6a5de33742c6e63a50",
+  "sha1": "6a3f6217c4396e0b4791a336d08f76f9d3e7f91e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -557,8 +557,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 41,
-        "column": 59
+        "line": 46,
+        "column": 15
       }
     },
     {
@@ -570,8 +570,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 75,
-        "column": 24
+        "line": 77,
+        "column": 15
       }
     },
     {
@@ -583,8 +583,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 120,
-        "column": 25
+        "line": 122,
+        "column": 22
       }
     },
     {
@@ -596,8 +596,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/restorable_state_search_bar.spec.ts",
-        "line": 150,
-        "column": 22
+        "line": 152,
+        "column": 20
       }
     },
     {
@@ -663,6 +663,19 @@
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/save_and_load_sessions.spec.ts",
         "line": 92,
         "column": 11
+      }
+    },
+    {
+      "id": "730c007220b9869-707fe310cb73118",
+      "title": "Discover tabs - session saved elsewhere keeps unsaved changes of a replaced tab as a recently closed tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/session_saved_elsewhere.spec.ts",
+        "line": 32,
+        "column": 25
       }
     },
     {

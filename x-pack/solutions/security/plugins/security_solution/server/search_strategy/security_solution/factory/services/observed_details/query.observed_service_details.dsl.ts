@@ -6,6 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { isEmpty } from 'lodash';
 import type { ISearchRequestParams } from '@kbn/search-types';
 import type { ObservedServiceDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
@@ -18,9 +19,14 @@ export const buildObservedServiceDetailsQuery = ({
   timerange: { from, to },
   filterQuery,
 }: ObservedServiceDetailsRequestOptions): ISearchRequestParams => {
+  // An entity-store identity filter replaces the default `service.name` term so resolution-group
+  // aliases with a different service name are still matched.
+  const serviceNameFilter: QueryDslQueryContainer[] = isEmpty(filterQuery)
+    ? [{ term: { 'service.name': serviceName } }]
+    : [];
   const filter: QueryDslQueryContainer[] = [
     ...createQueryFilterClauses(filterQuery),
-    { term: { 'service.name': serviceName } },
+    ...serviceNameFilter,
     {
       range: {
         '@timestamp': {

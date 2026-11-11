@@ -27,7 +27,6 @@ import {
   SavedObjectSaveModalDashboard,
   type SaveModalDashboardProps,
 } from '@kbn/presentation-util-plugin/public';
-import { toSearchEmbeddableByValueState } from '../../common/agent_builder/to_search_embeddable_by_value_state';
 import type { DiscoverAppLocator } from '../../common';
 import type { SearchEmbeddableApi, SearchEmbeddablePanelApiState } from '../embeddable/types';
 import { SearchEmbeddableToolbarProvider } from '../embeddable/components/search_embeddable_toolbar_context';
@@ -105,9 +104,9 @@ export const DiscoverSessionInline = ({
   const visibleColumnsRef = useRef<string[] | undefined>(undefined);
   const canWriteDashboards = application?.capabilities.dashboard_v2?.showWriteControls === true;
 
-  const mappedState = useMemo(() => toSearchEmbeddableByValueState(data), [data]);
   const seedTimeRange = getDiscoverSessionSeedTimeRange({
-    mappedTimeRange: mappedState.time_range,
+    // The inline embeddable renders the first session tab, so seed the picker from that tab.
+    mappedTimeRange: data.tabs[0].time_range,
     screenContextTimeRange,
   });
   const { searchBarProps, effectiveTimeRange } = useDiscoverSessionUnifiedSearch({
@@ -283,37 +282,39 @@ export const DiscoverSessionInline = ({
   }, [application, data, effectiveTimeRange, embeddableApi, locator, registerActionButtons]);
 
   return (
-    <SearchEmbeddableToolbarProvider value={toolbarSlot}>
-      {blockingError && (
-        <>
-          {toolbarLeftSide}
-          <EuiSpacer size="s" />
-        </>
-      )}
-      <div
-        css={css`
-          height: ${INLINE_TABLE_HEIGHT}px;
-          overflow: hidden;
-        `}
-      >
-        <EmbeddableRenderer<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
-          key={embeddableKey}
-          maybeId={undefined}
-          type={SEARCH_EMBEDDABLE_TYPE}
-          getParentApi={() => parentApi}
-          onApiAvailable={setEmbeddableApi}
-          hidePanelChrome
-        />
-      </div>
-      {isSaveModalOpen && (
-        <SavedObjectSaveModalDashboard
-          objectType={saveModalObjectType}
-          documentInfo={{ title: data.title ?? '', description: data.description }}
-          canSaveByReference={false}
-          onClose={closeSaveModal}
-          onSave={onSaveToDashboard}
-        />
-      )}
-    </SearchEmbeddableToolbarProvider>
+    <div data-test-subj="discoverAgentBuilderSessionCard">
+      <SearchEmbeddableToolbarProvider value={toolbarSlot}>
+        {blockingError && (
+          <>
+            {toolbarLeftSide}
+            <EuiSpacer size="s" />
+          </>
+        )}
+        <div
+          css={css`
+            height: ${INLINE_TABLE_HEIGHT}px;
+            overflow: hidden;
+          `}
+        >
+          <EmbeddableRenderer<SearchEmbeddablePanelApiState, SearchEmbeddableApi>
+            key={embeddableKey}
+            maybeId={undefined}
+            type={SEARCH_EMBEDDABLE_TYPE}
+            getParentApi={() => parentApi}
+            onApiAvailable={setEmbeddableApi}
+            hidePanelChrome
+          />
+        </div>
+        {isSaveModalOpen && (
+          <SavedObjectSaveModalDashboard
+            objectType={saveModalObjectType}
+            documentInfo={{ title: data.title ?? '', description: data.description }}
+            canSaveByReference={false}
+            onClose={closeSaveModal}
+            onSave={onSaveToDashboard}
+          />
+        )}
+      </SearchEmbeddableToolbarProvider>
+    </div>
   );
 };

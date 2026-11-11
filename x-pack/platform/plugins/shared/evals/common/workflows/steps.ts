@@ -231,6 +231,46 @@ export const ingestScoresCommonDefinition: CommonStepDefinition<
   outputSchema: ingestScoresOutputSchema,
 };
 
+export const PersistOnlineScoresStepId = 'ai.evals.persistOnlineScores' as const;
+
+export const persistOnlineScoresInputSchema = z.object({
+  monitor: z.object({ id: z.string(), name: z.string() }),
+  trace_id: z.string(),
+  connector_id: z.string().optional(),
+  results: z.array(
+    evaluatorResultSchema.extend({
+      evaluator: evaluatorResultSchema.shape.evaluator.extend({
+        version: z.string(),
+        kind: z.enum(['llm', 'code']),
+      }),
+    })
+  ),
+  /** Evaluator failures reported by `ai.evals.evaluateTrace`, counted but not persisted. */
+  errors: z.array(z.string()).optional(),
+});
+
+export const persistOnlineScoresOutputSchema = z.object({
+  created: z.number().int(),
+  skipped: z.number().int(),
+  failed_evaluators: z.number().int(),
+});
+
+export const persistOnlineScoresCommonDefinition: CommonStepDefinition<
+  typeof persistOnlineScoresInputSchema,
+  typeof persistOnlineScoresOutputSchema
+> = {
+  id: PersistOnlineScoresStepId,
+  category: StepCategory.Ai,
+  stability: 'tech_preview',
+  label: label('persistOnlineScores', 'Persist online evaluation scores'),
+  description: description(
+    'persistOnlineScores',
+    'Stores the scores an online evaluation produced for a single trace, attributed to the monitoring workflow.'
+  ),
+  inputSchema: persistOnlineScoresInputSchema,
+  outputSchema: persistOnlineScoresOutputSchema,
+};
+
 // ---------------------------------------------------------------------------
 // Layer 2 — composite convenience
 // ---------------------------------------------------------------------------
@@ -381,6 +421,7 @@ export const EVALS_STEP_IDS = [
   ExecuteTaskStepId,
   EvaluateTraceStepId,
   IngestScoresStepId,
+  PersistOnlineScoresStepId,
   EvaluateExampleStepId,
   EvaluateDatasetStepId,
   StartExperimentStepId,

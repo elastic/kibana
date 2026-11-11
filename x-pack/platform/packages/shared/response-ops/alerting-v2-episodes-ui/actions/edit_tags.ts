@@ -42,6 +42,7 @@ export const createEditTagsAction = (
 ): EpisodeAction => ({
   id: EDIT_TAGS_ACTION_ID,
   order: 40,
+  enforcesOwnPrivileges: false,
   displayName: i18n.EDIT_TAGS,
   iconType: 'tag',
   isCompatible: ({ episodes }: EpisodeActionContext) =>
@@ -64,7 +65,9 @@ export const createEditTagsAction = (
           eps.map(
             (ep): BulkTagEpisodeActionItem => ({
               alert_id: ep['episode.id'],
-              tags,
+              // The API clears with `null` and rejects an empty array, so an
+              // emptied selection is sent as a clear.
+              tags: tags.length === 0 ? null : tags,
             })
           )
         ),

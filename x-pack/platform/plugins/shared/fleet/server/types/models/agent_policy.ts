@@ -9,7 +9,11 @@ import { schema } from '@kbn/config-schema';
 
 import type { GlobalDataTag } from '../../../common/types';
 
-import { agentPolicyStatuses, dataTypes } from '../../../common/constants';
+import {
+  agentPolicyStatuses,
+  dataTypes,
+  FLEET_SCHEMA_NAME_MAX_LENGTH,
+} from '../../../common/constants';
 import { isValidNamespace } from '../../../common/services';
 import { getSettingsAPISchema } from '../../services/form_settings';
 
@@ -421,6 +425,83 @@ export const NewAgentPolicySchema = AgentPolicySchemaV6.extends(
       ])
     ),
     force: schema.maybe(schema.boolean()),
+    // REST-only reporting bounds: AgentPolicyBaseSchema stays unchanged so that they do not
+    // flow into the frozen SO model-version schemas (V3–V7).
+    id: schema.maybe(schema.savedObjectId.warn({ minLength: 0, label: 'fleet.agent_policies.id' })),
+    space_ids: schema.maybe(
+      schema.arrayOf(
+        schema.spaceId.warn({ minLength: 0, label: 'fleet.agent_policies.space_ids' }),
+        {
+          maxSize: 100,
+        }
+      )
+    ),
+    name: schema.displayName.warn({
+      minLength: 1,
+      maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+      label: 'fleet.agent_policies.name',
+      validate: validateNonEmptyString,
+    }),
+    description: schema.maybe(
+      schema.description.warn({ label: 'fleet.agent_policies.description' })
+    ),
+    data_output_id: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.savedObjectId.warn({ minLength: 0, label: 'fleet.agent_policies.data_output_id' }),
+      ])
+    ),
+    monitoring_output_id: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.agent_policies.monitoring_output_id',
+        }),
+      ])
+    ),
+    download_source_id: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.agent_policies.download_source_id',
+          meta: {
+            description: 'Use `download_source_ids` instead',
+            deprecated: true,
+          },
+        }),
+      ])
+    ),
+    fleet_server_host_id: schema.maybe(
+      schema.oneOf([
+        schema.literal(null),
+        schema.savedObjectId.warn({
+          minLength: 0,
+          label: 'fleet.agent_policies.fleet_server_host_id',
+        }),
+      ])
+    ),
+    global_data_tags: schema.maybe(
+      schema.arrayOf(
+        schema.object({
+          name: schema.displayName.warn({
+            minLength: 0,
+            maxLength: FLEET_SCHEMA_NAME_MAX_LENGTH,
+            label: 'fleet.agent_policies.global_data_tags.name',
+          }),
+          value: schema.oneOf([schema.string(), schema.number()]),
+        }),
+        {
+          validate: validateGlobalDataTagInput,
+          meta: {
+            description:
+              'User defined data tags that are added to all of the inputs. The values can be strings or numbers.',
+          },
+          maxSize: 100,
+        }
+      )
+    ),
   },
   { meta: { id: 'new_agent_policy' } }
 );

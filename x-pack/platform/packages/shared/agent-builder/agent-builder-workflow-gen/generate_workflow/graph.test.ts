@@ -37,6 +37,7 @@ steps:
       getAvailableConnectors: jest
         .fn()
         .mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
+      getTriggerSchemaOptions: jest.fn().mockReturnValue({ includePageTrigger: false }),
       validateWorkflow: jest.fn().mockResolvedValue({
         valid: true,
         diagnostics: [],

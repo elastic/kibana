@@ -70,15 +70,16 @@ export const DashboardAppNoDataPage = ({
     abortController?.abort(AbortReason.REPLACED);
     if (lensHelpersAsync.value) {
       const abc = new AbortController();
-      const indexName = (await getIndexForESQLQuery({ http: coreServices.http })) ?? '*';
-      const dataView = await getESQLAdHocDataview({
-        dataViewsService: dataService.dataViews,
-        query: `FROM ${indexName}`,
-        http: coreServices.http,
-      });
-      const esqlQuery = getInitialESQLQuery(dataView);
 
       try {
+        const indexName = (await getIndexForESQLQuery({ http: coreServices.http })) ?? '*';
+        const dataView = await getESQLAdHocDataview({
+          dataViewsService: dataService.dataViews,
+          query: `FROM ${indexName}`,
+          http: coreServices.http,
+        });
+        const esqlQuery = getInitialESQLQuery(dataView);
+
         const columns = await getESQLQueryColumns({
           esqlQuery,
           search: dataService.search.search,
@@ -150,7 +151,12 @@ export const DashboardAppNoDataPage = ({
         }
         hidden
       />
-      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} onTryESQL={onTryESQL} />
+      <AnalyticsNoDataPage
+        onDataViewCreated={onDataViewCreated}
+        onTryESQL={onTryESQL}
+        // the handler needs the Lens state helpers, so keep the button disabled until they resolve
+        isTryESQLDisabled={!lensHelpersAsync.value}
+      />
     </AnalyticsNoDataPageKibanaProvider>
   );
 };

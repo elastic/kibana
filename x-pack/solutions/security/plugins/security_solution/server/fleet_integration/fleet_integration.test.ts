@@ -176,7 +176,9 @@ describe('Fleet integrations', () => {
       linuxDnsEvents: true,
       customYaraSignaturesEnabled: true,
       linuxRansomwareProtection: true,
+      endpointAiDataCollection: true,
       perOsPolicySettings: true,
+      registryCredentialHardening: true,
     } as ExperimentalFeatures;
     productFeaturesService = endpointAppContextStartContract.productFeaturesService;
 
@@ -787,6 +789,24 @@ describe('Fleet integrations', () => {
 
       beforeEach(() => {
         licenseEmitter.next(Enterprise); // set license level to enterprise
+      });
+
+      it('resolves an update with absent macOS ransomware settings', async () => {
+        const mockPolicy = policyFactory();
+        Reflect.deleteProperty(mockPolicy.mac, 'ransomware');
+        Reflect.deleteProperty(mockPolicy.mac.popup, 'ransomware');
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        await expect(
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).resolves.toBeDefined();
       });
 
       it('should throw if endpointProtectionUpdates productFeature is disabled and user modifies global_manifest_version', async () => {
@@ -1520,6 +1540,123 @@ describe('Fleet integrations', () => {
       });
     });
 
+    describe('when registry credential hardening features are disabled', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const setRegistryCredentialHardeningOnPolicy = (policy: PolicyConfig, value: boolean) => {
+        policy.windows.attack_surface_reduction.registry_credential_hardening = {
+          enabled: value,
+        };
+      };
+
+      const expectRegistryCredentialHardeningAbsent = (policy: PolicyConfig) => {
+        expect(policy.windows.attack_surface_reduction).not.toHaveProperty(
+          'registry_credential_hardening'
+        );
+      };
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it('should strip registry credential hardening when the product feature is disabled', async () => {
+        // @ts-expect-error write to readonly property for testing
+        experimentalFeatures.registryCredentialHardening = true;
+        productFeaturesService = createProductFeaturesServiceMock(
+          ALL_PRODUCT_FEATURE_KEYS.filter(
+            (key) => key !== ProductFeatureSecurityKey.endpointRegistryCredentialHardening
+          )
+        );
+
+        const mockPolicy = policyFactory();
+        setRegistryCredentialHardeningOnPolicy(mockPolicy, true);
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expectRegistryCredentialHardeningAbsent(
+          updatedPolicyConfig.inputs[0]!.config!.policy.value
+        );
+      });
+
+      it('should strip registry credential hardening when the experimental flag is off', async () => {
+        // @ts-expect-error write to readonly property for testing
+        experimentalFeatures.registryCredentialHardening = false;
+
+        const mockPolicy = policyFactory();
+        setRegistryCredentialHardeningOnPolicy(mockPolicy, true);
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expectRegistryCredentialHardeningAbsent(
+          updatedPolicyConfig.inputs[0]!.config!.policy.value
+        );
+      });
+
+      it('should preserve registry credential hardening when both the product feature and experimental flag are enabled', async () => {
+        // @ts-expect-error write to readonly property for testing
+        experimentalFeatures.registryCredentialHardening = true;
+
+        const mockPolicy = policyFactory();
+        setRegistryCredentialHardeningOnPolicy(mockPolicy, true);
+
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(
+          updatedPolicyConfig.inputs[0]!.config!.policy.value.windows.attack_surface_reduction
+            .registry_credential_hardening
+        ).toEqual({ enabled: true });
+      });
+    });
+
     describe('Linux ransomware protection', () => {
       const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -1804,6 +1941,57 @@ describe('Fleet integrations', () => {
             message: expect.stringContaining('Invalid Elastic Defend policy configuration'),
           });
         });
+      });
+    });
+
+    describe('AI Data Collection', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const runUpdate = async () => {
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = policyFactory();
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        return updatedPolicyConfig.inputs[0]!.config!.policy.value;
+      };
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it.each([
+        ['endpointAiDataCollection', { endpointAiDataCollection: false }],
+        ['perOsPolicySettings', { perOsPolicySettings: false }],
+      ])('should strip ai_data_collection from every OS when %s is off', async (_flag, flags) => {
+        experimentalFeatures = { ...experimentalFeatures, ...flags };
+
+        const policy = await runUpdate();
+
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(policy[os]).not.toHaveProperty('ai_data_collection');
+        }
+      });
+
+      it('should keep ai_data_collection when both experimental flags are on', async () => {
+        const policy = await runUpdate();
+
+        for (const os of ['windows', 'mac', 'linux'] as const) {
+          expect(policy[os].ai_data_collection).toEqual({ enabled: true });
+        }
       });
     });
 

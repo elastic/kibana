@@ -61,7 +61,9 @@ describe('createSignificantEventsClients', () => {
   });
 
   it('gives the event client the writer lazily, and the trigger emitter, to write with', async () => {
-    const createAlertEvent = jest.fn().mockResolvedValue(undefined);
+    const createAlertEvent = jest
+      .fn()
+      .mockResolvedValue({ group_hash: 'hash-1', alert_id: 'alert-1' });
     const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent });
     const triggerEmitter = jest.fn();
     const clients = createSignificantEventsClients({
@@ -87,6 +89,7 @@ describe('createSignificantEventsClients', () => {
         severity: 'medium',
         confidence: 0.8,
       },
+      origin: { actor: 'agent_tool' },
     });
 
     expect(createAlertEvent).toHaveBeenCalledWith(

@@ -6,18 +6,14 @@
  */
 
 import { isEqual } from 'lodash';
-import type {
-  Conversation,
-  ConversationEvent,
-  ConversationRound,
-  RoundInput,
-} from '@kbn/agent-builder-common';
+import type { Conversation, ConversationEvent, ConversationRound } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_EVENT_ID_DELIMITER,
   TimelineEventType,
   createAttachmentPermanentDeleteBlockedError,
   lastExecutionTerminal,
   parseExecutionId,
+  TimelineTriggerType,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { isAttachmentReferencedInRounds } from '../../attachments/attachment_guards';
@@ -53,27 +49,46 @@ const storedRoundBlocks = (stored: ConversationEvent[]): Map<string, Conversatio
 
 /**
  * The events of a round present in `rounds`: its stored events when the round spans a resume
- * execution (only the `user_message` attachment refs are refreshed — the folded message belongs
- * to the resume, not the original user message), else regenerated from the round.
+ * execution (the stored `user_message` is never rewritten), else regenerated from the round.
  */
 const eventsForKnownRound = (
   round: ConversationRound,
   storedForRound: ConversationEvent[],
   conversation: Conversation
-): ConversationEvent[] => {
-  if (!hasResumeExecution(round.id, storedForRound)) {
-    return roundToEvents(round, conversation);
+): ConversationEvent[] =>
+  hasResumeExecution(round.id, storedForRound)
+    ? storedForRound
+    : keepStoredAgentMessages(storedForRound, roundToEvents(round, conversation));
+
+/** A round records no agent author, so its regenerated events take the stored agent message as is. */
+export const keepStoredAgentMessages = <E extends ConversationEvent>(
+  stored: ReadonlyArray<ConversationEvent>,
+  events: E[]
+): E[] => {
+  const agentMessages = new Map(
+    stored
+      .filter((event) => event.type === TimelineEventType.agentMessage)
+      .map((event) => [event.id, event])
+  );
+  if (agentMessages.size === 0) {
+    return events;
   }
-  const userMessageId = `${round.id}${CONVERSATION_EVENT_ID_DELIMITER}user_message`;
-  return storedForRound.map((event) => {
-    if (event.id !== userMessageId || !round.input.attachment_refs) {
-      return event;
+  return events.map((event) => {
+    const storedMessage = agentMessages.get(event.id);
+    if (storedMessage) {
+      return storedMessage as E;
     }
-    const data = event.data as RoundInput;
-    return {
-      ...event,
-      data: { ...data, attachment_refs: round.input.attachment_refs },
-    };
+    if (
+      event.type === TimelineEventType.executionStarted &&
+      event.trigger_event_id &&
+      agentMessages.has(event.trigger_event_id)
+    ) {
+      return {
+        ...event,
+        data: { ...event.data, trigger_type: TimelineTriggerType.agentMessage },
+      } as E;
+    }
+    return event;
   });
 };
 

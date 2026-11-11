@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import type { AgentDefinition, VersionedAttachment } from '@kbn/agent-builder-common';
 import { UserMessageEvent } from './items/user_message_event';
+import { SubagentReportEvent } from './items/subagent_report_event';
 import { AttachmentEvent } from './items/attachment_event';
 import { CustomEvent } from './items/custom_event';
 import { AgentTurn } from './agent_turn';
@@ -60,9 +61,13 @@ export const Timeline: React.FC<TimelineProps> = ({
                 <UserMessageEvent
                   event={item.event}
                   isPending={item.isPending}
+                  attachmentRefs={item.attachmentRefs}
                   conversationAttachments={conversationAttachments}
                 />
               );
+              break;
+            case 'agentMessage':
+              content = <SubagentReportEvent event={item.event} />;
               break;
             case 'agentTurn':
               content = (

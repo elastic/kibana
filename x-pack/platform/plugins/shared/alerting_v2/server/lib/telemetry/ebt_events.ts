@@ -1,0 +1,35 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  ActionPolicyChangedEbtData,
+  ActionPolicyEbtEventType,
+} from './action_policy_ebt_schema';
+import type {
+  ActionPolicyTestSentEbtData,
+  ActionPolicyTestSentEbtEventType,
+} from './action_policy_test_ebt_event';
+import type { AlertActionAppliedEbtData, AlertActionEbtEventType } from './alert_action_ebt_schema';
+import type { RuleChangedEbtData, RuleEbtEventType } from './rules/rule_ebt_schema';
+
+/**
+ * Maps every EBT event type the plugin registers to the data it is reported with.
+ * Rule-lifecycle events share {@link RuleChangedEbtData}, action policy change events share
+ * {@link ActionPolicyChangedEbtData}, alert-action events share {@link AlertActionAppliedEbtData},
+ * and test notification sends report {@link ActionPolicyTestSentEbtData}.
+ */
+export type AlertingEbtEventMap = {
+  [TEventType in RuleEbtEventType]: RuleChangedEbtData;
+} & {
+  [TEventType in ActionPolicyEbtEventType]: ActionPolicyChangedEbtData;
+} & {
+  [TEventType in AlertActionEbtEventType]: AlertActionAppliedEbtData;
+} & {
+  [TEventType in ActionPolicyTestSentEbtEventType]: ActionPolicyTestSentEbtData;
+};
+
+export type AlertingEbtEventType = keyof AlertingEbtEventMap;

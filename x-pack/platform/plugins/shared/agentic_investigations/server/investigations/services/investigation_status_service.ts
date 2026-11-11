@@ -17,6 +17,19 @@ import type {
   InvestigationClosePreviewResponse,
   ClosePreviewProposal,
 } from '../../../common/investigations/status';
+
+/**
+ * A pending proposal plus whether declining it has to be justified. Internal: the flag decides
+ * what the close asks the user for, which the response carries once for the whole investigation.
+ */
+type PendingProposal = ClosePreviewProposal & { requiresDiscardReason: boolean };
+import {
+  INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE,
+  type InvestigationSeverityChangedEventData,
+  type SetInvestigationSeverityRequest,
+  type SetInvestigationSeverityResponse,
+} from '../../../common/investigations/severity_change';
+import { isInvestigationSeverity } from '../../../common/investigations/severity';
 import { MissingDismissReasonError } from './errors';
 import { CloseTargetsChangedError } from './close_targets_changed_error';
 import { ProposalDismissFailedError } from './proposal_dismiss_failed_error';
@@ -138,12 +151,12 @@ export class InvestigationStatusService {
     conversationId: string,
     spaceId: string,
     request: KibanaRequest
-  ): Promise<ClosePreviewProposal[]> {
+  ): Promise<PendingProposal[]> {
     const proposals = this.getProposals();
     if (!proposals) return [];
 
     const proposalsService = proposals.getProposalsService();
-    const allProposals: ClosePreviewProposal[] = [];
+    const allProposals: PendingProposal[] = [];
     let from = 0;
     const size = 100;
 
@@ -166,6 +179,7 @@ export class InvestigationStatusService {
           id: p.id,
           // Mirrors the fallback order in proposal_approval_card.tsx:196
           action_name: p.action?.name ?? p.actionWorkflowId ?? null,
+          requiresDiscardReason: !p.skipDiscardReason,
         }))
       );
       if (allProposals.length >= page.total || page.proposals.length < size) break;
@@ -173,6 +187,34 @@ export class InvestigationStatusService {
     }
 
     return allProposals;
+  }
+
+  /**
+   * Counts the approved proposals whose action is still running (`executing`, not superseded).
+   * An executing proposal keeps the deadline it was approved under, so the deadline is not
+   * applied. Returns 0 when the proposals plugin is absent or disabled.
+   */
+  async countRunningProposals(
+    conversationId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<number> {
+    const proposals = this.getProposals();
+    if (!proposals) return 0;
+
+    const { total } = await proposals.getProposalsService().list(
+      {
+        conversationId,
+        status: 'executing',
+        excludeSuperseded: true,
+        excludeExpired: false,
+        size: 1,
+        from: 0,
+      },
+      spaceId,
+      request
+    );
+    return total;
   }
 
   /**
@@ -184,7 +226,7 @@ export class InvestigationStatusService {
   async listPendingProposalsForRequest(
     conversationId: string,
     request: KibanaRequest
-  ): Promise<ClosePreviewProposal[]> {
+  ): Promise<PendingProposal[]> {
     const proposals = this.getProposals();
     if (proposals) {
       // assertCanRead throws ProposalForbiddenError when the principal lacks read access.
@@ -205,7 +247,64 @@ export class InvestigationStatusService {
     }
 
     const pending = await this.listPendingProposalsForRequest(conversationId, request);
-    return { pending_proposal_count: pending.length, pending_proposals: pending };
+    const running = await this.countRunningProposals(
+      conversationId,
+      this.getSpaceId(request),
+      request
+    );
+    return {
+      pending_proposal_count: pending.length,
+      pending_proposals: pending.map(({ id, action_name: actionName }) => ({
+        id,
+        action_name: actionName,
+      })),
+      requires_discard_reason: pending.some((p) => p.requiresDiscardReason),
+      running_proposal_count: running,
+    };
+  }
+
+  /**
+   * Sets the severity a user chose and records the change on the timeline, so the agent continuing
+   * the investigation sees it was a human judgement. Setting the current severity again is a no-op.
+   */
+  async setSeverity(
+    request: KibanaRequest,
+    conversationId: string,
+    { severity }: SetInvestigationSeverityRequest
+  ): Promise<SetInvestigationSeverityResponse> {
+    const client = await this.getConversationClient(request);
+    const conversation = await client.get(conversationId);
+    if (conversation.template_id !== INVESTIGATION_TEMPLATE_ID) {
+      throw new WrongTemplateError(conversationId, INVESTIGATION_TEMPLATE_ID);
+    }
+
+    const current = conversation.metadata?.severity;
+    const previousSeverity = isInvestigationSeverity(current) ? current : undefined;
+    if (previousSeverity === severity) {
+      return { conversation_id: conversationId, severity, previous_severity: previousSeverity };
+    }
+
+    await client.patchMetadata(conversationId, { severity }, { access: 'converse' });
+
+    const data: InvestigationSeverityChangedEventData = {
+      severity,
+      ...(previousSeverity && { previous_severity: previousSeverity }),
+    };
+    // Best-effort: the severity is already written, and a missing note must not fail the change.
+    try {
+      await client.addEvents({
+        conversationId,
+        events: [{ type: INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE, data }],
+      });
+    } catch (error) {
+      this.logger.warn(
+        `Failed to record the severity change of investigation ${conversationId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+
+    return { conversation_id: conversationId, severity, previous_severity: previousSeverity };
   }
 
   async setStatus(
@@ -232,9 +331,13 @@ export class InvestigationStatusService {
       assertNoUnexpectedProposals(pending, body.expected_proposal_ids);
 
       if (pending.length > 0) {
-        if (!body.dismiss_reason) {
+        // Only proposals that stand for an action the agent would have taken need a justification;
+        // a close that drops to-dos alone records `no_reason` without prompting the user.
+        const requiresDismissReason = pending.some((p) => p.requiresDiscardReason);
+        if (requiresDismissReason && !body.dismiss_reason) {
           throw new MissingDismissReasonError();
         }
+        const dismissReason: DismissReason = body.dismiss_reason ?? 'no_reason';
 
         const proposals = this.getProposals();
         if (proposals) {
@@ -244,7 +347,7 @@ export class InvestigationStatusService {
           const proposalsService = proposals.getProposalsService();
           const releaseParams = {
             approved: false as const,
-            dismissReason: body.dismiss_reason as DismissReason,
+            dismissReason,
             rationale: body.rationale,
             spaceId,
             request,

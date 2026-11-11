@@ -9,23 +9,33 @@
 
 import { ImportResolver } from '@kbn/import-resolver';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { Rule } from 'eslint';
+import type { Context } from '@oxlint/plugins';
 import { RUNNING_IN_EDITOR } from './helpers/running_in_editor';
 
 let importResolverCache: ImportResolver | undefined;
+const editorImportResolvers = new WeakMap<object, ImportResolver>();
 
 /**
- * Create a request resolver for ESLint, requires a PluginPackageResolver from @kbn/repo-packages which will
- * be created and cached on contextServices automatically.
+ * Get the request resolver shared by the rules linting the current file. It is created once per
+ * process, except in editors, which keep linting while files change: there every linted file gets
+ * a new resolver, so its file system caches can't go stale.
  *
  * All import requests in the repository should return a result, if they don't it's a bug
  * which should be caught by the `@kbn/import/no_unresolved` rule, which should never be disabled. If you need help
  * adding support for an import style please reach out to operations.
  */
-export function getImportResolver(context: Rule.RuleContext): ImportResolver {
-  if (RUNNING_IN_EDITOR) {
-    return (context.parserServices.kibanaImportResolver ||= ImportResolver.create(REPO_ROOT));
+export function getImportResolver(context: Context): ImportResolver {
+  if (!RUNNING_IN_EDITOR) {
+    return (importResolverCache ||= ImportResolver.create(REPO_ROOT));
   }
 
-  return (importResolverCache ||= ImportResolver.create(REPO_ROOT));
+  // the AST object is unique to each linted version of a file and shared by all rules linting it
+  const { ast } = context.sourceCode;
+  let resolver = editorImportResolvers.get(ast);
+  if (!resolver) {
+    resolver = ImportResolver.create(REPO_ROOT);
+    editorImportResolvers.set(ast, resolver);
+  }
+
+  return resolver;
 }

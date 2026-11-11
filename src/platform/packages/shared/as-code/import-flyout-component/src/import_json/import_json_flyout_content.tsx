@@ -22,6 +22,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLink,
+  EuiLiveAnnouncer,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -29,6 +30,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 
+import { ImportJsonErrorDetails } from './import_json_error_details';
 import { importJsonFlyoutStrings } from './import_json_strings';
 import { ImportJsonWarningsCallout } from './import_json_warnings_callout';
 import type { CreateFromJson, ImportJsonFlyoutServices, SanitizeImportJson } from './types';
@@ -44,7 +46,7 @@ export interface ImportJsonFlyoutContentProps<SanitizedState> {
   /** Application-specific description shown above the NDJSON note. */
   description?: ReactNode;
   serverValidationErrorTitle: string;
-  serverValidationErrorText?: ReactNode;
+  serverValidationErrorText?: string;
   /** Override the default generic warnings summary. */
   getWarningsSummary?: (count: number) => string;
   sanitizeImportJson: SanitizeImportJson<SanitizedState>;
@@ -86,7 +88,6 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
     title,
     closeFlyout,
     services,
-    serverValidationErrorTitle,
     sanitizeImportJson,
     createFromJson,
     onImportSuccess,
@@ -133,12 +134,20 @@ export const ImportJsonFlyoutContent = <SanitizedState,>({
         {serverError && (
           <>
             <KbnDangerCallout
-              announceOnMount
-              title={serverError}
+              title={serverValidationErrorTitle}
               data-test-subj={`${dataTestSubjPrefix}ServerError`}
             >
               {serverValidationErrorText}
+              {serverError.details && (
+                <ImportJsonErrorDetails
+                  dataTestSubjPrefix={dataTestSubjPrefix}
+                  details={serverError.details}
+                />
+              )}
             </KbnDangerCallout>
+            <EuiLiveAnnouncer>
+              {[serverValidationErrorTitle, serverValidationErrorText].filter(Boolean).join(', ')}
+            </EuiLiveAnnouncer>
             <EuiSpacer size="m" />
           </>
         )}

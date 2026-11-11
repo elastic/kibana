@@ -18,16 +18,20 @@ import { PROPOSALS_MANAGED_WORKFLOW_OWNER_ID } from './constants';
 import { registerFeatures } from './features';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { registerRoutes } from './routes/register_routes';
+import { createProposalCreator } from './services/create_proposal';
 import { ProposalsService } from './services/proposals_service';
 import { createProposalPrivilegesChecker } from './services/check_proposal_privileges';
 import type { ProposalPrivilegesChecker } from './services/check_proposal_privileges';
 import { createProposalUserResolver } from './services/resolve_proposal_user';
 import type { ResolveProposalUser } from './services/resolve_proposal_user';
+import { createWorkerUserResolver } from './services/resolve_worker_user';
+import type { ResolveWorkerUser } from './services/resolve_worker_user';
 import { registerProposalAttachment } from './attachments';
 import { reviseProposalTool } from './agent_builder/tools/revise_proposal_tool';
 import { createProposalManagementSkill } from './agent_builder/skills/proposal_management';
 import { registerStepDefinitions } from './step_types';
 import { createProposalsStorageClient } from './storage/proposals_storage';
+import { registerProposalsEbtEvents } from './telemetry/proposal_decided_event';
 import { createProposalTool } from './tools/create_proposal_tool';
 import type {
   ProposalsPluginSetup,
@@ -53,6 +57,7 @@ export class ProposalsPlugin
   private proposalPrivileges?: ProposalPrivilegesChecker;
   private spaces?: ProposalsStartDependencies['spaces'];
   private resolveUser?: ResolveProposalUser;
+  private resolveWorkerUser?: ResolveWorkerUser;
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -66,6 +71,7 @@ export class ProposalsPlugin
     this.workflowsManagementApi = workflowsManagement.management;
 
     registerFeatures({ features });
+    registerProposalsEbtEvents(coreSetup.analytics);
 
     const privileges = this.getProposalPrivilegesChecker(coreSetup);
     agentBuilder.tools.register(
@@ -108,6 +114,7 @@ export class ProposalsPlugin
       workflowsExtensions,
       getProposalsService: () => this.requireProposalsService(),
       resolveUser: (request) => this.requireUserResolver()(request),
+      resolveWorkerUser: (params) => this.requireWorkerUserResolver()(params),
       // Steps register during setup but only run once Kibana has started, so
       // the authorization service is resolved per call rather than captured
       // here — `security.authz` does not exist yet.
@@ -132,6 +139,11 @@ export class ProposalsPlugin
       security: coreStart.security,
       logger: this.logger,
     });
+    this.resolveWorkerUser = createWorkerUserResolver({
+      security: coreStart.security,
+      getWorkflowsApi: () => this.requireWorkflowsApi(),
+      logger: this.logger,
+    });
 
     // Reads and writes go through the internal user; authorization is enforced
     // at the API layer.
@@ -143,9 +155,13 @@ export class ProposalsPlugin
     this.proposalsService = new ProposalsService({
       storage,
       logger: this.logger,
+      analytics: coreStart.analytics,
       getWorkflowsApi: () => this.requireWorkflowsApi(),
       getAttachmentsClient: (request) =>
         plugins.agentBuilder.attachments.getScopedClient({ request }),
+      // A gateless proposal is created and decided by the service itself, so
+      // the attribution the gate workflow used to resolve is resolved here.
+      resolveUser: (request) => this.requireUserResolver()(request),
     });
 
     void initializeManagedWorkflows({
@@ -162,6 +178,11 @@ export class ProposalsPlugin
     return {
       getProposalsService: () => this.requireProposalsService(),
       getProposalPrivileges: () => this.requireProposalPrivileges(),
+      createProposal: createProposalCreator({
+        getProposalsService: () => this.requireProposalsService(),
+        getWorkflowsApi: () => this.requireWorkflowsApi(),
+        privileges: this.requireProposalPrivileges(),
+      }).create,
     };
   }
 
@@ -216,6 +237,13 @@ export class ProposalsPlugin
       throw new Error('User resolution is not available until the proposals plugin has started');
     }
     return this.resolveUser;
+  }
+
+  private requireWorkerUserResolver(): ResolveWorkerUser {
+    if (!this.resolveWorkerUser) {
+      throw new Error('Worker users are not available until the proposals plugin has started');
+    }
+    return this.resolveWorkerUser;
   }
 
   stop() {}

@@ -23,13 +23,13 @@ import type {
   EsWorkflowStepExecution,
   ExecutionStatus,
   ExecutionType,
+  TriggerSchemaOptions,
   UpdatedWorkflowResponseDto,
   ValidateWorkflowResponseDto,
   WorkflowAggsDto,
   WorkflowDetailDto,
   WorkflowExecutionCollapseField,
   WorkflowExecutionDto,
-  WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
@@ -89,6 +89,7 @@ import {
   waitForManagedWorkflowInstallReadiness,
 } from '../lib/wait_for_managed_workflow_install_readiness';
 import { ManagedWorkflowsService } from '../services/managed_workflows_service';
+import type { HitlStepClaim } from '../services/mark_step_as_responded_updater';
 import { WorkflowAccessControlService } from '../services/workflow_access_control';
 import { WorkflowChangeHistoryService } from '../services/workflow_change_history_service';
 import {
@@ -140,6 +141,7 @@ export interface SearchWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  runName?: string;
   concurrencyGroupKey?: string;
   omitStepRuns?: boolean;
   finishedAfter?: string;
@@ -187,7 +189,9 @@ export class WorkflowsService {
     public readonly core: CoreSetup<WorkflowsServerPluginStartDeps>,
     public readonly plugins: WorkflowsServerPluginSetupDeps,
     private readonly logger: Logger,
-    public readonly kibanaVersion: string
+    public readonly kibanaVersion: string,
+    /** `workflowsManagement.pages.enabled`. */
+    private readonly pagesEnabled = false
   ) {
     this.changeHistoryService = new WorkflowChangeHistoryService(logger, kibanaVersion);
     this.initPromise = this.initialize(core);
@@ -264,6 +268,9 @@ export class WorkflowsService {
       getActionsClient: this.getActionsClient,
       getActionsClientWithRequest: this.getActionsClientWithRequest,
       getCoreStart: () => this.coreStart,
+      licensing: pluginsStart.licensing,
+      logger: this.logger,
+      pagesEnabled: this.pagesEnabled,
     });
 
     const { workflowExecutionsDataClient, stepExecutionsDataClient } =
@@ -638,15 +645,17 @@ export class WorkflowsService {
 
   public async markStepAsResponded(
     stepExecutionId: string,
+    executionId: string,
     request: KibanaRequest,
     channel: string | undefined,
     spaceId: string
-  ): Promise<boolean> {
+  ): Promise<HitlStepClaim | null> {
     await this.ensureInitialized();
     // Resolve responder identity server-side so callers cannot spoof audit metadata.
     const respondedBy = getAuthenticatedUser(request, this.coreStart?.security);
     return this.executionQueryService.markStepAsResponded(
       stepExecutionId,
+      executionId,
       { respondedBy, respondedAt: new Date().toISOString(), channel },
       spaceId
     );
@@ -654,15 +663,27 @@ export class WorkflowsService {
 
   public async claimHitlStepForExternalResume(
     stepExecutionId: string,
+    executionId: string,
     respondedBy: string,
     spaceId: string
-  ): Promise<boolean> {
+  ): Promise<HitlStepClaim | null> {
     await this.ensureInitialized();
     return this.executionQueryService.markStepAsResponded(
       stepExecutionId,
+      executionId,
       { respondedBy, respondedAt: new Date().toISOString(), channel: 'external' },
       spaceId
     );
+  }
+
+  /** Releases a step claim whose resume was not applied, and returns whether it was released. */
+  public async releaseHitlStepClaim(
+    stepExecutionId: string,
+    claim: HitlStepClaim,
+    spaceId: string
+  ): Promise<boolean> {
+    await this.ensureInitialized();
+    return this.executionQueryService.releaseHitlStepClaim(stepExecutionId, claim, spaceId);
   }
 
   public async getWaitingStepExecutionId(
@@ -671,14 +692,6 @@ export class WorkflowsService {
   ): Promise<string | null> {
     await this.ensureInitialized();
     return this.executionQueryService.getWaitingStepExecutionId(executionId, spaceId);
-  }
-
-  public async getWorkflowExecutionHistory(
-    executionId: string,
-    spaceId: string
-  ): Promise<WorkflowExecutionHistoryModel[]> {
-    await this.ensureInitialized();
-    return this.executionQueryService.getWorkflowExecutionHistory(executionId, spaceId);
   }
 
   public async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {
@@ -720,6 +733,10 @@ export class WorkflowsService {
     return this.validationService.getAvailableConnectors(spaceId, request);
   }
 
+  public getTriggerSchemaOptions(): TriggerSchemaOptions {
+    return { includePageTrigger: this.pagesEnabled };
+  }
+
   public async getRegisteredCustomTriggerDefinitions(): Promise<ServerTriggerDefinition[]> {
     await this.ensureInitialized();
     return this.validationService.getRegisteredCustomTriggerDefinitions();
@@ -729,7 +746,7 @@ export class WorkflowsService {
     yaml: string,
     spaceId: string,
     request: KibanaRequest,
-    options: { includeVariableRules: boolean }
+    options: { includeVariableRules: boolean; includeEsqlRules: boolean }
   ): Promise<ValidateWorkflowResponseDto> {
     await this.ensureInitialized();
     return this.validationService.validateWorkflow(yaml, spaceId, request, options);
@@ -783,6 +800,15 @@ export class WorkflowsService {
       registeredPluginId,
       request
     );
+  }
+
+  public async disableManagedWorkflow(
+    id: ManagedWorkflowId,
+    options: ManagedWorkflowOperationOptions,
+    registeredPluginId: string
+  ): Promise<boolean> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.disableManagedWorkflow(id, options, registeredPluginId);
   }
 
   public async getManagedWorkflowStatus(

@@ -32,6 +32,7 @@ export type CloudPostureEntityIdentifier =
       EntityIdentifierFields,
       | EntityIdentifierFields.hostName
       | EntityIdentifierFields.userName
+      | EntityIdentifierFields.serviceName
       | EntityIdentifierFields.generic
     >
   | 'related.entity'; // related.entity is not an entity identifier field, but it includes entity ids which we use to filter for related entities
@@ -61,7 +62,7 @@ export const EntityInsight = <T,>({
   hideHeaderIcons?: boolean;
   /**
    * Scope ID of the table or panel that opened this flyout. When the scope has
-   * a registered time-range override in {@link SCOPE_ALERT_TIME_RANGE_OVERRIDES}
+   * a registered time-range override in {@link getScopeFlyoutTimeRange}
    * that window is used for the alerts query instead of the global time range.
    */
   scopeId?: string;

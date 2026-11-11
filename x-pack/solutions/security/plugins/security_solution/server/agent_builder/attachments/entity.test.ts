@@ -271,6 +271,50 @@ describe('createEntityAttachmentType', () => {
       });
     });
 
+    describe('mode (resolution group)', () => {
+      it('preserves mode "resolved" on each entity of a list', async () => {
+        const input = {
+          entities: [
+            {
+              identifierType: 'host',
+              identifier: 'gold',
+              entityStoreId: 'host:gold',
+              mode: 'resolved',
+            },
+            { identifierType: 'host', identifier: 'solo', entityStoreId: 'host:solo' },
+          ],
+        };
+
+        const result = await attachmentType.validate(input);
+
+        expect(result.valid).toBe(true);
+        if (result.valid) {
+          expect(result.data).toEqual(input);
+        }
+      });
+
+      it('preserves mode "resolved" on a single-entity payload', async () => {
+        const input = { identifierType: 'host', identifier: 'gold', mode: 'resolved' };
+
+        const result = await attachmentType.validate(input);
+
+        expect(result.valid).toBe(true);
+        if (result.valid) {
+          expect(result.data).toEqual(input);
+        }
+      });
+
+      it('returns invalid for a mode other than "resolved"', async () => {
+        const result = await attachmentType.validate({
+          identifierType: 'host',
+          identifier: 'gold',
+          mode: 'single',
+        });
+
+        expect(result.valid).toBe(false);
+      });
+    });
+
     describe('multi-entity (entities list)', () => {
       it('returns valid when entities array contains a single item', async () => {
         const input = {

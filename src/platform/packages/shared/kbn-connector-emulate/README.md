@@ -1,0 +1,380 @@
+# @kbn/connector-emulate
+
+A package that emulates the connectors in `@kbn/connector-specs` in both CI and Kibana runtime methods.
+
+It validates the requests a connector makes against the vendor's API spec and answers them with responses that conform to that spec, so connector tests run without vendor credentials or network access.
+
+This package is being built in stages (see [#295684](https://github.com/elastic/kibana/issues/295684)).
+
+## In-process mock
+
+```ts
+import { createEmulatorFetch } from '@kbn/connector-emulate';
+
+const { fetch, calls } = createEmulatorFetch({ specs: [openApiDocument] });
+```
+
+The mock is a standard `fetch`. Connector clients built on axios use it through axios's fetch adapter, `{ adapter: 'fetch', env: { fetch } }`, so axios still builds the URL and serializes parameters exactly as it would against the vendor. The package itself doesn't depend on axios, whose new use Kibana disallows.
+
+For every request, the mock:
+
+1. routes it to an operation by server URL and path template, answering **404** with the method and URL when none matches and **405** naming the allowed methods when only the method is wrong. When several templates match, the one with the fewest parameters wins, then the one with the most literal text, so `/items/new` and `/items/{id}:archive` both take precedence over `/items/{id}`;
+2. validates it against the operation, answering **422** with `{ operation, violations }` when it breaks the spec. Parameters are deserialized by `style` and `explode` and checked against their schemas, as is the body for its declared content type. Undeclared query parameters and repeated keys for `explode: false` parameters are flagged too;
+3. builds a response, then validates its status code, headers and body against the spec.
+
+Each request is recorded in `calls` with its operation, status, and request and response violations, so tests can assert that a connector stays within the contract. `matched` gives the operation's method and path template.
+
+Connectors that call several vendor specs (one per API version or product) can name them:
+
+```ts
+const { fetch, calls } = createEmulatorFetch({ specs: { v1: datadogV1, v2: datadogV2 } });
+```
+
+Each call's `matched.source` then says which spec answered it. Fixtures, recordings and pagination entries can name a `source` next to their method and path template to apply to that spec only; without one, they apply to the operation in every spec.
+
+## Server mode
+
+A running Kibana can't use an in-process `fetch`, so the mock can also sit behind an HTTP forward proxy, which Kibana reaches through `xpack.actions.proxyUrl`:
+
+```ts
+import { createCertificateAuthority, createEmulatorProxy } from '@kbn/connector-emulate';
+
+const certificateAuthority = createCertificateAuthority();
+const proxy = createEmulatorProxy({ fetch: mock.fetch, certificateAuthority });
+const proxyUrl = await proxy.listen(8080);
+```
+
+Requests aren't forwarded: the proxy answers each one with `fetch`, so the vendor hosts in connector code and config need no changes. Plain HTTP requests arrive in absolute form (`GET http://vendor.example/path`). HTTPS ones arrive through `CONNECT` tunnels, whose TLS the proxy terminates with a certificate for the requested host, issued on first use by `certificateAuthority`. Requests sent to the proxy as if it were the vendor, or whose URL doesn't parse, get **400**, and errors thrown by `fetch` **502**.
+
+Clients must trust the CA's certificate (`certificateAuthority.cert`, PEM). Kibana's actions plugin trusts it for a vendor host through `xpack.actions.customHostSettings` (`ssl.certificateAuthoritiesData`), or for every host through the `NODE_EXTRA_CA_CERTS` environment variable. `createCertificateAuthority({ cert, key })` loads a CA created earlier, so a Kibana configured to trust it keeps working when the mock restarts.
+
+### Control endpoints
+
+A test that drives Kibana can't read `mock.calls` across processes, so the proxy can serve control endpoints on its own origin:
+
+```ts
+import { createEmulatorControl, createEmulatorControlHandler } from '@kbn/connector-emulate';
+
+const proxy = createEmulatorProxy({
+  fetch: mock.fetch,
+  certificateAuthority,
+  control: createEmulatorControlHandler(mock),
+});
+const proxyUrl = await proxy.listen(8080);
+
+// In the test, possibly in another process:
+const control = createEmulatorControl(proxyUrl);
+const { calls, total } = await control.calls(); // GET /_mock/calls?since=0
+await control.reset(); // POST /_mock/reset
+const operations = await control.operations(); // GET /_mock/operations
+const getItem = await control.describeOperation('getItem'); // GET /_mock/operations/getItem
+const rejected = await control.setFixtures([
+  { operation: { method: 'GET', path: '/items' }, response: { status: 429 } },
+]); // PUT /_mock/fixtures
+```
+
+| Endpoint | Answer |
+| --- | --- |
+| `GET /_mock/calls?since=<n>` | `{ calls, total }`: the calls from index `n` on (default 0); pass `total` as the next `since` to read only later calls |
+| `POST /_mock/reset` | **204** after emptying the calls and responder state and dropping the runtime fixtures (`mock.reset()`) |
+| `GET /_mock/operations` | `{ operations }`: each OpenAPI operation's method, path template, server URLs and spec name, and each GraphQL root field or MCP tool by the name calls give it |
+| `GET /_mock/operations/<id>[?source=<name>]` | An OpenAPI operation's parameters, request body and responses (`mock.describeOperation(id)`): each status with its headers and media types, the schemas with their `$ref`s inlined a few levels deep, the examples, and a `sample` that conforms, to start a fixture from. `id` is the operation's `id` from `GET /_mock/operations`, URL-encoded |
+| `PUT /_mock/fixtures` | Sets runtime fixtures from `{ fixtures }`, replacing those of the operations they name, and answers `{ fixtures }` in effect; or **400** with `rejected` when the spec rejects one, setting none |
+| `GET /_mock/fixtures` | `{ fixtures }`: the runtime fixtures in effect |
+| `DELETE /_mock/fixtures[?operation=<id>&source=<name>]` | **204** after dropping the runtime fixtures of one OpenAPI operation, or all of them |
+| `POST /_mock/mcp` | An MCP server with tools for the same (see below) |
+
+Only requests sent to the proxy itself (a path, not an absolute URL) reach them: requests through the proxy, plain or tunnelled, always go to the mock, so a vendor path under `/_mock` can't collide with them. Other paths sent to the proxy itself still get **400**. The endpoints take no credentials; like the proxy, they are for local and CI test runs.
+
+**Runtime fixtures** (`mock.runtimeFixtures`, or the `/_mock/fixtures` endpoints) let a test or an agent pick a scenario while the emulator runs: an empty list, a 429, a third page, a value the vendor just added. They are `ResponseFixture`s, with `when` to answer only some requests, and take precedence over the fixtures the emulator was created with until they are cleared or `reset()`. Unlike those, they are checked when set: a response the spec doesn't allow is rejected with its violations, so a test can't pass on answers the vendor never gives. The exception is an error status the spec doesn't declare, such as a 429 or a 503, which vendors answer with anyway; its body isn't checked. Runtime fixtures answer OpenAPI operations.
+
+**MCP server.** The same control is offered to agents as an MCP server at `/_mock/mcp` on the proxy (Streamable HTTP, stateless, JSON responses), so an agent testing a connector in a running Kibana can steer the vendor's answers:
+
+```bash
+claude mcp add --transport http emulator http://localhost:8080/_mock/mcp
+```
+
+Its tools are `list_operations` (with a `search`), `describe_operation`, `set_fixtures`, `list_fixtures`, `clear_fixtures`, `list_calls` and `reset`, over the same emulator and checks as the endpoints: a fixture the spec rejects comes back as a tool error with its violations. `createEmulatorControlHandler(mock, { exportFixtures })` adds `export_fixtures`, which hands the runtime fixtures to `exportFixtures` to save them somewhere lasting, such as a connector's committed fixtures, and reports where. `onRequest` is called with each MCP request, tool calls with their arguments and a short summary of what they did, e.g. to log them. `createEmulatorMcpHandler` serves the MCP server on its own. It is a control server for the emulator, unrelated to the vendor MCP servers the emulator emulates (see "MCP" below), and like the endpoints it is for local and CI test runs.
+
+Each call says where its response came from in `responseSource`: `runtime-fixture`, `fixture`, `recording`, `generated` for the spec's examples and samples, or `responder` when a `respond` answered without deferring to the default chain. `createEmulatorFetch({ onCall })` is called with each call as it is recorded, e.g. to log requests as they arrive.
+
+### Several connectors
+
+`combineEmulators` puts several connectors' emulators behind one `fetch`, so one proxy, and one Kibana, can serve them all. Each keeps its own specs, overlay, fixtures and recordings: A request no connector's specs match gets 404, which only the `onCall` option of `combineEmulators` sees, as no emulator answers it.
+
+```ts
+import { combineEmulators, emulatorCredential } from '@kbn/connector-emulate';
+
+const mock = combineEmulators({
+  outlook: createEmulatorFetch({ specs: outlookSpecs }),
+  one_drive: createEmulatorFetch({ specs: oneDriveSpecs, fixtures }),
+});
+const proxy = createEmulatorProxy({
+  fetch: mock.fetch,
+  certificateAuthority,
+  control: createEmulatorControlHandler(mock),
+});
+
+// The connector's secrets carry its credential, e.g. an API key or OAuth client ID:
+emulatorCredential('one_drive'); // 'emulate-one_drive'
+```
+
+A request goes to the connector whose credential it carries: in any header, in Basic auth, the query, the body, or a claim of a JWT assertion. Token URLs answering a request with the credential issue tokens that carry it too, so later requests with the token reach the same connector. Other requests go to the first connector whose specs name the URL's host (`emulator.namesHost(method, url)`), else the first whose specs match it on any host (`emulator.answers(method, url)`), and requests no connector matches get **404**. A server names a host when its host has a literal part or a variable limited by an `enum`, as do absolute token URLs; relative servers, and hosts that are only free variables such as `https://{host}`, match any host. Connectors that share a vendor host, or whose servers match any host, therefore need the credential to get their own responses.
+
+Every call is recorded in the combined `calls` with its `connector`, and `operations` and `rejectedResponses` say whose they are. The control endpoints take `?connector=<id>` to see, reset or list only one connector's (`createEmulatorControl(proxyUrl, { connector })`), so tests running in parallel don't read or clear each other's calls; an unknown connector gets **400**.
+
+Runtime fixtures and `describeOperation` are per connector too. A fixture goes to its `connector` (or the `?connector=` of `PUT /_mock/fixtures`, or `runtimeFixtures.set(fixtures, { connector })`), else to the one connector whose specs have its operation; when several have it, as Outlook and OneDrive both have Graph's `GET /me`, it is rejected until one is named, and when any fixture is rejected none is set on any connector. Listed fixtures carry their `connector`, and `GET /_mock/operations/<id>?connector=<id>` describes one connector's operation (without it, the first connector's that has it). The MCP server's tools take a `connector` argument, listing the connectors in their schemas.
+
+**Running tests in parallel.** One Kibana sends its requests through one emulator, so tests running at the same time share its state. Tests on different connectors may run in parallel when they scope what they read and change with `?connector=` (or `createEmulatorControl(proxyUrl, { connector })`). Tests on the same connector that set fixtures, read calls or reset must run serially: they share that connector's calls and runtime fixtures, so one test's fixture answers another's requests, and one test's reset clears what another set up.
+
+## GraphQL
+
+GraphQL APIs are specs too: the schema in SDL, and the URLs the vendor serves it at.
+
+```ts
+const { fetch, calls } = createEmulatorFetch({
+  specs: {
+    v2: mondayOpenApi,
+    graphql: { format: 'graphql', sdl: mondaySchema, endpoints: ['https://api.monday.com/v2'] },
+  },
+});
+```
+
+Requests to an endpoint (`GET` with `query`, `operationName` and `variables` in the query string, or `POST` with them in a JSON body) are parsed and validated against the schema, and their variables and arguments coerced to their declared types. A request that breaks the schema gets **400** with GraphQL `errors`, and a mutation sent with `GET` is rejected. Valid requests execute against the schema with sampled values, so a response has exactly the fields the document selects: scalars are sampled as in OpenAPI responses (custom scalars by their names, such as `ISO8601DateTime`), enums answer their first value, lists hold one item, abstract types resolve to their first possible type, and `Boolean`s are `false`, so flags such as a connection's `hasNextPage` end paging after one page. Documents that use `@defer` or `@stream` get **501**.
+
+Each root field a request selects is recorded in `calls` as its own operation, named by the operation type and field, such as `query items`. Its `matched` has that `name` instead of a method and path, and `readOnly` is `true` for queries.
+
+Fixtures and recordings name a root field the same way, `{ name: 'query boards' }`, and store the body the vendor answers a document selecting only that field, unaliased: `{ data: { boards: [...] } }`. The field then resolves from the stored value whatever the request's arguments and aliases: selected fields read the stored ones, fields the value lacks are sampled, and abstract types resolve by the value's `__typename`. Recordings with GraphQL `errors` are skipped, like recorded HTTP errors, though vendors answer them with HTTP 200. A recording is served only while its value fits the schema; fields the schema doesn't declare, `null` in non-null fields, and scalars or enum values the type can't represent put it in `rejectedResponses`. A fixture is always served: where it breaks the schema, the response carries GraphQL `errors` and partial data, as a vendor's would, and the call's `responseViolations` list them. Every request gets the same stored value, so a stored page of a connection should end paging (`hasNextPage: false`).
+
+## MCP
+
+MCP servers are specs too: the tools their `tools/list` describes, and the URLs of their Streamable HTTP endpoint.
+
+```ts
+const { fetch, calls } = createEmulatorFetch({
+  specs: {
+    mcp: { format: 'mcp', tools: githubTools, endpoints: ['https://api.githubcopilot.com/mcp/'] },
+  },
+});
+```
+
+The mock answers as a stateless server that replies with JSON: `POST`s must name both `application/json` and `text/event-stream` in `Accept`, and carry a JSON-RPC message or batch; `GET` (the event stream) and `DELETE` (ending a session) get **405**. Specs whose tools have no `inputSchema` object, or list a tool twice, are refused.
+
+`tools/call` arguments are validated against the tool's `inputSchema`, and arguments it doesn't declare are reported when it declares its `properties` and doesn't allow others, as servers ignore them. Calls that break the schema, or name a tool the spec doesn't list, get a JSON-RPC `InvalidParams` error; calls the SDK rejects itself, such as `arguments` that aren't an object, are reported in `requestViolations` too, and batches that repeat a request id get **400**. Valid calls answer a sample of the tool's `outputSchema` as JSON text, and as `structuredContent` when the sample is an object; tools without one answer `{}`. Samples that break the `outputSchema`, as a vendor's examples can, are reported in the call's `responseViolations`.
+
+`tools/list` and each `tools/call` are recorded in `calls` as operations named by the method and tool, such as `tools/call get_me`, with `readOnly` from the tool's `readOnlyHint` annotation. The other messages, such as `initialize`, are recorded with `protocolMessage: true`.
+
+Fixtures and recordings name a tool call the same way, `{ name: 'tools/call get_me' }`, and store the `result` of the vendor's JSON-RPC reply (`content`, and `structuredContent` when the tool returns it). Recordings with `isError: true` are skipped, like recorded HTTP errors. A recording is served only while it is a `tools/call` result whose `structuredContent` matches the tool's `outputSchema`, which it must have unless the schema is an array (`structuredContent` can't be one); others are listed in `rejectedResponses`. A fixture is always served, with where it breaks the `outputSchema` in the call's `responseViolations`, unless it isn't a `tools/call` result at all, which gets a JSON-RPC `InternalError`.
+
+## Credentials
+
+Requests need the credentials of one of the operation's `security` requirements (or the document's), in the place each scheme declares: the `apiKey` header, query parameter or cookie, or an `Authorization` header with the `http` scheme (`Basic`, `Bearer`, …), and `Bearer` for `oauth2` and `openIdConnect`. Any value is accepted. A request without them gets **401** listing what the operation expects, which catches connectors that forget a credential or send it in the wrong place. Schemes that can't be checked on a request, such as `mutualTLS`, count as present, and API keys in the query string aren't reported as undeclared parameters.
+
+The `tokenUrl` and `refreshUrl` of each `oauth2` flow (relative ones resolved against each of the spec's servers, keeping server variables such as `{subdomain}`) issue stub bearer tokens, as an authorization server would (RFC 6749): a form-encoded `POST` with the `grant_type` of a declared flow and the parameters it requires gets a token, and `client_credentials` also needs `client_id` or Basic client authentication. Token URLs also accept JWT bearer assertions (RFC 7523, `urn:ietf:params:oauth:grant-type:jwt-bearer`), as service accounts such as Google's send them; signatures aren't checked, and an assertion that claims a `target_audience` gets an `id_token`, as Google issues. Other requests get the OAuth error a vendor would return, such as `unsupported_grant_type`. Token requests are recorded in `calls` with `token: true`, and rejected ones list the OAuth error in `requestViolations`. A token URL that can't be parsed throws when the mock is created. Token URLs the spec also documents as operations are answered by those operations.
+
+A token request with a `scope` (or a JWT assertion with a `scope` claim) gets a token that carries those scopes, and the response echoes them in `scope`; a refresh keeps the original scopes unless it asks for others. With `checkScopes: true`, a request with such a token gets **403** with `WWW-Authenticate: Bearer error="insufficient_scope", scope="…"` (RFC 6750) when the token lacks a scope that every satisfied `oauth2` or `openIdConnect` requirement of the operation lists, which catches connectors that request too few scopes. Tokens issued without a scope, which get the vendor's defaults, and tokens the mock didn't issue, such as static tokens from connector config, aren't checked. The check is off by default because some specs declare scopes loosely.
+
+Vendor specs are sometimes wrong about authentication too. Trello's declares only OAuth2 for most operations, while the API also takes `key` and `token` query parameters; an overlay can add the missing requirement:
+
+```yaml
+- target: $.paths.*.*.security
+  description: Trello also accepts the API key and token as query parameters.
+  update:
+    - APIKey: []
+      APIToken: []
+```
+
+## Responses
+
+Responses come from, in order of preference:
+
+1. **Fixtures**: hand-written responses passed as `fixtures`, for operations where nothing else is good enough. A fixture with `when` answers only the requests it matches, and one with `responses` answers them in turn (see below);
+2. **Recordings**: responses captured from the real vendor API, passed as `recordings`. A recording is served only while it conforms to the spec; one that doesn't, or that names an operation the spec lacks, is listed in `rejectedResponses` (with the `spec` it contradicts, for named specs), which signals drift on the vendor's side. Recorded error responses are not served by default;
+3. **Spec examples**: the response media type's `example` or `examples`, when they match the schema;
+4. **Samples** of the response schema.
+
+Fixtures and recordings name their operation by method and path template, not by URL, so without `when` they apply whatever the request's parameters are (GraphQL and MCP operations by name, see above):
+
+```ts
+const { fetch, rejectedResponses } = createEmulatorFetch({
+  specs: [openApiDocument],
+  recordings: [
+    {
+      recordedAt: '2026-10-06',
+      exchanges: [
+        {
+          operation: { method: 'GET', path: '/api/v1/monitor' },
+          response: { status: 200, body: [{ id: 1, name: 'CPU' }] },
+        },
+      ],
+    },
+  ],
+});
+```
+
+A fixture's `when` names the requests it answers: path parameters, query parameters and headers by value, and the fields of a body it lists, so `GET /users/1` and `GET /users/2` can get different users, and an unknown ID a `404`:
+
+```ts
+const { fetch } = createEmulatorFetch({
+  specs: [openApiDocument],
+  fixtures: [
+    {
+      operation: { method: 'GET', path: '/users/{id}' },
+      when: { path: { id: '1' } },
+      response: { status: 200, body: { id: 1, name: 'Ada' } },
+    },
+    {
+      operation: { method: 'GET', path: '/users/{id}' },
+      when: { path: { id: '404' } },
+      response: { status: 404, body: { message: 'Not found' } },
+    },
+  ],
+});
+```
+
+A request gets the fixture that checks the most values among those it matches, else the operation's fixture without `when`. A `when.path` naming a parameter the operation doesn't have is listed in `rejectedResponses`. Recordings match the request they recorded the same way, by its `pathParameters`, query and body (not its headers), and other requests get the operation's first recording. `when` applies to OpenAPI operations; GraphQL and MCP fixtures name their operation instead.
+
+**Sequences.** A handler that polls inside one action, such as Firecrawl's `crawlAndWait` until its job is `completed`, sends the same request until the answer changes, so one response per fixture can't take it through its waiting path. A fixture of an OpenAPI operation can give `responses` in place of `response`: the requests it answers get them in turn, and the last one repeats.
+
+```ts
+const fixtures: ResponseFixture[] = [
+  {
+    operation: { method: 'GET', path: '/crawl/{id}' },
+    responses: [
+      { status: 200, body: { status: 'scraping' } },
+      { status: 200, body: { status: 'completed', data: [] } },
+    ],
+  },
+];
+```
+
+Each fixture keeps its own count, so sequences with different `when`s advance separately, and `reset()` starts every sequence again. Sequences work wherever fixtures do: at creation, in `--fixtures` files and as runtime fixtures, where each response is checked like a single one, and the violations' paths start with `responses` and the index of the response they belong to. A response can be an error status, such as urlscan.io's 404 until a scan finishes. GraphQL and MCP fixtures take one `response`; a sequence for them is listed in `rejectedResponses`.
+
+Examples and samples use the lowest declared 2xx response (then `2XX`, then `default`; operations without one, such as downloads that redirect or endpoints the vendor removed, get their lowest declared 3xx, then their lowest declared status) and the content type that best matches the request's `Accept` header, preferring JSON; the mock answers **406** when no content type matches. Sampled values come from the schema's first `examples` entry, `example` or `default` that conforms to the schema, then its `const` or first `enum` value, and otherwise from a placeholder that stays within the schema's type, format and bounds (`minimum`/`maximum`, `multipleOf`, `minLength`/`maxLength`, `minItems`/`maxItems`, and `pattern`, sampled from the regex). Vendors' examples often contradict their own schemas (a date-time under `format: date`, a number for a string), so non-conforming ones are skipped; examples of schemas merged from `allOf` parts are used unchecked. For `oneOf`, the first variant whose sample matches exactly one variant is used. Below a fixed depth only required properties are generated, which keeps recursive schemas finite. Required properties the schema doesn't declare are filled from `additionalProperties`, or with `null`.
+
+`sampleJsonSchema(schema, { optional, boundary })` samples a standalone JSON Schema the same way, with refs resolving against the schema itself (`#/$defs/...`), for example to generate inputs from a zod schema converted with `z.toJSONSchema`. `optional: 'required'` leaves out optional properties at every depth, so object and array examples and defaults, which may include them, are skipped; `boundary: true` samples at the upper bounds, ignoring examples and defaults.
+
+To test how a connector handles extreme responses, pass `sampling: 'boundary'`. Fixtures and recordings still come first, but examples are skipped and bodies are sampled at the schema's upper bounds: strings at `maxLength` (1024 characters when unbounded), numbers at `maximum` or the largest value of their format (`int32`, `float`; `int64` and unbounded integers at `Number.MAX_SAFE_INTEGER`), arrays at `maxItems` (capped at 100; 3 items when unbounded, one for `uniqueItems`), and the last `enum` value. Vendor `oneOf`s whose variants only differ in their examples can't be sampled without them, and are reported in the call's `responseViolations`; an overlay can correct them.
+
+### Responders
+
+Pass `respond` to answer OpenAPI operations in front of the default chain above, for example to keep state across requests (create something, then read it back), or to answer from another emulator. It gets the operation, the request (with its decoded `pathParameters`) and a context, and may return a promise:
+
+```ts
+const CREATED = Symbol('created items');
+
+const { fetch, reset } = createEmulatorFetch({
+  specs: [openApiDocument],
+  respond: async (operation, request, { state, next }) => {
+    const created = (state.get(CREATED) as unknown[] | undefined) ?? [];
+    if (operation.id === 'createItem') {
+      state.set(CREATED, [...created, request.body]);
+      return { statusCode: 201, headers: { 'content-type': 'application/json' }, body: request.body };
+    }
+    return operation.id === 'listItems'
+      ? { statusCode: 200, headers: { 'content-type': 'application/json' }, body: created }
+      : next();
+  },
+});
+```
+
+- `context.next()` answers with the default chain: fixtures as written, else recordings, examples or samples, paged for operations in `pagination`. A responder that defers to it for an operation behaves as if it weren't there. Each call gets its own copy, so a responder can change it without affecting later requests. Only `next()` is paged: a list a responder builds itself, for example from `state`, is answered whole.
+- `context.state` is a `Map` kept for the emulator's run; `reset()` empties it, along with `calls`. Responders keep their entries under keys of their own, such as a symbol, so several can share it.
+- Answers are validated against the spec like any other, so a responder that drifts from the vendor's contract shows up in `calls`.
+
+## Pagination
+
+Operations listed in `pagination` (method, path template and a descriptor from the connector's manifest) serve a virtual collection of `collectionSize` items (default 3), built from the first item of the response they would otherwise get, with distinct `id`s. The request's cursor, offset or page number and page size select a slice. For `cursor`, `offset` and `page`, `request.in` says whether they are read from the query (default), the JSON body or headers:
+
+- `cursor`: the next cursor is written at `nextPath` in the body, or in the `nextPath` header with `response.in: 'header'` (and at `hasMorePath`, if given); the last page signals the end as the vendor does (`empty_string`, `null` or `missing`). Cursors are opaque positions; a cursor the mock didn't issue gets **400**.
+- `offset` and `page`: the total is written at `totalPath`, if given.
+- `link`: the next page's URL is sent in a `Link: <url>; rel="next"` header, as on GitHub, and left out on the last page.
+- `next_url`: the next page's URL is written at `nextPath` in the body, as with Microsoft Graph's `@odata.nextLink`, and is `null` or missing on the last page. Leave out `request` when the URL is opaque and no source names its page parameter, as with Azure's `nextLink`: the mock then selects pages with its own `contract-mock-page` query parameter, which request validation ignores.
+
+Next-page URLs are the request's URL with the cursor, offset or page parameter named in `request` set to the next page. Body paths use lodash syntax; quote keys that contain dots, as in `["@odata.nextLink"]`. An empty `itemsPath` means the body is the collection itself, as with Datadog's `GET /api/v1/monitor`; such a body has no room for a next cursor, URL or total, so these operations page by offset, page number, `Link` header or a cursor in a header.
+
+When an operation has recordings, its collection is the recorded pages joined, in place of copies of one item. Pages join with those recorded for the same path parameters, and the same query and body apart from the parameters that select a page, so `/users/2/items` gets the pages recorded for user 2. A request none of them match gets the operation's first collection, and the most specific one if several match. Recordings store each exchange's request (`pathParameters`, `query`, `headers`, `body`) so pages can be placed: a page requested by offset or page number starts there, and a page requested with a vendor cursor starts where the page that returned that cursor ended. Recorded cursors then resolve to their position, so replaying them works, and the mock hands them out for the pages they lead to. `collectionSize` cuts the recorded items or pads them with copies of the last one. Fixtures and runtime fixtures aren't paged: a request they answer gets the response as written, with its own items and next-page values, so an empty list stays empty. To serve several pages, give one fixture per page with a `when` on the cursor or page parameter.
+
+Page sizes above the vendor's `maximum` already get **422** from request validation.
+
+## Correcting vendor specs
+
+Vendor specs are sometimes wrong about the API they describe: a parameter documented in the query string is sent in the body, or a property marked required is often missing. When verification against the real API shows this, record the correction in an [OpenAPI Overlay](https://spec.openapis.org/overlay/v1.1.0.html) next to the spec, rather than editing the vendor's file, and apply it before loading:
+
+```yaml
+overlay: 1.1.0
+info:
+  title: Trello corrections
+  version: 1.0.0
+actions:
+  - target: $.paths['/cards'].post.parameters[?@.name == 'idList']
+    description: idList is sent in the JSON body; verified against the API on 2026-10-06.
+    remove: true
+  - target: $.components.schemas.Card.required[?@ == 'badges']
+    description: Archived cards omit badges.
+    remove: true
+```
+
+```ts
+const { document, findings } = applyOverlay(vendorSpec, overlay);
+const { fetch } = createEmulatorFetch({ specs: [document], recordings });
+```
+
+The mock then enforces the API's real contract, and recordings the vendor's spec contradicted are served. Say in each action's `description` (or an `x-` field) what showed the spec to be wrong, so the correction can be dropped once the vendor fixes it.
+
+`applyOverlay` returns a corrected copy of the document. It implements the `update`, `copy` and `remove` actions of Overlay 1.0 and 1.1: `update` merges objects, appends to arrays and replaces primitives. Items an `update` would append are skipped when the array already has them. Targets are JSONPath ([RFC 9535](https://www.rfc-editor.org/rfc/rfc9535)) without function extensions. A malformed overlay or target throws an `InvalidOverlayError` naming the action. `findings` lists actions that matched nothing (`no-match`) or changed nothing (`no-change`), which signals that the vendor changed or fixed that part of the spec and the correction needs another look.
+
+## Spec loading
+
+Google API Discovery documents convert to OpenAPI 3.0 with `convertDiscovery` (`isDiscoveryDocument` recognizes them). Each method becomes an operation at its `flatPath` under `rootUrl` + `servicePath`. Reserved expansions such as `v1/{+name}:access` can't match requests, because OpenAPI path parameters can't contain slashes, so `flatPath` is used instead. Each operation gets the API-wide parameters next to its own, its request and response schemas as JSON bodies, and its OAuth scopes as security requirements. Schemas become components, with draft 3 `required: true` property flags moved into `required` lists. Simple media uploads become operations of their own, served from `rootUrl`.
+
+Some vendors publish their API reference as Markdown instead, with an [`llms.txt`](https://llmstxt.org) index linking a page per endpoint, written from a fixed template. `convertMarkdownReference({ format, pages })` converts the fetched pages to OpenAPI 3.0, and `readLlmsIndex` lists the pages an index links to. Each template has its own parser, while the conversion to OpenAPI is shared: parameters by location, request bodies, nested response fields, and types with their enums, defaults, examples, bounds, patterns, `required`, `deprecated` and nullability. Pages that describe neither an endpoint nor an object are skipped. The formats (`MARKDOWN_REFERENCE_FORMATS`) are:
+
+- `databricks-markdown` ([docs.databricks.com/api/llms.txt](https://docs.databricks.com/api/llms.txt)): nested bullet lists of `name (type, required|optional[, Deprecated])` with `Default:`, `Example:`, `Constraints:` and `Possible values:` lines. Object pages (`The Alert object`) become component schemas, which responses that say "Returns the Alert object" reference; objects with the same name in different API groups are prefixed with the group (`AlertsV1Alert`). Operations are served from any workspace host and take a bearer token.
+- `brave-markdown` ([api-dashboard.search.brave.com/llms.txt](https://api-dashboard.search.brave.com/llms.txt)): parameter tables with enums, ranges and defaults in a Constraints column, and flat field tables whose names encode nesting (`web.results[].url`), where a type ending in `?` is optional and nullable. The page's base URL is the server, and its authorization table becomes API key security.
+
+What a template can't express, such as a response given only as an example ("Returns a list of ClusterInfo objects"), is served from the example and corrected with an overlay where needed, not in the parser.
+
+AWS publishes its APIs as [Smithy](https://smithy.io) models ([`aws/api-models-aws`](https://github.com/aws/api-models-aws)), in the JSON AST that `isSmithyModel` recognizes. `convertSmithy(model)` converts an `aws.protocols#restJson1` service (such as EKS, Lambda and X-Ray) to OpenAPI 3.0; models with several services take `{ service }`.
+
+- Operations bound to the service or to its resources get their method and path from `@http`. Greedy labels such as `{Key+}` may span path segments, and URIs that fix query parameters (`/2018-10-31/layers?find=LayerVersion`) go under `x-ms-paths`.
+- Input members become path, query and header parameters by `@httpLabel`, `@httpQuery`, `@httpQueryParams` (a form-exploded object, which takes the query keys no other member binds) and `@httpHeader`; the `@httpPayload` member, or the remaining members as a JSON object (`<Operation>RequestContent`, with `@jsonName`), become the body. A blob payload without a `@mediaType` takes `application/octet-stream` or any JSON, as Lambda Invoke payloads are sent. Output members become response headers and the body (`<Operation>ResponseContent`) at the `@http` status, or at `2XX` when an `@httpResponseCode` member sets it.
+- Modeled errors of the operation and the service become responses at their `@httpError` status (400 for client and 500 for server errors otherwise). Errors that share a status are an `anyOf`, as error bodies with only a `message` match several of them.
+- Shapes map to JSON Schema: structures, unions and enums as components, with `@required`, `@clientOptional`, `@length`, `@range`, `@pattern`, `@default`, `@sparse`, `@deprecated` and `@sensitive`. Timestamps follow `@timestampFormat` or the binding's default (epoch seconds in documents, `http-date` in headers, `date-time` in query strings and labels), blobs are base64 in documents (with `@length` bounds converted to the encoding's length) and raw bytes as payloads, and event streams are `application/vnd.amazon.eventstream`.
+- Requests are served from `https://{endpointPrefix}.{region}.amazonaws.com` and, for SigV4 services, must carry an `Authorization` header (the signature isn't checked).
+
+`smithy_openapi_parity.test.ts` compares the conversion with [smithy-openapi](https://smithy.io/2.0/guides/model-translations/converting-to-openapi.html), AWS's own, for the operations the connectors call, and lists where the two differ on purpose.
+
+Smithy models can also be passed to `createEmulatorFetch` as specs: `restJson1` services are served from their conversion, and AWS's JSON RPC protocols, `awsJson1_0` and `awsJson1_1` (CloudWatch, CloudWatch Logs), are served as follows. Every operation is `POST /` with the operation named in `X-Amz-Target`, which OpenAPI paths can't express, so `convertSmithy` (or `toAwsJsonDocument`) describes them by operation instead: `POST /<Operation>` on the regional host, with an `x-amz-json` extension (`version`, `targetPrefix`, `endpointPrefix`) that marks the document. The emulator serves any document with that marker by `X-Amz-Target`, whether it was converted from the model or read from a snapshot (`isAwsJsonDocument`).
+
+- The service answers every request to its regional hosts (`https://{endpointPrefix}.{region}.amazonaws.com`, and subdomains of them for operations with an `@endpoint` host prefix). Requests must be `POST /` with `X-Amz-Target: <Service>.<Operation>` and `Content-Type: application/x-amz-json-1.0` (or `-1.1`); `application/json` is accepted too, as CloudWatch's connector sends it with `Content-Encoding: amz-1.0`, the legacy form of the protocol AWS still accepts.
+- Each operation is served as `POST /<Operation>` of an OpenAPI document built from the model, so the input is validated by member name (awsJson ignores `@jsonName`), null structure members count as absent, and doubles also take `"NaN"`, `"Infinity"` and `"-Infinity"`; responses come from fixtures, recordings or samples like any other operation. `calls` names the operation, and fixtures and recordings refer to it as `{ method: 'post', path: '/<Operation>' }`.
+- Errors are awsJson errors, `{ "__type": ..., "message": ... }`: 400 `UnknownOperationException` for targets that name no operation (404 for other paths), 400 `SerializationException` for other content types and bodies that aren't JSON, 403 `MissingAuthenticationTokenException` without SigV4's `Authorization` header, and 400 `ValidationException` for input that breaks the model. Modeled errors are responses at their `@httpError` status, or 400 for client and 500 for server errors.
+
+`aws_json_protocol_tests.test.ts` runs the awsJson1_0 and awsJson1_1 protocol compliance tests AWS publishes with Smithy that apply to servers.
+
+`aws.protocols#restXml` services, such as S3, convert the same way, with XML documents:
+
+- Bodies are `application/xml`. Their schemas carry OpenAPI `xml` objects: the root element is the input or output shape's name (or `@xmlName`), with the service's `@xmlNamespace`; members are elements named by `@xmlName`, or attributes with `@xmlAttribute`, in their `@xmlNamespace`; lists are wrapped in `member` elements unless renamed or `@xmlFlattened`; and maps, which OpenAPI's `xml` can't describe, carry `x-smithy-xml-map` with their `entry`, key and value names. Timestamps in documents are `date-time`, and floats also take `NaN`, `Infinity` and `-Infinity` wherever they're sent.
+- Errors are `<ErrorResponse><Error>` documents with the error's `Type`, `Code` (its name) and members, and a `RequestId`, or a bare `<Error>` for services with `noErrorWrapping` (S3).
+- Operations with an `@endpoint` host prefix are served from that subdomain, and operations with an `@httpResponseCode` member also declare `2XX`. Members bound to the query or a label don't apply to responses, so they're part of the body there.
+- Smithy mixins are expanded into the shapes that use them.
+- S3: bucket operations are also served from virtual-hosted buckets (`{Bucket}.s3.{region}.amazonaws.com`, and its dual-stack and Transfer Acceleration hosts), whose `Bucket` server variable supplies the path parameter (`x-path-parameter`). S3's `x-id` query parameters, which only tell SDKs' routers apart, are optional (`x-optional-fixed-query`), so `GET /{Bucket}/{Key}` is GetObject unless the query says otherwise, such as `uploadId` for ListParts. S3 Express's control operations are served from `s3express-control.{region}.amazonaws.com`, and `@s3UnwrappedXmlOutput` operations answer with their one member as the root (`<LocationConstraint>`).
+
+The emulator reads and writes XML bodies (`application/xml`, `text/xml` and `+xml` types) with the schema's `xml` objects: XML requests, recordings and fixtures are read into values and validated like JSON, and samples and fixtures given as values are written as XML, so `fixtures` can give either. Elements are matched by local name, unmodeled elements are ignored, and values that don't fit their type are left as text for validation to report. HEAD responses carry no body. `rest_xml_protocol_tests.test.ts` runs the restXml protocol compliance tests AWS publishes with Smithy that apply to servers. Other AWS protocols, such as awsJson, aren't converted.
+
+These additions to the emulator aren't specific to Smithy:
+
+- A server variable with `x-path-parameter: true` is also the operation's leading path parameter of the same name, which requests to that server leave out of the path.
+- `x-optional-fixed-query` on an `x-ms-paths` operation lists the fixed query parameters requests may leave out.
+- Operations on the same path are told apart by the query: first by the required query parameters a request leaves out, then by how many of its parameters each declares.
+- An operation with a query parameter that is a map (`style: form`, `explode: true`, an object with `additionalProperties`) takes every query parameter.
+- Response header arrays are read comma-separated, an empty response body counts as no body, and a response body without a `Content-Type` is taken to be the response's only media type, as is a request body when that is `application/octet-stream`.
+
+`loadContractOperations` accepts a parsed OpenAPI 3.x or Swagger 2.0 document (converted to OpenAPI 3.0 first, with `convertSwagger2`, which is also exported) and returns its operations: method, path, servers, parameters (with `style` and `explode` defaults applied), request body and responses. Parameter, request body, response and header refs are resolved. Schemas are not dereferenced: each one stays in place in a copy of the document, together with its JSON pointer, so its refs keep resolving against the document. This keeps large specs such as Microsoft Graph fast to load. The schema dialect follows the OpenAPI version: OpenAPI 3.0 schemas for 3.0, JSON Schema 2020-12 for 3.1 and later.
+
+Operations under AutoRest's [`x-ms-paths`](https://github.com/Azure/autorest/blob/main/docs/extensions/readme.md#x-ms-paths) extension load too, as Azure data-plane specs such as Blob Storage's keep all their operations there. Their keys add fixed query parameters to the path, such as `/?restype=service&comp=properties`, which tell operations on the same path apart. Bare tokens in a key, such as `flat` in `?restype=container&comp=list&flat` or `BlockBlob` in `/{containerName}/{blob}?BlockBlob`, only tell keys apart for AutoRest, which leaves them out of requests, so they don't have to be sent. The operation's `path` is the whole key, so `calls`, fixtures and recordings tell these operations apart, and `fixedQuery` lists its `name=value` pairs, decoded as a request's query is. A request matches an operation only when it carries those, and they count as declared in request validation. Among the operations it matches, those with a required parameter that allows one value, such as `comp: ['list']` or the header `x-ms-lease-action: ['acquire']`, which the request sends with another value, are left out (unless that leaves none, so validation can name the wrong value), then the operation declaring the most of the query and header parameters the request sends wins, then the one with the fewest required parameters missing. So a flat listing goes to `Container_ListBlobFlatSegment`, one with a `delimiter` to `Container_ListBlobHierarchySegment`, and a lease request to the operation for its `x-ms-lease-action`.
+
+Loading also rewrites schemas as plain JSON Schema and repairs defects common in vendor specs, in place and following refs: OpenAPI 3.0's `nullable` becomes a union with `null`, duplicate `enum` values are removed, regex escapes that are invalid under the `u` flag are dropped, and OpenAPI 3.0's boolean `exclusiveMinimum`/`exclusiveMaximum` become numeric bounds. It then checks every schema for defects that would break validation (unresolvable `$ref`s, unknown `type`s, patterns that don't compile, and keywords with values of the wrong type) and throws an `InvalidSchemaError` listing each operation and location that still has one, so a broken spec fails at load instead of on the first request that uses it.
+
+Schemas are validated with [`@cfworker/json-schema`](https://github.com/cfworker/cfworker/tree/main/packages/json-schema), as draft-07 for OpenAPI 3.0 and draft 2020-12 for 3.1 and later. It interprets schemas without generating code, and checks the JSON Schema formats (such as `date-time`, `email` and `uri`) but not OpenAPI's own (such as `int32` and `byte`).

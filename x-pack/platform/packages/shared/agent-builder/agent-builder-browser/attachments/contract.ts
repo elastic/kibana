@@ -6,6 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
+import type { Observable } from 'rxjs';
 import type { EuiButtonColor, IconType } from '@elastic/eui';
 import type {
   UnknownAttachment,
@@ -15,10 +16,14 @@ import type {
   VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
 
+/**
+ * Where an action is shown in the attachment header, which renders a split button.
+ * The first `PRIMARY` action is the main button; without one, the first `SECONDARY` action
+ * is (or a lone action). All other actions go in the menu next to it.
+ */
 export enum ActionButtonType {
   PRIMARY = 'primary',
   SECONDARY = 'secondary',
-  OVERFLOW = 'overflow',
 }
 
 export type AttachmentPreviewState = 'none' | 'preview_available' | 'previewing';
@@ -32,7 +37,7 @@ export interface AttachmentRenderProps<TAttachment extends UnknownAttachment = U
   isSidebar: boolean;
   /** Data from the screen context attachment, if present in the conversation */
   screenContext?: ScreenContextAttachmentData;
-  /** Callback to open the agent builder sidebar with the current conversation loaded. Undefined when already in the sidebar. */
+  /** Callback to open the agent builder sidebar with the current conversation loaded. */
   openSidebarConversation?: () => void;
 }
 
@@ -89,11 +94,6 @@ export interface GetActionButtonsParams<TAttachment extends UnknownAttachment = 
   closeCanvas?: () => void;
   /** Callback to open the agent builder sidebar with the current conversation loaded. */
   openSidebarConversation?: () => void;
-  /**
-   * Optional callback for externally-controlled inline preview state.
-   * Use to mark an attachment as currently previewed outside canvas.
-   */
-  setPreviewBadgeState?: (previewBadgeState: AttachmentPreviewState) => void;
 }
 
 /**
@@ -106,7 +106,11 @@ export interface ActionButton {
   icon?: IconType;
   /** Whether this is the primary action button */
   type: ActionButtonType;
-  /** Optional EUI button color override (defaults to 'text') */
+  /**
+   * Optional EUI button color override (defaults to 'text').
+   * Only applies when the action is the main button of the header; actions shown in the
+   * menu of the split button ignore it.
+   */
   color?: EuiButtonColor;
   /** Whether the action is currently unavailable */
   disabled?: boolean;
@@ -150,9 +154,20 @@ export interface GetHeaderParams<TAttachment extends UnknownAttachment = Unknown
 }
 
 /**
+ * Color variants for the attachment header and card border.
+ * Each name maps to the matching EUI color tokens, so dark mode keeps working.
+ */
+export type HeaderColor = 'primary' | 'danger' | 'warning';
+
+/**
  * Return value of the `getHeader` resolver.
  */
 export interface HeaderData {
+  /**
+   * Optional color variant, tinting the header and the card border by attachment type.
+   * Omitted: the default plain header and border.
+   */
+  color?: HeaderColor;
   /** Optional icon to display in the attachment header next to the title. */
   icon?: IconType;
   /** Optional secondary line rendered under the attachment title. */
@@ -221,8 +236,8 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
   /**
    * Optional preferred width for the canvas flyout when opened in full-screen context.
    * Accepts any valid CSS width value (e.g. `'600px'`, `'40vw'`).
-   * Defaults to `'50vw'` when not specified.
-   * Has no effect in sidebar context.
+   * Defaults to `'50vw'` when not specified, and is capped at `'50vw'`.
+   * Has no effect in sidebar context or on narrow viewports.
    */
   canvasWidth?: string;
   /**
@@ -249,6 +264,8 @@ export interface AttachmentUIDefinition<TAttachment extends UnknownAttachment = 
    * Buttons will appear alongside or below the rendered content.
    */
   getActionButtons?: (params: GetActionButtonsParams<TAttachment>) => ActionButton[];
+  /** Optional preview state of the inline card, e.g. `previewing` while the app shows it. */
+  getPreviewState$?: (attachment: TAttachment) => Observable<AttachmentPreviewState>;
   /**
    * Optional max-width (in px) for the inline attachment panel.
    * When provided, the outer panel will not exceed this width.

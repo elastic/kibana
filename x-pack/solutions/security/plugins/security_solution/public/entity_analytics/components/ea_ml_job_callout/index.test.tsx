@@ -29,6 +29,7 @@ describe('EaMlJobCallout', () => {
       loading: false,
       isMlUser: true,
       isLicensed: true,
+      isError: false,
       jobs: [{ id: 'v3_linux_rare_metadata_process' } as MlSummaryJob],
     });
     const { getByTestId, getAllByText, getByText } = render(
@@ -46,6 +47,7 @@ describe('EaMlJobCallout', () => {
       loading: false,
       isMlUser: true,
       isLicensed: true,
+      isError: false,
       jobs: [{ id: 'v3_linux_rare_metadata_process_ea' } as MlSummaryJob],
     });
     const { queryByTestId } = render(
@@ -61,6 +63,7 @@ describe('EaMlJobCallout', () => {
       loading: true,
       isMlUser: true,
       isLicensed: true,
+      isError: false,
       jobs: [],
     });
     const { queryByTestId } = render(

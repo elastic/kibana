@@ -15,7 +15,7 @@ import {
 } from './command_badge';
 import { COMMAND_METADATA_ATTRIBUTE } from './command_badge/attributes';
 import { insertImagePlaceholderChip } from './image_placeholder';
-import { createTextFragment, ensureCaretTargetBeforeFirstBadge, insertNodeAtCursor } from './utils';
+import { ensureCaretTargetBeforeFirstBadge, insertNodeAtCursor } from './utils';
 
 const stringContainsBadge = (html: string): boolean => html.includes(COMMAND_BADGE_ATTRIBUTE);
 
@@ -91,22 +91,18 @@ const handleImageFilePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts
   return true;
 };
 
-/** Handles the text/HTML fallback branch of a paste event. */
-const handleTextOrBadgePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts): void => {
+/**
+ * Handles the command badge branch of a paste event.
+ * Plain text is left to the browser, which keeps the paste in the native undo history.
+ */
+const handleBadgePaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts): void => {
   const { editorRef, onChange } = opts;
-  if (!event.clipboardData) return;
+  const htmlData = event.clipboardData?.getData('text/html');
+  if (!htmlData || !stringContainsBadge(htmlData)) return;
 
   event.preventDefault();
 
-  const htmlData = event.clipboardData.getData('text/html');
-  const textData = event.clipboardData.getData('text/plain');
-
-  const hasBadgeHtml = htmlData && stringContainsBadge(htmlData);
-  const node = hasBadgeHtml
-    ? createTextAndBadgeFragment(sanitizePastedHtml(htmlData))
-    : createTextFragment(textData);
-
-  insertNodeAtCursor(node);
+  insertNodeAtCursor(createTextAndBadgeFragment(sanitizePastedHtml(htmlData)));
   if (editorRef.current) {
     ensureCaretTargetBeforeFirstBadge(editorRef.current);
   }
@@ -116,12 +112,12 @@ const handleTextOrBadgePaste = (event: ClipboardEvent, opts: HandleEditorPasteOp
 
 /**
  * Full paste handler for the message editor contentEditable.
- * Dispatches to image-file paste or text/badge paste based on clipboard content.
+ * Dispatches to image-file paste or command badge paste based on clipboard content.
  */
 export const handleEditorPaste = (event: ClipboardEvent, opts: HandleEditorPasteOpts): void => {
   const handledAsImage = handleImageFilePaste(event, opts);
   if (!handledAsImage) {
-    handleTextOrBadgePaste(event, opts);
+    handleBadgePaste(event, opts);
   }
   opts.onAfterInput?.(); // to sync with the pills
 };

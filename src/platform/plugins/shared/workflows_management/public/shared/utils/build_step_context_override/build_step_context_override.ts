@@ -139,8 +139,8 @@ export function buildContextOverride(
       if (isLastPart) {
         // Set a default value for the final property
         current[part] =
-          current[part] ||
-          readPropertyRecursive(pathParts.slice(0, i + 1), staticDataWithInputs) ||
+          current[part] ??
+          readPropertyRecursive(pathParts.slice(0, i + 1), staticDataWithInputs) ??
           INPUT_STRING_PLACEHOLDER;
       } else {
         // Create nested object if it doesn't exist

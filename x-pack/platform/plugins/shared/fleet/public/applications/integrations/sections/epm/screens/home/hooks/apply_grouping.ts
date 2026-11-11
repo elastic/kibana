@@ -20,6 +20,7 @@ interface ApplyGroupingParams {
   getAbsolutePath: (path: string) => string;
   addBasePath: (url: string) => string;
   packageVerificationKeyId?: string;
+  canAddIntegration?: boolean;
 }
 
 interface ApplyGroupingResult {
@@ -36,6 +37,7 @@ export const applyGrouping = ({
   getAbsolutePath,
   addBasePath,
   packageVerificationKeyId,
+  canAddIntegration,
 }: ApplyGroupingParams): ApplyGroupingResult => {
   const byGroup = new Map<string, PackageListItem[]>();
   const ungroupedItems: Array<PackageListItem | CustomIntegration> = [];
@@ -83,6 +85,7 @@ export const applyGrouping = ({
         item,
         addBasePath,
         packageVerificationKeyId,
+        canAddIntegration,
       }),
       fromCollection: { groupId, title: groupConfig.title },
     }));

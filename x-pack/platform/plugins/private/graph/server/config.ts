@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { schema, offeringBasedSchema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
   savePolicy: schema.oneOf(
@@ -19,7 +19,7 @@ export const configSchema = schema.object({
     { defaultValue: 'configAndData' }
   ),
   canEditDrillDownUrls: schema.boolean({ defaultValue: true }),
-  enabled: offeringBasedSchema({ serverless: schema.boolean({ defaultValue: true }) }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

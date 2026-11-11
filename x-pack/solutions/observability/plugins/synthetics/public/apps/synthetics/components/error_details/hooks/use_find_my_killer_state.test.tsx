@@ -27,9 +27,15 @@ jest.mock('react-router-dom', () => ({
   useParams: () => ({ errorStateId: 'state-1', monitorId: 'monitor-1' }),
 }));
 
+const mockUseSelectedMonitor = jest.fn();
+jest.mock('../../monitor_details/hooks/use_selected_monitor', () => ({
+  useSelectedMonitor: () => mockUseSelectedMonitor(),
+}));
+
 describe('useFindMyKillerState', () => {
   beforeEach(() => {
     mockUrlParams.mockReturnValue({ dateRangeStart: 'now-15m', dateRangeEnd: 'now' });
+    mockUseSelectedMonitor.mockReturnValue({ monitor: null });
     mockUseReduxEsSearch.mockReturnValue({ data: undefined, loading: false });
   });
 
@@ -59,5 +65,19 @@ describe('useFindMyKillerState', () => {
       expect.arrayContaining(['remote-a']),
       expect.any(Object)
     );
+  });
+
+  it('filters heartbeat monitors by monitor.id', () => {
+    mockUseSelectedMonitor.mockReturnValue({
+      monitor: { origin: 'heartbeat', config_id: 'monitor-1', id: 'monitor-1' },
+    });
+
+    renderHook(() => useFindMyKillerState());
+
+    const params = mockUseReduxEsSearch.mock.calls[0][0];
+    expect(params.query.bool.filter).toEqual(
+      expect.arrayContaining([{ term: { 'monitor.id': 'monitor-1' } }])
+    );
+    expect(params.query.bool.filter).not.toContainEqual({ term: { config_id: 'monitor-1' } });
   });
 });

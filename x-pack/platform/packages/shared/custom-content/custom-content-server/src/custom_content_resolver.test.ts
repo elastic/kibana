@@ -6,6 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { CUSTOM_CONTENT_MAX_TEMPLATE_BYTES } from '@kbn/custom-content-common';
 import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
@@ -37,13 +38,13 @@ beforeEach(() => {
 describe('createCustomContentTemplateResolver — system prompt selection', () => {
   const resolve = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
 
-  it('uses the Liquid system prompt when hasExistingQuery is true and esqlQuery is omitted', async () => {
+  it('uses the Liquid system prompt for a panel whose query is not changing', async () => {
     mockChatComplete.mockResolvedValue({ content: '<div>{{ row["x"].value }}</div>' });
 
     await resolve({
       prompt: 'Change the colors',
       existingTemplate: '<div>{{ row["x"].value }}</div>',
-      hasExistingQuery: true,
+      esqlQueries: ['FROM logs'],
     });
 
     expect(mockEsqlQuery).not.toHaveBeenCalled();
@@ -53,15 +54,27 @@ describe('createCustomContentTemplateResolver — system prompt selection', () =
     expect(systemArg).not.toContain('Output ONLY valid HTML');
   });
 
-  it('does not sample ES when hasExistingQuery is true and esqlQuery is omitted', async () => {
+  it('asks both prompts for a root that fills the frame', async () => {
     mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
 
-    await resolve({ prompt: 'Restyle', hasExistingQuery: true });
+    await resolve({ prompt: 'Restyle', esqlQueries: ['FROM logs'] });
+    await resolve({ prompt: 'A banner' });
+
+    for (const [{ system }] of mockChatComplete.mock.calls) {
+      expect(system).toContain('FRAME FILL');
+      expect(system).toContain('flex: 1');
+    }
+  });
+
+  it('does not sample ES when the query is not changing', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+
+    await resolve({ prompt: 'Restyle', esqlQueries: ['FROM logs'] });
 
     expect(mockEsqlQuery).not.toHaveBeenCalled();
   });
 
-  it('uses the static system prompt when neither esqlQuery nor hasExistingQuery is set', async () => {
+  it('uses the static system prompt for a panel with no queries', async () => {
     mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
 
     await resolve({ prompt: 'Show a KPI card' });
@@ -111,6 +124,38 @@ describe('createCustomContentTemplateResolver — output validation', () => {
     await expect(resolve({ prompt: 'Show a KPI' })).rejects.toThrow(
       `Generated template was rejected: exceeds the ${CUSTOM_CONTENT_MAX_TEMPLATE_BYTES}-byte limit.`
     );
+  });
+
+  it('asks the model once to fix a template that is not valid Liquid', async () => {
+    mockChatComplete
+      .mockResolvedValueOnce({ content: '<div>{% if true %}Hello</div>' })
+      .mockResolvedValueOnce({ content: '<div>{% if true %}Hello{% endif %}</div>' });
+
+    const result = await resolve({ prompt: 'Show a KPI' });
+
+    expect(result.template).toBe('<div>{% if true %}Hello{% endif %}</div>');
+    expect(mockChatComplete).toHaveBeenCalledTimes(2);
+    const retryMessages = mockChatComplete.mock.calls[1][0].messages;
+    expect(retryMessages).toHaveLength(3);
+    expect(retryMessages[1]).toMatchObject({ content: '<div>{% if true %}Hello</div>' });
+    expect(retryMessages[2].content).toContain('not valid Liquid');
+  });
+
+  it('throws when the corrected template is still not valid Liquid', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>{% if true %}Hello</div>' });
+
+    await expect(resolve({ prompt: 'Show a KPI' })).rejects.toThrow(
+      'Generated template was rejected: invalid Liquid syntax'
+    );
+    expect(mockChatComplete).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not retry a template that is valid Liquid', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>{% for r in rows %}x{% endfor %}</div>' });
+
+    await resolve({ prompt: 'Show a KPI' });
+
+    expect(mockChatComplete).toHaveBeenCalledTimes(1);
   });
 
   it('detects <SCRIPT> tags case-insensitively', async () => {
@@ -180,7 +225,7 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
     [
       'a rejected query',
       responseError('verification_exception', 400, 'Unknown column [nope]'),
-      /ES\|QL query is invalid: Unknown column \[nope\].*generate_esql/,
+      /ES\|QL query is invalid: Unknown column \[nope\].*if it was generated, retry with a more specific description/,
     ],
     [
       'unparseable syntax',
@@ -196,9 +241,9 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
   ])('fails with a cause-specific message on %s', async (_label, error, expected) => {
     mockEsqlQuery.mockRejectedValue(error);
 
-    await expect(resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' })).rejects.toThrow(
-      expected
-    );
+    await expect(
+      resolve({ prompt: 'Show revenue', esqlQueries: ['FROM logs'], isQueryChanging: true })
+    ).rejects.toThrow(expected);
     expect(mockChatComplete).not.toHaveBeenCalled();
   });
 
@@ -206,14 +251,15 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
     mockEsqlQuery.mockResolvedValue({ columns: [{ name: 'count', type: 'long' }], values: [] });
 
     await expect(
-      resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' })
+      resolve({ prompt: 'Show revenue', esqlQueries: ['FROM logs'], isQueryChanging: true })
     ).resolves.toMatchObject({ template: '<div>ok</div>' });
   });
 
   it('binds ?_tstart and ?_tend when sampling a time-picker query', async () => {
     await resolve({
       prompt: 'Show revenue',
-      esqlQuery: 'FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend',
+      esqlQueries: ['FROM logs | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend'],
+      isQueryChanging: true,
     });
 
     expect(mockEsqlQuery).toHaveBeenCalledWith(
@@ -223,11 +269,172 @@ describe('createCustomContentTemplateResolver — ES|QL sampling failures', () =
     );
   });
 
+  describe('control values', () => {
+    const usesHost = 'FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)';
+    const esqlVariables = [
+      { key: 'host', value: 'web-1', type: ESQLVariableType.VALUES },
+      { key: 'unused', value: 'nope', type: ESQLVariableType.VALUES },
+    ];
+
+    it('binds the control values the query uses', async () => {
+      await resolve({
+        prompt: 'Show hits',
+        esqlQueries: [usesHost],
+        isQueryChanging: true,
+        esqlVariables,
+      });
+
+      expect(mockEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ params: [{ host: 'web-1' }] })
+      );
+    });
+
+    it('binds the time range and the control values together', async () => {
+      await resolve({
+        prompt: 'Show hits',
+        esqlQueries: [
+          'FROM logs | WHERE @timestamp >= ?_tstart AND host.name == ?host | STATS hits = COUNT(*)',
+        ],
+        isQueryChanging: true,
+        esqlVariables,
+      });
+
+      expect(mockEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ params: [{ _tstart: expect.any(String) }, { host: 'web-1' }] })
+      );
+    });
+
+    it('is unchanged for a query that uses a control when no values were provided', async () => {
+      mockEsqlQuery.mockRejectedValue(new Error('Unknown query parameter [host]'));
+
+      await expect(
+        resolve({ prompt: 'Show hits', esqlQueries: [usesHost], isQueryChanging: true })
+      ).rejects.toThrow(/Could not sample/);
+      expect(mockEsqlQuery).toHaveBeenCalledWith(
+        expect.not.objectContaining({ params: expect.anything() })
+      );
+    });
+
+    it('does not run anything when the query is not changing, whatever the values', async () => {
+      await resolve({
+        prompt: 'Restyle',
+        existingTemplate: '<div/>',
+        esqlQueries: ['FROM logs'],
+        esqlVariables,
+      });
+
+      expect(mockEsqlQuery).not.toHaveBeenCalled();
+    });
+  });
+
   it('sends no params for a query without time parameters', async () => {
-    await resolve({ prompt: 'Show revenue', esqlQuery: 'FROM logs' });
+    await resolve({ prompt: 'Show revenue', esqlQueries: ['FROM logs'], isQueryChanging: true });
 
     expect(mockEsqlQuery).toHaveBeenCalledWith(
       expect.not.objectContaining({ params: expect.anything() })
     );
+  });
+});
+
+// A panel's other queries are treated like its main one: a query that is not changing is not run, since
+// the template that already reads it describes it. They are given only so the model knows what
+// `queries[n]` is, and keeps the references to them when it refines the template.
+describe('createCustomContentTemplateResolver — additional queries', () => {
+  const resolve = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
+
+  const columnsFor = (name: string) => ({ columns: [{ name, type: 'long' }], values: [[1]] });
+
+  beforeEach(() => {
+    mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+  });
+
+  it('does not run the additional queries when refining a template whose queries are not changing', async () => {
+    await resolve({
+      prompt: 'Restyle',
+      existingTemplate: '<div>{{ queries[1].rows.size }}</div>',
+      esqlQueries: ['FROM main', 'FROM a', 'FROM b'],
+    });
+
+    expect(mockEsqlQuery).not.toHaveBeenCalled();
+    expect(mockChatComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it('runs only the main query when it is the one changing, not the additional ones', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('total'));
+
+    await resolve({
+      prompt: 'Show it',
+      esqlQueries: ['FROM main', 'FROM a', 'FROM b'],
+      isQueryChanging: true,
+    });
+
+    expect(mockEsqlQuery).toHaveBeenCalledTimes(1);
+    expect(mockEsqlQuery.mock.calls[0][0].query).toContain('FROM main');
+  });
+
+  it('does not describe the additional queries to the model beyond what queries[n] is', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('total'));
+
+    await resolve({
+      prompt: 'Show it',
+      esqlQueries: ['FROM main', 'FROM a'],
+      isQueryChanging: true,
+    });
+
+    const content: string = mockChatComplete.mock.calls[0][0].messages[0].content;
+    expect(content).toContain('total (long)');
+    expect(content).not.toContain('read by the template as queries[1]');
+  });
+
+  it('teaches the model about queries[n] only when the panel has additional queries', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('hits'));
+
+    await resolve({ prompt: 'Show it', esqlQueries: ['FROM main'], isQueryChanging: true });
+    expect(mockChatComplete.mock.calls[0][0].system).not.toContain('MULTIPLE QUERIES');
+
+    await resolve({
+      prompt: 'Show it',
+      esqlQueries: ['FROM main', 'FROM a'],
+      isQueryChanging: true,
+    });
+    const system: string = mockChatComplete.mock.calls[1][0].system;
+    expect(system).toContain('MULTIPLE QUERIES');
+    expect(system).toContain('queries[1]');
+    expect(system).toContain('Keep every existing reference to queries[n]');
+  });
+
+  it('gives the guidance to a style-only refinement too, which is what keeps the references', async () => {
+    await resolve({
+      prompt: 'Restyle',
+      existingTemplate: '<div>{{ queries[1].rows.size }}</div>',
+      esqlQueries: ['FROM main', 'FROM a'],
+    });
+
+    expect(mockChatComplete.mock.calls[0][0].system).toContain('MULTIPLE QUERIES');
+    const content: string = mockChatComplete.mock.calls[0][0].messages[0].content;
+    expect(content).toContain('Current template');
+  });
+
+  // The prompt of a panel with one query must stay what it was: nothing about `queries` until the
+  // panel actually has more than one.
+  it('does not mention queries[n] in the system prompt of a single-query panel', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('hits'));
+
+    await resolve({ prompt: 'Show it', esqlQueries: ['FROM main'], isQueryChanging: true });
+    await resolve({ prompt: 'Restyle', existingTemplate: '<div/>', esqlQueries: ['FROM main'] });
+
+    for (const [{ system }] of mockChatComplete.mock.calls) {
+      expect(system).not.toContain('queries');
+    }
+  });
+
+  it('does not change what a single-query panel sends to the model', async () => {
+    mockEsqlQuery.mockResolvedValue(columnsFor('hits'));
+
+    await resolve({ prompt: 'Show it', esqlQueries: ['FROM main'], isQueryChanging: true });
+
+    const content: string = mockChatComplete.mock.calls[0][0].messages[0].content;
+    expect(content).not.toContain('further queries');
+    expect(content).toContain('Data schema:');
   });
 });

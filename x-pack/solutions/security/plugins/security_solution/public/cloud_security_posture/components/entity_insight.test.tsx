@@ -18,7 +18,7 @@ import type { EntityStoreRecord } from '../../flyout/entity_details/shared/hooks
 import {
   ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_ANALYTICS_ALERTS_FROM,
-  ENTITY_ANALYTICS_ALERTS_TO,
+  ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO,
 } from '../../entity_analytics/components/home/constants';
 
 jest.mock('@kbn/entity-store/public', () => ({
@@ -90,7 +90,7 @@ describe('EntityInsight', () => {
       expect(useNonClosedAlerts).toHaveBeenCalledWith(
         expect.objectContaining({
           from: ENTITY_ANALYTICS_ALERTS_FROM,
-          to: ENTITY_ANALYTICS_ALERTS_TO,
+          to: ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO,
         })
       );
     });

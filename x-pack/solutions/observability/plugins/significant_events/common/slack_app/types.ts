@@ -44,6 +44,10 @@ export interface SlackAppStatusResponse {
   error?: string;
   /** Present once the install has registered a workspace (`pending_confirmation` and `connected`). */
   workspace?: SlackAppWorkspace;
+  /** Username of the admin who started the install; present with `workspace` when the request had one. */
+  createdBy?: string;
+  /** ISO timestamp of when the install started; present with `workspace`. */
+  createdAt?: string;
 }
 
 export interface SlackAppConfirmResponse {
@@ -70,6 +74,8 @@ export interface SlackChannelBinding {
   channel?: string;
   /** Human-readable channel name from the Relay's persisted display snapshot. */
   displayName?: string;
+  /** Absent for legacy rows; a private channel has no `displayName`. */
+  visibility?: 'public' | 'private';
   /** Binding status for this entry; always `bound_to_self` for the connected-channel list. */
   status: SlackChannelBindingStatus;
 }

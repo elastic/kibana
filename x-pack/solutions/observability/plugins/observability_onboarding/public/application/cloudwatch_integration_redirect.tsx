@@ -17,7 +17,10 @@ import {
   AWS_ONBOARDING_TELEMETRY_STORAGE_KEY,
 } from '@kbn/fleet-plugin/common';
 import type { ObservabilityOnboardingAppServices } from '..';
-import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../common/feature_flags';
+import {
+  ADD_DATA_PAGE_V2_ENABLED_DEFAULT,
+  IS_ADD_DATA_PAGE_V2_ENABLED,
+} from '../../common/feature_flags';
 
 const AWS_CLOUDWATCH_OTEL_PACKAGE = 'aws_cloudwatch_input_otel';
 const RESOLVE_TIMEOUT_MS = 30_000;
@@ -30,7 +33,10 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
   const [hasError, setHasError] = useState(false);
   const [attempt, setAttempt] = useState(0);
 
-  const isAddDataPageV2Enabled = featureFlags.useBooleanValue(IS_ADD_DATA_PAGE_V2_ENABLED, false);
+  const isAddDataPageV2Enabled = featureFlags.useBooleanValue(
+    IS_ADD_DATA_PAGE_V2_ENABLED,
+    ADD_DATA_PAGE_V2_ENABLED_DEFAULT
+  );
   // The V2 page has no category tabs, so the Cloud tab param only applies to V1.
   const backLinkPath = isAddDataPageV2Enabled ? '' : '?category=cloud';
 

@@ -37,18 +37,27 @@ const WHEEL_PAGE_FRACTION = 0.9;
 /** Absorbs fractional-DPR rounding when comparing a scroll offset against its extreme. */
 const SCROLL_EDGE_EPSILON = 1;
 
-/**
- * Class the header zone applies to its `EuiFlyoutHeader`. `EuiFlyoutHeader` does not forward a
- * ref, so `headerRef` walks up to this class to reach the header element and its padding.
- * Clean this up when EUI implements https://github.com/elastic/eui/issues/10087
- */
-export const FLYOUT_HEADER_CLASS_NAME = 'kbnFlyoutTemplateHeader';
-
 /** Whether the element can still move in the delta's direction. */
 const canScrollBy = (element: HTMLElement, delta: number): boolean => {
   if (delta === 0) return false;
   if (delta < 0) return element.scrollTop > SCROLL_EDGE_EPSILON;
   return element.scrollTop < element.scrollHeight - element.clientHeight - SCROLL_EDGE_EPSILON;
+};
+
+/**
+ * Whether an expanded control in the region owns a panel rendered outside it. An open EUI popover
+ * trigger points at its portalled panel with `aria-controls`, whereas a disclosure such as an
+ * accordion controls content inside the region, which collapses along with it.
+ */
+const hasExpandedControlWithExternalPanel = (region: HTMLElement): boolean => {
+  const expanded = region.querySelectorAll('[aria-expanded="true"][aria-controls]');
+  return Array.from(expanded).some((control) => {
+    const panelIds = (control.getAttribute('aria-controls') ?? '').split(/\s+/);
+    return panelIds.some((id) => {
+      const panel = region.ownerDocument.getElementById(id);
+      return panel != null && !region.contains(panel);
+    });
+  });
 };
 
 const SCROLLABLE_OVERFLOW = new Set(['auto', 'scroll', 'overlay']);
@@ -108,8 +117,8 @@ export interface HeaderCollapseState {
    */
   expandedSpacerRef: (node: HTMLElement | null) => void;
   /**
-   * Attach to a wrapper element inside the flyout header. Registers a non-passive `wheel`
-   * listener on the header itself, forwarding the scroll to the body.
+   * Attach to the `EuiFlyoutHeader`. Registers a non-passive `wheel` listener on it, forwarding
+   * the scroll to the body.
    */
   headerRef: (node: HTMLElement | null) => void;
 }
@@ -166,6 +175,13 @@ export const useHeaderCollapse = ({
       // incorrectly think it can't collapse, and expand again. This would cause an endless loop
       // of collapsing and expanding. Therefore, expanding is based purely on the scroll position.
       next = scrollTop > EXPAND_AT;
+    } else if (
+      collapsibleNodeRef.current &&
+      hasExpandedControlWithExternalPanel(collapsibleNodeRef.current)
+    ) {
+      // An open popover's panel is portalled outside the region, so collapsing would leave it
+      // floating over a hidden trigger that focus can no longer return to.
+      next = false;
     } else {
       next = scrollHeight - clientHeight > collapseBudget + EXPAND_AT && scrollTop >= COLLAPSE_AT;
     }
@@ -268,11 +284,9 @@ export const useHeaderCollapse = ({
     [observeNaturalHeight]
   );
 
-  const headerRef = useCallback((node: HTMLElement | null) => {
+  const headerRef = useCallback((header: HTMLElement | null) => {
     headerCleanupRef.current?.();
     headerCleanupRef.current = null;
-    // Walk up to the flyout header element to cover its padding, which the inner wrapper does not.
-    const header = node?.closest<HTMLElement>(`.${FLYOUT_HEADER_CLASS_NAME}`);
     if (!header) return;
 
     const onWheel = (event: Event) => {

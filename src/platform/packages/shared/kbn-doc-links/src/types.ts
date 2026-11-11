@@ -52,6 +52,7 @@ export interface DocLinks {
     readonly transactionSampling: string;
     readonly indexLifecycleManagement: string;
     readonly metricsUi: string;
+    readonly troubleshootingTooManyServices: string;
     readonly troubleshootingTooManyTransactions: string;
   };
   readonly canvas: {
@@ -94,13 +95,6 @@ export interface DocLinks {
     readonly auditdModule: string;
     readonly systemModule: string;
   };
-  readonly searchHomepage: {
-    readonly visitSearchLabs: string;
-    readonly notebooksExamples: string;
-    readonly customerEngineerRequestForm: string;
-    readonly elasticCommunity: string;
-    readonly elasticCloud: string;
-  };
   readonly searchGettingStarted: {
     readonly visitSearchLabs: string;
     readonly notebooksExamples: string;
@@ -132,6 +126,7 @@ export interface DocLinks {
     readonly connectorsConfluence: string;
     readonly connectorsContentExtraction: string;
     readonly connectorsDropbox: string;
+    readonly connectorsExchangeServer: string;
     readonly connectorsGithub: string;
     readonly connectorsGitlab: string;
     readonly connectorsGoogleCloudStorage: string;
@@ -329,12 +324,16 @@ export interface DocLinks {
     readonly attacksPage: string;
     readonly dashboardsPage: string;
     readonly detectionResponsePage: string;
+    readonly dataQualityPage: string;
+    readonly indicatorsPage: string;
+    readonly alertSummaryPage: string;
     readonly notesPage: string;
     readonly timelinesPage: string;
     readonly runAttackDiscoveryInWorkflow: string;
     readonly attackDiscovery: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
+    readonly valueReport: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -351,21 +350,27 @@ export interface DocLinks {
       knowledgeBaseIndexEntries: string;
     };
     readonly cloudSecurityPosture: string;
+    readonly cloudNativeVulnerabilityManagement: string;
     readonly cspmGcpAgentless: string;
     readonly installElasticDefend: string;
     readonly artifactControl: string;
     readonly avcResults: string;
     readonly bidirectionalIntegrations: string;
     readonly thirdPartyLlmProviders: string;
+    readonly endpoints: string;
     readonly endpointExceptions: string;
     readonly trustedApps: string;
     readonly trustedDevices: string;
     readonly elasticAiFeatures: string;
     readonly eventFilters: string;
+    readonly kubernetesDashboard: string;
     readonly eventMerging: string;
     readonly blocklist: string;
+    readonly hostIsolationExceptions: string;
     readonly endpointArtifacts: string;
     readonly endpointArtifactsNoEscaping: string;
+    readonly policies: string;
+    readonly responseActionsHistory: string;
     readonly scriptLibrary: string;
     readonly policyResponseTroubleshooting: {
       full_disk_access: string;
@@ -407,6 +412,14 @@ export interface DocLinks {
     readonly signalsMigrationApi: string;
     readonly siemMigrations: string;
     readonly llmPerformanceMatrix: string;
+    readonly alertZero: {
+      readonly overview: string;
+      readonly setUp: string;
+      readonly proposedActions: string;
+      readonly escalations: string;
+      readonly watches: string;
+      readonly continuousThreatHunt: string;
+    };
   };
   readonly query: {
     readonly eql: string;
@@ -503,7 +516,13 @@ export interface DocLinks {
     guide: string;
     actionTypes: string;
     actionPolicies: string;
+    manageActionPolicies: string;
     compareAlertingSystems: string;
+    viewManageRules: string;
+    viewAndManageAlerts: string;
+    investigateAlertEpisodes: string;
+    reviewRuleExecutionHistory: string;
+    reviewActionPolicyExecutionHistory: string;
     apmRulesErrorCount: string;
     apmRulesTransactionDuration: string;
     apmRulesTransactionError: string;
@@ -694,6 +713,9 @@ export interface DocLinks {
   readonly endpoints: {
     readonly troubleshooting: string;
   };
+  readonly osquery: {
+    readonly guide: string;
+  };
   readonly legal: {
     readonly privacyStatement: string;
     readonly generalPrivacyStatement: string;
@@ -816,9 +838,11 @@ export interface DocLinks {
   };
   readonly subscriptions: string;
   readonly cases: {
+    readonly overview: string;
     readonly casesPermissions: string;
     readonly configureCaseSettings: string;
     readonly manageCaseTemplates: string;
+    readonly createCases: string;
   };
 }
 

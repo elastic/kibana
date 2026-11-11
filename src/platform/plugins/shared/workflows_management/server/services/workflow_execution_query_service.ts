@@ -13,7 +13,6 @@ import type {
   EsWorkflowStepExecution,
   ExecutionStatus,
   WorkflowExecutionDto,
-  WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
 } from '@kbn/workflows';
 import type { ChildWorkflowExecutionItem } from '@kbn/workflows/types/v1';
@@ -26,7 +25,11 @@ import type {
 
 import {
   createMarkStepAsRespondedUpdater,
+  createReleaseHitlStepClaimUpdater,
+  getStrippedHitlToken,
+  type HitlStepClaim,
   MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
+  type MarkStepAsRespondedCurrent,
 } from './mark_step_as_responded_updater';
 import type { WorkflowExecutionQueryDeps } from './types';
 import { WORKFLOWS_INDEX } from '../../common';
@@ -66,14 +69,6 @@ const PROCESSED_WAIT_FOR_INPUT_SHOULD: estypes.QueryDslQueryContainer[] = [
   { exists: { field: 'finishedAt' } },
   { exists: { field: 'hitl.respondedAt' } },
 ];
-
-/**
- * Extends EsWorkflowStepExecution with the legacy `endedAt` field
- * that may exist on older documents written before the rename to `finishedAt`.
- */
-interface StepExecutionWithLegacyFields extends EsWorkflowStepExecution {
-  endedAt?: string;
-}
 
 /**
  * Filters applied to processed wait-for-input step executions. Multi-value
@@ -231,6 +226,15 @@ export class WorkflowExecutionQueryService {
       must.push({ terms: { executedBy: params.executedBy } });
     }
 
+    const runName = params.runName?.trim();
+    if (runName) {
+      must.push({
+        wildcard: {
+          runName: { value: `*${runName.replace(/[\\*?]/g, '\\$&')}*`, case_insensitive: true },
+        },
+      });
+    }
+
     if (params.concurrencyGroupKey !== undefined) {
       must.push({ term: { concurrencyGroupKey: params.concurrencyGroupKey } });
     }
@@ -277,6 +281,21 @@ export class WorkflowExecutionQueryService {
       sort,
       searchAfter: params.searchAfter,
       collapse: params.collapse ? { field: params.collapse } : undefined,
+      // First page only. Later pages reuse this flag. List filters stay off this query.
+      namedExecutionQuery:
+        params.workflowId && !params.searchAfter?.length
+          ? {
+              bool: {
+                must: [
+                  { term: { workflowId: params.workflowId } },
+                  buildWorkflowExecutionsSpaceFilter(spaceId),
+                  ...(params.accessControlFilter ? [params.accessControlFilter] : []),
+                  { wildcard: { runName: { value: '?*' } } },
+                ],
+                must_not: [{ term: { deleted: true } }],
+              },
+            }
+          : undefined,
     });
   }
 
@@ -357,40 +376,6 @@ export class WorkflowExecutionQueryService {
       size,
       page,
       collapse: params.collapse ? { field: params.collapse } : undefined,
-    });
-  }
-
-  async getWorkflowExecutionHistory(
-    executionId: string,
-    spaceId: string
-  ): Promise<WorkflowExecutionHistoryModel[]> {
-    const response = (await this.deps.stepExecutionsDataClient.search({
-      query: {
-        bool: {
-          must: [{ term: { executionId } }, { term: { spaceId } }],
-        },
-      },
-      sort: [{ timestamp: { order: 'asc' } }],
-    })) as estypes.SearchResponse<StepExecutionWithLegacyFields>;
-
-    return response.hits.hits.map((hit) => {
-      if (!hit._source) {
-        throw new Error('Missing _source in search result');
-      }
-      const source = hit._source;
-      const startedAt = source.startedAt;
-      const finishedAt = source.endedAt || source.finishedAt;
-
-      let duration = 0;
-      if (startedAt && finishedAt) {
-        duration = new Date(finishedAt).getTime() - new Date(startedAt).getTime();
-      }
-
-      return {
-        ...source,
-        finishedAt: finishedAt || '',
-        duration,
-      };
     });
   }
 
@@ -929,34 +914,106 @@ export class WorkflowExecutionQueryService {
     spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
     const { executionId, id } = params;
-    const response = (await this.deps.stepExecutionsDataClient.search({
-      query: {
-        bool: {
-          must: [{ term: { workflowRunId: executionId } }, { term: { id } }, { term: { spaceId } }],
-        },
-      },
-      size: 1,
-      track_total_hits: false,
-    })) as estypes.SearchResponse<EsWorkflowStepExecution>;
+    // Step writes use refresh:false. Search misses the doc until the next refresh, so an
+    // external resume link used immediately after the wait starts is rejected. getByIds
+    // reads the translog.
+    let stepExecution: EsWorkflowStepExecution | undefined;
+    try {
+      const { items } = await this.deps.stepExecutionsDataClient.getByIds([id]);
+      stepExecution = items[0]?.document;
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return null;
+      }
+      throw error;
+    }
 
-    if (response.hits.hits.length === 0) {
+    if (
+      !stepExecution ||
+      stepExecution.workflowRunId !== executionId ||
+      stepExecution.spaceId !== spaceId
+    ) {
       return null;
     }
 
-    return response.hits.hits[0]._source ?? null;
+    return stepExecution;
   }
 
   /**
    * Claims a `waitForInput` step by writing HITL audit metadata before resume.
    *
-   * Returns `true` when this caller won the claim, or `false` when the doc is
-   * missing, belongs to another space, has already settled (terminal status
-   * or `finishedAt` set), or was already claimed. Unexpected ES failures are
-   * rethrown.
+   * Returns the claim when this caller won it, or `null` when the doc is
+   * missing, belongs to another space or to an execution other than
+   * `executionId`, is not a HITL wait step, has already settled (terminal
+   * status or `finishedAt` set), or was already claimed. Unexpected ES
+   * failures are rethrown.
    */
   async markStepAsResponded(
     stepExecutionId: string,
+    executionId: string,
     audit: { respondedBy: string; respondedAt: string; channel?: string },
+    spaceId: string
+  ): Promise<HitlStepClaim | null> {
+    const claimUpdater = createMarkStepAsRespondedUpdater(audit, spaceId, executionId);
+    // The bulk helper re-runs the updater after a version conflict and only the last patch can land.
+    let claimedSource: MarkStepAsRespondedCurrent | undefined;
+    try {
+      const { items } = await this.deps.stepExecutionsDataClient.bulk({
+        refresh: 'wait_for',
+        items: [
+          bulkUpdaterItem<
+            EsWorkflowStepExecution,
+            (typeof MARK_STEP_AS_RESPONDED_SOURCE_FIELDS)[number]
+          >({
+            operation: 'update',
+            documentId: stepExecutionId,
+            sourceFields: MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
+            retryOnConflict: 3,
+            updater: (current) => {
+              const patch = claimUpdater(current);
+              claimedSource = patch === 'noop' ? undefined : current;
+              return patch;
+            },
+          }),
+        ],
+      });
+
+      const writeResult = getBulkUpdaterWriteResult(items[0]);
+      if (writeResult === 'conflict') {
+        // Retries were exhausted without a write; this is not a lost claim, so surface it.
+        throw new Error(`Version conflict claiming step execution ${stepExecutionId}`);
+      }
+      if (writeResult !== 'updated') {
+        return null;
+      }
+
+      const { respondedBy, respondedAt, channel } = audit;
+      const strippedToken = claimedSource ? getStrippedHitlToken(claimedSource) : undefined;
+      return {
+        respondedBy,
+        respondedAt,
+        ...(channel != null ? { channel } : {}),
+        ...(strippedToken ? { strippedToken } : {}),
+      };
+    } catch (error) {
+      this.deps.logger.error(
+        `Failed to mark step execution ${stepExecutionId} as responded: ${error}`
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Releases a claim written by `markStepAsResponded` whose resume was not applied, restoring the
+   * external-resume token it stripped.
+   *
+   * Returns `true` when the claim was released, or `false` when the doc is
+   * missing, belongs to another space, has settled, or no longer holds this
+   * claim. Unexpected ES failures are rethrown.
+   */
+  async releaseHitlStepClaim(
+    stepExecutionId: string,
+    claim: HitlStepClaim,
     spaceId: string
   ): Promise<boolean> {
     try {
@@ -971,20 +1028,21 @@ export class WorkflowExecutionQueryService {
             documentId: stepExecutionId,
             sourceFields: MARK_STEP_AS_RESPONDED_SOURCE_FIELDS,
             retryOnConflict: 3,
-            updater: createMarkStepAsRespondedUpdater(audit, spaceId),
+            updater: createReleaseHitlStepClaimUpdater(claim, spaceId),
           }),
         ],
       });
 
       const writeResult = getBulkUpdaterWriteResult(items[0]);
       if (writeResult === 'conflict') {
-        // Retries were exhausted without a write; this is not a lost claim, so surface it.
-        throw new Error(`Version conflict claiming step execution ${stepExecutionId}`);
+        throw new Error(
+          `Version conflict releasing the claim on step execution ${stepExecutionId}`
+        );
       }
       return writeResult === 'updated';
     } catch (error) {
       this.deps.logger.error(
-        `Failed to mark step execution ${stepExecutionId} as responded: ${error}`
+        `Failed to release the claim on step execution ${stepExecutionId}: ${error}`
       );
       throw error;
     }

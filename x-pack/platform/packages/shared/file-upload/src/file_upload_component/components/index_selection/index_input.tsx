@@ -104,7 +104,7 @@ export const IndexInput: FC<Props> = ({
         <EuiTitle size="xxxs">
           <h6>
             <FormattedMessage
-              id="xpack.dataVisualizer.file.importView.indexNameLabel"
+              id="xpack.fileUpload.file.importView.indexNameLabel"
               defaultMessage="Index name"
             />
           </h6>

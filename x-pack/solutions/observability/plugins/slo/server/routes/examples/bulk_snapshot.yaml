@@ -1,0 +1,94 @@
+requestBody:
+  content:
+    application/json:
+      examples:
+        bulkSnapshotRequest:
+          summary: Compute snapshots for two SLO instances
+          value:
+            at: '2025-01-12T10:00:00.000Z'
+            requests:
+              - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                instanceId: '*'
+              - id: d077e940-1515-11ee-9c50-9d096392f520
+                instanceId: web-01
+responses:
+  '200':
+    content:
+      application/json:
+        examples:
+          bulkSnapshotResponse:
+            summary: Bulk snapshot response with mixed success and per-instance error
+            value:
+              at: '2025-01-12T10:00:00.000Z'
+              results:
+                - id: 8853df00-ae2e-11ed-90af-09bb6422b258
+                  instanceId: '*'
+                  summary:
+                    status: HEALTHY
+                    sliValue: 0.9976
+                    errorBudget:
+                      initial: 0.01
+                      consumed: 0.24
+                      remaining: 0.76
+                    good: 9976
+                    total: 10000
+                - id: d077e940-1515-11ee-9c50-9d096392f520
+                  instanceId: web-01
+                  error:
+                    statusCode: 404
+                    message: SLO [d077e940-1515-11ee-9c50-9d096392f520] not found
+  '400':
+    description: Bad request
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/400_response
+        examples:
+          badRequestBodyExample:
+            summary: Invalid request body
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: |-
+                [
+                  {
+                    "expected": "array",
+                    "code": "invalid_type",
+                    "path": [
+                      "requests"
+                    ],
+                    "message": "Invalid input: expected array, received string"
+                  }
+                ]
+          badRequestTooManyRequestsExample:
+            summary: More than 100 requests
+            value:
+              statusCode: 400
+              error: Bad Request
+              message: '`requests` is limited to 100 entries'
+  '401':
+    description: Unauthorized response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/401_response
+        examples:
+          unauthorizedExample:
+            summary: Unauthorized
+            value:
+              statusCode: 401
+              error: Unauthorized
+              message: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]"
+  '403':
+    description: Forbidden response
+    content:
+      application/json:
+        schema:
+          $ref: ../oas_error_schemas.yaml#/403_response
+        examples:
+          forbiddenExample:
+            summary: Forbidden
+            value:
+              statusCode: 403
+              error: Forbidden
+              message: 'API [POST /api/observability/slos/_bulk_snapshot] is unauthorized for user, this action is granted by the Kibana privileges [slo_read]'

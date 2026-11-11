@@ -13,7 +13,7 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../../../com
 import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { sendBulkEventsToTimelineAction } from '../actions';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { State } from '../../../../common/store/types';
 import { TimelineId } from '../../../../../common/types/timeline';
 

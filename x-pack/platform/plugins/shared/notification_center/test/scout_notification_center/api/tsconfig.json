@@ -4,6 +4,6 @@
     "outDir": "target/types"
   },
   "include": ["**/*"],
-  "kbn_references": ["@kbn/scout"],
+  "kbn_references": ["@kbn/scout", "@kbn/es", "@kbn/test-es-server"],
   "exclude": ["target/**/*"]
 }
