@@ -11,6 +11,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { DispatchFailureReason } from '@kbn/alerting-v2-schemas';
+import { groupingModeSchema, throttleStrategySchema } from '@kbn/alerting-v2-schemas';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
@@ -18,12 +19,13 @@ import {
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { EVENT_LOG_INDEX, TERMS_SIZE, bucketsToRecord } from './constants';
 import type {
-  DispatcherActionBucket,
+  DispatcherGroupingModeBucket,
   DispatcherEventStatsAggregations,
   DispatcherPolicyActivityBucket,
   DispatcherPolicyStatsAggregations,
   DispatcherStatsResults,
   PercentilesAggregation,
+  TermsBucket,
   ValueAggregation,
 } from './types';
 import type { DispatcherPolicyActivity, Distribution } from '../types';
@@ -118,6 +120,16 @@ async function searchEventStats(esClient: ElasticsearchClient) {
           },
         },
       },
+      // Only events written with `throttle_strategy` land in a bucket.
+      throttled: {
+        filter: { term: { 'event.action': THROTTLED } },
+        aggs: {
+          by_strategy: {
+            terms: { field: `${DISPATCHER_FIELDS}.throttle_strategy`, size: ACTIONS_TERMS_SIZE },
+            aggs: { action_groups: sum('action_group_count') },
+          },
+        },
+      },
     },
   });
 
@@ -143,6 +155,11 @@ async function searchEventStats(esClient: ElasticsearchClient) {
     dispatcher_notifying_spaces_count_24hr: dispatched?.spaces.value ?? 0,
     dispatcher_dispatch_failures_count_by_reason_24hr: bucketsToRecord<DispatchFailureReason>(
       aggs?.dispatch_failed.by_reason.buckets
+    ),
+    dispatcher_action_groups_throttled_count_by_strategy_24hr: sumsByKey(
+      aggs?.throttled.by_strategy.buckets ?? [],
+      literalValuesOf(throttleStrategySchema),
+      (bucket) => bucket.action_groups
     ),
   };
 }
@@ -221,6 +238,16 @@ async function searchPolicyStats(esClient: ElasticsearchClient) {
             ...distributionOf('alerts', 'events>alerts'),
             ...distributionOf('workflow_executions', 'events>workflow_executions'),
           }),
+          // Same groups-per-policy distribution, one bucket per grouping mode recorded on the event.
+          by_grouping_mode: {
+            terms: { field: `${DISPATCHER_FIELDS}.grouping_mode`, size: ACTIONS_TERMS_SIZE },
+            aggs: {
+              policy_refs: policyRefs({
+                by_policy: byPolicy({ action_groups: sum('action_group_count') }),
+                ...distributionOf('action_groups', 'events>action_groups'),
+              }),
+            },
+          },
         },
       },
       unmatched_events: {
@@ -271,8 +298,33 @@ async function searchPolicyStats(esClient: ElasticsearchClient) {
     ),
     dispatcher_uncovered_rules_count_24hr:
       aggs?.unmatched_events.rule_refs.rules.uncovered_rules.value ?? 0,
+    dispatcher_action_groups_dispatched_per_policy_by_grouping_mode_24hr: distributionsByKey(
+      aggs?.dispatched_events.by_grouping_mode.buckets ?? [],
+      literalValuesOf(groupingModeSchema)
+    ),
   };
 }
+
+/** Values accepted by a union-of-literals schema, read at call time because the schemas are lazy. */
+const literalValuesOf = <T extends string>(schema: {
+  options: ReadonlyArray<{ values: Set<T> }>;
+}): T[] => schema.options.flatMap((option) => [...option.values]);
+
+/** One distribution per bucket whose key is in `keys`; other values (e.g. from older events) are ignored. */
+const distributionsByKey = <K extends string>(
+  buckets: DispatcherGroupingModeBucket[],
+  keys: readonly K[]
+): Partial<Record<K, Distribution>> => {
+  const allowed = new Set<string>(keys);
+  return buckets.reduce<Partial<Record<K, Distribution>>>((acc, { key, policy_refs: refs }) => {
+    if (!allowed.has(key)) return acc;
+    acc[key as K] = toDistribution(
+      refs.policies.action_groups_percentiles,
+      refs.policies.action_groups_avg
+    );
+    return acc;
+  }, {});
+};
 
 /** Policies with at least one event of each kind; `broken` = failing with nothing dispatched. */
 const countByActivity = (
@@ -301,16 +353,24 @@ const toDistribution = (
 });
 
 /** Picks the summed value of the buckets whose key is one of `keys`; absent keys stay undefined. */
-const sumsByKey = <K extends string>(
-  buckets: DispatcherActionBucket[],
+const sumsByKey = <K extends string, B extends TermsBucket>(
+  buckets: B[],
   keys: readonly K[],
-  getSum: (bucket: DispatcherActionBucket) => ValueAggregation
+  getSum: (bucket: B) => ValueAggregation
 ): Partial<Record<K, number>> => {
   const allowed = new Set<string>(keys);
-  return buckets.reduce<Partial<Record<K, number>>>((acc, bucket) => {
-    if (allowed.has(bucket.key)) {
-      acc[bucket.key as K] = getSum(bucket).value ?? 0;
-    }
+  return sumsToRecord<K, B>(
+    buckets.filter((bucket) => allowed.has(bucket.key)),
+    getSum
+  );
+};
+
+/** Maps every bucket to its summed value, keyed by the bucket key. */
+const sumsToRecord = <K extends string, B extends TermsBucket = TermsBucket>(
+  buckets: B[],
+  getSum: (bucket: B) => ValueAggregation
+): Partial<Record<K, number>> =>
+  buckets.reduce<Partial<Record<K, number>>>((acc, bucket) => {
+    acc[bucket.key as K] = getSum(bucket).value ?? 0;
     return acc;
   }, {});
-};
