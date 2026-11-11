@@ -719,7 +719,12 @@ describe('EndpointActionsClient', () => {
             esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
             index: metadataCurrentIndexPattern,
             response: generator.toEsSearchResponse([
-              generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+              // `capabilities` overrides are merged into the generated ones (not replaced), so pin
+              // a version (< 9.7.0) whose generated capabilities include neither `file_export` nor
+              // `get_file_force`
+              generator.toEsSearchHit(
+                generator.generate({ agent: { version: '9.6.0' }, Endpoint: { capabilities: [] } })
+              ),
             ]),
           });
 
@@ -778,7 +783,10 @@ describe('EndpointActionsClient', () => {
               index: metadataCurrentIndexPattern,
               response: generator.toEsSearchResponse([
                 generator.toEsSearchHit(
-                  generator.generate({ Endpoint: { capabilities: ['get_file_force'] } })
+                  generator.generate({
+                    agent: { version: '9.6.0' },
+                    Endpoint: { capabilities: ['get_file_force'] },
+                  })
                 ),
               ]),
             });
@@ -800,7 +808,10 @@ describe('EndpointActionsClient', () => {
               index: metadataCurrentIndexPattern,
               response: generator.toEsSearchResponse([
                 generator.toEsSearchHit(
-                  generator.generate({ Endpoint: { capabilities: ['file_export'] } })
+                  generator.generate({
+                    agent: { version: '9.6.0' },
+                    Endpoint: { capabilities: ['file_export'] },
+                  })
                 ),
               ]),
             });
@@ -821,7 +832,12 @@ describe('EndpointActionsClient', () => {
               esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
               index: metadataCurrentIndexPattern,
               response: generator.toEsSearchResponse([
-                generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+                generator.toEsSearchHit(
+                  generator.generate({
+                    agent: { version: '9.6.0' },
+                    Endpoint: { capabilities: [] },
+                  })
+                ),
               ]),
             });
 
@@ -1203,7 +1219,10 @@ describe('EndpointActionsClient', () => {
             index: metadataCurrentIndexPattern,
             response: generator.toEsSearchResponse([
               generator.toEsSearchHit(
-                generator.generate({ Endpoint: { capabilities: ['memdump_process'] } })
+                generator.generate({
+                  agent: { version: '9.6.0' },
+                  Endpoint: { capabilities: ['memdump_process'] },
+                })
               ),
             ]),
           });

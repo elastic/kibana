@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { get, keyBy, uniq } from 'lodash';
+import { keyBy, uniq } from 'lodash';
 import { escapeQuotes } from '@kbn/es-query';
 import { set } from '@kbn/safer-lodash-set';
 import { doesActionHaveFileAccess } from '../../../routes/actions/utils';
@@ -229,11 +229,16 @@ export const getActionCompletionInfo = <
         agentResponse.endpointResponse.EndpointActions.data.output
       ) {
         const output = agentResponse.endpointResponse.EndpointActions.data.output;
+        const { content } = output;
         completedInfo.outputs[agentId] = output;
 
         // An output that was exported to external storage was never uploaded to Fleet, so it
-        // must never get a download link. (`content` comes from the Endpoint response document)
-        const wasExported = Boolean(get(output, 'content.exported'));
+        // must never get a download link. (`content` is a string for `text` outputs)
+        const wasExported =
+          typeof content === 'object' &&
+          content !== null &&
+          'exported' in content &&
+          Boolean(content.exported);
 
         if (
           doesActionHaveFileAccess(action.agentType, action.command) &&
