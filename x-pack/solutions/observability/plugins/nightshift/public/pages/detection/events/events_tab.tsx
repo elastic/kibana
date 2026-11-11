@@ -6,7 +6,14 @@
  */
 
 import { css } from '@emotion/react';
-import { EuiButton, EuiEmptyPrompt, EuiIllustration, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiIllustration,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { analyzeMagnifyGlass } from '@elastic/eui-illustrations';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -221,21 +228,31 @@ export const EventsTab = ({
             data-test-subj="nightshiftDetectionEventsEmpty"
             layout="vertical"
             color="transparent"
+            paddingSize="s"
+            titleSize="xs"
             icon={
               <EuiIllustration
                 type={analyzeMagnifyGlass}
                 alt=""
                 css={css`
-                  max-inline-size: ${euiTheme.base * 6}px;
+                  max-inline-size: ${euiTheme.base * 5}px;
                   margin-inline: auto;
                 `}
               />
             }
             title={<h2>{EMPTY_TITLE}</h2>}
-            body={<p>{EMPTY_BODY}</p>}
+            body={
+              <EuiText size="s">
+                <p>{EMPTY_BODY}</p>
+              </EuiText>
+            }
             actions={
               hasFilters ? (
-                <EuiButton onClick={clearFilters} data-test-subj="nightshiftDetectionEventsClear">
+                <EuiButton
+                  size="s"
+                  onClick={clearFilters}
+                  data-test-subj="nightshiftDetectionEventsClear"
+                >
                   {CLEAR_FILTERS_LABEL}
                 </EuiButton>
               ) : undefined
