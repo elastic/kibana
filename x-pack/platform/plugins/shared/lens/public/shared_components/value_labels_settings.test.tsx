@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { VisualOptionsProps } from './value_labels_settings';
 import { ValueLabelsSettings } from './value_labels_settings';
 
@@ -19,29 +20,26 @@ describe('Value labels Settings', () => {
   });
 
   it('should not render the component if not enabled', () => {
-    const component = shallow(<ValueLabelsSettings {...props} isVisible={false} />);
-    expect(component.find('[data-test-subj="lens-value-labels-visibility-btn"]').length).toEqual(0);
+    render(<ValueLabelsSettings {...props} isVisible={false} />);
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
   it('should set hide as default value', () => {
-    const component = shallow(<ValueLabelsSettings {...props} />);
-    expect(
-      component.find('[data-test-subj="lens-value-labels-visibility-btn"]').prop('idSelected')
-    ).toEqual(`value_labels_hide`);
+    render(<ValueLabelsSettings {...props} />);
+    expect(screen.getByRole('button', { name: 'Hide' })).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('should have called onValueLabelChange function on ButtonGroup change', () => {
-    const component = shallow(<ValueLabelsSettings {...props} />);
-    component
-      .find('[data-test-subj="lens-value-labels-visibility-btn"]')
-      .simulate('change', 'value_labels_inside');
-    expect(props.onValueLabelChange).toHaveBeenCalled();
+  it('should have called onValueLabelChange function on ButtonGroup change', async () => {
+    render(<ValueLabelsSettings {...props} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Show, if able' }));
+    expect(props.onValueLabelChange).toHaveBeenCalledWith('show');
   });
 
   it('should render the passed value if given', () => {
-    const component = shallow(<ValueLabelsSettings {...props} valueLabels="show" />);
-    expect(
-      component.find('[data-test-subj="lens-value-labels-visibility-btn"]').prop('idSelected')
-    ).toEqual(`value_labels_inside`);
+    render(<ValueLabelsSettings {...props} valueLabels="show" />);
+    expect(screen.getByRole('button', { name: 'Show, if able' })).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
   });
 });
