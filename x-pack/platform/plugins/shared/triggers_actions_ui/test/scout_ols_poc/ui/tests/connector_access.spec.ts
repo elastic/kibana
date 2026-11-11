@@ -135,6 +135,86 @@ test.describe.serial('Connector access', { tag: '@local-stateful-classic' }, () 
     await expect(page.testSubj.locator('accessPanelSave')).toBeDisabled();
   });
 
+  test('the panel lists people and service accounts, and removes a service account', async ({
+    page,
+    browserAuth,
+    kbnUrl,
+    apiClient,
+    samlAuth,
+  }) => {
+    // Phase 1 grants service accounts through the API only, so the test sets up both grants there.
+    const name = `${prefix}-service-accounts`;
+    const created = await apiClient.post('api/actions/connector', {
+      headers: ownerHeaders,
+      body: { name, connector_type_id: '.server-log', config: {}, secrets: {} },
+      responseType: 'json',
+    });
+    expect(created.statusCode).toBe(200);
+    const adminHeaders = {
+      ...API_HEADERS,
+      ...(await samlAuth.asInteractiveUser('admin')).cookieHeader,
+    };
+    const account = await apiClient.post('internal/security/service_account', {
+      headers: adminHeaders,
+      body: { name: `${prefix}-runner`, roles: [samlAuth.customRoleName] },
+      responseType: 'json',
+    });
+    expect(account.statusCode).toBe(200);
+    const serviceAccountId: string = account.body.id;
+
+    try {
+      const accessPath = `internal/security/ols/action/${created.body.id}`;
+      const state = await apiClient.get(accessPath, {
+        headers: ownerHeaders,
+        responseType: 'json',
+      });
+      const granted = await apiClient.put(accessPath, {
+        headers: ownerHeaders,
+        body: {
+          version: state.body.version,
+          general_access: 'none',
+          entries: [
+            { type: 'user', id: grantee.uid, access: 'use' },
+            { type: 'service_account', id: serviceAccountId, access: 'use' },
+          ],
+        },
+        responseType: 'json',
+      });
+      expect(granted.statusCode).toBe(200);
+
+      await browserAuth.loginAsPrivilegedUser();
+      await openConnector(page, kbnUrl, name);
+      await openAccessTab(page);
+
+      await expect(page.testSubj.locator('accessPanelServiceAccountInput')).toHaveCount(0);
+      await expect(page.testSubj.locator(`accessPanelEntry-${grantee.uid}`)).toContainText(
+        grantee.displayName
+      );
+      const serviceAccountEntry = page.testSubj.locator(`accessPanelEntry-${serviceAccountId}`);
+      await expect(serviceAccountEntry).toContainText('Service account');
+      await expect(serviceAccountEntry).toContainText('Can run');
+
+      await serviceAccountEntry.getByRole('button', { name: 'Remove access' }).click();
+      await expect(serviceAccountEntry).toHaveCount(0);
+      await page.testSubj.click('accessPanelSave');
+      await expect(page.getByText('Access saved.')).toBeVisible();
+
+      const saved = await apiClient.get(accessPath, {
+        headers: ownerHeaders,
+        responseType: 'json',
+      });
+      // Stored ACL values are lists, the way Elasticsearch indexes them.
+      expect((saved.body.acl.entries as Array<{ id: string[] }>).map(({ id }) => id)).toStrictEqual(
+        [[grantee.uid]]
+      );
+    } finally {
+      await apiClient.delete(
+        `internal/security/service_account/${encodeURIComponent(serviceAccountId)}`,
+        { headers: adminHeaders }
+      );
+    }
+  });
+
   test('the grantee can run the connector, but not edit it or its access', async ({
     page,
     browserAuth,
