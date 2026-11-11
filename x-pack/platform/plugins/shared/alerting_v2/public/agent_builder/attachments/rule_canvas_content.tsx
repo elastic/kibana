@@ -29,7 +29,7 @@ import {
 import { RuleSummaryQueryPreviewSection } from '../../components/rule/rule_summary/rule_summary_query_preview_section';
 import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import { RulesApi } from '../../services/rules_api';
-import { recordAttachmentSync, useRecordedAttachmentSync } from './attachment_save_state';
+import { syncAttachmentOrigin, useRecordedAttachmentSync } from './attachment_save_state';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export interface RuleCanvasContentProps
@@ -79,7 +79,7 @@ export const RuleCanvasContent = ({
             const savedRule = data.id
               ? await rulesApi.upsertRule(data.id, buildRulePayload(data))
               : await rulesApi.createRule(buildRulePayload(data));
-            recordAttachmentSync(attachment.id, await updateOrigin(savedRule.id));
+            await syncAttachmentOrigin(attachment.id, () => updateOrigin(savedRule.id));
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
                 defaultMessage: 'Rule "{name}" created',
@@ -104,7 +104,7 @@ export const RuleCanvasContent = ({
         handler: async () => {
           await rulesApi.upsertRule(ruleId, buildRulePayload(data));
           // The origin is unchanged; this refreshes origin_snapshot_at so the save counts as synced.
-          recordAttachmentSync(attachment.id, await updateOrigin(ruleId));
+          await syncAttachmentOrigin(attachment.id, () => updateOrigin(ruleId));
           notifications.toasts.addSuccess(
             i18n.translate('xpack.alertingV2.ruleAttachment.updatedSuccess', {
               defaultMessage: 'Rule "{name}" updated',

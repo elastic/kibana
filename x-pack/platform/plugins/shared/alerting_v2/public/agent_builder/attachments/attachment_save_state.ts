@@ -46,6 +46,21 @@ export const recordAttachmentSync = (
   listeners.forEach((listener) => listener());
 };
 
+/**
+ * Refreshes the attachment's origin sync after the object was saved. A failure here only affects the
+ * unsaved-changes badge, so it is swallowed instead of reporting the (successful) save as failed.
+ */
+export const syncAttachmentOrigin = async (
+  attachmentId: string,
+  updateOrigin: () => Promise<UpdateOriginResponse | undefined>
+): Promise<void> => {
+  try {
+    recordAttachmentSync(attachmentId, await updateOrigin());
+  } catch (e) {
+    // The save itself succeeded; the badge catches up on the next successful sync.
+  }
+};
+
 /** The sync date recorded for an attachment in this page session, if any. */
 export const useRecordedAttachmentSync = (attachmentId: string): string | undefined =>
   useSyncExternalStore(subscribe, () => recordedSyncedAt.get(attachmentId));

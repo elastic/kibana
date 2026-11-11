@@ -255,6 +255,16 @@ describe('RuleCanvasContent', () => {
       expect(mockAddSuccess).toHaveBeenCalled();
     });
 
+    it('still reports success when refreshing the origin fails after the rule was saved', async () => {
+      const updateOrigin = jest.fn().mockRejectedValue(new Error('Conversation update failed'));
+      const { registerActionButtons } = renderCanvas({ origin: 'rule-123' }, { updateOrigin });
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      await buttons.find((b) => b.label === 'Update Rule')!.handler();
+
+      expect(mockAddSuccess).toHaveBeenCalled();
+    });
+
     it('View in Rules handler navigates with the observability host', () => {
       const { registerActionButtons } = renderCanvas({ origin: 'rule-123' });
 

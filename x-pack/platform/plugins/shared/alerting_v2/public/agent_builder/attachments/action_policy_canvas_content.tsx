@@ -23,7 +23,7 @@ import { ActionPolicyDefinitionList } from '../../components/action_policy/detai
 import { ActionPoliciesApi } from '../../services/action_policies_api';
 import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
-import { recordAttachmentSync, useRecordedAttachmentSync } from './attachment_save_state';
+import { syncAttachmentOrigin, useRecordedAttachmentSync } from './attachment_save_state';
 
 const EMPTY_VALUE = '-';
 
@@ -116,7 +116,7 @@ export const ActionPolicyCanvasContent = ({
                 data.id,
                 attachmentDataToActionPolicyPayload(data)
               );
-              recordAttachmentSync(attachment.id, await updateOrigin(data.id));
+              await syncAttachmentOrigin(attachment.id, () => updateOrigin(data.id));
               notifications.toasts.addSuccess(
                 i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
                   defaultMessage: 'Policy "{name}" created',
@@ -157,7 +157,7 @@ export const ActionPolicyCanvasContent = ({
               attachmentDataToActionPolicyPayload(data)
             );
             // The origin is unchanged; this refreshes origin_snapshot_at so the save counts as synced.
-            recordAttachmentSync(attachment.id, await updateOrigin(data.id));
+            await syncAttachmentOrigin(attachment.id, () => updateOrigin(data.id));
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
                 defaultMessage: 'Policy "{name}" updated',
