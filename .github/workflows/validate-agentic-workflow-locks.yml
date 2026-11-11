@@ -52,7 +52,7 @@ jobs:
           fi
 
       - name: Install gh-aw CLI
-        uses: github/gh-aw/actions/setup-cli@8e30bcd8897f5047051fa3971188e1dd4cdb23cf # v0.88.2
+        uses: github/gh-aw/actions/setup-cli@34f03fba65c7bf34c1c03654b3c03900b7597a39 # v1.1.0
         with:
           version: ${{ env.GH_AW_VERSION }}
 
