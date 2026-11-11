@@ -36,7 +36,11 @@ import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
 } from '../data/service_accounts/use_investigator_service_account';
-import { DETECTION_TAB_IDS, isDetectionTabId } from '../pages/detection/detection_tabs';
+import {
+  DETECTION_TAB_IDS,
+  isDetectionTabId,
+  isDeveloperModeTab,
+} from '../pages/detection/detection_tabs';
 import { KNOWLEDGE_TAB_IDS } from '../pages/knowledge/knowledge_tabs';
 
 /** Onboarding has a second column for the "Get started" card. */
@@ -146,7 +150,7 @@ export const DetectionRoute = ({
   const { search } = useLocation();
   const { isDeveloperMode } = useDeveloperMode();
 
-  if (!tab || !isDetectionTabId(tab) || (tab === 'signals' && !isDeveloperMode)) {
+  if (!tab || !isDetectionTabId(tab) || (isDeveloperModeTab(tab) && !isDeveloperMode)) {
     return <Redirect to={{ pathname: '/detections/events', search }} />;
   }
 
