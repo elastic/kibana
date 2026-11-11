@@ -85,6 +85,7 @@ export const DataGrid = <TRow extends object>({
     getRowId,
   });
 
+  const headerGroups = table.getHeaderGroups();
   const tableRows = table.getRowModel().rows;
   const getVirtualItemKey = useCallback(
     (index: number): string => {
@@ -117,13 +118,19 @@ export const DataGrid = <TRow extends object>({
       tabIndex={0}
       aria-label={ariaLabel}
       aria-colcount={columns.length}
-      aria-rowcount={rows.length}
+      aria-rowcount={rows.length + headerGroups.length}
       className={className}
       css={styles.grid}
       style={{ blockSize: height }}
     >
-      {table.getHeaderGroups().map((headerGroup) => (
-        <div key={headerGroup.id} role="row" css={styles.headerRow} style={{ gridTemplateColumns }}>
+      {headerGroups.map((headerGroup, headerGroupIndex) => (
+        <div
+          key={headerGroup.id}
+          role="row"
+          aria-rowindex={headerGroupIndex + 1}
+          css={styles.headerRow}
+          style={{ gridTemplateColumns }}
+        >
           {headerGroup.headers.map((header) => {
             const column = columns.find(({ id }) => id === header.column.id);
             return (
@@ -160,6 +167,7 @@ export const DataGrid = <TRow extends object>({
               key={row.id}
               ref={rowVirtualizer.measureElement}
               role="row"
+              aria-rowindex={headerGroups.length + virtualRow.index + 1}
               data-index={virtualRow.index}
               data-striped={virtualRow.index % 2 === 1}
               css={styles.row}

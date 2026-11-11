@@ -133,6 +133,26 @@ describe('DataGrid', () => {
     expect(measureElement).toHaveBeenCalledTimes(3);
   });
 
+  it('exposes the total row count and absolute indexes for virtualized rows', () => {
+    render(
+      <DataGrid
+        ariaLabel="Example data"
+        columns={columns}
+        rows={rows}
+        getRowId={(row) => row.id}
+        height={160}
+      />
+    );
+
+    expect(screen.getByRole('grid').getAttribute('aria-rowcount')).toBe('101');
+    expect(screen.getAllByRole('row').map((row) => row.getAttribute('aria-rowindex'))).toEqual([
+      '1',
+      '2',
+      '3',
+      '4',
+    ]);
+  });
+
   it('configures virtualization from the final table model using stable row IDs', () => {
     render(
       <DataGrid
