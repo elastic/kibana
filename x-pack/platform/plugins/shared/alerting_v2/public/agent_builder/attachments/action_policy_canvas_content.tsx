@@ -175,7 +175,7 @@ export const ActionPolicyCanvasContent = ({
           defaultMessage: 'View in Policies',
         }),
         icon: 'external',
-        type: ActionButtonType.OVERFLOW,
+        type: ActionButtonType.SECONDARY,
         handler: () => {
           getAlertingV2Locators(share).actionPolicyLocators.navigateSync({
             page: 'edit',

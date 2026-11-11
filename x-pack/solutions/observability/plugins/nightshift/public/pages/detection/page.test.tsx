@@ -73,6 +73,9 @@ jest.mock('./rules/rules_tab', () => ({
 jest.mock('./signals/signals_tab', () => ({
   SignalsTab: () => <div data-test-subj="signalsTabStub" />,
 }));
+jest.mock('./topology/tab', () => ({
+  TopologyTab: () => <div data-test-subj="topologyTabStub" />,
+}));
 jest.mock('./run_limits_banner', () => ({ RunLimitsBanner: () => null }));
 let mockRecommendedSourcesTableMountCount = 0;
 jest.mock('../../components/entities/source/recommended_sources/recommended_sources_table', () => ({
@@ -440,15 +443,16 @@ describe('DetectionPage', () => {
       'true'
     );
     expect(screen.queryByTestId('nightshiftDetectionTab-signals')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionTab-topology')).not.toBeInTheDocument();
   });
 
-  it('shows the Signals tab in developer mode', async () => {
+  it.each(['signals', 'topology'] as const)('shows the %s tab in developer mode', async (id) => {
     mockUseDeveloperMode.mockReturnValue({ isDeveloperMode: true });
 
-    renderPage('/detections/signals', 'signals');
+    renderPage(`/detections/${id}`, id);
 
-    expect(await screen.findByTestId('signalsTabStub')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftDetectionTab-signals')).toHaveAttribute(
+    expect(await screen.findByTestId(`${id}TabStub`)).toBeInTheDocument();
+    expect(screen.getByTestId(`nightshiftDetectionTab-${id}`)).toHaveAttribute(
       'aria-selected',
       'true'
     );

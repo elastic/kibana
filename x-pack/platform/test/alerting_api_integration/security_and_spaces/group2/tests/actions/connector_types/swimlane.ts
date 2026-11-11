@@ -7,7 +7,7 @@
 
 import type httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 import type http from 'http';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 
@@ -108,7 +108,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
 
     before(async () => {
       swimlaneServer = await getSwimlaneServer();
-      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
+      const availablePort = await getPort({ port: portNumbers(9000, 9100) });
       if (!swimlaneServer.listening) {
         swimlaneServer.listen(availablePort);
       }

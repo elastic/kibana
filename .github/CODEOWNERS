@@ -29,6 +29,7 @@ examples/hello_world @elastic/kibana-core
 examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
 examples/partial_results_example @elastic/kibana-discover
+examples/plugin_initialize_example @elastic/kibana-core
 examples/portable_dashboards_example @elastic/kibana-dashboards
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
 examples/pubsub_example @elastic/kibana-core
@@ -2447,6 +2448,7 @@ x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kiban
 /typings/ @elastic/kibana-core
 /src/platform/test/analytics @elastic/kibana-core
 /src/platform/packages/shared/kbn-jest/src/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
+/packages/kbn-eslint-plugin-imports/src/helpers/core_private_importers.ts @elastic/kibana-core
 /src/platform/packages/shared/kbn-jest/src/setup/mocks.vega.js @elastic/kibana-dashboards
 /x-pack/platform/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/platform/test/serverless/**/test_suites/saved_objects_management/ @elastic/kibana-core
@@ -4024,6 +4026,9 @@ pnpm-workspace.yaml @elastic/kibana-operations
 .pnpmfile.cjs @elastic/kibana-operations
 
 /knip.jsonc @elastic/kibana-security
+
+# Lint overrides
+/.oxlint/eui.mts @elastic/eui-team
 
 # Auto-generated Scout test metadata has no owner so the automated update PRs are auto-approved.
 /**/scout/.meta/**

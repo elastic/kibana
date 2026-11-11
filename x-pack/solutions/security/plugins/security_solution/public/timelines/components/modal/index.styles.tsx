@@ -17,11 +17,9 @@ import {
 } from '@elastic/eui';
 
 /**
- * @param zIndexOverride When the new flyout system is enabled, this is dynamically computed by
- * `useUnmanagedFlyoutZIndex` so that Timeline stays correctly stacked relative to the new
- * EUI-managed flyouts. Falls back to the static `maskBelowHeader` theme value otherwise (ie the
- * legacy expandable flyout system, where `TimelineFlyout`/`SecuritySolutionFlyout` handle their own
- * fixed offsets relative to that same static value).
+ * @param zIndexOverride Dynamically computed by `useUnmanagedFlyoutZIndex` so that Timeline stays
+ * correctly stacked relative to the EUI-managed flyouts. Falls back to the static `maskBelowHeader`
+ * theme value when undefined (ie while Timeline isn't visible).
  */
 export const usePaneStyles = (zIndexOverride?: number) => {
   const EuiTheme = useEuiTheme();

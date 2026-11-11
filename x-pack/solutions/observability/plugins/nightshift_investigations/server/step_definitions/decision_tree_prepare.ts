@@ -256,6 +256,7 @@ export const decisionTreePrepareStepDefinition = ({
             turnKind:
               earlierRounds.length === 0 ? 'initial_investigation' : 'feedback_reinforcement',
             investigationId: conversationId,
+            roundId,
             earlierAccessedTreeIds: extractAccessedTreeIdsFromRounds(earlierRounds),
             connectorNames: [],
             esClient: context.contextManager.getScopedEsClient(),

@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
-import type { StyledRenderContext } from '@elastic/isomer-sdk';
 import { nodeAnchor, sanitizeNavigationHref } from '@elastic/isomer-sdk';
-import { oneLine } from '../../lib';
+import { oneLine, type ComponentsRenderContext } from '../../lib';
+import { reactAppHref } from '../link/resolve_link';
 import type { ActionsNode } from './actions';
 
 const { handles } = isomerDistillery.createStyleModule(
@@ -40,13 +40,25 @@ const { handles } = isomerDistillery.createStyleModule(
   })
 );
 
+const reactButtonHref = (
+  { url, app, path }: ActionsNode['buttons'][number],
+  context: ComponentsRenderContext
+) => {
+  if (url !== undefined) {
+    return sanitizeNavigationHref(url);
+  }
+  return app === undefined ? null : reactAppHref({ app, path }, context);
+};
+
 export const actionsReactRenderer = (
   node: ActionsNode,
-  { context }: { context: StyledRenderContext }
+  { context }: { context: ComponentsRenderContext }
 ) => (
   <p {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>
-    {node.buttons.map(({ label, url, primary }, index) => {
-      const href = sanitizeNavigationHref(url);
+    {node.buttons.map((button, index) => {
+      const { label, primary } = button;
+      // A button the host can't resolve is shown as text, like a URL it can't open.
+      const href = reactButtonHref(button, context);
       const className = classNames(context, handles.button, primary ? handles.primary : undefined);
       return href ? (
         <a key={index} href={href} className={className}>
