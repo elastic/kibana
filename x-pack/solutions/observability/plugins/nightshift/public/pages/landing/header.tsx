@@ -119,9 +119,7 @@ export function NightshiftHeader({
     });
   // Hide the status dot when counts failed — zeros are not a trustworthy "all clear".
   const markSeverity: HeroMarkSeverity | undefined =
-    !hasSeverityCountsError && severityCounts
-      ? getHeroMarkSeverity(severityCounts)
-      : undefined;
+    !hasSeverityCountsError && severityCounts ? getHeroMarkSeverity(severityCounts) : undefined;
 
   return (
     <EuiFlexItem
