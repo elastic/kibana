@@ -310,6 +310,35 @@ describe('getApplyDreamChangesStepDefinition', () => {
     );
   });
 
+  it('fails when the memories do not all have the same permissions, before writing anything', async () => {
+    const esClient = createEsClient({});
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        memories: [
+          { id: 'mem-1', updated_at: '2026-11-01T09:00:00.000Z', title: 'A' },
+          {
+            id: 'mem-2',
+            updated_at: '2026-11-02T18:40:12.000Z',
+            title: 'B',
+            permissions: {
+              kibana: {
+                privileges: [{ space: 'default', name: ['ai_index:support/read'], count: 1 }],
+              },
+            },
+          },
+        ],
+        changes,
+      },
+      esClient,
+    });
+
+    await expect(definition(aiIndexService()).handler(context)).rejects.toThrow(
+      "The memories don't all have the same permissions"
+    );
+    expect(esClient.index).not.toHaveBeenCalled();
+  });
+
   it('fails when the AI index has no dreaming config, or does not exist', async () => {
     const context = createMockStepContext({
       input: { ai_index_id: 'support', memories: [], changes: {} },

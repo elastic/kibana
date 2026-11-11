@@ -141,7 +141,7 @@ export const applyDreamChangesInputSchema = lazySchema(() =>
       )
       .max(MAX_DREAMING_STEP_MEMORIES)
       .describe(
-        'The memories the model was shown, as read from the AI index: the latest revision of each. Every item it writes must cite some of them, or memories the item already cites, and is visible only where they all are. Deleted ones are ignored.'
+        'The memories the model was shown, as read from the AI index: the latest revision of each. They must all have the same permissions. Every item it writes must cite some of them, or memories the item already cites, and is visible only where they all are. Deleted ones are ignored.'
       ),
     changes: dreamChangeSetSchema.describe('The change set the dreaming model returned'),
     dry_run: z

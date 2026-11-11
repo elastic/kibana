@@ -24,6 +24,7 @@ import type { KiStepDependencies } from './helpers';
 import {
   assertContextEngineEnabled,
   assertKiWritePrivilege,
+  assertSameMemoryPermissions,
   assertWritableDest,
   kiWriterFromContext,
 } from './helpers';
@@ -57,6 +58,7 @@ export const getApplyDreamChangesStepDefinition = ({
         });
       }
       const changeSet = parsed.data;
+      assertSameMemoryPermissions(memories);
 
       let aiIndex: AiIndexHttpItem;
       try {
