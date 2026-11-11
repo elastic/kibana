@@ -113,7 +113,7 @@ export const getReroutePermissionsError = (permissions: string[]): string | unde
   if (invalid !== undefined) {
     return i18n.translate('xpack.ingestHub.integrationSettings.reroutePermissions.invalidError', {
       defaultMessage:
-        '{entry} is not a valid permission. It must start with logs-, metrics-, traces-, synthetics- or profiles-.',
+        '{entry} is not a valid permission. It must start with logs-, metrics-, traces-, synthetics-, or profiles-.',
       values: { entry: invalid },
     });
   }
