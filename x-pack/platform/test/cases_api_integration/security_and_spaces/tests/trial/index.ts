@@ -51,6 +51,8 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/observables_at_scale'));
     // metadata shared by every case of a space and owner that holds an observable value
     loadTestFile(require.resolve('./internal/observables_shared_data'));
+    // the cases holding an observable, for the observable drill-down
+    loadTestFile(require.resolve('./internal/find_cases_by_observable'));
     // end-to-end observable extraction via the attachment bulkCreate side effect
     loadTestFile(require.resolve('./internal/extract_observables'));
 
