@@ -21,7 +21,7 @@ import type { ResponseFixture } from '../engine/response_engine';
 import { createExchangeTransport } from '../mcp/exchange_transport';
 import { readMessages, transportErrorResponse } from '../mcp/mcp_protocol';
 import { isRecord } from '../openapi/schema_walk';
-import { checkFixtures } from './check_fixtures';
+import { checkFixtures, MAX_FIXTURES, MAX_RESPONSES } from './check_fixtures';
 import type { ControlledEmulator } from './controlled_emulator';
 
 /** A request the MCP control server received, e.g. to log it. */
@@ -113,7 +113,7 @@ const fixtureSchema = {
       description:
         'Instead of response: responses served in turn to the requests the fixture answers, the last one repeating, e.g. a pending status and then a finished one for a handler that polls. reset starts the sequence again',
       minItems: 1,
-      maxItems: 100,
+      maxItems: MAX_RESPONSES,
       items: responseSchema,
     },
   },
@@ -151,7 +151,7 @@ const TOOLS: Tool[] = [
     inputSchema: {
       type: 'object',
       required: ['fixtures'],
-      properties: { fixtures: { type: 'array', maxItems: 100, items: fixtureSchema } },
+      properties: { fixtures: { type: 'array', maxItems: MAX_FIXTURES, items: fixtureSchema } },
     },
   },
   {

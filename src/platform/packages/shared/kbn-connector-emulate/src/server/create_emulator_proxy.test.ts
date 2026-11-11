@@ -23,7 +23,11 @@ import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import { createCertificateAuthority } from './certificate_authority';
 import type { EmulatorProxy } from './create_emulator_proxy';
 import { createEmulatorProxy } from './create_emulator_proxy';
-import { createEmulatorControl, createEmulatorControlHandler } from './emulator_control';
+import {
+  createEmulatorControl,
+  createEmulatorControlHandler,
+  MAX_CONTROL_BODY_BYTES,
+} from './emulator_control';
 
 const spec: OpenApiDocument = {
   openapi: '3.0.3',
@@ -352,6 +356,17 @@ describe('createEmulatorProxy', () => {
 
       await control.clearFixtures({ id: 'getItem' });
       expect(await control.getFixtures()).toEqual([]);
+    });
+
+    it('answers 413 to a control request whose body is over the limit, without handling it', async () => {
+      const response = await send(new URL('/_mock/fixtures', proxyUrl).href, {
+        method: 'PUT',
+        body: ' '.repeat(MAX_CONTROL_BODY_BYTES + 1),
+        agent: undefined,
+      });
+
+      expect(response.status).toBe(413);
+      expect(JSON.parse(response.body).title).toBe('Body too large');
     });
 
     it('keeps answering 400 to other requests sent to the proxy itself', async () => {

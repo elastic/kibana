@@ -19,8 +19,8 @@ import { createEmulatorMcpHandler } from './emulator_mcp';
 /** The path the control endpoints are served under, on the proxy's own origin. */
 export const CONTROL_PATH = '/_mock';
 
-// The most `PUT /_mock/fixtures` reads.
-const MAX_FIXTURES_BODY = 10 * 1024 * 1024;
+/** The most bytes a control request's body may have, e.g. a `PUT /_mock/fixtures`. */
+export const MAX_CONTROL_BODY_BYTES = 10 * 1024 * 1024;
 
 export interface EmulatorCalls {
   /** The calls from index `since` on, in the order they arrived. */
@@ -79,12 +79,31 @@ const problem = (status: number, title: string, detail: string, headers?: Header
 export const isControlPath = (path: string): boolean =>
   path === CONTROL_PATH || /^\/_mock[/?]/.test(path);
 
+// Reads the body up to `MAX_CONTROL_BODY_BYTES`, stopping as soon as it is over.
+const readBoundedText = async (request: Request): Promise<string | undefined> => {
+  if (request.body === null) {
+    return '';
+  }
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  const reader = request.body.getReader();
+  for (let read = await reader.read(); !read.done; read = await reader.read()) {
+    size += read.value.byteLength;
+    if (size > MAX_CONTROL_BODY_BYTES) {
+      await reader.cancel();
+      return undefined;
+    }
+    chunks.push(read.value);
+  }
+  return Buffer.concat(chunks).toString('utf8');
+};
+
 const readFixtures = async (
   request: Request
-): Promise<{ fixtures: ResponseFixture[] } | { error: string }> => {
-  const text = await request.text();
-  if (text.length > MAX_FIXTURES_BODY) {
-    return { error: `The body is over ${MAX_FIXTURES_BODY} characters` };
+): Promise<{ fixtures: ResponseFixture[] } | { error: string; status?: number }> => {
+  const text = await readBoundedText(request);
+  if (text === undefined) {
+    return { error: `The body is over ${MAX_CONTROL_BODY_BYTES} bytes`, status: 413 };
   }
   try {
     return checkFixtures(JSON.parse(text));
@@ -146,7 +165,7 @@ export const createEmulatorControlHandler = (
       PUT: async (request, _url, connector) => {
         const read = await readFixtures(request);
         if ('error' in read) {
-          return problem(400, 'Invalid fixtures', read.error);
+          return problem(read.status ?? 400, 'Invalid fixtures', read.error);
         }
         const rejected = runtimeFixtures.set(read.fixtures, { connector });
         if (rejected.length > 0) {

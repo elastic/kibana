@@ -10,7 +10,11 @@
 import type { OpenApiDocument } from '../openapi';
 import { combineEmulators } from '../fetch/combine_emulators';
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
-import { createEmulatorControlHandler, isControlPath } from './emulator_control';
+import {
+  createEmulatorControlHandler,
+  isControlPath,
+  MAX_CONTROL_BODY_BYTES,
+} from './emulator_control';
 
 const spec: OpenApiDocument = {
   openapi: '3.0.3',
@@ -193,6 +197,18 @@ describe('createEmulatorControlHandler', () => {
 
     expect(response.status).toBe(400);
     expect((await response.json()).detail).toContain(detail);
+  });
+
+  it('answers 413, and sets none, to a fixtures body over the limit', async () => {
+    const response = await handle(
+      new Request(new URL('/_mock/fixtures', 'http://emulator.invalid'), {
+        method: 'PUT',
+        body: ' '.repeat(MAX_CONTROL_BODY_BYTES + 1),
+      })
+    );
+
+    expect(response.status).toBe(413);
+    expect(emulator.runtimeFixtures.list()).toEqual([]);
   });
 
   it('describes an operation on GET /_mock/operations/<id>', async () => {

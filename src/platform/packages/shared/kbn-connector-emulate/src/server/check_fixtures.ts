@@ -10,14 +10,14 @@
 import type { ResponseFixture } from '../engine/response_engine';
 import { isRecord } from '../openapi/schema_walk';
 
-// The most fixtures set at once.
-const MAX_FIXTURES = 1000;
+/** The most fixtures set at once, through the control endpoints or the MCP server. */
+export const MAX_FIXTURES = 1000;
 
 const isStringRecord = (value: unknown): boolean =>
   isRecord(value) && Object.values(value).every((entry) => typeof entry === 'string');
 
-// The most responses in one fixture's sequence.
-const MAX_RESPONSES = 100;
+/** The most responses in one fixture's sequence. */
+export const MAX_RESPONSES = 100;
 
 const responseShapeError = (response: unknown, at: string): string | undefined => {
   if (!isRecord(response) || !Number.isInteger(response.status)) {

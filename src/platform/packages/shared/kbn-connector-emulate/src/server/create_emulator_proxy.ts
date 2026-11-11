@@ -15,7 +15,7 @@ import type { SecureContext } from 'tls';
 import { createSecureContext, TLSSocket } from 'tls';
 import type { CertificateAuthority } from './certificate_authority';
 import type { EmulatorControlHandler } from './emulator_control';
-import { isControlPath } from './emulator_control';
+import { isControlPath, MAX_CONTROL_BODY_BYTES } from './emulator_control';
 
 export interface EmulatorProxyOptions {
   /** Answers every request the proxy receives, typically a contract mock's `fetch`. */
@@ -56,6 +56,23 @@ const readBody = async (request: IncomingMessage): Promise<Buffer> => {
     chunks.push(chunk);
   }
   return Buffer.concat(chunks);
+};
+
+// Reads the body unless it is over `limit` bytes; then drains the rest without keeping it, so
+// the response can still be sent, and returns undefined.
+const readBoundedBody = async (
+  request: IncomingMessage,
+  limit: number
+): Promise<Buffer | undefined> => {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of request) {
+    size += chunk.length;
+    if (size <= limit) {
+      chunks.push(chunk);
+    }
+  }
+  return size > limit ? undefined : Buffer.concat(chunks);
 };
 
 const toFetchRequest = (target: URL, request: IncomingMessage, body: Buffer): Request => {
@@ -163,7 +180,16 @@ export const createEmulatorProxy = ({
     response: ServerResponse
   ): Promise<void> => {
     try {
-      const body = await readBody(request);
+      const body = await readBoundedBody(request, MAX_CONTROL_BODY_BYTES);
+      if (body === undefined) {
+        sendError(
+          response,
+          413,
+          'Body too large',
+          `${request.method} ${request.url}: the body is over ${MAX_CONTROL_BODY_BYTES} bytes`
+        );
+        return;
+      }
       const target = new URL(request.url ?? '/', CONTROL_ORIGIN);
       await sendResponse(
         response,
