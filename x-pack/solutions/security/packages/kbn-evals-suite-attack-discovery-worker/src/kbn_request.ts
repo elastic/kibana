@@ -6,6 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import { httpStatus } from './kibana_api';
 
 export type KbnRequest = (args: {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -14,27 +15,27 @@ export type KbnRequest = (args: {
   version?: string;
 }) => Promise<{ statusCode: number; body: unknown }>;
 
-const statusOf = (error: unknown): number | undefined => {
-  if (typeof error !== 'object' || error === null || !('status' in error)) return undefined;
-  return typeof error.status === 'number' ? error.status : undefined;
-};
-
 /**
- * Adapts the evals `fetch` fixture, which throws on HTTP errors, to a request shape that
- * returns the status code instead.
+ * Adapts the evals `fetch` fixture, which throws on HTTP errors and by default returns only the
+ * parsed body, to a request shape that returns the real status code (201/204 included) instead.
  */
 export const kbnRequestFromFetch =
   (fetch: HttpHandler): KbnRequest =>
   async ({ method, path, body, version }) => {
     try {
-      const response = await fetch(path, {
+      const { response } = await fetch(path, {
         method,
+        asResponse: true,
         headers: version ? { 'elastic-api-version': version } : undefined,
         body: body === undefined ? undefined : JSON.stringify(body),
       });
-      return { statusCode: 200, body: response };
+      if (!response) throw new Error(`no response for ${method} ${path}`);
+      const statusCode = response.status;
+      // 204 (and other no-content statuses) have no body to parse.
+      const parsed = response.body && statusCode !== 204 ? await response.json() : undefined;
+      return { statusCode, body: parsed };
     } catch (error) {
-      const statusCode = statusOf(error);
+      const statusCode = httpStatus(error);
       if (statusCode === undefined) throw error;
       return { statusCode, body: error instanceof Error ? error.message : error };
     }
