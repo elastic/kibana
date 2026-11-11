@@ -1,5 +1,5 @@
 {
-  "sha1": "e5bc4275d926c553ea8d0d033b4c543a9417bd8c",
+  "sha1": "66320c7f35af4c946392bea99bd7960fad4a348f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1010,6 +1010,71 @@
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/overview_status.spec.ts",
         "line": 324,
         "column": 27
+      }
+    },
+    {
+      "id": "aa838cb8af235d9-882014d91bde61c",
+      "title": "RunTestManuallyPermissions - Elastic managed locations read + can_run_test_manually role cannot run a monitor on managed locations (403)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually_managed_locations.spec.ts",
+        "line": 132,
+        "column": 6
+      }
+    },
+    {
+      "id": "aa838cb8af235d9-70d40487a63bec5",
+      "title": "RunTestManuallyPermissions - Elastic managed locations read + can_run_test_manually role can run a private-location-only monitor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually_managed_locations.spec.ts",
+        "line": 137,
+        "column": 7
+      }
+    },
+    {
+      "id": "aa838cb8af235d9-80db0de7fb385b0",
+      "title": "RunTestManuallyPermissions - Elastic managed locations writer without the managed locations sub-feature cannot run it (403)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually_managed_locations.spec.ts",
+        "line": 142,
+        "column": 29
+      }
+    },
+    {
+      "id": "aa838cb8af235d9-17f0fa87bf63609",
+      "title": "RunTestManuallyPermissions - Elastic managed locations base `all` role can run a monitor on managed locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually_managed_locations.spec.ts",
+        "line": 148,
+        "column": 16
+      }
+    },
+    {
+      "id": "aa838cb8af235d9-c216704582b7743",
+      "title": "RunTestManuallyPermissions - Elastic managed locations run once (monitor editor) is also gated on managed locations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/run_test_manually_managed_locations.spec.ts",
+        "line": 155,
+        "column": 31
       }
     },
     {
