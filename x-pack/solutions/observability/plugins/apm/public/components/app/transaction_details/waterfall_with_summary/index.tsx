@@ -114,15 +114,17 @@ export function WaterfallWithSummary<TSample extends {}>({
     onSampleClick(sample, index);
   };
 
-  const hasSelectedSampleIndex = isValidSampleIndex(selectedSampleIndex, traceSamples);
+  const getControlledSamplePageIndex = () => {
+    if (isValidSampleIndex(selectedSampleIndex, traceSamples)) {
+      return selectedSampleIndex;
+    }
+    if (selectedSample) {
+      return traceSamples?.indexOf(selectedSample);
+    }
+    return 0;
+  };
 
-  const samplePageIndex = isControlled
-    ? hasSelectedSampleIndex
-      ? selectedSampleIndex
-      : selectedSample
-      ? traceSamples?.indexOf(selectedSample)
-      : 0
-    : sampleActivePage;
+  const samplePageIndex = isControlled ? getControlledSamplePageIndex() : sampleActivePage;
 
   const entryTransaction = unifiedWaterfallFetchResult.entryTransaction;
 
