@@ -70,6 +70,7 @@ export function markIdleServices(nodes: ServiceMapNode[]): ServiceMapNode[] {
       return node;
     }
 
-    return { ...node, data: { ...node.data, isIdle: true } } as ServiceMapNode;
+    const data: ServiceNodeData = { ...node.data, isIdle: true };
+    return { ...node, data };
   });
 }

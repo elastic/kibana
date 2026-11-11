@@ -11,6 +11,12 @@
  * - `scout_max_one_describe` allows only one root describe per file
  * - the grouping flag override is server-wide; the sequential lane (workers: 1) avoids
  *   racing sibling parallel suites (see `enableServiceMapGrouping`)
+ *
+ * When grouping ships as default (or the flag no longer needs a server-wide override),
+ * fold this coverage into the parallel service-map a11y suite.
+ *
+ * `@local-*` tags: CI MKI / cloud Scout cannot apply `feature_flags.overrides` the way
+ * local `apiServices` does, so this suite is intentionally local-only for now.
  */
 
 import { expect } from '@kbn/scout-oblt/ui';
@@ -23,6 +29,9 @@ import {
   SERVICE_MAP_KUERY_A11Y_IDLE,
 } from '../fixtures/constants';
 import { serviceMapA11yIdle } from '../fixtures/synthtrace/service_map_a11y_idle';
+
+/** Must match `IDLE_NODE_OPACITY` in `common/service_map/constants` (Scout can't import plugin common). */
+const IDLE_NODE_OPACITY = 0.5;
 
 test.describe(
   'Service map - accessibility with node stats',
@@ -100,6 +109,8 @@ test.describe(
       });
     });
 
+    // Fade contrast (whole-node opacity) is tracked in #304434 — do not run checkA11y
+    // on the faded node here until that pass lands; axe would flag contrast today.
     test('faded low-traffic service stays focusable and named', async ({
       pageObjects: { serviceMapPage },
     }) => {
@@ -109,7 +120,7 @@ test.describe(
       const quietRoot = serviceMapPage.getServiceNodeRoot(SERVICE_MAP_A11Y_QUIET);
       const quietNode = serviceMapPage.getServiceNode(SERVICE_MAP_A11Y_QUIET);
 
-      await expect(quietRoot).toHaveCSS('opacity', '0.5');
+      await expect(quietRoot).toHaveCSS('opacity', String(IDLE_NODE_OPACITY));
       await expect(quietNode).toHaveAttribute(
         'aria-label',
         new RegExp(SERVICE_MAP_A11Y_QUIET, 'i')

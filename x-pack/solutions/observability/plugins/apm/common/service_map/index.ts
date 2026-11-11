@@ -20,8 +20,3 @@ export { getPaths } from './get_paths';
 export { transformToReactFlow } from './transform_to_react_flow';
 export { groupResourceNodes } from './group_resource_nodes';
 export { markIdleServices, shouldKeepVisibleDespiteLowTraffic } from './mark_idle_services';
-export { aggregateServiceMapStats, getFailingServiceMembers } from './aggregate_service_map_stats';
-export type {
-  AggregatedServiceMapStats,
-  FailingServiceMember,
-} from './aggregate_service_map_stats';

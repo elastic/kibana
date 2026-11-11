@@ -8,53 +8,11 @@
 import React from 'react';
 import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import {
-  FAILURE_RATE_DANGER,
-  FAILURE_RATE_WARNING,
-  MIN_REQUESTS_FOR_FAILURE_RATE,
-} from '../../../../common/service_map/constants';
+import { getFailureLevel, useFailureColor } from './failure_level';
 
 const RING_WIDTH = 5;
 /** The shortest arc drawn, in pixels, so a small share of failures stays visible. */
 const MIN_ARC = 4;
-
-export type FailureLevel = 'none' | 'low' | 'warning' | 'danger';
-
-/**
- * How serious a share of failed requests is: none, low, a warning from 1%, a problem from 5%.
- * On fewer than 20 requests a rate says little (one failure of five reads 20%), so it stays low.
- */
-export function getFailureLevel(failedRate?: number | null, requestCount?: number): FailureLevel {
-  if (typeof failedRate !== 'number' || failedRate <= 0) {
-    return 'none';
-  }
-  if (requestCount !== undefined && requestCount < MIN_REQUESTS_FOR_FAILURE_RATE) {
-    return 'low';
-  }
-  if (failedRate >= FAILURE_RATE_DANGER) {
-    return 'danger';
-  }
-  if (failedRate >= FAILURE_RATE_WARNING) {
-    return 'warning';
-  }
-  return 'low';
-}
-
-/** The colour of a failure level, from the EUI theme. */
-export function useFailureColor(level: FailureLevel): string | undefined {
-  const { euiTheme } = useEuiTheme();
-  if (level === 'danger') {
-    return euiTheme.colors.danger;
-  }
-  if (level === 'warning') {
-    return euiTheme.colors.warning;
-  }
-  if (level === 'low') {
-    return euiTheme.colors.borderBaseSubdued;
-  }
-  return undefined;
-}
 
 /**
  * Inside a node, a ring whose arc is the share of failed requests, from the top clockwise,
@@ -140,68 +98,4 @@ export function FailureRing({
       </span>
     </div>
   );
-}
-
-function formatRateValue(perMinute: number): { value: string; perHour: boolean } {
-  if (perMinute < 1) {
-    const perHour = perMinute * 60;
-    return {
-      value: perHour >= 10 ? String(Math.round(perHour)) : perHour.toFixed(1),
-      perHour: true,
-    };
-  }
-  const value =
-    perMinute >= 1000
-      ? `${(perMinute / 1000).toFixed(perMinute >= 10000 ? 0 : 1)}k`
-      : perMinute >= 10
-      ? String(Math.round(perMinute))
-      : perMinute.toFixed(1);
-  return { value, perHour: false };
-}
-
-/**
- * Requests, short enough for the centre of a node: 412/m, 1.2k/m, or per hour below one a
- * minute (12/h), so low traffic doesn't read as zero.
- */
-export function formatCompactRate(perMinute?: number): string | undefined {
-  if (perMinute === undefined) {
-    return undefined;
-  }
-  if (perMinute <= 0) {
-    return i18n.translate('xpack.apm.serviceMap.node.noRequests', { defaultMessage: '0' });
-  }
-  const { value, perHour } = formatRateValue(perMinute);
-  return perHour
-    ? i18n.translate('xpack.apm.serviceMap.node.compactRatePerHour', {
-        defaultMessage: '{value}/h',
-        values: { value },
-      })
-    : i18n.translate('xpack.apm.serviceMap.node.compactRate', {
-        defaultMessage: '{value}/m',
-        values: { value },
-      });
-}
-
-/**
- * Same rate as {@link formatCompactRate}, spelled out for screen readers ("14 requests per minute").
- */
-export function describeCompactRate(perMinute?: number): string | undefined {
-  if (perMinute === undefined) {
-    return undefined;
-  }
-  if (perMinute <= 0) {
-    return i18n.translate('xpack.apm.serviceMap.node.noRequestsDescribed', {
-      defaultMessage: '0 requests per minute',
-    });
-  }
-  const { value, perHour } = formatRateValue(perMinute);
-  return perHour
-    ? i18n.translate('xpack.apm.serviceMap.node.requestsPerHourDescribed', {
-        defaultMessage: '{value} requests per hour',
-        values: { value },
-      })
-    : i18n.translate('xpack.apm.serviceMap.node.requestsPerMinuteDescribed', {
-        defaultMessage: '{value} requests per minute',
-        values: { value },
-      });
 }

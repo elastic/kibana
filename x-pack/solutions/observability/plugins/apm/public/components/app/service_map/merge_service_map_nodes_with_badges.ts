@@ -7,7 +7,10 @@
 
 import type { APIReturnType } from '@kbn/apm-api-shared';
 import type { ServiceMapNode } from '@kbn/apm-types';
-import { isServiceNodeData } from '../../../../common/service_map';
+import {
+  isServiceNodeData,
+  shouldKeepVisibleDespiteLowTraffic,
+} from '../../../../common/service_map';
 
 export type ServiceMapBadgesApiResponse =
   APIReturnType<'POST /internal/apm/service-map/service_badges'>;
@@ -33,19 +36,20 @@ export function mergeServiceMapNodesWithBadges(
     const serviceName = node.data.label;
     const alertsCount = alertsByService.get(serviceName);
     const slo = slosByService.get(serviceName);
-    // Badges load after idle marking; keep alerting / SLO-breaching services sharp.
-    const keepVisible =
-      (alertsCount !== undefined && alertsCount > 0) ||
-      slo?.sloStatus === 'violated' ||
-      slo?.sloStatus === 'degrading';
 
+    const data = {
+      ...node.data,
+      ...(alertsCount !== undefined ? { alertsCount } : {}),
+      ...(slo ? { sloStatus: slo.sloStatus, sloCount: slo.sloCount } : {}),
+    };
+
+    // Badges load after idle marking; reuse the same keep-visible rules (alerts / SLO /
+    // failure / anomaly) so a newly badged quiet node is not left faded.
     return {
       ...node,
       data: {
-        ...node.data,
-        ...(alertsCount !== undefined ? { alertsCount } : {}),
-        ...(slo ? { sloStatus: slo.sloStatus, sloCount: slo.sloCount } : {}),
-        ...(keepVisible ? { isIdle: false } : {}),
+        ...data,
+        ...(data.isIdle && shouldKeepVisibleDespiteLowTraffic(data) ? { isIdle: false } : {}),
       },
     };
   });

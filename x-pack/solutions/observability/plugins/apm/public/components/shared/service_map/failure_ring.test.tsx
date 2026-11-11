@@ -7,12 +7,9 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import {
-  FailureRing,
-  describeCompactRate,
-  formatCompactRate,
-  getFailureLevel,
-} from './failure_ring';
+import { FailureRing } from './failure_ring';
+import { describeCompactRate, formatCompactRate } from './compact_rate';
+import { getFailureLevel } from './failure_level';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './test_helpers';
 
 jest.mock('@elastic/eui', () => {
@@ -54,7 +51,9 @@ describe('formatCompactRate', () => {
     [0.4, '24/h'],
     [0.05, '3.0/h'],
     [2.5, '2.5/m'],
+    [9.96, '10/m'],
     [412.3, '412/m'],
+    [999.6, '1.0k/m'],
     [1234, '1.2k/m'],
     [45678, '46k/m'],
   ])('formats %p requests a minute as %p', (value, expected) => {

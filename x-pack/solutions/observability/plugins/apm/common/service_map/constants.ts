@@ -62,6 +62,9 @@ export const MIN_REQUESTS_FOR_FAILURE_RATE = 20;
  */
 export const IDLE_SHARE_OF_MEDIAN = 0.1;
 
+/** Opacity for idle (low-traffic) service nodes. */
+export const IDLE_NODE_OPACITY = 0.5;
+
 // Node dimensions for React Flow service map
 export const SERVICE_NODE_CIRCLE_SIZE = 56;
 export const DEPENDENCY_NODE_DIAMOND_SIZE = 48;

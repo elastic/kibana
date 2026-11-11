@@ -25,6 +25,7 @@ import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { getSeverity, getSeverityColor } from '../../../../common/anomaly_detection';
 import type { ServiceNodeData } from '../../../../common/service_map';
 import {
+  IDLE_NODE_OPACITY,
   NODE_BORDER_WIDTH_DEFAULT,
   NODE_BORDER_WIDTH_SELECTED,
   SERVICE_NODE_CIRCLE_SIZE,
@@ -32,7 +33,8 @@ import {
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import { NodeLabel } from './node_label';
 import { NodeStatsLine } from './node_stats_line';
-import { FailureRing, formatCompactRate, describeCompactRate } from './failure_ring';
+import { FailureRing } from './failure_ring';
+import { formatCompactRate, describeCompactRate } from './compact_rate';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { AlertsBadge } from '../badge/alerts_badge';
 import { SloStatusBadge } from '../slo_status_badge';
@@ -139,7 +141,7 @@ export const ServiceNode = memo(
         }
       }
 
-      if (data.isIdle) {
+      if (isIdle) {
         parts.push(
           i18n.translate('xpack.apm.serviceMap.serviceNode.idleInfo', {
             defaultMessage: 'Low traffic relative to other services on the map',
@@ -148,13 +150,7 @@ export const ServiceNode = memo(
       }
 
       return parts.join('. ');
-    }, [
-      data.label,
-      data.agentName,
-      data.serviceAnomalyStats?.anomalyScore,
-      data.stats,
-      data.isIdle,
-    ]);
+    }, [data.label, data.agentName, data.serviceAnomalyStats?.anomalyScore, data.stats, isIdle]);
 
     const containerStyles = css`
       position: relative;
@@ -213,7 +209,7 @@ export const ServiceNode = memo(
     `;
 
     const idleStyles = css`
-      opacity: 0.5;
+      opacity: ${IDLE_NODE_OPACITY};
     `;
 
     // Match service inventory cells: show count when API merged data (no extra capability check;
