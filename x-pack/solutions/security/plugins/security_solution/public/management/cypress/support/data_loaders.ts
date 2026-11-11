@@ -445,9 +445,15 @@ export const dataLoadersForRealEndpoints = (
       path: string;
       password?: string;
     }): Promise<string> => {
-      return (
-        await getHostVmClient(hostname).exec(`unzip -p ${password ? `-P ${password} ` : ''}${path}`)
-      ).stdout;
+      const hostVmClient = getHostVmClient(hostname);
+
+      // Installed on demand so that only this task, and not every endpoint host VM boot, needs apt
+      await hostVmClient.exec(
+        `command -v unzip || ( sudo apt-get update && sudo apt-get install -y unzip )`
+      );
+
+      return (await hostVmClient.exec(`unzip -p ${password ? `-P ${password} ` : ''}${path}`))
+        .stdout;
     },
 
     stopEndpointHost: async (hostName) => {
