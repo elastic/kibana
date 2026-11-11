@@ -4692,6 +4692,40 @@ describe('workflow page lifecycle', () => {
     '      message: "hi"',
   ].join('\n');
 
+  /** Makes searches return the documents that index and bulk wrote, by id. */
+  const storeWrites = (client: ReturnType<typeof makeStorageClient>) => {
+    const stored = new Map<string, WorkflowProperties>();
+    const index = client.index.getMockImplementation();
+    client.index.mockImplementation(
+      async (params: { id: string; document: WorkflowProperties }) => {
+        stored.set(params.id, params.document);
+        return index?.(params);
+      }
+    );
+    const bulk = client.bulk.getMockImplementation();
+    client.bulk.mockImplementation(
+      async (params: {
+        operations: Array<{ create?: { _id: string; document: WorkflowProperties } }>;
+      }) => {
+        params.operations.forEach(
+          ({ create }) => create && stored.set(create._id, create.document)
+        );
+        return bulk?.(params);
+      }
+    );
+    client.search.mockImplementation(async ({ query }: { query: unknown }) => {
+      const text = JSON.stringify(query);
+      return {
+        hits: {
+          hits: [...stored]
+            .filter(([id]) => text.includes(`"${id}"`))
+            .map(([id, source]) => ({ _id: id, _source: source, _seq_no: 1, _primary_term: 1 })),
+        },
+      };
+    });
+    return stored;
+  };
+
   const setup = () => {
     const pagesService = {
       syncWorkflowPages: jest.fn().mockResolvedValue(undefined),
@@ -4711,7 +4745,7 @@ describe('workflow page lifecycle', () => {
 
   it('syncs the pages after a create', async () => {
     const { service, client, pagesService, request } = setup();
-    client.search.mockResolvedValue({ hits: { hits: [] } });
+    storeWrites(client);
 
     const { id } = await service.createWorkflow({ yaml: pageYaml }, 'default', request);
 
@@ -4728,13 +4762,37 @@ describe('workflow page lifecycle', () => {
 
   it('keeps the created workflow when the page sync fails', async () => {
     const { service, client, deps, pagesService, request } = setup();
-    client.search.mockResolvedValue({ hits: { hits: [] } });
+    storeWrites(client);
     pagesService.syncWorkflowPages.mockRejectedValue(new Error('boom'));
 
     await expect(service.createWorkflow({ yaml: pageYaml }, 'default', request)).resolves.toEqual(
       expect.objectContaining({ name: 'Page Workflow' })
     );
     expect(deps.logger.error).toHaveBeenCalled();
+  });
+
+  it('syncs from the stored workflow when a newer save replaced the written one', async () => {
+    const { service, client, pagesService, request } = setup();
+    const stored = storeWrites(client);
+    client.index.mockImplementation(async ({ id, document }) => {
+      stored.set(id, { ...document, definition: { ...document.definition, triggers: [] } });
+      return { result: 'created', _seq_no: 1, _primary_term: 1 };
+    });
+
+    await service.createWorkflow({ yaml: pageYaml }, 'default', request);
+
+    expect(pagesService.syncWorkflowPages).toHaveBeenCalledWith(
+      expect.objectContaining({ definition: expect.objectContaining({ triggers: [] }) })
+    );
+  });
+
+  it('skips the page sync when the workflow is gone by then', async () => {
+    const { service, client, pagesService, request } = setup();
+    client.search.mockResolvedValue({ hits: { hits: [] } });
+
+    await service.createWorkflow({ yaml: pageYaml }, 'default', request);
+
+    expect(pagesService.syncWorkflowPages).not.toHaveBeenCalled();
   });
 
   it('syncs the pages after an update, with the stored created_at', async () => {
@@ -4758,14 +4816,11 @@ describe('workflow page lifecycle', () => {
     'syncs the pages of every bulk-written workflow (overwrite=%s)',
     async (overwrite) => {
       const { service, client, pagesService, request } = setup();
-      client.search.mockResolvedValue({
-        hits: {
-          hits: overwrite
-            ? [occSearchHit('existing', { created_at: '2024-01-01T00:00:00.000Z' })]
-            : [],
-        },
-      });
       client.bulk.mockResolvedValue({ items: [{ create: { _id: 'new-workflow', status: 201 } }] });
+      const stored = storeWrites(client);
+      if (overwrite) {
+        stored.set('existing', makeSource({ created_at: '2024-01-01T00:00:00.000Z' }));
+      }
 
       await service.bulkCreateWorkflows(
         [

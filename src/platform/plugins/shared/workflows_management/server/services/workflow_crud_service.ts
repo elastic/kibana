@@ -1323,7 +1323,11 @@ export class WorkflowCrudService {
 
   /**
    * Creates and retires pages after a write. A failure only logs: the workflow write already
-   * happened, and the public route also checks that the workflow still has the page trigger.
+   * happened, and the page resolver also checks that the workflow still has the page trigger.
+   * Syncs from the stored workflow, not the written one, so a slow sync cannot retire the page
+   * of a newer save.
+   * shortcut: a save that lands between this read and the sync can still lose its page until its
+   * next save; a version guard on the sync closes that if it shows up.
    */
   private async syncWorkflowPages(
     workflows: Array<{ id: string; document: WorkflowProperties }>
@@ -1332,14 +1336,16 @@ export class WorkflowCrudService {
     if (!pagesSystemClient) return;
     await pMap(
       workflows,
-      async ({ id, document }) => {
+      async ({ id, document: { spaceId } }) => {
         try {
+          const current = await this.getWorkflowDocumentSource(id, spaceId);
+          if (!current) return;
           await pagesSystemClient.syncWorkflowPages({
             workflowId: id,
-            workflowCreatedAt: document.created_at,
-            spaceId: document.spaceId,
-            definition: document.definition,
-            valid: document.valid,
+            workflowCreatedAt: current.created_at,
+            spaceId,
+            definition: current.definition,
+            valid: current.valid,
           });
         } catch (error) {
           this.deps.logger.error(`Failed to sync the pages of workflow [${id}]`, { error });
