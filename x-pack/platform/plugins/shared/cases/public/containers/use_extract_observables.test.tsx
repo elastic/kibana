@@ -102,9 +102,30 @@ describe('useExtractObservables', () => {
     expect(refreshCaseViewPage).not.toHaveBeenCalled();
   });
 
-  it('shows the not found message when no attached alert or event could be read', async () => {
+  it('shows the not readable message when no attached alert or event could be read', async () => {
     (extractObservables as jest.Mock).mockResolvedValue(
       buildResult({ status: 'alerts_not_found', newObservablesCount: 0, alertsFound: 0 })
+    );
+
+    await run();
+
+    await waitFor(() =>
+      expect(showInfoToast).toHaveBeenCalledWith(
+        i18n.ATTACHED_ALERTS_NOT_READABLE,
+        i18n.ATTACHED_ALERTS_NOT_READABLE_DESCRIPTION
+      )
+    );
+    expect(refreshCaseViewPage).not.toHaveBeenCalled();
+  });
+
+  it('shows the not found message when the case has no attached alerts or events', async () => {
+    (extractObservables as jest.Mock).mockResolvedValue(
+      buildResult({
+        status: 'alerts_not_found',
+        newObservablesCount: 0,
+        alertsRequested: 0,
+        alertsFound: 0,
+      })
     );
 
     await run();
