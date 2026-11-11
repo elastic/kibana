@@ -115,6 +115,16 @@ export type {
 } from './hypotheses/hypotheses';
 
 export {
+  isMissingDataReason,
+  MAX_MISSING_DATA,
+  MAX_MISSING_DATA_TEXT_LENGTH,
+  MISSING_DATA_REASONS,
+  parseMissingData,
+  serializeMissingData,
+} from './missing_data';
+export type { MissingDataItem, MissingDataReason } from './missing_data';
+
+export {
   ESCALATION_ASSIGNEES_FIELD,
   ESCALATION_ASSIGN_URL,
   ESCALATION_BY_ID_URL,

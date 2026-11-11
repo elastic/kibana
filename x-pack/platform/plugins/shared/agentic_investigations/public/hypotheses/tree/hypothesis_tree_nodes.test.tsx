@@ -352,6 +352,56 @@ describe('HypothesisTreeNode', () => {
     }
   );
 
+  it('shows what settles a hypothesis only while it is still open', () => {
+    const settledBy = 'Refuted if 5xx stays under 0.1% for 30 min';
+    renderNode({
+      kind: 'hypothesis',
+      index: 0,
+      isWinner: false,
+      hypothesis: {
+        candidate: 'Pool leak',
+        confidence: 0.4,
+        status: 'investigating',
+        settled_by: settledBy,
+      },
+      ...flags,
+    });
+    expect(screen.getByTestId('investigationHypothesisTreeNode-hypothesis')).toHaveTextContent(
+      `Settled by: ${settledBy}`
+    );
+  });
+
+  it('does not show settled_by on a dismissed hypothesis', () => {
+    renderNode({
+      kind: 'hypothesis',
+      index: 0,
+      isWinner: false,
+      hypothesis: {
+        candidate: 'Pool leak',
+        confidence: 0.1,
+        status: 'dismissed',
+        settled_by: 'Refuted if x',
+      },
+      ...flags,
+    });
+    expect(screen.getByTestId('investigationHypothesisTreeNode-hypothesis')).not.toHaveTextContent(
+      'Settled by'
+    );
+  });
+
+  it('lists the missing data under the conclusion, with why it is missing', () => {
+    renderNode({
+      kind: 'conclusion',
+      conclusion: 'Cause not confirmed: a bad deploy.',
+      missingData: [{ what: 'SLO definition', source: 'SLO API', why: 'no_access' }],
+      ...flags,
+    });
+
+    const list = screen.getByTestId('missingData');
+    expect(list).toHaveTextContent('No access');
+    expect(list).toHaveTextContent('SLO definition · SLO API');
+  });
+
   it('counts the hypotheses by status', () => {
     renderNode({
       kind: 'hypotheses',

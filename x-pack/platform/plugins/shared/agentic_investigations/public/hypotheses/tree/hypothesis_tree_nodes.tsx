@@ -23,6 +23,7 @@ import {
 import { Handle, Position, type Node, type NodeProps } from '@xyflow/react';
 import type { HypothesisStatus } from '../../../common/hypotheses/hypotheses';
 import type { InvestigationProposalSummary } from '../../../common/investigations/investigation';
+import type { MissingDataItem } from '../../../common/missing_data';
 import type { InvestigationSubjectType } from '../../../common/subjects/subject';
 import { getSubjectDisplayType, getSubjectTitle } from '../../subjects/attachments/subject_title';
 import {
@@ -38,9 +39,12 @@ import type { HypothesisTreeNodeData, HypothesisTreeNodeKind } from './build_hyp
 import { HYPOTHESIS_TREE_NODE_WIDTH } from './layout_hypothesis_graph';
 import { ProposalStatusBadge } from './proposal_status_badge';
 import {
+  MISSING_DATA_REASON_LABELS,
+  MISSING_DATA_TITLE,
   NODE_LABELS,
   OPEN_SLACK_THREAD_LABEL,
   PROPOSAL_CONFIDENCE_LABELS,
+  SETTLED_BY_LABEL,
   VIEW_ALERT_LABEL,
   actionsCountLabel,
   getHypothesisStatusLabel,
@@ -346,6 +350,40 @@ const ClampedMarkdown = ({
   </div>
 );
 
+const MissingDataList = ({
+  items,
+}: {
+  items: readonly MissingDataItem[];
+}): React.ReactElement | null => {
+  if (items.length === 0) return null;
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="xs"
+      responsive={false}
+      data-test-subj="missingData"
+    >
+      <EuiText size="xs">
+        <strong>{MISSING_DATA_TITLE}</strong>
+      </EuiText>
+      {items.map(({ what, source, why, would_decide: wouldDecide }, index) => (
+        <EuiFlexGroup key={index} gutterSize="xs" alignItems="flexStart" responsive={false}>
+          {why ? (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{MISSING_DATA_REASON_LABELS[why]}</EuiBadge>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem>
+            <EuiText size="xs" color="subdued">
+              {[what, source, wouldDecide].filter(Boolean).join(' · ')}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ))}
+    </EuiFlexGroup>
+  );
+};
+
 const TRIGGER_ICONS: Record<InvestigationSubjectType, IconType> = {
   alert: 'warning',
   significant_event: 'sparkles',
@@ -647,6 +685,11 @@ const HypothesisTreeNodeComponent = ({
               {data.hypothesis.candidate}
             </BodyText>
             <ClampedMarkdown text={data.hypothesis.reason ?? ''} lines={3} color="subdued" />
+            {data.hypothesis.status === 'investigating' && data.hypothesis.settled_by ? (
+              <EuiText size="xs" color="subdued" css={clampLines(2)}>
+                <strong>{SETTLED_BY_LABEL}</strong> {data.hypothesis.settled_by}
+              </EuiText>
+            ) : null}
           </EuiFlexGroup>
         </NodeShell>
       );
@@ -654,7 +697,10 @@ const HypothesisTreeNodeComponent = ({
     case 'conclusion':
       return (
         <NodeShell kind="conclusion" label={NODE_LABELS.conclusion} {...selectableProps}>
-          <ClampedMarkdown text={data.conclusion} lines={4} />
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+            <ClampedMarkdown text={data.conclusion} lines={4} />
+            <MissingDataList items={data.missingData ?? []} />
+          </EuiFlexGroup>
         </NodeShell>
       );
 

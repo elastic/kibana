@@ -9,7 +9,7 @@ import type { ConversationTemplate } from '@kbn/agent-builder-common';
 
 export const investigationTemplate: ConversationTemplate = {
   id: 'investigation',
-  version: 5,
+  version: 6,
   name: 'Investigation',
   description: 'Use for investigations',
   fields: {
@@ -37,6 +37,13 @@ export const investigationTemplate: ConversationTemplate = {
       required: false,
       description: 'The outcome of the investigation.',
       max_length: 10_000,
+    },
+    missing_data: {
+      input_type: 'TEXT_ARRAY',
+      required: false,
+      description:
+        'Gaps in the data that kept the cause from being confirmed, one JSON object per entry with what, source, why and would_decide.',
+      max_length: 1_000,
     },
     summary: {
       input_type: 'TEXT',

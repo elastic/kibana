@@ -9,6 +9,7 @@ import { z, isoDateTime } from '@kbn/zod/v4';
 import type { ProposalConfidence, ProposalImpact, ProposalStatus } from '@kbn/proposals-common';
 import type { InvestigationEvidence } from '../evidence/evidence';
 import type { Hypothesis } from '../hypotheses/hypotheses';
+import type { MissingDataItem } from '../missing_data';
 import { INVESTIGATION_SUBJECT_TYPES, MAX_SUBJECT_ID_LENGTH } from '../subjects/constants';
 import type {
   AlertSubjectSnapshot,
@@ -108,6 +109,8 @@ export interface InvestigationMetadata {
   summary?: string;
   /** The conclusion. */
   verdict?: string;
+  /** Gaps in the data that kept the cause from being confirmed. Absent when there are none. */
+  missing_data?: MissingDataItem[];
   /** User profile uids of the assignees. Absent when nobody is assigned. */
   assignees?: string[];
 }

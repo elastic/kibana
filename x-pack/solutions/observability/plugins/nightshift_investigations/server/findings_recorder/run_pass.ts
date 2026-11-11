@@ -14,6 +14,7 @@ import { MessageRole, type Message, type ToolCall } from '@kbn/inference-common'
 import {
   INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE,
   INVESTIGATION_TEMPLATE_ID,
+  serializeMissingData,
 } from '@kbn/agentic-investigations-plugin/common';
 import type { Hypothesis, ImpactEntity } from '@kbn/agentic-investigations-plugin/common';
 import type { AgenticInvestigationsPluginStart } from '@kbn/agentic-investigations-plugin/server';
@@ -567,6 +568,10 @@ export const runFindingsPass = async (
             ? { severity: record.severity }
             : {}),
           ...(verdict ? { verdict } : {}),
+          // A final record replaces the gaps: one that confirms the cause lists none.
+          ...(final && record
+            ? { missing_data: serializeMissingData(record.missing_data ?? []) }
+            : {}),
         }),
     ],
   ];

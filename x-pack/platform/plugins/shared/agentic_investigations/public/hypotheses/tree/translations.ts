@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ProposalConfidence } from '@kbn/proposals-common';
 import type { HypothesisStatus } from '../../../common/hypotheses/hypotheses';
+import type { MissingDataReason } from '../../../common/missing_data';
 import { HYPOTHESIS_STATUS_LABELS } from '../attachments/translations';
 
 export const HYPOTHESIS_TREE_TITLE = i18n.translate(
@@ -133,3 +134,30 @@ export const OPEN_SLACK_THREAD_LABEL = i18n.translate(
   'xpack.agenticInvestigations.hypothesisTree.node.openSlackThread',
   { defaultMessage: 'Open in Slack' }
 );
+
+export const SETTLED_BY_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.hypothesisTree.node.settledBy',
+  { defaultMessage: 'Settled by:' }
+);
+
+export const MISSING_DATA_TITLE = i18n.translate(
+  'xpack.agenticInvestigations.hypothesisTree.node.missingData',
+  { defaultMessage: 'Missing data' }
+);
+
+export const MISSING_DATA_REASON_LABELS: Record<MissingDataReason, string> = {
+  no_access: i18n.translate('xpack.agenticInvestigations.hypothesisTree.missingData.noAccess', {
+    defaultMessage: 'No access',
+  }),
+  not_retained: i18n.translate(
+    'xpack.agenticInvestigations.hypothesisTree.missingData.notRetained',
+    { defaultMessage: 'Not retained' }
+  ),
+  not_collected: i18n.translate(
+    'xpack.agenticInvestigations.hypothesisTree.missingData.notCollected',
+    { defaultMessage: 'Not collected' }
+  ),
+  not_queried: i18n.translate('xpack.agenticInvestigations.hypothesisTree.missingData.notQueried', {
+    defaultMessage: 'Not checked yet',
+  }),
+};

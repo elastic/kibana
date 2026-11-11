@@ -315,6 +315,7 @@ describe('runFindingsPass', () => {
       summary: output.summary,
       severity: 'high',
       verdict: output.verdict,
+      missing_data: [],
     });
     expect(writer.setHypotheses).toHaveBeenCalledWith({
       conversationId: 'c1',
@@ -328,6 +329,32 @@ describe('runFindingsPass', () => {
     });
   });
 
+  it('stores the gaps that kept the cause unconfirmed as metadata text, and a live pass does not', async () => {
+    const unconfirmed = {
+      ...output,
+      verdict: 'Cause not confirmed: a bad deploy.',
+      missing_data: [{ what: 'SLO definition', why: 'no_access', would_decide: 'if 499s count' }],
+    };
+    const final = setup({ answers: [answerWith(unconfirmed)] });
+    await run(final.deps, final.memory, { answer: 'Cause not confirmed' });
+    const live = setup({ answers: [answerWith(unconfirmed)] });
+    await run(live.deps, live.memory);
+
+    expect(final.patchMetadata).toHaveBeenCalledWith(
+      'c1',
+      expect.objectContaining({
+        missing_data: [
+          JSON.stringify({
+            what: 'SLO definition',
+            why: 'no_access',
+            would_decide: 'if 499s count',
+          }),
+        ],
+      })
+    );
+    expect(live.patchMetadata.mock.calls[0][1]).not.toHaveProperty('missing_data');
+  });
+
   it('asks a live pass for the live schema and a final pass for the full one', async () => {
     const live = setup();
     await run(live.deps, live.memory);
@@ -338,7 +365,13 @@ describe('runFindingsPass', () => {
       chatComplete.mock.calls[0][0].tools.structuredOutput.schema.properties;
     expect(Object.keys(schemaOf(live.chatComplete))).toEqual(['summary', 'hypotheses']);
     expect(Object.keys(schemaOf(final.chatComplete))).toEqual(
-      expect.arrayContaining(['verdict', 'severity', 'impact_summary', 'impact_entities'])
+      expect.arrayContaining([
+        'verdict',
+        'severity',
+        'impact_summary',
+        'impact_entities',
+        'missing_data',
+      ])
     );
   });
 

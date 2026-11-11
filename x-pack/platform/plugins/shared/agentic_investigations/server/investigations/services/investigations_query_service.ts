@@ -21,6 +21,7 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
 import type { InvestigationHypotheses } from '../../../common/hypotheses/hypotheses';
 import type { Impact } from '../../../common/impact/impact';
+import { parseMissingData } from '../../../common/missing_data';
 import {
   INVESTIGATION_SEVERITY_NONE,
   MAX_INVESTIGATION_CANDIDATES,
@@ -693,11 +694,13 @@ export const toMetadata = (
   const summary = optionalText(metadata?.summary);
   const verdict = optionalText(metadata?.verdict);
   const assignees = optionalTextList(metadata?.assignees);
+  const missingData = parseMissingData(metadata?.missing_data);
   return {
     status: metadata?.status === 'closed' ? 'closed' : 'open',
     ...(isInvestigationSeverity(severity) && { severity }),
     ...(summary !== undefined && { summary }),
     ...(verdict !== undefined && { verdict }),
+    ...(missingData.length > 0 && { missing_data: missingData }),
     ...(assignees !== undefined && { assignees }),
   };
 };

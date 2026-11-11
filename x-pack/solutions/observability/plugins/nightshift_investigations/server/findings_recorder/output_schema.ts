@@ -13,6 +13,7 @@ import {
   EVIDENCE_CHART_Y_AXIS_UNITS,
   HYPOTHESIS_STATUSES,
   investigationEvidenceSchema,
+  isMissingDataReason,
   MAX_ENTITY_ID_LENGTH,
   MAX_ENTITY_NAME_LENGTH,
   MAX_EVIDENCE_CHART_ANNOTATIONS,
@@ -23,7 +24,11 @@ import {
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_HYPOTHESES,
   MAX_IMPACT_TOOL_ENTITIES,
+  MAX_MISSING_DATA,
+  MAX_MISSING_DATA_TEXT_LENGTH,
+  MISSING_DATA_REASONS,
   type InvestigationEvidence,
+  type MissingDataItem,
 } from '@kbn/agentic-investigations-plugin/common';
 import {
   MAX_COMMENT_LENGTH,
@@ -78,6 +83,7 @@ export const findingsOutputSchema = lazySchema(() => {
     confidence: z.number(),
     status: z.enum(HYPOTHESIS_STATUSES),
     reason: z.string().optional(),
+    settled_by: z.string().optional(),
     evidence: z.array(evidenceSchema).optional(),
   });
 
@@ -106,6 +112,18 @@ export const findingsOutputSchema = lazySchema(() => {
           comment: z.string().min(1),
           impact: z.string().optional(),
           confidence: z.string().optional(),
+        })
+      )
+      .optional(),
+    // Only the final pass records the gaps that kept the cause unconfirmed.
+    missing_data: z
+      .array(
+        z.object({
+          what: z.string(),
+          source: z.string().optional(),
+          // A string, not the enum: an unknown label is dropped in `limitFindings`, not a failed record.
+          why: z.string().optional(),
+          would_decide: z.string().optional(),
         })
       )
       .optional(),
@@ -207,6 +225,7 @@ export type FindingsRecord = Omit<
   'impact_evidence' | 'impact_entities' | 'hypotheses' | 'proposals'
 > & {
   proposals?: Array<{ title: string; comment: string; impact?: string; confidence?: string }>;
+  missing_data?: MissingDataItem[];
   /** `null` retracts the stored evidence. */
   impact_evidence?: InvestigationEvidence | null;
   impact_entities?: Array<{ name: string; type?: string; evidence?: InvestigationEvidence }>;
@@ -222,6 +241,7 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
     impact_evidence: rawImpactEvidence,
     impact_entities: rawEntities,
     proposals: rawProposals,
+    missing_data: rawMissingData,
     hypotheses: rawHypotheses,
     ...rest
   } = output;
@@ -250,6 +270,21 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
             }),
         }
       : {}),
+    ...(rawMissingData !== undefined
+      ? {
+          missing_data: rawMissingData
+            .filter(({ what }) => what.trim() !== '')
+            .slice(0, MAX_MISSING_DATA)
+            .map(({ what, source, why, would_decide: wouldDecide }) => ({
+              what: truncate(what.trim(), MAX_MISSING_DATA_TEXT_LENGTH),
+              ...(source ? { source: truncate(source.trim(), MAX_MISSING_DATA_TEXT_LENGTH) } : {}),
+              ...(isMissingDataReason(why) ? { why } : {}),
+              ...(wouldDecide
+                ? { would_decide: truncate(wouldDecide.trim(), MAX_MISSING_DATA_TEXT_LENGTH) }
+                : {}),
+            })),
+        }
+      : {}),
     ...(rawProposals !== undefined
       ? {
           proposals: rawProposals
@@ -265,21 +300,24 @@ export const limitFindings = (output: FindingsOutput): FindingsRecord => {
             })),
         }
       : {}),
-    hypotheses: rawHypotheses.slice(0, MAX_HYPOTHESES).map(({ evidence, ...hypothesis }) => {
-      const kept = (evidence ?? [])
-        .map(limitEvidence)
-        .filter((item): item is InvestigationEvidence => item !== undefined)
-        .slice(0, MAX_HYPOTHESIS_EVIDENCE_ITEMS);
-      return {
-        ...hypothesis,
-        candidate: truncate(hypothesis.candidate, MAX_EVIDENCE_TEXT_LENGTH),
-        confidence: Math.min(1, Math.max(0, hypothesis.confidence)),
-        ...(hypothesis.reason !== undefined
-          ? { reason: truncate(hypothesis.reason, MAX_EVIDENCE_TEXT_LENGTH) }
-          : {}),
-        ...(kept.length ? { evidence: kept } : {}),
-      };
-    }),
+    hypotheses: rawHypotheses
+      .slice(0, MAX_HYPOTHESES)
+      .map(({ evidence, settled_by: settledBy, ...hypothesis }) => {
+        const kept = (evidence ?? [])
+          .map(limitEvidence)
+          .filter((item): item is InvestigationEvidence => item !== undefined)
+          .slice(0, MAX_HYPOTHESIS_EVIDENCE_ITEMS);
+        return {
+          ...hypothesis,
+          candidate: truncate(hypothesis.candidate, MAX_EVIDENCE_TEXT_LENGTH),
+          confidence: Math.min(1, Math.max(0, hypothesis.confidence)),
+          ...(hypothesis.reason !== undefined
+            ? { reason: truncate(hypothesis.reason, MAX_EVIDENCE_TEXT_LENGTH) }
+            : {}),
+          ...(settledBy ? { settled_by: truncate(settledBy, MAX_EVIDENCE_TEXT_LENGTH) } : {}),
+          ...(kept.length ? { evidence: kept } : {}),
+        };
+      }),
   };
 };
 
@@ -374,7 +412,7 @@ export const FINDINGS_JSON_SCHEMA = {
     verdict: {
       type: 'string',
       description:
-        'Only when the agent has given its final answer: the most likely cause. At most 70 words of Markdown: a lead sentence of at most 25 words, then at most three short bullets. Starts with Cause not confirmed: when no hypothesis is confirmed. Omit while the investigation is still running.',
+        'Only when the agent has given its final answer: the most likely cause. At most 70 words of Markdown: a lead sentence of at most 25 words, then at most three short bullets. Starts with Cause not confirmed: when no hypothesis is confirmed, and then its last bullet is Missing: followed by the most decisive gap from missing_data (at most 16 words after Missing:). Omit while the investigation is still running.',
     },
     severity: {
       type: 'string',
@@ -435,6 +473,29 @@ export const FINDINGS_JSON_SCHEMA = {
         required: ['title', 'comment'],
       },
     },
+    missing_data: {
+      type: 'array',
+      description:
+        'Only when the verdict starts with Cause not confirmed: at most 3 gaps in the data that kept the cause from being confirmed, the most decisive first. Only gaps the conversation shows (a failed query, a 403, an empty result, a source never checked). Never guess.',
+      items: {
+        type: 'object',
+        properties: {
+          what: { type: 'string', description: 'The data that is missing, in a few words.' },
+          source: { type: 'string', description: 'Where it would come from.' },
+          why: {
+            type: 'string',
+            enum: MISSING_DATA_REASONS,
+            description:
+              'no_access: a permission or connector error. not_retained: gone or empty for the window. not_collected: the source does not record it. not_queried: not checked yet.',
+          },
+          would_decide: {
+            type: 'string',
+            description: 'At most 15 words: the question the data would settle.',
+          },
+        },
+        required: ['what', 'why'],
+      },
+    },
     hypotheses: {
       type: 'array',
       description:
@@ -453,6 +514,11 @@ export const FINDINGS_JSON_SCHEMA = {
             type: 'string',
             description:
               'Two Markdown lines: **Tested:** what was checked, against which signal and window, then **Result:** what the data showed, ending in Confirmed, Dismissed or Unresolved. Under 600 characters.',
+          },
+          settled_by: {
+            type: 'string',
+            description:
+              'Only while the status is investigating: one line, at most 20 words, saying what observation would settle it: Refuted if <signal> <comparison> <threshold> in <window>; confirmed if <the opposite>. Use only signals, numbers and windows from the conversation. Always state the test, even if the data to run it is missing; then end with Needs <the data>. Without a basis for a number, give the signal and direction only, or write No clear test yet.',
           },
           evidence: {
             type: 'array',

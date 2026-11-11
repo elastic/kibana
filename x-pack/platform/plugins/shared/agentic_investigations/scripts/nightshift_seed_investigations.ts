@@ -52,6 +52,7 @@ import {
   INVESTIGATIONS_INTERNAL_URL,
   SUBJECT_ATTACHMENT_TYPE,
   SUBJECT_INDEX_NAME,
+  serializeMissingData,
 } from '../common';
 import type {
   AlertSubjectSnapshot,
@@ -61,6 +62,7 @@ import type {
   Hypothesis,
   Impact,
   ImpactEntity,
+  MissingDataItem,
   InvestigationEvidence,
   InvestigationHypotheses,
   InvestigationMetadataStatus,
@@ -115,6 +117,8 @@ interface Scenario {
   subject: SeedSubject;
   triggerType: InvestigationSubjectTriggerType;
   hypotheses?: Hypothesis[];
+  /** What kept the cause unconfirmed (`metadata.missing_data`). */
+  missingData?: MissingDataItem[];
   impact?: SeedImpact;
   proposals: SeedProposal[];
   createdMinutesAgo: number;
@@ -195,6 +199,12 @@ const hypothesis = (
   ...(evidences.length > 0 && { evidence: evidences }),
 });
 
+/** An open hypothesis states what would settle it. */
+const withSettledBy = (base: Hypothesis, settledBy: string): Hypothesis => ({
+  ...base,
+  settled_by: settledBy,
+});
+
 /** `proposals.create` takes a confidence level, not a score. */
 const toConfidenceLevel = (score: number): ProposalConfidence =>
   score >= 0.85 ? 'high' : score >= 0.7 ? 'medium' : 'low';
@@ -240,6 +250,7 @@ const completed = ({
   summary,
   verdict,
   hypotheses,
+  missingData,
   recommendations = [],
   impact,
 }: {
@@ -253,6 +264,7 @@ const completed = ({
   summary: string;
   verdict: string;
   hypotheses?: Hypothesis[];
+  missingData?: MissingDataItem[];
   recommendations?: SeedProposal[];
   impact: SeedImpact;
 }): Scenario => ({
@@ -264,6 +276,7 @@ const completed = ({
   subject,
   triggerType,
   hypotheses,
+  missingData,
   impact,
   proposals: recommendations,
   createdMinutesAgo: minutesAgo + durationMinutes,
@@ -709,6 +722,79 @@ const SCENARIOS: Scenario[] = [
         entity('checkout-frontend', 'service', 'logs.checkout-frontend'),
         entity('edge-proxy', 'service', 'logs.edge-proxy'),
       ],
+    },
+  }),
+  // Cause not confirmed: open hypotheses say what would settle them, and the conclusion lists the
+  // data that was missing.
+  completed({
+    severity: 'medium',
+    title: 'Checkout SLO burn rate above threshold',
+    subject: {
+      type: 'alert',
+      id: 'alert-checkout-slo-burn',
+      summary: 'Checkout availability SLO burn rate above 14.4',
+      snapshot: alertSnapshot(
+        'alert-checkout-slo-burn',
+        'Checkout availability SLO burn rate above 14.4',
+        'The 1h burn rate on checkout availability is 18.2, above the threshold of 14.4.',
+        150
+      ),
+    },
+    minutesAgo: 140,
+    durationMinutes: 18,
+    summary:
+      'The checkout availability SLO burned its error budget 18x faster than allowed for about 40 minutes from 11:20 UTC.',
+    verdict:
+      'Cause not confirmed: the 5xx rate on checkout-frontend rose from **0.4%** to **6.1%** at 11:20 UTC, but nothing in the available telemetry explains why.\n- Ruled out: the 10:45 deploy (errors started 35 minutes later) and the payment-gateway (P99 flat at 180ms).\n- Missing: upstream inventory-service logs from the logs-prod index (no access), needed to confirm the dependency theory.',
+    hypotheses: [
+      withSettledBy(
+        hypothesis(
+          'inventory-service dependency failing',
+          0.55,
+          'investigating',
+          'Tested: error traces on checkout-frontend. Result: 82% of the 5xx spans end in a call to inventory-service, but its own logs could not be read.'
+        ),
+        'Refuted if inventory-service error rate stays under 1% in 11:20-12:00; confirmed if it exceeds 5%.'
+      ),
+      withSettledBy(
+        hypothesis(
+          'Retry storm from a mobile client release',
+          0.25,
+          'investigating',
+          'Tested: request volume by user agent. Result: volume is up 9%, mostly one app version, which is too small to explain 6% errors alone.'
+        ),
+        'Refuted if requests per second from that app version are flat across 11:00-11:40; confirmed if they double.'
+      ),
+      hypothesis(
+        'checkout-frontend deploy at 10:45',
+        0.1,
+        'dismissed',
+        'Errors began 35 minutes after the rollout and affected pods on both the old and new versions.'
+      ),
+      hypothesis(
+        'payment-gateway latency',
+        0.05,
+        'dismissed',
+        'payment-gateway P99 stayed at 180ms throughout the window.'
+      ),
+    ],
+    missingData: [
+      {
+        what: 'inventory-service logs',
+        source: 'logs-prod index',
+        why: 'no_access',
+        would_decide: 'whether the dependency is the cause',
+      },
+      {
+        what: 'client app version breakdown',
+        source: 'mobile analytics',
+        why: 'not_collected',
+        would_decide: 'whether the retry storm theory holds',
+      },
+    ],
+    impact: {
+      summary: 'About 6% of checkout requests failed for 40 minutes. Shoppers had to retry.',
+      entities: [entity('checkout-frontend', 'service', 'logs.checkout-frontend')],
     },
   }),
   // Just started: no findings and no title yet, so the UI names it after its subject.
@@ -1232,6 +1318,7 @@ const seedScenario = async (
       ...(scenario.severity && { severity: scenario.severity }),
       ...(scenario.summary && { summary: scenario.summary }),
       ...(scenario.verdict && { verdict: scenario.verdict }),
+      ...(scenario.missingData && { missing_data: serializeMissingData(scenario.missingData) }),
     },
   });
 
