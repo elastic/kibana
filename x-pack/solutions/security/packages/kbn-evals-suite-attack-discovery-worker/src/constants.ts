@@ -110,12 +110,18 @@ export const FLOOR_TICK_CANCEL_TIMEOUT_MS = 60_000;
 export const SEED_WINDOW_MS = 20 * 60_000;
 export const SEED_WINDOW_END_OFFSET_MS = 60_000;
 
-export const RUNNER_TIMEOUT_MS = 40 * 60_000;
-export const REVIEW_SETTLE_TIMEOUT_MS = 20 * 60_000;
+/**
+ * Per-row budget, sized from observed runs rather than worst-case stack stalls: the runner
+ * (generation + floor round-trip) finishes well inside 15 minutes for the tier models, and the
+ * review settle inside 10. These are still generous ceilings — a row that exceeds them is stuck,
+ * not slow, and should fail with the suite's labeled timeout.
+ */
+export const RUNNER_TIMEOUT_MS = 15 * 60_000;
+export const REVIEW_SETTLE_TIMEOUT_MS = 10 * 60_000;
 export const POLL_INTERVAL_MS = 5_000;
 
 /** Per row, on top of the runner and review timeouts: seeding, cleanup and the judge calls. */
-export const ROW_OVERHEAD_MS = 10 * 60_000;
+export const ROW_OVERHEAD_MS = 5 * 60_000;
 
 /**
  * Playwright runs every row inside one test, so its timeout has to cover each row hitting its own
@@ -129,6 +135,5 @@ export const getPlaywrightTestTimeoutMs = (rowCount: number): number =>
   2 * FLOOR_IDLE_WAIT_MS;
 
 export const COHORT_ENV = 'AD_WORKER_EVAL_COHORT';
-export const REFERENCE_MODEL_ENV = 'AD_WORKER_EVAL_REFERENCE_MODEL';
 /** Comma-separated scenario ids; when set, the spec scores only those rows (a focused run). */
 export const SCENARIOS_ENV = 'AD_WORKER_EVAL_SCENARIOS';

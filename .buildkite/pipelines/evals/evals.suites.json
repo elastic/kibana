@@ -538,7 +538,7 @@
       "ciLabels": [
         "evals:security-attack-discovery-worker"
       ],
-      "stepTimeoutInMinutes": 555,
+      "stepTimeoutInMinutes": 270,
       "serverConfigSet": "evals_attack_discovery_worker",
       "requiredModelGroups": [
         "eis/openai-gpt-6-sol",
