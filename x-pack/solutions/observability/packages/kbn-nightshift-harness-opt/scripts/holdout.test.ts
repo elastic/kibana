@@ -8,8 +8,21 @@
 import { checkHoldout, holdoutReward } from './holdout';
 import type { RunSummary, TaskRun } from './runner';
 
-const run = (seedId: string, reward: number | null, executionSuccess = true): TaskRun =>
-  ({ seedId, caseId: seedId, reward, executionSuccess, costUsd: 0.5, rollout: 0 } as TaskRun);
+const run = (
+  seedId: string,
+  reward: number | null,
+  executionSuccess = true,
+  leaked = false
+): TaskRun =>
+  ({
+    seedId,
+    caseId: seedId,
+    reward,
+    executionSuccess,
+    leaked,
+    costUsd: 0.5,
+    rollout: 0,
+  } as TaskRun);
 
 const summary = (hash: string, runs: TaskRun[]): RunSummary =>
   ({
@@ -23,10 +36,9 @@ const summary = (hash: string, runs: TaskRun[]): RunSummary =>
   } as RunSummary);
 
 describe('holdoutReward', () => {
-  it('averages goal and cause, zeroes leakage, and is unscored without an answer', () => {
-    expect(holdoutReward({ goalPass: 1, causeCompleteness: 0.5, leaked: false })).toBe(0.75);
-    expect(holdoutReward({ goalPass: 1, causeCompleteness: 1, leaked: true })).toBe(0);
-    expect(holdoutReward({ goalPass: 0, causeCompleteness: null, leaked: false })).toBeNull();
+  it('averages goal and cause, and is unscored without an answer', () => {
+    expect(holdoutReward({ goalPass: 1, causeCompleteness: 0.5 })).toBe(0.75);
+    expect(holdoutReward({ goalPass: 0, causeCompleteness: null })).toBeNull();
   });
 });
 
@@ -68,5 +80,20 @@ describe('checkHoldout', () => {
     });
     expect(result.passed).toBe(false);
     expect(result.reasons.join()).toMatch(/execution success/);
+  });
+
+  it('fails when the candidate leaks on two more incidents', () => {
+    const result = checkHoldout({
+      incumbent: summary(
+        'a',
+        seeds.map((seed) => run(seed, 0.5))
+      ),
+      candidate: summary(
+        'b',
+        seeds.map((seed, i) => run(seed, 0.5, true, i < 2))
+      ),
+    });
+    expect(result.passed).toBe(false);
+    expect(result.reasons.join()).toMatch(/leakage/);
   });
 });

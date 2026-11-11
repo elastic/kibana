@@ -38,20 +38,19 @@ const asScore = (value: unknown): number | null => (typeof value === 'number' ? 
 
 /**
  * `0.5 · goal_pass + 0.5 · cause_completeness`, both against the incident's reference answer.
- * A run that read the humans' diagnosis (`rca_anti_leakage` = 0) scores 0: it answered from the
- * post-mortem, not the telemetry. Unscored when the investigation produced no answer.
+ * Unscored when the investigation produced no answer. Leakage is guarded separately
+ * (`checkHoldout`): zeroing the reward on it made one judge call swing an incident from 1 to 0,
+ * and the judge also flags evidence that merely postdates the alert, such as today's \`main\`.
  */
 export const holdoutReward = ({
   goalPass,
   causeCompleteness,
-  leaked,
 }: {
   goalPass: number | null;
   causeCompleteness: number | null;
-  leaked: boolean;
 }): number | null => {
   if (goalPass === null || causeCompleteness === null) return null;
-  return leaked ? 0 : 0.5 * goalPass + 0.5 * causeCompleteness;
+  return 0.5 * goalPass + 0.5 * causeCompleteness;
 };
 
 /** Runs the customer0 holdout on a lane, then puts nothing back: the next ORCA run resets it. */
@@ -139,7 +138,7 @@ export const runHoldoutVariant = ({
         const goalPass = asScore(goal.score);
         const causeCompleteness = asScore(cause.score);
         const leaked = asScore(leakage.score) === 0;
-        const reward = holdoutReward({ goalPass, causeCompleteness, leaked });
+        const reward = holdoutReward({ goalPass, causeCompleteness });
         const usage = output.usage;
         const tracePath = Path.join(traceDir, `${task.caseId}.json`);
         Fs.writeFileSync(
@@ -180,9 +179,11 @@ export const runHoldoutVariant = ({
           rollout: 0,
           question: example.input.question,
           plausibleFlags: [],
-          // goal_pass in the accuracy slot, so the shared summary reports it.
+          // goal_pass in the accuracy slot and leakage in the hallucination slot, so the shared
+          // summary reports both.
           rcaAccuracy: goalPass,
-          hallucination: null,
+          hallucination: leaked ? 1 : 0,
+          leaked,
           control_score: null,
           reward,
           executionSuccess: !output.execution_error,
@@ -234,23 +235,32 @@ export interface HoldoutResult {
   candidateReward: number;
   incumbentExecutionSuccess: number;
   candidateExecutionSuccess: number;
+  incumbentLeaked: number;
+  candidateLeaked: number;
   reasons: string[];
 }
 
 /**
  * Non-inferiority on the holdout: the gate already showed the candidate is better on ORCA, so here
  * it only must not be clearly worse. Paired bootstrap over incidents (one run each); fails when the
- * CI's low end is below `-margin`, or when more than one extra incident ends without an answer.
+ * CI's low end is below `-margin`, when more than one extra incident ends without an answer, or
+ * when the candidate reads post-incident evidence on `maxExtraLeaks` or more extra incidents.
  */
 export const checkHoldout = ({
   incumbent,
   candidate,
   margin = 0.1,
+  maxExtraLeaks = 2,
 }: {
   incumbent: RunSummary;
   candidate: RunSummary;
   margin?: number;
+  maxExtraLeaks?: number;
 }): HoldoutResult => {
+  const leaks = ({ runs }: RunSummary) =>
+    new Set(runs.filter((r) => r.leaked).map((r) => r.seedId));
+  const incumbentLeaked = leaks(incumbent).size;
+  const candidateLeaked = leaks(candidate).size;
   const paired = gateCandidate({ incumbent, candidate });
   const incidents = paired.seeds || 1;
   const reasons: string[] = [];
@@ -270,8 +280,15 @@ export const checkHoldout = ({
       )} to ${candidate.executionSuccessRate.toFixed(2)}`
     );
   }
+  if (candidateLeaked - incumbentLeaked >= maxExtraLeaks) {
+    reasons.push(
+      `holdout leakage rose from ${incumbentLeaked} to ${candidateLeaked} incidents (post-incident evidence)`
+    );
+  }
   return {
     passed: reasons.length === 0,
+    incumbentLeaked,
+    candidateLeaked,
     incidents: paired.seeds,
     meanDelta: paired.meanDelta,
     ciLow: paired.ciLow,

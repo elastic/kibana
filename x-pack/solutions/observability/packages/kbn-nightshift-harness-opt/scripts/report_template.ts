@@ -335,6 +335,7 @@ function viewRounds() {
       ['incidents', round.holdout.incidents],
       ['reward', n(round.holdout.incumbentReward) + ' → ' + n(round.holdout.candidateReward)],
       ['execution', pct(round.holdout.incumbentExecutionSuccess) + ' → ' + pct(round.holdout.candidateExecutionSuccess)],
+      ['leaked', (round.holdout.incumbentLeaked ?? '?') + ' → ' + (round.holdout.candidateLeaked ?? '?'), round.holdout.candidateLeaked > round.holdout.incumbentLeaked ? 'bad' : 'muted'],
     ]) + (round.holdout.reasons.length ? '<p class="bad">' + esc(round.holdout.reasons.join(' · ')) + '</p>' : '') : '') +
     '<h3>What changed</h3>' + renderDiff(round.diff, round.filesChanged) +
     '<h3>Why (proposer rationale)</h3><pre>' + esc(round.rationale || '—') + '</pre>' +

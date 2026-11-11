@@ -65,6 +65,8 @@ export interface TaskRun {
   llmCalls: number;
   latencyMs: number;
   costUsd: number;
+  /** Holdout only: the anti-leakage judge found post-incident evidence in the trajectory. */
+  leaked?: boolean;
   /** Full trajectory, report and scores on disk, for the proposer bundle. */
   tracePath: string;
 }
