@@ -6,9 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
+import type {
+  AppDeepLinkLocations,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { ManagementApp, ManagementSetup } from '@kbn/management-plugin/public';
 import type { IndexManagementPluginSetup } from '@kbn/index-management-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataViewsPublicPluginSetup } from '@kbn/data-views-plugin/public/types';
@@ -28,6 +35,12 @@ export interface RollupPluginSetupDependencies {
 }
 
 export class RollupPlugin implements Plugin {
+  private readonly appVisibleIn$ = new BehaviorSubject<AppDeepLinkLocations[]>([
+    'globalSearch',
+    'projectSideNav',
+  ]);
+  private managementApp?: ManagementApp;
+
   constructor(private ctx: PluginInitializerContext) {}
 
   setup(
@@ -70,10 +83,11 @@ export class RollupPlugin implements Plugin {
         defaultMessage: 'Rollup Jobs',
       });
 
-      management.sections.section.data.registerApp({
+      this.managementApp = management.sections.section.data.registerApp({
         id: 'rollup_jobs',
         title: pluginName,
         order: 4,
+        visibleIn$: this.appVisibleIn$,
         async mount(params) {
           const [coreStart] = await core.getStartServices();
 
@@ -100,5 +114,19 @@ export class RollupPlugin implements Plugin {
     setHttp(core.http);
     setNotifications(core.notifications);
     initDocumentation(core.docLinks);
+
+    if (this.managementApp && core.application.capabilities.management?.data?.rollup_jobs) {
+      void core.http
+        .get<{ jobs: Array<{ id: string }> }>('/api/rollup/jobs')
+        .then(({ jobs }) => {
+          if (jobs.length === 0) {
+            this.managementApp?.disable();
+            this.appVisibleIn$.next([]);
+          }
+        })
+        .catch(() => {
+          // Keep the app available if the jobs request fails.
+        });
+    }
   }
 }
