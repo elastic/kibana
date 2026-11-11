@@ -44,6 +44,8 @@ export interface Run {
   finishedAt?: string;
   duration?: number;
   triggeredBy?: string;
+  executedBy?: string;
+  executedByDisplayName?: string;
   title?: string;
   message?: string;
   investigationId?: string;
@@ -87,11 +89,24 @@ const labels = {
   }),
 };
 
-const getSkippedRunSummary = (
-  { skipReason, triggeredBy, dailyLimit }: Run,
-  fallbackSource: string
-) => {
-  const source = triggeredBy ?? fallbackSource;
+export const getRunSourceLabel = (
+  { triggeredBy, executedByDisplayName }: Run,
+  fallback = '—'
+): string => {
+  if (triggeredBy !== 'manual') return triggeredBy ?? fallback;
+  return executedByDisplayName
+    ? i18n.translate('xpack.nightshift.automations.detail.manualRunByLabel', {
+        defaultMessage: 'Manual · {user}',
+        values: { user: executedByDisplayName },
+      })
+    : i18n.translate('xpack.nightshift.automations.detail.manualRunLabel', {
+        defaultMessage: 'Manual',
+      });
+};
+
+const getSkippedRunSummary = (run: Run, fallbackSource: string) => {
+  const { skipReason, dailyLimit } = run;
+  const source = getRunSourceLabel(run, fallbackSource);
   if (skipReason === 'investigation_limit') {
     return i18n.translate('xpack.nightshift.automations.detail.skippedInvestigationLimitSummary', {
       defaultMessage: '{source} · Deployment-wide investigation limit reached',
@@ -582,6 +597,9 @@ export const RunHistory = ({
                       <EuiText size="s" className="eui-textTruncate">
                         <strong>{run.title || labels.automationRun}</strong>
                       </EuiText>
+                      {run.triggeredBy === 'manual' && (
+                        <EuiText size="xs">{getRunSourceLabel(run)}</EuiText>
+                      )}
                       <EuiText size="xs" color="subdued" className="eui-textTruncate">
                         {run.status === 'skipped'
                           ? getSkippedRunSummary(run, labels.trigger)

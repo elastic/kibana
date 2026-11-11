@@ -552,7 +552,7 @@ describe('HTTPAuthenticationProvider', () => {
         expect(result.authHeaders).toEqual({ authorization: `Bearer ${token}` });
         expect(client.asScoped).toHaveBeenLastCalledWith(request);
         if (token === 'essu_service_account_initial') {
-          await registry.ensureFreshToken(fakeRequest, 0);
+          await registry.ensureFreshToken(fakeRequest, 0, 'reauthenticate');
         }
       }
 

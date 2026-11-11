@@ -94,9 +94,12 @@ const ENABLE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.enable.
   defaultMessage: 'Enable Elastic nightshift',
 });
 
-const AUTOMATE_SECTION_TITLE = i18n.translate('xpack.nightshift.onboarding.automate.trialTitle', {
-  defaultMessage: 'Your first investigation',
-});
+const AUTOMATE_SECTION_TITLE = i18n.translate(
+  'xpack.nightshift.onboarding.automate.tryFirstInvestigationTitle',
+  {
+    defaultMessage: 'Try first investigation',
+  }
+);
 
 /**
  * First-run Nightshift: enable the space, add telemetry data, connect other sources, try a first
@@ -111,7 +114,7 @@ export function NightshiftOnboarding({
 }: {
   latestInvestigation?: InvestigationSummary;
   automationsHref?: string;
-  /** "I'll do it later" on the last step. */
+  /** "Skip this step" / Done on the last step. */
   onFinish: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -301,7 +304,7 @@ export function NightshiftOnboarding({
           onClick={() => setStepOverride(undefined)}
           data-test-subj="nightshiftOnboardingProceedToAutomationButton"
         >
-          {PROCEED_LABEL}
+          {SKIP_LABEL}
         </EuiButton>
       )
     ) : step === 'automate' ? (
@@ -320,9 +323,7 @@ export function NightshiftOnboarding({
           ? i18n.translate('xpack.nightshift.onboarding.doneButton', {
               defaultMessage: 'Done',
             })
-          : i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
-              defaultMessage: "I'll do it later",
-            })}
+          : SKIP_LABEL}
       </EuiButton>
     ) : undefined;
 
@@ -360,7 +361,7 @@ export function NightshiftOnboarding({
       )}
       {sectionTitle && (
         <>
-          <EuiTitle size={step === 'automate' ? 'xs' : 's'}>
+          <EuiTitle size="xs">
             <h3 data-test-subj="nightshiftOnboardingStepTitle">{sectionTitle}</h3>
           </EuiTitle>
           <EuiSpacer size="m" />
@@ -395,6 +396,7 @@ export function NightshiftOnboarding({
           ) : (
             <OnboardingAutomationStep
               investigation={latestInvestigation}
+              isInvestigationSelected={selectedInvestigationId === latestInvestigation.id}
               automations={automations.data?.automations ?? []}
               automationsAvailable={automationsHref != null}
               onInvestigationClick={openInvestigation}
