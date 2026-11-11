@@ -19,7 +19,7 @@ interface LinkedInvestigationsBadgeProps {
 export const LinkedInvestigationsBadge = memo<LinkedInvestigationsBadgeProps>(
   ({ count, isDisabled = false }) => {
     const tooltipContent = i18n.translate(
-      'xpack.alertzero.escalationQueue.linkedInvestigationsTooltip',
+      'xpack.agenticInvestigations.escalationQueue.linkedInvestigationsTooltip',
       {
         defaultMessage:
           '{count, plural, one {# linked investigation} other {# linked investigations}}',

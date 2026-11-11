@@ -70,8 +70,8 @@ export interface EpisodeAction {
   isNavigationAction?: boolean;
   /**
    * Whether privileges for this action are enforced by the system it hands off
-   * to, so it stays visible without alerting write privilege. Defaults to
-   * `false` when omitted, which hides the action from read-only users.
+   * to, so it stays available without alerting write privilege. When `false`,
+   * the action is restricted to the episodes the user may modify.
    */
-  enforcesOwnPrivileges?: boolean;
+  enforcesOwnPrivileges: boolean;
 }

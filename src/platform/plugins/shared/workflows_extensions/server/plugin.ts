@@ -169,6 +169,12 @@ export class WorkflowsExtensionsServerPlugin
           'No workflows client provider set, using noop emitEvent to avoid errors. Trigger event ignored.'
         );
       },
+      resumeExternalHitl: async () => {
+        this.logger.warn(
+          'No workflows client provider set, using noop resumeExternalHitl to avoid errors. HITL resume ignored.'
+        );
+        throw new Error('Workflows client provider is not available');
+      },
       managedWorkflows: {
         install: async () => {
           this.logger.warn(
@@ -208,6 +214,12 @@ export class WorkflowsExtensionsServerPlugin
           'No managed workflows system API provider set, using noop uninstall to avoid errors.'
         );
       },
+      disable: async () => {
+        this.logger.warn(
+          'No managed workflows system API provider set, using noop disable to avoid errors.'
+        );
+        return false;
+      },
       ready: async () => {
         this.logger.warn(
           'No managed workflows system API provider set, using noop ready to avoid errors.'
@@ -241,6 +253,7 @@ export class WorkflowsExtensionsServerPlugin
     return {
       install: systemClient.install,
       uninstall: systemClient.uninstall,
+      disable: systemClient.disable,
       ready: systemClient.ready,
       getWorkflowStatus: systemClient.getWorkflowStatus,
       getInstalledWorkflowState: systemClient.getInstalledWorkflowState,

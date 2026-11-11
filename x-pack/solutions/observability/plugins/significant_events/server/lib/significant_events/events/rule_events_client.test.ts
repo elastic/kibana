@@ -459,7 +459,7 @@ describe('RuleEventsClient', () => {
       );
     });
 
-    it('filters topologyFeatureIds via MV_INTERSECTS against causal_features.feature_id OR blast_radius.feature_id', async () => {
+    it('filters topologyFeatureIds via MV_INTERSECTS against feature ids and dependency endpoints', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
@@ -467,12 +467,14 @@ describe('RuleEventsClient', () => {
       await client.findLatestByCurrentStatePaginated({ topologyFeatureIds: ['feat-1'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
-      expect(q).toContain(
-        'MV_INTERSECTS(FIELD_EXTRACT(data, "causal_features.feature_id"), ["feat-1"])'
-      );
-      expect(q).toContain(
-        'MV_INTERSECTS(FIELD_EXTRACT(data, "blast_radius.feature_id"), ["feat-1"])'
-      );
+      for (const path of [
+        'causal_features.feature_id',
+        'blast_radius.feature_id',
+        'blast_radius.source',
+        'blast_radius.target',
+      ]) {
+        expect(q).toContain(`MV_INTERSECTS(FIELD_EXTRACT(data, "${path}"), ["feat-1"])`);
+      }
     });
 
     it('filters search, time range and status against the latest revision of each series', async () => {
@@ -573,6 +575,20 @@ describe('RuleEventsClient', () => {
         'EVAL sort_rank = CASE(severity == "critical", 4, severity == "high", 3, severity == "low", 1, 2)'
       );
       expect(commands).toContainEqual('SORT sort_rank DESC, created_at DESC, _id ASC');
+    });
+
+    it('sorts by the latest update timestamp', async () => {
+      const { client, query } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
+      );
+
+      await client.findLatestByCurrentStatePaginated({
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+      });
+
+      const { commands } = getPageRequest(query);
+      expect(commands).toContainEqual('SORT @timestamp DESC, created_at DESC, _id ASC');
     });
 
     it('sorts missing alert statuses as active', async () => {
@@ -1018,6 +1034,8 @@ describe('RuleEventsClient', () => {
       expect(q.indexOf('INLINE STATS created_at')).toBeLessThan(
         q.indexOf('@timestamp >= TO_DATETIME(?fromIso)')
       );
+      expect(q).toContain('COALESCE(`alert.status`, "active") IN ("active", "recovering")');
+      expect(q.indexOf('COALESCE(`alert.status`, "active")')).toBeLessThan(q.indexOf('LIMIT 500'));
       expect(q).toContain('SORT @timestamp DESC');
       expect(q).toContain(
         'MV_INTERSECTS(FIELD_EXTRACT(data, "signals.metadata.rule_uuid"), ["rule-A"])'
@@ -1103,6 +1121,55 @@ describe('RuleEventsClient', () => {
         ['event-1', 'active', 'confirms'],
         ['event-2', 'recovering', 'refutes'],
       ]);
+    });
+
+    describe('time bounds', () => {
+      const requestOf = (query: jest.Mock) => query.mock.calls[0][0] as EsqlRequest;
+      const LOOKBACK_FILTER = '@timestamp >= TO_DATETIME(?lookbackIso)';
+      const FROM_FILTER = '@timestamp >= TO_DATETIME(?fromIso)';
+
+      it('applies a lookback after the lineage is aggregated, with its own parameter', async () => {
+        const { client, query } = createClient(async () => sourceResponse([]));
+
+        await client.findLiveMemberships({
+          ruleUuids: ['rule-A'],
+          lookback: '2026-08-01T00:00:00.000Z',
+        });
+
+        const { query: q, params } = requestOf(query);
+        expect(q.indexOf(LOOKBACK_FILTER)).toBeGreaterThan(-1);
+        expect(q.indexOf('INLINE STATS created_at')).toBeLessThan(q.indexOf(LOOKBACK_FILTER));
+        expect(q).not.toContain('?fromIso');
+        expect(params).toContainEqual({ lookbackIso: '2026-08-01T00:00:00.000Z' });
+      });
+
+      it('adds no time filter when neither bound is given', async () => {
+        const { client, query } = createClient(async () => sourceResponse([]));
+
+        await client.findLiveMemberships({ ruleUuids: ['rule-A'] });
+
+        expect(requestOf(query).query).not.toContain('@timestamp >=');
+      });
+
+      it('applies each bound at its own position with its own value when both are given', async () => {
+        const { client, query } = createClient(async () => sourceResponse([]));
+
+        await client.findLiveMemberships({
+          ruleUuids: ['rule-A'],
+          lookback: '2026-08-01T00:00:00.000Z',
+          from: '2026-10-01T00:00:00.000Z',
+        });
+
+        const { query: q, params } = requestOf(query);
+        expect(q.indexOf('INLINE STATS created_at')).toBeLessThan(q.indexOf(LOOKBACK_FILTER));
+        expect(q.indexOf(LOOKBACK_FILTER)).toBeLessThan(q.indexOf(FROM_FILTER));
+        expect(params).toEqual(
+          expect.arrayContaining([
+            { lookbackIso: '2026-08-01T00:00:00.000Z' },
+            { fromIso: '2026-10-01T00:00:00.000Z' },
+          ])
+        );
+      });
     });
   });
 
@@ -1208,9 +1275,11 @@ describe('RuleEventsClient', () => {
       ...overrides,
     });
     const makeWriter = () =>
-      ({ createAlertEvent: jest.fn().mockResolvedValue(undefined) } as jest.Mocked<
-        Pick<AlertEventsClientApi, 'createAlertEvent'>
-      >);
+      ({
+        createAlertEvent: jest
+          .fn()
+          .mockResolvedValue({ group_hash: 'hash-1', alert_id: 'alert-1' }),
+      } as jest.Mocked<Pick<AlertEventsClientApi, 'createAlertEvent'>>);
     const clientWith = ({
       head,
       writer,
@@ -1225,13 +1294,14 @@ describe('RuleEventsClient', () => {
         { getAlertEventsClient: async () => writer as AlertEventsClientApi, emitTrigger }
       );
 
-    it('createEvent writes the version without reading the head, and notifies its creation', async () => {
+    it('createEvent writes without reading the head, returns its series identity, and notifies its creation', async () => {
       const writer = makeWriter();
       const emitTrigger = jest.fn();
       const client = clientWith({ writer, emitTrigger });
 
-      await client.createEvent({ event: version() });
+      const result = await client.createEvent({ event: version() });
 
+      expect(result).toEqual({ groupHash: 'hash-1', alertId: 'alert-1' });
       expect(writer.createAlertEvent).toHaveBeenCalledWith(
         expect.objectContaining({ fingerprint: 'agent-event-1' })
       );

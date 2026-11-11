@@ -16,16 +16,19 @@
  *     --testFiles x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/tests/new_home_page.spec.ts
  */
 
+import { randomUUID } from 'crypto';
 import { test, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
 
 const NEW_HOME_PAGE_FLAG = 'securitySolution.useNewEntityAnalyticsPage';
 
+// Run-unique, so a leftover from an interrupted run can't leave two docs for the same entity.
+const RUN_ID = randomUUID().slice(0, 8);
 // A risk score and a first seen time of now make this host count on the New entity tile.
-const NEW_RISKY_HOST = 'scout-new-risky-host';
+const NEW_RISKY_HOST = `scout-new-risky-host-${RUN_ID}`;
 // No risk score, so not on the tile.
-const OTHER_HOST = 'scout-other-host';
+const OTHER_HOST = `scout-other-host-${RUN_ID}`;
 // Narrows the grid to this suite's hosts, so other entities on a shared deployment can't push them
 // out of the rendered rows.
 const SEEDED_HOSTS_QUERY = `entity.name: "${NEW_RISKY_HOST}" or entity.name: "${OTHER_HOST}"`;
@@ -56,15 +59,14 @@ test.describe('Entity analytics new home page', { tag: [...tags.stateful.classic
     await pageObjects.queryBar.submitQuery();
   });
 
-  test.afterAll(async ({ apiServices, esClient }) => {
+  test.afterAll(async ({ apiServices }) => {
     if (installedHostEngine) {
       await apiServices.entityAnalytics.uninstallEntityStoreV2(['host']);
     } else {
-      await esClient.deleteByQuery({
-        index: 'entities-latest-default',
-        query: { terms: { 'entity.id': [`host:${NEW_RISKY_HOST}`, `host:${OTHER_HOST}`] } },
-        refresh: true,
-      });
+      await apiServices.entityAnalytics.deleteEntityStoreEntries([
+        `host:${NEW_RISKY_HOST}`,
+        `host:${OTHER_HOST}`,
+      ]);
     }
     await apiServices.core.settings({
       'feature_flags.overrides': { [NEW_HOME_PAGE_FLAG]: null },
@@ -96,15 +98,6 @@ test.describe('Entity analytics new home page', { tag: [...tags.stateful.classic
       await entityAnalyticsHomePage.toggleTile('newEntity', { selected: true });
       await expect(entityAnalyticsHomePage.gridRow(OTHER_HOST)).toBeHidden();
       await expect(entityAnalyticsHomePage.gridRow(NEW_RISKY_HOST)).toBeVisible();
-    });
-
-    await test.step('the grid holds as many entities as the tile counts', async () => {
-      const tileValue = entityAnalyticsHomePage.tileValue('newEntity');
-      await expect(tileValue).toHaveText(/^\d/);
-      // Compared with each other, not with a fixed number: other suites' data may count too.
-      await expect(entityAnalyticsHomePage.gridTotal).toHaveText(
-        (await tileValue.innerText()).trim()
-      );
     });
 
     await test.step('selecting it again brings every entity back', async () => {

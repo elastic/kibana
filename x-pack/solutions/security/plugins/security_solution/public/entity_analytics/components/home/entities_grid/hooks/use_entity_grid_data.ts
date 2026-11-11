@@ -10,6 +10,7 @@ import { useQuery } from '@kbn/react-query';
 import type { UseQueryResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
+import { isMissingIndexError } from '../../is_missing_index_error';
 import type { QueryArgs, Row } from '../common';
 import { ANOMALY_COUNT_FIELD, ENTITY_GRID_QUERY_KEY, getNumber } from '../common';
 import { findSortPageFetcher } from '../grid_columns';
@@ -104,7 +105,11 @@ const fetchCount = async (
   countQuery: readonly string[],
   signal?: AbortSignal
 ): Promise<number> => {
-  const [countRow] = await createEsqlRunner(searchService, signal)(countQuery);
+  const [countRow] = await createEsqlRunner(
+    searchService,
+    'entities_grid_count',
+    signal
+  )(countQuery);
   return (countRow && getNumber(countRow, 'total')) ?? 0;
 };
 
@@ -118,7 +123,19 @@ const fetchRows = async (
   if (!fetchSortPage) throw new Error(`Column ${options.sortField} is not sortable`);
   const args = getQueryArgs(context, options);
   const rowsWithLookahead = await fetchSortPage(args, {
-    runQuery: createEsqlRunner(context.searchService, signal),
+    runQuery: createEsqlRunner(
+      context.searchService,
+      {
+        id: 'entities_grid_rows',
+        meta: {
+          rowsMode: options.rowsMode,
+          sortField: options.sortField,
+          sortDirection: options.sortDirection,
+          timeRange: options.timeRange,
+        },
+      },
+      signal
+    ),
   });
   return {
     rows: rowsWithLookahead.slice(0, args.pageSize),
@@ -178,7 +195,7 @@ export const useResolvedEntityOverrides = (
           concreteEntityIndexName: ready.concreteEntityIndexName,
           ...conditions,
         },
-        createEsqlRunner(context.searchService, signal)
+        createEsqlRunner(context.searchService, 'entities_grid_resolved_entity_overrides', signal)
       );
     },
     { enabled: !!conditions && ready != null }
@@ -276,19 +293,21 @@ export const useEntityGridData = (
   );
   const { rows, onRowsInViewChange } = enrichment;
   const prefetch = usePrefetch(context);
-  const error =
-    context.entitiesIndexError ??
-    resolvedEntityFilterOverrides.error ??
-    rowsQuery.error ??
-    countQuery.error ??
-    enrichment.error;
-  useErrorToast(GRID_QUERY_ERROR_TITLE, error);
+  // A missing index is empty data. Skip those and toast the first real failure.
+  const gridError = [
+    context.entitiesIndexError,
+    resolvedEntityFilterOverrides.error,
+    rowsQuery.error,
+    countQuery.error,
+    enrichment.error,
+  ].find((error) => error != null && !isMissingIndexError(error));
+  useErrorToast(GRID_QUERY_ERROR_TITLE, gridError);
   const loadState: EntityGridLoadState = {
     isRowsPending: isQueryPending(rowsQuery),
     isCountPending: isQueryPending(countQuery),
     // The first chunk asked for settles it: chunks that scrolling asks for later don't count.
     isEnrichPending: rows.length > 0 && !enrichment.hasEnrichedRows,
-    hasError: error != null || enrichment.hasFailedColumns,
+    hasError: gridError != null || enrichment.hasFailedColumns,
   };
 
   return {

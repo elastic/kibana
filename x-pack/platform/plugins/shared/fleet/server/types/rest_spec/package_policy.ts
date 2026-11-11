@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import {
   CreatePackagePolicyRequestBodySchema,
   DryRunPackagePolicySchema,
+  OnboardingDeploymentIdQuerySchema,
   PackagePolicyPackageSchema,
   PackagePolicyResponseSchema,
   PackagePolicyStatusResponseSchema,
@@ -17,7 +18,7 @@ import {
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
-import { inputsFormat } from '../../../common/constants';
+import { ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION, inputsFormat } from '../../../common/constants';
 
 import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
@@ -149,10 +150,14 @@ export const UpdatePackagePolicyRequestSchema = {
         meta: { description: 'Format for the response: simplified or legacy' },
       })
     ),
+    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
   }),
 };
 
 export const DeletePackagePoliciesRequestSchema = {
+  query: schema.object({
+    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
+  }),
   body: schema.object(
     {
       packagePolicyIds: schema.arrayOf(
@@ -210,6 +215,7 @@ export const DeleteOnePackagePolicyRequestSchema = {
         meta: { description: 'When true, delete the package policy even if it is managed' },
       })
     ),
+    onboarding_deployment_id: OnboardingDeploymentIdQuerySchema,
   }),
 };
 
@@ -228,6 +234,13 @@ export const UpgradePackagePoliciesRequestSchema = {
         }),
         { maxSize: 1000 }
       ),
+      acknowledge_breaking_changes: schema.boolean({
+        defaultValue: false,
+        meta: {
+          description: ACKNOWLEDGE_BREAKING_CHANGES_DESCRIPTION,
+          availability: { since: '9.5.0', stability: 'stable' },
+        },
+      }),
     },
     { meta: { id: 'upgrade_package_policies_request' } }
   ),

@@ -29,6 +29,7 @@ import type {
   PublishingSubject,
   SerializedTimeRange,
   SerializedTitles,
+  SupportsJsonExport,
 } from '@kbn/presentation-publishing';
 import type {
   DiscoverSessionTab,
@@ -117,7 +118,8 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiS
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
   Partial<CanOverrideHoverActions> &
   HasDrilldowns &
-  HasSupportedTriggers;
+  HasSupportedTriggers &
+  SupportsJsonExport;
 
 export interface PublishesSavedSearch {
   savedSearch$: PublishingSubject<SavedSearch>;

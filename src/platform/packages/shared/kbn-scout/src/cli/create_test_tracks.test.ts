@@ -882,6 +882,43 @@ describe('buildTrack', () => {
     expect(track.lanes[0].metadata.buildkite.agentQueue).toBe('n2-4-spot');
   });
 
+  it('never puts parallel and standard configs in the same lane', () => {
+    // Both fit into one lane, but sharing it would run the standard config on the bigger agent
+    const standardLoad = createTestLoad('standard/config.ts', 3000, 'standard');
+    const parallelLoad = createTestLoad('parallel/config.ts', 3000, 'parallel');
+
+    const track = buildTrack(100000, 0, testTarget, [standardLoad, parallelLoad], log);
+
+    expect(track.lanes.map((lane) => lane.loads.map((load) => load.id))).toEqual([
+      ['parallel/config.ts'],
+      ['standard/config.ts'],
+    ]);
+    expect(track.lanes.map((lane) => lane.metadata.buildkite.agentQueue)).toEqual([
+      'n2-8-spot',
+      'n2-4-spot',
+    ]);
+  });
+
+  it('packs each kind of config into as few lanes as fit and numbers the lanes in order', () => {
+    const track = buildTrack(
+      10000,
+      0,
+      testTarget,
+      [
+        createTestLoad('standard-a.ts', 4000),
+        createTestLoad('parallel-a.ts', 6000, 'parallel'),
+        createTestLoad('standard-b.ts', 4000),
+        createTestLoad('parallel-b.ts', 3000, 'parallel'),
+      ],
+      log
+    );
+
+    expect(track.lanes.map((lane) => [lane.number, lane.loads.map((load) => load.id)])).toEqual([
+      [1, ['parallel-a.ts', 'parallel-b.ts']],
+      [2, ['standard-a.ts', 'standard-b.ts']],
+    ]);
+  });
+
   it('distributes loads across multiple lanes when capacity is exceeded', () => {
     const loadA = createTestLoad('config-a.ts', 8000);
     const loadB = createTestLoad('config-b.ts', 8000);

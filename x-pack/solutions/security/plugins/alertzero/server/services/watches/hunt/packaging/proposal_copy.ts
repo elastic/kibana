@@ -63,13 +63,13 @@ const huntConfirmedText = (state: CurrentRunState, host?: CurrentRunHost): strin
 const evidenceSummaryText = (state: CurrentRunState): string | undefined => {
   const parts: string[] = [];
   if (state.evidence.tier1HitCount !== undefined) {
-    parts.push(`Tier 1 matched ${pluralize(state.evidence.tier1HitCount, 'event')}`);
+    parts.push(`IOC Hunt matched ${pluralize(state.evidence.tier1HitCount, 'event')}`);
   }
   if (state.evidence.tier2Confirmed.length > 0) {
     const techniques = state.evidence.tier2Confirmed
       .map((t) => `${t.techniqueId} (${pluralize(t.rowCount, 'row')})`)
       .join(' and ');
-    parts.push(`Tier 2 confirmed ${techniques}`);
+    parts.push(`Behavior Hunt confirmed ${techniques}`);
   } else if (state.techniques.length > 0) {
     parts.push(`Techniques: ${state.techniques.join(', ')}`);
   }
@@ -111,7 +111,7 @@ const processTechniqueText = (
       : `Implicated in ${label}, confirmed in the hunt window`;
   }
   return state.evidence.tier1HitCount !== undefined
-    ? `Observed during the report's confirmed hunt window (Tier 1 matched ${pluralize(
+    ? `Observed during the report's confirmed hunt window (IOC Hunt matched ${pluralize(
         state.evidence.tier1HitCount,
         'event'
       )})`

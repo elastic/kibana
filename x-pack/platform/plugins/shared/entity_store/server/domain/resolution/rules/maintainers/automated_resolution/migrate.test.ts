@@ -348,4 +348,44 @@ describe('automated-resolution state migration', () => {
     });
     expect(output.rules['custom:b']).toEqual({ lastProcessedTimestamp: watermark, lastRun: null });
   });
+
+  it('keeps the failure backoff of any rule, and drops malformed values', () => {
+    const watermark = '2026-10-01T00:00:00Z';
+    const failure = {
+      lastError: 'circuit_breaking_exception',
+      lastFailedAt: '2026-10-29T12:00:00.000Z',
+      consecutiveFailures: 3,
+      nextAttemptAt: '2026-10-29T12:20:00.000Z',
+    };
+    const output = migrate(
+      {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: {
+          [RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH]: {
+            lastProcessedTimestamp: watermark,
+            lastRun: null,
+            ...failure,
+          },
+          [RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE]: {
+            lastProcessedTimestamp: watermark,
+            lastRun: null,
+            lastFailedAt: 1761739200000,
+            consecutiveFailures: '3',
+            nextAttemptAt: null,
+          },
+        },
+      },
+      loggerMock.create()
+    );
+
+    expect(output.rules[RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH]).toEqual({
+      lastProcessedTimestamp: watermark,
+      lastRun: null,
+      ...failure,
+    });
+    expect(output.rules[RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE]).toEqual({
+      lastProcessedTimestamp: watermark,
+      lastRun: null,
+    });
+  });
 });
