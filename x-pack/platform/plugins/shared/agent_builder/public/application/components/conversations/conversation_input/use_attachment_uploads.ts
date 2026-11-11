@@ -140,7 +140,7 @@ export const useAttachmentUploads = ({
 
       const name = getUniqueName(defaultName, namesInUse);
       claimedNames.current.add(name);
-      if (isSupportedBinaryMimeType(mimeType)) {
+      if (isBinary) {
         handlePasteBinary?.(file, name, mimeType);
       } else {
         handlePasteTextFile?.(file, name);
