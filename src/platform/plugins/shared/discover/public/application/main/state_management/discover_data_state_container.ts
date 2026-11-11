@@ -618,13 +618,11 @@ export function getDataStateContainer({
               })
             );
 
-            // Replay can mix cached responses and server requests, so exclude it from fresh load timings.
-            if (!isReplayedLoad({ replayCacheLastFetched })) {
-              fetchAllTracker.reportEvent({
-                requestAdapter: inspectorAdapters.requests,
-                approximationApplied: dataSubjects.documents$.getValue().approximationApplied,
-              });
-            }
+            fetchAllTracker.reportEvent({
+              requestAdapter: inspectorAdapters.requests,
+              approximationApplied: dataSubjects.documents$.getValue().approximationApplied,
+              isReplayedLoad: isReplayedLoad({ replayCacheLastFetched }),
+            });
           }
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call

@@ -153,13 +153,11 @@ export function fetchAll(
           dataSource: fetchedDataSource,
           approximationApplied,
         }) => {
-          // Replay can mix cached responses and server requests, so exclude it from fresh load timings.
-          if (!isReplayedLoad(currentTab.dataRequestParams)) {
-            fetchAllRequestsOnlyTracker.reportEvent({
-              requestAdapter: inspectorAdapters.requests,
-              approximationApplied,
-            });
-          }
+          fetchAllRequestsOnlyTracker.reportEvent({
+            requestAdapter: inspectorAdapters.requests,
+            approximationApplied,
+            isReplayedLoad: isReplayedLoad(currentTab.dataRequestParams),
+          });
 
           if (isEsqlQuery) {
             const fetchStatus =

@@ -129,12 +129,12 @@ describe('test getDataStateContainer', () => {
       });
     });
 
-    test('reports the load performance only when the load is not a replay', async () => {
+    test('marks replayed loads on the performance events and still reports a later refresh', async () => {
       const { toolkit, tabId } = await setup();
-      const reportedEvents: string[] = [];
+      const reportedEvents: Array<{ eventName: string; isReplayedLoad?: boolean }> = [];
       trackQueryPerformanceEvent.mockImplementation(({ eventName }) => ({
-        reportEvent: () => {
-          reportedEvents.push(eventName);
+        reportEvent: ({ isReplayedLoad }) => {
+          reportedEvents.push({ eventName, isReplayedLoad });
         },
       }));
       const { dataStateContainer } = await toolkit.initializeSingleTab({ tabId });
@@ -143,10 +143,19 @@ describe('test getDataStateContainer', () => {
       );
 
       dataStateContainer.fetch();
-      await waitFor(() => expect(reportedEvents).toContain('discoverFetchAll'));
+      await waitFor(() =>
+        expect(reportedEvents).toContainEqual({
+          eventName: 'discoverFetchAll',
+          isReplayedLoad: false,
+        })
+      );
 
-      // Only the refresh reports: replay loads are excluded from these metrics.
-      expect(reportedEvents).toEqual(['discoverFetchAllRequestsOnly', 'discoverFetchAll']);
+      expect(reportedEvents).toEqual([
+        { eventName: 'discoverFetchAllRequestsOnly', isReplayedLoad: true },
+        { eventName: 'discoverFetchAll', isReplayedLoad: true },
+        { eventName: 'discoverFetchAllRequestsOnly', isReplayedLoad: false },
+        { eventName: 'discoverFetchAll', isReplayedLoad: false },
+      ]);
     });
   });
 
