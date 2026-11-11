@@ -46,6 +46,7 @@ import {
   CanvasConfigPanelShell,
   DEFAULT_CONFIG_PANEL_WIDTH,
   FIELD_EDITOR_EXPANDED_PANEL_WIDTH,
+  getDefaultConfigPanelWidth,
   MIN_CONFIG_PANEL_WIDTH,
   MIN_VISIBLE_CANVAS_PX,
 } from './canvas_config_panel_shell';
@@ -165,7 +166,8 @@ interface WorkflowVisualEditorStatefulProps {
 
 /** Floating read-only flyout inset from the canvas edges (top, right, bottom). */
 const PANEL_MARGIN = CANVAS_CONFIG_PANEL_MARGIN;
-const CONFIG_PANEL_WIDTH_STORAGE_KEY = 'workflows:configPanelWidth.v3';
+// v4: the default became responsive, so a width the old hook saved by default must not stick.
+const CONFIG_PANEL_WIDTH_STORAGE_KEY = 'workflows:configPanelWidth.v4';
 const FLASH_MS = 900;
 const INSERT_LAYOUT_MS = 300;
 /** Slide subsequent nodes, then flash the inserted node border. */
@@ -285,9 +287,9 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const { notifications, application, workflowsExtensions } = useKibana().services;
   // Persisted preferred width from manual resize only — not the temporary
   // bump used while the advanced field editor is open.
-  const [storedPanelWidth = DEFAULT_CONFIG_PANEL_WIDTH, setStoredPanelWidth] = useLocalStorage(
-    CONFIG_PANEL_WIDTH_STORAGE_KEY,
-    DEFAULT_CONFIG_PANEL_WIDTH
+  // No initial value, so nothing is saved until the user drags the panel edge.
+  const [storedPanelWidth, setStoredPanelWidth] = useLocalStorage<number>(
+    CONFIG_PANEL_WIDTH_STORAGE_KEY
   );
   const [canvasWidth, setCanvasWidth] = useState(
     typeof window !== 'undefined' ? window.innerWidth : DEFAULT_CONFIG_PANEL_WIDTH * 2
@@ -298,7 +300,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     canvasWidth - MIN_VISIBLE_CANVAS_PX - PANEL_MARGIN * 2
   );
   const preferredPanelWidth = Math.min(
-    Math.max(storedPanelWidth, MIN_CONFIG_PANEL_WIDTH),
+    Math.max(storedPanelWidth ?? getDefaultConfigPanelWidth(canvasWidth), MIN_CONFIG_PANEL_WIDTH),
     maxPanelWidth
   );
   // Advanced editor needs room for the catalog + value pane; that width is

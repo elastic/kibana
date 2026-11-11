@@ -17,7 +17,19 @@ export const CANVAS_CONFIG_PANEL_MARGIN = WORKFLOWS_CANVAS_CHROME_INSET;
 /** Minimum canvas remaining beside the panel (px). */
 export const MIN_VISIBLE_CANVAS_PX = 320;
 /** Default step/trigger config panel width — keep canvas readable beside it. */
-export const DEFAULT_CONFIG_PANEL_WIDTH = 400;
+export const DEFAULT_CONFIG_PANEL_WIDTH = 480;
+/** The widest default panel. A user can still drag it wider. */
+export const MAX_DEFAULT_CONFIG_PANEL_WIDTH = 640;
+
+/**
+ * The panel width before a user resizes it: about 38% of the canvas, between 480 and 640 px,
+ * so form rows with a name, a type, and badges fit on one line.
+ */
+export const getDefaultConfigPanelWidth = (canvasWidth: number): number =>
+  Math.min(
+    MAX_DEFAULT_CONFIG_PANEL_WIDTH,
+    Math.max(DEFAULT_CONFIG_PANEL_WIDTH, Math.round(canvasWidth * 0.38))
+  );
 export const MIN_CONFIG_PANEL_WIDTH = 360;
 /** Expanded field editor: catalog tree (~340) + value pane — not full-bleed. */
 export const FIELD_EDITOR_EXPANDED_PANEL_WIDTH = 900;
