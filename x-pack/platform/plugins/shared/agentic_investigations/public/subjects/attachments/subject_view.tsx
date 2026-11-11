@@ -69,14 +69,14 @@ const SubjectIcon = ({ iconType, tone }: { iconType: IconType; tone: SubjectIcon
         align-items: center;
         justify-content: center;
         box-sizing: border-box;
-        inline-size: ${euiTheme.size.l};
-        block-size: ${euiTheme.size.l};
+        inline-size: ${euiTheme.size.xl};
+        block-size: ${euiTheme.size.xl};
         border-radius: 50%;
         border: ${border};
         background: ${background};
       `}
     >
-      <EuiIcon type={iconType} size="s" color={color} aria-hidden={true} />
+      <EuiIcon type={iconType} size="m" color={color} aria-hidden={true} />
     </span>
   );
 };
@@ -126,15 +126,15 @@ const CompactRow = ({
 
   const rowStyles = css`
     display: grid;
-    grid-template-columns: ${euiTheme.size.l} minmax(0, 1fr) ${hasTrailingIcon ? 'auto' : ''};
+    grid-template-columns: ${euiTheme.size.xl} minmax(0, 1fr) ${hasTrailingIcon ? 'auto' : ''};
     column-gap: ${euiTheme.size.m};
     align-items: center;
     box-sizing: border-box;
     inline-size: 100%;
     margin: 0;
-    padding: ${euiTheme.size.base};
+    padding: ${euiTheme.size.m} ${euiTheme.size.base};
     ${isNested &&
-    `padding-inline-start: calc(${euiTheme.size.base} + ${euiTheme.size.m} + ${euiTheme.size.l});`}
+    `padding-inline-start: calc(${euiTheme.size.base} + ${euiTheme.size.xl} + ${euiTheme.size.m});`}
     border: none;
     background: transparent;
     color: inherit;
@@ -197,12 +197,12 @@ const CompactRow = ({
           {description}
         </EuiText>
       </span>
-      {onToggle !== undefined && <EuiIcon type={toggleIcon} size="s" color="subdued" aria-hidden />}
+      {onToggle !== undefined && <EuiIcon type={toggleIcon} size="m" color="subdued" aria-hidden />}
       {onToggle === undefined && opensFlyout && (
         <span css={trailingStyles}>
           <EuiIconTip
             type="maximize"
-            size="s"
+            size="m"
             color="subdued"
             content={OPEN_IN_FLYOUT}
             aria-label={OPEN_IN_FLYOUT}
@@ -214,7 +214,7 @@ const CompactRow = ({
         <span css={trailingStyles}>
           <EuiIconTip
             type="external"
-            size="s"
+            size="m"
             color="subdued"
             content={OPEN_NEW_TAB}
             aria-label={OPENS_IN_NEW_TAB}

@@ -94,7 +94,7 @@ export const HypothesisTreeCard = ({
           box-sizing: border-box;
           inline-size: 100%;
           margin: 0;
-          padding: ${euiTheme.size.base};
+          padding: ${euiTheme.size.m} ${euiTheme.size.base};
           border: ${euiTheme.border.thin};
           border-radius: ${euiTheme.size.m};
           background: transparent;
@@ -124,11 +124,16 @@ export const HypothesisTreeCard = ({
                 justify-content: center;
                 width: ${euiTheme.size.xl};
                 height: ${euiTheme.size.xl};
-                border-radius: ${euiTheme.border.radius.medium};
+                border-radius: 50%;
                 background: ${euiTheme.colors.backgroundBaseAssistance};
               `}
             >
-              <EuiIcon type="branch" color={euiTheme.colors.textAssistance} aria-hidden={true} />
+              <EuiIcon
+                type="branch"
+                size="m"
+                color={euiTheme.colors.textAssistance}
+                aria-hidden={true}
+              />
             </span>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -141,7 +146,7 @@ export const HypothesisTreeCard = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="chevronSingleRight" color="subdued" aria-hidden={true} />
+            <EuiIcon type="chevronSingleRight" size="m" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </button>
