@@ -16,7 +16,8 @@ import type {
   XYByReferenceAnnotationLayerConfig,
 } from '../../types';
 import { onSave, SaveModal } from './save_action';
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
+import { renderWithI18n as render } from '@kbn/test-jest-helpers';
+import { act } from '@testing-library/react';
 import type {
   EventAnnotationGroupConfig,
   PointInTimeEventAnnotationConfig,
@@ -25,6 +26,11 @@ import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+
+jest.mock('@kbn/saved-objects-plugin/public', () => ({
+  ...jest.requireActual('@kbn/saved-objects-plugin/public'),
+  SavedObjectSaveModal: jest.fn(() => null),
+}));
 
 const mockSave = jest.fn();
 
@@ -45,10 +51,14 @@ describe('annotation group save action', () => {
       newCopyOnSave: false,
     };
 
+    beforeEach(() => {
+      jest.mocked(SavedObjectSaveModal).mockClear();
+    });
+
     it('reports new saved object attributes', async () => {
       const onSaveMock = jest.fn();
       const savedObjectsTagging = taggingApiMock.create();
-      const wrapper = shallowWithIntl(
+      render(
         <SaveModal
           eventAnnotationService={getMockEventAnnotationService()}
           domElement={document.createElement('div')}
@@ -66,12 +76,22 @@ describe('annotation group save action', () => {
       const newDescription = 'description';
       const myTags = ['my', 'many', 'tags'];
 
-      (wrapper
-        .find(SavedObjectSaveModal)
-        .prop('options') as React.ReactElement)!.props.onTagsSelected(myTags);
+      const options = jest.mocked(SavedObjectSaveModal).mock.lastCall?.[0].options;
+      if (
+        !React.isValidElement<
+          React.ComponentProps<
+            typeof savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+          >
+        >(options)
+      ) {
+        throw new Error('Expected tag selector options');
+      }
 
-      // ignore the linter, you need this await statement
-      wrapper.find(SavedObjectSaveModal).prop('onSave')({
+      act(() => {
+        options.props.onTagsSelected(myTags);
+      });
+
+      await jest.mocked(SavedObjectSaveModal).mock.lastCall?.[0].onSave({
         newTitle,
         newDescription,
         ...modalSaveArgs,
@@ -102,7 +122,7 @@ describe('annotation group save action', () => {
       const description = 'my description';
       const tags = ['my', 'tags'];
 
-      const wrapper = shallowWithIntl(
+      render(
         <SaveModal
           eventAnnotationService={getMockEventAnnotationService()}
           domElement={document.createElement('div')}
@@ -116,14 +136,22 @@ describe('annotation group save action', () => {
         />
       );
 
-      const saveModal = wrapper.find(SavedObjectSaveModal);
+      const saveModal = jest.mocked(SavedObjectSaveModal).mock.lastCall?.[0];
 
-      expect(saveModal.prop('title')).toBe(title);
-      expect(saveModal.prop('description')).toBe(description);
-      expect(saveModal.prop('showCopyOnSave')).toBe(true);
-      expect((saveModal.prop('options') as React.ReactElement).props.initialSelection).toEqual(
-        tags
-      );
+      expect(saveModal?.title).toBe(title);
+      expect(saveModal?.description).toBe(description);
+      expect(saveModal?.showCopyOnSave).toBe(true);
+      const options = saveModal?.options;
+      if (
+        !React.isValidElement<
+          React.ComponentProps<
+            typeof savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+          >
+        >(options)
+      ) {
+        throw new Error('Expected tag selector options');
+      }
+      expect(options.props.initialSelection).toEqual(tags);
     });
   });
 
