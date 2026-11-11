@@ -38698,7 +38698,6 @@
     "xpack.ingestPipelines.createFromCsv.preview.jsonMapSuccessful": "Sie können das JSON speichern oder bearbeiten, bevor Sie die Pipeline generieren.",
     "xpack.ingestPipelines.createFromCsv.processFile.emptyFileError": "Die bereitgestellte Datei ist leer.",
     "xpack.ingestPipelines.createFromCsv.processFile.emptyFileErrorTitle": "Die Datei ist leer",
-    "xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeError": "Die Datei ist größer als die zulässige Größe von {maxBytes} Bytes.",
     "xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeErrorTitle": "Datei zu groß",
     "xpack.ingestPipelines.createFromCsv.processFile.unexpectedError": "Die bereitgestellte Datei konnte nicht gelesen werden.",
     "xpack.ingestPipelines.createFromCsv.processFile.unexpectedErrorTitle": "Fehler beim Lesen der Datei",

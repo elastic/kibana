@@ -38628,7 +38628,6 @@
     "xpack.ingestPipelines.createFromCsv.preview.jsonMapSuccessful": "Vous pouvez enregistrer ou modifier le JSON avant de générer le pipeline.",
     "xpack.ingestPipelines.createFromCsv.processFile.emptyFileError": "Le fichier fourni est vide.",
     "xpack.ingestPipelines.createFromCsv.processFile.emptyFileErrorTitle": "Fichier vide",
-    "xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeError": "Le fichier dépasse la taille autorisée de {maxBytes} octets.",
     "xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeErrorTitle": "Fichier trop volumineux",
     "xpack.ingestPipelines.createFromCsv.processFile.unexpectedError": "Impossible de lire le fichier fourni.",
     "xpack.ingestPipelines.createFromCsv.processFile.unexpectedErrorTitle": "Erreur lors de la lecture du fichier",
