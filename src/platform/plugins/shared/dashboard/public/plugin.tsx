@@ -68,6 +68,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
 import type { DashboardListingTab } from './dashboard_listing/types';
@@ -77,7 +78,6 @@ import {
   LANDING_PAGE_PATH,
   SEARCH_SESSION_ID,
 } from '../common/page_bundle_constants';
-import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { untilPluginStartServicesReady, setKibanaServices } from './services/kibana_services';
 import { dashboardAppClientApi$ } from './services/dashboard_app_client_api';
 import { getDashboardRecentlyAccessedService } from './services/dashboard_recently_accessed_service';
