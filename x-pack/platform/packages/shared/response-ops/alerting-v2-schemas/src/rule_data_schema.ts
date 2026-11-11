@@ -716,25 +716,27 @@ const TIME_FIELD_DESCRIPTION =
  */
 const timeFieldSchema = lazySchema(() => z.string().min(1).max(MAX_FIELD_NAME_LENGTH));
 
+const ENABLED_DESCRIPTIONS = {
+  create:
+    'Whether the rule is enabled. Defaults to `true` when omitted. A disabled rule is saved but does not run until you enable it.',
+  put: 'Whether the rule is enabled. When you omit this field, a new rule defaults to `true` and an existing rule keeps its current enabled state. A disabled rule is saved but does not run until you enable it.',
+} as const;
+
+type RuleWriteApi = keyof typeof ENABLED_DESCRIPTIONS;
+
 /**
  * Optional with no default because the meaning of "omitted"
  * differs by outcome: on create it defaults to `true`, on replace it preserves
  * the existing stored value.
  */
-const enabledSchema = lazySchema(() =>
-  z
-    .boolean()
-    .optional()
-    .describe(
-      'Whether the rule is enabled. Defaults to `true` when omitted. A disabled rule is saved but does not run until you enable it.'
-    )
-);
+const enabledSchema = (api: RuleWriteApi) =>
+  z.boolean().optional().describe(ENABLED_DESCRIPTIONS[api]);
 
-export const createRuleDataBaseSchema = lazySchema(() =>
+const buildRuleDataBaseSchema = (api: RuleWriteApi) =>
   z
     .object({
       kind: ruleKindSchema,
-      enabled: enabledSchema,
+      enabled: enabledSchema(api),
       metadata: metadataSchema,
       time_field: timeFieldSchema.default(DEFAULT_TIME_FIELD).describe(TIME_FIELD_DESCRIPTION),
       schedule: scheduleSchema,
@@ -745,8 +747,9 @@ export const createRuleDataBaseSchema = lazySchema(() =>
       grouping: groupingSchema.optional(),
       artifacts: artifactsSchema.optional(),
     })
-    .strict()
-);
+    .strict();
+
+export const createRuleDataBaseSchema = lazySchema(() => buildRuleDataBaseSchema('create'));
 
 /** Cross-field validation predicates — shared between the CRUD API and the manage_rule tool. */
 
@@ -936,7 +939,7 @@ export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
  * Request body schema for `PUT /api/alerting/v2/rules/{id}`: the create-rule
  * data, including the optional `enabled`.
  */
-export const putRuleDataSchema = applyCreateRuleRefinements(createRuleDataBaseSchema).meta({
+export const putRuleDataSchema = applyCreateRuleRefinements(buildRuleDataBaseSchema('put')).meta({
   id: 'alerting_put_rule',
 });
 

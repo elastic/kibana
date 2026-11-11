@@ -300,19 +300,21 @@ const actionPolicyDescriptionSchema = lazySchema(() =>
     .describe(ACTION_POLICY_DESCRIPTION_DESCRIPTION)
 );
 
+const ENABLED_DESCRIPTIONS = {
+  create:
+    'Whether the action policy is enabled. Defaults to `true` when omitted. A disabled policy is saved but is not applied to alerts until you enable it.',
+  put: 'Whether the action policy is enabled. When you omit this field, a new policy defaults to `true` and an existing policy keeps its current enabled state. A disabled policy is saved but is not applied to alerts until you enable it.',
+} as const;
+
+type ActionPolicyWriteApi = keyof typeof ENABLED_DESCRIPTIONS;
+
 /**
  * Optional with no default because "omitted" means `true` on create and the stored value on replace.
  */
-const enabledSchema = lazySchema(() =>
-  z
-    .boolean()
-    .optional()
-    .describe(
-      'Whether the action policy is enabled. Defaults to `true` when omitted. A disabled policy is saved but is not applied to alerts until you enable it.'
-    )
-);
+const enabledSchema = (api: ActionPolicyWriteApi) =>
+  z.boolean().optional().describe(ENABLED_DESCRIPTIONS[api]);
 
-const createActionPolicyDataBaseSchema = lazySchema(() =>
+const buildActionPolicyDataBaseSchema = (api: ActionPolicyWriteApi) =>
   z
     .object({
       name: actionPolicyNameSchema,
@@ -321,13 +323,12 @@ const createActionPolicyDataBaseSchema = lazySchema(() =>
       matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
       grouping: actionPolicyGroupingSchema.optional().describe(GROUPING_DESCRIPTION),
       throttle: throttleSchema.optional().describe(THROTTLE_DESCRIPTION),
-      enabled: enabledSchema,
+      enabled: enabledSchema(api),
     })
-    .strict()
-);
+    .strict();
 
 export const createActionPolicyDataSchema = lazySchema(() =>
-  createActionPolicyDataBaseSchema
+  buildActionPolicyDataBaseSchema('create')
     .check(validateGroupingModeAndStrategy)
     .meta({ id: 'alerting_new_action_policy' })
 );
@@ -341,7 +342,7 @@ export type CreateActionPolicyDataInput = z.input<typeof createActionPolicyDataS
  * supplied value sets the state, like `_enable`/`_disable`. PATCH does not accept it.
  */
 export const putActionPolicyDataSchema = lazySchema(() =>
-  createActionPolicyDataBaseSchema
+  buildActionPolicyDataBaseSchema('put')
     .check(validateGroupingModeAndStrategy)
     .meta({ id: 'alerting_put_action_policy' })
 );

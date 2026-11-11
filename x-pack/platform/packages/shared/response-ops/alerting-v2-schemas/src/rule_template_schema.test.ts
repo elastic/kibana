@@ -679,7 +679,7 @@ describe('rule template create-rule schema coupling', () => {
               "type": "array",
             },
             "enabled": Object {
-              "description": "Whether the rule is enabled. On create, defaults to \`true\` when omitted. On replace, omitting this field preserves the existing enabled state. A rule created with \`false\` is saved but does not run until you enable it.",
+              "description": "Whether the rule is enabled. Defaults to \`true\` when omitted. A disabled rule is saved but does not run until you enable it.",
               "type": "boolean",
             },
             "grouping": Object {
