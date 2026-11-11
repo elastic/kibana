@@ -26,6 +26,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
   const createManagedClient = () => ({
     install: jest.fn().mockResolvedValue(undefined),
     uninstall: jest.fn().mockResolvedValue(undefined),
+    disable: jest.fn().mockResolvedValue(true),
     ready: jest.fn().mockResolvedValue(undefined),
     execute: jest.fn().mockResolvedValue('mock-execution-id'),
     getInstalledWorkflowState: jest.fn().mockResolvedValue(null),
@@ -84,6 +85,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: true,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -103,6 +105,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -127,6 +130,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: true,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -146,6 +150,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });
@@ -166,6 +171,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: true,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady,
       core: coreMock.createStart(),
     });
@@ -227,6 +233,7 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
       workflowsExtensions,
       logger: loggerMock.create(),
       threatIntelSupplyEnabled: false,
+      automaticTroubleshootingUniversalSkillEnabled: false,
       bootstrapReady: Promise.resolve(),
       core: coreMock.createStart(),
     });

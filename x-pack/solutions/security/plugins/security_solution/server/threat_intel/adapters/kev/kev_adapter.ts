@@ -137,6 +137,7 @@ const buildKevReport = (
   sourceName: string
 ): NormalizedReport => {
   const bodyText = `${vuln.shortDescription}\n\nRequired Action: ${vuln.requiredAction}`;
+  const parsedDateAdded = Date.parse(vuln.dateAdded);
 
   return {
     '@timestamp': ingestedAt,
@@ -169,7 +170,13 @@ const buildKevReport = (
       // extracted.vulnerability.cve_id.
       adapter_id: `kev:${sourceId}`,
     },
-    content: buildReportContent({ title: vuln.vulnerabilityName, bodyText, language: 'en' }),
+    // KEV is not age-filtered at ingest; the Hunt Watch candidate lookback reads this field.
+    content: {
+      ...buildReportContent({ title: vuln.vulnerabilityName, bodyText, language: 'en' }),
+      ...(Number.isNaN(parsedDateAdded)
+        ? {}
+        : { published_at: new Date(parsedDateAdded).toISOString() }),
+    },
     severity: {
       level: 'high',
       score: severityScore('high'),

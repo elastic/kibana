@@ -70,6 +70,7 @@ import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
 import { SearchMethodsService } from '../../common/search';
+import { getEsQueryConfig } from '../../common/es_query';
 import type { ISearchSessionEBTManager, ISessionsClient, ISessionService } from './session';
 import {
   SessionsClient,
@@ -235,7 +236,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }) as ISearchGeneric;
 
     this.searchMethodsService = new SearchMethodsService(
-      this.searchInterceptor.search.bind(this.searchInterceptor) as ISearchGeneric
+      this.searchInterceptor.search.bind(this.searchInterceptor) as ISearchGeneric,
+      { getEsQueryConfig: async () => getEsQueryConfig(uiSettings) }
     );
 
     const loadingCount$ = new BehaviorSubject(0);
@@ -294,6 +296,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs,
       search,
+      hasResponseCacheForSession: (sessionId) =>
+        this.searchInterceptor.hasResponseCacheForSession(sessionId),
+      evictResponseCacheForSession: (sessionId) =>
+        this.searchInterceptor.evictResponseCacheForSession(sessionId),
       dsl: (params, options) => this.searchMethodsService.dsl(params, options),
       dslPaginated: (params, options) => this.searchMethodsService.dslPaginated(params, options),
       esql: (params, options) => this.searchMethodsService.esql(params, options),

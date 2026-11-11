@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DiscoverSessionAttachmentPayloadSchema } from '../../../common/types/domain_zod/attachment/saved_object/v2';
+import { DiscoverSessionAttachmentPayloadSchema } from '../../../common/types/domain/attachment/saved_object/v2';
 import { DISCOVER_SESSION_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 import type { UnifiedAttachmentTypeSetup } from '../types';
 

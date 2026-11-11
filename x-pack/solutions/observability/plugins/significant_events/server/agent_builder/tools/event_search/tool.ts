@@ -33,7 +33,7 @@ import {
 } from './handler';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
   type SourceCatalog,
 } from '../../utils/resolve_source_slugs';
@@ -104,7 +104,7 @@ const searchEventsSchema = lazySchema(() =>
             'xpack.significantEvents.agentBuilder.tools.eventSearch.schema.topologyFeatureIds',
             {
               defaultMessage:
-                'Optional Knowledge Indicator feature.id values to match against causal_features.feature_id or blast_radius.feature_id. Defaults to no topology filter. An event matches when either topology field contains any requested ID.',
+                "Optional Knowledge Indicator feature.id values. Defaults to no topology filter. An event matches when any requested ID appears in causal_features.feature_id, blast_radius.feature_id, or a dependency blast radius entry's source or target.",
             }
           )
         ),
@@ -269,7 +269,7 @@ export function createSearchEventsTool({
         await assertCanReadSignificantEvents({ request, server });
         const { slugs, ...searchParams } = toolParams;
         const catalog = await loadSourceCatalog(sourcesClient);
-        const filterSources = slugs ? resolveSourcesBySlug(catalog, slugs) : [];
+        const filterSources = slugs ? resolveSourcesBySlugOrId(catalog, slugs) : [];
 
         const data = await searchEventsToolHandler({
           eventSearchClient: await getEventSearchClient(),

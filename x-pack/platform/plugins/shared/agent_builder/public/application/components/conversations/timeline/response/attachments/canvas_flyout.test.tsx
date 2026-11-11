@@ -111,6 +111,13 @@ describe('CanvasFlyout', () => {
       expect(props?.historyKey).toBeUndefined();
       expect(props?.outsideClickCloses).toBe(true);
     });
+
+    it('fills the available width in the sidebar', () => {
+      const props = renderCanvas({ isSidebar: true });
+
+      expect(props?.size).toBe('fill');
+      expect(props?.resizable).toBe(false);
+    });
   });
 
   it('shows a fallback instead of crashing when renderCanvasContent throws', () => {
@@ -210,12 +217,15 @@ describe('CanvasFlyout', () => {
       });
     });
 
-    it('does not invoke openSidebarConversationInternal when rendered inside the sidebar', () => {
+    it('invokes openSidebarConversationInternal with the active conversationId when rendered inside the sidebar', () => {
       renderWithFakeCanvas({ isSidebar: true });
 
       fireEvent.click(screen.getByRole('button', { name: TRIGGER_LABEL }));
 
-      expect(mockOpenSidebarConversation).not.toHaveBeenCalled();
+      expect(mockOpenSidebarConversation).toHaveBeenCalledTimes(1);
+      expect(mockOpenSidebarConversation).toHaveBeenCalledWith({
+        conversationId: 'conversation-1',
+      });
     });
   });
 

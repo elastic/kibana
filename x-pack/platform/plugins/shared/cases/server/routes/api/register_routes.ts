@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { countBy } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { RouteRegistrar, RouteSecurity } from '@kbn/core/server';
 import type { CasesRequestHandlerContext } from '../../types';
@@ -64,6 +65,32 @@ const logAndIncreaseDeprecationTelemetryCounters = ({
   }
 };
 
+const increaseAttachmentTypeCounters = ({
+  telemetryUsageCounter,
+  method,
+  path,
+  types,
+}: {
+  telemetryUsageCounter?: Exclude<RegisterRoutesDeps['telemetryUsageCounter'], undefined>;
+  method: string;
+  path: string;
+  types: string[];
+}) => {
+  if (!telemetryUsageCounter) {
+    return;
+  }
+
+  const counterName = getEndpoint(method, path);
+
+  for (const [type, incrementBy] of Object.entries(countBy(types))) {
+    telemetryUsageCounter.incrementCounter({
+      counterName,
+      counterType: `attachment_type.${type}`,
+      incrementBy,
+    });
+  }
+};
+
 export const registerRoutes = (deps: RegisterRoutesDeps) => {
   const { router, routes, logger, kibanaVersion, telemetryUsageCounter } = deps;
 
@@ -105,7 +132,15 @@ export const registerRoutes = (deps: RegisterRoutesDeps) => {
             };
           }
 
-          const res = await handler({ logger, context, request, response, kibanaVersion });
+          const res = await handler({
+            logger,
+            context,
+            request,
+            response,
+            kibanaVersion,
+            incrementAttachmentTypeCounters: (types) =>
+              increaseAttachmentTypeCounters({ telemetryUsageCounter, method, path, types }),
+          });
 
           if (telemetryUsageCounter) {
             increaseTelemetryCounters({ telemetryUsageCounter, method, path, isKibanaRequest });

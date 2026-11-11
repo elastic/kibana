@@ -73,11 +73,16 @@ const applyAssignee = async (
 export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeAction => ({
   id: EDIT_EPISODE_ASSIGNEE_ACTION_ID,
   order: 50,
+  enforcesOwnPrivileges: false,
   displayName: i18n.EDIT_ASSIGNEE,
   iconType: 'user',
   isCompatible: ({ episodes }: EpisodeActionContext) => episodes.some(episodeSupportsActions),
   getBulkDisabledReason: (episodes) =>
     episodes.every(episodeSupportsActions) ? undefined : i18n.EDIT_ASSIGNEE_NOT_AVAILABLE,
+  // Keyboard navigation is broken inside the context menu. The nested popover portals out of the
+  // menu's DOM, but its key events still bubble through the React tree to EuiContextMenu, which
+  // takes the arrow keys. Arrow keys in the user search field or user list move focus through the
+  // menu, or back a panel.
   renderMenuItem: ({ episodes, onSuccess, closeMenu }: EpisodeActionMenuItemContext) => (
     <EditEpisodeAssigneePopoverItem
       assigneeUid={getCurrentAssigneeUid(episodes)}

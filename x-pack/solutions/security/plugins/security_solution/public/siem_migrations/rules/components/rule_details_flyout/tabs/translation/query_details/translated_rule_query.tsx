@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import type {
   QueryLanguage,
@@ -14,6 +14,7 @@ import type {
 import type { RuleMigrationRule } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { VALIDATION_WARNING_CODES } from '../../../../../../../detection_engine/rule_creation/constants/validation_warning_codes';
 import { useFormWithWarnings } from '../../../../../../../common/hooks/use_form_with_warnings';
+import { useAppToasts } from '../../../../../../../common/hooks/use_app_toasts';
 import type { RuleTranslationSchema } from '../types';
 import { schema } from '../schema';
 import { QueryHeader } from './header';
@@ -92,11 +93,14 @@ export const TranslatedRuleQuery: React.FC<TranslatedRuleQueryProps> = React.mem
     });
 
     const [isEditing, setIsEditing] = useState(false);
+    // Version of the rule the draft is based on, to detect updates made while editing
+    const [editedRuleUpdatedAt, setEditedRuleUpdatedAt] = useState<string>();
     const onCancel = useCallback(() => setIsEditing(false), []);
     const onEdit = useCallback(() => {
       form.reset({ defaultValue: formDefaultValue });
+      setEditedRuleUpdatedAt(migrationRule.updated_at);
       setIsEditing(true);
-    }, [form, formDefaultValue]);
+    }, [form, formDefaultValue, migrationRule.updated_at]);
     const onSave = useCallback(
       async (newRuleName: string, newQuery: string) => {
         await onTranslationUpdate?.(newRuleName, newQuery);
@@ -104,6 +108,16 @@ export const TranslatedRuleQuery: React.FC<TranslatedRuleQueryProps> = React.mem
       },
       [onTranslationUpdate]
     );
+
+    // The rule can be updated while the user edits it, e.g. when the AI agent rewrites its query
+    // or matches it to a prebuilt rule. Saving the draft would overwrite that change, so discard it.
+    const { addWarning } = useAppToasts();
+    useEffect(() => {
+      if (isEditing && (!canEdit || migrationRule.updated_at !== editedRuleUpdatedAt)) {
+        setIsEditing(false);
+        addWarning({ title: i18n.RULE_UPDATED_IN_BACKGROUND });
+      }
+    }, [isEditing, canEdit, migrationRule.updated_at, editedRuleUpdatedAt, addWarning]);
 
     return (
       <>

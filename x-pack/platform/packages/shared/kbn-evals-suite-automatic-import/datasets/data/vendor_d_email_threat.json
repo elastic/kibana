@@ -1,0 +1,1405 @@
+{
+  "id": "vendor_d_email_threat",
+  "title": "Vendor D email threat",
+  "description": "Email threat logs",
+  "cohort": "recent",
+  "format": "json",
+  "samples": [
+    {
+      "line": "{\"event_type\":\"clicks_blocked\",\"url\":\"https://www.example.com/?name=john\",\"classification\":\"phish\",\"clickTime\":\"2022-03-21T07:52:11.000Z\",\"threatTime\":\"2022-03-18T14:54:20.000Z\",\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36 Edg/99.0.1150.39\",\"id\":\"8760d0fc-1234-1234-1234-2exxfxxxxx1xd\",\"clickIP\":\"89.160.20.112\",\"sender\":\"abc123@example.com\",\"recipient\":\"123abc@example.com\",\"senderIP\":\"81.2.69.143\",\"GUID\":\"x11xxxx1-12f9-111x-x12x-1x1x123456xx\",\"threatID\":\"3xx97xx852c66a7xx761450xxxxxx9f4ffaxxxxxxxxxxxxxxx7a76481xx\",\"threatStatus\":\"active\",\"messageID\":\"12345678912345.12345.mail@example.com\"}",
+      "expected": {
+        "@timestamp": "2022-03-21T07:52:11Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.clicks_blocked",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "destination": {
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.112"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "abc123@example.com"
+            ]
+          },
+          "message_id": "12345678912345.12345.mail@example.com",
+          "sender": {
+            "address": "abc123@example.com"
+          },
+          "to": {
+            "address": [
+              "123abc@example.com"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.143",
+            "89.160.20.112"
+          ],
+          "user": [
+            "abc123@example.com"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.143"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "last_seen": "2022-03-18T14:54:20.000Z",
+            "name": "https://www.example.com/?name=john",
+            "type": "url",
+            "url": {
+              "original": "https://www.example.com/?name=john"
+            }
+          }
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Edge",
+          "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36 Edg/99.0.1150.39",
+          "os": {
+            "full": "Windows 10",
+            "name": "Windows",
+            "version": "10"
+          },
+          "version": "99.0.1150.39"
+        },
+        "event": {
+          "action": "denied",
+          "category": [
+            "email"
+          ],
+          "id": "8760d0fc-1234-1234-1234-2exxfxxxxx1xd",
+          "kind": "event",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"clicks_blocked\",\"url\":\"http://www.example.com/public/download-shares/wwwxxxyyyzzz12345\",\"classification\":\"phish\",\"clickTime\":\"2022-03-30T07:22:52.000Z\",\"threatTime\":\"2022-03-07T01:21:41.000Z\",\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36\",\"id\":\"b80af74a-1234-1234-1234-43xdxxbxxxxx6\",\"clickIP\":\"89.160.20.112\",\"sender\":\"abc123@example.com\",\"recipient\":\"bd5da771530b11830e6dfd25838b0240@example.com\",\"senderIP\":\"81.2.69.143\",\"GUID\":\"bXkXXUrXAXVXWXGXxXrXAXXX-XXXH\",\"threatID\":\"fdxxxxxxxxxxxcc34aff1aefxbx3xx7xb7xfxcxx1xxxxxxxx98780b5xxxexbx5xc32c\",\"threatStatus\":\"active\",\"messageID\":\"12345678912345.12345.mail@example.com\"}",
+      "expected": {
+        "@timestamp": "2022-03-30T07:22:52Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.clicks_blocked",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "destination": {
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.112"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "abc123@example.com"
+            ]
+          },
+          "message_id": "12345678912345.12345.mail@example.com",
+          "sender": {
+            "address": "abc123@example.com"
+          },
+          "to": {
+            "address": [
+              "bd5da771530b11830e6dfd25838b0240@example.com"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.143",
+            "89.160.20.112"
+          ],
+          "user": [
+            "abc123@example.com"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.143"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "last_seen": "2022-03-07T01:21:41.000Z",
+            "name": "http://www.example.com/public/download-shares/wwwxxxyyyzzz12345",
+            "type": "url",
+            "url": {
+              "original": "http://www.example.com/public/download-shares/wwwxxxyyyzzz12345"
+            }
+          }
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Chrome",
+          "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36",
+          "os": {
+            "full": "Windows 10",
+            "name": "Windows",
+            "version": "10"
+          },
+          "version": "100.0.4896.60"
+        },
+        "event": {
+          "action": "denied",
+          "category": [
+            "email"
+          ],
+          "id": "b80af74a-1234-1234-1234-43xdxxbxxxxx6",
+          "kind": "event",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"clicks_blocked\",\"url\":\"https://www.example.com/?name=abcd\",\"classification\":\"phish\",\"clickTime\":\"2025-03-21T07:52:11.000Z\",\"threatTime\":\"2025-03-18T14:54:20.000Z\",\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36 Edg/99.0.1150.39\",\"id\":\"8760d0fc-1234-5678-1234-2exxfxxxxx1xd\",\"clickIP\":\"89.160.20.112\",\"sender\":\"test@example.com\",\"recipient\":\"badguy@example.com\",\"senderIP\":\"1.128.0.1\",\"GUID\":\"x11xxxx1-12f9-111x-x12x-1x1x123456xx\",\"threatID\":\"3xx97xx852c66a7xx761450xxxxxx9f4ffaxxxxxxxxxxxxxxx7a76481xx\",\"threatStatus\":\"active\",\"messageID\":\"12345678912345.12345.mail@example.com\"}",
+      "expected": {
+        "@timestamp": "2025-03-21T07:52:11Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.clicks_blocked",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "destination": {
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.112"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "test@example.com"
+            ]
+          },
+          "message_id": "12345678912345.12345.mail@example.com",
+          "sender": {
+            "address": "test@example.com"
+          },
+          "to": {
+            "address": [
+              "badguy@example.com"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "ip": [
+            "1.128.0.1",
+            "89.160.20.112"
+          ],
+          "user": [
+            "test@example.com"
+          ]
+        },
+        "source": {
+          "ip": "1.128.0.1"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "last_seen": "2025-03-18T14:54:20.000Z",
+            "name": "https://www.example.com/?name=abcd",
+            "type": "url",
+            "url": {
+              "original": "https://www.example.com/?name=abcd"
+            }
+          }
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Edge",
+          "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36 Edg/99.0.1150.39",
+          "os": {
+            "full": "Windows 10",
+            "name": "Windows",
+            "version": "10"
+          },
+          "version": "99.0.1150.39"
+        },
+        "event": {
+          "action": "denied",
+          "category": [
+            "email"
+          ],
+          "id": "8760d0fc-1234-5678-1234-2exxfxxxxx1xd",
+          "kind": "event",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"clicks_blocked\",\"url\":\"http://www.example.com/public/download-shares/wwwxxxskvdljyyyzzz12345\",\"classification\":\"malware\",\"clickTime\":\"2025-03-30T07:22:52.000Z\",\"threatTime\":\"2025-03-07T01:21:41.000Z\",\"userAgent\":\"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36\",\"id\":\"b80af74a-1234-adfe-1234-43xdxxbxxxxx6\",\"clickIP\":\"175.16.199.2\",\"sender\":\"manager@example.com\",\"recipient\":\"john@example.com\",\"senderIP\":\"81.2.69.143\",\"GUID\":\"bXkXXUrXAXVXWXGXxXrXAXXX-XXXH\",\"threatID\":\"fdxxxxxxxxxxxcc34aff1aefxbx3xx7xb7xfxcxx1xxxxxxxx98780b5xxxexbx5xc32c\",\"threatStatus\":\"falsepositive\",\"messageID\":\"12345678912345.12345.mail@example.com\"}",
+      "expected": {
+        "@timestamp": "2025-03-30T07:22:52Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.clicks_blocked",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "destination": {
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.2"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "manager@example.com"
+            ]
+          },
+          "message_id": "12345678912345.12345.mail@example.com",
+          "sender": {
+            "address": "manager@example.com"
+          },
+          "to": {
+            "address": [
+              "john@example.com"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.143",
+            "175.16.199.2"
+          ],
+          "user": [
+            "manager@example.com"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.143"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "last_seen": "2025-03-07T01:21:41.000Z",
+            "name": "http://www.example.com/public/download-shares/wwwxxxskvdljyyyzzz12345",
+            "type": "url",
+            "url": {
+              "original": "http://www.example.com/public/download-shares/wwwxxxskvdljyyyzzz12345"
+            }
+          }
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Chrome",
+          "original": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.60 Safari/537.36",
+          "os": {
+            "full": "Windows 10",
+            "name": "Windows",
+            "version": "10"
+          },
+          "version": "100.0.4896.60"
+        },
+        "event": {
+          "action": "denied",
+          "category": [
+            "email"
+          ],
+          "id": "b80af74a-1234-adfe-1234-43xdxxbxxxxx6",
+          "kind": "event",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"clicks_permitted\",\"url\":\"http://example.com/ixxxx464xxx6x6xxd_cXxxxT_kxxTuQx_xIhxlx2qxxnxvxPxn\",\"classification\":\"spam\",\"clickTime\":\"2022-03-30T10:51:53.000Z\",\"threatTime\":\"2022-02-26T00:36:25.000Z\",\"userAgent\":\"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36\",\"id\":\"90dd54bc-1234-1234-1234-cxxxxxxxxx4\",\"clickIP\":\"89.160.20.112\",\"sender\":\"abc123@example.com\",\"recipient\":\"exxxxxxx8x2xxxx2x6x6xxxxx6xxxx5@example.com\",\"senderIP\":\"81.2.69.143\",\"GUID\":\"QUWXXxXXJHlYXRXXXXVXUXXk\",\"threatID\":\"xxxxxxbx1cxcxx0xcx5xxxxdx5xex8xbx7xxxeexxxxxxxx9\",\"threatStatus\":\"cleared\",\"messageID\":\"12345678912345.12345.mail@example.com\"}",
+      "expected": {
+        "@timestamp": "2022-03-30T10:51:53Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.clicks_permitted",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "destination": {
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.112"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "abc123@example.com"
+            ]
+          },
+          "message_id": "12345678912345.12345.mail@example.com",
+          "sender": {
+            "address": "abc123@example.com"
+          },
+          "to": {
+            "address": [
+              "exxxxxxx8x2xxxx2x6x6xxxxx6xxxx5@example.com"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.143",
+            "89.160.20.112"
+          ],
+          "user": [
+            "abc123@example.com"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.143"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "last_seen": "2022-02-26T00:36:25.000Z",
+            "name": "http://example.com/ixxxx464xxx6x6xxd_cXxxxT_kxxTuQx_xIhxlx2qxxnxvxPxn",
+            "type": "url",
+            "url": {
+              "original": "http://example.com/ixxxx464xxx6x6xxd_cXxxxT_kxxTuQx_xIhxlx2qxxnxvxPxn"
+            }
+          }
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Chrome",
+          "original": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36",
+          "os": {
+            "full": "Windows 7",
+            "name": "Windows",
+            "version": "7"
+          },
+          "version": "72.0.3626.109"
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "email"
+          ],
+          "id": "90dd54bc-1234-1234-1234-cxxxxxxxxx4",
+          "kind": "event",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"clicks_permitted\",\"url\":\"https://xyz123456789.support.com#xyz@example.com\",\"classification\":\"phish\",\"clickTime\":\"2022-03-30T00:56:14.000Z\",\"threatTime\":\"2022-03-30T00:53:43.000Z\",\"userAgent\":\"Mozilla/5.0 (Linux; Android 12; SM-N976U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.88 Mobile Safari/537.36\",\"id\":\"4b4ae949-1234-1234-1234-6axxxxx9xxxxx3\",\"clickIP\":\"89.160.20.112\",\"sender\":\"abc123@example.com\",\"recipient\":\"f3xxxx0x2xcx3xaxbxcx2xaxxxcxxxx2@example.com\",\"senderIP\":\"81.2.69.143\",\"GUID\":\"VXXhXiXyXBXlXdXXfXXXXXWXLXXX\",\"threatID\":\"xxxdxxdx6x7x6xxxxx5xxx837ex4x4xcx8xcxxxexxx2xxxxxx5\",\"threatStatus\":\"active\",\"messageID\":\"12345678912345.12345.mail@example.com\"}",
+      "expected": {
+        "@timestamp": "2022-03-30T00:56:14Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.clicks_permitted",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "destination": {
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.112"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "abc123@example.com"
+            ]
+          },
+          "message_id": "12345678912345.12345.mail@example.com",
+          "sender": {
+            "address": "abc123@example.com"
+          },
+          "to": {
+            "address": [
+              "f3xxxx0x2xcx3xaxbxcx2xaxxxcxxxx2@example.com"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.143",
+            "89.160.20.112"
+          ],
+          "user": [
+            "abc123@example.com"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.143"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "last_seen": "2022-03-30T00:53:43.000Z",
+            "name": "https://xyz123456789.support.com#xyz@example.com",
+            "type": "url",
+            "url": {
+              "original": "https://xyz123456789.support.com#xyz@example.com"
+            }
+          }
+        },
+        "user_agent": {
+          "device": {
+            "name": "Samsung SM-N976U"
+          },
+          "name": "Chrome Mobile",
+          "original": "Mozilla/5.0 (Linux; Android 12; SM-N976U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.88 Mobile Safari/537.36",
+          "os": {
+            "full": "Android 12",
+            "name": "Android",
+            "version": "12"
+          },
+          "version": "99.0.4844.88"
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "email"
+          ],
+          "id": "4b4ae949-1234-1234-1234-6axxxxx9xxxxx3",
+          "kind": "event",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"clicks_permitted\",\"url\":\"http://example.com/ixxxx464xxx6x6xxd_cXxxxT_kxxTuQx_xsjbvkajbsdffIhxlx2qxxnxvxPxn\",\"classification\":\"spam\",\"clickTime\":\"2025-03-30T10:51:53.000Z\",\"threatTime\":\"2025-02-26T00:36:25.000Z\",\"userAgent\":\"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36\",\"id\":\"90dd54bc-acdf-1234-1234-cxxxxxxxxx4\",\"clickIP\":\"1.128.0.1\",\"sender\":\"qa@example.com\",\"recipient\":\"sony@example.com\",\"senderIP\":\"81.2.69.143\",\"GUID\":\"QUWXXxXXJHlYXRXXXXVXUXXk\",\"threatID\":\"xxxxxxbx1cxcxx0xcx5xxxxdx5xex8xbx7xxxeexxxxxxxx9\",\"threatStatus\":\"falsepositive\",\"messageID\":\"12345678912345.12345.mail@example.com\"}",
+      "expected": {
+        "@timestamp": "2025-03-30T10:51:53Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.clicks_permitted",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "destination": {
+          "ip": "1.128.0.1"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "qa@example.com"
+            ]
+          },
+          "message_id": "12345678912345.12345.mail@example.com",
+          "sender": {
+            "address": "qa@example.com"
+          },
+          "to": {
+            "address": [
+              "sony@example.com"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "ip": [
+            "81.2.69.143",
+            "1.128.0.1"
+          ],
+          "user": [
+            "qa@example.com"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "London",
+            "continent_name": "Europe",
+            "country_iso_code": "GB",
+            "country_name": "United Kingdom",
+            "region_iso_code": "GB-ENG",
+            "region_name": "England"
+          },
+          "ip": "81.2.69.143"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "last_seen": "2025-02-26T00:36:25.000Z",
+            "name": "http://example.com/ixxxx464xxx6x6xxd_cXxxxT_kxxTuQx_xsjbvkajbsdffIhxlx2qxxnxvxPxn",
+            "type": "url",
+            "url": {
+              "original": "http://example.com/ixxxx464xxx6x6xxd_cXxxxT_kxxTuQx_xsjbvkajbsdffIhxlx2qxxnxvxPxn"
+            }
+          }
+        },
+        "user_agent": {
+          "device": {
+            "name": "Other"
+          },
+          "name": "Chrome",
+          "original": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36",
+          "os": {
+            "full": "Windows 7",
+            "name": "Windows",
+            "version": "7"
+          },
+          "version": "72.0.3626.109"
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "email"
+          ],
+          "id": "90dd54bc-acdf-1234-1234-cxxxxxxxxx4",
+          "kind": "event",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"clicks_permitted\",\"url\":\"https://xyz123456789.support.com#xyz@example.com\",\"classification\":\"phish\",\"clickTime\":\"2025-03-30T00:56:14.000Z\",\"threatTime\":\"2025-03-30T00:53:43.000Z\",\"userAgent\":\"Mozilla/5.0 (Linux; Android 12; SM-N976U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.88 Mobile Safari/537.36\",\"id\":\"4b4ae949-1234-1234-abcd-6axxxdv9xxxxx3\",\"clickIP\":\"89.160.20.112\",\"sender\":\"support@example.com\",\"recipient\":\"f3xxxx0x2xcx3xaxbxcx2xaxxxcxxxx2@example.com\",\"senderIP\":\"175.16.199.1\",\"GUID\":\"VXXhXiXyXBXlXdXXfXXXXXWXLXXX\",\"threatID\":\"xxxdxxdx6x7x6xxxxx5xxx837ex4x4xcx8xcxxxexxx2xxxxxx5\",\"threatStatus\":\"active\",\"messageID\":\"12345678912345.12345.mail@example.com\"}",
+      "expected": {
+        "@timestamp": "2025-03-30T00:56:14Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.clicks_permitted",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "destination": {
+          "geo": {
+            "city_name": "Linköping",
+            "continent_name": "Europe",
+            "country_iso_code": "SE",
+            "country_name": "Sweden",
+            "region_iso_code": "SE-E",
+            "region_name": "Östergötland County"
+          },
+          "ip": "89.160.20.112"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "support@example.com"
+            ]
+          },
+          "message_id": "12345678912345.12345.mail@example.com",
+          "sender": {
+            "address": "support@example.com"
+          },
+          "to": {
+            "address": [
+              "f3xxxx0x2xcx3xaxbxcx2xaxxxcxxxx2@example.com"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "ip": [
+            "175.16.199.1",
+            "89.160.20.112"
+          ],
+          "user": [
+            "support@example.com"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "last_seen": "2025-03-30T00:53:43.000Z",
+            "name": "https://xyz123456789.support.com#xyz@example.com",
+            "type": "url",
+            "url": {
+              "original": "https://xyz123456789.support.com#xyz@example.com"
+            }
+          }
+        },
+        "user_agent": {
+          "device": {
+            "name": "Samsung SM-N976U"
+          },
+          "name": "Chrome Mobile",
+          "original": "Mozilla/5.0 (Linux; Android 12; SM-N976U) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.88 Mobile Safari/537.36",
+          "os": {
+            "full": "Android 12",
+            "name": "Android",
+            "version": "12"
+          },
+          "version": "99.0.4844.88"
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "email"
+          ],
+          "id": "4b4ae949-1234-1234-abcd-6axxxdv9xxxxx3",
+          "kind": "event",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.vendor",
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"messages_blocked\",\"GUID\":\"PE10US31763448305Iuh6KWTOOjEJV01\",\"completelyRewritten\":\"false\",\"customerEid\":\"1234567\",\"customerName\":\"Plan ABC\",\"fromAddress\":\"john@example.com\",\"headerFrom\":\"john@example.com\",\"impostorScore\":0,\"malwareScore\":0,\"messageDetailsUrl\":\"https://us3.proofpointessentials.com/index01.php?mod_id=13&mod_option=logitem&type=message_details&e_id=1234567&k=k1&payload=jsdbivugjkaegklmfa5dhta79hrg6dsab6nydtfjgn4ryt46sgdfvwetsr4dgf6earsg64qhea64rg64wv6s4hf65bsr68td4hfb68rts4dfh654brs6zd5s4dg6ba5z41r6hs5a4zd165dtu4h1j65nr1bgdf6g6s8d6fhg\",\"messageID\":\"<20251118064504.GA125698@m1234567.ppops.net>\",\"messageParts\":[{\"contentType\":\"text/html\",\"disposition\":\"inline\",\"filename\":\"text.html\",\"md5\":\"7d793037a0760186574b0282f2f435e7\",\"oContentType\":\"text/html\",\"sandboxStatus\":\"notrequested\",\"sha256\":\"486ea46224d1bb4fb680f34f7c9ad96a8f24ec88be73ea8e5a6c65260e9cb8a7\"},{\"contentType\":\"application/octet-stream\",\"disposition\":\"attached\",\"filename\":\"demo_146987645346416845132.docx.lrf\",\"md5\":\"5eb63bbbe01eeed093cb22bb8f5acdc3\",\"oContentType\":\"application/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"sandboxStatus\":\"notrequested\",\"sha256\":\"b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9\"}],\"messageSize\":52944,\"messageTime\":\"2025-11-18T06:45:05.000000Z\",\"parentEid\":\"12365\",\"parentName\":\"QA Test Account - example.net\",\"phishScore\":0,\"quarantineRule\":\"malware\",\"recipient\":[\"bob@example.org\"],\"replyToAddress\":\"\",\"sender\":\"test@example.org\",\"senderIP\":\"1.128.0.1\",\"spamScore\":0,\"stackName\":\"us3\",\"subject\":\"attachment threat\",\"threatsInfoMap\":[{\"classification\":\"malware\",\"threat\":\"ab4a368d0a65467ad6177ec6ae407f83d8e046ef34113fd89a2c7dd182e57c8e\",\"threatId\":\"ABCD1234-1234-5678-ABEF-80123456789D\",\"threatStatus\":\"active\",\"threatTime\":\"2025-11-18T06:47:26.915Z\",\"threatType\":\"attachment\"}],\"toAddresses\":[\"bob@example.org\"],\"xmailer\":\"\"}",
+      "expected": {
+        "@timestamp": "2025-11-18T06:47:26.915Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.message_blocked",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "attachments": [
+            {
+              "file": {
+                "hash": {
+                  "md5": "5eb63bbbe01eeed093cb22bb8f5acdc3",
+                  "sha256": "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+                },
+                "mime_type": "application/octet-stream",
+                "name": "demo_146987645346416845132.docx.lrf"
+              }
+            }
+          ],
+          "from": {
+            "address": [
+              "john@example.com"
+            ]
+          },
+          "message_id": "20251118064504.GA125698@m1234567.ppops.net",
+          "sender": {
+            "address": "test@example.org"
+          },
+          "subject": "attachment threat",
+          "to": {
+            "address": [
+              "bob@example.org"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "hash": [
+            "ab4a368d0a65467ad6177ec6ae407f83d8e046ef34113fd89a2c7dd182e57c8e",
+            "7d793037a0760186574b0282f2f435e7",
+            "5eb63bbbe01eeed093cb22bb8f5acdc3",
+            "486ea46224d1bb4fb680f34f7c9ad96a8f24ec88be73ea8e5a6c65260e9cb8a7",
+            "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+          ],
+          "ip": [
+            "1.128.0.1"
+          ],
+          "user": [
+            "john@example.com",
+            "test@example.org",
+            "bob@example.org"
+          ]
+        },
+        "rule": {
+          "name": "malware"
+        },
+        "source": {
+          "ip": "1.128.0.1"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "name": [
+              "ab4a368d0a65467ad6177ec6ae407f83d8e046ef34113fd89a2c7dd182e57c8e"
+            ]
+          }
+        },
+        "event": {
+          "action": "denied",
+          "category": [
+            "email"
+          ],
+          "id": "PE10US31763448305Iuh6KWTOOjEJV01",
+          "kind": "event",
+          "reference": "https://us3.proofpointessentials.com/index01.php?mod_id=13&mod_option=logitem&type=message_details&e_id=1234567&k=k1&payload=jsdbivugjkaegklmfa5dhta79hrg6dsab6nydtfjgn4ryt46sgdfvwetsr4dgf6earsg64qhea64rg64wv6s4hf65bsr68td4hfb68rts4dfh654brs6zd5s4dg6ba5z41r6hs5a4zd165dtu4h1j65nr1bgdf6g6s8d6fhg",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"messages_blocked\",\"GUID\":\"nadjkbgajgakjnvjkrgnaergevVFHJBvyujb\",\"completelyRewritten\":\"false\",\"customerEid\":\"1235567\",\"customerName\":\"Customer 4\",\"fromAddress\":\"john@example.com\",\"headerFrom\":\"alice@example.com\",\"impostorScore\":10,\"malwareScore\":30,\"messageDetailsUrl\":\"https://us3.proofpointessentials.com/index01.php?mod_id=13&mod_option=logitem&type=message_details&e_id=1235567&k=k1&payload=jsdbivugjkaegklmffdvdfa5dhta79hrg6dsab6nydtfjgn4ryt46sgdfvwetsr4dgf6earsg64qhea64rg64wv6s4hf65bsr68td4hfb68rts4dfh654brs6zd5s4dg6ba5z41r6hs5a4zd165dtu4h1j65nr1bgdf6g6s8d6fhg\",\"messageID\":\"<20251118064504.GA125698@m1235567.ppops.net>\",\"messageParts\":[{\"contentType\":\"text/html\",\"disposition\":\"inline\",\"filename\":\"text.html\",\"md5\":\"7d793037a0760186574b0282f2f435e7\",\"oContentType\":\"text/html\",\"sandboxStatus\":\"notrequested\",\"sha256\":\"486ea46224d1bb4fb680f34f7c9ad96a8f24ec88be73ea8e5a6c65260e9cb8a7\"},{\"contentType\":\"application/octet-stream\",\"disposition\":\"attached\",\"filename\":\"demo_146987645346416845132.docx.lrf\",\"md5\":\"5eb63bbbe01eeed093cb22bb8f5acdc3\",\"oContentType\":\"application/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"sandboxStatus\":\"notrequested\",\"sha256\":\"b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9\"}],\"messageSize\":52944,\"messageTime\":\"2025-11-18T16:45:05.000000Z\",\"parentEid\":\"12365\",\"parentName\":\"QA Test Account - example.net\",\"phishScore\":0,\"quarantineRule\":\"spam\",\"recipient\":[\"alex@example.org\"],\"replyToAddress\":\"\",\"sender\":\"test@example.org\",\"senderIP\":\"1.128.0.1\",\"spamScore\":0,\"stackName\":\"us3\",\"subject\":\"attachment threat\",\"threatsInfoMap\":[{\"classification\":\"spam\",\"threat\":\"ab4a368d0a65467ad6177ec6ae407f83d8e046ef34113fd89a2c7dd182e57c8e\",\"threatId\":\"ABCD1234-1234-5678-ABEF-80123456789D\",\"threatStatus\":\"active\",\"threatTime\":\"2025-11-18T06:47:26.915Z\",\"threatType\":\"attachment\"}],\"toAddresses\":[\"bob@example.org\"],\"xmailer\":\"\"}",
+      "expected": {
+        "@timestamp": "2025-11-18T16:45:05Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.message_blocked",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "attachments": [
+            {
+              "file": {
+                "hash": {
+                  "md5": "5eb63bbbe01eeed093cb22bb8f5acdc3",
+                  "sha256": "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+                },
+                "mime_type": "application/octet-stream",
+                "name": "demo_146987645346416845132.docx.lrf"
+              }
+            }
+          ],
+          "from": {
+            "address": [
+              "john@example.com"
+            ]
+          },
+          "message_id": "20251118064504.GA125698@m1235567.ppops.net",
+          "sender": {
+            "address": "test@example.org"
+          },
+          "subject": "attachment threat",
+          "to": {
+            "address": [
+              "alex@example.org",
+              "bob@example.org"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "hash": [
+            "ab4a368d0a65467ad6177ec6ae407f83d8e046ef34113fd89a2c7dd182e57c8e",
+            "7d793037a0760186574b0282f2f435e7",
+            "5eb63bbbe01eeed093cb22bb8f5acdc3",
+            "486ea46224d1bb4fb680f34f7c9ad96a8f24ec88be73ea8e5a6c65260e9cb8a7",
+            "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+          ],
+          "ip": [
+            "1.128.0.1"
+          ],
+          "user": [
+            "john@example.com",
+            "test@example.org",
+            "alex@example.org",
+            "bob@example.org"
+          ]
+        },
+        "rule": {
+          "name": "spam"
+        },
+        "source": {
+          "ip": "1.128.0.1"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "name": [
+              "ab4a368d0a65467ad6177ec6ae407f83d8e046ef34113fd89a2c7dd182e57c8e"
+            ]
+          }
+        },
+        "event": {
+          "action": "denied",
+          "category": [
+            "email"
+          ],
+          "id": "nadjkbgajgakjnvjkrgnaergevVFHJBvyujb",
+          "kind": "event",
+          "reference": "https://us3.proofpointessentials.com/index01.php?mod_id=13&mod_option=logitem&type=message_details&e_id=1235567&k=k1&payload=jsdbivugjkaegklmffdvdfa5dhta79hrg6dsab6nydtfjgn4ryt46sgdfvwetsr4dgf6earsg64qhea64rg64wv6s4hf65bsr68td4hfb68rts4dfh654brs6zd5s4dg6ba5z41r6hs5a4zd165dtu4h1j65nr1bgdf6g6s8d6fhg",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"messages_blocked\",\"GUID\":\"PE10US317634483018F4D6V464S6V46S5Iuh6KWTOOjEJV01\",\"completelyRewritten\":\"na\",\"customerEid\":\"1234567\",\"customerName\":\"Plan ABC\",\"fromAddress\":\"john@example.com\",\"headerFrom\":\"alice@example.com\",\"impostorScore\":70,\"malwareScore\":80,\"messageDetailsUrl\":\"https://us3.proofpointessentials.com/index01.php?mod_id=13&mod_option=logitem&type=message_details&e_id=1234567&k=k1&payload=jsdvdfdfbdfbivugjkaegklmfa5dhta79hrg6dsab6nydtfjgn4ryt46sgdfvwetsr4dgf6earsg64qhea64rg64wv6s4hf65bsr68td4hfb68rts4dfh654brs6zd5s4dg6ba5z41r6hs5a4zd165dtu4h1j65nr1bgdf6g6s8d6fhg\",\"messageID\":\"<20251118064504.GA125698@m1234567.ppops.net>\",\"messageParts\":[{\"contentType\":\"text/html\",\"disposition\":\"inline\",\"filename\":\"text.html\",\"md5\":\"7d793037a0760186574b0282f2f435e7\",\"oContentType\":\"text/html\",\"sandboxStatus\":\"notrequested\",\"sha256\":\"486ea46224d1bb4fb680f34f7c9ad96a8f24ec88be73ea8e5a6c65260e9cb8a7\"},{\"contentType\":\"application/octet-stream\",\"disposition\":\"attached\",\"filename\":\"demo_146987645346416845132.docx.lrf\",\"md5\":\"5eb63bbbe01eeed093cb22bb8f5acdc3\",\"oContentType\":\"application/vnd.openxmlformats-officedocument.wordprocessingml.document\",\"sandboxStatus\":\"notrequested\",\"sha256\":\"b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9\"}],\"messageSize\":52944,\"messageTime\":\"2025-11-19T16:45:05.000000Z\",\"parentEid\":\"12365\",\"parentName\":\"QA Test Account - example.net\",\"phishScore\":0,\"quarantineRule\":\"PHish Detection\",\"recipient\":[\"alex@example.org\"],\"replyToAddress\":\"\",\"sender\":\"support@example.org\",\"senderIP\":\"1.128.0.1\",\"spamScore\":0,\"stackName\":\"us3\",\"subject\":\"attachment threat\",\"threatsInfoMap\":[{\"classification\":\"spam\",\"threat\":\"ab4a368d0a65467ad6177ec6ae407f83d8e046ef34113fd89a2c7dd182e57c8e\",\"threatId\":\"ABCD1234-1234-5678-ABEF-80123456789D\",\"threatStatus\":\"active\",\"threatTime\":\"2025-11-18T06:47:26.915Z\",\"threatType\":\"attachment\"}],\"toAddresses\":[\"bob@example.org\"],\"xmailer\":\"\"}",
+      "expected": {
+        "@timestamp": "2025-11-19T16:45:05Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.message_blocked",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "attachments": [
+            {
+              "file": {
+                "hash": {
+                  "md5": "5eb63bbbe01eeed093cb22bb8f5acdc3",
+                  "sha256": "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+                },
+                "mime_type": "application/octet-stream",
+                "name": "demo_146987645346416845132.docx.lrf"
+              }
+            }
+          ],
+          "from": {
+            "address": [
+              "john@example.com"
+            ]
+          },
+          "message_id": "20251118064504.GA125698@m1234567.ppops.net",
+          "sender": {
+            "address": "support@example.org"
+          },
+          "subject": "attachment threat",
+          "to": {
+            "address": [
+              "alex@example.org",
+              "bob@example.org"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "hash": [
+            "ab4a368d0a65467ad6177ec6ae407f83d8e046ef34113fd89a2c7dd182e57c8e",
+            "7d793037a0760186574b0282f2f435e7",
+            "5eb63bbbe01eeed093cb22bb8f5acdc3",
+            "486ea46224d1bb4fb680f34f7c9ad96a8f24ec88be73ea8e5a6c65260e9cb8a7",
+            "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+          ],
+          "ip": [
+            "1.128.0.1"
+          ],
+          "user": [
+            "john@example.com",
+            "support@example.org",
+            "alex@example.org",
+            "bob@example.org"
+          ]
+        },
+        "rule": {
+          "name": "PHish Detection"
+        },
+        "source": {
+          "ip": "1.128.0.1"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "name": [
+              "ab4a368d0a65467ad6177ec6ae407f83d8e046ef34113fd89a2c7dd182e57c8e"
+            ]
+          }
+        },
+        "event": {
+          "action": "denied",
+          "category": [
+            "email"
+          ],
+          "id": "PE10US317634483018F4D6V464S6V46S5Iuh6KWTOOjEJV01",
+          "kind": "event",
+          "reference": "https://us3.proofpointessentials.com/index01.php?mod_id=13&mod_option=logitem&type=message_details&e_id=1234567&k=k1&payload=jsdvdfdfbdfbivugjkaegklmfa5dhta79hrg6dsab6nydtfjgn4ryt46sgdfvwetsr4dgf6earsg64qhea64rg64wv6s4hf65bsr68td4hfb68rts4dfh654brs6zd5s4dg6ba5z41r6hs5a4zd165dtu4h1j65nr1bgdf6g6s8d6fhg",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"messages_delivered\",\"GUID\":\"GBCJHVbvfdjHIVBDBbliuvsvoehfb64V9SFgvuvhVUYVbi-abcd\",\"completelyRewritten\":\"true\",\"customerEid\":\"1234567\",\"customerName\":\"Customer 1\",\"fromAddress\":\"not_a_badguy@example.com\",\"headerFrom\":\"not_a_badguy@example.com\",\"impostorScore\":0,\"malwareScore\":0,\"messageDetailsUrl\":\"https://us3.proofpointessentials.com/index01.php?mod_id=13&mod_option=logitem&type=message_details&e_id=1234567&k=k1&payload=4i7f2b8466a51c60523eef35e6295c91e9bhvdsdvabvadhv14684fbdf654b6dfba31g68t4h15badf65g4a4fd86b4trs65h1b6a53s4gde8a7sthgbaf6dg4v6aer8d7g46v5adr4fgv86aw4zs9f68b4y6j84nuy64ko6iu54kyjghf6ga54s6rzhxjtuf45jhn1b6svd5s4gh68mu5yf4ihj86h45srbd6g6\",\"messageID\":\"<20251118073503.GA12345@m1234567.ppops.net>\",\"messageParts\":[{\"contentType\":\"text/html\",\"disposition\":\"inline\",\"filename\":\"text.html\",\"md5\":\"5d41402abc4b2a76b9719d911017c592\",\"oContentType\":\"text/html\",\"sandboxStatus\":\"notrequested\",\"sha256\":\"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\"}],\"messageSize\":2319,\"messageTime\":\"2025-11-18T07:35:04.000000Z\",\"parentEid\":\"56890\",\"parentName\":\"QA Test Account - example.net\",\"phishScore\":0,\"quarantineRule\":\"N/A\",\"recipient\":[\"qa@example.org\"],\"replyToAddress\":\"\",\"sender\":\"www-data@example.com\",\"senderIP\":\"175.16.199.1\",\"spamScore\":0,\"stackName\":\"us3\",\"subject\":\"URL threat\",\"threatsInfoMap\":[{\"classification\":\"malware\",\"threat\":\"https://example.com/files/demo_1234567890.docx\",\"threatId\":\"6abcdef4-1234-5678-9012-dabcdef12314\",\"threatStatus\":\"active\",\"threatTime\":\"2025-11-18T07:37:18Z\",\"threatType\":\"URL\"}],\"toAddresses\":[\"qa@example.org\"],\"xmailer\":\"\"}",
+      "expected": {
+        "@timestamp": "2025-11-18T07:37:18.000Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.message_delivered",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "not_a_badguy@example.com"
+            ]
+          },
+          "message_id": "20251118073503.GA12345@m1234567.ppops.net",
+          "sender": {
+            "address": "www-data@example.com"
+          },
+          "subject": "URL threat",
+          "to": {
+            "address": [
+              "qa@example.org"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "hash": [
+            "5d41402abc4b2a76b9719d911017c592",
+            "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+          ],
+          "ip": [
+            "175.16.199.1"
+          ],
+          "user": [
+            "not_a_badguy@example.com",
+            "www-data@example.com",
+            "qa@example.org"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "name": [
+              "https://example.com/files/demo_1234567890.docx"
+            ],
+            "type": [
+              "url"
+            ],
+            "url": {
+              "original": [
+                "https://example.com/files/demo_1234567890.docx"
+              ]
+            }
+          }
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "email"
+          ],
+          "id": "GBCJHVbvfdjHIVBDBbliuvsvoehfb64V9SFgvuvhVUYVbi-abcd",
+          "kind": "event",
+          "reference": "https://us3.proofpointessentials.com/index01.php?mod_id=13&mod_option=logitem&type=message_details&e_id=1234567&k=k1&payload=4i7f2b8466a51c60523eef35e6295c91e9bhvdsdvabvadhv14684fbdf654b6dfba31g68t4h15badf65g4a4fd86b4trs65h1b6a53s4gde8a7sthgbaf6dg4v6aer8d7g46v5adr4fgv86aw4zs9f68b4y6j84nuy64ko6iu54kyjghf6ga54s6rzhxjtuf45jhn1b6svd5s4gh68mu5yf4ihj86h45srbd6g6",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"messages_delivered\",\"GUID\":\"GBCJHVbvfdjHIVsvoehfb64V9SFgvuvhVUYVbi-abcd\",\"completelyRewritten\":\"true\",\"customerEid\":\"1235567\",\"customerName\":\"Customer 4\",\"fromAddress\":\"devil@example.com\",\"headerFrom\":\"not_a_badguy@example.com\",\"impostorScore\":30,\"malwareScore\":40,\"messageDetailsUrl\":\"https://us3.proofpointessentials.com/index01.php?mod_id=13&mod_option=logitem&type=message_details&e_id=1235567&k=k1&payload=4i7dfvfdvf2b8466a51c60523eef35e6295c91e9bhvdsdvabvadhv14684fbdf654b6dfba31g68t4h15badf65g4a4fd86b4trs65h1b6a53s4gde8a7sthgbaf6dg4v6aer8d7g46v5adr4fgv86aw4zs9f68b4y6j84nuy64ko6iu54kyjghf6ga54s6rzhxjtuf45jhn1b6svd5s4gh68mu5yf4ihj86h45srbd6g6\",\"messageID\":\"<20251118073503.GA12345@m1235567.ppops.net>\",\"messageParts\":[{\"contentType\":\"text/html\",\"disposition\":\"inline\",\"filename\":\"text.html\",\"md5\":\"5d41402abc4b2a76b9719d911017c592\",\"oContentType\":\"text/html\",\"sandboxStatus\":\"notrequested\",\"sha256\":\"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\"}],\"messageSize\":2319,\"messageTime\":\"2025-11-19T09:35:04.000000Z\",\"parentEid\":\"56890\",\"parentName\":\"QA Test Account - example.net\",\"phishScore\":0,\"quarantineRule\":\"N/A\",\"recipient\":[\"support@example.com\"],\"replyToAddress\":\"\",\"sender\":\"www-data@example.com\",\"senderIP\":\"1.128.0.2\",\"spamScore\":0,\"stackName\":\"us3\",\"subject\":\"URL threat\",\"threatsInfoMap\":[{\"classification\":\"toad\",\"threat\":\"https://example.com/files/demo_1234567890.docx\",\"threatId\":\"6abcdef4-1234-5678-9012-dabcdef12314\",\"threatStatus\":\"active\",\"threatTime\":\"2025-11-18T07:37:18Z\",\"threatType\":\"URL\"}],\"toAddresses\":[\"qa@example.org\"],\"xmailer\":\"\"}",
+      "expected": {
+        "@timestamp": "2025-11-19T09:35:04Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.message_delivered",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "devil@example.com"
+            ]
+          },
+          "message_id": "20251118073503.GA12345@m1235567.ppops.net",
+          "sender": {
+            "address": "www-data@example.com"
+          },
+          "subject": "URL threat",
+          "to": {
+            "address": [
+              "support@example.com",
+              "qa@example.org"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "hash": [
+            "5d41402abc4b2a76b9719d911017c592",
+            "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+          ],
+          "ip": [
+            "1.128.0.2"
+          ],
+          "user": [
+            "devil@example.com",
+            "www-data@example.com",
+            "support@example.com",
+            "qa@example.org"
+          ]
+        },
+        "source": {
+          "ip": "1.128.0.2"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "name": [
+              "https://example.com/files/demo_1234567890.docx"
+            ],
+            "type": [
+              "url"
+            ],
+            "url": {
+              "original": [
+                "https://example.com/files/demo_1234567890.docx"
+              ]
+            }
+          }
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "email"
+          ],
+          "id": "GBCJHVbvfdjHIVsvoehfb64V9SFgvuvhVUYVbi-abcd",
+          "kind": "event",
+          "reference": "https://us3.proofpointessentials.com/index01.php?mod_id=13&mod_option=logitem&type=message_details&e_id=1235567&k=k1&payload=4i7dfvfdvf2b8466a51c60523eef35e6295c91e9bhvdsdvabvadhv14684fbdf654b6dfba31g68t4h15badf65g4a4fd86b4trs65h1b6a53s4gde8a7sthgbaf6dg4v6aer8d7g46v5adr4fgv86aw4zs9f68b4y6j84nuy64ko6iu54kyjghf6ga54s6rzhxjtuf45jhn1b6svd5s4gh68mu5yf4ihj86h45srbd6g6",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.product"
+      ]
+    },
+    {
+      "line": "{\"event_type\":\"messages_delivered\",\"GUID\":\"GBCJHVbvfdjHIVBDBbliuvsvojsdvnlaehfb64V9SFgvuvhVUYVbi-abcd\",\"completelyRewritten\":\"true\",\"customerEid\":\"1235567\",\"customerName\":\"Customer 4\",\"fromAddress\":\"devil@example.com\",\"headerFrom\":\"not_a_badguy@example.com\",\"impostorScore\":20,\"malwareScore\":30,\"messageDetailsUrl\":\"https://us3.proofpointessentials.com/index01.php?mod_id=13&mod_option=logitem&type=message_details&e_id=1235567&k=k1&payload=4i7ffvdf2b8466a51c60523eef35e6295c91e9bhvdsdvabvadhv14684fbdf654b6dfba31g68t4h15badf65g4a4fd86b4trs65h1b6a53s4gde8a7sthgbaf6dg4v6aer8d7g46v5adr4fgv86aw4zs9f68b4y6j84nuy64ko6iu54kyjghf6ga54s6rzhxjtuf45jhn1b6svd5s4gh68mu5yf4ihj86h45srbd6g6\",\"messageID\":\"<20251118073503.GA12345@m1235567.ppops.net>\",\"messageParts\":[{\"contentType\":\"text/html\",\"disposition\":\"inline\",\"filename\":\"text.html\",\"md5\":\"5d41402abc4b2a76b9719d911017c592\",\"oContentType\":\"text/html\",\"sandboxStatus\":\"notrequested\",\"sha256\":\"2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824\"}],\"messageSize\":2319,\"messageTime\":\"2025-11-18T09:35:04.000000Z\",\"parentEid\":\"56890\",\"parentName\":\"QA Test Account - example.net\",\"phishScore\":0,\"quarantineRule\":\"N/A\",\"recipient\":[\"test@example.org\"],\"replyToAddress\":\"\",\"sender\":\"www-data@example.com\",\"senderIP\":\"175.16.199.1\",\"spamScore\":0,\"stackName\":\"us3\",\"subject\":\"URL threat\",\"threatsInfoMap\":[{\"classification\":\"phish\",\"threat\":\"https://example.com/files/demo_1234567890.docx\",\"threatId\":\"6abcdef4-1234-5678-9012-dabcdef12314\",\"threatStatus\":\"active\",\"threatTime\":\"2025-11-18T07:37:18Z\",\"threatType\":\"URL\"}],\"toAddresses\":[\"qa@example.org\"],\"xmailer\":\"\"}",
+      "expected": {
+        "@timestamp": "2025-11-18T09:35:04Z",
+        "data_stream": {
+          "dataset": "proofpoint_essentials.message_delivered",
+          "namespace": "default",
+          "type": "logs"
+        },
+        "ecs": {
+          "version": "9.2.0"
+        },
+        "email": {
+          "from": {
+            "address": [
+              "devil@example.com"
+            ]
+          },
+          "message_id": "20251118073503.GA12345@m1235567.ppops.net",
+          "sender": {
+            "address": "www-data@example.com"
+          },
+          "subject": "URL threat",
+          "to": {
+            "address": [
+              "test@example.org",
+              "qa@example.org"
+            ]
+          }
+        },
+        "observer": {
+          "product": "Proofpoint Essentials",
+          "vendor": "Proofpoint"
+        },
+        "related": {
+          "hash": [
+            "5d41402abc4b2a76b9719d911017c592",
+            "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+          ],
+          "ip": [
+            "175.16.199.1"
+          ],
+          "user": [
+            "devil@example.com",
+            "www-data@example.com",
+            "test@example.org",
+            "qa@example.org"
+          ]
+        },
+        "source": {
+          "geo": {
+            "city_name": "Changchun",
+            "continent_name": "Asia",
+            "country_iso_code": "CN",
+            "country_name": "China",
+            "region_iso_code": "CN-22",
+            "region_name": "Jilin Sheng"
+          },
+          "ip": "175.16.199.1"
+        },
+        "tags": [
+          "preserve_original_event"
+        ],
+        "threat": {
+          "indicator": {
+            "name": [
+              "https://example.com/files/demo_1234567890.docx"
+            ],
+            "type": [
+              "url"
+            ],
+            "url": {
+              "original": [
+                "https://example.com/files/demo_1234567890.docx"
+              ]
+            }
+          }
+        },
+        "event": {
+          "action": "allowed",
+          "category": [
+            "email"
+          ],
+          "id": "GBCJHVbvfdjHIVBDBbliuvsvojsdvnlaehfb64V9SFgvuvhVUYVbi-abcd",
+          "kind": "event",
+          "reference": "https://us3.proofpointessentials.com/index01.php?mod_id=13&mod_option=logitem&type=message_details&e_id=1235567&k=k1&payload=4i7ffvdf2b8466a51c60523eef35e6295c91e9bhvdsdvabvadhv14684fbdf654b6dfba31g68t4h15badf65g4a4fd86b4trs65h1b6a53s4gde8a7sthgbaf6dg4v6aer8d7g46v5adr4fgv86aw4zs9f68b4y6j84nuy64ko6iu54kyjghf6ga54s6rzhxjtuf45jhn1b6svd5s4gh68mu5yf4ihj86h45srbd6g6",
+          "type": [
+            "info"
+          ]
+        }
+      },
+      "unscoredFields": [
+        "observer.product"
+      ]
+    }
+  ]
+}

@@ -8,7 +8,7 @@
  */
 
 import type { TestCase } from '@playwright/test/reporter';
-import type { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { ScoutElasticCloudTarget, ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { BuildkiteMetadata, HostMetadata } from '../../../datasources';
 
 /** A test's final classification, once no more retries can happen. Mirrors `TestCase.outcome()`. */
@@ -71,6 +71,8 @@ export interface ScoutTestRunInfo {
     mode: string;
     /** Test target attributes the run was executed under, e.g. `['fips']`. */
     attributes?: string[];
+    /** The Elastic Cloud project or deployment the run targeted, when it ran on Elastic Cloud. */
+    elastic_cloud?: ScoutElasticCloudTarget;
   };
   /** Why the run was started, e.g. `pull-request` or `batch-daily-ipv6`; `unknown` when undeclared. */
   scope: string;

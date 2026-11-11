@@ -38,10 +38,11 @@ export function useOnboardingOverride() {
   );
 
   // `newSession` makes the onboarding app drop session storage left over from an earlier run.
+  // `returnUrl` is the page the user came from, where cancelling the flow takes them back.
   const navigateToOnboarding = useCallback(() => {
     application.navigateToApp(ONBOARDING_APP_ID, {
       path: ONBOARDING_AWS_PATH,
-      state: { newSession: true },
+      state: { newSession: true, returnUrl: window.location.href },
     });
   }, [application]);
 
@@ -82,6 +83,7 @@ export function useOnboardingOverride() {
         categories,
         searchableContent,
         searchMembers: members,
+        ...(members.length > 0 ? { collectionSize: members.length } : {}),
         onCardClick: navigateToOnboarding,
       };
 

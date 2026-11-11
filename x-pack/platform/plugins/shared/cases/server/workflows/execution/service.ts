@@ -28,6 +28,7 @@ import type { CasesWorkflowOperations } from '../../client/workflows/operations'
 import type { CasesRequestHandlerContext } from '../../types';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { buildActivityOrigin } from './build_activity_origin';
+import { resolveAttachedAlertIndices } from './resolve_attached_alert_indices';
 import type { ResolvedWorkflowAttachmentOrigin } from './validate_origin';
 import {
   parseSelectedAlertPairs,
@@ -219,7 +220,7 @@ export class CasesWorkflowRunService {
       }
       // Only attachment origins consume `theCase.comments`; fetching them for every other
       // origin type would load all case attachments from ES (up to MAX_DOCS_PER_PAGE) and
-      // io-ts-decode the full case, only to discard the result immediately.
+      // zod-decode the full case, only to discard the result immediately.
       const needsComments =
         body.origin.type === ATTACHMENT_WORKFLOW_ORIGIN_TYPE ||
         body.origin.type === ATTACHMENTS_WORKFLOW_ORIGIN_TYPE;
@@ -241,12 +242,17 @@ export class CasesWorkflowRunService {
             })
           : Promise.resolve([]),
       ]);
+      const resolvedAttachedAlerts = await resolveAttachedAlertIndices({
+        selected: selectedAlerts,
+        attached: attachedAlerts,
+        confirmAlertIndices: workflowOperations.confirmAlertIndices,
+      });
       resolvedAttachmentOrigin = validateOrigin({
         origin: body.origin,
         theCase,
         inputs: body.inputs,
         attachmentTypeRegistry: this.attachmentTypeRegistry,
-        alerts: { selected: selectedAlerts, attached: attachedAlerts },
+        alerts: { selected: selectedAlerts, attached: resolvedAttachedAlerts },
         documents: { selected: selectedDocuments, attached: attachedEvents },
       });
     }

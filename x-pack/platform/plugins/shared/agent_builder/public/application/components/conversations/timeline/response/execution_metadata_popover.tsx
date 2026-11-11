@@ -13,11 +13,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiI18nNumber,
   EuiPopover,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRoundStep, ExecutionTerminatedEvent } from '@kbn/agent-builder-common';
@@ -25,9 +24,16 @@ import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { ExecutionJsonFlyout } from './execution_json_flyout';
 import { ExecutionMetadataByModel } from './execution_metadata_by_model';
+import { formatCompactNumber } from '../../../../utils/format_compact_number';
 
-const POPOVER_WIDTH = 420;
+const POPOVER_WIDTH_WITHOUT_TABLE = 200;
+const POPOVER_MIN_WIDTH_WITH_TABLE = 430;
+const POPOVER_MAX_WIDTH = 'calc(100vw - 4rem)';
 const MIN_MODELS_FOR_TABS = 2;
+
+const tabsStyles = ({ euiTheme }: UseEuiTheme) => ({ paddingBlockEnd: euiTheme.size.m });
+const footerStyles = ({ euiTheme }: UseEuiTheme) => ({ paddingBlockStart: euiTheme.size.m });
+const metadataRowStyles = ({ euiTheme }: UseEuiTheme) => ({ paddingBlock: euiTheme.size.xs });
 
 const labels = {
   tabsLegend: i18n.translate('xpack.agentBuilder.response.metadataPopover.tabsLegend', {
@@ -154,14 +160,16 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
       >
         <EuiFlexGroup
           direction="column"
-          gutterSize="s"
+          gutterSize="none"
           css={css`
-            width: ${POPOVER_WIDTH}px;
-            max-width: calc(100vw - 4rem);
+            ${hasSeveralModels
+              ? `min-width: min(${POPOVER_MIN_WIDTH_WITH_TABLE}px, ${POPOVER_MAX_WIDTH});`
+              : `width: ${POPOVER_WIDTH_WITHOUT_TABLE}px;`}
+            max-width: ${POPOVER_MAX_WIDTH};
           `}
         >
           {hasSeveralModels && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={tabsStyles}>
               <EuiButtonGroup
                 legend={labels.tabsLegend}
                 variant="selection"
@@ -192,7 +200,6 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
                   </EuiButton>
                 ))}
               </EuiButtonGroup>
-              <EuiSpacer size="xs" />
             </EuiFlexItem>
           )}
           {hasSeveralModels && selectedTab === 'byModel' ? (
@@ -203,32 +210,31 @@ export const ExecutionMetadataPopover: React.FC<ExecutionMetadataPopoverProps> =
               <MetadataDivider />
               <MetadataRow
                 label={labels.tokensSent}
-                value={<EuiI18nNumber value={modelUsage.input_tokens} />}
+                value={formatCompactNumber(modelUsage.input_tokens)}
               />
               {modelUsage.cached_input_tokens !== undefined && (
                 <MetadataRow
                   label={labels.cacheHitTokens}
-                  value={<EuiI18nNumber value={modelUsage.cached_input_tokens} />}
+                  value={formatCompactNumber(modelUsage.cached_input_tokens)}
                   isSubRow
                 />
               )}
               <MetadataDivider />
               <MetadataRow
                 label={labels.tokensReceived}
-                value={<EuiI18nNumber value={modelUsage.output_tokens} />}
+                value={formatCompactNumber(modelUsage.output_tokens)}
               />
               {modelUsage.reasoning_tokens !== undefined && (
                 <MetadataRow
                   label={labels.reasoningTokens}
-                  value={<EuiI18nNumber value={modelUsage.reasoning_tokens} />}
+                  value={formatCompactNumber(modelUsage.reasoning_tokens)}
                   isSubRow
                 />
               )}
               <MetadataDivider />
             </>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiSpacer size="xs" />
+          <EuiFlexItem grow={false} css={footerStyles}>
             <EuiButton
               iconType="code"
               size="s"
@@ -272,15 +278,15 @@ interface MetadataRowProps {
 }
 
 const MetadataRow: React.FC<MetadataRowProps> = ({ label, value, isSubRow = false }) => (
-  <EuiFlexItem grow={false}>
+  <EuiFlexItem grow={false} css={metadataRowStyles}>
     <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="l" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size="s" color={isSubRow ? 'subdued' : undefined}>
+        <EuiText size="xs" color={isSubRow ? 'subdued' : undefined}>
           {isSubRow ? label : <strong>{label}</strong>}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="s" color={isSubRow ? 'subdued' : undefined}>
+        <EuiText size="xs" color={isSubRow ? 'subdued' : undefined}>
           {value}
         </EuiText>
       </EuiFlexItem>

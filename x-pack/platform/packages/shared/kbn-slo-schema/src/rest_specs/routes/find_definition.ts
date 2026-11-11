@@ -4,42 +4,80 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { toBooleanRt } from '@kbn/io-ts-utils/src/to_boolean_rt';
-import * as t from 'io-ts';
-import { sloDefinitionSchema, transformHealthSchema } from '../../schema';
+import { BooleanFromString } from '@kbn/zod-helpers';
+import { z, lazySchema } from '@kbn/zod';
 
-const findSloDefinitionsParamsSchema = t.partial({
-  query: t.partial({
-    search: t.string,
-    includeOutdatedOnly: toBooleanRt,
-    includeHealth: toBooleanRt,
-    tags: t.string,
-    page: t.string,
-    perPage: t.string,
-  }),
-});
+import { sloHealthSchema } from '../../schema/health';
+import { sloDefinitionSchema } from '../../schema/slo';
 
-const healthMetadataSchema = t.partial({
-  health: t.type({
-    isProblematic: t.boolean,
-    rollup: transformHealthSchema,
-    summary: transformHealthSchema,
-  }),
-});
+const findSloDefinitionsParamsSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .object({
+        search: z
+          .string()
+          .meta({ example: 'checkout' })
+          .optional()
+          .describe('Filters the SLOs by name'),
+        includeOutdatedOnly: BooleanFromString.meta({ example: 'true' })
+          .optional()
+          .describe('Indicates if the API returns only outdated SLO or all SLO definitions'),
+        includeHealth: BooleanFromString.meta({ example: 'true' })
+          .optional()
+          .describe('Indicates if the API returns SLO health data with definitions'),
+        tags: z
+          .string()
+          .meta({ example: 'production' })
+          .optional()
+          .describe('Filters the SLOs by tag'),
+        page: z
+          .string()
+          .meta({ example: '1' })
+          .optional()
+          .describe('The page to use for pagination, must be greater or equal than 1'),
+        perPage: z
+          .string()
+          .meta({ example: '100' })
+          .optional()
+          .describe('Number of SLOs returned by page'),
+      })
+      .optional(),
+  })
+);
 
-const sloDefinitionResponseSchema = t.intersection([sloDefinitionSchema, healthMetadataSchema]);
+const sloDefinitionResponseSchema = lazySchema(() =>
+  sloDefinitionSchema
+    .extend({
+      health: sloHealthSchema.optional(),
+    })
+    .meta({
+      id: 'SLODefinitionResponse',
+      description: 'The SLO definition, with its health when requested',
+      additionalProperties: true,
+    })
+);
 
-const findSloDefinitionsResponseSchema = t.type({
-  page: t.number,
-  perPage: t.number,
-  total: t.number,
-  results: t.array(sloDefinitionResponseSchema),
-});
+const findSloDefinitionsResponseSchema = lazySchema(() =>
+  z
+    .object({
+      page: z.number(),
+      perPage: z.number(),
+      total: z.number(),
+      results: z.array(sloDefinitionResponseSchema),
+    })
+    .meta({
+      id: 'SLOFindDefinitionsResponse',
+      description: 'A paginated response of SLO definitions matching the query.',
+      additionalProperties: true,
+    })
+);
 
-type FindSLODefinitionsParams = t.TypeOf<typeof findSloDefinitionsParamsSchema.props.query>;
-type FindSLODefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
+type FindSLODefinitionsParams = NonNullable<
+  z.output<typeof findSloDefinitionsParamsSchema.shape.query>
+>;
+type FindSLODefinitionsResponse = z.input<typeof findSloDefinitionsResponseSchema>;
 
-type SLODefinitionResponse = t.OutputOf<typeof sloDefinitionResponseSchema>;
+type SLODefinitionResponse = z.input<typeof sloDefinitionResponseSchema>;
 
 export {
   findSloDefinitionsParamsSchema,

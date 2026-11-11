@@ -12,8 +12,9 @@ import { buildCreateActionPolicyData, test, testData } from '../fixtures';
  * Covers the UI capability gating on the Action Policies page.
  * Read-only users can view action policies and open the details flyout, but
  * every write affordance (create, row edit/actions, snooze toggle, details
- * flyout Take action button) is hidden and the `/edit/:id` route is gated by
- * the required-privileges interstitial.
+ * flyout edit/clone/delete menu items) is hidden and the `/edit/:id` route is
+ * gated by the required-privileges interstitial. The details flyout Take action
+ * button stays visible so read-only users can send a test notification.
  */
 test.describe('Action Policies - read/write privileges', { tag: testData.UI_TAG }, () => {
   const RUN_ID = Date.now().toString();
@@ -63,10 +64,10 @@ test.describe('Action Policies - read/write privileges', { tag: testData.UI_TAG 
       await expect(actionPoliciesList.detailsLink(policyName)).toBeVisible();
     });
 
-    await test.step('details flyout opens but hides the Take action button', async () => {
+    await test.step('details flyout opens and the Take action button only carries read actions', async () => {
       await actionPoliciesList.openDetailsFlyout(policyName);
       await expect(actionPoliciesList.detailsFlyout).toBeVisible();
-      await expect(actionPoliciesList.detailsFlyoutTakeActionButton).toHaveCount(0);
+      await expect(actionPoliciesList.detailsFlyoutTakeActionButton).toBeVisible();
     });
   });
 

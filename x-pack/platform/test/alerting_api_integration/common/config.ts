@@ -396,7 +396,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...enabledRuleTypesSetting,
           ...emailMaximumBodyLengthSetting,
           ...ruleChangeTrackingSettings,
-          '--xpack.eventLog.logEntries=true',
+          '--xpack.eventLog.logEntries=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',
           ])}`,
@@ -405,7 +405,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...disabledPlugins
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
-          ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
+          ...findTestPluginPaths(
+            path.resolve(__dirname, '../../../test_plugins/response_ops/alerting_api_integration')
+          ),
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl
             ? [

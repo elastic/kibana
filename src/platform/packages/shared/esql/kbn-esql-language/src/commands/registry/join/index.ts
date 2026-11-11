@@ -28,7 +28,7 @@ export const joinCommand = {
       // {
       //   name: 'left',
       //   description: i18n.translate(
-      //     'kbn-esql-language.esql.definitions.joinLeftDoc',
+      //     'esqlLanguage.esql.definitions.joinLeftDoc',
       //     {
       //       defaultMessage:
       //         'Join index with another index, keep only matching documents from the right index',
@@ -38,7 +38,7 @@ export const joinCommand = {
       // {
       //   name: 'right',
       //   description: i18n.translate(
-      //     'kbn-esql-language.esql.definitions.joinRightDoc',
+      //     'esqlLanguage.esql.definitions.joinRightDoc',
       //     {
       //       defaultMessage:
       //         'Join index with another index, keep only matching documents from the left index',
@@ -47,12 +47,12 @@ export const joinCommand = {
       // },
       {
         name: 'lookup',
-        description: i18n.translate('kbn-esql-language.esql.definitions.joinLookupDoc', {
+        description: i18n.translate('esqlLanguage.esql.definitions.joinLookupDoc', {
           defaultMessage: 'Join with a "lookup" mode index',
         }),
       },
     ],
-    description: i18n.translate('kbn-esql-language.esql.definitions.joinDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.joinDoc', {
       defaultMessage: 'Join table with another table.',
     }),
     declaration: `LOOKUP JOIN <lookup_index> ON <field_name>`,

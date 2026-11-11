@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { map, combineLatest } from 'rxjs';
+import { map, combineLatest, distinctUntilChanged } from 'rxjs';
+import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AIChatExperience } from '@kbn/ai-assistant-common';
 
@@ -18,14 +19,23 @@ export const registerSolutionNavigation = async (services: Services) => {
 
   const chatExperience$ = services.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE);
 
-  const navigationTree$ = chatExperience$.pipe(
-    map((chatExperience) => createNavigationTree(services, chatExperience))
+  const alertZeroEnabled$ = services.application.applications$.pipe(
+    map(defaultNavigationTree.isAlertZeroNavVisible),
+    distinctUntilChanged()
   );
 
-  combineLatest([navigation.isSolutionNavEnabled$, chatExperience$]).subscribe(
-    ([isSolutionNavigationEnabled, chatExperience]) => {
+  const navigationTree$ = combineLatest([chatExperience$, alertZeroEnabled$]).pipe(
+    map(([chatExperience, alertZeroEnabled]) =>
+      createNavigationTree(services, chatExperience, alertZeroEnabled)
+    )
+  );
+
+  combineLatest([navigation.isSolutionNavEnabled$, chatExperience$, alertZeroEnabled$]).subscribe(
+    ([isSolutionNavigationEnabled, chatExperience, alertZeroEnabled]) => {
       if (isSolutionNavigationEnabled) {
-        securitySolution.setSolutionNavigationTree(createNavigationTree(services, chatExperience));
+        securitySolution.setSolutionNavigationTree(
+          createNavigationTree(services, chatExperience, alertZeroEnabled)
+        );
       } else {
         securitySolution.setSolutionNavigationTree(null);
       }
