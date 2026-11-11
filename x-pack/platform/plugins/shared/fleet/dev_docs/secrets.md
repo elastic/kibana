@@ -105,8 +105,20 @@ For output secrets, we do not perform this check as outputs offer a plain text a
 
 ### Using Fleet secrets from other plugins
 
-Other plugins use `FleetStartContract.secretsService`. Fleet supplies its internal Elasticsearch and saved objects clients, so callers pass none:
+Other plugins call `FleetStartContract.getSecretsService({ request, consumer })`. Fleet supplies its internal Elasticsearch and saved objects clients. Every audit entry the service writes records `consumer` (`labels.consumer`) and, when `request` is given, the user. Omit `request` only for background work such as tasks.
 
 - `createSecrets(values)` creates one secret per value and returns `{ id }` in input order.
-- `deleteSecrets(ids)` deletes secrets by id; unknown ids are ignored.
-- `isSecretStorageEnabledForFeature({ featureName, minimumFleetServerVersion, settingKey })` runs the Fleet Server version check described above and latches `settingKey` in the global settings once it passes. A plugin that needs its own minimum version adds its own key to `FleetServerRequirementSettingsKey`, `BaseSettings`, the settings saved object mappings (with a new model version) and `mapSettingsSO`.
+- `deleteSecrets(ids)` returns `{ id, deleted }` per id.
+  - Callers may only pass ids returned by their own `createSecrets`. `.fleet-secrets` is shared, and secrets have no owner.
+  - An unknown id is reported as `deleted: false`.
+  - A 404 after a failed (retried) attempt counts as `deleted: true` and is audited, because the failed attempt may have deleted the secret.
+  - Malformed ids (anything but the 20-character ids Elasticsearch generates) throw before any request is sent.
+- `isSecretStorageEnabledForFeature(feature)` runs the Fleet Server version check described above for a `SecretStorageFeature`. Fleet owns each feature's settings key and minimum version.
+
+To add a feature:
+
+1. Add its id to `SecretStorageFeature` and an entry to `SECRET_STORAGE_FEATURES` (`server/services/secrets/secrets_service.ts`).
+2. Add a minimum version constant to `common/constants/secrets.ts`.
+3. Add a new settings key to `FleetServerRequirementSettingsKey`, `BaseSettings`, `mapSettingsSO` and the settings saved object (mappings plus a new model version).
+
+The settings latch is sticky, so raising a feature's minimum version needs a new settings key.

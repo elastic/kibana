@@ -16,7 +16,7 @@ import type {
   DeletedSecretReference,
 } from '../../../common/types';
 import type { SecretReference } from '../../types';
-import { FleetError, isESClientError } from '../../errors';
+import { FleetError } from '../../errors';
 import { SECRETS_ENDPOINT_PATH, SECRETS_MINIMUM_FLEET_SERVER_VERSION } from '../../constants';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 import { auditLoggingService } from '../audit_logging';
@@ -140,10 +140,8 @@ export async function createSecrets(opts: {
 export async function deleteSecrets(opts: {
   esClient: ElasticsearchClient;
   ids: string[];
-  /** Treats an unknown secret id as already deleted instead of failing. */
-  ignoreNotFound?: boolean;
 }): Promise<void> {
-  const { esClient, ids, ignoreNotFound = false } = opts;
+  const { esClient, ids } = opts;
   const logger = appContextService.getLogger();
 
   const deletedRes: DeletedSecretReference[] = await Promise.all(
@@ -160,10 +158,6 @@ export async function deleteSecrets(opts: {
 
         return { ...getDeleteRes, id };
       } catch (err) {
-        if (ignoreNotFound && isESClientError(err) && err.meta.statusCode === 404) {
-          return { id, deleted: false };
-        }
-
         const msg = `Error deleting secrets: ${err}`;
         logger.error(msg);
         throw new FleetError(msg);
@@ -173,16 +167,21 @@ export async function deleteSecrets(opts: {
 
   deletedRes.forEach((item) => {
     if (item.deleted === true) {
-      auditLoggingService.writeCustomAuditLog({
-        message: `secret deleted: ${item.id}`,
-        event: {
-          action: 'secret_delete',
-          category: ['database'],
-          type: ['access'],
-          outcome: 'success',
-        },
-      });
+      writeSecretDeletedAuditLog(item.id);
     }
+  });
+}
+
+/** Writes the audit entry for a deleted Fleet secret. */
+export function writeSecretDeletedAuditLog(id: string) {
+  auditLoggingService.writeCustomAuditLog({
+    message: `secret deleted: ${id}`,
+    event: {
+      action: 'secret_delete',
+      category: ['database'],
+      type: ['access'],
+      outcome: 'success',
+    },
   });
 }
 

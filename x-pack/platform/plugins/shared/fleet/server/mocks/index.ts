@@ -407,7 +407,7 @@ export function createSecretsServiceMock(): jest.Mocked<SecretsServiceInterface>
     createSecrets: jest.fn(async (values: string[]) =>
       values.map((_value, index) => ({ id: `secret-${index}` }))
     ),
-    deleteSecrets: jest.fn().mockResolvedValue(undefined),
+    deleteSecrets: jest.fn(async (ids: string[]) => ids.map((id) => ({ id, deleted: true }))),
     isSecretStorageEnabledForFeature: jest.fn().mockResolvedValue(true),
   };
 }
@@ -416,6 +416,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
   const fleetAuthzMock = createFleetAuthzMock();
   const fleetArtifactsClient = createArtifactsClientMock();
   const fleetActionsClient = createFleetActionsClientMock();
+  const secretsService = createSecretsServiceMock();
 
   const startContract: DeeplyMockedKeys<FleetStartContract> = {
     fleetSetupCompleted: jest.fn(async () => {}),
@@ -439,7 +440,7 @@ export const createFleetStartContractMock = (): DeeplyMockedKeys<FleetStartContr
     messageSigningService: createMessageSigningServiceMock(),
     uninstallTokenService: createUninstallTokenServiceMock(),
     createFleetActionsClient: jest.fn((_) => fleetActionsClient),
-    secretsService: createSecretsServiceMock(),
+    getSecretsService: jest.fn((_) => secretsService),
     getPackageSpecTagId: jest.fn(getPackageSpecTagId),
     createOutputClient: jest.fn(async (_) => createOutputClientMock()),
     runWithCache: (async (cb: any) => await cb()) as any,
