@@ -17,7 +17,6 @@ export const surfaceContext = {
   request: httpServerMock.createKibanaRequest(),
   spaceId: 'ops',
   agentId: 'ops-agent',
-  kibanaUrl: SURFACE_BASE_URL,
 };
 
 /**

@@ -196,7 +196,7 @@ apiTest.describe(
           expect.objectContaining({
             type: 'error',
             data: expect.objectContaining({
-              message: expect.stringContaining('requires the Nightshift manage privilege'),
+              message: expect.stringContaining('requires the nightshift manage privilege'),
             }),
           }),
         ]);

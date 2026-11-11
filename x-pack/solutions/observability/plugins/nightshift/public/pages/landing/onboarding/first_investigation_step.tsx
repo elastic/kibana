@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiEmptyPrompt,
-  EuiIcon,
   EuiIllustration,
   EuiPanel,
   EuiProgress,
@@ -30,6 +29,7 @@ import type {
   OnboardingSuggestion,
   OnboardingSuggestionsExecution,
 } from '@kbn/nightshift-investigations-plugin/common';
+import { ShowMoreButton } from '../../../components/ui/show_more_button';
 import { useStartInvestigation } from '../../../data/investigations/use_start_investigation';
 import {
   ConnectSourcesGrid,
@@ -360,48 +360,12 @@ function SuggestionList({
         ))}
       </ul>
       {remaining > 0 && (
-        <button
-          type="button"
-          onClick={() => setVisibleCount((count) => count + SUGGESTIONS_PAGE_SIZE)}
+        <ShowMoreButton
+          count={SUGGESTIONS_PAGE_SIZE}
+          remaining={remaining}
+          onClick={() => setVisibleCount((n) => n + SUGGESTIONS_PAGE_SIZE)}
           data-test-subj="nightshiftOnboardingSuggestionsShowMore"
-          css={css`
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: ${euiTheme.size.xs};
-            width: 100%;
-            padding: ${euiTheme.size.m};
-            border: none;
-            border-top: ${euiTheme.border.thin};
-            background: ${euiTheme.colors.emptyShade};
-            cursor: pointer;
-            font-size: ${euiTheme.size.m};
-            line-height: ${euiTheme.size.base};
-            font-weight: ${euiTheme.font.weight.bold};
-            color: ${euiTheme.colors.textParagraph};
-
-            &:hover {
-              background: ${euiTheme.colors.backgroundBaseSubdued};
-            }
-          `}
-        >
-          <EuiIcon type="chevronSingleDown" size="s" aria-hidden={true} />
-          {i18n.translate('xpack.nightshift.onboarding.investigate.showMore', {
-            defaultMessage: 'Show {count} more',
-            values: { count: Math.min(SUGGESTIONS_PAGE_SIZE, remaining) },
-          })}
-          <span
-            css={css`
-              font-weight: ${euiTheme.font.weight.regular};
-              color: ${euiTheme.colors.textDisabled};
-            `}
-          >
-            {i18n.translate('xpack.nightshift.onboarding.investigate.showMoreOf', {
-              defaultMessage: 'of {count}',
-              values: { count: remaining },
-            })}
-          </span>
-        </button>
+        />
       )}
     </div>
   );

@@ -16,7 +16,7 @@ const leaf = (url: string) => {
 };
 
 describe('streams app routes', () => {
-  it.each(['unit', 'map', 'sources', 'destinations', 'indices', 'new-experience'])(
+  it.each(['unit', 'map', 'sources', 'destinations', 'classic', 'indices', 'new-experience'])(
     'opens the legacy page for a classic stream named %s',
     (name) => {
       expect(leaf(`/${name}`).route.path).toBe('/{key}');
