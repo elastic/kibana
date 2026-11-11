@@ -9,6 +9,7 @@ import { createPrompt } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_JUDGE_TEXT_LENGTH } from '../alert_outcome_shared';
 import { gradeSchema } from '../run_judge';
+import { withIdentifierRule } from '../with_identifier_rule';
 import systemPromptText from './system_prompt.text';
 
 export const ALERT_OUTCOME_RCA_ACCURACY_TOOL_NAME = 'score_alert_outcome_rca';
@@ -31,7 +32,7 @@ export type AlertOutcomeRcaAccuracyOutput = z.infer<typeof alertOutcomeRcaAccura
 export const alertOutcomeRcaAccuracyPrompt = createPrompt({
   name: 'nightshift_alert_outcome_rca_accuracy',
   description:
-    "Grades a Nightshift investigation's conclusion against the root cause confirmed when its alert recovered",
+    "Grades a nightshift investigation's conclusion against the root cause confirmed when its alert recovered",
   input: lazySchema(() =>
     z.object({
       confirmed_root_cause: z.string().max(MAX_JUDGE_TEXT_LENGTH),
@@ -42,7 +43,7 @@ export const alertOutcomeRcaAccuracyPrompt = createPrompt({
   .version({
     system: {
       mustache: {
-        template: systemPromptText,
+        template: withIdentifierRule(systemPromptText),
       },
     },
     template: {
@@ -86,7 +87,7 @@ export const alertOutcomeRcaAccuracyPrompt = createPrompt({
             offending_claim: {
               type: 'string',
               description:
-                'The specific wrong claim (quote/paraphrase); required when materially_wrong_claim is true.',
+                'The specific wrong claim, paraphrased in your own words; required when materially_wrong_claim is true.',
             },
             reasoning: {
               type: 'string',

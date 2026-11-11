@@ -47,7 +47,7 @@ import { z } from '@kbn/zod/v4';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { AgentBuilderPluginStart, RunAgentParams } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
-import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../server/sandbox_audit';
 import type { NightshiftTelemetryClient } from '../server/telemetry';
 
 import { hydrateWikiWorkspace, runWikiOptimize } from '../server/wiki/register_wiki';
@@ -137,7 +137,7 @@ export type AgentRun = RunAgentParams;
 
 export interface NightshiftWorkflowFixture {
   engine: WorkflowRunFixtureType;
-  sandboxStart: jest.Mocked<SandboxPluginStart>;
+  sandboxStart: jest.Mocked<NightshiftSandboxStart>;
   agentBuilder: { ensure: jest.Mock };
   /** The saved rounds `prepare_turn` reads; none by default, so a round is a first round. */
   setSavedRounds: (rounds: Array<{ id: string; steps: unknown[] }>) => void;
@@ -245,11 +245,11 @@ export const createNightshiftWorkflowFixture = ({
     writeFiles: jest.fn().mockResolvedValue(undefined),
     mkdirs: jest.fn().mockResolvedValue(undefined),
     readFile: jest.fn().mockResolvedValue(''),
-  } as unknown as jest.Mocked<SandboxSession>;
+  } as unknown as jest.Mocked<AuditedSandboxSession>;
   const sandboxStart = {
     getSession: jest.fn(),
     getSessionForSpace: jest.fn().mockReturnValue(sandboxSession),
-  } as unknown as jest.Mocked<SandboxPluginStart>;
+  } as unknown as jest.Mocked<NightshiftSandboxStart>;
 
   const agentRuns: AgentRun[] = [];
   let agentFailure: Error | undefined;
@@ -296,6 +296,7 @@ export const createNightshiftWorkflowFixture = ({
     }),
     decisionTreeHydrateStepDefinition({
       getSandboxStart: () => sandboxStart,
+      analytics,
       logger,
       isEnabled: () => decisionTreesEnabled,
     }),

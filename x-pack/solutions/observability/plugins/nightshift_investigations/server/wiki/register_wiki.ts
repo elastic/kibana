@@ -16,7 +16,7 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import { i18n } from '@kbn/i18n';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../sandbox_audit';
 import {
   createInvestigationMemoryTelemetry,
   createOptimizeModel,
@@ -88,7 +88,7 @@ export const hydrateWikiWorkspace = async ({
   conversationId,
   logger,
 }: {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   esClient: ElasticsearchClient;
   spaceId: string;
   signal?: AbortSignal;
@@ -167,7 +167,7 @@ export const runWikiOptimize = async ({
   // rather than trusted — the optimize workflow has a manual trigger, so it can be run without an
   // agent id.
   if (!usesKnowledge(agentId)) {
-    logger.info('Wiki optimizer skipped — round was not produced by a Nightshift knowledge agent');
+    logger.info('Wiki optimizer skipped — round was not produced by a nightshift knowledge agent');
     return undefined;
   }
 

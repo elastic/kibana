@@ -15,6 +15,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+  PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 
 import {
@@ -67,7 +68,9 @@ import {
   CloudOnboardingDeploymentSchemaV4,
   CloudOnboardingDeploymentSchemaV5,
   CloudOnboardingDeploymentSchemaV6,
+  ProvisioningCallbackSchemaV1,
   CloudOnboardingDeploymentSchemaV7,
+  CloudOnboardingDeploymentSchemaV8,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -2301,6 +2304,50 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV7,
+          },
+        },
+        8: {
+          // Added dedicatedNamespaceTemplates and raised the policySettings value limit so a condition
+          // fits. No mappings_addition — neither is indexed (dynamic: false).
+          changes: [],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV8.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV8,
+          },
+        },
+      },
+    },
+    [PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE]: {
+      name: PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      // Only Fleet's own routes may make or change a record: a record written through the
+      // generic saved objects APIs could name any space and carry a hash of a token its author
+      // chose, and the unauthenticated receive route would honour it.
+      hiddenFromHttpApis: true,
+      // The stack's Lambda calls the receive route without a space prefix, so the record must be
+      // reachable from any space; the space the launch happened in is kept in `space_id`.
+      namespaceType: 'agnostic',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        dynamic: false,
+        // The token hash is deliberately not mapped: nothing searches it.
+        properties: {
+          status: { type: 'keyword', ignore_above: 1024 },
+          expires_at: { type: 'date' },
+        },
+      },
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: {
+            forwardCompatibility: ProvisioningCallbackSchemaV1.extends({}, { unknowns: 'ignore' }),
+            create: ProvisioningCallbackSchemaV1,
           },
         },
       },

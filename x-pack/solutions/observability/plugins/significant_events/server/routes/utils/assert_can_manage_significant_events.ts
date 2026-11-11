@@ -43,7 +43,7 @@ export const assertCanManageSignificantEvents = async (
       privileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     }))
   ) {
-    throw Boom.forbidden('Managing significant events requires the Nightshift manage privilege');
+    throw Boom.forbidden('Managing significant events requires the nightshift manage privilege');
   }
 };
 
@@ -56,7 +56,7 @@ export const assertCanChangeSources = async (params: PrivilegeCheckParams): Prom
     }))
   ) {
     throw Boom.forbidden(
-      'Changing sources requires the Nightshift manage and Nightshift configure privileges'
+      'Changing sources requires the nightshift manage and nightshift configure privileges'
     );
   }
 };
@@ -70,6 +70,6 @@ export const assertCanReadSignificantEvents = async (
   params: PrivilegeCheckParams
 ): Promise<void> => {
   if (!(await canReadSignificantEvents(params))) {
-    throw Boom.forbidden('Reading significant events requires the Nightshift read privilege');
+    throw Boom.forbidden('Reading significant events requires the nightshift read privilege');
   }
 };

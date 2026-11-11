@@ -85,6 +85,19 @@ export function generateTriggerSnippet(
       parameters = {};
       break;
 
+    case 'page':
+      parameters = {
+        title: monacoSuggestionFormat ? '${1:Report an incident}' : 'Report an incident',
+        description: monacoSuggestionFormat
+          ? '${2:Tell us what happened}'
+          : 'Tell us what happened',
+        inputs: {
+          properties: { summary: { type: 'string', description: 'What happened' } },
+          required: ['summary'],
+        },
+      };
+      break;
+
     default:
       // Custom triggers: include on/condition so users can add a KQL filter (use defaultCondition when provided)
       parameters = {
