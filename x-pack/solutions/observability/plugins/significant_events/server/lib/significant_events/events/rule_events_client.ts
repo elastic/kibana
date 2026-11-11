@@ -27,6 +27,7 @@ import {
   type Severity,
   type SignalVerdict,
   type SignificantEventStatus,
+  type SignificantEventCloseReason,
 } from '@kbn/significant-events-schema';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
@@ -66,6 +67,12 @@ import {
   type LifecycleSkipReason,
 } from './lifecycle/lifecycle_controller';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
+import {
+  reportEventStatusChange,
+  type EventStatusChangeReporter,
+  type WriteOrigin,
+} from './event_status_change_telemetry';
+import type { SignificantEventActor } from '../../telemetry/ebt';
 import { toRuleEvent } from './to_rule_event';
 
 /** `.rule-events` groups a series of writes by `group_hash`, not `event_id` (unavailable as a column). */
@@ -435,6 +442,7 @@ export class RuleEventsClient {
       space: string;
       getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
       emitTrigger?: TriggerEmitter;
+      telemetry?: EventStatusChangeReporter;
       /** Reads `.alert-actions`, a private Alerting v2 index; falls back to `esClient`. */
       internalEsClient?: ElasticsearchClient;
       logger?: Logger;
@@ -1027,8 +1035,14 @@ export class RuleEventsClient {
   }
 
   /** Writes the first version of an event; unguarded, as there is no prior version to compare. */
-  async createEvent({ event }: { event: SignificantEvent }): Promise<CreateEventResult> {
-    const { group_hash: groupHash, alert_id: alertId } = await this.writeVersion({ event });
+  async createEvent({
+    event,
+    origin,
+  }: {
+    event: SignificantEvent;
+    origin: WriteOrigin;
+  }): Promise<CreateEventResult> {
+    const { group_hash: groupHash, alert_id: alertId } = await this.writeVersion({ event, origin });
     return { groupHash, alertId };
   }
 
@@ -1036,9 +1050,11 @@ export class RuleEventsClient {
   async updateEvent({
     event,
     prior,
+    origin,
   }: {
     event: SignificantEvent;
     prior: SignificantEvent;
+    origin: WriteOrigin;
   }): Promise<UpdateEventResult> {
     // A head that cannot be read back is not a version to build on.
     const head = await this.findLatestByEventId(event.event_id);
@@ -1046,7 +1062,7 @@ export class RuleEventsClient {
       return { updated: false, head };
     }
 
-    await this.writeVersion({ event, prior });
+    await this.writeVersion({ event, prior, origin });
     return { updated: true };
   }
 
@@ -1054,12 +1070,17 @@ export class RuleEventsClient {
   async updateEventStatus({
     eventId,
     change,
+    actor,
+    closeReason,
     assessmentNote,
     expectedTimestamp,
     workflowExecutionId,
   }: {
     eventId: string;
     change: StatusChange;
+    /** Not derived from `change`: a `byOperator` change comes from the update route or from a chat tool. */
+    actor: SignificantEventActor;
+    closeReason?: SignificantEventCloseReason;
     assessmentNote?: string;
     /** Skips the write when the latest version's `@timestamp` differs (the event changed since). */
     expectedTimestamp?: string;
@@ -1090,6 +1111,7 @@ export class RuleEventsClient {
     const written = await this.updateEvent({
       event: { ...decision.event, workflow_execution_id: workflowExecutionId },
       prior: latest,
+      origin: { actor, change, closeReason },
     });
     if (!written.updated) {
       return {
@@ -1106,11 +1128,13 @@ export class RuleEventsClient {
   private async writeVersion({
     event,
     prior,
+    origin,
   }: {
     event: SignificantEvent;
     prior?: SignificantEvent;
+    origin: WriteOrigin;
   }): Promise<CreateAlertEventResponse> {
-    const { getAlertEventsClient, emitTrigger } = this.clients;
+    const { getAlertEventsClient, emitTrigger, telemetry, logger, space } = this.clients;
     if (!getAlertEventsClient) {
       throw new Error('RuleEventsClient was created without a writer, so it cannot write events');
     }
@@ -1123,6 +1147,7 @@ export class RuleEventsClient {
       significantEvent: event,
       priorSignificantEvent: prior,
     });
+    reportEventStatusChange({ telemetry, logger, event, prior, origin, spaceId: space });
     return response;
   }
 }

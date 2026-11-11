@@ -1029,6 +1029,7 @@
     "@kbn/painless-lab-plugin": "workspace:*",
     "@kbn/palettes": "workspace:*",
     "@kbn/panel-loader": "workspace:*",
+    "@kbn/plugin-initialize-example-plugin": "workspace:*",
     "@kbn/portable-dashboards-example": "workspace:*",
     "@kbn/preboot-example-plugin": "workspace:*",
     "@kbn/presentation-publishing": "workspace:*",
