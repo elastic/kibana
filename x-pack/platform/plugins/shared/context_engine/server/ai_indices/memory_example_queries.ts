@@ -5,25 +5,73 @@
  * 2.0.
  */
 
+import { ENTITY_TYPE_PREFIX, FACT_TYPE_PREFIX } from '../../common/dreaming';
+import { ENTITY_TYPE_PATTERN, FACT_TYPE_PATTERN } from './example_queries';
+
 export interface MemoryExampleQueries {
   crossSession: string;
+  factsOfType: string;
+  recentFacts: string;
+  entityByName: string;
+  entitiesOfType: string;
 }
 
+const latestActiveRevision = [
+  '| INLINE STATS latest_at = MAX(@timestamp) BY id',
+  '| WHERE @timestamp == latest_at',
+  '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active")',
+  '  AND (expires_at IS NULL OR expires_at > NOW())',
+];
+
+const KEEP_WITH_REFERENCES =
+  '| KEEP id, title, description, content, type, tags, updated_at, references.uri, references.relation, references.description';
+
+const KEEP_ENTITY_WITH_REFERENCES =
+  '| KEEP id, title, description, content, attributes, type, tags, updated_at, references.uri, references.relation, references.description';
+
+const newestOfType = (target: string, typeFilter: string, keep = KEEP_WITH_REFERENCES): string =>
+  [
+    `FROM ${target} METADATA _id`,
+    `| WHERE ${typeFilter}`,
+    ...latestActiveRevision,
+    '| SORT updated_at DESC, _id ASC',
+    keep,
+    '| LIMIT 20',
+  ].join('\n');
+
 /** ES|QL examples for recalling current memory revisions from an AI-index backing target. */
-export const buildMemoryExampleQueries = (target: string): MemoryExampleQueries => ({
+export const buildMemoryExampleQueries = (
+  target: string,
+  { includeFacts = false }: { includeFacts?: boolean } = {}
+): MemoryExampleQueries => ({
   crossSession: [
     `FROM ${target} METADATA _id, _index, _score`,
-    '| WHERE type == "memory.session_fact"',
-    '| INLINE STATS latest_at = MAX(@timestamp) BY id',
-    '| WHERE @timestamp == latest_at',
-    '  AND (governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active")',
-    '  AND (expires_at IS NULL OR expires_at > NOW())',
+    includeFacts
+      ? `| WHERE type == "memory.session_fact" OR type LIKE "${FACT_TYPE_PATTERN}"`
+      : '| WHERE type == "memory.session_fact"',
+    ...latestActiveRevision,
     '| FORK',
     '    ( WHERE content:"<query>" OR title:"<query>" OR description:"<query>" | SORT _score DESC | LIMIT 20 )',
     '    ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )',
     '| FUSE',
     '| SORT _score DESC, _id ASC',
-    '| KEEP id, title, description, content, type, tags, updated_at, references.uri, references.relation, references.description',
+    KEEP_WITH_REFERENCES,
     '| LIMIT 10',
   ].join('\n'),
+  factsOfType: newestOfType(target, `type == "${FACT_TYPE_PREFIX}<fact type>"`),
+  recentFacts: newestOfType(target, `type LIKE "${FACT_TYPE_PATTERN}"`),
+  entityByName: [
+    `FROM ${target} METADATA _id, _score`,
+    `| WHERE type LIKE "${ENTITY_TYPE_PATTERN}"`,
+    ...latestActiveRevision,
+    '| WHERE title:"<name>"',
+    '| SORT _score DESC, _id ASC',
+    KEEP_ENTITY_WITH_REFERENCES,
+    '| LIMIT 5',
+  ].join('\n'),
+  entitiesOfType: newestOfType(
+    target,
+    `type == "${ENTITY_TYPE_PREFIX}<entity type>"`,
+    KEEP_ENTITY_WITH_REFERENCES
+  ),
 });
