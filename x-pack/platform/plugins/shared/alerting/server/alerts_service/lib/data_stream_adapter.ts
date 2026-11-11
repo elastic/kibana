@@ -358,17 +358,34 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
     } catch (error) {
       logger.error(`Error creating concrete write index - ${error.message}`);
       // If the index already exists and it's the write index for the alias,
-      // something else created it so suppress the error. If it's not the write
-      // index, that's bad, throw an error.
+      // something else created it so suppress the error. If it exists but is
+      // not the write index, another node raced us between reading the aliases
+      // and creating the index, leaving the index unaliased; promote it to be
+      // the write index rather than failing the whole installation.
       if (error?.meta?.body?.error?.type === 'resource_already_exists_exception') {
         const existingIndices = await retryTransientEsErrors(
           () => esClient.indices.get({ index: indexPatterns.name }),
           { logger }
         );
-        if (!existingIndices[indexPatterns.name]?.aliases?.[indexPatterns.alias]?.is_write_index) {
-          throw Error(
-            `Attempted to create index: ${indexPatterns.name} as the write index for alias: ${indexPatterns.alias}, but the index already exists and is not the write index for the alias`
+        const existingAlias =
+          existingIndices[indexPatterns.name]?.aliases?.[indexPatterns.alias];
+        if (!existingAlias?.is_write_index) {
+          logger.info(
+            `Index ${indexPatterns.name} already exists but is not the write index for alias ${indexPatterns.alias}; promoting it to the write index`
           );
+          await updateAliasesAndSetConcreteWriteIndex({
+            logger,
+            esClient,
+            alias: indexPatterns.alias,
+            concreteIndices: [
+              {
+                index: indexPatterns.name,
+                alias: indexPatterns.alias,
+                isWriteIndex: existingAlias?.is_write_index ?? false,
+                isHidden: existingAlias?.is_hidden ?? true,
+              },
+            ],
+          });
         }
       } else {
         throw error;
