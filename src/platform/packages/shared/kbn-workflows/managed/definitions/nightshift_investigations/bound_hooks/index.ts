@@ -146,7 +146,7 @@ export const NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW = {
 export const NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW_ID,
   pluginId: 'nightshiftInvestigations',
-  version: 2,
+  version: 3,
   billable: false,
   yamlTemplate: {
     hashValues: NIGHTSHIFT_BOUND_HASH_VALUES,
