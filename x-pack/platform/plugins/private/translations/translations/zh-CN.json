@@ -38517,7 +38517,6 @@
     "xpack.ingestPipelines.createFromCsv.preview.jsonMapSuccessful": "在生成管道之前，您可以保存或编辑 JSON。",
     "xpack.ingestPipelines.createFromCsv.processFile.emptyFileError": "提供的文件是空的。",
     "xpack.ingestPipelines.createFromCsv.processFile.emptyFileErrorTitle": "文件是空的",
-    "xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeError": "文件超出 {maxBytes} 字节的允许大小。",
     "xpack.ingestPipelines.createFromCsv.processFile.fileTooLargeErrorTitle": "文件过大",
     "xpack.ingestPipelines.createFromCsv.processFile.unexpectedError": "无法读取提供的文件。",
     "xpack.ingestPipelines.createFromCsv.processFile.unexpectedErrorTitle": "读取文件时出错",
