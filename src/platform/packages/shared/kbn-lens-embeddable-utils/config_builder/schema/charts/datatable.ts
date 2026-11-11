@@ -15,7 +15,6 @@ import {
   colorByValueSchema,
   colorMappingSchema,
   autoColorSchema,
-  AUTO_COLOR,
 } from '../color';
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import {
@@ -218,7 +217,10 @@ const datatableConfigRowsOptionsNoESQLSchema = lazySchema(() =>
     /**
      * Color configuration
      */
-    color: z.union([colorMappingSchema, autoColorSchema]).default(AUTO_COLOR).optional(),
+    color: z.union([colorMappingSchema, autoColorSchema]).optional().meta({
+      description:
+        'Color configuration for datatable rows. Only applied when `apply_color_to` is set. Defaults to `auto`.',
+    }),
     /**
      * Whether to enable the one click filter
      */
@@ -241,14 +243,10 @@ const datatableConfigRowsOptionsESQLSchema = lazySchema(() =>
     /**
      * Color configuration
      */
-    color: z
-      .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
-      .default(AUTO_COLOR)
-      .optional()
-      .meta({
-        description:
-          'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
-      }),
+    color: z.union([colorByValueSchema, colorMappingSchema, autoColorSchema]).optional().meta({
+      description:
+        'Color configuration for ESQL datatable rows. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Only applied when `apply_color_to` is set, and then defaults to `auto`.',
+    }),
   })
 );
 
@@ -257,14 +255,10 @@ const datatableConfigMetricsOptionsSchema = lazySchema(() =>
     /**
      * Color configuration
      */
-    color: z
-      .union([colorByValueSchema, colorMappingSchema, autoColorSchema])
-      .default(AUTO_COLOR)
-      .optional()
-      .meta({
-        description:
-          'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data.',
-      }),
+    color: z.union([colorByValueSchema, colorMappingSchema, autoColorSchema]).optional().meta({
+      description:
+        'Color configuration for datatable metrics. Use dynamic coloring for numeric data and categorical/gradient mode for categorical data. Only applied when `apply_color_to` is set, and then defaults to `auto`.',
+    }),
     /**
      * Alignment of the columns
      */

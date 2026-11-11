@@ -10,7 +10,7 @@
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
 
-import type { DatatableConfig } from '../../schema';
+import { datatableConfigSchema, type DatatableConfig } from '../../schema';
 import { AUTO_COLOR } from '../../schema/color';
 import { LensConfigBuilder } from '../../config_builder';
 import type { LensAttributes } from '../../types';
@@ -273,6 +273,77 @@ describe('Datatable', () => {
 
       expect(apiOutput.metrics?.[0].color).not.toBeDefined();
       expect(apiOutput.metrics?.[0].apply_color_to).not.toBeDefined();
+    });
+
+    it('should not add a color on metrics and rows after schema parse when apply_color_to is not specified (DSL)', () => {
+      const config = {
+        ...baseDatatable,
+        metrics: [{ operation: 'count', empty_as_null: false }],
+        rows: [{ operation: 'terms', fields: ['agent.keyword'], limit: 5 }],
+      } satisfies DatatableConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = toDatatableApiConfig(builder, lensState);
+
+      const parsed = datatableConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.metrics?.[0].color).not.toBeDefined();
+      expect(apiOutput.rows?.[0].color).not.toBeDefined();
+      expect(parsed.metrics?.[0].color).not.toBeDefined();
+      expect(parsed.rows?.[0].color).not.toBeDefined();
+    });
+
+    it('should not add a color on metrics and rows after schema parse when apply_color_to is not specified (ES|QL)', () => {
+      const config = {
+        type: 'data_table',
+        title: 'Color default test',
+        data_source: {
+          type: 'esql',
+          query: 'FROM logs | STATS count = count() BY product',
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+        metrics: [{ column: 'count' }],
+        rows: [{ column: 'product' }],
+      } satisfies DatatableConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = toDatatableApiConfig(builder, lensState);
+
+      const parsed = datatableConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.metrics?.[0].color).not.toBeDefined();
+      expect(apiOutput.rows?.[0].color).not.toBeDefined();
+      expect(parsed.metrics?.[0].color).not.toBeDefined();
+      expect(parsed.rows?.[0].color).not.toBeDefined();
+    });
+
+    it('should apply AUTO_COLOR on an ES|QL metric and row with apply_color_to and keep it after schema parse', () => {
+      const config = {
+        type: 'data_table',
+        title: 'Color default test',
+        data_source: {
+          type: 'esql',
+          query: 'FROM logs | STATS count = count() BY product',
+        },
+        sampling: 1,
+        ignore_global_filters: false,
+        metrics: [{ column: 'count', apply_color_to: 'value' }],
+        rows: [{ column: 'product', apply_color_to: 'background' }],
+      } satisfies DatatableConfig;
+
+      const builder = new LensConfigBuilder();
+      const lensState = builder.fromAPIFormat(config);
+      const apiOutput = toDatatableApiConfig(builder, lensState);
+
+      const parsed = datatableConfigSchema.parse(apiOutput);
+
+      expect(apiOutput.metrics?.[0].color).toEqual(AUTO_COLOR);
+      expect(apiOutput.rows?.[0].color).toEqual(AUTO_COLOR);
+      expect(parsed.metrics?.[0].color).toEqual(AUTO_COLOR);
+      expect(parsed.rows?.[0].color).toEqual(AUTO_COLOR);
     });
   });
 });

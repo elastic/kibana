@@ -387,7 +387,6 @@ export const colorMappingSchema = lazySchema(() =>
        */
       gradientColorMappingSchema,
     ])
-    .default(DEFAULT_CATEGORICAL_COLOR_MAPPING_VALUE)
     .meta({
       id: 'visColorMapping',
       title: 'Color Mapping',
