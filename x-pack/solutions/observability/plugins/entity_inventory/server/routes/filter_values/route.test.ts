@@ -6,13 +6,13 @@
  */
 
 import { AuthzDisabled } from '@kbn/core-security-server';
-import { attributeValuesRoute } from './route';
+import { filterValuesRoute } from './route';
 
-const ENDPOINT = 'POST /internal/entity_inventory/attributes/_values';
+const ENDPOINT = 'POST /internal/entity_inventory/filters/_values';
 const WINDOW = { from: '2026-11-01T09:00:00.000Z', to: '2026-11-01T11:00:00.000Z' };
 const VALID = { attribute: 'k8s.cluster.name', types: ['k8s.deployment'], ...WINDOW };
 
-const route = attributeValuesRoute[ENDPOINT];
+const route = filterValuesRoute[ENDPOINT];
 
 const parseRequest = (body: Record<string, unknown>) => route.params?.safeParse({ body });
 

@@ -26,8 +26,8 @@ const MAX_TEXT_LENGTH = 256;
 
 const textParam = lazySchema(() => z.string().min(1).max(MAX_TEXT_LENGTH));
 
-export const attributeValuesRoute = createEntityInventoryServerRoute({
-  endpoint: 'POST /internal/entity_inventory/attributes/_values',
+export const filterValuesRoute = createEntityInventoryServerRoute({
+  endpoint: 'POST /internal/entity_inventory/filters/_values',
   params: lazySchema(() =>
     z.object({
       body: z
@@ -51,7 +51,7 @@ export const attributeValuesRoute = createEntityInventoryServerRoute({
   ),
   options: {
     access: 'internal',
-    summary: 'List the values of an attribute',
+    summary: 'List the values of a filter',
     description:
       'Returns the distinct values a dropdown can offer for an attribute that the types in scope suggest as a filter, narrowed by the other filters, with the selected values that are no longer offered.',
   },
