@@ -34,7 +34,8 @@ const DownloadSourceBaseSchema = {
     schema.boolean({
       meta: {
         description:
-          'When enabled, Elastic Agent reserves disk space equal to the size of the new agent package before upgrading. Defaults to true on the agent side when not set.',
+          'If `true`, Elastic Agent reserves disk space equal to the size of the new agent package before an upgrade, so the upgrade fails early if there is not enough space. If not set, defaults to `true` on the agent side.',
+        availability: { since: '9.7.0', stability: 'stable' },
       },
     })
   ),

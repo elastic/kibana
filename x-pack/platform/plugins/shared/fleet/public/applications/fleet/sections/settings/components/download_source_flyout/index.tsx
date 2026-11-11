@@ -309,7 +309,7 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
             helpText={
               <FormattedMessage
                 id="xpack.fleet.settings.editDownloadSourcesFlyout.reserveDiskspaceHelpText"
-                defaultMessage="Before upgrading, agents reserve disk space equal to the size of the new agent package to fail early when there is not enough space. Applies to agent policies using this host as their primary agent binary source. Turn off if this causes upgrade issues."
+                defaultMessage="Before an upgrade, agents reserve disk space for the new agent package so the upgrade fails early if there isn't enough space. Applies to agent policies that use this host as their primary agent binary source. Turn off if this causes upgrade issues."
               />
             }
           >
