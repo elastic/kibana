@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { z } from '@kbn/zod/v4';
-import { renderHook } from '@testing-library/react';
+import { render, renderHook, screen } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { basicCase, alertComment } from '../../containers/mock';
 import type { CaseUI } from '../../../common';
 import { TestProviders } from '../../common/mock';
-import { useCaseAttachmentsTotal } from './use_case_attachment_tabs';
+import { SimilarCasesBadge, useCaseAttachmentsTotal } from './use_case_attachment_tabs';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { UnifiedAttachmentTypeRegistry } from '../../client/attachment_framework/unified_attachment_registry';
 
@@ -150,5 +150,21 @@ describe('useCaseAttachmentsTotal', () => {
     );
 
     expect(result.current).toBe(3);
+  });
+});
+
+describe('SimilarCasesBadge', () => {
+  const euiTheme = { size: { xs: '4px' } } as Parameters<typeof SimilarCasesBadge>[0]['euiTheme'];
+
+  it('shows the count', () => {
+    render(<SimilarCasesBadge activeTab="activity" euiTheme={euiTheme} count={12} />);
+
+    expect(screen.getByTestId('case-view-similar-cases-badge')).toHaveTextContent(/^12$/);
+  });
+
+  it('marks a count that is a minimum', () => {
+    render(<SimilarCasesBadge activeTab="activity" euiTheme={euiTheme} count={10000} isMinimum />);
+
+    expect(screen.getByTestId('case-view-similar-cases-badge')).toHaveTextContent('10000+');
   });
 });

@@ -33,10 +33,13 @@ export const ATTACHMENT_TAB_ALIASES: ReadonlySet<string> = new Set([
 export const SimilarCasesBadge = ({
   activeTab,
   count,
+  isMinimum = false,
   euiTheme,
 }: {
   activeTab: string;
   count?: number;
+  /** More cases are similar than the count, which then reads as "count+". */
+  isMinimum?: boolean;
   euiTheme: EuiThemeComputed<{}>;
 }) => (
   <EuiNotificationBadge
@@ -49,6 +52,7 @@ export const SimilarCasesBadge = ({
     color={activeTab === CASE_VIEW_PAGE_TABS.SIMILAR_CASES ? 'accent' : 'subdued'}
   >
     {count ?? 0}
+    {isMinimum ? '+' : null}
   </EuiNotificationBadge>
 );
 SimilarCasesBadge.displayName = 'SimilarCasesBadge';

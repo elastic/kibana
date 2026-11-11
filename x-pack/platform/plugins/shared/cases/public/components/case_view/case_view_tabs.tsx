@@ -77,11 +77,19 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
             activeTab={activeTab}
             euiTheme={euiTheme}
             count={similarCasesData?.total}
+            isMinimum={similarCasesData?.totalRelation === 'gte'}
           />
         ),
       },
     ],
-    [activeTab, euiTheme, isAttachmentsTabActive, similarCasesData?.total, totalAttachments]
+    [
+      activeTab,
+      euiTheme,
+      isAttachmentsTabActive,
+      similarCasesData?.total,
+      similarCasesData?.totalRelation,
+      totalAttachments,
+    ]
   );
 
   const trackAttachmentsTabClick = useAttachmentsTabClickedEBT();

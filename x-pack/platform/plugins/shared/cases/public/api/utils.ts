@@ -161,4 +161,6 @@ export const convertSimilarCasesToCamel = (
   page: snakeCases.page,
   perPage: snakeCases.per_page,
   total: snakeCases.total,
+  totalRelation: snakeCases.total_relation,
+  skippedCommonObservables: snakeCases.skipped_common_observables,
 });
