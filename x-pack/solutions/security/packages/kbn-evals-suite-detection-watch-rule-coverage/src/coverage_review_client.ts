@@ -15,13 +15,18 @@ import {
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
 import {
+  AGENT_BUILDER_API_VERSION,
+  AGENT_BUILDER_CONVERSATIONS_PATH,
   AI_INDEX_ID,
   AI_INDEX_NAME,
   COVERAGE_CHECK_STEP_ID,
   COVERAGE_REVIEW_WORKFLOW_ID,
+  CREATE_INVESTIGATION_STEP_ID,
+  EVAL_INDICATOR_TAG,
   EVAL_SPACE_ID,
   WORKFLOWS_API_VERSION,
 } from './constants';
+import { ModelMismatchError } from './model_mismatch_error';
 import type { CoverageCheckResult, CoverageInput } from './types';
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
@@ -36,6 +41,20 @@ const asRecord = (value: unknown): Record<string, unknown> | undefined =>
 const asString = (value: unknown): string | undefined =>
   typeof value === 'string' && value !== '' ? value : undefined;
 
+const httpStatus = (error: unknown): number | undefined =>
+  typeof error === 'object' && error !== null && 'status' in error
+    ? (error as { status?: number }).status
+    : undefined;
+
+const errorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
+
+/** Output of the step record that has one. A step also writes a record with no output. */
+const stepOutput = (
+  steps: WorkflowStepExecutionDto[],
+  stepId: string
+): Record<string, unknown> | undefined =>
+  asRecord(steps.find((record) => record.stepId === stepId && record.output != null)?.output);
+
 /**
  * Reads the verdict from the `coverage_check` step records. A step writes one record when it
  * starts (no output) and one with its result, so the record with an output is the result.
@@ -45,7 +64,7 @@ export const extractCoverageCheck = (
 ): Omit<CoverageCheckResult, 'workflowExecutionId' | 'executionStatus'> => {
   const records = steps.filter(({ stepId }) => stepId === COVERAGE_CHECK_STEP_ID);
   const failedRecord = records.find(({ error }) => error != null);
-  const output = asRecord(records.find((record) => record.output != null)?.output);
+  const output = stepOutput(steps, COVERAGE_CHECK_STEP_ID);
   const structured = asRecord(output?.structured_output);
   // The ai.agent step reports the connector it ran on in `metadata.usage.connectorId`.
   const connectorId = asString(asRecord(asRecord(output?.metadata)?.usage)?.connectorId);
@@ -69,8 +88,16 @@ export const extractCoverageCheck = (
     ruleName: asString(structured.rule_name),
     prebuiltVersion: typeof prebuiltVersion === 'number' ? prebuiltVersion : undefined,
     rationale: asString(structured.rationale),
+    rationaleSummary: asString(structured.rationale_summary),
   };
 };
+
+/** Conversations the run wrote: the investigation and the conversation of the check. */
+const extractConversationIds = (steps: WorkflowStepExecutionDto[]): string[] =>
+  [CREATE_INVESTIGATION_STEP_ID, COVERAGE_CHECK_STEP_ID].flatMap((stepId) => {
+    const id = asString(stepOutput(steps, stepId)?.conversation_id);
+    return id ? [id] : [];
+  });
 
 /** True once the check has a result, or the run can no longer produce one. */
 const isCheckSettled = ({ status, stepExecutions = [] }: WorkflowExecutionDto): boolean =>
@@ -80,15 +107,25 @@ const isCheckSettled = ({ status, stepExecutions = [] }: WorkflowExecutionDto): 
       stepId === COVERAGE_CHECK_STEP_ID && (output != null || error != null)
   );
 
+/** What one run wrote to the stack, so it can be removed. */
+interface OpenRun {
+  kiId: string;
+  workflowExecutionId?: string;
+  conversationIds: string[];
+}
+
 /**
  * Runs the managed coverage review for one gap and returns what its `coverage_check` step
  * decided. Each run writes its own knowledge indicator with a fresh id, because the review
  * allows one run per indicator at a time and drops a second one.
  *
  * The run stops after the check: the review then waits up to days for an analyst to decide
- * on the proposal, so the client cancels it and deletes the indicator.
+ * on the proposal. The client cancels it and removes the indicator and the conversations.
  */
 export class CoverageReviewClient {
+  /** Runs that started and are not removed yet. The worker teardown removes what is left. */
+  private readonly openRuns = new Set<OpenRun>();
+
   constructor(
     private readonly fetch: HttpHandler,
     private readonly esClient: EsClient,
@@ -97,41 +134,38 @@ export class CoverageReviewClient {
     private readonly expectedConnectorId: string
   ) {}
 
+  /**
+   * An API error fails this example only: it returns a failed check. A thrown error would end
+   * the whole experiment. The only error it throws is a check on the wrong model.
+   */
   async run(
     { gapId, indicator }: CoverageInput,
     { maxWaitMs = 15 * 60_000, pollIntervalMs = 5_000 } = {}
   ): Promise<CoverageCheckResult> {
-    const kiId = `eval-coverage-${gapId.toLowerCase()}-${uuidv4()}`;
-    await this.writeIndicator(kiId, indicator);
-
-    let workflowExecutionId: string | undefined;
+    const openRun: OpenRun = { kiId: uuidv4(), conversationIds: [] };
+    this.openRuns.add(openRun);
     try {
-      ({ workflowExecutionId } = await this.fetch<{ workflowExecutionId: string }>(
-        `/api/workflows/workflow/${COVERAGE_REVIEW_WORKFLOW_ID}/run`,
-        {
-          method: 'POST',
-          headers: workflowsHeaders,
-          body: JSON.stringify({
-            inputs: { ki_id: kiId, ai_index_id: AI_INDEX_ID, autonomy_level: 'assisted' },
-          }),
-        }
-      ));
-      this.log.info(`[${gapId}] started coverage review ${workflowExecutionId}`);
+      await this.writeIndicator(openRun.kiId, indicator);
+      openRun.workflowExecutionId = await this.startReview(openRun.kiId);
+      this.log.info(`[${gapId}] started coverage review ${openRun.workflowExecutionId}`);
 
       const execution = await this.pollUntilCheckSettled(
-        workflowExecutionId,
+        openRun.workflowExecutionId,
         maxWaitMs,
         pollIntervalMs
       );
+      const steps = execution.stepExecutions ?? [];
+      openRun.conversationIds = extractConversationIds(steps);
       const result: CoverageCheckResult = {
-        workflowExecutionId,
+        workflowExecutionId: openRun.workflowExecutionId,
         executionStatus: execution.status,
-        ...extractCoverageCheck(execution.stepExecutions ?? []),
+        ...extractCoverageCheck(steps),
       };
-      // A score from another model would be filed under the subject model. Fail the example.
-      if (result.connectorId && result.connectorId !== this.expectedConnectorId) {
-        throw new Error(
-          `[${gapId}] the check ran on ${result.connectorId}, not on ${this.expectedConnectorId}`
+      if (!result.checkFailed && result.connectorId !== this.expectedConnectorId) {
+        throw new ModelMismatchError(
+          `[${gapId}] the check ran on ${result.connectorId ?? 'an unknown connector'}, not on ${
+            this.expectedConnectorId
+          }`
         );
       }
       this.log.info(
@@ -140,12 +174,38 @@ export class CoverageReviewClient {
         })${result.checkFailed ? ` check failed: ${result.checkError}` : ''}`
       );
       return result;
-    } finally {
-      if (workflowExecutionId) {
-        await this.cancel(workflowExecutionId);
+    } catch (err) {
+      if (err instanceof ModelMismatchError) {
+        throw err;
       }
-      await this.deleteIndicator(kiId);
+      this.log.warning(`[${gapId}] the eval could not run the review: ${errorMessage(err)}`);
+      return {
+        workflowExecutionId: openRun.workflowExecutionId ?? 'not started',
+        executionStatus: 'unknown',
+        checkFailed: true,
+        checkError: `The eval could not run the review: ${errorMessage(err)}`,
+      };
+    } finally {
+      await this.removeRun(openRun);
     }
+  }
+
+  /** Removes what the runs that are still open wrote. For the worker teardown. */
+  async removeOpenRuns(): Promise<void> {
+    const runs = [...this.openRuns];
+    if (runs.length > 0) {
+      this.log.info(`Removing ${runs.length} coverage review runs that did not finish`);
+    }
+    await Promise.allSettled(runs.map((openRun) => this.removeRun(openRun)));
+  }
+
+  private async removeRun(openRun: OpenRun): Promise<void> {
+    if (openRun.workflowExecutionId) {
+      await this.cancel(openRun.workflowExecutionId);
+    }
+    await Promise.allSettled(openRun.conversationIds.map((id) => this.deleteConversation(id)));
+    await this.deleteIndicator(openRun.kiId);
+    this.openRuns.delete(openRun);
   }
 
   private async writeIndicator(kiId: string, indicator: CoverageInput['indicator']): Promise<void> {
@@ -157,6 +217,7 @@ export class CoverageReviewClient {
       document: {
         ...indicator,
         id: kiId,
+        tags: [...indicator.tags, EVAL_INDICATOR_TAG],
         attributes: { ...indicator.attributes, status: 'pending', space_id: EVAL_SPACE_ID },
         '@timestamp': now,
         updated_at: now,
@@ -164,11 +225,42 @@ export class CoverageReviewClient {
     });
   }
 
+  private async startReview(kiId: string): Promise<string> {
+    const { workflowExecutionId } = await this.fetch<{ workflowExecutionId: string }>(
+      `/api/workflows/workflow/${COVERAGE_REVIEW_WORKFLOW_ID}/run`,
+      {
+        method: 'POST',
+        headers: workflowsHeaders,
+        body: JSON.stringify({
+          inputs: { ki_id: kiId, ai_index_id: AI_INDEX_ID, autonomy_level: 'assisted' },
+        }),
+      }
+    );
+    return workflowExecutionId;
+  }
+
   private async deleteIndicator(kiId: string): Promise<void> {
     try {
       await this.esClient.delete({ index: AI_INDEX_NAME, id: kiId, refresh: 'wait_for' });
     } catch (err) {
-      this.log.warning(`Could not delete indicator ${kiId}: ${String(err)}`);
+      if (httpStatus(err) !== 404 && asRecord(err)?.statusCode !== 404) {
+        this.log.warning(`Could not delete indicator ${kiId}: ${errorMessage(err)}`);
+      }
+    }
+  }
+
+  private async deleteConversation(conversationId: string): Promise<void> {
+    try {
+      await this.fetch(
+        `${AGENT_BUILDER_CONVERSATIONS_PATH}/${encodeURIComponent(conversationId)}`,
+        {
+          method: 'DELETE',
+          headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
+        }
+      );
+    } catch (err) {
+      // The API answers 404 for a conversation that the caller cannot delete.
+      this.log.debug(`Delete of conversation ${conversationId} returned: ${errorMessage(err)}`);
     }
   }
 
@@ -209,7 +301,7 @@ export class CoverageReviewClient {
       );
     } catch (err) {
       // A run that already ended cannot be cancelled. That is not an error here.
-      this.log.debug(`Cancel of ${workflowExecutionId} returned: ${String(err)}`);
+      this.log.debug(`Cancel of ${workflowExecutionId} returned: ${errorMessage(err)}`);
     }
   }
 }

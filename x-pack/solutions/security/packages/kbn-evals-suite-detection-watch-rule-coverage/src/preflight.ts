@@ -6,13 +6,16 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
+import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getInferenceEndpointId, type EvalConnector } from '@kbn/evals';
 import { ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID } from '@kbn/alertzero-common';
 import {
+  AI_INDEX_NAME,
   COVERAGE_CHECK_STEP_ID,
   COVERAGE_REVIEW_WORKFLOW_ID,
   DETECTION_RULES_API_VERSION,
+  EVAL_INDICATOR_TAG,
   FLEET_API_VERSION,
   FLEET_BULK_INSTALL_PATH,
   PREBUILT_RULES_PACKAGE,
@@ -158,6 +161,18 @@ const pinCoverageCheckModel = async ({
     { method: 'GET', headers: inferenceSettingsHeaders }
   );
   const previous = data.features;
+  const pinned = previous.find(
+    ({ feature_id: featureId }) => featureId === ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID
+  );
+  if (pinned) {
+    // A run that was killed before its teardown leaves its pin, and this run restores it.
+    log.warning(
+      `${ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID} is already set to ${JSON.stringify(
+        pinned.endpoints
+      )}. The suite restores this value at the end. If an earlier eval run left it, ` +
+        `remove it in the inference settings.`
+    );
+  }
 
   log.info(`Pinning ${ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID} to ${inferenceId}`);
   await putInferenceSettings(fetch, [
@@ -171,21 +186,47 @@ const pinCoverageCheckModel = async ({
 };
 
 /**
+ * Removes the indicators that a killed run left behind. A pending indicator in the AI index is
+ * work for the Detection Watch sweep, so a leftover would start real reviews on this stack.
+ */
+const removeLeftoverIndicators = async ({
+  esClient,
+  log,
+}: {
+  esClient: EsClient;
+  log: ToolingLog;
+}): Promise<void> => {
+  const { deleted = 0 } = await esClient.deleteByQuery({
+    index: AI_INDEX_NAME,
+    ignore_unavailable: true,
+    conflicts: 'proceed',
+    refresh: true,
+    query: { term: { tags: EVAL_INDICATOR_TAG } },
+  });
+  if (deleted > 0) {
+    log.warning(`Removed ${deleted} indicators that an earlier eval run left behind`);
+  }
+};
+
+/**
  * Prepares the stack before any example runs. Returns the inference endpoint id the check
  * must run on, and the cleanup.
  */
 export const prepareCoverageEnvironment = async ({
   fetch,
+  esClient,
   log,
   connector,
   expectedPrebuiltRuleIds,
 }: {
   fetch: HttpHandler;
+  esClient: EsClient;
   log: ToolingLog;
   connector: EvalConnector;
   expectedPrebuiltRuleIds: readonly string[];
 }): Promise<{ inferenceId: string; cleanup: () => Promise<void> }> => {
   await assertWorkflowInstalled({ fetch, log });
+  await removeLeftoverIndicators({ esClient, log });
   await installPrebuiltRulesPackage({ fetch, log });
   await assertRulesNotInstalled({ fetch, ruleIds: expectedPrebuiltRuleIds });
   const { inferenceId, restore } = await pinCoverageCheckModel({ fetch, log, connector });

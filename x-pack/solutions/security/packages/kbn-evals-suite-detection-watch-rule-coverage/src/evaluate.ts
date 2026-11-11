@@ -20,9 +20,10 @@ export const evaluate = base.extend<
 >({
   // `auto` so a spec cannot skip the setup and score a stack that cannot give a right answer.
   coverageEnvironment: [
-    async ({ fetch, log, connector }, use) => {
+    async ({ fetch, esClient, log, connector }, use) => {
       const { inferenceId, cleanup } = await prepareCoverageEnvironment({
         fetch,
+        esClient,
         log,
         connector,
         expectedPrebuiltRuleIds: prebuiltSuggestionDataset.flatMap(({ output }) =>
@@ -36,7 +37,15 @@ export const evaluate = base.extend<
   ],
   coverageReviewClient: [
     async ({ fetch, esClient, log, coverageEnvironment }, use) => {
-      await use(new CoverageReviewClient(fetch, esClient, log, coverageEnvironment.inferenceId));
+      const client = new CoverageReviewClient(
+        fetch,
+        esClient,
+        log,
+        coverageEnvironment.inferenceId
+      );
+      await use(client);
+      // A failed experiment does not wait for its running examples, so some runs are still open.
+      await client.removeOpenRuns();
     },
     { scope: 'worker' },
   ],

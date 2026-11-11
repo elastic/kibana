@@ -68,5 +68,8 @@ export interface CoverageCheckResult {
   ruleId?: string;
   ruleName?: string;
   prebuiltVersion?: number;
+  /** Full reasoning. The review writes it into the investigation. */
   rationale?: string;
+  /** One or two sentences. The review shows them in the proposal comment. */
+  rationaleSummary?: string;
 }
