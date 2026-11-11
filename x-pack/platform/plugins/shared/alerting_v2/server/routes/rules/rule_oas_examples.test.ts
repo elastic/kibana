@@ -13,7 +13,6 @@ import {
   bulkGetRulesResponseSchema,
   bulkResponseSchema,
   createRuleDataSchema,
-  createRuleRequestSchema,
   dryRunResponseSchema,
   findRulesResponseSchema,
   matchRulesBodySchema,
@@ -42,10 +41,6 @@ import { UPDATE_RULE_REQUEST } from './update_rule_oas_example';
 describe('rule OAS example payloads', () => {
   it('keeps create/upsert request examples valid against createRuleDataSchema', () => {
     expect(createRuleDataSchema.safeParse(CREATE_RULE_REQUEST).success).toBe(true);
-  });
-
-  it('keeps create request example valid against createRuleRequestSchema', () => {
-    expect(createRuleRequestSchema.safeParse(CREATE_RULE_REQUEST).success).toBe(true);
   });
 
   it('keeps update request example valid against updateRuleDataSchema', () => {

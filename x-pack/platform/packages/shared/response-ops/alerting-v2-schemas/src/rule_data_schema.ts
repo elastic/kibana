@@ -1139,6 +1139,14 @@ export const ruleIdSchema = lazySchema(() =>
   entityIdSchema.describe(`A rule identifier. ${ENTITY_ID_NOTE}`)
 );
 
+const createRuleIdSchema = lazySchema(() =>
+  ruleIdSchema
+    .optional()
+    .describe(
+      'Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, it is not changed and its create fails.'
+    )
+);
+
 /**
  * Request body schema for `POST /api/alerting/v2/rules`: the create-rule body
  * plus an optional client-supplied `id`.
@@ -1146,11 +1154,7 @@ export const ruleIdSchema = lazySchema(() =>
 export const createRuleRequestSchema = lazySchema(() =>
   applyCreateRuleRefinements(
     createRuleDataBaseSchema.extend({
-      id: ruleIdSchema
-        .optional()
-        .describe(
-          'Optional rule ID. If omitted, Kibana generates one. If a rule with this ID already exists, the request fails and the existing rule is not changed.'
-        ),
+      id: createRuleIdSchema,
     })
   ).meta({ id: 'alerting_create_rule_request' })
 );
@@ -1188,11 +1192,7 @@ export type BulkGetRulesResponse = z.infer<typeof bulkGetRulesResponseSchema>;
 export const bulkCreateRuleItemSchema = lazySchema(() =>
   applyCreateRuleRefinements(
     createRuleDataBaseSchema.extend({
-      id: ruleIdSchema
-        .optional()
-        .describe(
-          'Optional rule ID. If omitted, Kibana generates one. IDs in the request must be unique.'
-        ),
+      id: createRuleIdSchema,
       enabled: z
         .boolean()
         .default(true)
