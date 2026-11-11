@@ -7,17 +7,15 @@
 
 import type { ConnectorSpec } from '@kbn/connector-specs';
 import { z as z4 } from '@kbn/zod/v4';
-import type { ActionType } from '../../types';
-import type { ActionTypeConfig, ActionTypeParams, ActionTypeSecrets } from '../../types';
 import type { PluginSetupContract } from '../../plugin';
 import { parseDeclarativeConnectorSpec } from '../declarative_connectors';
 import { createConnectorTypeFromSpec } from '../single_file_connectors/create_connector_from_spec';
-import type { StoredCatalogDefinition } from './types';
+import type { CatalogActionType, StoredCatalogDefinition } from './types';
 
 export type BuildTypeFromStoredSpec = (
   definition: StoredCatalogDefinition,
   actions: PluginSetupContract
-) => ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown>;
+) => CatalogActionType;
 
 // Placeholder body. Swap it for the real build when #289816 (PR #304126) merges.
 export const buildTypeFromStoredSpec: BuildTypeFromStoredSpec = (definition, actions) => {

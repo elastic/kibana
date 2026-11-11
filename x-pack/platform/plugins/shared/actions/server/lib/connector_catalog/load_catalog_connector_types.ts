@@ -7,9 +7,9 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ActionTypeRegistry } from '../../action_type_registry';
-import type { ActionType } from '../../types';
 import { ensureSufficientLicense } from '../ensure_sufficient_license';
 import type {
+  CatalogActionType,
   CatalogDefinitionRef,
   ConnectorCatalogStorage,
   StoredCatalogDefinition,
@@ -87,7 +87,7 @@ export const loadCatalogConnectorTypes = async ({
 }: {
   storage: Pick<ConnectorCatalogStorage, 'getManifest' | 'getDefinitions'>;
   actionTypeRegistry: Pick<ActionTypeRegistry, 'has' | 'register'>;
-  buildType: (definition: StoredCatalogDefinition) => ActionType;
+  buildType: (definition: StoredCatalogDefinition) => CatalogActionType;
   logger: Logger;
   signal: AbortSignal;
 }): Promise<number> => {

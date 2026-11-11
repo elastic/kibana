@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import moment from 'moment';
+import { of } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { z } from '@kbn/zod/v4';
 import type { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
@@ -44,6 +45,8 @@ import {
 } from './constants/saved_objects';
 import { LeasePool } from './lib';
 import { defaultInboundEventsLimitConfigs } from './config';
+import { loadFixture } from './lib/declarative_connectors/__fixtures__/load_fixture';
+import { CONNECTOR_CATALOG_INDEX } from './lib/connector_catalog';
 
 function getConfig(overrides = {}) {
   return {
@@ -640,6 +643,142 @@ describe('Actions Plugin', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Action type \\"non-existing\\" is not registered."`
       );
+    });
+
+    describe('connector catalog', () => {
+      const SPEC_TYPE_ID = '.declarative-abuseipdb';
+      const flush = () => new Promise((resolve) => setImmediate(resolve));
+
+      const manifestDoc = {
+        _index: CONNECTOR_CATALOG_INDEX,
+        _id: 'manifest',
+        found: true,
+        _source: {
+          type: 'manifest',
+          raw: JSON.stringify({ connectors: [{ id: SPEC_TYPE_ID, version: '1.1.0' }] }),
+        },
+      };
+
+      const getEsClient = () => coreStart.elasticsearch.client.asInternalUser as jest.Mocked<any>;
+
+      const seedCatalog = () => {
+        const esClient = getEsClient();
+        esClient.indices.create.mockResolvedValue({
+          acknowledged: true,
+          shards_acknowledged: true,
+          index: CONNECTOR_CATALOG_INDEX,
+        });
+        esClient.get.mockResolvedValue(manifestDoc);
+        esClient.mget.mockResolvedValue({
+          docs: [
+            {
+              _index: CONNECTOR_CATALOG_INDEX,
+              _id: `definition:${SPEC_TYPE_ID}@1.1.0`,
+              found: true,
+              _source: {
+                type: 'definition',
+                connectorId: SPEC_TYPE_ID,
+                version: '1.1.0',
+                yaml: loadFixture('abuseipdb-1.1.0.yaml'),
+                contentHash: 'sha256:abuseipdb',
+                catalogVersion: '2026.11.1',
+              },
+            },
+          ],
+        });
+      };
+
+      const setupPlugin = async () => {
+        await plugin.setup(coreSetup, {
+          ...pluginsSetup,
+          encryptedSavedObjects: { ...pluginsSetup.encryptedSavedObjects, canEncrypt: true },
+        });
+      };
+
+      const getTypeIds = (pluginStart: PluginStartContract) => pluginStart.getAllTypes();
+
+      describe('flag on', () => {
+        beforeEach(() => {
+          coreStart.featureFlags.getBooleanValue$.mockReturnValue(of(true));
+        });
+
+        it('returns from start() while the catalog read is still pending', async () => {
+          seedCatalog();
+          let resolveGet: (value: unknown) => void = () => {};
+          getEsClient().get.mockReturnValue(
+            new Promise((resolve) => {
+              resolveGet = resolve;
+            })
+          );
+          await setupPlugin();
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+          const state = await Promise.race([
+            pluginStart.whenCatalogReady().then(() => 'ready'),
+            flush().then(() => 'pending'),
+          ]);
+
+          expect(state).toBe('pending');
+          expect(getEsClient().get).toHaveBeenCalledTimes(1);
+
+          resolveGet({ _index: CONNECTOR_CATALOG_INDEX, _id: 'manifest', found: false });
+          await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
+        });
+
+        it('knows in-tree types only before ready, and the spec type after', async () => {
+          seedCatalog();
+          let resolveGet: (value: unknown) => void = () => {};
+          getEsClient().get.mockReturnValue(
+            new Promise((resolve) => {
+              resolveGet = resolve;
+            })
+          );
+          await setupPlugin();
+          const registerSpy = jest.spyOn(ActionTypeRegistry.prototype, 'register');
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+          await flush();
+
+          expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+          expect(() => pluginStart.isActionTypeEnabled(SPEC_TYPE_ID)).toThrow(
+            `Action type "${SPEC_TYPE_ID}" is not registered.`
+          );
+
+          resolveGet(manifestDoc);
+          await pluginStart.whenCatalogReady();
+
+          expect(registerSpy).toHaveBeenCalledWith(expect.objectContaining({ id: SPEC_TYPE_ID }));
+          expect(getTypeIds(pluginStart)).toContain(SPEC_TYPE_ID);
+          expect(() => pluginStart.isActionTypeEnabled(SPEC_TYPE_ID)).not.toThrow();
+          registerSpy.mockRestore();
+        });
+
+        it('resolves whenCatalogReady() when the read fails', async () => {
+          seedCatalog();
+          getEsClient().get.mockRejectedValue(new Error('read failed'));
+          await setupPlugin();
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+
+          await expect(pluginStart.whenCatalogReady()).resolves.toBeUndefined();
+          expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+        });
+      });
+
+      describe('flag off', () => {
+        it('does not call Elasticsearch for the catalog index', async () => {
+          seedCatalog();
+          await setupPlugin();
+
+          const pluginStart = plugin.start(coreStart, pluginsStart);
+          await pluginStart.whenCatalogReady();
+
+          expect(getEsClient().indices.create).not.toHaveBeenCalled();
+          expect(getEsClient().get).not.toHaveBeenCalled();
+          expect(getEsClient().mget).not.toHaveBeenCalled();
+          expect(getTypeIds(pluginStart)).not.toContain(SPEC_TYPE_ID);
+        });
+      });
     });
 
     describe('getActionsClientWithRequest()', () => {
