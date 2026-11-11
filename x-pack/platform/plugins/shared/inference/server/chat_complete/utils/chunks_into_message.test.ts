@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { delay, lastValueFrom, of, toArray } from 'rxjs';
+import { delay, finalize, lastValueFrom, of, Subject, toArray } from 'rxjs';
 import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
@@ -280,6 +280,18 @@ describe('chunksIntoMessage', () => {
       content: '',
       toolCalls: [{ function: { name: 'myFunction', arguments: {} }, toolCallId }],
     });
+  });
+
+  it('unsubscribes from the source when the consumer unsubscribes', () => {
+    const onSourceFinalize = jest.fn();
+    const source$ = new Subject<ChatCompletionChunkEvent>().pipe(finalize(onSourceFinalize));
+
+    const subscription = chunksIntoMessage({ logger, toolOptions: {} })(source$).subscribe();
+    expect(onSourceFinalize).not.toHaveBeenCalled();
+
+    subscription.unsubscribe();
+
+    expect(onSourceFinalize).toHaveBeenCalledTimes(1);
   });
 
   it('forwards the id it puts in the message for an id-less call when the source is synchronous', async () => {

@@ -38,7 +38,8 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
       // first every call gets an id, then every call gets its own index.
       // The replay keeps a synchronous source from being run (and normalized, with new generated
       // ids) a second time: it completes before the second consumer subscribes, and a plain
-      // share() resets on completion.
+      // share() resets on completion. The reset on a ref count of zero stays on, so that
+      // unsubscribing still cancels the source.
       const shared$ = chunks$.pipe(
         normalizeToolCallChunks(),
         normalizeToolCallIndexes(),
@@ -46,7 +47,7 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
           connector: () => new ReplaySubject(),
           resetOnError: true,
           resetOnComplete: false,
-          resetOnRefCountZero: false,
+          resetOnRefCountZero: true,
         })
       );
 
