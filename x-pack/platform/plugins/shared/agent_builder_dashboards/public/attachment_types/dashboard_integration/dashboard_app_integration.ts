@@ -36,6 +36,7 @@ export const MANUAL_CHANGES_DEBOUNCE_MS =
 export interface DashboardAppIntegrationParams {
   agentBuilder: AgentBuilderPluginStart;
   api: DashboardApi;
+  canWriteDashboards: boolean;
   draftAttachmentId: IdGenerator;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   /**
@@ -58,6 +59,7 @@ interface State {
 export const registerDashboardAppIntegration = ({
   agentBuilder,
   api,
+  canWriteDashboards,
   draftAttachmentId,
   checkSavedDashboardExist,
   getUpdateOrigin,
@@ -127,6 +129,7 @@ export const registerDashboardAppIntegration = ({
   const agentLiveUpdatesSubscription = createAgentLiveUpdatesSubscription({
     agentBuilder,
     api,
+    canWriteDashboards,
     upsertAttachment: (attachment: DashboardAttachment) => {
       const otherAttachments = (state.attachments ?? []).filter(({ id }) => id !== attachment.id);
       state.attachments = [...otherAttachments, attachment];
