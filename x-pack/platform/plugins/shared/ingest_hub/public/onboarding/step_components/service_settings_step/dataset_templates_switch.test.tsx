@@ -88,7 +88,7 @@ const config: ServiceVars = { enabledDataStreams: ['ec2'], varsByDataStream: {} 
 const setDataset = (dataset: string) =>
   fireEvent.change(screen.getByTestId(DATASET_FIELD), { target: { value: dataset } });
 
-describe('ServiceSettingsFlyout — dedicated index template for a custom dataset', () => {
+describe('ServiceSettingsFlyout — dedicated index template switch', () => {
   const renderFlyout = (
     props: Partial<React.ComponentProps<typeof ServiceSettingsFlyout>> = {}
   ) => {
@@ -107,124 +107,83 @@ describe('ServiceSettingsFlyout — dedicated index template for a custom datase
     );
     return { onApply };
   };
+  const save = () => fireEvent.click(screen.getByTestId('serviceSettingsFlyout-saveButton'));
 
-  it('offers the switch once the dataset is customised, on by default', () => {
+  it('offers the switch on from the start, at the manifest default dataset', () => {
     renderFlyout();
-    expect(screen.queryByTestId(SWITCH)).toBeNull();
-
-    setDataset('aws.prod');
 
     expect(screen.getByTestId(SWITCH)).toBeChecked();
   });
 
-  it('saves the opt-out with the data stream', () => {
-    const { onApply } = renderFlyout();
+  it('keeps offering it for a custom dataset and hides it for the generic one', () => {
+    renderFlyout();
+
     setDataset('aws.prod');
-    fireEvent.click(screen.getByTestId(SWITCH));
+    expect(screen.getByTestId(SWITCH)).toBeChecked();
 
-    fireEvent.click(screen.getByTestId('serviceSettingsFlyout-saveButton'));
-
-    const [varsByDataStream] = onApply.mock.calls[0];
-    expect(varsByDataStream.ec2.createDatasetTemplates).toBe(false);
-    expect(varsByDataStream.ec2.varsByInput.otelcol['data_stream.dataset']).toBe('aws.prod');
+    setDataset('generic');
+    expect(screen.queryByTestId(SWITCH)).toBeNull();
   });
 
-  it('shows a stored opt-out when reopened', () => {
+  it('reports a change on save, for the policy to take', () => {
+    const { onApply } = renderFlyout();
+    fireEvent.click(screen.getByTestId(SWITCH));
+
+    save();
+
+    expect(onApply.mock.calls[0][3]).toBe(false);
+  });
+
+  it('reports nothing when the choice was not touched, so a save leaves the policy alone', () => {
+    const { onApply } = renderFlyout();
+    setDataset('aws.prod');
+
+    save();
+
+    expect(onApply.mock.calls[0][3]).toBeUndefined();
+  });
+
+  it('shows the value of the policy and which other services it applies to', () => {
     renderFlyout({
-      config: {
-        enabledDataStreams: ['ec2'],
-        varsByDataStream: {
-          ec2: {
-            enabledInputs: ['otelcol'],
-            varsByInput: { otelcol: { 'data_stream.dataset': 'aws.prod' } },
-            createDatasetTemplates: false,
-          },
-        },
+      datasetTemplatesPolicy: {
+        enabled: false,
+        instanceIds: ['ec2', 'lambda'],
+        sharedWith: ['Amazon Lambda'],
       },
     });
+
+    expect(screen.getByTestId(SWITCH)).not.toBeChecked();
+    expect(
+      screen.getByTestId('serviceSettingsFlyout-createDatasetTemplatesShared')
+    ).toHaveTextContent('Amazon Lambda');
+  });
+
+  it('can be turned back on over a policy that is off', () => {
+    const { onApply } = renderFlyout({
+      datasetTemplatesPolicy: { enabled: false, instanceIds: ['ec2'], sharedWith: [] },
+    });
+    fireEvent.click(screen.getByTestId(SWITCH));
+
+    save();
+
+    expect(onApply.mock.calls[0][3]).toBe(true);
+  });
+
+  it('falls back to the choice stored on the service when no policy is given', () => {
+    renderFlyout({ config: { ...config, createDatasetTemplates: false } });
 
     expect(screen.getByTestId(SWITCH)).not.toBeChecked();
   });
 
   it('hides the switch for a deployed service, where the flag is ignored on update', () => {
-    renderFlyout({
-      isDeployed: true,
-      config: {
-        enabledDataStreams: ['ec2'],
-        varsByDataStream: {
-          ec2: {
-            enabledInputs: ['otelcol'],
-            varsByInput: { otelcol: { 'data_stream.dataset': 'aws.prod' } },
-          },
-        },
-      },
-    });
+    renderFlyout({ isDeployed: true });
 
     expect(screen.queryByTestId(SWITCH)).toBeNull();
   });
 });
 
-describe('ServiceSettingsFlyout — services that deploy in the same policy', () => {
-  const customised: ServiceVars = {
-    enabledDataStreams: ['ec2'],
-    varsByDataStream: {
-      ec2: {
-        enabledInputs: ['otelcol'],
-        varsByInput: { otelcol: { 'data_stream.dataset': 'aws.prod' } },
-        createDatasetTemplates: false,
-      },
-    },
-  };
-  const renderWithBundle = (datasetTemplatesBundle: {
-    requiredBy: string[];
-    sharedWith: string[];
-  }) =>
-    render(
-      <I18nProvider>
-        <ServiceSettingsFlyout
-          service={service}
-          config={customised}
-          globalRegion="us-east-1"
-          datasetTemplatesBundle={datasetTemplatesBundle}
-          onApply={jest.fn()}
-          onClose={jest.fn()}
-        />
-      </I18nProvider>
-    );
-
-  it('locks the switch on and names the service that needs its template', () => {
-    renderWithBundle({ requiredBy: ['Amazon Lambda'], sharedWith: ['Amazon Lambda'] });
-
-    expect(screen.getByTestId(SWITCH)).toBeChecked();
-    expect(screen.getByTestId(SWITCH)).toBeDisabled();
-    expect(
-      screen.getByTestId('serviceSettingsFlyout-createDatasetTemplatesRequired')
-    ).toHaveTextContent('Amazon Lambda');
-    expect(screen.queryByTestId('serviceSettingsFlyout-createDatasetTemplatesShared')).toBeNull();
-  });
-
-  it('keeps the switch editable and says the choice covers the whole policy', () => {
-    renderWithBundle({ requiredBy: [], sharedWith: ['Amazon RDS'] });
-
-    expect(screen.getByTestId(SWITCH)).toBeEnabled();
-    expect(screen.getByTestId(SWITCH)).not.toBeChecked();
-    expect(
-      screen.getByTestId('serviceSettingsFlyout-createDatasetTemplatesShared')
-    ).toHaveTextContent('Amazon RDS');
-    expect(screen.queryByTestId('serviceSettingsFlyout-createDatasetTemplatesRequired')).toBeNull();
-  });
-
-  it('shows no note for a service that has its policy to itself', () => {
-    renderWithBundle({ requiredBy: [], sharedWith: [] });
-
-    expect(screen.getByTestId(SWITCH)).toBeEnabled();
-    expect(screen.queryByTestId('serviceSettingsFlyout-createDatasetTemplatesRequired')).toBeNull();
-    expect(screen.queryByTestId('serviceSettingsFlyout-createDatasetTemplatesShared')).toBeNull();
-  });
-});
-
-describe('DuplicateServiceModal — dedicated index template for a custom dataset', () => {
-  it('starts from the source choice and adds the duplicate with the new one', () => {
+describe('DuplicateServiceModal — dedicated index template switch', () => {
+  const renderModal = (createDatasetTemplates?: boolean) => {
     const onAdd = jest.fn();
     render(
       <I18nProvider>
@@ -232,13 +191,8 @@ describe('DuplicateServiceModal — dedicated index template for a custom datase
           service={service}
           sourceConfig={{
             enabledDataStreams: ['ec2'],
-            varsByDataStream: {
-              ec2: {
-                enabledInputs: ['otelcol'],
-                varsByInput: { otelcol: { 'data_stream.dataset': 'aws.prod' } },
-                createDatasetTemplates: false,
-              },
-            },
+            varsByDataStream: {},
+            ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
           }}
           suggestedName="Amazon EC2 [Duplicate]"
           existingNames={['Amazon EC2']}
@@ -248,12 +202,24 @@ describe('DuplicateServiceModal — dedicated index template for a custom datase
         />
       </I18nProvider>
     );
+    return { onAdd };
+  };
+
+  it('starts from the choice of the source and adds the duplicate with its own', () => {
+    const { onAdd } = renderModal(false);
 
     expect(screen.getByTestId(SWITCH)).not.toBeChecked();
     fireEvent.click(screen.getByTestId(SWITCH));
     fireEvent.click(screen.getByTestId('duplicateServiceModal-addButton'));
 
-    const [, varsByDataStream] = onAdd.mock.calls[0];
-    expect(varsByDataStream.ec2.createDatasetTemplates).toBe(true);
+    expect(onAdd.mock.calls[0][4]).toBe(true);
+  });
+
+  it('is on for the duplicate of a service that never chose', () => {
+    const { onAdd } = renderModal();
+
+    fireEvent.click(screen.getByTestId('duplicateServiceModal-addButton'));
+
+    expect(onAdd.mock.calls[0][4]).toBe(true);
   });
 });

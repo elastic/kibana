@@ -590,7 +590,7 @@ describe('ServiceFieldsForm — VarField onChange suppression', () => {
   });
 });
 
-describe('ServiceFieldsForm — dedicated index template switch for a custom dataset', () => {
+describe('ServiceFieldsForm — dedicated index template switch', () => {
   const SWITCH = 'serviceSettingsFlyout-createDatasetTemplatesSwitch';
   const DATASET_SERVICE = {
     id: 'test_otel',
@@ -622,23 +622,30 @@ describe('ServiceFieldsForm — dedicated index template switch for a custom dat
     },
   } as unknown as AwsServiceMatrixEntry;
 
-  const varsWithDataset = (dataset: string, createDatasetTemplates?: boolean) => ({
+  const varsWithDataset = (dataset: string) => ({
     otel_logs: {
       enabledInputs: ['aws-s3'],
       varsByInput: { 'aws-s3': { 'data_stream.dataset': dataset } },
-      ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
     },
   });
 
-  it('is hidden while the dataset is the manifest default', () => {
-    const { queryByTestId } = renderForm(DATASET_SERVICE, {
+  it('is offered at the manifest default dataset, as Fleet does for an input package', () => {
+    const { getByTestId } = renderForm(DATASET_SERVICE, {
       varsByDataStream: varsWithDataset('aws.test'),
       onCreateDatasetTemplatesChange: jest.fn(),
     });
-    expect(queryByTestId(SWITCH)).toBeNull();
+    expect(getByTestId(SWITCH)).toBeChecked();
   });
 
-  it('shows on once the dataset is customised', () => {
+  it('is offered before the dataset is touched, which shows the manifest default', () => {
+    const { getByTestId } = renderForm(DATASET_SERVICE, {
+      varsByDataStream: {},
+      onCreateDatasetTemplatesChange: jest.fn(),
+    });
+    expect(getByTestId(SWITCH)).toBeInTheDocument();
+  });
+
+  it('is offered for a custom dataset', () => {
     const { getByTestId } = renderForm(DATASET_SERVICE, {
       varsByDataStream: varsWithDataset('aws.prod'),
       onCreateDatasetTemplatesChange: jest.fn(),
@@ -646,15 +653,24 @@ describe('ServiceFieldsForm — dedicated index template switch for a custom dat
     expect(getByTestId(SWITCH)).toBeChecked();
   });
 
-  it('reflects a stored opt-out and reports a change with the data stream', () => {
+  it('is hidden for the generic dataset, where Fleet shows no switch', () => {
+    const { queryByTestId } = renderForm(DATASET_SERVICE, {
+      varsByDataStream: varsWithDataset('generic'),
+      onCreateDatasetTemplatesChange: jest.fn(),
+    });
+    expect(queryByTestId(SWITCH)).toBeNull();
+  });
+
+  it('shows the value it is given and reports a change', () => {
     const onCreateDatasetTemplatesChange = jest.fn();
     const { getByTestId } = renderForm(DATASET_SERVICE, {
-      varsByDataStream: varsWithDataset('aws.prod', false),
+      varsByDataStream: varsWithDataset('aws.prod'),
+      createDatasetTemplates: false,
       onCreateDatasetTemplatesChange,
     });
     expect(getByTestId(SWITCH)).not.toBeChecked();
     fireEvent.click(getByTestId(SWITCH));
-    expect(onCreateDatasetTemplatesChange).toHaveBeenCalledWith('otel_logs', true);
+    expect(onCreateDatasetTemplatesChange).toHaveBeenCalledWith(true);
   });
 
   it('is hidden for a deployed service, where Fleet ignores the flag on update', () => {
@@ -664,5 +680,24 @@ describe('ServiceFieldsForm — dedicated index template switch for a custom dat
       isDeployed: true,
     });
     expect(queryByTestId(SWITCH)).toBeNull();
+  });
+
+  it('says which other services the choice applies to, and nothing when there are none', () => {
+    const shared = renderForm(DATASET_SERVICE, {
+      varsByDataStream: varsWithDataset('aws.prod'),
+      onCreateDatasetTemplatesChange: jest.fn(),
+      datasetTemplatesSharedWith: ['Amazon Lambda', 'Amazon RDS'],
+    });
+    expect(
+      shared.getByTestId('serviceSettingsFlyout-createDatasetTemplatesShared')
+    ).toHaveTextContent('Amazon Lambda, Amazon RDS');
+    shared.unmount();
+
+    const alone = renderForm(DATASET_SERVICE, {
+      varsByDataStream: varsWithDataset('aws.prod'),
+      onCreateDatasetTemplatesChange: jest.fn(),
+      datasetTemplatesSharedWith: [],
+    });
+    expect(alone.queryByTestId('serviceSettingsFlyout-createDatasetTemplatesShared')).toBeNull();
   });
 });

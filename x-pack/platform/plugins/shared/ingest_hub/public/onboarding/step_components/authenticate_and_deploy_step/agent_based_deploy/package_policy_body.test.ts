@@ -313,9 +313,9 @@ describe('buildGroupPackagePolicy — dedicated index template for a custom data
             guardduty: {
               enabledInputs: ['aws-s3'],
               varsByInput: { 'aws-s3': { 'data_stream.dataset': dataset } },
-              ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
             },
           },
+          ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
         },
       },
       authenticateAndDeployStep: {},
@@ -329,8 +329,12 @@ describe('buildGroupPackagePolicy — dedicated index template for a custom data
     );
   });
 
-  it('leaves the flag out by default so Fleet keeps its own', async () => {
-    expect(await buildWithDataset('aws.prod')).not.toHaveProperty('create_dataset_templates');
+  it('says so when the template is on, which is the default', async () => {
+    expect(await buildWithDataset('aws.prod')).toHaveProperty('create_dataset_templates', true);
+  });
+
+  it('leaves the flag out for the generic dataset, where Fleet shows no switch', async () => {
+    expect(await buildWithDataset('generic', false)).not.toHaveProperty('create_dataset_templates');
   });
 
   it('never sends the choice as a package var', async () => {

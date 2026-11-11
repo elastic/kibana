@@ -7,7 +7,7 @@
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { getDefaultEnabledDataStreams, makeDsView } from '../../aws_service_matrix';
-import { DATASET_VAR_NAME, isCustomDataset, resolveFieldMeta } from './field_config';
+import { offersDatasetTemplates } from './field_config';
 import type { ServiceInstance, ServiceVars } from './use_service_settings';
 
 interface PolicyMember {
@@ -15,37 +15,23 @@ interface PolicyMember {
   service: AwsServiceMatrixEntry;
 }
 
-/** One stream that takes a dataset: a customised one can opt out, one at its default cannot. */
-interface DatasetStream {
-  custom: boolean;
-  optedOut: boolean;
-}
-
 /**
- * The enabled streams of a service that carry a `data_stream.dataset` var. For an input package
- * Fleet creates a dedicated index template for each of them, the default dataset included. A
- * service never configured counts with its defaults, since it deploys with them.
+ * Whether a service has a stream the dedicated index template switch applies to. A service never
+ * configured counts with its defaults, since it deploys with them.
  */
-function getDatasetStreams(
-  service: AwsServiceMatrixEntry,
-  vars: ServiceVars | undefined
-): DatasetStream[] {
-  const streams: DatasetStream[] = [];
+function offersTemplatesSwitch(service: AwsServiceMatrixEntry, vars: ServiceVars | undefined) {
   const enabledDataStreams = vars?.enabledDataStreams ?? getDefaultEnabledDataStreams(service);
-  for (const dsId of enabledDataStreams) {
-    if (!service.dataStreams.includes(dsId)) continue;
+  return enabledDataStreams.some((dsId) => {
+    if (!service.dataStreams.includes(dsId)) return false;
     const dsView = makeDsView(service, dsId);
     const dsVars = vars?.varsByDataStream[dsId];
     const inputs =
       dsVars?.enabledInputs ??
       (dsView.defaultEnabledInputs?.length ? dsView.defaultEnabledInputs : dsView.inputs ?? []);
-    for (const input of inputs) {
-      if (!resolveFieldMeta(dsView, input, DATASET_VAR_NAME)) continue;
-      const custom = isCustomDataset(dsView, input, dsVars?.varsByInput[input]);
-      streams.push({ custom, optedOut: custom && dsVars?.createDatasetTemplates === false });
-    }
-  }
-  return streams;
+    return inputs.some((input) =>
+      offersDatasetTemplates(dsView, input, dsVars?.varsByInput[input])
+    );
+  });
 }
 
 const getMemberVars = (
@@ -54,41 +40,62 @@ const getMemberVars = (
 ): ServiceVars | undefined =>
   storedServiceVars[instance.instanceId] ?? storedServiceVars[instance.serviceId];
 
+/** The services of a policy the switch applies to. */
+const getSwitchMembers = (
+  members: PolicyMember[],
+  storedServiceVars: Record<string, ServiceVars>
+): PolicyMember[] =>
+  members.filter((member) =>
+    offersTemplatesSwitch(member.service, getMemberVars(member, storedServiceVars))
+  );
+
 /**
- * The `create_dataset_templates` flag for one policy: `false` only when every stream it deploys
- * opted out. One policy takes one flag, so a stream that still needs its template (one that
- * cannot opt out, or one left on) keeps it for the whole policy and Fleet's default applies.
+ * The one value a policy takes, as in Fleet's form: off only when every service it applies to
+ * turned it off. Shown in each switch and sent on deploy, so the two cannot disagree.
+ */
+const isEnabledFor = (
+  members: PolicyMember[],
+  storedServiceVars: Record<string, ServiceVars>
+): boolean =>
+  members.some(
+    (member) => getMemberVars(member, storedServiceVars)?.createDatasetTemplates !== false
+  );
+
+/**
+ * The `create_dataset_templates` value for one policy, sent explicitly like Fleet's form does:
+ * the server default for a package that is not an input package is off, so a switch shown on has
+ * to say so. Undefined when the switch applies to none of the policy's services.
  */
 export function getCreateDatasetTemplates(
   members: PolicyMember[],
   storedServiceVars: Record<string, ServiceVars>
-): false | undefined {
-  const streams = members.flatMap((member) =>
-    getDatasetStreams(member.service, getMemberVars(member, storedServiceVars))
-  );
-  return streams.length > 0 && streams.every(({ optedOut }) => optedOut) ? false : undefined;
+): boolean | undefined {
+  const switchMembers = getSwitchMembers(members, storedServiceVars);
+  return switchMembers.length > 0 ? isEnabledFor(switchMembers, storedServiceVars) : undefined;
 }
 
-export interface DatasetTemplatesBundle {
-  /** Names of the other services of the policy whose template cannot be skipped. */
-  requiredBy: string[];
-  /** Names of the other services of the policy that take a dataset. */
+export interface DatasetTemplatesPolicy {
+  /** The value of the policy, which every switch of its services shows. */
+  enabled: boolean;
+  /** The services of the policy the switch applies to; a change is written to each of them. */
+  instanceIds: string[];
+  /** Names of the others among them. */
   sharedWith: string[];
 }
 
-/** What the other services of the same policy mean for one service's switch. */
-export function getDatasetTemplatesBundle(
+/** The template choice of the policy `instanceId` deploys in, from its members. */
+export function getDatasetTemplatesPolicy(
   instanceId: string,
   members: PolicyMember[],
   storedServiceVars: Record<string, ServiceVars>
-): DatasetTemplatesBundle {
-  const bundle: DatasetTemplatesBundle = { requiredBy: [], sharedWith: [] };
-  for (const member of members) {
-    if (member.instance.instanceId === instanceId) continue;
-    const streams = getDatasetStreams(member.service, getMemberVars(member, storedServiceVars));
-    if (streams.length === 0) continue;
-    bundle.sharedWith.push(member.instance.name);
-    if (streams.some(({ custom }) => !custom)) bundle.requiredBy.push(member.instance.name);
-  }
-  return bundle;
+): DatasetTemplatesPolicy | undefined {
+  const switchMembers = getSwitchMembers(members, storedServiceVars);
+  if (!switchMembers.some((member) => member.instance.instanceId === instanceId)) return undefined;
+  return {
+    enabled: isEnabledFor(switchMembers, storedServiceVars),
+    instanceIds: switchMembers.map(({ instance }) => instance.instanceId),
+    sharedWith: switchMembers
+      .filter(({ instance }) => instance.instanceId !== instanceId)
+      .map(({ instance }) => instance.name),
+  };
 }

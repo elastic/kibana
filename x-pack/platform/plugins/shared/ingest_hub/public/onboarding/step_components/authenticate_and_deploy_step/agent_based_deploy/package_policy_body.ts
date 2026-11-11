@@ -292,9 +292,10 @@ export async function buildGroupPackagePolicy(
   } = opts;
   const descriptionField = description?.trim() ? { description: description.trim() } : {};
   const policySettingsFields = getPolicySettings(policySettings, 'agent_based');
+  const createDatasetTemplates = getCreateDatasetTemplates(group, storedServiceVars);
   const createDatasetTemplatesField =
-    getCreateDatasetTemplates(group, storedServiceVars) === false
-      ? { create_dataset_templates: false }
+    createDatasetTemplates !== undefined
+      ? { create_dataset_templates: createDatasetTemplates }
       : {};
 
   // Build serviceVarsMap for all members. Key by service.id for buildPackageInputs.

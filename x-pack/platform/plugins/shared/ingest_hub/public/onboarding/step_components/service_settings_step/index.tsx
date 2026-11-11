@@ -33,7 +33,7 @@ import { supportsNamespace } from './instance_namespace_field';
 import { deploysAsPolicy, followsGlobalNamespace } from '../../common/effective_namespace';
 import { ecfFamilySupportsNamespace } from '../../ecf_cloudformation';
 import { getRegionFieldName, hasConfigurableFlyoutFields } from './field_config';
-import { getDatasetTemplatesBundle } from './dataset_templates';
+import { getDatasetTemplatesPolicy } from './dataset_templates';
 import {
   DEFAULT_NAMESPACE,
   groupByPackage,
@@ -175,7 +175,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
 
   // The other services that deploy in the active service's policy share its template choice. A
   // duplicate has a policy of its own.
-  const activeDatasetTemplatesBundle = useMemo(() => {
+  const activeDatasetTemplatesPolicy = useMemo(() => {
     if (!activeFlyoutInstance || activeFlyoutInstance.isDuplicate || !awsServicesMap) {
       return undefined;
     }
@@ -198,7 +198,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       namespace
     ).find(({ instanceIds }) => instanceIds.includes(activeFlyoutInstance.instanceId));
     return group
-      ? getDatasetTemplatesBundle(activeFlyoutInstance.instanceId, group.members, storedServiceVars)
+      ? getDatasetTemplatesPolicy(activeFlyoutInstance.instanceId, group.members, storedServiceVars)
       : undefined;
   }, [
     activeFlyoutInstance,
@@ -228,14 +228,24 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     (
       varsByDataStream: Record<string, import('./use_service_settings').ServiceDataStreamVars>,
       enabledDataStreams: string[],
-      instanceNamespace?: string
+      instanceNamespace?: string,
+      createDatasetTemplates?: boolean
     ) => {
       setServiceFieldsAndInputs(
         instanceId,
         varsByDataStream,
         enabledDataStreams,
         instanceNamespace,
-        duplicates.getRenamedName(instanceId, instanceNamespace)
+        duplicates.getRenamedName(instanceId, instanceNamespace),
+        // The policy takes one value, so a change reaches every service that deploys in it.
+        createDatasetTemplates === undefined
+          ? undefined
+          : {
+              instanceIds: [
+                ...new Set([instanceId, ...(activeDatasetTemplatesPolicy?.instanceIds ?? [])]),
+              ],
+              enabled: createDatasetTemplates,
+            }
       );
       setActiveFlyoutInstanceId(null);
     };
@@ -702,7 +712,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           isDuplicate={activeFlyoutInstance.isDuplicate}
           globalNamespace={namespace}
           isDeployed={!!detectAndReviewStep.policyIdsByInstance[activeFlyoutInstance.instanceId]}
-          datasetTemplatesBundle={activeDatasetTemplatesBundle}
+          datasetTemplatesPolicy={activeDatasetTemplatesPolicy}
           onApply={handleFlyoutApply(activeFlyoutInstance.instanceId)}
           onClose={() => setActiveFlyoutInstanceId(null)}
         />

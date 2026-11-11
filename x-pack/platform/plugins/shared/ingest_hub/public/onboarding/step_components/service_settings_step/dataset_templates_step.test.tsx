@@ -13,10 +13,18 @@ jest.mock('../../onboarding_flow_context', () => ({ useOnboardingFlow: jest.fn()
 jest.mock('./use_service_settings', () => ({ useServiceSettings: jest.fn() }));
 jest.mock('./service_settings_flyout', () => ({
   ServiceSettingsFlyout: ({
-    datasetTemplatesBundle,
+    datasetTemplatesPolicy,
+    onApply,
   }: {
-    datasetTemplatesBundle?: { requiredBy: string[]; sharedWith: string[] };
-  }) => <div data-test-subj="mockFlyout">{JSON.stringify(datasetTemplatesBundle ?? null)}</div>,
+    datasetTemplatesPolicy?: unknown;
+    onApply: (...args: unknown[]) => void;
+  }) => (
+    <div>
+      <div data-test-subj="mockFlyout">{JSON.stringify(datasetTemplatesPolicy ?? null)}</div>
+      <button data-test-subj="mockApplyUntouched" onClick={() => onApply({}, [], undefined)} />
+      <button data-test-subj="mockApplyOff" onClick={() => onApply({}, [], undefined, false)} />
+    </div>
+  ),
 }));
 jest.mock('./duplicate_service_modal', () => ({ DuplicateServiceModal: () => null }));
 jest.mock('../service_search_filter', () => ({ ServiceSearchFilter: () => null }));
@@ -80,9 +88,9 @@ const varsFor = (id: string, dataset: string, createDatasetTemplates?: boolean):
     [id]: {
       enabledInputs: ['otelcol'],
       varsByInput: { otelcol: { 'data_stream.dataset': dataset } },
-      ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
     },
   },
+  ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
 });
 
 const renderStep = ({
@@ -106,6 +114,7 @@ const renderStep = ({
     deploymentMethod,
     refetchAwsServiceMatrix: jest.fn(),
   });
+  const setServiceFieldsAndInputs = jest.fn();
   (useServiceSettings as jest.Mock).mockReturnValue({
     globalRegion: 'us-east-1',
     integrationName: 'my-aws',
@@ -124,7 +133,7 @@ const renderStep = ({
     setSignalFilter: jest.fn(),
     getServiceVars: (id: string) =>
       stored[id] ?? { enabledDataStreams: [id.split('__')[0]], varsByDataStream: {} },
-    setServiceFieldsAndInputs: jest.fn(),
+    setServiceFieldsAndInputs,
     addDuplicate: jest.fn(),
     removeInstance: jest.fn(),
     allInstanceNames: instances.map((i) => i.name),
@@ -142,50 +151,66 @@ const renderStep = ({
       <ServiceSettingsStep onContinue={jest.fn()} />
     </I18nProvider>
   );
+  return { setServiceFieldsAndInputs };
 };
 
 const openFlyout = (instanceId: string) =>
   fireEvent.click(screen.getByTestId(`serviceSettingsStep-serviceLink-${instanceId}`));
 
-const shownBundle = () => JSON.parse(screen.getByTestId('mockFlyout').textContent ?? 'null');
+const shownPolicy = () => JSON.parse(screen.getByTestId('mockFlyout').textContent ?? 'null');
 
 describe('ServiceSettingsStep — services that share a dataset template policy', () => {
   const ec2 = makeOtel('ec2');
   const lambda = makeOtel('lambda');
+  const twoServices = {
+    instances: [instance('ec2'), instance('lambda')],
+    services: [ec2, lambda],
+  };
 
-  it('tells the flyout which other service in the policy needs its template', () => {
+  it('gives the flyout the value of the policy and the services a change reaches', () => {
     renderStep({
-      instances: [instance('ec2'), instance('lambda')],
-      services: [ec2, lambda],
-      // Lambda still sits at its default dataset, so it cannot opt out.
+      ...twoServices,
       stored: { ec2: varsFor('ec2', 'aws.prod', false), lambda: varsFor('lambda', 'lambda') },
     });
 
     openFlyout('ec2');
 
-    expect(shownBundle()).toStrictEqual({
-      requiredBy: ['Name lambda'],
+    expect(shownPolicy()).toStrictEqual({
+      enabled: true,
+      instanceIds: ['ec2', 'lambda'],
       sharedWith: ['Name lambda'],
     });
   });
 
-  it('does not pull in a service of another package, which deploys in a policy of its own', () => {
-    const other = makeOtel('lambda', 'aws_other_input_otel');
+  it('is off when every service in the policy turned it off', () => {
     renderStep({
-      instances: [instance('ec2'), instance('lambda')],
-      services: [ec2, other],
+      ...twoServices,
+      stored: {
+        ec2: varsFor('ec2', 'aws.prod', false),
+        lambda: varsFor('lambda', 'lambda', false),
+      },
+    });
+
+    openFlyout('ec2');
+
+    expect(shownPolicy().enabled).toBe(false);
+  });
+
+  it('does not pull in a service of another package, which deploys in a policy of its own', () => {
+    renderStep({
+      instances: twoServices.instances,
+      services: [ec2, makeOtel('lambda', 'aws_other_input_otel')],
       stored: { ec2: varsFor('ec2', 'aws.prod', false) },
     });
 
     openFlyout('ec2');
 
-    expect(shownBundle()).toStrictEqual({ requiredBy: [], sharedWith: [] });
+    expect(shownPolicy()).toStrictEqual({ enabled: false, instanceIds: ['ec2'], sharedWith: [] });
   });
 
   it('separates a service in another namespace, which deploys in a policy of its own', () => {
     renderStep({
-      instances: [instance('ec2'), instance('lambda')],
-      services: [ec2, lambda],
+      ...twoServices,
       stored: {
         ec2: varsFor('ec2', 'aws.prod', false),
         lambda: { ...varsFor('lambda', 'lambda'), namespace: 'prod' },
@@ -194,29 +219,27 @@ describe('ServiceSettingsStep — services that share a dataset template policy'
 
     openFlyout('ec2');
 
-    expect(shownBundle()).toStrictEqual({ requiredBy: [], sharedWith: [] });
+    expect(shownPolicy().sharedWith).toStrictEqual([]);
   });
 
   it('groups an empty namespace with the explicit default one for managed', () => {
-    const stored = {
-      ec2: varsFor('ec2', 'aws.prod', false),
-      lambda: { ...varsFor('lambda', 'lambda'), namespace: 'default' },
-    };
-    const props = {
-      instances: [instance('ec2'), instance('lambda')],
-      services: [ec2, lambda],
-      stored,
-    };
+    renderStep({
+      ...twoServices,
+      stored: {
+        ec2: varsFor('ec2', 'aws.prod', false),
+        lambda: { ...varsFor('lambda', 'lambda'), namespace: 'default' },
+      },
+      deploymentMethod: 'managed_integration',
+    });
 
-    renderStep({ ...props, deploymentMethod: 'managed_integration' });
     openFlyout('ec2');
-    expect(shownBundle().sharedWith).toStrictEqual(['Name lambda']);
+
+    expect(shownPolicy().sharedWith).toStrictEqual(['Name lambda']);
   });
 
   it('keeps an empty and an explicit default namespace apart for agent-based', () => {
     renderStep({
-      instances: [instance('ec2'), instance('lambda')],
-      services: [ec2, lambda],
+      ...twoServices,
       stored: {
         ec2: varsFor('ec2', 'aws.prod', false),
         lambda: { ...varsFor('lambda', 'lambda'), namespace: 'default' },
@@ -227,18 +250,51 @@ describe('ServiceSettingsStep — services that share a dataset template policy'
     openFlyout('ec2');
 
     // An empty namespace inherits the agent policy's, so it is not the explicit `default` one.
-    expect(shownBundle()).toStrictEqual({ requiredBy: [], sharedWith: [] });
+    expect(shownPolicy().sharedWith).toStrictEqual([]);
   });
 
-  it('gives a duplicate a bundle of its own', () => {
+  it('gives a duplicate a policy of its own', () => {
     renderStep({
       instances: [instance('ec2'), instance('ec2__dup-1', true)],
       services: [ec2],
-      stored: { ec2: varsFor('ec2', 'aws.ec2'), 'ec2__dup-1': varsFor('ec2', 'aws.prod', false) },
+      stored: { 'ec2__dup-1': varsFor('ec2', 'aws.prod', false) },
     });
 
     openFlyout('ec2__dup-1');
 
     expect(screen.getByTestId('mockFlyout')).toHaveTextContent('null');
+  });
+
+  it('gives no policy for a service the switch does not apply to', () => {
+    renderStep({
+      instances: [instance('ec2')],
+      services: [ec2],
+      stored: { ec2: varsFor('ec2', 'generic') },
+    });
+
+    openFlyout('ec2');
+
+    expect(screen.getByTestId('mockFlyout')).toHaveTextContent('null');
+  });
+
+  it('writes a change to every service of the policy, in the same update', () => {
+    const { setServiceFieldsAndInputs } = renderStep({ ...twoServices, stored: {} });
+    openFlyout('ec2');
+
+    fireEvent.click(screen.getByTestId('mockApplyOff'));
+
+    expect(setServiceFieldsAndInputs.mock.calls[0][5]).toStrictEqual({
+      instanceIds: ['ec2', 'lambda'],
+      enabled: false,
+    });
+  });
+
+  it('writes nothing for the policy when the choice was not changed', () => {
+    const { setServiceFieldsAndInputs } = renderStep({ ...twoServices, stored: {} });
+    openFlyout('ec2');
+
+    fireEvent.click(screen.getByTestId('mockApplyUntouched'));
+
+    expect(setServiceFieldsAndInputs.mock.calls[0][5]).toBeUndefined();
   });
 });

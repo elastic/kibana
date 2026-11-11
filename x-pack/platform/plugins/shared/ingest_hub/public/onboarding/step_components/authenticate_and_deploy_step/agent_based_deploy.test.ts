@@ -1212,9 +1212,9 @@ describe('dedicated index template for a custom dataset', () => {
         vpcflow: {
           enabledInputs: ['aws-s3'],
           varsByInput: { 'aws-s3': { 'data_stream.dataset': 'aws.prod' } },
-          createDatasetTemplates: false,
         },
       },
+      createDatasetTemplates: false,
     },
   };
   const targets = () =>
@@ -1243,5 +1243,12 @@ describe('dedicated index template for a custom dataset', () => {
     });
 
     expect(mockSendCreatePackagePolicy.mock.calls[0][0].create_dataset_templates).toBe(false);
+  });
+
+  it('says the template is on when the user did not opt out', async () => {
+    await deployNewAgentPolicy(targets(), { ...BASE_OPTS, agentPolicyName: 'AWS Agent Policy 1' });
+
+    const [body] = mockSendCreateAgentPolicy.mock.calls[0];
+    expect(body.package_policies[0].create_dataset_templates).toBe(true);
   });
 });

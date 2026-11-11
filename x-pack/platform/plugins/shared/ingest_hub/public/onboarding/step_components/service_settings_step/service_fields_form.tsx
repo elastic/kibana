@@ -43,7 +43,7 @@ import {
   getRequiredTextFields,
   getStreamVarGroups,
   isAdvancedVar,
-  isCustomDataset,
+  offersDatasetTemplates,
   isFieldVisible,
   isInSelectedVarGroupOption,
   isRequiredBySelectedOption,
@@ -52,7 +52,6 @@ import {
   toDraft,
   toTyped,
 } from './field_config';
-import type { DatasetTemplatesBundle } from './dataset_templates';
 import type { ServiceDataStreamVars } from './use_service_settings';
 
 function getInputDisplayLabel(input: string, inputTitles?: Record<string, string>): string {
@@ -89,12 +88,14 @@ export interface ServiceFieldsFormProps {
     groupName: string,
     optionName: string
   ) => void;
-  /** The user turned the dedicated index template of a customised dataset on or off. */
-  onCreateDatasetTemplatesChange?: (dsId: string, enabled: boolean) => void;
+  /** The user turned the dedicated index template on or off. */
+  onCreateDatasetTemplatesChange?: (enabled: boolean) => void;
+  /** Whether the dedicated index template is on; the policy takes one value, as in Fleet. */
+  createDatasetTemplates?: boolean;
   /** The service is already deployed; Fleet only creates the template with a new policy. */
   isDeployed?: boolean;
   /** The other services that deploy in the same policy, which share the template choice. */
-  datasetTemplatesBundle?: DatasetTemplatesBundle;
+  datasetTemplatesSharedWith?: string[];
 }
 
 function VarField({
@@ -214,7 +215,7 @@ function InputVarFields({
   onVarGroupSelectionChange,
   createDatasetTemplates,
   onCreateDatasetTemplatesChange,
-  datasetTemplatesBundle,
+  datasetTemplatesSharedWith,
 }: {
   service: AwsServiceMatrixEntry;
   activeInput: string;
@@ -226,7 +227,7 @@ function InputVarFields({
   /** Set only where the switch applies: a new policy, so not for a deployed service. */
   createDatasetTemplates?: boolean;
   onCreateDatasetTemplatesChange?: (enabled: boolean) => void;
-  datasetTemplatesBundle?: DatasetTemplatesBundle;
+  datasetTemplatesSharedWith?: string[];
 }) {
   const [isShowingAdvanced, setIsShowingAdvanced] = useState(false);
 
@@ -292,14 +293,12 @@ function InputVarFields({
   const hasAdvancedOptions = advancedBoolFields.length > 0 || advancedOtherFields.length > 0;
 
   const draft = varsByInput[activeInput] ?? {};
-  // Like Fleet, offered only once the dataset differs from the default, and on creation only.
-  const templatesRequiredBy = datasetTemplatesBundle?.requiredBy ?? [];
-  const templatesSharedWith = datasetTemplatesBundle?.sharedWith ?? [];
-  const isTemplateRequiredByOthers = templatesRequiredBy.length > 0;
+  // Like Fleet, offered for a dataset that is set and not `generic`, and on creation only.
+  const templatesSharedWith = datasetTemplatesSharedWith ?? [];
   const renderDatasetTemplatesSwitch = (fieldName: string) =>
     fieldName === DATASET_VAR_NAME &&
     onCreateDatasetTemplatesChange &&
-    isCustomDataset(service, activeInput, draft) ? (
+    offersDatasetTemplates(service, activeInput, draft) ? (
       <>
         <EuiSpacer size="s" />
         <EuiFormRow
@@ -313,25 +312,13 @@ function InputVarFields({
                     'Creates a dedicated index template with proper mappings and settings for this custom dataset.',
                 }
               )}
-              {isTemplateRequiredByOthers && (
-                <p data-test-subj="serviceSettingsFlyout-createDatasetTemplatesRequired">
-                  {i18n.translate(
-                    'xpack.ingestHub.serviceSettingsStep.flyout.createDatasetTemplates.requiredBy',
-                    {
-                      defaultMessage:
-                        'Cannot be turned off: {services} deploys in the same policy and needs its template.',
-                      values: { services: templatesRequiredBy.join(', ') },
-                    }
-                  )}
-                </p>
-              )}
-              {!isTemplateRequiredByOthers && templatesSharedWith.length > 0 && (
+              {templatesSharedWith.length > 0 && (
                 <p data-test-subj="serviceSettingsFlyout-createDatasetTemplatesShared">
                   {i18n.translate(
                     'xpack.ingestHub.serviceSettingsStep.flyout.createDatasetTemplates.sharedWith',
                     {
                       defaultMessage:
-                        'Applies to the whole policy, which also deploys {services}. Templates are skipped only if every service in it turns this off.',
+                        'Applies to every service in this policy, which also deploys {services}.',
                       values: { services: templatesSharedWith.join(', ') },
                     }
                   )}
@@ -348,8 +335,7 @@ function InputVarFields({
                 defaultMessage: 'Create dedicated index template for custom dataset (recommended)',
               }
             )}
-            checked={isTemplateRequiredByOthers || (createDatasetTemplates ?? true)}
-            disabled={isTemplateRequiredByOthers}
+            checked={createDatasetTemplates ?? true}
             onChange={(e) => onCreateDatasetTemplatesChange(e.target.checked)}
             data-test-subj="serviceSettingsFlyout-createDatasetTemplatesSwitch"
           />
@@ -566,8 +552,9 @@ export function ServiceFieldsForm({
   onInputToggle,
   onVarGroupSelectionChange,
   onCreateDatasetTemplatesChange,
+  createDatasetTemplates,
   isDeployed = false,
-  datasetTemplatesBundle,
+  datasetTemplatesSharedWith,
 }: ServiceFieldsFormProps) {
   const { euiTheme } = useEuiTheme();
   const dataStreams = service.dataStreams ?? [];
@@ -614,12 +601,10 @@ export function ServiceFieldsForm({
                       onVarGroupSelectionChange={(inp, group, option) =>
                         onVarGroupSelectionChange?.(dsId, inp, group, option)
                       }
-                      createDatasetTemplates={dsVars?.createDatasetTemplates}
-                      datasetTemplatesBundle={datasetTemplatesBundle}
+                      createDatasetTemplates={createDatasetTemplates}
+                      datasetTemplatesSharedWith={datasetTemplatesSharedWith}
                       onCreateDatasetTemplatesChange={
-                        isDeployed || !onCreateDatasetTemplatesChange
-                          ? undefined
-                          : (enabled) => onCreateDatasetTemplatesChange(dsId, enabled)
+                        isDeployed ? undefined : onCreateDatasetTemplatesChange
                       }
                     />
                   </div>
@@ -674,12 +659,10 @@ export function ServiceFieldsForm({
                     onVarGroupSelectionChange={(inp, group, option) =>
                       onVarGroupSelectionChange?.(dsId, inp, group, option)
                     }
-                    createDatasetTemplates={dsVars?.createDatasetTemplates}
-                    datasetTemplatesBundle={datasetTemplatesBundle}
+                    createDatasetTemplates={createDatasetTemplates}
+                    datasetTemplatesSharedWith={datasetTemplatesSharedWith}
                     onCreateDatasetTemplatesChange={
-                      isDeployed || !onCreateDatasetTemplatesChange
-                        ? undefined
-                        : (enabled) => onCreateDatasetTemplatesChange(dsId, enabled)
+                      isDeployed ? undefined : onCreateDatasetTemplatesChange
                     }
                   />
                 </div>

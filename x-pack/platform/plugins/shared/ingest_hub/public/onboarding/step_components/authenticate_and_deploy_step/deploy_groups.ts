@@ -235,7 +235,9 @@ export async function deployGroup(
     package: { name: firstService.packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,
-    ...(createDatasetTemplates === false ? { create_dataset_templates: false } : {}),
+    ...(createDatasetTemplates !== undefined
+      ? { create_dataset_templates: createDatasetTemplates }
+      : {}),
     ...getPolicySettings(policySettings, 'managed_integration'),
     ...(connectorId
       ? {

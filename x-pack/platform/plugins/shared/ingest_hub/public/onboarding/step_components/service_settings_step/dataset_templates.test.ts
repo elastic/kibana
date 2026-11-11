@@ -6,7 +6,7 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import { getCreateDatasetTemplates, getDatasetTemplatesBundle } from './dataset_templates';
+import { getCreateDatasetTemplates, getDatasetTemplatesPolicy } from './dataset_templates';
 import type { ServiceInstance, ServiceVars } from './use_service_settings';
 
 const otelService = {
@@ -48,66 +48,53 @@ const vars = (dataset: string, createDatasetTemplates?: boolean): ServiceVars =>
     ec2: {
       enabledInputs: ['otelcol'],
       varsByInput: { otelcol: { 'data_stream.dataset': dataset } },
-      ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
     },
   },
+  ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
 });
 
 describe('getCreateDatasetTemplates', () => {
-  it('leaves the flag unset when nothing opted out', () => {
-    expect(getCreateDatasetTemplates([member('a')], { a: vars('aws.prod') })).toBeUndefined();
+  it('is on by default, for a dataset at its default as well as a custom one', () => {
+    expect(getCreateDatasetTemplates([member('a')], { a: vars('aws.prod') })).toBe(true);
+    expect(getCreateDatasetTemplates([member('a')], { a: vars('aws.ec2') })).toBe(true);
   });
 
-  it('is false when every stream is customised and opted out', () => {
-    const stored = { a: vars('aws.prod', false), b: vars('aws.dev', false) };
-    expect(getCreateDatasetTemplates([member('a'), member('b')], stored)).toBe(false);
+  it('is off once the service opted out', () => {
+    expect(getCreateDatasetTemplates([member('a')], { a: vars('aws.prod', false) })).toBe(false);
   });
 
-  it('keeps the template while one stream is left on', () => {
-    const stored = { a: vars('aws.prod', false), b: vars('aws.dev') };
-    expect(getCreateDatasetTemplates([member('a'), member('b')], stored)).toBeUndefined();
+  it('takes one value for the policy: off only when every service turned it off', () => {
+    const members = [member('a'), member('b')];
+
+    expect(
+      getCreateDatasetTemplates(members, { a: vars('aws.a', false), b: vars('aws.b', false) })
+    ).toBe(false);
+    expect(getCreateDatasetTemplates(members, { a: vars('aws.a', false), b: vars('aws.b') })).toBe(
+      true
+    );
   });
 
-  it('keeps the template while a stream sits at its default dataset, which cannot opt out', () => {
-    const stored = { a: vars('aws.prod', false), b: vars('aws.ec2') };
-    expect(getCreateDatasetTemplates([member('a'), member('b')], stored)).toBeUndefined();
-  });
-
-  it('counts a service that was never configured with its default dataset', () => {
+  it('counts a service that was never configured, which deploys with its default dataset', () => {
     expect(
       getCreateDatasetTemplates([member('a'), member('b')], { a: vars('aws.prod', false) })
-    ).toBeUndefined();
+    ).toBe(true);
   });
 
-  it('ignores an opt-out left over after the dataset went back to the default', () => {
-    expect(getCreateDatasetTemplates([member('a')], { a: vars('aws.ec2', false) })).toBeUndefined();
+  it('is unset when the switch applies to none of the services', () => {
+    expect(getCreateDatasetTemplates([member('a', ecsService)], {})).toBeUndefined();
+    expect(getCreateDatasetTemplates([member('a')], { a: vars('generic') })).toBeUndefined();
   });
 
-  it('ignores a service without a dataset var', () => {
+  it('ignores a service the switch does not apply to', () => {
     const stored = { a: vars('aws.prod', false) };
     expect(getCreateDatasetTemplates([member('a'), member('b', ecsService)], stored)).toBe(false);
-    expect(getCreateDatasetTemplates([member('b', ecsService)], {})).toBeUndefined();
   });
 
   it('ignores a data stream that is turned off', () => {
-    const twoStreams = {
-      ...otelService,
-      dataStreams: ['ec2', 'lambda'],
-      varDefsByDataStream: {
-        ...otelService.varDefsByDataStream,
-        lambda: otelService.varDefsByDataStream?.ec2,
-      },
-    } as unknown as AwsServiceMatrixEntry;
     const stored: Record<string, ServiceVars> = {
-      a: {
-        enabledDataStreams: ['ec2'],
-        varsByDataStream: {
-          ec2: vars('aws.prod', false).varsByDataStream.ec2,
-          lambda: vars('aws.other').varsByDataStream.ec2,
-        },
-      },
+      a: { ...vars('aws.prod', false), enabledDataStreams: [] },
     };
-    expect(getCreateDatasetTemplates([member('a', twoStreams)], stored)).toBe(false);
+    expect(getCreateDatasetTemplates([member('a')], stored)).toBeUndefined();
   });
 
   it('finds the vars by service id for state saved before instances were keyed', () => {
@@ -115,40 +102,40 @@ describe('getCreateDatasetTemplates', () => {
   });
 });
 
-describe('getDatasetTemplatesBundle', () => {
+describe('getDatasetTemplatesPolicy', () => {
   const members = [
     member('a', otelService, 'Amazon EC2'),
     member('b', otelService, 'Amazon Lambda'),
-    member('c', otelService, 'Amazon RDS'),
-    member('d', ecsService, 'AWS ELB'),
+    member('c', ecsService, 'AWS ELB'),
   ];
 
-  it('lists the others whose stream sits at the default dataset as requiring the template', () => {
-    const stored = { a: vars('aws.prod', false), b: vars('aws.ec2'), c: vars('aws.dev') };
-    expect(getDatasetTemplatesBundle('a', members, stored)).toStrictEqual({
-      requiredBy: ['Amazon Lambda'],
-      sharedWith: ['Amazon Lambda', 'Amazon RDS'],
+  it('gives the value every switch of the policy shows, and the services a change reaches', () => {
+    const stored = { a: vars('aws.prod', false), b: vars('aws.dev') };
+
+    expect(getDatasetTemplatesPolicy('a', members, stored)).toStrictEqual({
+      enabled: true,
+      instanceIds: ['a', 'b'],
+      sharedWith: ['Amazon Lambda'],
+    });
+    expect(getDatasetTemplatesPolicy('b', members, stored)?.enabled).toBe(true);
+  });
+
+  it('is off when every service turned it off', () => {
+    const stored = { a: vars('aws.prod', false), b: vars('aws.dev', false) };
+
+    expect(getDatasetTemplatesPolicy('a', members, stored)?.enabled).toBe(false);
+  });
+
+  it('shares with no one for a service that has its policy to itself', () => {
+    expect(getDatasetTemplatesPolicy('a', [members[0]], { a: vars('aws.prod') })).toStrictEqual({
+      enabled: true,
+      instanceIds: ['a'],
+      sharedWith: [],
     });
   });
 
-  it('shares without requiring when every other service has its own switch', () => {
-    const stored = { a: vars('aws.prod', false), b: vars('aws.dev'), c: vars('aws.test') };
-    expect(getDatasetTemplatesBundle('a', members, stored)).toStrictEqual({
-      requiredBy: [],
-      sharedWith: ['Amazon Lambda', 'Amazon RDS'],
-    });
-  });
-
-  it('counts a service that was never configured, which deploys at its default dataset', () => {
-    expect(getDatasetTemplatesBundle('a', members, { a: vars('aws.prod') }).requiredBy).toContain(
-      'Amazon Lambda'
-    );
-  });
-
-  it('does not count the service itself or one without a dataset var', () => {
-    const bundle = getDatasetTemplatesBundle('a', [members[0], members[3]], {
-      a: vars('aws.ec2'),
-    });
-    expect(bundle).toStrictEqual({ requiredBy: [], sharedWith: [] });
+  it('is undefined for a service the switch does not apply to', () => {
+    expect(getDatasetTemplatesPolicy('c', members, {})).toBeUndefined();
+    expect(getDatasetTemplatesPolicy('a', [members[0]], { a: vars('generic') })).toBeUndefined();
   });
 });

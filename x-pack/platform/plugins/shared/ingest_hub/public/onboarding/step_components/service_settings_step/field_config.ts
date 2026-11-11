@@ -305,16 +305,23 @@ export function getDefaultInput(service: AwsServiceMatrixEntry | undefined): str
 
 export const DATASET_VAR_NAME = 'data_stream.dataset';
 
-/** Whether the dataset entered for `input` differs from the manifest default, as in Fleet. */
-export function isCustomDataset(
+/** Fleet's name for the dataset of an input package that takes no dataset of its own. */
+export const GENERIC_DATASET_NAME = 'generic';
+
+/**
+ * Whether Fleet offers the dedicated index template switch for `input`: the dataset is set and,
+ * as for an input package in Fleet's form, is not `generic`. A dataset not entered yet is the
+ * manifest default, which is what the form shows.
+ */
+export function offersDatasetTemplates(
   service: AwsServiceMatrixEntry,
   input: string,
   vars: Record<string, string | string[]> | undefined
 ): boolean {
   const meta = resolveFieldMeta(service, input, DATASET_VAR_NAME);
-  const value = vars?.[DATASET_VAR_NAME];
-  if (!meta || typeof value !== 'string' || !value.trim()) return false;
-  return value.trim() !== meta.def.default;
+  if (!meta) return false;
+  const value = vars?.[DATASET_VAR_NAME] ?? meta.def.default;
+  return typeof value === 'string' && !!value.trim() && value.trim() !== GENERIC_DATASET_NAME;
 }
 
 export function getFlyoutFields(

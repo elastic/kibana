@@ -415,24 +415,15 @@ describe('toSOServiceVars', () => {
     expect(result['ec2__dup-1'].namespace).toBe('staging');
   });
 
-  it('keeps the dedicated index template choice of a data stream so a resume restores it', () => {
+  it('keeps the dedicated index template choice of an instance so a resume restores it', () => {
     const serviceVars: Record<string, ServiceVars> = {
-      ec2: {
-        enabledDataStreams: ['ec2'],
-        varsByDataStream: {
-          ec2: {
-            enabledInputs: ['otelcol'],
-            varsByInput: { otelcol: { 'data_stream.dataset': 'aws.prod' } },
-            createDatasetTemplates: false,
-          },
-        },
-      },
+      ec2: { enabledDataStreams: ['ec2'], varsByDataStream: {}, createDatasetTemplates: false },
     };
     const servicesMap = new Map([['ec2', { id: 'ec2' } as AwsServiceMatrixEntry]]);
 
     const result = toSOServiceVars(serviceVars, servicesMap) as Record<string, ServiceVars>;
 
-    expect(result.ec2.varsByDataStream.ec2.createDatasetTemplates).toBe(false);
+    expect(result.ec2.createDatasetTemplates).toBe(false);
   });
 
   describe('typing the vars', () => {

@@ -238,9 +238,9 @@ describe('deployGroup — dedicated index template for a custom dataset', () => 
             ec2: {
               enabledInputs: ['otelcol'],
               varsByInput: { otelcol: { 'data_stream.dataset': dataset } },
-              ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
             },
           },
+          ...(createDatasetTemplates !== undefined ? { createDatasetTemplates } : {}),
         },
       },
       authenticateAndDeployStep: {} as never,
@@ -260,12 +260,16 @@ describe('deployGroup — dedicated index template for a custom dataset', () => 
     expect(await deploy('aws.prod', false)).toHaveProperty('create_dataset_templates', false);
   });
 
-  it('leaves the flag out by default so Fleet keeps its own', async () => {
-    expect(await deploy('aws.prod')).not.toHaveProperty('create_dataset_templates');
+  it('says so when the template is on, which is the default', async () => {
+    expect(await deploy('aws.prod')).toHaveProperty('create_dataset_templates', true);
   });
 
-  it('ignores an opt-out once the dataset is back to the default', async () => {
-    expect(await deploy('aws.ec2', false)).not.toHaveProperty('create_dataset_templates');
+  it('offers the choice for the default dataset too, as Fleet does for an input package', async () => {
+    expect(await deploy('aws.ec2', false)).toHaveProperty('create_dataset_templates', false);
+  });
+
+  it('leaves the flag out for the generic dataset, where Fleet shows no switch', async () => {
+    expect(await deploy('generic', false)).not.toHaveProperty('create_dataset_templates');
   });
 
   it('never sends the choice as a package var', async () => {

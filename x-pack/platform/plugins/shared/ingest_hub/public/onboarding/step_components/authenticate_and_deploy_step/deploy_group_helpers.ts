@@ -258,10 +258,10 @@ export function collectDeployResults<G extends { instanceIds: string[] }>(
   return { policyIdsByInstance, failedInstances, errorsByInstance };
 }
 
-/** The `create_dataset_templates` flag for a group's policy; see `getDatasetTemplatesFlag`. */
+/** The `create_dataset_templates` value for a group's policy; see `getDatasetTemplatesFlag`. */
 export function getCreateDatasetTemplates(
   group: DeployGroup,
   storedServiceVars: Record<string, ServiceVars>
-): false | undefined {
+): boolean | undefined {
   return getDatasetTemplatesFlag(group.members, storedServiceVars);
 }

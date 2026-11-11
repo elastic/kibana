@@ -66,8 +66,8 @@ test.describe(
     test('turning the switch off sends the opt-out with the deploy', async ({ page }) => {
       const requests = await mockManagedIntegrations(page);
       await openEc2Flyout(page);
-      await expect(page.testSubj.locator('datasetComboBox')).toBeVisible();
-      await expect(page.testSubj.locator(SWITCH)).toBeHidden();
+      // Like Fleet's form, the switch is there for the default dataset and for a custom one.
+      await expect(page.testSubj.locator(SWITCH)).toHaveAttribute('aria-checked', 'true');
       await setDataset(page, 'aws.prod');
       await expect(page.testSubj.locator(SWITCH)).toHaveAttribute('aria-checked', 'true');
       await page.testSubj.locator(SWITCH).click();
@@ -80,7 +80,7 @@ test.describe(
       expect(requests.created[0]).toHaveProperty('create_dataset_templates', false);
     });
 
-    test('leaving the switch on leaves the choice to Fleet', async ({ page }) => {
+    test('leaving the switch on says so in the request', async ({ page }) => {
       const requests = await mockManagedIntegrations(page);
       await openEc2Flyout(page);
       await setDataset(page, 'aws.prod');
@@ -89,13 +89,21 @@ test.describe(
       await deployWithTypedKeys(page);
 
       await expect.poll(() => requests.created.length).toBe(1);
-      expect(requests.created[0]).not.toHaveProperty('create_dataset_templates');
+      expect(requests.created[0]).toHaveProperty('create_dataset_templates', true);
+    });
+
+    test('the switch is hidden for the generic dataset', async ({ page }) => {
+      await mockManagedIntegrations(page);
+      await openEc2Flyout(page);
+
+      await setDataset(page, 'generic');
+
+      await expect(page.testSubj.locator(SWITCH)).toBeHidden();
     });
 
     test('the choice survives closing and reopening the flyout', async ({ page }) => {
       await mockManagedIntegrations(page);
       await openEc2Flyout(page);
-      await setDataset(page, 'aws.prod');
       await page.testSubj.locator(SWITCH).click();
       await saveFlyout(page);
 
