@@ -37,6 +37,28 @@ export interface ProcessDefinition {
   readonly tool?: ToolOptions;
 }
 
+export interface ServiceContext {
+  /** Writes a line to the service's log and pane. */
+  readonly log: (text: string) => void;
+}
+
+export interface ServiceHandle {
+  readonly stop: () => Promise<void>;
+}
+
+/** A service that runs inside the supervisor rather than as a child process, such as the MCP server. */
+export interface ServiceDefinition {
+  readonly id: string;
+  readonly dependsOn?: readonly string[];
+  /** Resolves once the service is ready. */
+  readonly run: (context: ServiceContext) => Promise<ServiceHandle>;
+  readonly settings?: SettingsProvider;
+  readonly tool?: ToolOptions;
+}
+
+/** Anything the supervisor runs. */
+export type RunDefinition = ProcessDefinition | ServiceDefinition;
+
 export interface ToolOptions {
   readonly description: string;
   /** The arguments the tool starts with next, as the user typed them. */

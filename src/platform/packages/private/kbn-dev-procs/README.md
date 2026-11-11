@@ -40,6 +40,18 @@ the help.
 A running tool has its own log pane and can be restarted (`r`) or stopped (`x`) like the other
 processes, and stops when you quit.
 
+### MCP server
+
+The `mcp` tool is an MCP server that lets coding agents see and control these processes:
+`list_processes`, `read_logs`, `start_process`, `stop_process`, `restart_process` and
+`wait_until_ready`. Selecting it shows its address and how to add it to an agent; start it with `s`,
+or with everything else using `node scripts/dev --mcp` (also in `--headless` mode). It listens on
+`http://127.0.0.1:5690/mcp` by default and refuses requests that do not come from a local client.
+
+```sh
+claude mcp add --transport http esprocs http://127.0.0.1:5690/mcp
+```
+
 ### Settings
 
 `tab` shows the settings and launch flags of the selected process:

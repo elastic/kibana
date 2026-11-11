@@ -19,6 +19,7 @@ import { readRepoInfo } from './repo_info';
 import { readStatusFile } from './status_file';
 import type { KibanaSettingType } from './settings/kibana_settings';
 import { Supervisor } from './supervisor';
+import { createMcpService } from './mcp/mcp_server';
 import { getDefaultTools } from './tools';
 import type { InkModule } from './tui/ink_module';
 import { runTui } from './tui/run_tui';
@@ -76,6 +77,8 @@ interface StartOptions extends DevCliOptions {
 const runStart = async ({ log, flagsReader, logDir, addCleanupTask, loadInk }: StartOptions) => {
   const hideOutput = flagsReader.boolean('hide-output');
   const isTui = Boolean(loadInk) && process.stdout.isTTY && !flagsReader.boolean('headless');
+  // The MCP server controls the supervisor, which is created right after it, before the server can start.
+  const mcp = createMcpService({ getSupervisor: () => supervisor });
   const supervisor = new Supervisor({
     definitions: [
       ...getDefaultProcesses({
@@ -85,8 +88,10 @@ const runStart = async ({ log, flagsReader, logDir, addCleanupTask, loadInk }: S
         cacheDir: logDir,
       }),
       ...getDefaultTools(REPO_ROOT),
+      mcp,
     ],
     logDir,
+    startTools: flagsReader.boolean('mcp') ? [mcp.id] : [],
   });
 
   // Last resort when the supervisor exits without stopping its processes, e.g. on an error: exit handlers
@@ -220,7 +225,7 @@ export const runDevCli = ({ loadInk }: DevCliOptions = {}): void => {
       node scripts/dev status --wait-for kibana  wait until Kibana is ready (exits 1 if it fails or times out)`,
       flags: {
         string: ['log-dir', 'es-arg', 'kibana-arg', 'es-url', 'wait-for', 'timeout', 'out'],
-        boolean: ['headless', 'hide-output', 'json'],
+        boolean: ['headless', 'hide-output', 'json', 'mcp'],
         help: `
         --log-dir      Where logs and status.json are written (default data/dev)
 
@@ -228,6 +233,7 @@ export const runDevCli = ({ loadInk }: DevCliOptions = {}): void => {
         --es-arg       Argument passed to "node scripts/es snapshot", repeatable, e.g. --es-arg=--license=trial
         --kibana-arg   Argument passed to "node scripts/kibana --dev", repeatable
         --es-url       Where Elasticsearch answers, for its readiness check (default http://localhost:9200)
+        --mcp          Start the MCP server for coding agents too, at http://127.0.0.1:5690/mcp
         --headless     Print the combined output instead of showing the TUI (the default without a terminal)
         --hide-output  With --headless, only report state changes, not the output of each process
 

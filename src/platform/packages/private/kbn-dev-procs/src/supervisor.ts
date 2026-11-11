@@ -9,29 +9,27 @@
 
 import fs from 'fs';
 import path from 'path';
+import type { Runner } from './base_runner';
 import { ManagedProcess } from './managed_process';
+import { ManagedService } from './managed_service';
 import { writeStatusFile } from './status_file';
 import type { SettingsProvider } from './settings/types';
-import type {
-  LogLine,
-  ProcessDefinition,
-  ProcessStatus,
-  SupervisorStatus,
-  ToolOptions,
-} from './types';
+import type { LogLine, RunDefinition, ProcessStatus, SupervisorStatus, ToolOptions } from './types';
 
 export interface SupervisorOptions {
-  readonly definitions: readonly ProcessDefinition[];
+  readonly definitions: readonly RunDefinition[];
   readonly logDir: string;
+  /** Tools that startAll starts too, such as the MCP server with --mcp. */
+  readonly startTools?: readonly string[];
 }
 
 type Listener<T> = (value: T) => void;
 
 /** Orders definitions so every process comes after the processes it depends on; throws on unknown ids or cycles. */
 export const sortByDependencies = (
-  definitions: readonly ProcessDefinition[]
-): readonly ProcessDefinition[] => {
-  const byId = new Map<string, ProcessDefinition>();
+  definitions: readonly RunDefinition[]
+): readonly RunDefinition[] => {
+  const byId = new Map<string, RunDefinition>();
   for (const definition of definitions) {
     if (byId.has(definition.id)) {
       throw new Error(`Process id "${definition.id}" is defined more than once`);
@@ -39,10 +37,10 @@ export const sortByDependencies = (
     byId.set(definition.id, definition);
   }
 
-  const sorted: ProcessDefinition[] = [];
+  const sorted: RunDefinition[] = [];
   const visiting = new Set<string>();
   const visited = new Set<string>();
-  const visit = (definition: ProcessDefinition, trail: readonly string[]) => {
+  const visit = (definition: RunDefinition, trail: readonly string[]) => {
     const { id, dependsOn = [] } = definition;
     if (visited.has(id)) {
       return;
@@ -68,24 +66,31 @@ export const sortByDependencies = (
 
 /** Starts a set of processes in dependency order and lets callers restart, stop or start each of them. */
 export class Supervisor {
-  private readonly definitions: readonly ProcessDefinition[];
-  private readonly processes = new Map<string, ManagedProcess>();
+  private readonly definitions: readonly RunDefinition[];
+  private readonly processes = new Map<string, Runner>();
   private readonly changeListeners = new Set<Listener<ProcessStatus>>();
   private readonly lineListeners = new Set<Listener<LogLine>>();
   private readonly startedAt = new Date().toISOString();
   private readonly statusFile: string;
 
-  constructor({ definitions, logDir }: SupervisorOptions) {
+  private readonly startTools: readonly string[];
+
+  constructor({ definitions, logDir, startTools = [] }: SupervisorOptions) {
+    this.startTools = startTools;
     this.definitions = sortByDependencies(definitions);
     fs.mkdirSync(logDir, { recursive: true });
     this.statusFile = path.join(logDir, 'status.json');
     for (const definition of this.definitions) {
+      const logFile = path.join(logDir, `${definition.id}.log`);
+      const callbacks = {
+        onChange: (status: ProcessStatus) => this.handleChange(status),
+        onLine: (line: LogLine) => this.lineListeners.forEach((listener) => listener(line)),
+      };
       this.processes.set(
         definition.id,
-        new ManagedProcess(definition, path.join(logDir, `${definition.id}.log`), {
-          onChange: (status) => this.handleChange(status),
-          onLine: (line) => this.lineListeners.forEach((listener) => listener(line)),
-        })
+        'run' in definition
+          ? new ManagedService(definition, logFile, callbacks)
+          : new ManagedProcess(definition, logFile, callbacks)
       );
     }
     this.writeStatus();
@@ -112,8 +117,12 @@ export class Supervisor {
 
   /** Starts every process; each one waits until the processes it depends on are ready. */
   public async startAll(): Promise<void> {
-    // Tools are optional; they start when the user starts them.
-    await Promise.all(this.definitions.filter(({ tool }) => !tool).map(({ id }) => this.start(id)));
+    // Tools are optional; they start when the user starts them, or when asked to start with the rest.
+    await Promise.all(
+      this.definitions
+        .filter(({ id, tool }) => !tool || this.startTools.includes(id))
+        .map(({ id }) => this.start(id))
+    );
   }
 
   /** Starts one process once its dependencies are ready; marks it failed if a dependency does not get there. */
@@ -173,6 +182,11 @@ export class Supervisor {
   }
 
   /** Resolves once no process is running or waiting to start. */
+  /** Resolves once the process is ready; rejects when it ends or fails before that. */
+  public whenReady(id: string): Promise<void> {
+    return this.get(id).whenReady();
+  }
+
   public async whenAllEnded(): Promise<void> {
     const isSettled = () =>
       [...this.processes.values()].every((managed) => {
@@ -192,7 +206,7 @@ export class Supervisor {
     });
   }
 
-  private get(id: string): ManagedProcess {
+  private get(id: string): Runner {
     const managed = this.processes.get(id);
     if (!managed) {
       throw new Error(`Unknown process "${id}"`);
@@ -200,7 +214,7 @@ export class Supervisor {
     return managed;
   }
 
-  private getDefinition(id: string): ProcessDefinition {
+  private getDefinition(id: string): RunDefinition {
     const definition = this.definitions.find((candidate) => candidate.id === id);
     if (!definition) {
       throw new Error(`Unknown process "${id}"`);

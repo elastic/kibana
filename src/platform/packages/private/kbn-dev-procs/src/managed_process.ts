@@ -13,28 +13,17 @@ import fs from 'fs';
 import readline from 'readline';
 import type { Readable } from 'stream';
 import stripAnsi from 'strip-ansi';
+import { isTerminal, Runner } from './base_runner';
+import type { RunnerCallbacks } from './base_runner';
 import { pollUntilHttpReady } from './ready_check';
 import type { LogLine, ProcessDefinition, ProcessState, ProcessStatus } from './types';
 
 const DEFAULT_READY_TIMEOUT_MS = 10 * 60 * 1000;
 const DEFAULT_STOP_TIMEOUT_MS = 30 * 1000;
 
-export interface ManagedProcessCallbacks {
-  readonly onChange: (status: ProcessStatus) => void;
-  readonly onLine: (line: LogLine) => void;
-}
-
-interface ReadyWaiter {
-  readonly resolve: () => void;
-  readonly reject: (error: Error) => void;
-}
-
 const GROUP_POLL_MS = 100;
 // How long to wait for the process group to go away after SIGKILL.
 const KILL_GRACE_MS = 5 * 1000;
-
-const isTerminal = (state: ProcessState): boolean =>
-  state === 'stopped' || state === 'exited' || state === 'failed';
 
 const delay = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -63,51 +52,21 @@ const waitForGroupExit = async (pid: number, deadline: number): Promise<boolean>
 };
 
 /** Runs one process: spawns it in its own process group, logs its output to a file and tracks its readiness. */
-export class ManagedProcess {
-  private status: ProcessStatus;
+export class ManagedProcess extends Runner {
   private child?: ChildProcess;
   private closed: Promise<void> = Promise.resolve();
   private readiness?: AbortController;
-  private readyWaiters: ReadyWaiter[] = [];
 
   constructor(
     private readonly definition: ProcessDefinition,
     logFile: string,
-    private readonly callbacks: ManagedProcessCallbacks
+    callbacks: RunnerCallbacks
   ) {
-    this.status = { id: definition.id, state: 'stopped', logFile };
-  }
-
-  public getStatus(): ProcessStatus {
-    return this.status;
+    super(definition.id, logFile, callbacks);
   }
 
   public isRunning(): boolean {
     return this.child !== undefined;
-  }
-
-  /** Resolves once the process is ready; rejects when it ends or fails before that. */
-  public whenReady(): Promise<void> {
-    const { state, error } = this.status;
-    if (state === 'ready') {
-      return Promise.resolve();
-    }
-    if (isTerminal(state)) {
-      return Promise.reject(
-        new Error(`${this.definition.id} is ${state}${error ? `: ${error}` : ''}`)
-      );
-    }
-    return new Promise((resolve, reject) => {
-      this.readyWaiters.push({ resolve, reject });
-    });
-  }
-
-  public markWaiting(): void {
-    this.update({ state: 'waiting', error: undefined });
-  }
-
-  public markFailed(error: string): void {
-    this.update({ state: 'failed', error });
   }
 
   public start(): void {
@@ -267,23 +226,5 @@ export class ManagedProcess {
     } catch {
       // The process group is already gone.
     }
-  }
-
-  private markReady(): void {
-    this.update({ state: 'ready', readyAt: new Date().toISOString() });
-  }
-
-  private update(fields: Partial<ProcessStatus>): void {
-    this.status = { ...this.status, ...fields };
-    const { state } = this.status;
-    if (state === 'ready' || isTerminal(state)) {
-      const waiters = this.readyWaiters;
-      this.readyWaiters = [];
-      const error = new Error(
-        `${this.definition.id} is ${state}${this.status.error ? `: ${this.status.error}` : ''}`
-      );
-      waiters.forEach(({ resolve, reject }) => (state === 'ready' ? resolve() : reject(error)));
-    }
-    this.callbacks.onChange(this.status);
   }
 }
