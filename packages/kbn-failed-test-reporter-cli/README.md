@@ -61,6 +61,22 @@ the window. Thresholds are checked per branch, so a clean branch cannot hide a f
 branch a test qualified on is recorded as `flakiestBranch`. Tests that never passed in the window
 are consistently failing, not flaky, and are not reported.
 
+Breakages don't count as flakiness. A breakage is a run of at least 3 failed builds in a row in one
+pipeline, config and target, a failure that passed on a retry included, with less than a 1% chance
+for a test failing at random as often. A test in a breakage up to its latest build is broken right
+now and is dropped from the report. A test whose breakages are over is checked against the
+thresholds again without their builds: it's dropped if it no longer clears them, and otherwise
+kept, counted and ranked without those builds. Each test dropped this way is logged with the
+breakage that dropped it, or the longest one, and each test kept with how many builds it lost.
+
+Tests that were fixed since are dropped too. On every branch the test qualifies on, its last failure
+was at least 24 hours before the end of the window, and it has passed enough builds since then
+that, failing as often as before, it would have failed at least 1.5 times on average. The failure
+rate leaves out the breakage builds, but a breakage still counts as its last failure, as the test
+may have changed to end it. For a test failing 8% of its builds, that's 19 builds. Only
+the pipelines, configs and targets where the test failed are counted, so a test can only look less
+fixed for it.
+
 Tests that have been skipped since are left out (`--no-omit-skipped-tests` keeps them): on every
 branch the test failed on, its latest run in every pipeline, config and target was a skip. A suite
 left with no test gets no issue (`all-tests-skipped`).
@@ -104,10 +120,11 @@ off.
 - The body text stays as filed. Only the hidden metadata is updated (report count, history, last
   report); the test ids and branches recorded before are kept, so `/skip` still covers a branch
   the suite stopped failing on this week.
-- A comment with the new numbers ("This test suite still appears to be flaky […]") is posted when
-  the suite failed since the last one, or since the issue was filed, and at least
+- A short comment on where the suite is still flaky ("Still flaky on `main`: 4% of builds
+  (18 / 441), last failed […]", one line per branch when there are several) is posted when the
+  suite failed since the last one, or since the issue was filed, and at least
   `--comment-cooldown-days` later (default 3). Failures in between are covered by the next
-  comment. Every comment ends with how to skip the test.
+  comment. How to skip the test is at the end of the body.
 - A closed issue is reopened, with a comment, when the suite failed after it was closed. It stays
   closed when it was closed as a duplicate, or when the suite has not failed since: the report
   window can still hold the failures a fix was merged for.

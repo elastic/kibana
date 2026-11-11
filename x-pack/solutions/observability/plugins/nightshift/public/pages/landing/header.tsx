@@ -111,7 +111,7 @@ export function NightshiftHeader({
             <EuiFlexItem grow={false}>
               <div
                 aria-label={i18n.translate('xpack.nightshift.hero.nightshiftIconAriaLabel', {
-                  defaultMessage: 'Nightshift',
+                  defaultMessage: 'nightshift',
                 })}
                 role="img"
                 css={css`

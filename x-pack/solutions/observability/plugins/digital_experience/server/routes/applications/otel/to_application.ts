@@ -19,6 +19,8 @@ export const toApplication = (logs: LogsBucket, spans?: SpansBucket): Applicatio
   source: APPLICATION_SOURCE.otel,
   environments: environmentsOf(logs, spans),
   pageLoads: { count: logs.pageLoads.doc_count },
+  // Counting the distinct sessions of the raw events would add a cardinality to the heavy search.
+  sessions: null,
   webVitals: toWebVitals(logs),
   jsErrors: {
     count: logs.jsErrors.doc_count,

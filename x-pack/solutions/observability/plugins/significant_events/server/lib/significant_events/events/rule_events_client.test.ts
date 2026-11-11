@@ -151,6 +151,39 @@ describe('RuleEventsClient', () => {
       expect(lastStatusWritten(alertEventsClient)).toMatchObject({ alert_status: 'inactive' });
     });
 
+    it('replaces prior workflow provenance with the workflow that writes the status version', async () => {
+      const existing = createStatusEvent({
+        status: 'active',
+        workflow_execution_id: 'prior-workflow',
+      });
+      const alertEventsClient = makeStatusAlertEventsClient();
+
+      await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+        workflowExecutionId: 'current-workflow',
+      });
+
+      expect(lastStatusWritten(alertEventsClient).data.workflow_execution_id).toBe(
+        'current-workflow'
+      );
+    });
+
+    it('clears prior workflow provenance when a standalone status update writes a version', async () => {
+      const existing = createStatusEvent({
+        status: 'active',
+        workflow_execution_id: 'prior-workflow',
+      });
+      const alertEventsClient = makeStatusAlertEventsClient();
+
+      await createStatusSearchClient(existing, alertEventsClient).updateEventStatus({
+        eventId: existing.event_id,
+        change: DEACTIVATE_STATUS,
+      });
+
+      expect(lastStatusWritten(alertEventsClient).data.workflow_execution_id).toBeUndefined();
+    });
+
     it('records the given note, and falls back to the operator note when it is omitted or blank', async () => {
       const existing = createStatusEvent({ assessment_note: 'Operator dismissed as noise.' });
       const written = async (assessmentNote?: string) => {
@@ -459,7 +492,7 @@ describe('RuleEventsClient', () => {
       );
     });
 
-    it('filters topologyFeatureIds via MV_INTERSECTS against causal_features.feature_id OR blast_radius.feature_id', async () => {
+    it('filters topologyFeatureIds via MV_INTERSECTS against feature ids and dependency endpoints', async () => {
       const { client, query } = createClient(async (request) =>
         request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
       );
@@ -467,12 +500,14 @@ describe('RuleEventsClient', () => {
       await client.findLatestByCurrentStatePaginated({ topologyFeatureIds: ['feat-1'] });
 
       const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
-      expect(q).toContain(
-        'MV_INTERSECTS(FIELD_EXTRACT(data, "causal_features.feature_id"), ["feat-1"])'
-      );
-      expect(q).toContain(
-        'MV_INTERSECTS(FIELD_EXTRACT(data, "blast_radius.feature_id"), ["feat-1"])'
-      );
+      for (const path of [
+        'causal_features.feature_id',
+        'blast_radius.feature_id',
+        'blast_radius.source',
+        'blast_radius.target',
+      ]) {
+        expect(q).toContain(`MV_INTERSECTS(FIELD_EXTRACT(data, "${path}"), ["feat-1"])`);
+      }
     });
 
     it('filters search, time range and status against the latest revision of each series', async () => {
@@ -1273,9 +1308,11 @@ describe('RuleEventsClient', () => {
       ...overrides,
     });
     const makeWriter = () =>
-      ({ createAlertEvent: jest.fn().mockResolvedValue(undefined) } as jest.Mocked<
-        Pick<AlertEventsClientApi, 'createAlertEvent'>
-      >);
+      ({
+        createAlertEvent: jest
+          .fn()
+          .mockResolvedValue({ group_hash: 'hash-1', alert_id: 'alert-1' }),
+      } as jest.Mocked<Pick<AlertEventsClientApi, 'createAlertEvent'>>);
     const clientWith = ({
       head,
       writer,
@@ -1290,13 +1327,14 @@ describe('RuleEventsClient', () => {
         { getAlertEventsClient: async () => writer as AlertEventsClientApi, emitTrigger }
       );
 
-    it('createEvent writes the version without reading the head, and notifies its creation', async () => {
+    it('createEvent writes without reading the head, returns its series identity, and notifies its creation', async () => {
       const writer = makeWriter();
       const emitTrigger = jest.fn();
       const client = clientWith({ writer, emitTrigger });
 
-      await client.createEvent({ event: version() });
+      const result = await client.createEvent({ event: version() });
 
+      expect(result).toEqual({ groupHash: 'hash-1', alertId: 'alert-1' });
       expect(writer.createAlertEvent).toHaveBeenCalledWith(
         expect.objectContaining({ fingerprint: 'agent-event-1' })
       );

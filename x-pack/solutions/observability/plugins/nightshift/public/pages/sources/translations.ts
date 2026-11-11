@@ -119,7 +119,7 @@ export const SOURCES_LOAD_ERROR_TITLE = i18n.translate('xpack.nightshift.sources
 
 export const SOURCES_LOAD_ERROR_BODY = i18n.translate('xpack.nightshift.sources.loadErrorBody', {
   defaultMessage:
-    'The source list did not load. Try again, or check that you can read Nightshift sources in this space.',
+    'The source list did not load. Try again, or check that you can read nightshift sources in this space.',
 });
 
 export const RETRY_LABEL = i18n.translate('xpack.nightshift.sources.retryLabel', {
@@ -128,7 +128,7 @@ export const RETRY_LABEL = i18n.translate('xpack.nightshift.sources.retryLabel',
 
 export const EMPTY_STATE_BODY = i18n.translate('xpack.nightshift.sources.emptyStateBody', {
   defaultMessage:
-    'A source is an ES|QL query that describes the data Nightshift should learn about and watch.',
+    'A source is an ES|QL query that describes the data nightshift should learn about and watch.',
 });
 
 export const getSourcesCountLabel = (count: number) =>
