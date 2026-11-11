@@ -77,6 +77,9 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     getCaseIdsByAttachmentSearch: jest.fn(),
     searchCases: jest.fn(),
     searchCasesPage: jest.fn().mockResolvedValue({ cases: [], total: 0 }),
+    countCasesByObservableKeys: jest
+      .fn()
+      .mockImplementation(async ({ keys }: { keys: unknown[] }) => keys.map(() => 0)),
   });
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
@@ -306,10 +309,13 @@ export const createObservableServiceMock = (): ObservableServiceMock => {
     countForCase: jest.fn().mockResolvedValue(0),
     findExisting: jest.fn().mockResolvedValue([]),
     findPage: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-    getAllForCase: jest.fn().mockResolvedValue([]),
+    getKeysForCase: jest.fn().mockResolvedValue([]),
+    countCasesByKeys: jest
+      .fn()
+      .mockImplementation(async ({ keys }: { keys: unknown[] }) => keys.map(() => 0)),
     getPreviews: jest.fn().mockResolvedValue(new Map()),
     findCaseIdsByValuePrefix: jest.fn().mockResolvedValue([]),
-    findSimilarCandidates: jest.fn().mockResolvedValue([]),
+    findSimilarCandidates: jest.fn().mockResolvedValue({ candidates: [], capped: false }),
     getSharedForCases: jest.fn().mockResolvedValue(new Map()),
   });
 

@@ -429,6 +429,21 @@ export const MAX_OBSERVABLES_PER_CASE = 50;
 export const MAX_STORED_OBSERVABLES_PER_CASE = 10_000;
 /** Most observables one bulk create request accepts. */
 export const MAX_BULK_CREATE_OBSERVABLES = 1_000;
+/**
+ * Most cases a search for the cases holding a set of observables keeps from `cases-observables`:
+ * those sharing the most observables, then those with the newest match. Past it, the total is a
+ * lower bound.
+ */
+export const MAX_CASES_BY_OBSERVABLES_CANDIDATES = 10_000;
+/** Most observables one search counts holding cases for. */
+export const MAX_OBSERVABLES_PER_CASES_COUNT = 1_000;
+/**
+ * Similar cases skips a source observable that more cases than this hold, such as a public DNS
+ * server: it makes nearly every case a candidate and carries no signal.
+ */
+export const MAX_SIMILAR_OBSERVABLE_CASES = 1_000;
+/** Most source observables similar cases matches on, the ones the fewest cases hold first. */
+export const MAX_SIMILAR_SOURCE_OBSERVABLES = 1_000;
 /** Largest page the observables list route returns. */
 export const MAX_OBSERVABLES_PER_PAGE = 100;
 /** Default page size of the observables list route. */

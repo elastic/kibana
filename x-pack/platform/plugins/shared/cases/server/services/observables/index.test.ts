@@ -8,7 +8,13 @@
 import type { ISavedObjectsSerializer, SavedObjectsRawDoc } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { CASE_OBSERVABLE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
-import { ObservableService, groupValuesByTypeKey } from '.';
+import {
+  ObservableService,
+  caseFieldKeysQuery,
+  groupValuesByTypeKey,
+  keyCountAggs,
+  readKeyCounts,
+} from '.';
 
 const rawHit = ({
   id,
@@ -398,6 +404,7 @@ describe('ObservableService', () => {
                     { key: 'case-2', doc_count: 3 },
                     { key: 'case-3', doc_count: 1 },
                   ],
+                  sum_other_doc_count: 0,
                 },
               },
             },
@@ -417,10 +424,234 @@ describe('ObservableService', () => {
       expect(JSON.stringify(request.query)).toContain(
         JSON.stringify({ terms: { 'cases-observables.owner': ['securitySolution'] } })
       );
-      expect(candidates).toEqual([
-        { caseId: 'case-2', sharedCount: 3 },
-        { caseId: 'case-3', sharedCount: 1 },
-      ]);
+      expect(candidates).toEqual({
+        candidates: [
+          { caseId: 'case-2', sharedCount: 3 },
+          { caseId: 'case-3', sharedCount: 1 },
+        ],
+        capped: false,
+      });
+    });
+
+    it('keeps the cases sharing the most, then those with the newest match, rather than the lowest ids', async () => {
+      unsecuredSavedObjectsClient.search.mockResolvedValue(
+        searchResponse({ aggregations: { refs: { cases: { caseIds: { buckets: [] } } } } })
+      );
+
+      await service.findSimilarCandidates({
+        keys: [{ typeKey: 'observable-type-ipv4', value: '10.0.0.8' }],
+        owners: ['securitySolution'],
+        size: 10_000,
+      });
+
+      const [[request]] = unsecuredSavedObjectsClient.search.mock.calls;
+      const aggs = JSON.stringify(request.aggs);
+      expect(aggs).toContain('"order":[{"_count":"desc"},{"reverse>newest":"desc"}]');
+      expect(aggs).toContain(
+        JSON.stringify({
+          reverse: {
+            reverse_nested: {},
+            aggregations: { newest: { max: { field: 'cases-observables.created_at' } } },
+          },
+        })
+      );
+    });
+
+    it('says when more cases hold the keys than it kept', async () => {
+      unsecuredSavedObjectsClient.search.mockResolvedValue(
+        searchResponse({
+          aggregations: {
+            refs: {
+              cases: {
+                caseIds: { buckets: [{ key: 'case-2', doc_count: 1 }], sum_other_doc_count: 4 },
+              },
+            },
+          },
+        })
+      );
+
+      const { capped } = await service.findSimilarCandidates({
+        keys: [{ typeKey: 'observable-type-ipv4', value: '10.0.0.8' }],
+        owners: ['securitySolution'],
+        size: 1,
+      });
+
+      expect(capped).toBe(true);
+    });
+
+    it('does not search without keys', async () => {
+      expect(
+        await service.findSimilarCandidates({ keys: [], owners: ['securitySolution'], size: 10 })
+      ).toEqual({ candidates: [], capped: false });
+      expect(unsecuredSavedObjectsClient.search).not.toHaveBeenCalled();
+    });
+
+    it('keeps every case when none is excluded', async () => {
+      unsecuredSavedObjectsClient.search.mockResolvedValue(
+        searchResponse({ aggregations: { refs: { cases: { caseIds: { buckets: [] } } } } })
+      );
+
+      await service.findSimilarCandidates({
+        keys: [{ typeKey: 'observable-type-ipv4', value: '10.0.0.8' }],
+        owners: ['securitySolution'],
+        size: 10_000,
+      });
+
+      const [[request]] = unsecuredSavedObjectsClient.search.mock.calls;
+      expect(JSON.stringify(request.query)).not.toContain('"must_not"');
+      expect(JSON.stringify(request.aggs)).toContain('"size":10000');
+    });
+  });
+  describe('countCasesByKeys', () => {
+    const keys = [
+      { typeKey: 'observable-type-ipv4', value: '10.0.0.8' },
+      { typeKey: 'observable-type-hostname', value: 'host-1' },
+    ];
+
+    it('counts the objects holding each key in one search, in key order', async () => {
+      unsecuredSavedObjectsClient.search.mockResolvedValue(
+        searchResponse({
+          aggregations: {
+            type0: { values: { buckets: [{ key: '10.0.0.8', doc_count: 7 }] } },
+            type1: { values: { buckets: [] } },
+          },
+        })
+      );
+
+      const counts = await service.countCasesByKeys({
+        keys,
+        owners: ['securitySolution'],
+        excludeCaseId: 'case-1',
+      });
+
+      expect(counts).toEqual([7, 0]);
+      expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledTimes(1);
+      const [[request]] = unsecuredSavedObjectsClient.search.mock.calls;
+      expect(request.size).toBe(0);
+      expect(request.aggs).toEqual(
+        keyCountAggs(keys, {
+          typeKey: 'cases-observables.type_key',
+          value: 'cases-observables.value',
+        })
+      );
+      expect(JSON.stringify(request.query)).toContain('"must_not"');
+      expect(JSON.stringify(request.query)).toContain(
+        JSON.stringify({ terms: { 'cases-observables.owner': ['securitySolution'] } })
+      );
+    });
+
+    it('counts 1,000 keys per search', async () => {
+      unsecuredSavedObjectsClient.search.mockResolvedValue(searchResponse({ aggregations: {} }));
+
+      const counts = await service.countCasesByKeys({
+        keys: Array.from({ length: 1_500 }, (_, index) => ({
+          typeKey: 'observable-type-ipv4',
+          value: `10.0.${Math.floor(index / 256)}.${index % 256}`,
+        })),
+        owners: ['securitySolution'],
+      });
+
+      expect(counts).toHaveLength(1_500);
+      expect(unsecuredSavedObjectsClient.search).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('getKeysForCase', () => {
+    it('reads only the type key and value of every object of the case', async () => {
+      unsecuredSavedObjectsClient.search.mockResolvedValue(
+        searchResponse({
+          hits: [
+            {
+              ...rawHit({ id: 'obs-1' }),
+              _source: {
+                'cases-observables': { type_key: 'observable-type-ipv4', value: '10.0.0.8' },
+              },
+            } as unknown as ReturnType<typeof rawHit>,
+          ],
+        })
+      );
+
+      const keys = await service.getKeysForCase('case-1');
+
+      expect(keys).toEqual([{ typeKey: 'observable-type-ipv4', value: '10.0.0.8' }]);
+      const [[request]] = unsecuredSavedObjectsClient.search.mock.calls;
+      expect(request._source).toEqual(['cases-observables.type_key', 'cases-observables.value']);
+      expect(savedObjectsSerializer.rawToSavedObject).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('key count helpers', () => {
+    it('counts the values of each type key with one terms aggregation, read back in key order', () => {
+      const keys = [
+        { typeKey: 'a', value: '1' },
+        { typeKey: 'b', value: '1' },
+        { typeKey: 'a', value: '2' },
+      ];
+      const aggs = keyCountAggs(
+        keys,
+        { typeKey: 'f.typeKey', value: 'f.value' },
+        { cases: { reverse_nested: {} } }
+      );
+
+      expect(aggs).toEqual({
+        type0: {
+          filter: { term: { 'f.typeKey': 'a' } },
+          aggs: {
+            values: {
+              terms: { field: 'f.value', include: ['1', '2'], size: 2 },
+              aggs: { cases: { reverse_nested: {} } },
+            },
+          },
+        },
+        type1: {
+          filter: { term: { 'f.typeKey': 'b' } },
+          aggs: {
+            values: {
+              terms: { field: 'f.value', include: ['1'], size: 1 },
+              aggs: { cases: { reverse_nested: {} } },
+            },
+          },
+        },
+      });
+      // The same value under two type keys is counted apart.
+      expect(
+        readKeyCounts(
+          keys,
+          {
+            type0: { values: { buckets: [{ key: '2', doc_count: 4 }] } },
+            type1: { values: { buckets: [{ key: '1', doc_count: 9 }] } },
+          },
+          ({ doc_count: docCount }) => docCount
+        )
+      ).toEqual([0, 9, 4]);
+    });
+
+    it('matches the case field by one clause per type key inside one nested query', () => {
+      expect(
+        caseFieldKeysQuery([
+          { typeKey: 'a', value: '1' },
+          { typeKey: 'a', value: '2' },
+        ])
+      ).toEqual({
+        nested: {
+          path: 'cases.observables',
+          query: {
+            bool: {
+              should: [
+                {
+                  bool: {
+                    filter: [
+                      { term: { 'cases.observables.typeKey': 'a' } },
+                      { terms: { 'cases.observables.value': ['1', '2'] } },
+                    ],
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        },
+      });
     });
   });
 });

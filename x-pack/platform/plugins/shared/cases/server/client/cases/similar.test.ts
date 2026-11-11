@@ -9,7 +9,12 @@ import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { similar } from './similar';
 import { mockCase } from '../../../public/containers/mock';
-import { OBSERVABLE_TYPE_IPV4, OBSERVABLE_TYPE_HOSTNAME } from '../../../common/constants';
+import {
+  MAX_CASES_BY_OBSERVABLES_CANDIDATES,
+  MAX_SIMILAR_OBSERVABLE_CASES,
+  OBSERVABLE_TYPE_IPV4,
+  OBSERVABLE_TYPE_HOSTNAME,
+} from '../../../common/constants';
 import { flattenCaseSavedObject } from '../../common/utils';
 import Boom from '@hapi/boom';
 
@@ -43,8 +48,18 @@ describe('similar', () => {
       cases: [],
       total: 0,
     });
-    mockClientArgs.services.observableService.getAllForCase.mockResolvedValue([]);
-    mockClientArgs.services.observableService.findSimilarCandidates.mockResolvedValue([]);
+    mockClientArgs.services.observableService.getKeysForCase.mockResolvedValue([]);
+    mockClientArgs.services.observableService.findSimilarCandidates.mockResolvedValue({
+      candidates: [],
+      capped: false,
+    });
+    // Every source observable is held by one other case, in the field, unless a test says otherwise.
+    mockClientArgs.services.caseService.countCasesByObservableKeys.mockImplementation(
+      async ({ keys }) => keys.map(() => 1)
+    );
+    mockClientArgs.services.observableService.countCasesByKeys.mockImplementation(
+      async ({ keys }) => keys.map(() => 0)
+    );
     mockClientArgs.services.observableService.getSharedForCases.mockResolvedValue(new Map());
 
     mockClientArgs.services.caseConfigureService.find.mockResolvedValue({
@@ -70,17 +85,26 @@ describe('similar', () => {
 
     const { query, namespaces } = searchQuery();
     expect(namespaces).toEqual(['default']);
-    expect(query?.bool?.must_not).toEqual([{ term: { _id: `cases:${mockCase.id}` } }]);
+    expect(JSON.stringify(query?.bool?.filter)).toContain(
+      `"must_not":[{"term":{"_id":"cases:${mockCase.id}"}}]`
+    );
     expect(query?.bool?.should).toEqual([
       {
         nested: {
           path: 'cases.observables',
           query: {
             bool: {
-              filter: [
-                { term: { 'cases.observables.typeKey': OBSERVABLE_TYPE_IPV4.key } },
-                { terms: { 'cases.observables.value': ['127.0.0.1'] } },
+              should: [
+                {
+                  bool: {
+                    filter: [
+                      { term: { 'cases.observables.typeKey': OBSERVABLE_TYPE_IPV4.key } },
+                      { terms: { 'cases.observables.value': ['127.0.0.1'] } },
+                    ],
+                  },
+                },
               ],
+              minimum_should_match: 1,
             },
           },
         },
@@ -93,19 +117,13 @@ describe('similar', () => {
   });
 
   it('matches on the source case observables in both stores and on candidates from the type', async () => {
-    mockClientArgs.services.observableService.getAllForCase.mockResolvedValue([
-      {
-        id: 'type-obs',
-        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
-        value: 'host-1',
-        description: null,
-        createdAt: '2026-11-06T00:00:00.000Z',
-        updatedAt: null,
-      },
+    mockClientArgs.services.observableService.getKeysForCase.mockResolvedValue([
+      { typeKey: OBSERVABLE_TYPE_HOSTNAME.key, value: 'host-1' },
     ]);
-    mockClientArgs.services.observableService.findSimilarCandidates.mockResolvedValue([
-      { caseId: 'candidate-1', sharedCount: 2 },
-    ]);
+    mockClientArgs.services.observableService.findSimilarCandidates.mockResolvedValue({
+      candidates: [{ caseId: 'candidate-1', sharedCount: 2 }],
+      capped: false,
+    });
 
     await similar(mockCase.id, { page: 1, perPage: 10 }, mockClientArgs, mockCasesClient);
 
@@ -116,10 +134,10 @@ describe('similar', () => {
         { typeKey: OBSERVABLE_TYPE_HOSTNAME.key, value: 'host-1' },
       ],
       owners: [mockCases[0].attributes.owner],
-      size: 1000,
+      size: MAX_CASES_BY_OBSERVABLES_CANDIDATES,
     });
     const { query } = searchQuery();
-    expect(query?.bool?.should).toHaveLength(3);
+    expect(query?.bool?.should).toHaveLength(2);
     expect(query?.bool?.should).toContainEqual({ terms: { _id: ['cases:candidate-1'] } });
   });
 
@@ -141,15 +159,8 @@ describe('similar', () => {
       cases: [similarCase],
       total: 1,
     });
-    mockClientArgs.services.observableService.getAllForCase.mockResolvedValue([
-      {
-        id: 'type-obs',
-        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
-        value: 'host-1',
-        description: null,
-        createdAt: '2026-11-06T00:00:00.000Z',
-        updatedAt: null,
-      },
+    mockClientArgs.services.observableService.getKeysForCase.mockResolvedValue([
+      { typeKey: OBSERVABLE_TYPE_HOSTNAME.key, value: 'host-1' },
     ]);
     mockClientArgs.services.observableService.getSharedForCases.mockResolvedValue(
       new Map([
@@ -195,6 +206,126 @@ describe('similar', () => {
       ],
       total_observables: 2,
     });
+  });
+
+  describe('choosing the source observables to match', () => {
+    const hosts = (count: number) =>
+      Array.from({ length: count }, (_, index) => ({
+        typeKey: OBSERVABLE_TYPE_HOSTNAME.key,
+        value: `host-${index}`,
+      }));
+
+    it('counts the source observables in both stores, leaving out the source case', async () => {
+      await similar(mockCase.id, { page: 1, perPage: 10 }, mockClientArgs, mockCasesClient);
+
+      expect(mockClientArgs.services.observableService.countCasesByKeys).toHaveBeenCalledWith({
+        keys: [{ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '127.0.0.1' }],
+        owners: [mockCases[0].attributes.owner],
+        excludeCaseId: mockCase.id,
+      });
+      expect(mockClientArgs.services.caseService.countCasesByObservableKeys).toHaveBeenCalledTimes(
+        1
+      );
+      expect(mockClientArgs.authorization.getAuthorizationFilter).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips common observables and those no other case holds, and matches the rarest first', async () => {
+      mockClientArgs.services.observableService.getKeysForCase.mockResolvedValue(hosts(3));
+      // 127.0.0.1 (field), host-0, host-1, host-2
+      mockClientArgs.services.caseService.countCasesByObservableKeys.mockResolvedValue([
+        MAX_SIMILAR_OBSERVABLE_CASES + 1,
+        0,
+        5,
+        2,
+      ]);
+
+      const res = await similar(
+        mockCase.id,
+        { page: 1, perPage: 10 },
+        mockClientArgs,
+        mockCasesClient
+      );
+
+      expect(mockClientArgs.services.observableService.findSimilarCandidates).toHaveBeenCalledWith(
+        expect.objectContaining({
+          keys: [
+            { typeKey: OBSERVABLE_TYPE_HOSTNAME.key, value: 'host-2' },
+            { typeKey: OBSERVABLE_TYPE_HOSTNAME.key, value: 'host-1' },
+          ],
+        })
+      );
+      expect(res.skipped_common_observables).toBe(1);
+      // Shared observables are still read for every source observable.
+      expect(mockClientArgs.services.observableService.getSharedForCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          keys: expect.arrayContaining([{ typeKey: OBSERVABLE_TYPE_IPV4.key, value: '127.0.0.1' }]),
+        })
+      );
+    });
+
+    it('adds the counts of both stores before comparing them with the limit', async () => {
+      mockClientArgs.services.caseService.countCasesByObservableKeys.mockResolvedValue([
+        MAX_SIMILAR_OBSERVABLE_CASES,
+      ]);
+      mockClientArgs.services.observableService.countCasesByKeys.mockResolvedValue([1]);
+
+      const res = await similar(
+        mockCase.id,
+        { page: 1, perPage: 10 },
+        mockClientArgs,
+        mockCasesClient
+      );
+
+      expect(res.skipped_common_observables).toBe(1);
+      expect(mockClientArgs.services.caseService.searchCasesPage).not.toHaveBeenCalled();
+    });
+
+    it('returns no cases without searching when every source observable is common', async () => {
+      mockClientArgs.services.caseService.countCasesByObservableKeys.mockResolvedValue([
+        MAX_SIMILAR_OBSERVABLE_CASES + 1,
+      ]);
+
+      const res = await similar(
+        mockCase.id,
+        { page: 1, perPage: 10 },
+        mockClientArgs,
+        mockCasesClient
+      );
+
+      expect(res).toEqual({
+        cases: [],
+        page: 1,
+        per_page: 10,
+        total: 0,
+        total_relation: 'eq',
+        skipped_common_observables: 1,
+      });
+      expect(
+        mockClientArgs.services.observableService.findSimilarCandidates
+      ).not.toHaveBeenCalled();
+      expect(mockClientArgs.services.caseService.searchCasesPage).not.toHaveBeenCalled();
+    });
+  });
+
+  it('says the total is a minimum when the type side reached the cap', async () => {
+    mockClientArgs.services.observableService.findSimilarCandidates.mockResolvedValue({
+      candidates: [{ caseId: 'candidate-1', sharedCount: 1 }],
+      capped: true,
+    });
+    mockClientArgs.services.caseService.searchCasesPage.mockResolvedValue({
+      cases: [],
+      total: 10_000,
+    });
+
+    const res = await similar(
+      mockCase.id,
+      { page: 1, perPage: 0 },
+      mockClientArgs,
+      mockCasesClient
+    );
+
+    expect(res.total).toBe(10_000);
+    expect(res.total_relation).toBe('gte');
   });
 
   it('keeps a value that contains a comma whole', async () => {

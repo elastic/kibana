@@ -21,6 +21,7 @@ import {
   CASE_OBSERVABLE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_BULK_CREATE_OBSERVABLES,
+  MAX_OBSERVABLES_PER_CASES_COUNT,
 } from '../../../common/constants';
 import type { Observable } from '../../../common/types/domain';
 import { CASE_REF_NAME } from '../../common/constants';
@@ -92,7 +93,25 @@ interface CaseIdBucket {
 }
 
 interface CaseIdsAggs {
-  refs: { cases: { caseIds: { buckets: CaseIdBucket[] } } };
+  refs: { cases: { caseIds: { buckets: CaseIdBucket[]; sum_other_doc_count?: number } } };
+}
+
+export interface CandidateCase {
+  caseId: string;
+  /** How many of the searched keys the case holds as objects of the type. */
+  sharedCount: number;
+}
+
+export interface CandidateCases {
+  candidates: CandidateCase[];
+  /** More cases hold the keys than the search kept. */
+  capped: boolean;
+}
+
+/** The names of the fields a key's type key and value are stored in. */
+export interface ObservableKeyFields {
+  typeKey: string;
+  value: string;
 }
 
 interface CaseHitsBucket extends CaseIdBucket {
@@ -157,6 +176,10 @@ export const toObservable = ({
   updatedAt: attributes.updated_at ?? null,
 });
 
+/** Repeat key of an observable. JSON keeps type keys that contain a dash from colliding. */
+export const observableKey = ({ typeKey, value }: ObservableKey): string =>
+  JSON.stringify([typeKey, value]);
+
 /** Groups observable values by type key, dropping repeats. */
 export const groupValuesByTypeKey = (keys: ObservableKey[]): Map<string, string[]> => {
   const byType = new Map<string, Set<string>>();
@@ -185,21 +208,100 @@ export const caseReferenceQuery = (caseIds: string[]): estypes.QueryDslQueryCont
 
 /**
  * One clause per type key holding its values as a set, so the clause count follows the number of
- * types, not the number of observables, and stays far below Elasticsearch's clause limit.
+ * types, not the number of observables, and stays far below Elasticsearch's clause limit. `field`
+ * names the raw fields of the type the query runs on.
  */
-export const keysQuery = (keys: ObservableKey[]): estypes.QueryDslQueryContainer => ({
+export const keysQuery = (
+  keys: ObservableKey[],
+  field: (name: string) => string = observableField
+): estypes.QueryDslQueryContainer => ({
   bool: {
     should: [...groupValuesByTypeKey(keys)].map(([typeKey, values]) => ({
       bool: {
         filter: [
-          { term: { [observableField('type_key')]: typeKey } },
-          { terms: { [observableField('value')]: values } },
+          { term: { [field('type_key')]: typeKey } },
+          { terms: { [field('value')]: values } },
         ],
       },
     })),
     minimum_should_match: 1,
   },
 });
+
+/** The nested `observables` field of a case and its key fields, as Elasticsearch sees them. */
+export const CASE_FIELD_OBSERVABLES = `${CASE_SAVED_OBJECT}.observables`;
+export const CASE_FIELD_KEY_FIELDS: Readonly<ObservableKeyFields> = {
+  typeKey: `${CASE_FIELD_OBSERVABLES}.typeKey`,
+  value: `${CASE_FIELD_OBSERVABLES}.value`,
+};
+
+/** Matches the cases whose `observables` field holds any of the keys, one clause per type key. */
+export const caseFieldKeysQuery = (keys: ObservableKey[]): estypes.QueryDslQueryContainer => ({
+  nested: {
+    path: CASE_FIELD_OBSERVABLES,
+    query: keysQuery(keys, (name) =>
+      name === 'type_key' ? CASE_FIELD_KEY_FIELDS.typeKey : CASE_FIELD_KEY_FIELDS.value
+    ),
+  },
+});
+
+export interface KeyCountBucket {
+  key: string;
+  doc_count: number;
+  cases?: { doc_count: number };
+}
+
+/** The aggregations `keyCountAggs` builds, as Elasticsearch returns them. */
+export type KeyCountAggs = Partial<Record<string, { values?: { buckets: KeyCountBucket[] } }>>;
+
+/**
+ * Counts every key in one search: a `filter` per type key holding a `terms` aggregation over that
+ * type's values only (`include`). Each document costs one lookup however many keys the search
+ * counts, where a `filters` bucket per key would test every key against every document. `subAggs`
+ * runs under each value, such as a `reverse_nested` that counts the cases.
+ */
+export const keyCountAggs = (
+  keys: ObservableKey[],
+  fields: ObservableKeyFields,
+  subAggs?: Record<string, estypes.AggregationsAggregationContainer>
+): Record<string, estypes.AggregationsAggregationContainer> =>
+  Object.fromEntries(
+    [...groupValuesByTypeKey(keys)].map(([typeKey, values], index) => [
+      `type${index}`,
+      {
+        filter: { term: { [fields.typeKey]: typeKey } },
+        aggs: {
+          values: {
+            terms: { field: fields.value, include: values, size: values.length },
+            ...(subAggs != null && { aggs: subAggs }),
+          },
+        },
+      },
+    ])
+  );
+
+/** Reads each key's count, in key order, from the aggregations `keyCountAggs` built. */
+export const readKeyCounts = (
+  keys: ObservableKey[],
+  aggs: KeyCountAggs | undefined,
+  count: (bucket: KeyCountBucket) => number
+): number[] => {
+  const counts = new Map<string, number>();
+  [...groupValuesByTypeKey(keys)].forEach(([typeKey], index) => {
+    for (const bucket of aggs?.[`type${index}`]?.values?.buckets ?? []) {
+      counts.set(observableKey({ typeKey, value: bucket.key }), count(bucket));
+    }
+  });
+  return keys.map((key) => counts.get(observableKey(key)) ?? 0);
+};
+
+export const chunk = <T>(items: T[], size: number): T[][] => {
+  const chunks: T[][] = [];
+  for (let start = 0; start < items.length; start += size) {
+    chunks.push(items.slice(start, start + size));
+  }
+  return chunks;
+};
 
 const ownersQuery = (owners?: string[]): estypes.QueryDslQueryContainer[] =>
   owners != null && owners.length > 0 ? [{ terms: { [observableField('owner')]: owners } }] : [];
@@ -238,13 +340,8 @@ const reverseHitsAggs = (
 const getTotal = (total: estypes.SearchTotalHits | number | undefined): number =>
   typeof total === 'number' ? total : total?.value ?? 0;
 
-const chunk = <T>(items: T[], size: number): T[][] => {
-  const chunks: T[][] = [];
-  for (let start = 0; start < items.length; start += size) {
-    chunks.push(items.slice(start, start + size));
-  }
-  return chunks;
-};
+const notCaseQuery = (caseId?: string): Pick<estypes.QueryDslBoolQuery, 'must_not'> =>
+  caseId != null ? { must_not: [caseReferenceQuery([caseId])] } : {};
 
 /**
  * Reads and writes `cases-observables` objects. Every search runs in the request's space; callers
@@ -506,24 +603,75 @@ export class ObservableService {
     };
   }
 
-  /** Every observable of a case, oldest first. A case holds at most about 10,000. */
-  public async getAllForCase(caseId: string): Promise<Observable[]> {
-    const observables: Observable[] = [];
+  /**
+   * The type key and value of every observable of a case, oldest first, reading only those two
+   * fields. A case holds at most about 10,000.
+   */
+  public async getKeysForCase(caseId: string): Promise<ObservableKey[]> {
+    const keys: ObservableKey[] = [];
     let searchAfter: estypes.SortResults | undefined;
 
     do {
       const response = await this.search({
         size: SCAN_PAGE_SIZE,
         sort: OLDEST_FIRST,
+        // Without `type` in `_source`, the hits are not read back as saved objects, so the partial
+        // source passes through as stored.
+        _source: [observableField('type_key'), observableField('value')],
         ...(searchAfter != null && { search_after: searchAfter }),
         query: { bool: { filter: [caseReferenceQuery([caseId])] } },
       });
       const { hits } = response.hits;
-      observables.push(...hits.map((hit) => this.toObservableFromRaw(hit)));
+      for (const { _source: source } of hits) {
+        const attributes = source?.[CASE_OBSERVABLE_SAVED_OBJECT] as
+          | Partial<ObservablePersistedAttributes>
+          | undefined;
+        if (attributes?.type_key != null && attributes.value != null) {
+          keys.push({ typeKey: attributes.type_key, value: attributes.value });
+        }
+      }
       searchAfter = hits.length === SCAN_PAGE_SIZE ? hits[hits.length - 1].sort : undefined;
     } while (searchAfter != null);
 
-    return observables;
+    return keys;
+  }
+
+  /**
+   * For each key, how many cases other than the excluded case hold it as an object of the type, in
+   * key order. A case holds a key once (the repeat check on add, the daily dedupe), so a key's
+   * object count is its case count.
+   */
+  public async countCasesByKeys({
+    keys,
+    owners,
+    excludeCaseId,
+  }: {
+    keys: ObservableKey[];
+    owners?: string[];
+    excludeCaseId?: string;
+  }): Promise<number[]> {
+    const counts: number[] = [];
+
+    for (const keysChunk of chunk(keys, MAX_OBSERVABLES_PER_CASES_COUNT)) {
+      const response = await this.search<KeyCountAggs>({
+        size: 0,
+        query: {
+          bool: {
+            filter: [keysQuery(keysChunk), ...ownersQuery(owners)],
+            ...notCaseQuery(excludeCaseId),
+          },
+        },
+        aggs: keyCountAggs(keysChunk, {
+          typeKey: observableField('type_key'),
+          value: observableField('value'),
+        }),
+      });
+      counts.push(
+        ...readKeyCounts(keysChunk, response.aggregations, ({ doc_count: docCount }) => docCount)
+      );
+    }
+
+    return counts;
   }
 
   /**
@@ -582,8 +730,9 @@ export class ObservableService {
   }
 
   /**
-   * Cases, other than the source case, that hold any of the keys, with how many of them each
-   * holds, most first.
+   * Cases, other than the excluded case, that hold any of the keys, with how many of them each
+   * holds. Keeps up to `size`: the cases holding the most keys, then those whose newest match is
+   * newest, so that with one key the cut keeps the most recent cases rather than the lowest ids.
    */
   public async findSimilarCandidates({
     excludeCaseId,
@@ -591,13 +740,13 @@ export class ObservableService {
     owners,
     size,
   }: {
-    excludeCaseId: string;
+    excludeCaseId?: string;
     keys: ObservableKey[];
     owners?: string[];
     size: number;
-  }): Promise<Array<{ caseId: string; sharedCount: number }>> {
+  }): Promise<CandidateCases> {
     if (keys.length === 0) {
-      return [];
+      return { candidates: [], capped: false };
     }
 
     const response = await this.search<CaseIdsAggs>({
@@ -605,15 +754,29 @@ export class ObservableService {
       query: {
         bool: {
           filter: [keysQuery(keys), ...ownersQuery(owners)],
-          must_not: [caseReferenceQuery([excludeCaseId])],
+          ...notCaseQuery(excludeCaseId),
         },
       },
-      aggs: caseIdsAggs({ size }),
+      aggs: caseIdsAggs(
+        { size, order: [{ _count: 'desc' }, { 'reverse>newest': 'desc' }] },
+        {
+          reverse: {
+            reverse_nested: {},
+            aggregations: { newest: { max: { field: observableField('created_at') } } },
+          },
+        }
+      ),
     });
 
-    return (response.aggregations?.refs.cases.caseIds.buckets ?? []).map(
-      ({ key, doc_count: sharedCount }) => ({ caseId: key, sharedCount })
-    );
+    const caseIds = response.aggregations?.refs.cases.caseIds;
+
+    return {
+      candidates: (caseIds?.buckets ?? []).map(({ key, doc_count: sharedCount }) => ({
+        caseId: key,
+        sharedCount,
+      })),
+      capped: (caseIds?.sum_other_doc_count ?? 0) > 0,
+    };
   }
 
   /** For each case, how many of its objects match the keys, and the oldest of them. */

@@ -6,16 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import type { estypes } from '@elastic/elasticsearch';
-import { toElasticsearchQuery } from '@kbn/es-query';
-import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
-import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { ObservableType } from '../../../common/types/domain/observable/v1';
 import type { Case, Observable } from '../../../common/types/domain';
 import {
-  CASE_SAVED_OBJECT,
   MAX_OBSERVABLES_PER_CASE,
-  OWNER_FIELD,
+  MAX_SIMILAR_OBSERVABLE_CASES,
+  MAX_SIMILAR_SOURCE_OBSERVABLES,
 } from '../../../common/constants';
 import type { CasesSimilarResponse, SimilarCasesSearchRequest } from '../../../common/types/api';
 import {
@@ -26,18 +22,17 @@ import { decodeWithExcessOrThrowZod, decodeOrThrowZod } from '../../common/runti
 
 import { createCaseError } from '../../common/error';
 import type { CasesClient, CasesClientArgs } from '..';
-import { convertSortField, buildFilter, removeAttributesFromFilter } from '../utils';
-import { Operations } from '../../authorization';
-import { combineFilterWithAuthorizationFilter } from '../../authorization/utils';
+import { convertSortField } from '../utils';
 import { getAvailableObservableTypesMap } from '../observable_types';
 import { withObservablesPreview } from '../../common/observables_preview';
 import type { ObservableKey } from '../../services/observables';
-import { groupValuesByTypeKey } from '../../services/observables';
+import { Operations } from '../../authorization';
 import { observableKey } from './observables';
+import {
+  countCasesByObservableKeys,
+  searchCasesByObservableKeys,
+} from './search_cases_by_observables';
 import { DEFAULT_PER_PAGE } from '../../routes/api';
-
-/** Most candidate cases the `cases-observables` side of a similar search keeps, most shared first. */
-export const MAX_SIMILAR_CANDIDATE_CASES = 1_000;
 
 interface Similarity {
   typeKey: string;
@@ -53,22 +48,6 @@ const uniqueKeys = (observables: ObservableKey[]): ObservableKey[] => {
   return [...seen.values()];
 };
 
-/** One nested clause per type key with its values as a set, over other cases' fields. */
-const fieldMatchClauses = (keys: ObservableKey[]): estypes.QueryDslQueryContainer[] =>
-  [...groupValuesByTypeKey(keys)].map(([typeKey, values]) => ({
-    nested: {
-      path: `${CASE_SAVED_OBJECT}.observables`,
-      query: {
-        bool: {
-          filter: [
-            { term: { [`${CASE_SAVED_OBJECT}.observables.typeKey`]: typeKey } },
-            { terms: { [`${CASE_SAVED_OBJECT}.observables.value`]: values } },
-          ],
-        },
-      },
-    },
-  }));
-
 const toSimilarities = (
   observables: Array<Pick<Observable, 'typeKey' | 'value'>>,
   availableObservableTypes: Map<string, ObservableType>
@@ -82,13 +61,37 @@ const toSimilarities = (
     }));
 
 /**
+ * Picks the source observables similar cases matches on, from how many other cases hold each. It
+ * drops those no other case holds (they match nothing) and those more than
+ * `MAX_SIMILAR_OBSERVABLE_CASES` cases hold (common values that carry no signal), then keeps the
+ * ones the fewest cases hold, up to `MAX_SIMILAR_SOURCE_OBSERVABLES`.
+ */
+export const selectSimilarKeys = (
+  keys: ObservableKey[],
+  counts: number[]
+): { matchKeys: ObservableKey[]; skippedCommon: number } => {
+  const held = keys
+    .map((key, index) => ({ key, count: counts[index] ?? 0 }))
+    .filter(({ count }) => count > 0);
+  const rare = held.filter(({ count }) => count <= MAX_SIMILAR_OBSERVABLE_CASES);
+
+  return {
+    matchKeys: rare
+      .sort((a, b) => a.count - b.count)
+      .slice(0, MAX_SIMILAR_SOURCE_OBSERVABLES)
+      .map(({ key }) => key),
+    skippedCommon: held.length - rare.length,
+  };
+};
+
+/**
  * Retrieves the cases that share at least one observable with a case, in either store.
  *
  * The source case's observables come from its field and its `cases-observables` objects (up to
- * 10,000). Other cases match through their field, with one clause per type key, or through their
- * objects of the type, grouped by case and capped at the cases sharing the most. One case search
- * pages and sorts both together, as before. Each similar case lists up to 50 shared observables
- * and how many it shares in all.
+ * 10,000). Each is counted first, in two searches per 1,000, and only the rarer ones are matched
+ * (see `selectSimilarKeys`). Other cases match through their field or their objects of the type;
+ * one case search pages and sorts both together, as before. Each similar case lists up to 50
+ * shared observables and how many it shares in all.
  */
 export const similar = async (
   caseId: string,
@@ -98,9 +101,8 @@ export const similar = async (
 ): Promise<CasesSimilarResponse> => {
   const {
     services: { caseService, licensingService, attachmentService, observableService },
-    logger,
     authorization,
-    spaceId,
+    logger,
   } = clientArgs;
 
   const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
@@ -116,81 +118,62 @@ export const similar = async (
     const retrievedCase = await caseService.getCase({ id: caseId });
     const { owner } = retrievedCase.attributes;
 
-    const [availableObservableTypesMap, typeObservables] = await Promise.all([
+    const [availableObservableTypesMap, typeKeys] = await Promise.all([
       getAvailableObservableTypesMap(casesClient, owner),
-      observableService.getAllForCase(caseId),
+      observableService.getKeysForCase(caseId),
     ]);
 
     // NOTE: skip non-existent observable types
     const sourceKeys = uniqueKeys([
       ...(retrievedCase.attributes.observables ?? []),
-      ...typeObservables,
+      ...typeKeys,
     ]).filter(({ typeKey }) => availableObservableTypesMap.has(typeKey));
+
+    const noSimilarCases = (skippedCommon: number): CasesSimilarResponse => ({
+      cases: [],
+      page: paramArgs.page ?? 1,
+      per_page: paramArgs.perPage ?? 0,
+      total: 0,
+      total_relation: 'eq',
+      skipped_common_observables: skippedCommon,
+    });
 
     // NOTE: a case without observables has no similar cases.
     if (sourceKeys.length === 0) {
-      return {
-        cases: [],
-        page: 1,
-        per_page: paramArgs.perPage ?? 0,
-        total: 0,
-      };
+      return noSimilarCases(0);
     }
 
-    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-      await authorization.getAuthorizationFilter(Operations.findCases);
-
-    const candidates = await observableService.findSimilarCandidates({
-      excludeCaseId: caseId,
-      keys: sourceKeys,
-      owners: [owner],
-      size: MAX_SIMILAR_CANDIDATE_CASES,
-    });
-
-    const casesFilter = combineFilterWithAuthorizationFilter(
-      buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' }),
-      authorizationFilter
+    const authorizationFilter = await authorization.getAuthorizationFilter(Operations.findCases);
+    const counts = await countCasesByObservableKeys(
+      { keys: sourceKeys, owner, excludeCaseId: caseId, authorizationFilter },
+      clientArgs
     );
+    const { matchKeys, skippedCommon } = selectSimilarKeys(sourceKeys, counts);
 
-    const { cases, total } = await caseService.searchCasesPage({
-      namespaces: [spaceIdToNamespace(spaceId) ?? DEFAULT_NAMESPACE_STRING],
-      query: {
-        bool: {
-          // The raw search reads `cases.<field>`, not the find-style `cases.attributes.<field>`.
-          filter: casesFilter
-            ? [toElasticsearchQuery(removeAttributesFromFilter(casesFilter))]
-            : [],
-          must_not: [{ term: { _id: `${CASE_SAVED_OBJECT}:${caseId}` } }],
-          should: [
-            ...fieldMatchClauses(sourceKeys),
-            ...(candidates.length > 0
-              ? [
-                  {
-                    terms: {
-                      _id: candidates.map(({ caseId: id }) => `${CASE_SAVED_OBJECT}:${id}`),
-                    },
-                  },
-                ]
-              : []),
-          ],
-          minimum_should_match: 1,
+    if (matchKeys.length === 0) {
+      return noSimilarCases(skippedCommon);
+    }
+
+    const { cases, total, totalRelation } = await searchCasesByObservableKeys(
+      {
+        keys: matchKeys,
+        owner,
+        excludeCaseId: caseId,
+        authorizationFilter,
+        caseOptions: {
+          sortField: convertSortField(paramArgs.sortField),
+          sortOrder: paramArgs.sortOrder,
+          page: paramArgs.page,
+          perPage: paramArgs.perPage,
         },
       },
-      caseOptions: {
-        sortField: convertSortField(paramArgs.sortField),
-        sortOrder: paramArgs.sortOrder,
-        page: paramArgs.page,
-        perPage: paramArgs.perPage,
-      },
-    });
-
-    ensureSavedObjectsAreAuthorized(
-      cases.map(({ id, owner: caseOwner }) => ({ id, owner: caseOwner }))
+      clientArgs
     );
 
     const caseIds = cases.map(({ id }) => id);
     const sourceKeySet = new Set(sourceKeys.map(observableKey));
 
+    // Every observable a similar case shares is listed, including common ones it was not matched on.
     const [commentTotals, sharedInType, casesWithPreview] = await Promise.all([
       attachmentService.getter.getCaseAttatchmentStats({ caseIds }),
       observableService.getSharedForCases({
@@ -234,6 +217,8 @@ export const similar = async (
       page: paramArgs.page ?? 1,
       per_page: paramArgs.perPage ?? DEFAULT_PER_PAGE,
       total,
+      total_relation: totalRelation,
+      skipped_common_observables: skippedCommon,
     };
 
     return decodeOrThrowZod(CasesSimilarResponseSchema)(res);

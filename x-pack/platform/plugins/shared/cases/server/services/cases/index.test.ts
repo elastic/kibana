@@ -2346,6 +2346,70 @@ describe('CasesService', () => {
     });
   });
 
+  describe('countCasesByObservableKeys', () => {
+    const keys = [
+      { typeKey: 'observable-type-ipv4', value: '10.0.0.8' },
+      { typeKey: 'observable-type-hostname', value: 'host-1' },
+    ];
+    const scope = { bool: { filter: [{ term: { 'cases.owner': 'securitySolution' } }] } };
+
+    it('counts the cases holding each key in their field, in key order', async () => {
+      unsecuredSavedObjectsClient.search.mockResolvedValue({
+        took: 1,
+        timed_out: false,
+        _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+        hits: { hits: [] },
+        aggregations: {
+          observables: {
+            doc_count: 3,
+            type0: {
+              values: { buckets: [{ key: '10.0.0.8', doc_count: 3, cases: { doc_count: 2 } }] },
+            },
+            type1: { values: { buckets: [] } },
+          },
+        },
+      });
+
+      const counts = await service.countCasesByObservableKeys({
+        namespaces: ['default'],
+        query: scope,
+        keys,
+      });
+
+      expect(counts).toEqual([2, 0]);
+      const [[request]] = unsecuredSavedObjectsClient.search.mock.calls;
+      expect(request.size).toBe(0);
+      // Only the cases holding one of the keys are aggregated.
+      expect(JSON.stringify(request.query)).toContain(JSON.stringify(scope));
+      expect(JSON.stringify(request.query)).toContain('"path":"cases.observables"');
+      expect(request.aggs).toEqual({
+        observables: {
+          nested: { path: 'cases.observables' },
+          aggs: {
+            type0: {
+              filter: { term: { 'cases.observables.typeKey': 'observable-type-ipv4' } },
+              aggs: {
+                values: {
+                  terms: { field: 'cases.observables.value', include: ['10.0.0.8'], size: 1 },
+                  aggs: { cases: { reverse_nested: {} } },
+                },
+              },
+            },
+            type1: {
+              filter: { term: { 'cases.observables.typeKey': 'observable-type-hostname' } },
+              aggs: {
+                values: {
+                  terms: { field: 'cases.observables.value', include: ['host-1'], size: 1 },
+                  aggs: { cases: { reverse_nested: {} } },
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+  });
+
   describe('executeAggregations', () => {
     const aggregationBuilders = [
       {

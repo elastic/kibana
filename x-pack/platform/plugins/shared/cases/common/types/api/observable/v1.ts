@@ -128,6 +128,9 @@ export const FindObservablesResponseSchema = lazySchema(() =>
   })
 );
 
+/** `gte` when more cases hold the observables than the search kept, so `total` is a minimum. */
+export const CasesTotalRelationSchema = lazySchema(() => z.enum(['eq', 'gte']));
+
 export type ObservablePost = z.infer<typeof ObservablePostSchema>;
 export type ObservablePatch = z.infer<typeof ObservablePatchSchema>;
 export type AddObservableRequest = z.infer<typeof AddObservableRequestSchema>;
@@ -139,3 +142,4 @@ export type BulkCreateObservablesResponse = z.infer<typeof BulkCreateObservables
 export type ObservablesSortField = z.infer<typeof ObservablesSortFieldSchema>;
 export type FindObservablesRequest = z.input<typeof FindObservablesRequestSchema>;
 export type FindObservablesResponse = z.infer<typeof FindObservablesResponseSchema>;
+export type CasesTotalRelation = z.infer<typeof CasesTotalRelationSchema>;
