@@ -22,17 +22,22 @@ import {
 import { createAdminSessionRequest } from './admin_session_request';
 import type { AdminSessionRequestOptions } from './admin_session_request';
 
+/** Public repositories the eval custom context tells the agent to clone. */
+const EVAL_GITHUB_REPOS = [
+  'elastic/kibana',
+  'elastic/elasticsearch',
+  'open-telemetry/opentelemetry-demo',
+] as const;
+
 /**
  * Egress firewall rules the eval adds to the space's sandbox allowlist, on top of connector hosts.
- * Add a host here when an eval needs the sandbox to reach it.
+ * Git over HTTPS only needs `GET <repo>/info/refs` and `POST <repo>/git-upload-pack` on
+ * github.com, so each repo gets a path rule instead of the whole host. Paths match by plain
+ * prefix, so the trailing slash keeps `/elastic/kibana/` from also matching `/elastic/kibana-x`.
  */
-export const EVAL_SANDBOX_HOST_ALLOWLIST = [
-  // GitHub, for the repositories the eval custom context points the agent at.
-  // `*.github.com` does not cover the apex domain.
-  'github.com',
-  '*.github.com',
-  '*.githubusercontent.com',
-] as const;
+export const EVAL_SANDBOX_EGRESS_ALLOWLIST: readonly string[] = EVAL_GITHUB_REPOS.flatMap((repo) =>
+  [`/${repo}/`, `/${repo}.git/`].map((path) => `allow https github.com GET,POST ${path}`)
+);
 
 /**
  * Binds the space to the Nightshift service accounts, lifts the daily investigation limits, and
@@ -112,7 +117,7 @@ export const enableNightshiftSpace = async ({
     { method: 'GET' }
   );
   const allowlist: PutSandboxAllowlistRequest = {
-    hosts: [...new Set([...existingHosts, ...EVAL_SANDBOX_HOST_ALLOWLIST])],
+    hosts: [...new Set([...existingHosts, ...EVAL_SANDBOX_EGRESS_ALLOWLIST])],
   };
   await setupRequest(SANDBOX_ALLOWLIST_API_PATH, {
     method: 'PUT',
