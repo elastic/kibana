@@ -221,9 +221,10 @@ export type CustomContentTemplateResolver = (params: {
   esqlQueries?: readonly string[];
   /**
    * Whether the first query is new or changing. Only then is it run, to give the model its real
-   * columns; a query that is not changing is described by the template that already reads it. The
-   * other queries are never run: giving them only tells the model what `queries[n]` is, so a
-   * refinement keeps the references to them.
+   * columns; a query that is not changing is described by the template that already reads it.
+   * The other queries are neither run nor shown to the model: it is only told that the template may
+   * read `queries[n]`, so a refinement keeps those references. It does not know their columns; that
+   * comes with the change that lets the agent create and change them.
    */
   isQueryChanging?: boolean;
   existingTemplate?: string;
