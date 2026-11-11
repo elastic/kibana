@@ -15,6 +15,7 @@
     "@kbn/alertzero-common",
     "@kbn/elastic-assistant-common",
     "@kbn/repo-info",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/inference-common"
   ]
 }
