@@ -603,6 +603,11 @@ export const interactiveModeMachine = setup({
                 { type: 'sendStepsToSimulator', params: ({ event }) => event },
               ],
             },
+            'step.processorTypeChanged': {
+              actions: ({ context }) => {
+                context.parentRef.send({ type: 'simulation.reset' });
+              },
+            },
             'step.parentChanged': {
               actions: [
                 { type: 'reassignSteps' },
@@ -693,6 +698,11 @@ export const interactiveModeMachine = setup({
                 { type: 'sendStepsToSimulator' },
               ],
             },
+            'step.processorTypeChanged': {
+              actions: ({ context }) => {
+                context.parentRef.send({ type: 'simulation.reset' });
+              },
+            },
             'step.delete': {
               target: 'idle',
               guard: 'hasManagePrivileges',
@@ -732,6 +742,11 @@ export const interactiveModeMachine = setup({
           on: {
             'step.change': {
               actions: [{ type: 'syncToDSL' }, { type: 'sendStepsToSimulator' }],
+            },
+            'step.processorTypeChanged': {
+              actions: ({ context }) => {
+                context.parentRef.send({ type: 'simulation.reset' });
+              },
             },
             'step.cancel': {
               target: 'idle',
