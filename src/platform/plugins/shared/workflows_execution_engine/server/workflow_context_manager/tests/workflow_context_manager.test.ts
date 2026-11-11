@@ -1736,6 +1736,29 @@ describe('WorkflowContextManager', () => {
         expect(hits).toEqual([{ id: 'a' }, { id: 'b' }, { id: 'c' }]);
       });
     });
+
+    describe('renderObjectAccordingToContextAsync', () => {
+      it('builds the context synchronously, once for the whole object, and renders it async', async () => {
+        const rendered = { first: 'rendered' };
+        testContainer.templatingEngineMock.renderAsync = jest.fn().mockResolvedValue(rendered);
+        const obj = { first: '{{ workflow.name }}', nested: { second: '{{ inputs.userId }}' } };
+
+        const resultPromise = testContainer.underTest.renderObjectAccordingToContextAsync(obj);
+
+        // Parallel branches install their scope only during the synchronous part of a step.
+        expect(
+          testContainer.templatingEngineMock.extractGlobalVariableSegments
+        ).toHaveBeenCalledTimes(1);
+        expect(
+          testContainer.templatingEngineMock.extractGlobalVariableSegments
+        ).toHaveBeenCalledWith(obj);
+        expect(testContainer.templatingEngineMock.renderAsync).toHaveBeenCalledWith(
+          obj,
+          expect.any(Object)
+        );
+        expect(await resultPromise).toBe(rendered);
+      });
+    });
   });
 
   describe('getVariables', () => {
@@ -2223,6 +2246,25 @@ describe('WorkflowContextManager', () => {
       expect(underTest.evaluateBooleanExpressionInContext('${{ inputs.guess == "s3" }}')).toBe(
         true
       );
+    });
+
+    it('lets KQL conditions see the additional context (e.g. the error of a failed step)', () => {
+      const { underTest } = createContainerWithGuess('s3');
+      const error = { type: 'NetworkError', message: 'boom' };
+      expect(
+        underTest.evaluateBooleanExpressionInContext('error.type: NetworkError', { error })
+      ).toBe(true);
+      expect(underTest.evaluateBooleanExpressionInContext('error.type: Other', { error })).toBe(
+        false
+      );
+      expect(
+        underTest.evaluateBooleanExpressionInContext(
+          'consts.secret: {{ inputs.guess }} and error.message: *',
+          {
+            error,
+          }
+        )
+      ).toBe(true);
     });
 
     it('shows the interpolated value, not its internal token, in a syntax error', () => {

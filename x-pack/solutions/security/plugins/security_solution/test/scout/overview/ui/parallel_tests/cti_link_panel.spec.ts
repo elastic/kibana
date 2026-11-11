@@ -6,6 +6,7 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
+import { DATA_LOAD_TIMEOUT_MS } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest, tags } from '../fixtures';
 
@@ -119,7 +120,9 @@ spaceTest.describe(
         await securityOverviewPage.navigate(RANGE_WITHOUT_INDICATOR);
 
         await expect(securityOverviewPage.threatIntelDisabledCallout).toBeHidden();
-        await expect(securityOverviewPage.threatIntelPanel).toContainText(FEED_NAME);
+        await expect(securityOverviewPage.threatIntelPanel).toContainText(FEED_NAME, {
+          timeout: DATA_LOAD_TIMEOUT_MS,
+        });
         await expect(securityOverviewPage.threatIntelIndicatorCount).toHaveText(
           'Showing: 0 indicators'
         );
@@ -134,7 +137,9 @@ spaceTest.describe(
         const { securityOverviewPage } = pageObjects;
         await securityOverviewPage.navigate(RANGE_WITH_INDICATOR);
 
-        await expect(securityOverviewPage.threatIntelPanel).toContainText(FEED_NAME);
+        await expect(securityOverviewPage.threatIntelPanel).toContainText(FEED_NAME, {
+          timeout: DATA_LOAD_TIMEOUT_MS,
+        });
         await expect(securityOverviewPage.threatIntelPanel).not.toContainText('Anomali');
         await expect(securityOverviewPage.threatIntelIndicatorCount).toHaveText(
           'Showing: 1 indicator'

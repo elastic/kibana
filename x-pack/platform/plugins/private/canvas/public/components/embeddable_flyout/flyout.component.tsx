@@ -97,6 +97,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({ container, onClose }) => {
       <EuiFlyoutBody>
         <SavedObjectFinder
           id="canvasEmbeddableFlyout"
+          typeIconSize="m"
           onChoose={onChoose}
           savedObjectMetaData={canvasLibraryTypes}
           showFilter={true}

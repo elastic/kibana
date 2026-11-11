@@ -19,6 +19,8 @@ import { getSourceDisplaySignals } from './source_models';
 import { getSourceSortableValue } from './source_grid_cell';
 import { SourcesGrid } from './sources_grid';
 import { SourcesToolbar } from './sources_toolbar';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
+import { UnitReadOnlyCallout } from '../unit_read_only_callout';
 
 export const SourcesTab = () => {
   const sourcesController = useSourcesTable();
@@ -50,6 +52,9 @@ export const SourcesTab = () => {
     isUnitSaving,
   } = sourcesController;
 
+  const {
+    v2: { manage: canManage },
+  } = useStreamsPrivileges();
   const [sourcesPendingDeletion, setSourcesPendingDeletion] = useState<SourceViewModel[]>([]);
   const navigateToCanvasSearch = useNavigateToCanvasSearch();
   const showOnCanvas = useCallback(
@@ -113,6 +118,12 @@ export const SourcesTab = () => {
       >
         <EuiFlexItem grow={false}>
           <EuiSpacer size="m" />
+          {!canManage && (
+            <>
+              <UnitReadOnlyCallout />
+              <EuiSpacer size="m" />
+            </>
+          )}
           <SourcesToolbar
             query={query}
             typeOptions={typeFilterOptions}
@@ -121,7 +132,7 @@ export const SourcesTab = () => {
             onQueryChange={setQuery}
             onSelectedTypesChange={setSelectedTypes}
             onRefresh={refreshUnit}
-            onAddSource={openCreateModal}
+            onAddSource={canManage ? openCreateModal : undefined}
             isAddDisabled={isUnitSaving}
           />
           <EuiSpacer size="s" />
@@ -146,11 +157,11 @@ export const SourcesTab = () => {
             onSelectionChange={setSelectedSources}
             onOpenSource={openSourceFlyout}
             onShowOnCanvas={showOnCanvas}
-            onRequestDelete={setSourcesPendingDeletion}
+            onRequestDelete={canManage ? setSourcesPendingDeletion : undefined}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {isCreateModalOpen && (
+      {canManage && isCreateModalOpen && (
         <CreateSourceModal sources={sourcesController} onClose={closeCreateModal} />
       )}
       {selectedSource && (
@@ -158,6 +169,7 @@ export const SourcesTab = () => {
           sources={sourcesController}
           source={selectedSource}
           onClose={closeSourceFlyout}
+          readOnly={!canManage}
         />
       )}
       {sourcesPendingDeletion.length > 0 && (

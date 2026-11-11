@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { useFetchGroupByCardinality } from '../../../../hooks/use_fetch_group_by_cardinality';
 import type { CreateSLOForm } from '../../types';
 import { getGroupKeysProse } from '../../../../utils/slo/groupings';
@@ -23,12 +23,12 @@ export function GroupByCardinality({
   titleAppend?: React.ReactNode;
   customFilters?: QuerySchema;
 }) {
-  const { watch } = useFormContext<CreateSLOForm>();
+  const { control } = useFormContext<CreateSLOForm>();
 
-  const index = watch('indicator.params.index');
-  const filters = watch('indicator.params.filter');
-  const timestampField = watch('indicator.params.timestampField');
-  const groupByField = watch('groupBy');
+  const index = useWatch({ control, name: 'indicator.params.index' });
+  const filters = useWatch({ control, name: 'indicator.params.filter' });
+  const timestampField = useWatch({ control, name: 'indicator.params.timestampField' });
+  const groupByField = useWatch({ control, name: 'groupBy' });
 
   const { isLoading: isGroupByCardinalityLoading, data: groupByCardinality } =
     useFetchGroupByCardinality(index, timestampField, groupByField, customFilters || filters);

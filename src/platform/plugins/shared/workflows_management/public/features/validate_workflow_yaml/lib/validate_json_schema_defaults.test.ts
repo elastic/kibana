@@ -478,6 +478,55 @@ triggers:
     });
   });
 
+  describe('page trigger inputs', () => {
+    const validate = (yaml: string) => {
+      const doc = parseDocument(yaml);
+      return validateJsonSchemaDefaults(doc, doc.toJSON());
+    };
+
+    it('checks a page default against the page inputs, not the manual inputs', () => {
+      const errors = validate(`
+name: Test Workflow
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        severity:
+          type: number
+  - type: page
+    title: Report
+    inputs:
+      properties:
+        severity:
+          type: string
+          default: high
+`);
+
+      expect(errors).toEqual([]);
+    });
+
+    it('reports an invalid page default when the workflow has no manual trigger', () => {
+      const errors = validate(`
+name: Test Workflow
+triggers:
+  - type: page
+    title: Report
+    inputs:
+      properties:
+        severity:
+          type: number
+          default: high
+`);
+
+      expect(errors).toEqual([
+        expect.objectContaining({
+          message: expect.stringContaining('Invalid default value for severity'),
+          startLineNumber: 9,
+        }),
+      ]);
+    });
+  });
+
   it('should validate legacy array format inputs with invalid default type', () => {
     const yaml = `
 name: Test Workflow

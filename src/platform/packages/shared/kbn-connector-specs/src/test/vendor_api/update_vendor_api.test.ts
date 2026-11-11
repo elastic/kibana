@@ -27,15 +27,27 @@ paths:
   /items:
     get:
       description: Lists items
+      parameters: [{ name: page, in: query, schema: { type: integer } }]
       responses:
         '200':
           description: ok
           content:
             application/json:
               schema: { type: array, items: { $ref: 'models.yaml#/Item' } }
+  /tags:
+    get:
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: { type: array, items: { type: string } }
   /unused:
     get:
       responses: { '204': { description: none } }
+components:
+  schemas:
+    Legacy: { type: object }
 `;
 
 const modelsYaml = `
@@ -73,6 +85,25 @@ const withLegacy: ConnectorSpec = {
       handler: async ({ client }) => (await client.get(`${BASE}/legacy`)).data,
     },
   },
+};
+
+const withTags: ConnectorSpec = {
+  ...connector,
+  actions: {
+    ...connector.actions,
+    listTags: {
+      scope: 'read',
+      input: z.object({}),
+      handler: async ({ client }) => (await client.get(`${BASE}/tags`)).data,
+    },
+  },
+};
+
+const itemsOperation = {
+  source: 'main',
+  method: 'get',
+  path: '/items',
+  pagination: { style: 'page', request: { pageParam: 'page' }, response: { itemsPath: '' } },
 };
 
 describe('updateVendorApi', () => {
@@ -128,12 +159,45 @@ describe('updateVendorApi', () => {
           fetchedAt: '2026-10-07T12:00:00.000Z',
         },
       },
-      operations: { listItems: [{ source: 'main', method: 'get', path: '/items' }] },
+      operations: { listItems: [itemsOperation] },
     });
     const snapshot = await readJson('snapshots/main.openapi.json');
     expect(Object.keys(snapshot.paths)).toEqual(['/items']);
     expect(snapshot.paths['/items'].get.description).toBeUndefined();
     expect(snapshot.components.schemas.Item).toEqual(expect.objectContaining({ type: 'object' }));
+  });
+
+  it('records the sources an inspection added to the manifest, as fetched then', async () => {
+    await fs.writeFile(
+      path.join(directory, 'manifest.json'),
+      JSON.stringify({
+        sources: {
+          main: {
+            format: 'openapi',
+            url: SPEC_URL,
+            apiVersion: '0.9',
+            fetchedAt: '2026-10-01T08:00:00.000Z',
+          },
+        },
+        operations: {},
+      })
+    );
+
+    const result = await update({ fetchedAt: () => new Date('2026-10-01T08:00:00.000Z') });
+
+    expect(result.problems).toEqual([]);
+    expect(fetched).toEqual([SPEC_URL, MODELS_URL]);
+    expect(await readJson('manifest.json')).toEqual({
+      sources: {
+        main: {
+          format: 'openapi',
+          url: SPEC_URL,
+          apiVersion: '1.0',
+          fetchedAt: '2026-10-01T08:00:00.000Z',
+        },
+      },
+      operations: { listItems: [itemsOperation] },
+    });
   });
 
   it('records offline against the snapshots and changes nothing on a re-run', async () => {
@@ -164,6 +228,19 @@ describe('updateVendorApi', () => {
     );
   });
 
+  it('keeps the note written on a source', async () => {
+    await update({ sources: { main: SPEC_URL } });
+    const manifest = await readJson('manifest.json');
+    manifest.sources.main.note = 'A test fixture the vendor generates from its API definitions';
+    await fs.writeFile(path.join(directory, 'manifest.json'), JSON.stringify(manifest));
+    documents[SPEC_URL] = specYaml('1.1');
+
+    await update({ refresh: true });
+    expect((await readJson('manifest.json')).sources.main.note).toBe(
+      'A test fixture the vendor generates from its API definitions'
+    );
+  });
+
   it('reports unmatched requests until the manifest explains them', async () => {
     await update({ sources: { main: SPEC_URL } });
 
@@ -187,8 +264,90 @@ describe('updateVendorApi', () => {
     });
   });
 
+  it('acknowledges unmatched requests by path template', async () => {
+    await update({ sources: { main: SPEC_URL } });
+    const legacyItem = { method: 'get', path: '/legacy/{id}', reason: 'Not documented' };
+    const manifest = await readJson('manifest.json');
+    await fs.writeFile(
+      path.join(directory, 'manifest.json'),
+      JSON.stringify({ ...manifest, unmatched: { legacyItem: [legacyItem] } })
+    );
+    const withLegacyItem: ConnectorSpec = {
+      ...connector,
+      actions: {
+        ...connector.actions,
+        legacyItem: {
+          scope: 'read',
+          input: z.object({ id: z.string() }),
+          handler: async ({ client }, { id }) => (await client.get(`${BASE}/legacy/${id}`)).data,
+        },
+      },
+    };
+
+    expect((await update({ connector: withLegacyItem })).problems).toEqual([]);
+    expect((await readJson('manifest.json')).unmatched).toEqual({ legacyItem: [legacyItem] });
+  });
+
+  it('proposes pagination for review once, then keeps what the manifest declares', async () => {
+    await update({ sources: { main: SPEC_URL } });
+    expect(warnings).toEqual([
+      'GET /items (main): proposed "pagination" from parameter and field names in manifest.json; review it',
+    ]);
+
+    const manifest = await readJson('manifest.json');
+    const declared = {
+      ...manifest,
+      operations: { listItems: [{ ...itemsOperation, pagination: 'none' }] },
+    };
+    await fs.writeFile(path.join(directory, 'manifest.json'), JSON.stringify(declared));
+    warnings = [];
+
+    expect((await update()).problems).toEqual([]);
+    expect((await readJson('manifest.json')).operations).toEqual(declared.operations);
+    expect(warnings).toEqual([]);
+  });
+
+  it('reports requests the spec rejects as problems', async () => {
+    const invalid: ConnectorSpec = {
+      ...connector,
+      actions: {
+        listItems: {
+          scope: 'read',
+          input: z.object({}),
+          handler: async ({ client }) => (await client.get(`${BASE}/items?page=first`)).data,
+        },
+      },
+    };
+
+    const { problems } = await update({ connector: invalid, sources: { main: SPEC_URL } });
+
+    expect(problems).toEqual([
+      expect.stringMatching(/^listItems: GET .*\/items breaks the spec: /),
+    ]);
+  });
+
+  it('reports an auth type that cannot be recorded as a problem, so no manifest lacks its operations', async () => {
+    const twoAuthTypes: ConnectorSpec = { ...connector, auth: { types: ['none', 'unavailable'] } };
+
+    const { problems } = await update({ connector: twoAuthTypes, sources: { main: SPEC_URL } });
+
+    expect(problems).toEqual([
+      expect.stringMatching(/^auth type unavailable can't be used against the contract mock/),
+    ]);
+    expect(warnings.filter((warning) => warning.includes('auth type'))).toEqual([]);
+  });
+
+  it('reports list-like operations it cannot propose pagination for', async () => {
+    const { problems } = await update({ connector: withTags, sources: { main: SPEC_URL } });
+
+    expect(problems).toEqual([
+      'GET /tags (main) looks like it returns a collection, as it returns an array; declare its "pagination" in manifest.json, or "none" if it returns everything at once',
+    ]);
+  });
+
   it('records against the overlay but snapshots the vendor spec without it', async () => {
     await update({ sources: { main: SPEC_URL } });
+    warnings = [];
     await fs.writeFile(
       path.join(directory, 'overlay.yaml'),
       `
@@ -212,9 +371,65 @@ actions:
       { source: 'main', method: 'get', path: '/legacy' },
     ]);
     expect(Object.keys((await readJson('snapshots/main.openapi.json')).paths)).toEqual(['/items']);
-    expect(warnings).toEqual([
-      'overlay.yaml action 1 matches nothing in any source; the vendor may have fixed it',
-    ]);
+  });
+
+  describe('with an overlay action that matches nothing', () => {
+    beforeEach(async () => {
+      await update({ sources: { main: SPEC_URL } });
+      warnings = [];
+      await fs.writeFile(
+        path.join(directory, 'overlay.yaml'),
+        `
+overlay: 1.0.0
+info: { title: Example fixes, version: '1' }
+actions:
+  - target: $.paths['/gone']
+    remove: true
+`
+      );
+    });
+
+    it('stays quiet offline, as the route may just be left out of the snapshot', async () => {
+      await update();
+
+      expect(warnings).toEqual([]);
+    });
+
+    it('warns with --refresh, as the vendor spec has been fetched', async () => {
+      await update({ refresh: true });
+
+      expect(warnings).toEqual([
+        'overlay.yaml action 0 matches nothing in any source; the vendor may have fixed it',
+      ]);
+    });
+  });
+
+  it('keeps the components that overlay updates reference in the snapshot', async () => {
+    await update({ sources: { main: SPEC_URL } });
+    await fs.writeFile(
+      path.join(directory, 'overlay.yaml'),
+      `
+overlay: 1.0.0
+info: { title: Example fixes, version: '1' }
+actions:
+  - target: $.paths
+    update:
+      /legacy:
+        get:
+          responses:
+            '200':
+              description: ok
+              content:
+                application/json:
+                  schema: { $ref: '#/components/schemas/Legacy' }
+`
+    );
+
+    expect((await update({ connector: withLegacy, refresh: true })).problems).toEqual([]);
+    expect((await readJson('snapshots/main.openapi.json')).components.schemas.Legacy).toEqual({
+      type: 'object',
+    });
+    expect(await update({ connector: withLegacy })).toEqual({ changed: [], problems: [] });
   });
 
   it('reports what would change in check mode without writing', async () => {
@@ -227,6 +442,154 @@ actions:
     expect(result.changed).toEqual(['manifest.json', 'snapshots/old.openapi.json']);
     expect(await fs.readFile(path.join(directory, 'manifest.json'), 'utf8')).toBe(before);
     expect(await fs.readdir(path.join(directory, 'snapshots'))).toContain('old.openapi.json');
+  });
+
+  it('converts Google Discovery documents to OpenAPI before bundling them', async () => {
+    const discoveryUrl = 'https://api.example.com/$discovery/rest?version=v1';
+    documents[discoveryUrl] = JSON.stringify({
+      kind: 'discovery#restDescription',
+      title: 'Example',
+      version: 'v1',
+      rootUrl: `${BASE}/`,
+      servicePath: '',
+      schemas: { Item: { id: 'Item', type: 'object', properties: { name: { type: 'string' } } } },
+      resources: {
+        items: {
+          methods: {
+            list: {
+              id: 'example.items.list',
+              path: 'items',
+              httpMethod: 'GET',
+              response: { $ref: 'Item' },
+            },
+          },
+        },
+      },
+    });
+
+    expect(await update({ sources: { main: discoveryUrl } })).toEqual({
+      changed: ['snapshots/main.openapi.json', 'manifest.json'],
+      problems: [],
+    });
+    expect(fetched).toEqual([discoveryUrl]);
+    expect((await readJson('manifest.json')).sources.main).toEqual(
+      expect.objectContaining({ format: 'discovery', apiVersion: 'v1' })
+    );
+    const snapshot = await readJson('snapshots/main.openapi.json');
+    expect(snapshot.openapi).toBe('3.0.3');
+    expect(snapshot.paths['/items'].get.operationId).toBe('example.items.list');
+    expect((await update()).changed).toEqual([]);
+  });
+
+  describe('Markdown references', () => {
+    const LLMS_URL = 'https://docs.search.example.com/llms.txt';
+    const SEARCH_PAGE = 'https://docs.search.example.com/api-reference/web/search.md';
+    const SEARCH_BASE = 'https://api.search.example.com/res';
+    const PARAMETERS = [
+      '| Name | Location | Type | Required | Constraints | Description |',
+      '|------|----------|------|----------|-------------|-------------|',
+    ];
+    const searchPage = [
+      '# Search',
+      '',
+      '`GET` `/v1/web/search`',
+      '',
+      `**Base URL:** \`${SEARCH_BASE}\``,
+      '',
+      '## Query Parameters',
+      '',
+      ...PARAMETERS,
+      '| `q` | query | string | Yes |  | The search query. |',
+      '',
+      '## Responses',
+      '',
+      '### 200',
+      'Successful Response',
+      '',
+      '| Field | Type | Description |',
+      '|-------|------|-------------|',
+      '| `type` | string |  |',
+    ].join('\n');
+
+    const searcher: ConnectorSpec = {
+      ...connector,
+      actions: {
+        search: {
+          scope: 'read',
+          input: z.object({ q: z.string().min(1).max(400) }),
+          handler: async ({ client }, { q }) =>
+            (await client.get(`${SEARCH_BASE}/v1/web/search`, { params: { q } })).data,
+        },
+      },
+    };
+
+    beforeEach(() => {
+      documents[LLMS_URL] = [
+        '# Search API',
+        '- [Web search](api-reference/web/search.md)',
+        '- [Guide](guides/quickstart.md)',
+      ].join('\n');
+      documents[SEARCH_PAGE] = searchPage;
+    });
+
+    it('fetches the pages an llms.txt index links to, and keeps the format and pages in the manifest', async () => {
+      const result = await update({
+        connector: searcher,
+        sources: { search: LLMS_URL },
+        formats: { search: 'brave-markdown' },
+        pages: { search: ['api-reference/'] },
+      });
+
+      expect(result).toEqual({
+        changed: ['snapshots/search.openapi.json', 'manifest.json'],
+        problems: [],
+      });
+      expect(fetched).toEqual([LLMS_URL, SEARCH_PAGE]);
+      expect(await readJson('manifest.json')).toEqual({
+        sources: {
+          search: {
+            format: 'brave-markdown',
+            url: LLMS_URL,
+            pages: ['api-reference/'],
+            fetchedAt: '2026-10-07T12:00:00.000Z',
+          },
+        },
+        operations: { search: [{ source: 'search', method: 'get', path: '/v1/web/search' }] },
+      });
+      const snapshot = await readJson('snapshots/search.openapi.json');
+      expect(snapshot.servers).toEqual([{ url: SEARCH_BASE }]);
+      expect(Object.keys(snapshot.paths)).toEqual(['/v1/web/search']);
+    });
+
+    it('re-records offline against the snapshot, and refreshes from the manifest without flags', async () => {
+      await update({
+        connector: searcher,
+        sources: { search: LLMS_URL },
+        formats: { search: 'brave-markdown' },
+        pages: { search: ['api-reference/'] },
+      });
+      fetched = [];
+
+      expect(await update({ connector: searcher })).toEqual({ changed: [], problems: [] });
+      expect(fetched).toEqual([]);
+      expect(await update({ connector: searcher, refresh: true })).toEqual({
+        changed: [],
+        problems: [],
+      });
+      expect(fetched).toEqual([LLMS_URL, SEARCH_PAGE]);
+    });
+
+    it('refuses --pages for a source that is not a Markdown reference', async () => {
+      await expect(
+        update({ sources: { main: SPEC_URL }, pages: { main: ['api/'] } })
+      ).rejects.toThrow('main: --pages only applies to Markdown references; pass --format');
+    });
+
+    it('refuses --format and --pages for a source that does not exist', async () => {
+      await expect(
+        update({ sources: { main: SPEC_URL }, formats: { other: 'brave-markdown' } })
+      ).rejects.toThrow('there is no source "other"');
+    });
   });
 
   it('removes snapshots of sources that are gone', async () => {

@@ -16,12 +16,15 @@ import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   getProjectRoutingFromEsqlQuery,
+  getNamedParams,
+  getGeoPrecisionParamValues,
   hasStartEndParams,
 } from '@kbn/esql-utils';
 import type { Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { GeoJsonProperties } from 'geojson';
 import { asyncMap } from '@kbn/std';
+import { DEFAULT_GRID_RESOLUTION } from '@kbn/geo-precision';
 import {
   FIELD_ORIGIN,
   GEOJSON_FEATURE_ID_PROPERTY_NAME,
@@ -29,6 +32,7 @@ import {
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
 import type {
+  DataFilters,
   ESQLSourceDescriptor,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
@@ -50,7 +54,8 @@ import { ESQLField } from '../../fields/esql_field';
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
   'dateField' | 'esql' | 'geoField' | 'narrowByMapBounds' | 'narrowByGlobalTime'
->;
+> &
+  ReturnType<typeof getGeoPrecisionParamValues>;
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
@@ -229,13 +234,30 @@ export class ESQLSource
         }
       : requestMeta.timeFilters;
 
-    if (requestMeta.applyGlobalTime && !this._descriptor.dateField) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.esql.noDateFieldError', {
-          defaultMessage:
-            'Unable to narrow ES|QL statement by global time, date field is not provided',
-        })
-      );
+    if (requestMeta.applyGlobalTime) {
+      if (!this._descriptor.dateField) {
+        throw new Error(
+          i18n.translate('xpack.maps.source.esql.noDateFieldError', {
+            defaultMessage:
+              'Unable to narrow ES|QL statement by global time, date field is not provided',
+          })
+        );
+      }
+      const timeFilter = getTime(undefined, timeRange, {
+        fieldName: this._descriptor.dateField,
+      });
+
+      if (timeFilter) {
+        filters.push(timeFilter);
+      }
+    }
+
+    const namedParams = getNamedParams(this._descriptor.esql, timeRange, undefined, {
+      zoom: requestMeta.zoom,
+      resolution: this._getResolution(),
+    });
+    if (namedParams.length) {
+      params.params = namedParams;
     }
 
     const abortController = new AbortController();
@@ -333,8 +355,15 @@ export class ESQLSource
     );
   }
 
-  getSyncMeta(): ESQLSourceSyncMeta {
+  private _getResolution() {
+    return this._descriptor.resolution ?? DEFAULT_GRID_RESOLUTION;
+  }
+
+  getSyncMeta(dataFilters?: DataFilters): ESQLSourceSyncMeta {
     return {
+      ...(dataFilters
+        ? getGeoPrecisionParamValues(this._descriptor.esql, dataFilters.zoom, this._getResolution())
+        : {}),
       dateField: this._descriptor.dateField,
       esql: this._descriptor.esql,
       geoField: this._descriptor.geoField,

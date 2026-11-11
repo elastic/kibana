@@ -8,8 +8,6 @@
 import { spaceTest, tags } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
-const ENABLE_NEW_FLYOUT_SETTING = 'securitySolution:enableNewFlyout';
-
 spaceTest.describe(
   'Attack details flyout',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
@@ -20,12 +18,9 @@ spaceTest.describe(
       await apiServices.attackDiscovery.seedAttackSchedule();
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, scoutSpace, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       const { detectionsAttackDiscoveryPage, attackDetailsRightPanelPage } = pageObjects;
 
-      await scoutSpace.uiSettings.set({
-        [ENABLE_NEW_FLYOUT_SETTING]: false,
-      });
       await browserAuth.loginAsPlatformEngineer();
 
       await detectionsAttackDiscoveryPage.navigateToAttacksPage();
@@ -38,10 +33,6 @@ spaceTest.describe(
       await expect(attackDetailsRightPanelPage.detailsFlyoutBody).toBeAttached();
       await attackDetailsRightPanelPage.detailsFlyoutBody.scrollIntoViewIfNeeded();
       await expect(attackDetailsRightPanelPage.detailsFlyoutBody).toBeVisible();
-    });
-
-    spaceTest.afterEach(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset(ENABLE_NEW_FLYOUT_SETTING);
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

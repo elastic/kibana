@@ -578,7 +578,7 @@ describe('MultiOptionUnionWidget', () => {
       expect(screen.getAllByText('Recommended')).toHaveLength(1);
     });
 
-    it('renders authMode badges: per-user -> Personal credentials, shared -> Service account', () => {
+    it('renders authMode badges: per-user -> Personal credentials, shared -> Shared credentials', () => {
       const perUser = z
         .object({ type: z.literal('oauth'), clientId: z.string().meta({ label: 'Client ID' }) })
         .meta({ label: 'OAuth 2.0', authMode: 'per-user' });
@@ -589,7 +589,7 @@ describe('MultiOptionUnionWidget', () => {
       renderOptions([perUser, shared]);
 
       expect(screen.getByText('Personal credentials')).toBeInTheDocument();
-      expect(screen.getByText('Service account')).toBeInTheDocument();
+      expect(screen.getByText('Shared credentials')).toBeInTheDocument();
     });
 
     it('renders no badges when neither isRecommended nor authMode meta is present', () => {
@@ -604,7 +604,7 @@ describe('MultiOptionUnionWidget', () => {
 
       expect(screen.queryByText('Recommended')).toBeNull();
       expect(screen.queryByText('Personal credentials')).toBeNull();
-      expect(screen.queryByText('Service account')).toBeNull();
+      expect(screen.queryByText('Shared credentials')).toBeNull();
     });
   });
 

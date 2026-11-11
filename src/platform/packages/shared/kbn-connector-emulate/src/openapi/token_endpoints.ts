@@ -126,9 +126,13 @@ const uniqueServers = (operations: readonly ContractOperation[]): OperationServe
 
 /**
  * Collects the token and refresh URLs of the OAuth 2 flows declared by the operations' specs.
- * Relative ones resolve against every server of the spec. Throws on URLs that can't be parsed.
+ * Relative ones resolve against every server of the spec, and `include` keeps only some of the
+ * resolved URLs. Throws on URLs that can't be parsed.
  */
-export const findTokenEndpoints = (operations: readonly ContractOperation[]): TokenEndpoints => {
+export const findTokenEndpoints = (
+  operations: readonly ContractOperation[],
+  { include = () => true }: { include?: (endpoint: OperationServer) => boolean } = {}
+): TokenEndpoints => {
   const endpoints = new Map<string, { matches: (url: URL) => boolean; grants: Set<string> }>();
   const operationsBySpec = new Map<OpenApiDocument, ContractOperation[]>();
   for (const operation of operations) {
@@ -152,6 +156,9 @@ export const findTokenEndpoints = (operations: readonly ContractOperation[]): To
           endpoint = resolveTokenUrl(url, server);
         } catch {
           throw new Error(`${describe()} ${JSON.stringify(url)} is not a valid URL`);
+        }
+        if (!include(endpoint)) {
+          continue;
         }
         const key = JSON.stringify(endpoint);
         const existing = endpoints.get(key);

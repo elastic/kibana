@@ -46,29 +46,73 @@ export const createWatchlistSyncMarkersService = (
 
   const findLastEventMarkerInIndex = async (
     source: MonitoringEntitySource,
-    action: 'started' | 'completed'
+    action: 'started' | 'completed',
+    atOrBefore?: string
   ): Promise<string | undefined> => {
     if (!source.integrations?.syncMarkerIndex) return undefined;
     const resp = await esClient.search<EventDoc>({
       index: source.integrations.syncMarkerIndex,
+      ignore_unavailable: true,
       sort: [{ '@timestamp': { order: 'desc' } }],
       size: 1,
-      query: { term: { 'event.action': action } },
+      query: atOrBefore
+        ? {
+            bool: {
+              filter: [
+                { term: { 'event.action': action } },
+                { range: { '@timestamp': { lte: atOrBefore } } },
+              ],
+            },
+          }
+        : { term: { 'event.action': action } },
       _source: ['@timestamp'],
     });
     return resp?.hits?.hits?.[0]?._source?.['@timestamp'] ?? undefined;
   };
 
-  const detectNewFullSync = async (source: MonitoringEntitySource): Promise<boolean> => {
+  const detectNewFullSync = async (
+    source: MonitoringEntitySource
+  ): Promise<{ hasNewFullSync: boolean; completedAt?: string }> => {
     const lastFullSync = await descriptorClient.getLastFullSyncMarker(source);
     const latestCompletedEvent = await findLastEventMarkerInIndex(source, 'completed');
-    if (!latestCompletedEvent) return false;
+    if (!latestCompletedEvent) return { hasNewFullSync: false };
 
-    const shouldUpdate = !lastFullSync || latestCompletedEvent > lastFullSync;
-    if (!shouldUpdate) return false;
+    const hasNewFullSync = !lastFullSync || latestCompletedEvent > lastFullSync;
+    return hasNewFullSync
+      ? { hasNewFullSync, completedAt: latestCompletedEvent }
+      : { hasNewFullSync };
+  };
 
-    await descriptorClient.updateLastFullSyncMarker(source, latestCompletedEvent);
-    return true;
+  /**
+   * Persists that the full sync which completed at `completedAt` has been fully processed (its
+   * window searched, upserted, and used for deletion detection), so `detectNewFullSync` won't
+   * flag it again.
+   */
+  const markFullSyncProcessed = async (
+    source: MonitoringEntitySource,
+    completedAt: string
+  ): Promise<void> => {
+    await descriptorClient.updateLastFullSyncMarker(source, completedAt);
+  };
+
+  /**
+   * Returns how far back update detection should look when a new full sync has just been
+   * detected.
+   *
+   * A full sync re-crawls every entity from scratch, so to see everyone it found, update
+   * detection needs to look back to when that crawl started — not just use the normal
+   * incremental cursor (`lastUpdateProcessed`), which only covers recent changes and would miss
+   * entities the crawl re-confirmed further back. The lookup is bounded to `completedAt` so it
+   * finds the `started` marker belonging to *that* completed crawl, not a later, still
+   * in-progress one — otherwise the window would only cover the newer crawl's partial output.
+   * Falls back to the default lookback if the crawl has no `started` marker.
+   */
+  const getFullSyncWindowStart = async (
+    source: MonitoringEntitySource,
+    completedAt: string
+  ): Promise<string> => {
+    const startedMarker = await findLastEventMarkerInIndex(source, 'started', completedAt);
+    return startedMarker ?? parseOrThrow(FIRST_RUN_DEFAULT_RANGE);
   };
 
   return {
@@ -76,5 +120,7 @@ export const createWatchlistSyncMarkersService = (
     updateLastProcessedMarker,
     findLastEventMarkerInIndex,
     detectNewFullSync,
+    markFullSyncProcessed,
+    getFullSyncWindowStart,
   };
 };

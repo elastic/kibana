@@ -1,0 +1,453 @@
+openapi: 3.0.3
+info:
+  title: SIEM Workflow Migration API
+  version: '1'
+paths:
+  /internal/siem_migrations/workflows:
+    put:
+      summary: Creates a new workflow migration
+      operationId: CreateWorkflowMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Creates a new workflow migration and returns the corresponding migration_id
+      tags:
+        - SIEM Workflow Migrations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  description: The workflow migration name
+                  $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: The migration was created successfully and migration_id is returned
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - migration_id
+                properties:
+                  migration_id:
+                    description: The migration id created.
+                    $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+  /internal/siem_migrations/workflows/stats:
+    get:
+      summary: Retrieves the stats for all workflow migrations
+      operationId: GetAllWorkflowMigrationStats
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the workflow migration stats for all migrations stored in the system
+      tags:
+        - SIEM Workflow Migrations
+      responses:
+        200:
+          description: Indicates workflow migration stats have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../common.schema.yaml#/components/schemas/MigrationTaskStats'
+
+  /internal/siem_migrations/workflows/{migration_id}:
+    get:
+      summary: Retrieves a workflow migration
+      operationId: GetWorkflowMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the workflow migration document stored in the system given the workflow migration id
+      tags:
+        - SIEM Workflow Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to retrieve
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates the workflow migration has been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                $ref: '../../workflow_migration.schema.yaml#/components/schemas/WorkflowMigration'
+        404:
+          description: Indicates the migration id was not found.
+    patch:
+      summary: Updates a workflow migration
+      operationId: UpdateWorkflowMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Updates mutable fields of an existing workflow migration
+      tags:
+        - SIEM Workflow Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to update
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  description: The workflow migration name
+                  $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+              additionalProperties: false
+      responses:
+        200:
+          description: Indicates the workflow migration has been updated successfully.
+        404:
+          description: Indicates the migration id was not found.
+    delete:
+      summary: Deletes a workflow migration
+      operationId: DeleteWorkflowMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Deletes a SIEM workflow migration using the migration id provided
+      tags:
+        - SIEM Workflow Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to delete
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates the migration has been deleted successfully.
+        404:
+          description: Indicates the migration id was not found.
+
+  /internal/siem_migrations/workflows/{migration_id}/workflows:
+    post:
+      summary: Adds Tines stories to a workflow migration
+      operationId: CreateWorkflowMigrationWorkflows
+      x-codegen-enabled: true
+      x-internal: true
+      description: Adds original Tines story exports to an already existing workflow migration
+      tags:
+        - SIEM Workflow Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to add the workflows to
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              maxItems: 1000
+              items:
+                description: Tines story export to add to the migration
+                $ref: '../../vendor/workflows/tines.schema.yaml#/components/schemas/TinesStoryExport'
+      responses:
+        200:
+          description: Indicates workflows have been added to the migration successfully.
+    get:
+      summary: Retrieves workflows for a migration
+      operationId: GetWorkflowMigrationWorkflows
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the workflows added to an existing workflow migration
+      tags:
+        - SIEM Workflow Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to retrieve workflows for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 100000
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+        - name: sort_field
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: search_term
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 1000
+        - name: ids
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              description: The workflow migration item id
+              $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: is_installed
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_fully_translated
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_partially_translated
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_untranslatable
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_failed
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: Indicates workflows have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: integer
+                    minimum: 0
+                    description: The total number of workflows in the migration.
+                  data:
+                    type: array
+                    items:
+                      $ref: '../../workflow_migration.schema.yaml#/components/schemas/WorkflowMigrationWorkflow'
+    patch:
+      summary: Updates workflows of a migration
+      operationId: UpdateWorkflowMigrationWorkflows
+      x-codegen-enabled: true
+      x-internal: true
+      description: Updates workflow migration item attributes
+      tags:
+        - SIEM Workflow Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to update workflows for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              maxItems: 1000
+              items:
+                $ref: '../../workflow_migration.schema.yaml#/components/schemas/UpdateWorkflowMigrationWorkflow'
+      responses:
+        200:
+          description: Indicates workflow migration items have been updated correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - updated
+                properties:
+                  updated:
+                    type: boolean
+                    description: Indicates workflow migration items have been updated.
+
+  /internal/siem_migrations/workflows/{migration_id}/stats:
+    get:
+      summary: Retrieves the stats for a workflow migration
+      operationId: GetWorkflowMigrationStats
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the workflow migration stats for the migration id provided
+      tags:
+        - SIEM Workflow Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to fetch stats for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates workflow migration stats have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                $ref: '../../common.schema.yaml#/components/schemas/MigrationTaskStats'
+
+  /internal/siem_migrations/workflows/{migration_id}/translation_stats:
+    get:
+      summary: Retrieves the translation stats for a workflow migration
+      operationId: GetWorkflowMigrationTranslationStats
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the translation stats of a workflow migration using the migration id provided
+      tags:
+        - SIEM Workflow Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to fetch translation stats for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates workflow migration translation stats have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                $ref: '../../common.schema.yaml#/components/schemas/MigrationTranslationStats'
+
+  /internal/siem_migrations/workflows/{migration_id}/start:
+    post:
+      summary: Starts a workflow migration
+      operationId: StartWorkflowMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Starts a SIEM workflow migration using the migration id provided
+      tags:
+        - SIEM Workflow Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to start
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - settings
+              properties:
+                settings:
+                  type: object
+                  description: Settings applicable to the current workflow migration task execution.
+                  required:
+                    - connector_id
+                  properties:
+                    connector_id:
+                      type: string
+                      minLength: 1
+                      maxLength: 256
+                      description: The connector ID used for this execution.
+                langsmith_options:
+                  $ref: '../../common.schema.yaml#/components/schemas/LangSmithOptions'
+                retry:
+                  type: string
+                  description: The optional indicator to retry the workflow translation based on this filter criteria.
+                  enum:
+                    - failed
+                    - not_fully_translated
+                    - selected
+                selection:
+                  type: object
+                  description: Selected workflows to retry migration on.
+                  required:
+                    - ids
+                  properties:
+                    ids:
+                      type: array
+                      maxItems: 10000
+                      description: The list of workflow item ids
+                      items:
+                        $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates the migration start request has been processed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - started
+                properties:
+                  started:
+                    type: boolean
+                    description: Indicates the migration has been started. `false` means the migration does not need to be started.
+
+  /internal/siem_migrations/workflows/{migration_id}/stop:
+    post:
+      summary: Stops an existing workflow migration
+      operationId: StopWorkflowMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Stops a running SIEM workflow migration using the migration id provided
+      tags:
+        - SIEM Workflow Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to stop
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates migration task stop has been processed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - stopped
+                properties:
+                  stopped:
+                    type: boolean
+                    description: Indicates the migration has been stopped.

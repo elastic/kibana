@@ -456,6 +456,36 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       expect(searchMock).not.toHaveBeenCalled();
     });
 
+    it('forwards agentsCount so the aggregation counts responders exactly', async () => {
+      const { provider, searchMock } = setup();
+
+      await lastValueFrom(
+        provider.search(
+          { ...actionResultsRequest, agentsCount: 1000 },
+          {} as never,
+          { request: {} } as never
+        )
+      );
+
+      const aggs = searchMock.mock.calls[0][0].params.aggs.aggs.aggs.responses_by_action_id.aggs;
+
+      expect(aggs.responding_agent_ids).toEqual({ terms: { field: 'agent_id', size: 1000 } });
+      expect(aggs.responding_agents).toBeUndefined();
+    });
+
+    it('counts response documents when agentsCount is not sent', async () => {
+      const { provider, searchMock } = setup();
+
+      await lastValueFrom(
+        provider.search(actionResultsRequest, {} as never, { request: {} } as never)
+      );
+
+      const aggs = searchMock.mock.calls[0][0].params.aggs.aggs.aggs.responses_by_action_id.aggs;
+
+      expect(aggs.responding_agents).toBeUndefined();
+      expect(aggs.responding_agent_ids).toBeUndefined();
+    });
+
     it('prefers the new data-stream response when it returns hits', async () => {
       const { provider, searchMock } = setup({ newDataStreamIndexExists: true });
       searchMock
