@@ -282,6 +282,48 @@ describe('chunksIntoMessage', () => {
     });
   });
 
+  it('forwards the id it puts in the message for an id-less call when the source is synchronous', async () => {
+    const events = await lastValueFrom(
+      chunksIntoMessage({
+        toolOptions: {
+          toolChoice: ToolChoiceType.auto,
+          tools: {
+            myFunction: {
+              description: 'myFunction',
+              schema: { type: 'object', properties: {} },
+            },
+          },
+        },
+        logger,
+        // no delay: a synchronous source completes before the second consumer subscribes
+      })(
+        fromEvents({
+          content: '',
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          tool_calls: [
+            { function: { name: 'myFunction', arguments: '{}' }, index: 0, toolCallId: '' },
+          ],
+        })
+      ).pipe(toArray())
+    );
+
+    const forwardedToolCalls = events.flatMap((event) =>
+      event.type === ChatCompletionEventType.ChatCompletionChunk ? event.tool_calls : []
+    );
+    const message = events.find(
+      (event) => event.type === ChatCompletionEventType.ChatCompletionMessage
+    );
+
+    expect(forwardedToolCalls).toHaveLength(1);
+    const [{ toolCallId }] = forwardedToolCalls;
+    expect(toolCallId).not.toBe('');
+    expect(message).toEqual({
+      type: ChatCompletionEventType.ChatCompletionMessage,
+      content: '',
+      toolCalls: [{ function: { name: 'myFunction', arguments: {} }, toolCallId }],
+    });
+  });
+
   it('validates tool calls', async () => {
     async function getMessage() {
       return await lastValueFrom(

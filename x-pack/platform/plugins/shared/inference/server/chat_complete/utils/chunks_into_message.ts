@@ -14,7 +14,7 @@ import type {
 import { ChatCompletionEventType, withoutTokenCountEvents } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import type { OperatorFunction } from 'rxjs';
-import { map, merge, share, toArray } from 'rxjs';
+import { defer, map, merge, ReplaySubject, share, toArray } from 'rxjs';
 import { validateToolCalls } from '../../util/validate_tool_calls';
 import { mergeChunks } from './merge_chunks';
 import { normalizeToolCallChunks } from './normalize_tool_call_chunks';
@@ -32,37 +32,50 @@ export function chunksIntoMessage<TToolOptions extends ToolOptions>({
   | ChatCompletionTokenCountEvent
   | ChatCompletionMessageEvent<TToolOptions>
 > {
-  return (chunks$) => {
-    // Normalized before sharing, so the forwarded chunks and the merged message agree on tool calls:
-    // first every call gets an id, then every call gets its own index
-    const shared$ = chunks$.pipe(normalizeToolCallChunks(), normalizeToolCallIndexes(), share());
-
-    return merge(
-      shared$,
-      shared$.pipe(
-        withoutTokenCountEvents(),
-        toArray(),
-        map((chunks): ChatCompletionMessageEvent<TToolOptions> => {
-          const concatenatedChunk = mergeChunks(chunks);
-
-          logger.debug(() => `Received completed message: ${JSON.stringify(concatenatedChunk)}`);
-
-          const { content, refusal, tool_calls: toolCalls } = concatenatedChunk;
-
-          const validatedToolCalls = validateToolCalls<TToolOptions>({
-            ...toolOptions,
-            toolCalls,
-            logger,
-          });
-
-          return {
-            type: ChatCompletionEventType.ChatCompletionMessage,
-            content,
-            ...(refusal ? { refusal } : {}),
-            toolCalls: validatedToolCalls,
-          };
+  return (chunks$) =>
+    defer(() => {
+      // Normalized before sharing, so the forwarded chunks and the merged message agree on tool calls:
+      // first every call gets an id, then every call gets its own index.
+      // The replay keeps a synchronous source from being run (and normalized, with new generated
+      // ids) a second time: it completes before the second consumer subscribes, and a plain
+      // share() resets on completion.
+      const shared$ = chunks$.pipe(
+        normalizeToolCallChunks(),
+        normalizeToolCallIndexes(),
+        share({
+          connector: () => new ReplaySubject(),
+          resetOnError: true,
+          resetOnComplete: false,
+          resetOnRefCountZero: false,
         })
-      )
-    );
-  };
+      );
+
+      return merge(
+        shared$,
+        shared$.pipe(
+          withoutTokenCountEvents(),
+          toArray(),
+          map((chunks): ChatCompletionMessageEvent<TToolOptions> => {
+            const concatenatedChunk = mergeChunks(chunks);
+
+            logger.debug(() => `Received completed message: ${JSON.stringify(concatenatedChunk)}`);
+
+            const { content, refusal, tool_calls: toolCalls } = concatenatedChunk;
+
+            const validatedToolCalls = validateToolCalls<TToolOptions>({
+              ...toolOptions,
+              toolCalls,
+              logger,
+            });
+
+            return {
+              type: ChatCompletionEventType.ChatCompletionMessage,
+              content,
+              ...(refusal ? { refusal } : {}),
+              toolCalls: validatedToolCalls,
+            };
+          })
+        )
+      );
+    });
 }
