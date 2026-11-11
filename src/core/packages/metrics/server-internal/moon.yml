@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/core-threads-server-internal'
   - '@kbn/core-feature-flags-server'
   - '@kbn/core-status-common'
+  - '@kbn/repo-info'
 tags:
   - shared-server
   - package

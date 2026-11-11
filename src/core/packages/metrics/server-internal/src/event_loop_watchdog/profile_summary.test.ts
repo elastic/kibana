@@ -200,7 +200,7 @@ describe('summarizeProfile', () => {
     const summary = summarizeProfile(tiedProfile, { root: ROOT });
     expect(summary.frames).toHaveLength(2);
     expect(summary.kibanaFrames).toHaveLength(3);
-    // All 4 leaves have 1 sample each; sorted by location: src/leafA.ts:10, src/leafB.ts:10, src/leafC.ts:10, then the truncated deep location starting with '…'.
+    // All 4 leaves have 1 sample each; sorted by uncut repo-relative location: src/leafA.ts:10, src/leafB.ts:10, src/leafC.ts:10, src/segment/.../deep_kibana.ts:1.
     expect(summary.frames.map(({ name }) => name)).toEqual(['leafA', 'leafB']);
     expect(summary.kibanaFrames.map(({ name }) => name)).toEqual(['leafA', 'leafB', 'leafC']);
 

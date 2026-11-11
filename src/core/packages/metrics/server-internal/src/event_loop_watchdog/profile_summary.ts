@@ -79,6 +79,14 @@ const isKibanaPath = (rel: string | undefined): boolean =>
   rel !== undefined &&
   (rel.startsWith('src/') || rel.startsWith('x-pack/') || rel.startsWith('node_modules/@kbn/'));
 
+const rawLocation = (url: string, lineNumber: number, root: string): string => {
+  const rel = relativeLocation(url, root);
+  if (rel === undefined) {
+    return '';
+  }
+  return lineNumber >= 0 ? `${rel}:${lineNumber + 1}` : rel;
+};
+
 const percentOf = (part: number, total: number): number =>
   total === 0 ? 0 : Math.round((part / total) * 1000) / 10;
 
@@ -219,20 +227,14 @@ export const summarizeProfile = (
     }
   }
 
-  const describedCache = new Map<number, CallerSummary>();
   const describe = (f: number): CallerSummary => {
-    let cached = describedCache.get(f);
-    if (!cached) {
-      const { functionName, url = '', lineNumber = -1 } = nodes[frameNode[f]].callFrame;
-      const name = sanitize(functionName || '(anonymous)', {
-        maxBytes: MAX_NAME_BYTES,
-        keep: 'start',
-      });
-      const location = sanitizeLocation(url, lineNumber, root);
-      cached = location !== undefined ? { name, location } : { name };
-      describedCache.set(f, cached);
-    }
-    return cached;
+    const { functionName, url = '', lineNumber = -1 } = nodes[frameNode[f]].callFrame;
+    const name = sanitize(functionName || '(anonymous)', {
+      maxBytes: MAX_NAME_BYTES,
+      keep: 'start',
+    });
+    const location = sanitizeLocation(url, lineNumber, root);
+    return location !== undefined ? { name, location } : { name };
   };
 
   const compareFrames = (counts: Int32Array, a: number, b: number): number => {
@@ -240,13 +242,15 @@ export const summarizeProfile = (
     if (diff !== 0) {
       return diff;
     }
-    const locA = describe(a).location ?? '';
-    const locB = describe(b).location ?? '';
+    const frameA = nodes[frameNode[a]].callFrame;
+    const frameB = nodes[frameNode[b]].callFrame;
+    const locA = rawLocation(frameA.url ?? '', frameA.lineNumber ?? -1, root);
+    const locB = rawLocation(frameB.url ?? '', frameB.lineNumber ?? -1, root);
     if (locA !== locB) {
       return locA < locB ? -1 : 1;
     }
-    const nameA = describe(a).name;
-    const nameB = describe(b).name;
+    const nameA = frameA.functionName || '(anonymous)';
+    const nameB = frameB.functionName || '(anonymous)';
     return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
   };
 

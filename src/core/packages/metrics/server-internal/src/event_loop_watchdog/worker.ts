@@ -14,6 +14,7 @@
 
 import { getHeapStatistics } from 'node:v8';
 import { isMainThread, workerData } from 'node:worker_threads';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { WorkerLogger } from '@kbn/core-threads-server-internal';
 import { createWorkerLogger } from '@kbn/core-threads-server-internal';
 import { BlockDetector, type DetectedBlock } from './block_detector';
@@ -24,6 +25,7 @@ import {
   type CpuProfile,
   type InspectorSession,
 } from './profile_capture';
+import { summarizeProfile, type CallerSummary, type KibanaFrameSummary } from './profile_summary';
 import type {
   BlockLogMeta,
   CaptureStopReason,
@@ -41,6 +43,8 @@ export interface WatchdogWorkerDeps {
   nowUs?: () => number;
   heapUsed?: () => number;
   createSession?: () => InspectorSession;
+  /** `workerData` is for startup values that may vary between runs; the worker can determine `REPO_ROOT` itself. */
+  root?: string;
 }
 
 interface Capture {
@@ -56,6 +60,10 @@ interface Capture {
   activeFrom: number;
   /** Set when the stop is requested. */
   stopReason?: CaptureStopReason;
+  /** When `Profiler.stop` was sent (milliseconds). */
+  stopRequestedAt?: number;
+  /** When the block ended (milliseconds); only set for `block_ended`. */
+  blockEndedAt?: number;
   /** Largest heartbeat gap seen since a `block_ended` stop was requested. */
   stopHeartbeatGapMs: number;
 }
@@ -74,16 +82,19 @@ const noCaptures = (): ProfilingStats => ({
 const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-/** Time from the first sample to the stop. */
-const sampledMs = ({ startTime, endTime, timeDeltas }: CpuProfile): number =>
-  timeDeltas?.length ? toMs(endTime - (startTime + timeDeltas[0])) : 0;
+/** Time from the first sample to the block's end (`block_ended`) or to the stop (`max_duration`). */
+const sampledMs = ({ startTime, endTime, timeDeltas }: CpuProfile, untilUs = endTime): number =>
+  timeDeltas?.length ? Math.max(0, toMs(untilUs - (startTime + timeDeltas[0]))) : 0;
 
-/** Whether any sample is outside `(idle)`; `(program)` and GC count as busy. */
-const hasBusySample = ({ nodes, samples = [] }: CpuProfile): boolean => {
-  const idle = new Set(
-    nodes.filter(({ callFrame }) => callFrame.functionName === '(idle)').map(({ id }) => id)
-  );
-  return samples.some((id) => !idle.has(id));
+const formatFrame = ({ name, location }: CallerSummary): string =>
+  location === undefined ? name : `${name} (${location})`;
+
+const formatTopKibanaSuffix = (frame: KibanaFrameSummary | undefined): string => {
+  if (!frame) {
+    return '';
+  }
+  const chain = [formatFrame(frame), ...frame.callers.map(formatFrame)].join(' <- ');
+  return `; top Kibana frame: ${frame.percent}% ${chain}`;
 };
 
 /** Starts detection; returns a function that stops it (for tests: the worker never stops itself). */
@@ -94,6 +105,7 @@ export const runWatchdogWorker = (
     nowUs = monotonicUs,
     heapUsed = () => getHeapStatistics().used_heap_size,
     createSession = createInspectorSession,
+    root = REPO_ROOT,
   }: WatchdogWorkerDeps
 ): (() => void) => {
   const shared = new BigInt64Array(sharedBuffer);
@@ -205,12 +217,19 @@ export const runWatchdogWorker = (
     });
   };
 
-  const stopCapture = (current: Capture, stopReason: CaptureStopReason, blockedMs: number) => {
+  const stopCapture = (
+    current: Capture,
+    stopReason: CaptureStopReason,
+    blockedMs: number,
+    blockEndedAt?: number
+  ) => {
     current.stopReason = stopReason;
+    current.blockEndedAt = blockEndedAt;
     current.started
       .then(
-        () =>
-          current.profiler.stop().then(
+        () => {
+          current.stopRequestedAt = toMs(nowUs());
+          return current.profiler.stop().then(
             (profile) => onProfile(current, profile, stopReason, blockedMs),
             (error) => {
               if (stopped) {
@@ -222,7 +241,8 @@ export const runWatchdogWorker = (
                 { tags: ['event-loop-watchdog'] }
               );
             }
-          ),
+          );
+        },
         // A capture that failed to start was counted and ended by the start handler.
         () => undefined
       )
@@ -235,17 +255,40 @@ export const runWatchdogWorker = (
     stopReason: CaptureStopReason,
     blockedMs: number
   ) => {
-    const { phase, blockStartedAt, requestedAt, profilerStartMs = 0 } = current;
-    const samples = profile.samples?.length ?? 0;
-    if (hasBusySample(profile)) {
+    const nowMs = toMs(nowUs());
+    const {
+      phase,
+      blockStartedAt,
+      requestedAt,
+      profilerStartMs = 0,
+      stopRequestedAt = requestedAt,
+      blockEndedAt,
+    } = current;
+    // The profile's clock can be offset from the heartbeat clock, so anchor the block's end to
+    // `endTime` and the stop request. For `max_duration`, the block is still going at the stop.
+    const inBlockUntilUs =
+      stopReason === 'block_ended' && blockEndedAt !== undefined
+        ? profile.endTime - (stopRequestedAt - blockEndedAt) * 1000
+        : undefined;
+    let summary;
+    try {
+      summary = summarizeProfile(profile, { root, inBlockUntilUs });
+    } catch (error) {
+      counts.captureFailed++;
+      logger.error(`Failed to process an event loop block profile: ${errorMessage(error)}`, {
+        tags: ['event-loop-watchdog'],
+      });
+      return;
+    }
+    // Read after summarising while the profile is still held, so it includes both.
+    const heap = heapUsed();
+    if (summary.samples > 0) {
       counts.profiled++;
     } else {
       counts.emptyTooLate++;
     }
-    const nowMs = toMs(nowUs());
     const profiledAfterMs = requestedAt - blockStartedAt;
-    const sampled = sampledMs(profile);
-    // A block_ended profile runs until the stop resolves, so it can outlast the block.
+    const sampled = sampledMs(profile, inBlockUntilUs);
     const coverage = blockedMs > 0 ? Math.min(1, Math.round((sampled / blockedMs) * 100) / 100) : 0;
     // After a block ends, the stop and the profile's serialisation are main-thread work. A
     // max-duration stop happens during the block, so its gap is the block itself.
@@ -257,7 +300,9 @@ export const runWatchdogWorker = (
     logger.info<ProfileLogMeta>(
       `Event loop block profiled: block ~${blockedMs}ms${
         stopReason === 'block_ended' ? '' : ' so far'
-      } (profiled after ~${profiledAfterMs}ms, profiler start took ~${profilerStartMs}ms), ${samples} samples; stopped: ${stopReason}`,
+      } (profiled after ~${profiledAfterMs}ms, profiler start took ~${profilerStartMs}ms), ${
+        summary.samples
+      } samples; stopped: ${stopReason}${formatTopKibanaSuffix(summary.kibanaFrames[0])}`,
       {
         tags: ['event-loop-watchdog'],
         kibana: {
@@ -270,10 +315,9 @@ export const runWatchdogWorker = (
               sampledMs: sampled,
               coverage,
               captureDurationMs: nowMs - requestedAt,
-              samples,
+              ...summary,
               nodes: profile.nodes.length,
-              // Read while the profile is still held, so it includes the profile.
-              heapUsed: heapUsed(),
+              heapUsed: heap,
               stopReason,
               ...(stopHeartbeatGapMs === undefined ? {} : { stopHeartbeatGapMs }),
             },
@@ -294,7 +338,12 @@ export const runWatchdogWorker = (
       }
       if (block?.startedAt !== capture.blockStartedAt) {
         // Only the block this capture belongs to can have ended since the last poll.
-        stopCapture(capture, 'block_ended', ended?.blockedMs ?? nowMs - capture.blockStartedAt);
+        stopCapture(
+          capture,
+          'block_ended',
+          ended?.blockedMs ?? nowMs - capture.blockStartedAt,
+          ended?.endedAt ?? nowMs
+        );
       } else if (nowMs - capture.requestedAt >= profiling.maxDurationMs[capture.phase]) {
         // Still blocked: keep what was sampled so far.
         stopCapture(capture, 'max_duration', nowMs - capture.blockStartedAt);
