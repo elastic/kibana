@@ -56,30 +56,46 @@ describe('extractObservablesStepDefinition', () => {
     });
   });
 
-  it('returns an output, not an error, when no new observables were found', async () => {
-    const extractObservables = jest.fn().mockResolvedValue({
-      case: createCaseResponseFixture,
-      status: 'no_new_observables',
-      newObservablesCount: 0,
-      alertsRequested: 1,
-      alertsFound: 1,
-    });
-    const definition = extractObservablesStepDefinition(
-      jest.fn().mockResolvedValue({ cases: { extractObservables } } as unknown as CasesClient)
-    );
+  it.each([
+    { status: 'no_new_observables', alertsRequested: 1, alertsFound: 1 },
+    { status: 'alerts_not_found', alertsRequested: 1, alertsFound: 0 },
+    { status: 'cap_reached', alertsRequested: 1, alertsFound: 1 },
+  ])(
+    'returns an output, not an error, when the status is $status',
+    async ({ status, alertsRequested, alertsFound }) => {
+      const extractObservables = jest.fn().mockResolvedValue({
+        case: createCaseResponseFixture,
+        status,
+        newObservablesCount: 0,
+        alertsRequested,
+        alertsFound,
+      });
+      const definition = extractObservablesStepDefinition(
+        jest.fn().mockResolvedValue({ cases: { extractObservables } } as unknown as CasesClient)
+      );
 
-    const result = await definition.handler(createContext({ case_id: 'case-1' }));
+      const result = await definition.handler(createContext({ case_id: 'case-1' }));
 
-    expect(result.error).toBeUndefined();
-    expect(result.output).toEqual(
-      expect.objectContaining({ status: 'no_new_observables', new_observables_count: 0 })
-    );
-  });
+      expect(result.error).toBeUndefined();
+      expect(result.output).toEqual(
+        expect.objectContaining({
+          status,
+          new_observables_count: 0,
+          alerts_requested: alertsRequested,
+          alerts_found: alertsFound,
+        })
+      );
+    }
+  );
 
   it('returns an error that names the case when the extraction fails', async () => {
     const extractObservables = jest
       .fn()
-      .mockRejectedValue(new Error('Observable extraction is turned off for this case'));
+      .mockRejectedValue(
+        new Error(
+          'Observable extraction is turned off for case case-1. Turn it on in the case settings, then try again.'
+        )
+      );
     const definition = extractObservablesStepDefinition(
       jest.fn().mockResolvedValue({ cases: { extractObservables } } as unknown as CasesClient)
     );
@@ -87,7 +103,8 @@ describe('extractObservablesStepDefinition', () => {
     const result = await definition.handler(createContext({ case_id: 'case-1' }));
 
     expect(result.output).toBeUndefined();
-    expect(result.error?.message).toContain('case-1');
-    expect(result.error?.message).toContain('turned off');
+    expect(result.error?.message).toBe(
+      'Observables could not be extracted on case "case-1". Reason: Observable extraction is turned off for case case-1. Turn it on in the case settings, then try again.'
+    );
   });
 });
