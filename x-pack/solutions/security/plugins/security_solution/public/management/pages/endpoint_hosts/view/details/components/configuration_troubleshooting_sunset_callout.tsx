@@ -27,6 +27,7 @@ export const ConfigurationTroubleshootingSunsetCallout = ({
   const { euiTheme } = useEuiTheme();
   const { agentBuilder } = useKibana().services;
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
+  const canOpenAgentBuilder = isAgentBuilderEnabled && Boolean(agentBuilder?.openChat);
   const handleClick = useCallback(() => {
     agentBuilder?.openChat?.({
       newConversation: true,
@@ -51,12 +52,19 @@ export const ConfigurationTroubleshootingSunsetCallout = ({
     description: (
       <>
         <p>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.details.configurationTroubleshootingSunset.calloutDescription"
-            defaultMessage="To troubleshoot Elastic Defend on this host, ask Agent Builder."
-          />
+          {canOpenAgentBuilder ? (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.details.configurationTroubleshootingSunset.calloutDescription"
+              defaultMessage="To troubleshoot Elastic Defend on this host, ask Agent Builder."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.details.configurationTroubleshootingSunset.calloutDescriptionNoAgentBuilder"
+              defaultMessage="Automatic Troubleshooting is now only available in Agent Builder. Ask your administrator for access."
+            />
+          )}
         </p>
-        {isAgentBuilderEnabled && agentBuilder?.openChat && (
+        {canOpenAgentBuilder && (
           <EuiButton
             fill
             color="primary"
