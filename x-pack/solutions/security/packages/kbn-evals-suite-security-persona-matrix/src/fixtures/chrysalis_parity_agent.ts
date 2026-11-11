@@ -7,9 +7,13 @@
 
 import { CHRYSALIS_PARITY_AGENT_ID } from '../agent_profile';
 
-// Verbatim copy of the dedicated agent used by the external EIS model benchmark,
-// so `security-persona-matrix-parity` runs (AGENT_PROFILE=chrysalis-parity)
-// reproduce its environment. Opt-in only: default runs use the built-in Elastic AI Agent.
+// The dedicated agent used by the external EIS model benchmark, so
+// `security-persona-matrix-parity` runs (AGENT_PROFILE=chrysalis-parity)
+// reproduce its environment. One deliberate divergence from the benchmark's
+// agent: `write_todos` is a seeded workflow tool reconstructing the builtin
+// the platform removed (#303186) after the benchmark ran — same contract
+// (description and schema), different backing implementation. Opt-in only:
+// default runs use the built-in Elastic AI Agent.
 export const CHRYSALIS_PARITY_AGENT = {
   id: CHRYSALIS_PARITY_AGENT_ID,
   name: 'Chrysalis Hunting Agent',

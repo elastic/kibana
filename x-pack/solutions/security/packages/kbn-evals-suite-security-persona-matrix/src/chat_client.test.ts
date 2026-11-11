@@ -325,7 +325,8 @@ describe('PersonaMatrixChatClient HITL prompts', () => {
 
     const result = await createClient(fetch).query('q');
 
-    // 1 initial POST + MAX_AUTO_CONFIRM_ROUNDS continuations (withRetry does not retry this error)
+    // 1 initial POST + MAX_AUTO_CONFIRM_ROUNDS continuations (the cap records a
+    // soft error on the row; it no longer throws, so no retry is involved)
     expect(fetch).toHaveBeenCalledTimes(1 + MAX_AUTO_CONFIRM_ROUNDS);
     // The partial trajectory is preserved and the stuck-agent loop is recorded
     // as an error on the scored row instead of aborting the whole suite.
