@@ -64,7 +64,7 @@ apiTest.describe(
       const pollPromise = apiClient
         .post(`${ESE_API_PATH}/${id}`, {
           headers: { ...COMMON_HEADERS, ...cookieHeader },
-          body: { params: { wait_for_completion_timeout: '10s' } },
+          body: { pollLength: '10s' },
           signal: controller.signal,
         })
         .catch((e: Error) => e);

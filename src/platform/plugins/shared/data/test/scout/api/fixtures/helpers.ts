@@ -41,6 +41,18 @@ export function shardDelayAgg(delay: string) {
 }
 
 /**
+ * A query clause that stalls every shard for the given number of seconds (SNAPSHOT builds only).
+ * Useful for strategies that cannot use the `shard_delay` aggregation (e.g. SQL and EQL).
+ */
+export function stallQuery(seconds: number) {
+  return {
+    error_query: {
+      indices: [{ name: '*', error_type: 'none', stall_time_seconds: seconds }],
+    },
+  };
+}
+
+/**
  * Polls a callback until it returns true or the timeout is reached.
  */
 export async function waitFor(

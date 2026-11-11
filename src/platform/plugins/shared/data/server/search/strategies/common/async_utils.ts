@@ -66,8 +66,10 @@ export function getCommonDefaultAsyncGetParams(
     config.sessions.enabled && !!options.sessionId && !overrides?.disableSearchSessions;
 
   return {
-    // Wait up to the timeout for the response to return
-    ...(config.asyncSearch.pollLength
+    // Wait up to the timeout for the response to return; the client asks for a long-poll over HTTP/2
+    ...(options.pollLength
+      ? { wait_for_completion_timeout: options.pollLength }
+      : config.asyncSearch.pollLength
       ? { wait_for_completion_timeout: `${config.asyncSearch.pollLength.asMilliseconds()}ms` }
       : {}),
     ...(useSearchSessions && options.isStored
