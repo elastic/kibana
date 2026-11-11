@@ -115,6 +115,13 @@ const markerSays = async (worker: LaneSettings, hash: string): Promise<boolean> 
   }
 };
 
+/** Re-runs of infrastructure-broken runs per measurement, and the share still broken it accepts. */
+const INFRA_RETRIES = 2;
+const MAX_BROKEN_SHARE = 0.05;
+
+/** A measurement the infrastructure spoiled; its numbers must not reach a gate. */
+export class InfrastructureError extends Error {}
+
 const settleAll = async <T>(promises: Array<Promise<T>>): Promise<T[]> => {
   const results = await Promise.allSettled(promises);
   const failed = results.find((result) => result.status === 'rejected');
@@ -252,17 +259,40 @@ export const createWorkerPool = ({
       const fresh = (
         await settleAll(
           workers.map(async (worker, i) => {
-            const runs = await runOrcaWorkOnLane({
-              label,
-              lane: worker,
-              work: [...shards[i].values()].flat(),
-              concurrency,
-              agentConnectorId,
-              judgeConnectorId,
-              telemetryVariant,
-              traceDir,
-              log,
-            });
+            const runOn = (items: WorkItem[]) =>
+              runOrcaWorkOnLane({
+                label,
+                lane: worker,
+                work: items,
+                concurrency,
+                agentConnectorId,
+                judgeConnectorId,
+                telemetryVariant,
+                traceDir,
+                log,
+              });
+            const items = [...shards[i].values()].flat();
+            const runs = await runOn(items);
+            // A run the infrastructure broke (sandbox down, judge error) says nothing about the
+            // variant: run it again, a bounded number of times.
+            for (let retry = 1; retry <= INFRA_RETRIES; retry++) {
+              const broken = runs.filter(isInfrastructureFailure);
+              if (broken.length === 0) break;
+              log.warning(
+                `[${label}] ${worker.lane}: ${broken.length} run(s) broken by infrastructure, retry ${retry}/${INFRA_RETRIES}`
+              );
+              const again = await runOn(
+                items.filter(({ task, rollout }) =>
+                  broken.some((run) => run.exampleId === task.id && run.rollout === rollout)
+                )
+              );
+              for (const run of again) {
+                const at = runs.findIndex(
+                  (prior) => prior.exampleId === run.exampleId && prior.rollout === run.rollout
+                );
+                runs[at] = run;
+              }
+            }
             // Cached as soon as a worker is done, so a later worker's failure loses nothing.
             for (const run of runs) {
               if (!isInfrastructureFailure(run)) cache.put(run.exampleId, run);
@@ -271,6 +301,16 @@ export const createWorkerPool = ({
           })
         )
       ).flat();
+      const broken = fresh.filter(isInfrastructureFailure);
+      if (broken.length > MAX_BROKEN_SHARE * (cached.length + fresh.length)) {
+        throw new InfrastructureError(
+          `"${label}": ${broken.length} of ${
+            cached.length + fresh.length
+          } runs still broken by infrastructure after ${INFRA_RETRIES} retries (sandbox errors in ${
+            broken.filter((run) => (run.sandboxErrors ?? 0) > 0).length
+          })`
+        );
+      }
 
       return summarize({
         label,

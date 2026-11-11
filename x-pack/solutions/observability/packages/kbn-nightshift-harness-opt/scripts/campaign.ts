@@ -24,7 +24,7 @@ import {
   writeEdits,
 } from './candidate_workspace';
 import type { CodeEdit } from './candidate_workspace';
-import { variantOf } from './workers';
+import { InfrastructureError, variantOf } from './workers';
 import type { Variant, WorkerPool } from './workers';
 
 export interface CampaignOptions {
@@ -279,21 +279,41 @@ export const runCampaign = async ({
     }
 
     const candidate = variantOf(pool.workers, allEdits, attemptedDiff);
-    // The incumbent first: usually all cached, so the pool switches to the candidate only once.
-    const incumbentGate = await pool.measure({
-      label: `round${round}-incumbent-gate`,
-      variant: incumbent,
-      tasks: gateTasks,
-      rollouts: gateRollouts,
-      outputDir,
-    });
-    const candidateGate = await pool.measure({
-      label: `round${round}-candidate-gate`,
-      variant: candidate,
-      tasks: gateTasks,
-      rollouts: gateRollouts,
-      outputDir,
-    });
+    let incumbentGate: RunSummary;
+    let candidateGate: RunSummary;
+    try {
+      // The incumbent first: usually all cached, so the pool switches to the candidate only once.
+      incumbentGate = await pool.measure({
+        label: `round${round}-incumbent-gate`,
+        variant: incumbent,
+        tasks: gateTasks,
+        rollouts: gateRollouts,
+        outputDir,
+      });
+      candidateGate = await pool.measure({
+        label: `round${round}-candidate-gate`,
+        variant: candidate,
+        tasks: gateTasks,
+        rollouts: gateRollouts,
+        outputDir,
+      });
+    } catch (e) {
+      if (!(e instanceof InfrastructureError)) throw e;
+      // Not the proposal's fault: no feedback, and the next round's proposer starts over.
+      log.error(`[harness-opt] round ${round} gate spoiled by infrastructure: ${e.message}`);
+      ledger.push({
+        ...base,
+        rejected: 'infrastructure',
+        failures: [e.message],
+        manifest: proposal.manifest,
+        filesChanged,
+        diff: attemptedDiff,
+        variantHash: candidate.hash,
+        outputDir,
+      });
+      saveLedger();
+      continue;
+    }
     const gate = gateCandidate({ incumbent: incumbentGate, candidate: candidateGate });
 
     // Predictions name search cases, so they are checked by re-measuring the search split.

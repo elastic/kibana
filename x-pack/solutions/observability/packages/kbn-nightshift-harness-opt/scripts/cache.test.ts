@@ -9,7 +9,7 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { createRunCache, isInfrastructureFailure } from './cache';
+import { countSandboxErrors, createRunCache, isInfrastructureFailure } from './cache';
 import type { TaskRun } from './runner';
 
 const parts = {
@@ -69,5 +69,22 @@ describe('isInfrastructureFailure', () => {
       false
     );
     expect(isInfrastructureFailure({ reward: 0.3 } as TaskRun)).toBe(false);
+  });
+});
+
+describe('countSandboxErrors', () => {
+  it('counts sandbox transport failures, not the word UNAVAILABLE in what the agent read', () => {
+    expect(
+      countSandboxErrors([
+        { result: 'Error: Failed to view file: 14 UNAVAILABLE: Connection dropped' },
+        {
+          result:
+            'Error: 14 UNAVAILABLE: No connection established. Last error: Error: connect ECONNREFUSED 34.67.96.12:9090.',
+        },
+        { result: 'responseObserver.onError(Status.UNAVAILABLE);' },
+        { result: 'exit_code: 0 | stdout: ok' },
+      ])
+    ).toBe(2);
+    expect(isInfrastructureFailure({ sandboxErrors: 1 } as TaskRun)).toBe(true);
   });
 });

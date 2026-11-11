@@ -31,6 +31,7 @@ import type { OrcaTask } from './dataset';
 import type { LaneSettings } from './paths';
 import { createLaneFetch, createLaneKbnClient, applyOrcaSpace } from './kibana';
 import { costUsd } from './pricing';
+import { countSandboxErrors } from './cache';
 
 export type TelemetryVariant = 'full' | 'no-flags';
 
@@ -69,6 +70,8 @@ export interface TaskRun {
   leaked?: boolean;
   /** A judge call failed: the run is unscored for a harness reason, not the agent's. */
   judgeError?: boolean;
+  /** Tool calls that failed in the sandbox transport (sandbox-api down, refused, dropped). */
+  sandboxErrors?: number;
   /** Served from the run cache instead of a fresh investigation. */
   cached?: boolean;
   /** Full trajectory, report and scores on disk, for the proposer bundle. */
@@ -322,6 +325,9 @@ const runOrcaWork = async ({
         outputTokens: usage?.output_tokens,
       }),
       judgeError: results.some((result) => result.label === 'judge-error'),
+      sandboxErrors: countSandboxErrors(
+        output.tool_call_trajectory as Array<{ result?: string }> | undefined
+      ),
       tracePath,
     };
     Fs.writeFileSync(

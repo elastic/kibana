@@ -28,6 +28,7 @@ import { readCustomer0Telemetry } from './secrets';
 import { judgeConnector, withLane } from './runner';
 import type { RunSummary, TaskRun } from './runner';
 import { gateCandidate } from './gate';
+import { countSandboxErrors } from './cache';
 
 const SETTLE_MS = 2 * 60_000;
 
@@ -204,6 +205,9 @@ export const runHoldoutWorkOnLane = ({
             outputTokens: usage?.output_tokens,
           }),
           judgeError,
+          sandboxErrors: countSandboxErrors(
+            output.tool_call_trajectory as Array<{ result?: string }> | undefined
+          ),
           tracePath,
         };
         log.info(

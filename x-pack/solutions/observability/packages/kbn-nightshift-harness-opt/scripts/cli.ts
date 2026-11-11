@@ -68,7 +68,8 @@ export const cli = () =>
       const telemetryVariant = asVariant(flags.telemetry);
       const pool = createWorkerPool({
         workers: defaultWorkers(),
-        concurrency: asNumber(flags.concurrency, 16) ?? 16,
+        // 8 per worker: 4 workers at 16 each coincided with a sandbox-api outage (ECONNREFUSED).
+        concurrency: asNumber(flags.concurrency, 8) ?? 8,
         agentConnectorId,
         judgeConnectorId,
         telemetryVariant,

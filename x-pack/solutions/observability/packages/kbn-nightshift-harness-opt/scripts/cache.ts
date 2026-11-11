@@ -99,12 +99,25 @@ export const createRunCache = (parts: RunCacheKeyParts) => {
 };
 
 /**
+ * Tool results the sandbox transport produced, not the command: gRPC UNAVAILABLE (code 14), a
+ * refused or dropped connection to sandbox-api, a failed RPC. Exact signatures, because the
+ * agent's own reads can contain the word UNAVAILABLE (gRPC source code, for one).
+ */
+const SANDBOX_TRANSPORT_ERROR =
+  /\b14 UNAVAILABLE:|SandboxRpcError|ECONNREFUSED \d+\.\d+\.\d+\.\d+:9090|Failed to view file: 14 /;
+
+/** How many of a trajectory's tool calls failed in the sandbox transport. */
+export const countSandboxErrors = (trajectory: Array<{ result?: string }> | undefined): number =>
+  (trajectory ?? []).filter(({ result }) => SANDBOX_TRANSPORT_ERROR.test(result ?? '')).length;
+
+/**
  * Runs that say nothing about the variant: the harness or the infrastructure failed, not the
  * agent. They are never cached, so the next run measures them again. Everything else is, failures
  * included: re-running only failures would bias a variant's sample toward success.
  */
 export const isInfrastructureFailure = (run: TaskRun & { judgeError?: boolean }): boolean =>
   Boolean(run.judgeError) ||
+  (run.sandboxErrors ?? 0) > 0 ||
   /fetch failed|ECONNREFUSED|ECONNRESET|socket hang up|HTTP 5\d\d|outlived its timeout|CONNECT tunnel failed/i.test(
     run.executionError ?? ''
   );
