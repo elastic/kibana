@@ -7,43 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import Form from '@rjsf/core';
-import type { IChangeEvent } from '@rjsf/core';
-import type { RJSFSchema, UiSchema } from '@rjsf/utils';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { KbnDangerCallout } from '@kbn/ui-callout';
-import type { PageInputs, PageUi } from '@kbn/workflows/spec/schema/triggers/page_trigger_schema';
-import { PageFormValidator } from './page_validator';
-import { pageTemplates, pageWidgets, toRenderSchema, withWidgetComponents } from './page_widgets';
+import type { PageDefinition, PageFormData } from './page_form';
+import { PageForm } from './page_form';
 import { PAGE_API_PATH } from '../../common';
-
-/** The form definition returned by the server, after the secret check. */
-interface PageDefinition {
-  title?: string;
-  description?: string;
-  schema?: PageInputs;
-  ui?: PageUi;
-}
 
 interface PageRef {
   workflowId: string;
   secret: string;
 }
-
-type PageFormData = Record<string, unknown>;
 
 const PAGE_PATH_PATTERN = /^\/pages\/([^/]+)\/k\/([^/]+)\/?$/;
 
@@ -62,26 +39,6 @@ const pageApiPath = ({ workflowId, secret }: PageRef) =>
     encodeURIComponent(secret)
   );
 
-/** The form draws its own heading, so the schema title and description are not repeated. */
-const toFormSchema = (schema: PageInputs | undefined): RJSFSchema => {
-  const { title, description, ...rest } = schema ?? { type: 'object' as const };
-  return { type: 'object', ...rest } as RJSFSchema;
-};
-
-/** `ui:order` must name every field; fields that only a rule adds go last. */
-const toFormUiSchema = (ui: PageUi | undefined): UiSchema => {
-  const order = ui?.['ui:order'];
-  const withRest = order && !order.includes('*') ? [...order, '*'] : order;
-  return {
-    ...ui,
-    ...(withRest ? { 'ui:order': withRest } : {}),
-    'ui:submitButtonOptions': {
-      submitText: i18n.translate('workflows.pages.submit', { defaultMessage: 'Submit' }),
-      ...ui?.['ui:submitButtonOptions'],
-    },
-  } as UiSchema;
-};
-
 const errorMessage = (error: unknown): string => {
   const body = (error as { body?: { message?: string } })?.body;
   return body?.message ?? (error instanceof Error ? error.message : String(error));
@@ -95,7 +52,6 @@ type LoadState =
 export const PageApp = ({ http, page }: { http: HttpSetup; page: PageRef | undefined }) => {
   const { euiTheme } = useEuiTheme();
   const [loadState, setLoadState] = useState<LoadState>({ status: 'loading' });
-  const [formData, setFormData] = useState<PageFormData>({});
   const [submitError, setSubmitError] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -111,23 +67,15 @@ export const PageApp = ({ http, page }: { http: HttpSetup; page: PageRef | undef
       .catch(() => setLoadState({ status: 'failed' }));
   }, [http, page]);
 
-  const definition = loadState.status === 'ready' ? loadState.definition : undefined;
-  const schema = useMemo(() => toFormSchema(toRenderSchema(definition?.schema)), [definition]);
-  const validator = useMemo(() => new PageFormValidator(definition?.schema), [definition]);
-  const uiSchema = useMemo(
-    () => withWidgetComponents(definition?.schema, toFormUiSchema(definition?.ui)),
-    [definition]
-  );
-
   const onSubmit = useCallback(
-    async ({ formData: submitted }: IChangeEvent) => {
+    async (submitted: PageFormData) => {
       if (!page) {
         return;
       }
       setIsSubmitting(true);
       setSubmitError(undefined);
       try {
-        await http.post(pageApiPath(page), { body: JSON.stringify(submitted ?? {}) });
+        await http.post(pageApiPath(page), { body: JSON.stringify(submitted) });
         setIsSubmitted(true);
       } catch (error) {
         setSubmitError(errorMessage(error));
@@ -183,45 +131,12 @@ export const PageApp = ({ http, page }: { http: HttpSetup; page: PageRef | undef
     );
   } else {
     content = (
-      <>
-        {definition?.title && (
-          <EuiTitle size="m">
-            <h1>{definition.title}</h1>
-          </EuiTitle>
-        )}
-        {definition?.description && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiText color="subdued">
-              <p>{definition.description}</p>
-            </EuiText>
-          </>
-        )}
-        <EuiSpacer size="l" />
-        {submitError && (
-          <>
-            <KbnDangerCallout announceOnMount size="s" title={submitError} />
-            <EuiSpacer size="m" />
-          </>
-        )}
-        <Form
-          schema={schema}
-          uiSchema={uiSchema}
-          formData={formData}
-          validator={validator}
-          widgets={pageWidgets}
-          templates={pageTemplates}
-          onChange={({ formData: changed }) => setFormData(changed ?? {})}
-          onSubmit={onSubmit}
-          disabled={isSubmitting}
-          showErrorList={false}
-          noHtml5Validate
-          // A `const` choice is an option, not a default: start with nothing selected.
-          experimental_defaultFormStateBehavior={{ constAsDefaults: 'never' }}
-          omitExtraData
-          liveOmit
-        />
-      </>
+      <PageForm
+        definition={loadState.definition}
+        onSubmit={onSubmit}
+        disabled={isSubmitting}
+        submitError={submitError}
+      />
     );
   }
 

@@ -31,12 +31,14 @@ import { isMap, parseDocument, stringify as stringifyYaml } from 'yaml';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { YAML_LANG_ID } from '@kbn/monaco';
+import type { PageDefinition } from '@kbn/workflows-pages-plugin/public';
 import {
   ensureWorkflowGraphEuiIcons,
   resolveNodeChipStyle,
   workflowsEditorChromeOverrides,
 } from '@kbn/workflows-ui';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
+import { useKibana } from '../../../hooks/use_kibana';
 import {
   findStepsReferencingInput,
   parseInputsToSchemaProperties,
@@ -59,7 +61,11 @@ export interface TriggerConfigPanelProps {
   readonly onSave: (fragment: string) => void;
 }
 
-type ParametersMode = 'form' | 'yaml';
+type ParametersMode = 'form' | 'yaml' | 'preview';
+
+/** Triggers whose `inputs` is a JSON Schema the Inputs builder can edit. */
+const hasInputsSchema = (triggerType: string): boolean =>
+  triggerType === 'manual' || triggerType === 'page';
 
 const detectIndent = (yaml: string): number => {
   for (const line of yaml.split('\n')) {
@@ -140,7 +146,7 @@ export function TriggerConfigPanel({
   useEffect(() => {
     setFragment(initialFragment);
     setParametersMode('form');
-    if (triggerType !== 'manual') {
+    if (!hasInputsSchema(triggerType)) {
       setManualFields([]);
       setInputsJsonDraft('');
       return;
@@ -170,8 +176,20 @@ export function TriggerConfigPanel({
     return { valid, js, error: doc.errors[0]?.message };
   }, [fragment]);
 
+  const { workflowsPages } = useKibana().services;
+  const pageDefinition = useMemo(() => {
+    const js = parsed.js;
+    if (triggerType !== 'page' || !js) return undefined;
+    return {
+      title: typeof js.title === 'string' ? js.title : undefined,
+      description: typeof js.description === 'string' ? js.description : undefined,
+      schema: js.inputs,
+      ui: js.ui,
+    } as PageDefinition;
+  }, [parsed.js, triggerType]);
+
   const isUnsupportedInputs = useMemo(() => {
-    if (triggerType !== 'manual' || !parsed.js) return false;
+    if (!hasInputsSchema(triggerType) || !parsed.js) return false;
     return parseInputsToSchemaProperties(parsed.js.inputs) === 'unsupported';
   }, [triggerType, parsed.js]);
 
@@ -225,7 +243,7 @@ export function TriggerConfigPanel({
   const setParametersModeAndHydrate = useCallback(
     (mode: ParametersMode) => {
       setParametersMode(mode);
-      if (mode !== 'form' || triggerType !== 'manual') return;
+      if (mode !== 'form' || !hasInputsSchema(triggerType)) return;
       // Re-read inputs from YAML when returning from the YAML tab so form
       // state picks up external edits — without doing this on every form
       // keystroke (that remounted accordions and collapsed them).
@@ -258,12 +276,22 @@ export function TriggerConfigPanel({
     },
   ];
 
+  if (triggerType === 'page') {
+    editorModeOptions.push({
+      id: 'preview',
+      iconType: 'eye',
+      label: i18n.translate('workflows.triggerConfigPanel.previewTab', {
+        defaultMessage: 'Preview',
+      }),
+    });
+  }
+
   const isBuilderMode = parametersMode === 'form';
   const closeLabel = i18n.translate('workflows.triggerConfigPanel.close', {
     defaultMessage: 'Close',
   });
 
-  const showManualInputs = triggerType === 'manual';
+  const showManualInputs = hasInputsSchema(triggerType);
   const showScheduledSettings = triggerType === 'scheduled';
 
   return (
@@ -422,7 +450,34 @@ export function TriggerConfigPanel({
             width: '100%',
           }}
         >
-          {!isBuilderMode ? (
+          {parametersMode === 'preview' ? (
+            <div
+              css={{
+                flex: '1 1 auto',
+                minHeight: 0,
+                overflow: 'auto',
+                padding: euiTheme.size.base,
+              }}
+              data-test-subj="workflowTriggerConfigPanelPreview"
+            >
+              {!pageDefinition ? (
+                <EuiText size="s" color="danger">
+                  {i18n.translate('workflows.triggerConfigPanel.previewInvalidYaml', {
+                    defaultMessage: 'Fix the YAML to preview the page. {error}',
+                    values: { error: parsed.error ?? '' },
+                  })}
+                </EuiText>
+              ) : workflowsPages ? (
+                <workflowsPages.PageFormPreview definition={pageDefinition} />
+              ) : (
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('workflows.triggerConfigPanel.previewUnavailable', {
+                    defaultMessage: 'The page preview is not available in this Kibana.',
+                  })}
+                </EuiText>
+              )}
+            </div>
+          ) : !isBuilderMode ? (
             <FlyoutMonacoFrame minHeight={200}>
               <CodeEditor
                 languageId={YAML_LANG_ID}

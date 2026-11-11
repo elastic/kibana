@@ -32,6 +32,7 @@ import type {
   WorkflowsExtensionsPublicPluginSetup,
   WorkflowsExtensionsPublicPluginStart,
 } from '@kbn/workflows-extensions/public';
+import type { WorkflowsPagesPluginStart } from '@kbn/workflows-pages-plugin/public';
 import type {
   AvailabilityService,
   ServerlessTierRequiredProducts,
@@ -90,6 +91,7 @@ export interface WorkflowsPublicPluginStartDependencies {
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
   cloud?: CloudStart;
+  workflowsPages?: WorkflowsPagesPluginStart;
 }
 
 export interface WorkflowsPublicPluginStartAdditionalServices {

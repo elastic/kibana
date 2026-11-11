@@ -48,6 +48,26 @@ jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
   ),
 }));
 
+const mockPageFormPreview = jest.fn((props: { definition: { title?: string } }) => (
+  <div data-test-subj="mocked-page-form-preview">{props.definition.title}</div>
+));
+jest.mock('../../../hooks/use_kibana', () => ({
+  useKibana: () => ({
+    services: { workflowsPages: { PageFormPreview: mockPageFormPreview } },
+  }),
+}));
+
+const pageFragment = [
+  'type: page',
+  'title: CVE Report',
+  'inputs:',
+  '  type: object',
+  '  properties:',
+  '    summary:',
+  '      type: string',
+  '',
+].join('\n');
+
 const renderPanel = (overrides: Partial<React.ComponentProps<typeof TriggerConfigPanel>> = {}) => {
   const onSave = jest.fn();
   const onCancel = jest.fn();
@@ -120,6 +140,30 @@ describe('TriggerConfigPanel', () => {
     });
     fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelSave'));
     expect(onSave.mock.calls[0][0]).toContain('15m');
+  });
+
+  it('edits page trigger inputs with the Inputs builder', () => {
+    renderPanel({ triggerType: 'page', triggerLabel: 'Page', initialFragment: pageFragment });
+    expect(screen.getByTestId('workflowTriggerConfigPanelInputs')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('summary')).toBeInTheDocument();
+  });
+
+  it('previews the page form from the trigger draft', () => {
+    renderPanel({ triggerType: 'page', triggerLabel: 'Page', initialFragment: pageFragment });
+    fireEvent.click(screen.getByTestId('workflowTriggerConfigPanelView-preview'));
+
+    expect(screen.getByTestId('mocked-page-form-preview')).toHaveTextContent('CVE Report');
+    expect(mockPageFormPreview.mock.calls.at(-1)?.[0].definition).toEqual(
+      expect.objectContaining({
+        title: 'CVE Report',
+        schema: { type: 'object', properties: { summary: { type: 'string' } } },
+      })
+    );
+  });
+
+  it('shows no Preview tab for manual triggers', () => {
+    renderPanel();
+    expect(screen.queryByTestId('workflowTriggerConfigPanelView-preview')).not.toBeInTheDocument();
   });
 
   it('round-trips YAML tab edits', () => {

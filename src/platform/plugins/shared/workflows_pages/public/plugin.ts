@@ -10,13 +10,15 @@
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PAGE_APP_ROUTE } from '../common';
+import { PageFormPreview } from './page_form_preview_lazy';
+import type { WorkflowsPagesPluginStart } from './types';
 
 /**
  * Registers the chromeless app behind a workflow page URL. The plugin loads on anonymous
  * pages, so a visitor without a Kibana session gets the form. The server checks the URL
  * secret before it serves the app, so this only draws the form.
  */
-export class WorkflowsPagesPlugin implements Plugin {
+export class WorkflowsPagesPlugin implements Plugin<void, WorkflowsPagesPluginStart> {
   public setup(core: CoreSetup): void {
     // Anonymous paths match exactly, and every page URL is unique. Register the current
     // one so core loads default capabilities and the security plugin skips the login page.
@@ -41,7 +43,9 @@ export class WorkflowsPagesPlugin implements Plugin {
     });
   }
 
-  public start(): void {}
+  public start(): WorkflowsPagesPluginStart {
+    return { PageFormPreview };
+  }
 
   public stop(): void {}
 }

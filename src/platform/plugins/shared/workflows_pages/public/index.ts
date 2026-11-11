@@ -10,3 +10,5 @@
 import { WorkflowsPagesPlugin } from './plugin';
 
 export const plugin = () => new WorkflowsPagesPlugin();
+
+export type { PageDefinition, PageFormPreviewProps, WorkflowsPagesPluginStart } from './types';

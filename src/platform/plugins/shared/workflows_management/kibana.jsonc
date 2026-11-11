@@ -34,7 +34,14 @@
       "uiActions",
       "licensing"
     ],
-    "optionalPlugins": ["alerting", "serverless", "cloud", "inbox", "encryptedSavedObjects"],
+    "optionalPlugins": [
+      "alerting",
+      "serverless",
+      "cloud",
+      "inbox",
+      "encryptedSavedObjects",
+      "workflowsPages"
+    ],
     "runtimePluginDependencies": ["agentBuilder"],
     "extraPublicDirs": ["common"]
   }
