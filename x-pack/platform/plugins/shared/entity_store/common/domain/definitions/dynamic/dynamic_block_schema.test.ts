@@ -12,6 +12,7 @@ import {
   MAX_FILTER_LENGTH,
   MAX_INDEX_PATTERN_LENGTH,
   MAX_SOURCES,
+  MAX_SUGGESTED_FILTERS,
   MAX_VALUE_LABEL_LENGTH,
   MAX_VALUE_LABELS,
   dynamicAttributeSchema,
@@ -86,6 +87,66 @@ describe('dynamicBlockSchema', () => {
         ],
       });
       expect(result.success).toBe(true);
+    });
+  });
+
+  describe('suggestedFilters', () => {
+    it('keeps the names in the order given', () => {
+      const result = dynamicBlockSchema.safeParse({
+        sources: [
+          source({ attributes: [attribute({ name: 'os_name', field: 'host.os.name' })] }),
+          source({ attributes: [attribute({ name: 'arch', field: 'host.arch' })] }),
+        ],
+        suggestedFilters: ['arch', 'os_name'],
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data?.suggestedFilters).toEqual(['arch', 'os_name']);
+    });
+
+    it('accepts an empty list', () => {
+      expect(
+        dynamicBlockSchema.safeParse({ sources: [source()], suggestedFilters: [] }).success
+      ).toBe(true);
+    });
+
+    it('rejects a name listed twice', () => {
+      const result = dynamicBlockSchema.safeParse({
+        sources: [source({ attributes: [attribute()] })],
+        suggestedFilters: ['os_name', 'os_name'],
+      });
+
+      expect(result.success).toBe(false);
+      expect(issuePaths(result)).toEqual([['suggestedFilters', 1]]);
+    });
+
+    it('rejects a name that is not a field path', () => {
+      const result = dynamicBlockSchema.safeParse({
+        sources: [source({ attributes: [attribute()] })],
+        suggestedFilters: ['os name'],
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it(`accepts ${MAX_SUGGESTED_FILTERS} names`, () => {
+      const declared = attributes(MAX_SUGGESTED_FILTERS);
+      const result = dynamicBlockSchema.safeParse({
+        sources: [source({ attributes: declared })],
+        suggestedFilters: declared.map(({ name }) => name),
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it(`rejects ${MAX_SUGGESTED_FILTERS + 1} names`, () => {
+      const declared = attributes(MAX_SUGGESTED_FILTERS + 1);
+      const result = dynamicBlockSchema.safeParse({
+        sources: [source({ attributes: declared })],
+        suggestedFilters: declared.map(({ name }) => name),
+      });
+
+      expect(result.success).toBe(false);
     });
   });
 

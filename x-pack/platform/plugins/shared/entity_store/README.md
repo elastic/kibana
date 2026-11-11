@@ -200,6 +200,7 @@ dynamic: {
       ],
     },
   ],
+  suggestedFilters: ['namespace', 'phase'],
 },
 ```
 
@@ -207,6 +208,7 @@ dynamic: {
 - `filter`: optional opaque ES|QL boolean expression narrowing the source to this type's documents, at most 2000 characters. It is validated for length only; where it goes in the query is the generator's job.
 - Attributes: at most 32 per source. `name` is a field path such as `host.arch` or `os.type`, under the same rule as `field` but at most 64 characters, so a column can carry the OpenTelemetry semantic convention name while each source reads its own field. It is the output column and the merge key across sources, and is unique within a source. `field` is a literal field path (dot-separated segments of letters, digits, `_`, `@` and `-`; no wildcards, expressions, quoting or whitespace; at most 512 characters).
 - `valueLabels`: optional map from raw values (stringified) to canonical labels, at most 64 entries, keys and labels 1 to 256 characters. Unmapped values pass through.
+- `suggestedFilters`: optional list of the columns the inventory offers as dropdown filters, in display order. At most 16, none repeated, each the `name` of an attribute declared by some source or an identity field (such as a namespace that is part of the identity).
 - Unknown keys are rejected on the block, each source and each attribute. Bounds are denial-of-service limits for HTTP input, not design limits.
 
 Two whole-definition rules apply only when `dynamic` is present, at both `entitySchema` and registration:

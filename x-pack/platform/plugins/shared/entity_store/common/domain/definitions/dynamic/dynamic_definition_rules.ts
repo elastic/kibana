@@ -19,6 +19,8 @@ import type {
 
 /** Name of the rule that an attribute of a `dynamic` source may not read an identity field. */
 export const NO_IDENTITY_ATTRIBUTE_RULE = 'attributes are not identity fields';
+/** Name of the rule that a suggested filter is a column of the type. */
+export const SUGGESTED_FILTER_RULE = 'suggested filters are columns';
 /** Name of the rule restricting `identityField` to what the inventory can group by. */
 export const SERVABLE_IDENTITY_RULE = 'servable identity';
 
@@ -141,7 +143,8 @@ const checkCalculatedIdentity = (
 
 /**
  * Whole-definition rules for a definition carrying `dynamic`: its identity must be servable as
- * ES|QL `BY` keys, and no attribute may read an identity field. A definition without `dynamic` is
+ * ES|QL `BY` keys, no attribute may read an identity field, and every suggested filter is an
+ * attribute or an identity field. A definition without `dynamic` is
  * never checked.
  */
 export const assertDynamicDefinitionRules = (
@@ -183,5 +186,17 @@ export const assertDynamicDefinitionRules = (
         );
       }
     });
+  });
+
+  const attributeNames = new Set(
+    dynamic.sources.flatMap(({ attributes = [] }) => attributes.map(({ name }) => name))
+  );
+  (dynamic.suggestedFilters ?? []).forEach((name, index) => {
+    if (!attributeNames.has(name) && !identityFields.has(name)) {
+      addIssue(
+        ['dynamic', 'suggestedFilters', index],
+        `${SUGGESTED_FILTER_RULE}: "${name}" is neither an attribute of a source nor an identity field`
+      );
+    }
   });
 };
