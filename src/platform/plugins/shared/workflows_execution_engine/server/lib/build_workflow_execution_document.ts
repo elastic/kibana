@@ -20,6 +20,7 @@ import {
   MISSING_EXECUTION_IDENTITY_MESSAGE,
   UNKNOWN_EXECUTION_IDENTITY,
 } from './execution_identity';
+import type { ResolvedExecutionIdentity } from './get_user';
 import { normalizeEventChainVisitedWorkflowIds } from './telemetry/utils/extract_execution_metadata';
 import type { WorkflowExecutionForInputRendering } from '../workflow_context_manager/build_workflow_context';
 
@@ -29,10 +30,11 @@ export interface BuildWorkflowExecutionDocumentParams {
   spaceId: string;
   context: Record<string, unknown>;
   defaultTriggeredBy: string;
-  authenticatedUser: string | undefined;
+  authenticatedUser: ResolvedExecutionIdentity | undefined;
   now: Date;
   maxEventChainDepth: number;
   getConcurrencyGroupKey: (workflowExecution: WorkflowExecutionForInputRendering) => string | null;
+  getRunName: (workflowExecution: WorkflowExecutionForInputRendering) => string | undefined;
 }
 
 const stampExecutionWorkflowVersion = (
@@ -58,6 +60,7 @@ export const buildWorkflowExecutionDocument = (
     now,
     maxEventChainDepth,
     getConcurrencyGroupKey,
+    getRunName,
   } = params;
   const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
   // Strip the context's space so property order cannot override the trusted execution space.
@@ -101,7 +104,8 @@ export const buildWorkflowExecutionDocument = (
     context: executionContext,
     status: missingIdentity ? ExecutionStatus.FAILED : ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
-    executedBy: authenticatedUser ?? UNKNOWN_EXECUTION_IDENTITY,
+    executedBy: authenticatedUser?.executedBy ?? UNKNOWN_EXECUTION_IDENTITY,
+    ...(authenticatedUser ? { executedByUser: authenticatedUser.user } : {}),
     ...(inheritedIdentity
       ? { effectiveIdentity: inheritedIdentity }
       : workflow.definition?.settings?.run_as
@@ -129,6 +133,7 @@ export const buildWorkflowExecutionDocument = (
   };
 
   stampExecutionWorkflowVersion(workflowExecution, workflow);
+  workflowExecution.runName = getRunName(workflowExecution);
 
   const concurrencyGroupKey = getConcurrencyGroupKey(workflowExecution);
   if (concurrencyGroupKey) {

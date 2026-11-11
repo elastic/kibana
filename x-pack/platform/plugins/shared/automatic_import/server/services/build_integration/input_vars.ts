@@ -1166,14 +1166,6 @@ const HTTP_ENDPOINT_VARS: DataStreamManifestVar[] = [
     show_user: true,
   },
   {
-    name: 'prefix',
-    type: 'text',
-    title: 'Prefix',
-    description: 'This option specifies which prefix field the incoming request will be mapped to.',
-    required: false,
-    show_user: false,
-  },
-  {
     name: 'basic_auth',
     type: 'bool',
     title: 'Basic Auth',

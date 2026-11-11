@@ -99,6 +99,13 @@ describe('useWorkflowExecutionsSearch', () => {
     expect(params?.kql).toBe('(NOT executedBy: elastic)');
   });
 
+  it('sends a "Triggered by" display-name filter as KQL on executedByUser.name', async () => {
+    const params = await renderSearchHook([phraseFilter('executedByUser.name', 'Jane Doe')]);
+
+    expect(params?.executedBy).toBeUndefined();
+    expect(params?.kql).toBe('(executedByUser.name: "Jane Doe")');
+  });
+
   it('sends a status exists filter as KQL and not as structured statuses', async () => {
     const params = await renderSearchHook([existsFilter('status')]);
 

@@ -49,10 +49,9 @@ import {
 import { SlackAppService } from './lib/slack_app/service';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import {
-  consumeRunQuota,
+  consumeInvestigationRunQuota,
   createRunQuotaInternalRepository,
   dayKey,
-  releaseRunQuota,
   resolveDailyWindow,
   runQuotaLedgerSavedObjectType,
   runQuotaSettingsSavedObjectType,
@@ -89,13 +88,13 @@ import {
   type KnowledgeIndicatorClient,
   KnowledgeIndicatorService,
   knowledgeIndicatorsDataStream,
+  TopologySnapshotClient,
 } from './lib/knowledge_indicators';
 import {
   createSignificantEventsClients,
   createSignificantEventsServices,
 } from './lib/significant_events/significant_events_clients';
 import { detectionsDataStream } from './lib/significant_events/detections';
-import { deleteLegacyEventsDataStream } from './lib/significant_events/events';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
 import { registerSignificantEventsSkills } from './agent_builder/skills/register_skills';
 import { registerAgentBuilderSmlTypes } from './agent_builder/sml/register_sml_types';
@@ -115,7 +114,6 @@ import {
   type SignificantEventsScheduledWorkflowsService,
 } from './lib/workflows/significant_events_scheduled_workflows';
 import { createWorkflowClients } from './lib/workflows/create_workflow_clients';
-import { removeLegacyDefaultSpaceWorkflows } from './lib/workflows/setup/remove_legacy_default_space_workflows';
 import { registerSignificantEventsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import { createTriggerEmitter } from './workflows/triggers/emit';
 import {
@@ -161,9 +159,7 @@ export class SignificantEventsPlugin
   private kibanaVersion: string;
   private streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
-  private removeLegacyWorkflows?: () => Promise<void>;
   private maintenanceService?: SignificantEventsMaintenanceService;
-
   constructor(context: PluginInitializerContext) {
     this.isDev = context.env.mode.dev;
     this.logger = context.logger.get();
@@ -188,20 +184,22 @@ export class SignificantEventsPlugin
     core.savedObjects.registerType(runQuotaSettingsSavedObjectType);
     core.savedObjects.registerType(runQuotaLedgerSavedObjectType);
 
-    plugins.nightshiftInvestigations?.registerInvestigationQuota(async () => {
+    plugins.nightshiftInvestigations?.registerInvestigationQuota(async (trigger) => {
       if (!this.server?.core) {
         throw new Error('Significant Events start services are unavailable');
       }
-      const internalRepository = createRunQuotaInternalRepository(this.server);
-      const date = dayKey(resolveDailyWindow());
-      const { allowed } = await consumeRunQuota({
-        internalRepository,
-        group: 'investigation',
-        date,
+      const result = await consumeInvestigationRunQuota({
+        internalRepository: createRunQuotaInternalRepository(this.server),
+        group: trigger === 'manual' ? 'manual_investigation' : 'investigation',
+        date: dayKey(resolveDailyWindow()),
       });
+      if (result.allowed) {
+        return result;
+      }
       return {
-        allowed,
-        release: () => releaseRunQuota({ internalRepository, group: 'investigation', date }),
+        allowed: false,
+        deniedBy: result.deniedBy === 'total_investigation' ? 'all' : trigger,
+        limit: result.limit,
       };
     });
 
@@ -331,6 +329,12 @@ export class SignificantEventsPlugin
         return kiClientPromise;
       };
 
+      const getTopologySnapshotClient = async (): Promise<TopologySnapshotClient> =>
+        new TopologySnapshotClient({
+          reader: await getKnowledgeIndicatorClient(),
+          logger: this.logger.get('topology'),
+        });
+
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
 
@@ -341,6 +345,7 @@ export class SignificantEventsPlugin
         space,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
         getKnowledgeIndicatorClient,
+        getTopologySnapshotClient,
         sourceKnowledgeState,
         scheduleSourceOnboarding: async (
           source: NightshiftSource,
@@ -505,15 +510,6 @@ export class SignificantEventsPlugin
         getManagedWorkflowsClient,
       });
 
-      // TODO: remove with the legacy default-space cleanup.
-      // https://github.com/elastic/kibana/issues/294271
-      this.removeLegacyWorkflows = () =>
-        removeLegacyDefaultSpaceWorkflows({
-          getManagedWorkflowsClient,
-          managementApi,
-          logger: this.logger,
-        });
-
       significantEventsScheduledWorkflowsService = createSignificantEventsScheduledWorkflowsService(
         {
           logger: this.logger,
@@ -634,13 +630,6 @@ export class SignificantEventsPlugin
       this.server.agenticInvestigations = plugins.agenticInvestigations;
 
       this.server.relayClient = plugins.actions.getRelayClient();
-
-      // Significant Events history moved to `.rule-events`; remove the retired stream without
-      // backfilling its history into the shared Alerting v2 stream.
-      void deleteLegacyEventsDataStream({
-        esClient: core.elasticsearch.client.asInternalUser,
-        logger: this.logger,
-      });
 
       // The Elastic Slack connector is in-memory, so it survives neither a restart nor a connect
       // handled by another node. The connection document is namespace-agnostic, so one internal
@@ -830,10 +819,7 @@ export class SignificantEventsPlugin
     try {
       await this.managedWorkflowsInstaller?.install();
     } finally {
-      // Independent of the install outcome: one failing static workflow would otherwise keep the
-      // legacy default-space documents around, next to their per-space replacements, on every
-      // restart. It never throws.
-      await this.removeLegacyWorkflows?.();
+      // A partial install can still leave workflows enabled in a paused space.
       await this.reassertPauseAfterWorkflowInstall();
     }
   }

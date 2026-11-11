@@ -1,0 +1,1827 @@
+{
+  "components": {
+    "schemas": {
+      "ArchiveStatus": {
+        "enum": [
+          "ARCHIVE_ACCESS",
+          "DEEP_ARCHIVE_ACCESS"
+        ],
+        "type": "string"
+      },
+      "Bucket": {
+        "properties": {
+          "BucketArn": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^arn:[^:]+:(s3|s3express):",
+            "type": "string"
+          },
+          "BucketRegion": {
+            "type": "string"
+          },
+          "CreationDate": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "Bucket"
+        }
+      },
+      "ChecksumAlgorithm": {
+        "enum": [
+          "CRC32",
+          "CRC32C",
+          "SHA1",
+          "SHA256",
+          "CRC64NVME",
+          "SHA512",
+          "MD5",
+          "XXHASH64",
+          "XXHASH3",
+          "XXHASH128"
+        ],
+        "type": "string"
+      },
+      "ChecksumMode": {
+        "enum": [
+          "ENABLED"
+        ],
+        "type": "string"
+      },
+      "ChecksumType": {
+        "enum": [
+          "COMPOSITE",
+          "FULL_OBJECT"
+        ],
+        "type": "string"
+      },
+      "CommonPrefix": {
+        "properties": {
+          "Prefix": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "CommonPrefix"
+        }
+      },
+      "EncodingType": {
+        "enum": [
+          "url"
+        ],
+        "type": "string"
+      },
+      "IntelligentTieringAccessTier": {
+        "enum": [
+          "ARCHIVE_ACCESS",
+          "DEEP_ARCHIVE_ACCESS"
+        ],
+        "type": "string"
+      },
+      "InvalidObjectStateResponseContent": {
+        "properties": {
+          "AccessTier": {
+            "$ref": "#/components/schemas/IntelligentTieringAccessTier"
+          },
+          "Code": {
+            "enum": [
+              "InvalidObjectState"
+            ],
+            "type": "string"
+          },
+          "Message": {
+            "type": "string"
+          },
+          "StorageClass": {
+            "$ref": "#/components/schemas/StorageClass"
+          },
+          "Type": {
+            "enum": [
+              "Sender",
+              "Receiver"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "Code"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "Error"
+        }
+      },
+      "ListBucketsResponseContent": {
+        "properties": {
+          "Buckets": {
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Bucket"
+                }
+              ],
+              "xml": {
+                "name": "Bucket"
+              }
+            },
+            "type": "array",
+            "xml": {
+              "wrapped": true
+            }
+          },
+          "ContinuationToken": {
+            "type": "string"
+          },
+          "Owner": {
+            "$ref": "#/components/schemas/Owner"
+          },
+          "Prefix": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "ListAllMyBucketsResult",
+          "namespace": "http://s3.amazonaws.com/doc/2006-03-01/"
+        }
+      },
+      "ListObjectsV2ResponseContent": {
+        "properties": {
+          "CommonPrefixes": {
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/CommonPrefix"
+                }
+              ],
+              "xml": {
+                "name": "CommonPrefixes"
+              }
+            },
+            "type": "array",
+            "xml": {
+              "wrapped": false
+            }
+          },
+          "Contents": {
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Object"
+                }
+              ],
+              "xml": {
+                "name": "Contents"
+              }
+            },
+            "type": "array",
+            "xml": {
+              "wrapped": false
+            }
+          },
+          "ContinuationToken": {
+            "type": "string"
+          },
+          "Delimiter": {
+            "type": "string"
+          },
+          "EncodingType": {
+            "$ref": "#/components/schemas/EncodingType"
+          },
+          "IsTruncated": {
+            "type": "boolean"
+          },
+          "KeyCount": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "MaxKeys": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "NextContinuationToken": {
+            "type": "string"
+          },
+          "Prefix": {
+            "type": "string"
+          },
+          "StartAfter": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "ListBucketResult",
+          "namespace": "http://s3.amazonaws.com/doc/2006-03-01/"
+        }
+      },
+      "NoSuchBucketResponseContent": {
+        "properties": {
+          "Code": {
+            "enum": [
+              "NoSuchBucket"
+            ],
+            "type": "string"
+          },
+          "Message": {
+            "type": "string"
+          },
+          "Type": {
+            "enum": [
+              "Sender",
+              "Receiver"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "Code"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "Error"
+        }
+      },
+      "NoSuchKeyResponseContent": {
+        "properties": {
+          "Code": {
+            "enum": [
+              "NoSuchKey"
+            ],
+            "type": "string"
+          },
+          "Message": {
+            "type": "string"
+          },
+          "Type": {
+            "enum": [
+              "Sender",
+              "Receiver"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "Code"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "Error"
+        }
+      },
+      "NotFoundResponseContent": {
+        "properties": {
+          "Code": {
+            "enum": [
+              "NotFound"
+            ],
+            "type": "string"
+          },
+          "Message": {
+            "type": "string"
+          },
+          "Type": {
+            "enum": [
+              "Sender",
+              "Receiver"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "Code"
+        ],
+        "type": "object",
+        "xml": {
+          "name": "Error"
+        }
+      },
+      "Object": {
+        "properties": {
+          "ChecksumAlgorithm": {
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ChecksumAlgorithm"
+                }
+              ],
+              "xml": {
+                "name": "ChecksumAlgorithm"
+              }
+            },
+            "type": "array",
+            "xml": {
+              "wrapped": false
+            }
+          },
+          "ChecksumType": {
+            "$ref": "#/components/schemas/ChecksumType"
+          },
+          "ETag": {
+            "type": "string"
+          },
+          "Key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "LastModified": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "Owner": {
+            "$ref": "#/components/schemas/Owner"
+          },
+          "RestoreStatus": {
+            "$ref": "#/components/schemas/RestoreStatus"
+          },
+          "Size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "StorageClass": {
+            "$ref": "#/components/schemas/ObjectStorageClass"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "Object"
+        }
+      },
+      "ObjectLockEventHold": {
+        "enum": [
+          "ON",
+          "OFF"
+        ],
+        "type": "string"
+      },
+      "ObjectLockLegalHoldStatus": {
+        "enum": [
+          "ON",
+          "OFF"
+        ],
+        "type": "string"
+      },
+      "ObjectLockMode": {
+        "enum": [
+          "GOVERNANCE",
+          "COMPLIANCE"
+        ],
+        "type": "string"
+      },
+      "ObjectStorageClass": {
+        "enum": [
+          "STANDARD",
+          "REDUCED_REDUNDANCY",
+          "GLACIER",
+          "STANDARD_IA",
+          "ONEZONE_IA",
+          "INTELLIGENT_TIERING",
+          "DEEP_ARCHIVE",
+          "OUTPOSTS",
+          "GLACIER_IR",
+          "SNOW",
+          "EXPRESS_ONEZONE",
+          "FSX_OPENZFS",
+          "FSX_ONTAP",
+          "AWS_BACKUP_WARM",
+          "AWS_BACKUP_LOW_COST_WARM"
+        ],
+        "type": "string"
+      },
+      "OptionalObjectAttributes": {
+        "enum": [
+          "RestoreStatus"
+        ],
+        "type": "string"
+      },
+      "Owner": {
+        "properties": {
+          "DisplayName": {
+            "type": "string"
+          },
+          "ID": {
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "Owner"
+        }
+      },
+      "ReplicationStatus": {
+        "enum": [
+          "COMPLETE",
+          "PENDING",
+          "FAILED",
+          "REPLICA",
+          "COMPLETED"
+        ],
+        "type": "string"
+      },
+      "RequestCharged": {
+        "enum": [
+          "requester"
+        ],
+        "type": "string"
+      },
+      "RequestPayer": {
+        "enum": [
+          "requester"
+        ],
+        "type": "string"
+      },
+      "RestoreStatus": {
+        "properties": {
+          "IsRestoreInProgress": {
+            "type": "boolean"
+          },
+          "RestoreExpiryDate": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object",
+        "xml": {
+          "name": "RestoreStatus"
+        }
+      },
+      "ServerSideEncryption": {
+        "enum": [
+          "AES256",
+          "aws:fsx",
+          "aws:backup",
+          "aws:kms",
+          "aws:kms:dsse"
+        ],
+        "type": "string"
+      },
+      "StorageClass": {
+        "enum": [
+          "STANDARD",
+          "REDUCED_REDUNDANCY",
+          "STANDARD_IA",
+          "ONEZONE_IA",
+          "INTELLIGENT_TIERING",
+          "GLACIER",
+          "DEEP_ARCHIVE",
+          "OUTPOSTS",
+          "GLACIER_IR",
+          "SNOW",
+          "EXPRESS_ONEZONE",
+          "FSX_OPENZFS",
+          "FSX_ONTAP",
+          "AWS_BACKUP_WARM",
+          "AWS_BACKUP_LOW_COST_WARM"
+        ],
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "aws.auth.sigv4": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "Amazon Simple Storage Service"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/{Bucket}/{Key}": {
+      "head": {
+        "operationId": "HeadObject",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Bucket",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Modified-Since",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Unmodified-Since",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "Key",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "x-ms-skip-url-encoding": true
+          },
+          {
+            "in": "header",
+            "name": "Range",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "response-cache-control",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "response-content-disposition",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "response-content-encoding",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "response-content-language",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "response-content-type",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "response-expires",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "versionId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-server-side-encryption-customer-algorithm",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-server-side-encryption-customer-key",
+            "required": false,
+            "schema": {
+              "format": "password",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-server-side-encryption-customer-key-MD5",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-request-payer",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/RequestPayer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "partNumber",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-expected-bucket-owner",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-checksum-mode",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ChecksumMode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "headers": {
+              "Cache-Control": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Disposition": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Encoding": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Language": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Length": {
+                "required": false,
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              },
+              "Content-Range": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Expires": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Last-Modified": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "accept-ranges": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-archive-status": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ArchiveStatus"
+                }
+              },
+              "x-amz-checksum-crc32": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-crc32c": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-crc64nvme": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-md5": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-sha1": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-sha256": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-sha512": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-type": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ChecksumType"
+                }
+              },
+              "x-amz-checksum-xxhash128": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-xxhash3": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-xxhash64": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-delete-marker": {
+                "required": false,
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-amz-expiration": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-missing-meta": {
+                "required": false,
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              },
+              "x-amz-mp-parts-count": {
+                "required": false,
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              },
+              "x-amz-object-lock-event-hold": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectLockEventHold"
+                }
+              },
+              "x-amz-object-lock-event-hold-duration-days": {
+                "required": false,
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              },
+              "x-amz-object-lock-event-hold-duration-years": {
+                "required": false,
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              },
+              "x-amz-object-lock-legal-hold": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectLockLegalHoldStatus"
+                }
+              },
+              "x-amz-object-lock-mode": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectLockMode"
+                }
+              },
+              "x-amz-object-lock-retain-until-date": {
+                "required": false,
+                "schema": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "x-amz-replication-status": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ReplicationStatus"
+                }
+              },
+              "x-amz-request-charged": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/RequestCharged"
+                }
+              },
+              "x-amz-restore": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-server-side-encryption": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSideEncryption"
+                }
+              },
+              "x-amz-server-side-encryption-aws-kms-key-id": {
+                "required": false,
+                "schema": {
+                  "format": "password",
+                  "type": "string"
+                }
+              },
+              "x-amz-server-side-encryption-bucket-key-enabled": {
+                "required": false,
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-amz-server-side-encryption-customer-algorithm": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-server-side-encryption-customer-key-MD5": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-storage-class": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClass"
+                }
+              },
+              "x-amz-tagging-count": {
+                "required": false,
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              },
+              "x-amz-version-id": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-website-redirect-location": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponseContent"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://{Bucket}.s3.{region}.amazonaws.com",
+            "variables": {
+              "Bucket": {
+                "default": "example",
+                "x-path-parameter": true
+              },
+              "region": {
+                "default": "us-east-1"
+              }
+            }
+          },
+          {
+            "url": "https://{Bucket}.s3.dualstack.{region}.amazonaws.com",
+            "variables": {
+              "Bucket": {
+                "default": "example",
+                "x-path-parameter": true
+              },
+              "region": {
+                "default": "us-east-1"
+              }
+            }
+          },
+          {
+            "url": "https://{Bucket}.s3-accelerate.amazonaws.com",
+            "variables": {
+              "Bucket": {
+                "default": "example",
+                "x-path-parameter": true
+              }
+            }
+          },
+          {
+            "url": "https://{Bucket}.s3-accelerate.dualstack.amazonaws.com",
+            "variables": {
+              "Bucket": {
+                "default": "example",
+                "x-path-parameter": true
+              }
+            }
+          },
+          {
+            "url": "https://s3.{region}.amazonaws.com",
+            "variables": {
+              "region": {
+                "default": "us-east-1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "aws.auth.sigv4": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "https://s3.{region}.amazonaws.com",
+      "variables": {
+        "region": {
+          "default": "us-east-1"
+        }
+      }
+    }
+  ],
+  "x-ms-paths": {
+    "/?x-id=ListBuckets": {
+      "get": {
+        "operationId": "ListBuckets",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "max-buckets",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "maximum": 10000,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation-token",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prefix",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "bucket-region",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListBucketsResponseContent"
+                }
+              }
+            }
+          }
+        },
+        "x-optional-fixed-query": [
+          "x-id"
+        ]
+      }
+    },
+    "/{Bucket}/{Key}?x-id=GetObject": {
+      "get": {
+        "operationId": "GetObject",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Bucket",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Modified-Since",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "If-Unmodified-Since",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "Key",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "x-ms-skip-url-encoding": true
+          },
+          {
+            "in": "header",
+            "name": "Range",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "response-cache-control",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "response-content-disposition",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "response-content-encoding",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "response-content-language",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "response-content-type",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "response-expires",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "versionId",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-server-side-encryption-customer-algorithm",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-server-side-encryption-customer-key",
+            "required": false,
+            "schema": {
+              "format": "password",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-server-side-encryption-customer-key-MD5",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-request-payer",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/RequestPayer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "partNumber",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-expected-bucket-owner",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-checksum-mode",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/ChecksumMode"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "application/octet-stream": {
+                "schema": {
+                  "default": "",
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "headers": {
+              "Cache-Control": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Disposition": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Encoding": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Language": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Length": {
+                "required": false,
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              },
+              "Content-Range": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Content-Type": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "ETag": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Expires": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "Last-Modified": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "accept-ranges": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-crc32": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-crc32c": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-crc64nvme": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-md5": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-sha1": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-sha256": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-sha512": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-type": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ChecksumType"
+                }
+              },
+              "x-amz-checksum-xxhash128": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-xxhash3": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-checksum-xxhash64": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-delete-marker": {
+                "required": false,
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-amz-expiration": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-missing-meta": {
+                "required": false,
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              },
+              "x-amz-mp-parts-count": {
+                "required": false,
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              },
+              "x-amz-object-lock-event-hold": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectLockEventHold"
+                }
+              },
+              "x-amz-object-lock-event-hold-duration-days": {
+                "required": false,
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              },
+              "x-amz-object-lock-event-hold-duration-years": {
+                "required": false,
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              },
+              "x-amz-object-lock-legal-hold": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectLockLegalHoldStatus"
+                }
+              },
+              "x-amz-object-lock-mode": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ObjectLockMode"
+                }
+              },
+              "x-amz-object-lock-retain-until-date": {
+                "required": false,
+                "schema": {
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "x-amz-replication-status": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ReplicationStatus"
+                }
+              },
+              "x-amz-request-charged": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/RequestCharged"
+                }
+              },
+              "x-amz-restore": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-server-side-encryption": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/ServerSideEncryption"
+                }
+              },
+              "x-amz-server-side-encryption-aws-kms-key-id": {
+                "required": false,
+                "schema": {
+                  "format": "password",
+                  "type": "string"
+                }
+              },
+              "x-amz-server-side-encryption-bucket-key-enabled": {
+                "required": false,
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "x-amz-server-side-encryption-customer-algorithm": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-server-side-encryption-customer-key-MD5": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-storage-class": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/StorageClass"
+                }
+              },
+              "x-amz-tagging-count": {
+                "required": false,
+                "schema": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              },
+              "x-amz-version-id": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "x-amz-website-redirect-location": {
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidObjectStateResponseContent"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoSuchKeyResponseContent"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://{Bucket}.s3.{region}.amazonaws.com",
+            "variables": {
+              "Bucket": {
+                "default": "example",
+                "x-path-parameter": true
+              },
+              "region": {
+                "default": "us-east-1"
+              }
+            }
+          },
+          {
+            "url": "https://{Bucket}.s3.dualstack.{region}.amazonaws.com",
+            "variables": {
+              "Bucket": {
+                "default": "example",
+                "x-path-parameter": true
+              },
+              "region": {
+                "default": "us-east-1"
+              }
+            }
+          },
+          {
+            "url": "https://{Bucket}.s3-accelerate.amazonaws.com",
+            "variables": {
+              "Bucket": {
+                "default": "example",
+                "x-path-parameter": true
+              }
+            }
+          },
+          {
+            "url": "https://{Bucket}.s3-accelerate.dualstack.amazonaws.com",
+            "variables": {
+              "Bucket": {
+                "default": "example",
+                "x-path-parameter": true
+              }
+            }
+          },
+          {
+            "url": "https://s3.{region}.amazonaws.com",
+            "variables": {
+              "region": {
+                "default": "us-east-1"
+              }
+            }
+          }
+        ],
+        "x-optional-fixed-query": [
+          "x-id"
+        ]
+      }
+    },
+    "/{Bucket}?list-type=2": {
+      "get": {
+        "operationId": "ListObjectsV2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Bucket",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "delimiter",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "encoding-type",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EncodingType"
+            }
+          },
+          {
+            "in": "query",
+            "name": "max-keys",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prefix",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation-token",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fetch-owner",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "start-after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-request-payer",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/RequestPayer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-expected-bucket-owner",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amz-optional-object-attributes",
+            "required": false,
+            "schema": {
+              "items": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/OptionalObjectAttributes"
+                  }
+                ],
+                "xml": {
+                  "name": "member"
+                }
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListObjectsV2ResponseContent"
+                }
+              }
+            },
+            "headers": {
+              "x-amz-request-charged": {
+                "required": false,
+                "schema": {
+                  "$ref": "#/components/schemas/RequestCharged"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoSuchBucketResponseContent"
+                }
+              }
+            }
+          }
+        },
+        "servers": [
+          {
+            "url": "https://{Bucket}.s3.{region}.amazonaws.com",
+            "variables": {
+              "Bucket": {
+                "default": "example",
+                "x-path-parameter": true
+              },
+              "region": {
+                "default": "us-east-1"
+              }
+            }
+          },
+          {
+            "url": "https://{Bucket}.s3.dualstack.{region}.amazonaws.com",
+            "variables": {
+              "Bucket": {
+                "default": "example",
+                "x-path-parameter": true
+              },
+              "region": {
+                "default": "us-east-1"
+              }
+            }
+          },
+          {
+            "url": "https://{Bucket}.s3-accelerate.amazonaws.com",
+            "variables": {
+              "Bucket": {
+                "default": "example",
+                "x-path-parameter": true
+              }
+            }
+          },
+          {
+            "url": "https://{Bucket}.s3-accelerate.dualstack.amazonaws.com",
+            "variables": {
+              "Bucket": {
+                "default": "example",
+                "x-path-parameter": true
+              }
+            }
+          },
+          {
+            "url": "https://s3.{region}.amazonaws.com",
+            "variables": {
+              "region": {
+                "default": "us-east-1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

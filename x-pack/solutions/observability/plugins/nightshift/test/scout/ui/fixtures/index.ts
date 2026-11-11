@@ -39,7 +39,7 @@ const SET_UP_SERVICE_ACCOUNT_STATUS: InvestigatorServiceAccountStatus = {
 };
 
 /**
- * Reports the space as set up, so the app renders instead of its "Enable Elastic Nightshift" step.
+ * Reports the space as set up, so the app renders instead of its "Enable Elastic nightshift" step.
  * Setting it up for real needs service accounts, which these navigation tests do not exercise.
  */
 export const mockNightshiftSetUp = async (page: ScoutPage): Promise<void> => {

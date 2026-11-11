@@ -49,7 +49,7 @@ describe('toolToLangchain', () => {
     expect(toolKeys.sort()).toEqual(['foo']);
   });
 
-  it('adds reasoning param when specified', async () => {
+  it('adds the intent param when specified', async () => {
     const tool = createTool('toolA', {
       description: 'desc',
       getSchema: () => z.object({ foo: z.string() }),
@@ -59,11 +59,67 @@ describe('toolToLangchain', () => {
       tool,
       toolId: tool.id,
       logger,
-      addReasoningParam: true,
+      addIntentParam: true,
     });
 
-    const toolKeys = Object.keys((langchainTool.schema as any).shape);
-    expect(toolKeys.sort()).toEqual(['_reasoning', 'foo']);
+    const shape = (langchainTool.schema as any).shape;
+    expect(Object.keys(shape).sort()).toEqual(['_intent', 'foo']);
+    expect(shape._intent.description).toBe(
+      'Clear, concise description of what you are doing by calling this tool'
+    );
+    expect(shape._intent.isOptional()).toBe(true);
+  });
+
+  it('keeps the strictness of the tool schema when adding the intent param', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ foo: z.string() }).strict(),
+    });
+
+    const langchainTool = await toolToLangchain({
+      tool,
+      toolId: tool.id,
+      logger,
+      addIntentParam: true,
+    });
+
+    await expect(
+      langchainTool.invoke({ foo: 'a', _intent: 'Doing a', unknown: 'b' })
+    ).rejects.toThrow();
+    expect(tool.execute).not.toHaveBeenCalled();
+  });
+
+  it('does not add the intent param by default', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ foo: z.string() }),
+    });
+
+    const langchainTool = await toolToLangchain({ tool, toolId: tool.id, logger });
+
+    expect(Object.keys((langchainTool.schema as any).shape)).toEqual(['foo']);
+  });
+
+  it('strips _intent before calling the tool handler', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ hello: z.string() }),
+      execute: jest
+        .fn()
+        .mockResolvedValue({ results: [{ type: ToolResultType.other, data: 'foo' }] }),
+    });
+
+    const langchainTool = await toolToLangchain({
+      tool,
+      toolId: tool.id,
+      logger,
+      addIntentParam: true,
+    });
+    await langchainTool.invoke({ hello: 'world', _intent: 'Saying hello' });
+
+    expect(tool.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ toolParams: { hello: 'world' } })
+    );
   });
 
   it('wraps the tool handler', async () => {

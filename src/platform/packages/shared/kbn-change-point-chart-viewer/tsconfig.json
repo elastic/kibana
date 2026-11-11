@@ -13,6 +13,7 @@
     "@kbn/i18n",
     "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
+    "@kbn/presentation-publishing",
     "@kbn/react-hooks",
     "@kbn/shared-ux-error-boundary",
     "@kbn/shared-ux-utility",
