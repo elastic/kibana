@@ -8,11 +8,18 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AiIndexHttpItem, KiTypeCount } from '../../common/http_api/ai_indices';
 import { MEMORY_KI_TYPES } from '../../common/memory';
-import { isDreamingConfigured } from '../../common/dreaming';
+import {
+  dreamingTypesOf,
+  ENTITY_TYPE_PREFIX,
+  FACT_TYPE_PREFIX,
+  isDreamingConfigured,
+  type DreamingEntityType,
+  type DreamingFactType,
+} from '../../common/dreaming';
 import { describeAiIndexAggregations } from './describe_aggregations';
 import { describeAiIndexFields } from './describe_fields';
-import { buildExampleQueries, EXCLUDE_MEMORY_KI_TYPES_FILTER } from './example_queries';
-import { buildMemoryExampleQueries } from './memory_example_queries';
+import { buildExampleQueries, excludeMemoryKiTypesFilter } from './example_queries';
+import { buildMemoryExampleQueries, type MemoryExampleQueries } from './memory_example_queries';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
 const MEMORY_KI_TYPE_SET: ReadonlySet<string> = new Set(MEMORY_KI_TYPES);
@@ -54,11 +61,15 @@ const countsSection = (heading: string, counts: Array<[key: string, count: numbe
     ? [heading, ...counts.map(([key, count]) => `${JSON.stringify(key)}: ${count}`)]
     : [];
 
-const kiTypeCountsSection = (counts: KiTypeCount[]): string[] =>
+const kiTypeCountsSection = (counts: KiTypeCount[], dreamedPrefixes: readonly string[]): string[] =>
   countsSection(
     'Knowledge item types',
     counts
-      .filter(({ type }) => !MEMORY_KI_TYPE_SET.has(type))
+      .filter(
+        ({ type }) =>
+          !MEMORY_KI_TYPE_SET.has(type) &&
+          !dreamedPrefixes.some((prefix) => type.startsWith(prefix))
+      )
       .map(({ type, count }) => [type, count])
   );
 
@@ -68,12 +79,93 @@ const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
     counts.map(({ tag, count }) => [tag, count])
   );
 
-const memorySection = ({ dreaming }: AiIndexHttpItem, target: string): string[] => {
-  if (!isDreamingConfigured(dreaming)) {
+interface DreamedTypes {
+  facts: DreamingFactType[];
+  entities: DreamingEntityType[];
+}
+
+const NO_DREAMED_TYPES: DreamedTypes = { facts: [], entities: [] };
+
+const configuredDreamedTypes = ({ dreaming }: AiIndexHttpItem): DreamedTypes => {
+  if (!dreaming || !isDreamingConfigured(dreaming)) {
+    return NO_DREAMED_TYPES;
+  }
+  const { facts, entities } = dreamingTypesOf(dreaming);
+  return { facts, entities };
+};
+
+/** The prefixes of the kinds a config dreams, so ordinary retrieval leaves out only what dreaming writes. */
+const dreamedPrefixesOf = ({ facts, entities }: DreamedTypes): string[] => [
+  ...(facts.length > 0 ? [FACT_TYPE_PREFIX] : []),
+  ...(entities.length > 0 ? [ENTITY_TYPE_PREFIX] : []),
+];
+
+const dreamedKiTypes = ({ facts, entities }: DreamedTypes): string[] => [
+  ...facts.map(({ type }) => `${FACT_TYPE_PREFIX}${type}`),
+  ...entities.map(({ type }) => `${ENTITY_TYPE_PREFIX}${type}`),
+];
+
+const dreamedTypeLine = (
+  kiType: string,
+  counts: ReadonlyMap<string, number>,
+  { description, attributes = [] }: { description?: string; attributes?: string[] }
+): string =>
+  `${JSON.stringify(kiType)}: ${counts.get(kiType) ?? 0}${description ? ` - ${description}` : ''}${
+    attributes.length > 0 ? ` (attributes: ${attributes.join(', ')})` : ''
+  }`;
+
+const dreamedLines = (
+  { facts, entities }: DreamedTypes,
+  dreamedTypeCounts: KiTypeCount[],
+  queries: MemoryExampleQueries
+): string[] => {
+  const counts = new Map(dreamedTypeCounts.map(({ type, count }) => [type, count]));
+  return [
+    ...(facts.length > 0
+      ? [
+          `Dreaming turns memories into long-term facts, each typed ${FACT_TYPE_PREFIX}<fact type> and written to stand on its own. Fact types, with how many facts each has:`,
+          ...facts.map(({ type, description }) =>
+            dreamedTypeLine(`${FACT_TYPE_PREFIX}${type}`, counts, { description })
+          ),
+          'Facts of one type, newest first:',
+          queries.factsOfType,
+          'The most recent facts:',
+          queries.recentFacts,
+        ]
+      : []),
+    ...(entities.length > 0
+      ? [
+          `Dreaming keeps the things memories are about as entities, each typed ${ENTITY_TYPE_PREFIX}<entity type>: title holds its name, attributes its attribute values, and content a summary of what is known about it. Entity types, with how many entities each has:`,
+          ...entities.map(({ type, description, attributes }) =>
+            dreamedTypeLine(`${ENTITY_TYPE_PREFIX}${type}`, counts, { description, attributes })
+          ),
+          'An entity by name, across entity types:',
+          queries.entityByName,
+          'Entities of one type, newest first:',
+          queries.entitiesOfType,
+        ]
+      : []),
+  ];
+};
+
+const dreamedKindsText = ({ facts, entities }: DreamedTypes): string =>
+  [...(facts.length > 0 ? ['facts'] : []), ...(entities.length > 0 ? ['entities'] : [])].join(
+    ' and '
+  );
+
+const memorySection = (
+  aiIndex: AiIndexHttpItem,
+  target: string,
+  dreamedTypeCounts: KiTypeCount[]
+): string[] => {
+  if (!isDreamingConfigured(aiIndex.dreaming)) {
     return [];
   }
 
-  const { crossSession } = buildMemoryExampleQueries(target);
+  const types = configuredDreamedTypes(aiIndex);
+  const includeFacts = types.facts.length > 0;
+  const dreamedKinds = dreamedKindsText(types);
+  const queries = buildMemoryExampleQueries(target, { includeFacts });
 
   return [
     'Memory',
@@ -83,18 +175,31 @@ const memorySection = ({ dreaming }: AiIndexHttpItem, target: string): string[] 
     'memory.session_fact',
     'Use platform.context_engine.remember to write memory.',
     'Use platform.context_engine.forget with a memory id to tombstone memory.',
-    'Unless the task specifically calls for memory, exclude memory types from ordinary KI retrieval:',
-    EXCLUDE_MEMORY_KI_TYPES_FILTER,
-    'For cross-session recall, search granular facts with hybrid retrieval:',
-    crossSession,
+    `Unless the task specifically calls for memory, exclude memory types${
+      dreamedKinds ? `, and the ${dreamedKinds} dreaming writes,` : ''
+    } from ordinary KI retrieval:`,
+    excludeMemoryKiTypesFilter(dreamedPrefixesOf(types)),
+    ...dreamedLines(types, dreamedTypeCounts, queries),
+    includeFacts
+      ? 'For cross-session recall, search session facts and long-term facts together with hybrid retrieval, so memories dreaming has not reached yet are found too:'
+      : 'For cross-session recall, search granular facts with hybrid retrieval:',
+    queries.crossSession,
     'Select the latest revision before filtering deleted or expired memories, or an older active data-stream revision can reappear.',
     'References identify the source conversations.',
   ];
 };
 
-const exampleQueriesSection = (dest: AiIndexHttpItem['dest'], excludeMemory: boolean): string[] => [
+const exampleQueriesSection = (
+  dest: AiIndexHttpItem['dest'],
+  excludeMemory: boolean,
+  dreamedPrefixes: readonly string[]
+): string[] => [
   'Example queries (adapt field names for non-canonical indices)',
-  ...buildExampleQueries(dest, { excludeMemory }).flatMap(({ title, esql }) => ['', title, esql]),
+  ...buildExampleQueries(dest, { excludeMemory, dreamedPrefixes }).flatMap(({ title, esql }) => [
+    '',
+    title,
+    esql,
+  ]),
 ];
 
 /** One item per line; sections separated by a blank line; empty sections dropped. */
@@ -119,20 +224,24 @@ export const describeAiIndex = async ({
     esClient,
     target,
   });
-  const { kiTypeCounts, tagCounts } = await describeAiIndexAggregations({
+  const dreamedTypes = includeMemory ? configuredDreamedTypes(aiIndex) : NO_DREAMED_TYPES;
+  const dreamedPrefixes = dreamedPrefixesOf(dreamedTypes);
+  const { kiTypeCounts, tagCounts, dreamedTypeCounts } = await describeAiIndexAggregations({
     esClient,
     dest: aiIndex.dest,
     spaceId,
     fields: allFields,
+    dreamedPrefixes,
+    dreamedTypes: dreamedKiTypes(dreamedTypes),
   });
 
   return renderSections([
     headerSection(aiIndex),
     fieldsSection(fields, omittedFieldCount),
     semanticFieldsSection(semanticFields),
-    kiTypeCountsSection(kiTypeCounts),
+    kiTypeCountsSection(kiTypeCounts, dreamedPrefixes),
     tagCountsSection(tagCounts),
-    includeMemory ? memorySection(aiIndex, target) : [],
-    exampleQueriesSection(aiIndex.dest, includeMemory),
+    includeMemory ? memorySection(aiIndex, target, dreamedTypeCounts) : [],
+    exampleQueriesSection(aiIndex.dest, includeMemory, dreamedPrefixes),
   ]);
 };

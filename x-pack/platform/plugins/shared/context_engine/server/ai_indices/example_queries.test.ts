@@ -6,7 +6,7 @@
  */
 
 import { Parser } from '@elastic/esql';
-import { buildExampleQueries, EXCLUDE_MEMORY_KI_TYPES_FILTER } from './example_queries';
+import { buildExampleQueries, excludeMemoryKiTypesFilter } from './example_queries';
 
 const LIFECYCLE =
   '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()';
@@ -63,7 +63,35 @@ describe('buildExampleQueries', () => {
       expect(esql).not.toContain('memory.session');
     }
     for (const { esql } of queriesExcludingMemory) {
-      expect(esql).toContain(EXCLUDE_MEMORY_KI_TYPES_FILTER);
+      expect(esql).toContain(excludeMemoryKiTypesFilter([]));
+      expect(esql).not.toContain('fact.*');
+    }
+  });
+
+  it('also excludes the types dreaming writes when the AI index dreams', () => {
+    const dreaming = buildExampleQueries(
+      { type: 'index', value: 'ai-index-idx-support*' },
+      { excludeMemory: true, dreamedPrefixes: ['fact.', 'entity.'] }
+    );
+
+    for (const { esql } of dreaming) {
+      expect(esql).toContain(
+        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")'
+      );
+      expect(Parser.parse(esql).errors).toEqual([]);
+    }
+  });
+
+  it('excludes only the kinds the AI index dreams', () => {
+    const factsOnly = buildExampleQueries(
+      { type: 'index', value: 'ai-index-idx-support*' },
+      { excludeMemory: true, dreamedPrefixes: ['fact.'] }
+    );
+
+    for (const { esql } of factsOnly) {
+      expect(esql).toContain(
+        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*")\n'
+      );
     }
   });
 

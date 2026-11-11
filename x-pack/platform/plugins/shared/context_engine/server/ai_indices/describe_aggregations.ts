@@ -13,7 +13,7 @@ import {
 } from '../../common/constants';
 import type { AiIndexDest, KiTypeCount } from '../../common/http_api/ai_indices';
 import { buildAiIndexSpaceFilter } from '../../common/space_filter';
-import { EXCLUDE_MEMORY_KI_TYPES_CONDITION } from './example_queries';
+import { excludeMemoryKiTypesCondition } from './example_queries';
 import { kiLifecyclePipeline } from './ki_lifecycle';
 import type { AiIndexField, AiIndexTagCount } from './types';
 
@@ -26,6 +26,7 @@ const KEYWORD_TYPES: ReadonlySet<string> = new Set(['keyword', 'constant_keyword
 export interface AiIndexAggregationsDescription {
   kiTypeCounts: KiTypeCount[];
   tagCounts: AiIndexTagCount[];
+  dreamedTypeCounts: KiTypeCount[];
 }
 
 export interface DescribeAiIndexAggregationsParams {
@@ -33,9 +34,17 @@ export interface DescribeAiIndexAggregationsParams {
   dest: AiIndexDest;
   spaceId: string;
   fields: AiIndexField[];
+  /** The prefixes of the kinds the AI index dreams, left out of `kiTypeCounts` and `tagCounts`. */
+  dreamedPrefixes?: readonly string[];
+  /** The configured `fact.<type>` and `entity.<type>` KI types to count in `dreamedTypeCounts`. */
+  dreamedTypes?: string[];
 }
 
-const NO_COUNTS: AiIndexAggregationsDescription = { kiTypeCounts: [], tagCounts: [] };
+const NO_COUNTS: AiIndexAggregationsDescription = {
+  kiTypeCounts: [],
+  tagCounts: [],
+  dreamedTypeCounts: [],
+};
 
 const isAggregatableKeyword = (fields: AiIndexField[], path: string): boolean =>
   fields.some(
@@ -47,12 +56,12 @@ const countsQuery = (
   { type, value }: AiIndexDest,
   field: string,
   size: number,
-  excludeMemory: boolean
+  condition: string | undefined
 ): string =>
   [
     `FROM ${value} METADATA _id, _index`,
     ...kiLifecyclePipeline(type),
-    ...(excludeMemory ? [`WHERE ${EXCLUDE_MEMORY_KI_TYPES_CONDITION}`] : []),
+    ...(condition ? [`WHERE ${condition}`] : []),
     ...(field === KI_TAGS_FIELD ? [`MV_EXPAND ${field}`] : []),
     `WHERE ${field} IS NOT NULL`,
     `STATS count = COUNT(*) BY ${field}`,
@@ -83,6 +92,8 @@ export const describeAiIndexAggregations = async ({
   dest,
   spaceId,
   fields,
+  dreamedPrefixes = [],
+  dreamedTypes = [],
 }: DescribeAiIndexAggregationsParams): Promise<AiIndexAggregationsDescription> => {
   const hasType = isAggregatableKeyword(fields, KI_TYPE_FIELD);
   const hasTags = isAggregatableKeyword(fields, KI_TAGS_FIELD);
@@ -90,25 +101,36 @@ export const describeAiIndexAggregations = async ({
     return NO_COUNTS;
   }
 
-  const [types, tags] = await Promise.all([
-    hasType
-      ? runCounts(
-          esClient,
-          spaceId,
-          countsQuery(dest, KI_TYPE_FIELD, MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS, true)
-        )
-      : [],
+  const typeCounts = (size: number, condition: string) =>
+    runCounts(esClient, spaceId, countsQuery(dest, KI_TYPE_FIELD, size, condition));
+  const excludeMemory = excludeMemoryKiTypesCondition(dreamedPrefixes);
+  const [types, tags, dreamed] = await Promise.all([
+    hasType ? typeCounts(MAX_AI_INDEX_DESCRIBE_TYPE_COUNTS, excludeMemory) : [],
     hasTags
       ? runCounts(
           esClient,
           spaceId,
-          countsQuery(dest, KI_TAGS_FIELD, MAX_AI_INDEX_DESCRIBE_TAG_COUNTS, hasType)
+          countsQuery(
+            dest,
+            KI_TAGS_FIELD,
+            MAX_AI_INDEX_DESCRIBE_TAG_COUNTS,
+            hasType ? excludeMemory : undefined
+          )
+        )
+      : [],
+    hasType && dreamedTypes.length > 0
+      ? typeCounts(
+          dreamedTypes.length,
+          `type IN (${dreamedTypes.map((dreamedType) => `"${dreamedType}"`).join(', ')})`
         )
       : [],
   ]);
 
+  const toTypeCounts = (rows: Array<Record<string, unknown>>): KiTypeCount[] =>
+    rows.map((row) => ({ type: String(row.type), count: Number(row.count) }));
   return {
-    kiTypeCounts: types.map((row) => ({ type: String(row.type), count: Number(row.count) })),
+    kiTypeCounts: toTypeCounts(types),
     tagCounts: tags.map((row) => ({ tag: String(row.tags), count: Number(row.count) })),
+    dreamedTypeCounts: toTypeCounts(dreamed),
   };
 };

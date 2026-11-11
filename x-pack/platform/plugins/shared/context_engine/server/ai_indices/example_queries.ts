@@ -8,6 +8,7 @@
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { kiLifecyclePipeline } from './ki_lifecycle';
 import { MEMORY_KI_TYPES } from '../../common/memory';
+import { ENTITY_TYPE_PREFIX, FACT_TYPE_PREFIX } from '../../common/dreaming';
 
 export interface AiIndexExampleQuery {
   title: string;
@@ -16,10 +17,18 @@ export interface AiIndexExampleQuery {
 }
 
 const KEEP = '| KEEP title, description, content, type, tags';
-export const EXCLUDE_MEMORY_KI_TYPES_CONDITION = `type IS NULL OR (${MEMORY_KI_TYPES.map(
-  (type) => `type != "${type}"`
-).join(' AND ')})`;
-export const EXCLUDE_MEMORY_KI_TYPES_FILTER = `| WHERE ${EXCLUDE_MEMORY_KI_TYPES_CONDITION}`;
+export const FACT_TYPE_PATTERN = `${FACT_TYPE_PREFIX}*`;
+export const ENTITY_TYPE_PATTERN = `${ENTITY_TYPE_PREFIX}*`;
+
+/** Leaves out memory types and the KI types under `dreamedPrefixes`, the kinds the AI index dreams. */
+export const excludeMemoryKiTypesCondition = (dreamedPrefixes: readonly string[]): string =>
+  `type IS NULL OR (${[
+    ...MEMORY_KI_TYPES.map((type) => `type != "${type}"`),
+    ...dreamedPrefixes.map((prefix) => `NOT type LIKE "${prefix}*"`),
+  ].join(' AND ')})`;
+
+export const excludeMemoryKiTypesFilter = (dreamedPrefixes: readonly string[]): string =>
+  `| WHERE ${excludeMemoryKiTypesCondition(dreamedPrefixes)}`;
 
 /**
  * Three fixed ES|QL shapes for the canonical KI schema (`title`, `description`, `content`, their
@@ -29,12 +38,15 @@ export const EXCLUDE_MEMORY_KI_TYPES_FILTER = `| WHERE ${EXCLUDE_MEMORY_KI_TYPES
  */
 export const buildExampleQueries = (
   { type, value }: AiIndexDest,
-  { excludeMemory = false }: { excludeMemory?: boolean } = {}
+  {
+    excludeMemory = false,
+    dreamedPrefixes = [],
+  }: { excludeMemory?: boolean; dreamedPrefixes?: readonly string[] } = {}
 ): AiIndexExampleQuery[] => {
   const from = [
     `FROM ${value} METADATA _id, _index, _score`,
     ...kiLifecyclePipeline(type).map((command) => `| ${command}`),
-    ...(excludeMemory ? [EXCLUDE_MEMORY_KI_TYPES_FILTER] : []),
+    ...(excludeMemory ? [excludeMemoryKiTypesFilter(dreamedPrefixes)] : []),
   ];
   return [
     {
