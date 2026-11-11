@@ -13,9 +13,12 @@ import {
   foldClusterRows,
   foldNamespaceRows,
   foldNodeRows,
+  foldOtelHostRows,
+  foldSystemHostRows,
   foldWorkloadRows,
   getDatasetFamily,
   KUBERNETES_ENTITY_STORE_TYPES,
+  mergeHostFeatures,
 } from './entity_key_table';
 
 const datasetColumns = [
@@ -52,6 +55,16 @@ const clusterColumns = [
   { name: 'nodes', type: 'long' },
   { name: 'replicas', type: 'long' },
   { name: 'last_seen', type: 'date' },
+];
+
+const otelHostColumns = [
+  { name: 'host.name', type: 'keyword' },
+  { name: 'k8s.node.name', type: 'keyword' },
+  { name: 'last_seen', type: 'date' },
+  { name: 'os', type: 'keyword' },
+  { name: 'cloud_provider', type: 'keyword' },
+  { name: 'cloud_instance', type: 'keyword' },
+  { name: 'clusters', type: 'keyword' },
 ];
 
 const sourceEsql =
@@ -297,6 +310,81 @@ describe('Kubernetes entity derivation', () => {
   });
 });
 
+describe('host entity merging', () => {
+  it('enriches nodes, creates host-derived nodes, and keeps standalone hosts', () => {
+    const lastSeen = '2026-11-10T12:00:00.000Z';
+    const nodeFeatures = foldNodeRows([
+      {
+        'kubernetes.node.name': 'node-x',
+        clusters: ['cluster-a'],
+        replicas: 1,
+        last_seen: lastSeen,
+      },
+    ]).features;
+    const systemHostFeatures = foldSystemHostRows([
+      {
+        'host.name': 'node-x',
+        'kubernetes.node.name': 'node-x',
+        last_seen: lastSeen,
+        os: 'Wolfi',
+        cloud_provider: 'gcp',
+        cloud_instance: 'instance-x',
+        clusters: ['cluster-a'],
+      },
+      {
+        'host.name': 'node-y',
+        'kubernetes.node.name': 'node-y',
+        last_seen: lastSeen,
+        os: 'Linux',
+        cloud_provider: 'aws',
+        cloud_instance: 'instance-y',
+        clusters: ['cluster-b'],
+      },
+    ]).features;
+    const otelHostFeatures = foldOtelHostRows([
+      {
+        'host.name': 'router-1',
+        'k8s.node.name': null,
+        last_seen: lastSeen,
+        os: ['Linux'],
+        cloud_provider: [],
+        cloud_instance: [],
+        clusters: null,
+      },
+    ]).features;
+
+    const byId = new Map(
+      mergeHostFeatures([...nodeFeatures, ...systemHostFeatures, ...otelHostFeatures]).map(
+        (feature) => [feature.id, feature]
+      )
+    );
+    expect([...byId.keys()]).toEqual(['k8s.node:node-x', 'k8s.node:node-y', 'host:router-1']);
+    expect(byId.has('host:node-x')).toBe(false);
+    expect(byId.get('k8s.node:node-x')?.properties).toMatchObject({
+      host: {
+        os: ['Wolfi'],
+        cloud_provider: ['gcp'],
+        cloud_instance: ['instance-x'],
+      },
+      aliases: ['host:node-x'],
+    });
+    expect(byId.get('k8s.node:node-y')?.filter).toEqual({
+      field: 'kubernetes.node.name',
+      eq: 'node-y',
+    });
+    expect(byId.get('host:router-1')).toEqual(
+      expect.objectContaining({
+        subtype: 'host',
+        filter: { field: 'host.name', eq: 'router-1' },
+        properties: expect.objectContaining({
+          entity_store_type: 'host',
+          host: { os: ['Linux'], cloud_provider: [], cloud_instance: [] },
+        }),
+      })
+    );
+  });
+});
+
 describe('identifyMetricsEntities', () => {
   it('folds clusters while keeping equal deployment and daemonset names separate', async () => {
     const datasetList = {
@@ -513,7 +601,7 @@ describe('identifyMetricsEntities', () => {
     expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('<null>'));
   });
 
-  it('handles a Kubernetes pod dataset and counts an uncovered OTel dataset', async () => {
+  it('handles Kubernetes pod and OTel host datasets', async () => {
     const harness = createHarness([
       {
         columns: datasetColumns,
@@ -535,6 +623,20 @@ describe('identifyMetricsEntities', () => {
       },
       { columns: namespaceColumns, values: [] },
       { columns: clusterColumns, values: [] },
+      {
+        columns: otelHostColumns,
+        values: [
+          [
+            'router-1',
+            null,
+            '2026-11-10T12:00:00.000Z',
+            ['Linux'],
+            [],
+            [],
+            null,
+          ],
+        ],
+      },
     ]);
 
     const result = await identifyMetricsEntities({
@@ -548,14 +650,18 @@ describe('identifyMetricsEntities', () => {
     expect(result).toEqual(
       expect.objectContaining({
         handled: true,
-        matchedEntityKeyRowsCount: 3,
-        uncoveredDatasetsCount: 1,
+        metricsEntitiesCount: 2,
+        matchedEntityKeyRowsCount: 4,
+        uncoveredDatasetsCount: 0,
       })
     );
     expect(harness.bulk).toHaveBeenCalledTimes(1);
-    expect(harness.info).toHaveBeenCalledTimes(1);
-    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('[mixed-metrics]'));
-    expect(harness.info).toHaveBeenCalledWith(expect.stringContaining('hostmetricsreceiver.otel'));
+    expect(
+      harness.bulk.mock.calls[0][1].map(
+        ({ index }: { index: { feature: { id: string } } }) => index.feature.id
+      )
+    ).toEqual(['host:router-1', 'k8s.deployment:payments/checkout']);
+    expect(harness.info).not.toHaveBeenCalled();
   });
 
   it('keeps nodes before the highest-replica workloads within the 500 entity cap', async () => {

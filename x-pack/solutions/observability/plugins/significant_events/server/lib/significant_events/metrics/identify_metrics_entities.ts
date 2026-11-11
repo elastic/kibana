@@ -16,6 +16,7 @@ import {
   ENTITY_QUERY_LIMIT,
   ENTITY_KEY_TABLE,
   getDatasetFamily,
+  mergeHostFeatures,
   type DroppedMetricsEntityRows,
   type EsqlCell,
   type EsqlRow,
@@ -203,8 +204,12 @@ export const identifyMetricsEntities = async ({
     };
   }
 
-  const matchedKeyRows = ENTITY_KEY_TABLE.filter(({ datasets: keyDatasets }) =>
-    keyDatasets.some((dataset) => datasets.includes(dataset))
+  const matchedKeyRows = ENTITY_KEY_TABLE.filter(
+    ({ datasets: keyDatasets, datasetPrefixes = [] }) =>
+      keyDatasets.some((dataset) => datasets.includes(dataset)) ||
+      datasetPrefixes.some((prefix) =>
+        datasets.some((dataset) => typeof dataset === 'string' && dataset.startsWith(prefix))
+      )
   );
   const uncoveredDatasets = datasets.filter(
     (dataset) => !COVERED_DATASET_FAMILIES.has(getDatasetFamily(dataset) ?? '')
@@ -274,7 +279,7 @@ export const identifyMetricsEntities = async ({
     unknownClusterRows += folded.unknownClusterRows;
   }
 
-  const selectedFeatures = [...features].sort((left, right) => {
+  const selectedFeatures = mergeHostFeatures(features).sort((left, right) => {
     const priority = entityPriority(left) - entityPriority(right);
     if (priority !== 0) {
       return priority;

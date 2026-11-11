@@ -37,7 +37,8 @@ export interface EntityKeyRow {
   id: string;
   family: string;
   datasets: readonly string[];
-  subtype: 'k8s_workload' | 'k8s_node' | 'k8s_namespace' | 'k8s_cluster';
+  datasetPrefixes?: readonly string[];
+  subtype: 'k8s_workload' | 'k8s_node' | 'k8s_namespace' | 'k8s_cluster' | 'host';
   buildQuery: (tsPrefix: string) => string;
   foldRows: (rows: EsqlRow[]) => EntityFoldResult;
 }
@@ -469,6 +470,145 @@ export const foldClusterRows = (rows: EsqlRow[]): EntityFoldResult => {
   };
 };
 
+const buildSystemHostQuery = (sourceQuery: string): string => `${sourceQuery}
+| WHERE @timestamp > NOW() - 1 hour AND STARTS_WITH(data_stream.dataset, "system.")
+| STATS last_seen = MAX(@timestamp), os = VALUES(host.os.name),
+        cloud_provider = VALUES(cloud.provider), cloud_instance = VALUES(cloud.instance.id),
+        clusters = VALUES(orchestrator.cluster.name)
+  BY host.name, kubernetes.node.name
+| SORT last_seen DESC, host.name
+| LIMIT ${ENTITY_QUERY_LIMIT}`;
+
+const buildOtelHostQuery = (sourceQuery: string): string => `${sourceQuery}
+| WHERE @timestamp > NOW() - 1 hour
+    AND data_stream.dataset == "hostmetricsreceiver.otel"
+| STATS last_seen = MAX(@timestamp), os = VALUES(host.os.name),
+        cloud_provider = VALUES(cloud.provider), cloud_instance = VALUES(cloud.instance.id),
+        clusters = VALUES(orchestrator.cluster.name)
+  BY host.name, k8s.node.name
+| SORT last_seen DESC, host.name
+| LIMIT ${ENTITY_QUERY_LIMIT}`;
+
+const foldHostRows = ({
+  rows,
+  nodeField,
+  keyRow,
+}: {
+  rows: EsqlRow[];
+  nodeField: 'kubernetes.node.name' | 'k8s.node.name';
+  keyRow: 'ecs.host' | 'otel.host';
+}): EntityFoldResult => {
+  const droppedRows = createDroppedRows();
+  let unknownClusterRows = 0;
+  const features = rows.flatMap((row): FeatureUpsert[] => {
+    const hostName = row['host.name'];
+    if (typeof hostName !== 'string') {
+      droppedRows.ownerless += 1;
+      return [];
+    }
+    const nodeName = row[nodeField];
+    const isNode = typeof nodeName === 'string';
+    const name = isNode ? nodeName : hostName;
+    const id = isNode
+      ? buildKubernetesEntityId({ kind: 'node', name })
+      : `host:${hostName}`;
+    if (id.length > MAX_ID_LENGTH || name.length > MAX_TITLE_LENGTH) {
+      droppedRows.idTooLong += 1;
+      return [];
+    }
+    const clusters = clustersOf(row.clusters);
+    if (clusters.includes(UNKNOWN_CLUSTER)) {
+      unknownClusterRows += 1;
+    }
+    const host = {
+      os: stringsOf(row.os),
+      cloud_provider: stringsOf(row.cloud_provider),
+      cloud_instance: stringsOf(row.cloud_instance),
+    };
+    return [
+      {
+        type: 'entity',
+        subtype: isNode ? 'k8s_node' : 'host',
+        id,
+        title: name,
+        description: isNode ? `Kubernetes node ${name}.` : `Host ${name}.`,
+        filter: isNode
+          ? { field: 'kubernetes.node.name', eq: name }
+          : { field: 'host.name', eq: name },
+        properties: {
+          identity: isNode
+            ? { 'kubernetes.node.name': name }
+            : { 'host.name': name },
+          breakdown: ['orchestrator.cluster.name'],
+          entity_store_type: isNode ? KUBERNETES_ENTITY_STORE_TYPES.node : 'host',
+          clusters,
+          host,
+          aliases: [`host:${hostName}`],
+          last_seen: lastSeenOf(row),
+          origin: 'metrics',
+          key_row: keyRow,
+        },
+        confidence: 100,
+      },
+    ];
+  });
+  return {
+    features,
+    droppedIncompleteRowsCount: droppedRowsCount(droppedRows),
+    droppedRows,
+    unknownClusterRows,
+  };
+};
+
+export const foldSystemHostRows = (rows: EsqlRow[]): EntityFoldResult =>
+  foldHostRows({ rows, nodeField: 'kubernetes.node.name', keyRow: 'ecs.host' });
+
+export const foldOtelHostRows = (rows: EsqlRow[]): EntityFoldResult =>
+  foldHostRows({ rows, nodeField: 'k8s.node.name', keyRow: 'otel.host' });
+
+const featureLastSeen = (feature: FeatureUpsert): string =>
+  typeof feature.properties.last_seen === 'string' ? feature.properties.last_seen : '';
+
+export const mergeHostFeatures = (features: FeatureUpsert[]): FeatureUpsert[] => {
+  const featuresById = new Map<string, FeatureUpsert>();
+  for (const feature of features) {
+    const current = featuresById.get(feature.id);
+    if (!current) {
+      featuresById.set(feature.id, feature);
+      continue;
+    }
+    const currentIsNodeInventory = current.properties.key_row === 'ecs.k8s_node';
+    const featureIsNodeInventory = feature.properties.key_row === 'ecs.k8s_node';
+    if (current.subtype === 'k8s_node' && feature.subtype === 'k8s_node') {
+      const nodeFeature = currentIsNodeInventory ? current : featureIsNodeInventory ? feature : current;
+      const hostFeature = feature.properties.host !== undefined ? feature : current;
+      const lastSeen =
+        featureLastSeen(current) > featureLastSeen(feature)
+          ? featureLastSeen(current)
+          : featureLastSeen(feature);
+      featuresById.set(feature.id, {
+        ...nodeFeature,
+        properties: {
+          ...hostFeature.properties,
+          ...nodeFeature.properties,
+          ...(hostFeature.properties.host !== undefined && {
+            host: hostFeature.properties.host,
+          }),
+          ...(hostFeature.properties.aliases !== undefined && {
+            aliases: hostFeature.properties.aliases,
+          }),
+          last_seen: lastSeen,
+        },
+      });
+      continue;
+    }
+    if (featureLastSeen(feature) > featureLastSeen(current)) {
+      featuresById.set(feature.id, feature);
+    }
+  }
+  return [...featuresById.values()];
+};
+
 export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
   {
     id: 'ecs.k8s_workload',
@@ -501,5 +641,22 @@ export const ENTITY_KEY_TABLE: readonly EntityKeyRow[] = [
     subtype: 'k8s_cluster',
     buildQuery: buildClusterQuery,
     foldRows: foldClusterRows,
+  },
+  {
+    id: 'ecs.host',
+    family: 'system',
+    datasets: [],
+    datasetPrefixes: ['system.'],
+    subtype: 'host',
+    buildQuery: buildSystemHostQuery,
+    foldRows: foldSystemHostRows,
+  },
+  {
+    id: 'otel.host',
+    family: 'hostmetricsreceiver',
+    datasets: ['hostmetricsreceiver.otel'],
+    subtype: 'host',
+    buildQuery: buildOtelHostQuery,
+    foldRows: foldOtelHostRows,
   },
 ];
