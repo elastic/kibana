@@ -222,4 +222,31 @@ describe('startKiIdentificationToolHandler', () => {
 
     expect(managementApi.runWorkflow).not.toHaveBeenCalled();
   });
+
+  it('resolves the default connector as the caller when no connector is requested', async () => {
+    const {
+      managementApi,
+      getConnectorById,
+      streamsKIsOnboardingClient,
+      maintenanceService,
+      request,
+      server,
+    } = setup();
+    getConnectorById.mockRejectedValue(new Error('Connector not accessible'));
+
+    await expect(
+      startKiIdentificationToolHandler({
+        sourceId: 'logs.nginx',
+        sourceSlug: 'logs-nginx',
+        steps: [KIsOnboardingStep.FeaturesIdentification, KIsOnboardingStep.QueriesGeneration],
+        server,
+        streamsKIsOnboardingClient,
+        maintenanceService,
+        request,
+      })
+    ).rejects.toThrow('Connector not accessible');
+
+    expect(getConnectorById).toHaveBeenCalledWith(expect.any(String), request);
+    expect(managementApi.runWorkflow).not.toHaveBeenCalled();
+  });
 });

@@ -60,14 +60,19 @@ export async function startKiIdentificationToolHandler({
   // Same for the pause gate, so Nightshift cannot start onboarding while activity is paused.
   await assertNotPaused({ maintenanceService, request });
 
+  const now = Date.now();
+  const skipFeatures = !steps.includes(KIsOnboardingStep.FeaturesIdentification);
+  const skipQueries = !steps.includes(KIsOnboardingStep.QueriesGeneration);
+
   // The run executes as the detection engine service account, which may reach connectors the
-  // caller cannot. The HTTP onboarding route resolves the requested connectors as the caller; do
-  // the same here so a connector the caller cannot use is refused instead of used by the account.
-  const resolveRequestedConnector = (
+  // caller cannot. Like the HTTP onboarding route, resolve every selected step as the caller, with
+  // or without a requested id, so omitting the id cannot hand the account's default connector to
+  // a caller who is not allowed to use it.
+  const resolveSelectedConnector = (
     step: 'kiExtraction' | 'kiQueryGeneration',
-    requestedId: string | undefined
+    { skip, requestedId }: { skip: boolean; requestedId: string | undefined }
   ): Promise<string | undefined> =>
-    requestedId === undefined
+    skip
       ? Promise.resolve(undefined)
       : resolveNightshiftModelForRequest({
           request,
@@ -78,13 +83,15 @@ export async function startKiIdentificationToolHandler({
           requestedId,
         });
   const [featuresConnectorId, queriesConnectorId] = await Promise.all([
-    resolveRequestedConnector('kiExtraction', connectors?.features),
-    resolveRequestedConnector('kiQueryGeneration', connectors?.queries),
+    resolveSelectedConnector('kiExtraction', {
+      skip: skipFeatures,
+      requestedId: connectors?.features,
+    }),
+    resolveSelectedConnector('kiQueryGeneration', {
+      skip: skipQueries,
+      requestedId: connectors?.queries,
+    }),
   ]);
-
-  const now = Date.now();
-  const skipFeatures = !steps.includes(KIsOnboardingStep.FeaturesIdentification);
-  const skipQueries = !steps.includes(KIsOnboardingStep.QueriesGeneration);
 
   const inputs: SignificantEventsKIsOnboardingInputs = {
     sourceId,

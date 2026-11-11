@@ -50,8 +50,19 @@ describe('createKiIdentificationStartTool', () => {
     const tool = createKiIdentificationStartTool({
       server: {
         ...createSignificantEventsServer({ featurePrivilege }),
-        // A user's request: the service account guard has nothing to refuse.
-        core: { security: { authc: { getPrincipal: () => undefined } } } as never,
+        inference: {
+          getConnectorById: jest.fn().mockImplementation(async (connectorId: string) => ({
+            connectorId,
+          })),
+        } as never,
+        core: {
+          // A user's request: the service account guard has nothing to refuse.
+          security: { authc: { getPrincipal: () => undefined } },
+          savedObjects: { getScopedClient: jest.fn() },
+          uiSettings: {
+            asScopedToClient: jest.fn(() => ({ get: jest.fn().mockResolvedValue(false) })),
+          },
+        } as never,
       },
       telemetry: telemetry as never,
       streamsKIsOnboardingClient,
