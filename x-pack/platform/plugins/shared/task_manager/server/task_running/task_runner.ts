@@ -561,11 +561,10 @@ export class TaskManagerRunner implements TaskRunner {
 
           const abortController = new AbortController();
 
-          // Records only with adaptive capacity and task reports on; otherwise every call is a no-op.
-          this.memoryReporter =
-            this.observeRunEnd && this.config.adaptive_capacity.task_reports
-              ? createRunMemoryReporter()
-              : NOOP_RUN_MEMORY_REPORTER;
+          // Records only with adaptive capacity; otherwise every call is a no-op.
+          this.memoryReporter = this.observeRunEnd
+            ? createRunMemoryReporter()
+            : NOOP_RUN_MEMORY_REPORTER;
 
           this.task = definition.createTaskRunner({
             taskInstance: sanitizedTaskInstance,
@@ -1100,10 +1099,10 @@ export class TaskManagerRunner implements TaskRunner {
 
   /**
    * The `memoryEstimate` attribute for the run-end update: the instance's average
-   * after this run, when adaptive capacity observed it and persistence is on.
+   * after this run, when adaptive capacity observed it.
    */
   private memoryEstimateUpdate(): Pick<PartialConcreteTaskInstance, 'memoryEstimate'> {
-    if (!this.runMemory || !this.config.adaptive_capacity.persist_estimates) return {};
+    if (!this.runMemory) return {};
     return {
       memoryEstimate: {
         bytes: this.runMemory.instanceBytes,

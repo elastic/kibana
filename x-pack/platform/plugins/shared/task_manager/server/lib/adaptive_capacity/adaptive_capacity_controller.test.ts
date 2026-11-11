@@ -22,7 +22,7 @@ const settings: AdaptiveCapacitySettings = {
   maxIncreasePerDecision: 5,
   lightTaskBytes: 0,
   lightTaskSlots: 0,
-  persistEstimates: true,
+  decisionIntervalMs: 1000,
   memoryTargetRatio: 0.85,
 };
 
@@ -106,17 +106,6 @@ describe('AdaptiveCapacityController', () => {
     expect(gate.estimateBytes('task-x', 't', 2)).toBe(30 * MB);
     controller.refresh('tick');
     expect(controller.state.seeded_instances).toBe(1);
-  });
-
-  it('ignores document estimates when persistence is switched off', () => {
-    const { controller } = setup({ settings: { persistEstimates: false } });
-    const gate = controller.memoryGate();
-    const estimate = { bytes: 30 * MB, samples: 2, updatedAt: '2026-11-05T00:00:00.000Z' };
-    expect(gate.seed('task-x', 't', 2, estimate)).toBe(false);
-    // the cold-start default applies, as if the document carried nothing
-    expect(gate.estimateBytes('task-x', 't', 2)).toBe(100 * MB);
-    controller.refresh('tick');
-    expect(controller.state.seeded_instances).toBe(0);
   });
 
   it('starts from the minimum and steps up by at most maxIncreasePerDecision', () => {

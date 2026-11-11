@@ -139,8 +139,8 @@ type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T
 /**
  * Lets a running task tell adaptive capacity about memory the process-level
  * measurement cannot attribute to it precisely, such as streamed buffers held
- * outside the heap. Every call is a no-op when capacity is a fixed number or
- * `adaptive_capacity.task_reports` is off, so task code never checks the mode.
+ * outside the heap. Every call is a no-op when capacity is a fixed number, so
+ * task code never checks the mode.
  */
 export interface TaskMemoryReporter {
   /**

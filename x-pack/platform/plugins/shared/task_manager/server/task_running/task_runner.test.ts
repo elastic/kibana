@@ -4609,70 +4609,32 @@ describe('TaskManagerRunner', () => {
       expect(observeRunEnd).toHaveBeenCalledWith(expect.anything(), undefined);
     });
 
-    test('gives the task a no-op reporter when task reports are off or capacity is fixed', async () => {
-      for (const setup of [
-        { observeRunEnd: jest.fn().mockReturnValue(observation), taskReports: false },
-        { observeRunEnd: undefined, taskReports: true },
-      ]) {
-        const { runner } = await readyToRunStageSetup({
-          instance: { schedule: { interval: '10m' } },
-          definitions: {
-            bar: {
-              title: 'Bar!',
-              createTaskRunner: ({ memory }: RunContext) => ({
-                async run() {
-                  memory?.reserve(500 * MB);
-                  memory?.report(500 * MB);
-                  expect(runner.memoryReservationBytes).toBe(0);
-                  return { state: {} };
-                },
-              }),
-            },
-          },
-          observeRunEnd: setup.observeRunEnd,
-          config: {
-            adaptive_capacity: {
-              ...configMock.create().adaptive_capacity,
-              task_reports: setup.taskReports,
-            },
-          },
-        });
-
-        await runner.run();
-
-        if (setup.observeRunEnd) {
-          expect(setup.observeRunEnd).toHaveBeenCalledWith(expect.anything(), undefined);
-        }
-        expect(eventLoggerMock.logEvent).toHaveBeenCalledWith(
-          expect.objectContaining({
-            event: expect.objectContaining({ action: 'task-run' }),
-            kibana: {
-              task: expect.not.objectContaining({ memory_reported_bytes: expect.anything() }),
-            },
-          })
-        );
-      }
-    });
-
-    test('keeps the estimate out of the update when persistence is off', async () => {
-      const observeRunEnd = jest.fn().mockReturnValue(observation);
-      const { runner, store } = await readyToRunStageSetup({
+    test('gives the task a no-op reporter when capacity is fixed', async () => {
+      const { runner } = await readyToRunStageSetup({
         instance: { schedule: { interval: '10m' } },
-        definitions,
-        observeRunEnd,
-        config: {
-          adaptive_capacity: { ...configMock.create().adaptive_capacity, persist_estimates: false },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: ({ memory }: RunContext) => ({
+              async run() {
+                memory?.reserve(500 * MB);
+                memory?.report(500 * MB);
+                expect(runner.memoryReservationBytes).toBe(0);
+                return { state: {} };
+              },
+            }),
+          },
         },
       });
 
       await runner.run();
 
-      expect(store.partialUpdate).toHaveBeenCalledTimes(1);
-      expect(store.partialUpdate.mock.calls[0][0]).not.toHaveProperty('memoryEstimate');
       expect(eventLoggerMock.logEvent).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({ action: 'task-run' }),
-          kibana: { task: expect.objectContaining({ memory_bytes: 40 * MB }) },
+          kibana: {
+            task: expect.not.objectContaining({ memory_reported_bytes: expect.anything() }),
+          },
         })
       );
     });

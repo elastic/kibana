@@ -13,9 +13,11 @@ export {
 export type {
   MajorGcObserver,
   AdaptiveCapacitySettings,
+  AdaptiveCapacitySettingsState,
   AdaptiveCapacityState,
   AdaptiveCapacityTrigger,
   HeapStats,
 } from './adaptive_capacity_controller';
 export { TaskMemoryEstimator } from './task_memory_estimator';
+export { ADAPTIVE_CAPACITY } from './constants';
 export type { RunMemoryObservation, TaskTypeMemoryEstimate } from './task_memory_estimator';

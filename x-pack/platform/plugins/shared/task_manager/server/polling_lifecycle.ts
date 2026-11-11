@@ -66,7 +66,7 @@ import { TaskClaiming } from './queries/task_claiming';
 import type { ClaimOwnershipResult } from './task_claimers';
 import type { TaskPartitioner } from './lib/task_partitioner';
 import type { TaskPoller } from './polling/task_poller';
-import { AdaptiveCapacityController } from './lib/adaptive_capacity';
+import { ADAPTIVE_CAPACITY, AdaptiveCapacityController } from './lib/adaptive_capacity';
 import { registerAdaptiveCapacityTelemetry } from './otel/adaptive_capacity_telemetry';
 import type { AdaptiveCapacityState } from './lib/adaptive_capacity';
 import {
@@ -217,16 +217,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       this.adaptiveCapacity = new AdaptiveCapacityController({
         logger,
         settings: {
+          ...ADAPTIVE_CAPACITY,
           minCapacity: adaptive.min_capacity,
           maxCapacity: adaptive.max_capacity,
-          heapTargetRatio: adaptive.heap_target_ratio,
-          defaultBytesPerTask: adaptive.default_bytes_per_task,
-          maxIncreasePerDecision: adaptive.max_increase_per_decision,
-          lightTaskBytes: adaptive.light_task_bytes,
-          lightTaskSlots: adaptive.light_task_slots,
-          persistEstimates: adaptive.persist_estimates,
-          memoryLimitBytes: adaptive.memory_limit_bytes,
-          memoryTargetRatio: adaptive.memory_target_ratio,
         },
         // The first decision runs in the controller's constructor, before the pool exists.
         getRunningTasks: () => (this.pool ? this.pool.getRunningTasks() : []),
@@ -251,7 +244,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       logger.info(
         `Task Manager capacity is adaptive: ${adaptive.min_capacity}..${
           adaptive.max_capacity
-        } normal tasks, heap target ${Math.round(adaptive.heap_target_ratio * 100)}% of the limit`
+        } normal tasks, heap target ${Math.round(
+          ADAPTIVE_CAPACITY.heapTargetRatio * 100
+        )}% of the limit`
       );
     } else {
       this.capacityConfiguration$ = pressureCapacity$;
@@ -475,15 +470,15 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       return;
     }
     const controller = this.adaptiveCapacity;
-    this.adaptiveCapacitySubscription = interval(
-      this.config.adaptive_capacity.decision_interval
-    ).subscribe(() => {
-      try {
-        controller.tick();
-      } catch (error) {
-        this.logger.error(`Adaptive capacity decision failed: ${error.message}`);
+    this.adaptiveCapacitySubscription = interval(ADAPTIVE_CAPACITY.decisionIntervalMs).subscribe(
+      () => {
+        try {
+          controller.tick();
+        } catch (error) {
+          this.logger.error(`Adaptive capacity decision failed: ${error.message}`);
+        }
       }
-    });
+    );
   }
 
   public stop() {

@@ -38,8 +38,8 @@ export interface AdaptiveCapacitySettings {
   readonly lightTaskBytes: number;
   /** Normal-cost slots kept open for light runs while the heap budget is exhausted. */
   readonly lightTaskSlots: number;
-  /** Restore instance estimates from task documents at claim time; off ignores the attribute. */
-  readonly persistEstimates: boolean;
+  /** How often the owner is expected to call `tick()`; reported in the state only. */
+  readonly decisionIntervalMs: number;
   /** Memory limit to budget the resident set against; undefined falls back to the cgroup limit Node reports, if any. */
   readonly memoryLimitBytes?: number;
   /** Share of the memory limit the resident set may reach before claiming stops. */
@@ -61,8 +61,22 @@ export interface AdaptiveMemoryState extends JsonObject {
   budget_bytes: number;
 }
 
+/** The controller's effective settings, config bounds and fixed tuning alike. */
+export interface AdaptiveCapacitySettingsState extends JsonObject {
+  min_capacity: number;
+  max_capacity: number;
+  heap_target_ratio: number;
+  default_bytes_per_task: number;
+  max_increase_per_decision: number;
+  decision_interval: number;
+  light_task_bytes: number;
+  light_task_slots: number;
+  memory_target_ratio: number;
+}
+
 export interface AdaptiveCapacityState extends JsonObject {
   capacity: number;
+  settings: AdaptiveCapacitySettingsState;
   heap_used_bytes: number;
   /** Memory outside the V8 heap at the time of the decision; sampled together with the heap. */
   heap_external_bytes: number;
@@ -285,7 +299,6 @@ export class AdaptiveCapacityController {
           ? this.estimator.estimateBytes(taskId, taskType, cost)
           : this.estimator.estimateHeapBytes(taskId, taskType, cost),
       seed: (taskId, taskType, cost, estimate) =>
-        this.settings.persistEstimates &&
         this.estimator.seed(taskId, taskType, cost, estimate.bytes, estimate.samples),
     };
   }
@@ -498,6 +511,32 @@ export class AdaptiveCapacityController {
       seeded_instances: this.estimator.seededCount(),
       reservations,
       reported_runs: this.estimator.reportedRunCount(),
+      settings: this.settingsState(),
+    };
+  }
+
+  private settingsState(): AdaptiveCapacitySettingsState {
+    const {
+      minCapacity,
+      maxCapacity,
+      heapTargetRatio,
+      defaultBytesPerTask,
+      maxIncreasePerDecision,
+      decisionIntervalMs,
+      lightTaskBytes,
+      lightTaskSlots,
+      memoryTargetRatio,
+    } = this.settings;
+    return {
+      min_capacity: minCapacity,
+      max_capacity: maxCapacity,
+      heap_target_ratio: heapTargetRatio,
+      default_bytes_per_task: defaultBytesPerTask,
+      max_increase_per_decision: maxIncreasePerDecision,
+      decision_interval: decisionIntervalMs,
+      light_task_bytes: lightTaskBytes,
+      light_task_slots: lightTaskSlots,
+      memory_target_ratio: memoryTargetRatio,
     };
   }
 }
