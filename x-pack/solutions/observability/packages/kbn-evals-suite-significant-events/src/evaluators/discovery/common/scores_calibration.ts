@@ -39,12 +39,12 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   },
   {
     id: 'weak_signals_low_severity',
-    text: 'Unconfirmed signals — no confirmed failure evidence AND not statistically credible (high p_value) — should not claim high criticality. Neither change-point shape nor raw alert volume is a severity signal: a low-volume but evidence-confirmed failure on a user-critical path can warrant high criticality, and a high-volume signal is not severe without confirmed impact. Do not lower criticality merely because a rule fired few times.',
+    text: 'Unconfirmed signals — no confirmed failure evidence — should not claim high criticality. Neither change-point shape nor raw alert volume is a severity signal: a low-volume but evidence-confirmed failure on a user-critical path can warrant high criticality, and a high-volume signal is not severe without confirmed impact. Do not lower criticality merely because a rule fired few times.',
     score: 1,
   },
   {
     id: 'detection_metadata_not_severity',
-    text: 'Severity must not be lowered (or raised) because of `p_value`, `change_point_type`, or alert volume when grounding confirms a non-benign failure or material degradation. Those inputs, and the `severity_score` of the rule, are not severity inputs and may affect `confidence` only.',
+    text: 'Severity must not be lowered (or raised) because of `p_value`, `change_point_type`, or alert volume when grounding confirms a non-benign failure or material degradation. Those inputs, and the `severity_score` of the rule, are not severity inputs.',
     score: 2,
   },
   {
@@ -57,15 +57,16 @@ const SEVERITY_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
 const CONFIDENCE_CALIBRATION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'confidence_reflects_support',
-    text: 'Confidence follows the agent’s confidence rule: for a new event the base comes from the strongest detection’s `p_value` (≤0.01 → 0.55–0.65; 0.01–0.05 → 0.40–0.55; 0.05–0.1 → 0.25–0.40; >0.1 → below 0.25), plus up to 0.10 for several `confirms` verdicts and aligned KI backing, minus 0.10 for outnumbering non-`confirms` verdicts, missing `causal_features` or a key query that is not `found`; a figure the descriptions state as not measured (share, duration) caps it at 0.65. A continuation starts from the matched active event’s stored confidence and adjusts it incrementally; it is not recalculated from `p_value`. Confidence is at most 0.30 with no `confirms` verdict and at most 0.85 in any case; a `dimensions`, examples or `breakdown` query that could not be run or was not sent counts toward neither cap. A low confidence that follows from a weak `p_value` is correct even when the finding is well supported; do not penalise it, and do not credit support the rule does not count.',
+    text: 'Confidence is how credibly the signal descriptions support the hypothesis, not how strong or unusual the detection was. Timing, scope and mechanism that the descriptions leave not aligned or not established, and any contradiction or unresolved item, lower it: a confirmed, severe failure whose cause is not established carries lower confidence than an event whose timing, scope and mechanism are all established.',
   },
   {
-    id: 'no_ki_caps_confidence',
-    text: 'Failure findings with no KI match and no active failure evidence should not claim high confidence (kept at or below ~0.65 without KI backing). Exception: `refutes` discoveries — where queries returned healthy rows (`evidence.result: "found"` with a healthy signature) confirming the signal is a non-event — are confirmed non-events, not unconfirmed findings, so they may sit in the 0.65–0.75 range without KI backing and are exempt from this cap. `off_topic`, `inconclusive`, and `not_checked` findings are not exempt.',
+    id: 'confidence_basis_stated',
+    text: 'When the agent’s one-line statement of what its confidence follows from is visible, it names evidence the descriptions actually carry (timing, scope, mechanism, contradictions or unresolved items) and the number fits that basis.',
   },
   {
-    id: 'strong_corroboration_high_confidence',
-    text: 'Only strongly corroborated findings (multiple confirmed evidences plus aligned KI backing from the input topology or this cycle’s KI search, with no contradiction) may claim high confidence (>=0.85). The judge need not repeat KI search when the discovery already carries aligned causal_features or blast_radius.',
+    id: 'detection_metadata_not_confidence',
+    text: '`p_value`, `change_point_type`, and `recent_detection_count` are not inputs to confidence. A confirmed, well-supported finding is not given a low confidence because its `p_value` is weak, and a weakly supported one is not given a high confidence because its `p_value` is strong.',
+    score: 2,
   },
 ];
 
@@ -77,7 +78,7 @@ export const createSeverityCalibrationEvaluator = ({
 }): Evaluator =>
   createCalibrationEvaluator('severity_calibration', SEVERITY_CALIBRATION_CRITERIA, criteriaFn);
 
-/** LLM evaluator: scores whether `confidence` reflects evidence/KI backing, with the no-KI ceiling. */
+/** LLM evaluator: scores whether `confidence` is a credible summary of what the signal descriptions establish. */
 export const createConfidenceCalibrationEvaluator = ({
   criteriaFn,
 }: {

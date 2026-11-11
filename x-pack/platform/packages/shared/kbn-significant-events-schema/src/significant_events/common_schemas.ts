@@ -334,9 +334,6 @@ export const SEVERITY_OPTIONS = [
   'low',
 ] as const satisfies readonly AlertEventSeverity[];
 
-/** The most confidence an event can carry while no signal on it confirms anything. */
-export const UNCONFIRMED_EVENT_MAX_CONFIDENCE = 0.3;
-
 /**
  * Severity field contract — single source of truth for schema `.describe()`, the discovery agent
  * and eval judges. It is the ladder the investigation agent applies. Order of `SEVERITY_OPTIONS`
@@ -438,9 +435,8 @@ export const significantEventBaseSchema = lazySchema(() =>
       .min(0)
       .max(1)
       .describe(
-        'symptom_hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
-          'causal_features ceiling: cap at 0.65 when causal_features is empty (applies to open status only). ' +
-          `When the evidence establishes nothing, at most ${UNCONFIRMED_EVENT_MAX_CONFIDENCE}.`
+        'How credibly the evidence collected on the event supports symptom_hypothesis, 0.0–1.0 float: how well its signal descriptions agree on timing, scope and mechanism; every contradiction or unresolved item lowers it. ' +
+          'An event written without signals is rated on the evidence its author holds. It reflects the evidence held, never how strong or unusual the detection was.'
       ),
     source_ids: z
       .array(z.string().max(MAX_ID_LENGTH))

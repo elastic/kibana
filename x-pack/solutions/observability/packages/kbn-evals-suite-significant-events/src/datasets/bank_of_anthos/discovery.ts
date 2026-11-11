@@ -368,11 +368,13 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
   ],
 };
 
-/** Same confirmed impact as isolated balancereader failure, but weak detection metadata — severity must still follow grounding. */
+/**
+ * Same confirmed impact as isolated balancereader failure, but weak detection metadata: severity and
+ * confidence must still follow grounding, so it inherits the isolated event's confidence.
+ */
 const BALANCE_READER_WEAK_DETECTION_EVENT: Partial<SignificantEvent> = {
   ...BALANCE_READER_ISOLATED_EVENT,
   event_id: 'frontend__balancereader-connection-refused-weak-detection',
-  confidence: 0.52,
   signals: [
     {
       type: 'detection',
@@ -475,6 +477,16 @@ export const discovery: DatasetConfig['discovery'] = [
           score: 3,
         },
         {
+          id: 'confirmed-severe-confidence-not-low',
+          text: 'The cascade event is confirmed directly by query rows and its timing, scope and mechanism are established, so its confidence is not low, even if the detections’ p_value is weak.',
+          score: 2,
+        },
+        {
+          id: 'no-confirming-signal-no-event',
+          text: 'No event is written for detections that have no signal showing a failure (for example the unbacked authentication detections).',
+          score: 2,
+        },
+        {
           id: 'active-confirmed-cascade',
           text: 'Keeps the cascade event active at critical severity because freshly verified ledger signals still demonstrate the user-blocking database cascade.',
           score: 2,
@@ -503,8 +515,13 @@ export const discovery: DatasetConfig['discovery'] = [
           score: 3,
         },
         {
-          id: 'weak-detection-confidence-only',
-          text: 'May lower confidence because p_value is weak and change_point_type is stationary, but severity still reflects the confirmed failure impact.',
+          id: 'weak-detection-confidence-from-evidence',
+          text: 'Sets confidence from the confirmed grounding evidence: it follows the descriptions’ timing, scope and mechanism, and is not lowered because p_value is weak or change_point_type is stationary.',
+          score: 2,
+        },
+        {
+          id: 'mechanism-not-established',
+          text: 'The descriptions state the read timeouts and blocked balance lookups but no cause. The symptom_hypothesis does not invent one, and the confidence reflects that: it is not placed at the top of the range, because a confirmed, severe failure whose mechanism is not established is less credible than one whose timing, scope and mechanism are all established.',
           score: 2,
         },
         {

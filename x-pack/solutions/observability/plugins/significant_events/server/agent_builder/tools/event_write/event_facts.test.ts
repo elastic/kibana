@@ -204,6 +204,18 @@ describe('computeEventFacts', () => {
     );
   });
 
+  it('stores the confidence the write submits, not the stored one, whether or not a signal confirms', () => {
+    const stored = makeStored([makeSignal({ verdict: 'inconclusive' })], { confidence: 0.3 });
+
+    expect(
+      facts({
+        signals: [makeSignal({ verdict: 'inconclusive' })],
+        candidateOverrides: { confidence: 0.6 },
+        stored,
+      }).confidence
+    ).toBe(0.6);
+  });
+
   it('refuses signals without a proposed severity rather than guessing one', () => {
     expect(() =>
       facts({ signals: [makeSignal()], candidateOverrides: { severity: undefined } })

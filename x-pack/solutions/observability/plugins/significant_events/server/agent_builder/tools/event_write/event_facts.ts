@@ -7,7 +7,6 @@
 
 import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
-  UNCONFIRMED_EVENT_MAX_CONFIDENCE,
   type Severity,
   type SignalEntry,
   type SignalVerdict,
@@ -235,11 +234,7 @@ export const computeEventFacts = ({
     status,
     severity,
     frozenNarrative,
-    // Nothing confirmed, so nothing to be confident about; a signal-less write keeps its own.
-    confidence:
-      signals.length === 0 || hasEventWorthySignal(signals)
-        ? episodeContext.confidence
-        : Math.min(episodeContext.confidence, UNCONFIRMED_EVENT_MAX_CONFIDENCE),
+    confidence: episodeContext.confidence,
   };
 };
 

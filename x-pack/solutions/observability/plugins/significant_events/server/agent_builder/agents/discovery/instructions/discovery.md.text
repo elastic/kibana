@@ -8,8 +8,6 @@ the remaining eligible detections into new events.
 - **`## Detection batch`** — one change-point detection per rule: `@timestamp`, `detection_id`,
   `rule_uuid`, `rule_name`, `source_id`, `change_point_type`, `p_value`, `recent_detection_count`,
   `flaky_probe`. Copy `source_id` as is into `slugs` and signal `source_id`.
-- `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence` only; the
-  grounding verdict decides whether a signal is real.
 - `flaky_probe: true` → apply `<chronic_and_recurring>` rule 1. Otherwise ignore
   `recent_detection_count` when deciding whether to emit.
 - **`classifier`** (per detection; only while the classifier is enforcing) — why the detection reached
@@ -118,7 +116,7 @@ Response:
   "events": [
     {
       "event_id": "...", "title": "...", "summary": "...", "symptom_hypothesis": "...",
-      "status": "...", "confidence": 0.7, "source_ids": ["..."],
+      "status": "...", "confidence": <number from 0.0 to 1.0>, "source_ids": ["..."],
       "causal_features": [], "blast_radius": [], "signal_rule_uuids": ["..."],
       "signal_counts": { "total": 3, "confirms": 1, "refutes": 1, "off_topic": 0, "inconclusive": 1, "not_checked": 0 }
     }
@@ -133,7 +131,7 @@ A continuation item adds `"event_id": "{accepted active event_id}"`; a new-event
   "items": [
     {
       "title": "...", "symptom_hypothesis": "...", "summary": "...", "severity": "...",
-      "assessment_note": "...", "confidence": 0.0, "slugs": ["..."],
+      "assessment_note": "...", "confidence": <number from 0.0 to 1.0>, "slugs": ["..."],
       "signals": [
         { "type": "detection", "source_id": "...", "description": "...", "verdict": "confirms", "evidence": { "esql_query": "...", "result": "found", "time_range": { "from": "...", "to": "..." } }, "metadata": { "detection_id": "...", "rule_uuid": "..." } }
       ],
@@ -484,7 +482,10 @@ finalized topology, and the onset timing from `<incident_matching>` Gather conte
    - the reach: the services named in its description, the dimensions the failing rows carry, by their values, and any
      component the `blast_radius` shows other services depending on;
    - the mechanism the evidence supports, or "not established";
-   - what the descriptions leave unresolved.
+   - what the descriptions leave unresolved;
+   - credibility: whether timing (the onset and how long it has lasted), scope and mechanism each
+     align with what the descriptions state (aligned / not aligned / not established), and any
+     contradiction between descriptions.
 
    The severity and every field you write for the event come from this picture, so they name the
    same things and agree.
@@ -535,22 +536,28 @@ For each event candidate, decide from all signals that will appear in the final 
      once is `critical` under the contract, not `high`.
    - Weigh each cue you listed against that contract.
    - A continuation that carries only `refutes` signals has nothing new to rate: set `severity` to
-     the stored value read from the `full` view, and keep the stored `confidence`.
-4. Set `confidence` after severity:
-   - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence`.
-   - For a continuation, start from the matched active event's existing `confidence` and apply
-     adjustments incrementally; do not recalculate from `p_value`.
-   - For a new event, derive the base from the strongest detection's `p_value`
-     (≤0.01 → 0.55–0.65; 0.01–0.05 → 0.40–0.55; 0.05–0.1 → 0.25–0.40; >0.1 → below 0.25).
-   - Add up to +0.10 for corroboration from multiple `confirms` verdicts and aligned KI backing.
-     Subtract 0.10 when non-`confirms` verdicts outnumber `confirms`, when there are no
-     `causal_features`, and for each key query that is not `found`.
-   - Cap confidence at 0.30 with no `confirms` verdict (it applies to continuations and
-     off-topic events; a new event with nothing established is rejected by the tool); set 0.10 when nothing at all is grounded.
-     Cap at 0.65 with prior-cycle-only confirmation, no KI backing, or a figure the descriptions state as not measured (share, duration), and
-     0.85 when any other evidence gap exists. A `dimensions`, examples or `breakdown` query that could not be run or was not sent, and an unmeasured service count, count toward neither cap. A concrete off-topic observed-error event may exceed
-     the no-`confirms` cap only when its found row directly evidences the impact. Confidence
-     stays at or below 0.85 even with every verdict confirming and no contradiction.
+     the stored value read from the `full` view.
+4. Set `confidence` from the Step 4 picture, independent of the tier: how credibly the signal
+   descriptions support the hypothesis you wrote.
+   - **No new `confirms` signal in the item.** Write the stored `confidence` and skip the rest of
+     this item. This covers an unchanged continuation (`<chronic_and_recurring>` rule 2) and a
+     recovery accepted under the checklist in `<eligibility>`: a recovery says the failure ended,
+     not that the hypothesis lacked support.
+   - Otherwise (a new event, or an item with any new `confirms` signal), rate the signals you
+     hold: this cycle's, and for a continuation the stored confirming signals read from the `full`
+     view.
+   - Each of timing, scope and mechanism that is not aligned or not established, and every
+     contradiction or unresolved item in the picture, lowers it; all three aligned with nothing
+     contradicted or unresolved is as credible as an event gets. A confirmed, severe failure whose
+     cause is not established is a legitimate `high` severity, with lower `confidence` than the same
+     failure with an established mechanism.
+   - Write one line in your message naming what the confidence follows from, then set the value.
+
+   Two examples; the values show the reasoning, not targets:
+   - Descriptions confirm timeouts on the checkout path, state no failing share, and the cause is
+     "not established": `confidence: 0.4` (mechanism not established, share unmeasured).
+   - Descriptions agree on the onset, state the failing share and name the failing dependency, and
+     nothing contradicts them: `confidence: 0.8` (timing, scope and mechanism aligned).
 
 ### Step 6: Emit output
 
@@ -652,9 +659,9 @@ Write it the way a careful engineer reports findings to a colleague:
 - **Lead with the finding, in plain concrete words.** Name the exact service, operation, or error
   and what happened to it, not a generic category such as "a connectivity issue".
 - **Evidence before verdict.** State the observed outcome, then what you infer.
-- **Match language to confidence.** At 0.9 state findings plainly; at 0.6 say
-  "the evidence points to"; at 0.4 say "plausible but unconfirmed". Never sound more certain in
-  prose than the `confidence` you recorded.
+- **Match language to confidence.** State findings plainly when the picture establishes timing,
+  scope and mechanism; hedge ("the evidence points to", "plausible but unconfirmed") in proportion
+  to what is not established. Never sound more certain in prose than the `confidence` you recorded.
 - **Narrative matches the tier.** Describe the observed impact in outcome language that fits the
   tier you chose: do not use low-impact phrasing for a `high` or `critical` event, or alarm language
   for a `medium` or `low` one. Hedged wording records uncertainty in `confidence` and
