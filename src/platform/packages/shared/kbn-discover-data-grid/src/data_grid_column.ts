@@ -22,6 +22,7 @@ export interface DataGridColumnOptions<TRow extends object, TValue> {
   header: ReactNode;
   accessibilityLabel: string;
   getValue: (row: TRow) => TValue;
+  getAccessibilityValue: (context: DataGridCellContext<TRow, TValue>) => string;
   renderCell: (context: DataGridCellContext<TRow, TValue>) => ReactNode;
 }
 
@@ -34,6 +35,7 @@ interface InternalDataGridCellContext<TRow extends object> {
 
 interface InternalDataGridColumn<TRow extends object> {
   getValue: (row: TRow) => unknown;
+  getAccessibilityValue: (context: InternalDataGridCellContext<TRow>, value: unknown) => string;
   renderCell: (context: InternalDataGridCellContext<TRow>, value: unknown) => ReactNode;
 }
 
@@ -55,6 +57,7 @@ const createDataGridColumn = <TRow extends object, TValue>({
   header,
   accessibilityLabel,
   getValue,
+  getAccessibilityValue,
   renderCell,
 }: DataGridColumnOptions<TRow, TValue>): DataGridColumn<TRow> => ({
   id,
@@ -62,6 +65,12 @@ const createDataGridColumn = <TRow extends object, TValue>({
   accessibilityLabel,
   [internalColumnDefinition]: {
     getValue,
+    getAccessibilityValue: ({ row, ...context }, value) =>
+      getAccessibilityValue({
+        ...context,
+        row,
+        value: value as TValue,
+      }),
     renderCell: ({ row, ...context }, value) =>
       renderCell({
         ...context,
@@ -80,6 +89,12 @@ export const getDataGridColumnValue = <TRow extends object>(
   column: DataGridColumn<TRow>,
   row: TRow
 ): unknown => column[internalColumnDefinition].getValue(row);
+
+export const getDataGridCellAccessibilityValue = <TRow extends object>(
+  column: DataGridColumn<TRow>,
+  context: InternalDataGridCellContext<TRow>,
+  value: unknown
+): string => column[internalColumnDefinition].getAccessibilityValue(context, value);
 
 export const renderDataGridCell = <TRow extends object>(
   column: DataGridColumn<TRow>,

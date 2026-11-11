@@ -53,6 +53,7 @@
       "src/platform/packages/shared/kbn-discover-utils",
       "src/platform/packages/shared/kbn-discover-contextual-components"
     ],
+    "discoverDataGrid": "src/platform/packages/shared/kbn-discover-data-grid",
     "savedSearch": "src/platform/plugins/shared/saved_search",
     "embeddableApi": "src/platform/plugins/shared/embeddable",
     "embeddableExamples": "examples/embeddable_examples",

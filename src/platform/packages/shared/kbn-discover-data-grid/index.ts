@@ -9,6 +9,13 @@
 
 export { DataGrid, type DataGridProps, type DataGridVirtualizationOptions } from './src/data_grid';
 export {
+  type DataGridApi,
+  type DataGridCellAddress,
+  type DataGridCommandCancellationReason,
+  type DataGridCommandFailureReason,
+  type DataGridCommandResult,
+} from './src/data_grid_api';
+export {
   createDataGridColumnHelper,
   type DataGridCellContext,
   type DataGridColumn,
