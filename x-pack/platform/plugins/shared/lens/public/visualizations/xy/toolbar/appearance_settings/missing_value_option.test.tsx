@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { shallowWithIntl as shallow, mountWithIntl as mount } from '@kbn/test-jest-helpers';
-import { EuiSuperSelect } from '@elastic/eui';
+import { renderWithI18n as render } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { MissingValuesOptions } from './missing_values_option';
 
 describe('Missing values option', () => {
   it('should show currently selected fitting function', () => {
-    const component = shallow(
+    render(
       <MissingValuesOptions
         onFittingFnChange={jest.fn()}
         fittingFunction={'Carry'}
@@ -21,11 +21,11 @@ describe('Missing values option', () => {
       />
     );
 
-    expect(component.find(EuiSuperSelect).first().prop('valueOfSelected')).toEqual('Carry');
+    expect(screen.getByTestId('lnsMissingValuesSelect')).toHaveTextContent('Last');
   });
 
   it('should show the fitting option when enabled', () => {
-    const component = mount(
+    render(
       <MissingValuesOptions
         onFittingFnChange={jest.fn()}
         fittingFunction={'Carry'}
@@ -35,11 +35,11 @@ describe('Missing values option', () => {
       />
     );
 
-    expect(component.exists('[data-test-subj="lnsMissingValuesSelect"]')).toEqual(true);
+    expect(screen.getByTestId('lnsMissingValuesSelect')).toBeInTheDocument();
   });
 
   it('should hide the fitting option when disabled', () => {
-    const component = mount(
+    render(
       <MissingValuesOptions
         onFittingFnChange={jest.fn()}
         fittingFunction={'Carry'}
@@ -49,6 +49,6 @@ describe('Missing values option', () => {
       />
     );
 
-    expect(component.exists('[data-test-subj="lnsMissingValuesSelect"]')).toEqual(false);
+    expect(screen.queryByTestId('lnsMissingValuesSelect')).not.toBeInTheDocument();
   });
 });
