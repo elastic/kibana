@@ -10,6 +10,7 @@ import type { AvailabilityConfig } from '@kbn/agent-builder-server/availability'
 import {
   ACTION_POLICY_AUTHORING_SKILL_ID,
   RULE_AUTHORING_SKILL_ID,
+  UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
 } from '@kbn/alerting-v2-constants';
 import type { AttachActionPolicyToolDeps } from '../tools/attach_action_policy';
 import type { AttachRuleToolDeps } from '../tools/attach_rule';
@@ -18,6 +19,7 @@ import type { ManageRuleToolDeps } from '../tools/manage_rule';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import { createActionPolicyAuthoringSkill } from './action_policy_authoring_skill';
 import { createRuleAuthoringSkill } from './rule_authoring_skill';
+import { createUniversalAlertingFailureDiagnosisSkill } from './universal_alerting_failure_diagnosis_skill';
 
 export type RegisterSkillsDeps = ManageRuleToolDeps &
   AttachRuleToolDeps &
@@ -43,6 +45,10 @@ export const registerSkills = (
     {
       id: ACTION_POLICY_AUTHORING_SKILL_ID,
       create: () => createActionPolicyAuthoringSkill(deps),
+    },
+    {
+      id: UNIVERSAL_ALERTING_FAILURE_DIAGNOSIS_SKILL_ID,
+      create: () => createUniversalAlertingFailureDiagnosisSkill(deps),
     },
   ] as const;
 
