@@ -341,6 +341,7 @@ export class SignificantEventsKIsOnboardingClient {
     this.telemetry.trackOnboardingScheduled(
       {
         source_id: inputs.sourceId,
+        workflow_execution_id: executionId,
         execution_id: executionId,
         workflow_id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID,
         space_id: request.spaceId,

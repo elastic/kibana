@@ -6,6 +6,10 @@
  */
 
 import type { QueryLink } from '@kbn/significant-events-schema';
+import {
+  EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+} from '@kbn/workflows-extensions/server';
 import { internalDetectionsWorkflowRoutes } from './workflow_route';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
@@ -34,7 +38,14 @@ const setup = () => {
   const list = jest.fn().mockResolvedValue({ sources: [{ id: 'enabled-source' }], total: 1 });
   const handlerParams = {
     params: { body: { lookback: 'now-1440m', bucketInterval: '60m' } },
-    request: { spaceId: 'default' },
+    request: {
+      spaceId: 'default',
+      isInternalApiRequest: true,
+      headers: {
+        [EVENT_CHAIN_DEPTH_HEADER]: '0',
+        [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'detection-run-1',
+      },
+    },
     getScopedClients: jest.fn().mockResolvedValue({
       scopedClusterClient: { asCurrentUser: {} },
       licensing: {},
@@ -68,5 +79,9 @@ describe('change point scan route', () => {
     expect(list).toHaveBeenCalledWith(expect.objectContaining({ enabled: true }));
     const scannedRuleIds = runChangePointScan.mock.calls.flatMap(([, { ruleIds }]) => ruleIds);
     expect(scannedRuleIds).toEqual(['rule-1']);
+    expect(handlerParams.telemetry.trackSignificantEventsDetectionScan).toHaveBeenCalledWith(
+      expect.objectContaining({ workflow_execution_id: 'detection-run-1' }),
+      expect.anything()
+    );
   });
 });

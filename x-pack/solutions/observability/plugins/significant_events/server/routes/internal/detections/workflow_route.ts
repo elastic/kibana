@@ -26,6 +26,7 @@ import {
   type AnalysisProfileId,
 } from '../../../lib/significant_events/rules/schedule';
 import { createServerRoute } from '../../create_server_route';
+import { getWorkflowExecutionIdFromRequest } from '../../../lib/telemetry/ebt/workflow_execution_id';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { listAllSources } from '../../utils/list_all_sources';
 
@@ -207,8 +208,10 @@ const changePointScanRoute = createServerRoute({
     const criticalRuleCount = countRulesForProfile(queryLinks, CRITICAL_ANALYSIS_PROFILE);
     const defaultRuleCount = countRulesForProfile(queryLinks, DEFAULT_ANALYSIS_PROFILE);
 
+    const workflowExecutionId = getWorkflowExecutionIdFromRequest(request);
     telemetry.trackSignificantEventsDetectionScan(
       {
+        workflow_execution_id: workflowExecutionId,
         took_ms: took,
         duration_ms: durationMs,
         rules_requested: queryLinks.length,
