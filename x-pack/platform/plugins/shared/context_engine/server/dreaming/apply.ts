@@ -153,13 +153,21 @@ const hiddenFrom = ({ spaceId }: ApplyContext, revision: KiRevision | undefined)
   return source !== undefined && !isVisibleInSpace(source.permissions, spaceId);
 };
 
+/** The permissions of the batch's memories, which all share them. */
+const batchPermissions = ({
+  spaceId,
+  memoryPermissions,
+}: ApplyContext): KiPermissions | undefined =>
+  derivedPermissions([...memoryPermissions.values()], spaceId);
+
 const withDerivedPermissions =
   (
-    { spaceId, memoryPermissions }: ApplyContext,
+    context: ApplyContext,
     sourceMemoryIds: readonly string[],
     build: BuildDocument
   ): BuildPermittedDocument =>
   (current) => {
+    const { spaceId, memoryPermissions } = context;
     const cited = new Set(current ? citedMemoryIds(current) : []);
     const sources = sourceMemoryIds.filter((id) => memoryPermissions.has(id) || !cited.has(id));
     const permissions =
@@ -168,7 +176,7 @@ const withDerivedPermissions =
             sources.map((id) => memoryPermissions.get(id)),
             spaceId
           )
-        : current?.permissions;
+        : batchPermissions(context);
     if (current && !samePermissions(current.permissions, permissions)) {
       return 'rejected';
     }
@@ -336,7 +344,13 @@ const upsert = (
   }
 };
 
-const deletable = async (context: ApplyContext, kiId: string): Promise<boolean> => {
+type DeleteResult = 'deleted' | 'skipped' | 'rejected';
+
+/** Whether this batch may delete a KI: it exists, and has the permissions of the batch's memories. */
+const deletable = async (
+  context: ApplyContext,
+  kiId: string
+): Promise<'allowed' | Exclude<DeleteResult, 'deleted'>> => {
   const { esClient, aiIndexId, dest, abortSignal } = context;
   const revision = await findKiRevision({
     esClient,
@@ -346,35 +360,41 @@ const deletable = async (context: ApplyContext, kiId: string): Promise<boolean> 
     includeSource: true,
     abortSignal,
   });
-  return revision !== undefined && !hiddenFrom(context, revision);
+  if (revision === undefined || hiddenFrom(context, revision)) {
+    return 'skipped';
+  }
+  const { permissions } = revision.source as DreamedKi;
+  return samePermissions(permissions, batchPermissions(context)) ? 'allowed' : 'rejected';
 };
 
 const planDelete = async (
   context: ApplyContext,
   planned: Map<string, PlannedWrite>,
   kiId: string
-): Promise<boolean> => {
-  const exists = planned.has(kiId) || (await deletable(context, kiId));
-  if (exists) {
-    planned.set(kiId, { change: 'deleted' });
+): Promise<DeleteResult> => {
+  const check = planned.has(kiId) ? 'allowed' : await deletable(context, kiId);
+  if (check !== 'allowed') {
+    return check;
   }
-  return exists;
+  planned.set(kiId, { change: 'deleted' });
+  return 'deleted';
 };
 
-const deleteKi = async (context: ApplyContext, kiId: string): Promise<boolean> => {
+const deleteKi = async (context: ApplyContext, kiId: string): Promise<DeleteResult> => {
   const { esClient, aiIndexId, dest, writer, abortSignal, dryRun } = context;
   if (dryRun) {
     return planDelete(context, dryRun, kiId);
   }
-  if (!(await deletable(context, kiId))) {
-    return false;
+  const check = await deletable(context, kiId);
+  if (check !== 'allowed') {
+    return check;
   }
   try {
     await softDeleteKi(esClient, { aiIndexId, dest, kiId, writer, refresh: true, abortSignal });
-    return true;
+    return 'deleted';
   } catch (error) {
     if (error instanceof KiNotFoundError) {
-      return false;
+      return 'skipped';
     }
     throw error;
   }
@@ -388,7 +408,13 @@ export const applyOperations = async (
   const result: ApplyResult = { created: 0, updated: 0, deleted: 0, rejected: [] };
   for (const operation of operations) {
     if (operation.op === 'delete') {
-      if (await deleteKi(context, operation.id)) {
+      const deleted = await deleteKi(context, operation.id);
+      if (deleted === 'rejected') {
+        result.rejected.push({
+          item: `delete ${operation.id}`,
+          reason: "it has different permissions than this batch's memories",
+        });
+      } else if (deleted === 'deleted') {
         result.deleted += 1;
       }
       continue;

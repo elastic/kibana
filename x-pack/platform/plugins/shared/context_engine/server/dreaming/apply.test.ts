@@ -11,6 +11,7 @@ import { findKiRevision, putKiRevision, type KiRevision } from '../ai_indices/ki
 import { softDeleteKi } from '../ai_indices/ki_write';
 import { addReferences, applyOperations, type ApplyContext } from './apply';
 import type { DreamedKi } from './dreamed_ki';
+import type { DreamingOperation } from './resolve_change_set';
 
 jest.mock('../ai_indices/ki_revision', () => ({
   ...jest.requireActual('../ai_indices/ki_revision'),
@@ -407,6 +408,59 @@ describe('applyOperations', () => {
       { title: 'A2', permissions: teamA },
       { title: 'A3', permissions: teamA },
     ]);
+  });
+
+  it("changes or deletes only KIs with the permissions of the batch's memories", async () => {
+    const teamA = restrictedTo({ space: '*', name: ['ai_index:a/read'] });
+    const teamB = restrictedTo({ space: '*', name: ['ai_index:b/read'] });
+    stored.set('fact-a', { id: 'fact-a', type: 'fact.note', title: 'A', permissions: teamA });
+    stored.set('fact-b', {
+      id: 'fact-b',
+      type: 'fact.note',
+      title: 'B',
+      references: [{ uri: 'ki://m-old', relation: 'derived_from' }],
+      permissions: teamB,
+    });
+    jest.mocked(softDeleteKi).mockResolvedValue({ id: 'fact-a' });
+    const memoryPermissions = new Map([['m-a', teamA]]);
+    const operations: DreamingOperation[] = [
+      {
+        op: 'upsert_fact',
+        id: 'fact-b',
+        type: 'note',
+        title: 'B2',
+        content: 'B2.',
+        sourceMemoryIds: ['m-old'],
+      },
+      { op: 'delete', id: 'fact-b' },
+      { op: 'delete', id: 'fact-a' },
+    ];
+
+    for (const dryRun of [new Map(), undefined]) {
+      const counts = await applyOperations(
+        { ...context(undefined, memoryPermissions), dryRun },
+        operations
+      );
+
+      expect(counts).toEqual({
+        created: 0,
+        updated: 0,
+        deleted: 1,
+        rejected: [
+          { item: 'fact fact-b', reason: 'it has different permissions than its memories' },
+          {
+            item: 'delete fact-b',
+            reason: "it has different permissions than this batch's memories",
+          },
+        ],
+      });
+    }
+    expect(putKiRevision).not.toHaveBeenCalled();
+    expect(softDeleteKi).toHaveBeenCalledTimes(1);
+    expect(softDeleteKi).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ kiId: 'fact-a' })
+    );
   });
 
   it('leaves alone a KI this space cannot see', async () => {
