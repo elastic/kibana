@@ -464,6 +464,21 @@ describe('extractRunAs', () => {
     ).toEqual({ runAs: 'service_account', runAsInherited: true });
   });
 
+  it("reports an inherited service account that overrides the child's own settings.run_as", () => {
+    expect(
+      extractRunAs(
+        createMockWorkflowExecution({
+          workflowDefinition: definitionWithRunAs('sa-child'),
+          effectiveIdentity: {
+            type: 'service_account',
+            id: 'sa-parent',
+            inheritedFrom: { workloadId: 'parent-wf' },
+          },
+        })
+      )
+    ).toEqual({ runAs: 'service_account', runAsInherited: true });
+  });
+
   it('reports user when a non-inherited identity has no settings.run_as, as the runner does', () => {
     expect(
       extractRunAs(
