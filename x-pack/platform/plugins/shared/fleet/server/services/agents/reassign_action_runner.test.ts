@@ -190,6 +190,10 @@ describe('ReassignActionRunner', () => {
       expect.objectContaining({ 'agent-0': expect.anything(), 'agent-1': expect.anything() }),
       expect.any(String)
     );
+    // the document covering the rest of the batch is what makes the replay's error stand on its
+    // own here: these two were deliberately excluded by the earlier run, not actioned by it
+    const [, , recordedErrors] = (createErrorActionResults as jest.Mock).mock.calls[0];
+    expect(recordedErrors['agent-0'].message).not.toContain('an earlier attempt');
   });
 
   it('does not write error results again for agents that already have one', async () => {
@@ -225,13 +229,16 @@ describe('ReassignActionRunner', () => {
       BulkActionTaskType.REASSIGN_RETRY,
       RETRY_TASK_ID
     );
-    // the agents are not dropped silently: each is given the error as its result
-    expect(createErrorActionResults).toHaveBeenCalledWith(
-      esClient,
-      ACTION_ID,
-      expect.objectContaining({ 'agent-0': expect.anything(), 'agent-1': expect.anything() }),
-      expect.any(String)
+    // the agents are not dropped silently: each is given a result naming what happened. "Already
+    // assigned" on its own would read as a plain failure for agents this very action moved, so
+    // the result also says an earlier attempt may have handled the batch — as much as can
+    // honestly be said when no document records one
+    const [, , recordedErrors] = (createErrorActionResults as jest.Mock).mock.calls[0];
+    expect(Object.keys(recordedErrors)).toEqual(['agent-0', 'agent-1']);
+    expect(recordedErrors['agent-0'].message).toContain(
+      'an earlier attempt of this action may have handled this batch'
     );
+    expect(recordedErrors['agent-0'].message).toContain('already assigned');
     expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
       `${BulkActionTaskType.REASSIGN_RETRY}:check:${ACTION_ID}`,
       expect.objectContaining({ nbAgentsProcessed: 2 })

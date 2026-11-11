@@ -540,8 +540,15 @@ export abstract class ActionRunner {
    * having written both — because a second result for one agent would be counted twice. The
    * per-agent reasons the earlier run had are gone, so all of them are recorded under the error
    * the replay raised, which names the same cause for the batch as a whole.
+   *
+   * `hasEarlierRecord` says whether the dedupe read found a document covering part of this batch,
+   * which is what decides how that error can honestly be worded.
    */
-  private async writeMissingErrorActionResults(agents: Agent[], error: Error) {
+  private async writeMissingErrorActionResults(
+    agents: Agent[],
+    error: Error,
+    { hasEarlierRecord }: { hasEarlierRecord: boolean }
+  ) {
     const actionId = this.actionParams.actionId!;
     const agentIdsWithoutResults = await getAgentsWithoutActionResults(
       this.esClient,
@@ -556,10 +563,21 @@ export abstract class ActionRunner {
       .info(
         `Writing the missing error results of ${agentIdsWithoutResults.length} agents excluded by an earlier run of action ${actionId}`
       );
+    // With a document naming the rest of the batch, the replay's error describes agents an earlier
+    // run deliberately left out, and stands on its own. Without one, the same error may instead be
+    // this action's own change reported back at it — an earlier run's agent writes landing without
+    // their action document — and reading "already assigned" as a plain failure would send someone
+    // after agents that are exactly where they asked for them to be. Which of the two it is cannot
+    // be told from here, so the result says so rather than picking one.
+    const recordedError = hasEarlierRecord
+      ? error
+      : new Error(
+          `Not actioned by this attempt, an earlier attempt of this action may have handled this batch: ${error.message}`
+        );
     const refusedAgentIds = await createErrorActionResults(
       this.esClient,
       actionId,
-      Object.fromEntries(agentIdsWithoutResults.map((agentId) => [agentId, error])),
+      Object.fromEntries(agentIdsWithoutResults.map((agentId) => [agentId, recordedError])),
       'no actionable agents left in a replayed batch'
     );
     // `bulkCreateAgentActionResults` logs what it could not write and carries on, which is right
@@ -656,7 +674,9 @@ export abstract class ActionRunner {
       // still fails the batch, but the error it raised is logged rather than thrown: the batch has
       // to be retried for the reason `processAgents` gave, and that is what the retry should name.
       try {
-        await this.writeMissingErrorActionResults(remainingAgents, error);
+        await this.writeMissingErrorActionResults(remainingAgents, error, {
+          hasEarlierRecord: remainingAgents.length < agents.length,
+        });
       } catch (resultsError) {
         appContextService
           .getLogger()
