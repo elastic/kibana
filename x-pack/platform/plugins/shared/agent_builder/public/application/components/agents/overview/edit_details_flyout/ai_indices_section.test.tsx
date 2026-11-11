@@ -7,8 +7,7 @@
 
 import '@testing-library/jest-dom';
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -100,22 +99,24 @@ describe('AiIndicesSection (edit settings flyout)', () => {
   it('submits the AI indices the user picks', async () => {
     renderSection();
 
-    await userEvent.click(
+    fireEvent.click(
       within(screen.getByTestId('agentBuilderAdditionalAiIndices')).getByTestId(
         'comboBoxToggleListButton'
       )
     );
-    await userEvent.click(await screen.findByTestId('agentBuilderAiIndexOption-sales-outreach'));
-    await userEvent.click(screen.getByText('submit'));
+    fireEvent.click(screen.getByTestId('agentBuilderAiIndexOption-sales-outreach'));
+    fireEvent.click(screen.getByText('submit'));
 
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
     expect(submittedAiIndices()).toEqual(['sales-outreach']);
   });
 
   it('keeps the assigned AI indices when nothing is changed', async () => {
     renderSection({ assignedIds: ['sales-outreach'] });
 
-    await userEvent.click(screen.getByText('submit'));
+    fireEvent.click(screen.getByText('submit'));
 
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
     expect(submittedAiIndices()).toEqual(['sales-outreach']);
   });
 });
