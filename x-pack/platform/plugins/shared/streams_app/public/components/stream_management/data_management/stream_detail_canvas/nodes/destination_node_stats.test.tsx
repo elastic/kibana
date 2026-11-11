@@ -33,10 +33,12 @@ const statsWithRate = (eventsRate: number | null): DestinationStatsView =>
 
 const renderFooter = (
   entry: StatsEntry<DestinationStatsView> | undefined,
-  props: { indexCount?: number } = {}
+  { hasSavedSource = true, ...props }: { indexCount?: number; hasSavedSource?: boolean } = {}
 ) => {
   mockUseDestinationStats.mockReturnValue(entry);
-  return render(<DestinationNodeStats destinationId="es-prod" {...props} />);
+  return render(
+    <DestinationNodeStats destinationId="es-prod" hasSavedSource={hasSavedSource} {...props} />
+  );
 };
 
 const text = (testId: string) => screen.getByTestId(testId).textContent;
@@ -51,6 +53,47 @@ describe('DestinationNodeStats', () => {
     renderFooter(undefined);
 
     expect(mockUseDestinationStats).toHaveBeenCalledWith('es-prod');
+  });
+
+  describe('a destination that no source feeds in the saved unit', () => {
+    it('reads no stats, so nothing is registered or requested', () => {
+      renderFooter(undefined, { hasSavedSource: false });
+
+      expect(mockUseDestinationStats).toHaveBeenCalledWith(undefined);
+      expect(mockUseDestinationStats).not.toHaveBeenCalledWith('es-prod');
+    });
+
+    it('shows Data not flowing in, and no numbers', () => {
+      renderFooter(undefined, { hasSavedSource: false });
+
+      expect(text('streamsCanvasDestinationNotFlowing')).toBe('Data not flowing in');
+      expect(isShown('streamsCanvasDestinationRate')).toBe(false);
+      expect(isShown('streamsCanvasDestinationLatency')).toBe(false);
+    });
+
+    it('shows no numbers even when an entry is returned', () => {
+      renderFooter(
+        { status: 'ready', stats: statsWith({ eventsRate: 3700, latencyAverage: 0.012 }) },
+        { hasSavedSource: false }
+      );
+
+      expect(text('streamsCanvasDestinationNotFlowing')).toBe('Data not flowing in');
+      expect(isShown('streamsCanvasDestinationRate')).toBe(false);
+    });
+
+    it('still shows the index count', () => {
+      renderFooter(undefined, { hasSavedSource: false, indexCount: 3 });
+
+      expect(text('streamsCanvasDestinationIndexCount')).toBe('3 indices');
+    });
+
+    it('reads the stats again once a source feeds it', () => {
+      const { rerender } = renderFooter(undefined, { hasSavedSource: false });
+      rerender(<DestinationNodeStats destinationId="es-prod" hasSavedSource />);
+
+      expect(mockUseDestinationStats).toHaveBeenLastCalledWith('es-prod');
+      expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
+    });
   });
 
   describe('a destination with data', () => {

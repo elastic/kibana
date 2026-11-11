@@ -36,7 +36,7 @@ const destinationNode = (
   id: configuredDestinationNodeId(destinationId),
   type: DESTINATION_NODE_TYPE,
   position: { x: 0, y: 0 },
-  data: { destinationId, title, signals },
+  data: { destinationId, title, signals, hasSavedSource: true },
 });
 
 const edge = (sourceId: string, destinationId: string): ClassicCanvasEdge => ({
@@ -130,6 +130,7 @@ describe('resolveCanvasSearch', () => {
       position: { x: 0, y: 0 },
       data: {
         destinationId: 'd-logs',
+        hasSavedSource: true,
         title: 'prod logs',
         targetedIndexNames: ['logs-nginx-default'],
       },
@@ -146,6 +147,7 @@ describe('resolveCanvasSearch', () => {
       position: { x: 0, y: 0 },
       data: {
         destinationId: 'd-remote',
+        hasSavedSource: true,
         title: 'Backup',
         remoteIndexNames: ['archive-logs'],
       },
@@ -162,6 +164,7 @@ describe('resolveCanvasSearch', () => {
       position: { x: 0, y: 0 },
       data: {
         destinationId: 'd-s3',
+        hasSavedSource: true,
         title: 'Archive',
         subtitle: 'Long-term log archive',
         bucket: 'my-archive-bucket',
@@ -179,6 +182,7 @@ describe('resolveCanvasSearch', () => {
       position: { x: 0, y: 0 },
       data: {
         destinationId: 'd-remote',
+        hasSavedSource: true,
         title: 'Backup',
         subtitle: 'Long-term copy',
         endpoint: 'https://backup-cluster.example.com:9243',

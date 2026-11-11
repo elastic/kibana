@@ -22,6 +22,7 @@ const ELASTICSEARCH_NODE_DATA: DestinationNodeData = {
   subtitle: 'Auto',
   destinationId: 'es-prod',
   destinationType: 'elasticsearch',
+  hasSavedSource: true,
   signals: ['logs'],
   indexCount: 3,
 };
@@ -64,6 +65,16 @@ describe('DestinationNode', () => {
     expect(screen.getByTestId('streamsCanvasDestinationIndexCount').textContent).toBe('3 indices');
   });
 
+  it('does not read the stats of a destination that no source feeds in the saved unit', () => {
+    renderNode({ ...ELASTICSEARCH_NODE_DATA, hasSavedSource: false });
+
+    expect(mockUseDestinationStats).toHaveBeenCalledWith(undefined);
+    expect(mockUseDestinationStats).not.toHaveBeenCalledWith('es-prod');
+    expect(screen.getByTestId('streamsCanvasDestinationNotFlowing').textContent).toBe(
+      'Data not flowing in'
+    );
+  });
+
   it('still shows the title, the signals and the subtitle', () => {
     renderNode(ELASTICSEARCH_NODE_DATA);
 
@@ -85,6 +96,7 @@ describe('DestinationNode', () => {
         subtitle: 'my-archive',
         destinationId: 'archive',
         destinationType: 's3',
+        hasSavedSource: true,
         signals: ['logs'],
       });
 
