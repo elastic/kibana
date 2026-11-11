@@ -42,6 +42,13 @@ export const entityId = (type: string, name: string, audience?: string): string 
 export const factId = (executionId: string, batchKey: string, ref: string): string =>
   `fact-${shortHash(executionId, batchKey, ref)}`;
 
+/** A relationship's `memory.key`: `<from id>|<relationship type>|<to id>`. */
+export const relationshipKey = (from: string, relation: string, to: string): string =>
+  `${from}|${relation}|${to}`;
+
+/** The KI id of a relationship, from its key, so proposing it again updates it. */
+export const relationshipId = (key: string): string => `relationship-${shortHash(key)}`;
+
 /** The key of a batch of memories. */
 export const batchKeyOf = (memoryIds: Iterable<string>): string =>
   shortHash(...[...memoryIds].sort());

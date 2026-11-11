@@ -13,7 +13,7 @@ import {
   type ApplyDreamChangesOutput,
 } from '../../common/step_types/apply_dream_changes';
 import { AiIndexNotFoundError } from '../ai_indices/errors';
-import { findKiRevision, isKiDeleted } from '../ai_indices/ki_revision';
+import { findKiRevision, isKiDeleted, type StoredKi } from '../ai_indices/ki_revision';
 import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import { createVerifyEsql, keepVerifiedPatterns } from '../dreaming/access_patterns';
 import { applyOperations, type PlannedWrite } from '../dreaming/apply';
@@ -119,6 +119,7 @@ export const getApplyDreamChangesStepDefinition = ({
         createVerifyEsql({ esClient, logger, abortSignal: context.abortSignal })
       );
       const planned = dryRun ? new Map<string, PlannedWrite>() : undefined;
+      const written = new Map<string, StoredKi>();
       const { rejected: refused, ...counts } = await applyOperations(
         {
           esClient,
@@ -129,6 +130,7 @@ export const getApplyDreamChangesStepDefinition = ({
           memoryPermissions,
           abortSignal: context.abortSignal,
           dryRun: planned,
+          written,
         },
         operations
       );
@@ -154,8 +156,10 @@ export const getApplyDreamChangesStepDefinition = ({
               ...(document && { type: document.type, title: document.title }),
             };
           }),
-          documents: [...planned.values()].flatMap(({ ki }) => (ki ? [ki as DreamedKi] : [])),
         }),
+        documents: planned
+          ? [...planned.values()].flatMap(({ ki }) => (ki ? [ki as DreamedKi] : []))
+          : [...written.values()].map((ki) => ki as DreamedKi),
       };
       return { output };
     },

@@ -186,6 +186,7 @@ describe('describeAiIndex', () => {
         { type: 'memory.session_fact', count: 7 },
         { type: 'fact.preference', count: 4 },
         { type: 'entity.customer', count: 1 },
+        { type: 'memory.relationship', count: 5 },
         { type: 'document', count: 3 },
       ],
       tagCounts: [],
@@ -212,10 +213,11 @@ describe('describeAiIndex', () => {
     expect(response).not.toContain('"memory.session": 2');
     expect(response).not.toContain('"memory.session_fact": 7');
     expect(response).not.toContain('"entity.customer": 1');
+    expect(response).not.toContain('"memory.relationship": 5');
     expect(response).toContain(
       [
         'Unless the task specifically calls for memory, exclude memory types, and the facts and entities dreaming writes, from ordinary KI retrieval:',
-        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")',
+        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND type != "memory.relationship" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")',
       ].join('\n')
     );
     expect(response).toContain(
@@ -331,7 +333,7 @@ describe('describeAiIndex', () => {
     expect(response).toContain(
       [
         'Unless the task specifically calls for memory, exclude memory types, and the facts dreaming writes, from ordinary KI retrieval:',
-        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*")',
+        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND type != "memory.relationship" AND NOT type LIKE "fact.*")',
       ].join('\n')
     );
     expect(response).not.toContain('NOT type LIKE "entity.*"');

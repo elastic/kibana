@@ -27,6 +27,7 @@ import {
   RESERVED_ENTITY_ATTRIBUTE_KEYS,
   type DreamingEntityType,
   type DreamingFactType,
+  type DreamingRelationshipType,
 } from '../../../../common/dreaming';
 
 /** Lowercase, with spaces and dashes as underscores, as names are typed. */
@@ -220,6 +221,59 @@ export const FactTypeModal = ({ initial, taken, onSave, onClose }: FactTypeModal
               {
                 defaultMessage:
                   'What dreaming should write down as this type, ideally with an example.',
+              }
+            )}
+          />
+        </>
+      )}
+    </TypeModal>
+  );
+};
+
+interface RelationshipTypeModalProps {
+  initial?: DreamingRelationshipType;
+  /** Names other relationship types already use. */
+  taken: readonly string[];
+  onSave: (relationshipType: DreamingRelationshipType) => void;
+  onClose: () => void;
+}
+
+export const RelationshipTypeModal = ({
+  initial,
+  taken,
+  onSave,
+  onClose,
+}: RelationshipTypeModalProps) => {
+  const [name, setName] = useState(initial?.type ?? '');
+  const [description, setDescription] = useState(initial?.description ?? '');
+  const error = nameError(name, taken);
+  return (
+    <TypeModal
+      title={
+        initial
+          ? i18n.translate('xpack.contextEngine.dreamingConfig.relationshipModal.editTitle', {
+              defaultMessage: 'Edit relationship type',
+            })
+          : i18n.translate('xpack.contextEngine.dreamingConfig.relationshipModal.addTitle', {
+              defaultMessage: 'Add a relationship type',
+            })
+      }
+      isValid={error === undefined}
+      onSave={() => onSave(withDescription({ type: name }, description))}
+      onClose={onClose}
+      data-test-subj="contextDreamingRelationshipTypeModal"
+    >
+      {(showErrors) => (
+        <>
+          <NameField value={name} error={error} showErrors={showErrors} onChange={setName} />
+          <DescriptionField
+            value={description}
+            onChange={setDescription}
+            helpText={i18n.translate(
+              'xpack.contextEngine.dreamingConfig.relationshipModal.descriptionHelp',
+              {
+                defaultMessage:
+                  'What it links, read from one item to the other, such as "a person works for a company".',
               }
             )}
           />

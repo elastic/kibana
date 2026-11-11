@@ -85,6 +85,24 @@
           ]
         }
       ]
-    }
+    },
+    "relationships": [
+      {
+        "type": "has_tier",
+        "description": "A customer holds a loyalty tier."
+      },
+      {
+        "type": "experienced",
+        "description": "A customer ran into a problem."
+      },
+      {
+        "type": "lives_in",
+        "description": "A customer lives in a region."
+      },
+      {
+        "type": "affects",
+        "description": "A problem hits a tier, route or region."
+      }
+    ]
   }
 }

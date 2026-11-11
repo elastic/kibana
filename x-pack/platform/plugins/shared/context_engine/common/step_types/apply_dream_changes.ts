@@ -36,8 +36,8 @@ const MAX_PRIVILEGE_GROUPS = 100;
 const MAX_PRIVILEGE_NAMES = 50;
 const MAX_PRIVILEGE_LENGTH = 256;
 
-const refSchema = lazySchema(() => z.string().min(1).max(MAX_KI_ID_LENGTH));
-const typeSchema = lazySchema(() => z.string().max(MAX_DREAMING_TYPE_LENGTH));
+export const refSchema = lazySchema(() => z.string().min(1).max(MAX_KI_ID_LENGTH));
+export const typeSchema = lazySchema(() => z.string().max(MAX_DREAMING_TYPE_LENGTH));
 const sourceMemoryIdsSchema = lazySchema(() => z.array(refSchema).max(MAX_SOURCE_IDS));
 
 export const accessPatternSchema = lazySchema(() =>
@@ -101,48 +101,51 @@ export const dreamChangeSetSchema = lazySchema(() =>
 
 export type DreamChangeSet = z.infer<typeof dreamChangeSetSchema>;
 
+export const dreamingMemoriesSchema = lazySchema(() =>
+  z
+    .array(
+      z
+        .object({
+          id: refSchema,
+          updated_at: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+          governance: z
+            .object({
+              lifecycle: z.object({ status: z.string().max(64).optional() }).optional(),
+            })
+            .optional(),
+          permissions: z
+            .object({
+              kibana: z
+                .object({
+                  privileges: z
+                    .array(
+                      z.object({
+                        space: z.string().max(MAX_PRIVILEGE_LENGTH),
+                        name: z
+                          .array(z.string().max(MAX_PRIVILEGE_LENGTH))
+                          .max(MAX_PRIVILEGE_NAMES)
+                          .optional(),
+                        count: z.number().optional(),
+                      })
+                    )
+                    .max(MAX_PRIVILEGE_GROUPS)
+                    .optional(),
+                })
+                .optional(),
+            })
+            .optional(),
+        })
+        .passthrough()
+    )
+    .max(MAX_DREAMING_STEP_MEMORIES)
+);
+
 export const applyDreamChangesInputSchema = lazySchema(() =>
   z.object({
     ai_index_id: aiIndexIdSchema,
-    memories: z
-      .array(
-        z
-          .object({
-            id: refSchema,
-            updated_at: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
-            governance: z
-              .object({
-                lifecycle: z.object({ status: z.string().max(64).optional() }).optional(),
-              })
-              .optional(),
-            permissions: z
-              .object({
-                kibana: z
-                  .object({
-                    privileges: z
-                      .array(
-                        z.object({
-                          space: z.string().max(MAX_PRIVILEGE_LENGTH),
-                          name: z
-                            .array(z.string().max(MAX_PRIVILEGE_LENGTH))
-                            .max(MAX_PRIVILEGE_NAMES)
-                            .optional(),
-                          count: z.number().optional(),
-                        })
-                      )
-                      .max(MAX_PRIVILEGE_GROUPS)
-                      .optional(),
-                  })
-                  .optional(),
-              })
-              .optional(),
-          })
-          .passthrough()
-      )
-      .max(MAX_DREAMING_STEP_MEMORIES)
-      .describe(
-        'The memories the model was shown, as read from the AI index: the latest revision of each. They must all have the same permissions. Every item it writes must cite some of them, or memories the item already cites, and is visible only where they all are. Deleted ones are ignored.'
-      ),
+    memories: dreamingMemoriesSchema.describe(
+      'The memories the model was shown, as read from the AI index: the latest revision of each. They must all have the same permissions. Every item it writes must cite some of them, or memories the item already cites, and is visible only where they all are. Deleted ones are ignored.'
+    ),
     changes: dreamChangeSetSchema.describe('The change set the dreaming model returned'),
     dry_run: z
       .boolean()
@@ -153,14 +156,14 @@ export const applyDreamChangesInputSchema = lazySchema(() =>
   })
 );
 
-const rejectedItemSchema = lazySchema(() =>
+export const rejectedItemSchema = lazySchema(() =>
   z.object({
     item: z.string().describe('Which item of the change set, such as `fact new:1`'),
     reason: z.string().describe('Why it was not applied'),
   })
 );
 
-const plannedWriteSchema = lazySchema(() =>
+export const plannedWriteSchema = lazySchema(() =>
   z.object({
     id: z.string().describe('The KI id'),
     change: z.enum(['created', 'updated', 'deleted']),
@@ -169,8 +172,8 @@ const plannedWriteSchema = lazySchema(() =>
   })
 );
 
-const plannedDocumentSchema = lazySchema(() =>
-  z.object({ id: z.string(), type: z.string(), title: z.string() }).passthrough()
+export const plannedDocumentSchema = lazySchema(() =>
+  z.object({ id: refSchema, type: z.string(), title: z.string() }).passthrough()
 );
 
 export const applyDreamChangesOutputSchema = lazySchema(() =>
@@ -191,7 +194,9 @@ export const applyDreamChangesOutputSchema = lazySchema(() =>
     documents: z
       .array(plannedDocumentSchema)
       .optional()
-      .describe('On a dry run, each KI it would create or update, as it would be stored'),
+      .describe(
+        'Each KI it created or updated, as stored; on a dry run, each it would create or update'
+      ),
   })
 );
 

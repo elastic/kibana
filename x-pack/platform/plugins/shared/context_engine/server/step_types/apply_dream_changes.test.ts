@@ -109,6 +109,7 @@ describe('getApplyDreamChangesStepDefinition', () => {
       deleted: 0,
       rejected: [{ item: 'fact new:3', reason: "fact type 'complaint' is not configured" }],
       dropped_access_patterns: 0,
+      documents: Object.values(stored),
     });
     expect(stored['entity-city--montreal']).toEqual(
       expect.objectContaining({ type: 'entity.city', title: 'Montreal' })
@@ -208,6 +209,7 @@ describe('getApplyDreamChangesStepDefinition', () => {
         },
       ],
       dropped_access_patterns: 0,
+      documents: [],
     });
     expect(stored[existingCustomer.id]).toBe(existingCustomer);
   });

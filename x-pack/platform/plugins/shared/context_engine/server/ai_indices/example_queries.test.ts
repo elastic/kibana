@@ -76,7 +76,7 @@ describe('buildExampleQueries', () => {
 
     for (const { esql } of dreaming) {
       expect(esql).toContain(
-        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")'
+        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND type != "memory.relationship" AND NOT type LIKE "fact.*" AND NOT type LIKE "entity.*")'
       );
       expect(Parser.parse(esql).errors).toEqual([]);
     }
@@ -90,7 +90,7 @@ describe('buildExampleQueries', () => {
 
     for (const { esql } of factsOnly) {
       expect(esql).toContain(
-        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND NOT type LIKE "fact.*")\n'
+        '| WHERE type IS NULL OR (type != "memory.session" AND type != "memory.session_fact" AND type != "memory.relationship" AND NOT type LIKE "fact.*")\n'
       );
     }
   });

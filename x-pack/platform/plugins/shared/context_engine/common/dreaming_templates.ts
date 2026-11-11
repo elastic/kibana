@@ -17,7 +17,7 @@ export const DREAMING_TEMPLATES_ASSET_DIR = 'dreaming_templates';
 /** What a template sets: everything but whether and how often dreaming runs. */
 export type DreamingTemplateConfig = Pick<
   AiIndexDreamingConfig,
-  'instructions' | 'facts' | 'entities'
+  'instructions' | 'facts' | 'entities' | 'relationships'
 >;
 
 export interface DreamingTemplateSummary {

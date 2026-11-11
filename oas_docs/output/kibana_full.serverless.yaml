@@ -23519,7 +23519,7 @@ paths:
                             - value
                         dreaming:
                           additionalProperties: false
-                          description: 'What the AI Index learns from its memories: facts and entities.'
+                          description: 'What the AI Index learns from its memories: facts, entities, and the relationships between them.'
                           type: object
                           properties:
                             connector_id:
@@ -23589,6 +23589,26 @@ paths:
                               description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                               maxLength: 8192
                               type: string
+                            relationships:
+                              description: 'Relationship types between the entities dreaming builds, each stored as a `memory.relationship` KI. When set, facts also link to the entities they are about with the built-in `about` type, which cannot be configured. Omitted or empty: no relationships.'
+                              items:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  description:
+                                    description: What the type means, as the dreaming model reads it.
+                                    maxLength: 2048
+                                    type: string
+                                  type:
+                                    description: The relationship type, such as `member_of`, stored on the relationship KI as `attributes["relationship.relation"]`.
+                                    maxLength: 128
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - type
+                              maxItems: 50
+                              nullable: true
+                              type: array
                             schedule:
                               additionalProperties: false
                               type: object
@@ -23904,7 +23924,7 @@ paths:
                     - value
                 dreaming:
                   additionalProperties: false
-                  description: 'What the AI Index learns from its memories: facts and entities.'
+                  description: 'What the AI Index learns from its memories: facts, entities, and the relationships between them.'
                   type: object
                   properties:
                     connector_id:
@@ -23974,6 +23994,26 @@ paths:
                       description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                       maxLength: 8192
                       type: string
+                    relationships:
+                      description: 'Relationship types between the entities dreaming builds, each stored as a `memory.relationship` KI. When set, facts also link to the entities they are about with the built-in `about` type, which cannot be configured. Omitted or empty: no relationships.'
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          description:
+                            description: What the type means, as the dreaming model reads it.
+                            maxLength: 2048
+                            type: string
+                          type:
+                            description: The relationship type, such as `member_of`, stored on the relationship KI as `attributes["relationship.relation"]`.
+                            maxLength: 128
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                      maxItems: 50
+                      nullable: true
+                      type: array
                     schedule:
                       additionalProperties: false
                       type: object
@@ -24854,7 +24894,7 @@ paths:
                       - value
                   dreaming:
                     additionalProperties: false
-                    description: 'What the AI Index learns from its memories: facts and entities.'
+                    description: 'What the AI Index learns from its memories: facts, entities, and the relationships between them.'
                     type: object
                     properties:
                       connector_id:
@@ -24924,6 +24964,26 @@ paths:
                         description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                         maxLength: 8192
                         type: string
+                      relationships:
+                        description: 'Relationship types between the entities dreaming builds, each stored as a `memory.relationship` KI. When set, facts also link to the entities they are about with the built-in `about` type, which cannot be configured. Omitted or empty: no relationships.'
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: What the type means, as the dreaming model reads it.
+                              maxLength: 2048
+                              type: string
+                            type:
+                              description: The relationship type, such as `member_of`, stored on the relationship KI as `attributes["relationship.relation"]`.
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                          required:
+                            - type
+                        maxItems: 50
+                        nullable: true
+                        type: array
                       schedule:
                         additionalProperties: false
                         type: object
@@ -25217,7 +25277,7 @@ paths:
                     - value
                 dreaming:
                   additionalProperties: false
-                  description: 'What the AI Index learns from its memories: facts and entities.'
+                  description: 'What the AI Index learns from its memories: facts, entities, and the relationships between them.'
                   type: object
                   properties:
                     connector_id:
@@ -25287,6 +25347,26 @@ paths:
                       description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                       maxLength: 8192
                       type: string
+                    relationships:
+                      description: 'Relationship types between the entities dreaming builds, each stored as a `memory.relationship` KI. When set, facts also link to the entities they are about with the built-in `about` type, which cannot be configured. Omitted or empty: no relationships.'
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          description:
+                            description: What the type means, as the dreaming model reads it.
+                            maxLength: 2048
+                            type: string
+                          type:
+                            description: The relationship type, such as `member_of`, stored on the relationship KI as `attributes["relationship.relation"]`.
+                            maxLength: 128
+                            minLength: 1
+                            type: string
+                        required:
+                          - type
+                      maxItems: 50
+                      nullable: true
+                      type: array
                     schedule:
                       additionalProperties: false
                       type: object
@@ -25943,6 +26023,11 @@ paths:
                         - description: A confirmed way around a problem until it is fixed.
                           type: workaround
                       instructions: Record confirmed fixes, known issues and policies from support tickets.
+                      relationships:
+                        - description: An issue happens on a platform.
+                          type: affects
+                        - description: A workaround gets around an issue.
+                          type: works_around
                       schedule:
                         interval: 24h
               schema:
@@ -25951,7 +26036,7 @@ paths:
                 properties:
                   dreaming:
                     additionalProperties: false
-                    description: 'What the AI Index learns from its memories: facts and entities.'
+                    description: 'What the AI Index learns from its memories: facts, entities, and the relationships between them.'
                     type: object
                     properties:
                       connector_id:
@@ -26021,6 +26106,26 @@ paths:
                         description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                         maxLength: 8192
                         type: string
+                      relationships:
+                        description: 'Relationship types between the entities dreaming builds, each stored as a `memory.relationship` KI. When set, facts also link to the entities they are about with the built-in `about` type, which cannot be configured. Omitted or empty: no relationships.'
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: What the type means, as the dreaming model reads it.
+                              maxLength: 2048
+                              type: string
+                            type:
+                              description: The relationship type, such as `member_of`, stored on the relationship KI as `attributes["relationship.relation"]`.
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                          required:
+                            - type
+                        maxItems: 50
+                        nullable: true
+                        type: array
                       schedule:
                         additionalProperties: false
                         type: object
@@ -26127,7 +26232,7 @@ paths:
                   facts:
                     - type: known_issue
               putAiIndexDreamingRequestExample:
-                description: Example request that turns dreaming on with fact and entity types
+                description: Example request that turns dreaming on with fact, entity and relationship types
                 summary: Configure dreaming
                 value:
                   enabled: true
@@ -26146,11 +26251,16 @@ paths:
                     - description: A confirmed way around a problem until it is fixed.
                       type: workaround
                   instructions: Record confirmed fixes, known issues and policies from support tickets.
+                  relationships:
+                    - description: An issue happens on a platform.
+                      type: affects
+                    - description: A workaround gets around an issue.
+                      type: works_around
                   schedule:
                     interval: 24h
             schema:
               additionalProperties: false
-              description: 'What the AI Index learns from its memories: facts and entities.'
+              description: 'What the AI Index learns from its memories: facts, entities, and the relationships between them.'
               type: object
               properties:
                 connector_id:
@@ -26220,6 +26330,26 @@ paths:
                   description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                   maxLength: 8192
                   type: string
+                relationships:
+                  description: 'Relationship types between the entities dreaming builds, each stored as a `memory.relationship` KI. When set, facts also link to the entities they are about with the built-in `about` type, which cannot be configured. Omitted or empty: no relationships.'
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      description:
+                        description: What the type means, as the dreaming model reads it.
+                        maxLength: 2048
+                        type: string
+                      type:
+                        description: The relationship type, such as `member_of`, stored on the relationship KI as `attributes["relationship.relation"]`.
+                        maxLength: 128
+                        minLength: 1
+                        type: string
+                    required:
+                      - type
+                  maxItems: 50
+                  nullable: true
+                  type: array
                 schedule:
                   additionalProperties: false
                   type: object
@@ -26258,6 +26388,11 @@ paths:
                         - description: A confirmed way around a problem until it is fixed.
                           type: workaround
                       instructions: Record confirmed fixes, known issues and policies from support tickets.
+                      relationships:
+                        - description: An issue happens on a platform.
+                          type: affects
+                        - description: A workaround gets around an issue.
+                          type: works_around
                       schedule:
                         interval: 24h
               schema:
@@ -26266,7 +26401,7 @@ paths:
                 properties:
                   dreaming:
                     additionalProperties: false
-                    description: 'What the AI Index learns from its memories: facts and entities.'
+                    description: 'What the AI Index learns from its memories: facts, entities, and the relationships between them.'
                     type: object
                     properties:
                       connector_id:
@@ -26336,6 +26471,26 @@ paths:
                         description: 'What dreaming is told about the AI Index: what it holds, who uses it, and what to record or skip.'
                         maxLength: 8192
                         type: string
+                      relationships:
+                        description: 'Relationship types between the entities dreaming builds, each stored as a `memory.relationship` KI. When set, facts also link to the entities they are about with the built-in `about` type, which cannot be configured. Omitted or empty: no relationships.'
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            description:
+                              description: What the type means, as the dreaming model reads it.
+                              maxLength: 2048
+                              type: string
+                            type:
+                              description: The relationship type, such as `member_of`, stored on the relationship KI as `attributes["relationship.relation"]`.
+                              maxLength: 128
+                              minLength: 1
+                              type: string
+                          required:
+                            - type
+                        maxItems: 50
+                        nullable: true
+                        type: array
                       schedule:
                         additionalProperties: false
                         type: object
@@ -26473,7 +26628,11 @@ paths:
                     { "type": "issue", "description": "A known problem customers run into.", "attributes": ["status", "fixed_in"] },
                     { "type": "platform", "description": "A browser, operating system or device, with its version." }
                   ]
-                }
+                },
+                "relationships": [
+                  { "type": "affects", "description": "An issue happens on a platform." },
+                  { "type": "works_around", "description": "A workaround gets around an issue." }
+                ]
               }'
         - lang: Console
           source: |
@@ -26491,7 +26650,11 @@ paths:
                   { "type": "issue", "description": "A known problem customers run into.", "attributes": ["status", "fixed_in"] },
                   { "type": "platform", "description": "A browser, operating system or device, with its version." }
                 ]
-              }
+              },
+              "relationships": [
+                { "type": "affects", "description": "An issue happens on a platform." },
+                { "type": "works_around", "description": "A workaround gets around an issue." }
+              ]
             }
       x-state: Experimental
       x-metaTags:

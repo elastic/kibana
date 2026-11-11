@@ -51,6 +51,7 @@ describe('registerStepDefinitions', () => {
       'context-engine.recordImprovements',
       'context-engine.getDreamingStatus',
       'context-engine.applyDreamChanges',
+      'context-engine.applyDreamRelationships',
     ]);
   });
 });

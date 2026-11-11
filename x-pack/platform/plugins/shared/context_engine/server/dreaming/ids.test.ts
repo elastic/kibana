@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { batchKeyOf, entityId, factId, kiIdFromUri, kiUri, slugify } from './ids';
+import {
+  batchKeyOf,
+  entityId,
+  factId,
+  kiIdFromUri,
+  kiUri,
+  relationshipId,
+  relationshipKey,
+  slugify,
+} from './ids';
 
 describe('dreaming ids', () => {
   it('folds case, accents and punctuation out of entity names', () => {
@@ -52,6 +61,17 @@ describe('dreaming ids', () => {
     expect(factId('exec-1', batch, 'new:1')).not.toBe(factId('exec-2', batch, 'new:1'));
     expect(factId('exec-1', batch, 'new:1')).not.toBe(
       factId('exec-1', batchKeyOf(['m-3']), 'new:1')
+    );
+  });
+
+  it('gives a relationship one id per from, type and to', () => {
+    const key = relationshipKey('entity-person--priya', 'manages', 'entity-person--alex');
+
+    expect(key).toBe('entity-person--priya|manages|entity-person--alex');
+    expect(relationshipId(key)).toMatch(/^relationship-/);
+    expect(relationshipId(key)).toBe(relationshipId(key));
+    expect(relationshipId(key)).not.toBe(
+      relationshipId(relationshipKey('entity-person--alex', 'manages', 'entity-person--priya'))
     );
   });
 

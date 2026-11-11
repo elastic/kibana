@@ -7,9 +7,11 @@
 
 import { isEqual } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { isDreamedKiType } from '../../common/dreaming';
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import type { KiLifecycleStatus, KiPartialFields } from '../../common/step_types/ki';
-import { KiDeletedError } from './errors';
+import { KiDeletedError, KiNotFoundError } from './errors';
+import { findLinkingRelationshipIds } from './ki_relationships';
 import {
   getKiRevision,
   isKiDeleted,
@@ -124,7 +126,7 @@ export interface SoftDeleteKiOptions {
 export const softDeleteKi = async (
   esClient: ElasticsearchClient,
   options: SoftDeleteKiOptions
-): Promise<{ id: string }> => {
+): Promise<{ id: string; deletedRelationshipIds: string[] }> => {
   const { aiIndexId, dest, kiId, writer, backingIndex, refresh = true, abortSignal } = options;
 
   const revision = await getKiRevision({
@@ -133,33 +135,60 @@ export const softDeleteKi = async (
     dest,
     kiId,
     backingIndex,
+    includeSource: true,
     abortSignal,
   });
-  if (isKiDeleted(revision.source)) {
-    return { id: kiId };
+  if (!isKiDeleted(revision.source)) {
+    const now = new Date().toISOString();
+    const changes = {
+      updated_at: now,
+      governance: {
+        provenance: { updated_by: writer },
+        lifecycle: { status: 'deleted' as const },
+      },
+    };
+
+    await writeKiRevision({
+      esClient,
+      aiIndexId,
+      dest,
+      kiId,
+      revision,
+      changes,
+      refresh,
+      abortSignal,
+    });
   }
 
-  const now = new Date().toISOString();
-  const changes = {
-    updated_at: now,
-    governance: {
-      provenance: { updated_by: writer },
-      lifecycle: { status: 'deleted' as const },
-    },
-  };
+  // Runs for an already-deleted KI too, so a retry finishes a cleanup that failed partway.
+  const deletedRelationshipIds: string[] = [];
+  const { type } = revision.source;
+  if (typeof type === 'string' && isDreamedKiType(type)) {
+    for (const relationshipId of await findLinkingRelationshipIds({
+      esClient,
+      dest,
+      kiId,
+      abortSignal,
+    })) {
+      try {
+        await softDeleteKi(esClient, {
+          aiIndexId,
+          dest,
+          kiId: relationshipId,
+          writer,
+          refresh,
+          abortSignal,
+        });
+        deletedRelationshipIds.push(relationshipId);
+      } catch (error) {
+        if (!(error instanceof KiNotFoundError)) {
+          throw error;
+        }
+      }
+    }
+  }
 
-  await writeKiRevision({
-    esClient,
-    aiIndexId,
-    dest,
-    kiId,
-    revision,
-    changes,
-    refresh,
-    abortSignal,
-  });
-
-  return { id: kiId };
+  return { id: kiId, deletedRelationshipIds };
 };
 
 export interface RestoreKiOptions {

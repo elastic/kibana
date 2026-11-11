@@ -19,6 +19,10 @@ const config = {
       { type: 'city' },
     ],
   },
+  relationships: [
+    { type: 'lives_in', description: 'A customer lives in a city.' },
+    { type: 'knows' },
+  ],
 };
 
 describe('dreamingConfigSchema', () => {
@@ -30,12 +34,30 @@ describe('dreamingConfigSchema', () => {
     expect(dreamingConfigSchema.validate({ enabled: false })).toEqual({ enabled: false });
   });
 
-  it('accepts null facts and entities', () => {
-    expect(dreamingConfigSchema.validate({ enabled: false, facts: null, entities: null })).toEqual({
-      enabled: false,
-      facts: null,
-      entities: null,
-    });
+  it('accepts null facts, entities and relationships', () => {
+    expect(
+      dreamingConfigSchema.validate({
+        enabled: false,
+        facts: null,
+        entities: null,
+        relationships: null,
+      })
+    ).toEqual({ enabled: false, facts: null, entities: null, relationships: null });
+  });
+
+  it('rejects a relationship type name that is not lowercase letters, digits and underscores', () => {
+    expect(() =>
+      dreamingConfigSchema.validate({ ...config, relationships: [{ type: 'Lives In' }] })
+    ).toThrow('Must use lowercase letters, digits, and underscores only.');
+  });
+
+  it('bounds the relationship types', () => {
+    expect(() =>
+      dreamingConfigSchema.validate({
+        ...config,
+        relationships: Array.from({ length: 51 }, (_, index) => ({ type: `type_${index}` })),
+      })
+    ).toThrow();
   });
 
   it('rejects a type name that is not lowercase letters, digits and underscores', () => {
@@ -59,7 +81,7 @@ describe('dreamingConfigSchema', () => {
     ).toThrow('Must be at least 15 minutes.');
   });
 
-  it('rejects relationship types, which dreaming no longer builds', () => {
+  it('rejects entity edges, which relationship types replace', () => {
     expect(() =>
       dreamingConfigSchema.validate({
         ...config,

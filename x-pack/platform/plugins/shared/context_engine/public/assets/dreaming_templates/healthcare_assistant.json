@@ -55,6 +55,24 @@
           "description": "An issuing or approving body, such as the CDC or FDA."
         }
       ]
-    }
+    },
+    "relationships": [
+      {
+        "type": "treats",
+        "description": "A drug treats a condition."
+      },
+      {
+        "type": "contraindicated_in",
+        "description": "A drug should not be used with a condition."
+      },
+      {
+        "type": "recommended_for",
+        "description": "A drug or guideline is recommended for a population."
+      },
+      {
+        "type": "approved_by",
+        "description": "A drug or guideline is approved or issued by an organization."
+      }
+    ]
   }
 }

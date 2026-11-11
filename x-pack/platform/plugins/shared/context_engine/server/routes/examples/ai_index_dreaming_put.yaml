@@ -4,7 +4,7 @@ requestBody:
       examples:
         putAiIndexDreamingRequestExample:
           summary: "Configure dreaming"
-          description: "Example request that turns dreaming on with fact and entity types"
+          description: "Example request that turns dreaming on with fact, entity and relationship types"
           value:
             enabled: true
             schedule:
@@ -24,6 +24,11 @@ requestBody:
                     - fixed_in
                 - type: platform
                   description: A browser, operating system or device, with its version.
+            relationships:
+              - type: affects
+                description: An issue happens on a platform.
+              - type: works_around
+                description: A workaround gets around an issue.
         putAiIndexDreamingOffRequestExample:
           summary: "Turn dreaming off"
           description: "Example request that turns scheduled dreaming off and keeps the configured types"
@@ -59,6 +64,11 @@ responses:
                         - fixed_in
                     - type: platform
                       description: A browser, operating system or device, with its version.
+                relationships:
+                  - type: affects
+                    description: An issue happens on a platform.
+                  - type: works_around
+                    description: A workaround gets around an issue.
   400:
     content:
       application/json:
@@ -127,7 +137,11 @@ x-codeSamples:
               { "type": "issue", "description": "A known problem customers run into.", "attributes": ["status", "fixed_in"] },
               { "type": "platform", "description": "A browser, operating system or device, with its version." }
             ]
-          }
+          },
+          "relationships": [
+            { "type": "affects", "description": "An issue happens on a platform." },
+            { "type": "works_around", "description": "A workaround gets around an issue." }
+          ]
         }'
   - lang: Console
     source: |
@@ -145,5 +159,9 @@ x-codeSamples:
             { "type": "issue", "description": "A known problem customers run into.", "attributes": ["status", "fixed_in"] },
             { "type": "platform", "description": "A browser, operating system or device, with its version." }
           ]
-        }
+        },
+        "relationships": [
+          { "type": "affects", "description": "An issue happens on a platform." },
+          { "type": "works_around", "description": "A workaround gets around an issue." }
+        ]
       }

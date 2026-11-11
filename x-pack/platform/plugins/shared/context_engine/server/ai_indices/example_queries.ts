@@ -7,7 +7,7 @@
 
 import type { AiIndexDest } from '../../common/http_api/ai_indices';
 import { kiLifecyclePipeline } from './ki_lifecycle';
-import { MEMORY_KI_TYPES } from '../../common/memory';
+import { RETRIEVAL_EXCLUDED_MEMORY_KI_TYPES } from '../../common/memory';
 import { ENTITY_TYPE_PREFIX, FACT_TYPE_PREFIX } from '../../common/dreaming';
 
 export interface AiIndexExampleQuery {
@@ -23,7 +23,7 @@ export const ENTITY_TYPE_PATTERN = `${ENTITY_TYPE_PREFIX}*`;
 /** Leaves out memory types and the KI types under `dreamedPrefixes`, the kinds the AI index dreams. */
 export const excludeMemoryKiTypesCondition = (dreamedPrefixes: readonly string[]): string =>
   `type IS NULL OR (${[
-    ...MEMORY_KI_TYPES.map((type) => `type != "${type}"`),
+    ...RETRIEVAL_EXCLUDED_MEMORY_KI_TYPES.map((type) => `type != "${type}"`),
     ...dreamedPrefixes.map((prefix) => `NOT type LIKE "${prefix}*"`),
   ].join(' AND ')})`;
 

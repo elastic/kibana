@@ -16,6 +16,7 @@ interface Step {
   name: string;
   type: string;
   condition?: string;
+  'on-failure'?: { continue?: boolean };
   foreach?: string;
   steps?: Step[];
   with?: {
@@ -47,6 +48,10 @@ const values: ContextEngineDreamingWorkflowTemplateValues = {
     { type: 'customer', description: 'A loyalty member.', attributes: ['loyalty_number', 'tier'] },
     { type: 'city' },
   ],
+  relationshipTypes: [
+    { type: 'lives_in', description: 'A customer lives in a city.' },
+    { type: 'knows' },
+  ],
 };
 
 const render = (overrides: Partial<ContextEngineDreamingWorkflowTemplateValues> = {}) =>
@@ -61,6 +66,7 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       instructions: values.instructions,
       fact_types: values.factTypes,
       entity_types: values.entityTypes,
+      relationship_types: values.relationshipTypes,
     });
   });
 
@@ -409,9 +415,245 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
   });
 
   it('keeps empty type lists as lists', () => {
-    expect(render({ factTypes: [], entityTypes: [] }).consts).toEqual(
-      expect.objectContaining({ fact_types: [], entity_types: [] })
+    expect(render({ factTypes: [], entityTypes: [], relationshipTypes: [] }).consts).toEqual(
+      expect.objectContaining({ fact_types: [], entity_types: [], relationship_types: [] })
     );
+  });
+
+  describe('the relationships step', () => {
+    const relationshipsStep = (
+      overrides: Partial<ContextEngineDreamingWorkflowTemplateValues> = {}
+    ) => {
+      const workflow = render(overrides);
+      const batches = findStep(findStep(workflow.steps, 'dream').steps ?? [], 'batches');
+      return { workflow, step: findStep(batches.steps ?? [], 'relationships') };
+    };
+    const evaluate = (expression: unknown, scope: Record<string, unknown>) =>
+      createWorkflowLiquidEngine().evalValueSync(String(expression).slice(3, -2).trim(), scope);
+
+    const memory = {
+      id: 'm-1',
+      type: 'memory.session_fact',
+      title: 'Home',
+      content: 'Bob lives in Lyon.',
+    };
+    const bob = { id: 'entity-customer--bob', type: 'entity.customer', title: 'Bob' };
+    const lyon = {
+      id: 'entity-city--lyon',
+      type: 'entity.city',
+      title: 'Lyon',
+      description: 'A city.',
+    };
+    const paris = { id: 'entity-city--paris', type: 'entity.city', title: 'Paris' };
+    const fact = { id: 'fact-1', type: 'fact.preference', title: 'Bob likes aisles' };
+
+    const prompt = ({
+      documents = [bob],
+      existingItems = [lyon, paris, fact],
+      relationships = [] as Array<Record<string, unknown>>,
+      memories = [memory] as Array<Record<string, unknown>>,
+    } = {}) => {
+      const { workflow, step } = relationshipsStep();
+      const relate = findStep(step.steps ?? [], 'relate');
+      const hits = (sources: Array<Record<string, unknown>>) => ({
+        output: { hits: { hits: sources.map((source) => ({ _source: source })) } },
+      });
+      return createWorkflowLiquidEngine().parseAndRenderSync(String(relate.with?.prompt), {
+        consts: workflow.consts,
+        foreach: { item: memories },
+        steps: {
+          apply_changes: { output: { documents } },
+          read_existing: hits(existingItems),
+          read_relationships: hits(relationships),
+        },
+      });
+    };
+
+    it('runs only when relationship types are configured and the batch wrote something', () => {
+      const scope = (documents: unknown[]) => ({
+        steps: { apply_changes: { output: { documents } } },
+      });
+      const { workflow, step } = relationshipsStep();
+      const { workflow: none } = relationshipsStep({ relationshipTypes: [] });
+
+      expect(evaluate(step.condition, { ...scope([bob]), consts: workflow.consts })).toBe(true);
+      expect(evaluate(step.condition, { ...scope([]), consts: workflow.consts })).toBe(false);
+      expect(evaluate(step.condition, { ...scope([bob]), consts: none.consts })).toBe(false);
+    });
+
+    it('reads the relationships that link what the batch wrote', () => {
+      const readRelationships = findStep(
+        relationshipsStep().step.steps ?? [],
+        'read_relationships'
+      ).with;
+      const [type, uris] = (readRelationships?.query?.bool?.filter ?? []) as Array<{
+        terms?: Record<string, unknown>;
+      }>;
+
+      expect(type).toEqual({ term: { type: 'memory.relationship' } });
+      expect(
+        evaluate(uris.terms?.['references.uri'], {
+          steps: { apply_changes: { output: { documents: [bob, lyon] } } },
+        })
+      ).toEqual(['ki://entity-customer--bob', 'ki://entity-city--lyon']);
+      expect(readRelationships?.collapse).toEqual({ field: 'id' });
+    });
+
+    it('lists the relationship types, the new items, and the existing entities they could link to', () => {
+      const rendered = prompt();
+
+      expect(rendered).toContain(
+        'RELATIONSHIP TYPES:\n- about: A fact is about an entity. Built in; the only type for facts.\n- lives_in: A customer lives in a city.\n- knows\n'
+      );
+      expect(rendered).toContain(`INSTRUCTIONS:\n\n${values.instructions}\n`);
+      expect(rendered).toContain(`NEW (one item per line):\n${JSON.stringify(bob)}\n`);
+      expect(rendered).toContain(
+        `EXISTING ENTITIES (one per line, none when empty):\n${JSON.stringify(
+          lyon
+        )}\n${JSON.stringify(paris)}\n`
+      );
+      expect(rendered).not.toContain('"fact-1"');
+    });
+
+    it('leaves out existing entities that are new, deleted, or seen by other people', () => {
+      const restricted = {
+        ...paris,
+        permissions: {
+          kibana: { privileges: [{ space: 'default', name: ['ai_index:a/read'], count: 1 }] },
+        },
+      };
+      const deleted = { ...lyon, governance: { lifecycle: { status: 'deleted' } } };
+      const rendered = prompt({
+        documents: [bob, lyon],
+        existingItems: [bob, deleted, restricted],
+      });
+      const existing = rendered.slice(
+        rendered.indexOf('EXISTING ENTITIES ('),
+        rendered.indexOf('EXISTING RELATIONSHIPS (')
+      );
+
+      expect(existing).toBe('EXISTING ENTITIES (one per line, none when empty):\n\n');
+    });
+
+    it('shows each existing relationship by its ends and type', () => {
+      const relationship = {
+        id: 'relationship-1',
+        description: 'Bob moved to Lyon in 2024.',
+        attributes: {
+          'relationship.relation': 'lives_in',
+          'memory.key': `${bob.id}|lives_in|${lyon.id}`,
+        },
+      };
+      const deleted = {
+        ...relationship,
+        id: 'relationship-2',
+        governance: { lifecycle: { status: 'deleted' } },
+      };
+
+      expect(prompt({ relationships: [relationship, deleted] })).toContain(
+        `EXISTING RELATIONSHIPS (one per line, none when empty):\n{"from": "${bob.id}", "relation": "lives_in", "to": "${lyon.id}", "description": "Bob moved to Lyon in 2024."}\n`
+      );
+    });
+
+    it('asks only for relationships between two items', () => {
+      const relate = findStep(relationshipsStep().step.steps ?? [], 'relate');
+      const { schema } = relate.with as {
+        schema: {
+          properties: {
+            relationships: { items: { properties: Record<string, unknown>; required: string[] } };
+          };
+          required: string[];
+        };
+      };
+
+      expect(schema.required).toEqual(['relationships']);
+      expect(Object.keys(schema.properties.relationships.items.properties)).toEqual([
+        'from',
+        'relation',
+        'to',
+        'description',
+        'delete',
+      ]);
+      expect(schema.properties.relationships.items.required).toEqual(['from', 'relation', 'to']);
+    });
+
+    it('keeps the run going when linking fails, since the facts and entities are already written', () => {
+      const steps = relationshipsStep().step.steps ?? [];
+
+      for (const name of ['read_relationships', 'relate', 'apply_relationships']) {
+        expect(findStep(steps, name)).toEqual(
+          expect.objectContaining({ 'on-failure': expect.objectContaining({ continue: true }) })
+        );
+      }
+    });
+
+    it('applies the relationships with what the batch wrote, and totals them', () => {
+      const steps = relationshipsStep().step.steps ?? [];
+      const tally = findStep(steps, 'tally_relationships');
+      const earlier = { id: 'fact-1', change: 'created' };
+      const later = { id: 'relationship-1', change: 'created' };
+      const tallied = (output?: Record<string, unknown>) => {
+        const scope = {
+          variables: {
+            relationships_created: 1,
+            relationships_updated: 0,
+            relationships_deleted: 0,
+            relationships_rejected: 2,
+            would_write: [earlier],
+          },
+          steps: { apply_relationships: output ? { output } : {} },
+        };
+        return Object.fromEntries(
+          Object.entries(tally.with ?? {}).map(([key, value]) => [key, evaluate(value, scope)])
+        );
+      };
+
+      expect(findStep(steps, 'apply_relationships').with).toEqual(
+        expect.objectContaining({
+          changes: '${{ steps.relate.output.content }}',
+          documents: '${{ steps.apply_changes.output.documents }}',
+          dry_run: '${{ inputs.dry_run == true }}',
+        })
+      );
+      expect(
+        tallied({
+          created: 2,
+          updated: 1,
+          deleted: 1,
+          rejected: [{ item: 'x', reason: 'y' }],
+          would_write: [later],
+        })
+      ).toEqual({
+        relationships_created: 3,
+        relationships_updated: 1,
+        relationships_deleted: 1,
+        relationships_rejected: 3,
+        would_write: [earlier, later],
+      });
+      expect(tallied()).toEqual({
+        relationships_created: 1,
+        relationships_updated: 0,
+        relationships_deleted: 0,
+        relationships_rejected: 2,
+        would_write: [earlier],
+      });
+    });
+
+    it('outputs the relationship counts', () => {
+      const [dryRun] = findStep(render().steps, 'dry_run_result').steps ?? [];
+      const output = findStep(render().steps, 'output_result');
+
+      for (const step of [dryRun, output]) {
+        expect(Object.keys(step.with ?? {})).toEqual(
+          expect.arrayContaining([
+            'relationships_created',
+            'relationships_updated',
+            'relationships_deleted',
+            'relationships_rejected',
+          ])
+        );
+      }
+    });
   });
 
   it('checks whether to dream before reading memories or calling a model', () => {

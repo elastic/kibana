@@ -70,6 +70,24 @@
           ]
         }
       ]
-    }
+    },
+    "relationships": [
+      {
+        "type": "follows",
+        "description": "A contract or policy follows a regulation."
+      },
+      {
+        "type": "interprets",
+        "description": "A ruling interprets a regulation."
+      },
+      {
+        "type": "party_to",
+        "description": "An organization is a party to a contract."
+      },
+      {
+        "type": "supersedes",
+        "description": "A policy or contract replaces an earlier one."
+      }
+    ]
   }
 }

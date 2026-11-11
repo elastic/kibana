@@ -54,6 +54,24 @@
           ]
         }
       ]
-    }
+    },
+    "relationships": [
+      {
+        "type": "knows",
+        "description": "The user knows a person, and how, such as their manager or sister."
+      },
+      {
+        "type": "lives_in",
+        "description": "A person lives in a place."
+      },
+      {
+        "type": "member_of",
+        "description": "A person works for or belongs to an organization."
+      },
+      {
+        "type": "plans_to_visit",
+        "description": "A person plans to visit a place."
+      }
+    ]
   }
 }

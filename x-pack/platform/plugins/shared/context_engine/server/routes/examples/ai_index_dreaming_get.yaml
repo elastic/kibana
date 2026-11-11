@@ -26,6 +26,11 @@ responses:
                         - fixed_in
                     - type: platform
                       description: A browser, operating system or device, with its version.
+                relationships:
+                  - type: affects
+                    description: An issue happens on a platform.
+                  - type: works_around
+                    description: A workaround gets around an issue.
           getAiIndexDreamingNeverConfiguredExample:
             summary: "Dreaming never configured"
             description: "An AI Index that never configured dreaming"

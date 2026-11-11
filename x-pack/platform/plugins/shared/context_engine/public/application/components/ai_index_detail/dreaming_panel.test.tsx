@@ -117,6 +117,7 @@ describe('DreamingPanel', () => {
           connector_id: 'my-connector',
           facts: [{ type: 'solution' }],
           entities: null,
+          relationships: [],
         },
       })
     );
