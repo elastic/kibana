@@ -59,7 +59,7 @@ describe('createRecorderProposals', () => {
     expect(list).not.toHaveBeenCalled();
   });
 
-  it('proposes as nightshift, in the todo category the analyst marks applied', async () => {
+  it('proposes as nightshift, in the todo category the analyst marks applied, waiving the discard reason', async () => {
     const { adapter, createProposal } = setup();
 
     await adapter.propose({
@@ -78,6 +78,7 @@ describe('createRecorderProposals', () => {
         impact: 'low',
         origin: 'nightshift',
         category: 'todo',
+        skipDiscardReason: true,
       },
     });
   });

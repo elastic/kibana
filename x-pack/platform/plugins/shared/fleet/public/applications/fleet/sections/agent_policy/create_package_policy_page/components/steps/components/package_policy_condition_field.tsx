@@ -8,26 +8,68 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFieldText, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiIconTip, EuiLink, EuiText } from '@elastic/eui';
 
 import { useStartServices } from '../../../../../../hooks';
 
-export const PackagePolicyConditionField: React.FunctionComponent<{
+export interface PackagePolicyConditionFieldProps {
   value: string;
   onChange: (value: string | null) => void;
   isInvalid: boolean;
   errors: string[] | null;
+  compressed?: boolean;
+  /**
+   * Show the help text in an info icon tooltip next to the label instead of under the field. The
+   * learn more link stays under the field, where it can be clicked.
+   */
+  helpTextAsTooltip?: boolean;
   dataTestSubj?: string;
-}> = ({ value, onChange, isInvalid, errors, dataTestSubj = 'packagePolicyConditionInput' }) => {
+}
+
+export const PackagePolicyConditionField: React.FunctionComponent<
+  PackagePolicyConditionFieldProps
+> = ({
+  value,
+  onChange,
+  isInvalid,
+  errors,
+  compressed = false,
+  helpTextAsTooltip = false,
+  dataTestSubj = 'packagePolicyConditionInput',
+}) => {
   const { docLinks } = useStartServices();
+  const learnMoreLink = (
+    <EuiLink href={docLinks.links.fleet.elasticAgentInputConditions} target="_blank">
+      {i18n.translate('xpack.fleet.packagePolicy.conditionField.learnMoreLink', {
+        defaultMessage: 'Learn more',
+      })}
+    </EuiLink>
+  );
+
   return (
     <EuiFormRow
       fullWidth
+      display={compressed ? 'rowCompressed' : undefined}
       label={
-        <FormattedMessage
-          id="xpack.fleet.packagePolicy.conditionField.label"
-          defaultMessage="Condition"
-        />
+        <>
+          <FormattedMessage
+            id="xpack.fleet.packagePolicy.conditionField.label"
+            defaultMessage="Condition"
+          />
+          {helpTextAsTooltip && (
+            <>
+              {' '}
+              <EuiIconTip
+                type="info"
+                color="subdued"
+                content={i18n.translate('xpack.fleet.packagePolicy.conditionField.tooltip', {
+                  defaultMessage: 'Only collect data when this condition is met.',
+                })}
+                anchorProps={{ 'data-test-subj': `${dataTestSubj}-helpTooltip` }}
+              />
+            </>
+          )}
+        </>
       }
       labelAppend={
         <EuiText size="xs" color="subdued">
@@ -38,25 +80,22 @@ export const PackagePolicyConditionField: React.FunctionComponent<{
         </EuiText>
       }
       helpText={
-        <FormattedMessage
-          id="xpack.fleet.packagePolicy.conditionField.helpText"
-          defaultMessage="Only collect data when this condition is met. {learnMore}."
-          values={{
-            learnMore: (
-              <EuiLink href={docLinks.links.fleet.elasticAgentInputConditions} target="_blank">
-                {i18n.translate('xpack.fleet.packagePolicy.conditionField.learnMoreLink', {
-                  defaultMessage: 'Learn more',
-                })}
-              </EuiLink>
-            ),
-          }}
-        />
+        helpTextAsTooltip ? (
+          learnMoreLink
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.packagePolicy.conditionField.helpText"
+            defaultMessage="Only collect data when this condition is met. {learnMore}."
+            values={{ learnMore: learnMoreLink }}
+          />
+        )
       }
       isInvalid={isInvalid}
       error={errors ?? []}
     >
       <EuiFieldText
         fullWidth
+        compressed={compressed}
         isInvalid={isInvalid}
         value={value}
         onChange={(e) => onChange(e.target.value || null)}

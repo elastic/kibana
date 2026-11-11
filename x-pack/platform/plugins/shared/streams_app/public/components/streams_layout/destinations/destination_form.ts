@@ -12,6 +12,7 @@ import {
   DESTINATION_SIGNALS,
   getDestinationCreateSpec,
   getFormDestinationSignals,
+  localElasticsearchCredentialName,
   PREFIXED_DESTINATION_SIGNALS,
   SIGNAL_INDEX_FIELDS,
   validateAutoWritePattern,
@@ -292,11 +293,17 @@ export const getDestinationCreationFormErrors = ({
     return { destinationName, ...getRemoteElasticsearchErrors(remoteElasticsearch) };
   }
   const errors: DestinationCreationFormErrors = {
-    destinationName: getDestinationNameValidationError({
-      destinationName: formData.destinationName,
-      unitDefinition,
-      signals: getFormDestinationSignals(formData.elasticsearch),
-    }),
+    destinationName:
+      getDestinationNameValidationError({
+        destinationName: formData.destinationName,
+        unitDefinition,
+        signals: getFormDestinationSignals(formData.elasticsearch),
+      }) ??
+      getCredentialNameError({
+        destinationName: formData.destinationName,
+        unitDefinition,
+        getCredentialNames: (id) => [localElasticsearchCredentialName(id)],
+      }),
   };
   return { ...errors, ...getLocalElasticsearchErrors(formData.elasticsearch) };
 };

@@ -25,7 +25,7 @@
     "@kbn/management-settings-ids",
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
-    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-hooks",
     "@kbn/react-kibana-context-render",
     "@kbn/licensing-plugin",
     "@kbn/management-settings-components-field-row",
