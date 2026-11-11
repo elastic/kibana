@@ -89,9 +89,7 @@ export class AlertActionTelemetrySubscriber {
 
     for (const eventType of REPORTED_ALERT_ACTION_EVENT_TYPES) {
       this.#subscriptions.push(
-        this.bus.subscribe(eventType, (event, context) =>
-          this.#reportAlertAction(event, context)
-        )
+        this.bus.subscribe(eventType, (event, context) => this.#reportAlertAction(event, context))
       );
     }
   }
