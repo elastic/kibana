@@ -245,8 +245,7 @@ describe('processJUnitReports flaky suite issues', () => {
     await processJUnitReports(['report.xml'], params);
 
     expect(updateSuiteIssue).toHaveBeenCalledTimes(1);
-    expect(updateSuiteIssue.mock.calls[0][1]).toBe(suiteIssue);
-    expect(updateSuiteIssue.mock.calls[0][5]).toBe(failures[0]);
+    expect(updateSuiteIssue.mock.calls[0][0]).toBe(suiteIssue);
     expect(updateFailureIssue).not.toHaveBeenCalled();
     expect(failures[0].githubIssue).toBe('https://github.com/issues/7');
     expect(failures[0].failureCount).toBe(5);
@@ -274,7 +273,7 @@ describe('processJUnitReports flaky suite issues', () => {
     expect(failures[0].failureCount).toBe(4);
     // nothing was written, so the second failure of the suite counts from the same body
     expect(suiteIssue.github.body).toBe('suite body');
-    expect(updateSuiteIssue.mock.calls[1][1].github.body).toBe('suite body');
+    expect(updateSuiteIssue.mock.calls[1][0].github.body).toBe('suite body');
   });
 });
 

@@ -8,7 +8,11 @@ Reads the JUnit and Scout reports of a CI job and files or updates one `failed-t
 failing test. Run by `.buildkite/scripts/lifecycle/post_command.sh` after every job. With
 `--report-failing-suites` it also files one `Failing … suite` issue per test file whose tests
 started failing every attempt build after build, by the Scout test events, in `elastic/kibana` or
-the `--failing-suites-repo owner/name` given.
+the `--failing-suites-repo owner/name` given. A suite that already has an issue of its own, flaky
+or failing, gets a comment on it instead, with the builds the tests failed in and the commits
+since they last passed: at most once a day for each pipeline and branch while the break lasts
+(`failing.postedAt` in the issue's metadata), and right away when the issue was closed in the last
+30 days, which reopens it.
 
 `REPORT_FAILED_TESTS_PER_TEST_ISSUES=false` keeps it from opening per-test issues: a failure that
 an issue already tracks, per-test or flaky suite, still bumps it, and one that none tracks is
@@ -30,10 +34,10 @@ Tests without an exact file path get no link.
 
 For every failure the reporter asks ci-stats which `failed-test` issue tracks the test, by name,
 file or Scout test id, and links it from the failure's HTML report, the Buildkite annotation and
-the Slack message. If that issue is a flaky suite issue (see below), the failure is recorded there
-as on a per-test issue: the count goes up, the issue is reopened if needed and a comment names the
-test and the build. The count is kept in the issue's `failed-test` metadata; the daily report's
-body and `flaky-test-suite` metadata are left alone.
+the Slack message. If that issue is a suite issue, flaky or failing (see below), only its count
+goes up, without a comment or a reopen: the daily report posts where the suite is still flaky and
+reopens it, and `--report-failing-suites` posts breaks. The count is kept in the issue's
+`failed-test` metadata; the daily report's body and `flaky-test-suite` metadata are left alone.
 
 ## `node scripts/report_flaky_test_issues`
 

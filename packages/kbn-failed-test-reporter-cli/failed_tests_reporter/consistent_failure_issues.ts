@@ -17,6 +17,7 @@ import {
   type TestSetup,
 } from '@kbn/scout-reporting';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { FLAKY_TEST_SUITE_METADATA_PREFIX } from '../flaky_test_issues/issue_body';
 import { plural } from '../flaky_test_issues/markdown';
 import {
   candidateIssues,
@@ -29,14 +30,18 @@ import {
 import { FAILED_TEST_LABEL, issueLabels } from '../flaky_test_issues/reporter';
 import { getScoutTestId, getTestFilePath, isScoutFailure } from './failure_identity';
 import {
+  failingPostedAt,
   failingSuiteIssueTitle,
+  postedAtKey,
+  renderFailingSuiteComment,
   renderFailingSuiteIssueBody,
   type FailingSuite,
   type FailingTarget,
   type FailingTest,
 } from './failing_suite_issue';
 import type { TestFailure } from './get_failures';
-import type { GithubApi } from './github_api';
+import type { GithubApi, GithubIssue } from './github_api';
+import { updateIssueMetadata } from './issue_metadata';
 import { extractErrorMessage, testLabel } from './report_failure';
 
 /**
@@ -49,6 +54,10 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const LOGGED_BUILDS = 6;
 /** More files breaking at once in one job is a systemic failure, not that many suite breaks. */
 export const MAX_NEW_ISSUES_PER_JOB = 5;
+/** A suite whose issue was closed in these last days gets it reopened rather than a new one. */
+const CLOSED_ISSUES_DAYS = 30;
+/** Time between two posts of a break on an issue, per pipeline and branch: a daily reminder. */
+const POST_INTERVAL_MS = MS_PER_DAY;
 
 /** What frameworks without a Scout target (Jest, FTR, Cypress) record as the target mode. */
 const UNKNOWN_TARGET_MODE = 'unknown';
@@ -80,7 +89,12 @@ export interface SuiteIssueRef {
 export interface ConsistentFailureIssuesSummary {
   /** Issues filed, or that would have been in a dry run. */
   created: SuiteIssueRef[];
-  /** Suites an open issue is already about. */
+  /** Issues already about the suite that were told about the break, reopened if closed. */
+  commented: Array<SuiteIssueRef & { reopened: boolean }>;
+  /**
+   * Suites an issue is already about without a comment: per-test issues, which get their own
+   * failure comments, or a suite issue the break was posted on less than a day ago.
+   */
   tracked: SuiteIssueRef[];
   /** Files of the suites over the cap. */
   skipped: string[];
@@ -187,10 +201,12 @@ const groupIntoSuites = (breaks: readonly Break[]): FailingSuite[] => {
 /** A match that means the issue is about the test or the suite; `file` matches only mention it. */
 const isAbout = ({ match }: MatchedIssue): boolean => match !== 'file';
 
+const isOpen = ({ issue }: MatchedIssue): boolean => issue.state === 'open';
+
 /**
- * The open issue already tracking the suite: one about the suite or its whole file, or, failing
- * that, the per-test issue of one of its tests when every test has one. A single test without an
- * issue gets the suite its issue.
+ * The issue already tracking the suite: one about the suite or its whole file, an open one before
+ * a recently closed one, or, failing that, the open per-test issue of one of its tests when every
+ * test has one. A single test without an issue gets the suite its issue.
  */
 const trackingIssue = (suite: FailingSuite, index: IssueIndex): MatchedIssue | undefined => {
   const matches = findMatchingIssues(suite, candidateIssues(suite, index));
@@ -200,9 +216,27 @@ const trackingIssue = (suite: FailingSuite, index: IssueIndex): MatchedIssue | u
   }
   const perTest = suite.tests.map((test) => {
     const single = { ...suite, tests: [test] };
-    return findMatchingIssues(single, candidateIssues(single, index)).find(isAbout);
+    return findMatchingIssues(single, candidateIssues(single, index)).find(
+      (matched) => isAbout(matched) && isOpen(matched)
+    );
   });
   return perTest.every((issue) => issue !== undefined) ? perTest[0] : undefined;
+};
+
+/**
+ * The open `failed-test` issues and those closed in the last `CLOSED_ISSUES_DAYS`, issues closed as
+ * duplicates left out: they point at another issue instead of tracking the suite.
+ */
+const listFailedTestIssues = async (github: GithubApi, now: Date): Promise<GithubIssue[]> => {
+  const open = await github.listIssues({ state: 'open', labels: [FAILED_TEST_LABEL] });
+  const closed = await github.listIssues({
+    state: 'closed',
+    labels: [FAILED_TEST_LABEL],
+    since: new Date(now.getTime() - CLOSED_ISSUES_DAYS * MS_PER_DAY),
+  });
+  // an issue closed between the two listings is in both; keep the later, closed, version
+  const byNumber = new Map([...open, ...closed].map((issue) => [issue.number, issue]));
+  return [...byNumber.values()].filter(({ state_reason: reason }) => reason !== 'duplicate');
 };
 
 const describeSuite = ({ filePath, framework }: FailingSuite): string =>
@@ -211,16 +245,23 @@ const describeSuite = ({ filePath, framework }: FailingSuite): string =>
 /**
  * Files a `failed-test` issue for every test file of the job whose tests failed every attempt of
  * the latest builds of the pipeline and branch after passing before, by the test events of those
- * builds. A file an open issue is already about gets none, nor do files beyond
- * `MAX_NEW_ISSUES_PER_JOB`, so a job that breaks everything files a few issues, not dozens. The
- * same break is found again by the next builds while it lasts, so a check that could not run
- * does not lose it; the issue it filed then keeps it from being filed twice.
+ * builds. A file an issue is already about gets none: a suite issue, open or recently closed,
+ * gets a comment instead, at most once a day per pipeline and branch, and is reopened; per-test
+ * issues get their own failure comments. Nor do files beyond `MAX_NEW_ISSUES_PER_JOB` get one, so
+ * a job that breaks everything files a few issues, not dozens. The same break is found again by
+ * the next builds while it lasts, so a check that could not run does not lose it, and the issue
+ * it filed then keeps it from being filed twice.
  */
 export const reportConsistentFailureIssues = async (
   options: ConsistentFailureIssuesOptions
 ): Promise<ConsistentFailureIssuesSummary> => {
   const { log, failures, es, github, repo, build, dryRun, now = new Date() } = options;
-  const summary: ConsistentFailureIssuesSummary = { created: [], tracked: [], skipped: [] };
+  const summary: ConsistentFailureIssuesSummary = {
+    created: [],
+    commented: [],
+    tracked: [],
+    skipped: [],
+  };
 
   const candidates = candidatesOf(failures);
   if (candidates.length === 0) {
@@ -263,10 +304,51 @@ export const reportConsistentFailureIssues = async (
     return summary;
   }
 
-  const issues = await github.listIssues({ state: 'open', labels: [FAILED_TEST_LABEL] });
+  const issues = await listFailedTestIssues(github, now);
   const index = indexIssues(issues.map(describeIssue));
+  const key = postedAtKey(build);
+
+  /**
+   * Posts the break on the issue already about the suite, at most once per `POST_INTERVAL_MS` for
+   * this pipeline and branch while it is open, and reopens it, with the post, if closed. The time
+   * of the post goes in the issue's metadata first, read from GitHub as it is now: other jobs of
+   * the build find the same break.
+   */
+  const postBreak = async (suite: FailingSuite, issue: GithubIssue) => {
+    const ref = { filePath: suite.filePath, url: issue.html_url };
+    const body = (await github.getIssue(issue.number))?.body ?? issue.body;
+    const postedAt = failingPostedAt(body);
+    const last = postedAt[key];
+    const reopen = issue.state === 'closed';
+    if (!reopen && last && now.getTime() - new Date(last).getTime() < POST_INTERVAL_MS) {
+      log.info(
+        `Skip, the break on ${key} was posted on #${issue.number} at ${last}: ${describeSuite(
+          suite
+        )}`
+      );
+      summary.tracked.push(ref);
+      return;
+    }
+    const newBody = updateIssueMetadata(
+      body,
+      { 'failing.postedAt': { ...postedAt, [key]: now.toISOString() } },
+      FLAKY_TEST_SUITE_METADATA_PREFIX
+    );
+    await github.editIssue(issue.number, { body: newBody, ...(reopen ? { state: 'open' } : {}) });
+    await github.addIssueComment(issue.number, renderFailingSuiteComment(suite, build));
+    log.info(
+      `${dryRun ? 'Would post' : 'Posted'} the break on #${issue.number}` +
+        `${reopen ? ', reopened' : ''}: ${describeSuite(suite)}`
+    );
+    summary.commented.push({ ...ref, reopened: reopen });
+  };
+
   for (const suite of groupIntoSuites(breaks)) {
     const tracked = trackingIssue(suite, index);
+    if (tracked?.match === 'suite') {
+      await postBreak(suite, tracked.issue);
+      continue;
+    }
     if (tracked) {
       const { issue, match } = tracked;
       log.info(`Skip, #${issue.number} (${match}) is already about it: ${describeSuite(suite)}`);
@@ -281,11 +363,15 @@ export const reportConsistentFailureIssues = async (
       summary.skipped.push(suite.filePath);
       continue;
     }
-    const related = findMatchingIssues(suite, candidateIssues(suite, index)).map(
-      ({ issue }) => issue.number
-    );
+    const related = findMatchingIssues(suite, candidateIssues(suite, index))
+      .filter(isOpen)
+      .map(({ issue }) => issue.number);
     const title = failingSuiteIssueTitle(suite);
-    const body = renderFailingSuiteIssueBody(suite, { ...build, relatedIssues: related });
+    const body = renderFailingSuiteIssueBody(suite, {
+      ...build,
+      relatedIssues: related,
+      postedAt: now,
+    });
     const created = await github.createIssue(title, body, issueLabels(suite, repo));
     log.info(
       `${dryRun ? 'Would create' : 'Created'} ${created.html_url} "${title}" for ` +

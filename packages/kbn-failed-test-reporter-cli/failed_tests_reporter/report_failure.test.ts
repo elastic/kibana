@@ -10,7 +10,6 @@
 import dedent from 'dedent';
 
 import type { FlakySuiteIssue } from './existing_failed_test_issues';
-import type { TestFailure } from './get_failures';
 import {
   createFailureIssue,
   extractErrorMessage,
@@ -1179,45 +1178,25 @@ describe('updateSuiteIssue()', () => {
       body,
     },
   });
-  const ftrFailure: TestFailure = {
-    classname: `Chrome X-Pack UI Functional Tests.${FTR_FILE.replace(/\./g, '·')}`,
-    name: 'maps app sample data ecommerce should load the layers',
-    testType: 'ftr',
-    time: '1',
-    failure: 'Error: expected 3 layers, got 2',
-    likelyIrrelevant: false,
-  };
 
-  it('counts the failure in its own metadata, reopens the issue and names the test in the comment', async () => {
+  it('counts the failure in its own metadata, without reopening the issue or commenting', async () => {
     const api = createGithubApi();
 
     const { newCount } = await updateSuiteIssue(
-      'https://build-url',
       suiteIssue(`Flaky suite\n\n<!-- kibanaCiData = ${SUITE_METADATA} -->`),
-      api,
-      'main',
-      'kibana-on-merge',
-      ftrFailure
+      api
     );
 
     expect(newCount).toBe(1);
-    const [number, body] = api.editIssueBodyAndEnsureOpen.mock.calls[0];
-    expect(number).toBe(9000);
     // the daily report's metadata is untouched, the count sits next to it
-    expect(body).toBe(
-      `Flaky suite\n\n<!-- kibanaCiData = ${SUITE_METADATA.slice(
+    expect(api.editIssue).toHaveBeenCalledWith(9000, {
+      body: `Flaky suite\n\n<!-- kibanaCiData = ${SUITE_METADATA.slice(
         0,
         -1
-      )},"failed-test":{"test.failCount":1}} -->`
-    );
-    expect(body).not.toContain('Test history:');
-    const [, comment] = api.addIssueComment.mock.calls[0];
-    expect(comment.split('\n')[0]).toBe(
-      'New failure of `maps app sample data ecommerce should load the layers`: [kibana-on-merge - main](https://build-url)'
-    );
-    // the per-test history link belongs in the comment, not in the suite's body
-    expect(comment).toContain('Test history: [passes and failures over time](');
-    expect(comment).toContain('New error message:\n```\nError: expected 3 layers, got 2\n```');
+      )},"failed-test":{"test.failCount":1}} -->`,
+    });
+    expect(api.editIssueBodyAndEnsureOpen).not.toHaveBeenCalled();
+    expect(api.addIssueComment).not.toHaveBeenCalled();
   });
 
   it('counts on the body GitHub has now rather than on the ci-stats copy', async () => {
@@ -1228,50 +1207,11 @@ describe('updateSuiteIssue()', () => {
     });
 
     const { newCount, newBody } = await updateSuiteIssue(
-      'https://build-url',
       suiteIssue('Flaky suite\n\n<!-- kibanaCiData = {"failed-test":{"test.failCount":2}} -->'),
-      api,
-      'main',
-      'kibana-on-merge',
-      ftrFailure
+      api
     );
 
     expect(newCount).toBe(8);
     expect(newBody).toContain('"test.failCount":8');
-  });
-
-  it('names a Scout test by its describe block and title, with the target', async () => {
-    const api = createGithubApi();
-
-    await updateSuiteIssue(
-      'https://build-url',
-      suiteIssue('Flaky suite'),
-      api,
-      '8.19',
-      'kibana-on-merge',
-      {
-        classname: 'Attachments',
-        name: 'uploads a file',
-        failure: 'test failure',
-        errorMessage: 'Error: upload timed out',
-        time: '2018-01-01T01:00:00Z',
-        likelyIrrelevant: false,
-        id: 'test-id-123',
-        target: 'stateful',
-        location: 'x-pack/test/scout/ui/tests/attachments.spec.ts',
-        duration: 5000,
-        owners: 'team:test',
-        commandLine: 'node scripts/playwright test --config=config.ts',
-      }
-    );
-
-    expect(api.addIssueComment.mock.calls[0][1]).toMatchInlineSnapshot(`
-      "New failure of \`Attachments uploads a file\` for \\"stateful\\" target: [kibana-on-merge - 8.19](https://build-url)
-
-      New error message:
-      \`\`\`
-      Error: upload timed out
-      \`\`\`"
-    `);
   });
 });
