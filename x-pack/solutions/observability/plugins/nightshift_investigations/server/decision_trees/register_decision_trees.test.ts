@@ -11,6 +11,7 @@ import { DECISION_TREE_PROMPT_TOOLS } from '../tools/decision_tree/prompt_tools'
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { NO_CAUSAL_VERDICT } from './causal_check';
 import { createLearningStore } from './learning_store';
+import { parseRunMarker } from './accessed_trees';
 import { prepareReinforcementTurn } from './register_decision_trees';
 import { createDecisionTreeStore, type DecisionTreeSummary } from './store';
 
@@ -120,6 +121,18 @@ describe('prepareReinforcementTurn', () => {
   });
 
   describe('a follow-up', () => {
+    it("carries the investigator's ids for the hydrate hook", async () => {
+      const turn = await prepare({
+        roundId: 'round-1',
+        earlierAccessedTreeIds: ['symptom:checkout-latency'],
+      });
+
+      expect(turn.skipped === false && parseRunMarker(turn.message)).toEqual({
+        conversationId: 'inv-1',
+        roundId: 'round-1',
+      });
+    });
+
     it("edits only the investigation's own trees", async () => {
       const turn = await prepare({
         earlierAccessedTreeIds: ['symptom:checkout-latency', 'symptom:archived-tree'],
