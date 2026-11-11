@@ -954,8 +954,13 @@ export const registerAiIndexRoutes = ({
               return { output: result };
             },
           });
-          auditLogger.log(kiAuditEvent({ action: AiIndexAuditAction.KI_DELETE, aiIndexId, kiId }));
-          const body: DeleteKiResponse = output;
+          const { id, deletedRelationshipIds } = output;
+          for (const deletedKiId of [kiId, ...deletedRelationshipIds]) {
+            auditLogger.log(
+              kiAuditEvent({ action: AiIndexAuditAction.KI_DELETE, aiIndexId, kiId: deletedKiId })
+            );
+          }
+          const body: DeleteKiResponse = { id };
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(

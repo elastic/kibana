@@ -126,7 +126,7 @@ export interface SoftDeleteKiOptions {
 export const softDeleteKi = async (
   esClient: ElasticsearchClient,
   options: SoftDeleteKiOptions
-): Promise<{ id: string }> => {
+): Promise<{ id: string; deletedRelationshipIds: string[] }> => {
   const { aiIndexId, dest, kiId, writer, backingIndex, refresh = true, abortSignal } = options;
 
   const revision = await getKiRevision({
@@ -161,6 +161,7 @@ export const softDeleteKi = async (
   }
 
   // Runs for an already-deleted KI too, so a retry finishes a cleanup that failed partway.
+  const deletedRelationshipIds: string[] = [];
   const { type } = revision.source;
   if (typeof type === 'string' && isDreamedKiType(type)) {
     for (const relationshipId of await findLinkingRelationshipIds({
@@ -169,22 +170,25 @@ export const softDeleteKi = async (
       kiId,
       abortSignal,
     })) {
-      await softDeleteKi(esClient, {
-        aiIndexId,
-        dest,
-        kiId: relationshipId,
-        writer,
-        refresh,
-        abortSignal,
-      }).catch((error) => {
+      try {
+        await softDeleteKi(esClient, {
+          aiIndexId,
+          dest,
+          kiId: relationshipId,
+          writer,
+          refresh,
+          abortSignal,
+        });
+        deletedRelationshipIds.push(relationshipId);
+      } catch (error) {
         if (!(error instanceof KiNotFoundError)) {
           throw error;
         }
-      });
+      }
     }
   }
 
-  return { id: kiId };
+  return { id: kiId, deletedRelationshipIds };
 };
 
 export interface RestoreKiOptions {

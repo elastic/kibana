@@ -122,10 +122,14 @@ export const resolveRelationships = (
         reject('is listed twice');
       }
       const current = existing.get(id);
+      if (relationship.delete && !current) {
+        reject('only an existing relationship can be deleted');
+      }
+      const sourceMemoryIds = sourcesOf(from, to);
+      if (sourceMemoryIds.length === 0) {
+        reject('neither end is based on these memories');
+      }
       if (relationship.delete) {
-        if (!current) {
-          reject('only an existing relationship can be deleted');
-        }
         listed.add(id);
         operations.push({ op: 'delete', id });
         continue;
@@ -133,10 +137,6 @@ export const resolveRelationships = (
       const description = relationship.description ?? current?.description;
       if (!description) {
         reject('a new relationship needs a description');
-      }
-      const sourceMemoryIds = sourcesOf(from, to);
-      if (sourceMemoryIds.length === 0) {
-        reject('neither end is based on these memories');
       }
       for (const end of [from, to]) {
         if (

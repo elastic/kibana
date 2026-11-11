@@ -249,7 +249,7 @@ describe('applyOperations', () => {
     stored.set('fact-2', { id: 'fact-2', type: 'fact.note', title: 'Older' });
     jest
       .mocked(softDeleteKi)
-      .mockResolvedValueOnce({ id: 'fact-1' })
+      .mockResolvedValueOnce({ id: 'fact-1', deletedRelationshipIds: [] })
       .mockRejectedValueOnce(new KiNotFoundError('a', 'fact-2'));
 
     const counts = await applyOperations(context(), [
@@ -421,7 +421,7 @@ describe('applyOperations', () => {
       references: [{ uri: 'ki://m-old', relation: 'derived_from' }],
       permissions: teamB,
     });
-    jest.mocked(softDeleteKi).mockResolvedValue({ id: 'fact-a' });
+    jest.mocked(softDeleteKi).mockResolvedValue({ id: 'fact-a', deletedRelationshipIds: [] });
     const memoryPermissions = new Map([['m-a', teamA]]);
     const operations: DreamingOperation[] = [
       {
@@ -692,7 +692,7 @@ describe('applyOperations', () => {
         if (!stored.has(kiId)) {
           throw new KiNotFoundError(aiIndexId, kiId);
         }
-        return { id: kiId };
+        return { id: kiId, deletedRelationshipIds: [] };
       });
     });
 

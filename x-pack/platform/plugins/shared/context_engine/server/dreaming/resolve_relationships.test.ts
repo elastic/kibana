@@ -247,6 +247,15 @@ describe('resolveRelationships', () => {
       'neither end is based on these memories',
     ],
     [
+      'deleting a relationship whose ends are not based on these memories',
+      { ...manages, delete: true },
+      {
+        memoryPermissions: new Map([['m-9', undefined]]),
+        existing: new Map([[existingManages.id, existingManages]]),
+      },
+      'neither end is based on these memories',
+    ],
+    [
       'an end with other permissions than its memories',
       { ...manages, description: 'D' },
       {
