@@ -6,7 +6,10 @@
  */
 
 import { decodeOrThrowZod } from '../runtime_types';
-import { ConfigurationPartialAttributesSchema } from './configure';
+import {
+  ConfigurationPartialAttributesSchema,
+  ConfigurationPartialWriteAttributesSchema,
+} from './configure';
 
 describe('Configuration', () => {
   describe('ConfigurationPartialAttributesSchema', () => {
@@ -23,6 +26,29 @@ describe('Configuration', () => {
 
     it('should not throw even with an empty object', () => {
       expect(() => decodeOrThrowZod(ConfigurationPartialAttributesSchema)({})).not.toThrow();
+    });
+  });
+
+  describe('ConfigurationPartialWriteAttributesSchema', () => {
+    it('keeps a built-in override entry without a label', () => {
+      const observableTypes = [
+        {
+          key: 'observable-type-agent-id',
+          paths: [{ path: 'agent.id', enabled: false, excludedValues: ['static-id'] }],
+        },
+        {
+          key: 'employee-id',
+          label: 'Employee ID',
+          valuePattern: '^E\\d{6}$',
+          paths: [{ path: 'user.employee_id', enabled: true }],
+        },
+      ];
+
+      expect(
+        decodeOrThrowZod(ConfigurationPartialWriteAttributesSchema)({ observableTypes })
+      ).toStrictEqual({
+        observableTypes,
+      });
     });
   });
 });

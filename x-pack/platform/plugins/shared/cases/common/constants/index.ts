@@ -6,6 +6,7 @@
  */
 
 import type { CasesFeaturesAllRequired } from '../ui/types';
+import { OBSERVABLE_TYPES_BUILTIN } from './observables';
 
 export * from './owners';
 export * from './files';
@@ -507,6 +508,20 @@ export const MIN_BULK_DELETE_OBSERVABLE_IDS = 1;
 export const MAX_OBSERVABLE_TYPE_LABEL_LENGTH = 50;
 
 export const MAX_CUSTOM_OBSERVABLE_TYPES = 10;
+
+/** Custom types plus one override entry for each built-in type. */
+export const MAX_OBSERVABLE_TYPE_ENTRIES =
+  MAX_CUSTOM_OBSERVABLE_TYPES + OBSERVABLE_TYPES_BUILTIN.length;
+
+export const MAX_OBSERVABLE_TYPE_PATHS = 50;
+
+export const MAX_OBSERVABLE_TYPE_PATH_LENGTH = 256;
+
+export const MAX_OBSERVABLE_TYPE_VALUE_PATTERN_LENGTH = 256;
+
+export const MAX_OBSERVABLE_TYPE_EXCLUDED_VALUES = 50;
+
+export const MAX_OBSERVABLE_TYPE_EXCLUDED_VALUE_LENGTH = 256;
 
 /**
  * EBT events

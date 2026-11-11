@@ -11,6 +11,7 @@ import { CustomFieldTypes } from '../custom_field/v1';
 import {
   ConfigurationAttributesSchema,
   ConfigurationSchema,
+  ObservableTypesConfigurationSchema,
   CustomFieldConfigurationWithoutTypeSchema,
   TemplateConfigurationSchema,
   TextCustomFieldConfigurationSchema,
@@ -388,6 +389,38 @@ describe('configure', () => {
       });
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual({ ...defaultRequest, caseFields: {} });
+    });
+  });
+
+  describe('ObservableTypesConfigurationSchema', () => {
+    it('accepts a custom type with fields, excluded values, and a value pattern', () => {
+      const observableTypes = [
+        {
+          key: 'employee-id',
+          label: 'Employee ID',
+          valuePattern: '^E\\d{6}$',
+          paths: [{ path: 'user.employee_id', enabled: true, excludedValues: ['E000000'] }],
+        },
+      ];
+
+      const result = ObservableTypesConfigurationSchema.safeParse(observableTypes);
+      expect(result.success).toBe(true);
+      expect(result.data).toStrictEqual(observableTypes);
+    });
+
+    it('accepts a type without fields', () => {
+      expect(
+        ObservableTypesConfigurationSchema.safeParse([{ key: 'ticket-ref', label: 'Ticket ref' }])
+          .success
+      ).toBe(true);
+    });
+
+    it('rejects a field without the enabled flag', () => {
+      expect(
+        ObservableTypesConfigurationSchema.safeParse([
+          { key: 'employee-id', label: 'Employee ID', paths: [{ path: 'user.employee_id' }] },
+        ]).success
+      ).toBe(false);
     });
   });
 });
