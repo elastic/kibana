@@ -106,10 +106,14 @@ export const createSubAgentExecutor = ({
         mode: AgentExecutionMode.conversation,
         interactive: subAgentInteractivity,
         request,
+        ...(params.background ? backgroundDispatch : {}),
         params: {
           agentId: params.agentId,
           connectorId: params.connectorId,
           parentExecutionId: params.parentExecutionId,
+          ...(params.background
+            ? { parentTriggerMode: params.background.parentTriggerMode ?? ChatTriggerMode.Always }
+            : {}),
           conversationId: params.conversationId,
           autoCreateConversationWithId: false,
           nextInput: { message: params.prompt },

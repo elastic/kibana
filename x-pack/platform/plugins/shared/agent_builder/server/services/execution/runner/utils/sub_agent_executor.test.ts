@@ -228,7 +228,15 @@ describe('createSubAgentExecutor and background sub-agents', () => {
       subagentName: 'child',
       background: {},
     });
+    await executor.sendToSubAgent({
+      agentId: 'child',
+      prompt: 'and then',
+      parentExecutionId: 'parent-execution-id',
+      conversationId: 'conversation-id',
+      background: {},
+    });
 
+    expect(executeAgentMock).toHaveBeenCalledTimes(3);
     for (const [params] of executeAgentMock.mock.calls) {
       expect(params.params.parentTriggerMode).toBe(ChatTriggerMode.Always);
       expect(params.useTaskManager).toBe(true);
@@ -241,7 +249,7 @@ describe('createSubAgentExecutor and background sub-agents', () => {
       parentExecutionId: 'parent-execution-id',
       background: { parentTriggerMode: ChatTriggerMode.Never },
     });
-    expect(executeAgentMock.mock.calls[2][0].params.parentTriggerMode).toBe(ChatTriggerMode.Never);
+    expect(executeAgentMock.mock.calls[3][0].params.parentTriggerMode).toBe(ChatTriggerMode.Never);
   });
 
   it('leaves a foreground sub-agent alone', async () => {

@@ -143,6 +143,7 @@ export interface SendToSubAgentParams {
   /** Existing child conversation id */
   conversationId: string;
   prompt: string;
+  background?: SubAgentBackgroundOptions;
   connectorId?: string;
   abortSignal?: AbortSignal;
 }
@@ -183,6 +184,8 @@ export interface ExperimentalFeatures {
   sml: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
+  /** Whether a finished background sub-agent wakes its parent; follows the Agent Builder experimental setting */
+  backgroundWake: boolean;
   /** Whether the bash tool (and the just-bash runtime) is enabled */
   bash: boolean;
   /** Whether the `discover_apis` tool is enabled. */

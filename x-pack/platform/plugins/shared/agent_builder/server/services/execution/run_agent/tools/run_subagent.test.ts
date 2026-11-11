@@ -363,6 +363,49 @@ describe('createSubagentTool', () => {
     });
   });
 
+  it('offers no trigger_mode, and promises no wake, while a finished sub-agent cannot wake the parent', async () => {
+    const events$ = new ReplaySubject<ChatEvent>();
+    const executeSubAgent = jest.fn().mockResolvedValue({
+      executionId: 'bg-exec-id',
+      events$: events$.asObservable(),
+    });
+    const tool = createSubagentTool({
+      ownerAgentId: 'test-agent',
+      allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
+      executionId: 'parent-exec-id',
+      subAgentExecutor: {
+        executeSubAgent,
+        createSubAgent: jest.fn(),
+        sendToSubAgent: jest.fn(),
+        getExecution: jest.fn(),
+      },
+      backgroundExecutionService: {
+        registerExecution: jest.fn(),
+        getState: jest.fn(),
+        hasPending: jest.fn(),
+        checkForCompletions: jest.fn(),
+      } as any,
+    });
+
+    expect(tool.schema.shape).not.toHaveProperty('trigger_mode');
+
+    const { context } = createMockContext();
+    const result = await callHandler(
+      tool,
+      { description: 'background task', prompt: 'Do it', run_in_background: true },
+      context
+    );
+
+    expect(result.results[0].data).toEqual({
+      agent_execution_id: 'bg-exec-id',
+      mode: 'background',
+      status: 'queued',
+    });
+    expect(executeSubAgent).toHaveBeenCalledWith(expect.objectContaining({ background: {} }));
+
+    events$.complete();
+  });
+
   it('returns execution_id immediately when run_in_background is true', async () => {
     const events$ = new ReplaySubject<ChatEvent>();
     const registerExecution = jest.fn();
@@ -372,6 +415,7 @@ describe('createSubagentTool', () => {
     });
 
     const tool = createSubagentTool({
+      backgroundWakeEnabled: true,
       ownerAgentId: 'test-agent',
       allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
       executionId: 'parent-exec-id',
@@ -628,6 +672,7 @@ describe('createSubagentTool', () => {
       });
 
       const tool = createSubagentTool({
+        backgroundWakeEnabled: true,
         ownerAgentId: 'test-agent',
         allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
         executionId: 'parent-exec',

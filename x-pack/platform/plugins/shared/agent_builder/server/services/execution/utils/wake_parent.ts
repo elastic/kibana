@@ -18,6 +18,7 @@ import {
   isBackgroundExecutionAlreadyReportedError,
   isConversationBusyError,
   isConversationNotFoundError,
+  isConversationPausedError,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type {
@@ -32,6 +33,7 @@ import {
   wakeParentTaskId,
   WAKE_PARENT_RETRY_INTERVAL_MS,
 } from '../task/task_definitions';
+import { isTerminalExecutionStatus } from '../run_agent/background_execution_service';
 import { describeFinishedExecution } from '../run_agent/prompts/utils/notices';
 import { isPendingResumeConversation } from './conversations';
 
@@ -122,6 +124,13 @@ export const wakeParent = async ({
   if (!child?.owner || !child.parentExecutionId) {
     return 'skipped';
   }
+  // A finalizer whose last status write failed leaves the child running: reported now, its result
+  // would be lost, so the attempt fails and is retried within the task's attempts.
+  if (!isTerminalExecutionStatus(child.status)) {
+    throw new Error(
+      `Background execution ${childExecutionId} has not finished yet (status ${child.status})`
+    );
+  }
   // The run that spawned the child names the conversation and carries the settings the user
   // chose for it; the service would otherwise fall back to the agent's defaults.
   const parent = await executionClient.get(child.parentExecutionId, { signal });
@@ -187,7 +196,8 @@ export const wakeParent = async ({
     if (isConversationBusyError(error)) {
       return 'busy';
     }
-    if (isBackgroundExecutionAlreadyReportedError(error)) {
+    // Reported already, or paused on a prompt since the read above: the resume reports the child.
+    if (isBackgroundExecutionAlreadyReportedError(error) || isConversationPausedError(error)) {
       return 'skipped';
     }
     throw error;

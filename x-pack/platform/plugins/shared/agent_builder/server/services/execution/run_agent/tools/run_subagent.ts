@@ -47,6 +47,7 @@ import type { ResolvedSubagent } from '../../../agents/utils/resolve_allowed_sub
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
 import { selectSubagentConnectorId } from '../utils/select_subagent_connector_id';
+import { triggerModeSchema } from '../utils/trigger_mode_schema';
 
 export const SubAgentToolName = internalTools.runSubagent;
 
@@ -318,6 +319,7 @@ export const createSubagentTool = ({
   conversationExists,
   transientOnly = false,
   discoveryEnabled = false,
+  backgroundWakeEnabled = false,
 }: {
   /** Id of the agent currently executing (the "owner") */
   ownerAgentId: string;
@@ -341,6 +343,8 @@ export const createSubagentTool = ({
   transientOnly?: boolean;
   /** Whether the `discover_apis` tool is available, so errors can point the model at it. */
   discoveryEnabled?: boolean;
+  /** Whether a finished background sub-agent wakes the parent, which `trigger_mode` steers. */
+  backgroundWakeEnabled?: boolean;
 }) => {
   const orderedAllowed = orderAllowedWithSelfFirst(allowedSubagents);
   const allowedIds = orderedAllowed.map((a) => a.id) as [string, ...string[]];
@@ -352,7 +356,7 @@ export const createSubagentTool = ({
     orderedAllowed.map((subagent) => [subagent.id, subagent.approvals])
   );
 
-  const schema = z.object({
+  const baseSchema = z.object({
     agent_id: z
       .enum(allowedIds)
       .describe(
@@ -378,12 +382,6 @@ export const createSubagentTool = ({
       .describe(
         'Set to true to run this agent in the background. You will be notified when it completes.'
       ),
-    trigger_mode: z
-      .enum([ChatTriggerMode.Always, ChatTriggerMode.Never])
-      .optional()
-      .describe(
-        'Only with run_in_background. Leave unset: the sub-agent wakes you with its result as soon as it finishes, so you can report it. Set "never" only when the user said not to interrupt them; the result then waits in the conversation until the next turn.'
-      ),
     effort: z
       .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
       .optional()
@@ -408,6 +406,11 @@ export const createSubagentTool = ({
       ),
   });
 
+  const schema = backgroundWakeEnabled
+    ? baseSchema.extend({ trigger_mode: triggerModeSchema })
+    : baseSchema;
+  type SubagentToolParams = z.infer<typeof baseSchema> & { trigger_mode?: ChatTriggerMode };
+
   const tool: InternalBuiltinToolDefinition<typeof schema> = {
     id: SubAgentToolName,
     description: buildToolDescription(orderedAllowed, transientOnly),
@@ -425,7 +428,7 @@ export const createSubagentTool = ({
         mode,
         name,
         auto_approved_apis: autoApprovedApisByTarget,
-      },
+      }: SubagentToolParams,
       { events, modelProvider, prompts, interactivity, callContext }
     ) => {
       // Defense-in-depth: reject an off-enum agent_id even though Zod should already have filtered it.
@@ -579,7 +582,9 @@ export const createSubagentTool = ({
                   agent_execution_id: executionId,
                   mode: SubagentExecutionMode.background,
                   status: 'queued',
-                  trigger_mode: trigger_mode ?? ChatTriggerMode.Always,
+                  ...(backgroundWakeEnabled
+                    ? { trigger_mode: trigger_mode ?? ChatTriggerMode.Always }
+                    : {}),
                   ...grantReport,
                 }),
               ],
@@ -637,7 +642,9 @@ export const createSubagentTool = ({
                 agent_execution_id: executionId,
                 mode: SubagentExecutionMode.background,
                 status: 'queued',
-                trigger_mode: trigger_mode ?? ChatTriggerMode.Always,
+                ...(backgroundWakeEnabled
+                  ? { trigger_mode: trigger_mode ?? ChatTriggerMode.Always }
+                  : {}),
                 ...grantReport,
               }),
             ],

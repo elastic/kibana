@@ -34,6 +34,7 @@ import {
   createRequestAbortedError,
   isBadRequestError,
   isConversationBusyError,
+  isConversationPausedError,
   isConversationWriteConflictError,
 } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
@@ -267,7 +268,8 @@ describe('AgentExecutionService', () => {
               executionMode: AgentExecutionMode.conversation,
               agentParams: { conversationId: 'parent-conv', nextInput: { message: 'start' } },
             } as never)
-          : (childRecord as never)
+          : // Read back once the run settled, so the record carries its terminal status.
+            ({ ...childRecord, status: ExecutionStatus.completed } as never)
       );
       conversationClient.get.mockResolvedValue({
         id: 'parent-conv',
@@ -2597,6 +2599,24 @@ describe('AgentExecutionService', () => {
         expect.anything()
       );
       expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
+    });
+
+    it('refuses a background report while the conversation waits on a prompt, deleting its record', async () => {
+      conversationClient.get.mockResolvedValue({
+        ...conversation,
+        rounds: [createRound({ id: 'round-1', status: ConversationRoundStatus.awaitingPrompt })],
+      });
+
+      const error = await converse({ reportsBackgroundExecution: 'child-1' }).catch(
+        (thrown) => thrown
+      );
+
+      expect(isConversationPausedError(error)).toBe(true);
+      expect(conversationClient.update).not.toHaveBeenCalled();
+      expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+      const [{ executionId }] = mockExecutionClient.create.mock.calls[0];
+      expect(mockExecutionClient.delete).toHaveBeenCalledWith(executionId);
       expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
 

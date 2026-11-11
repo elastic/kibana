@@ -32,6 +32,8 @@ import {
   createInternalError,
   isBackgroundExecutionAlreadyReportedError,
   isConversationBusyError,
+  isConversationPausedError,
+  createConversationPausedError,
   isConversationWriteConflictError,
   isExecutionAbortReason,
   isRequestAbortedError,
@@ -318,6 +320,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
       try {
         if (pendingResumeRound) {
+          if (conversationParams.reportsBackgroundExecution) {
+            throw createConversationPausedError({ conversationId: conversation.id });
+          }
           await conversationClient.update(
             { id: conversation.id },
             { source: 'execution', access: 'converse', retryOnConflict: true, activeExecution }
@@ -347,7 +352,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         if (
           isConversationBusyError(err) ||
           isConversationWriteConflictError(err) ||
-          isBackgroundExecutionAlreadyReportedError(err)
+          isBackgroundExecutionAlreadyReportedError(err) ||
+          isConversationPausedError(err)
         ) {
           // Only a refusal is known to have written nothing; any other failure may follow a
           // write that landed, so what the hooks took stays taken.

@@ -27,6 +27,7 @@ export enum AgentBuilderErrorCode {
   conversationBusy = 'conversationBusy',
   conversationAlreadyExists = 'conversationAlreadyExists',
   backgroundExecutionAlreadyReported = 'backgroundExecutionAlreadyReported',
+  conversationPaused = 'conversationPaused',
   pluginNotFound = 'pluginNotFound',
   agentExecutionError = 'agentExecutionError',
   requestAborted = 'requestAborted',
@@ -395,6 +396,32 @@ export const createBackgroundExecutionAlreadyReportedError = ({
     AgentBuilderErrorCode.backgroundExecutionAlreadyReported,
     `Background execution ${executionId} was already reported on conversation ${conversationId}`,
     { ...meta, conversationId, executionId, statusCode: 409 }
+  );
+};
+
+/**
+ * Error thrown when an input that cannot answer a prompt reaches a conversation paused on one.
+ */
+export type AgentBuilderConversationPausedError =
+  AgentBuilderError<AgentBuilderErrorCode.conversationPaused>;
+
+export const isConversationPausedError = (
+  err: unknown
+): err is AgentBuilderConversationPausedError => {
+  return isAgentBuilderError(err) && err.code === AgentBuilderErrorCode.conversationPaused;
+};
+
+export const createConversationPausedError = ({
+  conversationId,
+  meta = {},
+}: {
+  conversationId: string;
+  meta?: Record<string, unknown>;
+}): AgentBuilderConversationPausedError => {
+  return new AgentBuilderError(
+    AgentBuilderErrorCode.conversationPaused,
+    `Conversation ${conversationId} is paused on a prompt`,
+    { ...meta, conversationId, statusCode: 409 }
   );
 };
 

@@ -18,6 +18,7 @@ import {
   createBackgroundExecutionAlreadyReportedError,
   createConversationBusyError,
   createConversationNotFoundError,
+  createConversationPausedError,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution, AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -300,12 +301,26 @@ describe('wakeParent', () => {
     expect(maybeExecuteAgent).toHaveBeenCalledTimes(1);
   });
 
-  it('skips when the write finds the result already reported and propagates any other error', async () => {
+  it('fails the attempt, so it is retried, while the child record has not reached a terminal status', async () => {
+    get.mockImplementation(async (id: string) =>
+      id === 'parent-1' ? parentRun : { ...finishedChild, status: ExecutionStatus.running }
+    );
+
+    await expect(wake()).rejects.toThrow('has not finished yet');
+    expect(maybeExecuteAgent).not.toHaveBeenCalled();
+  });
+
+  it('skips when the write finds the result already reported or the conversation paused since, and propagates any other error', async () => {
     maybeExecuteAgent.mockRejectedValueOnce(
       createBackgroundExecutionAlreadyReportedError({
         conversationId: 'conversation-1',
         executionId: 'child-1',
       })
+    );
+    await expect(wake()).resolves.toBe('skipped');
+
+    maybeExecuteAgent.mockRejectedValueOnce(
+      createConversationPausedError({ conversationId: 'conversation-1' })
     );
     await expect(wake()).resolves.toBe('skipped');
 

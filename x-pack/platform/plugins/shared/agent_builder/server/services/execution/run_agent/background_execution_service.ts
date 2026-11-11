@@ -16,6 +16,9 @@ const TERMINAL_STATUSES = new Set<string>([
   ExecutionStatus.aborted,
 ]);
 
+/** Whether an execution status is one it never leaves. */
+export const isTerminalExecutionStatus = (status: string): boolean => TERMINAL_STATUSES.has(status);
+
 const COMPLETION_CHECK_CONCURRENCY = 5;
 
 export class BackgroundExecutionService {

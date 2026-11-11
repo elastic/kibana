@@ -7,8 +7,9 @@
 
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
+  ChatTriggerMode,
   SELF_AGENT_ID,
   ToolType,
   isRoundCompleteEvent,
@@ -23,21 +24,27 @@ import type { BackgroundExecutionService } from '../background_execution_service
 import type { SubagentTracker } from '../subagent_tracker';
 import { filterReachableSubagents } from '../utils/filter_reachable_subagents';
 import { selectSubagentConnectorId } from '../utils/select_subagent_connector_id';
+import { triggerModeSchema } from '../utils/trigger_mode_schema';
 
-const schema = z.object({
-  to: z.string().describe('Name of the persistent sub-agent to talk to.'),
-  prompt: z.string().describe('The message to send.'),
-  run_in_background: z
-    .boolean()
-    .optional()
-    .describe(
-      'Set to true to fire this message off and continue with other work; you will be notified when the sub-agent finishes replying.'
-    ),
-  effort: z
-    .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
-    .optional()
-    .describe('The effort level of this exchange.'),
-});
+const baseSchema = lazySchema(() =>
+  z.object({
+    to: z.string().describe('Name of the persistent sub-agent to talk to.'),
+    prompt: z.string().describe('The message to send.'),
+    run_in_background: z
+      .boolean()
+      .optional()
+      .describe(
+        'Set to true to fire this message off and continue with other work; you will be notified when the sub-agent finishes replying.'
+      ),
+    effort: z
+      .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
+      .optional()
+      .describe('The effort level of this exchange.'),
+  })
+);
+const fullSchema = lazySchema(() => baseSchema.extend({ trigger_mode: triggerModeSchema }));
+type SendMessageSchema = typeof baseSchema | typeof fullSchema;
+type SendMessageParams = z.infer<typeof baseSchema> & { trigger_mode?: ChatTriggerMode };
 
 const toolDescription = `Send a message to an existing persistent sub-agent.
 
@@ -59,6 +66,7 @@ export const createSendMessageTool = ({
   subagentTracker,
   allowedIds,
   inferenceFeatureIdBySubagent,
+  backgroundWakeEnabled = false,
 }: {
   agentId: string;
   executionId: string;
@@ -68,7 +76,10 @@ export const createSendMessageTool = ({
   subagentTracker?: SubagentTracker;
   allowedIds: Set<string>;
   inferenceFeatureIdBySubagent?: ReadonlyMap<string, string | undefined>;
-}): InternalBuiltinToolDefinition<typeof schema> => {
+  /** Whether a finished background sub-agent wakes the parent, which `trigger_mode` steers. */
+  backgroundWakeEnabled?: boolean;
+}): InternalBuiltinToolDefinition<SendMessageSchema> => {
+  const schema: SendMessageSchema = backgroundWakeEnabled ? fullSchema : baseSchema;
   return {
     id: internalTools.sendMessageToAgent,
     description: toolDescription,
@@ -76,7 +87,7 @@ export const createSendMessageTool = ({
     schema,
     tags: ['subagent'],
     handler: async (
-      { to, prompt, run_in_background = false, effort = 'medium' },
+      { to, prompt, run_in_background = false, trigger_mode, effort = 'medium' }: SendMessageParams,
       { events, modelProvider }
     ) => {
       if (!subagentTracker) {
@@ -133,7 +144,9 @@ export const createSendMessageTool = ({
           conversationId: entry.conversation_id,
           prompt,
           connectorId,
-          ...(run_in_background ? {} : { abortSignal }),
+          ...(run_in_background
+            ? { background: { ...(trigger_mode ? { parentTriggerMode: trigger_mode } : {}) } }
+            : { abortSignal }),
         });
 
         events.reportProgress(`Sub-agent execution ${executionId} started`, {
@@ -147,6 +160,9 @@ export const createSendMessageTool = ({
               createOtherResult({
                 agent_execution_id: executionId,
                 status: 'queued',
+                ...(backgroundWakeEnabled
+                  ? { trigger_mode: trigger_mode ?? ChatTriggerMode.Always }
+                  : {}),
               }),
             ],
           };
