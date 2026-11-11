@@ -11,7 +11,6 @@ import type { EuiFlyoutProps } from '@elastic/eui';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { asyncForEach } from '@kbn/std';
 
-import { isDashboardSection } from '../../../common';
 import { getLastSavedState } from '../../../common/default_dashboard_state';
 import { dashboardClient } from '../../dashboard_client';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
@@ -20,7 +19,7 @@ import {
   getDashboardBackupService,
   initializeDashboardApiServices,
 } from '../../services/dashboard_api_services';
-import { coreServices, embeddableService } from '../../services/kibana_services';
+import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
 import { getDashboardUserActivityService } from '../../services/user_activity_service';
 import { parseChangeSources } from '../../../common/change_sources';
@@ -29,6 +28,7 @@ import { DASHBOARD_DURATION_START_MARK } from '../telemetry/dashboard_duration_s
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';
 import type { DashboardCreationOptions } from '../types';
 import { getUserAccessControlData } from './get_user_access_control_data';
+import { getDuplicate, type PanelsCache } from './get_duplicate';
 import { showWarningToast } from './show_warning_toast';
 import { transformPanels } from './transform_panels';
 
@@ -91,35 +91,11 @@ export async function loadDashboardApi({
   // Prepare incoming embeddables. Done here due to async fetching.
   // --------------------------------------------------------------------------------------
   const incomingEmbeddables = creationOptions?.getIncomingEmbeddables?.();
-  // Existing panels (grid and pinned) by type, gathered on demand for types with an isDuplicate check.
-  const panelsCache = new Map<string, Array<{ type: string; id?: string; state: object }>>();
-  const getPanels = (embeddableType: string) => {
-    const cached = panelsCache.get(embeddableType);
-    if (cached) return cached;
-
-    const panels = [
-      ...(initialState.pinned_panels ?? []),
-      ...(initialState.panels ?? []).flatMap((widget) =>
-        isDashboardSection(widget) ? widget.panels : [widget]
-      ),
-    ]
-      .filter(({ type }) => type === embeddableType)
-      .map(({ type, id, config }) => ({ type, id, state: config }));
-    panelsCache.set(embeddableType, panels);
-    return panels;
-  };
-
+  const panelsCache: PanelsCache = new Map();
   await asyncForEach(incomingEmbeddables ?? [], async (embeddable) => {
-    if (!embeddable.embeddableId) {
-      const embeddableDefinition = await embeddableService.getEmbeddableDefinition(embeddable.type);
-      if (embeddableDefinition?.isDuplicate) {
-        const duplicatePanel = getPanels(embeddable.type).find(({ state }) =>
-          embeddableDefinition.isDuplicate?.(embeddable.serializedState, state)
-        );
-        if (duplicatePanel?.id) {
-          embeddable.embeddableId = duplicatePanel.id;
-        }
-      }
+    const duplicate = await getDuplicate(embeddable, initialState, panelsCache);
+    if (duplicate?.id) {
+      embeddable.embeddableId = duplicate.id;
     }
 
     if (!embeddable.size) {
