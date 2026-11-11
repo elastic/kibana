@@ -367,37 +367,6 @@ export function ExecutionListFilters({
       <div css={styles.section}>
         <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
           <strong>
-            {i18n.translate('workflows.workflowExecutionList.filterIconButton.executionNameLabel', {
-              defaultMessage: 'Execution name',
-            })}
-          </strong>
-        </EuiText>
-        <div css={styles.search}>
-          <EuiFieldSearch
-            compressed
-            fullWidth
-            isClearable
-            aria-label={i18n.translate(
-              'workflows.workflowExecutionList.filterIconButton.executionNameAriaLabel',
-              { defaultMessage: 'Filter by execution name' }
-            )}
-            placeholder={i18n.translate(
-              'workflows.workflowExecutionList.filterIconButton.executionNamePlaceholder',
-              { defaultMessage: 'Filter by execution name' }
-            )}
-            value={filters.runName ?? ''}
-            maxLength={WORKFLOW_RUN_NAME_FILTER_MAX_LENGTH}
-            onChange={(event) => onFiltersChange({ ...filters, runName: event.target.value })}
-            data-test-subj="workflowExecutionListRunNameSearch"
-          />
-        </div>
-      </div>
-
-      <EuiHorizontalRule margin="none" />
-
-      <div css={styles.section}>
-        <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
-          <strong>
             {i18n.translate('workflows.workflowExecutionList.filterIconButton.statusLabel', {
               defaultMessage: 'Status',
             })}

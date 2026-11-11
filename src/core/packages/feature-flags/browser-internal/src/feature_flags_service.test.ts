@@ -47,10 +47,6 @@ async function flushAsyncWork() {
   });
 }
 
-jest.mock('@openfeature/ofrep-web-provider', () => ({
-  OFREPWebProvider: jest.fn(),
-}));
-
 async function isSettledPromise(p: Promise<unknown>) {
   const immediateValue = {};
   const result = await Promise.race([p, immediateValue]);

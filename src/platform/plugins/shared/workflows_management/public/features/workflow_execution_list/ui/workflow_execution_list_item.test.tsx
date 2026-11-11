@@ -118,7 +118,6 @@ describe('execution history columns', () => {
       timeZoneSetting: 'UTC',
     });
     expect(columns.map((c) => ('field' in c ? c.field : undefined))).toEqual([
-      'runName',
       'status',
       'startedAt',
       'duration',

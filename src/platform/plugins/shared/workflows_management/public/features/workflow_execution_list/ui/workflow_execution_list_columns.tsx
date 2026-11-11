@@ -205,19 +205,6 @@ export const getExecutionHistoryColumns = (
 
   columns.push(
     {
-      field: 'runName',
-      name: i18n.translate('workflows.workflowExecutionList.column.executionNameLabel', {
-        defaultMessage: 'Execution name',
-      }),
-      width: EXECUTION_HISTORY_COLUMN_WIDTHS.runName,
-      truncateText: true,
-      render: (runName: string | undefined) => (
-        <EuiText size="xs" data-test-subj="workflowExecutionListRunNameCell">
-          <EuiTextTruncate text={runName ?? EM_DASH} />
-        </EuiText>
-      ),
-    },
-    {
       field: 'status',
       name: i18n.translate('workflows.workflowExecutionList.column.status', {
         defaultMessage: 'Status',
