@@ -21,13 +21,16 @@ const SERVERLESS_TAGS = [
 
 const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 const TEST_SETTING = 'testSetting';
+const TEST_SETTING_VALUE = 100;
+// Several times the 10s uiSettings cache TTL, which a write only invalidates on the node serving it.
+const SETTINGS_PROPAGATION_TIMEOUT = 30_000;
 
 apiTest.describe('ui settings CRUD', { tag: SERVERLESS_TAGS }, () => {
   let sessionCredentials: RoleSessionCredentials;
 
   apiTest.beforeAll(async ({ samlAuth, kbnClient }) => {
     sessionCredentials = await samlAuth.asInteractiveUser('admin');
-    await kbnClient.uiSettings.update({ [TEST_SETTING]: 100 });
+    await kbnClient.uiSettings.update({ [TEST_SETTING]: TEST_SETTING_VALUE });
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
@@ -35,16 +38,24 @@ apiTest.describe('ui settings CRUD', { tag: SERVERLESS_TAGS }, () => {
   });
 
   apiTest('returns list of settings', async ({ apiClient }) => {
-    const response = await apiClient.get('/internal/kibana/settings', {
-      headers: {
-        ...INTERNAL_HEADERS,
-        ...sessionCredentials.cookieHeader,
-      },
-    });
+    await expect
+      .poll(
+        async () => {
+          const response = await apiClient.get('/internal/kibana/settings', {
+            headers: {
+              ...INTERNAL_HEADERS,
+              ...sessionCredentials.cookieHeader,
+            },
+          });
 
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.settings).toBeDefined();
-    expect(response.body.settings[TEST_SETTING]).toBeDefined();
+          return {
+            statusCode: response.statusCode,
+            userValue: response.body.settings?.[TEST_SETTING]?.userValue,
+          };
+        },
+        { timeout: SETTINGS_PROPAGATION_TIMEOUT, intervals: [1_000] }
+      )
+      .toStrictEqual({ statusCode: 200, userValue: TEST_SETTING_VALUE });
   });
 
   apiTest('set validates value', async ({ apiClient }) => {

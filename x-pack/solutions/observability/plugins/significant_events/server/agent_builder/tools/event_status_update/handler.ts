@@ -17,16 +17,19 @@ export async function updateEventStatusToolHandler({
   eventId,
   status,
   assessmentNote,
+  workflowExecutionId,
 }: {
   eventSearchClient: RuleEventsClient;
   eventId: string;
   status: SignificantEventManualStatus;
   assessmentNote?: string;
+  workflowExecutionId?: string;
 }): Promise<{ event_id: string } & UpdateEventStatusResult> {
   const result = await eventSearchClient.updateEventStatus({
     eventId,
     change: StatusChange.byOperator(status),
     assessmentNote,
+    workflowExecutionId,
   });
 
   return { event_id: eventId, ...result };
