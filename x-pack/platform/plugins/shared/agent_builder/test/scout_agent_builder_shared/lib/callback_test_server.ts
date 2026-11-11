@@ -6,7 +6,7 @@
  */
 
 import http from 'http';
-import getPort from 'get-port';
+import getPort, { portNumbers } from 'get-port';
 
 export interface CallbackTestServerRequest {
   method?: string;
@@ -29,7 +29,7 @@ export class CallbackTestServer {
   private readonly waiters: PendingWaiter[] = [];
 
   async start(): Promise<string> {
-    this.port = await getPort({ port: getPort.makeRange(18400, 18499) });
+    this.port = await getPort({ port: portNumbers(18400, 18499) });
 
     return new Promise((resolve, reject) => {
       this.server = http.createServer(async (req, res) => {
