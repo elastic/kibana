@@ -405,17 +405,21 @@ NIGHTSHIFT_KNOWLEDGE=memory,decision-trees NIGHTSHIFT_DATASETS=trace-only \
   and `NIGHTSHIFT_KNOWLEDGE_SPACE_ID` from the shell; an ORCA run needs its own block, so stale
   customer0 values in the shell can't load customer0 knowledge into it. See
   [Knowledge source key](#knowledge-source-key).
-- Before the first example, the eval clears all three knowledge indices in its space, then copies
-  every selected system's documents from the source space, moving their ids and `space_id` into its
-  own space. Embeddings are recomputed by the eval cluster on write. A source space with no
-  documents for a selected system fails the run.
+- Before the first example, the eval clears all three knowledge indices in its space (even when
+  `NIGHTSHIFT_KNOWLEDGE` is unset, so a reused Scout stack does not keep an earlier run's
+  documents), then copies every selected system's documents from the source space, moving their ids
+  and `space_id` into its own space. Embeddings are recomputed by the eval cluster on write. A
+  source space with no documents for a selected system fails the run.
 - The Scout config set turns on each selected system and turns learning off
   (`xpack.nightshift_investigations.learning.enabled=false`), so the post-run optimize hook doesn't
   change the knowledge while examples run. Decision trees need the Wiki runtime, so
   `decision-trees` alone also runs Wiki, with an empty Wiki index.
 - Every score records `knowledge` (the selection, or `none`), `knowledge_source`, and per system the
-  number of documents loaded and the newest one's `@timestamp`.
-- Changing `NIGHTSHIFT_KNOWLEDGE` restarts Scout, since it changes the server's flags.
+  number of documents loaded and the newest one's `@timestamp`. Knowledge-on runs also append
+  `(knowledge: <selection>)` to the experiment name so their scores stay in a separate series from
+  the baseline.
+- Changing `NIGHTSHIFT_KNOWLEDGE` needs `evals start`, which restarts Scout with the new server
+  flags; `evals run` reuses the running server and keeps its flags from `start`.
 
 ### Knowledge source key
 
