@@ -78,7 +78,10 @@ but never fail the dataset: a gate on them fails every weak model alike and the 
 models apart. `ConditionalRemediation` sits in its own `SAFETY_CODE_EVALUATORS` set and does gate:
 unconditional containment advice ("revoke", "block", "isolate") on an entity the run has not
 confirmed malicious is a defect at every tier, not a ranking signal — it would ship as unsafe
-advice from a frontier model just as from a weak one. The gate is fail-closed, so an evaluator
+advice from a frontier model just as from a weak one. Its check is layered: a deterministic regex
+screen over the discovery text is the lower bound, and an LLM judge confirms the gate (one judge
+call per example, over all of that example's scored discoveries, ~$0.001 per example; judge nulls
+are excluded from the mean, never a pass). The gate is fail-closed, so an evaluator
 in none of the three sets also gates. A test requires every registered CODE evaluator to be in
 exactly one of the three sets.
 
@@ -107,7 +110,10 @@ reason, are reported together with the seed error. Fingerprints and discoveries 
 a failed seed: the workflow has not started, so there are none from it.
 
 After a row has run, `cleanupSeed` clears the alerts (matched exactly by its run marker), the
-space's fingerprints and its discoveries, then refreshes those indices and counts again. A delete
+space's fingerprints, its discoveries, its Investigations (Agent Builder conversations in the
+shared `.chat-conversations` index), the investigations' side documents (`.kibana-investigation-*`)
+and the proposals the review opened (`.kibana-proposals`) — all matched by the space id — then
+refreshes those indices and counts again. A delete
 that reports failures, version conflicts, a timeout or fewer deletions than matches, or a document
 still found by the recount, starts another round (5s pause, `CLEANUP_ROUNDS` = 6); what is left
 after the last round fails the row. Steps of a row can still write after its cleanup (the
@@ -177,14 +183,18 @@ escalation gate instead of proceeding.
 
 - The attach path (a finding attached to an existing Investigation).
 - The approve and dismiss specs (what happens after the analyst acts at the gate).
+- Split cohorts (generation pinned to a reference model, review on the model under test, or the
+  reverse): blocked on the floor worker passing the runner a `connector_id` (see Cohorts).
 
 ## Cohorts
 
-`AD_WORKER_EVAL_COHORT` defaults to `whole`: generation and review both run the model under test. Runs
-start through the per-space floor worker, which passes the runner no `connector_id`, so generation
-cannot be pinned to a different model than review. The `generation` and `review` cohorts (the other
-stage pinned to `AD_WORKER_EVAL_REFERENCE_MODEL`) are therefore rejected by the preflight. Every score
-document carries the cohort, generation model, review model and stage in its metadata.
+`AD_WORKER_EVAL_COHORT` accepts only `whole` (the default): generation and review both run the
+model under test. Runs start through the per-space floor worker, which passes the runner no
+`connector_id`, so generation cannot be pinned to a different model than review; the earlier
+`generation` and `review` cohort machinery was removed with that constraint. Split cohorts are
+future work and need the floor worker to pass the runner a `connector_id` (or an equivalent
+supported way to pin one stage). Every score document carries the cohort, generation model,
+review model and stage in its metadata.
 
 The `alertzero_frontier` and `alertzero_template_models` inference features are routed for the
 duration of the run and restored afterwards.
@@ -251,14 +261,15 @@ AD_WORKER_EVAL_COHORT=whole \
 - The per-space `securitySolution:enableAlertZero` setting is set by the preflight spec.
 - Specs run with one Playwright worker: the runner's concurrency key is per space with
   cancel-in-progress.
-- Timeouts: runner 40 min, review settle 20 min, floor idle wait 2 min. Playwright rows x (runner +
-  review settle + 10 min overhead + floor idle wait) per test, plus one review settle for the seeded
-  row's floor-parent review and two more floor idle waits (528 min for 7 rows: 7 x 72 + 20 + 4), so
-  the suite's own timeouts fire first. Wall time
-  per row is dominated by one generation batch plus one review per unmatched attack (review
-  concurrency 2).
-- CI step timeout: `stepTimeoutInMinutes` in `.buildkite/pipelines/evals/evals.suites.json` is 555
-  min, the 528 min Playwright timeout plus 27 min for bootstrap, Scout boot and report upload.
+- Timeouts, sized from observed runs rather than worst-case stack stalls: runner 15 min, review
+  settle 10 min, per-row overhead (seeding, cleanup, judge) 5 min, floor idle wait 2 min. A row
+  that exceeds these is stuck, not slow. Playwright rows x (runner + review settle + overhead +
+  floor idle wait) per test, plus one review settle for the seeded row's floor-parent review and
+  two more floor idle waits (238 min for 7 rows: 7 x 32 + 10 + 4), so the suite's own timeouts
+  fire first. Wall time per row is dominated by one generation batch plus one review per
+  unmatched attack (review concurrency 2).
+- CI step timeout: `stepTimeoutInMinutes` in `.buildkite/pipelines/evals/evals.suites.json` is 270
+  min, the 238 min Playwright timeout plus headroom for bootstrap, Scout boot and report upload.
   Without it the step falls back to the 120 min default and Buildkite kills it before the suite's own
   timeouts fire, losing every score. `src/ci_step_timeout.test.ts` fails if the step timeout drops
   below the Playwright timeout (for example when a dataset row is added).
