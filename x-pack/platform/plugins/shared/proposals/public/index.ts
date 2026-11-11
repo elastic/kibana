@@ -31,9 +31,3 @@ export {
 } from './hooks/use_proposals_api';
 
 export { mutationKeys, queryKeys } from './query_keys';
-export {
-  reportProposalDecided,
-  type ProposalDecidedEvent,
-  type ProposalDecisionKind,
-  type ProposalDecisionSurface,
-} from './ebt_events';

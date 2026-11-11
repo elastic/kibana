@@ -20,7 +20,6 @@ import {
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
-import { useReopenProposal } from '../hooks/use_proposals_api';
 
 // ── Mock heavy external deps ──────────────────────────────────────────────────
 
@@ -53,7 +52,6 @@ jest.mock('@kbn/ui-callout', () => ({
  *  (e.g. to assert what its promise rejects with) without going through a simulated click. */
 let latestOnApprove: (() => void | Promise<void>) | undefined;
 let latestOnDismiss: ((params: DeclineParams) => Promise<void>) | undefined;
-let latestOnReopen: (() => Promise<void>) | undefined;
 
 jest.mock('@kbn/proposals-ui', () => {
   const actual = jest.requireActual('@kbn/proposals-ui');
@@ -71,7 +69,6 @@ jest.mock('@kbn/proposals-ui', () => {
       secondaryActions,
       readOnly,
       onDismiss,
-      onReopen,
       isSubmitting,
       currentActorName,
       'data-test-subj': dataTestSubj,
@@ -81,7 +78,6 @@ jest.mock('@kbn/proposals-ui', () => {
       secondaryActions?: ApprovalAction[];
       readOnly?: boolean;
       onDismiss?: (params: DeclineParams) => Promise<void>;
-      onReopen?: () => Promise<void>;
       isSubmitting?: 'applying' | 'declining';
       currentActorName?: string;
       'data-test-subj'?: string;
@@ -90,7 +86,6 @@ jest.mock('@kbn/proposals-ui', () => {
       const isReplaced = proposal.supersededBy !== undefined || proposal.status === 'superseded';
       latestOnApprove = onApprove;
       latestOnDismiss = onDismiss;
-      latestOnReopen = onReopen;
       const decision = isReplaced ? undefined : actual.getProposalDecision(proposal);
       const isExpired = actual.isProposalExpired(proposal);
       return (
@@ -199,8 +194,6 @@ const useCurrentUserProfileMock = useCurrentUserProfile as jest.MockedFunction<
 >;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 
-const reportEvent = jest.fn();
-
 const capabilitiesFor = (canDecide: boolean) =>
   ({
     services: {
@@ -208,7 +201,6 @@ const capabilitiesFor = (canDecide: boolean) =>
         capabilities: { proposals: { decideProposals: canDecide } },
       },
       http: { basePath: { serverBasePath: '', prepend: (path: string) => path } },
-      analytics: { reportEvent },
     },
   } as unknown as ReturnType<typeof useKibana>);
 
@@ -266,7 +258,6 @@ describe('ProposalApprovalCard', () => {
     jest.clearAllMocks();
     latestOnApprove = undefined;
     latestOnDismiss = undefined;
-    latestOnReopen = undefined;
     useKibanaMock.mockReturnValue(capabilitiesFor(true));
   });
 
@@ -695,99 +686,6 @@ describe('ProposalApprovalCard', () => {
       await expect(latestOnDismiss!({ dismissReason: 'no_reason' })).rejects.toThrow(
         'Network failure'
       );
-    });
-  });
-
-  describe('decision telemetry', () => {
-    const useReopenProposalMock = useReopenProposal as jest.MockedFunction<
-      typeof useReopenProposal
-    >;
-
-    beforeEach(() => reportEvent.mockClear());
-
-    it('reports an accepted approve with the proposal it belongs to', async () => {
-      setupMocks(baseProposal({ origin: 'nightshift', category: 'customer label' }));
-      useApproveProposalMock.mockReturnValue({
-        ...noopMutation,
-        mutateAsync: jest.fn().mockResolvedValue({}),
-      } as unknown as ReturnType<typeof useApproveProposal>);
-      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-
-      await latestOnApprove!();
-
-      expect(reportEvent).toHaveBeenCalledTimes(1);
-      expect(reportEvent).toHaveBeenCalledWith('proposal_decided', {
-        proposal_id: PROPOSAL_ID,
-        decision: 'approve',
-        surface: 'chat',
-        origin: 'nightshift',
-        investigation_id: undefined,
-        conversation_id: 'conv-1',
-        dismiss_reason: undefined,
-        confidence: 'medium',
-        impact: 'low',
-      });
-      expect(JSON.stringify(reportEvent.mock.calls)).not.toContain('customer label');
-    });
-
-    it('reports an accepted decline with its reason and never its rationale', async () => {
-      setupMocks(baseProposal({ origin: 'alertzero' }));
-      useDismissProposalMock.mockReturnValue({
-        ...noopMutation,
-        mutateAsync: jest.fn().mockResolvedValue({}),
-      } as unknown as ReturnType<typeof useDismissProposal>);
-      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-
-      await latestOnDismiss!({ dismissReason: 'duplicate', rationale: 'customer secret text' });
-
-      expect(reportEvent).toHaveBeenCalledTimes(1);
-      expect(reportEvent).toHaveBeenCalledWith(
-        'proposal_decided',
-        expect.objectContaining({
-          decision: 'decline',
-          dismiss_reason: 'duplicate',
-          origin: 'alertzero',
-        })
-      );
-      expect(JSON.stringify(reportEvent.mock.calls)).not.toContain('customer secret text');
-    });
-
-    it('reports an accepted reopen', async () => {
-      setupMocks();
-      useReopenProposalMock.mockReturnValue({
-        mutateAsync: jest.fn().mockResolvedValue({}),
-      } as unknown as ReturnType<typeof useReopenProposal>);
-      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-
-      await latestOnReopen!();
-
-      expect(reportEvent).toHaveBeenCalledWith(
-        'proposal_decided',
-        expect.objectContaining({ decision: 'reopen' })
-      );
-    });
-
-    it('reports nothing when the server rejects the decision', async () => {
-      setupMocks();
-      const mutateAsync = jest.fn().mockRejectedValue(new Error('Network failure'));
-      useApproveProposalMock.mockReturnValue({
-        ...noopMutation,
-        mutateAsync,
-      } as unknown as ReturnType<typeof useApproveProposal>);
-      useDismissProposalMock.mockReturnValue({
-        ...noopMutation,
-        mutateAsync,
-      } as unknown as ReturnType<typeof useDismissProposal>);
-      useReopenProposalMock.mockReturnValue({ mutateAsync } as unknown as ReturnType<
-        typeof useReopenProposal
-      >);
-      render(<ProposalApprovalCard proposalId={PROPOSAL_ID} />);
-
-      await expect(latestOnApprove!()).rejects.toThrow();
-      await expect(latestOnDismiss!({ dismissReason: 'no_reason' })).rejects.toThrow();
-      await expect(latestOnReopen!()).rejects.toThrow();
-
-      expect(reportEvent).not.toHaveBeenCalled();
     });
   });
 });

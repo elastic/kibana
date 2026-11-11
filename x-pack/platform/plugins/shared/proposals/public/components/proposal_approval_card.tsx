@@ -32,7 +32,6 @@ import {
   useReopenProposal,
 } from '../hooks/use_proposals_api';
 import { useCurrentUserProfile } from '../hooks/use_current_user_profile';
-import { reportProposalDecided, type ProposalDecidedEvent } from '../ebt_events';
 
 /**
  * Turns a decision mutation's rejection into the friendly text `ApprovalContent` shows in its own
@@ -90,7 +89,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
   const { euiTheme } = useEuiTheme();
   const titleId = useGeneratedHtmlId({ prefix: 'ApprovalChatCard' });
   const {
-    services: { application, http, analytics },
+    services: { application, http },
   } = useKibana<CoreStart>();
   const canDecide = application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] === true;
 
@@ -109,33 +108,16 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
 
-  const liveProposal = proposalQuery.data;
-
-  const report = useCallback(
-    (event: Pick<ProposalDecidedEvent, 'decision' | 'dismissReason'>) =>
-      reportProposalDecided(analytics, {
-        ...event,
-        proposalId,
-        surface: 'chat',
-        conversationId: liveProposal?.conversationId,
-        origin: liveProposal?.origin,
-        confidence: liveProposal?.confidence,
-        impact: liveProposal?.impact,
-      }),
-    [analytics, proposalId, liveProposal]
-  );
-
   const handleApprove = useCallback(async () => {
     try {
       await approveMutation.mutateAsync({
         id: proposalId,
-        body: { actionInput: liveProposal?.actionInput },
+        body: { actionInput: proposalQuery.data?.actionInput },
       });
     } catch (err) {
       throw toFriendlyError(err);
     }
-    report({ decision: 'approve' });
-  }, [approveMutation, liveProposal?.actionInput, proposalId, report]);
+  }, [approveMutation, proposalQuery.data?.actionInput, proposalId]);
 
   const handleDismiss = useCallback(
     async ({ dismissReason, rationale }: DeclineParams) => {
@@ -147,9 +129,8 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
       } catch (err) {
         throw toFriendlyError(err);
       }
-      report({ decision: 'decline', dismissReason });
     },
-    [dismissMutation, proposalId, report]
+    [dismissMutation, proposalId]
   );
 
   const handleReopen = useCallback(async () => {
@@ -158,8 +139,9 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(({ proposalI
     } catch (err) {
       throw toFriendlyError(err);
     }
-    report({ decision: 'reopen' });
-  }, [reopenMutation, proposalId, report]);
+  }, [reopenMutation, proposalId]);
+
+  const liveProposal = proposalQuery.data;
 
   if (proposalQuery.isLoading) {
     return <EuiLoadingSpinner size="m" />;

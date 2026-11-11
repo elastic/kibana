@@ -15,9 +15,6 @@ import {
 } from '@kbn/proposals-common';
 import type { DeclineParams } from '@kbn/proposals-ui';
 import {
-  reportProposalDecided,
-  type ProposalDecidedEvent,
-  type ProposalDecisionSurface,
   isDecisionShown,
   useApproveProposal,
   useDismissProposal,
@@ -30,15 +27,7 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { useCurrentUserProfile } from '../../../user_profiles';
 
 /** The part of the proposal that shows whether its decision is visible in this row's data. */
-type ProposalDecisionData = Pick<
-  Proposal,
-  'decision' | 'status' | 'supersededBy' | 'conversationId' | 'origin' | 'confidence' | 'impact'
->;
-
-export interface ProposalDecisionContext {
-  surface: ProposalDecisionSurface;
-  investigationId?: string;
-}
+type ProposalDecisionData = Pick<Proposal, 'decision' | 'status' | 'supersededBy'>;
 
 export interface ProposalDecision {
   /** The caller lacks the proposals decide capability. */
@@ -58,11 +47,10 @@ export interface ProposalDecision {
  */
 export const useProposalDecision = (
   proposalId: string,
-  proposal: ProposalDecisionData | undefined,
-  { surface, investigationId }: ProposalDecisionContext
+  proposal: ProposalDecisionData | undefined
 ): ProposalDecision => {
   const {
-    services: { application, analytics },
+    services: { application },
   } = useKibana<CoreStart>();
   const { mutateAsync: approveProposal } = useApproveProposal();
   const { mutateAsync: dismissProposal } = useDismissProposal();
@@ -73,46 +61,21 @@ export const useProposalDecision = (
   const isDeclining = useIsDecliningProposal(proposalId, decisionShown);
   const { data: currentUserProfile } = useCurrentUserProfile();
 
-  const report = useCallback(
-    (event: Pick<ProposalDecidedEvent, 'decision' | 'dismissReason'>) =>
-      reportProposalDecided(analytics, {
-        ...event,
-        proposalId,
-        surface,
-        investigationId,
-        conversationId: proposal?.conversationId,
-        origin: proposal?.origin,
-        confidence: proposal?.confidence,
-        impact: proposal?.impact,
-      }),
-    [analytics, proposalId, surface, investigationId, proposal]
-  );
-
   const approve = useCallback(
-    async (actionInput: ApproveProposalRequest['actionInput']) => {
-      const result = await approveProposal({ id: proposalId, body: { actionInput } });
-      report({ decision: 'approve' });
-      return result;
-    },
-    [approveProposal, proposalId, report]
+    (actionInput: ApproveProposalRequest['actionInput']) =>
+      approveProposal({ id: proposalId, body: { actionInput } }),
+    [approveProposal, proposalId]
   );
   const dismiss = useCallback(
-    async ({ dismissReason, rationale }: DeclineParams) => {
-      const result = await dismissProposal({
-        id: proposalId,
-        body: { dismissReason, rationale },
-      });
-      report({ decision: 'decline', dismissReason });
-      return result;
-    },
-    [dismissProposal, proposalId, report]
+    ({ dismissReason, rationale }: DeclineParams) =>
+      dismissProposal({ id: proposalId, body: { dismissReason, rationale } }),
+    [dismissProposal, proposalId]
   );
 
-  const reopen = useCallback(async () => {
-    const result = await reopenProposal({ id: proposalId });
-    report({ decision: 'reopen' });
-    return result;
-  }, [reopenProposal, proposalId, report]);
+  const reopen = useCallback(
+    () => reopenProposal({ id: proposalId }),
+    [reopenProposal, proposalId]
+  );
 
   return {
     readOnly: application.capabilities.proposals?.[PROPOSALS_UI_CAPABILITY_DECIDE] !== true,

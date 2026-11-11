@@ -6,6 +6,7 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import { analyticsServiceMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
@@ -141,6 +142,7 @@ const createService = (
   workflowsApi: ReturnType<typeof createWorkflowsApi> | null = createWorkflowsApi()
 ) => {
   const logger = loggerMock.create();
+  const analytics = analyticsServiceMock.createAnalyticsServiceStart();
   const attachmentsClient = {
     create: jest.fn().mockResolvedValue({ id: 'attachment-1' }),
     get: jest.fn(),
@@ -157,6 +159,7 @@ const createService = (
     service: new ProposalsService({
       storage,
       logger,
+      analytics,
       getWorkflowsApi: () => (workflowsApi ?? undefined) as never,
       getAttachmentsClient,
       resolveUser,
@@ -164,6 +167,7 @@ const createService = (
     workflowsApi: workflowsApi ?? createWorkflowsApi(),
     attachmentsClient,
     logger,
+    analytics,
   };
 };
 
@@ -1508,6 +1512,106 @@ describe('ProposalsService', () => {
       expect(proposal.decisionMode).toBe('manual');
       // Stamped by the service, so the recorded moment is the moment written.
       expect(proposal.decidedAt).toEqual(expect.any(String));
+    });
+
+    describe('decision telemetry', () => {
+      it('reports a recorded decision without its rationale or category', async () => {
+        const storage = createStorage(baseDocument());
+        const { service, analytics } = createService(storage);
+
+        await service.update(
+          {
+            id: 'proposal-1',
+            decision: 'dismissed',
+            status: 'no_action',
+            decidedBy: analyst('analyst'),
+            decisionMode: 'manual',
+            dismissReason: 'duplicate',
+            rationale: 'customer secret text',
+          },
+          SPACE_ID
+        );
+
+        expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+        expect(analytics.reportEvent).toHaveBeenCalledWith('proposal_decided', {
+          proposal_id: 'proposal-1',
+          decision: 'dismissed',
+          decision_mode: 'manual',
+          status: 'no_action',
+          gate: undefined,
+          origin: 'alertzero',
+          conversation_id: 'conv-1',
+          dismiss_reason: 'duplicate',
+          confidence: 'medium',
+          impact: 'low',
+        });
+        expect(JSON.stringify(analytics.reportEvent.mock.calls)).not.toContain(
+          'customer secret text'
+        );
+      });
+
+      it('reports an auto approval as auto', async () => {
+        const storage = createStorage(baseDocument());
+        const { service, analytics } = createService(storage);
+
+        await service.update(
+          { id: 'proposal-1', decision: 'approved', status: 'executing', decisionMode: 'auto' },
+          SPACE_ID
+        );
+
+        expect(analytics.reportEvent).toHaveBeenCalledWith(
+          'proposal_decided',
+          expect.objectContaining({ decision: 'approved', decision_mode: 'auto' })
+        );
+      });
+
+      it('reports nothing for an update that records no decision', async () => {
+        const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
+        const { service, analytics } = createService(storage);
+
+        await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
+        await service.update({ id: 'proposal-1', status: 'succeeded' }, SPACE_ID);
+
+        expect(analytics.reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('reports nothing when the decision is refused', async () => {
+        const storage = createStorage(baseDocument({ decision: 'approved', status: 'executing' }));
+        const { service, analytics } = createService(storage);
+
+        await expect(
+          service.update({ id: 'proposal-1', decision: 'dismissed', status: 'no_action' }, SPACE_ID)
+        ).rejects.toThrow(ProposalConflictError);
+
+        expect(analytics.reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('reports nothing when the write does not land', async () => {
+        const storage = createStorage(baseDocument());
+        storage.index.mockRejectedValueOnce(new Error('write failed'));
+        const { service, analytics } = createService(storage);
+
+        await expect(
+          service.update({ id: 'proposal-1', decision: 'approved', status: 'executing' }, SPACE_ID)
+        ).rejects.toThrow();
+
+        expect(analytics.reportEvent).not.toHaveBeenCalled();
+      });
+
+      it('does not fail a decision that landed when the reporter throws', async () => {
+        const storage = createStorage(baseDocument());
+        const { service, analytics } = createService(storage);
+        analytics.reportEvent.mockImplementationOnce(() => {
+          throw new Error('ebt down');
+        });
+
+        const proposal = await service.update(
+          { id: 'proposal-1', decision: 'approved', status: 'executing' },
+          SPACE_ID
+        );
+
+        expect(proposal.decision).toBe('approved');
+      });
     });
 
     it('should move an approved proposal to a terminal execution state', async () => {
@@ -4175,6 +4279,43 @@ describe('ProposalsService — gateless proposals', () => {
         service.releaseGate('proposal-1', releaseParams({ approved: false }))
       ).rejects.toBeInstanceOf(ProposalConflictError);
       expect(storage.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('decision telemetry', () => {
+    it.each([
+      [true, 'approved'],
+      [false, 'dismissed'],
+    ] as const)('reports a direct decision when approved is %s', async (approved, decision) => {
+      const storage = createStorage(gateless());
+      const { service, analytics } = createService(storage);
+
+      await service.releaseGate('proposal-1', releaseParams({ approved, rationale: 'private' }));
+
+      expect(analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        'proposal_decided',
+        expect.objectContaining({
+          proposal_id: 'proposal-1',
+          decision,
+          decision_mode: 'manual',
+          status: 'no_action',
+          gate: 'none',
+          origin: 'nightshift',
+        })
+      );
+      expect(JSON.stringify(analytics.reportEvent.mock.calls)).not.toContain('private');
+    });
+
+    it('reports nothing when the proposal was already decided', async () => {
+      const storage = createStorage(gateless({ decision: 'approved', status: 'no_action' }));
+      const { service, analytics } = createService(storage);
+
+      await expect(service.releaseGate('proposal-1', releaseParams())).rejects.toBeInstanceOf(
+        ProposalConflictError
+      );
+
+      expect(analytics.reportEvent).not.toHaveBeenCalled();
     });
   });
 

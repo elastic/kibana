@@ -31,6 +31,7 @@ import { reviseProposalTool } from './agent_builder/tools/revise_proposal_tool';
 import { createProposalManagementSkill } from './agent_builder/skills/proposal_management';
 import { registerStepDefinitions } from './step_types';
 import { createProposalsStorageClient } from './storage/proposals_storage';
+import { registerProposalsEbtEvents } from './telemetry/proposal_decided_event';
 import { createProposalTool } from './tools/create_proposal_tool';
 import type {
   ProposalsPluginSetup,
@@ -70,6 +71,7 @@ export class ProposalsPlugin
     this.workflowsManagementApi = workflowsManagement.management;
 
     registerFeatures({ features });
+    registerProposalsEbtEvents(coreSetup.analytics);
 
     const privileges = this.getProposalPrivilegesChecker(coreSetup);
     agentBuilder.tools.register(
@@ -153,6 +155,7 @@ export class ProposalsPlugin
     this.proposalsService = new ProposalsService({
       storage,
       logger: this.logger,
+      analytics: coreStart.analytics,
       getWorkflowsApi: () => this.requireWorkflowsApi(),
       getAttachmentsClient: (request) =>
         plugins.agentBuilder.attachments.getScopedClient({ request }),
