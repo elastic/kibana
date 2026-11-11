@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import useSet from 'react-use/lib/useSet';
 import type { ToastInput } from '@kbn/core/public';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import type { MessageEditorController } from './message_editor/use_message_editor';
@@ -31,26 +32,16 @@ export const useTextFileUpload = ({
 }: UseTextFileUploadParams): UseTextFileUploadResult => {
   const { attachments, conversationId, upsertAttachments, removeAttachments } =
     useConversationContext();
-  const [loadingTextFileNames, setLoadingTextFileNames] = useState<Set<string>>(new Set());
+  const [
+    loadingTextFileNames,
+    { add: addLoadingName, remove: removeLoadingName, clear: clearLoadingNames },
+  ] = useSet<string>();
   const readControllers = useRef<Map<string, AbortController>>(new Map());
   // Names of the text files this hook added, so text attachments from other features stay.
   const addedNames = useRef<Set<string>>(new Set());
 
   const attachmentsRef = useRef(attachments);
   attachmentsRef.current = attachments;
-
-  const setLoading = useCallback((name: string, isLoading: boolean) => {
-    setLoadingTextFileNames((prev) => {
-      if (prev.has(name) === isLoading) return prev;
-      const next = new Set(prev);
-      if (isLoading) {
-        next.add(name);
-      } else {
-        next.delete(name);
-      }
-      return next;
-    });
-  }, []);
 
   // Drops the results of reads still running when the user leaves this conversation.
   // A read can't be stopped (`file.arrayBuffer()` has no signal), so the controller only marks it as stale.
@@ -61,17 +52,17 @@ export const useTextFileUpload = ({
         controller.abort();
       }
       controllers.clear();
-      setLoadingTextFileNames(new Set());
+      clearLoadingNames();
     };
-  }, [conversationId]);
+  }, [conversationId, clearLoadingNames]);
 
   const stopReading = useCallback(
     (name: string) => {
       readControllers.current.get(name)?.abort();
       readControllers.current.delete(name);
-      setLoading(name, false);
+      removeLoadingName(name);
     },
-    [setLoading]
+    [removeLoadingName]
   );
 
   const removeAttachmentsByName = useCallback(
@@ -93,13 +84,13 @@ export const useTextFileUpload = ({
       if (!upsertAttachments) return;
       const controller = new AbortController();
       readControllers.current.set(name, controller);
-      setLoading(name, true);
+      addLoadingName(name);
 
       readTextFile(file).then((result) => {
         // The chip was deleted meanwhile, and its name may belong to a new read by now.
         if (readControllers.current.get(name) !== controller) return;
         readControllers.current.delete(name);
-        setLoading(name, false);
+        removeLoadingName(name);
 
         if (result.status === 'failed') {
           addErrorToast({ title: result.message, text: name });
@@ -110,7 +101,7 @@ export const useTextFileUpload = ({
         upsertAttachments([{ type: AttachmentType.text, data: { content: result.content, name } }]);
       });
     },
-    [upsertAttachments, setLoading, addErrorToast, messageEditorController]
+    [upsertAttachments, addLoadingName, removeLoadingName, addErrorToast, messageEditorController]
   );
 
   // Keeps the attachments in step with the chips: a chip the user deleted drops its text file.

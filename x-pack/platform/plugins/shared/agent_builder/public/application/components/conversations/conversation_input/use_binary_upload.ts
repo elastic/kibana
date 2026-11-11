@@ -6,6 +6,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import useSet from 'react-use/lib/useSet';
 import { useQueryClient } from '@kbn/react-query';
 import type { ToastInput } from '@kbn/core/public';
 import type { Conversation } from '@kbn/agent-builder-common';
@@ -55,7 +56,10 @@ export const useBinaryUpload = ({
   const agentId = useAgentId();
   const { attachments, conversationId, upsertAttachments, removeAttachments } =
     useConversationContext();
-  const [loadingBinaryNames, setLoadingBinaryNames] = useState<Set<string>>(new Set());
+  const [
+    loadingBinaryNames,
+    { add: addLoadingName, remove: removeLoadingName, clear: clearLoadingNames },
+  ] = useSet<string>();
   const [pendingConversationId, setPendingConversationId] = useState<string | undefined>();
 
   // Uploads and reads that are in flight, by file name.
@@ -66,19 +70,6 @@ export const useBinaryUpload = ({
 
   const attachmentsRef = useRef(attachments);
   attachmentsRef.current = attachments;
-
-  const setLoading = useCallback((name: string, isLoading: boolean) => {
-    setLoadingBinaryNames((prev) => {
-      if (prev.has(name) === isLoading) return prev;
-      const next = new Set(prev);
-      if (isLoading) {
-        next.add(name);
-      } else {
-        next.delete(name);
-      }
-      return next;
-    });
-  }, []);
 
   const ensurePendingConversation = useCallback((): Promise<string> => {
     if (!pendingConversation.current) {
@@ -132,10 +123,10 @@ export const useBinaryUpload = ({
       messageEditorController.removePlaceholderByName(name, 'binary');
       controllers.current.get(name)?.abort();
       controllers.current.delete(name);
-      setLoading(name, false);
+      removeLoadingName(name);
       deleteUnsentBinary(name);
     },
-    [messageEditorController, setLoading, deleteUnsentBinary]
+    [messageEditorController, removeLoadingName, deleteUnsentBinary]
   );
 
   const readBinary = useCallback(
@@ -179,7 +170,7 @@ export const useBinaryUpload = ({
       if (result.status === 'aborted') return;
 
       controllers.current.delete(name);
-      setLoading(name, false);
+      removeLoadingName(name);
 
       if (result.status === 'failed') {
         addErrorToast({ title: result.message, text: name });
@@ -217,7 +208,7 @@ export const useBinaryUpload = ({
       removeBinary,
       binaryFilesClient,
       attachmentsService,
-      setLoading,
+      removeLoadingName,
       addErrorToast,
       messageEditorController,
       queryClient,
@@ -229,10 +220,10 @@ export const useBinaryUpload = ({
       if (!upsertAttachments) return;
       const controller = new AbortController();
       controllers.current.set(name, controller);
-      setLoading(name, true);
+      addLoadingName(name);
       readBinary({ file, name, mimeType, controller });
     },
-    [upsertAttachments, setLoading, readBinary]
+    [upsertAttachments, addLoadingName, readBinary]
   );
 
   // Keeps the work in step with the chips: a chip the user deleted cancels or deletes its file.
@@ -261,7 +252,7 @@ export const useBinaryUpload = ({
     }
     pendingConversation.current = undefined;
     setPendingConversationId(undefined);
-    setLoadingBinaryNames(new Set());
+    clearLoadingNames();
   };
   useEffect(() => {
     const leave = leaveRef;
