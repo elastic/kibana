@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
+import { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 import type { ConversationPermissions } from '../../../../../../../common/http_api/conversations';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import { ConversationListItemRow } from './conversation_list_item_row';
@@ -25,7 +26,10 @@ const mockUseConversationListMutations = jest.mocked(useConversationListMutation
 
 const conversationId = 'conversation-1';
 
-const renderRow = (permissions: Partial<ConversationPermissions>) => {
+const renderRow = (
+  permissions: Partial<ConversationPermissions>,
+  { status, openMenu = true }: { status?: ConversationDisplayStatus; openMenu?: boolean } = {}
+) => {
   render(
     <IntlProvider locale="en">
       <MemoryRouter>
@@ -33,9 +37,9 @@ const renderRow = (permissions: Partial<ConversationPermissions>) => {
           agentId="agent-1"
           conversationId={conversationId}
           title="My conversation"
-          icon="comment"
           isActive={false}
           routeConversationId={conversationId}
+          status={status}
           permissions={{
             rename: false,
             delete: false,
@@ -47,7 +51,9 @@ const renderRow = (permissions: Partial<ConversationPermissions>) => {
     </IntlProvider>
   );
 
-  fireEvent.click(screen.getByTestId(`agentBuilderSidebarConversationMenu-${conversationId}`));
+  if (openMenu) {
+    fireEvent.click(screen.getByTestId(`agentBuilderSidebarConversationMenu-${conversationId}`));
+  }
 };
 
 describe('ConversationListItemRow', () => {
@@ -95,5 +101,27 @@ describe('ConversationListItemRow', () => {
     ).not.toBeInTheDocument();
     expect(screen.getByText('Mark as unread')).toBeInTheDocument();
     expect(screen.getByText('Pin')).toBeInTheDocument();
+  });
+
+  it('shows the status icon on the left of the title, inside the link', () => {
+    renderRow({}, { status: ConversationDisplayStatus.unread, openMenu: false });
+
+    const link = screen.getByTestId(`agentBuilderSidebarConversation-${conversationId}`);
+    const statusIcon = within(link).getByText('New');
+    const title = within(link).getByText('My conversation');
+
+    expect(
+      statusIcon.compareDocumentPosition(title) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it('renders no status icon when the conversation has no status', () => {
+    renderRow({}, { openMenu: false });
+
+    const link = screen.getByTestId(`agentBuilderSidebarConversation-${conversationId}`);
+
+    expect(
+      within(link).queryByText(/^(New|Working|Waiting for input|Error)$/)
+    ).not.toBeInTheDocument();
   });
 });

@@ -6,24 +6,24 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 
 const labels = {
   inProgress: i18n.translate(
     'xpack.agentBuilder.sidebar.conversationList.statusIndicator.inProgress',
-    { defaultMessage: 'In progress' }
+    { defaultMessage: 'Working' }
   ),
   awaitingPrompt: i18n.translate(
     'xpack.agentBuilder.sidebar.conversationList.statusIndicator.awaitingPrompt',
-    { defaultMessage: 'Awaiting your input' }
+    { defaultMessage: 'Waiting for input' }
   ),
   error: i18n.translate('xpack.agentBuilder.sidebar.conversationList.statusIndicator.error', {
     defaultMessage: 'Error',
   }),
   unread: i18n.translate('xpack.agentBuilder.sidebar.conversationList.statusIndicator.unread', {
-    defaultMessage: 'Unread',
+    defaultMessage: 'New',
   }),
 };
 
@@ -36,14 +36,24 @@ export const ConversationStatusIndicator: React.FC<ConversationStatusIndicatorPr
 }) => {
   const { euiTheme } = useEuiTheme();
 
+  const withTooltip = (label: string, icon: React.ReactElement) => (
+    <EuiToolTip content={label} disableScreenReaderOutput>
+      {icon}
+    </EuiToolTip>
+  );
+
   switch (status) {
     case ConversationDisplayStatus.inProgress:
-      return <EuiLoadingSpinner size="m" aria-label={labels.inProgress} />;
+      return withTooltip(
+        labels.inProgress,
+        <EuiLoadingSpinner size="m" aria-label={labels.inProgress} />
+      );
 
     case ConversationDisplayStatus.awaitingPrompt:
-      return (
+      return withTooltip(
+        labels.awaitingPrompt,
         <EuiIcon
-          type="if"
+          type="pause"
           size="m"
           color={euiTheme.colors.textWarning}
           aria-label={labels.awaitingPrompt}
@@ -51,11 +61,20 @@ export const ConversationStatusIndicator: React.FC<ConversationStatusIndicatorPr
       );
 
     case ConversationDisplayStatus.error:
-      return <EuiIcon type="warningFill" size="m" color="danger" aria-label={labels.error} />;
+      return withTooltip(
+        labels.error,
+        <EuiIcon type="warning" size="m" color="danger" aria-label={labels.error} />
+      );
 
     case ConversationDisplayStatus.unread:
-      return (
-        <EuiIcon type="dot" size="m" color={euiTheme.colors.primary} aria-label={labels.unread} />
+      return withTooltip(
+        labels.unread,
+        <EuiIcon
+          type="dot"
+          size="m"
+          color={euiTheme.colors.vis.euiColorVis2}
+          aria-label={labels.unread}
+        />
       );
 
     case ConversationDisplayStatus.read:
