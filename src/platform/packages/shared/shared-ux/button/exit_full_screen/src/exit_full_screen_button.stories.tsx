@@ -18,6 +18,8 @@ import { ExitFullScreenButton as Component } from './exit_full_screen_button';
 
 import mdx from '../README.mdx';
 
+const mock = new ExitFullScreenButtonStorybookMock();
+
 export default {
   title: 'Button/Exit Full Screen Button',
   description:
@@ -27,9 +29,10 @@ export default {
       page: mdx,
     },
   },
+  args: {
+    ...mock.getArguments(),
+  },
 };
-
-const mock = new ExitFullScreenButtonStorybookMock();
 
 export const ExitFullScreenButton = {
   render: (params: ExitFullScreenButtonStorybookParams) => {
