@@ -198,6 +198,39 @@ describe('computeEventFacts', () => {
     expect(result.signals).toHaveLength(2);
   });
 
+  describe('a rule promoted from an off-topic signal to a confirming one', () => {
+    it('frees the title and hypothesis and stores the confirming signal', () => {
+      const stored = makeStored([makeSignal({ verdict: 'off_topic' })]);
+
+      const result = facts({ signals: [makeSignal({ verdict: 'confirms' })], stored });
+
+      expect(result.frozenNarrative).toBeUndefined();
+      expect(result.signals?.map(({ verdict }) => verdict)).toEqual(['confirms']);
+    });
+
+    it('keeps the narrative frozen when the stored signal already confirmed the rule', () => {
+      const stored = makeStored([makeSignal({ verdict: 'confirms' })]);
+
+      const result = facts({ signals: [makeSignal({ verdict: 'confirms' })], stored });
+
+      expect(result.frozenNarrative).toMatchObject({
+        title: 'Checkout latency',
+        narrativePreserved: true,
+      });
+    });
+
+    it('keeps the narrative frozen when a confirmed rule comes back as off-topic', () => {
+      const stored = makeStored([makeSignal({ verdict: 'confirms' })]);
+
+      const result = facts({ signals: [makeSignal({ verdict: 'off_topic' })], stored });
+
+      expect(result.frozenNarrative).toMatchObject({
+        title: 'Checkout latency',
+        narrativePreserved: true,
+      });
+    });
+  });
+
   it('keeps an explicit severity on a signal-less write, and defaults it to low', () => {
     expect(facts({ signals: [], candidateOverrides: { severity: 'critical' } }).severity).toBe(
       'critical'
