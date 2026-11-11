@@ -113,7 +113,9 @@ describe('discovery started report', () => {
     const track = jest.fn();
 
     await startedRoute.handler({
-      params: { body: { discovery_execution_id: 'discovery-1', parent_execution_id: 'review-1' } },
+      params: {
+        body: { workflow_execution_id: 'discovery-1', parent_workflow_execution_id: 'review-1' },
+      },
       request: { spaceId: 'default' },
       getScopedClients: jest.fn().mockResolvedValue({ licensing: {} }),
       getSpaceId: jest.fn().mockResolvedValue('space-a'),
@@ -122,8 +124,8 @@ describe('discovery started report', () => {
     } as unknown as StartedParams);
 
     expect(track).toHaveBeenCalledWith({
-      execution_id: 'review-1',
-      discovery_execution_id: 'discovery-1',
+      parent_workflow_execution_id: 'review-1',
+      workflow_execution_id: 'discovery-1',
       space_id: 'space-a',
       alert_source: 'elastic.significant_events',
     });
@@ -151,8 +153,8 @@ describe('discovery completed report', () => {
       handlerParams: {
         params: {
           body: {
-            discovery_execution_id: 'discovery-1',
-            parent_execution_id: 'orchestrator-1',
+            workflow_execution_id: 'discovery-1',
+            parent_workflow_execution_id: 'orchestrator-1',
             outcome: 'completed',
             has_work: true,
             processed_count: 4,
@@ -180,8 +182,8 @@ describe('discovery completed report', () => {
 
     const [[reported]] = track.mock.calls;
     expect(reported).toMatchObject({
-      execution_id: 'orchestrator-1',
-      discovery_execution_id: 'discovery-1',
+      parent_workflow_execution_id: 'orchestrator-1',
+      workflow_execution_id: 'discovery-1',
       space_id: 'space-a',
       alert_source: 'elastic.significant_events',
       outcome: 'completed',
@@ -203,7 +205,7 @@ describe('discovery completed report', () => {
 
     const [[reported]] = track.mock.calls;
     expect(reported).toMatchObject({
-      execution_id: 'orchestrator-1',
+      parent_workflow_execution_id: 'orchestrator-1',
       outcome: 'failed',
       error_message: 'agent step failed',
     });
@@ -225,15 +227,15 @@ describe('discovery completed report', () => {
   it('reports without a duration or a parent when discovery ran directly and its execution is unknown', async () => {
     const { handlerParams, track } = makeParams({
       getExecution: jest.fn().mockResolvedValue(null),
-      body: { parent_execution_id: '' },
+      body: { parent_workflow_execution_id: '' },
     });
 
     await completedRoute.handler(handlerParams);
 
     const [[reported]] = track.mock.calls;
-    expect(reported).toMatchObject({ discovery_execution_id: 'discovery-1', outcome: 'completed' });
+    expect(reported).toMatchObject({ workflow_execution_id: 'discovery-1', outcome: 'completed' });
     expect(reported).not.toHaveProperty('duration_ms');
-    expect(reported).not.toHaveProperty('execution_id');
+    expect(reported).not.toHaveProperty('parent_workflow_execution_id');
   });
 });
 

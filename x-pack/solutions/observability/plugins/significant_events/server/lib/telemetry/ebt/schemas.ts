@@ -506,15 +506,15 @@ const optionalCount = (description: string) => ({
 });
 
 const discoveryStartedSchema: RootSchema<DiscoveryStartedProps> = {
-  execution_id: {
+  parent_workflow_execution_id: {
     type: 'keyword',
     _meta: {
       description:
-        'The workflow execution that started this run: the orchestrator execution `discovery-triggered` carries for a manual run, the scheduled review execution for a scheduled one (several runs can share it, one per review pass); absent when the discovery workflow was run directly',
+        'The workflow execution that started this run: the orchestrator execution `discovery-triggered` carries as `workflow_execution_id` for a manual run, the scheduled review execution for a scheduled one (several runs can share it, one per review pass); absent when the discovery workflow was run directly',
       optional: true,
     },
   },
-  discovery_execution_id: {
+  workflow_execution_id: {
     type: 'keyword',
     _meta: {
       description:

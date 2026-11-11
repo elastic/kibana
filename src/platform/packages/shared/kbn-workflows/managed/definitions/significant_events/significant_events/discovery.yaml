@@ -20,8 +20,8 @@ settings:
           method: POST
           path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
           body:
-            discovery_execution_id: '{{ execution.id }}'
-            parent_execution_id: '{{ parent.executionId }}'
+            workflow_execution_id: '{{ execution.id }}'
+            parent_workflow_execution_id: '{{ parent.executionId }}'
             outcome: failed
             error_type: '{{ steps.run_discovery_agent.error.type }}'
             error_message: '${{ steps.run_discovery_agent.error.message | default: steps.get_written_rules_backlog.error.message | default: steps.resolve_model.error.message | default: steps.classify_detections.error.message | default: "" | truncate: 1024, "" }}'
@@ -151,8 +151,8 @@ steps:
       method: POST
       path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_started'
       body:
-        discovery_execution_id: '{{ execution.id }}'
-        parent_execution_id: '{{ parent.executionId }}'
+        workflow_execution_id: '{{ execution.id }}'
+        parent_workflow_execution_id: '{{ parent.executionId }}'
       headers:
         x-elastic-internal-origin: 'kibana'
     timeout: '10s'
@@ -193,8 +193,8 @@ steps:
           method: POST
           path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
           body:
-            discovery_execution_id: '{{ execution.id }}'
-            parent_execution_id: '{{ parent.executionId }}'
+            workflow_execution_id: '{{ execution.id }}'
+            parent_workflow_execution_id: '{{ parent.executionId }}'
             outcome: completed
             has_work: false
             processed_count: 0
@@ -389,8 +389,8 @@ steps:
           method: POST
           path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
           body:
-            discovery_execution_id: '{{ execution.id }}'
-            parent_execution_id: '{{ parent.executionId }}'
+            workflow_execution_id: '{{ execution.id }}'
+            parent_workflow_execution_id: '{{ parent.executionId }}'
             outcome: completed
             has_work: false
             processed_count: '${{ steps.compute_batch_size.output.processedCount | default: 0 }}'
@@ -541,8 +541,8 @@ steps:
       method: POST
       path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_completed'
       body:
-        discovery_execution_id: '{{ execution.id }}'
-        parent_execution_id: '{{ parent.executionId }}'
+        workflow_execution_id: '{{ execution.id }}'
+        parent_workflow_execution_id: '{{ parent.executionId }}'
         outcome: completed
         has_work: true
         processed_count: '${{ steps.compute_batch_size.output.processedCount | default: 0 }}'

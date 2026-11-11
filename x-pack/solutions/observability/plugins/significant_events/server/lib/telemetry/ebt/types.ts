@@ -136,9 +136,9 @@ interface DiscoveryTriggeredProps extends WorkflowExecutionTelemetryProps {
   space_id: string;
 }
 
-interface DiscoveryRunIdentityProps {
-  execution_id?: string;
-  discovery_execution_id: string;
+interface DiscoveryRunIdentityProps
+  extends WorkflowExecutionTelemetryProps,
+    ParentWorkflowExecutionTelemetryProps {
   space_id: string;
   alert_source: string;
 }

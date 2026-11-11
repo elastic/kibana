@@ -146,8 +146,8 @@ describe('significant events persistence workflow contracts', () => {
       expect(isReport(report)).toBe(true);
       expect(report?.with?.body).toMatchObject({
         outcome: 'completed',
-        discovery_execution_id: '{{ execution.id }}',
-        parent_execution_id: '{{ parent.executionId }}',
+        workflow_execution_id: '{{ execution.id }}',
+        parent_workflow_execution_id: '{{ parent.executionId }}',
       });
     });
     expect(requireStep(discovery, 'report_discovery_completed').with?.body).toMatchObject({
@@ -162,7 +162,7 @@ describe('significant events persistence workflow contracts', () => {
     expect(fallback.with?.body).toMatchObject({
       outcome: 'failed',
       error_type: '{{ steps.run_discovery_agent.error.type }}',
-      parent_execution_id: '{{ parent.executionId }}',
+      parent_workflow_execution_id: '{{ parent.executionId }}',
     });
   });
 
@@ -194,8 +194,8 @@ describe('significant events persistence workflow contracts', () => {
       with: {
         path: '/s/{{ workflow.spaceId }}/internal/streams/significant_events/discovery/_started',
         body: {
-          discovery_execution_id: '{{ execution.id }}',
-          parent_execution_id: '{{ parent.executionId }}',
+          workflow_execution_id: '{{ execution.id }}',
+          parent_workflow_execution_id: '{{ parent.executionId }}',
         },
       },
       timeout: '10s',

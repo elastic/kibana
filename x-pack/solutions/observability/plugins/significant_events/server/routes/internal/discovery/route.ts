@@ -140,9 +140,9 @@ const discoveryStartedRoute = createServerRoute({
   params: lazySchema(() =>
     z.object({
       body: z.object({
-        discovery_execution_id: z.string().max(MAX_ID_LENGTH),
+        workflow_execution_id: z.string().max(MAX_ID_LENGTH),
         // Empty when the discovery workflow was run directly, with no parent execution.
-        parent_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
+        parent_workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
       }),
     })
   ),
@@ -167,12 +167,14 @@ const discoveryStartedRoute = createServerRoute({
   }): Promise<{ acknowledged: true }> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
-    const { discovery_execution_id: discoveryExecutionId, parent_execution_id: parentExecutionId } =
-      params.body;
+    const {
+      workflow_execution_id: discoveryExecutionId,
+      parent_workflow_execution_id: parentExecutionId,
+    } = params.body;
 
     telemetry.trackSignificantEventsDiscoveryStarted({
-      ...(parentExecutionId ? { execution_id: parentExecutionId } : {}),
-      discovery_execution_id: discoveryExecutionId,
+      ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
+      workflow_execution_id: discoveryExecutionId,
       space_id: await getSpaceId(request),
       alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
     });
@@ -186,8 +188,8 @@ const discoveryCompletedRoute = createServerRoute({
   params: lazySchema(() =>
     z.object({
       body: z.object({
-        discovery_execution_id: z.string().max(MAX_ID_LENGTH),
-        parent_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
+        workflow_execution_id: z.string().max(MAX_ID_LENGTH),
+        parent_workflow_execution_id: z.string().max(MAX_ID_LENGTH).optional(),
         outcome: z.enum(['completed', 'failed']),
         has_work: z.boolean().optional(),
         budget_denied: z.boolean().optional(),
@@ -233,8 +235,8 @@ const discoveryCompletedRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
     const spaceId = await getSpaceId(request);
     const {
-      discovery_execution_id: discoveryExecutionId,
-      parent_execution_id: parentExecutionId,
+      workflow_execution_id: discoveryExecutionId,
+      parent_workflow_execution_id: parentExecutionId,
       outcome,
       error_type: errorType,
       error_message: errorMessage,
@@ -260,8 +262,8 @@ const discoveryCompletedRoute = createServerRoute({
       : Date.now() - Date.parse(execution.startedAt);
 
     telemetry.trackSignificantEventsDiscoveryCompleted({
-      ...(parentExecutionId ? { execution_id: parentExecutionId } : {}),
-      discovery_execution_id: discoveryExecutionId,
+      ...(parentExecutionId ? { parent_workflow_execution_id: parentExecutionId } : {}),
+      workflow_execution_id: discoveryExecutionId,
       space_id: spaceId,
       alert_source: SIGNIFICANT_EVENTS_ALERT_SOURCE,
       // A step timeout reaches the failure fallback as a `TimeoutError`.
