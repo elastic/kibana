@@ -111,7 +111,7 @@ describe('mapDestinationStatsRows failure rates', () => {
     expect(failed.authorization).toEqual({ rate: rate(0) });
   });
 
-  it('reports a 401 total with no collections, because a whole request has none', () => {
+  it('reports a 401 rate with no collections, because a whole request has none', () => {
     const failed = mapFailed({ authentication_rate: 2, authorization_rate: 0 });
 
     expect(failed.authentication).toEqual({ rate: rate(2) });
@@ -138,7 +138,7 @@ describe('mapDestinationStatsRows failure rates', () => {
     });
   });
 
-  it('leaves out a collection with no failures of a type, and lists no more than the total', () => {
+  it('leaves out a collection with no failures of a type, and lists no more than the destination rate', () => {
     const failed = mapFailed({
       authentication_rate: 2.5,
       authorization_rate: 1,

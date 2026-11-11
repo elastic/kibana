@@ -25,7 +25,7 @@ export const toItemRate = (value: number | null): StatsRate => ({
 });
 
 /**
- * The failure rate of one status: the total, and the rate of each collection that has failures of
+ * The failure rate of one status: the rate of the destination, and the rate of each collection that has failures of
  * it, read from `column` of the collection rows. A collection with a null or zero rate is left out.
  * The ones with the highest rates stay, at most `MAX_FAILURE_COLLECTIONS`, highest first.
  * `collections` is missing when none is left.

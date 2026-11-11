@@ -27,12 +27,13 @@ import {
   type StatsQueryBaseParams,
 } from './filters';
 
-interface DestinationStatsQueryParams extends StatsQueryBaseParams {
+export interface DestinationStatsQueryParams extends StatsQueryBaseParams {
   /** A non-empty list of destination ids. */
   ids: string[];
 }
 
-const filterDestinations = (
+/** Keeps the documents of the named destinations of one unit in the window. */
+export const filterDestinations = (
   query: ComposerQuery,
   { ids, ...unitAndWindow }: DestinationStatsQueryParams
 ) =>

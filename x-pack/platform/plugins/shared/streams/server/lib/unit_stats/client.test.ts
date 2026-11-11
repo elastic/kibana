@@ -39,12 +39,14 @@ const responses = {
     columns: [
       { name: 'incoming_rate', type: 'double' },
       { name: 'failed_rate', type: 'double' },
+      { name: 'authentication_rate', type: 'double' },
+      { name: 'authorization_rate', type: 'double' },
       { name: 'avg_latency', type: 'double' },
       { name: 'id', type: 'keyword' },
     ],
     values: [
-      [4.6, 0, 0.18, 'es-prod'],
-      [4.2, 0, 0.17, 'es-dev'],
+      [4.6, 0, 0, 0, 0.18, 'es-prod'],
+      [4.2, 2.4, 0.5, 1.9, 0.17, 'es-dev'],
     ],
   },
   destinationSums: {
@@ -173,9 +175,17 @@ describe('UnitStatsClient.getStats', () => {
             ],
           },
         },
-        failed: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
+        failed: {
+          rate: { value: 0, unit: '{item}', time_unit: 's' },
+          authentication: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
+          authorization: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
+        },
       },
     });
+    const { failed } = response.components.destinations['es-dev'].events;
+    expect(failed.rate.value).toBe(2.4);
+    expect(failed.authentication.rate.value).toBe(0.5);
+    expect(failed.authorization.rate.value).toBe(1.9);
     expect(response.components.processors['uppercase-message']).toEqual({
       instances: [
         {

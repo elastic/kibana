@@ -10,6 +10,20 @@ import { ITEM_UNIT, SECONDS_UNIT, STATS_COLUMN } from '../constants';
 import { groupById, indexById, numberOrNull, type EsqlRow, type EsqlValue } from './esql_rows';
 import { toFailureRate, toItemRate, toSeries, toValue } from './stats_values';
 
+type AuthFailureStats = Pick<
+  StreamsUnit.StatsDestinationResult['events']['failed'],
+  'authentication' | 'authorization'
+>;
+
+/**
+ * The authentication and authorization failures of a destination that has no data for them, or
+ * whose type does not report them.
+ */
+export const noAuthFailures = (): AuthFailureStats => ({
+  authentication: { rate: toItemRate(null) },
+  authorization: { rate: toItemRate(null) },
+});
+
 export const noDestinationStats = (bucketMs: number): StreamsUnit.StatsDestinationResult => ({
   latency: { average: toValue(null, SECONDS_UNIT) },
   events: {
@@ -18,11 +32,7 @@ export const noDestinationStats = (bucketMs: number): StreamsUnit.StatsDestinati
       rate: toItemRate(null),
       series: { bucket_ms: bucketMs, points: [] },
     },
-    failed: {
-      rate: toItemRate(null),
-      authentication: { rate: toItemRate(null) },
-      authorization: { rate: toItemRate(null) },
-    },
+    failed: { rate: toItemRate(null), ...noAuthFailures() },
   },
 });
 
