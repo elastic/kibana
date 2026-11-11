@@ -107,7 +107,7 @@ const ImpactEntityRow = ({
       {entity.evidence && isExpanded && (
         <div
           css={css`
-            padding: ${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.base};
+            padding: ${euiTheme.size.base} ${euiTheme.size.xl} ${euiTheme.size.base};
           `}
           data-test-subj="investigationImpactEntityEvidence"
         >
