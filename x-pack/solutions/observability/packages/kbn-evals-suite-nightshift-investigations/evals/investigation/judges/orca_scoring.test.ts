@@ -6,12 +6,7 @@
  */
 
 import { goalScorePassed } from './scoring';
-import {
-  scoreOrcaControl,
-  scoreOrcaHallucination,
-  scoreOrcaRcaAccuracy,
-  shrinkQuietWindow,
-} from './orca_scoring';
+import { scoreOrcaHallucination, scoreOrcaRcaAccuracy } from './orca_scoring';
 
 describe('ORCA RCA accuracy', () => {
   it('is 0 when the best hypothesis names only one of several plausible flags', () => {
@@ -110,33 +105,5 @@ describe('ORCA hallucination', () => {
         namedCauses: [],
       })
     ).toBe(0);
-  });
-});
-
-describe('ORCA quiet window', () => {
-  it('shrinks each timestamped side by ten minutes', () => {
-    expect(
-      shrinkQuietWindow({
-        start: '2026-04-19T16:00:00.000Z',
-        end: '2026-04-19T17:00:00.000Z',
-      })
-    ).toEqual({
-      start: '2026-04-19T16:10:00.000Z',
-      end: '2026-04-19T16:50:00.000Z',
-    });
-  });
-});
-
-describe('ORCA control', () => {
-  it('passes an empty report', () => {
-    expect(scoreOrcaControl({ emptyReport: true, incidentInsideQuietWindow: false })).toBe(1);
-  });
-
-  it('fails when a report places an incident inside the quiet window', () => {
-    expect(scoreOrcaControl({ emptyReport: false, incidentInsideQuietWindow: true })).toBe(0);
-  });
-
-  it('passes a non-empty report that keeps the incident outside the quiet window', () => {
-    expect(scoreOrcaControl({ emptyReport: false, incidentInsideQuietWindow: false })).toBe(1);
   });
 });

@@ -692,40 +692,138 @@ PUT /_security/role/nightshift-orcabench-eval
 }
 ```
 
-ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector; Customer-0's bind to
-`eis-openai-gpt-6-sol`. ORCA's model is the paper's judge model, but not its settings: the paper runs
-GPT-5.4 at reasoning effort "high", temperature 1, and 128,000 max tokens. Our judges answer
-through a forced `score` tool call, so the inference adapter sends reasoning effort "none" to
-gpt-5 models, and temperature falls back to the provider default of 1. Until the judges can set
-an effort ([#297542](https://github.com/elastic/kibana/pull/297542)), ORCA scores here come from a
-judge that does not reason and are not directly comparable to the paper's. `goal_pass` is unchanged: it scores the single best hypothesis and passes at
-4/5. ORCA also records three scores. RCA accuracy is 1 when the report names every flag in
-`metadata.plausible_flags`. A flag named without its variant still counts, and an extra cause
-does not fail accuracy. Hallucination is 1 when the report names at least one cause and none of
-them is in that set, and its direction is minimize. An empty incident report scores 0 on both.
-Only the control judge uses ORCA's prompt. Accuracy and hallucination use our own extraction
-prompt, `OrcaFlagsJudgePrompt`, which lists the flags a report names, and the set logic above is
-applied in code. They do not use the paper's incident judge prompt (`JUDGE_PROMPT_MULTI_HEADER`
-plus its scoring footer).
-Control passes an empty report and fails when a report places an incident inside
-`metadata.quiet_window`. Its judge prompt is ORCA's `JUDGE_PROMPT_CONTROL` from the Harbor tasks'
-`check_prediction.py`, word for word except that it answers through the `score` tool. Like ORCA's
-judge reading the agent's report file, it sees the whole report: the answer, the evidence, the
-impact summary and the proposed actions. It gets
-`current_time` and the quiet window moved ten minutes inward on each defined side, with an
-open-ended bound shown as `null`, as ORCA does. Past incidents and timeline lines that only record
-when the issue was reported are not false positives. A run that crashed, timed out, or ended without recording anything has
-no answer, so all three scores are `unscored` (null) instead of reading it as an empty report,
-as ORCA leaves unscored trials out. A run whose last agent round failed or was aborted counts
-as crashed even when it recorded a verdict first. A report too large to persist keeps only its
-summary and conclusion, so it is unscored too. `execution_success` still counts those runs, so quote it next
-to any ORCA rate. A run that ended without a verdict but recorded hypotheses is scored on them.
-A control is `metadata.control`, `metadata.task_type === "control"`,
-`metadata.no_incident === true`, or `metadata.section === "control"`. Accuracy and hallucination
-stay `n/a` on a control, including when its flag set is empty. Golden drops an empty metadata
-array on write, so the ten controls keep those markers and do not store `plausible_flags: []`.
+### Grading
+
+ORCA grades a `report.md` its agent writes at the end of a task, with the verifier every Harbor task
+ships as `tests/check_prediction.py`. This eval does the same in two steps.
+
+**report.md.** After an ORCA investigation finishes, the model under test (the agent's connector,
+not the judge) makes one more call that turns the investigation into ORCA's four-section report:
+Summary, Timeline, 5 Whys and Remediation. It reads the question, the recorded verdict, summary,
+hypotheses with their evidence, impact, and the tool calls with their results. Its instructions
+are the `## Instructions` section of the tasks' `instruction.md`, identical in all 755, in
+[`orca_instructions.text`](evals/investigation/orca/report_prompt/orca_instructions.text). The
+only change is "return an empty report" for "write an empty file to `/app/report.md`". It may use
+only what the investigation recorded and add no cause. Where a section asks for PromQL or Lucene
+it cites the ES|QL the investigation ran.
+
+The report is empty only when the investigation found no incident. ORCA asks "whether an incident
+actually occurred", not whether the reported symptom was confirmed, and every incident task's
+answer set is the flags active on the report day before detection that plausibly match the symptom
+(paper §B5); a control's is empty. An incident here is a period of failed or slow requests the
+investigation treated as a problem, even outside the reported window, already over, or judged
+unrelated to the symptom; isolated errors it dismissed as noise (one failed request, scanner 404s,
+start-up warm-up) are not. So an investigation that concludes "no incident in the reported window"
+but describes an earlier failure still gets a report naming that failure's cause, and ORCA's judge
+scores it, as a hallucination when that cause is not in the answer set. An empty report on an
+incident task scores 0 on every rubric and is never a hallucination; on a control it passes.
+ORCA's 5 Whys ends at "a process or system gap"; the writer stops at the investigation's own
+finding unless the record establishes such a gap, and keeps fixes it did not establish under
+Remediation, so the report does not invent a contributing cause. The report is stored on the task output as `orca_report_md`
+(at most 100,000 characters). A failed write is recorded as `orca_report_error`.
+
+**Graders.** [`orca/check_prediction.ts`](evals/investigation/orca/check_prediction.ts) ports the
+verifier: the rubric rendering (including `tabulate`'s GitHub tables), `build_judge_prompt`,
+`JUDGE_PROMPT_CONTROL`, both output schemas and the score maths.
+[`check_prediction.test.ts`](evals/investigation/orca/check_prediction.test.ts) holds the port to the
+Python's own output, byte for byte: judge prompts, three control prompts, both schemas and six
+verdict aggregations, generated by
+[`generate_parity_fixtures.py`](evals/investigation/orca/__fixtures__/generate_parity_fixtures.py)
+with `tabulate` 0.10.0. The committed fixture renders hand-written rubrics in ORCA's format
+([`synthetic_rubrics.json`](evals/investigation/orca/__fixtures__/synthetic_rubrics.json)) that cover
+every rendering path, so no ORCA ground truth is in the repo. To check the port against ORCA's own
+rubrics, one task for each of the 55 rubric sets the public tasks use, generate the full fixture
+outside the repo and point the same test at it:
+
+```bash
+python3 -I evals/investigation/orca/__fixtures__/generate_parity_fixtures.py \
+  <task>/tests/check_prediction.py --harbor <orca-bench dir> /tmp/parity_harbor.json
+ORCA_PARITY_FIXTURES=/tmp/parity_harbor.json node scripts/jest \
+  x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/evals/investigation/orca/check_prediction.test.ts
+```
+
+**Rubrics.** The 32 rubric files the public tasks use live in the Golden dataset
+`nightshift/orca-bench-rubrics-v1` (`61ed5e46-7734-53a3-8396-f01ab4c47454`, 32 examples, sha256
+`6f02f19ae6ec61dfd92d5a5e838737d9eaa4fc3421e149e65c15fda4050ee6d6`), one example per event id:
+input `{event_id}`, output `{rubric}`, the task's `tests/rubrics/<event_id>.json` unchanged. Tasks
+reference them through `metadata.orca_expected.events[].event_id`. They are a dataset of their own
+rather than task metadata because the 755 would carry about 32 MB of them, over the dataset API's
+5 MB request limit. The eval loads the release by name and fails before any judge
+runs when its id, count or content digest ([`rubrics.ts`](evals/investigation/orca/rubrics.ts))
+differs. The digest keeps each rubric's key order, which the judge prompt renders in. ORCA's data and rubrics are CC BY 4.0, (c) the ORCA-bench authors; keep that attribution
+when sharing results or the rubrics.
+
+The judge is `eis-openai-gpt-5-4`, the paper's judge model, not the agent connector (Customer-0's
+judges bind to `eis-openai-gpt-6-sol`). An incident's
+judge gets ORCA's prompt for its rubrics (one per `metadata.orca_expected.events[].event_id`, in
+the verifier's order) with `orca_report_md` in place of `report.md`. It answers per rubric whether
+the report placed the onset within 10 minutes, named the flag, explained the mechanism, and cited
+each metric, log and trace cluster, plus a 0-3 score. A materially wrong claim lowers every
+rubric's score by one. The scores read those verdicts as the verifier does:
+
+| Score                  | Value                                                                                                          | Applies to |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------- | ---------- |
+| `orca_rca_accuracy`    | 1 when **every** rubric's flag was named (the prompt says "any one"; the code and the paper's numbers use all) | incidents  |
+| `orca_rca_depth`       | the paper's reward: mean per-rubric score / 3                                                                  | incidents  |
+| `orca_hallucination`   | 1 when the report is non-empty and matched no rubric's flag, even if it names no cause; minimize               | incidents  |
+| `orca_control`         | 1 when the report is empty or places no incident inside the quiet window                                       | controls   |
+| `orca_report_fidelity` | 1 when `report.md` adds no cause and keeps the investigation's verdict                                         | both       |
+
+The three incident scores come from one judge call per run. An empty incident report needs no
+call: every rubric scores 0 and it is not a hallucination. The control judge gets ORCA's
+`JUDGE_PROMPT_CONTROL` with `current_time` and the quiet window from `orca_expected`, each defined
+bound moved ten minutes inward and printed as Python's `isoformat` does, an open bound as `null`.
+An empty control report passes without a call. `orca_report_fidelity` is our own check, by the same
+judge, that the report step names no root or contributing cause the investigation did not and does
+not turn an incident into an empty report or the reverse. The judge also sees the task
+description, so facts taken from it are not counted as additions.
+
+The prompts are ORCA's byte for byte, and so is the incident judge's output schema, sent as the
+`score` tool's parameters. The inference API takes only `type`, `properties` and `required` at a
+tool schema's top level, so the top-level `additionalProperties: false` is left out; nested schemas
+keep theirs. The control judge's tool asks for `reasoning` before `claims_incident_in_quiet_window`:
+with the decision first it committed before comparing the times and contradicted its own
+reasoning. That field's description ("Compare each reported time of active impact with the window
+bounds, then state the verdict.") is the one instruction the control judge sees that ORCA's does
+not. `orca_hallucination` follows the verifier (`hallucinate_any = not any flag matched` for any
+non-empty report), which is stricter than the paper's formal definition (a named root cause outside
+the answer set): a non-empty report that names no cause counts. An incident judge answer without a
+verdict for every rubric is retried rather than scored. The metric checklist asks whether the
+report cited a query targeting each rubric's Prometheus metric family; the report cites the ES|QL
+the agent ran over the ORCA indices, so a correct query under different field names may not be
+credited. The paper runs GPT-5.4 at reasoning effort "high", temperature 1 and 128,000 max tokens.
+These judges answer through a forced tool call, so the inference adapter sends reasoning effort
+"none" to gpt-5 models, and temperature falls back to the provider default of 1. Until judges can
+set an effort ([#297542](https://github.com/elastic/kibana/pull/297542)), the incident judge decides
+without reasoning, and ORCA scores here are not directly comparable to the paper's.
+
+**Failed runs.** The paper retried failed trials except those that raised `AgentTimeoutError` or
+`NonZeroAgentExitCodeError` (Appendix I), and the verifier gives a trial without `report.md`
+reward 0, which Harbor aggregates as 0 on every score. So a run that failed because of the agent is
+scored as having no report: an investigation that timed out, whose agent round failed, or that
+ended having recorded nothing scores 0 on accuracy, depth and hallucination, fails a control, and
+is `n/a` for report fidelity. A failure of the harness, which the paper would have retried, is
+`unscored` (null) and left out: an investigation that was never created, a round aborted from
+outside, a conversation that did not persist, a structured report too large to keep its
+hypotheses, or a `report.md` that could not be written or was cut at its bound. `execution_success`
+counts all of these, so quote it, and the number of unscored runs, next to any ORCA rate. A run
+that ended without a verdict but recorded hypotheses gets a report written from them and is scored.
+A task without `orca_expected`, the 10 private medium tasks of the sampled 50, is `n/a`.
+
+**Earlier scores.** Before the port, accuracy and hallucination came from our own flag extraction
+(`OrcaFlagsJudgePrompt`) over the structured answer, compared with `metadata.plausible_flags` in
+code: the judge saw no evidence and no rubric, a flag named without a variant matched any variant,
+and hallucination needed at least one named cause. A slice 1 spot check found 22 partial hits and
+16 "no incident found" reports among incident runs that scored 0 on both, which ORCA's code also
+scores 0 on both when the investigation found nothing at all and its report is empty.
+`NIGHTSHIFT_ORCA_LEGACY_JUDGES=true` adds those two scores as `orca_flags_rca_accuracy` and
+`orca_flags_hallucination`, to compare both graders on the same runs.
+
+`goal_pass` is unchanged: it scores the single best hypothesis and passes at 4/5.
 `rca_anti_leakage` judges trajectory leakage of incident records and post-resolution writeups. It
-does not see prompt leakage, and a feature-flag key in telemetry is a legitimate signal.
+does not see prompt leakage, and a feature-flag key in telemetry is a legitimate signal. Nor does
+it look for the rubrics themselves: they are public in the ORCA-bench repository, and the sandbox
+can reach GitHub, as the paper's agents could reach the internet.
 
 `nightshift/orca-sampled50-v4` copies `plausible_flags` from the public Harbor dataset
 `orca-bench/orca-bench` (`sha256:2add497ac2f93468dba1b83977c295a784c89031754e6a35520195345ad62ada`).
@@ -766,8 +864,8 @@ a correlation and is not ORCA accuracy.
 
 Do not compare these scores with the paper's published rates yet. This agent reads telemetry with
 ES|QL and reaches the Astronomy Shop source by cloning it; the paper's agents have a checkout and
-Grafana (Prometheus, Jaeger, OpenSearch), an hour per task, and a `report.md` graded by ORCA's own
-judge. The closer paper baseline is the telemetry-only Sonnet 4.6 result, 21.4%,
+Grafana (Prometheus, Jaeger, OpenSearch), an hour per task, and write `report.md` themselves; ours
+is written after the investigation (see [grading](#grading)). The closer paper baseline is the telemetry-only Sonnet 4.6 result, 21.4%,
 against 30.9% for the same model with code. The 40 matched tasks above are the Verified view, so
 a later writeup may quote Verified only for those 40, still with this tool-surface caveat. The
 paper's 25.3% and 10.0% are not like-for-like.

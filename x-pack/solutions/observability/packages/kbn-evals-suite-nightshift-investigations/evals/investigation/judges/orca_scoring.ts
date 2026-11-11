@@ -6,12 +6,11 @@
  */
 
 /**
- * ORCA's set-based scores (paper Appendix H). `goal_pass` still scores the single best hypothesis.
- * Accuracy is 1 when every plausible flag was named. Hallucination is 1 only when the report
- * names at least one cause and none of them is in that set.
+ * The set logic behind the legacy `orca_flags_*` scores, which compare the flags a judge extracted
+ * from the structured report with `metadata.plausible_flags`. ORCA's own graders are in
+ * `../orca/check_prediction.ts`. Accuracy is 1 when every plausible flag was named. Hallucination
+ * is 1 only when the report names at least one cause and none of them is in that set.
  */
-
-const TEN_MINUTES_MS = 10 * 60 * 1000;
 
 interface FlagId {
   key: string;
@@ -64,32 +63,4 @@ export const scoreOrcaHallucination = ({
   if (namedCauses.length === 0) return 0;
   const hit = namedCauses.some((cause) => namesFlag(plausibleFlags, cause));
   return hit ? 0 : 1;
-};
-
-/**
- * Shrinks a `{start, end}` quiet window by ten minutes on each side that is a timestamp.
- * The paper shows the judge this margin so a claim a few minutes past the boundary still passes.
- */
-export const shrinkQuietWindow = (window: unknown): unknown => {
-  if (window === null || typeof window !== 'object' || Array.isArray(window)) return window;
-  const record = window as { start?: unknown; end?: unknown };
-  const start = typeof record.start === 'string' ? Date.parse(record.start) : Number.NaN;
-  const end = typeof record.end === 'string' ? Date.parse(record.end) : Number.NaN;
-  return {
-    ...record,
-    ...(Number.isNaN(start) ? {} : { start: new Date(start + TEN_MINUTES_MS).toISOString() }),
-    ...(Number.isNaN(end) ? {} : { end: new Date(end - TEN_MINUTES_MS).toISOString() }),
-  };
-};
-
-/** 1 when the report is empty or places no incident inside the quiet window. */
-export const scoreOrcaControl = ({
-  emptyReport,
-  incidentInsideQuietWindow,
-}: {
-  emptyReport: boolean;
-  incidentInsideQuietWindow: boolean;
-}): 0 | 1 => {
-  if (emptyReport) return 1;
-  return incidentInsideQuietWindow ? 0 : 1;
 };
