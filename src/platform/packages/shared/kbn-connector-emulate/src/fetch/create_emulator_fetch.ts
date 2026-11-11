@@ -54,9 +54,11 @@ import type { EmulatorOperation, LoadedProtocol } from './list_operations';
 import { listOperations } from './list_operations';
 import type { CaptureOptions, CapturedExchange } from './capture_call';
 import {
+  checkCaptureOptions,
   createCaptureExchange,
   createCaptureWindow,
   DEFAULT_MAX_CAPTURED_CALLS,
+  toCredentialNames,
 } from './capture_call';
 
 /** One request the mock received, for assertions in tests. */
@@ -354,10 +356,15 @@ export const createEmulatorFetch = ({
   capture,
 }: EmulatorOptions): Emulator => {
   const captureOptions = capture === true ? {} : capture || undefined;
-  const captureExchange = captureOptions && createCaptureExchange(captureOptions);
+  if (captureOptions) {
+    checkCaptureOptions(captureOptions);
+  }
   const maxCapturedCalls =
     captureOptions && (captureOptions.maxCalls ?? DEFAULT_MAX_CAPTURED_CALLS);
   const operations = loadSpecs(specs);
+  // The spec's API key parameters are redacted too, whatever their name.
+  const captureExchange =
+    captureOptions && createCaptureExchange(captureOptions, toCredentialNames(operations));
   const namedResponses = collectNamedResponses(fixtures, recordings);
   const loadedProtocols = loadProtocols(specs, namedResponses);
   const protocols = toProtocolEndpoints(loadedProtocols);

@@ -9,6 +9,7 @@
 
 import { omit } from 'lodash';
 import type { ContractRequest, ContractResponse } from '../contract/types';
+import type { ContractOperation } from '../openapi';
 import type { ContractCall } from './create_emulator_fetch';
 
 /** What replaces the value of a key that may hold a secret. */
@@ -97,11 +98,19 @@ const toSnakeCase = (key: string): string =>
 /** The redacted value of a credential key, or `undefined` when the key holds none. */
 type RedactEntry = (key: string, value: unknown) => string | undefined;
 
-const createRedactEntry = (redact: readonly string[] = []): RedactEntry => {
+/**
+ * `redact` adds keys matched by their end; `names` adds keys matched whole, such as the
+ * parameters a vendor's spec declares for its API keys, which can be as generic as `key`.
+ */
+const createRedactEntry = (
+  redact: readonly string[] = [],
+  names: readonly string[] = []
+): RedactEntry => {
   const suffixes = [...CREDENTIAL_SUFFIXES, ...redact.map(toSnakeCase)];
+  const exact = new Set([...CREDENTIAL_KEYS, ...names.map(toSnakeCase)]);
   return (key, value) => {
     const normalized = toSnakeCase(key);
-    if (!CREDENTIAL_KEYS.has(normalized) && !suffixes.some((end) => normalized.endsWith(end))) {
+    if (!exact.has(normalized) && !suffixes.some((end) => normalized.endsWith(end))) {
       return undefined;
     }
     const scheme =
@@ -193,21 +202,64 @@ export type CaptureExchange = (
 ) => CapturedExchange;
 
 /**
+ * The header and query parameters that carry API keys, as the vendor's spec declares them in its
+ * `apiKey` security schemes, e.g. Figma's `X-Figma-Token` header or Trello's `key` parameter.
+ */
+export interface CredentialNames {
+  readonly headers: readonly string[];
+  readonly query: readonly string[];
+}
+
+const NO_CREDENTIAL_NAMES: CredentialNames = { headers: [], query: [] };
+
+/** Collects the API key parameters of the security schemes the operations use. */
+export const toCredentialNames = (operations: readonly ContractOperation[]): CredentialNames => {
+  const headers = new Set<string>();
+  const query = new Set<string>();
+  for (const { security } of operations) {
+    for (const { credential } of security.flat()) {
+      if (credential?.in === 'header') {
+        headers.add(credential.name);
+      } else if (credential?.in === 'query') {
+        query.add(credential.name);
+      }
+    }
+  }
+  return { headers: [...headers], query: [...query] };
+};
+
+const isCount = (value: unknown): boolean => Number.isInteger(value) && Number(value) >= 0;
+
+/** Throws when a limit isn't a whole number of at least 0, which would break capturing. */
+export const checkCaptureOptions = ({ maxCalls, maxBodyBytes }: CaptureOptions): void => {
+  for (const [name, value] of [
+    ['maxCalls', maxCalls],
+    ['maxBodyBytes', maxBodyBytes],
+  ] as const) {
+    if (value !== undefined && !isCount(value)) {
+      throw new Error(`capture.${name} must be a whole number of at least 0, got ${value}`);
+    }
+  }
+};
+
+/**
  * Creates a function that captures an exchange's headers, query and bodies. Values of keys that
  * carry credentials are replaced with `[redacted]` in headers, the query, and JSON and form
  * bodies, at any depth, keeping an auth header's scheme; then bodies longer than `maxBodyBytes` are
  * cut and flagged. Redaction keeps credentials out of logs and agent context by accident; it is
  * no security control, as whoever points Kibana at the emulator can read its traffic anyway.
  */
-export const createCaptureExchange = ({
-  maxBodyBytes = DEFAULT_MAX_CAPTURED_BODY_BYTES,
-  redact,
-}: CaptureOptions = {}): CaptureExchange => {
+export const createCaptureExchange = (
+  { maxBodyBytes = DEFAULT_MAX_CAPTURED_BODY_BYTES, redact }: CaptureOptions = {},
+  credentials: CredentialNames = NO_CREDENTIAL_NAMES
+): CaptureExchange => {
   const redactEntry = createRedactEntry(redact);
+  const redactHeader = createRedactEntry(redact, credentials.headers);
+  const redactQuery = createRedactEntry(redact, credentials.query);
   return (request, response) => ({
     request: {
-      headers: redactRecord(request.headers, redactEntry),
-      query: redactRecord(request.query, redactEntry),
+      headers: redactRecord(request.headers, redactHeader),
+      query: redactRecord(request.query, redactQuery),
       ...toBody(
         request.body,
         findHeader(request.headers, 'content-type'),
@@ -246,7 +298,8 @@ export const createCaptureWindow = (calls: ContractCall[], limit: number): Captu
   return {
     add: (index) => {
       indices.push(index);
-      while (indices.length > limit) {
+      // Bounded by the list too, so a limit below 0 can't keep the loop going.
+      while (indices.length > limit && indices.length > 0) {
         const oldest = indices.shift();
         if (oldest !== undefined && calls[oldest]) {
           calls[oldest] = withoutCapture(calls[oldest]);

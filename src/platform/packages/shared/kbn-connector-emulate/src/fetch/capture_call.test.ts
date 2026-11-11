@@ -8,7 +8,12 @@
  */
 
 import type { ContractRequest } from '../contract/types';
-import { createCaptureExchange, createCaptureWindow, REDACTED } from './capture_call';
+import {
+  checkCaptureOptions,
+  createCaptureExchange,
+  createCaptureWindow,
+  REDACTED,
+} from './capture_call';
 import type { ContractCall } from './create_emulator_fetch';
 
 const request = (overrides: Partial<ContractRequest> = {}): ContractRequest => ({
@@ -231,5 +236,50 @@ describe('createCaptureWindow', () => {
     window.add(1);
 
     expect(calls.every(({ captured }) => captured !== undefined)).toBe(true);
+  });
+
+  it('returns with a limit below 0, dropping every capture', () => {
+    const calls = [call('a')];
+    createCaptureWindow(calls, -1).add(0);
+
+    expect(calls[0].captured).toBeUndefined();
+  });
+});
+
+describe('createCaptureExchange with the spec’s credential names', () => {
+  const capture = createCaptureExchange({}, { headers: ['X-Figma-Token'], query: ['key'] });
+
+  it('redacts them, whatever they are called, where the spec declares them', () => {
+    const { request: captured } = capture(
+      request({
+        headers: { 'x-figma-token': 'f', key: 'kept', 'content-type': 'application/json' },
+        query: { key: 'k', keyword: 'kept' },
+        body: { key: 'kept' },
+      }),
+      ok
+    );
+
+    expect(captured).toEqual({
+      headers: { 'x-figma-token': REDACTED, key: 'kept', 'content-type': 'application/json' },
+      query: { key: REDACTED, keyword: 'kept' },
+      body: { key: 'kept' },
+    });
+  });
+});
+
+describe('checkCaptureOptions', () => {
+  it.each([
+    { maxCalls: -1 },
+    { maxCalls: 1.5 },
+    { maxCalls: Number.NaN },
+    { maxBodyBytes: -1 },
+    { maxBodyBytes: Number.POSITIVE_INFINITY },
+  ])('rejects %p', (options) => {
+    expect(() => checkCaptureOptions(options)).toThrow('must be a whole number of at least 0');
+  });
+
+  it('accepts 0 and leaving them out', () => {
+    expect(() => checkCaptureOptions({ maxCalls: 0, maxBodyBytes: 0 })).not.toThrow();
+    expect(() => checkCaptureOptions({})).not.toThrow();
   });
 });

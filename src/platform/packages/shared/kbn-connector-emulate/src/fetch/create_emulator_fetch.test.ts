@@ -512,4 +512,40 @@ describe('createEmulatorFetch with capture', () => {
     expect(calls[0]).not.toHaveProperty('captured');
     expect(maxCapturedCalls).toBeUndefined();
   });
+
+  it('redacts the API key parameters the spec declares, such as Figma’s header and Trello’s key', async () => {
+    const securedSpec = {
+      ...spec,
+      components: {
+        securitySchemes: {
+          figma: { type: 'apiKey', in: 'header', name: 'X-Figma-Token' },
+          trello: { type: 'apiKey', in: 'query', name: 'key' },
+        },
+      },
+      security: [{ figma: [], trello: [] }],
+    };
+    const { fetch, calls } = createEmulatorFetch({
+      specs: [securedSpec],
+      capture: true,
+      respond: listResponder,
+    });
+
+    await fetch(`${BASE_URL}/items?key=k`, { headers: { 'X-Figma-Token': 'f' } });
+
+    expect(calls[0]).toMatchObject({
+      status: 200,
+      captured: {
+        request: {
+          headers: { 'x-figma-token': '[redacted]' },
+          query: { key: '[redacted]' },
+        },
+      },
+    });
+  });
+
+  it.each([-1, 1.5])('refuses maxCalls %p when created', (maxCalls) => {
+    expect(() => createEmulatorFetch({ specs: [spec], capture: { maxCalls } })).toThrow(
+      'capture.maxCalls must be a whole number of at least 0'
+    );
+  });
 });
